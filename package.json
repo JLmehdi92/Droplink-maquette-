@@ -16,11 +16,13 @@
     "db:types": "node scripts/db-types.mjs",
     "gates": "pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls",
     "fumee": "node scripts/fumee.mjs",
-    "falsifier": "node scripts/falsifier.mjs"
+    "falsifier": "node scripts/falsifier.mjs",
+    "check:r2": "vitest run --project r2"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
+    "aws4fetch": "^1.0.20",
     "next": "15.5.23",
     "next-intl": "^4.13.7",
     "posthog-node": "^5.49.2",
