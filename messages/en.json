@@ -93,8 +93,30 @@
       "quoi2": "A description of the disputed content and where it appears on the page.",
       "quoi3": "The legal grounds, and your contact details so we can reply.",
       "suiteTitre": "What happens next",
-      "suiteTexte": "We acknowledge receipt, review the report, and may suspend the account concerned. A suspension immediately makes all of its public pages unreachable."
-    }
+      "suiteTexte": "We acknowledge receipt, review the report, and may suspend the account concerned. A suspension immediately makes all of its public pages unreachable.",
+      "nom": "Your name",
+      "nomExemple": "e.g. Jane Doe",
+      "email": "Your email address",
+      "emailExemple": "you@example.com",
+      "lien": "Link to the page concerned",
+      "lienExemple": "https://…/p/…",
+      "categorie": "Reason for the report",
+      "categorieDefaut": "Select a reason…",
+      "cat_illicite": "Manifestly unlawful content",
+      "cat_droits": "Infringement of my rights (trademark, copyright)",
+      "cat_donnees": "Personal data concerning me",
+      "cat_securite": "Security issue",
+      "cat_autre": "Other",
+      "description": "Description of the disputed content",
+      "descriptionExemple": "Describe the content, where it appears on the page, and the legal grounds.",
+      "piecesTitre": "Supporting files",
+      "piecesTexte": "Attach your screenshots directly to the email: they cannot travel through this form.",
+      "envoyer": "Prepare my report",
+      "ouvreMessagerie": "The button opens your mail app with the message pre-filled. You send it yourself.",
+      "adresseDirecte": "You can also write directly to"
+    },
+    "sommaireTitre": "Contents",
+    "confidentialiteChapeau": "What we collect, why, and what we do not collect."
   },
   "connexion": {
     "titre": "Log in",

@@ -93,8 +93,30 @@
       "quoi2": "La description du contenu contesté et sa localisation sur la page.",
       "quoi3": "Le motif juridique, et vos coordonnées pour vous répondre.",
       "suiteTitre": "Ce qui se passe ensuite",
-      "suiteTexte": "Nous accusons réception, examinons le signalement, et pouvons suspendre le compte concerné. Une suspension rend immédiatement inaccessibles toutes ses pages publiques."
-    }
+      "suiteTexte": "Nous accusons réception, examinons le signalement, et pouvons suspendre le compte concerné. Une suspension rend immédiatement inaccessibles toutes ses pages publiques.",
+      "nom": "Votre nom",
+      "nomExemple": "Ex : Jean Dupont",
+      "email": "Votre adresse email",
+      "emailExemple": "vous@exemple.com",
+      "lien": "Lien de la page concernée",
+      "lienExemple": "https://…/p/…",
+      "categorie": "Motif du signalement",
+      "categorieDefaut": "Sélectionnez un motif…",
+      "cat_illicite": "Contenu manifestement illicite",
+      "cat_droits": "Atteinte à mes droits (marque, droit d’auteur)",
+      "cat_donnees": "Données personnelles me concernant",
+      "cat_securite": "Problème de sécurité",
+      "cat_autre": "Autre",
+      "description": "Description du contenu contesté",
+      "descriptionExemple": "Décrivez le contenu, sa localisation sur la page, et le motif juridique invoqué.",
+      "piecesTitre": "Pièces justificatives",
+      "piecesTexte": "Joignez vos captures d’écran directement à l’email : elles ne peuvent pas transiter par ce formulaire.",
+      "envoyer": "Préparer mon signalement",
+      "ouvreMessagerie": "Le bouton ouvre votre messagerie avec le message pré-rempli. C’est vous qui l’envoyez.",
+      "adresseDirecte": "Vous pouvez aussi écrire directement à"
+    },
+    "sommaireTitre": "Sommaire",
+    "confidentialiteChapeau": "Ce que nous collectons, pourquoi, et ce que nous ne collectons pas."
   },
   "connexion": {
     "titre": "Se connecter",

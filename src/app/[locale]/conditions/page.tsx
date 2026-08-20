@@ -26,14 +26,50 @@ export default async function Conditions({
   setRequestLocale(locale);
   const t = await getTranslations("legal");
 
+  // L'ordre et les largeurs suivent le rythme de la maquette : une section
+  // pleine, deux en regard, une pleine, deux en regard.
   const sections = [
-    { titre: t("conditions.objetTitre"), texte: t("conditions.objetTexte") },
-    { titre: t("conditions.roleTitre"), texte: t("conditions.roleTexte") },
-    { titre: t("conditions.interditTitre"), texte: t("conditions.interditTexte") },
-    { titre: t("conditions.retraitTitre"), texte: t("conditions.retraitTexte") },
-    { titre: t("conditions.paiementTitre"), texte: t("conditions.paiementTexte") },
-    { titre: t("conditions.responsabiliteTitre"), texte: t("conditions.responsabiliteTexte") },
+    {
+      id: "objet",
+      icone: "gavel",
+      large: true,
+      titre: t("conditions.objetTitre"),
+      texte: t("conditions.objetTexte"),
+    },
+    { id: "role", icone: "shield", titre: t("conditions.roleTitre"), texte: t("conditions.roleTexte") },
+    {
+      id: "interdit",
+      icone: "warning",
+      titre: t("conditions.interditTitre"),
+      texte: t("conditions.interditTexte"),
+    },
+    {
+      id: "retrait",
+      icone: "policy",
+      large: true,
+      titre: t("conditions.retraitTitre"),
+      texte: t("conditions.retraitTexte"),
+    },
+    {
+      id: "paiement",
+      icone: "money_off",
+      titre: t("conditions.paiementTitre"),
+      texte: t("conditions.paiementTexte"),
+    },
+    {
+      id: "limites",
+      icone: "balance",
+      titre: t("conditions.responsabiliteTitre"),
+      texte: t("conditions.responsabiliteTexte"),
+    },
   ] as const;
 
-  return <PageLegale locale={locale} titre={t("conditionsTitre")} sections={sections} />;
+  return (
+    <PageLegale
+      locale={locale}
+      titre={t("conditionsTitre")}
+      sections={sections}
+      variante="sommaire"
+    />
+  );
 }

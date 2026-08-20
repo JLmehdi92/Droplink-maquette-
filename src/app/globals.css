@@ -238,3 +238,43 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Carte « bento », reprise telle quelle de la maquette de signalement.
+ *
+ * Le rayon de 1,5rem et les deux ombres ne sont PAS dans l'échelle de tokens :
+ * la maquette les déclare elle-même en CSS, hors de sa configuration Tailwind.
+ * Les reprendre ici plutôt que les rapprocher d'un token existant évite de
+ * rendre des cartes deux fois moins arrondies que ce qui a été dessiné.
+ */
+.bento-item {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background-color: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-md);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bento-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/*
+ * Champ de la maquette de signalement : fond ardoise clair, halo bleu au focus.
+ * Distinct de `.champ`, qui porte la bordure et le rayon du DESIGN.md ; celui-ci
+ * suit les valeurs écrites dans le `code.html` de l'écran.
+ */
+.champ-verre {
+  background-color: var(--color-surface);
+  transition: all 0.2s ease;
+}
+
+.champ-verre:focus {
+  background-color: var(--color-surface-container-lowest);
+  border-color: var(--accent-interface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-interface) 10%, transparent);
+  outline: none;
+}

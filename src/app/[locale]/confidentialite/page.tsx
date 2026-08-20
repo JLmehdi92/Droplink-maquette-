@@ -27,12 +27,46 @@ export default async function Confidentialite({
   const t = await getTranslations("legal");
 
   const sections = [
-    { titre: t("confidentialite.collecteTitre"), texte: t("confidentialite.collecteTexte") },
-    { titre: t("confidentialite.pasDeCompteTitre"), texte: t("confidentialite.pasDeCompteTexte") },
-    { titre: t("confidentialite.indexationTitre"), texte: t("confidentialite.indexationTexte") },
-    { titre: t("confidentialite.conservationTitre"), texte: t("confidentialite.conservationTexte") },
-    { titre: t("confidentialite.droitsTitre"), texte: t("confidentialite.droitsTexte") },
+    {
+      id: "collecte",
+      icone: "database",
+      large: true,
+      titre: t("confidentialite.collecteTitre"),
+      texte: t("confidentialite.collecteTexte"),
+    },
+    {
+      id: "pas-de-compte",
+      icone: "person",
+      titre: t("confidentialite.pasDeCompteTitre"),
+      texte: t("confidentialite.pasDeCompteTexte"),
+    },
+    {
+      id: "indexation",
+      icone: "visibility_off",
+      titre: t("confidentialite.indexationTitre"),
+      texte: t("confidentialite.indexationTexte"),
+    },
+    {
+      id: "conservation",
+      icone: "schedule",
+      titre: t("confidentialite.conservationTitre"),
+      texte: t("confidentialite.conservationTexte"),
+    },
+    {
+      id: "droits",
+      icone: "shield_lock",
+      titre: t("confidentialite.droitsTitre"),
+      texte: t("confidentialite.droitsTexte"),
+    },
   ] as const;
 
-  return <PageLegale locale={locale} titre={t("confidentialiteTitre")} sections={sections} />;
+  return (
+    <PageLegale
+      locale={locale}
+      titre={t("confidentialiteTitre")}
+      sections={sections}
+      chapeau={t("confidentialiteChapeau")}
+      variante="compact"
+    />
+  );
 }
