@@ -49,13 +49,13 @@ export type Database = {
           internal_notes?: string | null
           notify_email?: string | null
           product_ref?: string | null
-          public_token?: string
+          public_token: string
           qc_status?: Database["public"]["Enums"]["qc_status"]
           recherche?: string | null
           shop_id: string
           status?: Database["public"]["Enums"]["order_status"]
           tracking_number?: string | null
-          unsubscribe_token?: string
+          unsubscribe_token: string
           updated_at?: string
         }
         Update: {
@@ -196,6 +196,10 @@ export type Database = {
         Returns: boolean
       }
       generer_jeton_public: { Args: never; Returns: string }
+      marquer_premier_contenu: {
+        Args: { p_order_id: string }
+        Returns: boolean
+      }
       mon_shop_id: { Args: never; Returns: string }
       regenerer_jeton_public: { Args: { p_order_id: string }; Returns: string }
       sans_accents: { Args: { p_texte: string }; Returns: string }

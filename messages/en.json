@@ -272,5 +272,49 @@
       "filtreTitre": "No order matches",
       "filtreTexte": "This account has orders, but none of them pass the current filters."
     }
+  },
+  "editeur": {
+    "titre": "New order",
+    "retour": "Back to my orders",
+    "voirPage": "View the customer page",
+    "sectionCommande": "The order",
+    "sectionDestinataire": "Recipient",
+    "sectionExpedition": "Shipping",
+    "sectionQc": "Photos",
+    "reference": "Product reference",
+    "referenceExemple": "e.g. blue jacket size M",
+    "suivi": "Tracking number",
+    "suiviExemple": "Paste the carrier number",
+    "transporteur": "Carrier",
+    "transporteurExemple": "e.g. DHL",
+    "notes": "Internal notes",
+    "notesExemple": "Purchase price, remarks, anything that must not leave this page.",
+    "notesPrivees": "Visible to you only. Never on the customer page, never in an export.",
+    "client": "Customer name",
+    "clientExemple": "e.g. Yanis, or @handle",
+    "clientAide": "Plain free text. Your customer has no account and will not create one.",
+    "enregistre": "Saved",
+    "enregistrement": "Saving…",
+    "echec": "Not saved: {champs}. The value shown is the one in the database.",
+    "nomChamp": {
+      "customer_label": "customer name",
+      "product_ref": "reference",
+      "tracking_number": "tracking number",
+      "carrier_code": "carrier",
+      "internal_notes": "internal notes",
+      "status": "shipping",
+      "qc_status": "photos"
+    },
+    "statut": {
+      "preparation": "Preparing",
+      "expedie": "Shipped",
+      "en_transit": "In transit",
+      "livre": "Delivered"
+    },
+    "qc": {
+      "en_attente": "Pending",
+      "approuve": "Approved",
+      "refuse": "Rejected"
+    }
   }
 }

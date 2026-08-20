@@ -278,3 +278,25 @@ body {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-interface) 10%, transparent);
   outline: none;
 }
+
+/*
+ * Champ de l'éditeur, repris du `code.html` de `droplink_cr_er_un_post_client` :
+ * fond ardoise, bordure transparente au repos, bordure d'accent et halo de 2px
+ * au focus, fond blanc.
+ *
+ * La bordure existe DÈS LE REPOS, en transparent. Sans elle, l'apparition d'une
+ * bordure au focus décalerait le champ d'un pixel — un mouvement à chaque clic,
+ * dans un formulaire à sauvegarde automatique où l'on passe de champ en champ.
+ */
+.champ-editeur {
+  background-color: #f1f5f9;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.champ-editeur:focus {
+  border-color: var(--accent-interface);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-interface) 20%, transparent);
+  outline: none;
+  background-color: var(--color-surface-container-lowest);
+}

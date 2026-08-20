@@ -156,6 +156,16 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "connaisse déjà.",
     ],
     [
+      "marquer_premier_contenu",
+      "Pose `first_content_at`, que `authenticated` n'a pas le droit d'écrire " +
+        "directement : c'est une MESURE, pas une donnée du vendeur, et la lui " +
+        "laisser écrire reviendrait à lui laisser écrire notre métrique de " +
+        "verdict. En `security definer` pour cette raison, mais elle vérifie la " +
+        "PROPRIÉTÉ dans son corps, et la condition `first_content_at is null` " +
+        "est évaluée par la base — deux sauvegardes simultanées ne peuvent donc " +
+        "pas produire deux créations.",
+    ],
+    [
       "regenerer_jeton_public",
       "Unique chemin légitime de révocation d'un lien. En `security definer` " +
         "pour poser le drapeau qu'exige le déclencheur d'immuabilité, mais elle " +

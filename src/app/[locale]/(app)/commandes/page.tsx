@@ -71,6 +71,7 @@ export default async function Commandes({
         <PanneauFiltres base={base} parametres={parametres} />
         <TableauCommandes
           base={base}
+          langue={langue}
           // Sans origine connue, le lien public serait construit sur une valeur
           // devinée. On rend alors un chemin relatif : il ne se copie pas dans
           // une conversation, mais il n'envoie personne sur un domaine inventé.

@@ -272,5 +272,49 @@
       "filtreTitre": "Aucune commande ne correspond",
       "filtreTexte": "Ce compte contient des commandes, mais aucune ne passe les filtres en cours."
     }
+  },
+  "editeur": {
+    "titre": "Nouvelle commande",
+    "retour": "Revenir à mes commandes",
+    "voirPage": "Voir la page du client",
+    "sectionCommande": "La commande",
+    "sectionDestinataire": "Destinataire",
+    "sectionExpedition": "Expédition",
+    "sectionQc": "Photos",
+    "reference": "Référence produit",
+    "referenceExemple": "Ex : veste bleue taille M",
+    "suivi": "Numéro de suivi",
+    "suiviExemple": "Collez le numéro du transporteur",
+    "transporteur": "Transporteur",
+    "transporteurExemple": "Ex : DHL",
+    "notes": "Notes internes",
+    "notesExemple": "Prix d’achat, remarques, tout ce qui ne doit pas sortir d’ici.",
+    "notesPrivees": "Visibles par vous seul. Jamais sur la page du client, jamais dans un export.",
+    "client": "Nom du client",
+    "clientExemple": "Ex : Yanis, ou @pseudo",
+    "clientAide": "Un simple texte libre. Votre client n’a pas de compte et n’en créera pas.",
+    "enregistre": "Enregistré",
+    "enregistrement": "Enregistrement…",
+    "echec": "Non enregistré : {champs}. La valeur affichée est celle qui est en base.",
+    "nomChamp": {
+      "customer_label": "nom du client",
+      "product_ref": "référence",
+      "tracking_number": "numéro de suivi",
+      "carrier_code": "transporteur",
+      "internal_notes": "notes internes",
+      "status": "expédition",
+      "qc_status": "photos"
+    },
+    "statut": {
+      "preparation": "En préparation",
+      "expedie": "Expédiée",
+      "en_transit": "En transit",
+      "livre": "Livrée"
+    },
+    "qc": {
+      "en_attente": "En attente",
+      "approuve": "Approuvées",
+      "refuse": "Refusées"
+    }
   }
 }

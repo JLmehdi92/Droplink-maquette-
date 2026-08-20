@@ -6,6 +6,7 @@ import { ActionsLigne } from "./actions-ligne";
 import { BadgeStatut, teinteExpedition, teinteQc } from "./badge-statut";
 import type { PageCommandes, ParametresListe } from "@/lib/commandes/liste";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
+import { creerBrouillon } from "@/lib/commandes/actions";
 
 /**
  * Le tableau des commandes, porté sur la maquette `gestion_d_inventaire_envois`.
@@ -23,11 +24,13 @@ import { lienListe, listeFiltree } from "@/lib/commandes/url";
  */
 export async function TableauCommandes({
   base,
+  langue,
   origine,
   parametres,
   page,
 }: {
   readonly base: string;
+  readonly langue: string;
   readonly origine: string;
   readonly parametres: ParametresListe;
   readonly page: PageCommandes;
@@ -66,17 +69,29 @@ export async function TableauCommandes({
           />
         </form>
 
-        <Link
-          href={base + "/nouvelle"}
-          className="flex items-center gap-2 rounded-lg bg-[var(--accent-remplissage)] px-4 py-2 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-opacity hover:opacity-90"
-        >
-          <Icone nom="add" className="text-[18px]" />
-          {t("nouvelle")}
-        </Link>
+        {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien vers
+            une page qui écrirait au rendu. Un lien serait suivi par le
+            préchargement du navigateur, par un aspirateur, par une visite
+            accidentelle — et chacun créerait un brouillon. */}
+        <form action={creerBrouillon}>
+          <input type="hidden" name="langue" value={langue} />
+          <button
+            type="submit"
+            className="flex items-center gap-2 rounded-lg bg-[var(--accent-remplissage)] px-4 py-2 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-opacity hover:opacity-90"
+          >
+            <Icone nom="add" className="text-[18px]" />
+            {t("nouvelle")}
+          </button>
+        </form>
       </div>
 
       {page.lignes.length === 0 ? (
-        <EtatVide compteVide={page.compteVide} base={base} parametres={parametres} />
+        <EtatVide
+          compteVide={page.compteVide}
+          base={base}
+          langue={langue}
+          parametres={parametres}
+        />
       ) : (
         <>
           <div className="flex-grow overflow-x-auto">
@@ -209,10 +224,12 @@ async function Pagination({
 async function EtatVide({
   compteVide,
   base,
+  langue,
   parametres,
 }: {
   readonly compteVide: boolean;
   readonly base: string;
+  readonly langue: string;
   readonly parametres: ParametresListe;
 }) {
   const t = await getTranslations("commandes");
@@ -238,13 +255,16 @@ async function EtatVide({
       </p>
 
       {vraimentVide ? (
-        <Link
-          href={base + "/nouvelle"}
-          className="flex items-center gap-2 rounded-lg bg-[var(--accent-remplissage)] px-6 py-3 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-opacity hover:opacity-90"
-        >
-          <Icone nom="add" className="text-[18px]" />
-          {t("vide.creer")}
-        </Link>
+        <form action={creerBrouillon}>
+          <input type="hidden" name="langue" value={langue} />
+          <button
+            type="submit"
+            className="flex items-center gap-2 rounded-lg bg-[var(--accent-remplissage)] px-6 py-3 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-opacity hover:opacity-90"
+          >
+            <Icone nom="add" className="text-[18px]" />
+            {t("vide.creer")}
+          </button>
+        </form>
       ) : (
         <Link
           href={base}
