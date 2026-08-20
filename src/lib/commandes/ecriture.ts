@@ -137,33 +137,37 @@ export async function appliquerChamp(
 }
 
 /**
- * Pose `first_content_at` et émet `order_created`, une seule fois.
+ * Émet `order_created`, exactement une fois.
  *
- * L'ÉCRITURE EST FAITE PAR LA BASE, pas ici. `first_content_at` n'est pas dans
- * le `grant update` de `authenticated` : c'est une MESURE, pas une donnée du
- * vendeur, et la lui laisser écrire reviendrait à lui laisser écrire notre
- * métrique de verdict. La fonction `marquer_premier_contenu` vérifie
- * l'appartenance dans son corps, pose la marque sous la condition
- * `first_content_at is null`, et rend `true` UNE SEULE FOIS.
+ * LA MARQUE ET L'ÉVÉNEMENT SONT DEUX CHOSES DIFFÉRENTES. `first_content_at` est
+ * un FAIT sur la commande, posé par un déclencheur depuis la migration 006 — et
+ * c'est bien qu'un déclencheur s'en charge, une règle en base ne peut pas être
+ * oubliée dans un nouveau chemin de code. `created_event_at` est la trace qu'on
+ * a émis l'événement correspondant, et c'est elle qu'on réclame ici.
  *
- * Deux sauvegardes simultanées ne peuvent donc pas produire deux créations :
- * c'est la base qui tranche, pas une lecture suivie d'une écriture.
+ * Les avoir confondues a coûté l'événement : la fonction de la migration 012
+ * cherchait à poser une marque que le déclencheur venait déjà de poser, ne
+ * trouvait jamais rien à écrire, et rendait toujours `false`. `order_created`
+ * n'était JAMAIS émis. Rien ne cassait — et c'est le NUMÉRATEUR de la métrique
+ * de verdict de la phase de validation.
  *
- * L'événement part APRÈS l'écriture. Une marque consommée avant une opération
- * qui peut échouer perd l'événement définitivement — et `order_created` est le
- * NUMÉRATEUR de la métrique de verdict.
+ * La condition est évaluée par la BASE, dans l'écriture elle-même : deux
+ * sauvegardes simultanées ne peuvent pas produire deux émissions.
+ *
+ * L'événement part APRÈS. Une marque consommée avant une opération qui peut
+ * échouer perd l'événement définitivement, sans réémission possible.
  */
 async function marquerPremierContenu(
   supabase: ClientEcriture,
   id: string,
   profilId: string,
 ): Promise<void> {
-  const { data, error } = await supabase.rpc("marquer_premier_contenu", { p_order_id: id });
+  const { data, error } = await supabase.rpc("reclamer_evenement_creation", { p_order_id: id });
 
   // Jamais de `catch` muet : une instrumentation qui échoue en silence se
   // découvre au moment de décider, c'est-à-dire trop tard.
   if (error !== null) {
-    console.warn("[commandes] marque de premier contenu impossible : " + error.message);
+    console.warn("[commandes] réclamation de l’événement de création impossible : " + error.message);
     return;
   }
 

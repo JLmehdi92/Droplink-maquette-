@@ -164,6 +164,7 @@ describe("Ce que la liste rend", () => {
       ["cover_media_id", "les médias n'existent pas encore ; à demander quand la vignette arrivera"],
       ["carrier_code", "la liste affiche le numéro de suivi, pas le transporteur"],
       ["first_content_at", "sert à l'instrumentation, pas à l'affichage"],
+      ["created_event_at", "trace d'émission de order_created : une mesure, pas une donnée d'écran"],
       ["recherche", "colonne générée, filtrée en base : la rendre serait la dupliquer"],
     ]);
 

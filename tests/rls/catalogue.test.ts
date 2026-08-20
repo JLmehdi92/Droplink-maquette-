@@ -156,14 +156,21 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "connaisse déjà.",
     ],
     [
-      "marquer_premier_contenu",
-      "Pose `first_content_at`, que `authenticated` n'a pas le droit d'écrire " +
-        "directement : c'est une MESURE, pas une donnée du vendeur, et la lui " +
-        "laisser écrire reviendrait à lui laisser écrire notre métrique de " +
-        "verdict. En `security definer` pour cette raison, mais elle vérifie la " +
-        "PROPRIÉTÉ dans son corps, et la condition `first_content_at is null` " +
-        "est évaluée par la base — deux sauvegardes simultanées ne peuvent donc " +
-        "pas produire deux créations.",
+      "reclamer_evenement_creation",
+      "Réclame l'émission de `order_created`, UNE SEULE FOIS. En `security " +
+        "definer` parce que `created_event_at` est une MESURE que le vendeur " +
+        "n'a pas le droit d'écrire, mais elle vérifie la PROPRIÉTÉ dans son " +
+        "corps, et la condition est évaluée par la base — deux sauvegardes " +
+        "simultanées ne peuvent donc pas produire deux émissions.",
+    ],
+    [
+      "reordonner_medias",
+      "Réordonne en UNE SEULE écriture, ce qu'aucune suite d'écritures " +
+        "applicatives ne peut garantir. En `security definer` pour s'appuyer " +
+        "sur l'unicité différée sans que la RLS coupe la transaction, mais elle " +
+        "vérifie la PROPRIÉTÉ dans son corps ET refuse toute liste qui ne " +
+        "décrit pas exactement les médias de la commande — un identifiant " +
+        "étranger y déplacerait le média d'un autre vendeur.",
     ],
     [
       "regenerer_jeton_public",
@@ -254,6 +261,17 @@ describe("Sonde C — privilèges de colonne", () => {
     "orders.cover_media_id",
     "orders.notify_email",
     "orders.archived_at",
+    // `order_media` — sont volontairement ABSENTES : `taille_octets` (elle fonde
+    // le MODÈLE DE COÛT et n'est écrite qu'une fois, avec la valeur RELUE chez
+    // le fournisseur de stockage), `cle` (la faire pointer ailleurs désignerait
+    // l'objet d'un autre vendeur — la RLS ne le verrait pas, la ligne appartient
+    // bien à l'appelant, c'est sa VALEUR qui change de cible), `type`,
+    // `order_id`, `source` et `created_at`.
+    "order_media.position",
+    "order_media.cle_vignette",
+    "order_media.largeur",
+    "order_media.hauteur",
+    "order_media.duree_s",
   ]);
 
   test("seules les colonnes déclarées sont modifiables par authenticated", async () => {
@@ -350,7 +368,12 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
     // pas dérivée du catalogue, parce que c'est le POINT : une table nouvelle
     // qui apparaît ici doit obliger quelqu'un à confirmer qu'elle est bien
     // censée être lisible par un vendeur authentifié.
-    expect(droitsAuth.map((d) => d.table_name)).toEqual(["orders", "profiles", "shops"]);
+    expect(droitsAuth.map((d) => d.table_name)).toEqual([
+      "order_media",
+      "orders",
+      "profiles",
+      "shops",
+    ]);
   });
 });
 

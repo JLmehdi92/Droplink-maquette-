@@ -17,12 +17,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_media: {
+        Row: {
+          cle: string
+          cle_vignette: string | null
+          created_at: string
+          duree_s: number | null
+          hauteur: number | null
+          id: string
+          largeur: number | null
+          order_id: string
+          position: number
+          source: Database["public"]["Enums"]["media_source"]
+          taille_octets: number
+          type: Database["public"]["Enums"]["media_type"]
+        }
+        Insert: {
+          cle: string
+          cle_vignette?: string | null
+          created_at?: string
+          duree_s?: number | null
+          hauteur?: number | null
+          id?: string
+          largeur?: number | null
+          order_id: string
+          position: number
+          source?: Database["public"]["Enums"]["media_source"]
+          taille_octets: number
+          type: Database["public"]["Enums"]["media_type"]
+        }
+        Update: {
+          cle?: string
+          cle_vignette?: string | null
+          created_at?: string
+          duree_s?: number | null
+          hauteur?: number | null
+          id?: string
+          largeur?: number | null
+          order_id?: string
+          position?: number
+          source?: Database["public"]["Enums"]["media_source"]
+          taille_octets?: number
+          type?: Database["public"]["Enums"]["media_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_media_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           archived_at: string | null
           carrier_code: string | null
           cover_media_id: string | null
           created_at: string
+          created_event_at: string | null
           customer_label: string | null
           first_content_at: string | null
           id: string
@@ -43,6 +97,7 @@ export type Database = {
           carrier_code?: string | null
           cover_media_id?: string | null
           created_at?: string
+          created_event_at?: string | null
           customer_label?: string | null
           first_content_at?: string | null
           id?: string
@@ -63,6 +118,7 @@ export type Database = {
           carrier_code?: string | null
           cover_media_id?: string | null
           created_at?: string
+          created_event_at?: string | null
           customer_label?: string | null
           first_content_at?: string | null
           id?: string
@@ -196,17 +252,23 @@ export type Database = {
         Returns: boolean
       }
       generer_jeton_public: { Args: never; Returns: string }
-      marquer_premier_contenu: {
+      mon_shop_id: { Args: never; Returns: string }
+      reclamer_evenement_creation: {
         Args: { p_order_id: string }
         Returns: boolean
       }
-      mon_shop_id: { Args: never; Returns: string }
       regenerer_jeton_public: { Args: { p_order_id: string }; Returns: string }
+      reordonner_medias: {
+        Args: { p_ids: string[]; p_order_id: string }
+        Returns: number
+      }
       sans_accents: { Args: { p_texte: string }; Returns: string }
     }
     Enums: {
       account_status: "active" | "suspended"
       account_type: "supplier" | "reseller"
+      media_source: "upload" | "agent_import"
+      media_type: "photo" | "video"
       order_status: "preparation" | "expedie" | "en_transit" | "livre"
       qc_status: "en_attente" | "approuve" | "refuse"
       user_role: "user" | "admin"
@@ -339,6 +401,8 @@ export const Constants = {
     Enums: {
       account_status: ["active", "suspended"],
       account_type: ["supplier", "reseller"],
+      media_source: ["upload", "agent_import"],
+      media_type: ["photo", "video"],
       order_status: ["preparation", "expedie", "en_transit", "livre"],
       qc_status: ["en_attente", "approuve", "refuse"],
       user_role: ["user", "admin"],

@@ -157,6 +157,71 @@ describe("Le premier contenu réel", () => {
     expect((await lire(alice, id, "first_content_at"))?.["first_content_at"]).not.toBeNull();
   });
 
+  /**
+   * LE TEST QUI MANQUAIT. Les précédents vérifiaient `first_content_at` — un
+   * FAIT posé par un déclencheur depuis la migration 006. Ils restaient donc
+   * verts alors que l'ÉVÉNEMENT `order_created`, lui, n'était jamais émis : la
+   * fonction censée le réclamer arrivait après le déclencheur et rendait
+   * toujours `false`.
+   *
+   * On interroge donc la réclamation elle-même, qui est ce que le code émetteur
+   * consulte réellement.
+   */
+  test("l'événement de création est réclamable UNE fois, et une seule", async () => {
+    const { data } = await alice.client
+      .from("orders")
+      .insert({ shop_id: alice.shopId })
+      .select("id")
+      .single();
+    const id = (data as { id: string }).id;
+
+    // Sans contenu réel, il n'y a rien à réclamer.
+    const avant = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
+    expect(avant.data, "réclamé alors que la commande est vide").toBe(false);
+
+    // On écrit SANS passer par `appliquerChamp` : celui-ci réclame déjà
+    // l'événement, et c'est bien son rôle. Le consommer ici masquerait ce qu'on
+    // cherche à établir.
+    await alice.client.from("orders").update({ customer_label: "Yanis" }).eq("id", id);
+
+    const premiere = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
+    expect(premiere.data, "l'événement n'a PAS pu être réclamé").toBe(true);
+
+    const seconde = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
+    expect(seconde.data, "l'événement a été réclamé deux fois").toBe(false);
+  });
+
+  /**
+   * ET LE LIEN AVEC LE CODE ÉMETTEUR. Le test précédent établit que la
+   * réclamation fonctionne ; celui-ci établit que le chemin du produit
+   * l'emprunte réellement — sans quoi la fonction serait correcte et l'événement
+   * toujours perdu, ce qui est exactement ce qui vient d'arriver.
+   */
+  test("une écriture de contenu réel CONSOMME la réclamation", async () => {
+    const { data } = await alice.client
+      .from("orders")
+      .insert({ shop_id: alice.shopId })
+      .select("id")
+      .single();
+    const id = (data as { id: string }).id;
+
+    await ecrire(alice, id, "product_ref", "REF-emission");
+
+    const restant = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
+    expect(
+      restant.data,
+      "la réclamation était encore disponible : le code n'a pas émis order_created",
+    ).toBe(false);
+  });
+
+  test("Bob ne peut pas réclamer l'événement d'une commande d'Alice", async () => {
+    const { error } = await bob.client.rpc("reclamer_evenement_creation", {
+      p_order_id: commande,
+    });
+    expect(error).not.toBeNull();
+    expect(error?.code).toBe("DL027");
+  });
+
   test("la marque n'est posée QU'UNE FOIS", async () => {
     const { data } = await alice.client
       .from("orders")
