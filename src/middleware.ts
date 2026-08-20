@@ -1,14 +1,14 @@
+import { createServerClient } from "@supabase/ssr";
 import createMiddleware from "next-intl/middleware";
+import type { NextRequest, NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
-
-export default createMiddleware(routing);
+import { clePubliable, urlSupabase } from "@/lib/supabase/config";
 
 /**
  * CHAQUE EXCLUSION DE CE MATCHER EST UNE PORTE.
  *
- * Ce middleware ne fait aujourd'hui que la négociation de langue. Il portera
- * plus tard le rafraîchissement de session et la protection de `/admin`, et
- * c'est pour cela que ses exclusions se justifient une par une dès maintenant :
+ * Le middleware négocie la langue ET rafraîchit la session. Il portera plus tard
+ * la protection de `/admin`. Ses exclusions se justifient donc une par une :
  * une exclusion posée sans raison devient une faille dès qu'on ajoute une
  * responsabilité au middleware.
  *
@@ -33,3 +33,50 @@ export default createMiddleware(routing);
 export const config = {
   matcher: "/((?!api(?:/|$)|p(?:/|$)|_next|_vercel|.*\\..*).*)",
 };
+
+const gestionLangue = createMiddleware(routing);
+
+/**
+ * LE MIDDLEWARE NE PROTÈGE AUCUNE DONNÉE À LUI SEUL.
+ *
+ * Il fait UNE chose de sécurité : garder les cookies de session à jour, pour
+ * qu'une session valide ne s'éteigne pas en cours de route. La garde qui fait
+ * autorité vit dans le code qui LIT les données — `exigerSession()` en tête de
+ * chaque page authentifiée, et la vérification du rôle EN BASE pour l'admin.
+ * Un middleware qui semblerait suffire ferait qu'on n'écrirait plus la vraie
+ * garde, et la première route ajoutée hors du matcher serait ouverte.
+ *
+ * L'ORDRE COMPTE. La réponse de next-intl est construite d'abord, puis les
+ * cookies rafraîchis y sont posés. Créer une réponse APRÈS le rafraîchissement
+ * perdrait les cookies mis à jour : ils auraient été écrits sur un objet qu'on
+ * jette, et la session expirerait silencieusement au bout d'une heure sans que
+ * rien ne l'explique.
+ */
+export default async function middleware(requete: NextRequest): Promise<NextResponse> {
+  const reponse = gestionLangue(requete);
+
+  const supabase = createServerClient(urlSupabase(), clePubliable(), {
+    cookies: {
+      getAll() {
+        return requete.cookies.getAll();
+      },
+      setAll(aPoser) {
+        for (const { name, value, options } of aPoser) {
+          reponse.cookies.set(name, value, options);
+        }
+      },
+    },
+  });
+
+  // `getSession()` déclenche le renouvellement quand le jeton d'accès a expiré,
+  // et ne fait AUCUN appel réseau quand il est encore valide — donc rien du tout
+  // pour un visiteur anonyme, qui n'a pas de cookie de session. C'est ce qui
+  // rend ce middleware indolore sur la landing, la page qui doit être la plus
+  // rapide du produit.
+  //
+  // On ne vérifie pas l'identité ici : ce n'est pas le rôle du middleware, et le
+  // faire donnerait l'illusion d'une protection. Voir `lib/auth/session.ts`.
+  await supabase.auth.getSession();
+
+  return reponse;
+}

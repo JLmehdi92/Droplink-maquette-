@@ -178,6 +178,29 @@ controles.push(
   [inscription.length > 5000, "la page d'inscription n'est pas vide"],
 );
 
+// CHAQUE PAGE NE TRANSPORTE QUE SES PROPRES LIBELLES.
+//
+// `NextIntlClientProvider` sans prop `messages` expedie le catalogue ENTIER sur
+// chaque page. Mesure sur les pages servies : la landing pesait 31,1 Ko et
+// portait les libelles du legal et de l onboarding. Providers descendus au
+// niveau de chaque page, elle est a 20,1 Ko.
+//
+// Le defaut ne casse RIEN et CROIT : chaque ecran client ajoute alourdirait
+// toutes les pages, dont la landing, ouverte en 4G depuis un message prive.
+// Un controle sur le HTML SERVI est le seul qui le voie — le code source, lui,
+// aura toujours l air correct.
+const conditions = await (await fetch(`${base}/fr/conditions`)).text();
+
+controles.push(
+  [!fr.includes("Je fournis des revendeurs"), "la landing ne porte pas l'onboarding"],
+  [!fr.includes("Recevoir mon lien"), "la landing ne porte pas la connexion"],
+  [!conditions.includes("Je fournis des revendeurs"), "les conditions ne portent pas l'onboarding"],
+  [!conditions.includes("Recevoir mon lien"), "les conditions ne portent pas la connexion"],
+  // Contre-test positif : la page qui A besoin de ses libelles les a bien.
+  // Sans lui, un provider casse ferait passer tous les controles ci-dessus.
+  [inscription.includes("Créer mon compte"), "l'inscription porte bien ses propres libelles"],
+);
+
 console.log("\n— Contenu rendu —");
 for (const [ok, libelle] of controles) {
   if (!ok) echecs += 1;

@@ -125,5 +125,46 @@
     "ceQuiSuit1": "Vous donnez un nom à votre boutique et choisissez votre couleur.",
     "ceQuiSuit2": "Vous créez votre première commande et déposez vos photos.",
     "ceQuiSuit3": "Vous envoyez un seul lien à votre client."
+  },
+  "onboarding": {
+    "titre": "Bienvenue",
+    "sousTitre": "Quatre réglages, une minute. Vous pourrez tout changer ensuite — vos liens déjà envoyés suivront.",
+    "typeTitre": "Vous vendez plutôt…",
+    "typeAide": "Cette réponse ne change rien à ce que vous pouvez faire. Elle nous aide à savoir pour qui nous construisons.",
+    "type": {
+      "supplier": {
+        "titre": "Je fournis des revendeurs",
+        "detail": "Vous envoyez photos et suivi à des gens qui revendent ensuite."
+      },
+      "reseller": {
+        "titre": "Je vends à mes clients",
+        "detail": "Vous vendez en direct, en message privé, sans boutique en ligne."
+      }
+    },
+    "erreurType": "Choisissez l'une des deux réponses.",
+    "nomTitre": "Nom de votre boutique",
+    "nomAide": "Il s'affiche en haut de la page que voit votre client. Vous pouvez le laisser vide pour l'instant.",
+    "nomPlaceholder": "Par exemple : Studio Nord",
+    "couleurTitre": "Votre couleur",
+    "couleurAide": "Elle habille la page de vos clients. N'importe quelle couleur convient : le texte reste lisible automatiquement.",
+    "apercuTexte": "Texte accentué",
+    "apercuBouton": "Bouton",
+    "couleurAjustee": "Cette teinte a été légèrement éclaircie ou foncée à l'affichage pour rester lisible. Votre couleur, elle, est conservée telle quelle.",
+    "logoTitre": "Votre logo",
+    "logoAide": "Facultatif. PNG, JPEG ou WebP, jusqu'à 2 Mo.",
+    "logoChoisir": "Choisir une image",
+    "logoRemplacer": "Remplacer",
+    "logoEnvoi": "Envoi… {pourcent} %",
+    "logoErreur": {
+      "session": "Votre session a expiré. Reconnectez-vous.",
+      "type": "Ce format n'est pas accepté. Utilisez un PNG, un JPEG ou un WebP.",
+      "taille": "Cette image dépasse 2 Mo.",
+      "envoi": "L'envoi a échoué. Vérifiez votre connexion et réessayez.",
+      "confirmation": "L'image est partie mais nous n'avons pas pu l'enregistrer. Réessayez."
+    },
+    "valider": "C'est parti",
+    "validationEnCours": "Enregistrement…",
+    "erreurSession": "Votre session a expiré. Reconnectez-vous.",
+    "erreurEcriture": "L'enregistrement a échoué. Réessayez dans un instant."
   }
 }

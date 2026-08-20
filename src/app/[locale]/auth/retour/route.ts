@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
+import { EVENEMENTS } from "@/lib/instrumentation/evenements";
+import { emettre } from "@/lib/instrumentation/emettre";
 import { estLangueSupportee } from "@/i18n/config";
 
 /**
@@ -36,6 +39,40 @@ export async function GET(
     // Lien expire, deja consomme, ou emis pour un autre navigateur. Les trois
     // se corrigent de la meme facon : en redemandant un lien.
     return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=expire`, requete.url));
+  }
+
+  const profil = await lireProfilVendeur();
+  if (profil === null) {
+    // La session existe mais le profil est introuvable : le declencheur de
+    // creation n'a pas tourne, ou la ligne a ete supprimee. On ne laisse pas
+    // l'utilisateur dans un espace authentifie sans profil, ou chaque ecran
+    // echouerait separement sans expliquer pourquoi.
+    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=profil`, requete.url));
+  }
+
+  if (profil.statut === "suspended") {
+    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=suspendu`, requete.url));
+  }
+
+  if (onboardingAFaire(profil)) {
+    /*
+     * L'INSCRIPTION EST COMPTÉE ICI, ET NULLE PART AILLEURS.
+     *
+     * Pas au moment de la demande de lien : mesuré sur ce projet, une demande
+     * crée `auth.users`, `profiles` et `shops` AVANT tout clic. Compter là
+     * gonflerait le dénombrement de toutes les fautes de frappe et de tout
+     * balayage d'adresses. Or l'inscription est un DÉNOMINATEUR — celui du taux
+     * d'activation — et un dénominateur gonflé fait BAISSER le taux : on
+     * s'alarmerait d'un problème d'activation qui n'existe pas.
+     *
+     * Ici, la personne a prouvé qu'elle possède la boîte : elle a cliqué. Et le
+     * critère « onboarding à faire » rend l'émission naturellement unique, sans
+     * marque à usage unique qu'il faudrait consommer avant l'envoi — une marque
+     * consommée avant une opération qui peut échouer perd l'événement
+     * définitivement, sans réémission possible.
+     */
+    await emettre(EVENEMENTS.INSCRIPTION, { sujet: profil.profilId }, { langue });
+    return NextResponse.redirect(new URL(`/${langue}/bienvenue`, requete.url));
   }
 
   // Le tableau de bord arrive au lot 4. En attendant, la racine localisee est la

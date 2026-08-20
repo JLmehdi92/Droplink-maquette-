@@ -1,4 +1,4 @@
-import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
@@ -67,12 +67,20 @@ export default async function LayoutLangue({
     <html lang={locale}>
       <body className={`${titre.variable} ${corps.variable} antialiased`}>
         {/*
-         * Le provider est nécessaire ici parce que l'espace vendeur aura des
-         * composants clients traduits. La page publique `/p/[token]`, elle,
-         * n'en aura AUCUN : son budget ne supporte pas l'expédition du
-         * catalogue au navigateur, et ses libellés voyagent en propriétés.
+         * AUCUN PROVIDER I18N ICI, DÉLIBÉRÉMENT.
+         *
+         * Un provider racine expédie les mêmes messages à toutes les pages.
+         * Mesuré : avec le catalogue entier la landing pesait 31,1 Ko et
+         * transportait les libellés du légal et de l'onboarding ; restreinte
+         * aux espaces utilisés côté client elle tombait à 23,7 Ko mais portait
+         * encore l'onboarding, qu'elle n'emploie pas. Le défaut ne casse rien
+         * et CROÎT avec chaque écran client ajouté.
+         *
+         * Chaque page enveloppe donc elle-même ses composants clients dans
+         * `<TraductionsClient espaces={[...]}>`, si bien que le coût d'un
+         * nouvel écran reste sur ce nouvel écran.
          */}
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        {children}
       </body>
     </html>
   );

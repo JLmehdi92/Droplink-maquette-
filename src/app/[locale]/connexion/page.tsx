@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { EnTete } from "@/components/en-tete";
 import { PiedDePage } from "@/components/pied-de-page";
 import { FormulaireConnexion } from "@/components/formulaire-connexion";
+import { TraductionsClient } from "@/components/traductions-client";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams(): Array<{ locale: string }> {
@@ -40,7 +41,9 @@ export default async function Connexion({
         <p className="mt-3 text-base leading-7 text-encre-douce">{t("sousTitre")}</p>
 
         <div className="mt-8">
-          <FormulaireConnexion locale={locale} />
+          <TraductionsClient espaces={["connexion"]}>
+            <FormulaireConnexion locale={locale} />
+          </TraductionsClient>
         </div>
 
         <div className="mt-10 border-t border-trait pt-6">

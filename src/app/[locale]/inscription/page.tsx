@@ -4,6 +4,7 @@ import Link from "next/link";
 import { EnTete } from "@/components/en-tete";
 import { PiedDePage } from "@/components/pied-de-page";
 import { FormulaireConnexion } from "@/components/formulaire-connexion";
+import { TraductionsClient } from "@/components/traductions-client";
 import { routing } from "@/i18n/routing";
 
 /**
@@ -75,7 +76,9 @@ export default async function Inscription({
               de comportement deviendrait un moyen de savoir si une adresse a
               déjà un compte.
             */}
-            <FormulaireConnexion locale={locale} intention="inscription" />
+            <TraductionsClient espaces={["connexion"]}>
+              <FormulaireConnexion locale={locale} intention="inscription" />
+            </TraductionsClient>
           </div>
 
           <p className="mt-4 text-sm leading-6 text-encre-douce">{t("gratuit")}</p>
