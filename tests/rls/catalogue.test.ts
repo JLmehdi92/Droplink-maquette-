@@ -138,7 +138,31 @@ describe("Sonde B — droits d'exécution dans public", () => {
    * nos migrations ne peuvent pas modifier — et un test qu'on ne peut pas faire
    * passer finit désactivé.
    */
-  const FONCTIONS_OUVERTES_ADMISES = new Map<string, string>([]);
+  const FONCTIONS_OUVERTES_ADMISES = new Map<string, string>([
+    [
+      "mon_shop_id",
+      "Rend la boutique de l'APPELANT et ne prend aucun argument : il n'y a rien " +
+        "à détourner. Les policies s'exécutant avec le rôle appelant (L-001), " +
+        "sans ce droit toute lecture de commande échouerait. Elle est évaluée " +
+        "une fois par requête au lieu d'une jointure par ligne, ce qui est la " +
+        "raison même de son existence.",
+    ],
+    [
+      "sans_accents",
+      "Appelée par la COLONNE GÉNÉRÉE `orders.recherche`, laquelle est calculée " +
+        "avec les privilèges du rôle qui insère. Sans ce droit, toute création " +
+        "de commande échoue. N'expose qu'une transformation de texte pure : elle " +
+        "ne lit ni n'écrit aucune donnée, et ne révèle rien que l'appelant ne " +
+        "connaisse déjà.",
+    ],
+    [
+      "regenerer_jeton_public",
+      "Unique chemin légitime de révocation d'un lien. En `security definer` " +
+        "pour poser le drapeau qu'exige le déclencheur d'immuabilité, mais elle " +
+        "vérifie la PROPRIÉTÉ dans son corps — sans quoi elle contournerait la " +
+        "RLS et permettrait de couper l'accès aux clients d'un autre vendeur.",
+    ],
+  ]);
 
   test("aucune fonction de public n'est exécutable par anon, authenticated ou PUBLIC", async () => {
     const toutes = await interroger<{ nom: string }>(
@@ -204,6 +228,22 @@ describe("Sonde C — privilèges de colonne", () => {
     "shops.accent_color",
     "shops.default_language",
     "shops.watermark_enabled",
+    // `orders` — sont volontairement ABSENTES : `public_token` et
+    // `unsubscribe_token` (immuables, et deux pouvoirs distincts), `shop_id`
+    // (aucun transfert entre comptes), `created_at`, `updated_at` (tenue par
+    // déclencheur) et `first_content_at` (c'est une MESURE, pas une donnée du
+    // vendeur : la lui laisser écrire reviendrait à lui laisser écrire notre
+    // métrique de verdict).
+    "orders.customer_label",
+    "orders.product_ref",
+    "orders.internal_notes",
+    "orders.status",
+    "orders.qc_status",
+    "orders.tracking_number",
+    "orders.carrier_code",
+    "orders.cover_media_id",
+    "orders.notify_email",
+    "orders.archived_at",
   ]);
 
   test("seules les colonnes déclarées sont modifiables par authenticated", async () => {
@@ -296,7 +336,11 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
        order by 1`,
     );
 
-    expect(droitsAuth.map((d) => d.table_name)).toEqual(["profiles", "shops"]);
+    // La liste s'allonge à chaque table du produit. Elle est écrite en dur, et
+    // pas dérivée du catalogue, parce que c'est le POINT : une table nouvelle
+    // qui apparaît ici doit obliger quelqu'un à confirmer qu'elle est bien
+    // censée être lisible par un vendeur authentifié.
+    expect(droitsAuth.map((d) => d.table_name)).toEqual(["orders", "profiles", "shops"]);
   });
 });
 
@@ -362,25 +406,71 @@ describe("Sonde E — aucune policy n'est trivialement permissive", () => {
     expect(perimees, `Exceptions périmées : ${perimees.join(", ")}`).toEqual([]);
   });
 
-  test("chaque policy mentionne bien auth.uid() dans son filtre", async () => {
-    // Contre-test structurel : une policy peut être non triviale ET ne pas
-    // dépendre de l'identité de l'appelant — par exemple `using (status =
-    // 'active')`, qui laisserait chacun voir les lignes de tous les autres.
-    const sansIdentite = await interroger<{ table_name: string; polname: string }>(
+  test("le filtre de chaque policy dépend de l'identité de l'appelant", async () => {
+    /*
+     * ON CHERCHE L'EFFET, PAS LE MOT.
+     *
+     * Une première version exigeait la chaîne « auth.uid() » DANS le texte de la
+     * policy. Elle a échoué sur `orders`, dont les policies appellent
+     * `mon_shop_id()` — une fonction qui dépend pourtant entièrement de
+     * l'identité de l'appelant. Un contrôle qui cherche un MOT ne prouve rien
+     * (L-020) : il refusait une policy correcte, et il aurait tout aussi bien
+     * accepté une policy où « auth.uid() » n'apparaît que dans un commentaire.
+     *
+     * La sonde résout donc la dépendance : elle relève d'abord les fonctions de
+     * `public` dont le CORPS s'appuie sur `auth.uid()`, puis accepte qu'une
+     * policy s'appuie sur l'une d'elles. Le contrôle reste honnête dans les deux
+     * sens — le jour où `mon_shop_id()` cesserait de dépendre de l'identité,
+     * elle sortirait de l'ensemble et les policies qui l'emploient échoueraient.
+     */
+    const porteusesDIdentite = await interroger<{ nom: string }>(
       bd,
-      `select c.relname as table_name, p.polname
+      `select p.proname as nom
+       from pg_proc p
+       join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public' and p.prosrc like '%auth.uid()%'
+       order by 1`,
+    );
+
+    const noms = porteusesDIdentite.map((f) => f.nom);
+    expect(
+      noms.length,
+      "Aucune fonction de public ne s'appuie sur auth.uid() : la sonde ne " +
+        "résout rien, et son indulgence serait vide de sens.",
+    ).toBeGreaterThan(0);
+
+    const policies = await interroger<{
+      table_name: string;
+      polname: string;
+      filtre: string;
+    }>(
+      bd,
+      `select c.relname as table_name, p.polname,
+              coalesce(pg_get_expr(p.polqual, p.polrelid), '') || ' ' ||
+              coalesce(pg_get_expr(p.polwithcheck, p.polrelid), '') as filtre
        from pg_policy p
        join pg_class c on c.oid = p.polrelid
        join pg_namespace n on n.oid = c.relnamespace
        where n.nspname = 'public'
-         and coalesce(pg_get_expr(p.polqual, p.polrelid), '') not like '%auth.uid()%'
-         and coalesce(pg_get_expr(p.polwithcheck, p.polrelid), '') not like '%auth.uid()%'
        order by 1, 2`,
     );
 
+    expect(policies.length, "aucune policy trouvée : la sonde vise à côté").toBeGreaterThan(0);
+
+    const sansIdentite = policies
+      .filter(
+        (p) =>
+          !p.filtre.includes("auth.uid()") &&
+          !noms.some((nom) => p.filtre.includes(`${nom}(`)),
+      )
+      .map((p) => `${p.table_name}.${p.polname}`);
+
     expect(
-      sansIdentite.map((p) => `${p.table_name}.${p.polname}`),
-      "Policies dont le filtre ne dépend pas de l'identité de l'appelant.",
+      sansIdentite,
+      `Policies dont le filtre ne dépend pas de l'identité de l'appelant : ` +
+        `${sansIdentite.join(", ")}. Une policy peut être non triviale ET ne ` +
+        "dépendre de personne — « using (status = 'active') » laisserait chacun " +
+        "voir les lignes de tous les autres.",
     ).toEqual([]);
   });
 });

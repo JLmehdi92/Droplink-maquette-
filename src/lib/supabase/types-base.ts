@@ -17,6 +17,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      orders: {
+        Row: {
+          archived_at: string | null
+          carrier_code: string | null
+          cover_media_id: string | null
+          created_at: string
+          customer_label: string | null
+          first_content_at: string | null
+          id: string
+          internal_notes: string | null
+          notify_email: string | null
+          product_ref: string | null
+          public_token: string
+          qc_status: Database["public"]["Enums"]["qc_status"]
+          recherche: string | null
+          shop_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          tracking_number: string | null
+          unsubscribe_token: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          carrier_code?: string | null
+          cover_media_id?: string | null
+          created_at?: string
+          customer_label?: string | null
+          first_content_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          notify_email?: string | null
+          product_ref?: string | null
+          public_token?: string
+          qc_status?: Database["public"]["Enums"]["qc_status"]
+          recherche?: string | null
+          shop_id: string
+          status?: Database["public"]["Enums"]["order_status"]
+          tracking_number?: string | null
+          unsubscribe_token?: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          carrier_code?: string | null
+          cover_media_id?: string | null
+          created_at?: string
+          customer_label?: string | null
+          first_content_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          notify_email?: string | null
+          product_ref?: string | null
+          public_token?: string
+          qc_status?: Database["public"]["Enums"]["qc_status"]
+          recherche?: string | null
+          shop_id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          tracking_number?: string | null
+          unsubscribe_token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
@@ -124,10 +195,16 @@ export type Database = {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
       }
+      generer_jeton_public: { Args: never; Returns: string }
+      mon_shop_id: { Args: never; Returns: string }
+      regenerer_jeton_public: { Args: { p_order_id: string }; Returns: string }
+      sans_accents: { Args: { p_texte: string }; Returns: string }
     }
     Enums: {
       account_status: "active" | "suspended"
       account_type: "supplier" | "reseller"
+      order_status: "preparation" | "expedie" | "en_transit" | "livre"
+      qc_status: "en_attente" | "approuve" | "refuse"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -258,6 +335,8 @@ export const Constants = {
     Enums: {
       account_status: ["active", "suspended"],
       account_type: ["supplier", "reseller"],
+      order_status: ["preparation", "expedie", "en_transit", "livre"],
+      qc_status: ["en_attente", "approuve", "refuse"],
       user_role: ["user", "admin"],
     },
   },

@@ -92,6 +92,60 @@ const SQL = {
     },
   },
 
+  /**
+   * Le declencheur d immuabilite du jeton, retire.
+   *
+   * L invariant le plus lourd du produit : le jeton ne transfere pas une donnee
+   * mais une CAPACITE, definitivement. Sans ce declencheur, il ne reste que le
+   * privilege de colonne — c est-a-dire une protection qui tient a une ABSENCE.
+   */
+  "jeton-mutable": {
+    casser: "drop trigger orders_jeton_public_immuable on public.orders;",
+    reparer:
+      "create trigger orders_jeton_public_immuable before update on public.orders " +
+      "for each row execute function public.jeton_public_immuable();",
+  },
+
+  /**
+   * La rotation SANS verification de propriete.
+   *
+   * `regenerer_jeton_public` est en `security definer`, donc la RLS ne la
+   * protege pas. Sans le controle dans son corps, n importe quel compte peut
+   * faire tourner le jeton d un autre vendeur — c est-a-dire couper le lien
+   * deja envoye aux clients de quelqu un d autre.
+   */
+  "rotation-sans-controle": {
+    casser: `create or replace function public.regenerer_jeton_public(p_order_id uuid)
+      returns text language plpgsql security definer set search_path = '' as $$
+      declare v_nouveau text;
+      begin
+        perform set_config('droplink.rotation_jeton', 'oui', true);
+        update public.orders
+          set public_token = public.generer_jeton_public(),
+              unsubscribe_token = public.generer_jeton_public()
+          where id = p_order_id
+          returning public_token into v_nouveau;
+        perform set_config('droplink.rotation_jeton', '', true);
+        return v_nouveau;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "007_jeton_public_immuable.sql",
+      depuis: "create function public.regenerer_jeton_public",
+    },
+  },
+
+  /** Le repli d accents desactive : « creme » cesse de trouver « Creme ». */
+  "accents-non-replies": {
+    casser: `create or replace function public.sans_accents(p_texte text)
+      returns text language sql immutable strict parallel safe set search_path = ''
+      as $$ select p_texte $$;`,
+    reparerDepuisMigration: {
+      fichier: "008_recherche_sans_accents.sql",
+      depuis: "create function public.sans_accents",
+      jusqua: "-- La fonction n'est PAS accordée",
+    },
+  },
+
   /** Une policy sur le compteur : il redevient atteignable hors de sa fonction. */
   "quota-policy": {
     casser:
@@ -144,10 +198,15 @@ await client.connect();
 let sql = SQL[cible][action];
 
 if (sql === undefined && action === "reparer" && SQL[cible].reparerDepuisMigration) {
-  const { fichier, depuis } = SQL[cible].reparerDepuisMigration;
+  // `jusqua` borne la decoupe. Sans borne, on rejoue tout ce qui suit la
+  // fonction dans le fichier — y compris des `create table` ou `alter table`
+  // deja appliques, qui echouent. Defaut constate en reparant `sans_accents` :
+  // la decoupe entrainait l ajout de colonne et l index de la migration 008.
+  const { fichier, depuis, jusqua } = SQL[cible].reparerDepuisMigration;
   const chemin = join(process.cwd(), "supabase", "migrations", fichier);
   const contenu = readFileSync(chemin, "utf8");
   const index = contenu.indexOf(depuis);
+  const fin = jusqua ? contenu.indexOf(jusqua, index) : -1;
   if (index === -1) {
     console.error(
       `Réparation impossible : « ${depuis} » est introuvable dans ${fichier}. ` +
@@ -159,7 +218,9 @@ if (sql === undefined && action === "reparer" && SQL[cible].reparerDepuisMigrati
   // `create or replace` sur la MÊME liste d arguments remplace bien la
   // fonction. Attention : si la signature changeait, Postgres en creerait une
   // SECONDE et un appel resoudrait l ANCIENNE, sans erreur.
-  sql = contenu.slice(index).replace("create function", "create or replace function");
+  sql = contenu
+    .slice(index, fin === -1 ? undefined : fin)
+    .replace("create function", "create or replace function");
 }
 
 if (typeof sql !== "string") {

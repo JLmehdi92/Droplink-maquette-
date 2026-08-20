@@ -1,0 +1,27 @@
+-- 010 — Rendre `sans_accents` exécutable par `authenticated`.
+--
+-- CORRECTION D'UNE AFFIRMATION FAUSSE ÉCRITE DANS LA MIGRATION 008.
+--
+-- Celle-ci retirait le droit d'exécution en le justifiant ainsi : « la colonne
+-- générée est calculée à l'écriture, donc aucune requête de lecture n'a besoin
+-- de l'appeler ». La phrase est exacte et la conclusion est fausse — c'est
+-- l'ÉCRITURE qui appelle la fonction, et une colonne générée est calculée avec
+-- les privilèges du rôle QUI INSÈRE. Toute création de commande échouait sur
+-- « permission denied for function sans_accents ».
+--
+-- C'est le deuxième cas identique dans ce lot, après le défaut de colonne qui
+-- appelait le générateur de jetons. La leçon est la même et mérite d'être
+-- écrite : un droit d'exécution ne se raisonne pas depuis le CHEMIN DE LECTURE.
+-- Défaut de colonne, colonne générée, contrainte de vérification, index
+-- d'expression — tous s'évaluent avec les droits de l'appelant, au moment de
+-- l'écriture, là où personne ne pense à regarder.
+--
+-- Le déclencheur de jetons a pu rester fermé parce qu'un déclencheur peut être
+-- `security definer`. Une colonne générée ne le peut pas : le droit est donc la
+-- seule voie.
+--
+-- CE QUE CE DROIT EXPOSE : une transformation de texte pure et déterministe, qui
+-- retire les accents d'une chaîne fournie par l'appelant. Elle ne lit aucune
+-- donnée, n'en écrit aucune, et ne révèle rien que l'appelant ne connaisse déjà.
+
+grant execute on function public.sans_accents(text) to authenticated;
