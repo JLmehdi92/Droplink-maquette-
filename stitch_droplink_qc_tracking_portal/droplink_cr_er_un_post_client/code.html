@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DropLink - Créer une publication de contrôle qualité (QC)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#dae2fd",
+                        "secondary-container": "#2170e4",
+                        "tertiary-container": "#0b1c30",
+                        "on-primary-container": "#7c839b",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "tertiary": "#000000",
+                        "primary": "#000000",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "background": "#f7f9fb",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "surface-variant": "#e0e3e5",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-dim": "#d8dadc",
+                        "on-tertiary-fixed-variant": "#38485d",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#131b2e",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#45464d",
+                        "surface-bright": "#f7f9fb",
+                        "tertiary-fixed": "#d3e4fe",
+                        "on-primary-fixed": "#131b2e",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container": "#eceef0",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#75859d",
+                        "surface-container-highest": "#e0e3e5",
+                        "inverse-primary": "#bec6e0",
+                        "on-background": "#191c1e",
+                        "on-tertiary-fixed": "#0b1c30",
+                        "surface-tint": "#565e74",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-secondary-container": "#fefcff",
+                        "outline": "#76777d",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "secondary": "#0058be",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed-dim": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "headline-xl": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom UI Tweaks */
+        body { background-color: #F8FAFC; }
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .btn-primary {
+            background-color: #0058be; /* Secondary in theme */
+            color: white;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:active {
+            box-shadow: none;
+            transform: translateY(2px);
+        }
+        .input-field {
+            background-color: #F1F5F9;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            border-color: #0058be;
+            box-shadow: 0 0 0 2px rgba(0, 88, 190, 0.2);
+            outline: none;
+            background-color: #ffffff;
+        }
+        /* Hide TopNavBar since it's a specific app flow (task-focused/creation) */
+    </style>
+</head>
+<body class="font-body-md text-body-md text-on-surface antialiased flex min-h-screen">
+<!-- Sidebar Navigation (Supplier View) -->
+<aside class="w-64 bg-surface-container-lowest border-r border-surface-container flex-shrink-0 flex flex-col hidden md:flex">
+<div class="h-20 flex items-center px-6 border-b border-surface-container">
+<span class="font-headline-md text-headline-md font-bold text-tertiary">DropLink <span class="text-secondary text-sm ml-2 px-2 py-1 bg-secondary-fixed rounded-full">Supplier</span></span>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-2">
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+<span class="font-label-md text-label-md">Orders</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-bold border-l-4 border-secondary" href="#">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+<span class="font-label-md text-label-md text-secondary">QC Publications</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">group</span>
+<span class="font-label-md text-label-md">Clients</span>
+</a>
+</nav>
+<div class="p-4 border-t border-surface-container">
+<a class="flex items-center space-x-3 px-3 py-2 text-on-surface-variant hover:text-error transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- Header (Task Context) -->
+<header class="h-20 px-gutter flex items-center justify-between border-b border-surface-container bg-surface-container-lowest/80 backdrop-blur-md z-10 shrink-0">
+<div class="flex items-center space-x-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors md:hidden">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface hidden md:block">Create QC Report</h1>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:hidden">Create QC Report</h1>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<button class="px-4 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant border border-outline-variant hover:bg-surface-container-low transition-colors">Save Draft</button>
+<button class="btn-primary px-6 rounded-lg font-label-md text-label-md flex items-center space-x-2">
+<span>Publish to Client</span>
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</header>
+<!-- Form Area -->
+<div class="flex-1 overflow-y-auto p-margin-mobile md:p-gutter lg:p-margin-desktop">
+<div class="max-w-[1000px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column (Main details & Media) -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Media Upload Bento -->
+<section class="glass-card rounded-xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Quality Control Media</h2>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-xs px-2 py-1 rounded-full font-medium">0/6 Uploaded</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+<!-- Main Drop Zone -->
+<div class="col-span-2 md:col-span-3 border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center text-center bg-surface-container-lowest/50 hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">add_photo_alternate</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface mb-1">Click to upload or drag &amp; drop</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">SVG, PNG, JPG or MP4 (max. 800x400px)</p>
+</div>
+<!-- Placeholder Slots for visual grid -->
+<div class="aspect-square rounded-lg bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center opacity-50">
+<span class="material-symbols-outlined text-outline">image</span>
+</div>
+<div class="aspect-square rounded-lg bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center opacity-50">
+<span class="material-symbols-outlined text-outline">image</span>
+</div>
+<div class="aspect-square rounded-lg bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center opacity-50 hidden md:flex">
+<span class="material-symbols-outlined text-outline">image</span>
+</div>
+</div>
+</section>
+<!-- Order Details -->
+<section class="glass-card rounded-xl p-6 shadow-sm">
+<h2 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-6">Logistics Data</h2>
+<div class="space-y-5">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Order Reference (Optional)</label>
+<input class="input-field w-full rounded-lg px-4 py-3 font-body-md text-body-md" placeholder="e.g. ORD-2023-8992" type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Tracking Number</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant">local_shipping</span>
+<input class="input-field w-full rounded-lg pl-10 pr-4 py-3 font-body-md text-body-md" placeholder="Enter tracking code" type="text"/>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Carrier</label>
+<select class="input-field w-full rounded-lg px-4 py-3 font-body-md text-body-md appearance-none">
+<option disabled="" selected="" value="">Select Carrier</option>
+<option value="dhl">DHL Express</option>
+<option value="fedex">FedEx</option>
+<option value="ups">UPS</option>
+<option value="yun">YunExpress</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">QC Inspector Notes</label>
+<textarea class="input-field w-full rounded-lg px-4 py-3 font-body-md text-body-md h-24 resize-none" placeholder="Add any details regarding packaging, visible defects, or special handling..."></textarea>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (Configuration) -->
+<div class="lg:col-span-4 space-y-6">
+<!-- Destination & Client -->
+<section class="glass-card rounded-xl p-6 shadow-sm">
+<h2 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-6">Destination</h2>
+<div class="space-y-5">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Client Account</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant">person_search</span>
+<input class="input-field w-full rounded-lg pl-10 pr-4 py-3 font-body-md text-body-md" placeholder="Search client..." type="text"/>
+</div>
+<div class="mt-2 bg-surface-container-lowest rounded-lg border border-outline-variant/50 p-2 space-y-1">
+<!-- Mock dropdown results -->
+<div class="flex items-center p-2 hover:bg-surface-container rounded cursor-pointer">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-primary text-xs flex items-center justify-center mr-3 font-bold">JD</div>
+<div>
+<p class="font-label-md text-label-md">John Doe</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">johndoe@store.com</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Status Configuration -->
+<section class="glass-card rounded-xl p-6 shadow-sm">
+<h2 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-6">Initial Status</h2>
+<div class="space-y-3">
+<label class="flex items-center p-3 border border-outline-variant/50 rounded-lg cursor-pointer hover:bg-surface-container-lowest bg-surface-container-lowest/50 transition-colors">
+<input checked="" class="text-secondary w-4 h-4 border-outline focus:ring-secondary focus:ring-2" name="qc_status" type="radio"/>
+<div class="ml-3 flex-1 flex justify-between items-center">
+<span class="font-body-md text-body-md font-medium">QC Passed</span>
+<span class="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Approved</span>
+</div>
+</label>
+<label class="flex items-center p-3 border border-outline-variant/50 rounded-lg cursor-pointer hover:bg-surface-container-lowest bg-transparent transition-colors">
+<input class="text-secondary w-4 h-4 border-outline focus:ring-secondary focus:ring-2" name="qc_status" type="radio"/>
+<div class="ml-3 flex-1 flex justify-between items-center">
+<span class="font-body-md text-body-md font-medium">Flagged for Review</span>
+<span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Warning</span>
+</div>
+</label>
+<label class="flex items-center p-3 border border-outline-variant/50 rounded-lg cursor-pointer hover:bg-surface-container-lowest bg-transparent transition-colors">
+<input class="text-secondary w-4 h-4 border-outline focus:ring-secondary focus:ring-2" name="qc_status" type="radio"/>
+<div class="ml-3 flex-1 flex justify-between items-center">
+<span class="font-body-md text-body-md font-medium">QC Failed</span>
+<span class="bg-red-100 text-red-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Rejected</span>
+</div>
+</label>
+</div>
+</section>
+</div>
+</div>
+<!-- Bottom spacing -->
+<div class="h-24"></div>
+</div>
+</main>
+</body></html>

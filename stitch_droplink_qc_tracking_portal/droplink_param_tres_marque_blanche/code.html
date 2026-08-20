@@ -1,0 +1,362 @@
+<!DOCTYPE html><html class="light" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DropLink - Paramètres du Compte</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#565e74",
+                      "secondary": "#0058be",
+                      "error-container": "#ffdad6",
+                      "surface-dim": "#d8dadc",
+                      "on-surface-variant": "#45464d",
+                      "primary": "#000000",
+                      "tertiary-container": "#0b1c30",
+                      "surface-bright": "#f7f9fb",
+                      "tertiary": "#000000",
+                      "tertiary-fixed-dim": "#b7c8e1",
+                      "on-background": "#191c1e",
+                      "on-error-container": "#93000a",
+                      "surface-variant": "#e0e3e5",
+                      "inverse-primary": "#bec6e0",
+                      "tertiary-fixed": "#d3e4fe",
+                      "surface-container-high": "#e6e8ea",
+                      "secondary-fixed": "#d8e2ff",
+                      "on-tertiary-container": "#75859d",
+                      "surface-container-low": "#f2f4f6",
+                      "outline": "#76777d",
+                      "on-tertiary-fixed": "#0b1c30",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed": "#131b2e",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-secondary-fixed": "#001a42",
+                      "error": "#ba1a1a",
+                      "outline-variant": "#c6c6cd",
+                      "on-secondary-container": "#fefcff",
+                      "on-tertiary-fixed-variant": "#38485d",
+                      "on-primary-container": "#7c839b",
+                      "on-secondary-fixed-variant": "#004395",
+                      "on-secondary": "#ffffff",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-surface": "#191c1e",
+                      "primary-fixed-dim": "#bec6e0",
+                      "surface-container": "#eceef0",
+                      "secondary-container": "#2170e4",
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#2d3133",
+                      "background": "#f7f9fb",
+                      "surface": "#f7f9fb",
+                      "primary-container": "#131b2e",
+                      "primary-fixed": "#dae2fd"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "gutter": "24px",
+                      "container-max": "1440px",
+                      "base": "8px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-xl": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-xl": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        /* Glassmorphism Utilities */
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .glass-modal {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar (Nav suppressed for settings page context, rendered as simple header) -->
+<header class="bg-surface/70 backdrop-blur-xl border-b-[0.5px] border-outline-variant shadow-sm sticky top-0 z-50 flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-20">
+<div class="flex items-center gap-4">
+<img src="https://lh3.googleusercontent.com/aida/AP1WRLscsJ2ZPeCeTCUFaWNgdvkllr9rJsAL28P_z0Cllk9G8X3gOQrOyxEbBVqyZQ4LOLiPQhxKF1Q_C64n92RaIGPHBsovdMU-bcm1FP5N97RKDTjaKTd5mFuLPYqB6PGW3Y4e0lrCe0StCGW6V0R1MBO3DWwGfon3lmGbJ23RqBQ8bkfxoLcjUUc3q1K9enscFjzqx3f2PfxSvpnn4ujW_vviFBpdiUI5xzl6Pe2MJk8S_XcTSUQQvol5OSU" alt="DropLink Logo" class="h-8 object-contain">
+<span class="text-on-surface-variant px-4 py-1 bg-surface-container rounded-full font-label-sm text-label-sm">Settings</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">arrow_back</span>
+</button>
+</div>
+</header>
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Sidebar Navigation (Settings Specific) -->
+<aside class="md:col-span-3">
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-secondary border-l-2 border-secondary font-bold bg-secondary-fixed/30 hover:bg-secondary-fixed/50 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">palette</span>
+                    White Label
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:text-primary hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+                    Profile
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:text-primary hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">security</span>
+                    Security
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:text-primary hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">notifications</span>
+                    Notifications
+                </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<div class="md:col-span-9 flex flex-col gap-8">
+<header>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">White Label Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Customize the tracking portal experience for your end-customers.</p>
+</header>
+<!-- Bento Grid Layout for Settings -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Brand Identity Card -->
+<div class="glass-card rounded-xl shadow-sm p-6 flex flex-col gap-6">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">image</span>
+                            Brand Identity
+                        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Upload your logo to replace DropLink branding on customer facing pages.</p>
+</div>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center text-center bg-surface-bright/50 hover:bg-surface-bright transition-colors cursor-pointer group">
+<div class="w-16 h-16 bg-secondary-fixed rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-secondary">upload</span>
+</div>
+<p class="font-label-md text-label-md text-primary mb-1">Click to upload or drag and drop</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-lg object-contain bg-white p-1" data-alt="A small, modern tech company logo, featuring geometric shapes in electric blue and dark navy, placed on a light neutral background. The style is clean, corporate, and minimalist." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiqFT3OlWdDfLK0T88u1R5RhUp2FRAttExCjuDTIWlNekbYVLG6E83-0FjTsLFkSawOfXHsKRrfHCgYdqEhP54EZ3zbMf7H1xM5XuHti3ARkMX7tCwi4ZfP8MgS77iasvCW2u7zHK4YA0eobXz5orFBv2_FL0aVtGSW-EQ6meISqbf1_B3k-f-i5tDpJv-c2NH5KSUN8kr2y5KPuvOFgsHJeC09hdaSYyYhzvVjaYHu29skRqrExcX">
+<div>
+<p class="font-label-md text-label-md text-primary">current_logo.png</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">124 KB</p>
+</div>
+</div>
+<button class="text-error hover:text-on-error-container transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<!-- Color Theme Card -->
+<div class="glass-card rounded-xl shadow-sm p-6 flex flex-col gap-6">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">format_color_fill</span>
+                            Color Theme
+                        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Select the primary color for the tracking portal to match your brand.</p>
+</div>
+<div>
+<label class="font-label-md text-label-md text-primary block mb-2">Primary Color (Hex)</label>
+<div class="flex gap-2">
+<div class="w-12 h-12 rounded-lg bg-secondary border border-outline-variant flex-shrink-0 shadow-sm"></div>
+<input class="w-full bg-[#F1F5F9] border-none rounded-lg px-4 font-body-md text-on-surface focus:ring-2 focus:ring-secondary focus:outline-none transition-shadow" placeholder="#000000" type="text" value="#0058be">
+</div>
+</div>
+<div>
+<p class="font-label-md text-label-md text-primary mb-3">Suggested Presets</p>
+<div class="flex gap-3 flex-wrap">
+<button class="w-10 h-10 rounded-full bg-secondary border-2 border-primary shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">check</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-tertiary-container border border-outline-variant shadow-sm hover:scale-110 transition-transform"></button>
+<button class="w-10 h-10 rounded-full bg-error border border-outline-variant shadow-sm hover:scale-110 transition-transform"></button>
+<button class="w-10 h-10 rounded-full bg-[#10b981] border border-outline-variant shadow-sm hover:scale-110 transition-transform"></button>
+</div>
+</div>
+</div>
+<!-- Preview Card (Full Width) -->
+<div class="glass-card rounded-xl shadow-sm p-6 lg:col-span-2 flex flex-col gap-6">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">visibility</span>
+                            Live Preview
+                        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">How your customers will see the tracking page.</p>
+</div>
+<div class="border rounded-xl border-outline-variant overflow-hidden bg-surface-container-lowest">
+<!-- Simulated Portal Header -->
+<div class="h-16 bg-surface border-b-[0.5px] border-outline-variant flex items-center px-6 justify-between">
+<img class="h-8 object-contain" data-alt="A small, modern tech company logo, featuring geometric shapes in electric blue and dark navy, placed on a light neutral background. The style is clean, corporate, and minimalist." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA96V2oLuKpO1nLLflOrxDalA1hfgXMaxEE7WPmt3PKaSHJH-nw-XCDuVzbMUIDQ5NPUfn4Agbo19uhMzECLBx92nADXOU1EAMO6ERfruMOfqch9WwVHOoYIb1MtRN5G5TT2m0S_HjVk5nITZC0c4QuvFpKHXVtRiMvIGWoUd7g2fK9OZTBV7Q9LXss0wGEjOjbZcWXq_Bmzrc2H9s1c6wnO3pC0b0NEnIT8EClcQ-oVipO2FZSfH5O">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tracking Portal</span>
+</div>
+<!-- Simulated Portal Content -->
+<div class="p-8 bg-background min-h-[300px] flex flex-col items-center justify-center">
+<div class="w-full max-w-md bg-white rounded-xl shadow-md p-6 border border-surface-variant">
+<h3 class="font-headline-md text-headline-md text-primary mb-4 text-center">Track your order</h3>
+<div class="flex gap-2">
+<input class="w-full bg-[#F1F5F9] border-none rounded-lg px-4 font-body-md text-on-surface" disabled="" placeholder="Enter tracking number" type="text">
+<button class="bg-secondary text-white px-6 py-3 rounded-lg font-label-md text-label-md shadow-md">Track</button>
+</div>
+<div class="mt-8 relative">
+<div class="absolute left-3 top-0 bottom-0 w-0.5 bg-surface-variant"></div>
+<div class="flex items-start gap-4 mb-6 relative">
+<div class="w-6 h-6 rounded-full bg-secondary flex-shrink-0 z-10 border-4 border-white flex items-center justify-center shadow-sm"></div>
+<div>
+<p class="font-label-md text-label-md text-primary">Delivered</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Today, 10:42 AM</p>
+</div>
+</div>
+<div class="flex items-start gap-4 relative opacity-50">
+<div class="w-6 h-6 rounded-full bg-surface-variant flex-shrink-0 z-10 border-4 border-white shadow-sm"></div>
+<div>
+<p class="font-label-md text-label-md text-primary">Out for delivery</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Today, 08:15 AM</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex justify-end gap-4 mt-4 border-t border-outline-variant pt-6">
+<button class="px-6 py-3 rounded-lg border-[1.5px] border-tertiary-container text-tertiary-container font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+                    Discard Changes
+                </button>
+<button class="px-6 py-3 rounded-lg bg-secondary text-white font-label-md text-label-md shadow-md hover:opacity-90 transition-opacity">
+                    Save Configuration
+                </button>
+</div>
+</div>
+</main>
+<footer class="w-full py-base px-margin-desktop flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto bg-surface-container-lowest border-t border-outline-variant mt-auto">
+<img src="https://lh3.googleusercontent.com/aida/AP1WRLscsJ2ZPeCeTCUFaWNgdvkllr9rJsAL28P_z0Cllk9G8X3gOQrOyxEbBVqyZQ4LOLiPQhxKF1Q_C64n92RaIGPHBsovdMU-bcm1FP5N97RKDTjaKTd5mFuLPYqB6PGW3Y4e0lrCe0StCGW6V0R1MBO3DWwGfon3lmGbJ23RqBQ8bkfxoLcjUUc3q1K9enscFjzqx3f2PfxSvpnn4ujW_vviFBpdiUI5xzl6Pe2MJk8S_XcTSUQQvol5OSU" alt="DropLink Logo" class="h-8 object-contain">
+<div class="flex gap-4 font-body-sm text-body-sm text-on-surface-variant mt-4 md:mt-0">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+<a class="hover:text-primary transition-colors" href="#">API Docs</a>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-4 md:mt-0">© 2024 DropLink Logistics Platforms. All rights reserved.</p>
+</footer>
+
+
+</body></html>

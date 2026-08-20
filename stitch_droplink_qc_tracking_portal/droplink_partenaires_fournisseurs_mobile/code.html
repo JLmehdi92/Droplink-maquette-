@@ -1,0 +1,381 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<title>DropLink - Partners</title>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#e0e3e5",
+                      "on-primary-fixed": "#131b2e",
+                      "surface": "#f7f9fb",
+                      "on-tertiary-fixed-variant": "#38485d",
+                      "secondary-fixed": "#d8e2ff",
+                      "error": "#ba1a1a",
+                      "surface-container": "#eceef0",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#0058be",
+                      "outline": "#76777d",
+                      "surface-bright": "#f7f9fb",
+                      "on-secondary-fixed": "#001a42",
+                      "on-secondary-fixed-variant": "#004395",
+                      "primary": "#000000",
+                      "on-error": "#ffffff",
+                      "on-surface": "#191c1e",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-background": "#191c1e",
+                      "on-tertiary-container": "#75859d",
+                      "inverse-surface": "#2d3133",
+                      "tertiary-fixed": "#d3e4fe",
+                      "primary-container": "#131b2e",
+                      "primary-fixed": "#dae2fd",
+                      "surface-tint": "#565e74",
+                      "primary-fixed-dim": "#bec6e0",
+                      "surface-container-high": "#e6e8ea",
+                      "surface-container-low": "#f2f4f6",
+                      "secondary-container": "#2170e4",
+                      "on-primary-container": "#7c839b",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#eff1f3",
+                      "surface-dim": "#d8dadc",
+                      "on-tertiary-fixed": "#0b1c30",
+                      "background": "#f7f9fb",
+                      "on-primary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "tertiary": "#000000",
+                      "on-error-container": "#93000a",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "on-surface-variant": "#45464d",
+                      "outline-variant": "#c6c6cd",
+                      "tertiary-fixed-dim": "#b7c8e1",
+                      "on-secondary-container": "#fefcff",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#bec6e0",
+                      "tertiary-container": "#0b1c30",
+                      "secondary-fixed-dim": "#adc6ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "container-max": "1440px",
+                      "gutter": "24px",
+                      "margin-desktop": "40px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "label-sm": ["Inter"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-xl": ["Plus Jakarta Sans"],
+                      "body-sm": ["Inter"],
+                      "label-md": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f7f9fb; /* bg-surface */
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Glassmorphism helpers */
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Hide scrollbar for clean horizontal scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Ambient shadows */
+        .ambient-shadow-sm {
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
+        }
+        .ambient-shadow-md {
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+        }
+        
+        /* Smooth transitions */
+        .btn-press {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .btn-press:active {
+            transform: scale(0.97);
+            box-shadow: none;
+        }
+        
+        /* Specific status chip colors requested in specs */
+        .status-chip-green {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: rgb(21, 128, 61);
+        }
+        .status-chip-amber {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: rgb(180, 83, 9);
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md antialiased pb-24 pt-20">
+<!-- TopAppBar Shared Component -->
+<header class="bg-surface-container-lowest/70 backdrop-blur-xl dark:bg-surface-dim/70 fixed top-0 w-full z-50 border-b border-outline-variant/30 shadow-sm transition-all duration-200 active:scale-95 flex justify-between items-center px-margin-mobile h-16 w-full">
+<button class="text-secondary dark:text-secondary-fixed-dim hover:bg-surface-variant/50 p-2 rounded-full flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<div class="h-8 flex items-center gap-2"><img src="https://lh3.googleusercontent.com/aida/AP1WRLscsJ2ZPeCeTCUFaWNgdvkllr9rJsAL28P_z0Cllk9G8X3gOQrOyxEbBVqyZQ4LOLiPQhxKF1Q_C64n92RaIGPHBsovdMU-bcm1FP5N97RKDTjaKTd5mFuLPYqB6PGW3Y4e0lrCe0StCGW6V0R1MBO3DWwGfon3lmGbJ23RqBQ8bkfxoLcjUUc3q1K9enscFjzqx3f2PfxSvpnn4ujW_vviFBpdiUI5xzl6Pe2MJk8S_XcTSUQQvol5OSU" alt="DropLink Logo" class="h-full w-auto object-contain"><span class="font-headline-md-mobile text-headline-md-mobile font-bold text-secondary dark:text-secondary-fixed">DropLink</span></div>
+<button class="hover:bg-surface-variant/50 rounded-full transition-colors flex items-center justify-center overflow-hidden h-8 w-8">
+<img src="https://lh3.googleusercontent.com/aida/AP1WRLvacHjqo_zt14fACteBFrFDvTZxZmQBDqp-NIngXxUYwIkVlUaBtKe-0l2d5CA5vW63wfrVWjwCXJBEzPxtnD_zv8FDNEy8wzbAH9BXhUrlvXHk5pjJ_5nLlI109QeubhDPalObsZ55fR3idk-_OZXi3WjQImPxzPu2xgaVK-sKdyTaTlCpkPyjzLlkLBNwNJ80Wct77PfN9-WnTBtO7g4uhVxCWHoOLx8lsyFxku3-V4dw6xsNpODhw5w" alt="DropLink Circular Logo" class="h-full w-full object-contain rounded-full">
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="px-margin-mobile flex flex-col gap-6">
+<!-- Header & Search -->
+<div class="flex flex-col gap-4">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Visibilité</h2>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-[#F1F5F9] border border-transparent rounded-lg py-3 pl-10 pr-4 font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/50 transition-all ambient-shadow-sm" placeholder="Rechercher un partenaire ou suivi..." type="text">
+<button class="absolute right-3 top-1/2 -translate-y-1/2 p-1 bg-surface-container rounded text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">tune</span>
+</button>
+</div>
+</div>
+<!-- Tab Navigation -->
+<div class="flex bg-surface-container-low rounded-lg p-1">
+<button class="flex-1 py-2 text-center rounded-md bg-surface-container-lowest text-on-surface font-label-md ambient-shadow-sm transition-all" id="tab-suppliers">Fournisseurs</button>
+<button class="flex-1 py-2 text-center rounded-md text-on-surface-variant font-body-sm transition-all" id="tab-carriers">Suivi Transport</button>
+</div>
+<!-- Quick Stats Bento (Supplier Context) -->
+<div class="grid grid-cols-2 gap-4">
+<div class="glass-card rounded-xl p-4 flex flex-col justify-between ambient-shadow-sm">
+<span class="material-symbols-outlined text-secondary mb-2" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">14</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Active Suppliers</span>
+</div>
+<div class="glass-card rounded-xl p-4 flex flex-col justify-between ambient-shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="material-symbols-outlined text-green-600" style="font-variation-settings: 'FILL' 1;">gpp_good</span>
+<span class="status-chip-green px-2 py-0.5 rounded-full font-label-sm text-[10px]">Avg Score</span>
+</div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">94%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Trust Rating</span>
+</div>
+</div>
+<!-- Section Title -->
+<div class="flex justify-between items-end mt-2 border-b border-slate-200 pb-2">
+<h3 class="font-label-md text-label-md text-on-surface">Annuaire des Partenaires</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                Sort by: Score <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</span>
+</div>
+<!-- Contact List (Cards) -->
+<div class="flex flex-col gap-4">
+<!-- Partner Card 1 -->
+<div class="glass-card rounded-xl overflow-hidden ambient-shadow-sm group transition-all hover:-translate-y-1">
+<div class="p-4 flex gap-4 items-start border-l-[3px] border-secondary">
+<!-- Avatar -->
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-surface-container-lowest shadow-sm">
+<img alt="Apex Global Logo" class="w-full h-full object-cover" data-alt="A clear, professional logo for a high-tech manufacturing company named 'Apex Global'. The logo features a sleek, geometric stylized 'A' in electric blue against a solid light gray background. It looks modern, corporate, and precise, suitable for a logistics or supply chain platform. The image is cropped tightly." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0lNZ42JzPZxQLN37lNaXZPg9YrFFEJHZ9F1HlVcWcul6rHpqFRJVT6NS96Fd8xMB84j_Nj_LFipJCc6EOwPW6A-fzDsDGX1KNuT1fVVnHiRxWP2_-I5D33XL9D6IVnL-s1g0Pd4tzO4QctT0SHG-KFvjBR1h6h9-id--uxsQrFTjlpmRFGbSfbiwvsTbWptEEvHE1qwTwX4soLiX0p4UG3Tf3RAGgyayLZo_3j2ks_35FwGtwpGf7">
+</div>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px] shadow-sm">
+<div class="w-3.5 h-3.5 rounded-full bg-green-500 border border-surface-container-lowest"></div>
+</div>
+</div>
+<!-- Info -->
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="font-label-md text-label-md text-on-surface truncate">Apex Global Mfg</h4>
+<div class="status-chip-green px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 ml-2">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-[10px] font-bold">98</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Shenzhen, CN • Electronics</p>
+<div class="flex items-center gap-3 mt-3">
+<span class="flex items-center gap-1 text-[11px] text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span> 12 Active POs
+                            </span>
+<span class="flex items-center gap-1 text-[11px] text-green-600 font-medium">
+<span class="material-symbols-outlined text-[14px]">fact_check</span> 100% Pass Rate
+                            </span>
+</div>
+</div>
+</div>
+<!-- Card Footer / Actions -->
+<div class="bg-slate-50 px-4 py-3 flex gap-2 border-t border-slate-100">
+<button class="flex-1 btn-press bg-secondary text-on-primary py-2 rounded-lg font-label-md text-label-md flex justify-center items-center gap-2 ambient-shadow-md"><span class="material-symbols-outlined text-[18px]">visibility</span> Voir le Suivi</button>
+<button class="px-3 border-[1.5px] border-on-secondary-fixed-variant text-on-secondary-fixed-variant rounded-lg flex justify-center items-center btn-press">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Partner Card 2 -->
+<div class="glass-card rounded-xl overflow-hidden ambient-shadow-sm group transition-all hover:-translate-y-1">
+<div class="p-4 flex gap-4 items-start border-l-[3px] border-amber-500">
+<!-- Avatar -->
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-surface-container-lowest shadow-sm">
+<img alt="Sarah from EuroTex" class="w-full h-full object-cover" data-alt="A professional headshot of a female account manager for a logistics supplier named 'EuroTex'. She is smiling confidently, wearing business casual attire. The background is a soft, out-of-focus modern office environment with bright, natural lighting. The image is cropped in a tight circle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8EKqkQY8pmiYx-ao8eurwP9DWTqeLCGi7wIoFcllfDDwWBE2GJzMuqXSlp0UBdey1kSGRKBPH2Z8KDrtC6kHE4fkNaPx2pl3mbsoDmQtYIanhIVHI5CFwfKHIyBtBKZApxxsoIK7YgS3pWeNFkaSu9o189urVdQVVuOAGqYGOstksphNUReQfJIN7Fn13h0TSsHKJ33xWvYIA-EOLB-T2YiTgQBANC7QPRabHXVthBIop_M0JKLjY">
+</div>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px] shadow-sm">
+<div class="w-3.5 h-3.5 rounded-full bg-amber-500 border border-surface-container-lowest"></div>
+</div>
+</div>
+<!-- Info -->
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="font-label-md text-label-md text-on-surface truncate">EuroTex Fabrics</h4>
+<div class="status-chip-amber px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 ml-2">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-sm text-[10px] font-bold">72</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Milan, IT • Textiles</p>
+<div class="flex items-center gap-3 mt-3">
+<span class="flex items-center gap-1 text-[11px] text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span> 3 Active POs
+                            </span>
+<span class="flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+<span class="material-symbols-outlined text-[14px]">fact_check</span> 2 Flags Open
+                            </span>
+</div>
+</div>
+</div>
+<!-- Card Footer / Actions -->
+<div class="bg-slate-50 px-4 py-3 flex gap-2 border-t border-slate-100">
+<button class="flex-1 btn-press bg-secondary text-on-primary py-2 rounded-lg font-label-md text-label-md flex justify-center items-center gap-2 ambient-shadow-md"><span class="material-symbols-outlined text-[18px]">visibility</span> Voir le Suivi</button>
+<button class="px-3 border-[1.5px] border-on-secondary-fixed-variant text-on-secondary-fixed-variant rounded-lg flex justify-center items-center btn-press">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Partner Card 3 -->
+<div class="glass-card rounded-xl overflow-hidden ambient-shadow-sm group transition-all hover:-translate-y-1">
+<div class="p-4 flex gap-4 items-start border-l-[3px] border-surface-container-high">
+<!-- Avatar -->
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-surface-container-lowest shadow-sm flex items-center justify-center bg-surface-container-low text-on-surface-variant font-headline-md">
+                            NS
+                        </div>
+<div class="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-[2px] shadow-sm">
+<div class="w-3.5 h-3.5 rounded-full bg-slate-300 border border-surface-container-lowest"></div>
+</div>
+</div>
+<!-- Info -->
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="font-label-md text-label-md text-on-surface truncate">Nordic Steel Co.</h4>
+<div class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 ml-2">
+<span class="font-label-sm text-[10px] font-bold">New</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Stockholm, SE • Raw Materials</p>
+<div class="flex items-center gap-3 mt-3">
+<span class="flex items-center gap-1 text-[11px] text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span> 0 Active POs
+                            </span>
+</div>
+</div>
+</div>
+<!-- Card Footer / Actions -->
+<div class="bg-slate-50 px-4 py-3 flex gap-2 border-t border-slate-100">
+<button class="flex-1 btn-press bg-secondary text-on-primary py-2 rounded-lg font-label-md text-label-md flex justify-center items-center gap-2 ambient-shadow-md"><span class="material-symbols-outlined text-[18px]">visibility</span> Voir le Suivi</button>
+<button class="px-3 border-[1.5px] border-on-secondary-fixed-variant text-on-secondary-fixed-variant rounded-lg flex justify-center items-center btn-press">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add New FAB (inline for list context) -->
+<button class="mt-2 w-full py-3 border-2 border-dashed border-outline-variant/50 rounded-xl text-on-surface-variant font-label-md flex items-center justify-center gap-2 hover:bg-surface-variant/30 transition-colors btn-press">
+<span class="material-symbols-outlined">add</span> Add New Partner
+        </button>
+</main>
+<!-- BottomNavBar Shared Component -->
+<!-- Determined 'Directory' as the active tab based on "Partners & Supplier Management" intent -->
+<nav class="bg-surface-container-lowest/80 backdrop-blur-md dark:bg-surface-container-high/80 fixed bottom-0 w-full z-50 border-t border-outline-variant/20 shadow-lg scale-110 transition-transform duration-300 flex justify-around items-center h-16 px-4 pb-safe">
+<button class="flex flex-col items-center justify-center text-on-surface-variant w-16 h-full pt-1 pb-2 active:bg-surface-variant/30 rounded-lg transition-colors">
+<span class="material-symbols-outlined mb-1 text-[24px]">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant w-16 h-full pt-1 pb-2 active:bg-surface-variant/30 rounded-lg transition-colors">
+<span class="material-symbols-outlined mb-1 text-[24px]">camera_enhance</span>
+<span class="font-label-sm text-label-sm">Audits</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant w-16 h-full pt-1 pb-2 active:bg-surface-variant/30 rounded-lg transition-colors">
+<span class="material-symbols-outlined mb-1 text-[24px]">package_2</span>
+<span class="font-label-sm text-label-sm">Inventory</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold w-16 h-full pt-1 pb-2 active:bg-surface-variant/30 rounded-lg transition-colors">
+<div class="px-4 py-0.5 bg-secondary-fixed/50 rounded-full mb-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">groups</span>
+</div>
+<span class="font-label-sm text-label-sm">Directory</span>
+</button>
+</nav>
+<script>
+        // Simple tab interaction script for demonstration
+        document.getElementById('tab-suppliers').addEventListener('click', function() {
+            this.classList.add('bg-surface-container-lowest', 'text-on-surface', 'font-label-md', 'ambient-shadow-sm');
+            this.classList.remove('text-on-surface-variant', 'font-body-sm');
+            
+            const carriersTab = document.getElementById('tab-carriers');
+            carriersTab.classList.remove('bg-surface-container-lowest', 'text-on-surface', 'font-label-md', 'ambient-shadow-sm');
+            carriersTab.classList.add('text-on-surface-variant', 'font-body-sm');
+        });
+
+        document.getElementById('tab-carriers').addEventListener('click', function() {
+            this.classList.add('bg-surface-container-lowest', 'text-on-surface', 'font-label-md', 'ambient-shadow-sm');
+            this.classList.remove('text-on-surface-variant', 'font-body-sm');
+            
+            const suppliersTab = document.getElementById('tab-suppliers');
+            suppliersTab.classList.remove('bg-surface-container-lowest', 'text-on-surface', 'font-label-md', 'ambient-shadow-sm');
+            suppliersTab.classList.add('text-on-surface-variant', 'font-body-sm');
+        });
+    </script>
+
+
+
+
+
+
+</body></html>

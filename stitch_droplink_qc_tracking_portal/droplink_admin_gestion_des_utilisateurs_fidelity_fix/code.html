@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DropLink - User Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-tertiary": "#ffffff",
+                "surface-dim": "#d8dadc",
+                "on-secondary-container": "#fefcff",
+                "surface-tint": "#565e74",
+                "on-secondary-fixed-variant": "#004395",
+                "surface-variant": "#e0e3e5",
+                "error": "#ba1a1a",
+                "on-surface": "#191c1e",
+                "on-error-container": "#93000a",
+                "surface-container-highest": "#e0e3e5",
+                "primary-container": "#131b2e",
+                "on-primary-fixed": "#131b2e",
+                "surface": "#f7f9fb",
+                "tertiary-container": "#0b1c30",
+                "surface-bright": "#f7f9fb",
+                "inverse-primary": "#bec6e0",
+                "secondary-fixed-dim": "#adc6ff",
+                "tertiary-fixed-dim": "#b7c8e1",
+                "tertiary": "#000000",
+                "surface-container-lowest": "#ffffff",
+                "outline": "#76777d",
+                "on-tertiary-fixed": "#0b1c30",
+                "inverse-on-surface": "#eff1f3",
+                "background": "#f7f9fb",
+                "secondary-container": "#2170e4",
+                "secondary": "#0058be",
+                "on-primary-container": "#7c839b",
+                "primary": "#000000",
+                "surface-container": "#eceef0",
+                "on-primary": "#ffffff",
+                "on-background": "#191c1e",
+                "primary-fixed": "#dae2fd",
+                "secondary-fixed": "#d8e2ff",
+                "on-tertiary-container": "#75859d",
+                "on-error": "#ffffff",
+                "surface-container-high": "#e6e8ea",
+                "on-primary-fixed-variant": "#3f465c",
+                "on-secondary": "#ffffff",
+                "error-container": "#ffdad6",
+                "on-tertiary-fixed-variant": "#38485d",
+                "tertiary-fixed": "#d3e4fe",
+                "on-surface-variant": "#45464d",
+                "outline-variant": "#c6c6cd",
+                "surface-container-low": "#f2f4f6",
+                "inverse-surface": "#2d3133",
+                "on-secondary-fixed": "#001a42",
+                "primary-fixed-dim": "#bec6e0"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "base": "8px",
+                "gutter": "24px",
+                "margin-mobile": "16px",
+                "margin-desktop": "40px",
+                "container-max": "1440px"
+        },
+        "fontFamily": {
+                "label-sm": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Plus Jakarta Sans"
+                ],
+                "body-sm": [
+                        "Inter"
+                ],
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Plus Jakarta Sans"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "label-md": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Plus Jakarta Sans"
+                ],
+                "headline-xl": [
+                        "Plus Jakarta Sans"
+                ]
+        },
+        "fontSize": {
+                "label-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-xl": [
+                        "40px",
+                        {
+                                "lineHeight": "48px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+        }
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 1);
+        }
+        body {
+            background-color: #F8FAFC;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased flex h-screen overflow-hidden font-body-md">
+<!-- Sidebar -->
+<aside class="w-64 bg-surface-container-lowest border-r border-outline-variant flex-shrink-0 flex flex-col hidden md:flex z-20 shadow-sm relative">
+<div class="h-20 flex items-center px-6 border-b border-outline-variant/50">
+<span class="font-headline-md text-headline-md font-bold text-primary">DropLink</span>
+<span class="ml-2 font-label-sm text-label-sm bg-primary-container text-on-primary-container px-2 py-0.5 rounded">ADMIN</span>
+</div>
+<nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+                Overview
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg bg-secondary/10 text-secondary font-label-md text-label-md font-bold transition-colors" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">group</span>
+                Users
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">corporate_fare</span>
+                Organizations
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">fact_check</span>
+                QC Logs
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">dns</span>
+                Infrastructure
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">receipt_long</span>
+                Billing
+            </a>
+</nav>
+<div class="p-4 border-t border-outline-variant/50">
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+                Settings
+            </a>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col overflow-hidden relative" id="main-wrapper">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b-[0.5px] border-outline-variant shadow-sm flex-shrink-0">
+<div class="flex-1 flex items-center md:hidden">
+<span class="font-headline-md text-headline-md font-bold text-primary">DropLink</span>
+</div>
+<!-- Search -->
+<div class="flex-1 max-w-xl hidden md:flex">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-[#F1F5F9] border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-white transition-all font-body-sm text-body-sm text-on-surface placeholder-on-surface-variant/70" placeholder="Search users, orgs, shipments..." type="text"/>
+</div>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center space-x-6 ml-auto">
+<button class="relative text-on-surface-variant hover:text-secondary transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="flex items-center space-x-3 pl-4 border-l border-outline-variant/50">
+<div class="text-right hidden md:block">
+<div class="font-label-md text-label-md text-on-surface">Super Admin</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">System Root</div>
+</div>
+<img class="w-10 h-10 rounded-full object-cover border border-outline-variant shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnwI3I_uemzNySVyY18TxtH96uOgzbLvH6ySJgekxl1f_UFz7rczNOt-xBipNPnrhUGPgpT8U61hdiFtBTx7teni9iRL8TmiI60kMYzpCiKcwcHEs-An7GeM47PksDaSTcp9jeEdmdwyhZLnhrW9hCAPmVEJgiORjQ0hWPK_LMxPXmypNboNfAb5QfQGxH-kZ3iI68nw8GLoRQwY6wBHIlHzWOKVK43bIlICnDAqUIMxSs2iwnNKsS"/>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop">
+<div class="max-w-container-max mx-auto space-y-gutter">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+<div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface">User Management</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1">Manage access, roles, and permissions across your organization.</p>
+</div>
+<div class="flex space-x-3">
+<button class="flex items-center px-4 py-2 border-[1.5px] border-primary-container text-primary-container rounded-lg font-label-md text-label-md hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined mr-2 text-[20px]">download</span>
+                            Export
+                        </button>
+<button class="flex items-center px-6 py-2 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md shadow-md hover:shadow-none transition-all">
+<span class="material-symbols-outlined mr-2 text-[20px]">person_add</span>
+                            Invite User
+                        </button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<div class="lg:col-span-2 space-y-gutter">
+<div class="glass-card rounded-xl p-0 overflow-hidden">
+<div class="p-6 border-b border-outline-variant/30 flex justify-between items-center bg-white/50 backdrop-blur-sm z-10">
+<h2 class="font-headline-md text-headline-md text-on-surface">All Users</h2>
+<div class="flex items-center space-x-2">
+<button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined">filter_list</span></button>
+</div>
+</div>
+<div class="overflow-x-auto bg-surface-container-lowest">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest/50 border-b-[0.5px] border-outline-variant/50">
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Name</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Role</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Last Active</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">MFA Status</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm text-on-surface">
+<tr class="border-b-[0.5px] border-outline-variant/30 hover:bg-surface-container/30 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap font-medium flex items-center">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md mr-3">JS</div>
+                                Jane Smith
+                            </td>
+<td class="px-6 py-4 whitespace-nowrap">Super Admin</td>
+<td class="px-6 py-4 whitespace-nowrap text-on-surface-variant">2 mins ago</td>
+<td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 rounded-full bg-[#10B981]/10 text-[#10B981] font-label-sm">Enabled</span></td>
+<td class="px-6 py-4 whitespace-nowrap"><button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="border-b-[0.5px] border-outline-variant/30 hover:bg-surface-container/30 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap font-medium flex items-center">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-label-md mr-3">MR</div>
+                                Michael Ross
+                            </td>
+<td class="px-6 py-4 whitespace-nowrap">Manager</td>
+<td class="px-6 py-4 whitespace-nowrap text-on-surface-variant">1 hour ago</td>
+<td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 rounded-full bg-[#10B981]/10 text-[#10B981] font-label-sm">Enabled</span></td>
+<td class="px-6 py-4 whitespace-nowrap"><button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap font-medium flex items-center">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center font-label-md mr-3">DL</div>
+                                David Lee
+                            </td>
+<td class="px-6 py-4 whitespace-nowrap">Carrier</td>
+<td class="px-6 py-4 whitespace-nowrap text-on-surface-variant">Yesterday</td>
+<td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 rounded-full bg-error/10 text-error font-label-sm">Disabled</span></td>
+<td class="px-6 py-4 whitespace-nowrap"><button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined">more_vert</span></button></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 space-y-gutter">
+<div class="glass-card rounded-xl p-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Invite Member</h2>
+<div class="space-y-4">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Email Address</label>
+<input class="w-full px-3 py-2 border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary transition-all font-body-sm text-body-sm" placeholder="colleague@company.com" type="email"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Role Assignment</label>
+<select class="w-full px-3 py-2 border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary transition-all font-body-sm text-body-sm">
+<option>Super Admin</option>
+<option>Manager</option>
+<option>Carrier</option>
+</select>
+</div>
+<button class="w-full py-2 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md hover:bg-secondary/90 transition-colors">Send Invitation</button>
+</div>
+</div>
+<div class="glass-card rounded-xl p-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">RBAC Settings</h2>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 border border-outline-variant rounded-lg">
+<div>
+<div class="font-label-md text-label-md text-on-surface">Require MFA</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Enforce for all admins</div>
+</div>
+<div class="w-10 h-6 bg-secondary rounded-full relative cursor-pointer">
+<div class="w-4 h-4 bg-white rounded-full absolute top-1 right-1"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 border border-outline-variant rounded-lg">
+<div>
+<div class="font-label-md text-label-md text-on-surface">Auto-Provisioning</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">SAML/SSO mapping</div>
+</div>
+<div class="w-10 h-6 bg-surface-variant rounded-full relative cursor-pointer">
+<div class="w-4 h-4 bg-white rounded-full absolute top-1 left-1"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="glass-card rounded-xl p-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Recent Activity</h2>
+<div class="space-y-4">
+<div class="flex items-start">
+<div class="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center mt-1 mr-3"><span class="material-symbols-outlined text-[16px]">person_add</span></div>
+<div>
+<div class="font-body-sm text-body-sm text-on-surface"><strong>Jane Smith</strong> invited <strong>Sarah Connor</strong></div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">10 mins ago</div>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-8 h-8 rounded-full bg-error/10 text-error flex items-center justify-center mt-1 mr-3"><span class="material-symbols-outlined text-[16px]">lock_reset</span></div>
+<div>
+<div class="font-body-sm text-body-sm text-on-surface"><strong>System</strong> reset password for <strong>David Lee</strong></div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">2 hours ago</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main></div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+            const selectAll = document.querySelector('thead input[type="checkbox"]');
+            const multiSelectBar = document.getElementById('multi-select-bar');
+            
+            function updateActionbar() {
+                const checkedCount = document.querySelectorAll('tbody input[type="checkbox"]:checked').length;
+                if(checkedCount > 0 && multiSelectBar) {
+                    multiSelectBar.classList.remove('hidden');
+                    multiSelectBar.querySelector('span.bg-secondary-fixed').textContent = checkedCount;
+                } else if (multiSelectBar) {
+                    multiSelectBar.classList.add('hidden');
+                }
+            }
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateActionbar);
+            });
+
+            if(selectAll) {
+                selectAll.addEventListener('change', (e) => {
+                    checkboxes.forEach(cb => cb.checked = e.target.checked);
+                    updateActionbar();
+                });
+            }
+        });
+    </script>
+</body></html>
