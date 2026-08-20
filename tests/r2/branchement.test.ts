@@ -70,15 +70,33 @@ describe("Configuration du stockage", () => {
   });
 });
 
+/**
+ * Toute clé produite ici est enregistrée pour être supprimee ensuite, QUEL QUE
+ * SOIT le sort du test qui l a creee.
+ *
+ * Ce n est pas de l hygiene : un test qui ne nettoie que son chemin heureux
+ * laisse un objet derriere lui a chaque ECHEC, c est-a-dire exactement quand on
+ * le relance en boucle. Le residu s accumule donc au rythme des ennuis, sur le
+ * seul poste de cout du produit qui puisse deraper. Defaut trouve en falsifiant
+ * la liaison de taille : le depot abusif a reussi, et son objet est reste.
+ */
+const clesCreees = new Set<string>();
+
+function suivre(cleSuivie: string): string {
+  clesCreees.add(cleSuivie);
+  return cleSuivie;
+}
+
 describe.runIf(configure)("Branchement de bout en bout", () => {
   beforeAll(async () => {
     // Un résidu d'un passage précédent ferait passer des assertions pour de
     // mauvaises raisons.
+    suivre(cle);
     await supprimer(cle);
   });
 
   afterAll(async () => {
-    await supprimer(cle);
+    for (const aSupprimer of clesCreees) await supprimer(aSupprimer);
   });
 
   /**
@@ -169,12 +187,9 @@ describe.runIf(configure)("Branchement de bout en bout", () => {
    * `allHeaders` fait son office.
    */
   test("un dépôt PLUS GROS que ce qui a été signé est REFUSÉ", async () => {
-    const cleAbus = cleMedia({
-      shopId,
-      orderId,
-      mediaId: randomUUID(),
-      typeMime: "image/png",
-    });
+    const cleAbus = suivre(
+      cleMedia({ shopId, orderId, mediaId: randomUUID(), typeMime: "image/png" }),
+    );
     const { url, enTetesObligatoires } = await signerDepot({
       cle: cleAbus,
       typeMime: TYPE,
@@ -227,12 +242,9 @@ describe.runIf(configure)("Branchement de bout en bout", () => {
   });
 
   test("la suppression est effective, et idempotente", async () => {
-    const cleTemp = cleMedia({
-      shopId,
-      orderId,
-      mediaId: randomUUID(),
-      typeMime: "image/png",
-    });
+    const cleTemp = suivre(
+      cleMedia({ shopId, orderId, mediaId: randomUUID(), typeMime: "image/png" }),
+    );
     await deposerDepuisLeServeur({ cle: cleTemp, corps: CORPS, typeMime: TYPE });
     expect(await lireTaille(cleTemp), "Dépôt serveur sans effet").toBe(CORPS.byteLength);
 
