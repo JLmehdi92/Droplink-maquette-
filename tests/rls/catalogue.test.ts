@@ -260,3 +260,88 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
     expect(droitsAuth.map((d) => d.table_name)).toEqual(["profiles", "shops"]);
   });
 });
+
+describe("Sonde E — aucune policy n'est trivialement permissive", () => {
+  /**
+   * Trouvé par falsification : remplacer la policy de mise à jour des profils
+   * par `using (true) with check (true)` ne faisait échouer AUCUN test.
+   *
+   * La raison est instructive. Postgres applique les policies SELECT aux lignes
+   * lues par la clause `WHERE` d'un `UPDATE` : c'était donc la policy de LECTURE
+   * qui bloquait l'écriture, pas celle d'écriture. La protection tenait à une
+   * propriété d'un AUTRE objet — et se serait effondrée en silence le jour où
+   * quelqu'un élargit la lecture, ce qui est un changement parfaitement banal
+   * (« que l'admin puisse lire tous les profils »).
+   *
+   * « Ce serait ouvert si quelqu'un élargissait la lecture » est exactement la
+   * phrase qui signale une protection en sursis (L-029). Cette sonde ne dépend
+   * d'aucun comportement : elle interroge l'EXPRESSION de chaque policy.
+   */
+  const POLICIES_PERMISSIVES_ADMISES = new Map<string, string>([
+    // Aucune. Toute entrée devra porter la raison pour laquelle une policy
+    // ouverte est correcte à cet endroit précis.
+  ]);
+
+  test("aucune policy d'écriture ne porte un qualificatif trivialement vrai", async () => {
+    const policies = await interroger<{
+      table_name: string;
+      polname: string;
+      commande: string;
+      using_expr: string | null;
+      check_expr: string | null;
+    }>(
+      bd,
+      `select c.relname as table_name,
+              p.polname,
+              case p.polcmd
+                when 'r' then 'SELECT' when 'a' then 'INSERT'
+                when 'w' then 'UPDATE' when 'd' then 'DELETE'
+                else 'ALL' end as commande,
+              pg_get_expr(p.polqual, p.polrelid) as using_expr,
+              pg_get_expr(p.polwithcheck, p.polrelid) as check_expr
+       from pg_policy p
+       join pg_class c on c.oid = p.polrelid
+       join pg_namespace n on n.oid = c.relnamespace
+       where n.nspname = 'public'
+       order by c.relname, p.polname`,
+    );
+
+    expect(policies.length, "aucune policy trouvée : la sonde n'inspecte rien").toBeGreaterThan(0);
+
+    const estTrivial = (e: string | null): boolean => e !== null && e.trim().toLowerCase() === "true";
+
+    const defauts = policies
+      .filter((p) => !POLICIES_PERMISSIVES_ADMISES.has(p.polname))
+      .filter((p) => estTrivial(p.using_expr) || estTrivial(p.check_expr))
+      .map((p) => `${p.table_name}.${p.polname} (${p.commande}) est ouverte à tous`);
+
+    expect(defauts, defauts.join(" | ")).toEqual([]);
+
+    const perimees = [...POLICIES_PERMISSIVES_ADMISES.keys()].filter(
+      (nom) => !policies.some((p) => p.polname === nom),
+    );
+    expect(perimees, `Exceptions périmées : ${perimees.join(", ")}`).toEqual([]);
+  });
+
+  test("chaque policy mentionne bien auth.uid() dans son filtre", async () => {
+    // Contre-test structurel : une policy peut être non triviale ET ne pas
+    // dépendre de l'identité de l'appelant — par exemple `using (status =
+    // 'active')`, qui laisserait chacun voir les lignes de tous les autres.
+    const sansIdentite = await interroger<{ table_name: string; polname: string }>(
+      bd,
+      `select c.relname as table_name, p.polname
+       from pg_policy p
+       join pg_class c on c.oid = p.polrelid
+       join pg_namespace n on n.oid = c.relnamespace
+       where n.nspname = 'public'
+         and coalesce(pg_get_expr(p.polqual, p.polrelid), '') not like '%auth.uid()%'
+         and coalesce(pg_get_expr(p.polwithcheck, p.polrelid), '') not like '%auth.uid()%'
+       order by 1, 2`,
+    );
+
+    expect(
+      sansIdentite.map((p) => `${p.table_name}.${p.polname}`),
+      "Policies dont le filtre ne dépend pas de l'identité de l'appelant.",
+    ).toEqual([]);
+  });
+});
