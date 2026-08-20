@@ -1,0 +1,21 @@
+{
+  "commun": {
+    "chargement": "Chargement…",
+    "erreurInattendue": "Une erreur inattendue est survenue.",
+    "reessayer": "Réessayer",
+    "fermer": "Fermer",
+    "copier": "Copier",
+    "copie": "Copié"
+  },
+  "pagePublique": {
+    "titre": "Suivi de commande",
+    "propulsePar": "Propulsé par DropLink",
+    "aucuneInfoTransporteur": "Pas encore d'information du transporteur",
+    "etapes": {
+      "preparation": "Préparation",
+      "expedie": "Expédié",
+      "enTransit": "En transit",
+      "livre": "Livré"
+    }
+  }
+}

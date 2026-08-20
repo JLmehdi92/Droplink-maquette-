@@ -1,26 +1,115 @@
 @import "tailwindcss";
 
+/*
+ * Tokens du design system, repris de `droplink_logistics_system/DESIGN.md`.
+ *
+ * Trois écarts assumés par rapport à la maquette Stitch :
+ *
+ * 1. La couleur d'accent n'est PAS ici. Elle est pilotée par le vendeur et
+ *    injectée par variable au rendu — voir `src/lib/design/contraste.ts`. La
+ *    poser en dur produirait une page correcte pour un seul vendeur.
+ * 2. Pas de glassmorphism ni de `backdrop-blur` sur la page publique. Sur un
+ *    aplat uni, un blanc à 70 % flouté rend exactement la même couleur qu'un
+ *    blanc opaque : le flou n'a rien à flouter, et c'est ce qui coûte le plus
+ *    cher sur un mobile d'entrée de gamme.
+ * 3. Les rayons suivent l'échelle du DESIGN.md (sm 0.25rem → xl 1.5rem), pas
+ *    la section « Shapes » du même fichier, qui se contredit elle-même en
+ *    annonçant 8/16/24/32 px.
+ */
+
+@theme {
+  /* --- Surfaces ------------------------------------------------------- */
+  --color-surface: #f7f9fb;
+  --color-surface-basse: #f2f4f6;
+  --color-surface-carte: #ffffff;
+  --color-surface-haute: #e6e8ea;
+  --color-surface-variante: #e0e3e5;
+
+  /* --- Texte ---------------------------------------------------------- */
+  --color-encre: #191c1e;
+  --color-encre-douce: #45464d;
+  --color-encre-inversee: #eff1f3;
+
+  /* --- Traits --------------------------------------------------------- */
+  --color-trait: #e2e8f0;
+  --color-trait-marque: #c6c6cd;
+
+  /* --- Marque (structure, PAS l'accent du vendeur) --------------------- */
+  --color-marine: #0f172a;
+
+  /* --- États ---------------------------------------------------------- */
+  --color-succes: #10b981;
+  --color-alerte: #f59e0b;
+  --color-erreur: #ba1a1a;
+  --color-erreur-fond: #ffdad6;
+
+  /* --- Typographie ---------------------------------------------------- */
+  --font-titre: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-corps: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --text-titre-xl: 2.5rem;
+  --text-titre-xl--line-height: 3rem;
+  --text-titre-xl--letter-spacing: -0.02em;
+  --text-titre-lg: 2rem;
+  --text-titre-lg--line-height: 2.5rem;
+  --text-titre-lg--letter-spacing: -0.02em;
+  --text-titre-md: 1.5rem;
+  --text-titre-md--line-height: 2rem;
+
+  /* --- Rayons --------------------------------------------------------- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* --- Élévation, sans flou de fond ----------------------------------- */
+  --shadow-carte: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-flottant: 0 4px 6px -1px rgb(15 23 42 / 0.1);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /*
+   * Valeur de repli identique au défaut de `shops.accent_color` en base. Elle
+   * est écrasée au rendu par la palette résolue du vendeur : il n'existe aucun
+   * état « couleur non configurée » à détecter.
+   */
+  --accent: #0058be;
+  --accent-texte: #0058be;
+  --accent-interface: #0058be;
+  --accent-remplissage: #0058be;
+  --accent-sur-remplissage: #ffffff;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface);
+  color: var(--color-encre);
+  font-family: var(--font-corps);
+}
+
+/*
+ * Cibles tactiles de 44 points minimum sur mobile. Sous ce seuil, le taux
+ * d'erreur au pouce grimpe, et la page publique est ouverte au téléphone dans
+ * la grande majorité des cas.
+ */
+@media (pointer: coarse) {
+  button,
+  a[role="button"],
+  [role="tab"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Respecter le réglage système : aucune animation imposée. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

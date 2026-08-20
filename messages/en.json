@@ -1,0 +1,21 @@
+{
+  "commun": {
+    "chargement": "Loading…",
+    "erreurInattendue": "An unexpected error occurred.",
+    "reessayer": "Try again",
+    "fermer": "Close",
+    "copier": "Copy",
+    "copie": "Copied"
+  },
+  "pagePublique": {
+    "titre": "Order tracking",
+    "propulsePar": "Powered by DropLink",
+    "aucuneInfoTransporteur": "No carrier information yet",
+    "etapes": {
+      "preparation": "Preparing",
+      "expedie": "Shipped",
+      "enTransit": "In transit",
+      "livre": "Delivered"
+    }
+  }
+}

@@ -14,7 +14,6 @@
     "test:perf": "vitest run --project perf",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:types": "node scripts/db-types.mjs",
-    "check:r2": "node scripts/check-r2.mjs",
     "gates": "pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls"
   },
   "dependencies": {
@@ -22,6 +21,7 @@
     "@supabase/supabase-js": "^2.112.3",
     "next": "15.5.23",
     "next-intl": "^4.13.7",
+    "posthog-node": "^5.49.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "server-only": "^0.0.1",
@@ -40,6 +40,7 @@
     "eslint-config-next": "15.5.23",
     "eslint-plugin-import": "^2.32.0",
     "pg": "^8.23.0",
+    "supabase": "^2.115.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "typescript-eslint": "^8.67.0",
