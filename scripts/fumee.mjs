@@ -18,6 +18,12 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Le serveur enfant lit `.env.local` lui-meme ; ce script, non. Sans ce
+// chargement, la sonde qui cree une commande de test echouerait sur une
+// variable absente — et l echec ressemblerait a un defaut du produit.
+const { config: chargerEnv } = await import("dotenv");
+chargerEnv({ path: ".env.local", quiet: true });
+
 const racine = dirname(dirname(fileURLToPath(import.meta.url)));
 
 if (!existsSync(join(racine, ".next"))) {
@@ -229,12 +235,112 @@ controles.push(
 // elle apparait, ce controle vire au rouge et oblige a le remplacer par la
 // verification du flou. Une affirmation trop vague pour etre fausse ne peut pas
 // non plus etre vraie.
-const pagePublique = await fetch(`${base}/p/exemple-inexistant`, { redirect: "manual" });
-controles.push([
-  pagePublique.status === 404,
-  "la page publique n'existe pas encore — quand elle arrivera, REMPLACER ce " +
-    "controle par la verification qu'elle ne porte aucun backdrop-blur",
-]);
+// LA PAGE PUBLIQUE, SUR UNE VRAIE COMMANDE.
+//
+// Ce controle remplace celui qui se contentait de verifier que la page
+// n existait pas encore. Il cree une commande avec la cle de service, demande
+// sa page comme le ferait le client, puis efface tout — quoi qu il arrive.
+//
+// Un controle sur le HTML SERVI est le seul qui voie ces defauts : le code
+// source, lui, aura toujours l air correct.
+const { createClient } = await import("@supabase/supabase-js");
+const service = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  { auth: { persistSession: false } },
+);
+
+const NOTE_SENTINELLE = "prix-achat-fumee-7d2e9c41";
+let jetonFumee = null;
+let commandeFumee = null;
+let profilFumee = null;
+
+try {
+  const courriel = `fumee-${Date.now()}@exemple.test`;
+  const { data: utilisateur } = await service.auth.admin.createUser({
+    email: courriel,
+    email_confirm: true,
+  });
+
+  if (utilisateur?.user) {
+    const { data: profil } = await service
+      .from("profiles")
+      .select("id")
+      .eq("user_id", utilisateur.user.id)
+      .maybeSingle();
+    profilFumee = profil?.id ?? null;
+
+    const { data: shop } = await service
+      .from("shops")
+      .select("id")
+      .eq("owner_id", profilFumee)
+      .maybeSingle();
+
+    if (shop?.id) {
+      const { data: commande } = await service
+        .from("orders")
+        .insert({
+          shop_id: shop.id,
+          customer_label: "Client de fumee",
+          product_ref: "REF-FUMEE",
+          internal_notes: NOTE_SENTINELLE,
+        })
+        .select("id, public_token, unsubscribe_token")
+        .single();
+
+      commandeFumee = commande?.id ?? null;
+      jetonFumee = commande?.public_token ?? null;
+
+      if (jetonFumee) {
+        const reponse = await fetch(`${base}/p/${jetonFumee}`);
+        const html = await reponse.text();
+
+        controles.push(
+          [reponse.status === 200, "la page publique repond sur un jeton valide"],
+          [html.includes("Client de fumee"), "elle porte bien le contenu de la commande"],
+
+          // CONTROLE PAR VALEUR, pas par nom : une valeur voyage sous n importe
+          // quel nom. On cherche la valeur elle-meme dans le HTML rendu, charges
+          // d hydratation comprises.
+          [!html.includes(NOTE_SENTINELLE), "les notes internes n apparaissent PAS dans le HTML servi"],
+          [
+            !html.includes(commande?.unsubscribe_token ?? "|impossible|"),
+            "le jeton de desabonnement n apparait pas — un jeton, un pouvoir",
+          ],
+
+          // Sur un aplat uni, un blanc a 70 % floute rend la meme couleur qu un
+          // blanc opaque : le flou n a rien a flouter, et c est ce qui rame le
+          // plus sur un mobile d entree de gamme.
+          [!/backdrop-blur/.test(html), "aucun backdrop-blur sur la page publique"],
+          [!/glass-card/.test(html), "aucun glassmorphism sur la page publique"],
+
+          // Un apercu enrichi montrerait la photo ou le pseudo du client DANS la
+          // conversation, et les messageries le mettent en cache sur leurs
+          // serveurs. La fuite serait hors de notre portee.
+          [!/og:image/.test(html), "aucune image de partage Open Graph"],
+          [/noindex/.test(html), "la page porte bien noindex"],
+
+          [
+            Buffer.byteLength(html) / 1024 < 300,
+            `poids du HTML public : ${(Buffer.byteLength(html) / 1024).toFixed(1)} Ko (budget 300)`,
+          ],
+        );
+      }
+
+      // Jeton inconnu : meme sortie, aucune divulgation.
+      const inconnu = await fetch(`${base}/p/aaaaaaaaaaaaaaaaaaaaa`, { redirect: "manual" });
+      controles.push([inconnu.status === 404, "un jeton inconnu rend 404"]);
+    }
+  }
+} finally {
+  // Nettoyage INCONDITIONNEL : un chemin d echec qui laisse des lignes derriere
+  // lui fausse toutes les mesures suivantes.
+  if (commandeFumee) await service.from("orders").delete().eq("id", commandeFumee);
+  if (profilFumee) {
+    const { data: p } = await service.from("profiles").select("user_id").eq("id", profilFumee).maybeSingle();
+    if (p?.user_id) await service.auth.admin.deleteUser(p.user_id);
+  }
+}
 
 console.log("\n— Contenu rendu —");
 for (const [ok, libelle] of controles) {

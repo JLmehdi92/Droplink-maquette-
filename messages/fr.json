@@ -378,5 +378,46 @@
       "enCours": "Révocation…",
       "echec": "Révocation impossible. L’ancien lien reste actif."
     }
+  },
+  "page-publique": {
+    "titre": "Votre commande",
+    "propulsePar": "Propulsé par DropLink",
+    "frise": {
+      "preparation": {
+        "titre": "En préparation",
+        "texte": "Votre commande est en cours de préparation."
+      },
+      "expedie": {
+        "titre": "Expédiée",
+        "texte": "Le colis a été remis au transporteur."
+      },
+      "en_transit": {
+        "titre": "En transit",
+        "texte": "Le colis est en route."
+      },
+      "livre": {
+        "titre": "Livrée",
+        "texte": "Le colis est arrivé."
+      }
+    },
+    "galerie": {
+      "titre": "Photos et vidéos",
+      "aucune": "Aucune photo pour le moment.",
+      "ouvrir": "Agrandir la photo",
+      "fermer": "Fermer",
+      "precedent": "Précédent",
+      "suivant": "Suivant",
+      "chargement": "Chargement…",
+      "indisponible": "Cette photo n’est pas disponible.",
+      "position": "{n} sur {total}"
+    },
+    "expedition": {
+      "titre": "Suivi"
+    },
+    "details": {
+      "titre": "Détails",
+      "reference": "Article",
+      "suivi": "Numéro de suivi"
+    }
   }
 }

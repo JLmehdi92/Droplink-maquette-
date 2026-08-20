@@ -378,5 +378,46 @@
       "enCours": "Revoking…",
       "echec": "Could not revoke. The old link is still active."
     }
+  },
+  "page-publique": {
+    "titre": "Your order",
+    "propulsePar": "Powered by DropLink",
+    "frise": {
+      "preparation": {
+        "titre": "Preparing",
+        "texte": "Your order is being prepared."
+      },
+      "expedie": {
+        "titre": "Shipped",
+        "texte": "The parcel was handed to the carrier."
+      },
+      "en_transit": {
+        "titre": "In transit",
+        "texte": "The parcel is on its way."
+      },
+      "livre": {
+        "titre": "Delivered",
+        "texte": "The parcel has arrived."
+      }
+    },
+    "galerie": {
+      "titre": "Photos and videos",
+      "aucune": "No photos yet.",
+      "ouvrir": "Enlarge photo",
+      "fermer": "Close",
+      "precedent": "Previous",
+      "suivant": "Next",
+      "chargement": "Loading…",
+      "indisponible": "This photo is unavailable.",
+      "position": "{n} of {total}"
+    },
+    "expedition": {
+      "titre": "Tracking"
+    },
+    "details": {
+      "titre": "Details",
+      "reference": "Item",
+      "suivi": "Tracking number"
+    }
   }
 }
