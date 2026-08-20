@@ -7,10 +7,13 @@ import {
 import {
   confirmerDepot,
   preparerDepot,
+  preparerDepotVignette,
   reordonnerMedias,
   supprimerMedia,
   type ClientMedias,
 } from "@/lib/commandes/medias";
+import { cleVignette } from "@/lib/storage/cles";
+import { limites } from "@/lib/storage/limites";
 import { lireTaille, supprimer } from "@/lib/storage/r2";
 
 /**
@@ -359,6 +362,98 @@ describe("Les plafonds tiennent EN BASE", () => {
       .update({ position: media.position })
       .eq("id", media.id);
     expect(error, `la position n'est pas modifiable : ${error?.message}`).toBeNull();
+  });
+});
+
+describe("La vignette", () => {
+  test("son emplacement est DÉRIVÉ de celui du média, jamais choisi", async () => {
+    const signature = await preparerDepotVignette(clientDe(alice), alice.shopId, {
+      orderId: commandeAlice,
+      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      typeMime: "image/jpeg",
+      tailleAnnoncee: 4096,
+    });
+
+    expect(signature.statut).toBe("ok");
+    if (signature.statut !== "ok") return;
+
+    // L'URL signée doit porter le chemin dérivé, sous la boutique de l'appelant.
+    const attendu = cleVignette(
+      "medias/" + alice.shopId + "/" + commandeAlice + "/3f2504e0-4f89-11d3-9a0c-0305e82c3301.jpg",
+    );
+    expect(decodeURIComponent(new URL(signature.url).pathname)).toContain(attendu);
+    expect(signature.url).not.toContain(bob.shopId);
+  });
+
+  test("au-delà du plafond dur, elle est refusée AVANT d'être signée", async () => {
+    // Le plafond vient du budget de page : 20 Ko de vignette maximum, sans quoi
+    // cinquante lignes de liste dépassent le poids autorisé — ce qui ne se
+    // verrait qu'une fois la volumétrie installée.
+    const signature = await preparerDepotVignette(clientDe(alice), alice.shopId, {
+      orderId: commandeAlice,
+      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      typeMime: "image/jpeg",
+      tailleAnnoncee: limites().vignetteOctets + 1,
+    });
+
+    expect(signature.statut).toBe("echec");
+    if (signature.statut === "echec") expect(signature.motif).toBe("trop_lourde");
+  });
+
+  test("Bob ne peut pas signer de vignette dans la commande d'Alice", async () => {
+    const signature = await preparerDepotVignette(clientDe(bob), bob.shopId, {
+      orderId: commandeAlice,
+      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      typeMime: "image/jpeg",
+      tailleAnnoncee: 4096,
+    });
+    expect(signature.statut).toBe("echec");
+  });
+});
+
+describe("La photo de couverture", () => {
+  /**
+   * La vérification existe AUSSI dans la Server Action. Ce test la contourne
+   * délibérément — écriture directe avec le client du vendeur — parce que c'est
+   * la seule façon de savoir si la règle tient quand un nouveau chemin de code
+   * oublie de la poser.
+   */
+  test("un média d'une AUTRE commande est refusé par la base", async () => {
+    const idsBob = await idsDe(bob, commandeBob);
+    expect(idsBob.length).toBeGreaterThan(0);
+
+    // Alice désigne le média de Bob. Elle n'a pas le droit de le LIRE, mais elle
+    // écrit dans SA propre commande : la RLS ne voit rien à redire, c'est la
+    // VALEUR qui désigne autre chose.
+    const { error } = await alice.client
+      .from("orders")
+      .update({ cover_media_id: idsBob[0] as string })
+      .eq("id", commandeAlice);
+
+    expect(error, "la couverture a pu désigner le média d'un autre vendeur").not.toBeNull();
+    expect(error?.code).toBe("DL028");
+  });
+
+  test("contre-test positif : un média de LA commande est accepté", async () => {
+    // Sans lui, « tout est refusé » passerait le test ci-dessus sans rien
+    // prouver — et la couverture ne serait jamais réglable.
+    const idsAlice = await idsDe(alice, commandeAlice);
+    expect(idsAlice.length).toBeGreaterThan(0);
+
+    const { error } = await alice.client
+      .from("orders")
+      .update({ cover_media_id: idsAlice[0] as string })
+      .eq("id", commandeAlice);
+
+    expect(error, `couverture légitime refusée : ${error?.message}`).toBeNull();
+  });
+
+  test("la retirer reste possible", async () => {
+    const { error } = await alice.client
+      .from("orders")
+      .update({ cover_media_id: null })
+      .eq("id", commandeAlice);
+    expect(error).toBeNull();
   });
 });
 

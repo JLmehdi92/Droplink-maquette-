@@ -316,5 +316,42 @@
       "approuve": "Approved",
       "refuse": "Rejected"
     }
+  },
+  "medias": {
+    "titre": "Photos and videos",
+    "compteur": "{n}/{max}",
+    "deposer": "Click or drop your files here",
+    "plein": "Limit reached for this order",
+    "formats": "JPEG, PNG, WebP or MP4 · {videos} videos maximum",
+    "apercu": "Preview of media {position}",
+    "estUneVideo": "Video",
+    "couverture": "Cover",
+    "definirCouverture": "Set as cover",
+    "supprimer": "Delete this media",
+    "deplacer": "Move media {position}",
+    "enCours": "Uploading {nom}",
+    "ecarter": "Dismiss",
+    "annonce": {
+      "debut": "Media {position} picked up. Arrows to move, Space to drop, Escape to cancel.",
+      "survol": "Media {position} over position {cible}.",
+      "depose": "Media dropped at position {cible}.",
+      "horsZone": "Outside the grid.",
+      "annule": "Move cancelled, the media returns to its place."
+    },
+    "refus": {
+      "type_non_accepte": "Format not accepted.",
+      "trop_lourd": "File too large.",
+      "trop_de_medias": "Media limit reached.",
+      "trop_de_videos": "Video limit reached.",
+      "video_trop_longue": "Video too long.",
+      "saisie": "File rejected.",
+      "introuvable": "Order not found.",
+      "absent": "The file did not arrive. Try again.",
+      "ecriture": "Could not save.",
+      "stockage": "Storage unavailable.",
+      "session": "Session expired. Please sign in again.",
+      "reseau": "Upload interrupted. Try again.",
+      "inconnu": "Upload rejected."
+    }
   }
 }

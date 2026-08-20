@@ -316,5 +316,42 @@
       "approuve": "Approuvées",
       "refuse": "Refusées"
     }
+  },
+  "medias": {
+    "titre": "Photos et vidéos",
+    "compteur": "{n}/{max}",
+    "deposer": "Cliquez ou déposez vos fichiers ici",
+    "plein": "Plafond atteint pour cette commande",
+    "formats": "JPEG, PNG, WebP ou MP4 · {videos} vidéos au maximum",
+    "apercu": "Aperçu du média {position}",
+    "estUneVideo": "Vidéo",
+    "couverture": "Couverture",
+    "definirCouverture": "Définir comme couverture",
+    "supprimer": "Supprimer ce média",
+    "deplacer": "Déplacer le média {position}",
+    "enCours": "Envoi de {nom}",
+    "ecarter": "Écarter",
+    "annonce": {
+      "debut": "Média {position} saisi. Flèches pour déplacer, Espace pour déposer, Échap pour annuler.",
+      "survol": "Média {position} au-dessus de la position {cible}.",
+      "depose": "Média déposé en position {cible}.",
+      "horsZone": "Hors de la grille.",
+      "annule": "Déplacement annulé, le média retrouve sa place."
+    },
+    "refus": {
+      "type_non_accepte": "Format non accepté.",
+      "trop_lourd": "Fichier trop lourd.",
+      "trop_de_medias": "Plafond de médias atteint.",
+      "trop_de_videos": "Plafond de vidéos atteint.",
+      "video_trop_longue": "Vidéo trop longue.",
+      "saisie": "Fichier refusé.",
+      "introuvable": "Commande introuvable.",
+      "absent": "Le fichier n’est pas arrivé. Réessayez.",
+      "ecriture": "Enregistrement impossible.",
+      "stockage": "Stockage indisponible.",
+      "session": "Session expirée. Reconnectez-vous.",
+      "reseau": "Envoi interrompu. Réessayez.",
+      "inconnu": "Envoi refusé."
+    }
   }
 }

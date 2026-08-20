@@ -43,11 +43,18 @@ export function Editeur({
   initiales,
   statuts,
   qcs,
+  medias,
 }: {
   readonly id: string;
   readonly initiales: ValeursCommande;
   readonly statuts: readonly string[];
   readonly qcs: readonly string[];
+  /**
+   * La carte des médias, rendue DANS la colonne de gauche comme le montre la
+   * maquette — au-dessus des champs, parce que c'est ce que le vendeur vient
+   * faire en premier.
+   */
+  readonly medias?: React.ReactNode;
 }) {
   const t = useTranslations("editeur");
 
@@ -138,6 +145,8 @@ export function Editeur({
 
       <div className="mx-auto grid max-w-[1000px] grid-cols-1 gap-8 lg:grid-cols-12">
         <div className="flex flex-col gap-6 lg:col-span-8">
+          {medias}
+
           <section className="glass-card rounded-xl p-6 shadow-sm">
             <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
               {t("sectionCommande")}

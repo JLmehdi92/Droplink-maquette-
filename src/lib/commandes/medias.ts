@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { emettre } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
-import { cleMedia, typesAcceptes } from "@/lib/storage/cles";
+import { cleMedia, cleVignette, typesAcceptes } from "@/lib/storage/cles";
 import { deciderDepot, estVideo, limites } from "@/lib/storage/limites";
 import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
 import type { creerClientServeur } from "@/lib/supabase/server";
@@ -167,6 +167,61 @@ export async function preparerDepot(
   }
 }
 
+/**
+ * Signe le dépôt de la VIGNETTE d'un média.
+ *
+ * Sa clé est DÉRIVÉE de celle du média, jamais reçue : une vignette dont le
+ * client choisirait l'emplacement pourrait écraser le média d'un autre — la
+ * vignette n'est pas moins dangereuse que le média, c'est le même bucket.
+ *
+ * Le plafond dur est appliqué DEUX FOIS : ici sur la taille annoncée, pour
+ * refuser tôt, et à la confirmation sur la taille relue, qui seule fait foi.
+ */
+export async function preparerDepotVignette(
+  supabase: ClientMedias,
+  shopId: string,
+  entree: unknown,
+): Promise<
+  | { readonly statut: "ok"; readonly url: string; readonly enTetes: Record<string, string> }
+  | { readonly statut: "echec"; readonly motif: "introuvable" | "trop_lourde" | "stockage" }
+> {
+  const analyse = z
+    .object({
+      orderId: z.string().uuid(),
+      mediaId: z.string().uuid(),
+      typeMime: z.string().min(3).max(120),
+      tailleAnnoncee: z.number().int().positive(),
+    })
+    .safeParse(entree);
+  if (!analyse.success) return { statut: "echec", motif: "introuvable" };
+
+  const { orderId, mediaId, typeMime, tailleAnnoncee } = analyse.data;
+
+  const { data: commande } = await supabase
+    .from("orders")
+    .select("id")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (commande === null) return { statut: "echec", motif: "introuvable" };
+
+  if (tailleAnnoncee > limites().vignetteOctets) {
+    return { statut: "echec", motif: "trop_lourde" };
+  }
+
+  const cle = cleVignette(cleMedia({ shopId, orderId, mediaId, typeMime }));
+
+  try {
+    const signature = await signerDepot({
+      cle,
+      typeMime: "image/webp",
+      tailleOctets: tailleAnnoncee,
+    });
+    return { statut: "ok", url: signature.url, enTetes: signature.enTetesObligatoires };
+  } catch {
+    return { statut: "echec", motif: "stockage" };
+  }
+}
+
 export type ConfirmationDepot =
   | { readonly statut: "ok"; readonly mediaId: string; readonly tailleOctets: number }
   | {
@@ -246,6 +301,35 @@ export async function confirmerDepot(
     };
   }
 
+  /*
+   * LA VIGNETTE EST VÉRIFIÉE PAR LE SERVEUR, jamais annoncée.
+   *
+   * `cle_vignette` n'est renseignée que si l'objet EXISTE réellement et respecte
+   * le plafond dur. Une clé enregistrée pour un objet absent produirait une
+   * image cassée sur la page d'un client — et une vignette hors budget ferait
+   * dépasser le poids de page à cinquante lignes, ce qui ne se verrait qu'une
+   * fois la volumétrie installée.
+   */
+  const cleDeVignette = cleVignette(cle);
+  const tailleVignette = await lireTaille(cleDeVignette);
+  const plafondVignette = limites().vignetteOctets;
+
+  let vignetteRetenue: string | null = null;
+  if (tailleVignette !== null) {
+    if (tailleVignette <= plafondVignette) {
+      vignetteRetenue = cleDeVignette;
+    } else {
+      // Elle est retirée : la garder ferait payer un stockage pour un objet que
+      // rien ne référencera.
+      await supprimer(cleDeVignette).catch(() => undefined);
+      await emettre(
+        EVENEMENTS.MEDIA_REFUSE,
+        { sujet: profilId },
+        { motif: "vignette_trop_lourde", taille: tailleVignette, plafond: plafondVignette },
+      );
+    }
+  }
+
   const { data, error } = await supabase
     .from("order_media")
     .insert({
@@ -253,6 +337,7 @@ export async function confirmerDepot(
       order_id: orderId,
       type: estVideo(typeMime) ? "video" : "photo",
       cle,
+      cle_vignette: vignetteRetenue,
       taille_octets: tailleReelle,
       position: compte.medias,
       largeur: largeur ?? null,
