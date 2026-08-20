@@ -9,6 +9,8 @@
  *
  * Usage : node scripts/falsifier.mjs <casser|reparer> <cible>
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { config } from "dotenv";
 import pg from "pg";
 
@@ -55,6 +57,54 @@ const SQL = {
     reparer: "alter table public.shops force row level security;",
   },
 
+  /**
+   * Le compteur de quota rendu NON ATOMIQUE.
+   *
+   * Lire puis écrire au lieu d'incrémenter en un seul ordre. Le defaut est
+   * invisible en séquentiel — tous les tests à la file continuent de passer —
+   * et ne se manifeste que sous concurrence, c'est-à-dire exactement sous la
+   * charge que la limitation doit borner. Une course qui DÉGRADE au lieu de
+   * casser est la plus difficile à attribuer.
+   */
+  "quota-non-atomique": {
+    casser: `create or replace function public.consommer_quota(
+        p_cle text, p_plafond integer, p_fenetre_secondes integer
+      ) returns boolean language plpgsql security definer set search_path = '' as $$
+      declare v_debut timestamptz; v_compte integer;
+      begin
+        v_debut := to_timestamp(floor(extract(epoch from clock_timestamp())
+                   / p_fenetre_secondes) * p_fenetre_secondes);
+        select coalesce(compte, 0) into v_compte from public.rate_limit
+          where cle = p_cle and fenetre_debut = v_debut;
+        v_compte := coalesce(v_compte, 0) + 1;
+        insert into public.rate_limit (cle, fenetre_debut, compte)
+          values (p_cle, v_debut, v_compte)
+          on conflict (cle, fenetre_debut) do update set compte = v_compte;
+        return v_compte <= p_plafond;
+      end; $$;`,
+    // La réparation est RELUE DEPUIS LA MIGRATION, pas réécrite ici. Une
+    // réparation recopiée à la main dérive du dépôt sans que rien ne le dise,
+    // et l'on croirait alors avoir restauré l'état de référence en ayant
+    // restauré une copie périmée.
+    reparerDepuisMigration: {
+      fichier: "005_limitation_de_debit.sql",
+      depuis: "create function public.consommer_quota",
+    },
+  },
+
+  /** Une policy sur le compteur : il redevient atteignable hors de sa fonction. */
+  "quota-policy": {
+    casser:
+      "create policy quota_falsification on public.rate_limit for select to authenticated using (true);",
+    reparer: "drop policy if exists quota_falsification on public.rate_limit;",
+  },
+
+  /** `shops.slug` réouvert en écriture : un espace de noms unique offert au premier arrivé. */
+  "slug-ouvert": {
+    casser: "grant update (slug) on public.shops to authenticated;",
+    reparer: "revoke update (slug) on public.shops from authenticated;",
+  },
+
   /** La policy de mise à jour trop large : chacun modifie le profil de chacun. */
   "policy-maj-large": {
     casser:
@@ -90,6 +140,34 @@ const client = new pg.Client({
 });
 
 await client.connect();
-await client.query(SQL[cible][action]);
+
+let sql = SQL[cible][action];
+
+if (sql === undefined && action === "reparer" && SQL[cible].reparerDepuisMigration) {
+  const { fichier, depuis } = SQL[cible].reparerDepuisMigration;
+  const chemin = join(process.cwd(), "supabase", "migrations", fichier);
+  const contenu = readFileSync(chemin, "utf8");
+  const index = contenu.indexOf(depuis);
+  if (index === -1) {
+    console.error(
+      `Réparation impossible : « ${depuis} » est introuvable dans ${fichier}. ` +
+        "La migration a changé sans que cette cible de falsification suive.",
+    );
+    await client.end();
+    process.exit(1);
+  }
+  // `create or replace` sur la MÊME liste d arguments remplace bien la
+  // fonction. Attention : si la signature changeait, Postgres en creerait une
+  // SECONDE et un appel resoudrait l ANCIENNE, sans erreur.
+  sql = contenu.slice(index).replace("create function", "create or replace function");
+}
+
+if (typeof sql !== "string") {
+  console.error(`Aucun SQL pour « ${action} ${cible} ».`);
+  await client.end();
+  process.exit(1);
+}
+
+await client.query(sql);
 console.log(`${action} ${cible} : fait`);
 await client.end();

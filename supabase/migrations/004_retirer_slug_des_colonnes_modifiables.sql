@@ -1,0 +1,29 @@
+-- 004 — Retirer `shops.slug` des colonnes qu'un vendeur peut écrire.
+--
+-- Défaut de la 001 : `slug` figure dans le `grant update` accordé à
+-- `authenticated`, alors qu'AUCUNE fonctionnalité du produit ne s'en sert. La
+-- page publique est adressée par `public_token`, pas par slug.
+--
+-- Une colonne écrivable et inutilisée est une surface offerte gratuitement, et
+-- celle-ci l'est doublement parce qu'elle porte une contrainte d'UNICITÉ :
+--
+--   - le premier arrivé peut réserver n'importe quelle valeur, y compris celles
+--     qui imiteraient une autre boutique ou une marque — sur un produit dont le
+--     risque principal est le contenu hébergé, c'est exactement le genre de
+--     ressemblance qu'on ne veut pas avoir à arbitrer ;
+--   - l'unicité étant globale, un compte peut EMPÊCHER un autre d'obtenir une
+--     valeur, ce qui fait sortir un réglage privé du périmètre de son
+--     propriétaire.
+--
+-- Ce n'est pas une faille aujourd'hui : rien ne lit la colonne. C'est
+-- précisément la raison de la fermer maintenant. Une protection qui tiendrait à
+-- ce que personne n'utilise encore le slug n'est pas une protection, c'est un
+-- sursis — et le jour où une URL personnalisée arriverait, elle hériterait d'un
+-- espace de noms déjà distribué, sans que rien ne le signale.
+--
+-- La colonne reste en place, avec sa contrainte : la retirer serait une
+-- migration destructive pour un besoin qui reviendra. Seul le DROIT D'ÉCRITURE
+-- disparaît. Le jour où le produit attribuera des slugs, il le fera côté
+-- serveur, avec ses propres règles.
+
+revoke update (slug) on public.shops from authenticated;

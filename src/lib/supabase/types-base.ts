@@ -50,6 +50,24 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit: {
+        Row: {
+          cle: string
+          compte: number
+          fenetre_debut: string
+        }
+        Insert: {
+          cle: string
+          compte?: number
+          fenetre_debut: string
+        }
+        Update: {
+          cle?: string
+          compte?: number
+          fenetre_debut?: string
+        }
+        Relationships: []
+      }
       shops: {
         Row: {
           accent_color: string
@@ -102,7 +120,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consommer_quota: {
+        Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
+        Returns: boolean
+      }
     }
     Enums: {
       account_status: "active" | "suspended"

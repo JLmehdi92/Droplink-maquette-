@@ -41,6 +41,29 @@ function horodatage() {
   );
 }
 
+/**
+ * Rend une version STRICTEMENT CROISSANTE.
+ *
+ * L horodatage seul est a la seconde pres. Deux migrations appliquees dans la
+ * meme seconde produisent donc la MEME cle primaire : la seconde echoue sur une
+ * violation d unicite, avec un message qui parle du registre et ne designe pas
+ * la vraie cause. C est arrive des la premiere fois ou deux fichiers ont ete
+ * appliques d affilee.
+ *
+ * Au-dela de la collision, la propriete qui compte est l ORDRE : la version est
+ * la cle de tri du registre, et il doit refleter l ordre lexicographique des
+ * fichiers, qui EST le contrat d application. Une version qui n augmente pas
+ * strictement laisserait le registre raconter un ordre different de celui dans
+ * lequel les migrations ont reellement tourne.
+ */
+function versionSuivante(derniere) {
+  const candidate = horodatage();
+  if (derniere === null || candidate > derniere) return candidate;
+  // Meme seconde, ou horloge qui recule : on avance d une unite plutot que de
+  // faire echouer une migration parfaitement valide.
+  return String(BigInt(derniere) + 1n);
+}
+
 const url = process.env.SUPABASE_DB_URL;
 if (!url) {
   console.error(
@@ -72,6 +95,14 @@ const { rows: dejaAppliquees } = await client.query(
 );
 const appliquees = new Set(dejaAppliquees.map((r) => r.name));
 
+// On repart de la version la plus haute deja inscrite : une nouvelle migration
+// doit se ranger APRES tout ce qui existe, y compris si l horloge de cette
+// machine est en retard sur celle qui a applique la precedente.
+const { rows: [{ maxi } = { maxi: null }] } = await client.query(
+  "select max(version) as maxi from supabase_migrations.schema_migrations",
+);
+let derniereVersion = maxi;
+
 const aFaire = fichiersMigration().filter((f) => !appliquees.has(nomDe(f)));
 
 if (aFaire.length === 0) {
@@ -94,7 +125,7 @@ for (const fichier of aFaire) {
     await client.query(sql);
     await client.query(
       "insert into supabase_migrations.schema_migrations (version, name, statements) values ($1, $2, $3)",
-      [horodatage(), nom, [sql]],
+      [(derniereVersion = versionSuivante(derniereVersion)), nom, [sql]],
     );
     await client.query("commit");
     console.log("ok");

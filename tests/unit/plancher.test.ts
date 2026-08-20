@@ -82,6 +82,23 @@ describe("Garde structurel sur l'énumération de comptes", () => {
     ).toBe(false);
   });
 
+  test("le quota est consommé AVANT l'appel à Supabase", () => {
+    // Mesuré sur ce projet : une demande de lien crée `auth.users`, `profiles`
+    // ET `shops` immédiatement, avant tout clic. Vérifier le quota après l'appel
+    // laisserait donc les comptes fantômes se créer — on saurait qu'on a été
+    // balayé sans l'avoir empêché. L'ordre EST la protection.
+    const code = codeSansCommentaires();
+    const indexQuota = code.indexOf("verifierQuotaAuth(");
+    const indexAppel = code.indexOf("signInWithOtp");
+    expect(indexQuota, "appel au quota introuvable").toBeGreaterThan(-1);
+    expect(indexAppel, "appel à Supabase introuvable").toBeGreaterThan(-1);
+    expect(
+      indexQuota < indexAppel,
+      "Le quota est vérifié APRÈS la demande de lien : les comptes fantômes " +
+        "sont déjà créés quand on décide de refuser.",
+    ).toBe(true);
+  });
+
   test("le plancher est appliqué APRÈS l'appel, pas seulement au succès", () => {
     // Ne l'appliquer qu'au chemin heureux rendrait l'échec reconnaissable à sa
     // rapidité, ce qui reconstituerait l'oracle qu'on vient de supprimer.

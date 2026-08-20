@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { attendrePlancher } from "@/lib/auth/plancher";
+import { verifierQuotaAuth } from "@/lib/limitation/quota";
 import { origineDuSite } from "@/lib/site";
 import { creerClientServeur } from "@/lib/supabase/server";
 
@@ -69,6 +70,20 @@ export async function envoyerLienConnexion(
     // Un format d'adresse invalide ne dit rien de l'existence d'un compte : ce
     // refus peut être immédiat sans rien divulguer.
     return { statut: "erreur", motif: "email_invalide" };
+  }
+
+  // LE QUOTA EST CONSOMMÉ AVANT L'APPEL À SUPABASE, et c'est tout l'intérêt.
+  // Mesuré sur ce projet : une demande crée `auth.users`, `profiles` ET `shops`
+  // immédiatement, avant que quiconque ait cliqué. Vérifier après coup laisserait
+  // donc les comptes fantômes se créer — on saurait qu'on a été balayé sans
+  // l'avoir empêché.
+  const quota = await verifierQuotaAuth(analyse.data.email);
+  if (!quota.autorise) {
+    await attendrePlancher(debut);
+    // Le motif est le MÊME dans les deux cas côté utilisateur : lui dire que
+    // notre compteur est en panne ne lui apprend rien d'actionnable, et
+    // distinguer les deux réponses renseignerait un attaquant sur notre état.
+    return { statut: "erreur", motif: "trop_de_tentatives" };
   }
 
   const origine = await origineDuSite();

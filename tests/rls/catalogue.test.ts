@@ -37,6 +37,29 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
     // signalée dès qu'elle deviendra inutile.
   ]);
 
+  /**
+   * Tables qui portent la RLS mais AUCUNE policy, délibérément.
+   *
+   * C'est une exception d'une autre nature que la précédente, et elle mérite
+   * son propre registre : ici la RLS est bien active et forcée, mais l'absence
+   * de policy est le MÉCANISME, pas un oubli. Une table sans policy n'est
+   * atteignable que par une fonction `security definer`, ce qui est exactement
+   * la propriété recherchée pour un compteur.
+   *
+   * Le second sens est inversé par rapport à l'autre registre : une entrée
+   * devient périmée quand la table GAGNE une policy — car alors le mécanisme a
+   * changé sans que l'exception le dise.
+   */
+  const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
+    [
+      "rate_limit",
+      "Compteur de limitation de débit. Sans policy, la table n'est atteignable " +
+        "que par public.consommer_quota(). Un compteur lisible dirait à " +
+        "l'attaquant combien il lui reste ; un compteur écrivable lui " +
+        "permettrait d'épuiser le quota d'un tiers.",
+    ],
+  ]);
+
   test("chaque table porte la RLS, activée et forcée, avec au moins une policy", async () => {
     const tables = await interroger<{
       table_name: string;
@@ -69,7 +92,7 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
       if (TABLES_SANS_RLS_ADMISES.has(t.table_name)) continue;
       if (!t.rls_active) defauts.push(`${t.table_name} : RLS non activée`);
       if (!t.rls_forcee) defauts.push(`${t.table_name} : RLS non forcée`);
-      if (Number(t.nb_policies) === 0) {
+      if (Number(t.nb_policies) === 0 && !TABLES_SANS_POLICY_ADMISES.has(t.table_name)) {
         defauts.push(`${t.table_name} : RLS activée mais AUCUNE policy`);
       }
     }
@@ -84,6 +107,20 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
       exceptionsPerimees,
       `Exceptions déclarées devenues inutiles : ${exceptionsPerimees.join(", ")}. ` +
         "Les retirer — une exception périmée couvre le retour du défaut.",
+    ).toEqual([]);
+
+    // Même exigence pour le registre « sans policy », dans son sens propre :
+    // une table qui a GAGNÉ une policy n'a plus besoin d'y figurer, et une
+    // entrée pour une table disparue n'aurait plus d'objet.
+    const sansPolicyPerimees = [...TABLES_SANS_POLICY_ADMISES.keys()].filter((nom) => {
+      const t = tables.find((x) => x.table_name === nom);
+      return t === undefined || Number(t.nb_policies) > 0;
+    });
+    expect(
+      sansPolicyPerimees,
+      `Tables déclarées « sans policy » qui en ont désormais une, ou qui ` +
+        `n'existent plus : ${sansPolicyPerimees.join(", ")}. Le mécanisme de ` +
+        "protection a changé sans que la déclaration le dise.",
     ).toEqual([]);
   });
 });
@@ -160,7 +197,9 @@ describe("Sonde C — privilèges de colonne", () => {
     "profiles.account_type",
     "profiles.locale",
     "shops.name",
-    "shops.slug",
+    // `shops.slug` a été RETIRÉ par la migration 004 : la colonne est unique et
+    // aucune fonctionnalité ne l'utilise, donc l'ouvrir en écriture offrait un
+    // espace de noms global au premier arrivé, sans contrepartie.
     "shops.logo_url",
     "shops.accent_color",
     "shops.default_language",
