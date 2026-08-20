@@ -6,6 +6,7 @@ import { Icone } from "@/components/icone";
 import { TraductionsClient } from "@/components/traductions-client";
 import { Editeur } from "@/components/commandes/editeur";
 import { CarteMedias, type MediaAffiche } from "@/components/commandes/carte-medias";
+import { ActionsCommande } from "@/components/commandes/actions-commande";
 import { plafondsAffichables } from "@/lib/commandes/medias";
 import { signerLecture } from "@/lib/storage/r2";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "@/lib/commandes/liste";
@@ -60,7 +61,7 @@ export default async function EditeurCommande({
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id",
+      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -140,11 +141,20 @@ export default async function EditeurCommande({
       </header>
 
       <div className="flex-1 overflow-y-auto p-margin-mobile md:p-gutter lg:p-margin-desktop">
-        <TraductionsClient espaces={["editeur", "medias"]}>
+        <TraductionsClient espaces={["editeur", "medias", "actions"]}>
           <Editeur
             id={data.id}
             statuts={STATUTS_EXPEDITION}
             qcs={STATUTS_QC}
+            actions={
+              <ActionsCommande
+                orderId={data.id}
+                langue={langue}
+                jeton={data.public_token}
+                origine={origine ?? ""}
+                estArchivee={data.archived_at !== null}
+              />
+            }
             medias={
               <CarteMedias
                 orderId={data.id}

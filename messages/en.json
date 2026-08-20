@@ -353,5 +353,30 @@
       "reseau": "Upload interrupted. Try again.",
       "inconnu": "Upload rejected."
     }
+  },
+  "actions": {
+    "titre": "Link and order",
+    "lien": "Link to send to your customer",
+    "copier": "Copy the link",
+    "copie": "Link copied",
+    "copieEchouee": "Copy refused by the browser. Select the link manually.",
+    "dupliquer": "Duplicate as a template",
+    "dupliquerAide": "Reuses the reference and your notes. Not the customer name, the photos or the tracking.",
+    "archiver": "Archive",
+    "desarchiver": "Remove from archives",
+    "archiverAide": "Files the order away in your archives. Your customer’s link keeps working.",
+    "archivage": {
+      "echec": "Could not archive. Nothing changed."
+    },
+    "revocation": {
+      "ouvrir": "Revoke and regenerate the link",
+      "titre": "Revoke this link?",
+      "explication": "The current link will PERMANENTLY stop working, including for your customer if they already received it. A new link will be created and you will have to send it again. This cannot be undone.",
+      "jeComprends": "I understand the old link will permanently stop working.",
+      "annuler": "Cancel",
+      "confirmer": "Revoke permanently",
+      "enCours": "Revoking…",
+      "echec": "Could not revoke. The old link is still active."
+    }
   }
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { emettre } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
@@ -8,6 +9,15 @@ import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
 import { appliquerChamp, type ResultatEnregistrement } from "./ecriture";
+import { etiquetteCommandePublique } from "./cache";
+import {
+  archiverCommande,
+  dupliquerCommande,
+  revoquerLien,
+  type Archivage,
+  type Duplication,
+  type Revocation,
+} from "./cycle";
 
 export type { ResultatEnregistrement };
 
@@ -89,4 +99,71 @@ export async function enregistrerChamp(
 
   const supabase = await creerClientServeur();
   return appliquerChamp(supabase, profil.profilId, id, champ, valeur);
+}
+
+/**
+ * Révoque le lien public et en régénère un.
+ *
+ * L'INVALIDATION PORTE SUR LES DEUX JETONS : l'ancien et le nouveau. Oublier
+ * l'ancien laisserait le cache servir la page à qui détient le lien fuité — et
+ * la révocation, qui existe précisément pour ça, n'aurait rien coupé.
+ */
+export async function revoquerLienPublic(
+  orderId: string,
+  ancienJeton: string,
+): Promise<Revocation | { statut: "echec"; motif: "session" }> {
+  const profil = await lireProfilVendeur();
+  if (profil === null || profil.statut !== "active") {
+    return { statut: "echec", motif: "session" };
+  }
+
+  const supabase = await creerClientServeur();
+  const resultat = await revoquerLien(supabase, profil.profilId, orderId);
+
+  if (resultat.statut === "ok") {
+    revalidateTag(etiquetteCommandePublique(ancienJeton));
+    revalidateTag(etiquetteCommandePublique(resultat.nouveauJeton));
+  }
+
+  return resultat;
+}
+
+export async function dupliquer(
+  orderId: string,
+  langue: string,
+): Promise<Duplication | { statut: "echec"; motif: "session" }> {
+  const profil = await lireProfilVendeur();
+  if (profil === null || profil.statut !== "active") {
+    return { statut: "echec", motif: "session" };
+  }
+
+  const supabase = await creerClientServeur();
+  const resultat = await dupliquerCommande(supabase, profil.profilId, profil.shopId, orderId);
+
+  if (resultat.statut === "ok") {
+    redirect("/" + (langue === "en" ? "en" : "fr") + "/commandes/" + resultat.nouvelleCommande);
+  }
+
+  return resultat;
+}
+
+export async function archiver(
+  orderId: string,
+  jeton: string,
+  archiver: boolean,
+): Promise<Archivage | { statut: "echec"; motif: "session" }> {
+  const profil = await lireProfilVendeur();
+  if (profil === null || profil.statut !== "active") {
+    return { statut: "echec", motif: "session" };
+  }
+
+  const supabase = await creerClientServeur();
+  const resultat = await archiverCommande(supabase, profil.profilId, orderId, archiver);
+
+  // Archiver ne retire PAS la page, mais l'invalidation reste juste : la vue
+  // publique lit d'autres colonnes de la même ligne, et un cache tenu pour une
+  // mutation près finirait par l'être pour toutes.
+  if (resultat.statut === "ok") revalidateTag(etiquetteCommandePublique(jeton));
+
+  return resultat;
 }

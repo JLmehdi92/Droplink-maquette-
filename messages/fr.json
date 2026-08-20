@@ -353,5 +353,30 @@
       "reseau": "Envoi interrompu. Réessayez.",
       "inconnu": "Envoi refusé."
     }
+  },
+  "actions": {
+    "titre": "Le lien et la commande",
+    "lien": "Lien à envoyer à votre client",
+    "copier": "Copier le lien",
+    "copie": "Lien copié",
+    "copieEchouee": "Copie refusée par le navigateur. Sélectionnez le lien à la main.",
+    "dupliquer": "Dupliquer comme modèle",
+    "dupliquerAide": "Reprend la référence et vos notes. Ni le nom du client, ni les photos, ni le suivi.",
+    "archiver": "Archiver",
+    "desarchiver": "Sortir des archives",
+    "archiverAide": "Range la commande dans vos archives. Le lien de votre client continue de fonctionner.",
+    "archivage": {
+      "echec": "Archivage impossible. Rien n’a changé."
+    },
+    "revocation": {
+      "ouvrir": "Révoquer et régénérer le lien",
+      "titre": "Révoquer ce lien ?",
+      "explication": "Le lien actuel cessera DÉFINITIVEMENT de fonctionner, y compris pour votre client s’il l’a déjà reçu. Un nouveau lien sera créé, et vous devrez le lui renvoyer. Cette action ne s’annule pas.",
+      "jeComprends": "Je comprends que l’ancien lien cessera définitivement de fonctionner.",
+      "annuler": "Annuler",
+      "confirmer": "Révoquer définitivement",
+      "enCours": "Révocation…",
+      "echec": "Révocation impossible. L’ancien lien reste actif."
+    }
   }
 }

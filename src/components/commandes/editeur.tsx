@@ -44,6 +44,7 @@ export function Editeur({
   statuts,
   qcs,
   medias,
+  actions,
 }: {
   readonly id: string;
   readonly initiales: ValeursCommande;
@@ -55,6 +56,8 @@ export function Editeur({
    * faire en premier.
    */
   readonly medias?: React.ReactNode;
+  /** Les actions de cycle de vie, dans la colonne de droite. */
+  readonly actions?: React.ReactNode;
 }) {
   const t = useTranslations("editeur");
 
@@ -269,6 +272,8 @@ export function Editeur({
             libelle={(v) => t("qc." + v)}
             onChoix={(v) => changer("qc_status", v, true)}
           />
+
+          {actions}
         </div>
       </div>
     </>
