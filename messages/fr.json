@@ -113,7 +113,19 @@
     "pasDeCompteTexte": "Le même lien crée votre compte s'il n'existe pas. Aucune inscription séparée.",
     "suggestionPrefixe": "Vouliez-vous dire",
     "suggestionSuffixe": " ?",
-    "envoyerInscription": "Créer mon compte"
+    "envoyerInscription": "Créer mon compte",
+    "panneauEtiquette": "Photos, vidéos et suivi dans un seul lien",
+    "panneauTitre": "Votre client ouvre, et il a tout.",
+    "panneauTexte": "Il voit vos photos en plein écran et l'avancée de son colis, sans rien installer et sans vous relancer. Vous complétez la page quand vous voulez : le lien, lui, ne change jamais.",
+    "chiffre1": "0",
+    "chiffre1Libelle": "compte à créer pour votre client",
+    "chiffre2": "1",
+    "chiffre2Libelle": "lien, valable à vie",
+    "cgvAvant": "En continuant, vous acceptez nos",
+    "cgvEt": "et notre",
+    "cgvConditions": "conditions d'utilisation",
+    "cgvConfidentialite": "politique de confidentialité",
+    "lienCreerCompte": "Créer un compte"
   },
   "inscription": {
     "titre": "Créer un compte",

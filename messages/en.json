@@ -113,7 +113,19 @@
     "pasDeCompteTexte": "The same link creates your account if it does not exist. No separate sign-up.",
     "suggestionPrefixe": "Did you mean",
     "suggestionSuffixe": "?",
-    "envoyerInscription": "Create my account"
+    "envoyerInscription": "Create my account",
+    "panneauEtiquette": "Photos, videos and tracking in a single link",
+    "panneauTitre": "Your customer opens it, and everything is there.",
+    "panneauTexte": "They see your photos full screen and where their parcel is, with nothing to install and no need to chase you. You update the page whenever you like — the link itself never changes.",
+    "chiffre1": "0",
+    "chiffre1Libelle": "accounts for your customer to create",
+    "chiffre2": "1",
+    "chiffre2Libelle": "link, valid for life",
+    "cgvAvant": "By continuing, you accept our",
+    "cgvEt": "and our",
+    "cgvConditions": "terms of use",
+    "cgvConfidentialite": "privacy policy",
+    "lienCreerCompte": "Create an account"
   },
   "inscription": {
     "titre": "Create an account",

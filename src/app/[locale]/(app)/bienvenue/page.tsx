@@ -43,10 +43,10 @@ export default async function Bienvenue({
 
   return (
     <main id="contenu" className="mx-auto w-full max-w-[640px] px-4 py-16 md:py-24">
-      <h1 className="font-[family-name:var(--font-titre)] text-3xl font-bold tracking-[-0.02em] text-encre">
+      <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
         {t("titre")}
       </h1>
-      <p className="mt-3 text-base leading-7 text-encre-douce">{t("sousTitre")}</p>
+      <p className="mt-3 font-body-md text-body-md text-on-surface-variant">{t("sousTitre")}</p>
 
       <div className="mt-10">
         <TraductionsClient espaces={["onboarding"]}>

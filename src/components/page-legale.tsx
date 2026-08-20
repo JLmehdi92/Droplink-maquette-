@@ -37,25 +37,25 @@ export async function PageLegale({
       <EnTete locale={locale} />
 
       <main id="contenu" className="mx-auto w-full max-w-[760px] px-4 py-12 md:px-10 md:py-16">
-        <h1 className="font-[family-name:var(--font-titre)] text-3xl font-bold tracking-[-0.02em] text-encre">
+        <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
           {titre}
         </h1>
 
         <aside
           role="note"
-          className="mt-6 rounded-md border border-trait bg-surface-basse p-4"
+          className="mt-6 rounded-lg border border-outline-variant bg-surface-container-low p-4"
         >
-          <p className="text-sm font-semibold text-encre">{t("avertissementTitre")}</p>
-          <p className="mt-1 text-sm leading-6 text-encre-douce">{t("avertissementTexte")}</p>
+          <p className="font-label-md text-label-md text-on-surface">{t("avertissementTitre")}</p>
+          <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">{t("avertissementTexte")}</p>
         </aside>
 
         <div className="mt-10 flex flex-col gap-8">
           {sections.map((s) => (
             <section key={s.titre}>
-              <h2 className="font-[family-name:var(--font-titre)] text-xl font-semibold text-encre">
+              <h2 className="font-headline-md text-headline-md-mobile text-on-surface">
                 {s.titre}
               </h2>
-              <p className="mt-2 text-base leading-7 text-encre-douce">{s.texte}</p>
+              <p className="mt-2 font-body-md text-body-md text-on-surface-variant">{s.texte}</p>
             </section>
           ))}
           {children}

@@ -34,7 +34,7 @@ function BoutonValider({ libelle, enCours }: { libelle: string; enCours: string 
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[var(--apercu-remplissage)] px-6 py-3 text-sm font-semibold text-[var(--apercu-sur-remplissage)] disabled:opacity-60"
+      className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-[var(--apercu-remplissage)] px-6 py-3 font-label-md text-label-md text-[var(--apercu-sur-remplissage)] disabled:opacity-60"
     >
       {pending ? enCours : libelle}
     </button>
@@ -128,8 +128,8 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
       <input type="hidden" name="couleurAccent" value={couleur} />
 
       <fieldset className="flex flex-col gap-3">
-        <legend className="text-sm font-semibold text-encre">{t("typeTitre")}</legend>
-        <p className="text-sm leading-6 text-encre-douce">{t("typeAide")}</p>
+        <legend className="font-label-md text-label-md text-on-surface">{t("typeTitre")}</legend>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">{t("typeAide")}</p>
         <div className="mt-1 grid gap-3 sm:grid-cols-2">
           {(["supplier", "reseller"] as const).map((valeur) => (
             <label
@@ -137,7 +137,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
               className={`flex cursor-pointer flex-col gap-1 rounded-lg border p-4 ${
                 typeDeCompte === valeur
                   ? "border-[var(--apercu-interface)] ring-2 ring-[var(--apercu-interface)]"
-                  : "border-trait"
+                  : "border-outline-variant"
               }`}
             >
               <input
@@ -148,51 +148,51 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
                 onChange={() => setTypeDeCompte(valeur)}
                 className="sr-only"
               />
-              <span className="text-sm font-semibold text-encre">{t(`type.${valeur}.titre`)}</span>
-              <span className="text-sm leading-6 text-encre-douce">
+              <span className="font-label-md text-label-md text-on-surface">{t(`type.${valeur}.titre`)}</span>
+              <span className="font-body-sm text-body-sm text-on-surface-variant">
                 {t(`type.${valeur}.detail`)}
               </span>
             </label>
           ))}
         </div>
         {champsEnEchec.includes("typeDeCompte") ? (
-          <p role="alert" className="text-sm text-erreur">
+          <p role="alert" className="font-body-sm text-body-sm text-error">
             {t("erreurType")}
           </p>
         ) : null}
       </fieldset>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="nomBoutique" className="text-sm font-semibold text-encre">
+        <label htmlFor="nomBoutique" className="font-label-md text-label-md text-on-surface">
           {t("nomTitre")}
         </label>
-        <p className="text-sm leading-6 text-encre-douce">{t("nomAide")}</p>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">{t("nomAide")}</p>
         <input
           id="nomBoutique"
           name="nomBoutique"
           type="text"
           maxLength={60}
           placeholder={t("nomPlaceholder")}
-          className="min-h-[44px] rounded-md border border-trait bg-surface-basse px-4 py-3 text-base text-encre outline-none focus:border-[var(--apercu-interface)] focus:ring-2 focus:ring-[var(--apercu-interface)]"
+          className="min-h-[44px] rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface outline-none focus:border-[var(--apercu-interface)] focus:ring-2 focus:ring-[var(--apercu-interface)]"
         />
       </div>
 
       <div className="flex flex-col gap-3">
-        <span className="text-sm font-semibold text-encre">{t("couleurTitre")}</span>
-        <p className="text-sm leading-6 text-encre-douce">{t("couleurAide")}</p>
+        <span className="font-label-md text-label-md text-on-surface">{t("couleurTitre")}</span>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">{t("couleurAide")}</p>
         <div className="flex flex-wrap items-center gap-4">
           <input
             type="color"
             aria-label={t("couleurTitre")}
             value={couleur}
             onChange={(e) => setCouleur(e.target.value)}
-            className="h-11 w-16 cursor-pointer rounded-md border border-trait bg-surface-basse"
+            className="h-11 w-16 cursor-pointer rounded-lg border border-outline-variant bg-surface-container-low"
           />
-          <div className="flex items-center gap-3 rounded-lg border border-trait px-4 py-3">
-            <span className="text-sm font-semibold text-[var(--apercu-texte)]">
+          <div className="flex items-center gap-3 rounded-lg border border-outline-variant px-4 py-3">
+            <span className="font-label-md text-label-md text-[var(--apercu-texte)]">
               {t("apercuTexte")}
             </span>
-            <span className="inline-flex min-h-[36px] items-center rounded-md bg-[var(--apercu-remplissage)] px-4 text-sm font-semibold text-[var(--apercu-sur-remplissage)]">
+            <span className="inline-flex min-h-[36px] items-center rounded-lg bg-[var(--apercu-remplissage)] px-4 font-label-md text-label-md text-[var(--apercu-sur-remplissage)]">
               {t("apercuBouton")}
             </span>
           </div>
@@ -202,13 +202,13 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
           // couleur rendue différemment sans explication croit à un bogue ; on
           // lui apprend au contraire que la lisibilité est garantie quoi qu'il
           // choisisse.
-          <p className="text-sm leading-6 text-encre-douce">{t("couleurAjustee")}</p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">{t("couleurAjustee")}</p>
         ) : null}
       </div>
 
       <div className="flex flex-col gap-3">
-        <span className="text-sm font-semibold text-encre">{t("logoTitre")}</span>
-        <p className="text-sm leading-6 text-encre-douce">{t("logoAide")}</p>
+        <span className="font-label-md text-label-md text-on-surface">{t("logoTitre")}</span>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">{t("logoAide")}</p>
         <div className="flex flex-wrap items-center gap-4">
           <input
             ref={champFichier}
@@ -223,21 +223,21 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
           <button
             type="button"
             onClick={() => champFichier.current?.click()}
-            className="inline-flex min-h-[44px] items-center rounded-md border border-[var(--apercu-interface)] px-4 py-2 text-sm font-semibold text-[var(--apercu-texte)]"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--apercu-interface)] px-4 py-2 font-label-md text-label-md text-[var(--apercu-texte)]"
           >
             {logo.phase === "pose" ? t("logoRemplacer") : t("logoChoisir")}
           </button>
           {logo.phase === "envoi" ? (
-            <span aria-live="polite" className="text-sm text-encre-douce">
+            <span aria-live="polite" className="font-body-sm text-body-sm text-on-surface-variant">
               {t("logoEnvoi", { pourcent: logo.pourcent })}
             </span>
           ) : null}
           {logo.phase === "pose" ? (
             // eslint-disable-next-line @next/next/no-img-element -- aperçu local (blob:), jamais une URL distante
-            <img src={logo.apercu} alt="" className="h-11 w-11 rounded-md object-contain" />
+            <img src={logo.apercu} alt="" className="h-11 w-11 rounded-lg object-contain" />
           ) : null}
           {logo.phase === "erreur" ? (
-            <span role="alert" className="text-sm text-erreur">
+            <span role="alert" className="font-body-sm text-body-sm text-error">
               {logo.motif}
             </span>
           ) : null}
@@ -245,7 +245,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
       </div>
 
       {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
-        <p role="alert" className="text-sm text-erreur">
+        <p role="alert" className="font-body-sm text-body-sm text-error">
           {resultat.motif === "session" ? t("erreurSession") : t("erreurEcriture")}
         </p>
       ) : null}

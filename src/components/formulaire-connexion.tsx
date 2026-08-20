@@ -8,6 +8,7 @@ import {
   type ResultatConnexion,
 } from "@/app/[locale]/connexion/actions";
 import { suggererCorrection } from "@/lib/email/domaines";
+import { Icone } from "@/components/icone";
 
 /**
  * Formulaire d'accès par lien email, partagé par la connexion et l'inscription.
@@ -36,9 +37,10 @@ function BoutonEnvoi({ libelle, libelleEnCours }: { libelle: string; libelleEnCo
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[var(--accent-remplissage)] px-6 py-3 text-sm font-semibold text-[var(--accent-sur-remplissage)] disabled:opacity-60"
+      className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--accent-remplissage)] py-3 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-all duration-200 hover:shadow-sm active:shadow-none disabled:opacity-60"
     >
-      {pending ? libelleEnCours : libelle}
+      <span>{pending ? libelleEnCours : libelle}</span>
+      {pending ? null : <Icone nom="arrow_forward" className="text-[18px]" />}
     </button>
   );
 }
@@ -64,10 +66,10 @@ export function FormulaireConnexion({
   if (resultat.statut === "envoye") {
     return (
       <div role="status" className="flex flex-col gap-3">
-        <h2 className="font-[family-name:var(--font-titre)] text-xl font-semibold text-encre">
+        <h2 className="font-headline-md text-headline-md-mobile text-on-surface">
           {t("succesTitre")}
         </h2>
-        <p className="text-base leading-7 text-encre-douce">
+        <p className="font-body-md text-body-md text-on-surface-variant">
           {t("succesTexte", { email: resultat.email })}
         </p>
         <form action={action}>
@@ -76,7 +78,7 @@ export function FormulaireConnexion({
           <input type="hidden" name="email" value={resultat.email} />
           <button
             type="submit"
-            className="mt-2 self-start text-sm font-semibold text-[var(--accent-texte)] underline"
+            className="mt-2 self-start font-label-md text-label-md text-[var(--accent-texte)] underline"
           >
             {t("renvoyer")}
           </button>
@@ -95,27 +97,38 @@ export function FormulaireConnexion({
       : null;
 
   return (
-    <form action={action} className="flex flex-col gap-4" noValidate>
+    <form action={action} className="space-y-6" noValidate>
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="intention" value={intention} />
-      <div className="flex flex-col gap-2">
-        <label htmlFor="email" className="text-sm font-semibold text-encre">
+      <div>
+        <label
+          htmlFor="email"
+          className="mb-1.5 block font-label-md text-label-md text-on-surface"
+        >
           {t("labelEmail")}
         </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          required
-          value={email}
-          onChange={(evenement) => setEmail(evenement.target.value)}
-          placeholder={t("placeholderEmail")}
-          aria-invalid={messageErreur !== null}
-          aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
-          className="min-h-[44px] rounded-md border border-trait bg-surface-basse px-4 py-3 text-base text-encre outline-none focus:border-[var(--accent-interface)] focus:ring-2 focus:ring-[var(--accent-interface)]"
-        />
+        {/* Icône DANS le champ, fond ardoise et non blanc, halo de 2 px au
+            focus : la spécification « Input Fields » du design system, et le
+            rendu exact de la maquette. */}
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-outline">
+            <Icone nom="mail" className="text-[20px]" />
+          </div>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            required
+            value={email}
+            onChange={(evenement) => setEmail(evenement.target.value)}
+            placeholder={t("placeholderEmail")}
+            aria-invalid={messageErreur !== null}
+            aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
+            className="w-full min-h-[44px] rounded-lg border-0 bg-[#F1F5F9] py-3 pl-10 pr-4 font-body-md text-body-md text-on-surface transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-interface)]"
+          />
+        </div>
       </div>
 
       {suggestion !== null ? (
@@ -123,12 +136,12 @@ export function FormulaireConnexion({
         // mais légitime enverrait le lien d'accès au compte à quelqu'un d'autre.
         // Le coût d'une suggestion ignorée est nul, celui d'une correction
         // erronée est un compte livré à un tiers.
-        <p className="text-sm leading-6 text-encre-douce" aria-live="polite">
+        <p className="font-body-sm text-body-sm text-on-surface-variant" aria-live="polite">
           {t("suggestionPrefixe")}{" "}
           <button
             type="button"
             onClick={() => setEmail(suggestion.adresse)}
-            className="font-semibold text-[var(--accent-texte)] underline"
+            className="font-label-md text-label-md text-[var(--accent-texte)] underline"
           >
             {suggestion.adresse}
           </button>
@@ -137,7 +150,7 @@ export function FormulaireConnexion({
       ) : null}
 
       {messageErreur !== null ? (
-        <p id="erreur-connexion" role="alert" className="text-sm text-erreur">
+        <p id="erreur-connexion" role="alert" className="font-body-sm text-body-sm text-error">
           {messageErreur}
         </p>
       ) : null}

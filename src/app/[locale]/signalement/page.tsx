@@ -53,11 +53,11 @@ export default async function Signalement({
   return (
     <PageLegale locale={locale} titre={t("signalementTitre")} sections={[]}>
       <section>
-        <p className="text-base leading-7 text-encre-douce">{t("signalement.intro")}</p>
+        <p className="font-body-md text-body-md text-on-surface-variant">{t("signalement.intro")}</p>
         <p className="mt-4">
           <a
             href={`mailto:${adresse}`}
-            className="text-base font-semibold text-[var(--accent-texte)] underline"
+            className="font-label-md text-label-md text-[var(--accent-texte)] underline"
           >
             {adresse}
           </a>
@@ -65,10 +65,10 @@ export default async function Signalement({
       </section>
 
       <section>
-        <h2 className="font-[family-name:var(--font-titre)] text-xl font-semibold text-encre">
+        <h2 className="font-headline-md text-headline-md-mobile text-on-surface">
           {sections[0].titre}
         </h2>
-        <ul className="mt-2 list-disc pl-5 text-base leading-7 text-encre-douce">
+        <ul className="mt-2 list-disc pl-5 font-body-md text-body-md text-on-surface-variant">
           <li>{t("signalement.quoi1")}</li>
           <li>{t("signalement.quoi2")}</li>
           <li>{t("signalement.quoi3")}</li>
@@ -76,10 +76,10 @@ export default async function Signalement({
       </section>
 
       <section>
-        <h2 className="font-[family-name:var(--font-titre)] text-xl font-semibold text-encre">
+        <h2 className="font-headline-md text-headline-md-mobile text-on-surface">
           {sections[1].titre}
         </h2>
-        <p className="mt-2 text-base leading-7 text-encre-douce">{sections[1].texte}</p>
+        <p className="mt-2 font-body-md text-body-md text-on-surface-variant">{sections[1].texte}</p>
       </section>
     </PageLegale>
   );

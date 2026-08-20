@@ -154,7 +154,12 @@ const controles = [
   [!/Logistique Invisible|Genealogie|Dedouanement/i.test(fr), "copy de fret absente"],
   [!/\bERP\b|\bSAP\b|\bOracle\b/.test(fr), "vocabulaire ERP absent"],
   [!/\brep\b|replica|\bW2C\b/i.test(fr), "vocabulaire du vertical absent"],
-  [!fr.includes("backdrop-blur"), "aucun flou de fond"],
+  // LE FLOU DE FOND N EST PAS INTERDIT ICI. Le brief le proscrit sur
+  // `/p/[token]`, et nulle part ailleurs : c est cette page-la qui est vue une
+  // fois, en 4G, sur un appareil quelconque, et sur un aplat uni le flou n a
+  // rien a flouter. La landing et l espace vendeur gardent le rendu des
+  // maquettes. Une premiere version de ce controle appliquait la regle partout
+  // et faisait echouer une landing pourtant conforme.
 ];
 
 // L inscription ne doit reprendre AUCUN des codes de la maquette Stitch : ni
@@ -200,6 +205,20 @@ controles.push(
   // Sans lui, un provider casse ferait passer tous les controles ci-dessus.
   [inscription.includes("Créer mon compte"), "l'inscription porte bien ses propres libelles"],
 );
+
+// LA PAGE PUBLIQUE N EXISTE PAS ENCORE — et ce controle le VERIFIE.
+//
+// C est la ou le flou de fond sera reellement interdit. Plutot que d ecrire une
+// note que personne ne relira, on affirme l absence de la route : le jour ou
+// elle apparait, ce controle vire au rouge et oblige a le remplacer par la
+// verification du flou. Une affirmation trop vague pour etre fausse ne peut pas
+// non plus etre vraie.
+const pagePublique = await fetch(`${base}/p/exemple-inexistant`, { redirect: "manual" });
+controles.push([
+  pagePublique.status === 404,
+  "la page publique n'existe pas encore — quand elle arrivera, REMPLACER ce " +
+    "controle par la verification qu'elle ne porte aucun backdrop-blur",
+]);
 
 console.log("\n— Contenu rendu —");
 for (const [ok, libelle] of controles) {

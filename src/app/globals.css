@@ -1,77 +1,169 @@
 @import "tailwindcss";
 
 /*
- * Tokens du design system, repris de `droplink_logistics_system/DESIGN.md`.
+ * THÈME REPRIS À L'IDENTIQUE DES MAQUETTES STITCH.
  *
- * Trois écarts assumés par rapport à la maquette Stitch :
+ * Les noms de tokens sont ceux du design system (`on-surface`, `body-sm`,
+ * `margin-mobile`…) et NON des noms français, contrairement au reste du code.
+ * C'est délibéré : ce sont les noms qu'emploie le balisage des maquettes, et les
+ * conserver rend le portage vérifiable — une classe de la maquette se retrouve
+ * telle quelle dans le code, donc un écart se voit au lieu de se deviner.
  *
- * 1. La couleur d'accent n'est PAS ici. Elle est pilotée par le vendeur et
- *    injectée par variable au rendu — voir `src/lib/design/contraste.ts`. La
- *    poser en dur produirait une page correcte pour un seul vendeur.
- * 2. Pas de glassmorphism ni de `backdrop-blur` sur la page publique. Sur un
- *    aplat uni, un blanc à 70 % flouté rend exactement la même couleur qu'un
- *    blanc opaque : le flou n'a rien à flouter, et c'est ce qui coûte le plus
- *    cher sur un mobile d'entrée de gamme.
- * 3. Les rayons suivent l'échelle du DESIGN.md (sm 0.25rem → xl 1.5rem), pas
- *    la section « Shapes » du même fichier, qui se contredit elle-même en
- *    annonçant 8/16/24/32 px.
+ * LA SOURCE DE VÉRITÉ EST LA CONFIGURATION DES ÉCRANS, pas la prose du
+ * `DESIGN.md`. Les deux divergent sur les rayons :
+ *
+ *              DESIGN.md    config des écrans
+ *   rounded     0.5rem            0.25rem
+ *   rounded-lg  1rem              0.5rem
+ *   rounded-xl  1.5rem            0.75rem
+ *
+ * C'est la configuration qui produit ce qu'on voit à l'écran : c'est elle qui
+ * fait foi. Suivre la prose donnerait des composants deux à trois fois plus
+ * arrondis que les maquettes.
+ *
+ * UN SEUL AJOUT au thème d'origine : la couleur d'accent du vendeur, absente
+ * des maquettes parce qu'elles la figent. Elle est injectée au rendu — voir
+ * `src/lib/design/contraste.ts`. La poser en dur produirait une page correcte
+ * pour un seul vendeur.
  */
 
 @theme {
-  /* --- Surfaces ------------------------------------------------------- */
+  /* ----- Couleurs, reprises une par une de la configuration des écrans ---- */
   --color-surface: #f7f9fb;
-  --color-surface-basse: #f2f4f6;
-  --color-surface-carte: #ffffff;
-  --color-surface-haute: #e6e8ea;
-  --color-surface-variante: #e0e3e5;
+  --color-surface-dim: #d8dadc;
+  --color-surface-bright: #f7f9fb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-variant: #e0e3e5;
+  --color-surface-tint: #565e74;
+  --color-background: #f7f9fb;
 
-  /* --- Texte ---------------------------------------------------------- */
-  --color-encre: #191c1e;
-  --color-encre-douce: #45464d;
-  --color-encre-inversee: #eff1f3;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #45464d;
+  --color-on-background: #191c1e;
+  --color-inverse-surface: #2d3133;
+  --color-inverse-on-surface: #eff1f3;
 
-  /* --- Traits --------------------------------------------------------- */
-  --color-trait: #e2e8f0;
-  --color-trait-marque: #c6c6cd;
+  --color-outline: #76777d;
+  --color-outline-variant: #c6c6cd;
 
-  /* --- Marque (structure, PAS l'accent du vendeur) --------------------- */
-  --color-marine: #0f172a;
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #131b2e;
+  --color-on-primary-container: #7c839b;
+  --color-inverse-primary: #bec6e0;
+  --color-primary-fixed: #dae2fd;
+  --color-primary-fixed-dim: #bec6e0;
+  --color-on-primary-fixed: #131b2e;
+  --color-on-primary-fixed-variant: #3f465c;
 
-  /* --- États ---------------------------------------------------------- */
-  --color-succes: #10b981;
-  --color-alerte: #f59e0b;
-  --color-erreur: #ba1a1a;
-  --color-erreur-fond: #ffdad6;
+  --color-secondary: #0058be;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #2170e4;
+  --color-on-secondary-container: #fefcff;
+  --color-secondary-fixed: #d8e2ff;
+  --color-secondary-fixed-dim: #adc6ff;
+  --color-on-secondary-fixed: #001a42;
+  --color-on-secondary-fixed-variant: #004395;
 
-  /* --- Typographie ---------------------------------------------------- */
-  --font-titre: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-corps: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-tertiary: #000000;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #0b1c30;
+  --color-on-tertiary-container: #75859d;
+  --color-tertiary-fixed: #d3e4fe;
+  --color-tertiary-fixed-dim: #b7c8e1;
+  --color-on-tertiary-fixed: #0b1c30;
+  --color-on-tertiary-fixed-variant: #38485d;
 
-  --text-titre-xl: 2.5rem;
-  --text-titre-xl--line-height: 3rem;
-  --text-titre-xl--letter-spacing: -0.02em;
-  --text-titre-lg: 2rem;
-  --text-titre-lg--line-height: 2.5rem;
-  --text-titre-lg--letter-spacing: -0.02em;
-  --text-titre-md: 1.5rem;
-  --text-titre-md--line-height: 2rem;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
 
-  /* --- Rayons --------------------------------------------------------- */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  /* ----- Rayons : la configuration des écrans, pas la prose -------------- */
+  --radius-DEFAULT: 0.25rem;
+  --radius: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
 
-  /* --- Élévation, sans flou de fond ----------------------------------- */
-  --shadow-carte: 0 1px 2px 0 rgb(15 23 42 / 0.05);
-  --shadow-flottant: 0 4px 6px -1px rgb(15 23 42 / 0.1);
+  /* ----- Espacements nommés --------------------------------------------- */
+  --spacing-base: 8px;
+  --spacing-gutter: 24px;
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 40px;
+  --spacing-container-max: 1440px;
+
+  /* ----- Familles -------------------------------------------------------- */
+  --font-headline-xl: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-lg: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-lg-mobile: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-md: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-md-mobile: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body-lg: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body-md: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body-sm: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-label-md: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-label-sm: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ----- Échelle typographique ------------------------------------------ */
+  --text-headline-xl: 40px;
+  --text-headline-xl--line-height: 48px;
+  --text-headline-xl--letter-spacing: -0.02em;
+  --text-headline-xl--font-weight: 700;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 600;
+
+  --text-headline-lg-mobile: 24px;
+  --text-headline-lg-mobile--line-height: 32px;
+  --text-headline-lg-mobile--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-headline-md-mobile: 20px;
+  --text-headline-md-mobile--line-height: 28px;
+  --text-headline-md-mobile--font-weight: 600;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--font-weight: 400;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.01em;
+  --text-label-md--font-weight: 600;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--font-weight: 500;
+
+  /* ----- Élévation, valeurs exactes du DESIGN.md ------------------------- */
+  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 8px 16px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 32px rgba(15, 23, 42, 0.12);
 }
 
 :root {
   /*
-   * Valeur de repli identique au défaut de `shops.accent_color` en base. Elle
-   * est écrasée au rendu par la palette résolue du vendeur : il n'existe aucun
-   * état « couleur non configurée » à détecter.
+   * Accent du vendeur. Valeur de repli identique au défaut de
+   * `shops.accent_color` en base : il n'existe aucun état « couleur non
+   * configurée » à détecter. Écrasée au rendu par la palette résolue.
    */
   --accent: #0058be;
   --accent-texte: #0058be;
@@ -82,8 +174,41 @@
 
 body {
   background: var(--color-surface);
-  color: var(--color-encre);
-  font-family: var(--font-corps);
+  color: var(--color-on-surface);
+  font-family: var(--font-body-md);
+}
+
+/*
+ * Carte de verre, reprise telle quelle des maquettes.
+ *
+ * Elle est INTERDITE sur `/p/[token]`, et nulle part ailleurs. Le brief est
+ * précis : sur un aplat uni, un blanc à 70 % flouté rend exactement la même
+ * couleur qu'un blanc opaque — le flou n'a rien à flouter, et c'est ce qui coûte
+ * le plus cher sur un mobile d'entrée de gamme. Cette page-là est vue une fois,
+ * en 4G, sur un appareil quelconque. La landing et l'espace vendeur, eux, la
+ * gardent : c'est le rendu que montrent les maquettes.
+ */
+.glass-card {
+  background-color: rgb(255 255 255 / 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgb(255 255 255 / 0.4);
+}
+
+/*
+ * Champs de saisie : fond ardoise et non blanc, pour contraster avec les cartes.
+ * Au focus, bordure de 2px et halo. Repris du DESIGN.md, section « Input Fields ».
+ */
+.champ {
+  background-color: #f1f5f9;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+}
+
+.champ:focus {
+  outline: none;
+  border-color: var(--accent-interface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 25%, transparent);
 }
 
 /*
