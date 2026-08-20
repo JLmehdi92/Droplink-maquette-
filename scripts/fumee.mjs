@@ -112,6 +112,22 @@ const cas = [
     statut: 404,
     libelle: "signalement SANS adresse d'abus configuree",
   },
+  // L espace vendeur, sans session : la liste ne doit JAMAIS repondre 200 a un
+  // visiteur anonyme. On suit la chaine et on verifie l etat FINAL — une
+  // redirection vers un ecran qui redirige ailleurs se lirait sinon comme une
+  // protection alors que ce serait une boucle.
+  {
+    chemin: "/fr/commandes",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "liste des commandes SANS session renvoyee vers la connexion",
+  },
+  {
+    chemin: "/en/commandes",
+    statut: 200,
+    final: "/en/connexion?erreur=session",
+    libelle: "liste anglaise SANS session renvoyee vers la connexion",
+  },
   { chemin: "/", statut: 200, final: "/fr", libelle: "racine negociee vers une langue" },
   { chemin: "/FR", statut: 200, final: "/fr", libelle: "casse de la langue normalisee" },
   { chemin: "/de", statut: 404, libelle: "langue non supportee" },

@@ -115,7 +115,7 @@ export async function terminerOnboarding(
     },
   );
 
-  redirect(`/${analyse.data.locale}`);
+  redirect(`/${analyse.data.locale}/commandes`);
 }
 
 export type ResultatDepotLogo =

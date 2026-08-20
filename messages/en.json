@@ -217,5 +217,60 @@
     "apercuEtape2Date": "Tomorrow",
     "apercuBoutonSuivi": "Track",
     "sansNom": "Your shop"
+  },
+  "commandes": {
+    "titre": "My orders",
+    "sousTitre": "Every order has its own page and link. Find them all here.",
+    "filtres": "Filters",
+    "trier": "Sort",
+    "statutExpedition": "Shipping status",
+    "statutQc": "Photo status",
+    "tousStatuts": "All statuses",
+    "tousQc": "All states",
+    "voirArchivees": "Show archived orders",
+    "appliquer": "Apply",
+    "toutEffacer": "Clear all",
+    "rechercher": "Search orders",
+    "rechercherExemple": "Customer name, reference or tracking number…",
+    "nouvelle": "New order",
+    "sansNom": "Unnamed",
+    "copierLien": "Copy the link for {client}",
+    "ouvrirPage": "Open the page for {client}",
+    "copieEchouee": "Copy refused by the browser",
+    "pageSuivante": "Next page",
+    "pageSuivanteDisponible": "More orders follow.",
+    "finDeListe": "End of list.",
+    "statut": {
+      "preparation": "Preparing",
+      "expedie": "Shipped",
+      "en_transit": "In transit",
+      "livre": "Delivered"
+    },
+    "qc": {
+      "en_attente": "Pending",
+      "approuve": "Approved",
+      "refuse": "Rejected"
+    },
+    "tri": {
+      "recentes": "Newest first",
+      "anciennes": "Oldest first",
+      "modifiees": "Recently edited"
+    },
+    "colonne": {
+      "client": "Customer",
+      "reference": "Reference",
+      "suivi": "Tracking number",
+      "statutCourt": "Shipping",
+      "qcCourt": "Photos",
+      "modifiee": "Edited on",
+      "actions": "Actions"
+    },
+    "vide": {
+      "compteTitre": "No orders yet",
+      "compteTexte": "Create your first order: upload your photos, paste the tracking number, and send the link to your customer.",
+      "creer": "Create my first order",
+      "filtreTitre": "No order matches",
+      "filtreTexte": "This account has orders, but none of them pass the current filters."
+    }
   }
 }

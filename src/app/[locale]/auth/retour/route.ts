@@ -75,9 +75,7 @@ export async function GET(
     return NextResponse.redirect(new URL(`/${langue}/bienvenue`, requete.url));
   }
 
-  // Le tableau de bord arrive au lot 4. En attendant, la racine localisee est la
-  // seule destination qui existe reellement — rediriger vers une route absente
-  // produirait un 404 juste apres une connexion reussie, ce qui se lit comme un
-  // echec de connexion.
-  return NextResponse.redirect(new URL(`/${langue}`, requete.url));
+  // Un vendeur qui se connecte veut ses commandes, pas la page de presentation
+  // du produit qu'il utilise deja.
+  return NextResponse.redirect(new URL(`/${langue}/commandes`, requete.url));
 }
