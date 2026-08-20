@@ -52,7 +52,7 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
           </p>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Link
-              href={`/${locale}/connexion`}
+              href={`/${locale}/inscription`}
               className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[var(--accent-remplissage)] px-6 py-3 text-sm font-semibold text-[var(--accent-sur-remplissage)] shadow-carte transition-shadow hover:shadow-flottant"
             >
               {t("ctaPrincipal")}

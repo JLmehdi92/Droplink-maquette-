@@ -1,30 +1,52 @@
 "use server";
 
-import { headers } from "next/headers";
 import { z } from "zod";
+import { attendrePlancher } from "@/lib/auth/plancher";
+import { origineDuSite } from "@/lib/site";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
  * Envoi du lien de connexion, CÔTÉ SERVEUR.
  *
- * Une première version faisait l'appel depuis le navigateur avec le SDK
- * Supabase. Elle fonctionnait, mais embarquait 69 ko de JavaScript dans une
- * page dont le seul rôle est de poster une adresse email — et cette page est la
- * porte d'entrée unique du fournisseur en Chine, souvent sur une connexion
- * lente. Une Server Action ramène la page à sa taille de socle.
+ * UN SEUL GESTE POUR S'INSCRIRE ET POUR SE CONNECTER. Avec un lien magique, la
+ * distinction n'existe pas techniquement : on envoie un lien à une adresse. Deux
+ * écrans existent parce que deux intentions existent, mais ils appellent la même
+ * action et le serveur se comporte exactement pareil.
  *
- * Le brief l'impose de toute façon : Server Actions pour les mutations, route
- * handlers réservés aux webhooks.
+ * CE QUI EST DÉLIBÉRÉ ICI, ET POURQUOI.
+ *
+ * `shouldCreateUser` vaut TOUJOURS `true`. L'alternative — refuser la création
+ * sur l'écran de connexion pour dire « aucun compte pour cette adresse » — a été
+ * mesurée sur le vrai projet :
+ *
+ *     email SANS compte : 422 `otp_disabled`      en  49 ms
+ *     email AVEC compte : autre code              en 778 ms
+ *
+ * Deux oracles, pas un. Même en uniformisant les codes d'erreur, l'écart de
+ * seize fois sur le délai reste lisible depuis l'extérieur : n'importe qui
+ * pourrait balayer des adresses et apprendre lesquelles ont un compte ici. Sur
+ * un produit qui sert ce marché, cette liste a une valeur marchande — c'est
+ * exactement ce qui a été extrait de Pandabuy.
+ *
+ * La faute de frappe, elle, est traitée à la SAISIE (`lib/email/domaines`), sans
+ * qu'aucune requête ne parte. Les deux besoins ne vivent pas au même endroit, on
+ * ne sacrifie donc ni l'un ni l'autre.
+ *
+ * Le seul endroit où l'on peut dire « tu n'avais pas encore de compte » est
+ * l'email lui-même : il n'est lu que par le propriétaire de la boîte.
  */
 
 const Saisie = z.object({
-  // La langue voyage avec le formulaire : le lien recu par email doit ramener
-  // l utilisateur dans la langue ou il etait, pas dans celle par defaut.
+  // La langue voyage avec le formulaire : le lien reçu par email doit ramener
+  // l'utilisateur dans la langue où il était, pas dans celle par défaut.
   locale: z.enum(["fr", "en"]),
   // Zod sur toute entrée externe, y compris ce qui « vient de notre
   // formulaire » : le formulaire n'est qu'une suggestion, la requête est ce qui
   // arrive vraiment.
   email: z.string().trim().min(3).max(254).email(),
+  // N'influence QUE le libellé affiché. Aucun effet sur le comportement du
+  // serveur — sans quoi elle redeviendrait un canal de distinction.
+  intention: z.enum(["connexion", "inscription"]).default("connexion"),
 });
 
 export type ResultatConnexion =
@@ -36,19 +58,24 @@ export async function envoyerLienConnexion(
   _precedent: ResultatConnexion,
   donnees: FormData,
 ): Promise<ResultatConnexion> {
+  const debut = Date.now();
+
   const analyse = Saisie.safeParse({
     email: donnees.get("email"),
     locale: donnees.get("locale"),
+    intention: donnees.get("intention") ?? undefined,
   });
   if (!analyse.success) {
+    // Un format d'adresse invalide ne dit rien de l'existence d'un compte : ce
+    // refus peut être immédiat sans rien divulguer.
     return { statut: "erreur", motif: "email_invalide" };
   }
 
-  const enTetes = await headers();
-  const origine = enTetes.get("origin");
+  const origine = await origineDuSite();
   if (origine === null) {
-    // Sans origine on ne peut pas construire une URL de retour fiable, et
-    // deviner produirait un lien qui mène ailleurs que là où l'utilisateur est.
+    // Sans origine fiable on ne construit pas d'URL de retour : deviner
+    // produirait un lien qui mène ailleurs que là où l'utilisateur se trouve.
+    await attendrePlancher(debut);
     return { statut: "erreur", motif: "envoi" };
   }
 
@@ -61,10 +88,16 @@ export async function envoyerLienConnexion(
     },
   });
 
+  // LE PLANCHER S'APPLIQUE À TOUS LES CHEMINS QUI ONT TOUCHÉ SUPABASE, succès
+  // comme échec. L'appliquer au seul succès rendrait l'échec reconnaissable à sa
+  // rapidité, ce qui reconstituerait l'oracle qu'on vient de supprimer.
+  await attendrePlancher(debut);
+
   if (error !== null) {
     // On distingue la limite de débit du reste : dire « réessayez » à quelqu'un
     // qui vient d'être limité le ferait réessayer aussitôt, donc échouer à
-    // nouveau, et conclure que le produit est cassé.
+    // nouveau, et conclure que le produit est cassé. Cette distinction ne
+    // dépend pas de l'existence d'un compte, elle ne divulgue donc rien.
     return {
       statut: "erreur",
       motif: error.status === 429 ? "trop_de_tentatives" : "envoi",

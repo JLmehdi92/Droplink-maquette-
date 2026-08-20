@@ -1,29 +1,35 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
 import {
   envoyerLienConnexion,
   type ResultatConnexion,
 } from "@/app/[locale]/connexion/actions";
+import { suggererCorrection } from "@/lib/email/domaines";
 
 /**
- * Formulaire de connexion par lien email.
+ * Formulaire d'accès par lien email, partagé par la connexion et l'inscription.
  *
  * PAS DE MOT DE PASSE, PAS DE SSO. La maquette Stitch montrait « Corporate
  * Email », un champ mot de passe et un bouton « Enterprise SSO » : ce sont les
  * codes d'un produit d'entreprise, pas de celui-ci.
  *
  * Le lien email n'est pas un confort, c'est l'UNIQUE porte d'entrée du
- * fournisseur en Chine, pour qui la connexion Google est inaccessible. Ce
- * chemin doit donc être irréprochable : renvoi possible sans blocage abusif, et
- * surtout un message d'erreur EXPLICITE quand l'envoi échoue — un formulaire
- * qui ne dit rien laisse conclure que le produit ne marche pas.
+ * fournisseur en Chine, pour qui la connexion Google est inaccessible.
  *
- * Ce composant ne porte QUE l'état du formulaire. L'appel réseau vit dans une
- * Server Action : le SDK Supabase ne part pas dans le navigateur.
+ * UN SEUL COMPOSANT POUR LES DEUX ÉCRANS, parce que le serveur fait strictement
+ * la même chose dans les deux cas — et qu'il doit continuer à le faire. Deux
+ * formulaires distincts dériveraient l'un de l'autre, et la première différence
+ * de comportement serait un moyen de savoir si une adresse a un compte.
+ *
+ * La suggestion de faute de frappe vit ICI, à la saisie, sans qu'aucune requête
+ * ne parte. C'est ce qui permet au serveur de répondre la même chose à tout le
+ * monde sans que l'utilisateur y perde : les deux besoins sont traités là où ils
+ * se produisent.
  */
+
 function BoutonEnvoi({ libelle, libelleEnCours }: { libelle: string; libelleEnCours: string }) {
   const { pending } = useFormStatus();
   return (
@@ -39,9 +45,21 @@ function BoutonEnvoi({ libelle, libelleEnCours }: { libelle: string; libelleEnCo
 
 const INITIAL: ResultatConnexion = { statut: "inactif" };
 
-export function FormulaireConnexion({ locale }: { locale: string }) {
+export function FormulaireConnexion({
+  locale,
+  intention = "connexion",
+}: {
+  locale: string;
+  intention?: "connexion" | "inscription";
+}) {
   const t = useTranslations("connexion");
   const [resultat, action] = useActionState(envoyerLienConnexion, INITIAL);
+  const [email, setEmail] = useState("");
+
+  // Le calcul est purement local et borné : quelques dizaines de comparaisons
+  // sur des chaînes courtes. Aucune requête, donc aucun moyen d'apprendre quoi
+  // que ce soit sur nos comptes en observant le réseau.
+  const suggestion = useMemo(() => suggererCorrection(email), [email]);
 
   if (resultat.statut === "envoye") {
     return (
@@ -54,6 +72,7 @@ export function FormulaireConnexion({ locale }: { locale: string }) {
         </p>
         <form action={action}>
           <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="intention" value={intention} />
           <input type="hidden" name="email" value={resultat.email} />
           <button
             type="submit"
@@ -78,6 +97,7 @@ export function FormulaireConnexion({ locale }: { locale: string }) {
   return (
     <form action={action} className="flex flex-col gap-4" noValidate>
       <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="intention" value={intention} />
       <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-semibold text-encre">
           {t("labelEmail")}
@@ -89,6 +109,8 @@ export function FormulaireConnexion({ locale }: { locale: string }) {
           autoComplete="email"
           inputMode="email"
           required
+          value={email}
+          onChange={(evenement) => setEmail(evenement.target.value)}
           placeholder={t("placeholderEmail")}
           aria-invalid={messageErreur !== null}
           aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
@@ -96,13 +118,34 @@ export function FormulaireConnexion({ locale }: { locale: string }) {
         />
       </div>
 
+      {suggestion !== null ? (
+        // On SUGGÈRE, on ne corrige jamais d'office : réécrire une adresse rare
+        // mais légitime enverrait le lien d'accès au compte à quelqu'un d'autre.
+        // Le coût d'une suggestion ignorée est nul, celui d'une correction
+        // erronée est un compte livré à un tiers.
+        <p className="text-sm leading-6 text-encre-douce" aria-live="polite">
+          {t("suggestionPrefixe")}{" "}
+          <button
+            type="button"
+            onClick={() => setEmail(suggestion.adresse)}
+            className="font-semibold text-[var(--accent-texte)] underline"
+          >
+            {suggestion.adresse}
+          </button>
+          {t("suggestionSuffixe")}
+        </p>
+      ) : null}
+
       {messageErreur !== null ? (
         <p id="erreur-connexion" role="alert" className="text-sm text-erreur">
           {messageErreur}
         </p>
       ) : null}
 
-      <BoutonEnvoi libelle={t("envoyer")} libelleEnCours={t("envoiEnCours")} />
+      <BoutonEnvoi
+        libelle={intention === "inscription" ? t("envoyerInscription") : t("envoyer")}
+        libelleEnCours={t("envoiEnCours")}
+      />
     </form>
   );
 }

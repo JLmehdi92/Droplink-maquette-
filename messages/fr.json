@@ -110,6 +110,20 @@
     "erreurEnvoi": "L'envoi a échoué. Nous n'avons pas pu joindre votre boîte mail — réessayez dans un instant.",
     "erreurTropDeTentatives": "Trop de demandes en peu de temps. Patientez une minute avant de réessayer.",
     "pasDeCompteTitre": "Pas encore de compte ?",
-    "pasDeCompteTexte": "Le même lien crée votre compte s'il n'existe pas. Aucune inscription séparée."
+    "pasDeCompteTexte": "Le même lien crée votre compte s'il n'existe pas. Aucune inscription séparée.",
+    "suggestionPrefixe": "Vouliez-vous dire",
+    "suggestionSuffixe": " ?",
+    "envoyerInscription": "Créer mon compte"
+  },
+  "inscription": {
+    "titre": "Créer un compte",
+    "sousTitre": "Entrez votre adresse email. Nous vous envoyons un lien qui crée votre compte — pas de mot de passe à choisir, ni à retenir.",
+    "gratuit": "Gratuit pendant la phase de lancement. Aucune carte demandée.",
+    "dejaCompteTitre": "Vous avez déjà un compte ?",
+    "dejaCompteTexte": "Le même lien vous connecte. Il n'y a pas deux chemins différents.",
+    "ceQuiSuitTitre": "Ce qui vous attend",
+    "ceQuiSuit1": "Vous donnez un nom à votre boutique et choisissez votre couleur.",
+    "ceQuiSuit2": "Vous créez votre première commande et déposez vos photos.",
+    "ceQuiSuit3": "Vous envoyez un seul lien à votre client."
   }
 }

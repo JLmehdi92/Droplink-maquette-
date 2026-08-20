@@ -103,6 +103,8 @@ const cas = [
   { chemin: "/en", statut: 200, libelle: "landing anglaise" },
   { chemin: "/fr/connexion", statut: 200, libelle: "connexion" },
   { chemin: "/en/connexion", statut: 200, libelle: "connexion anglaise" },
+  { chemin: "/fr/inscription", statut: 200, libelle: "inscription" },
+  { chemin: "/en/inscription", statut: 200, libelle: "inscription anglaise" },
   { chemin: "/fr/conditions", statut: 200, libelle: "conditions" },
   { chemin: "/fr/confidentialite", statut: 200, libelle: "confidentialite" },
   {
@@ -154,6 +156,27 @@ const controles = [
   [!/\brep\b|replica|\bW2C\b/i.test(fr), "vocabulaire du vertical absent"],
   [!fr.includes("backdrop-blur"), "aucun flou de fond"],
 ];
+
+// L inscription ne doit reprendre AUCUN des codes de la maquette Stitch : ni
+// mot de passe, ni SSO, ni certification qu on ne possede pas. Le controle
+// porte sur le HTML SERVI, pas sur le fichier source, parce que c est le HTML
+// que le visiteur recoit.
+const inscription = await (await fetch(`${base}/fr/inscription`)).text();
+controles.push(
+  [!/type="password"/.test(inscription), "aucun champ mot de passe"],
+  // FRONTIERES DE MOT OBLIGATOIRES, et pas de `/i` sur les acronymes. Le motif
+  // precedent, `/SSO|SOC2|Enterprise/i`, matchait « crossOrigin » et
+  // « associer » : deux faux positifs sur une page parfaitement
+  // correcte. Un controle qui crie au loup finit par etre ignore, et c est
+  // alors qu il laisse passer le vrai cas.
+  [!/SSO/.test(inscription), "aucune mention de SSO"],
+  [!/SOC ?2/i.test(inscription), "aucune certification SOC2 revendiquee"],
+  [!/Enterprise/.test(inscription), "aucun vocabulaire d'entreprise"],
+  [!/Corporate/i.test(inscription), "aucun « Corporate Email »"],
+  [!/99[.,]9\s*%/.test(inscription), "aucune promesse d'uptime invérifiable"],
+  [inscription.includes('name="email"'), "le champ email est bien present"],
+  [inscription.length > 5000, "la page d'inscription n'est pas vide"],
+);
 
 console.log("\n— Contenu rendu —");
 for (const [ok, libelle] of controles) {

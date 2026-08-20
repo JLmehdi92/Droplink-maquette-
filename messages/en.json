@@ -110,6 +110,20 @@
     "erreurEnvoi": "Sending failed. We could not reach your inbox — try again in a moment.",
     "erreurTropDeTentatives": "Too many requests in a short time. Wait a minute before trying again.",
     "pasDeCompteTitre": "No account yet?",
-    "pasDeCompteTexte": "The same link creates your account if it does not exist. No separate sign-up."
+    "pasDeCompteTexte": "The same link creates your account if it does not exist. No separate sign-up.",
+    "suggestionPrefixe": "Did you mean",
+    "suggestionSuffixe": "?",
+    "envoyerInscription": "Create my account"
+  },
+  "inscription": {
+    "titre": "Create an account",
+    "sousTitre": "Enter your email address. We send you a link that creates your account — no password to choose, none to remember.",
+    "gratuit": "Free during the launch phase. No card required.",
+    "dejaCompteTitre": "Already have an account?",
+    "dejaCompteTexte": "The same link signs you in. There are not two different paths.",
+    "ceQuiSuitTitre": "What happens next",
+    "ceQuiSuit1": "You name your shop and pick your colour.",
+    "ceQuiSuit2": "You create your first order and drop in your photos.",
+    "ceQuiSuit3": "You send a single link to your customer."
   }
 }
