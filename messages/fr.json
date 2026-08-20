@@ -177,6 +177,23 @@
     "valider": "C'est parti",
     "validationEnCours": "Enregistrement…",
     "erreurSession": "Votre session a expiré. Reconnectez-vous.",
-    "erreurEcriture": "L'enregistrement a échoué. Réessayez dans un instant."
+    "erreurEcriture": "L'enregistrement a échoué. Réessayez dans un instant.",
+    "marqueTitre": "Votre marque",
+    "marqueAide": "Votre nom et votre logo remplacent DropLink sur la page que voit votre client.",
+    "depotTitre": "Cliquez pour choisir une image, ou déposez-la ici",
+    "depotFormats": "PNG, JPEG ou WebP, jusqu'à 2 Mo",
+    "logoRetirer": "Retirer le logo",
+    "couleurHex": "Couleur principale (hexadécimal)",
+    "couleurPresets": "Teintes suggérées",
+    "apercuTitre": "Aperçu en direct",
+    "apercuAide": "Ce que votre client verra en ouvrant votre lien.",
+    "apercuEnTete": "Page de votre commande",
+    "apercuCommande": "Votre commande",
+    "apercuEtape1": "Expédié",
+    "apercuEtape1Date": "Aujourd'hui, 10 h 42",
+    "apercuEtape2": "En transit",
+    "apercuEtape2Date": "Demain",
+    "apercuBoutonSuivi": "Suivre",
+    "sansNom": "Votre boutique"
   }
 }

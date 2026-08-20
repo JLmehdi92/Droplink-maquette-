@@ -42,13 +42,13 @@ export default async function Bienvenue({
   const t = await getTranslations("onboarding");
 
   return (
-    <main id="contenu" className="mx-auto w-full max-w-[640px] px-4 py-16 md:py-24">
+    <main id="contenu" className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop">
       <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
         {t("titre")}
       </h1>
       <p className="mt-3 font-body-md text-body-md text-on-surface-variant">{t("sousTitre")}</p>
 
-      <div className="mt-10">
+      <div className="mt-8">
         <TraductionsClient espaces={["onboarding"]}>
           <FormulaireOnboarding locale={langue} />
         </TraductionsClient>

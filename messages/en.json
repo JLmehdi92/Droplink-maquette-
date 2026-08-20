@@ -177,6 +177,23 @@
     "valider": "Let's go",
     "validationEnCours": "Saving…",
     "erreurSession": "Your session has expired. Please sign in again.",
-    "erreurEcriture": "Saving failed. Please try again in a moment."
+    "erreurEcriture": "Saving failed. Please try again in a moment.",
+    "marqueTitre": "Your brand",
+    "marqueAide": "Your name and logo replace DropLink on the page your customer sees.",
+    "depotTitre": "Click to choose an image, or drop it here",
+    "depotFormats": "PNG, JPEG or WebP, up to 2 MB",
+    "logoRetirer": "Remove logo",
+    "couleurHex": "Primary colour (hex)",
+    "couleurPresets": "Suggested shades",
+    "apercuTitre": "Live preview",
+    "apercuAide": "What your customer will see when they open your link.",
+    "apercuEnTete": "Your order page",
+    "apercuCommande": "Your order",
+    "apercuEtape1": "Shipped",
+    "apercuEtape1Date": "Today, 10:42",
+    "apercuEtape2": "In transit",
+    "apercuEtape2Date": "Tomorrow",
+    "apercuBoutonSuivi": "Track",
+    "sansNom": "Your shop"
   }
 }

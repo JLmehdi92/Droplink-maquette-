@@ -36,7 +36,7 @@ export async function PageLegale({
     <>
       <EnTete locale={locale} />
 
-      <main id="contenu" className="mx-auto w-full max-w-[760px] px-4 py-12 md:px-10 md:py-16">
+      <main id="contenu" className="mx-auto w-full max-w-[760px] px-margin-mobile py-12 md:px-margin-desktop md:py-16">
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
           {titre}
         </h1>
