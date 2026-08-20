@@ -252,6 +252,38 @@ export type Database = {
         Returns: boolean
       }
       generer_jeton_public: { Args: never; Returns: string }
+      lire_commande_publique: {
+        Args: { p_jeton: string }
+        Returns: {
+          boutique_couleur: string
+          boutique_langue: string
+          boutique_logo: string
+          boutique_nom: string
+          client: string
+          couverture: string
+          creee_le: string
+          jeton: string
+          modifiee_le: string
+          numero_suivi: string
+          reference: string
+          statut: Database["public"]["Enums"]["order_status"]
+          statut_qc: Database["public"]["Enums"]["qc_status"]
+          transporteur: string
+        }[]
+      }
+      lire_medias_publics: {
+        Args: { p_jeton: string }
+        Returns: {
+          cle: string
+          cle_vignette: string
+          duree_s: number
+          hauteur: number
+          id: string
+          largeur: number
+          rang: number
+          type: Database["public"]["Enums"]["media_type"]
+        }[]
+      }
       mon_shop_id: { Args: never; Returns: string }
       reclamer_evenement_creation: {
         Args: { p_order_id: string }

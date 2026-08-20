@@ -173,6 +173,21 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "étranger y déplacerait le média d'un autre vendeur.",
     ],
     [
+      "lire_commande_publique",
+      "SEUL chemin de lecture publique. En `security definer` parce que `anon` " +
+        "n'a — et ne doit avoir — aucun droit sur `orders`. Elle EXIGE le jeton " +
+        "en argument : c'est ce qui rend l'énumération impossible, là où une VUE " +
+        "exposée à `anon` se lirait tout entière. Elle filtre la suspension du " +
+        "compte, et ne rend ni `internal_notes` ni `unsubscribe_token`.",
+    ],
+    [
+      "lire_medias_publics",
+      "Médias de la même commande, par jeton. Elle REFAIT le filtre de " +
+        "suspension : ne pas le refaire laisserait les photos d'un compte " +
+        "suspendu accessibles alors que sa page ne répond plus, et une coupure à " +
+        "moitié faite est une coupure qui n'a pas eu lieu.",
+    ],
+    [
       "regenerer_jeton_public",
       "Unique chemin légitime de révocation d'un lien. En `security definer` " +
         "pour poser le drapeau qu'exige le déclencheur d'immuabilité, mais elle " +
