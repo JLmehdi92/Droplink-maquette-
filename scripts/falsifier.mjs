@@ -134,6 +134,21 @@ const SQL = {
     },
   },
 
+  /**
+   * L index partiel du tri par defaut, retire.
+   *
+   * Defaut REEL trouve par la mesure du plan : sans lui, la premiere page lit
+   * 9 120 lignes pour en rendre 50, en 5,4 ms. Le chronometre ne sonne jamais —
+   * seul le plan le dit. Le cout croit ensuite lineairement avec le succes du
+   * vendeur, et le premier a en souffrir est celui qui a le plus de donnees.
+   */
+  "index-tri-absent": {
+    casser: "drop index public.orders_actives_recentes_idx;",
+    reparer:
+      "create index orders_actives_recentes_idx on public.orders " +
+      "(shop_id, created_at desc, id desc) where archived_at is null;",
+  },
+
   /** Le repli d accents desactive : « creme » cesse de trouver « Creme ». */
   "accents-non-replies": {
     casser: `create or replace function public.sans_accents(p_texte text)
