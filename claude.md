@@ -31,7 +31,10 @@ pnpm test:rls         # suites BLOQUANTES d'isolation — jamais désactivables
 pnpm test:perf        # mesures, avant chaque clôture de phase
 pnpm db:migrate       # applique les migrations
 pnpm db:types         # régénère les types Supabase
-pnpm check:r2         # vérifie le branchement R2 de bout en bout
+pnpm fumee            # le produit doit RÉPONDRE : serveur réel, statuts et HTML servi
+pnpm falsifier        # casse le produit EN BASE, de façon réversible, pour éprouver les sondes
+pnpm gates            # les cinq portes ci-dessus, enchaînées
+# pnpm check:r2       — n'existe pas encore : arrive avec le lot 5 (médias R2)
 ```
 
 Après toute modif de schéma : `pnpm db:migrate && pnpm db:types`, sinon les types sont périmés.
