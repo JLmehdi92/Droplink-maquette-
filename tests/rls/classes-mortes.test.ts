@@ -58,9 +58,24 @@ function cssCompile(): string {
 /**
  * Classes écrites en dur dans le code source.
  *
- * Les valeurs construites dynamiquement sont ignorées : Tailwind ne peut pas les
- * voir non plus, et c'est une règle connue de l'outil, pas un défaut à signaler
- * ici. Seules les chaînes littérales sont vérifiables.
+ * TROIS FORMES SONT LUES, et la troisième a été ajoutée après avoir constaté
+ * l'angle mort : le formulaire de signalement range la liste de classes de ses
+ * champs dans une constante, `className={champ}`. Dix classes — dont le fond,
+ * la bordure et la typographie de chaque champ — échappaient à l'inventaire.
+ * Le motif n'est pas exotique : c'est ce qu'on écrit dès qu'une même liste sert
+ * à plusieurs éléments, donc précisément là où une classe morte fait le plus de
+ * dégâts.
+ *
+ *   1. `className="…"`
+ *   2. `className={`…`}` — les SEGMENTS LITTÉRAUX sont conservés même quand le
+ *      gabarit porte une interpolation. Sauter le gabarit entier faisait perdre
+ *      des classes parfaitement vérifiables au motif qu'une seule ne l'était pas.
+ *   3. `className={identifiant}` et `${identifiant}` — résolus vers un
+ *      `const identifiant = "…"` du MÊME fichier.
+ *
+ * Ce qui reste hors de portée est ce que Tailwind ne voit pas non plus : une
+ * valeur construite à l'exécution. C'est une règle connue de l'outil, pas un
+ * défaut à signaler ici.
  */
 function classesEcrites(): Map<string, string[]> {
   const parClasse = new Map<string, string[]>();
@@ -69,16 +84,45 @@ function classesEcrites(): Map<string, string[]> {
     const source = readFileSync(chemin, "utf8");
     const court = chemin.replace(RACINE, "").replace(/\\/g, "/");
 
-    for (const trouve of source.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\})/g)) {
-      const brut = trouve[1] ?? trouve[2] ?? "";
-      // Une interpolation empêche de savoir ce qui sera réellement produit.
-      if (brut.includes("${")) continue;
+    const ajouter = (brut: string): void => {
       for (const classe of brut.split(/\s+/)) {
         if (classe === "") continue;
         const liste = parClasse.get(classe) ?? [];
         if (!liste.includes(court)) liste.push(court);
         parClasse.set(classe, liste);
       }
+    };
+
+    /** `const nom = "…"` du fichier courant, seule portée où l'on peut conclure. */
+    const constantes = new Map<string, string>();
+    for (const t of source.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*"([^"]*)"/g)) {
+      const [, nom, valeur] = t;
+      if (nom !== undefined && valeur !== undefined) constantes.set(nom, valeur);
+    }
+
+    const resoudre = (nom: string): void => {
+      const valeur = constantes.get(nom);
+      if (valeur !== undefined) ajouter(valeur);
+    };
+
+    for (const trouve of source.matchAll(
+      /className=(?:"([^"]*)"|\{`([^`]*)`\}|\{([A-Za-z_$][\w$]*)\})/g,
+    )) {
+      const [, guillemets, gabarit, identifiant] = trouve;
+
+      if (guillemets !== undefined) ajouter(guillemets);
+
+      if (gabarit !== undefined) {
+        // Les segments littéraux restent vérifiables ; chaque interpolation qui
+        // n'est qu'un identifiant est résolue dans la portée du fichier.
+        for (const interpolation of gabarit.matchAll(/\$\{\s*([A-Za-z_$][\w$]*)\s*\}/g)) {
+          const nom = interpolation[1];
+          if (nom !== undefined) resoudre(nom);
+        }
+        ajouter(gabarit.replace(/\$\{[^}]*\}/g, " "));
+      }
+
+      if (identifiant !== undefined) resoudre(identifiant);
     }
   }
 
