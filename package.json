@@ -14,7 +14,9 @@
     "test:perf": "vitest run --project perf",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:types": "node scripts/db-types.mjs",
-    "gates": "pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls"
+    "gates": "pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls",
+    "fumee": "node scripts/fumee.mjs",
+    "falsifier": "node scripts/falsifier.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

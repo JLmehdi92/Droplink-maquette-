@@ -1,0 +1,10 @@
+# Fins de ligne normalisees en LF dans le depot.
+#
+# Sans cette regle, tout script qui reecrit un fichier (node, sed) le repasse en
+# LF alors que l editeur Windows ecrit en CRLF, et git rapporte le fichier
+# ENTIER comme modifie. Un diff de 34 lignes pour zero changement reel est
+# exactement le bruit dans lequel une vraie modification passe inapercue.
+* text=auto eol=lf
+
+# Les maquettes Stitch sont livrees telles quelles.
+stitch_droplink_qc_tracking_portal/** -text

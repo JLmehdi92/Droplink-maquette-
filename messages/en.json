@@ -17,5 +17,99 @@
       "enTransit": "In transit",
       "livre": "Delivered"
     }
+  },
+  "navigation": {
+    "seConnecter": "Log in",
+    "creerUnCompte": "Sign up",
+    "retourAccueil": "Back to home"
+  },
+  "landing": {
+    "metaTitre": "DropLink — one page per order, in your colours",
+    "metaDescription": "Upload your photos and videos, paste the tracking number, send a single link. Your customer sees everything, with no account and no app.",
+    "heroTitre": "One link. The whole order.",
+    "heroSousTitre": "Upload your photos and videos, paste the tracking number. Your customer opens a single link in your colours and sees everything — no account, no app, no chasing you.",
+    "ctaPrincipal": "Create my first link",
+    "ctaSecondaire": "I already have an account",
+    "gratuitPourLInstant": "Free during the launch phase. No card required.",
+    "fonctionnalites": {
+      "titre": "What the link holds",
+      "mediasTitre": "Your photos and videos",
+      "mediasTexte": "Upload them once. Your customer views them full screen, as often as they like, without you sending anything again.",
+      "suiviTitre": "Parcel tracking that updates itself",
+      "suiviTexte": "Paste the number and the carrier is recognised. The page updates on its own, and says plainly when nothing is moving.",
+      "marqueTitre": "Your colours, editable after sending",
+      "marqueTexte": "Your name, your logo, your colour. Fix or complete the page whenever you want — the link itself never changes."
+    },
+    "commentTitre": "Three steps",
+    "etape1": "Create the order and upload your media.",
+    "etape2": "Paste the tracking number.",
+    "etape3": "Send the link. That is all.",
+    "destinataireTitre": "Your customer installs nothing",
+    "destinataireTexte": "No account, no password, no app. They click, they see. The link stays private: it is indexed nowhere and reachable only by the person you sent it to."
+  },
+  "pied": {
+    "conditions": "Terms of use",
+    "confidentialite": "Privacy",
+    "signaler": "Report content",
+    "droits": "All rights reserved."
+  },
+  "legal": {
+    "conditionsTitre": "Terms of use",
+    "confidentialiteTitre": "Privacy",
+    "signalementTitre": "Report content",
+    "misAJourLe": "Last updated",
+    "avertissementTitre": "Draft document",
+    "avertissementTexte": "This text has not yet been reviewed by a lawyer. It describes the service accurately, but it must be validated before any public launch.",
+    "conditions": {
+      "objetTitre": "What the service does",
+      "objetTexte": "DropLink lets a seller create a private page per order, upload photos and videos to it, attach a tracking number, and share the link with their customer. The recipient of the link has no account and creates none.",
+      "roleTitre": "Our role",
+      "roleTexte": "We host content uploaded by sellers. We do not produce it, select it, or review it in advance. Each seller remains solely responsible for what they upload and for holding the rights to share it.",
+      "interditTitre": "What is prohibited",
+      "interditTexte": "Uploading unlawful content, content infringing the rights of a third party, or content you do not hold the rights to. Using the service to share third-party personal data without a legal basis. Attempting to access another account's data.",
+      "retraitTitre": "Removal and suspension",
+      "retraitTexte": "We may suspend an account whose content is reported as manifestly unlawful. Suspension immediately makes all of the account's public pages unreachable. It is reversible: reactivation restores the pages on the same links.",
+      "responsabiliteTitre": "Limits",
+      "responsabiliteTexte": "The service is provided as is, free of charge, during its launch phase. Tracking information comes from carriers and we cannot guarantee its accuracy or freshness.",
+      "paiementTitre": "No payments",
+      "paiementTexte": "DropLink processes no payments, neither between a seller and their customer nor for use of the service. We are not a payment intermediary and take no part in any commercial transaction."
+    },
+    "confidentialite": {
+      "collecteTitre": "What we collect",
+      "collecteTexte": "For a seller: their email address, the declared account type, the language, and the content they upload. For a visitor to a public page: a salted, irreversible fingerprint of their IP address and browser, used only to count one visit per visitor per day.",
+      "pasDeCompteTitre": "The recipient has no account",
+      "pasDeCompteTexte": "The name shown on a page is free text entered by the seller. It is not an account, it is not a user lookup, and it creates no profile with us.",
+      "indexationTitre": "No indexing",
+      "indexationTexte": "Order pages carry a no-index directive, are listed nowhere, and are reachable only through their link. We publish no rich preview of these pages: a preview would show the content inside the conversation, therefore to people who never open the link.",
+      "conservationTitre": "Retention",
+      "conservationTexte": "Raw carrier responses are purged 90 days after the parcel's last movement, not after its creation: a stuck parcel is the one whose history matters most.",
+      "droitsTitre": "Your rights",
+      "droitsTexte": "You may request access to, correction of, or erasure of your data, as well as its portability. Data is hosted in the European Union."
+    },
+    "signalement": {
+      "intro": "If content hosted on DropLink appears unlawful to you or infringes your rights, write to us.",
+      "quoiTitre": "What your message must contain",
+      "quoi1": "The exact link to the page concerned.",
+      "quoi2": "A description of the disputed content and where it appears on the page.",
+      "quoi3": "The legal grounds, and your contact details so we can reply.",
+      "suiteTitre": "What happens next",
+      "suiteTexte": "We acknowledge receipt, review the report, and may suspend the account concerned. A suspension immediately makes all of its public pages unreachable."
+    }
+  },
+  "connexion": {
+    "titre": "Log in",
+    "sousTitre": "Enter your email address. We send you a sign-in link — there is no password to remember.",
+    "labelEmail": "Email address",
+    "placeholderEmail": "you@example.com",
+    "envoyer": "Send me the link",
+    "envoiEnCours": "Sending…",
+    "renvoyer": "Send the link again",
+    "succesTitre": "Check your inbox",
+    "succesTexte": "We sent a sign-in link to {email}. It stays valid for 24 hours. Remember to check your spam folder.",
+    "erreurEmailInvalide": "That address does not look valid.",
+    "erreurEnvoi": "Sending failed. We could not reach your inbox — try again in a moment.",
+    "erreurTropDeTentatives": "Too many requests in a short time. Wait a minute before trying again.",
+    "pasDeCompteTitre": "No account yet?",
+    "pasDeCompteTexte": "The same link creates your account if it does not exist. No separate sign-up."
   }
 }

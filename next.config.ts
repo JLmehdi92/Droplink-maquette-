@@ -1,4 +1,5 @@
 import path from "path";
+import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -9,4 +10,9 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
 };
 
-export default nextConfig;
+// Le plugin indique a Next ou trouver `getRequestConfig`. Sans lui, les
+// Server Components rendent les cles brutes au lieu des traductions — un
+// echec qui ne leve pas et se voit seulement a l ecran.
+const avecIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default avecIntl(nextConfig);
