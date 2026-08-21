@@ -24,7 +24,8 @@
     "retourAccueil": "Retour à l'accueil",
     "mesCommandes": "Mes commandes",
     "maMarque": "Ma marque",
-    "espaceVendeur": "Espace vendeur"
+    "espaceVendeur": "Espace vendeur",
+    "mesEnvois": "Mes envois"
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à vos couleurs",
@@ -271,6 +272,53 @@
     "erreur": {
       "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
       "ecriture": "Rien n'a été enregistré. Réessayez dans un instant."
+    }
+  },
+  "envois": {
+    "titre": "Vos envois",
+    "sousTitre": "Un colis par numéro de suivi, même quand il transporte plusieurs commandes.",
+    "compteurs": {
+      "titre": "Vue d'ensemble",
+      "total": "Colis suivis",
+      "enTransit": "En transit",
+      "silencieux": "Sans mouvement depuis plus de 10 jours",
+      "abandonnes": "Suivi arrêté"
+    },
+    "filtres": {
+      "titre": "Filtres",
+      "etat": "État",
+      "tri": "Trier par",
+      "tous": "Tous"
+    },
+    "etat": {
+      "preparation": "En préparation",
+      "expedie": "Expédié",
+      "en_transit": "En transit",
+      "livre": "Livré"
+    },
+    "tri": {
+      "immobiles": "Ce qui ne bouge plus",
+      "recents": "Mis à jour récemment",
+      "anciens": "Mis à jour il y a longtemps"
+    },
+    "colonnes": {
+      "numero": "Numéro de suivi",
+      "etat": "État",
+      "mouvement": "Dernier mouvement",
+      "commandes": "Commandes"
+    },
+    "mouvement": {
+      "aucun": "Pas encore d'information du transporteur",
+      "aujourdhui": "Aujourd'hui",
+      "jours": "Il y a {n} jours"
+    },
+    "commandesRattachees": "{n, plural, =0 {Aucune commande} one {# commande} other {# commandes}}",
+    "abandonne": "Suivi arrêté",
+    "pageSuivante": "Voir la suite",
+    "vide": {
+      "compte": "Aucun colis pour l'instant. Collez un numéro de suivi dans une commande et il apparaîtra ici.",
+      "filtre": "Aucun colis ne correspond à ce filtre.",
+      "effacer": "Tout effacer"
     }
   },
   "commandes": {

@@ -777,6 +777,59 @@ const SQL = {
     },
   },
 
+  /**
+   * LES COMPTEURS D ENVOIS COMPTENT LA BASE ENTIERE.
+   *
+   * `security definer` au lieu de `security invoker` : la fonction s execute
+   * alors avec les droits de son PROPRIETAIRE, donc hors de la RLS de
+   * l appelant. Le changement d un seul mot, celui qu on ecrit par habitude
+   * parce que la plupart des fonctions du produit en ont besoin.
+   *
+   * Le defaut ne leve rien et n affiche aucune erreur : le vendeur voit
+   * simplement des chiffres trop grands, et il n a aucun moyen de savoir qu ils
+   * comptent les colis de quelqu un d autre.
+   */
+  /**
+   * LE TRI PAR DEFAUT DE L ECRAN DES ENVOIS N A PLUS SON INDEX.
+   *
+   * Hors du cas motivant : ce n est pas l isolation, c est le COUT. Un tri par
+   * defaut sans index lit toutes les lignes pour en rendre cinquante, et ca
+   * reste parfaitement invisible tant qu un compte de test en porte trente.
+   * Seul le nombre de LIGNES LUES le montre — le chronometre, lui, reste
+   * rassurant jusqu a ce que la table ait dix fois cette taille.
+   */
+  "index-immobilite-absent": {
+    casser: "drop index public.tracked_parcels_immobilite_idx;",
+    reparer:
+      "create index tracked_parcels_immobilite_idx on public.tracked_parcels " +
+      "(shop_id, immobile_depuis asc, id asc);",
+  },
+
+  "compteurs-hors-rls": {
+    casser: `create or replace function public.compter_envois(p_silence_jours int)
+      returns table (total bigint, preparation bigint, expedie bigint, en_transit bigint,
+                     livre bigint, silencieux bigint, abandonnes bigint)
+      language sql stable security definer set search_path = '' as $$
+        select count(*),
+               count(*) filter (where tp.normalized_status = 'preparation'),
+               count(*) filter (where tp.normalized_status = 'expedie'),
+               count(*) filter (where tp.normalized_status = 'en_transit'),
+               count(*) filter (where tp.normalized_status = 'livre'),
+               count(*) filter (
+                 where tp.normalized_status <> 'livre'
+                   and tp.abandoned_at is null
+                   and tp.immobile_depuis < now() - make_interval(days => p_silence_jours)
+               ),
+               count(*) filter (where tp.abandoned_at is not null)
+        from public.tracked_parcels tp
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "036_envois_immobilite.sql",
+      depuis: "create function public.compter_envois",
+      jusqua: "comment on function",
+    },
+  },
+
   "suivi-public-sans-suspension": {
     casser: `create or replace function public.lire_suivi_public(p_jeton text)
       returns table (etape public.parcel_status, numero text,

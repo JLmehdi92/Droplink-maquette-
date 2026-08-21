@@ -63,6 +63,7 @@ export default async function LayoutApplication({
         <ul className="mx-auto flex w-full max-w-container-max gap-2 px-margin-mobile md:px-margin-desktop">
           {[
             { href: `/${langue}/commandes`, libelle: t("mesCommandes") },
+            { href: `/${langue}/envois`, libelle: t("mesEnvois") },
             { href: `/${langue}/marque`, libelle: t("maMarque") },
           ].map((entree) => (
             <li key={entree.href}>

@@ -229,6 +229,18 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "fois.",
     ],
     [
+      "compter_envois",
+      "Compteurs de l'écran des envois. `SECURITY INVOKER` — donc exécutée sous " +
+        "la RLS de l'appelant : elle ne peut structurellement compter que les " +
+        "colis de sa propre boutique, et il n'y a aucun filtre de propriété à " +
+        "écrire dans son corps, donc aucun à oublier. Elle existe parce que cinq " +
+        "requêtes séparées liraient cinq fois le même ensemble de lignes ; un " +
+        "`count(*) filter` les obtient d'un seul parcours. Le seuil de silence " +
+        "lui est PASSÉ EN ARGUMENT plutôt qu'écrit en dur : la valeur vit dans " +
+        "`silence.ts`, et une seconde définition en base divergerait au premier " +
+        "ajustement sans que personne ne pense à regarder dans une migration.",
+    ],
+    [
       "archiver_lot",
       "Archivage par LOT, tout-ou-rien. `SECURITY INVOKER` — donc exécutée avec " +
         "les droits de l'appelant, sous SA RLS : elle ne peut structurellement " +

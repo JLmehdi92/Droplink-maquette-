@@ -1,0 +1,308 @@
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import type { Client } from "pg";
+import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
+import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
+import {
+  compterEnvois,
+  decoderCurseur,
+  encoderCurseur,
+  lireEnvois,
+  ParametresEnvois,
+} from "@/lib/envois/liste";
+import { SEUIL_SILENCE_JOURS } from "@/lib/tracking/silence";
+
+/**
+ * L'ÉCRAN DES ENVOIS.
+ *
+ * Il lit les colis, pas les commandes, et c'est toute la raison de son
+ * existence : un numéro de suivi porte souvent PLUSIEURS commandes, et une liste
+ * de commandes le répéterait autant de fois — le vendeur relancerait alors le
+ * transporteur trois fois pour un colis unique.
+ *
+ * Deux propriétés portent le reste :
+ *
+ *  1. L'ISOLATION EST FAITE PAR LA RLS, pas par un `where` applicatif. Le module
+ *     n'écrit AUCUN filtre sur `shop_id` : si la RLS tombait, ce test le verrait.
+ *  2. LE SEUIL DE SILENCE EST UNIQUE. La liste filtrée et le compteur doivent
+ *     rendre le MÊME nombre — un écran qui annonce douze colis silencieux et en
+ *     liste neuf fait douter de tout le reste.
+ */
+
+let alice: UtilisateurDeTest;
+let bob: UtilisateurDeTest;
+let catalogue: Client;
+
+const DEFAUTS = ParametresEnvois.parse({});
+const MAINTENANT = new Date("2026-08-21T12:00:00Z");
+
+/** Pose un colis chez `qui`, avec un dernier mouvement daté. */
+async function poserColis(
+  qui: UtilisateurDeTest,
+  numero: string,
+  options: {
+    etat?: "preparation" | "expedie" | "en_transit" | "livre";
+    dernierMouvement?: string | null;
+    abandonne?: boolean;
+  } = {},
+): Promise<string> {
+  const { data } = await qui.client
+    .from("orders")
+    .insert({ shop_id: qui.shopId, customer_label: "Client " + numero })
+    .select("id")
+    .single();
+
+  const commande = (data as { id: string }).id;
+  const attache = await qui.client.rpc("attacher_colis", {
+    p_order_id: commande,
+    p_numero: numero,
+    p_transporteur: "3011",
+  });
+
+  const ligne = Array.isArray(attache.data) ? attache.data[0] : null;
+  const parcelId = (ligne as { parcel_id: string } | null)?.parcel_id ?? "";
+  expect(parcelId, "aucun colis attaché : la sonde n'inspecte rien").not.toBe("");
+
+  // On écrit l'état par le catalogue : c'est la tâche de fond qui le fait en
+  // production, et passer par elle ici exigerait un réseau.
+  await interroger(
+    catalogue,
+    `update public.tracked_parcels
+       set normalized_status = $2::public.parcel_status,
+           last_movement_at = $3::timestamptz,
+           abandoned_at = case when $4 then now() else null end
+     where id = $1`,
+    [parcelId, options.etat ?? "en_transit", options.dernierMouvement ?? null, options.abandonne ?? false],
+  );
+
+  return parcelId;
+}
+
+beforeAll(async () => {
+  catalogue = await ouvrirConnexionCatalogue();
+  alice = await creerUtilisateur("envois-alice");
+  bob = await creerUtilisateur("envois-bob");
+
+  // Trois colis chez Alice : un qui avance, un silencieux, un livré immobile.
+  await poserColis(alice, "AL-EN-ROUTE-01", {
+    etat: "en_transit",
+    dernierMouvement: "2026-08-20T10:00:00Z",
+  });
+  await poserColis(alice, "AL-SILENCE-02", {
+    etat: "en_transit",
+    dernierMouvement: "2026-07-01T10:00:00Z",
+  });
+  await poserColis(alice, "AL-LIVRE-03", {
+    etat: "livre",
+    dernierMouvement: "2026-06-01T10:00:00Z",
+  });
+
+  // Un colis chez Bob, volontairement le plus immobile de tous : s'il
+  // apparaissait chez Alice, il serait EN TÊTE de son tri par défaut.
+  await poserColis(bob, "BOB-TRES-VIEUX-01", {
+    etat: "en_transit",
+    dernierMouvement: "2020-01-01T10:00:00Z",
+  });
+}, 120_000);
+
+afterAll(async () => {
+  await supprimerUtilisateur(alice);
+  await supprimerUtilisateur(bob);
+  await catalogue.end();
+});
+
+describe("Ce que le vendeur voit", () => {
+  test("ses colis, et uniquement les siens", async () => {
+    const page = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
+    const numeros = page.lignes.map((l) => l.numero);
+
+    expect(numeros.length, "la sonde n'inspecte aucun envoi").toBeGreaterThan(0);
+    expect(numeros).toContain("AL-SILENCE-02");
+    expect(numeros, "le colis de Bob a fuité chez Alice").not.toContain("BOB-TRES-VIEUX-01");
+  });
+
+  test("contre-test positif : Bob voit le sien", async () => {
+    // Sans lui, une lecture qui ne rendrait JAMAIS rien passerait le test
+    // précédent à 100 % sans rien prouver.
+    const page = await lireEnvois(bob.client, DEFAUTS, MAINTENANT);
+    expect(page.lignes.map((l) => l.numero)).toContain("BOB-TRES-VIEUX-01");
+  });
+
+  test("le tri par défaut fait remonter ce qui ne bouge plus", async () => {
+    const page = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
+    const numeros = page.lignes.map((l) => l.numero);
+
+    // Le livré du 1er juin est plus ancien que le silencieux du 1er juillet :
+    // l'ordre attendu est donc livré, silencieux, en route.
+    expect(numeros.indexOf("AL-LIVRE-03")).toBeLessThan(numeros.indexOf("AL-SILENCE-02"));
+    expect(numeros.indexOf("AL-SILENCE-02")).toBeLessThan(numeros.indexOf("AL-EN-ROUTE-01"));
+  });
+
+  test("un colis porte le NOMBRE de commandes rattachées, pas leur liste", async () => {
+    const page = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
+    const ligne = page.lignes.find((l) => l.numero === "AL-SILENCE-02");
+    expect(ligne?.commandes).toBe(1);
+    // Rapporter les commandes multiplierait le poids de la réponse par le
+    // nombre de commandes groupées, chez le vendeur qui en groupe le plus.
+    expect(JSON.stringify(ligne)).not.toContain("customer_label");
+  });
+});
+
+describe("Le silence : la liste et le compteur disent la même chose", () => {
+  test("le filtre ne garde que ce qui est encore en route et vraiment immobile", async () => {
+    const page = await lireEnvois(
+      alice.client,
+      ParametresEnvois.parse({ silencieux: "oui" }),
+      MAINTENANT,
+    );
+    const numeros = page.lignes.map((l) => l.numero);
+
+    expect(numeros).toContain("AL-SILENCE-02");
+    // UN COLIS LIVRÉ NE BOUGE PLUS PAR DÉFINITION. Le compter comme silencieux
+    // ferait grossir l'alerte avec les livraisons réussies — donc avec le
+    // succès — et une alerte qui se déclenche quand tout va bien est une alerte
+    // qu'on apprend à ignorer.
+    expect(numeros, "un colis LIVRÉ est compté comme silencieux").not.toContain("AL-LIVRE-03");
+    expect(numeros, "un colis qui a bougé hier est compté comme silencieux").not.toContain(
+      "AL-EN-ROUTE-01",
+    );
+  });
+
+  test("le compteur rend EXACTEMENT le même nombre que la liste", async () => {
+    // C'est la propriété qui compte : deux définitions du seuil divergeraient au
+    // premier ajustement, et l'écran annoncerait un chiffre qu'aucune liste ne
+    // confirme.
+    const compteurs = await compterEnvois(alice.client);
+    const page = await lireEnvois(
+      alice.client,
+      ParametresEnvois.parse({ silencieux: "oui" }),
+      MAINTENANT,
+    );
+    expect(compteurs.silencieux).toBe(page.lignes.length);
+  });
+
+  test("le seuil est bien celui du produit, pas une valeur réécrite en base", async () => {
+    // Un colis posé JUSTE en deçà du seuil ne doit pas être silencieux, et un
+    // colis juste au-delà doit l'être. Sans ces deux bornes, un seuil de 30
+    // jours écrit par erreur dans la migration passerait inaperçu.
+    const juste = new Date(Date.now() - (SEUIL_SILENCE_JOURS - 1) * 86_400_000).toISOString();
+    const audela = new Date(Date.now() - (SEUIL_SILENCE_JOURS + 1) * 86_400_000).toISOString();
+
+    await poserColis(alice, "AL-BORNE-DEDANS", {
+      etat: "en_transit",
+      dernierMouvement: juste,
+    });
+    await poserColis(alice, "AL-BORNE-DEHORS", {
+      etat: "en_transit",
+      dernierMouvement: audela,
+    });
+
+    const page = await lireEnvois(
+      alice.client,
+      ParametresEnvois.parse({ silencieux: "oui" }),
+      new Date(),
+    );
+    const numeros = page.lignes.map((l) => l.numero);
+    expect(numeros).toContain("AL-BORNE-DEHORS");
+    expect(numeros).not.toContain("AL-BORNE-DEDANS");
+  });
+});
+
+describe("Les compteurs", () => {
+  test("ils comptent la boutique de l'appelant, pas la base entière", async () => {
+    const chezAlice = await compterEnvois(alice.client);
+    const chezBob = await compterEnvois(bob.client);
+
+    expect(chezBob.total, "Bob compte les colis d'Alice").toBe(1);
+    expect(chezAlice.total).toBeGreaterThan(1);
+  });
+
+  test("un colis abandonné est compté comme tel", async () => {
+    await poserColis(alice, "AL-ABANDONNE", { etat: "en_transit", abandonne: true });
+    const compteurs = await compterEnvois(alice.client);
+    expect(compteurs.abandonnes).toBeGreaterThan(0);
+
+    // ET IL N'EST PAS COMPTÉ COMME SILENCIEUX : on a cessé de l'interroger, donc
+    // son immobilité ne dit plus rien sur le colis, seulement sur nous.
+    const page = await lireEnvois(
+      alice.client,
+      ParametresEnvois.parse({ silencieux: "oui" }),
+      MAINTENANT,
+    );
+    expect(page.lignes.map((l) => l.numero)).not.toContain("AL-ABANDONNE");
+  });
+});
+
+describe("Les paramètres d'URL", () => {
+  test("la forme qui arrive RÉELLEMENT de l'URL active le filtre", () => {
+    // CE TEST EXISTE PARCE QUE LE DÉFAUT A EU LIEU. Un `z.boolean()` suivi d'un
+    // `catch` acceptait le booléen et rejetait silencieusement la chaîne « oui »,
+    // celle que porte le lien de l'écran. Le filtre disparaissait sans bruit :
+    // l'en-tête annonçait « 12 sans mouvement » au-dessus d'une liste qui les
+    // contenait tous. Rien n'échouait, rien n'était journalisé.
+    expect(ParametresEnvois.parse({ silencieux: "oui" }).silencieux).toBe(true);
+    expect(ParametresEnvois.parse({ abandonnes: "oui" }).abandonnes).toBe(true);
+    expect(ParametresEnvois.parse({ abandonnes: "non" }).abandonnes).toBe(false);
+  });
+
+  test("contre-test positif : l'absence de paramètre ne filtre rien", () => {
+    // Sans lui, un schéma qui rendrait TOUJOURS `true` passerait le test
+    // précédent sans rien prouver.
+    expect(ParametresEnvois.parse({}).silencieux).toBe(false);
+    expect(ParametresEnvois.parse({}).abandonnes).toBeNull();
+    expect(ParametresEnvois.parse({ abandonnes: "n'importe quoi" }).abandonnes).toBeNull();
+  });
+
+  test("un tri inventé retombe sur le tri par défaut au lieu de casser l'écran", () => {
+    expect(ParametresEnvois.parse({ tri: "par-couleur" }).tri).toBe("immobiles");
+    expect(ParametresEnvois.parse({ etat: "perdu" }).etat).toBeNull();
+  });
+});
+
+describe("Le curseur", () => {
+  test("il refuse ce qui pourrait prolonger l'expression de filtre", () => {
+    // Ces deux valeurs retournent dans une expression `or=` en syntaxe
+    // PostgREST, dont la grammaire emploie la virgule, le point et les
+    // parenthèses. La RLS resterait la dernière ligne — mais une protection qui
+    // tient à ce qu'une AUTRE couche rattrape est un sursis, pas une protection.
+    for (const forge of [
+      "2026-08-21T00:00:00Z,id.gt.0|" + "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "Dec 31, 2025 (UTC)|aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "2026-08-21T00:00:00Z|pas-un-uuid",
+      "2026-08-21T00:00:00Z|aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,shop_id.neq.0",
+    ]) {
+      const encode = Buffer.from(forge, "utf8").toString("base64url");
+      expect(decoderCurseur(encode), `curseur forgé accepté : ${forge}`).toBeNull();
+    }
+  });
+
+  test("contre-test positif : un curseur légitime est accepté, décalage `+00` compris", () => {
+    // Une suite où tout est refusé passe à 100 % sans rien prouver. Et `+00` est
+    // la forme que PostgREST rend RÉELLEMENT : l'oublier renverrait le vendeur à
+    // la première page à chaque « page suivante ».
+    const id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+    for (const valeur of [
+      "2026-08-21T12:00:00Z",
+      "2026-08-21 12:00:00+00",
+      "2026-08-21 12:00:00.123456+00:00",
+    ]) {
+      expect(decoderCurseur(encoderCurseur(valeur, id)), `refusé : ${valeur}`).toEqual({
+        valeur,
+        id,
+      });
+    }
+  });
+
+  test("la page suivante ne saute ni ne répète de ligne", async () => {
+    // LE CAS QUI MOTIVE LA COLONNE GÉNÉRÉE. Trier sur `last_movement_at`, qui est
+    // NULL tant que rien n'a été scanné, ferait rendre NULL à la comparaison de
+    // couple — et des colis disparaîtraient de la liste sans que rien n'échoue.
+    await poserColis(alice, "AL-JAMAIS-SCANNE", { etat: "preparation", dernierMouvement: null });
+
+    const tout = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
+    const numeros = tout.lignes.map((l) => l.numero);
+    expect(numeros, "un colis jamais scanné est absent de la liste").toContain(
+      "AL-JAMAIS-SCANNE",
+    );
+    expect(new Set(numeros).size, "une ligne apparaît deux fois").toBe(numeros.length);
+  });
+});

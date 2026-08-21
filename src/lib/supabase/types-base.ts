@@ -417,6 +417,7 @@ export type Database = {
           estimated_to: string | null
           first_movement_at: string | null
           id: string
+          immobile_depuis: string | null
           last_movement_at: string | null
           last_query_at: string | null
           normalized_status: Database["public"]["Enums"]["parcel_status"]
@@ -436,6 +437,7 @@ export type Database = {
           estimated_to?: string | null
           first_movement_at?: string | null
           id?: string
+          immobile_depuis?: string | null
           last_movement_at?: string | null
           last_query_at?: string | null
           normalized_status?: Database["public"]["Enums"]["parcel_status"]
@@ -455,6 +457,7 @@ export type Database = {
           estimated_to?: string | null
           first_movement_at?: string | null
           id?: string
+          immobile_depuis?: string | null
           last_movement_at?: string | null
           last_query_at?: string | null
           normalized_status?: Database["public"]["Enums"]["parcel_status"]
@@ -560,6 +563,18 @@ export type Database = {
           normalized_status: Database["public"]["Enums"]["parcel_status"]
           registered_at: string
           tracking_number: string
+        }[]
+      }
+      compter_envois: {
+        Args: { p_silence_jours: number }
+        Returns: {
+          abandonnes: number
+          en_transit: number
+          expedie: number
+          livre: number
+          preparation: number
+          silencieux: number
+          total: number
         }[]
       }
       compter_interrogation_vide: {

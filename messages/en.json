@@ -24,7 +24,8 @@
     "retourAccueil": "Back to home",
     "mesCommandes": "My orders",
     "maMarque": "My brand",
-    "espaceVendeur": "Seller area"
+    "espaceVendeur": "Seller area",
+    "mesEnvois": "My shipments"
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, in your colours",
@@ -271,6 +272,53 @@
     "erreur": {
       "session": "Your session has expired. Sign in again, then retry.",
       "ecriture": "Nothing was saved. Please retry in a moment."
+    }
+  },
+  "envois": {
+    "titre": "Your shipments",
+    "sousTitre": "One parcel per tracking number, even when it carries several orders.",
+    "compteurs": {
+      "titre": "Overview",
+      "total": "Tracked parcels",
+      "enTransit": "In transit",
+      "silencieux": "No movement for over 10 days",
+      "abandonnes": "Tracking stopped"
+    },
+    "filtres": {
+      "titre": "Filters",
+      "etat": "Status",
+      "tri": "Sort by",
+      "tous": "All"
+    },
+    "etat": {
+      "preparation": "Preparing",
+      "expedie": "Shipped",
+      "en_transit": "In transit",
+      "livre": "Delivered"
+    },
+    "tri": {
+      "immobiles": "What has stopped moving",
+      "recents": "Recently updated",
+      "anciens": "Updated long ago"
+    },
+    "colonnes": {
+      "numero": "Tracking number",
+      "etat": "Status",
+      "mouvement": "Last movement",
+      "commandes": "Orders"
+    },
+    "mouvement": {
+      "aucun": "No information from the carrier yet",
+      "aujourdhui": "Today",
+      "jours": "{n} days ago"
+    },
+    "commandesRattachees": "{n, plural, =0 {No orders} one {# order} other {# orders}}",
+    "abandonne": "Tracking stopped",
+    "pageSuivante": "Show more",
+    "vide": {
+      "compte": "No parcels yet. Paste a tracking number into an order and it will show up here.",
+      "filtre": "No parcel matches this filter.",
+      "effacer": "Clear all"
     }
   },
   "commandes": {
