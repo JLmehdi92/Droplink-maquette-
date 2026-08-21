@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -37,7 +38,24 @@ export interface Administrateur {
  * qu'appliquent les fonctions de lecture auditées. Deux définitions du rôle
  * finiraient par diverger, et c'est la plus permissive des deux qui gagnerait.
  */
-export async function exigerAdmin(): Promise<Administrateur> {
+export const exigerAdmin = cache(exigerAdminSansMemo);
+
+/**
+ * MÉMOÏSÉE PAR REQUÊTE, et rien de plus.
+ *
+ * `cache()` de React ne garde son résultat que le temps d'UN rendu : deux
+ * requêtes HTTP distinctes revérifient toujours le rôle en base. Ce n'est donc
+ * pas un cache d'autorisation — il n'y a rien à invalider, et une rétrogradation
+ * prend effet à la requête suivante.
+ *
+ * Ce qu'elle permet : appeler cette garde AUSSI DANS `generateMetadata` sans
+ * payer un second aller-retour. C'est nécessaire, et le défaut qui l'a montré
+ * était réel — Next évalue les métadonnées en parallèle du rendu, donc le
+ * `<title>` d'un écran d'administration se retrouvait dans le corps du 404 servi
+ * à un visiteur sans droits. Le code de réponse ne disait rien ; le titre disait
+ * tout.
+ */
+async function exigerAdminSansMemo(): Promise<Administrateur> {
   const profil = await lireProfilVendeur();
   if (profil === null) notFound();
 

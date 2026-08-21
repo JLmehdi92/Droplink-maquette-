@@ -714,6 +714,52 @@ try {
       controles.push([inconnu.status === 404, "un jeton inconnu rend 404"]);
     }
   }
+
+  /*
+   * L ADMINISTRATION, VUE PAR QUELQU UN QUI N Y A PAS DROIT.
+   *
+   * 404 ET JAMAIS 403, ET JAMAIS UNE REDIRECTION VERS LA CONNEXION. Les trois se
+   * distinguent : un 403 confirme que la surface existe, et une redirection vers
+   * « connectez-vous » aussi — elle dit « il y a quelque chose ici, et il te
+   * manque juste un compte ». Un 404 ne dit rien.
+   *
+   * LE CORPS EST INSPECTE, pas seulement le statut : une page d erreur qui
+   * porterait le mot « admin » ou un libelle reconnaissable serait un aveu
+   * malgre le bon code de reponse.
+   */
+  const cheminsAdmin = [
+    "/fr/admin",
+    "/fr/admin/comptes",
+    "/fr/admin/journal",
+    // Casse et absence de prefixe de langue : ne reconnaitre que `/fr/admin`
+    // laisserait ces formes franchir le filtre. Elles ne menent nulle part
+    // aujourd hui, mais une protection qui tient a ce qu une redirection ait
+    // lieu D ABORD n est pas une protection.
+    "/FR/admin/comptes",
+    "/admin/comptes",
+  ];
+
+  for (const chemin of cheminsAdmin) {
+    const reponse = await fetch(`${base}${chemin}`, { redirect: "manual" });
+    const corps = reponse.status === 404 ? await reponse.text() : "";
+
+    controles.push([
+      reponse.status === 404,
+      `${chemin} rend 404 sans session (statut ${reponse.status})`,
+    ]);
+    controles.push([
+      !/administration|audit|suspend/i.test(corps),
+      `${chemin} ne divulgue rien dans son corps`,
+    ]);
+  }
+
+  // CONTRE-TEST : la sonde saurait-elle voir une page qui REPOND ? Sans lui,
+  // « tout rend 404 » pourrait etre vrai parce que le serveur est mort.
+  const temoin = await fetch(`${base}/fr/connexion`, { redirect: "manual" });
+  controles.push([
+    temoin.status === 200,
+    `CONTRE-TEST : une page publique repond bien (statut ${temoin.status})`,
+  ]);
 } finally {
   // Nettoyage INCONDITIONNEL : un chemin d echec qui laisse des lignes derriere
   // lui fausse toutes les mesures suivantes.

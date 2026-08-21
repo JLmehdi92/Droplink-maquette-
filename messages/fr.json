@@ -636,6 +636,45 @@
       },
       "vide": "Aucune entrée pour l'instant.",
       "pageSuivante": "Voir la suite"
+    },
+    "fiche": {
+      "identite": "Identité",
+      "type": "Type",
+      "role": "Rôle",
+      "statut": "Statut",
+      "boutique": "Boutique",
+      "boutiqueNonConfiguree": "Non configurée",
+      "inscrit": "Inscrit le",
+      "volumes": "Volumes",
+      "volumesAide": "Des volumes, pas du contenu : ils suffisent à décider, et le contenu appartient au vendeur et à ses clients.",
+      "commandes": "Commandes",
+      "colis": "Colis suivis",
+      "vues": "Consultations"
+    },
+    "suspension": {
+      "ouvrir": "Suspendre ce compte",
+      "rouvrir": "Réactiver ce compte",
+      "titreSuspension": "Suspendre ce compte",
+      "titreReactivation": "Réactiver ce compte",
+      "aideSuspension": "Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.",
+      "aideReactivation": "Ses pages redeviendront accessibles sur les mêmes liens que ceux déjà envoyés à ses clients.",
+      "motif": "Motif",
+      "motifAide": "Au moins {n} caractères. Il s'affiche en clair dans le journal, et c'est ce qu'on relira si la décision est contestée.",
+      "recopier": "Recopiez l'adresse du compte pour confirmer",
+      "collageAide": "Le collage est désactivé : recopier l'adresse est ce qui garantit que vous suspendez le bon compte.",
+      "collageRefuse": "Collage refusé. Recopiez l'adresse à la main : c'est le seul moment où l'on vérifie vraiment quel compte est visé.",
+      "annuler": "Annuler",
+      "confirmerSuspension": "Suspendre",
+      "confirmerReactivation": "Réactiver",
+      "enCours": "En cours…",
+      "fait": "Effectué.",
+      "erreur": {
+        "saisie": "Le motif est trop court.",
+        "confirmation": "L'adresse recopiée ne correspond pas à ce compte.",
+        "refuse": "Ce compte ne peut pas être suspendu.",
+        "introuvable": "Compte introuvable.",
+        "ecriture": "Rien n'a été modifié. Réessayez."
+      }
     }
   }
 }

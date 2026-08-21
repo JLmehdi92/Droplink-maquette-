@@ -12,6 +12,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  // LA GARDE COURT AUSSI ICI. Next évalue les métadonnées EN PARALLÈLE du
+  // rendu : sans elle, le titre de l'écran partait dans le corps du 404 servi à
+  // un visiteur sans droits, et révélait la surface que le code de réponse
+  // cachait. L'appel est mémoïsé par requête, donc il ne coûte rien de plus.
+  await exigerAdmin();
   const t = await getTranslations({ locale, namespace: "admin" });
   return { title: t("journal.titre"), robots: { index: false, follow: false } };
 }

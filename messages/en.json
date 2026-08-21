@@ -636,6 +636,45 @@
       },
       "vide": "No entries yet.",
       "pageSuivante": "Show more"
+    },
+    "fiche": {
+      "identite": "Identity",
+      "type": "Type",
+      "role": "Role",
+      "statut": "Status",
+      "boutique": "Shop",
+      "boutiqueNonConfiguree": "Not configured",
+      "inscrit": "Joined",
+      "volumes": "Volumes",
+      "volumesAide": "Volumes, not content: they are enough to decide, and the content belongs to the seller and their customers.",
+      "commandes": "Orders",
+      "colis": "Tracked parcels",
+      "vues": "Views"
+    },
+    "suspension": {
+      "ouvrir": "Suspend this account",
+      "rouvrir": "Reactivate this account",
+      "titreSuspension": "Suspend this account",
+      "titreReactivation": "Reactivate this account",
+      "aideSuspension": "Its public pages stop being served immediately. Its links are not destroyed: reactivating restores them exactly as they were.",
+      "aideReactivation": "Its pages become reachable again on the very links already sent to its customers.",
+      "motif": "Reason",
+      "motifAide": "At least {n} characters. It appears in plain text in the audit log, and it is what will be read back if the decision is challenged.",
+      "recopier": "Retype the account address to confirm",
+      "collageAide": "Pasting is disabled: retyping the address is what makes sure you are suspending the right account.",
+      "collageRefuse": "Paste refused. Retype the address by hand: it is the one moment when you actually check which account is targeted.",
+      "annuler": "Cancel",
+      "confirmerSuspension": "Suspend",
+      "confirmerReactivation": "Reactivate",
+      "enCours": "Working…",
+      "fait": "Done.",
+      "erreur": {
+        "saisie": "The reason is too short.",
+        "confirmation": "The address you retyped does not match this account.",
+        "refuse": "This account cannot be suspended.",
+        "introuvable": "Account not found.",
+        "ecriture": "Nothing was changed. Please retry."
+      }
     }
   }
 }
