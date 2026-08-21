@@ -1,0 +1,76 @@
+import { clientService } from "./utilisateurs";
+
+/**
+ * PURGE DES COMPTES DE TEST ABANDONNÉS.
+ *
+ * DÉFAUT CONSTATÉ, PAS ANTICIPÉ. Le 21/08/2026, la base est passée en LECTURE
+ * SEULE : 930 Mo occupés, quota atteint. Cause : 47 comptes de test survivants,
+ * portant 288 001 commandes, 2 112 000 événements et 1 061 430 vues — le résidu
+ * de jeux de mesure successifs.
+ *
+ * CHAQUE SUITE NETTOIE POURTANT DERRIÈRE ELLE. Mais `afterAll` NE S'EXÉCUTE PAS
+ * quand `beforeAll` échoue — et il a échoué, régulièrement, sur le quota
+ * d'authentification. Chaque échec laissait donc derrière lui la volumétrie
+ * d'une mesure entière, et l'accumulation était invisible : rien n'échouait,
+ * jusqu'au jour où plus rien ne fonctionnait, d'un coup, pour une raison sans
+ * rapport apparent avec le code qu'on venait de toucher.
+ *
+ * UNE PROTECTION QUI TIENT À UNE ABSENCE N'EN EST PAS UNE : compter sur le fait
+ * que `afterAll` s'exécute toujours revenait à se protéger par une absence
+ * d'échec. La purge est donc faite À L'ENTRÉE, où rien ne peut l'avoir sautée.
+ *
+ * ELLE NE TOUCHE QUE CE QU'ELLE PEUT PROUVER JETABLE : le domaine
+ * `@droplink-test.invalid` — réservé par la RFC 2606, donc impossible à
+ * enregistrer — ET une ancienneté supérieure au délai ci-dessous, pour ne jamais
+ * emporter les comptes d'une exécution parallèle en cours.
+ */
+
+/**
+ * Deux heures : très au-delà de la plus longue suite (moins de trois minutes),
+ * et très en deçà du temps qu'il faut pour accumuler un quota. Un délai trop
+ * court emporterait les comptes d'une suite voisine encore en train de mesurer.
+ */
+const ANCIENNETE_HEURES = 2;
+
+const DOMAINE_DE_TEST = "@droplink-test.invalid";
+
+export async function purgerResidusDeTest(): Promise<number> {
+  const service = clientService();
+
+  const { data, error } = await service.auth.admin.listUsers({ page: 1, perPage: 1_000 });
+  if (error !== null) {
+    // Pas de `catch` muet — mais pas de blocage non plus : cette purge est une
+    // hygiène, pas une garde. La faire échouer empêcherait de mesurer pour une
+    // raison sans rapport avec ce qu'on mesure.
+    console.warn("[harnais] purge des résidus impossible : " + error.message);
+    return 0;
+  }
+
+  const limite = Date.now() - ANCIENNETE_HEURES * 3_600_000;
+  const jetables = data.users.filter(
+    (u) =>
+      typeof u.email === "string" &&
+      u.email.endsWith(DOMAINE_DE_TEST) &&
+      Date.parse(u.created_at) < limite,
+  );
+
+  let supprimes = 0;
+  for (const u of jetables) {
+    // La suppression du compte auth emporte le profil, la boutique, les
+    // commandes, les médias et les colis par cascade : c'est le seul geste à
+    // faire, et il n'y a donc pas d'ordre à respecter qu'on pourrait se tromper.
+    const { error: echec } = await service.auth.admin.deleteUser(u.id);
+    if (echec === null) supprimes += 1;
+    else console.warn(`[harnais] ${u.email ?? u.id} non supprimé : ${echec.message}`);
+  }
+
+  if (supprimes > 0) {
+    console.warn(
+      `[harnais] ${supprimes} compte(s) de test abandonné(s) purgé(s). ` +
+        "Ils viennent d'exécutions dont la mise en place a échoué : `afterAll` " +
+        "ne s'exécute pas quand `beforeAll` échoue.",
+    );
+  }
+
+  return supprimes;
+}

@@ -49,6 +49,10 @@ export default defineConfig({
           environment: "node",
           include: ["tests/rls/**/*.test.ts"],
           setupFiles: ["tests/aide/charger-env.ts"],
+          // Purge les comptes de test abandonnés par des exécutions dont la
+          // mise en place a échoué. À l'ENTRÉE, parce qu'une protection qui
+          // dépend d'un `afterAll` dépend d'une absence d'échec.
+          globalSetup: ["tests/aide/amorcage.ts"],
           // Les sondes ouvrent une connexion Postgres : le défaut de 5 s de
           // Vitest expire avant l'établissement de la connexion TLS.
           testTimeout: 30_000,
@@ -80,6 +84,7 @@ export default defineConfig({
           environment: "node",
           include: ["tests/perf/**/*.test.ts"],
           setupFiles: ["tests/aide/charger-env.ts"],
+          globalSetup: ["tests/aide/amorcage.ts"],
           testTimeout: 120_000,
           fileParallelism: false,
         },
