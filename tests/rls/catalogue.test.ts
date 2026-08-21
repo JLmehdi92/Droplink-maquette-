@@ -52,6 +52,14 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "tracking_snapshots",
+      "Réponses BRUTES du fournisseur de suivi. Aucune policy, donc atteignable " +
+        "par le seul rôle système : elles contiennent des champs que nous " +
+        "n'exposons pas, et leur unique usage est le diagnostic. Ce qui n'est " +
+        "lisible par personne ne peut fuiter par personne — et un vendeur qui " +
+        "les lirait obtiendrait des données que la page publique ne rend pas.",
+    ],
+    [
       "rate_limit",
       "Compteur de limitation de débit. Sans policy, la table n'est atteignable " +
         "que par public.consommer_quota(). Un compteur lisible dirait à " +
@@ -425,9 +433,18 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
       // pas un journal.
       "order_events",
       "order_media",
+      // Le lien commande ↔ colis, lisible par le vendeur pour afficher le suivi
+      // de sa commande. Aucune écriture : elle vient du transporteur.
+      "order_parcels",
       "orders",
+      // Les points de passage d'un colis, lisibles par son vendeur. Un vendeur
+      // qui pourrait les ÉCRIRE raconterait à son client une expédition qui n'a
+      // pas eu lieu : aucun droit d'écriture n'accompagne celui-ci.
+      "parcel_checkpoints",
       "profiles",
       "shops",
+      // Les colis suivis. Lecture seule, pour la même raison.
+      "tracked_parcels",
     ]);
   });
 });

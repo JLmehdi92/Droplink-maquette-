@@ -143,6 +143,36 @@ export type Database = {
           },
         ]
       }
+      order_parcels: {
+        Row: {
+          order_id: string
+          parcel_id: string
+        }
+        Insert: {
+          order_id: string
+          parcel_id: string
+        }
+        Update: {
+          order_id?: string
+          parcel_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_parcels_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_parcels_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           archived_at: string | null
@@ -219,6 +249,44 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parcel_checkpoints: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          location: string | null
+          occurred_at: string
+          parcel_id: string
+          stage: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          location?: string | null
+          occurred_at: string
+          parcel_id: string
+          stage?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          parcel_id?: string
+          stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_checkpoints_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_parcels"
             referencedColumns: ["id"]
           },
         ]
@@ -321,17 +389,135 @@ export type Database = {
           },
         ]
       }
+      tracked_parcels: {
+        Row: {
+          abandoned_at: string | null
+          carrier_code: number | null
+          created_at: string
+          empty_count: number
+          estimated_from: string | null
+          estimated_to: string | null
+          first_movement_at: string | null
+          id: string
+          last_movement_at: string | null
+          normalized_status: Database["public"]["Enums"]["parcel_status"]
+          query_count: number
+          raw_status: string | null
+          registered_at: string | null
+          shop_id: string
+          tracking_number: string
+          updated_at: string
+        }
+        Insert: {
+          abandoned_at?: string | null
+          carrier_code?: number | null
+          created_at?: string
+          empty_count?: number
+          estimated_from?: string | null
+          estimated_to?: string | null
+          first_movement_at?: string | null
+          id?: string
+          last_movement_at?: string | null
+          normalized_status?: Database["public"]["Enums"]["parcel_status"]
+          query_count?: number
+          raw_status?: string | null
+          registered_at?: string | null
+          shop_id: string
+          tracking_number: string
+          updated_at?: string
+        }
+        Update: {
+          abandoned_at?: string | null
+          carrier_code?: number | null
+          created_at?: string
+          empty_count?: number
+          estimated_from?: string | null
+          estimated_to?: string | null
+          first_movement_at?: string | null
+          id?: string
+          last_movement_at?: string | null
+          normalized_status?: Database["public"]["Enums"]["parcel_status"]
+          query_count?: number
+          raw_status?: string | null
+          registered_at?: string | null
+          shop_id?: string
+          tracking_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracked_parcels_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracking_snapshots: {
+        Row: {
+          fetched_at: string
+          id: string
+          normalized_status: Database["public"]["Enums"]["parcel_status"] | null
+          parcel_id: string
+          raw_payload: Json
+        }
+        Insert: {
+          fetched_at?: string
+          id?: string
+          normalized_status?:
+            | Database["public"]["Enums"]["parcel_status"]
+            | null
+          parcel_id: string
+          raw_payload: Json
+        }
+        Update: {
+          fetched_at?: string
+          id?: string
+          normalized_status?:
+            | Database["public"]["Enums"]["parcel_status"]
+            | null
+          parcel_id?: string
+          raw_payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracking_snapshots_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      appliquer_etat_colis: {
+        Args: {
+          p_brut: Json
+          p_estimation_au: string
+          p_estimation_du: string
+          p_etape: Database["public"]["Enums"]["parcel_status"]
+          p_numero: string
+          p_points: Json
+          p_statut_brut: string
+          p_transporteur: string
+        }
+        Returns: number
+      }
       arbitrer_qc: {
         Args: { p_commentaire: string; p_decision: string; p_jeton: string }
         Returns: Database["public"]["Enums"]["qc_status"]
       }
       archiver_lot: {
         Args: { p_archiver: boolean; p_ids: string[] }
+        Returns: number
+      }
+      compter_interrogation_vide: {
+        Args: { p_numero: string }
         Returns: number
       }
       consommer_quota: {
@@ -420,6 +606,7 @@ export type Database = {
       media_source: "upload" | "agent_import"
       media_type: "photo" | "video"
       order_status: "preparation" | "expedie" | "en_transit" | "livre"
+      parcel_status: "preparation" | "expedie" | "en_transit" | "livre"
       qc_status: "en_attente" | "approuve" | "refuse"
       user_role: "user" | "admin"
     }
@@ -554,6 +741,7 @@ export const Constants = {
       media_source: ["upload", "agent_import"],
       media_type: ["photo", "video"],
       order_status: ["preparation", "expedie", "en_transit", "livre"],
+      parcel_status: ["preparation", "expedie", "en_transit", "livre"],
       qc_status: ["en_attente", "approuve", "refuse"],
       user_role: ["user", "admin"],
     },

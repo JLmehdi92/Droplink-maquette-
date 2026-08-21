@@ -536,6 +536,76 @@ const SQL = {
       "(shop_id, created_at desc, id desc) where views_count = 0 and archived_at is null;",
   },
 
+
+  /**
+   * LE CAS MOTIVANT DU SUIVI : le statut peut reculer.
+   *
+   * `greatest()` retire, la fonction ecrit ce que le fournisseur vient de dire.
+   * Rien ne casse, rien n est journalise — et un client qui a lu « en transit »
+   * lit « en preparation » le lendemain, donc conclut que son colis s est perdu.
+   */
+  "statut-colis-recule": {
+    casser: `create or replace function public.appliquer_etat_colis(
+        p_numero text, p_etape public.parcel_status, p_statut_brut text,
+        p_transporteur text, p_points jsonb, p_estimation_du text,
+        p_estimation_au text, p_brut jsonb
+      ) returns integer language plpgsql security definer set search_path = '' as $$
+      declare v_colis record; v_touches integer := 0; v_dernier timestamptz; v_premier timestamptz;
+      begin
+        for v_colis in
+          select id from public.tracked_parcels where tracking_number = p_numero
+        loop
+          insert into public.parcel_checkpoints (parcel_id, occurred_at, location, description, stage)
+          select v_colis.id, (p->>'instant')::timestamptz, nullif(p->>'lieu', ''),
+                 p->>'description', nullif(p->>'etape', '')
+          from jsonb_array_elements(coalesce(p_points, '[]'::jsonb)) as p
+          where p->>'instant' is not null and nullif(p->>'description', '') is not null
+          on conflict (parcel_id, occurred_at, description) do nothing;
+
+          select min(occurred_at), max(occurred_at) into v_premier, v_dernier
+            from public.parcel_checkpoints where parcel_id = v_colis.id;
+
+          update public.tracked_parcels
+             set normalized_status = p_etape,
+                 first_movement_at = coalesce(v_premier, first_movement_at),
+                 last_movement_at = coalesce(v_dernier, last_movement_at),
+                 query_count = query_count + 1, empty_count = 0
+           where id = v_colis.id;
+
+          insert into public.tracking_snapshots (parcel_id, raw_payload, normalized_status)
+          values (v_colis.id, coalesce(p_brut, '{}'::jsonb), p_etape);
+          v_touches := v_touches + 1;
+        end loop;
+        return v_touches;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "031_etat_colis_arguments_omissibles.sql",
+      depuis: "create function public.appliquer_etat_colis",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : la deduplication des points de passage, retiree.
+   *
+   * Le fournisseur renvoie l historique COMPLET a chaque interrogation. Sans la
+   * contrainte, chaque notification duplique tout ce qui precede — et la page du
+   * client se remplit du meme scan repete quinze fois, sans qu aucune erreur ne
+   * soit levee.
+   */
+  "points-sans-dedup": {
+    casser:
+      "alter table public.parcel_checkpoints drop constraint " +
+      "parcel_checkpoints_parcel_id_occurred_at_description_key;",
+    reparer:
+      "delete from public.parcel_checkpoints a using public.parcel_checkpoints b " +
+      "where a.ctid > b.ctid and a.parcel_id = b.parcel_id " +
+      "and a.occurred_at = b.occurred_at and a.description = b.description; " +
+      "alter table public.parcel_checkpoints add constraint " +
+      "parcel_checkpoints_parcel_id_occurred_at_description_key " +
+      "unique (parcel_id, occurred_at, description);",
+  },
+
 };
 
 const [, , action, cible] = process.argv;

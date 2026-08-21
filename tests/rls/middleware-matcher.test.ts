@@ -117,6 +117,16 @@ describe("Matcher du middleware", () => {
    */
   const HORS_MIDDLEWARE = new Map<string, string>([
     [
+      "/api/suivi/notification",
+      "Point de réception des notifications de suivi. `/api` est exclu du " +
+        "matcher, et son préfixe donnerait l'impression contraire à qui la " +
+        "relit : cette route ne serait protégée par RIEN si elle ne portait pas " +
+        "SA garde. Elle la porte — VÉRIFICATION DE SIGNATURE sur le corps BRUT, " +
+        "comparaison à temps constant, refus sur signature absente. Sans elle, " +
+        "il suffirait de connaître un numéro de suivi — qui figure sur " +
+        "l'étiquette — pour écrire dans la commande d'un vendeur inconnu.",
+    ],
+    [
       "/p",
       "Page publique par jeton. Hors langue par conception : la langue est celle " +
         "du vendeur, pas de l'URL, et un préfixe créerait deux adresses pour un " +
