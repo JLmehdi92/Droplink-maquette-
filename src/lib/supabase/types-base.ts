@@ -523,6 +523,19 @@ export type Database = {
         Args: { p_motif: string; p_parcel_id: string }
         Returns: undefined
       }
+      analyser_activite: {
+        Args: { p_depuis: string }
+        Returns: {
+          archivees: number
+          avec_suivi: number
+          commandes_creees: number
+          commandes_ouvertes: number
+          qc_approuve: number
+          qc_en_attente: number
+          qc_refuse: number
+          vues_totales: number
+        }[]
+      }
       appliquer_etat_colis: {
         Args: {
           p_brut: Json

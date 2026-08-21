@@ -25,7 +25,8 @@
     "mesCommandes": "My orders",
     "maMarque": "My brand",
     "espaceVendeur": "Seller area",
-    "mesEnvois": "My shipments"
+    "mesEnvois": "My shipments",
+    "mesAnalyses": "My analytics"
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, in your colours",
@@ -319,6 +320,30 @@
       "compte": "No parcels yet. Paste a tracking number into an order and it will show up here.",
       "filtre": "No parcel matches this filter.",
       "effacer": "Clear all"
+    }
+  },
+  "analyses": {
+    "titre": "Your analytics",
+    "sousTitre": "What your links become once you have sent them.",
+    "periode": {
+      "titre": "Period",
+      "7j": "7 days",
+      "30j": "30 days",
+      "tout": "All time"
+    },
+    "commandesCreees": "Orders created",
+    "avecSuivi": "{n, plural, =0 {none with a tracking number} one {# with a tracking number} other {# with a tracking number}}",
+    "tauxOuverture": "Links opened by the customer",
+    "ouvertsSur": "{ouverts} of {total}",
+    "vuesMoyennes": "Views per opened link",
+    "vuesTotales": "{n, plural, =0 {no views} one {# view in total} other {# views in total}}",
+    "qc": {
+      "titre": "Your customers' replies",
+      "aide": "What your customers answered after seeing the photos. Without a reply from them, the order stays pending.",
+      "approuve": "Approved",
+      "refuse": "Refused",
+      "enAttente": "No reply",
+      "vide": "No orders in this period."
     }
   },
   "commandes": {

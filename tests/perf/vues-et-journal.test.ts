@@ -407,3 +407,79 @@ describe("Le tri « jamais ouvert par le client »", () => {
     expect(mesure.ms, `${mesure.ms.toFixed(1)} ms`).toBeLessThan(JAMAIS_OUVERT_MS);
   });
 });
+
+describe("Les analyses", () => {
+  /*
+   * SEUIL ÉCRIT AVANT LA PREMIÈRE EXÉCUTION : 150 ms.
+   *
+   * C'est un AGRÉGAT COMPLET sur la période, et aucun index ne rattrape un
+   * agrégat complet — la seule question est donc de savoir sur COMBIEN de lignes
+   * il porte. La réponse doit être : celles du vendeur, sur la période, et pas
+   * une de plus.
+   *
+   * `views_count` étant dénormalisé sur `orders` depuis la migration 027, il n'y
+   * a AUCUNE jointure vers `link_views`, la table qui grossit le plus vite du
+   * produit — une ligne par visiteur ET par jour. C'est ce qui rend cet écran
+   * possible : la même mesure par jointure lirait ici cinq fois plus de lignes.
+   */
+  const ANALYSES_MS = 150;
+  const LIGNES_LUES_ANALYSES = COMMANDES + 500;
+
+  test(`« depuis le début » n'agrège que le compte de l'appelant (< ${ANALYSES_MS} ms)`, async () => {
+    const m = await mesurerSerieuse(
+      alice,
+      `select count(*),
+              count(*) filter (where o.views_count > 0),
+              coalesce(sum(o.views_count), 0),
+              count(*) filter (where o.qc_status = 'approuve'),
+              count(*) filter (where o.qc_status = 'refuse'),
+              count(*) filter (where o.qc_status = 'en_attente')
+       from public.orders o
+       where o.created_at >= to_timestamp(0)`,
+    );
+
+    console.log(`  analyses, tout : ${m.ms.toFixed(1)} ms, ${m.lignesLues} lignes lues`);
+    expect(m.ms).toBeLessThan(ANALYSES_MS);
+    // LE SEUIL QUI PROTÈGE VRAIMENT. Un agrégat lit forcément toutes les
+    // commandes du vendeur ; dépasser ce compte signifierait qu'il lit aussi
+    // celles du voisin, et le coût croîtrait alors avec le NOMBRE DE VENDEURS —
+    // c'est-à-dire avec le succès du produit.
+    expect(
+      m.lignesLues,
+      `${m.lignesLues} lignes lues : les commandes du voisin sont agrégées aussi`,
+    ).toBeLessThan(LIGNES_LUES_ANALYSES);
+    // Et la sonde doit avoir inspecté quelque chose : un ensemble vide passe tout.
+    expect(m.lignesLues, "la sonde n'a rien inspecté").toBeGreaterThan(1_000);
+  });
+
+  test("une borne de période RESTREINT réellement ce que la base lit", async () => {
+    /*
+     * LA BORNE EST À UN JOUR, PAS À TRENTE. Le jeu sème une commande par minute,
+     * donc 9 600 commandes couvrent 6,7 jours : « 30 jours » et « depuis le
+     * début » y désignent exactement le même ensemble, et les comparer aurait
+     * comparé deux fois la même chose. C'est le genre de test qui passe au vert
+     * en ne prouvant rien — et qui aurait laissé passer une borne ignorée.
+     *
+     * Sans ce contrôle, une borne que l'optimiseur ne sait pas exploiter
+     * resterait invisible : les deux mesures seraient rapides à cette
+     * volumétrie, et l'écart n'apparaîtrait qu'à dix fois cette taille.
+     */
+    const unJour = await mesurerSerieuse(
+      alice,
+      `select count(*) from public.orders o
+       where o.created_at >= now() - interval '1 day'`,
+    );
+    const tout = await mesurerSerieuse(
+      alice,
+      "select count(*) from public.orders o where o.created_at >= to_timestamp(0)",
+    );
+
+    console.log(
+      `  analyses, 1 j : ${unJour.lignesLues} lignes / tout : ${tout.lignesLues} lignes`,
+    );
+    // Une journée du jeu vaut 1 440 commandes : la borne doit en écarter les
+    // huit mille autres, et non les lire pour les jeter ensuite.
+    expect(unJour.lignesLues).toBeLessThan(tout.lignesLues / 2);
+    expect(unJour.lignesLues, "la sonde n'a rien inspecté").toBeGreaterThan(100);
+  });
+});

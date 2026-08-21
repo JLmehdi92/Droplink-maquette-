@@ -805,6 +805,72 @@ const SQL = {
       "(shop_id, immobile_depuis asc, id asc);",
   },
 
+  /**
+   * LES ANALYSES COMPTENT LES COMMANDES DE TOUT LE MONDE.
+   *
+   * `security definer` au lieu de `security invoker` : un seul mot, celui qu on
+   * ecrit par habitude parce que la plupart des fonctions du produit en ont
+   * besoin. Le vendeur voit alors des chiffres trop grands — et parfaitement
+   * credibles. Une metrique legerement faussee est pire qu une metrique cassee.
+   */
+  "analyses-hors-rls": {
+    casser: `create or replace function public.analyser_activite(p_depuis timestamptz)
+      returns table (commandes_creees bigint, commandes_ouvertes bigint, vues_totales bigint,
+                     qc_approuve bigint, qc_refuse bigint, qc_en_attente bigint,
+                     avec_suivi bigint, archivees bigint)
+      language sql stable security definer set search_path = '' as $$
+        select count(*),
+               count(*) filter (where o.views_count > 0),
+               coalesce(sum(o.views_count), 0),
+               count(*) filter (where o.qc_status = 'approuve'),
+               count(*) filter (where o.qc_status = 'refuse'),
+               count(*) filter (where o.qc_status = 'en_attente'),
+               count(*) filter (where o.tracking_number is not null and o.tracking_number <> ''),
+               count(*) filter (where o.archived_at is not null)
+        from public.orders o
+        where o.created_at >= p_depuis
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "037_analyses_activite.sql",
+      depuis: "create function public.analyser_activite",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * LA BORNE DE PERIODE EST IGNOREE.
+   *
+   * Hors du cas motivant : ce n est pas l isolation, c est la JUSTESSE. Le
+   * `where` disparait, et « 7 jours » affiche le total de toute l histoire du
+   * compte. Rien ne leve, rien n est journalise, et le chiffre reste plausible :
+   * le vendeur conclut simplement qu il travaille beaucoup plus qu il ne croit.
+   * C est exactement la forme de defaut qu on ne remet jamais en question,
+   * puisqu elle va dans le sens rassurant.
+   */
+  "analyses-periode-ignoree": {
+    casser: `create or replace function public.analyser_activite(p_depuis timestamptz)
+      returns table (commandes_creees bigint, commandes_ouvertes bigint, vues_totales bigint,
+                     qc_approuve bigint, qc_refuse bigint, qc_en_attente bigint,
+                     avec_suivi bigint, archivees bigint)
+      language sql stable security invoker set search_path = '' as $$
+        select count(*),
+               count(*) filter (where o.views_count > 0),
+               coalesce(sum(o.views_count), 0),
+               count(*) filter (where o.qc_status = 'approuve'),
+               count(*) filter (where o.qc_status = 'refuse'),
+               count(*) filter (where o.qc_status = 'en_attente'),
+               count(*) filter (where o.tracking_number is not null and o.tracking_number <> ''),
+               count(*) filter (where o.archived_at is not null)
+        from public.orders o
+        
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "037_analyses_activite.sql",
+      depuis: "create function public.analyser_activite",
+      jusqua: "comment on function",
+    },
+  },
+
   "compteurs-hors-rls": {
     casser: `create or replace function public.compter_envois(p_silence_jours int)
       returns table (total bigint, preparation bigint, expedie bigint, en_transit bigint,

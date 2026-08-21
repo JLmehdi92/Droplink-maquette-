@@ -229,6 +229,17 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "fois.",
     ],
     [
+      "analyser_activite",
+      "Compteurs d'activité de l'écran des analyses. `SECURITY INVOKER` — donc " +
+        "exécutée sous la RLS de l'appelant : un vendeur ne peut structurellement " +
+        "agréger que ses propres commandes. Ce sont des MÉTRIQUES DE VERDICT, " +
+        "celles qui servent à décider : une fuite y serait parfaitement crédible, " +
+        "puisqu'un total gonflé ressemble exactement à un total normal. Elle " +
+        "s'appuie sur `views_count` dénormalisé plutôt que sur une jointure vers " +
+        "`link_views` — la table qui grossit le plus vite du produit, une ligne " +
+        "par visiteur ET par jour.",
+    ],
+    [
       "compter_envois",
       "Compteurs de l'écran des envois. `SECURITY INVOKER` — donc exécutée sous " +
         "la RLS de l'appelant : elle ne peut structurellement compter que les " +

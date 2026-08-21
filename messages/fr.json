@@ -25,7 +25,8 @@
     "mesCommandes": "Mes commandes",
     "maMarque": "Ma marque",
     "espaceVendeur": "Espace vendeur",
-    "mesEnvois": "Mes envois"
+    "mesEnvois": "Mes envois",
+    "mesAnalyses": "Mes analyses"
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à vos couleurs",
@@ -319,6 +320,30 @@
       "compte": "Aucun colis pour l'instant. Collez un numéro de suivi dans une commande et il apparaîtra ici.",
       "filtre": "Aucun colis ne correspond à ce filtre.",
       "effacer": "Tout effacer"
+    }
+  },
+  "analyses": {
+    "titre": "Vos analyses",
+    "sousTitre": "Ce que vos liens deviennent une fois envoyés.",
+    "periode": {
+      "titre": "Période",
+      "7j": "7 jours",
+      "30j": "30 jours",
+      "tout": "Depuis le début"
+    },
+    "commandesCreees": "Commandes créées",
+    "avecSuivi": "{n, plural, =0 {aucune avec un numéro de suivi} one {# avec un numéro de suivi} other {# avec un numéro de suivi}}",
+    "tauxOuverture": "Liens ouverts par le client",
+    "ouvertsSur": "{ouverts} sur {total}",
+    "vuesMoyennes": "Consultations par lien ouvert",
+    "vuesTotales": "{n, plural, =0 {aucune consultation} one {# consultation au total} other {# consultations au total}}",
+    "qc": {
+      "titre": "Réponses de vos clients",
+      "aide": "Ce que vos clients ont répondu après avoir vu les photos. Sans réponse de leur part, la commande reste en attente.",
+      "approuve": "Approuvé",
+      "refuse": "Refusé",
+      "enAttente": "Sans réponse",
+      "vide": "Aucune commande sur cette période."
     }
   },
   "commandes": {

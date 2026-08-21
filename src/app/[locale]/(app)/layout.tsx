@@ -64,6 +64,7 @@ export default async function LayoutApplication({
           {[
             { href: `/${langue}/commandes`, libelle: t("mesCommandes") },
             { href: `/${langue}/envois`, libelle: t("mesEnvois") },
+            { href: `/${langue}/analyses`, libelle: t("mesAnalyses") },
             { href: `/${langue}/marque`, libelle: t("maMarque") },
           ].map((entree) => (
             <li key={entree.href}>
