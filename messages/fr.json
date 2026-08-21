@@ -702,6 +702,36 @@
         "en_retard": "Aucun battement depuis {n} min"
       },
       "seuilsEnCours": "Seuils en vigueur : {colis} colis par compte et par mois, {minutes} minutes sans battement."
+    },
+    "parametres": {
+      "titre": "Paramètres",
+      "sousTitre": "Les seuils que le produit lit réellement. Chaque modification est enregistrée avec l'ancienne et la nouvelle valeur, votre email et l'heure.",
+      "enregistrer": "Enregistrer",
+      "enCours": "En cours…",
+      "fait": "Enregistré.",
+      "bornes": "Entre {min} et {max}. Valeur par défaut : {defaut}.",
+      "secretsAide": "Les secrets ne se règlent pas ici : clés d'API, secret du planificateur et clé de service restent dans l'environnement du serveur. Une valeur enregistrée en base serait lisible par toute personne ayant accès à la base — acceptable pour un seuil, jamais pour une clé.",
+      "origine": {
+        "jamaisDecide": "Valeur par défaut : personne ne l'a jamais modifiée.",
+        "decide": "Modifié le {date} par {email}.",
+        "auteurParti": "Modifié le {date}. Le compte auteur n'existe plus."
+      },
+      "cles": {
+        "seuil_colis_par_compte": {
+          "titre": "Signaler un compte au-delà de",
+          "aide": "Nombre de colis pris en charge dans le mois à partir duquel le compte apparaît dans les alertes du panneau. C'est le seul compteur du produit qui corresponde à une facture."
+        },
+        "retard_veilleur_minutes": {
+          "titre": "Déclarer une tâche en retard après",
+          "aide": "Minutes sans battement au-delà desquelles une tâche de fond est signalée comme en retard. Trop bas, l'alerte décrirait la cadence normale plutôt qu'une panne."
+        }
+      },
+      "erreur": {
+        "cle": "Ce réglage n'existe pas.",
+        "bornes": "Valeur hors des limites autorisées.",
+        "refuse": "Vous n'avez pas les droits pour modifier ce réglage.",
+        "panne": "Enregistrement impossible. Le réglage n'a pas changé."
+      }
     }
   }
 }

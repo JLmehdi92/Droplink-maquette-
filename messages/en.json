@@ -702,6 +702,36 @@
         "en_retard": "No beat for {n} min"
       },
       "seuilsEnCours": "Thresholds in force: {colis} parcels per account per month, {minutes} minutes without a beat."
+    },
+    "parametres": {
+      "titre": "Settings",
+      "sousTitre": "The thresholds the product actually reads. Every change is recorded with the previous and new value, your email and the time.",
+      "enregistrer": "Save",
+      "enCours": "Saving…",
+      "fait": "Saved.",
+      "bornes": "Between {min} and {max}. Default value: {defaut}.",
+      "secretsAide": "Secrets are not set here: API keys, the scheduler secret and the service key stay in the server environment. A value stored in the database would be readable by anyone with access to it — acceptable for a threshold, never for a key.",
+      "origine": {
+        "jamaisDecide": "Default value: nobody has ever changed it.",
+        "decide": "Changed on {date} by {email}.",
+        "auteurParti": "Changed on {date}. The account that changed it no longer exists."
+      },
+      "cles": {
+        "seuil_colis_par_compte": {
+          "titre": "Flag an account above",
+          "aide": "Number of parcels registered in the month above which the account appears in the panel alerts. This is the only counter in the product that matches an invoice."
+        },
+        "retard_veilleur_minutes": {
+          "titre": "Report a task as late after",
+          "aide": "Minutes without a heartbeat after which a background task is reported as late. Too low, and the alert would describe the normal cadence rather than a failure."
+        }
+      },
+      "erreur": {
+        "cle": "This setting does not exist.",
+        "bornes": "Value outside the allowed limits.",
+        "refuse": "You are not allowed to change this setting.",
+        "panne": "Could not save. The setting is unchanged."
+      }
     }
   }
 }

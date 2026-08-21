@@ -1177,6 +1177,77 @@ const SQL = {
     },
   },
 
+  /**
+   * HORS du cas motivant : la lecture des paramètres qui REND UN ENSEMBLE VIDE
+   * au lieu de refuser.
+   *
+   * Rien n'échoue, rien ne journalise, et l'appelant sans droits reçoit
+   * exactement ce que reçoit un administrateur d'une installation neuve — car
+   * « aucun paramètre écrit » est l'état NORMAL du produit. Le refus devient
+   * indiscernable du cas nominal : c'est un ensemble vide qui passe tout.
+   */
+  "parametres-lecture-vide": {
+    casser: `create or replace function public.lister_parametres()
+      returns table (cle text, valeur jsonb, modifie_le timestamptz, modifie_par text)
+      language plpgsql stable security definer set search_path = '' as $$
+      begin
+        if not public.est_admin() then
+          return;
+        end if;
+        return query
+        select s.key, s.value, s.updated_at, p.email
+        from public.system_settings s
+        left join public.profiles p on p.id = s.updated_by
+        order by s.key;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "048_lister_parametres.sql",
+      depuis: "create function public.lister_parametres",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant, et d'une autre nature : les TROIS ÉTATS RAMENÉS À DEUX.
+   *
+   * Aucune protection n'est retirée, aucune valeur ne change, et l'écran affiche
+   * les mêmes chiffres. Ce qui disparaît est un ÉTAT : la fonction rend une
+   * ligne pour chaque clé de l'inventaire, écrite ou non. « Personne n'a jamais
+   * décidé ce seuil » devient « quelqu'un l'a décidé à cette valeur » — le même
+   * chiffre, deux situations opposées, et plus rien pour les distinguer.
+   *
+   * C'est le mode de défaillance le plus discret de cet écran : rien n'échoue,
+   * et l'information perdue ne manque qu'au moment où l'on cherche qui a décidé
+   * quoi.
+   */
+  "parametres-etats-confondus": {
+    casser: `create or replace function public.lister_parametres()
+      returns table (cle text, valeur jsonb, modifie_le timestamptz, modifie_par text)
+      language plpgsql stable security definer set search_path = '' as $$
+      begin
+        if not public.est_admin() then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        return query
+        select d.cle,
+               coalesce(s.value, d.defaut),
+               coalesce(s.updated_at, now()),
+               coalesce(p.email, 'systeme')
+        from (values ('seuil_colis_par_compte', '1200'::jsonb),
+                     ('retard_veilleur_minutes', '90'::jsonb)) as d(cle, defaut)
+        left join public.system_settings s on s.key = d.cle
+        left join public.profiles p on p.id = s.updated_by
+        order by d.cle;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "048_lister_parametres.sql",
+      depuis: "create function public.lister_parametres",
+      jusqua: "comment on function",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

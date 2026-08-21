@@ -58,6 +58,7 @@ export default async function LayoutAdmin({
             { href: `/${langue}/admin`, libelle: t("panneau.titre") },
             { href: `/${langue}/admin/comptes`, libelle: t("comptes.titre") },
             { href: `/${langue}/admin/journal`, libelle: t("journal.titre") },
+            { href: `/${langue}/admin/parametres`, libelle: t("parametres.titre") },
           ].map((entree) => (
             <li key={entree.href}>
               <Link

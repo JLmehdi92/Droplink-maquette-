@@ -299,6 +299,16 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "ajouterait.",
     ],
     [
+      "lister_parametres",
+      "Liste les paramètres ÉCRITS. Elle REFUSE au lieu de rendre un ensemble " +
+        "vide : un vide serait ici indiscernable de « aucun paramètre n'a jamais " +
+        "été décidé », qui est l'état NORMAL du produit — un appelant sans droits " +
+        "lirait donc les défauts en croyant lire la configuration. Elle N'AUDITE " +
+        "PAS, et c'est délibéré : l'audit trace un humain qui lit les données " +
+        "d'un TIERS, or un seuil du produit n'appartient à personne. `stable` : " +
+        "le moteur refusera toute écriture qu'on y ajouterait.",
+    ],
+    [
       "alertes_admin",
       "Alertes du panneau. Elles PRÉCÈDENT les compteurs, et portent leur VALEUR " +
         "avec leur seuil — « 1 840 pour un seuil de 1 200 », jamais « ce compte " +

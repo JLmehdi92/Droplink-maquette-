@@ -600,6 +600,44 @@ export type Database = {
           },
         ]
       }
+      usage_counters: {
+        Row: {
+          media_count: number
+          orders_created: number
+          parcels_registered: number
+          period_month: string
+          profile_id: string
+          storage_bytes: number | null
+          updated_at: string
+        }
+        Insert: {
+          media_count?: number
+          orders_created?: number
+          parcels_registered?: number
+          period_month: string
+          profile_id: string
+          storage_bytes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          media_count?: number
+          orders_created?: number
+          parcels_registered?: number
+          period_month?: string
+          profile_id?: string
+          storage_bytes?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_counters_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -863,6 +901,15 @@ export type Database = {
           id: string
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["account_status"]
+        }[]
+      }
+      lister_parametres: {
+        Args: never
+        Returns: {
+          cle: string
+          modifie_le: string
+          modifie_par: string
+          valeur: Json
         }[]
       }
       marquer_interroge: { Args: { p_parcel_id: string }; Returns: undefined }
