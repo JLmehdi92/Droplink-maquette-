@@ -139,3 +139,69 @@ export async function signerMediaPlein(
 
   return signerLecture(media.cle).catch(() => null);
 }
+
+/**
+ * LE SUIVI DU COLIS, tel que la page publique l'affiche.
+ *
+ * SÉPARÉ DE LA COMMANDE, et lu par une seconde requête. Une commande sur deux
+ * n'a pas encore de numéro : joindre le suivi à la lecture principale ferait
+ * payer une jointure à tout le monde pour servir la moitié.
+ *
+ * AUCUN CHIFFRE DE COÛT N'EN SORT. Le nombre d'interrogations et de retours
+ * vides sont NOS chiffres, pas des informations pour le client — et ce qui n'est
+ * pas rendu ne peut pas fuiter.
+ */
+export interface Passage {
+  readonly instant: string;
+  readonly lieu: string | null;
+  readonly description: string;
+  readonly etape: string | null;
+}
+
+export interface SuiviPublic {
+  readonly etape: "preparation" | "expedie" | "en_transit" | "livre";
+  readonly numero: string;
+  readonly premierMouvement: string | null;
+  readonly dernierMouvement: string | null;
+  readonly estimationDu: string | null;
+  readonly estimationAu: string | null;
+  readonly abandonne: boolean;
+  readonly passages: readonly Passage[];
+}
+
+export async function lireSuiviPublic(jetonBrut: string): Promise<SuiviPublic | null> {
+  const analyse = JetonPublic.safeParse(jetonBrut);
+  if (!analyse.success) return null;
+
+  const supabase = creerClientAnonyme();
+  const jeton = analyse.data;
+
+  // Les deux lectures partent ENSEMBLE : elles ne dépendent pas l'une de
+  // l'autre, et les enchaîner doublerait la latence d'une page dont tout
+  // l'intérêt est d'apparaître vite.
+  const [suivi, passages] = await Promise.all([
+    supabase.rpc("lire_suivi_public", { p_jeton: jeton }),
+    supabase.rpc("lire_passages_publics", { p_jeton: jeton }),
+  ]);
+
+  if (suivi.error !== null || suivi.data === null || suivi.data.length === 0) return null;
+
+  const ligne = suivi.data[0];
+  if (ligne === undefined) return null;
+
+  return {
+    etape: ligne.etape,
+    numero: ligne.numero,
+    premierMouvement: ligne.premier_mouvement,
+    dernierMouvement: ligne.dernier_mouvement,
+    estimationDu: ligne.estimation_du,
+    estimationAu: ligne.estimation_au,
+    abandonne: ligne.abandonne,
+    passages: (passages.data ?? []).map((p) => ({
+      instant: p.occurred_at,
+      lieu: p.location,
+      description: p.description,
+      etape: p.stage,
+    })),
+  };
+}

@@ -117,6 +117,14 @@ describe("Matcher du middleware", () => {
    */
   const HORS_MIDDLEWARE = new Map<string, string>([
     [
+      "/api/suivi/cadence",
+      "Déclencheur de la tâche de fond du suivi. `/api` est exclu du matcher, et " +
+        "ce que cette route déclenche COÛTE DE L'ARGENT : chaque passage " +
+        "interroge le fournisseur. Elle porte SA garde — un secret partagé " +
+        "comparé à TEMPS CONSTANT, refus si le secret n'est pas configuré, et " +
+        "404 plutôt que 401 pour ne pas révéler l'existence de la surface.",
+    ],
+    [
       "/api/suivi/notification",
       "Point de réception des notifications de suivi. `/api` est exclu du " +
         "matcher, et son préfixe donnerait l'impression contraire à qui la " +

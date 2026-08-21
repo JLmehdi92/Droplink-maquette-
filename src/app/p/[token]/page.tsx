@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
 import { BaliseVue } from "@/components/publique/balise-vue";
 import { Frise } from "@/components/publique/frise";
+import { Suivi } from "@/components/publique/suivi";
 import { Visionneur } from "@/components/publique/visionneur";
-import { lireCommandePublique } from "@/lib/page-publique/lecture";
+import { lireCommandePublique, lireSuiviPublic } from "@/lib/page-publique/lecture";
 import { resoudreAccent } from "@/lib/design/contraste";
 import { estLangueSupportee } from "@/i18n/config";
 import { signalerJetonInconnu, verifierQuotaPublique } from "@/lib/limitation/quota";
@@ -66,8 +67,34 @@ export default async function PagePublique({
     notFound();
   }
 
+  // Lu APRÈS la commande : une commande sur deux n'a pas encore de numéro, et
+  // `null` est alors la réponse normale — pas une erreur.
+  const suivi = await lireSuiviPublic(token);
+
   const langue = estLangueSupportee(commande.boutique.langue) ? commande.boutique.langue : "fr";
   const t = await getTranslations({ locale: langue, namespace: "page-publique" });
+  const format = await getFormatter({ locale: langue });
+
+  // L'INSTANT EST PRIS UNE SEULE FOIS, ici, et descendu en propriété. Un
+  // composant qui lit l'horloge lui-même rend une chose au serveur et une autre
+  // à l'hydratation.
+  const maintenant = new Date();
+
+  /*
+   * LE STATUT AFFICHÉ VIENT DU COLIS DÈS QU'IL EN EXISTE UN.
+   *
+   * « Le vendeur prime avant la remise au transporteur, le transporteur après » :
+   * chacun est seul à savoir ce qu'il affirme. Tant qu'aucun colis n'est
+   * enregistré, c'est le vendeur qui décrit la réalité ; une fois le numéro
+   * suivi, c'est le transporteur. Prendre le maximum des deux plutôt que l'un ou
+   * l'autre garantit en plus que l'étape ne recule jamais à l'écran, même si le
+   * vendeur remet sa commande « en préparation » par mégarde.
+   */
+  const ETAPES = ["preparation", "expedie", "en_transit", "livre"] as const;
+  const statutAffiche =
+    suivi === null || ETAPES.indexOf(commande.statut) > ETAPES.indexOf(suivi.etape)
+      ? commande.statut
+      : suivi.etape;
 
   // La conformité de contraste est obtenue AUTOMATIQUEMENT : le vendeur n'a pas
   // à chercher « une couleur qui marche ». Un rouge saturé reste lisible.
@@ -185,8 +212,42 @@ export default async function PagePublique({
               <h2 className="mb-6 font-headline-md text-headline-md-mobile text-on-surface">
                 {t("expedition.titre")}
               </h2>
-              <Frise statut={commande.statut} libelles={libellesFrise} accent={accent.interface} />
+              <Frise statut={statutAffiche} libelles={libellesFrise} accent={accent.interface} />
             </section>
+
+            {/* LE DÉTAIL DU SUIVI, omis tant qu'aucun colis n'est enregistré :
+                une carte vide affirmerait qu'il y a quelque chose à y lire. */}
+            {suivi !== null ? (
+              <section className={carte}>
+                <h2 className="mb-4 font-headline-md text-headline-md-mobile text-on-surface">
+                  {t("suivi.titre")}
+                </h2>
+                <Suivi
+                  suivi={suivi}
+                  maintenant={maintenant}
+                  formaterDate={(instant) =>
+                    format.dateTime(instant, {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  }
+                  libelles={{
+                    titre: t("suivi.titre"),
+                    numero: t("suivi.numero"),
+                    aucunMouvement: t("suivi.aucunMouvement"),
+                    dernierMouvement: t("suivi.dernierMouvement"),
+                    aujourdHui: t("suivi.aujourdHui"),
+                    hier: t("suivi.hier"),
+                    silence: t("suivi.silence"),
+                    estimation: t("suivi.estimation"),
+                    arrete: t("suivi.arrete"),
+                    passages: t("suivi.passages"),
+                  }}
+                />
+              </section>
+            ) : null}
 
             {/* Bloc OMIS quand ni référence ni numéro de suivi : une carte vide
                 affirmerait qu'il y a quelque chose à y lire. */}

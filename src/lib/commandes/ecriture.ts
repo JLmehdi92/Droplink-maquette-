@@ -5,6 +5,7 @@ import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import type { creerClientServeur } from "@/lib/supabase/server";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "./liste";
 import { journaliser } from "./journal";
+import { attacherColis } from "@/lib/tracking/attache";
 
 /**
  * LE CŒUR DES ÉCRITURES DE COMMANDE, hors d'un module `"use server"`.
@@ -128,6 +129,13 @@ export async function appliquerChamp(
   // le dire reviendrait à confirmer l'existence d'une commande d'un autre.
   if (data === null) {
     return { statut: "echec", motif: "introuvable", champ: nom };
+  }
+
+  // LE NUMÉRO DE SUIVI DÉCLENCHE L'ATTACHE D'UN COLIS. Elle vient APRÈS
+  // l'écriture réussie : attacher un colis à une commande dont la sauvegarde a
+  // échoué créerait un suivi que personne n'a demandé — et qui se paierait.
+  if (nom === "tracking_number" || nom === "carrier_code") {
+    await attacherColis(supabase, analyse.data.id);
   }
 
   await marquerPremierContenu(supabase, analyse.data.id, profilId);

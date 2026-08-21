@@ -450,6 +450,18 @@
       "refuse": "Vous avez signalé un problème. Le vendeur est prévenu.",
       "modifier": "Changer d’avis",
       "echec": "Votre réponse n’a pas pu être enregistrée. Réessayez."
+    },
+    "suivi": {
+      "titre": "Suivi du colis",
+      "numero": "Numéro de suivi",
+      "aucunMouvement": "Pas encore d’information du transporteur",
+      "dernierMouvement": "Dernier mouvement il y a {n} jours",
+      "aujourdHui": "Bougé aujourd’hui",
+      "hier": "Bougé hier",
+      "silence": "Aucun mouvement depuis {n} jours. C’est fréquent sur les longs trajets, en particulier au passage en douane. Nous continuons à interroger le transporteur.",
+      "estimation": "Livraison estimée",
+      "arrete": "Le transporteur ne donne plus d’information sur ce numéro. Contactez le vendeur si vous n’avez rien reçu.",
+      "passages": "Étapes du transport"
     }
   }
 }

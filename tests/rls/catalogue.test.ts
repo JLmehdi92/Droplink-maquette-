@@ -52,6 +52,14 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "scheduler_heartbeat",
+      "Battement des tâches de fond. Aucune policy : la table n'est atteignable " +
+        "que par public.battre(). UN VEILLEUR DONT LE BATTEMENT EST ÉCRIVABLE " +
+        "ANONYMEMENT EST PIRE QU'UN VEILLEUR ABSENT — on cesse de le chercher, " +
+        "en croyant qu'il veille. Et son ABSENCE DE LIGNE est une information : " +
+        "« jamais déployé » n'est pas « en retard ».",
+    ],
+    [
       "tracking_snapshots",
       "Réponses BRUTES du fournisseur de suivi. Aucune policy, donc atteignable " +
         "par le seul rôle système : elles contiennent des champs que nous " +
@@ -189,11 +197,36 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "compte, et ne rend ni `internal_notes` ni `unsubscribe_token`.",
     ],
     [
+      "lire_suivi_public",
+      "Suivi d'une commande, par jeton. Troisième surface de lecture publique, " +
+        "et elle REFAIT le filtre de suspension : une coupure à moitié faite est " +
+        "une coupure qui n'a pas eu lieu. Elle ne rend AUCUN chiffre de coût — " +
+        "interrogations et retours vides sont nos chiffres, pas ceux du client.",
+    ],
+    [
+      "lire_passages_publics",
+      "Points de passage d'une commande, par jeton. Même filtre de suspension, " +
+        "et un plafond de trente dans la fonction : certains transporteurs " +
+        "émettent un scan par centre de tri traversé, et le budget de la page " +
+        "publique serait mangé par du bruit.",
+    ],
+    [
       "lire_medias_publics",
       "Médias de la même commande, par jeton. Elle REFAIT le filtre de " +
         "suspension : ne pas le refaire laisserait les photos d'un compte " +
         "suspendu accessibles alors que sa page ne répond plus, et une coupure à " +
         "moitié faite est une coupure qui n'a pas eu lieu.",
+    ],
+    [
+      "attacher_colis",
+      "Attache un numéro de suivi à une commande. `security definer` parce qu'un " +
+        "vendeur n'a AUCUN droit d'écriture sur `tracked_parcels` — l'écriture " +
+        "vient du transporteur, et un vendeur qui écrirait ses propres points de " +
+        "passage raconterait à son client une expédition qui n'a pas eu lieu. La " +
+        "PROPRIÉTÉ est donc vérifiée dans son corps. Elle rend aussi `cree`, le " +
+        "booléen qui décide si l'on PAIE une prise en charge : insertion et " +
+        "verdict dans le même ordre SQL, pour qu'un double clic ne paie pas deux " +
+        "fois.",
     ],
     [
       "archiver_lot",

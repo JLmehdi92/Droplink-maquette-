@@ -450,6 +450,18 @@
       "refuse": "You reported a problem. The seller has been notified.",
       "modifier": "Change my answer",
       "echec": "Your answer could not be saved. Please try again."
+    },
+    "suivi": {
+      "titre": "Parcel tracking",
+      "numero": "Tracking number",
+      "aucunMouvement": "No carrier information yet",
+      "dernierMouvement": "Last movement {n} days ago",
+      "aujourdHui": "Moved today",
+      "hier": "Moved yesterday",
+      "silence": "No movement for {n} days. This is common on long routes, especially at customs. We keep asking the carrier.",
+      "estimation": "Estimated delivery",
+      "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
+      "passages": "Transport steps"
     }
   }
 }

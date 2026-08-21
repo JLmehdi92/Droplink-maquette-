@@ -342,6 +342,24 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduler_heartbeat: {
+        Row: {
+          beat_at: string
+          detail: Json
+          source: string
+        }
+        Insert: {
+          beat_at?: string
+          detail?: Json
+          source: string
+        }
+        Update: {
+          beat_at?: string
+          detail?: Json
+          source?: string
+        }
+        Relationships: []
+      }
       shops: {
         Row: {
           accent_color: string
@@ -400,6 +418,7 @@ export type Database = {
           first_movement_at: string | null
           id: string
           last_movement_at: string | null
+          last_query_at: string | null
           normalized_status: Database["public"]["Enums"]["parcel_status"]
           query_count: number
           raw_status: string | null
@@ -418,6 +437,7 @@ export type Database = {
           first_movement_at?: string | null
           id?: string
           last_movement_at?: string | null
+          last_query_at?: string | null
           normalized_status?: Database["public"]["Enums"]["parcel_status"]
           query_count?: number
           raw_status?: string | null
@@ -436,6 +456,7 @@ export type Database = {
           first_movement_at?: string | null
           id?: string
           last_movement_at?: string | null
+          last_query_at?: string | null
           normalized_status?: Database["public"]["Enums"]["parcel_status"]
           query_count?: number
           raw_status?: string | null
@@ -495,6 +516,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      abandonner_colis: {
+        Args: { p_motif: string; p_parcel_id: string }
+        Returns: undefined
+      }
       appliquer_etat_colis: {
         Args: {
           p_brut: Json
@@ -515,6 +540,27 @@ export type Database = {
       archiver_lot: {
         Args: { p_archiver: boolean; p_ids: string[] }
         Returns: number
+      }
+      attacher_colis: {
+        Args: { p_numero: string; p_order_id: string; p_transporteur: string }
+        Returns: {
+          cree: boolean
+          parcel_id: string
+        }[]
+      }
+      battre: { Args: { p_detail: Json; p_source: string }; Returns: undefined }
+      colis_a_interroger: {
+        Args: { p_limite: number }
+        Returns: {
+          carrier_code: number
+          empty_count: number
+          id: string
+          last_movement_at: string
+          last_query_at: string
+          normalized_status: Database["public"]["Enums"]["parcel_status"]
+          registered_at: string
+          tracking_number: string
+        }[]
       }
       compter_interrogation_vide: {
         Args: { p_numero: string }
@@ -583,6 +629,32 @@ export type Database = {
           rang: number
           type: Database["public"]["Enums"]["media_type"]
         }[]
+      }
+      lire_passages_publics: {
+        Args: { p_jeton: string }
+        Returns: {
+          description: string
+          location: string
+          occurred_at: string
+          stage: string
+        }[]
+      }
+      lire_suivi_public: {
+        Args: { p_jeton: string }
+        Returns: {
+          abandonne: boolean
+          dernier_mouvement: string
+          estimation_au: string
+          estimation_du: string
+          etape: Database["public"]["Enums"]["parcel_status"]
+          numero: string
+          premier_mouvement: string
+        }[]
+      }
+      marquer_interroge: { Args: { p_parcel_id: string }; Returns: undefined }
+      marquer_prise_en_charge: {
+        Args: { p_abandonne: boolean; p_parcel_id: string }
+        Returns: undefined
       }
       mon_shop_id: { Args: never; Returns: string }
       quota_depasse: {

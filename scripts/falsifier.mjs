@@ -606,6 +606,164 @@ const SQL = {
       "unique (parcel_id, occurred_at, description);",
   },
 
+
+  /**
+   * LE CAS MOTIVANT DE L ATTACHE : `cree` toujours vrai.
+   *
+   * Le defaut le plus cher du produit, et le plus silencieux : tout continue de
+   * fonctionner, les colis sont suivis, les clients voient leur statut. Seule la
+   * facture du fournisseur grossit — une prise en charge payee a chaque
+   * sauvegarde automatique de l editeur, soit toutes les 800 ms de frappe.
+   */
+  "attache-paie-toujours": {
+    casser: `create or replace function public.attacher_colis(
+        p_order_id uuid, p_numero text, p_transporteur text
+      ) returns table (parcel_id uuid, cree boolean)
+      language plpgsql security definer set search_path = '' as $$
+      declare v_shop uuid; v_numero text := btrim(coalesce(p_numero, ''));
+              v_transporteur integer := nullif(btrim(coalesce(p_transporteur, '')), '')::integer;
+              v_parcel uuid;
+      begin
+        select public.mon_shop_id() into v_shop;
+        if v_shop is null then
+          raise exception 'Aucune boutique pour cet appelant.' using errcode = 'DL011';
+        end if;
+        perform 1 from public.orders o where o.id = p_order_id and o.shop_id = v_shop;
+        if not found then
+          raise exception 'Commande introuvable.' using errcode = 'DL012';
+        end if;
+        delete from public.order_parcels op using public.tracked_parcels tp
+         where op.order_id = p_order_id and op.parcel_id = tp.id
+           and (v_numero = '' or tp.tracking_number <> v_numero);
+        if v_numero = '' then
+          return query select null::uuid, false;
+          return;
+        end if;
+        insert into public.tracked_parcels as tp (shop_id, tracking_number, carrier_code)
+        values (v_shop, v_numero, v_transporteur)
+        on conflict (shop_id, tracking_number)
+          do update set carrier_code = coalesce(excluded.carrier_code, tp.carrier_code)
+        returning tp.id into v_parcel;
+        insert into public.order_parcels (order_id, parcel_id)
+        values (p_order_id, v_parcel) on conflict do nothing;
+        return query select v_parcel, true;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "032_attacher_colis.sql",
+      depuis: "create function public.attacher_colis",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : l ancien lien n est plus detache.
+   *
+   * Corriger une faute de frappe laisse la commande liee aux DEUX numeros. La
+   * page publique affiche alors le suivi d un colis qui n est plus le sien —
+   * donc, pour le client, la position d un envoi qui ne lui est pas destine.
+   */
+  "attache-sans-detacher": {
+    casser: `create or replace function public.attacher_colis(
+        p_order_id uuid, p_numero text, p_transporteur text
+      ) returns table (parcel_id uuid, cree boolean)
+      language plpgsql security definer set search_path = '' as $$
+      declare v_shop uuid; v_numero text := btrim(coalesce(p_numero, ''));
+              v_transporteur integer := nullif(btrim(coalesce(p_transporteur, '')), '')::integer;
+              v_parcel uuid; v_cree boolean := false;
+      begin
+        select public.mon_shop_id() into v_shop;
+        if v_shop is null then
+          raise exception 'Aucune boutique pour cet appelant.' using errcode = 'DL011';
+        end if;
+        perform 1 from public.orders o where o.id = p_order_id and o.shop_id = v_shop;
+        if not found then
+          raise exception 'Commande introuvable.' using errcode = 'DL012';
+        end if;
+        if v_numero = '' then
+          return query select null::uuid, false;
+          return;
+        end if;
+        insert into public.tracked_parcels as tp (shop_id, tracking_number, carrier_code)
+        values (v_shop, v_numero, v_transporteur)
+        on conflict (shop_id, tracking_number)
+          do update set carrier_code = coalesce(excluded.carrier_code, tp.carrier_code)
+        returning tp.id, (tp.xmax = 0) into v_parcel, v_cree;
+        insert into public.order_parcels (order_id, parcel_id)
+        values (p_order_id, v_parcel) on conflict do nothing;
+        return query select v_parcel, v_cree;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "032_attacher_colis.sql",
+      depuis: "create function public.attacher_colis",
+      jusqua: "comment on function",
+    },
+  },
+
+
+  /**
+   * Le suivi public rendu SANS le filtre de suspension.
+   *
+   * La page ne repond plus, les medias non plus, l ecran d admin affiche
+   * « suspendu » — et le suivi continue de dire ou est le colis a qui detient le
+   * lien qu on a precisement voulu couper. C est la troisieme surface : celle
+   * qu on oublie parce que les deux premieres ont ete traitees.
+   */
+  "suivi-public-sans-suspension": {
+    casser: `create or replace function public.lire_suivi_public(p_jeton text)
+      returns table (etape public.parcel_status, numero text,
+                     premier_mouvement timestamptz, dernier_mouvement timestamptz,
+                     estimation_du timestamptz, estimation_au timestamptz,
+                     abandonne boolean)
+      language sql stable security definer set search_path = '' as $$
+        select tp.normalized_status, tp.tracking_number, tp.first_movement_at,
+               tp.last_movement_at, tp.estimated_from, tp.estimated_to,
+               tp.abandoned_at is not null
+        from public.orders o
+        join public.order_parcels op on op.order_id = o.id
+        join public.tracked_parcels tp on tp.id = op.parcel_id
+        where o.public_token = p_jeton
+        limit 1
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "034_suivi_public.sql",
+      depuis: "create function public.lire_suivi_public",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * Les chiffres de COUT rendus a la page publique.
+   *
+   * Ils vivent dans la MEME ligne que ce qu on rend legitimement : il suffit de
+   * les ajouter a la liste des colonnes. Rien ne casse, la page s affiche — et
+   * le client d un vendeur apprend combien nous avons paye pour son colis.
+   */
+  "suivi-public-fuite-couts": {
+    casser: `create or replace function public.lire_suivi_public(p_jeton text)
+      returns table (etape public.parcel_status, numero text,
+                     premier_mouvement timestamptz, dernier_mouvement timestamptz,
+                     estimation_du timestamptz, estimation_au timestamptz,
+                     abandonne boolean)
+      language sql stable security definer set search_path = '' as $$
+        select tp.normalized_status,
+               tp.tracking_number || ' (' || tp.query_count || '/' || tp.empty_count || ')',
+               tp.first_movement_at, tp.last_movement_at, tp.estimated_from,
+               tp.estimated_to, tp.abandoned_at is not null
+        from public.orders o
+        join public.shops s on s.id = o.shop_id
+        join public.profiles pr on pr.id = s.owner_id
+        join public.order_parcels op on op.order_id = o.id
+        join public.tracked_parcels tp on tp.id = op.parcel_id
+        where o.public_token = p_jeton and pr.status = 'active'
+        limit 1
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "034_suivi_public.sql",
+      depuis: "create function public.lire_suivi_public",
+      jusqua: "comment on function",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

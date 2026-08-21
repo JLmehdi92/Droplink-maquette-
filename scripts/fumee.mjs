@@ -52,10 +52,21 @@ console.log(`port ephemere : ${port}\n`);
 // le comportement ne peut pas venir d ailleurs que de cette variable.
 const PLAFOND_PUBLIC = 7;
 
+// Secrets POSES POUR CE SERVEUR, et differents de ceux de production. Ce qu on
+// eprouve est le SCHEMA — « la porte est-elle fermee, et s ouvre-t-elle avec la
+// bonne cle » — pas le secret lui-meme.
+const SECRET_CRON = "fumee-cron-secret-0123456789";
+const CLE_SUIVI = "fumee-cle-suivi-abcdef0123456789";
+
 const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   cwd: racine,
   shell: true,
-  env: { ...process.env, QUOTA_PUBLIQUE_PAR_MINUTE: String(PLAFOND_PUBLIC) },
+  env: {
+    ...process.env,
+    QUOTA_PUBLIQUE_PAR_MINUTE: String(PLAFOND_PUBLIC),
+    CRON_SECRET: SECRET_CRON,
+    TRACKING_API_KEY: CLE_SUIVI,
+  },
   stdio: ["ignore", "pipe", "pipe"],
 });
 
@@ -442,6 +453,88 @@ try {
           [dernierStatut !== 429, "un refus de quota ne se distingue pas d un jeton inconnu"],
         );
       }
+
+      // ── LES DEUX ROUTES MACHINE DU SUIVI ──
+      //
+      // `/api` est EXCLU du matcher du middleware : ces deux routes ne sont
+      // protegees par rien d autre que leur propre garde. Le controle porte donc
+      // sur l EFFET — ce que le serveur repond reellement, et ce qui arrive en
+      // base — parce que « il repond » est la propriete que tous les residus
+      // possedent.
+      const { createHash } = await import("node:crypto");
+
+      const cadenceSansSecret = await fetch(`${base}/api/suivi/cadence`, { method: "POST" });
+      const cadenceMauvais = await fetch(`${base}/api/suivi/cadence`, {
+        method: "POST",
+        headers: { authorization: "Bearer mauvais-secret-0123456789" },
+      });
+      const cadenceGet = await fetch(`${base}/api/suivi/cadence`);
+      const cadenceOk = await fetch(`${base}/api/suivi/cadence`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${SECRET_CRON}` },
+      });
+      const bilan = cadenceOk.ok ? await cadenceOk.json() : null;
+
+      const { data: battement } = await service
+        .from("scheduler_heartbeat")
+        .select("source, beat_at")
+        .eq("source", "cadence-suivi")
+        .maybeSingle();
+
+      controles.push(
+        [cadenceSansSecret.status === 404, "la cadence sans secret rend 404"],
+        [cadenceMauvais.status === 404, "la cadence avec un MAUVAIS secret rend 404"],
+        [cadenceGet.status === 404, "un GET sur la cadence est refuse explicitement"],
+        [cadenceOk.status === 200, `la cadence s ouvre avec le bon secret (${cadenceOk.status})`],
+        [bilan !== null && typeof bilan.examines === "number", "elle rend un bilan chiffre"],
+        [battement !== null, "elle a ecrit son battement — un passage sans battement n a pas veille"],
+      );
+
+      // LE POINT DE RECEPTION. Sans signature, n importe qui pourrait annoncer au
+      // client d un vendeur inconnu que son colis est livre.
+      const corpsSuivi = JSON.stringify({
+        event: "TRACKING_UPDATED",
+        data: { number: "FUMEE-NUMERO-INEXISTANT", carrier: 3011 },
+      });
+      const signature = createHash("sha256")
+        .update(corpsSuivi + "/" + CLE_SUIVI, "utf8")
+        .digest("hex");
+
+      const sansSignature = await fetch(`${base}/api/suivi/notification`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: corpsSuivi,
+      });
+      const mauvaiseSignature = await fetch(`${base}/api/suivi/notification`, {
+        method: "POST",
+        headers: { "content-type": "application/json", sign: "f".repeat(64) },
+        body: corpsSuivi,
+      });
+      // Le bon secret, mais un corps MODIFIE apres signature : c est ce que
+      // ferait un intermediaire pour transformer « en transit » en « livre ».
+      const corpsModifie = corpsSuivi.replace("3011", "3012");
+      const corpsFalsifie = await fetch(`${base}/api/suivi/notification`, {
+        method: "POST",
+        headers: { "content-type": "application/json", sign: signature },
+        body: corpsModifie,
+      });
+      const signee = await fetch(`${base}/api/suivi/notification`, {
+        method: "POST",
+        headers: { "content-type": "application/json", sign: signature },
+        body: corpsSuivi,
+      });
+      const corpsSignee = signee.ok ? await signee.json() : null;
+
+      controles.push(
+        [sansSignature.status === 401, "une notification SANS signature est refusee"],
+        [mauvaiseSignature.status === 401, "une signature fausse est refusee"],
+        [corpsFalsifie.status === 401, "un corps modifie apres signature est refuse"],
+        [signee.status === 200, `une notification signee est acceptee (${signee.status})`],
+        [
+          corpsSignee !== null && corpsSignee.colis === 0,
+          "et elle dit COMBIEN de colis ont ete touches — ici zero, le numero n existe pas",
+        ],
+      );
 
       // Jeton inconnu : meme sortie, aucune divulgation.
       const inconnu = await fetch(`${base}/p/aaaaaaaaaaaaaaaaaaaaa`, { redirect: "manual" });
