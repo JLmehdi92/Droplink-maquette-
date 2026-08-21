@@ -17,7 +17,8 @@
     "gates": "pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls",
     "fumee": "node scripts/fumee.mjs",
     "falsifier": "node scripts/falsifier.mjs",
-    "check:r2": "vitest run --project r2"
+    "check:r2": "vitest run --project r2",
+    "purge:test": "node scripts/purger-residus-de-test.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",
