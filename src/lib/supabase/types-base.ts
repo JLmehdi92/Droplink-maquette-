@@ -17,6 +17,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      link_views: {
+        Row: {
+          country: string | null
+          id: string
+          ip_hash: string
+          order_id: string
+          user_agent_hash: string
+          viewed_at: string
+          viewed_on: string | null
+        }
+        Insert: {
+          country?: string | null
+          id?: string
+          ip_hash: string
+          order_id: string
+          user_agent_hash: string
+          viewed_at?: string
+          viewed_on?: string | null
+        }
+        Update: {
+          country?: string | null
+          id?: string
+          ip_hash?: string
+          order_id?: string
+          user_agent_hash?: string
+          viewed_at?: string
+          viewed_on?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_views_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_media: {
         Row: {
           cle: string
@@ -251,6 +289,20 @@ export type Database = {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
       }
+      enregistrer_vue: {
+        Args: {
+          p_ip_hash: string
+          p_jeton: string
+          p_pays: string
+          p_profil: string
+          p_ua_hash: string
+        }
+        Returns: boolean
+      }
+      fenetre_courante: {
+        Args: { p_fenetre_secondes: number }
+        Returns: string
+      }
       generer_jeton_public: { Args: never; Returns: string }
       lire_commande_publique: {
         Args: { p_jeton: string }
@@ -285,6 +337,10 @@ export type Database = {
         }[]
       }
       mon_shop_id: { Args: never; Returns: string }
+      quota_depasse: {
+        Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
+        Returns: boolean
+      }
       reclamer_evenement_creation: {
         Args: { p_order_id: string }
         Returns: boolean

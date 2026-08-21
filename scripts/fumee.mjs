@@ -45,9 +45,17 @@ const port = await portLibre();
 const base = `http://127.0.0.1:${port}`;
 console.log(`port ephemere : ${port}\n`);
 
+// Le plafond public est abaisse POUR CE SERVEUR : mesurer le seuil reel de 120
+// exigerait 121 requetes, et on ne verifierait de toute facon qu un nombre. Ce
+// qu on veut etablir est que le seuil CONFIGURE mord, et qu il mord par
+// adresse. La valeur est volontairement inhabituelle : un 7 qui apparait dans
+// le comportement ne peut pas venir d ailleurs que de cette variable.
+const PLAFOND_PUBLIC = 7;
+
 const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   cwd: racine,
   shell: true,
+  env: { ...process.env, QUOTA_PUBLIQUE_PAR_MINUTE: String(PLAFOND_PUBLIC) },
   stdio: ["ignore", "pipe", "pipe"],
 });
 
@@ -324,6 +332,64 @@ try {
             Buffer.byteLength(html) / 1024 < 300,
             `poids du HTML public : ${(Buffer.byteLength(html) / 1024).toFixed(1)} Ko (budget 300)`,
           ],
+        );
+      }
+
+      if (jetonFumee) {
+        // LA BALISE DE CONSULTATION, de bout en bout.
+        //
+        // `x-forwarded-for` est pose ici parce que c est ce que fait le bord en
+        // production. Sans adresse exploitable, le produit REFUSE d ecrire
+        // plutot que de fusionner tous les visiteurs sous une cle commune : le
+        // controle passerait alors sur un comportement qui n est pas celui qui
+        // sera servi.
+        const enTetes = { "x-forwarded-for": "203.0.113.7", "user-agent": "sonde-fumee/1" };
+
+        const balise = await fetch(`${base}/p/${jetonFumee}/vue`, {
+          method: "POST",
+          headers: enTetes,
+        });
+        const { count: apres } = await service
+          .from("link_views")
+          .select("id", { count: "exact", head: true })
+          .eq("order_id", commandeFumee);
+
+        // Deuxieme appel, meme visiteur, meme jour : ce n est pas une vue de
+        // plus. Une ligne = un visiteur, un JOUR — c est la definition de la
+        // metrique, pas un detail d implementation.
+        await fetch(`${base}/p/${jetonFumee}/vue`, { method: "POST", headers: enTetes });
+        const { count: apresDeux } = await service
+          .from("link_views")
+          .select("id", { count: "exact", head: true })
+          .eq("order_id", commandeFumee);
+
+        controles.push(
+          [balise.status === 204, "la balise de consultation repond 204"],
+          [apres === 1, `une vue enregistree (compte : ${apres})`],
+          [apresDeux === 1, `la seconde consultation du jour ne compte pas (compte : ${apresDeux})`],
+        );
+
+        // LES DEUX SEUILS. On epuise le plafond depuis UNE adresse, puis on
+        // verifie qu une AUTRE adresse passe encore : sans ce second controle,
+        // un compteur global — donc un seul balayeur capable de couper la page
+        // de tous les vendeurs — passerait le test.
+        const balayeur = { "x-forwarded-for": "198.51.100.4" };
+        let dernierStatut = 0;
+        for (let i = 0; i <= PLAFOND_PUBLIC; i += 1) {
+          dernierStatut = (await fetch(`${base}/p/${jetonFumee}`, { headers: balayeur })).status;
+        }
+        const voisin = await fetch(`${base}/p/${jetonFumee}`, {
+          headers: { "x-forwarded-for": "198.51.100.99" },
+        });
+
+        controles.push(
+          [dernierStatut === 404, `le plafond public mord (statut ${dernierStatut} au-dela de ${PLAFOND_PUBLIC})`],
+          [voisin.status === 200, "une autre adresse n est pas penalisee : le compteur est par adresse"],
+          // Le refus emprunte le MEME chemin de sortie que tout le reste :
+          // repondre 429 distinguerait « tu vas trop vite sur un jeton qui
+          // existe » de « ce jeton n existe pas », donc rendrait le balayage
+          // informatif.
+          [dernierStatut !== 429, "un refus de quota ne se distingue pas d un jeton inconnu"],
         );
       }
 

@@ -1,7 +1,6 @@
 import "server-only";
-import { createHash } from "node:crypto";
-import { headers } from "next/headers";
 import { creerClientSysteme } from "@/lib/supabase/system";
+import { adresseAppelant, empreinte } from "./empreinte";
 
 /**
  * Limitation de débit — côté application.
@@ -19,7 +18,13 @@ import { creerClientSysteme } from "@/lib/supabase/system";
  */
 
 /** Ce que le compteur protège. Les surfaces ne partagent JAMAIS leurs compteurs. */
-export type Surface = "auth-ip" | "auth-email";
+export type Surface =
+  | "auth-ip"
+  | "auth-email"
+  /** Toutes les requêtes de la page publique, par adresse. */
+  | "publique-requetes"
+  /** Les seules requêtes portant un jeton INCONNU, par adresse. */
+  | "publique-inconnu";
 
 export type Verdict = { autorise: true } | { autorise: false; motif: "quota" | "indisponible" };
 
@@ -59,52 +64,17 @@ function seuil(surface: Surface): { plafond: number; fenetreSecondes: number } {
         plafond: entierEnv("QUOTA_AUTH_EMAIL_PAR_HEURE", 6),
         fenetreSecondes: 3600,
       };
+    case "publique-requetes":
+      return {
+        plafond: entierEnv("QUOTA_PUBLIQUE_PAR_MINUTE", 120),
+        fenetreSecondes: 60,
+      };
+    case "publique-inconnu":
+      return {
+        plafond: entierEnv("QUOTA_PUBLIQUE_INCONNU_PAR_MINUTE", 20),
+        fenetreSecondes: 60,
+      };
   }
-}
-
-/**
- * Empreinte salée d'une valeur identifiante.
- *
- * Salée, parce qu'une IPv4 non salée se retrouve par force brute en quelques
- * secondes : l'espace fait quatre milliards de valeurs, et un sha256 se calcule
- * par milliards par seconde. Une empreinte non salée n'est pas une
- * pseudonymisation, c'est un encodage.
- */
-function empreinte(valeur: string): string {
-  const sel = process.env["HASH_SALT"] ?? "";
-  if (sel.length < 16) {
-    throw new Error(
-      "HASH_SALT absent ou trop court. Sans sel, l'empreinte d'une adresse IP " +
-        "se retrouve par force brute en quelques secondes : ce ne serait pas " +
-        "une pseudonymisation mais un encodage.",
-    );
-  }
-  return createHash("sha256").update(`${sel}:${valeur}`).digest("hex").slice(0, 32);
-}
-
-/**
- * Adresse de l'appelant, telle que le bord la rapporte.
- *
- * `x-forwarded-for` est une LISTE que n'importe quel intermédiaire peut
- * rallonger, et que le client peut préremplir. On prend donc l'en-tête posé par
- * notre propre bord quand il existe, et seulement à défaut la PREMIÈRE entrée de
- * `x-forwarded-for`.
- *
- * Rend `null` si rien n'est exploitable : mieux vaut l'absence assumée qu'une
- * valeur qu'un client aurait choisie, laquelle transformerait le compteur en
- * outil pour épuiser le quota des autres.
- */
-async function adresseAppelant(): Promise<string | null> {
-  const enTetes = await headers();
-  const cloudflare = enTetes.get("cf-connecting-ip");
-  if (cloudflare !== null && cloudflare.trim() !== "") return cloudflare.trim();
-
-  const transmis = enTetes.get("x-forwarded-for");
-  if (transmis !== null) {
-    const premiere = transmis.split(",")[0]?.trim();
-    if (premiere !== undefined && premiere !== "") return premiere;
-  }
-  return null;
 }
 
 async function consommer(cle: string, surface: Surface): Promise<Verdict> {
@@ -150,4 +120,61 @@ export async function verifierQuotaAuth(email: string): Promise<Verdict> {
   // L'adresse est normalisée avant empreinte, sinon « A@B.com » et « a@b.com »
   // recevraient deux quotas distincts pour une seule boîte.
   return consommer(empreinte(email.trim().toLowerCase()), "auth-email");
+}
+
+/**
+ * L'entrée de la page publique.
+ *
+ * TROIS TEMPS, parce que la validité du jeton n'est connue qu'APRÈS la lecture
+ * qu'on cherche justement à éviter :
+ *
+ *   1. consulter le compteur des jetons inconnus SANS le consommer — celui qui
+ *      a déjà brûlé ses vingt essais est refusé avant toute lecture ;
+ *   2. consommer le compteur des requêtes (120/min) ;
+ *   3. une fois le jeton révélé inconnu, appeler `signalerJetonInconnu()`.
+ *
+ * EN CAS DE PANNE DU COMPTEUR, ON AUTORISE. C'est l'inverse de la surface
+ * d'authentification, et c'est délibéré : refuser ici pénaliserait les clients
+ * d'un vendeur pour un incident qui ne les concerne pas. Le seul dommage d'un
+ * refus injustifié est porté par quelqu'un qui n'a rien à voir avec l'incident.
+ */
+export async function verifierQuotaPublique(): Promise<Verdict> {
+  const ip = await adresseAppelant();
+  // Sans adresse exploitable, il n'y a rien à compter — et compter tout le monde
+  // sous une clé commune reviendrait à laisser un seul balayeur couper la page
+  // de tous les vendeurs.
+  if (ip === null) return { autorise: true };
+
+  const cle = empreinte(ip);
+  const systeme = creerClientSysteme();
+  const seuilInconnu = seuil("publique-inconnu");
+
+  const { data: deja, error: erreurPeek } = await systeme.rpc("quota_depasse", {
+    p_cle: `publique-inconnu:${cle}`,
+    p_plafond: seuilInconnu.plafond,
+    p_fenetre_secondes: seuilInconnu.fenetreSecondes,
+  });
+
+  // Panne : on autorise, et on ne consomme rien non plus — un compteur dont on
+  // ignore l'état ne doit pas être avancé à l'aveugle.
+  if (erreurPeek !== null) return { autorise: true };
+  if (deja === true) return { autorise: false, motif: "quota" };
+
+  const verdict = await consommer(cle, "publique-requetes");
+  if (!verdict.autorise && verdict.motif === "indisponible") return { autorise: true };
+  return verdict;
+}
+
+/**
+ * Comptabilise un jeton inconnu. Appelée APRÈS la lecture, jamais avant.
+ *
+ * Elle ne rend rien : le refus qu'elle prépare est celui de la requête
+ * SUIVANTE. Refuser celle-ci n'aurait aucun sens — la lecture est déjà payée, et
+ * le visiteur qui se trompe une fois de lien mérite sa page « introuvable »
+ * comme les autres.
+ */
+export async function signalerJetonInconnu(): Promise<void> {
+  const ip = await adresseAppelant();
+  if (ip === null) return;
+  await consommer(empreinte(ip), "publique-inconnu");
 }

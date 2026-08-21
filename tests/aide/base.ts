@@ -27,11 +27,18 @@ export async function ouvrirConnexionCatalogue(): Promise<Client> {
   return client;
 }
 
-/** Exécute une requête et rend les lignes typées. */
+/**
+ * Exécute une requête et rend les lignes typées.
+ *
+ * Les paramètres sont PASSÉS, jamais interpolés : une sonde qui compose son SQL
+ * par concaténation finit par tester la concaténation. Et la valeur qu'on
+ * interpolerait ici est souvent celle qu'on cherche justement à faire échouer.
+ */
 export async function interroger<T extends Record<string, unknown>>(
   client: Client,
   sql: string,
+  parametres: readonly unknown[] = [],
 ): Promise<T[]> {
-  const resultat = await client.query<T>(sql);
+  const resultat = await client.query<T>(sql, [...parametres]);
   return resultat.rows;
 }

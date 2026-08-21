@@ -1,11 +1,16 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import { BaliseVue } from "@/components/publique/balise-vue";
 import { Frise } from "@/components/publique/frise";
 import { Visionneur } from "@/components/publique/visionneur";
 import { lireCommandePublique } from "@/lib/page-publique/lecture";
 import { resoudreAccent } from "@/lib/design/contraste";
 import { estLangueSupportee } from "@/i18n/config";
+import { signalerJetonInconnu, verifierQuotaPublique } from "@/lib/limitation/quota";
+import { adresseAppelant, empreinte } from "@/lib/limitation/empreinte";
+import { emettre } from "@/lib/instrumentation/emettre";
+import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 
 /**
  * LA PAGE QUE VOIT LE CLIENT.
@@ -43,9 +48,22 @@ export default async function PagePublique({
 }) {
   const { token } = await params;
 
+  // LA LIMITATION DE DÉBIT VIENT AVANT LA LECTURE : c'est la lecture qu'elle
+  // protège. Un refus emprunte le MÊME chemin de sortie que tout le reste —
+  // répondre 429 ici distinguerait « tu vas trop vite sur un jeton qui existe »
+  // de « ce jeton n'existe pas », donc rendrait le balayage informatif.
+  const quota = await verifierQuotaPublique();
+  if (!quota.autorise) notFound();
+
   const commande = await lireCommandePublique(token);
   // Jeton inconnu, jeton révoqué, compte suspendu : UN SEUL chemin de sortie.
-  if (commande === null) notFound();
+  if (commande === null) {
+    // Compté APRÈS la lecture : c'est la requête SUIVANTE que ce compteur
+    // refusera. Un balayage se coupe ainsi lui-même au bout de vingt essais,
+    // alors qu'un client qui clique un lien ne touche jamais ce seuil.
+    await signalerJetonInconnu();
+    notFound();
+  }
 
   const langue = estLangueSupportee(commande.boutique.langue) ? commande.boutique.langue : "fr";
   const t = await getTranslations({ locale: langue, namespace: "page-publique" });
@@ -68,6 +86,20 @@ export default async function PagePublique({
   const aUnEnTete = commande.boutique.nom !== null || commande.boutique.logo !== null;
 
   const carte = "rounded-xl bg-surface-container-lowest p-6 shadow-sm";
+
+  // LE RENDU EST COMPTÉ CÔTÉ SERVEUR, la VUE côté client, et les deux ne se
+  // confondent pas : `rendus ≥ vues réelles ≥ vues enregistrées`. Sans la borne
+  // haute, une perte de balises ressemblerait à une absence d'audience.
+  //
+  // NI LE JETON NI L'IDENTIFIANT DE LA COMMANDE NE PARTENT VERS L'ANALYTICS. Le
+  // jeton ne transporte pas une donnée mais une CAPACITÉ, définitivement,
+  // puisqu'il est immuable à vie : l'expédier chez un tiers reviendrait à lui
+  // donner la page. Le décompte par commande vit dans notre base, où il est
+  // déjà.
+  const visiteur = await adresseAppelant();
+  await emettre(EVENEMENTS.PAGE_PUBLIQUE_RENDUE, {
+    sujet: visiteur === null ? "visiteur:sans-adresse" : `visiteur:${empreinte(visiteur)}`,
+  });
 
   return (
     <div lang={langue} className="flex min-h-dvh flex-col">
@@ -205,6 +237,10 @@ export default async function PagePublique({
           {t("propulsePar")}
         </a>
       </footer>
+
+      {/* Monté APRÈS le premier rendu — c'est toute la différence entre une page
+          chargée et une page vue. Il ne rend rien. */}
+      <BaliseVue jeton={commande.jeton} />
     </div>
   );
 }

@@ -193,6 +193,120 @@ const SQL = {
     casser: "grant execute on function public.toucher_updated_at() to anon, authenticated;",
     reparer: "revoke execute on function public.toucher_updated_at() from anon, authenticated;",
   },
+
+  /**
+   * La CONSULTATION du compteur rendue aveugle.
+   *
+   * Elle regarde une fenetre figee, donc toujours vide : le seuil des jetons
+   * inconnus cesse de mordre et le balayage redevient gratuit. Aucune erreur,
+   * aucun journal — le produit continue simplement de repondre a tout le monde.
+   *
+   * Cette cible a remplace une premiere version qui DOUBLAIT la fenetre. Elle
+   * n etait detectee qu une minute sur deux, celles ou les deux fenetres
+   * coincident : la falsification passait au vert sans rien prouver. La reponse
+   * n a pas ete de borner le test mais de retirer la classe de defaut — les deux
+   * fonctions partagent desormais une seule definition de fenetre (021).
+   */
+  "peek-aveugle": {
+    casser: `create or replace function public.quota_depasse(
+        p_cle text, p_plafond integer, p_fenetre_secondes integer
+      ) returns boolean language plpgsql stable security definer set search_path = '' as $$
+      declare v_compte integer;
+      begin
+        select r.compte into v_compte from public.rate_limit r
+          where r.cle = p_cle and r.fenetre_debut = to_timestamp(0);
+        return coalesce(v_compte, 0) >= p_plafond;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "021_fenetre_partagee.sql",
+      depuis: "create or replace function public.quota_depasse",
+    },
+  },
+
+  /**
+   * LE CAS MOTIVANT du comptage des vues : l exclusion du vendeur, retiree.
+   *
+   * Le vendeur qui relit sa propre page verifie son travail, il ne consulte
+   * pas. Sans l exclusion, chaque relecture gonfle une METRIQUE DE VERDICT — et
+   * du cote rassurant, celui qu on ne remet jamais en question.
+   */
+  "vue-vendeur-compte": {
+    casser: `create or replace function public.enregistrer_vue(
+        p_jeton text, p_ip_hash text, p_ua_hash text, p_pays text, p_profil text
+      ) returns boolean language plpgsql security definer set search_path = '' as $$
+      declare v_order uuid; v_insere uuid;
+      begin
+        select o.id into v_order
+        from public.orders o
+        join public.shops s on s.id = o.shop_id
+        join public.profiles p on p.id = s.owner_id
+        where o.public_token = p_jeton and p.status = 'active';
+        if v_order is null then return false; end if;
+        insert into public.link_views (order_id, ip_hash, user_agent_hash, country)
+        values (v_order, p_ip_hash, p_ua_hash, nullif(p_pays, ''))
+        on conflict (order_id, ip_hash, user_agent_hash, viewed_on) do nothing
+        returning id into v_insere;
+        return v_insere is not null;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "020_vue_profil_omissible.sql",
+      depuis: "create function public.enregistrer_vue",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : la contrainte d unicite qui PORTE la deduplication.
+   *
+   * « Une ligne = un visiteur, un JOUR » n est pas une regle ecrite dans du
+   * code, c est une contrainte. Sans elle, la fonction continue de repondre, le
+   * `on conflict` ne trouve simplement plus rien a resoudre, et chaque
+   * rafraichissement devient une vue. Rien ne casse : le chiffre grossit.
+   */
+  "vue-sans-dedup": {
+    // Les DEUX en un seul geste, et c est ce qui rend la falsification
+    // interessante. Retirer la seule contrainte fait LEVER la fonction, parce
+    // qu un `on conflict` sans index a resoudre est une erreur : le defaut
+    // serait bruyant, donc facile. Retirer aussi le `on conflict` rend le
+    // defaut SILENCIEUX — la fonction repond, rend `true` a chaque fois, et le
+    // chiffre grossit sans que rien ne casse.
+    casser:
+      "alter table public.link_views drop constraint " +
+      "link_views_order_id_ip_hash_user_agent_hash_viewed_on_key; " +
+      `create or replace function public.enregistrer_vue(
+        p_jeton text, p_ip_hash text, p_ua_hash text, p_pays text, p_profil text
+      ) returns boolean language plpgsql security definer set search_path = '' as $$
+      declare v_order uuid; v_proprietaire uuid; v_insere uuid;
+      begin
+        select o.id, p.id into v_order, v_proprietaire
+        from public.orders o
+        join public.shops s on s.id = o.shop_id
+        join public.profiles p on p.id = s.owner_id
+        where o.public_token = p_jeton and p.status = 'active';
+        if v_order is null then return false; end if;
+        if nullif(p_profil, '') is not null
+           and nullif(p_profil, '')::uuid = v_proprietaire then return false; end if;
+        insert into public.link_views (order_id, ip_hash, user_agent_hash, country)
+        values (v_order, p_ip_hash, p_ua_hash, nullif(p_pays, ''))
+        returning id into v_insere;
+        return v_insere is not null;
+      end; $$;`,
+    reparerDepuisMigration: {
+      // Les doublons crees pendant la falsification empechent de reposer la
+      // contrainte : ils sont retires d abord. Ne garder que la premiere ligne
+      // de chaque groupe restaure exactement ce que la contrainte aurait tenu.
+      avant:
+        "delete from public.link_views a using public.link_views b " +
+        "where a.ctid > b.ctid and a.order_id = b.order_id and a.ip_hash = b.ip_hash " +
+        "and a.user_agent_hash = b.user_agent_hash and a.viewed_on = b.viewed_on; " +
+        "alter table public.link_views add constraint " +
+        "link_views_order_id_ip_hash_user_agent_hash_viewed_on_key " +
+        "unique (order_id, ip_hash, user_agent_hash, viewed_on);",
+      fichier: "020_vue_profil_omissible.sql",
+      depuis: "create function public.enregistrer_vue",
+      jusqua: "comment on function",
+    },
+  },
 };
 
 const [, , action, cible] = process.argv;
@@ -217,7 +331,10 @@ if (sql === undefined && action === "reparer" && SQL[cible].reparerDepuisMigrati
   // fonction dans le fichier — y compris des `create table` ou `alter table`
   // deja appliques, qui echouent. Defaut constate en reparant `sans_accents` :
   // la decoupe entrainait l ajout de colonne et l index de la migration 008.
-  const { fichier, depuis, jusqua } = SQL[cible].reparerDepuisMigration;
+  const { fichier, depuis, jusqua, avant } = SQL[cible].reparerDepuisMigration;
+  // Certaines falsifications touchent AUSSI le schema. Ce qui est rejoue depuis
+  // le fichier ne remet en etat que la fonction : le reste se repare ici, avant.
+  if (avant) await client.query(avant);
   const chemin = join(process.cwd(), "supabase", "migrations", fichier);
   const contenu = readFileSync(chemin, "utf8");
   const index = contenu.indexOf(depuis);

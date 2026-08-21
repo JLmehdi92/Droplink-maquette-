@@ -384,6 +384,12 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
     // qui apparaît ici doit obliger quelqu'un à confirmer qu'elle est bien
     // censée être lisible par un vendeur authentifié.
     expect(droitsAuth.map((d) => d.table_name)).toEqual([
+      // Lisible par le vendeur, et par lui seul : c'est son compteur de vues et
+      // son indicateur « jamais ouvert ». AUCUN droit d'écriture ne
+      // l'accompagne — un vendeur qui pourrait s'ajouter des vues se
+      // fabriquerait une preuve d'usage sur un produit dont le livrable EST la
+      // donnée d'usage.
+      "link_views",
       "order_media",
       "orders",
       "profiles",

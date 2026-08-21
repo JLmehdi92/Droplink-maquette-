@@ -255,3 +255,89 @@ describe("Le compteur compte juste", () => {
     })();
   });
 });
+
+/**
+ * LA CONSULTATION SANS CONSOMMATION.
+ *
+ * `quota_depasse` existe parce que la page publique a deux seuils dont l'un —
+ * celui des jetons inconnus — ne peut être évalué qu'APRÈS la lecture qu'il
+ * protège. Consulter le compteur avant de lire permet de couper un balayage
+ * qui a déjà brûlé son budget.
+ *
+ * Ce qui doit être vrai : elle ne crée rien, et elle calcule la MÊME fenêtre que
+ * `consommer_quota`. Deux calculs de fenêtre divergents feraient consulter une
+ * fenêtre et consommer l'autre — le plafond ne tiendrait alors rien, et rien ne
+ * casserait.
+ */
+describe("Consulter un compteur sans le consommer", () => {
+  test("elle ne crée aucune ligne, et n'en avance aucune", async () => {
+    const cle = `test-peek-${Date.now()}`;
+
+    const vide = await interroger<{ ok: boolean }>(
+      catalogue,
+      `select public.quota_depasse('${cle}', 2, 60) as ok`,
+    );
+    expect(vide[0]?.ok, "un compteur inexistant est déjà dépassé").toBe(false);
+
+    const lignes = await interroger<{ n: string }>(
+      catalogue,
+      `select count(*)::text as n from public.rate_limit where cle = '${cle}'`,
+    );
+    expect(lignes[0]?.n, "la consultation a créé une ligne : c'est une consommation déguisée").toBe(
+      "0",
+    );
+
+    // Contre-test positif : elle DOIT passer à `true` une fois le plafond
+    // atteint. Sans cette moitié, une fonction qui rend toujours `false` —
+    // c'est-à-dire un seuil qui ne mord jamais — passerait le test précédent.
+    await interroger(catalogue, `select public.consommer_quota('${cle}', 2, 60)`);
+    const apresUn = await interroger<{ ok: boolean }>(
+      catalogue,
+      `select public.quota_depasse('${cle}', 2, 60) as ok`,
+    );
+    expect(apresUn[0]?.ok, "un seul appel ne dépasse pas un plafond de deux").toBe(false);
+
+    await interroger(catalogue, `select public.consommer_quota('${cle}', 2, 60)`);
+    const apresDeux = await interroger<{ ok: boolean }>(
+      catalogue,
+      `select public.quota_depasse('${cle}', 2, 60) as ok`,
+    );
+    expect(apresDeux[0]?.ok, "le plafond est atteint et la consultation ne le voit pas").toBe(true);
+  });
+
+  test("elle lit la MÊME fenêtre que celle que l'on consomme", async () => {
+    // Le défaut visé n'est pas hypothétique : deux expressions de fenêtre
+    // écrites séparément dérivent au premier changement de l'une des deux, et la
+    // dérive est muette — la consultation regarde alors une fenêtre vide pendant
+    // que la consommation en remplit une autre.
+    const cle = `test-peek-fenetre-${Date.now()}`;
+    await interroger(catalogue, `select public.consommer_quota('${cle}', 1, 60)`);
+
+    const lignes = await interroger<{ ok: boolean }>(
+      catalogue,
+      `select public.quota_depasse('${cle}', 1, 60) as ok`,
+    );
+    expect(lignes[0]?.ok, "la consultation ne voit pas ce que la consommation vient d'écrire").toBe(
+      true,
+    );
+  });
+
+  test("elle n'est exécutable ni par `anon` ni par `authenticated`", async () => {
+    // Un compteur qu'un client peut consulter lui dit combien il lui reste,
+    // donc à quelle cadence balayer sans être vu.
+    const lignes = await interroger<{ beneficiaire: string }>(
+      catalogue,
+      `select coalesce(a.grantee::regrole::text, 'PUBLIC') as beneficiaire
+       from pg_proc p
+       join pg_namespace n on n.oid = p.pronamespace,
+            aclexplode(p.proacl) a
+       where n.nspname = 'public' and p.proname = 'quota_depasse'
+         and a.privilege_type = 'EXECUTE'`,
+    );
+    expect(lignes.length, "quota_depasse est introuvable : la sonde vise à côté").toBeGreaterThan(0);
+    const ouverts = lignes
+      .map((l) => l.beneficiaire)
+      .filter((r) => r === "PUBLIC" || r === "anon" || r === "authenticated");
+    expect(ouverts, "le compteur est consultable par un client").toEqual([]);
+  });
+});
