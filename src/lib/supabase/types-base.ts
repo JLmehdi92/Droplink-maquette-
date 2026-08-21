@@ -808,6 +808,10 @@ export type Database = {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
       }
+      reactiver_compte: {
+        Args: { p_ip_hash: string; p_motif: string; p_profil: string }
+        Returns: boolean
+      }
       reclamer_evenement_creation: {
         Args: { p_order_id: string }
         Returns: boolean
@@ -818,6 +822,10 @@ export type Database = {
         Returns: number
       }
       sans_accents: { Args: { p_texte: string }; Returns: string }
+      suspendre_compte: {
+        Args: { p_ip_hash: string; p_motif: string; p_profil: string }
+        Returns: boolean
+      }
     }
     Enums: {
       account_status: "active" | "suspended"

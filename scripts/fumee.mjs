@@ -52,6 +52,37 @@ console.log(`port ephemere : ${port}\n`);
 // le comportement ne peut pas venir d ailleurs que de cette variable.
 const PLAFOND_PUBLIC = 7;
 
+/*
+ * UNE ADRESSE PAR BLOC DE CONTROLES.
+ *
+ * Le plafond public est compte PAR ADRESSE. Sans ces en-tetes, tous les blocs
+ * partagent celle de la boucle locale, et le huitieme controle de la sonde se
+ * fait refuser par la limitation de debit — en repondant 404, c est-a-dire
+ * EXACTEMENT ce que repond une page suspendue ou un jeton inconnu. Le produit
+ * n a qu un seul chemin de sortie, par conception, donc l echec ressemble trait
+ * pour trait a la propriete qu on cherchait a etablir.
+ *
+ * C est le piege le plus retors de cette sonde : elle a affiche « la suspension
+ * coupe la page » alors qu elle mesurait son propre quota epuise.
+ */
+function visiteur(n) {
+  // L ADRESSE VARIE AUSSI D UNE EXECUTION A L AUTRE.
+  //
+  // La fenetre de limitation vit EN BASE et dure une minute : deux executions
+  // rapprochees partagent donc les memes compteurs, et la seconde trouve le
+  // plafond deja consomme par la premiere. La sonde devenait non reproductible
+  // — verte, puis rouge, puis pire — sans qu aucun code produit n ait change.
+  //
+  // Le port ephemere est unique par execution : il sert de graine. Sans lui, la
+  // seule facon d obtenir un vert serait d attendre une minute entre deux
+  // lancements, c est-a-dire de relancer jusqu au vert.
+  const serie = port % 250;
+  return {
+    "x-forwarded-for": `10.${serie}.${n}.1`,
+    "user-agent": `sonde-fumee/${serie}-${n}`,
+  };
+}
+
 // Secrets POSES POUR CE SERVEUR, et differents de ceux de production. Ce qu on
 // eprouve est le SCHEMA — « la porte est-elle fermee, et s ouvre-t-elle avec la
 // bonne cle » — pas le secret lui-meme.
@@ -311,7 +342,7 @@ try {
       jetonFumee = commande?.public_token ?? null;
 
       if (jetonFumee) {
-        const reponse = await fetch(`${base}/p/${jetonFumee}`);
+        const reponse = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(11) });
         const html = await reponse.text();
 
         controles.push(
@@ -359,7 +390,7 @@ try {
         // de code qui oublierait de la poser. Passer par une Server Action
         // prouverait seulement que l invalidation qu on vient d ecrire
         // fonctionne — pas que la page est fraiche.
-        const avant = await fetch(`${base}/p/${jetonFumee}`);
+        const avant = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(12) });
         const htmlAvant = await avant.text();
         const cachePublic = avant.headers.get("cache-control") ?? "";
 
@@ -374,7 +405,7 @@ try {
         const depart = Date.now();
         await service.from("orders").update({ customer_label: MARQUEUR }).eq("id", commandeFumee);
 
-        const apresMutation = await fetch(`${base}/p/${jetonFumee}`);
+        const apresMutation = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(12) });
         const htmlApres = await apresMutation.text();
         const delai = (Date.now() - depart) / 1000;
 
@@ -402,6 +433,48 @@ try {
           .update({ customer_label: "Client de fumee" })
           .eq("id", commandeFumee);
 
+        // LA COUPURE DE SUSPENSION COUPE-T-ELLE VRAIMENT ?
+        //
+        // C est la capacite technique qui fonde notre statut d hebergeur, et son
+        // mode de defaillance est SILENCIEUX : si un maillon de la chaine
+        // manquait, rien n echouerait. Le statut serait ecrit, l audit
+        // consigne, l ecran afficherait « suspendu » — et la page publique
+        // continuerait d etre servie. TOUT dirait que le compte est coupe.
+        //
+        // LE CONTRE-TEST VIENT EN PREMIER : on etablit que la page REPOND avant
+        // de pretendre mesurer une coupure. Sans lui, « elle ne repond plus »
+        // serait vrai pour n importe quelle raison — un jeton mal recopie, une
+        // commande jamais creee — et l on prouverait une coupure qui n a jamais
+        // eu lieu.
+        const avantCoupure = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(13) });
+
+        const departCoupure = Date.now();
+        await service
+          .from("profiles")
+          .update({ status: "suspended" })
+          .eq("id", profilFumee);
+
+        const pendantCoupure = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(13) });
+        const delaiCoupure = (Date.now() - departCoupure) / 1000;
+
+        // Les medias aussi : une coupure a moitie faite est une coupure qui n a
+        // pas eu lieu. La page peut cesser de repondre pendant que les photos
+        // restent atteignables par leur URL directe.
+        const mediasCoupes = await fetch(`${base}/p/${jetonFumee}/media/${commandeFumee}`, {
+          headers: visiteur(13),
+        });
+
+        await service.from("profiles").update({ status: "active" }).eq("id", profilFumee);
+        const apresRetour = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(13) });
+
+        controles.push(
+          [avantCoupure.status === 200, "CONTRE-TEST : la page repond AVANT la suspension"],
+          [pendantCoupure.status === 404, `la suspension coupe la page (statut ${pendantCoupure.status})`],
+          [delaiCoupure < 30, `la coupure prend ${delaiCoupure.toFixed(1)} s (seuil 30)`],
+          [mediasCoupes.status !== 200, "les medias sont coupes eux aussi"],
+          [apresRetour.status === 200, "la reactivation retablit la page SUR LE MEME LIEN"],
+        );
+
         // LA LANGUE DE LA PAGE PUBLIQUE EST CELLE DU VENDEUR, PAS DE L URL.
         //
         // Elle vient de `shops.default_language`, un reglage de marque. Avant le
@@ -423,14 +496,14 @@ try {
             .update({ name: "Atelier Fumee", default_language: "en", watermark_enabled: true })
             .eq("id", shopFumee.id);
 
-          const anglaise = await (await fetch(`${base}/p/${jetonFumee}`)).text();
+          const anglaise = await (await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(14) })).text();
 
           await service
             .from("shops")
             .update({ default_language: "fr" })
             .eq("id", shopFumee.id);
 
-          const francaise = await (await fetch(`${base}/p/${jetonFumee}`)).text();
+          const francaise = await (await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(14) })).text();
 
           controles.push(
             [/<html lang="en"/.test(anglaise), "la langue reglee par le vendeur est celle du document servi"],
@@ -452,7 +525,7 @@ try {
         // plutot que de fusionner tous les visiteurs sous une cle commune : le
         // controle passerait alors sur un comportement qui n est pas celui qui
         // sera servi.
-        const enTetes = { "x-forwarded-for": "203.0.113.7", "user-agent": "sonde-fumee/1" };
+        const enTetes = visiteur(21);
 
         const balise = await fetch(`${base}/p/${jetonFumee}/vue`, {
           method: "POST",
@@ -532,13 +605,15 @@ try {
         // verifie qu une AUTRE adresse passe encore : sans ce second controle,
         // un compteur global — donc un seul balayeur capable de couper la page
         // de tous les vendeurs — passerait le test.
-        const balayeur = { "x-forwarded-for": "198.51.100.4" };
+        // Le balayeur a SA propre adresse, et elle varie par execution comme les
+        // autres : sinon le plafond serait deja consomme au lancement suivant.
+        const balayeur = visiteur(31);
         let dernierStatut = 0;
         for (let i = 0; i <= PLAFOND_PUBLIC; i += 1) {
           dernierStatut = (await fetch(`${base}/p/${jetonFumee}`, { headers: balayeur })).status;
         }
         const voisin = await fetch(`${base}/p/${jetonFumee}`, {
-          headers: { "x-forwarded-for": "198.51.100.99" },
+          headers: visiteur(32),
         });
 
         controles.push(

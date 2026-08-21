@@ -240,6 +240,25 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "fois.",
     ],
     [
+      "suspendre_compte",
+      "LA CAPACITÉ QUI FONDE NOTRE STATUT D'HÉBERGEUR. `SECURITY DEFINER` parce " +
+        "que `profiles.status` n'est accordé en écriture à PERSONNE — c'est un " +
+        "privilège de colonne, évalué avant toute policy, et c'est ce qui empêche " +
+        "un vendeur de se réactiver lui-même. La fonction vérifie le rôle, exige " +
+        "un motif non vide, refuse l'auto-suspension (irréversible depuis " +
+        "l'intérieur) et la suspension d'un autre administrateur (un compte " +
+        "compromis couperait sinon tous les autres), écrit l'audit et modifie le " +
+        "statut — le tout dans une seule transaction.",
+    ],
+    [
+      "reactiver_compte",
+      "Réactivation, tracée comme la suspension : sans trace, un compte " +
+        "reviendrait en service sans que rien ne dise qui l'a décidé. Elle ne " +
+        "touche JAMAIS le `public_token`, immuable à vie : un compte réactivé " +
+        "retrouve exactement les liens qu'il avait envoyés, ce qui est la seule " +
+        "façon de rendre la suspension réversible pour ses clients aussi.",
+    ],
+    [
       "est_admin",
       "LA SEULE AUTORITÉ sur la question « cet appelant est-il administrateur ». " +
         "Ouverte à `authenticated` parce que chaque garde l'appelle. Elle lit le " +

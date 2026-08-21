@@ -955,6 +955,89 @@ const SQL = {
       "on public.admin_audit_log for each row execute function public.refuser_modification_audit();",
   },
 
+  /**
+   * LA SUSPENSION NE COUPE PLUS RIEN.
+   *
+   * Le filtre `p.status = 'active'` retire de la lecture publique. Le statut est
+   * ecrit, l audit consigne, l ecran d administration affiche « suspendu » — et
+   * la page publique continue d etre servie. TOUT dit que le compte est coupe.
+   * Il ne l est pas. C est le mode de defaillance le plus grave du produit,
+   * parce que c est celui qui nous expose directement.
+   */
+  "suspension-ne-coupe-pas": {
+    casser: `drop function if exists public.lire_commande_publique(text);
+      create function public.lire_commande_publique(p_jeton text)
+      returns table (jeton text, client text, reference text, statut public.order_status,
+                     statut_qc public.qc_status, numero_suivi text, transporteur text,
+                     couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
+                     boutique_nom text, boutique_logo text, boutique_couleur text,
+                     boutique_langue text, boutique_filigrane boolean)
+      language sql stable security definer set search_path = '' as $$
+        select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
+               o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
+               o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language,
+               (s.watermark_enabled and s.name is not null and btrim(s.name) <> '')
+        from public.orders o
+        join public.shops s on s.id = o.shop_id
+        join public.profiles p on p.id = s.owner_id
+        where o.public_token = p_jeton
+      $$;
+      revoke all on function public.lire_commande_publique(text) from public;
+      grant execute on function public.lire_commande_publique(text) to anon;`,
+    reparerDepuisMigration: {
+      fichier: "035_filigrane_public.sql",
+      depuis: "drop function if exists public.lire_commande_publique",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * LA SUSPENSION SE FAIT SANS MOTIF.
+   *
+   * Hors du cas motivant : ce n est ni la coupure ni l isolation, c est la
+   * JUSTIFICATION. Le refus du motif vide retire, une suspension peut etre
+   * prononcee sans qu on sache pourquoi — et six mois plus tard, quand celui qui
+   * l a prise ne s en souvient plus, il ne reste rien a produire. La coupure
+   * fonctionnerait parfaitement ; c est notre capacite a l expliquer qui
+   * disparait.
+   */
+  "suspension-sans-motif": {
+    casser: `create or replace function public.suspendre_compte(
+        p_profil uuid, p_motif text, p_ip_hash text)
+      returns boolean language plpgsql volatile security definer set search_path = '' as $$
+      declare
+        v_admin_id uuid;
+        v_cible_role public.user_role;
+      begin
+        select p.id into v_admin_id from public.profiles p
+        where p.user_id = (select auth.uid()) and p.role = 'admin' and p.status = 'active';
+        if v_admin_id is null then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        if p_profil = v_admin_id then
+          raise exception 'auto-suspension refusee' using errcode = 'DL033';
+        end if;
+        select p.role into v_cible_role from public.profiles p where p.id = p_profil;
+        if v_cible_role is null then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        if v_cible_role = 'admin' then
+          raise exception 'suspension d''un administrateur refusee' using errcode = 'DL034';
+        end if;
+        perform public.journaliser_admin(
+          'compte.suspension', 'profiles', p_profil::text, p_profil, p_ip_hash,
+          jsonb_build_object('motif', p_motif));
+        update public.profiles set status = 'suspended' where id = p_profil;
+        return true;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "043_suspension_de_compte.sql",
+      depuis: "create function public.suspendre_compte",
+      jusqua: "comment on function public.suspendre_compte",
+    },
+  },
+
   "compteurs-hors-rls": {
     casser: `create or replace function public.compter_envois(p_silence_jours int)
       returns table (total bigint, preparation bigint, expedie bigint, en_transit bigint,
