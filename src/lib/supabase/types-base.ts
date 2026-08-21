@@ -464,6 +464,35 @@ export type Database = {
           },
         ]
       }
+      system_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tracked_parcels: {
         Row: {
           abandoned_at: string | null
@@ -580,6 +609,16 @@ export type Database = {
         Args: { p_motif: string; p_parcel_id: string }
         Returns: undefined
       }
+      alertes_admin: {
+        Args: { p_retard_minutes: number; p_seuil_colis: number }
+        Returns: {
+          genre: string
+          gravite: string
+          seuil: number
+          sujet: string
+          valeur: number
+        }[]
+      }
       analyser_activite: {
         Args: { p_depuis: string }
         Returns: {
@@ -651,8 +690,23 @@ export type Database = {
         Args: { p_numero: string }
         Returns: number
       }
+      compteurs_admin: {
+        Args: never
+        Returns: {
+          colis_abandonnes_ce_mois: number
+          colis_pris_en_charge_ce_mois: number
+          comptes: number
+          comptes_actifs: number
+          comptes_sans_type: number
+          comptes_suspendus: number
+        }[]
+      }
       consommer_quota: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
+        Returns: boolean
+      }
+      ecrire_parametre: {
+        Args: { p_cle: string; p_valeur: Json }
         Returns: boolean
       }
       enregistrer_vue: {
@@ -666,6 +720,15 @@ export type Database = {
         Returns: boolean
       }
       est_admin: { Args: never; Returns: boolean }
+      etat_veilleur: {
+        Args: { p_retard_minutes: number }
+        Returns: {
+          dernier_battement: string
+          etat: string
+          minutes: number
+          source: string
+        }[]
+      }
       fenetre_courante: {
         Args: { p_fenetre_secondes: number }
         Returns: string
@@ -757,6 +820,10 @@ export type Database = {
           rang: number
           type: Database["public"]["Enums"]["media_type"]
         }[]
+      }
+      lire_parametre_entier: {
+        Args: { p_cle: string; p_defaut: number }
+        Returns: number
       }
       lire_passages_publics: {
         Args: { p_jeton: string }

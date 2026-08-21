@@ -1038,6 +1038,64 @@ const SQL = {
     },
   },
 
+  /**
+   * « JAMAIS DEPLOYE » DEVIENT UNE ALERTE.
+   *
+   * La condition sur `beat_at` retiree : toute ligne de battement alerte, et
+   * surtout l absence de ligne serait traitee comme un retard des qu on
+   * ajouterait la ligne correspondante. Une tache posee ce matin se signale
+   * alors comme en panne, on cherche un defaut dans un mecanisme qui n a
+   * simplement pas encore tourne — et l on apprend a ignorer cette alerte-la,
+   * donc a rater la vraie.
+   */
+  "veilleur-alerte-a-tort": {
+    casser: `create or replace function public.alertes_admin(p_seuil_colis int, p_retard_minutes int)
+      returns table (genre text, gravite text, sujet text, valeur bigint, seuil bigint)
+      language plpgsql stable security definer set search_path = '' as $$
+      begin
+        if not public.est_admin() then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        return query
+        select 'colis_au_dessus_du_seuil'::text, 'attention'::text, p.email,
+               u.parcels_registered::bigint, p_seuil_colis::bigint
+        from public.usage_counters u
+        join public.profiles p on p.id = u.profile_id
+        where u.period_month = date_trunc('month', now())::date
+          and u.parcels_registered > p_seuil_colis
+        union all
+        select 'veilleur_en_retard'::text, 'critique'::text, h.source,
+               extract(epoch from (now() - h.beat_at))::bigint / 60,
+               p_retard_minutes::bigint
+        from public.scheduler_heartbeat h;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "047_panneau_sur_compteurs.sql",
+      depuis: "create or replace function public.alertes_admin",
+      jusqua: "create or replace function public.compteurs_admin",
+    },
+  },
+
+  /**
+   * LE COMPTEUR D USAGE CESSE DE COMPTER.
+   *
+   * Hors du cas motivant : ce n est ni l alerte ni l isolation, c est la
+   * FACTURATION. Le declencheur retire, le compteur reste a sa valeur du moment
+   * et le panneau affiche un mois plus calme qu il ne l est. Rien ne leve, aucun
+   * ecran ne casse — le chiffre est simplement FAUX, et il l est du cote
+   * rassurant. C est le seul compteur du produit qui corresponde a une facture :
+   * on ne s en apercevrait qu en la recevant.
+   */
+  "compteur-usage-decroche": {
+    casser:
+      "drop trigger if exists tracked_parcels_compter_prise_en_charge on public.tracked_parcels;",
+    reparer:
+      "create trigger tracked_parcels_compter_prise_en_charge " +
+      "after insert or update of registered_at on public.tracked_parcels " +
+      "for each row execute function public.compter_prise_en_charge();",
+  },
+
   "compteurs-hors-rls": {
     casser: `create or replace function public.compter_envois(p_silence_jours int)
       returns table (total bigint, preparation bigint, expedie bigint, en_transit bigint,

@@ -52,6 +52,29 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "system_settings",
+      "Paramètres système. AUCUNE POLICY : la table n'est atteignable que par " +
+        "`ecrire_parametre` et `lire_parametre_entier`, toutes deux en " +
+        "`security definer` avec vérification du rôle. Un paramètre modifiable " +
+        "sans trace est PIRE qu'un paramètre figé — figé, on sait ce qu'il vaut ; " +
+        "modifiable en silence, on croit savoir. La trace est écrite par un " +
+        "DÉCLENCHEUR et porte l'ancienne ET la nouvelle valeur, parce qu'un " +
+        "journal qui ne dit que la nouvelle répète ce que la table dit déjà. " +
+        "Aucun secret n'y passe : une valeur en base est lisible par qui accède " +
+        "à la base, ce qui convient à un seuil et jamais à une clé.",
+    ],
+    [
+      "usage_counters",
+      "Compteurs d'usage, tenus à l'écriture par déclencheur. AUCUNE POLICY : " +
+        "seules les fonctions du panneau les lisent. Ils existent parce que le " +
+        "panneau agrégeait `tracked_parcels` directement — 19 244 lignes lues " +
+        "pour DEUX comptes, donc un coût linéaire dans l'activité TOTALE du " +
+        "produit et des millions de lignes à mille vendeurs. Après : une ligne " +
+        "par compte et par mois, 22 lignes lues. `storage_bytes` est NULLABLE et " +
+        "non `default 0` : tant qu'aucun mécanisme ne mesure le stockage, la " +
+        "valeur est INCONNUE, et zéro affirmerait qu'on a mesuré.",
+    ],
+    [
       "admin_audit_log",
       "Journal d'audit. AUCUNE POLICY, délibérément : la table n'est atteignable " +
         "que par les fonctions `security definer` de l'administration, qui " +
@@ -257,6 +280,45 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "touche JAMAIS le `public_token`, immuable à vie : un compte réactivé " +
         "retrouve exactement les liens qu'il avait envoyés, ce qui est la seule " +
         "façon de rendre la suspension réversible pour ses clients aussi.",
+    ],
+    [
+      "ecrire_parametre",
+      "Écriture d'un paramètre système. Vérifie le rôle elle-même : une fonction " +
+        "qui accepterait n'importe quel appelant laisserait un vendeur modifier " +
+        "les seuils du produit, et la trace dirait QUI sans empêcher QUOI. La " +
+        "trace, elle, est posée par un déclencheur — un appel explicite se " +
+        "contourne en écrivant directement dans la table, y compris par " +
+        "inadvertance dans un script de maintenance.",
+    ],
+    [
+      "lire_parametre_entier",
+      "Lecture d'un seuil, avec son défaut fourni PAR L'APPEL. Une ligne absente " +
+        "est donc un état NORMAL — le produit fonctionne sans qu'aucun paramètre " +
+        "n'ait jamais été décidé — et non une panne à diagnostiquer. `stable` : " +
+        "elle n'écrit rien, et le moteur refusera toute écriture qu'on y " +
+        "ajouterait.",
+    ],
+    [
+      "alertes_admin",
+      "Alertes du panneau. Elles PRÉCÈDENT les compteurs, et portent leur VALEUR " +
+        "avec leur seuil — « 1 840 pour un seuil de 1 200 », jamais « ce compte " +
+        "dépasse » : un chiffre se vérifie, une appréciation se discute. Elles se " +
+        "lisent sur `usage_counters`, pas sur `tracked_parcels`, pour que le coût " +
+        "suive le nombre d'INSCRITS et non leur activité.",
+    ],
+    [
+      "etat_veilleur",
+      "État des tâches de fond, rendu SÉPARÉMENT des alertes — parce que « jamais " +
+        "déployé » doit s'afficher sans alerter. Le mélanger aux alertes " +
+        "obligerait à choisir entre le taire, et l'on ignorerait qu'aucune tâche " +
+        "ne tourne, ou l'alerter à tort. L'ABSENCE de ligne est l'information.",
+    ],
+    [
+      "compteurs_admin",
+      "Compteurs du panneau. Les comptes sont exacts — `profiles` est la seule " +
+        "table dont le volume suit les inscriptions et non l'usage. Les colis " +
+        "viennent des compteurs dénormalisés et sont bornés au MOIS : leur coût " +
+        "ne croît pas avec l'âge du produit.",
     ],
     [
       "est_admin",

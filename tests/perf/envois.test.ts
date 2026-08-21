@@ -113,6 +113,64 @@ async function mesurer(utilisateur: UtilisateurDeTest, sql: string): Promise<Mes
   }
 }
 
+/**
+ * Mesure SANS RLS, comme s'exécute une fonction `security definer`.
+ *
+ * LE HARNAIS ORDINAIRE POSE `set local role authenticated`, donc la RLS filtre :
+ * il mesure ce que voit UN vendeur. Le panneau d'administration, lui, agrège
+ * TOUT — c'est une fonction `security definer`. Mesurer le panneau avec le
+ * harnais du vendeur sous-estimait son coût d'un facteur égal au NOMBRE DE
+ * COMPTES : 9 600 lignes annoncées pour 19 200 réellement lues, avec deux
+ * comptes seulement. À mille comptes, l'écart aurait été de mille.
+ *
+ * C'est exactement le genre de mesure qui rassure jusqu'au jour où le produit
+ * marche.
+ */
+async function mesurerGlobal(sql: string): Promise<Mesure> {
+  const resultat = await bd.query<{ "QUERY PLAN": unknown[] }>(
+    `explain (analyze, buffers, format json) ${sql}`,
+  );
+  const racine = (
+    resultat.rows[0]?.["QUERY PLAN"] as Array<{
+      Plan: Record<string, unknown>;
+      "Execution Time": number;
+    }>
+  )[0];
+  if (racine === undefined) throw new Error("plan illisible");
+
+  let lignesLues = 0;
+  let opaque = false;
+  const balayees: string[] = [];
+
+  const parcourir = (noeud: Record<string, unknown>): void => {
+    const type = String(noeud["Node Type"] ?? "");
+    if (type.includes("Scan")) {
+      const boucles = Number(noeud["Actual Loops"] ?? 1);
+      lignesLues +=
+        (Number(noeud["Actual Rows"] ?? 0) +
+          Number(noeud["Rows Removed by Filter"] ?? 0) +
+          Number(noeud["Rows Removed by Index Recheck"] ?? 0)) *
+        boucles;
+    }
+    if (type === "Seq Scan") balayees.push(String(noeud["Relation Name"] ?? "?"));
+    if (type === "Function Scan") opaque = true;
+    for (const enfant of (noeud["Plans"] as Array<Record<string, unknown>>) ?? []) {
+      parcourir(enfant);
+    }
+  };
+  parcourir(racine.Plan);
+
+  return { ms: racine["Execution Time"], lignesLues, balayees, opaque };
+}
+
+/** Rodage jeté, puis deux séries, sans RLS. Rend la PIRE. */
+async function mesurerGlobalSerieuse(sql: string): Promise<Mesure> {
+  await mesurerGlobal(sql);
+  const a = await mesurerGlobal(sql);
+  const b = await mesurerGlobal(sql);
+  return a.ms >= b.ms ? a : b;
+}
+
 /** Rodage jeté, puis deux séries. Rend la PIRE — jamais la meilleure. */
 async function mesurerSerieuse(utilisateur: UtilisateurDeTest, sql: string): Promise<Mesure> {
   await mesurer(utilisateur, sql);
@@ -164,6 +222,35 @@ beforeAll(async () => {
   await semer(alice, "AL");
   await semer(voisin, "VO");
 
+  // LES PRISES EN CHARGE SONT DATÉES sur le mois courant : c'est ce que le
+  // panneau d'administration agrège, et sans elles la mesure porterait sur zéro
+  // ligne — un ensemble vide passe tout.
+  await bd.query(
+    `update public.tracked_parcels set registered_at = date_trunc('month', now()) + interval '1 hour'
+     where shop_id = any($1)`,
+    [[alice.shopId, voisin.shopId]],
+  );
+
+  /*
+   * `VACUUM` SUR LES COMPTEURS, ET C'EST UN ARTEFACT DU SEED QU'IL FAUT NOMMER.
+   *
+   * L'`update` ci-dessus incrémente le compteur 19 200 fois sur DEUX lignes : le
+   * déclencheur produit donc 19 200 versions mortes que le parcours relit
+   * ensuite, et la mesure annonçait 19 213 lignes lues pour une table qui en
+   * porte deux.
+   *
+   * En usage réel, ces incréments sont étalés — quelques centaines par compte et
+   * par MOIS, au rythme où un vendeur colle ses numéros — et l'autovacuum suit
+   * sans peine. Le seed les concentre en une seconde, ce qu'aucun vendeur ne
+   * fera jamais. On nettoie donc explicitement pour que la mesure décrive le
+   * régime permanent plutôt que le pire instant d'un remplissage artificiel.
+   *
+   * Ce n'est PAS un maquillage : la contention et le gonflement de cette table
+   * sont réels et suivent le nombre de prises en charge. Ce que cette mesure ne
+   * peut pas établir, elle ne l'établit pas — elle porte sur le COÛT DE LECTURE
+   * du panneau, pas sur le coût d'écriture du compteur.
+   */
+  await bd.query("vacuum analyze public.usage_counters");
   await bd.query("analyze public.tracked_parcels");
 }, 300_000);
 
@@ -257,6 +344,86 @@ describe("La liste des envois", () => {
     expect(m.ms).toBeLessThan(PAGE_MS);
     expect(m.lignesLues).toBeLessThan(LIGNES_LUES_PAGE);
     expect(balayagesInterdits(m), "balayage séquentiel").toEqual([]);
+  });
+});
+
+describe("Le panneau d'administration, à l'échelle", () => {
+  /*
+   * SEUIL ÉCRIT AVANT LA PREMIÈRE EXÉCUTION : 300 ms.
+   *
+   * C'EST LE SEUL ENDROIT DU PRODUIT OÙ LE COÛT CROÎT AVEC LE NOMBRE TOTAL DE
+   * COMPTES. Partout ailleurs la RLS borne chaque requête à une boutique ; ici
+   * on agrège volontairement l'ensemble, et c'est donc le premier écran qui
+   * ralentira quand le produit marchera.
+   *
+   * Ce qui le rend tenable : les compteurs de colis sont bornés AU MOIS. Leur
+   * coût ne croît pas avec l'âge du produit, seulement avec son activité
+   * courante — et un index partiel sur `registered_at` écarte les colis jamais
+   * pris en charge, qui sont la majorité chez un vendeur qui débute.
+   */
+  const PANNEAU_MS = 300;
+
+  test(`les alertes ne balaient pas la table des colis (< ${PANNEAU_MS} ms)`, async () => {
+    const m = await mesurerGlobalSerieuse(
+      `select p.email, u.parcels_registered
+       from public.usage_counters u
+       join public.profiles p on p.id = u.profile_id
+       where u.period_month = date_trunc('month', now())::date
+         and u.parcels_registered > 1200`,
+    );
+
+    console.log(`  panneau, alertes : ${m.ms.toFixed(1)} ms, ${m.lignesLues} lignes lues`);
+    expect(m.opaque, "plan opaque : la mesure ne décrit rien").toBe(false);
+    expect(m.ms).toBeLessThan(PANNEAU_MS);
+    // La sonde doit avoir inspecté quelque chose : le jeu porte 19 200 colis
+    // pris en charge ce mois, répartis sur deux comptes.
+    /*
+     * LE SEUIL QUI PROTÈGE CET ÉCRAN À L'ÉCHELLE.
+     *
+     * Le panneau doit lire UNE LIGNE PAR COMPTE, jamais une par colis. Mesuré
+     * avant dénormalisation : 19 244 lignes pour deux comptes de 9 600 colis —
+     * un coût linéaire dans l'activité TOTALE du produit, donc des millions de
+     * lignes à mille vendeurs, exactement quand le produit marche.
+     *
+     * Le seuil est délibérément bas : il échouerait immédiatement si quelqu'un
+     * refaisait passer cette requête par `tracked_parcels`.
+     */
+    expect(
+      m.lignesLues,
+      `${m.lignesLues} lignes lues : le panneau parcourt les colis au lieu des compteurs`,
+    ).toBeLessThan(500);
+  });
+
+  test(`le compteur facturable est borné au mois (< ${PANNEAU_MS} ms)`, async () => {
+    const m = await mesurerGlobalSerieuse(
+      `select coalesce(sum(u.parcels_registered), 0) from public.usage_counters u
+       where u.period_month = date_trunc('month', now())::date`,
+    );
+
+    console.log(`  panneau, facturable : ${m.ms.toFixed(1)} ms, ${m.lignesLues} lignes lues`);
+    expect(m.ms).toBeLessThan(PANNEAU_MS);
+    expect(m.lignesLues, "le compteur facturable parcourt encore les colis").toBeLessThan(500);
+  });
+
+  test("contre-test positif : la sonde SAIT voir un parcours de colis", async () => {
+    // Sans lui, « moins de 500 lignes » ci-dessus pourrait vouloir dire que la
+    // sonde ne regarde rien. Un ensemble vide passe tout.
+    const m = await mesurerGlobalSerieuse(
+      `select count(*) from public.tracked_parcels
+       where registered_at >= date_trunc('month', now())`,
+    );
+    expect(m.lignesLues, "la sonde ne voit pas un parcours de 19 200 colis").toBeGreaterThan(
+      COLIS * 2 - 100,
+    );
+  });
+
+  test("le comptage des comptes reste borné par le nombre d'inscrits", async () => {
+    // Il est EXACT, et il peut l'être : `profiles` porte une ligne par compte,
+    // soit quelques milliers. C'est la seule table du produit dont le volume ne
+    // croît pas avec l'usage, seulement avec les inscriptions.
+    const m = await mesurerGlobalSerieuse("select count(*) from public.profiles");
+    console.log(`  panneau, comptes : ${m.ms.toFixed(1)} ms, ${m.lignesLues} lignes lues`);
+    expect(m.ms).toBeLessThan(PANNEAU_MS);
   });
 });
 

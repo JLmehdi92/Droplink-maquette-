@@ -675,6 +675,33 @@
         "introuvable": "Account not found.",
         "ecriture": "Nothing was changed. Please retry."
       }
+    },
+    "panneau": {
+      "titre": "Dashboard",
+      "alertes": "Alerts",
+      "aucuneAlerte": "No alerts. Nothing is over the thresholds, and background tasks are beating normally.",
+      "alerte": {
+        "colis_au_dessus_du_seuil": "An account is over the parcel registration threshold this month",
+        "veilleur_en_retard": "A background task has not beaten for too long"
+      },
+      "valeurContreSeuil": "{sujet} — {valeur} against a threshold of {seuil}",
+      "compteurs": "Counters",
+      "colisFactures": "Parcels registered this month",
+      "colisFacturesAide": "This is the only item the tracking provider bills. {abandonnes} abandoned this month.",
+      "comptes": "Accounts",
+      "comptesActifs": "Active",
+      "comptesSuspendus": "Suspended",
+      "comptesSansType": "Onboarding unfinished",
+      "stockage": "Media storage",
+      "stockageIndisponible": "Unavailable",
+      "stockageAide": "No measurement is in place yet. “Unavailable” rather than “0 B”: zero would claim we measured.",
+      "taches": "Background tasks",
+      "tachesJamaisDeployees": "No task has ever beaten. This is not a failure: nothing has been deployed yet.",
+      "tache": {
+        "actif": "Last beat {n} min ago",
+        "en_retard": "No beat for {n} min"
+      },
+      "seuilsEnCours": "Thresholds in force: {colis} parcels per account per month, {minutes} minutes without a beat."
     }
   }
 }
