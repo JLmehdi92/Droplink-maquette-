@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
 import { BaliseVue } from "@/components/publique/balise-vue";
 import { Frise } from "@/components/publique/frise";
 import { Visionneur } from "@/components/publique/visionneur";
@@ -189,6 +190,42 @@ export default async function PagePublique({
 
             {/* Bloc OMIS quand ni référence ni numéro de suivi : une carte vide
                 affirmerait qu'il y a quelque chose à y lire. */}
+            {/*
+              L'ARBITRAGE QC, sous le suivi sur grand écran et après la galerie
+              sur mobile : on ne demande pas à quelqu'un de juger des photos
+              avant de les lui avoir montrées.
+
+              OMIS QUAND IL N'Y A AUCUNE PHOTO. Demander « ces photos
+              correspondent-elles ? » devant une galerie vide n'appelle aucune
+              réponse sensée, et une décision prise là-dessus serait écrite au
+              journal comme les autres.
+            */}
+            {commande.medias.length > 0 ? (
+              <section className={carte}>
+                <h2 className="mb-4 font-headline-md text-headline-md-mobile text-on-surface">
+                  {t("qc.titre")}
+                </h2>
+                <ArbitrageQc
+                  jeton={commande.jeton}
+                  etatInitial={commande.qc}
+                  remplissage={accent.remplissage}
+                  surRemplissage={accent.surRemplissage}
+                  libelles={{
+                    titre: t("qc.titre"),
+                    texte: t("qc.texte"),
+                    approuver: t("qc.approuver"),
+                    refuser: t("qc.refuser"),
+                    commentaire: t("qc.commentaire"),
+                    envoi: t("qc.envoi"),
+                    approuve: t("qc.approuve"),
+                    refuse: t("qc.refuse"),
+                    modifier: t("qc.modifier"),
+                    echec: t("qc.echec"),
+                  }}
+                />
+              </section>
+            ) : null}
+
             {commande.reference !== null || commande.numeroSuivi !== null ? (
               <section className={carte}>
                 <h2 className="mb-4 font-headline-md text-headline-md-mobile text-on-surface">

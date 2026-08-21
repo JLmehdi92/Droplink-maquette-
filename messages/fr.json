@@ -418,6 +418,18 @@
       "titre": "Détails",
       "reference": "Article",
       "suivi": "Numéro de suivi"
+    },
+    "qc": {
+      "titre": "Votre avis",
+      "texte": "Ces photos correspondent-elles à ce que vous attendiez ?",
+      "approuver": "C’est bon pour moi",
+      "refuser": "Il y a un problème",
+      "commentaire": "Un mot à ajouter ? (facultatif)",
+      "envoi": "Envoi…",
+      "approuve": "Vous avez validé cette commande.",
+      "refuse": "Vous avez signalé un problème. Le vendeur est prévenu.",
+      "modifier": "Changer d’avis",
+      "echec": "Votre réponse n’a pas pu être enregistrée. Réessayez."
     }
   }
 }

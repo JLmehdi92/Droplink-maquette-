@@ -168,6 +168,69 @@ describe("Ce qui NE compte PAS", () => {
   });
 });
 
+/**
+ * LE COMPTEUR DÉNORMALISÉ (027).
+ *
+ * Il existe parce que le tri « jamais ouvert » mesurait 500 ms et 48 001 lignes
+ * lues dans son pire cas — un vendeur dont toutes les commandes ont été
+ * ouvertes, c'est-à-dire un vendeur chez qui ça marche. Le tri portait sur une
+ * ABSENCE, et rien ne s'indexe du côté d'une absence.
+ *
+ * Mais un compteur tenu par déclencheur est une SECONDE source de vérité, et une
+ * seconde source ne se contente pas d'exister : elle doit dire la même chose que
+ * la première. Un écart ne casserait rien — il produirait un tri qui ment au
+ * vendeur sur ce que ses clients ont vu.
+ */
+describe("Le compteur porté par la commande", () => {
+  async function compteur(): Promise<{ n: number; derniere: string | null }> {
+    const lignes = await interroger<{ n: number; derniere: string | null }>(
+      catalogue,
+      "select views_count as n, last_viewed_at as derniere from public.orders where id = $1",
+      [commande],
+    );
+    return { n: Number(lignes[0]?.n ?? -1), derniere: lignes[0]?.derniere ?? null };
+  }
+
+  test("il suit EXACTEMENT le nombre de lignes de vues", async () => {
+    const reelles = await compterVues();
+    const porte = await compteur();
+    expect(porte.n, "le compteur a divergé des vues réelles").toBe(reelles);
+    expect(reelles, "aucune vue : la sonde n'inspecte rien").toBeGreaterThan(0);
+  });
+
+  test("une vue de plus l'incrémente, une vue dédupliquée NON", async () => {
+    const avant = (await compteur()).n;
+
+    expect(await enregistrer(jeton, "vue-ip-compteur", "vue-agent-compteur")).toBe(true);
+    expect((await compteur()).n, "le déclencheur n'a pas compté").toBe(avant + 1);
+
+    // Le même visiteur le même jour : aucune ligne, donc aucun incrément. Sans
+    // ce contre-test, un compteur incrémenté à chaque APPEL — et non à chaque
+    // ligne — passerait le test précédent.
+    expect(await enregistrer(jeton, "vue-ip-compteur", "vue-agent-compteur")).toBe(false);
+    expect((await compteur()).n, "une consultation dédupliquée a été comptée").toBe(avant + 1);
+  });
+
+  test("la date de dernière vue est renseignée", async () => {
+    expect((await compteur()).derniere, "aucune date de dernière vue").not.toBeNull();
+  });
+
+  test("un vendeur ne peut pas écrire son propre compteur", async () => {
+    // C'est une MESURE, pas une donnée du vendeur. La lui laisser écrire
+    // reviendrait à le laisser fabriquer sa preuve d'usage — sur un produit dont
+    // le livrable EST la donnée d'usage.
+    const avant = (await compteur()).n;
+    const { error } = await alice.client
+      .from("orders")
+      .update({ views_count: 9999 })
+      .eq("id", commande);
+    expect(
+      (await compteur()).n,
+      `un vendeur a écrit son compteur (erreur : ${error?.message ?? "aucune"})`,
+    ).toBe(avant);
+  });
+});
+
 describe("Qui peut écrire, qui peut lire", () => {
   test("`anon` ne peut ni exécuter la fonction ni toucher la table", async () => {
     const anonyme = clientAnonyme();

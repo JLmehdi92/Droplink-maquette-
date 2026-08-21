@@ -78,8 +78,19 @@ export interface PageCommandes {
  * d'hydratation de l'écran sans que personne n'ait pris la décision de l'y
  * mettre. Ce qui n'est pas demandé ne peut pas fuiter.
  */
+/*
+ * `views_count` et `last_viewed_at` sont PORTÉS PAR LA COMMANDE (migration 027),
+ * pas agrégés depuis `link_views`. Mesuré au plafond : la jointure latérale
+ * lisait 1 021 lignes pour en afficher cinquante, et le tri « jamais ouvert »
+ * montait à 500 ms chez un vendeur dont TOUT avait été ouvert. Lus ici, ils ne
+ * coûtent rien de plus que la ligne elle-même.
+ *
+ * La liste reste une CHAÎNE LITTÉRALE d'un seul tenant : PostgREST en déduit le
+ * type du résultat, et la découper par concaténation fait retomber tout l'objet
+ * sur un type d'erreur — le typage cesse alors de vérifier quoi que ce soit.
+ */
 export const COLONNES =
-  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, created_at, updated_at, archived_at";
+  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at";
 
 /** Colonne de tri et sens, par tri demandé. */
 function ordre(tri: Tri): { colonne: "created_at" | "updated_at"; croissant: boolean } {

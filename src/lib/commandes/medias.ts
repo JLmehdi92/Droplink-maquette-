@@ -7,6 +7,7 @@ import { cleMedia, cleVignette, typesAcceptes } from "@/lib/storage/cles";
 import { deciderDepot, estVideo, limites } from "@/lib/storage/limites";
 import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
 import type { creerClientServeur } from "@/lib/supabase/server";
+import { journaliser } from "./journal";
 
 /**
  * LES MÉDIAS D'UNE COMMANDE, côté serveur.
@@ -360,6 +361,13 @@ export async function confirmerDepot(
     { commande: orderId, taille: tailleReelle, type: typeMime },
   );
 
+  // La CLÉ de l'objet n'entre pas au journal : elle est dérivable en URL signée,
+  // et l'historique est un écran de plus où elle pourrait fuiter.
+  await journaliser(supabase, orderId, "media_ajoute", {
+    taille: tailleReelle,
+    type: typeMime,
+  });
+
   return { statut: "ok", mediaId, tailleOctets: tailleReelle };
 }
 
@@ -392,6 +400,9 @@ export async function supprimerMedia(
   if (error !== null || data === null) return { statut: "echec", motif: "introuvable" };
 
   await supprimer(data.cle).catch(() => undefined);
+
+  await journaliser(supabase, analyse.data.orderId, "media_supprime");
+
   return { statut: "ok" };
 }
 
@@ -419,6 +430,14 @@ export async function reordonnerMedias(
   });
 
   if (error !== null) return { statut: "echec", motif: error.code ?? "ecriture" };
+
+  await journaliser(
+    supabase,
+    analyse.data.orderId,
+    "medias_reordonnes",
+    { nombre: data ?? 0 },
+  );
+
   return { statut: "ok", nombre: data ?? 0 };
 }
 

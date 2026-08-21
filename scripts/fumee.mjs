@@ -369,6 +369,56 @@ try {
           [apresDeux === 1, `la seconde consultation du jour ne compte pas (compte : ${apresDeux})`],
         );
 
+        // L ARBITRAGE QC, de bout en bout : la seule ecriture publique du
+        // produit. Le controle porte sur l EFFET en base, pas sur le code de
+        // reponse — « il repond » est la propriete que tous les residus
+        // possedent.
+        const arbitrage = await fetch(`${base}/p/${jetonFumee}/qc`, {
+          method: "POST",
+          headers: { ...enTetes, "content-type": "application/json" },
+          body: JSON.stringify({ decision: "refuse", commentaire: "La couture est de travers" }),
+        });
+        const corpsQc = arbitrage.ok ? await arbitrage.json() : null;
+
+        const { data: apresArbitrage } = await service
+          .from("orders")
+          .select("qc_status")
+          .eq("id", commandeFumee)
+          .single();
+
+        const { data: journal } = await service
+          .from("order_events")
+          .select("type, actor, payload")
+          .eq("order_id", commandeFumee)
+          .order("occurred_at", { ascending: false })
+          .limit(1);
+
+        const derniere = journal?.[0] ?? null;
+
+        // Un corps invalide ne doit rien ecrire, et ne doit pas se distinguer
+        // d un jeton inconnu.
+        const invalide = await fetch(`${base}/p/${jetonFumee}/qc`, {
+          method: "POST",
+          headers: { ...enTetes, "content-type": "application/json" },
+          body: JSON.stringify({ decision: "peut_etre" }),
+        });
+
+        controles.push(
+          [arbitrage.status === 200, "l arbitrage QC repond 200"],
+          [corpsQc?.qc === "refuse", "il rend le statut CONFIRME par la base"],
+          [
+            apresArbitrage?.qc_status === "refuse",
+            `la commande porte le nouveau statut (${apresArbitrage?.qc_status})`,
+          ],
+          [derniere?.type === "qc_refuse", `le journal porte la decision (${derniere?.type})`],
+          [derniere?.actor === "client", "elle est attribuee au CLIENT, pas au vendeur"],
+          [
+            derniere?.payload?.commentaire === "La couture est de travers",
+            "le commentaire est retenu",
+          ],
+          [invalide.status === 404, "une decision inventee ne se distingue pas d un jeton inconnu"],
+        );
+
         // LES DEUX SEUILS. On epuise le plafond depuis UNE adresse, puis on
         // verifie qu une AUTRE adresse passe encore : sans ce second controle,
         // un compteur global — donc un seul balayeur capable de couper la page

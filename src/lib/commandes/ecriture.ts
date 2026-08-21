@@ -4,6 +4,7 @@ import { emettre } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import type { creerClientServeur } from "@/lib/supabase/server";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "./liste";
+import { journaliser } from "./journal";
 
 /**
  * LE CŒUR DES ÉCRITURES DE COMMANDE, hors d'un module `"use server"`.
@@ -133,6 +134,13 @@ export async function appliquerChamp(
 
   await emettre(EVENEMENTS.COMMANDE_MODIFIEE, { sujet: profilId }, { champ: nom });
 
+  // Le JOURNAL est distinct de l'instrumentation, et les deux ne se remplacent
+  // pas : l'un dit au vendeur ce qui est arrivé à SA commande, l'autre nous dit
+  // combien de vendeurs modifient. La VALEUR du champ n'y entre pas — les notes
+  // internes portent le prix d'achat, et un journal qui montre tout devient une
+  // surface de fuite.
+  await journaliser(supabase, analyse.data.id, "commande_modifiee", { champ: nom });
+
   return { statut: "ok", modifieeLe: data.updated_at };
 }
 
@@ -174,4 +182,9 @@ async function marquerPremierContenu(
   if (data !== true) return;
 
   await emettre(EVENEMENTS.COMMANDE_CREEE, { sujet: profilId }, { commande: id });
+
+  // Journalisé ICI et pas à l'ouverture de l'éditeur : la commande naît au
+  // premier CONTENU RÉEL. Un brouillon ouvert puis abandonné n'a jamais existé
+  // pour le client, et son historique n'a rien à raconter.
+  await journaliser(supabase, id, "commande_creee");
 }

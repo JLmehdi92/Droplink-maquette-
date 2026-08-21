@@ -188,6 +188,25 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "moitié faite est une coupure qui n'a pas eu lieu.",
     ],
     [
+      "arbitrer_qc",
+      "SEULE écriture publique du produit. En `security definer` parce que " +
+        "`anon` n'a et ne doit avoir aucun droit sur `orders` : sans elle, il " +
+        "faudrait une policy d'UPDATE ouverte à `anon`, laquelle porterait sur " +
+        "TOUTES les commandes. Elle exige le jeton et n'accepte AUCUN " +
+        "identifiant de commande — en accepter un permettrait d'arbitrer la " +
+        "commande d'un autre vendeur avec un jeton valide quelconque. Elle " +
+        "refait le filtre de suspension et borne le commentaire.",
+    ],
+    [
+      "journaliser_vendeur",
+      "Écrit le journal d'un vendeur sur SES commandes. Volontairement " +
+        "DISTINCTE de `journaliser`, qui reste réservée au rôle système : " +
+        "celle-ci refuse les types `qc_*` et `lien_revoque`, et écrit l'acteur " +
+        "en dur. Un vendeur qui pourrait écrire « le client a approuvé » " +
+        "fabriquerait la seule pièce contestable du journal. Elle vérifie la " +
+        "PROPRIÉTÉ dans son corps, `security definer` mettant la RLS de côté.",
+    ],
+    [
       "regenerer_jeton_public",
       "Unique chemin légitime de révocation d'un lien. En `security definer` " +
         "pour poser le drapeau qu'exige le déclencheur d'immuabilité, mais elle " +
@@ -390,6 +409,11 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
       // fabriquerait une preuve d'usage sur un produit dont le livrable EST la
       // donnée d'usage.
       "link_views",
+      // Le journal d'une commande, lisible par son vendeur et par lui seul.
+      // AUCUN droit d'écriture : la table est append-only et son seul chemin
+      // d'écriture est `security definer`. Un journal qu'on peut corriger n'est
+      // pas un journal.
+      "order_events",
       "order_media",
       "orders",
       "profiles",

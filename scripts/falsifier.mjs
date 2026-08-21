@@ -307,6 +307,150 @@ const SQL = {
       jusqua: "comment on function",
     },
   },
+
+  /**
+   * LE CAS MOTIVANT du journal : un vendeur autorise a ecrire l arbitrage de
+   * son client. Le defaut se presente comme une simplification — une porte au
+   * lieu de deux — et l arbitrage QC est la seule ligne contestable du journal,
+   * donc la seule qu un vendeur aurait interet a fabriquer.
+   */
+  "journal-vendeur-tout-puissant": {
+    casser: `create or replace function public.journaliser_vendeur(
+        p_order_id uuid, p_type text, p_payload jsonb default '{}'::jsonb
+      ) returns uuid language plpgsql security definer set search_path = '' as $$
+      declare v_shop uuid; v_id uuid;
+      begin
+        select public.mon_shop_id() into v_shop;
+        if v_shop is null then
+          raise exception 'Aucune boutique pour cet appelant.' using errcode = 'DL011';
+        end if;
+        perform 1 from public.orders o where o.id = p_order_id and o.shop_id = v_shop;
+        if not found then
+          raise exception 'Commande introuvable.' using errcode = 'DL012';
+        end if;
+        insert into public.order_events (order_id, type, actor, payload)
+        values (p_order_id, p_type, 'vendeur', coalesce(p_payload, '{}'::jsonb))
+        returning id into v_id;
+        return v_id;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "026_journal_du_vendeur.sql",
+      depuis: "create function public.journaliser_vendeur",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : le filtre de suspension retire du chemin d ECRITURE.
+   *
+   * La lecture s arrete, l ecriture continue. Tout dit que le compte est coupe —
+   * ses pages ne repondent plus, l ecran d admin affiche « suspendu » — et ses
+   * commandes restent arbitrables par quiconque detient un lien.
+   */
+  "qc-sans-suspension": {
+    casser: `create or replace function public.arbitrer_qc(
+        p_jeton text, p_decision text, p_commentaire text
+      ) returns public.qc_status language plpgsql security definer set search_path = '' as $$
+      declare v_order uuid; v_statut public.qc_status; v_commentaire text;
+      begin
+        if p_decision not in ('approuve', 'refuse') then
+          raise exception 'decision inconnue' using errcode = '22023';
+        end if;
+        select o.id into v_order from public.orders o where o.public_token = p_jeton;
+        if v_order is null then return null; end if;
+        v_commentaire := left(coalesce(nullif(btrim(p_commentaire), ''), ''), 1000);
+        v_statut := p_decision::public.qc_status;
+        update public.orders set qc_status = v_statut where id = v_order;
+        perform public.journaliser(v_order,
+          case when v_statut = 'approuve' then 'qc_approuve' else 'qc_refuse' end,
+          'client',
+          case when v_commentaire = '' then '{}'::jsonb
+               else jsonb_build_object('commentaire', v_commentaire) end);
+        return v_statut;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "024_arbitrage_qc.sql",
+      depuis: "create function public.arbitrer_qc",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : la revocation cesse d ecrire sa trace.
+   *
+   * Le principe V exige que l action explicite ecrive un evenement. Sans lui, la
+   * rotation fonctionne parfaitement — le lien est bien coupe — et il ne reste
+   * simplement aucune piece a produire sur la date a laquelle il l a ete.
+   */
+  "revocation-sans-trace": {
+    casser: `create or replace function public.regenerer_jeton_public(p_order_id uuid)
+      returns text language plpgsql security definer set search_path = '' as $$
+      declare v_shop uuid; v_nouveau text;
+      begin
+        select public.mon_shop_id() into v_shop;
+        if v_shop is null then
+          raise exception 'Aucune boutique pour cet appelant.' using errcode = 'DL011';
+        end if;
+        perform 1 from public.orders o where o.id = p_order_id and o.shop_id = v_shop;
+        if not found then
+          raise exception 'Commande introuvable.' using errcode = 'DL012';
+        end if;
+        perform set_config('droplink.rotation_jeton', 'oui', true);
+        update public.orders
+          set public_token = public.generer_jeton_public(),
+              unsubscribe_token = public.generer_jeton_public()
+          where id = p_order_id returning public_token into v_nouveau;
+        perform set_config('droplink.rotation_jeton', '', true);
+        return v_nouveau;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "025_revocation_journalisee.sql",
+      depuis: "create or replace function public.regenerer_jeton_public",
+    },
+  },
+
+  /**
+   * Le vocabulaire du journal, desaccorde entre la base et le code.
+   *
+   * Un type retire de la contrainte fait ECHOUER l ecriture — et la transaction
+   * etant partagee, annule la mutation entiere. Le defaut ne se manifeste donc
+   * pas sur le journal mais sur la sauvegarde du vendeur, plusieurs ecrans plus
+   * loin que sa cause.
+   */
+  "journal-vocabulaire-desaccorde": {
+    casser:
+      "alter table public.order_events drop constraint order_events_type_connu; " +
+      "alter table public.order_events add constraint order_events_type_connu " +
+      "check (type in ('commande_creee', 'commande_modifiee', 'commande_archivee', " +
+      "'commande_dupliquee', 'media_ajoute', 'media_supprime', 'lien_revoque', " +
+      "'qc_approuve', 'qc_refuse'));",
+    reparer:
+      "alter table public.order_events drop constraint order_events_type_connu; " +
+      "alter table public.order_events add constraint order_events_type_connu " +
+      "check (type in ('commande_creee', 'commande_modifiee', 'commande_archivee', " +
+      "'commande_dupliquee', 'media_ajoute', 'media_supprime', 'medias_reordonnes', " +
+      "'lien_revoque', 'qc_approuve', 'qc_refuse'));",
+  },
+
+
+  /**
+   * Le compteur denormalise, DECROCHE de sa source.
+   *
+   * Le declencheur retire, `link_views` continue de se remplir normalement et le
+   * compteur reste fige. Rien ne casse : le tableau de bord annonce simplement
+   * « jamais ouvert » a des commandes que le client a vues, et le vendeur relance
+   * quelqu un qui a deja regarde ses photos.
+   *
+   * Une seconde source de verite ne se contente pas d exister : elle doit dire la
+   * meme chose que la premiere.
+   */
+  "compteur-vues-decroche": {
+    casser: "drop trigger link_views_compter on public.link_views;",
+    reparer:
+      "create trigger link_views_compter after insert on public.link_views " +
+      "for each row execute function public.compter_vue();",
+  },
+
 };
 
 const [, , action, cible] = process.argv;

@@ -55,6 +55,41 @@ export type Database = {
           },
         ]
       }
+      order_events: {
+        Row: {
+          actor: string
+          id: string
+          occurred_at: string
+          order_id: string
+          payload: Json
+          type: string
+        }
+        Insert: {
+          actor: string
+          id?: string
+          occurred_at?: string
+          order_id: string
+          payload?: Json
+          type: string
+        }
+        Update: {
+          actor?: string
+          id?: string
+          occurred_at?: string
+          order_id?: string
+          payload?: Json
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_media: {
         Row: {
           cle: string
@@ -119,6 +154,7 @@ export type Database = {
           first_content_at: string | null
           id: string
           internal_notes: string | null
+          last_viewed_at: string | null
           notify_email: string | null
           product_ref: string | null
           public_token: string
@@ -129,6 +165,7 @@ export type Database = {
           tracking_number: string | null
           unsubscribe_token: string
           updated_at: string
+          views_count: number
         }
         Insert: {
           archived_at?: string | null
@@ -140,6 +177,7 @@ export type Database = {
           first_content_at?: string | null
           id?: string
           internal_notes?: string | null
+          last_viewed_at?: string | null
           notify_email?: string | null
           product_ref?: string | null
           public_token: string
@@ -150,6 +188,7 @@ export type Database = {
           tracking_number?: string | null
           unsubscribe_token: string
           updated_at?: string
+          views_count?: number
         }
         Update: {
           archived_at?: string | null
@@ -161,6 +200,7 @@ export type Database = {
           first_content_at?: string | null
           id?: string
           internal_notes?: string | null
+          last_viewed_at?: string | null
           notify_email?: string | null
           product_ref?: string | null
           public_token?: string
@@ -171,6 +211,7 @@ export type Database = {
           tracking_number?: string | null
           unsubscribe_token?: string
           updated_at?: string
+          views_count?: number
         }
         Relationships: [
           {
@@ -285,6 +326,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      arbitrer_qc: {
+        Args: { p_commentaire: string; p_decision: string; p_jeton: string }
+        Returns: Database["public"]["Enums"]["qc_status"]
+      }
       consommer_quota: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
@@ -304,6 +349,19 @@ export type Database = {
         Returns: string
       }
       generer_jeton_public: { Args: never; Returns: string }
+      journaliser: {
+        Args: {
+          p_actor: string
+          p_order_id: string
+          p_payload?: Json
+          p_type: string
+        }
+        Returns: string
+      }
+      journaliser_vendeur: {
+        Args: { p_order_id: string; p_payload?: Json; p_type: string }
+        Returns: string
+      }
       lire_commande_publique: {
         Args: { p_jeton: string }
         Returns: {

@@ -24,7 +24,9 @@ export type Surface =
   /** Toutes les requêtes de la page publique, par adresse. */
   | "publique-requetes"
   /** Les seules requêtes portant un jeton INCONNU, par adresse. */
-  | "publique-inconnu";
+  | "publique-inconnu"
+  /** La seule ÉCRITURE publique du produit : l'arbitrage QC. */
+  | "publique-ecriture";
 
 export type Verdict = { autorise: true } | { autorise: false; motif: "quota" | "indisponible" };
 
@@ -72,6 +74,14 @@ function seuil(surface: Surface): { plafond: number; fenetreSecondes: number } {
     case "publique-inconnu":
       return {
         plafond: entierEnv("QUOTA_PUBLIQUE_INCONNU_PAR_MINUTE", 20),
+        fenetreSecondes: 60,
+      };
+    case "publique-ecriture":
+      // Dix par minute : un client approuve ou refuse une fois, éventuellement
+      // se ravise. Personne n'a besoin de dix arbitrages par minute, et le
+      // seuil reste largement au-dessus de tout usage réel.
+      return {
+        plafond: entierEnv("QUOTA_PUBLIQUE_ECRITURE_PAR_MINUTE", 10),
         fenetreSecondes: 60,
       };
   }
@@ -177,4 +187,28 @@ export async function signalerJetonInconnu(): Promise<void> {
   const ip = await adresseAppelant();
   if (ip === null) return;
   await consommer(empreinte(ip), "publique-inconnu");
+}
+
+/**
+ * L'unique ÉCRITURE publique : l'arbitrage QC.
+ *
+ * ELLE REFUSE EN CAS DE PANNE DU COMPTEUR, et c'est l'inverse de la lecture de
+ * la même page. La règle « la page publique autorise » protège la CONSULTATION :
+ * refuser d'afficher ses photos à quelqu'un le prive de ce qu'il est venu
+ * chercher, pour un incident qui ne le concerne pas.
+ *
+ * Ici l'arbitrage est REJOUABLE — le visiteur reclique et rien n'est perdu — et
+ * ce qui serait perdu dans l'autre sens ne l'est pas : un chemin d'écriture sans
+ * plafond laisse une seule adresse remplir le journal de n'importe quelle
+ * commande dont elle détient le lien. Le coût d'un refus injustifié est de
+ * quelques secondes ; celui d'une écriture sans borne est permanent.
+ */
+export async function verifierQuotaEcriturePublique(): Promise<Verdict> {
+  const ip = await adresseAppelant();
+  // Sans adresse exploitable il n'y a rien à compter — et regrouper tout le
+  // monde sous une clé commune laisserait un seul abuseur bloquer l'arbitrage de
+  // tous les clients de tous les vendeurs.
+  if (ip === null) return { autorise: true };
+
+  return consommer(empreinte(ip), "publique-ecriture");
 }

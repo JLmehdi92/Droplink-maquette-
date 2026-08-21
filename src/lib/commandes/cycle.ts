@@ -4,6 +4,7 @@ import { emettre } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import type { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
+import { journaliser } from "./journal";
 
 /**
  * LE CYCLE DE VIE D'UNE COMMANDE : révoquer le lien, dupliquer, archiver.
@@ -59,6 +60,11 @@ export async function revoquerLien(
     return { statut: "echec", motif: "ecriture" };
   }
 
+  // AUCUN appel au journal ici, et c'est délibéré : `regenerer_jeton_public`
+  // écrit sa propre ligne, DANS LA MÊME TRANSACTION que la rotation (025). Un
+  // second appel depuis l'application ajouterait une ligne en double — et une
+  // trace qui compte double se relit comme deux révocations, sur la pièce
+  // exacte qu'on produirait en cas de litige. Un fait, un point d'émission.
   await emettre(EVENEMENTS.LIEN_REVOQUE, { sujet: profilId }, { commande: analyse.data });
 
   return { statut: "ok", nouveauJeton: data };
@@ -124,6 +130,10 @@ export async function dupliquerCommande(
     { source: analyse.data, copie: data.id },
   );
 
+  // Journalisé sur la COPIE : c'est son historique à elle qui doit dire d'où
+  // elle vient. L'écrire sur la source répondrait à une autre question.
+  await journaliser(supabase, data.id, "commande_dupliquee", { source: analyse.data });
+
   return { statut: "ok", nouvelleCommande: data.id };
 }
 
@@ -167,6 +177,8 @@ export async function archiverCommande(
     { sujet: profilId },
     { commande: analyse.data, archivee: archiver },
   );
+
+  await journaliser(supabase, analyse.data, "commande_archivee", { archivee: archiver });
 
   return { statut: "ok", archivee: data.archived_at !== null };
 }
