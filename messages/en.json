@@ -694,14 +694,15 @@
       "comptesSansType": "Onboarding unfinished",
       "stockage": "Media storage",
       "stockageIndisponible": "Unavailable",
-      "stockageAide": "No measurement is in place yet. “Unavailable” rather than “0 B”: zero would claim we measured.",
+      "stockageAide": "Sum of the sizes measured server-side on upload, across all accounts. The per-shop breakdown is on the Shops screen.",
       "taches": "Background tasks",
       "tachesJamaisDeployees": "No task has ever beaten. This is not a failure: nothing has been deployed yet.",
       "tache": {
         "actif": "Last beat {n} min ago",
         "en_retard": "No beat for {n} min"
       },
-      "seuilsEnCours": "Thresholds in force: {colis} parcels per account per month, {minutes} minutes without a beat."
+      "seuilsEnCours": "Thresholds in force: {colis} parcels per account per month, {minutes} minutes without a beat.",
+      "stockageValeur": "{valeur} {unite}"
     },
     "parametres": {
       "titre": "Settings",
@@ -732,6 +733,34 @@
         "refuse": "You are not allowed to change this setting.",
         "panne": "Could not save. The setting is unchanged."
       }
+    },
+    "boutiques": {
+      "titre": "Shops",
+      "sousTitre": "What each account takes up, sorted by storage. This screen shows no content: no customer name, no reference, no notes. Every view is recorded with your email and the time.",
+      "recherche": "Search for a shop",
+      "recherchePlaceholder": "Shop name or email address",
+      "chercher": "Search",
+      "nonConfiguree": "Shop not set up",
+      "taille": "{valeur} {unite}",
+      "videTout": "No shops.",
+      "videRecherche": "No shop matches this search.",
+      "pageSuivante": "Show more",
+      "colonnes": {
+        "nom": "Shop",
+        "type": "Type",
+        "statut": "Status",
+        "commandes": "Orders",
+        "medias": "Media",
+        "stockage": "Storage",
+        "colis": "Parcels this month"
+      }
+    },
+    "unites": {
+      "o": "B",
+      "Ko": "KB",
+      "Mo": "MB",
+      "Go": "GB",
+      "To": "TB"
     }
   }
 }

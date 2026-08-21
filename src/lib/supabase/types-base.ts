@@ -420,37 +420,46 @@ export type Database = {
       shops: {
         Row: {
           accent_color: string
+          commandes_reelles: number
           created_at: string
           default_language: string
           id: string
           logo_url: string | null
+          medias_count: number
           name: string | null
           owner_id: string
           slug: string | null
+          stockage_octets: number
           updated_at: string
           watermark_enabled: boolean
         }
         Insert: {
           accent_color?: string
+          commandes_reelles?: number
           created_at?: string
           default_language?: string
           id?: string
           logo_url?: string | null
+          medias_count?: number
           name?: string | null
           owner_id: string
           slug?: string | null
+          stockage_octets?: number
           updated_at?: string
           watermark_enabled?: boolean
         }
         Update: {
           accent_color?: string
+          commandes_reelles?: number
           created_at?: string
           default_language?: string
           id?: string
           logo_url?: string | null
+          medias_count?: number
           name?: string | null
           owner_id?: string
           slug?: string | null
+          stockage_octets?: number
           updated_at?: string
           watermark_enabled?: boolean
         }
@@ -884,6 +893,28 @@ export type Database = {
           premier_mouvement: string
         }[]
       }
+      lister_boutiques_admin: {
+        Args: {
+          p_curseur_id: string
+          p_curseur_octets: string
+          p_ip_hash: string
+          p_limite: number
+          p_recherche: string
+        }
+        Returns: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          colis_ce_mois: number
+          commandes_reelles: number
+          created_at: string
+          email: string
+          id: string
+          medias_count: number
+          nom: string
+          proprietaire_id: string
+          status: Database["public"]["Enums"]["account_status"]
+          stockage_octets: number
+        }[]
+      }
       lister_comptes_admin: {
         Args: {
           p_curseur_date: string
@@ -936,6 +967,7 @@ export type Database = {
         Returns: number
       }
       sans_accents: { Args: { p_texte: string }; Returns: string }
+      stockage_total_admin: { Args: never; Returns: number }
       suspendre_compte: {
         Args: { p_ip_hash: string; p_motif: string; p_profil: string }
         Returns: boolean

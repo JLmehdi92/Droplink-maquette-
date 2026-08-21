@@ -694,14 +694,15 @@
       "comptesSansType": "Onboarding non terminé",
       "stockage": "Stockage des médias",
       "stockageIndisponible": "Indisponible",
-      "stockageAide": "Aucune mesure n'est encore en place. « Indisponible » plutôt que « 0 o » : zéro affirmerait qu'on a mesuré.",
+      "stockageAide": "Somme des tailles relues côté serveur au dépôt, tous comptes confondus. Le détail par boutique est sur l'écran Boutiques.",
       "taches": "Tâches de fond",
       "tachesJamaisDeployees": "Aucune tâche n'a jamais battu. Ce n'est pas une panne : rien n'a encore été déployé.",
       "tache": {
         "actif": "Dernier battement il y a {n} min",
         "en_retard": "Aucun battement depuis {n} min"
       },
-      "seuilsEnCours": "Seuils en vigueur : {colis} colis par compte et par mois, {minutes} minutes sans battement."
+      "seuilsEnCours": "Seuils en vigueur : {colis} colis par compte et par mois, {minutes} minutes sans battement.",
+      "stockageValeur": "{valeur} {unite}"
     },
     "parametres": {
       "titre": "Paramètres",
@@ -732,6 +733,34 @@
         "refuse": "Vous n'avez pas les droits pour modifier ce réglage.",
         "panne": "Enregistrement impossible. Le réglage n'a pas changé."
       }
+    },
+    "boutiques": {
+      "titre": "Boutiques",
+      "sousTitre": "Ce que chaque compte occupe, trié par stockage. Cet écran ne montre aucun contenu : ni nom de client, ni référence, ni note. Chaque consultation est enregistrée avec votre email et l'heure.",
+      "recherche": "Rechercher une boutique",
+      "recherchePlaceholder": "Nom de boutique ou adresse email",
+      "chercher": "Rechercher",
+      "nonConfiguree": "Boutique non configurée",
+      "taille": "{valeur} {unite}",
+      "videTout": "Aucune boutique.",
+      "videRecherche": "Aucune boutique ne correspond à cette recherche.",
+      "pageSuivante": "Voir la suite",
+      "colonnes": {
+        "nom": "Boutique",
+        "type": "Type",
+        "statut": "Statut",
+        "commandes": "Commandes",
+        "medias": "Médias",
+        "stockage": "Stockage",
+        "colis": "Colis ce mois"
+      }
+    },
+    "unites": {
+      "o": "o",
+      "Ko": "Ko",
+      "Mo": "Mo",
+      "Go": "Go",
+      "To": "To"
     }
   }
 }

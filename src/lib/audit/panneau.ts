@@ -73,10 +73,18 @@ export interface Panneau {
   /**
    * Le stockage est-il mesurable ?
    *
-   * LA RÉPONSE VIENT DE LA CONFIGURATION, jamais d'une valeur observée. Tant
-   * qu'aucun mécanisme de mesure n'existe, l'écran doit écrire « indisponible ».
+   * LA RÉPONSE VIENT DE LA CONFIGURATION, jamais d'une valeur observée. Elle est
+   * passée à vrai avec la migration 049, qui installe les compteurs par
+   * boutique : il existe désormais un mécanisme qui relève les octets. Tant
+   * qu'il n'existait pas, l'écran écrivait « indisponible » — et surtout jamais
+   * « 0 o », qui aurait affirmé qu'on avait mesuré.
+   *
+   * Le raisonnement inverse — « le total vaut zéro, donc ce n'est pas mesuré » —
+   * serait faux pour toute installation neuve, c'est-à-dire dès le premier jour.
    */
   readonly stockageMesurable: boolean;
+  /** Octets occupés, tous comptes confondus. `null` si non mesurable. */
+  readonly stockageOctets: number | null;
 }
 
 export type ClientAdmin = SupabaseClient<Database>;
@@ -87,13 +95,14 @@ export async function lirePanneau(
 ): Promise<Panneau> {
   // Les trois lectures sont indépendantes : les enchaîner tripleraient la
   // latence du premier écran que voit un administrateur.
-  const [alertes, compteurs, taches] = await Promise.all([
+  const [alertes, compteurs, taches, stockage] = await Promise.all([
     supabase.rpc("alertes_admin", {
       p_seuil_colis: seuils.colis,
       p_retard_minutes: seuils.retardMinutes,
     }),
     supabase.rpc("compteurs_admin"),
     supabase.rpc("etat_veilleur", { p_retard_minutes: seuils.retardMinutes }),
+    supabase.rpc("stockage_total_admin"),
   ]);
 
   // JAMAIS DE `catch` MUET, et surtout pas ici : un panneau qui affiche zéro
@@ -106,6 +115,9 @@ export async function lirePanneau(
   }
   if (taches.error !== null) {
     throw new Error("lecture des tâches impossible : " + taches.error.message);
+  }
+  if (stockage.error !== null) {
+    throw new Error("lecture du stockage impossible : " + stockage.error.message);
   }
 
   const c = (compteurs.data ?? [])[0];
@@ -136,11 +148,11 @@ export async function lirePanneau(
     },
     taches: lignesTaches,
     aucuneTacheDeployee: lignesTaches.length === 0,
-    // AUCUN MÉCANISME DE MESURE DU STOCKAGE N'EXISTE ENCORE. La valeur est donc
-    // « indisponible », et elle le restera tant que ce drapeau ne changera pas —
-    // pas tant qu'un compte affichera zéro. Il arrivera avec le lot des médias,
-    // qui apportera le relevé des tailles réelles côté serveur.
-    stockageMesurable: false,
+    // LE MÉCANISME EXISTE DEPUIS LA 049 : les octets sont tenus à l'écriture,
+    // boutique par boutique, à partir de la taille RELUE CÔTÉ SERVEUR au dépôt.
+    // C'est ce qui autorise à afficher un chiffre plutôt qu'« indisponible ».
+    stockageMesurable: true,
+    stockageOctets: Number(stockage.data ?? 0),
   };
 }
 

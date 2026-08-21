@@ -732,6 +732,7 @@ try {
     "/fr/admin/comptes",
     "/fr/admin/journal",
     "/fr/admin/parametres",
+    "/fr/admin/boutiques",
     // Casse et absence de prefixe de langue : ne reconnaitre que `/fr/admin`
     // laisserait ces formes franchir le filtre. Elles ne menent nulle part
     // aujourd hui, mais une protection qui tient a ce qu une redirection ait

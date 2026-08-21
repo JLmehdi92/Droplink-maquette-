@@ -1248,6 +1248,124 @@ const SQL = {
     },
   },
 
+  /**
+   * LE CAS MOTIVANT : le compteur d'octets qui ne redescend jamais.
+   *
+   * La suppression d'un média cesse de décrémenter. Rien n'échoue, et le chiffre
+   * reste parfaitement crédible — il mesure simplement les octets JAMAIS DÉPOSÉS
+   * au lieu des octets OCCUPÉS. L'écart ne se voit qu'en comparant à une facture
+   * d'hébergement, c'est-à-dire des mois plus tard.
+   */
+  "octets-sans-retour": {
+    casser: `create or replace function public.compter_media()
+      returns trigger language plpgsql security definer set search_path = '' as $$
+      declare v_shop uuid; v_ligne record;
+      begin
+        v_ligne := case when tg_op = 'DELETE' then old else new end;
+        select o.shop_id into v_shop from public.orders o where o.id = v_ligne.order_id;
+        if v_shop is null then return v_ligne; end if;
+        if tg_op = 'DELETE' then return old; end if;
+        update public.shops
+        set medias_count = medias_count + 1,
+            stockage_octets = stockage_octets + new.taille_octets
+        where id = v_shop;
+        return new;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "049_compteurs_par_boutique.sql",
+      depuis: "create function public.compter_media",
+      jusqua: "revoke all on function public.compter_media",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : le compteur de commandes qui compte les MODIFICATIONS.
+   *
+   * La condition de transition saute. Chaque enregistrement de l'éditeur
+   * incrémente alors le compteur, qui mesure les modifications et non les
+   * commandes. Les deux chiffres se ressemblent assez pour qu'on ne remarque
+   * rien — et celui-ci monte du côté rassurant, ce qui est le pire des deux.
+   */
+  "commandes-comptees-a-chaque-ecriture": {
+    casser: `create or replace function public.compter_commande_reelle()
+      returns trigger language plpgsql security definer set search_path = '' as $$
+      begin
+        if tg_op = 'DELETE' then
+          if old.first_content_at is not null then
+            update public.shops set commandes_reelles = greatest(commandes_reelles - 1, 0)
+            where id = old.shop_id;
+          end if;
+          return old;
+        end if;
+        if new.first_content_at is null then return new; end if;
+        update public.shops set commandes_reelles = commandes_reelles + 1
+        where id = new.shop_id;
+        return new;
+      end;
+      $$;
+      drop trigger if exists orders_compter_commande_reelle on public.orders;
+      create trigger orders_compter_commande_reelle
+        after insert or delete or update on public.orders
+        for each row execute function public.compter_commande_reelle();`,
+    reparerDepuisMigration: {
+      fichier: "049_compteurs_par_boutique.sql",
+      depuis: "create function public.compter_commande_reelle",
+      jusqua: "revoke all on function public.compter_commande_reelle",
+      avant: `drop trigger if exists orders_compter_commande_reelle on public.orders;
+        create trigger orders_compter_commande_reelle
+          after insert or delete or update of first_content_at on public.orders
+          for each row execute function public.compter_commande_reelle();`,
+    },
+  },
+
+  /**
+   * HORS du cas motivant, et d'une autre nature : le JETON REPUBLIÉ SOUS UN NOM
+   * ANODIN.
+   *
+   * La liste des boutiques rend le `public_token` d'une commande dans la colonne
+   * `nom`. Aucun nom de colonne suspect n'apparaît, aucune erreur ne se produit,
+   * et l'écran affiche quelque chose de plausible. Un contrôle qui chercherait le
+   * MOT « token » ne verrait rien — seule la recherche de la VALEUR le trouve. Et
+   * ce champ-là ne fuite pas une donnée, il transfère une CAPACITÉ, définitivement.
+   */
+  "jeton-sous-nom-anodin": {
+    casser: `create or replace function public.lister_boutiques_admin(
+        p_recherche text, p_curseur_octets text, p_curseur_id text,
+        p_limite int, p_ip_hash text
+      ) returns table (
+        id uuid, nom text, proprietaire_id uuid, email text,
+        account_type public.account_type, status public.account_status,
+        commandes_reelles integer, medias_count integer, stockage_octets bigint,
+        colis_ce_mois integer, created_at timestamptz
+      ) language plpgsql volatile security definer set search_path = '' as $$
+      declare v_limite int := least(greatest(coalesce(p_limite, 50), 1), 100);
+      begin
+        if not public.est_admin() then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        return query
+        select s.id,
+               coalesce((select o.public_token from public.orders o
+                         where o.shop_id = s.id limit 1), s.name),
+               p.id, p.email, p.account_type, p.status,
+               s.commandes_reelles, s.medias_count, s.stockage_octets,
+               coalesce(u.parcels_registered, 0), s.created_at
+        from public.shops s
+        join public.profiles p on p.id = s.owner_id
+        left join public.usage_counters u
+          on u.profile_id = p.id and u.period_month = date_trunc('month', now())::date
+        order by s.stockage_octets desc, s.id desc
+        limit v_limite;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "050_boutiques_admin.sql",
+      depuis: "create function public.lister_boutiques_admin",
+      jusqua: "comment on function public.lister_boutiques_admin",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

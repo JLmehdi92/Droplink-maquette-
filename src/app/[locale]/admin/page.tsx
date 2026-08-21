@@ -2,6 +2,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import type { Metadata } from "next";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lirePanneau, lireSeuils } from "@/lib/audit/panneau";
+import { mettreOctetsALEchelle } from "@/lib/format/octets";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -57,6 +58,14 @@ export default async function PanneauAdmin({
 
   const t = await getTranslations("admin");
   const format = await getFormatter();
+
+  // `null` porte les DEUX cas où l'on n'affiche pas de chiffre : pas de
+  // mécanisme de mesure, ou pas de valeur rendue. Les distinguer à l'écran
+  // n'apprendrait rien — dans les deux cas, on n'a pas mesuré.
+  const taille =
+    panneau.stockageMesurable && panneau.stockageOctets !== null
+      ? mettreOctetsALEchelle(panneau.stockageOctets)
+      : null;
 
   return (
     <main
@@ -149,22 +158,34 @@ export default async function PanneauAdmin({
           ))}
         </div>
 
-        {/* LE STOCKAGE EST NOMMÉ « INDISPONIBLE », JAMAIS AFFICHÉ À ZÉRO.
-            Zéro affirme qu'on a mesuré ; l'absence de mesure n'affirme rien. Et
-            la décision vient de la CONFIGURATION, pas d'une valeur observée :
-            déduire « zéro donc indisponible » deviendrait faux le jour où un
-            compte a réellement zéro octet — c'est-à-dire pour tout compte neuf.
+        {/* LE STOCKAGE EST MESURÉ DEPUIS LA MIGRATION 049 : les octets sont
+            tenus à l'écriture, boutique par boutique, à partir de la taille
+            RELUE CÔTÉ SERVEUR au dépôt — jamais celle annoncée par le client,
+            qui est la base du modèle de coût.
+
+            IL A LONGTEMPS AFFICHÉ « INDISPONIBLE », ET C'ÉTAIT CORRECT : zéro
+            aurait affirmé qu'on avait mesuré. La bascule vient de l'existence
+            d'un MÉCANISME, pas d'une valeur observée — déduire « zéro donc pas
+            mesuré » serait faux pour toute installation neuve, c'est-à-dire dès
+            le premier jour.
 
             C'est l'inverse de la règle de la page publique, et c'est voulu : là
             une information absente est OMISE, ici elle est NOMMÉE. Un client
-            consulte, un administrateur décide — omettre le stockage lui ferait
-            croire qu'il n'y a rien à surveiller. */}
+            consulte, un administrateur décide. */}
         <div className={CARTE + " mt-gutter"}>
           <p className="font-label-sm text-label-sm text-on-surface-variant">
             {t("panneau.stockage")}
           </p>
-          <p className="mt-1 font-headline-md text-headline-md text-on-surface-variant">
-            {panneau.stockageMesurable ? "—" : t("panneau.stockageIndisponible")}
+          <p className="mt-1 font-headline-md text-headline-md text-on-surface">
+            {taille === null
+              ? t("panneau.stockageIndisponible")
+              : t("panneau.stockageValeur", {
+                  valeur: format.number(taille.valeur, {
+                    minimumFractionDigits: taille.decimales,
+                    maximumFractionDigits: taille.decimales,
+                  }),
+                  unite: t(`unites.${taille.unite}`),
+                })}
           </p>
           <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
             {t("panneau.stockageAide")}

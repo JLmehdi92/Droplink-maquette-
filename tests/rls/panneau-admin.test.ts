@@ -148,12 +148,26 @@ describe("Le veilleur a TROIS états, pas deux", () => {
 });
 
 describe("Ce que le panneau refuse d'affirmer", () => {
-  test("le stockage est INDISPONIBLE, et cela vient de la configuration", async () => {
-    // Pas de la valeur : déduire « zéro donc indisponible » deviendrait faux le
-    // jour où un compte a réellement zéro octet — c'est-à-dire pour tout compte
-    // neuf, donc dès le premier jour.
+  test("le stockage est MESURÉ, et cela vient de la configuration", async () => {
+    // IL A LONGTEMPS ÉTÉ « INDISPONIBLE », ET C'ÉTAIT CORRECT : aucun mécanisme
+    // ne le relevait, et « 0 o » aurait affirmé qu'on avait mesuré. La bascule
+    // vient de l'EXISTENCE d'un mécanisme — les compteurs par boutique, tenus à
+    // l'écriture — jamais d'une valeur observée. Déduire « zéro donc pas
+    // mesuré » serait faux pour toute installation neuve, donc dès le premier
+    // jour.
     const p = await lirePanneau(admin.client, SEUILS);
-    expect(p.stockageMesurable).toBe(false);
+    expect(p.stockageMesurable).toBe(true);
+    expect(p.stockageOctets, "mesurable mais sans valeur : l'écran n'aurait rien à écrire")
+      .not.toBeNull();
+  });
+
+  test("le total est la somme réelle des boutiques, pas une estimation", async () => {
+    const p = await lirePanneau(admin.client, SEUILS);
+    const somme = await interroger<{ s: string | null }>(
+      catalogue,
+      "select sum(stockage_octets) as s from public.shops",
+    );
+    expect(p.stockageOctets).toBe(Number(somme[0]?.s ?? 0));
   });
 
   test("les compteurs de comptes sont exacts, jamais estimés", async () => {

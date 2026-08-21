@@ -309,6 +309,24 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "le moteur refusera toute écriture qu'on y ajouterait.",
     ],
     [
+      "lister_boutiques_admin",
+      "Liste des boutiques pour l'administration. UN HUMAIN Y LIT LES DONNÉES " +
+        "D'UN TIERS : elle écrit donc UNE entrée d'audit par page, portant ses " +
+        "critères — une par ligne affichée noierait les consultations " +
+        "individuelles, qui sont ce qu'on relit en cas de litige. `volatile` " +
+        "parce qu'elle écrit cette trace : déclarée `stable`, PostgREST " +
+        "l'exécuterait en lecture seule et l'audit échouerait. Elle ne rend " +
+        "AUCUN contenu — ni nom de client, ni référence, ni note interne, ni " +
+        "`public_token`, qui transfère une capacité et non une donnée.",
+    ],
+    [
+      "stockage_total_admin",
+      "Somme des octets occupés, tous comptes confondus. Elle lit les compteurs " +
+        "par boutique et jamais `order_media` : le coût suit ainsi le nombre de " +
+        "COMPTES et non le nombre de fichiers. `stable` — elle n'écrit rien, et " +
+        "n'a rien à auditer : un total agrégé ne désigne les données de personne.",
+    ],
+    [
       "alertes_admin",
       "Alertes du panneau. Elles PRÉCÈDENT les compteurs, et portent leur VALEUR " +
         "avec leur seuil — « 1 840 pour un seuil de 1 200 », jamais « ce compte " +
