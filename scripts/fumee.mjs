@@ -347,6 +347,63 @@ try {
       }
 
       if (jetonFumee) {
+        // CE QUE LE VENDEUR CHANGE ARRIVE-T-IL CHEZ SON CLIENT ?
+        //
+        // C est la chaine dont le mode de defaillance est le plus trompeur du
+        // produit : si une page publique etait servie depuis un cache, la
+        // mutation reussirait, l ecran du vendeur afficherait le nouvel etat, et
+        // le client continuerait de voir l ancien. Rien n echouerait nulle part.
+        //
+        // LA MUTATION EST FAITE EN BASE, EN CONTOURNANT L APPLICATION. Aucune
+        // invalidation n est declenchee : c est le PIRE cas, celui d un chemin
+        // de code qui oublierait de la poser. Passer par une Server Action
+        // prouverait seulement que l invalidation qu on vient d ecrire
+        // fonctionne — pas que la page est fraiche.
+        const avant = await fetch(`${base}/p/${jetonFumee}`);
+        const htmlAvant = await avant.text();
+        const cachePublic = avant.headers.get("cache-control") ?? "";
+
+        // CONTRE-TEST, ET IL VIENT EN PREMIER : la sonde doit savoir
+        // DISTINGUER une reponse mise en cache d une reponse dynamique. Sans
+        // lui, « la page publique n est pas en cache » pourrait etre vrai
+        // simplement parce qu on interroge le mauvais en-tete.
+        const statique = await fetch(`${base}/fr/conditions`);
+        const cacheStatique = statique.headers.get("cache-control") ?? "";
+
+        const MARQUEUR = `Client-propage-${Date.now()}`;
+        const depart = Date.now();
+        await service.from("orders").update({ customer_label: MARQUEUR }).eq("id", commandeFumee);
+
+        const apresMutation = await fetch(`${base}/p/${jetonFumee}`);
+        const htmlApres = await apresMutation.text();
+        const delai = (Date.now() - depart) / 1000;
+
+        controles.push(
+          [
+            cacheStatique !== cachePublic,
+            `la sonde distingue cache et dynamique (statique: ${cacheStatique || "absent"} / publique: ${cachePublic || "absent"})`,
+          ],
+          [
+            /no-store|no-cache|private/.test(cachePublic),
+            `la page publique n est pas mise en cache (cache-control: ${cachePublic || "absent"})`,
+          ],
+          [htmlAvant.includes("Client de fumee"), "avant mutation, la page porte bien l ancienne valeur"],
+          [htmlApres.includes(MARQUEUR), "la mutation faite EN BASE est servie sur la page publique"],
+          [
+            !htmlApres.includes("Client de fumee"),
+            "l ancienne valeur ne survit nulle part dans le HTML servi",
+          ],
+          [delai < 30, `delai de propagation : ${delai.toFixed(1)} s (seuil 30)`],
+        );
+
+        // On remet la valeur d origine : les controles suivants la lisent.
+        await service
+          .from("orders")
+          .update({ customer_label: "Client de fumee" })
+          .eq("id", commandeFumee);
+      }
+
+      if (jetonFumee) {
         // LA BALISE DE CONSULTATION, de bout en bout.
         //
         // `x-forwarded-for` est pose ici parce que c est ce que fait le bord en
