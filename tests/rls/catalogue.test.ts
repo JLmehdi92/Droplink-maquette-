@@ -52,6 +52,17 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "admin_audit_log",
+      "Journal d'audit. AUCUNE POLICY, délibérément : la table n'est atteignable " +
+        "que par les fonctions `security definer` de l'administration, qui " +
+        "vérifient le rôle EN BASE. Une policy de lecture, même réservée aux " +
+        "administrateurs, créerait un SECOND chemin — et c'est le second chemin " +
+        "qu'on oublie de protéger le jour où le premier change. Elle est de plus " +
+        "append-only par déclencheur, ce qui s'applique même aux fonctions " +
+        "`security definer` : sans lui, le retrait des droits ne suffirait pas, " +
+        "puisqu'elles s'exécutent avec ceux du propriétaire de la table.",
+    ],
+    [
       "scheduler_heartbeat",
       "Battement des tâches de fond. Aucune policy : la table n'est atteignable " +
         "que par public.battre(). UN VEILLEUR DONT LE BATTEMENT EST ÉCRIVABLE " +
@@ -227,6 +238,53 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "booléen qui décide si l'on PAIE une prise en charge : insertion et " +
         "verdict dans le même ordre SQL, pour qu'un double clic ne paie pas deux " +
         "fois.",
+    ],
+    [
+      "est_admin",
+      "LA SEULE AUTORITÉ sur la question « cet appelant est-il administrateur ». " +
+        "Ouverte à `authenticated` parce que chaque garde l'appelle. Elle lit le " +
+        "rôle EN BASE, jamais dans un claim du jeton : un jeton reste valide " +
+        "jusqu'à son expiration même après une rétrogradation, et s'y fier " +
+        "laisserait un ancien administrateur travailler une heure de plus. Elle " +
+        "exige aussi `status = 'active'` — sans quoi suspendre un compte lui " +
+        "retirerait l'accès vendeur tout en lui laissant l'accès à TOUTES les " +
+        "données, l'inverse exact de l'intention.",
+    ],
+    [
+      "journaliser_admin",
+      "Écriture d'une entrée d'audit. Ouverte à `authenticated` parce que les " +
+        "fonctions de lecture l'appellent avec la session de l'administrateur. " +
+        "Elle VÉRIFIE LE RÔLE ELLE-MÊME et relit l'email de l'auteur en base " +
+        "plutôt que de le recevoir en argument : une fonction d'audit qui écrit " +
+        "ce qu'on lui dit accepterait une entrée forgée par n'importe quel " +
+        "utilisateur, et le journal deviendrait un endroit où écrire des " +
+        "mensonges sur les autres.",
+    ],
+    [
+      "lister_comptes_admin",
+      "Liste des comptes pour l'administration. `SECURITY DEFINER` parce qu'un " +
+        "administrateur lit des lignes que sa RLS lui refuse ; la garde vit donc " +
+        "dans son corps, en tête. Elle écrit UNE entrée d'audit portant les " +
+        "CRITÈRES — une entrée par ligne affichée noierait les consultations " +
+        "individuelles, les seules réellement utiles en cas de litige. " +
+        "`VOLATILE` et non `stable` : PostgREST exécute une fonction `stable` en " +
+        "transaction lecture seule, et l'audit ne pouvait pas s'y écrire.",
+    ],
+    [
+      "lire_compte_admin",
+      "Détail d'un compte. Trace la consultation AVEC sa cible, et le fait même " +
+        "quand le compte n'existe pas : ne consigner que les succès laisserait " +
+        "l'énumération d'identifiants totalement invisible, alors que c'est " +
+        "exactement le motif qu'on chercherait après coup.",
+    ],
+    [
+      "lire_journal_admin",
+      "Lecture du journal. Reste DÉLIBÉRÉMENT `stable` : PostgREST l'exécute donc " +
+        "en transaction lecture seule, et toute écriture qu'on y ajouterait " +
+        "serait refusée par le moteur. « Lire le journal n'écrit pas dans le " +
+        "journal » cesse d'être une intention commentée pour devenir une " +
+        "propriété que la base fait respecter — sans quoi ouvrir la page d'audit " +
+        "y ajouterait une ligne, qui apparaîtrait à la consultation suivante.",
     ],
     [
       "analyser_activite",

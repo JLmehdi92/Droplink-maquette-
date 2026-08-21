@@ -17,6 +17,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_email: string
+          admin_id: string | null
+          id: string
+          ip_hash: string | null
+          occurred_at: string
+          payload: Json
+          resource_id: string | null
+          resource_type: string
+          target_email: string | null
+          target_profile_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_email: string
+          admin_id?: string | null
+          id?: string
+          ip_hash?: string | null
+          occurred_at?: string
+          payload?: Json
+          resource_id?: string | null
+          resource_type: string
+          target_email?: string | null
+          target_profile_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string
+          admin_id?: string | null
+          id?: string
+          ip_hash?: string | null
+          occurred_at?: string
+          payload?: Json
+          resource_id?: string | null
+          resource_type?: string
+          target_email?: string | null
+          target_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_log_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_audit_log_target_profile_id_fkey"
+            columns: ["target_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       link_views: {
         Row: {
           country: string | null
@@ -608,6 +665,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      est_admin: { Args: never; Returns: boolean }
       fenetre_courante: {
         Args: { p_fenetre_secondes: number }
         Returns: string
@@ -619,6 +677,17 @@ export type Database = {
           p_order_id: string
           p_payload?: Json
           p_type: string
+        }
+        Returns: string
+      }
+      journaliser_admin: {
+        Args: {
+          p_action: string
+          p_cible: string
+          p_ip_hash: string
+          p_payload: Json
+          p_resource_id: string
+          p_resource_type: string
         }
         Returns: string
       }
@@ -644,6 +713,36 @@ export type Database = {
           statut: Database["public"]["Enums"]["order_status"]
           statut_qc: Database["public"]["Enums"]["qc_status"]
           transporteur: string
+        }[]
+      }
+      lire_compte_admin: {
+        Args: { p_ip_hash: string; p_profil: string }
+        Returns: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          boutique_id: string
+          boutique_nom: string
+          colis: number
+          commandes: number
+          created_at: string
+          email: string
+          id: string
+          locale: string
+          role: Database["public"]["Enums"]["user_role"]
+          status: Database["public"]["Enums"]["account_status"]
+          vues: number
+        }[]
+      }
+      lire_journal_admin: {
+        Args: { p_curseur_date: string; p_curseur_id: string; p_limite: number }
+        Returns: {
+          action: string
+          admin_email: string
+          id: string
+          motif: string
+          occurred_at: string
+          resource_id: string
+          resource_type: string
+          target_email: string
         }[]
       }
       lire_medias_publics: {
@@ -678,6 +777,25 @@ export type Database = {
           etape: Database["public"]["Enums"]["parcel_status"]
           numero: string
           premier_mouvement: string
+        }[]
+      }
+      lister_comptes_admin: {
+        Args: {
+          p_curseur_date: string
+          p_curseur_id: string
+          p_ip_hash: string
+          p_limite: number
+          p_recherche: string
+        }
+        Returns: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          boutique_nom: string
+          commandes: number
+          created_at: string
+          email: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          status: Database["public"]["Enums"]["account_status"]
         }[]
       }
       marquer_interroge: { Args: { p_parcel_id: string }; Returns: undefined }

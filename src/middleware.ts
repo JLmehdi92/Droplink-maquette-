@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import createMiddleware from "next-intl/middleware";
-import type { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "@/i18n/routing";
 import { clePubliable, urlSupabase } from "@/lib/supabase/config";
 
@@ -52,6 +52,22 @@ const gestionLangue = createMiddleware(routing);
  * jette, et la session expirerait silencieusement au bout d'une heure sans que
  * rien ne l'explique.
  */
+/**
+ * Vrai quand le chemin vise la surface d'administration.
+ *
+ * Le segment est RÉEL — `/fr/admin/...` — et jamais un groupe entre parenthèses.
+ * Un groupe n'ajoute rien à l'URL : les écrans tomberaient hors de ce filtre
+ * tout en paraissant rangés au bon endroit, ce qui est la pire combinaison.
+ *
+ * La langue est acceptée sous n'importe quelle casse et le préfixe peut manquer :
+ * ne reconnaître que `/fr/admin` laisserait `/FR/admin` et `/admin` franchir le
+ * filtre. Ils ne mèneraient nulle part aujourd'hui — mais une protection qui
+ * tient à ce qu'une redirection ait lieu D'ABORD n'est pas une protection.
+ */
+function viseAdmin(chemin: string): boolean {
+  return /^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?admin(?:\/|$)/i.test(chemin);
+}
+
 export default async function middleware(requete: NextRequest): Promise<NextResponse> {
   const reponse = gestionLangue(requete);
 
@@ -76,7 +92,26 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
   //
   // On ne vérifie pas l'identité ici : ce n'est pas le rôle du middleware, et le
   // faire donnerait l'illusion d'une protection. Voir `lib/auth/session.ts`.
-  await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
+
+  /*
+   * PREMIÈRE COUCHE SUR `/admin`, ET RIEN DE PLUS.
+   *
+   * Elle écarte les visiteurs SANS SESSION. Elle ne vérifie PAS le rôle : le
+   * middleware s'exécute au bord, sur chaque navigation, et y lire `profiles`
+   * ajouterait un aller-retour vers la base à toutes les pages du produit. La
+   * garde qui fait autorité est `exigerAdmin()`, qui lit le rôle EN BASE dans
+   * chaque page et chaque Server Action — et qui reste indispensable, puisque
+   * les Server Actions ne passent jamais par ici.
+   *
+   * 404 ET JAMAIS 403. Un 403 confirme que la surface existe ; un 404 ne dit
+   * rien. C'est ce qui sépare « il y a un back-office ici, cherchons une
+   * faille » de « il n'y a rien ». Le corps de la réponse est vide pour la même
+   * raison : une page d'erreur reconnaissable serait un aveu.
+   */
+  if (data.session === null && viseAdmin(requete.nextUrl.pathname)) {
+    return new NextResponse(null, { status: 404 });
+  }
 
   return reponse;
 }

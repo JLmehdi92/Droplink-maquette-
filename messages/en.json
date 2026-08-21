@@ -591,5 +591,51 @@
       "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
       "passages": "Transport steps"
     }
+  },
+  "admin": {
+    "navigation": "Administration",
+    "bandeau": "Administration",
+    "comptes": {
+      "titre": "Accounts",
+      "sousTitre": "Every visit to this page is recorded with your email and the time.",
+      "recherche": "Search for an account",
+      "recherchePlaceholder": "Email address",
+      "chercher": "Search",
+      "colonnes": {
+        "email": "Account",
+        "type": "Type",
+        "role": "Role",
+        "statut": "Status",
+        "commandes": "Orders",
+        "cree": "Joined"
+      },
+      "type": {
+        "supplier": "Supplier",
+        "reseller": "Reseller"
+      },
+      "typeNonDeclare": "Not declared",
+      "roles": {
+        "user": "Seller",
+        "admin": "Administrator"
+      },
+      "statuts": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "videCompte": "No accounts.",
+      "videRecherche": "No account matches this search.",
+      "pageSuivante": "Show more"
+    },
+    "journal": {
+      "titre": "Audit log",
+      "sousTitre": "What administrators have viewed or changed. Entries cannot be edited or deleted, and outlive the accounts they describe.",
+      "cible": "Account concerned: {email}",
+      "actions": {
+        "comptes.liste": "Viewed the account list",
+        "comptes.detail": "Viewed an account record"
+      },
+      "vide": "No entries yet.",
+      "pageSuivante": "Show more"
+    }
   }
 }

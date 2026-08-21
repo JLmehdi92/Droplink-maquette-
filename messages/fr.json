@@ -591,5 +591,51 @@
       "arrete": "Le transporteur ne donne plus d’information sur ce numéro. Contactez le vendeur si vous n’avez rien reçu.",
       "passages": "Étapes du transport"
     }
+  },
+  "admin": {
+    "navigation": "Administration",
+    "bandeau": "Administration",
+    "comptes": {
+      "titre": "Comptes",
+      "sousTitre": "Chaque consultation de cette page est enregistrée avec votre email et l'heure.",
+      "recherche": "Rechercher un compte",
+      "recherchePlaceholder": "Adresse email",
+      "chercher": "Rechercher",
+      "colonnes": {
+        "email": "Compte",
+        "type": "Type",
+        "role": "Rôle",
+        "statut": "Statut",
+        "commandes": "Commandes",
+        "cree": "Inscrit le"
+      },
+      "type": {
+        "supplier": "Fournisseur",
+        "reseller": "Revendeur"
+      },
+      "typeNonDeclare": "Non déclaré",
+      "roles": {
+        "user": "Vendeur",
+        "admin": "Administrateur"
+      },
+      "statuts": {
+        "active": "Actif",
+        "suspended": "Suspendu"
+      },
+      "videCompte": "Aucun compte.",
+      "videRecherche": "Aucun compte ne correspond à cette recherche.",
+      "pageSuivante": "Voir la suite"
+    },
+    "journal": {
+      "titre": "Journal d'audit",
+      "sousTitre": "Ce que les administrateurs ont consulté ou modifié. Les entrées ne peuvent être ni corrigées ni effacées, et survivent à la suppression des comptes qu'elles décrivent.",
+      "cible": "Compte concerné : {email}",
+      "actions": {
+        "comptes.liste": "Consultation de la liste des comptes",
+        "comptes.detail": "Consultation d'une fiche de compte"
+      },
+      "vide": "Aucune entrée pour l'instant.",
+      "pageSuivante": "Voir la suite"
+    }
   }
 }

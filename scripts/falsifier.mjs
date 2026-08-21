@@ -871,6 +871,90 @@ const SQL = {
     },
   },
 
+  /**
+   * UN ADMINISTRATEUR SUSPENDU RESTE ADMINISTRATEUR.
+   *
+   * `and p.status = 'active'` retire de `est_admin()`. Suspendre un compte lui
+   * retire alors l acces vendeur tout en lui laissant l acces a TOUTES les
+   * donnees de tous les autres — l inverse exact de l intention. Rien ne leve,
+   * l ecran de suspension affiche bien « suspendu », et la personne continue de
+   * lire les comptes des autres.
+   */
+  "admin-suspendu-reste-admin": {
+    casser: `create or replace function public.est_admin()
+      returns boolean language sql stable security definer set search_path = '' as $$
+        select exists (
+          select 1 from public.profiles p
+          where p.user_id = (select auth.uid()) and p.role = 'admin'
+        )
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "038_socle_admin.sql",
+      depuis: "create function public.est_admin",
+      jusqua: "comment on function public.est_admin",
+    },
+  },
+
+  /**
+   * LA LECTURE ADMIN NE LAISSE PLUS DE TRACE.
+   *
+   * Le `perform journaliser_admin` retire de la liste des comptes. L ecran
+   * FONCTIONNE, rend les memes donnees, et n ecrit rien. C est le mode de
+   * defaillance le plus silencieux de cette surface : il n y a aucune erreur a
+   * chercher, seulement une absence — et une absence ne se remarque que le jour
+   * ou l on va chercher une trace qui n existe pas.
+   */
+  "audit-sans-trace": {
+    casser: `create or replace function public.lister_comptes_admin(
+        p_recherche text, p_curseur_date text, p_curseur_id text, p_limite int, p_ip_hash text)
+      returns table (id uuid, email text, account_type public.account_type,
+                     role public.user_role, status public.account_status,
+                     created_at timestamptz, boutique_nom text, commandes bigint)
+      language plpgsql volatile security definer set search_path = '' as $$
+      declare
+        v_limite int := least(greatest(coalesce(p_limite, 50), 1), 100);
+        v_recherche text := nullif(btrim(coalesce(p_recherche, '')), '');
+        v_date timestamptz := nullif(btrim(coalesce(p_curseur_date, '')), '')::timestamptz;
+        v_id uuid := nullif(btrim(coalesce(p_curseur_id, '')), '')::uuid;
+      begin
+        if not public.est_admin() then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        return query
+        select p.id, p.email, p.account_type, p.role, p.status, p.created_at, s.name,
+               (select count(*) from public.orders o where o.shop_id = s.id)
+        from public.profiles p
+        left join public.shops s on s.owner_id = p.id
+        where (v_recherche is null or p.email ilike '%' || v_recherche || '%')
+          and (v_date is null or (p.created_at, p.id) < (v_date, v_id))
+        order by p.created_at desc, p.id desc
+        limit v_limite;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "041_volatilite_des_lectures_auditees.sql",
+      depuis: "create or replace function public.lister_comptes_admin",
+      jusqua: "create or replace function public.lire_compte_admin",
+    },
+  },
+
+  /**
+   * LE JOURNAL D AUDIT REDEVIENT MODIFIABLE.
+   *
+   * Hors du cas motivant : ce n est ni l isolation ni la trace, c est
+   * l IMMUABILITE. Le declencheur retire, une entrée peut etre reecrite ou
+   * effacee apres coup — et un journal modifiable n est pas un journal, c est
+   * une note dont la valeur en cas de litige est nulle. Le retrait des droits ne
+   * suffit pas a le proteger : les fonctions `security definer` s executent avec
+   * les droits du proprietaire de la table, donc AVEC celui de modifier.
+   */
+  "journal-modifiable": {
+    casser: "drop trigger if exists admin_audit_log_append_only on public.admin_audit_log;",
+    reparer:
+      "create trigger admin_audit_log_append_only before update or delete " +
+      "on public.admin_audit_log for each row execute function public.refuser_modification_audit();",
+  },
+
   "compteurs-hors-rls": {
     casser: `create or replace function public.compter_envois(p_silence_jours int)
       returns table (total bigint, preparation bigint, expedie bigint, en_transit bigint,
