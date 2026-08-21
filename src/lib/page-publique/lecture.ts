@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { z } from "zod";
 import { creerClientAnonyme } from "@/lib/supabase/anon";
 import { signerLecture } from "@/lib/storage/r2";
@@ -33,6 +34,12 @@ export interface Boutique {
   readonly logo: string | null;
   readonly couleur: string;
   readonly langue: string;
+  /**
+   * Vrai quand le vendeur a demandé un filigrane ET qu'il y a un nom à écrire.
+   * La condition est résolue EN BASE : un filigrane activé sans nom de boutique
+   * n'a rien à superposer, et l'afficher quand même produirait une bande vide.
+   */
+  readonly filigrane: boolean;
 }
 
 export interface MediaPublic {
@@ -67,7 +74,24 @@ export interface CommandePublique {
  * façon la plus courante de croire qu'on a différé un chargement sans l'avoir
  * fait.
  */
-export async function lireCommandePublique(jetonBrut: string): Promise<CommandePublique | null> {
+/**
+ * MÉMOÏSATION PAR REQUÊTE, et rien de plus.
+ *
+ * `cache()` de React ne garde son résultat que le temps d'UN rendu : deux
+ * requêtes HTTP distinctes repartent toujours de la base. Ce n'est donc pas un
+ * cache de données — il n'y a rien à invalider, et la sonde de fumée continue de
+ * constater qu'une mutation faite en base arrive en deux dixièmes de seconde.
+ *
+ * Ce qu'elle évite : la mise en page racine a besoin de la langue du vendeur
+ * pour poser `lang` sur le document, et la page a besoin de toute la commande.
+ * Sans mémoïsation, l'écran le plus contraint du produit paierait deux
+ * allers-retours là où un seul suffit.
+ */
+export const lireCommandePublique = cache(lireCommandePubliqueSansMemo);
+
+async function lireCommandePubliqueSansMemo(
+  jetonBrut: string,
+): Promise<CommandePublique | null> {
   const analyse = JetonPublic.safeParse(jetonBrut);
   if (!analyse.success) return null;
 
@@ -108,6 +132,7 @@ export async function lireCommandePublique(jetonBrut: string): Promise<CommandeP
       logo: ligne.boutique_logo,
       couleur: ligne.boutique_couleur,
       langue: ligne.boutique_langue,
+      filigrane: ligne.boutique_filigrane,
     },
     medias: rendus,
     couverture: ligne.couverture,

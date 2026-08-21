@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -45,5 +46,37 @@ export default async function LayoutApplication({
     redirect(`/${langue}/connexion?erreur=suspendu`);
   }
 
-  return <div className="min-h-dvh bg-surface">{children}</div>;
+  const t = await getTranslations("navigation");
+
+  // LA NAVIGATION EST RENDUE CÔTÉ SERVEUR, en liens simples. Un composant client
+  // ici coûterait du bundle sur TOUS les écrans de l'espace vendeur, pour un
+  // menu qui ne fait que naviguer — et le dashboard est l'écran le plus vu du
+  // produit. `aria-current` n'est pas posé : le layout ne connaît pas le chemin
+  // courant sans lire l'URL, et l'annoncer de travers serait pire que ne rien
+  // annoncer à un lecteur d'écran.
+  return (
+    <div className="min-h-dvh bg-surface">
+      <nav
+        aria-label={t("espaceVendeur")}
+        className="border-b border-outline-variant bg-surface-container-lowest"
+      >
+        <ul className="mx-auto flex w-full max-w-container-max gap-2 px-margin-mobile md:px-margin-desktop">
+          {[
+            { href: `/${langue}/commandes`, libelle: t("mesCommandes") },
+            { href: `/${langue}/marque`, libelle: t("maMarque") },
+          ].map((entree) => (
+            <li key={entree.href}>
+              <Link
+                href={entree.href}
+                className="flex min-h-[44px] items-center px-3 font-label-md text-label-md text-on-surface-variant transition-colors hover:text-on-surface"
+              >
+                {entree.libelle}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      {children}
+    </div>
+  );
 }

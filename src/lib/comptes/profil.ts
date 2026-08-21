@@ -23,6 +23,12 @@ export type ProfilVendeur = {
   readonly logoUrl: string | null;
   readonly couleurAccent: string;
   readonly filigrane: boolean;
+  /**
+   * Langue des pages que voient les CLIENTS, distincte de `langue` qui habille
+   * l'interface du vendeur. Un fournisseur peut travailler en anglais et livrer
+   * en France ; confondre les deux ne se voit jamais côté vendeur.
+   */
+  readonly languePublique: "fr" | "en";
 };
 
 /**
@@ -41,7 +47,7 @@ export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled)",
+      "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language)",
     )
     .maybeSingle();
 
@@ -59,6 +65,7 @@ export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
     logo_url: string | null;
     accent_color: string;
     watermark_enabled: boolean;
+    default_language: string;
   };
 
   return {
@@ -72,6 +79,10 @@ export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
     logoUrl: s.logo_url,
     couleurAccent: s.accent_color,
     filigrane: s.watermark_enabled,
+    // La contrainte `shops_langue_supportee` borne la colonne aux deux valeurs.
+    // Le repli n'est donc pas un choix produit mais ce que le TYPAGE exige : la
+    // base rend du `text`, et parier dessus sans contrôle serait un `as` déguisé.
+    languePublique: s.default_language === "en" ? "en" : "fr",
   };
 }
 

@@ -602,6 +602,7 @@ export type Database = {
         Args: { p_jeton: string }
         Returns: {
           boutique_couleur: string
+          boutique_filigrane: boolean
           boutique_langue: string
           boutique_logo: string
           boutique_nom: string

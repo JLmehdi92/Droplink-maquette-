@@ -36,9 +36,18 @@ export function Visionneur({
   jeton,
   medias,
   libelles,
+  filigrane,
 }: {
   readonly jeton: string;
   readonly medias: readonly EntreeVisionneur[];
+  /**
+   * Texte du filigrane, ou `null`. Le NON-FILIGRANE est `null` et pas la chaîne
+   * vide : une chaîne vide produirait une bande transparente sans texte, donc un
+   * filigrane invisible que personne ne saurait diagnostiquer. La décision
+   * d'afficher est prise EN BASE — un filigrane demandé sans nom de boutique n'a
+   * rien à écrire et arrive ici déjà éteint.
+   */
+  readonly filigrane: string | null;
   readonly libelles: {
     readonly ouvrir: string;
     readonly fermer: string;
@@ -126,6 +135,19 @@ export function Visionneur({
 
   return (
     <>
+      {/* LE FILIGRANE. Superposition à L'AFFICHAGE, jamais gravée dans le
+          fichier : graver exigerait de réencoder chaque photo au dépôt, donc de
+          payer un transcodage sur le téléphone du vendeur pour un résultat
+          qu'un recadrage retire de toute façon.
+
+          IL NE PROTÈGE PAS, IL DÉCOURAGE. Trois clics dans l'inspecteur le font
+          disparaître, et une capture d'écran le garde. C'est exactement ce que
+          l'interface de réglage doit dire — annoncer une protection qu'on
+          n'apporte pas serait pire que ne rien proposer.
+
+          `pointer-events-none` : sans lui, la couche intercepterait le clic qui
+          ouvre la photo. `select-none` évite qu'on le sélectionne comme du
+          texte. Aucune police n'est chargée pour lui. */}
       {/* LA GRILLE. Deux colonnes sur mobile — sur une seule colonne pleine
           largeur, une vignette de 200 px serait agrandie de 80 % et floue. Les
           dimensions sont RÉSERVÉES avant chargement : sans elles, l'arrivée des
@@ -136,7 +158,7 @@ export function Visionneur({
             <button
               type="button"
               onClick={() => setIndex(rang)}
-              className="block aspect-square w-full overflow-hidden rounded-lg bg-surface-container-highest"
+              className="relative block aspect-square w-full overflow-hidden rounded-lg bg-surface-container-highest"
               aria-label={libelles.ouvrir + " " + (rang + 1)}
             >
               {media.urlVignette !== null ? (
@@ -158,6 +180,11 @@ export function Visionneur({
                   {rang + 1}
                 </span>
               )}
+              {filigrane !== null ? (
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 select-none truncate bg-black/35 px-1 py-0.5 text-center font-label-sm text-label-sm text-white">
+                  {filigrane}
+                </span>
+              ) : null}
             </button>
           </li>
         ))}
@@ -191,7 +218,7 @@ export function Visionneur({
             </button>
           </div>
 
-          <div className="flex flex-1 items-center justify-center overflow-hidden p-4">
+          <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
             {echec ? (
               <p className="font-body-md text-body-md text-white">{libelles.indisponible}</p>
             ) : url === null ? (
@@ -218,6 +245,12 @@ export function Visionneur({
                 className="max-h-full max-w-full object-contain"
               />
             )}
+
+            {filigrane !== null && url !== null && !echec ? (
+              <span className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 select-none rounded bg-black/45 px-3 py-1 font-label-md text-label-md text-white">
+                {filigrane}
+              </span>
+            ) : null}
           </div>
 
           <div className="flex justify-between p-4 text-white">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { lireCommandePublique } from "@/lib/page-publique/lecture";
 import "../../globals.css";
 
 /**
@@ -33,9 +34,34 @@ export const metadata: Metadata = {
   twitter: undefined,
 };
 
-export default function LayoutPagePublique({ children }: { children: React.ReactNode }) {
+/**
+ * L'ATTRIBUT `lang` PORTE LA LANGUE DU VENDEUR.
+ *
+ * Sans lui, le document n'annonce aucune langue : un lecteur d'écran prononce
+ * alors un texte anglais avec la phonétique de sa langue par défaut, et la
+ * traduction automatique du navigateur se trompe de sens. Le défaut est
+ * strictement invisible à l'œil — il ne se manifeste que chez qui n'utilise pas
+ * ses yeux pour lire.
+ *
+ * `fr` quand le jeton est inconnu : la page qui suit est un 404, il faut bien
+ * annoncer quelque chose, et c'est la langue par défaut du produit. Ce n'est pas
+ * une information sur le vendeur, puisqu'il n'y en a pas.
+ *
+ * La lecture est mémoïsée pour le temps du rendu : la page fera le même appel
+ * sans payer un second aller-retour.
+ */
+export default async function LayoutPagePublique({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ token: string }>;
+}) {
+  const { token } = await params;
+  const commande = await lireCommandePublique(token);
+
   return (
-    <html>
+    <html lang={commande?.boutique.langue ?? "fr"}>
       <body className="min-h-dvh bg-surface text-on-surface antialiased">{children}</body>
     </html>
   );

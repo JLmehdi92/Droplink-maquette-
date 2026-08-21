@@ -708,6 +708,75 @@ const SQL = {
    * lien qu on a precisement voulu couper. C est la troisieme surface : celle
    * qu on oublie parce que les deux premieres ont ete traitees.
    */
+  /**
+   * LE FILIGRANE S ALLUME SANS RIEN A ECRIRE.
+   *
+   * `watermark_enabled` seul, sans la condition sur le nom. Le vendeur voit son
+   * reglage actif, la base le confirme — et ses clients recoivent des photos
+   * portant une bande noire VIDE. Le defaut ne casse rien, ne leve rien, et ne
+   * se voit que sur la page de quelqu un d autre.
+   */
+  "filigrane-sans-nom": {
+    casser: `drop function if exists public.lire_commande_publique(text);
+      create function public.lire_commande_publique(p_jeton text)
+      returns table (jeton text, client text, reference text, statut public.order_status,
+                     statut_qc public.qc_status, numero_suivi text, transporteur text,
+                     couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
+                     boutique_nom text, boutique_logo text, boutique_couleur text,
+                     boutique_langue text, boutique_filigrane boolean)
+      language sql stable security definer set search_path = '' as $$
+      select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
+             o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
+             o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language, s.watermark_enabled
+      from public.orders o
+      join public.shops s on s.id = o.shop_id
+      join public.profiles p on p.id = s.owner_id
+      where o.public_token = p_jeton and p.status = 'active'
+      $$;
+      revoke all on function public.lire_commande_publique(text) from public;
+      grant execute on function public.lire_commande_publique(text) to anon;`,
+    reparerDepuisMigration: {
+      fichier: "035_filigrane_public.sql",
+      depuis: "drop function if exists public.lire_commande_publique",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * LA LANGUE PUBLIQUE EST FIGEE EN FRANCAIS.
+   *
+   * Hors du cas motivant : ce n est pas le filigrane, c est la colonne voisine.
+   * C etait l etat REEL du produit avant le lot 8 — la colonne existait, la page
+   * la lisait, et personne ne l ecrivait jamais. Un vendeur qui a tout choisi en
+   * anglais livre des pages en francais. Rien cote vendeur ne le montre : le
+   * defaut ne se voit que chez son client, et seulement si celui-ci le dit.
+   */
+  "langue-publique-figee": {
+    casser: `drop function if exists public.lire_commande_publique(text);
+      create function public.lire_commande_publique(p_jeton text)
+      returns table (jeton text, client text, reference text, statut public.order_status,
+                     statut_qc public.qc_status, numero_suivi text, transporteur text,
+                     couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
+                     boutique_nom text, boutique_logo text, boutique_couleur text,
+                     boutique_langue text, boutique_filigrane boolean)
+      language sql stable security definer set search_path = '' as $$
+      select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
+             o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
+             o.updated_at, s.name, s.logo_url, s.accent_color, 'fr'::text, (s.watermark_enabled and s.name is not null and btrim(s.name) <> '')
+      from public.orders o
+      join public.shops s on s.id = o.shop_id
+      join public.profiles p on p.id = s.owner_id
+      where o.public_token = p_jeton and p.status = 'active'
+      $$;
+      revoke all on function public.lire_commande_publique(text) from public;
+      grant execute on function public.lire_commande_publique(text) to anon;`,
+    reparerDepuisMigration: {
+      fichier: "035_filigrane_public.sql",
+      depuis: "drop function if exists public.lire_commande_publique",
+      jusqua: "comment on function",
+    },
+  },
+
   "suivi-public-sans-suspension": {
     casser: `create or replace function public.lire_suivi_public(p_jeton text)
       returns table (etape public.parcel_status, numero text,

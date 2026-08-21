@@ -194,6 +194,11 @@ export default async function PagePublique({
                   largeur: m.largeur,
                   hauteur: m.hauteur,
                 }))}
+                // Le texte du filigrane est le NOM DE LA BOUTIQUE. La base a déjà
+                // décidé si un filigrane est possible : elle éteint le drapeau
+                // quand il n'y a pas de nom, ce qui rend ce `??` inatteignable —
+                // il est là parce que le typage l'exige, pas comme un repli.
+                filigrane={commande.boutique.filigrane ? (commande.boutique.nom ?? null) : null}
                 libelles={{
                   ouvrir: t("galerie.ouvrir"),
                   fermer: t("galerie.fermer"),

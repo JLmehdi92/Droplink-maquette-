@@ -16,6 +16,13 @@ export const EVENEMENTS = {
   // --- Compte ---
   INSCRIPTION: "inscription",
   ONBOARDING_TERMINE: "onboarding_termine",
+  /**
+   * Réglages de marque enregistrés — un geste qui rhabille TOUTES les pages
+   * publiques du vendeur à la fois. Distinct de `ONBOARDING_TERMINE` : l'écart
+   * entre les deux dit si le vendeur revient régler sa marque après coup, donc
+   * si l'écran sert à autre chose qu'à cocher une case le premier jour.
+   */
+  MARQUE_ENREGISTREE: "marque_enregistree",
 
   // --- Commandes ---
   /**

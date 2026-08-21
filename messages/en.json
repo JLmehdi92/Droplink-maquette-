@@ -21,7 +21,10 @@
   "navigation": {
     "seConnecter": "Log in",
     "creerUnCompte": "Sign up",
-    "retourAccueil": "Back to home"
+    "retourAccueil": "Back to home",
+    "mesCommandes": "My orders",
+    "maMarque": "My brand",
+    "espaceVendeur": "Seller area"
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, in your colours",
@@ -217,6 +220,58 @@
     "apercuEtape2Date": "Tomorrow",
     "apercuBoutonSuivi": "Track",
     "sansNom": "Your shop"
+  },
+  "marque": {
+    "titre": "Your brand",
+    "sousTitre": "What your customers see when they open one of your links. Every change applies right away, including to links you have already sent.",
+    "identiteTitre": "Name and logo",
+    "identiteAide": "They appear at the top of every order page.",
+    "nomTitre": "Your shop name",
+    "nomAide": "Left empty, no banner appears at the top of the page — no name, and no empty bar either.",
+    "nomPlaceholder": "For example: Studio Nord",
+    "erreurNom": "The name cannot be longer than 60 characters.",
+    "logoActuel": "Current logo",
+    "logoRemplacer": "Replace",
+    "logoRetirer": "Remove logo",
+    "logoEnvoi": "Uploading…",
+    "depotTitre": "Choose an image",
+    "depotFormats": "PNG, JPG or WebP",
+    "logoErreur": {
+      "type": "That format is not accepted. Choose a PNG, a JPG or a WebP.",
+      "taille": "This image is too heavy.",
+      "session": "Your session has expired. Sign in again, then retry.",
+      "reseau": "The upload did not go through. Check your connection and retry.",
+      "confirmation": "The image was sent but we could not save it. Please retry."
+    },
+    "couleurTitre": "Your colour",
+    "couleurAide": "It carries the buttons and markers on your customers' page.",
+    "couleurHex": "Colour code",
+    "couleurPresets": "A few suggestions",
+    "couleurAjustee": "On your customers' page, text sitting on this colour is darkened or lightened slightly so it stays readable. Your colour itself is not changed.",
+    "erreurCouleur": "Enter six digits or letters preceded by a hash, for example #0058be.",
+    "pageTitre": "Your customers' page",
+    "pageAide": "Two settings that only affect what the person receiving the link sees.",
+    "langueTitre": "Page language",
+    "langueAide": "Your customers' language, not yours: they do not choose it when they open the link. The language of this screen is set separately.",
+    "langue": {
+      "fr": "French",
+      "en": "English"
+    },
+    "filigraneTitre": "Watermark on photos",
+    "filigraneLabel": "Show my shop name on the photos",
+    "filigraneAide": "The name appears over the photos and videos. It discourages reuse but does not prevent it: the name is not burned into the file.",
+    "filigraneSansNom": "Give your shop a name first: without one there is nothing to write on the photos.",
+    "apercuTitre": "Preview",
+    "apercuAide": "What your customer sees, with your current settings.",
+    "apercuStatut": "In transit",
+    "apercuLangue": "This page will be shown in {langue}.",
+    "enregistrer": "Save",
+    "enregistrement": "Saving…",
+    "enregistre": "Saved.",
+    "erreur": {
+      "session": "Your session has expired. Sign in again, then retry.",
+      "ecriture": "Nothing was saved. Please retry in a moment."
+    }
   },
   "commandes": {
     "titre": "My orders",

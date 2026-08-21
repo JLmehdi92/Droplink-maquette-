@@ -10,6 +10,7 @@ import { cleLogo } from "@/lib/storage/cles";
 import { limites } from "@/lib/storage/limites";
 import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { appliquerReglagesMarque } from "@/lib/boutique/reglages";
 
 /**
  * Onboarding — soixante secondes, quatre décisions.
@@ -84,22 +85,32 @@ export async function terminerOnboarding(
   }
 
   const nom = analyse.data.nomBoutique;
-  const { error: erreurShop } = await supabase
-    .from("shops")
-    .update({
-      // Une chaîne vide est enregistrée comme ABSENCE, pas comme nom vide : la
-      // page publique décide d'omettre l'en-tête sur `null`, et un nom vide
-      // produirait une barre de titre vide au lieu de pas de barre du tout.
-      name: nom === undefined || nom === "" ? null : nom,
-      // La valeur choisie est stockée telle quelle et n'est JAMAIS réécrite. Le
-      // contraste est obtenu au rendu, en dérivant des variantes lisibles — si
-      // l'on corrigeait la couleur en base, le vendeur verrait autre chose que
-      // ce qu'il a choisi sans qu'on le lui dise.
-      accent_color: analyse.data.couleurAccent.toLowerCase(),
-    })
-    .eq("id", profil.shopId);
 
-  if (erreurShop !== null) {
+  // LE CHOIX UNIQUE DE L'ONBOARDING INITIALISE LES DEUX LANGUES.
+  //
+  // `profiles.locale` habille l'interface du vendeur, `shops.default_language`
+  // habille les pages que voient ses clients. Ce sont deux réglages distincts,
+  // et les réglages de marque permettent de les dissocier — un fournisseur peut
+  // travailler en anglais et livrer en France. Mais à l'inscription, personne
+  // n'a encore de raison de les distinguer : offrir deux menus ici ferait payer
+  // à tout le monde un cas qui concerne une minorité.
+  //
+  // Sans cette ligne, `default_language` restait à son défaut `fr` pour TOUS les
+  // comptes, y compris ceux qui avaient tout choisi en anglais. Le défaut ne se
+  // voyait pas côté vendeur : il ne se voyait que chez son client. Ce qui
+  // l'empêche de revenir n'est pas cette relecture mais le TYPAGE — la langue
+  // publique est obligatoire dans `ReglagesMarque`, donc l'omettre ne compile
+  // pas.
+  const ecrit = await appliquerReglagesMarque(supabase, profil.shopId, {
+    ...(nom === undefined ? {} : { nom }),
+    couleurAccent: analyse.data.couleurAccent,
+    languePublique: analyse.data.locale,
+    // Le filigrane est un réglage de marque, pas une décision d'inscription :
+    // il se règle plus tard, avec un aperçu sous les yeux.
+    filigrane: false,
+  });
+
+  if (!ecrit) {
     return { statut: "erreur", motif: "ecriture" };
   }
 

@@ -401,6 +401,47 @@ try {
           .from("orders")
           .update({ customer_label: "Client de fumee" })
           .eq("id", commandeFumee);
+
+        // LA LANGUE DE LA PAGE PUBLIQUE EST CELLE DU VENDEUR, PAS DE L URL.
+        //
+        // Elle vient de `shops.default_language`, un reglage de marque. Avant le
+        // lot 8 la colonne existait, la page la lisait, et PERSONNE ne l ecrivait
+        // jamais : toute page publique sortait en francais, y compris pour un
+        // vendeur ayant tout choisi en anglais. Le defaut ne se voyait pas cote
+        // vendeur — il ne se voyait que chez son client.
+        //
+        // Le controle porte sur du texte que SEUL le catalogue anglais contient.
+        const { data: shopFumee } = await service
+          .from("shops")
+          .select("id")
+          .eq("owner_id", profilFumee)
+          .maybeSingle();
+
+        if (shopFumee?.id) {
+          await service
+            .from("shops")
+            .update({ name: "Atelier Fumee", default_language: "en", watermark_enabled: true })
+            .eq("id", shopFumee.id);
+
+          const anglaise = await (await fetch(`${base}/p/${jetonFumee}`)).text();
+
+          await service
+            .from("shops")
+            .update({ default_language: "fr" })
+            .eq("id", shopFumee.id);
+
+          const francaise = await (await fetch(`${base}/p/${jetonFumee}`)).text();
+
+          controles.push(
+            [/<html lang="en"/.test(anglaise), "la langue reglee par le vendeur est celle du document servi"],
+            [/<html lang="fr"/.test(francaise), "et elle rebascule quand il la change"],
+            [anglaise !== francaise, "les deux rendus different reellement, pas seulement l attribut"],
+            [
+              anglaise.includes("Atelier Fumee"),
+              "le nom de boutique regle apparait dans l en-tete de la page publique",
+            ],
+          );
+        }
       }
 
       if (jetonFumee) {

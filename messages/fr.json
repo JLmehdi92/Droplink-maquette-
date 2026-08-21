@@ -21,7 +21,10 @@
   "navigation": {
     "seConnecter": "Se connecter",
     "creerUnCompte": "Créer un compte",
-    "retourAccueil": "Retour à l'accueil"
+    "retourAccueil": "Retour à l'accueil",
+    "mesCommandes": "Mes commandes",
+    "maMarque": "Ma marque",
+    "espaceVendeur": "Espace vendeur"
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à vos couleurs",
@@ -217,6 +220,58 @@
     "apercuEtape2Date": "Demain",
     "apercuBoutonSuivi": "Suivre",
     "sansNom": "Votre boutique"
+  },
+  "marque": {
+    "titre": "Votre marque",
+    "sousTitre": "Ce que vos clients voient quand ils ouvrent un de vos liens. Chaque changement s'applique tout de suite, y compris aux liens déjà envoyés.",
+    "identiteTitre": "Nom et logo",
+    "identiteAide": "Ils s'affichent en haut de la page de chaque commande.",
+    "nomTitre": "Nom de votre boutique",
+    "nomAide": "Laissé vide, aucun bandeau n'apparaît en haut de la page — ni nom, ni barre vide.",
+    "nomPlaceholder": "Par exemple : Studio Nord",
+    "erreurNom": "Le nom ne peut pas dépasser 60 caractères.",
+    "logoActuel": "Logo actuel",
+    "logoRemplacer": "Remplacer",
+    "logoRetirer": "Retirer le logo",
+    "logoEnvoi": "Envoi en cours…",
+    "depotTitre": "Choisir une image",
+    "depotFormats": "PNG, JPG ou WebP",
+    "logoErreur": {
+      "type": "Ce format n'est pas accepté. Choisissez un PNG, un JPG ou un WebP.",
+      "taille": "Cette image est trop lourde.",
+      "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
+      "reseau": "L'envoi n'a pas abouti. Vérifiez votre connexion et réessayez.",
+      "confirmation": "L'image est partie mais nous n'avons pas pu l'enregistrer. Réessayez."
+    },
+    "couleurTitre": "Votre couleur",
+    "couleurAide": "Elle habille les boutons et les repères de la page de vos clients.",
+    "couleurHex": "Code de la couleur",
+    "couleurPresets": "Quelques suggestions",
+    "couleurAjustee": "Sur la page de vos clients, le texte posé sur cette couleur est légèrement assombri ou éclairci pour rester lisible. Votre couleur, elle, n'est pas modifiée.",
+    "erreurCouleur": "Indiquez un code de six chiffres ou lettres précédé d'un dièse, par exemple #0058be.",
+    "pageTitre": "La page de vos clients",
+    "pageAide": "Deux réglages qui ne concernent que ce que voit le destinataire du lien.",
+    "langueTitre": "Langue de la page",
+    "langueAide": "Celle de vos clients, pas la vôtre : ils ne la choisissent pas en ouvrant le lien. La langue de cet écran se règle séparément.",
+    "langue": {
+      "fr": "Français",
+      "en": "Anglais"
+    },
+    "filigraneTitre": "Filigrane sur les photos",
+    "filigraneLabel": "Afficher le nom de ma boutique sur les photos",
+    "filigraneAide": "Le nom apparaît en surimpression sur les photos et vidéos. Cela décourage la réutilisation, mais ne l'empêche pas : le nom n'est pas gravé dans le fichier.",
+    "filigraneSansNom": "Donnez d'abord un nom à votre boutique : sans lui, il n'y a rien à écrire sur les photos.",
+    "apercuTitre": "Aperçu",
+    "apercuAide": "Ce que voit votre client, avec vos réglages actuels.",
+    "apercuStatut": "En transit",
+    "apercuLangue": "Cette page s'affichera en {langue}.",
+    "enregistrer": "Enregistrer",
+    "enregistrement": "Enregistrement…",
+    "enregistre": "Enregistré.",
+    "erreur": {
+      "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
+      "ecriture": "Rien n'a été enregistré. Réessayez dans un instant."
+    }
   },
   "commandes": {
     "titre": "Mes commandes",
