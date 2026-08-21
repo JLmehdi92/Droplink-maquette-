@@ -1366,6 +1366,85 @@ const SQL = {
     },
   },
 
+  /**
+   * LE CAS MOTIVANT : le compteur d'interrogations qui ignore les appels VIDES.
+   *
+   * L'optimisation paraît raisonnable — « une interrogation sans mouvement n'a
+   * rien rapporté » — et elle est fausse : le fournisseur facture l'appel, pas
+   * le résultat. Le compteur descend alors SOUS la facture, du côté rassurant,
+   * et l'écart ne se voit qu'en recevant la facture. Un numéro fraîchement collé
+   * n'est souvent pas encore scanné : ce sont précisément les plus nombreuses.
+   */
+  "interrogations-vides-non-comptees": {
+    casser: `create or replace function public.compter_interrogation()
+      returns trigger language plpgsql security definer set search_path = '' as $$
+      declare v_profil uuid;
+      begin
+        if new.normalized_status is null then return new; end if;
+        select s.owner_id into v_profil
+        from public.tracked_parcels tp
+        join public.shops s on s.id = tp.shop_id
+        where tp.id = new.parcel_id;
+        if v_profil is null then return new; end if;
+        insert into public.usage_counters (profile_id, period_month, tracking_api_calls)
+        values (v_profil, date_trunc('month', new.fetched_at)::date, 1)
+        on conflict (profile_id, period_month) do update
+          set tracking_api_calls = public.usage_counters.tracking_api_calls + 1,
+              updated_at = now();
+        return new;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "051_compteur_interrogations.sql",
+      depuis: "create function public.compter_interrogation()",
+      jusqua: "revoke all on function public.compter_interrogation",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : les SURFACES DE LIMITATION CONFONDUES.
+   *
+   * L'écran rend un pic unique au lieu d'un par surface. Le chiffre reste juste
+   * — c'est bien le plus haut compteur — mais il perd la seule distinction qui
+   * compte : une saturation de la page publique peut être un vendeur qui perce,
+   * une saturation de l'authentification est une attaque. Confondues, l'attaque
+   * se lit comme un succès commercial.
+   */
+  "surfaces-de-limitation-confondues": {
+    casser: `create or replace function public.sante_infrastructure()
+      returns table (genre text, indicateur text, valeur bigint)
+      language plpgsql stable security definer set search_path = '' as $$
+      begin
+        if not public.est_admin() then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        return query
+        select 'suivi'::text, 'interrogations_ce_mois'::text,
+               coalesce(sum(u.tracking_api_calls), 0)::bigint
+        from public.usage_counters u
+        where u.period_month = date_trunc('month', now())::date
+        union all
+        select 'suivi'::text, 'colis_pris_en_charge_ce_mois'::text,
+               coalesce(sum(u.parcels_registered), 0)::bigint
+        from public.usage_counters u
+        where u.period_month = date_trunc('month', now())::date
+        union all
+        select 'suivi'::text, 'abandons_ce_mois'::text, count(*)::bigint
+        from public.tracked_parcels tp
+        where tp.abandoned_at >= date_trunc('month', now())
+        union all
+        select 'limitation'::text, 'pic_total'::text, max(r.compte)::bigint
+        from public.rate_limit r
+        where r.fenetre_debut > now() - interval '1 hour';
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "052_sante_infrastructure.sql",
+      depuis: "create function public.sante_infrastructure",
+      jusqua: "comment on function public.sante_infrastructure",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

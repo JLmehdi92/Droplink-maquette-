@@ -761,6 +761,33 @@
       "Mo": "MB",
       "Go": "GB",
       "To": "TB"
+    },
+    "surveillance": {
+      "titre": "Monitoring",
+      "sousTitre": "What the product actually measures. The figures it does not measure are named below rather than left out: a silent screen would suggest they are being watched.",
+      "taches": "Background tasks",
+      "nonMesure": "Not measured",
+      "nonMesureAide": "Nothing currently records these figures. They will appear here together with the mechanism that measures them, never before: one invented number on this screen would cast doubt on all the others.",
+      "genre": {
+        "suivi": "Parcel tracking",
+        "limitation": "Rate limit pressure"
+      },
+      "indicateur": {
+        "interrogations_ce_mois": "Carrier lookups this month",
+        "colis_pris_en_charge_ce_mois": "Parcels registered this month",
+        "abandons_ce_mois": "Tracking given up this month",
+        "pic_auth-ip": "Peak — sign-ins per address",
+        "pic_auth-email": "Peak — links per email address",
+        "pic_publique-requetes": "Peak — public page requests",
+        "pic_publique-inconnu": "Peak — unknown links",
+        "pic_publique-ecriture": "Peak — QC responses"
+      },
+      "absent": {
+        "disponibilite": "Uptime",
+        "latence": "Latency",
+        "charge_serveur": "Server load",
+        "erreurs_5xx": "Server errors"
+      }
     }
   }
 }

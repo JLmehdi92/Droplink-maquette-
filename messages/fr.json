@@ -761,6 +761,33 @@
       "Mo": "Mo",
       "Go": "Go",
       "To": "To"
+    },
+    "surveillance": {
+      "titre": "Surveillance",
+      "sousTitre": "Ce que le produit mesure réellement. Les grandeurs qu'il ne mesure pas sont nommées plus bas plutôt que passées sous silence : un écran muet laisserait croire qu'elles sont surveillées.",
+      "taches": "Tâches de fond",
+      "nonMesure": "Non mesuré",
+      "nonMesureAide": "Aucun mécanisme ne relève ces grandeurs aujourd'hui. Elles apparaîtront ici avec le mécanisme qui les mesure, jamais avant : un chiffre inventé sur cet écran ferait douter de tous les autres.",
+      "genre": {
+        "suivi": "Suivi de colis",
+        "limitation": "Pression sur les limites"
+      },
+      "indicateur": {
+        "interrogations_ce_mois": "Interrogations du transporteur ce mois",
+        "colis_pris_en_charge_ce_mois": "Colis pris en charge ce mois",
+        "abandons_ce_mois": "Suivis abandonnés ce mois",
+        "pic_auth-ip": "Pic — connexions par adresse",
+        "pic_auth-email": "Pic — liens par adresse email",
+        "pic_publique-requetes": "Pic — requêtes de page publique",
+        "pic_publique-inconnu": "Pic — liens inconnus",
+        "pic_publique-ecriture": "Pic — réponses QC"
+      },
+      "absent": {
+        "disponibilite": "Disponibilité",
+        "latence": "Latence",
+        "charge_serveur": "Charge serveur",
+        "erreurs_5xx": "Erreurs serveur"
+      }
     }
   }
 }

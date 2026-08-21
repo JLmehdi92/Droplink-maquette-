@@ -617,6 +617,7 @@ export type Database = {
           period_month: string
           profile_id: string
           storage_bytes: number | null
+          tracking_api_calls: number
           updated_at: string
         }
         Insert: {
@@ -626,6 +627,7 @@ export type Database = {
           period_month: string
           profile_id: string
           storage_bytes?: number | null
+          tracking_api_calls?: number
           updated_at?: string
         }
         Update: {
@@ -635,6 +637,7 @@ export type Database = {
           period_month?: string
           profile_id?: string
           storage_bytes?: number | null
+          tracking_api_calls?: number
           updated_at?: string
         }
         Relationships: [
@@ -967,6 +970,14 @@ export type Database = {
         Returns: number
       }
       sans_accents: { Args: { p_texte: string }; Returns: string }
+      sante_infrastructure: {
+        Args: never
+        Returns: {
+          genre: string
+          indicateur: string
+          valeur: number
+        }[]
+      }
       stockage_total_admin: { Args: never; Returns: number }
       suspendre_compte: {
         Args: { p_ip_hash: string; p_motif: string; p_profil: string }

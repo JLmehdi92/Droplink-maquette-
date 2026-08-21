@@ -327,6 +327,17 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "n'a rien à auditer : un total agrégé ne désigne les données de personne.",
     ],
     [
+      "sante_infrastructure",
+      "Indicateurs de surveillance. Elle ne rend QUE ce que le produit mesure " +
+        "réellement : la maquette affichait une disponibilité, des websockets et " +
+        "des IOPS que rien ne relève, et inventer un chiffre sur l'écran où l'on " +
+        "décide ferait douter de tous les autres. Les surfaces de limitation y " +
+        "restent SÉPARÉES — une saturation de la page publique peut être un " +
+        "vendeur qui perce, une saturation de l'authentification est une " +
+        "attaque. `stable` : elle n'écrit rien, et le moteur refusera toute " +
+        "écriture qu'on y ajouterait.",
+    ],
+    [
       "alertes_admin",
       "Alertes du panneau. Elles PRÉCÈDENT les compteurs, et portent leur VALEUR " +
         "avec leur seuil — « 1 840 pour un seuil de 1 200 », jamais « ce compte " +
