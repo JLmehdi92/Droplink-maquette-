@@ -47,6 +47,14 @@ const HISTORIQUE_MS = 30;
 const JAMAIS_OUVERT_MS = 120;
 const LIGNES_LUES_PAGE = 5_000;
 const LIGNES_LUES_HISTORIQUE = 500;
+/*
+ * Le seuil qui protège vraiment le tri « jamais ouvert ». Sans lui, la suite ne
+ * vérifierait qu'un CHRONOMÈTRE — et un chronomètre certifie une performance qui
+ * n'existe qu'à la volumétrie de test. L'index partiel retiré, la requête
+ * resterait rapide sur 9 600 lignes et s'effondrerait sur 100 000, sans que rien
+ * ne l'ait signalé entre les deux.
+ */
+const LIGNES_LUES_JAMAIS_OUVERT = 200;
 
 let bd: Client;
 let alice: UtilisateurDeTest;
@@ -87,8 +95,22 @@ async function mesurer(utilisateur: UtilisateurDeTest, sql: string): Promise<Mes
     const parcourir = (noeud: Record<string, unknown>): void => {
       const type = String(noeud["Node Type"] ?? "");
       if (type.includes("Scan")) {
-        // Ce que la base a dû LIRE pour rendre cinquante lignes.
-        lignesLues += Number(noeud["Actual Rows"] ?? 0) * Number(noeud["Actual Loops"] ?? 1);
+        /*
+         * CE QUE LA BASE A DÛ REGARDER, pas ce qu'elle a rendu.
+         *
+         * « Actual Rows » ne compte que les lignes SORTIES du nœud. Les lignes
+         * lues puis JETÉES par un filtre n'y figurent pas — et ce sont
+         * exactement celles qu'on cherche à borner. Défaut constaté par
+         * falsification : l'index partiel du tri « jamais ouvert » retiré, la
+         * mesure annonçait « 0 ligne lue » pendant que le temps passait de
+         * 0,5 ms à 11,5 ms. La sonde regardait à côté et le disait avec aplomb.
+         */
+        const boucles = Number(noeud["Actual Loops"] ?? 1);
+        lignesLues +=
+          (Number(noeud["Actual Rows"] ?? 0) +
+            Number(noeud["Rows Removed by Filter"] ?? 0) +
+            Number(noeud["Rows Removed by Index Recheck"] ?? 0)) *
+          boucles;
       }
       if (type === "Seq Scan") balayees.push(String(noeud["Relation Name"] ?? "?"));
       for (const enfant of (noeud["Plans"] as Array<Record<string, unknown>>) ?? []) {
@@ -336,6 +358,13 @@ describe("Le tri « jamais ouvert par le client »", () => {
   test("première page, sur un jeu réaliste", async () => {
     const mesure = await mesurerSerieuse(alice, REQUETE.replace("@SHOP@", alice.shopId));
     console.log(`jamais ouvert : ${mesure.ms.toFixed(1)} ms, ${mesure.lignesLues} lignes lues`);
+    expect(
+      balayagesInterdits(mesure),
+      `balayage séquentiel : ${mesure.balayees.join(", ")}`,
+    ).toEqual([]);
+    expect(mesure.lignesLues, `${mesure.lignesLues} lignes lues`).toBeLessThan(
+      LIGNES_LUES_JAMAIS_OUVERT,
+    );
     expect(mesure.ms, `${mesure.ms.toFixed(1)} ms`).toBeLessThan(JAMAIS_OUVERT_MS);
   });
 
@@ -366,6 +395,15 @@ describe("Le tri « jamais ouvert par le client »", () => {
       `jamais ouvert, PIRE CAS : ${mesure.ms.toFixed(1)} ms, ${mesure.lignesLues} lignes lues`,
     );
 
+    expect(
+      balayagesInterdits(mesure),
+      `balayage séquentiel : ${mesure.balayees.join(", ")}`,
+    ).toEqual([]);
+    // ZÉRO ligne attendue : le tri ne trouve rien, et l'index partiel doit le
+    // dire sans parcourir les 9 600 commandes pour s'en apercevoir.
+    expect(mesure.lignesLues, `${mesure.lignesLues} lignes lues`).toBeLessThan(
+      LIGNES_LUES_JAMAIS_OUVERT,
+    );
     expect(mesure.ms, `${mesure.ms.toFixed(1)} ms`).toBeLessThan(JAMAIS_OUVERT_MS);
   });
 });

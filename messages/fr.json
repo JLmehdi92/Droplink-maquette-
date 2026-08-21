@@ -254,7 +254,8 @@
     "tri": {
       "recentes": "Les plus récentes",
       "anciennes": "Les plus anciennes",
-      "modifiees": "Modifiées en dernier"
+      "modifiees": "Modifiées en dernier",
+      "jamais-ouvert": "Jamais ouvertes par le client"
     },
     "colonne": {
       "client": "Client",
@@ -263,7 +264,8 @@
       "statutCourt": "Expédition",
       "qcCourt": "Photos",
       "modifiee": "Modifiée le",
-      "actions": "Actions"
+      "actions": "Actions",
+      "vues": "Vues"
     },
     "vide": {
       "compteTitre": "Aucune commande pour l’instant",
@@ -271,6 +273,24 @@
       "creer": "Créer ma première commande",
       "filtreTitre": "Aucune commande ne correspond",
       "filtreTexte": "Ce compte contient des commandes, mais aucune ne passe les filtres en cours."
+    },
+    "jamaisOuvert": "Jamais ouvert",
+    "jamaisOuvertAide": "{client} n’a pas encore ouvert son lien.",
+    "vuesNombre": "{n, plural, one {# vue} other {# vues}}",
+    "derniereVue": "Dernière ouverture le {date}",
+    "archiver": "Archiver {client}",
+    "desarchiver": "Sortir {client} des archives",
+    "dupliquerLigne": "Dupliquer {client} comme gabarit",
+    "selectionner": "Sélectionner {client}",
+    "lot": {
+      "titre": "Actions groupées",
+      "aide": "Cochez des commandes, puis choisissez. Chaque lot est tout ou rien.",
+      "archiver": "Archiver la sélection",
+      "desarchiver": "Sortir la sélection des archives",
+      "ok": "{n, plural, one {# commande traitée} other {# commandes traitées}}.",
+      "vide": "Aucune commande sélectionnée.",
+      "partiel": "Lot refusé : rien n’a été modifié. Certaines commandes ne sont plus accessibles — rechargez la liste.",
+      "ecriture": "Le lot n’a pas pu être traité. Rien n’a été modifié."
     }
   },
   "editeur": {

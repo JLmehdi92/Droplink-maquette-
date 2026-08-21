@@ -6,7 +6,13 @@ import { ActionsLigne } from "./actions-ligne";
 import { BadgeStatut, teinteExpedition, teinteQc } from "./badge-statut";
 import type { PageCommandes, ParametresListe } from "@/lib/commandes/liste";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
-import { creerBrouillon } from "@/lib/commandes/actions";
+import type { EtatLot } from "@/lib/commandes/lot";
+import {
+  archiverDepuisListe,
+  archiverLot,
+  creerBrouillon,
+  dupliquerDepuisListe,
+} from "@/lib/commandes/actions";
 
 /**
  * Le tableau des commandes, porté sur la maquette `gestion_d_inventaire_envois`.
@@ -28,15 +34,31 @@ export async function TableauCommandes({
   origine,
   parametres,
   page,
+  lot,
 }: {
   readonly base: string;
   readonly langue: string;
   readonly origine: string;
   readonly parametres: ParametresListe;
   readonly page: PageCommandes;
+  /**
+   * Résultat du dernier lot.
+   *
+   * L'état est un ENSEMBLE FERMÉ et pas une chaîne, parce qu'il finit dans une
+   * clef de traduction : `t("lot." + etat)`. Une valeur libre venue de la barre
+   * d'adresse ferait lever le rendu de l'écran sur une clef inexistante — un
+   * `?lot=n_importe_quoi` suffirait à casser la page de n'importe quel vendeur.
+   * La validation est faite par la page, en amont.
+   */
+  readonly lot: { readonly etat: EtatLot | null; readonly nombre: number };
 }) {
   const t = await getTranslations("commandes");
   const format = await getFormatter();
+
+  // L'URL courante, pour y revenir après une action. Reconstruite depuis les
+  // paramètres et non lue dans un en-tête : c'est le même calcul que celui des
+  // liens de la page, donc le retour atterrit exactement là où on était.
+  const retour = lienListe(base, parametres, {});
 
   const cellule = "px-6 py-4 font-body-sm text-body-sm";
 
@@ -94,11 +116,41 @@ export async function TableauCommandes({
         />
       ) : (
         <>
+          {/* LE RÉSULTAT DU DERNIER LOT, DIT. Un lot refusé et un lot en panne
+              ne se disent pas pareil : le premier se refait à l'identique, le
+              second non. Et « rien n'a été modifié » est une information — sans
+              elle, le vendeur ne sait pas s'il doit recommencer. */}
+          {lot.etat !== null ? (
+            <p
+              role="status"
+              className={
+                "border-b border-outline-variant/30 px-6 py-3 font-body-sm text-body-sm " +
+                (lot.etat === "ok" ? "text-on-surface" : "text-error")
+              }
+            >
+              {lot.etat === "ok" ? t("lot.ok", { n: lot.nombre }) : t("lot." + lot.etat)}
+            </p>
+          ) : null}
+
+          {/*
+            LE FORMULAIRE DE LOT ENVELOPPE LE TABLEAU, et les actions de LIGNE
+            sont des formulaires rendus APRÈS lui, atteints par l'attribut `form`
+            de leurs boutons. HTML interdit d'imbriquer un formulaire dans un
+            autre ; sans cette construction il faudrait un îlot client pour une
+            opération que le navigateur sait faire seul, et l'archivage cesserait
+            de fonctionner quand le JavaScript n'a pas chargé — ce qui arrive plus
+            souvent qu'on ne le croit sur un téléphone en 4G.
+          */}
+          <form action={archiverLot}>
+            <input type="hidden" name="retour" value={retour} />
           <div className="flex-grow overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-outline-variant/50 bg-surface-container-lowest/30">
-                  {["client", "reference", "suivi", "statutCourt", "qcCourt", "modifiee"].map(
+                  <th scope="col" className="w-12 px-4 py-4">
+                    <span className="sr-only">{t("lot.titre")}</span>
+                  </th>
+                  {["client", "reference", "suivi", "statutCourt", "qcCourt", "vues", "modifiee"].map(
                     (clef) => (
                       <th
                         key={clef}
@@ -125,6 +177,15 @@ export async function TableauCommandes({
                   const nom = ligne.client ?? t("sansNom");
                   return (
                     <tr key={ligne.id} className="group transition-colors hover:bg-surface-bright/50">
+                      <td className="w-12 px-4 py-4">
+                        <input
+                          type="checkbox"
+                          name="selection"
+                          value={ligne.id}
+                          aria-label={t("selectionner", { client: nom })}
+                          className="h-4 w-4 accent-[var(--accent-remplissage)]"
+                        />
+                      </td>
                       <td
                         className={
                           cellule +
@@ -151,6 +212,38 @@ export async function TableauCommandes({
                           teinte={teinteQc(ligne.qc)}
                         />
                       </td>
+                      {/* LE COMPTEUR DE VUES, et surtout « JAMAIS OUVERT ».
+                          C'est l'information pour laquelle le vendeur ouvre cet
+                          écran : savoir qui n'a pas encore regardé ses photos.
+                          Zéro n'est pas affiché comme un chiffre — un « 0 » se
+                          lit de loin comme n'importe quel autre nombre. */}
+                      <td className={cellule + " whitespace-nowrap"}>
+                        {ligne.vues === 0 ? (
+                          <span
+                            className="rounded-full bg-surface-container-high px-2 py-1 font-label-sm text-label-sm text-on-surface-variant"
+                            title={t("jamaisOuvertAide", { client: nom })}
+                          >
+                            {t("jamaisOuvert")}
+                          </span>
+                        ) : (
+                          <span
+                            className="text-on-surface"
+                            title={
+                              ligne.derniereVueLe === null
+                                ? undefined
+                                : t("derniereVue", {
+                                    date: format.dateTime(new Date(ligne.derniereVueLe), {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    }),
+                                  })
+                            }
+                          >
+                            {t("vuesNombre", { n: ligne.vues })}
+                          </span>
+                        )}
+                      </td>
                       <td className={cellule + " whitespace-nowrap text-on-surface"}>
                         {format.dateTime(new Date(ligne.modifieeLe), {
                           day: "numeric",
@@ -158,10 +251,49 @@ export async function TableauCommandes({
                           year: "numeric",
                         })}
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <TraductionsClient espaces={["commandes"]}>
-                          <ActionsLigne lien={origine + "/p/" + ligne.jetonPublic} nomClient={nom} />
-                        </TraductionsClient>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <TraductionsClient espaces={["commandes"]}>
+                            <ActionsLigne
+                              lien={origine + "/p/" + ligne.jetonPublic}
+                              nomClient={nom}
+                            />
+                          </TraductionsClient>
+
+                          <button
+                            type="submit"
+                            form={"dup-" + ligne.id}
+                            className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-[var(--accent-texte)]"
+                            title={t("dupliquerLigne", { client: nom })}
+                          >
+                            <Icone
+                              nom="file_copy"
+                              className="text-[18px]"
+                              titre={t("dupliquerLigne", { client: nom })}
+                            />
+                          </button>
+
+                          <button
+                            type="submit"
+                            form={"arch-" + ligne.id}
+                            className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-[var(--accent-texte)]"
+                            title={
+                              ligne.archiveeLe === null
+                                ? t("archiver", { client: nom })
+                                : t("desarchiver", { client: nom })
+                            }
+                          >
+                            <Icone
+                              nom={ligne.archiveeLe === null ? "inventory_2" : "unarchive"}
+                              className="text-[18px]"
+                              titre={
+                                ligne.archiveeLe === null
+                                  ? t("archiver", { client: nom })
+                                  : t("desarchiver", { client: nom })
+                              }
+                            />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -169,6 +301,46 @@ export async function TableauCommandes({
               </tbody>
             </table>
           </div>
+
+          {/* LA BARRE DE LOT. Un seul bouton, dont le sens dépend de la vue
+              courante : proposer « archiver » dans les archives n'aurait pas de
+              sens. `name` et `value` d'un bouton partent avec le formulaire — le
+              navigateur sait donc lequel a été pressé, sans JavaScript. */}
+          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant/30 bg-surface-container-lowest/50 px-6 py-4">
+            <span className="font-label-sm text-label-sm text-on-surface-variant">
+              {t("lot.aide")}
+            </span>
+            <button
+              type="submit"
+              name="archiver"
+              value={parametres.archivees ? "0" : "1"}
+              className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-variant"
+            >
+              {parametres.archivees ? t("lot.desarchiver") : t("lot.archiver")}
+            </button>
+          </div>
+          </form>
+
+          {/*
+            LES FORMULAIRES DES ACTIONS DE LIGNE, hors du tableau et hors du
+            formulaire de lot. Chacun porte SES champs : un formulaire commun
+            enverrait ceux de toutes les lignes à chaque clic.
+          */}
+          {page.lignes.map((ligne) => (
+            <div key={"formulaires-" + ligne.id} className="hidden">
+              <form id={"arch-" + ligne.id} action={archiverDepuisListe}>
+                <input type="hidden" name="id" value={ligne.id} />
+                <input type="hidden" name="jeton" value={ligne.jetonPublic} />
+                <input type="hidden" name="archiver" value={ligne.archiveeLe === null ? "1" : "0"} />
+                <input type="hidden" name="retour" value={retour} />
+              </form>
+              <form id={"dup-" + ligne.id} action={dupliquerDepuisListe}>
+                <input type="hidden" name="id" value={ligne.id} />
+                <input type="hidden" name="langue" value={langue} />
+                <input type="hidden" name="retour" value={retour} />
+              </form>
+            </div>
+          ))}
 
           <Pagination base={base} parametres={parametres} suivant={page.suivant} />
         </>

@@ -330,6 +330,10 @@ export type Database = {
         Args: { p_commentaire: string; p_decision: string; p_jeton: string }
         Returns: Database["public"]["Enums"]["qc_status"]
       }
+      archiver_lot: {
+        Args: { p_archiver: boolean; p_ids: string[] }
+        Returns: number
+      }
       consommer_quota: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean

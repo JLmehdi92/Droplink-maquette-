@@ -5,6 +5,7 @@ import { TableauCommandes } from "@/components/commandes/tableau-commandes";
 import { analyserParametres, lireCommandes } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
+import { EtatLot, NombreLot } from "@/lib/commandes/lot";
 
 export async function generateMetadata({
   params,
@@ -48,7 +49,17 @@ export default async function Commandes({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const parametres = analyserParametres(await searchParams);
+  const requete = await searchParams;
+  const parametres = analyserParametres(requete);
+
+  // Le résultat du dernier lot revient par l'URL, donc il est VALIDÉ comme tout
+  // ce qui vient de la barre d'adresse : il finit dans une clef de traduction, et
+  // une clef inexistante ferait lever le rendu de l'écran le plus utilisé du
+  // produit.
+  const lot = {
+    etat: EtatLot.parse(requete["lot"]),
+    nombre: NombreLot.parse(requete["n"]),
+  };
   const t = await getTranslations("commandes");
 
   const [page, origine] = await Promise.all([lireCommandes(parametres), origineDuSite()]);
@@ -78,6 +89,7 @@ export default async function Commandes({
           origine={origine ?? ""}
           parametres={parametres}
           page={page}
+          lot={lot}
         />
       </div>
     </main>

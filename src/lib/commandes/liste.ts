@@ -19,7 +19,12 @@ export const STATUTS_QC = [
   "refuse",
 ] as const satisfies readonly StatutQc[];
 
-export const TRIS = ["recentes", "anciennes", "modifiees"] as const;
+/*
+ * `jamais-ouvert` est un TRI et pas un filtre de plus, parce que c'est ainsi que
+ * le vendeur y pense : « montre-moi ce que mes clients n'ont pas encore vu ».
+ * Il restreint donc ET ordonne, exactement comme l'index partiel posé pour lui.
+ */
+export const TRIS = ["recentes", "anciennes", "modifiees", "jamais-ouvert"] as const;
 export type Tri = (typeof TRIS)[number];
 
 /** Cinquante lignes : la valeur mesurée au plafond, pas un chiffre choisi à vue. */
@@ -60,6 +65,12 @@ export interface LigneCommande {
   readonly creeeLe: string;
   readonly modifieeLe: string;
   readonly archiveeLe: string | null;
+  /**
+   * Vues DÉDUPLIQUÉES : un visiteur, un jour. Lue sur la commande et non agrégée
+   * depuis `link_views` — mesuré, l'agrégat lisait vingt fois plus de lignes.
+   */
+  readonly vues: number;
+  readonly derniereVueLe: string | null;
 }
 
 export interface PageCommandes {
@@ -99,6 +110,10 @@ function ordre(tri: Tri): { colonne: "created_at" | "updated_at"; croissant: boo
       return { colonne: "created_at", croissant: true };
     case "modifiees":
       return { colonne: "updated_at", croissant: false };
+    case "jamais-ouvert":
+    // Même ordre que `recentes` : ce tri restreint, il ne réordonne pas. C'est
+    // aussi l'ordre de l'index partiel posé pour lui, et un ordre différent le
+    // rendrait inutilisable sans que rien ne le signale.
     case "recentes":
       return { colonne: "created_at", croissant: false };
   }
@@ -216,6 +231,11 @@ export async function lireCommandes(
       ? requete.not("archived_at", "is", null)
       : requete.is("archived_at", null);
 
+  // Le tri « jamais ouvert » RESTREINT. Il s'appuie sur le compteur porté par la
+  // commande, jamais sur une anti-jointure : mesurée au plafond, celle-ci coûtait
+  // 500 ms et 48 001 lignes lues chez un vendeur dont tout avait été ouvert.
+  if (parametres.tri === "jamais-ouvert") requete = requete.eq("views_count", 0);
+
   if (parametres.statut !== null) requete = requete.eq("status", parametres.statut);
   if (parametres.qc !== null) requete = requete.eq("qc_status", parametres.qc);
 
@@ -274,6 +294,8 @@ export async function lireCommandes(
     creeeLe: l.created_at,
     modifieeLe: l.updated_at,
     archiveeLe: l.archived_at,
+    vues: l.views_count,
+    derniereVueLe: l.last_viewed_at,
   }));
 
   const derniere = lignes[lignes.length - 1];

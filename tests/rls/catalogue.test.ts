@@ -188,6 +188,16 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "moitié faite est une coupure qui n'a pas eu lieu.",
     ],
     [
+      "archiver_lot",
+      "Archivage par LOT, tout-ou-rien. `SECURITY INVOKER` — donc exécutée avec " +
+        "les droits de l'appelant, sous SA RLS : elle ne peut structurellement " +
+        "pas toucher la commande d'un autre vendeur, et il n'y a aucun contrôle " +
+        "de propriété à écrire dans son corps, donc aucun à oublier. Elle existe " +
+        "parce qu'un `update ... where id = any(...)` ignorerait SILENCIEUSEMENT " +
+        "les lignes hors de portée : elle compare ce qu'elle a modifié à ce " +
+        "qu'on lui a demandé, et lève si les deux diffèrent.",
+    ],
+    [
       "arbitrer_qc",
       "SEULE écriture publique du produit. En `security definer` parce que " +
         "`anon` n'a et ne doit avoir aucun droit sur `orders` : sans elle, il " +

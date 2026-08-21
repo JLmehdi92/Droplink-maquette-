@@ -167,3 +167,124 @@ export async function archiver(
 
   return resultat;
 }
+
+/**
+ * LES ACTIONS DE LA LISTE — appelées par des FORMULAIRES, pas par du JavaScript.
+ *
+ * Elles existent en plus des trois ci-dessus, qui prennent leurs arguments un à
+ * un depuis un îlot client. Ici l'écran est rendu entièrement côté serveur : une
+ * action par formulaire ne coûte pas un octet de bundle, et archiver marche
+ * même si le JavaScript n'a pas chargé — ce qui arrive plus souvent qu'on ne le
+ * croit sur un téléphone d'entrée de gamme en 4G.
+ *
+ * ⚠️ CHAQUE EXPORT D'UN MODULE `"use server"` EST UN POINT D'ENTRÉE ATTEIGNABLE
+ * DEPUIS LE NAVIGATEUR. Ces trois-là revérifient donc la session et valident
+ * leur `FormData` avec Zod, sans supposer qu'un écran les a précédées : rien ne
+ * garantit qu'un formulaire a jamais été affiché.
+ */
+
+const Retour = z.string().max(500).catch("");
+
+/** Où revenir après l'action. Toujours une URL RELATIVE de ce site. */
+function destination(donnees: FormData, defaut: string): string {
+  const brut = Retour.parse(donnees.get("retour"));
+  // Une redirection ouverte transformerait un bouton « archiver » en tremplin
+  // vers un site tiers : il suffirait d'un lien préparé pour que le vendeur
+  // atterrisse sur une fausse page de connexion, en venant de chez nous. Seul un
+  // chemin commençant par UN SEUL `/` est accepté — `//exemple.test` est une URL
+  // absolue déguisée, que le navigateur suit vers un autre domaine.
+  if (brut.startsWith("/") && !brut.startsWith("//")) return brut;
+  return defaut;
+}
+
+const Identifiant = z.string().uuid();
+
+export async function archiverDepuisListe(donnees: FormData): Promise<void> {
+  const profil = await lireProfilVendeur();
+  if (profil === null || profil.statut !== "active") redirect("/fr/connexion?erreur=session");
+
+  const id = Identifiant.safeParse(donnees.get("id"));
+  const jeton = z.string().max(64).safeParse(donnees.get("jeton"));
+  const archiver = donnees.get("archiver") === "1";
+  const retour = destination(donnees, "/fr/commandes");
+  if (!id.success) redirect(retour);
+
+  const supabase = await creerClientServeur();
+  const resultat = await archiverCommande(supabase, profil.profilId, id.data, archiver);
+
+  if (resultat.statut === "ok" && jeton.success && jeton.data !== "") {
+    revalidateTag(etiquetteCommandePublique(jeton.data));
+  }
+
+  redirect(retour);
+}
+
+export async function dupliquerDepuisListe(donnees: FormData): Promise<void> {
+  const profil = await lireProfilVendeur();
+  if (profil === null || profil.statut !== "active") redirect("/fr/connexion?erreur=session");
+
+  const id = Identifiant.safeParse(donnees.get("id"));
+  const langue = z.enum(["fr", "en"]).catch("fr").parse(donnees.get("langue"));
+  const retour = destination(donnees, "/" + langue + "/commandes");
+  if (!id.success) redirect(retour);
+
+  const supabase = await creerClientServeur();
+  const resultat = await dupliquerCommande(supabase, profil.profilId, profil.shopId, id.data);
+
+  // La copie est un GABARIT vide : on ouvre son éditeur, parce que personne ne
+  // duplique pour laisser la copie en l'état. Sur échec on revient à la liste
+  // plutôt que d'inventer une destination.
+  if (resultat.statut !== "ok") redirect(retour);
+  redirect("/" + langue + "/commandes/" + resultat.nouvelleCommande);
+}
+
+export type ResultatLot =
+  | { readonly statut: "ok"; readonly nombre: number }
+  | { readonly statut: "echec"; readonly motif: "session" | "saisie" | "partiel" | "ecriture" };
+
+/**
+ * Archive ou désarchive une SÉLECTION, tout ou rien.
+ *
+ * L'atomicité est celle de la base : la fonction `archiver_lot` compare ce
+ * qu'elle a modifié à ce qu'on lui a demandé et lève si les deux diffèrent, ce
+ * qui annule la transaction entière. Une sélection à moitié archivée sans que le
+ * vendeur sache LAQUELLE est pire que l'échec complet.
+ */
+export async function archiverLot(donnees: FormData): Promise<void> {
+  const profil = await lireProfilVendeur();
+  if (profil === null || profil.statut !== "active") redirect("/fr/connexion?erreur=session");
+
+  const ids = z
+    .array(Identifiant)
+    .max(200)
+    .safeParse(donnees.getAll("selection").map(String));
+  const archiver = donnees.get("archiver") === "1";
+  const retour = destination(donnees, "/fr/commandes");
+
+  if (!ids.success || ids.data.length === 0) redirect(retour + separateur(retour) + "lot=vide");
+
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.rpc("archiver_lot", {
+    p_ids: ids.data,
+    p_archiver: archiver,
+  });
+
+  if (error !== null) {
+    // L'ÉCHEC EST DIT, et distingué : « refusé » n'est pas « en panne ». Un lot
+    // refusé se refait à l'identique, un lot en panne non.
+    const motif = error.code === "DL021" ? "partiel" : "ecriture";
+    redirect(retour + separateur(retour) + "lot=" + motif);
+  }
+
+  await emettre(
+    EVENEMENTS.COMMANDE_ARCHIVEE,
+    { sujet: profil.profilId },
+    { lot: data ?? 0, archivee: archiver },
+  );
+
+  redirect(retour + separateur(retour) + "lot=ok&n=" + String(data ?? 0));
+}
+
+function separateur(url: string): string {
+  return url.includes("?") ? "&" : "?";
+}

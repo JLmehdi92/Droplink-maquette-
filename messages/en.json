@@ -254,7 +254,8 @@
     "tri": {
       "recentes": "Newest first",
       "anciennes": "Oldest first",
-      "modifiees": "Recently edited"
+      "modifiees": "Recently edited",
+      "jamais-ouvert": "Never opened by the customer"
     },
     "colonne": {
       "client": "Customer",
@@ -263,7 +264,8 @@
       "statutCourt": "Shipping",
       "qcCourt": "Photos",
       "modifiee": "Edited on",
-      "actions": "Actions"
+      "actions": "Actions",
+      "vues": "Views"
     },
     "vide": {
       "compteTitre": "No orders yet",
@@ -271,6 +273,24 @@
       "creer": "Create my first order",
       "filtreTitre": "No order matches",
       "filtreTexte": "This account has orders, but none of them pass the current filters."
+    },
+    "jamaisOuvert": "Never opened",
+    "jamaisOuvertAide": "{client} has not opened their link yet.",
+    "vuesNombre": "{n, plural, one {# view} other {# views}}",
+    "derniereVue": "Last opened on {date}",
+    "archiver": "Archive {client}",
+    "desarchiver": "Move {client} out of the archive",
+    "dupliquerLigne": "Duplicate {client} as a template",
+    "selectionner": "Select {client}",
+    "lot": {
+      "titre": "Bulk actions",
+      "aide": "Tick some orders, then choose. Each batch is all or nothing.",
+      "archiver": "Archive the selection",
+      "desarchiver": "Move the selection out of the archive",
+      "ok": "{n, plural, one {# order processed} other {# orders processed}}.",
+      "vide": "No order selected.",
+      "partiel": "Batch refused: nothing was changed. Some orders are no longer reachable — reload the list.",
+      "ecriture": "The batch could not be processed. Nothing was changed."
     }
   },
   "editeur": {

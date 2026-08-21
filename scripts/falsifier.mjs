@@ -451,6 +451,91 @@ const SQL = {
       "for each row execute function public.compter_vue();",
   },
 
+
+  /**
+   * Le lot rendu PARTIEL : l ecriture directe, sans comparer ce qu on a modifie
+   * a ce qu on a demande.
+   *
+   * C est exactement la version « evidente » de la fonction, et elle est fausse.
+   * Sous RLS l `update` ne touche que les commandes de l appelant — ce qui est
+   * correct — et ignore les autres SANS RIEN DIRE. L ecran affiche « lot
+   * archive » pour une selection dont une partie n a pas bouge. Rien ne casse,
+   * rien n est journalise, et le vendeur le decouvre des semaines plus tard sur
+   * la commande qu il croyait rangee.
+   */
+  "lot-partiel-silencieux": {
+    casser: `create or replace function public.archiver_lot(p_ids uuid[], p_archiver boolean)
+      returns integer language plpgsql set search_path = '' as $$
+      declare v_modifiees integer;
+      begin
+        if coalesce(array_length(p_ids, 1), 0) = 0 then return 0; end if;
+        update public.orders
+           set archived_at = case when p_archiver then now() else null end
+         where id = any(p_ids);
+        get diagnostics v_modifiees = row_count;
+        return v_modifiees;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "028_archivage_par_lot.sql",
+      depuis: "create function public.archiver_lot",
+      jusqua: "comment on function",
+    },
+  },
+
+
+  /**
+   * HORS du cas motivant : le lot passe en `SECURITY DEFINER`.
+   *
+   * C est la modification qu on fait « pour que ca marche » quand un appel
+   * echoue, et elle retire la SEULE chose qui protegeait la fonction. Le corps
+   * ne contient aucun controle de propriete — il n en avait pas besoin tant que
+   * la RLS de l appelant s appliquait. Un vendeur peut alors archiver le lot de
+   * n importe qui, et le compte des lignes modifiees continue de correspondre :
+   * la fonction ne leve rien, elle obeit.
+   */
+  "lot-definer": {
+    casser: `create or replace function public.archiver_lot(p_ids uuid[], p_archiver boolean)
+      returns integer language plpgsql security definer set search_path = '' as $$
+      declare v_demandes integer; v_modifiees integer;
+      begin
+        v_demandes := coalesce(array_length(p_ids, 1), 0);
+        if v_demandes = 0 then return 0; end if;
+        if v_demandes > 200 then
+          raise exception 'lot trop grand' using errcode = 'DL020';
+        end if;
+        update public.orders
+           set archived_at = case when p_archiver then now() else null end
+         where id = any(p_ids);
+        get diagnostics v_modifiees = row_count;
+        if v_modifiees <> v_demandes then
+          raise exception 'lot refuse' using errcode = 'DL021';
+        end if;
+        return v_modifiees;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "028_archivage_par_lot.sql",
+      depuis: "create function public.archiver_lot",
+      jusqua: "comment on function",
+    },
+  },
+
+
+  /**
+   * L index PARTIEL du tri « jamais ouvert », retire.
+   *
+   * Le defaut le plus tranquille de tous : la requete reste rapide a la
+   * volumetrie de test, et ne s effondre qu en production. C est pour cela que
+   * la mesure porte sur les LIGNES LUES et pas seulement sur le chronometre — un
+   * chronometre certifie une performance qui n existe qu au volume ou on l a
+   * mesuree.
+   */
+  "index-jamais-ouvert-absent": {
+    casser: "drop index public.orders_jamais_ouvert_idx;",
+    reparer:
+      "create index orders_jamais_ouvert_idx on public.orders " +
+      "(shop_id, created_at desc, id desc) where views_count = 0 and archived_at is null;",
+  },
+
 };
 
 const [, , action, cible] = process.argv;
