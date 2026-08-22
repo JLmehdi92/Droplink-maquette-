@@ -42,3 +42,8 @@ next-env.d.ts
 
 # Artefacts temporaires de la CLI Supabase
 supabase/.temp/
+
+# Contenu utilisateur : photos et vidéos QC réelles servant au calibrage.
+# Elles appartiennent aux vendeurs et à leurs clients, pas au dépôt de code.
+qc photo/
+photos-qc-reelles/
