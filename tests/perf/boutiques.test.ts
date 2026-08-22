@@ -135,10 +135,15 @@ beforeAll(async () => {
       [shop],
     );
     const id = commande.rows[0]?.id;
+    const prefixe = await bd.query<{ p: string }>(
+      "select public.prefixe_media_attendu($1) as p",
+      [id],
+    );
     await bd.query(
       `insert into public.order_media (order_id, type, cle, taille_octets, position)
        values ($1, 'photo', $2, 1000, 0)`,
-      [id, `perf-${String(id)}`],
+      // Le préfixe réel : la base contrôle la valeur de la clé depuis la 055.
+      [id, `${String(prefixe.rows[0]?.p)}0.jpg`],
     );
   }
 

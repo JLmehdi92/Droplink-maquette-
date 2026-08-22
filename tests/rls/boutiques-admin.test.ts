@@ -47,12 +47,28 @@ async function creerCommande(shopId: string, client: string): Promise<string> {
   return id;
 }
 
+/** Le préfixe que la base exige pour un média de cette commande. */
+async function prefixeDe(orderId: string): Promise<string> {
+  const lignes = await interroger<{ p: string }>(
+    catalogue,
+    "select public.prefixe_media_attendu($1) as p",
+    [orderId],
+  );
+  const p = lignes[0]?.p;
+  if (p === null || p === undefined) throw new Error("préfixe introuvable");
+  return p;
+}
+
 async function ajouterMedia(orderId: string, position: number, octets: number): Promise<string> {
   const lignes = await interroger<{ id: string }>(
     catalogue,
     `insert into public.order_media (order_id, type, cle, taille_octets, position)
      values ($1, 'photo', $2, $3, $4) returning id`,
-    [orderId, `cle-${orderId}-${position}`, octets, position],
+    // LA CLÉ PORTE LE PRÉFIXE RÉEL, parce que la base l'exige désormais :
+    // `medias/{shop}/{commande}/`. Une clé fictive était acceptée tant que rien
+    // ne contrôlait la valeur — et c'est exactement ce qui permettait à un
+    // vendeur de désigner l'objet d'un autre.
+    [orderId, `${await prefixeDe(orderId)}${position}.jpg`, octets, position],
   );
   const id = lignes[0]?.id;
   if (id === undefined) throw new Error("média non créé");

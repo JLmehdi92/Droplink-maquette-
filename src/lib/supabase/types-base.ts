@@ -952,6 +952,7 @@ export type Database = {
         Returns: undefined
       }
       mon_shop_id: { Args: never; Returns: string }
+      prefixe_media_attendu: { Args: { p_order_id: string }; Returns: string }
       quota_depasse: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean

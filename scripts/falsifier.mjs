@@ -1445,6 +1445,40 @@ const SQL = {
     },
   },
 
+  /**
+   * LE CAS MOTIVANT : le contrôle par VALEUR des clés de médias, retiré.
+   *
+   * Le droit d'insertion reste restreint aux bonnes colonnes — donc un contrôle
+   * qui n'inspecterait que les PRIVILÈGES resterait vert. Ce qui disparaît est
+   * la seule chose qui empêche une clé légitime en forme de désigner l'objet
+   * d'un autre vendeur.
+   */
+  "cles-media-sans-controle": {
+    casser: "drop trigger if exists order_media_cles_par_valeur on public.order_media;",
+    reparer: `create trigger order_media_cles_par_valeur
+      before insert or update of cle, cle_vignette on public.order_media
+      for each row execute function public.verifier_cles_media();`,
+  },
+
+  /**
+   * HORS du cas motivant : le droit d'INSERTION rendu à la table entière.
+   *
+   * Aucun déclencheur n'est touché, les clés restent contrôlées par valeur, et
+   * l'isolation entre vendeurs tient toujours — la policy contrôle le `shop_id`.
+   * Ce qui redevient possible est autre chose : fabriquer soi-même les colonnes
+   * de MESURE. Un vendeur pose `first_content_at` et `views_count`, le
+   * déclencheur de comptage suit, et le « signal roi » de la phase de validation
+   * devient fabricable sans jamais créer le moindre contenu.
+   *
+   * Une métrique de verdict légèrement faussée est pire qu'une métrique cassée,
+   * parce qu'elle reste crédible.
+   */
+  "insertion-orders-sur-la-table": {
+    casser: "grant insert on public.orders to authenticated;",
+    reparer: `revoke insert on public.orders from authenticated;
+      grant insert (shop_id, product_ref, internal_notes) on public.orders to authenticated;`,
+  },
+
 };
 
 const [, , action, cible] = process.argv;
