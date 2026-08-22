@@ -48,6 +48,31 @@ export async function origineDuSite(): Promise<string | null> {
   const configuree = origineConfiguree();
   if (configuree !== null) return configuree;
 
+  /*
+   * EN PRODUCTION, AUCUN REPLI. L'origine DOIT être configurée.
+   *
+   * Le repli sur `Origin` puis `Host` existait pour le développement, et le
+   * commentaire ci-dessus le justifiait par « la liste d'autorisation de
+   * Supabase reste en vigueur ». C'est vrai, et c'est précisément le problème :
+   * la seule barrière restante était un réglage de console que rien dans ce
+   * dépôt ne vérifie, ne teste ni ne documente. Une protection dont on ne peut
+   * pas dire par exécution qu'elle est en place n'est pas une protection.
+   *
+   * Le mode de défaillance était SILENCIEUX dans le mauvais sens : déployer sans
+   * `NEXT_PUBLIC_SITE_URL` ne cassait rien, ne signalait rien, et laissait
+   * l'origine des emails de connexion dépendre d'un en-tête de requête. Il est
+   * maintenant bruyant — la demande de lien échoue et le dit — ce qui se
+   * découvre à la première connexion plutôt qu'à la première victime.
+   */
+  if (process.env["NODE_ENV"] === "production") {
+    console.error(
+      "[site] NEXT_PUBLIC_SITE_URL absente ou invalide en production. " +
+        "L'URL de retour d'un lien magique porte le pouvoir d'ouvrir un compte : " +
+        "on refuse de la déduire d'un en-tête de requête.",
+    );
+    return null;
+  }
+
   const enTetes = await headers();
   const origine = enTetes.get("origin");
   if (origine !== null && origine !== "") return origine;

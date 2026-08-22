@@ -160,6 +160,13 @@ const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   env: {
     ...process.env,
     QUOTA_PUBLIQUE_PAR_MINUTE: String(PLAFOND_PUBLIC),
+    // LE MODE DE CONFIANCE EST DECLARE, comme il devra l etre en production.
+    // Le defaut est `cloudflare` — seul `cf-connecting-ip` est cru — et il n y a
+    // pas de Cloudflare devant ce serveur : sans ce reglage, aucune adresse ne
+    // serait lisible, donc AUCUN QUOTA NE SERAIT CONSOMME, et les controles de
+    // limitation passeraient tous en ne mesurant rien. Un ensemble vide passe
+    // tout.
+    BORD_DE_CONFIANCE: "xff",
     CRON_SECRET: SECRET_CRON,
     TRACKING_API_KEY: CLE_SUIVI,
   },

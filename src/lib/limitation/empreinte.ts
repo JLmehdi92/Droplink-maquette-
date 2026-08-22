@@ -37,21 +37,65 @@ export function empreinte(valeur: string): string {
 }
 
 /**
- * Adresse de l'appelant, telle que le bord la rapporte.
+ * LE BORD À QUI L'ON FAIT CONFIANCE, déclaré et non supposé.
  *
- * `x-forwarded-for` est une LISTE que n'importe quel intermédiaire peut
- * rallonger, et que le client peut préremplir. On prend donc l'en-tête posé par
- * notre propre bord quand il existe, et seulement à défaut la PREMIÈRE entrée de
- * `x-forwarded-for`.
+ * `cloudflare` (défaut) — seul `cf-connecting-ip` est cru. Cet en-tête est
+ *   RÉÉCRIT par Cloudflare à chaque requête : ce que le client envoie sous ce
+ *   nom est écrasé, donc infalsifiable depuis l'extérieur.
+ * `xff` — la première entrée de `x-forwarded-for`. À ne poser que derrière un
+ *   bord qui la réécrit lui aussi. C'est le mode des sondes locales.
+ * `aucun` — aucune adresse n'est déduite d'un en-tête.
+ *
+ * POURQUOI CE RÉGLAGE EXISTE. `x-forwarded-for` était cru SANS CONDITION : c'est
+ * une LISTE que n'importe quel intermédiaire rallonge et que le client peut
+ * préremplir. Toute la limitation de débit publique se contournait donc en
+ * changeant un en-tête — il suffisait d'en varier la valeur pour repartir avec
+ * un quota neuf à chaque requête, et le comptage des vues reposait sur la même
+ * source.
+ *
+ * Le commentaire d'origine disait bien « on prend l'en-tête posé par notre
+ * propre bord QUAND IL EXISTE, et seulement à défaut `x-forwarded-for` ». Le
+ * défaut, c'est justement le « seulement à défaut » : il suffit de ne pas
+ * envoyer `cf-connecting-ip` — ce que fait tout appelant qui n'est pas
+ * Cloudflare — pour que le repli s'applique. La protection tenait à ce que
+ * l'attaquant se donne la peine de poser un en-tête qu'il n'a aucune raison de
+ * poser.
+ *
+ * LE DÉFAUT EST LE MODE LE PLUS STRICT qui laisse le produit fonctionner sur sa
+ * cible de déploiement. Un défaut permissif serait la valeur en vigueur partout
+ * où personne n'a lu ce fichier.
+ */
+type BordDeConfiance = "cloudflare" | "xff" | "aucun";
+
+function bordDeConfiance(): BordDeConfiance {
+  const brut = (process.env["BORD_DE_CONFIANCE"] ?? "").trim().toLowerCase();
+  if (brut === "xff" || brut === "aucun") return brut;
+  // Toute autre valeur — absente, mal orthographiée, héritée d'un copier-coller
+  // — retombe sur le mode strict. Une configuration illisible ne doit jamais
+  // ouvrir quelque chose ; c'est le sens de la lecture qui compte, pas la
+  // présence d'une valeur.
+  return "cloudflare";
+}
+
+/**
+ * Adresse de l'appelant, telle que le bord de confiance la rapporte.
  *
  * Rend `null` si rien n'est exploitable : mieux vaut l'absence assumée qu'une
- * valeur qu'un client aurait choisie, laquelle transformerait le compteur en
- * outil pour épuiser le quota des autres.
+ * valeur que l'appelant aurait choisie, laquelle transformerait le compteur en
+ * outil pour épuiser le quota des autres — ou en moyen de n'en consommer aucun.
  */
 export async function adresseAppelant(): Promise<string | null> {
+  const mode = bordDeConfiance();
+  if (mode === "aucun") return null;
+
   const enTetes = await headers();
+
   const cloudflare = enTetes.get("cf-connecting-ip");
   if (cloudflare !== null && cloudflare.trim() !== "") return cloudflare.trim();
+
+  // PAS DE REPLI EN MODE `cloudflare`. C'était le défaut : l'absence de
+  // `cf-connecting-ip` rouvrait `x-forwarded-for`, que l'appelant contrôle.
+  if (mode !== "xff") return null;
 
   const transmis = enTetes.get("x-forwarded-for");
   if (transmis !== null) {
