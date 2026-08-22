@@ -1721,6 +1721,46 @@ const SQL = {
     },
   },
 
+  /**
+   * LE CAS MOTIVANT : la rotation de jeton redevient silencieuse.
+   *
+   * Le declencheur d immuabilite reste en place, la fonction de rotation
+   * fonctionne, le jeton reste imprevisible. Seule la TRACE disparait.
+   *
+   * Mesure avant correction : `set_config('droplink.rotation_jeton','oui')`
+   * suivi d un `update` reecrivait le jeton sans ecrire le moindre
+   * `lien_revoque`. Le lien du client cesse de fonctionner et rien nulle part ne
+   * dit pourquoi ni quand — or la question « pourquoi ce lien ne marche plus »
+   * est exactement celle qu on posera.
+   */
+  "rotation-jeton-silencieuse": {
+    casser: "drop trigger if exists orders_tracer_rotation_jeton on public.orders;",
+    reparer: `create trigger orders_tracer_rotation_jeton
+      after update of public_token on public.orders
+      for each row execute function public.tracer_rotation_jeton();`,
+  },
+
+  /**
+   * HORS du cas motivant : le droit de SUPPRIMER une commande, rendu.
+   *
+   * Rien ne change sur les jetons, sur les traces, ni sur l isolation — la
+   * policy rendue ici ne laisse toucher que ses PROPRES commandes. Ce qui
+   * redevient possible est qu un compte fasse redescendre sa propre courbe
+   * d usage.
+   *
+   * Les commandes creees sont une METRIQUE DE VERDICT de la phase de validation.
+   * Les rendre effacables par celui qu elles mesurent, c est rendre le verdict
+   * negociable — et la disparition ne laisse aucune trace, les lignes de
+   * `order_events` partant en cascade avec la commande.
+   */
+  "suppression-de-commande-rendue": {
+    casser: `grant delete on public.orders to authenticated;
+      create policy orders_suppression on public.orders for delete to authenticated
+      using (shop_id = public.mon_shop_id());`,
+    reparer: `drop policy if exists orders_suppression on public.orders;
+      revoke delete on public.orders from authenticated;`,
+  },
+
 };
 
 const [, , action, cible] = process.argv;

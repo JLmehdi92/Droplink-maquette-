@@ -214,6 +214,149 @@ describe("Un jeton, un pouvoir", () => {
   });
 });
 
+describe("Toute rotation de jeton laisse sa trace", () => {
+  test("même par un chemin détourné, la révocation est écrite", async () => {
+    /*
+     * MESURÉ AVANT CORRECTION : `set_config('droplink.rotation_jeton','oui')`
+     * suivi d'un `update` réécrivait le jeton SANS écrire le moindre
+     * `lien_revoque`. Le lien du client cessait de fonctionner, et rien nulle
+     * part ne disait pourquoi ni quand.
+     *
+     * Ce chemin n'est pas atteignable par PostgREST — les clients n'exécutent
+     * pas de SQL libre. Il passe donc par une connexion directe, c'est-à-dire
+     * par NOUS. Et c'est pour cela qu'il fallait le fermer : la trace sert à
+     * répondre « pourquoi ce lien ne marche plus », et la réponse la plus
+     * probable est « quelqu'un chez nous a lancé quelque chose ».
+     *
+     * On ne ferme pas la porte, on la trace : chercher à empêcher `set_config`
+     * reviendrait à courir après tous les moyens de le poser.
+     */
+    const commande = await creerCommande(alice);
+
+    const avant = await interroger<{ n: string }>(
+      catalogue,
+      "select count(*)::text as n from public.order_events where order_id = $1 and type = 'lien_revoque'",
+      [commande],
+    );
+    expect(Number(avant[0]?.n), "la commande porte déjà une révocation").toBe(0);
+
+    // Deux ordres séparés : `set_config(..., true)` est local à la TRANSACTION,
+    // et une requête paramétrée n'en accepte qu'un. On ouvre donc la transaction
+    // à la main — c'est aussi ce que ferait un script de maintenance.
+    await interroger(catalogue, "begin");
+    await interroger(catalogue, "select set_config('droplink.rotation_jeton', 'oui', true)");
+    await interroger(
+      catalogue,
+      "update public.orders set public_token = public.generer_jeton_public() where id = $1",
+      [commande],
+    );
+    await interroger(catalogue, "commit");
+
+    const apres = await interroger<{ n: string }>(
+      catalogue,
+      "select count(*)::text as n from public.order_events where order_id = $1 and type = 'lien_revoque'",
+      [commande],
+    );
+    expect(
+      Number(apres[0]?.n),
+      "un jeton a tourné sans laisser de trace : le client perd son lien sans explication",
+    ).toBe(1);
+  });
+
+  test("contre-test positif : une écriture qui NE touche pas le jeton n'écrit rien", async () => {
+    // Sans lui, un déclencheur qui tracerait à chaque `update` passerait le test
+    // précédent — et l'historique d'une commande se remplirait de révocations
+    // imaginaires, ce qui est pire qu'un historique vide.
+    const commande = await creerCommande(alice);
+    await interroger(catalogue, "update public.orders set product_ref = 'x' where id = $1", [
+      commande,
+    ]);
+
+    const l = await interroger<{ n: string }>(
+      catalogue,
+      "select count(*)::text as n from public.order_events where order_id = $1 and type = 'lien_revoque'",
+      [commande],
+    );
+    expect(Number(l[0]?.n), "une modification anodine a produit une révocation").toBe(0);
+  });
+
+  test("la révocation n'est PAS écrite deux fois par le chemin normal", async () => {
+    // `regenerer_jeton_public` écrivait la trace elle-même. Deux points
+    // d'émission pour un seul fait rendent le double comptage inévitable, et
+    // l'historique est précisément l'endroit où une ligne en double se lit comme
+    // deux révocations.
+    const commande = await creerCommande(alice);
+    // Par le CLIENT D'ALICE : `regenerer_jeton_public` lit `mon_shop_id()`, donc
+    // exige une session réelle. L'appeler depuis la connexion de catalogue
+    // n'éprouverait pas le chemin que le vendeur emprunte.
+    const { error } = await alice.client.rpc("regenerer_jeton_public", { p_order_id: commande });
+    expect(error, `rotation refusée : ${error?.message}`).toBeNull();
+
+    const l = await interroger<{ n: string }>(
+      catalogue,
+      "select count(*)::text as n from public.order_events where order_id = $1 and type = 'lien_revoque'",
+      [commande],
+    );
+    expect(Number(l[0]?.n), "la révocation est écrite deux fois").toBe(1);
+  });
+});
+
+describe("Une commande ne s'efface pas", () => {
+  test("le vendeur ne peut pas supprimer les siennes", async () => {
+    /*
+     * Le produit n'a jamais supprimé de commande : il ARCHIVE. Le droit était
+     * donc accordé à personne — au sens où aucun code ne s'en sert — mais
+     * accordé quand même.
+     *
+     * Ce qu'il permettait : un compte pouvait faire redescendre sa propre courbe
+     * d'usage. Les commandes créées sont une MÉTRIQUE DE VERDICT de la phase de
+     * validation ; les rendre effaçables par celui qu'elles mesurent, c'est
+     * rendre le verdict négociable. Et la disparition ne laisserait aucune
+     * trace : `order_events` part en cascade avec la commande.
+     *
+     * Une protection qui tient à ce que personne n'ait encore écrit l'appel n'est
+     * pas une protection — et un bouton « supprimer » est ce qu'on ajoute sans y
+     * penser.
+     */
+    const commande = await creerCommande(alice);
+
+    const { error } = await alice.client.from("orders").delete().eq("id", commande);
+
+    const { data: reste } = await alice.client.from("orders").select("id").eq("id", commande);
+    expect(
+      (reste ?? []).length,
+      `la commande a été supprimée par son vendeur (erreur : ${error?.message ?? "aucune"})`,
+    ).toBe(1);
+  });
+
+  test("le droit est retiré DANS LE CATALOGUE, pas seulement par une policy", async () => {
+    // Une policy retirée laisse le droit de table : PostgREST répondrait alors
+    // « 0 ligne supprimée » au lieu d'un refus, ce qui se lit comme un succès.
+    // Le droit lui-même ne s'écrit nulle part dans le code — il faut interroger
+    // le catalogue.
+    const l = await interroger<{ n: string }>(
+      catalogue,
+      `select count(*)::text as n from information_schema.role_table_grants
+        where table_schema = 'public' and table_name = 'orders'
+          and grantee = 'authenticated' and privilege_type = 'DELETE'`,
+    );
+    expect(Number(l[0]?.n), "`authenticated` détient encore DELETE sur orders").toBe(0);
+  });
+
+  test("contre-test positif : le vendeur peut toujours ARCHIVER", async () => {
+    // Une suite où tout est refusé passe à 100 % sans rien prouver. Archiver est
+    // le geste réel du produit : le casser en fermant la suppression serait
+    // remplacer un défaut par une panne.
+    const commande = await creerCommande(alice);
+    const { error } = await alice.client
+      .from("orders")
+      .update({ archived_at: new Date().toISOString() })
+      .eq("id", commande);
+
+    expect(error, `l'archivage est cassé : ${error?.message}`).toBeNull();
+  });
+});
+
 describe("Un média EST du contenu réel", () => {
   test("déposer un média marque le premier contenu de la commande", async () => {
     /*
