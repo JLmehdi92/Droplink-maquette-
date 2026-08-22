@@ -1761,6 +1761,44 @@ const SQL = {
       revoke delete on public.orders from authenticated;`,
   },
 
+  /**
+   * HORS du cas motivant : `liberer_evenement_creation` prétend toujours avoir
+   * rendu quelque chose.
+   *
+   * Elle rend la marque correctement — l ecriture est intacte, la marque est
+   * bien effacee. Seul le RETOUR ment : `true` a chaque appel, y compris quand
+   * il n y avait rien a rendre.
+   *
+   * C est la variante qu on soupconnait sans l avoir etablie : `FOUND` porte sur
+   * le DERNIER ordre execute, et cette fonction en execute plusieurs. Verifie par
+   * execution, le vrai code est correct — mais rien ne l empechait de cesser de
+   * l etre, et un « oui » de trop ferait reemettre `order_created` pour une
+   * commande deja comptee. Cet evenement est le DENOMINATEUR du taux
+   * d activation : le fausser le fait bouger du cote rassurant.
+   */
+  "liberation-toujours-affirmative": {
+    casser: `create or replace function public.liberer_evenement_creation(p_order_id uuid)
+      returns boolean language plpgsql volatile security definer set search_path = '' as $fals$
+      declare v_shop uuid;
+      begin
+        select public.mon_shop_id() into v_shop;
+        if v_shop is null then
+          raise exception 'Aucune boutique pour cet appelant.' using errcode = 'DL026';
+        end if;
+        perform 1 from public.orders o where o.id = p_order_id and o.shop_id = v_shop;
+        if not found then
+          raise exception 'Commande introuvable.' using errcode = 'DL027';
+        end if;
+        update public.orders set created_event_at = null
+         where id = p_order_id and created_event_at is not null;
+        return true;
+      end; $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "066_liberer_la_marque_si_l_emission_echoue.sql",
+      depuis: "create function public.liberer_evenement_creation",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

@@ -270,3 +270,87 @@ describe("Le premier contenu réel", () => {
     expect(seconde).toBe(premiere);
   });
 });
+
+describe("La marque d'événement se rend, et une seule fois", () => {
+  /*
+   * L'audit avait laissé un point en suspens : `liberer_evenement_creation`
+   * finit par `return found`, et `FOUND` porte sur le DERNIER ordre exécuté. La
+   * fonction en exécute plusieurs — un `perform` de contrôle, puis un `update`
+   * conditionnel. Si `found` reflétait le `perform`, elle rendrait « marque
+   * rendue » à chaque appel, y compris quand elle n'a rien rendu.
+   *
+   * L'ENJEU N'EST PAS COSMÉTIQUE. Ce retour dit à l'appelant si la marque est
+   * de nouveau disponible. Un « oui » de trop ferait réémettre `order_created`
+   * pour une commande déjà comptée — et cet événement est le DÉNOMINATEUR du
+   * taux d'activation.
+   *
+   * On l'établit par EXÉCUTION, pas par lecture : `FOUND` après un `UPDATE` est
+   * exactement le genre de détail qu'on croit connaître.
+   *
+   * LE CYCLE ÉPROUVÉ EST CELUI DU PRODUIT. `appliquerChamp` réclame la marque
+   * lui-même dès la première sauvegarde de contenu réel — c'est la décision
+   * produit : `order_created` est émis au premier CONTENU, jamais à l'ouverture
+   * de l'éditeur. On part donc d'une marque déjà posée, comme dans la vraie vie.
+   */
+  test("elle se rend une fois, et le second appel ne prétend rien", async () => {
+    const { data: creee } = await alice.client
+      .from("orders")
+      .insert({ shop_id: alice.shopId })
+      .select("id")
+      .single();
+    const id = (creee as { id: string }).id;
+
+    // Le contenu réel rend la commande éligible : la marque ne se réclame que
+    // sur une commande qui porte du contenu.
+    await ecrire(alice, id, "customer_label", "Yanis");
+
+    /*
+     * ON RÉCLAME EXPLICITEMENT ICI, et le détour mérite d'être dit : dans cet
+     * environnement, `appliquerChamp` réclame la marque puis la REND aussitôt,
+     * parce que l'émission vers l'analytique n'aboutit pas — il n'y a pas de
+     * clé. C'est exactement le comportement que la migration 066 a installé, et
+     * le constater au passage vaut mieux que de l'écrire quelque part.
+     *
+     * On repart donc d'une marque posée, sans dépendre de la réussite d'un envoi
+     * réseau : une sonde qui en dépendrait échouerait par intermittence, et un
+     * test qu'on relance jusqu'au vert n'est plus bloquant.
+     */
+    const posee = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
+    expect(
+      posee.data,
+      "aucune marque posée : la sonde n'a rien à rendre, elle ne prouverait rien",
+    ).toBe(true);
+
+    const rendue = await alice.client.rpc("liberer_evenement_creation", { p_order_id: id });
+    expect(rendue.error, `libération refusée : ${rendue.error?.message}`).toBeNull();
+    expect(rendue.data, "la libération d'une marque posée n'est pas signalée").toBe(true);
+
+    // LE CONTRÔLE QUI COMPTE : le second appel ne doit pas prétendre avoir rendu
+    // quelque chose. C'est lui qui distingue un `FOUND` correct d'un `FOUND`
+    // hérité de l'ordre précédent.
+    const encore = await alice.client.rpc("liberer_evenement_creation", { p_order_id: id });
+    expect(
+      encore.data,
+      "la fonction prétend avoir rendu une marque qui n'existait plus : une réémission de trop fausserait le dénominateur du taux d'activation",
+    ).toBe(false);
+  });
+
+  test("contre-test positif : la marque rendue est réellement réclamable", async () => {
+    // Sans lui, une fonction qui ne rendrait JAMAIS rien passerait le contrôle
+    // précédent en répondant `false` partout — et l'événement serait perdu
+    // définitivement au lieu d'être réémis.
+    const { data: creee } = await alice.client
+      .from("orders")
+      .insert({ shop_id: alice.shopId })
+      .select("id")
+      .single();
+    const id = (creee as { id: string }).id;
+    await ecrire(alice, id, "customer_label", "Chen");
+
+    await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
+    await alice.client.rpc("liberer_evenement_creation", { p_order_id: id });
+
+    const seconde = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
+    expect(seconde.data, "la marque rendue n'est pas réclamable : l'événement est perdu").toBe(true);
+  });
+});
