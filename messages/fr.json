@@ -140,7 +140,18 @@
     "cgvEt": "et notre",
     "cgvConditions": "conditions d'utilisation",
     "cgvConfidentialite": "politique de confidentialité",
-    "lienCreerCompte": "Créer un compte"
+    "lienCreerCompte": "Créer un compte",
+    "ou": "ou",
+    "avecGoogle": "Continuer avec Google",
+    "motif": {
+      "lien": "Ce lien est incomplet. Certaines messageries le coupent : demandez-en un nouveau ci-dessous.",
+      "expire": "Ce lien a expiré ou a déjà servi. Demandez-en un nouveau ci-dessous.",
+      "profil": "Votre compte n'a pas pu être ouvert. Réessayez, et écrivez-nous si cela se reproduit.",
+      "suspendu": "Ce compte est suspendu. Écrivez-nous pour en connaître la raison.",
+      "indisponible": "La connexion Google est momentanément indisponible. Utilisez le lien par email ci-dessous.",
+      "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
+      "session": "Votre session a expiré. Reconnectez-vous pour continuer."
+    }
   },
   "inscription": {
     "titre": "Créer un compte",

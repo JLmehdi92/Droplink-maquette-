@@ -120,6 +120,25 @@ async function consommer(cle: string, surface: Surface): Promise<Verdict> {
  * premier refus : consommer le second après avoir déjà refusé ferait payer à une
  * adresse email le quota d'une IP qui n'est pas la sienne.
  */
+/**
+ * Le quota d'authentification quand aucune adresse n'est en jeu.
+ *
+ * Le départ vers un fournisseur externe ne connaît pas d'email : c'est le
+ * fournisseur qui le révélera au retour. Seule la dimension ADRESSE IP
+ * s'applique donc — et elle emploie EXACTEMENT le même compteur que le lien
+ * magique. Un compteur distinct offrirait un second budget à qui balaie : il
+ * suffirait d'alterner les deux chemins pour doubler sa cadence.
+ */
+export async function verifierQuotaAuthAdresse(): Promise<Verdict> {
+  const ip = await adresseAppelant();
+  // AUCUNE ADRESSE LISIBLE : on laisse passer. C'est la règle de la surface
+  // publique — refuser ici pénaliserait des utilisateurs légitimes derrière un
+  // intermédiaire mal configuré, pour un incident qui ne les concerne pas. La
+  // barrière qui fait autorité reste la liste d'autorisation de Supabase.
+  if (ip === null) return { autorise: true };
+  return consommer(empreinte(ip), "auth-ip");
+}
+
 export async function verifierQuotaAuth(email: string): Promise<Verdict> {
   const ip = await adresseAppelant();
   if (ip !== null) {

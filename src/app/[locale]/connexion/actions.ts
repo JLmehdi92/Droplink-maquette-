@@ -1,8 +1,10 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { attendrePlancher } from "@/lib/auth/plancher";
-import { verifierQuotaAuth } from "@/lib/limitation/quota";
+import { fournisseurActif } from "@/lib/auth/fournisseurs";
+import { verifierQuotaAuth, verifierQuotaAuthAdresse } from "@/lib/limitation/quota";
 import { origineDuSite } from "@/lib/site";
 import { creerClientServeur } from "@/lib/supabase/server";
 
@@ -123,4 +125,64 @@ export async function envoyerLienConnexion(
   // avant serait un pari sur le serveur, et un pari perdu laisserait
   // l'utilisateur attendre un email qui n'est jamais parti.
   return { statut: "envoye", email: analyse.data.email };
+}
+
+/**
+ * DÉPART VERS GOOGLE.
+ *
+ * SERVER ACTION, ET AUCUN JAVASCRIPT CLIENT. Le client Supabase du navigateur
+ * saurait faire cette redirection, mais il faudrait alors embarquer un îlot
+ * client sur la page de connexion — pour un bouton qui ne fait que naviguer.
+ * `skipBrowserRedirect` rend l'URL au lieu de l'emprunter, et le serveur y
+ * redirige lui-même.
+ *
+ * CETTE ACTION PORTE SA PROPRE GARDE. Dans un module `"use server"`, chaque
+ * export est un point d'entrée atteignable par une requête forgée : elle n'est
+ * pas protégée par le fait que le bouton ne soit pas affiché. Vérifier ici que
+ * le fournisseur est réellement configuré évite de lancer un aller-retour vers
+ * Google avec des identifiants vides — l'utilisateur atterrirait sur une erreur
+ * Google, chez Google, en concluant que c'est nous qui sommes cassés.
+ *
+ * LE QUOTA EST CELUI DU LIEN MAGIQUE, pas un second. Deux compteurs distincts
+ * offriraient un budget doublé à qui alterne les deux chemins.
+ */
+const DepartExterne = z.object({ locale: z.enum(["fr", "en"]) });
+
+export async function partirVersGoogle(donnees: FormData): Promise<void> {
+  const analyse = DepartExterne.safeParse({ locale: donnees.get("locale") });
+  const langue = analyse.success ? analyse.data.locale : "fr";
+
+  if (!fournisseurActif("google")) {
+    redirect(`/${langue}/connexion?erreur=indisponible`);
+  }
+
+  const quota = await verifierQuotaAuthAdresse();
+  if (!quota.autorise) {
+    redirect(`/${langue}/connexion?erreur=trop`);
+  }
+
+  const origine = await origineDuSite();
+  if (origine === null) {
+    redirect(`/${langue}/connexion?erreur=indisponible`);
+  }
+
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      // LA MÊME ROUTE DE RETOUR QUE LE LIEN MAGIQUE. Elle échange déjà le code
+      // contre une session, vérifie le profil, refuse un compte suspendu et
+      // compte l'inscription au premier passage : dupliquer cette logique pour
+      // Google aurait fait diverger les deux chemins, et c'est le second qu'on
+      // oublie de corriger.
+      redirectTo: `${origine}/${langue}/auth/retour`,
+      skipBrowserRedirect: true,
+    },
+  });
+
+  if (error !== null || data.url === null) {
+    redirect(`/${langue}/connexion?erreur=indisponible`);
+  }
+
+  redirect(data.url);
 }
