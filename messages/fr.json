@@ -567,8 +567,8 @@
       "refuser": "Il y a un problème",
       "commentaire": "Un mot à ajouter ? (facultatif)",
       "envoi": "Envoi…",
-      "approuve": "Vous avez validé cette commande.",
-      "refuse": "Vous avez signalé un problème. Le vendeur est prévenu.",
+      "approuve": "Cette commande est validée.",
+      "refuse": "Un problème a été signalé sur cette commande. Le vendeur est prévenu.",
       "modifier": "Changer d’avis",
       "echec": "Votre réponse n’a pas pu être enregistrée. Réessayez."
     },

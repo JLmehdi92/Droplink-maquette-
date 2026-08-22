@@ -327,6 +327,28 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "n'a rien à auditer : un total agrégé ne désigne les données de personne.",
     ],
     [
+      "liberer_evenement_creation",
+      "Rend la marque d'émission quand l'événement n'est PAS parti. Elle vérifie " +
+        "la propriété de la commande comme sa jumelle `reclamer_`, et ne rend la " +
+        "marque que si elle est posée — sans cette condition, un appel isolé " +
+        "effacerait la trace d'un événement réellement émis et provoquerait un " +
+        "DOUBLE comptage, l'erreur symétrique de celle qu'elle corrige.",
+    ],
+    [
+      "reclamer_evenement_inscription",
+      "Marque d'inscription, en base et non déduite d'un autre état. Le critère " +
+        "précédent — « l'onboarding reste à faire » — restait vrai tant que le " +
+        "vendeur ne l'avait pas soumis : trois connexions donnaient trois " +
+        "inscriptions pour un compte. Sur un DÉNOMINATEUR, cela fait baisser le " +
+        "taux d'activation, et le biais est corrélé au comportement mesuré.",
+    ],
+    [
+      "liberer_evenement_inscription",
+      "Jumelle de la précédente, même raison que pour la création : une marque " +
+        "consommée avant une opération qui peut échouer perd l'événement " +
+        "définitivement.",
+    ],
+    [
       "sante_infrastructure",
       "Indicateurs de surveillance. Elle ne rend QUE ce que le produit mesure " +
         "réellement : la maquette affichait une disponibilité, des websockets et " +

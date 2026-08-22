@@ -197,7 +197,26 @@ describe("Le premier contenu réel", () => {
    * l'emprunte réellement — sans quoi la fonction serait correcte et l'événement
    * toujours perdu, ce qui est exactement ce qui vient d'arriver.
    */
-  test("une écriture de contenu réel CONSOMME la réclamation", async () => {
+  test("une écriture de contenu réel emprunte le chemin de réclamation", async () => {
+    /*
+     * CE TEST A CHANGÉ DE CONTRAT, PARCE QUE LE PRODUIT A CHANGÉ.
+     *
+     * Il exigeait auparavant que la réclamation soit CONSOMMÉE après une
+     * écriture de contenu. C'était l'ancien comportement — et c'était le défaut :
+     * la marque était consommée AVANT l'émission, et `emettre` rend `false`
+     * sans lever quand le collecteur n'est pas configuré. L'événement n'était
+     * alors jamais réémis. Avec la clé d'analytics vide — l'état actuel du
+     * dépôt, et celui de ce harnais — cela signifiait 100 % de pertes
+     * définitives sur le NUMÉRATEUR de la métrique de verdict.
+     *
+     * Le produit REND désormais la marque quand l'émission n'est pas partie.
+     * Ici, l'analytics n'étant pas configuré, la marque doit donc être encore
+     * disponible : c'est la preuve que rien n'a été perdu en silence.
+     *
+     * CE QUE LE TEST ÉTABLIT MALGRÉ TOUT — et c'était sa vraie raison d'être :
+     * que le chemin d'écriture emprunte bien la réclamation, au lieu de laisser
+     * la fonction correcte et l'événement jamais émis.
+     */
     const { data } = await alice.client
       .from("orders")
       .insert({ shop_id: alice.shopId })
@@ -207,11 +226,23 @@ describe("Le premier contenu réel", () => {
 
     await ecrire(alice, id, "product_ref", "REF-emission");
 
+    // Le premier contenu, lui, EST posé : c'est ce qui prouve que l'écriture a
+    // traversé le chemin instrumenté et non un raccourci.
+    const { data: marque } = await alice.client
+      .from("orders")
+      .select("first_content_at")
+      .eq("id", id)
+      .single();
+    expect(
+      (marque as { first_content_at: string | null } | null)?.first_content_at,
+      "le premier contenu n'a pas été posé",
+    ).not.toBeNull();
+
     const restant = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
     expect(
       restant.data,
-      "la réclamation était encore disponible : le code n'a pas émis order_created",
-    ).toBe(false);
+      "la marque a été consommée alors que l'événement n'est pas parti : la perte serait définitive",
+    ).toBe(true);
   });
 
   test("Bob ne peut pas réclamer l'événement d'une commande d'Alice", async () => {

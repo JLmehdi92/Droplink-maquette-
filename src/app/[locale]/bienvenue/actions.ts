@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { emettre } from "@/lib/instrumentation/emettre";
-import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { cleLogo } from "@/lib/storage/cles";
 import { limites } from "@/lib/storage/limites";
 import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
@@ -57,6 +57,31 @@ export async function terminerOnboarding(
 ): Promise<ResultatOnboarding> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
+    return { statut: "erreur", motif: "session" };
+  }
+
+  /*
+   * L'ONBOARDING NE SE REJOUE PAS.
+   *
+   * DÉFAUT TROUVÉ PAR AUDIT : cette action ne vérifiait pas qu'il restait à
+   * faire. Un second appel — un POST forgé, qui ne passe ni par le layout ni
+   * par la redirection de la page — RÉÉCRIVAIT quatre choses :
+   *
+   *   - `account_type`, donc un RECLASSEMENT RÉTROACTIF de tout l'historique
+   *     d'usage du compte. La segmentation fournisseur / revendeur est le
+   *     livrable réel de cette phase : la laisser réécrivable, c'est laisser
+   *     réécrire la conclusion ;
+   *   - la couleur d'accent et la langue publique, donc l'apparence de toutes
+   *     les pages déjà envoyées aux clients ;
+   *   - le FILIGRANE, remis à `false` — un réglage que le vendeur avait pu
+   *     activer depuis, et qui disparaissait sans un mot ;
+   *   - l'événement de fin d'onboarding, réémis, donc ce compteur gonflé.
+   *
+   * L'onboarding est un geste initial. Tout ce qu'il pose est modifiable
+   * ensuite, mais par l'écran des réglages de marque — celui qui montre au
+   * vendeur ce qu'il change.
+   */
+  if (!onboardingAFaire(profil)) {
     return { statut: "erreur", motif: "session" };
   }
 

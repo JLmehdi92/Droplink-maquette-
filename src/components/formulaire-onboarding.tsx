@@ -8,7 +8,7 @@ import {
   preparerDepotLogo,
   terminerOnboarding,
   type ResultatOnboarding,
-} from "@/app/[locale]/(app)/bienvenue/actions";
+} from "@/app/[locale]/bienvenue/actions";
 import { ACCENT_DEFAUT, resoudreAccent } from "@/lib/design/contraste";
 import { Icone } from "@/components/icone";
 

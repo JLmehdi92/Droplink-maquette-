@@ -37,6 +37,7 @@ export default async function Bienvenue({
   // remettre à lui : une page qui suppose qu'un parent l'a protégée devient
   // fausse le jour où elle est déplacée.
   if (profil === null) redirect(`/${langue}/connexion?erreur=session`);
+  if (profil.statut !== "active") redirect(`/${langue}/connexion?erreur=suspendu`);
   if (!onboardingAFaire(profil)) redirect(`/${langue}`);
 
   const t = await getTranslations("onboarding");

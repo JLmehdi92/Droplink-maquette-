@@ -245,6 +245,7 @@ export type Database = {
           notify_email: string | null
           product_ref: string | null
           public_token: string
+          qc_decide_par: string | null
           qc_status: Database["public"]["Enums"]["qc_status"]
           recherche: string | null
           shop_id: string
@@ -268,6 +269,7 @@ export type Database = {
           notify_email?: string | null
           product_ref?: string | null
           public_token: string
+          qc_decide_par?: string | null
           qc_status?: Database["public"]["Enums"]["qc_status"]
           recherche?: string | null
           shop_id: string
@@ -291,6 +293,7 @@ export type Database = {
           notify_email?: string | null
           product_ref?: string | null
           public_token?: string
+          qc_decide_par?: string | null
           qc_status?: Database["public"]["Enums"]["qc_status"]
           recherche?: string | null
           shop_id?: string
@@ -301,6 +304,13 @@ export type Database = {
           views_count?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_cover_media_id_fkey"
+            columns: ["cover_media_id"]
+            isOneToOne: false
+            referencedRelation: "order_media"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_shop_id_fkey"
             columns: ["shop_id"]
@@ -356,6 +366,7 @@ export type Database = {
           id: string
           locale: string
           role: Database["public"]["Enums"]["user_role"]
+          signup_event_at: string | null
           status: Database["public"]["Enums"]["account_status"]
           user_id: string
         }
@@ -366,6 +377,7 @@ export type Database = {
           id?: string
           locale?: string
           role?: Database["public"]["Enums"]["user_role"]
+          signup_event_at?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           user_id: string
         }
@@ -376,6 +388,7 @@ export type Database = {
           id?: string
           locale?: string
           role?: Database["public"]["Enums"]["user_role"]
+          signup_event_at?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           user_id?: string
         }
@@ -808,6 +821,11 @@ export type Database = {
         Args: { p_order_id: string; p_payload?: Json; p_type: string }
         Returns: string
       }
+      liberer_evenement_creation: {
+        Args: { p_order_id: string }
+        Returns: boolean
+      }
+      liberer_evenement_inscription: { Args: never; Returns: boolean }
       lire_commande_publique: {
         Args: { p_jeton: string }
         Returns: {
@@ -965,6 +983,7 @@ export type Database = {
         Args: { p_order_id: string }
         Returns: boolean
       }
+      reclamer_evenement_inscription: { Args: never; Returns: boolean }
       regenerer_jeton_public: { Args: { p_order_id: string }; Returns: string }
       reordonner_medias: {
         Args: { p_ids: string[]; p_order_id: string }

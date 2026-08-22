@@ -170,8 +170,17 @@ export async function appliquerChamp(
  * La condition est évaluée par la BASE, dans l'écriture elle-même : deux
  * sauvegardes simultanées ne peuvent pas produire deux émissions.
  *
- * L'événement part APRÈS. Une marque consommée avant une opération qui peut
- * échouer perd l'événement définitivement, sans réémission possible.
+ * L'événement part APRÈS — ET LA MARQUE EST RENDUE S'IL N'EST PAS PARTI.
+ *
+ * C'est le correctif d'un défaut critique : `emettre` rend `false` sans lever
+ * quand le collecteur n'est pas joignable ou pas configuré, et la marque
+ * restait consommée. L'événement n'était alors jamais réémis. Avec la clé
+ * d'analytics vide — l'état actuel — cela signifiait 100 % de pertes,
+ * définitives, sur le NUMÉRATEUR de la métrique de verdict.
+ *
+ * Rendre la marque plutôt que d'émettre avant : émettre d'abord ferait
+ * réémettre à chaque sauvegarde tant que l'écriture échoue, donc du double
+ * comptage — l'erreur symétrique, et celle-là gonfle du côté rassurant.
  */
 async function marquerPremierContenu(
   supabase: ClientEcriture,
@@ -189,7 +198,23 @@ async function marquerPremierContenu(
 
   if (data !== true) return;
 
-  await emettre(EVENEMENTS.COMMANDE_CREEE, { sujet: profilId }, { commande: id });
+  const parti = await emettre(EVENEMENTS.COMMANDE_CREEE, { sujet: profilId }, { commande: id });
+
+  if (!parti) {
+    // La marque est rendue : la prochaine sauvegarde de cette commande
+    // réessaiera. Un échec de libération n'est pas rattrapable ici — on le dit
+    // plutôt que de l'avaler, faute de quoi la perte redeviendrait invisible.
+    const { error: erreurLiberation } = await supabase.rpc("liberer_evenement_creation", {
+      p_order_id: id,
+    });
+    if (erreurLiberation !== null) {
+      console.warn(
+        "[commandes] événement de création perdu ET marque non rendue : " +
+          erreurLiberation.message,
+      );
+    }
+    return;
+  }
 
   // Journalisé ICI et pas à l'ouverture de l'éditeur : la commande naît au
   // premier CONTENU RÉEL. Un brouillon ouvert puis abandonné n'a jamais existé

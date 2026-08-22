@@ -165,6 +165,14 @@ describe("Ce que la liste rend", () => {
       ["carrier_code", "la liste affiche le numéro de suivi, pas le transporteur"],
       ["first_content_at", "sert à l'instrumentation, pas à l'affichage"],
       ["created_event_at", "trace d'émission de order_created : une mesure, pas une donnée d'écran"],
+      [
+        "qc_decide_par",
+        "QUI a arbitré le contrôle qualité — le client par sa page, ou le vendeur " +
+          "qui reporte une réponse reçue en message privé. La liste n'affiche que " +
+          "le statut : l'auteur sert à ne pas écrire « VOUS avez validé » à un " +
+          "client qui n'a rien validé, et à ne pas mélanger les deux dans les " +
+          "compteurs. Une colonne de plus sur cet écran serait du bruit.",
+      ],
       ["recherche", "colonne générée, filtrée en base : la rendre serait la dupliquer"],
     ]);
 

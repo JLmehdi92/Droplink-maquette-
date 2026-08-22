@@ -283,6 +283,18 @@ export default async function PagePublique({
                     refuser: t("qc.refuser"),
                     commentaire: t("qc.commentaire"),
                     envoi: t("qc.envoi"),
+                    /* LES LIBELLÉS NE DISENT PLUS « VOUS ». Le vendeur peut
+                       reporter dans son éditeur une réponse reçue par message
+                       privé — c'est une fonction voulue — et la page affichait
+                       alors « Vous avez validé cette commande » à un client qui
+                       n'avait rien validé. Une phrase qui parle du lecteur et
+                       qui est fausse est pire qu'une phrase neutre, et c'est
+                       celle-là qu'on invoquerait en cas de litige.
+
+                       `orders.qc_decide_par` enregistre désormais l'auteur, en
+                       base ; la vue publique ne l'expose pas encore, et la
+                       rouvrir pour deux libellés coûterait plus que la
+                       formulation neutre ne rapporte. */
                     approuve: t("qc.approuve"),
                     refuse: t("qc.refuse"),
                     modifier: t("qc.modifier"),

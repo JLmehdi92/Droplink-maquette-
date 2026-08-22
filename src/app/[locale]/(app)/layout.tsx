@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 
 /**
@@ -44,6 +44,33 @@ export default async function LayoutApplication({
     // neutre. Expliquer une suspension dans l'interface du suspendu revient à
     // lui donner la liste de ce qu'il doit contourner.
     redirect(`/${langue}/connexion?erreur=suspendu`);
+  }
+
+  /*
+   * L'ONBOARDING N'ÉTAIT POUSSÉ QUE PAR LE RETOUR DU LIEN MAGIQUE.
+   *
+   * DÉFAUT TROUVÉ PAR AUDIT : ce layout vérifiait la session et le statut, pas
+   * le type de compte. Un vendeur qui tapait `/fr/commandes` directement, ou
+   * qui revenait en arrière, ou qui avait un signet, employait le produit
+   * entier avec `account_type = null` — À VIE.
+   *
+   * `account_type` est nullable SANS DÉFAUT exprès : un défaut aurait classé
+   * tous les fournisseurs comme revendeurs et faussé irrémédiablement la
+   * segmentation d'usage, qui est le livrable réel de cette phase. La nullité
+   * rend le manque VISIBLE — mais encore faut-il que quelque chose le comble.
+   * Sans cette redirection, la nullité voulue devenait un trou permanent que
+   * rien ne refermait.
+   *
+   * LA PAGE D'ONBOARDING A ÉTÉ SORTIE DE CE GROUPE pour que cette redirection
+   * ne se retourne pas contre elle. `(app)` est un groupe : il n'apparaît pas
+   * dans l'URL, donc le déplacement est invisible du dehors — `/fr/bienvenue`
+   * reste `/fr/bienvenue`. Elle porte ses propres gardes de session et de
+   * statut, et n'a de toute façon rien à faire de la navigation vendeur : on
+   * n'invite pas quelqu'un à parcourir un produit qu'il n'a pas fini
+   * d'installer.
+   */
+  if (onboardingAFaire(profil)) {
+    redirect(`/${langue}/bienvenue`);
   }
 
   const t = await getTranslations("navigation");

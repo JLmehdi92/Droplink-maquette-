@@ -56,22 +56,37 @@ export async function GET(
 
   if (onboardingAFaire(profil)) {
     /*
-     * L'INSCRIPTION EST COMPTÉE ICI, ET NULLE PART AILLEURS.
+     * L'INSCRIPTION EST COMPTÉE ICI, UNE SEULE FOIS, ET LA MARQUE EST EN BASE.
      *
      * Pas au moment de la demande de lien : mesuré sur ce projet, une demande
      * crée `auth.users`, `profiles` et `shops` AVANT tout clic. Compter là
      * gonflerait le dénombrement de toutes les fautes de frappe et de tout
-     * balayage d'adresses. Or l'inscription est un DÉNOMINATEUR — celui du taux
-     * d'activation — et un dénominateur gonflé fait BAISSER le taux : on
-     * s'alarmerait d'un problème d'activation qui n'existe pas.
+     * balayage d'adresses.
      *
-     * Ici, la personne a prouvé qu'elle possède la boîte : elle a cliqué. Et le
-     * critère « onboarding à faire » rend l'émission naturellement unique, sans
-     * marque à usage unique qu'il faudrait consommer avant l'envoi — une marque
-     * consommée avant une opération qui peut échouer perd l'événement
-     * définitivement, sans réémission possible.
+     * Ici, la personne a prouvé qu'elle possède la boîte : elle a cliqué.
+     *
+     * MAIS LE CRITÈRE « ONBOARDING À FAIRE » NE RENDAIT PAS L'ÉMISSION UNIQUE,
+     * contrairement à ce qui était écrit ici. Il vaut `account_type is null`,
+     * donc il reste vrai tant que l'onboarding n'est pas soumis : un vendeur qui
+     * clique son lien trois jours de suite avant de le remplir produisait TROIS
+     * inscriptions pour UN compte. Sur un DÉNOMINATEUR, cela fait baisser le
+     * taux d'activation — et le biais est corrélé au comportement mesuré, donc
+     * il amplifie sa propre erreur.
+     *
+     * La marque est donc réclamée en base, et RENDUE si l'émission échoue : une
+     * marque consommée avant une opération qui peut échouer perd l'événement
+     * définitivement.
      */
-    await emettre(EVENEMENTS.INSCRIPTION, { sujet: profil.profilId }, { langue });
+    const supabaseMarque = await creerClientServeur();
+    const { data: reclamee } = await supabaseMarque.rpc("reclamer_evenement_inscription");
+
+    if (reclamee === true) {
+      const parti = await emettre(EVENEMENTS.INSCRIPTION, { sujet: profil.profilId }, { langue });
+      if (!parti) {
+        await supabaseMarque.rpc("liberer_evenement_inscription");
+      }
+    }
+
     return NextResponse.redirect(new URL(`/${langue}/bienvenue`, requete.url));
   }
 

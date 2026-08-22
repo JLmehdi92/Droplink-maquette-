@@ -567,8 +567,8 @@
       "refuser": "There is a problem",
       "commentaire": "Anything to add? (optional)",
       "envoi": "Sending…",
-      "approuve": "You approved this order.",
-      "refuse": "You reported a problem. The seller has been notified.",
+      "approuve": "This order is approved.",
+      "refuse": "A problem has been reported on this order. The seller has been notified.",
       "modifier": "Change my answer",
       "echec": "Your answer could not be saved. Please try again."
     },
