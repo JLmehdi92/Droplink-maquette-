@@ -322,6 +322,36 @@ export async function TableauCommandes({
           </form>
 
           {/*
+            L'EXPORT CSV — HORS du formulaire de lot, et c'est structurel.
+
+            C'est un LIEN, pas un bouton de ce formulaire : un export est une
+            lecture, il porte les FILTRES de la vue et non la sélection cochée.
+            Le mettre dans le formulaire de lot l'aurait fait dépendre des cases
+            cochées, ce qui n'est pas ce qu'il exporte.
+
+            L'AVERTISSEMENT EST À CÔTÉ DU LIEN, jamais après le téléchargement.
+            Le fichier contient les liens publics des commandes, et un lien
+            public transfère une CAPACITÉ, définitivement : le prévenir une fois
+            le fichier ouvert serait le prévenir trop tard.
+          */}
+          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant/30 px-6 py-4">
+            <a
+              // LES MÊMES PARAMÈTRES QUE LA VUE, composés par la MÊME fonction
+              // que tous les autres liens de l'écran. Recomposer la chaîne ici
+              // ferait une seconde façon d'encoder les filtres, et deux façons
+              // divergent au premier filtre ajouté — le vendeur exporterait
+              // alors autre chose que ce qu'il regarde, sans s'en apercevoir.
+              href={lienListe("/api/commandes/export", { ...parametres, curseur: null }, {})}
+              className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-variant"
+            >
+              {t("lot.exporter")}
+            </a>
+            <span className="font-label-sm text-label-sm text-on-surface-variant">
+              {t("lot.exportAvertissement")}
+            </span>
+          </div>
+
+          {/*
             LES FORMULAIRES DES ACTIONS DE LIGNE, hors du tableau et hors du
             formulaire de lot. Chacun porte SES champs : un formulaire commun
             enverrait ceux de toutes les lignes à chaque clic.

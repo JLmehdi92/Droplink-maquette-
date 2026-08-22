@@ -411,7 +411,9 @@
       "ok": "{n, plural, one {# commande traitée} other {# commandes traitées}}.",
       "vide": "Aucune commande sélectionnée.",
       "partiel": "Lot refusé : rien n’a été modifié. Certaines commandes ne sont plus accessibles — rechargez la liste.",
-      "ecriture": "Le lot n’a pas pu être traité. Rien n’a été modifié."
+      "ecriture": "Le lot n’a pas pu être traité. Rien n’a été modifié.",
+      "exporter": "Exporter en CSV",
+      "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients."
     }
   },
   "editeur": {

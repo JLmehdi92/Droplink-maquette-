@@ -41,6 +41,15 @@ export const EVENEMENTS = {
   COMMANDE_MODIFIEE: "commande_modifiee",
   COMMANDE_ARCHIVEE: "commande_archivee",
   COMMANDE_DUPLIQUEE: "commande_dupliquee",
+  /**
+   * L'export CSV. Il porte le nombre de lignes ET si le plafond a coupé.
+   *
+   * Sans le second, on ne saurait pas si le plafond de cinq mille gêne
+   * réellement quelqu'un — on saurait seulement qu'il existe. C'est la même
+   * discipline que pour un média refusé : un refus sans sa mesure ne dit pas de
+   * combien on s'est trompé.
+   */
+  EXPORT_CSV: "export_csv",
 
   // --- Médias ---
   MEDIA_AJOUTE: "media_ajoute",

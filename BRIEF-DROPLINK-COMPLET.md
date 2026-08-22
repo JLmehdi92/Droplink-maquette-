@@ -469,6 +469,17 @@ base dans chaque fonction auditée.
 
 ### Les tables — RLS activée sur TOUTES
 
+> ⚠️ **CE BLOC AVAIT DÉRIVÉ, et personne ne l'a vu pendant des semaines.** Il
+> citait `notifications_sent`, qui n'existe pas ; `public_rate_limit`, dont le
+> vrai nom est `rate_limit` ; et six colonnes de `order_media` sous des noms
+> anglais qui ne sont pas les vrais. Un document assez précis pour être cru et
+> assez discret pour n'être jamais vérifié.
+>
+> Une suite compare désormais ce bloc à `pg_tables` **DANS LES DEUX SENS** — une
+> table décrite ici et absente de la base, et une table de la base absente d'ici.
+> C'est elle qui fait foi, pas cette liste. Les descriptions de colonnes, elles,
+> restent indicatives : les vraies sont dans `supabase/migrations/`.
+
 ```
 profiles            id, user_id, email, account_type (supplier|reseller),
                     role (user|admin), status (active|suspended), locale, created_at
@@ -482,8 +493,8 @@ orders              id, shop_id, public_token (unique, nanoid 16+, IMMUABLE),
                     notify_email, unsubscribe_token, first_content_at,
                     created_at, updated_at, archived_at
 
-order_media         id, order_id, type (photo|video), url, thumb_url, width, height,
-                    size_bytes, duration_s, position, source (upload|agent_import)
+order_media         id, order_id, type (photo|video), cle, cle_vignette, largeur,
+                    hauteur, taille_octets, duree_s, position, source, created_at
 
 order_events        id, order_id, type, payload, actor, occurred_at
 
@@ -504,8 +515,6 @@ link_views          id, order_id, viewed_at, viewed_on (GÉNÉRÉE), ip_hash,
 usage_counters      profile_id, period_month, orders_created, media_count,
                     storage_bytes, parcels_registered, tracking_api_calls
 
-notifications_sent  id, order_id, email, type, sent_at, bounced_at, bounce_type
-
 admin_audit_log     id, admin_id, admin_email, action, resource_type, resource_id,
                     target_profile_id, target_email, ip_hash, occurred_at, payload
 
@@ -513,7 +522,11 @@ system_settings     key, value, updated_by, updated_at
 
 scheduler_heartbeat source, beat_at
 
-public_rate_limit   (aucune policy — atteignable uniquement par fonction)
+rate_limit          (aucune policy — atteignable uniquement par consommer_quota)
+
+tracking_notifications_vues
+                    cle, vue_at — (aucune policy) empreintes des notifications
+                    de suivi déjà traitées, pour qu'un rejeu ne compte qu'une fois
 ```
 
 ### Colonnes structurantes, et leurs conséquences produit
@@ -548,7 +561,7 @@ public_rate_limit   (aucune policy — atteignable uniquement par fonction)
 - **`orders.internal_notes`** — **absent de la vue publique** ET de l'export CSV. Porte
   le prix d'achat.
 - **`order_media`** — `unique (order_id, position) DEFERRABLE INITIALLY DEFERRED`, posée
-  exprès pour autoriser l'état intermédiaire d'une permutation. `thumb_url` **nullable** :
+  exprès pour autoriser l'état intermédiaire d'une permutation. `cle_vignette` **nullable** :
   l'absence de vignette est un cas normal.
 - **`link_views`** — **une ligne = un visiteur, un JOUR**. Colonne `viewed_on`
   **générée** depuis `viewed_at`. **Ce n'est pas un détail d'implémentation : c'est la

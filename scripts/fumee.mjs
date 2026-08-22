@@ -430,7 +430,42 @@ try {
       commandeFumee = commande?.id ?? null;
       jetonFumee = commande?.public_token ?? null;
 
-      if (jetonFumee) {
+      {
+    // L EXPORT CSV — ROUTE `/api`, DONC HORS DU MIDDLEWARE.
+    //
+    // Elle n est protegee par RIEN d autre que sa propre garde, et son
+    // emplacement donnerait l impression contraire a qui la relit. Le controle
+    // porte sur ce qui SORT : un export produit un fichier qui quitte
+    // l application, sera ouvert ailleurs, transmis, garde. Une fuite ici ne se
+    // rattrape pas.
+    const sansSession = await fetch(`${base}/api/commandes/export`, { redirect: "manual" });
+    const corpsExport = await sansSession.text();
+
+    controles.push(
+      [
+        sansSession.status === 404,
+        `l export refuse sans session (statut ${sansSession.status}, attendu 404)`,
+      ],
+      // 404 et non 401 : un 401 confirmerait que la route existe et ce qu elle
+      // fait. Un seul chemin de sortie.
+      [
+        !corpsExport.includes("client,reference") && !corpsExport.includes("lien_public"),
+        "aucune ligne de CSV ne fuit dans la reponse refusee",
+      ],
+      [
+        (sansSession.headers.get("content-disposition") ?? "") === "",
+        "aucun telechargement n est propose a qui n a pas de session",
+      ],
+    );
+
+    const enPost = await fetch(`${base}/api/commandes/export`, { method: "POST" });
+    controles.push([
+      enPost.status === 405,
+      `l export refuse explicitement les autres methodes (statut ${enPost.status})`,
+    ]);
+  }
+
+  if (jetonFumee) {
         const reponse = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(11) });
         const html = await reponse.text();
 

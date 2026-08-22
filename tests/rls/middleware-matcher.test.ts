@@ -125,6 +125,18 @@ describe("Matcher du middleware", () => {
         "404 plutôt que 401 pour ne pas révéler l'existence de la surface.",
     ],
     [
+      "/api/commandes/export",
+      "Export CSV des commandes du vendeur connecté. Route handler et non Server " +
+        "Action parce qu'un téléchargement exige `Content-Disposition`, que la " +
+        "seconde ne peut pas fixer — c'est la déviation documentée au brief. " +
+        "`/api` est exclu du matcher, et son emplacement donnerait l'impression " +
+        "contraire : elle porte SA garde, qui lit le profil EN BASE et répond " +
+        "404 — jamais 401 — à qui n'a pas de session active, pour ne pas " +
+        "confirmer qu'elle existe. La lecture se fait sous RLS AVEC LA SESSION : " +
+        "un export est le pire endroit où contourner l'isolation, puisqu'il " +
+        "produit un fichier qui SORT de l'application.",
+    ],
+    [
       "/api/suivi/notification",
       "Point de réception des notifications de suivi. `/api` est exclu du " +
         "matcher, et son préfixe donnerait l'impression contraire à qui la " +
