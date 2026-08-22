@@ -175,7 +175,12 @@ export async function archiverCommande(
   await emettre(
     EVENEMENTS.COMMANDE_ARCHIVEE,
     { sujet: profilId },
-    { commande: analyse.data, archivee: archiver },
+    // `lot: 1` PARCE QUE LE CHEMIN PAR LOT EN ÉMET UN SEUL POUR N COMMANDES.
+    // Sans cette propriété des deux côtés, « commandes archivées » compterait
+    // les GESTES d'un côté et les COMMANDES de l'autre, et l'écart suivrait
+    // l'usage : plus un vendeur emploie la sélection multiple, plus le chiffre
+    // le sous-estime. Une métrique légèrement faussée reste crédible.
+    { commande: analyse.data, archivee: archiver, lot: 1 },
   );
 
   await journaliser(supabase, analyse.data, "commande_archivee", { archivee: archiver });

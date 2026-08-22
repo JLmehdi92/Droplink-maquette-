@@ -1681,6 +1681,46 @@ const SQL = {
       for each row execute function public.verifier_plafond_stockage();`,
   },
 
+  /**
+   * HORS du cas motivant : l archivage par lot cesse de tracer.
+   *
+   * Le lot fonctionne toujours — il archive, il refuse au-dela de deux cents, il
+   * dedoublonne, il reste tout-ou-rien. Seule la trace disparait. C est
+   * exactement l etat d avant : deux cents commandes archivees, zero ligne dans
+   * leur historique, et l ecran qui repond « qui a modifie quoi » muet sur le
+   * seul geste qui les a touchees.
+   *
+   * Rien n echoue, rien n alerte. Le defaut ne se decouvre qu au moment ou l on
+   * cherche la trace — c est-a-dire trop tard.
+   */
+  "lot-sans-trace": {
+    casser: `create or replace function public.archiver_lot(p_ids uuid[], p_archiver boolean)
+      returns integer language plpgsql security invoker set search_path = '' as $fals$
+      declare v_ids uuid[]; v_demandes integer; v_modifiees integer;
+      begin
+        select array_agg(distinct x) into v_ids
+        from unnest(coalesce(p_ids, '{}'::uuid[])) as x where x is not null;
+        v_demandes := coalesce(array_length(v_ids, 1), 0);
+        if v_demandes = 0 then return 0; end if;
+        if v_demandes > 200 then
+          raise exception 'lot trop grand : % commandes', v_demandes using errcode = 'DL037';
+        end if;
+        update public.orders
+           set archived_at = case when p_archiver then now() else null end
+         where id = any(v_ids);
+        get diagnostics v_modifiees = row_count;
+        if v_modifiees <> v_demandes then
+          raise exception 'lot refusé : % commandes sur % sont hors de portée',
+            v_demandes - v_modifiees, v_demandes using errcode = 'DL038';
+        end if;
+        return v_modifiees;
+      end; $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "081_le_lot_laisse_une_trace_par_commande.sql",
+      depuis: "create or replace function public.archiver_lot",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

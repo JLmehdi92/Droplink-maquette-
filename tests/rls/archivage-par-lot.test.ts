@@ -171,6 +171,68 @@ describe("Ce que le lot ne permet pas", () => {
     expect(error, "anon a pu appeler l'archivage par lot").not.toBeNull();
   });
 
+  test("chaque commande du lot laisse sa trace, et le lot est nommé", async () => {
+    /*
+     * L'archivage unitaire écrivait sa ligne dans `order_events` ; le lot n'en
+     * écrivait AUCUNE. Deux cents commandes archivées, zéro trace — et
+     * l'historique d'une commande, l'écran qui répond « qui a modifié quoi »,
+     * restait muet sur le seul geste qui l'avait touchée.
+     *
+     * Le défaut se lit à l'envers de ce qu'on croit : ce n'est pas le lot qui a
+     * oublié le journal, c'est que la trace vivait dans l'APPELANT. Rien ne la
+     * rappelait au chemin écrit ensuite.
+     */
+    const deux = commandesAlice.slice(0, 2);
+    expect(deux.length, "la sonde n'a pas deux commandes : elle ne prouverait rien").toBe(2);
+
+    const { error } = await alice.client.rpc("archiver_lot", { p_ids: deux, p_archiver: true });
+    expect(error, `archivage refusé : ${error?.message}`).toBeNull();
+
+    for (const id of deux) {
+      const { data } = await alice.client
+        .from("order_events")
+        .select("type, actor, payload")
+        .eq("order_id", id)
+        .eq("type", "commande_archivee");
+
+      const lignes = (data ?? []) as {
+        actor: string;
+        payload: { par_lot?: boolean; taille_lot?: number };
+      }[];
+      expect(lignes.length, `aucune trace d'archivage pour ${id}`).toBeGreaterThan(0);
+
+      // On cherche la trace DE CE LOT, pas « la dernière ». Ces commandes ont
+      // déjà servi à d'autres contrôles, et deux entrées écrites dans la même
+      // transaction portent le même instant : « la dernière » n'y désigne rien
+      // de stable.
+      const celleDuLot = lignes.find((l) => l.payload?.taille_lot === 2);
+      expect(celleDuLot, `aucune trace du lot de 2 pour ${id}`).toBeDefined();
+      expect(celleDuLot?.actor, "la trace n'est pas attribuée au vendeur").toBe("vendeur");
+      // Sans cette distinction, l'historique dirait « archivée » sans qu'on
+      // puisse savoir si quelqu'un l'a visée ou si elle était dans une sélection
+      // de deux cents.
+      expect(celleDuLot?.payload?.par_lot, "le lot n'est pas nommé dans la trace").toBe(true);
+    }
+  });
+
+  test("un lot REFUSÉ ne laisse aucune trace non plus", async () => {
+    // L'atomicité s'étend au journal : un lot qui échoue n'a rien archivé ET
+    // rien tracé. C'est la seule combinaison qui ne mente pas — un journal qui
+    // consignerait un archivage annulé serait pire que pas de journal du tout.
+    const inexistante = "3f2504e0-4f89-11d3-9a0c-0305e82c33ff";
+    const { error } = await alice.client.rpc("archiver_lot", {
+      p_ids: [inexistante],
+      p_archiver: true,
+    });
+    expect(error?.code, "le lot aurait dû être refusé").toBe("DL038");
+
+    const { data } = await alice.client
+      .from("order_events")
+      .select("id")
+      .eq("order_id", inexistante);
+    expect((data ?? []).length, "un lot refusé a laissé une trace").toBe(0);
+  });
+
   test("un lot au-delà du plafond est refusé EN BASE", async () => {
     // Le plafond vit dans la fonction et pas seulement dans l'écran : une borne
     // posée côté application est une borne que le prochain appelant n'aura pas.
