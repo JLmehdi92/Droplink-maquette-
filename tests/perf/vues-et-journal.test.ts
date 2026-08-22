@@ -153,7 +153,7 @@ async function semer(
 ): Promise<void> {
   await bd.query(
     `insert into public.orders (shop_id, customer_label, product_ref, created_at)
-     select $1, $2 || ' client ' || i, 'REF-' || i, now() - (i || ' minutes')::interval
+     select $1, $2 || ' client ' || i, 'REF-' || i, now() - (i || ' hours')::interval
      from generate_series(1, $3) as i`,
     [utilisateur.shopId, etiquette, COMMANDES],
   );
@@ -464,10 +464,10 @@ describe("Les analyses", () => {
      * resterait invisible : les deux mesures seraient rapides à cette
      * volumétrie, et l'écart n'apparaîtrait qu'à dix fois cette taille.
      */
-    const unJour = await mesurerSerieuse(
+    const unMois = await mesurerSerieuse(
       alice,
       `select count(*) from public.orders o
-       where o.created_at >= now() - interval '1 day'`,
+       where o.created_at >= now() - interval '30 days'`,
     );
     const tout = await mesurerSerieuse(
       alice,
@@ -475,11 +475,27 @@ describe("Les analyses", () => {
     );
 
     console.log(
-      `  analyses, 1 j : ${unJour.lignesLues} lignes / tout : ${tout.lignesLues} lignes`,
+      `  analyses, 30 j : ${unMois.lignesLues} lignes / tout : ${tout.lignesLues} lignes`,
     );
-    // Une journée du jeu vaut 1 440 commandes : la borne doit en écarter les
-    // huit mille autres, et non les lire pour les jeter ensuite.
-    expect(unJour.lignesLues).toBeLessThan(tout.lignesLues / 2);
-    expect(unJour.lignesLues, "la sonde n'a rien inspecté").toBeGreaterThan(100);
+
+    /*
+     * TRENTE JOURS ET NON UN, PARCE QUE LE JEU A CHANGÉ SOUS LA SONDE.
+     *
+     * Le semis étalait une commande par MINUTE : une journée en valait 1 440, et
+     * la borne d'un jour avait de quoi mordre. Il étale désormais une commande
+     * par HEURE — les 9 600 couvrent treize mois au lieu de sept jours, parce
+     * que le plafond par compte rend le jeu d'origine inatteignable.
+     *
+     * Une journée n'y vaut plus que 24 commandes, et la sonde l'a DIT : « la
+     * sonde n'a rien inspecté, 23 au lieu de 100 ». C'est exactement son rôle —
+     * sans cette borne basse, elle aurait continué de passer en comparant deux
+     * poignées de lignes, et aurait certifié une pagination qu'elle n'éprouvait
+     * plus. Un ensemble presque vide passe presque tout.
+     *
+     * La fenêtre suit donc le jeu : un mois vaut ~740 commandes, la borne écarte
+     * les 8 800 autres au lieu de les lire pour les jeter ensuite.
+     */
+    expect(unMois.lignesLues).toBeLessThan(tout.lignesLues / 2);
+    expect(unMois.lignesLues, "la sonde n'a rien inspecté").toBeGreaterThan(100);
   });
 });

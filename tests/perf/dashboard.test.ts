@@ -110,6 +110,19 @@ async function mesurerSerieuse(utilisateur: UtilisateurDeTest, sql: string): Pro
 async function semer(utilisateur: UtilisateurDeTest, etiquette: string): Promise<void> {
   // Semé par le propriétaire : la RLS n'a rien à voir avec la constitution du
   // jeu, seulement avec sa lecture.
+  /*
+   * ÉTALÉ SUR DES HEURES ET NON DES MINUTES, et ce n'est pas un détail de semis.
+   *
+   * À une commande par minute, les 9 600 du jeu tenaient dans SEPT JOURS —
+   * c'est-à-dire un état que le produit rend désormais inatteignable, le
+   * plafond par compte étant de 3 000 commandes par mois. Le jeu décrivait donc
+   * un vendeur qui ne peut pas exister, et une mesure porte une assertion sur
+   * le jeu qu'elle prétend décrire.
+   *
+   * Étalées sur des heures, les 9 600 couvrent treize mois, soit environ 740
+   * par mois : très exactement le persona du brief, celui dont on veut savoir
+   * si l'écran tient.
+   */
   await bd.query(
     `insert into public.orders (shop_id, customer_label, product_ref, tracking_number, status, archived_at, created_at)
      select $1,
@@ -117,8 +130,8 @@ async function semer(utilisateur: UtilisateurDeTest, etiquette: string): Promise
             'REF-' || $2 || '-' || i,
             case when i % 3 = 0 then 'LP' || lpad(i::text, 10, '0') || 'FR' else null end,
             (array['preparation','expedie','en_transit','livre'])[1 + (i % 4)]::public.order_status,
-            case when i % 20 = 0 then now() - (i || ' minutes')::interval else null end,
-            now() - (i || ' minutes')::interval
+            case when i % 20 = 0 then now() - (i || ' hours')::interval else null end,
+            now() - (i || ' hours')::interval
      from generate_series(1, $3) as i`,
     [utilisateur.shopId, etiquette, PLAFOND_COMMANDES],
   );
