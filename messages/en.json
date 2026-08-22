@@ -412,13 +412,13 @@
     "selectionner": "Select {client}",
     "lot": {
       "titre": "Bulk actions",
-      "aide": "Tick some orders, then choose. Each batch is all or nothing.",
+      "aide": "Tick some orders, then choose. Each bulk action is all or nothing.",
       "archiver": "Archive the selection",
       "desarchiver": "Move the selection out of the archive",
       "ok": "{n, plural, one {# order processed} other {# orders processed}}.",
       "vide": "No order selected.",
-      "partiel": "Batch refused: nothing was changed. Some orders are no longer reachable — reload the list.",
-      "ecriture": "The batch could not be processed. Nothing was changed."
+      "partiel": "Bulk action refused: nothing was changed. Some orders are no longer reachable — reload the list.",
+      "ecriture": "The bulk action could not be processed. Nothing was changed."
     }
   },
   "editeur": {
