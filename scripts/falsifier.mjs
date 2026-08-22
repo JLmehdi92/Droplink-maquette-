@@ -1641,6 +1641,46 @@ const SQL = {
     },
   },
 
+  /**
+   * LE CAS MOTIVANT : le plafond de commandes par compte, retire.
+   *
+   * Mesure avant correction : cinq mille commandes inserees en 533 ms, et rien
+   * ne s y opposait. Les plafonds existants — vingt medias, trois videos — sont
+   * poses PAR COMMANDE : un compte pouvait donc remplir le stockage sans jamais
+   * franchir aucune limite, chaque commande prise separement restant dans les
+   * clous.
+   */
+  "plafond-commandes-absent": {
+    casser: "drop trigger if exists orders_plafond_par_compte on public.orders;",
+    reparer: `create trigger orders_plafond_par_compte
+      before insert on public.orders
+      for each row execute function public.verifier_plafond_commandes();`,
+  },
+
+  /**
+   * HORS du cas motivant : le plafond de STOCKAGE, retire.
+   *
+   * Le cas motivant etait le NOMBRE de commandes. Ici rien ne change de ce
+   * cote-la : un compte reste borne a trois mille commandes par mois. Ce qui
+   * redevient possible est de les remplir sans limite d octets — c est-a-dire de
+   * faire deraper le seul poste de cout du produit qui puisse reellement
+   * deraper, sans jamais franchir aucun compteur.
+   *
+   * NOTE SUR UNE FALSIFICATION ECARTEE. On a d abord ecrit une variante qui
+   * remplacait le compteur tenu a l ecriture par une SOMME sur `order_media`.
+   * Elle laissait toutes les suites VERTES — le refus tombe au bon moment, seul
+   * le cout de la lecture change — donc elle ne prouvait rien et donnait
+   * l illusion inverse. Elle dit surtout ce qui manque : AUCUNE SONDE
+   * N EXAMINE LE PLAN d execution de ce declencheur, alors qu il s execute a
+   * chaque depot de media. C est un trou connu, pas un trou couvert.
+   */
+  "plafond-stockage-absent": {
+    casser: "drop trigger if exists order_media_plafond_stockage on public.order_media;",
+    reparer: `create trigger order_media_plafond_stockage
+      before insert on public.order_media
+      for each row execute function public.verifier_plafond_stockage();`,
+  },
+
 };
 
 const [, , action, cible] = process.argv;

@@ -272,7 +272,7 @@ export async function archiverLot(donnees: FormData): Promise<void> {
   if (error !== null) {
     // L'ÉCHEC EST DIT, et distingué : « refusé » n'est pas « en panne ». Un lot
     // refusé se refait à l'identique, un lot en panne non.
-    const motif = error.code === "DL021" ? "partiel" : "ecriture";
+    const motif = error.code === "DL038" ? "partiel" : "ecriture";
     redirect(retour + separateur(retour) + "lot=" + motif);
   }
 

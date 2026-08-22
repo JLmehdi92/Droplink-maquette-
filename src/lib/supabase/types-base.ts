@@ -713,20 +713,34 @@ export type Database = {
           vues_totales: number
         }[]
       }
-      appliquer_etat_colis: {
-        Args: {
-          p_brut: Json
-          p_estimation_au: string
-          p_estimation_du: string
-          p_etape: Database["public"]["Enums"]["parcel_status"]
-          p_numero: string
-          p_points: Json
-          p_premier_mouvement: string
-          p_statut_brut: string
-          p_transporteur: string
-        }
-        Returns: number
-      }
+      appliquer_etat_colis:
+        | {
+            Args: {
+              p_brut: Json
+              p_estimation_au: string
+              p_estimation_du: string
+              p_etape: Database["public"]["Enums"]["parcel_status"]
+              p_numero: string
+              p_points: Json
+              p_statut_brut: string
+              p_transporteur: string
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              p_brut: Json
+              p_estimation_au: string
+              p_estimation_du: string
+              p_etape: Database["public"]["Enums"]["parcel_status"]
+              p_numero: string
+              p_points: Json
+              p_premier_mouvement: string
+              p_statut_brut: string
+              p_transporteur: string
+            }
+            Returns: number
+          }
       arbitrer_qc: {
         Args: { p_commentaire: string; p_decision: string; p_jeton: string }
         Returns: Database["public"]["Enums"]["qc_status"]

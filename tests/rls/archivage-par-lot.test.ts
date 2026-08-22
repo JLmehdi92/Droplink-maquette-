@@ -114,7 +114,7 @@ describe("Un lot qui déborde", () => {
     });
 
     expect(error, "le lot a été accepté alors qu'il déborde").not.toBeNull();
-    expect(error?.code, `code inattendu : ${error?.code}`).toBe("DL021");
+    expect(error?.code, `code inattendu : ${error?.code}`).toBe("DL038");
 
     // ET RIEN N'A BOUGÉ. C'est la moitié qui compte : un refus qui laisse
     // quatre commandes archivées est exactement le défaut qu'on cherche.
@@ -174,11 +174,19 @@ describe("Ce que le lot ne permet pas", () => {
   test("un lot au-delà du plafond est refusé EN BASE", async () => {
     // Le plafond vit dans la fonction et pas seulement dans l'écran : une borne
     // posée côté application est une borne que le prochain appelant n'aura pas.
-    const trop = Array.from({ length: 201 }, () => "3f2504e0-4f89-11d3-9a0c-0305e82c3301");
+    // DES IDENTIFIANTS DISTINCTS, et ce détail vient d'un défaut réel : la
+    // sélection est désormais DÉDOUBLONNÉE avant d'être comptée, parce qu'un
+    // doublon faisait annoncer « hors de portée » pour des commandes qui étaient
+    // bien à soi. Deux cent une fois le même identifiant ne décrivent donc plus
+    // un lot de deux cent un — et ce contrôle ne prouvait plus le plafond.
+    const trop = Array.from(
+      { length: 201 },
+      (_, i) => `3f2504e0-4f89-11d3-9a0c-${String(i).padStart(12, "0")}`,
+    );
     const { error } = await alice.client.rpc("archiver_lot", {
       p_ids: trop,
       p_archiver: true,
     });
-    expect(error?.code, `code inattendu : ${error?.code}`).toBe("DL020");
+    expect(error?.code, `code inattendu : ${error?.code}`).toBe("DL037");
   });
 });

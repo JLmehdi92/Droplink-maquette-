@@ -176,7 +176,7 @@ describe("Un colis et sa commande appartiennent au même vendeur", () => {
         colisBob[0]?.id,
       ]),
       "une commande a été reliée au colis d'un autre vendeur",
-    ).toBe("DL033");
+    ).toBe("DL043");
   });
 
   test("contre-test positif : le rattachement légitime passe", async () => {

@@ -97,7 +97,7 @@ describe("La clé du média est contrôlée PAR VALEUR", () => {
       error,
       "un vendeur a inséré une ligne désignant le média d'un autre : sa page publique servirait le média d'Alice, y compris après suspension du compte d'Alice",
     ).not.toBeNull();
-    expect(error?.code).toBe("DL026");
+    expect(error?.code).toBe("DL039");
   });
 
   test("il ne peut pas non plus l'atteindre en modifiant une ligne existante", async () => {
@@ -122,7 +122,7 @@ describe("La clé du média est contrôlée PAR VALEUR", () => {
       .eq("order_id", commandeBob);
 
     expect(error, "la vignette peut désigner l'objet d'un autre vendeur").not.toBeNull();
-    expect(error?.code).toBe("DL027");
+    expect(error?.code).toBe("DL040");
   });
 
   test("contre-test positif : la vignette dérivée, elle, est acceptée", async () => {
@@ -151,7 +151,7 @@ describe("La clé du média est contrôlée PAR VALEUR", () => {
     });
 
     expect(error, "une clé d'une autre commande du même vendeur est acceptée").not.toBeNull();
-    expect(error?.code).toBe("DL026");
+    expect(error?.code).toBe("DL039");
   });
 });
 
