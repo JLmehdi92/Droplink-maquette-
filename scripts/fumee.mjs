@@ -14,7 +14,7 @@
 // `pnpm build`, avant de clore un lot.
 import { spawn, execSync } from "node:child_process";
 import { createServer } from "node:net";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -212,9 +212,26 @@ const en = await (await fetch(`${base}/en`)).text();
 // Controle par VALEUR de ce qui est REELLEMENT rendu. Verifier qu une cle de
 // traduction existe dans le catalogue ne prouve pas qu elle est resolue a
 // l ecran : une cle manquante sort telle quelle dans le HTML.
+// Le titre attendu est LU DANS LE CATALOGUE, pas fige ici.
+//
+// Une phrase en dur dans la sonde casse a chaque changement de copy, sans que
+// rien ne soit casse dans le produit — et un controle qui echoue pour de
+// mauvaises raisons finit par etre supprime. En lisant le catalogue, la sonde
+// verifie ce qu elle doit verifier : que la cle est RESOLUE dans le HTML servi,
+// pas qu une phrase precise a ete choisie.
+//
+// Elle refuse une valeur trop courte : lire une chaine vide rendrait le
+// controle vrai sans rien prouver, `includes("")` etant toujours vrai.
+const titreFr = JSON.parse(readFileSync(join(process.cwd(), "messages", "fr.json"), "utf8"))
+  .landing.heroTitre;
+const titreEn = JSON.parse(readFileSync(join(process.cwd(), "messages", "en.json"), "utf8"))
+  .landing.heroTitre;
+
 const controles = [
-  [fr.includes("Un lien. Toute la commande."), "titre francais rendu"],
-  [en.includes("One link. The whole order."), "titre anglais rendu"],
+  [typeof titreFr === "string" && titreFr.length > 10, "titre francais lisible au catalogue"],
+  [typeof titreEn === "string" && titreEn.length > 10, "titre anglais lisible au catalogue"],
+  [fr.includes(titreFr), "titre francais rendu"],
+  [en.includes(titreEn), "titre anglais rendu"],
   [!fr.includes("landing."), "aucune cle brute rendue en francais"],
   [!en.includes("landing."), "aucune cle brute rendue en anglais"],
   [fr.includes('lang="fr"'), "attribut lang correct en francais"],

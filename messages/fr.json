@@ -1,22 +1,9 @@
 {
   "commun": {
     "chargement": "Chargement…",
-    "erreurInattendue": "Une erreur inattendue est survenue.",
-    "reessayer": "Réessayer",
     "fermer": "Fermer",
     "copier": "Copier",
     "copie": "Copié"
-  },
-  "pagePublique": {
-    "titre": "Suivi de commande",
-    "propulsePar": "Propulsé par DropLink",
-    "aucuneInfoTransporteur": "Pas encore d'information du transporteur",
-    "etapes": {
-      "preparation": "Préparation",
-      "expedie": "Expédié",
-      "enTransit": "En transit",
-      "livre": "Livré"
-    }
   },
   "navigation": {
     "seConnecter": "Se connecter",
@@ -29,28 +16,29 @@
     "mesAnalyses": "Mes analyses"
   },
   "landing": {
-    "metaTitre": "DropLink — une page par commande, à vos couleurs",
-    "metaDescription": "Déposez vos photos et vidéos, collez le numéro de suivi, envoyez un seul lien. Votre client voit tout, sans compte et sans application.",
-    "heroTitre": "Un lien. Toute la commande.",
-    "heroSousTitre": "Déposez vos photos et vidéos, collez le numéro de suivi. Votre client ouvre un seul lien à vos couleurs et voit tout — sans compte, sans application, sans vous relancer.",
-    "ctaPrincipal": "Créer mon premier lien",
+    "metaTitre": "DropLink — une page par commande, à votre marque",
+    "metaDescription": "Réunissez photos, vidéos et suivi du colis sur une page à vos couleurs. Vos clients consultent tout eux-mêmes, sans compte et sans application.",
+    "heroTitre": "Une page par commande. À votre marque.",
+    "heroSousTitre": "Photos, vidéos et suivi du colis réunis sur une seule page. Vous envoyez le lien, vos clients consultent tout eux-mêmes — sans compte, sans application.",
+    "ctaPrincipal": "Créer une page",
     "ctaSecondaire": "J'ai déjà un compte",
     "gratuitPourLInstant": "Gratuit pendant la phase de lancement. Aucune carte demandée.",
+    "pourQui": "Pour les fournisseurs, les revendeurs, les marques et les ateliers — de la première commande à plusieurs centaines par semaine.",
     "fonctionnalites": {
-      "titre": "Ce que le lien contient",
+      "titre": "Ce que contient la page",
       "mediasTitre": "Vos photos et vidéos",
-      "mediasTexte": "Déposez-les une fois. Votre client les consulte en plein écran, autant de fois qu'il veut, sans que vous ayez à les renvoyer.",
-      "suiviTitre": "Le suivi du colis, à jour tout seul",
-      "suiviTexte": "Collez le numéro, le transporteur est reconnu. La page se met à jour d'elle-même, et dit clairement quand rien ne bouge.",
-      "marqueTitre": "À vos couleurs, modifiable après envoi",
-      "marqueTexte": "Votre nom, votre logo, votre couleur. Vous corrigez ou complétez la page quand vous voulez : le lien, lui, ne change jamais."
+      "mediasTexte": "Déposées une fois, consultables en pleine page autant de fois que vos clients le souhaitent. Vous ne les renvoyez plus.",
+      "suiviTitre": "Le suivi du colis, tenu à jour",
+      "suiviTexte": "Renseignez le numéro : le transporteur est reconnu et la page se met à jour d'elle-même. Elle indique clairement quand rien ne bouge.",
+      "marqueTitre": "Votre marque, modifiable après envoi",
+      "marqueTexte": "Votre nom, votre logo, votre couleur. Vous complétez ou corrigez la page à tout moment : le lien, lui, ne change jamais."
     },
-    "commentTitre": "Trois gestes",
+    "commentTitre": "Trois étapes",
     "etape1": "Créez la commande et déposez vos médias.",
-    "etape2": "Collez le numéro de suivi.",
-    "etape3": "Envoyez le lien. C'est tout.",
-    "destinataireTitre": "Votre client n'a rien à installer",
-    "destinataireTexte": "Pas de compte à créer, pas de mot de passe, pas d'application. Il clique, il voit. Le lien reste privé : il n'est référencé nulle part et n'est trouvable que par celui à qui vous l'avez envoyé."
+    "etape2": "Renseignez le numéro de suivi.",
+    "etape3": "Transmettez le lien à votre client.",
+    "destinataireTitre": "Vos clients n'ont rien à installer",
+    "destinataireTexte": "Aucun compte à créer, aucun mot de passe, aucune application. Ils ouvrent le lien et voient tout. La page reste privée : elle n'est référencée nulle part et n'est accessible qu'à qui détient le lien."
   },
   "pied": {
     "conditions": "Conditions d'utilisation",
@@ -186,12 +174,7 @@
     "nomPlaceholder": "Par exemple : Studio Nord",
     "couleurTitre": "Votre couleur",
     "couleurAide": "Elle habille la page de vos clients. N'importe quelle couleur convient : le texte reste lisible automatiquement.",
-    "apercuTexte": "Texte accentué",
-    "apercuBouton": "Bouton",
     "couleurAjustee": "Cette teinte a été légèrement éclaircie ou foncée à l'affichage pour rester lisible. Votre couleur, elle, est conservée telle quelle.",
-    "logoTitre": "Votre logo",
-    "logoAide": "Facultatif. PNG, JPEG ou WebP, jusqu'à 2 Mo.",
-    "logoChoisir": "Choisir une image",
     "logoRemplacer": "Remplacer",
     "logoEnvoi": "Envoi… {pourcent} %",
     "logoErreur": {
@@ -220,7 +203,6 @@
     "apercuEtape1Date": "Aujourd'hui, 10 h 42",
     "apercuEtape2": "En transit",
     "apercuEtape2Date": "Demain",
-    "apercuBoutonSuivi": "Suivre",
     "sansNom": "Votre boutique"
   },
   "marque": {
@@ -584,8 +566,8 @@
       "numero": "Numéro de suivi",
       "aucunMouvement": "Pas encore d’information du transporteur",
       "dernierMouvement": "Dernier mouvement il y a {n} jours",
-      "aujourdHui": "Bougé aujourd’hui",
-      "hier": "Bougé hier",
+      "aujourdHui": "Mouvement aujourd’hui",
+      "hier": "Mouvement hier",
       "silence": "Aucun mouvement depuis {n} jours. C’est fréquent sur les longs trajets, en particulier au passage en douane. Nous continuons à interroger le transporteur.",
       "estimation": "Livraison estimée",
       "arrete": "Le transporteur ne donne plus d’information sur ce numéro. Contactez le vendeur si vous n’avez rien reçu.",

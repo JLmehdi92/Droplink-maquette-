@@ -103,6 +103,14 @@ export default async function Accueil({
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             {t("gratuitPourLInstant")}
           </p>
+
+          {/* À QUI LE PRODUIT S'ADRESSE, dit une fois et sans nommer de secteur.
+              Le lecteur doit pouvoir s'y reconnaître qu'il expédie dix commandes
+              par mois ou plusieurs centaines par semaine — une page qui ne
+              nomme personne laisse chacun se demander si c'est pour lui. */}
+          <p className="mx-auto max-w-[640px] font-body-sm text-body-sm text-on-surface-variant">
+            {t("pourQui")}
+          </p>
         </section>
 
         {/* Emplacement du visuel : dimensions exactes de la maquette

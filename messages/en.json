@@ -1,22 +1,9 @@
 {
   "commun": {
     "chargement": "Loading…",
-    "erreurInattendue": "An unexpected error occurred.",
-    "reessayer": "Try again",
     "fermer": "Close",
     "copier": "Copy",
     "copie": "Copied"
-  },
-  "pagePublique": {
-    "titre": "Order tracking",
-    "propulsePar": "Powered by DropLink",
-    "aucuneInfoTransporteur": "No carrier information yet",
-    "etapes": {
-      "preparation": "Preparing",
-      "expedie": "Shipped",
-      "enTransit": "In transit",
-      "livre": "Delivered"
-    }
   },
   "navigation": {
     "seConnecter": "Log in",
@@ -29,28 +16,29 @@
     "mesAnalyses": "My analytics"
   },
   "landing": {
-    "metaTitre": "DropLink — one page per order, in your colours",
-    "metaDescription": "Upload your photos and videos, paste the tracking number, send a single link. Your customer sees everything, with no account and no app.",
-    "heroTitre": "One link. The whole order.",
-    "heroSousTitre": "Upload your photos and videos, paste the tracking number. Your customer opens a single link in your colours and sees everything — no account, no app, no chasing you.",
-    "ctaPrincipal": "Create my first link",
+    "metaTitre": "DropLink — one page per order, under your brand",
+    "metaDescription": "Bring photos, videos and parcel tracking together on a page in your colours. Your customers see everything themselves, with no account and no app.",
+    "heroTitre": "One page per order. Under your brand.",
+    "heroSousTitre": "Photos, videos and parcel tracking on a single page. You send the link; your customers see everything themselves — no account, no app.",
+    "ctaPrincipal": "Create a page",
     "ctaSecondaire": "I already have an account",
     "gratuitPourLInstant": "Free during the launch phase. No card required.",
+    "pourQui": "For suppliers, resellers, brands and workshops — from your first order to several hundred a week.",
     "fonctionnalites": {
-      "titre": "What the link holds",
+      "titre": "What the page holds",
       "mediasTitre": "Your photos and videos",
-      "mediasTexte": "Upload them once. Your customer views them full screen, as often as they like, without you sending anything again.",
-      "suiviTitre": "Parcel tracking that updates itself",
-      "suiviTexte": "Paste the number and the carrier is recognised. The page updates on its own, and says plainly when nothing is moving.",
-      "marqueTitre": "Your colours, editable after sending",
-      "marqueTexte": "Your name, your logo, your colour. Fix or complete the page whenever you want — the link itself never changes."
+      "mediasTexte": "Uploaded once, viewable full-page as often as your customers like. You never resend them.",
+      "suiviTitre": "Parcel tracking, kept current",
+      "suiviTexte": "Enter the number: the carrier is recognised and the page updates on its own. It says plainly when nothing is moving.",
+      "marqueTitre": "Your brand, editable after sending",
+      "marqueTexte": "Your name, your logo, your colour. Complete or correct the page whenever you like — the link itself never changes."
     },
     "commentTitre": "Three steps",
     "etape1": "Create the order and upload your media.",
-    "etape2": "Paste the tracking number.",
-    "etape3": "Send the link. That is all.",
-    "destinataireTitre": "Your customer installs nothing",
-    "destinataireTexte": "No account, no password, no app. They click, they see. The link stays private: it is indexed nowhere and reachable only by the person you sent it to."
+    "etape2": "Enter the tracking number.",
+    "etape3": "Send the link to your customer.",
+    "destinataireTitre": "Your customers install nothing",
+    "destinataireTexte": "No account to create, no password, no app. They open the link and see everything. The page stays private: it is listed nowhere and is reachable only by whoever holds the link."
   },
   "pied": {
     "conditions": "Terms of use",
@@ -186,12 +174,7 @@
     "nomPlaceholder": "For example: Studio Nord",
     "couleurTitre": "Your colour",
     "couleurAide": "It dresses your customers' page. Any colour works: text stays readable automatically.",
-    "apercuTexte": "Accented text",
-    "apercuBouton": "Button",
     "couleurAjustee": "This shade was lightened or darkened slightly on screen so it stays readable. Your colour itself is kept as chosen.",
-    "logoTitre": "Your logo",
-    "logoAide": "Optional. PNG, JPEG or WebP, up to 2 MB.",
-    "logoChoisir": "Choose an image",
     "logoRemplacer": "Replace",
     "logoEnvoi": "Uploading… {pourcent}%",
     "logoErreur": {
@@ -220,7 +203,6 @@
     "apercuEtape1Date": "Today, 10:42",
     "apercuEtape2": "In transit",
     "apercuEtape2Date": "Tomorrow",
-    "apercuBoutonSuivi": "Track",
     "sansNom": "Your shop"
   },
   "marque": {
@@ -584,8 +566,8 @@
       "numero": "Tracking number",
       "aucunMouvement": "No carrier information yet",
       "dernierMouvement": "Last movement {n} days ago",
-      "aujourdHui": "Moved today",
-      "hier": "Moved yesterday",
+      "aujourdHui": "Movement today",
+      "hier": "Movement yesterday",
       "silence": "No movement for {n} days. This is common on long routes, especially at customs. We keep asking the carrier.",
       "estimation": "Estimated delivery",
       "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
