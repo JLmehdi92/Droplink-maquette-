@@ -33,11 +33,35 @@ export type ResultatIngestion =
 export async function ingererEtat(
   numero: string,
   reponse: ReponsePort,
+  /**
+   * Empreinte de la notification reçue, pour n'en tenir compte qu'une fois.
+   *
+   * ABSENTE POUR LA CADENCE, ET C'EST DÉLIBÉRÉ. Nous interrogeons alors de notre
+   * propre initiative, et recevoir deux fois la même réponse pour un colis qui
+   * n'a pas bougé est le cas NORMAL — c'est même la définition d'un colis bloqué
+   * en douane. Dédupliquer là empêcherait `query_count` d'avancer, donc la
+   * fenêtre d'abandon de se fermer, donc ferait interroger ce colis pour
+   * toujours, à nos frais.
+   */
+  empreinteNotification?: string,
 ): Promise<ResultatIngestion> {
   const propre = numero.trim();
   if (propre === "") return { statut: "ignore", motif: "numero-vide" };
 
   const systeme = creerClientSysteme();
+
+  if (empreinteNotification !== undefined && empreinteNotification !== "") {
+    const { data: dejaVue, error: erreurVue } = await systeme.rpc("notification_deja_vue", {
+      p_cle: empreinteNotification,
+    });
+
+    // FAIL-CLOSED SUR LE COMPTEUR DE COÛT. Si la déduplication est indisponible,
+    // on n'ingère pas : traiter quand même reviendrait à rouvrir exactement le
+    // défaut qu'on vient de fermer, et le fournisseur réémettra. Refuser coûte
+    // un retard ; accepter coûte de l'argent, sans trace de la raison.
+    if (erreurVue !== null) return { statut: "ignore", motif: "deduplication-indisponible" };
+    if (dejaVue === true) return { statut: "ignore", motif: "rejeu" };
+  }
 
   if (reponse.statut === "vide") {
     // FACTURÉ MAIS SANS EFFET. Le compteur avance — c'est le seul poste de coût
@@ -85,6 +109,21 @@ export async function ingererEtat(
     p_estimation_du: reponse.etat.estimationDu ?? "",
     p_estimation_au: reponse.etat.estimationAu ?? "",
     p_brut: reponse.brut as never,
+    /*
+     * LE DÉPART RÉEL, calculé AVANT le plafond d'affichage.
+     *
+     * `assemblerPassages` borne la liste à trente points — sans quoi la page
+     * publique d'un colis parti d'Asie porte quarante lignes dont trente-cinq
+     * disent la même chose. Le plafond garde les plus RÉCENTES, donc il coupe
+     * justement celle qui date le départ.
+     *
+     * Cette valeur était CALCULÉE PUIS JETÉE ICI, et la base recalculait le
+     * minimum depuis la table tronquée. Mesuré sur quarante points : dix jours
+     * d'écart, rendus au client. Le module pur avait raison depuis le début ;
+     * c'est l'appelant qui perdait son travail.
+     */
+    p_premier_mouvement:
+      passages.premierMouvement === null ? "" : passages.premierMouvement.toISOString(),
   });
 
   if (error !== null) return { statut: "ignore", motif: "ecriture" };

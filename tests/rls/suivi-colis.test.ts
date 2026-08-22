@@ -2,110 +2,113 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
-  clientAnonyme,
-  clientService,
   creerUtilisateur,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
 
 /**
- * LE SUIVI DE COLIS, CÔTÉ BASE.
+ * LE LOT SUIVI DE COLIS — CE QUE L'AUDIT A FAIT LEVER.
  *
- * Deux propriétés portent tout le reste, et aucune des deux ne vit dans du code
- * applicatif :
+ * Sept défauts, un seul motif : LE SUIVI PARTAGE SON ÉTAT ENTRE VENDEURS, ET LE
+ * PARTAGE AVAIT ÉTÉ ÉTENDU À CE QUI NE DOIT PAS L'ÊTRE. Que deux vendeurs
+ * suivant le même colis en voient tous deux l'avancement est voulu et documenté.
+ * Que le COÛT de l'appel, l'ancienneté des dates et la fenêtre d'abandon leur
+ * soient également communs ne l'était pas — et rien ne le disait, parce que ces
+ * trois-là ne s'observent qu'en comparant deux comptes.
  *
- *  1. LE STATUT NE RECULE JAMAIS, garanti par `greatest()` sur l'énumération.
- *     Il y aura au moins deux chemins d'écriture — la notification poussée et la
- *     tâche de fond — et une règle applicative peut être oubliée dans le second.
- *  2. UN NUMÉRO EST UNIQUE PAR VENDEUR, pas globalement. Un revendeur et son
- *     fournisseur suivent le MÊME colis : une unicité globale aurait attribué au
- *     second le colis du premier, avec ses points de passage.
+ * CHAQUE CONTRÔLE ICI A ÉTÉ VU ROUGE avant sa correction, sur la base réelle.
+ * Les chiffres cités dans les commentaires sont ceux qui ont été MESURÉS, pas
+ * ceux qu'on attendait.
+ *
+ * LA CONNEXION DE CATALOGUE est employée à dessein : ces fonctions sont
+ * `security definer` et révoquées à `anon` comme à `authenticated`. Les éprouver
+ * sous le rôle d'un vendeur ne prouverait que la révocation — c'est-à-dire une
+ * ABSENCE — et pas ce qu'elles font quand elles sont légitimement appelées.
  */
 
 let alice: UtilisateurDeTest;
 let bob: UtilisateurDeTest;
 let catalogue: Client;
 
-const NUMERO = "LX-SUIVI-TEST-0001";
-
-async function colisDe(utilisateur: UtilisateurDeTest): Promise<{
-  id: string;
-  statut: string;
-  premier: string | null;
-  dernier: string | null;
-  vides: number;
-  interrogations: number;
-}> {
-  const lignes = await interroger<{
-    id: string;
-    normalized_status: string;
-    first_movement_at: string | null;
-    last_movement_at: string | null;
-    empty_count: number;
-    query_count: number;
-  }>(
-    catalogue,
-    `select id, normalized_status, first_movement_at, last_movement_at, empty_count, query_count
-     from public.tracked_parcels where shop_id = $1 and tracking_number = $2`,
-    [utilisateur.shopId, NUMERO],
-  );
-  const l = lignes[0];
-  if (l === undefined) throw new Error("colis introuvable : la sonde vise à côté");
-  // Le pilote rend des objets `Date`, pas des chaînes : comparer deux `Date`
-  // avec `toBe` compare l'IDENTITÉ, et deux instants égaux échouent. Normalisé
-  // ici plutôt qu'à chaque comparaison — sinon la première oubliée passe.
-  const iso = (v: unknown): string | null =>
-    v === null || v === undefined ? null : new Date(v as string).toISOString();
-
-  return {
-    id: l.id,
-    statut: l.normalized_status,
-    premier: iso(l.first_movement_at),
-    dernier: iso(l.last_movement_at),
-    vides: Number(l.empty_count),
-    interrogations: Number(l.query_count),
-  };
+/** Un numéro neuf par contrôle : deux contrôles qui le partageraient s'observeraient. */
+let compteur = 0;
+function numeroNeuf(): string {
+  compteur += 1;
+  return `SUIVI-${Date.now()}-${compteur}`;
 }
 
-async function appliquer(
-  etape: string,
-  statutBrut: string,
-  points: { instant: string; description: string; lieu?: string }[],
-): Promise<number> {
-  const lignes = await interroger<{ n: number }>(
+async function enregistrerColis(u: UtilisateurDeTest, numero: string): Promise<string> {
+  const l = await interroger<{ id: string }>(
     catalogue,
-    "select public.appliquer_etat_colis($1, $2::public.parcel_status, $3, $4, $5::jsonb, $6, $7, $8::jsonb) as n",
-    [
-      NUMERO,
-      etape,
-      statutBrut,
-      "",
-      JSON.stringify(points.map((p) => ({ ...p, lieu: p.lieu ?? "", etape: "" }))),
-      "",
-      "",
-      JSON.stringify({ source: "test" }),
-    ],
+    "insert into public.tracked_parcels (shop_id, tracking_number) values ($1,$2) returning id",
+    [u.shopId, numero],
   );
-  return Number(lignes[0]?.n ?? 0);
+  const id = l[0]?.id;
+  if (id === undefined) throw new Error("colis non enregistré");
+  return id;
+}
+
+/** Ce que le compteur de coût du mois affiche pour un vendeur. */
+async function appelsFactures(u: UtilisateurDeTest): Promise<number> {
+  const l = await interroger<{ n: string | number | null }>(
+    catalogue,
+    `select tracking_api_calls as n from public.usage_counters
+      where profile_id = $1 and period_month = date_trunc('month', now())::date`,
+    [u.profilId],
+  );
+  return Number(l[0]?.n ?? 0);
+}
+
+async function colis(numero: string): Promise<
+  {
+    query_count: number;
+    empty_count: number;
+    first_movement_at: string | null;
+    last_movement_at: string | null;
+    estimated_from: string | null;
+    raw_status: string | null;
+    abandon_motif: string | null;
+    snaps: string;
+  }[]
+> {
+  return interroger(
+    catalogue,
+    `select tp.query_count, tp.empty_count, tp.first_movement_at, tp.last_movement_at,
+            tp.estimated_from, tp.raw_status, tp.abandon_motif,
+            (select count(*) from public.tracking_snapshots ts where ts.parcel_id = tp.id) as snaps
+       from public.tracked_parcels tp
+      where tp.tracking_number = $1
+      order by tp.created_at asc, tp.id asc`,
+    [numero],
+  );
+}
+
+/** Une ingestion, telle que l'application l'émet. */
+async function ingerer(
+  numero: string,
+  options: {
+    points?: { instant: string; description: string }[];
+    estimation?: string;
+    premier?: string;
+  } = {},
+): Promise<number> {
+  const points = (options.points ?? []).map((p) => ({ ...p, lieu: "", etape: "" }));
+  const l = await interroger<{ n: number }>(
+    catalogue,
+    `select public.appliquer_etat_colis(
+       $1, 'expedie', 'In transit', '', $2::jsonb, $3, $3, '{}'::jsonb, $4
+     ) as n`,
+    [numero, JSON.stringify(points), options.estimation ?? "", options.premier ?? ""],
+  );
+  return l[0]?.n ?? 0;
 }
 
 beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
-  alice = await creerUtilisateur("colis-alice");
-  bob = await creerUtilisateur("colis-bob");
-
-  // LES DEUX vendeurs suivent le MÊME numéro. C'est le cas normal d'un revendeur
-  // et de son fournisseur, et c'est aussi le cas qui casserait une unicité
-  // globale.
-  for (const u of [alice, bob]) {
-    await interroger(
-      catalogue,
-      "insert into public.tracked_parcels (shop_id, tracking_number) values ($1, $2)",
-      [u.shopId, NUMERO],
-    );
-  }
-}, 90_000);
+  alice = await creerUtilisateur("suivi-alice");
+  bob = await creerUtilisateur("suivi-bob");
+}, 120_000);
 
 afterAll(async () => {
   await supprimerUtilisateur(alice);
@@ -113,201 +116,297 @@ afterAll(async () => {
   await catalogue.end();
 });
 
-describe("Un numéro par VENDEUR, pas par monde", () => {
-  test("deux vendeurs peuvent suivre le même numéro", async () => {
-    const a = await colisDe(alice);
-    const b = await colisDe(bob);
-    expect(a.id).not.toBe(b.id);
+describe("Un appel payé n'est imputé qu'une fois", () => {
+  test("deux vendeurs suivant le même numéro ne paient pas chacun l'appel", async () => {
+    /*
+     * MESURÉ AVANT CORRECTION : une ingestion, `tracking_api_calls` = 1 CHEZ
+     * CHACUN DES DEUX. Le coût suivait le nombre de vendeurs qui regardent,
+     * alors que le fournisseur facture à la prise en charge d'un NUMÉRO.
+     *
+     * Ce n'est pas qu'une erreur de comptabilité. Un numéro de suivi figure sur
+     * l'étiquette : n'importe qui pouvait l'enregistrer chez lui et faire porter
+     * à un vendeur le coût de son propre suivi. Le seul compteur du produit qui
+     * corresponde à une facture était falsifiable À LA HAUSSE, par un tiers.
+     */
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+    await enregistrerColis(bob, numero);
+
+    const avantAlice = await appelsFactures(alice);
+    const avantBob = await appelsFactures(bob);
+
+    const touches = await ingerer(numero);
+    expect(touches, "l'état n'a pas été appliqué aux deux colis").toBe(2);
+
+    // ALICE A ENREGISTRÉ LA PREMIÈRE : c'est son enregistrement qui a déclenché
+    // la prise en charge facturée, c'est donc elle qui la porte.
+    expect(await appelsFactures(alice), "le pionnier ne porte pas l'appel").toBe(avantAlice + 1);
+    expect(
+      await appelsFactures(bob),
+      "un tiers s'est vu imputer un appel qu'il n'a pas déclenché",
+    ).toBe(avantBob);
   });
 
-  test("le même vendeur ne peut pas l'enregistrer deux fois", async () => {
-    // La règle de coût rendue STRUCTURELLE : le fournisseur facture à la prise
-    // en charge, et deux lignes pour un même numéro chez un même vendeur
-    // paieraient deux fois le même colis.
-    await expect(
-      interroger(
-        catalogue,
-        "insert into public.tracked_parcels (shop_id, tracking_number) values ($1, $2)",
-        [alice.shopId, NUMERO],
-      ),
-    ).rejects.toThrow();
+  test("un seul instantané est écrit par appel", async () => {
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+    await enregistrerColis(bob, numero);
+
+    await ingerer(numero);
+
+    const lignes = await colis(numero);
+    const total = lignes.reduce((s, l) => s + Number(l.snaps), 0);
+    expect(total, "la réponse brute a été copiée une fois par vendeur").toBe(1);
   });
-});
 
-describe("Appliquer un état", () => {
-  test("il touche TOUS les colis qui portent le numéro", async () => {
-    const touches = await appliquer("en_transit", "InTransit", [
-      { instant: "2026-08-10T12:00:00Z", description: "Départ du centre de tri", lieu: "Shenzhen" },
-      { instant: "2026-08-09T08:00:00Z", description: "Pris en charge", lieu: "Shenzhen" },
-    ]);
-    expect(touches, "un seul colis a été mis à jour").toBe(2);
+  test("contre-test positif : l'ÉTAT, lui, est bien partagé", async () => {
+    // Sans ce contrôle, une correction qui cesserait purement et simplement
+    // d'écrire chez le second vendeur passerait les deux tests précédents. Or le
+    // partage de l'état est la fonctionnalité, pas le défaut : un revendeur et
+    // son fournisseur suivent légitimement le même colis.
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+    await enregistrerColis(bob, numero);
 
-    for (const u of [alice, bob]) {
-      const c = await colisDe(u);
-      expect(c.statut).toBe("en_transit");
-      expect(c.dernier).not.toBeNull();
-      expect(c.premier).not.toBeNull();
+    await ingerer(numero, {
+      points: [{ instant: "2026-08-10T08:00:00Z", description: "Départ du centre" }],
+    });
+
+    const lignes = await colis(numero);
+    expect(lignes).toHaveLength(2);
+    for (const l of lignes) {
+      expect(l.last_movement_at, "un vendeur ne voit pas l'avancement du colis").not.toBeNull();
     }
   });
 
-  test("les points de passage sont dédupliqués par la CONTRAINTE", async () => {
-    // Le fournisseur renvoie l'historique COMPLET à chaque appel : sans la
-    // contrainte, chaque notification dupliquerait tout ce qui précède.
-    const avant = await interroger<{ n: string }>(
-      catalogue,
-      "select count(*)::text as n from public.parcel_checkpoints where parcel_id = $1",
-      [(await colisDe(alice)).id],
-    );
+  test("une interrogation VIDE est comptée elle aussi", async () => {
+    /*
+     * Elle ne l'était pas : le compteur ne bougeait que sur un instantané, et un
+     * retour vide n'en écrit aucun. Or l'appel est payé quand même, et le retour
+     * vide est le cas le PLUS FRÉQUENT — un numéro fraîchement collé n'est pas
+     * encore scanné. Notre unique compteur de coût sous-estimait donc la
+     * dépense, c'est-à-dire se trompait du côté rassurant.
+     */
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
 
-    await appliquer("en_transit", "InTransit", [
-      { instant: "2026-08-10T12:00:00Z", description: "Départ du centre de tri", lieu: "Shenzhen" },
-      { instant: "2026-08-09T08:00:00Z", description: "Pris en charge", lieu: "Shenzhen" },
-    ]);
+    const avant = await appelsFactures(alice);
+    await interroger(catalogue, "select public.compter_interrogation_vide($1)", [numero]);
 
-    const apres = await interroger<{ n: string }>(
-      catalogue,
-      "select count(*)::text as n from public.parcel_checkpoints where parcel_id = $1",
-      [(await colisDe(alice)).id],
-    );
-    expect(Number(apres[0]?.n)).toBe(Number(avant[0]?.n));
-    expect(Number(apres[0]?.n), "aucun point : la sonde n'inspecte rien").toBe(2);
-  });
-
-  /**
-   * LA PROPRIÉTÉ QUI COMPTE LE PLUS. Les transporteurs reculent : un scan tardif
-   * arrive après un scan plus avancé. Un client qui a lu « en transit » et lit
-   * « en préparation » le lendemain conclut que son colis s'est perdu — et écrit
-   * à son vendeur, c'est-à-dire exactement ce que le produit doit tuer.
-   */
-  test("un état MOINS avancé ne fait pas reculer le statut", async () => {
-    await appliquer("preparation", "InfoReceived", []);
-    expect((await colisDe(alice)).statut, "le statut a reculé").toBe("en_transit");
-  });
-
-  test("mais un état PLUS avancé passe — sinon rien n'avancerait jamais", async () => {
-    await appliquer("livre", "Delivered", [
-      { instant: "2026-08-14T09:00:00Z", description: "Livré" },
-    ]);
-    expect((await colisDe(alice)).statut).toBe("livre");
-  });
-
-  test("un numéro inconnu ne touche rien, et ne lève pas", async () => {
-    const lignes = await interroger<{ n: number }>(
-      catalogue,
-      "select public.appliquer_etat_colis($1, 'livre'::public.parcel_status, '', '', '[]'::jsonb, '', '', '{}'::jsonb) as n",
-      ["NUMERO-QUI-NEXISTE-PAS"],
-    );
-    // Zéro n'est pas une erreur : le fournisseur pousse aussi pour des numéros
-    // qu'on ne suit plus. Mais c'est une INFORMATION — « il répond » est la
-    // propriété que tous les résidus possèdent.
-    expect(Number(lignes[0]?.n)).toBe(0);
+    expect(await appelsFactures(alice), "une interrogation payée n'est pas comptée").toBe(avant + 1);
   });
 });
 
-describe("Une interrogation vide", () => {
-  test("elle compte dans le COÛT sans rien déplacer", async () => {
-    const avant = await colisDe(alice);
+describe("Une notification rejouée ne compte qu'une fois", () => {
+  test("la seconde présentation de la même empreinte est reconnue", async () => {
+    // MESURÉ AVANT CORRECTION : la même notification signée, renvoyée cinq fois,
+    // faisait passer `query_count` de 1 à 6 et imputait cinq appels. Le rejeu
+    // n'exige personne en face : le fournisseur lui-même réémet quand il n'a pas
+    // de réponse assez vite.
+    const cle = `empreinte-${Date.now()}`;
 
-    const lignes = await interroger<{ n: number }>(
+    const premiere = await interroger<{ v: boolean }>(
       catalogue,
-      "select public.compter_interrogation_vide($1) as n",
-      [NUMERO],
+      "select public.notification_deja_vue($1) as v",
+      [cle],
     );
-    expect(Number(lignes[0]?.n)).toBe(2);
+    expect(premiere[0]?.v, "une notification neuve est prise pour un rejeu").toBe(false);
 
-    const apres = await colisDe(alice);
-    expect(apres.interrogations, "le coût n'a pas été compté").toBe(avant.interrogations + 1);
-    expect(apres.vides).toBe(avant.vides + 1);
-    // Rien d'autre ne bouge : un « pas encore scanné » qui écraserait
-    // `last_movement_at` ferait paraître immobile un colis en transit.
-    expect(apres.statut).toBe(avant.statut);
-    expect(apres.dernier).toBe(avant.dernier);
+    const seconde = await interroger<{ v: boolean }>(
+      catalogue,
+      "select public.notification_deja_vue($1) as v",
+      [cle],
+    );
+    expect(seconde[0]?.v, "un rejeu à l'octet près est traité une seconde fois").toBe(true);
+  });
+
+  test("une empreinte absente ne prétend pas dédupliquer", async () => {
+    // La chaîne vide vaut absence, comme partout dans ce dépôt. Rendre `true`
+    // ici ferait IGNORER toute notification dont l'empreinte manque — c'est-à-
+    // dire transformerait un défaut de calcul en panne totale du suivi.
+    const l = await interroger<{ v: boolean }>(
+      catalogue,
+      "select public.notification_deja_vue('') as v",
+    );
+    expect(l[0]?.v, "une clé absente est traitée comme un rejeu").toBe(false);
   });
 });
 
-describe("Qui peut lire, qui peut écrire", () => {
-  test("un vendeur lit SES colis et pas ceux des autres", async () => {
-    const sien = await alice.client.from("tracked_parcels").select("id, tracking_number");
-    expect(sien.error).toBeNull();
-    expect((sien.data ?? []).length, "le vendeur ne voit pas son colis").toBe(1);
+describe("Les dates d'un colis ne reculent pas", () => {
+  test("le premier mouvement tient au-delà du plafond d'affichage", async () => {
+    /*
+     * MESURÉ AVANT CORRECTION sur quarante points : date affichée 11/06, date
+     * réelle 01/06 — DIX JOURS d'écart, rendus au client.
+     *
+     * `assemblerPassages` bornait la liste à trente points et gardait les plus
+     * RÉCENTS, donc coupait justement celui qui date le départ. Le module pur
+     * calculait pourtant la bonne valeur ; c'est l'appelant qui la jetait.
+     *
+     * Le contrôle passe la borne SANS le point correspondant, exactement comme
+     * l'application le fait après troncature.
+     */
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
 
-    // Le colis de Bob porte le MÊME numéro : si l'isolation était mal posée,
-    // Alice en verrait deux.
-    expect((sien.data as { id: string }[])[0]?.id).toBe((await colisDe(alice)).id);
+    await ingerer(numero, {
+      points: [{ instant: "2026-06-11T00:00:00Z", description: "Scan tardif" }],
+      premier: "2026-06-01T00:00:00Z",
+    });
+
+    const [ligne] = await colis(numero);
+    expect(
+      ligne?.first_movement_at === null ? null : new Date(String(ligne?.first_movement_at)),
+      "le départ du colis est daté après le premier scan réel",
+    ).toEqual(new Date("2026-06-01T00:00:00Z"));
   });
 
-  test("un vendeur ne peut RIEN écrire sur un colis", async () => {
-    // L'écriture vient du transporteur. Un vendeur qui pourrait écrire ses
-    // propres points de passage raconterait à son client une expédition qui n'a
-    // pas eu lieu.
-    const avant = await colisDe(alice);
+  test("l'estimation de livraison ne revient pas dans le passé", async () => {
+    // MESURÉ AVANT CORRECTION : estimation au 01/09, puis une notification
+    // portant le 01/08 → la table lisait 01/08. Le client voyait s'afficher une
+    // date de livraison DÉJÀ PASSÉE.
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
 
-    const maj = await alice.client
-      .from("tracked_parcels")
-      .update({ normalized_status: "preparation" })
-      .eq("id", avant.id);
-    expect((await colisDe(alice)).statut, `écriture acceptée : ${maj.error?.message ?? "aucune"}`).toBe(
-      avant.statut,
+    await ingerer(numero, { estimation: "2026-09-01T00:00:00Z" });
+    await ingerer(numero, { estimation: "2026-08-01T00:00:00Z" });
+
+    const [ligne] = await colis(numero);
+    expect(
+      ligne?.estimated_from === null ? null : new Date(String(ligne?.estimated_from)),
+      "l'estimation de livraison a reculé",
+    ).toEqual(new Date("2026-09-01T00:00:00Z"));
+  });
+
+  test("contre-test positif : une estimation POSTÉRIEURE est bien prise", async () => {
+    // Sans lui, une correction qui refuserait toute mise à jour d'estimation
+    // passerait le test précédent en ne faisant plus rien du tout.
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+
+    await ingerer(numero, { estimation: "2026-09-01T00:00:00Z" });
+    await ingerer(numero, { estimation: "2026-09-20T00:00:00Z" });
+
+    const [ligne] = await colis(numero);
+    expect(
+      ligne?.estimated_from === null ? null : new Date(String(ligne?.estimated_from)),
+      "un report annoncé par le transporteur est ignoré",
+    ).toEqual(new Date("2026-09-20T00:00:00Z"));
+  });
+});
+
+describe("Le motif d'abandon n'écrase pas ce que disait le transporteur", () => {
+  test("`raw_status` survit à l'abandon", async () => {
+    // La colonne existe pour qu'un statut qu'on n'a pas su traduire ne
+    // disparaisse pas sans trace. L'abandon — le seul moment où l'on veut savoir
+    // ce que le fournisseur disait juste avant — était la seule écriture qui la
+    // détruisait.
+    const numero = numeroNeuf();
+    const id = await enregistrerColis(alice, numero);
+    await ingerer(numero);
+
+    await interroger(catalogue, "select public.abandonner_colis($1, 'abandon:trop-de-vides')", [id]);
+
+    const [ligne] = await colis(numero);
+    expect(ligne?.raw_status, "le statut du transporteur a été écrasé par notre motif").toBe(
+      "In transit",
     );
-
-    const insertion = await alice.client.from("parcel_checkpoints").insert({
-      parcel_id: avant.id,
-      occurred_at: new Date().toISOString(),
-      description: "Livré (inventé par le vendeur)",
-    });
-    expect(insertion.error, "un vendeur a pu écrire un point de passage").not.toBeNull();
+    expect(ligne?.abandon_motif, "le motif d'abandon n'est nulle part").toBe(
+      "abandon:trop-de-vides",
+    );
   });
+});
 
-  test("les réponses BRUTES ne sont lisibles par personne d'autre que le système", async () => {
-    // Elles contiennent des champs que nous n'exposons pas, et leur seul usage
-    // est le diagnostic. Ce qui n'est pas lisible ne peut pas fuiter.
-    const lecture = await alice.client.from("tracking_snapshots").select("*").limit(1);
-    const vide = lecture.error !== null || (lecture.data ?? []).length === 0;
-    expect(vide, "un vendeur lit les réponses brutes du fournisseur").toBe(true);
+describe("Deux passages concurrents ne se servent pas deux fois", () => {
+  test("la sélection réserve : un second appel ne rend plus le colis", async () => {
+    /*
+     * `colis_a_interroger` était `stable` et sans verrou : deux passages
+     * simultanés rendaient EXACTEMENT la même liste, donc interrogeaient — donc
+     * facturaient — deux fois chaque colis.
+     *
+     * La protection tenait à une ABSENCE : celle d'un second planificateur. Or
+     * le brief en prévoit un, pour la veille mutuelle. « Ce serait doublement
+     * facturé si quelqu'un ajoutait un deuxième planificateur » était donc la
+     * phrase juste, et c'est ce qu'on est en train de planifier.
+     */
+    const numero = numeroNeuf();
+    const id = await enregistrerColis(alice, numero);
 
-    // Contre-test : elles EXISTENT bien. Sans lui, « personne ne les lit » serait
-    // vrai parce qu'il n'y a rien à lire.
-    const service = clientService();
-    const brutes = await service.from("tracking_snapshots").select("id").limit(1);
-    expect((brutes.data ?? []).length, "aucune réponse brute enregistrée").toBeGreaterThan(0);
-  });
-
-  test("`anon` ne touche rien du suivi", async () => {
-    const anonyme = clientAnonyme();
-
-    for (const table of ["tracked_parcels", "parcel_checkpoints", "tracking_snapshots"] as const) {
-      const { data, error } = await anonyme.from(table).select("*").limit(1);
-      const vide = error !== null || (data ?? []).length === 0;
-      expect(vide, `anon a pu lire ${table}`).toBe(true);
-    }
-
-    const appel = await anonyme.rpc("appliquer_etat_colis", {
-      p_numero: NUMERO,
-      p_etape: "livre",
-      p_statut_brut: "",
-      p_transporteur: "",
-      p_points: [],
-      p_estimation_du: "",
-      p_estimation_au: "",
-      p_brut: {},
-    });
-    expect(appel.error, "anon a pu écrire l'état d'un colis").not.toBeNull();
-  });
-
-  test("le droit d'exécution est retiré DANS LE CATALOGUE", async () => {
-    const lignes = await interroger<{ beneficiaire: string }>(
+    const premier = await interroger<{ id: string }>(
       catalogue,
-      `select coalesce(a.grantee::regrole::text, 'PUBLIC') as beneficiaire
-       from pg_proc p
-       join pg_namespace n on n.oid = p.pronamespace,
-            aclexplode(p.proacl) a
-       where n.nspname = 'public'
-         and p.proname in ('appliquer_etat_colis', 'compter_interrogation_vide')
-         and a.privilege_type = 'EXECUTE'`,
+      "select id from public.colis_a_interroger(200) where id = $1",
+      [id],
     );
-    const ouverts = lignes
-      .map((l) => l.beneficiaire)
-      .filter((r) => r === "PUBLIC" || r === "anon" || r === "authenticated");
-    expect(ouverts, "l'écriture du suivi est exécutable trop largement").toEqual([]);
+    expect(premier, "un colis neuf n'est pas proposé à l'interrogation").toHaveLength(1);
+
+    const second = await interroger<{ id: string }>(
+      catalogue,
+      "select id from public.colis_a_interroger(200) where id = $1",
+      [id],
+    );
+    expect(second, "le même colis a été servi deux fois, donc payé deux fois").toHaveLength(0);
+  });
+
+  test("la prise en charge ne se compte pas deux fois", async () => {
+    // `marquer_prise_en_charge` incrémentait `query_count` sans condition :
+    // rejouée, elle rapprochait le colis de sa fenêtre d'abandon (sept jours ou
+    // seize interrogations) sans qu'aucune interrogation ait eu lieu. Un colis
+    // pouvait être abandonné pour avoir été trop interrogé alors qu'il l'avait
+    // été une fois.
+    const numero = numeroNeuf();
+    const id = await enregistrerColis(alice, numero);
+
+    await interroger(catalogue, "select public.marquer_prise_en_charge($1, false)", [id]);
+    const apresPremiere = (await colis(numero))[0]?.query_count;
+
+    await interroger(catalogue, "select public.marquer_prise_en_charge($1, false)", [id]);
+    const apresSeconde = (await colis(numero))[0]?.query_count;
+
+    expect(apresSeconde, "un rejeu rapproche le colis de son abandon").toBe(apresPremiere);
+  });
+});
+
+describe("La purge des réponses brutes existe et fait quelque chose", () => {
+  test("elle supprime au-delà de 90 jours SANS MOUVEMENT", async () => {
+    /*
+     * Elle était promise en commentaire depuis la première migration du suivi.
+     * Aucune fonction ne la faisait, aucune tâche ne l'appelait, et `pg_cron`
+     * n'était même pas installé — vérifié au catalogue. L-014 pur : un document
+     * affirme un état que personne n'a exécuté.
+     */
+    const numero = numeroNeuf();
+    const id = await enregistrerColis(alice, numero);
+    await ingerer(numero);
+
+    await interroger(
+      catalogue,
+      `update public.tracked_parcels
+          set last_movement_at = now() - interval '200 days',
+              created_at = now() - interval '200 days'
+        where id = $1`,
+      [id],
+    );
+
+    const avant = Number((await colis(numero))[0]?.snaps);
+    expect(avant, "la sonde n'a rien à purger : elle ne prouverait rien").toBeGreaterThan(0);
+
+    await interroger(catalogue, "select * from public.purger_donnees_de_suivi(50000)");
+
+    expect(Number((await colis(numero))[0]?.snaps), "la purge n'a rien supprimé").toBe(0);
+  });
+
+  test("contre-test positif : un colis RÉCENT garde ses réponses brutes", async () => {
+    // Le critère est le DERNIER MOUVEMENT, pas la création : un colis bloqué en
+    // douane depuis quatre mois est celui pour lequel la réponse brute sert le
+    // plus. Une purge qui emporterait tout passerait le test précédent.
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+    await ingerer(numero);
+
+    await interroger(catalogue, "select * from public.purger_donnees_de_suivi(50000)");
+
+    expect(
+      Number((await colis(numero))[0]?.snaps),
+      "la purge a emporté les réponses d'un colis actif",
+    ).toBeGreaterThan(0);
   });
 });

@@ -1479,6 +1479,128 @@ const SQL = {
       grant insert (shop_id, product_ref, internal_notes) on public.orders to authenticated;`,
   },
 
+  /**
+   * LE CAS MOTIVANT DU LOT SUIVI : le coût imputé à chaque vendeur.
+   *
+   * On rétablit exactement l'ancien comportement — une imputation par colis
+   * portant le numéro. Mesuré avant correction : deux boutiques, un appel, deux
+   * imputations ; cinq rejeux, dix imputations pour un appel payé.
+   *
+   * Le numéro de suivi figurant sur l'étiquette, ce défaut permettait à un tiers
+   * de faire porter à un vendeur le coût de son propre suivi. Le seul compteur
+   * du produit qui corresponde à une facture était falsifiable À LA HAUSSE.
+   */
+  "cout-du-suivi-par-vendeur": {
+    casser: `create or replace function public.imputer_appel_suivi(p_numero text)
+      returns void language plpgsql security definer set search_path = '' as $fals$
+      begin
+        insert into public.usage_counters (profile_id, period_month, tracking_api_calls)
+        select s.owner_id, date_trunc('month', now())::date, 1
+        from public.tracked_parcels tp join public.shops s on s.id = tp.shop_id
+        where tp.tracking_number = p_numero
+        on conflict (profile_id, period_month) do update
+          set tracking_api_calls = public.usage_counters.tracking_api_calls + 1;
+      end; $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "070_cout_du_suivi_impute_une_fois.sql",
+      depuis: "create function public.imputer_appel_suivi",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : la déduplication des notifications qui accepte tout.
+   *
+   * Rien n'est retiré, aucun droit ne change, la table reste fermée et le
+   * compteur de coût reste imputé une seule fois par appel. Ce qui redevient
+   * possible est le REJEU : la fonction répond toujours « jamais vue », donc
+   * chaque réémission du fournisseur est traitée comme un fait neuf.
+   *
+   * C'est la forme la plus trompeuse du défaut — la garde est là, elle répond,
+   * elle ne lève rien. « Il répond » est la propriété que tous les résidus
+   * possèdent.
+   */
+  "notifications-toujours-neuves": {
+    casser: `create or replace function public.notification_deja_vue(p_cle text)
+      returns boolean language sql security definer set search_path = '' as $fals$
+        select false;
+      $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "071_une_notification_ne_compte_qu_une_fois.sql",
+      depuis: "create function public.notification_deja_vue",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : les dates du colis redeviennent écrasables.
+   *
+   * Ni le coût, ni la déduplication, ni les droits ne sont touchés. Seul le
+   * `least`/`greatest` redevient un `coalesce`, c'est-à-dire l'écriture
+   * inconditionnelle d'origine. Le colis reste suivi, la page publique reste
+   * servie, aucune requête n'échoue — la seule chose qui change est que la date
+   * de départ et l'estimation de livraison peuvent revenir en arrière.
+   *
+   * Mesuré avant correction : dix jours d'écart sur le départ dès trente points
+   * de passage, et une estimation de livraison DÉJÀ PASSÉE affichée au client.
+   * Aucun de ces deux effets ne produit d'erreur : ils se lisent chez le
+   * destinataire, des semaines plus tard.
+   */
+  "dates-du-colis-ecrasables": {
+    casser: `create or replace function public.appliquer_etat_colis(
+      p_numero text, p_etape public.parcel_status, p_statut_brut text, p_transporteur text,
+      p_points jsonb, p_estimation_du text, p_estimation_au text, p_brut jsonb,
+      p_premier_mouvement text
+    ) returns integer language plpgsql security definer set search_path = '' as $fals$
+    declare
+      v_colis record; v_touches integer := 0; v_dernier timestamptz; v_premier timestamptz;
+      v_pionnier uuid;
+      v_du timestamptz := nullif(btrim(coalesce(p_estimation_du, '')), '')::timestamptz;
+      v_au timestamptz := nullif(btrim(coalesce(p_estimation_au, '')), '')::timestamptz;
+    begin
+      select tp.id into v_pionnier from public.tracked_parcels tp
+      where tp.tracking_number = p_numero order by tp.created_at asc, tp.id asc limit 1;
+
+      for v_colis in
+        select id from public.tracked_parcels where tracking_number = p_numero
+      loop
+        insert into public.parcel_checkpoints (parcel_id, occurred_at, location, description, stage)
+        select v_colis.id, (p->>'instant')::timestamptz, nullif(p->>'lieu', ''),
+               p->>'description', nullif(p->>'etape', '')
+        from jsonb_array_elements(coalesce(p_points, '[]'::jsonb)) as p
+        where p->>'instant' is not null and nullif(p->>'description', '') is not null
+        on conflict (parcel_id, occurred_at, description) do nothing;
+
+        select min(occurred_at), max(occurred_at) into v_premier, v_dernier
+          from public.parcel_checkpoints where parcel_id = v_colis.id;
+
+        update public.tracked_parcels
+           set normalized_status = greatest(normalized_status, p_etape),
+               raw_status = coalesce(nullif(p_statut_brut, ''), raw_status),
+               first_movement_at = coalesce(v_premier, first_movement_at),
+               last_movement_at = coalesce(v_dernier, last_movement_at),
+               estimated_from = coalesce(v_du, estimated_from),
+               estimated_to = coalesce(v_au, estimated_to),
+               query_count = query_count + 1, empty_count = 0
+         where id = v_colis.id;
+
+        -- L'instantané reste écrit, et une seule fois : cette falsification ne
+        -- doit toucher QUE les dates. Une falsification qui casse plus que la
+        -- garde visée ne prouve pas que c'est la garde visée qui tenait.
+        if v_colis.id = v_pionnier then
+          insert into public.tracking_snapshots (parcel_id, raw_payload, normalized_status)
+          values (v_colis.id, coalesce(p_brut, '{}'::jsonb), p_etape);
+        end if;
+
+        v_touches := v_touches + 1;
+      end loop;
+      if v_touches > 0 then perform public.imputer_appel_suivi(p_numero); end if;
+      return v_touches;
+    end; $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "072_les_dates_du_colis_ne_reculent_pas.sql",
+      depuis: "create function public.appliquer_etat_colis",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

@@ -26,7 +26,9 @@ export type Surface =
   /** Les seules requêtes portant un jeton INCONNU, par adresse. */
   | "publique-inconnu"
   /** La seule ÉCRITURE publique du produit : l'arbitrage QC. */
-  | "publique-ecriture";
+  | "publique-ecriture"
+  /** Les notifications de suivi poussées par le fournisseur. */
+  | "suivi-notification";
 
 export type Verdict = { autorise: true } | { autorise: false; motif: "quota" | "indisponible" };
 
@@ -82,6 +84,26 @@ function seuil(surface: Surface): { plafond: number; fenetreSecondes: number } {
       // seuil reste largement au-dessus de tout usage réel.
       return {
         plafond: entierEnv("QUOTA_PUBLIQUE_ECRITURE_PAR_MINUTE", 10),
+        fenetreSecondes: 60,
+      };
+    case "suivi-notification":
+      /*
+       * VOLONTAIREMENT GÉNÉREUX, et il faut dire pourquoi.
+       *
+       * Cette surface n'a qu'un appelant légitime, le fournisseur de suivi, et
+       * toutes ses notifications arrivent de la même poignée d'adresses. Un
+       * seuil serré ne bornerait donc pas un abus, il couperait une rafale
+       * normale — le fournisseur pousse par paquets quand un vol atterrit et
+       * que trois cents colis sont scannés dans la même minute.
+       *
+       * Le rejeu, lui, n'est PAS arrêté ici : il l'est par l'empreinte de la
+       * notification, qui le reconnaît quel que soit son débit. Ce seuil-ci ne
+       * couvre qu'une chose : empêcher qu'on nous fasse calculer des signatures
+       * à l'infini. Six cents par minute est très au-dessus de tout trafic réel
+       * et très en dessous de ce qu'il faudrait pour saturer.
+       */
+      return {
+        plafond: entierEnv("QUOTA_SUIVI_NOTIFICATION_PAR_MINUTE", 600),
         fenetreSecondes: 60,
       };
   }
@@ -230,4 +252,24 @@ export async function verifierQuotaEcriturePublique(): Promise<Verdict> {
   if (ip === null) return { autorise: true };
 
   return consommer(empreinte(ip), "publique-ecriture");
+}
+
+/**
+ * Le point de réception des notifications de suivi.
+ *
+ * IL REFUSE EN CAS DE PANNE DU COMPTEUR. Le brief tranche l'inverse pour la page
+ * publique, et le raisonnement ne s'applique pas ici : personne n'attend devant
+ * son écran. Un fournisseur qui n'obtient pas de réponse RÉÉMET — c'est même le
+ * comportement qui a rendu le rejeu atteignable — donc un refus temporaire ne
+ * perd aucune information, il la retarde. Accepter à l'aveugle, à l'inverse,
+ * ouvrirait une écriture non bornée sur les colis de tous les vendeurs pendant
+ * exactement la période où l'on ne voit plus rien.
+ */
+export async function verifierQuotaNotificationSuivi(): Promise<Verdict> {
+  const ip = await adresseAppelant();
+  // Sans adresse exploitable, on compte quand même — sous une clé commune. Cette
+  // surface n'a qu'un appelant légitime : regrouper les anonymes ne prive donc
+  // personne de service, alors que les laisser passer offrirait un contournement
+  // à qui sait masquer son adresse.
+  return consommer(ip === null ? "sans-adresse" : empreinte(ip), "suivi-notification");
 }

@@ -102,6 +102,15 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
         "les lirait obtiendrait des données que la page publique ne rend pas.",
     ],
     [
+      "tracking_notifications_vues",
+      "Empreintes des notifications de suivi déjà traitées. Aucune policy : la " +
+        "table n'est atteignable que par public.notification_deja_vue(). Elle " +
+        "n'est pas seulement à protéger en LECTURE — un tiers capable d'y " +
+        "insérer l'empreinte d'une notification À VENIR la ferait IGNORER, " +
+        "c'est-à-dire empêcherait un colis de jamais se mettre à jour, sans " +
+        "qu'aucune erreur soit levée nulle part.",
+    ],
+    [
       "rate_limit",
       "Compteur de limitation de débit. Sans policy, la table n'est atteignable " +
         "que par public.consommer_quota(). Un compteur lisible dirait à " +

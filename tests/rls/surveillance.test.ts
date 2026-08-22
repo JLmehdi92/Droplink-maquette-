@@ -13,10 +13,10 @@ import { lireSurveillance, NON_MESURE } from "@/lib/audit/surveillance";
  *
  * Trois propriétés portent tout le reste :
  *
- *  1. LE COMPTEUR D'INTERROGATIONS SUIT LES INSTANTANÉS, un pour un. C'est
- *     notre seul coût facturé par un tiers avec le stockage : un compteur plus
- *     bas que la facture est exactement le défaut qu'on ne voit qu'en recevant
- *     la facture.
+ *  1. LE COMPTEUR D'INTERROGATIONS SUIT LES APPELS, un pour un — et non les
+ *     écritures qu'ils provoquent. C'est notre seul coût facturé par un tiers
+ *     avec le stockage : un compteur plus bas que la facture est exactement le
+ *     défaut qu'on ne voit qu'en recevant la facture.
  *  2. LES INTERROGATIONS VIDES COMPTENT AUSSI. Le fournisseur facture l'appel,
  *     qu'il rende un mouvement ou rien. Les exclure ferait diverger notre
  *     chiffre du sien, du côté rassurant.
@@ -76,16 +76,35 @@ describe("Qui peut lire la surveillance", () => {
   });
 });
 
-describe("Le compteur d'interrogations suit les instantanés", () => {
-  test("chaque instantané écrit incrémente le compteur du mois", async () => {
+/*
+ * LE COMPTEUR SUIT L'APPEL, PLUS L'ÉCRITURE — ET C'EST UN CHANGEMENT DE CONTRAT.
+ *
+ * Ces trois contrôles éprouvaient auparavant un déclencheur posé sur
+ * `tracking_snapshots` : un instantané écrit, un appel imputé. Le contrat était
+ * FAUX, et le contrôle le certifiait fidèlement.
+ *
+ * Il l'était de deux façons opposées, ce qui est la raison pour laquelle
+ * personne ne l'avait vu : `appliquer_etat_colis` écrivait un instantané PAR
+ * COLIS portant le numéro, donc SURESTIMAIT dès que deux vendeurs suivaient le
+ * même colis — mesuré, deux imputations pour un appel — tandis qu'une
+ * interrogation VIDE n'écrivait aucun instantané, donc n'était pas comptée du
+ * tout, et le retour vide est le cas le plus fréquent.
+ *
+ * Le contrôle a donc changé parce que le PRODUIT avait tort, pas parce qu'il
+ * gênait.
+ */
+describe("Le compteur d'interrogations suit les APPELS", () => {
+  test("chaque appel au fournisseur incrémente le compteur du mois", async () => {
     const avant = (await indicateur(admin, "interrogations_ce_mois")) ?? 0;
 
-    const colis = await creerColis(vendeur.shopId, `SURV-${Date.now()}`);
+    const numero = `SURV-${Date.now()}`;
+    await creerColis(vendeur.shopId, numero);
     for (let i = 0; i < 3; i += 1) {
       await interroger(
         catalogue,
-        "insert into public.tracking_snapshots (parcel_id, raw_payload) values ($1, $2)",
-        [colis, JSON.stringify({ essai: i })],
+        `select public.appliquer_etat_colis($1, 'expedie', 'In transit', '', '[]'::jsonb,
+           '', '', $2::jsonb, '')`,
+        [numero, JSON.stringify({ essai: i })],
       );
     }
 
@@ -99,29 +118,55 @@ describe("Le compteur d'interrogations suit les instantanés", () => {
     // Le fournisseur facture l'appel qu'il rende un mouvement ou rien. Un numéro
     // fraîchement collé n'est souvent pas encore scanné : exclure ces
     // interrogations ferait diverger notre chiffre du sien, du côté rassurant.
+    // Elles n'étaient PAS comptées, précisément parce qu'elles n'écrivent aucun
+    // instantané et que le comptage suivait l'instantané.
     const avant = (await indicateur(admin, "interrogations_ce_mois")) ?? 0;
 
-    const colis = await creerColis(vendeur.shopId, `VIDE-${Date.now()}`);
-    await interroger(
-      catalogue,
-      `insert into public.tracking_snapshots (parcel_id, raw_payload, normalized_status)
-       values ($1, '{}'::jsonb, null)`,
-      [colis],
-    );
+    const numero = `VIDE-${Date.now()}`;
+    await creerColis(vendeur.shopId, numero);
+    await interroger(catalogue, "select public.compter_interrogation_vide($1)", [numero]);
 
     expect((await indicateur(admin, "interrogations_ce_mois")) ?? 0).toBe(avant + 1);
   });
 
-  test("le compteur ÉGALE le nombre réel d'instantanés du mois", async () => {
-    // Le contrôle central : un compteur dénormalisé qui dérive est rapide et
-    // faux, donc crédible. On le compare au décompte complet, celui qu'on refuse
-    // de faire à la lecture.
+  test("deux vendeurs sur un même numéro ne comptent qu'un appel", async () => {
+    // Le contrôle central, et celui qui manquait : c'est ici que le compteur
+    // divergeait de la facture. Un compteur dénormalisé qui dérive est rapide et
+    // faux, donc crédible.
+    const avant = (await indicateur(admin, "interrogations_ce_mois")) ?? 0;
+
+    const numero = `PARTAGE-${Date.now()}`;
+    await creerColis(vendeur.shopId, numero);
+    await creerColis(admin.shopId, numero);
+
+    const touches = await interroger<{ n: number }>(
+      catalogue,
+      `select public.appliquer_etat_colis($1, 'expedie', 'In transit', '', '[]'::jsonb,
+         '', '', '{}'::jsonb, '') as n`,
+      [numero],
+    );
+    expect(touches[0]?.n, "l'état n'a pas été appliqué aux deux colis : rien n'est éprouvé").toBe(2);
+
+    expect(
+      (await indicateur(admin, "interrogations_ce_mois")) ?? 0,
+      "un appel unique a été facturé deux fois",
+    ).toBe(avant + 1);
+  });
+
+  test("le compteur ne descend jamais sous le nombre d'instantanés du mois", async () => {
+    // La borne qui reste vraie après le changement de contrat : tout instantané
+    // vient d'un appel, mais tout appel n'écrit pas d'instantané — un retour
+    // vide n'en produit aucun. L'égalité d'autrefois était donc devenue fausse
+    // dans le bon sens ; l'inégalité, elle, se vérifie encore et attrape la
+    // dérive qui compte : un compteur PLUS BAS que la réalité.
     const reel = await interroger<{ n: string }>(
       catalogue,
       `select count(*) as n from public.tracking_snapshots
        where fetched_at >= date_trunc('month', now())`,
     );
-    expect(await indicateur(admin, "interrogations_ce_mois")).toBe(Number(reel[0]?.n));
+    expect(await indicateur(admin, "interrogations_ce_mois")).toBeGreaterThanOrEqual(
+      Number(reel[0]?.n),
+    );
   });
 });
 

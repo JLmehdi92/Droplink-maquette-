@@ -45,7 +45,25 @@ export async function prendreEnCharge(
     // abandonne le suivi TOUT DE SUITE plutôt que de le réessayer seize fois :
     // un refus de forme ne devient pas vrai en insistant, et chaque tentative
     // se paie.
-    await systeme.rpc("marquer_prise_en_charge", { p_parcel_id: parcelId, p_abandonne: true });
+    const { error: erreurMarque } = await systeme.rpc("marquer_prise_en_charge", {
+      p_parcel_id: parcelId,
+      p_abandonne: true,
+    });
+
+    // L'ERREUR ÉTAIT JETÉE ICI. Émettre « suivi abandonné » sans que l'abandon
+    // soit écrit produit un colis toujours actif que nos compteurs déclarent
+    // mort : il continuera d'être interrogé — donc payé — et il ne figurera plus
+    // dans ce qu'on regarde pour s'en apercevoir.
+    if (erreurMarque !== null) {
+      console.error(
+        "[suivi] abandon à la prise en charge non écrit pour " +
+          numero.slice(0, 4) +
+          " — " +
+          erreurMarque.message,
+      );
+      return { statut: "indisponible", motif: "abandon-non-ecrit" };
+    }
+
     await emettre(
       EVENEMENTS.SUIVI_ABANDONNE,
       { sujet: "suivi:" + numero.slice(0, 4) },
@@ -61,7 +79,23 @@ export async function prendreEnCharge(
     return { statut: "indisponible", motif: inscription.motif };
   }
 
-  await systeme.rpc("marquer_prise_en_charge", { p_parcel_id: parcelId, p_abandonne: false });
+  const { error: erreurPriseEnCharge } = await systeme.rpc("marquer_prise_en_charge", {
+    p_parcel_id: parcelId,
+    p_abandonne: false,
+  });
+
+  // Le fournisseur a bien pris le numéro — donc c'est payé — mais notre trace ne
+  // s'est pas écrite. On le NOMME et on continue : `registered_at` restée nulle
+  // fera reprendre la cadence, ce qui est le comportement correct. Le taire
+  // laisserait croire à une prise en charge complète.
+  if (erreurPriseEnCharge !== null) {
+    console.error(
+      "[suivi] prise en charge payée mais non enregistrée pour " +
+        numero.slice(0, 4) +
+        " — " +
+        erreurPriseEnCharge.message,
+    );
+  }
 
   await emettre(
     EVENEMENTS.COLIS_PRIS_EN_CHARGE,

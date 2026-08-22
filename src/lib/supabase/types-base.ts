@@ -517,6 +517,7 @@ export type Database = {
       }
       tracked_parcels: {
         Row: {
+          abandon_motif: string | null
           abandoned_at: string | null
           carrier_code: number | null
           created_at: string
@@ -537,6 +538,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          abandon_motif?: string | null
           abandoned_at?: string | null
           carrier_code?: number | null
           created_at?: string
@@ -557,6 +559,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          abandon_motif?: string | null
           abandoned_at?: string | null
           carrier_code?: number | null
           created_at?: string
@@ -585,6 +588,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tracking_notifications_vues: {
+        Row: {
+          cle: string
+          vue_at: string
+        }
+        Insert: {
+          cle: string
+          vue_at?: string
+        }
+        Update: {
+          cle?: string
+          vue_at?: string
+        }
+        Relationships: []
       }
       tracking_snapshots: {
         Row: {
@@ -703,6 +721,7 @@ export type Database = {
           p_etape: Database["public"]["Enums"]["parcel_status"]
           p_numero: string
           p_points: Json
+          p_premier_mouvement: string
           p_statut_brut: string
           p_transporteur: string
         }
@@ -797,6 +816,7 @@ export type Database = {
         Returns: string
       }
       generer_jeton_public: { Args: never; Returns: string }
+      imputer_appel_suivi: { Args: { p_numero: string }; Returns: undefined }
       journaliser: {
         Args: {
           p_actor: string
@@ -970,7 +990,15 @@ export type Database = {
         Returns: undefined
       }
       mon_shop_id: { Args: never; Returns: string }
+      notification_deja_vue: { Args: { p_cle: string }; Returns: boolean }
       prefixe_media_attendu: { Args: { p_order_id: string }; Returns: string }
+      purger_donnees_de_suivi: {
+        Args: { p_lot?: number }
+        Returns: {
+          instantanes: number
+          notifications: number
+        }[]
+      }
       quota_depasse: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean

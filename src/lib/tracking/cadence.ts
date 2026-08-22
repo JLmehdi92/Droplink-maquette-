@@ -72,10 +72,26 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
     if (decision.action === "attendre" || decision.action === "terminer") continue;
 
     if (decision.action === "abandonner") {
-      await systeme.rpc("abandonner_colis", {
+      const { error: erreurAbandon } = await systeme.rpc("abandonner_colis", {
         p_parcel_id: colis.id,
         p_motif: "abandon:" + decision.motif,
       });
+
+      // L'INTERFACE N'AFFIRME JAMAIS CE QUE LA BASE N'A PAS ENREGISTRÉ, et un
+      // événement d'analytics est une affirmation comme une autre. L'erreur
+      // était jetée : on émettait « suivi abandonné » pour un colis toujours
+      // actif, et le bilan le comptait. Une métrique légèrement fausse reste
+      // crédible — c'est ce qui la rend pire qu'une métrique cassée.
+      if (erreurAbandon !== null) {
+        console.error(
+          "[suivi] cadence : abandon non écrit pour " +
+            colis.tracking_number.slice(0, 4) +
+            " — " +
+            erreurAbandon.message,
+        );
+        continue;
+      }
+
       await emettre(
         EVENEMENTS.SUIVI_ABANDONNE,
         { sujet: "suivi:" + colis.tracking_number.slice(0, 4) },
@@ -89,7 +105,24 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
     // injoignable, le colis ne doit PAS revenir au prochain passage : il
     // reviendrait à chaque passage, en boucle, et chaque tentative se paie. On
     // accepte donc de perdre un tour plutôt que de risquer une boucle.
-    await systeme.rpc("marquer_interroge", { p_parcel_id: colis.id });
+    //
+    // ET SON ÉCHEC ARRÊTE LE TRAITEMENT DE CE COLIS. L'erreur était jetée : si
+    // la date d'interrogation n'était pas posée, on interrogeait quand même, le
+    // colis ressortait au passage suivant, et on repayait — à chaque passage,
+    // indéfiniment. La seule protection contre la boucle était l'écriture dont
+    // on ne lisait pas le résultat.
+    const { error: erreurMarque } = await systeme.rpc("marquer_interroge", {
+      p_parcel_id: colis.id,
+    });
+    if (erreurMarque !== null) {
+      console.error(
+        "[suivi] cadence : date d'interrogation non posée pour " +
+          colis.tracking_number.slice(0, 4) +
+          " — colis ignoré ce passage pour ne pas boucler. " +
+          erreurMarque.message,
+      );
+      continue;
+    }
 
     // UN COLIS JAMAIS ENREGISTRÉ CHEZ LE FOURNISSEUR EST REPRIS ICI. C'est le
     // filet de la prise en charge différée : `registered_at` restée nulle est
@@ -114,6 +147,27 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
     bilan.interroges += 1;
   }
 
+  /*
+   * LA PURGE VIT ICI, ET NON DANS SON PROPRE PLANIFICATEUR.
+   *
+   * Le brief promet une purge des réponses brutes à 90 jours depuis la première
+   * migration du suivi. Elle n'existait pas — aucune fonction, aucune tâche, et
+   * `pg_cron` même pas installé. Un second mécanisme de planification serait un
+   * second mécanisme à surveiller ; celui-ci passe déjà régulièrement.
+   *
+   * APRÈS le travail utile, et son échec ne fait pas échouer le passage : ne pas
+   * avoir purgé n'annule pas ce qui a été suivi. Mais il est NOMMÉ — une purge
+   * silencieusement en panne se découvre au quota disque, et cette base y est
+   * déjà passée une fois.
+   */
+  const { data: purge, error: erreurPurge } = await systeme.rpc("purger_donnees_de_suivi", {
+    p_lot: 5000,
+  });
+  if (erreurPurge !== null) {
+    console.error("[suivi] cadence : purge des réponses brutes en échec — " + erreurPurge.message);
+  }
+  const purgee = purge?.[0];
+
   await systeme.rpc("battre", {
     p_source: "cadence-suivi",
     p_detail: {
@@ -122,6 +176,10 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
       abandonnes: bilan.abandonnes,
       repris: bilan.repris,
       indisponibles: bilan.indisponibles,
+      // `null` et `0` ne disent pas la même chose : l'un dit « la purge n'a pas
+      // tourné », l'autre « elle a tourné et n'a rien trouvé à faire ».
+      purge_instantanes: erreurPurge !== null ? null : (purgee?.instantanes ?? 0),
+      purge_notifications: erreurPurge !== null ? null : (purgee?.notifications ?? 0),
     },
   });
 
