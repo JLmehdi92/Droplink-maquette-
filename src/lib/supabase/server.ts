@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
+import { OPTIONS_COOKIES } from "@/lib/auth/cookies";
 import { cookies } from "next/headers";
 import type { Database } from "./types-base";
 import { clePubliable, urlSupabase } from "./config";
@@ -16,6 +17,9 @@ export async function creerClientServeur() {
   const magasin = await cookies();
 
   return createServerClient<Database>(urlSupabase(), clePubliable(), {
+    // Les jetons de session ne doivent JAMAIS être lisibles en JavaScript :
+    // la bibliothèque les pose `httpOnly:false` par défaut.
+    cookieOptions: OPTIONS_COOKIES,
     cookies: {
       getAll() {
         return magasin.getAll();

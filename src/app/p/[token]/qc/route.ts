@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { arbitrerQc } from "@/lib/page-publique/qc";
-import { verifierQuotaEcriturePublique } from "@/lib/limitation/quota";
+import { signalerJetonInconnu, verifierQuotaEcriturePublique } from "@/lib/limitation/quota";
 
 /**
  * L'arbitrage QC. La SEULE écriture que la page publique autorise.
@@ -33,6 +33,21 @@ export async function POST(
 
   const resultat = await arbitrerQc(token, corps);
   if (resultat.statut !== "ok") {
+    /*
+     * CETTE ROUTE ÉTAIT L'ORACLE LE PLUS NET DU PRODUIT, et il était gratuit.
+     *
+     * Elle distingue 200 (jeton valide, compte actif) de 404 (inconnu, révoqué
+     * ou suspendu) — ce qui est correct pour son usage. Mais elle n'armait pas
+     * le compteur des jetons INCONNUS : un balayeur obtenait donc un signal
+     * binaire en une requête, sans consommer un seul des vingt essais que la
+     * page publique, elle, lui aurait décomptés. Il suffisait de choisir cette
+     * entrée-ci plutôt que celle-là.
+     *
+     * Le compteur d'écriture (10/min) s'appliquait bien, mais il ne défend pas
+     * contre la même chose : il borne le volume d'écritures, pas la découverte
+     * de jetons.
+     */
+    await signalerJetonInconnu();
     return NextResponse.json({ erreur: "introuvable" }, { status: 404 });
   }
 

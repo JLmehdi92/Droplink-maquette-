@@ -91,6 +91,59 @@ describe("Ce que le jeton donne", () => {
     expect((data as { internal_notes: string }).internal_notes).toBe(NOTE_SECRETE);
   });
 
+  test("aucun identifiant INTERNE ne sort — ni shop, ni commande, ni média", async () => {
+    /*
+     * DÉFAUT RÉEL, TROUVÉ PAR AUDIT ET NON PAR CETTE SONDE. Le logo de boutique
+     * était rendu comme clé R2 brute — `logos/{shopId}/{uuid}.png` — donc le
+     * `shop_id` sortait dans le HTML, SOUS LE NOM `boutique_logo`. La migration
+     * 017 l'énumère pourtant parmi ce qui n'est PAS rendu.
+     *
+     * La sonde ne le voyait pas parce qu'elle n'inspectait que deux sentinelles,
+     * choisies. Un contrôle ne doit pas dépendre de ce que son auteur a pensé à
+     * inspecter : elle inventorie désormais TOUS les identifiants internes.
+     *
+     * L'ENJEU N'EST PAS LE SECRET, C'EST LA CORRÉLATION. Deux liens publics de
+     * deux commandes différentes deviennent rattachables au même vendeur par un
+     * identifiant stable — et le client d'un revendeur n'a pas à savoir qui est
+     * derrière, ni combien de pages il existe.
+     */
+    const page = await lireCommandePublique(jeton);
+    const rendu = JSON.stringify(page);
+
+    const internes = await interroger<{ valeur: string }>(
+      catalogue,
+      `select o.shop_id::text as valeur from public.orders o where o.id = $1
+       union all
+       select o.id::text from public.orders o where o.id = $1
+       union all
+       select s.owner_id::text from public.shops s
+         join public.orders o on o.shop_id = s.id where o.id = $1`,
+      [commande],
+    );
+
+    // UN ENSEMBLE VIDE PASSE TOUT : sans ce contrôle, une requête fausse
+    // rendrait la sonde verte et muette.
+    expect(
+      internes.length,
+      "aucun identifiant à chercher : la requête est fausse",
+    ).toBeGreaterThanOrEqual(3);
+
+    /*
+     * L'IDENTIFIANT DE MÉDIA EST EXCLU, ET C'EST DÉCLARÉ. Il est rendu exprès :
+     * le visionneur plein écran construit `/p/{jeton}/media/{mediaId}` avec lui.
+     * Il ne corrèle rien — il n'a de sens qu'accompagné du jeton, et la route
+     * revérifie que le média appartient bien à la commande de ce jeton. Ce qui
+     * est interdit ici, ce sont les identifiants qui désignent le VENDEUR ou
+     * relient deux pages entre elles.
+     */
+    const fuites = internes.map((l) => l.valeur).filter((v) => rendu.includes(v));
+    expect(
+      fuites,
+      `Identifiants internes rendus au visiteur : ${fuites.join(", ")}. Ils permettent ` +
+        "de rattacher deux liens publics au même vendeur.",
+    ).toEqual([]);
+  });
+
   test("le jeton de désabonnement ne sort pas : un jeton, un pouvoir", async () => {
     const { data } = await alice.client
       .from("orders")

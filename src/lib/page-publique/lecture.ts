@@ -119,6 +119,31 @@ async function lireCommandePubliqueSansMemo(
     })),
   );
 
+  /*
+   * LE LOGO EST UNE CLÉ D'OBJET, PAS UNE URL — il se signe comme le reste.
+   *
+   * DÉFAUT TROUVÉ PAR AUDIT. `shops.logo_url` porte la clé R2
+   * `logos/{shopId}/{uuid}.{ext}` ; la surface vendeur la signait déjà, la page
+   * publique la rendait BRUTE dans l'attribut `src`. Deux effets, et le second
+   * était visible à l'œil sans que personne ne l'ait vu :
+   *
+   *   1. le `shop_id` sortait dans le HTML — la migration 017 l'énumère
+   *      pourtant parmi ce qui n'est PAS rendu. La valeur voyageait sous le nom
+   *      `boutique_logo`, ce qui est exactement ce qu'un contrôle par NOM ne
+   *      peut pas voir : deux liens publics de deux commandes différentes
+   *      devenaient corrélables au même vendeur par un identifiant interne
+   *      stable ;
+   *   2. l'URL étant relative, le navigateur la résolvait depuis `/p/{jeton}/`
+   *      et obtenait un 404. Un vendeur ayant un logo mais pas encore de nom
+   *      obtenait donc un en-tête ne contenant qu'une image cassée — une barre
+   *      vide, précisément ce que la décision 24 interdit.
+   *
+   * L'échec de signature rend `null` plutôt que de lever : un logo illisible ne
+   * doit pas emporter la page que le client vient consulter.
+   */
+  const logoSigne =
+    ligne.boutique_logo === null ? null : await signerLecture(ligne.boutique_logo).catch(() => null);
+
   return {
     jeton: ligne.jeton,
     client: ligne.client,
@@ -129,7 +154,7 @@ async function lireCommandePubliqueSansMemo(
     modifieeLe: ligne.modifiee_le,
     boutique: {
       nom: ligne.boutique_nom,
-      logo: ligne.boutique_logo,
+      logo: logoSigne,
       couleur: ligne.boutique_couleur,
       langue: ligne.boutique_langue,
       filigrane: ligne.boutique_filigrane,

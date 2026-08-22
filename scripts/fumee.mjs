@@ -791,6 +791,30 @@ try {
 }
 
 console.log("\n— Contenu rendu —");
+// --- En-tetes de securite, sur le RESEAU et non dans la configuration ---
+//
+// Un `headers()` ecrit dans `next.config.ts` peut etre correct et ne rien
+// produire : mauvais motif de chemin, plugin qui le remplace, build qui ne le
+// reprend pas. Ce qui fait autorite est ce que le serveur REPOND.
+const enTetesPublique = (await fetch(`${base}/p/inexistant-pour-les-entetes`)).headers;
+const enTetesLanding = (await fetch(`${base}/fr`)).headers;
+
+controles.push(
+  [enTetesLanding.get("x-content-type-options") === "nosniff", "nosniff sur la landing"],
+  [enTetesLanding.get("x-frame-options") === "DENY", "cadrage refuse sur la landing"],
+  // LE POINT QUI COMPTE : l URL de la page publique CONTIENT le jeton. Un
+  // `Referer` sortant vers R2 emporterait la capacite d ouvrir la commande.
+  [enTetesPublique.get("referrer-policy") === "no-referrer", "aucun referent sur la page publique"],
+  [
+    (enTetesPublique.get("content-security-policy") ?? "").includes("frame-ancestors 'none'"),
+    "page publique non cadrable — l arbitrage QC ne peut pas etre vole au clic",
+  ],
+  [
+    (enTetesLanding.get("referrer-policy") ?? "") === "strict-origin-when-cross-origin",
+    "referent borne ailleurs que sur la page publique",
+  ],
+);
+
 for (const [ok, libelle] of controles) {
   if (!ok) echecs += 1;
   console.log(`${ok ? "OK   " : "ECHEC"} ${libelle}`);

@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { OPTIONS_COOKIES } from "@/lib/auth/cookies";
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "@/i18n/routing";
@@ -72,6 +73,10 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
   const reponse = gestionLangue(requete);
 
   const supabase = createServerClient(urlSupabase(), clePubliable(), {
+    // Le middleware REPOSE les cookies rafraîchis : sans les mêmes options ici,
+    // chaque renouvellement de session réécrirait des cookies lisibles en
+    // JavaScript par-dessus ceux que le serveur avait bien fermés.
+    cookieOptions: OPTIONS_COOKIES,
     cookies: {
       getAll() {
         return requete.cookies.getAll();
