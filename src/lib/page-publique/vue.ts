@@ -2,7 +2,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { creerClientSysteme } from "@/lib/supabase/system";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
-import { adresseAppelant, empreinte, paysAppelant } from "@/lib/limitation/empreinte";
+import { adresseAppelant, classeAgent, empreinte, paysAppelant } from "@/lib/limitation/empreinte";
 import { emettre } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { JetonPublic } from "./lecture";
@@ -63,7 +63,10 @@ export async function enregistrerVue(jetonBrut: string): Promise<ResultatVue> {
   const { data, error } = await systeme.rpc("enregistrer_vue", {
     p_jeton: analyse.data,
     p_ip_hash: empreinte(ip),
-    p_ua_hash: empreinte(agent),
+    // LA CLASSE, JAMAIS LA CHAÎNE ENTIÈRE. Prise entière, elle est presque
+    // unique par machine — donc offrait un espace illimité de lignes distinctes
+    // pour un seul visiteur. Mesuré : cinq cents vues depuis une seule adresse.
+    p_ua_hash: empreinte(classeAgent(agent)),
     p_pays: (await paysAppelant()) ?? "",
     p_profil: profil?.profilId ?? "",
   });

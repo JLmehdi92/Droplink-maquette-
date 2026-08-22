@@ -70,3 +70,62 @@ export async function paysAppelant(): Promise<string | null> {
   if (pays === null || pays.trim() === "" || pays.trim().toUpperCase() === "XX") return null;
   return pays.trim().toUpperCase().slice(0, 2);
 }
+
+/**
+ * LA CLASSE D'UN AGENT UTILISATEUR — grossière, et c'est le point.
+ *
+ * MESURÉ AVANT CORRECTION : cinq cents vues enregistrées sur UNE SEULE commande,
+ * depuis UNE SEULE adresse, en variant l'agent utilisateur cinq cents fois. Avec
+ * le quota public actuel — cent vingt requêtes par minute — cela porte à
+ * 172 800 vues par jour ce qu'une seule machine peut inscrire.
+ *
+ * Or « vues par lien > 3 » est une MÉTRIQUE DE VERDICT : c'est un des chiffres
+ * sur lesquels se décide si le produit continue. Un vendeur qui veut se
+ * rassurer, un concurrent qui veut nous faire conclure à tort, ou simplement un
+ * outil de test un peu bavard suffisaient à la rendre fausse — et une métrique
+ * légèrement faussée reste crédible.
+ *
+ * LA CAUSE EST QUE L'AGENT ÉTAIT PRIS ENTIER. Sa chaîne complète est presque
+ * unique par machine : versions du navigateur, du système, du moteur, parfois
+ * du modèle d'appareil. Elle offrait donc un espace pratiquement infini de
+ * valeurs distinctes pour une même personne, alors que la clé de déduplication
+ * repose dessus.
+ *
+ * CE QU'ON PERD EST ASSUMÉ. Deux visiteurs derrière la même adresse partagée,
+ * avec le même navigateur et le même type d'appareil, ne comptent plus que pour
+ * un. C'est le bon sens de l'erreur : sous-compter une métrique de verdict est
+ * moins dangereux que la sur-compter, parce qu'un chiffre qui confirme ce qu'on
+ * espère ne se remet jamais en question.
+ *
+ * Le résultat vit dans un ensemble FERMÉ de quelques dizaines de valeurs. C'est
+ * lui qu'on empreinte, jamais la chaîne d'origine.
+ */
+export function classeAgent(agentBrut: string): string {
+  const a = agentBrut.toLowerCase();
+
+  // L'ordre compte : presque tous les navigateurs se déclarent « mozilla », et
+  // Chrome, Edge et les navigateurs embarqués se déclarent tous « safari ». On
+  // reconnaît donc du plus spécifique au plus général.
+  const navigateur =
+    a.includes("edg/") || a.includes("edga/")
+      ? "edge"
+      : a.includes("opr/") || a.includes("opera")
+        ? "opera"
+        : a.includes("samsungbrowser")
+          ? "samsung"
+          : a.includes("firefox") || a.includes("fxios")
+            ? "firefox"
+            : a.includes("chrome") || a.includes("crios")
+              ? "chrome"
+              : a.includes("safari")
+                ? "safari"
+                : "autre";
+
+  const appareil = a.includes("ipad") || a.includes("tablet")
+    ? "tablette"
+    : a.includes("mobi") || a.includes("android") || a.includes("iphone")
+      ? "mobile"
+      : "bureau";
+
+  return `${navigateur}/${appareil}`;
+}

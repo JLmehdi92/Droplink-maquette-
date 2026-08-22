@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
@@ -29,10 +30,33 @@ let catalogue: Client;
 let commande: string;
 let jeton: string;
 
-/** Deux visiteurs distincts, deux empreintes distinctes. */
-const IP_A = "vue-ip-a-1f4c";
-const IP_B = "vue-ip-b-9d02";
-const AGENT = "vue-agent-7b31";
+/*
+ * Deux visiteurs distincts, deux empreintes distinctes.
+ *
+ * ELLES ONT LA FORME RÉELLE de ce que `empreinte()` produit — trente-deux
+ * caractères hexadécimaux — parce que la base l'exige désormais. Elle ne
+ * l'exigeait pas : `''`, `'x'` et `'vue-ip-a-1f4c'` étaient acceptés, et la clé
+ * de déduplication d'une métrique de VERDICT reposait dessus. Les valeurs
+ * lisibles employées ici jusque-là étaient donc du même genre que le défaut.
+ */
+const IP_A = "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1";
+const IP_B = "b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2";
+const AGENT = "c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3";
+
+/**
+ * Une empreinte de test AU FORMAT RÉEL, dérivée d'un libellé lisible.
+ *
+ * Les contrôles employaient jusqu'ici des chaînes lisibles telles quelles
+ * (`"vue-ip-a"`), ce que la base acceptait. Elle ne l'accepte plus : la clé de
+ * déduplication est la DÉFINITION de « vues par lien », une métrique de verdict,
+ * et une valeur qui n'a pas la forme d'une empreinte n'en est pas une.
+ *
+ * Le libellé reste donc à l'écriture — un test doit se lire — mais ce qui part
+ * en base est ce que `empreinte()` produirait.
+ */
+function emp(libelle: string): string {
+  return createHash("sha256").update(libelle).digest("hex").slice(0, 32);
+}
 
 async function enregistrer(
   jetonAppele: string,
@@ -101,7 +125,7 @@ describe("Ce qui compte comme une vue", () => {
   });
 
   test("un autre agent depuis la même adresse compte aussi", async () => {
-    expect(await enregistrer(jeton, IP_A, "vue-agent-autre")).toBe(true);
+    expect(await enregistrer(jeton, IP_A, emp("vue-agent-autre"))).toBe(true);
     expect(await compterVues()).toBe(3);
   });
 
@@ -128,7 +152,7 @@ describe("Ce qui NE compte PAS", () => {
     const avant = await compterVues();
     // Une adresse et un agent jamais vus : si l'exclusion ne fonctionnait pas,
     // la ligne serait créée, aucune déduplication ne la retiendrait.
-    expect(await enregistrer(jeton, "vue-ip-vendeur", "vue-agent-vendeur", alice.profilId)).toBe(
+    expect(await enregistrer(jeton, emp("vue-ip-vendeur"), emp("vue-agent-vendeur"), alice.profilId)).toBe(
       false,
     );
     expect(await compterVues()).toBe(avant);
@@ -138,13 +162,13 @@ describe("Ce qui NE compte PAS", () => {
     // Le contre-test de l'exclusion : sans lui, « exclure tout profil connecté »
     // — donc ne jamais rien compter dès qu'un cookie traîne — passerait.
     const avant = await compterVues();
-    expect(await enregistrer(jeton, "vue-ip-bob", "vue-agent-bob", bob.profilId)).toBe(true);
+    expect(await enregistrer(jeton, emp("vue-ip-bob"), emp("vue-agent-bob"), bob.profilId)).toBe(true);
     expect(await compterVues()).toBe(avant + 1);
   });
 
   test("un jeton inconnu n'enregistre rien", async () => {
     const avant = await compterVues();
-    expect(await enregistrer("jeton-qui-nexiste-pas", "vue-ip-x", "vue-agent-x")).toBe(false);
+    expect(await enregistrer("jeton-qui-nexiste-pas", emp("vue-ip-x"), emp("vue-agent-x"))).toBe(false);
     expect(await compterVues()).toBe(avant);
   });
 
@@ -158,13 +182,13 @@ describe("Ce qui NE compte PAS", () => {
     await service.from("profiles").update({ status: "suspended" }).eq("id", alice.profilId);
 
     const avant = await compterVues();
-    expect(await enregistrer(jeton, "vue-ip-pendant-suspension", "vue-agent-susp")).toBe(false);
+    expect(await enregistrer(jeton, emp("vue-ip-pendant-suspension"), emp("vue-agent-susp"))).toBe(false);
     expect(await compterVues()).toBe(avant);
 
     await service.from("profiles").update({ status: "active" }).eq("id", alice.profilId);
     // Et la réactivation rétablit le comptage : sans cette moitié-là, une
     // fonction cassée passerait pour une suspension qui fonctionne.
-    expect(await enregistrer(jeton, "vue-ip-apres-suspension", "vue-agent-susp")).toBe(true);
+    expect(await enregistrer(jeton, emp("vue-ip-apres-suspension"), emp("vue-agent-susp"))).toBe(true);
   });
 });
 
@@ -201,13 +225,13 @@ describe("Le compteur porté par la commande", () => {
   test("une vue de plus l'incrémente, une vue dédupliquée NON", async () => {
     const avant = (await compteur()).n;
 
-    expect(await enregistrer(jeton, "vue-ip-compteur", "vue-agent-compteur")).toBe(true);
+    expect(await enregistrer(jeton, emp("vue-ip-compteur"), emp("vue-agent-compteur"))).toBe(true);
     expect((await compteur()).n, "le déclencheur n'a pas compté").toBe(avant + 1);
 
     // Le même visiteur le même jour : aucune ligne, donc aucun incrément. Sans
     // ce contre-test, un compteur incrémenté à chaque APPEL — et non à chaque
     // ligne — passerait le test précédent.
-    expect(await enregistrer(jeton, "vue-ip-compteur", "vue-agent-compteur")).toBe(false);
+    expect(await enregistrer(jeton, emp("vue-ip-compteur"), emp("vue-agent-compteur"))).toBe(false);
     expect((await compteur()).n, "une consultation dédupliquée a été comptée").toBe(avant + 1);
   });
 
@@ -231,14 +255,50 @@ describe("Le compteur porté par la commande", () => {
   });
 });
 
+describe("Une empreinte doit en être une", () => {
+  /*
+   * MESURÉ AVANT CORRECTION : `enregistrer_vue` acceptait `''` et `'x'`, et
+   * créait la ligne. Le refus existait — mais dans l'APPELANT, `vue.ts`, qui
+   * renvoie « ignorée » quand l'adresse ou l'agent manque.
+   *
+   * C'est L-029 littéralement : la phrase juste était « ce serait faussé si
+   * quelqu'un appelait cette fonction d'ailleurs », et rien dans la signature ne
+   * l'aurait appris au prochain appelant.
+   *
+   * La forme, pas la présence : `'x'` n'est pas vide et franchissait donc toute
+   * validation de présence. Valider la présence ne dit rien de la substitution.
+   */
+  test("des empreintes vides sont refusées", async () => {
+    expect(await enregistrer(jeton, "", ""), "une vue sans empreinte a été comptée").toBe(false);
+  });
+
+  test("des empreintes hors format sont refusées", async () => {
+    expect(await enregistrer(jeton, "x", "y"), "une vue à l'empreinte inventée a été comptée").toBe(
+      false,
+    );
+    // Bon alphabet, mauvaise longueur — le cas qu'une simple vérification de
+    // non-vacuité laisserait passer sans rien dire.
+    expect(await enregistrer(jeton, "a1a1a1", "c3c3c3"), "une empreinte tronquée passe").toBe(false);
+  });
+
+  test("contre-test positif : une empreinte AU FORMAT est bien acceptée", async () => {
+    // Une suite où tout est refusé passe à 100 % sans rien prouver. Sans ce
+    // contrôle, une expression régulière qui refuserait TOUT serait verte.
+    const inedite = "d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4";
+    expect(await enregistrer(jeton, inedite, AGENT), "une empreinte légitime est refusée").toBe(
+      true,
+    );
+  });
+});
+
 describe("Qui peut écrire, qui peut lire", () => {
   test("`anon` ne peut ni exécuter la fonction ni toucher la table", async () => {
     const anonyme = clientAnonyme();
 
     const appel = await anonyme.rpc("enregistrer_vue", {
       p_jeton: jeton,
-      p_ip_hash: "anon-ip",
-      p_ua_hash: "anon-agent",
+      p_ip_hash: IP_A,
+      p_ua_hash: AGENT,
       p_pays: "",
       p_profil: "",
     });

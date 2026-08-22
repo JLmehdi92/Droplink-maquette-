@@ -1601,6 +1601,46 @@ const SQL = {
     },
   },
 
+  /**
+   * HORS du cas motivant : l empreinte de vue redevient n importe quoi.
+   *
+   * Rien ne change sur le suivi, sur les droits, ni sur l isolation. Seule la
+   * verification de FORME disparait de `enregistrer_vue`. La fonction accepte
+   * alors `''` et `'x'` — mesure avant correction — et la cle de deduplication
+   * d une METRIQUE DE VERDICT repose dessus : soit tous les visiteurs d un jour
+   * fusionnent en une ligne, soit ils se multiplient sans borne.
+   *
+   * Le refus existe toujours dans l appelant, `vue.ts`. C est precisement ce qui
+   * rendait le defaut invisible : la protection tenait a ce qu un seul chemin de
+   * code pense a la poser.
+   */
+  "vue-empreinte-non-verifiee": {
+    casser: `create or replace function public.enregistrer_vue(
+      p_jeton text, p_ip_hash text, p_ua_hash text, p_pays text, p_profil text
+    ) returns boolean language plpgsql security definer set search_path = '' as $fals$
+    declare v_order uuid; v_proprietaire uuid; v_insere uuid;
+    begin
+      select o.id, p.id into v_order, v_proprietaire
+      from public.orders o
+      join public.shops s on s.id = o.shop_id
+      join public.profiles p on p.id = s.owner_id
+      where o.public_token = p_jeton and p.status = 'active';
+      if v_order is null then return false; end if;
+      if nullif(p_profil, '') is not null and nullif(p_profil, '')::uuid = v_proprietaire then
+        return false;
+      end if;
+      insert into public.link_views (order_id, ip_hash, user_agent_hash, country)
+      values (v_order, p_ip_hash, p_ua_hash, nullif(p_pays, ''))
+      on conflict (order_id, ip_hash, user_agent_hash, viewed_on) do nothing
+      returning id into v_insere;
+      return v_insere is not null;
+    end; $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "076_une_vue_exige_une_empreinte_reelle.sql",
+      depuis: "create or replace function public.enregistrer_vue",
+    },
+  },
+
 };
 
 const [, , action, cible] = process.argv;

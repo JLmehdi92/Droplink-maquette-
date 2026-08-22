@@ -14,7 +14,7 @@
 // `pnpm build`, avant de clore un lot.
 import { spawn, execSync } from "node:child_process";
 import { createServer } from "node:net";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -88,6 +88,71 @@ function visiteur(n) {
 // bonne cle » — pas le secret lui-meme.
 const SECRET_CRON = "fumee-cron-secret-0123456789";
 const CLE_SUIVI = "fumee-cle-suivi-abcdef0123456789";
+
+/*
+ * LE BUILD DOIT CORRESPONDRE AU CODE SOUS TEST — verifie AVANT de demarrer.
+ *
+ * `pnpm start` sert le contenu de `.next`, pas les sources. Une sonde de fumee
+ * lancee sans rebuild interroge donc le passage precedent, et le fait
+ * SILENCIEUSEMENT : le serveur demarre, repond 200, et tous les controles
+ * passent — sur un produit qui n est plus celui qu on a ecrit.
+ *
+ * OBSERVE SUR CE PROJET, a l instant meme ou l on falsifiait une garde : le code
+ * casse, la fumee VERTE. C est exactement L-032 — « il repond » est la propriete
+ * que tous les residus possedent — et les suites RLS s en protegeaient depuis
+ * longtemps, alors que la sonde qui interroge le produit REEL ne s en protegeait
+ * pas. La verification qui en avait le plus besoin etait la seule a ne pas
+ * l avoir.
+ *
+ * ON REFUSE DE DEMARRER plutot que d avertir : un avertissement dans un journal
+ * de cent lignes est un avertissement que personne ne lit, et le cout d une
+ * fausse assurance est ici maximal.
+ */
+function dateModifLaPlusRecente(dossiers) {
+  let plusRecente = 0;
+  const parcourir = (chemin) => {
+    for (const entree of readdirSync(chemin, { withFileTypes: true })) {
+      const complet = join(chemin, entree.name);
+      if (entree.isDirectory()) {
+        parcourir(complet);
+      } else if (/\.(ts|tsx|mjs|json|css)$/.test(entree.name)) {
+        plusRecente = Math.max(plusRecente, statSync(complet).mtimeMs);
+      }
+    }
+  };
+  for (const d of dossiers) {
+    if (!existsSync(d)) continue;
+    // Un fichier isole — `next.config.ts` — n est pas un dossier a parcourir.
+    if (statSync(d).isDirectory()) parcourir(d);
+    else plusRecente = Math.max(plusRecente, statSync(d).mtimeMs);
+  }
+  return plusRecente;
+}
+
+const manifeste = join(racine, ".next", "build-manifest.json");
+if (!existsSync(manifeste)) {
+  console.error(
+    "ECHEC .next/build-manifest.json absent : il n y a rien a servir. Lancer `pnpm build`.",
+  );
+  process.exit(1);
+}
+
+const dateBuild = statSync(manifeste).mtimeMs;
+const dateSource = dateModifLaPlusRecente([
+  join(racine, "src"),
+  join(racine, "messages"),
+  join(racine, "next.config.ts"),
+]);
+
+if (dateBuild < dateSource) {
+  console.error(
+    `ECHEC le build (${new Date(dateBuild).toISOString()}) est ANTERIEUR a la source ` +
+      `la plus recente (${new Date(dateSource).toISOString()}).`,
+  );
+  console.error("      La sonde interrogerait le passage PRECEDENT, et tout serait vert.");
+  console.error("      Lancer `pnpm build` avant `pnpm fumee`.");
+  process.exit(1);
+}
 
 const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   cwd: racine,
@@ -562,10 +627,41 @@ try {
           .select("id", { count: "exact", head: true })
           .eq("order_id", commandeFumee);
 
+        // MEME VISITEUR, AGENT LEGEREMENT DIFFERENT : toujours une seule vue.
+        //
+        // MESURE AVANT CORRECTION, en base : cinq cents vues sur une seule
+        // commande depuis une seule adresse, en variant l agent. La chaine
+        // complete est presque unique par machine, et la cle de deduplication
+        // reposait dessus — donc une mise a jour de navigateur suffisait a
+        // recompter un visiteur, sans que personne triche.
+        //
+        // Les deux agents ci-dessous ne different QUE par la version. Ce
+        // controle passe par le produit reel : il etablit que la reduction en
+        // classe est bien CABLEE dans le chemin servi, pas seulement qu une
+        // fonction sait la calculer.
+        const CHROME = (v) =>
+          `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${v}.0.0.0 Safari/537.36`;
+        await fetch(`${base}/p/${jetonFumee}/vue`, {
+          method: "POST",
+          headers: { ...enTetes, "user-agent": CHROME(120) },
+        });
+        await fetch(`${base}/p/${jetonFumee}/vue`, {
+          method: "POST",
+          headers: { ...enTetes, "user-agent": CHROME(131) },
+        });
+        const { count: apresVersions } = await service
+          .from("link_views")
+          .select("id", { count: "exact", head: true })
+          .eq("order_id", commandeFumee);
+
         controles.push(
           [balise.status === 204, "la balise de consultation repond 204"],
           [apres === 1, `une vue enregistree (compte : ${apres})`],
           [apresDeux === 1, `la seconde consultation du jour ne compte pas (compte : ${apresDeux})`],
+          [
+            apresVersions === 2,
+            `deux versions du meme navigateur ne comptent qu une fois (compte : ${apresVersions}, attendu 2)`,
+          ],
         );
 
         // L ARBITRAGE QC, de bout en bout : la seule ecriture publique du
