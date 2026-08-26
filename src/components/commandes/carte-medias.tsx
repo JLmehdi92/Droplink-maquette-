@@ -32,7 +32,7 @@ import {
 import { apercuDepuisVideo, vignetteDepuisImage } from "@/lib/medias/vignette";
 
 /**
- * La carte des médias, portée sur `droplink_cr_er_un_post_client` : zone de
+ * La carte des médias, porté sur le canevas Claude Design : zone de
  * dépôt pleine largeur, grille en dessous, compteur « n/N » dans l'en-tête.
  *
  * RIEN N'EST AFFICHÉ QUE LA BASE N'AIT ENREGISTRÉ. Une vignette apparaît quand

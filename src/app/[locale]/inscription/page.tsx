@@ -7,7 +7,7 @@ import { TraductionsClient } from "@/components/traductions-client";
 import { routing } from "@/i18n/routing";
 
 /**
- * Inscription, portée sur la maquette `droplink_cr_ation_de_compte_inscription`.
+ * Inscription, porté sur le canevas Claude Design.
  *
  * STRUCTURE REPRISE : deux volets, formulaire à gauche
  * (`w-full lg:w-1/2 flex flex-col justify-center px-margin-mobile lg:px-[10%]

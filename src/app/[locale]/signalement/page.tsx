@@ -24,9 +24,8 @@ export async function generateMetadata({
 }
 
 /**
- * Page de signalement de contenu, portée sur la maquette
- * `droplink_signaler_un_probl_me_final_harmonization` : grille de 12 colonnes,
- * cartes bento de contexte sur 4 colonnes, formulaire sur 8.
+ * Page de signalement de contenu, portée sur le canevas Claude Design : grille
+ * de 12 colonnes, cartes de contexte sur 4 colonnes, formulaire sur 8.
  *
  * Elle N'EXISTE PAS tant qu'aucune adresse de contact n'est configurée. Ce n'est
  * pas une dégradation, c'est le comportement voulu : publier une procédure de

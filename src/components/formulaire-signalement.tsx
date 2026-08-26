@@ -5,10 +5,9 @@ import { useTranslations } from "next-intl";
 import { Icone } from "./icone";
 
 /**
- * Formulaire de signalement, porté sur la maquette
- * `droplink_signaler_un_probl_me_final_harmonization`.
+ * Formulaire de signalement, porté sur le canevas Claude Design.
  *
- * ÉCART ASSUMÉ, ET LA RAISON COMPTE : la maquette montre un formulaire qui
+ * ÉCART ASSUMÉ, ET LA RAISON COMPTE : la planche montre un formulaire qui
  * s'envoie tout seul. Nous n'avons aucun point de réception — pas de route, pas
  * de table, pas d'envoi vérifié. Publier le même formulaire branché sur rien
  * produirait la pire défaillance possible pour cette page précise : un

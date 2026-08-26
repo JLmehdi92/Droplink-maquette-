@@ -34,7 +34,6 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
-      "stitch_droplink_qc_tracking_portal/**",
       "scripts/**",
     ],
   },

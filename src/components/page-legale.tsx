@@ -24,11 +24,9 @@ export interface SectionLegale {
 const DERNIERE_MAJ = new Date("2026-08-20T00:00:00Z");
 
 /**
- * Gabarit commun aux pages légales, porté sur les maquettes
- * `droplink_cgu_final_harmonization` et
- * `droplink_politique_de_confidentialit_final_harmonization`.
+ * Gabarit commun aux pages légales, porté sur le canevas Claude Design.
  *
- * DEUX MISES EN PAGE, parce que les deux maquettes en montrent deux :
+ * DEUX MISES EN PAGE, parce que les deux planches en montrent deux :
  *
  * - `sommaire` (CGU) : grille de 12 colonnes, sommaire collant sur 3 colonnes à
  *   partir de `md`, contenu sur 9, cartes de verre en `rounded-xl p-8`.

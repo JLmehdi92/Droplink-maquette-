@@ -28,7 +28,7 @@ export async function generateMetadata({
 const CARTE = "rounded-xl border border-outline-variant bg-surface-container-lowest p-4";
 
 /**
- * LES ANALYSES, portées sur `droplink_analyses_rapports_qc`.
+ * LES ANALYSES, porté sur le canevas Claude Design.
  *
  * SON TITRE EST ABANDONNÉ. La maquette annonce un « taux de conformité global »
  * calculé sur des articles inspectés : personne n'inspecte de contrôle qualité

@@ -13,7 +13,7 @@ import { ACCENT_DEFAUT, resoudreAccent } from "@/lib/design/contraste";
 import { Icone } from "@/components/icone";
 
 /**
- * Onboarding, porté sur la maquette `droplink_param_tres_marque_blanche`.
+ * Onboarding, porté sur le canevas Claude Design.
  *
  * POURQUOI CETTE MAQUETTE-LÀ. L'onboarding n'a pas d'écran dédié dans le zip,
  * mais celui des réglages de marque demande EXACTEMENT les mêmes choses : un

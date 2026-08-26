@@ -617,9 +617,12 @@ image ferait payer au vendeur une limite qui est la nôtre.
 <a id="7"></a>
 ## 7. LES ÉCRANS, UN PAR UN
 
-Les maquettes Google Stitch sont dans le dossier
-`stitch_droplink_qc_tracking_portal/`. **On les utilise toutes**, sauf indication
-contraire ci-dessous.
+> ⚠️ **LE DOSSIER STITCH A ÉTÉ SUPPRIMÉ DU DÉPÔT le 26/08/2026**, une fois les
+> 20 routes portées sur le canevas Claude Design. Les noms de maquettes cités
+> dans les tableaux ci-dessous ne renvoient plus à aucun fichier : ils valent
+> comme **inventaire historique des écrans**, et les notes qui les accompagnent
+> valent comme **corrections de vocabulaire déjà appliquées**. La source du
+> design est le canevas — voir §8.
 
 > ⚠️ **Ne pas lire** `droplink_project.md`, `droplink_claude.md` ni
 > `droplink_guide_spec_kit_pour_claude_code.md` du zip : ils décrivent un produit

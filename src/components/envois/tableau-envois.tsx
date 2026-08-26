@@ -5,8 +5,7 @@ import type { CompteursEnvois, Etat, PageEnvois, ParametresEnvois } from "@/lib/
 import { ETATS, TRIS } from "@/lib/envois/liste";
 
 /**
- * L'ÉCRAN DES ENVOIS, porté sur `droplink_gestion_d_inventaire_envois` et
- * `droplink_tableau_de_bord_visibilit_qc`.
+ * L'ÉCRAN DES ENVOIS, portés sur le canevas Claude Design.
  *
  * LA GÉOMÉTRIE DES DEUX MAQUETTES EST REPRISE, leur vocabulaire non. Elles
  * parlent de fournisseurs, d'entrepôts, de palettes, de lots et de tolérances —

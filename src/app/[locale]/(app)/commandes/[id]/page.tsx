@@ -28,7 +28,7 @@ export async function generateMetadata({
 }
 
 /**
- * L'éditeur d'une commande, porté sur `droplink_cr_er_un_post_client`.
+ * L'éditeur d'une commande, porté sur le canevas Claude Design.
  *
  * TROIS CORRECTIONS SUR LA MAQUETTE, toutes portées par une décision :
  *

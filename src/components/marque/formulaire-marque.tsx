@@ -14,7 +14,7 @@ import { resoudreAccent } from "@/lib/design/contraste";
 import { Icone } from "@/components/icone";
 
 /**
- * RÉGLAGES DE MARQUE, portés sur `droplink_param_tres_marque_blanche`.
+ * RÉGLAGES DE MARQUE, porté sur le canevas Claude Design.
  *
  * La géométrie de la maquette est reprise telle quelle : grille bento, cartes
  * `rounded-xl shadow-sm p-6`, zone de dépôt en pointillés, saisie hexadécimale

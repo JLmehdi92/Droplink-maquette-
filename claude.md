@@ -58,8 +58,8 @@ Next.js 15 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 
 ## Assets design
 
-> ⚠️ **STITCH EST ABANDONNÉ — décision de Wassim, 26/08/2026.**
-> Ce fichier a longtemps dit « on implémente TOUS les écrans Stitch, c'est une décision produit, pas une suggestion ». **Cette phrase est morte.** Le dossier `stitch_droplink_qc_tracking_portal/` n'est plus la source du design : il ne reste utile que pour l'INVENTAIRE DES ÉCRANS et le vocabulaire déjà corrigé.
+> ⚠️ **STITCH EST SUPPRIMÉ — décision de Wassim, 26/08/2026.**
+> Ce fichier a longtemps dit « on implémente TOUS les écrans Stitch, c'est une décision produit, pas une suggestion ». **Cette phrase est morte, et le dossier avec elle** : `stitch_droplink_qc_tracking_portal/` a été effacé du dépôt le 26/08/2026, une fois les 20 routes portées sur le canevas. Si un commentaire du code cite encore une maquette Stitch, il parle d'une décision PASSÉE, jamais d'une référence à consulter.
 
 **La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — 40 planches, chaque écran en bureau ET téléphone, plus une page d'états.
 
