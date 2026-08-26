@@ -170,7 +170,28 @@ export function emettreApres(
   contexte: ContexteEmission,
   proprietes: ProprietesEvenement = {},
 ): void {
-  after(async () => {
-    await emettre(nom, contexte, proprietes);
-  });
+  try {
+    after(async () => {
+      await emettre(nom, contexte, proprietes);
+    });
+  } catch {
+    /*
+     * HORS CONTEXTE DE REQUÊTE, ON ÉMET TOUT DE SUITE.
+     *
+     * `after()` LÈVE quand il n'y a pas de requête en cours — suites de tests,
+     * scripts, tâches appelées directement. Laisser cette exception remonter
+     * ferait échouer la MUTATION qu'on instrumente, ce qui est exactement
+     * l'inverse de la règle « une panne d'analytics ne doit pas annuler la
+     * mutation d'un vendeur ».
+     *
+     * Et il n'y a rien à différer : hors requête, il n'existe aucune réponse à
+     * rendre en premier. Le report n'a de sens que pour ne pas faire attendre
+     * quelqu'un.
+     *
+     * `void` et non `await` : cette fonction est synchrone par contrat, ses
+     * appelants ne l'attendent pas. `emettre()` ne lève jamais, donc la
+     * promesse ne peut pas se terminer par un rejet non traité.
+     */
+    void emettre(nom, contexte, proprietes);
+  }
 }

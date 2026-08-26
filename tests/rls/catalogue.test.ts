@@ -52,6 +52,15 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "parametres_admis",
+      "Inventaire FERMÉ des paramètres système et de leurs bornes. AUCUNE " +
+        "POLICY : la table n'est lue que par `ecrire_parametre`, en " +
+        "`security definer` avec vérification du rôle. Personne d'autre n'a de " +
+        "raison de la lire, et surtout personne n'a de raison de l'écrire — une " +
+        "borne modifiable par celui qu'elle borne n'est pas une borne. Elle " +
+        "change par migration, comme le reste des invariants du produit.",
+    ],
+    [
       "system_settings",
       "Paramètres système. AUCUNE POLICY : la table n'est atteignable que par " +
         "`ecrire_parametre` et `lire_parametre_entier`, toutes deux en " +
@@ -198,6 +207,17 @@ describe("Sonde B — droits d'exécution dans public", () => {
    * passer finit désactivé.
    */
   const FONCTIONS_OUVERTES_ADMISES = new Map<string, string>([
+    [
+      "cle_media_canonique",
+      "La forme canonique d'une clé d'objet, appelée depuis DEUX CONTRAINTES " +
+        "`CHECK` sur `order_media`. Une contrainte s'évalue avec les droits de " +
+        "CELUI QUI ÉCRIT : sans ce `grant`, la table devient insérable par " +
+        "personne, et le refus se présente comme une erreur de permission sur " +
+        "la fonction plutôt que comme une violation de contrainte. Elle ne lit " +
+        "aucune donnée — elle compare une chaîne à une expression rationnelle — " +
+        "donc l'ouvrir n'expose rien. `anon` n'y a pas droit : il ne fait que " +
+        "lire, et une contrainte ne s'évalue qu'à l'écriture.",
+    ],
     [
       "mon_shop_id",
       "Rend la boutique de l'APPELANT et ne prend aucun argument : il n'y a rien " +

@@ -520,6 +520,12 @@ admin_audit_log     id, admin_id, admin_email, action, resource_type, resource_i
 
 system_settings     key, value, updated_by, updated_at
 
+parametres_admis    cle, minimum, maximum, raison — (aucune policy) inventaire
+                    FERMÉ des paramètres système et de leurs bornes, lu par
+                    ecrire_parametre. Les bornes ne vivaient que dans
+                    TypeScript ; un admin appelant la RPC hors du formulaire
+                    écrivait n'importe quelle clé, hors bornes
+
 scheduler_heartbeat source, beat_at
 
 rate_limit          (aucune policy — atteignable uniquement par consommer_quota)

@@ -64,11 +64,17 @@ async function ajouterMedia(orderId: string, position: number, octets: number): 
     catalogue,
     `insert into public.order_media (order_id, type, cle, taille_octets, position)
      values ($1, 'photo', $2, $3, $4) returning id`,
-    // LA CLÉ PORTE LE PRÉFIXE RÉEL, parce que la base l'exige désormais :
-    // `medias/{shop}/{commande}/`. Une clé fictive était acceptée tant que rien
-    // ne contrôlait la valeur — et c'est exactement ce qui permettait à un
-    // vendeur de désigner l'objet d'un autre.
-    [orderId, `${await prefixeDe(orderId)}${position}.jpg`, octets, position],
+    // LA CLÉ PORTE LE PRÉFIXE RÉEL ET LA FORME RÉELLE, parce que la base exige
+    // désormais les deux : `medias/{shop}/{commande}/{uuid}.{ext}`. Seul le
+    // préfixe était vérifié jusqu'à la migration 089 ; le dernier segment
+    // pouvait être n'importe quoi, ce que le signeur refusait ensuite en
+    // silence — un média enregistré côté vendeur et invisible côté client.
+    [
+      orderId,
+      `${await prefixeDe(orderId)}aaaaaaaa-0000-4000-8000-${String(position).padStart(12, "0")}.jpg`,
+      octets,
+      position,
+    ],
   );
   const id = lignes[0]?.id;
   if (id === undefined) throw new Error("média non créé");

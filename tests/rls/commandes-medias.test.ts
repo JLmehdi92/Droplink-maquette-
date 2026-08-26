@@ -97,6 +97,17 @@ afterAll(async () => {
   await supprimerUtilisateur(bob);
 }, 60_000);
 
+/**
+ * Un UUID déterministe par position.
+ *
+ * Les jeux de plafond forgeaient `plafond-3.jpg` : une clé qu'aucun chemin du
+ * produit ne fabrique, et que la base refuse depuis la migration 089. On garde
+ * le déterminisme — utile pour relire un échec — en donnant une forme réelle.
+ */
+function uuidDeposition(n: number): string {
+  return "aaaaaaaa-0000-4000-8000-" + String(n).padStart(12, "0");
+}
+
 describe("Le dépôt de bout en bout", () => {
   test("un média déposé est enregistré avec la taille RELUE, pas l'annoncée", async () => {
     const { preparation, confirmation } = await deposer(alice, commandeAlice, PIXEL);
@@ -272,7 +283,8 @@ describe("Les plafonds tiennent EN BASE", () => {
       alice.client.from("order_media").insert({
         order_id: id,
         type,
-        cle: "medias/" + alice.shopId + "/" + id + "/plafond-" + position + ".jpg",
+        cle:
+          "medias/" + alice.shopId + "/" + id + "/" + uuidDeposition(position) + ".jpg",
         taille_octets: 1,
         position,
       });
@@ -299,7 +311,8 @@ describe("Les plafonds tiennent EN BASE", () => {
       alice.client.from("order_media").insert({
         order_id: id,
         type: "video",
-        cle: "medias/" + alice.shopId + "/" + id + "/video-" + position + ".mp4",
+        cle:
+          "medias/" + alice.shopId + "/" + id + "/" + uuidDeposition(position) + ".mp4",
         taille_octets: 1,
         position,
       });
@@ -334,7 +347,10 @@ describe("Les plafonds tiennent EN BASE", () => {
 
     const { error: erreurCle } = await alice.client
       .from("order_media")
-      .update({ cle: "medias/" + bob.shopId + "/detourne.jpg" })
+      .update({
+        cle:
+          "medias/" + bob.shopId + "/" + commandeAlice + "/aaaaaaaa-0000-4000-8000-0000000000ff.jpg",
+      })
       .eq("id", media.id);
     expect(erreurCle, "la clé a pu être réécrite").not.toBeNull();
 

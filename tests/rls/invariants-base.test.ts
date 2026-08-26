@@ -54,7 +54,16 @@ async function ajouterMedia(commande: string, position: number): Promise<string>
     catalogue,
     `insert into public.order_media (order_id, type, cle, taille_octets, position)
      values ($1, 'photo', $2, 100, $3) returning id`,
-    [commande, `${String(prefixe[0]?.p)}${position}.jpg`, position],
+    // LA CLÉ A LA FORME QUE LE PRODUIT FABRIQUE. Le préfixe vient de la base ;
+    // le dernier segment doit être un UUID depuis la migration 089, qui a
+    // descendu la forme complète en contrainte. `${position}.jpg` était accepté
+    // à l'écriture et refusé à la signature — la divergence exacte que cette
+    // migration a fermée.
+    [
+      commande,
+      `${String(prefixe[0]?.p)}aaaaaaaa-0000-4000-8000-${String(position).padStart(12, "0")}.jpg`,
+      position,
+    ],
   );
   const id = l[0]?.id;
   if (id === undefined) throw new Error("média non créé");

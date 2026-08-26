@@ -140,7 +140,16 @@ describe("Le stockage par compte est borné", () => {
       refus(
         `insert into public.order_media (order_id, type, cle, taille_octets, position)
          values ($1, 'photo', $2, $3, $4)`,
-        [commande, `${String(prefixe[0]?.p)}${position}.jpg`, taille, position],
+        // Le dernier segment est un UUID : c'est la forme que `cleMedia()`
+        // fabrique, et celle que la migration 089 exige en base. Un
+        // `${position}.jpg` serait refusé pour une raison SANS RAPPORT avec le
+        // plafond — et ce test certifierait alors une garde qui n'a pas joué.
+        [
+          commande,
+          `${String(prefixe[0]?.p)}aaaaaaaa-0000-4000-8000-${String(position).padStart(12, "0")}.jpg`,
+          taille,
+          position,
+        ],
       );
 
     // Sous la borne : accepté. Sans ce premier dépôt, le refus suivant pourrait

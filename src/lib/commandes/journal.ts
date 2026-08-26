@@ -129,7 +129,15 @@ export function journaliserApres(
   type: TypeVendeur,
   charge: ChargeJournal = {},
 ): void {
-  after(async () => {
-    await journaliser(supabase, commandeId, type, charge);
-  });
+  try {
+    after(async () => {
+      await journaliser(supabase, commandeId, type, charge);
+    });
+  } catch {
+    // Même raison que pour l'instrumentation : `after()` lève hors requête, et
+    // laisser cette exception remonter annulerait la mutation que la trace
+    // accompagne — le contraire exact de ce que ce module promet. Hors requête,
+    // il n'y a de toute façon aucune réponse à rendre en premier.
+    void journaliser(supabase, commandeId, type, charge);
+  }
 }

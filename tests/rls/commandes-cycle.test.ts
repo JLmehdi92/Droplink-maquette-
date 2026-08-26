@@ -131,7 +131,8 @@ describe("La duplication", () => {
     await alice.client.from("order_media").insert({
       order_id: source.id,
       type: "photo",
-      cle: "medias/" + alice.shopId + "/" + source.id + "/source.jpg",
+      cle:
+        "medias/" + alice.shopId + "/" + source.id + "/aaaaaaaa-0000-4000-8000-000000000001.jpg",
       taille_octets: 42,
       position: 0,
     });

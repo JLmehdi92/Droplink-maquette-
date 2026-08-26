@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import { cleMedia } from "../../src/lib/storage/cles";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
@@ -48,13 +50,40 @@ beforeAll(async () => {
   commande = (data as { id: string }).id;
   jeton = (data as { public_token: string }).public_token;
 
-  await alice.client.from("order_media").insert({
+  /*
+   * LA CLÉ EST PRODUITE PAR LE PRODUIT, jamais écrite à la main.
+   *
+   * Ce jeu employait `medias/{shop}/{commande}/pub.jpg` — un identifiant de
+   * média qui n'est pas un UUID. La base l'acceptait (son déclencheur ne
+   * vérifiait que le PRÉFIXE) et le signeur le refusait (il exige la forme
+   * complète depuis la correction de la traversée de chemin). Un média
+   * enregistré, compté dans les plafonds, affiché au vendeur — et invisible
+   * chez son client, sans un mot.
+   *
+   * C'est ce jeu de test qui a révélé la divergence ; la migration 089 y a mis
+   * fin en descendant la forme complète en base. Faire produire la clé par
+   * `cleMedia()` garantit que le jeu décrit ce que le produit fabrique
+   * réellement, et non ce qu'on imagine qu'il fabrique.
+   */
+  const idMedia = randomUUID();
+  // L'ÉCHEC DU JEU DOIT ÊTRE BRUYANT. Sans cette assertion, une insertion
+  // refusée laissait la suite s'exécuter sur une commande SANS média : des
+  // tests passaient en n'inspectant rien, et l'échec ne se voyait que sur un
+  // « expected 0 to be greater than 0 » trois écrans plus bas.
+  const { error: erreurMedia } = await alice.client.from("order_media").insert({
+    id: idMedia,
     order_id: commande,
     type: "photo",
-    cle: "medias/" + alice.shopId + "/" + commande + "/pub.jpg",
+    cle: cleMedia({
+      shopId: alice.shopId,
+      orderId: commande,
+      mediaId: idMedia,
+      typeMime: "image/jpeg",
+    }),
     taille_octets: 100,
     position: 0,
   });
+  expect(erreurMedia, `média du jeu non inséré : ${erreurMedia?.message}`).toBeNull();
 }, 90_000);
 
 afterAll(async () => {
