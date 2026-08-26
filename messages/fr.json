@@ -830,5 +830,11 @@
     },
     "traceTitre": "Tout est tracé",
     "traceTexte": "Chaque consultation de données d’un vendeur est écrite au journal."
+  },
+  "erreurs": {
+    "titre": "Cet écran n'a pas pu s'afficher",
+    "texte": "Une erreur est survenue de notre côté. Vos données ne sont pas touchées : rien n'a été enregistré ni supprimé.",
+    "reessayer": "Réessayer",
+    "reference": "Référence de l'incident : {ref}"
   }
 }

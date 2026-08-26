@@ -3,6 +3,7 @@ import { Icone } from "@/components/icone";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { estLangueSupportee } from "@/i18n/config";
+import { TraductionsClient } from "@/components/traductions-client";
 
 /**
  * ENVELOPPE DE L'ADMINISTRATION.
@@ -116,7 +117,9 @@ export default async function LayoutAdmin({
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TraductionsClient espaces={["erreurs"]}>{children}</TraductionsClient>
+        </div>
       </div>
     </div>
   );

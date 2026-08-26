@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
+import { TraductionsClient } from "@/components/traductions-client";
 
 /**
  * Enveloppe de l'espace authentifié.
@@ -138,7 +139,9 @@ export default async function LayoutApplication({
 
         {/* La marge basse laisse la place à la barre d'onglets, qui est fixe :
             sans elle, la dernière ligne de chaque écran est inatteignable. */}
-        <div className="flex min-w-0 flex-1 flex-col pb-[86px] md:pb-0">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col pb-[86px] md:pb-0">
+          <TraductionsClient espaces={["erreurs"]}>{children}</TraductionsClient>
+        </div>
       </div>
 
       <NavigationVendeur entrees={entrees} variante="bas" etiquette={t("espaceVendeur")} />

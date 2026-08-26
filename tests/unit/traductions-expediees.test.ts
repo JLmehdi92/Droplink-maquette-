@@ -86,11 +86,48 @@ function espacesExpedies(source: string): readonly string[] {
   return trouves;
 }
 
-/** Le nom du composant exporté par un fichier, tel qu'un parent l'écrirait. */
+const CONVENTIONS = ["error.tsx", "loading.tsx", "not-found.tsx", "template.tsx"] as const;
+
+function estFichierDeConvention(chemin: string): boolean {
+  const nom = chemin.split(/[\\/]/).pop() as string;
+  return (CONVENTIONS as readonly string[]).includes(nom);
+}
+
+/** Les chemins sont comparés en séparateurs POSIX : ce dépôt vit sur Windows. */
+function enPosix(chemin: string): string {
+  return chemin.split(/[\\/]/).join("/");
+}
+
+/**
+ * Les `layout.tsx` qui enveloppent un fichier, du plus proche à la racine.
+ *
+ * Next monte un fichier de convention À L'INTÉRIEUR des layouts de son segment
+ * et de ses ancêtres : c'est donc là, et nulle part ailleurs, que peut vivre le
+ * provider qui l'alimente.
+ */
+function layoutsAncetres(chemin: string): typeof TOUS {
+  const segments = enPosix(chemin).split("/");
+  const dossiers = new Set<string>();
+  for (let i = segments.length - 1; i > 0; i -= 1) {
+    dossiers.add(segments.slice(0, i).join("/") + "/layout.tsx");
+  }
+  return TOUS.filter((f) => dossiers.has(enPosix(f.chemin)));
+}
+
+/**
+ * Le nom du composant exporté par un fichier, tel qu'un parent l'écrirait.
+ *
+ * ⚠️ `default` EST ACCEPTÉ, et c'est ce qui manquait. Le motif ne reconnaissait
+ * que `export function Truc` : tous les fichiers de convention de Next
+ * s'écrivent `export default function`, donc la sonde ne trouvait AUCUN
+ * composant chez eux et sautait la vérification en silence. La falsification —
+ * retirer le provider du layout — restait verte, et le contrôle qu'on venait
+ * d'écrire pour couvrir ces fichiers ne couvrait rien du tout.
+ */
 function composantsExportes(source: string): readonly string[] {
-  return [...source.matchAll(/export\s+(?:async\s+)?function\s+([A-Z][A-Za-z0-9_]*)/g)].map(
-    (m) => m[1] as string,
-  );
+  return [
+    ...source.matchAll(/export\s+(?:default\s+)?(?:async\s+)?function\s+([A-Z][A-Za-z0-9_]*)/g),
+  ].map((m) => m[1] as string);
 }
 
 describe("tout espace réclamé par un composant client lui est expédié", () => {
@@ -117,19 +154,33 @@ describe("tout espace réclamé par un composant client lui est expédié", () =
 
         // Les fichiers qui rendent ce composant, quels qu'ils soient : on ne
         // suppose pas que c'est « la page du même dossier ».
-        const parents = TOUS.filter(
-          (f) => f.chemin !== client.chemin && new RegExp(`<${composant}\\b`).test(f.source),
-        );
+        //
+        // ⚠️ SAUF LES FICHIERS DE CONVENTION. `error.tsx` et `loading.tsx` ne
+        // sont rendus par AUCUN parent visible : c'est Next qui les invoque. Un
+        // inventaire qui remonte aux appelants les saute donc en silence — et
+        // un `error.tsx` traduit sans provider lèverait au moment précis où le
+        // produit essaie d'afficher une erreur, c'est-à-dire au pire moment.
+        // Leur provider est celui d'un `layout.tsx` ancêtre.
+        const parents = estFichierDeConvention(client.chemin)
+          ? layoutsAncetres(client.chemin)
+          : TOUS.filter(
+              (f) => f.chemin !== client.chemin && new RegExp(`<${composant}\\b`).test(f.source),
+            );
 
         if (parents.length === 0) continue;
 
         for (const espace of espaces) {
-          const couvert = parents.every((parent) => {
+          const verifierTous = !estFichierDeConvention(client.chemin);
+          const predicat = (parent: (typeof TOUS)[number]): boolean => {
             const expedies = espacesExpedies(parent.source);
             // Expédier `admin` couvre `admin.suspension` : le provider rend
             // l'arbre entier. L'inverse est faux.
             return expedies.some((e) => espace === e || espace.startsWith(e + "."));
-          });
+          };
+          // Pour un composant ordinaire, TOUS ses parents doivent l'alimenter.
+          // Pour un fichier de convention, UN SEUL layout ancêtre suffit : le
+          // provider posé haut couvre tout ce qui est monté dessous.
+          const couvert = verifierTous ? parents.every(predicat) : parents.some(predicat);
           if (!couvert && !DISPENSES.has(client.nom)) {
             orphelins.push(
               `${client.nom} → « ${espace} » (rendu par ${parents.map((p) => p.nom).join(", ")})`,

@@ -830,5 +830,11 @@
     },
     "traceTitre": "Everything is logged",
     "traceTexte": "Every read of a seller’s data is written to the audit log."
+  },
+  "erreurs": {
+    "titre": "This screen could not be displayed",
+    "texte": "Something went wrong on our side. Your data is untouched: nothing was saved or deleted.",
+    "reessayer": "Try again",
+    "reference": "Incident reference: {ref}"
   }
 }

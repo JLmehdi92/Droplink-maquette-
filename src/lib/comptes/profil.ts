@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
@@ -44,8 +45,32 @@ export type ProfilVendeur = {
  * session, ou une session dont le profil a disparu. Les deux se traitent de la
  * même façon — renvoyer vers la connexion — et les distinguer n'apporterait
  * qu'une occasion de se tromper.
+ *
+ * ⚠️ MÉMOÏSÉE PAR REQUÊTE — `cache()` de React, pas un cache de données.
+ *
+ * DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 26/08/2026. Le commentaire de la requête
+ * ci-dessous dit « une seule requête, jointure comprise : deux allers-retours
+ * par page authentifiée doubleraient la latence de l'écran le plus utilisé du
+ * produit ». C'est exactement ce qui se passait — non pas dans la requête, mais
+ * autour d'elle : le layout de l'espace authentifié appelle cette fonction, et
+ * CHAQUE page l'appelle à son tour. Deux fois la même lecture `profiles ⨝
+ * shops`, en série, à chaque navigation.
+ *
+ * C'était la seule chose qui ralentissait TOUS les boutons de la même façon,
+ * indépendamment de la volumétrie — donc la première à corriger sur un « c'est
+ * lent quand je clique ».
+ *
+ * CE QUE `cache()` FAIT, ET SURTOUT CE QU'IL NE FAIT PAS : il déduplique les
+ * appels À L'INTÉRIEUR D'UNE MÊME REQUÊTE. Rien n'est conservé d'une requête à
+ * l'autre, rien n'est partagé entre utilisateurs, et la RLS reste évaluée
+ * puisque la requête part réellement — simplement une fois au lieu de deux. Un
+ * cache de données ici serait un défaut de sécurité : le profil porte le statut
+ * du compte, et un compte suspendu doit cesser d'être servi immédiatement.
+ *
+ * Le motif est déjà employé pour `lireCommandePublique` et `exigerAdmin` ; il
+ * manquait ici, où il paie le plus.
  */
-export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
+export const lireProfilVendeur = cache(async (): Promise<ProfilVendeur | null> => {
   const supabase = await creerClientServeur();
 
   // Une seule requête, jointure comprise : deux allers-retours par page
@@ -98,7 +123,7 @@ export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
       whatsapp: s.whatsapp_url,
     },
   };
-}
+});
 
 /**
  * Vrai quand l'onboarding reste à faire.
