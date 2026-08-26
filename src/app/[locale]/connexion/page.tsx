@@ -8,24 +8,17 @@ import { PanneauAcces } from "@/components/panneau-acces";
 import { routing } from "@/i18n/routing";
 
 /**
- * Connexion, portée sur la maquette `droplink_connexion_acc_s_portail`.
+ * CONNEXION — deux volets dans la carte-page du canevas.
  *
- * STRUCTURE REPRISE : mise en page en deux volets, formulaire à gauche dans une
- * carte de verre (`bg-white/70 backdrop-blur-[20px] rounded-xl border
- * border-white/50 shadow-lg p-8 md:p-12`), volet de contexte à droite masqué
- * sous `lg`. Les classes sont celles de la maquette.
+ * PAS DE CHAMP MOT DE PASSE, ni de « mot de passe oublié » : il n'existe pas de
+ * mot de passe dans ce produit. Le lien envoyé par email EST le mode d'accès,
+ * et c'est la SEULE porte d'un fournisseur en Chine, à qui Google est
+ * inaccessible. Tout ce qui pourrait le faire passer pour secondaire est donc
+ * écarté : il est en premier, en grand, et le bouton Google vient après.
  *
- * TROIS ÉCARTS, tous imposés par le produit :
- *
- * 1. PAS DE CHAMP MOT DE PASSE, ni de « Forgot password ». Il n'y a pas de mot
- *    de passe dans ce produit : le lien envoyé par email EST le mode d'accès.
- * 2. PAS DE BOUTON GOOGLE NI « ENTERPRISE SSO ». Le SSO d'entreprise n'est pas
- *    notre produit, et la connexion Google n'est PAS implémentée à ce jour —
- *    afficher un bouton qui ne fait rien est pire que ne pas l'afficher.
- * 3. LES CHIFFRES DU VOLET DROIT. « 99.9% Uptime » et « SOC2 Compliant » sont
- *    des affirmations que rien n'étaye. Une certification qu'on ne détient pas
- *    est un mensonge, pas un élément de décor. La géométrie du bloc est
- *    conservée, avec deux chiffres vrais.
+ * LA CARTE DE VERRE A DISPARU avec le reste du flou. Le formulaire n'est plus
+ * dans une carte du tout : à cette largeur, un cadre autour d'un seul champ
+ * n'encadre rien.
  */
 
 export function generateStaticParams(): Array<{ locale: string }> {
@@ -81,87 +74,89 @@ export default async function Connexion({
   const motif = motifConnu(typeof brut === "string" ? brut : undefined);
 
   return (
-    <main id="contenu" className="flex w-full flex-grow">
-      <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col justify-center px-margin-mobile py-12 md:px-margin-desktop lg:w-1/2 lg:py-24">
-        <div className="carte relative w-full overflow-hidden rounded-xl p-8 shadow-lg md:p-12">
-          {/* Le liseré intérieur de la maquette, qui simule le bord du verre. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-xl border border-white/40"
-          />
+    <div className="min-h-dvh bg-surface-container-lowest md:bg-canvas md:p-7">
+      <main
+        id="contenu"
+        className="mx-auto grid w-full max-w-[1384px] overflow-hidden bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-xl lg:grid-cols-2"
+      >
+        <div className="flex flex-col px-margin-mobile py-8 md:px-[76px] md:py-10">
+          <Link
+            href={`/${locale}`}
+            className="font-headline-md text-[18px] font-extrabold tracking-[-0.02em] text-on-surface"
+          >
+            DropLink
+          </Link>
 
-          <div className="mb-10 flex flex-col items-start gap-4">
-            <Link
-              href={`/${locale}`}
-              className="mb-6 font-headline-lg text-headline-lg-mobile font-bold tracking-[-0.02em] text-on-surface"
-            >
-              DropLink
-            </Link>
-            <h1 className="mb-2 font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
+          <div className="flex max-w-[400px] flex-grow flex-col justify-center py-10">
+            <h1 className="font-headline-xl text-[30px] leading-[36px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
               {t("titre")}
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">{t("sousTitre")}</p>
+            <p className="mt-2.5 font-body-md text-[15px] leading-6 text-on-surface-variant">
+              {t("sousTitre")}
+            </p>
+
+            {/* CE QUI A ÉCHOUÉ EST DIT. La route de retour redirige ici avec son
+                motif depuis le premier jour, et rien ne l'affichait : un lien
+                expiré ramenait l'utilisateur sur un écran identique à celui
+                qu'il venait de quitter, sans un mot. Il recommence, échoue
+                pareil, et conclut que le produit ne marche pas.
+
+                `role="alert"` et non un simple paragraphe : le message apparaît
+                après une navigation, donc hors du champ de quelqu'un qui
+                emploie un lecteur d'écran. */}
+            {motif === null ? null : (
+              <p
+                role="alert"
+                className="mt-6 rounded-md border border-error bg-error-container p-4 font-body-sm text-body-sm text-on-error-container"
+              >
+                {t(`motif.${motif}`)}
+              </p>
+            )}
+
+            <div className="mt-[34px]">
+              <TraductionsClient espaces={["connexion"]}>
+                <FormulaireConnexion locale={locale} />
+              </TraductionsClient>
+            </div>
+
+            <div className="my-[26px] flex items-center gap-3.5">
+              <span className="h-px flex-grow bg-outline-variant" />
+              <span className="font-body-sm text-[12px] text-on-surface-variant">{t("ou")}</span>
+              <span className="h-px flex-grow bg-outline-variant" />
+            </div>
+
+            {/* APRÈS le lien magique, et non avant : c'est la seule porte du
+                fournisseur en Chine, Google lui étant inaccessible. Le placer en
+                tête ferait passer pour secondaire le chemin qui, pour toute une
+                part des utilisateurs, est le seul qui existe. */}
+            <BoutonGoogle locale={locale} />
+
+            <p className="mt-[30px] font-body-md text-[13px] leading-[21px] text-on-surface-variant">
+              {t("pasDeCompteTitre")}{" "}
+              <Link
+                href={`/${locale}/inscription`}
+                className="font-semibold text-secondary hover:underline"
+              >
+                {t("lienCreerCompte")}
+              </Link>
+            </p>
           </div>
 
-          {/* CE QUI A ÉCHOUÉ EST DIT. La route de retour redirige ici avec son
-              motif depuis le premier jour, et rien ne l'affichait : un lien
-              expiré ramenait l'utilisateur sur un écran identique à celui qu'il
-              venait de quitter, sans un mot. Il recommence, échoue pareil, et
-              conclut que le produit ne marche pas.
-
-              `role="alert"` et non un simple paragraphe : le message apparaît
-              après une navigation, donc hors du champ de l'utilisateur qui
-              emploie un lecteur d'écran. */}
-          {motif === null ? null : (
-            <p
-              role="alert"
-              className="mb-6 rounded-lg border border-error bg-error-container p-4 font-body-sm text-body-sm text-on-error-container"
-            >
-              {t(`motif.${motif}`)}
-            </p>
-          )}
-
-          <TraductionsClient espaces={["connexion"]}>
-            <FormulaireConnexion locale={locale} />
-          </TraductionsClient>
-
-          {/* APRÈS le lien magique, et non avant : c'est la seule porte du
-              fournisseur en Chine, Google lui étant inaccessible. Le placer en
-              tête ferait passer pour secondaire le chemin qui, pour toute une
-              part des utilisateurs, est le seul qui existe. */}
-          <BoutonGoogle locale={locale} />
-
-          <p className="mt-6 text-center font-body-md text-body-md text-on-surface-variant">
-            {t("pasDeCompteTitre")}{" "}
-            <Link
-              href={`/${locale}/inscription`}
-              className="font-label-md text-[var(--accent-texte)] hover:underline"
-            >
-              {t("lienCreerCompte")}
-            </Link>
-          </p>
-
-          <p className="mt-8 text-center font-body-sm text-body-sm text-on-surface-variant">
+          <p className="font-body-sm text-[12px] text-on-surface-variant">
             {t("cgvAvant")}{" "}
-            <Link
-              href={`/${locale}/conditions`}
-              className="text-[var(--accent-texte)] hover:underline"
-            >
+            <Link href={`/${locale}/conditions`} className="text-secondary hover:underline">
               {t("cgvConditions")}
             </Link>{" "}
             {t("cgvEt")}{" "}
-            <Link
-              href={`/${locale}/confidentialite`}
-              className="text-[var(--accent-texte)] hover:underline"
-            >
+            <Link href={`/${locale}/confidentialite`} className="text-secondary hover:underline">
               {t("cgvConfidentialite")}
             </Link>
             .
           </p>
         </div>
-      </div>
 
-      <PanneauAcces />
-    </main>
+        <PanneauAcces />
+      </main>
+    </div>
   );
 }

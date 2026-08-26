@@ -35,7 +35,8 @@ const DERNIERE_MAJ = new Date("2026-08-20T00:00:00Z");
  * - `compact` (confidentialité) : colonne de 3xl centrée, grille de 2 colonnes,
  *   cartes opaques `bg-surface-container-lowest` bordées, en `rounded-lg p-6`.
  *
- * Le `carte` est CONSERVÉ : le brief ne l'interdit que sur `/p/[token]`.
+ * LE FLOU A DISPARU DU PRODUIT ENTIER avec le canevas : les cartes sont
+ * opaques, bordées d'un filet, ici comme ailleurs.
  *
  * L'avertissement « document provisoire » est affiché tant que le texte n'a pas
  * été relu par un avocat. Il n'est pas décoratif : un document juridique
@@ -85,7 +86,7 @@ export async function PageLegale({
   const carte = (s: SectionLegale) => {
     const cadre =
       variante === "sommaire"
-        ? "carte rounded-xl p-8 shadow-sm"
+        ? "rounded-lg border border-outline-variant bg-surface-container-lowest p-8"
         : "rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm";
 
     return (
@@ -135,7 +136,7 @@ export async function PageLegale({
           {variante === "sommaire" ? (
             <div className="relative grid grid-cols-1 items-start gap-8 md:grid-cols-12">
               <aside className="sticky top-24 hidden md:col-span-3 md:block">
-                <nav aria-label={t("sommaireTitre")} className="carte rounded-xl p-6 shadow-sm">
+                <nav aria-label={t("sommaireTitre")} className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6">
                   <ul className="flex flex-col gap-4">
                     {sections.map((s) => (
                       <li key={s.id}>

@@ -22,27 +22,44 @@
   "landing": {
     "metaTitre": "DropLink — one page per order, under your brand",
     "metaDescription": "Bring photos, videos and parcel tracking together on a page in your colours. Your customers see everything themselves, with no account and no app.",
-    "heroTitre": "One page per order. Under your brand.",
-    "heroSousTitre": "Photos, videos and parcel tracking on a single page. You send the link; your customers see everything themselves — no account, no app.",
-    "ctaPrincipal": "Create a page",
+    "heroTitre": "One link for the whole order",
+    "heroSousTitre": "Drop the photos, paste the tracking, send the link. Your customer sees everything on their own, with no account to create.",
+    "ctaPrincipal": "Create my first order",
     "ctaSecondaire": "I already have an account",
     "gratuitPourLInstant": "Free during the launch phase. No card required.",
-    "pourQui": "For suppliers, resellers, brands and workshops — from your first order to several hundred a week.",
     "fonctionnalites": {
       "titre": "What the page holds",
-      "mediasTitre": "Your photos and videos",
-      "mediasTexte": "Uploaded once, viewable full-page as often as your customers like. You never resend them.",
-      "suiviTitre": "Parcel tracking, kept current",
-      "suiviTexte": "Enter the number: the carrier is recognised and the page updates on its own. It says plainly when nothing is moving.",
-      "marqueTitre": "Your brand, editable after sending",
-      "marqueTexte": "Your name, your logo, your colour. Complete or correct the page whenever you like — the link itself never changes."
+      "mediasTitre": "One-click photo import",
+      "mediasTexte": "Your photos land straight in the order. No shared folder, no transfer that expires.",
+      "suiviTitre": "Tracking updates itself",
+      "suiviTexte": "You paste the number once. Your customer sees where the parcel is, without ever asking you.",
+      "marqueTitre": "The link never changes",
+      "marqueTexte": "Edit the page whenever you like: your customer keeps the same link, in your colours and under your name."
     },
-    "commentTitre": "Three steps",
-    "etape1": "Create the order and upload your media.",
-    "etape2": "Enter the tracking number.",
-    "etape3": "Send the link to your customer.",
     "destinataireTitre": "Your customers install nothing",
-    "destinataireTexte": "No account to create, no password, no app. They open the link and see everything. The page stays private: it is listed nowhere and is reachable only by whoever holds the link."
+    "menu": {
+      "fonctionnement": "How it works",
+      "clientVoit": "What your customer sees",
+      "tarif": "Pricing"
+    },
+    "apercuTitre": "Your order",
+    "apercuEtape": "In transit",
+    "flottant": {
+      "suiviTitre": "Tracking up to date",
+      "suiviTexte": "with nothing to do",
+      "valideTitre": "Order approved",
+      "valideTexte": "by the customer"
+    },
+    "beneficesPilule": "WHAT IT TAKES OFF YOUR PLATE",
+    "beneficesTitre": "No more sending photos one by one",
+    "beneficesTexte": "Three things you will not do by hand again, and your customer will not have to ask for.",
+    "finalTitre": "Your next order deserves better than a shared folder",
+    "piedNavigation": "Legal links",
+    "pied": {
+      "conditions": "Terms",
+      "confidentialite": "Privacy",
+      "signalement": "Report content"
+    }
   },
   "pied": {
     "conditions": "Terms of use",
@@ -116,8 +133,8 @@
     "confidentialiteChapeau": "What we collect, why, and what we do not collect."
   },
   "connexion": {
-    "titre": "Log in",
-    "sousTitre": "Enter your email address. We send you a sign-in link — there is no password to remember.",
+    "titre": "Good to see you again",
+    "sousTitre": "Enter your address: we send you a sign-in link. No password to remember.",
     "labelEmail": "Email address",
     "placeholderEmail": "you@example.com",
     "envoyer": "Send me the link",
@@ -133,13 +150,8 @@
     "suggestionPrefixe": "Did you mean",
     "suggestionSuffixe": "?",
     "envoyerInscription": "Create my account",
-    "panneauEtiquette": "Photos, videos and tracking in a single link",
-    "panneauTitre": "Your customer opens it, and everything is there.",
-    "panneauTexte": "They see your photos full screen and where their parcel is, with nothing to install and no need to chase you. You update the page whenever you like — the link itself never changes.",
-    "chiffre1": "0",
-    "chiffre1Libelle": "accounts for your customer to create",
-    "chiffre2": "1",
-    "chiffre2Libelle": "link, valid for life",
+    "panneauTitre": "Your customer opens the link and sees everything.",
+    "panneauTexte": "No account to create on their side, no app to install.",
     "cgvAvant": "By continuing, you accept our",
     "cgvEt": "and our",
     "cgvConditions": "terms of use",
@@ -155,15 +167,14 @@
       "suspendu": "This account is suspended. Write to us to find out why.",
       "indisponible": "Google sign-in is temporarily unavailable. Use the email link below.",
       "trop": "Too many attempts from this device. Please wait a few minutes."
-    }
+    },
+    "apercuTitre": "Your order"
   },
   "inscription": {
     "titre": "Create an account",
     "sousTitre": "Enter your email address. We send you a link that creates your account — no password to choose, none to remember.",
     "gratuit": "Free during the launch phase. No card required.",
-    "dejaCompteTitre": "Already have an account?",
     "dejaCompteTexte": "The same link signs you in. There are not two different paths.",
-    "ceQuiSuitTitre": "What happens next",
     "ceQuiSuit1": "You name your shop and pick your colour.",
     "ceQuiSuit2": "You create your first order and drop in your photos.",
     "ceQuiSuit3": "You send a single link to your customer."

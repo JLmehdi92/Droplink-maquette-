@@ -366,3 +366,87 @@ body {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+
+/*
+ * LE DÉCOR ANIMÉ DE LA LANDING — et de la landing SEULEMENT.
+ *
+ * Il est confiné à la scène du téléphone. Une animation qui suit le lecteur sur
+ * toute la page cesse d'attirer l'œil : elle le fatigue. Et rien ici ne porte
+ * d'information — ce sont des halos, des anneaux et des points. Si l'animation
+ * est coupée, il ne se perd rien : c'est la condition pour qu'on ait le droit
+ * de la couper.
+ */
+@keyframes dl-flotte {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-11px);
+  }
+}
+
+@keyframes dl-derive {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(9px, -14px) rotate(7deg);
+  }
+  66% {
+    transform: translate(-7px, -7px) rotate(-5deg);
+  }
+}
+
+@keyframes dl-anneau {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.09);
+    opacity: 0.2;
+  }
+}
+
+@keyframes dl-halo {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.07);
+    opacity: 0.85;
+  }
+}
+
+.anim-flot {
+  animation: dl-flotte 6s ease-in-out infinite;
+}
+.anim-derive {
+  animation: dl-derive 14s ease-in-out infinite;
+}
+.anim-anneau {
+  animation: dl-anneau 7s ease-in-out infinite;
+}
+.anim-halo {
+  animation: dl-halo 9s ease-in-out infinite;
+}
+
+/*
+ * Le réglage système fait autorité. La règle générale plus haut ramène déjà
+ * toutes les durées à 0,01 ms ; celle-ci coupe franchement, parce qu'une
+ * animation infinie réduite à un centième de milliseconde reste une animation
+ * infinie — le navigateur continue de recalculer une image par trame.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .anim-flot,
+  .anim-derive,
+  .anim-anneau,
+  .anim-halo {
+    animation: none;
+  }
+}

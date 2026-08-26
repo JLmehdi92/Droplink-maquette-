@@ -43,17 +43,24 @@ export default async function Bienvenue({
   const t = await getTranslations("onboarding");
 
   return (
-    <main id="contenu" className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop">
-      <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
-        {t("titre")}
-      </h1>
-      <p className="mt-3 font-body-md text-body-md text-on-surface-variant">{t("sousTitre")}</p>
+    <div className="min-h-dvh bg-surface-container-lowest md:bg-canvas md:p-7">
+      <main
+        id="contenu"
+        className="mx-auto w-full max-w-[1000px] bg-surface-container-lowest px-margin-mobile py-10 md:rounded-xl md:px-14 md:py-12"
+      >
+        <h1 className="font-headline-xl text-[30px] leading-[36px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
+          {t("titre")}
+        </h1>
+        <p className="mt-2.5 font-body-lg text-[15px] leading-6 text-on-surface-variant">
+          {t("sousTitre")}
+        </p>
 
       <div className="mt-8">
         <TraductionsClient espaces={["onboarding"]}>
           <FormulaireOnboarding locale={langue} />
         </TraductionsClient>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

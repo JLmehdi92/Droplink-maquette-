@@ -1,73 +1,67 @@
 import { getTranslations } from "next-intl/server";
-import { Icone } from "@/components/icone";
 
 /**
- * Volet de contexte des écrans d'accès, à droite, masqué sous `lg`.
+ * LE VOLET DE DROITE DES ÉCRANS D'ACCÈS — connexion et inscription.
  *
- * REPRIS DE LA MAQUETTE : `hidden lg:flex w-1/2 relative
- * bg-surface-container-lowest border-l border-outline-variant overflow-hidden`,
- * avec un visuel de fond, un dégradé qui le fond vers le bas, et une carte de
- * verre posée en bas (`bg-white/80 backdrop-blur-[20px] rounded-xl p-8 border
- * border-white/50 shadow-md`).
+ * MASQUÉ SOUS `lg`, ET C'EST LE POINT. Il ne porte aucune information dont la
+ * connexion dépend : sur un écran étroit il disparaît entièrement, sans que
+ * rien ne manque. Un volet de contexte qui deviendrait nécessaire serait un
+ * volet mal conçu.
  *
- * DEUX ÉCARTS :
+ * IL MONTRE LA PAGE CLIENT, en petit. C'est ce que le produit fabrique, et
+ * c'est la seule chose honnête à montrer sur un écran de connexion : une photo
+ * d'entrepôt illustrerait un autre produit que le nôtre.
  *
- * 1. LE VISUEL DE FOND est un bouchon dans la maquette — une photo de « centre
- *    de contrôle logistique ». Il est remplacé par un aplat travaillé, aux mêmes
- *    dimensions : mettre une photo d'agence de stock reviendrait à illustrer un
- *    produit avec l'image d'un autre.
- *
- * 2. LES DEUX CHIFFRES. La maquette affiche « 99.9% Uptime » et « SOC2
- *    Compliant ». Nous n'avons ni l'un ni l'autre, et une certification qu'on ne
- *    détient pas est un mensonge, pas un élément de décor. Le bloc garde sa
- *    géométrie — deux valeurs séparées d'un filet vertical — et porte deux faits
- *    vrais : le client n'a aucun compte à créer, et le lien vaut à vie.
+ * LE TÉMOIGNAGE DE LA PLANCHE N'EST PAS REPRIS. Elle porte une citation entre
+ * guillemets suivie de « [TÉMOIGNAGE À RECUEILLIR] ». Une citation inventée sur
+ * un écran de connexion est un faux avis ; l'emplacement reste vide jusqu'à ce
+ * qu'un vrai vendeur nous en donne un. Ce qui le remplace est un fait
+ * vérifiable : le client n'a aucun compte à créer.
  */
 export async function PanneauAcces() {
   const t = await getTranslations("connexion");
 
   return (
-    <div className="relative hidden w-1/2 overflow-hidden border-l border-outline-variant bg-surface-container-lowest lg:flex">
-      <div aria-hidden="true" className="absolute inset-0 z-0">
-        <div className="h-full w-full bg-gradient-to-br from-surface-container-low via-surface-container to-surface-container-high opacity-80" />
-        {/* Dégradé de la maquette, qui fond le visuel vers le bas. */}
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/40 to-transparent" />
+    <div className="relative hidden items-center justify-center overflow-hidden bg-surface-container-low lg:flex">
+      {/* DÉCOR. Deux halos, purement décoratifs, sans animation : cet écran est
+          celui où l'on attend un email, pas celui où l'on regarde bouger. */}
+      <div aria-hidden="true">
+        <div className="absolute -top-36 -right-36 h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle,rgba(124,92,245,0.20)_0%,rgba(244,244,250,0)_68%)]" />
+        <div className="absolute -bottom-40 -left-30 h-[440px] w-[440px] rounded-full bg-[radial-gradient(circle,rgba(242,118,94,0.16)_0%,rgba(244,244,250,0)_68%)]" />
       </div>
 
-      <div className="relative z-10 flex w-full max-w-xl flex-col justify-end p-12 pb-24">
-        <div className="carte rounded-xl p-8 shadow-md">
-          <div className="mb-4 flex items-center gap-2 text-[var(--accent-texte)]">
-            <Icone nom="link" />
-            <span className="font-label-md text-label-md uppercase tracking-wider">
-              {t("panneauEtiquette")}
-            </span>
-          </div>
-
-          <h2 className="mb-3 font-headline-md text-headline-md text-on-surface">
-            {t("panneauTitre")}
-          </h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">{t("panneauTexte")}</p>
-
-          <div className="mt-6 flex gap-4">
-            <div className="flex flex-col items-center">
-              <span className="font-headline-md text-headline-md text-[var(--accent-texte)]">
-                {t("chiffre1")}
-              </span>
-              <span className="text-center font-label-sm text-label-sm text-on-surface-variant">
-                {t("chiffre1Libelle")}
-              </span>
+      <div className="relative px-[60px] text-center">
+        <div className="inline-block h-[500px] w-[268px] rounded-[38px] bg-primary p-2 text-left shadow-[0_40px_70px_-28px_rgba(14,14,19,0.4)]">
+          <div className="h-full w-full overflow-hidden rounded-[31px] bg-surface-container-lowest">
+            <div className="degrade-marque px-4 pt-[26px] pb-4">
+              <div className="flex items-center gap-2">
+                <span className="h-[22px] w-[22px] rounded-full bg-white/30" />
+                <span className="font-label-md text-[12px] font-bold">Atelier Nord</span>
+              </div>
+              <p className="mt-2 font-headline-md text-[17px] font-extrabold tracking-[-0.02em]">
+                {t("apercuTitre")}
+              </p>
             </div>
-            <div aria-hidden="true" className="h-12 w-px bg-outline-variant" />
-            <div className="flex flex-col items-center">
-              <span className="font-headline-md text-headline-md text-[var(--accent-texte)]">
-                {t("chiffre2")}
-              </span>
-              <span className="text-center font-label-sm text-label-sm text-on-surface-variant">
-                {t("chiffre2Libelle")}
-              </span>
+            <div className="p-3">
+              <div className="grid grid-cols-2 gap-[5px]">
+                {["#e4e2ee", "#eee4e0", "#e0e4ee", "#eaeaef"].map((teinte) => (
+                  <span
+                    key={teinte}
+                    className="block aspect-square rounded-[9px]"
+                    style={{ backgroundColor: teinte }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
+
+        <p className="mt-9 font-headline-md text-[22px] leading-8 font-bold tracking-[-0.02em] text-on-surface">
+          {t("panneauTitre")}
+        </p>
+        <p className="mt-2.5 font-body-md text-[14px] text-on-surface-variant">
+          {t("panneauTexte")}
+        </p>
       </div>
     </div>
   );

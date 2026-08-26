@@ -400,7 +400,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
             </div>
 
             <div className="flex min-h-[300px] flex-col items-center justify-center bg-background p-8">
-              <div className="w-full max-w-md rounded-xl border border-surface-variant bg-white p-6 shadow-md">
+              <div className="w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-lowest p-6">
                 <h3 className="mb-4 text-center font-headline-md text-headline-md text-on-surface">
                   {t("apercuCommande")}
                 </h3>

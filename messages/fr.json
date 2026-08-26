@@ -22,27 +22,44 @@
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",
     "metaDescription": "Réunissez photos, vidéos et suivi du colis sur une page à vos couleurs. Vos clients consultent tout eux-mêmes, sans compte et sans application.",
-    "heroTitre": "Une page par commande. À votre marque.",
-    "heroSousTitre": "Photos, vidéos et suivi du colis réunis sur une seule page. Vous envoyez le lien, vos clients consultent tout eux-mêmes — sans compte, sans application.",
-    "ctaPrincipal": "Créer une page",
+    "heroTitre": "Un seul lien pour toute la commande",
+    "heroSousTitre": "Déposez les photos, collez le suivi, envoyez le lien. Votre client consulte tout lui-même, sans créer de compte.",
+    "ctaPrincipal": "Créer ma première commande",
     "ctaSecondaire": "J'ai déjà un compte",
     "gratuitPourLInstant": "Gratuit pendant la phase de lancement. Aucune carte demandée.",
-    "pourQui": "Pour les fournisseurs, les revendeurs, les marques et les ateliers — de la première commande à plusieurs centaines par semaine.",
     "fonctionnalites": {
       "titre": "Ce que contient la page",
-      "mediasTitre": "Vos photos et vidéos",
-      "mediasTexte": "Déposées une fois, consultables en pleine page autant de fois que vos clients le souhaitent. Vous ne les renvoyez plus.",
-      "suiviTitre": "Le suivi du colis, tenu à jour",
-      "suiviTexte": "Renseignez le numéro : le transporteur est reconnu et la page se met à jour d'elle-même. Elle indique clairement quand rien ne bouge.",
-      "marqueTitre": "Votre marque, modifiable après envoi",
-      "marqueTexte": "Votre nom, votre logo, votre couleur. Vous complétez ou corrigez la page à tout moment : le lien, lui, ne change jamais."
+      "mediasTitre": "Import des photos en un clic",
+      "mediasTexte": "Vos photos arrivent directement dans la commande. Plus de dossier partagé, plus de transfert qui expire.",
+      "suiviTitre": "Le suivi se met à jour seul",
+      "suiviTexte": "Vous collez le numéro une fois. Le client voit où en est son colis, sans jamais vous le demander.",
+      "marqueTitre": "Le lien ne change jamais",
+      "marqueTexte": "Modifiez la page quand vous voulez : le client garde le même lien, à vos couleurs et à votre nom."
     },
-    "commentTitre": "Trois étapes",
-    "etape1": "Créez la commande et déposez vos médias.",
-    "etape2": "Renseignez le numéro de suivi.",
-    "etape3": "Transmettez le lien à votre client.",
     "destinataireTitre": "Vos clients n'ont rien à installer",
-    "destinataireTexte": "Aucun compte à créer, aucun mot de passe, aucune application. Ils ouvrent le lien et voient tout. La page reste privée : elle n'est référencée nulle part et n'est accessible qu'à qui détient le lien."
+    "menu": {
+      "fonctionnement": "Fonctionnement",
+      "clientVoit": "Ce que voit le client",
+      "tarif": "Tarif"
+    },
+    "apercuTitre": "Votre commande",
+    "apercuEtape": "En transit",
+    "flottant": {
+      "suiviTitre": "Suivi à jour",
+      "suiviTexte": "sans rien faire",
+      "valideTitre": "Commande validée",
+      "valideTexte": "par le client"
+    },
+    "beneficesPilule": "CE QUE ÇA VOUS ENLÈVE",
+    "beneficesTitre": "Fini de renvoyer les photos une par une",
+    "beneficesTexte": "Trois choses que vous ne referez plus à la main, et que votre client n’aura plus à demander.",
+    "finalTitre": "Votre prochaine commande mérite mieux qu’un dossier partagé",
+    "piedNavigation": "Liens légaux",
+    "pied": {
+      "conditions": "Conditions",
+      "confidentialite": "Confidentialité",
+      "signalement": "Signaler un contenu"
+    }
   },
   "pied": {
     "conditions": "Conditions d'utilisation",
@@ -116,8 +133,8 @@
     "confidentialiteChapeau": "Ce que nous collectons, pourquoi, et ce que nous ne collectons pas."
   },
   "connexion": {
-    "titre": "Se connecter",
-    "sousTitre": "Entrez votre adresse email. Nous vous envoyons un lien de connexion — il n'y a pas de mot de passe à retenir.",
+    "titre": "Content de vous revoir",
+    "sousTitre": "Entrez votre adresse : nous vous envoyons un lien de connexion. Pas de mot de passe à retenir.",
     "labelEmail": "Adresse email",
     "placeholderEmail": "vous@exemple.com",
     "envoyer": "Recevoir mon lien",
@@ -133,13 +150,8 @@
     "suggestionPrefixe": "Vouliez-vous dire",
     "suggestionSuffixe": " ?",
     "envoyerInscription": "Créer mon compte",
-    "panneauEtiquette": "Photos, vidéos et suivi dans un seul lien",
-    "panneauTitre": "Votre client ouvre, et il a tout.",
-    "panneauTexte": "Il voit vos photos en plein écran et l'avancée de son colis, sans rien installer et sans vous relancer. Vous complétez la page quand vous voulez : le lien, lui, ne change jamais.",
-    "chiffre1": "0",
-    "chiffre1Libelle": "compte à créer pour votre client",
-    "chiffre2": "1",
-    "chiffre2Libelle": "lien, valable à vie",
+    "panneauTitre": "Votre client ouvre le lien et voit tout.",
+    "panneauTexte": "Aucun compte à créer de son côté, aucune application à installer.",
     "cgvAvant": "En continuant, vous acceptez nos",
     "cgvEt": "et notre",
     "cgvConditions": "conditions d'utilisation",
@@ -155,15 +167,14 @@
       "indisponible": "La connexion Google est momentanément indisponible. Utilisez le lien par email ci-dessous.",
       "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
       "session": "Votre session a expiré. Reconnectez-vous pour continuer."
-    }
+    },
+    "apercuTitre": "Votre commande"
   },
   "inscription": {
     "titre": "Créer un compte",
     "sousTitre": "Entrez votre adresse email. Nous vous envoyons un lien qui crée votre compte — pas de mot de passe à choisir, ni à retenir.",
     "gratuit": "Gratuit pendant la phase de lancement. Aucune carte demandée.",
-    "dejaCompteTitre": "Vous avez déjà un compte ?",
     "dejaCompteTexte": "Le même lien vous connecte. Il n'y a pas deux chemins différents.",
-    "ceQuiSuitTitre": "Ce qui vous attend",
     "ceQuiSuit1": "Vous donnez un nom à votre boutique et choisissez votre couleur.",
     "ceQuiSuit2": "Vous créez votre première commande et déposez vos photos.",
     "ceQuiSuit3": "Vous envoyez un seul lien à votre client."

@@ -56,6 +56,10 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   ["admin.journal.actions.", "composé depuis l'action tracée"],
   ["admin.suspension.erreur.", "composé depuis le SQLSTATE traduit"],
   ["page-publique.frise.", "composé depuis le statut normalisé du colis"],
+  [
+    "landing.fonctionnalites.",
+    "composé depuis la liste des trois bénéfices — landing, section « ce que ça vous enlève »",
+  ],
   ["commandes.qc.", "composé depuis le statut QC"],
   ["medias.refus.", "composé depuis le motif de refus d'un média"],
   ["legal.signalement.cat_", "composé depuis la catégorie de signalement"],
