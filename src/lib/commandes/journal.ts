@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
@@ -102,4 +103,33 @@ export async function journaliser(
     );
     return false;
   }
+}
+
+/**
+ * Écrit la trace APRÈS que la réponse est partie.
+ *
+ * ⚠️ CE QUE CELA NE CHANGE PAS : la trace est toujours écrite, dans la même
+ * requête, sous la même session, donc sous la même RLS. `after()` ne diffère
+ * pas l'écriture à plus tard — il la sort du chemin de la RÉPONSE.
+ *
+ * POURQUOI C'EST LÉGITIME ICI ALORS QUE L'ORDRE COMPTE : la règle « appeler
+ * après la mutation, jamais avant » reste tenue, et même renforcée — le travail
+ * différé ne démarre qu'une fois la mutation rendue. Ce qui change est ce que
+ * le vendeur ATTEND : sauvegarder un champ enchaînait jusqu'ici six
+ * allers-retours en série avant de répondre, dont celui-ci et celui de
+ * l'instrumentation. Ni l'un ni l'autre n'est destiné à l'écran ; les faire
+ * attendre au vendeur, c'est lui faire payer notre besoin de mesurer.
+ *
+ * CE QUI RESTE VRAI : la trace ne lève pas, et son échec est nommé dans le
+ * journal serveur — simplement, plus personne ne l'attend pour voir son écran.
+ */
+export function journaliserApres(
+  supabase: ClientJournal,
+  commandeId: string,
+  type: TypeVendeur,
+  charge: ChargeJournal = {},
+): void {
+  after(async () => {
+    await journaliser(supabase, commandeId, type, charge);
+  });
 }

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { appliquerReglagesMarque } from "@/lib/boutique/reglages";
@@ -134,7 +134,7 @@ export async function terminerOnboarding(
     return { statut: "erreur", motif: "ecriture" };
   }
 
-  await emettre(
+  emettreApres(
     EVENEMENTS.ONBOARDING_TERMINE,
     { sujet: profil.profilId },
     {

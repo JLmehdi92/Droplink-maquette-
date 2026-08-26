@@ -1,13 +1,13 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { cleMedia, cleVignette, typesAcceptes } from "@/lib/storage/cles";
 import { deciderDepot, estVideo, limites } from "@/lib/storage/limites";
 import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
 import type { creerClientServeur } from "@/lib/supabase/server";
-import { journaliser } from "./journal";
+import { journaliserApres } from "./journal";
 
 /**
  * LES MÉDIAS D'UNE COMMANDE, côté serveur.
@@ -109,7 +109,7 @@ export async function preparerDepot(
   if (commande === null) return { statut: "echec", motif: "introuvable" };
 
   if (!typesAcceptes("media").includes(typeMime)) {
-    await emettre(
+    emettreApres(
       EVENEMENTS.MEDIA_REFUSE,
       { sujet: profilId },
       { motif: "type_non_accepte", taille: tailleAnnoncee, type: typeMime },
@@ -137,7 +137,7 @@ export async function preparerDepot(
     // REFUS INSTRUMENTÉ AVEC MOTIF **ET TAILLE RÉELLE** : sans la taille, on ne
     // saura pas de combien le plafond s'est trompé, donc on ne saura pas s'il
     // faut le relever ou si le vendeur envoyait n'importe quoi.
-    await emettre(
+    emettreApres(
       EVENEMENTS.MEDIA_REFUSE,
       { sujet: profilId },
       { motif: decision.motif, taille: decision.tailleReelle, plafond: decision.plafond },
@@ -301,7 +301,7 @@ export async function confirmerDepot(
     // L'objet déposé est retiré : le garder ferait payer un stockage pour un
     // média que personne ne verra jamais.
     await supprimer(cle).catch(() => undefined);
-    await emettre(
+    emettreApres(
       EVENEMENTS.MEDIA_REFUSE,
       { sujet: profilId },
       { motif: decision.motif, taille: decision.tailleReelle, plafond: decision.plafond, apresDepot: true },
@@ -335,7 +335,7 @@ export async function confirmerDepot(
       // Elle est retirée : la garder ferait payer un stockage pour un objet que
       // rien ne référencera.
       await supprimer(cleDeVignette).catch(() => undefined);
-      await emettre(
+      emettreApres(
         EVENEMENTS.MEDIA_REFUSE,
         { sujet: profilId },
         { motif: "vignette_trop_lourde", taille: tailleVignette, plafond: plafondVignette },
@@ -381,7 +381,7 @@ export async function confirmerDepot(
     return { statut: "echec", motif: "ecriture" };
   }
 
-  await emettre(
+  emettreApres(
     EVENEMENTS.MEDIA_AJOUTE,
     { sujet: profilId },
     { commande: orderId, taille: tailleReelle, type: typeMime },
@@ -389,7 +389,7 @@ export async function confirmerDepot(
 
   // La CLÉ de l'objet n'entre pas au journal : elle est dérivable en URL signée,
   // et l'historique est un écran de plus où elle pourrait fuiter.
-  await journaliser(supabase, orderId, "media_ajoute", {
+  journaliserApres(supabase, orderId, "media_ajoute", {
     taille: tailleReelle,
     type: typeMime,
   });
@@ -427,7 +427,7 @@ export async function supprimerMedia(
 
   await supprimer(data.cle).catch(() => undefined);
 
-  await journaliser(supabase, analyse.data.orderId, "media_supprime");
+  journaliserApres(supabase, analyse.data.orderId, "media_supprime");
 
   return { statut: "ok" };
 }
@@ -457,7 +457,7 @@ export async function reordonnerMedias(
 
   if (error !== null) return { statut: "echec", motif: error.code ?? "ecriture" };
 
-  await journaliser(
+  journaliserApres(
     supabase,
     analyse.data.orderId,
     "medias_reordonnes",

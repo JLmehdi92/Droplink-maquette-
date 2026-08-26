@@ -1,10 +1,10 @@
 import "server-only";
 import { z } from "zod";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import type { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
-import { journaliser } from "./journal";
+import { journaliserApres } from "./journal";
 
 /**
  * LE CYCLE DE VIE D'UNE COMMANDE : révoquer le lien, dupliquer, archiver.
@@ -65,7 +65,7 @@ export async function revoquerLien(
   // second appel depuis l'application ajouterait une ligne en double — et une
   // trace qui compte double se relit comme deux révocations, sur la pièce
   // exacte qu'on produirait en cas de litige. Un fait, un point d'émission.
-  await emettre(EVENEMENTS.LIEN_REVOQUE, { sujet: profilId }, { commande: analyse.data });
+  emettreApres(EVENEMENTS.LIEN_REVOQUE, { sujet: profilId }, { commande: analyse.data });
 
   return { statut: "ok", nouveauJeton: data };
 }
@@ -124,7 +124,7 @@ export async function dupliquerCommande(
 
   if (error !== null || data === null) return { statut: "echec", motif: "ecriture" };
 
-  await emettre(
+  emettreApres(
     EVENEMENTS.COMMANDE_DUPLIQUEE,
     { sujet: profilId },
     { source: analyse.data, copie: data.id },
@@ -132,7 +132,7 @@ export async function dupliquerCommande(
 
   // Journalisé sur la COPIE : c'est son historique à elle qui doit dire d'où
   // elle vient. L'écrire sur la source répondrait à une autre question.
-  await journaliser(supabase, data.id, "commande_dupliquee", { source: analyse.data });
+  journaliserApres(supabase, data.id, "commande_dupliquee", { source: analyse.data });
 
   return { statut: "ok", nouvelleCommande: data.id };
 }
@@ -172,7 +172,7 @@ export async function archiverCommande(
   if (error !== null) return { statut: "echec", motif: "ecriture" };
   if (data === null) return { statut: "echec", motif: "introuvable" };
 
-  await emettre(
+  emettreApres(
     EVENEMENTS.COMMANDE_ARCHIVEE,
     { sujet: profilId },
     // `lot: 1` PARCE QUE LE CHEMIN PAR LOT EN ÉMET UN SEUL POUR N COMMANDES.
@@ -183,7 +183,7 @@ export async function archiverCommande(
     { commande: analyse.data, archivee: archiver, lot: 1 },
   );
 
-  await journaliser(supabase, analyse.data, "commande_archivee", { archivee: archiver });
+  journaliserApres(supabase, analyse.data, "commande_archivee", { archivee: archiver });
 
   return { statut: "ok", archivee: data.archived_at !== null };
 }

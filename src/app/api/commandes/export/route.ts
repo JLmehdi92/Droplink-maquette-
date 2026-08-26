@@ -3,7 +3,7 @@ import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { exporterCommandes } from "@/lib/commandes/export-csv";
 import { ParametresListe } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 
 /**
@@ -61,7 +61,7 @@ export async function GET(requete: NextRequest): Promise<NextResponse> {
 
   const resultat = await exporterCommandes(parametres, origine);
 
-  await emettre(
+  emettreApres(
     EVENEMENTS.EXPORT_CSV,
     { sujet: profil.profilId },
     { lignes: resultat.lignes, tronque: resultat.tronque },

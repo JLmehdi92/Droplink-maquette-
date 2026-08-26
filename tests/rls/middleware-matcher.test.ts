@@ -207,14 +207,75 @@ describe("Matcher du middleware", () => {
   });
 
   test("l'exclusion des fichiers pointés n'avale aucune route réelle", () => {
-    // `.*\..*` est l'exclusion la plus large du matcher. Elle vise les fichiers
-    // statiques, mais elle exclurait aussi un segment de route contenant un
-    // point — un `rapport.png` en sortirait sans que rien ne le signale.
+    // L'exclusion des fichiers statiques vise `favicon.ico` et consorts. Elle
+    // exclurait aussi un segment de route contenant un point — un `rapport.png`
+    // en sortirait sans que rien ne le signale.
     const routesAvecPoint = routesDeclarees().filter((r) => r.includes("."));
     expect(
       routesAvecPoint,
       `Routes contenant un point, donc invisibles au middleware : ${routesAvecPoint.join(", ")}`,
     ).toEqual([]);
+  });
+
+  test("un point dans la VALEUR d'un segment dynamique n'exclut pas la route", () => {
+    /*
+     * ⚠️ CE CONTRÔLE EXISTE PARCE QUE LE PRÉCÉDENT REGARDAIT À CÔTÉ (L-025).
+     *
+     * Le test ci-dessus inventorie les GABARITS de routes et vérifie qu'aucun
+     * DOSSIER ne contient de point. Il passait — aucun n'en contient. Mais le
+     * défaut n'était pas là : `concretiser()` remplace les segments dynamiques
+     * par la chaîne littérale « exemple », qui n'a pas de point, alors que la
+     * valeur d'un segment dynamique est CHOISIE PAR LE VISITEUR.
+     *
+     * Avec l'ancienne exclusion `.*\..*` — « un point, n'importe où, sans
+     * ancrage » — il suffisait donc d'un point dans l'identifiant pour sortir
+     * `/[locale]/admin/comptes/[id]` du middleware. Vérifié par exécution avant
+     * correction. Aucune donnée ne fuitait, `exigerAdmin()` tenant ; c'est la
+     * défense en profondeur qui tombait à une seule couche, sur la seule route
+     * admin dont l'URL est contrôlée par le visiteur.
+     *
+     * ON ÉPROUVE DONC LES ROUTES CONCRÈTES AVEC DES VALEURS HOSTILES, pas les
+     * gabarits avec une valeur polie.
+     */
+    const VALEURS_HOSTILES = ["a.b", "x.png", "00000000-0000-0000-0000-000000000000.x", "..", "a.b.c"];
+
+    const dynamiques = routesDeclarees().filter(
+      (r) => /\[[^\]]+\]/.test(r.replace("[locale]", "fr")) && !r.startsWith("/p/"),
+    );
+
+    // UN ENSEMBLE VIDE PASSE TOUT : sans routes dynamiques à éprouver, ce
+    // contrôle serait décoratif et personne ne le saurait.
+    expect(
+      dynamiques.length,
+      "aucune route à segment dynamique trouvée : la sonde vise à côté",
+    ).toBeGreaterThan(0);
+
+    const avales: string[] = [];
+    for (const route of dynamiques) {
+      for (const valeur of VALEURS_HOSTILES) {
+        const concret = route
+          .replace("[locale]", "fr")
+          .replace(/\[[^\]]+\]/g, valeur);
+        if (!motif.test(concret)) avales.push(concret);
+      }
+    }
+
+    expect(
+      avales,
+      "Ces URL sortent du middleware alors qu'elles atteignent une vraie route. " +
+        "La valeur d'un segment dynamique est choisie par le visiteur : une " +
+        "exclusion qui la regarde est une porte.",
+    ).toEqual([]);
+  });
+
+  test("les fichiers statiques de la racine restent exclus", () => {
+    // CONTRE-TEST POSITIF. Resserrer l'exclusion jusqu'à ne plus rien exclure
+    // ferait passer le contrôle ci-dessus à 100 % en envoyant chaque requête de
+    // fichier statique dans le middleware — donc dans un rafraîchissement de
+    // session, pour une icône.
+    for (const fichier of ["/favicon.ico", "/robots.txt", "/manifest.webmanifest"]) {
+      expect(motif.test(fichier), `${fichier} devrait rester hors du middleware`).toBe(false);
+    }
   });
 
   test("le fichier middleware ne déclare aucune exclusion non documentée", () => {
@@ -247,7 +308,7 @@ describe("Matcher du middleware", () => {
 
     // Inventaire explicite : toute exclusion ajoutée sans être listée ici fait
     // échouer, y compris si elle a l'air anodine.
-    const CONNUES = ["api(?:/|$)", "p(?:/|$)", "_next", "_vercel", ".*\\..*"];
+    const CONNUES = ["api(?:/|$)", "p(?:/|$)", "_next", "_vercel", "[^/]+\\.[^/]+$"];
     const inconnues = exclusions.filter((e) => !CONNUES.includes(e));
     expect(
       inconnues,
@@ -265,13 +326,81 @@ describe("Matcher du middleware", () => {
     // n importe quel caractere » — c est-a-dire presque tout.
     //
     // Comparer un chemin AVEC point et le meme SANS point separe les deux cas.
-    // Verifier seulement que `/fr/logo.png` est exclu ne les separe pas : il
+    // Verifier seulement qu un fichier pointe est exclu ne les separe pas : il
     // l est dans les deux mondes.
-    expect(motif.test("/fr/logo.png"), "un fichier pointe doit etre exclu").toBe(false);
+    //
+    // ⚠️ LES DEUX CHEMINS SONT DÉSORMAIS À LA RACINE, et c'est le sens de la
+    // correction du 26/08/2026 : l'exclusion ne s'applique plus qu'à un chemin
+    // d'UN SEUL segment. `/fr/logo.png` traverse maintenant le middleware —
+    // c'est voulu, `fr` est un segment de route, pas un dossier de fichiers.
+    expect(motif.test("/logo.png"), "un fichier pointe doit etre exclu").toBe(false);
     expect(
-      motif.test("/fr/logopng"),
+      motif.test("/logopng"),
       "un chemin SANS point est exclu : le point n est pas echappe, et " +
         "l exclusion avale toutes les routes au lieu des seuls fichiers.",
     ).toBe(true);
+  });
+
+  test("un point dans la VALEUR d'un segment dynamique n'exclut pas la route", () => {
+    /*
+     * ⚠️ CE CONTRÔLE EXISTE PARCE QUE LE PRÉCÉDENT REGARDAIT À CÔTÉ (L-025).
+     *
+     * Le test « l'exclusion des fichiers pointés n'avale aucune route réelle »
+     * inventorie les GABARITS et vérifie qu'aucun DOSSIER ne contient de point.
+     * Il passait — aucun n'en contient. Mais le défaut n'était pas là :
+     * `concretiser()` remplace les segments dynamiques par la chaîne littérale
+     * « exemple », qui n'a pas de point, alors que la valeur d'un segment
+     * dynamique est CHOISIE PAR LE VISITEUR.
+     *
+     * Avec l'ancienne exclusion `.*\..*` — « un point, n'importe où, sans
+     * ancrage de fin » — il suffisait d'un point dans l'identifiant pour sortir
+     * `/[locale]/admin/comptes/[id]` du middleware. Vérifié par exécution avant
+     * correction. Aucune donnée ne fuitait, `exigerAdmin()` tenant ; c'est la
+     * défense en profondeur exigée par le brief sur cette surface qui tombait à
+     * UNE SEULE couche, sur la seule route admin dont l'URL est contrôlée par
+     * le visiteur.
+     *
+     * ON ÉPROUVE DONC DES ROUTES CONCRÈTES AVEC DES VALEURS HOSTILES, plutôt
+     * que des gabarits avec une valeur polie.
+     */
+    const VALEURS_HOSTILES = ["a.b", "x.png", "e6ac6d6e-0000-4000-8000-000000000000.x", "a.b.c"];
+
+    const dynamiques = routesDeclarees().filter(
+      (r) => r.replace("[locale]", "L").includes("[") && !r.startsWith("/p/"),
+    );
+
+    // UN ENSEMBLE VIDE PASSE TOUT : sans route dynamique à éprouver, ce
+    // contrôle serait décoratif et personne ne le saurait.
+    expect(
+      dynamiques.length,
+      "aucune route à segment dynamique trouvée : la sonde vise à côté",
+    ).toBeGreaterThan(0);
+
+    const avales: string[] = [];
+    for (const route of dynamiques) {
+      for (const valeur of VALEURS_HOSTILES) {
+        const concret = route.replace("[locale]", "fr").split("[").length
+          ? route.replace("[locale]", "fr").replace(/\[[^\]]+\]/g, valeur)
+          : route;
+        if (!motif.test(concret)) avales.push(concret);
+      }
+    }
+
+    expect(
+      avales,
+      "Ces URL sortent du middleware alors qu'elles atteignent une vraie route. " +
+        "La valeur d'un segment dynamique est choisie par le visiteur : une " +
+        "exclusion qui la regarde est une porte.",
+    ).toEqual([]);
+  });
+
+  test("les fichiers statiques de la racine restent exclus", () => {
+    // CONTRE-TEST POSITIF. Resserrer l'exclusion jusqu'à ne plus rien exclure
+    // ferait passer le contrôle ci-dessus à 100 % en envoyant chaque requête de
+    // fichier statique dans le middleware — donc dans un rafraîchissement de
+    // session, pour une icône.
+    for (const fichier of ["/favicon.ico", "/robots.txt", "/manifest.webmanifest"]) {
+      expect(motif.test(fichier), `${fichier} devrait rester hors du middleware`).toBe(false);
+    }
   });
 });

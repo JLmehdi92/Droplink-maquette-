@@ -3,6 +3,7 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { verifierQuotaAdmin } from "@/lib/limitation/quota";
 
 /**
  * LA GARDE ADMIN — la seule qui fasse autorité.
@@ -56,6 +57,32 @@ export const exigerAdmin = cache(exigerAdminSansMemo);
  * tout.
  */
 async function exigerAdminSansMemo(): Promise<Administrateur> {
+  /*
+   * LE PLAFOND VIENT EN PREMIER, AVANT MÊME DE SAVOIR QUI APPELLE.
+   *
+   * DÉFAUT TROUVÉ À L'AUDIT DU 26/08/2026 : la surface d'administration n'avait
+   * AUCUN compteur de débit, alors que le brief en exige un, distinct de celui
+   * de la page publique. Chaque requête anonyme vers `/fr/admin/...` coûtait
+   * deux allers-retours en base — le profil, puis le rôle — avant de rendre son
+   * 404. C'était le moyen le moins cher de nous faire travailler, et il était
+   * gratuit pour l'attaquant.
+   *
+   * L'ORDRE COMPTE : si le plafond était vérifié APRÈS la lecture du profil, il
+   * ne bornerait plus rien — le coût qu'il est censé éviter serait déjà payé.
+   *
+   * ET IL REFUSE EN CAS DE PANNE DU COMPTEUR. La page publique fait l'inverse,
+   * délibérément : y refuser pénaliserait les clients d'un vendeur pour un
+   * incident qui ne les concerne pas. Ici, un refus injustifié ne coûte qu'un
+   * rechargement de page, à nous.
+   *
+   * `notFound()` COMME PARTOUT AILLEURS SUR CETTE SURFACE. Un 429 distinguerait
+   * « trop de requêtes » de « rien ici », et cette distinction suffit à établir
+   * que la surface existe. Le plafond ne doit pas devenir l'oracle que le 404
+   * refuse d'être.
+   */
+  const quota = await verifierQuotaAdmin();
+  if (!quota.autorise) notFound();
+
   const profil = await lireProfilVendeur();
   if (profil === null) notFound();
 

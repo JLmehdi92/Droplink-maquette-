@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { creerClientAnonyme } from "@/lib/supabase/anon";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { adresseAppelant, empreinte } from "@/lib/limitation/empreinte";
 import { JetonPublic } from "./lecture";
@@ -82,7 +82,7 @@ export async function arbitrerQc(
   // NI LE JETON NI L'IDENTIFIANT DE LA COMMANDE ne partent vers l'analytics. Le
   // jeton ne transporte pas une donnée mais une capacité, définitivement.
   const visiteur = await adresseAppelant();
-  await emettre(
+  emettreApres(
     corps.data.decision === "approuve" ? EVENEMENTS.QC_APPROUVE : EVENEMENTS.QC_REFUSE,
     { sujet: visiteur === null ? "visiteur:sans-adresse" : `visiteur:${empreinte(visiteur)}` },
     // Le commentaire lui-même ne sort pas : il peut contenir n'importe quoi, y

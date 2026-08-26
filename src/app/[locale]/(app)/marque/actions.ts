@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { appliquerReglagesMarque, ReglagesMarque } from "@/lib/boutique/reglages";
 import {
@@ -72,7 +72,7 @@ export async function enregistrerMarque(
   const ecrit = await appliquerReglagesMarque(supabase, profil.shopId, analyse.data);
   if (!ecrit) return { statut: "erreur", motif: "ecriture" };
 
-  await emettre(
+  emettreApres(
     EVENEMENTS.MARQUE_ENREGISTREE,
     { sujet: profil.profilId },
     {

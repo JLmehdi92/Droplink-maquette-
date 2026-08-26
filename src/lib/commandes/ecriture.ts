@@ -1,10 +1,10 @@
 import "server-only";
 import { z } from "zod";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettre, emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import type { creerClientServeur } from "@/lib/supabase/server";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "./liste";
-import { journaliser } from "./journal";
+import { journaliserApres } from "./journal";
 import { attacherColis } from "@/lib/tracking/attache";
 
 /**
@@ -140,14 +140,14 @@ export async function appliquerChamp(
 
   await marquerPremierContenu(supabase, analyse.data.id, profilId);
 
-  await emettre(EVENEMENTS.COMMANDE_MODIFIEE, { sujet: profilId }, { champ: nom });
+  emettreApres(EVENEMENTS.COMMANDE_MODIFIEE, { sujet: profilId }, { champ: nom });
 
   // Le JOURNAL est distinct de l'instrumentation, et les deux ne se remplacent
   // pas : l'un dit au vendeur ce qui est arrivé à SA commande, l'autre nous dit
   // combien de vendeurs modifient. La VALEUR du champ n'y entre pas — les notes
   // internes portent le prix d'achat, et un journal qui montre tout devient une
   // surface de fuite.
-  await journaliser(supabase, analyse.data.id, "commande_modifiee", { champ: nom });
+  journaliserApres(supabase, analyse.data.id, "commande_modifiee", { champ: nom });
 
   return { statut: "ok", modifieeLe: data.updated_at };
 }
@@ -219,5 +219,5 @@ async function marquerPremierContenu(
   // Journalisé ICI et pas à l'ouverture de l'éditeur : la commande naît au
   // premier CONTENU RÉEL. Un brouillon ouvert puis abandonné n'a jamais existé
   // pour le client, et son historique n'a rien à raconter.
-  await journaliser(supabase, id, "commande_creee");
+  journaliserApres(supabase, id, "commande_creee");
 }

@@ -11,7 +11,7 @@ import { plafondsAffichables } from "@/lib/commandes/medias";
 import { signerLecture } from "@/lib/storage/r2";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "@/lib/commandes/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { origineDuSite } from "@/lib/site";
@@ -106,7 +106,7 @@ export default async function EditeurCommande({
     // premier contenu réel. L'écart entre les deux est l'information : un
     // brouillon ouvert puis abandonné est exactement le cas « teste une ou deux
     // fois puis disparaît ».
-    await emettre(EVENEMENTS.EDITEUR_OUVERT, { sujet: profil.profilId }, { origine: "edition" });
+    emettreApres(EVENEMENTS.EDITEUR_OUVERT, { sujet: profil.profilId }, { origine: "edition" });
   }
 
   const lienPublic = origine === null ? null : origine + "/p/" + data.public_token;

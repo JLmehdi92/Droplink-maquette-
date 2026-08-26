@@ -12,7 +12,7 @@ import { resoudreAccent } from "@/lib/design/contraste";
 import { estLangueSupportee } from "@/i18n/config";
 import { signalerJetonInconnu, verifierQuotaPublique } from "@/lib/limitation/quota";
 import { adresseAppelant, empreinte } from "@/lib/limitation/empreinte";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 
 /**
@@ -165,7 +165,7 @@ export default async function PagePublique({
   // donner la page. Le décompte par commande vit dans notre base, où il est
   // déjà.
   const visiteur = await adresseAppelant();
-  await emettre(EVENEMENTS.PAGE_PUBLIQUE_RENDUE, {
+  emettreApres(EVENEMENTS.PAGE_PUBLIQUE_RENDUE, {
     sujet: visiteur === null ? "visiteur:sans-adresse" : `visiteur:${empreinte(visiteur)}`,
   });
 

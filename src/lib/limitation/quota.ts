@@ -28,9 +28,47 @@ export type Surface =
   /** La seule ÉCRITURE publique du produit : l'arbitrage QC. */
   | "publique-ecriture"
   /** Les notifications de suivi poussées par le fournisseur. */
-  | "suivi-notification";
+  | "suivi-notification"
+  /** Toute requête visant la surface d'administration, par adresse. */
+  | "admin";
 
 export type Verdict = { autorise: true } | { autorise: false; motif: "quota" | "indisponible" };
+
+/**
+ * CE QUE CHAQUE SURFACE FAIT QUAND LE COMPTEUR EST EN PANNE.
+ *
+ * ⚠️ UNE TABLE, ET NON DES `if` DISPERSÉS. C'est la décision la plus délicate
+ * du module — le brief la tranche explicitement — et elle vivait éparpillée
+ * dans six fonctions, sous six formulations différentes. Une règle écrite six
+ * fois est une règle qu'on applique cinq fois : c'est ainsi que la surface
+ * d'administration s'est retrouvée sans compteur du tout, sans que rien ne le
+ * signale.
+ *
+ * Exhaustive PAR LE TYPE : ajouter une valeur à `Surface` sans l'inscrire ici
+ * ne compile pas. On ne peut donc pas créer une surface dont personne n'a
+ * décidé du comportement en panne.
+ *
+ * LA RÈGLE, ET SA RAISON :
+ *
+ *   - `autorise` pour ce que CONSULTE le client d'un vendeur. Refuser
+ *     l'affichage de ses photos le prive de ce qu'il vient chercher, pour un
+ *     incident qui ne le concerne en rien. Le dommage est porté par quelqu'un
+ *     d'étranger à la panne.
+ *   - `refuse` partout ailleurs. Pour l'authentification, l'écriture publique
+ *     et l'administration, un refus injustifié coûte une nouvelle tentative —
+ *     à nous, ou à quelqu'un qui peut réessayer. L'autorisation par défaut,
+ *     elle, ouvre une surface sans plafond le jour précis où la base va mal,
+ *     c'est-à-dire le jour où le plafond sert le plus.
+ */
+export const DEGRADATION: Readonly<Record<Surface, "autorise" | "refuse">> = {
+  "auth-ip": "refuse",
+  "auth-email": "refuse",
+  "publique-requetes": "autorise",
+  "publique-inconnu": "autorise",
+  "publique-ecriture": "refuse",
+  "suivi-notification": "refuse",
+  admin: "refuse",
+};
 
 function entierEnv(nom: string, defaut: number): number {
   const brut = process.env[nom];
@@ -56,6 +94,13 @@ function entierEnv(nom: string, defaut: number): number {
  * Un seuil unique obligerait à choisir entre les deux, et le compromis serait
  * mauvais des deux côtés.
  */
+/** Le verdict d'une surface dont le compteur est injoignable. */
+export function surPanne(surface: Surface): Verdict {
+  return DEGRADATION[surface] === "autorise"
+    ? { autorise: true }
+    : { autorise: false, motif: "indisponible" };
+}
+
 function seuil(surface: Surface): { plafond: number; fenetreSecondes: number } {
   switch (surface) {
     case "auth-ip":
@@ -84,6 +129,31 @@ function seuil(surface: Surface): { plafond: number; fenetreSecondes: number } {
       // seuil reste largement au-dessus de tout usage réel.
       return {
         plafond: entierEnv("QUOTA_PUBLIQUE_ECRITURE_PAR_MINUTE", 10),
+        fenetreSecondes: 60,
+      };
+    case "admin":
+      /*
+       * LA SURFACE D'ADMINISTRATION — compteur DISTINCT de la page publique.
+       *
+       * DÉFAUT TROUVÉ À L'AUDIT DU 26/08/2026 : cette branche n'existait pas.
+       * Le brief exige « deux seuils distincts, EN BASE, compteurs distincts
+       * entre page publique et admin », et le module ne contenait pas une seule
+       * occurrence du mot « admin ». La moitié de la règle n'avait jamais été
+       * écrite.
+       *
+       * LE SEUIL EST BAS, ET IL PEUT L'ÊTRE. Un administrateur consulte, lit un
+       * journal, suspend un compte : trente requêtes par minute couvrent très
+       * largement une navigation soutenue, et un humain n'en fait jamais
+       * davantage. Ce n'est pas la page publique, où le seuil doit absorber
+       * vingt médias chargés d'un coup par un client pressé.
+       *
+       * CE QU'IL BORNE VRAIMENT : le martèlement ANONYME de `/admin`. Chaque
+       * requête y coûte deux allers-retours en base — le profil, puis le rôle —
+       * avant même de rendre le 404. Sans plafond, cette surface est le moyen
+       * le moins cher de nous faire travailler.
+       */
+      return {
+        plafond: entierEnv("QUOTA_ADMIN_PAR_MINUTE", 30),
         fenetreSecondes: 60,
       };
     case "suivi-notification":
@@ -206,13 +276,15 @@ export async function verifierQuotaPublique(): Promise<Verdict> {
     p_fenetre_secondes: seuilInconnu.fenetreSecondes,
   });
 
-  // Panne : on autorise, et on ne consomme rien non plus — un compteur dont on
-  // ignore l'état ne doit pas être avancé à l'aveugle.
-  if (erreurPeek !== null) return { autorise: true };
+  // Panne : la table tranche, et on ne consomme rien non plus — un compteur
+  // dont on ignore l'état ne doit pas être avancé à l'aveugle.
+  if (erreurPeek !== null) return surPanne("publique-inconnu");
   if (deja === true) return { autorise: false, motif: "quota" };
 
   const verdict = await consommer(cle, "publique-requetes");
-  if (!verdict.autorise && verdict.motif === "indisponible") return { autorise: true };
+  if (!verdict.autorise && verdict.motif === "indisponible") {
+    return surPanne("publique-requetes");
+  }
   return verdict;
 }
 
@@ -272,4 +344,35 @@ export async function verifierQuotaNotificationSuivi(): Promise<Verdict> {
   // personne de service, alors que les laisser passer offrirait un contournement
   // à qui sait masquer son adresse.
   return consommer(ip === null ? "sans-adresse" : empreinte(ip), "suivi-notification");
+}
+
+/**
+ * Le quota de la surface d'administration.
+ *
+ * ⚠️ ELLE REFUSE EN CAS DE PANNE DU COMPTEUR, et c'est l'inverse exact de la
+ * page publique. Le brief tranche la question ainsi, et la raison tient en une
+ * phrase : refuser côté public pénaliserait les CLIENTS D'UN VENDEUR pour un
+ * incident qui ne les concerne pas ; refuser côté admin ne pénalise QUE NOUS.
+ *
+ * Le coût d'un refus injustifié est ici qu'un administrateur recharge sa page.
+ * Le coût de l'autorisation par défaut est une surface sans plafond le jour
+ * précis où la base va mal — c'est-à-dire le jour où elle en a le plus besoin.
+ *
+ * LA CLÉ EST L'ADRESSE, PAS L'IDENTITÉ. Ce qu'on borne est le martèlement, et
+ * il vient d'un visiteur qui n'a précisément aucune identité : la garde
+ * `exigerAdmin()` s'exécute AVANT qu'on sache si l'appelant est administrateur.
+ * Compter par identité ne bornerait que ceux qui en ont une.
+ *
+ * SANS ADRESSE EXPLOITABLE, ON REFUSE — encore l'inverse du public. Une clé
+ * commune regrouperait tous les administrateurs sous un seul compteur, ce qui
+ * serait pire ; et l'administration n'a aucune raison d'être atteinte depuis un
+ * chemin qui ne porte pas d'adresse.
+ */
+export async function verifierQuotaAdmin(): Promise<Verdict> {
+  const ip = await adresseAppelant();
+  if (ip === null) return surPanne("admin");
+
+  const verdict = await consommer(empreinte(ip), "admin");
+  if (!verdict.autorise && verdict.motif === "indisponible") return surPanne("admin");
+  return verdict;
 }

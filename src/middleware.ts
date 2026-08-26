@@ -25,14 +25,44 @@ import { clePubliable, urlSupabase } from "@/lib/supabase/config";
  * - `p`        : la page publique par jeton. Hors langue par conception.
  * - `_next`,
  *   `_vercel`  : artefacts du framework.
- * - `.*\\..*`   : LA PLUS LARGE, et la plus dangereuse. Elle vise les fichiers
- *                statiques, mais elle exclut aussi n'importe quel segment de
- *                route contenant un point — un `rapport.png` en sortirait sans
- *                que rien ne le signale. Une sonde inventorie les routes réelles
- *                et vérifie qu'aucune ne tombe dedans par accident.
+ * - `[^/]+\\.[^/]+$`
+ *              : les fichiers statiques servis à la RACINE — `favicon.ico`,
+ *                `robots.txt`. Elle ne s'applique qu'à un chemin d'UN SEUL
+ *                segment, et c'est tout l'objet de la correction ci-dessous.
+ *
+ * ⚠️ CETTE EXCLUSION ÉTAIT `.*\\..*`, ET ELLE OUVRAIT UNE PORTE SUR `/admin`.
+ *
+ * DÉFAUT TROUVÉ À L'AUDIT DU 26/08/2026, vérifié par exécution sur le motif
+ * extrait de ce fichier :
+ *
+ *     /fr/admin/comptes/exemple  → passe par le middleware
+ *     /fr/admin/comptes/a.b      → EXCLU
+ *
+ * `.*\\..*` signifie « n'importe quel point, n'importe où », sans ancrage de
+ * fin. Le trou n'était pas dans les noms de dossiers — aucun n'en contient —
+ * mais dans les VALEURS des segments dynamiques, que le visiteur choisit
+ * lui-même. `/[locale]/admin/comptes/[id]` est exactement cela : il suffisait
+ * d'un point dans l'identifiant pour que la requête sorte du middleware, donc
+ * pour que le 404 pré-emptif n'ait jamais lieu et que la session ne soit pas
+ * rafraîchie.
+ *
+ * Aucune donnée ne fuitait — `exigerAdmin()` tient et rend 404 — mais la
+ * défense en profondeur, que le brief exige nommément sur cette surface,
+ * tombait à UNE SEULE couche, précisément sur la seule route admin dont l'URL
+ * est contrôlée par le visiteur. Et chaque requête anonyme y coûtait deux
+ * allers-retours en base.
+ *
+ * LA SONDE REGARDAIT LÀ OÙ LE DÉFAUT N'ÉTAIT PAS (L-025) : elle remplaçait les
+ * segments dynamiques par la chaîne littérale « exemple », qui ne contient pas
+ * de point. Elle prouvait donc qu'aucun DOSSIER ne s'appelle `rapport.png`, et
+ * laissait passer tout le reste.
+ *
+ * POURQUOI UN SEUL SEGMENT SUFFIT : `public/` est vide, et les fichiers servis
+ * à la racine par Next — `favicon.ico`, `robots.txt`, `manifest.webmanifest` —
+ * n'ont jamais de segment parent. Tout ce qui vit plus profond est une route.
  */
 export const config = {
-  matcher: "/((?!api(?:/|$)|p(?:/|$)|_next|_vercel|.*\\..*).*)",
+  matcher: "/((?!api(?:/|$)|p(?:/|$)|_next|_vercel|[^/]+\\.[^/]+$).*)",
 };
 
 const gestionLangue = createMiddleware(routing);

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { after } from "next/server";
 import { PostHog } from "posthog-node";
 import type { NomEvenement } from "./evenements";
 
@@ -128,4 +129,48 @@ export function reinitialiserInstrumentation(): void {
   compteurs.dernierEchec = null;
   clientMemoise = null;
   avertissementDejaEmis = false;
+}
+
+/**
+ * Émet APRÈS que la réponse est partie. À employer partout où l'appelant n'a
+ * pas besoin de savoir si l'événement est parti.
+ *
+ * ⚠️ DÉFAUT DE PERFORMANCE RÉEL, TROUVÉ À L'AUDIT DU 26/08/2026.
+ *
+ * Le client est configuré en `flushAt: 1, flushInterval: 0` — un POST HTTP par
+ * événement, et `emettre()` l'attend. Vingt-cinq appels vivaient sur le chemin
+ * de la requête, dont neuf sur des gestes que le vendeur ou son client
+ * DÉCLENCHENT : créer une commande, ouvrir l'éditeur, sauvegarder un champ,
+ * déposer un média, rendre la page publique.
+ *
+ * Tant que PostHog n'est pas configuré, `emettre()` sort immédiatement et cela
+ * ne coûte rien — c'est pourquoi le défaut ne se voyait pas. Le jour où la clé
+ * est renseignée, chaque clic paie un aller-retour vers l'UE : de l'ordre de
+ * 80 à 400 ms, ajoutés en série AVANT la réponse. Sur `/p/[token]`, cela vient
+ * directement sur un budget de LCP inférieur à deux secondes en 4G.
+ *
+ * `after()` exécute le travail UNE FOIS LA RÉPONSE ENVOYÉE, dans le même
+ * contexte de requête. La plateforme garde le processus vivant jusqu'à sa fin :
+ * l'événement part réellement, il ne part simplement plus AVANT la réponse. Le
+ * dépôt employait déjà ce motif pour l'appel au fournisseur de suivi ;
+ * l'instrumentation ne l'avait pas reçu.
+ *
+ * ⚠️ CE N'EST PAS UN « TIRE ET OUBLIE ». La promesse est confiée à `after`, qui
+ * l'attend : `no-floating-promises` reste satisfait, et une promesse non
+ * attendue perdrait les événements en silence — le piège nommé au brief.
+ *
+ * QUAND NE PAS L'EMPLOYER : quand le RETOUR compte. Deux appelants réclament
+ * une marque en base et la RENDENT si l'événement n'est pas parti, pour qu'une
+ * réémission reste possible. Ceux-là doivent attendre, et c'est leur raison
+ * d'être — le brief le dit : un compteur perdu qui sert de dénominateur fait
+ * monter le taux du côté rassurant.
+ */
+export function emettreApres(
+  nom: NomEvenement,
+  contexte: ContexteEmission,
+  proprietes: ProprietesEvenement = {},
+): void {
+  after(async () => {
+    await emettre(nom, contexte, proprietes);
+  });
 }

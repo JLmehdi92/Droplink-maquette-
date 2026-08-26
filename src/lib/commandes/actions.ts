@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -71,7 +71,7 @@ export async function creerBrouillon(donnees: FormData): Promise<void> {
     throw new Error("création de commande impossible : " + (error?.message ?? "réponse vide"));
   }
 
-  await emettre(EVENEMENTS.EDITEUR_OUVERT, { sujet: profil.profilId }, { origine: "creation" });
+  emettreApres(EVENEMENTS.EDITEUR_OUVERT, { sujet: profil.profilId }, { origine: "creation" });
 
   redirect("/" + langue + "/commandes/" + data.id);
 }
@@ -276,7 +276,7 @@ export async function archiverLot(donnees: FormData): Promise<void> {
     redirect(retour + separateur(retour) + "lot=" + motif);
   }
 
-  await emettre(
+  emettreApres(
     EVENEMENTS.COMMANDE_ARCHIVEE,
     { sujet: profil.profilId },
     { lot: data ?? 0, archivee: archiver },

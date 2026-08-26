@@ -146,14 +146,21 @@ async function semer(utilisateur: UtilisateurDeTest, etiquette: string): Promise
    * si l'écran tient.
    */
   await bd.query(
-    `insert into public.orders (shop_id, customer_label, product_ref, tracking_number, status, archived_at, created_at)
+    `insert into public.orders (shop_id, customer_label, product_ref, tracking_number, status, archived_at, created_at, updated_at)
      select $1,
             case when i % 7 = 0 then 'Crème Solaire ' || i else $2 || ' client ' || i end,
             'REF-' || $2 || '-' || i,
             case when i % 3 = 0 then 'LP' || lpad(i::text, 10, '0') || 'FR' else null end,
             (array['preparation','expedie','en_transit','livre'])[1 + (i % 4)]::public.order_status,
             case when i % 20 = 0 then now() - (i || ' hours')::interval else null end,
-            now() - (i || ' hours')::interval
+            now() - (i || ' hours')::interval,
+            -- \`updated_at\` est semée SÉPARÉMENT de \`created_at\`, et décalée.
+            -- Sans cela, toutes les lignes porteraient la même modification et
+            -- le tri « modifiées » se réduirait à un tri par \`id\` : on
+            -- mesurerait un cas que le produit ne rencontre jamais. Le décalage
+            -- pseudo-aléatoire reproduit ce que fait la sauvegarde automatique,
+            -- qui touche cette colonne à chaque frappe temporisée.
+            now() - (i || ' hours')::interval + ((i * 37 % 900) || ' minutes')::interval
      from generate_series(1, $3) as i`,
     [utilisateur.shopId, etiquette, PLAFOND_COMMANDES],
   );
@@ -283,6 +290,57 @@ describe("Liste du tableau de bord", () => {
       `La page profonde coûte ${ratio.toFixed(1)} fois la première. Une pagination ` +
         "par curseur doit rendre les deux équivalentes.",
     ).toBeLessThan(RATIO_PAGINATION);
+  });
+
+  test("tri « modifiées » : plan indexé, et le curseur BORNE l'index", async () => {
+    /*
+     * LE TRI QUI N'AVAIT AUCUN INDEX — le piège nommé au brief.
+     *
+     * Les sept index d'`orders` portaient tous `created_at` ; aucun ne portait
+     * `updated_at`. Le plan était `Limit ← Sort (top-N) ← Index Scan (shop_id)`,
+     * c'est-à-dire 9 600 lignes lues pour en rendre 50, en quelques
+     * millisecondes — un temps qui n'aurait JAMAIS fait sonner un seuil.
+     *
+     * Et surtout : la comparaison de couple du curseur restait un FILTRE au lieu
+     * de devenir une BORNE. Le commentaire de `liste.ts` promet que le coût ne
+     * croît pas avec le numéro de page ; c'était vrai pour trois tris sur
+     * quatre. Une promesse tenue à 75 % est plus dangereuse qu'une promesse
+     * absente, parce qu'on cesse de la vérifier.
+     *
+     * C'est donc la page PROFONDE qui est mesurée ici, pas la première : la
+     * première page passe même sans index, l'absence ne se voit qu'au fond.
+     */
+    const { rows } = await bd.query<{ updated_at: string; id: string }>(
+      `select updated_at, id from public.orders
+       where shop_id = $1 and archived_at is null
+       order by updated_at desc, id desc
+       offset 9000 limit 1`,
+      [alice.shopId],
+    );
+    const curseur = rows[0];
+    expect(curseur, "curseur introuvable : le jeu est plus petit qu'annoncé").toBeDefined();
+    const curseurIso = new Date(curseur?.updated_at ?? "").toISOString();
+
+    const m = await mesurerSerieuse(
+      alice,
+      `select id, customer_label, product_ref, status, updated_at
+       from public.orders
+       where archived_at is null
+         and (updated_at, id) < ('${curseurIso}'::timestamptz, '${curseur?.id}'::uuid)
+       order by updated_at desc, id desc
+       limit ${PAR_PAGE}`,
+    );
+    console.log(`  tri modifiées (page profonde) : ${m.ms.toFixed(1)} ms, ${m.lignesLues} lignes lues`);
+    const index = [...m.plan.matchAll(/"Index Name":"([^"]+)"/g)].map((x) => x[1]);
+    console.log(`  index  : ${index.join(", ") || "aucun"}`);
+
+    expect(m.plan.includes("Seq Scan"), "balayage complet sur le tri « modifiées »").toBe(false);
+    expect(
+      m.lignesLues,
+      `${m.lignesLues} lignes lues pour en rendre ${PAR_PAGE} : le curseur ne ` +
+        "borne pas l'index, le coût croît avec le numéro de page.",
+    ).toBeLessThan(LIGNES_LUES_MAX);
+    expect(m.ms, `${m.ms.toFixed(1)} ms au-dessus du seuil de ${PAGE_MS} ms`).toBeLessThan(PAGE_MS);
   });
 
   test("filtre par statut : plan indexé", async () => {

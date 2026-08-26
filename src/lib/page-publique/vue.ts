@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { creerClientSysteme } from "@/lib/supabase/system";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { adresseAppelant, classeAgent, empreinte, paysAppelant } from "@/lib/limitation/empreinte";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { JetonPublic } from "./lecture";
 
@@ -76,6 +76,6 @@ export async function enregistrerVue(jetonBrut: string): Promise<ResultatVue> {
 
   // ÉMIS APRÈS l'écriture, jamais avant. Un compteur incrémenté avant une
   // opération qui peut échouer perd son événement définitivement.
-  await emettre(EVENEMENTS.VUE_ENREGISTREE, { sujet: `visiteur:${empreinte(ip)}` });
+  emettreApres(EVENEMENTS.VUE_ENREGISTREE, { sujet: `visiteur:${empreinte(ip)}` });
   return "enregistree";
 }
