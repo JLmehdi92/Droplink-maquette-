@@ -879,3 +879,320 @@ describe("Sonde E — aucune policy n'est trivialement permissive", () => {
     ).toEqual([]);
   });
 });
+
+describe("Sonde F — chemin de recherche des fonctions `security definer`", () => {
+  /**
+   * Une fonction `security definer` s'exécute avec les droits de son
+   * PROPRIÉTAIRE. Si son `search_path` n'est pas épinglé, l'appelant choisit
+   * quelle table `orders` la fonction lira : il lui suffit de créer un schéma à
+   * lui, d'y poser un objet du même nom, et de le placer devant dans son propre
+   * chemin. La fonction, elle, ne change pas d'une ligne.
+   *
+   * C'est exactement le genre de propriété que décrit L-028 : elle vit dans le
+   * catalogue, aucune relecture du CORPS ne peut la voir, et son absence ne
+   * produit aucune erreur — seulement un résultat qui vient d'ailleurs.
+   *
+   * Vérifié par exécution avant de poser cette sonde : retirer
+   * `set search_path = ''` de `mon_shop_id()` — la fonction pivot de la moitié
+   * des policies — laissait la suite ENTIÈREMENT VERTE.
+   */
+  const DEFINER_SANS_CHEMIN_ADMISES = new Map<string, string>([
+    // Aucune. Une entrée ici devrait expliquer pourquoi une fonction privilégiée
+    // peut laisser son appelant décider des objets qu'elle touche.
+  ]);
+
+  test("toute fonction `security definer` épingle son `search_path` à vide", async () => {
+    const fonctions = await interroger<{
+      nom: string;
+      signature: string;
+      config: string[] | null;
+    }>(
+      bd,
+      `select p.proname as nom,
+              pg_get_function_identity_arguments(p.oid) as signature,
+              p.proconfig as config
+       from pg_proc p
+       join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public' and p.prosecdef
+       order by 1, 2`,
+    );
+
+    expect(
+      fonctions.length,
+      "Aucune fonction `security definer` trouvée dans public. La sonde " +
+        "n'inspecte rien, et un ensemble vide passe tout.",
+    ).toBeGreaterThan(0);
+
+    const defauts = fonctions
+      .filter((f) => !DEFINER_SANS_CHEMIN_ADMISES.has(f.nom))
+      .filter((f) => !(f.config ?? []).some((c) => c === 'search_path=""'))
+      .map(
+        (f) =>
+          `${f.nom}(${f.signature}) : chemin de recherche ` +
+          `${f.config === null ? "ABSENT" : JSON.stringify(f.config)}`,
+      );
+
+    expect(
+      defauts,
+      "Fonctions privilégiées dont le chemin de recherche n'est pas épinglé à " +
+        `vide : ${defauts.join(" | ")}. L'appelant peut leur substituer ses ` +
+        "propres objets.",
+    ).toEqual([]);
+
+    // Deuxième sens : une exception qui n'a plus d'objet doit faire échouer.
+    const perimees = [...DEFINER_SANS_CHEMIN_ADMISES.keys()].filter(
+      (nom) => !fonctions.some((f) => f.nom === nom),
+    );
+    expect(perimees, `Exceptions périmées : ${perimees.join(", ")}`).toEqual([]);
+  });
+
+  test("contre-test positif : la sonde distingue une fonction NON épinglée", async () => {
+    /*
+     * ON NE FALSIFIE PAS UNE ABSENCE EN LA REGARDANT.
+     *
+     * Le test ci-dessus passe aujourd'hui parce que toutes les fonctions sont
+     * correctes. Rien, dans ce vert, ne dit qu'il serait rouge autrement : une
+     * requête mal écrite rendrait un ensemble vide et se lirait pareil.
+     *
+     * On pose donc un TÉMOIN — une fonction privilégiée délibérément sans
+     * chemin — dans une transaction ANNULÉE, et on exige que la requête de la
+     * sonde la trouve. Le témoin ne survit pas au test : `rollback` défait la
+     * création, y compris si l'assertion échoue.
+     */
+    await bd.query("begin");
+    try {
+      await bd.query(
+        "create function public.temoin_sans_chemin() returns int " +
+          "language sql security definer as 'select 1'",
+      );
+
+      const trouvees = await interroger<{ nom: string }>(
+        bd,
+        `select p.proname as nom
+         from pg_proc p
+         join pg_namespace n on n.oid = p.pronamespace
+         where n.nspname = 'public' and p.prosecdef
+           and not (coalesce(p.proconfig, '{}') @> array['search_path=""'])`,
+      );
+
+      expect(
+        trouvees.map((f) => f.nom),
+        "La sonde n'a pas vu une fonction `security definer` sans chemin de " +
+          "recherche alors qu'elle venait d'être créée sous ses yeux. Son vert " +
+          "ne prouvait donc rien.",
+      ).toContain("temoin_sans_chemin");
+    } finally {
+      await bd.query("rollback");
+    }
+  });
+});
+
+describe("Sonde G — vues", () => {
+  /**
+   * Le dépôt ne contient AUCUNE vue, et c'est délibéré : la lecture publique est
+   * une FONCTION qui exige le jeton, précisément parce qu'une vue se parcourt.
+   *
+   * Une sonde qui se contenterait de constater cette absence porterait sur un
+   * ensemble vide — elle passerait aussi bien le jour où la vue existe et où la
+   * requête vise à côté. C'est le cas de la sonde de `page-publique`, qui ne
+   * regarde que `anon` : une vue `create view mes_commandes as select * from
+   * orders` accordée à `authenticated`, sans `security_invoker`, rendrait
+   * TOUTES les commandes de TOUS les vendeurs — `internal_notes` et
+   * `public_token` compris — sans qu'une seule suite rougisse.
+   *
+   * Deux propriétés indépendantes se cumulent donc ici, et la seconde est celle
+   * qui manquait : une vue s'exécute par défaut avec les droits de CELUI QUI
+   * L'A CRÉÉE, donc du propriétaire, donc SANS la RLS de l'appelant.
+   */
+  const VUES_ADMISES = new Map<string, string>([
+    // Aucune vue n'existe. Une entrée ici devra dire quelle donnée la vue
+    // expose et pourquoi son parcours intégral est acceptable.
+  ]);
+
+  test("aucune vue n'est lisible par anon ou authenticated sans `security_invoker`", async () => {
+    const vues = await interroger<{
+      nom: string;
+      invoker: boolean;
+      lisible_anon: boolean;
+      lisible_auth: boolean;
+    }>(
+      bd,
+      `select c.relname as nom,
+              coalesce(c.reloptions, '{}') @> array['security_invoker=true'] as invoker,
+              has_table_privilege('anon', c.oid, 'SELECT') as lisible_anon,
+              has_table_privilege('authenticated', c.oid, 'SELECT') as lisible_auth
+       from pg_class c
+       join pg_namespace n on n.oid = c.relnamespace
+       where n.nspname = 'public' and c.relkind in ('v', 'm')
+       order by 1`,
+    );
+
+    const defauts = vues
+      .filter((v) => !VUES_ADMISES.has(v.nom))
+      .filter((v) => (v.lisible_anon || v.lisible_auth) && !v.invoker)
+      .map(
+        (v) =>
+          `${v.nom} : lisible par ${v.lisible_anon ? "anon" : "authenticated"} ` +
+          "et exécutée avec les droits du PROPRIÉTAIRE, donc hors RLS",
+      );
+
+    expect(defauts, defauts.join(" | ")).toEqual([]);
+
+    const perimees = [...VUES_ADMISES.keys()].filter((nom) => !vues.some((v) => v.nom === nom));
+    expect(perimees, `Exceptions périmées : ${perimees.join(", ")}`).toEqual([]);
+  });
+
+  test("contre-test positif : la sonde voit une vue qui contourne la RLS", async () => {
+    // Même raison qu'en sonde F : l'inventaire des vues est VIDE, donc le test
+    // ci-dessus est aujourd'hui muet. Le témoin est ce qui le rend probant.
+    await bd.query("begin");
+    try {
+      await bd.query("create view public.temoin_vue as select id from public.orders");
+      await bd.query("grant select on public.temoin_vue to authenticated");
+
+      const vues = await interroger<{ nom: string; invoker: boolean; lisible_auth: boolean }>(
+        bd,
+        `select c.relname as nom,
+                coalesce(c.reloptions, '{}') @> array['security_invoker=true'] as invoker,
+                has_table_privilege('authenticated', c.oid, 'SELECT') as lisible_auth
+         from pg_class c
+         join pg_namespace n on n.oid = c.relnamespace
+         where n.nspname = 'public' and c.relkind in ('v', 'm')`,
+      );
+
+      const dangereuses = vues.filter((v) => v.lisible_auth && !v.invoker).map((v) => v.nom);
+      expect(
+        dangereuses,
+        "La sonde n'a pas vu une vue accordée à `authenticated` sans " +
+          "`security_invoker` créée sous ses yeux.",
+      ).toContain("temoin_vue");
+
+      // ... et le contre-test du contre-test : la même vue en `security_invoker`
+      // ne doit PLUS être signalée, sinon la sonde refuserait tout et ne
+      // prouverait rien de plus qu'un refus systématique.
+      await bd.query("alter view public.temoin_vue set (security_invoker = true)");
+      const apres = await interroger<{ invoker: boolean }>(
+        bd,
+        `select coalesce(c.reloptions, '{}') @> array['security_invoker=true'] as invoker
+         from pg_class c
+         join pg_namespace n on n.oid = c.relnamespace
+         where n.nspname = 'public' and c.relname = 'temoin_vue'`,
+      );
+      expect(apres[0]?.invoker, "la sonde ne distingue pas les deux cas").toBe(true);
+    } finally {
+      await bd.query("rollback");
+    }
+  });
+});
+
+describe("Sonde H — toute policy d'écriture porte un `WITH CHECK` explicite", () => {
+  /**
+   * `CLAUDE.md` revendique « zéro INSERT sans `WITH CHECK`, zéro UPDATE sans
+   * `WITH CHECK` ». C'était vrai, et rien ne l'exigeait.
+   *
+   * La sonde E, qui est la seule à lire `polwithcheck`, le CONCATÈNE avec
+   * `polqual` dans un `coalesce` : un `WITH CHECK` absent y disparaît sans
+   * laisser de trace, et la policy passe pour correcte parce que son `USING`,
+   * lui, dépend bien de l'identité.
+   *
+   * Ce que la présence explicite achète : sur un `UPDATE`, Postgres se rabat sur
+   * `USING` quand `WITH CHECK` manque. Les deux clauses répondent pourtant à
+   * deux questions différentes — `USING` dit quelles lignes on a le droit de
+   * MODIFIER, `WITH CHECK` dit ce qu'elles ont le droit de DEVENIR. Se reposer
+   * sur le repli, c'est faire dépendre l'interdiction de déplacer une commande
+   * chez un autre vendeur d'une propriété de la clause de LECTURE — la même
+   * dépendance à un autre objet qui avait déjà piégé la sonde E, et exactement
+   * la phrase de L-029 : « ce serait ouvert si quelqu'un élargissait le USING ».
+   */
+  const ECRITURES_SANS_CHECK_ADMISES = new Map<string, string>([
+    // Aucune. Une entrée devra dire à quoi la ligne écrite est autorisée à
+    // ressembler, et pourquoi la clause de lecture suffit à le garantir.
+  ]);
+
+  test("chaque policy INSERT ou UPDATE déclare son `WITH CHECK`", async () => {
+    const ecritures = await interroger<{
+      table_name: string;
+      polname: string;
+      commande: string;
+      check_present: boolean;
+    }>(
+      bd,
+      `select c.relname as table_name,
+              p.polname,
+              case p.polcmd when 'a' then 'INSERT' else 'UPDATE' end as commande,
+              p.polwithcheck is not null as check_present
+       from pg_policy p
+       join pg_class c on c.oid = p.polrelid
+       join pg_namespace n on n.oid = c.relnamespace
+       where n.nspname = 'public' and p.polcmd in ('a', 'w')
+       order by 1, 2`,
+    );
+
+    expect(
+      ecritures.length,
+      "Aucune policy d'écriture trouvée. Soit les migrations ne sont pas " +
+        "appliquées, soit la sonde vise à côté — dans les deux cas son vert " +
+        "ne vaut rien.",
+    ).toBeGreaterThan(0);
+
+    const defauts = ecritures
+      .filter((p) => !ECRITURES_SANS_CHECK_ADMISES.has(p.polname))
+      .filter((p) => !p.check_present)
+      .map(
+        (p) =>
+          `${p.table_name}.${p.polname} (${p.commande}) : aucun WITH CHECK — ` +
+          "ce que la ligne a le droit de DEVENIR n'est contrôlé par rien qui " +
+          "lui soit propre",
+      );
+
+    expect(defauts, defauts.join(" | ")).toEqual([]);
+
+    const perimees = [...ECRITURES_SANS_CHECK_ADMISES.keys()].filter(
+      (nom) => !ecritures.some((p) => p.polname === nom),
+    );
+    expect(perimees, `Exceptions périmées : ${perimees.join(", ")}`).toEqual([]);
+  });
+
+  test("contre-test positif : la sonde voit un `WITH CHECK` retiré", async () => {
+    /*
+     * Falsification HORS du cas motivant : on ne touche pas à `orders`, la table
+     * qui a motivé la sonde, mais à `order_media` — dont la policy de mise à
+     * jour est celle qui autorise le réordonnancement, donc celle qu'on est le
+     * plus susceptible de réécrire un jour sans y penser.
+     *
+     * Transaction annulée : la policy d'origine est intacte à la sortie, y
+     * compris si l'assertion échoue.
+     */
+    await bd.query("begin");
+    try {
+      // `alter policy` ne sait pas RETIRER un `with check` : on recrée la policy
+      // sans lui, ce qui est exactement le geste qu'un correctif pressé ferait.
+      // Le `using` est celui de la vraie policy, à la lettre : une falsification
+      // qui simplifie l'objet qu'elle casse ne casse pas l'objet.
+      await bd.query("drop policy order_media_maj on public.order_media");
+      await bd.query(
+        "create policy order_media_maj on public.order_media for update to authenticated " +
+          "using (exists (select 1 from public.orders o " +
+          "where o.id = order_media.order_id and o.shop_id = public.mon_shop_id()))",
+      );
+
+      const sansCheck = await interroger<{ polname: string }>(
+        bd,
+        `select p.polname
+         from pg_policy p
+         join pg_class c on c.oid = p.polrelid
+         join pg_namespace n on n.oid = c.relnamespace
+         where n.nspname = 'public' and p.polcmd in ('a', 'w')
+           and p.polwithcheck is null`,
+      );
+
+      expect(
+        sansCheck.map((p) => p.polname),
+        "La sonde n'a pas vu une policy d'écriture privée de son WITH CHECK " +
+          "alors qu'elle venait d'être recréée sous ses yeux.",
+      ).toContain("order_media_maj");
+    } finally {
+      await bd.query("rollback");
+    }
+  });
+});
