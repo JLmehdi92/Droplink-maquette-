@@ -122,3 +122,59 @@ describe("Parité des catalogues", () => {
     ).toBeLessThan(0.3);
   });
 });
+
+describe("Aucune clé ne contient de point", () => {
+  /*
+   * NEXT-INTL TRAITE LE POINT COMME UN SÉPARATEUR DE NIVEAU, et REFUSE qu'une
+   * clé en porte un. Deux libellés du journal d'administration s'appelaient
+   * `comptes.liste` et `comptes.detail` — les valeurs réelles des actions
+   * auditées, recopiées telles quelles.
+   *
+   * CE QUE ÇA CASSAIT, ET JUSQU'OÙ. `INVALID_KEY` est levé au CHARGEMENT du
+   * catalogue, donc sur toute page appelant `getTranslations` — la landing
+   * comprise. En développement, deux clés d'un écran d'administration
+   * cassaient le produit entier. Trouvé en lançant simplement `pnpm dev`.
+   *
+   * ET LES LIBELLÉS ÉTAIENT MORTS DE TOUTE FAÇON : `t("journal.actions.
+   * comptes.liste")` cherche une clé imbriquée qui n'existe pas, donc l'écran
+   * affichait l'identifiant technique brut à l'administrateur.
+   *
+   * POURQUOI LA PARITÉ NE L'A PAS VU, et c'est le plus instructif : elle
+   * inventorie bien les deux arbres, mais elle les APLATIT en chemins pointés.
+   * `admin.journal.actions.comptes.liste` s'écrit pareil qu'il vienne d'une clé
+   * fautive ou de deux niveaux légitimes — l'aplatissement effaçait exactement
+   * la distinction qui comptait. Une garde peut inventorier correctement et
+   * rester aveugle par sa REPRÉSENTATION.
+   */
+  function clesAvecPoint(arbre: Arbre, prefixe = ""): string[] {
+    const fautives: string[] = [];
+    for (const [cle, valeur] of Object.entries(arbre)) {
+      const chemin = prefixe === "" ? cle : `${prefixe}.${cle}`;
+      if (cle.includes(".")) fautives.push(chemin);
+      if (typeof valeur === "object") fautives.push(...clesAvecPoint(valeur, chemin));
+    }
+    return fautives;
+  }
+
+  test("la sonde parcourt réellement les catalogues", () => {
+    // Un ensemble vide passe tout : si le parcours cessait de descendre dans
+    // l'arbre, l'absence de clé fautive ne dirait rien.
+    for (const langue of LANGUES) {
+      const arbre = chargerCatalogue(langue);
+      expect(
+        Object.keys(arbre).length,
+        `catalogue ${langue} vide : la sonde ne regarde rien`,
+      ).toBeGreaterThan(3);
+    }
+  });
+
+  test.each(LANGUES)("catalogue %s", (langue) => {
+    const fautives = clesAvecPoint(chargerCatalogue(langue));
+    expect(
+      fautives,
+      `Clés contenant un point : ${fautives.join(", ")}. next-intl lève ` +
+        "INVALID_KEY au chargement du catalogue — donc sur TOUTE page qui " +
+        "appelle getTranslations, pas seulement celle qui emploie la clé.",
+    ).toEqual([]);
+  });
+});

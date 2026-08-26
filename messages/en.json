@@ -626,8 +626,14 @@
       "sousTitre": "What administrators have viewed or changed. Entries cannot be edited or deleted, and outlive the accounts they describe.",
       "cible": "Account concerned: {email}",
       "actions": {
-        "comptes.liste": "Viewed the account list",
-        "comptes.detail": "Viewed an account record"
+        "boutiques_liste": "Viewed the shop list",
+        "compte_reactivation": "Reactivated an account",
+        "compte_suspension": "Suspended an account",
+        "comptes_detail": "Viewed an account record",
+        "comptes_liste": "Viewed the account list",
+        "panneau_alertes": "Viewed the dashboard alerts",
+        "parametre_creation": "Created a system setting",
+        "parametre_modification": "Changed a system setting"
       },
       "vide": "No entries yet.",
       "pageSuivante": "Show more"

@@ -626,8 +626,14 @@
       "sousTitre": "Ce que les administrateurs ont consulté ou modifié. Les entrées ne peuvent être ni corrigées ni effacées, et survivent à la suppression des comptes qu'elles décrivent.",
       "cible": "Compte concerné : {email}",
       "actions": {
-        "comptes.liste": "Consultation de la liste des comptes",
-        "comptes.detail": "Consultation d'une fiche de compte"
+        "boutiques_liste": "Consultation de la liste des boutiques",
+        "compte_reactivation": "Réactivation d’un compte",
+        "compte_suspension": "Suspension d’un compte",
+        "comptes_detail": "Consultation d’une fiche de compte",
+        "comptes_liste": "Consultation de la liste des comptes",
+        "panneau_alertes": "Consultation des alertes du panneau",
+        "parametre_creation": "Création d’un paramètre système",
+        "parametre_modification": "Modification d’un paramètre système"
       },
       "vide": "Aucune entrée pour l'instant.",
       "pageSuivante": "Voir la suite"

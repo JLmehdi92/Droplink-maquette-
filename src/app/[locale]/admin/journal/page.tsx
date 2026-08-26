@@ -88,7 +88,26 @@ export default async function AdminJournal({
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span className="font-label-md text-label-md text-on-surface">
-                  {t(`journal.actions.${ligne.action}`, { defaut: ligne.action })}
+                  {/*
+                    LE POINT DEVIENT UN SOULIGNÉ, et ce n'est pas cosmétique.
+
+                    Les actions d'audit s'appellent `comptes.liste`,
+                    `compte.suspension`… et next-intl traite le point comme un
+                    séparateur de NIVEAU. `t("journal.actions.comptes.liste")`
+                    cherchait donc une clé imbriquée qui n'existe pas, et la
+                    valeur de repli affichait l'identifiant technique brut à
+                    l'administrateur.
+
+                    Pire : les deux libellés qui existaient portaient un point
+                    DANS leur clé, ce que next-intl REFUSE — il levait
+                    `INVALID_KEY` au chargement du catalogue, donc sur toute
+                    page appelant `getTranslations`, la landing comprise. En
+                    développement, le produit entier était cassé par deux clés
+                    d'un écran d'administration.
+                  */}
+                  {t(`journal.actions.${ligne.action.replaceAll(".", "_")}`, {
+                    defaut: ligne.action,
+                  })}
                 </span>
                 <span className="font-body-sm text-body-sm text-on-surface-variant">
                   {ligne.adminEmail}
