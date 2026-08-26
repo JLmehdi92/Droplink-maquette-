@@ -150,8 +150,8 @@ export function Editeur({
         <div className="flex flex-col gap-6 lg:col-span-8">
           {medias}
 
-          <section className="carte rounded-xl p-6 shadow-sm">
-            <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
+          <section className="carte rounded-lg p-[22px]">
+            <h2 className="mb-[18px] font-headline-md text-[16px] font-bold tracking-[-0.015em] text-on-surface">
               {t("sectionCommande")}
             </h2>
 
@@ -228,8 +228,8 @@ export function Editeur({
         </div>
 
         <div className="flex flex-col gap-6 lg:col-span-4">
-          <section className="carte rounded-xl p-6 shadow-sm">
-            <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
+          <section className="carte rounded-lg p-[22px]">
+            <h2 className="mb-[18px] font-headline-md text-[16px] font-bold tracking-[-0.015em] text-on-surface">
               {t("sectionDestinataire")}
             </h2>
 
@@ -338,8 +338,8 @@ function ChoixRadio({
   readonly onChoix: (v: string) => void;
 }) {
   return (
-    <section className="carte rounded-xl p-6 shadow-sm">
-      <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
+    <section className="carte rounded-lg p-[22px]">
+      <h2 className="mb-[18px] font-headline-md text-[16px] font-bold tracking-[-0.015em] text-on-surface">
         {titre}
       </h2>
       <div className="flex flex-col gap-3">

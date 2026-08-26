@@ -301,7 +301,7 @@ export function CarteMedias({
   const complet = total >= plafondMedias;
 
   return (
-    <section className="carte rounded-xl p-6 shadow-sm">
+    <section className="carte rounded-lg p-[22px]">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-label-md text-label-md tracking-wider text-on-surface uppercase">
           {t("titre")}

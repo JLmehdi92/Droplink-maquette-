@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { TableauEnvois } from "@/components/envois/tableau-envois";
@@ -66,16 +67,11 @@ export default async function Envois({
   const t = await getTranslations("envois");
 
   return (
-    <main
-      id="contenu"
-      className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop"
-    >
-      <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
-        {t("titre")}
-      </h1>
-      <p className="mt-3 font-body-md text-body-md text-on-surface-variant">{t("sousTitre")}</p>
+    <>
+      <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre")} />
 
-      <div className="mt-8">
+      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:py-[22px]">
+        <div>
         <TableauEnvois
           base={`/${langue}/envois`}
           parametres={parametres}
@@ -84,6 +80,7 @@ export default async function Envois({
           maintenant={maintenant}
         />
       </div>
-    </main>
+      </main>
+    </>
   );
 }

@@ -60,53 +60,10 @@ export async function TableauCommandes({
   // liens de la page, donc le retour atterrit exactement là où on était.
   const retour = lienListe(base, parametres, {});
 
-  const cellule = "px-6 py-4 font-body-sm text-body-sm";
+  const cellule = "px-4 py-3.5 font-body-md text-[14px] first:pl-5 last:pr-5";
 
   return (
-    <section className="col-span-1 flex h-full min-h-[600px] flex-col overflow-hidden rounded-xl shadow-md md:col-span-9 carte">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-outline-variant bg-surface-container-lowest p-6 sm:flex-row sm:items-center">
-        <form method="get" action={base} className="relative w-full sm:w-96">
-          {/* Les autres réglages voyagent avec la recherche : chercher ne doit
-              pas défaire le filtre qu'on vient de poser. */}
-          {parametres.statut !== null ? (
-            <input type="hidden" name="statut" value={parametres.statut} />
-          ) : null}
-          {parametres.qc !== null ? <input type="hidden" name="qc" value={parametres.qc} /> : null}
-          {parametres.tri !== "recentes" ? (
-            <input type="hidden" name="tri" value={parametres.tri} />
-          ) : null}
-          {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
-
-          <Icone
-            nom="search"
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[20px] text-on-surface-variant"
-          />
-          <input
-            type="search"
-            name="q"
-            defaultValue={parametres.q}
-            placeholder={t("rechercherExemple")}
-            aria-label={t("rechercher")}
-            className="champ-app w-full rounded-lg border border-outline-variant py-2 pr-4 pl-10 font-body-sm text-body-sm text-on-surface transition-all"
-          />
-        </form>
-
-        {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien vers
-            une page qui écrirait au rendu. Un lien serait suivi par le
-            préchargement du navigateur, par un aspirateur, par une visite
-            accidentelle — et chacun créerait un brouillon. */}
-        <form action={creerBrouillon}>
-          <input type="hidden" name="langue" value={langue} />
-          <button
-            type="submit"
-            className="flex items-center gap-2 rounded-lg bg-[var(--accent-remplissage)] px-4 py-2 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-opacity hover:opacity-90"
-          >
-            <Icone nom="add" className="text-[18px]" />
-            {t("nouvelle")}
-          </button>
-        </form>
-      </div>
-
+    <section className="flex flex-col overflow-hidden border-y border-outline-variant bg-surface-container-lowest md:mx-0 md:rounded-lg md:border">
       {page.lignes.length === 0 ? (
         <EtatVide
           compteVide={page.compteVide}
@@ -124,7 +81,7 @@ export async function TableauCommandes({
             <p
               role="status"
               className={
-                "border-b border-outline-variant px-6 py-3 font-body-sm text-body-sm " +
+                "border-b border-outline-variant px-5 py-3 font-body-md text-body-md " +
                 (lot.etat === "ok" ? "text-on-surface" : "text-error")
               }
             >
@@ -146,8 +103,8 @@ export async function TableauCommandes({
           <div className="flex-grow overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="border-b border-outline-variant bg-surface-container-lowest">
-                  <th scope="col" className="w-12 px-4 py-4">
+                <tr className="border-b border-outline-variant">
+                  <th scope="col" className="w-12 px-4 py-3 pl-5">
                     <span className="sr-only">{t("lot.titre")}</span>
                   </th>
                   {["client", "reference", "suivi", "statutCourt", "qcCourt", "vues", "modifiee"].map(
@@ -155,7 +112,7 @@ export async function TableauCommandes({
                       <th
                         key={clef}
                         scope="col"
-                        className="px-6 py-4 font-label-md text-label-md whitespace-nowrap text-on-surface-variant"
+                        className="px-4 py-3 font-label-sm text-[11px] font-bold tracking-[0.05em] whitespace-nowrap text-sourdine uppercase"
                       >
                         {t("colonne." + clef)}
                       </th>
@@ -163,7 +120,7 @@ export async function TableauCommandes({
                   )}
                   <th
                     scope="col"
-                    className="px-6 py-4 text-right font-label-md text-label-md whitespace-nowrap text-on-surface-variant"
+                    className="px-4 py-3 pr-5 text-right font-label-sm text-[11px] font-bold tracking-[0.05em] whitespace-nowrap text-sourdine uppercase"
                   >
                     {t("colonne.actions")}
                   </th>
@@ -176,8 +133,8 @@ export async function TableauCommandes({
                   // inventé : on le nomme pour ce qu'il est.
                   const nom = ligne.client ?? t("sansNom");
                   return (
-                    <tr key={ligne.id} className="group transition-colors hover:bg-surface-bright/50">
-                      <td className="w-12 px-4 py-4">
+                    <tr key={ligne.id} className="group transition-colors hover:bg-surface-container-low">
+                      <td className="w-12 px-4 py-3.5 pl-5">
                         <input
                           type="checkbox"
                           name="selection"
@@ -187,10 +144,7 @@ export async function TableauCommandes({
                         />
                       </td>
                       <td
-                        className={
-                          cellule +
-                          " border-l-2 border-transparent font-medium text-on-surface group-hover:border-[var(--accent-interface)]"
-                        }
+                        className={cellule + " font-semibold text-on-surface"}
                       >
                         <Link href={base + "/" + ligne.id} className="hover:underline">
                           {nom}
@@ -200,13 +154,13 @@ export async function TableauCommandes({
                       <td className={cellule + " text-on-surface-variant"}>
                         {ligne.numeroSuivi ?? "—"}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5">
                         <BadgeStatut
                           libelle={t("statut." + ligne.statut)}
                           teinte={teinteExpedition(ligne.statut)}
                         />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5">
                         <BadgeStatut
                           libelle={t("qc." + ligne.qc)}
                           teinte={teinteQc(ligne.qc)}
@@ -251,8 +205,8 @@ export async function TableauCommandes({
                           year: "numeric",
                         })}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="px-4 py-3.5 pr-5">
+                        <div className="flex items-center justify-end gap-0.5">
                           <TraductionsClient espaces={["commandes"]}>
                             <ActionsLigne
                               lien={origine + "/p/" + ligne.jetonPublic}
@@ -263,7 +217,7 @@ export async function TableauCommandes({
                           <button
                             type="submit"
                             form={"dup-" + ligne.id}
-                            className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-[var(--accent-texte)]"
+                            className="flex h-11 w-11 items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-surface-container hover:text-on-surface md:h-8 md:w-8"
                             title={t("dupliquerLigne", { client: nom })}
                           >
                             <Icone
@@ -276,7 +230,7 @@ export async function TableauCommandes({
                           <button
                             type="submit"
                             form={"arch-" + ligne.id}
-                            className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-[var(--accent-texte)]"
+                            className="flex h-11 w-11 items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-surface-container hover:text-on-surface md:h-8 md:w-8"
                             title={
                               ligne.archiveeLe === null
                                 ? t("archiver", { client: nom })
@@ -306,7 +260,7 @@ export async function TableauCommandes({
               courante : proposer « archiver » dans les archives n'aurait pas de
               sens. `name` et `value` d'un bouton partent avec le formulaire — le
               navigateur sait donc lequel a été pressé, sans JavaScript. */}
-          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant bg-surface-container-lowest px-6 py-4">
+          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant px-5 py-4">
             <span className="font-label-sm text-label-sm text-on-surface-variant">
               {t("lot.aide")}
             </span>
@@ -314,7 +268,7 @@ export async function TableauCommandes({
               type="submit"
               name="archiver"
               value={parametres.archivees ? "0" : "1"}
-              className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-variant"
+              className="flex min-h-11 items-center rounded-full border border-outline px-3.5 font-label-md text-[13px] font-semibold text-on-surface-variant transition-colors hover:bg-surface-container md:min-h-0 md:h-[34px]"
             >
               {parametres.archivees ? t("lot.desarchiver") : t("lot.archiver")}
             </button>
@@ -334,7 +288,7 @@ export async function TableauCommandes({
             public transfère une CAPACITÉ, définitivement : le prévenir une fois
             le fichier ouvert serait le prévenir trop tard.
           */}
-          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant px-6 py-4">
+          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant px-5 py-4">
             <a
               // LES MÊMES PARAMÈTRES QUE LA VUE, composés par la MÊME fonction
               // que tous les autres liens de l'écran. Recomposer la chaîne ici
@@ -342,7 +296,7 @@ export async function TableauCommandes({
               // divergent au premier filtre ajouté — le vendeur exporterait
               // alors autre chose que ce qu'il regarde, sans s'en apercevoir.
               href={lienListe("/api/commandes/export", { ...parametres, curseur: null }, {})}
-              className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-variant"
+              className="flex min-h-11 items-center rounded-full border border-outline px-3.5 font-label-md text-[13px] font-semibold text-on-surface-variant transition-colors hover:bg-surface-container md:min-h-0 md:h-[34px]"
             >
               {t("lot.exporter")}
             </a>
@@ -405,7 +359,7 @@ async function Pagination({
   const t = await getTranslations("commandes");
 
   return (
-    <div className="flex items-center justify-between gap-4 border-t border-outline-variant bg-surface-container-lowest px-6 py-4">
+    <div className="flex items-center justify-between gap-4 border-t border-outline-variant px-5 py-4">
       <p className="font-label-sm text-label-sm text-on-surface-variant">
         {suivant === null ? t("finDeListe") : t("pageSuivanteDisponible")}
       </p>
@@ -413,7 +367,7 @@ async function Pagination({
       {suivant !== null ? (
         <Link
           href={lienListe(base, parametres, { curseur: suivant })}
-          className="flex items-center gap-1 rounded-md border border-outline-variant px-3 py-1 font-label-sm text-label-sm text-on-surface transition-colors hover:bg-surface-variant"
+          className="flex min-h-11 items-center gap-1 rounded-md border border-outline px-[18px] font-label-md text-[14px] font-semibold text-on-surface transition-colors hover:bg-surface-container md:min-h-[38px]"
         >
           {t("pageSuivante")}
           <Icone nom="arrow_forward" className="text-[16px]" />
@@ -444,8 +398,8 @@ async function EtatVide({
   const vraimentVide = compteVide && !filtree;
 
   return (
-    <div className="flex flex-grow flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-      <span className="rounded-full bg-surface-container-low p-4 text-on-surface-variant">
+    <div className="flex flex-grow flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+      <span className="rounded-full bg-surface-container p-4 text-sourdine">
         <Icone nom={vraimentVide ? "add" : "search"} className="text-[32px]" />
       </span>
 
@@ -461,7 +415,7 @@ async function EtatVide({
           <input type="hidden" name="langue" value={langue} />
           <button
             type="submit"
-            className="flex items-center gap-2 rounded-lg bg-[var(--accent-remplissage)] px-6 py-3 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-opacity hover:opacity-90"
+            className="degrade-marque flex min-h-11 items-center gap-2 rounded-md px-6 font-label-md text-[14px] font-bold transition-opacity hover:opacity-90"
           >
             <Icone nom="add" className="text-[18px]" />
             {t("vide.creer")}
@@ -470,7 +424,7 @@ async function EtatVide({
       ) : (
         <Link
           href={base}
-          className="rounded-lg border border-outline-variant px-6 py-3 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-variant"
+          className="flex min-h-11 items-center rounded-md border border-outline px-6 font-label-md text-[14px] font-semibold text-on-surface transition-colors hover:bg-surface-container"
         >
           {t("toutEffacer")}
         </Link>

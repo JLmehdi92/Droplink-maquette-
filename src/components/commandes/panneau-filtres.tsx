@@ -5,15 +5,17 @@ import { STATUTS_EXPEDITION, STATUTS_QC, TRIS, type ParametresListe } from "@/li
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
 
 /**
- * Colonne de gauche de la maquette `gestion_d_inventaire_envois` : la boîte de
- * filtres, puis une boîte de même géométrie pour le tri.
+ * LE PANNEAU DE FILTRES COMPLET, replié par défaut.
  *
- * LA MAQUETTE MET DEUX ENCARTS D'INDICATEURS SOUS LES FILTRES — « durée moyenne
- * de transit », « fournisseurs actifs ». Aucun des deux ne se calcule : nous
- * n'avons ni durées de transit, ni fournisseurs. Les afficher avec une valeur
- * inventée ferait décider sur du faux ; les afficher à zéro ferait croire qu'on
- * a mesuré. La géométrie de l'emplacement est conservée, le contenu est le tri —
- * qui, lui, existe.
+ * IL A PERDU SA COLONNE. Le canevas n'a pas de barre latérale de filtres : les
+ * quatre vues courantes sont des pilules au-dessus du tableau, et tout le reste
+ * — statut QC, archives, tri — vit ici, dans un panneau qu'on ouvre quand on en
+ * a besoin. Une colonne permanente coûtait un quart de la largeur de l'écran le
+ * plus utilisé du produit pour des réglages qu'on touche une fois par semaine.
+ *
+ * REPLIÉ PAR `<details>`, donc SANS JAVASCRIPT. Il s'ouvre de lui-même quand un
+ * filtre est actif : sinon un vendeur verrait une liste restreinte sans voir ce
+ * qui la restreint, et conclurait à une perte de données.
  *
  * TOUT PASSE PAR UN FORMULAIRE `GET`. Pas d'état client, pas de bundle, et
  * l'écran fonctionne sans JavaScript. Le vendeur peut recopier son URL, la
@@ -31,11 +33,25 @@ export async function PanneauFiltres({
   const filtree = listeFiltree(parametres);
 
   const champ =
-    "w-full rounded-lg border border-outline-variant champ-app px-3 py-2 font-body-sm text-body-sm text-on-surface outline-none transition-all";
+    "champ-app min-h-11 w-full rounded-md border border-outline px-3 font-body-md text-body-md text-on-surface outline-none";
 
   return (
-    <aside className="col-span-1 flex flex-col gap-gutter md:col-span-3">
-      <form method="get" action={base} className="carte rounded-xl p-6 shadow-sm">
+    <details
+      open={filtree}
+      className="mx-margin-mobile rounded-lg border border-outline-variant bg-surface-container-lowest md:mx-0"
+    >
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-5 py-3 font-label-md text-[13px] font-bold text-on-surface-variant">
+        <Icone nom="filter_list" className="text-[18px]" />
+        {t("filtres")}
+        {filtree ? (
+          <span className="ml-auto font-body-sm text-[12px] font-normal text-secondary">
+            {t("filtresActifs")}
+          </span>
+        ) : null}
+      </summary>
+
+      <div className="grid gap-5 border-t border-outline-variant p-5 md:grid-cols-2">
+      <form method="get" action={base}>
         {/* Le tri courant survit à l'envoi du formulaire : c'est un réglage
             d'affichage, pas un filtre, et le perdre à chaque filtrage serait
             vécu comme une remise à zéro. */}
@@ -43,11 +59,6 @@ export async function PanneauFiltres({
           <input type="hidden" name="tri" value={parametres.tri} />
         ) : null}
         {parametres.q !== "" ? <input type="hidden" name="q" value={parametres.q} /> : null}
-
-        <h2 className="mb-4 flex items-center gap-2 font-label-md text-label-md text-on-surface">
-          <Icone nom="filter_list" className="text-[20px] text-on-surface-variant" />
-          {t("filtres")}
-        </h2>
 
         <div className="flex flex-col gap-4">
           <div>
@@ -97,7 +108,7 @@ export async function PanneauFiltres({
 
           <button
             type="submit"
-            className="mt-2 w-full rounded-lg border-2 border-on-surface px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-variant"
+            className="mt-1 min-h-11 w-full rounded-md bg-primary px-4 font-label-md text-[14px] font-bold text-on-primary transition-opacity hover:opacity-90"
           >
             {t("appliquer")}
           </button>
@@ -105,7 +116,7 @@ export async function PanneauFiltres({
           {filtree ? (
             <Link
               href={base}
-              className="text-center font-label-sm text-label-sm text-[var(--accent-texte)] hover:underline"
+              className="text-center font-label-md text-[13px] text-secondary hover:underline"
             >
               {t("toutEffacer")}
             </Link>
@@ -113,9 +124,9 @@ export async function PanneauFiltres({
         </div>
       </form>
 
-      <div className="carte rounded-xl p-6 shadow-sm">
-        <h2 className="mb-4 flex items-center gap-2 font-label-md text-label-md text-on-surface">
-          <Icone nom="schedule" className="text-[20px] text-on-surface-variant" />
+      <div>
+        <h2 className="mb-3 flex items-center gap-2 font-label-sm text-[11px] font-bold tracking-[0.05em] text-sourdine uppercase">
+          <Icone nom="schedule" className="text-[16px]" />
           {t("trier")}
         </h2>
         <ul className="flex flex-col gap-1">
@@ -127,10 +138,10 @@ export async function PanneauFiltres({
                   href={lienListe(base, parametres, { tri })}
                   aria-current={actif ? "true" : undefined}
                   className={
-                    "block rounded-lg px-3 py-2 font-body-sm text-body-sm transition-colors " +
+                    "flex min-h-11 items-center rounded-md px-3 font-body-md text-body-md transition-colors md:min-h-0 md:py-2 " +
                     (actif
-                      ? "bg-[color-mix(in_srgb,var(--accent-interface)_12%,transparent)] font-semibold text-[var(--accent-texte)]"
-                      : "text-on-surface-variant hover:bg-surface-variant")
+                      ? "bg-secondary-container font-semibold text-secondary"
+                      : "text-on-surface-variant hover:bg-surface-container")
                   }
                 >
                   {t("tri." + tri)}
@@ -140,6 +151,7 @@ export async function PanneauFiltres({
           })}
         </ul>
       </div>
-    </aside>
+      </div>
+    </details>
   );
 }

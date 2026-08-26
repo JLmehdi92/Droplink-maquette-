@@ -13,7 +13,11 @@
     "maMarque": "Ma marque",
     "espaceVendeur": "Espace vendeur",
     "mesEnvois": "Mes envois",
-    "mesAnalyses": "Mes analyses"
+    "mesAnalyses": "Mes analyses",
+    "lancement": {
+      "titre": "Phase de lancement",
+      "texte": "Tout est gratuit et sans limite pendant cette période."
+    }
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",
@@ -414,6 +418,13 @@
       "ecriture": "Le lot n’a pas pu être traité. Rien n’a été modifié.",
       "exporter": "Exporter en CSV",
       "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients."
+    },
+    "filtresActifs": "filtres actifs",
+    "vues": {
+      "toutes": "Toutes",
+      "enTransit": "En transit",
+      "jamaisOuvertes": "Jamais ouvertes",
+      "livrees": "Livrées"
     }
   },
   "editeur": {

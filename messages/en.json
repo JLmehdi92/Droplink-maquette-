@@ -13,7 +13,11 @@
     "maMarque": "My brand",
     "espaceVendeur": "Seller area",
     "mesEnvois": "My shipments",
-    "mesAnalyses": "My analytics"
+    "mesAnalyses": "My analytics",
+    "lancement": {
+      "titre": "Launch phase",
+      "texte": "Everything is free and unlimited during this period."
+    }
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, under your brand",
@@ -414,6 +418,13 @@
       "ecriture": "The bulk action could not be processed. Nothing was changed.",
       "exporter": "Export as CSV",
       "exportAvertissement": "The file contains your orders’ public links: anyone who opens it can open your customers’ pages."
+    },
+    "filtresActifs": "filters on",
+    "vues": {
+      "toutes": "All",
+      "enTransit": "In transit",
+      "jamaisOuvertes": "Never opened",
+      "livrees": "Delivered"
     }
   },
   "editeur": {

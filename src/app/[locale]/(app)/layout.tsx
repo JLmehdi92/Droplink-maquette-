@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
+import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
 
 /**
  * Enveloppe de l'espace authentifié.
@@ -75,37 +75,73 @@ export default async function LayoutApplication({
 
   const t = await getTranslations("navigation");
 
-  // LA NAVIGATION EST RENDUE CÔTÉ SERVEUR, en liens simples. Un composant client
-  // ici coûterait du bundle sur TOUS les écrans de l'espace vendeur, pour un
-  // menu qui ne fait que naviguer — et le dashboard est l'écran le plus vu du
-  // produit. `aria-current` n'est pas posé : le layout ne connaît pas le chemin
-  // courant sans lire l'URL, et l'annoncer de travers serait pire que ne rien
-  // annoncer à un lecteur d'écran.
+  const entrees: readonly EntreeNavigation[] = [
+    { href: `/${langue}/commandes`, libelle: t("mesCommandes"), icone: "inventory_2" },
+    { href: `/${langue}/envois`, libelle: t("mesEnvois"), icone: "local_shipping" },
+    { href: `/${langue}/analyses`, libelle: t("mesAnalyses"), icone: "monitoring" },
+    { href: `/${langue}/marque`, libelle: t("maMarque"), icone: "palette" },
+  ];
+
+  /*
+   * LA COQUILLE DU CANEVAS : une carte-page posée sur le fond lavande.
+   *
+   * Ce n'est pas une bordure décorative. Le fond extérieur borne la largeur du
+   * contenu sans le centrer dans du vide : à 2560 px, une application qui
+   * s'étale de bord à bord force à balayer l'écran des yeux pour relier une
+   * ligne à son action.
+   *
+   * LE FOND LAVANDE N'EXISTE QU'À PARTIR DE `md`. Au téléphone, encadrer coûte
+   * seize pixels de chaque côté sur une largeur de 390 — c'est-à-dire un
+   * dixième de la ligne, pris à ce qu'il y a dedans.
+   */
   return (
-    <div className="min-h-dvh bg-surface">
-      <nav
-        aria-label={t("espaceVendeur")}
-        className="border-b border-outline-variant bg-surface-container-lowest"
-      >
-        <ul className="mx-auto flex w-full max-w-container-max gap-2 px-margin-mobile md:px-margin-desktop">
-          {[
-            { href: `/${langue}/commandes`, libelle: t("mesCommandes") },
-            { href: `/${langue}/envois`, libelle: t("mesEnvois") },
-            { href: `/${langue}/analyses`, libelle: t("mesAnalyses") },
-            { href: `/${langue}/marque`, libelle: t("maMarque") },
-          ].map((entree) => (
-            <li key={entree.href}>
-              <Link
-                href={entree.href}
-                className="flex min-h-[44px] items-center px-3 font-label-md text-label-md text-on-surface-variant transition-colors hover:text-on-surface"
-              >
-                {entree.libelle}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      {children}
+    <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-xl">
+        <aside className="hidden border-r border-outline-variant bg-surface-container-lowest px-4 py-[22px] md:flex md:w-[236px] md:shrink-0 md:flex-col">
+          <span className="mb-[26px] px-2 font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-on-surface">
+            DropLink
+          </span>
+
+          <NavigationVendeur entrees={entrees} variante="cote" etiquette={t("espaceVendeur")} />
+
+          <div className="flex-grow" />
+
+          {/*
+            LA PHASE DE LANCEMENT EST DITE, ET C'EST UNE DÉCISION PRODUIT.
+            Le produit est gratuit et sans limite pendant la validation ; ne
+            rien dire laisserait un vendeur découvrir un jour une facture qu'il
+            n'attendait pas, ou craindre une limite qui n'existe pas.
+          */}
+          <div className="mb-3.5 rounded-lg bg-secondary-container p-4">
+            <p className="font-label-md text-[13px] font-bold text-on-secondary-container">
+              {t("lancement.titre")}
+            </p>
+            <p className="mt-1.5 font-body-sm text-[12px] leading-[18px] text-on-surface-variant">
+              {t("lancement.texte")}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 rounded-[11px] p-2">
+            <span className="h-8 w-8 shrink-0 rounded-full bg-surface-container-highest" />
+            <div className="min-w-0">
+              {profil.nomBoutique !== null ? (
+                <p className="truncate font-label-md text-[13px] font-semibold text-on-surface">
+                  {profil.nomBoutique}
+                </p>
+              ) : null}
+              <p className="truncate font-body-sm text-[11px] text-on-surface-variant">
+                {profil.email}
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        {/* La marge basse laisse la place à la barre d'onglets, qui est fixe :
+            sans elle, la dernière ligne de chaque écran est inatteignable. */}
+        <div className="flex min-w-0 flex-1 flex-col pb-[86px] md:pb-0">{children}</div>
+      </div>
+
+      <NavigationVendeur entrees={entrees} variante="bas" etiquette={t("espaceVendeur")} />
     </div>
   );
 }

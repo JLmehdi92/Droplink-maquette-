@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
@@ -82,16 +83,11 @@ export default async function Analyses({
   const qcTotal = activite.qcApprouve + activite.qcRefuse + activite.qcEnAttente;
 
   return (
-    <main
-      id="contenu"
-      className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop"
-    >
-      <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
-        {t("titre")}
-      </h1>
-      <p className="mt-3 font-body-md text-body-md text-on-surface-variant">{t("sousTitre")}</p>
+    <>
+      <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre")} />
 
-      <nav aria-label={t("periode.titre")} className="mt-6 flex flex-wrap gap-2">
+      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:py-[22px]">
+        <nav aria-label={t("periode.titre")} className="mt-6 flex flex-wrap gap-2">
         {PERIODES.map((p) => (
           <Link
             key={p}
@@ -191,6 +187,7 @@ export default async function Analyses({
           </ul>
         )}
       </section>
-    </main>
+      </main>
+    </>
   );
 }

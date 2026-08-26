@@ -107,8 +107,8 @@ export function ActionsCommande({
     "flex w-full items-center justify-between gap-2 rounded-lg border border-outline-variant px-4 py-3 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container-low";
 
   return (
-    <section className="carte rounded-xl p-6 shadow-sm">
-      <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
+    <section className="carte rounded-lg p-[22px]">
+      <h2 className="mb-[18px] font-headline-md text-[16px] font-bold tracking-[-0.015em] text-on-surface">
         {t("titre")}
       </h2>
 

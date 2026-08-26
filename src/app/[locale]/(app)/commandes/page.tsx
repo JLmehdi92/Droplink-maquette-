@@ -1,6 +1,9 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { Icone } from "@/components/icone";
 import { PanneauFiltres } from "@/components/commandes/panneau-filtres";
+import { PilulesFiltres } from "@/components/commandes/pilules-filtres";
+import { creerBrouillon } from "@/lib/commandes/actions";
 import { TableauCommandes } from "@/components/commandes/tableau-commandes";
 import { analyserParametres, lireCommandes } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
@@ -67,19 +70,102 @@ export default async function Commandes({
   const base = "/" + langue + "/commandes";
 
   return (
-    <main
-      id="contenu"
-      className="mx-auto flex w-full max-w-container-max flex-col gap-gutter px-margin-mobile py-8 md:px-margin-desktop"
-    >
-      <header className="mb-4">
-        <h1 className="mb-2 font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-xl md:text-headline-xl">
-          {t("titre")}
-        </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant">{t("sousTitre")}</p>
+    <>
+      {/*
+        L'EN-TÊTE D'ÉCRAN, sur fond blanc et détaché du contenu par un filet.
+        Il porte les deux gestes qu'on fait en arrivant : chercher, et créer.
+      */}
+      <header className="border-b border-outline-variant bg-surface-container-lowest px-margin-mobile py-4 md:px-[30px] md:py-[26px]">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-headline-lg text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
+              {t("titre")}
+            </h1>
+            <p className="mt-1 font-body-sm text-[13px] text-on-surface-variant md:text-[14px]">
+              {t("sousTitre")}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2.5">
+            <form method="get" action={base} className="relative hidden md:block">
+              {/* Les autres réglages voyagent avec la recherche : chercher ne
+                  doit pas défaire le filtre qu'on vient de poser. */}
+              {parametres.statut !== null ? (
+                <input type="hidden" name="statut" value={parametres.statut} />
+              ) : null}
+              {parametres.qc !== null ? (
+                <input type="hidden" name="qc" value={parametres.qc} />
+              ) : null}
+              {parametres.tri !== "recentes" ? (
+                <input type="hidden" name="tri" value={parametres.tri} />
+              ) : null}
+              {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
+
+              <Icone
+                nom="search"
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[18px] text-sourdine"
+              />
+              <input
+                type="search"
+                name="q"
+                defaultValue={parametres.q}
+                placeholder={t("rechercherExemple")}
+                aria-label={t("rechercher")}
+                className="champ-app h-[42px] w-[290px] rounded-md border border-outline pr-3.5 pl-[38px] font-body-md text-[14px] text-on-surface"
+              />
+            </form>
+
+            {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien
+                vers une page qui écrirait au rendu. Un lien serait suivi par le
+                préchargement du navigateur, par un aspirateur, par une visite
+                accidentelle — et chacun créerait un brouillon.
+
+                LE DÉGRADÉ EST ICI, ET NULLE PART AILLEURS SUR L'ÉCRAN : une
+                seule action principale par page. */}
+            <form action={creerBrouillon}>
+              <input type="hidden" name="langue" value={langue} />
+              <button
+                type="submit"
+                className="degrade-marque flex h-[42px] items-center gap-2 rounded-md px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
+              >
+                <Icone nom="add" className="text-[16px]" />
+                <span className="hidden sm:inline">{t("nouvelle")}</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* La recherche passe SOUS le titre au téléphone : à 390 px elle ne
+            tient pas à côté du bouton, et c'est elle qu'on utilise le plus. */}
+        <form method="get" action={base} className="relative mt-3.5 md:hidden">
+          {parametres.statut !== null ? (
+            <input type="hidden" name="statut" value={parametres.statut} />
+          ) : null}
+          {parametres.qc !== null ? <input type="hidden" name="qc" value={parametres.qc} /> : null}
+          {parametres.tri !== "recentes" ? (
+            <input type="hidden" name="tri" value={parametres.tri} />
+          ) : null}
+          {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
+          <Icone
+            nom="search"
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[18px] text-sourdine"
+          />
+          <input
+            type="search"
+            name="q"
+            defaultValue={parametres.q}
+            placeholder={t("rechercherExemple")}
+            aria-label={t("rechercher")}
+            className="champ-app h-11 w-full rounded-md border border-outline pr-3.5 pl-[38px] font-body-md text-[15px] text-on-surface"
+          />
+        </form>
       </header>
 
-      <div className="grid grid-cols-1 items-start gap-gutter md:grid-cols-12">
+      <main id="contenu" className="flex flex-col gap-3.5 py-3.5 md:gap-4 md:px-[30px] md:py-[22px]">
+        <PilulesFiltres base={base} parametres={parametres} />
+
         <PanneauFiltres base={base} parametres={parametres} />
+
         <TableauCommandes
           base={base}
           langue={langue}
@@ -91,7 +177,7 @@ export default async function Commandes({
           page={page}
           lot={lot}
         />
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

@@ -113,34 +113,50 @@ export default async function EditeurCommande({
 
   return (
     <main id="contenu" className="flex min-h-dvh flex-col">
-      <header className="z-10 flex h-20 shrink-0 items-center justify-between border-b border-surface-container bg-surface-container-lowest px-gutter">
-        <div className="flex items-center gap-4">
-          <Link
-            href={"/" + langue + "/commandes"}
-            className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container"
-            title={t("retour")}
-          >
-            <Icone nom="arrow_back" className="text-[24px]" titre={t("retour")} />
-          </Link>
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-md md:text-headline-md">
+      {/*
+        LA BARRE HAUTE DE L'ÉDITEUR : d'où l'on vient, ce qu'on édite, et les
+        deux gestes qui suivent l'édition — copier le lien, l'ouvrir.
+
+        LE DÉGRADÉ EST SUR « VOIR LA PAGE PUBLIQUE » et sur rien d'autre. Une
+        seule action principale par écran : c'est celle qui termine le travail,
+        celle qu'on fait avant d'envoyer le lien à son client.
+      */}
+      <header className="z-10 flex shrink-0 flex-wrap items-center gap-3 border-b border-outline-variant bg-surface-container-lowest px-margin-mobile py-3.5 md:gap-[18px] md:px-[26px]">
+        <Link
+          href={"/" + langue + "/commandes"}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-outline text-on-surface transition-colors hover:bg-surface-container md:h-[38px] md:w-[38px]"
+          title={t("retour")}
+        >
+          <Icone nom="arrow_back" className="text-[17px]" titre={t("retour")} />
+        </Link>
+
+        <div className="min-w-0">
+          <h1 className="truncate font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-on-surface">
             {data.customer_label ?? t("titre")}
           </h1>
+          {data.product_ref !== null ? (
+            <p className="truncate font-body-sm text-[12px] text-on-surface-variant">
+              {data.product_ref}
+            </p>
+          ) : null}
         </div>
+
+        <span className="flex-grow" />
 
         {lienPublic !== null ? (
           <a
             href={lienPublic}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container-low"
+            className="degrade-marque flex h-11 items-center gap-2 rounded-md px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90 md:h-10"
           >
             {t("voirPage")}
-            <Icone nom="open_in_new" className="text-[16px]" />
+            <Icone nom="open_in_new" className="text-[14px]" />
           </a>
         ) : null}
       </header>
 
-      <div className="flex-1 overflow-y-auto p-margin-mobile md:p-gutter lg:p-margin-desktop">
+      <div className="flex-1 p-margin-mobile md:px-[26px] md:py-5">
         <TraductionsClient espaces={["editeur", "medias", "actions"]}>
           <Editeur
             id={data.id}
