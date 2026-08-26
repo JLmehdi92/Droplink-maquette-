@@ -131,11 +131,28 @@ export async function ingererEtat(
   const colis = data ?? 0;
 
   if (colis > 0) {
-    // Émis APRÈS l'écriture. Le numéro de suivi NE PART PAS vers l'analytics :
-    // c'est une donnée du client d'un vendeur, et quatre caractères suffisent à
-    // relier deux événements entre eux sans identifier personne.
+    /*
+     * CE POINT N'ÉMET PLUS « COLIS PRIS EN CHARGE », ET C'EST UNE CORRECTION DE
+     * COMPTEUR, PAS DE STYLE.
+     *
+     * L'ingestion est appelée à CHAQUE passage de cadence et à chaque
+     * notification poussée. Émettre ici la prise en charge faisait compter les
+     * INTERROGATIONS — un colis long en produit des dizaines — sous le nom du
+     * seul geste que le fournisseur facture. Le compteur qui devait dire si le
+     * coût variable du produit tient mesurait autre chose, en le surestimant.
+     * La vraie prise en charge est émise une fois, dans `prise-en-charge.ts`.
+     *
+     * « Premier scan » était pire encore : il était choisi quand l'étape valait
+     * « livré ». Il comptait donc des LIVRAISONS. Ce que cette fonction sait,
+     * c'est l'étape atteinte — jamais la transition, que la base calcule sans
+     * la lui rendre. On nomme donc ce qu'on observe.
+     *
+     * Le numéro de suivi NE PART PAS vers l'analytics : c'est une donnée du
+     * client d'un vendeur, et quatre caractères suffisent à relier deux
+     * événements entre eux sans identifier personne.
+     */
     await emettre(
-      etape === "livre" ? EVENEMENTS.PREMIER_SCAN : EVENEMENTS.COLIS_PRIS_EN_CHARGE,
+      EVENEMENTS.ETAPE_FRANCHIE,
       { sujet: "suivi:" + propre.slice(0, 4) },
       { etape, colis, statut_inconnu: inconnu },
     );

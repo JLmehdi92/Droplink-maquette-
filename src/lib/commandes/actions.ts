@@ -71,8 +71,19 @@ export async function creerBrouillon(donnees: FormData): Promise<void> {
     throw new Error("création de commande impossible : " + (error?.message ?? "réponse vide"));
   }
 
-  emettreApres(EVENEMENTS.EDITEUR_OUVERT, { sujet: profil.profilId }, { origine: "creation" });
-
+  /*
+   * PAS D'ÉMISSION ICI, et c'est la correction d'un DÉNOMINATEUR.
+   *
+   * Cette action redirige vers l'éditeur, qui émet `order_editor_opened` en
+   * rendant. Émettre aussi depuis ici produisait DEUX événements pour une seule
+   * ouverture — sur un événement déclaré dénominateur du taux d'activation.
+   * Un dénominateur gonflé fait BAISSER le taux : le biais va cette fois du
+   * côté pessimiste, ce qui le rend seulement moins dangereux, pas correct.
+   *
+   * La distinction que portait `origine: "creation"` n'est pas perdue : la page
+   * la reconstruit depuis `first_content_at`, qui dit si la commande a déjà reçu
+   * du contenu réel. Un fait, un point d'émission.
+   */
   redirect("/" + langue + "/commandes/" + data.id);
 }
 

@@ -61,7 +61,11 @@ export default async function EditeurCommande({
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at",
+      // `first_content_at` n'est pas rendu à l'écran : il sert à dire si cette
+      // ouverture porte sur un brouillon encore vide ou sur une commande déjà
+      // remplie — la distinction que portait le second point d'émission qu'on
+      // vient de retirer.
+      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -106,7 +110,15 @@ export default async function EditeurCommande({
     // premier contenu réel. L'écart entre les deux est l'information : un
     // brouillon ouvert puis abandonné est exactement le cas « teste une ou deux
     // fois puis disparaît ».
-    emettreApres(EVENEMENTS.EDITEUR_OUVERT, { sujet: profil.profilId }, { origine: "edition" });
+    //
+    // POINT D'ÉMISSION UNIQUE. `creerBrouillon` en portait un second et
+    // redirigeait ici : une création comptait donc deux ouvertures, sur un
+    // événement qui sert de DÉNOMINATEUR.
+    emettreApres(
+      EVENEMENTS.EDITEUR_OUVERT,
+      { sujet: profil.profilId },
+      { origine: data.first_content_at === null ? "brouillon" : "edition" },
+    );
   }
 
   const lienPublic = origine === null ? null : origine + "/p/" + data.public_token;

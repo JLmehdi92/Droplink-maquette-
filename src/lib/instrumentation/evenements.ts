@@ -76,7 +76,28 @@ export const EVENEMENTS = {
   QC_REFUSE: "qc_refuse",
 
   // --- Suivi ---
+  /**
+   * LA PRISE EN CHARGE CHEZ LE FOURNISSEUR — LE SEUL GESTE FACTURÉ.
+   *
+   * Le fournisseur facture à la prise en charge, pas à l'interrogation : ce
+   * compteur est donc le seul du produit qui corresponde à une ligne de facture,
+   * et le seul dont l'exactitude se paie en argent.
+   *
+   * ⚠️ IL AVAIT UN SECOND POINT D'ÉMISSION, dans l'ingestion, franchi à CHAQUE
+   * interrogation de cadence qui appliquait un état. Le compteur mesurait donc
+   * les interrogations — un colis long en compte des dizaines — et non les
+   * prises en charge. C'est le double comptage sur le pire des compteurs :
+   * celui qui aurait servi à décider si le coût variable du produit tient.
+   */
   COLIS_PRIS_EN_CHARGE: "colis_pris_en_charge",
+  /**
+   * Un état de colis appliqué en base, avec l'étape atteinte.
+   *
+   * C'est ce que l'ingestion SAIT réellement : elle voit l'état que le
+   * fournisseur rapporte, jamais la transition depuis l'état précédent — la
+   * base applique `greatest(actuel, candidat)` sans le lui dire.
+   */
+  ETAPE_FRANCHIE: "etape_franchie",
   PREMIER_SCAN: "premier_scan",
   /**
    * Un numéro fraîchement collé n'est souvent pas encore scanné. Ce retour vide
@@ -107,3 +128,66 @@ export const EVENEMENTS_DENOMINATEURS: readonly NomEvenement[] = [
   EVENEMENTS.EDITEUR_OUVERT,
   EVENEMENTS.PAGE_PUBLIQUE_RENDUE,
 ];
+
+/**
+ * Événements CATALOGUÉS MAIS PAS ENCORE ÉMIS, et pourquoi.
+ *
+ * Ce registre existe parce que l'alternative est pire dans les deux sens. Les
+ * retirer du catalogue ferait disparaître du dépôt la trace d'une mesure qu'on
+ * a décidé de prendre — et le brief les nomme. Les laisser sans rien dire les
+ * rendrait indiscernables de ceux qui sont branchés : une lecture du catalogue
+ * conclurait que le produit mesure ce qu'il ne mesure pas, et c'est exactement
+ * L-014, un document qui affirme un état que personne n'a exécuté.
+ *
+ * La sonde `tests/unit/instrumentation-inventaire.test.ts` compare ce registre
+ * aux sites d'émission réels DANS LES DEUX SENS : un événement qui perd son
+ * émetteur sans être déclaré ici fait échouer, et une déclaration devenue
+ * inutile aussi.
+ */
+export const EVENEMENTS_SANS_EMETTEUR: ReadonlyMap<NomEvenement, string> = new Map([
+  [
+    EVENEMENTS.LIEN_PARTAGE,
+    "Le partage est un geste de NAVIGATEUR — copier le lien, ouvrir la page. " +
+      "L'émettre depuis le serveur exigerait une action dédiée, donc un point " +
+      "d'entrée public de plus pour une mesure ; l'émettre depuis le client le " +
+      "rendrait invisible derrière un bloqueur. À trancher avec Wassim, pas à " +
+      "brancher au plus vite.",
+  ],
+  [
+    EVENEMENTS.PREMIER_SCAN,
+    "Il désigne la PREMIÈRE MISE EN MOUVEMENT d'un colis, c'est-à-dire une " +
+      "TRANSITION. L'ingestion ne connaît que l'état rapporté : c'est la base " +
+      "qui compare à l'existant, et `appliquer_etat_colis` ne rend que le " +
+      "nombre de commandes touchées. Il était émis quand l'étape valait " +
+      "« livré » — donc il comptait des LIVRAISONS sous le nom de premiers " +
+      "scans. Le rebrancher demande que la fonction rende la transition, donc " +
+      "une migration qui change sa signature ; mieux vaut ne pas mesurer que " +
+      "mesurer autre chose sous le bon nom.",
+  ],
+  [
+    EVENEMENTS.COLIS_IMMOBILISE,
+    "L'immobilisation est un SEUIL FRANCHI, pas un état : l'émettre à chaque " +
+      "passage de cadence produirait un événement par interrogation pour un " +
+      "colis qui, par définition, ne bouge pas — le double comptage dans sa " +
+      "forme la plus caricaturale. Il faut une marque en base disant que le " +
+      "franchissement a déjà été signalé, donc une migration.",
+  ],
+  [
+    EVENEMENTS.NOTIFICATION_ENVOYEE,
+    "Aucun envoi d'email n'existe encore dans le produit : `src/lib/email/` ne " +
+      "contient que la correction de saisie d'adresse. Un émetteur posé avant " +
+      "la fonctionnalité mesurerait le vide.",
+  ],
+  [
+    EVENEMENTS.NOTIFICATION_ECHOUEE,
+    "Même raison : il n'y a pas d'envoi, donc pas d'échec d'envoi. Et cet " +
+      "événement-là n'a de sens qu'avec le précédent — un taux d'échec sans " +
+      "dénominateur ne se lit pas.",
+  ],
+  [
+    EVENEMENTS.NOTIFICATION_REBOND,
+    "Un rebond est rapporté par le prestataire d'envoi, sur un point de " +
+      "réception qui n'existe pas. Il viendra avec le sous-domaine d'envoi " +
+      "dédié et sa configuration SPF/DKIM/DMARC.",
+  ],
+]);
