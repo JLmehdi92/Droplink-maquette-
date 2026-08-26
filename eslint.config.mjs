@@ -28,14 +28,16 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 
   {
-    ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-      "scripts/**",
-    ],
+    // ⚠️ `scripts/**` NE FIGURE PLUS ICI, et c'est délibéré.
+    //
+    // Ce dossier porte `falsifier.mjs` et `fumee.mjs` : les deux outils qui
+    // certifient que le produit est VIVANT et que ses gardes mordent. Ils
+    // étaient hors de toutes les portes — ni typés, ni lintés — donc
+    // `no-floating-promises` ne s'y appliquait pas. Une promesse perdue dans
+    // le falsificateur laisse le produit CASSÉ EN BASE pendant que le script
+    // annonce l'avoir réparé : le seul défaut du dépôt dont la conséquence est
+    // une base durablement fausse.
+    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"],
   },
 
   // Règles à typage requis. Le brief les exige nommément : `foo()` et
@@ -43,7 +45,7 @@ const eslintConfig = [
   // textuelle les distingue — c'est le TYPAGE qui doit l'exiger, sinon une
   // promesse non attendue perd son événement en silence.
   {
-    files: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"],
+    files: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "scripts/**/*.mjs"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: { projectService: true, tsconfigRootDir: __dirname },
