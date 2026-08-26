@@ -31,11 +31,11 @@ export async function PanneauFiltres({
   const filtree = listeFiltree(parametres);
 
   const champ =
-    "w-full rounded-lg border border-outline-variant champ-verre px-3 py-2 font-body-sm text-body-sm text-on-surface outline-none transition-all";
+    "w-full rounded-lg border border-outline-variant champ-app px-3 py-2 font-body-sm text-body-sm text-on-surface outline-none transition-all";
 
   return (
     <aside className="col-span-1 flex flex-col gap-gutter md:col-span-3">
-      <form method="get" action={base} className="glass-card rounded-xl p-6 shadow-sm">
+      <form method="get" action={base} className="carte rounded-xl p-6 shadow-sm">
         {/* Le tri courant survit à l'envoi du formulaire : c'est un réglage
             d'affichage, pas un filtre, et le perdre à chaque filtrage serait
             vécu comme une remise à zéro. */}
@@ -113,7 +113,7 @@ export async function PanneauFiltres({
         </div>
       </form>
 
-      <div className="glass-card rounded-xl p-6 shadow-sm">
+      <div className="carte rounded-xl p-6 shadow-sm">
         <h2 className="mb-4 flex items-center gap-2 font-label-md text-label-md text-on-surface">
           <Icone nom="schedule" className="text-[20px] text-on-surface-variant" />
           {t("trier")}

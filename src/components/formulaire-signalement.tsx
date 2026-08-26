@@ -55,7 +55,7 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
   };
 
   const champ =
-    "champ-verre w-full rounded-lg border border-outline-variant/50 px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline";
+    "champ-app w-full rounded-lg border border-outline-variant px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline";
 
   return (
     <form

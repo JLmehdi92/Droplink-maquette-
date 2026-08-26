@@ -7,7 +7,7 @@ import { signalementDisponible } from "@/lib/contact";
  *
  * CLASSES REPRISES : `w-full py-8 bg-surface-container flex flex-col
  * items-center gap-4 px-margin-mobile text-center border-t
- * border-outline-variant/50`, liens en `font-body-sm text-body-sm
+ * border-outline-variant`, liens en `font-body-sm text-body-sm
  * text-on-surface-variant hover:text-secondary transition-colors opacity-80
  * hover:opacity-100`.
  *
@@ -29,7 +29,7 @@ export async function PiedDePage({ locale }: { locale: string }) {
   const signalement = signalementDisponible();
 
   return (
-    <footer className="flex w-full flex-col items-center gap-4 border-t border-outline-variant/50 bg-surface-container px-margin-mobile py-8 text-center md:px-margin-desktop">
+    <footer className="flex w-full flex-col items-center gap-4 border-t border-outline-variant bg-surface-container px-margin-mobile py-8 text-center md:px-margin-desktop">
       <div className="mb-2 flex justify-center">
         <span className="font-headline-md text-headline-md-mobile font-bold text-on-surface">
           DropLink

@@ -172,7 +172,7 @@ describe("Classes de style", () => {
      * Classes qui n'auraient légitimement aucune règle.
      *
      * VIDE, et vérifié comme tel. Trois entrées y avaient été posées par
-     * précaution — `glass-card`, `champ`, `material-symbols-outlined` — et le
+     * précaution — `carte`, `champ`, `material-symbols-outlined` — et le
      * second sens du test les a immédiatement signalées comme inutiles : les
      * deux premières sont écrites à la main dans `globals.css`, donc bel et bien
      * compilées ; la troisième n'est plus employée nulle part depuis que les

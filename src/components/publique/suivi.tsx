@@ -65,7 +65,7 @@ export function Suivi({
   return (
     <div className="flex flex-col gap-4">
       <dl className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-4 border-b border-outline-variant/40 pb-2">
+        <div className="flex items-center justify-between gap-4 border-b border-outline-variant pb-2">
           <dt className="font-body-sm text-body-sm text-on-surface-variant">{libelles.numero}</dt>
           <dd className="text-right font-label-md text-label-md break-all text-on-surface">
             {suivi.numero}

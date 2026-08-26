@@ -122,7 +122,7 @@ export default async function Inscription({
         />
 
         <div className="absolute bottom-16 right-16 z-10 w-full max-w-sm">
-          <div className="glass-card rounded-xl p-8 shadow-lg">
+          <div className="carte rounded-xl p-8 shadow-lg">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--accent-remplissage)]/10 text-[var(--accent-texte)]">
                 <Icone nom="check_circle" className="text-2xl" />

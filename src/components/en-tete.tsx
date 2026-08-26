@@ -4,15 +4,10 @@ import { getTranslations } from "next-intl/server";
 /**
  * En-tête des pages publiques, portée sur la barre supérieure des maquettes.
  *
- * CLASSES REPRISES DE LA MAQUETTE : `fixed top-0 w-full z-50
- * bg-surface-container-lowest/70 backdrop-blur-xl border-b
- * border-outline-variant/30 shadow-sm flex justify-between items-center
- * px-margin-mobile h-16`.
- *
- * Le `backdrop-blur-xl` est CONSERVÉ ici. Le brief ne l'interdit que sur
- * `/p/[token]` : c'est là que le flou coûte cher, sur un mobile d'entrée de
- * gamme, pour une page vue une fois en 4G. Sur la landing et l'espace vendeur,
- * c'est le rendu que montrent les maquettes.
+ * Barre OPAQUE, posée sur un filet. Le flou a disparu de tout le produit avec
+ * le canevas Claude Design : il n'y en a nulle part sur les 41 planches. Une
+ * barre translucide sans flou laisserait le contenu défiler derrière elle en
+ * clair, ce qui est pire que les deux.
  *
  * DEUX ÉCARTS. L'avatar utilisateur est retiré : ces pages sont vues par des
  * visiteurs non connectés, et une silhouette de compte laisserait croire qu'une
@@ -24,7 +19,7 @@ export async function EnTete({ locale }: { locale: string }) {
   const t = await getTranslations("navigation");
 
   return (
-    <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-outline-variant/30 bg-surface-container-lowest/70 px-margin-mobile shadow-sm backdrop-blur-xl transition-all duration-200 md:px-margin-desktop">
+    <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-outline-variant bg-surface-container-lowest px-margin-mobile shadow-sm transition-all duration-200 md:px-margin-desktop">
       {/* Le saut au contenu doit être le premier élément focusable de la page. */}
       <a
         href="#contenu"

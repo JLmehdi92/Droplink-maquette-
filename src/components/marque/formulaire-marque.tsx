@@ -171,7 +171,7 @@ export function FormulaireMarque({
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
         {/* --- Nom et logo ---------------------------------------------- */}
-        <div className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm">
+        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="image" className="text-[var(--apercu-texte)]" />
@@ -284,7 +284,7 @@ export function FormulaireMarque({
         </div>
 
         {/* --- Couleur -------------------------------------------------- */}
-        <div className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm">
+        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="palette" className="text-[var(--apercu-texte)]" />
@@ -367,7 +367,7 @@ export function FormulaireMarque({
         </div>
 
         {/* --- Langue publique et filigrane ----------------------------- */}
-        <div className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
+        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="tune" className="text-[var(--apercu-texte)]" />
@@ -451,7 +451,7 @@ export function FormulaireMarque({
         </div>
 
         {/* --- Aperçu en direct ----------------------------------------- */}
-        <div className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
+        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="visibility" className="text-[var(--apercu-texte)]" />

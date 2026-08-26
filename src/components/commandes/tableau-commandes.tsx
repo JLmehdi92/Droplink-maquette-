@@ -63,8 +63,8 @@ export async function TableauCommandes({
   const cellule = "px-6 py-4 font-body-sm text-body-sm";
 
   return (
-    <section className="col-span-1 flex h-full min-h-[600px] flex-col overflow-hidden rounded-xl shadow-md md:col-span-9 glass-card">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-outline-variant/30 bg-surface-container-lowest/50 p-6 sm:flex-row sm:items-center">
+    <section className="col-span-1 flex h-full min-h-[600px] flex-col overflow-hidden rounded-xl shadow-md md:col-span-9 carte">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-outline-variant bg-surface-container-lowest p-6 sm:flex-row sm:items-center">
         <form method="get" action={base} className="relative w-full sm:w-96">
           {/* Les autres réglages voyagent avec la recherche : chercher ne doit
               pas défaire le filtre qu'on vient de poser. */}
@@ -87,7 +87,7 @@ export async function TableauCommandes({
             defaultValue={parametres.q}
             placeholder={t("rechercherExemple")}
             aria-label={t("rechercher")}
-            className="champ-verre w-full rounded-lg border border-outline-variant py-2 pr-4 pl-10 font-body-sm text-body-sm text-on-surface transition-all"
+            className="champ-app w-full rounded-lg border border-outline-variant py-2 pr-4 pl-10 font-body-sm text-body-sm text-on-surface transition-all"
           />
         </form>
 
@@ -124,7 +124,7 @@ export async function TableauCommandes({
             <p
               role="status"
               className={
-                "border-b border-outline-variant/30 px-6 py-3 font-body-sm text-body-sm " +
+                "border-b border-outline-variant px-6 py-3 font-body-sm text-body-sm " +
                 (lot.etat === "ok" ? "text-on-surface" : "text-error")
               }
             >
@@ -146,7 +146,7 @@ export async function TableauCommandes({
           <div className="flex-grow overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="border-b border-outline-variant/50 bg-surface-container-lowest/30">
+                <tr className="border-b border-outline-variant bg-surface-container-lowest">
                   <th scope="col" className="w-12 px-4 py-4">
                     <span className="sr-only">{t("lot.titre")}</span>
                   </th>
@@ -169,7 +169,7 @@ export async function TableauCommandes({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/30">
+              <tbody className="divide-y divide-outline-variant">
                 {page.lignes.map((ligne) => {
                   // Une commande sans nom de client est le cas NORMAL d'un
                   // brouillon tout juste créé. On ne remplace pas par un nom
@@ -306,7 +306,7 @@ export async function TableauCommandes({
               courante : proposer « archiver » dans les archives n'aurait pas de
               sens. `name` et `value` d'un bouton partent avec le formulaire — le
               navigateur sait donc lequel a été pressé, sans JavaScript. */}
-          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant/30 bg-surface-container-lowest/50 px-6 py-4">
+          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant bg-surface-container-lowest px-6 py-4">
             <span className="font-label-sm text-label-sm text-on-surface-variant">
               {t("lot.aide")}
             </span>
@@ -334,7 +334,7 @@ export async function TableauCommandes({
             public transfère une CAPACITÉ, définitivement : le prévenir une fois
             le fichier ouvert serait le prévenir trop tard.
           */}
-          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant/30 px-6 py-4">
+          <div className="flex flex-wrap items-center gap-3 border-t border-outline-variant px-6 py-4">
             <a
               // LES MÊMES PARAMÈTRES QUE LA VUE, composés par la MÊME fonction
               // que tous les autres liens de l'écran. Recomposer la chaîne ici
@@ -405,7 +405,7 @@ async function Pagination({
   const t = await getTranslations("commandes");
 
   return (
-    <div className="flex items-center justify-between gap-4 border-t border-outline-variant/30 bg-surface-container-lowest/50 px-6 py-4">
+    <div className="flex items-center justify-between gap-4 border-t border-outline-variant bg-surface-container-lowest px-6 py-4">
       <p className="font-label-sm text-label-sm text-on-surface-variant">
         {suivant === null ? t("finDeListe") : t("pageSuivanteDisponible")}
       </p>

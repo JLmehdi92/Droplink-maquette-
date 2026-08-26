@@ -83,7 +83,7 @@ export default async function Connexion({
   return (
     <main id="contenu" className="flex w-full flex-grow">
       <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col justify-center px-margin-mobile py-12 md:px-margin-desktop lg:w-1/2 lg:py-24">
-        <div className="glass-card relative w-full overflow-hidden rounded-xl p-8 shadow-lg md:p-12">
+        <div className="carte relative w-full overflow-hidden rounded-xl p-8 shadow-lg md:p-12">
           {/* Le liseré intérieur de la maquette, qui simule le bord du verre. */}
           <div
             aria-hidden="true"

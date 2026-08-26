@@ -150,7 +150,7 @@ export default async function Accueil({
           <h2 className="sr-only">{t("fonctionnalites.titre")}</h2>
 
           {/* Carte 1 : pastille d'icône de 40 px, titre, texte. */}
-          <div className="glass-card flex flex-col gap-4 rounded-xl p-5 shadow-sm">
+          <div className="carte flex flex-col gap-4 rounded-xl p-5 shadow-sm">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary-fixed text-on-secondary-fixed">
               <Icone nom="image" className="text-2xl" />
             </div>
@@ -166,17 +166,17 @@ export default async function Accueil({
 
           {/* Carte 2 : la carte haute de la maquette, avec sa pastille d'état
               en haut à droite et son pied opaque. */}
-          <div className="glass-card flex flex-col overflow-hidden rounded-xl p-0 shadow-sm">
+          <div className="carte flex flex-col overflow-hidden rounded-xl p-0 shadow-sm">
             <div className="relative h-40 bg-surface-container-low">
               <div className="absolute inset-0 flex items-center justify-center">
                 <Icone nom="local_shipping" className="text-[64px] text-outline-variant" />
               </div>
-              <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full border border-white/50 bg-white/80 px-3 py-1 font-label-sm text-label-sm text-[var(--accent-texte)] shadow-sm backdrop-blur-md">
+              <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full border border-white/50 bg-white/80 px-3 py-1 font-label-sm text-label-sm text-[var(--accent-texte)] shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-[#10b981]" />
                 {t("etape2")}
               </div>
             </div>
-            <div className="flex flex-col gap-2 bg-surface-container-lowest/90 p-5">
+            <div className="flex flex-col gap-2 bg-surface-container-lowest p-5">
               <div className="mb-1 flex items-center gap-2 text-[var(--accent-texte)]">
                 <Icone nom="schedule" className="text-xl" />
                 <h3 className="font-headline-md-mobile text-headline-md-mobile text-on-surface">
@@ -190,7 +190,7 @@ export default async function Accueil({
           </div>
 
           {/* Carte 3 : filet vertical de 4 px à gauche, pastille et étiquette. */}
-          <div className="glass-card flex flex-col gap-4 rounded-xl border-l-4 border-l-[var(--accent-interface)] p-5 shadow-sm">
+          <div className="carte flex flex-col gap-4 rounded-xl border-l-4 border-l-[var(--accent-interface)] p-5 shadow-sm">
             <div className="flex items-start justify-between">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-fixed text-on-primary-fixed">
                 <Icone nom="palette" className="text-2xl" />
@@ -211,8 +211,8 @@ export default async function Accueil({
         </section>
 
         {/* Emplacement des faux logos clients de la maquette : même géométrie
-            (`py-6 border-t border-outline-variant/30 text-center`), contenu vrai. */}
-        <section className="border-t border-outline-variant/30 py-6 text-center">
+            (`py-6 border-t border-outline-variant text-center`), contenu vrai. */}
+        <section className="border-t border-outline-variant py-6 text-center">
           <p className="mb-6 font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">
             {t("commentTitre")}
           </p>

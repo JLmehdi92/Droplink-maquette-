@@ -150,7 +150,7 @@ export function Editeur({
         <div className="flex flex-col gap-6 lg:col-span-8">
           {medias}
 
-          <section className="glass-card rounded-xl p-6 shadow-sm">
+          <section className="carte rounded-xl p-6 shadow-sm">
             <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
               {t("sectionCommande")}
             </h2>
@@ -228,7 +228,7 @@ export function Editeur({
         </div>
 
         <div className="flex flex-col gap-6 lg:col-span-4">
-          <section className="glass-card rounded-xl p-6 shadow-sm">
+          <section className="carte rounded-xl p-6 shadow-sm">
             <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
               {t("sectionDestinataire")}
             </h2>
@@ -338,7 +338,7 @@ function ChoixRadio({
   readonly onChoix: (v: string) => void;
 }) {
   return (
-    <section className="glass-card rounded-xl p-6 shadow-sm">
+    <section className="carte rounded-xl p-6 shadow-sm">
       <h2 className="mb-6 font-label-md text-label-md tracking-wider text-on-surface uppercase">
         {titre}
       </h2>
@@ -347,7 +347,7 @@ function ChoixRadio({
           <label
             key={option}
             className={
-              "flex cursor-pointer items-center rounded-lg border border-outline-variant/50 p-3 transition-colors hover:bg-surface-container-lowest " +
+              "flex cursor-pointer items-center rounded-lg border border-outline-variant p-3 transition-colors hover:bg-surface-container-lowest " +
               (valeur === option ? "bg-surface-container-lowest" : "bg-transparent")
             }
           >

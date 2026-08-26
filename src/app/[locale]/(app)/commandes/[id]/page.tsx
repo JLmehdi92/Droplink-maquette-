@@ -113,7 +113,7 @@ export default async function EditeurCommande({
 
   return (
     <main id="contenu" className="flex min-h-dvh flex-col">
-      <header className="z-10 flex h-20 shrink-0 items-center justify-between border-b border-surface-container bg-surface-container-lowest/80 px-gutter backdrop-blur-md">
+      <header className="z-10 flex h-20 shrink-0 items-center justify-between border-b border-surface-container bg-surface-container-lowest px-gutter">
         <div className="flex items-center gap-4">
           <Link
             href={"/" + langue + "/commandes"}

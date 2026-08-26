@@ -35,7 +35,7 @@ export async function PanneauAcces() {
       </div>
 
       <div className="relative z-10 flex w-full max-w-xl flex-col justify-end p-12 pb-24">
-        <div className="glass-card rounded-xl p-8 shadow-md">
+        <div className="carte rounded-xl p-8 shadow-md">
           <div className="mb-4 flex items-center gap-2 text-[var(--accent-texte)]">
             <Icone nom="link" />
             <span className="font-label-md text-label-md uppercase tracking-wider">

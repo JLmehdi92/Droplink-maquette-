@@ -1,103 +1,126 @@
 @import "tailwindcss";
 
 /*
- * THÈME REPRIS À L'IDENTIQUE DES MAQUETTES STITCH.
+ * THÈME DU CANEVAS CLAUDE DESIGN, validé écran par écran le 26/08/2026.
  *
- * Les noms de tokens sont ceux du design system (`on-surface`, `body-sm`,
- * `margin-mobile`…) et NON des noms français, contrairement au reste du code.
- * C'est délibéré : ce sont les noms qu'emploie le balisage des maquettes, et les
- * conserver rend le portage vérifiable — une classe de la maquette se retrouve
- * telle quelle dans le code, donc un écart se voit au lieu de se deviner.
+ * Stitch est abandonné. Ce fichier portait sa palette ; il porte désormais
+ * celle des 41 planches. Les NOMS de tokens sont conservés tels quels
+ * (`on-surface`, `surface-container`, `outline-variant`…) alors qu'ils
+ * viennent de Stitch : les renommer aurait touché ~900 classes dans 60
+ * fichiers pour un résultat visuel identique. Ce sont les VALEURS qui font le
+ * design, et changer les valeurs seules fait basculer tous les écrans d'un
+ * coup — c'est précisément ce qui rend visible ce qui dépendait d'une couleur
+ * en dur plutôt que d'un token.
  *
- * LA SOURCE DE VÉRITÉ EST LA CONFIGURATION DES ÉCRANS, pas la prose du
- * `DESIGN.md`. Les deux divergent sur les rayons :
+ * Le tableau de correspondance, pour relire une planche et retrouver le token :
  *
- *              DESIGN.md    config des écrans
- *   rounded     0.5rem            0.25rem
- *   rounded-lg  1rem              0.5rem
- *   rounded-xl  1.5rem            0.75rem
+ *   canvas (extérieur)  #c5cbfb   --color-canvas
+ *   carte-page          #ffffff   --color-surface-container-lowest
+ *   app (dashboard)     #f7f7fb   --color-surface
+ *   encre               #0e0e13   --color-on-surface
+ *   sourdine            #83858f   --color-sourdine       (voir la note ci-dessous)
+ *   filet               #ececf0   --color-outline-variant
+ *   pilule noire        #111117   --color-primary
+ *   admin               #111117   --color-admin
+ *   dégradé de marque             --degrade-marque
+ *   rayons  carte-page 28 · carte 16 · contrôle 12 · pilule 9999
  *
- * C'est la configuration qui produit ce qu'on voit à l'écran : c'est elle qui
- * fait foi. Suivre la prose donnerait des composants deux à trois fois plus
- * arrondis que les maquettes.
+ * ⚠️ LA SOURDINE EXISTE EN DEUX VALEURS, ET C'EST DÉLIBÉRÉ.
+ * `#83858f` sur blanc donne 3,67:1 — en dessous des 4,5:1 exigés pour du
+ * texte. La planche l'emploie pour des libellés ; le code l'emploie pour du
+ * texte secondaire lu à longueur de journée par un fournisseur à 200
+ * commandes/semaine. Donc : `--color-sourdine` garde la valeur DESSINÉE pour
+ * ce qui est décoratif ou en gros corps, et `--color-on-surface-variant`
+ * prend `#6f7079` (4,92:1) pour tout ce qui est du texte. À l'œil c'est le
+ * même gris ; à la lecture, l'un se lit et l'autre pas.
  *
- * UN SEUL AJOUT au thème d'origine : la couleur d'accent du vendeur, absente
- * des maquettes parce qu'elles la figent. Elle est injectée au rendu — voir
- * `src/lib/design/contraste.ts`. La poser en dur produirait une page correcte
- * pour un seul vendeur.
+ * L'accent du vendeur reste injecté au rendu — voir `src/lib/design/contraste.ts`.
+ * Le dégradé de marque est réservé à UNE action principale par écran, et
+ * n'apparaît JAMAIS sur `/p/[token]` : cette page porte la couleur du vendeur,
+ * pas la nôtre.
  */
 
 @theme {
-  /* ----- Couleurs, reprises une par une de la configuration des écrans ---- */
-  --color-surface: #f7f9fb;
-  --color-surface-dim: #d8dadc;
-  --color-surface-bright: #f7f9fb;
+  /* ----- Surfaces --------------------------------------------------------- */
+  --color-canvas: #c5cbfb;
+  --color-surface: #f7f7fb;
+  --color-surface-dim: #ececf0;
+  --color-surface-bright: #ffffff;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f2f4f6;
-  --color-surface-container: #eceef0;
-  --color-surface-container-high: #e6e8ea;
-  --color-surface-container-highest: #e0e3e5;
-  --color-surface-variant: #e0e3e5;
-  --color-surface-tint: #565e74;
-  --color-background: #f7f9fb;
+  --color-surface-container-low: #fafaFc;
+  --color-surface-container: #f2f2f7;
+  --color-surface-container-high: #ececf0;
+  --color-surface-container-highest: #e4e4ec;
+  --color-surface-variant: #f2f2f7;
+  --color-surface-tint: #7c5cf5;
+  --color-background: #f7f7fb;
 
-  --color-on-surface: #191c1e;
-  --color-on-surface-variant: #45464d;
-  --color-on-background: #191c1e;
-  --color-inverse-surface: #2d3133;
-  --color-inverse-on-surface: #eff1f3;
+  /* ----- Encre et sourdine ------------------------------------------------ */
+  --color-on-surface: #0e0e13;
+  --color-on-surface-variant: #6f7079;
+  --color-sourdine: #83858f;
+  --color-on-background: #0e0e13;
+  --color-inverse-surface: #111117;
+  --color-inverse-on-surface: #f7f7fb;
 
-  --color-outline: #76777d;
-  --color-outline-variant: #c6c6cd;
+  /* ----- Filets ----------------------------------------------------------- */
+  --color-outline: #d5d6dd;
+  --color-outline-variant: #ececf0;
 
-  --color-primary: #000000;
+  /* ----- Pilule noire : l'action neutre, celle qui n'est pas la principale - */
+  --color-primary: #111117;
   --color-on-primary: #ffffff;
-  --color-primary-container: #131b2e;
-  --color-on-primary-container: #7c839b;
-  --color-inverse-primary: #bec6e0;
-  --color-primary-fixed: #dae2fd;
-  --color-primary-fixed-dim: #bec6e0;
-  --color-on-primary-fixed: #131b2e;
-  --color-on-primary-fixed-variant: #3f465c;
+  --color-primary-container: #111117;
+  --color-on-primary-container: #83858f;
+  --color-inverse-primary: #e4e4ec;
+  --color-primary-fixed: #ececf0;
+  --color-primary-fixed-dim: #e4e4ec;
+  --color-on-primary-fixed: #111117;
+  --color-on-primary-fixed-variant: #4a4b55;
 
-  --color-secondary: #0058be;
+  /* ----- Violet de marque : la borne gauche du dégradé --------------------- */
+  --color-secondary: #6244d8;
   --color-on-secondary: #ffffff;
-  --color-secondary-container: #2170e4;
-  --color-on-secondary-container: #fefcff;
-  --color-secondary-fixed: #d8e2ff;
-  --color-secondary-fixed-dim: #adc6ff;
-  --color-on-secondary-fixed: #001a42;
-  --color-on-secondary-fixed-variant: #004395;
+  --color-secondary-container: #efeaff;
+  --color-on-secondary-container: #33208f;
+  --color-secondary-fixed: #efeaff;
+  --color-secondary-fixed-dim: #ded4ff;
+  --color-on-secondary-fixed: #23155f;
+  --color-on-secondary-fixed-variant: #4b32b3;
 
-  --color-tertiary: #000000;
+  /* ----- Corail de marque : la borne droite du dégradé --------------------- */
+  --color-tertiary: #b4462f;
   --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #0b1c30;
-  --color-on-tertiary-container: #75859d;
-  --color-tertiary-fixed: #d3e4fe;
-  --color-tertiary-fixed-dim: #b7c8e1;
-  --color-on-tertiary-fixed: #0b1c30;
-  --color-on-tertiary-fixed-variant: #38485d;
+  --color-tertiary-container: #ffe6e0;
+  --color-on-tertiary-container: #7a2d1d;
+  --color-tertiary-fixed: #ffe6e0;
+  --color-tertiary-fixed-dim: #ffcec2;
+  --color-on-tertiary-fixed: #5c2115;
+  --color-on-tertiary-fixed-variant: #8f3724;
 
+  /* ----- Erreur : inchangée, elle passe déjà les seuils -------------------- */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
 
-  /* ----- Rayons : la configuration des écrans, pas la prose -------------- */
-  --radius-DEFAULT: 0.25rem;
-  --radius: 0.25rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  /* ----- Rayons du canevas ------------------------------------------------ */
+  --radius-DEFAULT: 12px;
+  --radius: 12px;
+  --radius-md: 13px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-2xl: 28px;
   --radius-full: 9999px;
 
-  /* ----- Espacements nommés --------------------------------------------- */
+  /* ----- Espacements nommés ----------------------------------------------- */
   --spacing-base: 8px;
   --spacing-gutter: 24px;
   --spacing-margin-mobile: 16px;
   --spacing-margin-desktop: 40px;
   --spacing-container-max: 1440px;
 
-  /* ----- Familles -------------------------------------------------------- */
+  /* ----- Familles : inchangées, servies par next/font, jamais un CDN ------- */
   --font-headline-xl: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-headline-lg: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-headline-lg-mobile: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
@@ -109,57 +132,80 @@
   --font-label-md: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-label-sm: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  /* ----- Échelle typographique ------------------------------------------ */
-  --text-headline-xl: 40px;
+  /*
+   * ----- Échelle typographique -------------------------------------------
+   * Les titres passent en 800 avec un tracking de -0,03em : c'est ce qui
+   * donne au canevas sa densité. Le corps reste en Inter 400.
+   */
+  --text-headline-xl: 44px;
   --text-headline-xl--line-height: 48px;
-  --text-headline-xl--letter-spacing: -0.02em;
-  --text-headline-xl--font-weight: 700;
+  --text-headline-xl--letter-spacing: -0.03em;
+  --text-headline-xl--font-weight: 800;
 
   --text-headline-lg: 32px;
-  --text-headline-lg--line-height: 40px;
-  --text-headline-lg--letter-spacing: -0.02em;
-  --text-headline-lg--font-weight: 600;
+  --text-headline-lg--line-height: 38px;
+  --text-headline-lg--letter-spacing: -0.03em;
+  --text-headline-lg--font-weight: 800;
 
-  --text-headline-lg-mobile: 24px;
+  --text-headline-lg-mobile: 26px;
   --text-headline-lg-mobile--line-height: 32px;
-  --text-headline-lg-mobile--font-weight: 600;
+  --text-headline-lg-mobile--letter-spacing: -0.03em;
+  --text-headline-lg-mobile--font-weight: 800;
 
-  --text-headline-md: 24px;
-  --text-headline-md--line-height: 32px;
-  --text-headline-md--font-weight: 600;
+  --text-headline-md: 22px;
+  --text-headline-md--line-height: 28px;
+  --text-headline-md--letter-spacing: -0.02em;
+  --text-headline-md--font-weight: 800;
 
-  --text-headline-md-mobile: 20px;
-  --text-headline-md-mobile--line-height: 28px;
-  --text-headline-md-mobile--font-weight: 600;
+  --text-headline-md-mobile: 19px;
+  --text-headline-md-mobile--line-height: 25px;
+  --text-headline-md-mobile--letter-spacing: -0.02em;
+  --text-headline-md-mobile--font-weight: 800;
 
-  --text-body-lg: 18px;
-  --text-body-lg--line-height: 28px;
+  --text-body-lg: 17px;
+  --text-body-lg--line-height: 27px;
   --text-body-lg--font-weight: 400;
 
-  --text-body-md: 16px;
-  --text-body-md--line-height: 24px;
+  --text-body-md: 15px;
+  --text-body-md--line-height: 23px;
   --text-body-md--font-weight: 400;
 
-  --text-body-sm: 14px;
-  --text-body-sm--line-height: 20px;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 19px;
   --text-body-sm--font-weight: 400;
 
-  --text-label-md: 14px;
+  --text-label-md: 13px;
   --text-label-md--line-height: 16px;
   --text-label-md--letter-spacing: 0.01em;
-  --text-label-md--font-weight: 600;
+  --text-label-md--font-weight: 700;
 
-  --text-label-sm: 12px;
-  --text-label-sm--line-height: 16px;
-  --text-label-sm--font-weight: 500;
+  --text-label-sm: 11px;
+  --text-label-sm--line-height: 15px;
+  --text-label-sm--letter-spacing: 0.02em;
+  --text-label-sm--font-weight: 700;
 
-  /* ----- Élévation, valeurs exactes du DESIGN.md ------------------------- */
-  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 8px 16px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 20px 32px rgba(15, 23, 42, 0.12);
+  /*
+   * ----- Élévation --------------------------------------------------------
+   * Le canevas repose sur le FILET, pas sur l'ombre : les ombres deviennent
+   * beaucoup plus discrètes qu'elles ne l'étaient. Une carte se détache par
+   * son contour, pas par un halo.
+   */
+  --shadow-sm: 0 1px 2px rgba(14, 14, 19, 0.04);
+  --shadow-md: 0 4px 14px rgba(14, 14, 19, 0.06);
+  --shadow-lg: 0 18px 40px rgba(14, 14, 19, 0.1);
 }
 
 :root {
+  /*
+   * Le dégradé de marque. Une seule action principale par écran, et
+   * uniquement sur les surfaces DropLink. Il n'apparaît jamais sur
+   * `/p/[token]` : cette page porte la couleur DU VENDEUR.
+   */
+  --degrade-marque: linear-gradient(97deg, #7c5cf5 0%, #f2765e 100%);
+
+  /* Chrome sombre de l'administration. */
+  --color-admin: #111117;
+
   /*
    * Accent du vendeur. Valeur de repli identique au défaut de
    * `shops.accent_color` en base : il n'existe aucun état « couleur non
@@ -179,36 +225,85 @@ body {
 }
 
 /*
- * Carte de verre, reprise telle quelle des maquettes.
+ * LA CARTE DU CANEVAS : fond opaque, filet, rayon 16.
  *
- * Elle est INTERDITE sur `/p/[token]`, et nulle part ailleurs. Le brief est
- * précis : sur un aplat uni, un blanc à 70 % flouté rend exactement la même
- * couleur qu'un blanc opaque — le flou n'a rien à flouter, et c'est ce qui coûte
- * le plus cher sur un mobile d'entrée de gamme. Cette page-là est vue une fois,
- * en 4G, sur un appareil quelconque. La landing et l'espace vendeur, eux, la
- * gardent : c'est le rendu que montrent les maquettes.
+ * Elle remplace l'ancienne carte de verre, qui portait un `backdrop-filter: blur(20px)`.
+ * Le flou disparaît PARTOUT, pas seulement sur `/p/[token]` où le brief
+ * l'interdisait : le canevas n'en emploie nulle part, et sur un aplat uni un
+ * blanc à 70 % flouté rend exactement la même couleur qu'un blanc opaque —
+ * le flou n'a rien à flouter, il ne fait que coûter cher au rendu.
  */
-.glass-card {
-  background-color: rgb(255 255 255 / 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgb(255 255 255 / 0.4);
+.carte {
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
 }
 
 /*
- * Champs de saisie : fond ardoise et non blanc, pour contraster avec les cartes.
- * Au focus, bordure de 2px et halo. Repris du DESIGN.md, section « Input Fields ».
+ * L'action principale du canevas. `color: #ffffff` en dur est correct ICI et
+ * seulement ici : le dégradé est NOTRE couleur, elle ne varie pas. Sur un
+ * aplat d'accent VENDEUR, c'est `--accent-sur-remplissage` qui décide, jamais
+ * un blanc en dur — un accent clair rendrait le blanc illisible.
+ */
+.degrade-marque {
+  background-image: var(--degrade-marque);
+  color: #ffffff;
+}
+
+/*
+ * Champs de saisie. Fond légèrement en retrait de la carte, filet au repos,
+ * accent et halo au focus.
+ *
+ * La bordure existe DÈS LE REPOS. Sans elle, l'apparition d'une bordure au
+ * focus décalerait le champ d'un pixel — un mouvement à chaque clic, dans un
+ * formulaire à sauvegarde automatique où l'on passe de champ en champ.
  */
 .champ {
-  background-color: #f1f5f9;
+  background-color: var(--color-surface-container);
   border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
 }
 
 .champ:focus {
   outline: none;
   border-color: var(--accent-interface);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 25%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 22%, transparent);
+}
+
+/*
+ * Champ posé DANS une carte : le fond de la carte étant déjà blanc, le champ
+ * se distingue par son fond en retrait et redevient blanc au focus.
+ */
+.champ-app {
+  background-color: var(--color-surface-container);
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.champ-app:focus {
+  background-color: var(--color-surface-container-lowest);
+  border-color: var(--accent-interface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 14%, transparent);
+  outline: none;
+}
+
+/* Alias historique de `.champ-app`, conservé le temps de reprendre l'éditeur. */
+.champ-editeur {
+  background-color: var(--color-surface-container);
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.champ-editeur:focus {
+  border-color: var(--accent-interface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 14%, transparent);
+  outline: none;
+  background-color: var(--color-surface-container-lowest);
 }
 
 /*
@@ -240,18 +335,14 @@ body {
 }
 
 /*
- * Carte « bento », reprise telle quelle de la maquette de signalement.
- *
- * Le rayon de 1,5rem et les deux ombres ne sont PAS dans l'échelle de tokens :
- * la maquette les déclare elle-même en CSS, hors de sa configuration Tailwind.
- * Les reprendre ici plutôt que les rapprocher d'un token existant évite de
- * rendre des cartes deux fois moins arrondies que ce qui a été dessiné.
+ * Carte « bento » de la page de signalement. Elle garde son rayon propre :
+ * c'est la carte-page du canevas, rayon 28, et non la carte ordinaire.
  */
 .bento-item {
-  border-radius: 1.5rem;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   background-color: var(--color-surface-container-lowest);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-outline-variant);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -259,44 +350,5 @@ body {
 
 .bento-item:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-/*
- * Champ de la maquette de signalement : fond ardoise clair, halo bleu au focus.
- * Distinct de `.champ`, qui porte la bordure et le rayon du DESIGN.md ; celui-ci
- * suit les valeurs écrites dans le `code.html` de l'écran.
- */
-.champ-verre {
-  background-color: var(--color-surface);
-  transition: all 0.2s ease;
-}
-
-.champ-verre:focus {
-  background-color: var(--color-surface-container-lowest);
-  border-color: var(--accent-interface);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-interface) 10%, transparent);
-  outline: none;
-}
-
-/*
- * Champ de l'éditeur, repris du `code.html` de `droplink_cr_er_un_post_client` :
- * fond ardoise, bordure transparente au repos, bordure d'accent et halo de 2px
- * au focus, fond blanc.
- *
- * La bordure existe DÈS LE REPOS, en transparent. Sans elle, l'apparition d'une
- * bordure au focus décalerait le champ d'un pixel — un mouvement à chaque clic,
- * dans un formulaire à sauvegarde automatique où l'on passe de champ en champ.
- */
-.champ-editeur {
-  background-color: #f1f5f9;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.champ-editeur:focus {
-  border-color: var(--accent-interface);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-interface) 20%, transparent);
-  outline: none;
-  background-color: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-md);
 }

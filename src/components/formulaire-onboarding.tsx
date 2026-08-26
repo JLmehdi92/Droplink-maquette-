@@ -158,7 +158,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
         {/* --- Type de compte : propre à l'onboarding ------------------- */}
-        <fieldset className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
+        <fieldset className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
           <div>
             <legend className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="storefront" className="text-[var(--apercu-texte)]" />
@@ -203,7 +203,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
         </fieldset>
 
         {/* --- Marque : nom + logo -------------------------------------- */}
-        <div className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm">
+        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="image" className="text-[var(--apercu-texte)]" />
@@ -296,7 +296,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
         </div>
 
         {/* --- Couleur -------------------------------------------------- */}
-        <div className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm">
+        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="palette" className="text-[var(--apercu-texte)]" />
@@ -372,7 +372,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
         </div>
 
         {/* --- Aperçu en direct, pleine largeur ------------------------- */}
-        <div className="glass-card flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
+        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="visibility" className="text-[var(--apercu-texte)]" />

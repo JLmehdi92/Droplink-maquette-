@@ -301,7 +301,7 @@ export function CarteMedias({
   const complet = total >= plafondMedias;
 
   return (
-    <section className="glass-card rounded-xl p-6 shadow-sm">
+    <section className="carte rounded-xl p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-label-md text-label-md tracking-wider text-on-surface uppercase">
           {t("titre")}
@@ -343,7 +343,7 @@ export function CarteMedias({
           "flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
           (survol
             ? "border-[var(--accent-interface)] bg-[color-mix(in_srgb,var(--accent-interface)_5%,transparent)]"
-            : "border-outline-variant bg-surface-container-lowest/50 hover:bg-surface-container-low")
+            : "border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low")
         }
       >
         <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent-interface)_12%,transparent)] text-[var(--accent-texte)]">
@@ -394,7 +394,7 @@ export function CarteMedias({
               {enCours.map((e) => (
                 <li
                   key={e.cleLocale}
-                  className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant/30 bg-surface-container-highest p-3"
+                  className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-highest p-3"
                 >
                   {e.echec === null ? (
                     <>
@@ -471,7 +471,7 @@ function Case({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={
-        "group relative aspect-square overflow-hidden rounded-lg border border-outline-variant/30 bg-surface-container-highest " +
+        "group relative aspect-square overflow-hidden rounded-lg border border-outline-variant bg-surface-container-highest " +
         (isDragging ? "z-10 opacity-80 shadow-lg" : "")
       }
     >
@@ -512,7 +512,7 @@ function Case({
           type="button"
           {...attributes}
           {...listeners}
-          className="cursor-grab rounded-md bg-surface-container-lowest/90 p-1.5 text-on-surface-variant shadow-sm"
+          className="cursor-grab rounded-md bg-surface-container-lowest p-1.5 text-on-surface-variant shadow-sm"
           title={t("deplacer", { position: index + 1 })}
         >
           <Icone nom="menu" className="text-[16px]" titre={t("deplacer", { position: index + 1 })} />
@@ -522,7 +522,7 @@ function Case({
           <button
             type="button"
             onClick={onCouvrir}
-            className="rounded-md bg-surface-container-lowest/90 p-1.5 text-on-surface-variant shadow-sm"
+            className="rounded-md bg-surface-container-lowest p-1.5 text-on-surface-variant shadow-sm"
             title={t("definirCouverture")}
           >
             <Icone nom="check_circle" className="text-[16px]" titre={t("definirCouverture")} />
@@ -532,7 +532,7 @@ function Case({
         <button
           type="button"
           onClick={onSupprimer}
-          className="rounded-md bg-surface-container-lowest/90 p-1.5 text-error shadow-sm"
+          className="rounded-md bg-surface-container-lowest p-1.5 text-error shadow-sm"
           title={t("supprimer")}
         >
           <Icone nom="close" className="text-[16px]" titre={t("supprimer")} />

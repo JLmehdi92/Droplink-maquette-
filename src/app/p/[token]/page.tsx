@@ -132,7 +132,7 @@ export default async function PagePublique({
   return (
     <div lang={langue} className="flex min-h-dvh flex-col">
       {aUnEnTete ? (
-        <header className="border-b border-outline-variant/30 bg-surface-container-lowest">
+        <header className="border-b border-outline-variant bg-surface-container-lowest">
           <div className="mx-auto flex h-16 max-w-container-max items-center gap-3 px-margin-mobile md:px-margin-desktop">
             {commande.boutique.logo !== null ? (
               /* eslint-disable-next-line @next/next/no-img-element -- le logo
@@ -326,7 +326,7 @@ export default async function PagePublique({
                 </h2>
                 <dl className="flex flex-col gap-4">
                   {commande.reference !== null ? (
-                    <div className="flex items-center justify-between gap-4 border-b border-outline-variant/40 pb-2">
+                    <div className="flex items-center justify-between gap-4 border-b border-outline-variant pb-2">
                       <dt className="font-body-sm text-body-sm text-on-surface-variant">
                         {t("details.reference")}
                       </dt>
@@ -352,7 +352,7 @@ export default async function PagePublique({
         </div>
       </main>
 
-      <footer className="border-t border-outline-variant/30 px-margin-mobile py-6 text-center md:px-margin-desktop">
+      <footer className="border-t border-outline-variant px-margin-mobile py-6 text-center md:px-margin-desktop">
         {/*
           « Powered by DropLink », avec ses trois garde-fous : secondaire
           visuellement, jamais confondable avec l'expéditeur, et ouverture HORS
