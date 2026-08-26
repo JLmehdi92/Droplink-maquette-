@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
+import { sansCommentaires } from "../aide/source";
 
 /**
  * LA FRONTIÈRE DU FOURNISSEUR DE SUIVI.
@@ -53,10 +54,12 @@ const DEROGATIONS = new Map<string, string>([
  * de fournisseur ne vive hors de l'adaptateur.
  */
 function codeSeul(chemin: string): string {
-  return readFileSync(chemin, "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\/\/.*$/gm, "")
-    .toLowerCase();
+  // ⚠️ LA DÉPOLLUTION LOCALE COUPAIT À LA PREMIÈRE DOUBLE BARRE, où qu'elle
+  // soit. `const BASE = "https://api.17track.net/..."` devenait `const BASE =
+  // "https:` — le nom de domaine du fournisseur était donc INTROUVABLE dans le
+  // dépôt dépollué, et cette suite était aveugle au seul cas qu'elle existe
+  // pour attraper. Voir `depollution.test.ts`.
+  return sansCommentaires(readFileSync(chemin, "utf8")).toLowerCase();
 }
 
 function fichiers(dossier: string): string[] {
@@ -125,15 +128,13 @@ describe("Un port, pas une API", () => {
     // redeviendrait invérifiable sans attendre un vrai colis.
     for (const nom of ["normalize", "checkpoints", "silence", "schedule"]) {
       const contenu = readFileSync(path.join(RACINE, "lib/tracking", nom + ".ts"), "utf8");
-      const sansCommentaires = contenu
-        .replace(/\/\*[\s\S]*?\*\//g, "")
-        .replace(/\/\/.*$/gm, "");
-
       // Le motif s'applique au CODE, commentaires retirés : sinon il se
       // satisferait du commentaire qui décrit la règle.
-      expect(sansCommentaires, `${nom}.ts appelle fetch`).not.toMatch(/\bfetch\s*\(/);
-      expect(sansCommentaires, `${nom}.ts lit l'horloge`).not.toMatch(/Date\.now\s*\(|new Date\s*\(\s*\)/);
-      expect(sansCommentaires, `${nom}.ts touche la base`).not.toMatch(/supabase|createClient/i);
+      const code = sansCommentaires(contenu);
+
+      expect(code, `${nom}.ts appelle fetch`).not.toMatch(/\bfetch\s*\(/);
+      expect(code, `${nom}.ts lit l'horloge`).not.toMatch(/Date\.now\s*\(|new Date\s*\(\s*\)/);
+      expect(code, `${nom}.ts touche la base`).not.toMatch(/supabase|createClient/i);
     }
   });
 });

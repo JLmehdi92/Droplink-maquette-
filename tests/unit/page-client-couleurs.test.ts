@@ -3,6 +3,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { resoudreAccent } from "../../src/lib/design/contraste";
 import { ReseauxVendeur } from "../../src/components/publique/reseaux-vendeur";
+import { sansCommentaires } from "../aide/source";
 
 /**
  * DEUX RÈGLES DE LA PAGE CLIENT QUE RIEN N'INTERROGEAIT.
@@ -61,10 +62,6 @@ function fichiers(racine: string): readonly string[] {
   };
   parcourir(racine);
   return trouves;
-}
-
-function sansCommentaires(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
 }
 
 describe("la page client ne décide jamais d'une couleur à la place du vendeur", () => {

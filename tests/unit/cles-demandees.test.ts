@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { sansCommentaires } from "../aide/source";
 
 /**
  * TOUTE CLÉ DEMANDÉE PAR LE CODE EXISTE-T-ELLE DANS LES DEUX CATALOGUES ?
@@ -47,17 +48,18 @@ function aplatir(objet: unknown, prefixe = ""): Set<string> {
   return clefs;
 }
 
-/**
- * Retire les commentaires avant toute recherche.
+/*
+ * La dépollution est partagée — `tests/aide/source.ts`.
  *
  * Ces fichiers PARLENT de clés dans leurs commentaires pour expliquer une
  * règle — `t("journal.actions.comptes.liste")` y est cité en exemple. Un motif
  * appliqué au texte brut se satisfait de l'explication et signale une clé que
  * personne n'appelle (L-031).
+ *
+ * La copie locale coupait aussi à la première double barre OBLIQUE, où qu'elle
+ * soit : elle amputait toute ligne contenant une URL. Le défaut est décrit et
+ * gardé par `depollution.test.ts`.
  */
-function sansCommentaires(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-}
 
 function fichiersSource(): readonly string[] {
   const trouves: string[] = [];
