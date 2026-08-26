@@ -3,7 +3,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
 import { BaliseVue } from "@/components/publique/balise-vue";
-import { Frise } from "@/components/publique/frise";
+import { EtatExpedition } from "@/components/publique/etat-expedition";
 import { Suivi } from "@/components/publique/suivi";
 import { Visionneur } from "@/components/publique/visionneur";
 import { lireCommandePublique, lireSuiviPublic } from "@/lib/page-publique/lecture";
@@ -20,23 +20,30 @@ import { EVENEMENTS } from "@/lib/instrumentation/evenements";
  * Elle est ouverte UNE FOIS, au téléphone, en 4G, depuis un message privé. Tout
  * ce qui suit découle de cette phrase.
  *
- * MOBILE D'ABORD, ET LA GALERIE AVANT LES DÉTAILS D'EXPÉDITION : c'est ce que
- * le client vient voir. La maquette compose pour desktop et met les deux côte à
- * côte, ce qui n'a pas d'équivalent en une colonne — il faut choisir un ordre,
- * et l'ordre est celui-là.
+ * L'ORDRE EST CELUI DES QUESTIONS QU'ON SE POSE, dans l'ordre où on se les
+ * pose : quand est-ce que ça arrive (la carte d'état), à quoi ça ressemble (la
+ * galerie), est-ce que c'est bien ça (la validation), et seulement ensuite le
+ * détail du transport. Le canevas met la galerie AVANT les détails
+ * d'expédition sur téléphone ; sur grand écran, les deux tiennent côte à côte,
+ * et c'est la seule chose que la largeur change.
+ *
+ * L'EN-TÊTE PORTE LA COULEUR DU VENDEUR EN APLAT PLEIN. C'est sa page, pas la
+ * nôtre : le dégradé de marque DropLink n'apparaît nulle part ici. Et aucune
+ * couleur d'écriture n'est posée en dur sur cet aplat — `resoudreAccent()`
+ * décide, sinon un accent jaune rendrait un titre blanc illisible.
  *
  * AUCUN GLASSMORPHISM, AUCUN `backdrop-blur`. Sur un aplat uni, un blanc à 70 %
- * flouté rend exactement la même couleur qu'un blanc opaque : le flou n'a rien à
- * flouter, et c'est ce qui coûte le plus cher sur un appareil d'entrée de gamme.
- * La géométrie de la maquette est conservée, les fonds deviennent opaques.
+ * flouté rend exactement la même couleur qu'un blanc opaque : le flou n'a rien
+ * à flouter, et c'est ce qui coûte le plus cher sur un appareil d'entrée de
+ * gamme.
  *
  * LA LANGUE EST CELLE DU VENDEUR, lue en base. Aucun provider de traduction
  * n'est expédié au navigateur : les Server Components résolvent, et le
  * visionneur reçoit ses libellés en propriétés.
  *
- * UNE INFORMATION ABSENTE EST OMISE. Pas de texte de remplacement, pas de valeur
- * inventée, pas de bloc vide : sur cette page, « nous n'avons pas encore cette
- * information » se dit en n'affichant rien.
+ * UNE INFORMATION ABSENTE EST OMISE. Pas de texte de remplacement, pas de
+ * valeur inventée, pas de bloc vide : sur cette page, « nous n'avons pas encore
+ * cette information » se dit en n'affichant rien.
  */
 
 export const metadata: Metadata = {
@@ -100,11 +107,30 @@ export default async function PagePublique({
   // à chercher « une couleur qui marche ». Un rouge saturé reste lisible.
   const accent = resoudreAccent(commande.boutique.couleur);
 
-  const libellesFrise = {
-    preparation: { titre: t("frise.preparation.titre"), texte: t("frise.preparation.texte") },
-    expedie: { titre: t("frise.expedie.titre"), texte: t("frise.expedie.texte") },
-    en_transit: { titre: t("frise.en_transit.titre"), texte: t("frise.en_transit.texte") },
-    livre: { titre: t("frise.livre.titre"), texte: t("frise.livre.texte") },
+  const libellesEtat = {
+    arriveeEstimee: t("etat.arriveeEstimee"),
+    aucunMouvement: t("suivi.aucunMouvement"),
+    /*
+     * `t.raw` ET NON `t` POUR LES CHAÎNES À PARAMÈTRE.
+     *
+     * La substitution de `{n}` est faite plus bas, avec un nombre de jours que
+     * seul le composant connaît. Or `t()` FORMATE : présenté à une chaîne ICU
+     * dont le paramètre manque, il ne rend pas le gabarit — il lève
+     * `FORMATTING_ERROR`, et la page rendait alors le nom de la clé au client.
+     * `t.raw()` rend le gabarit tel quel, ce qui est exactement ce qu'on
+     * transporte ici.
+     */
+    dernierMouvement: t.raw("suivi.dernierMouvement"),
+    aujourdHui: t("suivi.aujourdHui"),
+    hier: t("suivi.hier"),
+    silenceTitre: t.raw("suivi.silenceTitre"),
+    silenceTexte: t("suivi.silence"),
+    etapes: {
+      preparation: t("frise.preparation"),
+      expedie: t("frise.expedie"),
+      en_transit: t("frise.en_transit"),
+      livre: t("frise.livre"),
+    },
   } as const;
 
   // EN-TÊTE OMIS quand il n'y a NI nom NI logo. Pas de barre vide, pas de
@@ -113,7 +139,20 @@ export default async function PagePublique({
   // vie d'un compte — pas un repli dégradé.
   const aUnEnTete = commande.boutique.nom !== null || commande.boutique.logo !== null;
 
-  const carte = "rounded-xl bg-surface-container-lowest p-6 shadow-sm";
+  const surTitre =
+    "font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] uppercase text-sourdine";
+
+  /*
+   * SECTION AU TÉLÉPHONE, CARTE SUR GRAND ÉCRAN — et c'est la largeur qui
+   * décide, pas le contenu. À 390 px, une carte n'encadre rien : elle ajoute
+   * deux traits et retire seize pixels à ce qu'il y a dedans. Un filet en tête
+   * de section sépare aussi bien pour rien.
+   */
+  const section =
+    "border-t border-outline-variant px-margin-mobile py-6 " +
+    "md:rounded-lg md:border md:border-outline-variant md:bg-surface-container-lowest md:px-5 md:py-5";
+
+  const jour = (instant: Date): string => format.dateTime(instant, { day: "numeric", month: "long" });
 
   // LE RENDU EST COMPTÉ CÔTÉ SERVEUR, la VUE côté client, et les deux ne se
   // confondent pas : `rendus ≥ vues réelles ≥ vues enregistrées`. Sans la borne
@@ -129,230 +168,242 @@ export default async function PagePublique({
     sujet: visiteur === null ? "visiteur:sans-adresse" : `visiteur:${empreinte(visiteur)}`,
   });
 
+  const galerie =
+    commande.medias.length === 0 ? (
+      /* LA GALERIE VIDE SE DIT. Ni cadres gris ni « bientôt disponible » : on
+         nomme ce qui est, et on dit ce qui va se passer. */
+      <div className="rounded-lg border border-dashed border-outline p-8 text-center">
+        <p className="font-body-md text-[15px] font-semibold text-on-surface">
+          {t("galerie.videTitre")}
+        </p>
+        <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+          {t("galerie.videTexte")}
+        </p>
+      </div>
+    ) : (
+      <Visionneur
+        jeton={commande.jeton}
+        medias={commande.medias.map((m) => ({
+          id: m.id,
+          type: m.type,
+          urlVignette: m.urlVignette,
+          largeur: m.largeur,
+          hauteur: m.hauteur,
+        }))}
+        // Le texte du filigrane est le NOM DE LA BOUTIQUE. La base a déjà
+        // décidé si un filigrane est possible : elle éteint le drapeau
+        // quand il n'y a pas de nom, ce qui rend ce `??` inatteignable —
+        // il est là parce que le typage l'exige, pas comme un repli.
+        filigrane={commande.boutique.filigrane ? (commande.boutique.nom ?? null) : null}
+        libelles={{
+          ouvrir: t("galerie.ouvrir"),
+          fermer: t("galerie.fermer"),
+          precedent: t("galerie.precedent"),
+          suivant: t("galerie.suivant"),
+          chargement: t("galerie.chargement"),
+          indisponible: t("galerie.indisponible"),
+          position: t("galerie.position"),
+        }}
+      />
+    );
+
+  const validation =
+    commande.medias.length === 0 ? null : (
+      /*
+        L'ARBITRAGE QC vient JUSTE APRÈS CE QU'IL JUGE : on ne demande pas à
+        quelqu'un de se prononcer sur des photos avant de les lui avoir
+        montrées.
+
+        OMIS QUAND IL N'Y A AUCUNE PHOTO. Demander « ces photos
+        correspondent-elles ? » devant une galerie vide n'appelle aucune
+        réponse sensée, et une décision prise là-dessus serait écrite au
+        journal comme les autres.
+      */
+      <div>
+        <p className={surTitre + " mb-3"}>{t("qc.titre")}</p>
+        <ArbitrageQc
+          jeton={commande.jeton}
+          etatInitial={commande.qc}
+          remplissage={accent.remplissage}
+          surRemplissage={accent.surRemplissage}
+          libelles={{
+            titre: t("qc.titre"),
+            texte: t("qc.texte"),
+            approuver: t("qc.approuver"),
+            refuser: t("qc.refuser"),
+            commentaire: t("qc.commentaire"),
+            envoi: t("qc.envoi"),
+            /* LES LIBELLÉS NE DISENT PLUS « VOUS ». Le vendeur peut
+               reporter dans son éditeur une réponse reçue par message
+               privé — c'est une fonction voulue — et la page affichait
+               alors « Vous avez validé cette commande » à un client qui
+               n'avait rien validé. Une phrase qui parle du lecteur et
+               qui est fausse est pire qu'une phrase neutre, et c'est
+               celle-là qu'on invoquerait en cas de litige. */
+            approuve: t("qc.approuve"),
+            refuse: t("qc.refuse"),
+            modifier: t("qc.modifier"),
+            echec: t("qc.echec"),
+          }}
+        />
+      </div>
+    );
+
   return (
-    <div lang={langue} className="flex min-h-dvh flex-col">
+    <div lang={langue} className="flex min-h-dvh flex-col bg-surface-container-lowest">
+      {/*
+        L'EN-TÊTE À LA COULEUR DU VENDEUR. Il porte aussi le titre et le nom du
+        destinataire : sans lui, le bandeau serait une bande de couleur qui
+        n'apprend rien, et la page commencerait deux fois.
+      */}
       {aUnEnTete ? (
-        <header className="border-b border-outline-variant bg-surface-container-lowest">
-          <div className="mx-auto flex h-16 max-w-container-max items-center gap-3 px-margin-mobile md:px-margin-desktop">
-            {commande.boutique.logo !== null ? (
-              /* eslint-disable-next-line @next/next/no-img-element -- le logo
-                 est servi par une URL signée à expiration ; l'optimiseur la
-                 mettrait en cache au-delà de sa validité. */
-              <img
-                src={commande.boutique.logo}
-                alt=""
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-full object-contain"
-              />
-            ) : null}
-            {commande.boutique.nom !== null ? (
-              <span className="font-headline-md text-headline-md-mobile text-on-surface">
-                {commande.boutique.nom}
-              </span>
-            ) : null}
+        <header
+          style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
+          className="px-margin-mobile pt-5 pb-6 md:px-margin-desktop md:pt-6 md:pb-8"
+        >
+          <div className="mx-auto max-w-container-max">
+            <div className="mb-5 flex items-center gap-2.5 md:mb-6">
+              {commande.boutique.logo !== null ? (
+                /* eslint-disable-next-line @next/next/no-img-element -- le logo
+                   est servi par une URL signée à expiration ; l'optimiseur la
+                   mettrait en cache au-delà de sa validité. */
+                <img
+                  src={commande.boutique.logo}
+                  alt=""
+                  width={34}
+                  height={34}
+                  className="h-[34px] w-[34px] rounded-full object-contain"
+                />
+              ) : null}
+              {commande.boutique.nom !== null ? (
+                <span className="font-headline-md text-[16px] font-bold tracking-[-0.01em] md:text-[18px]">
+                  {commande.boutique.nom}
+                </span>
+              ) : null}
+            </div>
+            <EnTeteTitre
+              titre={t("titre")}
+              client={commande.client}
+              pourClient={t.raw("pourClient")}
+              doux={accent.surRemplissageDoux}
+            />
           </div>
         </header>
-      ) : null}
+      ) : (
+        <div className="px-margin-mobile pt-8 md:px-margin-desktop">
+          <div className="mx-auto max-w-container-max">
+            <EnTeteTitre
+              titre={t("titre")}
+              client={commande.client}
+              pourClient={t.raw("pourClient")}
+              doux="var(--color-on-surface-variant)"
+            />
+          </div>
+        </div>
+      )}
 
+      {/*
+        UNE SEULE GRILLE, TROIS BLOCS, PLACEMENT EXPLICITE.
+
+        L'ordre de la SOURCE est celui du téléphone — état, galerie, détail —
+        parce que c'est lui qui compte pour la grande majorité des visiteurs et
+        pour qui lit la page sans feuille de style. Sur grand écran, la galerie
+        occupe les deux rangées de la colonne large pendant que l'état et le
+        détail s'empilent à droite. Sans `row-start` explicite, le détail
+        tomberait SOUS la galerie et laisserait un trou sous l'état.
+      */}
       <main
         id="contenu"
-        className="mx-auto w-full max-w-container-max flex-grow px-margin-mobile py-8 md:px-margin-desktop"
+        className="mx-auto w-full max-w-container-max flex-grow md:grid md:grid-cols-12 md:items-start md:gap-x-gutter md:px-margin-desktop md:pt-8"
       >
-        <div className="mb-8">
-          <h1 className="mb-2 font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-xl md:text-headline-xl">
-            {t("titre")}
-          </h1>
-          {commande.client !== null ? (
-            <p className="font-body-lg text-body-lg text-on-surface-variant">{commande.client}</p>
+        <div className="px-margin-mobile pt-4 md:col-span-4 md:col-start-9 md:row-start-1 md:px-0 md:pt-0">
+          <EtatExpedition
+            statut={statutAffiche}
+            suivi={suivi}
+            maintenant={maintenant}
+            libelles={libellesEtat}
+            accent={accent}
+            formaterJour={jour}
+          />
+        </div>
+
+        <div className="md:col-span-8 md:col-start-1 md:row-span-2 md:row-start-1">
+          {/* PLEINE LARGEUR AU TÉLÉPHONE. Les vignettes sortent des marges :
+              c'est ce que le client vient voir, et une marge de chaque côté lui
+              coûte un dixième de la surface de chaque photo. */}
+          <div className="mt-6 md:mt-0">
+            <p className={surTitre + " mb-3 px-margin-mobile md:px-0"}>{t("galerie.titre")}</p>
+            {commande.medias.length === 0 ? (
+              <div className="px-margin-mobile md:px-0">{galerie}</div>
+            ) : (
+              galerie
+            )}
+          </div>
+
+          {validation !== null ? (
+            <div className="mt-7 px-margin-mobile md:mt-8 md:px-0">{validation}</div>
           ) : null}
         </div>
 
-        {/*
-          L'ORDRE DU DOCUMENT EST L'ORDRE MOBILE : galerie d'abord. Sur grand
-          écran, `md:order-*` remet les détails à gauche comme la maquette — la
-          présentation change, la source reste dans l'ordre qui compte pour le
-          plus grand nombre de visiteurs.
-        */}
-        <div className="grid grid-cols-1 gap-gutter md:grid-cols-12">
-          <section className={carte + " md:order-2 md:col-span-8"}>
-            <h2 className="mb-6 font-headline-md text-headline-md-mobile text-on-surface">
-              {t("galerie.titre")}
-            </h2>
-
-            {commande.medias.length === 0 ? (
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                {t("galerie.aucune")}
-              </p>
-            ) : (
-              <Visionneur
-                jeton={commande.jeton}
-                medias={commande.medias.map((m) => ({
-                  id: m.id,
-                  type: m.type,
-                  urlVignette: m.urlVignette,
-                  largeur: m.largeur,
-                  hauteur: m.hauteur,
-                }))}
-                // Le texte du filigrane est le NOM DE LA BOUTIQUE. La base a déjà
-                // décidé si un filigrane est possible : elle éteint le drapeau
-                // quand il n'y a pas de nom, ce qui rend ce `??` inatteignable —
-                // il est là parce que le typage l'exige, pas comme un repli.
-                filigrane={commande.boutique.filigrane ? (commande.boutique.nom ?? null) : null}
+        <div className="mt-8 md:col-span-4 md:col-start-9 md:row-start-2 md:mt-4 md:flex md:flex-col md:gap-4">
+          {/* OMIS tant qu'aucun colis n'est enregistré : une carte vide
+              affirmerait qu'il y a quelque chose à y lire. */}
+          {suivi !== null ? (
+            <section className={section}>
+              <p className={surTitre + " mb-3"}>{t("suivi.titre")}</p>
+              <Suivi
+                suivi={suivi}
+                accent={accent.interface}
+                formaterDate={(instant) =>
+                  format.dateTime(instant, {
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                }
                 libelles={{
-                  ouvrir: t("galerie.ouvrir"),
-                  fermer: t("galerie.fermer"),
-                  precedent: t("galerie.precedent"),
-                  suivant: t("galerie.suivant"),
-                  chargement: t("galerie.chargement"),
-                  indisponible: t("galerie.indisponible"),
-                  position: t("galerie.position"),
+                  titre: t("suivi.titre"),
+                  numero: t("suivi.numero"),
+                  arrete: t("suivi.arrete"),
                 }}
               />
-            )}
-          </section>
-
-          <div className="flex flex-col gap-gutter md:order-1 md:col-span-4">
-            <section className={carte}>
-              <h2 className="mb-6 font-headline-md text-headline-md-mobile text-on-surface">
-                {t("expedition.titre")}
-              </h2>
-              <Frise statut={statutAffiche} libelles={libellesFrise} accent={accent.interface} />
             </section>
+          ) : null}
 
-            {/* LE DÉTAIL DU SUIVI, omis tant qu'aucun colis n'est enregistré :
-                une carte vide affirmerait qu'il y a quelque chose à y lire. */}
-            {suivi !== null ? (
-              <section className={carte}>
-                <h2 className="mb-4 font-headline-md text-headline-md-mobile text-on-surface">
-                  {t("suivi.titre")}
-                </h2>
-                <Suivi
-                  suivi={suivi}
-                  maintenant={maintenant}
-                  formaterDate={(instant) =>
-                    format.dateTime(instant, {
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  }
-                  libelles={{
-                    titre: t("suivi.titre"),
-                    numero: t("suivi.numero"),
-                    aucunMouvement: t("suivi.aucunMouvement"),
-                    /*
-                     * `t.raw` ET NON `t` POUR LES DEUX CHAÎNES À PARAMÈTRE.
-                     *
-                     * Le visionneur reçoit ses libellés EN PROPRIÉTÉS — la page
-                     * publique n'embarque aucun catalogue côté client, c'est le
-                     * budget qui l'impose. Il fait donc lui-même la
-                     * substitution de `{n}`, avec le nombre de jours qu'il est
-                     * seul à connaître.
-                     *
-                     * Mais `t()` FORMATE : présenté à une chaîne ICU dont le
-                     * paramètre manque, il ne rend pas le gabarit — il LÈVE
-                     * `FORMATTING_ERROR`, et la page rendait alors le nom de la
-                     * clé au client. `t.raw()` rend le gabarit tel quel, ce qui
-                     * est exactement ce qu'on transporte ici.
-                     */
-                    dernierMouvement: t.raw("suivi.dernierMouvement"),
-                    aujourdHui: t("suivi.aujourdHui"),
-                    hier: t("suivi.hier"),
-                    silence: t.raw("suivi.silence"),
-                    estimation: t("suivi.estimation"),
-                    arrete: t("suivi.arrete"),
-                    passages: t("suivi.passages"),
-                  }}
-                />
-              </section>
-            ) : null}
-
-            {/* Bloc OMIS quand ni référence ni numéro de suivi : une carte vide
-                affirmerait qu'il y a quelque chose à y lire. */}
-            {/*
-              L'ARBITRAGE QC, sous le suivi sur grand écran et après la galerie
-              sur mobile : on ne demande pas à quelqu'un de juger des photos
-              avant de les lui avoir montrées.
-
-              OMIS QUAND IL N'Y A AUCUNE PHOTO. Demander « ces photos
-              correspondent-elles ? » devant une galerie vide n'appelle aucune
-              réponse sensée, et une décision prise là-dessus serait écrite au
-              journal comme les autres.
-            */}
-            {commande.medias.length > 0 ? (
-              <section className={carte}>
-                <h2 className="mb-4 font-headline-md text-headline-md-mobile text-on-surface">
-                  {t("qc.titre")}
-                </h2>
-                <ArbitrageQc
-                  jeton={commande.jeton}
-                  etatInitial={commande.qc}
-                  remplissage={accent.remplissage}
-                  surRemplissage={accent.surRemplissage}
-                  libelles={{
-                    titre: t("qc.titre"),
-                    texte: t("qc.texte"),
-                    approuver: t("qc.approuver"),
-                    refuser: t("qc.refuser"),
-                    commentaire: t("qc.commentaire"),
-                    envoi: t("qc.envoi"),
-                    /* LES LIBELLÉS NE DISENT PLUS « VOUS ». Le vendeur peut
-                       reporter dans son éditeur une réponse reçue par message
-                       privé — c'est une fonction voulue — et la page affichait
-                       alors « Vous avez validé cette commande » à un client qui
-                       n'avait rien validé. Une phrase qui parle du lecteur et
-                       qui est fausse est pire qu'une phrase neutre, et c'est
-                       celle-là qu'on invoquerait en cas de litige.
-
-                       `orders.qc_decide_par` enregistre désormais l'auteur, en
-                       base ; la vue publique ne l'expose pas encore, et la
-                       rouvrir pour deux libellés coûterait plus que la
-                       formulation neutre ne rapporte. */
-                    approuve: t("qc.approuve"),
-                    refuse: t("qc.refuse"),
-                    modifier: t("qc.modifier"),
-                    echec: t("qc.echec"),
-                  }}
-                />
-              </section>
-            ) : null}
-
-            {commande.reference !== null || commande.numeroSuivi !== null ? (
-              <section className={carte}>
-                <h2 className="mb-4 font-headline-md text-headline-md-mobile text-on-surface">
-                  {t("details.titre")}
-                </h2>
-                <dl className="flex flex-col gap-4">
-                  {commande.reference !== null ? (
-                    <div className="flex items-center justify-between gap-4 border-b border-outline-variant pb-2">
-                      <dt className="font-body-sm text-body-sm text-on-surface-variant">
-                        {t("details.reference")}
-                      </dt>
-                      <dd className="text-right font-label-md text-label-md text-on-surface">
-                        {commande.reference}
-                      </dd>
-                    </div>
-                  ) : null}
-                  {commande.numeroSuivi !== null ? (
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="font-body-sm text-body-sm text-on-surface-variant">
-                        {t("details.suivi")}
-                      </dt>
-                      <dd className="text-right font-label-md text-label-md break-all text-on-surface">
-                        {commande.numeroSuivi}
-                      </dd>
-                    </div>
-                  ) : null}
-                </dl>
-              </section>
-            ) : null}
-          </div>
+          {/* Bloc OMIS quand ni référence ni destinataire : une carte vide
+              affirmerait qu'il y a quelque chose à y lire. */}
+          {commande.reference !== null || commande.client !== null ? (
+            <section className={section}>
+              <p className={surTitre + " mb-3"}>{t("details.titre")}</p>
+              <dl className="flex flex-col gap-3">
+                {commande.reference !== null ? (
+                  <div className="flex items-baseline justify-between gap-4">
+                    <dt className="font-body-md text-body-md text-on-surface-variant">
+                      {t("details.reference")}
+                    </dt>
+                    <dd className="text-right font-label-md text-[14px] font-bold text-on-surface">
+                      {commande.reference}
+                    </dd>
+                  </div>
+                ) : null}
+                {commande.client !== null ? (
+                  <div className="flex items-baseline justify-between gap-4">
+                    <dt className="font-body-md text-body-md text-on-surface-variant">
+                      {t("details.destinataire")}
+                    </dt>
+                    <dd className="text-right font-label-md text-[14px] font-bold text-on-surface">
+                      {commande.client}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </section>
+          ) : null}
         </div>
       </main>
 
-      <footer className="border-t border-outline-variant px-margin-mobile py-6 text-center md:px-margin-desktop">
+      <footer className="mt-8 border-t border-outline-variant px-margin-mobile py-6 text-center md:px-margin-desktop">
         {/*
           « Powered by DropLink », avec ses trois garde-fous : secondaire
           visuellement, jamais confondable avec l'expéditeur, et ouverture HORS
@@ -362,7 +413,7 @@ export default async function PagePublique({
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-label-sm text-label-sm text-on-surface-variant hover:underline"
+          className="font-body-sm text-[12px] text-on-surface-variant hover:underline"
         >
           {t("propulsePar")}
         </a>
@@ -372,5 +423,41 @@ export default async function PagePublique({
           chargée et une page vue. Il ne rend rien. */}
       <BaliseVue jeton={commande.jeton} />
     </div>
+  );
+}
+
+/**
+ * Le titre et le destinataire, rendus à l'identique dans les deux en-têtes.
+ *
+ * Ils sont extraits parce qu'ils existent en DEUX exemplaires — sur l'aplat
+ * d'accent quand la boutique est configurée, sur fond blanc sinon — et que
+ * deux copies d'un même bloc divergent toujours par le libellé qu'on oublie de
+ * corriger dans la seconde.
+ */
+function EnTeteTitre({
+  titre,
+  client,
+  pourClient,
+  doux,
+}: {
+  readonly titre: string;
+  readonly client: string | null;
+  readonly pourClient: string;
+  readonly doux: string;
+}) {
+  return (
+    <>
+      <h1 className="font-headline-lg text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] md:text-[44px] md:leading-[50px]">
+        {titre}
+      </h1>
+      {client !== null ? (
+        <p
+          className="mt-1.5 font-body-md text-[15px] leading-[22px] md:mt-2 md:text-[17px] md:leading-[26px]"
+          style={{ color: doux }}
+        >
+          {pourClient.replace("{nom}", client)}
+        </p>
+      ) : null}
+    </>
   );
 }

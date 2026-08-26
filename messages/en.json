@@ -526,41 +526,28 @@
     "titre": "Your order",
     "propulsePar": "Powered by DropLink",
     "frise": {
-      "preparation": {
-        "titre": "Preparing",
-        "texte": "Your order is being prepared."
-      },
-      "expedie": {
-        "titre": "Shipped",
-        "texte": "The parcel was handed to the carrier."
-      },
-      "en_transit": {
-        "titre": "In transit",
-        "texte": "The parcel is on its way."
-      },
-      "livre": {
-        "titre": "Delivered",
-        "texte": "The parcel has arrived."
-      }
+      "preparation": "In preparation",
+      "expedie": "Shipped",
+      "en_transit": "In transit",
+      "livre": "Delivered"
     },
     "galerie": {
       "titre": "Photos and videos",
-      "aucune": "No photos yet.",
       "ouvrir": "Enlarge photo",
       "fermer": "Close",
       "precedent": "Previous",
       "suivant": "Next",
       "chargement": "Loading…",
       "indisponible": "This photo is unavailable.",
-      "position": "{n} of {total}"
-    },
-    "expedition": {
-      "titre": "Tracking"
+      "position": "{n} of {total}",
+      "videTitre": "No photos yet",
+      "videTexte": "They will appear here as soon as the seller adds them."
     },
     "details": {
       "titre": "Details",
       "reference": "Item",
-      "suivi": "Tracking number"
+      "suivi": "Tracking number",
+      "destinataire": "Recipient"
     },
     "qc": {
       "titre": "Your feedback",
@@ -581,10 +568,13 @@
       "dernierMouvement": "Last movement {n} days ago",
       "aujourdHui": "Movement today",
       "hier": "Movement yesterday",
-      "silence": "No movement for {n} days. This is common on long routes, especially at customs. We keep asking the carrier.",
-      "estimation": "Estimated delivery",
+      "silence": "The parcel is registered and tracked. Such a delay is not unusual at customs — we keep querying the carrier every day.",
       "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
-      "passages": "Transport steps"
+      "silenceTitre": "No movement for {n} days"
+    },
+    "pourClient": "for {nom}",
+    "etat": {
+      "arriveeEstimee": "Estimated arrival"
     }
   },
   "admin": {

@@ -35,6 +35,21 @@ export interface AccentResolu {
   /** Remplissage de bouton, et la couleur d'écriture qui va dessus. */
   readonly remplissage: string;
   readonly surRemplissage: string;
+  /**
+   * Les deux retraits de `surRemplissage`, pour ce qui est SUBORDONNÉ sur un
+   * aplat d'accent : un libellé secondaire, un segment de frise non franchi.
+   *
+   * Ils vivent ICI et pas dans les composants parce qu'ils dépendent d'une
+   * chose que seul ce module sait : laquelle du blanc ou du noir a été retenue.
+   * Recalculés à chaque appel, ils dériveraient — et le jour où l'un d'eux
+   * partirait du blanc alors que l'écriture est noire, le résultat serait
+   * invisible sans être faux nulle part.
+   *
+   * ILS NE VISENT PAS 4,5:1 ET NE LE PRÉTENDENT PAS. Ce sont des retraits
+   * délibérés, réservés à ce dont la lecture ne dépend pas.
+   */
+  readonly surRemplissageDoux: string;
+  readonly surRemplissageFaible: string;
   /** Vrai si la couleur choisie a dû être ajustée pour atteindre les cibles. */
   readonly ajuste: boolean;
 }
@@ -223,12 +238,16 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
     remplissage = ajusterPourRatio(base, surRemplissage, RATIO_TEXTE);
   }
 
+  const ecritureBlanche = surRemplissage === BLANC;
+
   return {
     brut: versHex(base),
     texte: versHex(texte),
     interface: versHex(elementInterface),
     remplissage: versHex(remplissage),
     surRemplissage: versHex(surRemplissage),
+    surRemplissageDoux: ecritureBlanche ? "rgba(255,255,255,0.82)" : "rgba(0,0,0,0.72)",
+    surRemplissageFaible: ecritureBlanche ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.22)",
     ajuste: choisi === null || versHex(texte) !== versHex(base),
   };
 }

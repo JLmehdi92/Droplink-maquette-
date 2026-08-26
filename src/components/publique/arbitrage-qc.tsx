@@ -131,7 +131,7 @@ export function ArbitrageQc({
           // en base protège. Les deux ne remplacent pas le même défaut.
           maxLength={1000}
           rows={3}
-          className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-3 font-body-md text-body-md text-on-surface"
+          className="champ-app w-full rounded-md p-3 font-body-md text-body-md text-on-surface"
         />
       </label>
 
@@ -142,7 +142,7 @@ export function ArbitrageQc({
           disabled={envoi}
           onClick={() => void decider("approuve")}
           style={{ backgroundColor: remplissage, color: surRemplissage }}
-          className="min-h-11 flex-1 rounded-lg px-4 py-3 font-label-md text-label-md disabled:opacity-50"
+          className="min-h-[50px] flex-grow rounded-md px-6 font-label-md text-[15px] font-bold disabled:opacity-50"
         >
           {envoi ? libelles.envoi : libelles.approuver}
         </button>
@@ -150,7 +150,7 @@ export function ArbitrageQc({
           type="button"
           disabled={envoi}
           onClick={() => void decider("refuse")}
-          className="min-h-11 flex-1 rounded-lg border border-outline-variant px-4 py-3 font-label-md text-label-md text-on-surface disabled:opacity-50"
+          className="min-h-[50px] rounded-md border border-outline px-6 font-label-md text-[15px] font-bold text-on-surface-variant disabled:opacity-50"
         >
           {envoi ? libelles.envoi : libelles.refuser}
         </button>

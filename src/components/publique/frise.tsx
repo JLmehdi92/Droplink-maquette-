@@ -1,15 +1,23 @@
 import type { CommandePublique } from "@/lib/page-publique/lecture";
 
 /**
- * La frise d'expédition, à QUATRE étapes.
+ * La frise d'expédition, à QUATRE étapes, en quatre segments horizontaux.
  *
  * Quatre et pas douze : la granularité vit dans le DÉTAIL du suivi, pas dans la
  * frise. Un client qui voit douze étapes ne sait plus laquelle compte.
  *
- * Portée sur la frise verticale de `droplink_votre_suivi_de_commande` — pastille
- * de 16 px sur une ligne de 2 px, l'étape en cours creuse et pulsante, les
- * étapes à venir à demi-opacité. Le vocabulaire de fret disparaît : ni port de
- * départ, ni dédouanement, ni palette.
+ * ELLE A CHANGÉ DE FORME AVEC LE CANEVAS. Elle était une colonne de pastilles
+ * sur une ligne verticale, chaque étape portant une phrase. Le client n'a pas
+ * besoin qu'on lui explique ce que « expédié » veut dire : il a besoin de voir
+ * où en est son colis, en un coup d'œil, sans dérouler. Les quatre phrases sont
+ * donc parties — et leurs clés de traduction avec elles, sinon elles seraient
+ * restées à traduire et à relire pour rien.
+ *
+ * DEUX FONDS, DEUX PALETTES. Sur téléphone la frise est posée sur l'aplat
+ * d'accent du vendeur ; sur grand écran elle est dans une carte blanche. Le
+ * remplissage des segments ne peut donc pas être une couleur en dur : sur
+ * l'aplat il prend `surRemplissage` — la couleur que `resoudreAccent()` a jugée
+ * lisible dessus — et sur blanc il prend l'accent lui-même.
  *
  * LE STATUT NE RECULE JAMAIS. Ici c'est simplement l'affichage d'un état que la
  * base a déjà arbitré ; la règle vit en amont, mais l'écran ne doit pas pouvoir
@@ -23,55 +31,44 @@ type Etape = (typeof ETAPES)[number];
 export function Frise({
   statut,
   libelles,
-  accent,
+  rempli,
+  vide,
+  texteAtteint,
+  texteAVenir,
 }: {
   readonly statut: CommandePublique["statut"];
-  readonly libelles: Readonly<Record<Etape, { titre: string; texte: string }>>;
-  readonly accent: string;
+  readonly libelles: Readonly<Record<Etape, string>>;
+  /** Couleur des segments franchis. */
+  readonly rempli: string;
+  /** Couleur des segments à venir. */
+  readonly vide: string;
+  /** Couleur du libellé de l'étape en cours. */
+  readonly texteAtteint: string;
+  /** Couleur des libellés des autres étapes. */
+  readonly texteAVenir: string;
 }) {
   const courante = ETAPES.indexOf(statut);
 
   return (
-    <ol className="relative ml-3 flex flex-col gap-8 border-l-2 border-surface-container-high">
+    <ol className="grid grid-cols-4 gap-[5px]" aria-label={libelles[statut]}>
       {ETAPES.map((etape, rang) => {
-        const faite = rang < courante;
         const active = rang === courante;
 
         return (
-          <li
-            key={etape}
-            className={"relative pl-6 " + (!faite && !active ? "opacity-50" : "")}
-            aria-current={active ? "step" : undefined}
-          >
-            {active ? (
-              <span
-                className="absolute top-0 -left-[11px] flex h-5 w-5 items-center justify-center rounded-full border-2 bg-surface-container-lowest"
-                style={{ borderColor: accent }}
-              >
-                <span
-                  className="h-2 w-2 rounded-full motion-safe:animate-pulse"
-                  style={{ backgroundColor: accent }}
-                />
-              </span>
-            ) : (
-              <span
-                className={
-                  "absolute top-1 -left-[9px] h-4 w-4 rounded-full " +
-                  (faite ? "" : "border-2 border-outline-variant bg-surface-container-lowest")
-                }
-                style={faite ? { backgroundColor: accent } : undefined}
-              />
-            )}
-
-            <h3
-              className="font-label-md text-label-md"
-              style={active ? { color: accent } : undefined}
+          <li key={etape} aria-current={active ? "step" : undefined}>
+            <div
+              className="h-1.5 rounded-full"
+              style={{ backgroundColor: rang <= courante ? rempli : vide }}
+            />
+            <span
+              className="mt-2 block font-body-sm text-[10px] leading-[14px] md:text-[11px] md:leading-[15px]"
+              style={{
+                color: active ? texteAtteint : texteAVenir,
+                fontWeight: active ? 700 : 400,
+              }}
             >
-              {libelles[etape].titre}
-            </h3>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-              {libelles[etape].texte}
-            </p>
+              {libelles[etape]}
+            </span>
           </li>
         );
       })}

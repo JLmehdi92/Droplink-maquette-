@@ -526,41 +526,28 @@
     "titre": "Votre commande",
     "propulsePar": "Propulsé par DropLink",
     "frise": {
-      "preparation": {
-        "titre": "En préparation",
-        "texte": "Votre commande est en cours de préparation."
-      },
-      "expedie": {
-        "titre": "Expédiée",
-        "texte": "Le colis a été remis au transporteur."
-      },
-      "en_transit": {
-        "titre": "En transit",
-        "texte": "Le colis est en route."
-      },
-      "livre": {
-        "titre": "Livrée",
-        "texte": "Le colis est arrivé."
-      }
+      "preparation": "En préparation",
+      "expedie": "Expédié",
+      "en_transit": "En transit",
+      "livre": "Livré"
     },
     "galerie": {
       "titre": "Photos et vidéos",
-      "aucune": "Aucune photo pour le moment.",
       "ouvrir": "Agrandir la photo",
       "fermer": "Fermer",
       "precedent": "Précédent",
       "suivant": "Suivant",
       "chargement": "Chargement…",
       "indisponible": "Cette photo n’est pas disponible.",
-      "position": "{n} sur {total}"
-    },
-    "expedition": {
-      "titre": "Suivi"
+      "position": "{n} sur {total}",
+      "videTitre": "Pas encore de photos",
+      "videTexte": "Elles apparaîtront ici dès que le vendeur les aura ajoutées."
     },
     "details": {
       "titre": "Détails",
       "reference": "Article",
-      "suivi": "Numéro de suivi"
+      "suivi": "Numéro de suivi",
+      "destinataire": "Destinataire"
     },
     "qc": {
       "titre": "Votre avis",
@@ -581,10 +568,13 @@
       "dernierMouvement": "Dernier mouvement il y a {n} jours",
       "aujourdHui": "Mouvement aujourd’hui",
       "hier": "Mouvement hier",
-      "silence": "Aucun mouvement depuis {n} jours. C’est fréquent sur les longs trajets, en particulier au passage en douane. Nous continuons à interroger le transporteur.",
-      "estimation": "Livraison estimée",
+      "silence": "Le colis est enregistré et suivi. Ce délai n’est pas rare au passage en douane — nous continuons d’interroger le transporteur chaque jour.",
       "arrete": "Le transporteur ne donne plus d’information sur ce numéro. Contactez le vendeur si vous n’avez rien reçu.",
-      "passages": "Étapes du transport"
+      "silenceTitre": "Aucun mouvement depuis {n} jours"
+    },
+    "pourClient": "pour {nom}",
+    "etat": {
+      "arriveeEstimee": "Arrivée estimée"
     }
   },
   "admin": {

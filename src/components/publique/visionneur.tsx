@@ -32,6 +32,37 @@ export interface EntreeVisionneur {
   readonly hauteur: number | null;
 }
 
+/**
+ * Combien de tuiles suivent la pièce en grand, par largeur d'écran.
+ *
+ * Six et huit AVEC la pièce en grand comprise : ce sont des lignes pleines de
+ * trois et de quatre, et une ligne incomplète se lit comme un chargement qui
+ * n'a pas fini.
+ */
+const TUILES_TELEPHONE = 5;
+const TUILES_BUREAU = 7;
+
+/** La pastille de lecture d'une vidéo, posée sur sa vignette. */
+function PastilleLecture({ grande = false }: { readonly grande?: boolean }) {
+  return (
+    <span
+      className={
+        "pointer-events-none absolute inset-0 flex items-center justify-center text-on-surface-variant"
+      }
+      aria-hidden="true"
+    >
+      <svg
+        width={grande ? 34 : 22}
+        height={grande ? 34 : 22}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M8 5v14l11-7z" />
+      </svg>
+    </span>
+  );
+}
+
 export function Visionneur({
   jeton,
   medias,
@@ -63,6 +94,8 @@ export function Visionneur({
   const [echec, setEchec] = useState(false);
 
   const courant = index === null ? undefined : medias[index];
+  const premier = medias[0];
+  const tuiles = medias.slice(1, TUILES_BUREAU + 1);
 
   // L'URL pleine est demandée à CHAQUE ouverture, et jetée à la fermeture : une
   // URL signée a une durée de vie, la garder en mémoire ferait échouer une
@@ -148,47 +181,105 @@ export function Visionneur({
           `pointer-events-none` : sans lui, la couche intercepterait le clic qui
           ouvre la photo. `select-none` évite qu'on le sélectionne comme du
           texte. Aucune police n'est chargée pour lui. */}
-      {/* LA GRILLE. Deux colonnes sur mobile — sur une seule colonne pleine
-          largeur, une vignette de 200 px serait agrandie de 80 % et floue. Les
-          dimensions sont RÉSERVÉES avant chargement : sans elles, l'arrivée des
-          images pousse le contenu et le décalage cumulé explose. */}
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-        {medias.map((media, rang) => (
-          <li key={media.id}>
-            <button
-              type="button"
-              onClick={() => setIndex(rang)}
-              className="relative block aspect-square w-full overflow-hidden rounded-lg bg-surface-container-highest"
-              aria-label={libelles.ouvrir + " " + (rang + 1)}
-            >
-              {media.urlVignette !== null ? (
-                /* eslint-disable-next-line @next/next/no-img-element -- URL
-                   signée à expiration : l'optimiseur la mettrait en cache
-                   au-delà de sa validité et servirait des images mortes. Et
-                   c'est une vignette de 200 px : il n'y a rien à optimiser. */
-                <img
-                  src={media.urlVignette}
-                  alt=""
-                  width={200}
-                  height={200}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="flex h-full w-full items-center justify-center font-label-sm text-label-sm text-on-surface-variant">
-                  {rang + 1}
-                </span>
-              )}
-              {filigrane !== null ? (
-                <span className="pointer-events-none absolute inset-x-0 bottom-0 select-none truncate bg-black/35 px-1 py-0.5 text-center font-label-sm text-label-sm text-white">
-                  {filigrane}
-                </span>
-              ) : null}
-            </button>
-          </li>
-        ))}
-      </ul>
+      {/*
+        LA GALERIE DU CANEVAS : une pièce en grand, puis les autres en tuiles.
+
+        Ce n'est pas un choix d'esthétique. La première photo est celle que le
+        vendeur a désignée comme couverture ; c'est elle que le client veut
+        voir, et une grille uniforme la noie parmi les autres.
+
+        LE NOMBRE DE TUILES EST BORNÉ, et les tuiles au-delà de la borne ne
+        sont PAS RENDUES du tout — pas masquées. Une vignette masquée par CSS
+        est tout de même téléchargée, et c'est la façon la plus courante de
+        croire qu'on a différé un chargement sans l'avoir fait. À vingt médias,
+        rendre toute la grille ferait treize requêtes que personne ne regarde.
+
+        Deux bornes, parce que la grille n'a pas la même largeur sur les deux
+        écrans : six tuiles visibles au téléphone, huit sur grand écran. La
+        pastille « +N » porte donc deux nombres, et chacun n'apparaît que sur
+        l'écran qui le rend vrai.
+      */}
+      {premier !== undefined ? (
+        <div>
+          <button
+            type="button"
+            onClick={() => setIndex(0)}
+            className="relative block aspect-[4/3] w-full overflow-hidden bg-surface-container-highest md:aspect-[16/10] md:rounded-lg"
+            aria-label={libelles.ouvrir + " 1"}
+          >
+            {premier.urlVignette !== null ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- URL
+                 signée à expiration : l'optimiseur la mettrait en cache
+                 au-delà de sa validité et servirait des images mortes. */
+              <img
+                src={premier.urlVignette}
+                alt=""
+                width={200}
+                height={200}
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+            ) : null}
+            {premier.type === "video" ? <PastilleLecture grande /> : null}
+            {filigrane !== null ? (
+              <span className="pointer-events-none absolute right-3 bottom-3 select-none font-label-md text-label-md text-white drop-shadow">
+                {filigrane}
+              </span>
+            ) : null}
+          </button>
+
+          {tuiles.length > 0 ? (
+            <ul className="mt-[5px] grid grid-cols-3 gap-[5px] md:mt-2 md:grid-cols-4 md:gap-2">
+              {tuiles.map((media, decalage) => {
+                const rang = decalage + 1;
+                const resteTelephone = medias.length - TUILES_TELEPHONE - 1;
+                const resteBureau = medias.length - TUILES_BUREAU - 1;
+
+                return (
+                  <li
+                    key={media.id}
+                    className={rang > TUILES_TELEPHONE ? "hidden md:block" : undefined}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setIndex(rang)}
+                      className="relative block aspect-square w-full overflow-hidden bg-surface-container-highest md:rounded"
+                      aria-label={libelles.ouvrir + " " + (rang + 1)}
+                    >
+                      {media.urlVignette !== null ? (
+                        /* eslint-disable-next-line @next/next/no-img-element --
+                           même raison : URL signée à expiration, et une
+                           vignette de 200 px n'a rien à optimiser. */
+                        <img
+                          src={media.urlVignette}
+                          alt=""
+                          width={200}
+                          height={200}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
+                      {media.type === "video" ? <PastilleLecture /> : null}
+
+                      {rang === TUILES_TELEPHONE && resteTelephone > 0 ? (
+                        <span className="absolute inset-0 flex items-center justify-center bg-surface-container-highest/90 font-headline-md text-[15px] font-extrabold text-on-surface-variant md:hidden">
+                          {"+" + resteTelephone}
+                        </span>
+                      ) : null}
+                      {rang === TUILES_BUREAU && resteBureau > 0 ? (
+                        <span className="absolute inset-0 hidden items-center justify-center bg-surface-container-highest/90 font-headline-md text-[16px] font-extrabold text-on-surface-variant md:flex">
+                          {"+" + resteBureau}
+                        </span>
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
 
       {courant !== undefined ? (
         <div
@@ -197,25 +288,42 @@ export function Visionneur({
           aria-label={libelles.position
             .replace("{n}", String((index ?? 0) + 1))
             .replace("{total}", String(medias.length))}
-          className="fixed inset-0 z-50 flex flex-col bg-black/95"
+          className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0d]"
           onClick={(e) => {
             if (e.target === e.currentTarget) fermer();
           }}
         >
-          <div className="flex items-center justify-between p-4 text-white">
+          {/* La fermeture est à GAUCHE et ronde, le compteur au centre : le
+              pouce d'une main qui tient le téléphone atteint le coin haut
+              gauche, pas le coin haut droit. */}
+          <div className="flex items-center justify-between p-3.5 text-white">
+            <button
+              type="button"
+              onClick={fermer}
+              autoFocus
+              aria-label={libelles.fermer}
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
             <span className="font-label-md text-label-md">
               {libelles.position
                 .replace("{n}", String((index ?? 0) + 1))
                 .replace("{total}", String(medias.length))}
             </span>
-            <button
-              type="button"
-              onClick={fermer}
-              autoFocus
-              className="rounded-full px-4 py-2 font-label-md text-label-md"
-            >
-              {libelles.fermer}
-            </button>
+            <span className="w-11" />
           </div>
 
           <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
@@ -253,22 +361,48 @@ export function Visionneur({
             ) : null}
           </div>
 
-          <div className="flex justify-between p-4 text-white">
+          <div className="flex items-center justify-between p-3.5 text-white">
             <button
               type="button"
               onClick={() => aller(-1)}
               disabled={index === 0}
-              className="rounded-lg px-4 py-3 font-label-md text-label-md disabled:opacity-30"
+              aria-label={libelles.precedent}
+              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/10 disabled:opacity-30"
             >
-              {libelles.precedent}
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m15 6-6 6 6 6" />
+              </svg>
             </button>
             <button
               type="button"
               onClick={() => aller(1)}
               disabled={index === medias.length - 1}
-              className="rounded-lg px-4 py-3 font-label-md text-label-md disabled:opacity-30"
+              aria-label={libelles.suivant}
+              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/10 disabled:opacity-30"
             >
-              {libelles.suivant}
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m9 6 6 6-6 6" />
+              </svg>
             </button>
           </div>
         </div>

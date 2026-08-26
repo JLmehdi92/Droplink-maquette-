@@ -98,6 +98,20 @@
   --color-on-tertiary-fixed: #5c2115;
   --color-on-tertiary-fixed-variant: #8f3724;
 
+  /*
+   * ----- Attention ---------------------------------------------------------
+   * Le silence d'un colis n'est PAS une erreur : rien n'est cassé, le colis
+   * est suivi, il ne bouge simplement plus. Le rouge de l'erreur ferait croire
+   * à une panne et enverrait le client écrire à son vendeur — exactement ce
+   * que le produit doit tuer. D'où une famille distincte, ambrée.
+   */
+  --color-attention: #8a6415;
+  --color-attention-doux: #9c7527;
+  --color-attention-fond: #fffaf0;
+  --color-attention-filet: #f3e4c4;
+  --color-attention-puce: #faedd2;
+  --color-attention-icone: #a97b1e;
+
   /* ----- Erreur : inchangée, elle passe déjà les seuils -------------------- */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
