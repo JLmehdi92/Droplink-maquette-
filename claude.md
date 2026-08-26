@@ -33,7 +33,7 @@ pnpm db:migrate       # applique les migrations
 pnpm db:types         # régénère les types Supabase
 pnpm fumee            # le produit doit RÉPONDRE : serveur réel, statuts et HTML servi
 pnpm falsifier        # casse le produit EN BASE, de façon réversible, pour éprouver les sondes
-pnpm gates            # les cinq portes ci-dessus, enchaînées
+pnpm gates            # les six portes ci-dessus, enchaînées
 pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 ```
 
@@ -41,7 +41,7 @@ Après toute modif de schéma : `pnpm db:migrate && pnpm db:types`, sinon les ty
 
 **Portes de qualité avant chaque commit :**
 ```
-pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls
+pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls && pnpm fumee
 ```
 
 **Ne jamais commiter par-dessus des portes rouges**, même si la cause est ailleurs — c'est comme ça qu'on s'habitue au rouge.

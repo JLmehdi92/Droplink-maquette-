@@ -9,7 +9,8 @@
  *
  * Usage : node scripts/falsifier.mjs <casser|reparer> <cible>
  */
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { config } from "dotenv";
 import pg from "pg";
@@ -1815,11 +1816,190 @@ const SQL = {
 
 };
 
+/**
+ * ══════════════════════════════════════════════════════════════════════════
+ * SECOND REGISTRE : LE DÉPÔT
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * Les soixante-cinq cibles ci-dessus cassent la BASE, et c'est là que vivent
+ * les invariants qui comptent le plus. Mais elles n'atteignent RIEN de ce que
+ * TypeScript protège — et plusieurs gardes du produit vivent uniquement là :
+ * la signature des URL de dépôt, la forme canonique des clés, le refus du SVG,
+ * la neutralisation des formules dans l'export, le filtre du middleware, la
+ * vérification de signature du point de réception des notifications.
+ *
+ * Une suite qui n'a jamais été vue rouge sur ces sujets-là ne prouve rien à
+ * leur propos. Ce registre les rend falsifiables.
+ *
+ * ⚠️ TROIS PRÉCAUTIONS, ET CHACUNE VIENT D'UN DÉFAUT RÉEL RENCONTRÉ.
+ *
+ * 1. LA RÉPARATION PASSE PAR `git checkout`, jamais par un second
+ *    remplacement. Un remplacement inverse qui ne trouve pas sa chaîne échoue
+ *    en SILENCE et laisse le dépôt cassé — exactement ce qui s'est produit
+ *    deux fois aujourd'hui avec des remplacements scriptés qui n'ont rien
+ *    remplacé, et dont la falsification est restée verte pour cette seule
+ *    raison. `git checkout` restaure un état connu ou échoue bruyamment.
+ *
+ * 2. ON REFUSE DE CASSER UN FICHIER DÉJÀ MODIFIÉ. Sans ce contrôle, la
+ *    réparation détruirait du travail non commité. La vérification porte sur
+ *    le fichier visé, pas sur l'arbre entier : exiger un arbre propre rendrait
+ *    l'outil inutilisable pendant qu'on travaille.
+ *
+ * 3. UN REMPLACEMENT QUI NE TROUVE PAS SA CHAÎNE EST UNE ERREUR, PAS UN
+ *    NON-ÉVÉNEMENT. C'est le point le plus important : sans lui, une cible
+ *    devenue périmée par une refonte annoncerait « cassé » sans rien avoir
+ *    cassé, et la suite qui reste verte se lirait comme une preuve.
+ */
+const DEPOT = {
+  /**
+   * LE CAS MOTIVANT DU MODULE DE STOCKAGE : la signature cesse de sceller les
+   * en-têtes.
+   *
+   * `aws4fetch` ne signe par défaut qu'un sous-ensemble des en-têtes.
+   * `allHeaders: true` fait entrer `content-length` et `content-type` dans la
+   * signature : sans lui, une URL de dépôt obtenue pour une vignette de douze
+   * kilo-octets accepte n'importe quel contenu de n'importe quelle taille.
+   * Le plafond de coût du produit devient décoratif, et rien n'échoue.
+   */
+  "signature-r2-partielle": {
+    fichier: "src/lib/storage/r2.ts",
+    remplacer: "    allHeaders: true,",
+    par: "    allHeaders: false,",
+  },
+
+  /**
+   * HORS du cas motivant : la forme canonique des clés cesse d'être exigée à
+   * l'endroit où une clé devient une URL.
+   *
+   * La contrainte `CHECK` de la migration 089 garde la BASE. Celle-ci garde la
+   * SIGNATURE — et c'est elle qui avait laissé passer la traversée de chemin :
+   * `new URL()` normalise les `..`, donc une clé sortant du compartiment du
+   * vendeur produisait une URL signée valide vers le média d'un autre.
+   */
+  "cle-non-canonique-a-la-signature": {
+    fichier: "src/lib/storage/r2.ts",
+    remplacer: "  exigerCleCanonique(cle);",
+    par: "  void cle;",
+  },
+
+  /**
+   * HORS du cas motivant : le SVG redevient un format de logo admis.
+   *
+   * Le commentaire qui l'autorisait affirmait un assainissement qui n'existe
+   * nulle part. Le remettre rend le dépôt d'un SVG possible — donc du script
+   * exécuté dans le navigateur du client d'un vendeur, sur une page qui porte
+   * les couleurs de ce vendeur.
+   */
+  "svg-de-nouveau-admis": {
+    fichier: "src/lib/storage/cles.ts",
+    // ⚠️ MOTIF SUR UNE SEULE LIGNE. Une premiere version enjambait deux lignes
+    // avec un `\n` : les fichiers de ce depot sont en CRLF sur le poste, donc
+    // le motif ne trouvait rien — et le refus de remplacement l a dit, ce qui
+    // est exactement ce pour quoi il existe. Sans lui, la cible aurait annonce
+    // « casse » et la suite verte se serait lue comme une preuve.
+    remplacer: '  logo: {',
+    par: '  logo: {\n    "image/svg+xml": "svg",',
+  },
+
+  /**
+   * HORS du cas motivant : l'export CSV cesse de neutraliser les formules.
+   *
+   * `customer_label` est du texte libre venu d'une conversation. Une cellule
+   * commençant par `=` s'évalue à l'ouverture, dans le tableur de quelqu'un
+   * d'autre. L'échappement CSV standard ne protège pas de cela : les
+   * guillemets rendent la cellule bien formée et la formule s'exécute quand
+   * même — donc un export « correct » au sens du format reste dangereux.
+   */
+  "export-formule-evaluee": {
+    fichier: "src/lib/commandes/export-csv.ts",
+    remplacer: 'return /^[=+\\-@\\t\\r]/.test(valeur) ? "\'" + valeur : valeur;',
+    par: "return valeur;",
+  },
+
+  /**
+   * HORS du cas motivant : le middleware cesse de reconnaître `/admin`.
+   *
+   * Il ne protège aucune donnée à lui seul — `exigerAdmin()` reste en tête de
+   * chaque action, et c'est elle qui fait autorité. Ce que la cible établit,
+   * c'est si UNE SEULE suite constate la défense en profondeur : une garde
+   * dont on ne teste que la couche interne n'a plus qu'une couche.
+   */
+  "middleware-aveugle-a-admin": {
+    fichier: "src/middleware.ts",
+    remplacer: "  return /^\\/(?:[a-z]{2}(?:-[a-z]{2})?\\/)?admin(?:\\/|$)/i.test(chemin);",
+    par: "  void chemin;\n  return false;",
+  },
+
+  /**
+   * HORS du cas motivant : le point de réception des notifications accepte
+   * sans vérifier la signature.
+   *
+   * C'est la cible dont la conséquence est la plus large du registre : un
+   * point d'ingestion non authentifié laisse n'importe qui écrire dans les
+   * commandes de n'importe quel vendeur — faire reculer un statut, inventer
+   * une livraison, ou simplement épuiser le compteur facturé.
+   */
+  "notification-non-signee": {
+    fichier: "src/app/api/suivi/notification/route.ts",
+    remplacer: "    authentique = dixSeptTrack.verifierNotification(corps, signature);",
+    par: "    authentique = true;\n    void signature;",
+  },
+};
+
 const [, , action, cible] = process.argv;
 
-if (!SQL[cible] || !["casser", "reparer"].includes(action)) {
-  console.error(`Usage : node scripts/falsifier.mjs <casser|reparer> <${Object.keys(SQL).join("|")}>`);
+if ((!SQL[cible] && !DEPOT[cible]) || !["casser", "reparer"].includes(action)) {
+  console.error(
+    `Usage : node scripts/falsifier.mjs <casser|reparer> <cible>\n` +
+      `  base  : ${Object.keys(SQL).join(" ")}\n` +
+      `  dépôt : ${Object.keys(DEPOT).join(" ")}`,
+  );
   process.exit(1);
+}
+
+if (DEPOT[cible]) {
+  const { fichier, remplacer, par } = DEPOT[cible];
+  const chemin = join(process.cwd(), fichier);
+
+  if (action === "reparer") {
+    // RESTAURER, PAS REMPLACER À L ENVERS. Un remplacement inverse qui ne
+    // trouve pas sa chaine echoue en silence et laisse le depot casse.
+    execFileSync("git", ["checkout", "--", fichier], { stdio: "inherit" });
+    console.log(`reparer ${cible} : ${fichier} restaure depuis git`);
+    process.exit(0);
+  }
+
+  // REFUSER DE CASSER UN FICHIER DEJA MODIFIE : la reparation le restaurerait
+  // depuis git et detruirait du travail non commite.
+  const etat = execFileSync("git", ["status", "--porcelain", "--", fichier], {
+    encoding: "utf8",
+  }).trim();
+  if (etat !== "") {
+    console.error(
+      `Refus : ${fichier} porte deja des modifications non commitees.\n` +
+        "La reparation le restaurerait depuis git, donc les detruirait.",
+    );
+    process.exit(1);
+  }
+
+  const contenu = readFileSync(chemin, "utf8");
+  const occurrences = contenu.split(remplacer).length - 1;
+  if (occurrences !== 1) {
+    // UN REMPLACEMENT QUI NE TROUVE PAS SA CHAINE EST UNE ERREUR. Sans ce
+    // refus, une cible perimee annoncerait « casse » sans rien avoir casse, et
+    // la suite restee verte se lirait comme une preuve.
+    console.error(
+      `Refus : le motif de « ${cible} » apparait ${occurrences} fois dans ` +
+        `${fichier}, il en faut exactement une.\n` +
+        "La cible a ete perimee par une refonte : la corriger, sinon elle " +
+        "annoncera casser ce qu elle ne casse plus.",
+    );
+    process.exit(1);
+  }
+
+  writeFileSync(chemin, contenu.replace(remplacer, par), "utf8");
+  console.log(`casser ${cible} : ${fichier} modifie`);
+  process.exit(0);
 }
 
 const client = new pg.Client({

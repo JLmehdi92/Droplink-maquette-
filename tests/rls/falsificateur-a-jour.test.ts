@@ -180,3 +180,126 @@ describe("Le falsificateur répare vers le produit d'aujourd'hui", () => {
     expect(defauts, defauts.join(" | ")).toEqual([]);
   });
 });
+
+/**
+ * LE SECOND REGISTRE : LES CIBLES QUI AGISSENT SUR LE DÉPÔT.
+ *
+ * Les soixante-cinq cibles SQL cassent la base. Le second registre casse des
+ * FICHIERS — la signature des URL de dépôt, la forme canonique des clés, le
+ * refus du SVG, la neutralisation des formules de l'export, le filtre du
+ * middleware, la vérification de signature du point de réception.
+ *
+ * SON MODE DE DÉFAILLANCE EST LE PIRE QUI SOIT : une cible dont le motif ne se
+ * trouve plus dans le fichier — parce qu'une refonte a déplacé la ligne —
+ * annoncerait « cassé » sans rien avoir cassé, et la suite restée verte se
+ * lirait comme une preuve que la garde tient. C'est exactement ce qui s'est
+ * produit deux fois pendant cette session avec des remplacements scriptés qui
+ * n'ont rien remplacé.
+ *
+ * Le script se protège lui-même en refusant un motif qui n'apparaît pas
+ * exactement une fois. Ce contrôle-ci le vérifie SANS EXÉCUTER le falsificateur,
+ * donc sans jamais toucher au dépôt : il rougit à l'intégration, pas au moment
+ * où quelqu'un croit falsifier.
+ */
+describe("Second registre du falsificateur — les cibles du dépôt", () => {
+  const source = readFileSync(FALSIFICATEUR, "utf8");
+
+  /**
+   * Relit les cibles du dépôt par expression régulière, pour la même raison que
+   * ci-dessus : importer le script le ferait s'exécuter.
+   */
+  function ciblesDuDepot(): readonly { cible: string; fichier: string; remplacer: string }[] {
+    const debut = source.indexOf("const DEPOT = {");
+    expect(debut, "le registre DEPOT a disparu du falsificateur").toBeGreaterThan(-1);
+    const bloc = source.slice(debut);
+
+    const trouvees: { cible: string; fichier: string; remplacer: string }[] = [];
+    const motif =
+      /"([a-z0-9-]+)":\s*\{[\s\S]*?fichier:\s*"([^"]+)",[\s\S]*?remplacer:\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g;
+    for (const t of bloc.matchAll(motif)) {
+      const brut = t[3] ?? t[4] ?? "";
+      // Le motif est écrit comme un littéral JavaScript : on rétablit les
+      // échappements pour comparer aux octets réels du fichier visé.
+      /*
+       * ⚠️ UN SEUL PASSAGE, DE GAUCHE À DROITE. Une première version enchaînait
+       * six `replace` : sur `[=+\\-@\\t\\r]` — dont la valeur réelle contient
+       * un antislash SUIVI d'un `t`, pas une tabulation — le remplacement de
+       * `\t` mordait sur le second antislash et produisait une tabulation là où
+       * il n'y en avait pas. La cible était alors déclarée introuvable, c'est-
+       * à-dire qu'un contrôle destiné à repérer les cibles périmées inventait
+       * lui-même sa propre péremption.
+       */
+      const remplacer = brut.replace(/\\(.)/g, (_, c: string) =>
+        c === "n" ? "\n" : c === "t" ? "\t" : c === "r" ? "\r" : c,
+      );
+      trouvees.push({ cible: t[1] ?? "", fichier: t[2] ?? "", remplacer });
+    }
+    return trouvees;
+  }
+
+  test("les cibles du dépôt sont réellement relues", () => {
+    expect(
+      ciblesDuDepot().length,
+      "Aucune cible de dépôt relue : le motif vise à côté, et tout ce bloc " +
+        "passerait au vert sur un ensemble vide.",
+    ).toBeGreaterThan(3);
+  });
+
+  test("chaque cible désigne un fichier qui existe et un motif présent UNE FOIS", () => {
+    const defauts: string[] = [];
+
+    for (const { cible, fichier, remplacer } of ciblesDuDepot()) {
+      const chemin = join(process.cwd(), fichier);
+      let contenu: string;
+      try {
+        contenu = readFileSync(chemin, "utf8");
+      } catch {
+        defauts.push(`${cible} : ${fichier} n'existe plus`);
+        continue;
+      }
+
+      const occurrences = contenu.split(remplacer).length - 1;
+      if (occurrences !== 1) {
+        defauts.push(
+          `${cible} : son motif apparaît ${occurrences} fois dans ${fichier}, ` +
+            "il en faut exactement une. À zéro, la cible annoncerait casser ce " +
+            "qu'elle ne casse plus ; au-delà d'une, elle casserait autre chose " +
+            "que ce qu'elle décrit.",
+        );
+      }
+    }
+
+    expect(defauts, defauts.join("\n")).toEqual([]);
+  });
+
+  test("aucune cible du dépôt ne porte le nom d'une cible SQL", () => {
+    /*
+     * Les deux registres partagent le même argument de ligne de commande, et le
+     * dépôt est consulté EN PREMIER. Un nom présent des deux côtés rendrait la
+     * cible SQL inatteignable — sans erreur, sans message : `pnpm falsifier
+     * casser X` casserait un fichier en croyant casser la base, et la
+     * réparation restaurerait ce fichier en laissant la base intacte.
+     */
+    const noms = new Set(ciblesDuDepot().map((c) => c.cible));
+    expect(noms.size, "aucune cible de dépôt : rien à comparer").toBeGreaterThan(0);
+
+    const debutSql = source.indexOf("const SQL = {");
+    const finSql = source.indexOf("const DEPOT = {");
+    expect(debutSql, "le registre SQL a disparu").toBeGreaterThan(-1);
+    expect(finSql).toBeGreaterThan(debutSql);
+
+    const nomsSql = new Set(
+      [...source.slice(debutSql, finSql).matchAll(/^\s{2}"?([a-z][a-z0-9-]+)"?:\s*\{/gm)].map(
+        (t) => t[1] ?? "",
+      ),
+    );
+    expect(nomsSql.size, "aucune cible SQL relue : la comparaison serait vide").toBeGreaterThan(10);
+
+    const collisions = [...noms].filter((n) => nomsSql.has(n));
+    expect(
+      collisions,
+      `Noms présents dans les DEUX registres : ${collisions.join(", ")}. La cible ` +
+        "SQL du même nom est devenue inatteignable, en silence.",
+    ).toEqual([]);
+  });
+});

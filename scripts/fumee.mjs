@@ -9,10 +9,21 @@
 //     parler par accident au serveur d un passage precedent.
 //   - Les chemins passent par `path.join`, jamais de separateur en dur.
 //
-// Ce script n est pas dans les portes de qualite : il demarre un serveur et
-// coute une trentaine de secondes. Il se lance a la main (`pnpm fumee`) apres
-// `pnpm build`, avant de clore un lot.
+// ⚠️ CE SCRIPT EST DANS LES PORTES DE QUALITE depuis qu on a MESURE ce qu il
+// coute : SEPT SECONDES, et non « une trentaine » comme l affirmait cette ligne
+// — une affirmation que personne n avait executee, sur le fichier meme dont le
+// role est d etablir les choses par execution.
+//
+// Ce qui a tranche n est pas le cout mais un TROU CONSTATE : falsifier la
+// verification de signature du point de reception des notifications laissait
+// typecheck, lint, build, unitaires et RLS entierement verts. Cette route est la
+// seule surface du produit qui ECRIVE sans qu aucun humain soit implique, et son
+// unique couverture vivait ici — c est-a-dire hors de ce qu on lance avant de
+// commiter. Une protection posee a l endroit ou l on ne regarde pas.
+//
+// Il exige un `.next` a jour, donc il vient APRES `pnpm build` dans la chaine.
 import { spawn, execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { createServer } from "node:net";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -916,8 +927,6 @@ try {
       // sur l EFFET — ce que le serveur repond reellement, et ce qui arrive en
       // base — parce que « il repond » est la propriete que tous les residus
       // possedent.
-      const { createHash } = await import("node:crypto");
-
       const cadenceSansSecret = await fetch(`${base}/api/suivi/cadence`, { method: "POST" });
       const cadenceMauvais = await fetch(`${base}/api/suivi/cadence`, {
         method: "POST",
