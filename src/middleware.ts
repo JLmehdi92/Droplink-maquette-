@@ -72,8 +72,26 @@ const gestionLangue = createMiddleware(routing);
  *
  * Il fait UNE chose de sécurité : garder les cookies de session à jour, pour
  * qu'une session valide ne s'éteigne pas en cours de route. La garde qui fait
- * autorité vit dans le code qui LIT les données — `exigerSession()` en tête de
- * chaque page authentifiée, et la vérification du rôle EN BASE pour l'admin.
+ * autorité vit dans le code qui LIT les données :
+ *
+ *   - `lireProfilVendeur()` suivi d'une redirection, en tête du layout de
+ *     l'espace vendeur ET de chaque Server Action — une Server Action ne passe
+ *     jamais par un layout ;
+ *   - `exigerAdmin()` pour la surface d'administration, qui relit le rôle EN
+ *     BASE à chaque requête.
+ *
+ * ⚠️ CE COMMENTAIRE DÉSIGNAIT `exigerSession()`, QUI N'ÉTAIT APPELÉE NULLE
+ * PART. Trouvé à l'audit du 26/08/2026 : la fonction existait, ce fichier et
+ * CLAUDE.md la présentaient tous deux comme la garde du produit, et elle avait
+ * ZÉRO site d'appel — le module entier n'était importé par personne.
+ *
+ * Le piège n'était pas seulement documentaire : `exigerSession()` ne vérifiait
+ * QUE la présence d'une session, jamais `status`. Quelqu'un qui aurait suivi la
+ * consigne à la lettre sur une nouvelle page aurait écrit une garde LAISSANT
+ * PASSER UN COMPTE SUSPENDU, en croyant appliquer la règle du projet. Une
+ * documentation fausse est plus dangereuse qu'une documentation absente : on la
+ * suit.
+ *
  * Un middleware qui semblerait suffire ferait qu'on n'écrirait plus la vraie
  * garde, et la première route ajoutée hors du matcher serait ouverte.
  *
@@ -126,7 +144,8 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
   // rapide du produit.
   //
   // On ne vérifie pas l'identité ici : ce n'est pas le rôle du middleware, et le
-  // faire donnerait l'illusion d'une protection. Voir `lib/auth/session.ts`.
+  // faire donnerait l'illusion d'une protection. Voir `lib/comptes/profil.ts`
+  // et `lib/audit/garde.ts`, qui portent les vraies gardes.
   const { data } = await supabase.auth.getSession();
 
   /*
