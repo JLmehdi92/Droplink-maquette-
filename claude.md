@@ -206,7 +206,8 @@ Typographie inchangée : **Plus Jakarta Sans** (titres, 800, tracking -0.03em) +
 
 **Un test qui échoue par intermittence doit être borné**, pas relancé jusqu'au vert.
 
-**Suites jamais désactivables :** isolation RLS, 403 admin, immuabilité du jeton.
+**Suites jamais désactivables :** isolation RLS, **404 admin** (jamais 403 — un 403
+confirmerait l'existence de la surface à qui n'y a pas droit), immuabilité du jeton.
 
 ---
 
