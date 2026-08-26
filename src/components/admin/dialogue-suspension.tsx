@@ -135,7 +135,7 @@ export function DialogueSuspension({
         // Échap ferme. La sortie doit toujours être plus facile que l'action.
         if (e.key === "Escape") fermer();
       }}
-      className="rounded-xl border border-outline-variant bg-surface-container-low p-4"
+      className="rounded-lg border border-outline-variant bg-surface-container-low p-4"
     >
       <form action={action} className="flex flex-col gap-4">
         <input type="hidden" name="profilId" value={profilId} />

@@ -118,6 +118,15 @@
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
 
+  /*
+   * ----- Chrome de l'administration ---------------------------------------
+   * La colonne noire de l'admin. Dans `@theme` et non dans `:root` : c'est
+   * `bg-admin` que le code écrit, et une variable posée hors du thème ne
+   * produit AUCUNE classe — le fond serait simplement transparent, sans
+   * erreur nulle part.
+   */
+  --color-admin: #111117;
+
   /* ----- Rayons du canevas ------------------------------------------------ */
   --radius-DEFAULT: 12px;
   --radius: 12px;
@@ -216,9 +225,6 @@
    * `/p/[token]` : cette page porte la couleur DU VENDEUR.
    */
   --degrade-marque: linear-gradient(97deg, #7c5cf5 0%, #f2765e 100%);
-
-  /* Chrome sombre de l'administration. */
-  --color-admin: #111117;
 
   /*
    * Accent du vendeur. Valeur de repli identique au défaut de

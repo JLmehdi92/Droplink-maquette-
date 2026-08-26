@@ -22,7 +22,7 @@ export async function generateMetadata({
   return { title: t("comptes.titre"), robots: { index: false, follow: false } };
 }
 
-const CARTE = "rounded-xl border border-outline-variant bg-surface-container-lowest";
+const CARTE = "rounded-lg border border-outline-variant bg-surface-container-lowest";
 
 /**
  * GESTION DES COMPTES — surface d'administration.
@@ -69,11 +69,8 @@ export default async function AdminComptes({
   const base = `/${langue}/admin/comptes`;
 
   return (
-    <main
-      id="contenu"
-      className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop"
-    >
-      <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
+    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
+      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
         {t("comptes.titre")}
       </h1>
       {/* ON DIT QUE LA CONSULTATION EST TRACÉE. Ce n'est pas une formalité : un

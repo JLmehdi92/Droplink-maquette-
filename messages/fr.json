@@ -624,7 +624,7 @@
   },
   "admin": {
     "navigation": "Administration",
-    "bandeau": "Administration",
+    "bandeau": "ADMINISTRATION",
     "comptes": {
       "titre": "Comptes",
       "sousTitre": "Chaque consultation de cette page est enregistrée avec votre email et l'heure.",
@@ -824,6 +824,8 @@
         "charge_serveur": "Charge serveur",
         "erreurs_5xx": "Erreurs serveur"
       }
-    }
+    },
+    "traceTitre": "Tout est tracé",
+    "traceTexte": "Chaque consultation de données d’un vendeur est écrite au journal."
   }
 }

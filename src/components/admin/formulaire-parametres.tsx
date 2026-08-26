@@ -55,7 +55,7 @@ export function FormulaireParametre({ parametre }: { parametre: ParametreVu }) {
   return (
     <form
       action={action}
-      className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4"
+      className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4"
     >
       <input type="hidden" name="cle" value={parametre.cle} />
 

@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { Icone } from "@/components/icone";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lirePanneau, lireSeuils } from "@/lib/audit/panneau";
 import { mettreOctetsALEchelle } from "@/lib/format/octets";
@@ -20,7 +21,7 @@ export async function generateMetadata({
   return { title: t("panneau.titre"), robots: { index: false, follow: false } };
 }
 
-const CARTE = "rounded-xl border border-outline-variant bg-surface-container-lowest p-4";
+const CARTE = "rounded-lg border border-outline-variant bg-surface-container-lowest p-4";
 
 /**
  * LE PANNEAU D'ADMINISTRATION.
@@ -68,16 +69,16 @@ export default async function PanneauAdmin({
       : null;
 
   return (
-    <main
-      id="contenu"
-      className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop"
-    >
-      <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
+    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
+      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
         {t("panneau.titre")}
       </h1>
 
       {/* --- LES ALERTES, EN PREMIER --- */}
       <section aria-label={t("panneau.alertes")} className="mt-6">
+        <p className="mb-3 font-label-sm text-[11px] font-bold tracking-[0.08em] text-sourdine uppercase">
+          {t("panneau.alertes")}
+        </p>
         {panneau.alertes.length === 0 ? (
           <p className={CARTE + " font-body-md text-body-md text-on-surface-variant"}>
             {t("panneau.aucuneAlerte")}
@@ -88,16 +89,31 @@ export default async function PanneauAdmin({
               <li
                 key={a.genre + a.sujet}
                 className={
-                  "rounded-xl border p-4 " +
+                  "flex items-start gap-3 rounded-lg border p-4 " +
                   (a.gravite === "critique"
-                    ? "border-error bg-error-container"
-                    : "border-outline-variant bg-surface-container-low")
+                    ? "border-tertiary-container bg-tertiary-container/30"
+                    : "border-outline-variant bg-surface-container-lowest")
                 }
               >
+                {/* La pastille dit la GRAVITÉ sans un mot. Elle double le
+                    contraste de fond, elle ne le remplace pas : une couleur
+                    seule ne se lit pas de la même façon selon les yeux. */}
+                <span
+                  aria-hidden="true"
+                  className={
+                    "mt-0.5 flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-md " +
+                    (a.gravite === "critique"
+                      ? "bg-tertiary-container text-on-tertiary-container"
+                      : "bg-surface-container text-on-surface-variant")
+                  }
+                >
+                  <Icone nom={a.gravite === "critique" ? "warning" : "schedule"} className="text-[17px]" />
+                </span>
+                <div>
                 <p
                   className={
-                    "font-label-md text-label-md " +
-                    (a.gravite === "critique" ? "text-on-error-container" : "text-on-surface")
+                    "font-label-md text-[15px] font-bold " +
+                    (a.gravite === "critique" ? "text-on-tertiary-container" : "text-on-surface")
                   }
                 >
                   {t(`panneau.alerte.${a.genre}`)}
@@ -112,6 +128,7 @@ export default async function PanneauAdmin({
                     seuil: format.number(a.seuil),
                   })}
                 </p>
+                </div>
               </li>
             ))}
           </ul>

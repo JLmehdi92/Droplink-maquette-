@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icone } from "@/components/icone";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { estLangueSupportee } from "@/i18n/config";
@@ -40,40 +41,83 @@ export default async function LayoutAdmin({
 
   const t = await getTranslations("admin");
 
+  const entrees = [
+    { href: `/${langue}/admin`, libelle: t("panneau.titre"), icone: "monitoring" as const },
+    { href: `/${langue}/admin/comptes`, libelle: t("comptes.titre"), icone: "person" as const },
+    { href: `/${langue}/admin/boutiques`, libelle: t("boutiques.titre"), icone: "storefront" as const },
+    { href: `/${langue}/admin/journal`, libelle: t("journal.titre"), icone: "gavel" as const },
+    {
+      href: `/${langue}/admin/surveillance`,
+      libelle: t("surveillance.titre"),
+      icone: "schedule" as const,
+    },
+    {
+      href: `/${langue}/admin/parametres`,
+      libelle: t("parametres.titre"),
+      icone: "settings" as const,
+    },
+  ];
+
+  /*
+   * LA COQUILLE DE L'ADMINISTRATION — chrome SOMBRE, et ce n'est pas décoratif.
+   *
+   * Les deux surfaces montrent des tableaux qui se ressemblent, et savoir en
+   * permanence lequel on regarde évite d'agir sur les données de quelqu'un
+   * d'autre en croyant toucher les siennes. La colonne noire est ce qui rend la
+   * confusion impossible à un coup d'œil.
+   *
+   * L'ENCART « TOUT EST TRACÉ » EST UN RAPPEL PERMANENT, pas une décoration :
+   * chaque consultation de données d'un vendeur écrit une ligne au journal, y
+   * compris les LECTURES. Celui qui regarde doit le savoir avant de regarder,
+   * pas le découvrir dans le journal.
+   *
+   * AU TÉLÉPHONE, la colonne devient une bande horizontale défilante. Elle n'y
+   * est pas confortable, et c'est assumé : on ne suspend pas un compte dans le
+   * métro — la confirmation exige de recopier une adresse, collage bloqué.
+   */
   return (
-    <div className="min-h-dvh bg-surface">
-      {/* LA BANDE EST VISUELLEMENT DISTINCTE de l'espace vendeur. Ce n'est pas
-          décoratif : les deux surfaces montrent des tableaux qui se ressemblent,
-          et savoir en permanence lequel on regarde évite d'agir sur les données
-          de quelqu'un d'autre en croyant toucher les siennes. */}
-      <nav
-        aria-label={t("navigation")}
-        className="border-b border-outline-variant bg-inverse-surface"
-      >
-        <ul className="mx-auto flex w-full max-w-container-max flex-wrap items-center gap-2 px-margin-mobile md:px-margin-desktop">
-          <li className="py-3 pr-4 font-label-md text-label-md text-inverse-on-surface">
-            {t("bandeau")}
-          </li>
-          {[
-            { href: `/${langue}/admin`, libelle: t("panneau.titre") },
-            { href: `/${langue}/admin/comptes`, libelle: t("comptes.titre") },
-            { href: `/${langue}/admin/boutiques`, libelle: t("boutiques.titre") },
-            { href: `/${langue}/admin/journal`, libelle: t("journal.titre") },
-            { href: `/${langue}/admin/surveillance`, libelle: t("surveillance.titre") },
-            { href: `/${langue}/admin/parametres`, libelle: t("parametres.titre") },
-          ].map((entree) => (
-            <li key={entree.href}>
-              <Link
-                href={entree.href}
-                className="flex min-h-[44px] items-center px-3 font-label-md text-label-md text-inverse-on-surface underline-offset-4 hover:underline"
-              >
-                {entree.libelle}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      {children}
+    <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-xl">
+        <div className="bg-admin px-4 py-4 md:w-[236px] md:shrink-0 md:py-[22px]">
+          <div className="mb-4 px-2 md:mb-[26px]">
+            <span className="font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-white">
+              DropLink
+            </span>
+            <span className="mt-0.5 block font-label-sm text-[11px] font-bold tracking-[0.1em] text-tertiary-fixed-dim">
+              {t("bandeau")}
+            </span>
+          </div>
+
+          <nav aria-label={t("navigation")}>
+            <ul className="flex gap-1 overflow-x-auto md:flex-col md:gap-[3px] md:overflow-visible">
+              {entrees.map((entree) => (
+                <li key={entree.href}>
+                  <Link
+                    href={entree.href}
+                    className="flex h-11 items-center gap-[11px] rounded-[11px] px-[13px] font-label-md text-[14px] font-semibold whitespace-nowrap text-white/60 transition-colors hover:bg-white/10 hover:text-white md:h-[42px]"
+                  >
+                    <Icone nom={entree.icone} className="text-[18px]" />
+                    {entree.libelle}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="hidden md:block">
+            <div className="mt-6 rounded-md bg-[rgba(242,118,94,0.14)] p-3.5">
+              <p className="font-label-md text-[12px] font-bold text-tertiary-fixed-dim">
+                {t("traceTitre")}
+              </p>
+              <p className="mt-1 font-body-sm text-[11px] leading-[17px] text-white/50">
+                {t("traceTexte")}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      </div>
     </div>
   );
 }

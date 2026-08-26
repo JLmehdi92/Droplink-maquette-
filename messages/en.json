@@ -624,7 +624,7 @@
   },
   "admin": {
     "navigation": "Administration",
-    "bandeau": "Administration",
+    "bandeau": "ADMINISTRATION",
     "comptes": {
       "titre": "Accounts",
       "sousTitre": "Every visit to this page is recorded with your email and the time.",
@@ -824,6 +824,8 @@
         "charge_serveur": "Server load",
         "erreurs_5xx": "Server errors"
       }
-    }
+    },
+    "traceTitre": "Everything is logged",
+    "traceTexte": "Every read of a seller’s data is written to the audit log."
   }
 }

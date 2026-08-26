@@ -64,11 +64,8 @@ export default async function AdminJournal({
   const format = await getFormatter();
 
   return (
-    <main
-      id="contenu"
-      className="mx-auto w-full max-w-container-max px-margin-mobile py-12 md:px-margin-desktop"
-    >
-      <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">
+    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
+      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
         {t("journal.titre")}
       </h1>
       <p className="mt-3 font-body-md text-body-md text-on-surface-variant">
@@ -76,7 +73,7 @@ export default async function AdminJournal({
       </p>
 
       {page.lignes.length === 0 ? (
-        <p className="mt-6 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 text-center font-body-md text-body-md text-on-surface-variant">
+        <p className="mt-6 rounded-lg border border-outline-variant bg-surface-container-lowest p-6 text-center font-body-md text-body-md text-on-surface-variant">
           {t("journal.vide")}
         </p>
       ) : (
@@ -84,7 +81,7 @@ export default async function AdminJournal({
           {page.lignes.map((ligne) => (
             <li
               key={ligne.id}
-              className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4"
+              className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4"
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span className="font-label-md text-label-md text-on-surface">
