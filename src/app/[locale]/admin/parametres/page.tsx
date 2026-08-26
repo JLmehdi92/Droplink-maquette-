@@ -1,10 +1,15 @@
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getFormatter,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import type { Metadata } from "next";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lireParametres } from "@/lib/audit/parametres";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 import { FormulaireParametre } from "@/components/admin/formulaire-parametres";
+import { TraductionsClient } from "@/components/traductions-client";
 
 export async function generateMetadata({
   params,
@@ -17,7 +22,10 @@ export async function generateMetadata({
   // les droits.
   await exigerAdmin();
   const t = await getTranslations({ locale, namespace: "admin" });
-  return { title: t("parametres.titre"), robots: { index: false, follow: false } };
+  return {
+    title: t("parametres.titre"),
+    robots: { index: false, follow: false },
+  };
 }
 
 /**
@@ -60,7 +68,10 @@ export default async function ParametresAdmin({
   const format = await getFormatter();
 
   return (
-    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
+    <main
+      id="contenu"
+      className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]"
+    >
       <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
         {t("titre")}
       </h1>
@@ -68,35 +79,50 @@ export default async function ParametresAdmin({
         {t("sousTitre")}
       </p>
 
-      <div className="mt-gutter flex flex-col gap-gutter">
-        {parametres.map((p) => (
-          <FormulaireParametre
-            key={p.cle}
-            parametre={{
-              cle: p.cle,
-              valeur: p.valeur,
-              defaut: p.defaut,
-              min: p.min,
-              max: p.max,
-              ecrit: p.ecrit,
-              // L'ORIGINE EST COMPOSÉE ICI, côté serveur : la date y est mise en
-              // forme avec la même locale que le reste de l'écran, et le
-              // catalogue de traduction ne part pas dans le navigateur pour
-              // trois phrases.
-              origine: !p.ecrit
-                ? t("origine.jamaisDecide")
-                : p.modifiePar === null
-                  ? t("origine.auteurParti", {
-                      date: format.dateTime(new Date(p.modifieLe ?? 0), "long"),
-                    })
-                  : t("origine.decide", {
-                      date: format.dateTime(new Date(p.modifieLe ?? 0), "long"),
-                      email: p.modifiePar,
-                    }),
-            }}
-          />
-        ))}
-      </div>
+      {/* ⚠️ SANS CE PROVIDER, L'ÉCRAN LÈVE AU RENDU.
+          `FormulaireParametre` est un composant CLIENT qui appelle
+          `useTranslations("admin.parametres")`, et la racine `[locale]` n'a
+          délibérément aucun provider — le catalogue entier ne part pas dans
+          chaque page. Il manquait ici : l'écran des paramètres administrateur
+          était cassé, et aucune sonde ne pouvait le voir puisque `pnpm fumee`
+          n'interroge que les pages atteignables SANS session. */}
+      <TraductionsClient espaces={["admin.parametres"]}>
+        <div className="mt-gutter flex flex-col gap-gutter">
+          {parametres.map((p) => (
+            <FormulaireParametre
+              key={p.cle}
+              parametre={{
+                cle: p.cle,
+                valeur: p.valeur,
+                defaut: p.defaut,
+                min: p.min,
+                max: p.max,
+                ecrit: p.ecrit,
+                // L'ORIGINE EST COMPOSÉE ICI, côté serveur : la date y est mise en
+                // forme avec la même locale que le reste de l'écran, et le
+                // catalogue de traduction ne part pas dans le navigateur pour
+                // trois phrases.
+                origine: !p.ecrit
+                  ? t("origine.jamaisDecide")
+                  : p.modifiePar === null
+                    ? t("origine.auteurParti", {
+                        date: format.dateTime(
+                          new Date(p.modifieLe ?? 0),
+                          "long",
+                        ),
+                      })
+                    : t("origine.decide", {
+                        date: format.dateTime(
+                          new Date(p.modifieLe ?? 0),
+                          "long",
+                        ),
+                        email: p.modifiePar,
+                      }),
+              }}
+            />
+          ))}
+        </div>
+      </TraductionsClient>
 
       {/* CE QUI N'EST PAS ICI EST DIT, plutôt que laissé à deviner. Un écran de
           paramètres muet sur les secrets laisse chercher où les régler. */}
