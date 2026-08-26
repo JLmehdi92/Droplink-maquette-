@@ -58,23 +58,33 @@ Next.js 15 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 
 ## Assets design
 
-Le dossier `stitch_droplink_qc_tracking_portal/` contient les maquettes Google Stitch, plus un fichier d'inventaire des assets et polices.
+> ⚠️ **STITCH EST ABANDONNÉ — décision de Wassim, 26/08/2026.**
+> Ce fichier a longtemps dit « on implémente TOUS les écrans Stitch, c'est une décision produit, pas une suggestion ». **Cette phrase est morte.** Le dossier `stitch_droplink_qc_tracking_portal/` n'est plus la source du design : il ne reste utile que pour l'INVENTAIRE DES ÉCRANS et le vocabulaire déjà corrigé.
 
-**On implémente TOUS les écrans Stitch.** C'est une décision produit, pas une suggestion.
+**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — 40 planches, chaque écran en bureau ET téléphone, plus une page d'états.
 
-Trois précautions :
-- **Ne lis jamais** `droplink_project.md`, `droplink_claude.md` ni `droplink_guide_spec_kit_pour_claude_code.md` du zip. Ils décrivent un produit différent (fret maritime B2B, ERP, Three.js) et contredisent ce fichier.
-- **Cinq `screen.png` sont corrompus** (28 octets) ; leur `code.html` est intact → lire le HTML.
-- **Les images des maquettes sont des placeholders**, remplacées par les vraies photos et vidéos QC. Ne pas chercher à les reproduire.
+**Design system — les valeurs font foi, pas la prose :**
 
-**Design system :** garder l'échelle de spacing 8px, les rayons, l'échelle typographique, Plus Jakarta Sans (titres) + Inter (corps).
+```
+canvas (extérieur)  #c5cbfb    carte-page  #ffffff, rayon 28
+app (dashboard)     #f7f7fb    encre       #0e0e13
+sourdine            #83858f    filet       #ececf0
+pilule noire        #111117    admin       #111117 (chrome sombre)
+DÉGRADÉ DE MARQUE   linear-gradient(97deg, #7c5cf5 0%, #f2765e 100%)
+rayons              carte 16 · contrôle 12-13 · pilule 9999
+```
 
-**Trois modifications obligatoires sur les maquettes :**
-1. **La couleur d'accent est une VARIABLE pilotée par le vendeur**, jamais en dur. Le design doit rester correct avec n'importe quelle valeur, y compris un rouge saturé. Contraste obtenu **automatiquement** : 4,5:1 sur le texte, 3:1 sur l'interface.
-2. **Pas de glassmorphism ni backdrop-blur sur la page publique.** Géométrie conservée, fond opaque. Sur un aplat uni le flou n'a rien à flouter, et c'est ce qui rame le plus sur mobile bas de gamme.
+Typographie inchangée : **Plus Jakarta Sans** (titres, 800, tracking -0.03em) + **Inter** (corps), servies par `next/font/google` — **jamais de `<link>` vers un CDN de polices**.
+
+**Le dégradé est réservé à UNE SEULE action principale par écran, et uniquement sur les surfaces DropLink** (landing, connexion, inscription, dashboard). Il **n'apparaît jamais** sur `/p/[token]` : cette page porte la couleur DU VENDEUR, pas la nôtre.
+
+**Quatre règles qui survivent à tout changement de design :**
+1. **La couleur d'accent est une VARIABLE pilotée par le vendeur**, jamais en dur. Contraste obtenu **automatiquement** par `resoudreAccent()` : 4,5:1 sur le texte, 3:1 sur l'interface. **Sur un aplat d'accent, le texte prend `surRemplissage`, jamais `#ffffff` en dur** — un accent clair rendrait le blanc illisible.
+2. **Pas de glassmorphism ni backdrop-blur sur la page publique.** Sur un aplat uni le flou n'a rien à flouter, et c'est ce qui rame le plus sur mobile bas de gamme.
 3. **Le vocabulaire de fret disparaît partout** : conteneur, palette, dédouanement, inspecteur QC, lot, tolérances, généalogie. → commande, colis, photos, suivi, client.
+4. **Toute animation respecte `prefers-reduced-motion`**, et ne porte jamais d'information.
 
-Deux titres d'écrans admin à refaire : « Global Logistics Health » et « QC Master Logs » — nous n'exploitons aucune logistique et personne n'inspecte de contrôle qualité chez nous.
+**Réseaux sociaux du vendeur** (Instagram, TikTok, WhatsApp — **et ces trois-là seulement** : Snapchat et Telegram écartés par Wassim) : facultatifs, stockés sur `shops`, rendus sur la page client **uniquement s'ils sont configurés**. Aucun bloc, aucun logo grisé quand il n'y en a pas.
 
 ---
 

@@ -757,8 +757,15 @@ Vidéos en `preload="none"` avec poster. Dimensions réservées avant chargement
 
 ### Les écrans restants — tous implémentés
 
-**Décision produit : on implémente TOUS les écrans Stitch.** Wassim veut un contrôle
-total sur la plateforme et une surface complète dès le départ.
+> ⚠️ **AMENDÉ LE 26/08/2026 — STITCH EST ABANDONNÉ.** La source du design est
+> désormais le canevas Claude Design validé par Wassim (voir §8). Ce qui reste
+> vrai de la décision d'origine : **la surface est complète dès le départ**, tous
+> ces écrans existent. Ce qui est faux : qu'ils doivent ressembler aux maquettes
+> Stitch. Le tableau ci-dessous vaut comme **inventaire des écrans**, pas comme
+> référence visuelle.
+
+**Décision produit : la surface est complète dès le départ.** Wassim veut un
+contrôle total sur la plateforme et tous les écrans dès la première version.
 
 | Écran | Notes |
 |---|---|
@@ -785,11 +792,20 @@ budget de performance de la page publique l'interdit de toute façon.
 <a id="8"></a>
 ## 8. LE DESIGN SYSTEM
 
-Base : `droplink_logistics_system/DESIGN.md` du zip Stitch.
+> ⚠️ **REMPLACÉ LE 26/08/2026.** La base n'est plus `DESIGN.md` du zip Stitch,
+> **abandonné**. La source est le **canevas Claude Design validé par Wassim** :
+> `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af`
+> — 40 planches, chaque écran en bureau ET téléphone, plus une page d'états.
+> Les valeurs exactes vivent dans `CLAUDE.md` § « Assets design ».
 
-**À conserver** : échelle de spacing 8 px, rayons (sm 0.25rem → xl 1.5rem), échelle
-typographique, **Plus Jakarta Sans** (titres) + **Inter** (corps et tableaux denses),
-grille 12 colonnes / conteneur 1440 px.
+**Ce qui SURVIT de l'ancien système** : **Plus Jakarta Sans** (titres) + **Inter**
+(corps et tableaux denses), servies par `next/font/google` — jamais un CDN.
+
+**Ce qui CHANGE** : la palette (lavande `#c5cbfb` / encre `#0e0e13` / dégradé de
+marque `#7c5cf5 → #f2765e`), les rayons (carte-page 28, carte 16, contrôle 12),
+et la composition de tous les écrans.
+
+**Ce qui reste vrai quel que soit le design** : les quatre règles ci-dessous.
 
 **À modifier obligatoirement** :
 
