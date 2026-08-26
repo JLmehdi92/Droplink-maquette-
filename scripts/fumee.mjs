@@ -310,6 +310,104 @@ for (const { chemin, statut, final, libelle } of cas) {
 const fr = await (await fetch(`${base}/fr`)).text();
 const en = await (await fetch(`${base}/en`)).text();
 
+/*
+ * AUCUNE CLE BRUTE, SUR AUCUN ECRAN ATTEIGNABLE SANS SESSION.
+ *
+ * Le controle qui suit ne cherchait que « landing. », et seulement sur les deux
+ * landings. Une cle manquante ailleurs sortait telle quelle dans le HTML sans
+ * que rien ne le dise — et c est exactement ce qui arrive quand un ecran est
+ * refait : le composant demande des cles que le catalogue n a pas encore.
+ *
+ * IL INVENTORIE PLUTOT QUE DE SELECTIONNER : le motif est construit depuis les
+ * espaces de noms REELS du catalogue, pas depuis une liste tenue a cote.
+ *
+ * ⚠️ CE QU IL NE COUVRE PAS, ET IL FAUT LE DIRE : les ecrans de l espace
+ * vendeur et de l administration EXIGENT une session. Sans elle ils
+ * redirigent, et une sonde qui suivrait la redirection inspecterait la page de
+ * connexion en annoncant « marque : aucune cle brute ». Un controle qui rend un
+ * verdict sur un ecran qu il n a pas regarde est pire que son absence. Ils sont
+ * donc REFUSES explicitement plus bas, et la limitation est nommee.
+ *
+ * LES SCRIPTS SONT RETIRES AVANT LA RECHERCHE : une charge d hydratation peut
+ * legitimement porter un nom de cle comme DONNEE ; ce qui compte est le TEXTE
+ * rendu au lecteur.
+ */
+const catalogue = JSON.parse(readFileSync(join(process.cwd(), "messages", "fr.json"), "utf8"));
+const espaces = Object.keys(catalogue);
+// AUCUN ANTISLASH DANS CE MOTIF, ET C EST DELIBERE.
+//
+// Ecrit avec une frontiere de mot et un point echappes, il a ete casse DEUX
+// FOIS de suite : dans un gabarit, la sequence de frontiere de mot vaut le
+// caractere RETOUR ARRIERE. Le motif etait alors muet — il annoncait « aucune
+// cle brute » sur une page qui en portait une.
+//
+// Ni la relecture ni la sortie du terminal ne pouvaient le montrer : un retour
+// arriere EFFACE le caractere precedent a l affichage, donc le motif casse
+// avait l air correct partout ou on le regardait. C est le contre-test du
+// motif, plus bas, qui l a attrape — deux fois.
+//
+// La frontiere est donc ecrite en classe de caracteres, et le point en `[.]`.
+// Moins lisible, impossible a casser en silence.
+const motifCle = new RegExp("(?:^|[^A-Za-z0-9_-])(" + espaces.join("|") + ")[.][A-Za-z][A-Za-z0-9_.]*", "g");
+
+const ECRANS_SANS_SESSION = [
+  "/fr",
+  "/en",
+  "/fr/connexion",
+  "/en/connexion",
+  "/fr/inscription",
+  "/en/inscription",
+  "/fr/conditions",
+  "/fr/confidentialite",
+];
+
+console.log("");
+console.log("— Cles resolues —");
+let ecransInspectes = 0;
+for (const chemin of ECRANS_SANS_SESSION) {
+  const r = await fetch(`${base}${chemin}`, { redirect: "manual" });
+
+  // Une redirection ici signifie que l ecran n a pas ete rendu. On le DIT :
+  // annoncer « aucune cle brute » sur une page qu on n a pas lue serait
+  // exactement le defaut que ce controle est cense empecher.
+  if (r.status >= 300 && r.status < 400) {
+    echecs += 1;
+    console.log(`ECHEC ${chemin.padEnd(20)} redirige (${r.status}) : l ecran n a PAS ete inspecte`);
+    continue;
+  }
+
+  const visible = (await r.text()).replace(/<script[\s\S]*?<\/script>/g, "");
+  const brutes = [...new Set(visible.match(motifCle) ?? [])];
+  ecransInspectes += 1;
+  if (brutes.length > 0) {
+    echecs += 1;
+    console.log(
+      `ECHEC ${chemin.padEnd(20)} cles rendues telles quelles : ` +
+        `${brutes.slice(0, 6).join(", ")}${brutes.length > 6 ? ` … (+${brutes.length - 6})` : ""}`,
+    );
+  } else {
+    console.log(`OK    ${chemin.padEnd(20)} aucune cle brute`);
+  }
+}
+
+// UN ENSEMBLE VIDE PASSE TOUT. Sans ces bornes, une liste videe par erreur ou un
+// catalogue illisible rendrait cette section verte et muette.
+if (ecransInspectes !== ECRANS_SANS_SESSION.length || espaces.length < 5) {
+  echecs += 1;
+  console.log("ECHEC la sonde des cles n a pas inspecte ce qu elle pretend inspecter");
+}
+
+// CONTRE-TEST DU MOTIF LUI-MEME : il doit reconnaitre une cle brute fabriquee.
+// C est ce controle-la qui manquait — le motif etait casse et personne ne le
+// voyait, puisqu il ne trouvait jamais rien.
+if (!motifCle.test("<h2>landing.exempleDeCleBrute</h2>")) {
+  echecs += 1;
+  console.log("ECHEC le motif de cle brute ne reconnait meme pas une cle brute");
+}
+motifCle.lastIndex = 0;
+
+console.log("");
+
 // Controle par VALEUR de ce qui est REELLEMENT rendu. Verifier qu une cle de
 // traduction existe dans le catalogue ne prouve pas qu elle est resolue a
 // l ecran : une cle manquante sort telle quelle dans le HTML.
