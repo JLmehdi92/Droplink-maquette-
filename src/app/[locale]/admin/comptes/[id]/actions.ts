@@ -72,10 +72,22 @@ export async function suspendre(
   );
 
   if (resultat.statut === "ok") {
-    // L'écran doit refléter ce que la base porte désormais. La page publique du
-    // vendeur, elle, n'a rien à invalider : elle est dynamique, et la coupure y
-    // arrive en un dixième de seconde — établi par la sonde de fumée.
-    revalidatePath(`/[locale]/admin/comptes/${analyse.data.profilId}`, "page");
+    // L'écran doit refléter ce que la base porte désormais.
+    //
+    // ⚠️ CE CHEMIN ÉTAIT MALFORMÉ. Il mêlait un segment de GABARIT (`[locale]`,
+    // littéral) et une valeur CONCRÈTE (l'identifiant). Next accepte l'un ou
+    // l'autre — un chemin entièrement concret, ou un motif dont TOUS les
+    // segments dynamiques sont entre crochets — jamais les deux mélangés. La
+    // chaîne ne correspondait donc à aucune entrée : l'appel réussissait et
+    // n'invalidait rien. L'écran voisin, `admin/parametres`, employait déjà la
+    // forme juste : le bon usage était connu, il n'avait pas été appliqué ici.
+    //
+    // La page publique du vendeur n'a rien à invalider AUJOURD'HUI : elle est
+    // dynamique, et la coupure y arrive en un dixième de seconde — établi par
+    // la sonde de fumée. Ce n'est pas une protection, c'est une absence de
+    // cache ; `tests/unit/coupure-et-cache.test.ts` exige que l'invalidation
+    // soit câblée AVANT qu'un cache n'apparaisse.
+    revalidatePath("/[locale]/admin/comptes/[id]", "page");
   }
 
   return resultat;
@@ -102,7 +114,8 @@ export async function reactiver(
   );
 
   if (resultat.statut === "ok") {
-    revalidatePath(`/[locale]/admin/comptes/${analyse.data.profilId}`, "page");
+    // Même correction que ci-dessus : gabarit complet, jamais un mélange.
+    revalidatePath("/[locale]/admin/comptes/[id]", "page");
   }
 
   return resultat;
