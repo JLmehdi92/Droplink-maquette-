@@ -1,16 +1,13 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { emettre } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
-import { cleLogo } from "@/lib/storage/cles";
-import { limites } from "@/lib/storage/limites";
-import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { appliquerReglagesMarque } from "@/lib/boutique/reglages";
+import { confirmerDepotDeLogo, preparerDepotDeLogo } from "@/lib/boutique/logo";
 
 /**
  * Onboarding — soixante secondes, quatre décisions.
@@ -26,8 +23,6 @@ import { appliquerReglagesMarque } from "@/lib/boutique/reglages";
  * parce que notre requête est bien écrite. La différence compte le jour où
  * quelqu'un ajoutera un filtre de travers.
  */
-
-const TYPES_LOGO_ACCEPTES = ["image/png", "image/jpeg", "image/webp"] as const;
 
 const Onboarding = z.object({
   // NULLABLE EN BASE, OBLIGATOIRE ICI. La colonne n'a pas de valeur par défaut
@@ -185,24 +180,10 @@ export async function preparerDepotLogo(
     return { statut: "erreur", motif: "session" };
   }
 
-  const normalise = typeMime.split(";")[0]?.trim().toLowerCase() ?? "";
-  if (!(TYPES_LOGO_ACCEPTES as readonly string[]).includes(normalise)) {
-    return { statut: "erreur", motif: "type" };
-  }
-
-  const plafond = limites().logoOctets;
-  if (!Number.isInteger(tailleOctets) || tailleOctets <= 0 || tailleOctets > plafond) {
-    return { statut: "erreur", motif: "taille" };
-  }
-
-  const cle = cleLogo({ shopId: profil.shopId, logoId: randomUUID(), typeMime: normalise });
-  const { url, enTetesObligatoires } = await signerDepot({
-    cle,
-    typeMime: normalise,
-    tailleOctets,
-  });
-
-  return { statut: "pret", url, cle, enTetes: enTetesObligatoires };
+  // Même geste que les réglages de marque, donc même code. La duplication qui
+  // vivait ici est ce qui a permis à la traversée de chemin de survivre dans un
+  // chemin pendant qu'on regardait l'autre.
+  return preparerDepotDeLogo(profil.shopId, typeMime, tailleOctets);
 }
 
 export type ResultatConfirmationLogo = { statut: "ok"; cle: string } | { statut: "erreur" };
@@ -219,24 +200,14 @@ export async function confirmerDepotLogo(cle: string): Promise<ResultatConfirmat
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") return { statut: "erreur" };
 
-  // La clé doit appartenir à CE vendeur. Sans ce contrôle, quelqu'un pourrait
-  // confirmer la clé d'un autre et s'attribuer son logo — une clé n'est pas un
-  // secret, elle est simplement difficile à deviner.
-  if (!cle.startsWith(`logos/${profil.shopId}/`)) return { statut: "erreur" };
-
-  const taille = await lireTaille(cle);
-  if (taille === null) return { statut: "erreur" };
-
-  if (taille > limites().logoOctets) {
-    // Refus APRÈS mesure réelle : on retire l'objet plutôt que de le laisser
-    // occuper l'espace d'un fichier qu'on vient de déclarer inacceptable.
-    await supprimer(cle);
-    return { statut: "erreur" };
-  }
-
+  // ⚠️ DÉLÉGATION VOLONTAIRE, ET C'EST LA CORRECTION.
+  //
+  // Ce chemin recopiait la confirmation du module partagé : contrôle
+  // d'appartenance, relecture de taille, écriture. Deux copies d'une garde,
+  // c'est celle qu'on corrige et celle qu'on oublie — et c'est exactement ce
+  // qui est arrivé : la traversée de chemin trouvée le 26/08/2026 vivait dans
+  // les DEUX, avec des formulations différentes.
   const supabase = await creerClientServeur();
-  const { error } = await supabase.from("shops").update({ logo_url: cle }).eq("id", profil.shopId);
-  if (error !== null) return { statut: "erreur" };
-
-  return { statut: "ok", cle };
+  const ok = await confirmerDepotDeLogo(supabase, profil.shopId, cle);
+  return ok ? { statut: "ok", cle } : { statut: "erreur" };
 }

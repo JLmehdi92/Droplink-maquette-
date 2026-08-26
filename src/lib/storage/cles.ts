@@ -48,10 +48,22 @@ const EXTENSIONS: Readonly<Record<UsageObjet, Readonly<Record<string, string>>>>
     "image/jpeg": "jpg",
     "image/png": "png",
     "image/webp": "webp",
-    // Le SVG est accepté pour un logo parce que c'est le format dans lequel un
-    // vendeur possède le sien. Il est ASSAINI AVANT STOCKAGE, jamais après :
-    // un SVG non assaini est un document capable d'exécuter du script.
-    "image/svg+xml": "svg",
+    // ⚠️ PAS DE SVG, ET LE COMMENTAIRE QUI DISAIT LE CONTRAIRE ÉTAIT FAUX.
+    //
+    // Cette table portait `"image/svg+xml": "svg"` avec la mention « il est
+    // ASSAINI AVANT STOCKAGE ». Cet assainissement N'EXISTE PAS — aucun module
+    // du dépôt ne le fait. Ce qui refusait réellement le SVG, c'étaient les
+    // deux listes blanches des appelants ; la règle du brief était donc tenue
+    // par l'ABSENCE d'un troisième appelant, pas par un assainissement (L-029).
+    //
+    // `extensionPour` est une fonction GÉNÉRIQUE : c'est sa vocation d'être
+    // appelée d'ailleurs. Le jour où elle l'aurait été, le produit aurait
+    // hébergé un document capable d'exécuter du script, servi depuis une URL
+    // signée, dans l'en-tête de la page publique d'un vendeur — et le
+    // commentaire aurait affirmé que c'était sûr.
+    //
+    // Le format revient le jour où l'assainisseur existe, pas avant. Tout
+    // vendeur sait exporter un PNG.
   },
 };
 
@@ -136,4 +148,76 @@ export function cleLogo(params: { shopId: string; logoId: string; typeMime: stri
 export function prefixesBoutique(shopId: string): readonly string[] {
   const shop = exigerUuid(shopId, "shopId");
   return [`medias/${shop}/`, `logos/${shop}/`];
+}
+
+export class CleNonCanonique extends Error {
+  constructor(cle: string) {
+    super(
+      `La clé « ${cle} » ne correspond à aucune forme produite par ce module. ` +
+        "Seules les formes `medias/{uuid}/{uuid}/{uuid}.{ext}`, " +
+        "`medias/{uuid}/{uuid}/{uuid}.vignette.webp` et `logos/{uuid}/{uuid}.{ext}` " +
+        "sont admises.",
+    );
+    this.name = "CleNonCanonique";
+  }
+}
+
+/**
+ * Les formes de clés que ce module produit, et AUCUNE autre.
+ *
+ * DÉRIVÉES DES TABLES CI-DESSUS plutôt qu'écrites à la main : un format ajouté
+ * à `EXTENSIONS` entre ici tout seul. Une seconde liste recopiée aurait divergé
+ * à la première extension ajoutée, et personne ne l'aurait vu — le dépôt aurait
+ * simplement cessé de fonctionner pour ce format, ou pire, la validation
+ * l'aurait accepté sans que la table le connaisse.
+ */
+const UUID_NU = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+
+function extensionsPossibles(): string {
+  const toutes = new Set<string>();
+  for (const usage of Object.keys(EXTENSIONS) as UsageObjet[]) {
+    for (const ext of Object.values(EXTENSIONS[usage])) toutes.add(ext);
+  }
+  // `vignette.webp` est un suffixe composé, produit par `cleVignette`.
+  return [...toutes].sort().join("|");
+}
+
+const FORMES_ADMISES = new RegExp(
+  "^(?:" +
+    `medias/${UUID_NU}/${UUID_NU}/${UUID_NU}\\.(?:vignette\\.webp|${extensionsPossibles()})` +
+    "|" +
+    `logos/${UUID_NU}/${UUID_NU}\\.(?:${extensionsPossibles()})` +
+    ")$",
+  // PAS DE DRAPEAU INSENSIBLE À LA CASSE. Une clé R2 est sensible à la casse :
+  // `LOGOS/x` et `logos/x` sont DEUX objets. Les tolérer confondrait un espace
+  // de noms que le produit ne crée jamais avec celui qu'il gère, et le contrôle
+  // de propriété — qui compare des segments littéraux — ne les verrait pas.
+  // `exigerUuid` met déjà les identifiants en minuscules à la fabrication.
+);
+
+/**
+ * Exige qu'une clé ait EXACTEMENT une des formes que ce module produit.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 26/08/2026.
+ *
+ * Le logo est le SEUL objet dont la clé revient du CLIENT : le navigateur
+ * dépose sur une URL présignée, puis confirme la clé. Le contrôle qui gardait
+ * ce chemin était `cle.startsWith("logos/" + shopId + "/")`. Il est vrai — au
+ * caractère 1 — pour :
+ *
+ *     logos/{monShop}/../../medias/{victime}/{commande}/{media}.jpg
+ *
+ * et `new URL()` NORMALISE les `..` en construisant l'adresse. La clé signée
+ * pointait donc hors du compartiment du vendeur : lecture, et suppression, du
+ * média de quelqu'un d'autre.
+ *
+ * ON VALIDE DONC PAR FORME, PAS PAR PRÉFIXE. Une liste fermée de formes ne
+ * laisse rien passer qu'on n'ait pas décidé d'accepter, alors qu'un contrôle de
+ * préfixe doit prévoir tout ce qui peut suivre — et `..` n'était que la
+ * première idée. Chercher `..` aurait été un contrôle par MOTIF (L-020) ; on
+ * interroge la forme complète, et `urlObjet()` vérifie l'EFFET.
+ */
+export function exigerCleCanonique(cle: string): string {
+  if (!FORMES_ADMISES.test(cle)) throw new CleNonCanonique(cle);
+  return cle;
 }

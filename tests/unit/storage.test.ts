@@ -34,6 +34,23 @@ const UUID_A = "11111111-2222-4333-8444-555555555555";
 const UUID_B = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 const UUID_C = "01234567-89ab-4cde-8f01-23456789abcd";
 
+/**
+ * Une clé RÉELLE, produite par le module lui-même.
+ *
+ * Ces tests employaient `"medias/a/b/c.png"`, une clé qu'aucun chemin du
+ * produit ne fabrique. Depuis que `adresseObjet` exige une forme canonique,
+ * elle est refusée — et c'est le bon comportement : signer une adresse à partir
+ * d'une chaîne libre est précisément ce qui a permis la traversée de chemin du
+ * 26/08/2026. On fait donc produire la clé par le produit plutôt que de
+ * l'écrire à la main, ce qui la garde juste si la disposition change.
+ */
+const CLE_REELLE = cleMedia({
+  shopId: UUID_A,
+  orderId: UUID_B,
+  mediaId: UUID_C,
+  typeMime: "image/png",
+});
+
 describe("Clés d'objet", () => {
   test("la clé se compose du vendeur, de la commande et du média", () => {
     expect(cleMedia({ shopId: UUID_A, orderId: UUID_B, mediaId: UUID_C, typeMime: "image/jpeg" }))
@@ -75,11 +92,12 @@ describe("Clés d'objet", () => {
   test("un type non listé est REFUSÉ", () => {
     expect(() => extensionPour("media", "application/x-msdownload")).toThrow(TypeNonAccepte);
     expect(() => extensionPour("media", "text/html")).toThrow(TypeNonAccepte);
-    // Le SVG est accepté pour un logo, mais PAS pour un média de commande : un
-    // SVG est un document capable de porter du script, et les médias de commande
+    // LE SVG N'EST ACCEPTÉ NULLE PART — et il l'était pour un logo jusqu'au
+    // 26/08/2026, sur la foi d'un commentaire affirmant un assainissement qui
+    // n'a jamais existé. Un SVG est un document capable de porter du script
     // sont affichés à des inconnus sur la page publique.
     expect(() => extensionPour("media", "image/svg+xml")).toThrow(TypeNonAccepte);
-    expect(extensionPour("logo", "image/svg+xml")).toBe("svg");
+    expect(() => extensionPour("logo", "image/svg+xml")).toThrow(TypeNonAccepte);
   });
 
   test("la sonde inspecte réellement une table non vide", () => {
@@ -120,8 +138,8 @@ describe("Clés d'objet", () => {
   });
 
   test("le logo vit hors de l'espace des médias", () => {
-    expect(cleLogo({ shopId: UUID_A, logoId: UUID_C, typeMime: "image/svg+xml" })).toBe(
-      `logos/${UUID_A}/${UUID_C}.svg`,
+    expect(cleLogo({ shopId: UUID_A, logoId: UUID_C, typeMime: "image/webp" })).toBe(
+      `logos/${UUID_A}/${UUID_C}.webp`,
     );
   });
 });
@@ -165,7 +183,7 @@ describe("Signature des URLs", () => {
     const { signerDepot, signerLecture } = await import("@/lib/storage/r2");
 
     const depot = await signerDepot({
-      cle: "medias/a/b/c.png",
+      cle: CLE_REELLE,
       typeMime: "image/png",
       tailleOctets: 1234,
     });
@@ -177,7 +195,7 @@ describe("Signature des URLs", () => {
     ).not.toBe(86400);
     expect(Number(expiresDepot)).toBeLessThanOrEqual(3600);
 
-    const lecture = await signerLecture("medias/a/b/c.png", 120);
+    const lecture = await signerLecture(CLE_REELLE, 120);
     expect(new URL(lecture).searchParams.get("X-Amz-Expires")).toBe("120");
   });
 
@@ -187,7 +205,7 @@ describe("Signature des URLs", () => {
     // qui les réintègre, et rien d'autre ne le prouverait.
     const { signerDepot } = await import("@/lib/storage/r2");
     const { url, enTetesObligatoires } = await signerDepot({
-      cle: "medias/a/b/c.png",
+      cle: CLE_REELLE,
       typeMime: "image/png",
       tailleOctets: 4242,
     });
@@ -206,12 +224,12 @@ describe("Signature des URLs", () => {
     return (async () => {
       const { signerDepot } = await import("@/lib/storage/r2");
       const a = await signerDepot({
-        cle: "medias/a/b/c.png",
+        cle: CLE_REELLE,
         typeMime: "image/png",
         tailleOctets: 1000,
       });
       const b = await signerDepot({
-        cle: "medias/a/b/c.png",
+        cle: CLE_REELLE,
         typeMime: "image/png",
         tailleOctets: 1001,
       });
@@ -228,20 +246,20 @@ describe("Signature des URLs", () => {
 
   test("une durée de lecture hors bornes est REFUSÉE", async () => {
     const { signerLecture, DureeHorsBornes, LECTURE_MAX_S } = await import("@/lib/storage/r2");
-    await expect(signerLecture("medias/a/b/c.png", 5)).rejects.toThrow(DureeHorsBornes);
-    await expect(signerLecture("medias/a/b/c.png", LECTURE_MAX_S + 1)).rejects.toThrow(
+    await expect(signerLecture(CLE_REELLE, 5)).rejects.toThrow(DureeHorsBornes);
+    await expect(signerLecture(CLE_REELLE, LECTURE_MAX_S + 1)).rejects.toThrow(
       DureeHorsBornes,
     );
     // Contre-test positif : une suite où tout est refusé passerait à 100 % sans
     // rien prouver.
-    await expect(signerLecture("medias/a/b/c.png", 600)).resolves.toContain("X-Amz-Signature");
+    await expect(signerLecture(CLE_REELLE, 600)).resolves.toContain("X-Amz-Signature");
   });
 
   test("une taille annoncée absurde est REFUSÉE", async () => {
     const { signerDepot } = await import("@/lib/storage/r2");
     for (const taille of [0, -1, 1.5, Number.NaN]) {
       await expect(
-        signerDepot({ cle: "medias/a/b/c.png", typeMime: "image/png", tailleOctets: taille }),
+        signerDepot({ cle: CLE_REELLE, typeMime: "image/png", tailleOctets: taille }),
         `taille ${taille} acceptée`,
       ).rejects.toThrow();
     }

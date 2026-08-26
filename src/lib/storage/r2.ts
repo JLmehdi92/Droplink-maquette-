@@ -1,6 +1,7 @@
 import "server-only";
 import { AwsClient, AwsV4Signer } from "aws4fetch";
 import { configR2 } from "./config";
+import { exigerCleCanonique } from "./cles";
 
 /**
  * Accès au stockage R2. MODULE UNIQUE — jamais d'appels dispersés ailleurs.
@@ -66,12 +67,44 @@ export class EchecStockage extends Error {
   }
 }
 
+/**
+ * L'adresse d'un objet — SEUL point où une clé devient une URL.
+ *
+ * ⚠️ CE POINT DE PASSAGE EST LA GARDE, et il l'est parce qu'il est UNIQUE.
+ *
+ * Le contrôle vivait auparavant chez l'appelant, dupliqué en deux endroits
+ * (`lib/boutique/logo.ts` et `bienvenue/actions.ts`), sous la forme d'un
+ * préfixe. Une garde dupliquée est une garde qu'on corrige à un endroit et
+ * qu'on oublie à l'autre ; et un contrôle de préfixe ne dit rien de ce qui
+ * suit. La clé du logo revient du client : `logos/{monShop}/../../medias/...`
+ * passait le préfixe, et `new URL()` normalisait les `..` juste ici.
+ *
+ * Deux barrières, et la seconde interroge l'EFFET plutôt que la forme :
+ *   1. la clé doit avoir une des formes que `cles.ts` produit ;
+ *   2. le chemin RÉELLEMENT construit doit encore contenir cette clé, à la
+ *      lettre. Si une normalisation future — de `URL`, du runtime, d'un
+ *      encodage — déplaçait l'objet, la première barrière ne le verrait pas.
+ *      Celle-ci le voit, quelle qu'en soit la cause.
+ */
+export function adresseObjet(endpoint: string, bucket: string, cle: string): URL {
+  exigerCleCanonique(cle);
+
+  const url = new URL(`${endpoint}/${bucket}/${cle}`);
+  const attendu = `/${bucket}/${cle}`;
+  if (url.pathname !== attendu) {
+    throw new EchecStockage(
+      "construction de l'adresse",
+      0,
+      `Le chemin construit (${url.pathname}) ne correspond pas à la clé demandée ` +
+        `(${attendu}) : l'objet visé n'est pas celui qui a été autorisé.`,
+    );
+  }
+  return url;
+}
+
 function urlObjet(cle: string): URL {
   const { endpoint, bucket } = configR2();
-  // La clé est déjà construite par `cles.ts` à partir d'UUID et d'une extension
-  // issue d'une table fermée : elle ne contient que des caractères sûrs. On
-  // n'encode donc pas, ce qui éviterait d'encoder aussi les barres obliques.
-  return new URL(`${endpoint}/${bucket}/${cle}`);
+  return adresseObjet(endpoint, bucket, cle);
 }
 
 function client(): AwsClient {

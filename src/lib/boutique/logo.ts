@@ -61,13 +61,25 @@ export async function preparerDepotDeLogo(
   return { statut: "pret", url, cle, enTetes: enTetesObligatoires };
 }
 
-/** Vrai si la clé appartient bien à CE vendeur. */
+/**
+ * Vrai si la clé appartient bien à CE vendeur.
+ *
+ * ⚠️ LA COMPARAISON PORTE SUR LE SEGMENT, PAS SUR LE PRÉFIXE.
+ *
+ * L'ancienne version faisait `cle.startsWith("logos/" + shopId + "/")`. Elle
+ * était vraie pour `logos/{monShop}/../../medias/{victime}/…`, et `new URL()`
+ * normalisait les `..` au moment de signer : le vendeur obtenait une URL sur
+ * l'objet d'un autre, et `retirerLogo` le supprimait. Un contrôle de préfixe
+ * répond à « par quoi ça commence », jamais à « qu'est-ce que c'est ».
+ *
+ * On découpe donc, et on exige la forme exacte `logos/{shop}/{logo}.{ext}` —
+ * trois segments, pas quatre. `exigerCleCanonique` refuse déjà tout le reste
+ * en amont ; ce contrôle-ci ne répond qu'à la question de la PROPRIÉTÉ, et il
+ * reste juste même si la liste des formes s'allonge un jour.
+ */
 export function cleAppartientAuShop(cle: string, shopId: string): boolean {
-  // Une clé n'est pas un secret, elle est simplement difficile à deviner. Sans
-  // ce contrôle, quelqu'un pourrait confirmer la clé d'un autre et s'attribuer
-  // son logo. Le préfixe est comparé en entier, séparateur compris : sans le
-  // slash final, le shop `abc` accepterait une clé du shop `abcdef`.
-  return cle.startsWith("logos/" + shopId + "/");
+  const segments = cle.split("/");
+  return segments.length === 3 && segments[0] === "logos" && segments[1] === shopId;
 }
 
 /**
