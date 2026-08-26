@@ -256,6 +256,35 @@ const cas = [
     final: "/en/connexion?erreur=session",
     libelle: "liste anglaise SANS session renvoyee vers la connexion",
   },
+  // LES TROIS AUTRES ECRANS DE L ESPACE VENDEUR. Ils n etaient pas ici, et
+  // c est un trou : un ecran qui plante au rendu repond 500, et rien ne le
+  // disait tant que seule la liste des commandes etait interrogee. Ils
+  // partagent desormais leur en-tete avec elle, donc une erreur dans cet
+  // en-tete les emporterait tous les trois d un coup.
+  {
+    chemin: "/fr/envois",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "envois SANS session renvoyes vers la connexion",
+  },
+  {
+    chemin: "/fr/analyses",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "analyses SANS session renvoyees vers la connexion",
+  },
+  {
+    chemin: "/fr/marque",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "reglages de marque SANS session renvoyes vers la connexion",
+  },
+  {
+    chemin: "/fr/bienvenue",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "onboarding SANS session renvoye vers la connexion",
+  },
   { chemin: "/", statut: 200, final: "/fr", libelle: "racine negociee vers une langue" },
   { chemin: "/FR", statut: 200, final: "/fr", libelle: "casse de la langue normalisee" },
   { chemin: "/de", statut: 404, libelle: "langue non supportee" },
