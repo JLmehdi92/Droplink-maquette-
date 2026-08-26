@@ -40,6 +40,17 @@ export interface Boutique {
    * n'a rien à superposer, et l'afficher quand même produirait une bande vide.
    */
   readonly filigrane: boolean;
+  /**
+   * Les réseaux du vendeur, chacun `null` quand il n'est pas configuré.
+   *
+   * TROIS CHAMPS ET PAS UN TABLEAU : le rendu n'est pas le même d'un réseau à
+   * l'autre — logo, couleur, libellé — et un tableau obligerait la page à
+   * traduire une chaîne en composant, donc à accepter une valeur inconnue. Ici,
+   * ce qui n'est pas prévu ne peut pas arriver.
+   */
+  readonly instagram: string | null;
+  readonly tiktok: string | null;
+  readonly whatsapp: string | null;
 }
 
 export interface MediaPublic {
@@ -158,6 +169,9 @@ async function lireCommandePubliqueSansMemo(
       couleur: ligne.boutique_couleur,
       langue: ligne.boutique_langue,
       filigrane: ligne.boutique_filigrane,
+      instagram: ligne.boutique_instagram,
+      tiktok: ligne.boutique_tiktok,
+      whatsapp: ligne.boutique_whatsapp,
     },
     medias: rendus,
     couverture: ligne.couverture,

@@ -13,7 +13,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -437,14 +437,17 @@ export type Database = {
           created_at: string
           default_language: string
           id: string
+          instagram_url: string | null
           logo_url: string | null
           medias_count: number
           name: string | null
           owner_id: string
           slug: string | null
           stockage_octets: number
+          tiktok_url: string | null
           updated_at: string
           watermark_enabled: boolean
+          whatsapp_url: string | null
         }
         Insert: {
           accent_color?: string
@@ -452,14 +455,17 @@ export type Database = {
           created_at?: string
           default_language?: string
           id?: string
+          instagram_url?: string | null
           logo_url?: string | null
           medias_count?: number
           name?: string | null
           owner_id: string
           slug?: string | null
           stockage_octets?: number
+          tiktok_url?: string | null
           updated_at?: string
           watermark_enabled?: boolean
+          whatsapp_url?: string | null
         }
         Update: {
           accent_color?: string
@@ -467,14 +473,17 @@ export type Database = {
           created_at?: string
           default_language?: string
           id?: string
+          instagram_url?: string | null
           logo_url?: string | null
           medias_count?: number
           name?: string | null
           owner_id?: string
           slug?: string | null
           stockage_octets?: number
+          tiktok_url?: string | null
           updated_at?: string
           watermark_enabled?: boolean
+          whatsapp_url?: string | null
         }
         Relationships: [
           {
@@ -770,6 +779,15 @@ export type Database = {
           tracking_number: string
         }[]
       }
+      compter_commandes_par_etat: {
+        Args: never
+        Returns: {
+          en_transit: number
+          jamais_ouvertes: number
+          livrees: number
+          preparation: number
+        }[]
+      }
       compter_envois: {
         Args: { p_silence_jours: number }
         Returns: {
@@ -865,9 +883,12 @@ export type Database = {
         Returns: {
           boutique_couleur: string
           boutique_filigrane: boolean
+          boutique_instagram: string
           boutique_langue: string
           boutique_logo: string
           boutique_nom: string
+          boutique_tiktok: string
+          boutique_whatsapp: string
           client: string
           couverture: string
           creee_le: string

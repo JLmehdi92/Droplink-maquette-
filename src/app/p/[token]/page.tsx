@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
 import { BaliseVue } from "@/components/publique/balise-vue";
 import { EtatExpedition } from "@/components/publique/etat-expedition";
+import { ReseauxVendeur } from "@/components/publique/reseaux-vendeur";
 import { Suivi } from "@/components/publique/suivi";
 import { Visionneur } from "@/components/publique/visionneur";
 import { lireCommandePublique, lireSuiviPublic } from "@/lib/page-publique/lecture";
@@ -403,7 +404,18 @@ export default async function PagePublique({
         </div>
       </main>
 
-      <footer className="mt-8 border-t border-outline-variant px-margin-mobile py-6 text-center md:px-margin-desktop">
+      {/* LES RÉSEAUX DU VENDEUR, s'il en a configuré. Le titre porte son nom :
+          sans nom de boutique, « Retrouvez-nous » ne dit pas qui. */}
+      <ReseauxVendeur
+        boutique={commande.boutique}
+        titre={
+          commande.boutique.nom === null
+            ? t("reseaux.sansNom")
+            : t.raw("reseaux.titre").replace("{nom}", commande.boutique.nom)
+        }
+      />
+
+      <footer className="border-t border-outline-variant px-margin-mobile py-6 text-center md:px-margin-desktop">
         {/*
           « Powered by DropLink », avec ses trois garde-fous : secondaire
           visuellement, jamais confondable avec l'expéditeur, et ouverture HORS

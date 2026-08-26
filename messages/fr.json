@@ -270,7 +270,20 @@
     "erreur": {
       "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
       "ecriture": "Rien n'a été enregistré. Réessayez dans un instant."
-    }
+    },
+    "reseauxTitre": "Vos réseaux",
+    "reseauxAide": "Facultatif. Ce que vous laissez vide n’apparaît pas sur la page de vos clients.",
+    "reseau": {
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "whatsapp": "WhatsApp"
+    },
+    "reseauExemple": {
+      "instagram": "https://instagram.com/votrecompte",
+      "tiktok": "https://tiktok.com/@votrecompte",
+      "whatsapp": "https://wa.me/33612345678"
+    },
+    "reseauInvalide": "Ce lien n’est pas reconnu. Collez l’adresse complète depuis votre navigateur."
   },
   "envois": {
     "titre": "Vos envois",
@@ -422,6 +435,12 @@
     "filtresActifs": "filtres actifs",
     "vues": {
       "toutes": "Toutes",
+      "enTransit": "En transit",
+      "jamaisOuvertes": "Jamais ouvertes",
+      "livrees": "Livrées"
+    },
+    "compteurs": {
+      "preparation": "En préparation",
       "enTransit": "En transit",
       "jamaisOuvertes": "Jamais ouvertes",
       "livrees": "Livrées"
@@ -586,6 +605,10 @@
     "pourClient": "pour {nom}",
     "etat": {
       "arriveeEstimee": "Arrivée estimée"
+    },
+    "reseaux": {
+      "titre": "Retrouvez {nom}",
+      "sansNom": "Retrouvez le vendeur"
     }
   },
   "admin": {

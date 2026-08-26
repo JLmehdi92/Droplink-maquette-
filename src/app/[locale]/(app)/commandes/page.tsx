@@ -5,7 +5,7 @@ import { PanneauFiltres } from "@/components/commandes/panneau-filtres";
 import { PilulesFiltres } from "@/components/commandes/pilules-filtres";
 import { creerBrouillon } from "@/lib/commandes/actions";
 import { TableauCommandes } from "@/components/commandes/tableau-commandes";
-import { analyserParametres, lireCommandes } from "@/lib/commandes/liste";
+import { analyserParametres, compterParEtat, lireCommandes } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { EtatLot, NombreLot } from "@/lib/commandes/lot";
@@ -65,7 +65,11 @@ export default async function Commandes({
   };
   const t = await getTranslations("commandes");
 
-  const [page, origine] = await Promise.all([lireCommandes(parametres), origineDuSite()]);
+  const [page, origine, compteurs] = await Promise.all([
+    lireCommandes(parametres),
+    origineDuSite(),
+    compterParEtat(),
+  ]);
 
   const base = "/" + langue + "/commandes";
 
@@ -162,6 +166,55 @@ export default async function Commandes({
       </header>
 
       <main id="contenu" className="flex flex-col gap-3.5 py-3.5 md:gap-4 md:px-[30px] md:py-[22px]">
+        {/*
+          LES QUATRE COMPTEURS. Omis en bloc si la lecture échoue : rendre des
+          zéros affirmerait qu'on a compté et trouvé rien, ce qui est faux — et
+          c'est le genre de nombre crédible qui fait décider de travers.
+
+          « JAMAIS OUVERTES » EST MIS EN AVANT parce que c'est le seul des
+          quatre qui appelle une action : une commande que le client n'a pas
+          regardée est un lien qu'il n'a peut-être jamais reçu.
+        */}
+        {compteurs !== null ? (
+          <ul className="grid grid-cols-2 gap-3 px-margin-mobile md:grid-cols-4 md:px-0">
+            {(
+              [
+                ["preparation", compteurs.preparation, false],
+                ["enTransit", compteurs.enTransit, false],
+                ["jamaisOuvertes", compteurs.jamaisOuvertes, true],
+                ["livrees", compteurs.livrees, false],
+              ] as const
+            ).map(([clef, valeur, alerte]) => (
+              <li
+                key={clef}
+                className={
+                  "rounded-lg border px-5 py-[18px] " +
+                  (alerte && valeur > 0
+                    ? "border-tertiary-container bg-tertiary-container/40"
+                    : "border-outline-variant bg-surface-container-lowest")
+                }
+              >
+                <p
+                  className={
+                    "font-body-sm text-[12px] " +
+                    (alerte && valeur > 0 ? "text-on-tertiary-container" : "text-on-surface-variant")
+                  }
+                >
+                  {t("compteurs." + clef)}
+                </p>
+                <p
+                  className={
+                    "mt-1.5 font-headline-lg text-[26px] font-extrabold tracking-[-0.03em] " +
+                    (alerte && valeur > 0 ? "text-on-tertiary-container" : "text-on-surface")
+                  }
+                >
+                  {valeur}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
         <PilulesFiltres base={base} parametres={parametres} />
 
         <PanneauFiltres base={base} parametres={parametres} />

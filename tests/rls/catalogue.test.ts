@@ -207,6 +207,15 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "raison même de son existence.",
     ],
     [
+      "compter_commandes_par_etat",
+      "Les quatre compteurs de tête de la liste des commandes. En `security " +
+        "INVOKER` : la RLS s'applique, elle ne voit que les commandes de son " +
+        "appelant — c'est une lecture ordinaire enveloppée pour tenir en un " +
+        "seul aller-retour. Elle ne prend AUCUN argument, donc il n'y a rien à " +
+        "détourner, et elle ne rend que des nombres portant sur des lignes que " +
+        "l'appelant peut de toute façon lire une par une.",
+    ],
+    [
       "sans_accents",
       "Appelée par la COLONNE GÉNÉRÉE `orders.recherche`, laquelle est calculée " +
         "avec les privilèges du rôle qui insère. Sans ce droit, toute création " +
@@ -562,6 +571,12 @@ describe("Sonde C — privilèges de colonne", () => {
     "shops.accent_color",
     "shops.default_language",
     "shops.watermark_enabled",
+    // Les trois réseaux (migration 085). Ils sont FACULTATIFS et leur domaine
+    // est contraint EN BASE : un lien libre rendu sur la page publique d'un
+    // vendeur serait une redirection ouverte offerte à qui prend son compte.
+    "shops.instagram_url",
+    "shops.tiktok_url",
+    "shops.whatsapp_url",
     // `orders` — sont volontairement ABSENTES : `public_token` et
     // `unsubscribe_token` (immuables, et deux pouvoirs distincts), `shop_id`
     // (aucun transfert entre comptes), `created_at`, `updated_at` (tenue par

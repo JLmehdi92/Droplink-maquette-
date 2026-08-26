@@ -56,6 +56,9 @@ export async function enregistrerMarque(
     // vaut « faux ». Lire `=== "on"` traiterait l'absence comme une erreur de
     // saisie et refuserait tout enregistrement qui désactive le filigrane.
     filigrane: donnees.get("filigrane") !== null,
+    instagram: donnees.get("instagram") ?? undefined,
+    tiktok: donnees.get("tiktok") ?? undefined,
+    whatsapp: donnees.get("whatsapp") ?? undefined,
   });
 
   if (!analyse.success) {
@@ -83,6 +86,11 @@ export async function enregistrerMarque(
       // La couleur a-t-elle bougé depuis le défaut ? Sans cette distinction, on
       // ne saurait pas si les vendeurs personnalisent réellement leurs pages.
       couleur_personnalisee: analyse.data.couleurAccent.toLowerCase() !== "#0058be",
+      // COMBIEN de réseaux, jamais LESQUELS ni leurs adresses : le compte d'un
+      // vendeur lui appartient, le fait qu'il en configure appartient au
+      // produit — c'est ce dernier qui dit si l'écran sert à quelque chose.
+      reseaux_configures: [analyse.data.instagram, analyse.data.tiktok, analyse.data.whatsapp]
+        .filter((v) => v !== undefined && v.trim() !== "").length,
     },
   );
 

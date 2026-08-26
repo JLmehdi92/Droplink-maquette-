@@ -76,6 +76,7 @@ export default async function Marque({
               languePublique: profil.languePublique,
               filigrane: profil.filigrane,
               logoUrl,
+              reseaux: profil.reseaux,
             }}
           />
         </TraductionsClient>

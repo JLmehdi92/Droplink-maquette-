@@ -29,6 +29,12 @@ export type ProfilVendeur = {
    * en France ; confondre les deux ne se voit jamais côté vendeur.
    */
   readonly languePublique: "fr" | "en";
+  /** Les trois réseaux, `null` chacun quand il n'est pas configuré. */
+  readonly reseaux: {
+    readonly instagram: string | null;
+    readonly tiktok: string | null;
+    readonly whatsapp: string | null;
+  };
 };
 
 /**
@@ -47,7 +53,7 @@ export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language)",
+      "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url)",
     )
     .maybeSingle();
 
@@ -66,6 +72,9 @@ export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
     accent_color: string;
     watermark_enabled: boolean;
     default_language: string;
+    instagram_url: string | null;
+    tiktok_url: string | null;
+    whatsapp_url: string | null;
   };
 
   return {
@@ -83,6 +92,11 @@ export async function lireProfilVendeur(): Promise<ProfilVendeur | null> {
     // Le repli n'est donc pas un choix produit mais ce que le TYPAGE exige : la
     // base rend du `text`, et parier dessus sans contrôle serait un `as` déguisé.
     languePublique: s.default_language === "en" ? "en" : "fr",
+    reseaux: {
+      instagram: s.instagram_url,
+      tiktok: s.tiktok_url,
+      whatsapp: s.whatsapp_url,
+    },
   };
 }
 

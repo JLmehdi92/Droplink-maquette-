@@ -353,3 +353,38 @@ export function analyserParametres(
     curseur: seul("curseur") ?? null,
   });
 }
+
+/**
+ * LES QUATRE COMPTEURS DE TÊTE D'ÉCRAN.
+ *
+ * UN SEUL APPEL POUR QUATRE NOMBRES qui s'affichent ensemble : quatre allers et
+ * retours coûteraient quatre fois la latence réseau sur l'écran le plus ouvert
+ * du produit. La fonction est `security invoker` — la RLS s'applique, elle ne
+ * voit que les commandes de son appelant.
+ *
+ * `null` EN CAS D'ÉCHEC, et l'écran omet alors la rangée. Il ne rend pas des
+ * zéros : zéro affirme qu'on a compté et trouvé rien, ce qui est faux, et c'est
+ * précisément le genre de nombre crédible qui fait décider de travers.
+ */
+export interface CompteursListe {
+  readonly preparation: number;
+  readonly enTransit: number;
+  readonly jamaisOuvertes: number;
+  readonly livrees: number;
+}
+
+export async function compterParEtat(): Promise<CompteursListe | null> {
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.rpc("compter_commandes_par_etat");
+  if (error !== null || data === null) return null;
+
+  const ligne = Array.isArray(data) ? data[0] : data;
+  if (ligne === undefined || ligne === null) return null;
+
+  return {
+    preparation: Number(ligne.preparation),
+    enTransit: Number(ligne.en_transit),
+    jamaisOuvertes: Number(ligne.jamais_ouvertes),
+    livrees: Number(ligne.livrees),
+  };
+}

@@ -270,7 +270,20 @@
     "erreur": {
       "session": "Your session has expired. Sign in again, then retry.",
       "ecriture": "Nothing was saved. Please retry in a moment."
-    }
+    },
+    "reseauxTitre": "Your socials",
+    "reseauxAide": "Optional. Whatever you leave empty does not appear on your customers’ page.",
+    "reseau": {
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "whatsapp": "WhatsApp"
+    },
+    "reseauExemple": {
+      "instagram": "https://instagram.com/youraccount",
+      "tiktok": "https://tiktok.com/@youraccount",
+      "whatsapp": "https://wa.me/33612345678"
+    },
+    "reseauInvalide": "This link is not recognised. Paste the full address from your browser."
   },
   "envois": {
     "titre": "Your shipments",
@@ -422,6 +435,12 @@
     "filtresActifs": "filters on",
     "vues": {
       "toutes": "All",
+      "enTransit": "In transit",
+      "jamaisOuvertes": "Never opened",
+      "livrees": "Delivered"
+    },
+    "compteurs": {
+      "preparation": "In preparation",
       "enTransit": "In transit",
       "jamaisOuvertes": "Never opened",
       "livrees": "Delivered"
@@ -586,6 +605,10 @@
     "pourClient": "for {nom}",
     "etat": {
       "arriveeEstimee": "Estimated arrival"
+    },
+    "reseaux": {
+      "titre": "Find {nom}",
+      "sansNom": "Find the seller"
     }
   },
   "admin": {

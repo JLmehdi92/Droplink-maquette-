@@ -75,6 +75,11 @@ export function FormulaireMarque({
     readonly languePublique: "fr" | "en";
     readonly filigrane: boolean;
     readonly logoUrl: string | null;
+    readonly reseaux: {
+      readonly instagram: string | null;
+      readonly tiktok: string | null;
+      readonly whatsapp: string | null;
+    };
   };
 }) {
   const t = useTranslations("marque");
@@ -171,7 +176,7 @@ export function FormulaireMarque({
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
         {/* --- Nom et logo ---------------------------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm">
+        <div className="carte flex flex-col gap-6 rounded-lg p-[22px]">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="image" className="text-[var(--apercu-texte)]" />
@@ -283,8 +288,62 @@ export function FormulaireMarque({
           ) : null}
         </div>
 
+        {/*
+          --- Réseaux ---------------------------------------------------
+          FACULTATIFS, ET LEUR ABSENCE NE SE VOIT PAS CHEZ LE CLIENT : le bloc
+          entier est omis de la page publique quand les trois sont vides. Pas de
+          logos grisés, pas d'invitation à en ajouter.
+
+          TROIS RÉSEAUX, ET CES TROIS-LÀ SEULEMENT. Snapchat et Telegram sont
+          écartés par décision produit.
+
+          LE DOMAINE EST EXIGÉ. Un lien libre rendu sur la page d'un vendeur
+          serait une redirection ouverte offerte à qui prend son compte. La base
+          l'empêche par contrainte ; ce formulaire, lui, l'EXPLIQUE — les deux
+          ne remplacent pas le même défaut.
+        */}
+        <div className="carte flex flex-col gap-6 rounded-lg p-[22px] lg:col-span-2">
+          <div>
+            <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
+              <Icone nom="link" className="text-[var(--apercu-texte)]" />
+              {t("reseauxTitre")}
+            </h2>
+            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+              {t("reseauxAide")}
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {(["instagram", "tiktok", "whatsapp"] as const).map((reseau) => (
+              <div key={reseau}>
+                <label
+                  htmlFor={reseau}
+                  className="mb-2 block font-label-md text-label-md text-on-surface"
+                >
+                  {t("reseau." + reseau)}
+                </label>
+                <input
+                  id={reseau}
+                  name={reseau}
+                  type="url"
+                  inputMode="url"
+                  maxLength={200}
+                  defaultValue={initial.reseaux[reseau] ?? ""}
+                  placeholder={t("reseauExemple." + reseau)}
+                  className="champ-app min-h-[44px] w-full rounded-md border border-outline px-4 font-body-md text-body-md text-on-surface"
+                />
+                {champsEnEchec.includes(reseau) ? (
+                  <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
+                    {t("reseauInvalide")}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* --- Couleur -------------------------------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm">
+        <div className="carte flex flex-col gap-6 rounded-lg p-[22px]">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="palette" className="text-[var(--apercu-texte)]" />
@@ -367,7 +426,7 @@ export function FormulaireMarque({
         </div>
 
         {/* --- Langue publique et filigrane ----------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
+        <div className="carte flex flex-col gap-6 rounded-lg p-[22px] lg:col-span-2">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="tune" className="text-[var(--apercu-texte)]" />
@@ -451,7 +510,7 @@ export function FormulaireMarque({
         </div>
 
         {/* --- Aperçu en direct ----------------------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-xl p-6 shadow-sm lg:col-span-2">
+        <div className="carte flex flex-col gap-6 rounded-lg p-[22px] lg:col-span-2">
           <div>
             <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
               <Icone nom="visibility" className="text-[var(--apercu-texte)]" />
