@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
+import { cleVignette } from "@/lib/storage/cles";
 import {
   creerUtilisateur,
   supprimerUtilisateur,
@@ -118,7 +119,7 @@ describe("La clé du média est contrôlée PAR VALEUR", () => {
     // longtemps après l'insertion.
     const { error } = await bob.client
       .from("order_media")
-      .update({ cle_vignette: `${cleAlice}.vignette.webp` })
+      .update({ cle_vignette: cleVignette(cleAlice) })
       .eq("order_id", commandeBob);
 
     expect(error, "la vignette peut désigner l'objet d'un autre vendeur").not.toBeNull();
@@ -126,9 +127,21 @@ describe("La clé du média est contrôlée PAR VALEUR", () => {
   });
 
   test("contre-test positif : la vignette dérivée, elle, est acceptée", async () => {
+    /*
+     * `cleVignette()` ET NON UNE RECOPIE DE LA RÈGLE. Ce test écrivait
+     * `${cle}.vignette.webp` à la main — la formule de la migration, recopiée.
+     * Il éprouvait donc la base contre une copie d'elle-même, et deux sources
+     * qui se citent l'une l'autre ne se contredisent jamais.
+     *
+     * Pendant ce temps, le vrai `cleVignette()` RETIRE l'extension du média
+     * avant d'ajouter la sienne. Les deux dérivations différaient d'un point, la
+     * base refusait toutes les vignettes du produit, et le vendeur lisait
+     * « Enregistrement impossible » sur chacune de ses photos — sans qu'aucune
+     * suite ne bronche.
+     */
     const { error } = await bob.client
       .from("order_media")
-      .update({ cle_vignette: `${cleBob}.vignette.webp` })
+      .update({ cle_vignette: cleVignette(cleBob) })
       .eq("order_id", commandeBob);
 
     expect(error, "la vignette légitime est refusée").toBeNull();

@@ -163,7 +163,15 @@ export async function preparerDepot(
       enTetes: signature.enTetesObligatoires,
       expireDansS: signature.expireDans,
     };
-  } catch {
+  } catch (erreur) {
+    // JAMAIS DE `CATCH` VIDE. Celui-ci l'était, et c'est ce qui a rendu un
+    // échec de dépôt impossible à diagnostiquer : le vendeur lisait « stockage
+    // indisponible », et rien nulle part ne disait si la clé R2 manquait, si le
+    // bucket refusait, ou si la signature était mal formée.
+    console.error(
+      "[medias] signature de dépôt impossible : " +
+        (erreur instanceof Error ? erreur.message : String(erreur)),
+    );
     return { statut: "echec", motif: "stockage" };
   }
 }
@@ -218,7 +226,11 @@ export async function preparerDepotVignette(
       tailleOctets: tailleAnnoncee,
     });
     return { statut: "ok", url: signature.url, enTetes: signature.enTetesObligatoires };
-  } catch {
+  } catch (erreur) {
+    console.error(
+      "[medias] signature de dépôt de vignette impossible : " +
+        (erreur instanceof Error ? erreur.message : String(erreur)),
+    );
     return { statut: "echec", motif: "stockage" };
   }
 }
@@ -349,8 +361,22 @@ export async function confirmerDepot(
     .maybeSingle();
 
   if (error !== null || data === null) {
-    // L'écriture a échoué — plafond en base, course, isolation. L'objet est
-    // retiré pour la même raison que ci-dessus.
+    /*
+     * L'écriture a échoué — plafond en base, course, isolation. L'objet est
+     * retiré pour la même raison que ci-dessus.
+     *
+     * ET LA CAUSE EST NOMMÉE. Elle ne l'était pas : le vendeur lisait
+     * « Enregistrement impossible » et personne — nous compris — ne pouvait
+     * savoir lequel des six déclencheurs de `order_media` avait refusé, ni si
+     * c'était un plafond, une clé hors préfixe ou une policy. Un message d'échec
+     * sans sa cause transforme un défaut d'une ligne en enquête.
+     */
+    console.error(
+      "[medias] écriture refusée pour la commande " +
+        orderId +
+        " — " +
+        (error === null ? "aucune ligne rendue" : `${error.code ?? "?"} : ${error.message}`),
+    );
     await supprimer(cle).catch(() => undefined);
     return { statut: "echec", motif: "ecriture" };
   }

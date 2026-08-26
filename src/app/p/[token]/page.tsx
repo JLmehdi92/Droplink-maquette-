@@ -242,10 +242,25 @@ export default async function PagePublique({
                     titre: t("suivi.titre"),
                     numero: t("suivi.numero"),
                     aucunMouvement: t("suivi.aucunMouvement"),
-                    dernierMouvement: t("suivi.dernierMouvement"),
+                    /*
+                     * `t.raw` ET NON `t` POUR LES DEUX CHAÎNES À PARAMÈTRE.
+                     *
+                     * Le visionneur reçoit ses libellés EN PROPRIÉTÉS — la page
+                     * publique n'embarque aucun catalogue côté client, c'est le
+                     * budget qui l'impose. Il fait donc lui-même la
+                     * substitution de `{n}`, avec le nombre de jours qu'il est
+                     * seul à connaître.
+                     *
+                     * Mais `t()` FORMATE : présenté à une chaîne ICU dont le
+                     * paramètre manque, il ne rend pas le gabarit — il LÈVE
+                     * `FORMATTING_ERROR`, et la page rendait alors le nom de la
+                     * clé au client. `t.raw()` rend le gabarit tel quel, ce qui
+                     * est exactement ce qu'on transporte ici.
+                     */
+                    dernierMouvement: t.raw("suivi.dernierMouvement"),
                     aujourdHui: t("suivi.aujourdHui"),
                     hier: t("suivi.hier"),
-                    silence: t("suivi.silence"),
+                    silence: t.raw("suivi.silence"),
                     estimation: t("suivi.estimation"),
                     arrete: t("suivi.arrete"),
                     passages: t("suivi.passages"),
