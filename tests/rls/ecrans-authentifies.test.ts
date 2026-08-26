@@ -43,7 +43,30 @@ function routesAuthentifiees(): string[] {
   return trouvees;
 }
 
+/**
+ * `.next` PORTE-T-IL UN BUILD DE PRODUCTION ?
+ *
+ * `next dev` écrit dans le MÊME dossier et n'y prérend rien. Une suite qui
+ * inspecte l'artefact échoue alors en annonçant « la sonde ne regarde pas au
+ * bon endroit » — le message envoie chercher un défaut dans la sonde alors que
+ * le dossier appartient simplement à un serveur de développement en cours.
+ * Constaté le 26/08/2026, et le diagnostic a coûté plus cher que la panne.
+ *
+ * `BUILD_ID` n'existe qu'après un `next build` : c'est le témoin le plus court
+ * qui distingue les deux.
+ */
+const BUILD_DE_PRODUCTION = existsSync(join(RACINE, ".next", "BUILD_ID"));
+
+const MESSAGE_DEV =
+  "`.next` ne contient PAS de build de production — il n'y a pas de `BUILD_ID`. " +
+  "Un `pnpm dev` en cours écrit dans le même dossier et n'y prérend rien. " +
+  "Arrêter le serveur de développement, puis `pnpm build`.";
+
 describe("Écrans authentifiés", () => {
+  test("le dossier de build est bien un build de PRODUCTION", () => {
+    expect(BUILD_DE_PRODUCTION, MESSAGE_DEV).toBe(true);
+  });
+
   test("la sonde inspecte réellement des routes et un build", () => {
     // Un ensemble vide passe tout : sans routes trouvées, « aucune n'est
     // prérendue » serait vrai par vacuité.
@@ -61,7 +84,9 @@ describe("Écrans authentifiés", () => {
     const publique = join(SORTIE, routing.defaultLocale, "conditions.html");
     expect(
       existsSync(publique),
-      "La page des conditions n'est pas prérendue : la sonde ne regarde pas au bon endroit.",
+      BUILD_DE_PRODUCTION
+        ? "La page des conditions n'est pas prérendue : la sonde ne regarde pas au bon endroit."
+        : MESSAGE_DEV,
     ).toBe(true);
   });
 
