@@ -536,7 +536,10 @@
       "session": "Session expired. Please sign in again.",
       "reseau": "Upload interrupted. Try again.",
       "inconnu": "Upload rejected."
-    }
+    },
+    "echecCouverture": "The cover photo could not be saved. The one shown is still the server's.",
+    "echecSuppression": "This media could not be deleted. It is still visible on your customer's link.",
+    "echecOrdre": "The new order could not be saved. The previous order has been restored."
   },
   "actions": {
     "titre": "Link and order",

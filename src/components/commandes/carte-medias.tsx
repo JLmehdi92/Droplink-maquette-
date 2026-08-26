@@ -30,6 +30,7 @@ import {
   validerDepot,
 } from "@/lib/commandes/actions-medias";
 import { apercuDepuisVideo, vignetteDepuisImage } from "@/lib/medias/vignette";
+import { creerSuiviDeCouverture } from "@/lib/commandes/suivi-couverture";
 
 /**
  * La carte des médias, porté sur le canevas Claude Design : zone de
@@ -104,6 +105,41 @@ export function CarteMedias({
 
   const [medias, setMedias] = useState<readonly MediaAffiche[]>(initiaux);
   const [enCours, setEnCours] = useState<readonly EnCours[]>([]);
+
+  /**
+   * Le nombre de médias CONFIRMÉS, tenu à jour à la main.
+   *
+   * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 26/08/2026, ET IL SE VOYAIT CHEZ LE
+   * CLIENT.
+   *
+   * `deposer` lisait `medias.length`, capturé à la construction du `useCallback`.
+   * `ajouter` chaîne les fichiers d'un même lot sur UNE SEULE instance de
+   * `deposer` : pour les huit fichiers d'une sélection, `medias.length` valait
+   * donc `0`. `definirCouverture` était appelée huit fois, la DERNIÈRE gagnait
+   * en base — pendant que l'écran, lui, évaluait `liste.length === 0` sur la
+   * liste fraîche et encadrait la PREMIÈRE.
+   *
+   * Le vendeur envoyait son lien en croyant avoir mis en avant la photo 1 ; son
+   * client voyait la photo 8. Rien ne cassait, rien n'apparaissait dans un
+   * journal, et il ne pouvait s'en apercevoir qu'en rouvrant sa page publique.
+   *
+   * POURQUOI UNE RÉFÉRENCE ET NON L'ÉTAT : elle est exacte À L'INSTANT de la
+   * lecture, alors qu'une valeur d'état est celle du rendu qui a créé la
+   * fermeture. Elle est mise à jour à chaque mutation du nombre — ajout et
+   * suppression — et le réordonnancement n'y touche pas, puisqu'il ne change
+   * pas le compte.
+   */
+  const suiviCouverture = useRef(creerSuiviDeCouverture(initiaux.length));
+
+  /**
+   * Ce que la dernière action a échoué à faire, en clair.
+   *
+   * « Pari perdu → retour à l'état confirmé, ET ON LE DIT » : la première
+   * moitié était tenue partout, la seconde nulle part. Le vendeur cliquait
+   * « supprimer », la vignette restait, aucun message — il concluait que le
+   * bouton était cassé, ou réessayait en croyant avoir supprimé.
+   */
+  const [echecAction, setEchecAction] = useState<string | null>(null);
   const [survol, setSurvol] = useState(false);
   const champFichier = useRef<HTMLInputElement>(null);
   const compteur = useRef(0);
@@ -114,17 +150,24 @@ export function CarteMedias({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     // 200 ms au toucher : sur mobile, sans délai, chaque tentative de défilement
     // dans la grille démarre un déplacement.
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
     // Le clavier DÈS LE DÉPART, et non « plus tard » : un réordonnancement qui
     // n'existe qu'à la souris n'a jamais été rattrapé dans aucun produit.
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
-  const majEnCours = useCallback((cleLocale: string, modif: Partial<EnCours>): void => {
-    setEnCours((liste) =>
-      liste.map((e) => (e.cleLocale === cleLocale ? { ...e, ...modif } : e)),
-    );
-  }, []);
+  const majEnCours = useCallback(
+    (cleLocale: string, modif: Partial<EnCours>): void => {
+      setEnCours((liste) =>
+        liste.map((e) => (e.cleLocale === cleLocale ? { ...e, ...modif } : e)),
+      );
+    },
+    [],
+  );
 
   /** Dépose UN fichier, de bout en bout. */
   const deposer = useCallback(
@@ -156,7 +199,11 @@ export function CarteMedias({
         : await vignetteDepuisImage(fichier).then((r) =>
             r === null
               ? { vignette: null, dureeSecondes: null, dimensions: null }
-              : { vignette: r.vignette, dureeSecondes: null, dimensions: r.dimensions },
+              : {
+                  vignette: r.vignette,
+                  dureeSecondes: null,
+                  dimensions: r.dimensions,
+                },
           );
 
       const dimensions = rendu.dimensions;
@@ -165,7 +212,9 @@ export function CarteMedias({
         orderId,
         typeMime: fichier.type,
         tailleAnnoncee: fichier.size,
-        ...(rendu.dureeSecondes === null ? {} : { dureeSecondes: rendu.dureeSecondes }),
+        ...(rendu.dureeSecondes === null
+          ? {}
+          : { dureeSecondes: rendu.dureeSecondes }),
       });
 
       if (preparation.statut !== "ok") {
@@ -192,9 +241,12 @@ export function CarteMedias({
           tailleAnnoncee: rendu.vignette.blob.size,
         });
         if (signature.statut === "ok") {
-          await envoyer(signature.url, signature.enTetes, rendu.vignette.blob, () => undefined).catch(
+          await envoyer(
+            signature.url,
+            signature.enTetes,
+            rendu.vignette.blob,
             () => undefined,
-          );
+          ).catch(() => undefined);
         }
       }
 
@@ -205,7 +257,9 @@ export function CarteMedias({
         ...(dimensions === null
           ? {}
           : { largeur: dimensions.largeur, hauteur: dimensions.hauteur }),
-        ...(rendu.dureeSecondes === null ? {} : { dureeSecondes: rendu.dureeSecondes }),
+        ...(rendu.dureeSecondes === null
+          ? {}
+          : { dureeSecondes: rendu.dureeSecondes }),
       });
 
       if (confirmation.statut !== "ok") {
@@ -217,25 +271,46 @@ export function CarteMedias({
       // La ligne existe : on peut afficher. L'URL locale sert de vignette en
       // attendant le prochain rendu serveur — elle décrit le fichier que le
       // serveur vient d'accepter, pas un pari sur ce qu'il aurait accepté.
-      const apercu = rendu.vignette === null ? null : URL.createObjectURL(rendu.vignette.blob);
+      // LE COMPTE EST LU AVANT L'AJOUT, et une seule fois : c'est ce qui rend
+      // « le premier du lot » vrai pour un seul fichier, et non pour tous.
+      const premier = suiviCouverture.current.ajouter();
+
+      const apercu =
+        rendu.vignette === null
+          ? null
+          : URL.createObjectURL(rendu.vignette.blob);
       setMedias((liste) => [
         ...liste,
         {
           id: confirmation.mediaId,
           type: estVideo ? "video" : "photo",
           urlVignette: apercu,
-          estCouverture: liste.length === 0,
+          // Rien n'est affirmé ici : la couverture n'est posée à l'écran
+          // qu'APRÈS que la base l'a confirmée, quelques lignes plus bas.
+          estCouverture: false,
         },
       ]);
       setEnCours((liste) => liste.filter((e) => e.cleLocale !== cleLocale));
 
-      if (medias.length === 0) {
-        // La première photo devient la couverture. Si l'écriture échoue, l'écran
-        // ne l'affirme pas : le prochain rendu serveur fera foi.
-        await definirCouverture(orderId, confirmation.mediaId).catch(() => undefined);
+      if (premier) {
+        // La première photo devient la couverture — mais l'écran ne le dit
+        // qu'une fois la base d'accord. `definirCouverture` NE LÈVE PAS : elle
+        // rend un statut. Le `.catch()` qui vivait ici ne pouvait donc rien
+        // attraper, et l'échec était jeté en silence.
+        const resultat = await definirCouverture(orderId, confirmation.mediaId);
+        if (resultat.statut === "ok") {
+          setMedias((liste) =>
+            liste.map((m) => ({
+              ...m,
+              estCouverture: m.id === confirmation.mediaId,
+            })),
+          );
+        } else {
+          setEchecAction(t("echecCouverture"));
+        }
       }
     },
-    [orderId, libelleRefus, majEnCours, medias.length],
+    [orderId, libelleRefus, majEnCours, t],
   );
 
   const ajouter = useCallback(
@@ -255,19 +330,30 @@ export function CarteMedias({
   const supprimer = useCallback(
     async (id: string): Promise<void> => {
       const resultat = await retirerMedia(orderId, id);
-      if (resultat.statut !== "ok") return;
+      if (resultat.statut !== "ok") {
+        setEchecAction(t("echecSuppression"));
+        return;
+      }
+      setEchecAction(null);
+      suiviCouverture.current.retirer();
       setMedias((liste) => liste.filter((m) => m.id !== id));
     },
-    [orderId],
+    [orderId, t],
   );
 
   const couvrir = useCallback(
     async (id: string): Promise<void> => {
       const resultat = await definirCouverture(orderId, id);
-      if (resultat.statut !== "ok") return;
-      setMedias((liste) => liste.map((m) => ({ ...m, estCouverture: m.id === id })));
+      if (resultat.statut !== "ok") {
+        setEchecAction(t("echecCouverture"));
+        return;
+      }
+      setEchecAction(null);
+      setMedias((liste) =>
+        liste.map((m) => ({ ...m, estCouverture: m.id === id })),
+      );
     },
-    [orderId],
+    [orderId, t],
   );
 
   const deplacer = useCallback(
@@ -292,9 +378,14 @@ export function CarteMedias({
       // laissé à l'écran après un appel échoué est l'un des trois défauts qui
       // ont fait adopter la règle — il ne casse rien, n'apparaît nulle part, et
       // se manifeste chez le destinataire.
-      if (resultat.statut !== "ok") setMedias(avant);
+      if (resultat.statut !== "ok") {
+        setMedias(avant);
+        setEchecAction(t("echecOrdre"));
+        return;
+      }
+      setEchecAction(null);
     },
-    [medias, orderId],
+    [medias, orderId, t],
   );
 
   const total = medias.length + enCours.length;
@@ -310,6 +401,19 @@ export function CarteMedias({
           {t("compteur", { n: medias.length, max: plafondMedias })}
         </span>
       </div>
+
+      {/* L'ÉCHEC EST DIT, ET IL EST DIT ICI — au-dessus de la grille, pas
+          replié dans une case qui vient de disparaître. `role="alert"` pour
+          qu'un lecteur d'écran l'annonce sans que l'utilisateur ait à le
+          chercher : c'est le retour d'une action qu'il vient de déclencher. */}
+      {echecAction !== null && (
+        <p
+          role="alert"
+          className="mb-4 rounded-md border border-attention-filet bg-attention-fond px-3 py-2 font-body-sm text-body-sm text-attention"
+        >
+          {echecAction}
+        </p>
+      )}
 
       <input
         ref={champFichier}
@@ -364,7 +468,8 @@ export function CarteMedias({
           onDragEnd={(e) => void deplacer(e)}
           accessibility={{
             announcements: {
-              onDragStart: ({ active }) => t("annonce.debut", { position: rang(medias, active.id) }),
+              onDragStart: ({ active }) =>
+                t("annonce.debut", { position: rang(medias, active.id) }),
               onDragOver: ({ active, over }) =>
                 over === null
                   ? t("annonce.horsZone")
@@ -380,7 +485,10 @@ export function CarteMedias({
             },
           }}
         >
-          <SortableContext items={medias.map((m) => m.id)} strategy={rectSortingStrategy}>
+          <SortableContext
+            items={medias.map((m) => m.id)}
+            strategy={rectSortingStrategy}
+          >
             <ul className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3">
               {medias.map((media, index) => (
                 <Case
@@ -398,7 +506,10 @@ export function CarteMedias({
                 >
                   {e.echec === null ? (
                     <>
-                      <Icone nom="upload" className="text-[24px] text-on-surface-variant" />
+                      <Icone
+                        nom="upload"
+                        className="text-[24px] text-on-surface-variant"
+                      />
                       <div
                         role="progressbar"
                         aria-valuenow={e.progression}
@@ -416,11 +527,15 @@ export function CarteMedias({
                   ) : (
                     <>
                       <Icone nom="error" className="text-[24px] text-error" />
-                      <p className="text-center font-body-sm text-body-sm text-error">{e.echec}</p>
+                      <p className="text-center font-body-sm text-body-sm text-error">
+                        {e.echec}
+                      </p>
                       <button
                         type="button"
                         onClick={() =>
-                          setEnCours((liste) => liste.filter((x) => x.cleLocale !== e.cleLocale))
+                          setEnCours((liste) =>
+                            liste.filter((x) => x.cleLocale !== e.cleLocale),
+                          )
                         }
                         className="font-label-sm text-label-sm text-on-surface-variant underline"
                       >
@@ -462,7 +577,14 @@ function Case({
   readonly onCouvrir: () => void;
 }) {
   const t = useTranslations("medias");
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: media.id,
   });
 
@@ -491,13 +613,20 @@ function Case({
         />
       ) : (
         <span className="flex h-full w-full items-center justify-center text-on-surface-variant">
-          <Icone nom={media.type === "video" ? "photo_camera" : "image"} className="text-[28px]" />
+          <Icone
+            nom={media.type === "video" ? "photo_camera" : "image"}
+            className="text-[28px]"
+          />
         </span>
       )}
 
       {media.type === "video" ? (
         <span className="absolute top-2 left-2 rounded-full bg-black/60 p-1 text-white">
-          <Icone nom="photo_camera" className="text-[14px]" titre={t("estUneVideo")} />
+          <Icone
+            nom="photo_camera"
+            className="text-[14px]"
+            titre={t("estUneVideo")}
+          />
         </span>
       ) : null}
 
@@ -515,7 +644,11 @@ function Case({
           className="cursor-grab rounded-md bg-surface-container-lowest p-1.5 text-on-surface-variant shadow-sm"
           title={t("deplacer", { position: index + 1 })}
         >
-          <Icone nom="menu" className="text-[16px]" titre={t("deplacer", { position: index + 1 })} />
+          <Icone
+            nom="menu"
+            className="text-[16px]"
+            titre={t("deplacer", { position: index + 1 })}
+          />
         </button>
 
         {!media.estCouverture ? (
@@ -525,7 +658,11 @@ function Case({
             className="rounded-md bg-surface-container-lowest p-1.5 text-on-surface-variant shadow-sm"
             title={t("definirCouverture")}
           >
-            <Icone nom="check_circle" className="text-[16px]" titre={t("definirCouverture")} />
+            <Icone
+              nom="check_circle"
+              className="text-[16px]"
+              titre={t("definirCouverture")}
+            />
           </button>
         ) : null}
 

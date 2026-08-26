@@ -536,7 +536,10 @@
       "session": "Session expirée. Reconnectez-vous.",
       "reseau": "Envoi interrompu. Réessayez.",
       "inconnu": "Envoi refusé."
-    }
+    },
+    "echecCouverture": "La photo de couverture n'a pas pu être enregistrée. Celle qui est affichée reste celle du serveur.",
+    "echecSuppression": "Ce média n'a pas pu être supprimé. Il est toujours visible sur le lien de votre client.",
+    "echecOrdre": "Le nouvel ordre n'a pas pu être enregistré. L'ordre précédent a été rétabli."
   },
   "actions": {
     "titre": "Le lien et la commande",
