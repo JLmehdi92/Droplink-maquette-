@@ -47,6 +47,28 @@ const RECHERCHE_MS = 250;
 const RATIO_PAGINATION = 2;
 const LIGNES_LUES_MAX = 1_000;
 
+/*
+ * SEUILS DES QUATRE COMPTEURS DE TÊTE — écrits avant la première exécution.
+ *
+ * `COMPTEURS_MS` vaut 120. Deux fois le seuil de la page elle-même, et c'est
+ * délibéré : ces quatre nombres parcourent l'index de TOUT le compte, là où la
+ * liste n'en rend que cinquante lignes. Au-delà, la tête de l'écran coûterait
+ * plus cher que son contenu, et il faudrait dénormaliser plutôt que compter.
+ *
+ * `LIGNES_COMPTEURS_MAX` ne mesure pas un temps : il mesure CE QUE LA RLS
+ * FILTRE, par le plan. Le jeu contient deux comptes de même volumétrie ; une
+ * requête qui lirait les deux ressortirait à 19 200 lignes au lieu de 9 600.
+ *
+ * CE QU'IL NE PROUVE PAS, et il faut le dire : il n'établit pas que la FONCTION
+ * est restée `security invoker`. Elle est mesurée par son corps — voir
+ * ci-dessous pourquoi l'appel n'est pas mesurable. Le jour où quelqu'un la
+ * passerait en `security definer`, ce contrôle-ci resterait vert ; c'est
+ * `tests/rls/reseaux-et-compteurs` qui le refuse, et cette falsification-là a
+ * été constatée en rouge.
+ */
+const COMPTEURS_MS = 120;
+const LIGNES_COMPTEURS_MAX = 12_000;
+
 let bd: Client;
 let alice: UtilisateurDeTest;
 let voisin: UtilisateurDeTest;
@@ -318,5 +340,77 @@ describe("Liste du tableau de bord", () => {
     console.log(`  comptage exact : ${m.ms.toFixed(1)} ms sur ${PLAFOND_COMMANDES} lignes`);
     expect(m.lignesLues, "le comptage lit forcément toutes les lignes du vendeur")
       .toBeGreaterThan(PLAFOND_COMMANDES / 2);
+  });
+});
+
+/*
+ * LE CORPS DES COMPTEURS, RECOPIÉ ICI — et vérifié contre le catalogue.
+ *
+ * ON NE PEUT PAS MESURER L'APPEL. `explain` d'un appel de fonction rend un
+ * `Function Scan` opaque dont l'`Actual Rows` vaut 1 : celui de la ligne
+ * rendue. Constaté ici même — la première version de cette mesure a consigné
+ * « 1 ligne lue » sur un jeu de 9 600, et seul le contre-test de borne basse
+ * l'a signalé. Sans lui, elle aurait certifié une isolation qu'elle
+ * n'inspectait pas.
+ *
+ * MAIS MESURER UNE COPIE NE PROUVE RIEN DE L'ORIGINAL (L-018). Le test compare
+ * donc cette transcription au corps RÉEL lu dans `pg_proc`, avant de s'en
+ * servir. Le jour où la fonction change sans que cette chaîne suive, c'est la
+ * comparaison qui échoue — pas la mesure qui ment.
+ */
+const CORPS_COMPTEURS = `
+  select
+    count(*) filter (where o.status = 'preparation'),
+    count(*) filter (where o.status = 'en_transit'),
+    count(*) filter (where o.views_count = 0),
+    count(*) filter (where o.status = 'livre')
+  from public.orders o
+  where o.archived_at is null`;
+
+const normaliser = (v: string): string => v.replace(/\s+/g, " ").trim();
+
+describe("Les quatre compteurs de tête", () => {
+  test("la transcription mesurée EST le corps de la fonction", async () => {
+    const { rows } = await bd.query<{ corps: string }>(
+      `select p.prosrc as corps from pg_proc p
+         join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public' and p.proname = 'compter_commandes_par_etat'`,
+    );
+    const corps = rows[0]?.corps;
+    expect(corps, "la fonction est introuvable dans le catalogue").toBeDefined();
+    if (corps === undefined) return;
+
+    expect(
+      normaliser(corps),
+      "le corps de la fonction a changé sans que la mesure suive : elle mesurerait autre chose",
+    ).toContain(normaliser(CORPS_COMPTEURS));
+  });
+
+  test("ils tiennent au plafond, et ne lisent QUE le compte qui les demande", async () => {
+    const m = await mesurerSerieuse(alice, CORPS_COMPTEURS);
+
+    console.log(
+      `  compteurs : ${m.ms.toFixed(1)} ms, ${m.lignesLues} lignes lues ` +
+        `(plafond ${PLAFOND_COMMANDES} par compte, deux comptes dans le jeu)`,
+    );
+
+    expect(m.ms, `les compteurs prennent ${m.ms.toFixed(1)} ms`).toBeLessThan(COMPTEURS_MS);
+
+    // CE QUE LA RLS FILTRE, LU DANS LE PLAN. Deux comptes de même volumétrie
+    // sont présents : dépasser ce seuil signifie que la requête lit aussi le
+    // voisin.
+    expect(
+      m.lignesLues,
+      `les compteurs lisent ${m.lignesLues} lignes : le compte voisin est dans le jeu, ` +
+        "donc la RLS ne filtre plus",
+    ).toBeLessThan(LIGNES_COMPTEURS_MAX);
+
+    // ET LE CONTRE-TEST : un plan qui ne lit presque rien décrirait un jeu vide,
+    // pas une requête rapide. Sans cette borne basse, une purge accidentelle du
+    // jeu ferait consigner une performance spectaculaire.
+    expect(
+      m.lignesLues,
+      "les compteurs ne lisent presque rien : le jeu de mesure a disparu",
+    ).toBeGreaterThan(PLAFOND_COMMANDES / 2);
   });
 });
