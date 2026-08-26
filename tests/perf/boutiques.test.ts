@@ -142,8 +142,13 @@ beforeAll(async () => {
     await bd.query(
       `insert into public.order_media (order_id, type, cle, taille_octets, position)
        values ($1, 'photo', $2, 1000, 0)`,
-      // Le préfixe réel : la base contrôle la valeur de la clé depuis la 055.
-      [id, `${String(prefixe.rows[0]?.p)}0.jpg`],
+      // LA CLÉ A LA FORME QUE LE PRODUIT FABRIQUE. Le préfixe vient de la base,
+      // et le dernier segment doit être un UUID depuis la migration 089 : ce
+      // jeu de mesure forgeait encore `0.jpg`, que la base ACCEPTAIT à
+      // l'écriture et que le signeur REFUSAIT à la lecture. La contrainte a
+      // fermé cette divergence — le jeu de mesure, lui, ne l'avait pas suivie,
+      // et c'est la mesure elle-même qui ne pouvait plus tourner.
+      [id, `${String(prefixe.rows[0]?.p)}${crypto.randomUUID()}.jpg`],
     );
   }
 
