@@ -36,6 +36,11 @@ export default defineConfig({
     projects: [
       {
         resolve: { alias },
+        // Le projet `unit` importe des composants `.tsx` — la garde qui vérifie
+        // qu'un lien de réseau non conforme n'est PAS rendu appelle le composant
+        // lui-même. Tester une fonction pure extraite à côté prouverait que la
+        // fonction est correcte, jamais que le composant l'appelle (L-018).
+        oxc: { jsx: { runtime: "automatic" } },
         test: {
           name: "unit",
           environment: "node",

@@ -1,3 +1,4 @@
+import { MOTIFS_RESEAUX } from "@/lib/boutique/reglages";
 import type { Boutique } from "@/lib/page-publique/lecture";
 
 /**
@@ -17,6 +18,23 @@ import type { Boutique } from "@/lib/page-publique/lecture";
  * ouverte garde une référence sur celle-ci par `window.opener` et peut la
  * remplacer — sur une page qui porte le nom d'un vendeur, cela suffit à
  * envoyer son client sur une copie.
+ *
+ * ⚠️ LE DOMAINE EST REVÉRIFIÉ ICI, AU RENDU, alors qu'une contrainte de base et
+ * un schéma Zod le vérifient déjà.
+ *
+ * CE N'EST PAS UNE REDITE : c'est le seul des trois contrôles qui protège la
+ * page de CE QU'ELLE LIT. Les deux autres protègent l'ÉCRITURE. React n'assainit
+ * pas un `href` — un `javascript:` stocké en base par n'importe quel chemin
+ * futur (une migration corrective, un import, une console d'administration de
+ * la base) arriverait ici et s'exécuterait chez le client d'un vendeur, sur une
+ * page qu'il croit être la sienne.
+ *
+ * Trouvé à l'audit du 26/08/2026 : la protection tenait entièrement à l'ABSENCE
+ * d'un second chemin d'écriture. La phrase juste était « ce serait ouvert si
+ * quelqu'un écrivait en base autrement », donc c'était en sursis (L-029).
+ *
+ * UN LIEN QUI NE PASSE PAS EST OMIS, pas corrigé et pas signalé au client : il
+ * n'y peut rien, et son vendeur ne lira jamais cette page.
  *
  * AUCUNE COULEUR D'ACCENT ICI. Les logos portent la couleur de LEUR marque,
  * pas celle du vendeur : un Instagram vert parce que la boutique est verte ne
@@ -58,7 +76,10 @@ export function ReseauxVendeur({
   const liens = RESEAUX.map((reseau) => ({
     ...reseau,
     href: boutique[reseau.clef],
-  })).filter((r): r is (typeof RESEAUX)[number] & { href: string } => r.href !== null);
+  })).filter(
+    (r): r is (typeof RESEAUX)[number] & { href: string } =>
+      r.href !== null && MOTIFS_RESEAUX[r.clef].test(r.href),
+  );
 
   if (liens.length === 0) return null;
 

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { resoudreAccent } from "../../src/lib/design/contraste";
+import { ReseauxVendeur } from "../../src/components/publique/reseaux-vendeur";
 
 /**
  * DEUX RÈGLES DE LA PAGE CLIENT QUE RIEN N'INTERROGEAIT.
@@ -140,5 +141,68 @@ describe("les retraits de l'écriture sur accent suivent l'écriture elle-même"
   test("les deux branches sont réellement empruntées", () => {
     expect(resoudreAccent("#eab308").surRemplissage).toBe("#000000");
     expect(resoudreAccent("#0058be").surRemplissage).toBe("#ffffff");
+  });
+});
+
+describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
+  /*
+   * TROIS CONTRÔLES POUR UN MÊME CHAMP, ET CE N'EST PAS UNE REDITE.
+   *
+   * Zod et la contrainte de base protègent l'ÉCRITURE ; celui-ci protège la
+   * page de CE QU'ELLE LIT. React n'assainit pas un `href` — un `javascript:`
+   * arrivé en base par n'importe quel autre chemin (migration corrective,
+   * import, console d'administration) s'exécuterait chez le client d'un
+   * vendeur, sur une page qu'il croit être la sienne.
+   *
+   * Avant ce contrôle, la phrase juste était « ce serait ouvert si quelqu'un
+   * écrivait en base autrement » : une protection qui tient à une ABSENCE
+   * n'est pas une protection (L-029).
+   */
+  const BOUTIQUE = {
+    nom: "Atelier Nord",
+    logo: null,
+    couleur: "#0058be",
+    langue: "fr",
+    filigrane: false,
+    instagram: null,
+    tiktok: null,
+    whatsapp: null,
+  };
+
+  test("un lien exécutable stocké en base n'est PAS rendu", () => {
+    const rendu = ReseauxVendeur({
+      boutique: { ...BOUTIQUE, instagram: "javascript:alert(1)" },
+      titre: "Retrouvez Atelier Nord",
+    });
+
+    // Les trois liens invalides : le bloc entier disparaît, sans un mot au
+    // client — il n'y peut rien, et son vendeur ne lira jamais cette page.
+    expect(rendu).toBeNull();
+  });
+
+  test.each([
+    ["https://instagram.com.attaquant.example/x", "domaine en préfixe"],
+    ["https://attaquant.example/instagram.com/x", "domaine en chemin"],
+    ["http://instagram.com/x", "http en clair"],
+    ["data:text/html,<script>", "charge inline"],
+  ])("« %s » (%s) n'est pas rendu", (valeur) => {
+    expect(
+      ReseauxVendeur({ boutique: { ...BOUTIQUE, instagram: valeur }, titre: "t" }),
+    ).toBeNull();
+  });
+
+  // CONTRE-TEST POSITIF. Une garde qui refuserait TOUT passerait ces cas à
+  // 100 % en n'affichant jamais aucun réseau — c'est-à-dire en cassant la
+  // fonctionnalité sans que rien ne le dise.
+  test("un lien conforme EST rendu, et il porte noopener", () => {
+    const rendu = ReseauxVendeur({
+      boutique: { ...BOUTIQUE, instagram: "https://instagram.com/atelier.nord" },
+      titre: "Retrouvez Atelier Nord",
+    });
+
+    expect(rendu).not.toBeNull();
+    const serialise = JSON.stringify(rendu);
+    expect(serialise).toContain("https://instagram.com/atelier.nord");
+    expect(serialise).toContain("noopener");
   });
 });

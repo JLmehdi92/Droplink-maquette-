@@ -87,8 +87,9 @@ const SQL = {
     // et l'on croirait alors avoir restauré l'état de référence en ayant
     // restauré une copie périmée.
     reparerDepuisMigration: {
-      fichier: "005_limitation_de_debit.sql",
-      depuis: "create function public.consommer_quota",
+      fichier: "021_fenetre_partagee.sql",
+      depuis: "create or replace function public.consommer_quota",
+      jusqua: "create or replace function public.quota_depasse",
     },
   },
 
@@ -129,8 +130,9 @@ const SQL = {
         return v_nouveau;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "007_jeton_public_immuable.sql",
-      depuis: "create function public.regenerer_jeton_public",
+      fichier: "082_toute_rotation_de_jeton_laisse_sa_trace.sql",
+      depuis: "create or replace function public.regenerer_jeton_public",
+      jusqua: "/*",
     },
   },
 
@@ -249,8 +251,8 @@ const SQL = {
         return v_insere is not null;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "020_vue_profil_omissible.sql",
-      depuis: "create function public.enregistrer_vue",
+      fichier: "076_une_vue_exige_une_empreinte_reelle.sql",
+      depuis: "create or replace function public.enregistrer_vue",
       jusqua: "comment on function",
     },
   },
@@ -302,8 +304,8 @@ const SQL = {
         "alter table public.link_views add constraint " +
         "link_views_order_id_ip_hash_user_agent_hash_viewed_on_key " +
         "unique (order_id, ip_hash, user_agent_hash, viewed_on);",
-      fichier: "020_vue_profil_omissible.sql",
-      depuis: "create function public.enregistrer_vue",
+      fichier: "076_une_vue_exige_une_empreinte_reelle.sql",
+      depuis: "create or replace function public.enregistrer_vue",
       jusqua: "comment on function",
     },
   },
@@ -369,9 +371,8 @@ const SQL = {
         return v_statut;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "024_arbitrage_qc.sql",
-      depuis: "create function public.arbitrer_qc",
-      jusqua: "comment on function",
+      fichier: "069_qui_a_arbitre_le_qc.sql",
+      depuis: "create or replace function public.arbitrer_qc",
     },
   },
 
@@ -404,8 +405,9 @@ const SQL = {
         return v_nouveau;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "025_revocation_journalisee.sql",
+      fichier: "082_toute_rotation_de_jeton_laisse_sa_trace.sql",
       depuis: "create or replace function public.regenerer_jeton_public",
+      jusqua: "/*",
     },
   },
 
@@ -476,8 +478,8 @@ const SQL = {
         return v_modifiees;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "028_archivage_par_lot.sql",
-      depuis: "create function public.archiver_lot",
+      fichier: "081_le_lot_laisse_une_trace_par_commande.sql",
+      depuis: "create or replace function public.archiver_lot",
       jusqua: "comment on function",
     },
   },
@@ -513,8 +515,8 @@ const SQL = {
         return v_modifiees;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "028_archivage_par_lot.sql",
-      depuis: "create function public.archiver_lot",
+      fichier: "081_le_lot_laisse_une_trace_par_commande.sql",
+      depuis: "create or replace function public.archiver_lot",
       jusqua: "comment on function",
     },
   },
@@ -579,7 +581,7 @@ const SQL = {
         return v_touches;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "031_etat_colis_arguments_omissibles.sql",
+      fichier: "072_les_dates_du_colis_ne_reculent_pas.sql",
       depuis: "create function public.appliquer_etat_colis",
       jusqua: "comment on function",
     },
@@ -736,9 +738,14 @@ const SQL = {
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
     reparerDepuisMigration: {
-      fichier: "035_filigrane_public.sql",
+      fichier: "085_reseaux_du_vendeur.sql",
       depuis: "drop function if exists public.lire_commande_publique",
-      jusqua: "comment on function",
+      // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
+      // s'arrêtait au `comment on`, donc la réparation recréait la fonction
+      // SANS son `revoke all from public` ni son `grant execute to anon` : le
+      // produit repartait avec une lecture publique exécutable par PUBLIC et
+      // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
+      jusqua: "grant update (instagram_url",
     },
   },
 
@@ -771,9 +778,14 @@ const SQL = {
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
     reparerDepuisMigration: {
-      fichier: "035_filigrane_public.sql",
+      fichier: "085_reseaux_du_vendeur.sql",
       depuis: "drop function if exists public.lire_commande_publique",
-      jusqua: "comment on function",
+      // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
+      // s'arrêtait au `comment on`, donc la réparation recréait la fonction
+      // SANS son `revoke all from public` ni son `grant execute to anon` : le
+      // produit repartait avec une lecture publique exécutable par PUBLIC et
+      // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
+      jusqua: "grant update (instagram_url",
     },
   },
 
@@ -831,9 +843,8 @@ const SQL = {
         where o.created_at >= p_depuis
       $$;`,
     reparerDepuisMigration: {
-      fichier: "037_analyses_activite.sql",
-      depuis: "create function public.analyser_activite",
-      jusqua: "comment on function",
+      fichier: "068_analyses_sur_le_contenu_reel.sql",
+      depuis: "create or replace function public.analyser_activite",
     },
   },
 
@@ -865,9 +876,8 @@ const SQL = {
         
       $$;`,
     reparerDepuisMigration: {
-      fichier: "037_analyses_activite.sql",
-      depuis: "create function public.analyser_activite",
-      jusqua: "comment on function",
+      fichier: "068_analyses_sur_le_contenu_reel.sql",
+      depuis: "create or replace function public.analyser_activite",
     },
   },
 
@@ -985,9 +995,14 @@ const SQL = {
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
     reparerDepuisMigration: {
-      fichier: "035_filigrane_public.sql",
+      fichier: "085_reseaux_du_vendeur.sql",
       depuis: "drop function if exists public.lire_commande_publique",
-      jusqua: "comment on function",
+      // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
+      // s'arrêtait au `comment on`, donc la réparation recréait la fonction
+      // SANS son `revoke all from public` ni son `grant execute to anon` : le
+      // produit repartait avec une lecture publique exécutable par PUBLIC et
+      // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
+      jusqua: "grant update (instagram_url",
     },
   },
 
@@ -1071,9 +1086,8 @@ const SQL = {
       end;
       $$;`,
     reparerDepuisMigration: {
-      fichier: "047_panneau_sur_compteurs.sql",
+      fichier: "058_alertes_admin_auditees.sql",
       depuis: "create or replace function public.alertes_admin",
-      jusqua: "create or replace function public.compteurs_admin",
     },
   },
 
