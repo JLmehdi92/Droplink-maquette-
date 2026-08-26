@@ -20,8 +20,67 @@ import type { EtatColisPort, FournisseurSuivi, ReponsePort } from "./port";
  * vendeur.
  */
 
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CE QUI EST ÉTABLI SUR CE FOURNISSEUR — RELEVÉ LE 27/08/2026
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * FACTURATION À LA PRISE EN CHARGE, verbatim de leur documentation :
+ * « Successfully registering 1 tracking number equals 1 quota. No quota will be
+ * deducted for continuous tracking after successful registration; repeated API
+ * calls or automatic tracking do not incur quota deduction. »
+ *
+ * C'est ce qui fonde deux décisions déjà prises, et qui les CONFIRME plutôt que
+ * de les rouvrir : l'unicité `(shop_id, tracking_number)` en base, et le refus
+ * d'un second fournisseur de secours — garder un secours doublerait le seul
+ * coût variable du produit, puisqu'on paierait DEUX prises en charge par colis.
+ *
+ * Pas d'abonnement : des packs de quotas, valables douze mois, non
+ * reconductibles automatiquement. Palier gratuit de 100 quotas par mois, remis
+ * à 100 le premier du mois, non cumulables. Limite de débit 3 requêtes/seconde,
+ * 429 au-delà.
+ *
+ * ⚠️ LEURS PRIX NE SONT PAS PUBLIÉS. La page « Plan Details » renvoie à une
+ * adresse commerciale, et la page tarifaire est une application JavaScript dont
+ * le HTML servi ne contient aucun montant. Les chiffres qui circulent
+ * (« 119 $ pour 5 000 ») viennent du blog d'un CONCURRENT. On ne les retient
+ * pas : il faudra les demander. À titre de comparaison, le seul concurrent qui
+ * publie ses prix en clair, TrackingMore, facture 74 $ pour 2 000 envois et
+ * 0,04 $ par envoi supplémentaire — soit environ 32 $/mois pour un fournisseur
+ * à 800 commandes mensuelles.
+ *
+ * ⚠️ DEUX CHIFFRES OFFICIELS SE CONTREDISENT sur la couverture : 2 100
+ * transporteurs dans la documentation de l'API, « 3 500+ » sur la page
+ * marketing. Aucun comparatif indépendant n'existe — toutes les pages qui
+ * comparent ces fournisseurs sont écrites par l'un d'eux. C'est précisément
+ * pourquoi le protocole des dix vrais numéros reste le seul juge.
+ *
+ * ⚠️ ILS ARRÊTENT DE SUIVRE APRÈS 30 JOURS SANS ÉVÉNEMENT, et 15 jours après
+ * une livraison ; ils conservent les données 90 jours puis les suppriment. Notre
+ * rétention en prévoit 90 après le DERNIER MOUVEMENT : un colis bloqué en douane
+ * sort donc de leur radar avant du nôtre. C'est la réserve consignée au brief,
+ * et elle est confirmée par leur documentation.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 const BASE = "https://api.17track.net/track/v2.4";
 const EN_TETE_CLE = "17token";
+/**
+ * ⚠️ NOM D'EN-TÊTE À CONFIRMER SUR UNE VRAIE NOTIFICATION.
+ *
+ * Leur documentation v1 nomme cet en-tête `sign`. Une lecture de la v2.2 — la
+ * version dont vient l'adresse ci-dessus — a fait remonter
+ * `x-17track-signature`. Les deux sont des sources officielles, et elles ne
+ * disent pas la même chose.
+ *
+ * ON NE DEVINE PAS. Changer ce nom sur une lecture incertaine échangerait un
+ * risque connu contre un risque inconnu : si le nom retenu est faux, aucune
+ * notification n'est jamais authentifiée, donc TOUTES sont refusées en 401 — le
+ * suivi cesse de se mettre à jour, en silence, et rien dans nos journaux ne
+ * dirait que la cause est un nom d'en-tête.
+ *
+ * À trancher sur la PREMIÈRE notification réelle reçue, en journalisant les
+ * en-têtes présents. C'est un des points que débloquent les dix vrais numéros.
+ */
 const EN_TETE_SIGNATURE = "sign";
 
 /** Au-delà, on considère le fournisseur indisponible plutôt que d'attendre. */
@@ -255,7 +314,30 @@ export const dixSeptTrack: FournisseurSuivi = {
    * VÉRIFICATION DE SIGNATURE — la garde du point de réception.
    *
    * Le schéma est le leur : `sha256(corps_brut + "/" + clé)`, en hexadécimal,
-   * comparé à l'en-tête `sign`. Trois points qui ne se négocient pas :
+   * comparé à l'en-tête `sign`.
+   *
+   * ⚠️ CE N'EST PAS UN HMAC, ET IL FAUT LE DIRE. Relevé le 27/08/2026 : ils
+   * concatènent simplement le secret au message avant de hacher. Un HMAC existe
+   * précisément parce que cette construction est faible — elle expose en théorie
+   * à l'extension de longueur, dont l'effet ici serait qu'un tiers ayant vu une
+   * notification légitime puisse en signer une PLUS LONGUE sans connaître la
+   * clé. Leur documentation v1 signe `event/data/clé` là où la v2.2 signe le
+   * corps entier ; c'est la seconde qui est implémentée ici, cohérente avec
+   * l'adresse d'API employée.
+   *
+   * Ce n'est PAS une raison de changer de fournisseur : celui qui documente le
+   * schéma le plus faible des quatre examinés est TrackingMore — HMAC du seul
+   * HORODATAGE, avec l'adresse email du compte pour secret, donc une signature
+   * valide n'y prouve rien du CONTENU. AfterShip et ParcelsApp signent bien le
+   * corps brut, mais leur API n'est accessible qu'à partir de paliers payants
+   * dont les prix ne sont, eux non plus, pas publiés en clair.
+   *
+   * C'est en revanche une raison de ne jamais faire reposer une écriture
+   * IRRÉVERSIBLE sur cette seule garde. Elle ne l'est pas : le statut ne recule
+   * jamais, l'unicité borne le coût, et la déduplication des notifications
+   * empêche un rejeu de compter deux fois.
+   *
+   * Trois points qui ne se négocient pas :
    *
    *  1. LE CORPS BRUT, jamais un objet réanalysé. Un aller-retour par
    *     `JSON.parse` puis `JSON.stringify` réordonne les clefs et change les
