@@ -154,25 +154,6 @@ export const EVENEMENTS_SANS_EMETTEUR: ReadonlyMap<NomEvenement, string> = new M
       "brancher au plus vite.",
   ],
   [
-    EVENEMENTS.PREMIER_SCAN,
-    "Il désigne la PREMIÈRE MISE EN MOUVEMENT d'un colis, c'est-à-dire une " +
-      "TRANSITION. L'ingestion ne connaît que l'état rapporté : c'est la base " +
-      "qui compare à l'existant, et `appliquer_etat_colis` ne rend que le " +
-      "nombre de commandes touchées. Il était émis quand l'étape valait " +
-      "« livré » — donc il comptait des LIVRAISONS sous le nom de premiers " +
-      "scans. Le rebrancher demande que la fonction rende la transition, donc " +
-      "une migration qui change sa signature ; mieux vaut ne pas mesurer que " +
-      "mesurer autre chose sous le bon nom.",
-  ],
-  [
-    EVENEMENTS.COLIS_IMMOBILISE,
-    "L'immobilisation est un SEUIL FRANCHI, pas un état : l'émettre à chaque " +
-      "passage de cadence produirait un événement par interrogation pour un " +
-      "colis qui, par définition, ne bouge pas — le double comptage dans sa " +
-      "forme la plus caricaturale. Il faut une marque en base disant que le " +
-      "franchissement a déjà été signalé, donc une migration.",
-  ],
-  [
     EVENEMENTS.NOTIFICATION_ENVOYEE,
     "Aucun envoi d'email n'existe encore dans le produit : `src/lib/email/` ne " +
       "contient que la correction de saisie d'adresse. Un émetteur posé avant " +

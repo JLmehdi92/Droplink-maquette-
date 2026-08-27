@@ -55,7 +55,7 @@ beforeAll(async () => {
 
   await interroger(
     catalogue,
-    `select public.appliquer_etat_colis($1, 'en_transit'::public.parcel_status, 'InTransit', '3011',
+    `select colis from public.appliquer_etat_colis($1, 'en_transit'::public.parcel_status, 'InTransit', '3011',
       $2::jsonb, '', '', '{}'::jsonb, '')`,
     [
       NUMERO,

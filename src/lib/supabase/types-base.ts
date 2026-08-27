@@ -560,6 +560,7 @@ export type Database = {
           first_movement_at: string | null
           id: string
           immobile_depuis: string | null
+          immobilite_signalee_at: string | null
           last_movement_at: string | null
           last_query_at: string | null
           normalized_status: Database["public"]["Enums"]["parcel_status"]
@@ -581,6 +582,7 @@ export type Database = {
           first_movement_at?: string | null
           id?: string
           immobile_depuis?: string | null
+          immobilite_signalee_at?: string | null
           last_movement_at?: string | null
           last_query_at?: string | null
           normalized_status?: Database["public"]["Enums"]["parcel_status"]
@@ -602,6 +604,7 @@ export type Database = {
           first_movement_at?: string | null
           id?: string
           immobile_depuis?: string | null
+          immobilite_signalee_at?: string | null
           last_movement_at?: string | null
           last_query_at?: string | null
           normalized_status?: Database["public"]["Enums"]["parcel_status"]
@@ -746,34 +749,23 @@ export type Database = {
           vues_totales: number
         }[]
       }
-      appliquer_etat_colis:
-        | {
-            Args: {
-              p_brut: Json
-              p_estimation_au: string
-              p_estimation_du: string
-              p_etape: Database["public"]["Enums"]["parcel_status"]
-              p_numero: string
-              p_points: Json
-              p_statut_brut: string
-              p_transporteur: string
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_brut: Json
-              p_estimation_au: string
-              p_estimation_du: string
-              p_etape: Database["public"]["Enums"]["parcel_status"]
-              p_numero: string
-              p_points: Json
-              p_premier_mouvement: string
-              p_statut_brut: string
-              p_transporteur: string
-            }
-            Returns: number
-          }
+      appliquer_etat_colis: {
+        Args: {
+          p_brut: Json
+          p_estimation_au: string
+          p_estimation_du: string
+          p_etape: Database["public"]["Enums"]["parcel_status"]
+          p_numero: string
+          p_points: Json
+          p_premier_mouvement: string
+          p_statut_brut: string
+          p_transporteur: string
+        }
+        Returns: {
+          colis: number
+          premier_scan: boolean
+        }[]
+      }
       arbitrer_qc: {
         Args: { p_commentaire: string; p_decision: string; p_jeton: string }
         Returns: Database["public"]["Enums"]["qc_status"]
@@ -1075,6 +1067,10 @@ export type Database = {
         Returns: boolean
       }
       reclamer_evenement_inscription: { Args: never; Returns: boolean }
+      reclamer_immobilite: {
+        Args: { p_parcel_id: string; p_quand: string }
+        Returns: boolean
+      }
       regenerer_jeton_public: { Args: { p_order_id: string }; Returns: string }
       reordonner_medias: {
         Args: { p_ids: string[]; p_order_id: string }

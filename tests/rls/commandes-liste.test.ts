@@ -338,7 +338,7 @@ describe("Le tri « bloqué en transit »", () => {
     const ingerer = (numero: string, instant: string) =>
       interroger(
         catalogue,
-        `select public.appliquer_etat_colis(
+        `select colis from public.appliquer_etat_colis(
            $1, 'en_transit'::public.parcel_status, 'brut', '', $2::jsonb, '', '', '{}'::jsonb, ''
          )`,
         [numero, JSON.stringify([{ instant, description: "Scan", lieu: "", etape: "" }])],
@@ -353,7 +353,7 @@ describe("Le tri « bloqué en transit »", () => {
     // expédiée.
     await interroger(
       catalogue,
-      `select public.appliquer_etat_colis(
+      `select colis from public.appliquer_etat_colis(
          $1, 'en_transit'::public.parcel_status, 'brut', '', '[]'::jsonb, '', '', '{}'::jsonb, ''
        )`,
       [NUMERO_JAMAIS],

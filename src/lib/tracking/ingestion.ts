@@ -128,7 +128,16 @@ export async function ingererEtat(
 
   if (error !== null) return { statut: "ignore", motif: "ecriture" };
 
-  const colis = data ?? 0;
+  /*
+   * LA FONCTION REND MAINTENANT UNE LIGNE, PAS UN ENTIER.
+   *
+   * PostgREST rend un tableau pour un `returns table`, et la ligne peut manquer
+   * — c'est le cas normal d'un numéro qu'aucun colis ne porte. On ne suppose
+   * donc rien de sa présence : le `?? 0` ci-dessous n'est pas une politesse,
+   * c'est ce qui empêche un compteur de coût de partir en `undefined`.
+   */
+  const ligne = Array.isArray(data) ? data[0] : null;
+  const colis = ligne?.colis ?? 0;
 
   if (colis > 0) {
     /*
@@ -143,9 +152,10 @@ export async function ingererEtat(
      * La vraie prise en charge est émise une fois, dans `prise-en-charge.ts`.
      *
      * « Premier scan » était pire encore : il était choisi quand l'étape valait
-     * « livré ». Il comptait donc des LIVRAISONS. Ce que cette fonction sait,
-     * c'est l'étape atteinte — jamais la transition, que la base calcule sans
-     * la lui rendre. On nomme donc ce qu'on observe.
+     * « livré », donc il comptait des LIVRAISONS. Il est désormais émis plus
+     * bas, sur la TRANSITION que la base rend explicitement — plus jamais sur
+     * une étape atteinte, que cette fonction est seule à voir et qui ne dit rien
+     * de l'état d'avant.
      *
      * Le numéro de suivi NE PART PAS vers l'analytics : c'est une donnée du
      * client d'un vendeur, et quatre caractères suffisent à relier deux
@@ -156,6 +166,31 @@ export async function ingererEtat(
       { sujet: "suivi:" + propre.slice(0, 4) },
       { etape, colis, statut_inconnu: inconnu },
     );
+
+    /*
+     * LE PREMIER SCAN, ENFIN ÉMIS POUR CE QU'IL EST.
+     *
+     * C'est une TRANSITION — « ce colis n'avait jamais bougé, il vient de
+     * bouger » — et cette fonction ne peut pas la connaître : elle voit l'état
+     * que le fournisseur rapporte, jamais l'état d'avant. Seule la base l'a sous
+     * les yeux, dans la même instruction qui l'écrase. Elle le rend désormais.
+     *
+     * Avant d'être débranché, cet événement était choisi quand l'étape valait
+     * « livré » : il comptait des LIVRAISONS sous le nom de premiers scans. Une
+     * métrique légèrement faussée est pire qu'une métrique cassée, parce qu'elle
+     * reste crédible — et celle-ci l'était.
+     *
+     * Il est émis UNE FOIS dans la vie d'un colis : la colonne qui le porte ne
+     * peut pas redevenir nulle, donc le franchissement ne peut pas se rejouer.
+     * C'est ce qui le distingue de l'étape franchie, émise à chaque passage.
+     */
+    if (ligne?.premier_scan === true) {
+      await emettre(
+        EVENEMENTS.PREMIER_SCAN,
+        { sujet: "suivi:" + propre.slice(0, 4) },
+        { etape, colis },
+      );
+    }
   }
 
   // UN STATUT NON TRADUIT EST NOMMÉ, pas avalé. Le fournisseur peut ajouter une

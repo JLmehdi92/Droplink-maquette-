@@ -69,14 +69,22 @@ export interface FournisseurSuivi {
   readonly nom: string;
 
   /**
-   * L'en-tête HTTP qui porte la signature des notifications.
+   * LES en-têtes HTTP susceptibles de porter la signature des notifications.
    *
-   * Il est DÉCLARÉ ICI et pas écrit en dur dans la route, parce que son nom est
-   * du vocabulaire de fournisseur : le laisser dans la route ferait de celle-ci
-   * un second fichier qui connaît 17TRACK, et la frontière ne tiendrait plus
-   * qu'à la discipline de qui la relit.
+   * Ils sont DÉCLARÉS ICI et pas écrits en dur dans la route, parce que leurs
+   * noms sont du vocabulaire de fournisseur : les laisser dans la route ferait
+   * de celle-ci un second fichier qui connaît le fournisseur, et la frontière
+   * ne tiendrait plus qu'à la discipline de qui la relit.
+   *
+   * C'est une LISTE et non un nom unique parce que les documentations d'un même
+   * fournisseur peuvent se contredire sur ce point — et un pari perdu sur un nom
+   * refuse TOUTES les notifications en 401, donc arrête le suivi EN SILENCE.
+   * Accepter plusieurs noms n'affaiblit rien : une requête non signée n'en porte
+   * aucun, et la signature reste vérifiée à l'identique sur celui qui arrive.
+   *
+   * L'ordre compte : le premier en-tête PRÉSENT est celui qui fait foi.
    */
-  readonly enTeteSignature: string;
+  readonly enTetesSignature: readonly string[];
 
   /** Déclare un numéro au fournisseur. C'est CE geste qui est facturé. */
   prendreEnCharge(numero: string, transporteur: number | null): Promise<ReponsePort>;

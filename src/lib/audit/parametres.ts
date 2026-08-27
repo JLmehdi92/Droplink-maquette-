@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import {
+  PLAFOND_COMMANDES_MENSUEL_DEFAUT,
   RETARD_VEILLEUR_MINUTES_DEFAUT,
   SEUIL_COLIS_DEFAUT,
   type ClientAdmin,
@@ -62,6 +63,17 @@ export const PARAMETRES: readonly DefinitionParametre[] = [
     // une panne.
     min: 5,
     max: 10_080,
+  },
+  {
+    cle: "plafond_commandes_mensuel",
+    defaut: PLAFOND_COMMANDES_MENSUEL_DEFAUT,
+    // 100 et non 1 : le revendeur type cree 20 a 80 commandes par mois, donc un
+    // plafond sous 100 refuserait des ecritures a un compte parfaitement normal
+    // — et le vendeur l apprendrait par son client.
+    min: 100,
+    // Au-dela, le plafond ne borne plus rien. Un garde qui ne peut pas se
+    // declencher est un garde qu on croit avoir.
+    max: 100_000,
   },
 ] as const;
 

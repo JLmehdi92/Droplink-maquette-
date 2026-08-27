@@ -26,6 +26,20 @@ import type { Database } from "@/lib/supabase/types-base";
 export const SEUIL_COLIS_DEFAUT = 1_200;
 export const RETARD_VEILLEUR_MINUTES_DEFAUT = 90;
 
+/**
+ * Le plafond mensuel de commandes par compte.
+ *
+ * Il vivait EN DUR dans le corps du declencheur, ce qui en faisait le seul
+ * seuil capable de refuser une ecriture a un utilisateur legitime, et le seul
+ * qu on ne pouvait pas changer sans migration.
+ *
+ * 3 000 : le fournisseur type du brief cree environ 870 commandes par mois
+ * (200 par semaine), soit une marge de 3,4 fois. Ce plafond ne bride pas
+ * l usage normal — il fait couter une erreur, et non une facture, a un
+ * emballement de script.
+ */
+export const PLAFOND_COMMANDES_MENSUEL_DEFAUT = 3_000;
+
 export interface Alerte {
   readonly genre: string;
   readonly gravite: "critique" | "attention";

@@ -102,7 +102,7 @@ describe("Le compteur d'interrogations suit les APPELS", () => {
     for (let i = 0; i < 3; i += 1) {
       await interroger(
         catalogue,
-        `select public.appliquer_etat_colis($1, 'expedie', 'In transit', '', '[]'::jsonb,
+        `select colis from public.appliquer_etat_colis($1, 'expedie', 'In transit', '', '[]'::jsonb,
            '', '', $2::jsonb, '')`,
         [numero, JSON.stringify({ essai: i })],
       );
@@ -141,8 +141,8 @@ describe("Le compteur d'interrogations suit les APPELS", () => {
 
     const touches = await interroger<{ n: number }>(
       catalogue,
-      `select public.appliquer_etat_colis($1, 'expedie', 'In transit', '', '[]'::jsonb,
-         '', '', '{}'::jsonb, '') as n`,
+      `select colis as n from public.appliquer_etat_colis($1, 'expedie', 'In transit', '', '[]'::jsonb,
+         '', '', '{}'::jsonb, '')`,
       [numero],
     );
     expect(touches[0]?.n, "l'état n'a pas été appliqué aux deux colis : rien n'est éprouvé").toBe(2);

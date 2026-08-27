@@ -65,23 +65,29 @@ import type { EtatColisPort, FournisseurSuivi, ReponsePort } from "./port";
 const BASE = "https://api.17track.net/track/v2.4";
 const EN_TETE_CLE = "17token";
 /**
- * ⚠️ NOM D'EN-TÊTE À CONFIRMER SUR UNE VRAIE NOTIFICATION.
+ * LES DEUX NOMS D'EN-TÊTE DE SIGNATURE — ON ACCEPTE CELUI QUI ARRIVE.
  *
  * Leur documentation v1 nomme cet en-tête `sign`. Une lecture de la v2.2 — la
  * version dont vient l'adresse ci-dessus — a fait remonter
  * `x-17track-signature`. Les deux sont des sources officielles, et elles ne
  * disent pas la même chose.
  *
- * ON NE DEVINE PAS. Changer ce nom sur une lecture incertaine échangerait un
- * risque connu contre un risque inconnu : si le nom retenu est faux, aucune
- * notification n'est jamais authentifiée, donc TOUTES sont refusées en 401 — le
- * suivi cesse de se mettre à jour, en silence, et rien dans nos journaux ne
- * dirait que la cause est un nom d'en-tête.
+ * ON NE PARIE PAS SUR UN NOM. Si le nom retenu est le mauvais, aucune
+ * notification n'est jamais authentifiée : TOUTES sont refusées en 401, le suivi
+ * cesse de se mettre à jour EN SILENCE, et rien dans les journaux ne dirait que
+ * la cause est un nom d'en-tête. C'est le pire mode de défaillance possible pour
+ * cette route — celui qu'on ne cherche pas parce que tout paraît fonctionner.
  *
- * À trancher sur la PREMIÈRE notification réelle reçue, en journalisant les
- * en-têtes présents. C'est un des points que débloquent les dix vrais numéros.
+ * ⚠️ CE N'EST PAS UN AFFAIBLISSEMENT DE LA GARDE, et il faut savoir dire
+ * pourquoi : accepter deux noms ne change RIEN à ce qui est vérifié. La
+ * signature est calculée et comparée à l'identique ; une requête non signée ne
+ * porte AUCUN des deux, donc elle reste refusée. On lève un pari, on n'ouvre
+ * pas une porte.
+ *
+ * Le premier PRÉSENT fait foi, et la route journalise lequel est arrivé : c'est
+ * ce journal qui tranchera définitivement à la première vraie notification.
  */
-const EN_TETE_SIGNATURE = "sign";
+const EN_TETES_SIGNATURE = ["sign", "x-17track-signature"] as const;
 
 /** Au-delà, on considère le fournisseur indisponible plutôt que d'attendre. */
 const DELAI_MS = 12_000;
@@ -265,7 +271,7 @@ async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
 
 export const dixSeptTrack: FournisseurSuivi = {
   nom: "17track",
-  enTeteSignature: EN_TETE_SIGNATURE,
+  enTetesSignature: EN_TETES_SIGNATURE,
 
   async prendreEnCharge(numero, transporteur) {
     const entree: Record<string, unknown> = { number: numero };

@@ -219,6 +219,20 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "lire, et une contrainte ne s'évalue qu'à l'écriture.",
     ],
     [
+      "lire_plafond_commandes",
+      "Le plafond mensuel de commandes, lu par le déclencheur `verifier_plafond_" +
+        "commandes` — qui s'exécute avec le rôle du VENDEUR qui insère. Sans ce " +
+        "`grant`, aucun vendeur ne peut plus créer de commande : le défaut a " +
+        "existé, entre les migrations 095 et 096, et il ramenait le plafond " +
+        "effectif à zéro pour tout le monde. Elle ne prend AUCUN argument — " +
+        "contrairement à `lire_parametre_entier`, qui reste réservée aux " +
+        "administrateurs parce qu'une clé libre laisserait lire n'importe quel " +
+        "réglage et servirait d'oracle d'existence sur n'importe quelle clé " +
+        "devinée. Elle ne rend qu'une valeur que le vendeur lit de toute façon " +
+        "dans le message de refus s'il atteint la borne. `anon` n'y a pas droit : " +
+        "il n'insère aucune commande.",
+    ],
+    [
       "mon_shop_id",
       "Rend la boutique de l'APPELANT et ne prend aucun argument : il n'y a rien " +
         "à détourner. Les policies s'exécutant avec le rôle appelant (L-001), " +

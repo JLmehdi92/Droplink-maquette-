@@ -65,9 +65,30 @@ export async function POST(requete: Request): Promise<NextResponse> {
     return NextResponse.json({ statut: "refuse" }, { status: 413 });
   }
 
-  // Le NOM de l'en-tête vient de l'adaptateur : l'écrire en dur ici ferait de
-  // cette route un second fichier qui connaît le fournisseur.
-  const signature = requete.headers.get(dixSeptTrack.enTeteSignature);
+  /*
+   * LES NOMS d'en-têtes viennent de l'adaptateur : les écrire en dur ici ferait
+   * de cette route un second fichier qui connaît le fournisseur.
+   *
+   * ON PREND LE PREMIER PRÉSENT, parce que deux documentations officielles du
+   * même fournisseur se contredisent sur ce nom. Parier sur l'un des deux et
+   * perdre refuserait TOUTES les notifications en 401 — le suivi s'arrêterait
+   * sans qu'aucun journal ne dise pourquoi.
+   *
+   * ⚠️ ET ON JOURNALISE LEQUEL EST ARRIVÉ. Sans cette ligne, accepter les deux
+   * noms ne ferait que déplacer l'ignorance : on ne saurait toujours pas lequel
+   * le fournisseur emploie réellement, et la question resterait ouverte pour
+   * toujours. C'est ce journal qui la tranche à la première vraie notification.
+   */
+  let signature: string | null = null;
+  let enTeteRecu: string | null = null;
+  for (const nom of dixSeptTrack.enTetesSignature) {
+    const valeur = requete.headers.get(nom);
+    if (valeur !== null) {
+      signature = valeur;
+      enTeteRecu = nom;
+      break;
+    }
+  }
 
   let authentique = false;
   try {
@@ -83,6 +104,16 @@ export async function POST(requete: Request): Promise<NextResponse> {
     // simplement fausse — apprendrait à qui essaie où il en est.
     return NextResponse.json({ statut: "refuse" }, { status: 401 });
   }
+
+  /*
+   * LE JOURNAL QUI TRANCHE, écrit SEULEMENT après authentification.
+   *
+   * Le journaliser avant laisserait n'importe qui remplir nos journaux en
+   * envoyant des en-têtes inventés : une route ouverte devient un canal d'écrit
+   * dès qu'elle trace ce qu'on lui donne. Ici la ligne ne peut être produite que
+   * par quelqu'un qui détient la clé, donc par le fournisseur.
+   */
+  console.info("[suivi] notification authentifiée via l'en-tête « " + (enTeteRecu ?? "?") + " »");
 
   const lecture = dixSeptTrack.lireNotification(corps);
   if (lecture.statut === "refuse") {

@@ -989,11 +989,44 @@ try {
       });
       const corpsSignee = signee.ok ? await signee.json() : null;
 
+      /*
+       * LE SECOND NOM D EN-TETE. Leur doc v1 dit `sign`, leur v2.2 dit
+       * `x-17track-signature` : deux sources officielles qui se contredisent.
+       *
+       * Parier sur un seul nom et perdre refuserait TOUTES les notifications en
+       * 401 — le suivi s arreterait EN SILENCE, et rien dans les journaux ne
+       * dirait que la cause est un nom d en-tete. On accepte donc les deux, et
+       * on eprouve ICI que les deux passent vraiment : un test qui n exercerait
+       * que le nom deja implemente ne prouverait rien de la correction.
+       */
+      const signeeAutreNom = await fetch(`${base}/api/suivi/notification`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-17track-signature": signature },
+        body: corpsSuivi,
+      });
+      // ET LE CONTRE-TEST : un TROISIEME nom, plausible mais jamais declare, ne
+      // doit rien ouvrir. Sans lui, une route qui accepterait n importe quel
+      // en-tete — ou qui ne lirait plus d en-tete du tout — passerait le
+      // controle ci-dessus a cent pour cent.
+      const nomInvente = await fetch(`${base}/api/suivi/notification`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-signature": signature },
+        body: corpsSuivi,
+      });
+
       controles.push(
         [sansSignature.status === 401, "une notification SANS signature est refusee"],
         [mauvaiseSignature.status === 401, "une signature fausse est refusee"],
         [corpsFalsifie.status === 401, "un corps modifie apres signature est refuse"],
         [signee.status === 200, `une notification signee est acceptee (${signee.status})`],
+        [
+          signeeAutreNom.status === 200,
+          `signee sous le SECOND nom d en-tete, acceptee aussi (${signeeAutreNom.status})`,
+        ],
+        [
+          nomInvente.status === 401,
+          `un nom d en-tete jamais declare n ouvre rien (${nomInvente.status})`,
+        ],
         [
           corpsSignee !== null && corpsSignee.colis === 0,
           "et elle dit COMBIEN de colis ont ete touches — ici zero, le numero n existe pas",

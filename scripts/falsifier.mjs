@@ -551,8 +551,9 @@ const SQL = {
     casser: `create or replace function public.appliquer_etat_colis(
         p_numero text, p_etape public.parcel_status, p_statut_brut text,
         p_transporteur text, p_points jsonb, p_estimation_du text,
-        p_estimation_au text, p_brut jsonb
-      ) returns integer language plpgsql security definer set search_path = '' as $$
+        p_estimation_au text, p_brut jsonb, p_premier_mouvement text
+      ) returns table (colis integer, premier_scan boolean)
+        language plpgsql security definer set search_path = '' as $$
       declare v_colis record; v_touches integer := 0; v_dernier timestamptz; v_premier timestamptz;
       begin
         for v_colis in
@@ -579,11 +580,11 @@ const SQL = {
           values (v_colis.id, coalesce(p_brut, '{}'::jsonb), p_etape);
           v_touches := v_touches + 1;
         end loop;
-        return v_touches;
+        colis := v_touches; premier_scan := false; return next;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "090_le_colis_met_a_jour_la_commande.sql",
-      depuis: "create or replace function public.appliquer_etat_colis",
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
       jusqua: "comment on function",
     },
   },
@@ -1564,7 +1565,8 @@ const SQL = {
       p_numero text, p_etape public.parcel_status, p_statut_brut text, p_transporteur text,
       p_points jsonb, p_estimation_du text, p_estimation_au text, p_brut jsonb,
       p_premier_mouvement text
-    ) returns integer language plpgsql security definer set search_path = '' as $fals$
+    ) returns table (colis integer, premier_scan boolean)
+        language plpgsql security definer set search_path = '' as $fals$
     declare
       v_colis record; v_touches integer := 0; v_dernier timestamptz; v_premier timestamptz;
       v_pionnier uuid;
@@ -1608,11 +1610,11 @@ const SQL = {
         v_touches := v_touches + 1;
       end loop;
       if v_touches > 0 then perform public.imputer_appel_suivi(p_numero); end if;
-      return v_touches;
+      colis := v_touches; premier_scan := false; return next;
     end; $fals$;`,
     reparerDepuisMigration: {
-      fichier: "090_le_colis_met_a_jour_la_commande.sql",
-      depuis: "create or replace function public.appliquer_etat_colis",
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
     },
   },
 
@@ -1827,12 +1829,181 @@ const SQL = {
    * deux colonnes existent, les deux ecrans repondent, aucune requete n echoue.
    * Le vendeur ne s en apercoit qu en comparant deux ecrans du meme produit.
    */
+  /**
+   * LE CAS MOTIVANT DU PREMIER SCAN : il redevient un ETAT au lieu d une
+   * TRANSITION.
+   *
+   * La condition ne regarde plus l etat d avant. L evenement part donc a CHAQUE
+   * passage de cadence, pour un colis qui a bouge une fois il y a trois
+   * semaines. Rien ne casse : la fonction rend le meme nombre de colis, le
+   * statut descend pareil, la page du client est identique.
+   *
+   * Ce qui change est invisible depuis le produit : la mesure des DEPARTS
+   * devient une mesure des INTERROGATIONS, gonflee d un facteur qui suit la
+   * duree du transport. C est exactement le defaut deja attrape sur « colis
+   * pris en charge » — et une metrique legerement faussee est pire qu une
+   * metrique cassee, parce qu elle reste credible.
+   */
+  /**
+   * LE CAS MOTIVANT DE L IMMOBILITE : la marque cesse d etre RECLAMEE.
+   *
+   * La condition `is null` retiree, chaque passage de cadence repose la marque
+   * et rend vrai. L evenement part donc a chaque interrogation, pour un colis
+   * qui par definition ne bouge pas — le double comptage sur exactement la
+   * population qu on veut compter.
+   *
+   * Rien ne casse : la fonction repond, la colonne est ecrite, le colis est
+   * suivi normalement. Seule la mesure ment.
+   */
+  /**
+   * LE CAS MOTIVANT DU PLAFOND CONFIGURABLE : le declencheur cesse de lire le
+   * reglage et retrouve son 3 000 en dur.
+   *
+   * Rien ne casse. Les commandes se creent, le plafond existe, le refus
+   * fonctionne toujours — a 3 000. Ce qui disparait, c est la POSSIBILITE de le
+   * bouger : l ecran d administration affiche la valeur choisie, la trace
+   * d audit la consigne, et le produit continue d appliquer l ancienne.
+   *
+   * C est le pire des trois etats possibles. Un plafond fige se voit ; un
+   * plafond qui MENT sur sa valeur ne se voit qu au moment ou un fournisseur se
+   * fait refuser une commande qu on croyait avoir autorisee.
+   */
+  "plafond-commandes-en-dur": {
+    casserDepuisMigration: {
+      fichier: "096_le_plafond_se_lit_sans_etre_admin.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function",
+      remplacer: "  v_plafond := public.lire_plafond_commandes();",
+      par: "  v_plafond := 3000;",
+    },
+    reparerDepuisMigration: {
+      fichier: "096_le_plafond_se_lit_sans_etre_admin.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : le reglage est bien lu, mais le defaut disparait.
+   *
+   * Tant qu une valeur est ecrite en base, tout marche. Le jour ou personne n a
+   * jamais decide — c est-a-dire sur une base neuve, donc en production au
+   * premier deploiement — `v_plafond` vaut NULL, la comparaison rend NULL, et
+   * le `if` ne se declenche JAMAIS. Le plafond est desactive sans qu une seule
+   * ligne n echoue.
+   *
+   * Une protection qui tient a la presence d une ligne de configuration n est
+   * pas une protection.
+   */
+  "plafond-commandes-sans-defaut": {
+    casserDepuisMigration: {
+      fichier: "096_le_plafond_se_lit_sans_etre_admin.sql",
+      depuis: "create function public.lire_plafond_commandes()",
+      jusqua: "comment on function",
+      remplacer: "  return coalesce(v_valeur, 3000);",
+      par: "  return v_valeur;",
+    },
+    reparerDepuisMigration: {
+      fichier: "096_le_plafond_se_lit_sans_etre_admin.sql",
+      depuis: "create function public.lire_plafond_commandes()",
+      jusqua: "comment on function",
+    },
+  },
+
+  "immobilite-resignalee": {
+    casserDepuisMigration: {
+      fichier: "094_l_immobilite_ne_se_signale_qu_une_fois.sql",
+      depuis: "create function public.reclamer_immobilite",
+      jusqua: "comment on function",
+      remplacer: "     and immobilite_signalee_at is null\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "094_l_immobilite_ne_se_signale_qu_une_fois.sql",
+      depuis: "create function public.reclamer_immobilite",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : la marque est bien posee une seule fois, mais sa
+   * DATE est repoussee a chaque passage.
+   *
+   * La condition `is null` reste, donc le retour est correct et l evenement ne
+   * part qu une fois : les controles du comptage passent tous. Ce qui derive,
+   * c est la date — un second `update` inconditionnel la repousse.
+   *
+   * La colonne repond alors a « quand la cadence est-elle passee » au lieu de
+   * « quand le seuil a-t-il ete franchi », et la valeur reste parfaitement
+   * plausible. C est le genre de defaut qu on ne trouve qu en le cherchant.
+   */
+  "immobilite-datee-du-dernier-passage": {
+    casserDepuisMigration: {
+      fichier: "094_l_immobilite_ne_se_signale_qu_une_fois.sql",
+      depuis: "create function public.reclamer_immobilite",
+      jusqua: "comment on function",
+      remplacer: "  return v_pose is not null;",
+      par:
+        "  update public.tracked_parcels set immobilite_signalee_at = p_quand\n" +
+        "   where id = p_parcel_id;\n  return v_pose is not null;",
+    },
+    reparerDepuisMigration: {
+      fichier: "094_l_immobilite_ne_se_signale_qu_une_fois.sql",
+      depuis: "create function public.reclamer_immobilite",
+      jusqua: "comment on function",
+    },
+  },
+
+  "premier-scan-a-chaque-fois": {
+    casserDepuisMigration: {
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
+      jusqua: "comment on function",
+      remplacer: "if v_avant is null and v_apres is not null then",
+      par: "if v_apres is not null then",
+    },
+    reparerDepuisMigration: {
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : le premier scan se declenche des que la DATE change.
+   *
+   * Le transporteur rend l historique complet, pas toujours dans l ordre : un
+   * point plus ANCIEN que tous les autres arrive apres coup et fait reculer
+   * `first_movement_at` — c est voulu, `least()` le veut.
+   *
+   * Avec cette condition-la, ce point en retard ressemble a un depart. Un
+   * SECOND depart est donc signale pour le meme colis, parfois des semaines
+   * apres le vrai, et uniquement pour les transporteurs qui rendent leurs
+   * points dans le desordre. Le defaut ne se manifeste donc jamais sur les
+   * colis de test, qui arrivent toujours dans l ordre.
+   */
+  "premier-scan-sur-date-changee": {
+    casserDepuisMigration: {
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
+      jusqua: "comment on function",
+      remplacer: "if v_avant is null and v_apres is not null then",
+      par: "if v_avant is distinct from v_apres then",
+    },
+    reparerDepuisMigration: {
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
+      jusqua: "comment on function",
+    },
+  },
+
   "statut-ne-descend-pas": {
     casser: `create or replace function public.appliquer_etat_colis(
         p_numero text, p_etape public.parcel_status, p_statut_brut text,
         p_transporteur text, p_points jsonb, p_estimation_du text,
         p_estimation_au text, p_brut jsonb, p_premier_mouvement text
-      ) returns integer language plpgsql security definer set search_path = '' as $fals$
+      ) returns table (colis integer, premier_scan boolean)
+        language plpgsql security definer set search_path = '' as $fals$
       declare
         v_colis record; v_touches integer := 0; v_dernier timestamptz;
         v_premier timestamptz; v_pionnier uuid;
@@ -1871,11 +2042,11 @@ const SQL = {
           v_touches := v_touches + 1;
         end loop;
         if v_touches > 0 then perform public.imputer_appel_suivi(p_numero); end if;
-        return v_touches;
+        colis := v_touches; premier_scan := false; return next;
       end; $fals$;`,
     reparerDepuisMigration: {
-      fichier: "090_le_colis_met_a_jour_la_commande.sql",
-      depuis: "create or replace function public.appliquer_etat_colis",
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
       jusqua: "comment on function",
     },
   },
@@ -1898,7 +2069,8 @@ const SQL = {
         p_numero text, p_etape public.parcel_status, p_statut_brut text,
         p_transporteur text, p_points jsonb, p_estimation_du text,
         p_estimation_au text, p_brut jsonb, p_premier_mouvement text
-      ) returns integer language plpgsql security definer set search_path = '' as $fals$
+      ) returns table (colis integer, premier_scan boolean)
+        language plpgsql security definer set search_path = '' as $fals$
       declare
         v_colis record; v_touches integer := 0; v_dernier timestamptz;
         v_premier timestamptz; v_pionnier uuid;
@@ -1943,11 +2115,11 @@ const SQL = {
           v_touches := v_touches + 1;
         end loop;
         if v_touches > 0 then perform public.imputer_appel_suivi(p_numero); end if;
-        return v_touches;
+        colis := v_touches; premier_scan := false; return next;
       end; $fals$;`,
     reparerDepuisMigration: {
-      fichier: "090_le_colis_met_a_jour_la_commande.sql",
-      depuis: "create or replace function public.appliquer_etat_colis",
+      fichier: "092_le_premier_scan_est_une_transition.sql",
+      depuis: "create function public.appliquer_etat_colis",
       jusqua: "comment on function",
     },
   },
@@ -2141,6 +2313,26 @@ const DEPOT = {
    * commandes de n'importe quel vendeur — faire reculer un statut, inventer
    * une livraison, ou simplement épuiser le compteur facturé.
    */
+  /**
+   * HORS du cas motivant : on REPARIE sur un seul nom d en-tete de signature.
+   *
+   * Leur doc v1 nomme l en-tete `sign`, leur v2.2 `x-17track-signature`. Deux
+   * sources officielles qui se contredisent. Reduire la liste a un seul nom ne
+   * casse RIEN de visible : la route repond, la signature est toujours
+   * verifiee, tous les refus restent des refus. Simplement, si le fournisseur
+   * emploie l autre nom, TOUTES les notifications tombent en 401 — le suivi
+   * cesse de se mettre a jour EN SILENCE.
+   *
+   * C est exactement le defaut que ce projet appelle « une degradation plutot
+   * qu une casse » : rien n echoue, tout parait fonctionner, et le vendeur
+   * decouvre des semaines plus tard que ses colis n avancent plus.
+   */
+  "signature-un-seul-en-tete": {
+    fichier: "src/lib/tracking/provider/dix-sept-track.ts",
+    remplacer: 'const EN_TETES_SIGNATURE = ["sign", "x-17track-signature"] as const;',
+    par: 'const EN_TETES_SIGNATURE = ["sign"] as const;',
+  },
+
   "notification-non-signee": {
     fichier: "src/app/api/suivi/notification/route.ts",
     remplacer: "    authentique = dixSeptTrack.verifierNotification(corps, signature);",
@@ -2248,6 +2440,56 @@ const client = new pg.Client({
 await client.connect();
 
 let sql = SQL[cible][action];
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CASSER EN PARTANT DE LA MIGRATION, ET NON D UNE COPIE ECRITE A LA MAIN
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * DEFAUT REEL, TROUVE LE 27/08/2026. La cible `statut-colis-recule` portait une
+ * copie du corps de `appliquer_etat_colis` figee a l epoque ou la fonction
+ * prenait HUIT arguments. La fonction du produit en prenait NEUF depuis la 072.
+ *
+ * Son `create or replace` n a donc jamais remplace quoi que ce soit : il a cree
+ * une SECONDE fonction, orpheline, que personne n appelle. La falsification
+ * n avait plus aucun effet sur le produit, et la suite restait verte — non
+ * parce que la garde tenait, mais parce que l outil charge de la casser tapait
+ * a cote. C est la pire defaillance possible pour un falsificateur : il rassure.
+ *
+ * Une copie se perime en silence. Une DERIVATION ne le peut pas : si le motif
+ * `remplacer` n apparait plus exactement une fois dans la migration, on refuse
+ * plutot que de casser autre chose — ou rien.
+ */
+if (sql === undefined && action === "casser" && SQL[cible].casserDepuisMigration) {
+  const { fichier, depuis, jusqua, remplacer, par } = SQL[cible].casserDepuisMigration;
+  const chemin = join(process.cwd(), "supabase", "migrations", fichier);
+  const contenu = readFileSync(chemin, "utf8");
+  const index = contenu.indexOf(depuis);
+  if (index === -1) {
+    console.error(
+      `Falsification impossible : « ${depuis} » est introuvable dans ${fichier}.`,
+    );
+    await client.end();
+    process.exit(1);
+  }
+  const fin = jusqua ? contenu.indexOf(jusqua, index) : -1;
+  const corps = contenu
+    .slice(index, fin === -1 ? undefined : fin)
+    .replace("create function", "create or replace function");
+
+  const occurrences = corps.split(remplacer).length - 1;
+  if (occurrences !== 1) {
+    console.error(
+      `Falsification impossible : « ${remplacer} » apparait ${occurrences} fois ` +
+        `dans ${fichier} (une seule attendue). La migration a change sans que ` +
+        "cette cible suive — c est exactement ainsi qu une falsification cesse " +
+        "d avoir un effet sans que rien ne le dise.",
+    );
+    await client.end();
+    process.exit(1);
+  }
+  sql = corps.replace(remplacer, par);
+}
 
 if (sql === undefined && action === "reparer" && SQL[cible].reparerDepuisMigration) {
   // `jusqua` borne la decoupe. Sans borne, on rejoue tout ce qui suit la

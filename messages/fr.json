@@ -781,6 +781,10 @@
           "titre": "Signaler un compte au-delà de",
           "aide": "Nombre de colis pris en charge dans le mois à partir duquel le compte apparaît dans les alertes du panneau. C'est le seul compteur du produit qui corresponde à une facture."
         },
+        "plafond_commandes_mensuel": {
+          "titre": "Refuser au-delà de",
+          "aide": "Commandes qu'un même compte peut créer dans le mois. Au-delà, la création est REFUSÉE : c'est le seul seuil du produit qui bloque une écriture, et le vendeur l'apprendrait par son client. Le laisser au-dessus de l'usage réel — un fournisseur en crée environ 870 par mois."
+        },
         "retard_veilleur_minutes": {
           "titre": "Déclarer une tâche en retard après",
           "aide": "Minutes sans battement au-delà desquelles une tâche de fond est signalée comme en retard. Trop bas, l'alerte décrirait la cadence normale plutôt qu'une panne."

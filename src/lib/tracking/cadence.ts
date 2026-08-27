@@ -6,6 +6,7 @@ import { dixSeptTrack } from "./provider/dix-sept-track";
 import { ingererEtat } from "./ingestion";
 import { prendreEnCharge } from "./prise-en-charge";
 import { decider, type EtatColis } from "./schedule";
+import { decrireSilence } from "./silence";
 
 /**
  * LA TÂCHE DE FOND DU SUIVI.
@@ -31,6 +32,8 @@ export interface BilanCadence {
   readonly abandonnes: number;
   readonly repris: number;
   readonly indisponibles: number;
+  /** Colis dont le silence vient d'être NOMMÉ, une seule fois dans leur vie. */
+  readonly immobilises: number;
 }
 
 /** Ce qu'on traite en un passage. Borné : un passage doit finir. */
@@ -55,6 +58,7 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
     abandonnes: 0,
     repris: 0,
     indisponibles: 0,
+    immobilises: 0,
   };
 
   for (const colis of data) {
@@ -66,6 +70,38 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
       etape: colis.normalized_status,
       abandonneLe: null,
     };
+
+    /*
+     * L'IMMOBILITÉ EST ÉVALUÉE AVANT LA DÉCISION, ET C'EST LE POINT DÉLICAT.
+     *
+     * La placer après le `continue` du cas « attendre » ne signalerait jamais
+     * rien : un colis silencieux est précisément celui que la cadence espace le
+     * plus, donc celui qui tombe le plus souvent dans « attendre ». La garde
+     * regarderait exactement là où le cas ne se produit pas.
+     *
+     * La marque est RÉCLAMÉE, pas lue puis écrite : deux passages concurrents
+     * liraient tous deux « jamais signalé » et émettraient tous deux. La base
+     * tranche en une seule instruction et dit qui a gagné.
+     */
+    const silence = decrireSilence(etat.dernierMouvement, maintenant);
+    if (silence.etat === "silencieux") {
+      const { data: reclame, error: erreurMarque } = await systeme.rpc("reclamer_immobilite", {
+        p_parcel_id: colis.id,
+        p_quand: maintenant.toISOString(),
+      });
+      // On n'émet QUE si la base a confirmé. Émettre sur une écriture dont on
+      // ignore le sort ferait compter des immobilisations qui ne sont inscrites
+      // nulle part — et l'interface, l'analytics comprise, n'affirme jamais ce
+      // que la base n'a pas enregistré.
+      if (erreurMarque === null && reclame === true) {
+        await emettre(
+          EVENEMENTS.COLIS_IMMOBILISE,
+          { sujet: "suivi:" + colis.tracking_number.slice(0, 4) },
+          { jours: silence.jours, etape: colis.normalized_status },
+        );
+        bilan.immobilises += 1;
+      }
+    }
 
     const decision = decider(etat, maintenant);
 
@@ -176,6 +212,7 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
       abandonnes: bilan.abandonnes,
       repris: bilan.repris,
       indisponibles: bilan.indisponibles,
+      immobilises: bilan.immobilises,
       // `null` et `0` ne disent pas la même chose : l'un dit « la purge n'a pas
       // tourné », l'autre « elle a tourné et n'a rien trouvé à faire ».
       purge_instantanes: erreurPurge !== null ? null : (purgee?.instantanes ?? 0),

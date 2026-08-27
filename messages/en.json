@@ -781,6 +781,10 @@
           "titre": "Flag an account above",
           "aide": "Number of parcels registered in the month above which the account appears in the panel alerts. This is the only counter in the product that matches an invoice."
         },
+        "plafond_commandes_mensuel": {
+          "titre": "Refuse above",
+          "aide": "Orders a single account may create in a month. Beyond that, creation is REFUSED: this is the only threshold in the product that blocks a write, and the seller would learn about it from their customer. Keep it above real usage — a supplier creates around 870 a month."
+        },
         "retard_veilleur_minutes": {
           "titre": "Report a task as late after",
           "aide": "Minutes without a heartbeat after which a background task is reported as late. Too low, and the alert would describe the normal cadence rather than a failure."

@@ -88,19 +88,27 @@ async function lire(id: string): Promise<Commande> {
   return c;
 }
 
+/**
+ * ⚠️ `select * from ...` ET NON `select f(...)`.
+ *
+ * Depuis la 092 la fonction rend une LIGNE à deux colonnes. Appelée dans la
+ * liste de sélection, elle rendrait un enregistrement composite — soit la chaîne
+ * `(1,t)` côté client — et `l[0].colis` vaudrait `undefined`. Le test ne
+ * lèverait pas : il comparerait `undefined` et passerait à côté de tout.
+ */
 async function ingerer(
   numero: string,
   etape: string,
   points: readonly { instant: string; description: string }[],
-): Promise<number> {
-  const l = await interroger<{ n: number }>(
+): Promise<{ colis: number; premierScan: boolean }> {
+  const l = await interroger<{ colis: number; premier_scan: boolean }>(
     catalogue,
-    `select public.appliquer_etat_colis(
+    `select colis, premier_scan from public.appliquer_etat_colis(
        $1, $2::public.parcel_status, 'brut', '', $3::jsonb, '', '', '{}'::jsonb, ''
-     ) as n`,
+     )`,
     [numero, etape, JSON.stringify(points.map((p) => ({ ...p, lieu: "", etape: "" })))],
   );
-  return l[0]?.n ?? 0;
+  return { colis: l[0]?.colis ?? 0, premierScan: l[0]?.premier_scan === true };
 }
 
 beforeAll(async () => {
@@ -318,5 +326,101 @@ describe("Isolation entre vendeurs", () => {
       { instant: "2026-08-25T10:00:00Z", description: "Pris en charge" },
     ]);
     expect((await lire(chezBob)).status).toBe("expedie");
+  });
+});
+
+/**
+ * LE PREMIER SCAN EST UNE TRANSITION, PAS UN ÉTAT.
+ *
+ * C'est la distinction qui a fait débrancher cet événement pendant plusieurs
+ * mois. « Ce colis a bougé » est un état — vrai à chaque interrogation d'un
+ * colis en route. « Ce colis vient de bouger pour la première fois » est un
+ * franchissement, vrai UNE FOIS dans sa vie, et seule la base peut le voir :
+ * elle seule connaît l'état d'avant, dans l'instruction même qui l'écrase.
+ *
+ * Avant d'être débranché il était pire qu'absent : il était choisi quand
+ * l'étape valait « livré », donc il comptait des LIVRAISONS sous le nom de
+ * premiers scans. Une métrique légèrement faussée est pire qu'une métrique
+ * cassée, parce qu'elle reste crédible.
+ */
+describe("Le premier scan", () => {
+  test("il est signalé au tout premier mouvement", async () => {
+    const numero = numeroNeuf();
+    const commande = await creerCommande(alice, numero);
+    await attacher(alice, commande, numero);
+
+    const premier = await ingerer(numero, "expedie", [
+      { instant: "2026-08-20T10:00:00Z", description: "Pris en charge" },
+    ]);
+    expect(premier.colis, "aucun colis touché : rien n'est éprouvé").toBe(1);
+    expect(premier.premierScan, "le premier mouvement n'a pas été signalé").toBe(true);
+  });
+
+  test("il n'est PAS resignalé aux mouvements suivants", async () => {
+    /*
+     * LE CONTRÔLE QUI COMPTE. L'ingestion est appelée à chaque passage de
+     * cadence et à chaque notification poussée — un colis long en produit des
+     * dizaines. Un événement émis à chaque fois ferait compter les
+     * INTERROGATIONS sous le nom des départs, exactement le défaut que ce
+     * produit a déjà attrapé sur « colis pris en charge ».
+     */
+    const numero = numeroNeuf();
+    const commande = await creerCommande(alice, numero);
+    await attacher(alice, commande, numero);
+
+    await ingerer(numero, "expedie", [
+      { instant: "2026-08-20T10:00:00Z", description: "Pris en charge" },
+    ]);
+    const deuxieme = await ingerer(numero, "en_transit", [
+      { instant: "2026-08-21T10:00:00Z", description: "Départ du centre de tri" },
+    ]);
+    expect(deuxieme.colis, "le second passage n'a rien touché").toBe(1);
+    expect(deuxieme.premierScan, "le premier scan a été signalé DEUX fois").toBe(false);
+
+    // Et une troisième fois, sans aucun point nouveau : c'est la forme la plus
+    // fréquente — un colis bloqué que la cadence réinterroge chaque jour.
+    const troisieme = await ingerer(numero, "en_transit", []);
+    expect(troisieme.premierScan).toBe(false);
+  });
+
+  test("un colis qui n'a encore RIEN à raconter ne déclenche pas de premier scan", async () => {
+    /*
+     * HORS DU CAS MOTIVANT. Un numéro fraîchement collé n'est souvent pas encore
+     * scanné : le fournisseur répond, l'état est appliqué, et pourtant aucun
+     * mouvement n'existe. Signaler un départ ici ferait compter comme partis des
+     * colis encore sur l'établi du vendeur — et ce cas-là est le plus fréquent
+     * de tous, puisqu'il précède tous les autres.
+     */
+    const numero = numeroNeuf();
+    const commande = await creerCommande(alice, numero);
+    await attacher(alice, commande, numero);
+
+    const vide = await ingerer(numero, "preparation", []);
+    expect(vide.colis, "le colis n'a pas été touché : rien n'est éprouvé").toBe(1);
+    expect(vide.premierScan, "un départ a été signalé pour un colis jamais scanné").toBe(false);
+  });
+
+  test("un point ARRIVÉ EN RETARD ne rejoue pas le premier scan", async () => {
+    /*
+     * SECONDE FALSIFICATION, hors du cas motivant elle aussi. Les transporteurs
+     * rendent l'historique complet et pas toujours dans l'ordre : un point plus
+     * ANCIEN que tous les autres arrive après coup, et il fait bel et bien
+     * reculer `first_movement_at` — c'est voulu, `least()` le veut.
+     *
+     * Ce qu'il ne doit pas faire, c'est ressembler à un départ. La transition
+     * observée est NULL → valeur, jamais « la date a changé » : confondre les
+     * deux ferait émettre un second départ des semaines après le vrai.
+     */
+    const numero = numeroNeuf();
+    const commande = await creerCommande(alice, numero);
+    await attacher(alice, commande, numero);
+
+    await ingerer(numero, "en_transit", [
+      { instant: "2026-08-20T10:00:00Z", description: "Départ du centre de tri" },
+    ]);
+    const retard = await ingerer(numero, "en_transit", [
+      { instant: "2026-08-18T08:00:00Z", description: "Étiquette créée" },
+    ]);
+    expect(retard.premierScan, "un point arrivé en retard a rejoué le premier scan").toBe(false);
   });
 });

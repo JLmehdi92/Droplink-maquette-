@@ -1,0 +1,53 @@
+-- 093 — LA SURCHARGE ORPHELINE DE `appliquer_etat_colis`.
+--
+-- ═══════════════════════════════════════════════════════════════════════════
+-- CE QUI A ÉTÉ TROUVÉ, ET COMMENT
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- Après la 092, `pnpm db:types` a rendu `appliquer_etat_colis` sous forme
+-- d'UNION de deux signatures. Le catalogue l'a confirmé : DEUX fonctions du
+-- même nom coexistaient dans `public`, une à huit arguments rendant `integer`,
+-- une à neuf.
+--
+-- La migration 072 avait pourtant fait le `drop` explicite de la version à huit
+-- arguments, et elle l'a bien fait. L'orpheline ne vient d'aucune migration :
+-- elle vient du FALSIFICATEUR. Sa cible `statut-colis-recule` écrivait un
+-- `create or replace` à HUIT arguments alors que la fonction du produit en
+-- portait neuf.
+--
+-- ⚠️ LA CONSÉQUENCE EST PIRE QUE LE RÉSIDU. Cette falsification était censée
+-- prouver que le statut ne peut pas reculer. Elle n'a jamais touché la fonction
+-- qu'elle visait : elle en a créé une SECONDE, que personne n'appelle. La suite
+-- restait donc verte — non parce que la garde tenait, mais parce que
+-- l'outil chargé de la casser tapait à côté. « Si la suite reste verte, elle ne
+-- prouvait rien » ; ici c'est le falsificateur lui-même qui était aveugle.
+--
+-- C'est exactement le piège que le dépôt documente depuis longtemps —
+-- `create or replace` ne remplace pas une fonction dont la liste d'arguments
+-- change, il en crée une seconde, et un appel résout l'ancienne sans la moindre
+-- erreur. Il était écrit dans les commentaires des migrations 070 et 072. Le
+-- connaître n'a pas suffi : rien ne l'INTERROGEAIT.
+--
+-- Un test de catalogue le fait désormais (`tests/rls/surcharges.test.ts`) : il
+-- inventorie toutes les fonctions de `public` portant plus d'une signature et
+-- exige que chacune soit déclarée avec sa raison. Une relecture de code ne
+-- pouvait pas voir ce défaut — il ne vivait dans aucun fichier.
+--
+-- ═══════════════════════════════════════════════════════════════════════════
+-- POURQUOI LA SUPPRIMER PLUTÔT QUE LA LAISSER DORMIR
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- Ses droits sont sains — `postgres` et `service_role` seulement, jamais `anon`
+-- ni `authenticated` — donc ce n'est pas une brèche. C'est un piège de
+-- résolution : son corps date d'avant la 072 et d'avant la 090. Il laisse les
+-- dates du colis RECULER, et il ne descend RIEN dans les commandes.
+--
+-- Le jour où un chemin d'écriture appellerait sans `p_premier_mouvement` — un
+-- appel écrit de mémoire, un client généré depuis une doc plus ancienne —
+-- Postgres résoudrait cette version-ci. Sans erreur. Le suivi se remettrait à
+-- reculer chez le client, et la gestion de commandes cesserait de suivre le
+-- transporteur, sans qu'aucune ligne de code n'ait changé.
+
+drop function public.appliquer_etat_colis(
+  text, public.parcel_status, text, text, jsonb, text, text, jsonb
+);

@@ -96,9 +96,9 @@ async function ingerer(
   const points = (options.points ?? []).map((p) => ({ ...p, lieu: "", etape: "" }));
   const l = await interroger<{ n: number }>(
     catalogue,
-    `select public.appliquer_etat_colis(
+    `select colis as n from public.appliquer_etat_colis(
        $1, 'expedie', 'In transit', '', $2::jsonb, $3, $3, '{}'::jsonb, $4
-     ) as n`,
+     )`,
     [numero, JSON.stringify(points), options.estimation ?? "", options.premier ?? ""],
   );
   return l[0]?.n ?? 0;
@@ -408,5 +408,85 @@ describe("La purge des réponses brutes existe et fait quelque chose", () => {
       Number((await colis(numero))[0]?.snaps),
       "la purge a emporté les réponses d'un colis actif",
     ).toBeGreaterThan(0);
+  });
+});
+
+
+/**
+ * L'IMMOBILITÉ NE SE SIGNALE QU'UNE FOIS.
+ *
+ * « Ce colis n'a pas bougé depuis plus de dix jours » est vrai à CHAQUE passage
+ * de cadence, et le reste jusqu'à ce qu'il bouge — pour un colis bloqué en
+ * douane, pendant des semaines. C'est un SEUIL FRANCHI, pas un état : l'émettre
+ * là où on le constate produirait un événement par interrogation, sur
+ * exactement la population qu'on veut compter.
+ *
+ * La marque est RÉCLAMÉE et non lue puis écrite. Une lecture suivie d'une
+ * écriture laisserait deux passages concurrents émettre tous les deux : la
+ * fenêtre est étroite, donc le défaut est rare, donc il est indébogable — il ne
+ * produirait qu'un doublon occasionnel dans une métrique, jamais une erreur.
+ */
+describe("La marque d'immobilité", () => {
+  const QUAND = "2026-08-27T10:00:00Z";
+
+  async function reclamer(parcelId: string, quand = QUAND): Promise<boolean> {
+    const l = await interroger<{ ok: boolean }>(
+      catalogue,
+      "select public.reclamer_immobilite($1, $2::timestamptz) as ok",
+      [parcelId, quand],
+    );
+    return l[0]?.ok === true;
+  }
+
+  test("le PREMIER appel la pose et le dit", async () => {
+    const colis = await enregistrerColis(alice, numeroNeuf());
+    expect(await reclamer(colis), "la marque n'a pas été posée : rien n'est éprouvé").toBe(true);
+
+    const l = await interroger<{ marque: string | null }>(
+      catalogue,
+      "select immobilite_signalee_at as marque from public.tracked_parcels where id = $1",
+      [colis],
+    );
+    expect(l[0]?.marque, "la colonne est restée nulle malgré un retour positif").not.toBeNull();
+  });
+
+  test("les appels SUIVANTS ne la reposent pas et le disent", async () => {
+    const colis = await enregistrerColis(alice, numeroNeuf());
+    expect(await reclamer(colis)).toBe(true);
+    expect(await reclamer(colis), "l'immobilité a été signalée DEUX fois").toBe(false);
+    expect(await reclamer(colis, "2026-09-15T10:00:00Z")).toBe(false);
+  });
+
+  test("la marque du premier appel n'est pas ÉCRASÉE par les suivants", async () => {
+    /*
+     * HORS du cas motivant. Un `update` sans la condition `is null` rendrait
+     * peut-être faux au second appel — si le retour venait d'ailleurs — tout en
+     * repoussant la date à chaque passage. On mesurerait alors l'ancienneté de
+     * la dernière cadence au lieu de celle du franchissement, et la valeur
+     * resterait parfaitement plausible.
+     */
+    const colis = await enregistrerColis(alice, numeroNeuf());
+    await reclamer(colis, "2026-08-01T10:00:00Z");
+    await reclamer(colis, "2026-09-30T10:00:00Z");
+
+    const l = await interroger<{ marque: string }>(
+      catalogue,
+      "select immobilite_signalee_at::text as marque from public.tracked_parcels where id = $1",
+      [colis],
+    );
+    expect(
+      (l[0]?.marque ?? "").startsWith("2026-08-01"),
+      "la date du franchissement a été repoussée : « depuis quand » ment.",
+    ).toBe(true);
+  });
+
+  test("deux colis DISTINCTS ne se volent pas leur marque", async () => {
+    // CONTRE-TEST. Une fonction qui rendrait toujours faux passerait les
+    // contrôles ci-dessus dès le second appel ; une fonction qui marquerait
+    // TOUS les colis passerait le premier.
+    const unA = await enregistrerColis(alice, numeroNeuf());
+    const unB = await enregistrerColis(bob, numeroNeuf());
+    expect(await reclamer(unA)).toBe(true);
+    expect(await reclamer(unB), "le colis de Bob a été marqué par celui d'Alice").toBe(true);
   });
 });
