@@ -129,7 +129,15 @@ export default async function EditeurCommande({
     );
   }
 
-  const lienPublic = origine === null ? null : origine + "/p/" + data.public_token;
+  /*
+   * LE LIEN DE L'EN-TÊTE NE PORTE PLUS LE JETON, il porte la commande.
+   *
+   * Il embarquait `origine + "/p/" + data.public_token`, calculé ici. Après une
+   * révocation, il continuait de pointer vers le lien qu'on venait de tuer — le
+   * moment précis où l'on veut vérifier que la NOUVELLE page répond. Une copie
+   * du jeton peut vieillir ; une page qui le relit au moment du clic, non.
+   */
+  const versPageClient = "/" + langue + "/commandes/" + data.id + "/page-client";
 
   return (
     <main id="contenu" className="flex min-h-dvh flex-col">
@@ -163,9 +171,8 @@ export default async function EditeurCommande({
 
         <span className="flex-grow" />
 
-        {lienPublic !== null ? (
-          <a
-            href={lienPublic}
+        <a
+            href={versPageClient}
             target="_blank"
             rel="noopener noreferrer"
             className="degrade-marque flex h-11 items-center gap-2 rounded-md px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90 md:h-10"
@@ -173,7 +180,6 @@ export default async function EditeurCommande({
             {t("voirPage")}
             <Icone nom="open_in_new" className="text-[14px]" />
           </a>
-        ) : null}
       </header>
 
       <div className="flex-1 p-margin-mobile md:px-[26px] md:py-5">

@@ -419,6 +419,81 @@ motifCle.lastIndex = 0;
 
 /*
  * ═════════════════════════════════════════════════════════════════════════════
+ * AUCUNE ROUTE DE L ESPACE VENDEUR NE REPOND A UN VISITEUR ANONYME
+ * ═════════════════════════════════════════════════════════════════════════════
+ *
+ * LA LISTE CI-DESSUS EST ECRITE A LA MAIN, DONC ELLE SE PERIME. Elle a deja
+ * ete completee une fois — trois ecrans y manquaient — et le commentaire qui
+ * l accompagne le dit. Le probleme n est pas ces trois-la : c est qu un
+ * controle ne doit pas dependre de ce que son auteur a pense a inspecter.
+ *
+ * Constate le 27/08/2026 : l ajout de `/commandes/[id]/page-client` n aurait
+ * ete vu par RIEN. La sonde qui suit ENUMERE le dossier `(app)` et exige que
+ * chaque route trouvee reponde la meme chose a un anonyme — la connexion.
+ *
+ * LES SEGMENTS DYNAMIQUES SONT EPROUVES AVEC DEUX VALEURS, dont une portant un
+ * POINT. Le matcher du middleware exclut `[^/]+\.[^/]+$`, et c est exactement
+ * par la qu une valeur choisie par le visiteur est sortie du filtre sur
+ * `/admin` — le defaut n etait pas dans les noms de dossiers, mais dans les
+ * valeurs. Un garde qui n essaie qu une valeur bien elevee regarde la ou le
+ * defaut n est pas (L-025).
+ */
+console.log("");
+console.log("— L espace vendeur, sans session —");
+
+function routesDeLEspaceVendeur(dossier, prefixe = "") {
+  const trouvees = [];
+  for (const entree of readdirSync(dossier)) {
+    const chemin = join(dossier, entree);
+    if (!statSync(chemin).isDirectory()) continue;
+    // Un groupe entre parentheses n ajoute rien a l URL.
+    const segment = entree.startsWith("(") ? prefixe : prefixe + "/" + entree;
+    if (existsSync(join(chemin, "page.tsx"))) trouvees.push(segment);
+    trouvees.push(...routesDeLEspaceVendeur(chemin, segment));
+  }
+  return trouvees;
+}
+
+const VALEURS_DYNAMIQUES = [
+  "11111111-1111-1111-1111-111111111111",
+  // Une valeur qui PORTE UN POINT : le cas par lequel `/admin` est sorti du
+  // middleware. Elle n a aucune raison d etre traitee autrement.
+  "rapport.png",
+];
+
+const ESPACE_VENDEUR = join(process.cwd(), "src", "app", "[locale]", "(app)");
+const routesVendeur = routesDeLEspaceVendeur(ESPACE_VENDEUR);
+
+let routesEprouvees = 0;
+
+for (const route of routesVendeur) {
+  const dynamique = route.includes("[");
+  for (const valeur of dynamique ? VALEURS_DYNAMIQUES : [null]) {
+    const chemin = "/fr" + (valeur === null ? route : route.replace(/\[[^\]]+\]/g, valeur));
+    const r = await suivre(chemin);
+    routesEprouvees += 1;
+
+    const ok = r.statut === 200 && r.final === "/fr/connexion?erreur=session";
+    if (!ok) echecs += 1;
+    console.log(
+      `${ok ? "OK   " : "ECHEC"} ${chemin.padEnd(56)} ` +
+        (ok ? "renvoye vers la connexion" : `attendu la connexion, obtenu ${r.statut} sur ${r.final}`),
+    );
+  }
+}
+
+// UN ENSEMBLE VIDE PASSE TOUT. Sans cette borne, un chemin de dossier errone
+// rendrait cette section verte et muette — et c est precisement le mode de
+// defaillance qu elle existe pour empecher.
+if (routesVendeur.length < 5 || routesEprouvees < routesVendeur.length) {
+  echecs += 1;
+  console.log(
+    `ECHEC la sonde n a inventorie que ${routesVendeur.length} routes : elle n inspecte pas ce qu elle pretend`,
+  );
+}
+
+/*
+ * ═════════════════════════════════════════════════════════════════════════════
  * LA PROCEDURE DE SIGNALEMENT NE SE PROMET QUE SI ELLE EXISTE
  * ═════════════════════════════════════════════════════════════════════════════
  *

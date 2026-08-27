@@ -79,6 +79,7 @@ export function ActionsCommande({
     }
 
     setJetonCourant(resultat.nouveauJeton);
+
     setCompris(false);
     setOuvert(false);
   }, [orderId, jetonCourant, t]);
