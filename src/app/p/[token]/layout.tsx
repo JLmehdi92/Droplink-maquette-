@@ -62,7 +62,16 @@ export default async function LayoutPagePublique({
 
   return (
     <html lang={commande?.boutique.langue ?? "fr"}>
-      <body className="min-h-dvh bg-surface text-on-surface antialiased">{children}</body>
+      {/*
+        LE FOND EST BLANC, pas le gris de l'espace vendeur. Les six planches de
+        la page client déclarent toutes `body { background: #ffffff }` : cette
+        page n'est pas un plan de travail, c'est une page qu'on reçoit. Le gris
+        ne se voyait que sur les bords, ce qui est exactement ce qui rend ce
+        genre d'écart durable.
+      */}
+      <body className="min-h-dvh bg-surface-container-lowest text-on-surface antialiased">
+        {children}
+      </body>
     </html>
   );
 }

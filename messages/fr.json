@@ -381,7 +381,6 @@
     "rechercher": "Rechercher une commande",
     "rechercherExemple": "Nom du client, référence ou numéro de suivi…",
     "nouvelle": "Nouvelle commande",
-    "sansNom": "Sans nom",
     "copierLien": "Copier le lien de {client}",
     "ouvrirPage": "Ouvrir la page de {client}",
     "copieEchouee": "Copie refusée par le navigateur",
@@ -461,7 +460,8 @@
       "livrees": "Livrées"
     },
     "periodeDu": "Créées à partir du",
-    "periodeAu": "Jusqu'au"
+    "periodeAu": "Jusqu'au",
+    "sansNom": "Sans nom"
   },
   "editeur": {
     "historique": {
@@ -645,9 +645,10 @@
       "arriveeEstimee": "Arrivée estimée"
     },
     "reseaux": {
-      "titre": "Retrouvez {nom}",
-      "sansNom": "Retrouvez le vendeur"
-    }
+      "titre": "Retrouvez {nom}"
+    },
+    "lienInvalideTitre": "Ce lien n'est plus valable",
+    "lienInvalideTexte": "Demandez un nouveau lien à la personne qui vous a envoyé celui-ci."
   },
   "admin": {
     "navigation": "Administration",

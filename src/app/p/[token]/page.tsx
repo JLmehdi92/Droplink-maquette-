@@ -432,13 +432,15 @@ export default async function PagePublique({
         </div>
       </main>
 
-      {/* LES RÉSEAUX DU VENDEUR, s'il en a configuré. Le titre porte son nom :
-          sans nom de boutique, « Retrouvez-nous » ne dit pas qui. */}
+      {/* LES RÉSEAUX DU VENDEUR, s'il en a configuré. Le titre porte son nom —
+          et SANS nom, il n'y a pas de titre du tout. Un texte de remplacement
+          est ce que la décision 26 interdit, et ce que la planche
+          `PageClientSansEntete` refuse explicitement. */}
       <ReseauxVendeur
         boutique={commande.boutique}
         titre={
           commande.boutique.nom === null
-            ? t("reseaux.sansNom")
+            ? null
             : t.raw("reseaux.titre").replace("{nom}", commande.boutique.nom)
         }
       />

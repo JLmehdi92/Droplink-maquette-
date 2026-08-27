@@ -632,10 +632,10 @@ controles.push(
   // « associer » : deux faux positifs sur une page parfaitement
   // correcte. Un controle qui crie au loup finit par etre ignore, et c est
   // alors qu il laisse passer le vrai cas.
-  [!/SSO/.test(inscription), "aucune mention de SSO"],
-  [!/SOC ?2/i.test(inscription), "aucune certification SOC2 revendiquee"],
-  [!/Enterprise/.test(inscription), "aucun vocabulaire d'entreprise"],
-  [!/Corporate/i.test(inscription), "aucun « Corporate Email »"],
+  [!/\bSSO\b/.test(inscription), "aucune mention de SSO"],
+  [!/\bSOC ?2\b/i.test(inscription), "aucune certification SOC2 revendiquee"],
+  [!/\bEnterprise\b/.test(inscription), "aucun vocabulaire d'entreprise"],
+  [!/\bCorporate\b/i.test(inscription), "aucun « Corporate Email »"],
   [!/99[.,]9\s*%/.test(inscription), "aucune promesse d'uptime invérifiable"],
   [inscription.includes('name="email"'), "le champ email est bien present"],
   [inscription.length > 5000, "la page d'inscription n'est pas vide"],
@@ -688,6 +688,9 @@ const service = createClient(
 
 const NOTE_SENTINELLE = "prix-achat-fumee-7d2e9c41";
 let jetonFumee = null;
+// Capturee pour les controles qui viennent APRES le nettoyage : la commande
+// de fumee est supprimee dans le `finally`, donc la page ne repond plus.
+let htmlPagePublique = null;
 let commandeFumee = null;
 let profilFumee = null;
 
@@ -727,6 +730,24 @@ try {
       commandeFumee = commande?.id ?? null;
       jetonFumee = commande?.public_token ?? null;
 
+      // La boutique de fumee n a PAS de nom — `shops.name` est nullable et la
+      // ligne nait a l inscription. On lui pose un reseau : c est exactement le
+      // cas de la planche `PageClientSansEntete`, ou le libelle « Retrouvez … »
+      // doit DISPARAITRE au lieu d etre remplace par un texte generique.
+      //
+      // ⚠️ LA COLONNE S APPELLE `instagram_url`. Le premier jet ecrivait
+      // `instagram`, PostgREST refusait, et l erreur n etait pas lue : la sonde
+      // se serait declaree verte en n ayant rien rendu. C est le contre-test
+      // qui l a signale, ce pour quoi il vient EN PREMIER.
+      const { error: erreurReseau } = await service
+        .from("shops")
+        .update({ instagram_url: "https://instagram.com/fumee" })
+        .eq("id", shop.id);
+      if (erreurReseau) {
+        console.error(`ECHEC impossible de poser le reseau de fumee : ${erreurReseau.message}`);
+        echecs += 1;
+      }
+
       {
     // L EXPORT CSV — ROUTE `/api`, DONC HORS DU MIDDLEWARE.
     //
@@ -765,10 +786,27 @@ try {
   if (jetonFumee) {
         const reponse = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(11) });
         const html = await reponse.text();
+        htmlPagePublique = html;
 
         controles.push(
           [reponse.status === 200, "la page publique repond sur un jeton valide"],
           [html.includes("Client de fumee"), "elle porte bien le contenu de la commande"],
+
+          // CONTRE-TEST D ABORD : sans reseau rendu, « aucun texte de
+          // remplacement » serait vrai en n ayant rien regarde.
+          [
+            html.includes("instagram.com/fumee"),
+            "CONTRE-TEST : le bloc des reseaux du vendeur est bien rendu",
+          ],
+          // ⚠️ LA BOUTIQUE N A PAS DE NOM, et la page affichait « Retrouvez le
+          // vendeur ». La planche l interdit nommement, et c est la decision 26
+          // du brief : une information absente est OMISE, jamais remplacee.
+          // Le controle porte sur la FORME du texte, pas sur une chaine precise
+          // — un autre texte invente passerait tout aussi mal.
+          [
+            !/Retrouvez\s+(le|la|nos|notre|l’|ce)\b/i.test(html) && !/Find\s+(the|our|us)\b/i.test(html),
+            "sans nom de boutique, AUCUN libelle de remplacement n est rendu",
+          ],
 
           // CONTROLE PAR VALEUR, pas par nom : une valeur voyage sous n importe
           // quel nom. On cherche la valeur elle-meme dans le HTML rendu, charges
@@ -1469,6 +1507,96 @@ controles.push(
   ],
 );
 
+
+// --- Le lien mort rend NOTRE ecran, pas celui de Next ---
+//
+// ⚠️ IL RENDAIT CELUI DE NEXT. `notFound()` etait appele sans qu aucun
+// `not-found.tsx` existe sous `p/[token]`, donc le destinataire d un lien
+// revoque recevait une page en Times New Roman, en anglais, sans rapport avec
+// ce qu il venait de recevoir en message prive. Rien ne cassait, rien ne levait,
+// et le defaut ne se voyait que chez quelqu un qui ne peut pas le signaler.
+//
+// La sonde interroge le CORPS SERVI. Verifier que le statut vaut 404 ne prouve
+// rien : le 404 de Next en est un aussi.
+const reponseLienMort = await fetch(`${base}/p/jeton-qui-n-existe-pas-du-tout`);
+const corpsLienMort = await reponseLienMort.text();
+
+controles.push(
+  [reponseLienMort.status === 404, `un jeton inconnu rend 404 (statut ${reponseLienMort.status})`],
+  [
+    corpsLienMort.includes("Ce lien n"),
+    "le lien mort rend l ecran du produit, et non le 404 generique",
+  ],
+  // CONTRE-TEST : sans lui, « ne contient rien du vendeur » serait vrai d une
+  // page vide. On etablit d abord qu on regarde une vraie page.
+  [
+    corpsLienMort.length > 800,
+    `CONTRE-TEST : la page du lien mort fait ${corpsLienMort.length} octets`,
+  ],
+  // CONTROLE PAR VALEUR : la page ne doit RIEN dire de la boutique. Le nom du
+  // vendeur de fumee est une sentinelle : s il apparait ici, c est que le 404
+  // a resolu la commande avant de refuser.
+  [
+    !corpsLienMort.toLowerCase().includes("fumee"),
+    "le lien mort ne divulgue rien de la boutique",
+  ],
+);
+
+// --- Aucune page ne montre un IDENTIFIANT de traduction ---
+//
+// ⚠️ CONSTATE EN DIRECT LE 27/08/2026 : la page publique a servi
+// `page-publique.reseaux.sansNom` EN CLAIR au client, parce qu une cle avait
+// ete retiree du catalogue pendant que le code l appelait encore. next-intl ne
+// leve pas — il rend l identifiant. Le defaut ne casse rien, ne se voit dans
+// aucun journal, et ne se manifeste que chez le destinataire.
+//
+// C est la meme famille que le format de date jamais declare (commit fee1454) :
+// une cle absente degrade au lieu de casser.
+//
+// LE MOTIF EST ANCRE AUX NAMESPACES REELS du catalogue, jamais devine : sans
+// cela, `instagram.com` ou `droplink.fr` seraient signales, la sonde crierait
+// au loup, et on apprendrait a l ignorer.
+const catalogueI18n = JSON.parse(
+  fsSonde.readFileSync(pathSonde.join(racine, "messages", "fr.json"), "utf8"),
+);
+const namespaces = Object.keys(catalogueI18n);
+// ⚠️ `String.raw` N'EST PAS UNE COQUETTERIE. Ce motif a d'abord ete ecrit dans
+// un template literal ordinaire, ou \b est la sequence d'echappement
+// JavaScript du BACKSPACE — pas une frontiere de mot. La regex cherchait donc
+// un caractere de controle en tete, ne matchait jamais, et le controle se
+// declarait vert. Le caractere etant invisible, ni la relecture ni l'affichage
+// terminal ne pouvaient le montrer : seul un decodage octet par octet le voit.
+const motifIdentifiant = new RegExp(
+  String.raw`\b(?:${namespaces.join("|")})\.[A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z][A-Za-z0-9]*)*`,
+  "g",
+);
+
+const pagesAInspecter = [
+  ["/fr", fr],
+  ["/p/<jeton>", htmlPagePublique],
+  ["/p/<jeton mort>", corpsLienMort],
+];
+const identifiantsVus = [];
+for (const [nom, contenu] of pagesAInspecter) {
+  for (const m of (contenu ?? "").matchAll(motifIdentifiant)) {
+    identifiantsVus.push(`${nom} : ${m[0]}`);
+  }
+}
+
+controles.push(
+  // CONTRE-TEST : sans namespaces, le motif ne peut rien trouver et le controle
+  // serait vert en n ayant rien cherche.
+  [
+    namespaces.length >= 5 && pagesAInspecter.every(([, c]) => (c ?? "").length > 500),
+    `CONTRE-TEST : ${namespaces.length} namespaces cherches sur ${pagesAInspecter.length} pages servies`,
+  ],
+  [
+    identifiantsVus.length === 0,
+    identifiantsVus.length === 0
+      ? "aucune page ne montre un identifiant de traduction"
+      : `IDENTIFIANTS DE TRADUCTION RENDUS EN CLAIR : ${identifiantsVus.join(" | ")}`,
+  ],
+);
 
 for (const [ok, libelle] of controles) {
   if (!ok) echecs += 1;

@@ -381,7 +381,6 @@
     "rechercher": "Search orders",
     "rechercherExemple": "Customer name, reference or tracking number…",
     "nouvelle": "New order",
-    "sansNom": "Unnamed",
     "copierLien": "Copy the link for {client}",
     "ouvrirPage": "Open the page for {client}",
     "copieEchouee": "Copy refused by the browser",
@@ -461,7 +460,8 @@
       "livrees": "Delivered"
     },
     "periodeDu": "Created from",
-    "periodeAu": "Up to"
+    "periodeAu": "Up to",
+    "sansNom": "Unnamed"
   },
   "editeur": {
     "historique": {
@@ -645,9 +645,10 @@
       "arriveeEstimee": "Estimated arrival"
     },
     "reseaux": {
-      "titre": "Find {nom}",
-      "sansNom": "Find the seller"
-    }
+      "titre": "Find {nom}"
+    },
+    "lienInvalideTitre": "This link is no longer valid",
+    "lienInvalideTexte": "Ask the person who sent it to you for a new link."
   },
   "admin": {
     "navigation": "Administration",

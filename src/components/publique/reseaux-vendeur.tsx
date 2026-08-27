@@ -70,8 +70,21 @@ export function ReseauxVendeur({
   titre,
 }: {
   readonly boutique: Boutique;
-  /** « Retrouvez {nom} », déjà substitué par l'appelant. */
-  readonly titre: string;
+  /**
+   * « Retrouvez {nom} », déjà substitué par l'appelant — ou `null` quand la
+   * boutique n'a pas de nom.
+   *
+   * ⚠️ IL ÉTAIT OBLIGATOIRE, et l'appelant y passait « Retrouvez le vendeur ».
+   * La planche `PageClientSansEntete` l'interdit NOMMÉMENT en commentaire :
+   * « les icônes restent, le libellé "Retrouvez …" disparaît. Écrire "Retrouvez
+   * le vendeur" serait un texte de remplacement, donc précisément ce que la
+   * règle interdit. » C'est la décision 26 du brief — une information absente
+   * est OMISE, jamais remplacée.
+   *
+   * Le type le dit désormais : `string | null`. Une propriété obligatoire
+   * OBLIGE à inventer quelque chose le jour où l'on n'a rien.
+   */
+  readonly titre: string | null;
 }) {
   const liens = RESEAUX.map((reseau) => ({
     ...reseau,
@@ -86,9 +99,11 @@ export function ReseauxVendeur({
   return (
     <section className="border-t border-outline-variant px-margin-mobile py-6 md:px-margin-desktop">
       <div className="mx-auto max-w-container-max">
-        <p className="mb-3 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-sourdine uppercase">
-          {titre}
-        </p>
+        {titre !== null ? (
+          <p className="mb-3 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-sourdine uppercase">
+            {titre}
+          </p>
+        ) : null}
         <ul className="flex gap-2.5">
           {liens.map((lien) => (
             <li key={lien.clef} className="flex-grow">
