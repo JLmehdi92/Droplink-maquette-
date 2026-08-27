@@ -62,7 +62,7 @@ export default async function Marque({
     <>
       <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre")} />
 
-      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:py-[22px]">
+      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:pt-0 md:pb-[26px]">
         <div>
         <TraductionsClient espaces={["marque"]}>
           <FormulaireMarque

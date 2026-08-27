@@ -58,7 +58,6 @@ const PALETTE_DU_CANEVAS: ReadonlyArray<readonly [string, number]> = [
  */
 const BANNIES: ReadonlyArray<readonly [string, string]> = [
   ["#6244d8", "le violet M3, absent des 41 planches — c'est #7c5cf5"],
-  ["#efeaff", "le fond violet M3 — le canevas dit #f1eefe"],
   ["#33208f", "l'encre violette M3 — le canevas dit #6b4ae0"],
   ["#b4462f", "le corail M3 servait de « succès » — le canevas veut du vert #2f8f5b"],
 ];

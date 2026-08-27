@@ -86,7 +86,7 @@ export default async function Analyses({
     <>
       <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre")} />
 
-      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:py-[22px]">
+      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:pt-0 md:pb-[26px]">
         <nav aria-label={t("periode.titre")} className="mt-6 flex flex-wrap gap-2">
         {PERIODES.map((p) => (
           <Link

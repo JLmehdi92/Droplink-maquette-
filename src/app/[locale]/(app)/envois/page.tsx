@@ -70,7 +70,7 @@ export default async function Envois({
     <>
       <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre")} />
 
-      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:py-[22px]">
+      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:pt-0 md:pb-[26px]">
         <div>
         <TableauEnvois
           base={`/${langue}/envois`}

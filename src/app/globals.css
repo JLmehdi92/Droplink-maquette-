@@ -365,8 +365,16 @@ body {
  * se distingue par son fond en retrait et redevient blanc au focus.
  */
 .champ-app {
-  background-color: var(--color-surface-container);
-  border: 1px solid transparent;
+  /*
+   * ⚠️ FOND ET BORDURE RELEVÉS SUR LES PLANCHES, pas choisis. Sur les 18
+   * déclarations de `.champ` du canevas : 13 portent `#fafafc`, 14 portent
+   * `1px solid #e6e6ec`, et les 15 portent 15px de texte. Le code posait un
+   * fond plus gris et une bordure TRANSPARENTE — donc un champ sans contour,
+   * qui ne se distinguait de la carte que par sa nuance de gris.
+   */
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-filet-controle);
+  font-size: 15px;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
@@ -382,8 +390,16 @@ body {
 
 /* Alias historique de `.champ-app`, conservé le temps de reprendre l'éditeur. */
 .champ-editeur {
-  background-color: var(--color-surface-container);
-  border: 1px solid transparent;
+  /*
+   * ⚠️ FOND ET BORDURE RELEVÉS SUR LES PLANCHES, pas choisis. Sur les 18
+   * déclarations de `.champ` du canevas : 13 portent `#fafafc`, 14 portent
+   * `1px solid #e6e6ec`, et les 15 portent 15px de texte. Le code posait un
+   * fond plus gris et une bordure TRANSPARENTE — donc un champ sans contour,
+   * qui ne se distinguait de la carte que par sa nuance de gris.
+   */
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-filet-controle);
+  font-size: 15px;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,

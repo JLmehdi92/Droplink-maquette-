@@ -229,7 +229,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
               value={nom}
               onChange={(e) => setNom(e.target.value)}
               placeholder={t("nomPlaceholder")}
-              className="min-h-[44px] w-full rounded-lg border-none bg-[#F1F5F9] px-4 font-body-md text-body-md text-on-surface transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--apercu-interface)]"
+              className="min-h-[44px] w-full rounded-lg champ-app px-4 font-body-md text-body-md text-on-surface transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--apercu-interface)]"
             />
           </div>
 
@@ -333,7 +333,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
                 value={couleur}
                 onChange={(e) => setCouleur(e.target.value.trim())}
                 placeholder="#000000"
-                className="min-h-[44px] w-full rounded-lg border-none bg-[#F1F5F9] px-4 font-body-md text-body-md text-on-surface transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--apercu-interface)]"
+                className="min-h-[44px] w-full rounded-lg champ-app px-4 font-body-md text-body-md text-on-surface transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--apercu-interface)]"
               />
             </div>
           </div>

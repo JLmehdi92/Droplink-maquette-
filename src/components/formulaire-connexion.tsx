@@ -126,7 +126,7 @@ export function FormulaireConnexion({
             placeholder={t("placeholderEmail")}
             aria-invalid={messageErreur !== null}
             aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
-            className="w-full min-h-[44px] rounded-lg border-0 bg-[#F1F5F9] py-3 pl-10 pr-4 font-body-md text-body-md text-on-surface transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-interface)]"
+            className="w-full min-h-[44px] rounded-lg champ-app py-3 pl-10 pr-4 font-body-md text-body-md text-on-surface transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-interface)]"
           />
         </div>
       </div>

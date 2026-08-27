@@ -1418,9 +1418,23 @@ function fichiersSources(dossier) {
 // scanne le code trebuche sur ses propres exemples.
 const MOTIF_CLASSE = /\b(?:bg|text|border|ring|fill|stroke|divide|decoration|outline|accent|shadow|from|via|to)-[a-z][a-z0-9]*(?:-[a-z0-9]+)*\b/g;
 
+/**
+ * LES COMMENTAIRES SONT RETIRES AVANT LA RECHERCHE — L-031. Un commentaire qui
+ * cite une propriete CSS (`border-bottom: 1px solid #ececf0`, `text-align`)
+ * ressemble mot pour mot a une classe utilitaire, et la sonde reclamait au
+ * serveur de servir une classe que personne n a jamais ecrite. La regle vaut
+ * dans les deux sens : une garde doit inspecter le CODE, jamais sa description.
+ */
+function sansCommentaires(source) {
+  return source
+    .split("/*").map((p, i) => (i === 0 ? p : p.slice(p.indexOf("*/") + 2))).join("")
+    .split(String.fromCharCode(10)).map((l) => { const i = l.indexOf("//"); return i === -1 ? l : l.slice(0, i); }).join(String.fromCharCode(10));
+}
+
 const classesEcrites = new Set();
 for (const fichier of fichiersSources(pathSonde.join(racine, "src"))) {
-  for (const m of fsSonde.readFileSync(fichier, "utf8").matchAll(MOTIF_CLASSE)) {
+  const source = sansCommentaires(fsSonde.readFileSync(fichier, "utf8"));
+  for (const m of source.matchAll(MOTIF_CLASSE)) {
     classesEcrites.add(m[0]);
   }
 }
@@ -1433,11 +1447,10 @@ const servie = (c) => SUITES_SERVIES.some((suite) => css.includes(`${c}${suite}`
 
 // Ce que le code ecrit sans que Tailwind ait a le servir. Chaque exception
 // porte sa raison, et le controle suivant verifie qu elle sert encore.
-const EXCEPTIONS_CLASSES = [
-  ["text-align", "propriete CSS citee dans un commentaire, pas une classe"],
-];
-const exceptees = new Set(EXCEPTIONS_CLASSES.map(([c]) => c));
-const jamaisServies = [...classesEcrites].filter((c) => !exceptees.has(c) && !servie(c));
+// Plus aucune exception : elles ne servaient qu a rattraper les proprietes CSS
+// citees en commentaire, et les commentaires sont desormais retires en amont.
+// Une exception qu on peut supprimer vaut mieux qu une exception qu on declare.
+const jamaisServies = [...classesEcrites].filter((c) => !servie(c));
 
 controles.push(
   // CONTRE-TEST : un inventaire vide declarerait « tout est servi » sans avoir
