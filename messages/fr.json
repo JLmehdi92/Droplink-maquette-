@@ -251,7 +251,8 @@
       "taille": "Cette image est trop lourde.",
       "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
       "reseau": "L'envoi n'a pas abouti. Vérifiez votre connexion et réessayez.",
-      "confirmation": "L'image est partie mais nous n'avons pas pu l'enregistrer. Réessayez."
+      "confirmation": "L'image est partie mais nous n'avons pas pu l'enregistrer. Réessayez.",
+      "illisible": "Cette image n'a pas pu être lue par votre navigateur. Essayez un PNG, un JPG ou un WebP."
     },
     "couleurTitre": "Votre couleur",
     "couleurAide": "Elle habille les boutons et les repères de la page de vos clients.",

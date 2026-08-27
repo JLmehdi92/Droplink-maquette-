@@ -55,7 +55,27 @@ export function limites(): Limites {
     photoOctets: entierDepuisEnv("DEPOT_PHOTO_MAX_MO", 10) * MO,
     // 20 Mo : provisoire, à recalibrer sur le lot de photos et vidéos réelles.
     videoOctets: entierDepuisEnv("DEPOT_VIDEO_MAX_MO", 20) * MO,
-    logoOctets: entierDepuisEnv("DEPOT_LOGO_MAX_MO", 2) * MO,
+    /*
+     * ⚠️ CE PLAFOND ÉTAIT DE 2 Mo, ET IL ÉTAIT LE SEUL CONTRÔLE DU LOGO.
+     *
+     * Mesuré le 27/08/2026 sur un vrai compte : un logo de 1 682,9 Ko servi à
+     * chaque client de chaque commande, pour un affichage de 40 px. Soit 5,6
+     * fois le budget de la page publique entière (300 Ko hors médias) — le
+     * plafond autorisait donc, à lui seul, de dépasser le budget de 6,7 fois.
+     *
+     * 20 Ko VIENT DE LA MESURE, pas d'un arrondi. Le même logo réduit à 256 px
+     * en WebP pèse 4,3 Ko : le plafond laisse un facteur 4,6 pour absorber un
+     * logo pathologique — bruit, dégradé fin — sans jamais approcher le budget.
+     * C'est aussi le plafond dur de la vignette, et c'est cohérent : une
+     * vignette et un logo sont deux images du même ordre de grandeur sur la
+     * même page.
+     *
+     * LE NOM DE LA VARIABLE CHANGE AVEC L'UNITÉ. Garder `_MO` pour y lire des
+     * kilo-octets aurait produit un plafond mille fois trop grand au premier
+     * réglage, et rien ne l'aurait signalé — une valeur qui a la FORME d'une
+     * configuration franchit toutes les validations de présence (L-026).
+     */
+    logoOctets: entierDepuisEnv("DEPOT_LOGO_MAX_KO", 20) * 1024,
     mediasParCommande: entierDepuisEnv("DEPOT_MEDIAS_PAR_COMMANDE", 20),
     videosParCommande: entierDepuisEnv("DEPOT_VIDEOS_PAR_COMMANDE", 3),
     dureeVideoMaxS: entierDepuisEnv("DEPOT_VIDEO_DUREE_MAX_S", 60),

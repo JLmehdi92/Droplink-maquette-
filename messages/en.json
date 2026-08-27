@@ -251,7 +251,8 @@
       "taille": "This image is too heavy.",
       "session": "Your session has expired. Sign in again, then retry.",
       "reseau": "The upload did not go through. Check your connection and retry.",
-      "confirmation": "The image was sent but we could not save it. Please retry."
+      "confirmation": "The image was sent but we could not save it. Please retry.",
+      "illisible": "Your browser could not read this image. Try a PNG, a JPG or a WebP."
     },
     "couleurTitre": "Your colour",
     "couleurAide": "It carries the buttons and markers on your customers' page.",

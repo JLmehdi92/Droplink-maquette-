@@ -11,6 +11,8 @@ import {
   type ResultatMarque,
 } from "@/app/[locale]/(app)/marque/actions";
 import { resoudreAccent } from "@/lib/design/contraste";
+import { logoReduit } from "@/lib/medias/vignette";
+import { limites } from "@/lib/storage/limites";
 import { Icone } from "@/components/icone";
 
 /**
@@ -105,7 +107,31 @@ export function FormulaireMarque({
   async function deposerLogo(fichier: File): Promise<void> {
     setLogo({ phase: "envoi" });
 
-    const prepare = await preparerLogo(fichier.type, fichier.size);
+    /*
+     * LE LOGO EST RÉDUIT AVANT D'ÊTRE ENVOYÉ, et c'est le geste qui manquait.
+     *
+     * Mesuré le 27/08/2026 : un logo déposé partait tel quel — 1254 × 1254,
+     * 1 682,9 Ko — pour être affiché en 40 px, et il était rechargé par chaque
+     * client de chaque commande. Les photos, elles, reçoivent une vignette
+     * depuis le premier jour ; le logo était le seul média du produit à ne
+     * traverser AUCUNE réduction.
+     *
+     * ON ENVOIE LE RÉDUIT, PAS L'ORIGINAL, et la préparation est signée sur ses
+     * caractéristiques à LUI. Signer sur l'original puis envoyer le réduit
+     * ferait mentir la signature sur le type comme sur la taille.
+     *
+     * ÉCHEC DE RÉDUCTION = REFUS, contrairement à la vignette d'une photo. Là,
+     * l'échec est sans conséquence : la photo pleine reste servie. Ici, le
+     * fichier réduit EST le logo — se rabattre sur l'original ramènerait
+     * exactement le défaut qu'on corrige, en silence.
+     */
+    const reduit = await logoReduit(fichier, limites().logoOctets);
+    if (reduit === null) {
+      setLogo({ phase: "erreur", motif: t("logoErreur.illisible") });
+      return;
+    }
+
+    const prepare = await preparerLogo(reduit.type, reduit.size);
     if (prepare.statut !== "pret") {
       setLogo({ phase: "erreur", motif: t(`logoErreur.${prepare.motif}`) });
       return;
@@ -117,7 +143,7 @@ export function FormulaireMarque({
     const envoi = await fetch(prepare.url, {
       method: "PUT",
       headers: prepare.enTetes,
-      body: fichier,
+      body: reduit,
     }).catch(() => null);
 
     if (envoi === null || !envoi.ok) {
@@ -136,9 +162,12 @@ export function FormulaireMarque({
 
     setLogo({
       phase: "pose",
-      apercu: URL.createObjectURL(fichier),
+      apercu: URL.createObjectURL(reduit),
       nom: fichier.name,
-      octets: fichier.size,
+      // La taille MONTRÉE est celle qui part réellement, jamais celle du fichier
+      // choisi : afficher 1 683 Ko pour un objet de 4 Ko ferait croire au vendeur
+      // qu'il alourdit la page de son client alors qu'il ne l'alourdit plus.
+      octets: reduit.size,
     });
   }
 
