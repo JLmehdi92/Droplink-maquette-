@@ -49,19 +49,43 @@ function classes(teinte: Teinte): { fond: string; point: string } {
   }
 }
 
+/**
+ * DEUX TAILLES, PARCE QUE LES DEUX PLANCHES EN DESSINENT DEUX.
+ *
+ *   bureau   `padding: 4px 10px`, 12 px, point de 6 px, écart de 6 px ;
+ *   téléphone `padding: 3px 9px`,  11 px, point de 5 px, écart de 5 px.
+ *
+ * Ce n'est pas de la coquetterie : sur la carte de 390 px, la puce partage sa
+ * ligne avec « 7 photos · 12 vues », et la version bureau y déborde.
+ */
 export function BadgeStatut({
   libelle,
   teinte,
+  taille = "bureau",
 }: {
   readonly libelle: string;
   readonly teinte: Teinte;
+  readonly taille?: "bureau" | "telephone";
 }) {
   const { fond, point } = classes(teinte);
+  const petit = taille === "telephone";
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-label-sm text-label-sm ${fond}`}
+      className={
+        "inline-flex shrink-0 items-center rounded-full font-label-sm font-semibold " +
+        // La hauteur de ligne est celle du rendu naturel, comme sur la planche :
+        // avec les 1,5 du corps de texte, la puce passait de 23 à 26 px.
+        (petit
+          ? "gap-[5px] px-[9px] py-[3px] text-[11px] leading-[1.25] "
+          : "gap-1.5 px-2.5 py-1 text-[12px] leading-[1.25] ") +
+        fond
+      }
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${point}`} />
+      <span
+        className={
+          (petit ? "h-[5px] w-[5px] " : "h-1.5 w-1.5 ") + "shrink-0 rounded-full " + point
+        }
+      />
       {libelle}
     </span>
   );

@@ -330,6 +330,27 @@ body {
 }
 
 /*
+ * UNE RANGÉE QUI DÉFILE AU DOIGT, SANS BARRE DE DÉFILEMENT DESSINÉE.
+ *
+ * Les planches téléphone posent `overflow-x: auto` sur les rangées de pilules.
+ * Sous macOS la barre est en surimpression et disparaît au repos ; sous Windows
+ * elle est PERMANENTE et prend dix-sept pixels de haut sous la rangée — la
+ * planche paraissait alors juste, et le produit portait un trait gris que
+ * personne n'avait dessiné.
+ *
+ * Le contenu reste atteignable : au doigt par le geste, à la souris par la
+ * molette horizontale, au clavier par le focus qui fait défiler le conteneur.
+ */
+.defilement-discret {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.defilement-discret::-webkit-scrollbar {
+  display: none;
+}
+
+/*
  * L'action principale du canevas. `color: #ffffff` en dur est correct ICI et
  * seulement ici : le dégradé est NOTRE couleur, elle ne varie pas. Sur un
  * aplat d'accent VENDEUR, c'est `--accent-sur-remplissage` qui décide, jamais

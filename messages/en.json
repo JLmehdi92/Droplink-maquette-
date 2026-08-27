@@ -9,11 +9,11 @@
     "seConnecter": "Log in",
     "creerUnCompte": "Sign up",
     "retourAccueil": "Back to home",
-    "mesCommandes": "My orders",
+    "mesCommandes": "Orders",
     "maMarque": "My brand",
     "espaceVendeur": "Seller area",
-    "mesEnvois": "My shipments",
-    "mesAnalyses": "My analytics",
+    "mesEnvois": "Shipments",
+    "mesAnalyses": "Analytics",
     "lancement": {
       "titre": "Launch phase",
       "texte": "Everything is free and unlimited during this period."
@@ -367,8 +367,7 @@
     }
   },
   "commandes": {
-    "titre": "My orders",
-    "sousTitre": "Every order has its own page and link. Find them all here.",
+    "titre": "Orders",
     "filtres": "Filters",
     "trier": "Sort",
     "statutExpedition": "Shipping status",
@@ -379,7 +378,7 @@
     "appliquer": "Apply",
     "toutEffacer": "Clear all",
     "rechercher": "Search orders",
-    "rechercherExemple": "Customer name, reference or tracking number…",
+    "rechercherExemple": "Customer, reference, tracking number…",
     "nouvelle": "New order",
     "copierLien": "Copy the link for {client}",
     "ouvrirPage": "Open the page for {client}",
@@ -408,30 +407,44 @@
     "colonne": {
       "client": "Customer",
       "reference": "Reference",
-      "suivi": "Tracking number",
-      "statutCourt": "Shipping",
-      "qcCourt": "Photos",
-      "modifiee": "Edited on",
-      "actions": "Actions",
-      "vues": "Views"
+      "statutCourt": "Status",
+      "photos": "Photos",
+      "vues": "Views",
+      "modifiee": "Updated",
+      "actions": "Actions"
     },
     "vide": {
-      "compteTitre": "No orders yet",
-      "compteTexte": "Create your first order: upload your photos, paste the tracking number, and send the link to your customer.",
-      "creer": "Create my first order",
+      "compteTitre": "Create your first order",
+      "compteTexte": "Three minutes is enough. Your customer gets a link in your name, with no account to create.",
       "filtreTitre": "No order matches",
       "filtreTexte": "This account has orders, but none of them pass the current filters.",
       "archiveTitre": "Everything is archived",
       "archiveTexte": "This account has no active order: they are all filed in the archive. Their links keep working for your customers.",
-      "voirArchives": "View the archive"
+      "voirArchives": "View the archive",
+      "etapes": {
+        "photos": {
+          "titre": "Add your photos",
+          "texte": "Up to 20 per order, videos included."
+        },
+        "suivi": {
+          "titre": "Paste the tracking number",
+          "texte": "Once only: the page then updates itself."
+        },
+        "lien": {
+          "titre": "Send the link",
+          "texte": "And you never come back to it."
+        }
+      },
+      "marqueQuestion": "Haven’t set up your brand yet?",
+      "marqueLien": "Add your name and your colour",
+      "filtreTexteChiffre": "Your {total} orders are still there. It is these criteria, together, that return nothing.",
+      "accents": "Search ignores accents: “creme” also finds “Crème”."
     },
     "jamaisOuvert": "Never opened",
     "jamaisOuvertAide": "{client} has not opened their link yet.",
-    "vuesNombre": "{n, plural, one {# view} other {# views}}",
     "derniereVue": "Last opened on {date}",
     "archiver": "Archive {client}",
     "desarchiver": "Move {client} out of the archive",
-    "dupliquerLigne": "Duplicate {client} as a template",
     "selectionner": "Select {client}",
     "lot": {
       "titre": "Bulk actions",
@@ -442,16 +455,14 @@
       "vide": "No order selected.",
       "partiel": "Bulk action refused: nothing was changed. Some orders are no longer reachable — reload the list.",
       "ecriture": "The bulk action could not be processed. Nothing was changed.",
-      "exporter": "Export as CSV",
+      "exporter": "Export",
       "exportAvertissement": "The file contains your orders’ public links: anyone who opens it can open your customers’ pages."
     },
-    "filtresActifs": "filters on",
     "vues": {
       "toutes": "All",
       "enTransit": "In transit",
       "jamaisOuvertes": "Never opened",
-      "bloquees": "Stuck",
-      "livrees": "Delivered"
+      "bloquees": "Stuck"
     },
     "compteurs": {
       "preparation": "In preparation",
@@ -461,7 +472,32 @@
     },
     "periodeDu": "Created from",
     "periodeAu": "Up to",
-    "sansNom": "Unnamed"
+    "sansNom": "Unnamed",
+    "sousTitreChiffre": "{total, plural, one {# order} other {# orders}}, {semaine, plural, one {# created} other {# created}} this week",
+    "sousTitreVide": "Your space is ready",
+    "rechercherExempleCourt": "Customer, reference, tracking…",
+    "nouvelleCourt": "New",
+    "photosEtVues": "{photos} photos · {vues} views",
+    "surTotal": "{n} of {total}",
+    "chargerLaSuite": "Load more",
+    "plusDActions": "More actions for {client}",
+    "dupliquer": "Duplicate as template",
+    "archiverCourt": "Archive",
+    "desarchiverCourt": "Restore from archive",
+    "filtresActifsLabel": "Active filters:",
+    "retirerFiltre": "Remove filter: {filtre}",
+    "puce": {
+      "recherche": "Search: “{q}”",
+      "statut": "Status: {valeur}",
+      "qc": "Photos: {valeur}",
+      "periodeEntre": "Period: {du} to {au}",
+      "periodeDepuis": "Period: from {du}",
+      "periodeJusqua": "Period: until {au}",
+      "archivees": "Archive",
+      "tri": "View: {valeur}"
+    },
+    "statutSansMouvement": "No movement · {jours} d",
+    "sousTitreArchives": "You are viewing your archive. The links still work."
   },
   "editeur": {
     "historique": {

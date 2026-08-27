@@ -40,16 +40,18 @@ export function ActionsLigne({
   };
 
   return (
-    <div className="flex items-center justify-end gap-1">
+    <div className="flex items-center justify-end gap-0.5">
       <button
         type="button"
         onClick={() => void copier()}
-        className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-[var(--accent-texte)]"
+        // 32 x 32, rayon 9, fond transparent au repos, `#f4f4f8` au survol : la
+        // géométrie exacte de `.icobtn` des planches.
+        className="flex h-8 w-8 items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-fond-neutre hover:text-on-surface"
         title={t("copierLien", { client: nomClient })}
       >
         <Icone
           nom={etat === "copie" ? "done" : etat === "echec" ? "error" : "content_copy"}
-          className="text-[18px]"
+          className="text-[16px]"
           titre={t("copierLien", { client: nomClient })}
         />
       </button>
@@ -58,12 +60,12 @@ export function ActionsLigne({
         href={lien}
         target="_blank"
         rel="noopener noreferrer"
-        className="rounded-md p-2 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-[var(--accent-texte)]"
+        className="flex h-8 w-8 items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-fond-neutre hover:text-on-surface"
         title={t("ouvrirPage", { client: nomClient })}
       >
         <Icone
           nom="open_in_new"
-          className="text-[18px]"
+          className="text-[16px]"
           titre={t("ouvrirPage", { client: nomClient })}
         />
       </a>

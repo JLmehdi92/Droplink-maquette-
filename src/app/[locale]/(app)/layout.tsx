@@ -113,11 +113,15 @@ export default async function LayoutApplication({
             rien dire laisserait un vendeur découvrir un jour une facture qu'il
             n'attendait pas, ou craindre une limite qui n'existe pas.
           */}
-          <div className="mb-3.5 rounded-lg bg-violet-fond p-4">
-            <p className="font-label-md text-[13px] font-bold text-violet-encre">
+          <div className="mb-3.5 rounded-[15px] bg-violet-fond p-4">
+            {/* LE TITRE EST À L'ENCRE, PAS AU VIOLET. La planche n'écrit aucune
+                couleur dessus : il hérite de `#0e0e13`. En violet sur fond
+                violet clair, il se lisait comme un lien — dans un encart qui
+                n'en contient aucun. */}
+            <p className="font-label-md text-[13px] font-bold text-on-surface">
               {t("lancement.titre")}
             </p>
-            <p className="mt-1.5 font-body-sm text-[12px] leading-[18px] text-on-surface-variant">
+            <p className="mt-[5px] font-body-sm text-[12px] leading-[18px] text-sourdine">
               {t("lancement.texte")}
             </p>
           </div>

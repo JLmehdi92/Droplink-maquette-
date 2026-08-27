@@ -13,9 +13,14 @@ import { lienListe, listeFiltree } from "@/lib/commandes/url";
  * a besoin. Une colonne permanente coûtait un quart de la largeur de l'écran le
  * plus utilisé du produit pour des réglages qu'on touche une fois par semaine.
  *
- * REPLIÉ PAR `<details>`, donc SANS JAVASCRIPT. Il s'ouvre de lui-même quand un
- * filtre est actif : sinon un vendeur verrait une liste restreinte sans voir ce
- * qui la restreint, et conclurait à une perte de données.
+ * REPLIÉ PAR `<details>`, donc SANS JAVASCRIPT.
+ *
+ * ⚠️ IL S'OUVRAIT DE LUI-MÊME dès qu'un filtre était actif, pour que le vendeur
+ * voie ce qui restreint sa liste. Ce n'est plus son travail : les PUCES DE
+ * CRITÈRES au-dessus de la carte le disent désormais, chacune retirable seule,
+ * comme la planche `CommandesFiltreVide` l'exige. Le panneau déplié en
+ * permanence coûtait alors quatre cents pixels de haut sur l'écran le plus
+ * ouvert du produit pour répéter ce qui était déjà écrit juste au-dessus.
  *
  * TOUT PASSE PAR UN FORMULAIRE `GET`. Pas d'état client, pas de bundle, et
  * l'écran fonctionne sans JavaScript. Le vendeur peut recopier son URL, la
@@ -37,17 +42,17 @@ export async function PanneauFiltres({
 
   return (
     <details
-      open={filtree}
-      className="mx-margin-mobile rounded-lg border border-outline-variant bg-surface-container-lowest md:mx-0"
+      // Le rayon est celui de la carte du tableau — 18 — pour que les deux blocs
+      // se lisent comme une seule surface, et non comme deux cartes empilées.
+      className="mx-margin-mobile rounded-[18px] border border-outline-variant bg-surface-container-lowest md:mx-0"
     >
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-5 py-3 font-label-md text-[13px] font-bold text-on-surface-variant">
         <Icone nom="filter_list" className="text-[18px]" />
         {t("filtres")}
-        {filtree ? (
-          <span className="ml-auto font-body-sm text-[12px] font-normal text-violet">
-            {t("filtresActifs")}
-          </span>
-        ) : null}
+        {/* ⚠️ IL Y AVAIT ICI UN « filtres actifs » EN VIOLET. Les puces de
+            critères, au-dessus, nomment désormais chaque filtre et le rendent
+            retirable : répéter qu'il y en a, sans dire lesquels, ne renseignait
+            plus personne. */}
       </summary>
 
       <div className="grid gap-5 border-t border-outline-variant p-5 md:grid-cols-2">

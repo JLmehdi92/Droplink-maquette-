@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { signerLecture } from "@/lib/storage/r2";
 import type { Database } from "@/lib/supabase/types-base";
 
 type StatutExpedition = Database["public"]["Enums"]["order_status"];
@@ -148,6 +149,25 @@ export interface LigneCommande {
    * d'un vendeur en tête du tri « modifiées » à chaque passage de cadence.
    */
   readonly colisBougeLe: string | null;
+  /**
+   * Nombre de médias, LU SUR LA COMMANDE (migration 101) et non agrégé.
+   *
+   * Compter à la lecture aurait fait lire jusqu'à mille lignes de `order_media`
+   * pour en afficher cinquante — au plafond produit de 20 médias par commande,
+   * donc chez le vendeur qui s'en sert le plus.
+   */
+  readonly photos: number;
+  /**
+   * Vignette de couverture, déjà signée, ou `null`.
+   *
+   * `null` recouvre TROIS cas qui se ressemblent et ne se distinguent pas ici :
+   * la commande n'a aucun média, le média de couverture n'a pas de vignette
+   * (cas normal d'une vidéo dont la capture a échoué), ou le stockage n'est pas
+   * joignable. L'écran rend la même tuile neutre dans les trois : inventer une
+   * différence visible obligerait à affirmer laquelle, et deux d'entre elles ne
+   * regardent pas le vendeur.
+   */
+  readonly vignette: string | null;
 }
 
 /**
@@ -206,7 +226,7 @@ export interface PageCommandes {
  * sur un type d'erreur — le typage cesse alors de vérifier quoi que ce soit.
  */
 export const COLONNES =
-  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at";
+  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at, media_count, cover_media_id";
 
 /**
  * La valeur de tri d'une ligne, pour le curseur.
@@ -353,6 +373,88 @@ export function motifRecherche(saisie: string): string {
  */
 export type ClientLecture = Awaited<ReturnType<typeof creerClientServeur>>;
 
+/**
+ * LA VIGNETTE DE COUVERTURE DE CHAQUE LIGNE, EN UNE SEULE REQUÊTE BORNÉE.
+ *
+ * La planche pose une tuile de 34 px en tête de ligne, et le brief §7 la demande
+ * en toutes lettres : « miniature du premier média ». Elle vaut mieux qu'un
+ * ornement — c'est ce qui permet de reconnaître une commande sans lire son
+ * libellé, chez un vendeur qui en a neuf mille.
+ *
+ * POURQUOI PAS UNE JOINTURE. PostgREST rendrait alors les médias imbriqués dans
+ * la ligne, donc TOUS les médias de la commande : jusqu'à mille lignes pour en
+ * afficher cinquante, au plafond produit de vingt médias. Ici la requête est
+ * bornée à DEUX lignes par commande au pire — la couverture désignée et le
+ * premier média — et elle s'appuie sur `(order_id, position)`, déjà unique.
+ *
+ * POURQUOI LA COUVERTURE PRIME SUR LA POSITION. Choisir une couverture est un
+ * geste explicite de l'éditeur ; l'ignorer ici ferait mentir la liste sur ce que
+ * le client verra en tête de sa page.
+ *
+ * ⚠️ UN ÉCHEC N'EST PAS UNE ERREUR D'ÉCRAN. La liste des commandes doit
+ * s'afficher quand le stockage est injoignable ou mal configuré : c'est une
+ * tuile qui manque, pas une page. La lecture qui, elle, DOIT remonter est celle
+ * des commandes — et elle est au-dessus, sans `catch`.
+ */
+async function lireVignettes(
+  client: ClientLecture,
+  commandes: readonly { id: string; cover_media_id: string | null; media_count: number }[],
+): Promise<Map<string, string>> {
+  const parVignette = new Map<string, string>();
+
+  // Aucune commande ne porte de média : rien à demander. Interroger quand même
+  // enverrait un aller-retour pour un `in ()` vide sur l'écran le plus ouvert du
+  // produit — et c'est l'état d'un compte qui débute.
+  const avecMedia = commandes.filter((c) => c.media_count > 0);
+  if (avecMedia.length === 0) return parVignette;
+
+  const idsCommandes = avecMedia.map((c) => c.id);
+  const couvertures = avecMedia
+    .map((c) => c.cover_media_id)
+    .filter((v): v is string => v !== null);
+
+  let requete = client
+    .from("order_media")
+    .select("id, order_id, cle_vignette")
+    .in("order_id", idsCommandes);
+
+  // ⚠️ `id.in.()` AVEC UNE LISTE VIDE EST UNE ERREUR DE SYNTAXE PostgREST, pas
+  // un ensemble vide. Le cas est courant — aucune couverture désignée sur les
+  // cinquante lignes — et il aurait fait échouer la lecture des vignettes de
+  // tout un écran.
+  requete =
+    couvertures.length === 0
+      ? requete.eq("position", 0)
+      : requete.or("position.eq.0,id.in.(" + couvertures.join(",") + ")");
+
+  const { data, error } = await requete;
+  if (error !== null || data === null) return parVignette;
+
+  const cles = new Map<string, string>();
+  for (const commande of avecMedia) {
+    const couverture =
+      commande.cover_media_id === null
+        ? undefined
+        : data.find((m) => m.id === commande.cover_media_id);
+    const retenu = couverture ?? data.find((m) => m.order_id === commande.id);
+    if (retenu?.cle_vignette != null) cles.set(commande.id, retenu.cle_vignette);
+  }
+
+  // La signature est locale — un HMAC, aucun appel réseau — donc cinquante
+  // signatures coûtent moins qu'un aller-retour de base. Elles sont tout de même
+  // menées ensemble plutôt qu'en série : une boucle `await` ferait cinquante
+  // micro-tâches là où une suffit.
+  const signees = await Promise.all(
+    [...cles].map(async ([id, cle]) => [id, await signerLecture(cle).catch(() => null)] as const),
+  );
+
+  for (const [id, url] of signees) {
+    if (url !== null) parVignette.set(id, url);
+  }
+
+  return parVignette;
+}
+
 export async function lireCommandes(
   parametres: ParametresListe,
   // Injecté UNIQUEMENT par les tests d'isolation, qui doivent éprouver CETTE
@@ -443,6 +545,8 @@ export async function lireCommandes(
   const trop = data.length > PAR_PAGE;
   const visibles = trop ? data.slice(0, PAR_PAGE) : data;
 
+  const vignettes = await lireVignettes(supabase, visibles);
+
   const lignes: LigneCommande[] = visibles.map((l) => ({
     id: l.id,
     jetonPublic: l.public_token,
@@ -457,6 +561,8 @@ export async function lireCommandes(
     vues: l.views_count,
     derniereVueLe: l.last_viewed_at,
     colisBougeLe: l.parcel_last_movement_at,
+    photos: l.media_count,
+    vignette: vignettes.get(l.id) ?? null,
   }));
 
   const derniere = lignes[lignes.length - 1];
@@ -550,10 +656,27 @@ export interface CompteursListe {
   readonly enTransit: number;
   readonly jamaisOuvertes: number;
   readonly livrees: number;
+  /** Total des commandes NON archivées — le premier nombre du sous-titre. */
+  readonly total: number;
+  /**
+   * Créées sur sept jours GLISSANTS.
+   *
+   * C'est le signal roi de la phase de validation (brief §2) : un fournisseur
+   * qui dépasse quinze en une semaine sans relance. Il est montré au vendeur
+   * parce que c'est son rythme ; il vaut mieux qu'il compte la même chose que
+   * ce que nous mesurons.
+   */
+  readonly creeesCetteSemaine: number;
 }
 
-export async function compterParEtat(): Promise<CompteursListe | null> {
-  const supabase = await creerClientServeur();
+export async function compterParEtat(
+  // Injecté UNIQUEMENT par les tests, pour la même raison que `lireCommandes` :
+  // ces compteurs sont `security invoker`, donc ce qu'ils rendent DÉPEND de
+  // l'appelant. Les éprouver avec un client service-role prouverait qu'ils
+  // comptent, pas qu'ils isolent.
+  client?: ClientLecture,
+): Promise<CompteursListe | null> {
+  const supabase = client ?? (await creerClientServeur());
   const { data, error } = await supabase.rpc("compter_commandes_par_etat");
   if (error !== null || data === null) return null;
 
@@ -565,5 +688,7 @@ export async function compterParEtat(): Promise<CompteursListe | null> {
     enTransit: Number(ligne.en_transit),
     jamaisOuvertes: Number(ligne.jamais_ouvertes),
     livrees: Number(ligne.livrees),
+    total: Number(ligne.total),
+    creeesCetteSemaine: Number(ligne.cette_semaine),
   };
 }

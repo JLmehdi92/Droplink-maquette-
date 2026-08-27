@@ -9,11 +9,11 @@
     "seConnecter": "Se connecter",
     "creerUnCompte": "Créer un compte",
     "retourAccueil": "Retour à l'accueil",
-    "mesCommandes": "Mes commandes",
+    "mesCommandes": "Commandes",
     "maMarque": "Ma marque",
     "espaceVendeur": "Espace vendeur",
-    "mesEnvois": "Mes envois",
-    "mesAnalyses": "Mes analyses",
+    "mesEnvois": "Envois",
+    "mesAnalyses": "Analyses",
     "lancement": {
       "titre": "Phase de lancement",
       "texte": "Tout est gratuit et sans limite pendant cette période."
@@ -367,8 +367,7 @@
     }
   },
   "commandes": {
-    "titre": "Mes commandes",
-    "sousTitre": "Chaque commande a sa page et son lien. Retrouvez-les ici.",
+    "titre": "Commandes",
     "filtres": "Filtres",
     "trier": "Trier",
     "statutExpedition": "Statut d’expédition",
@@ -379,7 +378,7 @@
     "appliquer": "Appliquer",
     "toutEffacer": "Tout effacer",
     "rechercher": "Rechercher une commande",
-    "rechercherExemple": "Nom du client, référence ou numéro de suivi…",
+    "rechercherExemple": "Client, référence, numéro de suivi…",
     "nouvelle": "Nouvelle commande",
     "copierLien": "Copier le lien de {client}",
     "ouvrirPage": "Ouvrir la page de {client}",
@@ -388,10 +387,10 @@
     "pageSuivanteDisponible": "D’autres commandes suivent.",
     "finDeListe": "Fin de la liste.",
     "statut": {
-      "preparation": "En préparation",
-      "expedie": "Expédiée",
+      "preparation": "Préparation",
+      "expedie": "Expédié",
       "en_transit": "En transit",
-      "livre": "Livrée"
+      "livre": "Livré"
     },
     "qc": {
       "en_attente": "En attente",
@@ -408,30 +407,44 @@
     "colonne": {
       "client": "Client",
       "reference": "Référence",
-      "suivi": "Numéro de suivi",
-      "statutCourt": "Expédition",
-      "qcCourt": "Photos",
-      "modifiee": "Modifiée le",
-      "actions": "Actions",
-      "vues": "Vues"
+      "statutCourt": "Statut",
+      "photos": "Photos",
+      "vues": "Vues",
+      "modifiee": "Modifiée",
+      "actions": "Actions"
     },
     "vide": {
-      "compteTitre": "Aucune commande pour l’instant",
-      "compteTexte": "Créez votre première commande : déposez vos photos, collez le numéro de suivi, et envoyez le lien à votre client.",
-      "creer": "Créer ma première commande",
+      "compteTitre": "Créez votre première commande",
+      "compteTexte": "Trois minutes suffisent. Votre client recevra un lien à votre nom, sans avoir à créer de compte.",
       "filtreTitre": "Aucune commande ne correspond",
       "filtreTexte": "Ce compte contient des commandes, mais aucune ne passe les filtres en cours.",
       "archiveTitre": "Tout est archivé",
       "archiveTexte": "Ce compte n’a aucune commande active : elles sont toutes rangées dans les archives. Leurs liens continuent de fonctionner pour vos clients.",
-      "voirArchives": "Voir les archives"
+      "voirArchives": "Voir les archives",
+      "etapes": {
+        "photos": {
+          "titre": "Déposez vos photos",
+          "texte": "Jusqu’à 20 par commande, vidéos comprises."
+        },
+        "suivi": {
+          "titre": "Collez le numéro de suivi",
+          "texte": "Une seule fois : la page se met à jour toute seule ensuite."
+        },
+        "lien": {
+          "titre": "Envoyez le lien",
+          "texte": "Et vous n’y revenez plus."
+        }
+      },
+      "marqueQuestion": "Vous n’avez pas encore configuré votre marque ?",
+      "marqueLien": "Ajoutez votre nom et votre couleur",
+      "filtreTexteChiffre": "Vos {total} commandes sont toujours là. Ce sont ces critères, ensemble, qui ne renvoient rien.",
+      "accents": "La recherche ignore les accents : « creme » trouve aussi « Crème »."
     },
     "jamaisOuvert": "Jamais ouvert",
     "jamaisOuvertAide": "{client} n’a pas encore ouvert son lien.",
-    "vuesNombre": "{n, plural, one {# vue} other {# vues}}",
     "derniereVue": "Dernière ouverture le {date}",
     "archiver": "Archiver {client}",
     "desarchiver": "Sortir {client} des archives",
-    "dupliquerLigne": "Dupliquer {client} comme gabarit",
     "selectionner": "Sélectionner {client}",
     "lot": {
       "titre": "Actions groupées",
@@ -442,16 +455,14 @@
       "vide": "Aucune commande sélectionnée.",
       "partiel": "Lot refusé : rien n’a été modifié. Certaines commandes ne sont plus accessibles — rechargez la liste.",
       "ecriture": "Le lot n’a pas pu être traité. Rien n’a été modifié.",
-      "exporter": "Exporter en CSV",
+      "exporter": "Exporter",
       "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients."
     },
-    "filtresActifs": "filtres actifs",
     "vues": {
       "toutes": "Toutes",
       "enTransit": "En transit",
       "jamaisOuvertes": "Jamais ouvertes",
-      "bloquees": "Bloquées",
-      "livrees": "Livrées"
+      "bloquees": "Bloquées"
     },
     "compteurs": {
       "preparation": "En préparation",
@@ -461,7 +472,32 @@
     },
     "periodeDu": "Créées à partir du",
     "periodeAu": "Jusqu'au",
-    "sansNom": "Sans nom"
+    "sansNom": "Sans nom",
+    "sousTitreChiffre": "{total, plural, one {# commande} other {# commandes}}, {semaine, plural, one {# créée} other {# créées}} cette semaine",
+    "sousTitreVide": "Votre espace est prêt",
+    "rechercherExempleCourt": "Client, référence, suivi…",
+    "nouvelleCourt": "Nouvelle",
+    "photosEtVues": "{photos} photos · {vues} vues",
+    "surTotal": "{n} sur {total}",
+    "chargerLaSuite": "Charger la suite",
+    "plusDActions": "Plus d’actions pour {client}",
+    "dupliquer": "Dupliquer comme gabarit",
+    "archiverCourt": "Archiver",
+    "desarchiverCourt": "Sortir des archives",
+    "filtresActifsLabel": "Filtres actifs :",
+    "retirerFiltre": "Retirer le filtre : {filtre}",
+    "puce": {
+      "recherche": "Recherche : « {q} »",
+      "statut": "Statut : {valeur}",
+      "qc": "Photos : {valeur}",
+      "periodeEntre": "Période : du {du} au {au}",
+      "periodeDepuis": "Période : à partir du {du}",
+      "periodeJusqua": "Période : jusqu’au {au}",
+      "archivees": "Archives",
+      "tri": "Vue : {valeur}"
+    },
+    "statutSansMouvement": "Sans mouvement · {jours} j",
+    "sousTitreArchives": "Vous consultez vos archives. Les liens continuent de fonctionner."
   },
   "editeur": {
     "historique": {

@@ -1,8 +1,9 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { Icone } from "@/components/icone";
+import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { PanneauFiltres } from "@/components/commandes/panneau-filtres";
-import { PilulesFiltres } from "@/components/commandes/pilules-filtres";
+import { PucesFiltresActifs } from "@/components/commandes/puces-filtres-actifs";
 import { creerBrouillon } from "@/lib/commandes/actions";
 import { TableauCommandes } from "@/components/commandes/tableau-commandes";
 import { analyserParametres, compterParEtat, lireCommandes } from "@/lib/commandes/liste";
@@ -28,7 +29,7 @@ export async function generateMetadata({
  * découlent, tous mesurés plutôt que supposés :
  *
  *   - PAGINATION PAR CURSEUR, jamais par décalage ;
- *   - AUCUN COMPTAGE EXACT, qu'aucun index ne rattrape ;
+ *   - AUCUN COMPTAGE EXACT DU JEU FILTRÉ, qu'aucun index ne rattrape ;
  *   - RECHERCHE INSENSIBLE AUX ACCENTS, servie par une colonne générée.
  *
  * L'écran est ENTIÈREMENT rendu côté serveur, sauf les deux boutons d'action de
@@ -73,113 +74,110 @@ export default async function Commandes({
 
   const base = "/" + langue + "/commandes";
 
+  // LE COMPTE VIDE A SA PROPRE PLANCHE, et ce n'est pas une nuance de mise en
+  // page : `CommandesVide` n'a NI recherche, NI compteurs, NI filtres. Il n'y a
+  // rien à chercher dans rien, et quatre zéros en tête d'écran seraient la
+  // première chose qu'un nouveau vendeur verrait du produit.
+  const compteVide = page.diagnostic === "aucune-commande";
+  const listeVide = page.lignes.length === 0;
+
+  /*
+   * LES COMPTEURS DÉCRIVENT LES COMMANDES ACTIVES. Dans la vue des archives, ils
+   * décriraient donc exactement ce qui n'est PAS affiché — quatre nombres justes
+   * posés au-dessus d'une liste qu'ils ne comptent pas. C'est le genre d'écart
+   * qu'on lit sans le voir, et qui fait conclure à une perte de données.
+   *
+   * Les deux planches d'écran vide n'en portent pas non plus : il n'y a rien à
+   * compter au-dessus de rien.
+   */
+  const compteursVisibles = compteurs !== null && !compteVide && !listeVide && !parametres.archivees;
+
+  /*
+   * LE SOUS-TITRE EST UN CHIFFRE, PAS UNE PHRASE.
+   *
+   * La planche écrit « 184 commandes, 12 créées cette semaine ». Le produit y
+   * mettait une phrase fixe qui n'apprenait rien, à l'endroit exact où la
+   * planche répond à la seule question qu'on se pose en arrivant.
+   *
+   * ⚠️ QUAND LE COMPTE A ÉCHOUÉ, ON N'ÉCRIT PAS ZÉRO. Un « 0 commande » affirme
+   * qu'on a compté et trouvé rien — c'est-à-dire exactement le genre de nombre
+   * crédible et faux que ce projet s'interdit. Le sous-titre est alors OMIS.
+   */
+  const sousTitre = compteVide
+    ? t("sousTitreVide")
+    : parametres.archivees
+      ? // ⚠️ LE CHIFFRE COMPTE LES COMMANDES ACTIVES, et cette vue montre celles
+        // qu'il exclut. « 0 commande » au-dessus de sept lignes archivées est une
+        // contradiction que le vendeur lit sans la voir : elle passe pour une
+        // perte de données. La vue se NOMME plutôt que de se compter.
+        t("sousTitreArchives")
+      : compteurs === null
+        ? null
+        : t("sousTitreChiffre", {
+            total: compteurs.total,
+            semaine: compteurs.creeesCetteSemaine,
+          });
+
   return (
     <>
       {/*
-        L'EN-TÊTE D'ÉCRAN, sur fond blanc et détaché du contenu par un filet.
-        Il porte les deux gestes qu'on fait en arrivant : chercher, et créer.
+        L'EN-TÊTE EST CELUI DE TOUS LES ÉCRANS DE L'ESPACE VENDEUR. Cette page
+        recopiait le sien, et la copie avait déjà divergé sur trois valeurs.
       */}
-      <header className="border-b border-outline-variant bg-surface-container-lowest px-margin-mobile py-4 md:px-[30px] md:py-[26px]">
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="font-headline-lg text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
-              {t("titre")}
-            </h1>
-            <p className="mt-1 font-body-sm text-[13px] text-on-surface-variant md:text-[14px]">
-              {t("sousTitre")}
-            </p>
-          </div>
+      <EnTeteEcran
+        titre={t("titre")}
+        {...(sousTitre !== null ? { sousTitre } : {})}
+        actions={
+          compteVide ? undefined : (
+            <div className="hidden shrink-0 items-center gap-2.5 md:flex">
+              <FormulaireRecherche base={base} parametres={parametres} libelles={t} />
 
-          <div className="flex shrink-0 items-center gap-2.5">
-            <form method="get" action={base} className="relative hidden md:block">
-              {/* Les autres réglages voyagent avec la recherche : chercher ne
-                  doit pas défaire le filtre qu'on vient de poser. */}
-              {parametres.statut !== null ? (
-                <input type="hidden" name="statut" value={parametres.statut} />
-              ) : null}
-              {parametres.qc !== null ? (
-                <input type="hidden" name="qc" value={parametres.qc} />
-              ) : null}
-              {parametres.tri !== "recentes" ? (
-                <input type="hidden" name="tri" value={parametres.tri} />
-              ) : null}
-              {parametres.du !== null ? <input type="hidden" name="du" value={parametres.du} /> : null}
-              {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
-              {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
+              {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien
+                  vers une page qui écrirait au rendu. Un lien serait suivi par
+                  le préchargement du navigateur, par un aspirateur, par une
+                  visite accidentelle — et chacun créerait un brouillon.
 
-              <Icone
-                nom="search"
-                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[18px] text-sourdine"
-              />
-              <input
-                type="search"
-                name="q"
-                defaultValue={parametres.q}
-                placeholder={t("rechercherExemple")}
-                aria-label={t("rechercher")}
-                className="champ-app h-[42px] w-[290px] rounded-md border border-outline pr-3.5 pl-[38px] font-body-md text-[14px] text-on-surface"
-              />
-            </form>
+                  LE DÉGRADÉ EST ICI, ET NULLE PART AILLEURS SUR L'ÉCRAN : une
+                  seule action principale par page. */}
+              <form action={creerBrouillon}>
+                <input type="hidden" name="langue" value={langue} />
+                <button
+                  type="submit"
+                  className="degrade-marque flex h-[42px] items-center gap-2 rounded-[11px] px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
+                >
+                  <Icone nom="add" className="text-[15px]" />
+                  {t("nouvelle")}
+                </button>
+              </form>
+            </div>
+          )
+        }
+        dessous={
+          /* La recherche passe SOUS le titre au téléphone : à 390 px elle ne
+             tient pas à côté du bouton, et c'est elle qu'on utilise le plus. Le
+             bouton, lui, devient l'action flottante du bas d'écran. */
+          compteVide ? undefined : (
+            <div className="mt-3.5 md:hidden">
+              <FormulaireRecherche base={base} parametres={parametres} libelles={t} telephone />
+            </div>
+          )
+        }
+      />
 
-            {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien
-                vers une page qui écrirait au rendu. Un lien serait suivi par le
-                préchargement du navigateur, par un aspirateur, par une visite
-                accidentelle — et chacun créerait un brouillon.
-
-                LE DÉGRADÉ EST ICI, ET NULLE PART AILLEURS SUR L'ÉCRAN : une
-                seule action principale par page. */}
-            <form action={creerBrouillon}>
-              <input type="hidden" name="langue" value={langue} />
-              <button
-                type="submit"
-                className="degrade-marque flex h-[42px] items-center gap-2 rounded-md px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
-              >
-                <Icone nom="add" className="text-[16px]" />
-                <span className="hidden sm:inline">{t("nouvelle")}</span>
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* La recherche passe SOUS le titre au téléphone : à 390 px elle ne
-            tient pas à côté du bouton, et c'est elle qu'on utilise le plus. */}
-        <form method="get" action={base} className="relative mt-3.5 md:hidden">
-          {parametres.statut !== null ? (
-            <input type="hidden" name="statut" value={parametres.statut} />
-          ) : null}
-          {parametres.qc !== null ? <input type="hidden" name="qc" value={parametres.qc} /> : null}
-          {parametres.tri !== "recentes" ? (
-            <input type="hidden" name="tri" value={parametres.tri} />
-          ) : null}
-          {parametres.du !== null ? <input type="hidden" name="du" value={parametres.du} /> : null}
-          {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
-          {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
-          <Icone
-            nom="search"
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[18px] text-sourdine"
-          />
-          <input
-            type="search"
-            name="q"
-            defaultValue={parametres.q}
-            placeholder={t("rechercherExemple")}
-            aria-label={t("rechercher")}
-            className="champ-app h-11 w-full rounded-md border border-outline pr-3.5 pl-[38px] font-body-md text-[15px] text-on-surface"
-          />
-        </form>
-      </header>
-
-      <main id="contenu" className="flex flex-col gap-3.5 py-3.5 md:gap-4 md:px-[30px] md:py-[22px]">
+      <main
+        id="contenu"
+        className="flex flex-grow flex-col gap-3.5 py-3.5 md:gap-5 md:px-[30px] md:pt-0 md:pb-[26px]"
+      >
         {/*
           LES QUATRE COMPTEURS. Omis en bloc si la lecture échoue : rendre des
           zéros affirmerait qu'on a compté et trouvé rien, ce qui est faux — et
           c'est le genre de nombre crédible qui fait décider de travers.
 
-          « JAMAIS OUVERTES » EST MIS EN AVANT parce que c'est le seul des
-          quatre qui appelle une action : une commande que le client n'a pas
-          regardée est un lien qu'il n'a peut-être jamais reçu.
+          « JAMAIS OUVERTES » EST MIS EN AVANT parce que c'est le seul des quatre
+          qui appelle une action : une commande que le client n'a pas regardée est
+          un lien qu'il n'a peut-être jamais reçu.
         */}
-        {compteurs !== null ? (
+        {compteursVisibles && compteurs !== null ? (
           <ul className="grid grid-cols-2 gap-3 px-margin-mobile md:grid-cols-4 md:px-0">
             {(
               [
@@ -200,8 +198,7 @@ export default async function Commandes({
               >
                 <p
                   className={
-                    "font-body-sm text-[12px] " +
-                    (alerte && valeur > 0 ? "text-alerte" : "text-on-surface-variant")
+                    "font-body-sm text-[12px] " + (alerte && valeur > 0 ? "text-alerte" : "text-sourdine")
                   }
                 >
                   {t("compteurs." + clef)}
@@ -219,9 +216,16 @@ export default async function Commandes({
           </ul>
         ) : null}
 
-        <PilulesFiltres base={base} parametres={parametres} />
+        {compteVide ? null : <PucesFiltresActifs base={base} parametres={parametres} />}
 
-        <PanneauFiltres base={base} parametres={parametres} />
+        {/* LE PANNEAU DE FILTRES NE SE REND PAS AU-DESSUS D'UNE LISTE VIDE. La
+            planche `CommandesFiltreVide` ne dessine rien entre les puces et la
+            carte : les critères se retirent un par un depuis les puces, et
+            dérouler un panneau pour en poser un de plus sur un résultat déjà vide
+            ne mène nulle part. */}
+        {compteVide || listeVide ? null : (
+          <PanneauFiltres base={base} parametres={parametres} />
+        )}
 
         <TableauCommandes
           base={base}
@@ -233,8 +237,90 @@ export default async function Commandes({
           parametres={parametres}
           page={page}
           lot={lot}
+          total={compteurs?.total ?? null}
         />
       </main>
+
+      {/*
+        L'ACTION FLOTTANTE DU TÉLÉPHONE, dessinée par la planche `CommandesMobile`
+        juste au-dessus de la barre d'onglets.
+
+        `bottom-[102px]` = les 86 px réservés à la barre d'onglets fixe par le
+        layout, plus les 16 px de marge de la planche. Sans ce calage, le bouton
+        se poserait SUR la navigation — c'est-à-dire sur les quatre destinations
+        du produit.
+      */}
+      {compteVide ? null : (
+        <form action={creerBrouillon} className="fixed right-4 bottom-[102px] z-20 md:hidden">
+          <input type="hidden" name="langue" value={langue} />
+          <button
+            type="submit"
+            className="degrade-marque flex h-[52px] items-center gap-2 rounded-full px-[22px] font-label-md text-[15px] font-bold shadow-[0_14px_28px_-10px_rgba(124,92,245,0.7)]"
+          >
+            <Icone nom="add" className="text-[16px]" />
+            {t("nouvelleCourt")}
+          </button>
+        </form>
+      )}
     </>
+  );
+}
+
+/**
+ * Le champ de recherche.
+ *
+ * LES AUTRES RÉGLAGES VOYAGENT AVEC LUI, en champs cachés : chercher ne doit pas
+ * défaire le filtre qu'on vient de poser. Ils étaient recopiés deux fois — une
+ * pour le bureau, une pour le téléphone — et deux copies d'une même liste
+ * divergent au premier paramètre ajouté, sans que rien ne le signale : le
+ * vendeur perdrait alors son filtre en cherchant, mais seulement sur un des deux
+ * écrans.
+ */
+function FormulaireRecherche({
+  base,
+  parametres,
+  libelles,
+  telephone = false,
+}: {
+  readonly base: string;
+  readonly parametres: Awaited<ReturnType<typeof analyserParametres>>;
+  readonly libelles: (clef: string) => string;
+  readonly telephone?: boolean;
+}) {
+  return (
+    <form method="get" action={base} className="relative">
+      {parametres.statut !== null ? (
+        <input type="hidden" name="statut" value={parametres.statut} />
+      ) : null}
+      {parametres.qc !== null ? <input type="hidden" name="qc" value={parametres.qc} /> : null}
+      {parametres.tri !== "recentes" ? (
+        <input type="hidden" name="tri" value={parametres.tri} />
+      ) : null}
+      {parametres.du !== null ? <input type="hidden" name="du" value={parametres.du} /> : null}
+      {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
+      {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
+
+      <Icone
+        nom="search"
+        className="pointer-events-none absolute top-1/2 left-[13px] -translate-y-1/2 text-[16px] text-gris-inactif"
+      />
+      <input
+        type="search"
+        name="q"
+        defaultValue={parametres.q}
+        placeholder={libelles(telephone ? "rechercherExempleCourt" : "rechercherExemple")}
+        aria-label={libelles("rechercher")}
+        className={
+          // La planche bureau pose le champ sur du BLANC — il est seul sur le
+          // gris de la zone de travail. La planche téléphone le pose sur
+          // `#fafafc`, parce qu'il est déjà dans la barre blanche : un blanc sur
+          // blanc n'aurait plus de bord.
+          "rounded-[11px] border border-filet-controle pr-3.5 pl-[38px] font-body-md text-on-surface " +
+          (telephone
+            ? "h-11 w-full rounded-[12px] bg-surface-container-low text-[15px]"
+            : "h-[42px] w-[290px] bg-surface-container-lowest text-[14px]")
+        }
+      />
+    </form>
   );
 }

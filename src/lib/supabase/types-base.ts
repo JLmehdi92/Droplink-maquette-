@@ -245,6 +245,7 @@ export type Database = {
           id: string
           internal_notes: string | null
           last_viewed_at: string | null
+          media_count: number
           notify_email: string | null
           parcel_last_movement_at: string | null
           product_ref: string | null
@@ -270,6 +271,7 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           last_viewed_at?: string | null
+          media_count?: number
           notify_email?: string | null
           parcel_last_movement_at?: string | null
           product_ref?: string | null
@@ -295,6 +297,7 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           last_viewed_at?: string | null
+          media_count?: number
           notify_email?: string | null
           parcel_last_movement_at?: string | null
           product_ref?: string | null
@@ -805,10 +808,12 @@ export type Database = {
       compter_commandes_par_etat: {
         Args: never
         Returns: {
+          cette_semaine: number
           en_transit: number
           jamais_ouvertes: number
           livrees: number
           preparation: number
+          total: number
         }[]
       }
       compter_envois: {

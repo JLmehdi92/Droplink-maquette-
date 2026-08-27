@@ -4,20 +4,18 @@ import type { ParametresListe } from "@/lib/commandes/liste";
 import { lienListe } from "@/lib/commandes/url";
 
 /**
- * LES CINQ VUES QU'ON OUVRE VINGT FOIS PAR JOUR, en pilules.
+ * LES QUATRE VUES QU'ON OUVRE VINGT FOIS PAR JOUR, en pilules.
  *
  * Ce ne sont pas des filtres de plus : ce sont des RACCOURCIS vers des
- * combinaisons du panneau de filtres, qui existe toujours en dessous pour tout
- * le reste. Un fournisseur à 200 commandes par semaine ne déroule pas deux
- * listes déroulantes pour voir ce qui est en transit.
+ * combinaisons du panneau de filtres, qui existe toujours pour tout le reste. Un
+ * fournisseur à 200 commandes par semaine ne déroule pas deux listes déroulantes
+ * pour voir ce qui est en transit.
  *
- * ⚠️ CE BLOC DÉCRIVAIT UN ÉCART QUI N'EXISTE PLUS. Il annonçait que le tri
- * « bloqué en transit » n'était pas implémenté et que la pilule « Bloquées »
- * menait aux commandes livrées. Le tri existe depuis, la pilule y mène — et le
- * commentaire, lui, est resté. C'est le mensonge en attente que le projet
- * s'interdit : il décrivait une INTENTION passée là où le lecteur cherche le
- * comportement présent, et il aurait fait chercher un défaut là où il n'y en a
- * plus. Les cinq pilules mènent chacune à ce qu'elles annoncent.
+ * ⚠️ ELLES ÉTAIENT CINQ, LA PLANCHE EN DESSINE QUATRE. « Livrées » a été retirée
+ * — et ce n'est pas une perte de fonction : le compteur « Livrées » de la rangée
+ * du dessus est juste au-dessus, et le panneau de filtres porte le statut au
+ * complet. Ce qui disparaît, c'est un raccourci de plus dans une barre qui doit
+ * rester lisible d'un coup d'œil.
  *
  * DES LIENS, PAS DES BOUTONS. L'URL décrit ce qui est affiché : elle se met en
  * favori, se recopie, revient par l'historique. Un état client ne fait rien de
@@ -51,47 +49,37 @@ export async function PilulesFiltres({
     {
       /*
        * LA PILULE QUI FAIT GAGNER DU TEMPS. Elle répond à « quels colis dois-je
-       * relancer », et c'est la seule question de cet écran dont la réponse
-       * n'est pas visible en parcourant la liste.
+       * relancer », et c'est la seule question de cet écran dont la réponse n'est
+       * pas visible en parcourant la liste.
        *
        * Elle repose sur le TRI et non sur un filtre de statut : le statut dit
-       * « en transit », il ne dit pas depuis combien de temps rien ne bouge. Le
-       * tri place le colis le plus immobile en tête — et l'état d'un colis vient
-       * désormais du transporteur, sans que le vendeur ait à toucher quoi que
-       * ce soit.
+       * « en transit », il ne dit pas depuis combien de temps rien ne bouge.
        */
       clef: "bloquees",
       href: lienListe(base, parametres, { tri: "bloquees", statut: null }),
       actif: parametres.tri === "bloquees",
     },
-    {
-      clef: "livrees",
-      href: lienListe(base, parametres, { statut: "livre" }),
-      actif: parametres.statut === "livre",
-    },
   ] as const;
 
   return (
-    // Le débordement horizontal est ASSUMÉ au téléphone : cinq pilules ne
-    // tiennent pas sur 390 px, et les replier sur deux lignes coûterait la
-    // hauteur d'une commande dans la liste.
-    <ul className="flex gap-2 overflow-x-auto px-margin-mobile pb-1 md:px-0">
+    <>
       {vues.map((vue) => (
-        <li key={vue.clef}>
-          <Link
-            href={vue.href}
-            aria-current={vue.actif ? "true" : undefined}
-            className={
-              "flex min-h-11 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors md:min-h-0 md:h-[34px] " +
-              (vue.actif
-                ? "border-primary bg-primary text-on-primary"
-                : "border-outline bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container")
-            }
-          >
-            {t("vues." + vue.clef)}
-          </Link>
-        </li>
+        <Link
+          key={vue.clef}
+          href={vue.href}
+          aria-current={vue.actif ? "true" : undefined}
+          className={
+            // 44 px au doigt, 34 px à la souris : la planche téléphone écrit
+            // `min-height: 44px` là où la planche bureau écrit `height: 34px`.
+            "flex min-h-11 shrink-0 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors md:h-[34px] md:min-h-0 " +
+            (vue.actif
+              ? "border-primary bg-primary text-on-primary"
+              : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
+          }
+        >
+          {t("vues." + vue.clef)}
+        </Link>
       ))}
-    </ul>
+    </>
   );
 }
