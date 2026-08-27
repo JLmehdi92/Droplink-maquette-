@@ -96,7 +96,7 @@ export default async function Analyses({
             className={
               "min-h-[44px] rounded-full px-4 py-2 font-label-md text-label-md transition-colors " +
               (periode === p
-                ? "bg-secondary-fixed text-on-surface"
+                ? "bg-violet-fond text-on-surface"
                 : "text-on-surface-variant hover:bg-surface-container-low")
             }
           >

@@ -135,7 +135,7 @@ export default async function Connexion({
               {t("pasDeCompteTitre")}{" "}
               <Link
                 href={`/${locale}/inscription`}
-                className="font-semibold text-secondary hover:underline"
+                className="font-semibold text-violet hover:underline"
               >
                 {t("lienCreerCompte")}
               </Link>
@@ -144,11 +144,11 @@ export default async function Connexion({
 
           <p className="font-body-sm text-[12px] text-on-surface-variant">
             {t("cgvAvant")}{" "}
-            <Link href={`/${locale}/conditions`} className="text-secondary hover:underline">
+            <Link href={`/${locale}/conditions`} className="text-violet hover:underline">
               {t("cgvConditions")}
             </Link>{" "}
             {t("cgvEt")}{" "}
-            <Link href={`/${locale}/confidentialite`} className="text-secondary hover:underline">
+            <Link href={`/${locale}/confidentialite`} className="text-violet hover:underline">
               {t("cgvConfidentialite")}
             </Link>
             .

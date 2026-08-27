@@ -84,7 +84,7 @@ export default async function LayoutAdmin({
             <span className="font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-white">
               DropLink
             </span>
-            <span className="mt-0.5 block font-label-sm text-[11px] font-bold tracking-[0.1em] text-tertiary-fixed-dim">
+            <span className="mt-0.5 block font-label-sm text-[11px] font-bold tracking-[0.1em] text-corail">
               {t("bandeau")}
             </span>
           </div>
@@ -107,7 +107,7 @@ export default async function LayoutAdmin({
 
           <div className="hidden md:block">
             <div className="mt-6 rounded-md bg-[rgba(242,118,94,0.14)] p-3.5">
-              <p className="font-label-md text-[12px] font-bold text-tertiary-fixed-dim">
+              <p className="font-label-md text-[12px] font-bold text-corail">
                 {t("traceTitre")}
               </p>
               <p className="mt-1 font-body-sm text-[11px] leading-[17px] text-white/50">

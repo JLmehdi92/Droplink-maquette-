@@ -8,7 +8,7 @@ import { signalementDisponible } from "@/lib/contact";
  * CLASSES REPRISES : `w-full py-8 bg-surface-container flex flex-col
  * items-center gap-4 px-margin-mobile text-center border-t
  * border-outline-variant`, liens en `font-body-sm text-body-sm
- * text-on-surface-variant hover:text-secondary transition-colors opacity-80
+ * text-on-surface-variant hover:text-violet transition-colors opacity-80
  * hover:opacity-100`.
  *
  * DEUX ÉCARTS. La maquette liste « Support », « Privacy » et « Terms » : le

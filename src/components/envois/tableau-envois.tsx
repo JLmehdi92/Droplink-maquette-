@@ -114,7 +114,7 @@ export async function TableauEnvois({
             className={
               "min-h-[44px] rounded-full px-3 py-2 font-label-sm text-label-sm transition-colors " +
               (parametres.etat === null
-                ? "bg-secondary-fixed text-on-surface"
+                ? "bg-violet-fond text-on-surface"
                 : "text-on-surface-variant hover:bg-surface-container-low")
             }
           >
@@ -128,7 +128,7 @@ export async function TableauEnvois({
               className={
                 "min-h-[44px] rounded-full px-3 py-2 font-label-sm text-label-sm transition-colors " +
                 (parametres.etat === etat
-                  ? "bg-secondary-fixed text-on-surface"
+                  ? "bg-violet-fond text-on-surface"
                   : "text-on-surface-variant hover:bg-surface-container-low")
               }
             >
@@ -149,7 +149,7 @@ export async function TableauEnvois({
               className={
                 "min-h-[44px] rounded-full px-3 py-2 font-label-sm text-label-sm transition-colors " +
                 (parametres.tri === tri
-                  ? "bg-secondary-fixed text-on-surface"
+                  ? "bg-violet-fond text-on-surface"
                   : "text-on-surface-variant hover:bg-surface-container-low")
               }
             >

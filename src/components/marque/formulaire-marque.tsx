@@ -295,7 +295,7 @@ export function FormulaireMarque({
               onClick={() => champFichier.current?.click()}
               className="group flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant bg-surface-bright/50 p-8 text-center transition-colors hover:bg-surface-bright"
             >
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary-fixed transition-transform group-hover:scale-110">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-violet-fond transition-transform group-hover:scale-110">
                 <Icone nom="upload" className="text-2xl text-[var(--apercu-texte)]" />
               </div>
               <p className="mb-1 font-label-md text-label-md text-on-surface">

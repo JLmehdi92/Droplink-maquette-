@@ -95,7 +95,7 @@ export default async function AdminComptes({
         />
         <button
           type="submit"
-          className="min-h-[44px] rounded-lg bg-secondary-fixed px-6 font-label-md text-label-md text-on-surface"
+          className="min-h-[44px] rounded-lg bg-violet-fond px-6 font-label-md text-label-md text-on-surface"
         >
           {t("comptes.chercher")}
         </button>

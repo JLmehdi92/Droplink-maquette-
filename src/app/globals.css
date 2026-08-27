@@ -79,24 +79,8 @@
   --color-on-primary-fixed-variant: #4a4b55;
 
   /* ----- Violet de marque : la borne gauche du dégradé --------------------- */
-  --color-secondary: #6244d8;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #efeaff;
-  --color-on-secondary-container: #33208f;
-  --color-secondary-fixed: #efeaff;
-  --color-secondary-fixed-dim: #ded4ff;
-  --color-on-secondary-fixed: #23155f;
-  --color-on-secondary-fixed-variant: #4b32b3;
 
   /* ----- Corail de marque : la borne droite du dégradé --------------------- */
-  --color-tertiary: #b4462f;
-  --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #ffe6e0;
-  --color-on-tertiary-container: #7a2d1d;
-  --color-tertiary-fixed: #ffe6e0;
-  --color-tertiary-fixed-dim: #ffcec2;
-  --color-on-tertiary-fixed: #5c2115;
-  --color-on-tertiary-fixed-variant: #8f3724;
 
   /*
    * ----- Attention ---------------------------------------------------------
@@ -126,6 +110,78 @@
    * erreur nulle part.
    */
   --color-admin: #111117;
+
+  /*
+   * ===== LA PALETTE DU CANEVAS ============================================
+   *
+   * ⚠️ DÉFAUT DE FOND, MESURÉ LE 27/08/2026 sur les 41 planches. Le thème
+   * était une palette Material Design 3 générée (primary / secondary /
+   * tertiary, et leurs déclinaisons `on-*`, `*-container`, `*-fixed-dim`).
+   * Le canevas, lui, est dessiné à la main : ses couleurs sont nommées par
+   * ce qu'elles FONT, pas par un rang dans une échelle.
+   *
+   * Les deux ne se recouvrent pas. Compté sur les planches : QUATORZE
+   * couleurs du canevas n'avaient aucun équivalent dans le thème, dont le
+   * violet de marque #7c5cf5 — 168 occurrences, la deuxième couleur la plus
+   * fréquente du canevas — et toute la famille du VERT, que M3 n'a pas de
+   * place pour loger : `tertiary` était déjà le corail, donc « livré » et
+   * « approuvé » sortaient en corail là où le canevas les veut verts.
+   *
+   * Et le violet du code, #6244d8, N'APPARAÎT DANS AUCUNE DES 41 PLANCHES.
+   * Ce n'était pas une nuance, c'était une couleur étrangère.
+   *
+   * C'est la cause racine de l'essentiel des écarts relevés sur les 21
+   * écrans : ce ne sont pas deux cents défauts indépendants, c'est une
+   * palette qui ne contenait pas les couleurs à rendre. Les noms sont donc
+   * en français et disent le RÔLE — un nom de rang aurait reproduit
+   * exactement le défaut qu'on corrige.
+   *
+   * Les fréquences ci-dessous sont MESURÉES, pas estimées : elles disent
+   * quelle couleur porte quel poids, et empêchent d'en inventer une.
+   */
+
+  /* ----- Violet de marque ------------------------------------------------ */
+  --color-violet: #7c5cf5;          /* 168× — la couleur de marque */
+  --color-violet-survol: #5c3fd0;   /*  32× — liens au survol */
+  --color-violet-encre: #6b4ae0;    /*  24× — texte SUR un fond violet clair */
+  --color-violet-fond: #f1eefe;     /*  25× — pilule, navigation active */
+
+  /* ----- Corail de marque — le second terme du dégradé -------------------- */
+  --color-corail: #f2765e;          /*  34× */
+  --color-corail-fond: #ffeee9;     /*   4× — aplat pastel, landing */
+  --color-succes-pastel: #e7f3ec;   /*   3× — aplat pastel, landing */
+
+  /* ----- Succès — absent du thème, donc rendu en corail jusqu'ici -------- */
+  --color-succes: #2f8f5b;          /*  53× */
+  --color-succes-fond: #eef4f0;     /*  25× */
+
+  /* ----- Alerte : trois fonds, sur trois écrans distincts ---------------- */
+  --color-alerte: #c2543c;          /*  55× — texte et icône */
+  --color-alerte-puce: #e0674a;     /*  12× — pastille de puce */
+  --color-alerte-filet: #f6d9d2;    /*  16× */
+  --color-alerte-fond: #fff8f6;     /*   5× — compteur en alerte */
+  --color-alerte-fond-doux: #fffaf9;/*  12× — bandeau d'échec */
+  --color-alerte-fond-vif: #fdeeea; /*  12× — puce d'état */
+
+  /*
+   * ----- Les quatre gris de texte ----------------------------------------
+   * Le thème n'en avait que DEUX pour couvrir ces quatre-là. C'est ce
+   * manque qui faisait rendre un en-tête de tableau de la même teinte
+   * qu'un libellé de navigation, alors que le canevas les sépare.
+   */
+  --color-ardoise: #5b5d68;         /*  80× — navigation, pilules, texte fort */
+  --color-gris-entete: #9a9ca6;     /*  29× — en-têtes de colonnes */
+  --color-gris-inactif: #a4a6b0;    /*  28× — icônes au repos */
+
+  /* ----- Les quatre filets, du plus marqué au plus discret --------------- */
+  --color-filet-controle: #e6e6ec;  /*  78× — champs, boutons, pilules */
+  --color-filet-ligne: #f2f2f6;     /*  34× — séparateur de lignes */
+  --color-filet-section: #f0f0f4;   /*  12× — filet de section, page publique */
+
+  /* ----- Fonds neutres ---------------------------------------------------- */
+  --color-fond-neutre: #f4f4f8;     /*  37× — survol, aplat neutre */
+  --color-fond-barre: #eaeaef;      /*  16× — barre de progression inactive */
+  --color-fond-avatar: #e4e2ee;     /*  27× — avatar, vignette sans image */
 
   /* ----- Rayons du canevas ------------------------------------------------ */
   --radius-DEFAULT: 12px;

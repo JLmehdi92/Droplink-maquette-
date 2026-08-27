@@ -11,14 +11,14 @@ import type { LigneCommande } from "@/lib/commandes/liste";
  * « refusé ».
  */
 const TEINTES = {
-  neutre: "bg-surface-container-highest text-on-surface-variant",
-  pointNeutre: "bg-outline",
-  info: "bg-secondary-fixed/40 text-secondary",
-  pointInfo: "bg-secondary",
-  succes: "bg-tertiary-fixed/50 text-on-tertiary-fixed-variant",
-  pointSucces: "bg-on-tertiary-fixed-variant",
-  alerte: "bg-error-container/60 text-on-error-container",
-  pointAlerte: "bg-error",
+  neutre: "bg-fond-neutre text-ardoise",
+  pointNeutre: "bg-gris-inactif",
+  info: "bg-violet-fond text-violet-encre",
+  pointInfo: "bg-violet",
+  succes: "bg-succes-fond text-succes",
+  pointSucces: "bg-succes",
+  alerte: "bg-alerte-fond-vif text-alerte",
+  pointAlerte: "bg-alerte-puce",
 } as const;
 
 type Teinte = "neutre" | "info" | "succes" | "alerte";

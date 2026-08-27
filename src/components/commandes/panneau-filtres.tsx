@@ -44,7 +44,7 @@ export async function PanneauFiltres({
         <Icone nom="filter_list" className="text-[18px]" />
         {t("filtres")}
         {filtree ? (
-          <span className="ml-auto font-body-sm text-[12px] font-normal text-secondary">
+          <span className="ml-auto font-body-sm text-[12px] font-normal text-violet">
             {t("filtresActifs")}
           </span>
         ) : null}
@@ -166,7 +166,7 @@ export async function PanneauFiltres({
           {filtree ? (
             <Link
               href={base}
-              className="text-center font-label-md text-[13px] text-secondary hover:underline"
+              className="text-center font-label-md text-[13px] text-violet hover:underline"
             >
               {t("toutEffacer")}
             </Link>
@@ -190,7 +190,7 @@ export async function PanneauFiltres({
                   className={
                     "flex min-h-11 items-center rounded-md px-3 font-body-md text-body-md transition-colors md:min-h-0 md:py-2 " +
                     (actif
-                      ? "bg-secondary-container font-semibold text-secondary"
+                      ? "bg-violet-fond font-semibold text-violet"
                       : "text-on-surface-variant hover:bg-surface-container")
                   }
                 >

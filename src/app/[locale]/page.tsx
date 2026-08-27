@@ -180,9 +180,9 @@ export default async function Accueil({
                     ))}
                   </div>
                   <div className="mb-1.5 grid grid-cols-4 gap-1">
-                    <span className="h-1.5 rounded-full bg-secondary" />
-                    <span className="h-1.5 rounded-full bg-secondary" />
-                    <span className="h-1.5 rounded-full bg-secondary" />
+                    <span className="h-1.5 rounded-full bg-violet" />
+                    <span className="h-1.5 rounded-full bg-violet" />
+                    <span className="h-1.5 rounded-full bg-violet" />
                     <span className="h-1.5 rounded-full bg-outline-variant" />
                   </div>
                   <p className="font-body-sm text-[10px] text-on-surface-variant">
@@ -199,8 +199,8 @@ export default async function Accueil({
               className="anim-flot absolute top-[120px] left-[64px] hidden items-center gap-3 rounded-[14px] bg-surface-container-lowest px-3.5 py-3 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)] lg:flex"
               style={{ animationDelay: "1.2s" }}
             >
-              <span className="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] bg-secondary-container">
-                <Icone nom="local_shipping" className="text-[19px] text-secondary" />
+              <span className="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] bg-violet-fond">
+                <Icone nom="local_shipping" className="text-[19px] text-violet" />
               </span>
               <span>
                 <span className="block font-label-md text-[13px] font-bold text-on-surface">
@@ -213,8 +213,8 @@ export default async function Accueil({
             </div>
 
             <div className="anim-flot absolute top-[300px] right-[64px] hidden items-center gap-3 rounded-[14px] bg-surface-container-lowest px-3.5 py-3 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)] lg:flex">
-              <span className="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] bg-secondary-container">
-                <Icone nom="check_circle" className="text-[19px] text-secondary" />
+              <span className="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] bg-violet-fond">
+                <Icone nom="check_circle" className="text-[19px] text-violet" />
               </span>
               <span>
                 <span className="block font-label-md text-[13px] font-bold text-on-surface">
@@ -243,8 +243,8 @@ export default async function Accueil({
             <ul className="grid gap-5 text-left md:grid-cols-3">
               {(
                 [
-                  ["medias", "upload", "bg-secondary-container text-secondary"],
-                  ["suivi", "schedule", "bg-tertiary-container text-tertiary"],
+                  ["medias", "upload", "bg-violet-fond text-violet"],
+                  ["suivi", "schedule", "bg-corail-fond text-corail"],
                   ["marque", "link", "bg-surface-container-high text-on-surface-variant"],
                 ] as const
               ).map(([clef, icone, teinte]) => (

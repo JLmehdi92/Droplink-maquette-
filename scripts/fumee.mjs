@@ -1328,6 +1328,135 @@ controles.push(
   ],
 );
 
+// --- Aucune classe ne peint dans le vide ---
+//
+// Une classe Tailwind qui reference un token supprime ne casse RIEN : elle
+// produit `border-radius: var(--disparu)`, donc aucune peinture, sans une
+// erreur nulle part. C est le mode de defaillance de tout refactor de palette,
+// et aucune relecture de code ne peut le voir — il faut confronter, dans le CSS
+// SERVI, ce qui est REFERENCE a ce qui est DEFINI.
+//
+// La sonde INVENTORIE au lieu de selectionner : elle rend TOUT, et les
+// exceptions sont declarees ici avec leur raison.
+const EXCEPTIONS_VARIABLES = [
+  // Posees par le moteur Tailwind lui-meme au moment du rendu.
+  ["--default-font-feature-settings", "interne Tailwind"],
+  ["--default-font-variation-settings", "interne Tailwind"],
+  ["--default-mono-font-feature-settings", "interne Tailwind"],
+  ["--default-mono-font-variation-settings", "interne Tailwind"],
+  ["--tw-ease", "interne Tailwind"],
+  // Ecrites EN LIGNE par l apercu de marque : elles portent la couleur du
+  // vendeur, donc elles ne peuvent pas vivre dans une feuille statique.
+  ["--apercu-interface", "posee en ligne par l apercu de marque"],
+  ["--apercu-remplissage", "posee en ligne par l apercu de marque"],
+  ["--apercu-sur-remplissage", "posee en ligne par l apercu de marque"],
+  ["--apercu-texte", "posee en ligne par l apercu de marque"],
+];
+const tolerees = new Set(EXCEPTIONS_VARIABLES.map(([v]) => v));
+
+const definies = new Set([...css.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+const referencees = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
+const orphelines = [...referencees].filter((v) => !definies.has(v) && !tolerees.has(v));
+
+controles.push(
+  // CONTRE-TEST : sur une feuille vide, « aucune orpheline » serait vrai et ne
+  // prouverait rien. On etablit d abord que la sonde voit une vraie palette.
+  [
+    definies.size > 100 && referencees.size > 100,
+    `CONTRE-TEST : ${definies.size} variables definies, ${referencees.size} referencees`,
+  ],
+  [
+    orphelines.length === 0,
+    orphelines.length === 0
+      ? "aucune classe ne peint dans le vide"
+      : `des classes peignent dans le vide : ${orphelines.join(", ")}`,
+  ],
+  // L autre sens : une exception qui ne sert plus est une exception qui
+  // masquera le jour ou la variable reviendra vraiment orpheline.
+  [
+    EXCEPTIONS_VARIABLES.every(([v]) => referencees.has(v)),
+    "chaque exception declaree correspond a une variable reellement referencee",
+  ],
+);
+
+// --- Toute classe utilitaire ECRITE est-elle SERVIE ? ---
+//
+// ⚠️ CE CONTROLE A ETE ECRIT TROIS FOIS, et les deux premieres versions
+// passaient VERTES sur le defaut qu elles etaient censees voir.
+//
+//   1. La sonde des variables orphelines : renommer `--color-violet` la laisse
+//      verte, parce que Tailwind v4 ne GENERE PAS la classe quand le token
+//      manque — plus de reference, donc plus d orpheline. Le HTML porte encore
+//      `class="text-violet"`, aucune regle ne s y applique, et la couleur
+//      dispara it SANS ERREUR.
+//   2. La deuxieme version derivait son inventaire des tokens de `globals.css`
+//      — le fichier meme qu elle protege. Renommer le token le retirait de
+//      l inventaire : la garde s aveuglait AVEC le defaut. C est la forme la
+//      plus traitre de L-025, parce qu elle donne un vert franc.
+//
+// Celle-ci part de ce que le CODE ECRIT, qui ne bouge pas quand le theme bouge,
+// et demande au SERVEUR si chaque classe existe.
+const fsSonde = await import("node:fs");
+const pathSonde = await import("node:path");
+
+function fichiersSources(dossier) {
+  return fsSonde.readdirSync(dossier, { withFileTypes: true }).flatMap((e) => {
+    const chemin = pathSonde.join(dossier, e.name);
+    if (e.isDirectory()) return fichiersSources(chemin);
+    return /\.(tsx|ts)$/.test(e.name) ? [chemin] : [];
+  });
+}
+
+// Les prefixes qui portent une couleur ou une bordure. Les valeurs arbitraires
+// entre crochets sont exclues par la classe de caracteres : elles ne dependent
+// d aucun token, donc leur disparition est impossible.
+//
+// ⚠️ NE PAS ECRIRE D EXEMPLE DE CLASSE ENTRE CROCHETS DANS CE FICHIER : le
+// scanner de Tailwind lit ce script comme n importe quelle source, et il a
+// genere la classe citee en exemple — dont la variable etait alors signalee
+// orpheline par la sonde d a cote. C est L-008 : un controle de contenu qui
+// scanne le code trebuche sur ses propres exemples.
+const MOTIF_CLASSE = /\b(?:bg|text|border|ring|fill|stroke|divide|decoration|outline|accent|shadow|from|via|to)-[a-z][a-z0-9]*(?:-[a-z0-9]+)*\b/g;
+
+const classesEcrites = new Set();
+for (const fichier of fichiersSources(pathSonde.join(racine, "src"))) {
+  for (const m of fsSonde.readFileSync(fichier, "utf8").matchAll(MOTIF_CLASSE)) {
+    classesEcrites.add(m[0]);
+  }
+}
+
+// Tailwind accole quatre suites differentes au nom de la classe, CONSTATEES
+// dans le CSS produit et non supposees : une regle nue, un modificateur
+// d opacite echappe, une pseudo-classe, un combinateur.
+const SUITES_SERVIES = ["{", "\\", ":", ">", ","];
+const servie = (c) => SUITES_SERVIES.some((suite) => css.includes(`${c}${suite}`));
+
+// Ce que le code ecrit sans que Tailwind ait a le servir. Chaque exception
+// porte sa raison, et le controle suivant verifie qu elle sert encore.
+const EXCEPTIONS_CLASSES = [
+  ["text-align", "propriete CSS citee dans un commentaire, pas une classe"],
+];
+const exceptees = new Set(EXCEPTIONS_CLASSES.map(([c]) => c));
+const jamaisServies = [...classesEcrites].filter((c) => !exceptees.has(c) && !servie(c));
+
+controles.push(
+  // CONTRE-TEST : un inventaire vide declarerait « tout est servi » sans avoir
+  // rien regarde. C est lui qui a signale les deux versions precedentes.
+  [
+    // Seuil pose SOUS la mesure du jour (96) : il signale une extraction
+    // cassee, pas une variation normale du code.
+    classesEcrites.size >= 80,
+    `CONTRE-TEST : ${classesEcrites.size} classes utilitaires ecrites dans le code`,
+  ],
+  [
+    jamaisServies.length === 0,
+    jamaisServies.length === 0
+      ? "chaque classe ecrite est reellement servie"
+      : `ecrites mais JAMAIS SERVIES (rendu perdu en silence) : ${jamaisServies.join(", ")}`,
+  ],
+);
+
+
 for (const [ok, libelle] of controles) {
   if (!ok) echecs += 1;
   console.log(`${ok ? "OK   " : "ECHEC"} ${libelle}`);

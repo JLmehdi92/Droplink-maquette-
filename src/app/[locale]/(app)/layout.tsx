@@ -113,8 +113,8 @@ export default async function LayoutApplication({
             rien dire laisserait un vendeur découvrir un jour une facture qu'il
             n'attendait pas, ou craindre une limite qui n'existe pas.
           */}
-          <div className="mb-3.5 rounded-lg bg-secondary-container p-4">
-            <p className="font-label-md text-[13px] font-bold text-on-secondary-container">
+          <div className="mb-3.5 rounded-lg bg-violet-fond p-4">
+            <p className="font-label-md text-[13px] font-bold text-violet-encre">
               {t("lancement.titre")}
             </p>
             <p className="mt-1.5 font-body-sm text-[12px] leading-[18px] text-on-surface-variant">

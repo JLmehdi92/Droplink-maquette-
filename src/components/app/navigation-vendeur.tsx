@@ -69,7 +69,7 @@ export function NavigationVendeur({
                   aria-current={active ? "page" : undefined}
                   className={
                     "flex min-h-11 min-w-11 flex-col items-center justify-center gap-1 " +
-                    (active ? "text-secondary" : "text-sourdine")
+                    (active ? "text-violet" : "text-sourdine")
                   }
                 >
                   <Icone nom={entree.icone} className="h-[21px] w-[21px]" />
@@ -96,7 +96,7 @@ export function NavigationVendeur({
                 className={
                   "flex h-[42px] items-center gap-[11px] rounded-[11px] px-[13px] font-label-md text-[14px] font-semibold transition-colors " +
                   (active
-                    ? "bg-secondary-container text-secondary"
+                    ? "bg-violet-fond text-violet"
                     : "text-on-surface-variant hover:bg-surface-container")
                 }
               >

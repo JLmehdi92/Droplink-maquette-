@@ -91,7 +91,7 @@ export default async function PanneauAdmin({
                 className={
                   "flex items-start gap-3 rounded-lg border p-4 " +
                   (a.gravite === "critique"
-                    ? "border-tertiary-container bg-tertiary-container/30"
+                    ? "border-alerte-filet bg-alerte-fond"
                     : "border-outline-variant bg-surface-container-lowest")
                 }
               >
@@ -103,7 +103,7 @@ export default async function PanneauAdmin({
                   className={
                     "mt-0.5 flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-md " +
                     (a.gravite === "critique"
-                      ? "bg-tertiary-container text-on-tertiary-container"
+                      ? "bg-alerte-fond text-alerte"
                       : "bg-surface-container text-on-surface-variant")
                   }
                 >
@@ -113,7 +113,7 @@ export default async function PanneauAdmin({
                 <p
                   className={
                     "font-label-md text-[15px] font-bold " +
-                    (a.gravite === "critique" ? "text-on-tertiary-container" : "text-on-surface")
+                    (a.gravite === "critique" ? "text-alerte" : "text-on-surface")
                   }
                 >
                   {t(`panneau.alerte.${a.genre}`)}

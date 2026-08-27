@@ -106,7 +106,7 @@ export default async function Inscription({
                 <li key={etape} className="flex gap-3">
                   <span
                     aria-hidden="true"
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary-container font-label-sm text-label-sm text-secondary"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-fond font-label-sm text-label-sm text-violet"
                   >
                     {index + 1}
                   </span>
@@ -119,7 +119,7 @@ export default async function Inscription({
               {t("dejaCompteTexte")}{" "}
               <Link
                 href={`/${locale}/connexion`}
-                className="font-semibold text-secondary hover:underline"
+                className="font-semibold text-violet hover:underline"
               >
                 {tc("titre")}
               </Link>

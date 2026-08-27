@@ -55,7 +55,7 @@ function BoutonAction({
       disabled={pending || desactive}
       className={
         "min-h-[44px] rounded-lg px-6 font-label-md text-label-md transition-opacity disabled:opacity-50 " +
-        (danger ? "bg-error text-on-error" : "bg-secondary-fixed text-on-surface")
+        (danger ? "bg-error text-on-error" : "bg-violet-fond text-on-surface")
       }
     >
       {pending ? enCours : libelle}

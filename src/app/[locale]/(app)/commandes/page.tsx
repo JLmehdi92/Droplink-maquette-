@@ -194,14 +194,14 @@ export default async function Commandes({
                 className={
                   "rounded-lg border px-5 py-[18px] " +
                   (alerte && valeur > 0
-                    ? "border-tertiary-container bg-tertiary-container/40"
+                    ? "border-alerte-filet bg-alerte-fond"
                     : "border-outline-variant bg-surface-container-lowest")
                 }
               >
                 <p
                   className={
                     "font-body-sm text-[12px] " +
-                    (alerte && valeur > 0 ? "text-on-tertiary-container" : "text-on-surface-variant")
+                    (alerte && valeur > 0 ? "text-alerte" : "text-on-surface-variant")
                   }
                 >
                   {t("compteurs." + clef)}
@@ -209,7 +209,7 @@ export default async function Commandes({
                 <p
                   className={
                     "mt-1.5 font-headline-lg text-[26px] font-extrabold tracking-[-0.03em] " +
-                    (alerte && valeur > 0 ? "text-on-tertiary-container" : "text-on-surface")
+                    (alerte && valeur > 0 ? "text-alerte" : "text-on-surface")
                   }
                 >
                   {valeur}
