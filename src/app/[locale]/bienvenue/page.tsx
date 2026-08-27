@@ -46,7 +46,7 @@ export default async function Bienvenue({
     <div className="min-h-dvh bg-surface-container-lowest md:bg-canvas md:p-7">
       <main
         id="contenu"
-        className="mx-auto w-full max-w-[1000px] bg-surface-container-lowest px-margin-mobile py-10 md:rounded-xl md:px-14 md:py-12"
+        className="mx-auto w-full max-w-[1000px] bg-surface-container-lowest px-margin-mobile py-10 md:rounded-page-publique md:px-14 md:py-12"
       >
         <h1 className="font-headline-xl text-[30px] leading-[36px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
           {t("titre")}

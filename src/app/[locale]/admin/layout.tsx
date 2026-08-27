@@ -78,7 +78,7 @@ export default async function LayoutAdmin({
    */
   return (
     <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-xl">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-page">
         <div className="bg-admin px-4 py-4 md:w-[236px] md:shrink-0 md:py-[22px]">
           <div className="mb-4 px-2 md:mb-[26px]">
             <span className="font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-white">

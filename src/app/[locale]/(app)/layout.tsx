@@ -97,7 +97,7 @@ export default async function LayoutApplication({
    */
   return (
     <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-xl">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-page">
         <aside className="hidden border-r border-outline-variant bg-surface-container-lowest px-4 py-[22px] md:flex md:w-[236px] md:shrink-0 md:flex-col">
           <span className="mb-[26px] px-2 font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-on-surface">
             DropLink

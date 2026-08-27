@@ -63,7 +63,7 @@ export default async function Accueil({
 
   return (
     <div className="bg-canvas md:p-7">
-      <div className="mx-auto w-full max-w-[1384px] overflow-hidden bg-surface-container-lowest md:rounded-xl">
+      <div className="mx-auto w-full max-w-[1384px] overflow-hidden bg-surface-container-lowest md:rounded-page-publique">
         {/* ---- NAVIGATION ------------------------------------------------ */}
         <header className="flex items-center justify-between gap-6 px-margin-mobile py-4 md:px-10 md:py-[22px]">
           <span className="font-headline-md text-[18px] font-extrabold tracking-[-0.02em] text-on-surface">

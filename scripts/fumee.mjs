@@ -1281,6 +1281,53 @@ controles.push(
   ],
 );
 
+// --- Le rayon de la carte-page, dans le CSS REELLEMENT SERVI ---
+//
+// Deux valeurs, selon la surface : 24 sur l authentifie, 28 sur le public.
+// Les tests unitaires etablissent l APPARIEMENT — quelle classe est ecrite ou.
+// Ils ne peuvent pas etablir que la classe PRODUIT un rayon : un token Tailwind
+// v4 qui n arrive pas jusqu au CSS ne casse rien, il rend simplement un coin
+// carre, sans une erreur nulle part. C est le meme piege que `--color-admin`,
+// et il ne se voit qu ici, sur ce que le serveur repond.
+const feuilles = [...fr.matchAll(/href="(\/_next\/static\/css\/[^"]+)"/g)].map((m) => m[1]);
+const css = (
+  await Promise.all(feuilles.map(async (f) => (await fetch(`${base}${f}`)).text()))
+).join("\n");
+
+// CONTRE-TEST D ABORD : une feuille vide satisferait toutes les absences qu on
+// s apprete a verifier. On etablit qu on regarde une vraie feuille avant d y
+// chercher quoi que ce soit.
+controles.push([
+  feuilles.length > 0 && css.includes("--color-surface:"),
+  `CONTRE-TEST : ${feuilles.length} feuille(s) servie(s), et elles portent bien le theme`,
+]);
+
+const valeur = (nom) => /:\s*(\d+)px/.exec(new RegExp(`--radius-${nom}\s*:\s*[^;]+;`).exec(css)?.[0] ?? "")?.[1];
+const rayonAuth = valeur("page");
+const rayonPublic = valeur("page-publique");
+
+controles.push(
+  [rayonAuth === "24", `carte-page authentifiee servie a 24px (lu : ${rayonAuth ?? "AUCUNE VALEUR"})`],
+  [rayonPublic === "28", `carte-page publique servie a 28px (lu : ${rayonPublic ?? "AUCUNE VALEUR"})`],
+  // LES DEUX SENS : si quelqu un ramene une valeur unique, les deux tokens
+  // resteraient definis et les deux controles ci-dessus pourraient rester verts
+  // sur la mauvaise moitie. Ce qui distingue les surfaces, c est l ECART.
+  [
+    rayonAuth !== undefined && rayonAuth !== rayonPublic,
+    "les deux surfaces ne partagent PAS le meme rayon",
+  ],
+  // Et la classe doit exister ET referencer le token : une variable definie que
+  // personne n utilise laisse le coin carre tout aussi silencieusement.
+  [
+    /rounded-page\{border-radius:var\(--radius-page\)\}/.test(css),
+    "la classe du rayon authentifie existe et pointe sur son token",
+  ],
+  [
+    /rounded-page-publique\{border-radius:var\(--radius-page-publique\)\}/.test(css),
+    "la classe du rayon public existe et pointe sur son token",
+  ],
+);
+
 for (const [ok, libelle] of controles) {
   if (!ok) echecs += 1;
   console.log(`${ok ? "OK   " : "ECHEC"} ${libelle}`);

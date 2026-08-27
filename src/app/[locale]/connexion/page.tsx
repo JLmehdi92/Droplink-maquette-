@@ -77,7 +77,7 @@ export default async function Connexion({
     <div className="min-h-dvh bg-surface-container-lowest md:bg-canvas md:p-7">
       <main
         id="contenu"
-        className="mx-auto grid w-full max-w-[1384px] overflow-hidden bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-xl lg:grid-cols-2"
+        className="mx-auto grid w-full max-w-[1384px] overflow-hidden bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-page-publique lg:grid-cols-2"
       >
         <div className="flex flex-col px-margin-mobile py-8 md:px-[76px] md:py-10">
           <Link
