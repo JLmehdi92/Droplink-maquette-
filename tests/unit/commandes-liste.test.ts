@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   ParametresListe,
   analyserParametres,
+  borneHauteExclusive,
   decoderCurseur,
   encoderCurseur,
   motifRecherche,
@@ -145,5 +146,59 @@ describe("Construction des liens", () => {
     expect(listeFiltree(analyserParametres({ q: "x" }))).toBe(true);
     expect(listeFiltree(analyserParametres({ statut: "livre" }))).toBe(true);
     expect(listeFiltree(analyserParametres({ archivees: "1" }))).toBe(true);
+    // La période est un filtre comme les autres : l'oublier ici ferait proposer
+    // « créez votre première commande » à qui a simplement borné ses dates.
+    expect(listeFiltree(analyserParametres({ du: "2026-08-01" }))).toBe(true);
+    expect(listeFiltree(analyserParametres({ au: "2026-08-31" }))).toBe(true);
+  });
+});
+
+/**
+ * LE FILTRE DE PÉRIODE, ET SON PIÈGE.
+ *
+ * Le brief le nomme : `au=2026-08-16` vaut MINUIT. Comparé tel quel, il exclut
+ * toute la journée du 16 — donc un vendeur qui demande « jusqu'à aujourd'hui »
+ * ne voit rien de ce qu'il a créé aujourd'hui, c'est-à-dire précisément ce qu'il
+ * cherchait. Le défaut est silencieux : la liste n'est pas vide, elle est
+ * INCOMPLÈTE, et elle le reste jusqu'à ce que quelqu'un compte.
+ */
+describe("La période", () => {
+  test("la borne haute couvre TOUTE la journée demandée", () => {
+    // La borne rendue est le LENDEMAIN à minuit, et la comparaison est stricte.
+    // Une commande créée le 16 à 23:59:59.999 doit donc passer.
+    expect(borneHauteExclusive("2026-08-16")).toBe("2026-08-17T00:00:00.000Z");
+    expect(new Date("2026-08-16T23:59:59.999Z") < new Date(borneHauteExclusive("2026-08-16"))).toBe(
+      true,
+    );
+    // Et le 17 à minuit pile ne passe PAS : la borne reste une borne.
+    expect(new Date("2026-08-17T00:00:00.000Z") < new Date(borneHauteExclusive("2026-08-16"))).toBe(
+      false,
+    );
+  });
+
+  test("elle franchit les fins de mois et les années bissextiles", () => {
+    // Une arithmétique écrite « +1 jour » sur la chaîne casserait ici sans que
+    // rien ne le dise : le mois suivant, l'année suivante, le 29 février.
+    expect(borneHauteExclusive("2026-08-31")).toBe("2026-09-01T00:00:00.000Z");
+    expect(borneHauteExclusive("2026-12-31")).toBe("2027-01-01T00:00:00.000Z");
+    expect(borneHauteExclusive("2024-02-28")).toBe("2024-02-29T00:00:00.000Z");
+  });
+
+  test("une date qui n'existe pas est refusée, pas propagée", () => {
+    // `2026-02-31` a la FORME d'une date. La laisser passer ferait comparer une
+    // valeur que Postgres refuse, donc échouer la lecture de l'écran le plus
+    // utilisé du produit — sur une saisie que n'importe qui peut écrire dans la
+    // barre d'adresse.
+    for (const saisie of ["2026-02-31", "2026-13-01", "16/08/2026", "hier", "2026-08-1", ""]) {
+      expect(analyserParametres({ au: saisie }).au, `« ${saisie} » a été acceptée`).toBeNull();
+    }
+    expect(analyserParametres({ au: "2026-02-28" }).au).toBe("2026-02-28");
+  });
+
+  test("elle voyage dans l'URL et survit à la page suivante", () => {
+    const avec = analyserParametres({ du: "2026-08-01", au: "2026-08-31" });
+    const lien = lienListe("/fr/commandes", avec, { curseur: "abc" });
+    expect(lien).toContain("du=2026-08-01");
+    expect(lien).toContain("au=2026-08-31");
   });
 });

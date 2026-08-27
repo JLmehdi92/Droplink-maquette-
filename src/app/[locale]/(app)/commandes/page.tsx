@@ -103,6 +103,8 @@ export default async function Commandes({
               {parametres.tri !== "recentes" ? (
                 <input type="hidden" name="tri" value={parametres.tri} />
               ) : null}
+              {parametres.du !== null ? <input type="hidden" name="du" value={parametres.du} /> : null}
+              {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
               {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
 
               <Icone
@@ -149,6 +151,8 @@ export default async function Commandes({
           {parametres.tri !== "recentes" ? (
             <input type="hidden" name="tri" value={parametres.tri} />
           ) : null}
+          {parametres.du !== null ? <input type="hidden" name="du" value={parametres.du} /> : null}
+          {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
           {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
           <Icone
             nom="search"

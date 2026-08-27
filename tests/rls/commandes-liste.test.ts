@@ -348,6 +348,59 @@ describe("Les trois états vides", () => {
   });
 });
 
+/**
+ * LE FILTRE DE PÉRIODE, ÉPROUVÉ SUR LA BASE — pas sur une copie de la requête.
+ *
+ * LE PIÈGE QUE LE BRIEF NOMME : `au=<aujourd'hui>` vaut MINUIT. Comparé tel
+ * quel, il exclut TOUTE la journée en cours. Le vendeur qui demande « jusqu'à
+ * aujourd'hui » ne voit donc rien de ce qu'il vient de créer — c'est-à-dire
+ * exactement ce qu'il cherchait. Et le défaut est silencieux : la liste n'est
+ * pas vide, elle est INCOMPLÈTE.
+ *
+ * Les commandes d'Alice sont créées à l'instant par ce fichier : elles portent
+ * donc la date du jour, ce qui rend ce cas éprouvable sans figer d'horloge.
+ */
+describe("La période", () => {
+  const jour = (decalage: number): string => {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() + decalage);
+    return d.toISOString().slice(0, 10);
+  };
+
+  test("« jusqu'à aujourd'hui » inclut ce qui a été créé aujourd'hui", async () => {
+    const page = await lire(alice, defauts({ au: jour(0) }));
+    expect(
+      page.lignes.length,
+      "la journée en cours est exclue : c'est le piège de la borne haute",
+    ).toBeGreaterThan(0);
+  });
+
+  test("contre-test : une borne haute d'HIER n'en rend aucune", async () => {
+    // Sans lui, le test précédent passerait avec un filtre qui ne filtre rien.
+    const page = await lire(alice, defauts({ au: jour(-1) }));
+    expect(page.lignes).toEqual([]);
+  });
+
+  test("la borne basse du jour laisse tout passer, celle de demain rien", async () => {
+    const aujourdhui = await lire(alice, defauts({ du: jour(0) }));
+    expect(aujourdhui.lignes.length).toBeGreaterThan(0);
+
+    const demain = await lire(alice, defauts({ du: jour(1) }));
+    expect(demain.lignes).toEqual([]);
+  });
+
+  test("les deux bornes ensemble encadrent la journée", async () => {
+    const page = await lire(alice, defauts({ du: jour(0), au: jour(0) }));
+    expect(page.lignes.length).toBeGreaterThan(0);
+  });
+
+  test("une période hors sujet le dit comme un filtre, pas comme un compte vide", async () => {
+    const page = await lire(alice, defauts({ du: "2020-01-01", au: "2020-01-31" }));
+    expect(page.lignes).toEqual([]);
+    expect(page.diagnostic).toBe("filtre-trop-etroit");
+  });
+});
+
 describe("Pagination", () => {
 
   test("sans page suivante, aucun curseur n'est proposé", async () => {

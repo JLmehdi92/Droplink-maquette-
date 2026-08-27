@@ -461,7 +461,9 @@
       "enTransit": "In transit",
       "jamaisOuvertes": "Never opened",
       "livrees": "Delivered"
-    }
+    },
+    "periodeDu": "Created from",
+    "periodeAu": "Up to"
   },
   "editeur": {
     "historique": {

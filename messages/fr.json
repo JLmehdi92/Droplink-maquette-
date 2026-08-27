@@ -461,7 +461,9 @@
       "enTransit": "En transit",
       "jamaisOuvertes": "Jamais ouvertes",
       "livrees": "Livrées"
-    }
+    },
+    "periodeDu": "Créées à partir du",
+    "periodeAu": "Jusqu'au"
   },
   "editeur": {
     "historique": {

@@ -29,6 +29,8 @@ export function lienListe(
   if (suivant.statut !== null) params.set("statut", suivant.statut);
   if (suivant.qc !== null) params.set("qc", suivant.qc);
   if (suivant.tri !== "recentes") params.set("tri", suivant.tri);
+  if (suivant.du !== null) params.set("du", suivant.du);
+  if (suivant.au !== null) params.set("au", suivant.au);
   if (suivant.archivees) params.set("archivees", "1");
   if (curseur !== null) params.set("curseur", curseur);
 
@@ -44,5 +46,5 @@ export function lienListe(
  * commande » à qui consulte ses archives serait absurde.
  */
 export function listeFiltree(p: ParametresListe): boolean {
-  return p.q !== "" || p.statut !== null || p.qc !== null || p.archivees;
+  return p.q !== "" || p.statut !== null || p.qc !== null || p.archivees || p.du !== null || p.au !== null;
 }

@@ -95,6 +95,56 @@ export async function PanneauFiltres({
             </select>
           </div>
 
+          {/*
+            LA PÉRIODE, sur la date de CRÉATION — c'est ainsi que le vendeur y
+            pense : « les commandes de la semaine dernière ».
+
+            DEUX CHAMPS `date` NATIFS et non un sélecteur maison : ils ouvrent le
+            calendrier du système, se saisissent au clavier, et ne coûtent pas un
+            octet de JavaScript sur un écran que le fournisseur ouvre deux cents
+            fois par semaine.
+
+            ⚠️ LA BORNE HAUTE EST INCLUSE, et c'est tout le sujet de ce filtre.
+            `au=2026-08-16` vaut minuit : comparé tel quel, il exclurait toute la
+            journée du 16. La lecture compare donc au LENDEMAIN en strictement
+            inférieur — voir `borneHauteExclusive`. Le libellé promet « jusqu'au »,
+            et la base tient cette promesse.
+          */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="du"
+                className="mb-1 block font-label-sm text-label-sm text-on-surface-variant"
+              >
+                {t("periodeDu")}
+              </label>
+              <input
+                id="du"
+                name="du"
+                type="date"
+                defaultValue={parametres.du ?? ""}
+                max={parametres.au ?? undefined}
+                className={champ}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="au"
+                className="mb-1 block font-label-sm text-label-sm text-on-surface-variant"
+              >
+                {t("periodeAu")}
+              </label>
+              <input
+                id="au"
+                name="au"
+                type="date"
+                defaultValue={parametres.au ?? ""}
+                min={parametres.du ?? undefined}
+                className={champ}
+              />
+            </div>
+          </div>
+
           <label className="flex items-center gap-2 font-body-sm text-body-sm text-on-surface">
             <input
               type="checkbox"

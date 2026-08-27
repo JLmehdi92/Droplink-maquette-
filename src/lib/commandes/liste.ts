@@ -54,14 +54,70 @@ export const PAR_PAGE = 50;
  * lieu de faire échouer l'analyse entière. Un lien tronqué recopié depuis une
  * conversation doit ouvrir la liste, pas une erreur.
  */
+/**
+ * Une date de bornage, telle qu'un `<input type="date">` l'écrit : `AAAA-MM-JJ`.
+ *
+ * LA FORME NE SUFFIT PAS. `2026-02-31` la respecte et n'existe pas ; le laisser
+ * passer ferait comparer une valeur que Postgres refuse, donc échouer la lecture
+ * de l'écran le plus utilisé du produit sur une saisie que n'importe qui peut
+ * écrire dans la barre d'adresse. On reconstruit la date et on exige qu'elle se
+ * rende identique à elle-même.
+ */
+export const DateBornage = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine((v) => {
+    const d = new Date(v + "T00:00:00Z");
+    // ⚠️ LA NULLITÉ SE TESTE AVANT `toISOString`, QUI LÈVE. Écrite d'un trait,
+    // cette validation jetait une `RangeError` sur `2026-13-01` — et une
+    // exception n'est pas un refus : elle traverse le `catch` de Zod et fait
+    // échouer le rendu de l'écran le plus utilisé du produit, sur une valeur que
+    // n'importe qui peut écrire dans la barre d'adresse. Attrapé par le test,
+    // pas par la relecture.
+    if (Number.isNaN(d.getTime())) return false;
+    return d.toISOString().slice(0, 10) === v;
+  })
+  .nullable()
+  .catch(null);
+
 export const ParametresListe = z.object({
   q: z.string().trim().max(120).catch(""),
   statut: z.enum(STATUTS_EXPEDITION).nullable().catch(null),
   qc: z.enum(STATUTS_QC).nullable().catch(null),
   tri: z.enum(TRIS).catch("recentes"),
   archivees: z.boolean().catch(false),
+  /** Borne basse de création, incluse. */
+  du: DateBornage,
+  /** Borne haute de création, INCLUSE — voir `borneHauteExclusive`. */
+  au: DateBornage,
   curseur: z.string().max(120).nullable().catch(null),
 });
+
+/**
+ * LA BORNE HAUTE EST LE PIÈGE DE CE FILTRE, et le brief le nomme.
+ *
+ * `au=2026-08-16` vaut `2026-08-16T00:00:00`. Comparé par `<=`, il exclut TOUTE
+ * la journée du 16 : un vendeur qui demande « jusqu'à aujourd'hui » ne voit rien
+ * de ce qu'il a créé aujourd'hui — c'est-à-dire précisément ce qu'il cherchait.
+ * Le défaut est silencieux : la liste n'est pas vide, elle est incomplète, et
+ * elle le reste jusqu'à ce que quelqu'un compte.
+ *
+ * On compare donc en STRICTEMENT INFÉRIEUR au lendemain. Une inclusion écrite
+ * `<= au + 23:59:59` laisserait passer à côté des enregistrements de la dernière
+ * seconde et des fractions de seconde que Postgres stocke.
+ *
+ * ⚠️ LES BORNES SONT EN UTC, et il faut le dire plutôt que de le laisser
+ * découvrir. `created_at` est un `timestamptz` ; la date saisie n'a pas de fuseau.
+ * Pour un fournisseur à Guangzhou (UTC+8), « jusqu'au 16 » inclut donc les huit
+ * premières heures du 17 local. C'est une SUR-inclusion : elle montre un peu
+ * plus que demandé, jamais moins. Le sens de l'erreur est délibéré — le défaut
+ * qu'on corrige ici est une omission, et une omission ne se voit pas.
+ */
+export function borneHauteExclusive(au: string): string {
+  const lendemain = new Date(au + "T00:00:00Z");
+  lendemain.setUTCDate(lendemain.getUTCDate() + 1);
+  return lendemain.toISOString();
+}
 
 export type ParametresListe = z.infer<typeof ParametresListe>;
 
@@ -332,6 +388,14 @@ export async function lireCommandes(
     requete = requete.eq("status", "en_transit").not("parcel_last_movement_at", "is", null);
   }
 
+  // LA PÉRIODE PORTE SUR LA CRÉATION, pas sur la modification. C'est ainsi que le
+  // vendeur y pense — « les commandes de la semaine dernière » — et c'est aussi
+  // la colonne de l'index `(shop_id, created_at)` posé pour le tri par défaut.
+  if (parametres.du !== null) requete = requete.gte("created_at", parametres.du);
+  if (parametres.au !== null) {
+    requete = requete.lt("created_at", borneHauteExclusive(parametres.au));
+  }
+
   if (parametres.statut !== null) requete = requete.eq("status", parametres.statut);
   if (parametres.qc !== null) requete = requete.eq("qc_status", parametres.qc);
 
@@ -463,6 +527,8 @@ export function analyserParametres(
     qc: seul("qc") ?? null,
     tri: seul("tri") ?? "recentes",
     archivees: seul("archivees") === "1",
+    du: seul("du") ?? null,
+    au: seul("au") ?? null,
     curseur: seul("curseur") ?? null,
   });
 }
