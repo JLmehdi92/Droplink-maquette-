@@ -183,7 +183,8 @@ afterAll(async () => {
   await supprimerUtilisateur(alice);
   await supprimerUtilisateur(voisin);
   await bd.end();
-});
+  // Même cascade, même borne : voir vues-et-journal.
+}, 300_000);
 
 describe("Le jeu de mesure est bien celui qu'on décrit", () => {
   test("chaque compte porte exactement le plafond annoncé", async () => {

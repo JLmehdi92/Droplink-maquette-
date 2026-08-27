@@ -258,7 +258,8 @@ afterAll(async () => {
   await supprimerUtilisateur(alice);
   await supprimerUtilisateur(voisin);
   await bd.end();
-});
+  // Même cascade, même borne : voir vues-et-journal.
+}, 300_000);
 
 describe("Le jeu de mesure", () => {
   test("il porte bien la volumétrie qu'il prétend décrire", async () => {

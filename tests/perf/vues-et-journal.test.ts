@@ -204,11 +204,24 @@ beforeAll(async () => {
 }, 900_000);
 
 afterAll(async () => {
+  /*
+   * LA BORNE EST EXPLICITE, ET ELLE A UNE RAISON CHIFFRÉE.
+   *
+   * Le défaut par défaut d'un crochet est de DIX SECONDES. Supprimer les
+   * comptes de ce jeu fait tomber en cascade neuf mille six cents commandes,
+   * leurs vues et leurs événements : mesuré, c'est plus long que dix secondes,
+   * et la suite échouait au NETTOYAGE après que les quarante-cinq mesures
+   * soient toutes passées.
+   *
+   * Un test qui échoue par intermittence se BORNE, il ne se relance pas jusqu'au
+   * vert. Et un échec de nettoyage qui ressemble à un échec de mesure est le
+   * genre de rouge auquel on s'habitue.
+   */
   await supprimerUtilisateur(alice);
   await supprimerUtilisateur(voisin);
   await supprimerUtilisateur(assidu);
   await bd.end();
-});
+}, 300_000);
 
 /**
  * TOUTE MESURE PORTE UNE ASSERTION SUR LE JEU QU'ELLE PRÉTEND DÉCRIRE.

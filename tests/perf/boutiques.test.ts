@@ -161,7 +161,8 @@ afterAll(async () => {
   await supprimerUtilisateur(alice);
   await supprimerUtilisateur(bob);
   await bd.end();
-});
+  // Même cascade, même borne : voir vues-et-journal.
+}, 300_000);
 
 describe("La mesure décrit bien le jeu qu'elle prétend décrire", () => {
   test("les tables interdites ne sont PAS vides", async () => {
