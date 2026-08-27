@@ -422,7 +422,10 @@
       "compteTexte": "Create your first order: upload your photos, paste the tracking number, and send the link to your customer.",
       "creer": "Create my first order",
       "filtreTitre": "No order matches",
-      "filtreTexte": "This account has orders, but none of them pass the current filters."
+      "filtreTexte": "This account has orders, but none of them pass the current filters.",
+      "archiveTitre": "Everything is archived",
+      "archiveTexte": "This account has no active order: they are all filed in the archive. Their links keep working for your customers.",
+      "voirArchives": "View the archive"
     },
     "jamaisOuvert": "Never opened",
     "jamaisOuvertAide": "{client} has not opened their link yet.",

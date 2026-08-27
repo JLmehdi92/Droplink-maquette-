@@ -94,12 +94,40 @@ export interface LigneCommande {
   readonly colisBougeLe: string | null;
 }
 
+/**
+ * POURQUOI LA PAGE EST VIDE — mesuré, jamais déduit.
+ *
+ * Il y a TROIS raisons, pas deux, et la troisième a été trouvée en pilotant le
+ * produit : un compte dont TOUTES les commandes sont archivées. L'écran
+ * affichait alors « aucune ne passe les filtres en cours » ALORS QU'AUCUN FILTRE
+ * N'ÉTAIT POSÉ, et proposait « Tout effacer » vers l'adresse déjà ouverte —
+ * c'est-à-dire un bouton qui ne fait rien. Le produit avait raison sur les
+ * données et mentait sur la cause.
+ *
+ * Le diagnostic est LU EN BASE et non déduit de « aucun filtre donc archivé ».
+ * Une déduction de ce genre reste vraie tant que personne n'ajoute un filtre à
+ * `lireCommandes` sans l'ajouter à `listeFiltree` — c'est-à-dire qu'elle tient
+ * par une ABSENCE (L-029). Deux lectures d'UNE ligne, et seulement quand la page
+ * est vide, coûtent moins que ce sursis.
+ */
+export type DiagnosticListeVide =
+  /** Le compte n'a aucune commande, archivées comprises. */
+  | "aucune-commande"
+  /** Il existe des commandes, et AUCUNE n'est active : tout est archivé. */
+  | "tout-archive"
+  /** Des commandes actives existent, mais aucune ne passe les critères. */
+  | "filtre-trop-etroit";
+
 export interface PageCommandes {
   readonly lignes: readonly LigneCommande[];
   /** Curseur de la page suivante, ou `null` s'il n'y en a pas. */
   readonly suivant: string | null;
-  /** Vrai si le compte ne contient AUCUNE commande, filtres mis à part. */
-  readonly compteVide: boolean;
+  /**
+   * Pourquoi la page ne contient rien, ou `null` quand elle contient quelque
+   * chose — la question ne se pose alors pas, et un booléen l'aurait fait
+   * répondre quand même.
+   */
+  readonly diagnostic: DiagnosticListeVide | null;
 }
 
 /**
@@ -376,23 +404,42 @@ export async function lireCommandes(
   return {
     lignes,
     suivant,
-    compteVide: lignes.length === 0 ? await compteEstVide(supabase) : false,
+    diagnostic: lignes.length === 0 ? await diagnostiquerVide(supabase) : null,
   };
 }
 
 /**
- * Distingue « ce compte n'a rien » de « ce filtre ne renvoie rien ».
+ * Établit POURQUOI la page est vide, en deux lectures d'UNE ligne.
  *
- * Afficher « créez votre première commande » à un vendeur qui en a neuf mille est
- * une perte de confiance immédiate. La question ne se pose QUE lorsque la page
- * est vide, et se répond en lisant UNE ligne — jamais en comptant.
+ * Afficher « créez votre première commande » à un vendeur qui en a neuf mille
+ * est une perte de confiance immédiate ; lui dire que ses filtres excluent tout
+ * alors qu'il n'en a posé aucun l'est tout autant, parce qu'il cherche alors un
+ * filtre qui n'existe pas.
+ *
+ * La question ne se pose QUE lorsque la page est vide, et se répond en lisant
+ * une ligne — jamais en comptant : un `count` complet lit toutes les lignes du
+ * compte et ne se rattrape par aucun index (L-017).
+ *
+ * SUR ÉCHEC DE LECTURE, on rend « filtre trop étroit », qui est l'affirmation la
+ * plus faible des trois : elle n'invente ni un compte vide — ce qui proposerait
+ * de créer une première commande à qui en a des milliers — ni un archivage que
+ * personne n'a constaté.
  */
-async function compteEstVide(
+async function diagnostiquerVide(
   supabase: Awaited<ReturnType<typeof creerClientServeur>>,
-): Promise<boolean> {
-  const { data, error } = await supabase.from("orders").select("id").limit(1);
-  if (error !== null || data === null) return false;
-  return data.length === 0;
+): Promise<DiagnosticListeVide> {
+  const [toutes, actives] = await Promise.all([
+    supabase.from("orders").select("id").limit(1),
+    supabase.from("orders").select("id").is("archived_at", null).limit(1),
+  ]);
+
+  if (toutes.error !== null || toutes.data === null) return "filtre-trop-etroit";
+  if (toutes.data.length === 0) return "aucune-commande";
+
+  if (actives.error !== null || actives.data === null) return "filtre-trop-etroit";
+  if (actives.data.length === 0) return "tout-archive";
+
+  return "filtre-trop-etroit";
 }
 
 /**

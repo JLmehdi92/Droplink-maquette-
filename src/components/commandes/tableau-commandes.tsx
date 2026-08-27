@@ -4,7 +4,7 @@ import { Icone } from "@/components/icone";
 import { TraductionsClient } from "@/components/traductions-client";
 import { ActionsLigne } from "./actions-ligne";
 import { BadgeStatut, teinteExpedition, teinteQc } from "./badge-statut";
-import type { PageCommandes, ParametresListe } from "@/lib/commandes/liste";
+import type { DiagnosticListeVide, PageCommandes, ParametresListe } from "@/lib/commandes/liste";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
 import type { EtatLot } from "@/lib/commandes/lot";
 import {
@@ -66,7 +66,7 @@ export async function TableauCommandes({
     <section className="flex flex-col overflow-hidden border-y border-outline-variant bg-surface-container-lowest md:mx-0 md:rounded-lg md:border">
       {page.lignes.length === 0 ? (
         <EtatVide
-          compteVide={page.compteVide}
+          diagnostic={page.diagnostic}
           base={base}
           langue={langue}
           parametres={parametres}
@@ -377,40 +377,70 @@ async function Pagination({
   );
 }
 
+/**
+ * L'ÉCRAN VIDE DIT LA CAUSE, ET N'OFFRE QUE DES GESTES QUI FONT QUELQUE CHOSE.
+ *
+ * Trois causes, trois écrans. La troisième — « tout est archivé » — manquait, et
+ * son absence produisait exactement le défaut que Wassim a signalé le
+ * 27/08/2026 : sur un compte dont les cinq commandes étaient archivées, l'écran
+ * annonçait « aucune ne passe les filtres en cours » SANS QU'AUCUN FILTRE SOIT
+ * POSÉ, et son seul bouton, « Tout effacer », pointait vers l'adresse déjà
+ * ouverte. Cliquer ne changeait rien — non par panne, mais parce qu'il n'y avait
+ * rien à effacer.
+ *
+ * D'où la règle qui vaut au-delà de cet écran : UN BOUTON DONT L'ACTION EST
+ * DÉJÀ L'ÉTAT COURANT NE SE REND PAS. « Tout effacer » n'apparaît donc que
+ * lorsqu'un filtre est réellement posé — sans quoi il enseigne au vendeur que
+ * l'interface ne répond pas, ce qui est plus coûteux que l'absence de bouton.
+ */
 async function EtatVide({
-  compteVide,
+  diagnostic,
   base,
   langue,
   parametres,
 }: {
-  readonly compteVide: boolean;
+  readonly diagnostic: DiagnosticListeVide | null;
   readonly base: string;
   readonly langue: string;
   readonly parametres: ParametresListe;
 }) {
   const t = await getTranslations("commandes");
-  const filtree = listeFiltree(parametres);
 
-  // `compteVide` fait autorité : il vient d'une lecture sans filtre. Déduire
-  // « pas de filtre donc compte vide » serait faux le jour où une lecture
-  // échoue, et proposerait de créer une première commande à qui en a des
-  // milliers.
-  const vraimentVide = compteVide && !filtree;
+  // Le diagnostic vient d'une LECTURE, pas d'une déduction sur les paramètres.
+  // Il ne suffit pourtant pas seul : proposer « voir les archives » à qui les
+  // consulte déjà rendrait un second bouton sans effet.
+  const toutArchive = diagnostic === "tout-archive" && !parametres.archivees;
+  const compteVide = diagnostic === "aucune-commande";
+
+  // Le lien vers les archives GARDE les autres critères : le vendeur qui filtrait
+  // sur un statut ne veut pas le reperdre en changeant de pile.
+  const lienArchives = lienListe(base, parametres, { archivees: true });
+
+  const titre = compteVide
+    ? t("vide.compteTitre")
+    : toutArchive
+      ? t("vide.archiveTitre")
+      : t("vide.filtreTitre");
+
+  const texte = compteVide
+    ? t("vide.compteTexte")
+    : toutArchive
+      ? t("vide.archiveTexte")
+      : t("vide.filtreTexte");
 
   return (
     <div className="flex flex-grow flex-col items-center justify-center gap-3 px-6 py-16 text-center">
       <span className="rounded-full bg-surface-container p-4 text-sourdine">
-        <Icone nom={vraimentVide ? "add" : "search"} className="text-[32px]" />
+        <Icone
+          nom={compteVide ? "add" : toutArchive ? "inventory_2" : "search"}
+          className="text-[32px]"
+        />
       </span>
 
-      <h2 className="font-headline-md text-headline-md-mobile text-on-surface">
-        {vraimentVide ? t("vide.compteTitre") : t("vide.filtreTitre")}
-      </h2>
-      <p className="max-w-md font-body-md text-body-md text-on-surface-variant">
-        {vraimentVide ? t("vide.compteTexte") : t("vide.filtreTexte")}
-      </p>
+      <h2 className="font-headline-md text-headline-md-mobile text-on-surface">{titre}</h2>
+      <p className="max-w-md font-body-md text-body-md text-on-surface-variant">{texte}</p>
 
-      {vraimentVide ? (
+      {compteVide ? (
         <form action={creerBrouillon}>
           <input type="hidden" name="langue" value={langue} />
           <button
@@ -421,14 +451,21 @@ async function EtatVide({
             {t("vide.creer")}
           </button>
         </form>
-      ) : (
+      ) : toutArchive ? (
+        <Link
+          href={lienArchives}
+          className="flex min-h-11 items-center rounded-md border border-outline px-6 font-label-md text-[14px] font-semibold text-on-surface transition-colors hover:bg-surface-container"
+        >
+          {t("vide.voirArchives")}
+        </Link>
+      ) : listeFiltree(parametres) ? (
         <Link
           href={base}
           className="flex min-h-11 items-center rounded-md border border-outline px-6 font-label-md text-[14px] font-semibold text-on-surface transition-colors hover:bg-surface-container"
         >
           {t("toutEffacer")}
         </Link>
-      )}
+      ) : null}
     </div>
   );
 }

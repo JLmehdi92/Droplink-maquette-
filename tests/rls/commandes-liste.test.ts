@@ -25,6 +25,10 @@ import {
 
 let alice: UtilisateurDeTest;
 let bob: UtilisateurDeTest;
+/** Une seule commande, ARCHIVÉE : le compte dont la liste est vide sans filtre. */
+let carla: UtilisateurDeTest;
+/** Aucune commande du tout : le compte réellement neuf. */
+let dylan: UtilisateurDeTest;
 let catalogue: Client;
 
 /** Sentinelle : une valeur unique, cherchée ensuite PAR SA VALEUR, pas par son nom. */
@@ -42,6 +46,8 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("liste-alice");
   bob = await creerUtilisateur("liste-bob");
+  carla = await creerUtilisateur("liste-carla");
+  dylan = await creerUtilisateur("liste-dylan");
 
   // Alice : de quoi éprouver les filtres, la recherche et la pagination.
   const lignes = [
@@ -67,11 +73,27 @@ beforeAll(async () => {
     .from("orders")
     .insert({ shop_id: bob.shopId, customer_label: "Commande de Bob", product_ref: "BOB-1" });
   expect(error, `insertion impossible pour Bob : ${error?.message}`).toBeNull();
-}, 90_000);
+
+  // Carla reproduit le compte de Wassim au 27/08/2026 : des commandes existent,
+  // TOUTES archivées. Dylan n'en a aucune. Sans ces deux comptes, les trois
+  // diagnostics d'écran vide ne seraient jamais tous exercés, et deux d'entre
+  // eux pourraient rendre n'importe quoi sans qu'une suite verte le signale.
+  const { error: erreurCarla } = await carla.client
+    .from("orders")
+    .insert({ shop_id: carla.shopId, customer_label: "Rangée", product_ref: "CARLA-1" });
+  expect(erreurCarla, `insertion impossible pour Carla : ${erreurCarla?.message}`).toBeNull();
+
+  await carla.client
+    .from("orders")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("customer_label", "Rangée");
+}, 120_000);
 
 afterAll(async () => {
   await supprimerUtilisateur(alice);
   await supprimerUtilisateur(bob);
+  await supprimerUtilisateur(carla);
+  await supprimerUtilisateur(dylan);
   await catalogue.end();
 });
 
@@ -251,7 +273,7 @@ describe("Filtres et recherche", () => {
     const page = await lire(alice, defauts({ q: "zzzz-introuvable" }));
     expect(page.lignes).toEqual([]);
     // ET le compte n'est PAS déclaré vide : c'est le filtre qui ne rend rien.
-    expect(page.compteVide).toBe(false);
+    expect(page.diagnostic).toBe("filtre-trop-etroit");
   });
 
   /**
@@ -274,14 +296,59 @@ describe("Filtres et recherche", () => {
   });
 });
 
-describe("Pagination", () => {
-  test("l'état vide distingue le compte vide du filtre stérile", async () => {
+/**
+ * LES TROIS RAISONS D'UNE LISTE VIDE, chacune éprouvée sur un compte qui la
+ * produit réellement.
+ *
+ * La troisième — tout archivé — manquait au produit, et son absence a été
+ * trouvée en pilotant l'écran, pas en le relisant : l'interface annonçait
+ * « aucune ne passe les filtres en cours » sans qu'aucun filtre soit posé, et
+ * offrait « Tout effacer » vers l'adresse déjà ouverte. Un bouton qui ne fait
+ * rien enseigne que le produit ne répond pas.
+ *
+ * Les trois valeurs sont exercées ici, et le sont par des comptes DISTINCTS :
+ * une suite qui n'en produirait qu'une passerait au vert en ne prouvant que
+ * celle-là.
+ */
+describe("Les trois états vides", () => {
+  test("un filtre stérile sur un compte qui a des commandes actives", async () => {
     // Bob n'a qu'une commande : filtrée sur un statut absent, la page est vide
     // SANS que le compte le soit.
     const filtre = await lire(bob, defauts({ statut: "livre" }));
     expect(filtre.lignes).toEqual([]);
-    expect(filtre.compteVide).toBe(false);
+    expect(filtre.diagnostic).toBe("filtre-trop-etroit");
   });
+
+  test("un compte dont TOUT est archivé se dit archivé, pas filtré", async () => {
+    const page = await lire(carla);
+    expect(page.lignes).toEqual([]);
+    expect(page.diagnostic).toBe("tout-archive");
+  });
+
+  test("contre-test : la commande de Carla EXISTE, et les archives la montrent", async () => {
+    // Sans ce contre-test, « tout-archive » serait indiscernable d'un compte que
+    // la RLS empêcherait simplement de lire quoi que ce soit.
+    const archives = await lire(carla, defauts({ archivees: true }));
+    expect(archives.lignes.map((l) => l.client)).toEqual(["Rangée"]);
+    expect(archives.diagnostic).toBeNull();
+  });
+
+  test("un compte neuf se dit vide, et n'est pas confondu avec un archivage", async () => {
+    const page = await lire(dylan);
+    expect(page.lignes).toEqual([]);
+    expect(page.diagnostic).toBe("aucune-commande");
+  });
+
+  test("une page qui contient des lignes ne porte AUCUN diagnostic", async () => {
+    // Le diagnostic répond à « pourquoi est-ce vide ». Sur une page pleine, la
+    // question ne se pose pas — un booléen y aurait répondu quand même.
+    const page = await lire(alice);
+    expect(page.lignes.length).toBeGreaterThan(0);
+    expect(page.diagnostic).toBeNull();
+  });
+});
+
+describe("Pagination", () => {
 
   test("sans page suivante, aucun curseur n'est proposé", async () => {
     const page = await lire(bob);

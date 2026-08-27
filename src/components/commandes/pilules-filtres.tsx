@@ -4,18 +4,20 @@ import type { ParametresListe } from "@/lib/commandes/liste";
 import { lienListe } from "@/lib/commandes/url";
 
 /**
- * LES QUATRE VUES QU'ON OUVRE VINGT FOIS PAR JOUR, en pilules.
+ * LES CINQ VUES QU'ON OUVRE VINGT FOIS PAR JOUR, en pilules.
  *
  * Ce ne sont pas des filtres de plus : ce sont des RACCOURCIS vers des
  * combinaisons du panneau de filtres, qui existe toujours en dessous pour tout
  * le reste. Un fournisseur à 200 commandes par semaine ne déroule pas deux
  * listes déroulantes pour voir ce qui est en transit.
  *
- * ÉCART ASSUMÉ AVEC LA PLANCHE, et il faut le dire plutôt que le maquiller :
- * la quatrième pilule dessinée est « Bloquées ». Le tri « bloqué en transit »
- * n'existe pas encore dans le produit — il est au reste du lot 4. Rendre une
- * pilule qui filtre sur autre chose que ce qu'elle annonce serait pire que
- * l'absence : ici elle mène aux commandes livrées, et elle le dit.
+ * ⚠️ CE BLOC DÉCRIVAIT UN ÉCART QUI N'EXISTE PLUS. Il annonçait que le tri
+ * « bloqué en transit » n'était pas implémenté et que la pilule « Bloquées »
+ * menait aux commandes livrées. Le tri existe depuis, la pilule y mène — et le
+ * commentaire, lui, est resté. C'est le mensonge en attente que le projet
+ * s'interdit : il décrivait une INTENTION passée là où le lecteur cherche le
+ * comportement présent, et il aurait fait chercher un défaut là où il n'y en a
+ * plus. Les cinq pilules mènent chacune à ce qu'elles annoncent.
  *
  * DES LIENS, PAS DES BOUTONS. L'URL décrit ce qui est affiché : elle se met en
  * favori, se recopie, revient par l'historique. Un état client ne fait rien de
