@@ -67,7 +67,7 @@ export function empreinte(valeur: string): string {
  */
 type BordDeConfiance = "cloudflare" | "xff" | "aucun";
 
-function bordDeConfiance(): BordDeConfiance {
+export function bordDeConfiance(): BordDeConfiance {
   const brut = (process.env["BORD_DE_CONFIANCE"] ?? "").trim().toLowerCase();
   if (brut === "xff" || brut === "aucun") return brut;
   // Toute autre valeur — absente, mal orthographiée, héritée d'un copier-coller

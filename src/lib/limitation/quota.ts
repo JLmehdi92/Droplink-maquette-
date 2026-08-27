@@ -1,6 +1,6 @@
 import "server-only";
 import { creerClientSysteme } from "@/lib/supabase/system";
-import { adresseAppelant, empreinte } from "./empreinte";
+import { adresseAppelant, bordDeConfiance, empreinte } from "./empreinte";
 
 /**
  * Limitation de débit — côté application.
@@ -368,9 +368,54 @@ export async function verifierQuotaNotificationSuivi(): Promise<Verdict> {
  * serait pire ; et l'administration n'a aucune raison d'être atteinte depuis un
  * chemin qui ne porte pas d'adresse.
  */
+/**
+ * L'ABSENCE D'ADRESSE SUR LA SURFACE D'ADMINISTRATION SE DIT — UNE FOIS.
+ *
+ * ⚠️ PIÈGE DE DÉPLOIEMENT RENCONTRÉ LE 27/08/2026. Les six écrans admin
+ * rendaient 404 à un compte QUI EST administrateur, en local. La chaîne :
+ * `BORD_DE_CONFIANCE` absente → mode strict `cloudflare` → aucun
+ * `cf-connecting-ip` → `adresseAppelant()` rend `null` → refus par sécurité →
+ * `notFound()`.
+ *
+ * LE REFUS EST BON, ET IL NE CHANGE PAS. Ce qui était mauvais, c'est qu'il
+ * était MUET : un 404 rigoureusement identique à « tu n'es pas administrateur »
+ * et à « il n'y a rien ici », sans une ligne nulle part. En production, le jour
+ * où le bord cesse de poser son en-tête, l'administration devient injoignable et
+ * rien n'explique pourquoi — on chercherait le défaut dans le rôle, dans la
+ * session, dans la base, partout sauf là où il est.
+ *
+ * *Un silence nommé est une information, un silence subi se lit comme une
+ * panne.* Le produit applique déjà cette règle au colis immobile ; elle vaut
+ * autant pour l'exploitation.
+ *
+ * UNE SEULE FOIS PAR INSTANCE, et ce n'est pas de l'économie de journal. Ce
+ * message décrit une CONFIGURATION, pas une requête : il ne devient pas plus
+ * vrai en étant répété dix mille fois, et le répéter ferait deux dégâts —
+ * noyer les vraies lignes, et offrir à n'importe quel visiteur anonyme un moyen
+ * de remplir nos journaux depuis une surface qui ne lui répond même pas.
+ */
+let refusSansAdresseSignale = false;
+
+export function signalerAdminSansAdresse(): void {
+  if (refusSansAdresseSignale) return;
+  refusSansAdresseSignale = true;
+
+  console.error(
+    "[admin] REFUS : aucune adresse d'appelant exploitable, bord de confiance « " +
+      bordDeConfiance() +
+      " ». La surface d'administration refuse par sécurité et rend 404, donc " +
+      "indiscernable d'un « vous n'êtes pas administrateur ». Vérifier que le " +
+      "bord pose bien « cf-connecting-ip », ou régler BORD_DE_CONFIANCE " +
+      "(cloudflare | xff | aucun). Message émis UNE SEULE FOIS par instance.",
+  );
+}
+
 export async function verifierQuotaAdmin(): Promise<Verdict> {
   const ip = await adresseAppelant();
-  if (ip === null) return surPanne("admin");
+  if (ip === null) {
+    signalerAdminSansAdresse();
+    return surPanne("admin");
+  }
 
   const verdict = await consommer(empreinte(ip), "admin");
   if (!verdict.autorise && verdict.motif === "indisponible") return surPanne("admin");
