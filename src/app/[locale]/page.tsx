@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Icone } from "@/components/icone";
 import { routing } from "@/i18n/routing";
+import { signalementDisponible } from "@/lib/contact";
 
 /**
  * LA LANDING, portée sur le canevas Claude Design.
@@ -286,12 +287,31 @@ export default async function Accueil({
           <span className="font-headline-md text-[15px] font-extrabold tracking-[-0.02em] text-on-surface">
             DropLink
           </span>
+          {/*
+            LE LIEN DE SIGNALEMENT DISPARAÎT QUAND LE CANAL N'EXISTE PAS, et ce
+            n'est pas un détail d'affichage : c'est la procédure de notification
+            et retrait qui fonde notre statut d'hébergeur (brief §12).
+
+            ⚠️ DÉFAUT TROUVÉ EN PILOTANT LE PRODUIT LE 27/08/2026. Cette landing
+            porte SON PROPRE pied de page — celui du canevas, horizontal, qui
+            n'est pas celui de `PiedDePage` — et la garde n'y avait pas été
+            recopiée. Elle écrivait donc le lien SANS CONDITION, vers une page
+            qui rend 404 tant qu'aucune adresse n'est configurée. Le premier
+            clic d'un visiteur qui cherche à signaler un contenu tombait dans le
+            vide, sur la seule page que tout le monde voit.
+
+            La garde est recopiée plutôt que le composant partagé importé : les
+            deux pieds n'ont pas le même dessin, et la planche fait foi. Ce qui
+            se partage ici, c'est la RÈGLE, pas la mise en page.
+          */}
           <nav aria-label={t("piedNavigation")} className="flex flex-wrap justify-center gap-6">
             {(
               [
                 ["conditions", `/${locale}/conditions`],
                 ["confidentialite", `/${locale}/confidentialite`],
-                ["signalement", `/${locale}/signalement`],
+                ...(signalementDisponible()
+                  ? ([["signalement", `/${locale}/signalement`]] as const)
+                  : []),
               ] as const
             ).map(([clef, href]) => (
               <Link

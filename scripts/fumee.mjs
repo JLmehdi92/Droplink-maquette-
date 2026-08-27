@@ -417,6 +417,90 @@ if (!motifCle.test("<h2>landing.exempleDeCleBrute</h2>")) {
 }
 motifCle.lastIndex = 0;
 
+/*
+ * ═════════════════════════════════════════════════════════════════════════════
+ * LA PROCEDURE DE SIGNALEMENT NE SE PROMET QUE SI ELLE EXISTE
+ * ═════════════════════════════════════════════════════════════════════════════
+ *
+ * DEFAUT TROUVE EN PILOTANT LE PRODUIT LE 27/08/2026. La landing porte SON
+ * PROPRE pied de page — celui du canevas — et la garde de `PiedDePage` n y
+ * avait pas ete recopiee : le lien « Signaler un contenu » etait ecrit SANS
+ * CONDITION vers une page qui rend 404 tant qu aucune adresse n est
+ * configuree. Sur la seule page que tout le monde voit, le recours qui fonde
+ * notre statut d hebergeur tombait dans le vide au premier clic.
+ *
+ * ON INTERROGE L EFFET, PAS LA CONFIGURATION (L-020). Le produit repond
+ * lui-meme : `/fr/signalement` rend 200 quand le canal existe, 404 sinon. Lire
+ * `NEXT_PUBLIC_CONTACT_ABUS` ici reproduirait la regle au lieu de l eprouver,
+ * et la copie pourrait deriver sans que rien ne le dise.
+ *
+ * LE CONTROLE ECHOUE DANS LES DEUX SENS, parce que les deux etats sont des
+ * defauts :
+ *   - page absente ET lien present  → on promet un recours qui n aboutit pas ;
+ *   - page presente ET aucun lien   → le recours existe et personne ne peut
+ *                                     l atteindre, ce qui revient au meme pour
+ *                                     celui qui cherche a signaler.
+ *
+ * ET IL PROUVE D ABORD QU IL INSPECTE QUELQUE CHOSE : sans la presence
+ * constatee du lien « conditions » sur chaque page, une page rendue sans pied
+ * de page — ou pas rendue du tout — passerait ce controle en ne prouvant rien.
+ */
+console.log("");
+console.log("— Le recours de signalement —");
+
+const PAGES_A_PIED = ["/fr", "/en", "/fr/conditions", "/fr/confidentialite"];
+
+const signalementServi = (await fetch(`${base}/fr/signalement`, { redirect: "manual" })).status;
+const canalOuvert = signalementServi === 200;
+console.log(
+  `      /fr/signalement rend ${signalementServi} — canal ${canalOuvert ? "OUVERT" : "FERME"}`,
+);
+
+let piedsInspectes = 0;
+let pagesQuiPromettent = 0;
+
+for (const chemin of PAGES_A_PIED) {
+  const r = await fetch(`${base}${chemin}`, { redirect: "manual" });
+  if (r.status !== 200) {
+    echecs += 1;
+    console.log(`ECHEC ${chemin.padEnd(22)} rend ${r.status} : le pied n a PAS ete inspecte`);
+    continue;
+  }
+
+  const html = await r.text();
+  const langue = chemin.startsWith("/en") ? "en" : "fr";
+
+  // La preuve que la sonde regarde un vrai pied de page. Sans elle, « aucun
+  // lien de signalement » serait vrai sur une page qui n en a aucun.
+  if (!html.includes(`/${langue}/conditions`)) {
+    echecs += 1;
+    console.log(`ECHEC ${chemin.padEnd(22)} aucun pied de page trouve : la sonde n inspecte rien`);
+    continue;
+  }
+  piedsInspectes += 1;
+
+  const promet = html.includes(`/${langue}/signalement`);
+  if (promet) pagesQuiPromettent += 1;
+
+  if (!canalOuvert && promet) {
+    echecs += 1;
+    console.log(`ECHEC ${chemin.padEnd(22)} promet un signalement vers une page qui rend 404`);
+  } else {
+    console.log(`OK    ${chemin.padEnd(22)} pied inspecte, lien ${promet ? "present" : "absent"}`);
+  }
+}
+
+if (piedsInspectes !== PAGES_A_PIED.length) {
+  echecs += 1;
+  console.log("ECHEC la sonde du recours n a pas inspecte tous les pieds de page annonces");
+}
+
+// L AUTRE SENS : un canal ouvert que personne ne peut atteindre.
+if (canalOuvert && pagesQuiPromettent === 0) {
+  echecs += 1;
+  console.log("ECHEC le canal de signalement existe mais AUCUNE page ne le propose");
+}
+
 console.log("");
 
 // Controle par VALEUR de ce qui est REELLEMENT rendu. Verifier qu une cle de
