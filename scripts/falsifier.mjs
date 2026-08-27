@@ -582,8 +582,8 @@ const SQL = {
         return v_touches;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "072_les_dates_du_colis_ne_reculent_pas.sql",
-      depuis: "create function public.appliquer_etat_colis",
+      fichier: "090_le_colis_met_a_jour_la_commande.sql",
+      depuis: "create or replace function public.appliquer_etat_colis",
       jusqua: "comment on function",
     },
   },
@@ -1611,8 +1611,8 @@ const SQL = {
       return v_touches;
     end; $fals$;`,
     reparerDepuisMigration: {
-      fichier: "072_les_dates_du_colis_ne_reculent_pas.sql",
-      depuis: "create function public.appliquer_etat_colis",
+      fichier: "090_le_colis_met_a_jour_la_commande.sql",
+      depuis: "create or replace function public.appliquer_etat_colis",
     },
   },
 
@@ -1814,6 +1814,183 @@ const SQL = {
     },
   },
 
+
+  /**
+   * LE CAS MOTIVANT DE LA 090 : le statut du transporteur ne descend plus dans
+   * la commande.
+   *
+   * Le colis, lui, continue d etre parfaitement suivi : `tracked_parcels` est a
+   * jour, la page du client affiche le bon etat, l ecran Envois aussi. Seule la
+   * GESTION DE COMMANDES reste figee sur ce que le vendeur avait pose a la main.
+   *
+   * C est l etat d avant la 090, et il est silencieux par construction : les
+   * deux colonnes existent, les deux ecrans repondent, aucune requete n echoue.
+   * Le vendeur ne s en apercoit qu en comparant deux ecrans du meme produit.
+   */
+  "statut-ne-descend-pas": {
+    casser: `create or replace function public.appliquer_etat_colis(
+        p_numero text, p_etape public.parcel_status, p_statut_brut text,
+        p_transporteur text, p_points jsonb, p_estimation_du text,
+        p_estimation_au text, p_brut jsonb, p_premier_mouvement text
+      ) returns integer language plpgsql security definer set search_path = '' as $fals$
+      declare
+        v_colis record; v_touches integer := 0; v_dernier timestamptz;
+        v_premier timestamptz; v_pionnier uuid;
+        v_transporteur integer := nullif(btrim(coalesce(p_transporteur, '')), '')::integer;
+        v_du timestamptz := nullif(btrim(coalesce(p_estimation_du, '')), '')::timestamptz;
+        v_au timestamptz := nullif(btrim(coalesce(p_estimation_au, '')), '')::timestamptz;
+        v_premier_reel timestamptz := nullif(btrim(coalesce(p_premier_mouvement, '')), '')::timestamptz;
+      begin
+        select tp.id into v_pionnier from public.tracked_parcels tp
+         where tp.tracking_number = p_numero order by tp.created_at asc, tp.id asc limit 1;
+        for v_colis in
+          select id, normalized_status from public.tracked_parcels where tracking_number = p_numero
+        loop
+          insert into public.parcel_checkpoints (parcel_id, occurred_at, location, description, stage)
+          select v_colis.id, (p->>'instant')::timestamptz, nullif(p->>'lieu', ''),
+                 p->>'description', nullif(p->>'etape', '')
+          from jsonb_array_elements(coalesce(p_points, '[]'::jsonb)) as p
+          where p->>'instant' is not null and nullif(p->>'description', '') is not null
+          on conflict (parcel_id, occurred_at, description) do nothing;
+          select min(occurred_at), max(occurred_at) into v_premier, v_dernier
+            from public.parcel_checkpoints where parcel_id = v_colis.id;
+          update public.tracked_parcels
+             set normalized_status = greatest(normalized_status, p_etape),
+                 raw_status = coalesce(nullif(p_statut_brut, ''), raw_status),
+                 carrier_code = coalesce(v_transporteur, carrier_code),
+                 first_movement_at = least(first_movement_at, v_premier, v_premier_reel),
+                 last_movement_at = greatest(last_movement_at, v_dernier),
+                 estimated_from = greatest(estimated_from, v_du),
+                 estimated_to = greatest(estimated_to, v_au),
+                 query_count = query_count + 1, empty_count = 0
+           where id = v_colis.id;
+          if v_colis.id = v_pionnier then
+            insert into public.tracking_snapshots (parcel_id, raw_payload, normalized_status)
+            values (v_colis.id, coalesce(p_brut, '{}'::jsonb), p_etape);
+          end if;
+          v_touches := v_touches + 1;
+        end loop;
+        if v_touches > 0 then perform public.imputer_appel_suivi(p_numero); end if;
+        return v_touches;
+      end; $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "090_le_colis_met_a_jour_la_commande.sql",
+      depuis: "create or replace function public.appliquer_etat_colis",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : la descente vise le NUMERO au lieu du COLIS.
+   *
+   * Le statut descend toujours, et il descend meme « correctement » pour tout le
+   * monde tant que deux vendeurs suivent le meme colis — ce qui est justement le
+   * cas ou l on croirait le verifier. Mais l ecriture traverse la frontiere du
+   * vendeur : la commande d un tiers est modifiee par le colis d un autre.
+   *
+   * Un vendeur peut donc faire avancer — jamais reculer, la regle tient — le
+   * statut affiche chez le CLIENT D UN CONCURRENT, en enregistrant simplement un
+   * numero qu il a lu sur une etiquette. Rien n echoue, rien n est trace, et les
+   * deux tableaux de bord ont l air justes.
+   */
+  "descente-vise-le-numero": {
+    casser: `create or replace function public.appliquer_etat_colis(
+        p_numero text, p_etape public.parcel_status, p_statut_brut text,
+        p_transporteur text, p_points jsonb, p_estimation_du text,
+        p_estimation_au text, p_brut jsonb, p_premier_mouvement text
+      ) returns integer language plpgsql security definer set search_path = '' as $fals$
+      declare
+        v_colis record; v_touches integer := 0; v_dernier timestamptz;
+        v_premier timestamptz; v_pionnier uuid;
+        v_transporteur integer := nullif(btrim(coalesce(p_transporteur, '')), '')::integer;
+        v_du timestamptz := nullif(btrim(coalesce(p_estimation_du, '')), '')::timestamptz;
+        v_au timestamptz := nullif(btrim(coalesce(p_estimation_au, '')), '')::timestamptz;
+        v_premier_reel timestamptz := nullif(btrim(coalesce(p_premier_mouvement, '')), '')::timestamptz;
+      begin
+        select tp.id into v_pionnier from public.tracked_parcels tp
+         where tp.tracking_number = p_numero order by tp.created_at asc, tp.id asc limit 1;
+        for v_colis in
+          select id, normalized_status from public.tracked_parcels where tracking_number = p_numero
+        loop
+          insert into public.parcel_checkpoints (parcel_id, occurred_at, location, description, stage)
+          select v_colis.id, (p->>'instant')::timestamptz, nullif(p->>'lieu', ''),
+                 p->>'description', nullif(p->>'etape', '')
+          from jsonb_array_elements(coalesce(p_points, '[]'::jsonb)) as p
+          where p->>'instant' is not null and nullif(p->>'description', '') is not null
+          on conflict (parcel_id, occurred_at, description) do nothing;
+          select min(occurred_at), max(occurred_at) into v_premier, v_dernier
+            from public.parcel_checkpoints where parcel_id = v_colis.id;
+          update public.tracked_parcels
+             set normalized_status = greatest(normalized_status, p_etape),
+                 raw_status = coalesce(nullif(p_statut_brut, ''), raw_status),
+                 carrier_code = coalesce(v_transporteur, carrier_code),
+                 first_movement_at = least(first_movement_at, v_premier, v_premier_reel),
+                 last_movement_at = greatest(last_movement_at, v_dernier),
+                 estimated_from = greatest(estimated_from, v_du),
+                 estimated_to = greatest(estimated_to, v_au),
+                 query_count = query_count + 1, empty_count = 0
+           where id = v_colis.id;
+          perform set_config('droplink.maj_transporteur', 'oui', true);
+          update public.orders o
+             set status = greatest(o.status, p_etape::text::public.order_status),
+                 parcel_last_movement_at = greatest(o.parcel_last_movement_at, v_dernier)
+           where o.tracking_number = p_numero;
+          perform set_config('droplink.maj_transporteur', '', true);
+          if v_colis.id = v_pionnier then
+            insert into public.tracking_snapshots (parcel_id, raw_payload, normalized_status)
+            values (v_colis.id, coalesce(p_brut, '{}'::jsonb), p_etape);
+          end if;
+          v_touches := v_touches + 1;
+        end loop;
+        if v_touches > 0 then perform public.imputer_appel_suivi(p_numero); end if;
+        return v_touches;
+      end; $fals$;`,
+    reparerDepuisMigration: {
+      fichier: "090_le_colis_met_a_jour_la_commande.sql",
+      depuis: "create or replace function public.appliquer_etat_colis",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : `updated_at` se remet a suivre le transporteur.
+   *
+   * Le declencheur redevient celui, partage et INCONDITIONNEL, des autres
+   * tables. Le produit continue de fonctionner exactement pareil : les statuts
+   * descendent, la page du client est juste, le tri « bloquees » ordonne bien.
+   *
+   * Seul le tri « modifiees » se met a mentir — et il ment d une facon qui
+   * ressemble a un fonctionnement normal. A deux cents commandes par semaine,
+   * chaque passage de cadence fait remonter des dizaines de lignes en tete avec
+   * « modifiee il y a deux minutes ». Le vendeur conclut que l ecran est casse,
+   * ou pire, cesse d utiliser le tri sans le dire.
+   */
+  "updated-at-suit-le-transporteur": {
+    casser: `drop trigger orders_toucher_updated_at on public.orders;
+      create trigger orders_toucher_updated_at before update on public.orders
+      for each row execute function public.toucher_updated_at();`,
+    reparer: `drop trigger orders_toucher_updated_at on public.orders;
+      create trigger orders_toucher_updated_at before update on public.orders
+      for each row execute function public.toucher_updated_at_commande();`,
+  },
+
+  /**
+   * HORS du cas motivant : l index du tri « bloquees », supprime.
+   *
+   * Le tri continue de rendre exactement les memes lignes, dans le meme ordre.
+   * Il les rend simplement en lisant toute la tranche du vendeur au lieu des
+   * cinquante demandees — donc a l echelle d un fournisseur a deux cents
+   * commandes par semaine, en lisant dix mille lignes par page.
+   *
+   * Aucun seuil de temps ne sonnerait sur une base de developpement : c est
+   * l assertion sur les LIGNES LUES qui doit l attraper.
+   */
+  "index-bloquees-absent": {
+    casser: "drop index public.orders_bloquees_idx;",
+    reparer: `create index orders_bloquees_idx
+      on public.orders (shop_id, parcel_last_movement_at asc nulls last, id asc)
+      where status = 'en_transit' and archived_at is null;`,
+  },
 };
 
 /**
@@ -1943,6 +2120,41 @@ const DEPOT = {
     fichier: "src/app/api/suivi/notification/route.ts",
     remplacer: "    authentique = dixSeptTrack.verifierNotification(corps, signature);",
     par: "    authentique = true;\n    void signature;",
+  },
+
+  /**
+   * HORS du cas motivant : le tri « bloquees » s inverse.
+   *
+   * Il rend toujours exactement les memes commandes, et il les rend toujours
+   * triees. Simplement, le colis qui vient de bouger passe en tete et celui qui
+   * n a pas bouge depuis trois mois tombe en derniere page.
+   *
+   * C est le pire cas d un tri faux : l ecran a l air de fonctionner. Le vendeur
+   * l ouvre, voit des commandes en transit, n en relance aucune — et conclut que
+   * rien n est bloque.
+   */
+  "tri-bloquees-inverse": {
+    fichier: "src/lib/commandes/liste.ts",
+    remplacer: 'return { colonne: "parcel_last_movement_at", croissant: true };',
+    par: 'return { colonne: "parcel_last_movement_at", croissant: false };',
+  },
+
+  /**
+   * HORS du cas motivant : le tri cesse d ecarter les colis jamais partis.
+   *
+   * A deux cents commandes par semaine, les expeditions du jour n ont encore
+   * aucun mouvement. Sans la restriction, elles remplissent la premiere page du
+   * tri — et les vrais blocages, eux, passent derriere. Le tri repond encore,
+   * mais il ne repond plus a la question qu on lui pose.
+   *
+   * Le curseur casse par la meme occasion : la comparaison de couple ne sait pas
+   * ordonner une valeur absente, donc une page dont la frontiere tombe sur un
+   * NULL saute des lignes en silence.
+   */
+  "tri-bloquees-sans-mouvement": {
+    fichier: "src/lib/commandes/liste.ts",
+    remplacer: 'requete = requete.eq("status", "en_transit").not("parcel_last_movement_at", "is", null);',
+    par: 'requete = requete.eq("status", "en_transit");',
   },
 };
 

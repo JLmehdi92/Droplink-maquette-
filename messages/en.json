@@ -404,7 +404,8 @@
       "recentes": "Newest first",
       "anciennes": "Oldest first",
       "modifiees": "Recently edited",
-      "jamais-ouvert": "Never opened by the customer"
+      "jamais-ouvert": "Never opened by the customer",
+      "bloquees": "Stuck in transit"
     },
     "colonne": {
       "client": "Customer",
@@ -448,6 +449,7 @@
       "toutes": "All",
       "enTransit": "In transit",
       "jamaisOuvertes": "Never opened",
+      "bloquees": "Stuck",
       "livrees": "Delivered"
     },
     "compteurs": {

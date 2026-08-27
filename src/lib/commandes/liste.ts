@@ -24,7 +24,19 @@ export const STATUTS_QC = [
  * le vendeur y pense : « montre-moi ce que mes clients n'ont pas encore vu ».
  * Il restreint donc ET ordonne, exactement comme l'index partiel posé pour lui.
  */
-export const TRIS = ["recentes", "anciennes", "modifiees", "jamais-ouvert"] as const;
+/*
+ * `bloquees` suit la même logique, et c'est le tri qui fait gagner du temps : il
+ * répond à « quels colis dois-je relancer ». Il restreint aux commandes EN
+ * TRANSIT dont le colis a bougé PUIS s'est arrêté, et les ordonne du plus
+ * ancien mouvement au plus récent — donc le plus immobile en tête.
+ *
+ * IL EXIGE UN MOUVEMENT DÉJÀ CONSTATÉ, et ce n'est pas un contournement
+ * technique : un colis qui n'a jamais bougé n'est pas bloqué, il n'est pas
+ * encore parti. Les mélanger noierait les vrais blocages sous les commandes
+ * fraîchement expédiées, c'est-à-dire supprimerait l'information que ce tri
+ * existe pour donner.
+ */
+export const TRIS = ["recentes", "anciennes", "modifiees", "jamais-ouvert", "bloquees"] as const;
 export type Tri = (typeof TRIS)[number];
 
 /** Cinquante lignes : la valeur mesurée au plafond, pas un chiffre choisi à vue. */
@@ -71,6 +83,15 @@ export interface LigneCommande {
    */
   readonly vues: number;
   readonly derniereVueLe: string | null;
+  /**
+   * Dernier mouvement rapporté par le TRANSPORTEUR, dénormalisé sur la commande.
+   *
+   * Distinct de `modifieeLe`, et la distinction est le cœur du sujet :
+   * `modifieeLe` dit quand le VENDEUR a touché la commande, celui-ci dit quand
+   * le COLIS a bougé. Les confondre ferait remonter les deux cents commandes
+   * d'un vendeur en tête du tri « modifiées » à chaque passage de cadence.
+   */
+  readonly colisBougeLe: string | null;
 }
 
 export interface PageCommandes {
@@ -101,15 +122,51 @@ export interface PageCommandes {
  * sur un type d'erreur — le typage cesse alors de vérifier quoi que ce soit.
  */
 export const COLONNES =
-  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at";
+  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at";
+
+/**
+ * La valeur de tri d'une ligne, pour le curseur.
+ *
+ * ⚠️ EXHAUSTIVE PAR LE TYPAGE, et c'est délibéré. La version précédente
+ * s'écrivait `colonne === "created_at" ? creeeLe : modifieeLe` : ajouter une
+ * troisième colonne de tri l'aurait laissée compiler ET rendre silencieusement
+ * la mauvaise valeur — donc un curseur qui compare une date de mouvement à une
+ * date de modification, donc des lignes sautées ou répétées d'une page à
+ * l'autre, sans la moindre erreur. Ici, une quatrième colonne ne compile pas.
+ */
+function valeurDeTri(
+  colonne: "created_at" | "updated_at" | "parcel_last_movement_at",
+  ligne: LigneCommande,
+): string {
+  switch (colonne) {
+    case "created_at":
+      return ligne.creeeLe;
+    case "updated_at":
+      return ligne.modifieeLe;
+    case "parcel_last_movement_at":
+      // Le tri `bloquees` exclut les valeurs absentes : cette branche ne peut
+      // pas rendre la chaîne vide sur un jeu réel. On ne LÈVE pas pour autant —
+      // un curseur vide fait recommencer la pagination, ce qui est gênant ;
+      // une exception ferait disparaître l'écran.
+      return ligne.colisBougeLe ?? "";
+  }
+}
 
 /** Colonne de tri et sens, par tri demandé. */
-function ordre(tri: Tri): { colonne: "created_at" | "updated_at"; croissant: boolean } {
+function ordre(tri: Tri): {
+  colonne: "created_at" | "updated_at" | "parcel_last_movement_at";
+  croissant: boolean;
+} {
   switch (tri) {
     case "anciennes":
       return { colonne: "created_at", croissant: true };
     case "modifiees":
       return { colonne: "updated_at", croissant: false };
+    case "bloquees":
+      // CROISSANT : le mouvement le plus ANCIEN vient en tête, donc le colis le
+      // plus immobile. C'est aussi l'ordre de l'index partiel `orders_bloquees_idx`
+      // — l'inverser le rendrait inutilisable sans que rien ne le signale.
+      return { colonne: "parcel_last_movement_at", croissant: true };
     case "jamais-ouvert":
     // Même ordre que `recentes` : ce tri restreint, il ne réordonne pas. C'est
     // aussi l'ordre de l'index partiel posé pour lui, et un ordre différent le
@@ -236,6 +293,17 @@ export async function lireCommandes(
   // 500 ms et 48 001 lignes lues chez un vendeur dont tout avait été ouvert.
   if (parametres.tri === "jamais-ouvert") requete = requete.eq("views_count", 0);
 
+  // Le tri « bloqué en transit » restreint AUX DEUX CONDITIONS de son index
+  // partiel — sans quoi le planificateur ne peut pas s'en servir, et la
+  // dégradation reste invisible tant qu'un vendeur n'a pas beaucoup de lignes.
+  //
+  // Le `not is null` sert aussi la pagination : la comparaison de couple du
+  // curseur ne sait pas ordonner un NULL, et une page dont la frontière tombe
+  // sur une valeur absente sauterait des lignes en silence.
+  if (parametres.tri === "bloquees") {
+    requete = requete.eq("status", "en_transit").not("parcel_last_movement_at", "is", null);
+  }
+
   if (parametres.statut !== null) requete = requete.eq("status", parametres.statut);
   if (parametres.qc !== null) requete = requete.eq("qc_status", parametres.qc);
 
@@ -296,15 +364,13 @@ export async function lireCommandes(
     archiveeLe: l.archived_at,
     vues: l.views_count,
     derniereVueLe: l.last_viewed_at,
+    colisBougeLe: l.parcel_last_movement_at,
   }));
 
   const derniere = lignes[lignes.length - 1];
   const suivant =
     trop && derniere !== undefined
-      ? encoderCurseur(
-          colonne === "created_at" ? derniere.creeeLe : derniere.modifieeLe,
-          derniere.id,
-        )
+      ? encoderCurseur(valeurDeTri(colonne, derniere), derniere.id)
       : null;
 
   return {

@@ -243,6 +243,7 @@ export type Database = {
           internal_notes: string | null
           last_viewed_at: string | null
           notify_email: string | null
+          parcel_last_movement_at: string | null
           product_ref: string | null
           public_token: string
           qc_decide_par: string | null
@@ -267,6 +268,7 @@ export type Database = {
           internal_notes?: string | null
           last_viewed_at?: string | null
           notify_email?: string | null
+          parcel_last_movement_at?: string | null
           product_ref?: string | null
           public_token: string
           qc_decide_par?: string | null
@@ -291,6 +293,7 @@ export type Database = {
           internal_notes?: string | null
           last_viewed_at?: string | null
           notify_email?: string | null
+          parcel_last_movement_at?: string | null
           product_ref?: string | null
           public_token?: string
           qc_decide_par?: string | null
@@ -319,6 +322,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      parametres_admis: {
+        Row: {
+          cle: string
+          maximum: number
+          minimum: number
+          raison: string
+        }
+        Insert: {
+          cle: string
+          maximum: number
+          minimum: number
+          raison: string
+        }
+        Update: {
+          cle?: string
+          maximum?: number
+          minimum?: number
+          raison?: string
+        }
+        Relationships: []
       }
       parcel_checkpoints: {
         Row: {
@@ -766,6 +790,10 @@ export type Database = {
         }[]
       }
       battre: { Args: { p_detail: Json; p_source: string }; Returns: undefined }
+      cle_media_canonique: {
+        Args: { p_cle: string; p_vignette: boolean }
+        Returns: boolean
+      }
       colis_a_interroger: {
         Args: { p_limite: number }
         Returns: {

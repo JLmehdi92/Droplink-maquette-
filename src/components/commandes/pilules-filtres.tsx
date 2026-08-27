@@ -47,6 +47,22 @@ export async function PilulesFiltres({
       actif: parametres.tri === "jamais-ouvert",
     },
     {
+      /*
+       * LA PILULE QUI FAIT GAGNER DU TEMPS. Elle répond à « quels colis dois-je
+       * relancer », et c'est la seule question de cet écran dont la réponse
+       * n'est pas visible en parcourant la liste.
+       *
+       * Elle repose sur le TRI et non sur un filtre de statut : le statut dit
+       * « en transit », il ne dit pas depuis combien de temps rien ne bouge. Le
+       * tri place le colis le plus immobile en tête — et l'état d'un colis vient
+       * désormais du transporteur, sans que le vendeur ait à toucher quoi que
+       * ce soit.
+       */
+      clef: "bloquees",
+      href: lienListe(base, parametres, { tri: "bloquees", statut: null }),
+      actif: parametres.tri === "bloquees",
+    },
+    {
       clef: "livrees",
       href: lienListe(base, parametres, { statut: "livre" }),
       actif: parametres.statut === "livre",
@@ -54,7 +70,7 @@ export async function PilulesFiltres({
   ] as const;
 
   return (
-    // Le débordement horizontal est ASSUMÉ au téléphone : quatre pilules ne
+    // Le débordement horizontal est ASSUMÉ au téléphone : cinq pilules ne
     // tiennent pas sur 390 px, et les replier sur deux lignes coûterait la
     // hauteur d'une commande dans la liste.
     <ul className="flex gap-2 overflow-x-auto px-margin-mobile pb-1 md:px-0">

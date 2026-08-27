@@ -404,7 +404,8 @@
       "recentes": "Les plus récentes",
       "anciennes": "Les plus anciennes",
       "modifiees": "Modifiées en dernier",
-      "jamais-ouvert": "Jamais ouvertes par le client"
+      "jamais-ouvert": "Jamais ouvertes par le client",
+      "bloquees": "Bloquées en transit"
     },
     "colonne": {
       "client": "Client",
@@ -448,6 +449,7 @@
       "toutes": "Toutes",
       "enTransit": "En transit",
       "jamaisOuvertes": "Jamais ouvertes",
+      "bloquees": "Bloquées",
       "livrees": "Livrées"
     },
     "compteurs": {

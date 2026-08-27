@@ -288,3 +288,129 @@ describe("Pagination", () => {
     expect(page.suivant).toBeNull();
   });
 });
+
+describe("Le tri « bloqué en transit »", () => {
+  /**
+   * LE TRI QUI FAIT GAGNER DU TEMPS. Il répond à « quels colis dois-je
+   * relancer » — la seule question de cet écran dont la réponse n'est pas
+   * visible en parcourant la liste.
+   *
+   * Il s'appuie sur `parcel_last_movement_at`, écrit UNIQUEMENT par
+   * l'ingestion de suivi. Ces contrôles posent donc la colonne par le chemin
+   * qui l'écrit réellement en production — jamais à la main : une valeur posée
+   * directement prouverait que le tri sait trier, pas que le produit sait la
+   * renseigner.
+   */
+  const NUMERO_ANCIEN = "BLOQ-ANCIEN-8821";
+  const NUMERO_RECENT = "BLOQ-RECENT-8822";
+  const NUMERO_JAMAIS = "BLOQ-JAMAIS-8823";
+
+  let ancienne = "";
+  let recente = "";
+  let jamaisPartie = "";
+
+  beforeAll(async () => {
+    const creer = async (numero: string): Promise<string> => {
+      const l = await interroger<{ id: string }>(
+        catalogue,
+        `insert into public.orders (shop_id, customer_label, tracking_number, status)
+         values ($1, $2, $3, 'preparation') returning id`,
+        [alice.shopId, "bloq-" + numero, numero],
+      );
+      const id = l[0]?.id ?? "";
+      const c = await interroger<{ id: string }>(
+        catalogue,
+        "insert into public.tracked_parcels (shop_id, tracking_number) values ($1,$2) returning id",
+        [alice.shopId, numero],
+      );
+      await interroger(
+        catalogue,
+        "insert into public.order_parcels (order_id, parcel_id) values ($1,$2)",
+        [id, c[0]?.id],
+      );
+      return id;
+    };
+
+    ancienne = await creer(NUMERO_ANCIEN);
+    recente = await creer(NUMERO_RECENT);
+    jamaisPartie = await creer(NUMERO_JAMAIS);
+
+    const ingerer = (numero: string, instant: string) =>
+      interroger(
+        catalogue,
+        `select public.appliquer_etat_colis(
+           $1, 'en_transit'::public.parcel_status, 'brut', '', $2::jsonb, '', '', '{}'::jsonb, ''
+         )`,
+        [numero, JSON.stringify([{ instant, description: "Scan", lieu: "", etape: "" }])],
+      );
+
+    await ingerer(NUMERO_ANCIEN, "2026-06-01T10:00:00Z");
+    await ingerer(NUMERO_RECENT, "2026-08-20T10:00:00Z");
+
+    // `jamaisPartie` reçoit un état SANS aucun point de passage : le colis est
+    // pris en charge mais rien n'a encore bougé. C'est le cas que le tri doit
+    // ÉCARTER, et il n'est pas rare — c'est l'état de toute commande fraîchement
+    // expédiée.
+    await interroger(
+      catalogue,
+      `select public.appliquer_etat_colis(
+         $1, 'en_transit'::public.parcel_status, 'brut', '', '[]'::jsonb, '', '', '{}'::jsonb, ''
+       )`,
+      [NUMERO_JAMAIS],
+    );
+  }, 60_000);
+
+  test("le colis le plus immobile vient EN TÊTE", async () => {
+    const page = await lire(alice, defauts({ tri: "bloquees" }));
+
+    const ids = page.lignes.map((l) => l.id);
+    expect(ids.length, "le tri ne rend rien : il ne prouve alors aucun ordre").toBeGreaterThan(1);
+    expect(
+      ids.indexOf(ancienne),
+      "la commande dont le colis n'a pas bougé depuis juin devrait être en tête",
+    ).toBeLessThan(ids.indexOf(recente));
+  });
+
+  test("un colis qui n'a JAMAIS bougé n'est pas « bloqué »", async () => {
+    /*
+     * Ce n'est pas une commodité technique. Un colis sans mouvement n'est pas
+     * bloqué, il n'est pas encore parti — et à deux cents commandes par
+     * semaine, les mélanger noierait les vrais blocages sous les expéditions du
+     * jour, c'est-à-dire supprimerait l'information que ce tri existe pour
+     * donner.
+     */
+    const page = await lire(alice, defauts({ tri: "bloquees" }));
+    expect(page.lignes.map((l) => l.id)).not.toContain(jamaisPartie);
+  });
+
+  test("le tri RESTREINT aux commandes en transit", async () => {
+    const page = await lire(alice, defauts({ tri: "bloquees" }));
+    expect(page.lignes.length, "un ensemble vide passerait tout").toBeGreaterThan(0);
+    for (const ligne of page.lignes) {
+      expect(ligne.statut, `${ligne.client} n'est pas en transit`).toBe("en_transit");
+    }
+  });
+
+  test("CONTRE-TEST : sans ce tri, les mêmes commandes ne sont pas ordonnées ainsi", async () => {
+    /*
+     * Sans lui, un tri qui rendrait n'importe quel ordre passerait le premier
+     * contrôle une fois sur deux — et « une fois sur deux » est exactement ce
+     * qu'on ne veut pas d'une suite bloquante.
+     *
+     * Le tri par défaut est la date de CRÉATION : les trois commandes ont été
+     * créées dans l'ordre ancien, récent, jamais-partie, donc `recentes` les
+     * rend dans l'ordre INVERSE de `bloquees`.
+     */
+    const page = await lire(alice, defauts({ tri: "recentes" }));
+    const ids = page.lignes.map((l) => l.id);
+    expect(ids.indexOf(ancienne)).toBeGreaterThan(ids.indexOf(recente));
+  });
+
+  test("l'isolation tient sur ce tri comme sur les autres", async () => {
+    const page = await lire(bob, defauts({ tri: "bloquees" }));
+    for (const ligne of page.lignes) {
+      expect(ligne.id, "une commande d'Alice est apparue chez Bob").not.toBe(ancienne);
+      expect(ligne.id).not.toBe(recente);
+    }
+  });
+});

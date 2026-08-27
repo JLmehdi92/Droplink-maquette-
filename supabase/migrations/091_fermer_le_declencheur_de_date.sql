@@ -1,0 +1,33 @@
+-- 091 — FERMER LE DROIT D'EXÉCUTION DU DÉCLENCHEUR DE DATE.
+--
+-- CORRECTIF DE LA 090, ET C'EST UNE MIGRATION NEUVE — pas une réouverture. La
+-- 090 est appliquée ; la rouvrir ferait diverger silencieusement une base déjà
+-- migrée d'un environnement neuf, et le fichier ne le dirait pas.
+--
+-- ── CE QUI A ÉTÉ OUBLIÉ ──────────────────────────────────────────────────────
+--
+-- La 090 crée `toucher_updated_at_commande()` et ne révoque rien. POSTGRES
+-- ACCORDE `EXECUTE` À `PUBLIC` PAR DÉFAUT (L-027) : la fonction est donc née
+-- appelable par tout rôle présent ET FUTUR, y compris `anon`.
+--
+-- Ce n'est pas la relecture du code qui l'a vue — un droit d'exécution ne
+-- s'écrit pas dans le corps d'une fonction, et le fichier de migration a l'air
+-- parfait. C'est la sonde de catalogue qui l'a signalée, ce qui est exactement
+-- la raison pour laquelle elle interroge `pg_proc` plutôt que le dépôt (L-028).
+--
+-- ── CE QUE ÇA OUVRAIT RÉELLEMENT ────────────────────────────────────────────
+--
+-- Peu, et il faut le dire plutôt que de dramatiser : une fonction déclencheur
+-- appelée hors déclencheur échoue, parce que `old` et `new` n'existent pas. Le
+-- risque n'est pas l'appel direct.
+--
+-- Le risque est la RÈGLE : « toute fonction de `public` est fermée » est une
+-- propriété qu'on vérifie d'un coup d'œil au catalogue. Une exception tolérée
+-- parce qu'elle est inoffensive rend la prochaine exception invisible — et
+-- celle-là ne le sera peut-être pas. Le défaut est vérifiable, on le ferme.
+--
+-- `alter default privileges` était déjà posé sur le schéma ; il ne couvre que
+-- les objets créés APRÈS lui par le rôle qui l'a posé, et n'a donc pas attrapé
+-- celui-ci. La révocation explicite reste nécessaire.
+
+revoke execute on function public.toucher_updated_at_commande() from public, anon, authenticated;
