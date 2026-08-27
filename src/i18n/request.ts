@@ -2,6 +2,36 @@ import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
 import { routing } from "./routing";
 
+/**
+ * LES FORMATS NOMMÉS, déclarés une fois pour toutes les langues.
+ *
+ * ⚠️ CE BLOC N'EXISTAIT PAS, ET SON ABSENCE ÉTAIT SILENCIEUSE. Trouvé en
+ * pilotant le produit le 27/08/2026 : l'écran des paramètres d'administration,
+ * en `lang="fr"`, affichait « Modifié le Thu Aug 27 2026 17:26:26 GMT+0200 ».
+ *
+ * La cause n'est pas une faute de frappe mais un MODE DE DÉFAILLANCE : appeler
+ * `format.dateTime(date, "long")` avec un nom qui n'est déclaré nulle part ne
+ * lève pas, ne prévient pas, et retombe sur `String(date)` — c'est-à-dire sur
+ * la représentation brute de JavaScript, en anglais, avec un décalage horaire.
+ * Partout ailleurs le code passe un OBJET d'options, qui ne peut pas manquer :
+ * les deux écritures se ressemblent trop pour qu'une relecture les distingue.
+ *
+ * `long` PORTE L'HEURE. Ces dates répondent à « qui a changé ce réglage, et
+ * quand » : à la journée près, deux modifications du même jour deviennent
+ * indiscernables, et c'est précisément le cas où l'on regarde.
+ *
+ * TOUT NOM AJOUTÉ ICI DOIT ÊTRE EMPLOYÉ, et tout nom employé doit être ici —
+ * `tests/unit/formats-nommes.test.ts` échoue dans les deux sens.
+ */
+export const FORMATS = {
+  dateTime: {
+    long: {
+      dateStyle: "long",
+      timeStyle: "short",
+    },
+  },
+} as const;
+
 export default getRequestConfig(async ({ requestLocale }) => {
   const demande = await requestLocale;
 
@@ -13,5 +43,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
   return {
     locale,
     messages: (await import(`../../messages/${locale}.json`)).default,
+    formats: FORMATS,
   };
 });
