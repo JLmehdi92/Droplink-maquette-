@@ -61,9 +61,6 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#c13584", "logo Instagram"],
   ["#1da851", "logo WhatsApp"],
   ["#ef0000", "cité dans un commentaire de contraste, jamais rendu"],
-  ["#0b1c30", "teinte suggérée — absente des planches : ÉCART OUVERT"],
-  ["#ba1a1a", "teinte suggérée et couleur d'erreur — ÉCART OUVERT"],
-  ["#10b981", "teinte suggérée — absente des planches : ÉCART OUVERT"],
 ];
 const tolerees = new Map(EXCEPTIONS);
 

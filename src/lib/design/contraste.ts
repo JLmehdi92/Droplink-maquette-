@@ -16,8 +16,15 @@
 export const RATIO_TEXTE = 4.5;
 export const RATIO_INTERFACE = 3;
 
-/** Valeur de repli, identique au défaut de `shops.accent_color` en base. */
-export const ACCENT_DEFAUT = "#0058be";
+/**
+ * Valeur de repli, identique au défaut de `shops.accent_color` en base — voir
+ * la migration 100. Le canevas déclare `#7c5cf5` comme défaut et `#0058be`
+ * seulement parmi les OPTIONS : une couleur qu'un vendeur peut choisir, jamais
+ * celle qu'il reçoit sans rien choisir. La distinction compte, parce que
+ * `shops` est créée à l'inscription, donc avant l'onboarding : cette couleur
+ * est celle que voient les clients d'un vendeur qui n'a rien configuré.
+ */
+export const ACCENT_DEFAUT = "#7c5cf5";
 
 export interface Rvb {
   readonly r: number;
@@ -40,7 +47,8 @@ export interface AccentResolu {
    * aplat d'accent : un libellé secondaire, un segment de frise non franchi.
    *
    * Ils vivent ICI et pas dans les composants parce qu'ils dépendent d'une
-   * chose que seul ce module sait : laquelle du blanc ou du noir a été retenue.
+   * chose que seul ce module sait : laquelle du blanc ou de l'encre a été
+   * retenue.
    * Recalculés à chaque appel, ils dériveraient — et le jour où l'un d'eux
    * partirait du blanc alors que l'écriture est noire, le résultat serait
    * invisible sans être faux nulle part.
@@ -212,7 +220,25 @@ export function ajusterPourRatio(couleur: Rvb, fond: Rvb, ratioVise: number): Rv
 }
 
 const BLANC: Rvb = { r: 255, g: 255, b: 255 };
-const NOIR: Rvb = { r: 0, g: 0, b: 0 };
+/**
+ * L'ENCRE DU CANEVAS, ET NON LE NOIR PUR.
+ *
+ * ⚠️ ÉCART MESURÉ LE 27/08/2026. Le script de la planche Marque résout le même
+ * contraste que ce module — il le cite nommément — mais il choisit entre
+ * `#ffffff` et `#111117`. Ce module choisissait entre `#ffffff` et `#000000`,
+ * et le noir pur gagne plus souvent, parce qu'il contraste toujours un peu
+ * mieux qu'une encre légèrement relevée.
+ *
+ * Sur le violet du canevas, l'écart est visible et net : blanc 4,46:1, encre
+ * 4,22:1, noir pur 4,71:1. Le canevas écrivait donc en BLANC sur l'aplat
+ * violet, et le produit en NOIR — sur le bouton d'approbation que le client
+ * voit en premier.
+ *
+ * Le noir pur n'apparaît d'ailleurs dans aucune des 41 planches : l'encre du
+ * produit est #111117, et un texte à #000000 sur une page dont tous les autres
+ * noirs sont relevés se voit.
+ */
+const ENCRE: Rvb = { r: 0x11, g: 0x11, b: 0x17 };
 
 /**
  * Rend la palette d'accent complète et conforme pour une couleur de vendeur.
@@ -233,7 +259,7 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
   // contraste le mieux, et on n'assombrit le remplissage que si aucune des deux
   // n'atteint la cible.
   let remplissage = base;
-  const surRemplissage = ratioContraste(base, BLANC) >= ratioContraste(base, NOIR) ? BLANC : NOIR;
+  const surRemplissage = ratioContraste(base, BLANC) >= ratioContraste(base, ENCRE) ? BLANC : ENCRE;
   if (ratioContraste(quantifier(remplissage), surRemplissage) < RATIO_TEXTE) {
     remplissage = ajusterPourRatio(base, surRemplissage, RATIO_TEXTE);
   }
@@ -246,8 +272,8 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
     interface: versHex(elementInterface),
     remplissage: versHex(remplissage),
     surRemplissage: versHex(surRemplissage),
-    surRemplissageDoux: ecritureBlanche ? "rgba(255,255,255,0.82)" : "rgba(0,0,0,0.72)",
-    surRemplissageFaible: ecritureBlanche ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.22)",
+    surRemplissageDoux: ecritureBlanche ? "rgba(255,255,255,0.82)" : "rgba(17,17,23,0.72)",
+    surRemplissageFaible: ecritureBlanche ? "rgba(255,255,255,0.32)" : "rgba(17,17,23,0.22)",
     ajuste: choisi === null || versHex(texte) !== versHex(base),
   };
 }

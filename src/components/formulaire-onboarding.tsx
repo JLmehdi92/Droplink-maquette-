@@ -48,8 +48,6 @@ import { Icone } from "@/components/icone";
 
 const INITIAL: ResultatOnboarding = { statut: "inactif" };
 
-/** Les quatre teintes de la maquette, reprises telles quelles. */
-const TEINTES_SUGGEREES = ["#0058be", "#0b1c30", "#ba1a1a", "#10b981"] as const;
 
 function BoutonValider({ libelle, enCours }: { libelle: string; enCours: string }) {
   const { pending } = useFormStatus();
@@ -338,29 +336,6 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
             </div>
           </div>
 
-          <div>
-            <p className="mb-3 font-label-md text-label-md text-on-surface">{t("couleurPresets")}</p>
-            <div className="flex flex-wrap gap-3">
-              {TEINTES_SUGGEREES.map((teinte) => {
-                const choisie = teinte.toLowerCase() === couleur.toLowerCase();
-                return (
-                  <button
-                    key={teinte}
-                    type="button"
-                    onClick={() => setCouleur(teinte)}
-                    aria-pressed={choisie}
-                    style={{ backgroundColor: teinte }}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm transition-transform hover:scale-110 ${
-                      choisie ? "border-2 border-on-surface" : "border border-outline-variant"
-                    }`}
-                  >
-                    {choisie ? <Icone nom="done" className="text-sm text-white" /> : null}
-                    <span className="sr-only">{teinte}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {accent.ajuste ? (
             // On le DIT plutôt que de corriger en silence. Un vendeur qui voit

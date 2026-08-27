@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { ACCENT_DEFAUT } from "@/lib/design/contraste";
 import {
   clientAnonyme,
   clientService,
@@ -64,7 +65,12 @@ describe("Le déclencheur d'inscription", () => {
     expect(data?.name).toBeNull();
     // En revanche la couleur a un défaut : il n'existe aucun état « non
     // configurée » à détecter.
-    expect(data?.accent_color).toBe("#0058be");
+    //
+    // La valeur n'est PAS réécrite ici. Elle l'était, et il a fallu la corriger
+    // à la main le jour où le défaut a changé — c'est précisément la mécanique
+    // qui fait diverger deux valeurs censées être une seule. `ACCENT_DEFAUT`
+    // est ancrée au canevas ET au catalogue par `tests/rls/accent-defaut`.
+    expect(data?.accent_color).toBe(ACCENT_DEFAUT);
   });
 });
 

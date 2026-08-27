@@ -128,16 +128,25 @@ describe("les retraits de l'écriture sur accent suivent l'écriture elle-même"
     const r = resoudreAccent(couleur);
     const blanche = r.surRemplissage === "#ffffff";
 
-    expect(r.surRemplissageDoux.startsWith(blanche ? "rgba(255" : "rgba(0")).toBe(true);
-    expect(r.surRemplissageFaible.startsWith(blanche ? "rgba(255" : "rgba(0")).toBe(true);
+    // L'ÉCRITURE SOMBRE EST L'ENCRE #111117, PAS LE NOIR PUR — comme dans le
+    // script de la planche Marque, qui résout le même contraste et choisit
+    // entre `#ffffff` et `rgba(17,17,23,...)`. Le noir pur n'apparaît dans
+    // aucune des 41 planches.
+    expect(r.surRemplissageDoux.startsWith(blanche ? "rgba(255" : "rgba(17")).toBe(true);
+    expect(r.surRemplissageFaible.startsWith(blanche ? "rgba(255" : "rgba(17")).toBe(true);
   });
 
   // CONTRE-TEST POSITIF : une suite où tout serait noir passerait à 100 % sans
   // rien prouver. Il faut qu'au moins un cas bascule dans chaque sens, sinon la
   // cohérence vérifiée plus haut ne porte que sur une branche.
   test("les deux branches sont réellement empruntées", () => {
-    expect(resoudreAccent("#eab308").surRemplissage).toBe("#000000");
+    expect(resoudreAccent("#eab308").surRemplissage).toBe("#111117");
     expect(resoudreAccent("#0058be").surRemplissage).toBe("#ffffff");
+    // Et le violet du canevas bascule bien du côté CLAIR : c'est ce que le
+    // choix des candidats a changé. Avec le noir pur en lice il l'emportait
+    // (4,71:1 contre 4,46:1), et le bouton d'approbation que le client voit en
+    // premier s'écrivait en noir là où la planche l'écrit en blanc.
+    expect(resoudreAccent("#7c5cf5").surRemplissage).toBe("#ffffff");
   });
 });
 
