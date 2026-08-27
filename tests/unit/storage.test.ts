@@ -199,6 +199,35 @@ describe("Signature des URLs", () => {
     expect(new URL(lecture).searchParams.get("X-Amz-Expires")).toBe("120");
   });
 
+  test("le DÉFAUT — celui que tout le produit emploie — borne à 15 minutes", async () => {
+    /*
+     * LE CONTRÔLE PRÉCÉDENT PASSE UNE DURÉE EXPLICITE, donc il ne dit RIEN de
+     * la valeur que le produit emploie réellement : aucun appelant de
+     * `signerLecture` ne passe d'argument. C'est exactement le champ de vision
+     * d'un garde écrit après coup — il regarde là où le défaut n'est pas.
+     *
+     * ⚠️ CE NOMBRE EST LE DERNIER RÉSIDU DE LA COUPURE DE SUSPENSION. La page
+     * cesse d'être servie instantanément, mais R2 ne révoque pas une URL déjà
+     * signée : cette durée EST le temps pendant lequel les médias d'un compte
+     * suspendu restent atteignables par qui avait la page ouverte. C'est la
+     * coupure qui fonde notre statut d'hébergeur, donc ce n'est pas un réglage
+     * de confort — l'allonger sans le décider est une décision produit prise
+     * par accident.
+     *
+     * On interroge l'URL PRODUITE, pas la constante : comparer la constante à
+     * elle-même prouverait qu'une déclaration existe, jamais qu'elle a un effet.
+     */
+    const { signerLecture, DUREE_LECTURE_DEFAUT_S } = await import("@/lib/storage/r2");
+
+    const url = new URL(await signerLecture(CLE_REELLE));
+    expect(
+      url.searchParams.get("X-Amz-Expires"),
+      "L'URL de lecture par défaut ne porte pas 900 s : la fenêtre pendant " +
+        "laquelle un compte suspendu reste visible a changé sans être décidée.",
+    ).toBe("900");
+    expect(DUREE_LECTURE_DEFAUT_S, "la constante et l'URL divergent").toBe(900);
+  });
+
   test("content-length et content-type sont DANS la signature du dépôt", async () => {
     // Sans eux, une URL prévue pour une photo laisse pousser des gigaoctets de
     // n'importe quel format. aws4fetch les exclut par défaut : c'est `allHeaders`

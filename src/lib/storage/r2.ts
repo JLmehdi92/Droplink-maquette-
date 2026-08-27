@@ -42,7 +42,37 @@ export const DUREE_DEPOT_S = 900;
  */
 export const LECTURE_MIN_S = 60;
 export const LECTURE_MAX_S = 7 * 24 * 3600;
-export const DUREE_LECTURE_DEFAUT_S = 3600;
+
+/**
+ * QUINZE MINUTES, ET C'EST UN ARBITRAGE DE WASSIM, PAS UNE VALEUR TECHNIQUE.
+ *
+ * ⚠️ CE NOMBRE EST LE DERNIER RÉSIDU DE LA COUPURE DE SUSPENSION, et c'est la
+ * coupure qui fonde notre statut d'hébergeur. La chaîne
+ * `suspension → la vue filtre → la page cesse de répondre` est INSTANTANÉE : le
+ * lien public renvoie 404 dès la seconde suivante. Mais R2 ne révoque pas une
+ * URL déjà signée — elle vit sa vie jusqu'à son expiration, hors de notre
+ * portée. Ce nombre EST donc la durée pendant laquelle les médias d'un compte
+ * suspendu restent atteignables par qui avait déjà la page ouverte.
+ *
+ * Elle valait 3 600 s. Passée à 900 s : la fenêtre est divisée par quatre.
+ *
+ * CE QUE ÇA NE CASSE PAS, et c'est ce qui rend l'arbitrage gratuit. Le lien que
+ * le client reçoit — `/p/[token]` — ne périme JAMAIS et n'est jamais régénéré.
+ * La page est rendue à la demande (établi au build : `ƒ /p/[token]`), donc
+ * chaque visite refabrique des URL neuves ; un client qui revient cinq heures
+ * plus tard voit tout. Et les photos en plein écran sont signées AU CLIC, pas
+ * au chargement — elles ne peuvent pas expirer avant d'être vues.
+ *
+ * Le seul cas dégradé est un onglet laissé ouvert au-delà du délai dont le
+ * navigateur redemande une vignette : un rafraîchissement répare.
+ *
+ * LA COUPURE VRAIMENT INSTANTANÉE demanderait de faire transiter chaque média
+ * par notre serveur, donc de renoncer à l'accès direct au stockage — sur le
+ * seul poste de coût du produit qui puisse déraper, la vidéo. Ce n'est PAS
+ * mesuré, et ce n'est pas tranché : c'est un sujet du premier déploiement,
+ * là où l'on prouvera de toute façon que la coupure coupe.
+ */
+export const DUREE_LECTURE_DEFAUT_S = 900;
 
 export class DureeHorsBornes extends Error {
   constructor(demandee: number) {
