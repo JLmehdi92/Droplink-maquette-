@@ -16,6 +16,8 @@ import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
+import { lireHistorique } from "@/lib/commandes/historique";
+import { HistoriqueCommande } from "@/components/commandes/historique-commande";
 
 export async function generateMetadata({
   params,
@@ -65,7 +67,7 @@ export default async function EditeurCommande({
       // ouverture porte sur un brouillon encore vide ou sur une commande déjà
       // remplie — la distinction que portait le second point d'émission qu'on
       // vient de retirer.
-      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at",
+      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -92,6 +94,12 @@ export default async function EditeurCommande({
     .select("id, type, cle_vignette")
     .eq("order_id", id)
     .order("position", { ascending: true });
+
+  // Lu SOUS LA SESSION du vendeur : la policy de `order_events` remonte à
+  // `orders → shops → profiles`, et c'est elle qui garantit qu'on ne lit que
+  // ses propres commandes. Contourner la RLS ici en ferait la seule surface du
+  // produit où l'historique d'un tiers serait atteignable.
+  const historique = await lireHistorique(supabase, id);
 
   const medias: MediaAffiche[] = await Promise.all(
     (lignesMedias ?? []).map(async (m) => ({
@@ -203,6 +211,20 @@ export default async function EditeurCommande({
             }}
           />
         </TraductionsClient>
+
+        {/*
+          L'HISTORIQUE EST HORS DE `TraductionsClient`, et c'est délibéré : c'est
+          un composant SERVEUR. L'inclure dans l'îlot ferait voyager ses libellés
+          et sa liste d'événements dans la charge d'hydratation, pour un bloc que
+          personne n'interroge.
+        */}
+        <div className="mt-5">
+          <HistoriqueCommande
+            lignes={historique}
+            vues={data.views_count}
+            derniereVueLe={data.last_viewed_at}
+          />
+        </div>
       </div>
     </main>
   );

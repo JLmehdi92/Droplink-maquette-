@@ -460,6 +460,24 @@
     }
   },
   "editeur": {
+    "historique": {
+      "titre": "History",
+      "aucun": "Nothing has happened on this order yet.",
+      "jamaisOuvert": "Your customer has not opened the link yet.",
+      "derniereOuverture": "Last opened by your customer on {quand} — {vues} views.",
+      "types": {
+        "commande_creee": "Order created",
+        "commande_modifiee": "Field edited",
+        "commande_archivee": "Order archived",
+        "commande_dupliquee": "Order duplicated",
+        "media_ajoute": "Media added",
+        "media_supprime": "Media removed",
+        "medias_reordonnes": "Media reordered",
+        "lien_revoque": "Link revoked and regenerated",
+        "qc_approuve": "Check approved by customer",
+        "qc_refuse": "Check declined by customer"
+      }
+    },
     "titre": "New order",
     "retour": "Back to my orders",
     "voirPage": "View the customer page",

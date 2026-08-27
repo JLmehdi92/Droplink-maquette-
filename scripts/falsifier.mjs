@@ -1991,6 +1991,31 @@ const SQL = {
       on public.orders (shop_id, parcel_last_movement_at asc nulls last, id asc)
       where status = 'en_transit' and archived_at is null;`,
   },
+
+  /**
+   * HORS du cas motivant : le journal d une commande devient lisible par tous.
+   *
+   * L ecran d historique de l editeur rend `order_events`. Sa policy est la
+   * SEULE chose qui empeche un vendeur de lire le journal d un autre — et comme
+   * l ecran affiche des libelles traduits et des dates plausibles, un historique
+   * etranger y ressemblerait trait pour trait a un historique legitime.
+   *
+   * Rien n echoue, rien n alerte : le vendeur verrait simplement des gestes
+   * qu il n a pas faits sur une commande qu il croit sienne.
+   */
+  "journal-commande-ouvert": {
+    casser: `drop policy if exists "vendeur lit le journal de ses commandes" on public.order_events;
+      create policy "vendeur lit le journal de ses commandes" on public.order_events
+      for select to authenticated using (true);`,
+    reparer: `drop policy if exists "vendeur lit le journal de ses commandes" on public.order_events;
+      create policy "vendeur lit le journal de ses commandes" on public.order_events
+      for select to authenticated
+      using (exists (select 1 from public.orders o
+                     join public.shops s on s.id = o.shop_id
+                     join public.profiles p on p.id = s.owner_id
+                     where o.id = order_events.order_id and p.user_id = (select auth.uid())));`,
+  },
+
 };
 
 /**

@@ -460,6 +460,24 @@
     }
   },
   "editeur": {
+    "historique": {
+      "titre": "Historique",
+      "aucun": "Rien ne s'est encore passé sur cette commande.",
+      "jamaisOuvert": "Votre client n'a pas encore ouvert le lien.",
+      "derniereOuverture": "Dernière ouverture par votre client le {quand} — {vues} consultations.",
+      "types": {
+        "commande_creee": "Commande créée",
+        "commande_modifiee": "Champ modifié",
+        "commande_archivee": "Commande archivée",
+        "commande_dupliquee": "Commande dupliquée",
+        "media_ajoute": "Média ajouté",
+        "media_supprime": "Média supprimé",
+        "medias_reordonnes": "Médias réordonnés",
+        "lien_revoque": "Lien révoqué et régénéré",
+        "qc_approuve": "Contrôle approuvé par le client",
+        "qc_refuse": "Contrôle refusé par le client"
+      }
+    },
     "titre": "Nouvelle commande",
     "retour": "Revenir à mes commandes",
     "voirPage": "Voir la page du client",
