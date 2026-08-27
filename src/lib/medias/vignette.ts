@@ -221,6 +221,123 @@ export async function vignetteDepuisImage(
 }
 
 /**
+ * LE PLUS GRAND CÔTÉ D'UNE COUVERTURE.
+ *
+ * ⚠️ MESURÉ LE 27/08/2026 : la couverture de `/p/[token]` était servie par la
+ * VIGNETTE, 200 × 200, rendue en 899 × 562 — agrandissement 4,49× au bureau,
+ * 5,85× sur un téléphone en DPR 3. C'est le plus gros élément de la page, celui
+ * que le client vient voir, et il était flou à l'endroit exact où le produit
+ * prétend montrer un contrôle qualité.
+ *
+ * 900 EST DÉDUIT DU RENDU, pas choisi : la couverture fait 899 px au bureau. À
+ * 900 px il n'y a donc AUCUN agrandissement, et 1,3× seulement en DPR 3.
+ */
+export const COTE_COUVERTURE = 900;
+
+/**
+ * Dimensions dont la LARGEUR est bornée, ratio conservé.
+ *
+ * ⚠️ DISTINCTE DE `dimensionsBornees`, ET LA DISTINCTION EST TOUT LE SUJET.
+ * Le logo est borné par son PLUS GRAND CÔTÉ : il s'affiche dans un carré, donc
+ * c'est le grand côté qui sature. La couverture, elle, est rendue dans un cadre
+ * en 16/10 rempli par `object-cover` : c'est la LARGEUR qui commande, et la
+ * hauteur excédentaire est rognée à l'affichage.
+ *
+ * Borner le plus grand côté aurait donné, sur une photo QC typique en 3:4 —
+ * 2160 × 2880 — une image de 675 px de large pour un rendu à 899. Soit un
+ * agrandissement de 1,33× au bureau et 1,73× sur un téléphone en DPR 3 : bien
+ * mieux que les 4,49× d'avant, mais toujours du flou, et du flou qu'on aurait
+ * cru corrigé.
+ *
+ * C'est aussi ce que MESURENT les chiffres qui ont fixé le plafond de 90 Ko :
+ * ils ont été relevés à largeur bornée. Une implémentation qui borne autre chose
+ * que ce qu'on a mesuré rend la mesure sans objet.
+ *
+ * JAMAIS D'AGRANDISSEMENT ici non plus : une photo déjà moins large que la
+ * borne est rendue telle quelle.
+ */
+export function dimensionsLargeurBornee(
+  largeur: number,
+  hauteur: number,
+  cote: number,
+): Dimensions {
+  if (largeur <= 0 || hauteur <= 0) return { largeur: 1, hauteur: 1 };
+  const l = Math.min(largeur, cote);
+  return { largeur: l, hauteur: Math.max(1, Math.round((hauteur * l) / largeur)) };
+}
+
+/**
+ * L'échelle de qualité de la couverture, essayée dans l'ordre.
+ *
+ * Mesuré sur cinq vraies photos QC, en WebP à 900 px : 78 à 122 Ko à q0,82 ;
+ * 56 à 89 Ko à q0,75. On s'arrête à la PREMIÈRE qui tient sous le plafond, donc
+ * la plupart des photos gardent 0,82 et seules les plus détaillées descendent.
+ * Fixer une qualité unique aurait payé le pire cas sur toutes les photos.
+ */
+const QUALITES_COUVERTURE = [0.82, 0.75, 0.7, 0.62] as const;
+
+/**
+ * Produit la couverture d'une image — la version 900 px servie sur la page
+ * publique.
+ *
+ * PAS DE RECADRAGE, contrairement à la vignette. Le cadre de la page est en
+ * 16/10 et l'image le remplit par `object-cover` : recadrer ici en plus
+ * couperait deux fois. Les proportions d'origine sont conservées et le cadrage
+ * reste une décision de mise en page, faite au rendu.
+ *
+ * ÉCHEC NON BLOQUANT, comme la vignette : la page publique retombe sur la
+ * vignette quand la couverture manque. C'est ce qui rend cette dérivée posable
+ * sans rien casser de l'existant — aucune commande déjà déposée n'en a.
+ */
+export async function couvertureDepuisImage(
+  fichier: Blob,
+  plafondOctets: number,
+): Promise<Vignette | null> {
+  let image: ImageBitmap;
+  try {
+    image = await createImageBitmap(fichier);
+  } catch {
+    return null;
+  }
+
+  try {
+    const { largeur, hauteur } = dimensionsLargeurBornee(
+      image.width,
+      image.height,
+      COTE_COUVERTURE,
+    );
+
+    const toile = document.createElement("canvas");
+    toile.width = largeur;
+    toile.height = hauteur;
+
+    const contexte = toile.getContext("2d");
+    if (contexte === null) return null;
+
+    contexte.imageSmoothingEnabled = true;
+    contexte.imageSmoothingQuality = "high";
+    contexte.drawImage(image, 0, 0, largeur, hauteur);
+
+    let dernier: Blob | null = null;
+    for (const qualite of QUALITES_COUVERTURE) {
+      const blob = await new Promise<Blob | null>((resoudre) => {
+        toile.toBlob(resoudre, "image/webp", qualite);
+      });
+      if (blob === null) break;
+      dernier = blob;
+      if (blob.size <= plafondOctets) return { blob, largeur, hauteur };
+    }
+
+    // Hors plafond même au palier le plus bas : on rend quand même, et c'est le
+    // SERVEUR qui refuse, sur la taille relue. Décider ici sur une taille
+    // annoncée par le client serait le seul endroit du dépôt où on le croirait.
+    return dernier === null ? null : { blob: dernier, largeur, hauteur };
+  } finally {
+    image.close();
+  }
+}
+
+/**
  * Mesure la durée et capture une image d'une vidéo.
  *
  * ÉCHEC NON BLOQUANT, ici aussi et pour la même raison. On ne transcode RIEN :

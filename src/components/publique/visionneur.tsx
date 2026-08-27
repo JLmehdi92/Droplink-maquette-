@@ -28,6 +28,20 @@ export interface EntreeVisionneur {
   readonly id: string;
   readonly type: "photo" | "video";
   readonly urlVignette: string | null;
+  /**
+   * LA DÉRIVÉE 900 PX, pour la seule image qui est rendue en grand.
+   *
+   * ⚠️ La couverture était servie par la VIGNETTE : 200 × 200 étirés en
+   * 899 × 562, soit un agrandissement de 4,49× au bureau et 5,85× sur un
+   * téléphone en DPR 3. Le plus gros élément de la page — celui que le client
+   * vient voir — était flou, à l'endroit exact où le produit prétend montrer
+   * un contrôle qualité.
+   *
+   * Nulle pour tout média déposé avant qu'elle existe, et pour les vidéos,
+   * dont la vignette est une capture. La couverture retombe alors sur la
+   * vignette : l'écran reste celui d'avant, il ne casse pas.
+   */
+  readonly urlCouverture?: string | null;
   readonly largeur: number | null;
   readonly hauteur: number | null;
 }
@@ -207,15 +221,23 @@ export function Visionneur({
             className="relative block aspect-[4/3] w-full overflow-hidden bg-surface-container-highest md:aspect-[16/10] md:rounded-lg"
             aria-label={libelles.ouvrir + " 1"}
           >
-            {premier.urlVignette !== null ? (
+            {(premier.urlCouverture ?? premier.urlVignette) !== null ? (
               /* eslint-disable-next-line @next/next/no-img-element -- URL
                  signée à expiration : l'optimiseur la mettrait en cache
                  au-delà de sa validité et servirait des images mortes. */
               <img
-                src={premier.urlVignette}
+                src={premier.urlCouverture ?? (premier.urlVignette as string)}
                 alt=""
-                width={200}
-                height={200}
+                // Les dimensions déclarées SUIVENT la source réellement
+                // servie. Annoncer 200 × 200 pour une image de 900 px ferait
+                // réserver la mauvaise place et produirait le décalage que le
+                // budget de cette page interdit (< 0,1).
+                width={premier.urlCouverture != null ? 900 : 200}
+                height={premier.urlCouverture != null ? 563 : 200}
+                // LA COUVERTURE EST L'ÉLÉMENT LCP de la page. La différer la
+                // ferait attendre le premier passage de mise en page, ce qui
+                // est exactement ce qu'on cherche à éviter ici.
+                fetchPriority="high"
                 decoding="async"
                 className="h-full w-full object-cover"
               />

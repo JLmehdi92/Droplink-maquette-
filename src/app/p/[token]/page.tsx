@@ -169,6 +169,33 @@ export default async function PagePublique({
     sujet: visiteur === null ? "visiteur:sans-adresse" : `visiteur:${empreinte(visiteur)}`,
   });
 
+  /*
+   * LA COUVERTURE CHOISIE PAR LE VENDEUR PASSE EN TÊTE.
+   *
+   * ⚠️ DÉFAUT TROUVÉ EN PILOTANT LE PRODUIT LE 27/08/2026, en vérifiant tout
+   * autre chose. « Définir comme couverture » écrivait bien `cover_media_id` en
+   * base, l'éditeur affichait le badge « Couverture » sur la bonne photo — et la
+   * page du client montrait la PREMIÈRE photo par position, quoi qu'il arrive.
+   * Le réglage était enregistré, affiché, et sans effet.
+   *
+   * C'est le pire genre de défaut de ce produit : le vendeur croit avoir choisi
+   * ce que son client verra en grand, personne ne le contredit, et l'écart ne se
+   * découvre que chez le destinataire — s'il se découvre.
+   *
+   * ON RÉORDONNE ICI plutôt que dans le visionneur : celui-ci se sert de la
+   * POSITION dans le tableau pour son index de plein écran, pour ses tuiles et
+   * pour son compteur « 3 / 12 ». Lui faire choisir une tête différente du reste
+   * l'obligerait à distinguer deux ordres, et c'est exactement le genre de
+   * question qu'on finit par trancher de travers.
+   */
+  const mediasAvecCouvertureEnTete =
+    commande.couverture === null
+      ? commande.medias
+      : [
+          ...commande.medias.filter((m) => m.id === commande.couverture),
+          ...commande.medias.filter((m) => m.id !== commande.couverture),
+        ];
+
   const galerie =
     commande.medias.length === 0 ? (
       /* LA GALERIE VIDE SE DIT. Ni cadres gris ni « bientôt disponible » : on
@@ -184,10 +211,11 @@ export default async function PagePublique({
     ) : (
       <Visionneur
         jeton={commande.jeton}
-        medias={commande.medias.map((m) => ({
+        medias={mediasAvecCouvertureEnTete.map((m) => ({
           id: m.id,
           type: m.type,
           urlVignette: m.urlVignette,
+          urlCouverture: m.urlCouverture,
           largeur: m.largeur,
           hauteur: m.hauteur,
         }))}

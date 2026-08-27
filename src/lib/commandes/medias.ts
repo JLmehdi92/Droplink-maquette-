@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
-import { cleMedia, cleVignette, typesAcceptes } from "@/lib/storage/cles";
+import { cleCouverture, cleMedia, cleVignette, typesAcceptes } from "@/lib/storage/cles";
 import { deciderDepot, estVideo, limites } from "@/lib/storage/limites";
 import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
 import type { creerClientServeur } from "@/lib/supabase/server";
@@ -186,10 +186,11 @@ export async function preparerDepot(
  * Le plafond dur est appliqué DEUX FOIS : ici sur la taille annoncée, pour
  * refuser tôt, et à la confirmation sur la taille relue, qui seule fait foi.
  */
-export async function preparerDepotVignette(
+async function preparerDepotDerivee(
   supabase: ClientMedias,
   shopId: string,
   entree: unknown,
+  genre: "vignette" | "couverture",
 ): Promise<
   | { readonly statut: "ok"; readonly url: string; readonly enTetes: Record<string, string> }
   | { readonly statut: "echec"; readonly motif: "introuvable" | "trop_lourde" | "stockage" }
@@ -213,11 +214,13 @@ export async function preparerDepotVignette(
     .maybeSingle();
   if (commande === null) return { statut: "echec", motif: "introuvable" };
 
-  if (tailleAnnoncee > limites().vignetteOctets) {
+  const plafond = genre === "vignette" ? limites().vignetteOctets : limites().couvertureOctets;
+  if (tailleAnnoncee > plafond) {
     return { statut: "echec", motif: "trop_lourde" };
   }
 
-  const cle = cleVignette(cleMedia({ shopId, orderId, mediaId, typeMime }));
+  const cleDuMedia = cleMedia({ shopId, orderId, mediaId, typeMime });
+  const cle = genre === "vignette" ? cleVignette(cleDuMedia) : cleCouverture(cleDuMedia);
 
   try {
     const signature = await signerDepot({
@@ -228,11 +231,29 @@ export async function preparerDepotVignette(
     return { statut: "ok", url: signature.url, enTetes: signature.enTetesObligatoires };
   } catch (erreur) {
     console.error(
-      "[medias] signature de dépôt de vignette impossible : " +
+      "[medias] signature de dépôt de " + genre + " impossible : " +
         (erreur instanceof Error ? erreur.message : String(erreur)),
     );
     return { statut: "echec", motif: "stockage" };
   }
+}
+
+/** Signe le dépôt de la VIGNETTE — 200 px, la tuile de la grille. */
+export function preparerDepotVignette(supabase: ClientMedias, shopId: string, entree: unknown) {
+  return preparerDepotDerivee(supabase, shopId, entree, "vignette");
+}
+
+/**
+ * Signe le dépôt de la COUVERTURE — 900 px, le plus gros élément de la page.
+ *
+ * MÊME CHEMIN QUE LA VIGNETTE, délibérément. Les deux dérivées partagent tout
+ * ce qui compte : clé dérivée et jamais reçue, plafond appliqué DEUX FOIS —
+ * tôt sur la taille annoncée, puis à la confirmation sur la taille relue, qui
+ * seule fait foi. Les écrire séparément aurait laissé deux chemins vivre leur
+ * vie : celui qu'on corrige et celui qu'on oublie.
+ */
+export function preparerDepotCouverture(supabase: ClientMedias, shopId: string, entree: unknown) {
+  return preparerDepotDerivee(supabase, shopId, entree, "couverture");
 }
 
 export type ConfirmationDepot =
@@ -343,6 +364,33 @@ export async function confirmerDepot(
     }
   }
 
+  /*
+   * LA COUVERTURE SUIT EXACTEMENT LA MÊME RÈGLE QUE LA VIGNETTE : elle n'est
+   * enregistrée que si l'objet EXISTE et respecte son plafond dur, relu ici.
+   *
+   * Son absence est un cas NORMAL, pas une erreur : la page publique retombe
+   * alors sur la vignette. C'est ce qui permet de poser cette dérivée sans rien
+   * casser de l'existant — aucun média déjà déposé n'en a, et nous n'avons aucun
+   * encodeur côté serveur pour les rattraper.
+   */
+  const cleDeCouverture = cleCouverture(cle);
+  const tailleCouverture = await lireTaille(cleDeCouverture);
+  const plafondCouverture = limites().couvertureOctets;
+
+  let couvertureRetenue: string | null = null;
+  if (tailleCouverture !== null) {
+    if (tailleCouverture <= plafondCouverture) {
+      couvertureRetenue = cleDeCouverture;
+    } else {
+      await supprimer(cleDeCouverture).catch(() => undefined);
+      emettreApres(
+        EVENEMENTS.MEDIA_REFUSE,
+        { sujet: profilId },
+        { motif: "couverture_trop_lourde", taille: tailleCouverture, plafond: plafondCouverture },
+      );
+    }
+  }
+
   const { data, error } = await supabase
     .from("order_media")
     .insert({
@@ -351,6 +399,7 @@ export async function confirmerDepot(
       type: estVideo(typeMime) ? "video" : "photo",
       cle,
       cle_vignette: vignetteRetenue,
+      cle_couverture: couvertureRetenue,
       taille_octets: tailleReelle,
       position: compte.medias,
       largeur: largeur ?? null,

@@ -5,6 +5,7 @@ import { creerClientServeur } from "@/lib/supabase/server";
 import {
   confirmerDepot,
   preparerDepot,
+  preparerDepotCouverture,
   preparerDepotVignette,
   reordonnerMedias,
   supprimerMedia,
@@ -54,6 +55,25 @@ export async function demanderDepotVignette(
   const c = await contexte();
   if (c === null) return REFUS;
   return preparerDepotVignette(c.supabase, c.shopId, entree);
+}
+
+/**
+ * Le dépôt de la COUVERTURE — la dérivée 900 px servie sur la page publique.
+ *
+ * Séparée du dépôt de la vignette parce que ce sont DEUX objets, avec deux
+ * plafonds : 20 Ko pour une tuile de grille, 90 Ko pour l'image qui occupe la
+ * plus grande surface de la page. Les faire passer par un seul appel aurait
+ * obligé à choisir un plafond commun, donc à se tromper pour l'une des deux.
+ */
+export async function demanderDepotCouverture(
+  entree: unknown,
+): Promise<
+  | { statut: "ok"; url: string; enTetes: Record<string, string> }
+  | { statut: "echec"; motif: string }
+> {
+  const c = await contexte();
+  if (c === null) return REFUS;
+  return preparerDepotCouverture(c.supabase, c.shopId, entree);
 }
 
 export async function retirerMedia(

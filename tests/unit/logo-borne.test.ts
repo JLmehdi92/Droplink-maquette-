@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { COTE_LOGO, COTE_VIGNETTE, dimensionsBornees } from "@/lib/medias/vignette";
+import {
+  COTE_COUVERTURE,
+  COTE_LOGO,
+  COTE_VIGNETTE,
+  dimensionsBornees,
+  dimensionsLargeurBornee,
+} from "@/lib/medias/vignette";
 import { limites } from "@/lib/storage/limites";
 
 /**
@@ -96,5 +102,65 @@ describe("La borne serveur", () => {
     // 200 px de vignette carrée — mais il n'a aucune raison d'être démesuré.
     expect(COTE_LOGO).toBeGreaterThan(COTE_VIGNETTE / 2);
     expect(COTE_LOGO).toBeLessThanOrEqual(COTE_VIGNETTE * 2);
+  });
+});
+
+/**
+ * LA COUVERTURE SE BORNE PAR SA LARGEUR, PAS PAR SON PLUS GRAND CÔTÉ.
+ *
+ * ⚠️ DÉFAUT ATTRAPÉ SUR MOI-MÊME, en vérifiant le résultat à l'écran. La
+ * première implémentation réutilisait `dimensionsBornees`, qui borne le plus
+ * grand côté — c'est juste pour un logo, qui s'affiche dans un carré. La
+ * couverture, elle, remplit un cadre en 16/10 par `object-cover` : c'est la
+ * LARGEUR qui commande.
+ *
+ * Sur une photo QC typique en 3:4 — 2160 × 2880 — borner le grand côté donnait
+ * 675 px de large pour un rendu à 899 : 1,33× au bureau, 1,73× sur un téléphone
+ * en DPR 3. Bien mieux que les 4,49× d'avant, mais toujours du flou, et du flou
+ * qu'on aurait cru corrigé.
+ *
+ * Et surtout : les chiffres qui ont fixé le plafond de 90 Ko ont été relevés À
+ * LARGEUR BORNÉE. Une implémentation qui borne autre chose que ce qu'on a mesuré
+ * rend la mesure sans objet.
+ */
+describe("La borne de la couverture", () => {
+  test("une photo QC en 3:4 sort à 900 px de LARGE, pas de haut", () => {
+    expect(dimensionsLargeurBornee(2160, 2880, COTE_COUVERTURE)).toEqual({
+      largeur: 900,
+      hauteur: 1200,
+    });
+  });
+
+  test("contre-test : la borne du logo, elle, aurait rendu 675 de large", () => {
+    // C'est exactement le défaut corrigé. Sans ce contre-test, les deux
+    // fonctions pourraient converger un jour sans que rien ne le signale.
+    expect(dimensionsBornees(2160, 2880, COTE_COUVERTURE).largeur).toBe(675);
+  });
+
+  test("une photo paysage n'est pas rognée pour autant", () => {
+    expect(dimensionsLargeurBornee(2880, 2160, COTE_COUVERTURE)).toEqual({
+      largeur: 900,
+      hauteur: 675,
+    });
+  });
+
+  test("une image DÉJÀ moins large n'est jamais agrandie", () => {
+    expect(dimensionsLargeurBornee(600, 800, COTE_COUVERTURE)).toEqual({
+      largeur: 600,
+      hauteur: 800,
+    });
+  });
+
+  test("des dimensions absurdes ne font pas lever le dépôt", () => {
+    expect(dimensionsLargeurBornee(0, 0, COTE_COUVERTURE)).toEqual({ largeur: 1, hauteur: 1 });
+  });
+
+  test("le plafond de la couverture est distinct de celui de la vignette", () => {
+    // 20 Ko pour une tuile de 200 px, 90 Ko pour une image de 900 px. Un plafond
+    // commun aurait forcé à se tromper pour l'une des deux.
+    const l = limites();
+    expect(l.couvertureOctets).toBeGreaterThan(l.vignetteOctets * 3);
+    // Et il reste très en dessous du mégaoctet que le brief fixe à 20 médias.
+    expect(l.couvertureOctets).toBeLessThan(128 * 1024);
   });
 });

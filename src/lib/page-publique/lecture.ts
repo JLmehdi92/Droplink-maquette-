@@ -57,6 +57,12 @@ export interface MediaPublic {
   readonly id: string;
   readonly type: "photo" | "video";
   readonly urlVignette: string | null;
+  /**
+   * La dérivée 900 px, servie comme COUVERTURE — le plus gros élément de la
+   * page. Nulle pour tout média déposé avant qu'elle existe : la page retombe
+   * alors sur la vignette, comme elle le faisait pour tout le monde.
+   */
+  readonly urlCouverture: string | null;
   readonly largeur: number | null;
   readonly hauteur: number | null;
   readonly dureeSecondes: number | null;
@@ -124,6 +130,10 @@ async function lireCommandePubliqueSansMemo(
       type: m.type,
       urlVignette:
         m.cle_vignette === null ? null : await signerLecture(m.cle_vignette).catch(() => null),
+      urlCouverture:
+        m.cle_couverture === null
+          ? null
+          : await signerLecture(m.cle_couverture).catch(() => null),
       largeur: m.largeur,
       hauteur: m.hauteur,
       dureeSecondes: m.duree_s,

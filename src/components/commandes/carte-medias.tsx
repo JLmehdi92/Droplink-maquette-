@@ -24,12 +24,14 @@ import { Icone } from "@/components/icone";
 import {
   definirCouverture,
   demanderDepot,
+  demanderDepotCouverture,
   demanderDepotVignette,
   ordonnerMedias,
   retirerMedia,
   validerDepot,
 } from "@/lib/commandes/actions-medias";
-import { apercuDepuisVideo, vignetteDepuisImage } from "@/lib/medias/vignette";
+import { apercuDepuisVideo, couvertureDepuisImage, vignetteDepuisImage } from "@/lib/medias/vignette";
+import { limites } from "@/lib/storage/limites";
 import { creerSuiviDeCouverture } from "@/lib/commandes/suivi-couverture";
 
 /**
@@ -192,15 +194,31 @@ export function CarteMedias({
       // question qu'on finit par trancher de travers.
       const rendu: {
         vignette: { blob: Blob } | null;
+        couverture: { blob: Blob } | null;
         dureeSecondes: number | null;
         dimensions: { largeur: number; hauteur: number } | null;
       } = estVideo
-        ? { ...(await apercuDepuisVideo(fichier)), dimensions: null }
-        : await vignetteDepuisImage(fichier).then((r) =>
+        ? { ...(await apercuDepuisVideo(fichier)), couverture: null, dimensions: null }
+        : await vignetteDepuisImage(fichier).then(async (r) =>
             r === null
-              ? { vignette: null, dureeSecondes: null, dimensions: null }
+              ? { vignette: null, couverture: null, dureeSecondes: null, dimensions: null }
               : {
                   vignette: r.vignette,
+                  /*
+                   * LA COUVERTURE EST PRODUITE ICI, avec la vignette, et pas
+                   * ailleurs : c'est le seul instant où le fichier est déjà
+                   * décodé en mémoire. La fabriquer à la lecture ferait payer ce
+                   * coût à CHAQUE consultation, pour toujours — et la page
+                   * publique est vue en 4G sur un téléphone d'entrée de gamme.
+                   *
+                   * PAS POUR LES VIDÉOS : leur couverture serait l'image
+                   * capturée, déjà servie comme vignette et comme poster. Une
+                   * dérivée 900 px d'une capture vidéo coûterait du stockage
+                   * pour un gain que personne ne verrait.
+                   */
+                  couverture: await couvertureDepuisImage(fichier, limites().couvertureOctets).then(
+                    (c) => (c === null ? null : { blob: c.blob }),
+                  ),
                   dureeSecondes: null,
                   dimensions: r.dimensions,
                 },
@@ -232,21 +250,23 @@ export function CarteMedias({
         return;
       }
 
-      // La vignette part ensuite, et son échec ne compromet pas le média.
-      if (rendu.vignette !== null) {
-        const signature = await demanderDepotVignette({
+      // Les deux dérivées partent ensuite, et leur échec ne compromet pas le
+      // média : la page publique retombe sur ce qu'elle a.
+      for (const [derivee, demander] of [
+        [rendu.vignette, demanderDepotVignette],
+        [rendu.couverture, demanderDepotCouverture],
+      ] as const) {
+        if (derivee === null) continue;
+        const signature = await demander({
           orderId,
           mediaId: preparation.mediaId,
           typeMime: fichier.type,
-          tailleAnnoncee: rendu.vignette.blob.size,
+          tailleAnnoncee: derivee.blob.size,
         });
         if (signature.statut === "ok") {
-          await envoyer(
-            signature.url,
-            signature.enTetes,
-            rendu.vignette.blob,
+          await envoyer(signature.url, signature.enTetes, derivee.blob, () => undefined).catch(
             () => undefined,
-          ).catch(() => undefined);
+          );
         }
       }
 

@@ -1,4 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import type { Client } from "pg";
+import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
   supprimerUtilisateur,
@@ -7,12 +9,13 @@ import {
 import {
   confirmerDepot,
   preparerDepot,
+  preparerDepotCouverture,
   preparerDepotVignette,
   reordonnerMedias,
   supprimerMedia,
   type ClientMedias,
 } from "@/lib/commandes/medias";
-import { cleVignette } from "@/lib/storage/cles";
+import { cleCouverture, cleVignette } from "@/lib/storage/cles";
 import { limites } from "@/lib/storage/limites";
 import { lireTaille, supprimer } from "@/lib/storage/r2";
 
@@ -28,6 +31,15 @@ let alice: UtilisateurDeTest;
 let bob: UtilisateurDeTest;
 let commandeAlice: string;
 let commandeBob: string;
+/**
+ * Connexion DIRECTE au catalogue, hors du produit.
+ *
+ * Elle sert à éprouver les gardes qui vivent EN BASE : écrire en SQL en
+ * contournant tout le code applicatif est le seul moyen de prouver qu'une règle
+ * tient sans lui. Une règle applicative peut être oubliée dans un nouveau chemin
+ * de code ; une règle en base ne peut pas l'être.
+ */
+let bd: Client;
 
 /** Objets réellement déposés, retirés en fin de suite quoi qu'il arrive. */
 const clesCreees: string[] = [];
@@ -72,6 +84,7 @@ async function deposer(
 }
 
 beforeAll(async () => {
+  bd = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("med-alice");
   bob = await creerUtilisateur("med-bob");
 
@@ -95,6 +108,7 @@ afterAll(async () => {
   for (const cle of clesCreees) await supprimer(cle).catch(() => undefined);
   await supprimerUtilisateur(alice);
   await supprimerUtilisateur(bob);
+  await bd.end();
 }, 60_000);
 
 /**
@@ -424,6 +438,130 @@ describe("La vignette", () => {
       tailleAnnoncee: 4096,
     });
     expect(signature.statut).toBe("echec");
+  });
+});
+
+/**
+ * LA COUVERTURE 900 PX — la dérivée qui manquait.
+ *
+ * ⚠️ MESURÉ LE 27/08/2026 : la couverture de la page publique était servie par
+ * la VIGNETTE, 200 × 200 rendus en 899 × 562. Agrandissement 4,49× au bureau,
+ * 5,85× sur un téléphone en DPR 3 — sur le plus gros élément de la page, celui
+ * que le client vient voir, et à l'endroit exact où le produit prétend montrer
+ * un contrôle qualité.
+ *
+ * Ces tests portent sur ce qui peut mal tourner en SÉCURITÉ, pas sur la netteté
+ * — laquelle tient au canevas du navigateur et a été mesurée à la main : une
+ * dérivée dont le client choisirait l'emplacement pourrait écraser le média d'un
+ * autre vendeur, exactement comme la vignette.
+ */
+describe("La dérivée de couverture", () => {
+  test("son emplacement est DÉRIVÉ de celui du média, jamais choisi", async () => {
+    const signature = await preparerDepotCouverture(clientDe(alice), alice.shopId, {
+      orderId: commandeAlice,
+      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      typeMime: "image/jpeg",
+      tailleAnnoncee: 40_000,
+    });
+
+    expect(signature.statut).toBe("ok");
+    if (signature.statut !== "ok") return;
+
+    const attendu = cleCouverture(
+      "medias/" + alice.shopId + "/" + commandeAlice + "/3f2504e0-4f89-11d3-9a0c-0305e82c3301.jpg",
+    );
+    expect(decodeURIComponent(new URL(signature.url).pathname)).toContain(attendu);
+    expect(signature.url).not.toContain(bob.shopId);
+  });
+
+  test("elle ne partage PAS le plafond de la vignette", async () => {
+    // Le point de la séparation : 20 Ko pour une tuile de 200 px, 90 Ko pour une
+    // image de 900 px. Un plafond commun aurait forcé à se tromper pour l'une des
+    // deux — soit une couverture refusée, soit une vignette qui crève le budget.
+    const juste = limites().vignetteOctets + 1;
+    expect(juste).toBeLessThan(limites().couvertureOctets);
+
+    const acceptee = await preparerDepotCouverture(clientDe(alice), alice.shopId, {
+      orderId: commandeAlice,
+      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      typeMime: "image/jpeg",
+      tailleAnnoncee: juste,
+    });
+    expect(acceptee.statut, "une couverture de 20 Ko a été refusée").toBe("ok");
+
+    const refusee = await preparerDepotCouverture(clientDe(alice), alice.shopId, {
+      orderId: commandeAlice,
+      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      typeMime: "image/jpeg",
+      tailleAnnoncee: limites().couvertureOctets + 1,
+    });
+    expect(refusee.statut).toBe("echec");
+    if (refusee.statut === "echec") expect(refusee.motif).toBe("trop_lourde");
+  });
+
+  test("Bob ne peut pas signer de couverture dans la commande d'Alice", async () => {
+    const signature = await preparerDepotCouverture(clientDe(bob), bob.shopId, {
+      orderId: commandeAlice,
+      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      typeMime: "image/jpeg",
+      tailleAnnoncee: 40_000,
+    });
+    expect(signature.statut).toBe("echec");
+  });
+
+  /**
+   * LA BASE REFUSE UNE COUVERTURE NON DÉRIVÉE, et c'est elle qui fait autorité.
+   *
+   * Une règle applicative peut être oubliée dans un nouveau chemin de code ; une
+   * règle en base ne peut pas l'être. On écrit donc EN SQL, directement, en
+   * contournant tout le code du produit — c'est le seul moyen de prouver que la
+   * garde tient sans lui.
+   */
+  test("une couverture pointant AILLEURS est refusée par la base, avec son code", async () => {
+    const media = await interroger<{ id: string; cle: string }>(
+      bd,
+      "select id, cle from public.order_media where order_id = $1 limit 1",
+      [commandeAlice],
+    );
+    const ligne = media[0];
+    expect(ligne, "aucun média : le test ne prouverait rien").toBeDefined();
+    if (ligne === undefined) return;
+
+    await expect(
+      bd.query("update public.order_media set cle_couverture = $2 where id = $1", [
+        ligne.id,
+        // CANONIQUE, mais pointant chez BOB. Une clé mal formée serait refusée
+        // par la contrainte de FORME avant d'atteindre le déclencheur : le test
+        // passerait au vert sans jamais éprouver la dérivation.
+        "medias/" +
+          bob.shopId +
+          "/" +
+          commandeAlice +
+          "/3f2504e0-4f89-11d3-9a0c-0305e82c3399.couverture.webp",
+      ]),
+    ).rejects.toMatchObject({ code: "DL048" });
+  });
+
+  test("contre-test positif : la couverture DÉRIVÉE, elle, est acceptée", async () => {
+    // Sans lui, « la base refuse » serait aussi vrai d'une base qui refuse tout.
+    const media = await interroger<{ id: string; cle: string }>(
+      bd,
+      "select id, cle from public.order_media where order_id = $1 limit 1",
+      [commandeAlice],
+    );
+    const ligne = media[0];
+    expect(ligne).toBeDefined();
+    if (ligne === undefined) return;
+
+    await expect(
+      bd.query("update public.order_media set cle_couverture = $2 where id = $1", [
+        ligne.id,
+        cleCouverture(ligne.cle),
+      ]),
+    ).resolves.toBeDefined();
+
+    // On repose l'état : les tests suivants ne doivent pas hériter de celui-ci.
+    await bd.query("update public.order_media set cle_couverture = null where id = $1", [ligne.id]);
   });
 });
 

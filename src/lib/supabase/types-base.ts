@@ -150,6 +150,7 @@ export type Database = {
       order_media: {
         Row: {
           cle: string
+          cle_couverture: string | null
           cle_vignette: string | null
           created_at: string
           duree_s: number | null
@@ -164,6 +165,7 @@ export type Database = {
         }
         Insert: {
           cle: string
+          cle_couverture?: string | null
           cle_vignette?: string | null
           created_at?: string
           duree_s?: number | null
@@ -178,6 +180,7 @@ export type Database = {
         }
         Update: {
           cle?: string
+          cle_couverture?: string | null
           cle_vignette?: string | null
           created_at?: string
           duree_s?: number | null
@@ -783,7 +786,7 @@ export type Database = {
       }
       battre: { Args: { p_detail: Json; p_source: string }; Returns: undefined }
       cle_media_canonique: {
-        Args: { p_cle: string; p_vignette: boolean }
+        Args: { p_cle: string; p_genre: string }
         Returns: boolean
       }
       colis_a_interroger: {
@@ -955,6 +958,7 @@ export type Database = {
         Args: { p_jeton: string }
         Returns: {
           cle: string
+          cle_couverture: string
           cle_vignette: string
           duree_s: number
           hauteur: number
@@ -977,6 +981,7 @@ export type Database = {
           stage: string
         }[]
       }
+      lire_plafond_commandes: { Args: never; Returns: number }
       lire_suivi_public: {
         Args: { p_jeton: string }
         Returns: {

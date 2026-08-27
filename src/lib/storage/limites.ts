@@ -48,6 +48,8 @@ export type Limites = {
   readonly dureeVideoMaxS: number;
   /** Plafond DUR de la vignette, déduit du budget de page. */
   readonly vignetteOctets: number;
+  /** Plafond DUR de la couverture 900 px, déduit de la mesure. */
+  readonly couvertureOctets: number;
 };
 
 export function limites(): Limites {
@@ -82,6 +84,21 @@ export function limites(): Limites {
     // 12 Ko visés, 20 Ko de plafond dur : 400 Ko de page + 600 Ko de vignettes
     // à 50 lignes, divisés par 50.
     vignetteOctets: entierDepuisEnv("VIGNETTE_MAX_KO", 20) * 1024,
+    /*
+     * LA COUVERTURE — 900 px, plafond 90 Ko.
+     *
+     * Le plafond vient de la MESURE, sur cinq vraies photos QC en WebP à
+     * 900 px : 78 à 122 Ko à q0,82, et 56 à 89 Ko à q0,75. 90 Ko laisse donc
+     * passer la plupart des photos à pleine qualité et force les plus détaillées
+     * d'un palier — sans jamais dépasser ce que la page peut porter.
+     *
+     * CE QU'ELLE COÛTE À LA PAGE : une seule couverture par page, contre vingt
+     * vignettes. À 20 médias, la page passe d'environ 272 à 340 Ko, très en
+     * dessous du mégaoctet que le brief fixe comme plafond à cette volumétrie.
+     * C'est aussi l'élément LCP : sur 4G bridée, 70 Ko coûtent environ 0,4 s,
+     * pour un budget de 2 s.
+     */
+    couvertureOctets: entierDepuisEnv("COUVERTURE_MAX_KO", 90) * 1024,
   };
 }
 

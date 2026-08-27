@@ -136,6 +136,24 @@ export function cleVignette(cleDuMedia: string): string {
   return `${sansExtension}.vignette.webp`;
 }
 
+/**
+ * Clé de la COUVERTURE d'un média, dérivée elle aussi.
+ *
+ * Distincte de la vignette parce qu'elles ne servent pas le même écran : la
+ * vignette fait 200 px dans une grille, la couverture fait 900 px et occupe la
+ * plus grande surface de la page publique. Les confondre, c'est ce que le
+ * produit faisait — et la couverture était alors une vignette étirée 4,49 fois.
+ *
+ * Dérivée et non indépendante, pour la même raison que la vignette : une clé
+ * dont le client choisirait l'emplacement pourrait écraser le média d'un autre
+ * vendeur. La base le vérifie AUSSI, par déclencheur — une règle applicative
+ * peut être oubliée dans un nouveau chemin de code, une règle en base non.
+ */
+export function cleCouverture(cleDuMedia: string): string {
+  const sansExtension = cleDuMedia.replace(/.[^./]+$/, "");
+  return `${sansExtension}.couverture.webp`;
+}
+
 /** Clé du logo d'une boutique. */
 export function cleLogo(params: { shopId: string; logoId: string; typeMime: string }): string {
   const shop = exigerUuid(params.shopId, "shopId");
@@ -184,7 +202,7 @@ function extensionsPossibles(): string {
 
 const FORMES_ADMISES = new RegExp(
   "^(?:" +
-    `medias/${UUID_NU}/${UUID_NU}/${UUID_NU}\\.(?:vignette\\.webp|${extensionsPossibles()})` +
+    `medias/${UUID_NU}/${UUID_NU}/${UUID_NU}\\.(?:couverture\\.webp|vignette\\.webp|${extensionsPossibles()})` +
     "|" +
     `logos/${UUID_NU}/${UUID_NU}\\.(?:${extensionsPossibles()})` +
     ")$",
