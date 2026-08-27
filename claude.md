@@ -61,18 +61,39 @@ Next.js 15 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 > ⚠️ **STITCH EST SUPPRIMÉ — décision de Wassim, 26/08/2026.**
 > Ce fichier a longtemps dit « on implémente TOUS les écrans Stitch, c'est une décision produit, pas une suggestion ». **Cette phrase est morte, et le dossier avec elle** : `stitch_droplink_qc_tracking_portal/` a été effacé du dépôt le 26/08/2026, une fois les 20 routes portées sur le canevas. Si un commentaire du code cite encore une maquette Stitch, il parle d'une décision PASSÉE, jamais d'une référence à consulter.
 
-**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — 40 planches, chaque écran en bureau ET téléphone, plus une page d'états.
+**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — **41 planches**, chaque écran en bureau ET téléphone, plus les planches d'états.
+
+**Les planches sont EXTRAITES sur le disque : `C:/Users/mehdi/Desktop/canevas-droplink/`** (fichiers `.dc.html` + `canvas.json`, hors du dépôt). Ce sont de vraies pages HTML qui portent **toutes les valeurs en clair** : on ne compare donc pas une impression, on compare des nombres. Ré-extraction si le canevas change : `Artifact action:"read"` sur l'URL, puis `node "<skill design>/seed-canvas.mjs" --extract <fichier> --to <dossier vide>`.
+
+> **RÈGLE DE CONFORMITÉ — décision de Wassim, 27/08/2026.** Chaque écran doit
+> correspondre à sa planche **au millimètre près**. On ne passe pas à l'écran
+> suivant tant que celui en cours n'est pas exactement conforme. Cela vaut pour
+> **tous** les écrans, **landing comprise**. En cas de désaccord entre ce
+> fichier et une planche, **c'est la planche qui gagne**.
 
 **Design system — les valeurs font foi, pas la prose :**
 
 ```
-canvas (extérieur)  #c5cbfb    carte-page  #ffffff, rayon 28
+canvas (extérieur)  #c5cbfb    carte-page  #ffffff
 app (dashboard)     #f7f7fb    encre       #0e0e13
 sourdine            #83858f    filet       #ececf0
 pilule noire        #111117    admin       #111117 (chrome sombre)
 DÉGRADÉ DE MARQUE   linear-gradient(97deg, #7c5cf5 0%, #f2765e 100%)
 rayons              carte 16 · contrôle 12-13 · pilule 9999
+
+RAYON DE LA CARTE-PAGE — DEUX VALEURS, SELON LA SURFACE
+  28  surfaces PUBLIQUES  : landing, connexion, inscription, onboarding,
+                            conditions, confidentialité, signalement
+  24  surfaces AUTHENTIFIÉES : commandes, éditeur, envois, analyses, marque,
+                            et les six écrans admin
 ```
+
+> ⚠️ Ce bloc disait « carte-page rayon 28 », valeur unique. **C'était
+> incomplet, et le code a suivi la prose plutôt que le canevas** : `/fr/commandes`
+> rendait 28 là où sa planche dit 24. Relevé le 27/08/2026 en comparant les 41
+> planches extraites : **15 planches à 24, 6 à 28**, et la coupure est nette —
+> elle sépare le public de l'authentifié. Le canevas fait foi ; ce fichier ne
+> fait que le rapporter.
 
 Typographie inchangée : **Plus Jakarta Sans** (titres, 800, tracking -0.03em) + **Inter** (corps), servies par `next/font/google` — **jamais de `<link>` vers un CDN de polices**.
 
