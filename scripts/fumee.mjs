@@ -1385,10 +1385,16 @@ const EXCEPTIONS_VARIABLES = [
   ["--tw-ease", "interne Tailwind"],
   // Ecrites EN LIGNE par l apercu de marque : elles portent la couleur du
   // vendeur, donc elles ne peuvent pas vivre dans une feuille statique.
-  ["--apercu-interface", "posee en ligne par l apercu de marque"],
-  ["--apercu-remplissage", "posee en ligne par l apercu de marque"],
-  ["--apercu-sur-remplissage", "posee en ligne par l apercu de marque"],
-  ["--apercu-texte", "posee en ligne par l apercu de marque"],
+  // POSEE EN LIGNE par les apercus de marque et d onboarding — elle porte la
+  // couleur du vendeur, donc elle ne peut pas vivre dans une feuille statique —
+  // mais elle est LUE par une classe utilitaire (la bordure et le halo de la
+  // carte choisie), donc elle apparait bien dans le CSS servi.
+  //
+  // ⚠️ `--apercu-sur-remplissage` A QUITTE CETTE LISTE. Elle est desormais posee
+  // ET lue en ligne : elle ne traverse plus jamais la feuille de style, donc
+  // l attendre ici revenait a declarer une exception qui ne correspond plus a
+  // rien. C est la sonde qui l a dit, en echouant DANS L AUTRE SENS.
+  ["--apercu-remplissage", "posee en ligne, mais lue par une classe utilitaire"],
 ];
 const tolerees = new Set(EXCEPTIONS_VARIABLES.map(([v]) => v));
 

@@ -394,8 +394,6 @@ export function FormulaireMarque({
       className="flex flex-col gap-3 lg:gap-[18px]"
       style={
         {
-          "--apercu-texte": accent.texte,
-          "--apercu-interface": accent.interface,
           "--apercu-remplissage": accent.remplissage,
           "--apercu-sur-remplissage": accent.surRemplissage,
         } as React.CSSProperties

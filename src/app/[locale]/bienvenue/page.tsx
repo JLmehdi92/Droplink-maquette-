@@ -40,26 +40,22 @@ export default async function Bienvenue({
   if (profil.statut !== "active") redirect(`/${langue}/connexion?erreur=suspendu`);
   if (!onboardingAFaire(profil)) redirect(`/${langue}`);
 
-  const t = await getTranslations("onboarding");
-
   return (
-    <div className="min-h-dvh bg-surface-container-lowest md:bg-canvas md:p-7">
+    <div className="min-h-dvh bg-canvas p-3 md:p-7">
+      {/*
+        ⚠️ LE CONTENEUR FAIT 1384, PAS 1000, et la carte-page porte les DEUX
+        colonnes de la planche : les réglages à gauche, l'aperçu en direct à
+        droite. Le formulaire les rend lui-même — l'aperçu dépend de ce qu'on
+        est en train de saisir, donc il ne peut pas vivre dans un composant
+        serveur qui ne verra jamais ces frappes.
+      */}
       <main
         id="contenu"
-        className="mx-auto w-full max-w-[1000px] bg-surface-container-lowest px-margin-mobile py-10 md:rounded-page-publique md:px-14 md:py-12"
+        className="mx-auto w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:rounded-page-publique"
       >
-        <h1 className="font-headline-xl text-[30px] leading-[36px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
-          {t("titre")}
-        </h1>
-        <p className="mt-2.5 font-body-lg text-[15px] leading-6 text-on-surface-variant">
-          {t("sousTitre")}
-        </p>
-
-      <div className="mt-8">
         <TraductionsClient espaces={["onboarding"]}>
           <FormulaireOnboarding locale={langue} />
         </TraductionsClient>
-      </div>
       </main>
     </div>
   );

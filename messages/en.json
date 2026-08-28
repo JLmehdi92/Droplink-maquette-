@@ -196,54 +196,45 @@
     "dejaCompteTexte": "Already have an account?"
   },
   "onboarding": {
-    "titre": "Welcome",
-    "sousTitre": "Four settings, one minute. You can change everything later — links you have already sent will follow.",
-    "typeTitre": "You mostly sell…",
-    "typeAide": "This answer changes nothing about what you can do. It helps us know who we are building for.",
-    "type": {
-      "supplier": {
-        "titre": "I supply resellers",
-        "detail": "You send photos and tracking to people who resell afterwards."
-      },
-      "reseller": {
-        "titre": "I sell to my own customers",
-        "detail": "You sell directly, in DMs, without an online shop."
-      }
-    },
-    "erreurType": "Pick one of the two answers.",
+    "titre": "Let’s put your name on the page",
+    "sousTitre": "This is what your customer will see. You can change everything later.",
+    "etape": "Step 1 of 2",
     "nomTitre": "Your shop name",
-    "nomAide": "It appears at the top of the page your customer sees. You can leave it empty for now.",
-    "nomPlaceholder": "For example: Studio Nord",
-    "couleurTitre": "Your colour",
-    "couleurAide": "It dresses your customers' page. Any colour works: text stays readable automatically.",
-    "couleurAjustee": "This shade was lightened or darkened slightly on screen so it stays readable. Your colour itself is kept as chosen.",
+    "nomPlaceholder": "Atelier Nord",
+    "logoTitre": "Logo",
+    "logoChoisir": "Choose an image",
     "logoRemplacer": "Replace",
+    "logoFormats": "PNG or JPG, 512 px minimum",
+    "logoRetirer": "Remove the logo",
     "logoEnvoi": "Uploading… {pourcent}%",
     "logoErreur": {
-      "session": "Your session has expired. Please sign in again.",
-      "type": "That format is not accepted. Use a PNG, JPEG or WebP.",
-      "taille": "That image is larger than 2 MB.",
-      "envoi": "Upload failed. Check your connection and try again.",
-      "confirmation": "The image was sent but we could not save it. Please try again."
+      "type": "This image format is not accepted.",
+      "taille": "This image is too heavy.",
+      "envoi": "The upload failed. Try again.",
+      "confirmation": "The server did not confirm the upload. Try again."
     },
-    "valider": "Let's go",
+    "couleurTitre": "Your colour",
+    "couleurAide": "Contrast is adjusted automatically: any colour stays readable.",
+    "typeTitre": "You mostly sell…",
+    "type": {
+      "supplier": {
+        "titre": "To resellers",
+        "detail": "You supply other sellers"
+      },
+      "reseller": {
+        "titre": "To your customers",
+        "detail": "You sell directly, in private messages"
+      }
+    },
+    "erreurType": "Choose who you sell to.",
+    "valider": "Continue",
     "validationEnCours": "Saving…",
-    "erreurSession": "Your session has expired. Please sign in again.",
-    "erreurEcriture": "Saving failed. Please try again in a moment.",
-    "marqueTitre": "Your brand",
-    "marqueAide": "Your name and logo replace DropLink on the page your customer sees.",
-    "depotTitre": "Click to choose an image, or drop it here",
-    "depotFormats": "PNG, JPEG or WebP, up to 2 MB",
-    "logoRetirer": "Remove logo",
-    "couleurHex": "Primary colour (hex)",
-    "apercuTitre": "Live preview",
-    "apercuAide": "What your customer will see when they open your link.",
-    "apercuEnTete": "Your order page",
+    "erreurSession": "Your session expired. Sign in again.",
+    "erreurEcriture": "Saving failed. Try again.",
+    "apercuTitre": "WHAT YOUR CUSTOMER WILL SEE",
     "apercuCommande": "Your order",
-    "apercuEtape1": "Shipped",
-    "apercuEtape1Date": "Today, 10:42",
-    "apercuEtape2": "In transit",
-    "apercuEtape2Date": "Tomorrow",
+    "apercuPour": "for your customer",
+    "apercuApprouver": "Approve",
     "sansNom": "Your shop"
   },
   "marque": {

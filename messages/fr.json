@@ -196,54 +196,45 @@
     "dejaCompteTexte": "Vous avez déjà un compte ?"
   },
   "onboarding": {
-    "titre": "Bienvenue",
-    "sousTitre": "Quatre réglages, une minute. Vous pourrez tout changer ensuite — vos liens déjà envoyés suivront.",
-    "typeTitre": "Vous vendez plutôt…",
-    "typeAide": "Cette réponse ne change rien à ce que vous pouvez faire. Elle nous aide à savoir pour qui nous construisons.",
-    "type": {
-      "supplier": {
-        "titre": "Je fournis des revendeurs",
-        "detail": "Vous envoyez photos et suivi à des gens qui revendent ensuite."
-      },
-      "reseller": {
-        "titre": "Je vends à mes clients",
-        "detail": "Vous vendez en direct, en message privé, sans boutique en ligne."
-      }
-    },
-    "erreurType": "Choisissez l'une des deux réponses.",
+    "titre": "Mettons votre nom sur la page",
+    "sousTitre": "C’est ce que verra votre client. Vous pourrez tout changer plus tard.",
+    "etape": "Étape 1 sur 2",
     "nomTitre": "Nom de votre boutique",
-    "nomAide": "Il s'affiche en haut de la page que voit votre client. Vous pouvez le laisser vide pour l'instant.",
-    "nomPlaceholder": "Par exemple : Studio Nord",
-    "couleurTitre": "Votre couleur",
-    "couleurAide": "Elle habille la page de vos clients. N'importe quelle couleur convient : le texte reste lisible automatiquement.",
-    "couleurAjustee": "Cette teinte a été légèrement éclaircie ou foncée à l'affichage pour rester lisible. Votre couleur, elle, est conservée telle quelle.",
+    "nomPlaceholder": "Atelier Nord",
+    "logoTitre": "Logo",
+    "logoChoisir": "Choisir une image",
     "logoRemplacer": "Remplacer",
+    "logoFormats": "PNG ou JPG, 512 px minimum",
+    "logoRetirer": "Retirer le logo",
     "logoEnvoi": "Envoi… {pourcent} %",
     "logoErreur": {
-      "session": "Votre session a expiré. Reconnectez-vous.",
-      "type": "Ce format n'est pas accepté. Utilisez un PNG, un JPEG ou un WebP.",
-      "taille": "Cette image dépasse 2 Mo.",
-      "envoi": "L'envoi a échoué. Vérifiez votre connexion et réessayez.",
-      "confirmation": "L'image est partie mais nous n'avons pas pu l'enregistrer. Réessayez."
+      "type": "Ce format d’image n’est pas accepté.",
+      "taille": "Cette image est trop lourde.",
+      "envoi": "L’envoi a échoué. Réessayez.",
+      "confirmation": "Le serveur n’a pas confirmé l’envoi. Réessayez."
     },
-    "valider": "C'est parti",
+    "couleurTitre": "Votre couleur",
+    "couleurAide": "Le contraste est ajusté automatiquement : n’importe quelle couleur reste lisible.",
+    "typeTitre": "Vous vendez plutôt…",
+    "type": {
+      "supplier": {
+        "titre": "À des revendeurs",
+        "detail": "Vous fournissez d’autres vendeurs"
+      },
+      "reseller": {
+        "titre": "À vos clients",
+        "detail": "Vous vendez en direct, en message privé"
+      }
+    },
+    "erreurType": "Choisissez à qui vous vendez.",
+    "valider": "Continuer",
     "validationEnCours": "Enregistrement…",
     "erreurSession": "Votre session a expiré. Reconnectez-vous.",
-    "erreurEcriture": "L'enregistrement a échoué. Réessayez dans un instant.",
-    "marqueTitre": "Votre marque",
-    "marqueAide": "Votre nom et votre logo remplacent DropLink sur la page que voit votre client.",
-    "depotTitre": "Cliquez pour choisir une image, ou déposez-la ici",
-    "depotFormats": "PNG, JPEG ou WebP, jusqu'à 2 Mo",
-    "logoRetirer": "Retirer le logo",
-    "couleurHex": "Couleur principale (hexadécimal)",
-    "apercuTitre": "Aperçu en direct",
-    "apercuAide": "Ce que votre client verra en ouvrant votre lien.",
-    "apercuEnTete": "Page de votre commande",
+    "erreurEcriture": "L’enregistrement a échoué. Réessayez.",
+    "apercuTitre": "CE QUE VOTRE CLIENT VERRA",
     "apercuCommande": "Votre commande",
-    "apercuEtape1": "Expédié",
-    "apercuEtape1Date": "Aujourd'hui, 10 h 42",
-    "apercuEtape2": "En transit",
-    "apercuEtape2Date": "Demain",
+    "apercuPour": "pour votre client",
+    "apercuApprouver": "Approuver",
     "sansNom": "Votre boutique"
   },
   "marque": {
