@@ -363,20 +363,58 @@
     "aideCourte": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur."
   },
   "analyses": {
-    "titre": "Vos analyses",
-    "sousTitre": "Ce que vos liens deviennent une fois envoyés.",
+    "titre": "Analyses",
+    "sousTitre": {
+      "7j": "7 derniers jours",
+      "30j": "30 derniers jours",
+      "90j": "90 derniers jours"
+    },
     "periode": {
       "titre": "Période",
       "7j": "7 jours",
       "30j": "30 jours",
-      "tout": "Depuis le début"
+      "90j": "90 jours"
     },
-    "commandesCreees": "Commandes créées",
-    "avecSuivi": "{n, plural, =0 {aucune avec un numéro de suivi} one {# avec un numéro de suivi} other {# avec un numéro de suivi}}",
-    "tauxOuverture": "Liens ouverts par le client",
-    "ouvertsSur": "{ouverts} sur {total}",
-    "vuesMoyennes": "Consultations par lien ouvert",
-    "vuesTotales": "{n, plural, =0 {aucune consultation} one {# consultation au total} other {# consultations au total}}",
+    "compteurs": "Vue d’ensemble",
+    "carte": {
+      "commandesCreees": "Commandes créées",
+      "vuesMoyennes": "Vues par commande",
+      "avecSuivi": "Commandes avec suivi",
+      "jamaisOuvertes": "Jamais ouvertes"
+    },
+    "carteCourt": {
+      "commandesCreees": "Commandes créées",
+      "vuesMoyennes": "Vues par commande",
+      "avecSuivi": "Avec suivi",
+      "jamaisOuvertes": "Jamais ouvertes"
+    },
+    "ecartPrecedent": "{n} vs période précédente",
+    "aucuneComparaison": "rien à comparer",
+    "leClientRevient": "le client revient plusieurs fois",
+    "leClientRevientCourt": "le client revient",
+    "partSur": "{n} sur {total}",
+    "aRelancer": "à relancer",
+    "toutesOuvertes": "toutes ont été ouvertes",
+    "frise": {
+      "titre": "Commandes créées par semaine",
+      "fenetre": "{n} dernières semaines",
+      "barre": "Semaine du {semaine} : {n, plural, =0 {aucune commande} one {# commande} other {# commandes}}",
+      "vide": "Aucune commande créée sur ces douze semaines."
+    },
+    "colis": {
+      "titre": "Où en sont vos colis",
+      "enTransit": "En transit",
+      "livre": "Livrés",
+      "preparation": "Pas encore scannés",
+      "silencieux": "Sans mouvement",
+      "vide": "Aucun colis suivi pour le moment."
+    },
+    "consultees": {
+      "titre": "Vos commandes les plus consultées",
+      "aide": "Un client qui revient plusieurs fois sur sa page est un client rassuré.",
+      "sansNom": "Sans destinataire",
+      "vide": "Aucun lien n’a encore été ouvert sur cette période."
+    },
     "qc": {
       "titre": "Réponses de vos clients",
       "aide": "Ce que vos clients ont répondu après avoir vu les photos. Sans réponse de leur part, la commande reste en attente.",

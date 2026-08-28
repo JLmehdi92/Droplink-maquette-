@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
+import { signerLecture } from "@/lib/storage/r2";
 
 /**
  * LES ANALYSES — ce que le vendeur apprend sur son propre usage.
@@ -16,8 +17,28 @@ import type { Database } from "@/lib/supabase/types-base";
  * inutilisable.
  */
 
-export const PERIODES = ["7j", "30j", "tout"] as const;
+/**
+ * LES TROIS PÉRIODES DES PLANCHES.
+ *
+ * ⚠️ « DEPUIS LE DÉBUT » A DISPARU AU PROFIT DE « 90 JOURS », et ce n'est pas
+ * un détail de libellé. Les deux planches, `Analyses` et `AnalysesMobile`,
+ * posent 7 / 30 / 90. Une période non bornée n'a PAS de période précédente à
+ * laquelle se comparer : le premier compteur de l'écran, « + N vs période
+ * précédente », serait resté vide sur un tiers des choix — donc la colonne
+ * aurait affiché tantôt une tendance, tantôt rien, sans que le vendeur sache
+ * pourquoi. Trois fenêtres de même nature, trois comparaisons possibles.
+ */
+export const PERIODES = ["7j", "30j", "90j"] as const;
 export type Periode = (typeof PERIODES)[number];
+
+/** Le nombre de jours de chaque fenêtre. Un seul endroit le sait. */
+const JOURS: Record<Periode, number> = { "7j": 7, "30j": 30, "90j": 90 };
+
+/** Douze barres au bureau, huit au téléphone : on lit les douze, on en cache quatre. */
+export const SEMAINES_FRISE = 12;
+
+/** Trois lignes sur la planche, et pas une de plus : c'est un classement, pas une liste. */
+export const PLUS_CONSULTEES = 3;
 
 export const ParametresAnalyses = z.object({
   periode: z.enum(PERIODES).catch("30j"),
@@ -34,26 +55,42 @@ export interface Activite {
   readonly qcEnAttente: number;
   readonly avecSuivi: number;
   readonly archivees: number;
+  /** Les commandes de la fenêtre de même longueur qui précède celle affichée. */
+  readonly creeesPeriodePrecedente: number;
+}
+
+/** Une semaine de la frise : son lundi, et ce qui y a été créé. */
+export interface SemaineCreee {
+  readonly debut: Date;
+  readonly total: number;
+}
+
+/** Une ligne du classement des commandes les plus consultées. */
+export interface CommandeConsultee {
+  readonly id: string;
+  readonly client: string | null;
+  readonly reference: string | null;
+  readonly vues: number;
+  /** Vignette signée, ou `null` : l'absence de vignette est un cas normal. */
+  readonly vignette: string | null;
+}
+
+/** Le début de la période affichée. */
+export function debutPeriode(periode: Periode, maintenant: Date): Date {
+  return new Date(maintenant.getTime() - JOURS[periode] * 86_400_000);
 }
 
 /**
- * Le début de la période.
+ * Le début de la fenêtre PRÉCÉDENTE, de même longueur.
  *
- * « tout » est borné à l'époque Unix plutôt qu'à `null` : la fonction en base
- * prend un horodatage NON NUL, et une borne nulle aurait exigé un `or p_depuis
- * is null` dans son `where` — c'est-à-dire une condition que l'optimiseur ne
- * peut plus satisfaire par l'index sur `(shop_id, created_at)`. Le produit n'a
- * pas de commande antérieure à 1970.
+ * Elle est fermée en haut par le début de la période courante — c'est la base
+ * du « + N vs période précédente ». Deux fenêtres de longueurs différentes
+ * produiraient un delta qui semble mesurer une tendance et mesure en fait la
+ * différence de durée, exactement le genre de métrique faussée qui reste
+ * crédible.
  */
-export function debutPeriode(periode: Periode, maintenant: Date): Date {
-  switch (periode) {
-    case "7j":
-      return new Date(maintenant.getTime() - 7 * 86_400_000);
-    case "30j":
-      return new Date(maintenant.getTime() - 30 * 86_400_000);
-    default:
-      return new Date(0);
-  }
+export function debutPeriodePrecedente(periode: Periode, maintenant: Date): Date {
+  return new Date(maintenant.getTime() - 2 * JOURS[periode] * 86_400_000);
 }
 
 /**
@@ -67,6 +104,40 @@ export function debutPeriode(periode: Periode, maintenant: Date): Date {
 export function tauxOuverture(activite: Activite): number | null {
   if (activite.commandesCreees === 0) return null;
   return Math.round((activite.commandesOuvertes / activite.commandesCreees) * 100);
+}
+
+/**
+ * La part des commandes qui portent un numéro de suivi.
+ *
+ * Le brief en fait une métrique de verdict à part entière : au-delà de 80 %, le
+ * suivi est utilisé. Elle se rendait jusqu'ici en nombre absolu, ce qui ne se
+ * compare à aucun seuil — « 40 » ne dit rien sans « sur 47 ».
+ */
+export function partAvecSuivi(activite: Activite): number | null {
+  if (activite.commandesCreees === 0) return null;
+  return Math.round((activite.avecSuivi / activite.commandesCreees) * 100);
+}
+
+/**
+ * Les commandes jamais ouvertes par leur destinataire.
+ *
+ * `null` sans aucune commande : « 0 jamais ouverte » se lirait comme un succès
+ * alors qu'il n'y a rien à ouvrir.
+ */
+export function jamaisOuvertes(activite: Activite): number | null {
+  if (activite.commandesCreees === 0) return null;
+  return activite.commandesCreees - activite.commandesOuvertes;
+}
+
+/**
+ * L'écart avec la période précédente.
+ *
+ * `null` quand la période précédente est vide ET la courante aussi : il n'y a
+ * alors rien à comparer, et « +0 » affirmerait une stabilité qui n'existe pas.
+ */
+export function ecartPeriodePrecedente(activite: Activite): number | null {
+  if (activite.commandesCreees === 0 && activite.creeesPeriodePrecedente === 0) return null;
+  return activite.commandesCreees - activite.creeesPeriodePrecedente;
 }
 
 /**
@@ -92,6 +163,7 @@ export async function lireActivite(
 ): Promise<Activite> {
   const { data, error } = await supabase.rpc("analyser_activite", {
     p_depuis: debutPeriode(periode, maintenant).toISOString(),
+    p_precedent: debutPeriodePrecedente(periode, maintenant).toISOString(),
   });
 
   if (error !== null || data === null) {
@@ -117,7 +189,138 @@ export async function lireActivite(
     qcEnAttente: Number(l.qc_en_attente),
     avecSuivi: Number(l.avec_suivi),
     archivees: Number(l.archivees),
+    creeesPeriodePrecedente: Number(l.creees_periode_precedente),
   };
+}
+
+/**
+ * La frise des commandes créées, semaine par semaine.
+ *
+ * ⚠️ ELLE NE DÉPEND PAS DE LA PÉRIODE CHOISIE, et c'est voulu. Une frise de
+ * douze semaines réduite à une semaine quand le vendeur clique « 7 jours »
+ * n'aurait plus rien d'une tendance : elle montrerait une barre. Le graphique
+ * répond à « est-ce que ça monte ? », les compteurs du haut répondent à
+ * « combien sur cette période » — deux questions, deux fenêtres.
+ */
+export async function lireSemaines(
+  supabase: ClientLecture,
+  maintenant: Date,
+  semaines: number = SEMAINES_FRISE,
+): Promise<readonly SemaineCreee[]> {
+  const { data, error } = await supabase.rpc("compter_commandes_par_semaine", {
+    p_fin: maintenant.toISOString(),
+    p_semaines: semaines,
+  });
+
+  if (error !== null || data === null) {
+    throw new Error("lecture de la frise impossible : " + (error?.message ?? "réponse vide"));
+  }
+
+  return data.map((l) => ({ debut: new Date(l.debut), total: Number(l.total) }));
+}
+
+/**
+ * Les commandes les plus consultées de la période.
+ *
+ * BORNÉE À LA PÉRIODE, comme les compteurs : un bloc qui ne bougerait pas quand
+ * le vendeur change de fenêtre passerait pour figé, et le classement de
+ * l'année écrase par construction celui de la semaine.
+ *
+ * ⚠️ UN ÉCHEC DE SIGNATURE N'EST PAS UNE ERREUR D'ÉCRAN. Une vignette manquante
+ * laisse un aplat ; une lecture de commandes qui échoue, elle, remonte.
+ */
+export async function lirePlusConsultees(
+  supabase: ClientLecture,
+  periode: Periode,
+  maintenant: Date,
+  limite: number = PLUS_CONSULTEES,
+): Promise<readonly CommandeConsultee[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id, customer_label, product_ref, views_count, cover_media_id, media_count")
+    .gte("created_at", debutPeriode(periode, maintenant).toISOString())
+    .not("first_content_at", "is", null)
+    .gt("views_count", 0)
+    // Le tri secondaire est celui de l'index : à égalité de vues, sans lui,
+    // l'ordre serait celui que la base renvoie, c'est-à-dire aucun — le
+    // classement changerait d'un rafraîchissement à l'autre.
+    .order("views_count", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limite);
+
+  if (error !== null || data === null) {
+    throw new Error("lecture des plus consultées impossible : " + (error?.message ?? "vide"));
+  }
+
+  const vignettes = await lireVignettes(supabase, data);
+
+  return data.map((l) => ({
+    id: l.id,
+    client: l.customer_label,
+    reference: l.product_ref,
+    vues: Number(l.views_count),
+    vignette: vignettes.get(l.id) ?? null,
+  }));
+}
+
+/**
+ * Les vignettes de couverture des lignes du classement.
+ *
+ * MÊME RÈGLE QUE LA LISTE DES COMMANDES : la couverture désignée prime sur le
+ * premier média, parce que la désigner est un geste explicite de l'éditeur.
+ * La requête est bornée à deux lignes par commande au pire, et le classement
+ * n'en compte que trois.
+ */
+async function lireVignettes(
+  supabase: ClientLecture,
+  commandes: readonly { id: string; cover_media_id: string | null; media_count: number }[],
+): Promise<Map<string, string>> {
+  const parVignette = new Map<string, string>();
+
+  const avecMedia = commandes.filter((c) => c.media_count > 0);
+  if (avecMedia.length === 0) return parVignette;
+
+  const couvertures = avecMedia
+    .map((c) => c.cover_media_id)
+    .filter((v): v is string => v !== null);
+
+  let requete = supabase
+    .from("order_media")
+    .select("id, order_id, cle_vignette")
+    .in(
+      "order_id",
+      avecMedia.map((c) => c.id),
+    );
+
+  // ⚠️ `id.in.()` AVEC UNE LISTE VIDE EST UNE ERREUR DE SYNTAXE PostgREST, pas
+  // un ensemble vide — et « aucune couverture désignée » est le cas courant.
+  requete =
+    couvertures.length === 0
+      ? requete.eq("position", 0)
+      : requete.or("position.eq.0,id.in.(" + couvertures.join(",") + ")");
+
+  const { data, error } = await requete;
+  if (error !== null || data === null) return parVignette;
+
+  const cles = new Map<string, string>();
+  for (const commande of avecMedia) {
+    const couverture =
+      commande.cover_media_id === null
+        ? undefined
+        : data.find((m) => m.id === commande.cover_media_id);
+    const retenu = couverture ?? data.find((m) => m.order_id === commande.id);
+    if (retenu?.cle_vignette != null) cles.set(commande.id, retenu.cle_vignette);
+  }
+
+  const signees = await Promise.all(
+    [...cles].map(async ([id, cle]) => [id, await signerLecture(cle).catch(() => null)] as const),
+  );
+
+  for (const [id, url] of signees) {
+    if (url !== null) parVignette.set(id, url);
+  }
+
+  return parVignette;
 }
 
 export function analyserParametres(

@@ -363,27 +363,65 @@
     "aideCourte": "A number you have just pasted is often not scanned yet. This is not an error."
   },
   "analyses": {
-    "titre": "Your analytics",
-    "sousTitre": "What your links become once you have sent them.",
+    "titre": "Analytics",
+    "sousTitre": {
+      "7j": "Last 7 days",
+      "30j": "Last 30 days",
+      "90j": "Last 90 days"
+    },
     "periode": {
       "titre": "Period",
       "7j": "7 days",
       "30j": "30 days",
-      "tout": "All time"
+      "90j": "90 days"
     },
-    "commandesCreees": "Orders created",
-    "avecSuivi": "{n, plural, =0 {none with a tracking number} one {# with a tracking number} other {# with a tracking number}}",
-    "tauxOuverture": "Links opened by the customer",
-    "ouvertsSur": "{ouverts} of {total}",
-    "vuesMoyennes": "Views per opened link",
-    "vuesTotales": "{n, plural, =0 {no views} one {# view in total} other {# views in total}}",
+    "compteurs": "Overview",
+    "carte": {
+      "commandesCreees": "Orders created",
+      "vuesMoyennes": "Views per order",
+      "avecSuivi": "Orders with tracking",
+      "jamaisOuvertes": "Never opened"
+    },
+    "carteCourt": {
+      "commandesCreees": "Orders created",
+      "vuesMoyennes": "Views per order",
+      "avecSuivi": "With tracking",
+      "jamaisOuvertes": "Never opened"
+    },
+    "ecartPrecedent": "{n} vs previous period",
+    "aucuneComparaison": "nothing to compare",
+    "leClientRevient": "the customer comes back",
+    "leClientRevientCourt": "the customer returns",
+    "partSur": "{n} of {total}",
+    "aRelancer": "worth a reminder",
+    "toutesOuvertes": "all of them were opened",
+    "frise": {
+      "titre": "Orders created per week",
+      "fenetre": "last {n} weeks",
+      "barre": "Week of {semaine}: {n, plural, =0 {no order} one {# order} other {# orders}}",
+      "vide": "No order created over these twelve weeks."
+    },
+    "colis": {
+      "titre": "Where your parcels are",
+      "enTransit": "In transit",
+      "livre": "Delivered",
+      "preparation": "Not scanned yet",
+      "silencieux": "No movement",
+      "vide": "No tracked parcel yet."
+    },
+    "consultees": {
+      "titre": "Your most viewed orders",
+      "aide": "A customer who comes back to their page several times is a reassured customer.",
+      "sansNom": "No recipient",
+      "vide": "No link has been opened over this period yet."
+    },
     "qc": {
-      "titre": "Your customers' replies",
-      "aide": "What your customers answered after seeing the photos. Without a reply from them, the order stays pending.",
+      "titre": "What your customers replied",
+      "aide": "What your customers replied after seeing the photos. Without a reply from them, the order stays pending.",
       "approuve": "Approved",
-      "refuse": "Refused",
+      "refuse": "Declined",
       "enAttente": "No reply",
-      "vide": "No orders in this period."
+      "vide": "No order over this period."
     }
   },
   "commandes": {

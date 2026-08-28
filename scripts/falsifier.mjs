@@ -828,25 +828,33 @@ const SQL = {
    * credibles. Une metrique legerement faussee est pire qu une metrique cassee.
    */
   "analyses-hors-rls": {
-    casser: `create or replace function public.analyser_activite(p_depuis timestamptz)
+    // ⚠️ LA SIGNATURE DOIT ÊTRE CELLE D'AUJOURD'HUI, à DEUX arguments. Avec
+    // l'ancienne, `create or replace` aurait créé une SECONDE fonction, le
+    // produit aurait continué d'appeler la bonne, et la falsification n'aurait
+    // rien cassé — un vert qui ne prouve rien.
+    casser: `create or replace function public.analyser_activite(
+        p_depuis timestamptz, p_precedent timestamptz)
       returns table (commandes_creees bigint, commandes_ouvertes bigint, vues_totales bigint,
                      qc_approuve bigint, qc_refuse bigint, qc_en_attente bigint,
-                     avec_suivi bigint, archivees bigint)
+                     avec_suivi bigint, archivees bigint, creees_periode_precedente bigint)
       language sql stable security definer set search_path = '' as $$
-        select count(*),
-               count(*) filter (where o.views_count > 0),
-               coalesce(sum(o.views_count), 0),
-               count(*) filter (where o.qc_status = 'approuve'),
-               count(*) filter (where o.qc_status = 'refuse'),
-               count(*) filter (where o.qc_status = 'en_attente'),
-               count(*) filter (where o.tracking_number is not null and o.tracking_number <> ''),
-               count(*) filter (where o.archived_at is not null)
+        select count(*) filter (where o.created_at >= p_depuis),
+               count(*) filter (where o.created_at >= p_depuis and o.views_count > 0),
+               coalesce(sum(o.views_count) filter (where o.created_at >= p_depuis), 0),
+               count(*) filter (where o.created_at >= p_depuis and o.qc_status = 'approuve'),
+               count(*) filter (where o.created_at >= p_depuis and o.qc_status = 'refuse'),
+               count(*) filter (where o.created_at >= p_depuis and o.qc_status = 'en_attente'),
+               count(*) filter (where o.created_at >= p_depuis
+                                  and o.tracking_number is not null and o.tracking_number <> ''),
+               count(*) filter (where o.created_at >= p_depuis and o.archived_at is not null),
+               count(*) filter (where o.created_at < p_depuis)
         from public.orders o
-        where o.created_at >= p_depuis
+        where o.created_at >= p_precedent and o.first_content_at is not null
       $$;`,
     reparerDepuisMigration: {
-      fichier: "068_analyses_sur_le_contenu_reel.sql",
-      depuis: "create or replace function public.analyser_activite",
+      fichier: "106_la_periode_precedente_est_un_chiffre.sql",
+      depuis: "create function public.analyser_activite",
+      jusqua: "comment on function",
     },
   },
 
@@ -861,10 +869,15 @@ const SQL = {
    * puisqu elle va dans le sens rassurant.
    */
   "analyses-periode-ignoree": {
-    casser: `create or replace function public.analyser_activite(p_depuis timestamptz)
+    // LA PÉRIODE N'EST PLUS APPLIQUÉE AUX AGRÉGATS : ils comptent tout ce que
+    // le `where` laisse passer, c'est-à-dire la fenêtre précédente EN PLUS de
+    // la courante. Les chiffres restent parfaitement crédibles — c'est le
+    // propre d'une métrique faussée.
+    casser: `create or replace function public.analyser_activite(
+        p_depuis timestamptz, p_precedent timestamptz)
       returns table (commandes_creees bigint, commandes_ouvertes bigint, vues_totales bigint,
                      qc_approuve bigint, qc_refuse bigint, qc_en_attente bigint,
-                     avec_suivi bigint, archivees bigint)
+                     avec_suivi bigint, archivees bigint, creees_periode_precedente bigint)
       language sql stable security invoker set search_path = '' as $$
         select count(*),
                count(*) filter (where o.views_count > 0),
@@ -873,13 +886,15 @@ const SQL = {
                count(*) filter (where o.qc_status = 'refuse'),
                count(*) filter (where o.qc_status = 'en_attente'),
                count(*) filter (where o.tracking_number is not null and o.tracking_number <> ''),
-               count(*) filter (where o.archived_at is not null)
+               count(*) filter (where o.archived_at is not null),
+               count(*) filter (where o.created_at < p_depuis)
         from public.orders o
-        
+        where o.created_at >= p_precedent and o.first_content_at is not null
       $$;`,
     reparerDepuisMigration: {
-      fichier: "068_analyses_sur_le_contenu_reel.sql",
-      depuis: "create or replace function public.analyser_activite",
+      fichier: "106_la_periode_precedente_est_un_chiffre.sql",
+      depuis: "create function public.analyser_activite",
+      jusqua: "comment on function",
     },
   },
 

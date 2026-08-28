@@ -492,6 +492,20 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "par visiteur ET par jour.",
     ],
     [
+      "compter_commandes_par_semaine",
+      "Frise hebdomadaire de l'écran des analyses. `SECURITY INVOKER` — donc " +
+        "exécutée sous la RLS de l'appelant : la jointure externe sur `orders` " +
+        "ne peut structurellement voir que les commandes de sa propre boutique, " +
+        "et il n'y a aucun filtre de propriété à écrire dans son corps, donc " +
+        "aucun à oublier. Elle existe parce que regrouper par semaine côté " +
+        "application obligerait à RAPATRIER douze semaines de commandes pour " +
+        "n'en rendre que douze nombres — jusqu'à deux mille quatre cents lignes " +
+        "chez un fournisseur à deux cents commandes par semaine. L'axe du temps " +
+        "vient d'un `generate_series` et non des données : une semaine sans " +
+        "commande doit rester visible, sans quoi le graphique montrerait une " +
+        "activité continue là où il y a eu un trou.",
+    ],
+    [
       "compter_envois",
       "Compteurs de l'écran des envois. `SECURITY INVOKER` — donc exécutée sous " +
         "la RLS de l'appelant : elle ne peut structurellement compter que les " +

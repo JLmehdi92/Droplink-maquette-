@@ -746,12 +746,13 @@ export type Database = {
         }[]
       }
       analyser_activite: {
-        Args: { p_depuis: string }
+        Args: { p_depuis: string; p_precedent: string }
         Returns: {
           archivees: number
           avec_suivi: number
           commandes_creees: number
           commandes_ouvertes: number
+          creees_periode_precedente: number
           qc_approuve: number
           qc_en_attente: number
           qc_refuse: number
@@ -816,6 +817,13 @@ export type Database = {
           jamais_ouvertes: number
           livrees: number
           preparation: number
+          total: number
+        }[]
+      }
+      compter_commandes_par_semaine: {
+        Args: { p_fin: string; p_semaines: number }
+        Returns: {
+          debut: string
           total: number
         }[]
       }
