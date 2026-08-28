@@ -13,7 +13,6 @@ import {
 import { resoudreAccent } from "@/lib/design/contraste";
 import { logoReduit } from "@/lib/medias/vignette";
 import { limites } from "@/lib/storage/limites";
-import { Icone } from "@/components/icone";
 
 /**
  * RÉGLAGES DE MARQUE, porté sur le canevas Claude Design.
@@ -92,6 +91,19 @@ export function FormulaireMarque({
   const [logo, setLogo] = useState<EtatLogo>(
     initial.logoUrl === null ? { phase: "aucun" } : { phase: "existant", url: initial.logoUrl },
   );
+  /*
+   * LES RÉSEAUX SONT CONTRÔLÉS, et ils ne l'étaient pas.
+   *
+   * L'aperçu montre le pied de page du client : il doit refléter ce qui est
+   * SAISI à l'instant, pas ce que la base portait au chargement. Un champ non
+   * contrôlé rendrait un aperçu qui ne bouge jamais — donc un aperçu qui ment
+   * sur la seule chose qu'il promet de montrer.
+   */
+  const [reseaux, setReseaux] = useState<Record<"instagram" | "tiktok" | "whatsapp", string>>({
+    instagram: initial.reseaux.instagram ?? "",
+    tiktok: initial.reseaux.tiktok ?? "",
+    whatsapp: initial.reseaux.whatsapp ?? "",
+  });
   const champFichier = useRef<HTMLInputElement>(null);
 
   const accent = useMemo(() => resoudreAccent(couleur), [couleur]);
@@ -185,10 +197,201 @@ export function FormulaireMarque({
   const apercuLogo =
     logo.phase === "existant" ? logo.url : logo.phase === "pose" ? logo.apercu : null;
 
+  /*
+   * LES TROIS RÉSEAUX, ET CES TROIS-LÀ SEULEMENT. La teinte de la pastille est
+   * celle de LEUR marque, jamais l'accent du vendeur : un Instagram vert parce
+   * que la boutique est verte ne se reconnaît plus, et c'est la reconnaissance
+   * qui fait cliquer.
+   */
+  const RESEAUX = [
+    {
+      clef: "instagram",
+      fond: "#fdeef6",
+      encre: "#c13584",
+      trace:
+        "M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1zm0 3.2a6.6 6.6 0 1 0 0 13.2 6.6 6.6 0 0 0 0-13.2zm0 10.9a4.3 4.3 0 1 1 0-8.6 4.3 4.3 0 0 1 0 8.6zm6.9-11.2a1.5 1.5 0 1 1-3.1 0 1.5 1.5 0 0 1 3.1 0z",
+    },
+    {
+      clef: "tiktok",
+      fond: "var(--color-filet-section)",
+      encre: "var(--color-on-surface)",
+      trace:
+        "M14.7 3h2.5a5.3 5.3 0 0 0 4.3 4.3v2.5a7.7 7.7 0 0 1-4.3-1.4v5.9a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v2.6a3.3 3.3 0 1 0 2.5 3.2z",
+    },
+    {
+      clef: "whatsapp",
+      fond: "#e9f7ee",
+      encre: "#1da851",
+      trace:
+        "M12 3.5a8.4 8.4 0 0 0-7.2 12.7L3.6 20.4l4.3-1.1A8.4 8.4 0 1 0 12 3.5zm4.8 11.9c-.2.6-1.2 1.1-1.7 1.1-.4 0-1 .1-3-.8-2.5-1.1-4.1-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.8.9-2 .2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.5l-.3.4c-.1.2-.3.3-.1.6.2.3.7 1.1 1.4 1.8.9.8 1.7 1.1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.7.8c.2.1.4.2.4.3.1.2.1.7-.1 1.4z",
+    },
+  ] as const;
+
+  const carte = "carte rounded-lg p-[18px] lg:rounded-[18px] lg:p-6";
+  const titreCarte =
+    "font-headline-md text-[15px] leading-[19px] font-bold text-on-surface lg:text-[16px] lg:leading-5 lg:tracking-[-0.015em]";
+  /*
+   * ⚠️ `rounded-xl` VAUT 28 DANS CE THÈME. La planche dit 12 pour un champ.
+   *
+   * ⚠️ ET LA HAUTEUR EST SORTIE DE LA BASE. Écrire `champ + " h-11 lg:h-[42px]"`
+   * laissait DEUX `lg:h-[…]` sur le même élément, et c'est l'ordre dans la
+   * FEUILLE qui tranche, pas l'ordre dans l'attribut : mesuré, les champs de
+   * réseaux rendaient 46 px là où la planche en dessine 42.
+   */
+  const champBase = "champ-app w-full rounded-[12px] px-3.5 text-on-surface";
+  const champ = champBase + " h-12 lg:h-[46px]";
+  const champReseau = champBase + " h-11 lg:h-[42px]";
+  const etiquette = "mb-[7px] block font-label-md text-[12px] font-bold text-ardoise";
+  const aide = "font-body-sm text-[12px] leading-[18px] text-on-surface-variant";
+
+  const aUnEnTete = nom.trim() !== "" || apercuLogo !== null;
+  const reseauxConfigures = RESEAUX.filter((r) => reseaux[r.clef].trim() !== "");
+
+  /*
+   * L'APERÇU EST LA RAISON D'ÊTRE DE CET ÉCRAN.
+   *
+   * Régler une couleur sans écran où la voir revient à demander au vendeur de
+   * choisir à l'aveugle. Il vient donc EN PREMIER au téléphone — c'est ce que
+   * dessine `MarqueMobile` — et occupe une colonne fixe de 372 px sur grand
+   * écran, où il reste visible pendant qu'on modifie les champs.
+   *
+   * IL MONTRE LE CONTRASTE RÉSOLU, jamais la couleur brute : la conformité doit
+   * être obtenue automatiquement, sans que le vendeur ait à chercher « une
+   * couleur qui marche ».
+   */
+  const apercu = (
+    <section className={carte + " lg:p-[18px]"} aria-labelledby="titre-apercu">
+      <div className="mb-3.5 flex items-center justify-between gap-3">
+        <h2 id="titre-apercu" className="font-headline-md text-[14px] font-bold text-on-surface">
+          {t("apercuTitre")}
+        </h2>
+        <span className="font-body-sm text-[11px] text-on-surface-variant">
+          {t("apercuDirect")}
+        </span>
+      </div>
+
+      {/* `aria-hidden` : c'est une IMAGE de la page, pas la page. Un lecteur
+          d'écran y annoncerait un bouton « Approuver » sur lequel il n'y a
+          rien à approuver. */}
+      <div
+        aria-hidden="true"
+        className="overflow-hidden rounded-[14px] border border-outline-variant lg:rounded-[15px]"
+      >
+        {/* L'EN-TÊTE EST OMIS QUAND IL N'Y A NI NOM NI LOGO — exactement comme
+            sur la page publique. L'aperçu doit montrer l'ABSENCE de barre, pas
+            une barre vide : c'est le cas le plus fréquent en début de vie d'un
+            compte, et c'est celui qu'un vendeur a besoin de voir avant
+            d'envoyer son premier lien. */}
+        <div
+          className="px-[13px] py-[15px] lg:px-3.5 lg:py-4"
+          style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
+        >
+          {aUnEnTete ? (
+            <div className="flex items-center gap-[7px]">
+              {apercuLogo !== null ? (
+                /* eslint-disable-next-line @next/next/no-img-element -- aperçu
+                   local `blob:` ou URL signée à expiration. */
+                <img
+                  src={apercuLogo}
+                  alt=""
+                  className="h-[21px] w-[21px] shrink-0 rounded-full object-cover lg:h-[22px] lg:w-[22px]"
+                />
+              ) : (
+                <span
+                  className="h-[21px] w-[21px] shrink-0 rounded-full lg:h-[22px] lg:w-[22px]"
+                  style={{ backgroundColor: accent.surRemplissageFaible }}
+                />
+              )}
+              {nom.trim() !== "" ? (
+                <span className="truncate font-label-md text-[11px] font-bold lg:text-[12px]">
+                  {nom}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          <p
+            className={
+              "font-headline-md text-[17px] font-extrabold tracking-[-0.02em] lg:text-[18px] " +
+              (aUnEnTete ? "mt-2 mb-px lg:mt-[9px]" : "mb-px")
+            }
+          >
+            {t("apercuCommande")}
+          </p>
+          <p className="font-body-sm text-[11px]" style={{ color: accent.surRemplissageDoux }}>
+            {t("apercuPour")}
+          </p>
+        </div>
+
+        <div className="p-3 lg:p-[13px]">
+          <div className="mb-3 grid grid-cols-4 gap-1 lg:mb-[13px]">
+            {[0, 1, 2, 3].map((etape) => (
+              <span
+                key={etape}
+                className="h-[5px] rounded-full"
+                style={{
+                  backgroundColor:
+                    etape < 3 ? accent.remplissage : "var(--color-outline-variant)",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Trois vignettes au téléphone, quatre sur grand écran : la colonne
+              d'aperçu est plus étroite que la carte pleine largeur. */}
+          <div className="mb-3 grid grid-cols-3 gap-[5px] lg:mb-[13px] lg:grid-cols-2">
+            {["bg-fond-avatar", "bg-[#eee4e0]", "bg-[#e0e4ee]", "bg-[#eaeaef] hidden lg:block"].map(
+              (fond, rang) => (
+                <span
+                  key={rang}
+                  className={"aspect-square w-full rounded-[8px] lg:rounded-[9px] " + fond}
+                />
+              ),
+            )}
+          </div>
+
+          <div
+            className="mb-[13px] flex h-[38px] items-center justify-center rounded-[10px] lg:mb-3.5 lg:h-10"
+            style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
+          >
+            <span className="font-label-md text-[12px] font-bold lg:text-[13px]">
+              {t("apercuApprouver")}
+            </span>
+          </div>
+
+          {/* LE PIED DES RÉSEAUX N'EXISTE QUE S'IL Y EN A, et son titre n'existe
+              que s'il y a un nom à écrire. « Retrouvez le vendeur » serait un
+              texte de remplacement — ce que la décision 26 interdit. */}
+          {reseauxConfigures.length > 0 ? (
+            <div className="border-t border-filet-section pt-3 text-center lg:pt-[13px]">
+              {nom.trim() !== "" ? (
+                <p className="mb-[7px] font-body-sm text-[10px] text-on-surface-variant lg:mb-2">
+                  {t("apercuReseaux", { nom })}
+                </p>
+              ) : null}
+              <div className="flex justify-center gap-[7px] lg:gap-2">
+                {reseauxConfigures.map((reseau) => (
+                  <span
+                    key={reseau.clef}
+                    className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-fond-neutre text-ardoise-doux lg:h-[30px] lg:w-[30px] lg:rounded-[9px]"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d={reseau.trace} />
+                    </svg>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+
   return (
     <form
       action={action}
-      className="flex flex-col gap-8"
+      className="flex flex-col gap-3 lg:gap-[18px]"
       style={
         {
           "--apercu-texte": accent.texte,
@@ -201,21 +404,34 @@ export function FormulaireMarque({
       <input type="hidden" name="couleurAccent" value={couleur} />
       <input type="hidden" name="languePublique" value={langue} />
 
-      <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
-        {/* --- Nom et logo ---------------------------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-lg p-[22px]">
-          <div>
-            <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
-              <Icone nom="image" className="text-[var(--apercu-texte)]" />
+      {/*
+        DEUX CELLULES, UNE RANGÉE. L'aperçu est le PREMIER de la source parce
+        que c'est sa place au téléphone ; sur grand écran il passe en colonne de
+        droite par un placement explicite. Une grille à deux rangées aurait
+        distribué la hauteur de la colonne gauche entre elles.
+
+        ⚠️ LA BASCULE EST À `xl`, PAS À `lg`, ET C'EST UNE MESURE QUI L'A DIT.
+        La colonne d'aperçu est FIXE à 372 px : à 1 024 px de fenêtre il ne
+        restait que 303 px pour tout le reste, et la grille débordait de 8 px
+        — la colonne de droite sortait de la carte-page. Entre 1 024 et
+        1 279 px, une seule colonne : les cartes prennent toute la largeur et
+        l'aperçu reste en tête, comme au téléphone.
+
+        `minmax(0, 1fr)` et non `1fr` : le plancher d'un `1fr` est son
+        contenu minimum, et c'est exactement ce plancher qui produisait le
+        débordement.
+      */}
+      <div className="flex flex-col gap-3 lg:gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_372px] xl:items-start xl:gap-[18px]">
+        <div className="xl:col-start-2 xl:row-start-1">{apercu}</div>
+
+        <div className="flex flex-col gap-3 lg:gap-4 xl:col-start-1 xl:row-start-1">
+          {/* --- Identité ------------------------------------------------ */}
+          <section className={carte} aria-labelledby="titre-identite">
+            <h2 id="titre-identite" className={titreCarte + " mb-4 lg:mb-5"}>
               {t("identiteTitre")}
             </h2>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-              {t("identiteAide")}
-            </p>
-          </div>
 
-          <div>
-            <label htmlFor="nom" className="mb-2 block font-label-md text-label-md text-on-surface">
+            <label htmlFor="nom" className={etiquette}>
               {t("nomTitre")}
             </label>
             <input
@@ -226,174 +442,114 @@ export function FormulaireMarque({
               value={nom}
               onChange={(e) => setNom(e.target.value)}
               placeholder={t("nomPlaceholder")}
-              className="min-h-[44px] w-full rounded-lg champ-app px-4 font-body-md text-body-md text-on-surface transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--apercu-interface)]"
+              className={champ}
             />
-            <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">{t("nomAide")}</p>
+            <p className={"mt-1.5 " + aide + " text-[11px]"}>{t("nomAide")}</p>
             {champsEnEchec.includes("nom") ? (
               <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
                 {t("erreurNom")}
               </p>
             ) : null}
-          </div>
 
-          <input
-            ref={champFichier}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="sr-only"
-            onChange={(e) => {
-              const fichier = e.target.files?.[0];
-              if (fichier !== undefined) void deposerLogo(fichier);
-            }}
-          />
+            <div className="h-[18px] lg:h-5" />
 
-          {apercuLogo !== null ? (
-            <div className="flex items-center justify-between rounded-lg bg-surface-container-low p-4">
-              <div className="flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element -- URL signée
-                    à expiration côté serveur, ou aperçu local `blob:`.
-                    L'optimiseur mettrait la première en cache au-delà de sa
-                    validité et servirait une image morte. */}
-                <img
-                  src={apercuLogo}
-                  alt=""
-                  className="h-10 w-10 rounded-lg bg-white object-contain p-1"
-                />
-                <div>
-                  <p className="font-label-md text-label-md text-on-surface">
-                    {logo.phase === "pose" ? logo.nom : t("logoActuel")}
-                  </p>
-                  {logo.phase === "pose" ? (
-                    <p className="font-body-sm text-body-sm text-on-surface-variant">
-                      {Math.round(logo.octets / 1024)} Ko
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
+            <span className={etiquette}>{t("logoTitre")}</span>
+            <input
+              ref={champFichier}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="sr-only"
+              onChange={(e) => {
+                const fichier = e.target.files?.[0];
+                if (fichier !== undefined) void deposerLogo(fichier);
+              }}
+            />
+            <div className="flex flex-wrap items-center gap-3 lg:gap-3.5">
+              <span className="flex h-[54px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-fond-avatar lg:h-[60px] lg:w-[60px] lg:rounded-[15px]">
+                {apercuLogo !== null ? (
+                  /* eslint-disable-next-line @next/next/no-img-element -- URL
+                     signée à expiration, ou aperçu local `blob:`. */
+                  <img src={apercuLogo} alt="" className="h-full w-full object-contain p-1" />
+                ) : null}
+              </span>
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => champFichier.current?.click()}
-                  className="min-h-[44px] rounded-lg px-3 font-label-md text-label-md text-[var(--apercu-texte)]"
+                  className="min-h-11 rounded-[12px] border border-filet-controle px-4 font-label-md text-[14px] font-semibold text-on-surface lg:h-10 lg:min-h-0 lg:rounded-[11px] lg:px-[15px]"
                 >
-                  {t("logoRemplacer")}
+                  {logo.phase === "envoi"
+                    ? t("logoEnvoi")
+                    : apercuLogo === null
+                      ? t("depotTitre")
+                      : t("logoRemplacer")}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => void retirer()}
-                  className="min-h-[44px] px-2 text-error transition-colors hover:text-on-error-container"
-                >
-                  <Icone nom="delete" titre={t("logoRetirer")} className="text-xl" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => champFichier.current?.click()}
-              className="group flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-outline-variant bg-surface-bright/50 p-8 text-center transition-colors hover:bg-surface-bright"
-            >
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-violet-fond transition-transform group-hover:scale-110">
-                <Icone nom="upload" className="text-2xl text-[var(--apercu-texte)]" />
-              </div>
-              <p className="mb-1 font-label-md text-label-md text-on-surface">
-                {logo.phase === "envoi" ? t("logoEnvoi") : t("depotTitre")}
-              </p>
-              {/* LES FORMATS SONT ÉNUMÉRÉS, ET LE SVG N'Y EST PAS. Il est refusé
-                  côté serveur parce qu'un SVG est un document capable de porter
-                  du script ; l'annoncer ici évite un refus après téléversement. */}
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                {t("depotFormats")}
-              </p>
-            </button>
-          )}
-
-          {logo.phase === "erreur" ? (
-            <p role="alert" className="font-body-sm text-body-sm text-error">
-              {logo.motif}
-            </p>
-          ) : null}
-        </div>
-
-        {/*
-          --- Réseaux ---------------------------------------------------
-          FACULTATIFS, ET LEUR ABSENCE NE SE VOIT PAS CHEZ LE CLIENT : le bloc
-          entier est omis de la page publique quand les trois sont vides. Pas de
-          logos grisés, pas d'invitation à en ajouter.
-
-          TROIS RÉSEAUX, ET CES TROIS-LÀ SEULEMENT. Snapchat et Telegram sont
-          écartés par décision produit.
-
-          LE DOMAINE EST EXIGÉ. Un lien libre rendu sur la page d'un vendeur
-          serait une redirection ouverte offerte à qui prend son compte. La base
-          l'empêche par contrainte ; ce formulaire, lui, l'EXPLIQUE — les deux
-          ne remplacent pas le même défaut.
-        */}
-        <div className="carte flex flex-col gap-6 rounded-lg p-[22px] lg:col-span-2">
-          <div>
-            <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
-              <Icone nom="link" className="text-[var(--apercu-texte)]" />
-              {t("reseauxTitre")}
-            </h2>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-              {t("reseauxAide")}
-            </p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-3">
-            {(["instagram", "tiktok", "whatsapp"] as const).map((reseau) => (
-              <div key={reseau}>
-                <label
-                  htmlFor={reseau}
-                  className="mb-2 block font-label-md text-label-md text-on-surface"
-                >
-                  {t("reseau." + reseau)}
-                </label>
-                <input
-                  id={reseau}
-                  name={reseau}
-                  type="url"
-                  inputMode="url"
-                  maxLength={200}
-                  defaultValue={initial.reseaux[reseau] ?? ""}
-                  placeholder={t("reseauExemple." + reseau)}
-                  className="champ-app min-h-[44px] w-full rounded-md border border-outline px-4 font-body-md text-body-md text-on-surface"
-                />
-                {champsEnEchec.includes(reseau) ? (
-                  <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
-                    {t("reseauInvalide")}
-                  </p>
+                {/* « RETIRER » N'EXISTE QUE S'IL Y A QUELQUE CHOSE À RETIRER.
+                    La planche dessine les deux boutons côte à côte, mais elle
+                    dessine une boutique QUI A un logo : un bouton qui ne peut
+                    rien faire est une commande morte. */}
+                {apercuLogo !== null ? (
+                  <button
+                    type="button"
+                    onClick={() => void retirer()}
+                    className="min-h-11 rounded-[12px] border border-filet-controle px-4 font-label-md text-[14px] font-semibold text-alerte lg:h-10 lg:min-h-0 lg:rounded-[11px] lg:px-[15px]"
+                  >
+                    {t("logoRetirer")}
+                  </button>
                 ) : null}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+            {/* LES FORMATS SONT ÉNUMÉRÉS, ET LE SVG N'Y EST PAS. Il est refusé
+                côté serveur parce qu'un SVG est un document capable de porter du
+                script ; l'annoncer ici évite un refus après téléversement. */}
+            <p className={"mt-2 " + aide + " text-[11px]"}>{t("depotFormats")}</p>
 
-        {/* --- Couleur -------------------------------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-lg p-[22px]">
-          <div>
-            <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
-              <Icone nom="palette" className="text-[var(--apercu-texte)]" />
-              {t("couleurTitre")}
-            </h2>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-              {t("couleurAide")}
-            </p>
-          </div>
+            {logo.phase === "erreur" ? (
+              <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
+                {logo.motif}
+              </p>
+            ) : null}
+          </section>
 
-          <div>
-            <label
-              htmlFor="couleurTexte"
-              className="mb-2 block font-label-md text-label-md text-on-surface"
-            >
-              {t("couleurHex")}
-            </label>
-            <div className="flex gap-2">
+          {/* --- Couleur ------------------------------------------------- */}
+          <section className={carte} aria-labelledby="titre-couleur">
+            <div className="mb-3.5 flex items-center justify-between gap-3 lg:mb-[18px]">
+              <h2 id="titre-couleur" className={titreCarte}>
+                {t("couleurTitre")}
+              </h2>
+              {/*
+                LE BADGE DIT CE QUE LA MACHINE A ÉTABLI, pas ce qu'on espère.
+                `resoudreAccent()` garantit 4,5:1 sur le texte et 3:1 sur
+                l'interface pour N'IMPORTE QUELLE valeur — y compris invalide,
+                où elle retombe sur le défaut. Le badge n'est donc jamais rouge :
+                il rappelle au vendeur qu'il n'a pas à chercher une couleur qui
+                marche.
+              */}
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-succes-fond px-2.5 py-1 font-label-md text-[11px] font-bold text-succes">
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                <span className="lg:hidden">{t("contrasteCourt")}</span>
+                <span className="hidden lg:inline">{t("contrasteConforme")}</span>
+              </span>
+            </div>
+
+            <div className="mb-2.5 flex items-center gap-2.5 lg:mb-[18px] lg:gap-3">
               <label
-                className="h-12 w-12 flex-shrink-0 cursor-pointer rounded-lg border border-outline-variant shadow-sm"
+                className="h-[46px] w-[46px] shrink-0 cursor-pointer rounded-[13px] border border-outline-variant"
                 style={{ backgroundColor: couleur }}
               >
-                <span className="sr-only">{t("couleurTitre")}</span>
+                <span className="sr-only">{t("couleurHex")}</span>
                 <input
                   type="color"
                   value={couleur}
@@ -403,92 +559,198 @@ export function FormulaireMarque({
               </label>
               <input
                 id="couleurTexte"
+                aria-label={t("couleurHex")}
                 type="text"
                 value={couleur}
                 onChange={(e) => setCouleur(e.target.value.trim())}
                 placeholder="#000000"
-                className="min-h-[44px] w-full rounded-lg champ-app px-4 font-body-md text-body-md text-on-surface transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--apercu-interface)]"
+                className={champ + " font-mono text-[14px] lg:w-40"}
               />
+              <span className={"hidden lg:block " + aide}>{t("couleurAide")}</span>
             </div>
+            <p className={"lg:hidden " + aide}>{t("couleurAide")}</p>
+
             {champsEnEchec.includes("couleurAccent") ? (
               <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
                 {t("erreurCouleur")}
               </p>
             ) : null}
-          </div>
 
+            {/*
+              LES TROIS DÉMONSTRATIONS, sur grand écran seulement.
 
-          {accent.ajuste ? (
-            // On le DIT plutôt que de corriger en silence. La couleur stockée
-            // reste celle du vendeur ; c'est le RENDU qui dérive des variantes
-            // lisibles. Un vendeur qui voit sa couleur affichée autrement sans
-            // explication croit à un bogue.
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              {t("couleurAjustee")}
-            </p>
-          ) : null}
-        </div>
-
-        {/* --- Langue publique et filigrane ----------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-lg p-[22px] lg:col-span-2">
-          <div>
-            <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
-              <Icone nom="tune" className="text-[var(--apercu-texte)]" />
-              {t("pageTitre")}
-            </h2>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-              {t("pageAide")}
-            </p>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <fieldset>
-              <legend className="mb-2 font-label-md text-label-md text-on-surface">
-                {t("langueTitre")}
-              </legend>
-              {/* DEUX LANGUES DISTINCTES, ET C'EST DIT. Celle-ci habille les
-                  pages que voient les clients ; celle de l'interface se règle
-                  ailleurs. Un fournisseur peut travailler en anglais et livrer
-                  en France, et le client ne choisit pas la langue de son lien. */}
-              <p className="mb-3 font-body-sm text-body-sm text-on-surface-variant">
-                {t("langueAide")}
-              </p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {(["fr", "en"] as const).map((valeur) => (
-                  <label
-                    key={valeur}
-                    className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border px-4 transition-colors ${
-                      langue === valeur
-                        ? "border-[var(--apercu-interface)] bg-surface-container-low ring-2 ring-[var(--apercu-interface)]"
-                        : "border-outline-variant hover:bg-surface-container-low"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="langueChoix"
-                      value={valeur}
-                      checked={langue === valeur}
-                      onChange={() => setLangue(valeur)}
-                      className="sr-only"
-                    />
-                    <span className="font-label-md text-label-md text-on-surface">
-                      {t(`langue.${valeur}`)}
-                    </span>
-                  </label>
-                ))}
+              Elles ne décorent pas : elles montrent les TROIS emplois de la
+              couleur sur la page du client — texte sur blanc, aplat de bouton,
+              bandeau — avec le seuil que chacun doit tenir. C'est la seule façon
+              de rendre visible que le produit ajuste tout seul, et donc que le
+              vendeur peut choisir la couleur qu'il veut.
+            */}
+            <div className="mt-4 hidden grid-cols-3 gap-2.5 lg:grid">
+              <div className="rounded-[12px] border border-outline-variant p-3">
+                <p className={"mb-2 " + aide + " text-[11px]"}>{t("demoTexte")}</p>
+                <p
+                  className="font-headline-md text-[15px] font-bold"
+                  style={{ color: accent.texte }}
+                >
+                  {t("apercuStatut")}
+                </p>
+                <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoTexteSeuil")}</p>
               </div>
-            </fieldset>
 
-            <div>
-              <p className="mb-2 font-label-md text-label-md text-on-surface">
-                {t("filigraneTitre")}
-              </p>
+              <div className="rounded-[12px] border border-outline-variant p-3">
+                <p className={"mb-2 " + aide + " text-[11px]"}>{t("demoBouton")}</p>
+                <div
+                  className="flex h-[30px] items-center justify-center rounded-[8px]"
+                  style={{
+                    backgroundColor: accent.remplissage,
+                    color: accent.surRemplissage,
+                  }}
+                >
+                  <span className="font-label-md text-[12px] font-bold">
+                    {t("apercuApprouver")}
+                  </span>
+                </div>
+                <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoBoutonSeuil")}</p>
+              </div>
+
+              <div className="rounded-[12px] border border-outline-variant p-3">
+                <p className={"mb-2 " + aide + " text-[11px]"}>{t("demoBandeau")}</p>
+                <div
+                  className="flex h-[30px] items-center overflow-hidden rounded-[8px] px-2.5"
+                  style={{
+                    backgroundColor: accent.remplissage,
+                    color: accent.surRemplissage,
+                  }}
+                >
+                  <span className="truncate font-label-md text-[11px] font-bold">
+                    {nom.trim() === "" ? t("apercuCommande") : nom}
+                  </span>
+                </div>
+                <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoBandeauSeuil")}</p>
+              </div>
+            </div>
+
+            {accent.ajuste ? (
+              // On le DIT plutôt que de corriger en silence. La couleur stockée
+              // reste celle du vendeur ; c'est le RENDU qui dérive des variantes
+              // lisibles. Un vendeur qui voit sa couleur affichée autrement sans
+              // explication croit à un bogue.
+              <p className={"mt-3 " + aide}>{t("couleurAjustee")}</p>
+            ) : null}
+          </section>
+
+          {/* --- Réseaux ------------------------------------------------- */}
+          <section className={carte} aria-labelledby="titre-reseaux">
+            <div className="mb-1 flex items-baseline justify-between gap-3">
+              <h2 id="titre-reseaux" className={titreCarte}>
+                {t("reseauxTitre")}
+              </h2>
+              <span className="shrink-0 font-body-sm text-[12px] text-on-surface-variant">
+                {t("reseauxFacultatif")}
+              </span>
+            </div>
+            <p className="mb-4 font-body-sm text-[13px] leading-5 text-on-surface-variant lg:mb-[18px]">
+              {t("reseauxAide")}
+            </p>
+
+            <div className="flex flex-col gap-3.5 lg:gap-3">
+              {RESEAUX.map((reseau) => (
+                <div key={reseau.clef} className="flex items-end gap-[11px] lg:gap-3">
+                  <span
+                    className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[12px] lg:mb-px lg:h-10 lg:w-10"
+                    style={{ backgroundColor: reseau.fond, color: reseau.encre }}
+                    aria-hidden="true"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d={reseau.trace} />
+                    </svg>
+                  </span>
+                  <div className="min-w-0 flex-grow">
+                    <label htmlFor={reseau.clef} className={etiquette + " mb-[5px]"}>
+                      {t("reseau." + reseau.clef)}
+                    </label>
+                    <input
+                      id={reseau.clef}
+                      name={reseau.clef}
+                      type="url"
+                      inputMode="url"
+                      maxLength={200}
+                      value={reseaux[reseau.clef]}
+                      onChange={(e) =>
+                        setReseaux((actuels) => ({ ...actuels, [reseau.clef]: e.target.value }))
+                      }
+                      placeholder={t("reseauExemple." + reseau.clef)}
+                      className={champReseau}
+                    />
+                    {champsEnEchec.includes(reseau.clef) ? (
+                      <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
+                        {t("reseauInvalide")}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CE QUE LE LIEN FAIT ET CE QU'IL NE FAIT PAS. Il s'ouvre hors de
+                la page, il ne crée aucun compte et ne demande rien au client —
+                c'est la promesse centrale du produit, elle mérite d'être écrite
+                là où le vendeur colle ses adresses. */}
+            <div className="mt-4 flex items-start gap-2.5 rounded-[11px] bg-surface-container-low px-3.5 py-3">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="mt-px shrink-0 text-sourdine"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 16v-4" />
+                <path d="M12 8h.01" />
+              </svg>
+              <span className={aide}>{t("reseauxNouvelOnglet")}</span>
+            </div>
+          </section>
+
+          {/* --- Options ------------------------------------------------- */}
+          <section className={carte} aria-labelledby="titre-options">
+            <h2 id="titre-options" className={titreCarte + " mb-1 lg:mb-[18px]"}>
+              {t("optionsTitre")}
+            </h2>
+
+            <div className="mt-3 flex items-center justify-between gap-4 border-t border-filet-ligne py-3.5 lg:mt-0 lg:border-t-0 lg:border-b lg:pt-0 lg:pb-4">
+              <div>
+                <p className="mb-0.5 font-body-md text-[15px] font-semibold text-on-surface">
+                  {t("filigraneTitre")}
+                </p>
+                <p className="font-body-sm text-[13px] leading-5 text-on-surface-variant">
+                  {filigranePossible ? t("filigraneAide") : t("filigraneSansNom")}
+                </p>
+              </div>
+
+              {/*
+                L'INTERRUPTEUR EST DESSINÉ, pas une case native — c'est ce que
+                montre la planche, et une case de 13 px n'est pas une cible au
+                pouce. La case reste dans le document, en `sr-only` : c'est elle
+                qui porte le nom du champ, l'état coché et le focus clavier.
+                Un interrupteur peint sans champ derrière ne s'envoie pas.
+              */}
               <label
-                className={`flex min-h-[44px] items-center gap-3 rounded-lg border px-4 ${
-                  filigranePossible
-                    ? "cursor-pointer border-outline-variant hover:bg-surface-container-low"
-                    : "cursor-not-allowed border-outline-variant opacity-60"
-                }`}
+                className={
+                  "relative inline-flex h-[27px] w-[46px] shrink-0 items-center rounded-full px-[3px] transition-colors " +
+                  (filigranePossible ? "cursor-pointer" : "cursor-not-allowed opacity-50")
+                }
+                style={{
+                  backgroundColor:
+                    filigrane && filigranePossible
+                      ? accent.remplissage
+                      : "var(--color-fond-barre)",
+                }}
               >
                 <input
                   type="checkbox"
@@ -496,103 +758,72 @@ export function FormulaireMarque({
                   checked={filigrane && filigranePossible}
                   disabled={!filigranePossible}
                   onChange={(e) => setFiligrane(e.target.checked)}
-                  className="h-5 w-5 accent-[var(--apercu-interface)]"
+                  className="peer sr-only"
                 />
-                <span className="font-body-md text-body-md text-on-surface">
-                  {t("filigraneLabel")}
-                </span>
+                <span
+                  className="h-[21px] w-[21px] rounded-full transition-transform peer-checked:translate-x-[19px]"
+                  style={{
+                    backgroundColor:
+                      filigrane && filigranePossible
+                        ? accent.surRemplissage
+                        : "var(--color-surface-container-lowest)",
+                  }}
+                />
+                <span className="sr-only">{t("filigraneLabel")}</span>
               </label>
-              {/* CE QU'IL FAIT ET CE QU'IL NE FAIT PAS. Un filigrane superposé à
-                  l'affichage décourage la réutilisation ; il ne l'empêche pas.
-                  Annoncer une protection qu'on n'apporte pas serait pire que ne
-                  rien proposer du tout. */}
-              <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
-                {filigranePossible ? t("filigraneAide") : t("filigraneSansNom")}
-              </p>
             </div>
-          </div>
-        </div>
 
-        {/* --- Aperçu en direct ----------------------------------------- */}
-        <div className="carte flex flex-col gap-6 rounded-lg p-[22px] lg:col-span-2">
-          <div>
-            <h2 className="flex items-center gap-2 font-headline-md text-headline-md text-on-surface">
-              <Icone nom="visibility" className="text-[var(--apercu-texte)]" />
-              {t("apercuTitre")}
-            </h2>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-              {t("apercuAide")}
-            </p>
-          </div>
-
-          <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
-            {/* L'EN-TÊTE EST OMIS QUAND IL N'Y A NI NOM NI LOGO — exactement
-                comme sur la page publique. L'aperçu doit montrer l'ABSENCE de
-                barre, pas une barre vide : c'est le cas le plus fréquent en
-                début de vie d'un compte, et c'est précisément celui qu'un vendeur
-                a besoin de voir avant d'envoyer son premier lien. */}
-            {nom.trim() !== "" || apercuLogo !== null ? (
-              <div className="flex h-16 items-center gap-2 border-b-[0.5px] border-outline-variant bg-surface px-6">
-                {apercuLogo !== null ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- aperçu local ou URL signée
-                  <img src={apercuLogo} alt="" className="h-8 object-contain" />
-                ) : null}
-                {nom.trim() !== "" ? (
-                  <span className="font-headline-md text-headline-md-mobile text-on-surface">
-                    {nom}
-                  </span>
-                ) : null}
+            <div className="border-t border-filet-ligne pt-3.5 lg:flex lg:items-center lg:justify-between lg:gap-5 lg:border-t-0 lg:pt-4">
+              <div>
+                <p className="mb-0.5 font-body-md text-[15px] font-semibold text-on-surface">
+                  {t("langueTitre")}
+                </p>
+                <p className="font-body-sm text-[13px] leading-5 text-on-surface-variant">
+                  {t("langueAide")}
+                </p>
               </div>
-            ) : null}
-
-            <div className="flex flex-col gap-4 p-6">
-              <span
-                className="self-start rounded-full px-3 py-1 font-label-sm text-label-sm"
-                style={{
-                  backgroundColor: "var(--apercu-remplissage)",
-                  color: "var(--apercu-sur-remplissage)",
-                }}
+              {/* UNE LISTE, ET NON DEUX BOUTONS RADIO : deux options
+                  aujourd'hui, et la planche dessine une liste — une troisième
+                  langue ne redessinerait pas l'écran. */}
+              <select
+                aria-label={t("langueTitre")}
+                value={langue}
+                onChange={(e) => setLangue(e.target.value === "en" ? "en" : "fr")}
+                className={champ + " champ-liste mt-2.5 cursor-pointer lg:mt-0 lg:w-[150px]"}
               >
-                {t("apercuStatut")}
-              </span>
-
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {[0, 1, 2, 3].map((rang) => (
-                  <div
-                    key={rang}
-                    className="relative aspect-square overflow-hidden rounded-lg bg-surface-container-highest"
-                  >
-                    {filigrane && filigranePossible ? (
-                      <span className="pointer-events-none absolute inset-x-0 bottom-0 select-none truncate bg-black/35 px-1 py-0.5 text-center font-label-sm text-label-sm text-white">
-                        {nom}
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                {t("apercuLangue", { langue: t(`langue.${langue}`) })}
-              </p>
+                <option value="fr">{t("langue.fr")}</option>
+                <option value="en">{t("langue.en")}</option>
+              </select>
             </div>
+          </section>
+
+          {/*
+            LA BARRE D'ENREGISTREMENT.
+
+            ⚠️ AUCUNE DES DEUX PLANCHES NE LA DESSINE, et elle est conservée
+            quand même. Ici, un seul geste rhabille TOUTES les pages du vendeur,
+            y compris les liens déjà envoyés : enregistrer à chaque frappe ferait
+            défiler des couleurs intermédiaires chez ses clients pendant qu'il
+            tape un code hexadécimal. La sauvegarde automatique de l'éditeur ne
+            touche, elle, qu'une commande que personne ne regarde à cet instant.
+          */}
+          <div className="flex flex-wrap items-center justify-end gap-3 pt-1">
+            {/* LE TÉMOIN N'AFFIRME QUE CE QUE LE SERVEUR A CONFIRMÉ :
+                « enregistré » n'apparaît qu'au retour de l'action, jamais à la
+                soumission. */}
+            {resultat.statut === "enregistre" ? (
+              <p role="status" className="font-body-sm text-body-sm text-on-surface-variant">
+                {t("enregistre")}
+              </p>
+            ) : null}
+            {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
+              <p role="alert" className="font-body-sm text-body-sm text-error">
+                {t(`erreur.${resultat.motif}`)}
+              </p>
+            ) : null}
+            <BoutonEnregistrer libelle={t("enregistrer")} enCours={t("enregistrement")} />
           </div>
         </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-end gap-4 border-t border-outline-variant pt-6">
-        {/* LE TÉMOIN N'AFFIRME QUE CE QUE LE SERVEUR A CONFIRMÉ : « enregistré »
-            n'apparaît qu'au retour de l'action, jamais à la soumission. */}
-        {resultat.statut === "enregistre" ? (
-          <p role="status" className="font-body-sm text-body-sm text-on-surface-variant">
-            {t("enregistre")}
-          </p>
-        ) : null}
-        {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
-          <p role="alert" className="font-body-sm text-body-sm text-error">
-            {t(`erreur.${resultat.motif}`)}
-          </p>
-        ) : null}
-        <BoutonEnregistrer libelle={t("enregistrer")} enCours={t("enregistrement")} />
       </div>
     </form>
   );
