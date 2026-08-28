@@ -74,25 +74,26 @@ export default async function Connexion({
   const motif = motifConnu(typeof brut === "string" ? brut : undefined);
 
   return (
-    <div className="min-h-dvh bg-surface-container-lowest md:bg-canvas md:p-7">
+    <div className="min-h-dvh bg-canvas p-3 md:p-7">
       <main
         id="contenu"
-        className="mx-auto grid w-full max-w-[1384px] overflow-hidden bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-page-publique lg:grid-cols-2"
+        className="mx-auto grid min-h-[calc(100dvh-24px)] w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-page-publique lg:grid-cols-2"
       >
-        <div className="flex flex-col px-margin-mobile py-8 md:px-[76px] md:py-10">
+        <div className="flex flex-col px-[22px] pt-7 pb-[26px] md:px-[76px] md:py-10">
           <Link
             href={`/${locale}`}
-            className="font-headline-md text-[18px] font-extrabold tracking-[-0.02em] text-on-surface"
+            className="font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:text-[18px] md:leading-[23px]"
           >
             DropLink
           </Link>
 
-          <div className="flex max-w-[400px] flex-grow flex-col justify-center py-10">
-            <h1 className="font-headline-xl text-[30px] leading-[36px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
+          <div className="flex max-w-[400px] flex-grow flex-col justify-center py-[30px]">
+            <h1 className="font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
               {t("titre")}
             </h1>
-            <p className="mt-2.5 font-body-md text-[15px] leading-6 text-on-surface-variant">
-              {t("sousTitre")}
+            <p className="mt-2.5 font-body-md text-[15px] leading-6 text-sourdine">
+              <span className="md:hidden">{t("sousTitreCourt")}</span>
+              <span className="hidden md:inline">{t("sousTitre")}</span>
             </p>
 
             {/* CE QUI A ÉCHOUÉ EST DIT. La route de retour redirige ici avec son
@@ -113,16 +114,10 @@ export default async function Connexion({
               </p>
             )}
 
-            <div className="mt-[34px]">
+            <div className="mt-7 md:mt-[34px]">
               <TraductionsClient espaces={["connexion"]}>
                 <FormulaireConnexion locale={locale} />
               </TraductionsClient>
-            </div>
-
-            <div className="my-[26px] flex items-center gap-3.5">
-              <span className="h-px flex-grow bg-outline-variant" />
-              <span className="font-body-sm text-[12px] text-on-surface-variant">{t("ou")}</span>
-              <span className="h-px flex-grow bg-outline-variant" />
             </div>
 
             {/* APRÈS le lien magique, et non avant : c'est la seule porte du
@@ -131,7 +126,7 @@ export default async function Connexion({
                 part des utilisateurs, est le seul qui existe. */}
             <BoutonGoogle locale={locale} />
 
-            <p className="mt-[30px] font-body-md text-[13px] leading-[21px] text-on-surface-variant">
+            <p className="mt-[26px] text-center font-body-md text-[14px] leading-[22px] text-sourdine md:mt-[30px] md:text-left md:text-[13px] md:leading-[21px]">
               {t("pasDeCompteTitre")}{" "}
               <Link
                 href={`/${locale}/inscription`}
@@ -142,7 +137,7 @@ export default async function Connexion({
             </p>
           </div>
 
-          <p className="font-body-sm text-[12px] text-on-surface-variant">
+          <p className="text-center font-body-sm text-[11px] leading-[18px] text-sourdine md:text-left md:text-[12px] md:leading-[15px]">
             {t("cgvAvant")}{" "}
             <Link href={`/${locale}/conditions`} className="text-violet hover:underline">
               {t("cgvConditions")}

@@ -147,6 +147,7 @@
   "connexion": {
     "titre": "Content de vous revoir",
     "sousTitre": "Entrez votre adresse : nous vous envoyons un lien de connexion. Pas de mot de passe à retenir.",
+    "sousTitreCourt": "Nous vous envoyons un lien de connexion. Pas de mot de passe.",
     "labelEmail": "Adresse email",
     "placeholderEmail": "vous@exemple.com",
     "envoyer": "Recevoir mon lien",

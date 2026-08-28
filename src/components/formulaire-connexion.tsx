@@ -37,10 +37,10 @@ function BoutonEnvoi({ libelle, libelleEnCours }: { libelle: string; libelleEnCo
     <button
       type="submit"
       disabled={pending}
-      className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--accent-remplissage)] py-3 font-label-md text-label-md text-[var(--accent-sur-remplissage)] shadow-md transition-all duration-200 hover:shadow-sm active:shadow-none disabled:opacity-60"
+      className="degrade-marque flex h-13 w-full items-center justify-center gap-[9px] rounded-[13px] font-headline-md text-[15px] leading-5 font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-90 disabled:opacity-60"
     >
       <span>{pending ? libelleEnCours : libelle}</span>
-      {pending ? null : <Icone nom="arrow_forward" className="text-[18px]" />}
+      {pending ? null : <Icone nom="arrow_forward" className="text-[15px]" />}
     </button>
   );
 }
@@ -97,23 +97,20 @@ export function FormulaireConnexion({
       : null;
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <form action={action} className="flex flex-col gap-4 md:gap-[18px]" noValidate>
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="intention" value={intention} />
       <div>
         <label
           htmlFor="email"
-          className="mb-1.5 block font-label-md text-label-md text-on-surface"
+          className="mb-2 block font-headline-md text-[13px] leading-4 font-semibold text-on-surface"
         >
           {t("labelEmail")}
         </label>
-        {/* Icône DANS le champ, fond ardoise et non blanc, halo de 2 px au
-            focus : la spécification « Input Fields » du design system, et le
-            rendu exact de la maquette. */}
-        <div className="relative">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-outline">
-            <Icone nom="mail" className="text-[20px]" />
-          </div>
+        {/* ⚠️ PAS D'ICÔNE DANS LE CHAMP. Elle venait de la spécification
+            Stitch ; les deux planches du canevas posent un champ nu, et
+            l'enveloppe n'apprenait rien que le libellé ne dise déjà. */}
+        <div>
           <input
             id="email"
             name="email"
@@ -126,7 +123,7 @@ export function FormulaireConnexion({
             placeholder={t("placeholderEmail")}
             aria-invalid={messageErreur !== null}
             aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
-            className="w-full min-h-[44px] rounded-lg champ-app py-3 pl-10 pr-4 font-body-md text-body-md text-on-surface transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent-interface)]"
+            className="h-13 w-full rounded-[13px] border border-filet-controle bg-surface-container-low px-4 font-body-md text-[15px] text-on-surface transition-colors focus:border-violet focus:outline-none focus:ring-2 focus:ring-violet/30"
           />
         </div>
       </div>

@@ -147,6 +147,7 @@
   "connexion": {
     "titre": "Good to see you again",
     "sousTitre": "Enter your address: we send you a sign-in link. No password to remember.",
+    "sousTitreCourt": "We send you a sign-in link. No password.",
     "labelEmail": "Email address",
     "placeholderEmail": "you@example.com",
     "envoyer": "Send me the link",

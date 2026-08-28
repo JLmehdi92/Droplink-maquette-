@@ -31,14 +31,14 @@ export async function PanneauAcces() {
       </div>
 
       <div className="relative px-[60px] text-center">
-        <div className="inline-block h-[500px] w-[268px] rounded-[38px] bg-primary p-2 text-left shadow-[0_40px_70px_-28px_rgba(14,14,19,0.4)]">
+        <div className="inline-block h-[516px] w-[284px] rounded-[38px] bg-primary p-2 text-left shadow-[0_40px_70px_-28px_rgba(14,14,19,0.4)]">
           <div className="h-full w-full overflow-hidden rounded-[31px] bg-surface-container-lowest">
             <div className="degrade-marque px-4 pt-[26px] pb-4">
               <div className="flex items-center gap-2">
                 <span className="h-[22px] w-[22px] rounded-full bg-white/30" />
-                <span className="font-label-md text-[12px] font-bold">Atelier Nord</span>
+                <span className="font-headline-md text-[12px] leading-[15px] font-bold">Atelier Nord</span>
               </div>
-              <p className="mt-2 font-headline-md text-[17px] font-extrabold tracking-[-0.02em]">
+              <p className="mt-2 font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em]">
                 {t("apercuTitre")}
               </p>
             </div>
