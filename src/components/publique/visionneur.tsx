@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * LE VISIONNEUR PLEIN ÉCRAN, ÉCRIT À LA MAIN.
@@ -19,6 +19,12 @@ import { useCallback, useEffect, useState } from "react";
  *  2. L'URL PLEINE EST DEMANDÉE AU SERVEUR À L'OUVERTURE, et non rendue avec la
  *     page. Vingt URL signées dans le document, c'est vingt capacités
  *     distribuées à qui lit la source, pour une seule qui sera regardée.
+ *
+ * LA PELLICULE OBÉIT À LA MÊME RÈGLE. Elle rend une vignette par média — donc
+ * plus que la grille, qui s'arrête à sept — mais elle ne vit QUE pendant que le
+ * visionneur est ouvert, et ses vignettes sont en `loading="lazy"` : celles qui
+ * sont hors du champ ne sont pas demandées. Le coût est payé par qui regarde,
+ * pas par qui ouvre le lien.
  *
  * Les libellés arrivent en PROPRIÉTÉS : aucun catalogue de traduction n'est
  * expédié au navigateur pour cette page.
@@ -49,28 +55,26 @@ export interface EntreeVisionneur {
 /**
  * Combien de tuiles suivent la pièce en grand, par largeur d'écran.
  *
- * Six et huit AVEC la pièce en grand comprise : ce sont des lignes pleines de
- * trois et de quatre, et une ligne incomplète se lit comme un chargement qui
- * n'a pas fini.
+ * ⚠️ LE TÉLÉPHONE EN PORTAIT CINQ, ET LA PLANCHE EN DESSINE SIX. Cinq tuiles
+ * dans une grille de trois colonnes, c'est une rangée pleine et une rangée à
+ * moitié vide — exactement ce qui se lit comme un chargement inachevé. Six
+ * remplit deux rangées. Le bureau en montre sept sur quatre colonnes, et la
+ * planche `PageClientDesktop` laisse délibérément la huitième case libre.
  */
-const TUILES_TELEPHONE = 5;
+const TUILES_TELEPHONE = 6;
 const TUILES_BUREAU = 7;
 
+/** Au-delà de ce déplacement horizontal, un glissement du doigt change de média. */
+const SEUIL_BALAYAGE_PX = 40;
+
 /** La pastille de lecture d'une vidéo, posée sur sa vignette. */
-function PastilleLecture({ grande = false }: { readonly grande?: boolean }) {
+function PastilleLecture({ taille = 22 }: { readonly taille?: number }) {
   return (
     <span
-      className={
-        "pointer-events-none absolute inset-0 flex items-center justify-center text-on-surface-variant"
-      }
+      className="pointer-events-none absolute inset-0 flex items-center justify-center text-ardoise"
       aria-hidden="true"
     >
-      <svg
-        width={grande ? 34 : 22}
-        height={grande ? 34 : 22}
-        viewBox="0 0 24 24"
-        fill="currentColor"
-      >
+      <svg width={taille} height={taille} viewBox="0 0 24 24" fill="currentColor">
         <path d="M8 5v14l11-7z" />
       </svg>
     </span>
@@ -101,6 +105,7 @@ export function Visionneur({
     readonly chargement: string;
     readonly indisponible: string;
     readonly position: string;
+    readonly balayez: string;
   };
 }) {
   const [index, setIndex] = useState<number | null>(null);
@@ -180,21 +185,35 @@ export function Visionneur({
     };
   }, [index, fermer, aller]);
 
+  /*
+   * LE BALAYAGE, parce que la planche l'ANNONCE en toutes lettres.
+   *
+   * Écrire « Balayez pour changer de photo » sous une couche qui ne réagit pas
+   * au doigt serait la pire sorte de texte : une promesse d'interface que
+   * l'interface ne tient pas, et que personne ne signalera puisque le client ne
+   * reviendra pas dire qu'il a essayé.
+   *
+   * Le départ est mémorisé dans une ref et non dans un état : un `setState` par
+   * `touchmove` re-rendrait la couche plein écran à chaque pixel.
+   */
+  const departX = useRef<number | null>(null);
+
+  const surDebutToucher = (e: React.TouchEvent): void => {
+    departX.current = e.touches[0]?.clientX ?? null;
+  };
+
+  const surFinToucher = (e: React.TouchEvent): void => {
+    const depart = departX.current;
+    departX.current = null;
+    const fin = e.changedTouches[0]?.clientX;
+    if (depart === null || fin === undefined) return;
+    const ecart = fin - depart;
+    if (Math.abs(ecart) < SEUIL_BALAYAGE_PX) return;
+    aller(ecart < 0 ? 1 : -1);
+  };
+
   return (
     <>
-      {/* LE FILIGRANE. Superposition à L'AFFICHAGE, jamais gravée dans le
-          fichier : graver exigerait de réencoder chaque photo au dépôt, donc de
-          payer un transcodage sur le téléphone du vendeur pour un résultat
-          qu'un recadrage retire de toute façon.
-
-          IL NE PROTÈGE PAS, IL DÉCOURAGE. Trois clics dans l'inspecteur le font
-          disparaître, et une capture d'écran le garde. C'est exactement ce que
-          l'interface de réglage doit dire — annoncer une protection qu'on
-          n'apporte pas serait pire que ne rien proposer.
-
-          `pointer-events-none` : sans lui, la couche intercepterait le clic qui
-          ouvre la photo. `select-none` évite qu'on le sélectionne comme du
-          texte. Aucune police n'est chargée pour lui. */}
       {/*
         LA GALERIE DU CANEVAS : une pièce en grand, puis les autres en tuiles.
 
@@ -208,17 +227,16 @@ export function Visionneur({
         croire qu'on a différé un chargement sans l'avoir fait. À vingt médias,
         rendre toute la grille ferait treize requêtes que personne ne regarde.
 
-        Deux bornes, parce que la grille n'a pas la même largeur sur les deux
-        écrans : six tuiles visibles au téléphone, huit sur grand écran. La
-        pastille « +N » porte donc deux nombres, et chacun n'apparaît que sur
-        l'écran qui le rend vrai.
+        PLEINE LARGEUR ET SANS RAYON AU TÉLÉPHONE, encadrée sur grand écran :
+        c'est ce que les deux planches dessinent. Sur 390 px, une marge de
+        chaque côté coûterait un dixième de la surface de chaque photo.
       */}
       {premier !== undefined ? (
         <div>
           <button
             type="button"
             onClick={() => setIndex(0)}
-            className="relative block aspect-[4/3] w-full overflow-hidden bg-surface-container-highest md:aspect-[16/10] md:rounded-lg"
+            className="relative block aspect-[4/3] w-full overflow-hidden bg-fond-avatar lg:aspect-[16/10] lg:rounded-lg"
             aria-label={libelles.ouvrir + " 1"}
           >
             {(premier.urlCouverture ?? premier.urlVignette) !== null ? (
@@ -242,7 +260,7 @@ export function Visionneur({
                 className="h-full w-full object-cover"
               />
             ) : null}
-            {premier.type === "video" ? <PastilleLecture grande /> : null}
+            {premier.type === "video" ? <PastilleLecture taille={34} /> : null}
             {filigrane !== null ? (
               <span className="pointer-events-none absolute right-3 bottom-3 select-none font-label-md text-label-md text-white drop-shadow">
                 {filigrane}
@@ -251,7 +269,7 @@ export function Visionneur({
           </button>
 
           {tuiles.length > 0 ? (
-            <ul className="mt-[5px] grid grid-cols-3 gap-[5px] md:mt-2 md:grid-cols-4 md:gap-2">
+            <ul className="mt-[5px] grid grid-cols-3 gap-[5px] lg:mt-2 lg:grid-cols-4 lg:gap-2">
               {tuiles.map((media, decalage) => {
                 const rang = decalage + 1;
                 const resteTelephone = medias.length - TUILES_TELEPHONE - 1;
@@ -260,12 +278,12 @@ export function Visionneur({
                 return (
                   <li
                     key={media.id}
-                    className={rang > TUILES_TELEPHONE ? "hidden md:block" : undefined}
+                    className={rang > TUILES_TELEPHONE ? "hidden lg:block" : undefined}
                   >
                     <button
                       type="button"
                       onClick={() => setIndex(rang)}
-                      className="relative block aspect-square w-full overflow-hidden bg-surface-container-highest md:rounded"
+                      className="relative block aspect-square w-full overflow-hidden bg-fond-avatar lg:rounded"
                       aria-label={libelles.ouvrir + " " + (rang + 1)}
                     >
                       {media.urlVignette !== null ? (
@@ -285,12 +303,12 @@ export function Visionneur({
                       {media.type === "video" ? <PastilleLecture /> : null}
 
                       {rang === TUILES_TELEPHONE && resteTelephone > 0 ? (
-                        <span className="absolute inset-0 flex items-center justify-center bg-surface-container-highest/90 font-headline-md text-[15px] font-extrabold text-on-surface-variant md:hidden">
+                        <span className="absolute inset-0 flex items-center justify-center bg-surface-container-high/90 font-headline-md text-[15px] font-extrabold text-ardoise lg:hidden">
                           {"+" + resteTelephone}
                         </span>
                       ) : null}
                       {rang === TUILES_BUREAU && resteBureau > 0 ? (
-                        <span className="absolute inset-0 hidden items-center justify-center bg-surface-container-highest/90 font-headline-md text-[16px] font-extrabold text-on-surface-variant md:flex">
+                        <span className="absolute inset-0 hidden items-center justify-center bg-surface-container-high/90 font-headline-md text-[16px] font-extrabold text-ardoise lg:flex">
                           {"+" + resteBureau}
                         </span>
                       ) : null}
@@ -318,13 +336,13 @@ export function Visionneur({
           {/* La fermeture est à GAUCHE et ronde, le compteur au centre : le
               pouce d'une main qui tient le téléphone atteint le coin haut
               gauche, pas le coin haut droit. */}
-          <div className="flex items-center justify-between p-3.5 text-white">
+          <div className="flex items-center justify-between px-3.5 pt-3.5 pb-2.5 text-white">
             <button
               type="button"
               onClick={fermer}
               autoFocus
               aria-label={libelles.fermer}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10"
+              className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-white/12"
             >
               <svg
                 width="20"
@@ -340,15 +358,36 @@ export function Visionneur({
                 <path d="m6 6 12 12" />
               </svg>
             </button>
-            <span className="font-label-md text-label-md">
-              {libelles.position
-                .replace("{n}", String((index ?? 0) + 1))
-                .replace("{total}", String(medias.length))}
+            {/* « 3 / 7 » : la planche écrit la position telle quelle. La forme
+                lisible — « 3 sur 7 » — reste sur le dialogue lui-même, pour qui
+                ne lit pas l'écran. */}
+            <span
+              aria-hidden="true"
+              className="font-label-md text-[14px] font-bold tracking-[0.02em]"
+            >
+              {(index ?? 0) + 1} / {medias.length}
             </span>
-            <span className="w-11" />
+            <span className="w-[46px]" />
           </div>
 
-          <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
+          {/*
+            LA PHOTO PLEINE. La planche `Visionneur` lui donne un cadre 3/4, un
+            rayon de 4 et 8 px de marge latérale — le rayon et la marge sont
+            repris tels quels.
+
+            LE CADRE 3/4 NE L'EST PAS, et c'est délibéré : sur la planche c'est
+            un aplat gris, ici c'est une vraie photo. Imposer un portrait à une
+            photo posée à plat ajouterait deux bandes noires et RÉDUIRAIT le
+            sujet, sur l'écran dont le produit tout entier promet qu'on y voit
+            l'article. `object-contain` dans l'espace disponible donne le même
+            résultat que la planche pour une photo portrait, et un meilleur
+            pour les autres.
+          */}
+          <div
+            className="relative flex flex-1 items-center justify-center overflow-hidden px-2"
+            onTouchStart={surDebutToucher}
+            onTouchEnd={surFinToucher}
+          >
             {echec ? (
               <p className="font-body-md text-body-md text-white">{libelles.indisponible}</p>
             ) : url === null ? (
@@ -362,7 +401,7 @@ export function Visionneur({
                 controls
                 preload="none"
                 playsInline
-                className="max-h-full max-w-full"
+                className="max-h-full max-w-full rounded-[4px]"
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element -- même
@@ -372,24 +411,35 @@ export function Visionneur({
                 alt=""
                 width={courant.largeur ?? undefined}
                 height={courant.hauteur ?? undefined}
-                className="max-h-full max-w-full object-contain"
+                className="max-h-full max-w-full rounded-[4px] object-contain"
               />
             )}
 
+            {/* LE FILIGRANE. Superposition à L'AFFICHAGE, jamais gravée dans le
+                fichier : graver exigerait de réencoder chaque photo au dépôt,
+                donc de payer un transcodage sur le téléphone du vendeur pour un
+                résultat qu'un recadrage retire de toute façon.
+
+                IL NE PROTÈGE PAS, IL DÉCOURAGE. Trois clics dans l'inspecteur
+                le font disparaître, et une capture d'écran le garde.
+
+                `pointer-events-none` : sans lui, la couche intercepterait le
+                balayage. Aucune police n'est chargée pour lui. */}
             {filigrane !== null && url !== null && !echec ? (
-              <span className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 select-none rounded bg-black/45 px-3 py-1 font-label-md text-label-md text-white">
+              <span className="pointer-events-none absolute right-5 bottom-5 select-none font-label-md text-[13px] font-bold tracking-[0.02em] text-white/40">
                 {filigrane}
               </span>
             ) : null}
           </div>
 
-          <div className="flex items-center justify-between p-3.5 text-white">
+          {/* NAVIGATION : cibles larges, pouce en bas d'écran. */}
+          <div className="flex items-center justify-between px-3.5 pt-4 pb-2.5 text-white">
             <button
               type="button"
               onClick={() => aller(-1)}
               disabled={index === 0}
               aria-label={libelles.precedent}
-              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/10 disabled:opacity-30"
+              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/12 disabled:opacity-30"
             >
               <svg
                 width="22"
@@ -405,12 +455,15 @@ export function Visionneur({
                 <path d="m15 6-6 6 6 6" />
               </svg>
             </button>
+            <span className="font-body-sm text-[13px] text-white/50 lg:hidden">
+              {libelles.balayez}
+            </span>
             <button
               type="button"
               onClick={() => aller(1)}
               disabled={index === medias.length - 1}
               aria-label={libelles.suivant}
-              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/10 disabled:opacity-30"
+              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/12 disabled:opacity-30"
             >
               <svg
                 width="22"
@@ -427,6 +480,68 @@ export function Visionneur({
               </svg>
             </button>
           </div>
+
+          {/*
+            LA PELLICULE — on sait toujours combien il en reste et où l'on est.
+
+            Elle manquait, et c'est la seule pièce du visionneur qui répond à
+            « combien y en a-t-il encore » sans compter. La tuile courante porte
+            un liseré ; les autres sont assombries, ce qui distingue la position
+            sans ajouter un mot.
+          */}
+          {medias.length > 1 ? (
+            <ul className="defilement-discret flex gap-1.5 overflow-x-auto px-3.5 pt-1.5 pb-[22px]">
+              {medias.map((media, rang) => (
+                <li key={media.id} className="shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIndex(rang)}
+                    aria-label={libelles.ouvrir + " " + (rang + 1)}
+                    aria-current={rang === index ? "true" : undefined}
+                    ref={
+                      rang === index
+                        ? (element) => {
+                            element?.scrollIntoView({ block: "nearest", inline: "center" });
+                          }
+                        : undefined
+                    }
+                    className={
+                      /* ⚠️ `rounded-lg` VAUT 16 DANS CE THÈME, la planche dit 8.
+                         Un token de rayon NOMMÉ n'est pas une valeur de rayon :
+                         c'est le même piège que les trois boutons de la liste
+                         des commandes, qui portaient 28 pour 12. */
+                      "relative block h-[52px] w-[52px] overflow-hidden rounded-[8px] bg-[#2a2730] " +
+                      (rang === index ? "ring-2 ring-white" : "opacity-50")
+                    }
+                  >
+                    {media.urlVignette !== null ? (
+                      /* eslint-disable-next-line @next/next/no-img-element --
+                         URL signée à expiration. */
+                      <img
+                        src={media.urlVignette}
+                        alt=""
+                        width={200}
+                        height={200}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null}
+                    {media.type === "video" ? (
+                      <span
+                        className="pointer-events-none absolute inset-0 flex items-center justify-center text-white/70"
+                        aria-hidden="true"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       ) : null}
     </>

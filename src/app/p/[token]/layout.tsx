@@ -69,7 +69,22 @@ export default async function LayoutPagePublique({
         ne se voyait que sur les bords, ce qui est exactement ce qui rend ce
         genre d'écart durable.
       */}
-      <body className="min-h-dvh bg-surface-container-lowest text-on-surface antialiased">
+      <body
+        /*
+         * ⚠️ LE FOND EST POSÉ EN STYLE EN LIGNE, ET C'EST NÉCESSAIRE. La classe
+         * `bg-surface-container-lowest` était bien écrite ici, et elle ne
+         * s'appliquait PAS : `globals.css` porte une règle `body { background:
+         * var(--color-surface) }` HORS de toute couche, et une règle non
+         * couchée l'emporte sur un utilitaire Tailwind. Mesuré dans Chrome :
+         * le corps rendait #f7f7fb, le gris du tableau de bord.
+         *
+         * Invisible tant que le contenu couvre l'écran — d'où sa durée de vie.
+         * Il se voit au rebond de défilement sur iOS, c'est-à-dire exactement
+         * sur l'appareil pour lequel cette page est écrite.
+         */
+        style={{ backgroundColor: "var(--color-surface-container-lowest)" }}
+        className="min-h-dvh text-on-surface antialiased"
+      >
         {children}
       </body>
     </html>

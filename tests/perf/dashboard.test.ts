@@ -422,13 +422,27 @@ const CORPS_COMPTEURS = `
     count(*) filter (where o.status = 'preparation'),
     count(*) filter (where o.status = 'en_transit'),
     count(*) filter (where o.views_count = 0),
-    count(*) filter (where o.status = 'livre')
+    count(*) filter (where o.status = 'livre'),
+    count(*),
+    count(*) filter (where o.created_at >= now() - interval '7 days')
   from public.orders o
   where o.archived_at is null`;
 
+/*
+ * LES COMMENTAIRES SQL SONT RETIRÉS AVANT LA COMPARAISON (L-031).
+ *
+ * La migration 102 a ajouté deux agrégats ET un commentaire qui explique
+ * pourquoi la fenêtre glisse sur sept jours. Comparer le corps BRUT ferait
+ * échouer la sonde chaque fois que quelqu'un explique son code, ce qui
+ * apprendrait à recopier les commentaires dans la transcription — donc à
+ * mesurer une chaîne choisie pour passer le test plutôt que pour dire ce
+ * qui est exécuté.
+ */
+const sansCommentairesSql = (v: string): string => v.replace(/--[^\n]*/g, " ");
+
 const normaliser = (v: string): string => v.replace(/\s+/g, " ").trim();
 
-describe("Les quatre compteurs de tête", () => {
+describe("Les compteurs de tête", () => {
   test("la transcription mesurée EST le corps de la fonction", async () => {
     const { rows } = await bd.query<{ corps: string }>(
       `select p.prosrc as corps from pg_proc p
@@ -440,7 +454,7 @@ describe("Les quatre compteurs de tête", () => {
     if (corps === undefined) return;
 
     expect(
-      normaliser(corps),
+      normaliser(sansCommentairesSql(corps)),
       "le corps de la fonction a changé sans que la mesure suive : elle mesurerait autre chose",
     ).toContain(normaliser(CORPS_COMPTEURS));
   });

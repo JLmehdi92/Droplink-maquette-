@@ -173,12 +173,16 @@
   --color-ardoise: #5b5d68;         /*  80× — navigation, pilules, texte fort */
   --color-gris-entete: #9a9ca6;     /*  29× — en-têtes de colonnes */
   --color-gris-inactif: #a4a6b0;    /*  28× — icônes au repos */
+  --color-ardoise-doux: #45464d;    /*   9× — libellé d'un lien encadré */
+  --color-gris-illustration: #c6c6d0; /* 2× — trait d'une icône d'état vide */
 
   /* ----- Les quatre filets, du plus marqué au plus discret --------------- */
   --color-filet-controle: #e6e6ec;  /*  78× — champs, boutons, pilules */
   --color-filet-ligne: #f2f2f6;     /*  34× — séparateur de lignes */
   --color-filet-section: #f0f0f4;   /*  12× — filet de section, page publique */
   --color-filet-depot: #cfcfda;    /*   2× — pointillé de la case de dépôt */
+  --color-filet-pastille: #d9d9e2; /*   9× — pastille d'un passage déjà franchi */
+  --color-filet-vide: #e0e0e8;     /*   1× — pointillé d'un bloc vide, page client */
 
   /* ----- Fonds neutres ---------------------------------------------------- */
   --color-fond-neutre: #f4f4f8;     /*  37× — survol, aplat neutre */
@@ -473,15 +477,29 @@ body {
  * Cibles tactiles de 44 points minimum sur mobile. Sous ce seuil, le taux
  * d'erreur au pouce grimpe, et la page publique est ouverte au téléphone dans
  * la grande majorité des cas.
+ *
+ * ⚠️ DANS `@layer base`, ET C'EST TOUTE LA DIFFÉRENCE. Cette règle vivait HORS
+ * de toute couche, donc elle l'emportait sur les utilitaires Tailwind : sur un
+ * appareil tactile, un bouton portant `min-h-[50px]` rendait 44. Mesuré dans
+ * Chrome le 28/08/2026 sur « Approuver » de la page client — 44 px là où les
+ * deux planches en dessinent 50 — et le défaut valait pour TOUS les boutons du
+ * produit, y compris la bande d'action de l'éditeur, sur l'appareil qui est
+ * justement la cible.
+ *
+ * C'est un PLANCHER, pas une valeur imposée : dans `base`, un bouton qui ne
+ * déclare rien reçoit toujours ses 44 points, et un bouton qui déclare mieux
+ * garde ce qu'il déclare.
  */
-@media (pointer: coarse) {
-  button,
-  a[role="button"],
-  [role="tab"],
-  input[type="checkbox"],
-  input[type="radio"] {
-    min-height: 44px;
-    min-width: 44px;
+@layer base {
+  @media (pointer: coarse) {
+    button,
+    a[role="button"],
+    [role="tab"],
+    input[type="checkbox"],
+    input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 }
 

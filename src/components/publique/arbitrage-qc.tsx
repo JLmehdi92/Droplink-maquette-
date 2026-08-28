@@ -42,7 +42,6 @@ export function ArbitrageQc({
   readonly remplissage: string;
   readonly surRemplissage: string;
   readonly libelles: {
-    readonly titre: string;
     readonly texte: string;
     readonly approuver: string;
     readonly refuser: string;
@@ -50,6 +49,7 @@ export function ArbitrageQc({
     readonly envoi: string;
     readonly approuve: string;
     readonly refuse: string;
+    readonly annuler: string;
     readonly modifier: string;
     readonly echec: string;
   };
@@ -62,6 +62,9 @@ export function ArbitrageQc({
   // permanence, sinon l'écran demanderait sans cesse de trancher une question
   // déjà tranchée.
   const [rouvert, setRouvert] = useState(false);
+  // Le refus est en deux temps : la planche ne montre au repos que les deux
+  // boutons, et le motif s'ouvre après le second.
+  const [motif, setMotif] = useState(false);
 
   const decider = async (decision: "approuve" | "refuse"): Promise<void> => {
     setEnvoi(true);
@@ -92,6 +95,7 @@ export function ArbitrageQc({
       setEtat(confirme);
       setCommentaire("");
       setRouvert(false);
+      setMotif(false);
     } catch {
       setEchec(true);
     } finally {
@@ -101,16 +105,22 @@ export function ArbitrageQc({
 
   const decide = etat !== "en_attente" && !rouvert;
 
+  const boutonPlein =
+    "min-h-[50px] rounded-md px-6 font-label-md text-[15px] font-bold disabled:opacity-50";
+  const boutonBorde =
+    "min-h-[50px] rounded-md border border-filet-controle px-[22px] font-label-md text-[15px] " +
+    "font-bold text-ardoise disabled:opacity-50 lg:px-[26px]";
+
   if (decide) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="font-body-md text-body-md text-on-surface">
+        <p className="font-body-md text-[15px] leading-[23px] text-on-surface lg:text-[16px] lg:leading-6">
           {etat === "approuve" ? libelles.approuve : libelles.refuse}
         </p>
         <button
           type="button"
           onClick={() => setRouvert(true)}
-          className="self-start rounded-lg px-3 py-2 font-label-md text-label-md underline"
+          className="min-h-11 self-start font-label-md text-label-md text-on-surface-variant underline"
         >
           {libelles.modifier}
         </button>
@@ -118,41 +128,97 @@ export function ArbitrageQc({
     );
   }
 
+  /*
+   * LE COMMENTAIRE N'APPARAÎT QU'APRÈS « REFUSER », et c'est la planche qui le
+   * décide : `PageClient` et `PageClientDesktop` ne montrent, au repos, QUE la
+   * question et les deux boutons.
+   *
+   * Ce n'est pas une amputation du champ. Personne n'écrit un commentaire avant
+   * d'avoir tranché, et un champ posé au-dessus des boutons demande d'abord de
+   * rédiger pour ensuite décider — l'ordre inverse de celui dans lequel on
+   * pense. C'est aussi le refus, pas l'accord, qui a besoin d'être expliqué :
+   * « c'est bon » se suffit, « il y a un problème » ne dit rien au vendeur.
+   */
+  if (motif) {
+    return (
+      <div className="flex flex-col gap-4">
+        <label className="flex flex-col gap-2">
+          <span className="font-label-md text-label-md text-on-surface">
+            {libelles.commentaire}
+          </span>
+          <textarea
+            value={commentaire}
+            onChange={(e) => setCommentaire(e.target.value)}
+            autoFocus
+            // Le même plafond qu'en base : refuser à la saisie explique,
+            // tronquer en base protège. Les deux ne remplacent pas le même
+            // défaut.
+            maxLength={1000}
+            rows={3}
+            className="champ-app w-full rounded-md p-3 font-body-md text-body-md text-on-surface"
+          />
+        </label>
+
+        <div className="flex flex-wrap gap-2.5">
+          <button
+            type="button"
+            disabled={envoi}
+            onClick={() => void decider("refuse")}
+            style={{ backgroundColor: remplissage, color: surRemplissage }}
+            className={boutonPlein + " flex-grow lg:flex-grow-0 lg:px-[34px]"}
+          >
+            {envoi ? libelles.envoi : libelles.refuser}
+          </button>
+          <button
+            type="button"
+            disabled={envoi}
+            onClick={() => {
+              setMotif(false);
+              setCommentaire("");
+              setEchec(false);
+            }}
+            className={boutonBorde}
+          >
+            {libelles.annuler}
+          </button>
+        </div>
+
+        {echec ? (
+          <p role="alert" className="font-body-sm text-body-sm text-error">
+            {libelles.echec}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-body-md text-body-md text-on-surface-variant">{libelles.texte}</p>
+      <p className="font-body-md text-[15px] leading-[23px] text-on-surface lg:text-[16px] lg:leading-6">
+        {libelles.texte}
+      </p>
 
-      <label className="flex flex-col gap-2">
-        <span className="font-label-md text-label-md text-on-surface">{libelles.commentaire}</span>
-        <textarea
-          value={commentaire}
-          onChange={(e) => setCommentaire(e.target.value)}
-          // Le même plafond qu'en base : refuser à la saisie explique, tronquer
-          // en base protège. Les deux ne remplacent pas le même défaut.
-          maxLength={1000}
-          rows={3}
-          className="champ-app w-full rounded-md p-3 font-body-md text-body-md text-on-surface"
-        />
-      </label>
-
-      <div className="flex flex-wrap gap-3">
-        {/* Cibles de 44 points au doigt : cette page est ouverte au téléphone. */}
+      {/* Cibles de 50 points au doigt : cette page est ouverte au téléphone. */}
+      <div className="flex gap-2.5">
         <button
           type="button"
           disabled={envoi}
           onClick={() => void decider("approuve")}
           style={{ backgroundColor: remplissage, color: surRemplissage }}
-          className="min-h-[50px] flex-grow rounded-md px-6 font-label-md text-[15px] font-bold disabled:opacity-50"
+          className={boutonPlein + " flex-grow lg:flex-grow-0 lg:px-[34px]"}
         >
           {envoi ? libelles.envoi : libelles.approuver}
         </button>
         <button
           type="button"
           disabled={envoi}
-          onClick={() => void decider("refuse")}
-          className="min-h-[50px] rounded-md border border-outline px-6 font-label-md text-[15px] font-bold text-on-surface-variant disabled:opacity-50"
+          onClick={() => {
+            setEchec(false);
+            setMotif(true);
+          }}
+          className={boutonBorde}
         >
-          {envoi ? libelles.envoi : libelles.refuser}
+          {libelles.refuser}
         </button>
       </div>
 

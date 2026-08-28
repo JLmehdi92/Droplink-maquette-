@@ -1,107 +1,103 @@
 import { Frise } from "@/components/publique/frise";
-import { decrireSilence } from "@/lib/tracking/silence";
-import type { CommandePublique, SuiviPublic } from "@/lib/page-publique/lecture";
+import type { CommandePublique } from "@/lib/page-publique/lecture";
+import type { Silence } from "@/lib/tracking/silence";
 
 /**
- * LA CARTE D'ÉTAT — le premier objet de la page, avant même les photos.
+ * L'ÉTAT DU COLIS — le premier objet de la page au téléphone, une carte de la
+ * colonne de droite sur grand écran.
  *
- * Elle répond d'abord à la SEULE question que le client se pose en ouvrant le
- * lien : quand est-ce que ça arrive. La frise vient ensuite, en subordonné.
+ * DEUX VARIANTES, ET C'EST LE CANEVAS QUI LES SÉPARE, pas une préférence.
  *
- * DEUX VISAGES, ET C'EST UNE DÉCISION PRODUIT, PAS UNE VARIANTE DE STYLE.
+ *  - `accent` (planche `PageClient`) : aplat à la couleur du vendeur, DATE
+ *    D'ARRIVÉE EN GRAND. C'est la seule question que le client se pose en
+ *    ouvrant le lien, et sur un écran de 390 px elle doit être la première
+ *    chose lue.
+ *  - `carte` (planche `PageClientDesktop`) : carte blanche encadrée, titrée
+ *    « Expédition », qui porte le NOM DE L'ÉTAPE en grand. La date d'arrivée
+ *    n'est plus ici : sur grand écran elle est montée dans l'en-tête, à droite
+ *    du titre, où elle est visible sans descendre.
  *
- *  1. Le colis bouge : aplat à la couleur du vendeur, date d'arrivée en grand,
- *     ancienneté du dernier mouvement en dessous.
- *  2. Le colis est silencieux depuis plus de dix jours : la carte change de
- *     nature. Fond d'attention, silence NOMMÉ en titre, et **la date d'arrivée
- *     disparaît** — elle n'est plus crédible, et une estimation qu'on sait
- *     fausse est pire qu'une absence d'estimation. On ne la remplace pas : on
- *     omet.
+ * LES DEUX SONT RENDUES ET L'UNE EST MASQUÉE PAR LA LARGEUR. C'est du texte,
+ * quelques centaines d'octets ; distribuer la même information à deux endroits
+ * selon la largeur ne se fait pas autrement sans JavaScript, et cette page n'en
+ * dépense pas pour de la mise en page.
+ *
+ * LE SILENCE CHANGE LA NATURE DE LA CARTE, dans les deux variantes. Au-delà de
+ * dix jours sans mouvement : fond d'attention, silence NOMMÉ, et **la date
+ * d'arrivée disparaît** — elle n'est plus crédible, et une estimation qu'on
+ * sait fausse est pire qu'une absence d'estimation. On ne la remplace pas.
  *
  * AUCUNE COULEUR DE TEXTE EN DUR SUR L'APLAT D'ACCENT. `resoudreAccent()` a
  * déjà choisi ce qui se lit dessus ; écrire `#ffffff` ici court-circuiterait
  * exactement le mécanisme qui empêche le blanc sur jaune.
- *
- * L'INSTANT ARRIVE EN PROPRIÉTÉ. Un composant qui lit l'horloge rend une chose
- * au serveur et une autre à l'hydratation.
  */
 
 export interface LibellesEtat {
+  readonly titre: string;
   readonly arriveeEstimee: string;
-  readonly aucunMouvement: string;
-  readonly dernierMouvement: string;
-  readonly aujourdHui: string;
-  readonly hier: string;
   readonly silenceTitre: string;
   readonly silenceTexte: string;
   readonly etapes: Readonly<Record<"preparation" | "expedie" | "en_transit" | "livre", string>>;
 }
 
+export interface AccentEtat {
+  readonly remplissage: string;
+  readonly surRemplissage: string;
+  readonly surRemplissageDoux: string;
+  readonly surRemplissageFaible: string;
+  readonly interface: string;
+}
+
 export function EtatExpedition({
+  variante,
   statut,
-  suivi,
-  maintenant,
+  silence,
+  estimation,
+  anciennete,
+  ancienneteCourte,
   libelles,
   accent,
-  formaterJour,
 }: {
+  readonly variante: "accent" | "carte";
   readonly statut: CommandePublique["statut"];
-  readonly suivi: SuiviPublic | null;
-  readonly maintenant: Date;
+  readonly silence: Silence;
+  /** La fourchette d'arrivée déjà formatée, ou `null` si le transporteur n'a rien annoncé. */
+  readonly estimation: string | null;
+  /** « Dernier mouvement il y a 3 jours » — la forme longue, sous la date. */
+  readonly anciennete: string;
+  /** « il y a 3 jours » — la forme courte, à droite du nom de l'étape. */
+  readonly ancienneteCourte: string;
   readonly libelles: LibellesEtat;
-  readonly accent: {
-    readonly remplissage: string;
-    readonly surRemplissage: string;
-    readonly surRemplissageDoux: string;
-    readonly surRemplissageFaible: string;
-    readonly interface: string;
-  };
-  readonly formaterJour: (instant: Date) => string;
+  readonly accent: AccentEtat;
 }) {
-  const dernier =
-    suivi === null || suivi.dernierMouvement === null ? null : new Date(suivi.dernierMouvement);
-  const silence = decrireSilence(dernier, maintenant);
-
-  const anciennete =
-    silence.etat === "aucun-mouvement"
-      ? libelles.aucunMouvement
-      : silence.jours === 0
-        ? libelles.aujourdHui
-        : silence.jours === 1
-          ? libelles.hier
-          : libelles.dernierMouvement.replace("{n}", String(silence.jours));
-
-  /*
-   * LA FOURCHETTE D'ARRIVÉE. Les deux bornes existent en base ; quand elles
-   * tombent le même jour, on n'écrit pas « 2 — 2 septembre ». Et quand le
-   * transporteur n'a rien annoncé, tout le bloc disparaît : une fourchette
-   * inventée serait indiscernable d'une vraie, et c'est celle qu'on croirait.
-   */
-  const du = suivi?.estimationDu == null ? null : new Date(suivi.estimationDu);
-  const au = suivi?.estimationAu == null ? null : new Date(suivi.estimationAu);
-  const estimation =
-    du === null
-      ? null
-      : au === null || formaterJour(au) === formaterJour(du)
-        ? formaterJour(du)
-        : formaterJour(du) + " — " + formaterJour(au);
+  const silencieux = silence.etat === "silencieux";
 
   const frise = (
     <Frise
       statut={statut}
       libelles={libelles.etapes}
-      rempli={silence.etat === "silencieux" ? accent.interface : accent.surRemplissage}
-      vide={silence.etat === "silencieux" ? "var(--color-outline-variant)" : accent.surRemplissageFaible}
-      texteAtteint={silence.etat === "silencieux" ? accent.interface : accent.surRemplissage}
+      rempli={
+        silencieux || variante === "carte" ? accent.interface : accent.surRemplissage
+      }
+      vide={
+        silencieux || variante === "carte"
+          ? "var(--color-outline-variant)"
+          : accent.surRemplissageFaible
+      }
+      texteAtteint={
+        silencieux || variante === "carte" ? accent.interface : accent.surRemplissage
+      }
       texteAVenir={
-        silence.etat === "silencieux" ? "var(--color-sourdine)" : accent.surRemplissageDoux
+        silencieux || variante === "carte"
+          ? "var(--color-gris-entete)"
+          : accent.surRemplissageDoux
       }
     />
   );
 
-  if (silence.etat === "silencieux") {
+  if (silencieux) {
     return (
-      <section className="rounded-lg border border-attention-filet bg-attention-fond p-5">
+      <section className="rounded-[18px] border border-attention-filet bg-attention-fond p-5 lg:p-6">
         <div className="flex items-start gap-3">
           <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-attention-puce">
             <svg
@@ -124,43 +120,60 @@ export function EtatExpedition({
             <p className="font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-attention">
               {libelles.silenceTitre.replace("{n}", String(silence.jours))}
             </p>
-            <p className="mt-1 font-body-sm text-[14px] leading-[22px] text-attention-doux">
+            <p className="mt-[5px] font-body-sm text-[14px] leading-[22px] text-attention-doux">
               {libelles.silenceTexte}
             </p>
           </div>
         </div>
-        <div className="mt-5">{frise}</div>
+        <div className="mt-[18px]">{frise}</div>
+      </section>
+    );
+  }
+
+  if (variante === "carte") {
+    return (
+      <section className="rounded-[18px] border border-outline-variant p-6">
+        <p className="mb-3.5 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-gris-entete uppercase">
+          {libelles.titre}
+        </p>
+        <div className="mb-3.5 flex items-baseline justify-between gap-4">
+          <span className="font-headline-md text-[18px] leading-[23px] font-extrabold tracking-[-0.02em] text-on-surface">
+            {libelles.etapes[statut]}
+          </span>
+          <span className="shrink-0 font-body-sm text-[13px] text-on-surface-variant">
+            {ancienneteCourte}
+          </span>
+        </div>
+        {frise}
       </section>
     );
   }
 
   return (
     <section
-      className="rounded-lg p-5"
+      className="rounded-[18px] p-5"
       style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
     >
       {estimation !== null ? (
         <>
           <p
-            className="font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] uppercase"
+            className="mb-1.5 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] uppercase"
             style={{ color: accent.surRemplissageDoux }}
           >
             {libelles.arriveeEstimee}
           </p>
-          <p className="mt-1.5 font-headline-lg text-[27px] leading-[32px] font-extrabold tracking-[-0.03em]">
+          <p className="mb-[3px] font-headline-lg text-[27px] leading-[33px] font-extrabold tracking-[-0.03em]">
             {estimation}
           </p>
         </>
       ) : null}
       <p
-        className={
-          "font-body-md text-[14px] leading-[20px] " + (estimation === null ? "" : "mt-1")
-        }
+        className="font-body-md text-[14px] leading-[20px]"
         style={{ color: accent.surRemplissageDoux }}
       >
         {anciennete}
       </p>
-      <div className="mt-4">{frise}</div>
+      <div className="mt-[18px]">{frise}</div>
     </section>
   );
 }

@@ -68,6 +68,7 @@ const RESEAUX = [
 export function ReseauxVendeur({
   boutique,
   titre,
+  note,
 }: {
   readonly boutique: Boutique;
   /**
@@ -85,6 +86,8 @@ export function ReseauxVendeur({
    * OBLIGE à inventer quelque chose le jour où l'on n'a rien.
    */
   readonly titre: string | null;
+  /** « Les liens s'ouvrent dans un nouvel onglet. » — rendue sur grand écran seulement. */
+  readonly note: string;
 }) {
   const liens = RESEAUX.map((reseau) => ({
     ...reseau,
@@ -97,21 +100,38 @@ export function ReseauxVendeur({
   if (liens.length === 0) return null;
 
   return (
-    <section className="border-t border-outline-variant px-margin-mobile py-6 md:px-margin-desktop">
-      <div className="mx-auto max-w-container-max">
+    /*
+      DEUX COMPOSITIONS, ET C'EST LE CANEVAS QUI LES SÉPARE.
+
+      Au téléphone (`PageClient`) : une section pleine largeur, les trois liens
+      côte à côte, chacun en colonne — icône au-dessus du nom — et tous de
+      largeur égale. Sur grand écran (`PageClientDesktop`) : un pied de page,
+      titre et note à gauche, les liens alignés à droite, en ligne.
+
+      LA NOTE N'EXISTE QUE SUR GRAND ÉCRAN, comme sur la planche. Elle dit ce
+      que le clic va faire ; sur 390 px elle prendrait une ligne entière pour
+      une information qu'un pouce découvre en une seconde.
+    */
+    <section className="border-t border-filet-section px-[18px] py-[26px] lg:px-14 lg:pt-7 lg:pb-[34px]">
+      <div className="mx-auto flex max-w-[1240px] flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-[30px]">
         {titre !== null ? (
-          <p className="mb-3 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-sourdine uppercase">
-            {titre}
-          </p>
+          <div>
+            <p className="font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-gris-entete uppercase">
+              {titre}
+            </p>
+            <p className="mt-[5px] hidden font-body-md text-[14px] text-on-surface-variant lg:block">
+              {note}
+            </p>
+          </div>
         ) : null}
         <ul className="flex gap-2.5">
           {liens.map((lien) => (
-            <li key={lien.clef} className="flex-grow">
+            <li key={lien.clef} className="flex-grow lg:flex-grow-0">
               <a
                 href={lien.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-h-[52px] flex-col items-center justify-center gap-1.5 rounded-md border border-outline font-label-md text-[12px] font-semibold text-on-surface-variant transition-colors hover:border-outline-variant hover:bg-surface-container hover:text-on-surface"
+                className="flex min-h-[52px] flex-col items-center justify-center gap-1.5 rounded-md border border-filet-controle font-label-md text-[12px] font-semibold text-ardoise-doux transition-colors hover:border-outline hover:bg-surface-container-low hover:text-on-surface lg:min-h-12 lg:flex-row lg:gap-2.5 lg:px-5 lg:text-[14px]"
               >
                 <svg
                   width="20"

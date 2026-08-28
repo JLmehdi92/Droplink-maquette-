@@ -164,6 +164,9 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
    * écrivait en base autrement » : une protection qui tient à une ABSENCE
    * n'est pas une protection (L-029).
    */
+  /** La note du pied de page bureau — sans effet sur ce que ce test éprouve. */
+  const NOTE = "Les liens s'ouvrent dans un nouvel onglet.";
+
   const BOUTIQUE = {
     nom: "Atelier Nord",
     logo: null,
@@ -179,6 +182,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     const rendu = ReseauxVendeur({
       boutique: { ...BOUTIQUE, instagram: "javascript:alert(1)" },
       titre: "Retrouvez Atelier Nord",
+      note: NOTE,
     });
 
     // Les trois liens invalides : le bloc entier disparaît, sans un mot au
@@ -193,7 +197,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     ["data:text/html,<script>", "charge inline"],
   ])("« %s » (%s) n'est pas rendu", (valeur) => {
     expect(
-      ReseauxVendeur({ boutique: { ...BOUTIQUE, instagram: valeur }, titre: "t" }),
+      ReseauxVendeur({ boutique: { ...BOUTIQUE, instagram: valeur }, titre: "t", note: NOTE }),
     ).toBeNull();
   });
 
@@ -204,6 +208,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     const rendu = ReseauxVendeur({
       boutique: { ...BOUTIQUE, instagram: "https://instagram.com/atelier.nord" },
       titre: "Retrouvez Atelier Nord",
+      note: NOTE,
     });
 
     expect(rendu).not.toBeNull();

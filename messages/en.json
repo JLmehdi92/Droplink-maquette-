@@ -637,7 +637,7 @@
     "titre": "Your order",
     "propulsePar": "Powered by DropLink",
     "frise": {
-      "preparation": "In preparation",
+      "preparation": "Preparation",
       "expedie": "Shipped",
       "en_transit": "In transit",
       "livre": "Delivered"
@@ -652,43 +652,48 @@
       "indisponible": "This photo is unavailable.",
       "position": "{n} of {total}",
       "videTitre": "No photos yet",
-      "videTexte": "They will appear here as soon as the seller adds them."
+      "videTexte": "They will appear here as soon as the seller adds them.",
+      "compte": "{n, plural, one {# item} other {# items}}",
+      "balayez": "Swipe to change photo"
     },
     "details": {
       "titre": "Details",
-      "reference": "Item",
-      "suivi": "Tracking number",
+      "reference": "Reference",
       "destinataire": "Recipient"
     },
     "qc": {
-      "titre": "Your feedback",
-      "texte": "Do these photos match what you expected?",
-      "approuver": "Looks good to me",
-      "refuser": "There is a problem",
+      "titre": "Your approval",
+      "texte": "Do these photos match your order?",
+      "approuver": "Approve",
+      "refuser": "Reject",
       "commentaire": "Anything to add? (optional)",
       "envoi": "Sending…",
       "approuve": "This order is approved.",
       "refuse": "A problem has been reported on this order. The seller has been notified.",
       "modifier": "Change my answer",
-      "echec": "Your answer could not be saved. Please try again."
+      "echec": "Your answer could not be saved. Please try again.",
+      "annuler": "Cancel"
     },
     "suivi": {
       "titre": "Parcel tracking",
-      "numero": "Tracking number",
+      "numero": "Number",
       "aucunMouvement": "No carrier information yet",
       "dernierMouvement": "Last movement {n} days ago",
       "aujourdHui": "Movement today",
       "hier": "Movement yesterday",
       "silence": "The parcel is registered and tracked. Such a delay is not unusual at customs — we keep querying the carrier every day.",
       "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
-      "silenceTitre": "No movement for {n} days"
+      "silenceTitre": "No movement for {n} days",
+      "anciennete": "{n} days ago"
     },
     "pourClient": "for {nom}",
     "etat": {
-      "arriveeEstimee": "Estimated arrival"
+      "arriveeEstimee": "Estimated arrival",
+      "titre": "Shipping"
     },
     "reseaux": {
-      "titre": "Find {nom}"
+      "titre": "Find {nom}",
+      "note": "Links open in a new tab."
     },
     "lienInvalideTitre": "This link is no longer valid",
     "lienInvalideTexte": "Ask the person who sent it to you for a new link."
