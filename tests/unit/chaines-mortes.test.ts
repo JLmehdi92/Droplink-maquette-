@@ -41,6 +41,10 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
     "admin.panneau.alerte.",
     "composé depuis le genre d'alerte rendu par `alertes_admin` — page admin",
   ],
+  [
+    "admin.panneau.alerteDetail.",
+    "composé depuis le même genre d'alerte, pour la ligne de détail — page admin",
+  ],
   ["admin.panneau.tache.", "composé depuis l'état du veilleur — page admin"],
   [
     "admin.surveillance.indicateur.",

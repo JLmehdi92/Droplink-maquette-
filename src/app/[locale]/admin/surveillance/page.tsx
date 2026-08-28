@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lireSeuils } from "@/lib/audit/panneau";
 import { lireSurveillance } from "@/lib/audit/surveillance";
@@ -62,13 +63,10 @@ export default async function SurveillanceAdmin({
   }
 
   return (
-    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
-      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
-        {t("surveillance.titre")}
-      </h1>
-      <p className="mt-3 max-w-[640px] font-body-md text-body-md text-on-surface-variant">
-        {t("surveillance.sousTitre")}
-      </p>
+    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+      <EnTeteAdmin titre={t("surveillance.titre")} sousTitre={t("surveillance.sousTitre")} />
+
+      <div className="p-4 md:mt-[22px] md:p-0">
 
       {/* --- LES TÂCHES DE FOND, EN PREMIER --- */}
       <section aria-label={t("surveillance.taches")} className="mt-gutter">
@@ -149,6 +147,7 @@ export default async function SurveillanceAdmin({
           ))}
         </ul>
       </section>
+      </div>
     </main>
   );
 }

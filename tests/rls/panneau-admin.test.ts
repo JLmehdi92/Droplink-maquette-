@@ -247,3 +247,93 @@ describe("Les seuils sont configurables, et tracés", () => {
     expect(Number(lignes[0]?.value)).toBe(7);
   });
 });
+
+/**
+ * LE COMPTEUR MENSUEL DE COMMANDES.
+ *
+ * ⚠️ IL N'ÉTAIT ALIMENTÉ PAR RIEN. `usage_counters.orders_created` est né avec
+ * la migration 046, a reçu une contrainte de positivité en 064 — donc quelqu'un
+ * l'a relu et l'a cru vivant — et aucune migration ne l'incrémentait. Il valait
+ * zéro depuis le premier jour, sur la métrique de verdict de toute la phase de
+ * validation. Un zéro crédible est pire qu'une absence : il ne fait chercher
+ * personne.
+ *
+ * CES QUATRE CONTRÔLES ÉCHOUENT SI ON RETIRE LE DÉCLENCHEUR DE LA 110, et le
+ * troisième échoue aussi si on retire seulement la condition de transition —
+ * c'est celui-là qui distingue « compter les créations » de « compter les
+ * modifications », deux chiffres qui se ressemblent assez pour qu'on ne
+ * remarque rien.
+ */
+describe("Les commandes créées du mois sont comptées", () => {
+  const moisCourant = async (profilId: string): Promise<number> => {
+    const lignes = await interroger<{ n: number | null }>(
+      catalogue,
+      `select orders_created as n from public.usage_counters
+        where profile_id = $1 and period_month = date_trunc('month', now())::date`,
+      [profilId],
+    );
+    return Number(lignes[0]?.n ?? 0);
+  };
+
+  test("une commande SANS contenu réel ne compte pas", async () => {
+    const avant = await moisCourant(vendeur.profilId);
+    await interroger(catalogue, "insert into public.orders (shop_id) values ($1)", [
+      vendeur.shopId,
+    ]);
+    // Un brouillon ouvert puis abandonné est exactement le cas « teste une ou
+    // deux fois puis disparaît ». Le compter gonflerait la métrique du côté
+    // rassurant, et une métrique fausse qui confirme ce qu'on espère ne se
+    // remet jamais en question.
+    expect(await moisCourant(vendeur.profilId), "un brouillon vide a été compté").toBe(avant);
+  });
+
+  test("contre-test positif : une commande AVEC contenu réel compte", async () => {
+    const avant = await moisCourant(vendeur.profilId);
+    await interroger(
+      catalogue,
+      "insert into public.orders (shop_id, customer_label) values ($1, 'Client compté')",
+      [vendeur.shopId],
+    );
+    expect(await moisCourant(vendeur.profilId), "le déclencheur n'a rien compté").toBe(avant + 1);
+  });
+
+  test("une modification ultérieure ne recompte PAS la même commande", async () => {
+    const lignes = await interroger<{ id: string }>(
+      catalogue,
+      `insert into public.orders (shop_id, customer_label) values ($1, 'Client modifié')
+       returning id`,
+      [vendeur.shopId],
+    );
+    const id = lignes[0]?.id;
+    if (id === undefined) throw new Error("commande non créée");
+
+    const apresCreation = await moisCourant(vendeur.profilId);
+    // L'éditeur produit une écriture par frappe débattue : sans la condition de
+    // transition, le compteur mesurerait les MODIFICATIONS.
+    await interroger(catalogue, "update public.orders set product_ref = 'REF-2' where id = $1", [
+      id,
+    ]);
+    await interroger(catalogue, "update public.orders set customer_label = 'Autre' where id = $1", [
+      id,
+    ]);
+    expect(await moisCourant(vendeur.profilId), "une modification a été comptée").toBe(
+      apresCreation,
+    );
+  });
+
+  test("le panneau rend ce compteur, et c'est la somme réelle", async () => {
+    const p = await lirePanneau(admin.client, SEUILS);
+    const somme = await interroger<{ s: string | null }>(
+      catalogue,
+      `select sum(orders_created) as s from public.usage_counters
+        where period_month = date_trunc('month', now())::date`,
+    );
+    expect(p.compteurs.commandesCreeesCeMois).toBe(Number(somme[0]?.s ?? 0));
+    // Contre-test : un compteur resté à zéro passerait l'égalité ci-dessus sans
+    // rien prouver, puisque la somme vaudrait zéro elle aussi.
+    expect(
+      p.compteurs.commandesCreeesCeMois,
+      "le compteur vaut zéro alors que des commandes réelles viennent d'être créées",
+    ).toBeGreaterThan(0);
+  });
+});

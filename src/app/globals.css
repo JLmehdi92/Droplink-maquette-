@@ -145,6 +145,9 @@
   --color-violet-survol: #5c3fd0;   /*  32× — liens au survol */
   --color-violet-encre: #6b4ae0;    /*  24× — texte SUR un fond violet clair */
   --color-violet-fond: #f1eefe;     /*  25× — pilule, navigation active */
+  --color-violet-carte: #f8f6ff;    /*   4× — fond d'une carte de compteur facturé */
+  --color-violet-filet: #d8d2f8;    /*   3× — bordure de cette même carte */
+  --color-violet-sombre: #4b2fb0;   /*   7× — chiffre sur fond violet pâle */
 
   /* ----- Corail de marque — le second terme du dégradé -------------------- */
   --color-corail: #f2765e;          /*  34× */
@@ -163,6 +166,11 @@
   --color-alerte-fond: #fff8f6;     /*   5× — compteur en alerte */
   --color-alerte-fond-doux: #fffaf9;/*  12× — bandeau d'échec */
   --color-alerte-fond-vif: #fdeeea; /*  12× — puce d'état */
+  --color-alerte-fond-carte: #fff4f1; /* 2× — carte d'alerte, panneau admin */
+  --color-alerte-puce-fond: #fdded6;  /* 3× — pastille d'icône d'alerte */
+  --color-alerte-titre: #a8412c;      /* 6× — titre d'une alerte critique */
+  --color-alerte-texte: #b5654f;      /* 7× — corps d'une alerte critique */
+  --color-attention-bordure: #e6d3a8; /* 2× — bordure d'un bouton en attention */
 
   /*
    * ----- Les quatre gris de texte ----------------------------------------

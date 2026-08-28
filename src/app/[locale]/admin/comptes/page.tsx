@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
 import { listerComptes, ParametresComptes } from "@/lib/audit/comptes";
@@ -69,17 +70,10 @@ export default async function AdminComptes({
   const base = `/${langue}/admin/comptes`;
 
   return (
-    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
-      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
-        {t("comptes.titre")}
-      </h1>
-      {/* ON DIT QUE LA CONSULTATION EST TRACÉE. Ce n'est pas une formalité : un
-          administrateur qui sait que ses lectures laissent une trace nominative
-          ne consulte pas de la même façon, et c'est précisément l'effet
-          recherché. */}
-      <p className="mt-3 font-body-md text-body-md text-on-surface-variant">
-        {t("comptes.sousTitre")}
-      </p>
+    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+      <EnTeteAdmin titre={t("comptes.titre")} sousTitre={t("comptes.sousTitre")} />
+
+      <div className="p-4 md:mt-[22px] md:p-0">
 
       <form method="get" action={base} className="mt-6 flex flex-wrap gap-2">
         <label htmlFor="q" className="sr-only">
@@ -185,6 +179,7 @@ export default async function AdminComptes({
           {t("comptes.pageSuivante")}
         </Link>
       ) : null}
+      </div>
     </main>
   );
 }

@@ -55,6 +55,7 @@ export interface CompteursAdmin {
   readonly comptesSansType: number;
   readonly colisPrisEnChargeCeMois: number;
   readonly colisAbandonnesCeMois: number;
+  readonly commandesCreeesCeMois: number;
 }
 
 /**
@@ -159,6 +160,7 @@ export async function lirePanneau(
       comptesSansType: Number(c.comptes_sans_type),
       colisPrisEnChargeCeMois: Number(c.colis_pris_en_charge_ce_mois),
       colisAbandonnesCeMois: Number(c.colis_abandonnes_ce_mois),
+      commandesCreeesCeMois: Number(c.commandes_creees_ce_mois),
     },
     taches: lignesTaches,
     aucuneTacheDeployee: lignesTaches.length === 0,

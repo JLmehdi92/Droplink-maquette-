@@ -212,6 +212,66 @@ export interface LigneJournal {
  * suivante — le journal se remplirait de sa propre consultation et noierait ce
  * qu'il est censé conserver.
  */
+/**
+ * Les N dernieres entrees du journal, pour le panneau.
+ *
+ * ELLE PASSE PAR LA MEME FONCTION EN BASE QUE LE JOURNAL COMPLET, et c'est
+ * delibere : `lire_journal_admin` est declaree `stable`, donc PostgREST
+ * l'execute en transaction lecture seule et le moteur refuserait toute ecriture
+ * qu'on y ajouterait. Une seconde fonction ecrite pour le panneau aurait pu
+ * perdre cette propriete sans que rien ne le signale — et le panneau, ouvert a
+ * chaque arrivee, aurait alors rempli le journal de sa propre consultation.
+ *
+ * `p_limite` EST BORNEE PAR L'APPELANT ET PAR LA BASE : la planche en montre
+ * quatre, et une valeur plus grande ne ferait que rendre l'ecran plus lourd
+ * pour une information que l'ecran Journal donne deja en entier.
+ */
+export const ACTION_EXCLUE_DE_L_APERCU = "panneau.alertes";
+
+/**
+ * Combien de lignes lire en base pour en garder `limite` apres exclusion.
+ *
+ * BORNE HAUTE ASSUMEE : si les cent dernieres entrees sont toutes des
+ * consultations du panneau, la carte en montre moins que prevu — et c'est
+ * l'aveu correct, puisqu'il ne s'est alors rien passe d'autre.
+ */
+const FENETRE_APERCU = 100;
+
+export async function lireDernieresActions(
+  supabase: ClientAdmin,
+  limite: number,
+): Promise<readonly LigneJournal[]> {
+  const { data, error } = await supabase
+    .rpc("lire_journal_admin", {
+      p_curseur_date: "",
+      p_curseur_id: "",
+      p_limite: FENETRE_APERCU,
+    })
+    // L'EXCLUSION EST POUSSEE EN SQL, pas appliquee apres coup : PostgREST sait
+    // filtrer le resultat d'une fonction qui rend une table, et ramener cent
+    // lignes pour en jeter quatre-vingt-seize cote serveur serait du transport
+    // pur.
+    .neq("action", ACTION_EXCLUE_DE_L_APERCU)
+    .limit(limite);
+
+  if (error !== null || data === null) {
+    throw new Error(
+      "lecture des dernieres actions impossible : " + (error?.message ?? "reponse vide"),
+    );
+  }
+
+  return data.map((l) => ({
+    id: l.id,
+    adminEmail: l.admin_email,
+    action: l.action,
+    typeRessource: l.resource_type,
+    idRessource: l.resource_id,
+    cibleEmail: l.target_email,
+    quand: l.occurred_at,
+    motif: l.motif,
+  }));
+}
+
 export async function lireJournal(
   supabase: ClientAdmin,
   curseur: string | null,

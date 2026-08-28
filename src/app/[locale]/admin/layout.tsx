@@ -1,9 +1,8 @@
-import Link from "next/link";
-import { Icone } from "@/components/icone";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { estLangueSupportee } from "@/i18n/config";
 import { TraductionsClient } from "@/components/traductions-client";
+import { NavigationAdmin, type EntreeAdmin } from "@/components/admin/navigation-admin";
 
 /**
  * ENVELOPPE DE L'ADMINISTRATION.
@@ -38,24 +37,46 @@ export default async function LayoutAdmin({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  await exigerAdmin();
+  const admin = await exigerAdmin();
 
   const t = await getTranslations("admin");
 
-  const entrees = [
-    { href: `/${langue}/admin`, libelle: t("panneau.titre"), icone: "monitoring" as const },
-    { href: `/${langue}/admin/comptes`, libelle: t("comptes.titre"), icone: "person" as const },
-    { href: `/${langue}/admin/boutiques`, libelle: t("boutiques.titre"), icone: "storefront" as const },
-    { href: `/${langue}/admin/journal`, libelle: t("journal.titre"), icone: "gavel" as const },
+  const entrees: readonly EntreeAdmin[] = [
+    {
+      href: `/${langue}/admin`,
+      libelle: t("panneau.titre"),
+      court: t("onglets.panneau"),
+      icone: "dashboard",
+    },
+    {
+      href: `/${langue}/admin/comptes`,
+      libelle: t("comptes.titre"),
+      court: t("onglets.comptes"),
+      icone: "person",
+    },
+    {
+      href: `/${langue}/admin/boutiques`,
+      libelle: t("boutiques.titre"),
+      court: t("onglets.boutiques"),
+      icone: "storefront",
+    },
+    {
+      href: `/${langue}/admin/journal`,
+      libelle: t("journal.titre"),
+      court: t("onglets.journal"),
+      icone: "bookmark",
+    },
     {
       href: `/${langue}/admin/surveillance`,
       libelle: t("surveillance.titre"),
-      icone: "schedule" as const,
+      court: t("onglets.surveillance"),
+      icone: "monitoring",
     },
     {
       href: `/${langue}/admin/parametres`,
       libelle: t("parametres.titre"),
-      icone: "settings" as const,
+      court: t("onglets.parametres"),
+      icone: "settings",
     },
   ];
 
@@ -64,61 +85,109 @@ export default async function LayoutAdmin({
    *
    * Les deux surfaces montrent des tableaux qui se ressemblent, et savoir en
    * permanence lequel on regarde évite d'agir sur les données de quelqu'un
-   * d'autre en croyant toucher les siennes. La colonne noire est ce qui rend la
-   * confusion impossible à un coup d'œil.
+   * d'autre en croyant toucher les siennes. Le noir est ce qui rend la confusion
+   * impossible à un coup d'œil.
    *
    * L'ENCART « TOUT EST TRACÉ » EST UN RAPPEL PERMANENT, pas une décoration :
    * chaque consultation de données d'un vendeur écrit une ligne au journal, y
    * compris les LECTURES. Celui qui regarde doit le savoir avant de regarder,
    * pas le découvrir dans le journal.
    *
-   * AU TÉLÉPHONE, la colonne devient une bande horizontale défilante. Elle n'y
-   * est pas confortable, et c'est assumé : on ne suspend pas un compte dans le
-   * métro — la confirmation exige de recopier une adresse, collage bloqué.
+   * AU TÉLÉPHONE, LA COLONNE DEVIENT DEUX BLOCS : la marque en haut, la
+   * navigation en barre d'onglets tout en bas. C'est le dessin des trois
+   * planches mobiles, et il vaut mieux que la bande défilante d'avant — une
+   * navigation qu'il faut faire défiler cache la moitié de ses entrées, donc la
+   * moitié de la surface.
+   *
+   * ⚠️ SIX ONGLETS LÀ OÙ LES PLANCHES EN DESSINENT QUATRE. Elles omettent
+   * Boutiques et Paramètres ; les porter telles quelles rendrait ces deux écrans
+   * INATTEIGNABLES sous 768 px, puisque rien d'autre n'y mène. Un écran
+   * inaccessible n'est pas un écart de dessin, c'est une fonction perdue.
    */
   return (
     <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-page">
-        <div className="bg-admin px-4 py-4 md:w-[236px] md:shrink-0 md:py-[22px]">
-          <div className="mb-4 px-2 md:mb-[26px]">
-            <span className="font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-white">
-              DropLink
-            </span>
-            <span className="mt-0.5 block font-label-sm text-[11px] font-bold tracking-[0.1em] text-corail">
-              {t("bandeau")}
+      {/* PREMIER ÉLÉMENT FOCUSABLE DE LA PAGE. Au bureau, la colonne pose six
+          liens avant le contenu ; les traverser à chaque écran au clavier est
+          le genre de coût qu'on ne mesure jamais parce qu'on ne le paie pas
+          soi-même. */}
+      <a
+        href="#contenu"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-surface-container-lowest focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-surface focus:shadow-md"
+      >
+        {t("allerAuContenu")}
+      </a>
+      <div className="mx-auto flex w-full min-h-dvh flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:w-full md:max-w-[1400px] md:flex-row md:overflow-hidden md:rounded-page">
+        {/* --- LA MARQUE : bande supérieure au téléphone, colonne au bureau --- */}
+        <div className="flex flex-col bg-admin px-4 pt-4 md:w-[236px] md:shrink-0 md:py-[22px]">
+          <div className="mb-4 flex items-center justify-between md:mb-[26px] md:block md:px-2">
+            <div>
+              <span className="block font-headline-md text-[16px] leading-[21px] font-extrabold tracking-[-0.02em] text-white md:text-[17px] md:leading-[22px]">
+                DropLink
+              </span>
+              <span className="mt-0.5 block font-headline-md text-[10px] leading-[13px] font-bold tracking-[0.1em] text-corail md:mt-[3px] md:text-[11px] md:leading-[13px]">
+                {t("bandeau")}
+              </span>
+            </div>
+            {/* L'avatar du téléphone porte l'initiale de l'administrateur
+                CONNECTÉ, pas une silhouette : sur une surface où l'on agit au
+                nom de quelqu'un, savoir qui l'on est vaut mieux qu'un rond. */}
+            <span
+              aria-hidden="true"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.14] font-headline-md text-[15px] leading-[19px] font-bold text-white md:hidden"
+            >
+              {admin.email.slice(0, 1).toUpperCase()}
             </span>
           </div>
 
-          <nav aria-label={t("navigation")}>
-            <ul className="flex gap-1 overflow-x-auto md:flex-col md:gap-[3px] md:overflow-visible">
-              {entrees.map((entree) => (
-                <li key={entree.href}>
-                  <Link
-                    href={entree.href}
-                    className="flex h-11 items-center gap-[11px] rounded-[11px] px-[13px] font-label-md text-[14px] font-semibold whitespace-nowrap text-white/60 transition-colors hover:bg-white/10 hover:text-white md:h-[42px]"
-                  >
-                    <Icone nom={entree.icone} className="text-[18px]" />
-                    {entree.libelle}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="colonne" />
+
+          {/* L'espace pousse le rappel et l'identité en bas de colonne, comme la
+              planche : ce sont les deux choses qu'on relit, pas celles qu'on
+              parcourt. */}
+          <div className="hidden md:block md:flex-grow" />
 
           <div className="hidden md:block">
-            <div className="mt-6 rounded-md bg-[rgba(242,118,94,0.14)] p-3.5">
-              <p className="font-label-md text-[12px] font-bold text-corail">
+            <div className="rounded-[13px] bg-[rgba(242,118,94,0.14)] p-[13px]">
+              <p className="font-headline-md text-[12px] leading-[15px] font-bold text-corail">
                 {t("traceTitre")}
               </p>
-              <p className="mt-1 font-body-sm text-[11px] leading-[17px] text-white/50">
+              <p className="mt-1 font-headline-md text-[11px] leading-[17px] font-normal text-white/50">
                 {t("traceTexte")}
               </p>
+            </div>
+
+            <div className="mt-3.5 flex items-center gap-2.5 p-2">
+              <span
+                aria-hidden="true"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.14] font-headline-md text-[13px] leading-4 font-bold text-white"
+              >
+                {admin.email.slice(0, 1).toUpperCase()}
+              </span>
+              <div className="min-w-0">
+                {/* L'ADRESSE, PAS UN PRÉNOM. Le compte est identifié par son
+                    email dans le journal ; afficher autre chose ici obligerait à
+                    faire la correspondance de tête au moment de relire une
+                    trace. */}
+                <p className="truncate font-headline-md text-[13px] leading-4 font-semibold text-white">
+                  {admin.email}
+                </p>
+                <p className="font-headline-md text-[11px] leading-[13px] font-normal text-white/[0.44]">
+                  {t("roleAdministrateur")}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* --- LE CONTENU, et la barre d'onglets sous lui au téléphone --- */}
         <div className="flex min-w-0 flex-1 flex-col">
           <TraductionsClient espaces={["erreurs"]}>{children}</TraductionsClient>
+
+          {/* L'espace n'existe qu'au téléphone : il colle la barre d'onglets au
+              bas de l'écran quand la page est courte, sans la rendre fixe — une
+              barre fixe masquerait la dernière ligne de tous les tableaux. */}
+          <div className="flex-grow md:hidden" />
+          <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="onglets" />
         </div>
       </div>
     </div>

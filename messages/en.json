@@ -857,31 +857,37 @@
     },
     "panneau": {
       "titre": "Dashboard",
-      "alertes": "Alerts",
       "aucuneAlerte": "No alerts. Nothing is over the thresholds, and background tasks are beating normally.",
       "alerte": {
-        "colis_au_dessus_du_seuil": "An account is over the parcel registration threshold this month",
-        "veilleur_en_retard": "A background task has not beaten for too long"
+        "colis_au_dessus_du_seuil": "One account is over the parcel ceiling: {valeur} against a threshold of {seuil}",
+        "veilleur_en_retard": "A background job has not beaten for {valeur} minutes"
       },
-      "valeurContreSeuil": "{sujet} — {valeur} against a threshold of {seuil}",
-      "compteurs": "Counters",
-      "colisFactures": "Parcels registered this month",
-      "colisFacturesAide": "This is the only item the tracking provider bills. {abandonnes} abandoned this month.",
-      "comptes": "Accounts",
-      "comptesActifs": "Active",
-      "comptesSuspendus": "Suspended",
-      "comptesSansType": "Onboarding unfinished",
+      "colisFactures": "Parcels taken over",
+      "comptesActifs": "Active accounts",
       "stockage": "Media storage",
       "stockageIndisponible": "Unavailable",
-      "stockageAide": "Sum of the sizes measured server-side on upload, across all accounts. The per-shop breakdown is on the Shops screen.",
-      "taches": "Background tasks",
+      "stockageAide": "Sum of the sizes re-read server-side at upload, across all accounts.",
       "tachesJamaisDeployees": "No task has ever beaten. This is not a failure: nothing has been deployed yet.",
       "tache": {
         "actif": "Last beat {n} min ago",
         "en_retard": "No beat for {n} min"
       },
-      "seuilsEnCours": "Thresholds in force: {colis} parcels per account per month, {minutes} minutes without a beat.",
-      "stockageValeur": "{valeur} {unite}"
+      "stockageValeur": "{valeur} {unite}",
+      "sousTitre": "Platform status. Viewing these alerts is recorded with your email address and the time.",
+      "decision": "Needs a decision",
+      "volumes": "Volumes",
+      "examiner": "Review",
+      "facture": "BILLED",
+      "ceMoisCi": "this month",
+      "commandes": "Orders created",
+      "commandesCourt": "Orders",
+      "comptesDont": "including {suspendus} suspended, {sansType} with no type",
+      "dernieresActions": "Latest administration actions",
+      "toutLeJournal": "Full log",
+      "alerteDetail": {
+        "colis_au_dessus_du_seuil": "{sujet} · Every parcel taken over is billed to us.",
+        "veilleur_en_retard": "Alert threshold: {seuil} minutes. Job concerned: {sujet}."
+      }
     },
     "parametres": {
       "titre": "Settings",
@@ -973,7 +979,17 @@
       }
     },
     "traceTitre": "Everything is logged",
-    "traceTexte": "Every read of a seller’s data is written to the audit log."
+    "traceTexte": "Every read of a seller’s data is written to the audit log.",
+    "allerAuContenu": "Skip to content",
+    "roleAdministrateur": "Administrator",
+    "onglets": {
+      "panneau": "Overview",
+      "comptes": "Accounts",
+      "boutiques": "Shops",
+      "journal": "Log",
+      "surveillance": "Watch",
+      "parametres": "Settings"
+    }
   },
   "erreurs": {
     "titre": "This screen could not be displayed",

@@ -1360,6 +1360,49 @@ const SQL = {
   },
 
   /**
+   * LE MEME COMPTAGE, MAIS PAR MOIS, ET IL ETAIT MORT.
+   *
+   * `usage_counters.orders_created` n'a jamais ete ecrit : la colonne est nee
+   * en 046, a recu une contrainte de positivite en 064 — donc quelqu'un l'a
+   * relue et l'a crue vivante — et rien ne l'incrementait. C'est le compteur
+   * mensuel de la metrique de verdict de la phase de validation ; il valait
+   * zero, et un zero credible ne fait chercher personne.
+   *
+   * La falsification retire la garde de transition : le compteur mesure alors
+   * les ECRITURES et non les creations, deux chiffres qui se ressemblent assez
+   * pour qu'on ne remarque rien.
+   */
+  "commandes-du-mois-comptees-a-chaque-ecriture": {
+    casser: `create or replace function public.compter_commande_du_mois()
+      returns trigger language plpgsql security definer set search_path = '' as $$
+      declare v_profil uuid;
+      begin
+        select s.owner_id into v_profil from public.shops s where s.id = new.shop_id;
+        if v_profil is null then return new; end if;
+        insert into public.usage_counters (profile_id, period_month, orders_created)
+        values (v_profil, date_trunc('month', coalesce(new.first_content_at, now()))::date, 1)
+        on conflict (profile_id, period_month) do update
+          set orders_created = public.usage_counters.orders_created + 1,
+              updated_at = now();
+        return new;
+      end;
+      $$;
+      drop trigger if exists orders_compter_commande_du_mois on public.orders;
+      create trigger orders_compter_commande_du_mois
+        after insert or update on public.orders
+        for each row execute function public.compter_commande_du_mois();`,
+    reparerDepuisMigration: {
+      fichier: "110_le_compteur_de_commandes_etait_mort.sql",
+      depuis: "create function public.compter_commande_du_mois",
+      jusqua: "revoke all on function public.compter_commande_du_mois",
+      avant: `drop trigger if exists orders_compter_commande_du_mois on public.orders;
+        create trigger orders_compter_commande_du_mois
+          after insert or update of first_content_at on public.orders
+          for each row execute function public.compter_commande_du_mois();`,
+    },
+  },
+
+  /**
    * HORS du cas motivant, et d'une autre nature : le JETON REPUBLIÉ SOUS UN NOM
    * ANODIN.
    *

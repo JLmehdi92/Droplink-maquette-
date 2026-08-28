@@ -3,6 +3,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import type { Metadata } from "next";
 import { DialogueSuspension } from "@/components/admin/dialogue-suspension";
 import { TraductionsClient } from "@/components/traductions-client";
+import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
 import { lireCompte } from "@/lib/audit/comptes";
@@ -63,13 +64,10 @@ export default async function FicheCompte({
   ] as const;
 
   return (
-    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
-      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
-        {fiche.email}
-      </h1>
-      <p className="mt-3 font-body-md text-body-md text-on-surface-variant">
-        {t("comptes.sousTitre")}
-      </p>
+    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+      <EnTeteAdmin titre={fiche.email} sousTitre={t("comptes.sousTitre")} />
+
+      <div className="p-4 md:mt-[22px] md:p-0">
 
       <div className="mt-6 grid grid-cols-1 gap-gutter md:grid-cols-3">
         <div className={CARTE + " md:col-span-1"}>
@@ -146,6 +144,7 @@ export default async function FicheCompte({
           />
         </TraductionsClient>
       </section>
+      </div>
     </main>
   );
 }

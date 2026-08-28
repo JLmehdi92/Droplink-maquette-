@@ -4,6 +4,7 @@ import {
   setRequestLocale,
 } from "next-intl/server";
 import type { Metadata } from "next";
+import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lireParametres } from "@/lib/audit/parametres";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -68,16 +69,10 @@ export default async function ParametresAdmin({
   const format = await getFormatter();
 
   return (
-    <main
-      id="contenu"
-      className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]"
-    >
-      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
-        {t("titre")}
-      </h1>
-      <p className="mt-2 max-w-[640px] font-body-md text-body-md text-on-surface-variant">
-        {t("sousTitre")}
-      </p>
+    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+      <EnTeteAdmin titre={t("titre")} sousTitre={t("sousTitre")} />
+
+      <div className="p-4 md:mt-[22px] md:p-0">
 
       {/* ⚠️ SANS CE PROVIDER, L'ÉCRAN LÈVE AU RENDU.
           `FormulaireParametre` est un composant CLIENT qui appelle
@@ -127,8 +122,9 @@ export default async function ParametresAdmin({
       {/* CE QUI N'EST PAS ICI EST DIT, plutôt que laissé à deviner. Un écran de
           paramètres muet sur les secrets laisse chercher où les régler. */}
       <p className="mt-gutter max-w-[640px] font-body-sm text-body-sm text-on-surface-variant">
-        {t("secretsAide")}
-      </p>
+          {t("secretsAide")}
+        </p>
+      </div>
     </main>
   );
 }

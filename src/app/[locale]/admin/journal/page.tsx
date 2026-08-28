@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lireJournal } from "@/lib/audit/comptes";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -64,13 +65,10 @@ export default async function AdminJournal({
   const format = await getFormatter();
 
   return (
-    <main id="contenu" className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]">
-      <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px]">
-        {t("journal.titre")}
-      </h1>
-      <p className="mt-3 font-body-md text-body-md text-on-surface-variant">
-        {t("journal.sousTitre")}
-      </p>
+    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+      <EnTeteAdmin titre={t("journal.titre")} sousTitre={t("journal.sousTitre")} />
+
+      <div className="p-4 md:mt-[22px] md:p-0">
 
       {page.lignes.length === 0 ? (
         <p className="mt-6 rounded-lg border border-outline-variant bg-surface-container-lowest p-6 text-center font-body-md text-body-md text-on-surface-variant">
@@ -142,6 +140,7 @@ export default async function AdminJournal({
           {t("journal.pageSuivante")}
         </Link>
       ) : null}
+      </div>
     </main>
   );
 }

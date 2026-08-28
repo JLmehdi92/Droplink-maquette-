@@ -849,6 +849,7 @@ export type Database = {
         Returns: {
           colis_abandonnes_ce_mois: number
           colis_pris_en_charge_ce_mois: number
+          commandes_creees_ce_mois: number
           comptes: number
           comptes_actifs: number
           comptes_sans_type: number

@@ -857,31 +857,37 @@
     },
     "panneau": {
       "titre": "Panneau",
-      "alertes": "Alertes",
       "aucuneAlerte": "Aucune alerte. Rien ne dépasse les seuils, et les tâches de fond battent normalement.",
       "alerte": {
-        "colis_au_dessus_du_seuil": "Un compte dépasse le seuil de colis pris en charge ce mois",
-        "veilleur_en_retard": "Une tâche de fond n'a plus battu depuis trop longtemps"
+        "colis_au_dessus_du_seuil": "Un compte dépasse le plafond de colis : {valeur} sur un seuil de {seuil}",
+        "veilleur_en_retard": "Une tâche de fond n'a pas battu depuis {valeur} minutes"
       },
-      "valeurContreSeuil": "{sujet} — {valeur} pour un seuil de {seuil}",
-      "compteurs": "Compteurs",
-      "colisFactures": "Colis pris en charge ce mois",
-      "colisFacturesAide": "C'est le seul poste facturé par le fournisseur de suivi. {abandonnes} abandonnés ce mois.",
-      "comptes": "Comptes",
-      "comptesActifs": "Actifs",
-      "comptesSuspendus": "Suspendus",
-      "comptesSansType": "Onboarding non terminé",
+      "colisFactures": "Colis pris en charge",
+      "comptesActifs": "Comptes actifs",
       "stockage": "Stockage des médias",
       "stockageIndisponible": "Indisponible",
-      "stockageAide": "Somme des tailles relues côté serveur au dépôt, tous comptes confondus. Le détail par boutique est sur l'écran Boutiques.",
-      "taches": "Tâches de fond",
+      "stockageAide": "Somme des tailles relues côté serveur au dépôt, tous comptes confondus.",
       "tachesJamaisDeployees": "Aucune tâche n'a jamais battu. Ce n'est pas une panne : rien n'a encore été déployé.",
       "tache": {
         "actif": "Dernier battement il y a {n} min",
         "en_retard": "Aucun battement depuis {n} min"
       },
-      "seuilsEnCours": "Seuils en vigueur : {colis} colis par compte et par mois, {minutes} minutes sans battement.",
-      "stockageValeur": "{valeur} {unite}"
+      "stockageValeur": "{valeur} {unite}",
+      "sousTitre": "État de la plateforme. La consultation des alertes est enregistrée avec votre email et l'heure.",
+      "decision": "Ce qui demande une décision",
+      "volumes": "Volumes",
+      "examiner": "Examiner",
+      "facture": "FACTURÉ",
+      "ceMoisCi": "ce mois-ci",
+      "commandes": "Commandes créées",
+      "commandesCourt": "Commandes",
+      "comptesDont": "dont {suspendus} suspendus, {sansType} sans type",
+      "dernieresActions": "Dernières actions d'administration",
+      "toutLeJournal": "Tout le journal",
+      "alerteDetail": {
+        "colis_au_dessus_du_seuil": "{sujet} · Chaque colis pris en charge nous est facturé.",
+        "veilleur_en_retard": "Seuil d'alerte : {seuil} minutes. Tâche concernée : {sujet}."
+      }
     },
     "parametres": {
       "titre": "Paramètres",
@@ -973,7 +979,17 @@
       }
     },
     "traceTitre": "Tout est tracé",
-    "traceTexte": "Chaque consultation de données d’un vendeur est écrite au journal."
+    "traceTexte": "Chaque consultation de données d’un vendeur est écrite au journal.",
+    "allerAuContenu": "Aller au contenu",
+    "roleAdministrateur": "Administrateur",
+    "onglets": {
+      "panneau": "Panneau",
+      "comptes": "Comptes",
+      "boutiques": "Boutiques",
+      "journal": "Journal",
+      "surveillance": "Veille",
+      "parametres": "Réglages"
+    }
   },
   "erreurs": {
     "titre": "Cet écran n'a pas pu s'afficher",
