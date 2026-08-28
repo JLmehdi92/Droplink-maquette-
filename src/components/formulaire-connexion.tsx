@@ -50,9 +50,17 @@ const INITIAL: ResultatConnexion = { statut: "inactif" };
 export function FormulaireConnexion({
   locale,
   intention = "connexion",
+  aide,
 }: {
   locale: string;
   intention?: "connexion" | "inscription";
+  /**
+   * Phrase rendue SOUS le champ, avant le bouton — la planche d'inscription y
+   * annonce la durée de validité du lien. Optionnelle : la planche de connexion
+   * n'en pose aucune, et écrire deux fois la même chose sur deux écrans que
+   * l'utilisateur enchaîne serait du bruit.
+   */
+  aide?: string;
 }) {
   const t = useTranslations("connexion");
   const [resultat, action] = useActionState(envoyerLienConnexion, INITIAL);
@@ -126,6 +134,9 @@ export function FormulaireConnexion({
             className="h-13 w-full rounded-[13px] border border-filet-controle bg-surface-container-low px-4 font-body-md text-[15px] text-on-surface transition-colors focus:border-violet focus:outline-none focus:ring-2 focus:ring-violet/30"
           />
         </div>
+        {aide === undefined ? null : (
+          <p className="mt-2 font-body-sm text-[12px] leading-[18px] text-sourdine">{aide}</p>
+        )}
       </div>
 
       {suggestion !== null ? (

@@ -185,12 +185,15 @@
   },
   "inscription": {
     "titre": "Créer un compte",
-    "sousTitre": "Entrez votre adresse email. Nous vous envoyons un lien qui crée votre compte — pas de mot de passe à choisir, ni à retenir.",
-    "gratuit": "Gratuit pendant la phase de lancement. Aucune carte demandée.",
-    "dejaCompteTexte": "Le même lien vous connecte. Il n'y a pas deux chemins différents.",
-    "ceQuiSuit1": "Vous donnez un nom à votre boutique et choisissez votre couleur.",
-    "ceQuiSuit2": "Vous créez votre première commande et déposez vos photos.",
-    "ceQuiSuit3": "Vous envoyez un seul lien à votre client."
+    "badge": "GRATUIT PENDANT LE LANCEMENT",
+    "accroche": "Votre première commande en trois minutes",
+    "sousTitre": "Créez votre compte, configurez votre nom et votre couleur, envoyez votre premier lien.",
+    "argument1": "Aucune carte bancaire demandée",
+    "argument2": "Votre client n’a jamais besoin de créer un compte",
+    "argument3": "Vos pages restent à votre nom et à vos couleurs",
+    "formulaireTitre": "Créer mon compte",
+    "aideEmail": "Nous envoyons un lien de connexion à cette adresse. Valable 24 heures.",
+    "dejaCompteTexte": "Vous avez déjà un compte ?"
   },
   "onboarding": {
     "titre": "Bienvenue",

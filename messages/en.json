@@ -185,12 +185,15 @@
   },
   "inscription": {
     "titre": "Create an account",
-    "sousTitre": "Enter your email address. We send you a link that creates your account — no password to choose, none to remember.",
-    "gratuit": "Free during the launch phase. No card required.",
-    "dejaCompteTexte": "The same link signs you in. There are not two different paths.",
-    "ceQuiSuit1": "You name your shop and pick your colour.",
-    "ceQuiSuit2": "You create your first order and drop in your photos.",
-    "ceQuiSuit3": "You send a single link to your customer."
+    "badge": "FREE DURING LAUNCH",
+    "accroche": "Your first order in three minutes",
+    "sousTitre": "Create your account, set your name and your colour, send your first link.",
+    "argument1": "No bank card required",
+    "argument2": "Your customer never needs to create an account",
+    "argument3": "Your pages keep your name and your colours",
+    "formulaireTitre": "Create my account",
+    "aideEmail": "We send a sign-in link to this address. Valid for 24 hours.",
+    "dejaCompteTexte": "Already have an account?"
   },
   "onboarding": {
     "titre": "Welcome",
