@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   DndContext,
@@ -50,6 +50,14 @@ export interface MediaAffiche {
   readonly type: "photo" | "video";
   readonly urlVignette: string | null;
   readonly estCouverture: boolean;
+  /**
+   * Durée d'une vidéo, en secondes, ou `null`.
+   *
+   * `null` pour une photo, mais AUSSI pour une vidéo dont la durée n'a pas pu
+   * être lue au dépôt — c'est un cas normal, pas une anomalie. La pastille est
+   * alors omise : afficher « 0:00 » affirmerait une durée qu'on n'a pas mesurée.
+   */
+  readonly dureeS: number | null;
 }
 
 type EnCours = {
@@ -65,12 +73,22 @@ export function CarteMedias({
   plafondMedias,
   plafondVideos,
   typesAcceptes,
+  onMedias,
 }: {
   readonly orderId: string;
   readonly initiaux: readonly MediaAffiche[];
   readonly plafondMedias: number;
   readonly plafondVideos: number;
   readonly typesAcceptes: readonly string[];
+  /**
+   * Appelé à chaque changement de la liste.
+   *
+   * L'APERÇU « CE QUE VOIT LE CLIENT » EST EN DIRECT, et il doit l'être sur les
+   * photos autant que sur les champs. Sans ce rappel, il montrerait les médias
+   * du chargement de la page — donc mentirait dès le premier dépôt, à l'endroit
+   * exact où il promet de dire la vérité.
+   */
+  readonly onMedias?: (medias: readonly MediaAffiche[]) => void;
 }) {
   const t = useTranslations("medias");
 
@@ -107,6 +125,19 @@ export function CarteMedias({
 
   const [medias, setMedias] = useState<readonly MediaAffiche[]>(initiaux);
   const [enCours, setEnCours] = useState<readonly EnCours[]>([]);
+
+  /*
+   * LE RAPPEL PART D'UN EFFET, PAS DE CHAQUE `setMedias`.
+   *
+   * Il y a six endroits où la liste change — dépôt, couverture, suppression,
+   * réordonnancement, et deux retours en arrière après échec. En appeler un
+   * septième à la main dans chacun garantit qu'on en oubliera un, et l'oubli ne
+   * casserait rien : l'aperçu afficherait simplement l'avant-dernier état, ce
+   * que personne ne remarque avant que ça compte.
+   */
+  useEffect(() => {
+    onMedias?.(medias);
+  }, [medias, onMedias]);
 
   /**
    * Le nombre de médias CONFIRMÉS, tenu à jour à la main.
@@ -308,6 +339,7 @@ export function CarteMedias({
           // Rien n'est affirmé ici : la couverture n'est posée à l'écran
           // qu'APRÈS que la base l'a confirmée, quelques lignes plus bas.
           estCouverture: false,
+          dureeS: rendu.dureeSecondes,
         },
       ]);
       setEnCours((liste) => liste.filter((e) => e.cleLocale !== cleLocale));
@@ -410,26 +442,34 @@ export function CarteMedias({
 
   const total = medias.length + enCours.length;
   const complet = total >= plafondMedias;
+  const videos = medias.filter((m) => m.type === "video").length;
 
   return (
-    <section className="carte rounded-lg p-[22px]">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="font-label-md text-label-md tracking-wider text-on-surface uppercase">
+    <section className="carte rounded-lg p-[18px] lg:rounded-[18px] lg:p-[22px]">
+      <div className="mb-3.5 flex items-center justify-between gap-3 lg:mb-4">
+        <h2 className="font-headline-md text-[15px] font-bold tracking-[-0.015em] text-on-surface lg:text-[16px]">
           {t("titre")}
         </h2>
-        <span className="rounded-full bg-[color-mix(in_srgb,var(--accent-interface)_12%,transparent)] px-2 py-1 font-label-sm text-label-sm text-[var(--accent-texte)]">
+        {/* LE COMPTE DES VIDEOS N'EST DIT QU'AU BUREAU. La planche telephone
+            ecrit « 7 sur 20 » et rien de plus : la ligne n'a pas la place, et
+            c'est le plafond global qu'on approche en premier. */}
+        <span className="shrink-0 font-body-sm text-[12px] text-sourdine">
           {t("compteur", { n: medias.length, max: plafondMedias })}
+          <span className="hidden lg:inline">
+            {" \u00b7 "}
+            {t("videos", { n: videos, max: plafondVideos })}
+          </span>
         </span>
       </div>
 
-      {/* L'ÉCHEC EST DIT, ET IL EST DIT ICI — au-dessus de la grille, pas
-          replié dans une case qui vient de disparaître. `role="alert"` pour
-          qu'un lecteur d'écran l'annonce sans que l'utilisateur ait à le
-          chercher : c'est le retour d'une action qu'il vient de déclencher. */}
+      {/* L'ECHEC EST DIT, ET IL EST DIT ICI — au-dessus de la grille, pas
+          replie dans une case qui vient de disparaitre. `role="alert"` pour
+          qu'un lecteur d'ecran l'annonce sans que l'utilisateur ait a le
+          chercher : c'est le retour d'une action qu'il vient de declencher. */}
       {echecAction !== null && (
         <p
           role="alert"
-          className="mb-4 rounded-md border border-attention-filet bg-attention-fond px-3 py-2 font-body-sm text-body-sm text-attention"
+          className="mb-3.5 rounded-[12px] border border-alerte-filet bg-alerte-fond-doux px-4 py-3.5 font-body-sm text-[13px] leading-5 text-alerte"
         >
           {echecAction}
         </p>
@@ -443,132 +483,158 @@ export function CarteMedias({
         className="hidden"
         onChange={(e) => {
           ajouter(e.target.files);
-          // Sans cette remise à zéro, redéposer le MÊME fichier ne déclenche
-          // aucun événement : la valeur n'a pas changé.
+          // Sans cette remise a zero, redeposer le MEME fichier ne declenche
+          // aucun evenement : la valeur n'a pas change.
           e.target.value = "";
         }}
       />
 
-      <button
-        type="button"
-        disabled={complet}
-        onClick={() => champFichier.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setSurvol(true);
-        }}
-        onDragLeave={() => setSurvol(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setSurvol(false);
-          ajouter(e.dataTransfer.files);
-        }}
-        className={
-          "flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
-          (survol
-            ? "border-[var(--accent-interface)] bg-[color-mix(in_srgb,var(--accent-interface)_5%,transparent)]"
-            : "border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low")
-        }
-      >
-        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent-interface)_12%,transparent)] text-[var(--accent-texte)]">
-          <Icone nom="add" className="text-[24px]" />
-        </span>
-        <span className="mb-1 font-label-md text-label-md text-on-surface">
-          {complet ? t("plein") : t("deposer")}
-        </span>
-        <span className="font-body-sm text-body-sm text-on-surface-variant">
-          {t("formats", { videos: plafondVideos })}
-        </span>
-      </button>
+      {/*
+        LA ZONE DE DEPOT EST UNE CASE DE LA GRILLE, pas un grand rectangle
+        au-dessus. C'est ce que dessinent les deux planches, et la raison se voit
+        a vingt medias : un rectangle de depot de cent pixels de haut pose
+        au-dessus de la grille repousse chaque photo d'autant, sur l'ecran ou le
+        vendeur passe son temps. En case, il occupe la place d'une vignette.
 
-      {medias.length > 0 || enCours.length > 0 ? (
-        <DndContext
-          sensors={capteurs}
-          collisionDetection={closestCenter}
-          onDragEnd={(e) => void deplacer(e)}
-          accessibility={{
-            announcements: {
-              onDragStart: ({ active }) =>
-                t("annonce.debut", { position: rang(medias, active.id) }),
-              onDragOver: ({ active, over }) =>
-                over === null
-                  ? t("annonce.horsZone")
-                  : t("annonce.survol", {
-                      position: rang(medias, active.id),
-                      cible: rang(medias, over.id),
-                    }),
-              onDragEnd: ({ over }) =>
-                over === null
-                  ? t("annonce.annule")
-                  : t("annonce.depose", { cible: rang(medias, over.id) }),
-              onDragCancel: () => t("annonce.annule"),
-            },
-          }}
-        >
-          <SortableContext
-            items={medias.map((m) => m.id)}
-            strategy={rectSortingStrategy}
+        Le depot par glisser reste accepte sur TOUTE la grille, et pas seulement
+        sur cette case : viser un carre de cent pixels avec un fichier au bout du
+        curseur est un geste que personne ne reussit du premier coup.
+      */}
+      <DndContext
+        sensors={capteurs}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => void deplacer(e)}
+        accessibility={{
+          announcements: {
+            onDragStart: ({ active }) =>
+              t("annonce.debut", { position: rang(medias, active.id) }),
+            onDragOver: ({ active, over }) =>
+              over === null
+                ? t("annonce.horsZone")
+                : t("annonce.survol", {
+                    position: rang(medias, active.id),
+                    cible: rang(medias, over.id),
+                  }),
+            onDragEnd: ({ over }) =>
+              over === null
+                ? t("annonce.annule")
+                : t("annonce.depose", { cible: rang(medias, over.id) }),
+            onDragCancel: () => t("annonce.annule"),
+          },
+        }}
+      >
+        <SortableContext items={medias.map((m) => m.id)} strategy={rectSortingStrategy}>
+          <ul
+            onDragOver={(e) => {
+              e.preventDefault();
+              setSurvol(true);
+            }}
+            onDragLeave={() => setSurvol(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setSurvol(false);
+              ajouter(e.dataTransfer.files);
+            }}
+            className="grid grid-cols-3 gap-2 lg:grid-cols-6 lg:gap-[9px]"
           >
-            <ul className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3">
-              {medias.map((media, index) => (
-                <Case
-                  key={media.id}
-                  media={media}
-                  index={index}
-                  onSupprimer={() => void supprimer(media.id)}
-                  onCouvrir={() => void couvrir(media.id)}
-                />
-              ))}
-              {enCours.map((e) => (
-                <li
-                  key={e.cleLocale}
-                  className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-highest p-3"
-                >
-                  {e.echec === null ? (
-                    <>
-                      <Icone
-                        nom="upload"
-                        className="text-[24px] text-on-surface-variant"
-                      />
+            {medias.map((media, index) => (
+              <Case
+                key={media.id}
+                media={media}
+                index={index}
+                onSupprimer={() => void supprimer(media.id)}
+                onCouvrir={() => void couvrir(media.id)}
+              />
+            ))}
+
+            {enCours.map((e) => (
+              <li
+                key={e.cleLocale}
+                className="flex aspect-square flex-col items-center justify-center gap-2 rounded-[11px] border border-outline-variant bg-surface-container-low p-2"
+              >
+                {e.echec === null ? (
+                  <>
+                    <Icone nom="upload" className="text-[20px] text-gris-inactif" />
+                    <div
+                      role="progressbar"
+                      aria-valuenow={e.progression}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={t("enCours", { nom: e.nom })}
+                      className="h-1.5 w-full overflow-hidden rounded-full bg-fond-barre"
+                    >
                       <div
-                        role="progressbar"
-                        aria-valuenow={e.progression}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label={t("enCours", { nom: e.nom })}
-                        className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container"
-                      >
-                        <div
-                          className="h-full rounded-full bg-[var(--accent-remplissage)] transition-[width]"
-                          style={{ width: e.progression + "%" }}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Icone nom="error" className="text-[24px] text-error" />
-                      <p className="text-center font-body-sm text-body-sm text-error">
-                        {e.echec}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEnCours((liste) =>
-                            liste.filter((x) => x.cleLocale !== e.cleLocale),
-                          )
-                        }
-                        className="font-label-sm text-label-sm text-on-surface-variant underline"
-                      >
-                        {t("ecarter")}
-                      </button>
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
+                        className="h-full rounded-full bg-violet transition-[width]"
+                        style={{ width: e.progression + "%" }}
+                      />
+                    </div>
+                    <span className="font-body-sm text-[11px] text-sourdine">
+                      {e.progression} %
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Icone nom="error" className="text-[20px] text-alerte" />
+                    {/* LE MOTIF ET LA TAILLE REELLE, TOUJOURS LES DEUX : sans la
+                        taille, le vendeur ne sait pas de combien il s'est
+                        trompe, donc ne sait pas quoi faire du fichier. */}
+                    <p className="text-center font-body-sm text-[11px] leading-4 text-alerte">
+                      {e.echec}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEnCours((liste) => liste.filter((x) => x.cleLocale !== e.cleLocale))
+                      }
+                      className="font-label-sm text-[11px] font-semibold text-alerte underline"
+                    >
+                      {t("ecarter")}
+                    </button>
+                  </>
+                )}
+              </li>
+            ))}
+
+            {complet ? null : (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => champFichier.current?.click()}
+                  aria-label={t("deposer")}
+                  title={t("formats", { videos: plafondVideos })}
+                  className={
+                    "flex aspect-square w-full flex-col items-center justify-center gap-[5px] rounded-[11px] border border-dashed transition-colors " +
+                    (survol
+                      ? "border-violet bg-violet-fond"
+                      : "border-filet-depot bg-surface-container-low hover:bg-fond-neutre")
+                  }
+                >
+                  <Icone nom="add" className="text-[19px] text-gris-inactif" />
+                  <span className="font-label-sm text-[10px] font-semibold text-sourdine">
+                    {t("ajouter")}
+                  </span>
+                </button>
+              </li>
+            )}
+          </ul>
+        </SortableContext>
+      </DndContext>
+
+      {complet ? (
+        <p className="mt-3.5 font-body-sm text-[12px] text-alerte">{t("plein")}</p>
       ) : null}
+
+      {/* L'AIDE AU DEPLACEMENT, et elle ne dit pas la meme chose selon l'engin :
+          au doigt, il faut MAINTENIR la poignee 200 ms avant que le deplacement
+          demarre — sans quoi chaque effleurement de la grille pendant qu'on fait
+          defiler la page deplacerait une photo. */}
+      <div className="mt-3.5 hidden items-center gap-[9px] rounded-[11px] bg-surface-container-low px-[13px] py-[11px] lg:flex">
+        <Icone nom="error" className="shrink-0 text-[15px] text-sourdine" />
+        <span className="font-body-sm text-[12px] text-sourdine">{t("aideOrdre")}</span>
+      </div>
+      <p className="mt-3 font-body-sm text-[11px] leading-[17px] text-sourdine lg:hidden">
+        {t("aideOrdreTelephone")}
+      </p>
     </section>
   );
 }
@@ -578,12 +644,20 @@ function rang(medias: readonly MediaAffiche[], id: string | number): number {
 }
 
 /**
- * Une case de la grille.
+ * Une case de la grille, portée sur `.vig` des deux planches.
  *
- * LA POIGNÉE DE DÉPLACEMENT EST SÉPARÉE des boutons couverture et suppression.
- * Sans cette séparation, chaque tentative de clic sur l'un d'eux démarre un
- * déplacement — surtout au doigt, où la cible fait quarante-quatre points et le
- * geste n'est jamais parfaitement immobile.
+ * LA POIGNÉE DE DÉPLACEMENT EST EN HAUT À GAUCHE, SEULE DE SON CÔTÉ, et les
+ * deux planches le dessinent ainsi. Ce n'est pas un choix graphique : sans cette
+ * séparation, chaque tentative de clic sur « supprimer » démarre un déplacement
+ * — surtout au doigt, où la cible fait quarante-quatre points et le geste n'est
+ * jamais parfaitement immobile. C'est la décision 19 du brief, et la planche la
+ * confirme en écartant les deux boutons aux coins opposés.
+ *
+ * LE CHOIX DE COUVERTURE N'APPARAÎT QU'AU SURVOL, et c'est un écart assumé : la
+ * planche ne dessine que deux boutons par case. Le retirer aurait laissé la
+ * couverture au seul ordre des vignettes, alors que la base porte un
+ * `cover_media_id` explicite et que le vendeur peut vouloir mettre en avant une
+ * photo qui n'est pas la première. Au repos, la case est celle de la planche.
  */
 function Case({
   media,
@@ -597,23 +671,22 @@ function Case({
   readonly onCouvrir: () => void;
 }) {
   const t = useTranslations("medias");
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: media.id,
   });
+
+  // 24 px au bureau, 26 au téléphone : les deux planches ne posent pas la même
+  // valeur, et au doigt deux pixels de plus se sentent.
+  const coin =
+    "absolute flex h-[26px] w-[26px] items-center justify-center rounded-[8px] bg-white/94 lg:h-6 lg:w-6 lg:rounded-[7px] lg:bg-white/92";
 
   return (
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={
-        "group relative aspect-square overflow-hidden rounded-lg border border-outline-variant bg-surface-container-highest " +
+        "group/case relative aspect-square overflow-hidden rounded-[11px] bg-fond-avatar " +
+        (media.estCouverture ? "shadow-[0_0_0_2px_var(--color-violet)] " : "") +
         (isDragging ? "z-10 opacity-80 shadow-lg" : "")
       }
     >
@@ -632,71 +705,80 @@ function Case({
           loading="lazy"
         />
       ) : (
-        <span className="flex h-full w-full items-center justify-center text-on-surface-variant">
-          <Icone
-            nom={media.type === "video" ? "photo_camera" : "image"}
-            className="text-[28px]"
-          />
+        <span className="flex h-full w-full items-center justify-center text-gris-inactif">
+          <Icone nom={media.type === "video" ? "play_arrow" : "image"} className="text-[24px]" />
         </span>
       )}
 
       {media.type === "video" ? (
-        <span className="absolute top-2 left-2 rounded-full bg-black/60 p-1 text-white">
-          <Icone
-            nom="photo_camera"
-            className="text-[14px]"
-            titre={t("estUneVideo")}
-          />
-        </span>
+        <>
+          {media.urlVignette !== null ? (
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(14,14,19,0.6)]">
+              <Icone nom="play_arrow" className="text-[24px]" titre={t("estUneVideo")} />
+            </span>
+          ) : null}
+
+          {/* LA DURÉE N'EST ÉCRITE QUE SI ELLE A ÉTÉ MESURÉE. Une vidéo dont la
+              capture a échoué n'a pas de durée connue, et « 0:00 » affirmerait
+              une mesure qu'on n'a pas faite. */}
+          {media.dureeS !== null ? (
+            <span className="absolute right-[5px] bottom-[5px] rounded-[5px] bg-[rgba(14,14,19,0.72)] px-[6px] py-[2px] font-label-sm text-[9px] font-bold text-white lg:right-1.5 lg:bottom-1.5 lg:rounded-md lg:px-[7px] lg:text-[10px]">
+              {duree(media.dureeS)}
+            </span>
+          ) : null}
+        </>
       ) : null}
 
       {media.estCouverture ? (
-        <span className="absolute bottom-2 left-2 rounded-full bg-[var(--accent-remplissage)] px-2 py-0.5 font-label-sm text-label-sm text-[var(--accent-sur-remplissage)]">
+        <span className="absolute bottom-[5px] left-[5px] rounded-full bg-violet px-[7px] py-[3px] font-label-sm text-[9px] font-bold text-white lg:bottom-1.5 lg:left-1.5 lg:px-2 lg:text-[10px]">
           {t("couverture")}
         </span>
-      ) : null}
-
-      <div className="absolute top-2 right-2 flex gap-1">
+      ) : (
         <button
           type="button"
-          {...attributes}
-          {...listeners}
-          className="cursor-grab rounded-md bg-surface-container-lowest p-1.5 text-on-surface-variant shadow-sm"
-          title={t("deplacer", { position: index + 1 })}
+          onClick={onCouvrir}
+          className={
+            coin +
+            " bottom-[5px] left-[5px] text-ardoise opacity-0 transition-opacity group-hover/case:opacity-100 focus-visible:opacity-100 lg:bottom-1.5 lg:left-1.5"
+          }
+          title={t("definirCouverture")}
         >
-          <Icone
-            nom="menu"
-            className="text-[16px]"
-            titre={t("deplacer", { position: index + 1 })}
-          />
+          <Icone nom="check_circle" className="text-[13px]" titre={t("definirCouverture")} />
         </button>
+      )}
 
-        {!media.estCouverture ? (
-          <button
-            type="button"
-            onClick={onCouvrir}
-            className="rounded-md bg-surface-container-lowest p-1.5 text-on-surface-variant shadow-sm"
-            title={t("definirCouverture")}
-          >
-            <Icone
-              nom="check_circle"
-              className="text-[16px]"
-              titre={t("definirCouverture")}
-            />
-          </button>
-        ) : null}
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className={coin + " top-[5px] left-[5px] cursor-grab text-ardoise lg:top-1.5 lg:left-1.5"}
+        title={t("deplacer", { position: index + 1 })}
+      >
+        <Icone
+          nom="drag_indicator"
+          className="text-[13px]"
+          titre={t("deplacer", { position: index + 1 })}
+        />
+      </button>
 
-        <button
-          type="button"
-          onClick={onSupprimer}
-          className="rounded-md bg-surface-container-lowest p-1.5 text-error shadow-sm"
-          title={t("supprimer")}
-        >
-          <Icone nom="close" className="text-[16px]" titre={t("supprimer")} />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onSupprimer}
+        className={coin + " top-[5px] right-[5px] text-alerte lg:top-1.5 lg:right-1.5"}
+        title={t("supprimer")}
+      >
+        <Icone nom="close" className="text-[12px]" titre={t("supprimer")} />
+      </button>
     </li>
   );
+}
+
+/** « 0:42 » — la forme de la planche. Les heures n'existent pas : le plafond
+ *  produit est de soixante secondes par vidéo. */
+function duree(secondes: number): string {
+  const m = Math.floor(secondes / 60);
+  const s = secondes % 60;
+  return m + ":" + String(s).padStart(2, "0");
 }
 
 /**

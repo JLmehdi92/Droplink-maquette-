@@ -1,12 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { Icone } from "@/components/icone";
 import { TraductionsClient } from "@/components/traductions-client";
 import { Editeur } from "@/components/commandes/editeur";
-import { CarteMedias, type MediaAffiche } from "@/components/commandes/carte-medias";
-import { ActionsCommande } from "@/components/commandes/actions-commande";
+import type { MediaAffiche } from "@/components/commandes/carte-medias";
 import { plafondsAffichables } from "@/lib/commandes/medias";
 import { signerLecture } from "@/lib/storage/r2";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "@/lib/commandes/liste";
@@ -14,6 +11,7 @@ import { creerClientServeur } from "@/lib/supabase/server";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { resoudreAccent } from "@/lib/design/contraste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { lireHistorique } from "@/lib/commandes/historique";
@@ -30,16 +28,16 @@ export async function generateMetadata({
 }
 
 /**
- * L'éditeur d'une commande, porté sur le canevas Claude Design.
+ * L'éditeur d'une commande, porté sur les planches `Editeur`, `EditeurMobile` et
+ * `EditeurEtats`.
  *
- * TROIS CORRECTIONS SUR LA MAQUETTE, toutes portées par une décision :
+ * TROIS CORRECTIONS SUR LA MAQUETTE D'ORIGINE, toutes portées par une décision :
  *
  *  1. Le bloc « Client Account » — recherche de compte, avatar, adresse email —
  *     devient un simple champ texte libre. Le destinataire n'a JAMAIS de compte.
  *  2. Les boutons « Save Draft » et « Publish to Client » disparaissent : la
  *     sauvegarde est automatique, et il n'y a rien à publier — le lien existe
- *     dès la création et ne change plus jamais. Leur emplacement porte le témoin
- *     de sauvegarde et le lien vers la page publique.
+ *     dès la création et ne change plus jamais.
  *  3. Le vocabulaire d'inspection qualité laisse place à celui d'une commande.
  *
  * LES VIGNETTES SONT SIGNÉES AU RENDU, jamais stockées. Le bucket est privé sans
@@ -67,14 +65,13 @@ export default async function EditeurCommande({
       // ouverture porte sur un brouillon encore vide ou sur une commande déjà
       // remplie — la distinction que portait le second point d'émission qu'on
       // vient de retirer.
-      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at",
+      "id, public_token, customer_label, product_ref, tracking_number, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at",
     )
     .eq("id", id)
     .maybeSingle();
 
   if (error !== null || data === null) notFound();
 
-  const t = await getTranslations("editeur");
   const [origine, profil] = await Promise.all([origineDuSite(), lireProfilVendeur()]);
 
   /*
@@ -91,7 +88,7 @@ export default async function EditeurCommande({
    */
   const { data: lignesMedias } = await supabase
     .from("order_media")
-    .select("id, type, cle_vignette")
+    .select("id, type, cle_vignette, duree_s")
     .eq("order_id", id)
     .order("position", { ascending: true });
 
@@ -108,10 +105,24 @@ export default async function EditeurCommande({
       urlVignette:
         m.cle_vignette === null ? null : await signerLecture(m.cle_vignette).catch(() => null),
       estCouverture: m.id === data.cover_media_id,
+      dureeS: m.duree_s,
     })),
   );
 
   const plafonds = plafondsAffichables();
+
+  /*
+   * LA PALETTE DE L'APERÇU EST RÉSOLUE ICI, côté serveur, par la MÊME fonction
+   * que la page publique. Un aperçu qui calculerait ses couleurs autrement
+   * finirait par montrer autre chose que ce que le client verra — et c'est
+   * exactement l'unique chose que cet aperçu promet de ne pas faire.
+   *
+   * `accent_color` est NON NULLE avec un défaut en base : il n'existe aucun état
+   * « couleur non configurée » à détecter.
+   */
+  const accent = resoudreAccent(profil?.couleurAccent ?? "");
+  const logoUrl =
+    profil?.logoUrl == null ? null : await signerLecture(profil.logoUrl).catch(() => null);
 
   if (profil !== null) {
     // `order_editor_opened` mesure l'OUVERTURE, `order_created` mesure le
@@ -140,98 +151,63 @@ export default async function EditeurCommande({
   const versPageClient = "/" + langue + "/commandes/" + data.id + "/page-client";
 
   return (
-    <main id="contenu" className="flex min-h-dvh flex-col">
-      {/*
-        LA BARRE HAUTE DE L'ÉDITEUR : d'où l'on vient, ce qu'on édite, et les
-        deux gestes qui suivent l'édition — copier le lien, l'ouvrir.
-
-        LE DÉGRADÉ EST SUR « VOIR LA PAGE PUBLIQUE » et sur rien d'autre. Une
-        seule action principale par écran : c'est celle qui termine le travail,
-        celle qu'on fait avant d'envoyer le lien à son client.
-      */}
-      <header className="z-10 flex shrink-0 flex-wrap items-center gap-3 border-b border-outline-variant bg-surface-container-lowest px-margin-mobile py-3.5 md:gap-[18px] md:px-[26px]">
-        <Link
-          href={"/" + langue + "/commandes"}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-outline text-on-surface transition-colors hover:bg-surface-container md:h-[38px] md:w-[38px]"
-          title={t("retour")}
-        >
-          <Icone nom="arrow_back" className="text-[17px]" titre={t("retour")} />
-        </Link>
-
-        <div className="min-w-0">
-          <h1 className="truncate font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-on-surface">
-            {data.customer_label ?? t("titre")}
-          </h1>
-          {data.product_ref !== null ? (
-            <p className="truncate font-body-sm text-[12px] text-on-surface-variant">
-              {data.product_ref}
-            </p>
-          ) : null}
-        </div>
-
-        <span className="flex-grow" />
-
-        <a
-            href={versPageClient}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="degrade-marque flex h-11 items-center gap-2 rounded-md px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90 md:h-10"
-          >
-            {t("voirPage")}
-            <Icone nom="open_in_new" className="text-[14px]" />
-          </a>
-      </header>
-
-      <div className="flex-1 p-margin-mobile md:px-[26px] md:py-5">
-        <TraductionsClient espaces={["editeur", "medias", "actions"]}>
-          <Editeur
-            id={data.id}
-            statuts={STATUTS_EXPEDITION}
-            qcs={STATUTS_QC}
-            actions={
-              <ActionsCommande
-                orderId={data.id}
-                langue={langue}
-                jeton={data.public_token}
-                origine={origine ?? ""}
-                estArchivee={data.archived_at !== null}
-              />
-            }
-            medias={
-              <CarteMedias
-                orderId={data.id}
-                initiaux={medias}
-                plafondMedias={plafonds.medias}
-                plafondVideos={plafonds.videos}
-                typesAcceptes={plafonds.typesAcceptes}
-              />
-            }
-            initiales={{
-              customer_label: data.customer_label ?? "",
-              product_ref: data.product_ref ?? "",
-              tracking_number: data.tracking_number ?? "",
-              carrier_code: data.carrier_code ?? "",
-              internal_notes: data.internal_notes ?? "",
-              status: data.status,
-              qc_status: data.qc_status,
-            }}
-          />
-        </TraductionsClient>
-
-        {/*
-          L'HISTORIQUE EST HORS DE `TraductionsClient`, et c'est délibéré : c'est
-          un composant SERVEUR. L'inclure dans l'îlot ferait voyager ses libellés
-          et sa liste d'événements dans la charge d'hydratation, pour un bloc que
-          personne n'interroge.
-        */}
-        <div className="mt-5">
-          <HistoriqueCommande
-            lignes={historique}
-            vues={data.views_count}
-            derniereVueLe={data.last_viewed_at}
-          />
-        </div>
-      </div>
+    /*
+      LA MARGE NÉGATIVE ANNULE LA PLACE RÉSERVÉE AUX ONGLETS. Le layout de
+      l'espace vendeur réserve 86 px en bas pour la barre d'onglets fixe ;
+      l'éditeur n'en a pas — la planche `EditeurMobile` met une bande d'action à
+      la place. Sans cette annulation, 86 px de gris flottaient sous la bande.
+    */
+    <main id="contenu" className="-mb-[86px] flex min-h-dvh flex-col md:mb-0">
+      <TraductionsClient espaces={["editeur", "medias", "actions"]}>
+        <Editeur
+          id={data.id}
+          langue={langue}
+          jeton={data.public_token}
+          // Sans origine connue, le lien public serait construit sur une valeur
+          // devinée. On rend alors un chemin relatif : il ne se copie pas dans
+          // une conversation, mais il n'envoie personne sur un domaine inventé.
+          origine={origine ?? ""}
+          versPageClient={versPageClient}
+          statuts={STATUTS_EXPEDITION}
+          qcs={STATUTS_QC}
+          medias={{
+            initiaux: medias,
+            plafondMedias: plafonds.medias,
+            plafondVideos: plafonds.videos,
+            typesAcceptes: plafonds.typesAcceptes,
+          }}
+          boutique={{
+            nom: profil?.nomBoutique ?? null,
+            logoUrl,
+            palette: {
+              remplissage: accent.remplissage,
+              surRemplissage: accent.surRemplissage,
+              surRemplissageDoux: accent.surRemplissageDoux,
+              surRemplissageFaible: accent.surRemplissageFaible,
+            },
+          }}
+          /*
+            L'HISTORIQUE EST UN COMPOSANT SERVEUR passé en propriété. Le rendre
+            dans l'îlot ferait voyager ses libellés et sa liste d'événements dans
+            la charge d'hydratation, pour un bloc que personne n'interroge.
+          */
+          historique={
+            <HistoriqueCommande
+              lignes={historique}
+              vues={data.views_count}
+              derniereVueLe={data.last_viewed_at}
+            />
+          }
+          initiales={{
+            customer_label: data.customer_label ?? "",
+            product_ref: data.product_ref ?? "",
+            tracking_number: data.tracking_number ?? "",
+            internal_notes: data.internal_notes ?? "",
+            status: data.status,
+            qc_status: data.qc_status,
+          }}
+        />
+      </TraductionsClient>
     </main>
   );
 }

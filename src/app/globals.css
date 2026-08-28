@@ -159,6 +159,7 @@
   --color-alerte: #c2543c;          /*  55× — texte et icône */
   --color-alerte-puce: #e0674a;     /*  12× — pastille de puce */
   --color-alerte-filet: #f6d9d2;    /*  16× */
+  --color-alerte-bordure: #e8bfb4;  /*   4× — bordure d'un bouton en alerte */
   --color-alerte-fond: #fff8f6;     /*   5× — compteur en alerte */
   --color-alerte-fond-doux: #fffaf9;/*  12× — bandeau d'échec */
   --color-alerte-fond-vif: #fdeeea; /*  12× — puce d'état */
@@ -177,6 +178,7 @@
   --color-filet-controle: #e6e6ec;  /*  78× — champs, boutons, pilules */
   --color-filet-ligne: #f2f2f6;     /*  34× — séparateur de lignes */
   --color-filet-section: #f0f0f4;   /*  12× — filet de section, page publique */
+  --color-filet-depot: #cfcfda;    /*   2× — pointillé de la case de dépôt */
 
   /* ----- Fonds neutres ---------------------------------------------------- */
   --color-fond-neutre: #f4f4f8;     /*  37× — survol, aplat neutre */
@@ -425,6 +427,39 @@ body {
     background-color 0.15s ease,
     border-color 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+/*
+ * QUINZE PIXELS AU DOIGT, QUATORZE À LA SOURIS, et c'est la planche qui le dit :
+ * `EditeurMobile` écrit `font-size: 15px`, `Editeur` écrit 14. La bascule vit
+ * ICI et non en classe utilitaire, parce que `.champ-editeur` n'est dans aucune
+ * couche : elle l'emporterait sur un `lg:text-[14px]` écrit à côté, et le champ
+ * resterait à 15 sans que rien ne le signale.
+ */
+@media (min-width: 1024px) {
+  .champ-editeur {
+    font-size: 14px;
+  }
+}
+
+/*
+ * UNE LISTE DÉROULANTE QUI RESSEMBLE AUX CHAMPS VOISINS, CHEVRON COMPRIS.
+ *
+ * ⚠️ `appearance: none` RETIRE LE CHEVRON DU NAVIGATEUR SANS LE REMPLACER. Sans
+ * lui, « Expédiée » et « Refusées » se présentaient exactement comme les champs
+ * de texte d'à côté : rien ne disait qu'on pouvait les dérouler, et rien ne
+ * disait non plus qu'on ne pouvait pas y taper.
+ *
+ * Le chevron est une image `data:` posée EN CSS et non en classe utilitaire :
+ * une valeur arbitraire Tailwind contenant guillemets, slashes et `#` ne
+ * produit aucune règle — silencieusement, comme toujours.
+ */
+.champ-liste {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7' fill='none'><path d='M1 1l4.5 4.5L10 1' stroke='%2383858f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
 }
 
 .champ-editeur:focus {

@@ -130,6 +130,50 @@ function composantsExportes(source: string): readonly string[] {
   ].map((m) => m[1] as string);
 }
 
+/**
+ * Un fichier couvre-t-il un espace pour ce qu'il rend ?
+ *
+ * ⚠️ CETTE FONCTION EST RÉCURSIVE, ET ELLE NE L'ÉTAIT PAS. Le contrôle exigeait
+ * que le rendu DIRECT porte le `espaces={[...]}`. C'était vrai tant que chaque
+ * composant client était rendu par une page serveur — donc tant que l'arbre
+ * était plat. Dès qu'un composant client en rend un autre, la règle devient
+ * fausse : un composant client NE PEUT PAS poser le provider, celui-ci se monte
+ * au-dessus de lui. Le contrôle réclamait alors une chose impossible.
+ *
+ * Trouvé en portant l'éditeur sur sa planche : la barre haute y descend dans
+ * l'îlot d'édition, qui rend à son tour les médias, l'aperçu et la révocation.
+ *
+ * La règle correcte : un parent couvre s'il expédie l'espace LUI-MÊME, ou s'il
+ * est lui aussi un composant client et que TOUS ceux qui le rendent couvrent.
+ * Un parent client que personne ne rend ne couvre RIEN — sans quoi un composant
+ * orphelin passerait sur une chaîne vide.
+ */
+function couvre(
+  fichier: (typeof TOUS)[number],
+  espace: string,
+  vus: Set<string>,
+): boolean {
+  // Expédier `admin` couvre `admin.suspension` : le provider rend l'arbre
+  // entier. L'inverse est faux.
+  if (espacesExpedies(fichier.source).some((e) => espace === e || espace.startsWith(e + "."))) {
+    return true;
+  }
+
+  // Un cycle d'imports ne doit pas faire boucler la sonde — et un cycle ne
+  // fournit aucun provider, donc il ne couvre pas.
+  if (vus.has(fichier.chemin)) return false;
+  if (!/^\s*["']use client["']/m.test(fichier.source)) return false;
+
+  const suivant = new Set(vus).add(fichier.chemin);
+  const rendus = composantsExportes(fichier.source).flatMap((composant) =>
+    TOUS.filter(
+      (f) => f.chemin !== fichier.chemin && new RegExp(`<${composant}\\b`).test(f.source),
+    ),
+  );
+  if (rendus.length === 0) return false;
+  return rendus.every((parent) => couvre(parent, espace, suivant));
+}
+
 describe("tout espace réclamé par un composant client lui est expédié", () => {
   const clients = TOUS.filter((f) => espacesReclames(f.source).length > 0);
 
@@ -171,12 +215,8 @@ describe("tout espace réclamé par un composant client lui est expédié", () =
 
         for (const espace of espaces) {
           const verifierTous = !estFichierDeConvention(client.chemin);
-          const predicat = (parent: (typeof TOUS)[number]): boolean => {
-            const expedies = espacesExpedies(parent.source);
-            // Expédier `admin` couvre `admin.suspension` : le provider rend
-            // l'arbre entier. L'inverse est faux.
-            return expedies.some((e) => espace === e || espace.startsWith(e + "."));
-          };
+          const predicat = (parent: (typeof TOUS)[number]): boolean =>
+            couvre(parent, espace, new Set());
           // Pour un composant ordinaire, TOUS ses parents doivent l'alimenter.
           // Pour un fichier de convention, UN SEUL layout ancêtre suffit : le
           // provider posé haut couvre tout ce qui est monté dessous.

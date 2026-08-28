@@ -42,6 +42,18 @@ function estActive(chemin: string, href: string): boolean {
   return chemin === href || chemin.startsWith(href + "/");
 }
 
+/**
+ * Sommes-nous dans l'éditeur d'UNE commande ?
+ *
+ * `/fr/commandes` est la liste — les onglets y ont toute leur place.
+ * `/fr/commandes/<id>` est l'éditeur, `/fr/commandes/<id>/page-client` son
+ * aperçu. On exige donc un segment APRÈS `commandes`, et pas seulement un
+ * préfixe : sans cela la liste elle-même perdrait sa navigation.
+ */
+function estEditionDeCommande(chemin: string): boolean {
+  return /^\/[a-z]{2}\/commandes\/[^/]+/.test(chemin);
+}
+
 export function NavigationVendeur({
   entrees,
   variante,
@@ -54,6 +66,22 @@ export function NavigationVendeur({
   const chemin = usePathname();
 
   if (variante === "bas") {
+    /*
+     * ⚠️ LA BARRE D'ONGLETS DISPARAÎT SUR L'ÉDITEUR D'UNE COMMANDE, et c'est la
+     * planche `EditeurMobile` qui le dit : elle n'en dessine aucune. Elle pose à
+     * la place une bande d'action collée en bas — « copier le lien » et « voir
+     * la page publique ».
+     *
+     * Ce n'est pas un choix esthétique : les deux barres se superposaient. La
+     * bande d'action de l'éditeur passait DERRIÈRE les onglets, donc les deux
+     * gestes qui terminent le travail étaient inatteignables au téléphone.
+     *
+     * Éditer une commande est un contexte PLEIN ÉCRAN — on y entre par une
+     * ligne de liste, on en sort par la flèche de retour, qui est en haut à
+     * gauche et ne bouge pas. Il n'y a donc aucun cul-de-sac.
+     */
+    if (estEditionDeCommande(chemin)) return null;
+
     return (
       <nav
         aria-label={etiquette}
