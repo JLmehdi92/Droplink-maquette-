@@ -136,10 +136,15 @@ export async function TableauCommandes({
       */}
       {vide ? null : (
       <>
-      <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:mb-4 md:overflow-visible md:px-0">
+      {/* ⚠️ LE DÉFILEMENT TIENT JUSQU'À `lg`, pas jusqu'à `md`. Sous 1024 px, six
+          contrôles ne tiennent pas sur la largeur restante : « Exporter »
+          dépassait de 103 px, mesurés, et la carte-page le coupait. Le
+          repoussoir qui écarte l'export des pilules n'apparaît donc qu'avec la
+          place de l'accueillir. */}
+      <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-0 lg:mb-4 lg:overflow-visible">
         <PilulesFiltres base={base} parametres={parametres} />
 
-        <span className="hidden flex-grow md:block" />
+        <span className="hidden flex-grow lg:block" />
 
         {/*
           L'EXPORT CSV — HORS du formulaire de lot, et c'est structurel.
@@ -175,7 +180,7 @@ export async function TableauCommandes({
         où loger cette phrase ; la retirer aurait retiré la seule occasion de la
         lire.
       */}
-      <p className="mt-2 px-margin-mobile font-body-sm text-[12px] text-sourdine md:mt-0 md:mb-4 md:px-0">
+      <p className="mt-2 px-margin-mobile font-body-sm text-[12px] text-sourdine md:px-0 lg:mt-0 lg:mb-4">
         {t("lot.exportAvertissement")}
       </p>
       </>
@@ -220,9 +225,36 @@ export async function TableauCommandes({
               </button>
             </div>
 
-            {/* ---------- BUREAU : LE TABLEAU ---------- */}
-            <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[720px] border-collapse text-left">
+            {/* ---------- BUREAU : LE TABLEAU, À PARTIR DE 1024 px ---------- */}
+            {/*
+              ⚠️ LA BASCULE EST À `lg`, PAS À `md`, ET C'EST MESURÉ. À 768 px le
+              tableau demandait 720 px là où la carte lui en laisse 470 : il
+              débordait, et la carte-page — qui porte `overflow-hidden` — le
+              coupait net. La colonne des actions et la moitié du bouton
+              principal sortaient de l'écran, et les en-têtes se collaient en
+              « CLIENTRÉFÉRENCESTATUT ».
+
+              Le conteneur à défilement qui vivait ici masquait le problème en le
+              transformant en glissement horizontal — et en rognait un autre au
+              passage, voir plus bas. La liste de cartes tient jusqu'à 1024 px ;
+              c'est elle qui sert cet intervalle.
+            */}
+            {/*
+              ⚠️ PAS DE CONTENEUR À DÉFILEMENT ICI, ET C'EST UNE CORRECTION.
+              Il y en avait un — `overflow-x-auto` — pour garantir une largeur
+              minimale au tableau. Or `overflow-x: auto` fait calculer
+              `overflow-y: auto` : le menu « … » de la DERNIÈRE ligne débordait
+              alors de 87 px, mesurés, et se faisait rogner par le conteneur.
+              Ses deux gestes — dupliquer, archiver — étaient inatteignables sur
+              la dernière commande de chaque page, et sur elle seule.
+
+              Le tableau se rétrécit donc plutôt que de défiler. Les cellules
+              n'ont aucune marge horizontale, comme sur la planche : à l'étroit
+              le texte se replie sur deux lignes au lieu de chevaucher la colonne
+              voisine.
+            */}
+            <div className="hidden lg:block">
+              <table className="w-full border-collapse text-left">
                 <thead>
                   <tr>
                     <th scope="col" className={enTete + " w-[34px]"}>
@@ -322,7 +354,11 @@ export async function TableauCommandes({
                               îlot client, et les deux gestes qu'il contient
                               restent des soumissions de formulaire.
                             */}
-                            <details className="relative">
+                            {/* `name` partagé : ouvrir un menu ferme celui qui
+                                l'était, comme un groupe de boutons radio. Sans
+                                lui, cinquante menus peuvent rester ouverts en
+                                même temps. Aucun JavaScript. */}
+                            <details name="actions-commande" className="relative">
                               <summary className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-fond-neutre hover:text-on-surface">
                                 <Icone
                                   nom="more_vert"
@@ -362,7 +398,7 @@ export async function TableauCommandes({
             </div>
 
             {/* ---------- TÉLÉPHONE : LA LISTE DE CARTES ---------- */}
-            <ul className="flex flex-col gap-2.5 px-margin-mobile md:hidden">
+            <ul className="flex flex-col gap-2.5 px-margin-mobile md:px-0 lg:hidden">
               {page.lignes.map((ligne) => {
                 const nom = ligne.client ?? t("sansNom");
                 const jamaisOuverte = ligne.vues === 0;
@@ -561,7 +597,7 @@ function VignetteEtSelection({
         name="selection"
         value={ligne.id}
         aria-label={libelle}
-        className="absolute inset-0 m-auto h-[18px] w-[18px] cursor-pointer opacity-0 accent-primary outline-offset-2 group-hover/ligne:pointer-events-auto group-hover/ligne:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100 checked:pointer-events-auto checked:opacity-100 pointer-events-none"
+        className="pointer-events-none absolute inset-0 m-auto h-[18px] w-[18px] cursor-pointer opacity-0 accent-primary outline-offset-2 group-hover/ligne:pointer-events-auto group-hover/ligne:opacity-100 group-has-[input:checked]/lot:pointer-events-auto group-has-[input:checked]/lot:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100 checked:pointer-events-auto checked:opacity-100"
       />
     </span>
   );

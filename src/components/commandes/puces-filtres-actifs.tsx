@@ -120,11 +120,16 @@ export async function PucesFiltresActifs({
           {puce.libelle}
           <Link
             href={puce.href}
-            // LA CIBLE TACTILE FAIT 44 PX SANS QUE LA CROIX EN FASSE 20 DE PLUS.
-            // La planche dessine un rond de 20 px ; au doigt, 20 px se rate une
+            // LA CIBLE TACTILE EST AGRANDIE SANS QUE LA CROIX GROSSISSE. La
+            // planche dessine un rond de 20 px ; au doigt, 20 px se rate une
             // fois sur trois. Le pseudo-élément agrandit la zone de clic sans
             // rien changer à ce qui est dessiné.
-            className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet/[0.18] transition-colors after:absolute after:-inset-3 after:content-[''] hover:bg-violet/30"
+            //
+            // ⚠️ HORIZONTALEMENT, L'AGRANDISSEMENT NE DÉPASSE PAS 8 PX, qui est
+            // exactement le `gap` de la rangée. À 12 px, la zone de clic mordait
+            // de quatre pixels sur la puce SUIVANTE : viser le bord gauche d'un
+            // critère retirait le précédent, et rien à l'écran ne l'expliquait.
+            className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet/[0.18] transition-colors after:absolute after:-inset-x-2 after:-inset-y-3 after:content-[''] hover:bg-violet/30"
             aria-label={t("retirerFiltre", { filtre: puce.libelle })}
           >
             <svg

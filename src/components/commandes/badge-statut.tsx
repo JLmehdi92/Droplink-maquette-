@@ -72,7 +72,10 @@ export function BadgeStatut({
   return (
     <span
       className={
-        "inline-flex shrink-0 items-center rounded-full font-label-sm font-semibold " +
+        // `whitespace-nowrap` : le tableau se rétrécit désormais au lieu de
+        // défiler, et « Sans mouvement · 14 j » se replierait en deux lignes
+        // dans une puce arrondie de 26 px de haut.
+        "inline-flex shrink-0 items-center rounded-full font-label-sm font-semibold whitespace-nowrap " +
         // La hauteur de ligne est celle du rendu naturel, comme sur la planche :
         // avec les 1,5 du corps de texte, la puce passait de 23 à 26 px.
         (petit

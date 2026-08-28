@@ -130,7 +130,17 @@ export default async function Commandes({
         actions={
           compteVide ? undefined : (
             <div className="hidden shrink-0 items-center gap-2.5 md:flex">
-              <FormulaireRecherche base={base} parametres={parametres} libelles={t} />
+              {/*
+                ⚠️ LA RECHERCHE DE 290 px NE TIENT PAS À CÔTÉ DU BOUTON SOUS
+                1024 px. Mesuré : à 768 px, la barre latérale prend 236 px et il
+                reste 432 px à l'en-tête, pour un titre et 500 px de contrôles.
+                Le bouton principal sortait de la carte-page — qui porte
+                `overflow-hidden` — donc il était COUPÉ, pas repoussé. Sous `lg`,
+                la recherche descend en pleine largeur sous le titre.
+              */}
+              <span className="hidden lg:block">
+                <FormulaireRecherche base={base} parametres={parametres} libelles={t} />
+              </span>
 
               {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien
                   vers une page qui écrirait au rendu. Un lien serait suivi par
@@ -154,10 +164,11 @@ export default async function Commandes({
         }
         dessous={
           /* La recherche passe SOUS le titre au téléphone : à 390 px elle ne
-             tient pas à côté du bouton, et c'est elle qu'on utilise le plus. Le
-             bouton, lui, devient l'action flottante du bas d'écran. */
+             tient pas à côté du bouton, et c'est elle qu'on utilise le plus.
+             Elle y reste jusqu'à 1024 px, faute de place. Le bouton, lui,
+             devient l'action flottante du bas d'écran sous 768 px. */
           compteVide ? undefined : (
-            <div className="mt-3.5 md:hidden">
+            <div className="mt-3.5 lg:hidden">
               <FormulaireRecherche base={base} parametres={parametres} libelles={t} telephone />
             </div>
           )
