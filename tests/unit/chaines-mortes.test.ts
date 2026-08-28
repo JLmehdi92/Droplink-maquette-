@@ -60,6 +60,10 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
     "landing.fonctionnalites.",
     "composé depuis la liste des trois bénéfices — landing, section « ce que ça vous enlève »",
   ],
+  [
+    "landing.flottant.",
+    "composé depuis la liste des trois cartes flottantes de la scène du téléphone — landing",
+  ],
   ["commandes.qc.", "composé depuis le statut QC"],
   ["medias.refus.", "composé depuis le motif de refus d'un média"],
   ["legal.signalement.cat_", "composé depuis la catégorie de signalement"],

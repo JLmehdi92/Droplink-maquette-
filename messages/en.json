@@ -24,7 +24,6 @@
     "heroTitre": "One link for the whole order",
     "heroSousTitre": "Drop the photos, paste the tracking, send the link. Your customer sees everything on their own, with no account to create.",
     "ctaPrincipal": "Create my first order",
-    "ctaSecondaire": "I already have an account",
     "gratuitPourLInstant": "Free during the launch phase. No card required.",
     "fonctionnalites": {
       "titre": "What the page holds",
@@ -33,7 +32,10 @@
       "suiviTitre": "Tracking updates itself",
       "suiviTexte": "You paste the number once. Your customer sees where the parcel is, without ever asking you.",
       "marqueTitre": "The link never changes",
-      "marqueTexte": "Edit the page whenever you like: your customer keeps the same link, in your colours and under your name."
+      "marqueTexte": "Edit the page whenever you like: your customer keeps the same link, in your colours and under your name.",
+      "mediasTexteCourt": "No more shared folder, no more transfer that expires.",
+      "suiviTexteCourt": "The customer sees where their parcel is, without asking.",
+      "marqueTexteCourt": "Edit the page whenever you want, the link stays the same."
     },
     "destinataireTitre": "Your customers install nothing",
     "menu": {
@@ -42,10 +44,13 @@
       "tarif": "Pricing"
     },
     "apercuTitre": "Your order",
-    "apercuEtape": "In transit",
     "flottant": {
-      "suiviTitre": "Tracking up to date",
-      "suiviTexte": "with nothing to do",
+      "photosTitre": "11 photos added",
+      "photosTexte": "Seen by the customer",
+      "photosCourt": "11 photos",
+      "transitTitre": "Parcel in transit",
+      "transitTexte": "Updates on its own",
+      "transitCourt": "In transit",
       "valideTitre": "Order approved",
       "valideTexte": "by the customer"
     },
@@ -58,6 +63,14 @@
       "conditions": "Terms",
       "confidentialite": "Privacy",
       "signalement": "Report content"
+    },
+    "heroSousTitreCourt": "Drop the photos, paste the tracking, send the link. Your customer sees everything.",
+    "finalTitreCourt": "Your next order deserves better",
+    "gratuitPourLInstantCourt": "Free during launch. No card required.",
+    "piedCourt": {
+      "conditions": "Terms",
+      "confidentialite": "Privacy",
+      "signalement": "Report"
     }
   },
   "pied": {

@@ -24,7 +24,6 @@
     "heroTitre": "Un seul lien pour toute la commande",
     "heroSousTitre": "Déposez les photos, collez le suivi, envoyez le lien. Votre client consulte tout lui-même, sans créer de compte.",
     "ctaPrincipal": "Créer ma première commande",
-    "ctaSecondaire": "J'ai déjà un compte",
     "gratuitPourLInstant": "Gratuit pendant la phase de lancement. Aucune carte demandée.",
     "fonctionnalites": {
       "titre": "Ce que contient la page",
@@ -33,7 +32,10 @@
       "suiviTitre": "Le suivi se met à jour seul",
       "suiviTexte": "Vous collez le numéro une fois. Le client voit où en est son colis, sans jamais vous le demander.",
       "marqueTitre": "Le lien ne change jamais",
-      "marqueTexte": "Modifiez la page quand vous voulez : le client garde le même lien, à vos couleurs et à votre nom."
+      "marqueTexte": "Modifiez la page quand vous voulez : le client garde le même lien, à vos couleurs et à votre nom.",
+      "mediasTexteCourt": "Plus de dossier partagé, plus de transfert qui expire.",
+      "suiviTexteCourt": "Le client voit où en est son colis, sans vous le demander.",
+      "marqueTexteCourt": "Modifiez la page quand vous voulez, le lien reste le même."
     },
     "destinataireTitre": "Vos clients n'ont rien à installer",
     "menu": {
@@ -42,10 +44,13 @@
       "tarif": "Tarif"
     },
     "apercuTitre": "Votre commande",
-    "apercuEtape": "En transit",
     "flottant": {
-      "suiviTitre": "Suivi à jour",
-      "suiviTexte": "sans rien faire",
+      "photosTitre": "11 photos ajoutées",
+      "photosTexte": "Vues par le client",
+      "photosCourt": "11 photos",
+      "transitTitre": "Colis en transit",
+      "transitTexte": "Mis à jour tout seul",
+      "transitCourt": "En transit",
       "valideTitre": "Commande validée",
       "valideTexte": "par le client"
     },
@@ -58,6 +63,14 @@
       "conditions": "Conditions",
       "confidentialite": "Confidentialité",
       "signalement": "Signaler un contenu"
+    },
+    "heroSousTitreCourt": "Déposez les photos, collez le suivi, envoyez le lien. Votre client consulte tout lui-même.",
+    "finalTitreCourt": "Votre prochaine commande mérite mieux",
+    "gratuitPourLInstantCourt": "Gratuit pendant le lancement. Aucune carte demandée.",
+    "piedCourt": {
+      "conditions": "Conditions",
+      "confidentialite": "Confidentialité",
+      "signalement": "Signaler"
     }
   },
   "pied": {
