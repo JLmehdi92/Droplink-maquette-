@@ -137,13 +137,146 @@ describe("Ce que le vendeur voit", () => {
     expect(numeros.indexOf("AL-SILENCE-02")).toBeLessThan(numeros.indexOf("AL-EN-ROUTE-01"));
   });
 
-  test("un colis porte le NOMBRE de commandes rattachées, pas leur liste", async () => {
+  test("un colis porte le nombre de commandes rattachées ET leurs destinataires", async () => {
     const page = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
     const ligne = page.lignes.find((l) => l.numero === "AL-SILENCE-02");
     expect(ligne?.commandes).toBe(1);
-    // Rapporter les commandes multiplierait le poids de la réponse par le
-    // nombre de commandes groupées, chez le vendeur qui en groupe le plus.
-    expect(JSON.stringify(ligne)).not.toContain("customer_label");
+    // ⚠️ CE TEST DISAIT L'INVERSE, et il avait raison au moment où il a été
+    // écrit. Les deux planches `Envois` et `EnvoisMobile` nomment la colonne
+    // « Commandes liées » et y montrent « @yanis », « @lea.store, @nadia » : un
+    // chiffre ne dit pas de QUI il s'agit, et c'est exactement ce que le vendeur
+    // cherche en regardant un colis groupé. Le poids reste borné par la réalité
+    // physique — un colis transporte ce qui tient dans un carton.
+    expect(ligne?.clients).toEqual(["Client AL-SILENCE-02"]);
+  });
+
+  test("un destinataire vide n'ajoute pas un nom vide, et le compte le garde", async () => {
+    // `customer_label` est un texte LIBRE et facultatif. Une commande sans
+    // destinataire nommé existe : elle compte, elle ne se nomme pas.
+    const { data } = await alice.client
+      .from("orders")
+      .insert({ shop_id: alice.shopId, customer_label: null })
+      .select("id")
+      .single();
+    await alice.client.rpc("attacher_colis", {
+      p_order_id: (data as { id: string }).id,
+      p_numero: "AL-SILENCE-02",
+      p_transporteur: "3011",
+    });
+
+    const page = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
+    const ligne = page.lignes.find((l) => l.numero === "AL-SILENCE-02");
+    expect(ligne?.commandes).toBe(2);
+    expect(ligne?.clients).toEqual(["Client AL-SILENCE-02"]);
+  });
+});
+
+/**
+ * LE DERNIER POINT DE PASSAGE (migration 104).
+ *
+ * La colonne est tenue par un DÉCLENCHEUR, et c'est tout l'objet de ces
+ * contrôles : aucun chemin applicatif ne l'écrit, donc rien dans le code ne
+ * prouve qu'elle est juste. Seule l'exécution le montre.
+ *
+ * LE PIÈGE QU'ILS VISENT : le déclencheur RECALCULE au lieu de comparer. Une
+ * version qui aurait testé « ce point est-il plus récent que le dernier
+ * mouvement ? » aurait laissé passer plusieurs points d'une même rafale, et
+ * c'est alors le DERNIER INSÉRÉ qui l'emporte — pas le plus récent. Le
+ * fournisseur ne garantit aucun ordre dans son tableau, donc le test insère
+ * DÉLIBÉRÉMENT dans le désordre.
+ */
+describe("Le dernier point de passage", () => {
+  let colis: string;
+
+  beforeAll(async () => {
+    colis = await poserColis(alice, "AL-POINTS-04", {
+      etat: "en_transit",
+      dernierMouvement: "2026-08-20T10:00:00Z",
+    });
+  }, 60_000);
+
+  test("il est vide tant qu'aucun point n'est arrivé", async () => {
+    const lignes = await interroger<{ dernier_point: string | null }>(
+      catalogue,
+      "select dernier_point from public.tracked_parcels where id = $1",
+      [colis],
+    );
+    expect(lignes[0]?.dernier_point).toBeNull();
+  });
+
+  test("le PLUS RÉCENT gagne, même inséré en premier", async () => {
+    await interroger(
+      catalogue,
+      `insert into public.parcel_checkpoints (parcel_id, occurred_at, description)
+       values ($1, '2026-08-20T10:00:00Z', 'Départ du centre de tri'),
+              ($1, '2026-08-10T10:00:00Z', 'Pris en charge par le transporteur')`,
+      [colis],
+    );
+
+    const lignes = await interroger<{ dernier_point: string | null }>(
+      catalogue,
+      "select dernier_point from public.tracked_parcels where id = $1",
+      [colis],
+    );
+    expect(lignes[0]?.dernier_point).toBe("Départ du centre de tri");
+  });
+
+  test("un point plus ancien arrivé APRÈS ne le remplace pas", async () => {
+    await interroger(
+      catalogue,
+      `insert into public.parcel_checkpoints (parcel_id, occurred_at, description)
+       values ($1, '2026-08-01T10:00:00Z', 'Colis préparé')`,
+      [colis],
+    );
+
+    const lignes = await interroger<{ dernier_point: string | null }>(
+      catalogue,
+      "select dernier_point from public.tracked_parcels where id = $1",
+      [colis],
+    );
+    expect(lignes[0]?.dernier_point).toBe("Départ du centre de tri");
+  });
+
+  test("la suppression du dernier point rend la main au précédent", async () => {
+    // La purge des points de passage existe. Sans le déclencheur sur `delete`,
+    // la colonne garderait le nom d'un passage effacé — un écran qui affirme ce
+    // que la base n'a plus.
+    await interroger(
+      catalogue,
+      `delete from public.parcel_checkpoints
+        where parcel_id = $1 and description = 'Départ du centre de tri'`,
+      [colis],
+    );
+
+    const lignes = await interroger<{ dernier_point: string | null }>(
+      catalogue,
+      "select dernier_point from public.tracked_parcels where id = $1",
+      [colis],
+    );
+    expect(lignes[0]?.dernier_point).toBe("Pris en charge par le transporteur");
+  });
+
+  test("la liste rend la colonne, elle ne la recalcule pas", async () => {
+    const page = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
+    const ligne = page.lignes.find((l) => l.numero === "AL-POINTS-04");
+    expect(ligne?.dernierPoint).toBe("Pris en charge par le transporteur");
+  });
+
+  test("le vendeur ne peut PAS écrire cette colonne", async () => {
+    // Une valeur tenue par un déclencheur qu'un vendeur pourrait réécrire ne
+    // serait plus un fait sur le colis, mais une affirmation de sa part.
+    const { error } = await alice.client
+      .from("tracked_parcels")
+      .update({ dernier_point: "inventé" })
+      .eq("id", colis);
+    expect(error, "l'écriture a été acceptée : la colonne est ouverte").not.toBeNull();
+
+    const lignes = await interroger<{ dernier_point: string | null }>(
+      catalogue,
+      "select dernier_point from public.tracked_parcels where id = $1",
+      [colis],
+    );
+    expect(lignes[0]?.dernier_point).toBe("Pris en charge par le transporteur");
   });
 });
 

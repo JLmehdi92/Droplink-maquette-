@@ -1115,7 +1115,8 @@ const SQL = {
   "compteurs-hors-rls": {
     casser: `create or replace function public.compter_envois(p_silence_jours int)
       returns table (total bigint, preparation bigint, expedie bigint, en_transit bigint,
-                     livre bigint, silencieux bigint, abandonnes bigint)
+                     livre bigint, silencieux bigint, abandonnes bigint,
+                     livres_ce_mois bigint)
       language sql stable security definer set search_path = '' as $$
         select count(*),
                count(*) filter (where tp.normalized_status = 'preparation'),
@@ -1127,11 +1128,19 @@ const SQL = {
                    and tp.abandoned_at is null
                    and tp.immobile_depuis < now() - make_interval(days => p_silence_jours)
                ),
-               count(*) filter (where tp.abandoned_at is not null)
+               count(*) filter (where tp.abandoned_at is not null),
+               count(*) filter (
+                 where tp.normalized_status = 'livre'
+                   and tp.last_movement_at >= date_trunc('month', now())
+               )
         from public.tracked_parcels tp
       $$;`,
+    // ⚠️ LA RÉPARATION SUIT LA MIGRATION LA PLUS RÉCENTE, pas celle d'origine.
+    // La 105 a ajouté « livrés ce mois » ; réparer depuis la 036 aurait ramené
+    // le produit en arrière — et c'est la sonde `falsificateur-a-jour` qui l'a
+    // dit, pas une relecture.
     reparerDepuisMigration: {
-      fichier: "036_envois_immobilite.sql",
+      fichier: "105_les_livraisons_du_mois_sont_un_compteur.sql",
       depuis: "create function public.compter_envois",
       jusqua: "comment on function",
     },

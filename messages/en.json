@@ -306,14 +306,15 @@
     "apercuReseaux": "Find {nom}"
   },
   "envois": {
-    "titre": "Your shipments",
-    "sousTitre": "One parcel per tracking number, even when it carries several orders.",
+    "titre": "Shipments",
+    "sousTitre": "{n} tracked parcels, all carriers together",
     "compteurs": {
       "titre": "Overview",
       "total": "Tracked parcels",
       "enTransit": "In transit",
-      "silencieux": "No movement for over 10 days",
-      "abandonnes": "Tracking stopped"
+      "silencieux": "No movement > 10 d",
+      "abandonnes": "Tracking stopped",
+      "livresCeMois": "Delivered this month"
     },
     "filtres": {
       "titre": "Filters",
@@ -322,7 +323,7 @@
       "tous": "All"
     },
     "etat": {
-      "preparation": "Preparing",
+      "preparation": "Not scanned yet",
       "expedie": "Shipped",
       "en_transit": "In transit",
       "livre": "Delivered"
@@ -333,15 +334,18 @@
       "anciens": "Updated long ago"
     },
     "colonnes": {
-      "numero": "Tracking number",
+      "numero": "Number",
       "etat": "Status",
       "mouvement": "Last movement",
-      "commandes": "Orders"
+      "commandes": "Linked orders",
+      "point": "Last checkpoint",
+      "interrogations": "Queries"
     },
     "mouvement": {
-      "aucun": "No information from the carrier yet",
+      "aucun": "No carrier information yet",
       "aujourdhui": "Today",
-      "jours": "{n} days ago"
+      "jours": "{n} days ago",
+      "hier": "Yesterday"
     },
     "commandesRattachees": "{n, plural, =0 {No orders} one {# order} other {# orders}}",
     "abandonne": "Tracking stopped",
@@ -350,7 +354,13 @@
       "compte": "No parcels yet. Paste a tracking number into an order and it will show up here.",
       "filtre": "No parcel matches this filter.",
       "effacer": "Clear all"
-    }
+    },
+    "puce": {
+      "silence": "No movement · {n} d"
+    },
+    "interrogationsFaites": "{n, plural, one {# query} other {# queries}}",
+    "aide": "A number you have just pasted is often not scanned yet. This is not an error: the carrier simply has not published anything.",
+    "aideCourte": "A number you have just pasted is often not scanned yet. This is not an error."
   },
   "analyses": {
     "titre": "Your analytics",

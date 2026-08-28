@@ -68,9 +68,12 @@ export default async function Envois({
 
   return (
     <>
-      <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre")} />
+      {/* LE NOMBRE EST DANS LE SOUS-TITRE, et pas seulement dans la carte
+          « Colis suivis » : celle-ci n'est pas rendue au téléphone, où la
+          planche `EnvoisMobile` ne garde que deux compteurs sur quatre. */}
+      <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre", { n: compteurs.total })} />
 
-      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:pt-0 md:pb-[26px]">
+      <main id="contenu" className="px-margin-mobile pt-3.5 pb-5 md:px-[30px] md:pt-0 md:pb-[26px]">
         <div>
         <TableauEnvois
           base={`/${langue}/envois`}

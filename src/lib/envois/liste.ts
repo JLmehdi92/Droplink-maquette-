@@ -75,6 +75,16 @@ export interface LigneEnvoi {
   readonly abandonneLe: string | null;
   readonly interrogations: number;
   readonly commandes: number;
+  /**
+   * Les destinataires des commandes rattachées, dans l'ordre rendu par la base.
+   * Un nom peut être `null` : `customer_label` est un texte LIBRE et facultatif.
+   */
+  readonly clients: readonly string[];
+  /**
+   * La dernière chose que le transporteur a dite. Tenue par un déclencheur
+   * (migration 104), donc jamais recalculée à la lecture.
+   */
+  readonly dernierPoint: string | null;
 }
 
 export interface PageEnvois {
@@ -90,6 +100,7 @@ export interface CompteursEnvois {
   readonly livre: number;
   readonly silencieux: number;
   readonly abandonnes: number;
+  readonly livresCeMois: number;
 }
 
 /**
@@ -99,14 +110,19 @@ export interface CompteursEnvois {
  * concaténation effondre le type rendu en erreur générique, et l'on perd
  * exactement le contrôle qui aurait signalé une colonne mal orthographiée.
  *
- * `order_parcels(count)` compte les commandes rattachées SANS les rapporter :
- * l'écran affiche « 3 commandes », il n'a pas besoin de les lister. Les
- * rapporter multiplierait le poids de la réponse par le nombre de commandes
- * groupées, sur la liste d'un vendeur qui en groupe beaucoup — c'est-à-dire
- * précisément celui pour qui l'écran compte.
+ * ⚠️ ON RAPPORTE DÉSORMAIS LES DESTINATAIRES, PAS UN COMPTE. La colonne
+ * s'appelle « commandes liées » sur les deux planches et elle y montre
+ * « @yanis » ou « @lea.store, @nadia » — pas « 2 commandes ». Un chiffre ne dit
+ * pas de QUI il s'agit, et c'est précisément ce que le vendeur cherche quand il
+ * regarde un colis groupé.
+ *
+ * Le poids reste borné par la réalité physique : un colis transporte ce qui
+ * tient dans un carton. La page en rend cinquante, et l'affichage s'arrête à
+ * deux noms suivis d'un « +N » — mais c'est l'AFFICHAGE qui s'arrête, pas la
+ * lecture : le compte doit rester exact.
  */
 const COLONNES =
-  "id, tracking_number, carrier_code, normalized_status, immobile_depuis, updated_at, first_movement_at, last_movement_at, abandoned_at, query_count, order_parcels(count)";
+  "id, tracking_number, carrier_code, normalized_status, immobile_depuis, updated_at, first_movement_at, last_movement_at, abandoned_at, query_count, dernier_point, order_parcels(orders(customer_label))";
 
 /** La colonne de tri, et son sens. */
 function ordre(tri: Tri): { colonne: "immobile_depuis" | "updated_at"; croissant: boolean } {
@@ -232,7 +248,14 @@ export async function lireEnvois(
     dernierMouvement: l.last_movement_at,
     abandonneLe: l.abandoned_at,
     interrogations: l.query_count,
-    commandes: l.order_parcels[0]?.count ?? 0,
+    commandes: l.order_parcels.length,
+    // `customer_label` est facultatif : une commande sans destinataire nommé
+    // n'ajoute pas de nom vide à la liste, elle n'ajoute rien du tout. Le
+    // COMPTE, lui, la garde — elle existe.
+    clients: l.order_parcels
+      .map((op) => op.orders?.customer_label ?? null)
+      .filter((nom): nom is string => nom !== null && nom.trim() !== ""),
+    dernierPoint: l.dernier_point,
   }));
 
   const dernier = trop ? visibles[visibles.length - 1] : undefined;
@@ -284,6 +307,7 @@ export async function compterEnvois(supabase: ClientLecture): Promise<CompteursE
     livre: Number(l.livre),
     silencieux: Number(l.silencieux),
     abandonnes: Number(l.abandonnes),
+    livresCeMois: Number(l.livres_ce_mois),
   };
 }
 

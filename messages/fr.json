@@ -306,14 +306,15 @@
     "apercuReseaux": "Retrouvez {nom}"
   },
   "envois": {
-    "titre": "Vos envois",
-    "sousTitre": "Un colis par numéro de suivi, même quand il transporte plusieurs commandes.",
+    "titre": "Envois",
+    "sousTitre": "{n} colis suivis, tous transporteurs confondus",
     "compteurs": {
-      "titre": "Vue d'ensemble",
+      "titre": "Vue d’ensemble",
       "total": "Colis suivis",
       "enTransit": "En transit",
-      "silencieux": "Sans mouvement depuis plus de 10 jours",
-      "abandonnes": "Suivi arrêté"
+      "silencieux": "Sans mouvement > 10 j",
+      "abandonnes": "Suivi arrêté",
+      "livresCeMois": "Livrés ce mois"
     },
     "filtres": {
       "titre": "Filtres",
@@ -322,7 +323,7 @@
       "tous": "Tous"
     },
     "etat": {
-      "preparation": "En préparation",
+      "preparation": "Pas encore scanné",
       "expedie": "Expédié",
       "en_transit": "En transit",
       "livre": "Livré"
@@ -333,15 +334,18 @@
       "anciens": "Mis à jour il y a longtemps"
     },
     "colonnes": {
-      "numero": "Numéro de suivi",
+      "numero": "Numéro",
       "etat": "État",
       "mouvement": "Dernier mouvement",
-      "commandes": "Commandes"
+      "commandes": "Commandes liées",
+      "point": "Dernier point",
+      "interrogations": "Interrogations"
     },
     "mouvement": {
-      "aucun": "Pas encore d'information du transporteur",
-      "aujourdhui": "Aujourd'hui",
-      "jours": "Il y a {n} jours"
+      "aucun": "Pas encore d’information du transporteur",
+      "aujourdhui": "Aujourd’hui",
+      "jours": "il y a {n} jours",
+      "hier": "Hier"
     },
     "commandesRattachees": "{n, plural, =0 {Aucune commande} one {# commande} other {# commandes}}",
     "abandonne": "Suivi arrêté",
@@ -350,7 +354,13 @@
       "compte": "Aucun colis pour l'instant. Collez un numéro de suivi dans une commande et il apparaîtra ici.",
       "filtre": "Aucun colis ne correspond à ce filtre.",
       "effacer": "Tout effacer"
-    }
+    },
+    "puce": {
+      "silence": "Sans mouvement · {n} j"
+    },
+    "interrogationsFaites": "{n, plural, one {# interrogation} other {# interrogations}}",
+    "aide": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur : le transporteur n’a simplement rien publié.",
+    "aideCourte": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur."
   },
   "analyses": {
     "titre": "Vos analyses",
