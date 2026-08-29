@@ -192,7 +192,16 @@ describe("La mesure décrit bien le jeu qu'elle prétend décrire", () => {
     try {
       await bd.query("set local role authenticated");
       await bd.query(`set local request.jwt.claims = '{"sub":"${alice.userId}"}'`);
-      fonction = await bd.query("select * from public.lister_boutiques_admin('', '', '', 51, '')");
+      // ⚠️ SIX ARGUMENTS, PAS CINQ. La migration 113 a ajouté le filtre par type
+      // et DROPPÉ l'ancienne signature ; cet appel est resté à cinq arguments,
+      // donc il ne résolvait plus aucune fonction et cette mesure était ROUGE
+      // sans que personne le voie — `test:perf` ne fait pas partie des six
+      // portes de commit. C'est exactement le défaut que ce test existe pour
+      // attraper, retourné contre lui-même : l'artefact mesuré doit
+      // CORRESPONDRE au code sous test.
+      fonction = await bd.query(
+        "select * from public.lister_boutiques_admin('', '', '', '', 51, '')",
+      );
     } finally {
       await bd.query("rollback");
     }
