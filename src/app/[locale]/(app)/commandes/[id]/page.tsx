@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
@@ -15,16 +16,57 @@ import { resoudreAccent } from "@/lib/design/contraste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { lireHistorique } from "@/lib/commandes/historique";
+import { titreDeCommande } from "@/lib/commandes/titre";
 import { HistoriqueCommande } from "@/components/commandes/historique-commande";
 
+/**
+ * LA COMMANDE, LUE UNE SEULE FOIS PAR REQUETE.
+ *
+ * `generateMetadata` et le rendu tournent dans la MEME requete, et `cache()` de
+ * React memoise sur l argument : la deuxieme lecture ne repart pas en base.
+ * Sans cette memoisation, donner un titre juste a l onglet couterait une
+ * requete de plus sur l ecran le plus ouvert du produit.
+ *
+ * Elle reste SOUS RLS, comme le rendu : le titre d une commande d un autre
+ * vendeur ne doit pas etre atteignable par un detour de metadonnees.
+ */
+const lireCommandeEditee = cache(async (id: string) => {
+  const supabase = await creerClientServeur();
+  return await supabase
+    .from("orders")
+    .select(
+      // `first_content_at` n'est pas rendu à l'écran : il sert à dire si cette
+      // ouverture porte sur un brouillon encore vide ou sur une commande déjà
+      // remplie — la distinction que portait le second point d'émission qu'on
+      // vient de retirer.
+      "id, public_token, customer_label, product_ref, tracking_number, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at",
+    )
+    .eq("id", id)
+    .maybeSingle();
+});
+
+/**
+ * ⚠️ CE TITRE DISAIT « Nouvelle commande » SUR TOUTES LES COMMANDES.
+ *
+ * Il n'existe aucune route « créer une commande » : la Server Action crée la
+ * ligne puis redirige vers `/commandes/<id>`. Le libellé écrit pour l'instant
+ * qui suit la création s'appliquait donc à vie, y compris à une commande
+ * remplie, expédiée et déjà consultée. Le titre À L'ÉCRAN, lui, était juste —
+ * la règle vivait à deux endroits et un seul l'appliquait. Elle vit désormais
+ * dans `titreDeCommande`, appelée par les deux.
+ */
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: "editeur" });
-  return { title: t("titre"), robots: { index: false, follow: false } };
+  const { data } = await lireCommandeEditee(id);
+  return {
+    title: titreDeCommande(data?.customer_label, t("titre")),
+    robots: { index: false, follow: false },
+  };
 }
 
 /**
@@ -58,17 +100,7 @@ export default async function EditeurCommande({
   setRequestLocale(langue);
 
   const supabase = await creerClientServeur();
-  const { data, error } = await supabase
-    .from("orders")
-    .select(
-      // `first_content_at` n'est pas rendu à l'écran : il sert à dire si cette
-      // ouverture porte sur un brouillon encore vide ou sur une commande déjà
-      // remplie — la distinction que portait le second point d'émission qu'on
-      // vient de retirer.
-      "id, public_token, customer_label, product_ref, tracking_number, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at",
-    )
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await lireCommandeEditee(id);
 
   if (error !== null || data === null) notFound();
 

@@ -692,6 +692,7 @@ let jetonFumee = null;
 // de fumee est supprimee dans le `finally`, donc la page ne repond plus.
 let htmlPagePublique = null;
 let commandeFumee = null;
+let brouillonFumee = null;
 let profilFumee = null;
 
 try {
@@ -708,6 +709,17 @@ try {
       .eq("user_id", utilisateur.user.id)
       .maybeSingle();
     profilFumee = profil?.id ?? null;
+
+    // L ONBOARDING EST OBLIGATOIRE TANT QUE `account_type` EST NUL : sans lui
+    // toute page de l espace vendeur redirige vers `/bienvenue`, et une sonde
+    // qui y mesure un titre lirait celui de l onboarding en croyant lire celui
+    // de l editeur. La colonne est nullable SANS defaut, expres.
+    if (profilFumee) {
+      await service
+        .from("profiles")
+        .update({ account_type: "reseller", locale: "fr" })
+        .eq("id", profilFumee);
+    }
 
     const { data: shop } = await service
       .from("shops")
@@ -746,6 +758,135 @@ try {
       if (erreurReseau) {
         console.error(`ECHEC impossible de poser le reseau de fumee : ${erreurReseau.message}`);
         echecs += 1;
+      }
+
+      // ── UNE SESSION VENDEUR REELLE ──
+      //
+      // ⚠️ JUSQU AU 29/08/2026 CETTE SONDE NE VOYAIT RIEN DERRIERE UNE SESSION.
+      // Elle verifiait que l espace vendeur REFUSE un anonyme — ce qui est la
+      // moitie de la question — et jamais ce qu il SERT a celui qui a le droit.
+      // Un titre d onglet faux a vecu la, invisible : « Nouvelle commande » sur
+      // toutes les commandes, y compris remplies et expediees.
+      //
+      // La session est fabriquee par un lien magique genere en service-role puis
+      // verifie avec la cle publiable : c est le VRAI chemin d authentification
+      // du produit, pas un jeton bricole. Le cookie est celui qu attend
+      // `@supabase/ssr`.
+      const { data: lienMagique } = await service.auth.admin.generateLink({
+        type: "magiclink",
+        email: courriel,
+      });
+
+      let cookieVendeur = null;
+      if (lienMagique?.properties?.hashed_token) {
+        const publiable = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+          { auth: { persistSession: false } },
+        );
+        const { data: verif } = await publiable.auth.verifyOtp({
+          token_hash: lienMagique.properties.hashed_token,
+          type: "magiclink",
+        });
+        if (verif?.session) {
+          const ref = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname.split(".")[0];
+          // Reduite au strict necessaire : au-dela d environ 3180 octets
+          // `@supabase/ssr` decoupe le cookie en `.0`, `.1`, … et une sonde qui
+          // ne decoupe pas enverrait un cookie tronque, donc pas de session —
+          // et le controle ci-dessous se croirait rouge pour la mauvaise raison.
+          const mince = {
+            access_token: verif.session.access_token,
+            refresh_token: verif.session.refresh_token,
+            token_type: verif.session.token_type,
+            expires_in: verif.session.expires_in,
+            expires_at: verif.session.expires_at,
+            user: {
+              id: verif.session.user.id,
+              aud: verif.session.user.aud,
+              role: verif.session.user.role,
+              email: verif.session.user.email,
+              app_metadata: {},
+              user_metadata: {},
+              created_at: verif.session.user.created_at,
+            },
+          };
+          const valeur = "base64-" + Buffer.from(JSON.stringify(mince)).toString("base64");
+          cookieVendeur =
+            valeur.length <= 3180
+              ? `sb-${ref}-auth-token=${valeur}`
+              : valeur
+                  .match(/.{1,3180}/g)
+                  .map((m, i) => `sb-${ref}-auth-token.${i}=${m}`)
+                  .join("; ");
+        }
+      }
+
+      controles.push([
+        cookieVendeur !== null,
+        "une session vendeur reelle a pu etre fabriquee (sinon rien de ce qui suit ne prouve quoi que ce soit)",
+      ]);
+
+      if (cookieVendeur) {
+        // Une SECONDE commande, sans nom de client : c est le contre-test. Sans
+        // elle, « le titre porte le nom du client » serait indistinguable de
+        // « le titre porte n importe quoi qui contient ce nom ».
+        const { data: brouillon } = await service
+          .from("orders")
+          .insert({ shop_id: shop.id })
+          .select("id")
+          .single();
+        brouillonFumee = brouillon?.id ?? null;
+
+        // LE LIBELLE EST LU DANS LE CATALOGUE, jamais recopie ici : recopie, il
+        // resterait vrai apres un renommage et la sonde passerait au vert sur
+        // une chaine que le produit n emploie plus.
+        const catalogue = JSON.parse(readFileSync(join(racine, "messages", "fr.json"), "utf8"));
+        const libelleBrouillon = catalogue.editeur.titre;
+
+        const entetes = { cookie: cookieVendeur, ...visiteur(41) };
+        const titreDe = (html) => (html.match(/<title[^>]*>([^<]*)<\/title>/i) ?? [])[1] ?? "";
+
+        const remplie = await fetch(`${base}/fr/commandes/${commandeFumee}`, {
+          headers: entetes,
+          redirect: "manual",
+        });
+        const htmlRemplie = remplie.status === 200 ? await remplie.text() : "";
+        const titreRemplie = titreDe(htmlRemplie);
+
+        const vide = brouillonFumee
+          ? await fetch(`${base}/fr/commandes/${brouillonFumee}`, {
+              headers: entetes,
+              redirect: "manual",
+            })
+          : null;
+        const htmlVide = vide && vide.status === 200 ? await vide.text() : "";
+        const titreVide = titreDe(htmlVide);
+
+        // CONTRE-TEST, EN PREMIER : la session donne-t-elle vraiment acces ?
+        // Sans lui, un titre mesure sur la page de connexion passerait pour un
+        // titre d editeur.
+        controles.push([
+          remplie.status === 200 && htmlRemplie.includes("Client de fumee"),
+          `la session ouvre bien l editeur (statut ${remplie.status}` +
+            `${remplie.status === 200 ? "" : ", vers " + remplie.headers.get("location")})`,
+        ]);
+
+        controles.push(
+          [
+            titreRemplie.includes("Client de fumee"),
+            `l onglet d une commande remplie porte son client (titre « ${titreRemplie} »)`,
+          ],
+          // L AUTRE SENS. Le defaut du 29/08 est exactement celui-ci : un titre
+          // de brouillon servi a une commande qui n en est plus un.
+          [
+            !titreRemplie.includes(libelleBrouillon),
+            `l onglet d une commande remplie ne dit pas « ${libelleBrouillon} » (titre « ${titreRemplie} »)`,
+          ],
+          [
+            titreVide.includes(libelleBrouillon),
+            `l onglet d une commande SANS client dit bien « ${libelleBrouillon} » (titre « ${titreVide} »)`,
+          ],
+        );
       }
 
       {
@@ -1097,23 +1238,53 @@ try {
         // de tous les vendeurs — passerait le test.
         // Le balayeur a SA propre adresse, et elle varie par execution comme les
         // autres : sinon le plafond serait deja consomme au lancement suivant.
+        //
+        // ⚠️ CETTE SONDE FLOTTAIT, ET ELLE A ETE BORNEE LE 29/08/2026 — pas
+        // relancee jusqu au vert. Elle envoyait PLAFOND+1 requetes et exigeait
+        // que la DERNIERE soit refusee. Or la fenetre du compteur est FIXE et
+        // dure soixante secondes : une rafale a cheval sur une bordure laisse
+        // le compteur repartir de zero, et la derniere requete passe. Mesure :
+        // un echec sur trois executions, sans qu aucun defaut existe.
+        //
+        // AUCUN NOMBRE DE REQUETES NE REND LA DERNIERE DETERMINISTE : la
+        // bordure peut tomber juste avant elle. Ce qui est deterministe, c est
+        // qu AU MOINS UNE soit refusee — avec 2×PLAFOND+1 requetes, l une des
+        // deux fenetres en contient forcement plus que le plafond.
+        //
+        // La propriete verifiee ne s affaiblit pas : on exige toujours un refus
+        // reel, qu il emprunte le meme chemin de sortie qu un jeton inconnu, et
+        // qu une AUTRE adresse ne soit pas penalisee.
         const balayeur = visiteur(31);
-        let dernierStatut = 0;
-        for (let i = 0; i <= PLAFOND_PUBLIC; i += 1) {
-          dernierStatut = (await fetch(`${base}/p/${jetonFumee}`, { headers: balayeur })).status;
+        const statuts = [];
+        for (let i = 0; i < 2 * PLAFOND_PUBLIC + 1; i += 1) {
+          statuts.push((await fetch(`${base}/p/${jetonFumee}`, { headers: balayeur })).status);
         }
+        const refuses = statuts.filter((c) => c !== 200);
+        const dernierStatut = refuses[0] ?? 200;
         const voisin = await fetch(`${base}/p/${jetonFumee}`, {
           headers: visiteur(32),
         });
 
         controles.push(
-          [dernierStatut === 404, `le plafond public mord (statut ${dernierStatut} au-dela de ${PLAFOND_PUBLIC})`],
+          [
+            refuses.length > 0 && dernierStatut === 404,
+            `le plafond public mord (${refuses.length} refus sur ${statuts.length} requetes, ` +
+              `premier statut refuse ${dernierStatut}, plafond ${PLAFOND_PUBLIC})`,
+          ],
           [voisin.status === 200, "une autre adresse n est pas penalisee : le compteur est par adresse"],
           // Le refus emprunte le MEME chemin de sortie que tout le reste :
           // repondre 429 distinguerait « tu vas trop vite sur un jeton qui
           // existe » de « ce jeton n existe pas », donc rendrait le balayage
           // informatif.
-          [dernierStatut !== 429, "un refus de quota ne se distingue pas d un jeton inconnu"],
+          // ⚠️ CE CONTROLE PASSAIT A VIDE. Ecrit `dernierStatut !== 429`, il
+          // etait VRAI quand aucune requete n avait ete refusee — donc vert
+          // pendant la falsification qui vient de retirer le plafond. Un
+          // ensemble vide passe tout : il doit exiger qu il y ait eu un refus
+          // AVANT de dire de quoi ce refus a l air.
+          [
+            refuses.length > 0 && !refuses.includes(429),
+            `un refus de quota ne se distingue pas d un jeton inconnu (${refuses.length} refus, statuts ${[...new Set(refuses)].join("/") || "aucun"})`,
+          ],
         );
       }
 
@@ -1288,6 +1459,7 @@ try {
   // Nettoyage INCONDITIONNEL : un chemin d echec qui laisse des lignes derriere
   // lui fausse toutes les mesures suivantes.
   if (commandeFumee) await service.from("orders").delete().eq("id", commandeFumee);
+  if (brouillonFumee) await service.from("orders").delete().eq("id", brouillonFumee);
   if (profilFumee) {
     const { data: p } = await service.from("profiles").select("user_id").eq("id", profilFumee).maybeSingle();
     if (p?.user_id) await service.auth.admin.deleteUser(p.user_id);

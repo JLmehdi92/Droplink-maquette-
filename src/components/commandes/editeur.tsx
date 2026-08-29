@@ -5,6 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Icone } from "@/components/icone";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
+import { titreDeCommande } from "@/lib/commandes/titre";
 import { CarteMedias, type MediaAffiche } from "./carte-medias";
 import { CarteRevocation } from "./carte-revocation";
 import { ApercuClient, type PaletteApercu } from "./apercu-client";
@@ -182,7 +183,7 @@ export function Editeur({
     <>
       <BarreHaute
         langue={langue}
-        titre={valeurs.customer_label.trim() === "" ? t("titre") : valeurs.customer_label}
+        titre={titreDeCommande(valeurs.customer_label, t("titre"))}
         reference={valeurs.product_ref}
         etat={etat}
         lienPublic={lienPublic}
