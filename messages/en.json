@@ -537,7 +537,8 @@
       "partiel": "Bulk action refused: nothing was changed. Some orders are no longer reachable — reload the list.",
       "ecriture": "The bulk action could not be processed. Nothing was changed.",
       "exporter": "Export",
-      "exportAvertissement": "The file contains your orders’ public links: anyone who opens it can open your customers’ pages."
+      "exportAvertissement": "The file contains your orders’ public links: anyone who opens it can open your customers’ pages.",
+      "exportTelecharger": "Download the CSV"
     },
     "vues": {
       "toutes": "All",

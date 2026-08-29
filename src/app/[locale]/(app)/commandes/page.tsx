@@ -2,7 +2,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { Icone } from "@/components/icone";
 import { EnTeteEcran } from "@/components/app/en-tete-ecran";
-import { PanneauFiltres } from "@/components/commandes/panneau-filtres";
 import { PucesFiltresActifs } from "@/components/commandes/puces-filtres-actifs";
 import { creerBrouillon } from "@/lib/commandes/actions";
 import { TableauCommandes } from "@/components/commandes/tableau-commandes";
@@ -229,15 +228,13 @@ export default async function Commandes({
 
         {compteVide ? null : <PucesFiltresActifs base={base} parametres={parametres} />}
 
-        {/* LE PANNEAU DE FILTRES NE SE REND PAS AU-DESSUS D'UNE LISTE VIDE. La
-            planche `CommandesFiltreVide` ne dessine rien entre les puces et la
-            carte : les critères se retirent un par un depuis les puces, et
-            dérouler un panneau pour en poser un de plus sur un résultat déjà vide
-            ne mène nulle part. */}
-        {compteVide || listeVide ? null : (
-          <PanneauFiltres base={base} parametres={parametres} />
-        )}
-
+        {/* ⚠️ LE PANNEAU DE FILTRES N'EST PLUS ICI. Il était une carte à part,
+            posée entre les puces et le tableau ; il est devenu un contrôle de la
+            barre d'outils, DANS la carte du tableau, comme la planche
+            `CommandesOutils` le dessine. Il suit donc désormais la barre
+            d'outils, qui ne se rend pas au-dessus d'une liste vide : sur un
+            résultat vide, la sortie se fait par les puces de critères, chacune
+            retirable seule, et par « tout effacer ». */}
         <TableauCommandes
           base={base}
           langue={langue}

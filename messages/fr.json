@@ -537,7 +537,8 @@
       "partiel": "Lot refusé : rien n’a été modifié. Certaines commandes ne sont plus accessibles — rechargez la liste.",
       "ecriture": "Le lot n’a pas pu être traité. Rien n’a été modifié.",
       "exporter": "Exporter",
-      "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients."
+      "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients.",
+      "exportTelecharger": "Télécharger le CSV"
     },
     "vues": {
       "toutes": "Toutes",

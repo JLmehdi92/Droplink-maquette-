@@ -3,24 +3,32 @@ import { Icone } from "@/components/icone";
 import { STATUTS_EXPEDITION, STATUTS_QC, TRIS, type ParametresListe } from "@/lib/commandes/liste";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
 import { LienEcran } from "@/components/lien-ecran";
+import { DETAILS_OUTIL, PANNEAU_OUTIL, PILULE_OUTIL } from "@/components/panneau-outil";
 
 /**
- * LE PANNEAU DE FILTRES COMPLET, replié par défaut.
+ * LE PANNEAU DE FILTRES COMPLET, replié dans la barre d'outils du tableau.
  *
- * IL A PERDU SA COLONNE. Le canevas n'a pas de barre latérale de filtres : les
- * quatre vues courantes sont des pilules au-dessus du tableau, et tout le reste
- * — statut QC, archives, tri — vit ici, dans un panneau qu'on ouvre quand on en
- * a besoin. Une colonne permanente coûtait un quart de la largeur de l'écran le
- * plus utilisé du produit pour des réglages qu'on touche une fois par semaine.
+ * IL A PERDU SA COLONNE, PUIS SA CARTE. Le canevas n'a jamais eu de barre
+ * latérale de filtres : les quatre vues courantes sont des pilules au-dessus du
+ * tableau, et tout le reste — statut QC, période, archives, tri — vit ici.
  *
- * REPLIÉ PAR `<details>`, donc SANS JAVASCRIPT.
+ * ⚠️ IL ÉTAIT UNE CARTE À PART, POSÉE ENTRE LES PUCES ET LE TABLEAU. Deux
+ * cartes empilées au-dessus d'une liste, dont l'une ne sert qu'à en régler
+ * l'autre : la planche `Commandes` n'en dessine qu'une, et c'est elle qui a
+ * raison. La planche `CommandesOutils`, écrite le 29/08/2026, montre désormais
+ * l'état ouvert — une pilule dans la rangée, un panneau ancré dessous.
+ *
+ * ⚠️ LE PANNEAU RECOUVRE, IL NE POUSSE PAS, et ce n'est pas un choix
+ * d'implantation. Déplié dans le flux, il descend le tableau de près de 360 px :
+ * la liste qu'on est en train de filtrer sort de l'écran au moment précis où on
+ * la règle. Ancré, il se referme sur la même liste, au même endroit.
+ *
+ * REPLIÉ PAR `<details>`, donc SANS JAVASCRIPT, et Échap ferme.
  *
  * ⚠️ IL S'OUVRAIT DE LUI-MÊME dès qu'un filtre était actif, pour que le vendeur
  * voie ce qui restreint sa liste. Ce n'est plus son travail : les PUCES DE
- * CRITÈRES au-dessus de la carte le disent désormais, chacune retirable seule,
- * comme la planche `CommandesFiltreVide` l'exige. Le panneau déplié en
- * permanence coûtait alors quatre cents pixels de haut sur l'écran le plus
- * ouvert du produit pour répéter ce qui était déjà écrit juste au-dessus.
+ * CRITÈRES au-dessus de la carte le disent, chacune retirable seule, comme la
+ * planche `CommandesFiltreVide` l'exige.
  *
  * TOUT PASSE PAR UN FORMULAIRE `GET`. Pas d'état client, pas de bundle, et
  * l'écran fonctionne sans JavaScript. Le vendeur peut recopier son URL, la
@@ -38,38 +46,35 @@ export async function PanneauFiltres({
   const filtree = listeFiltree(parametres);
 
   const champ =
-    "champ-app min-h-11 w-full rounded-md border border-outline px-3 font-body-md text-body-md text-on-surface outline-none";
+    "champ-app min-h-11 w-full rounded-[11px] border border-filet-controle px-3 font-body-md text-[14px] text-on-surface outline-none lg:h-[42px] lg:min-h-0";
 
   return (
-    <details
-      // Le rayon est celui de la carte du tableau — 18 — pour que les deux blocs
-      // se lisent comme une seule surface, et non comme deux cartes empilées.
-      className="mx-margin-mobile rounded-[18px] border border-outline-variant bg-surface-container-lowest md:mx-0"
-    >
-      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-5 py-3 font-label-md text-[13px] font-bold text-on-surface-variant">
-        <Icone nom="filter_list" className="text-[18px]" />
+    <details className={DETAILS_OUTIL + " lg:open:static"}>
+      <summary className={PILULE_OUTIL}>
+        <Icone nom="filter_list" className="text-[14px]" />
         {t("filtres")}
-        {/* ⚠️ IL Y AVAIT ICI UN « filtres actifs » EN VIOLET. Les puces de
-            critères, au-dessus, nomment désormais chaque filtre et le rendent
-            retirable : répéter qu'il y en a, sans dire lesquels, ne renseignait
-            plus personne. */}
+        <Icone nom="expand_more" className="text-[14px]" />
       </summary>
 
-      <div className="grid gap-5 border-t border-outline-variant p-5 md:grid-cols-2">
-      <form method="get" action={base}>
-        {/* Le tri courant survit à l'envoi du formulaire : c'est un réglage
-            d'affichage, pas un filtre, et le perdre à chaque filtrage serait
-            vécu comme une remise à zéro. */}
-        {parametres.tri !== "recentes" ? (
-          <input type="hidden" name="tri" value={parametres.tri} />
-        ) : null}
-        {parametres.q !== "" ? <input type="hidden" name="q" value={parametres.q} /> : null}
+      <div
+        className={
+          PANNEAU_OUTIL +
+          " flex flex-col gap-5 lg:grid lg:w-[666px] lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-[22px]"
+        }
+      >
+        <form method="get" action={base} className="flex flex-col gap-3.5">
+          {/* Le tri courant survit à l'envoi du formulaire : c'est un réglage
+              d'affichage, pas un filtre, et le perdre à chaque filtrage serait
+              vécu comme une remise à zéro. */}
+          {parametres.tri !== "recentes" ? (
+            <input type="hidden" name="tri" value={parametres.tri} />
+          ) : null}
+          {parametres.q !== "" ? <input type="hidden" name="q" value={parametres.q} /> : null}
 
-        <div className="flex flex-col gap-4">
           <div>
             <label
               htmlFor="statut"
-              className="mb-1 block font-label-sm text-label-sm text-on-surface-variant"
+              className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
             >
               {t("statutExpedition")}
             </label>
@@ -86,7 +91,7 @@ export async function PanneauFiltres({
           <div>
             <label
               htmlFor="qc"
-              className="mb-1 block font-label-sm text-label-sm text-on-surface-variant"
+              className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
             >
               {t("statutQc")}
             </label>
@@ -119,7 +124,7 @@ export async function PanneauFiltres({
             <div>
               <label
                 htmlFor="du"
-                className="mb-1 block font-label-sm text-label-sm text-on-surface-variant"
+                className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
               >
                 {t("periodeDu")}
               </label>
@@ -135,7 +140,7 @@ export async function PanneauFiltres({
             <div>
               <label
                 htmlFor="au"
-                className="mb-1 block font-label-sm text-label-sm text-on-surface-variant"
+                className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
               >
                 {t("periodeAu")}
               </label>
@@ -150,62 +155,67 @@ export async function PanneauFiltres({
             </div>
           </div>
 
-          <label className="flex items-center gap-2 font-body-sm text-body-sm text-on-surface">
+          <label className="flex min-h-11 items-center gap-2.5 font-body-md text-[14px] text-on-surface lg:min-h-0 lg:leading-[18px]">
             <input
               type="checkbox"
               name="archivees"
               value="1"
               defaultChecked={parametres.archivees}
-              className="h-4 w-4 rounded border-outline-variant accent-[var(--accent-interface)]"
+              className="h-4 w-4 rounded-[5px] border-outline-variant accent-[var(--accent-interface)]"
             />
             {t("voirArchivees")}
           </label>
 
-          <button
-            type="submit"
-            className="mt-1 min-h-11 w-full rounded-md bg-primary px-4 font-label-md text-[14px] font-bold text-on-primary transition-opacity hover:opacity-90"
-          >
-            {t("appliquer")}
-          </button>
-
-          {filtree ? (
-            <LienEcran
-              href={base}
-              className="text-center font-label-md text-[13px] text-violet hover:underline"
+          <div className="flex items-center gap-3.5 lg:mt-0.5">
+            <button
+              type="submit"
+              className="flex min-h-11 items-center rounded-[11px] bg-primary px-[22px] font-label-md text-[14px] font-bold text-on-primary transition-opacity hover:opacity-90 lg:h-[42px] lg:min-h-0"
             >
-              {t("toutEffacer")}
-            </LienEcran>
-          ) : null}
-        </div>
-      </form>
+              {t("appliquer")}
+            </button>
 
-      <div>
-        <h2 className="mb-3 flex items-center gap-2 font-label-sm text-[11px] font-bold tracking-[0.05em] text-sourdine uppercase">
-          <Icone nom="schedule" className="text-[16px]" />
-          {t("trier")}
-        </h2>
-        <ul className="flex flex-col gap-1">
-          {TRIS.map((tri) => {
-            const actif = parametres.tri === tri;
-            return (
-              <li key={tri}>
-                <LienEcran
-                  href={lienListe(base, parametres, { tri })}
-                  aria-current={actif ? "true" : undefined}
-                  className={
-                    "flex min-h-11 items-center rounded-md px-3 font-body-md text-body-md transition-colors md:min-h-0 md:py-2 " +
-                    (actif
-                      ? "bg-violet-fond font-semibold text-violet"
-                      : "text-on-surface-variant hover:bg-surface-container")
-                  }
-                >
-                  {t("tri." + tri)}
-                </LienEcran>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+            {filtree ? (
+              <LienEcran
+                href={base}
+                className="font-label-md text-[13px] font-bold text-violet hover:underline"
+              >
+                {t("toutEffacer")}
+              </LienEcran>
+            ) : null}
+          </div>
+        </form>
+
+        {/*
+          LE TRI N'EST PAS DANS LE FORMULAIRE : ce sont des LIENS. Un tri se pose
+          d'un geste et se lit dans l'URL ; le passer par « Appliquer » ferait
+          payer deux gestes pour un réglage qu'on change en parcourant la liste.
+        */}
+        <div className="border-t border-filet-ligne pt-4 lg:border-t-0 lg:border-s lg:pt-0 lg:ps-5">
+          <h2 className="mb-3 font-label-sm text-[11px] font-bold tracking-[0.05em] text-gris-entete uppercase">
+            {t("trier")}
+          </h2>
+          <ul className="flex flex-col gap-0.5">
+            {TRIS.map((tri) => {
+              const actif = parametres.tri === tri;
+              return (
+                <li key={tri}>
+                  <LienEcran
+                    href={lienListe(base, parametres, { tri })}
+                    aria-current={actif ? "true" : undefined}
+                    className={
+                      "flex min-h-11 items-center rounded-[8px] px-3 font-body-md text-[14px] transition-colors lg:min-h-9 " +
+                      (actif
+                        ? "bg-violet-fond font-semibold text-violet"
+                        : "text-ardoise hover:bg-surface-container")
+                    }
+                  >
+                    {t("tri." + tri)}
+                  </LienEcran>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </details>
   );

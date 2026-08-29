@@ -3,6 +3,7 @@ import { decrireSilence } from "@/lib/tracking/silence";
 import type { CompteursEnvois, Etat, PageEnvois, ParametresEnvois } from "@/lib/envois/liste";
 import { ETATS, TRIS } from "@/lib/envois/liste";
 import { Icone } from "@/components/icone";
+import { DETAILS_OUTIL, PANNEAU_OUTIL, PILULE_OUTIL } from "@/components/panneau-outil";
 import { LienEcran } from "@/components/lien-ecran";
 
 /**
@@ -268,15 +269,22 @@ export async function TableauEnvois({
         seconde rangée sur l'écran ; repliés, ils tiennent dans un bouton qui dit
         déjà lequel est actif. `<details>` : zéro JavaScript, et Échap ferme.
       */}
-      <details className="relative shrink-0">
-        <summary
-          className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-full border border-filet-controle bg-surface-container-lowest px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap text-ardoise transition-colors hover:bg-fond-neutre lg:h-[34px] lg:min-h-0"
-        >
+      {/*
+        ⚠️ CE MENU ÉTAIT INJOIGNABLE AU TÉLÉPHONE, et rien ne le disait. Il était
+        `absolute` DANS la bande qui défile — et **un conteneur qui rogne en X
+        rogne aussi en Y** : mesuré à 390 px, il s'ouvrait à y 242 pour 150 px de
+        haut alors que sa bande s'arrête à 238. Cent pour cent hors du cadre,
+        aucune erreur, aucune trace. La géométrie vit maintenant dans
+        `PANNEAU_OUTIL`, avec `Commandes` : feuille du bas au téléphone, panneau
+        ancré au bureau.
+      */}
+      <details className={DETAILS_OUTIL + " lg:open:relative"}>
+        <summary className={PILULE_OUTIL}>
           <Icone nom="schedule" className="text-[14px]" />
           {t(`tri.${parametres.tri}`)}
           <Icone nom="expand_more" className="text-[14px]" />
         </summary>
-        <ul className="absolute end-0 z-20 mt-1.5 flex w-[232px] flex-col gap-0.5 rounded-[13px] border border-filet-controle bg-surface-container-lowest p-1.5 shadow-[0_16px_32px_-16px_rgba(14,14,19,0.28)]">
+        <ul className={PANNEAU_OUTIL + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
           {TRIS.map((tri) => (
             <li key={tri}>
               <LienEcran

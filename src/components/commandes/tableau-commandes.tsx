@@ -6,6 +6,8 @@ import { TraductionsClient } from "@/components/traductions-client";
 import { ActionsLigne } from "./actions-ligne";
 import { BadgeStatut, teinteExpedition } from "./badge-statut";
 import { PilulesFiltres } from "./pilules-filtres";
+import { PanneauFiltres } from "./panneau-filtres";
+import { DETAILS_OUTIL, PANNEAU_OUTIL, PILULE_OUTIL } from "@/components/panneau-outil";
 import type {
   DiagnosticListeVide,
   LigneCommande,
@@ -142,48 +144,59 @@ export async function TableauCommandes({
           dépassait de 103 px, mesurés, et la carte-page le coupait. Le
           repoussoir qui écarte l'export des pilules n'apparaît donc qu'avec la
           place de l'accueillir. */}
-      <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-0 lg:mb-4 lg:overflow-visible">
+      <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-0 lg:relative lg:mb-4 lg:overflow-visible">
         <PilulesFiltres base={base} parametres={parametres} />
 
         <span className="hidden flex-grow lg:block" />
 
+        <PanneauFiltres base={base} parametres={parametres} />
+
         {/*
           L'EXPORT CSV — HORS du formulaire de lot, et c'est structurel.
 
-          C'est un LIEN, pas un bouton de ce formulaire : un export est une
-          lecture, il porte les FILTRES de la vue et non la sélection cochée. Le
-          mettre dans le formulaire de lot l'aurait fait dépendre des cases
-          cochées, ce qui n'est pas ce qu'il exporte.
+          Un export est une LECTURE : il porte les FILTRES de la vue et non la
+          sélection cochée. Le mettre dans le formulaire de lot l'aurait fait
+          dépendre des cases cochées, ce qui n'est pas ce qu'il exporte.
+
+          ⚠️ IL NE TÉLÉCHARGE PAS AU PREMIER CLIC, et l'avertissement est la
+          raison. Le fichier contient les liens publics des commandes, et un lien
+          public transfère une CAPACITÉ, définitivement, puisque le jeton est
+          immuable à vie. Prévenir une fois le fichier ouvert serait prévenir
+          trop tard — *le vendeur ne décide pas d'une fuite, il décide d'un
+          export, deux gestes différents parfois séparés de plusieurs mois.*
+
+          La phrase vivait en travers de la carte, entre les pilules et l'en-tête
+          des colonnes, faute d'un endroit où la loger. Elle en a un maintenant :
+          la planche `CommandesOutils` la dessine ancrée sous son propre bouton,
+          et le téléchargement n'existe qu'à l'intérieur. Deux gestes, comme la
+          révocation d'un lien, et pour exactement la même raison.
         */}
-        <a
-          // LES MÊMES PARAMÈTRES QUE LA VUE, composés par la MÊME fonction que
-          // tous les autres liens de l'écran. Recomposer la chaîne ici ferait une
-          // seconde façon d'encoder les filtres, et deux façons divergent au
-          // premier filtre ajouté — le vendeur exporterait alors autre chose que
-          // ce qu'il regarde, sans s'en apercevoir.
-          href={lienListe("/api/commandes/export", { ...parametres, curseur: null }, {})}
-          className="flex min-h-11 shrink-0 items-center gap-[7px] rounded-full border border-filet-controle bg-surface-container-lowest px-[13px] font-label-md text-[13px] font-semibold whitespace-nowrap text-ardoise transition-colors hover:bg-fond-neutre md:h-[34px] md:min-h-0"
-        >
-          <Icone nom="download" className="text-[14px]" />
-          {t("lot.exporter")}
-        </a>
+        <details className={DETAILS_OUTIL + " lg:open:static"}>
+          <summary className={PILULE_OUTIL}>
+            <Icone nom="download" className="text-[14px]" />
+            {t("lot.exporter")}
+            <Icone nom="expand_more" className="text-[14px]" />
+          </summary>
+
+          <div className={PANNEAU_OUTIL + " lg:w-[368px]"}>
+            <p className="mb-3.5 font-body-sm text-[13px] leading-5 text-sourdine">
+              {t("lot.exportAvertissement")}
+            </p>
+            <a
+              // LES MÊMES PARAMÈTRES QUE LA VUE, composés par la MÊME fonction
+              // que tous les autres liens de l'écran. Recomposer la chaîne ici
+              // ferait une seconde façon d'encoder les filtres, et deux façons
+              // divergent au premier filtre ajouté — le vendeur exporterait
+              // alors autre chose que ce qu'il regarde, sans s'en apercevoir.
+              href={lienListe("/api/commandes/export", { ...parametres, curseur: null }, {})}
+              className="flex min-h-11 items-center justify-center gap-2 rounded-[11px] bg-primary px-4 font-label-md text-[14px] font-bold text-on-primary transition-opacity hover:opacity-90 lg:h-[42px] lg:min-h-0"
+            >
+              <Icone nom="download" className="text-[15px]" />
+              {t("lot.exportTelecharger")}
+            </a>
+          </div>
+        </details>
       </div>
-
-      {/*
-        L'AVERTISSEMENT D'EXPORT — ÉCART ASSUMÉ SUR LA PLANCHE, qui dessine
-        « Exporter » nu.
-
-        Le fichier contient les liens publics des commandes, et un lien public
-        transfère une CAPACITÉ, définitivement, puisque le jeton est immuable à
-        vie. Prévenir une fois le fichier ouvert serait prévenir trop tard, et le
-        vendeur ne décide pas d'une fuite : il décide d'un export — deux gestes
-        différents, parfois séparés de plusieurs mois. La planche n'a pas prévu
-        où loger cette phrase ; la retirer aurait retiré la seule occasion de la
-        lire.
-      */}
-      <p className="mt-2 px-margin-mobile font-body-sm text-[12px] text-sourdine md:px-0 lg:mt-0 lg:mb-4">
-        {t("lot.exportAvertissement")}
-      </p>
       </>
       )}
 
