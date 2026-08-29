@@ -696,6 +696,40 @@ let brouillonFumee = null;
 let profilFumee = null;
 
 try {
+  // ── RAMASSER LES COMPTES DE FUMEE ABANDONNES ──
+  //
+  // ⚠️ TROU REEL, TROUVE LE 29/08/2026 A LA VERIFICATION D ETAT : un compte
+  // `fumee-…@exemple.test` vivait depuis dix-sept heures, avec sa boutique et sa
+  // commande. Le `finally` plus bas nettoie tout chemin d ECHEC — mais pas un
+  // processus TUE, et c est exactement ce qui arrive quand on interrompt les
+  // portes. `pnpm purge:test` ne le ramassait pas non plus : il ne connait que
+  // le domaine `@droplink-test.invalid`.
+  //
+  // Ce que ca coutait : ces comptes fantomes se comptent dans les ecrans
+  // d administration. Le panneau annoncait deux comptes actifs pour un seul
+  // vrai vendeur — une metrique de verdict faussee par notre propre outillage.
+  //
+  // LE GARDE-FOU D AGE : on ne supprime que ce qui a plus d une heure. Sans
+  // lui, une execution concurrente se supprimerait elle-meme, et le defaut
+  // serait pire que celui qu on repare.
+  {
+    const { data: connus } = await service.auth.admin.listUsers({ perPage: 200 });
+    const limite = Date.now() - 60 * 60 * 1000;
+    const abandonnes = (connus?.users ?? []).filter(
+      (u) =>
+        /^fumee-\d+@exemple\.test$/.test(u.email ?? "") &&
+        Date.parse(u.created_at) < limite,
+    );
+    for (const u of abandonnes) {
+      await service.auth.admin.deleteUser(u.id);
+    }
+    if (abandonnes.length > 0) {
+      console.log(
+        `  ${abandonnes.length} compte(s) de fumee abandonne(s) par une execution interrompue, ramasse(s)`,
+      );
+    }
+  }
+
   const courriel = `fumee-${Date.now()}@exemple.test`;
   const { data: utilisateur } = await service.auth.admin.createUser({
     email: courriel,
