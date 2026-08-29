@@ -156,7 +156,9 @@ export default async function AdminBoutiques({
                     href={lienFiltre(type)}
                     aria-current={actif ? "true" : undefined}
                     className={
-                      "inline-flex h-[38px] items-center rounded-full border px-3.5 font-headline-md text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors " +
+                      // 44 px au doigt, 40 à la souris : la planche écrit `height: 38px` sur une
+                      // boîte en `content-box`, donc elle REND 40 avec son filet.
+                      "inline-flex min-h-11 items-center rounded-full border px-3.5 font-headline-md text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:h-10 md:min-h-0 " +
                       (actif
                         ? "border-primary bg-primary text-on-primary"
                         : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
