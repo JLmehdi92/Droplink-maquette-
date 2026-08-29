@@ -472,6 +472,16 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "exactement le motif qu'on chercherait après coup.",
     ],
     [
+      "colis_par_jour_admin",
+      "Les colis pris en charge JOUR PAR JOUR, pour la frise de surveillance. " +
+        "`usage_counters` tient le compteur au MOIS : il répond « combien ce " +
+        "mois-ci », jamais « depuis quand ça monte », et c'est QUAND qu'on " +
+        "demande devant une facture inattendue. `stable` et SANS audit : un " +
+        "agrégat par jour, tous vendeurs confondus, ne désigne les données de " +
+        "personne — même règle que `stockage_total_admin`. Garde interne " +
+        "`est_admin()`.",
+    ],
+    [
       "compter_journal_admin",
       "Le nombre d'entrées du journal, avec les MÊMES filtres que la lecture — " +
         "un total qui les ignorerait afficherait « 1 284 entrées » au-dessus " +

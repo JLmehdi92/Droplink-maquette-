@@ -61,7 +61,6 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
     "admin.journal.famille.",
     "composé depuis FAMILLES_JOURNAL — filtres du journal d'audit",
   ],
-  ["admin.panneau.tache.", "composé depuis l'état du veilleur — page admin"],
   [
     "admin.surveillance.indicateur.",
     "composé depuis l'indicateur rendu par `sante_infrastructure`",

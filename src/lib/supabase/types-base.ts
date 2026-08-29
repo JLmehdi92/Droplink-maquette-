@@ -809,6 +809,13 @@ export type Database = {
           tracking_number: string
         }[]
       }
+      colis_par_jour_admin: {
+        Args: { p_jours: number }
+        Returns: {
+          jour: string
+          n: number
+        }[]
+      }
       compter_commandes_par_etat: {
         Args: never
         Returns: {

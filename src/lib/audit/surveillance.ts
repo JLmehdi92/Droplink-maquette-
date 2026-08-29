@@ -46,20 +46,47 @@ export const NON_MESURE: readonly string[] = [
   "erreurs_5xx",
 ] as const;
 
+/**
+ * LES TÂCHES DE FOND QUE LE PRODUIT DÉPLOIE.
+ *
+ * ⚠️ UNE SEULE AUJOURD'HUI, et c'est un fait, pas un oubli : `cadence-suivi` est
+ * la seule source qui appelle `battre`. La « veille mutuelle entre deux
+ * planificateurs » est une décision du brief (§3, décision 11) qui n'est PAS
+ * implémentée — l'afficher reviendrait à annoncer une protection qui n'existe
+ * pas, et c'est la forme de mensonge la plus coûteuse sur un écran de
+ * surveillance.
+ *
+ * CETTE LISTE EST CE QUI REND LE TROISIÈME ÉTAT POSSIBLE. `scheduler_heartbeat`
+ * ne porte que les sources ayant DÉJÀ battu : sans inventaire, une tâche jamais
+ * exécutée est invisible, donc indiscernable d'une tâche qui n'existe pas.
+ */
+export const TACHES_ATTENDUES: readonly string[] = ["cadence-suivi"] as const;
+
+/** Une tâche telle que l'écran la montre : trois états, jamais deux. */
+export interface TacheSurveillee {
+  readonly source: string;
+  readonly etat: "actif" | "en_retard" | "jamais_executee";
+  /** Minutes depuis le dernier battement. `null` quand il n'y en a jamais eu. */
+  readonly minutes: number | null;
+}
+
+/** Un jour de la frise des colis pris en charge. */
+export interface JourDeColis {
+  readonly jour: string;
+  readonly n: number;
+}
+
 export interface Surveillance {
   readonly indicateurs: readonly Indicateur[];
   readonly taches: readonly EtatTache[];
-  /**
-   * Vrai quand AUCUNE tâche n'a jamais battu.
-   *
-   * TROIS ÉTATS, PAS DEUX. « Jamais déployé » n'est pas « en retard » : une
-   * tâche posée ce matin n'a pas encore eu son premier passage, et la signaler
-   * enverrait chercher une panne dans un mécanisme inexistant. Une alerte qui se
-   * trompe est une alerte qu'on apprend à ignorer.
-   */
-  readonly aucuneTacheDeployee: boolean;
   readonly nonMesure: readonly string[];
+  /** Les tâches ATTENDUES, chacune avec son état — y compris jamais exécutée. */
+  readonly surveillees: readonly TacheSurveillee[];
+  readonly colisParJour: readonly JourDeColis[];
 }
+
+/** Combien de jours la frise des colis couvre. La planche en dessine 14. */
+export const JOURS_DE_FRISE = 14;
 
 export async function lireSurveillance(
   supabase: ClientAdmin,
@@ -67,9 +94,10 @@ export async function lireSurveillance(
 ): Promise<Surveillance> {
   // Les deux lectures sont indépendantes : les enchaîner doublerait la latence
   // d'un écran qu'on ouvre précisément quand quelque chose semble aller mal.
-  const [sante, taches] = await Promise.all([
+  const [sante, taches, colis] = await Promise.all([
     supabase.rpc("sante_infrastructure"),
     supabase.rpc("etat_veilleur", { p_retard_minutes: retardMinutes }),
+    supabase.rpc("colis_par_jour_admin", { p_jours: JOURS_DE_FRISE }),
   ]);
 
   // JAMAIS DE `catch` MUET, et surtout pas ici : un écran de surveillance qui
@@ -80,6 +108,9 @@ export async function lireSurveillance(
   }
   if (taches.error !== null) {
     throw new Error("lecture des tâches impossible : " + taches.error.message);
+  }
+  if (colis.error !== null) {
+    throw new Error("lecture des colis par jour impossible : " + colis.error.message);
   }
 
   const lignesTaches: EtatTache[] = (taches.data ?? []).map((t) => ({
@@ -96,7 +127,15 @@ export async function lireSurveillance(
       valeur: Number(i.valeur),
     })),
     taches: lignesTaches,
-    aucuneTacheDeployee: lignesTaches.length === 0,
     nonMesure: NON_MESURE,
+    // L'INVENTAIRE MÈNE LA JOINTURE, pas les battements : c'est ce qui fait
+    // apparaître une tâche attendue dont aucune ligne n'existe.
+    surveillees: TACHES_ATTENDUES.map((source) => {
+      const vue = lignesTaches.find((t) => t.source === source);
+      return vue === undefined
+        ? { source, etat: "jamais_executee" as const, minutes: null }
+        : { source, etat: vue.etat, minutes: vue.minutes };
+    }),
+    colisParJour: (colis.data ?? []).map((j) => ({ jour: j.jour, n: Number(j.n) })),
   };
 }

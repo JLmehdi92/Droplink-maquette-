@@ -941,11 +941,6 @@
       "stockage": "Media storage",
       "stockageIndisponible": "Unavailable",
       "stockageAide": "Sum of the sizes re-read server-side at upload, across all accounts.",
-      "tachesJamaisDeployees": "No task has ever beaten. This is not a failure: nothing has been deployed yet.",
-      "tache": {
-        "actif": "Last beat {n} min ago",
-        "en_retard": "No beat for {n} min"
-      },
       "stockageValeur": "{valeur} {unite}",
       "sousTitre": "Platform status. Viewing these alerts is recorded with your email address and the time.",
       "decision": "Needs a decision",
@@ -1039,7 +1034,7 @@
     },
     "surveillance": {
       "titre": "Monitoring",
-      "sousTitre": "What the product actually measures. The figures it does not measure are named below rather than left out: a silent screen would suggest they are being watched.",
+      "sousTitre": "What runs with nobody watching.",
       "taches": "Background tasks",
       "nonMesure": "Not measured",
       "nonMesureAide": "Nothing currently records these figures. They will appear here together with the mechanism that measures them, never before: one invented number on this screen would cast doubt on all the others.",
@@ -1062,6 +1057,33 @@
         "latence": "Latency",
         "charge_serveur": "Server load",
         "erreurs_5xx": "Server errors"
+      },
+      "consommation": "Consumption",
+      "colisParJour": "Parcels taken over per day",
+      "seulPosteFacture": "the only billed item",
+      "friseLegende": "Last {n} days · the orange bar is today",
+      "friseAide": "Parcels taken over each day over the last {n} days",
+      "limitation": "Rate limiting",
+      "surPlafond": "{valeur} / {plafond} per minute",
+      "etat": {
+        "actif": "Running",
+        "en_retard": "Late",
+        "jamais_executee": "Never ran"
+      },
+      "actifAide": "Last run {n} minutes ago",
+      "enRetardAide": "Last run {n} minutes ago · alert threshold: {seuil} minutes",
+      "jamaisExecuteeAide": "No run recorded. This job has never run since it was deployed — that is not a failure, and not an alert.",
+      "tache": {
+        "cadence-suivi": "Carrier polling"
+      },
+      "surface": {
+        "publique-requetes": "Public pages",
+        "publique-inconnu": "Unknown tokens",
+        "admin": "Administration"
+      },
+      "degradation": {
+        "autorise": "If the counter fails, access stays allowed: the incident does not concern a vendor's customers.",
+        "refuse": "Here, a counter failure denies access. That only penalises us."
       }
     },
     "traceTitre": "Everything is logged",

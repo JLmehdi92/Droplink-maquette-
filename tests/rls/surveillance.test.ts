@@ -6,7 +6,7 @@ import {
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
-import { lireSurveillance, NON_MESURE } from "@/lib/audit/surveillance";
+import { lireSurveillance, NON_MESURE, TACHES_ATTENDUES } from "@/lib/audit/surveillance";
 
 /**
  * L'ÉCRAN DE SURVEILLANCE.
@@ -263,5 +263,120 @@ describe("Ce qui n'est PAS mesuré est nommé", () => {
     for (const invente of NON_MESURE) {
       expect(cles, `« ${invente} » est rendu comme mesuré`).not.toContain(invente);
     }
+  });
+});
+
+/**
+ * LA FRISE DES COLIS PRIS EN CHARGE.
+ *
+ * ⚠️ LES JOURS VIDES DOIVENT VALOIR ZÉRO, PAS UN. Sur une jointure externe,
+ * `count(*)` compte la LIGNE PRODUITE PAR LA JOINTURE : un jour sans colis
+ * rendrait 1. Le même piège avait été attrapé sur la frise des semaines en
+ * migration 107, et il ne se voit qu'un jour où il ne s'est rien passé —
+ * c'est-à-dire jamais sur un jeu dense.
+ *
+ * ET LES JOURS VIDES DOIVENT ÊTRE RENDUS. Une frise qui saute les jours creux
+ * tasse le temps et fait disparaître exactement ce qu'on y cherche.
+ */
+describe("La frise des colis, jour par jour", () => {
+  test("elle rend TOUS les jours demandés, vides compris", async () => {
+    const { data, error } = await admin.client.rpc("colis_par_jour_admin", { p_jours: 14 });
+    expect(error).toBeNull();
+    expect(data?.length, "la frise ne rend pas 14 jours").toBe(14);
+  });
+
+  test("un jour sans colis vaut ZÉRO, jamais un", async () => {
+    // On vide la fenêtre pour que tous les jours soient creux : c'est le seul
+    // état où le piège de `count(*)` se voit.
+    await interroger(
+      catalogue,
+      "delete from public.tracked_parcels where registered_at >= now() - interval '30 days'",
+    );
+    const { data } = await admin.client.rpc("colis_par_jour_admin", { p_jours: 7 });
+    for (const j of data ?? []) {
+      expect(Number(j.n), `le jour ${j.jour} vaut ${j.n} au lieu de 0`).toBe(0);
+    }
+  });
+
+  test("contre-test : un colis pris en charge aujourd'hui apparaît au dernier jour", async () => {
+    await interroger(
+      catalogue,
+      `insert into public.tracked_parcels (shop_id, tracking_number, registered_at)
+       values ($1, 'FRISE-1', now())`,
+      [vendeur.shopId],
+    );
+    const { data } = await admin.client.rpc("colis_par_jour_admin", { p_jours: 7 });
+    const dernier = (data ?? [])[(data ?? []).length - 1];
+    // Sans ce contrôle, « tous les jours valent zéro » serait vrai pour une
+    // fonction qui ne compterait jamais rien.
+    expect(Number(dernier?.n), "le colis du jour n'est pas compté").toBe(1);
+  });
+
+  test("un vendeur ne lit pas la frise, et n'apprend pas qu'elle existe", async () => {
+    const { error } = await vendeur.client.rpc("colis_par_jour_admin", { p_jours: 7 });
+    expect(error, "un vendeur a lu la frise d'administration").not.toBeNull();
+  });
+});
+
+/**
+ * LES TROIS ÉTATS D'UNE TÂCHE, PAR TÂCHE.
+ *
+ * ⚠️ `scheduler_heartbeat` NE PORTE QUE LES SOURCES AYANT DÉJÀ BATTU. Une tâche
+ * jamais exécutée y est donc INVISIBLE, et se présentait jusqu'ici comme
+ * absente — indiscernable d'une tâche qui n'existe pas. C'est l'inventaire
+ * `TACHES_ATTENDUES` qui rend le troisième état possible, et il mène la
+ * jointure.
+ */
+describe("Les tâches attendues ont trois états", () => {
+  test("sans battement : JAMAIS EXÉCUTÉE, et ce n'est pas un retard", async () => {
+    await interroger(catalogue, "delete from public.scheduler_heartbeat");
+    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+
+    expect(s.surveillees.length, "l'inventaire est vide : la sonde n'inspecte rien").toBe(
+      TACHES_ATTENDUES.length,
+    );
+    for (const tache of s.surveillees) {
+      expect(tache.etat).toBe("jamais_executee");
+      // « Jamais exécutée » n'est PAS « en retard » : une tâche posée ce matin
+      // n'a pas encore eu son premier passage, et la signaler enverrait chercher
+      // une panne dans un mécanisme inexistant.
+      expect(tache.minutes).toBeNull();
+    }
+  });
+
+  test("battement récent : ACTIF", async () => {
+    for (const source of TACHES_ATTENDUES) {
+      await interroger(
+        catalogue,
+        "insert into public.scheduler_heartbeat (source, beat_at) values ($1, now())",
+        [source],
+      );
+    }
+    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    expect(s.surveillees.every((t) => t.etat === "actif")).toBe(true);
+  });
+
+  test("battement trop ancien : EN RETARD — le contre-test des deux autres", async () => {
+    // Sans lui, une fonction qui rendrait TOUJOURS « actif » passerait le test
+    // précédent sans rien prouver.
+    await interroger(
+      catalogue,
+      "update public.scheduler_heartbeat set beat_at = now() - interval '5 hours'",
+    );
+    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    expect(s.surveillees.every((t) => t.etat === "en_retard")).toBe(true);
+    expect(s.surveillees[0]?.minutes ?? 0).toBeGreaterThan(200);
+  });
+
+  test("une source INCONNUE de l'inventaire n'invente pas une tâche", async () => {
+    await interroger(
+      catalogue,
+      "insert into public.scheduler_heartbeat (source, beat_at) values ('source-fantome', now())",
+    );
+    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    // L'INVENTAIRE MÈNE, pas les battements : une source qui bat sans être
+    // attendue n'est pas une tâche du produit, c'est un résidu.
+    expect(s.surveillees.map((t) => t.source)).not.toContain("source-fantome");
+    expect(s.surveillees.length).toBe(TACHES_ATTENDUES.length);
   });
 });

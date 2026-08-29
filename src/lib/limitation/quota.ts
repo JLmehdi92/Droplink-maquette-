@@ -101,7 +101,15 @@ export function surPanne(surface: Surface): Verdict {
     : { autorise: false, motif: "indisponible" };
 }
 
-function seuil(surface: Surface): { plafond: number; fenetreSecondes: number } {
+/**
+ * Le plafond et la fenêtre d'une surface.
+ *
+ * EXPORTÉE POUR L'ÉCRAN DE SURVEILLANCE, qui affiche « pic sur plafond ».
+ * Recopier ces valeurs côté page les ferait diverger de celles que le compteur
+ * applique réellement — et une barre remplie contre un plafond faux est pire
+ * qu'une barre absente : elle rassure.
+ */
+export function seuil(surface: Surface): { plafond: number; fenetreSecondes: number } {
   switch (surface) {
     case "auth-ip":
       return {
