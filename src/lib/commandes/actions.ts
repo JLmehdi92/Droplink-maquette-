@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
@@ -210,6 +210,33 @@ function destination(donnees: FormData, defaut: string): string {
 
 const Identifiant = z.string().uuid();
 
+/**
+ * INVALIDE LA ROUTE SUR LAQUELLE ON REVIENT.
+ *
+ * ⚠️ DÉFAUT RÉEL, MESURÉ EN PILOTANT LE 29/08/2026. Une action qui se termine
+ * par `redirect()` vers la route où le vendeur se trouve DÉJÀ ne redessine
+ * rien : le routeur pousse la nouvelle URL, retrouve la route dans son cache
+ * client et rend la charge PÉRIMÉE. La base était modifiée, l'écran montrait
+ * l'état d'avant, indéfiniment.
+ *
+ * Mesuré sur le lot d'archivage : la réponse portait bien
+ * `x-action-redirect: /fr/commandes?archivees=1&lot=ok&n=2;push` ET
+ * `x-action-revalidated: [[],0,0]` — rien d'invalidé. La même page, avec
+ * « Nouvelle commande », navigue correctement : elle redirige vers une AUTRE
+ * route, que le routeur n'a pas en cache.
+ *
+ * CE QUE ÇA COÛTAIT : un vendeur archive une sélection, ne voit rien bouger, et
+ * recommence. Sur un lot tout-ou-rien, recommencer est exactement le geste dont
+ * on ne veut pas — et il y perd la confiance dans l'écran qu'il ouvre le plus.
+ *
+ * On invalide le CHEMIN, pas le motif de route : le chemin est ce que le
+ * routeur a réellement mis en cache.
+ */
+function invaliderRetour(retour: string): void {
+  const chemin = retour.split("?")[0] ?? retour;
+  revalidatePath(chemin);
+}
+
 export async function archiverDepuisListe(donnees: FormData): Promise<void> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") redirect("/fr/connexion?erreur=session");
@@ -227,6 +254,7 @@ export async function archiverDepuisListe(donnees: FormData): Promise<void> {
     revalidateTag(etiquetteCommandePublique(jeton.data));
   }
 
+  invaliderRetour(retour);
   redirect(retour);
 }
 
@@ -245,7 +273,10 @@ export async function dupliquerDepuisListe(donnees: FormData): Promise<void> {
   // La copie est un GABARIT vide : on ouvre son éditeur, parce que personne ne
   // duplique pour laisser la copie en l'état. Sur échec on revient à la liste
   // plutôt que d'inventer une destination.
-  if (resultat.statut !== "ok") redirect(retour);
+  if (resultat.statut !== "ok") {
+    invaliderRetour(retour);
+    redirect(retour);
+  }
   redirect("/" + langue + "/commandes/" + resultat.nouvelleCommande);
 }
 
@@ -272,7 +303,10 @@ export async function archiverLot(donnees: FormData): Promise<void> {
   const archiver = donnees.get("archiver") === "1";
   const retour = destination(donnees, "/fr/commandes");
 
-  if (!ids.success || ids.data.length === 0) redirect(retour + separateur(retour) + "lot=vide");
+  if (!ids.success || ids.data.length === 0) {
+    invaliderRetour(retour);
+    redirect(retour + separateur(retour) + "lot=vide");
+  }
 
   const supabase = await creerClientServeur();
   const { data, error } = await supabase.rpc("archiver_lot", {
@@ -284,6 +318,7 @@ export async function archiverLot(donnees: FormData): Promise<void> {
     // L'ÉCHEC EST DIT, et distingué : « refusé » n'est pas « en panne ». Un lot
     // refusé se refait à l'identique, un lot en panne non.
     const motif = error.code === "DL038" ? "partiel" : "ecriture";
+    invaliderRetour(retour);
     redirect(retour + separateur(retour) + "lot=" + motif);
   }
 
@@ -293,6 +328,7 @@ export async function archiverLot(donnees: FormData): Promise<void> {
     { lot: data ?? 0, archivee: archiver },
   );
 
+  invaliderRetour(retour);
   redirect(retour + separateur(retour) + "lot=ok&n=" + String(data ?? 0));
 }
 
