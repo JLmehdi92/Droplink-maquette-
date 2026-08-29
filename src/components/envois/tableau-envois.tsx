@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { decrireSilence } from "@/lib/tracking/silence";
 import type { CompteursEnvois, Etat, PageEnvois, ParametresEnvois } from "@/lib/envois/liste";
 import { ETATS, TRIS } from "@/lib/envois/liste";
+import { LienEcran } from "@/components/lien-ecran";
 
 /**
  * L'ÉCRAN DES ENVOIS, porté sur `Envois` et `EnvoisMobile`.
@@ -239,7 +239,7 @@ export async function TableauEnvois({
             },
           ] as const
         ).map((c) => (
-          <Link
+          <LienEcran
             key={c.cle}
             href={lien(base, parametres, {
               etat: null,
@@ -271,7 +271,7 @@ export async function TableauEnvois({
             >
               {format.number(c.valeur)}
             </p>
-          </Link>
+          </LienEcran>
         ))}
       </section>
 
@@ -289,22 +289,22 @@ export async function TableauEnvois({
           <span className="shrink-0 pr-1 font-label-md text-[12px] font-bold text-gris-entete uppercase">
             {t("filtres.etat")}
           </span>
-          <Link
+          <LienEcran
             href={lien(base, parametres, { etat: null, silencieux: null })}
             aria-current={parametres.etat === null && !parametres.silencieux ? "true" : undefined}
             className={pilule(parametres.etat === null && !parametres.silencieux) + " shrink-0"}
           >
             {t("filtres.tous")}
-          </Link>
+          </LienEcran>
           {ETATS.map((etat: Etat) => (
-            <Link
+            <LienEcran
               key={etat}
               href={lien(base, parametres, { etat, silencieux: null })}
               aria-current={parametres.etat === etat ? "true" : undefined}
               className={pilule(parametres.etat === etat) + " shrink-0"}
             >
               {t(`etat.${etat}`)}
-            </Link>
+            </LienEcran>
           ))}
         </div>
 
@@ -313,14 +313,14 @@ export async function TableauEnvois({
             {t("filtres.tri")}
           </span>
           {TRIS.map((tri) => (
-            <Link
+            <LienEcran
               key={tri}
               href={lien(base, parametres, { tri: tri === "immobiles" ? "" : tri })}
               aria-current={parametres.tri === tri ? "true" : undefined}
               className={pilule(parametres.tri === tri) + " shrink-0"}
             >
               {t(`tri.${tri}`)}
-            </Link>
+            </LienEcran>
           ))}
         </div>
       </section>
@@ -335,12 +335,12 @@ export async function TableauEnvois({
             {aUnFiltre ? t("vide.filtre") : t("vide.compte")}
           </p>
           {aUnFiltre ? (
-            <Link
+            <LienEcran
               href={base}
               className="mt-3 inline-flex min-h-11 items-center font-label-md text-[14px] font-semibold text-on-surface underline"
             >
               {t("vide.effacer")}
-            </Link>
+            </LienEcran>
           ) : null}
         </div>
       ) : (
@@ -479,12 +479,12 @@ export async function TableauEnvois({
       )}
 
       {page.curseurSuivant !== null ? (
-        <Link
+        <LienEcran
           href={lien(base, parametres, { curseur: page.curseurSuivant })}
           className="mx-auto inline-flex min-h-11 items-center rounded-[11px] border border-filet-controle px-6 font-label-md text-[14px] font-semibold text-on-surface transition-colors hover:bg-surface-container-low"
         >
           {t("pageSuivante")}
-        </Link>
+        </LienEcran>
       ) : null}
     </div>
   );

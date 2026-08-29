@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
@@ -16,6 +15,7 @@ import { lireCompteurs, lireSeuils } from "@/lib/audit/panneau";
 import { mettreOctetsALEchelle } from "@/lib/format/octets";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
+import { LienEcran } from "@/components/lien-ecran";
 
 export async function generateMetadata({
   params,
@@ -152,7 +152,7 @@ export default async function AdminBoutiques({
               const actif = parametres.type === type;
               return (
                 <li key={type === "" ? "toutes" : type}>
-                  <Link
+                  <LienEcran
                     href={lienFiltre(type)}
                     aria-current={actif ? "true" : undefined}
                     className={
@@ -163,7 +163,7 @@ export default async function AdminBoutiques({
                     }
                   >
                     {t(`boutiques.filtre.${type === "" ? "toutes" : type}`)}
-                  </Link>
+                  </LienEcran>
                 </li>
               );
             })}
@@ -286,12 +286,12 @@ export default async function AdminBoutiques({
                 seul sous une grille de cartes se lit comme la fin de la page. */}
             {lienSuivant === null ? null : (
               <li className="flex min-h-[190px] items-center justify-center rounded-[16px] border border-dashed border-outline bg-surface-container-lowest p-[18px]">
-                <Link
+                <LienEcran
                   href={lienSuivant}
                   className="inline-flex h-[38px] items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-4 font-headline-md text-[13px] leading-4 font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
                 >
                   {t("boutiques.pageSuivante")}
-                </Link>
+                </LienEcran>
               </li>
             )}
           </ul>

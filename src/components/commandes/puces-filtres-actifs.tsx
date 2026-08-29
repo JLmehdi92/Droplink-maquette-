@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { ParametresListe } from "@/lib/commandes/liste";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
+import { LienEcran } from "@/components/lien-ecran";
 
 /**
  * LES CRITÈRES ACTIFS, VISIBLES ET RETIRABLES UN PAR UN.
@@ -118,7 +118,7 @@ export async function PucesFiltresActifs({
           className="inline-flex h-[34px] items-center gap-[7px] rounded-full border border-violet bg-violet-fond pr-2 pl-[13px] font-label-md text-[13px] font-semibold text-violet-encre"
         >
           {puce.libelle}
-          <Link
+          <LienEcran
             href={puce.href}
             // LA CIBLE TACTILE EST AGRANDIE SANS QUE LA CROIX GROSSISSE. La
             // planche dessine un rond de 20 px ; au doigt, 20 px se rate une
@@ -145,16 +145,16 @@ export async function PucesFiltresActifs({
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
             </svg>
-          </Link>
+          </LienEcran>
         </span>
       ))}
 
-      <Link
+      <LienEcran
         href={base}
         className="ml-1 font-label-md text-[13px] font-bold text-violet hover:text-violet-survol"
       >
         {t("toutEffacer")}
-      </Link>
+      </LienEcran>
     </div>
   );
 }

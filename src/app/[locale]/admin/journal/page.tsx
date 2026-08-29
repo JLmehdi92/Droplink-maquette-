@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
@@ -14,6 +13,7 @@ import {
 } from "@/lib/audit/comptes";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
+import { LienEcran } from "@/components/lien-ecran";
 
 export async function generateMetadata({
   params,
@@ -157,7 +157,7 @@ export default async function AdminJournal({
               const actif = parametres.famille === f;
               return (
                 <li key={f === "" ? "toutes" : f}>
-                  <Link
+                  <LienEcran
                     href={lien(f, parametres.jours)}
                     aria-current={actif ? "true" : undefined}
                     className={
@@ -169,7 +169,7 @@ export default async function AdminJournal({
                     }
                   >
                     {t(`journal.famille.${f === "" ? "toutes" : f}`)}
-                  </Link>
+                  </LienEcran>
                 </li>
               );
             })}
@@ -180,7 +180,7 @@ export default async function AdminJournal({
               const actif = parametres.jours === j;
               return (
                 <li key={j}>
-                  <Link
+                  <LienEcran
                     href={lien(parametres.famille, j)}
                     aria-current={actif ? "true" : undefined}
                     className={
@@ -192,7 +192,7 @@ export default async function AdminJournal({
                     }
                   >
                     {t(`journal.fenetre.${j}`)}
-                  </Link>
+                  </LienEcran>
                 </li>
               );
             })}
@@ -322,12 +322,12 @@ export default async function AdminJournal({
         )}
 
         {lienSuivant === null ? null : (
-          <Link
+          <LienEcran
             href={lienSuivant}
             className="mx-auto inline-flex min-h-11 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-6 font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface"
           >
             {t("journal.pageSuivante")}
-          </Link>
+          </LienEcran>
         )}
       </div>
     </main>

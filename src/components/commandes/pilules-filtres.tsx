@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ParametresListe } from "@/lib/commandes/liste";
 import { lienListe } from "@/lib/commandes/url";
+import { LienEcran } from "@/components/lien-ecran";
 
 /**
  * LES QUATRE VUES QU'ON OUVRE VINGT FOIS PAR JOUR, en pilules.
@@ -64,7 +64,7 @@ export async function PilulesFiltres({
   return (
     <>
       {vues.map((vue) => (
-        <Link
+        <LienEcran
           key={vue.clef}
           href={vue.href}
           aria-current={vue.actif ? "true" : undefined}
@@ -78,7 +78,7 @@ export async function PilulesFiltres({
           }
         >
           {t("vues." + vue.clef)}
-        </Link>
+        </LienEcran>
       ))}
     </>
   );

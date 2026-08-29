@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
@@ -18,6 +17,7 @@ import {
 import { compterEnvois } from "@/lib/envois/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
+import { LienEcran } from "@/components/lien-ecran";
 
 export async function generateMetadata({
   params,
@@ -130,14 +130,14 @@ export default async function Analyses({
             className="-mt-0.5 flex flex-wrap gap-2 lg:mt-0"
           >
             {PERIODES.map((p) => (
-              <Link
+              <LienEcran
                 key={p}
                 href={p === "30j" ? base : `${base}?periode=${p}`}
                 aria-current={periode === p ? "true" : undefined}
                 className={pilule(periode === p)}
               >
                 {t(`periode.${p}`)}
-              </Link>
+              </LienEcran>
             ))}
           </nav>
         }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LienEcran } from "@/components/lien-ecran";
 import { Icone } from "@/components/icone";
 import type { NomIcone } from "@/lib/design/traces-icones";
 
@@ -37,6 +38,15 @@ export interface EntreeNavigation {
  * commande, et laisser la barre sans entrée active à cet endroit ferait croire
  * qu'on a quitté la section. Le préfixe est borné par un `/` pour que
  * `/fr/commandes-archivees` ne s'allume pas sur `/fr/commandes`.
+ */
+/**
+ * ⚠️ L'ENTRÉE COURANTE EST UN LIEN À RECHARGEMENT, LES AUTRES NON.
+ *
+ * Cliquer « Commandes » alors qu'on est sur `/fr/commandes?statut=expedie`
+ * est une navigation vers le MÊME chemin — celle que le routeur de Next
+ * abandonne en silence (mesuré le 29/08/2026, voir `LienEcran`). Les autres
+ * entrées mènent à un autre chemin, où la navigation cliente marche : les
+ * rendre natives coûterait un document complet sans rien réparer.
  */
 function estActive(chemin: string, href: string): boolean {
   return chemin === href || chemin.startsWith(href + "/");
@@ -90,9 +100,10 @@ export function NavigationVendeur({
         <ul className="flex justify-between">
           {entrees.map((entree) => {
             const active = estActive(chemin, entree.href);
+            const Composant = active ? LienEcran : Link;
             return (
               <li key={entree.href}>
-                <Link
+                <Composant
                   href={entree.href}
                   aria-current={active ? "page" : undefined}
                   className={
@@ -102,7 +113,7 @@ export function NavigationVendeur({
                 >
                   <Icone nom={entree.icone} className="h-[21px] w-[21px]" />
                   <span className="font-label-sm text-[10px] font-bold">{entree.libelle}</span>
-                </Link>
+                </Composant>
               </li>
             );
           })}
@@ -116,9 +127,10 @@ export function NavigationVendeur({
       <ul className="flex flex-col gap-[3px]">
         {entrees.map((entree) => {
           const active = estActive(chemin, entree.href);
+          const Composant = active ? LienEcran : Link;
           return (
             <li key={entree.href}>
-              <Link
+              <Composant
                 href={entree.href}
                 aria-current={active ? "page" : undefined}
                 className={
@@ -130,7 +142,7 @@ export function NavigationVendeur({
               >
                 <Icone nom={entree.icone} className="h-[18px] w-[18px]" />
                 {entree.libelle}
-              </Link>
+              </Composant>
             </li>
           );
         })}

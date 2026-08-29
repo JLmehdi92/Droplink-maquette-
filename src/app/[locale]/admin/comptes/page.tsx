@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LienEcran } from "@/components/lien-ecran";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
@@ -316,12 +317,12 @@ export default async function AdminComptes({
         )}
 
         {lienSuivant === null ? null : (
-          <Link
+          <LienEcran
             href={lienSuivant}
             className="mx-auto inline-flex min-h-11 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-6 font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface"
           >
             {t("comptes.pageSuivante")}
-          </Link>
+          </LienEcran>
         )}
       </div>
     </main>

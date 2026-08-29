@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LienEcran } from "@/components/lien-ecran";
 import { Icone } from "@/components/icone";
 import type { NomIcone } from "@/lib/design/traces-icones";
 
@@ -63,8 +64,10 @@ export function NavigationAdmin({
       >
         {entrees.map((entree) => {
           const courante = estCourante(chemin, entree.href);
+          // Voir `LienEcran` : l'entrée courante vise le chemin déjà occupé.
+          const Composant = courante ? LienEcran : Link;
           return (
-            <Link
+            <Composant
               key={entree.href}
               href={entree.href}
               aria-current={courante ? "page" : undefined}
@@ -82,7 +85,7 @@ export function NavigationAdmin({
               >
                 {entree.court}
               </span>
-            </Link>
+            </Composant>
           );
         })}
       </nav>
@@ -94,9 +97,10 @@ export function NavigationAdmin({
       <ul className="flex flex-col gap-[3px]">
         {entrees.map((entree) => {
           const courante = estCourante(chemin, entree.href);
+          const Composant = courante ? LienEcran : Link;
           return (
             <li key={entree.href}>
-              <Link
+              <Composant
                 href={entree.href}
                 aria-current={courante ? "page" : undefined}
                 className={
@@ -108,7 +112,7 @@ export function NavigationAdmin({
               >
                 <Icone nom={entree.icone} className="text-[18px]" />
                 {entree.libelle}
-              </Link>
+              </Composant>
             </li>
           );
         })}

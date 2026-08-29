@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Icone } from "@/components/icone";
 import { STATUTS_EXPEDITION, STATUTS_QC, TRIS, type ParametresListe } from "@/lib/commandes/liste";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
+import { LienEcran } from "@/components/lien-ecran";
 
 /**
  * LE PANNEAU DE FILTRES COMPLET, replié par défaut.
@@ -169,12 +169,12 @@ export async function PanneauFiltres({
           </button>
 
           {filtree ? (
-            <Link
+            <LienEcran
               href={base}
               className="text-center font-label-md text-[13px] text-violet hover:underline"
             >
               {t("toutEffacer")}
-            </Link>
+            </LienEcran>
           ) : null}
         </div>
       </form>
@@ -189,7 +189,7 @@ export async function PanneauFiltres({
             const actif = parametres.tri === tri;
             return (
               <li key={tri}>
-                <Link
+                <LienEcran
                   href={lienListe(base, parametres, { tri })}
                   aria-current={actif ? "true" : undefined}
                   className={
@@ -200,7 +200,7 @@ export async function PanneauFiltres({
                   }
                 >
                   {t("tri." + tri)}
-                </Link>
+                </LienEcran>
               </li>
             );
           })}

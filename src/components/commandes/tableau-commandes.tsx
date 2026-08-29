@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LienEcran } from "@/components/lien-ecran";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Icone } from "@/components/icone";
 import { TraductionsClient } from "@/components/traductions-client";
@@ -699,12 +700,12 @@ async function PiedDeListe({
       </p>
 
       {suivant !== null ? (
-        <Link
+        <LienEcran
           href={lienListe(base, parametres, { curseur: suivant })}
           className="flex min-h-11 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-[18px] font-label-md text-[14px] font-semibold whitespace-nowrap text-on-surface transition-colors hover:bg-fond-neutre md:h-[38px] md:min-h-0"
         >
           {t("chargerLaSuite")}
-        </Link>
+        </LienEcran>
       ) : null}
     </div>
   );
@@ -839,19 +840,19 @@ async function FiltreSansResultat({
         </p>
 
         {toutArchive ? (
-          <Link
+          <LienEcran
             href={lienListe(base, parametres, { archivees: true })}
             className="mt-6 inline-flex min-h-11 items-center rounded-[12px] border border-filet-controle bg-surface-container-lowest px-[22px] font-label-md text-[15px] font-bold text-on-surface transition-colors hover:bg-fond-neutre md:h-[46px] md:min-h-0"
           >
             {t("vide.voirArchives")}
-          </Link>
+          </LienEcran>
         ) : filtree ? (
-          <Link
+          <LienEcran
             href={base}
             className="mt-6 inline-flex min-h-11 items-center rounded-[12px] border border-filet-controle bg-surface-container-lowest px-[22px] font-label-md text-[15px] font-bold text-on-surface transition-colors hover:bg-fond-neutre md:h-[46px] md:min-h-0"
           >
             {t("toutEffacer")}
-          </Link>
+          </LienEcran>
         ) : null}
 
         {/* LA RECHERCHE IGNORE LES ACCENTS, et c'est le moment de le dire : la
