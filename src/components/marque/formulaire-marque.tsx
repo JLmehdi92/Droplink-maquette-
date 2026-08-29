@@ -48,17 +48,27 @@ type EtatLogo =
   | { phase: "pose"; apercu: string; nom: string; octets: number }
   | { phase: "erreur"; motif: string };
 
+/**
+ * ⚠️ IL PORTAIT LA COULEUR DU VENDEUR, IL PORTE LE DÉGRADÉ DE MARQUE.
+ *
+ * C'est une action de DropLink sur une surface DropLink — exactement la
+ * correction déjà faite sur la connexion, où le bouton principal peignait
+ * `--accent-remplissage`. La couleur que le vendeur est en train de choisir se
+ * démontre dans l'aperçu, à droite, et dans les trois mesures de contraste ;
+ * elle n'a pas à peindre nos propres commandes, et un bouton qui change de
+ * teinte pendant qu'on tape un code hexadécimal ne se lit plus comme un bouton.
+ *
+ * PLEINE LARGEUR AU TÉLÉPHONE : c'est la seule action de l'écran, en bas d'une
+ * colonne qu'on parcourt au pouce. La coincer à droite en ferait la plus petite
+ * cible d'une page qui n'en a qu'une.
+ */
 function BoutonEnregistrer({ libelle, enCours }: { libelle: string; enCours: string }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={pending}
-      style={{
-        backgroundColor: "var(--apercu-remplissage)",
-        color: "var(--apercu-sur-remplissage)",
-      }}
-      className="min-h-[44px] rounded-lg px-6 font-label-md text-label-md shadow-sm transition-opacity disabled:opacity-60"
+      className="degrade-marque flex min-h-12 w-full items-center justify-center rounded-[12px] font-label-md text-[15px] font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90 disabled:opacity-60 lg:h-[42px] lg:min-h-0 lg:w-auto lg:rounded-[11px] lg:px-[18px] lg:text-[14px] lg:shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)]"
     >
       {pending ? enCours : libelle}
     </button>
@@ -391,13 +401,12 @@ export function FormulaireMarque({
   return (
     <form
       action={action}
+      // ⚠️ LES DEUX VARIABLES D'APERÇU ONT DISPARU AVEC LE BOUTON QUI LES LISAIT.
+      // L'aperçu, lui, n'en a jamais eu besoin : il peint avec `accent.*` en
+      // ligne. Les laisser posées aurait fait deux déclarations que plus
+      // personne ne lit — le défaut exact que la sonde de fumée a déjà attrapé
+      // une fois sur l'onboarding.
       className="flex flex-col gap-3 lg:gap-[18px]"
-      style={
-        {
-          "--apercu-remplissage": accent.remplissage,
-          "--apercu-sur-remplissage": accent.surRemplissage,
-        } as React.CSSProperties
-      }
     >
       <input type="hidden" name="couleurAccent" value={couleur} />
       <input type="hidden" name="languePublique" value={langue} />
@@ -805,7 +814,7 @@ export function FormulaireMarque({
             tape un code hexadécimal. La sauvegarde automatique de l'éditeur ne
             touche, elle, qu'une commande que personne ne regarde à cet instant.
           */}
-          <div className="flex flex-wrap items-center justify-end gap-3 pt-1">
+          <div className="flex flex-col gap-2 pt-1 lg:flex-row lg:items-center lg:justify-end lg:gap-3">
             {/* LE TÉMOIN N'AFFIRME QUE CE QUE LE SERVEUR A CONFIRMÉ :
                 « enregistré » n'apparaît qu'au retour de l'action, jamais à la
                 soumission. */}
