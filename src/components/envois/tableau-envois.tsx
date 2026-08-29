@@ -2,6 +2,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { decrireSilence } from "@/lib/tracking/silence";
 import type { CompteursEnvois, Etat, PageEnvois, ParametresEnvois } from "@/lib/envois/liste";
 import { ETATS, TRIS } from "@/lib/envois/liste";
+import { Icone } from "@/components/icone";
 import { LienEcran } from "@/components/lien-ecran";
 
 /**
@@ -140,11 +141,24 @@ export async function TableauEnvois({
   const cellule =
     "border-t border-filet-ligne py-[15px] pr-4 font-body-md text-[14px] last:pr-0";
 
+  /**
+   * LA PILULE DE VUE, celle du canevas : bordée, noire quand elle est active.
+   *
+   * ⚠️ ELLE ÉTAIT VIOLETTE SANS BORDURE, et elle ne l'est nulle part ailleurs.
+   * La planche pose `background: #111117` ET `border: 1px solid #111117` sur
+   * l'active, blanc bordé `#e6e6ec` sur les autres — c'est ce que rend déjà
+   * `PilulesFiltres` sur Commandes. Deux écrans voisins qui dessinent
+   * différemment le même contrôle apprennent au vendeur qu'ils sont deux
+   * produits.
+   *
+   * 44 px au doigt, 34 px à la souris : la planche téléphone écrit
+   * `min-height: 44px` là où la planche bureau écrit `height: 34px`.
+   */
   const pilule = (actif: boolean): string =>
-    "inline-flex min-h-9 items-center rounded-full px-3 font-label-md text-[13px] font-semibold transition-colors " +
+    "flex min-h-11 shrink-0 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors lg:h-[34px] lg:min-h-0 " +
     (actif
-      ? "bg-violet-fond text-violet-encre"
-      : "text-on-surface-variant hover:bg-surface-container-low");
+      ? "border-primary bg-primary text-on-primary"
+      : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre");
 
   /**
    * Tout ce qu'une ligne dit de son colis, calculé UNE FOIS et servi aux deux
@@ -194,6 +208,95 @@ export async function TableauEnvois({
       ),
     };
   };
+
+
+  /**
+   * LA BARRE D'OUTILS DE L'ÉCRAN — pilules d'état à gauche, tri à droite.
+   *
+   * ⚠️ ELLE ÉTAIT UNE CARTE GRISE À DEUX RANGÉES, avec « ÉTAT » et « TRIER PAR »
+   * écrits en petites majuscules. Elle coupait l'écran en deux, et au téléphone
+   * la seconde rangée était TRONQUÉE — mesuré à 390 px : « Mis à jour réc… ».
+   * La planche `Envois` a été RÉÉCRITE le 29/08/2026 pour dire ce que l'écran
+   * fait vraiment, dans le vocabulaire que le canevas avait déjà : une rangée de
+   * pilules DANS la carte du tableau, exactement comme `Commandes`.
+   *
+   * LES ÉTIQUETTES ONT DISPARU parce que les pilules se lisent seules : une
+   * rangée d'états n'a pas besoin qu'on annonce que ce sont des états. Le tri,
+   * lui, se nomme dans son propre bouton.
+   */
+  const barreOutils = (
+    <div className="defilement-discret -mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-0.5 lg:mx-0 lg:mb-4 lg:overflow-visible lg:px-0 lg:pb-0">
+      <LienEcran
+        href={lien(base, parametres, { etat: null, silencieux: null })}
+        aria-current={parametres.etat === null && !parametres.silencieux ? "true" : undefined}
+        className={pilule(parametres.etat === null && !parametres.silencieux)}
+      >
+        {t("filtres.tous")}
+      </LienEcran>
+
+      {ETATS.map((etat: Etat) => (
+        <LienEcran
+          key={etat}
+          href={lien(base, parametres, { etat, silencieux: null })}
+          aria-current={parametres.etat === etat ? "true" : undefined}
+          className={pilule(parametres.etat === etat)}
+        >
+          {t(`etat.${etat}`)}
+        </LienEcran>
+      ))}
+
+      {/* LE SILENCE EST UNE PILULE D'ALERTE, et c'est le seul filtre qui appelle
+          un geste. Le peindre comme les autres l'aurait noyé ; peindre les
+          autres comme lui n'aurait rien mis en avant. */}
+      <LienEcran
+        href={lien(base, parametres, { silencieux: parametres.silencieux ? null : "oui", etat: null })}
+        aria-current={parametres.silencieux ? "true" : undefined}
+        className={
+          "flex min-h-11 shrink-0 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors lg:h-[34px] lg:min-h-0 " +
+          (parametres.silencieux
+            ? "border-alerte bg-alerte text-white"
+            : "border-alerte-filet bg-alerte-fond text-alerte hover:bg-alerte-fond-vif")
+        }
+      >
+        {t("filtres.silencieux")}
+      </LienEcran>
+
+      <span className="hidden flex-grow lg:block" />
+
+      {/*
+        LE TRI EST UN MENU, PAS UNE RANGÉE. Trois tris posés à plat coûtaient une
+        seconde rangée sur l'écran ; repliés, ils tiennent dans un bouton qui dit
+        déjà lequel est actif. `<details>` : zéro JavaScript, et Échap ferme.
+      */}
+      <details className="relative shrink-0">
+        <summary
+          className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-full border border-filet-controle bg-surface-container-lowest px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap text-ardoise transition-colors hover:bg-fond-neutre lg:h-[34px] lg:min-h-0"
+        >
+          <Icone nom="schedule" className="text-[14px]" />
+          {t(`tri.${parametres.tri}`)}
+          <Icone nom="expand_more" className="text-[14px]" />
+        </summary>
+        <ul className="absolute end-0 z-20 mt-1.5 flex w-[232px] flex-col gap-0.5 rounded-[13px] border border-filet-controle bg-surface-container-lowest p-1.5 shadow-[0_16px_32px_-16px_rgba(14,14,19,0.28)]">
+          {TRIS.map((tri) => (
+            <li key={tri}>
+              <LienEcran
+                href={lien(base, parametres, { tri: tri === "immobiles" ? "" : tri })}
+                aria-current={parametres.tri === tri ? "true" : undefined}
+                className={
+                  "flex min-h-11 items-center rounded-[9px] px-3 font-body-md text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
+                  (parametres.tri === tri
+                    ? "bg-violet-fond font-semibold text-violet"
+                    : "text-on-surface-variant hover:bg-surface-container")
+                }
+              >
+                {t(`tri.${tri}`)}
+              </LienEcran>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-2.5 lg:gap-5">
@@ -275,61 +378,14 @@ export async function TableauEnvois({
         ))}
       </section>
 
-      {/*
-        LES FILTRES FINS.
-
-        ⚠️ AUCUNE DES DEUX PLANCHES NE LES DESSINE, et ils sont conservés. Les
-        compteurs filtrent déjà — c'est ce que la planche exploite — mais ils ne
-        couvrent ni « expédié » ni « en préparation », ni aucun des trois tris.
-        Les retirer aurait rendu l'écran conforme en lui ôtant ce qui le rend
-        utile à qui a neuf mille colis.
-      */}
-      <section aria-label={t("filtres.titre")} className={CARTE + " lg:px-5 lg:py-4"}>
-        <div className="defilement-discret -mx-1 flex items-center gap-1.5 overflow-x-auto px-1">
-          <span className="shrink-0 pr-1 font-label-md text-[12px] font-bold text-gris-entete uppercase">
-            {t("filtres.etat")}
-          </span>
-          <LienEcran
-            href={lien(base, parametres, { etat: null, silencieux: null })}
-            aria-current={parametres.etat === null && !parametres.silencieux ? "true" : undefined}
-            className={pilule(parametres.etat === null && !parametres.silencieux) + " shrink-0"}
-          >
-            {t("filtres.tous")}
-          </LienEcran>
-          {ETATS.map((etat: Etat) => (
-            <LienEcran
-              key={etat}
-              href={lien(base, parametres, { etat, silencieux: null })}
-              aria-current={parametres.etat === etat ? "true" : undefined}
-              className={pilule(parametres.etat === etat) + " shrink-0"}
-            >
-              {t(`etat.${etat}`)}
-            </LienEcran>
-          ))}
-        </div>
-
-        <div className="defilement-discret -mx-1 mt-2.5 flex items-center gap-1.5 overflow-x-auto border-t border-filet-ligne px-1 pt-2.5">
-          <span className="shrink-0 pr-1 font-label-md text-[12px] font-bold text-gris-entete uppercase">
-            {t("filtres.tri")}
-          </span>
-          {TRIS.map((tri) => (
-            <LienEcran
-              key={tri}
-              href={lien(base, parametres, { tri: tri === "immobiles" ? "" : tri })}
-              aria-current={parametres.tri === tri ? "true" : undefined}
-              className={pilule(parametres.tri === tri) + " shrink-0"}
-            >
-              {t(`tri.${tri}`)}
-            </LienEcran>
-          ))}
-        </div>
-      </section>
 
       {page.lignes.length === 0 ? (
         /* DEUX ÉTATS VIDES DISTINCTS. « Ce compte n'a rien » et « ce filtre ne
            rend rien » sont deux situations différentes : afficher « collez votre
            premier numéro de suivi » à un vendeur qui en a neuf mille est une
            perte de confiance immédiate. */
+        <>
+        {barreOutils}
         <div className={CARTE + " px-5 py-10 text-center"}>
           <p className="font-body-md text-[14px] leading-5 text-on-surface-variant">
             {aUnFiltre ? t("vide.filtre") : t("vide.compte")}
@@ -343,10 +399,12 @@ export async function TableauEnvois({
             </LienEcran>
           ) : null}
         </div>
+        </>
       ) : (
         <>
           {/* --- LE TABLEAU, à partir de `lg` ---------------------------- */}
           <div className={"hidden xl:block " + CARTE + " xl:px-[22px] xl:py-5"}>
+            {barreOutils}
             <table className="w-full border-collapse">
               <thead>
                 <tr>
@@ -424,7 +482,8 @@ export async function TableauEnvois({
           </div>
 
           {/* --- LES CARTES, en dessous de `lg` -------------------------- */}
-          <ul className="flex flex-col gap-2.5 xl:hidden">
+          <div className="xl:hidden">{barreOutils}</div>
+          <ul className="mt-2.5 flex flex-col gap-2.5 xl:hidden">
             {page.lignes.map((ligne) => {
               const d = decrire(ligne);
               return (

@@ -342,10 +342,8 @@
       "livresCeMois": "Livrés ce mois"
     },
     "filtres": {
-      "titre": "Filtres",
-      "etat": "État",
-      "tri": "Trier par",
-      "tous": "Tous"
+      "tous": "Tous",
+      "silencieux": "Sans mouvement"
     },
     "etat": {
       "preparation": "Pas encore scanné",

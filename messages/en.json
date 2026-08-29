@@ -342,10 +342,8 @@
       "livresCeMois": "Delivered this month"
     },
     "filtres": {
-      "titre": "Filters",
-      "etat": "Status",
-      "tri": "Sort by",
-      "tous": "All"
+      "tous": "All",
+      "silencieux": "No movement"
     },
     "etat": {
       "preparation": "Not scanned yet",
