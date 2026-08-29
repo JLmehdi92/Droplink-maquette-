@@ -31,11 +31,27 @@ import {
  * pourrait plus distinguer les deux.
  */
 
+/**
+ * DEUX NATURES, PARCE QUE DEUX GESTES.
+ *
+ * Un seuil se saisit ; un interrupteur se bascule. Les rendre pareils
+ * obligerait à taper 0 ou 1 dans un champ, c'est-à-dire à connaître un encodage
+ * pour couper la facturation — et à se tromper de sens un jour de panique.
+ *
+ * L'ENCODAGE RESTE ENTIER EN BASE. `system_settings` porte du JSON que tout le
+ * produit lit par `(value #>> '{}')::int` ; introduire un second encodage
+ * obligerait chaque lecteur à savoir lequel s'applique, et un lecteur qui se
+ * trompe ne lève pas, il rend une valeur. Les bornes `0..1` font ici le travail
+ * d'un type.
+ */
+export type NatureParametre = "nombre" | "interrupteur";
+
 export interface DefinitionParametre {
   readonly cle: string;
   readonly defaut: number;
   readonly min: number;
   readonly max: number;
+  readonly nature: NatureParametre;
 }
 
 /**
@@ -49,6 +65,7 @@ export interface DefinitionParametre {
 export const PARAMETRES: readonly DefinitionParametre[] = [
   {
     cle: "seuil_colis_par_compte",
+    nature: "nombre",
     defaut: SEUIL_COLIS_DEFAUT,
     // 1 et non 0 : à zéro, tout compte ayant pris un colis en charge serait
     // signalé, donc le panneau signalerait l'usage normal du produit.
@@ -57,6 +74,7 @@ export const PARAMETRES: readonly DefinitionParametre[] = [
   },
   {
     cle: "retard_veilleur_minutes",
+    nature: "nombre",
     defaut: RETARD_VEILLEUR_MINUTES_DEFAUT,
     // Sous la période du planificateur lui-même, le veilleur serait déclaré en
     // retard entre deux battements normaux : l'alerte décrirait la cadence, pas
@@ -66,6 +84,7 @@ export const PARAMETRES: readonly DefinitionParametre[] = [
   },
   {
     cle: "plafond_commandes_mensuel",
+    nature: "nombre",
     defaut: PLAFOND_COMMANDES_MENSUEL_DEFAUT,
     // 100 et non 1 : le revendeur type cree 20 a 80 commandes par mois, donc un
     // plafond sous 100 refuserait des ecritures a un compte parfaitement normal
@@ -74,6 +93,23 @@ export const PARAMETRES: readonly DefinitionParametre[] = [
     // Au-dela, le plafond ne borne plus rien. Un garde qui ne peut pas se
     // declencher est un garde qu on croit avoir.
     max: 100_000,
+  },
+  {
+    cle: "suivi_actif",
+    nature: "interrupteur",
+    // OUVERT PAR DÉFAUT, comme la fonction en base. Un produit dont la table de
+    // réglages est vide doit fonctionner : partir fermé transformerait une base
+    // neuve en panne totale et silencieuse du suivi.
+    defaut: 1,
+    min: 0,
+    max: 1,
+  },
+  {
+    cle: "inscriptions_ouvertes",
+    nature: "interrupteur",
+    defaut: 1,
+    min: 0,
+    max: 1,
   },
 ] as const;
 
@@ -92,6 +128,7 @@ export function definitionDe(cle: string): DefinitionParametre | null {
  */
 export interface ParametreAffiche {
   readonly cle: string;
+  readonly nature: NatureParametre;
   readonly valeur: number;
   readonly defaut: number;
   readonly min: number;
@@ -122,6 +159,7 @@ export async function lireParametres(supabase: ClientAdmin): Promise<ParametreAf
 
     return {
       cle: p.cle,
+      nature: p.nature,
       // Une valeur écrite hors bornes — par une migration, par un script — est
       // AFFICHÉE telle quelle. La corriger en silence ferait voir à l'écran
       // autre chose que ce que le produit applique réellement.

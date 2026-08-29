@@ -179,7 +179,8 @@
       "suspendu": "Ce compte est suspendu. Écrivez-nous pour en connaître la raison.",
       "indisponible": "La connexion Google est momentanément indisponible. Utilisez le lien par email ci-dessous.",
       "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
-      "session": "Votre session a expiré. Reconnectez-vous pour continuer."
+      "session": "Votre session a expiré. Reconnectez-vous pour continuer.",
+      "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés."
     },
     "apercuTitre": "Votre commande"
   },
@@ -960,30 +961,97 @@
       }
     },
     "parametres": {
-      "titre": "Paramètres",
-      "sousTitre": "Les seuils que le produit lit réellement. Chaque modification est enregistrée avec l'ancienne et la nouvelle valeur, votre email et l'heure.",
+      "titre": "Paramètres système",
+      "sousTitre": "Chaque modification est écrite au journal d'audit, avec l'ancienne et la nouvelle valeur. Les valeurs grisées se changent au déploiement.",
       "enregistrer": "Enregistrer",
       "enCours": "En cours…",
       "fait": "Enregistré.",
       "bornes": "Entre {min} et {max}. Valeur par défaut : {defaut}.",
-      "secretsAide": "Les secrets ne se règlent pas ici : clés d'API, secret du planificateur et clé de service restent dans l'environnement du serveur. Une valeur enregistrée en base serait lisible par toute personne ayant accès à la base — acceptable pour un seuil, jamais pour une clé.",
+      "aucunPlafond": "Aucun",
+      "secretsTitre": "Les secrets ne sont pas ici",
+      "secretsAide": "Clés d'API, jeton de stockage et clé de service ne passent jamais par cet écran ni par la base. Ils vivent uniquement dans les variables d'environnement du serveur.",
       "origine": {
         "jamaisDecide": "Valeur par défaut : personne ne l'a jamais modifiée.",
         "decide": "Modifié le {date} par {email}.",
         "auteurParti": "Modifié le {date}. Le compte auteur n'existe plus."
       },
-      "cles": {
-        "seuil_colis_par_compte": {
-          "titre": "Signaler un compte au-delà de",
-          "aide": "Nombre de colis pris en charge dans le mois à partir duquel le compte apparaît dans les alertes du panneau. C'est le seul compteur du produit qui corresponde à une facture."
+      "carte": {
+        "plafonds": {
+          "titre": "Plafonds par compte",
+          "sousTitre": "Vérifiés en base, pas seulement dans l'interface."
         },
+        "suivi": {
+          "titre": "Suivi des colis",
+          "sousTitre": "Le seul poste de coût variable du produit."
+        },
+        "debit": {
+          "titre": "Limitation de débit",
+          "sousTitre": "Par fenêtre d'une minute, comptée en base."
+        },
+        "interrupteurs": {
+          "titre": "Interrupteurs",
+          "sousTitre": "Effet immédiat sur toute la plateforme."
+        }
+      },
+      "cles": {
         "plafond_commandes_mensuel": {
-          "titre": "Refuser au-delà de",
-          "aide": "Commandes qu'un même compte peut créer dans le mois. Au-delà, la création est REFUSÉE : c'est le seul seuil du produit qui bloque une écriture, et le vendeur l'apprendrait par son client. Le laisser au-dessus de l'usage réel — un fournisseur en crée environ 870 par mois."
+          "titre": "Commandes par mois",
+          "aide": "Au-delà, la création est refusée"
+        },
+        "seuil_colis_par_compte": {
+          "titre": "Seuil d'alerte colis",
+          "aide": "Signale un compte au-delà de ce nombre"
         },
         "retard_veilleur_minutes": {
-          "titre": "Déclarer une tâche en retard après",
-          "aide": "Minutes sans battement au-delà desquelles une tâche de fond est signalée comme en retard. Trop bas, l'alerte décrirait la cadence normale plutôt qu'une panne."
+          "titre": "Tâche en retard après",
+          "aide": "En minutes sans battement"
+        },
+        "inscriptions_ouvertes": {
+          "titre": "Inscriptions ouvertes",
+          "aide": "Fermer n'affecte pas les comptes existants"
+        },
+        "suivi_actif": {
+          "titre": "Interrogation des transporteurs",
+          "aide": "Couper arrête la facturation à la prise en charge"
+        }
+      },
+      "constate": {
+        "stockage_par_compte": {
+          "titre": "Stockage par compte",
+          "aide": "Aucun plafond n'est appliqué"
+        },
+        "medias_par_commande": {
+          "titre": "Médias par commande",
+          "aide": "Dont {videos} vidéos au maximum"
+        },
+        "poids_video": {
+          "titre": "Poids maximum d'une vidéo",
+          "aide": "En mégaoctets · provisoire, à calibrer"
+        },
+        "silence_jours": {
+          "titre": "Silence nommé après",
+          "aide": "En jours sans mouvement"
+        },
+        "abandon_jours": {
+          "titre": "Abandon du suivi après",
+          "aide": "En jours, ou {interrogations} interrogations vides"
+        },
+        "purge_jours": {
+          "titre": "Purge des réponses brutes",
+          "aide": "En jours après le dernier mouvement"
+        },
+        "debit_inconnu": {
+          "titre": "Jeton inconnu"
+        },
+        "debit_valide": {
+          "titre": "Jeton valide"
+        },
+        "debit_depot": {
+          "titre": "Dépôts de médias"
+        },
+        "notifications_email": {
+          "titre": "Notifications par email",
+          "aide": "Non déployées : rien n'est envoyé"
         }
       },
       "erreur": {

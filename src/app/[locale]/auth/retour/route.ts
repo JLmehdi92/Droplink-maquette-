@@ -56,6 +56,34 @@ export async function GET(
 
   if (onboardingAFaire(profil)) {
     /*
+     * ⚠️ LA PORTE D'ENTRÉE SE FERME ICI, ET NULLE PART AILLEURS.
+     *
+     * Le geste naturel serait `shouldCreateUser: false` à l'envoi du lien. Il
+     * est INTERDIT sur ce produit, et la mesure le dit : un email sans compte
+     * rend 422 `otp_disabled` en 49 ms, un email avec compte autre chose en
+     * 778 ms. Seize fois d'écart, lisible depuis l'extérieur même après
+     * uniformisation des codes — n'importe qui pourrait balayer des adresses et
+     * apprendre lesquelles ont un compte ici, ce qui est exactement la liste que
+     * ce marché achète.
+     *
+     * Ici, la personne a cliqué : elle possède la boîte, et aucun balayage
+     * anonyme n'atteint ce chemin. Fermer coûte donc un message à quelqu'un de
+     * réel, et rien à personne d'autre.
+     *
+     * LA LECTURE QUI ÉCHOUE LAISSE ENTRER. Le défaut de la fonction en base est
+     * « ouvert » ; le répéter ici évite qu'une base momentanément illisible
+     * ferme le produit sans que personne l'ait décidé.
+     */
+    const { data: ouvertes, error: erreurPorte } = await supabase.rpc(
+      "lire_inscriptions_ouvertes",
+    );
+    if (erreurPorte !== null) {
+      console.error("[auth] interrupteur d'inscription illisible — " + erreurPorte.message);
+    } else if (ouvertes === false) {
+      return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=fermees`, requete.url));
+    }
+
+    /*
      * L'INSCRIPTION EST COMPTÉE ICI, UNE SEULE FOIS, ET LA MARQUE EST EN BASE.
      *
      * Pas au moment de la demande de lien : mesuré sur ce projet, une demande

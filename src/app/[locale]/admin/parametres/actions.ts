@@ -1,9 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { exigerAdmin } from "@/lib/audit/garde";
-import { ecrireParametre, type ResultatEcriture } from "@/lib/audit/parametres";
+import {
+  ecrireParametre,
+  lireParametres,
+  type ParametreAffiche,
+  type ResultatEcriture,
+} from "@/lib/audit/parametres";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
@@ -33,7 +39,54 @@ const Formulaire = z.object({
   valeur: z.coerce.number().int(),
 });
 
-export type EtatParametre = { statut: "inactif" } | ResultatEcriture;
+/**
+ * Ce que l'écran doit redessiner APRÈS l'écriture.
+ *
+ * ⚠️ IL EST RELU EN BASE, jamais déduit de ce qu'on vient d'envoyer. C'est toute
+ * la différence entre « la valeur que j'ai demandée » et « la valeur que le
+ * produit applique » — et sur un interrupteur qui coupe une facturation, seule
+ * la seconde vaut quelque chose.
+ */
+export interface ValeurRelue {
+  readonly valeur: number;
+  readonly ecrit: boolean;
+  readonly origine: string;
+}
+
+export type EtatParametre =
+  | { statut: "inactif" }
+  | ({ statut: "ok"; cle: string } & { readonly apres: ValeurRelue })
+  | Extract<ResultatEcriture, { statut: "erreur" }>;
+
+/*
+ * ⚠️ POURQUOI LE SERVEUR RENVOIE LA VALEUR RELUE, AU LIEU DE LAISSER LE CACHE
+ * FAIRE SON TRAVAIL. Mesuré le 29/08/2026, écran piloté, requêtes lues octet par
+ * octet — TROIS chemins ont été essayés, tous écrivaient correctement en base et
+ * aucun ne redessinait l'écran :
+ *
+ *   - `useActionState` : la réponse contient le résultat ET l'arbre rafraîchi,
+ *     et l'état du composant reste `inactif` indéfiniment (observé 8 s, toutes
+ *     les 500 ms) ;
+ *   - `router.refresh()` après un `await` ordinaire : rien ne bouge, 10 s
+ *     durant, alors que la base a changé ;
+ *   - le même appel DANS une transition : l'écran se met à jour, mais
+ *     `isPending` ne retombe jamais, donc le bouton reste désactivé et le clic
+ *     SUIVANT est avalé sans un mot.
+ *
+ * Un écran d'administration qui affirme un état que la base n'a plus est le
+ * défaut le plus grave que cet écran puisse porter. On cesse donc de dépendre
+ * d'une invalidation de cache : la Server Action RELIT et rend ce qu'elle a lu.
+ * `revalidatePath` reste, pour le panneau et pour la navigation suivante.
+ */
+function composerOrigine(
+  p: ParametreAffiche,
+  t: (cle: string, valeurs?: Record<string, string>) => string,
+  quand: (iso: string | null) => string,
+): string {
+  if (!p.ecrit) return t("origine.jamaisDecide");
+  if (p.modifiePar === null) return t("origine.auteurParti", { date: quand(p.modifieLe) });
+  return t("origine.decide", { date: quand(p.modifieLe), email: p.modifiePar });
+}
 
 export async function enregistrerParametre(
   _precedent: EtatParametre,
@@ -50,14 +103,33 @@ export async function enregistrerParametre(
   const supabase = await creerClientServeur();
   const resultat = await ecrireParametre(supabase, analyse.data.cle, analyse.data.valeur);
 
-  if (resultat.statut === "ok") {
-    // Les deux écrans concernés : celui-ci, et le panneau dont les alertes
-    // dépendent directement de ces seuils. Oublier le second laisserait le
-    // panneau signaler selon l'ancien seuil pendant que l'écran de réglage
-    // affiche le nouveau — les deux se contrediraient sans que rien n'échoue.
-    revalidatePath("/[locale]/admin/parametres", "page");
-    revalidatePath("/[locale]/admin", "page");
-  }
+  if (resultat.statut !== "ok") return resultat;
 
-  return resultat;
+  // Les deux écrans concernés : celui-ci, et le panneau dont les alertes
+  // dépendent directement de ces seuils. Oublier le second laisserait le panneau
+  // signaler selon l'ancien seuil pendant que l'écran de réglage affiche le
+  // nouveau — les deux se contrediraient sans que rien n'échoue.
+  revalidatePath("/[locale]/admin/parametres", "page");
+  revalidatePath("/[locale]/admin", "page");
+
+  const relu = (await lireParametres(supabase)).find((p) => p.cle === resultat.cle);
+  // ⚠️ SI LA RELECTURE NE RETROUVE PAS LA CLÉ, ON LE DIT. Rendre « enregistré »
+  // sans valeur laisserait l'écran sur l'ancienne, c'est-à-dire exactement le
+  // défaut qu'on vient de corriger — mais cette fois sans même un message.
+  if (relu === undefined) return { statut: "erreur", motif: "panne" };
+
+  const t = await getTranslations("admin.parametres");
+  const format = await getFormatter();
+  const quand = (iso: string | null): string =>
+    format.dateTime(new Date(iso ?? 0), "long");
+
+  return {
+    statut: "ok",
+    cle: resultat.cle,
+    apres: {
+      valeur: relu.valeur,
+      ecrit: relu.ecrit,
+      origine: composerOrigine(relu, t, quand),
+    },
+  };
 }

@@ -53,6 +53,7 @@ const MOTIFS = [
   "suspendu",
   "indisponible",
   "trop",
+  "fermees",
 ] as const;
 
 function motifConnu(brut: string | undefined): (typeof MOTIFS)[number] | null {

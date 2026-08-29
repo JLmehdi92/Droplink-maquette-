@@ -179,7 +179,8 @@
       "session": "Your session has expired. Sign in again to continue.",
       "suspendu": "This account is suspended. Write to us to find out why.",
       "indisponible": "Google sign-in is temporarily unavailable. Use the email link below.",
-      "trop": "Too many attempts from this device. Please wait a few minutes."
+      "trop": "Too many attempts from this device. Please wait a few minutes.",
+      "fermees": "Sign-ups are closed for now. Existing accounts are unaffected."
     },
     "apercuTitre": "Your order"
   },
@@ -960,37 +961,104 @@
       }
     },
     "parametres": {
-      "titre": "Settings",
-      "sousTitre": "The thresholds the product actually reads. Every change is recorded with the previous and new value, your email and the time.",
+      "titre": "System settings",
+      "sousTitre": "Every change is written to the audit log, with the old and the new value. Greyed values can only be changed at deploy time.",
       "enregistrer": "Save",
       "enCours": "Saving…",
       "fait": "Saved.",
-      "bornes": "Between {min} and {max}. Default value: {defaut}.",
-      "secretsAide": "Secrets are not set here: API keys, the scheduler secret and the service key stay in the server environment. A value stored in the database would be readable by anyone with access to it — acceptable for a threshold, never for a key.",
+      "bornes": "Between {min} and {max}. Default: {defaut}.",
+      "aucunPlafond": "None",
+      "secretsTitre": "Secrets are not here",
+      "secretsAide": "API keys, storage token and service key never go through this screen or the database. They live only in the server's environment variables.",
       "origine": {
         "jamaisDecide": "Default value: nobody has ever changed it.",
         "decide": "Changed on {date} by {email}.",
-        "auteurParti": "Changed on {date}. The account that changed it no longer exists."
+        "auteurParti": "Changed on {date}. The author's account no longer exists."
+      },
+      "carte": {
+        "plafonds": {
+          "titre": "Per-account limits",
+          "sousTitre": "Enforced in the database, not only in the interface."
+        },
+        "suivi": {
+          "titre": "Parcel tracking",
+          "sousTitre": "The product's only variable cost."
+        },
+        "debit": {
+          "titre": "Rate limiting",
+          "sousTitre": "Per one-minute window, counted in the database."
+        },
+        "interrupteurs": {
+          "titre": "Switches",
+          "sousTitre": "Immediate effect across the platform."
+        }
       },
       "cles": {
-        "seuil_colis_par_compte": {
-          "titre": "Flag an account above",
-          "aide": "Number of parcels registered in the month above which the account appears in the panel alerts. This is the only counter in the product that matches an invoice."
-        },
         "plafond_commandes_mensuel": {
-          "titre": "Refuse above",
-          "aide": "Orders a single account may create in a month. Beyond that, creation is REFUSED: this is the only threshold in the product that blocks a write, and the seller would learn about it from their customer. Keep it above real usage — a supplier creates around 870 a month."
+          "titre": "Orders per month",
+          "aide": "Beyond this, creation is refused"
+        },
+        "seuil_colis_par_compte": {
+          "titre": "Parcel alert threshold",
+          "aide": "Flags an account above this number"
         },
         "retard_veilleur_minutes": {
-          "titre": "Report a task as late after",
-          "aide": "Minutes without a heartbeat after which a background task is reported as late. Too low, and the alert would describe the normal cadence rather than a failure."
+          "titre": "Task late after",
+          "aide": "In minutes without a heartbeat"
+        },
+        "inscriptions_ouvertes": {
+          "titre": "Sign-ups open",
+          "aide": "Closing does not affect existing accounts"
+        },
+        "suivi_actif": {
+          "titre": "Carrier polling",
+          "aide": "Switching off stops billing on registration"
+        }
+      },
+      "constate": {
+        "stockage_par_compte": {
+          "titre": "Storage per account",
+          "aide": "No limit is enforced"
+        },
+        "medias_par_commande": {
+          "titre": "Media per order",
+          "aide": "Including at most {videos} videos"
+        },
+        "poids_video": {
+          "titre": "Maximum video size",
+          "aide": "In megabytes · provisional, to calibrate"
+        },
+        "silence_jours": {
+          "titre": "Silence named after",
+          "aide": "In days without movement"
+        },
+        "abandon_jours": {
+          "titre": "Tracking abandoned after",
+          "aide": "In days, or {interrogations} empty queries"
+        },
+        "purge_jours": {
+          "titre": "Raw responses purged after",
+          "aide": "In days after the last movement"
+        },
+        "debit_inconnu": {
+          "titre": "Unknown token"
+        },
+        "debit_valide": {
+          "titre": "Valid token"
+        },
+        "debit_depot": {
+          "titre": "Media uploads"
+        },
+        "notifications_email": {
+          "titre": "Email notifications",
+          "aide": "Not deployed: nothing is sent"
         }
       },
       "erreur": {
         "cle": "This setting does not exist.",
-        "bornes": "Value outside the allowed limits.",
-        "refuse": "You are not allowed to change this setting.",
-        "panne": "Could not save. The setting is unchanged."
+        "bornes": "Value outside the allowed range.",
+        "refuse": "You do not have the rights to change this setting.",
+        "panne": "Could not save. The setting has not changed."
       }
     },
     "boutiques": {

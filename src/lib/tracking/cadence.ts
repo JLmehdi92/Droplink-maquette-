@@ -42,7 +42,30 @@ const LOT = 50;
 export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<BilanCadence> {
   const systeme = creerClientSysteme();
 
-  const { data, error } = await systeme.rpc("colis_a_interroger", { p_limite: limite });
+  /*
+   * L'INTERRUPTEUR COUPE LE TRAVAIL, PAS LE VEILLEUR.
+   *
+   * Le battement continue d'être écrit plus bas : une tâche coupée à dessein
+   * n'est pas une tâche en panne, et laisser le veilleur se taire ferait
+   * chercher une panne pendant que l'écran d'administration affiche
+   * l'interrupteur qu'on a soi-même baissé.
+   *
+   * LA PURGE, ELLE, CONTINUE. Elle ne coûte rien chez le fournisseur : c'est de
+   * l'hygiène de notre propre base, et l'arrêter ferait payer une décision de
+   * facturation par une croissance de disque.
+   */
+  const { data: actif, error: erreurInterrupteur } = await systeme.rpc("lire_suivi_actif");
+  if (erreurInterrupteur !== null) {
+    console.error(
+      "[suivi] cadence : interrupteur illisible, passage laissé ouvert — " +
+        erreurInterrupteur.message,
+    );
+  }
+  const coupe = erreurInterrupteur === null && actif === false;
+
+  const { data, error } = coupe
+    ? { data: [], error: null }
+    : await systeme.rpc("colis_a_interroger", { p_limite: limite });
 
   if (error !== null || data === null) {
     // Le battement N'EST PAS écrit : un passage qui n'a pas pu lire sa liste n'a
@@ -207,6 +230,10 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
   await systeme.rpc("battre", {
     p_source: "cadence-suivi",
     p_detail: {
+      // ÉCRIT DANS LE BATTEMENT : sans lui, un passage coupé et un passage sans
+      // rien à faire produisent exactement la même trace, et l'on ne pourrait
+      // pas relire pourquoi une journée n'a rien suivi.
+      suivi_actif: !coupe,
       examines: bilan.examines,
       interroges: bilan.interroges,
       abandonnes: bilan.abandonnes,

@@ -976,6 +976,7 @@ export type Database = {
           watermark_enabled: boolean
         }[]
       }
+      lire_inscriptions_ouvertes: { Args: never; Returns: boolean }
       lire_journal_admin: {
         Args: {
           p_curseur_date: string
@@ -1025,6 +1026,7 @@ export type Database = {
         }[]
       }
       lire_plafond_commandes: { Args: never; Returns: number }
+      lire_suivi_actif: { Args: never; Returns: boolean }
       lire_suivi_public: {
         Args: { p_jeton: string }
         Returns: {

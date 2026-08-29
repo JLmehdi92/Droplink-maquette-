@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   reactiver,
@@ -33,6 +32,31 @@ import {
  *
  * ÉCHAP FERME, et la fermeture ne suspend rien : la sortie doit toujours être
  * plus facile que l'action.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ L'ACTION EST APPELÉE DIRECTEMENT, ET L'ÉCRAN SE RECHARGE ENSUITE
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * DÉFAUT MESURÉ LE 29/08/2026, en pilotant l'écran sur un vrai compte. Avec
+ * `<form action={dispatch}>` de `useActionState` : le compte EST suspendu — la
+ * colonne passe à `suspended`, l'audit est inscrit, la page est même re-rendue
+ * côté serveur (une seconde trace `comptes.detail` suit immédiatement) — et
+ * l'écran ne montre RIEN. Pas de message, pas de pilule « Suspendu », le
+ * dialogue reste ouvert avec son bouton « Suspendre ». Observé sept secondes
+ * durant.
+ *
+ * C'est le pire endroit du produit où ce défaut pouvait vivre : la coupure de
+ * suspension est la capacité technique qui fonde notre statut d'hébergeur.
+ * Un administrateur qui ne voit rien recommence — ou conclut que ça n'a pas
+ * marché, alors que si.
+ *
+ * Le même défaut a été trouvé le même jour sur l'écran des paramètres, par la
+ * même mesure : `useActionState` ne rend jamais son résultat au composant, et
+ * `router.refresh()` ne redessine rien. On cesse donc de dépendre d'une
+ * invalidation : l'action est appelée comme une fonction, et une fois qu'elle a
+ * confirmé, la page est RECHARGÉE. Grossier, mais c'est le seul mécanisme dont
+ * on ait établi qu'il montre l'état réel — et cette décision-là se prend une
+ * fois par mois, pas dix fois par minute.
  */
 
 const INITIAL: EtatSuspension = { statut: "inactif" };
@@ -42,23 +66,27 @@ function BoutonAction({
   enCours,
   danger,
   desactive,
+  travaille,
+  onConfirmer,
 }: {
-  libelle: string;
-  enCours: string;
-  danger: boolean;
-  desactive: boolean;
+  readonly libelle: string;
+  readonly enCours: string;
+  readonly danger: boolean;
+  readonly desactive: boolean;
+  readonly travaille: boolean;
+  readonly onConfirmer: () => void;
 }) {
-  const { pending } = useFormStatus();
   return (
     <button
-      type="submit"
-      disabled={pending || desactive}
+      type="button"
+      disabled={desactive || travaille}
+      onClick={onConfirmer}
       className={
-        "min-h-[44px] rounded-lg px-6 font-label-md text-label-md transition-opacity disabled:opacity-50 " +
-        (danger ? "bg-error text-on-error" : "bg-violet-fond text-on-surface")
+        "min-h-[44px] rounded-lg px-4 font-label-md text-label-md disabled:opacity-50 " +
+        (danger ? "bg-error text-on-error" : "bg-primary text-on-primary")
       }
     >
-      {pending ? enCours : libelle}
+      {travaille ? enCours : libelle}
     </button>
   );
 }
@@ -83,7 +111,8 @@ export function DialogueSuspension({
   readonly motifMin: number;
 }) {
   const t = useTranslations("admin.suspension");
-  const [etat, action] = useActionState(suspendu ? reactiver : suspendre, INITIAL);
+  const [etat, setEtat] = useState<EtatSuspension>(INITIAL);
+  const [travaille, setTravaille] = useState(false);
   const [ouvert, setOuvert] = useState(false);
   const [motif, setMotif] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -96,6 +125,22 @@ export function DialogueSuspension({
   // lieu de faire relire le compte.
   const confirme = confirmation.trim().toLowerCase() === email.trim().toLowerCase();
   const pret = suspendu ? motifSuffisant : motifSuffisant && confirme;
+
+  async function confirmer(): Promise<void> {
+    setTravaille(true);
+    const donnees = new FormData();
+    donnees.set("profilId", profilId);
+    donnees.set("motif", motif);
+    if (!suspendu) donnees.set("confirmation", confirmation);
+
+    const resultat = await (suspendu ? reactiver : suspendre)(INITIAL, donnees);
+    setEtat(resultat);
+    setTravaille(false);
+    // ON NE RECHARGE QU'APRÈS UNE CONFIRMATION DE LA BASE. Recharger sur un
+    // échec effacerait le message d'erreur ET la saisie, en laissant croire que
+    // quelque chose s'est passé.
+    if (resultat.statut === "ok") window.location.reload();
+  }
 
   function fermer(): void {
     setOuvert(false);
@@ -137,9 +182,7 @@ export function DialogueSuspension({
       }}
       className="rounded-lg border border-outline-variant bg-surface-container-low p-4"
     >
-      <form action={action} className="flex flex-col gap-4">
-        <input type="hidden" name="profilId" value={profilId} />
-
+      <div className="flex flex-col gap-4">
         <div>
           <h3 className="font-headline-md text-headline-md-mobile text-on-surface">
             {suspendu ? t("titreReactivation") : t("titreSuspension")}
@@ -226,9 +269,11 @@ export function DialogueSuspension({
             enCours={t("enCours")}
             danger={!suspendu}
             desactive={!pret}
+            travaille={travaille}
+            onConfirmer={() => void confirmer()}
           />
         </div>
-      </form>
+      </div>
     </div>
   );
 }

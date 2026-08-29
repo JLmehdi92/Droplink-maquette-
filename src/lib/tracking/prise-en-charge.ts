@@ -36,6 +36,35 @@ export async function prendreEnCharge(
 ): Promise<ResultatPriseEnCharge> {
   const systeme = creerClientSysteme();
 
+  /*
+   * L'INTERRUPTEUR PASSE AVANT L'APPEL PAYANT, et il est posé ICI parce que
+   * c'est le seul endroit par lequel les DEUX chemins passent : le numéro que le
+   * vendeur vient de coller, et la reprise de la tâche de fond. Le poser dans la
+   * cadence seule aurait laissé la dépense ouverte par le geste le plus
+   * fréquent — et l'écran d'administration aurait annoncé une coupure qui ne
+   * coupait que la moitié.
+   *
+   * `indisponible` ET NON `refuse` : rien n'est marqué, `registered_at` reste
+   * nulle, et le colis est donc repris tel quel le jour où l'on rouvre. Un refus
+   * aurait abandonné le suivi pour de bon — une décision d'exploitation
+   * deviendrait une perte de données pour le vendeur.
+   *
+   * ⚠️ EN CAS D'ÉCHEC DE LECTURE, ON LAISSE COURIR. Le défaut de la fonction en
+   * base est déjà « ouvert » ; le répéter ici évite qu'une base momentanément
+   * illisible coupe le suivi de tout le monde en silence. Couper serait le choix
+   * prudent pour la facture et le pire pour le produit, et personne ne verrait
+   * la différence entre les deux avant des semaines.
+   */
+  const { data: actif, error: erreurInterrupteur } = await systeme.rpc("lire_suivi_actif");
+  if (erreurInterrupteur !== null) {
+    console.error(
+      "[suivi] interrupteur illisible, prise en charge laissée ouverte — " +
+        erreurInterrupteur.message,
+    );
+  } else if (actif === false) {
+    return { statut: "indisponible", motif: "interrupteur-coupe" };
+  }
+
   const inscription = await dixSeptTrack
     .prendreEnCharge(numero, transporteur)
     .catch(() => ({ statut: "indisponible" as const, motif: "exception" }));

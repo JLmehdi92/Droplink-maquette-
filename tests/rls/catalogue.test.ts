@@ -233,6 +233,21 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "il n'insère aucune commande.",
     ],
     [
+      "lire_inscriptions_ouvertes",
+      "L'interrupteur de création de comptes, lu par le RETOUR " +
+        "D'AUTHENTIFICATION — qui s'exécute avec la session fraîchement " +
+        "échangée, donc en `authenticated`. Sans ce `grant`, la porte resterait " +
+        "ouverte en silence : la lecture échouerait, et le code laisse entrer " +
+        "quand il ne peut pas lire, parce qu'une base momentanément illisible ne " +
+        "doit pas fermer le produit sans que personne l'ait décidé. Elle ne " +
+        "prend AUCUN argument, contrairement à `lire_parametre_entier` qui reste " +
+        "réservée aux administrateurs parce qu'une clé libre servirait d'oracle " +
+        "d'existence sur n'importe quelle clé devinée. Elle ne rend qu'un " +
+        "booléen que l'écran de connexion annonce de toute façon quand la porte " +
+        "est fermée. `anon` n'y a pas droit : il n'atteint jamais ce chemin, qui " +
+        "vient APRÈS l'échange du code.",
+    ],
+    [
       "mon_shop_id",
       "Rend la boutique de l'APPELANT et ne prend aucun argument : il n'y a rien " +
         "à détourner. Les policies s'exécutant avec le rôle appelant (L-001), " +
