@@ -98,3 +98,26 @@ export async function rendreLesParametresAuDefaut(): Promise<void> {
     console.warn("[harnais] remise à zéro des paramètres impossible : " + error.message);
   }
 }
+
+/**
+ * Efface les battements de tâches de fond.
+ *
+ * ⚠️ `scheduler_heartbeat` EST GLOBALE, ET L'ABSENCE DE LIGNE Y EST
+ * L'INFORMATION. Les suites y écrivent des battements pour éprouver les trois
+ * états, et ils SURVIVENT : la base de développement portait `cadence-suivi` —
+ * une tâche de l'inventaire, donc affichée — et `source-fantome`, un résidu pur.
+ * L'écran de surveillance montrait « actif » puis « en retard » au fil des
+ * minutes, selon des battements que personne n'avait voulus.
+ *
+ * C'est PIRE que le résidu d'un paramètre : celui-ci ne fausse pas une valeur,
+ * il fait passer une tâche de « jamais exécutée » à « en retard », c'est-à-dire
+ * d'un constat à une ALERTE. Et une alerte qui se trompe est une alerte qu'on
+ * apprend à ignorer.
+ */
+export async function effacerLesBattements(): Promise<void> {
+  const service = clientService();
+  const { error } = await service.from("scheduler_heartbeat").delete().neq("source", "");
+  if (error !== null) {
+    console.warn("[harnais] effacement des battements impossible : " + error.message);
+  }
+}
