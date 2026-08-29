@@ -945,18 +945,24 @@ export type Database = {
       lire_compte_admin: {
         Args: { p_ip_hash: string; p_profil: string }
         Returns: {
+          accent_color: string
           account_type: Database["public"]["Enums"]["account_type"]
           boutique_id: string
           boutique_nom: string
-          colis: number
+          colis_ce_mois: number
           commandes: number
+          commandes_ce_mois: number
           created_at: string
           email: string
+          evenements: Json
           id: string
           locale: string
+          medias: number
+          reseaux: string[]
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["account_status"]
-          vues: number
+          stockage_octets: number
+          watermark_enabled: boolean
         }[]
       }
       lire_journal_admin: {

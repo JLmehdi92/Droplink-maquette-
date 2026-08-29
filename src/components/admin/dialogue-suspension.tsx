@@ -111,10 +111,10 @@ export function DialogueSuspension({
           type="button"
           onClick={() => setOuvert(true)}
           className={
-            "min-h-[44px] rounded-lg px-6 font-label-md text-label-md " +
+            "flex min-h-11 w-full items-center justify-center rounded-[11px] border bg-surface-container-lowest px-[18px] font-headline-md text-[14px] leading-[18px] font-bold transition-colors md:min-h-0 md:h-[42px] " +
             (suspendu
-              ? "border border-outline-variant text-on-surface"
-              : "border border-error text-error")
+              ? "border-filet-controle text-on-surface hover:bg-fond-neutre"
+              : "border-alerte-bordure text-alerte hover:bg-alerte-fond-carte")
           }
         >
           {suspendu ? t("rouvrir") : t("ouvrir")}

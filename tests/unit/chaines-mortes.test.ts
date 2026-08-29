@@ -45,6 +45,14 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
     "admin.panneau.alerteDetail.",
     "composé depuis le même genre d'alerte, pour la ligne de détail — page admin",
   ],
+  [
+    "admin.fiche.evenement.",
+    "composé depuis le type d'événement rendu par `lire_compte_admin` — fiche de compte",
+  ],
+  [
+    "admin.langues.",
+    "composé depuis `profiles.locale` — fiche de compte",
+  ],
   ["admin.panneau.tache.", "composé depuis l'état du veilleur — page admin"],
   [
     "admin.surveillance.indicateur.",

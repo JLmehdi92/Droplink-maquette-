@@ -74,3 +74,27 @@ export async function purgerResidusDeTest(): Promise<number> {
 
   return supprimes;
 }
+
+/**
+ * Rend les paramètres système à leur état d'origine : AUCUNE LIGNE.
+ *
+ * `system_settings` est globale au produit — elle ne porte aucune isolation par
+ * compte. Cinq suites y écrivent des seuils pour éprouver qu'ils sont bien LUS,
+ * et aucune ne les défaisait : le plafond de colis valait 33 sur la base de
+ * développement, écrit par une exécution passée, et la fiche d'un compte
+ * affichait « 5 sur 33 » à un humain venu mesurer autre chose.
+ *
+ * ON EFFACE, ON NE RÉÉCRIT PAS LE DÉFAUT. Une ligne absente est l'état normal du
+ * produit ; réinsérer 1 200 ferait croire que quelqu'un a choisi ce seuil, et le
+ * test « sans paramètre écrit, les défauts s'appliquent » n'aurait plus rien à
+ * observer.
+ */
+export async function rendreLesParametresAuDefaut(): Promise<void> {
+  const service = clientService();
+  const { error } = await service.from("system_settings").delete().neq("key", "");
+  if (error !== null) {
+    // Hygiène, pas garde : la faire échouer empêcherait de mesurer pour une
+    // raison sans rapport avec ce qu'on mesure.
+    console.warn("[harnais] remise à zéro des paramètres impossible : " + error.message);
+  }
+}

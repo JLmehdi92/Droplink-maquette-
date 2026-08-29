@@ -828,15 +828,60 @@
       "identite": "Identité",
       "type": "Type",
       "role": "Rôle",
-      "statut": "Statut",
       "boutique": "Boutique",
       "boutiqueNonConfiguree": "Non configurée",
-      "inscrit": "Inscrit le",
       "volumes": "Volumes",
-      "volumesAide": "Des volumes, pas du contenu : ils suffisent à décider, et le contenu appartient au vendeur et à ses clients.",
       "commandes": "Commandes",
-      "colis": "Colis suivis",
-      "vues": "Consultations"
+      "colis": "Colis",
+      "retour": "Revenir à la liste des comptes",
+      "resume": "{email} · {type} · inscrit le {date}",
+      "trace": "L'ouverture de cette fiche a été écrite au journal d'audit, avec votre identité. Le contenu des commandes de ce vendeur n'est accessible depuis nulle part ici.",
+      "medias": "Médias",
+      "stockage": "Stockage",
+      "langue": "Langue",
+      "plafonds": "Plafonds",
+      "plafondColis": "Colis pris en charge",
+      "plafondCommandes": "Commandes ce mois",
+      "surPlafond": "{valeur} sur {plafond}",
+      "depassementColis": "Dépassé de {ecart}. Chaque prise en charge nous est facturée par le fournisseur de suivi.",
+      "activite": "Ce que ce compte a fait",
+      "activiteAide": "Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.",
+      "activiteVide": "Ce compte n'a encore rien fait.",
+      "activiteLigne": "{n, plural, one {# {quoi}} other {# {quoi}}}",
+      "filigrane": "Filigrane",
+      "active": "Activé",
+      "inactive": "Désactivé",
+      "reseaux": "Réseaux configurés",
+      "reseauxAucun": "Aucun",
+      "interdits": "Ce que cette page ne permet pas",
+      "evenement": {
+        "commande_creee": "commandes créées",
+        "commande_modifiee": "modifications de commande",
+        "commande_archivee": "commandes archivées",
+        "commande_dupliquee": "commandes dupliquées",
+        "media_ajoute": "médias ajoutés",
+        "media_supprime": "médias supprimés",
+        "medias_reordonnes": "réordonnancements de médias",
+        "lien_revoque": "liens révoqués",
+        "qc_approuve": "validations de client",
+        "qc_refuse": "refus de client"
+      },
+      "interdit": {
+        "suppression": {
+          "quoi": "Supprimer le compte.",
+          "pourquoi": "Suspendre est réversible, supprimer ne l'est pas."
+        },
+        "usurpation": {
+          "quoi": "Se connecter à sa place.",
+          "pourquoi": "La lecture tracée suffit au diagnostic."
+        },
+        "commandes": {
+          "quoi": "Ouvrir ses commandes.",
+          "pourquoi": "Leur contenu appartient à son client."
+        }
+      },
+      "email": "Email",
+      "titre": "Fiche de compte"
     },
     "suspension": {
       "ouvrir": "Suspendre ce compte",
@@ -997,6 +1042,10 @@
       "journal": "Journal",
       "surveillance": "Veille",
       "parametres": "Réglages"
+    },
+    "langues": {
+      "fr": "Français",
+      "en": "Anglais"
     }
   },
   "erreurs": {

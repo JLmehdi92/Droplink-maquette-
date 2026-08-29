@@ -144,6 +144,19 @@ export async function listerComptes(
   };
 }
 
+/**
+ * Un agrégat de la frise d'activité : ce que le vendeur a fait, un jour donné.
+ *
+ * NI IDENTIFIANT NI CHARGE UTILE. Un événement individuel porterait le nom du
+ * client et la référence du produit ; le compte par type et par jour suffit à
+ * décider d'une suspension et n'apprend rien du contenu.
+ */
+export interface ActiviteCompte {
+  readonly type: string;
+  readonly jour: string;
+  readonly n: number;
+}
+
 export interface FicheCompte {
   readonly id: string;
   readonly email: string;
@@ -153,9 +166,17 @@ export interface FicheCompte {
   readonly langue: string;
   readonly creeLe: string;
   readonly boutique: string | null;
+  readonly accent: string | null;
+  readonly filigrane: boolean;
+  /** Noms des réseaux configurés, jamais leurs adresses. */
+  readonly reseaux: readonly string[];
+  /** Commandes AYANT DU CONTENU RÉEL — même définition que les deux listes. */
   readonly commandes: number;
-  readonly colis: number;
-  readonly vues: number;
+  readonly commandesCeMois: number;
+  readonly colisCeMois: number;
+  readonly medias: number;
+  readonly stockageOctets: number;
+  readonly activite: readonly ActiviteCompte[];
 }
 
 /**
@@ -191,9 +212,25 @@ export async function lireCompte(
     langue: l.locale,
     creeLe: l.created_at,
     boutique: l.boutique_nom,
+    accent: l.accent_color,
+    filigrane: l.watermark_enabled === true,
+    reseaux: l.reseaux ?? [],
     commandes: Number(l.commandes),
-    colis: Number(l.colis),
-    vues: Number(l.vues),
+    commandesCeMois: Number(l.commandes_ce_mois),
+    colisCeMois: Number(l.colis_ce_mois),
+    medias: Number(l.medias),
+    stockageOctets: Number(l.stockage_octets),
+    // La base rend `[]` plutot que `null` : l'appelant n'a pas a distinguer
+    // « aucun evenement » de « rien lu ». Le `?? []` reste par prudence de
+    // typage, pas parce qu'un cas nul serait attendu.
+    activite: (Array.isArray(l.evenements) ? l.evenements : []).map((e) => {
+      const brut = e as { type?: unknown; jour?: unknown; n?: unknown };
+      return {
+        type: String(brut.type ?? ""),
+        jour: String(brut.jour ?? ""),
+        n: Number(brut.n ?? 0),
+      };
+    }),
   };
 }
 

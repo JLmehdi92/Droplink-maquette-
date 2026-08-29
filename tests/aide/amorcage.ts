@@ -14,6 +14,7 @@ import { config } from "dotenv";
 config({ path: ".env.local", quiet: true });
 
 export async function setup(): Promise<void> {
-  const { purgerResidusDeTest } = await import("./purger-residus");
+  const { purgerResidusDeTest, rendreLesParametresAuDefaut } = await import("./purger-residus");
   await purgerResidusDeTest();
+  await rendreLesParametresAuDefaut();
 }

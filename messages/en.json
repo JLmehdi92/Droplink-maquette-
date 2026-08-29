@@ -828,15 +828,60 @@
       "identite": "Identity",
       "type": "Type",
       "role": "Role",
-      "statut": "Status",
       "boutique": "Shop",
       "boutiqueNonConfiguree": "Not configured",
-      "inscrit": "Joined",
       "volumes": "Volumes",
-      "volumesAide": "Volumes, not content: they are enough to decide, and the content belongs to the seller and their customers.",
       "commandes": "Orders",
-      "colis": "Tracked parcels",
-      "vues": "Views"
+      "colis": "Parcels",
+      "retour": "Back to the account list",
+      "resume": "{email} · {type} · signed up on {date}",
+      "trace": "Opening this record was written to the audit log, with your identity. This vendor's order content is not reachable from anywhere here.",
+      "medias": "Media",
+      "stockage": "Storage",
+      "langue": "Language",
+      "plafonds": "Ceilings",
+      "plafondColis": "Parcels taken over",
+      "plafondCommandes": "Orders this month",
+      "surPlafond": "{valeur} of {plafond}",
+      "depassementColis": "Over by {ecart}. Every parcel taken over is billed to us by the tracking provider.",
+      "activite": "What this account has done",
+      "activiteAide": "The vendor's events, not yours, and only their counts. No order content appears here.",
+      "activiteVide": "This account has done nothing yet.",
+      "activiteLigne": "{n, plural, one {# {quoi}} other {# {quoi}}}",
+      "filigrane": "Watermark",
+      "active": "On",
+      "inactive": "Off",
+      "reseaux": "Configured networks",
+      "reseauxAucun": "None",
+      "interdits": "What this page does not allow",
+      "evenement": {
+        "commande_creee": "orders created",
+        "commande_modifiee": "order edits",
+        "commande_archivee": "orders archived",
+        "commande_dupliquee": "orders duplicated",
+        "media_ajoute": "media added",
+        "media_supprime": "media removed",
+        "medias_reordonnes": "media reorderings",
+        "lien_revoque": "links revoked",
+        "qc_approuve": "customer approvals",
+        "qc_refuse": "customer rejections"
+      },
+      "interdit": {
+        "suppression": {
+          "quoi": "Delete the account.",
+          "pourquoi": "Suspending is reversible, deleting is not."
+        },
+        "usurpation": {
+          "quoi": "Sign in as them.",
+          "pourquoi": "Audited reading is enough to diagnose."
+        },
+        "commandes": {
+          "quoi": "Open their orders.",
+          "pourquoi": "That content belongs to their customer."
+        }
+      },
+      "email": "Email",
+      "titre": "Account record"
     },
     "suspension": {
       "ouvrir": "Suspend this account",
@@ -997,6 +1042,10 @@
       "journal": "Log",
       "surveillance": "Watch",
       "parametres": "Settings"
+    },
+    "langues": {
+      "fr": "French",
+      "en": "English"
     }
   },
   "erreurs": {

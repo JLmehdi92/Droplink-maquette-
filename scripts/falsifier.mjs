@@ -1470,6 +1470,109 @@ const SQL = {
     },
   },
 
+  /**
+   * LA FRISE D UNE FICHE REPUBLIE LA CHARGE UTILE, SOUS UN NOM ANODIN.
+   *
+   * `meta` porte alors le pseudo du client et la reference produit, sur l ecran
+   * dont toute la raison d etre est de ne montrer QUE des volumes. Aucun nom de
+   * colonne suspect, aucune erreur, et l ecran continue d afficher exactement la
+   * meme chose — le mappeur TypeScript jette la colonne en trop. Seul un
+   * controle par VALEUR sur la reponse BRUTE de la base le voit.
+   */
+  "frise-republie-la-charge-utile": {
+    casser: `drop function if exists public.lire_compte_admin(uuid, text);
+create or replace function public.lire_compte_admin(p_profil uuid, p_ip_hash text)
+  returns table (
+    id uuid,
+    email text,
+    account_type public.account_type,
+    role public.user_role,
+    status public.account_status,
+    locale text,
+    created_at timestamptz,
+    boutique_id uuid,
+    boutique_nom text,
+    accent_color text,
+    watermark_enabled boolean,
+    reseaux text[],
+    commandes bigint,
+    commandes_ce_mois bigint,
+    colis_ce_mois bigint,
+    medias bigint,
+    stockage_octets bigint,
+    evenements jsonb
+  )
+  language plpgsql
+  volatile
+  security definer
+  set search_path = ''
+as $$
+begin
+  if not public.est_admin() then
+    raise exception 'introuvable' using errcode = 'DL031';
+  end if;
+
+  -- ON TRACE MÊME QUAND LE COMPTE N'EXISTE PAS. Ne tracer que les succès
+  -- laisserait l'énumération d'identifiants totalement invisible.
+  perform public.journaliser_admin(
+    'comptes.detail', 'profiles', p_profil::text, p_profil, p_ip_hash, '{}'::jsonb
+  );
+
+  return query
+  select
+    p.id, p.email, p.account_type, p.role, p.status, p.locale, p.created_at,
+    s.id, s.name, s.accent_color, s.watermark_enabled,
+    -- LES RÉSEAUX CONFIGURÉS, PAR LEUR NOM, jamais par leur adresse : savoir
+    -- qu'un vendeur a mis un Instagram suffit à décrire son compte, l'ouvrir ne
+    -- regarde personne ici.
+    array_remove(array[
+      case when nullif(btrim(coalesce(s.instagram_url, '')), '') is null then null else 'instagram' end,
+      case when nullif(btrim(coalesce(s.tiktok_url, '')), '') is null then null else 'tiktok' end,
+      case when nullif(btrim(coalesce(s.whatsapp_url, '')), '') is null then null else 'whatsapp' end
+    ], null),
+    -- MÊME DÉFINITION QUE LES DEUX AUTRES ÉCRANS, enfin.
+    coalesce(s.commandes_reelles, 0)::bigint,
+    coalesce(u.orders_created, 0)::bigint,
+    coalesce(u.parcels_registered, 0)::bigint,
+    coalesce(s.medias_count, 0)::bigint,
+    coalesce(s.stockage_octets, 0)::bigint,
+    -- LA FRISE : agrégats seulement, six lignes au plus, du plus récent au plus
+    -- ancien. \`coalesce\` sur un tableau vide plutôt que \`null\` — l'appelant ne
+    -- doit pas avoir à distinguer « aucun événement » de « rien lu ».
+    coalesce((
+      select jsonb_agg(x order by x.jour desc)
+        from (
+          select e.type as type,
+                 date_trunc('day', e.occurred_at)::date as jour,
+                 count(*) as n,
+                 (array_agg(e.payload))[1] as meta
+            from public.order_events e
+            join public.orders o on o.id = e.order_id
+           where o.shop_id = s.id
+             and e.actor = 'vendeur'
+           group by e.type, date_trunc('day', e.occurred_at)::date
+           order by 2 desc
+           limit 6
+        ) as x
+    ), '[]'::jsonb)
+  from public.profiles p
+  left join public.shops s on s.owner_id = p.id
+  left join public.usage_counters u
+         on u.profile_id = p.id
+        and u.period_month = date_trunc('month', now())::date
+  where p.id = p_profil;
+end;
+$$;
+
+`,
+    reparerDepuisMigration: {
+      fichier: "112_la_fiche_de_compte_dit_ce_que_la_planche_montre.sql",
+      depuis: "create function public.lire_compte_admin",
+      jusqua: "-- L'INDEX QUE LA FRISE DEMANDE",
+      avant: "drop function if exists public.lire_compte_admin(uuid, text);",
+    },
+  },
+
   "jeton-sous-nom-anodin": {
     casser: `create or replace function public.lister_boutiques_admin(
         p_recherche text, p_curseur_octets text, p_curseur_id text,

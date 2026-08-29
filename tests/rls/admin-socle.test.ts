@@ -475,3 +475,139 @@ describe("La liste des comptes et celle des boutiques comptent pareil", () => {
     ).toBe(7);
   });
 });
+
+/**
+ * LA FICHE D'UN COMPTE NE REND QUE DES VOLUMES.
+ *
+ * CONTRÔLE PAR VALEUR, PAS PAR NOM. Une valeur voyage sous n'importe quel nom :
+ * un pseudo de client republié sous `meta`, `debug` ou `diagnostic` survivrait
+ * intégralement à une vérification de la liste des colonnes. On injecte donc des
+ * SENTINELLES uniques en base et on les cherche dans la réponse ENTIÈRE,
+ * sérialisée — c'est le seul contrôle qui ne dépende pas de ce que son auteur a
+ * pensé à inspecter.
+ *
+ * LA SENTINELLE DE JETON COMPTE LE PLUS : les autres exposent une donnée,
+ * celle-là transfère une CAPACITÉ, définitivement, puisque le jeton est immuable
+ * à vie.
+ */
+describe("La fiche rend des volumes, jamais du contenu", () => {
+  const PSEUDO = "ZZSENTINELLE-pseudo-de-client";
+  const REFERENCE = "ZZSENTINELLE-reference-produit";
+  const RESEAU = "https://instagram.com/ZZSENTINELLE-adresse";
+  let jeton = "";
+
+  beforeAll(async () => {
+    const lignes = await interroger<{ public_token: string }>(
+      catalogue,
+      `insert into public.orders (shop_id, customer_label, product_ref)
+       values ($1, $2, $3) returning public_token`,
+      [cible.shopId, PSEUDO, REFERENCE],
+    );
+    jeton = lignes[0]?.public_token ?? "";
+    if (jeton === "") throw new Error("commande sentinelle non créée");
+
+    await interroger(catalogue, "update public.shops set instagram_url = $2 where id = $1", [
+      cible.shopId,
+      RESEAU,
+    ]);
+
+    // LES ÉVÉNEMENTS SONT ÉCRITS PAR LES SERVER ACTIONS, pas par un déclencheur :
+    // une insertion SQL directe n'en produit aucun. On les pose donc à la main,
+    // AVEC une charge utile qui porte une sentinelle — c'est tout l'intérêt, la
+    // frise ne doit jamais la laisser sortir.
+    await interroger(
+      catalogue,
+      `insert into public.order_events (order_id, type, actor, payload)
+       select o.id, t.type, 'vendeur', jsonb_build_object('client', $2::text)
+         from public.orders o
+        cross join (values ('commande_creee'), ('media_ajoute')) as t(type)
+        where o.shop_id = $1`,
+      [cible.shopId, PSEUDO],
+    );
+  }, 60_000);
+
+  test("contre-test d'abord : la sonde lit bien une fiche remplie", async () => {
+    const fiche = await lireCompte(admin.client, cible.profilId, IP);
+    expect(fiche, "la fiche est introuvable").not.toBeNull();
+    // Sans ces deux-là, « aucune sentinelle trouvée » serait vrai sur une fiche
+    // vide et ne prouverait rien du tout.
+    expect(fiche?.commandes, "la fiche ne porte aucune commande").toBeGreaterThan(0);
+    expect(fiche?.reseaux, "le réseau posé n'est pas vu").toContain("instagram");
+  });
+
+  test("aucune sentinelle ne franchit la fiche, sous AUCUN nom", async () => {
+    const fiche = await lireCompte(admin.client, cible.profilId, IP);
+    const rendu = JSON.stringify(fiche);
+
+    for (const [quoi, sentinelle] of [
+      ["le pseudo du client", PSEUDO],
+      ["la référence produit", REFERENCE],
+      ["l'adresse du réseau", RESEAU],
+      ["LE JETON PUBLIC", jeton],
+    ] as const) {
+      expect(rendu.includes(sentinelle), `${quoi} est rendu par la fiche d'administration`).toBe(
+        false,
+      );
+    }
+  });
+
+  test("LA BASE elle-même ne rend que des agrégats", async () => {
+    // ⚠️ ON INTERROGE LA RPC, PAS `lireCompte`. Le mappeur TypeScript
+    // reconstruit chaque entrée champ par champ : il JETAIT la colonne en trop
+    // avant que la sonde ne la voie, et une falsification qui republiait
+    // `payload` sous le nom `meta` est passée au vert. Le mappeur est une vraie
+    // frontière — il a son propre test juste en dessous — mais il ne dit rien de
+    // ce que la base accepte de rendre.
+    const { data, error } = await admin.client.rpc("lire_compte_admin", {
+      p_profil: cible.profilId,
+      p_ip_hash: IP,
+    });
+    expect(error).toBeNull();
+
+    const brut = (data ?? [])[0] as { evenements?: unknown } | undefined;
+    const evenements = Array.isArray(brut?.evenements) ? brut.evenements : [];
+    expect(evenements.length, "la frise est vide : la sonde n'inspecte rien").toBeGreaterThan(0);
+
+    for (const e of evenements) {
+      // INVENTAIRE, PAS SÉLECTION : on énumère les clés rendues et on refuse
+      // tout ce qui n'est pas déclaré, plutôt que de chercher `payload` — un
+      // champ ajouté demain sous un autre nom passerait la seconde forme.
+      expect(Object.keys(e as object).sort()).toEqual(["jour", "n", "type"]);
+    }
+
+    // ET PAR VALEUR, sur la réponse entière : une sentinelle ne voyage pas
+    // seulement dans les champs qu'on a pensé à énumérer.
+    const rendu = JSON.stringify(brut);
+    for (const [quoi, sentinelle] of [
+      ["le pseudo du client", PSEUDO],
+      ["la référence produit", REFERENCE],
+      ["l'adresse du réseau", RESEAU],
+      ["LE JETON PUBLIC", jeton],
+    ] as const) {
+      expect(rendu.includes(sentinelle), `${quoi} sort de la base`).toBe(false);
+    }
+  });
+
+  test("et le mappeur ne laisse passer que ce qu'il déclare", async () => {
+    // La seconde frontière, celle qui a effectivement arrêté la falsification.
+    const fiche = await lireCompte(admin.client, cible.profilId, IP);
+    expect(fiche?.activite.length, "la frise est vide : la sonde n'inspecte rien").toBeGreaterThan(
+      0,
+    );
+    for (const a of fiche?.activite ?? []) {
+      expect(Object.keys(a).sort()).toEqual(["jour", "n", "type"]);
+      expect(a.n).toBeGreaterThan(0);
+    }
+  });
+
+  test("la fiche compte comme les DEUX listes, pas comme une troisième", async () => {
+    const fiche = await lireCompte(admin.client, cible.profilId, IP);
+    const comptes = await listerComptes(admin.client, DEFAUTS, IP);
+    const ligne = comptes.lignes.find((l) => l.email === cible.email);
+
+    // ⚠️ TROISIÈME ENDROIT OÙ « COMMANDE » NE VOULAIT PAS DIRE LA MÊME CHOSE.
+    // Un administrateur qui ouvre une fiche depuis la liste voyait le nombre
+    // CHANGER en un clic, sans que rien ne bouge en base.
+    expect(fiche?.commandes).toBe(ligne?.commandes);
+  });
+});
