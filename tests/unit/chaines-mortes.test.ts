@@ -53,6 +53,14 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
     "admin.langues.",
     "composé depuis `profiles.locale` — fiche de compte",
   ],
+  [
+    "admin.journal.fenetre.",
+    "composé depuis FENETRES_JOURNAL — filtres du journal d'audit",
+  ],
+  [
+    "admin.journal.famille.",
+    "composé depuis FAMILLES_JOURNAL — filtres du journal d'audit",
+  ],
   ["admin.panneau.tache.", "composé depuis l'état du veilleur — page admin"],
   [
     "admin.surveillance.indicateur.",

@@ -234,6 +234,33 @@ export async function lireCompte(
   };
 }
 
+/**
+ * Les familles d'action que le journal sait filtrer.
+ *
+ * ⚠️ `consultation` EST DÉFINIE PAR EXCLUSION en base : toute action qui n'est
+ * ni une décision sur un compte ni un réglage est une lecture. Une liste
+ * positive aurait laissé la prochaine action hors de tous les filtres, donc
+ * introuvable par tous.
+ */
+export const FAMILLES_JOURNAL = ["suspension", "consultation", "parametre"] as const;
+
+/** Fenêtres proposées, en jours. `0` vaut « depuis le début ». */
+export const FENETRES_JOURNAL = [7, 30, 0] as const;
+
+export const ParametresJournal = z.object({
+  famille: z.enum(FAMILLES_JOURNAL).or(z.literal("")).catch(""),
+  // UNE FENÊTRE HORS LISTE RETOMBE SUR « DEPUIS LE DÉBUT ». Elle ne peut venir
+  // que d'une URL retouchée à la main : montrer tout est le comportement le
+  // moins surprenant, et l'écran allume alors la pilule correspondante.
+  jours: z.coerce
+    .number()
+    .int()
+    .catch(0)
+    .transform((n) => (FENETRES_JOURNAL.some((f) => f === n) ? n : 0)),
+  curseur: z.string().max(160).nullable().catch(null),
+});
+export type ParametresJournal = z.infer<typeof ParametresJournal>;
+
 export interface LigneJournal {
   readonly id: string;
   readonly adminEmail: string;
@@ -243,6 +270,9 @@ export interface LigneJournal {
   readonly cibleEmail: string | null;
   readonly quand: string;
   readonly motif: string | null;
+  /** Valeur d'un paramètre système AVANT la modification. `null` ailleurs. */
+  readonly avant: string | null;
+  readonly apres: string | null;
 }
 
 /**
@@ -284,6 +314,10 @@ export async function lireDernieresActions(
 ): Promise<readonly LigneJournal[]> {
   const { data, error } = await supabase
     .rpc("lire_journal_admin", {
+      // NI FILTRE NI FENÊTRE : l'aperçu du panneau montre ce qui vient
+      // d'arriver, quel qu'en soit le genre.
+      p_famille: "",
+      p_depuis_jours: 0,
       p_curseur_date: "",
       p_curseur_id: "",
       p_limite: FENETRE_APERCU,
@@ -310,16 +344,42 @@ export async function lireDernieresActions(
     cibleEmail: l.target_email,
     quand: l.occurred_at,
     motif: l.motif,
+    avant: l.avant,
+    apres: l.apres,
   }));
+}
+
+/**
+ * Le nombre d'entrées, avec les MÊMES filtres que la lecture.
+ *
+ * Un total qui ignorerait le filtre afficherait « 1 284 entrées » au-dessus
+ * d'une liste qui en montre trois, et l'on chercherait longtemps les 1 281
+ * autres. La fonction en base est `stable`, comme sa jumelle : compter le
+ * journal ne l'écrit pas non plus.
+ */
+export async function compterJournal(
+  supabase: ClientAdmin,
+  parametres: Pick<ParametresJournal, "famille" | "jours">,
+): Promise<number> {
+  const { data, error } = await supabase.rpc("compter_journal_admin", {
+    p_famille: parametres.famille,
+    p_depuis_jours: parametres.jours,
+  });
+  if (error !== null) {
+    throw new Error("comptage du journal impossible : " + error.message);
+  }
+  return Number(data ?? 0);
 }
 
 export async function lireJournal(
   supabase: ClientAdmin,
-  curseur: string | null,
+  parametres: ParametresJournal,
 ): Promise<{ lignes: readonly LigneJournal[]; curseurSuivant: string | null }> {
-  const point = curseur === null ? null : decoderCurseur(curseur);
+  const point = parametres.curseur === null ? null : decoderCurseur(parametres.curseur);
 
   const { data, error } = await supabase.rpc("lire_journal_admin", {
+    p_famille: parametres.famille,
+    p_depuis_jours: parametres.jours,
     p_curseur_date: point?.date ?? "",
     p_curseur_id: point?.id ?? "",
     p_limite: PAR_PAGE + 1,
@@ -341,6 +401,8 @@ export async function lireJournal(
     cibleEmail: l.target_email,
     quand: l.occurred_at,
     motif: l.motif,
+    avant: l.avant,
+    apres: l.apres,
   }));
 
   const dernier = trop ? visibles[visibles.length - 1] : undefined;

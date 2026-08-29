@@ -809,8 +809,6 @@
     },
     "journal": {
       "titre": "Audit log",
-      "sousTitre": "What administrators have viewed or changed. Entries cannot be edited or deleted, and outlive the accounts they describe.",
-      "cible": "Account concerned: {email}",
       "actions": {
         "boutiques_liste": "Viewed the shop list",
         "compte_reactivation": "Reactivated an account",
@@ -822,7 +820,30 @@
         "parametre_modification": "Changed a system setting"
       },
       "vide": "No entries yet.",
-      "pageSuivante": "Show more"
+      "pageSuivante": "Show more",
+      "decompte": "{total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
+      "garantie": "This log can be neither edited nor erased, and it outlives the deletion of the accounts it describes. Reading it writes nothing to it.",
+      "filtres": "Filter the log",
+      "famille": {
+        "toutes": "All",
+        "suspension": "Suspensions",
+        "consultation": "Views",
+        "parametre": "Settings"
+      },
+      "fenetre": {
+        "0": "Since the beginning",
+        "7": "Last 7 days",
+        "30": "Last 30 days"
+      },
+      "colonnes": {
+        "quand": "When",
+        "quoi": "What was done",
+        "qui": "By whom"
+      },
+      "cibleAvant": "Account concerned:",
+      "motifAvant": "Reason:",
+      "parQui": "By",
+      "videFiltre": "No entry matches this filter."
     },
     "fiche": {
       "identite": "Identity",

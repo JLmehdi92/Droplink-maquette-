@@ -1679,6 +1679,146 @@ $$;
     },
   },
 
+  /**
+   * LA FAMILLE « CONSULTATION » DEVIENT UNE LISTE POSITIVE, INCOMPLETE.
+   *
+   * Les trois filtres du journal cessent alors de le PARTITIONNER : une action
+   * qui n appartient a aucune des listes devient introuvable PAR TOUS LES
+   * FILTRES. Et un filtre qui rend zero ligne ressemble a un filtre qui n a rien
+   * trouve — c est exactement ainsi qu on cesse de chercher.
+   */
+  "journal-consultation-en-liste-positive": {
+    casser: `drop function if exists public.lire_journal_admin(text, int, text, text, int);
+      drop function if exists public.compter_journal_admin(text, int);
+create or replace function public.lire_journal_admin(
+  p_famille text,
+  p_depuis_jours int,
+  p_curseur_date text,
+  p_curseur_id text,
+  p_limite int
+)
+  returns table (
+    id uuid,
+    admin_email text,
+    action text,
+    resource_type text,
+    resource_id text,
+    target_email text,
+    occurred_at timestamptz,
+    motif text,
+    avant text,
+    apres text
+  )
+  language plpgsql
+  stable
+  security definer
+  set search_path = ''
+as $$
+declare
+  v_limite int := least(greatest(coalesce(p_limite, 50), 1), 100);
+  v_famille text := nullif(btrim(coalesce(p_famille, '')), '');
+  v_depuis timestamptz := case
+    when coalesce(p_depuis_jours, 0) > 0 then now() - make_interval(days => p_depuis_jours)
+    else null
+  end;
+  v_date timestamptz := nullif(btrim(coalesce(p_curseur_date, '')), '')::timestamptz;
+  v_id uuid := nullif(btrim(coalesce(p_curseur_id, '')), '')::uuid;
+begin
+  if not public.est_admin() then
+    raise exception 'introuvable' using errcode = 'DL031';
+  end if;
+
+  -- UNE FAMILLE INCONNUE EST REFUSÉE, jamais ignorée : ignorée, elle rendrait
+  -- le journal ENTIER, soit l'inverse de ce qu'on demande à un filtre — et sur
+  -- CE journal, « tout » veut dire les milliers de lignes qui masquent la seule
+  -- qu'on cherchait.
+  if v_famille is not null and v_famille not in ('suspension', 'consultation', 'parametre') then
+    raise exception 'famille d''action inconnue : %', v_famille using errcode = 'DL050';
+  end if;
+
+  -- AUCUNE ÉCRITURE ICI. Lire le journal ne se journalise pas : sans cette
+  -- règle, ouvrir la page d'audit y ajouterait une ligne, laquelle apparaîtrait
+  -- à la consultation suivante, et le journal se remplirait de sa propre
+  -- consultation en noyant ce qu'il est censé conserver.
+  return query
+  select
+    a.id, a.admin_email, a.action, a.resource_type, a.resource_id,
+    a.target_email, a.occurred_at,
+    a.payload ->> 'motif',
+    -- L'AVANT ET L'APRÈS D'UN PARAMÈTRE, et rien d'autre de la charge utile.
+    -- Sans l'avant, la ligne dit « le seuil vaut maintenant 1 200 » — ce que la
+    -- table dit déjà. Ce qu'on cherche six mois plus tard, c'est ce qu'il valait
+    -- AVANT qu'on le change.
+    case when a.action like 'parametre.%' then a.payload ->> 'avant' end,
+    case when a.action like 'parametre.%' then a.payload ->> 'apres' end
+  from public.admin_audit_log a
+  where (v_date is null or (a.occurred_at, a.id) < (v_date, v_id))
+    and (v_depuis is null or a.occurred_at >= v_depuis)
+    and (
+      v_famille is null
+      or (v_famille = 'suspension' and a.action like 'compte.%')
+      or (v_famille = 'parametre' and a.action like 'parametre.%')
+      -- LA CONSULTATION EST DÉFINIE PAR EXCLUSION, et c'est délibéré : toute
+      -- action future qui n'est ni une décision sur un compte ni un réglage est
+      -- une LECTURE. Une liste positive aurait laissé la prochaine action hors
+      -- de tous les filtres, donc introuvable par tous.
+      or (v_famille = 'consultation' and a.action like 'comptes.%')
+    )
+  order by a.occurred_at desc, a.id desc
+  limit v_limite;
+end;
+$$;
+
+create or replace function public.compter_journal_admin(p_famille text, p_depuis_jours int)
+  returns bigint
+  language plpgsql
+  stable
+  security definer
+  set search_path = ''
+as $$
+declare
+  v_famille text := nullif(btrim(coalesce(p_famille, '')), '');
+  v_depuis timestamptz := case
+    when coalesce(p_depuis_jours, 0) > 0 then now() - make_interval(days => p_depuis_jours)
+    else null
+  end;
+  v_total bigint;
+begin
+  if not public.est_admin() then
+    raise exception 'introuvable' using errcode = 'DL031';
+  end if;
+
+  if v_famille is not null and v_famille not in ('suspension', 'consultation', 'parametre') then
+    raise exception 'famille d''action inconnue : %', v_famille using errcode = 'DL050';
+  end if;
+
+  select count(*) into v_total
+  from public.admin_audit_log a
+  where (v_depuis is null or a.occurred_at >= v_depuis)
+    and (
+      v_famille is null
+      or (v_famille = 'suspension' and a.action like 'compte.%')
+      or (v_famille = 'parametre' and a.action like 'parametre.%')
+      or (v_famille = 'consultation' and a.action like 'comptes.%')
+    );
+
+  return v_total;
+end;
+$$;
+
+`,
+    reparerDepuisMigration: {
+      fichier: "115_le_journal_se_filtre_et_se_compte.sql",
+      depuis: "create function public.lire_journal_admin",
+      // PAS DE BORNE : la 115 se termine sur le `comment` du compteur, et tout
+      // ce qui suit `depuis` doit etre rejoue — revoke et grant compris, un
+      // objet recree par `drop` renaissant ouvert a PUBLIC.
+      avant:
+        "drop function if exists public.lire_journal_admin(text, int, text, text, int); " +
+        "drop function if exists public.compter_journal_admin(text, int);",
+    },
+  },
+
   "jeton-sous-nom-anodin": {
     casser: `drop function if exists public.lister_boutiques_admin(text, text, text, text, int, text);
       create function public.lister_boutiques_admin(

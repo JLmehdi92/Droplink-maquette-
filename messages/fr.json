@@ -809,8 +809,6 @@
     },
     "journal": {
       "titre": "Journal d'audit",
-      "sousTitre": "Ce que les administrateurs ont consulté ou modifié. Les entrées ne peuvent être ni corrigées ni effacées, et survivent à la suppression des comptes qu'elles décrivent.",
-      "cible": "Compte concerné : {email}",
       "actions": {
         "boutiques_liste": "Consultation de la liste des boutiques",
         "compte_reactivation": "Réactivation d’un compte",
@@ -822,7 +820,30 @@
         "parametre_modification": "Modification d’un paramètre système"
       },
       "vide": "Aucune entrée pour l'instant.",
-      "pageSuivante": "Voir la suite"
+      "pageSuivante": "Voir la suite",
+      "decompte": "{total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
+      "garantie": "Ce journal ne peut être ni modifié ni effacé, et il survit à la suppression des comptes concernés. Le consulter n'y écrit rien.",
+      "filtres": "Filtrer le journal",
+      "famille": {
+        "toutes": "Toutes",
+        "suspension": "Suspensions",
+        "consultation": "Consultations",
+        "parametre": "Paramètres"
+      },
+      "fenetre": {
+        "0": "Depuis le début",
+        "7": "7 derniers jours",
+        "30": "30 derniers jours"
+      },
+      "colonnes": {
+        "quand": "Quand",
+        "quoi": "Ce qui a été fait",
+        "qui": "Par qui"
+      },
+      "cibleAvant": "Compte visé :",
+      "motifAvant": "Motif :",
+      "parQui": "Par",
+      "videFiltre": "Aucune entrée ne correspond à ce filtre."
     },
     "fiche": {
       "identite": "Identité",

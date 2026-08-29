@@ -8,7 +8,13 @@ import {
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
-import { listerComptes, lireCompte, lireJournal, ParametresComptes } from "@/lib/audit/comptes";
+import {
+  compterJournal,
+  listerComptes,
+  lireCompte,
+  lireJournal,
+  ParametresComptes,
+} from "@/lib/audit/comptes";
 import { listerBoutiques, ParametresBoutiques } from "@/lib/audit/boutiques";
 
 /**
@@ -34,6 +40,9 @@ let catalogue: Client;
 
 const DEFAUTS = ParametresComptes.parse({});
 const IP = "empreinte-de-test-0123456789abcdef";
+
+/** Le journal, sans famille ni fenêtre : tout, du plus récent au plus ancien. */
+const SANS_FILTRE_JOURNAL = { famille: "" as const, jours: 0, curseur: null };
 
 beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
@@ -75,7 +84,7 @@ describe("Qui peut lire", () => {
     // peine d'y chercher une faille.
     await expect(listerComptes(vendeur.client, DEFAUTS, IP)).rejects.toThrow(/introuvable/i);
     await expect(lireCompte(vendeur.client, cible.profilId, IP)).rejects.toThrow(/introuvable/i);
-    await expect(lireJournal(vendeur.client, null)).rejects.toThrow(/introuvable/i);
+    await expect(lireJournal(vendeur.client, SANS_FILTRE_JOURNAL)).rejects.toThrow(/introuvable/i);
   });
 
   test("un anonyme non plus", async () => {
@@ -112,7 +121,7 @@ describe("Qui peut lire", () => {
     // `lire_journal_admin` ne passe PAS par `journaliser_admin` — lire le
     // journal ne se journalise pas. Elle ne dépend donc que d'`est_admin()`,
     // et c'est le chemin qui aurait été ouvert.
-    await expect(lireJournal(admin.client, null)).rejects.toThrow(/introuvable/i);
+    await expect(lireJournal(admin.client, SANS_FILTRE_JOURNAL)).rejects.toThrow(/introuvable/i);
 
     await service.from("profiles").update({ status: "active" }).eq("id", admin.profilId);
     const actif = await admin.client.rpc("est_admin");
@@ -214,7 +223,7 @@ describe("L'audit est la même opération que la lecture", () => {
       catalogue,
       "select count(*) as n from public.admin_audit_log",
     );
-    const page = await lireJournal(admin.client, null);
+    const page = await lireJournal(admin.client, SANS_FILTRE_JOURNAL);
     const apres = await interroger<{ n: string }>(
       catalogue,
       "select count(*) as n from public.admin_audit_log",
@@ -609,5 +618,114 @@ describe("La fiche rend des volumes, jamais du contenu", () => {
     // Un administrateur qui ouvre une fiche depuis la liste voyait le nombre
     // CHANGER en un clic, sans que rien ne bouge en base.
     expect(fiche?.commandes).toBe(ligne?.commandes);
+  });
+});
+
+/**
+ * LES FILTRES DU JOURNAL.
+ *
+ * LA PROPRIÉTÉ QUI PORTE TOUT : les trois familles PARTITIONNENT le journal.
+ * Leur somme égale le total, donc aucune action ne tombe hors de tous les
+ * filtres. C'est ce qui justifie de définir `consultation` PAR EXCLUSION en
+ * base : une liste positive aurait laissé la prochaine action introuvable par
+ * tous les filtres, et personne ne l'aurait remarqué — un filtre qui rend zéro
+ * ligne ressemble à un filtre qui n'a rien trouvé.
+ *
+ * C'est un contrôle d'INVENTAIRE : il ne dépend pas de ce que son auteur a pensé
+ * à énumérer, et il échouera le jour où une action naîtra sans famille.
+ */
+describe("Le journal se filtre sans rien perdre", () => {
+  const sansFiltre = { famille: "" as const, jours: 0 };
+
+  test("contre-test d'abord : le journal n'est pas vide", async () => {
+    const total = await compterJournal(admin.client, sansFiltre);
+    expect(total, "la sonde compte un journal vide").toBeGreaterThan(0);
+  });
+
+  test("LES TROIS FAMILLES PARTITIONNENT LE JOURNAL", async () => {
+    const [total, suspensions, consultations, parametres] = await Promise.all([
+      compterJournal(admin.client, sansFiltre),
+      compterJournal(admin.client, { famille: "suspension", jours: 0 }),
+      compterJournal(admin.client, { famille: "consultation", jours: 0 }),
+      compterJournal(admin.client, { famille: "parametre", jours: 0 }),
+    ]);
+    expect(suspensions + consultations + parametres).toBe(total);
+    // Et chacune est NON VIDE : trois zéros et un total nul passeraient
+    // l'égalité ci-dessus sans rien prouver.
+    expect(consultations, "aucune consultation dans le journal").toBeGreaterThan(0);
+  });
+
+  test("le filtre porte sur la LECTURE, pas seulement sur le décompte", async () => {
+    const page = await lireJournal(admin.client, {
+      famille: "consultation",
+      jours: 0,
+      curseur: null,
+    });
+    expect(page.lignes.length, "la sonde n'inspecte aucune ligne").toBeGreaterThan(0);
+    for (const l of page.lignes) {
+      expect(l.action.startsWith("compte."), `« ${l.action} » n'est pas une consultation`).toBe(
+        false,
+      );
+      expect(l.action.startsWith("parametre."), `« ${l.action} » n'est pas une consultation`).toBe(
+        false,
+      );
+    }
+  });
+
+  test("une fenêtre BORNE réellement dans le temps", async () => {
+    // ⚠️ LA PREMIÈRE VERSION DE CE TEST NE PROUVAIT RIEN : elle affirmait
+    // « la semaine ≤ le tout », ce qui reste vrai quand la fenêtre est IGNORÉE —
+    // les deux valent alors la même chose. Falsifié, il est resté vert.
+    //
+    // On sème donc une entrée DATÉE D'IL Y A UN AN et on exige qu'elle soit
+    // comptée sans fenêtre et PAS avec. C'est la seule forme qui distingue une
+    // fenêtre appliquée d'une fenêtre absente.
+    await interroger(
+      catalogue,
+      `insert into public.admin_audit_log
+         (admin_id, admin_email, action, resource_type, occurred_at)
+       values ($1, $2, 'comptes.liste', 'profiles', now() - interval '365 days')`,
+      [admin.profilId, admin.email],
+    );
+
+    const [tout, semaine] = await Promise.all([
+      compterJournal(admin.client, sansFiltre),
+      compterJournal(admin.client, { famille: "", jours: 7 }),
+    ]);
+
+    expect(tout - semaine, "l'entrée d'il y a un an est comptée dans les 7 jours").toBeGreaterThan(
+      0,
+    );
+
+    // Et la lecture applique la MÊME borne que le décompte : un total filtré
+    // au-dessus d'une liste qui ne l'est pas ferait chercher des lignes absentes.
+    const page = await lireJournal(admin.client, { famille: "", jours: 7, curseur: null });
+    const limite = Date.now() - 7 * 24 * 3_600_000;
+    for (const l of page.lignes) {
+      expect(Date.parse(l.quand), `« ${l.quand} » est hors de la fenêtre`).toBeGreaterThanOrEqual(
+        limite,
+      );
+    }
+  });
+
+  test("une famille INCONNUE est refusée, jamais ignorée", async () => {
+    // Ignorée, elle rendrait le journal ENTIER — et sur CE journal, « tout » veut
+    // dire les milliers de lignes qui masquent la seule qu'on cherchait.
+    const { error } = await admin.client.rpc("compter_journal_admin", {
+      p_famille: "tout-ce-qui-brille",
+      p_depuis_jours: 0,
+    });
+    expect(error, "une famille inconnue a été acceptée").not.toBeNull();
+  });
+
+  test("lire le journal N'ÉCRIT PAS dans le journal", async () => {
+    const avant = await compterJournal(admin.client, sansFiltre);
+    await lireJournal(admin.client, { famille: "", jours: 0, curseur: null });
+    await compterJournal(admin.client, sansFiltre);
+    const apres = await compterJournal(admin.client, sansFiltre);
+    // La garantie ne vit pas dans le code applicatif : les deux fonctions sont
+    // `stable`, donc PostgREST les exécute en transaction lecture seule et le
+    // moteur refuserait toute écriture qu'on y ajouterait.
+    expect(apres).toBe(avant);
   });
 });

@@ -472,6 +472,14 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "exactement le motif qu'on chercherait après coup.",
     ],
     [
+      "compter_journal_admin",
+      "Le nombre d'entrées du journal, avec les MÊMES filtres que la lecture — " +
+        "un total qui les ignorerait afficherait « 1 284 entrées » au-dessus " +
+        "d'une liste qui en montre trois. `stable` comme sa jumelle, et pour la " +
+        "même raison : compter le journal ne l'écrit pas non plus. Garde " +
+        "interne `est_admin()`, comme toute la surface.",
+    ],
+    [
       "lire_journal_admin",
       "Lecture du journal. Reste DÉLIBÉRÉMENT `stable` : PostgREST l'exécute donc " +
         "en transaction lecture seule, et toute écriture qu'on y ajouterait " +

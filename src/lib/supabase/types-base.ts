@@ -844,6 +844,10 @@ export type Database = {
         Args: { p_numero: string }
         Returns: number
       }
+      compter_journal_admin: {
+        Args: { p_depuis_jours: number; p_famille: string }
+        Returns: number
+      }
       compteurs_admin: {
         Args: never
         Returns: {
@@ -966,10 +970,18 @@ export type Database = {
         }[]
       }
       lire_journal_admin: {
-        Args: { p_curseur_date: string; p_curseur_id: string; p_limite: number }
+        Args: {
+          p_curseur_date: string
+          p_curseur_id: string
+          p_depuis_jours: number
+          p_famille: string
+          p_limite: number
+        }
         Returns: {
           action: string
           admin_email: string
+          apres: string
+          avant: string
           id: string
           motif: string
           occurred_at: string
