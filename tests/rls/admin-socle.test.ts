@@ -425,7 +425,7 @@ describe("La liste des comptes et celle des boutiques comptent pareil", () => {
     const comptes = await listerComptes(admin.client, DEFAUTS, IP);
     const boutiques = await listerBoutiques(
       admin.client,
-      ParametresBoutiques.parse({ q: "", curseur: null }),
+      ParametresBoutiques.parse({ q: "", type: "", curseur: null }),
       IP,
     );
 

@@ -23,8 +23,20 @@ import type { ClientAdmin } from "@/lib/audit/comptes";
 
 export const PAR_PAGE = 50;
 
+/**
+ * Les types de compte que le filtre accepte, et RIEN D'AUTRE.
+ *
+ * `sans` désigne l'ABSENCE de type déclaré, pas une valeur d'énumération :
+ * `account_type` est nullable sans défaut pour que l'onboarding non terminé se
+ * voie, donc le filtre doit savoir nommer ce trou. La base refuse toute autre
+ * valeur — ce `catch("")` n'est donc pas la garde, il évite juste d'aller
+ * chercher un refus qu'on peut voir ici.
+ */
+export const TYPES_FILTRABLES = ["supplier", "reseller", "sans"] as const;
+
 export const ParametresBoutiques = z.object({
   q: z.string().trim().max(120).catch(""),
+  type: z.enum(TYPES_FILTRABLES).or(z.literal("")).catch(""),
   curseur: z.string().max(160).nullable().catch(null),
 });
 
@@ -35,6 +47,9 @@ export interface LigneBoutique {
   /** `null` quand la boutique n'a jamais été configurée : c'est le cas le plus
    *  fréquent en début de vie d'un compte, pas une anomalie. */
   readonly nom: string | null;
+  /** Couleur de marque. NON NULLE en base : il n'existe aucun état « non
+   *  configurée » — c'est le NOM qui dit si la boutique a été réglée. */
+  readonly accent: string;
   readonly proprietaireId: string;
   readonly email: string;
   readonly typeDeCompte: "supplier" | "reseller" | null;
@@ -103,6 +118,7 @@ export async function listerBoutiques(
 
   const { data, error } = await supabase.rpc("lister_boutiques_admin", {
     p_recherche: parametres.q,
+    p_type: parametres.type,
     // LA CHAÎNE VIDE VAUT ABSENCE — convention du dépôt.
     p_curseur_octets: point?.octets ?? "",
     p_curseur_id: point?.id ?? "",
@@ -124,6 +140,7 @@ export async function listerBoutiques(
   const lignes: LigneBoutique[] = visibles.map((l) => ({
     id: l.id,
     nom: l.nom,
+    accent: l.accent_color,
     proprietaireId: l.proprietaire_id,
     email: l.email,
     typeDeCompte: l.account_type,

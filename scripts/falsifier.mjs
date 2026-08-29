@@ -1573,12 +1573,119 @@ $$;
     },
   },
 
+  /**
+   * LE FILTRE PAR TYPE DE COMPTE EST IGNORE.
+   *
+   * L ecran continue d afficher ses quatre pilules, la pilule cliquee reste
+   * allumee, et la liste rend TOUT LE MONDE. Aucune erreur, aucune trace : un
+   * filtre qui ne filtre pas montre PLUS que demande, ce qui est l inverse de ce
+   * qu on attend de lui — et sur une surface d administration, « plus » veut
+   * dire les donnees de comptes qu on n avait pas l intention de regarder.
+   */
+  "filtre-de-type-ignore": {
+    casser: `drop function if exists public.lister_boutiques_admin(text, text, text, text, int, text);
+create or replace function public.lister_boutiques_admin(
+  p_recherche text,
+  p_type text,
+  p_curseur_octets text,
+  p_curseur_id text,
+  p_limite int,
+  p_ip_hash text
+)
+  returns table (
+    id uuid,
+    nom text,
+    accent_color text,
+    proprietaire_id uuid,
+    email text,
+    account_type public.account_type,
+    status public.account_status,
+    commandes_reelles integer,
+    medias_count integer,
+    stockage_octets bigint,
+    colis_ce_mois integer,
+    created_at timestamptz
+  )
+  language plpgsql
+  volatile
+  security definer
+  set search_path = ''
+as $$
+declare
+  v_limite int := least(greatest(coalesce(p_limite, 50), 1), 100);
+  v_recherche text := nullif(btrim(coalesce(p_recherche, '')), '');
+  v_type text := nullif(btrim(coalesce(p_type, '')), '');
+  v_octets bigint := nullif(btrim(coalesce(p_curseur_octets, '')), '')::bigint;
+  v_id uuid := nullif(btrim(coalesce(p_curseur_id, '')), '')::uuid;
+begin
+  if not public.est_admin() then
+    raise exception 'introuvable' using errcode = 'DL031';
+  end if;
+
+  -- UNE VALEUR INCONNUE EST REFUSÉE, jamais ignorée : ignorée, elle rendrait la
+  -- liste ENTIÈRE, soit l'inverse de ce qu'on attend d'un filtre.
+  if v_type is not null and v_type not in ('supplier', 'reseller', 'sans') then
+    raise exception 'type de compte inconnu : %', v_type using errcode = 'DL049';
+  end if;
+
+  perform public.journaliser_admin(
+    'boutiques.liste', 'shops', null, null, p_ip_hash,
+    jsonb_build_object(
+      'recherche', v_recherche,
+      'type', v_type,
+      'limite', v_limite,
+      'page_suivante', v_octets is not null
+    )
+  );
+
+  return query
+  select
+    s.id,
+    s.name,
+    s.accent_color,
+    p.id,
+    p.email,
+    p.account_type,
+    p.status,
+    s.commandes_reelles,
+    s.medias_count,
+    s.stockage_octets,
+    coalesce(u.parcels_registered, 0),
+    s.created_at
+  from public.shops s
+  join public.profiles p on p.id = s.owner_id
+  left join public.usage_counters u
+    on u.profile_id = p.id
+   and u.period_month = date_trunc('month', now())::date
+  where
+    (
+      v_recherche is null
+      or extensions.unaccent(coalesce(s.name, '')) ilike '%' || extensions.unaccent(v_recherche) || '%'
+      or extensions.unaccent(p.email) ilike '%' || extensions.unaccent(v_recherche) || '%'
+    )
+    and (v_octets is null or (s.stockage_octets, s.id) < (v_octets, v_id))
+  order by s.stockage_octets desc, s.id desc
+  limit v_limite;
+end;
+$$;
+
+`,
+    reparerDepuisMigration: {
+      fichier: "114_la_couleur_de_marque_dans_la_liste_des_boutiques.sql",
+      depuis: "create function public.lister_boutiques_admin",
+      // PAS DE BORNE : la 114 se termine sur son `grant`, et la reparation doit
+      // le rejouer — un objet recree par `drop` renait ouvert a PUBLIC.
+      avant: "drop function if exists public.lister_boutiques_admin(text, text, text, text, int, text);",
+    },
+  },
+
   "jeton-sous-nom-anodin": {
-    casser: `create or replace function public.lister_boutiques_admin(
-        p_recherche text, p_curseur_octets text, p_curseur_id text,
+    casser: `drop function if exists public.lister_boutiques_admin(text, text, text, text, int, text);
+      create function public.lister_boutiques_admin(
+        p_recherche text, p_type text, p_curseur_octets text, p_curseur_id text,
         p_limite int, p_ip_hash text
       ) returns table (
-        id uuid, nom text, proprietaire_id uuid, email text,
+        id uuid, nom text, accent_color text, proprietaire_id uuid, email text,
         account_type public.account_type, status public.account_status,
         commandes_reelles integer, medias_count integer, stockage_octets bigint,
         colis_ce_mois integer, created_at timestamptz
@@ -1592,7 +1699,7 @@ $$;
         select s.id,
                coalesce((select o.public_token from public.orders o
                          where o.shop_id = s.id limit 1), s.name),
-               p.id, p.email, p.account_type, p.status,
+               s.accent_color, p.id, p.email, p.account_type, p.status,
                s.commandes_reelles, s.medias_count, s.stockage_octets,
                coalesce(u.parcels_registered, 0), s.created_at
         from public.shops s
@@ -1604,9 +1711,12 @@ $$;
       end;
       $$;`,
     reparerDepuisMigration: {
-      fichier: "050_boutiques_admin.sql",
+      fichier: "114_la_couleur_de_marque_dans_la_liste_des_boutiques.sql",
       depuis: "create function public.lister_boutiques_admin",
-      jusqua: "comment on function public.lister_boutiques_admin",
+      // PAS DE BORNE : la 114 se termine sur son `grant`, qu il faut rejouer —
+      // un objet recree par `drop` renait ouvert a PUBLIC.
+      avant:
+        "drop function if exists public.lister_boutiques_admin(text, text, text, text, int, text);",
     },
   },
 
@@ -2700,6 +2810,14 @@ if (sql === undefined && action === "casser" && SQL[cible].casserDepuisMigration
     await client.end();
     process.exit(1);
   }
+  if (jusqua !== undefined && fin === -1) {
+    console.error(
+      `Borne introuvable : « ${jusqua} » n'est pas dans ${fichier} apres « ${depuis} ». ` +
+        "Sans elle, la decoupe irait jusqu'a la fin du fichier et rejouerait ce qui suit.",
+    );
+    await client.end();
+    process.exit(1);
+  }
   const fin = jusqua ? contenu.indexOf(jusqua, index) : -1;
   const corps = contenu
     .slice(index, fin === -1 ? undefined : fin)
@@ -2736,6 +2854,14 @@ if (sql === undefined && action === "reparer" && SQL[cible].reparerDepuisMigrati
     console.error(
       `Réparation impossible : « ${depuis} » est introuvable dans ${fichier}. ` +
         "La migration a changé sans que cette cible de falsification suive.",
+    );
+    await client.end();
+    process.exit(1);
+  }
+  if (jusqua !== undefined && fin === -1) {
+    console.error(
+      `Borne introuvable : « ${jusqua} » n'est pas dans ${fichier} apres « ${depuis} ». ` +
+        "Sans elle, la decoupe irait jusqu'a la fin du fichier et rejouerait ce qui suit.",
     );
     await client.end();
     process.exit(1);

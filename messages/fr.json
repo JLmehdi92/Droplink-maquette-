@@ -980,7 +980,7 @@
       "titre": "Boutiques",
       "sousTitre": "Ce que chaque compte occupe, trié par stockage. Cet écran ne montre aucun contenu : ni nom de client, ni référence, ni note. Chaque consultation est enregistrée avec votre email et l'heure.",
       "recherche": "Rechercher une boutique",
-      "recherchePlaceholder": "Nom de boutique ou adresse email",
+      "recherchePlaceholder": "Nom de boutique ou adresse email…",
       "chercher": "Rechercher",
       "nonConfiguree": "Boutique non configurée",
       "taille": "{valeur} {unite}",
@@ -994,8 +994,20 @@
         "commandes": "Commandes",
         "medias": "Médias",
         "stockage": "Stockage",
-        "colis": "Colis ce mois"
-      }
+        "colis": "Colis"
+      },
+      "decompte": "Une boutique par compte · {total, plural, one {# au total} other {# au total}}",
+      "trace": "Cette consultation est écrite au journal d'audit, avec les critères employés, filtre compris.",
+      "filtres": "Filtrer par type de compte",
+      "filtre": {
+        "toutes": "Toutes",
+        "supplier": "Fournisseurs",
+        "reseller": "Revendeurs",
+        "sans": "Non configurées"
+      },
+      "suspendue": "Suspendue",
+      "plafondDepasse": "Plafond dépassé",
+      "activeEtat": "Active"
     },
     "unites": {
       "o": "o",

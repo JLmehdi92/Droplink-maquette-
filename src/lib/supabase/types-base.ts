@@ -1025,8 +1025,10 @@ export type Database = {
           p_ip_hash: string
           p_limite: number
           p_recherche: string
+          p_type: string
         }
         Returns: {
+          accent_color: string
           account_type: Database["public"]["Enums"]["account_type"]
           colis_ce_mois: number
           commandes_reelles: number

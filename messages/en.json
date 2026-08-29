@@ -980,7 +980,7 @@
       "titre": "Shops",
       "sousTitre": "What each account takes up, sorted by storage. This screen shows no content: no customer name, no reference, no notes. Every view is recorded with your email and the time.",
       "recherche": "Search for a shop",
-      "recherchePlaceholder": "Shop name or email address",
+      "recherchePlaceholder": "Shop name or email address…",
       "chercher": "Search",
       "nonConfiguree": "Shop not set up",
       "taille": "{valeur} {unite}",
@@ -994,8 +994,20 @@
         "commandes": "Orders",
         "medias": "Media",
         "stockage": "Storage",
-        "colis": "Parcels this month"
-      }
+        "colis": "Parcels"
+      },
+      "decompte": "One shop per account · {total, plural, one {# in total} other {# in total}}",
+      "trace": "This view is written to the audit log, along with the criteria used, filter included.",
+      "filtres": "Filter by account type",
+      "filtre": {
+        "toutes": "All",
+        "supplier": "Suppliers",
+        "reseller": "Resellers",
+        "sans": "Not set up"
+      },
+      "suspendue": "Suspended",
+      "plafondDepasse": "Over ceiling",
+      "activeEtat": "Active"
     },
     "unites": {
       "o": "B",

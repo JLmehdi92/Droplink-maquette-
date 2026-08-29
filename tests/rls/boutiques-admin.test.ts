@@ -33,7 +33,7 @@ let petit: UtilisateurDeTest;
 let catalogue: Client;
 
 const AUCUNE_EMPREINTE = "";
-const SANS_FILTRE = { q: "", curseur: null };
+const SANS_FILTRE = { q: "", type: "" as const, curseur: null };
 
 /** Crée une commande PORTANT DU CONTENU, et rend son identifiant. */
 async function creerCommande(shopId: string, client: string): Promise<string> {
@@ -256,7 +256,7 @@ describe("Le tri, la recherche et la pagination", () => {
     // tape vite dans une barre de recherche.
     const page = await listerBoutiques(
       admin.client,
-      { q: "creme", curseur: null },
+      { q: "creme", type: "" as const, curseur: null },
       AUCUNE_EMPREINTE,
     );
     expect(page.lignes.map((l) => l.id), "« creme » ne trouve pas « Crème »").toContain(gros.shopId);
@@ -267,7 +267,7 @@ describe("Le tri, la recherche et la pagination", () => {
     // précédent sans rien prouver.
     const page = await listerBoutiques(
       admin.client,
-      { q: "zzz-inexistant-zzz", curseur: null },
+      { q: "zzz-inexistant-zzz", type: "" as const, curseur: null },
       AUCUNE_EMPREINTE,
     );
     expect(page.lignes).toEqual([]);
@@ -276,7 +276,7 @@ describe("Le tri, la recherche et la pagination", () => {
   test("la recherche trouve aussi par email", async () => {
     const page = await listerBoutiques(
       admin.client,
-      { q: petit.email, curseur: null },
+      { q: petit.email, type: "" as const, curseur: null },
       AUCUNE_EMPREINTE,
     );
     expect(page.lignes.map((l) => l.email)).toContain(petit.email);
@@ -383,7 +383,7 @@ describe("La consultation est tracée", () => {
 
     const page = await listerBoutiques(
       admin.client,
-      { q: "creme", curseur: null },
+      { q: "creme", type: "" as const, curseur: null },
       "empreinte-de-test",
     );
     expect(page.lignes.length).toBeGreaterThan(0);
@@ -396,5 +396,103 @@ describe("La consultation est tracée", () => {
        where action = 'boutiques.liste' order by occurred_at desc limit 1`,
     );
     expect(trace[0]?.payload.recherche, "les critères ne sont pas tracés").toBe("creme");
+  });
+});
+
+/**
+ * LE FILTRE PAR TYPE DE COMPTE.
+ *
+ * TROIS VALEURS ET UN TROU. `supplier` et `reseller` sont des valeurs
+ * d'énumération ; `sans` désigne l'ABSENCE de type déclaré, que `account_type`
+ * porte sans défaut précisément pour que l'onboarding non terminé se voie. Un
+ * filtre qui ne saurait pas nommer ce troisième cas le rendrait invisible.
+ *
+ * LE FILTRE EST EN BASE, PAS DANS LA PAGE. La pagination est par curseur :
+ * filtrer après lecture rendrait des pages de taille variable, parfois vides,
+ * avec un « charger la suite » qui semblerait ne rien faire — et ce défaut ne se
+ * voit qu'au-delà de la première page, donc jamais en développement.
+ */
+describe("Le filtre par type de compte", () => {
+  const filtre = (type: "" | "supplier" | "reseller" | "sans") => ({
+    q: "",
+    type,
+    curseur: null,
+  });
+
+  beforeAll(async () => {
+    // Trois types distincts dans le jeu, sinon « le filtre rend le bon » serait
+    // vrai pour une fonction qui rend TOUT LE MONDE.
+    await interroger(catalogue, "update public.profiles set account_type = 'supplier' where id = $1", [
+      gros.profilId,
+    ]);
+    await interroger(catalogue, "update public.profiles set account_type = 'reseller' where id = $1", [
+      petit.profilId,
+    ]);
+    await interroger(catalogue, "update public.profiles set account_type = null where id = $1", [
+      admin.profilId,
+    ]);
+  }, 60_000);
+
+  test("contre-test d'abord : sans filtre, les trois types sont là", async () => {
+    const page = await listerBoutiques(admin.client, filtre(""), AUCUNE_EMPREINTE);
+    const emails = page.lignes.map((l) => l.email);
+    expect(emails).toContain(gros.email);
+    expect(emails).toContain(petit.email);
+    expect(emails).toContain(admin.email);
+  });
+
+  test("« fournisseurs » ne rend QUE les fournisseurs", async () => {
+    const page = await listerBoutiques(admin.client, filtre("supplier"), AUCUNE_EMPREINTE);
+    const emails = page.lignes.map((l) => l.email);
+    expect(emails, "le fournisseur manque").toContain(gros.email);
+    // Les deux exclusions comptent autant que l'inclusion : sans elles, une
+    // fonction qui ignorerait le filtre passerait la première assertion.
+    expect(emails, "un revendeur est passé").not.toContain(petit.email);
+    expect(emails, "un compte sans type est passé").not.toContain(admin.email);
+  });
+
+  test("« non configurées » vise la NULLITÉ, pas une valeur", async () => {
+    const page = await listerBoutiques(admin.client, filtre("sans"), AUCUNE_EMPREINTE);
+    const emails = page.lignes.map((l) => l.email);
+    expect(emails, "le compte sans type déclaré manque").toContain(admin.email);
+    expect(emails, "un fournisseur est passé").not.toContain(gros.email);
+    expect(emails, "un revendeur est passé").not.toContain(petit.email);
+  });
+
+  test("un type INCONNU est refusé par la base, jamais ignoré", async () => {
+    // Ignoré, il rendrait la liste ENTIÈRE : un filtre mal orthographié
+    // montrerait plus de comptes que demandé, soit l'inverse d'un filtre. La
+    // page, elle, normalise avant d'appeler — cette garde protège les appels
+    // directs à la RPC, qui sont les seuls à pouvoir envoyer n'importe quoi.
+    const { error } = await admin.client.rpc("lister_boutiques_admin", {
+      p_recherche: "",
+      p_type: "administrateur",
+      p_curseur_octets: "",
+      p_curseur_id: "",
+      p_limite: 50,
+      p_ip_hash: AUCUNE_EMPREINTE,
+    });
+    expect(error, "un type inconnu a été accepté").not.toBeNull();
+  });
+
+  test("le filtre employé est écrit au journal", async () => {
+    await listerBoutiques(admin.client, filtre("supplier"), AUCUNE_EMPREINTE);
+    const trace = await interroger<{ payload: { type?: string | null } }>(
+      catalogue,
+      `select payload from public.admin_audit_log
+        where action = 'boutiques.liste' order by occurred_at desc limit 1`,
+    );
+    // Une consultation restreinte aux fournisseurs n'est pas la même
+    // consultation qu'une liste complète, et le journal doit pouvoir le dire.
+    expect(trace[0]?.payload.type).toBe("supplier");
+  });
+
+  test("la couleur de marque est rendue, et c'est bien la sienne", async () => {
+    await interroger(catalogue, "update public.shops set accent_color = $2 where owner_id = $1", [
+      petit.profilId,
+      "#123456",
+    ]);
+    const page = await listerBoutiques(admin.client, filtre("reseller"), AUCUNE_EMPREINTE);
+    expect(page.lignes.find((l) => l.email === petit.email)?.accent).toBe("#123456");
   });
 });
