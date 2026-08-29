@@ -28,7 +28,7 @@ pnpm lint             # eslint
 pnpm typecheck        # tsc --noEmit — zéro erreur tolérée
 pnpm test             # vitest, projet unit
 pnpm test:rls         # suites BLOQUANTES d'isolation — jamais désactivables
-pnpm test:perf        # mesures, avant chaque clôture de phase
+pnpm test:perf        # mesures (~10 min) — PAS une porte de commit, voir ci-dessous
 pnpm db:migrate       # applique les migrations
 pnpm db:types         # régénère les types Supabase
 pnpm fumee            # le produit doit RÉPONDRE : serveur réel, statuts et HTML servi
@@ -36,6 +36,19 @@ pnpm falsifier        # casse le produit EN BASE, de façon réversible, pour é
 pnpm gates            # les six portes ci-dessus, enchaînées
 pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 ```
+
+> ⚠️ **`pnpm test:perf` N'EST PAS DANS LES PORTES, ET IL EST RESTÉ ROUGE PLUSIEURS
+> JOURS.** Dix minutes, donc hors de la boucle de commit ; « avant chaque clôture
+> de phase » a voulu dire « rarement », et quand il a enfin tourné il ne pouvait
+> plus dire quelle modification l'avait cassé. Ce qui l'avait cassé : la
+> migration 113 change l'arité de `lister_boutiques_admin`, et la mesure appelait
+> encore l'ancienne signature.
+>
+> La moitié bon marché est donc passée dans les portes :
+> `tests/rls/mesures-a-jour.test.ts` vérifie en quelques millisecondes que chaque
+> `public.<fonction>(…)` du banc résout encore, **nom ET arité**. Le reste — les
+> temps, les plans, les lignes lues — reste dans `test:perf`, **à relancer à
+> chaque reprise de séance**, pas seulement en fin de phase.
 
 Après toute modif de schéma : `pnpm db:migrate && pnpm db:types`, sinon les types sont périmés.
 
@@ -61,7 +74,20 @@ Next.js 15 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 > ⚠️ **STITCH EST SUPPRIMÉ — décision de Wassim, 26/08/2026.**
 > Ce fichier a longtemps dit « on implémente TOUS les écrans Stitch, c'est une décision produit, pas une suggestion ». **Cette phrase est morte, et le dossier avec elle** : `stitch_droplink_qc_tracking_portal/` a été effacé du dépôt le 26/08/2026, une fois les 20 routes portées sur le canevas. Si un commentaire du code cite encore une maquette Stitch, il parle d'une décision PASSÉE, jamais d'une référence à consulter.
 
-**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — **41 planches**, chaque écran en bureau ET téléphone, plus les planches d'états.
+**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — **43 planches**, chaque écran en bureau ET téléphone, plus les planches d'états.
+
+> ⚠️ **LE CANEVAS EST MODIFIABLE — décision de Wassim, 29/08/2026.** Quand un
+> écran a besoin de ce que la planche ne dessine pas, **on écrit d'abord DANS LA
+> PLANCHE**, on republie, puis on implémente. L'ordre est la règle : implémenter
+> d'abord ferait du code la référence, c'est-à-dire plus de référence du tout.
+> Et on écrit dans le VOCABULAIRE du canevas — avant d'ajouter un motif,
+> chercher lequel des écrans existants le porte déjà.
+>
+> ⚠️ **LES PLANCHES SONT EN `content-box`.** `height: 38px` sur une boîte à filet
+> REND 40 ; `width: 620px; padding: 18px` REND 658. **Ne jamais recopier un
+> nombre depuis le style d'une planche** : l'ouvrir et mesurer la boîte rendue.
+> Et une planche téléphone plus haute que sa fenêtre perd 15 px à sa barre de
+> défilement — la mesurer dans une fenêtre de **405**, jamais de 390.
 
 **Les planches sont EXTRAITES sur le disque : `C:/Users/mehdi/Desktop/canevas-droplink/`** (fichiers `.dc.html` + `canvas.json`, hors du dépôt). Ce sont de vraies pages HTML qui portent **toutes les valeurs en clair** : on ne compare donc pas une impression, on compare des nombres. Ré-extraction si le canevas change : `Artifact action:"read"` sur l'URL, puis `node "<skill design>/seed-canvas.mjs" --extract <fichier> --to <dossier vide>`.
 

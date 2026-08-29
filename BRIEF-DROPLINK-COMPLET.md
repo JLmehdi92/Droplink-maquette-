@@ -804,7 +804,12 @@ budget de performance de la page publique l'interdit de toute façon.
 > ⚠️ **REMPLACÉ LE 26/08/2026.** La base n'est plus `DESIGN.md` du zip Stitch,
 > **abandonné**. La source est le **canevas Claude Design validé par Wassim** :
 > `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af`
-> — 40 planches, chaque écran en bureau ET téléphone, plus une page d'états.
+> — **43 planches** (40 à l'origine, 41 après `Envois`, 43 après la passe du
+> 30/08), chaque écran en bureau ET téléphone, plus une page d'états.
+>
+> ⚠️ **LE CANEVAS EST MODIFIABLE depuis le 29/08/2026** : quand un écran a besoin
+> de ce que la planche ne dessine pas, on écrit d'abord DANS LA PLANCHE, on
+> republie, puis on implémente. Voir `CLAUDE.md` § « Assets design ».
 > Les valeurs exactes vivent dans `CLAUDE.md` § « Assets design ».
 
 **Ce qui SURVIT de l'ancien système** : **Plus Jakarta Sans** (titres) + **Inter**
