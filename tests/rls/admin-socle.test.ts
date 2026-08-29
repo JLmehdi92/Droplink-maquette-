@@ -9,6 +9,7 @@ import {
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
 import { listerComptes, lireCompte, lireJournal, ParametresComptes } from "@/lib/audit/comptes";
+import { listerBoutiques, ParametresBoutiques } from "@/lib/audit/boutiques";
 
 /**
  * LE SOCLE DE L'ADMINISTRATION — SUITE JAMAIS DÉSACTIVABLE.
@@ -381,5 +382,96 @@ describe("Personne ne se promeut administrateur", () => {
     expect(lignes[0]?.status, "un suspendu s'est réactivé lui-même").toBe("suspended");
 
     await service.from("profiles").update({ status: "active" }).eq("id", vendeur.profilId);
+  });
+});
+
+/**
+ * LES DEUX ÉCRANS D'ADMINISTRATION DISENT LA MÊME CHOSE.
+ *
+ * ⚠️ ILS NE LE DISAIENT PAS. `lister_boutiques_admin` rendait
+ * `shops.commandes_reelles` — le compteur tenu par déclencheur, qui ne compte
+ * que le contenu réel — pendant que `lister_comptes_admin` comptait les LIGNES
+ * de `orders`, brouillons compris. Deux nombres pour le même compte, sur la
+ * même surface, et aucun des deux ne mentait sur son calcul : il y avait deux
+ * définitions du mot « commande » et rien pour le signaler.
+ *
+ * CE CONTRÔLE ÉCHOUE DANS LES DEUX SENS. Si l'une des deux fonctions repasse à
+ * un comptage de lignes, l'égalité tombe ; si les deux comptent les brouillons,
+ * le second test tombe. Une seule des deux assertions laisserait passer la
+ * moitié des régressions.
+ */
+describe("La liste des comptes et celle des boutiques comptent pareil", () => {
+  test("contre-test d'abord : le compte inspecté porte bien des commandes", async () => {
+    await interroger(
+      catalogue,
+      `insert into public.orders (shop_id, customer_label)
+       select $1, 'Client ' || i from generate_series(1, 3) as i`,
+      [cible.shopId],
+    );
+    // ⚠️ LE BROUILLON EST ICI, ET IL EST INDISPENSABLE. Les deux définitions du
+    // mot « commande » ne divergent QUE s'il en existe un : sans lui, une liste
+    // remise à `count(*)` rendrait exactement le même nombre que le compteur, et
+    // le test d'égalité qui suit passerait au vert sur un produit cassé.
+    // Constaté en falsifiant, pas déduit.
+    await interroger(catalogue, "insert into public.orders (shop_id) values ($1)", [cible.shopId]);
+
+    const page = await listerComptes(admin.client, DEFAUTS, IP);
+    const ligne = page.lignes.find((l) => l.email === cible.email);
+    expect(ligne, "le compte inspecté n'est pas dans la liste").toBeDefined();
+    expect(ligne?.commandes, "la sonde compare deux zéros").toBeGreaterThan(0);
+  });
+
+  test("les deux écrans rendent le MÊME nombre pour le même compte", async () => {
+    const comptes = await listerComptes(admin.client, DEFAUTS, IP);
+    const boutiques = await listerBoutiques(
+      admin.client,
+      ParametresBoutiques.parse({ q: "", curseur: null }),
+      IP,
+    );
+
+    const c = comptes.lignes.find((l) => l.email === cible.email);
+    const b = boutiques.lignes.find((l) => l.email === cible.email);
+    expect(b, "le compte inspecté n'est pas dans la liste des boutiques").toBeDefined();
+    expect(c?.commandes).toBe(b?.commandes);
+  });
+
+  test("un brouillon sans contenu réel n'est compté NULLE PART", async () => {
+    const avant = (await listerComptes(admin.client, DEFAUTS, IP)).lignes.find(
+      (l) => l.email === cible.email,
+    )?.commandes;
+
+    // Aucune colonne de contenu : la commande existe, mais elle n'est pas
+    // « créée » au sens du produit. La compter gonflerait la seule métrique sur
+    // laquelle on décidera.
+    await interroger(catalogue, "insert into public.orders (shop_id) values ($1)", [cible.shopId]);
+
+    const apres = (await listerComptes(admin.client, DEFAUTS, IP)).lignes.find(
+      (l) => l.email === cible.email,
+    )?.commandes;
+    expect(apres, "un brouillon vide a été compté comme une commande").toBe(avant);
+  });
+
+  test("les colis du mois viennent du compteur, et valent 0 plutôt que rien", async () => {
+    const page = await listerComptes(admin.client, DEFAUTS, IP);
+    const ligne = page.lignes.find((l) => l.email === cible.email);
+
+    // ZÉRO, PAS `null` : la colonne est un nombre sur tout l'écran, et un compte
+    // sans colis en a zéro. Rendre `null` obligerait chaque appelant à décider
+    // quoi afficher, et l'un d'eux finirait par écrire « — ».
+    expect(ligne?.colisCeMois).toBe(0);
+
+    await interroger(
+      catalogue,
+      `insert into public.usage_counters (profile_id, period_month, parcels_registered)
+       values ($1, date_trunc('month', now())::date, 7)
+       on conflict (profile_id, period_month) do update set parcels_registered = 7`,
+      [cible.profilId],
+    );
+
+    const apres = await listerComptes(admin.client, DEFAUTS, IP);
+    expect(
+      apres.lignes.find((l) => l.email === cible.email)?.colisCeMois,
+      "la liste ne lit pas le compteur de colis",
+    ).toBe(7);
   });
 });

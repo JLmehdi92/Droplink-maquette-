@@ -772,15 +772,16 @@
       "titre": "Comptes",
       "sousTitre": "Chaque consultation de cette page est enregistrée avec votre email et l'heure.",
       "recherche": "Rechercher un compte",
-      "recherchePlaceholder": "Adresse email",
+      "recherchePlaceholder": "Adresse email ou nom de boutique…",
       "chercher": "Rechercher",
       "colonnes": {
         "email": "Compte",
         "type": "Type",
-        "role": "Rôle",
         "statut": "Statut",
         "commandes": "Commandes",
-        "cree": "Inscrit le"
+        "cree": "Inscrit le",
+        "colis": "Colis",
+        "action": "Action"
       },
       "type": {
         "supplier": "Fournisseur",
@@ -797,7 +798,14 @@
       },
       "videCompte": "Aucun compte.",
       "videRecherche": "Aucun compte ne correspond à cette recherche.",
-      "pageSuivante": "Voir la suite"
+      "pageSuivante": "Voir la suite",
+      "trace": "Cette consultation est écrite au journal d'audit, avec les critères employés. Ouvrir un compte y ajoute une entrée.",
+      "sansNom": "Pas encore nommée",
+      "ouvrir": "Ouvrir",
+      "colisSurSeuil": "{valeur} / {seuil}",
+      "colisSurSeuilLong": "{valeur} / {seuil} colis",
+      "commandesLong": "{n} commandes",
+      "decompte": "{total, plural, one {# compte} other {# comptes}} · {suspendus, plural, one {# suspendu} other {# suspendus}}"
     },
     "journal": {
       "titre": "Journal d'audit",

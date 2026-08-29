@@ -104,6 +104,32 @@ export interface Panneau {
 
 export type ClientAdmin = SupabaseClient<Database>;
 
+/**
+ * Les seuls compteurs de comptes, sans le reste du panneau.
+ *
+ * `compteurs_admin` est declaree `stable` : elle n'ecrit rien, donc l'appeler
+ * depuis un autre ecran n'ajoute aucune trace. C'est ce qui la distingue de
+ * `alertes_admin`, qui rend des adresses et doit donc etre auditee.
+ */
+export async function lireCompteurs(supabase: ClientAdmin): Promise<CompteursAdmin> {
+  const { data, error } = await supabase.rpc("compteurs_admin");
+  if (error !== null) {
+    throw new Error("lecture des compteurs impossible : " + error.message);
+  }
+  const c = (data ?? [])[0];
+  if (c === undefined) throw new Error("compteurs illisibles : aucune ligne");
+
+  return {
+    comptes: Number(c.comptes),
+    comptesActifs: Number(c.comptes_actifs),
+    comptesSuspendus: Number(c.comptes_suspendus),
+    comptesSansType: Number(c.comptes_sans_type),
+    colisPrisEnChargeCeMois: Number(c.colis_pris_en_charge_ce_mois),
+    colisAbandonnesCeMois: Number(c.colis_abandonnes_ce_mois),
+    commandesCreeesCeMois: Number(c.commandes_creees_ce_mois),
+  };
+}
+
 export async function lirePanneau(
   supabase: ClientAdmin,
   seuils: { colis: number; retardMinutes: number },

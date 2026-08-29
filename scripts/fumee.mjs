@@ -1340,6 +1340,35 @@ controles.push([
   `CONTRE-TEST : ${feuilles.length} feuille(s) servie(s), et elles portent bien le theme`,
 ]);
 
+// LE PLANCHER TACTILE N ECRASE PAS `sr-only`.
+//
+// DEFAUT MESURE DANS CHROME LE 29/08/2026 : le bouton d envoi visuellement
+// masque du champ de recherche rendait 44 x 44 au lieu de 1 x 1, et debordait de
+// 27 px a droite du telephone. `sr-only` pose `width: 1px`, la regle de cible
+// tactile pose `min-width: 44px` — et `min-width` l emporte TOUJOURS sur
+// `width`, quelle que soit la couche. Aucun classement de couches ne corrige
+// cela : ce ne sont pas deux declarations de la meme propriete.
+//
+// ON INTERROGE LA FEUILLE SERVIE, pas la source : c est la seule facon
+// d etablir que la regle a survecu a la compilation. Et sans regex multiligne —
+// la premiere version en portait une, et le saut de ligne qu elle contenait a
+// casse le fichier au chargement.
+const cssCompact = css.replace(/\s+/g, "");
+const debutTactile = cssCompact.indexOf("@media(pointer:coarse){");
+const blocTactile = debutTactile < 0 ? "" : cssCompact.slice(debutTactile, debutTactile + 800);
+
+// LE CONTRE-TEST VIENT EN PREMIER : sans le plancher dans la feuille, « aucune
+// cible invisible » serait vrai et ne prouverait rien.
+const plancherPose = blocTactile.includes("min-width:44px");
+controles.push([
+  plancherPose,
+  "CONTRE-TEST : le plancher tactile de 44 px est bien dans la feuille servie",
+]);
+controles.push([
+  plancherPose && /\.sr-only\{[^}]*min-width:0/.test(blocTactile),
+  "un element visuellement masque n est pas une cible tactile de 44 px",
+]);
+
 const valeur = (nom) => /:\s*(\d+)px/.exec(new RegExp(`--radius-${nom}\s*:\s*[^;]+;`).exec(css)?.[0] ?? "")?.[1];
 const rayonAuth = valeur("page");
 const rayonPublic = valeur("page-publique");

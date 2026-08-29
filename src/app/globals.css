@@ -148,6 +148,7 @@
   --color-violet-carte: #f8f6ff;    /*   4× — fond d'une carte de compteur facturé */
   --color-violet-filet: #d8d2f8;    /*   3× — bordure de cette même carte */
   --color-violet-sombre: #4b2fb0;   /*   7× — chiffre sur fond violet pâle */
+  --color-violet-filet-doux: #ddd5fb; /* 5× — bordure d'un encart d'information */
 
   /* ----- Corail de marque — le second terme du dégradé -------------------- */
   --color-corail: #f2765e;          /*  34× */
@@ -507,6 +508,19 @@ body {
     input[type="radio"] {
       min-height: 44px;
       min-width: 44px;
+    }
+
+    /*
+     * ⚠️ L'EXCEPTION EST OBLIGATOIRE, PAS DEFENSIVE. `sr-only` pose
+     * `width: 1px`, et `min-width` l'emporte sur `width` quelle que soit la
+     * couche : sans ces deux lignes, tout bouton visuellement masque devient
+     * une cible cliquable de 44 px que personne ne voit. Mesure sur le bouton
+     * d'envoi du champ de recherche de l'administration, qui debordait de
+     * 27 px a droite du telephone.
+     */
+    .sr-only {
+      min-height: 0;
+      min-width: 0;
     }
   }
 }

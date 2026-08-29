@@ -38,7 +38,10 @@ export interface LigneCompte {
   readonly statut: "active" | "suspended";
   readonly creeLe: string;
   readonly boutique: string | null;
+  /** Commandes AYANT DU CONTENU RÉEL, lues sur le compteur de la boutique. */
   readonly commandes: number;
+  /** Colis pris en charge dans le mois — le seul poste que le suivi facture. */
+  readonly colisCeMois: number;
 }
 
 export interface PageComptes {
@@ -130,6 +133,7 @@ export async function listerComptes(
     creeLe: l.created_at,
     boutique: l.boutique_nom,
     commandes: Number(l.commandes),
+    colisCeMois: Number(l.colis_ce_mois),
   }));
 
   const dernier = trop ? visibles[visibles.length - 1] : undefined;

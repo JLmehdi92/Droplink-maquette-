@@ -959,9 +959,10 @@ const SQL = {
       end;
       $$;`,
     reparerDepuisMigration: {
-      fichier: "041_volatilite_des_lectures_auditees.sql",
-      depuis: "create or replace function public.lister_comptes_admin",
-      jusqua: "create or replace function public.lire_compte_admin",
+      fichier: "111_la_liste_des_comptes_dit_la_meme_chose_que_les_boutiques.sql",
+      depuis: "create function public.lister_comptes_admin",
+      jusqua: "comment on function public.lister_comptes_admin",
+      avant: "drop function if exists public.lister_comptes_admin(text, text, text, int, text);",
     },
   },
 
@@ -1394,7 +1395,7 @@ const SQL = {
     reparerDepuisMigration: {
       fichier: "110_le_compteur_de_commandes_etait_mort.sql",
       depuis: "create function public.compter_commande_du_mois",
-      jusqua: "revoke all on function public.compter_commande_du_mois",
+      jusqua: "comment on function public.compter_commande_du_mois",
       avant: `drop trigger if exists orders_compter_commande_du_mois on public.orders;
         create trigger orders_compter_commande_du_mois
           after insert or update of first_content_at on public.orders
@@ -1412,6 +1413,63 @@ const SQL = {
    * MOT « token » ne verrait rien — seule la recherche de la VALEUR le trouve. Et
    * ce champ-là ne fuite pas une donnée, il transfère une CAPACITÉ, définitivement.
    */
+  /**
+   * DEUX DEFINITIONS DU MOT « COMMANDE » DANS LA MEME SURFACE.
+   *
+   * La liste des comptes recompte les LIGNES de `orders`, brouillons compris,
+   * pendant que la liste des boutiques lit `shops.commandes_reelles`. Les deux
+   * ecrans affichent alors un nombre different pour le meme compte, sans erreur
+   * et sans que rien ne le signale — et le coût redevient proportionnel au
+   * volume total du produit.
+   */
+  "deux-definitions-du-mot-commande": {
+    casser: `create or replace function public.lister_comptes_admin(
+        p_recherche text, p_curseur_date text, p_curseur_id text,
+        p_limite int, p_ip_hash text
+      )
+      returns table (
+        id uuid, email text, account_type public.account_type,
+        role public.user_role, status public.account_status,
+        created_at timestamptz, boutique_nom text,
+        commandes bigint, colis_ce_mois bigint
+      )
+      language plpgsql volatile security definer set search_path = '' as $$
+      declare
+        v_limite int := least(greatest(coalesce(p_limite, 50), 1), 100);
+        v_recherche text := nullif(btrim(coalesce(p_recherche, '')), '');
+        v_date timestamptz := nullif(btrim(coalesce(p_curseur_date, '')), '')::timestamptz;
+        v_id uuid := nullif(btrim(coalesce(p_curseur_id, '')), '')::uuid;
+      begin
+        if not public.est_admin() then
+          raise exception 'introuvable' using errcode = 'DL031';
+        end if;
+        perform public.journaliser_admin(
+          'comptes.liste', 'profiles', null, null, p_ip_hash,
+          jsonb_build_object('recherche', v_recherche, 'limite', v_limite,
+                             'page_suivante', v_date is not null));
+        return query
+        select p.id, p.email, p.account_type, p.role, p.status, p.created_at, s.name,
+               (select count(*) from public.orders o where o.shop_id = s.id),
+               coalesce(u.parcels_registered, 0)::bigint
+          from public.profiles p
+          left join public.shops s on s.owner_id = p.id
+          left join public.usage_counters u
+                 on u.profile_id = p.id
+                and u.period_month = date_trunc('month', now())::date
+         where (v_recherche is null or p.email ilike '%' || v_recherche || '%')
+           and (v_date is null or (p.created_at, p.id) < (v_date, v_id))
+         order by p.created_at desc, p.id desc
+         limit v_limite;
+      end;
+      $$;`,
+    reparerDepuisMigration: {
+      fichier: "111_la_liste_des_comptes_dit_la_meme_chose_que_les_boutiques.sql",
+      depuis: "create function public.lister_comptes_admin",
+      jusqua: "comment on function public.lister_comptes_admin",
+      avant: "drop function if exists public.lister_comptes_admin(text, text, text, int, text);",
+    },
+  },
+
   "jeton-sous-nom-anodin": {
     casser: `create or replace function public.lister_boutiques_admin(
         p_recherche text, p_curseur_octets text, p_curseur_id text,

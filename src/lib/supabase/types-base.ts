@@ -1045,6 +1045,7 @@ export type Database = {
         Returns: {
           account_type: Database["public"]["Enums"]["account_type"]
           boutique_nom: string
+          colis_ce_mois: number
           commandes: number
           created_at: string
           email: string

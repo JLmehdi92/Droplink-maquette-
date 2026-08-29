@@ -770,17 +770,18 @@
     "bandeau": "ADMINISTRATION",
     "comptes": {
       "titre": "Accounts",
-      "sousTitre": "Every visit to this page is recorded with your email and the time.",
+      "sousTitre": "Every view of this page is recorded with your email address and the time.",
       "recherche": "Search for an account",
-      "recherchePlaceholder": "Email address",
+      "recherchePlaceholder": "Email address or shop name…",
       "chercher": "Search",
       "colonnes": {
         "email": "Account",
         "type": "Type",
-        "role": "Role",
         "statut": "Status",
         "commandes": "Orders",
-        "cree": "Joined"
+        "cree": "Joined",
+        "colis": "Parcels",
+        "action": "Action"
       },
       "type": {
         "supplier": "Supplier",
@@ -797,7 +798,14 @@
       },
       "videCompte": "No accounts.",
       "videRecherche": "No account matches this search.",
-      "pageSuivante": "Show more"
+      "pageSuivante": "Show more",
+      "trace": "This view is written to the audit log, along with the criteria used. Opening an account adds another entry.",
+      "sansNom": "Not named yet",
+      "ouvrir": "Open",
+      "colisSurSeuil": "{valeur} / {seuil}",
+      "colisSurSeuilLong": "{valeur} / {seuil} parcels",
+      "commandesLong": "{n} orders",
+      "decompte": "{total, plural, one {# account} other {# accounts}} · {suspendus, plural, one {# suspended} other {# suspended}}"
     },
     "journal": {
       "titre": "Audit log",
