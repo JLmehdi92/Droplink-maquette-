@@ -166,7 +166,7 @@ export default async function Analyses({
           <h2 className="font-headline-md text-[15px] leading-[19px] font-bold tracking-normal text-on-surface lg:text-[16px] lg:leading-[21px] lg:tracking-[-0.015em]">
             {t("qc.titre")}
           </h2>
-          <p className="mt-1 mb-4 font-body-sm text-[13px] leading-[19px] text-sourdine lg:mb-[18px] lg:leading-4">
+          <p className="mt-1 mb-4 font-body-sm text-[13px] leading-[19px] text-sourdine lg:mt-1.5 lg:mb-[18px] lg:leading-4">
             {t("qc.aide")}
           </p>
 
