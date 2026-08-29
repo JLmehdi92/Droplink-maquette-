@@ -77,7 +77,20 @@ export const metadata: Metadata = {
  * elle qui donne le « conteneur 1240 » annoncé, et c'est le corps qui porte le
  * contenu.
  */
-const CONTENEUR = "mx-auto w-full max-w-[1240px] px-[18px] lg:px-14";
+/**
+ * LE CONTENEUR DE LA PAGE CLIENT.
+ *
+ * ⚠️ 600 px JUSQU'À `lg`, PAS PLEINE LARGEUR. Entre 768 et 1 023 px la page ne
+ * peut pas passer à deux colonnes — mesuré, la colonne de droite y ferait
+ * 246 px et « Préparation » n'y tiendrait pas. Elle restait donc en une colonne
+ * qui s'étirait jusqu'au bord : mesuré à 900 px, la photo de couverture rendait
+ * **885 x 885**, soit un écran et demi de photo avant la moindre autre
+ * information. La planche `PageClient` porte désormais ce plafond.
+ *
+ * La bande de couleur du vendeur reste PLEINE LARGEUR : elle est posée sur le
+ * `<header>`, pas ici. C'est sa marque, pas un bloc de contenu.
+ */
+const CONTENEUR = "mx-auto w-full max-w-[600px] px-[18px] lg:max-w-[1240px] lg:px-14";
 
 export default async function PagePublique({
   params,
@@ -358,7 +371,7 @@ export default async function PagePublique({
       */}
       <main
         id="contenu"
-        className="mx-auto w-full max-w-[1240px] flex-grow lg:grid lg:grid-cols-[1.55fr_1fr] lg:items-start lg:gap-[30px] lg:px-14 lg:pt-[34px]"
+        className="mx-auto w-full max-w-[600px] flex-grow lg:grid lg:max-w-[1240px] lg:grid-cols-[1.55fr_1fr] lg:items-start lg:gap-[30px] lg:px-14 lg:pt-[34px]"
       >
         {/* LA CARTE À LA COULEUR DU VENDEUR — téléphone uniquement. */}
         <div className={"px-[18px] lg:hidden " + (aUnEnTete ? "pt-4" : "pt-5")}>
