@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { PageLegale } from "@/components/page-legale";
+import { PageLegale, type SectionLegale } from "@/components/page-legale";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams(): Array<{ locale: string }> {
@@ -26,47 +26,43 @@ export default async function Confidentialite({
   setRequestLocale(locale);
   const t = await getTranslations("legal");
 
-  const sections = [
+  const sections: readonly SectionLegale[] = [
     {
       id: "collecte",
-      icone: "database",
-      large: true,
       titre: t("confidentialite.collecteTitre"),
-      texte: t("confidentialite.collecteTexte"),
+      paragraphes: [t("confidentialite.collecteP1")],
     },
     {
       id: "pas-de-compte",
-      icone: "person",
       titre: t("confidentialite.pasDeCompteTitre"),
-      texte: t("confidentialite.pasDeCompteTexte"),
+      paragraphes: [t("confidentialite.pasDeCompteP1")],
     },
     {
       id: "indexation",
-      icone: "visibility_off",
       titre: t("confidentialite.indexationTitre"),
-      texte: t("confidentialite.indexationTexte"),
+      paragraphes: [t("confidentialite.indexationP1")],
     },
     {
       id: "conservation",
-      icone: "schedule",
       titre: t("confidentialite.conservationTitre"),
-      texte: t("confidentialite.conservationTexte"),
+      paragraphes: [t("confidentialite.conservationP1")],
+      lacune: t("confidentialite.conservationLacune"),
     },
     {
       id: "droits",
-      icone: "shield_lock",
       titre: t("confidentialite.droitsTitre"),
-      texte: t("confidentialite.droitsTexte"),
+      paragraphes: [t("confidentialite.droitsP1")],
+      lacune: t("confidentialite.droitsLacune"),
     },
-  ] as const;
+  ];
 
   return (
     <PageLegale
       locale={locale}
+      surTitre={t("confidentialiteSurTitre")}
       titre={t("confidentialiteTitre")}
-      sections={sections}
       chapeau={t("confidentialiteChapeau")}
-      variante="compact"
+      sections={sections}
     />
   );
 }

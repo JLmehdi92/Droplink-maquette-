@@ -1,66 +1,74 @@
+import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Icone } from "./icone";
-import { EnTete } from "./en-tete";
-import { PiedDePage } from "./pied-de-page";
-import type { NomIcone } from "@/lib/design/traces-icones";
+import { CoquePublique } from "./coque-publique";
+import { signalementDisponible } from "@/lib/contact";
 
 export interface SectionLegale {
   readonly id: string;
   readonly titre: string;
-  readonly texte: string;
-  readonly icone: NomIcone;
-  /** Occupe toute la largeur de la grille, comme les sections pleines des maquettes. */
-  readonly large?: boolean;
+  /** Un ou plusieurs paragraphes. Les planches en posent deux par section. */
+  readonly paragraphes: readonly string[];
+  /**
+   * Ce qui reste À FAIRE RÉDIGER dans cette section.
+   *
+   * ⚠️ CE N'EST PAS UN OUBLI, C'EST LA PLANCHE. Elle écrit « [DROIT APPLICABLE
+   * ET JURIDICTION À FIXER AVEC L'AVOCAT] » en toutes lettres, et c'est plus
+   * honnête que d'inventer une clause : un texte juridique présenté comme
+   * complet alors qu'il ne l'est pas engage davantage que le même texte annoncé
+   * comme incomplet. La lacune est donc RENDUE, dans un style qui interdit de la
+   * confondre avec le corps du document.
+   */
+  readonly lacune?: string;
 }
 
 /**
  * Date de dernière rédaction de ces textes.
  *
- * Elle est écrite ici et non dans les catalogues de traduction : c'est un FAIT,
- * pas une chaîne à traduire, et le même fait doit valoir dans les deux langues.
- * La mettre à jour est le geste qui accompagne toute modification du contenu
- * légal — une date figée sur un texte modifié affirme un état qui n'existe plus.
+ * Elle est écrite ici et non dans les catalogues : c'est un FAIT, pas une chaîne
+ * à traduire, et le même fait doit valoir dans les deux langues. La mettre à
+ * jour est le geste qui accompagne toute modification du contenu légal — une
+ * date figée sur un texte modifié affirme un état qui n'existe plus.
  */
-const DERNIERE_MAJ = new Date("2026-08-20T00:00:00Z");
+const DERNIERE_MAJ = new Date("2026-08-29T00:00:00Z");
 
 /**
- * Gabarit commun aux pages légales, porté sur le canevas Claude Design.
+ * LES PAGES LÉGALES, portées sur leurs planches.
  *
- * DEUX MISES EN PAGE, parce que les deux planches en montrent deux :
+ * ⚠️ CE GABARIT RENDAIT DES CARTES ; LA PLANCHE REND UN DOCUMENT. L'ancienne
+ * version disposait chaque section dans une carte à icône, sur une grille de
+ * deux colonnes. Les planches Conditions — bureau et téléphone — dessinent un
+ * texte suivi : sur-titre, grand titre, avertissement, puis huit sections en
+ * prose, avec un sommaire collant à gauche au bureau. Ce n'est pas une nuance de
+ * goût : un document juridique se LIT dans l'ordre, et une grille de cartes en
+ * casse la lecture en huit fragments sans début ni fin.
  *
- * - `sommaire` (CGU) : grille de 12 colonnes, sommaire collant sur 3 colonnes à
- *   partir de `md`, contenu sur 9, cartes de verre en `rounded-xl p-8`.
- * - `compact` (confidentialité) : colonne de 3xl centrée, grille de 2 colonnes,
- *   cartes opaques `bg-surface-container-lowest` bordées, en `rounded-lg p-6`.
+ * LE SOMMAIRE EST UN VRAI SOMMAIRE : ses liens visent les ancres des sections,
+ * il disparaît au téléphone — où la planche ne le dessine pas — et la première
+ * entrée n'y est PAS marquée « active » à l'arrivée. La planche la peint en
+ * violet, mais un marquage figé sur la première section ment dès qu'on défile,
+ * et le suivre en JavaScript coûterait un observateur sur une page dont c'est
+ * précisément ce qu'on ne veut pas.
  *
- * LE FLOU A DISPARU DU PRODUIT ENTIER avec le canevas : les cartes sont
- * opaques, bordées d'un filet, ici comme ailleurs.
- *
- * L'avertissement « document provisoire » est affiché tant que le texte n'a pas
- * été relu par un avocat. Il n'est pas décoratif : un document juridique
- * présenté comme définitif alors qu'il ne l'est pas engage plus que le même
- * document annoncé comme provisoire.
- *
- * Ces pages sont indexables — contrairement aux pages de commande. Un hébergeur
- * dont les conditions ne sont pas consultables publiquement se prive précisément
- * du statut qu'elles servent à établir.
+ * Ces pages restent indexables — contrairement aux pages de commande. Un
+ * hébergeur dont les conditions ne sont pas consultables se prive du statut
+ * qu'elles servent à établir.
  */
 export async function PageLegale({
   locale,
+  surTitre,
   titre,
   chapeau,
   sections,
-  variante,
-  children,
 }: {
   readonly locale: string;
+  readonly surTitre: string;
   readonly titre: string;
   readonly chapeau?: string;
   readonly sections: readonly SectionLegale[];
-  readonly variante: "sommaire" | "compact";
-  readonly children?: React.ReactNode;
 }) {
   const t = await getTranslations("legal");
+  const nav = await getTranslations("navigation");
   const format = await getFormatter();
   const dateMaj = format.dateTime(DERNIERE_MAJ, {
     year: "numeric",
@@ -69,106 +77,153 @@ export async function PageLegale({
     timeZone: "UTC",
   });
 
-  const avertissement = (
-    <aside
-      role="note"
-      className="rounded-lg border-l-4 border-[var(--accent-interface)] bg-[color-mix(in_srgb,var(--accent-interface)_5%,transparent)] p-4"
-    >
-      <p className="font-label-md text-label-md text-on-surface">{t("avertissementTitre")}</p>
-      <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-        {t("avertissementTexte")}
+  const corps =
+    "font-body-md text-[15px] leading-[25px] text-ardoise-doux md:text-[16px] md:leading-[27px]";
+
+  const encartSignalement = signalementDisponible() ? (
+    <div className="rounded-[14px] border border-outline-variant bg-[#fafafc] p-[18px] md:p-4">
+      <p className="font-headline-md text-[14px] leading-[18px] font-bold text-on-surface md:text-[13px]">
+        {t("encartSignalerTitre")}
       </p>
-    </aside>
-  );
-
-  const carte = (s: SectionLegale) => {
-    const cadre =
-      variante === "sommaire"
-        ? "rounded-lg border border-outline-variant bg-surface-container-lowest p-8"
-        : "rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm";
-
-    return (
-      <section
-        key={s.id}
-        id={s.id}
-        className={`${cadre} h-full scroll-mt-24 ${s.large === true ? "md:col-span-2" : ""}`}
+      <p className="mt-1.5 mb-3 font-body-sm text-[13px] leading-5 text-sourdine">
+        {t("encartSignalerTexte")}
+      </p>
+      <Link
+        href={`/${locale}/signalement`}
+        className="font-headline-md text-[14px] font-bold text-violet md:text-[13px]"
       >
-        <h2 className="mb-6 flex items-center gap-3 font-headline-md text-headline-md-mobile text-on-surface">
-          <span className="flex items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--accent-interface)_10%,transparent)] p-2 text-[var(--accent-texte)]">
-            <Icone nom={s.icone} className="text-[24px]" />
-          </span>
-          {s.titre}
-        </h2>
-        <p className="font-body-md text-body-md leading-relaxed text-on-surface-variant">
-          {s.texte}
-        </p>
-      </section>
-    );
-  };
+        {t("encartSignalerLien")}
+      </Link>
+    </div>
+  ) : null;
 
   return (
-    <>
-      <EnTete locale={locale} />
+    <CoquePublique
+      locale={locale}
+      action={
+        <>
+          {/*
+            ⚠️ LE TÉLÉPHONE PORTE UN HAMBURGER, PAS LA PILULE — c'est la planche
+            mobile qui le dit, et elle a raison : à 390, une pilule « Se
+            connecter » dans l'en-tête d'un document juridique propose la seule
+            chose que le lecteur n'est pas venu faire.
 
-      <main
-        id="contenu"
-        className="mx-auto w-full max-w-container-max px-margin-mobile pt-24 pb-12 md:px-margin-desktop md:pb-16"
-      >
-        <div
-          className={
-            variante === "compact"
-              ? "mx-auto max-w-3xl"
-              : "mx-auto w-full"
-          }
-        >
-          <div className={variante === "compact" ? "mb-12" : "mb-12 text-center"}>
-            <h1 className="mb-4 font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-xl md:text-headline-xl">
-              {titre}
-            </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant">
-              {t("misAJourLe")} : {dateMaj}
-              {chapeau !== undefined ? ` — ${chapeau}` : ""}
+            IL OUVRE LE SOMMAIRE, et c'est ce qui le sauve d'être un bouton
+            mort. La planche mobile retire le sommaire du corps sans dire où il
+            passe ; le mettre ici le rend atteignable au téléphone, sur un
+            document de huit sections où l'on cherche presque toujours une
+            section précise. En `<details>`, donc sans une ligne de JavaScript :
+            Échap le referme, le clavier l'atteint, et il fonctionne avant
+            l'hydratation.
+          */}
+          <details name="sommaire-legal" className="relative md:hidden">
+            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-fond-neutre text-on-surface [&::-webkit-details-marker]:hidden">
+              <Icone nom="menu" titre={t("sommaireTitre")} className="text-[18px]" />
+            </summary>
+            <nav
+              aria-label={t("sommaireTitre")}
+              className="absolute right-0 z-20 mt-2 flex w-[280px] flex-col rounded-[14px] border border-outline-variant bg-surface-container-lowest p-2 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)]"
+            >
+              {sections.map((s, i) => (
+                <a
+                  key={s.id}
+                  href={`#${s.id}`}
+                  className="flex min-h-11 items-center rounded-[9px] px-3 font-headline-md text-[14px] leading-[22px] font-medium text-ardoise"
+                >
+                  {i + 1}. {s.titre}
+                </a>
+              ))}
+            </nav>
+          </details>
+
+          <Link
+            href={`/${locale}/connexion`}
+            className="hidden h-10 items-center gap-2 rounded-full bg-primary px-[18px] font-headline-md text-[13px] font-semibold text-on-primary transition-opacity hover:opacity-90 md:inline-flex"
+          >
+            {nav("seConnecter")}
+            <Icone nom="open_in_new" className="text-[13px]" />
+          </Link>
+        </>
+      }
+    >
+      <div className="px-5 pt-[30px] pb-9 md:grid md:grid-cols-[268px_minmax(0,1fr)] md:gap-[60px] md:px-10 md:pt-11 md:pb-[60px]">
+        {/* LE SOMMAIRE — collant, et absent du téléphone comme sur la planche. */}
+        <aside className="hidden self-start md:sticky md:top-10 md:block">
+          <p className="mb-3 ml-3 font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.08em] text-gris-entete">
+            {t("sommaireTitre")}
+          </p>
+          <nav aria-label={t("sommaireTitre")}>
+            <ul>
+              {sections.map((s, i) => (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className="block rounded-[9px] px-3 py-[7px] font-headline-md text-[14px] leading-[22px] font-medium text-ardoise transition-colors hover:bg-violet-fond hover:text-violet"
+                  >
+                    {i + 1}. {s.titre}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {encartSignalement === null ? null : <div className="mt-[22px]">{encartSignalement}</div>}
+        </aside>
+
+        <div className="md:max-w-[700px]">
+          <p className="mb-2.5 font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.09em] text-gris-entete md:mb-3">
+            {surTitre}
+          </p>
+          <h1 className="mb-2.5 font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.035em] text-on-surface md:mb-3 md:text-[42px] md:leading-[48px]">
+            {titre}
+          </h1>
+          <p className={corps}>
+            {t("misAJourLe")} : {dateMaj}
+            {chapeau === undefined ? "" : ` — ${chapeau}`}
+          </p>
+
+          {/* L'AVERTISSEMENT EST AMBRE, pas décoratif : un document juridique
+              présenté comme définitif alors qu'il ne l'est pas engage plus que
+              le même document annoncé comme provisoire. */}
+          <aside
+            role="note"
+            className="mt-[22px] flex gap-[11px] rounded-[14px] border border-attention-filet bg-[#fffaf0] px-4 py-[15px] md:mt-6 md:gap-3 md:px-[18px] md:py-4"
+          >
+            <Icone
+              nom="warning"
+              className="mt-0.5 shrink-0 text-[17px] text-attention-icone md:text-[18px]"
+            />
+            <p className="font-body-sm text-[13px] leading-[21px] text-[#8a6415] md:text-[14px] md:leading-[22px]">
+              <strong className="font-semibold">{t("avertissementTitre")}</strong>{" "}
+              {t("avertissementTexte")}
             </p>
-          </div>
+          </aside>
 
-          {variante === "sommaire" ? (
-            <div className="relative grid grid-cols-1 items-start gap-8 md:grid-cols-12">
-              <aside className="sticky top-24 hidden md:col-span-3 md:block">
-                <nav aria-label={t("sommaireTitre")} className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6">
-                  <ul className="flex flex-col gap-4">
-                    {sections.map((s) => (
-                      <li key={s.id}>
-                        <a
-                          href={`#${s.id}`}
-                          className="block border-l-2 border-transparent pl-3 font-label-md text-label-md text-on-surface transition-colors hover:border-[var(--accent-interface)] hover:text-[var(--accent-texte)]"
-                        >
-                          {s.titre}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              </aside>
+          {sections.map((s, i) => (
+            <section key={s.id} id={s.id} className="scroll-mt-6">
+              <h2 className="mt-8 mb-2.5 font-headline-lg text-[19px] leading-[24px] font-bold tracking-[-0.02em] text-on-surface md:mt-10 md:mb-3 md:text-[22px] md:leading-7">
+                {i + 1}. {s.titre}
+              </h2>
+              {s.paragraphes.map((p) => (
+                <p key={p.slice(0, 40)} className={corps}>
+                  {p}
+                </p>
+              ))}
+              {s.lacune === undefined ? null : (
+                <p className={`${corps} text-gris-entete`}>[{s.lacune}]</p>
+              )}
+            </section>
+          ))}
 
-              <div className="col-span-1 flex flex-col gap-6 md:col-span-9">
-                {avertissement}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {sections.map(carte)}
-                </div>
-                {children}
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6">
-              {avertissement}
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">{sections.map(carte)}</div>
-              {children}
-            </div>
+          {/* AU TÉLÉPHONE L'ENCART DE SIGNALEMENT VIENT EN FIN DE DOCUMENT, là
+              où la planche mobile le place : il n'y a pas de colonne pour le
+              porter, et le mettre en tête retarderait le texte qu'on vient
+              lire. */}
+          {encartSignalement === null ? null : (
+            <div className="mt-[34px] md:hidden">{encartSignalement}</div>
           )}
         </div>
-      </main>
-
-      <PiedDePage locale={locale} />
-    </>
+      </div>
+    </CoquePublique>
   );
 }

@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { PageLegale } from "@/components/page-legale";
+import { PageLegale, type SectionLegale } from "@/components/page-legale";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams(): Array<{ locale: string }> {
@@ -17,6 +17,22 @@ export async function generateMetadata({
   return { title: t("conditionsTitre") };
 }
 
+/**
+ * LES CONDITIONS D'UTILISATION.
+ *
+ * HUIT SECTIONS, DANS L'ORDRE DE LA PLANCHE. L'écran en portait six, disposées
+ * en cartes ; les planches en dessinent huit, en prose. Trois manquaient
+ * réellement au document — compte et accès, résiliation, droit applicable — et
+ * deux des six existantes ont été fondues là où la planche les met : le
+ * paiement dans l'objet du service, les limites dans la disponibilité.
+ *
+ * ⚠️ LES LACUNES SONT ÉCRITES, PAS COMBLÉES. Trois sections portent une mention
+ * entre crochets : clauses de limitation, durée de conservation, droit
+ * applicable. C'est la planche, et c'est plus honnête que d'inventer une clause
+ * — un texte juridique présenté comme complet alors qu'il ne l'est pas engage
+ * davantage que le même texte annoncé comme incomplet. Le brief le tranche
+ * ainsi : faire valider par un avocat avant tout lancement public.
+ */
 export default async function Conditions({
   params,
 }: {
@@ -26,50 +42,58 @@ export default async function Conditions({
   setRequestLocale(locale);
   const t = await getTranslations("legal");
 
-  // L'ordre et les largeurs suivent le rythme de la maquette : une section
-  // pleine, deux en regard, une pleine, deux en regard.
-  const sections = [
+  const sections: readonly SectionLegale[] = [
     {
       id: "objet",
-      icone: "gavel",
-      large: true,
       titre: t("conditions.objetTitre"),
-      texte: t("conditions.objetTexte"),
+      paragraphes: [t("conditions.objetP1"), t("conditions.objetP2")],
     },
-    { id: "role", icone: "shield", titre: t("conditions.roleTitre"), texte: t("conditions.roleTexte") },
     {
-      id: "interdit",
-      icone: "warning",
-      titre: t("conditions.interditTitre"),
-      texte: t("conditions.interditTexte"),
+      id: "compte",
+      titre: t("conditions.compteTitre"),
+      paragraphes: [t("conditions.compteP1"), t("conditions.compteP2")],
+    },
+    {
+      id: "contenus",
+      titre: t("conditions.contenusTitre"),
+      paragraphes: [t("conditions.contenusP1"), t("conditions.contenusP2")],
     },
     {
       id: "retrait",
-      icone: "policy",
-      large: true,
       titre: t("conditions.retraitTitre"),
-      texte: t("conditions.retraitTexte"),
+      paragraphes: [t("conditions.retraitP1"), t("conditions.retraitP2")],
     },
     {
-      id: "paiement",
-      icone: "money_off",
-      titre: t("conditions.paiementTitre"),
-      texte: t("conditions.paiementTexte"),
+      id: "disponibilite",
+      titre: t("conditions.disponibiliteTitre"),
+      paragraphes: [t("conditions.disponibiliteP1")],
+      lacune: t("conditions.disponibiliteLacune"),
     },
     {
-      id: "limites",
-      icone: "balance",
-      titre: t("conditions.responsabiliteTitre"),
-      texte: t("conditions.responsabiliteTexte"),
+      id: "donnees",
+      titre: t("conditions.donneesTitre"),
+      paragraphes: [t("conditions.donneesP1")],
     },
-  ] as const;
+    {
+      id: "resiliation",
+      titre: t("conditions.resiliationTitre"),
+      paragraphes: [t("conditions.resiliationP1")],
+      lacune: t("conditions.resiliationLacune"),
+    },
+    {
+      id: "droit",
+      titre: t("conditions.droitTitre"),
+      paragraphes: [],
+      lacune: t("conditions.droitLacune"),
+    },
+  ];
 
   return (
     <PageLegale
       locale={locale}
+      surTitre={t("conditionsSurTitre")}
       titre={t("conditionsTitre")}
       sections={sections}
-      variante="sommaire"
     />
   );
 }
