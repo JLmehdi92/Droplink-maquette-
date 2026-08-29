@@ -668,6 +668,7 @@
       "absent": "Le fichier n’est pas arrivé. Réessayez.",
       "ecriture": "Enregistrement impossible.",
       "stockage": "Stockage indisponible.",
+      "cadence": "Trop de dépôts en peu de temps. Patientez une minute.",
       "session": "Session expirée. Reconnectez-vous.",
       "reseau": "Envoi interrompu. Réessayez.",
       "inconnu": "Envoi refusé."

@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { emettreApres } from "@/lib/instrumentation/emettre";
+import { verifierQuotaDepot } from "@/lib/limitation/quota";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { cleCouverture, cleMedia, cleVignette, typesAcceptes } from "@/lib/storage/cles";
 import { deciderDepot, estVideo, limites } from "@/lib/storage/limites";
@@ -57,7 +58,7 @@ export type PreparationDepot =
       readonly tailleReelle: number;
       readonly plafond: number;
     }
-  | { readonly statut: "echec"; readonly motif: "introuvable" | "stockage" };
+  | { readonly statut: "echec"; readonly motif: "introuvable" | "stockage" | "cadence" };
 
 const Preparation = z.object({
   orderId: z.string().uuid(),
@@ -97,6 +98,16 @@ export async function preparerDepot(
   }
 
   const { orderId, typeMime, tailleAnnoncee, dureeSecondes } = analyse.data;
+
+  /*
+   * LE PLAFOND DE DÉBIT PASSE AVANT TOUTE LECTURE, et cet ordre est la seule
+   * raison d'être du contrôle. Placé après le comptage des médias, il bornerait
+   * le nombre d'URL signées sans borner le travail : chaque appel refusé aurait
+   * déjà coûté deux lectures en base. Un plafond qui s'applique après la dépense
+   * qu'il prétend éviter n'est pas un plafond.
+   */
+  const cadence = await verifierQuotaDepot(profilId);
+  if (!cadence.autorise) return { statut: "echec", motif: "cadence" };
 
   // La commande doit être lisible par l'appelant. C'est la RLS qui tranche : on
   // ne filtre pas sur `shop_id`, on demande la ligne et on regarde si elle vient.

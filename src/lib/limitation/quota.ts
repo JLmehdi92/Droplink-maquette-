@@ -29,6 +29,8 @@ export type Surface =
   | "publique-ecriture"
   /** Les notifications de suivi poussées par le fournisseur. */
   | "suivi-notification"
+  /** La demande d'une URL de dépôt de média, par VENDEUR. */
+  | "depot"
   /** Toute requête visant la surface d'administration, par adresse. */
   | "admin";
 
@@ -67,6 +69,7 @@ export const DEGRADATION: Readonly<Record<Surface, "autorise" | "refuse">> = {
   "publique-inconnu": "autorise",
   "publique-ecriture": "refuse",
   "suivi-notification": "refuse",
+  depot: "refuse",
   admin: "refuse",
 };
 
@@ -162,6 +165,33 @@ export function seuil(surface: Surface): { plafond: number; fenetreSecondes: num
        */
       return {
         plafond: entierEnv("QUOTA_ADMIN_PAR_MINUTE", 30),
+        fenetreSecondes: 60,
+      };
+    case "depot":
+      /*
+       * LES DÉPÔTS DE MÉDIAS — le troisième seuil du brief, et il MANQUAIT.
+       *
+       * Le brief nomme trois plafonds par fenêtre d'une minute : 20 sur un
+       * jeton inconnu, 120 sur un jeton valide, 60 dépôts. Les deux premiers
+       * existaient depuis l'origine ; le troisième n'avait jamais été écrit, et
+       * rien ne le signalait — les plafonds PAR COMMANDE (20 médias, 3 vidéos)
+       * ressemblent assez à une limite de dépôt pour qu'on croie l'avoir posée.
+       * Ils bornent le RÉSULTAT, pas le DÉBIT : un compte pouvait demander des
+       * signatures aussi vite qu'il le voulait, chacune coûtant une lecture de
+       * `order_media` avant d'être refusée.
+       *
+       * 60 EST AU-DESSUS DE TOUT USAGE RÉEL : le plafond d'une commande étant
+       * de 20 médias, une minute couvre trois commandes remplies d'un coup.
+       *
+       * ⚠️ LA CLÉ EST LE VENDEUR, PAS L'ADRESSE — à l'inverse des trois
+       * surfaces publiques. Le fournisseur en Chine passe par un réseau
+       * partagé : compter par adresse ferait partager 60 dépôts par minute à
+       * plusieurs comptes légitimes, c'est-à-dire couper précisément le persona
+       * qui dépose le plus. Le vendeur, lui, est authentifié : son identité est
+       * connue, exacte, et ne se maquille pas.
+       */
+      return {
+        plafond: entierEnv("QUOTA_DEPOT_PAR_MINUTE", 60),
         fenetreSecondes: 60,
       };
     case "suivi-notification":
@@ -352,6 +382,28 @@ export async function verifierQuotaNotificationSuivi(): Promise<Verdict> {
   // personne de service, alors que les laisser passer offrirait un contournement
   // à qui sait masquer son adresse.
   return consommer(ip === null ? "sans-adresse" : empreinte(ip), "suivi-notification");
+}
+
+/**
+ * Le quota des DEMANDES D'URL DE DÉPÔT, par vendeur.
+ *
+ * ELLE REFUSE EN CAS DE PANNE DU COMPTEUR. Le vendeur est devant son écran et
+ * un refus lui coûte une nouvelle tentative sur un fichier qu'il a toujours ;
+ * rien n'est perdu, seulement retardé. Laisser passer, à l'inverse, ouvrirait
+ * pendant toute la panne le seul chemin du produit qui signe des URL d'écriture
+ * vers le stockage.
+ *
+ * Elle NE CONSOMME RIEN quand l'identité manque : sans vendeur il n'y a pas de
+ * dépôt à préparer, et l'appel est déjà refusé plus haut par la garde de
+ * session.
+ */
+export async function verifierQuotaDepot(profilId: string): Promise<Verdict> {
+  // L'identifiant n'est PAS empreinté, à la différence des adresses. L'empreinte
+  // salée existe parce qu'une IPv4 se retrouve par force brute en quelques
+  // secondes ; un UUID, non. La garder en clair rend le compteur lisible le jour
+  // où l'on cherche quel compte dépose sans arrêt — et c'est le seul moment où
+  // cette table sert à quelque chose.
+  return consommer(profilId, "depot");
 }
 
 /**

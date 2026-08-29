@@ -668,6 +668,7 @@
       "absent": "The file did not arrive. Try again.",
       "ecriture": "Could not save.",
       "stockage": "Storage unavailable.",
+      "cadence": "Too many uploads in a short time. Wait a minute.",
       "session": "Session expired. Please sign in again.",
       "reseau": "Upload interrupted. Try again.",
       "inconnu": "Upload rejected."

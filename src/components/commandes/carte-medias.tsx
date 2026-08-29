@@ -115,6 +115,7 @@ export function CarteMedias({
         "stockage",
         "session",
         "reseau",
+        "cadence",
       ] as const;
       return CONNUS.includes(motif as (typeof CONNUS)[number])
         ? t("refus." + motif)
