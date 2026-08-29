@@ -30,8 +30,17 @@ export async function generateMetadata({
   return { title: t("journal.titre"), robots: { index: false, follow: false } };
 }
 
+/**
+ * LA PILULE DE FILTRE DU JOURNAL — un rectangle arrondi, et non une pilule
+ * pleine : elle occupe la place des deux listes déroulantes que la planche
+ * posait là, et en garde la géométrie.
+ *
+ * ⚠️ 44 px, PAS 42. La planche écrit `height: 42px` sur une boîte en
+ * `content-box` : avec son filet, elle REND 44. Quatrième fois cette séance que
+ * l'attribut et le rendu ne disent pas la même chose.
+ */
 const PILULE_FILTRE =
-  "inline-flex min-h-11 items-center rounded-full border px-[13px] font-headline-md text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:min-h-0 md:h-[42px] md:rounded-[11px]";
+  "inline-flex min-h-11 items-center rounded-full border px-[13px] font-headline-md text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:rounded-[11px]";
 
 /**
  * LE JOURNAL D'AUDIT.
@@ -186,8 +195,13 @@ export default async function AdminJournal({
                     className={
                       PILULE_FILTRE +
                       " " +
+                      // ⚠️ LE MÊME NOIR QUE LA RANGÉE DU DESSUS. Cette rangée
+                      // peignait son actif en ardoise (#5b5d68) : deux états
+                      // « actif » de deux teintes dans le même contrôle, et le
+                      // second se lisait comme désactivé. Une seule couleur
+                      // d’état actif dans tout le produit.
                       (actif
-                        ? "border-ardoise bg-ardoise text-on-primary"
+                        ? "border-primary bg-primary text-on-primary"
                         : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
                     }
                   >
