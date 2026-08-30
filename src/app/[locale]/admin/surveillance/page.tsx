@@ -57,21 +57,29 @@ const TEINTE_TACHE = {
     carte: "border-outline-variant bg-surface-container-lowest",
     point: "bg-succes",
     titre: "text-on-surface",
-    detail: "text-sourdine",
+    // LA PLANCHE MET CE DÉTAIL EN INTER (classe `.mut`) sur les deux états
+    // neutres, et en Plus Jakarta Sans sur le seul état en retard — la ligne
+    // qui doit se lire comme une alerte porte la police des titres.
+    detail: "font-body-sm leading-4 text-sourdine",
     pilule: "bg-succes-fond text-succes",
   },
   en_retard: {
     carte: "border-attention-filet bg-attention-fond",
-    point: "bg-attention-icone",
+    // ⚠️ PAS `attention-icone` (#a97b1e) : la planche peint cette pastille en
+    // #d19a20, plus clair. L'ambre foncé est celui du TEXTE ; réemployer un
+    // token voisin parce qu'il est ambre est invisible à toute relecture.
+    point: "bg-attention-pastille",
     titre: "text-attention",
-    detail: "text-attention-doux",
+    detail: "font-headline-md leading-4 text-attention-doux",
     pilule: "bg-attention-puce text-attention",
   },
   jamais_executee: {
     carte: "border-outline-variant bg-surface-container-lowest",
     point: "bg-gris-illustration",
     titre: "text-on-surface",
-    detail: "text-sourdine",
+    // 20 px, et déclaré comme tel dans la planche : c'est le seul détail qui
+    // tienne sur deux lignes, donc le seul où l'interlignage se voie.
+    detail: "font-body-sm leading-5 text-sourdine",
     pilule: "bg-fond-neutre text-sourdine",
   },
 } as const;
@@ -165,7 +173,7 @@ export default async function SurveillanceAdmin({
                     </p>
                     <p
                       className={
-                        "font-headline-md text-[13px] leading-4 font-normal " + teinte.detail
+                        "text-[13px] font-normal " + teinte.detail
                       }
                     >
                       {tache.etat === "jamais_executee"

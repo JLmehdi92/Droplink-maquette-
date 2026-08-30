@@ -128,15 +128,22 @@ export default async function LayoutAdmin({
                 {t("bandeau")}
               </span>
             </div>
-            {/* L'avatar du téléphone porte l'initiale de l'administrateur
-                CONNECTÉ, pas une silhouette : sur une surface où l'on agit au
-                nom de quelqu'un, savoir qui l'on est vaut mieux qu'un rond. */}
+            {/* ⚠️ UN ROND VIDE, ET C'EST CE QUE LES PLANCHES DESSINENT — les
+                sept, bandeau du téléphone comme colonne du bureau. Il portait
+                l'initiale de l'administrateur connecté, au motif que savoir qui
+                l'on est vaut mieux qu'un rond ; sauf que l'adresse complète est
+                déjà écrite juste à côté, dans le même bloc. L'initiale ne
+                répétait qu'une seule lettre de ce qui est déjà lisible.
+
+                `AdminCompteDetailMobile` fait exception dans le canevas : son
+                bandeau y porte un avatar de 34 px, fond rgba(255,255,255,.1),
+                avec initiale. C'est une variante d'écran que cette coque
+                partagée ne peut pas exprimer — écart connu et nommé, plutôt que
+                silencieux. */}
             <span
               aria-hidden="true"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.14] font-headline-md text-[15px] leading-[19px] font-bold text-white md:hidden"
-            >
-              {admin.email.slice(0, 1).toUpperCase()}
-            </span>
+              className="h-10 w-10 shrink-0 rounded-full bg-white/[0.14] md:hidden"
+            />
           </div>
 
           <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="colonne" />
@@ -159,10 +166,8 @@ export default async function LayoutAdmin({
             <div className="mt-3.5 flex items-center gap-2.5 p-2">
               <span
                 aria-hidden="true"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.14] font-headline-md text-[13px] leading-4 font-bold text-white"
-              >
-                {admin.email.slice(0, 1).toUpperCase()}
-              </span>
+                className="h-8 w-8 shrink-0 rounded-full bg-white/[0.14]"
+              />
               <div className="min-w-0">
                 {/* L'ADRESSE, PAS UN PRÉNOM. Le compte est identifié par son
                     email dans le journal ; afficher autre chose ici obligerait à

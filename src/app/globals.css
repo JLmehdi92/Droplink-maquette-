@@ -95,6 +95,7 @@
   --color-attention-filet: #f3e4c4;
   --color-attention-puce: #faedd2;
   --color-attention-icone: #a97b1e;
+  --color-attention-pastille: #d19a20; /* 1× — pastille d'une tâche en retard */
 
   /* ----- Erreur : inchangée, elle passe déjà les seuils -------------------- */
   --color-error: #ba1a1a;
