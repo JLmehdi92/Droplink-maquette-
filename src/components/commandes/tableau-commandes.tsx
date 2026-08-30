@@ -17,12 +17,8 @@ import type {
 import { decrireSilence } from "@/lib/tracking/silence";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
 import type { EtatLot } from "@/lib/commandes/lot";
-import {
-  archiverDepuisListe,
-  archiverLot,
-  creerBrouillon,
-  dupliquerDepuisListe,
-} from "@/lib/commandes/actions";
+import { creerBrouillon } from "@/lib/commandes/actions";
+import { cheminGesteDeListe } from "@/lib/commandes/geste-liste";
 
 /**
  * La liste des commandes, portée sur les planches `Commandes`, `CommandesMobile`,
@@ -218,7 +214,16 @@ export async function TableauCommandes({
             de fonctionner quand le JavaScript n'a pas chargé — ce qui arrive plus
             souvent qu'on ne le croit sur un téléphone en 4G.
           */}
-          <form action={archiverLot} className="group/lot">
+          {/*
+            ⚠️ POST NATIF, ET NON UNE SERVER ACTION. Ces trois gestes reviennent
+            sur la MÊME route, et le routeur client jette une telle navigation en
+            build de production : la base changeait, l'écran ne bougeait pas.
+            React n'intercepte que les formulaires dont l'`action` est une
+            FONCTION — une chaîne ne l'est pas. Raison complète et treize pistes
+            fermées par mesure : `@/lib/commandes/geste-liste`.
+          */}
+          <form method="post" action={cheminGesteDeListe(langue)} className="group/lot">
+            <input type="hidden" name="geste" value="lot" />
             <input type="hidden" name="retour" value={retour} />
 
             {/*
@@ -495,13 +500,15 @@ export async function TableauCommandes({
           */}
           {page.lignes.map((ligne) => (
             <div key={"formulaires-" + ligne.id} className="hidden">
-              <form id={"arch-" + ligne.id} action={archiverDepuisListe}>
+              <form id={"arch-" + ligne.id} method="post" action={cheminGesteDeListe(langue)}>
+                <input type="hidden" name="geste" value="archiver" />
                 <input type="hidden" name="id" value={ligne.id} />
                 <input type="hidden" name="jeton" value={ligne.jetonPublic} />
                 <input type="hidden" name="archiver" value={ligne.archiveeLe === null ? "1" : "0"} />
                 <input type="hidden" name="retour" value={retour} />
               </form>
-              <form id={"dup-" + ligne.id} action={dupliquerDepuisListe}>
+              <form id={"dup-" + ligne.id} method="post" action={cheminGesteDeListe(langue)}>
+                <input type="hidden" name="geste" value="dupliquer" />
                 <input type="hidden" name="id" value={ligne.id} />
                 <input type="hidden" name="langue" value={langue} />
                 <input type="hidden" name="retour" value={retour} />

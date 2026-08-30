@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
 /**
@@ -81,7 +81,14 @@ function motifs(source: string, motif: RegExp): Set<string> {
   return vus;
 }
 
-/** `@/app/[locale]/bienvenue/actions` -> le chemin réel du module. */
+/**
+ * `@/app/[locale]/bienvenue/actions` -> le chemin réel du module.
+ *
+ * ⚠️ `@/lib/…/actions` COMPTE AUTANT QUE `@/app/…/actions`. Ce motif ne visait
+ * d'abord que `@/app`, et il laissait donc `@/lib/commandes/actions` — les trois
+ * gestes de la liste — entièrement hors de l'inventaire. Un garde qui choisit
+ * où regarder finit par regarder là où le défaut n'est pas.
+ */
 function moduleDepuisImport(specifieur: string): string {
   return join(RACINE, "src", specifieur.slice("@/".length) + ".ts").replace(/\//g, sep);
 }
@@ -95,20 +102,96 @@ interface Couple {
   readonly litteraux: Set<string>;
 }
 
+/**
+ * Les `name=` des formulaires PILOTÉS — ceux dont l'`action` est une fonction
+ * (Server Action) ou qui POSTENT vers l'un de nos route handlers.
+ *
+ * ⚠️ UN FORMULAIRE `GET` DE FILTRES N'ENVOIE RIEN À PERSONNE : il navigue, et
+ * ses champs sont relus depuis l'URL par un tout autre contrat. Les compter
+ * faisait accuser l'écran des commandes de perdre sept saisies qu'il ne perd
+ * pas — et un garde qui crie à tort est un garde qu'on finit par désactiver.
+ */
+function champsDesFormulairesPilotes(source: string): Set<string> {
+  const noms = new Set<string>();
+
+  for (const ouverture of source.matchAll(/<form\b/g)) {
+    const debut = ouverture.index;
+    const finBalise = source.indexOf(">", debut);
+    if (finBalise === -1) continue;
+
+    const attributs = source.slice(debut, finBalise);
+
+    // ⚠️ LA MÉTHODE PRIME SUR TOUT LE RESTE. Le formulaire de recherche s'écrit
+    // `<form method="get" action={base}>` : son `action` EST une expression, et
+    // s'arrêter là le classait parmi les formulaires pilotés. Il ne poste rien —
+    // il navigue vers une URL que la page relit ensuite depuis `searchParams`.
+    if (/method="get"/i.test(attributs)) continue;
+    if (!/action=\{/.test(attributs) && !/method="post"/i.test(attributs)) continue;
+
+    // La fin du formulaire, en comptant les imbrications : celui du lot enveloppe
+    // tout le tableau, et s'arrêter au premier `</form>` venu lui ferait perdre
+    // la case à cocher de la sélection.
+    let profondeur = 1;
+    let i = finBalise;
+    while (profondeur > 0) {
+      const ouvre = source.indexOf("<form", i + 1);
+      const ferme = source.indexOf("</form>", i + 1);
+      if (ferme === -1) break;
+      if (ouvre !== -1 && ouvre < ferme) {
+        profondeur++;
+        i = ouvre;
+      } else {
+        profondeur--;
+        i = ferme;
+      }
+    }
+
+    for (const n of motifs(source.slice(finBalise, i), /\bname="([a-zA-Z_][a-zA-Z0-9_]*)"/g)) {
+      noms.add(n);
+    }
+  }
+
+  return noms;
+}
+
+/**
+ * Un module est un RÉCEPTEUR DE FORMULAIRE s'il déclare un paramètre `FormData`.
+ *
+ * ⚠️ CE CRITÈRE A REMPLACÉ UNE CONVENTION DE NOM, et c'est ce qui compte ici. Le
+ * motif ne visait d'abord que `@/app/…/actions` : il laissait donc
+ * `@/lib/commandes/actions` — les trois gestes de la liste — entièrement hors de
+ * l'inventaire, sans que rien ne le dise. **Un garde qui choisit où regarder
+ * finit par regarder là où le défaut n'est pas.** Le nouveau critère suit ce que
+ * le module FAIT, pas où il est rangé, et il a rattrapé du même coup
+ * `@/lib/commandes/geste-liste`, qui n'existait pas quand il a été écrit.
+ */
+const recepteurs = new Map<string, boolean>();
+function recepteurDeFormulaire(chemin: string): boolean {
+  const connu = recepteurs.get(chemin);
+  if (connu !== undefined) return connu;
+  const reponse = existsSync(chemin) && /:\s*FormData\b/.test(code(chemin));
+  recepteurs.set(chemin, reponse);
+  return reponse;
+}
+
 const couples: Couple[] = [];
 for (const composant of fichiers(join(RACINE, "src"), ".tsx")) {
   const source = code(composant);
-  const actions = [...motifs(source, /from "(@\/app\/[^"]*\/actions)"/g)];
+  const actions = [...motifs(source, /from "(@\/[^"]*)"/g)]
+    .map(moduleDepuisImport)
+    .filter(recepteurDeFormulaire);
   if (actions.length === 0) continue;
 
   const envoie = new Set<string>([
-    ...motifs(source, /\bname="([a-zA-Z_][a-zA-Z0-9_]*)"/g),
+    ...champsDesFormulairesPilotes(source),
+    // Les clés posées par le CODE, hors de tout formulaire : l'identifiant du
+    // compte à suspendre et la clé d'un paramètre système en sont.
     ...motifs(source, /\.set\("([a-zA-Z_][a-zA-Z0-9_]*)"/g),
   ]);
 
   couples.push({
     composant: relative(RACINE, composant),
-    actions: actions.map(moduleDepuisImport),
+    actions,
     envoie,
     litteraux: motifs(source, /"([a-zA-Z_][a-zA-Z0-9_]*)"/g),
   });
@@ -119,7 +202,11 @@ const lues = new Map<string, Set<string>>();
 for (const couple of couples) {
   for (const action of couple.actions) {
     if (lues.has(action)) continue;
-    lues.set(action, motifs(code(action), /\.get\("([a-zA-Z_][a-zA-Z0-9_]*)"\)/g));
+    // `getAll` AUTANT QUE `get` : la sélection d'un lot arrive en plusieurs
+    // valeurs sous le même nom. Ne pas la compter rendait le champ `selection`
+    // invisible à l'inventaire, donc non couvert — le trou exact que ce fichier
+    // existe pour interdire.
+    lues.set(action, motifs(code(action), /\.get(?:All)?\("([a-zA-Z_][a-zA-Z0-9_]*)"\)/g));
   }
 }
 
@@ -139,6 +226,35 @@ describe("Le contrat FormData tient des deux côtés", () => {
       expect(
         couple.envoie.size + couple.actions.length,
         `${couple.composant} n'expose aucune clé : la sonde ne l'inspecte pas`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  test("CONTRE-TEST : les formulaires en POST NATIF sont bien inventoriés", () => {
+    /*
+     * Le repérage des formulaires a DEUX branches — `action={fonction}` et
+     * `method="post"` —, et rien ne dirait que la seconde a cessé de trouver
+     * quoi que ce soit : les couples resteraient nombreux, les sens 1 et 2
+     * resteraient verts, et les trois gestes de la liste sortiraient de
+     * l'inventaire en silence. C'est précisément l'état d'où vient ce fichier.
+     *
+     * On ne nomme aucun composant : on part de ce que le code CONTIENT.
+     */
+    const enPost = fichiers(join(RACINE, "src"), ".tsx").filter((f) =>
+      /method="post"/i.test(code(f)),
+    );
+    expect(
+      enPost.length,
+      "aucun formulaire en POST natif : cette branche du repérage n'est pas exercée",
+    ).toBeGreaterThan(0);
+
+    for (const fichier of enPost) {
+      const nom = relative(RACINE, fichier);
+      const couple = couples.find((c) => c.composant === nom);
+      expect(couple, `${nom} poste un formulaire et n'est pas dans l'inventaire`).toBeDefined();
+      expect(
+        couple?.envoie.size ?? 0,
+        `${nom} poste un formulaire sans qu'aucun champ soit relevé`,
       ).toBeGreaterThan(0);
     }
   });

@@ -1,0 +1,213 @@
+import "server-only";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { z } from "zod";
+import { emettreApres } from "@/lib/instrumentation/emettre";
+import { EVENEMENTS } from "@/lib/instrumentation/evenements";
+import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { creerClientServeur } from "@/lib/supabase/server";
+import { etiquetteCommandePublique } from "./cache";
+import { archiverCommande, dupliquerCommande } from "./cycle";
+
+/**
+ * LES TROIS GESTES DE LA LISTE — archiver, dupliquer, archiver une SÉLECTION.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * POURQUOI CE MODULE N'EST PLUS EN `"use server"`
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ CES TROIS GESTES ÉCRIVAIENT EN BASE SANS QUE L'ÉCRAN BOUGE. Mesuré, et
+ * reproduit à volonté : en build de production, une Server Action qui se termine
+ * par `redirect()` vers la route où le vendeur se trouve DÉJÀ voit sa navigation
+ * **jetée** par le routeur client. Pas d'erreur, pas de message, l'URL ne bouge
+ * même pas. Le vendeur archive une sélection, ne voit rien, et recommence — sur
+ * un lot déclaré tout-ou-rien, recommencer est exactement le geste qu'on ne veut
+ * pas. La cause est en amont, dans Next : un mécanisme d'entrées de préchargement
+ * « aliasées » qui est DÉSACTIVÉ en développement, ce qui explique que le défaut
+ * ait traversé toute la campagne de conformité sans se montrer.
+ *
+ * Le contournement retenu est celui que le navigateur sait faire seul : un
+ * **POST natif** vers un route handler, dont la réponse est une vraie
+ * redirection HTTP. React n'intercepte que les formulaires dont l'`action` est
+ * une FONCTION ; une chaîne ne l'est pas, donc rien ne s'interpose.
+ *
+ * C'EST UNE DÉVIATION DOCUMENTÉE de la règle « Server Actions pour les
+ * mutations », du même ordre que celle déjà accordée à l'export CSV. Elle a un
+ * effet secondaire qu'il faut nommer : chaque geste recharge un document (mesuré
+ * à 34,8 Ko compressés sur `/fr/commandes`), là où une Server Action rendait une
+ * charge RSC. C'est le prix d'un écran qui dit la vérité.
+ *
+ * ⚠️ ELLE PRÉSERVE CE QUE L'ÉCRAN PROTÉGEAIT DÉJÀ : ces formulaires marchent
+ * SANS JavaScript. C'était l'argument qui avait écarté un îlot client, et un
+ * `router.refresh()` l'aurait perdu. Un `<form method="post">` est au contraire
+ * le cas le plus ancien du Web.
+ *
+ * ⚠️ ET IL N'Y A PLUS DE `"use server"` ICI : ces fonctions ne sont donc PLUS
+ * des points d'entrée appelables depuis le navigateur. Une seule porte reste
+ * ouverte — le route handler —, et elle porte sa garde d'origine ET la
+ * vérification de session. Le contournement RETIRE de la surface d'attaque au
+ * lieu d'en ajouter.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Aucune de ces fonctions ne redirige : elles RENDENT la destination, et c'est
+ * le route handler qui en fait une réponse `303`. Un `307` rejouerait le POST
+ * sur la liste — le navigateur reposterait le formulaire à chaque rafraîchissement.
+ */
+
+/** Les gestes que le route handler accepte. Toute autre valeur est refusée. */
+export const GESTES_DE_LISTE = ["archiver", "dupliquer", "lot"] as const;
+export type GesteDeListe = (typeof GESTES_DE_LISTE)[number];
+
+/** Où poster. Sous `[locale]`, donc COUVERT par le middleware — pas sous `/api`. */
+export function cheminGesteDeListe(langue: string): string {
+  return "/" + langue + "/commandes/geste";
+}
+
+const Retour = z.string().max(500).catch("");
+const Identifiant = z.string().uuid();
+
+/** Où revenir après le geste. Toujours une URL RELATIVE de ce site. */
+function destination(donnees: FormData, defaut: string): string {
+  const brut = Retour.parse(donnees.get("retour"));
+  // Une redirection ouverte transformerait un bouton « archiver » en tremplin
+  // vers un site tiers : il suffirait d'un lien préparé pour que le vendeur
+  // atterrisse sur une fausse page de connexion, en venant de chez nous. Seul un
+  // chemin commençant par UN SEUL `/` est accepté — `//exemple.test` est une URL
+  // absolue déguisée, que le navigateur suit vers un autre domaine.
+  if (brut.startsWith("/") && !brut.startsWith("//")) return brut;
+  return defaut;
+}
+
+/**
+ * INVALIDE LA ROUTE SUR LAQUELLE ON REVIENT.
+ *
+ * Le POST natif recharge le document, mais le cache de données du serveur, lui,
+ * ne s'invalide pas tout seul : sans cet appel la page reconstruite pourrait
+ * être servie depuis une entrée périmée. On invalide le CHEMIN, pas le motif de
+ * route — le chemin est ce qui est réellement mis en cache.
+ */
+function invaliderRetour(retour: string): void {
+  const chemin = retour.split("?")[0] ?? retour;
+  revalidatePath(chemin);
+}
+
+function separateur(url: string): string {
+  return url.includes("?") ? "&" : "?";
+}
+
+async function archiverUne(donnees: FormData, profilId: string): Promise<string> {
+  const id = Identifiant.safeParse(donnees.get("id"));
+  const jeton = z.string().max(64).safeParse(donnees.get("jeton"));
+  const archiver = donnees.get("archiver") === "1";
+  const retour = destination(donnees, "/fr/commandes");
+  if (!id.success) return retour;
+
+  const supabase = await creerClientServeur();
+  const resultat = await archiverCommande(supabase, profilId, id.data, archiver);
+
+  if (resultat.statut === "ok" && jeton.success && jeton.data !== "") {
+    revalidateTag(etiquetteCommandePublique(jeton.data));
+  }
+
+  invaliderRetour(retour);
+  return retour;
+}
+
+async function dupliquerUne(donnees: FormData, profilId: string, shopId: string): Promise<string> {
+  const langue = z.enum(["fr", "en"]).catch("fr").parse(donnees.get("langue"));
+  const retour = destination(donnees, "/" + langue + "/commandes");
+
+  const id = Identifiant.safeParse(donnees.get("id"));
+  if (!id.success) return retour;
+
+  const supabase = await creerClientServeur();
+  const resultat = await dupliquerCommande(supabase, profilId, shopId, id.data);
+
+  // La copie est un GABARIT vide : on ouvre son éditeur, parce que personne ne
+  // duplique pour laisser la copie en l'état. Sur échec on revient à la liste
+  // plutôt que d'inventer une destination.
+  if (resultat.statut !== "ok") {
+    invaliderRetour(retour);
+    return retour;
+  }
+  return "/" + langue + "/commandes/" + resultat.nouvelleCommande;
+}
+
+/**
+ * Archive ou désarchive une SÉLECTION, tout ou rien.
+ *
+ * L'atomicité est celle de la base : la fonction `archiver_lot` compare ce
+ * qu'elle a modifié à ce qu'on lui a demandé et lève si les deux diffèrent, ce
+ * qui annule la transaction entière. Une sélection à moitié archivée sans que le
+ * vendeur sache LAQUELLE est pire que l'échec complet.
+ */
+async function archiverUnLot(donnees: FormData, profilId: string): Promise<string> {
+  const ids = z
+    .array(Identifiant)
+    .max(200)
+    .safeParse(donnees.getAll("selection").map(String));
+  const archiver = donnees.get("archiver") === "1";
+  const retour = destination(donnees, "/fr/commandes");
+
+  if (!ids.success || ids.data.length === 0) {
+    invaliderRetour(retour);
+    return retour + separateur(retour) + "lot=vide";
+  }
+
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.rpc("archiver_lot", {
+    p_ids: ids.data,
+    p_archiver: archiver,
+  });
+
+  if (error !== null) {
+    // L'ÉCHEC EST DIT, et distingué : « refusé » n'est pas « en panne ». Un lot
+    // refusé se refait à l'identique, un lot en panne non.
+    const motif = error.code === "DL038" ? "partiel" : "ecriture";
+    invaliderRetour(retour);
+    return retour + separateur(retour) + "lot=" + motif;
+  }
+
+  emettreApres(
+    EVENEMENTS.COMMANDE_ARCHIVEE,
+    { sujet: profilId },
+    { lot: data ?? 0, archivee: archiver },
+  );
+
+  invaliderRetour(retour);
+  return retour + separateur(retour) + "lot=ok&n=" + String(data ?? 0);
+}
+
+export type ResultatGeste =
+  | { readonly statut: "ok"; readonly destination: string }
+  | { readonly statut: "session" }
+  | { readonly statut: "geste-inconnu" };
+
+/**
+ * Exécute le geste demandé et rend où aller.
+ *
+ * ⚠️ LA GARDE DE SESSION EST ICI, et pas seulement dans le route handler. Elle y
+ * était déjà quand ces fonctions étaient des Server Actions, pour la même
+ * raison : rien ne garantit qu'un écran les a précédées. La déplacer dans
+ * l'appelant ferait dépendre l'isolation de la discipline de chaque appelant
+ * futur, ce qui est exactement ce qu'une garde ne doit pas être.
+ */
+export async function executerGesteDeListe(donnees: FormData): Promise<ResultatGeste> {
+  const profil = await lireProfilVendeur();
+  if (profil === null || profil.statut !== "active") return { statut: "session" };
+
+  const geste = z.enum(GESTES_DE_LISTE).safeParse(donnees.get("geste"));
+  if (!geste.success) return { statut: "geste-inconnu" };
+
+  switch (geste.data) {
+    case "archiver":
+      return { statut: "ok", destination: await archiverUne(donnees, profil.profilId) };
+    case "dupliquer":
+      return {
+        statut: "ok",
+        destination: await dupliquerUne(donnees, profil.profilId, profil.shopId),
+      };
+    case "lot":
+      return { statut: "ok", destination: await archiverUnLot(donnees, profil.profilId) };
+  }
+}

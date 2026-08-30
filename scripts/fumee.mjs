@@ -958,6 +958,94 @@ try {
     ]);
   }
 
+  {
+    // LES GESTES DE LA LISTE — POST NATIF, DONC CSRF A NOTRE CHARGE.
+    //
+    // ⚠️ EN QUITTANT LES SERVER ACTIONS, ON A PERDU LA PROTECTION QUE NEXT
+    // APPLIQUE TOUT SEUL : il compare `Origin` a l hote avant d executer une
+    // action. Sans elle, un formulaire pose sur un site tiers archiverait les
+    // commandes d un vendeur connecte sans qu il clique sur quoi que ce soit.
+    // La route refait donc cette comparaison, et ces controles etablissent
+    // qu elle mord VRAIMENT — pas qu elle est ecrite.
+    const chemin = `${base}/fr/commandes/geste`;
+
+    const sansOrigine = await fetch(chemin, { method: "POST", redirect: "manual" });
+    const origineEtrangere = await fetch(chemin, {
+      method: "POST",
+      redirect: "manual",
+      headers: { origin: "https://collecteur.exemple.test" },
+    });
+
+    controles.push(
+      // ELLE ECHOUE FERMEE. Tout navigateur envoie `Origin` sur un POST ; ne pas
+      // l exiger laisserait la porte ouverte a qui sait simplement l omettre.
+      [
+        sansOrigine.status === 403,
+        `le geste de liste refuse un POST SANS origine (statut ${sansOrigine.status}, attendu 403)`,
+      ],
+      [
+        origineEtrangere.status === 403,
+        `le geste de liste refuse une origine etrangere (statut ${origineEtrangere.status}, attendu 403)`,
+      ],
+      [
+        (await sansOrigine.text()) === "",
+        "le refus CSRF ne rend aucun corps — un refus n a rien a apprendre a qui l a provoque",
+      ],
+    );
+
+    // ⚠️ CONTRE-TEST POSITIF, ET IL EST INDISPENSABLE. Une route qui repondrait
+    // 403 a TOUT passerait les deux controles ci-dessus sans rien prouver. Avec
+    // la BONNE origine, la requete doit franchir la garde CSRF et se faire
+    // refuser plus loin, par la garde de SESSION — donc rendre une redirection
+    // vers la connexion, et non un 403.
+    const corps = new URLSearchParams({ geste: "archiver", retour: "/fr/commandes" });
+    const bonneOrigine = await fetch(chemin, {
+      method: "POST",
+      redirect: "manual",
+      headers: { origin: base, "content-type": "application/x-www-form-urlencoded" },
+      body: corps,
+    });
+    const ou = bonneOrigine.headers.get("location") ?? "";
+
+    // ⚠️ UN CORPS ABSENT NE DOIT PAS PRODUIRE UN 500. `formData()` leve sur un
+    // corps mal forme, et l exception remontait telle quelle : un point d entree
+    // qui plante sur une requete fabriquee ecrit une trace d erreur a chaque
+    // tentative, donc noie son journal a la demande.
+    const sansCorps = await fetch(chemin, {
+      method: "POST",
+      redirect: "manual",
+      headers: { origin: base },
+    });
+    controles.push([
+      sansCorps.status === 400,
+      `un POST sans corps est refuse proprement (statut ${sansCorps.status}, attendu 400)`,
+    ]);
+
+    controles.push(
+      [
+        bonneOrigine.status !== 403,
+        `CONTRE-TEST : avec la bonne origine, la garde CSRF laisse passer (statut ${bonneOrigine.status})`,
+      ],
+      [
+        bonneOrigine.status === 303,
+        `sans session, le geste renvoie a la connexion en 303 (statut ${bonneOrigine.status})`,
+      ],
+      // 303 ET NON 307 : un 307 conserve la METHODE. Le navigateur reposterait
+      // le formulaire sur la destination, et chaque rafraichissement rejouerait
+      // l archivage. C est le motif POST-redirect-GET, et il tient a ce nombre.
+      [
+        ou.includes("/connexion") && ou.includes("erreur=session"),
+        `la destination du refus est la connexion (« ${ou} »)`,
+      ],
+    );
+
+    const enGet = await fetch(chemin, { redirect: "manual" });
+    controles.push([
+      enGet.status === 405,
+      `le geste de liste n existe qu en POST (GET : statut ${enGet.status}, attendu 405)`,
+    ]);
+  }
+
   if (jetonFumee) {
         const reponse = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(11) });
         const html = await reponse.text();
