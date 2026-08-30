@@ -31,6 +31,12 @@ import { describe, expect, test } from "vitest";
 const ADMIS: ReadonlyMap<string, string> = new Map([
   [".gitattributes", "Normalisation des fins de ligne — le dépôt vit sous Windows."],
   [".gitignore", "Ce que le dépôt n'emporte pas."],
+  [
+    ".nvmrc",
+    "La version de Node, lue par la CI (`actions/setup-node`). Sans elle, le " +
+      "workflow échouerait à sa troisième étape — et une CI née rouge n'est pas " +
+      "une CI. La valeur est celle réellement employée ici, relevée et non devinée.",
+  ],
   ["BRIEF-DROPLINK-COMPLET.md", "Le contexte produit complet, cité par CLAUDE.md."],
   ["claude.md", "Les instructions de projet."],
   ["eslint.config.mjs", "Configuration d'ESLint, lue par `pnpm lint`."],

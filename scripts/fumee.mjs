@@ -923,6 +923,92 @@ try {
         );
       }
 
+      /*
+       * ═══════════════════════════════════════════════════════════════════════
+       * L ADMIN N ETAIT EPROUVE QUE QUAND IL REFUSE
+       * ═══════════════════════════════════════════════════════════════════════
+       *
+       * Cette sonde etablit depuis longtemps que `/fr/admin` rend 404 sans
+       * session, et que son corps ne divulgue rien. C est la moitie de la
+       * propriete. L autre moitie — QU UN ADMINISTRATEUR OBTIENNE SA PAGE —
+       * n etait verifiee par aucune porte.
+       *
+       * UNE SUITE OU TOUT EST REFUSE PASSE A 100 % SANS RIEN PROUVER. Un
+       * middleware qui rendrait 404 a tout le monde, une garde qui leverait
+       * toujours, une page qui aurait cesse de compiler : les trois passaient
+       * les controles existants sans les faire broncher.
+       *
+       * ⚠️ LE MEME COOKIE SERT AUX DEUX CONTROLES, ET C EST LE COEUR DU TEST.
+       * On promeut le compte en base, on demande la page, on le retrograde, on
+       * redemande la MEME page avec la MEME session. Si le 404 revenait de la
+       * session plutot que du ROLE LU EN BASE A CHAQUE REQUETE, le second appel
+       * repondrait encore 200 — et c est exactement ce qu on veut interdire.
+       */
+      if (cookieVendeur && profilFumee) {
+        const entetesAdmin = { cookie: cookieVendeur, ...visiteur(42) };
+        const catalogueAdmin = JSON.parse(
+          readFileSync(join(racine, "messages", "fr.json"), "utf8"),
+        );
+        // Un libelle LU DANS LE CATALOGUE, jamais recopie : une chaine en dur
+        // resterait vraie apres un renommage, et la sonde passerait au vert sur
+        // un texte que le produit n emploie plus.
+        const titreAdmin = catalogueAdmin.admin.panneau.titre;
+
+        await service.from("profiles").update({ role: "admin" }).eq("id", profilFumee);
+        const promu = await fetch(`${base}/fr/admin`, {
+          headers: entetesAdmin,
+          redirect: "manual",
+        });
+        const htmlPromu = promu.status === 200 ? await promu.text() : "";
+
+        const journalPromu = await fetch(`${base}/fr/admin/journal`, {
+          headers: entetesAdmin,
+          redirect: "manual",
+        });
+
+        await service.from("profiles").update({ role: "user" }).eq("id", profilFumee);
+        const retrograde = await fetch(`${base}/fr/admin`, {
+          headers: entetesAdmin,
+          redirect: "manual",
+        });
+        const corpsRetrograde = await retrograde.text();
+
+        controles.push(
+          [
+            promu.status === 200,
+            `CONTRE-TEST : un administrateur OBTIENT le panneau (statut ${promu.status}` +
+              `${promu.status === 200 ? "" : ", vers " + promu.headers.get("location")})`,
+          ],
+          [
+            htmlPromu.includes(titreAdmin),
+            `et la page rendue porte bien son titre « ${titreAdmin} »`,
+          ],
+          // UNE PAGE QUI REPOND N EST PAS UNE PAGE QUI RENDT. Sans ce seuil,
+          // une coquille vide de deux cents octets passerait les deux controles
+          // ci-dessus — « il repond » est la propriete que tous les residus
+          // possedent.
+          [
+            htmlPromu.length > 4000,
+            `le panneau rendu fait ${htmlPromu.length} octets, pas une coquille`,
+          ],
+          [
+            journalPromu.status === 200,
+            `le journal d audit repond aussi a un administrateur (statut ${journalPromu.status})`,
+          ],
+          // L AUTRE SENS, AVEC LA MEME SESSION. C est ici que se prouve que le
+          // role est relu EN BASE a chaque requete, et non porte par le jeton.
+          [
+            retrograde.status === 404,
+            `retrograde, LE MEME COOKIE ne rouvre plus le panneau (statut ${retrograde.status})`,
+          ],
+          [
+            !corpsRetrograde.includes(titreAdmin),
+            "et le corps du refus ne laisse pas fuir le titre de la surface",
+          ],
+        );
+      }
+
+
       {
     // L EXPORT CSV — ROUTE `/api`, DONC HORS DU MIDDLEWARE.
     //
