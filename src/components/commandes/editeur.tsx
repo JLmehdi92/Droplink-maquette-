@@ -528,7 +528,36 @@ function CarteCommande({
             placeholder={t("suiviExemple")}
             value={valeurs.tracking_number}
             onChange={(e) => onChanger("tracking_number", e.target.value, false)}
+            aria-describedby="tracking_number-aide"
           />
+          {/*
+            ⚠️ CETTE PHRASE EXISTAIT SUR L'ÉCRAN DES ENVOIS ET PAS ICI — c'est-à-dire
+            partout SAUF à l'endroit où le vendeur colle son numéro. Il collait,
+            ne voyait rien pendant des semaines, et n'avait aucun moyen de savoir
+            si c'était normal. La décision 7 du brief l'impose pourtant : on dit
+            « pas encore d'information du transporteur », JAMAIS « introuvable ».
+
+            La seconde phrase vient d'une observation de Wassim : un numéro
+            Colissimo remis par un fournisseur étranger n'existe dans AUCUN
+            système avant la prise en charge locale — le colis a voyagé sous un
+            autre identifiant. Aucun fournisseur de suivi ne peut montrer des
+            événements qu'aucun transporteur n'a enregistrés sous ce numéro.
+            C'est une limite du NUMÉRO, pas de la nôtre, et le vendeur a une
+            action utile : réclamer le numéro d'expédition d'origine.
+
+            ⚠️ ELLE EST ÉCRITE AU CONDITIONNEL, ET C'EST DÉLIBÉRÉ. On ne SAIT pas
+            de quel type est le numéro collé : le savoir exigerait une réponse du
+            fournisseur de suivi, qui n'arrive qu'APRÈS le premier scan —
+            c'est-à-dire quand le vendeur a cessé de s'inquiéter. Affirmer
+            « ce numéro n'est suivi qu'à l'arrivée » serait affirmer ce que la
+            base n'a pas enregistré.
+          */}
+          <p
+            id="tracking_number-aide"
+            className="mt-2 font-body-sm text-[12px] leading-4 text-sourdine"
+          >
+            {t("suiviAide")}
+          </p>
         </div>
 
         <div>

@@ -610,6 +610,7 @@
     "referenceExemple": "Ex : veste bleue taille M",
     "suivi": "Numéro de suivi",
     "suiviExemple": "Collez le numéro du transporteur",
+    "suiviAide": "Un numéro tout juste collé n’est souvent pas encore scanné : c’est normal, le transporteur n’a rien publié. Si le colis part de l’étranger, le suivi peut ne commencer qu’à son arrivée — un numéro d’expédition d’origine, lui, suit tout le trajet.",
     "notes": "Notes internes",
     "notesExemple": "Prix d’achat, remarques, tout ce qui ne doit pas sortir d’ici.",
     "notesPrivees": "Jamais visible par le client, et absent de l’export.",

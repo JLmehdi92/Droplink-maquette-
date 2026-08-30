@@ -610,6 +610,7 @@
     "referenceExemple": "e.g. blue jacket size M",
     "suivi": "Tracking number",
     "suiviExemple": "Paste the carrier number",
+    "suiviAide": "A tracking number you just pasted often hasn’t been scanned yet — that’s normal, the carrier has published nothing. If the parcel ships from abroad, tracking may only start on arrival; an origin shipping number follows the whole journey.",
     "notes": "Internal notes",
     "notesExemple": "Purchase price, remarks, anything that must not leave this page.",
     "notesPrivees": "Never visible to the customer, and absent from the export.",
