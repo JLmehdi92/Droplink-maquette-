@@ -1192,7 +1192,24 @@ try {
         controles.push(
           [avantCoupure.status === 200, "CONTRE-TEST : la page repond AVANT la suspension"],
           [pendantCoupure.status === 404, `la suspension coupe la page (statut ${pendantCoupure.status})`],
-          [delaiCoupure < 30, `la coupure prend ${delaiCoupure.toFixed(1)} s (seuil 30)`],
+          // UN DELAI NE SE MESURE QUE SI L EVENEMENT A EU LIEU.
+          //
+          // Cette ligne disait « OK, la coupure prend 0.1 s » ALORS QUE LA
+          // COUPURE N AVAIT PAS EU LIEU : constate le 30/08/2026 en cassant
+          // `suspension-ne-coupe-pas`. Elle chronometre le temps entre l ecriture
+          // et la requete, sans jamais regarder ce que la requete a rendu — donc
+          // elle certifie un seuil sur un evenement qui ne s est pas produit.
+          //
+          // Elle n etait rattrapee que par la ligne du dessus. Le jour ou
+          // celle-ci serait assouplie, celle-ci continuerait de dire OK pour
+          // toujours, et le journal afficherait une coupure rapide sur un
+          // produit qui ne coupe plus.
+          [
+            pendantCoupure.status === 404 && delaiCoupure < 30,
+            pendantCoupure.status === 404
+              ? `la coupure prend ${delaiCoupure.toFixed(1)} s (seuil 30)`
+              : `delai NON MESURABLE : la page repond encore (${pendantCoupure.status})`,
+          ],
           [mediasCoupes.status !== 200, "les medias sont coupes eux aussi"],
           [apresRetour.status === 200, "la reactivation retablit la page SUR LE MEME LIEN"],
         );

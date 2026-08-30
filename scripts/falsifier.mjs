@@ -727,11 +727,13 @@ const SQL = {
                      statut_qc public.qc_status, numero_suivi text, transporteur text,
                      couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
                      boutique_nom text, boutique_logo text, boutique_couleur text,
-                     boutique_langue text, boutique_filigrane boolean)
+                     boutique_langue text, boutique_filigrane boolean,
+                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
-             o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language, s.watermark_enabled
+             o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language, s.watermark_enabled,
+             s.instagram_url, s.tiktok_url, s.whatsapp_url
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -767,11 +769,13 @@ const SQL = {
                      statut_qc public.qc_status, numero_suivi text, transporteur text,
                      couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
                      boutique_nom text, boutique_logo text, boutique_couleur text,
-                     boutique_langue text, boutique_filigrane boolean)
+                     boutique_langue text, boutique_filigrane boolean,
+                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
-             o.updated_at, s.name, s.logo_url, s.accent_color, 'fr'::text, (s.watermark_enabled and s.name is not null and btrim(s.name) <> '')
+             o.updated_at, s.name, s.logo_url, s.accent_color, 'fr'::text, (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
+             s.instagram_url, s.tiktok_url, s.whatsapp_url
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -993,18 +997,33 @@ const SQL = {
    * parce que c est celui qui nous expose directement.
    */
   "suspension-ne-coupe-pas": {
+    // ⚠️ CETTE VERSION CASSÉE AVAIT VIEILLI, et cassait DEUX choses.
+    //
+    // Elle rendait 15 colonnes, celles d'avant la migration 085 : les trois
+    // réseaux du vendeur (Instagram, TikTok, WhatsApp) manquaient. La
+    // falsification retirait donc le filtre de suspension ET amputait la page
+    // de son bloc de réseaux — la sonde de fumée signalait les deux, et le
+    // second échec brouillait l'attribution du premier.
+    //
+    // UNE FALSIFICATION QUI CASSE PLUS QUE CE QU'ELLE ANNONCE ne prouve pas ce
+    // qu'elle prétend : on ne sait plus laquelle des deux ruptures a fait
+    // rougir la sonde. `tests/rls/falsificateur-a-jour.test.ts` compare
+    // désormais la liste de colonnes de chaque corps cassé à celle de la
+    // migration qu'il répare, pour que cette dérive ne se reproduise pas.
     casser: `drop function if exists public.lire_commande_publique(text);
       create function public.lire_commande_publique(p_jeton text)
       returns table (jeton text, client text, reference text, statut public.order_status,
                      statut_qc public.qc_status, numero_suivi text, transporteur text,
                      couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
                      boutique_nom text, boutique_logo text, boutique_couleur text,
-                     boutique_langue text, boutique_filigrane boolean)
+                     boutique_langue text, boutique_filigrane boolean,
+                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text)
       language sql stable security definer set search_path = '' as $$
         select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
                o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
                o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language,
-               (s.watermark_enabled and s.name is not null and btrim(s.name) <> '')
+               (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
+               s.instagram_url, s.tiktok_url, s.whatsapp_url
         from public.orders o
         join public.shops s on s.id = o.shop_id
         join public.profiles p on p.id = s.owner_id

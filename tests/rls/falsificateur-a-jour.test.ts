@@ -303,3 +303,127 @@ describe("Second registre du falsificateur — les cibles du dépôt", () => {
     ).toEqual([]);
   });
 });
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * UNE FALSIFICATION QUI CASSE PLUS QUE CE QU'ELLE ANNONCE NE PROUVE RIEN
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * DÉFAUT RÉEL, TROUVÉ LE 30/08/2026 EN EXÉCUTANT LE FALSIFICATEUR — pas en le
+ * relisant.
+ *
+ * La cible `suspension-ne-coupe-pas` recrée `lire_commande_publique` sans son
+ * filtre `p.status = 'active'`. Son corps avait été écrit avant la migration
+ * 085 : il rendait quinze colonnes là où la fonction réelle en rend dix-huit,
+ * les trois réseaux du vendeur en moins. Casser cette cible retirait donc le
+ * filtre de suspension ET amputait la page de son bloc de réseaux. La sonde de
+ * fumée signalait DEUX échecs, et le second brouillait l'attribution du
+ * premier : on ne savait plus laquelle des deux ruptures l'avait fait rougir.
+ *
+ * Le registre existant vérifie que la RÉPARATION vise le produit d'aujourd'hui.
+ * Personne ne vérifiait que la CASSE, elle, part du produit d'aujourd'hui — et
+ * c'est pourtant elle qui définit ce que la falsification prouve.
+ *
+ * Ce contrôle compare donc, pour chaque cible qui recrée une fonction à
+ * `returns table`, la liste de colonnes du corps CASSÉ à celle de la migration
+ * qu'il répare. Il échoue dans les deux sens : une colonne oubliée comme une
+ * colonne en trop.
+ */
+
+interface Recreation {
+  readonly cible: string;
+  readonly fonction: string;
+  readonly colonnesCassees: readonly string[];
+  readonly fichier: string;
+}
+
+/** Les noms de colonnes d'un bloc `returns table ( ... )`. */
+function colonnesDe(bloc: string): readonly string[] {
+  return bloc
+    .split(",")
+    .map((c) => c.trim().split(/\s+/)[0] ?? "")
+    .filter((c) => c !== "");
+}
+
+/**
+ * Les cibles qui RECRÉENT une fonction à `returns table`, avec les colonnes que
+ * leur version cassée déclare.
+ */
+function recreations(): readonly Recreation[] {
+  const source = readFileSync(FALSIFICATEUR, "utf8");
+  const trouvees: Recreation[] = [];
+
+  const motif =
+    /create function public\.([a-z_0-9]+)\s*\([^)]*\)\s*\n?\s*returns table\s*\(([^)]*)\)/g;
+  let m: RegExpExecArray | null;
+  while ((m = motif.exec(source)) !== null) {
+    const avant = source.slice(0, m.index);
+    const cible = /"([a-z0-9-]+)":\s*\{[^{]*$/.exec(avant)?.[1] ?? null;
+    if (cible === null) continue;
+
+    // Le fichier de migration cité par la réparation de CETTE cible : on
+    // repart du nom de cible pour ne pas confondre deux blocs voisins.
+    const apres = source.slice(m.index);
+    const fichier = /reparerDepuisMigration:\s*\{\s*fichier:\s*"([^"]+)"/.exec(apres)?.[1] ?? null;
+    if (fichier === null) continue;
+
+    trouvees.push({
+      cible,
+      fonction: m[1] as string,
+      colonnesCassees: colonnesDe(m[2] as string),
+      fichier,
+    });
+  }
+  return trouvees;
+}
+
+describe("Le falsificateur CASSE aussi le produit d'aujourd'hui", () => {
+  const RECREATIONS = recreations();
+
+  test("la sonde trouve réellement des recréations de fonction", () => {
+    // Un ensemble vide passe tout : si le format du script changeait, ce bloc
+    // deviendrait vert en ne comparant plus rien.
+    expect(
+      RECREATIONS.length,
+      "aucune cible qui recrée une fonction à `returns table` : la sonde vise à côté",
+    ).toBeGreaterThan(0);
+  });
+
+  test("chaque version cassée déclare EXACTEMENT les colonnes de la vraie", () => {
+    const ecarts: string[] = [];
+
+    for (const r of RECREATIONS) {
+      const sql = readFileSync(join(MIGRATIONS, r.fichier), "utf8");
+      const vraie = new RegExp(
+        `create (?:or replace )?function public\\.${r.fonction}\\s*\\([^)]*\\)\\s*\\n?\\s*returns table\\s*\\(([^)]*)\\)`,
+      ).exec(sql);
+
+      if (vraie === null) {
+        ecarts.push(
+          `${r.cible} : ${r.fonction} introuvable dans ${r.fichier} — la citation ne pointe plus sur la définition`,
+        );
+        continue;
+      }
+
+      const attendues = colonnesDe(vraie[1] as string);
+      const manquantes = attendues.filter((c) => !r.colonnesCassees.includes(c));
+      const enTrop = r.colonnesCassees.filter((c) => !attendues.includes(c));
+
+      if (manquantes.length > 0 || enTrop.length > 0) {
+        ecarts.push(
+          `${r.cible} → ${r.fonction} : ` +
+            (manquantes.length > 0 ? `manquent [${manquantes.join(", ")}] ` : "") +
+            (enTrop.length > 0 ? `en trop [${enTrop.join(", ")}]` : ""),
+        );
+      }
+    }
+
+    expect(
+      ecarts,
+      "La version CASSÉE de ces fonctions ne rend plus les mêmes colonnes que la " +
+        "vraie. La falsification casse donc autre chose EN PLUS de ce qu'elle " +
+        "annonce, et l'échec supplémentaire brouille l'attribution de celui qu'on " +
+        "cherchait à provoquer.",
+    ).toEqual([]);
+  });
+});
