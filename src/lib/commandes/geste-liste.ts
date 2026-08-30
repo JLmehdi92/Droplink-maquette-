@@ -66,16 +66,45 @@ export function cheminGesteDeListe(langue: string): string {
 const Retour = z.string().max(500).catch("");
 const Identifiant = z.string().uuid();
 
-/** Où revenir après le geste. Toujours une URL RELATIVE de ce site. */
+/**
+ * Une origine qui n'existe pas, uniquement pour RÉSOUDRE le retour.
+ *
+ * Le nom de premier niveau `.invalid` est réservé par la RFC 2606 : il ne peut
+ * appartenir à personne, donc aucune erreur de raisonnement ici ne peut envoyer
+ * un vendeur quelque part.
+ */
+const BASE_DE_RESOLUTION = "http://retour.invalid";
+
+/**
+ * Où revenir après le geste. Toujours un chemin RELATIF de ce site.
+ *
+ * ⚠️ CE CONTRÔLE SE FAISAIT PAR PRÉFIXE, ET IL ÉTAIT FRANCHISSABLE. Il acceptait
+ * tout ce qui commence par un `/` sans être suivi d'un second, pour écarter
+ * `//exemple.test` — une URL absolue déguisée. Mesuré : `/\exemple.test/x`
+ * franchit cette règle et se résout vers l'hôte `exemple.test`, parce que
+ * l'analyseur d'URL traite l'ANTISLASH comme une barre pour les schémas
+ * spéciaux. `/\/exemple.test` et `/\\exemple.test` aussi.
+ *
+ * C'est exactement la faille que ce garde existait pour fermer : un bouton
+ * « archiver » devenait un tremplin vers un site tiers, et le vendeur
+ * atterrissait sur une fausse page de connexion EN VENANT DE CHEZ NOUS.
+ *
+ * → CONTRÔLE PAR VALEUR, PAS PAR FORME. On résout la chaîne avec le MÊME
+ * analyseur que celui qui construira la redirection, et on exige que l'origine
+ * obtenue soit restée la nôtre. Puis on ne rend que `pathname + search` : ce qui
+ * sort d'ici ne peut plus porter d'hôte, quelle qu'ait été l'entrée.
+ */
 function destination(donnees: FormData, defaut: string): string {
   const brut = Retour.parse(donnees.get("retour"));
-  // Une redirection ouverte transformerait un bouton « archiver » en tremplin
-  // vers un site tiers : il suffirait d'un lien préparé pour que le vendeur
-  // atterrisse sur une fausse page de connexion, en venant de chez nous. Seul un
-  // chemin commençant par UN SEUL `/` est accepté — `//exemple.test` est une URL
-  // absolue déguisée, que le navigateur suit vers un autre domaine.
-  if (brut.startsWith("/") && !brut.startsWith("//")) return brut;
-  return defaut;
+  if (brut === "") return defaut;
+
+  try {
+    const resolue = new URL(brut, BASE_DE_RESOLUTION);
+    if (resolue.origin !== BASE_DE_RESOLUTION) return defaut;
+    return resolue.pathname + resolue.search;
+  } catch {
+    return defaut;
+  }
 }
 
 /**
