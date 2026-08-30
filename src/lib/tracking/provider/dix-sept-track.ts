@@ -37,9 +37,23 @@ import type { EtatColisPort, FournisseurSuivi, ReponsePort } from "./port";
  * coût variable du produit, puisqu'on paierait DEUX prises en charge par colis.
  *
  * Pas d'abonnement : des packs de quotas, valables douze mois, non
- * reconductibles automatiquement. Palier gratuit de 100 quotas par mois, remis
- * à 100 le premier du mois, non cumulables. Limite de débit 3 requêtes/seconde,
- * 429 au-delà.
+ * reconductibles automatiquement. Limite de débit 3 requêtes/seconde, 429 au-delà.
+ *
+ * ⚠️ LE PALIER GRATUIT A CHANGÉ, ET CE BLOC AFFIRMAIT L'ANCIEN — relevé le
+ * 30/08/2026 dans leur documentation courante. Il disait « 100 quotas par mois,
+ * remis à 100 le premier du mois ». C'était vrai au relevé du 27/08 ; ça ne l'est
+ * plus :
+ *
+ *   « Effective January 7, 2026, at 00:00 UTC, the platform's free order number
+ *     allocation policy will be adjusted as follows: The previous monthly
+ *     automatic allocation of 100 free order numbers will cease. New accounts
+ *     registered after January 7, 2026, will receive a ONE-TIME allocation of
+ *     200 free order numbers. »
+ *
+ * La différence n'est pas cosmétique : ce n'est plus une rente mensuelle, c'est
+ * **200 prises en charge, une seule fois**. Le suivi cesse d'être gratuit dès
+ * le 201ᵉ colis du compte, pas du mois. Toute estimation de coût qui repose sur
+ * « 100 par mois » est fausse.
  *
  * ⚠️ LEURS PRIX NE SONT PAS PUBLIÉS. La page « Plan Details » renvoie à une
  * adresse commerciale, et la page tarifaire est une application JavaScript dont
