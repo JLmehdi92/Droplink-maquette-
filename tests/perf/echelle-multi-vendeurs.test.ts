@@ -466,3 +466,141 @@ describe("Ce que mille comptes changent pour un vendeur ORDINAIRE", () => {
     ).toBe(false);
   });
 });
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LA RECHERCHE ADMIN N'ÉTAIT MESURÉE PAR RIEN
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * RELEVÉ LE 30/08/2026. `tests/perf/boutiques.test.ts` mesure
+ * `lister_boutiques_admin('', '', '', '', 51, '')` — quatre arguments texte
+ * VIDES. La branche `ilike` n'est donc jamais évaluée : le banc mesurait le
+ * chemin sans recherche, c'est-à-dire celui qui ne coûte rien, et déclarait
+ * l'écran mesuré.
+ *
+ * C'est un garde qui regarde là où le défaut n'est pas — le même motif que
+ * L-025, appliqué non pas à une correction mais à une mesure.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CE QUE LA MESURE AU PLAFOND A DIT, avant d'écrire ce test
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * 20 001 boutiques semées par le CHEMIN RÉEL (insertion dans `auth.users`, le
+ * déclencheur d'inscription créant profil et boutique), dans une transaction
+ * annulée. Rodage jeté, deux séries concordantes :
+ *
+ *   sans recherche — ce que le banc mesurait          0 /  0 ms   index
+ *   terme fréquent                                   63 / 62 ms   Seq Scan
+ *   terme rare (le pire cas)                         95 / 95 ms   Seq Scan
+ *   terme accentué                                   91 / 91 ms   Seq Scan
+ *
+ * ⚠️ ON NE POSE PAS D'INDEX SUR CE CONSTAT. 95 ms sur vingt mille comptes est
+ * acceptable pour un écran d'administration, et un index trigramme coûterait un
+ * GIN sur toutes les lignes de tous les comptes, donc un surcoût à CHAQUE
+ * inscription, pour accélérer une lecture dont on n'a pas établi qu'elle gêne.
+ * Un seuil dépassé ne veut pas dire qu'il manque un index (L-017) — et ici le
+ * seuil n'est même pas dépassé.
+ *
+ * CE QUI MANQUAIT N'ÉTAIT PAS L'INDEX, C'ÉTAIT LA MESURE. Le coût croît
+ * linéairement avec le nombre d'inscrits ; il doit donc être VU croître. Ce
+ * test le fait apparaître à chaque passage du banc, et échouera le jour où il
+ * cesse d'être linéaire — par exemple si quelqu'un ajoutait une jointure vers
+ * une table d'activité, ce qui rendrait le coût proportionnel aux COMMANDES et
+ * non plus aux inscrits.
+ */
+
+/** Seuil FIXÉ AVANT la mesure, à mille boutiques : vingt fois la marge. */
+const RECHERCHE_ADMIN_MS = 60;
+
+/**
+ * Le corps de la recherche de `lister_boutiques_admin`, tel que la migration
+ * 114 l'écrit. Recopié, donc susceptible de diverger : le test compare le
+ * nombre de lignes rendues par la transcription et par la fonction elle-même.
+ */
+const CORPS_RECHERCHE = (terme: string): string => `
+  select s.id, s.name, p.email
+  from public.shops s
+  join public.profiles p on p.id = s.owner_id
+  where extensions.unaccent(coalesce(s.name, '')) ilike '%' || extensions.unaccent('${terme}') || '%'
+     or extensions.unaccent(p.email) ilike '%' || extensions.unaccent('${terme}') || '%'
+  order by s.stockage_octets desc, s.id desc
+  limit 51`;
+
+describe("La recherche des boutiques est mesurée, et pas seulement la liste", () => {
+  test("CONTRE-TEST : le jeu porte bien les mille boutiques", async () => {
+    // Un ensemble vide passe tout : sans ce contrôle, une recherche instantanée
+    // sur une table vide passerait tous les seuils sans rien prouver.
+    // ⚠️ LE PRÉFIXE EST SUR L'E-MAIL, PAS SUR LE NOM DE BOUTIQUE. Les mille
+    // comptes sont créés par le déclencheur d'inscription, qui pose une
+    // boutique SANS NOM — `shops.name` est nullable sans défaut, et c'est
+    // justement l'état le plus fréquent au début de vie d'un compte. Compter
+    // par le nom rendait zéro, et ce contre-test l'a dit tout de suite.
+    const { rows } = await bd.query<{ n: string }>(
+      `select count(*)::int as n from public.shops s
+       join public.profiles p on p.id = s.owner_id where p.email like $1`,
+      [PREFIXE + "%"],
+    );
+    expect(Number(rows[0]?.n ?? 0), "les mille boutiques ne sont pas là").toBeGreaterThanOrEqual(
+      BOUTIQUES,
+    );
+  });
+
+  test("un terme RARE — le pire cas — reste sous le seuil", async () => {
+    /*
+     * LE PIRE CAS EST LE TERME QUI NE TROUVE RIEN, pas celui qui trouve tout :
+     * Postgres parcourt l'index de tri dans l'ordre en évaluant le `ilike`
+     * ligne à ligne jusqu'à réunir cinquante et une correspondances. Un terme
+     * qui n'en a aucune l'oblige à aller au bout.
+     */
+    const m = await mesurerSerieuse(alice, CORPS_RECHERCHE("zzintrouvable"));
+    console.log(`  recherche, terme rare : ${m.ms.toFixed(1)} ms, ${m.lignesLues} lignes lues`);
+    expect(
+      m.ms,
+      `${m.ms.toFixed(1)} ms au-dessus de ${RECHERCHE_ADMIN_MS} ms. Vérifier D'ABORD ` +
+        "que la requête ne demande pas plus que nécessaire : mesuré à 95 ms sur " +
+        "VINGT MILLE comptes, ce chemin ne devrait pas coûter cela sur mille.",
+    ).toBeLessThan(RECHERCHE_ADMIN_MS);
+  });
+
+  test("le coût suit les INSCRITS, jamais les commandes", async () => {
+    /*
+     * LA PROPRIÉTÉ QUI COMPTE À LONG TERME. Le coût de cette recherche doit
+     * croître avec le nombre de comptes, et avec lui seulement. Une jointure
+     * ajoutée un jour vers `orders`, `order_media` ou `link_views` la rendrait
+     * proportionnelle à l'ACTIVITÉ — et un vendeur à deux cents commandes par
+     * semaine ferait alors ralentir un écran qui ne parle pas de lui.
+     */
+    const m = await mesurerSerieuse(alice, CORPS_RECHERCHE("zzintrouvable"));
+    for (const table of ["orders", "order_media", "link_views", "tracked_parcels"]) {
+      expect(
+        m.plan.includes(`"Relation Name":"${table}"`),
+        `la recherche des boutiques lit ${table} : son coût suivrait l'activité`,
+      ).toBe(false);
+    }
+    // Et elle ne lit pas plus de lignes qu'il n'y a d'inscrits — à un facteur
+    // deux près, les deux tables jointes étant parcourues.
+    expect(m.lignesLues).toBeLessThan((BOUTIQUES + 2) * 3);
+  });
+
+  test("« creme » trouve « Crème » — le repli d'accents, à l'échelle", async () => {
+    /*
+     * ⚠️ CE N'EST PAS UNE MESURE, C'EST LA PROPRIÉTÉ QUE LA MESURE SUPPOSE.
+     * « La recherche insensible aux accents est en place » est resté vrai
+     * pendant que l'index ne repliait rien. Ici le repli vient d'un appel
+     * `unaccent()` à l'exécution ; on vérifie qu'il RÉPOND, pas qu'il existe.
+     */
+    await bd.query("begin");
+    try {
+      await bd.query("update public.shops set name = 'Crème Fraîche' where id = $1", [
+        alice.shopId,
+      ]);
+      const { rows } = await bd.query<{ name: string }>(CORPS_RECHERCHE("creme"));
+      expect(
+        rows.map((r) => r.name),
+        "« creme » ne trouve pas « Crème » : le repli d'accents ne replie rien",
+      ).toContain("Crème Fraîche");
+    } finally {
+      await bd.query("rollback");
+    }
+  });
+});

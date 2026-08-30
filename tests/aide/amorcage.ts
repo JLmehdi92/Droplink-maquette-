@@ -13,11 +13,81 @@ import { config } from "dotenv";
  */
 config({ path: ".env.local", quiet: true });
 
-export async function setup(): Promise<void> {
-  const { purgerResidusDeTest, rendreLesParametresAuDefaut, effacerLesBattements } = await import(
-    "./purger-residus"
-  );
+/**
+ * Au-delà de quoi on refuse de commencer, en octets.
+ *
+ * L'offre gratuite de Supabase plafonne à 500 Mo, et la base bascule alors en
+ * LECTURE SEULE — sans avertissement, et avec un message qui ne dit rien de sa
+ * cause (« Database error creating new user »). Le banc de mesure sème à lui
+ * seul plusieurs centaines de mégaoctets ; démarrer à 300 Mo, c'est le
+ * déclencher.
+ */
+const PLAFOND_BASE = 300 * 1024 * 1024;
+
+export async function setup(projet?: { readonly name?: string }): Promise<void> {
+  const { purgerResidusDeTest, rendreLesParametresAuDefaut, effacerLesBattements, tailleBase, rendreLEspace } =
+    await import("./purger-residus");
   await purgerResidusDeTest();
   await rendreLesParametresAuDefaut();
   await effacerLesBattements();
+
+  /*
+   * LE BANC DE MESURE RESTITUE À CHAQUE PASSAGE, sans condition de taille.
+   *
+   * ⚠️ LE SEUIL SEUL NE SUFFISAIT PAS, et c'est une mesure qui l'a dit. Le banc
+   * a échoué sur `canceling statement due to statement timeout` alors que la
+   * base occupait 153 Mo — bien SOUS le seuil de 300 Mo. Le seuil protège du
+   * basculement en lecture seule ; il ne protège pas du RALENTISSEMENT. Après
+   * restitution, la même suite est passée 13/13 sans autre changement.
+   *
+   * C'est le banc qui sème des centaines de milliers de lignes puis les efface,
+   * donc c'est lui qui laisse le mort derrière lui : il le paie à l'entrée,
+   * une dizaine de secondes, plutôt que de le léguer au passage suivant sous
+   * la forme d'une panne qui désigne le mauvais coupable.
+   */
+  if (projet?.name === "perf") {
+    const apres = await rendreLEspace();
+    console.warn(`[banc] espace restitué — base à ${(apres / 1024 / 1024).toFixed(0)} Mo.`);
+    return;
+  }
+
+  /*
+   * ⚠️ SUPPRIMER NE REND PAS L'ESPACE, ET C'EST CE QUI A COÛTÉ DEUX INCIDENTS.
+   *
+   * La purge ci-dessus efface les lignes depuis toujours ; le disque, lui,
+   * continuait de croître, parce qu'un `DELETE` laisse des lignes MORTES et
+   * que seul un `VACUUM FULL` restitue l'espace au système. La base a donc
+   * glissé jusqu'à 930 Mo le 21/08, puis 753 Mo le 30/08, et Supabase l'a
+   * basculée en LECTURE SEULE les deux fois.
+   *
+   * Le mode de défaillance est celui qu'on redoute le plus ici : il ne casse
+   * rien tant qu'il ne casse pas tout, et quand il casse, le symptôme désigne
+   * le mauvais coupable — on cherche la régression dans les fichiers qu'on
+   * vient de toucher.
+   *
+   * ON RÉCUPÈRE PLUTÔT QUE D'AVERTIR, et on ne récupère que si c'est
+   * nécessaire : `VACUUM FULL` prend un verrou exclusif et coûte des secondes,
+   * il n'a pas à être payé à chaque passage.
+   */
+  const avant = await tailleBase();
+  if (avant > PLAFOND_BASE) {
+    console.warn(
+      `Base à ${(avant / 1024 / 1024).toFixed(0)} Mo — au-delà du seuil de ` +
+        `${PLAFOND_BASE / 1024 / 1024} Mo. Restitution de l'espace en cours…`,
+    );
+    const apres = await rendreLEspace();
+    console.warn(`Base ramenée à ${(apres / 1024 / 1024).toFixed(0)} Mo.`);
+
+    // ET SI ÇA NE SUFFIT PAS, ON REFUSE DE COMMENCER. Lancer le banc à ce
+    // stade le ferait échouer plus loin, sur un message qui ne dirait pas
+    // pourquoi — et laisserait la base bloquée pour tout le reste.
+    if (apres > PLAFOND_BASE) {
+      throw new Error(
+        `La base occupe encore ${(apres / 1024 / 1024).toFixed(0)} Mo après ` +
+          `restitution. L'offre gratuite plafonne à 500 Mo et bascule en LECTURE ` +
+          `SEULE au-delà, sans le dire. Purger avant de mesurer : ` +
+          `\`pnpm purge:test --confirmer\`.`,
+      );
+    }
+  }
 }

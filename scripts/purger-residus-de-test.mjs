@@ -58,27 +58,68 @@ const avant = await client.query(
 );
 console.log(`Taille de la base : ${avant.rows[0].t}`);
 
-// GARDE 1 — aucun compte réel ne doit exister.
+/*
+ * GARDE 1 — LA PORTÉE, PAS LE REFUS.
+ *
+ * ⚠️ CETTE GARDE REFUSAIT DE S'EXÉCUTER dès qu'un seul compte hors du domaine
+ * de test existait. L'intention était juste — ne jamais supprimer un compte
+ * réel — mais le moyen rendait l'outil INUTILISABLE sur la seule base où il
+ * sert : celle qui porte le compte de test de Wassim.
+ *
+ * CONSTATÉ LE 30/08/2026, UNE SECONDE FOIS. La base est repassée en lecture
+ * seule à 753 Mo — même symptôme qu'au 21/08 raconté en tête de ce fichier —
+ * et l'outil bâti pour s'en remettre a répondu « ARRÊT : 1 compte hors du
+ * domaine de test. Rien n'a été supprimé. » Il a fallu écrire la suppression à
+ * la main, au moment précis où l'on voulait une procédure éprouvée.
+ *
+ * UN OUTIL DE RATTRAPAGE QUI REFUSE DE SERVIR N'EST PAS UN OUTIL PRUDENT,
+ * c'est un outil ABSENT — et son absence se découvre en situation d'incident,
+ * quand elle coûte le plus cher.
+ *
+ * La sécurité ne vient pas du refus, elle vient de la PORTÉE. Le domaine
+ * `@droplink-test.invalid` est réservé par la RFC 2606 : il ne peut être
+ * enregistré par personne, donc aucun compte réel ne peut y appartenir. La
+ * suppression y est bornée, et les comptes réels sont NOMMÉS pour qu'on voie
+ * qu'ils sont laissés intacts — se taire sur eux serait moins rassurant.
+ */
 const horsTest = await client.query(
   "select email from auth.users where email not like $1",
   [`%${DOMAINE_DE_TEST}`],
 );
 if (horsTest.rowCount > 0) {
-  console.error(
-    `ARRÊT : ${horsTest.rowCount} compte(s) hors du domaine de test. Rien n'a été supprimé.\n` +
+  console.log(
+    `${horsTest.rowCount} compte(s) hors du domaine de test — LAISSÉS INTACTS :\n` +
       horsTest.rows.map((r) => `  - ${r.email}`).join("\n"),
   );
-  await client.end();
-  process.exit(1);
 }
 
+/*
+ * ⚠️ LE DÉCOMPTE DES CASCADES DOIT ÊTRE CELUI DES CIBLES, PAS DE LA TABLE.
+ *
+ * Il comptait TOUTES les commandes, tous les événements et toutes les vues de
+ * la base — y compris ceux des comptes réels, qui ne seront pas supprimés. Le
+ * message de confirmation annonçait donc une destruction plus large que la
+ * suppression réelle.
+ *
+ * Or c'est précisément l'instant où l'on décide. Un chiffre faux et alarmant
+ * ici pousse soit à renoncer à une purge inoffensive, soit — plus grave — à
+ * apprendre que ce message exagère, donc à ne plus le lire.
+ */
 const cibles = await client.query(
-  `select count(*) as comptes,
-          (select count(*) from public.orders) as commandes,
-          (select count(*) from public.order_events) as evenements,
-          (select count(*) from public.link_views) as vues,
-          (select count(*) from public.order_media) as medias
-     from auth.users where email like $1`,
+  `with vises as (
+     select p.id from public.profiles p
+     join auth.users u on u.id = p.user_id
+     where u.email like $1
+   ), boutiques as (
+     select s.id from public.shops s join vises v on v.id = s.owner_id
+   ), commandes as (
+     select o.id from public.orders o join boutiques b on b.id = o.shop_id
+   )
+   select (select count(*) from auth.users where email like $1) as comptes,
+          (select count(*) from commandes) as commandes,
+          (select count(*) from public.order_events e join commandes c on c.id = e.order_id) as evenements,
+          (select count(*) from public.link_views v join commandes c on c.id = v.order_id) as vues,
+          (select count(*) from public.order_media m join commandes c on c.id = m.order_id) as medias`,
   [`%${DOMAINE_DE_TEST}`],
 );
 const c = cibles.rows[0];

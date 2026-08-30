@@ -121,3 +121,61 @@ export async function effacerLesBattements(): Promise<void> {
     console.warn("[harnais] effacement des battements impossible : " + error.message);
   }
 }
+
+/**
+ * La taille de la base, en octets.
+ *
+ * Elle passe par une connexion Postgres DIRECTE : `pg_database_size` n'est pas
+ * exposée par PostgREST, et c'est justement le genre de fait qu'aucune requête
+ * applicative ne peut établir.
+ */
+export async function tailleBase(): Promise<number> {
+  const { ouvrirConnexionCatalogue } = await import("./base");
+  const bd = await ouvrirConnexionCatalogue();
+  try {
+    const { rows } = await bd.query<{ n: string }>(
+      "select pg_database_size(current_database())::bigint as n",
+    );
+    return Number(rows[0]?.n ?? 0);
+  } finally {
+    await bd.end();
+  }
+}
+
+/**
+ * Rend au système l'espace que les suppressions ont laissé mort.
+ *
+ * ⚠️ `DELETE` NE REND RIEN. Il marque les lignes mortes ; l'autovacuum les
+ * réutilise, mais le fichier ne rétrécit pas. Seul `VACUUM FULL` le réécrit —
+ * et c'est pour cela que la base a pu glisser jusqu'à 930 Mo puis 753 Mo alors
+ * qu'une purge tournait à l'entrée de chaque suite.
+ *
+ * Les tables visées sont celles que les jeux de mesure font gonfler ; les
+ * autres ne pèsent rien et un `VACUUM FULL` inutile coûte un verrou exclusif.
+ */
+export async function rendreLEspace(): Promise<number> {
+  const { ouvrirConnexionCatalogue } = await import("./base");
+  const bd = await ouvrirConnexionCatalogue();
+  try {
+    for (const table of [
+      "public.orders",
+      "public.order_media",
+      "public.order_events",
+      "public.link_views",
+      "public.admin_audit_log",
+      "public.tracked_parcels",
+      "public.parcel_checkpoints",
+      "public.tracking_snapshots",
+      "public.shops",
+      "public.profiles",
+    ]) {
+      await bd.query(`vacuum (full, analyze) ${table}`);
+    }
+    const { rows } = await bd.query<{ n: string }>(
+      "select pg_database_size(current_database())::bigint as n",
+    );
+    return Number(rows[0]?.n ?? 0);
+  } finally {
+    await bd.end();
+  }
+}
