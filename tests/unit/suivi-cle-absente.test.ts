@@ -119,3 +119,66 @@ describe("CONTRE-TESTS : avec une clé, les autres échecs gardent leur nom", ()
     expect("motif" in r ? r.motif : null).toBe("delai");
   });
 });
+
+/**
+ * ⚠️ UN 200 NE PROUVE PAS QU'ILS ONT ACCEPTÉ.
+ *
+ * L'adaptateur rendait SUCCÈS dès qu'aucun numéro n'était explicitement rejeté.
+ * Or leur réponse porte un `code` de niveau COMPTE — quota épuisé, clé révoquée,
+ * compte suspendu — et dans ces cas il n'y a ni `accepted` ni `rejected` : juste
+ * un code et deux tableaux vides.
+ *
+ * L'appelant marquait alors `registered_at`. Et c'est `registered_at` restée
+ * NULLE qui déclenche la reprise par la tâche de fond : un quota épuisé aurait
+ * donc éteint le suivi de tous les colis suivants, définitivement, sans un mot.
+ * Le vendeur n'aurait vu que des pages qui ne bougent jamais.
+ *
+ * `indisponible` et non `refuse` : rien n'est marqué, le colis est repris tel
+ * quel quand le quota est rechargé.
+ */
+describe("La prise en charge exige un accusé POSITIF", () => {
+  const repondre = (corps: unknown) => {
+    process.env["TRACKING_API_KEY"] = "cle-de-test";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(new Response(JSON.stringify(corps), { status: 200 }))),
+    );
+  };
+
+  test("un 200 sans accusé N'EST PAS un succès", async () => {
+    repondre({ code: 0, data: { accepted: [], rejected: [] } });
+    const r = await dixSeptTrack.prendreEnCharge(NUMERO, null);
+    expect(r.statut, "un 200 vide est pris pour une prise en charge réussie").toBe("indisponible");
+    expect("motif" in r ? r.motif : null).toBe("sans-accuse");
+  });
+
+  test("un code de compte non nul est rapporté, jamais avalé", async () => {
+    // La forme d'un quota épuisé : un code, et aucun tableau.
+    repondre({ code: -18010012, data: null });
+    const r = await dixSeptTrack.prendreEnCharge(NUMERO, null);
+    expect(r.statut).toBe("indisponible");
+    expect("motif" in r ? r.motif : null).toBe("code--18010012");
+  });
+
+  test("CONTRE-TEST POSITIF : un vrai accusé reste un succès", async () => {
+    // Une règle qui refuserait tout passerait les deux contrôles ci-dessus sans
+    // rien prouver — et empêcherait toute prise en charge de jamais aboutir.
+    repondre({ code: 0, data: { accepted: [{ number: NUMERO, carrier: 3011 }], rejected: [] } });
+    const r = await dixSeptTrack.prendreEnCharge(NUMERO, null);
+    expect(r.statut, "un accusé en bonne et due forme est refusé").toBe("vide");
+  });
+
+  test("un numéro explicitement rejeté reste un REFUS, pas une indisponibilité", async () => {
+    // Les deux ne se confondent pas : un refus abandonne le suivi tout de suite,
+    // une indisponibilité le fait reprendre. Confondre l'un pour l'autre, c'est
+    // soit payer seize fois pour un numéro invalide, soit abandonner un colis
+    // valide sur une panne passagère.
+    repondre({
+      code: 0,
+      data: { accepted: [], rejected: [{ number: NUMERO, error: { code: -18019903 } }] },
+    });
+    const r = await dixSeptTrack.prendreEnCharge(NUMERO, null);
+    expect(r.statut).toBe("refuse");
+    expect("motif" in r ? r.motif : null).toBe("code--18019903");
+  });
+});

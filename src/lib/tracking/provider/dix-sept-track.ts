@@ -37,7 +37,26 @@ import type { EtatColisPort, FournisseurSuivi, ReponsePort } from "./port";
  * coût variable du produit, puisqu'on paierait DEUX prises en charge par colis.
  *
  * Pas d'abonnement : des packs de quotas, valables douze mois, non
- * reconductibles automatiquement. Limite de débit 3 requêtes/seconde, 429 au-delà.
+ * reconductibles automatiquement.
+ *
+ * ⚠️ LIMITE DE DÉBIT : 3 REQUÊTES/SECONDE, 429 AU-DELÀ — ET NOUS NE LA LIMITONS
+ * PAS. Écart connu, assumé, et nommé ici plutôt que colmaté :
+ *
+ *   - le seul appelant qui puisse faire une rafale est la CADENCE, et elle
+ *     boucle en série, un `await` par colis ;
+ *   - un 429 est déjà traité comme `indisponible` (motif `http-429`), donc le
+ *     colis est REPRIS au passage suivant : la rafale dégrade, elle ne perd
+ *     rien ;
+ *   - une limitation EN MÉMOIRE ne tiendrait pas : le projet s'interdit
+ *     explicitement ce mécanisme, parce que les instances se multiplient
+ *     précisément sous la charge à limiter. La faire en base coûterait un
+ *     aller-retour par appel de suivi ;
+ *   - et surtout, RIEN N'EST OBSERVABLE tant que la clé est absente : on n'a
+ *     jamais vu un seul 429. Poser une temporisation qu'on ne peut pas éprouver,
+ *     c'est se donner l'impression d'avoir traité le sujet.
+ *
+ * → À reprendre avec de vrais 429 sous les yeux, et en base si le volume le
+ * justifie. Le déclencheur se mesure : `usage_counters.tracking_api_calls`.
  *
  * ⚠️ LE PALIER GRATUIT A CHANGÉ, ET CE BLOC AFFIRMAIT L'ANCIEN — relevé le
  * 30/08/2026 dans leur documentation courante. Il disait « 100 quotas par mois,
@@ -229,6 +248,64 @@ const Enregistrement = z
   })
   .passthrough();
 
+/**
+ * LES CHAMPS DE LEUR RÉPONSE QUI DÉCRIVENT UNE PERSONNE, ET QU'ON NE STOCKE PAS.
+ *
+ * ⚠️ RELEVÉ LE 30/08/2026 DANS LEUR DOCUMENTATION, ET C'EST UNE SURPRISE. La
+ * charge utile d'une notification `TRACKING_UPDATED` contient
+ * `track_info.shipping_info.recipient_address` — pays, région, ville, RUE, code
+ * postal et coordonnées du DESTINATAIRE — ainsi que `consignee`, `phone_number`,
+ * `phone_number_last_4` et `cpf_or_cnpj`. Nous ne les demandons jamais : notre
+ * `/register` n'envoie que le numéro et, parfois, le transporteur. Le
+ * transporteur, lui, les publie.
+ *
+ * On les recevait donc, et on les ÉCRIVAIT dans `tracking_snapshots.raw_payload`
+ * — pendant quatre-vingt-dix jours après le dernier mouvement.
+ *
+ * Ce n'était pas une fuite : cette table porte la RLS sans aucune policy, donc
+ * elle n'est atteignable qu'en service-role, et rien de tout cela n'atteint
+ * jamais un écran. Mais c'est une collecte : des données personnelles sur le
+ * CLIENT D'UN VENDEUR, que le produit s'interdit par principe — le destinataire
+ * n'a pas de compte, et son nom même n'est qu'un pseudo en texte libre.
+ *
+ * La réponse brute existe pour DIAGNOSTIQUER. L'adresse d'un tiers n'a aucune
+ * valeur de diagnostic. On la retire avant d'écrire.
+ *
+ * ⚠️ CETTE LISTE EST UN CONTRÔLE PAR NOM, avec la faiblesse que ça implique :
+ * elle vaut pour le schéma qu'ils documentent AUJOURD'HUI. Un champ personnel
+ * ajouté demain sous un autre nom passerait. C'est assumé — l'inverse, une liste
+ * blanche, jetterait précisément les champs inconnus pour lesquels on garde la
+ * réponse brute. À revoir quand leur schéma change.
+ */
+const CHAMPS_PERSONNELS = new Set([
+  "shipping_info",
+  "shipper",
+  "consignee",
+  "phone_number",
+  "phone_number_last_4",
+  "cpf_or_cnpj",
+]);
+
+/**
+ * Rend une copie de leur réponse SANS les champs qui décrivent une personne.
+ *
+ * Le parcours est récursif et porte sur le NOM de la clef, à n'importe quelle
+ * profondeur : leur schéma place `shipping_info` sous `track_info`, mais rien ne
+ * garantit qu'il n'apparaisse pas ailleurs, et un contrôle qui ne regarde qu'un
+ * chemin précis regarde là où le défaut n'est peut-être plus.
+ */
+export function sansDonneesPersonnelles(valeur: unknown): unknown {
+  if (Array.isArray(valeur)) return valeur.map(sansDonneesPersonnelles);
+  if (valeur === null || typeof valeur !== "object") return valeur;
+
+  const propre: Record<string, unknown> = {};
+  for (const [clef, contenu] of Object.entries(valeur as Record<string, unknown>)) {
+    if (CHAMPS_PERSONNELS.has(clef)) continue;
+    propre[clef] = sansDonneesPersonnelles(contenu);
+  }
+  return propre;
+}
+
 /** Traduit leur `track_info` dans le vocabulaire du produit. */
 function versPort(colis: z.infer<typeof Colis>): EtatColisPort {
   const info = colis.track_info ?? null;
@@ -295,13 +372,46 @@ async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
       return { statut: "indisponible", motif: "http-" + String(reponse.status) };
     }
 
-    const brut: unknown = await reponse.json();
+    const brut: unknown = sansDonneesPersonnelles(await reponse.json());
     const analyse = Enregistrement.safeParse(brut);
     if (!analyse.success) return { statut: "indisponible", motif: "reponse-illisible" };
+
+    /*
+     * ⚠️ UN 200 NE PROUVE PAS QU'ILS ONT ACCEPTÉ — ET ON LE PRÉSUMAIT.
+     *
+     * Cette fonction rendait « vide », c'est-à-dire SUCCÈS, dès qu'aucun numéro
+     * n'était explicitement rejeté. Or leur réponse porte un `code` de niveau
+     * COMPTE : quota épuisé, clé révoquée, compte suspendu. Dans ces cas il n'y a
+     * ni `accepted` ni `rejected` — juste un code non nul et deux tableaux vides.
+     *
+     * L'appelant marquait alors `registered_at`, donc « ce colis est pris en
+     * charge ». La tâche de fond ne le reprenait plus JAMAIS, puisque c'est
+     * précisément `registered_at` restée nulle qui la déclenche. Un quota épuisé
+     * aurait donc éteint le suivi de tous les colis suivants, définitivement et
+     * sans un mot — le vendeur voyant seulement des pages qui ne bougent pas.
+     *
+     * → ON EXIGE UN ACCUSÉ POSITIF. C'est la leçon L-024 : trouver l'appel qui
+     * REFUSE quand la configuration est fausse, et l'avoir vu refuser.
+     *
+     * `indisponible` et non `refuse` : rien n'est marqué, `registered_at` reste
+     * nulle, et le colis est repris tel quel quand le quota est rechargé. Un
+     * refus l'aurait abandonné pour de bon.
+     */
+    const code = analyse.data.code;
+    // 0 dans leur doc v2.4, 200 dans une autre page officielle : les deux
+    // conventions circulent, on ne parie sur aucune et on ne refuse que ce qui
+    // n'est visiblement ni l'une ni l'autre.
+    if (code !== null && code !== undefined && code !== 0 && code !== 200) {
+      return { statut: "indisponible", motif: "code-" + String(code) };
+    }
 
     const rejete = analyse.data.data?.rejected?.[0];
     if (rejete !== undefined) {
       return { statut: "refuse", motif: "code-" + String(rejete.error?.code ?? "inconnu") };
+    }
+
+    if ((analyse.data.data?.accepted ?? []).length === 0) {
+      return { statut: "indisponible", motif: "sans-accuse" };
     }
 
     // La prise en charge ne rend PAS l'état du colis : elle l'enregistre. L'état
@@ -340,7 +450,7 @@ export const dixSeptTrack: FournisseurSuivi = {
       });
       if (!reponse.ok) return { statut: "indisponible", motif: "http-" + String(reponse.status) };
 
-      const brut: unknown = await reponse.json();
+      const brut: unknown = sansDonneesPersonnelles(await reponse.json());
       const accepte = z
         .object({ data: z.object({ accepted: z.array(Colis).nullish() }).passthrough().nullish() })
         .passthrough()
@@ -419,7 +529,10 @@ export const dixSeptTrack: FournisseurSuivi = {
   lireNotification(corpsBrut) {
     let brut: unknown;
     try {
-      brut = JSON.parse(corpsBrut);
+      // ⚠️ ON ANALYSE LE CORPS BRUT, PUIS ON RETIRE LES CHAMPS PERSONNELS. La
+      // SIGNATURE, elle, a déjà été vérifiée sur le corps BRUT tel quel, avant
+      // cet appel : la nettoyer ici ne peut donc pas casser la vérification.
+      brut = sansDonneesPersonnelles(JSON.parse(corpsBrut));
     } catch {
       return { statut: "refuse", motif: "json-illisible" };
     }
