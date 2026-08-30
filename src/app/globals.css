@@ -158,6 +158,7 @@
   /* ----- Succès — absent du thème, donc rendu en corail jusqu'ici -------- */
   --color-succes: #2f8f5b;          /*  53× */
   --color-succes-fond: #eef4f0;     /*  25× */
+  --color-succes-fond-doux: #f9fcfa;/*   1× — encart de motif d'une réactivation */
 
   /* ----- Alerte : trois fonds, sur trois écrans distincts ---------------- */
   --color-alerte: #c2543c;          /*  55× — texte et icône */

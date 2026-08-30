@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Icone } from "@/components/icone";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
+import { natureDAction } from "@/lib/admin/nature-d-action";
 import { lireDernieresActions } from "@/lib/audit/comptes";
 import { lirePanneau, lireSeuils } from "@/lib/audit/panneau";
 import { mettreOctetsALEchelle } from "@/lib/format/octets";
@@ -38,11 +39,15 @@ const SUR_TITRE =
  * information : elle ne fait que doubler le libellé qui suit, lequel dit déjà
  * de quelle action il s'agit. C'est un repère de balayage, pas un code.
  */
+const PASTILLE = {
+  suspension: "bg-alerte-puce",
+  reactivation: "bg-succes",
+  parametre: "bg-violet",
+  consultation: "bg-gris-inactif",
+} as const;
+
 function couleurPastille(action: string): string {
-  if (action.startsWith("compte.suspension")) return "bg-alerte-puce";
-  if (action.startsWith("compte.reactivation")) return "bg-succes";
-  if (action.startsWith("parametre.")) return "bg-violet";
-  return "bg-gris-inactif";
+  return PASTILLE[natureDAction(action)];
 }
 
 /**

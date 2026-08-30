@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { Icone } from "@/components/icone";
 import { exigerAdmin } from "@/lib/audit/garde";
+import { natureDAction } from "@/lib/admin/nature-d-action";
 import {
   compterJournal,
   lireJournal,
@@ -122,21 +123,30 @@ export default async function AdminJournal({
         }).toString()}`;
 
   /**
-   * La famille d'une action, DÉDUITE DE SON PRÉFIXE — même règle qu'en base.
-   * Deux définitions de « suspension » finiraient par diverger, et c'est la plus
-   * permissive qui gagnerait.
+   * LA COULEUR SUIT LA NATURE, PAS LA FAMILLE.
+   *
+   * Cet écran repliait tout `compte.*` sur « suspension » : une réactivation
+   * s'affichait donc en rouge, pilule et motif compris, alors que le Panneau la
+   * peignait en vert. Deux règles écrites séparément avaient divergé, et c'est
+   * la plus permissive qui gagnait — ici, sur l'écran qu'on ouvre justement
+   * pour savoir ce qui s'est passé.
+   *
+   * La FAMILLE, elle, reste volontairement aveugle à cette distinction : elle
+   * sert au filtre, et la base range tout `compte.%` sous « suspension ».
    */
-  const famille = (action: string): "suspension" | "parametre" | "consultation" =>
-    action.startsWith("compte.")
-      ? "suspension"
-      : action.startsWith("parametre.")
-        ? "parametre"
-        : "consultation";
-
   const TEINTE = {
     suspension: "bg-alerte-fond-vif text-alerte",
+    reactivation: "bg-succes-fond text-succes",
     parametre: "bg-violet-fond text-violet-encre",
     consultation: "bg-fond-neutre text-ardoise",
+  } as const;
+
+  /** Le filet de gauche de l'encart de motif, teinté comme la pilule. */
+  const MOTIF = {
+    suspension: "border-alerte-puce bg-alerte-fond-doux",
+    reactivation: "border-succes bg-succes-fond-doux",
+    parametre: "border-violet bg-violet-fond",
+    consultation: "border-gris-inactif bg-fond-neutre",
   } as const;
 
   const libelleAction = (l: LigneJournal): string =>
@@ -245,7 +255,7 @@ export default async function AdminJournal({
 
             <ol className="flex flex-col gap-2.5 md:gap-0">
               {page.lignes.map((l) => {
-                const f = famille(l.action);
+                const f = natureDAction(l.action);
                 return (
                   <li
                     key={l.id}
@@ -314,7 +324,12 @@ export default async function AdminJournal({
                       ) : null}
 
                       {l.motif !== null ? (
-                        <p className="mt-[5px] rounded-r-lg border-l-2 border-alerte-puce bg-alerte-fond-doux px-3 py-[9px] font-headline-md text-[13px] leading-5 font-normal text-on-surface">
+                        <p
+                          className={
+                            "mt-[5px] rounded-r-lg border-l-2 px-3 py-[9px] font-headline-md text-[13px] leading-5 font-normal text-on-surface " +
+                            MOTIF[f]
+                          }
+                        >
                           {t("journal.motifAvant")} {l.motif}
                         </p>
                       ) : null}
