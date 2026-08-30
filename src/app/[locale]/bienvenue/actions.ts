@@ -82,7 +82,16 @@ export async function terminerOnboarding(
 
   const analyse = Onboarding.safeParse({
     typeDeCompte: donnees.get("typeDeCompte"),
-    nomBoutique: donnees.get("nomBoutique") ?? undefined,
+    // ⚠️ LA CLÉ EST « nom », comme dans le champ qui l'envoie et comme dans
+    // l'action des réglages de marque. Elle a longtemps valu « nomBoutique »
+    // ici, et nulle part ailleurs : le formulaire postait `nom`, cette ligne
+    // lisait autre chose, et le nom de boutique saisi à l'inscription était
+    // jeté pour tous les comptes. Rien ne pouvait le dire — le champ est
+    // facultatif, l'absence est un état légitime, et la page publique omet son
+    // en-tête sans nom, ce que le brief décrit comme le cas principal.
+    // `tests/unit/formulaires-et-actions.test.ts` compare désormais les deux
+    // bouts du contrat, dans les deux sens.
+    nomBoutique: donnees.get("nom") ?? undefined,
     couleurAccent: donnees.get("couleurAccent"),
     locale: donnees.get("locale"),
   });
