@@ -57,6 +57,22 @@ export type ReponsePort =
   | { readonly statut: "indisponible"; readonly motif: string };
 
 /**
+ * LE SEUL MOTIF QUE LE PRODUIT DOIT SAVOIR DISTINGUER, et il vit ICI.
+ *
+ * Les autres motifs sont libres : ils nomment ce qui est arrivé chez un
+ * fournisseur donné, et le produit se contente de les journaliser. Celui-ci est
+ * différent parce qu'il ne décrit pas un incident mais une CONFIGURATION
+ * MANQUANTE — donc un échec permanent, que réessayer ne réparera jamais.
+ *
+ * Il appartient au port et non à l'adaptateur : tout fournisseur a une clé, et
+ * la question « le produit est-il capable de prendre en charge un colis ? » est
+ * une question du produit. Le mettre dans l'adaptateur obligerait chaque
+ * appelant à importer le fournisseur pour poser une question qui ne le regarde
+ * pas.
+ */
+export const MOTIF_CLE_ABSENTE = "cle-absente";
+
+/**
  * L'adaptateur d'un fournisseur de suivi.
  *
  * `prendreEnCharge` est SÉPARÉE de `interroger` parce que les deux ne coûtent

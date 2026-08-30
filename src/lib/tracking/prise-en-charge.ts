@@ -3,6 +3,7 @@ import { creerClientSysteme } from "@/lib/supabase/system";
 import { emettre } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { dixSeptTrack } from "./provider/dix-sept-track";
+import { MOTIF_CLE_ABSENTE } from "./provider/port";
 import { ingererEtat } from "./ingestion";
 
 /**
@@ -102,6 +103,31 @@ export async function prendreEnCharge(
   }
 
   if (inscription.statut === "indisponible") {
+    // ⚠️ UNE CLÉ ABSENTE N'EST PAS UNE PANNE, ET SE TAIRE LA REND INVISIBLE.
+    //
+    // Ce silence était total : un vendeur collait son numéro, la commande
+    // s'enregistrait, un colis était créé — et AUCUNE prise en charge n'avait
+    // lieu, pour aucun colis, jamais. La tâche de fond « reprendra » un travail
+    // qui échouera à l'identique à chaque passage, puis abandonnera le colis au
+    // bout de seize tentatives. Rien, nulle part, n'aurait nommé la cause.
+    //
+    // Le suivi multi-transporteurs dans le même lien est l'une des trois
+    // features qui font ce produit. Le voir s'éteindre sans un mot est
+    // exactement ce que le projet refuse : « aucune requête vers un domaine
+    // tiers sur un chemin dont l'échec est invisible ».
+    //
+    // Le chemin jumeau disait déjà la même chose : la vérification de signature
+    // LÈVE quand la clé manque, et son test explique que rendre `false` en
+    // silence ferait cesser le suivi « sans que personne ne sache pourquoi ».
+    // Cette branche-ci était restée muette.
+    if (inscription.motif === MOTIF_CLE_ABSENTE) {
+      console.error(
+        "[suivi] TRACKING_API_KEY absente : AUCUN colis n'est pris en charge. " +
+          "La tâche de fond réessaiera en vain jusqu'à l'abandon, et le suivi " +
+          "restera vide pour tous les vendeurs. Renseigner TRACKING_API_KEY.",
+      );
+    }
+
     // PAS ABANDONNÉ. Une panne réseau n'est pas un numéro invalide : la tâche de
     // fond reprendra. Rien n'est marqué, donc rien n'est perdu — c'est
     // exactement pour cela que `registered_at` reste nulle.

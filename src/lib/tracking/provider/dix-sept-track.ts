@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
+import { MOTIF_CLE_ABSENTE } from "./port";
 import type { EtatColisPort, FournisseurSuivi, ReponsePort } from "./port";
 
 /**
@@ -92,17 +93,48 @@ const EN_TETES_SIGNATURE = ["sign", "x-17track-signature"] as const;
 /** Au-delà, on considère le fournisseur indisponible plutôt que d'attendre. */
 const DELAI_MS = 12_000;
 
+/**
+ * Le nom porté par l'erreur de configuration, pour qu'elle reste RECONNAISSABLE
+ * après avoir traversé un `catch`.
+ *
+ * ⚠️ SANS LUI, UNE CLÉ ABSENTE SE FAISAIT PASSER POUR UNE PANNE RÉSEAU. Les deux
+ * `catch` de ce fichier rendaient `motif: "reseau"` pour toute erreur qui n'est
+ * pas une expiration de délai — et `cle()` lève AVANT le `fetch`, puisqu'elle est
+ * évaluée en construisant les en-têtes. Le message le plus utile du fichier
+ * était donc jeté et remplacé par un diagnostic faux.
+ *
+ * La différence n'est pas cosmétique : une panne réseau est TRANSITOIRE et la
+ * tâche de fond la rattrape, alors qu'une clé absente échouera à l'identique
+ * pour toujours. Les taire toutes les deux revient à taire la seconde.
+ */
+const ERREUR_CONFIGURATION = "ConfigurationDeSuiviAbsente";
+
 function cle(): string {
   const valeur = process.env["TRACKING_API_KEY"] ?? "";
   if (valeur.trim() === "") {
-    throw new Error(
+    const erreur = new Error(
       "TRACKING_API_KEY absente. Le suivi ne peut ni prendre en charge un " +
         "numéro ni vérifier une notification : sans clé, la vérification de " +
         "signature accepterait ou refuserait tout, et les deux sont pires que " +
         "l'arrêt.",
     );
+    erreur.name = ERREUR_CONFIGURATION;
+    throw erreur;
   }
   return valeur.trim();
+}
+
+/**
+ * Le motif d'un échec, sans jamais confondre configuration et réseau.
+ *
+ * On teste le NOM de l'erreur, comme le fait déjà l'expiration de délai avec
+ * `AbortError` : c'est l'idiome du fichier, et il survit à une reformulation du
+ * message.
+ */
+function motifDeLErreur(erreur: unknown): string {
+  if (erreur instanceof Error && erreur.name === ERREUR_CONFIGURATION) return MOTIF_CLE_ABSENTE;
+  if (erreur instanceof Error && erreur.name === "AbortError") return "delai";
+  return "reseau";
 }
 
 /*
@@ -262,8 +294,7 @@ async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
     // arrive ensuite, par notification ou par interrogation.
     return { statut: "vide", brut };
   } catch (erreur) {
-    const motif = erreur instanceof Error && erreur.name === "AbortError" ? "delai" : "reseau";
-    return { statut: "indisponible", motif };
+    return { statut: "indisponible", motif: motifDeLErreur(erreur) };
   } finally {
     clearTimeout(minuterie);
   }
@@ -309,8 +340,7 @@ export const dixSeptTrack: FournisseurSuivi = {
       const etat = versPort(colis);
       return estVide(etat) ? { statut: "vide", brut } : { statut: "ok", etat, brut };
     } catch (erreur) {
-      const motif = erreur instanceof Error && erreur.name === "AbortError" ? "delai" : "reseau";
-      return { statut: "indisponible", motif };
+      return { statut: "indisponible", motif: motifDeLErreur(erreur) };
     } finally {
       clearTimeout(minuterie);
     }

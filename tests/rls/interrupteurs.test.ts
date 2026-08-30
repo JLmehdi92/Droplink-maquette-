@@ -6,6 +6,7 @@ import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import { PARAMETRES } from "@/lib/audit/parametres";
 import { PURGE_JOURS } from "@/lib/audit/reglages-constates";
 import { prendreEnCharge } from "@/lib/tracking/prise-en-charge";
+import { MOTIF_CLE_ABSENTE } from "@/lib/tracking/provider/port";
 
 /**
  * LES DEUX INTERRUPTEURS, ET CE QUE L'ÉCRAN DES PARAMÈTRES DOIT MONTRER.
@@ -102,7 +103,19 @@ describe("L'interrupteur du suivi coupe la dépense, avant l'appel", () => {
      * appartiennent à l'adaptateur, qui peut légitimement en ajouter un. Ce que
      * ce test doit tenir, c'est qu'aucun d'eux n'est celui de l'interrupteur.
      */
-    const MOTIFS_DE_L_ADAPTATEUR = ["reseau", "exception", "http", "reponse"];
+    const MOTIFS_DE_L_ADAPTATEUR = [
+      "reseau",
+      "exception",
+      "http",
+      "reponse",
+      // ⚠️ CELUI-CI EST LE MOTIF RENDU DANS CET ENVIRONNEMENT, où `TRACKING_API_KEY`
+      // est absente — et il n'existait pas quand ce test a été écrit. L'adaptateur
+      // rendait alors `reseau` pour une clé manquante : le test passait, mais pour
+      // une raison qui était elle-même le défaut. Il est repris par sa CONSTANTE et
+      // non par sa chaîne, pour qu'un renommage casse ici plutôt que de retomber en
+      // silence dans le cas `reseau`.
+      MOTIF_CLE_ABSENTE,
+    ];
     await poser("suivi_actif", 1);
     const r = await prendreEnCharge(COLIS, "TESTINTERRUPTEUR02", null);
     expect(r.statut).toBe("indisponible");
