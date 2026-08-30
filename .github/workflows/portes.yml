@@ -1,0 +1,70 @@
+# LES PORTES QUI N'EXIGENT AUCUN SECRET, EXÉCUTÉES MÉCANIQUEMENT.
+#
+# POURQUOI CE FICHIER EXISTE. L'audit du 30/08/2026 a relevé qu'aucune CI
+# n'existait : `pnpm gates` ne tenait qu'à la discipline de le lancer en local
+# avant de commiter. « Ne jamais commiter par-dessus des portes rouges » est une
+# règle de conduite ; rien ne l'imposait.
+#
+# ⚠️ CETTE CI NE REMPLACE PAS `pnpm gates`, ET LE DIRE EST LA MOITIÉ DE SON
+# UTILITÉ. Elle couvre TROIS des six portes. Les trois autres exigent une VRAIE
+# base Postgres et de VRAIS utilisateurs authentifiés :
+#
+#   typecheck  ✅ ici        build      ❌ prérend des écrans qui interrogent la
+#   lint       ✅ ici                      base : sans elle, il échoue
+#   test       ✅ ici        test:rls   ❌ « un test qui simule RLS ne teste pas
+#   (412 unitaires)                        RLS » — il lui faut la base
+#                            fumee      ❌ sert un build de production réel
+#
+# Une CI verte ne dit donc PAS que le produit va bien. Elle dit que ce qui peut
+# être vérifié sans compte tiers l'a été. Le nom du job le répète, pour qu'un
+# badge vert ne se lise jamais comme un blanc-seing.
+#
+# LE PROJET `unit` EST PUR — sans réseau ni base, par construction
+# (`vitest.config.mts` le déclare et s'y tient). C'est ce qui rend cette CI
+# possible sans confier le moindre secret à un tiers.
+
+name: Portes sans secret
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  portes-partielles:
+    name: typecheck · lint · 412 tests unitaires (PAS build/rls/fumée)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # `--frozen-lockfile` : une CI qui résoudrait des versions différentes de
+      # celles du dépôt vérifierait un autre produit que celui qu'on commite.
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+
+      - run: pnpm lint
+
+      # ⚠️ `pnpm test` PASSE PAR `scripts/suite.mjs`, qui REFUSE un test sauté,
+      # un todo ou une suite vide. Sans lui, `vitest` sortirait en statut 0 sur
+      # « 589 passed | 22 skipped » — ce qui est arrivé, et a rendu une porte
+      # verte sur vingt-deux contrôles qui n'avaient pas tourné.
+      - run: pnpm test
+
+      # LA CHOSE QU'UNE CI OUBLIE LE PLUS SOUVENT : dire ce qu'elle n'a pas fait.
+      - name: Ce que cette CI n'a PAS vérifié
+        if: always()
+        run: |
+          echo "::warning title=Portes partielles::build, test:rls et fumee n'ont PAS tourne."
+          echo "Ils exigent une vraie base Postgres. Lancer 'pnpm gates' en local avant de pousser."
