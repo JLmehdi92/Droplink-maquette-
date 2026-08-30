@@ -1088,6 +1088,7 @@
       "videTout": "No shops.",
       "videRecherche": "No shop matches this search.",
       "pageSuivante": "Show more",
+      "autres": "{restantes, plural, one {# other shop} other {# other shops}}",
       "colonnes": {
         "nom": "Shop",
         "type": "Type",

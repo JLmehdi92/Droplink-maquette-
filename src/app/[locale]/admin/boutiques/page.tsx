@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
+import { Icone } from "@/components/icone";
 import { EncartTrace } from "@/components/admin/encart-trace";
 import { RechercheAdmin } from "@/components/admin/recherche-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
@@ -196,11 +197,18 @@ export default async function AdminBoutiques({
                     <span
                       aria-hidden="true"
                       className={
-                        "h-11 w-11 shrink-0 rounded-[12px] " +
+                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] " +
                         (b.nom === null ? "bg-fond-neutre" : "")
                       }
                       {...(b.nom === null ? {} : { style: { backgroundColor: b.accent } })}
-                    />
+                    >
+                      {/* LA PLANCHE POSE UNE ICÔNE DANS LE CARRÉ NEUTRE, et
+                          seulement là : une boutique nommée porte l'aplat de sa
+                          couleur, qui se suffit. Le carré était rendu vide —
+                          une pastille grise sans rien dedans se lit comme un
+                          média qui n'a pas chargé. */}
+                      {b.nom === null ? <Icone nom="storefront" className="text-[18px] text-gris-inactif" /> : null}
+                    </span>
                     <div className="min-w-0 flex-grow">
                       {b.nom === null ? (
                         <p className="truncate font-body-md text-[15px] leading-[19px] font-semibold italic text-sourdine">
@@ -286,11 +294,27 @@ export default async function AdminBoutiques({
 
             {/* LA SUITE EST UNE CARTE DE LA GRILLE, comme la planche : un bouton
                 seul sous une grille de cartes se lit comme la fin de la page. */}
+            {/* ⚠️ LES DEUX HAUTEURS CI-DESSOUS SONT CELLES DE LA BOÎTE RENDUE,
+                pas celles du style de la planche : la planche est en
+                `content-box`, donc ses `min-height: 190px` et `height: 38px`
+                posés sur des boîtes à filet rendent 192 et 40. Tailwind est en
+                `border-box` : recopier 190 et 38 rendait deux pixels de moins. */}
             {lienSuivant === null ? null : (
-              <li className="flex min-h-[190px] items-center justify-center rounded-[16px] border border-dashed border-outline bg-surface-container-lowest p-[18px]">
+              <li className="flex min-h-[192px] flex-col items-center justify-center rounded-[16px] border border-dashed border-outline-variant bg-surface-container-lowest p-[18px]">
+                {/* LE DÉCOMPTE N'EST EXACT QUE SUR LA PREMIÈRE PAGE. La
+                    pagination est par curseur : passé la première page, rien ne
+                    dit combien de lignes ont déjà défilé, et « autres » serait
+                    un nombre inventé. Une information absente est OMISE. */}
+                {parametres.curseur === null ? (
+                  <p className="mb-1 font-body-md text-[14px] leading-[18px] text-sourdine">
+                    {t("boutiques.autres", {
+                      restantes: Math.max(0, compteurs.comptes - page.lignes.length),
+                    })}
+                  </p>
+                ) : null}
                 <LienEcran
                   href={lienSuivant}
-                  className="inline-flex h-[38px] items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-4 font-headline-md text-[13px] leading-4 font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
+                  className="inline-flex h-10 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-4 font-headline-md text-[13px] leading-4 font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
                 >
                   {t("boutiques.pageSuivante")}
                 </LienEcran>

@@ -1088,6 +1088,7 @@
       "videTout": "Aucune boutique.",
       "videRecherche": "Aucune boutique ne correspond à cette recherche.",
       "pageSuivante": "Voir la suite",
+      "autres": "{restantes, plural, one {# autre boutique} other {# autres boutiques}}",
       "colonnes": {
         "nom": "Boutique",
         "type": "Type",
