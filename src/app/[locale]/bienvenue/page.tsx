@@ -38,7 +38,14 @@ export default async function Bienvenue({
   // fausse le jour où elle est déplacée.
   if (profil === null) redirect(`/${langue}/connexion?erreur=session`);
   if (profil.statut !== "active") redirect(`/${langue}/connexion?erreur=suspendu`);
-  if (!onboardingAFaire(profil)) redirect(`/${langue}`);
+  // ⚠️ CHEZ LUI, C'EST SON TABLEAU DE BORD, PAS NOTRE PAGE DE VENTE. Cette
+  // ligne renvoyait sur `/${langue}`, la landing : un vendeur déjà inscrit qui
+  // rouvrait un ancien lien vers l'onboarding se retrouvait devant l'argumentaire
+  // commercial du produit qu'il utilise déjà. L'en-tête de ce fichier annonçait
+  // pourtant « renvoyé chez lui » — le commentaire décrivait une intention que le
+  // code ne tenait pas. C'est aussi la destination que l'action choisit
+  // elle-même quand l'onboarding réussit.
+  if (!onboardingAFaire(profil)) redirect(`/${langue}/commandes`);
 
   return (
     <div className="min-h-dvh bg-canvas p-3 md:p-7">
