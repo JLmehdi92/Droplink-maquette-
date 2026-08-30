@@ -6,9 +6,22 @@
  * la page publique (300 Ko hors médias), pour dessiner une poignée de symboles.
  *
  * Ces tracés sont EXACTEMENT ceux de la police — récupérés depuis
- * fonts.gstatic.com, un par un, puis figés ici. Le dessin est donc identique aux
- * maquettes, pour 9,2 Ko de tracés au total, dont seuls ceux réellement employés
- * par une page finissent dans son rendu.
+ * fonts.gstatic.com, un par un, puis figés ici, pour 9,2 Ko de tracés au total,
+ * dont seuls ceux réellement employés par une page finissent dans son rendu.
+ *
+ * ⚠️ CE COMMENTAIRE A DIT « le dessin est donc identique aux maquettes »
+ * JUSQU'AU 30/08/2026, ET C'ÉTAIT DEVENU FAUX. C'était vrai des maquettes
+ * Stitch, qui chargeaient cette même police. Le canevas Claude Design, qui les
+ * a remplacées le 26/08, dessine ses 240 icônes AU TRAIT — `fill="none"`,
+ * `stroke="currentColor"`, `stroke-width` 1,8 à 2,2, gabarit 24×24 de type
+ * Lucide. Ces 55 tracés-ci sont PLEINS, sur un gabarit 0 -960 960 960.
+ *
+ * L'écart est donc réel et porte sur les 63 appels d'icône du produit, dans 23
+ * fichiers. Il n'est PAS corrigé ici : le fermer veut dire redessiner les 55
+ * glyphes au trait, et c'est un arbitrage de Wassim, pas une correction. Ce que
+ * ce commentaire doit faire en attendant, c'est cesser d'affirmer le contraire —
+ * une affirmation trop vague pour être fausse ne peut pas non plus être vraie,
+ * et celle-ci était assez précise pour être crue.
  *
  * Figés dans le dépôt, et pas chargés à l'exécution : une requête vers un
  * domaine tiers sur un chemin dont l'échec est invisible échoue en SILENCE
