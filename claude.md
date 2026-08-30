@@ -26,7 +26,7 @@ pnpm dev              # serveur de développement
 pnpm build            # build de prod — doit passer avant tout commit
 pnpm lint             # eslint
 pnpm typecheck        # tsc --noEmit — zéro erreur tolérée
-pnpm test             # vitest, projet unit
+pnpm test             # projet unit — REFUSE un test sauté, todo, ou une suite vide
 pnpm test:rls         # suites BLOQUANTES d'isolation — jamais désactivables
 pnpm test:perf        # mesures (~10 min) — PAS une porte de commit, voir ci-dessous
 pnpm db:migrate       # applique les migrations
@@ -49,6 +49,18 @@ pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 > `public.<fonction>(…)` du banc résout encore, **nom ET arité**. Le reste — les
 > temps, les plans, les lignes lues — reste dans `test:perf`, **à relancer à
 > chaque reprise de séance**, pas seulement en fin de phase.
+
+> ⚠️ **UN TEST SAUTÉ N'EST PAS UN TEST QUI PASSE.** Une exécution a rendu
+> `589 passed | 22 skipped` là où les 611 passent — aucun échec, statut 0, porte
+> verte, et vingt-deux contrôles qui n'avaient pas tourné. Vitest ne sait pas
+> échouer sur un saut ; `scripts/suite.mjs` lit son rapport JSON et refuse
+> **saut, todo, et suite vide** (un ensemble vide passe tout). Le projet `r2` en
+> est exclu : son `describe.runIf` est délibéré, il ne peut pas tourner sans
+> identifiants Cloudflare.
+>
+> ⚠️ **NE JAMAIS LANCER UNE PORTE DANS UN TUYAU.** `pnpm test:rls | grep …` rend
+> le statut de `grep`, pas celui de la suite : l'enchaînement `&&` continue sur
+> du rouge. Lancer `pnpm gates`, et **relever le décompte**, pas la couleur.
 
 Après toute modif de schéma : `pnpm db:migrate && pnpm db:types`, sinon les types sont périmés.
 
