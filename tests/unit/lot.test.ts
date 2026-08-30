@@ -11,6 +11,20 @@ import { ETATS_LOT, EtatLot, NombreLot } from "@/lib/commandes/lot";
  */
 describe("L'état d'un lot, tel qu'il revient de l'URL", () => {
   test("les états connus passent — sinon la sonde n'inspecte rien", () => {
+    /*
+     * ⚠️ CE TEST PROMETTAIT DANS SON NOM CE QU'IL NE VÉRIFIAIT PAS.
+     *
+     * « sinon la sonde n'inspecte rien » : la phrase était juste, et aucune
+     * assertion ne l'éprouvait. `ETATS_LOT` vient du module SOUS TEST ; s'il
+     * devenait vide, la boucle tournerait zéro fois, ce test passerait au vert,
+     * et `EtatLot.parse("ok")` rendrait `null` pour toute valeur — donc
+     * `?lot=ok` casserait le message de fin de lot sur l'écran le plus utilisé
+     * du produit, sans qu'une seule suite ne bronche.
+     *
+     * Un ensemble vide passe tout. On l'établit d'abord.
+     */
+    expect(ETATS_LOT.length, "ETATS_LOT est vide : la boucle ci-dessous ne prouve rien").toBe(4);
+
     for (const etat of ETATS_LOT) {
       expect(EtatLot.parse(etat), `${etat} devrait être accepté`).toBe(etat);
     }

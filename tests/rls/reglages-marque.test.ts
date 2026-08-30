@@ -185,7 +185,19 @@ describe("L'isolation, sur cette surface aussi", () => {
     expect(publique?.boutique.nom, "Bob a réécrit la boutique d'Alice").not.toBe(
       "Boutique detournee",
     );
-    expect(ok || true).toBe(true);
+    /*
+     * ⚠️ IL Y AVAIT ICI `expect(ok || true).toBe(true)`.
+     *
+     * `ok || true` vaut TOUJOURS `true` : cette ligne ne pouvait pas échouer,
+     * quelle que soit la valeur de `ok`. C'était le résidu d'une assertion
+     * déplacée sur l'ÉTAT, deux lignes plus haut — vidée de sa fonction sans
+     * être retirée. Elle ne prouvait rien et donnait la forme d'un contrôle à
+     * un endroit qui n'en portait plus.
+     *
+     * Ce qui reste à dire est la propriété RÉELLE : l'écriture hors périmètre
+     * ne LÈVE pas, elle ne trouve aucune ligne. C'est vérifiable, donc vérifié.
+     */
+    expect(ok, "l'écriture hors périmètre a levé : la RLS ne filtre plus, elle refuse").toBe(true);
   });
 
   test("contre-test positif : Bob PEUT rhabiller la sienne", async () => {

@@ -150,7 +150,14 @@ export function cleVignette(cleDuMedia: string): string {
  * peut être oubliée dans un nouveau chemin de code, une règle en base non.
  */
 export function cleCouverture(cleDuMedia: string): string {
-  const sansExtension = cleDuMedia.replace(/.[^./]+$/, "");
+  // ⚠️ LE POINT EST ÉCHAPPÉ, et il ne l'était pas. `/.[^./]+$/` employait « . »
+  // au sens de « n'importe quel caractère » : sur les clés d'aujourd'hui —
+  // `medias/{uuid}/{uuid}/{uuid}.ext`, un seul point — le résultat était le
+  // même, par COÏNCIDENCE, puisque le caractère à cette position se trouve
+  // justement être un point. `cleVignette`, juste au-dessus, l'échappait déjà.
+  // Deux fonctions dérivées de la même clé auraient divergé au premier format
+  // à double extension, sans qu'aucun test en place ne puisse le voir.
+  const sansExtension = cleDuMedia.replace(/\.[^./]+$/, "");
   return `${sansExtension}.couverture.webp`;
 }
 

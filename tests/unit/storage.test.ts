@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import {
   cleLogo,
   cleMedia,
+  cleCouverture,
   cleVignette,
   extensionPour,
   IdentifiantInvalide,
@@ -135,6 +136,42 @@ describe("Clés d'objet", () => {
     expect(cleVignette(cleMedia({
       shopId: UUID_A, orderId: UUID_B, mediaId: UUID_C, typeMime: "image/png",
     }))).toMatch(/\.vignette\.webp$/);
+  });
+
+  test("la couverture dérive comme la vignette, y compris sans extension", () => {
+    /*
+     * ⚠️ `cleCouverture` EMPLOYAIT UN POINT NON ÉCHAPPÉ : `/.[^./]+$/`, donc
+     * « n'importe quel caractère » au lieu de « un point ». Sur les clés
+     * d'aujourd'hui — un seul point, l'extension — le résultat était le même
+     * PAR COÏNCIDENCE, le caractère à cette position étant justement un point.
+     * `cleVignette`, sa jumelle, l'échappait déjà.
+     *
+     * Le cas qui les séparait : une clé SANS extension. L'ancienne expression
+     * mangeait alors le séparateur et le dernier segment, et rendait une clé
+     * du répertoire PARENT — `medias/{shop}/{order}.couverture.webp` au lieu
+     * de `medias/{shop}/{order}/{media}.couverture.webp`.
+     *
+     * Aucune clé sans extension n'existe aujourd'hui : elles sont toutes
+     * générées par le serveur à partir du type MIME. La protection tenait donc
+     * à une ABSENCE — exactement ce qu'on refuse d'appeler une protection.
+     */
+    const cle = cleMedia({
+      shopId: UUID_A,
+      orderId: UUID_B,
+      mediaId: UUID_C,
+      typeMime: "image/jpeg",
+    });
+    expect(cleCouverture(cle)).toBe(`medias/${UUID_A}/${UUID_B}/${UUID_C}.couverture.webp`);
+
+    // LES DEUX DÉRIVÉES SE COMPORTENT PAREIL — c'est la propriété qui manquait.
+    const memeRacine = (c: string): string => c.replace(/\.(vignette|couverture)\.webp$/, "");
+    expect(memeRacine(cleCouverture(cle))).toBe(memeRacine(cleVignette(cle)));
+
+    // Le cas qui les séparait, éprouvé directement : sans extension, la clé
+    // reste dans SON répertoire et ne remonte pas d'un cran.
+    const sansExtension = `medias/${UUID_A}/${UUID_B}/${UUID_C}`;
+    expect(cleCouverture(sansExtension)).toBe(`${sansExtension}.couverture.webp`);
+    expect(memeRacine(cleCouverture(sansExtension))).toBe(memeRacine(cleVignette(sansExtension)));
   });
 
   test("le logo vit hors de l'espace des médias", () => {

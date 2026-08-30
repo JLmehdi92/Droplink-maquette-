@@ -198,3 +198,292 @@ describe("les chemins d'invalidation sont des chemins que Next sait résoudre", 
     expect(suspects, "Chemins de gabarit portant un identifiant concret").toEqual([]);
   });
 });
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LA SENTINELLE REGARDAIT UNE MUTATION SUR SEIZE
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Le bloc ci-dessus garde un seul chemin : la suspension de compte. C'est celui
+ * qui a motivé son écriture, et c'est exactement le défaut L-025 — « un garde
+ * écrit après coup hérite du champ de vision de la CORRECTION, pas du
+ * problème ». Il regarde là où le défaut n'est plus.
+ *
+ * RELEVÉ LE 30/08/2026 : seize modules écrivent ce que le client finit par
+ * voir. Trois posent une étiquette d'invalidation. Le jour où quelqu'un
+ * enveloppe la lecture publique dans un cache de données — l'optimisation la
+ * plus naturelle sur une page dont tout le budget est la vitesse — les autres
+ * serviraient du périmé SANS ÉCHOUER. L'éditeur dirait « enregistré », le
+ * webhook du transporteur écrirait son point de passage, et le client verrait
+ * l'état d'avant, indéfiniment.
+ *
+ * CE BLOC INVENTORIE AU LIEU DE SÉLECTIONNER. La sonde rend TOUT ce qui a la
+ * forme d'une écriture dans les dossiers qui écrivent, le test DÉCLARE chaque
+ * fichier avec sa raison, et il échoue DANS LES DEUX SENS :
+ *   - un fichier qui écrit sans être déclaré  → la liste a vieilli ;
+ *   - une déclaration sans fichier qui écrit  → la liste ment.
+ *
+ * ⚠️ LA FORME D'UNE ÉCRITURE N'EST PAS UNE ÉCRITURE. `dix-sept-track.ts`
+ * contient `.update(corpsBrut + "/" + cle(), "utf8")` : c'est un condensat
+ * SHA-256, pas une ligne de base. Une sonde purement textuelle l'aurait compté
+ * — d'où la déclaration explicite, avec sa raison, plutôt qu'un silence.
+ */
+
+/** Les dossiers d'où part tout ce que le client finit par voir. */
+const DOSSIERS_MUTANTS = [
+  "/src/lib/commandes/",
+  "/src/lib/page-publique/",
+  "/src/lib/tracking/",
+  "/src/lib/audit/",
+  "/src/lib/boutique/",
+] as const;
+
+/*
+ * ⚠️ LES DOSSIERS VISÉS SONT CEUX QUI ÉCRIVENT, PAS CEUX QUI DÉCLENCHENT.
+ *
+ * Cette liste a d'abord visé `app/[locale]/admin/comptes/` et
+ * `app/[locale]/(app)/marque/`, parce que ce sont les Server Actions qu'on lit
+ * quand on cherche « où suspend-on un compte ». Le contrôle de SENS 2 l'a
+ * refusée tout de suite : ces deux fichiers ne portent aucune écriture, ils
+ * délèguent à `lib/audit/suspension.ts` et `lib/boutique/reglages.ts`.
+ *
+ * Une sonde posée sur les Server Actions aurait donc déclaré surveiller la
+ * coupure de suspension en ne regardant pas le module qui la fait.
+ */
+
+/**
+ * Ce qui a la FORME d'une écriture. Volontairement LARGE : on préfère devoir
+ * déclarer un faux positif que rater une mutation. Une sonde étroite se tairait
+ * sur ce qu'elle n'a pas su reconnaître, et son silence passerait pour une
+ * absence de défaut.
+ */
+const FORME_ECRITURE = /\.(update|insert|delete|upsert)\(|\.rpc\(\s*["'][a-z_]+["']/;
+
+type Verdict =
+  /** Change ce que le client voit. `couvreur` : le module qui invalide à sa place. */
+  | { readonly change: true; readonly couvreur: string | null; readonly raison: string }
+  /** N'atteint jamais la page publique. */
+  | { readonly change: false; readonly raison: string };
+
+const DECLARES: Readonly<Record<string, Verdict>> = {
+  "commandes/actions.ts": {
+    change: true,
+    couvreur: null,
+    raison: "revocation et archivage — invalide deja ses deux jetons",
+  },
+  "commandes/geste-liste.ts": {
+    change: true,
+    couvreur: null,
+    raison: "archivage depuis la liste — invalide deja",
+  },
+  "commandes/cycle.ts": {
+    change: true,
+    couvreur: "commandes/actions.ts",
+    raison: "revocation, duplication, archivage : appeles par les actions, qui invalident",
+  },
+  "commandes/ecriture.ts": {
+    change: true,
+    couvreur: null,
+    raison:
+      "DETTE NOMMEE. Sauvegarde automatique de l'editeur — le geste le PLUS " +
+      "frequent du produit. Change le nom du client affiche, la reference, le " +
+      "statut d'expedition et le statut QC. N'invalide rien.",
+  },
+  "commandes/medias.ts": {
+    change: true,
+    couvreur: null,
+    raison: "DETTE NOMMEE. Ajout, suppression et reordonnancement des medias.",
+  },
+  "commandes/actions-medias.ts": {
+    change: true,
+    couvreur: null,
+    raison: "DETTE NOMMEE. Choix de la photo de couverture.",
+  },
+  "page-publique/qc.ts": {
+    change: true,
+    couvreur: null,
+    raison:
+      "DETTE NOMMEE. L'arbitrage du client lui-meme — la seule ecriture que la " +
+      "page publique autorise. C'est le badge que verra le visiteur suivant.",
+  },
+  "tracking/attache.ts": {
+    change: true,
+    couvreur: null,
+    raison: "DETTE NOMMEE. Rattache un colis a une commande.",
+  },
+  "tracking/cadence.ts": {
+    change: true,
+    couvreur: null,
+    raison:
+      "DETTE NOMMEE, ET LA PLUS DANGEREUSE : declenchee par une tache de fond, " +
+      "donc hors de portee d'un vendeur qui penserait a rafraichir.",
+  },
+  "tracking/ingestion.ts": {
+    change: true,
+    couvreur: null,
+    raison: "DETTE NOMMEE. Notification du transporteur — meme remarque que la cadence.",
+  },
+  "tracking/prise-en-charge.ts": {
+    change: true,
+    couvreur: null,
+    raison: "DETTE NOMMEE. Premiere inscription d'un numero chez le fournisseur.",
+  },
+  "audit/suspension.ts": {
+    change: true,
+    couvreur: null,
+    raison:
+      "DETTE NOMMEE, gardee a part par le bloc ci-dessus : c'est la COUPURE de " +
+      "suspension, la capacite qui fonde notre statut d'hebergeur. Le module " +
+      "qui la FAIT, pas la Server Action qui la declenche.",
+  },
+  "boutique/reglages.ts": {
+    change: true,
+    couvreur: null,
+    raison:
+      "DETTE NOMMEE. Nom, couleur, langue publique, filigrane et reseaux : " +
+      "l'en-tete de CHAQUE page publique de ce vendeur, pas d'une seule.",
+  },
+  "boutique/logo.ts": {
+    change: true,
+    couvreur: null,
+    raison: "DETTE NOMMEE. Le logo, affiche en tete de chaque page publique du vendeur.",
+  },
+  "audit/boutiques.ts": {
+    change: false,
+    raison: "liste admin des boutiques : lecture auditee, l'ecriture detectee est sa trace",
+  },
+  "audit/comptes.ts": {
+    change: false,
+    raison: "listes et journal admin : lectures auditees, l'ecriture detectee est leur trace",
+  },
+  "audit/garde.ts": {
+    change: false,
+    raison: "est_admin : une lecture, appelee a chaque requete admin",
+  },
+  "audit/panneau.ts": {
+    change: false,
+    raison: "compteurs et alertes du panneau : agregats de lecture",
+  },
+  "audit/parametres.ts": {
+    change: false,
+    raison:
+      "ecrit les parametres systeme, mais aucun ne figure dans ce qu'une page " +
+      "publique rend : ils pilotent des seuils et des interrupteurs, jamais le " +
+      "contenu d'une commande",
+  },
+  "audit/surveillance.ts": {
+    change: false,
+    raison: "battement du veilleur : etat d'exploitation, jamais rendu a un client",
+  },
+  "page-publique/lecture.ts": {
+    change: false,
+    raison: "quatre rpc de LECTURE (lire_*) — la forme trompe, rien n'est ecrit",
+  },
+  "page-publique/vue.ts": {
+    change: false,
+    raison: "compte une consultation ; invisible du client, et deliberement apres le rendu",
+  },
+  "commandes/journal.ts": {
+    change: false,
+    raison: "historique de la commande — ecran vendeur, absent de la page publique",
+  },
+  "commandes/liste.ts": {
+    change: false,
+    raison: "compter_commandes_par_etat est un agregat de LECTURE",
+  },
+  "tracking/provider/dix-sept-track.ts": {
+    change: false,
+    raison: "le .update() detecte est celui d'un condensat SHA-256, pas d'une ligne de base",
+  },
+};
+
+/** Le nom court sous lequel un module est declare. */
+function nomCourt(posix: string): string {
+  return posix.split("/src/lib/")[1] ?? posix;
+}
+
+describe("toute mutation visible du client est inventoriée, pas sélectionnée", () => {
+  const ECRIVAINS = TOUS.filter(
+    (f) => DOSSIERS_MUTANTS.some((d) => f.posix.includes(d)) && FORME_ECRITURE.test(f.source),
+  ).map((f) => ({ ...f, nom: nomCourt(f.posix) }));
+
+  test("CONTRE-TEST : la sonde trouve réellement des écritures", () => {
+    // Un ensemble vide passe tout. Si les dossiers étaient renommés, ce bloc
+    // deviendrait vert en ne surveillant plus rien — l'état exact qu'il existe
+    // pour empêcher.
+    expect(ECRIVAINS.length, "aucun module d'écriture trouvé : la sonde vise à côté").toBeGreaterThan(
+      12,
+    );
+  });
+
+  test("SENS 1 — tout fichier qui écrit est déclaré", () => {
+    const inconnus = ECRIVAINS.filter((f) => DECLARES[f.nom] === undefined).map((f) => f.nom);
+    expect(
+      inconnus,
+      "Ces modules écrivent et ne sont pas déclarés. Dire s'ils changent ce que " +
+        "voit le client, et pourquoi — sans quoi la liste vieillit en silence.",
+    ).toEqual([]);
+  });
+
+  test("SENS 2 — toute déclaration correspond à un fichier qui écrit", () => {
+    const noms = new Set(ECRIVAINS.map((f) => f.nom));
+    const mortes = Object.keys(DECLARES).filter((n) => !noms.has(n));
+    expect(
+      mortes,
+      "Ces déclarations ne correspondent à aucun module qui écrit : la liste ment.",
+    ).toEqual([]);
+  });
+
+  test("chaque couvreur nommé invalide RÉELLEMENT — vérifiable sans cache", () => {
+    /*
+     * CE CONTRÔLE VAUT AUJOURD'HUI, pas seulement le jour du cache. Déclarer
+     * qu'un module est couvert par un autre est une affirmation vérifiable tout
+     * de suite : ou bien le couvreur appelle `revalidateTag`, ou bien la
+     * couverture est imaginaire et la dette est plus grande qu'annoncé.
+     */
+    const couvreurs = Object.entries(DECLARES)
+      .filter((e): e is [string, Extract<Verdict, { change: true }>] => {
+        const v = e[1];
+        return v.change && v.couvreur !== null;
+      })
+      .map(([nom, v]) => ({ nom, couvreur: v.couvreur as string }));
+
+    expect(couvreurs.length, "aucun couvreur déclaré : ce contrôle n'inspecte rien").toBeGreaterThan(
+      0,
+    );
+
+    for (const { nom, couvreur } of couvreurs) {
+      const fichier = ECRIVAINS.find((f) => f.nom === couvreur);
+      expect(fichier, `${nom} déclare être couvert par ${couvreur}, introuvable`).toBeDefined();
+      expect(
+        /revalidateTag\s*\(/.test(fichier?.source ?? ""),
+        `${nom} déclare être couvert par ${couvreur}, qui n'invalide rien`,
+      ).toBe(true);
+    }
+  });
+
+  test("SI un cache apparaît, aucune mutation visible ne peut rester muette", () => {
+    const enCache = SURFACE_PUBLIQUE.filter((f) =>
+      MISES_EN_CACHE.some((motif) => motif.test(f.source)),
+    );
+    if (enCache.length === 0) return; // Rien à garder tant que rien n'est en cache.
+
+    const muets = ECRIVAINS.filter((f) => {
+      const v = DECLARES[f.nom];
+      if (v === undefined || !v.change) return false;
+      if (/revalidateTag\s*\(/.test(f.source)) return false;
+      if (v.couvreur === null) return true;
+      const c = ECRIVAINS.find((x) => x.nom === v.couvreur);
+      return c === undefined || !/revalidateTag\s*\(/.test(c.source);
+    }).map((f) => f.nom);
+
+    expect(
+      muets,
+      `Un cache de données a été posé sur la lecture publique (${enCache
+        .map((f) => f.posix.split("/").pop())
+        .join(", ")}), et ces mutations n'invalident toujours rien. Elles ne ` +
+        "casseront pas : elles serviront l'état d'AVANT, indéfiniment, pendant " +
+        "que l'écran du vendeur affichera « enregistré ».",
+    ).toEqual([]);
+  });
+});
