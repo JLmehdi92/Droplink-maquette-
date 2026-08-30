@@ -350,25 +350,61 @@ export async function lireDernieresActions(
 }
 
 /**
+ * LE PLAFOND DU COMPTAGE DU JOURNAL, identique à celui de la migration 118.
+ *
+ * Au-delà, l'écran dit « plus de 10 000 » plutôt qu'un chiffre exact. Mesuré au
+ * plafond : le comptage exact coûtait 313 à 511 ms sur 517 031 lignes, pour une
+ * page qui en coûte 0 — soit cent pour cent de la latence de l'écran. Borné, il
+ * coûte 4 à 10 ms, et ce coût cesse de croître avec la table.
+ *
+ * La base compte jusqu'à 10 001 : le +1 est ce qui distingue « exactement dix
+ * mille » de « au moins dix mille et un ». Sans lui, une table portant
+ * exactement 10 000 entrées s'afficherait « plus de 10 000 », faux d'une unité
+ * et faux dans le sens qui exagère.
+ */
+export const PLAFOND_COMPTAGE_JOURNAL = 10_000;
+
+
+
+/**
  * Le nombre d'entrées, avec les MÊMES filtres que la lecture.
  *
  * Un total qui ignorerait le filtre afficherait « 1 284 entrées » au-dessus
  * d'une liste qui en montre trois, et l'on chercherait longtemps les 1 281
  * autres. La fonction en base est `stable`, comme sa jumelle : compter le
  * journal ne l'écrit pas non plus.
+ *
+ * ⚠️ LA VALEUR RENDUE EST BORNÉE. `depasse` vaut vrai quand la base a cessé de
+ * compter : l'appelant doit alors afficher « plus de N », jamais le nombre
+ * brut, qui vaudrait 10 001 et serait un chiffre inventé.
  */
 export async function compterJournal(
   supabase: ClientAdmin,
   parametres: Pick<ParametresJournal, "famille" | "jours">,
-): Promise<number> {
+  plafond: number | null,
+): Promise<{ total: number; depasse: boolean }> {
   const { data, error } = await supabase.rpc("compter_journal_admin", {
     p_famille: parametres.famille,
     p_depuis_jours: parametres.jours,
+    // ⚠️ ON DEMANDE UN DE PLUS QUE CE QU'ON AFFICHERA, et la convention vit
+    // ICI plutôt qu'au site d'appel. Ce +1 est ce qui distingue « exactement
+    // N » de « au moins N+1 » : sans lui, la base s'arrête PILE au plafond, le
+    // comptage ne peut par construction jamais le dépasser, et `depasse` reste
+    // faux pour toujours. Défaut trouvé par le test du contrat, pas par
+    // relecture — il est invisible tant qu'on ne demande pas un plafond
+    // volontairement bas.
+    //
+    // `0` dit « ne borne pas » à la base. Il n'y a PAS de valeur par défaut, ni
+    // ici ni en base : un défaut rendrait le coût invisible au site d'appel, et
+    // c'est précisément ce coût qu'on veut voir écrit là où il est payé.
+    p_plafond: plafond === null ? 0 : plafond + 1,
   });
   if (error !== null) {
     throw new Error("comptage du journal impossible : " + error.message);
   }
-  return Number(data ?? 0);
+  const compte = Number(data ?? 0);
+  if (plafond === null) return { total: compte, depasse: false };
+  return { total: Math.min(compte, plafond), depasse: compte > plafond };
 }
 
 export async function lireJournal(

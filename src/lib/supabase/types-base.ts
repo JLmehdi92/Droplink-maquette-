@@ -852,7 +852,7 @@ export type Database = {
         Returns: number
       }
       compter_journal_admin: {
-        Args: { p_depuis_jours: number; p_famille: string }
+        Args: { p_depuis_jours: number; p_famille: string; p_plafond: number }
         Returns: number
       }
       compteurs_admin: {

@@ -838,8 +838,10 @@
         "parametre_modification": "Modification d’un paramètre système"
       },
       "vide": "Aucune entrée pour l'instant.",
+      "surTotalAuDela": "{affichees} sur plus de {total, number} entrées",
       "surTotal": "{affichees} sur {total, plural, one {# entrée} other {# entrées}}",
       "pageSuivante": "Voir la suite",
+      "decompteAuDela": "Plus de {total, number} entrées · ni modifiables ni effaçables",
       "decompte": "{total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
       "portee": "Chaque accès administrateur à des données d’un vendeur, consultations comprises",
       "garantie": "Ce journal ne peut être ni modifié ni effacé, et il survit à la suppression des comptes concernés. Le consulter n'y écrit rien.",

@@ -6,6 +6,7 @@ import { exigerAdmin } from "@/lib/audit/garde";
 import { natureDAction } from "@/lib/admin/nature-d-action";
 import {
   compterJournal,
+  PLAFOND_COMPTAGE_JOURNAL,
   lireJournal,
   FAMILLES_JOURNAL,
   FENETRES_JOURNAL,
@@ -94,10 +95,11 @@ export default async function AdminJournal({
   });
 
   const supabase = await creerClientServeur();
-  const [page, total] = await Promise.all([
+  const [page, decompte] = await Promise.all([
     lireJournal(supabase, parametres),
-    compterJournal(supabase, parametres),
+    compterJournal(supabase, parametres, PLAFOND_COMPTAGE_JOURNAL),
   ]);
+  const { total, depasse } = decompte;
 
   const t = await getTranslations("admin");
   const format = await getFormatter();
@@ -160,7 +162,9 @@ export default async function AdminJournal({
       <EnTeteAdmin
         titre={t("journal.titre")}
         sousTitre={t("journal.portee")}
-        sousTitreMobile={t("journal.decompte", { total })}
+        sousTitreMobile={
+          depasse ? t("journal.decompteAuDela", { total }) : t("journal.decompte", { total })
+        }
       />
 
       <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-4 md:px-0 md:py-0">
@@ -369,7 +373,9 @@ export default async function AdminJournal({
             {lienSuivant === null ? null : (
               <div className="mt-[18px] flex flex-col gap-3 border-t border-filet-ligne px-4 pt-4 md:flex-row md:items-center md:justify-between md:px-0">
                 <p className="font-body-sm text-[13px] leading-4 text-sourdine">
-                  {t("journal.surTotal", { affichees: page.lignes.length, total })}
+                  {depasse
+                    ? t("journal.surTotalAuDela", { affichees: page.lignes.length, total })
+                    : t("journal.surTotal", { affichees: page.lignes.length, total })}
                 </p>
                 <LienEcran
                   href={lienSuivant}

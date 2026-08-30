@@ -637,22 +637,73 @@ describe("La fiche rend des volumes, jamais du contenu", () => {
 describe("Le journal se filtre sans rien perdre", () => {
   const sansFiltre = { famille: "" as const, jours: 0 };
 
+  /*
+   * ⚠️ CE FICHIER COMPTE SANS PLAFOND, ET C'EST DÉLIBÉRÉ.
+   *
+   * La migration 118 a borné le comptage du journal à 10 001 lignes, sur
+   * mesure : le comptage exact coûtait 313 à 511 ms au plafond de 517 031
+   * lignes, pour une page qui en coûte 0. L'écran paie donc 4 à 10 ms.
+   *
+   * Mais ce plafond aurait CASSÉ la preuve ci-dessous. La partition des trois
+   * familles se vérifie par une somme ; au-delà du plafond, la somme compare
+   * trois bornes à une quatrième borne et ne prouve plus rien — silencieusement,
+   * puisque la base de test porte déjà plus de 17 000 entrées.
+   *
+   * La migration 119 en a donc fait un ARGUMENT plutôt qu'un défaut subi :
+   * l'écran demande une borne, ce test demande l'exactitude et paie le temps
+   * qu'il faut. On n'échange pas une correction de performance contre une
+   * preuve perdue.
+   */
+  const EXACT = null;
+
   test("contre-test d'abord : le journal n'est pas vide", async () => {
-    const total = await compterJournal(admin.client, sansFiltre);
-    expect(total, "la sonde compte un journal vide").toBeGreaterThan(0);
+    const total = await compterJournal(admin.client, sansFiltre, EXACT);
+    expect(total.total, "la sonde compte un journal vide").toBeGreaterThan(0);
+  });
+
+  test("LE PLAFOND BORNE VRAIMENT, et le dit", async () => {
+    /*
+     * SANS CE CONTRÔLE, LA CORRECTION DE PERFORMANCE N'EST GARDÉE PAR RIEN.
+     *
+     * Le plafond ne se mesure pas ici — mesurer un temps dans une suite
+     * fonctionnelle certifierait une performance qui n'existe qu'à la
+     * volumétrie du moment. Ce qui se vérifie, c'est le CONTRAT : la valeur
+     * rendue s'arrête au plafond demandé, et l'appelant apprend qu'elle s'y est
+     * arrêtée — sans quoi il afficherait un nombre plafonné comme s'il était
+     * exact.
+     *
+     * On demande un plafond ABSURDEMENT BAS plutôt que le vrai : le contrat se
+     * prouve alors sans dépendre du volume du journal, donc sans devenir
+     * intermittent le jour où la base grossit.
+     */
+    const borne = await compterJournal(admin.client, sansFiltre, 5);
+    expect(borne.total, "le comptage a dépassé le plafond demandé").toBe(5);
+    expect(borne.depasse, "le plafond a mordu sans que l'appelant l'apprenne").toBe(true);
+
+    // CONTRE-TEST : sans plafond, le même appel rend davantage. Sans lui, une
+    // fonction qui rendrait toujours 5 passerait le contrôle ci-dessus.
+    const exact = await compterJournal(admin.client, sansFiltre, EXACT);
+    expect(exact.total, "le journal ne contient pas plus de 5 entrées : le contre-test ne prouve rien").toBeGreaterThan(5);
+    expect(exact.depasse, "un comptage sans plafond ne peut pas se déclarer plafonné").toBe(false);
+
+    // ET LE PLAFOND NE MENT PAS QUAND IL NE MORD PAS : au-dessus du volume
+    // réel, la valeur rendue redevient exacte et `depasse` retombe à faux.
+    const large = await compterJournal(admin.client, sansFiltre, exact.total + 1);
+    expect(large.total).toBe(exact.total);
+    expect(large.depasse).toBe(false);
   });
 
   test("LES TROIS FAMILLES PARTITIONNENT LE JOURNAL", async () => {
     const [total, suspensions, consultations, parametres] = await Promise.all([
-      compterJournal(admin.client, sansFiltre),
-      compterJournal(admin.client, { famille: "suspension", jours: 0 }),
-      compterJournal(admin.client, { famille: "consultation", jours: 0 }),
-      compterJournal(admin.client, { famille: "parametre", jours: 0 }),
+      compterJournal(admin.client, sansFiltre, EXACT),
+      compterJournal(admin.client, { famille: "suspension", jours: 0 }, EXACT),
+      compterJournal(admin.client, { famille: "consultation", jours: 0 }, EXACT),
+      compterJournal(admin.client, { famille: "parametre", jours: 0 }, EXACT),
     ]);
-    expect(suspensions + consultations + parametres).toBe(total);
+    expect(suspensions.total + consultations.total + parametres.total).toBe(total.total);
     // Et chacune est NON VIDE : trois zéros et un total nul passeraient
     // l'égalité ci-dessus sans rien prouver.
-    expect(consultations, "aucune consultation dans le journal").toBeGreaterThan(0);
+    expect(consultations.total, "aucune consultation dans le journal").toBeGreaterThan(0);
   });
 
   test("le filtre porte sur la LECTURE, pas seulement sur le décompte", async () => {
@@ -689,13 +740,14 @@ describe("Le journal se filtre sans rien perdre", () => {
     );
 
     const [tout, semaine] = await Promise.all([
-      compterJournal(admin.client, sansFiltre),
-      compterJournal(admin.client, { famille: "", jours: 7 }),
+      compterJournal(admin.client, sansFiltre, EXACT),
+      compterJournal(admin.client, { famille: "", jours: 7 }, EXACT),
     ]);
 
-    expect(tout - semaine, "l'entrée d'il y a un an est comptée dans les 7 jours").toBeGreaterThan(
-      0,
-    );
+    expect(
+      tout.total - semaine.total,
+      "l'entrée d'il y a un an est comptée dans les 7 jours",
+    ).toBeGreaterThan(0);
 
     // Et la lecture applique la MÊME borne que le décompte : un total filtré
     // au-dessus d'une liste qui ne l'est pas ferait chercher des lignes absentes.
@@ -719,13 +771,13 @@ describe("Le journal se filtre sans rien perdre", () => {
   });
 
   test("lire le journal N'ÉCRIT PAS dans le journal", async () => {
-    const avant = await compterJournal(admin.client, sansFiltre);
+    const avant = await compterJournal(admin.client, sansFiltre, EXACT);
     await lireJournal(admin.client, { famille: "", jours: 0, curseur: null });
-    await compterJournal(admin.client, sansFiltre);
-    const apres = await compterJournal(admin.client, sansFiltre);
+    await compterJournal(admin.client, sansFiltre, EXACT);
+    const apres = await compterJournal(admin.client, sansFiltre, EXACT);
     // La garantie ne vit pas dans le code applicatif : les deux fonctions sont
     // `stable`, donc PostgREST les exécute en transaction lecture seule et le
     // moteur refuserait toute écriture qu'on y ajouterait.
-    expect(apres).toBe(avant);
+    expect(apres).toEqual(avant);
   });
 });

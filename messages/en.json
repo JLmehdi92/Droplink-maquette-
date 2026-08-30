@@ -838,8 +838,10 @@
         "parametre_modification": "Changed a system setting"
       },
       "vide": "No entries yet.",
+      "surTotalAuDela": "{affichees} of more than {total, number} entries",
       "surTotal": "{affichees} of {total, plural, one {# entry} other {# entries}}",
       "pageSuivante": "Show more",
+      "decompteAuDela": "More than {total, number} entries · neither editable nor erasable",
       "decompte": "{total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
       "portee": "Every administrator access to a seller’s data, including views",
       "garantie": "This log can be neither edited nor erased, and it outlives the deletion of the accounts it describes. Reading it writes nothing to it.",
