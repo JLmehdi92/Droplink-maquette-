@@ -159,7 +159,8 @@ export default async function AdminJournal({
     <main id="contenu" className="md:px-[30px] md:py-[26px]">
       <EnTeteAdmin
         titre={t("journal.titre")}
-        sousTitre={t("journal.decompte", { total })}
+        sousTitre={t("journal.portee")}
+        sousTitreMobile={t("journal.decompte", { total })}
       />
 
       <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-4 md:px-0 md:py-0">
@@ -171,7 +172,10 @@ export default async function AdminJournal({
             qu'on n'a pas trouvé le bouton. Les pilules du téléphone, elles, sont
             des liens — la même chose partout coûte moins cher à comprendre. */}
         <nav aria-label={t("journal.filtres")} className="-mx-4 px-4 md:mx-0 md:px-0">
-          <ul className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0">
+          {/* `gap-y-4` AU BUREAU : les deux rangées vivent dans une seule liste
+              qui se replie, donc le `gap` de 8 px servait aussi d'espace VERTICAL
+              entre elles. La planche en met 16. */}
+          <ul className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:gap-y-4 md:overflow-visible md:pb-0">
             {(["", ...FAMILLES_JOURNAL] as const).map((f) => {
               const actif = parametres.famille === f;
               return (
@@ -224,9 +228,13 @@ export default async function AdminJournal({
         </nav>
 
         {/* CE QUE CE JOURNAL GARANTIT, dit avant qu'on le lise. Un journal dont
-            on ignore qu'il est inaltérable n'a pas la valeur d'un journal. */}
-        <p className="flex items-center gap-2.5 rounded-[12px] border border-outline-variant bg-surface-container-lowest px-3.5 py-3">
-          <Icone nom="shield_lock" className="shrink-0 text-[16px] text-gris-inactif" />
+            on ignore qu'il est inaltérable n'a pas la valeur d'un journal.
+
+            AU BUREAU SEULEMENT : la planche du téléphone met cette même
+            garantie dans le sous-titre, faute de place. L'encart s'y affichait
+            AUSSI, donc la phrase était dite deux fois à l'écran le plus étroit. */}
+        <p className="hidden items-center gap-2.5 rounded-[12px] border border-outline-variant bg-surface-container-lowest px-3.5 py-3 md:flex">
+          <Icone nom="shield_lock" className="shrink-0 text-[16px] text-sourdine" />
           <span className="font-body-sm text-[13px] leading-4 text-sourdine">
             {t("journal.garantie")}
           </span>
@@ -239,7 +247,10 @@ export default async function AdminJournal({
               : t("journal.videFiltre")}
           </p>
         ) : (
-          <div className="rounded-[18px] border border-outline-variant bg-surface-container-lowest md:px-6 md:py-5">
+          /* LA CARTE N'EXISTE QU'AU BUREAU. La planche du téléphone pose des
+             cartes LIBRES, sans conteneur : le filet portait donc un second
+             filet autour de lui, visible sur le seul écran où la place manque. */
+          <div className="md:rounded-[18px] md:border md:border-outline-variant md:bg-surface-container-lowest md:px-6 md:py-5">
             {/* Les en-têtes de colonne n'existent qu'au bureau : sur une carte,
                 « QUAND » au-dessus d'une heure n'apprend rien. */}
             <div className="hidden gap-[18px] pb-3 xl:grid xl:grid-cols-[132px_minmax(0,1fr)_168px]">
@@ -347,16 +358,28 @@ export default async function AdminJournal({
                 );
               })}
             </ol>
-          </div>
-        )}
 
-        {lienSuivant === null ? null : (
-          <LienEcran
-            href={lienSuivant}
-            className="mx-auto inline-flex min-h-11 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-6 font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface"
-          >
-            {t("journal.pageSuivante")}
-          </LienEcran>
+            {/* LE PIED DE LISTE EST DANS LA CARTE, séparé par un filet — la
+                planche l'y met. Le bouton vivait dehors et seul : une pagination
+                détachée de ce qu'elle pagine se lit comme la fin de la page.
+
+                ET IL DIT COMBIEN. « Voir la suite » sans nombre ne dit pas s'il
+                reste dix lignes ou dix mille ; le total est déjà compté par
+                `compter_journal_admin`, il ne coûte rien de plus ici. */}
+            {lienSuivant === null ? null : (
+              <div className="mt-[18px] flex flex-col gap-3 border-t border-filet-ligne px-4 pt-4 md:flex-row md:items-center md:justify-between md:px-0">
+                <p className="font-body-sm text-[13px] leading-4 text-sourdine">
+                  {t("journal.surTotal", { affichees: page.lignes.length, total })}
+                </p>
+                <LienEcran
+                  href={lienSuivant}
+                  className="inline-flex min-h-12 items-center justify-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-[18px] font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface md:h-10 md:min-h-0"
+                >
+                  {t("journal.pageSuivante")}
+                </LienEcran>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </main>

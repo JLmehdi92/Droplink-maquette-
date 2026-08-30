@@ -22,6 +22,14 @@ import type { ReactNode } from "react";
  * juste en dessous, le répéter dans le noir n'ajoute rien et repousse le champ
  * de recherche hors de l'écran.
  *
+ * `sousTitreMobile` couvre le cas voisin mais distinct du Journal : les deux
+ * planches n'y disent pas la même chose. Le bureau annonce la PORTÉE de ce
+ * qu'on va lire (« chaque accès administrateur… »), parce qu'un encart voisin
+ * porte déjà la garantie d'inaltérabilité ; le téléphone, où cet encart est
+ * masqué faute de place, met la garantie dans le sous-titre avec le décompte.
+ * Servir un seul texte aux deux gabarits disait donc, au bureau, ce que la
+ * planche fait dire au téléphone — et le répétait deux fois au téléphone.
+ *
  * `children` est l'espace de l'action de l'écran — un champ de recherche. Au
  * bureau la planche le pose À DROITE du titre, au téléphone SOUS lui, dans le
  * noir : c'est là qu'on tape avant de lire quoi que ce soit.
@@ -29,11 +37,13 @@ import type { ReactNode } from "react";
 export function EnTeteAdmin({
   titre,
   sousTitre,
+  sousTitreMobile,
   sousTitreAuBureauSeulement = false,
   children,
 }: {
   readonly titre: string;
   readonly sousTitre: string;
+  readonly sousTitreMobile?: string;
   readonly sousTitreAuBureauSeulement?: boolean;
   readonly children?: ReactNode;
 }) {
@@ -49,7 +59,14 @@ export function EnTeteAdmin({
             (sousTitreAuBureauSeulement ? "hidden md:block" : "mt-1")
           }
         >
-          {sousTitre}
+          {sousTitreMobile === undefined ? (
+            sousTitre
+          ) : (
+            <>
+              <span className="md:hidden">{sousTitreMobile}</span>
+              <span className="hidden md:inline">{sousTitre}</span>
+            </>
+          )}
         </p>
       </div>
 
