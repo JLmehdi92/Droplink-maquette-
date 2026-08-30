@@ -33,7 +33,37 @@ let bob: UtilisateurDeTest;
 let catalogue: Client;
 
 const DEFAUTS = ParametresEnvois.parse({});
-const MAINTENANT = new Date("2026-08-21T12:00:00Z");
+
+/*
+ * UNE SEULE HORLOGE, PRISE À L'EXÉCUTION — ET C'EST LA CORRECTION.
+ *
+ * ⚠️ CETTE CONSTANTE ÉTAIT UNE DATE LITTÉRALE (`2026-08-21T12:00:00Z`), et les
+ * colis étaient semés à des dates littérales elles aussi. Le test est donc parti
+ * en rouge le 30/08/2026, sans qu'aucune ligne de code ait bougé : le colis
+ * « qui a bougé hier » avait été écrit au 20/08, et il a franchi le seuil de dix
+ * jours ce jour-là.
+ *
+ * Le rouge était JUSTE, et il désignait le bon endroit. La liste reçoit son
+ * instant en argument — on pouvait donc le geler —, tandis que le compteur lit
+ * `now()` DANS POSTGRES, où rien ne se gèle. Les deux horloges avaient neuf
+ * jours d'écart, et la liste a continué de répondre selon le calendrier de son
+ * auteur pendant que le compteur répondait selon le vrai. Le compteur voyait
+ * trois colis silencieux, la liste un seul.
+ *
+ * ⚠️ LE PRODUIT, LUI, EST CORRECT : `compter_envois` et `lireEnvois` expriment
+ * la MÊME règle (ni livré, ni abandonné, immobile depuis plus de
+ * `SEUIL_SILENCE_JOURS`), et l'écran passe `new Date()` à la seconde près de
+ * `now()`. C'était le test qui portait deux calendriers.
+ *
+ * Toute date de ce fichier est désormais DÉRIVÉE de cet instant. Un jeu dont le
+ * sens dépend du jour où on le lit ne décrit plus ce qu'il prétend décrire.
+ */
+const MAINTENANT = new Date();
+
+/** Un instant daté depuis l'horloge du test, jamais depuis le calendrier. */
+function ilYa(jours: number): string {
+  return new Date(MAINTENANT.getTime() - jours * 86_400_000).toISOString();
+}
 
 /** Pose un colis chez `qui`, avec un dernier mouvement daté. */
 async function poserColis(
@@ -83,24 +113,18 @@ beforeAll(async () => {
   bob = await creerUtilisateur("envois-bob");
 
   // Trois colis chez Alice : un qui avance, un silencieux, un livré immobile.
-  await poserColis(alice, "AL-EN-ROUTE-01", {
-    etat: "en_transit",
-    dernierMouvement: "2026-08-20T10:00:00Z",
-  });
-  await poserColis(alice, "AL-SILENCE-02", {
-    etat: "en_transit",
-    dernierMouvement: "2026-07-01T10:00:00Z",
-  });
-  await poserColis(alice, "AL-LIVRE-03", {
-    etat: "livre",
-    dernierMouvement: "2026-06-01T10:00:00Z",
-  });
+  // Les écarts sont pris LOIN du seuil — un jour contre soixante — pour que la
+  // seconde qui sépare l'horloge du test de celle de Postgres ne puisse jamais
+  // faire basculer un colis d'un côté à l'autre.
+  await poserColis(alice, "AL-EN-ROUTE-01", { etat: "en_transit", dernierMouvement: ilYa(1) });
+  await poserColis(alice, "AL-SILENCE-02", { etat: "en_transit", dernierMouvement: ilYa(60) });
+  await poserColis(alice, "AL-LIVRE-03", { etat: "livre", dernierMouvement: ilYa(90) });
 
   // Un colis chez Bob, volontairement le plus immobile de tous : s'il
   // apparaissait chez Alice, il serait EN TÊTE de son tri par défaut.
   await poserColis(bob, "BOB-TRES-VIEUX-01", {
     etat: "en_transit",
-    dernierMouvement: "2020-01-01T10:00:00Z",
+    dernierMouvement: ilYa(2_000),
   });
 }, 120_000);
 
@@ -191,7 +215,7 @@ describe("Le dernier point de passage", () => {
   beforeAll(async () => {
     colis = await poserColis(alice, "AL-POINTS-04", {
       etat: "en_transit",
-      dernierMouvement: "2026-08-20T10:00:00Z",
+      dernierMouvement: ilYa(1),
     });
   }, 60_000);
 
@@ -310,6 +334,16 @@ describe("Le silence : la liste et le compteur disent la même chose", () => {
       ParametresEnvois.parse({ silencieux: "oui" }),
       MAINTENANT,
     );
+
+    // ⚠️ CONTRE-TEST : DEUX ZÉROS SONT ÉGAUX. Sans cette ligne, un jeu qui ne
+    // contient plus aucun colis silencieux — un semis raté, un seuil réécrit —
+    // ferait passer l'égalité sans rien prouver, exactement l'état que ce test
+    // existe pour empêcher.
+    expect(
+      page.lignes.map((l) => l.numero),
+      "aucun colis silencieux dans le jeu : l'égalité ne prouverait rien",
+    ).toContain("AL-SILENCE-02");
+
     expect(compteurs.silencieux).toBe(page.lignes.length);
   });
 
@@ -317,22 +351,19 @@ describe("Le silence : la liste et le compteur disent la même chose", () => {
     // Un colis posé JUSTE en deçà du seuil ne doit pas être silencieux, et un
     // colis juste au-delà doit l'être. Sans ces deux bornes, un seuil de 30
     // jours écrit par erreur dans la migration passerait inaperçu.
-    const juste = new Date(Date.now() - (SEUIL_SILENCE_JOURS - 1) * 86_400_000).toISOString();
-    const audela = new Date(Date.now() - (SEUIL_SILENCE_JOURS + 1) * 86_400_000).toISOString();
-
     await poserColis(alice, "AL-BORNE-DEDANS", {
       etat: "en_transit",
-      dernierMouvement: juste,
+      dernierMouvement: ilYa(SEUIL_SILENCE_JOURS - 1),
     });
     await poserColis(alice, "AL-BORNE-DEHORS", {
       etat: "en_transit",
-      dernierMouvement: audela,
+      dernierMouvement: ilYa(SEUIL_SILENCE_JOURS + 1),
     });
 
     const page = await lireEnvois(
       alice.client,
       ParametresEnvois.parse({ silencieux: "oui" }),
-      new Date(),
+      MAINTENANT,
     );
     const numeros = page.lignes.map((l) => l.numero);
     expect(numeros).toContain("AL-BORNE-DEHORS");
