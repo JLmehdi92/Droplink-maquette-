@@ -25,6 +25,7 @@
 import { spawn, execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createServer } from "node:net";
+import { gzipSync } from "node:zlib";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -1221,7 +1222,52 @@ try {
 
           [
             Buffer.byteLength(html) / 1024 < 300,
-            `poids du HTML public : ${(Buffer.byteLength(html) / 1024).toFixed(1)} Ko (budget 300)`,
+            `poids du HTML public : ${(Buffer.byteLength(html) / 1024).toFixed(1)} Ko`,
+          ],
+        );
+
+        /*
+         * ⚠️ LE BUDGET DU BRIEF PORTE SUR LA PAGE, PAS SUR SON HTML.
+         *
+         * DEFAUT REEL, TROUVE A L AUDIT DU 31/08/2026. Le controle ci-dessus
+         * etait etiquete « budget 300 » et comparait 44 Ko de HTML a 300 : il ne
+         * pouvait PAS devenir rouge pour la chose que le budget protege. Une
+         * bibliotheque de carrousel de 40 a 90 Ko — le cas exact que le brief
+         * redoute, en toutes lettres — serait passee sans un mot.
+         *
+         * ON PESE DONC CE QUE LE NAVIGATEUR TELECHARGE : le HTML, plus chaque
+         * sous-ressource `_next/static` qu il reference. Mesure du 31/08 sur une
+         * commande a 14 medias : 631 Ko bruts, 177 Ko compresses. C est le
+         * chiffre compresse qui compte — c est celui qui passe sur le reseau —
+         * et le brief annonce « ~116 Ko atteignable », valeur devenue fausse.
+         *
+         * LE CONTRE-TEST VIENT EN PREMIER : sans sous-ressource trouvee, la
+         * somme vaudrait le seul HTML et le controle passerait en n ayant rien
+         * pese.
+         */
+        const refs = [
+          ...new Set(
+            [...html.matchAll(/(?:src|href)="(\/_next\/static\/[^"]+)"/g)].map((m) => m[1]),
+          ),
+        ];
+        let brut = Buffer.byteLength(html);
+        let compresse = gzipSync(Buffer.from(html)).length;
+        for (const u of refs) {
+          const octets = Buffer.from(await (await fetch(base + u)).arrayBuffer());
+          brut += octets.length;
+          compresse += gzipSync(octets).length;
+        }
+        const ko = (n) => (n / 1024).toFixed(1);
+
+        controles.push(
+          [
+            refs.length >= 3,
+            `CONTRE-TEST : ${refs.length} sous-ressource(s) pesee(s) avec la page`,
+          ],
+          [
+            compresse / 1024 < 300,
+            `poids TOTAL hors medias : ${ko(compresse)} Ko compresses ` +
+              `(${ko(brut)} Ko bruts) — budget 300`,
           ],
         );
       }
@@ -1844,14 +1890,14 @@ controles.push(
 // La sonde INVENTORIE au lieu de selectionner : elle rend TOUT, et les
 // exceptions sont declarees ici avec leur raison.
 const EXCEPTIONS_VARIABLES = [
-  // Posees par le moteur Tailwind lui-meme au moment du rendu.
-  ["--default-font-feature-settings", "interne Tailwind"],
-  ["--default-font-variation-settings", "interne Tailwind"],
-  ["--default-mono-font-feature-settings", "interne Tailwind"],
-  ["--default-mono-font-variation-settings", "interne Tailwind"],
-  ["--tw-ease", "interne Tailwind"],
-  // Ecrites EN LIGNE par l apercu de marque : elles portent la couleur du
-  // vendeur, donc elles ne peuvent pas vivre dans une feuille statique.
+  // ⚠️ LES CINQ EXCEPTIONS « interne Tailwind » ONT DISPARU LE 31/08/2026, et
+  // c est la sonde qui l a exige en echouant DANS L AUTRE SENS. Elles couvraient
+  // `--tw-ease` et les quatre `--default-*`, toutes referencees AVEC UN REPLI :
+  // depuis que la sonde ne retient que les references NUES — les seules qui
+  // peuvent reellement ne rien peindre — ces cinq-la ne peuvent plus etre
+  // signalees. Une exception qui ne peut plus servir est une exception qui
+  // masquera le jour ou la variable reviendra vraiment orpheline.
+  //
   // POSEE EN LIGNE par les apercus de marque et d onboarding — elle porte la
   // couleur du vendeur, donc elle ne peut pas vivre dans une feuille statique —
   // mais elle est LUE par une classe utilitaire (la bordure et le halo de la
@@ -1866,15 +1912,37 @@ const EXCEPTIONS_VARIABLES = [
 const tolerees = new Set(EXCEPTIONS_VARIABLES.map(([v]) => v));
 
 const definies = new Set([...css.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-const referencees = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
+
+/*
+ * ⚠️ SEULES LES REFERENCES SANS REPLI PEUVENT PEINDRE DANS LE VIDE.
+ *
+ * FAUX POSITIF REEL, LE 31/08/2026. La sonde a signale `--tw-duration` apres la
+ * suppression d un composant mort — le seul du depot a porter une classe
+ * `duration-200`. Or Tailwind emet
+ * `transition-duration: var(--tw-duration, var(--default-transition-duration))`
+ * : le repli est la, la transition dure la valeur par defaut, et RIEN ne peint
+ * dans le vide. La sonde accusait le produit d un defaut qui n existait pas.
+ *
+ * Une sonde qui crie au loup finit desactivee, et on perd le vrai signal avec
+ * le bruit. On ne retient donc que `var(--x)` NU, c est-a-dire le seul cas ou
+ * la propriete n a aucune valeur — ce que le libelle du controle affirme.
+ *
+ * `[^),]` : on s arrete au premier `,` ou `)`. Une reference a repli porte une
+ * virgule, une reference nue porte directement la parenthese fermante.
+ */
+const referencees = new Set(
+  [...css.matchAll(/var\((--[a-z0-9-]+)\s*\)/g)].map((m) => m[1]),
+);
+const avecRepli = new Set([...css.matchAll(/var\((--[a-z0-9-]+)\s*,/g)].map((m) => m[1]));
 const orphelines = [...referencees].filter((v) => !definies.has(v) && !tolerees.has(v));
 
 controles.push(
   // CONTRE-TEST : sur une feuille vide, « aucune orpheline » serait vrai et ne
   // prouverait rien. On etablit d abord que la sonde voit une vraie palette.
   [
-    definies.size > 100 && referencees.size > 100,
-    `CONTRE-TEST : ${definies.size} variables definies, ${referencees.size} referencees`,
+    definies.size > 100 && referencees.size + avecRepli.size > 100,
+    `CONTRE-TEST : ${definies.size} variables definies, ${referencees.size} referencees ` +
+      `sans repli et ${avecRepli.size} avec repli`,
   ],
   [
     orphelines.length === 0,
