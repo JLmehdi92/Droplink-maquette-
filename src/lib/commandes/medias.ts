@@ -564,7 +564,22 @@ export async function confirmerDepot(
   emettreApres(
     EVENEMENTS.MEDIA_AJOUTE,
     { sujet: profilId },
-    { commande: orderId, taille: tailleReelle, type: typeMime },
+    {
+      commande: orderId,
+      taille: tailleReelle,
+      type: typeMime,
+      /*
+       * UNE VIDÉO ACCEPTÉE SANS DURÉE DÉCLARÉE EST COMPTÉE COMME TELLE.
+       *
+       * Le plafond de 60 s est déclaratif : la durée vient du navigateur et
+       * peut manquer — le fichier n'a pas été décodable, ou le champ a été
+       * omis. On accepte quand même, parce que refuser ferait payer au vendeur
+       * une limite qui est la nôtre. Mais on ne peut pas décider s'il faut
+       * s'en inquiéter sans savoir à quelle fréquence cela arrive, et ce
+       * compteur ne peut pas être branché après coup : il démarrerait vide.
+       */
+      duree_inconnue: estVideo(typeMime) && dureeSecondes === undefined,
+    },
   );
 
   // La CLÉ de l'objet n'entre pas au journal : elle est dérivable en URL signée,

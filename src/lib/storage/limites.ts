@@ -158,6 +158,32 @@ export function deciderDepot(params: {
     };
   }
 
+  /*
+   * ⚠️ CE PLAFOND EST DÉCLARATIF, ET IL FAUT LE DIRE PLUTÔT QUE LE MAQUILLER.
+   *
+   * `dureeSecondes` est OPTIONNEL et vient de `video.duration`, lu dans le
+   * NAVIGATEUR. Trois façons de le franchir sans rien forger : omettre le
+   * champ, envoyer un fichier que le navigateur ne sait pas décoder — auquel
+   * cas la durée vaut `null` —, ou appeler la Server Action directement.
+   *
+   * ON NE PEUT PAS FAIRE MIEUX SANS CONTREDIRE UNE DÉCISION EXISTANTE. Le
+   * rendre obligatoire refuserait une vidéo parce que le navigateur du vendeur
+   * n'a pas su la décoder — exactement ce que le brief interdit à propos de la
+   * vignette : « refuser une vidéo parce qu'on n'a pas su en extraire une image
+   * ferait payer au vendeur une limite qui est la nôtre ». Et le mesurer côté
+   * serveur demanderait le transcodeur que le brief refuse (30 Mo de WASM, des
+   * minutes sur mobile).
+   *
+   * CE QUI BORNE RÉELLEMENT LE COÛT EST LA TAILLE, elle relue côté serveur
+   * après dépôt. Une vidéo de dix minutes sous 20 Mo passe ; elle coûte le prix
+   * de ses 20 Mo, pas celui de ses dix minutes.
+   *
+   * ALORS ON COMPTE. Une vidéo acceptée SANS durée déclarée est instrumentée :
+   * si le cas est marginal, le plafond fait son travail ; s'il est courant, on
+   * l'apprendra au lieu de le supposer. C'est la règle du brief sur les refus —
+   * « sans la taille, je ne saurai pas de combien je me suis trompé » —
+   * appliquée à ce qu'on ACCEPTE faute de pouvoir le mesurer.
+   */
   if (
     video &&
     params.dureeSecondes !== undefined &&
