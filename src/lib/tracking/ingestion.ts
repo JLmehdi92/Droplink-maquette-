@@ -30,6 +30,32 @@ export type ResultatIngestion =
   | { readonly statut: "vide"; readonly colis: number }
   | { readonly statut: "ignore"; readonly motif: string };
 
+/**
+ * Rend son droit d'être rejouée à une notification dont le traitement a ÉCHOUÉ.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. `notification_deja_vue` est
+ * une marque à USAGE UNIQUE dont l'insertion EST le test — la bonne forme pour
+ * dédupliquer — mais elle était consommée AVANT l'écriture qui peut échouer. Une
+ * écriture ratée laissait donc l'empreinte posée : le fournisseur réémettait le
+ * même corps, donc la même empreinte, et la notification ressortait en
+ * « rejeu ». L'état était perdu définitivement.
+ *
+ * C'est le premier des trois pièges d'instrumentation du brief, et le chemin
+ * JUMEAU le traitait déjà : `auth/retour` réclame la marque d'inscription puis
+ * la LIBÈRE si l'émission échoue. Il n'existait pas d'équivalent ici.
+ *
+ * L'ÉCHEC DE LA LIBÉRATION EST AVALÉ, délibérément : on est déjà sur un chemin
+ * d'échec, et lever ici masquerait la cause première derrière un second
+ * incident. Le pire cas reste celui d'avant la correction.
+ */
+async function relacherLaMarque(
+  systeme: ReturnType<typeof creerClientSysteme>,
+  empreinte: string | undefined,
+): Promise<void> {
+  if (empreinte === undefined || empreinte === "") return;
+  await systeme.rpc("liberer_notification_vue", { p_cle: empreinte });
+}
+
 export async function ingererEtat(
   numero: string,
   reponse: ReponsePort,
@@ -68,7 +94,10 @@ export async function ingererEtat(
     // variable du produit — et rien d'autre ne bouge. Un numéro fraîchement
     // collé n'est simplement pas encore scanné.
     const { data, error } = await systeme.rpc("compter_interrogation_vide", { p_numero: propre });
-    if (error !== null) return { statut: "ignore", motif: "ecriture" };
+    if (error !== null) {
+      await relacherLaMarque(systeme, empreinteNotification);
+      return { statut: "ignore", motif: "ecriture" };
+    }
 
     await emettre(EVENEMENTS.INTERROGATION_VIDE, { sujet: "suivi:" + propre.slice(0, 4) });
     return { statut: "vide", colis: data ?? 0 };
@@ -126,7 +155,10 @@ export async function ingererEtat(
       passages.premierMouvement === null ? "" : passages.premierMouvement.toISOString(),
   });
 
-  if (error !== null) return { statut: "ignore", motif: "ecriture" };
+  if (error !== null) {
+    await relacherLaMarque(systeme, empreinteNotification);
+    return { statut: "ignore", motif: "ecriture" };
+  }
 
   /*
    * LA FONCTION REND MAINTENANT UNE LIGNE, PAS UN ENTIER.

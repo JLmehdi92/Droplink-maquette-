@@ -155,9 +155,30 @@ export async function POST(requete: Request): Promise<NextResponse> {
   // la seule chose qui distingue un point de réception qui travaille d'un point
   // de réception qui acquiesce.
   const colis = resultat.statut === "ignore" ? 0 : resultat.colis;
+
+  /*
+   * ⚠️ UN ÉCHEC DE NOTRE CÔTÉ NE SE PRÉSENTE PAS COMME UN SUCCÈS.
+   *
+   * DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026 : cette route répondait 200 y
+   * compris quand l'écriture en base avait échoué (`motif: "ecriture"`) ou quand
+   * la déduplication était indisponible. Le fournisseur considérait alors la
+   * notification distribuée et CESSAIT de la réémettre — l'état du colis était
+   * perdu jusqu'à la prochaine interrogation de cadence, laquelle n'est pas
+   * encore déployée. C'est L-024 retourné : un point d'ingestion qui répond 200
+   * ne prouve pas qu'il a accepté, et ici il répondait 200 en n'ayant rien fait.
+   *
+   * SEULS NOS PROPRES ÉCHECS SONT EN 5xx. « rejeu », « vide », « numero-vide »
+   * et un numéro qu'on ne suit plus sont des réponses NORMALES : les mettre en
+   * erreur ferait réémettre indéfiniment ce qui a été correctement traité, ce
+   * qui est le défaut symétrique et coûte tout autant.
+   */
+  const NOTRE_FAUTE = new Set(["ecriture", "deduplication-indisponible"]);
+  const aEchoue =
+    resultat.statut === "ignore" && "motif" in resultat && NOTRE_FAUTE.has(resultat.motif);
+
   return NextResponse.json(
     { statut: resultat.statut, colis },
-    { headers: { "cache-control": "no-store" } },
+    { status: aEchoue ? 503 : 200, headers: { "cache-control": "no-store" } },
   );
 }
 

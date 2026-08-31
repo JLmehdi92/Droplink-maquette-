@@ -930,6 +930,7 @@ export type Database = {
         Returns: boolean
       }
       liberer_evenement_inscription: { Args: never; Returns: boolean }
+      liberer_notification_vue: { Args: { p_cle: string }; Returns: undefined }
       lire_commande_publique: {
         Args: { p_jeton: string }
         Returns: {
