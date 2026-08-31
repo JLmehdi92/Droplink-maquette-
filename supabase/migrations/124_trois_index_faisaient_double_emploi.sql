@@ -1,0 +1,41 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- TROIS INDEX FAISAIENT DOUBLE EMPLOI AVEC UN INDEX DE CONTRAINTE
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- ⚠️ RELEVÉ DANS `pg_index` LE 31/08/2026. Postgres crée automatiquement un
+-- index d'unicité pour chaque contrainte `unique`. Trois index posés à la main
+-- portent EXACTEMENT les mêmes colonnes, dans le même ordre, que celui de leur
+-- contrainte :
+--
+--   profiles_user_id_idx      (user_id)          ⟷ profiles_user_id_key
+--   shops_owner_id_idx        (owner_id)         ⟷ shops_owner_id_key
+--   order_media_ordre_idx     (order_id, position) ⟷ order_media_position_unique
+--
+-- Un index redondant ne rend jamais une lecture plus rapide : le planificateur
+-- en choisit un et ignore l'autre. Il coûte, en revanche, à chaque ÉCRITURE —
+-- et `order_media` est écrite à chaque dépôt de média, c'est-à-dire sur le
+-- chemin le plus chaud du produit pour un fournisseur à 200 commandes/semaine.
+--
+-- ── POURQUOI LA SONDE D'INDEX NE POUVAIT PAS LES VOIR ───────────────────────
+--
+-- `tests/rls/index-attendus.test.ts` compare le dépôt à la base dans les deux
+-- sens, ce qui est la bonne forme. Mais il EXCLUT délibérément les index de
+-- contrainte de l'inventaire de la base :
+--
+--     not exists (… pg_constraint k where k.conindid = c.oid)
+--
+-- Il compare donc un ensemble à un autre sans jamais les confronter. Les trois
+-- doublons sont dans l'ensemble comparé, leurs jumeaux dans l'ensemble exclu :
+-- aucun des deux sens ne les rapproche. C'est L-025 sur une sonde par ailleurs
+-- solide — son champ de vision est celui de la question qu'elle a été écrite
+-- pour poser.
+--
+-- ── `if exists` PLUTÔT QU'UN `drop` NU ──────────────────────────────────────
+--
+-- Une base montée depuis un instantané antérieur pourrait ne pas les porter.
+-- Un `drop index` nu ferait alors échouer la migration sur un objet dont
+-- l'absence est précisément le but recherché.
+
+drop index if exists public.profiles_user_id_idx;
+drop index if exists public.shops_owner_id_idx;
+drop index if exists public.order_media_ordre_idx;
