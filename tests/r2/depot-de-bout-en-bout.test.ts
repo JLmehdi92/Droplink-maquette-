@@ -135,11 +135,12 @@ describe("Un dépôt aboutit réellement", () => {
     });
 
     // LA VIGNETTE, exactement comme le composant la dépose.
-    const sigVignette = await preparerDepotVignette(client, vendeur.shopId, {
+    const sigVignette = await preparerDepotVignette(client, vendeur.profilId, vendeur.shopId, {
       orderId: commande,
       mediaId: preparation.mediaId,
       typeMime: "image/png",
       tailleAnnoncee: PNG_1x1.length,
+      laissezPasser: preparation.laissezPasser,
     });
     expect(
       sigVignette.statut,

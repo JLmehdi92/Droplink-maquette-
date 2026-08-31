@@ -1,5 +1,5 @@
 import "server-only";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { verifierQuotaDepot } from "@/lib/limitation/quota";
@@ -51,6 +51,11 @@ export type PreparationDepot =
        */
       readonly enTetes: Record<string, string>;
       readonly expireDansS: number;
+      /**
+       * Preuve, à rendre avec chaque dérivée, que ce `mediaId` vient d'ici.
+       * Voir `laissezPasser` : sans elle, l'identifiant serait libre.
+       */
+      readonly laissezPasser: string;
     }
   | {
       readonly statut: "refus";
@@ -68,6 +73,77 @@ const Preparation = z.object({
   tailleAnnoncee: z.number().int().positive().max(2_000_000_000),
   dureeSecondes: z.number().int().positive().max(36_000).optional(),
 });
+
+/**
+ * LE LAISSEZ-PASSER D'UNE DÉRIVÉE — la preuve que son média vient de nous.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. `mediaId` était un UUID
+ * LIBRE : rien ne vérifiait qu'il désigne quoi que ce soit. Un vendeur
+ * authentifié obtenait donc autant d'URL `PUT` qu'il voulait sur des clés
+ * `medias/{sa boutique}/{sa commande}/{n'importe quel UUID}.vignette.webp`, et
+ * les objets déposés là n'ont AUCUNE ligne en base. Ils n'entrent donc ni dans
+ * `shops.stockage_octets` (migration 049, qui ne somme que
+ * `order_media.taille_octets`), ni dans le plafond de stockage (migration 077),
+ * ni dans aucun compteur d'usage : le seul poste de coût que le brief désigne
+ * comme pouvant déraper était écrivable **sans borne ET sans mesure**.
+ *
+ * POURQUOI UNE SIGNATURE PLUTÔT QU'UNE VÉRIFICATION. À cet instant du dépôt, la
+ * ligne `order_media` n'existe pas encore — elle est écrite par
+ * `confirmerDepot`, APRÈS les dérivées (séquence dans `carte-medias.tsx`).
+ * Interroger la base ne prouverait donc rien, et interroger le STOCKAGE
+ * mettrait un appel réseau dans la suite `rls`, qui doit tenir sans compte
+ * Cloudflare. Le laissez-passer se vérifie HORS LIGNE, sans état : il ne peut
+ * être émis que par `preparerDepot`, c'est-à-dire par le chemin qui plafonne le
+ * type, la taille, le nombre de médias et le débit.
+ *
+ * IL EST LIÉ AUX TROIS IDENTIFIANTS, pas seulement au média : un laissez-passer
+ * obtenu sur sa propre commande ne vaut rien sur une autre, ni sous une autre
+ * boutique. Le sel est celui du produit, avec un préfixe de domaine — sans lui,
+ * une empreinte d'adresse IP et un laissez-passer partageraient le même espace
+ * de valeurs.
+ */
+function laissezPasser(shopId: string, orderId: string, mediaId: string): string {
+  const sel = process.env["HASH_SALT"] ?? "";
+  if (sel.length < 16) {
+    throw new Error(
+      "HASH_SALT absent ou trop court : impossible de signer le laissez-passer " +
+        "d'une dérivée. Sans lui, n'importe quel identifiant de média serait " +
+        "accepté, et le stockage deviendrait écrivable sans borne ni mesure.",
+    );
+  }
+  return createHash("sha256")
+    .update(`derivee:${sel}:${shopId}:${orderId}:${mediaId}`)
+    .digest("hex");
+}
+
+/**
+ * Retire un média ET SES DEUX DÉRIVÉES du stockage.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. Les trois chemins de retrait
+ * — refus après relecture de la taille, échec d'écriture en base, suppression
+ * demandée par le vendeur — n'effaçaient QUE `cle`. Or un média porte jusqu'à
+ * trois objets : lui-même, sa vignette et sa couverture, et le client dépose
+ * les deux dérivées AVANT d'appeler `confirmerDepot`. Chaque refus tardif et
+ * chaque suppression laissaient donc jusqu'à 110 Ko derrière eux.
+ *
+ * CES ORPHELINS SONT PIRES QUE DU STOCKAGE PERDU : ils sont INVISIBLES. Aucune
+ * ligne ne les référence, donc ils n'entrent ni dans `shops.stockage_octets`,
+ * ni dans le plafond de la migration 077, ni dans l'écran d'administration qui
+ * prétend dire ce qu'un compte consomme. Le commentaire au-dessus du premier
+ * des trois sites énonçait pourtant la règle — « le garder ferait payer un
+ * stockage pour un média que personne ne verra jamais ». Elle était tenue pour
+ * un tiers de ce qui avait été déposé.
+ *
+ * L'ÉCHEC DE CHAQUE EFFACEMENT EST AVALÉ SÉPARÉMENT, délibérément : ne pas
+ * réussir à retirer la vignette ne doit pas empêcher de retirer le média.
+ */
+async function supprimerAvecDerivees(cle: string): Promise<void> {
+  await Promise.all(
+    [cle, cleVignette(cle), cleCouverture(cle)].map((c) =>
+      supprimer(c).catch(() => undefined),
+    ),
+  );
+}
 
 /** Compte les médias d'une commande. Compté PAR LE SERVEUR — un plafond qu'on demande à l'intéressé de mesurer n'en est pas un. */
 async function compter(
@@ -173,6 +249,7 @@ export async function preparerDepot(
       url: signature.url,
       enTetes: signature.enTetesObligatoires,
       expireDansS: signature.expireDans,
+      laissezPasser: laissezPasser(shopId, orderId, mediaId),
     };
   } catch (erreur) {
     // JAMAIS DE `CATCH` VIDE. Celui-ci l'était, et c'est ce qui a rendu un
@@ -199,12 +276,16 @@ export async function preparerDepot(
  */
 async function preparerDepotDerivee(
   supabase: ClientMedias,
+  profilId: string,
   shopId: string,
   entree: unknown,
   genre: "vignette" | "couverture",
 ): Promise<
   | { readonly statut: "ok"; readonly url: string; readonly enTetes: Record<string, string> }
-  | { readonly statut: "echec"; readonly motif: "introuvable" | "trop_lourde" | "stockage" }
+  | {
+      readonly statut: "echec";
+      readonly motif: "introuvable" | "trop_lourde" | "stockage" | "cadence";
+    }
 > {
   const analyse = z
     .object({
@@ -212,11 +293,39 @@ async function preparerDepotDerivee(
       mediaId: z.string().uuid(),
       typeMime: z.string().min(3).max(120),
       tailleAnnoncee: z.number().int().positive(),
+      laissezPasser: z.string().regex(/^[0-9a-f]{64}$/),
     })
     .safeParse(entree);
   if (!analyse.success) return { statut: "echec", motif: "introuvable" };
 
   const { orderId, mediaId, typeMime, tailleAnnoncee } = analyse.data;
+
+  /*
+   * LE LAISSEZ-PASSER EST VÉRIFIÉ AVANT TOUT LE RESTE, et sa comparaison est à
+   * TEMPS CONSTANT : comparer deux empreintes avec `===` fuit leur préfixe
+   * commun, ce qui suffit à les reconstruire octet par octet.
+   */
+  const attendu = Buffer.from(laissezPasser(shopId, orderId, mediaId), "hex");
+  const presente = Buffer.from(analyse.data.laissezPasser, "hex");
+  if (attendu.length !== presente.length || !timingSafeEqual(attendu, presente)) {
+    return { statut: "echec", motif: "introuvable" };
+  }
+
+  /*
+   * LE PLAFOND DE DÉBIT S'APPLIQUE ICI AUSSI, ET IL Y MANQUAIT.
+   *
+   * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. `preparerDepot` pose le
+   * plafond en tête et explique pourquoi ; ce chemin-ci ne le posait pas. Or il
+   * signe lui aussi des URL `PUT`, donc il ouvre lui aussi une écriture chez le
+   * fournisseur de stockage. Le seuil du brief — « 60 dépôts par minute » —
+   * était donc appliqué à UN des TROIS points d'entrée de signature.
+   *
+   * C'est L-025 dans sa forme littérale : la garde a été écrite au moment où le
+   * dépôt de média était le seul chemin, et les deux dérivées sont nées après,
+   * hors de son champ de vision.
+   */
+  const cadence = await verifierQuotaDepot(profilId);
+  if (!cadence.autorise) return { statut: "echec", motif: "cadence" };
 
   const { data: commande } = await supabase
     .from("orders")
@@ -250,8 +359,13 @@ async function preparerDepotDerivee(
 }
 
 /** Signe le dépôt de la VIGNETTE — 200 px, la tuile de la grille. */
-export function preparerDepotVignette(supabase: ClientMedias, shopId: string, entree: unknown) {
-  return preparerDepotDerivee(supabase, shopId, entree, "vignette");
+export function preparerDepotVignette(
+  supabase: ClientMedias,
+  profilId: string,
+  shopId: string,
+  entree: unknown,
+) {
+  return preparerDepotDerivee(supabase, profilId, shopId, entree, "vignette");
 }
 
 /**
@@ -263,8 +377,13 @@ export function preparerDepotVignette(supabase: ClientMedias, shopId: string, en
  * seule fait foi. Les écrire séparément aurait laissé deux chemins vivre leur
  * vie : celui qu'on corrige et celui qu'on oublie.
  */
-export function preparerDepotCouverture(supabase: ClientMedias, shopId: string, entree: unknown) {
-  return preparerDepotDerivee(supabase, shopId, entree, "couverture");
+export function preparerDepotCouverture(
+  supabase: ClientMedias,
+  profilId: string,
+  shopId: string,
+  entree: unknown,
+) {
+  return preparerDepotDerivee(supabase, profilId, shopId, entree, "couverture");
 }
 
 export type ConfirmationDepot =
@@ -331,8 +450,9 @@ export async function confirmerDepot(
 
   if (!decision.accepte) {
     // L'objet déposé est retiré : le garder ferait payer un stockage pour un
-    // média que personne ne verra jamais.
-    await supprimer(cle).catch(() => undefined);
+    // média que personne ne verra jamais. LES DEUX DÉRIVÉES PARTENT AVEC LUI :
+    // le client les a déjà déposées à ce stade (voir `supprimerAvecDerivees`).
+    await supprimerAvecDerivees(cle);
     emettreApres(
       EVENEMENTS.MEDIA_REFUSE,
       { sujet: profilId },
@@ -437,7 +557,7 @@ export async function confirmerDepot(
         " — " +
         (error === null ? "aucune ligne rendue" : `${error.code ?? "?"} : ${error.message}`),
     );
-    await supprimer(cle).catch(() => undefined);
+    await supprimerAvecDerivees(cle);
     return { statut: "echec", motif: "ecriture" };
   }
 
@@ -485,7 +605,7 @@ export async function supprimerMedia(
 
   if (error !== null || data === null) return { statut: "echec", motif: "introuvable" };
 
-  await supprimer(data.cle).catch(() => undefined);
+  await supprimerAvecDerivees(data.cle);
 
   journaliserApres(supabase, analyse.data.orderId, "media_supprime");
 

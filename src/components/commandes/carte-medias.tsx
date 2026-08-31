@@ -294,6 +294,9 @@ export function CarteMedias({
           mediaId: preparation.mediaId,
           typeMime: fichier.type,
           tailleAnnoncee: derivee.blob.size,
+          // La preuve que ce `mediaId` vient de `demanderDepot`. Sans elle,
+          // l'identifiant serait libre et le stockage écrivable sans mesure.
+          laissezPasser: preparation.laissezPasser,
         });
         if (signature.statut === "ok") {
           await envoyer(signature.url, signature.enTetes, derivee.blob, () => undefined).catch(

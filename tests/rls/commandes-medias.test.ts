@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
@@ -50,6 +52,36 @@ const PIXEL = Buffer.from(
 );
 
 const clientDe = (u: UtilisateurDeTest) => u.client as unknown as ClientMedias;
+
+/**
+ * LE LAISSEZ-PASSER D'UNE DÉRIVÉE, obtenu comme le navigateur l'obtient.
+ *
+ * Les dérivées ne s'obtenaient auparavant que sur la foi d'un `mediaId` LIBRE :
+ * n'importe quel UUID était accepté, donc n'importe qui d'authentifié pouvait
+ * faire signer des `PUT` sans borne sur des clés qu'aucune ligne ne
+ * référencerait jamais — donc sans qu'aucun compteur de stockage ne bouge.
+ *
+ * Le billet ne peut venir que de `preparerDepot`, c'est-à-dire du chemin qui
+ * plafonne le type, la taille, le nombre de médias et le débit. Ces tests
+ * l'obtiennent donc par ce chemin, exactement comme `carte-medias.tsx`.
+ */
+async function billet(
+  u: UtilisateurDeTest,
+  orderId: string,
+  typeMime = "image/jpeg",
+): Promise<{ mediaId: string; laissezPasser: string }> {
+  const preparation = await preparerDepot(clientDe(u), u.profilId, u.shopId, {
+    orderId,
+    typeMime,
+    tailleAnnoncee: 4096,
+  });
+  if (preparation.statut !== "ok") {
+    throw new Error(
+      "préparation refusée : " + ("motif" in preparation ? preparation.motif : "?"),
+    );
+  }
+  return { mediaId: preparation.mediaId, laissezPasser: preparation.laissezPasser };
+}
 
 /** Dépose un fichier de bout en bout, comme le fait le navigateur. */
 async function deposer(
@@ -397,11 +429,13 @@ describe("Les plafonds tiennent EN BASE", () => {
 
 describe("La vignette", () => {
   test("son emplacement est DÉRIVÉ de celui du média, jamais choisi", async () => {
-    const signature = await preparerDepotVignette(clientDe(alice), alice.shopId, {
+    const b = await billet(alice, commandeAlice);
+    const signature = await preparerDepotVignette(clientDe(alice), alice.profilId, alice.shopId, {
       orderId: commandeAlice,
-      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      mediaId: b.mediaId,
       typeMime: "image/jpeg",
       tailleAnnoncee: 4096,
+      laissezPasser: b.laissezPasser,
     });
 
     expect(signature.statut).toBe("ok");
@@ -409,7 +443,7 @@ describe("La vignette", () => {
 
     // L'URL signée doit porter le chemin dérivé, sous la boutique de l'appelant.
     const attendu = cleVignette(
-      "medias/" + alice.shopId + "/" + commandeAlice + "/3f2504e0-4f89-11d3-9a0c-0305e82c3301.jpg",
+      "medias/" + alice.shopId + "/" + commandeAlice + "/" + b.mediaId + ".jpg",
     );
     expect(decodeURIComponent(new URL(signature.url).pathname)).toContain(attendu);
     expect(signature.url).not.toContain(bob.shopId);
@@ -419,11 +453,13 @@ describe("La vignette", () => {
     // Le plafond vient du budget de page : 20 Ko de vignette maximum, sans quoi
     // cinquante lignes de liste dépassent le poids autorisé — ce qui ne se
     // verrait qu'une fois la volumétrie installée.
-    const signature = await preparerDepotVignette(clientDe(alice), alice.shopId, {
+    const b = await billet(alice, commandeAlice);
+    const signature = await preparerDepotVignette(clientDe(alice), alice.profilId, alice.shopId, {
       orderId: commandeAlice,
-      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      mediaId: b.mediaId,
       typeMime: "image/jpeg",
       tailleAnnoncee: limites().vignetteOctets + 1,
+      laissezPasser: b.laissezPasser,
     });
 
     expect(signature.statut).toBe("echec");
@@ -431,13 +467,94 @@ describe("La vignette", () => {
   });
 
   test("Bob ne peut pas signer de vignette dans la commande d'Alice", async () => {
-    const signature = await preparerDepotVignette(clientDe(bob), bob.shopId, {
+    const b = await billet(bob, commandeBob);
+    const signature = await preparerDepotVignette(clientDe(bob), bob.profilId, bob.shopId, {
       orderId: commandeAlice,
-      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      mediaId: b.mediaId,
       typeMime: "image/jpeg",
       tailleAnnoncee: 4096,
+      laissezPasser: b.laissezPasser,
     });
     expect(signature.statut).toBe("echec");
+  });
+
+  /**
+   * SANS LAISSEZ-PASSER VALIDE, RIEN N'EST SIGNÉ — et c'est ce qui borne le coût.
+   *
+   * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026 : `mediaId` était un UUID
+   * libre. Un vendeur authentifié obtenait autant d'URL `PUT` qu'il voulait sur
+   * des clés qu'aucune ligne ne référencerait jamais — donc invisibles à
+   * `shops.stockage_octets`, au plafond de stockage et à tous les compteurs.
+   *
+   * LES TROIS FORMES SONT ÉPROUVÉES, parce qu'une seule ne prouverait rien :
+   * billet absent, billet forgé, et billet VALIDE MAIS ÉMIS AILLEURS. La
+   * troisième est la seule qui distingue une vraie signature d'un simple
+   * contrôle de forme.
+   */
+  test("un laissez-passer absent, forgé, ou émis pour un AUTRE média est refusé", async () => {
+    const b = await billet(alice, commandeAlice);
+    const base = {
+      orderId: commandeAlice,
+      mediaId: b.mediaId,
+      typeMime: "image/jpeg",
+      tailleAnnoncee: 4096,
+    };
+
+    // CONTRE-TEST POSITIF D'ABORD : le billet légitime, lui, passe. Sans lui,
+    // les trois refus ci-dessous passeraient aussi bien avec une fonction qui
+    // refuserait TOUT.
+    const legitime = await preparerDepotVignette(clientDe(alice), alice.profilId, alice.shopId, {
+      ...base,
+      laissezPasser: b.laissezPasser,
+    });
+    expect(legitime.statut, "le billet légitime est refusé : la sonde vise à côté").toBe("ok");
+
+    const absent = await preparerDepotVignette(
+      clientDe(alice),
+      alice.profilId,
+      alice.shopId,
+      base,
+    );
+    expect(absent.statut).toBe("echec");
+
+    const forge = await preparerDepotVignette(clientDe(alice), alice.profilId, alice.shopId, {
+      ...base,
+      laissezPasser: "0".repeat(64),
+    });
+    expect(forge.statut).toBe("echec");
+
+    // Un billet PARFAITEMENT valide, mais émis pour un AUTRE média : il ne doit
+    // pas servir à signer sous l'identifiant du premier.
+    const ailleurs = await billet(alice, commandeAlice);
+    const detourne = await preparerDepotVignette(clientDe(alice), alice.profilId, alice.shopId, {
+      ...base,
+      laissezPasser: ailleurs.laissezPasser,
+    });
+    expect(
+      detourne.statut,
+      "un billet émis pour un autre média a été accepté : la signature ne lie pas l'identifiant",
+    ).toBe("echec");
+  });
+
+  /**
+   * LE PLAFOND DE DÉBIT S'APPLIQUE AUSSI AUX DÉRIVÉES.
+   *
+   * Il manquait : `preparerDepot` le posait, les deux chemins de dérivée non.
+   * Le seuil du brief — 60 dépôts par minute — n'était donc appliqué qu'à UN des
+   * TROIS points d'entrée de signature.
+   */
+  test("le plafond de débit des dépôts couvre aussi les dérivées", async () => {
+    const source = readFileSync(
+      join(process.cwd(), "src", "lib", "commandes", "medias.ts"),
+      "utf8",
+    );
+    const debut = source.indexOf("async function preparerDepotDerivee");
+    expect(
+      debut,
+      "preparerDepotDerivee est introuvable : la sonde vise à côté",
+    ).toBeGreaterThan(0);
+    const corps = source.slice(debut, source.indexOf("\n}", debut));
+    expect(corps).toContain("verifierQuotaDepot");
   });
 });
 
@@ -457,18 +574,20 @@ describe("La vignette", () => {
  */
 describe("La dérivée de couverture", () => {
   test("son emplacement est DÉRIVÉ de celui du média, jamais choisi", async () => {
-    const signature = await preparerDepotCouverture(clientDe(alice), alice.shopId, {
+    const b = await billet(alice, commandeAlice);
+    const signature = await preparerDepotCouverture(clientDe(alice), alice.profilId, alice.shopId, {
       orderId: commandeAlice,
-      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      mediaId: b.mediaId,
       typeMime: "image/jpeg",
       tailleAnnoncee: 40_000,
+      laissezPasser: b.laissezPasser,
     });
 
     expect(signature.statut).toBe("ok");
     if (signature.statut !== "ok") return;
 
     const attendu = cleCouverture(
-      "medias/" + alice.shopId + "/" + commandeAlice + "/3f2504e0-4f89-11d3-9a0c-0305e82c3301.jpg",
+      "medias/" + alice.shopId + "/" + commandeAlice + "/" + b.mediaId + ".jpg",
     );
     expect(decodeURIComponent(new URL(signature.url).pathname)).toContain(attendu);
     expect(signature.url).not.toContain(bob.shopId);
@@ -481,30 +600,35 @@ describe("La dérivée de couverture", () => {
     const juste = limites().vignetteOctets + 1;
     expect(juste).toBeLessThan(limites().couvertureOctets);
 
-    const acceptee = await preparerDepotCouverture(clientDe(alice), alice.shopId, {
+    const b = await billet(alice, commandeAlice);
+    const acceptee = await preparerDepotCouverture(clientDe(alice), alice.profilId, alice.shopId, {
       orderId: commandeAlice,
-      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      mediaId: b.mediaId,
       typeMime: "image/jpeg",
       tailleAnnoncee: juste,
+      laissezPasser: b.laissezPasser,
     });
     expect(acceptee.statut, "une couverture de 20 Ko a été refusée").toBe("ok");
 
-    const refusee = await preparerDepotCouverture(clientDe(alice), alice.shopId, {
+    const refusee = await preparerDepotCouverture(clientDe(alice), alice.profilId, alice.shopId, {
       orderId: commandeAlice,
-      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      mediaId: b.mediaId,
       typeMime: "image/jpeg",
       tailleAnnoncee: limites().couvertureOctets + 1,
+      laissezPasser: b.laissezPasser,
     });
     expect(refusee.statut).toBe("echec");
     if (refusee.statut === "echec") expect(refusee.motif).toBe("trop_lourde");
   });
 
   test("Bob ne peut pas signer de couverture dans la commande d'Alice", async () => {
-    const signature = await preparerDepotCouverture(clientDe(bob), bob.shopId, {
+    const b = await billet(bob, commandeBob);
+    const signature = await preparerDepotCouverture(clientDe(bob), bob.profilId, bob.shopId, {
       orderId: commandeAlice,
-      mediaId: "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      mediaId: b.mediaId,
       typeMime: "image/jpeg",
       tailleAnnoncee: 40_000,
+      laissezPasser: b.laissezPasser,
     });
     expect(signature.statut).toBe("echec");
   });

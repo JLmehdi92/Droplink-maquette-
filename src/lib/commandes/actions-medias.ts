@@ -54,7 +54,7 @@ export async function demanderDepotVignette(
 > {
   const c = await contexte();
   if (c === null) return REFUS;
-  return preparerDepotVignette(c.supabase, c.shopId, entree);
+  return preparerDepotVignette(c.supabase, c.profilId, c.shopId, entree);
 }
 
 /**
@@ -73,7 +73,7 @@ export async function demanderDepotCouverture(
 > {
   const c = await contexte();
   if (c === null) return REFUS;
-  return preparerDepotCouverture(c.supabase, c.shopId, entree);
+  return preparerDepotCouverture(c.supabase, c.profilId, c.shopId, entree);
 }
 
 export async function retirerMedia(
