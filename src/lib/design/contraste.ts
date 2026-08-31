@@ -255,13 +255,39 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
   const texte = ajusterPourRatio(base, fond, RATIO_TEXTE);
   const elementInterface = ajusterPourRatio(base, fond, RATIO_INTERFACE);
 
-  // Pour un bouton, c'est l'accent qui fait le fond : on choisit l'écriture qui
-  // contraste le mieux, et on n'assombrit le remplissage que si aucune des deux
-  // n'atteint la cible.
-  let remplissage = base;
-  const surRemplissage = ratioContraste(base, BLANC) >= ratioContraste(base, ENCRE) ? BLANC : ENCRE;
+  /*
+   * L'APLAT DOIT SE DÉTACHER DU FOND DE PAGE, ET IL NE LE FAISAIT PAS.
+   *
+   * ⚠️ DÉFAUT RÉEL, MESURÉ LE 31/08/2026 SUR CETTE FONCTION. `texte` et
+   * `interface` étaient bien ajustés contre `fondPage` ; `remplissage` ne
+   * l'était contre RIEN — seulement contre l'écriture qu'il porte. Mesures
+   * obtenues en appelant `resoudreAccent` sur un fond blanc :
+   *
+   *     accent #ffffff → remplissage #ffffff → 1,000 contre le fond
+   *     accent #ffff00 → remplissage #ffff00 → 1,074
+   *     accent #eab308 → remplissage #eab308 → 1,918
+   *
+   * Or `arbitrage-qc.tsx` peint le bouton « Approuver » avec cet aplat et SANS
+   * bordure. Un vendeur qui choisit un accent clair — valeur parfaitement
+   * acceptée, `^#[0-9a-fA-F]{6}$` ne borne aucune luminance — obtenait donc,
+   * sur la page de SON CLIENT, une action principale invisible, pendant que le
+   * bouton secondaire « Refuser » restait encadré et lisible. WCAG 1.4.11
+   * demande 3:1 pour la frontière d'un contrôle ; le brief le dit aussi, et
+   * ajoute que la conformité doit être obtenue AUTOMATIQUEMENT, sans que le
+   * vendeur ait à chercher « une couleur qui marche ».
+   *
+   * L'ORDRE DES DEUX AJUSTEMENTS COMPTE. On détache d'abord l'aplat du fond,
+   * PUIS on choisit l'écriture, PUIS on ne resserre que si l'écriture ne passe
+   * pas. Choisir l'écriture avant l'ajustement la choisirait pour une couleur
+   * qui n'est plus celle qu'on peindra. Et le second ajustement ne défait pas
+   * le premier : il pousse la clarté dans la même direction — sur fond clair,
+   * les deux assombrissent.
+   */
+  let remplissage = ajusterPourRatio(base, fond, RATIO_INTERFACE);
+  const surRemplissage =
+    ratioContraste(remplissage, BLANC) >= ratioContraste(remplissage, ENCRE) ? BLANC : ENCRE;
   if (ratioContraste(quantifier(remplissage), surRemplissage) < RATIO_TEXTE) {
-    remplissage = ajusterPourRatio(base, surRemplissage, RATIO_TEXTE);
+    remplissage = ajusterPourRatio(remplissage, surRemplissage, RATIO_TEXTE);
   }
 
   const ecritureBlanche = surRemplissage === BLANC;

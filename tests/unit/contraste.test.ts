@@ -79,6 +79,31 @@ describe("Résolution de l'accent — conformité obtenue automatiquement", () =
     expect(ratio, `${r.surRemplissage} sur ${r.remplissage}`).toBeGreaterThanOrEqual(RATIO_TEXTE);
   });
 
+  /**
+   * L'APLAT DOIT SE DÉTACHER DU FOND, pas seulement porter une écriture lisible.
+   *
+   * ⚠️ DÉFAUT RÉEL, MESURÉ LE 31/08/2026. Le test juste au-dessus mesurait le
+   * remplissage contre `surRemplissage`, et JAMAIS contre le fond de page. Il
+   * passait donc à 18,8:1 sur `#ffffff` — la couleur qui figure dans cet
+   * inventaire avec, en toutes lettres, le commentaire « contraste nul contre un
+   * fond blanc ». Le garde nommait le défaut et regardait ailleurs (L-025).
+   *
+   * CE QUE ÇA DONNAIT À L'ÉCRAN : `arbitrage-qc.tsx` peint « Approuver » avec cet
+   * aplat, sans bordure. Un accent clair rendait donc l'action principale
+   * invisible sur la page du CLIENT, à côté d'un « Refuser » encadré et lisible.
+   */
+  test.each(COULEURS_EXTREMES)("%s : l'aplat se détache du fond de page", (couleur) => {
+    const r = resoudreAccent(couleur, "#ffffff");
+    const blanc = analyserHex("#ffffff");
+    if (blanc === null) throw new Error("fond de référence illisible");
+
+    const ratio = ratioContraste(analyserHex(r.remplissage) as never, blanc);
+    expect(
+      ratio,
+      `l'aplat ${r.remplissage} issu de ${couleur} ne se détache pas du fond blanc`,
+    ).toBeGreaterThanOrEqual(RATIO_INTERFACE);
+  });
+
   test("une valeur invalide retombe sur le défaut sans lever", () => {
     // La page publique d'un vendeur ne doit jamais cesser de s'afficher parce
     // qu'une couleur est mal formée.

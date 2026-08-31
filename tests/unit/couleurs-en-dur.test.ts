@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { describe, expect, test } from "vitest";
+import { sansCommentaires } from "../aide/source";
 
 /**
  * TOUTE COULEUR ÉCRITE EN DUR DANS UN COMPOSANT EST SOIT UNE COULEUR DU
@@ -60,7 +61,6 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#34a853", "logo Google"],
   ["#c13584", "logo Instagram"],
   ["#1da851", "logo WhatsApp"],
-  ["#ef0000", "cité dans un commentaire de contraste, jamais rendu"],
 ];
 const tolerees = new Map(EXCEPTIONS);
 
@@ -75,7 +75,23 @@ function sources(dossier: string): string[] {
 const trouvees = new Map<string, string[]>();
 for (const fichier of sources(RACINE)) {
   const relatif = relative(RACINE, fichier).split(sep).join("/");
-  for (const m of readFileSync(fichier, "utf8").matchAll(/#[0-9a-fA-F]{6}\b/g)) {
+  /*
+   * ⚠️ LA SONDE LISAIT LES COMMENTAIRES, ET S'EN SATISFAISAIT (L-031).
+   *
+   * L'exception `#ef0000` le disait en toutes lettres : « cité dans un
+   * commentaire de contraste, jamais rendu ». Une couleur écrite dans un
+   * commentaire comptait donc comme TROUVÉE — ce qui a deux effets, tous deux
+   * mauvais : elle exige une exception pour un texte qui ne peint rien, et le
+   * second sens du test (« aucune exception n'est devenue inutile ») pouvait
+   * être maintenu vert par un commentaire seul.
+   *
+   * Relevé le 31/08/2026, quand une mesure de contraste écrite en commentaire —
+   * `accent #ffff00 → aplat à 1,074 contre le fond` — a fait échouer un test qui
+   * ne cherche que ce qui est RENDU. On dépollue donc, et l'exception `#ef0000`
+   * disparaît d'elle-même : elle ne servait qu'à contourner ce défaut.
+   */
+  const code = sansCommentaires(readFileSync(fichier, "utf8"));
+  for (const m of code.matchAll(/#[0-9a-fA-F]{6}\b/g)) {
     const hex = m[0].toLowerCase();
     trouvees.set(hex, [...(trouvees.get(hex) ?? []), relatif]);
   }
