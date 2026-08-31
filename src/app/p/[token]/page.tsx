@@ -15,6 +15,7 @@ import { adresseAppelant, empreinte } from "@/lib/limitation/empreinte";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { decrireSilence } from "@/lib/tracking/silence";
+import { substituer } from "@/lib/format/gabarit";
 
 /**
  * LA PAGE QUE VOIT LE CLIENT.
@@ -577,7 +578,7 @@ export default async function PagePublique({
         titre={
           commande.boutique.nom === null
             ? null
-            : t.raw("reseaux.titre").replace("{nom}", commande.boutique.nom)
+            : substituer(t.raw("reseaux.titre"), "{nom}", commande.boutique.nom)
         }
       />
 
@@ -634,7 +635,7 @@ function EnTeteTitre({
   readonly arriveeEstimee: string;
   readonly estimation: string | null;
 }) {
-  const pour = client === null ? null : pourClient.replace("{nom}", client);
+  const pour = client === null ? null : substituer(pourClient, "{nom}", client);
 
   return (
     <div className="lg:flex lg:items-end lg:justify-between lg:gap-10">

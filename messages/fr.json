@@ -6,6 +6,7 @@
   },
   "navigation": {
     "seConnecter": "Se connecter",
+    "allerAuContenu": "Aller au contenu",
     "creerUnCompte": "Créer un compte",
     "retourAccueil": "Retour à l'accueil",
     "mesCommandes": "Commandes",
@@ -44,6 +45,7 @@
       "tarif": "Tarif"
     },
     "apercuTitre": "Votre commande",
+    "apercuBoutique": "Atelier Nord",
     "flottant": {
       "photosTitre": "11 photos ajoutées",
       "photosTexte": "Vues par le client",
@@ -109,7 +111,7 @@
       "contenusP1": "Le vendeur reste seul responsable des contenus qu'il dépose et garantit disposer des droits nécessaires. Sont notamment prohibés les contenus contrefaisants, illicites, ou portant atteinte aux droits de tiers.",
       "contenusP2": "DropLink agit en qualité d'hébergeur : le service n'exerce aucun contrôle a priori sur les contenus déposés, et ne les sélectionne pas.",
       "retraitTitre": "Notification et retrait",
-      "retraitP1": "Toute personne peut signaler un contenu qu'elle estime illicite au moyen du formulaire prévu à cet effet. Chaque signalement fait l'objet d'un examen, et le compte concerné peut être suspendu à titre conservatoire — ses pages cessant alors immédiatement d'être servies.",
+      "retraitP1": "Toute personne peut signaler un contenu qu'elle estime illicite. Chaque signalement fait l'objet d'un examen, et le compte concerné peut être suspendu à titre conservatoire — ses pages cessant alors immédiatement d'être servies.",
       "retraitP2": "La suspension est réversible : la réactivation rétablit les pages sur les mêmes liens.",
       "disponibiliteTitre": "Disponibilité",
       "disponibiliteP1": "Le service est fourni en l'état, pendant sa phase de validation, à titre gratuit et sans engagement de disponibilité. Les informations de suivi proviennent des transporteurs : nous n'en garantissons ni l'exactitude ni la fraîcheur.",
@@ -120,7 +122,8 @@
       "resiliationP1": "Le vendeur peut cesser d'utiliser le service à tout moment.",
       "resiliationLacune": "MODALITÉS DE SUPPRESSION DES DONNÉES ET DURÉE DE CONSERVATION À FIXER",
       "droitTitre": "Droit applicable",
-      "droitLacune": "DROIT APPLICABLE ET JURIDICTION COMPÉTENTE À FIXER AVEC L'AVOCAT"
+      "droitLacune": "DROIT APPLICABLE ET JURIDICTION COMPÉTENTE À FIXER AVEC L'AVOCAT",
+      "retraitFormulaire": "Le signalement se fait au moyen du formulaire prévu à cet effet."
     },
     "confidentialite": {
       "collecteTitre": "Ce que nous collectons",
@@ -198,7 +201,8 @@
       "session": "Votre session a expiré. Reconnectez-vous pour continuer.",
       "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés."
     },
-    "apercuTitre": "Votre commande"
+    "apercuTitre": "Votre commande",
+    "apercuBoutique": "Atelier Nord"
   },
   "inscription": {
     "titre": "Créer un compte",

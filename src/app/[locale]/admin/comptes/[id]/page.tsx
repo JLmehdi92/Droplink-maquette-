@@ -306,7 +306,9 @@ export default async function FicheCompte({
                       <span className="min-w-0 flex-grow font-headline-md text-[14px] leading-[18px] font-normal text-on-surface">
                         {t("fiche.activiteLigne", {
                           n: a.n,
-                          quoi: t(`fiche.evenement.${a.type}`, { defaut: a.type }),
+                          quoi: t.has(`fiche.evenement.${a.type}`)
+                            ? t(`fiche.evenement.${a.type}`)
+                            : a.type,
                         })}
                       </span>
                       <span className="shrink-0 font-body-sm text-[13px] leading-4 text-sourdine">
@@ -346,7 +348,12 @@ export default async function FicheCompte({
                     { cle: "email", valeur: fiche.email },
                     { cle: "type", valeur: typeLisible },
                     { cle: "role", valeur: t(`comptes.roles.${fiche.role}`) },
-                    { cle: "langue", valeur: t(`langues.${fiche.langue}`, { defaut: fiche.langue }) },
+                    {
+                      cle: "langue",
+                      valeur: t.has(`langues.${fiche.langue}`)
+                        ? t(`langues.${fiche.langue}`)
+                        : fiche.langue,
+                    },
                   ] as const
                 ).map((l, i) => (
                   <div key={l.cle} className={LIGNE + (i === 0 ? " border-t-0 pt-0" : "")}>
@@ -391,7 +398,9 @@ export default async function FicheCompte({
                 <span className={VALEUR}>
                   {fiche.reseaux.length === 0
                     ? t("fiche.reseauxAucun")
-                    : fiche.reseaux.map((r) => tMarque(`reseau.${r}`, { defaut: r })).join(", ")}
+                    : fiche.reseaux
+                        .map((r) => (tMarque.has(`reseau.${r}`) ? tMarque(`reseau.${r}`) : r))
+                        .join(", ")}
                 </span>
               </div>
             </section>

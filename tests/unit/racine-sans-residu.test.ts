@@ -37,6 +37,13 @@ const ADMIS: ReadonlyMap<string, string> = new Map([
       "workflow échouerait à sa troisième étape — et une CI née rouge n'est pas " +
       "une CI. La valeur est celle réellement employée ici, relevée et non devinée.",
   ],
+  [
+    "AUDIT-COMPLET.md",
+    "Le rapport de l'audit du 31/08/2026, demandé explicitement. Il vit à la " +
+      "racine parce qu'il porte la matrice de couverture et la liste de ce qui " +
+      "N'A PAS pu être vérifié : un rapport rangé dans un sous-dossier est un " +
+      "rapport que personne ne relit avant la reprise suivante.",
+  ],
   ["BRIEF-DROPLINK-COMPLET.md", "Le contexte produit complet, cité par CLAUDE.md."],
   ["claude.md", "Les instructions de projet."],
   ["eslint.config.mjs", "Configuration d'ESLint, lue par `pnpm lint`."],

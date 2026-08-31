@@ -12,6 +12,7 @@ import {
   type PreparationLogo,
 } from "@/lib/boutique/logo";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { ACCENT_DEFAUT } from "@/lib/design/contraste";
 
 /**
  * RÉGLAGES DE MARQUE — les actions.
@@ -85,7 +86,14 @@ export async function enregistrerMarque(
       langue_publique: analyse.data.languePublique,
       // La couleur a-t-elle bougé depuis le défaut ? Sans cette distinction, on
       // ne saurait pas si les vendeurs personnalisent réellement leurs pages.
-      couleur_personnalisee: analyse.data.couleurAccent.toLowerCase() !== "#0058be",
+      // ⚠️ CETTE COMPARAISON VISAIT L'ANCIEN DÉFAUT. La migration 100 a fait
+      // passer le défaut de `shops.accent_color` à `#7c5cf5` ; cette ligne
+      // comparait encore à `#0058be`. Toute boutique née depuis déclarait donc
+      // « couleur personnalisée » sans que le vendeur ait rien touché — et le
+      // biais va du côté RASSURANT, celui qu'on ne remet jamais en question.
+      // La source unique est `ACCENT_DEFAUT`, ancrée au canevas par un test.
+      couleur_personnalisee:
+        analyse.data.couleurAccent.toLowerCase() !== ACCENT_DEFAUT.toLowerCase(),
       // COMBIEN de réseaux, jamais LESQUELS ni leurs adresses : le compte d'un
       // vendeur lui appartient, le fait qu'il en configure appartient au
       // produit — c'est ce dernier qui dit si l'écran sert à quelque chose.

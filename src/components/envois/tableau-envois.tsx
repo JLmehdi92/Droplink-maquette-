@@ -197,11 +197,19 @@ export async function TableauEnvois({
       // Deux noms puis « +N ». Le compte reste celui des commandes rattachées,
       // pas celui des noms : une commande sans destinataire nommé existe quand
       // même.
+      // ⚠️ LE RESTE SE COMPTE DEPUIS LES NOMS AFFICHÉS, PAS DEPUIS DEUX.
+      // `clients` est filtré des destinataires sans nom, `commandes` ne l'est
+      // pas : soustraire 2 sous-comptait dès qu'une commande rattachée n'avait
+      // pas de nom. Deux commandes dont une nommée rendaient « Léa » tout court,
+      // et il en manquait une — sur la colonne qui existe précisément pour le
+      // colis groupé à destinataires partiellement nommés.
       clients:
         ligne.clients.length === 0
           ? null
           : ligne.clients.slice(0, 2).join(", ") +
-            (ligne.commandes > 2 ? " +" + String(ligne.commandes - 2) : ""),
+            (ligne.commandes > Math.min(ligne.clients.length, 2)
+              ? " +" + String(ligne.commandes - Math.min(ligne.clients.length, 2))
+              : ""),
       puce: silencieux ? (
         <Puce {...ALERTE}>{t("puce.silence", { n: silence.jours })}</Puce>
       ) : (

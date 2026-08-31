@@ -358,9 +358,9 @@ export default async function PanneauAdmin({
                       {/* Le point devient un souligné : next-intl le traite comme
                           un séparateur de NIVEAU, et `journal.actions.compte.suspension`
                           irait chercher une clé imbriquée qui n'existe pas. */}
-                      {t(`journal.actions.${ligne.action.replaceAll(".", "_")}`, {
-                        defaut: ligne.action,
-                      })}
+                      {t.has(`journal.actions.${ligne.action.replaceAll(".", "_")}`)
+                        ? t(`journal.actions.${ligne.action.replaceAll(".", "_")}`)
+                        : ligne.action}
                       {ligne.cibleEmail !== null ? (
                         <>
                           {" — "}

@@ -55,6 +55,16 @@ export async function GET(requete: NextRequest): Promise<NextResponse> {
     statut: p.get("statut"),
     qc: p.get("qc"),
     tri: p.get("tri") ?? "recentes",
+    // ⚠️ LES DEUX BORNES DE PÉRIODE ÉTAIENT OUBLIÉES ICI, alors que le bouton
+    // d'export les écrit bien dans l'URL (`lib/commandes/url.ts`). `DateBornage`
+    // étant `.nullable().catch(null)`, une clé absente était ramenée à `null`
+    // SANS ERREUR : un vendeur qui filtrait « août » recevait TOUTES ses
+    // commandes, jusqu'au plafond de 5 000 lignes — et le fichier porte les
+    // liens publics, donc des capacités permanentes sur des commandes qu'il
+    // n'avait pas demandées. Le défaut est silencieux : le fichier n'est pas
+    // vide, il est trop gros.
+    du: p.get("du"),
+    au: p.get("au"),
     archivees: p.get("archivees") === "1",
     curseur: null,
   });

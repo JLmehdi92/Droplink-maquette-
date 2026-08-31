@@ -6,6 +6,7 @@
   },
   "navigation": {
     "seConnecter": "Log in",
+    "allerAuContenu": "Skip to content",
     "creerUnCompte": "Sign up",
     "retourAccueil": "Back to home",
     "mesCommandes": "Orders",
@@ -44,6 +45,7 @@
       "tarif": "Pricing"
     },
     "apercuTitre": "Your order",
+    "apercuBoutique": "Atelier Nord",
     "flottant": {
       "photosTitre": "11 photos added",
       "photosTexte": "Seen by the customer",
@@ -109,7 +111,7 @@
       "contenusP1": "The seller remains solely responsible for the content they upload and warrants holding the necessary rights. Infringing or unlawful content, and content harming third-party rights, are prohibited.",
       "contenusP2": "DropLink acts as a host: the service exercises no prior control over uploaded content, and does not select it.",
       "retraitTitre": "Notice and takedown",
-      "retraitP1": "Anyone may report content they consider unlawful using the dedicated form. Every report is reviewed, and the account concerned may be suspended as a precaution — its pages then immediately stop being served.",
+      "retraitP1": "Anyone may report content they consider unlawful. Every report is reviewed, and the account concerned may be suspended as a precaution — its pages then immediately stop being served.",
       "retraitP2": "Suspension is reversible: reactivation restores the pages on the same links.",
       "disponibiliteTitre": "Availability",
       "disponibiliteP1": "The service is provided as is, during its validation phase, free of charge and without any availability commitment. Tracking information comes from carriers: we guarantee neither its accuracy nor its freshness.",
@@ -120,7 +122,8 @@
       "resiliationP1": "The seller may stop using the service at any time.",
       "resiliationLacune": "DATA DELETION TERMS AND RETENTION PERIOD TO BE SET",
       "droitTitre": "Governing law",
-      "droitLacune": "GOVERNING LAW AND COMPETENT JURISDICTION TO BE SET WITH THE LAWYER"
+      "droitLacune": "GOVERNING LAW AND COMPETENT JURISDICTION TO BE SET WITH THE LAWYER",
+      "retraitFormulaire": "Reports are made using the form provided for that purpose."
     },
     "confidentialite": {
       "collecteTitre": "What we collect",
@@ -198,7 +201,8 @@
       "trop": "Too many attempts from this device. Please wait a few minutes.",
       "fermees": "Sign-ups are closed for now. Existing accounts are unaffected."
     },
-    "apercuTitre": "Your order"
+    "apercuTitre": "Your order",
+    "apercuBoutique": "Atelier Nord"
   },
   "inscription": {
     "titre": "Create an account",

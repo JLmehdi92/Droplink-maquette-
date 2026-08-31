@@ -155,7 +155,9 @@ export default async function AdminJournal({
     // LE POINT DEVIENT UN SOULIGNÉ : next-intl traite le point comme un
     // séparateur de NIVEAU, donc `journal.actions.compte.suspension` irait
     // chercher une clé imbriquée qui n'existe pas.
-    t(`journal.actions.${l.action.replaceAll(".", "_")}`, { defaut: l.action });
+    t.has(`journal.actions.${l.action.replaceAll(".", "_")}`)
+      ? t(`journal.actions.${l.action.replaceAll(".", "_")}`)
+      : l.action;
 
   return (
     <main id="contenu" className="md:px-[30px] md:py-[26px]">
@@ -323,7 +325,9 @@ export default async function AdminJournal({
                         <p className="font-headline-md text-[14px] leading-[21px] font-normal text-on-surface">
                           {l.idRessource === null ? null : (
                             <>
-                              {t(`parametres.cles.${l.idRessource}.titre`, { defaut: l.idRessource })}{" "}
+                              {t.has(`parametres.cles.${l.idRessource}.titre`)
+                                ? t(`parametres.cles.${l.idRessource}.titre`)
+                                : l.idRessource}{" "}
                             </>
                           )}
                           {l.avant === null ? null : (

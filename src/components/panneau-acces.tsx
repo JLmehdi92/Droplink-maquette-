@@ -36,7 +36,9 @@ export async function PanneauAcces() {
             <div className="degrade-marque px-4 pt-[26px] pb-4">
               <div className="flex items-center gap-2">
                 <span className="h-[22px] w-[22px] rounded-full bg-white/30" />
-                <span className="font-headline-md text-[12px] leading-[15px] font-bold">Atelier Nord</span>
+                <span className="font-headline-md text-[12px] leading-[15px] font-bold">
+                  {t("apercuBoutique")}
+                </span>
               </div>
               <p className="mt-2 font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em]">
                 {t("apercuTitre")}

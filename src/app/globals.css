@@ -318,11 +318,18 @@
    * Accent du vendeur. Valeur de repli identique au défaut de
    * `shops.accent_color` en base : il n'existe aucun état « couleur non
    * configurée » à détecter. Écrasée au rendu par la palette résolue.
+   *
+   * ⚠️ ELLE NE L'ÉTAIT PLUS. Ce bloc portait `#0058be`, l'ancien défaut, alors
+   * que la migration 100 a fait passer celui de `shops.accent_color` à
+   * `#7c5cf5` — valeur que `contraste.ts` porte déjà sous `ACCENT_DEFAUT`. Le
+   * commentaire ci-dessus affirmait donc une identité qui avait cessé d'être
+   * vraie, et deux liens de l'écran de connexion rendaient un bleu
+   * n'appartenant à aucune palette du canevas.
    */
-  --accent: #0058be;
-  --accent-texte: #0058be;
-  --accent-interface: #0058be;
-  --accent-remplissage: #0058be;
+  --accent: #7c5cf5;
+  --accent-texte: #7c5cf5;
+  --accent-interface: #7c5cf5;
+  --accent-remplissage: #7c5cf5;
   --accent-sur-remplissage: #ffffff;
 }
 

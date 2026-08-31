@@ -230,7 +230,7 @@ export default async function Accueil({
                   <div className="flex items-center gap-[7px] md:gap-2">
                     <span className="h-[19px] w-[19px] rounded-full bg-white/30 md:h-6 md:w-6" />
                     <span className="font-headline-md text-[11px] leading-[13px] font-bold text-white md:text-[13px] md:leading-4">
-                      Atelier Nord
+                      {t("apercuBoutique")}
                     </span>
                   </div>
                   <p className="mt-[7px] font-headline-md text-[16px] leading-[21px] font-extrabold tracking-[-0.02em] text-white md:mt-[9px] md:text-[19px] md:leading-6">

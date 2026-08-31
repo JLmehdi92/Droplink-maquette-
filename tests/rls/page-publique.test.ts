@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { cleMedia } from "../../src/lib/storage/cles";
+import { cleLogo, cleMedia, cleVignette } from "../../src/lib/storage/cles";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
@@ -82,8 +82,36 @@ beforeAll(async () => {
     }),
     taille_octets: 100,
     position: 0,
+    /*
+     * ⚠️ CE JEU N'AVAIT NI VIGNETTE NI LOGO, ET C'EST POUR ÇA QUE LA SONDE
+     * D'IDENTIFIANTS INTERNES NE VOYAIT RIEN.
+     *
+     * Trouvé à l'audit du 31/08/2026, puis MESURÉ sur un build servi : le HTML
+     * réel de `/p/{jeton}` contient bien `shop_id` et `order_id`. Ils voyagent
+     * dans le CHEMIN des URL présignées — une signature S3/R2 porte la clé
+     * d'objet dans son `pathname`, il ne peut pas en être autrement.
+     *
+     * `cle_vignette` et `logo_url` valant NULL, les trois champs qui portent une
+     * URL signée valaient `null` : le test cherchait les identifiants dans un
+     * objet où aucune URL signée n'existait. Le garde regardait là où le défaut
+     * ne pouvait pas être (L-025).
+     */
+    cle_vignette: cleVignette(
+      cleMedia({
+        shopId: alice.shopId,
+        orderId: commande,
+        mediaId: idMedia,
+        typeMime: "image/jpeg",
+      }),
+    ),
   });
   expect(erreurMedia, `média du jeu non inséré : ${erreurMedia?.message}`).toBeNull();
+
+  const { error: erreurLogo } = await alice.client
+    .from("shops")
+    .update({ logo_url: cleLogo({ shopId: alice.shopId, logoId: randomUUID(), typeMime: "image/png" }) })
+    .eq("id", alice.shopId);
+  expect(erreurLogo, `logo du jeu non posé : ${erreurLogo?.message}`).toBeNull();
 }, 90_000);
 
 afterAll(async () => {
@@ -137,7 +165,53 @@ describe("Ce que le jeton donne", () => {
      * derrière, ni combien de pages il existe.
      */
     const page = await lireCommandePublique(jeton);
-    const rendu = JSON.stringify(page);
+    const renduComplet = JSON.stringify(page);
+
+    /*
+     * ⚠️ L'EXCEPTION DES URL SIGNÉES — DÉCLARÉE, BORNÉE, ET MESURÉE.
+     *
+     * FAIT ÉTABLI LE 31/08/2026 SUR UN BUILD SERVI, pas déduit : le HTML réel de
+     * `/p/{jeton}` contient `shop_id` et `order_id`. Ils sont dans le CHEMIN des
+     * URL présignées R2 — `…/medias/{shop}/{commande}/{media}.vignette.webp` —
+     * et une signature S3/R2 ne peut pas ne pas porter la clé d'objet qu'elle
+     * signe.
+     *
+     * CE TEST NE LE VOYAIT PAS, et la raison est exactement L-025 : son jeu ne
+     * posait ni `cle_vignette` ni `logo_url`. Les trois champs qui portent une
+     * URL signée valaient donc `null`, et il cherchait les identifiants dans un
+     * objet où aucune URL signée n'existait. Le jeu porte désormais les deux, et
+     * ce test a ÉCHOUÉ au premier passage — c'est ce qui prouve qu'il regarde
+     * enfin le bon endroit.
+     *
+     * POURQUOI L'EXCEPTION PLUTÔT QU'UNE CORRECTION. La forme de la clé n'est
+     * pas un accident : générée par le serveur, ancrée au préfixe de la
+     * commande, et vérifiée par un déclencheur EN BASE (`verifier_cles_media`,
+     * DL039) — c'est elle qui empêche un vendeur d'écraser le média d'un autre.
+     * La rendre opaque demanderait une table d'indirection et retirerait la
+     * garde la plus forte du stockage, pour masquer un UUID sans signification
+     * hors de notre base.
+     *
+     * CE QUI RESTE INTERDIT, ET QUE CE TEST TIENT : les identifiants ne doivent
+     * apparaître QUE là. Ailleurs — un champ, un attribut, une charge
+     * d'hydratation — ce serait la fuite que la migration 017 dit ne pas
+     * produire.
+     *
+     * ARBITRAGE LAISSÉ À WASSIM : deux liens publics du même vendeur restent
+     * rattachables l'un à l'autre par ce `shop_id`. Ce n'est pas un secret,
+     * c'est une corrélation — et c'est un choix produit, pas un défaut à
+     * réparer en silence.
+     */
+    const urlsSignees = (renduComplet.match(/https?:\/\/[^"\\]+/g) ?? []).filter((u) =>
+      u.includes("X-Amz-Signature"),
+    );
+    expect(
+      urlsSignees.length,
+      "aucune URL signée dans le rendu : le jeu ne porte ni vignette ni logo, " +
+        "donc l'exception ci-dessus masquerait un rendu vide au lieu de le borner",
+    ).toBeGreaterThan(0);
+
+    let rendu = renduComplet;
+    for (const u of urlsSignees) rendu = rendu.split(u).join("[url-signee]");
 
     const internes = await interroger<{ valeur: string }>(
       catalogue,
@@ -168,8 +242,8 @@ describe("Ce que le jeton donne", () => {
     const fuites = internes.map((l) => l.valeur).filter((v) => rendu.includes(v));
     expect(
       fuites,
-      `Identifiants internes rendus au visiteur : ${fuites.join(", ")}. Ils permettent ` +
-        "de rattacher deux liens publics au même vendeur.",
+      `Identifiants internes rendus au visiteur HORS d'une URL signée : ${fuites.join(", ")}. ` +
+        "Ils permettent de rattacher deux liens publics au même vendeur.",
     ).toEqual([]);
   });
 

@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { PageLegale, type SectionLegale } from "@/components/page-legale";
 import { routing } from "@/i18n/routing";
+import { signalementDisponible } from "@/lib/contact";
 
 export function generateStaticParams(): Array<{ locale: string }> {
   return routing.locales.map((locale) => ({ locale }));
@@ -61,7 +62,26 @@ export default async function Conditions({
     {
       id: "retrait",
       titre: t("conditions.retraitTitre"),
-      paragraphes: [t("conditions.retraitP1"), t("conditions.retraitP2")],
+      /*
+       * ⚠️ LA PROSE CITAIT UN FORMULAIRE QUI POUVAIT NE PAS EXISTER.
+       *
+       * DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. Quatre surfaces gardent
+       * correctement le LIEN derrière `signalementDisponible()`, et la page de
+       * signalement rend 404 quand aucune adresse n'est configurée — tout cela
+       * est délibéré. Mais le texte des conditions, lui, n'était conditionné par
+       * rien : il affirmait « au moyen du formulaire prévu à cet effet » alors
+       * que le formulaire pouvait être injoignable et qu'aucune adresse n'était
+       * publiée nulle part.
+       *
+       * C'est le document qui ENGAGE, sur la capacité qui fonde notre statut
+       * d'hébergeur : chaque garde prise séparément était correcte, et
+       * l'ensemble mentait. C'est L-014 appliqué à un texte juridique.
+       */
+      paragraphes: [
+        t("conditions.retraitP1"),
+        ...(signalementDisponible() ? [t("conditions.retraitFormulaire")] : []),
+        t("conditions.retraitP2"),
+      ],
     },
     {
       id: "disponibilite",

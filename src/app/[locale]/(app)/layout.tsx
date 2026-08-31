@@ -97,6 +97,21 @@ export default async function LayoutApplication({
    */
   return (
     <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
+      {/*
+        ⚠️ CE LIEN MANQUAIT ICI, ALORS QU'IL EXISTE DANS L'ADMIN.
+        Trouvé à l'audit du 31/08/2026. Les deux racines sont structurellement
+        identiques — barre latérale au bureau, barre d'onglets au téléphone — et
+        les cinq écrans du vendeur déclarent tous `id="contenu"` : la CIBLE
+        existait partout, le lien nulle part. Au clavier, un fournisseur à
+        200 commandes/semaine retraversait donc quatre destinations de navigation
+        à CHAQUE changement de page, sur l'écran le plus utilisé du produit.
+      */}
+      <a
+        href="#contenu"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-surface-container-lowest focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-surface focus:shadow-md"
+      >
+        {t("allerAuContenu")}
+      </a>
       <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-page">
         <aside className="hidden border-r border-outline-variant bg-surface-container-lowest px-4 py-[22px] md:flex md:w-[236px] md:shrink-0 md:flex-col">
           <span className="mb-[26px] px-2 font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-on-surface">

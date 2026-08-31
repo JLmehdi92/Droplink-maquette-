@@ -169,7 +169,9 @@ export default async function SurveillanceAdmin({
                         teinte.titre
                       }
                     >
-                      {t(`surveillance.tache.${tache.source}`, { defaut: tache.source })}
+                      {t.has(`surveillance.tache.${tache.source}`)
+                        ? t(`surveillance.tache.${tache.source}`)
+                        : tache.source}
                     </p>
                     <p
                       className={
