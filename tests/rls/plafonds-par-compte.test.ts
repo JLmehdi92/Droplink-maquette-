@@ -149,6 +149,64 @@ describe("Le nombre de commandes par mois est borné", () => {
   });
 });
 
+/**
+ * LE NOMBRE DE COLIS PRIS EN CHARGE PAR MOIS EST BORNÉ.
+ *
+ * ⚠️ DÉFAUT RÉEL, RELEVÉ LE 31/08/2026 : `tracked_parcels` ne portait AUCUN
+ * plafond. Or la prise en charge est la seule opération PAYANTE du produit, et
+ * le palier gratuit du fournisseur n'est plus mensuel — 200 prises en charge,
+ * une seule fois, COMMUNES à tous les comptes.
+ *
+ * LE VECTEUR N'EST PAS LE VOLUME, C'EST LE BATTEMENT. `attacher_colis` détache
+ * l'ancien colis puis insère le nouveau : changer le numéro de suivi N fois sur
+ * UNE SEULE commande crée N colis, chacun avec `registered_at is null`, donc
+ * chacun repris par la cadence. Un compte, une commande, et la sauvegarde
+ * automatique toutes les 800 ms suffisaient à épuiser le budget de tout le
+ * monde. La fonction étant accordée à `authenticated`, elle est de surcroît
+ * appelable directement en PostgREST, hors de toute limitation de débit.
+ *
+ * Le plafond vaut DEUX FOIS celui des commandes (migration 125) : un colis
+ * correspond à une commande, et le facteur 2 laisse une correction de numéro sur
+ * chacune. On abaisse donc le réglage des commandes pour éprouver la borne, plutôt
+ * que d'insérer six mille lignes — ce qui mesurerait la vitesse d'insertion.
+ */
+describe("Le nombre de colis pris en charge est borné", () => {
+  async function creerColis(u: UtilisateurDeTest, numero: string): Promise<string | null> {
+    return refus(
+      "insert into public.tracked_parcels (shop_id, tracking_number) values ($1, $2)",
+      [u.shopId, numero],
+    );
+  }
+
+  test("au-delà du plafond, la base refuse la prise en charge", async () => {
+    // Plafond de commandes à 1 ⇒ plafond de colis à 2.
+    await abaisserPlafondCommandes(1);
+
+    // LA SONDE PROUVE D'ABORD QU'ELLE INSPECTE QUELQUE CHOSE : si les deux
+    // premiers étaient refusés, le troisième refus ne dirait rien.
+    for (let i = 0; i < 2; i += 1) {
+      expect(
+        await creerColis(alice, `SONDE-PLAFOND-${Date.now()}-${i}`),
+        `le colis ${i + 1} a été refusé à tort`,
+      ).toBeNull();
+    }
+
+    expect(
+      await creerColis(alice, `SONDE-PLAFOND-${Date.now()}-trop`),
+      "un compte a dépassé son plafond mensuel de colis : il peut épuiser le budget de suivi de tout le produit",
+    ).toBe("DL051");
+  });
+
+  test("contre-test positif : sous le plafond, une prise en charge passe", async () => {
+    // Sans lui, un déclencheur qui refuserait TOUT passerait le test ci-dessus.
+    await abaisserPlafondCommandes(50);
+    expect(
+      await creerColis(alice, `SONDE-PLAFOND-OK-${Date.now()}`),
+      "une prise en charge légitime a été refusée",
+    ).toBeNull();
+  });
+});
+
 describe("Le stockage par compte est borné", () => {
   test("un dépôt qui ferait franchir le plafond est refusé", async () => {
     /*
