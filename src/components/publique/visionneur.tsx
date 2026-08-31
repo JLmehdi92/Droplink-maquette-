@@ -149,6 +149,40 @@ export function Visionneur({
     };
   }, [courant, jeton]);
 
+  /**
+   * D'OÙ L'ON VIENT — mémorisé À L'INSTANT DU CLIC, pas dans l'effet.
+   *
+   * ⚠️ DÉFAUT RÉEL, TROUVÉ LE 31/08/2026 PAR LE TEST QUI MANQUAIT.
+   *
+   * L'effet d'ouverture lisait `document.activeElement` pour savoir à qui
+   * rendre le focus à la fermeture. C'était trop tard : React applique
+   * `autoFocus` pendant le COMMIT, et un `useEffect` ne tourne qu'APRÈS. À cet
+   * instant l'élément actif n'est plus la vignette cliquée — c'est déjà le
+   * bouton « fermer » du dialogue.
+   *
+   * Le visionneur mémorisait donc, comme point de retour, un bouton qui
+   * appartient au dialogue lui-même. À la fermeture ce bouton n'existe plus,
+   * `isConnected` est faux, et le focus retombe sur `<body>` — exactement ce
+   * que la correction prétendait avoir réparé. Rien ne le montrait : à l'écran
+   * la fermeture est identique, et le coût ne se paie qu'au clavier.
+   *
+   * C'est la démonstration de ce que le brief répète : une correction posée
+   * sans test ne prouve rien, et celle-ci était FAUSSE.
+   */
+  const declencheur = useRef<HTMLElement | null>(null);
+
+  /**
+   * Ouvre le plein écran sur `rang`, en retenant d'où l'on vient.
+   *
+   * Passer par un seul ouvreur plutôt que par cinq `setIndex(…)` dispersés :
+   * un point d'ouverture oublié rendrait le focus à la mauvaise vignette, ou à
+   * rien, sans qu'aucune porte ne s'en aperçoive.
+   */
+  const ouvrirA = useCallback((rang: number) => {
+    declencheur.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setIndex(rang);
+  }, []);
+
   const fermer = useCallback(() => setIndex(null), []);
 
   const aller = useCallback(
@@ -185,8 +219,6 @@ export function Visionneur({
      * suivante — le genre de coût qu'on ne mesure jamais parce qu'on ne le paie
      * pas soi-même.
      */
-    const declencheur = document.activeElement;
-
     const focalisables = (): HTMLElement[] => {
       const boite = dialogue.current;
       if (boite === null) return [];
@@ -233,8 +265,11 @@ export function Visionneur({
     return () => {
       window.removeEventListener("keydown", surTouche);
       document.body.style.overflow = avant;
-      // Rendu à la vignette d'où l'on vient, si elle est toujours là.
-      if (declencheur instanceof HTMLElement && declencheur.isConnected) declencheur.focus();
+      // Rendu à la vignette d'où l'on vient, si elle est toujours là. La
+      // référence a été prise AU CLIC : la lire ici reviendrait à lire le
+      // bouton « fermer » que `autoFocus` vient de saisir.
+      const retour = declencheur.current;
+      if (retour !== null && retour.isConnected) retour.focus();
     };
   }, [index, fermer, aller]);
 
@@ -290,7 +325,7 @@ export function Visionneur({
         <div>
           <button
             type="button"
-            onClick={() => setIndex(0)}
+            onClick={() => ouvrirA(0)}
             className="relative block aspect-[4/3] w-full overflow-hidden bg-fond-avatar lg:aspect-[16/10] lg:rounded-lg"
             aria-label={libelles.ouvrir + " 1"}
           >
@@ -337,7 +372,7 @@ export function Visionneur({
                   >
                     <button
                       type="button"
-                      onClick={() => setIndex(rang)}
+                      onClick={() => ouvrirA(rang)}
                       className="relative block aspect-square w-full overflow-hidden bg-fond-avatar lg:rounded"
                       aria-label={libelles.ouvrir + " " + (rang + 1)}
                     >
@@ -551,7 +586,7 @@ export function Visionneur({
                 <li key={media.id} className="shrink-0">
                   <button
                     type="button"
-                    onClick={() => setIndex(rang)}
+                    onClick={() => ouvrirA(rang)}
                     aria-label={libelles.ouvrir + " " + (rang + 1)}
                     aria-current={rang === index ? "true" : undefined}
                     ref={
