@@ -10,6 +10,7 @@ import {
   COLONNES,
   analyserParametres,
   lireCommandes,
+  motifRecherche,
   type ClientLecture,
   type ParametresListe,
 } from "@/lib/commandes/liste";
@@ -531,5 +532,73 @@ describe("Le tri « bloqué en transit »", () => {
       expect(ligne.id, "une commande d'Alice est apparue chez Bob").not.toBe(ancienne);
       expect(ligne.id).not.toBe(recente);
     }
+  });
+});
+
+/**
+ * LES DEUX REPLIS D'ACCENTS DOIVENT COÏNCIDER — ET C'EST LA BASE QUI ARBITRE.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. La colonne indexée contient
+ * `sans_accents(lower(col))` ; la saisie, elle, passait par `normalize("NFD")`.
+ * NFD isole les diacritiques COMBINANTS — d'où « creme » → « Crème », qui
+ * marchait — mais `ø`, `æ`, `œ`, `ß`, `ł`, `ð`, `þ`, `ı` n'en portent aucun :
+ * ce sont des lettres à part entière, que NFD laisse intactes et qu'`unaccent`
+ * replie.
+ *
+ * Taper « Søren » ne trouvait donc PAS la commande de Søren, alors que taper
+ * « soren » la trouvait. Le sens de l'erreur est celui qui se voit le moins :
+ * la liste n'est pas vide, elle est incomplète.
+ *
+ * CE TEST NE RECOPIE AUCUNE TABLE. Il demande à Postgres ce qu'`unaccent`
+ * replie, et compare. Une divergence future — une mise à jour du dictionnaire,
+ * une règle qu'on aurait devinée — se verra ici au lieu de se deviner.
+ *
+ * LES TESTS UNITAIRES EXISTANTS N'ÉPROUVAIENT QUE « Crème » et « ÉTÉ » : les
+ * deux seuls cas où NFD et unaccent coïncident par construction. Le garde
+ * regardait là où il ne pouvait rien trouver.
+ */
+describe("Le repli d'accents de la saisie est celui de la base", () => {
+  const MOTS = [
+    "Crème",
+    "ÉTÉ",
+    "Søren",
+    "Cœur",
+    "Æther",
+    "Straße",
+    "Łódź",
+    "Ðja",
+    "Þor",
+    "ıst",
+    "Ñandú",
+    "Çà et là",
+  ];
+
+  test("chaque mot se replie de la même façon des deux côtés", async () => {
+    const lignes = await interroger<{ saisie: string; base: string }>(
+      catalogue,
+      `select m as saisie, public.sans_accents(lower(m)) as base
+         from unnest($1::text[]) as m`,
+      [MOTS],
+    );
+
+    // UN ENSEMBLE VIDE PASSE TOUT : si la requête rendait zéro ligne, la boucle
+    // ci-dessous ne comparerait rien et le test serait vert et muet.
+    expect(lignes.length, "la sonde ne compare rien").toBe(MOTS.length);
+
+    const ecarts = lignes
+      .filter((l) => motifRecherche(l.saisie) !== l.base)
+      .map((l) => `« ${l.saisie} » → application « ${motifRecherche(l.saisie)} » vs base « ${l.base} »`);
+
+    expect(
+      ecarts,
+      "les deux replis divergent : taper le mot exact ne trouverait pas la commande",
+    ).toEqual([]);
+  });
+
+  test("contre-test : la sonde SAIT reconnaître une divergence", () => {
+    // Sans lui, une comparaison toujours vraie — deux chaînes vides, par
+    // exemple — passerait à 100 % sans rien prouver.
+    expect(motifRecherche("Søren")).not.toBe("søren");
+    expect(motifRecherche("Søren")).toBe("soren");
   });
 });

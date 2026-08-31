@@ -342,12 +342,55 @@ export function decoderCurseur(curseur: string): { valeur: string; id: string } 
  * partie — PostgREST le traduit en `%`, ce qui n'est écrit nulle part dans le
  * code appelant.
  */
+/**
+ * CE QUE NFD NE DÉCOMPOSE PAS, ET QUE `unaccent` REPLIE QUAND MÊME.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. NFD isole les diacritiques
+ * COMBINANTS — c'est ce qui fait marcher « creme » → « Crème ». Mais `ø`, `æ`,
+ * `œ`, `ß`, `ł`, `ð`, `þ`, `ı` n'en portent aucun : ce sont des lettres à part
+ * entière, et NFD les laisse intactes. Le dictionnaire d'`unaccent`, lui, les
+ * replie.
+ *
+ * Les deux côtés divergeaient donc, et dans le sens qui se voit le moins :
+ * taper « Søren » ne trouvait PAS la commande de Søren — la colonne indexée
+ * contient « soren » — alors que taper « soren » la trouvait. La liste n'est pas
+ * vide, elle est incomplète.
+ *
+ * LA TABLE EST RELEVÉE DANS LA BASE, PAS RECOPIÉE D'UNE DOCUMENTATION :
+ *
+ *     select public.sans_accents('Søren æuf Œuf ßeta Łodz Ðja Þor ıst Crème');
+ *     → Soren aeuf OEuf sseta Lodz Dja THor ist Creme
+ *
+ * Et un test compare les deux replis PAR EXÉCUTION, pour que la prochaine
+ * divergence se voie au lieu de se deviner.
+ */
+const LIGATURES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/æ/g, "ae"],
+  [/œ/g, "oe"],
+  [/ø/g, "o"],
+  [/ß/g, "ss"],
+  [/ł/g, "l"],
+  [/đ/g, "d"],
+  [/ð/g, "d"],
+  [/þ/g, "th"],
+  [/ħ/g, "h"],
+  [/ı/g, "i"],
+  [/ŋ/g, "n"],
+  [/ſ/g, "s"],
+];
+
 export function motifRecherche(saisie: string): string {
-  const replie = saisie
+  // MINUSCULES D'ABORD, comme la base : elle indexe `sans_accents(lower(col))`.
+  // Dans l'autre ordre, « ß » deviendrait « SS » puis « ss » — même résultat
+  // ici, mais l'ordre inverse cesserait de coïncider dès la première règle
+  // sensible à la casse.
+  let replie = saisie.toLowerCase();
+  for (const [motif, par] of LIGATURES) replie = replie.replace(motif, par);
+
+  replie = replie
     .normalize("NFD")
     // Bloc « Combining Diacritical Marks » : c'est ce que NFD isole des lettres.
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
+    .replace(/[̀-ͯ]/g, "");
 
   return replie.replace(/[\\%_*]/g, (c) => "\\" + c);
 }
