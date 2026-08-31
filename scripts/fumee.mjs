@@ -731,18 +731,51 @@ try {
   }
 
   const courriel = `fumee-${Date.now()}@exemple.test`;
-  const { data: utilisateur } = await service.auth.admin.createUser({
+  const { data: utilisateur, error: erreurCompte } = await service.auth.admin.createUser({
     email: courriel,
     email_confirm: true,
   });
 
+  /*
+   * ⚠️ L ERREUR ETAIT JETEE, ET LES DEUX TIERS DE LA SONDE AVEC ELLE.
+   *
+   * DEFAUT REEL, ATTRAPE PAR LE PLANCHER DE CONTROLES POSE LE 31/08/2026 : un
+   * passage a rendu 143 controles la ou il en faut 183, sans un seul ECHEC. La
+   * creation du compte avait echoue, le `if` ci-dessous etait faux, et quarante
+   * controles — signature du point de reception, garde CSRF, export CSV, les
+   * deux seuils de limitation, la coupure de suspension, la propagation de
+   * cache, l arbitrage QC, le contre-test admin — n avaient pas tourne.
+   *
+   * LE MOTIF EST DIT MAINTENANT. Sans lui, le plancher signale que quelque
+   * chose manque sans jamais dire quoi, et on cherche dans le produit un defaut
+   * qui est dans l environnement (quota d authentification, base en lecture
+   * seule, service indisponible).
+   */
+  if (erreurCompte !== null) {
+    echecs += 1;
+    console.log(
+      `ECHEC compte de fumee non cree : ${erreurCompte.message}. Les controles qui ` +
+        "en dependent — les deux tiers de cette sonde — ne tourneront pas.",
+    );
+  }
+
   if (utilisateur?.user) {
-    const { data: profil } = await service
+    const { data: profil, error: erreurProfil } = await service
       .from("profiles")
       .select("id")
       .eq("user_id", utilisateur.user.id)
       .maybeSingle();
     profilFumee = profil?.id ?? null;
+
+    // MEME RAISON QUE CI-DESSUS : sans le motif, le plancher dit qu il manque
+    // des controles sans jamais dire lequel des trois etages a cede.
+    if (profilFumee === null) {
+      echecs += 1;
+      console.log(
+        "ECHEC profil de fumee introuvable apres creation du compte" +
+          (erreurProfil ? ` : ${erreurProfil.message}` : " (aucune ligne, aucune erreur)"),
+      );
+    }
 
     // L ONBOARDING EST OBLIGATOIRE TANT QUE `account_type` EST NUL : sans lui
     // toute page de l espace vendeur redirige vers `/bienvenue`, et une sonde
@@ -755,11 +788,19 @@ try {
         .eq("id", profilFumee);
     }
 
-    const { data: shop } = await service
+    const { data: shop, error: erreurShop } = await service
       .from("shops")
       .select("id")
       .eq("owner_id", profilFumee)
       .maybeSingle();
+
+    if (!shop?.id) {
+      echecs += 1;
+      console.log(
+        "ECHEC boutique de fumee introuvable" +
+          (erreurShop ? ` : ${erreurShop.message}` : " (aucune ligne, aucune erreur)"),
+      );
+    }
 
     if (shop?.id) {
       const { data: commande } = await service
@@ -2044,6 +2085,39 @@ if (fr.length < 5000) {
 
 const poids = Buffer.byteLength(fr) / 1024;
 console.log(`\npoids HTML /fr : ${poids.toFixed(1)} Ko`);
+
+/*
+ * COMBIEN DE CONTROLES LE TABLEAU PORTE, ET UN PLANCHER DESSUS.
+ *
+ * ⚠️ DEFAUT REEL, TROUVE A L AUDIT DU 31/08/2026. Ce script ne comptait que les
+ * ECHECS. Or vingt de ses trente-quatre `controles.push` vivent a l interieur de
+ * deux `if` imbriques — `if (utilisateur?.user)` puis `if (shop?.id)` — dont
+ * l erreur etait JETEE. Un quota d authentification a 429, ou une base repassee
+ * en lecture seule, suffisait a faire disparaitre la signature du point de
+ * reception, la garde CSRF, l export CSV, les deux seuils de limitation, la
+ * coupure de suspension, la propagation de cache et le contre-test admin — et
+ * le script affichait « Tout est vert. » en statut 0.
+ *
+ * ⚠️ ET LE PREMIER PLANCHER ETAIT FAUX : pose a 170 parce que la sortie imprime
+ * 183 lignes « OK ». Elle en imprime 183, mais le TABLEAU n en porte que 143 —
+ * une quarantaine de controles s impriment directement, sans y passer. Un
+ * plancher qui compte la mauvaise quantite accuse le produit d un defaut qui est
+ * le sien : il a fallu le mesurer pour s en apercevoir. 140 est donc juste sous
+ * la valeur RELEVEE, pas sous une valeur supposee.
+ *
+ * Les trois etages disent desormais leur motif quand ils cedent, sans quoi le
+ * plancher signale qu il manque quelque chose sans jamais dire quoi.
+ */
+const PLANCHER_CONTROLES = 140;
+console.log(`controles empiles : ${controles.length}`);
+if (controles.length < PLANCHER_CONTROLES) {
+  echecs += 1;
+  console.log(
+    `ECHEC seulement ${controles.length} controles empiles pour un plancher de ` +
+      `${PLANCHER_CONTROLES}. Les deux tiers de cette sonde vivent sous deux \`if\` : ` +
+      "si la creation du compte de fumee a echoue, ils ont ete SAUTES en silence.",
+  );
+}
 
 arreter();
 console.log(echecs === 0 ? "\nTout est vert." : `\n${echecs} ecart(s).`);

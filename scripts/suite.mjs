@@ -86,6 +86,35 @@ const griefs = [];
 // prouver. C est l etat qu on redoute le plus, et le seul que le statut de
 // sortie de vitest ne signale pas du tout.
 if (total === 0) griefs.push("la suite n a trouve AUCUN test : elle ne prouve rien");
+
+/*
+ * ⚠️ CE SCRIPT COUVRAIT LE SAUT, PAS LA DISPARITION.
+ *
+ * DEFAUT REEL, TROUVE A L AUDIT DU 31/08/2026. `total === 0` est le seul
+ * plancher : entre « aucun test » et « tous les tests », rien n etait borne.
+ * Renommer `tests/unit/quelque-chose.test.ts` en `.ts`, deplacer trois fichiers
+ * hors de `tests/rls/`, ou retirer tous les `test()` d un `describe` faisait
+ * disparaitre des controles SANS aucun grief : zero echec, zero saut, statut 0,
+ * et un decompte plus faible que personne ne releve.
+ *
+ * C est exactement le defaut que ce script existe pour empecher, dans sa
+ * variante silencieuse : « 589 passed » a la place de « 611 passed » ne se voit
+ * pas plus que « 22 skipped » ne se voyait.
+ *
+ * LE PLANCHER EST UN NOMBRE ECRIT, DONC IL SE PERIME — et c est voulu : le
+ * message dit quoi faire, et l abaisser est un geste DELIBERE, inscrit dans un
+ * commit. Un plancher qu on met a jour sans y penser ne borne rien.
+ */
+const PLANCHERS = { unit: 400, rls: 600 };
+const plancher = PLANCHERS[projet];
+if (plancher !== undefined && total < plancher) {
+  griefs.push(
+    `${total} test(s) collecte(s) pour un plancher de ${plancher} : des controles ont ` +
+      "DISPARU. Un fichier renomme, deplace, ou un describe vide de ses test() ne " +
+      "produit ni echec ni saut. Retrouver ce qui manque, ou abaisser le plancher " +
+      "dans scripts/suite.mjs EN LE DISANT dans le commit.",
+  );
+}
 if (echecs > 0) griefs.push(`${echecs} test(s) en echec`);
 if (sautes > 0) {
   griefs.push(

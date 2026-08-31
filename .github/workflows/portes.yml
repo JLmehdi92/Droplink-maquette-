@@ -12,8 +12,15 @@
 #   typecheck  ✅ ici        build      ❌ prérend des écrans qui interrogent la
 #   lint       ✅ ici                      base : sans elle, il échoue
 #   test       ✅ ici        test:rls   ❌ « un test qui simule RLS ne teste pas
-#   (412 unitaires)                        RLS » — il lui faut la base
+#                                          RLS » — il lui faut la base
 #                            fumee      ❌ sert un build de production réel
+#
+# ⚠️ LE NOMBRE DE TESTS N'EST PLUS ÉCRIT ICI. Il l'était — « 412 tests
+# unitaires », dans le nom du job et dans ce tableau — et rien ne le comparait
+# au décompte réel. C'est le motif L-014 du projet lui-même, laissé dans le seul
+# fichier que personne ne relit : un décompte se périme à chaque session, et
+# « penser à le mettre à jour » a un taux d'échec observé de 3 sur 3. Le plancher
+# vit désormais dans `scripts/suite.mjs`, où il est VÉRIFIÉ à chaque exécution.
 #
 # Une CI verte ne dit donc PAS que le produit va bien. Elle dit que ce qui peut
 # être vérifié sans compte tiers l'a été. Le nom du job le répète, pour qu'un
@@ -32,7 +39,7 @@ on:
 
 jobs:
   portes-partielles:
-    name: typecheck · lint · 412 tests unitaires (PAS build/rls/fumée)
+    name: typecheck · lint · tests unitaires (PAS build/rls/fumée)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
