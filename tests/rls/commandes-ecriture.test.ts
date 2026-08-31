@@ -4,6 +4,8 @@ import {
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
+import type { Client } from "pg";
+import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import { appliquerChamp, type ClientEcriture } from "@/lib/commandes/ecriture";
 
 /**
@@ -352,5 +354,74 @@ describe("La marque d'événement se rend, et une seule fois", () => {
 
     const seconde = await alice.client.rpc("reclamer_evenement_creation", { p_order_id: id });
     expect(seconde.data, "la marque rendue n'est pas réclamable : l'événement est perdu").toBe(true);
+  });
+});
+
+
+/**
+ * QUAND L'ÉCRITURE ÉCHOUE, LE SERVEUR REND LA VALEUR QUE LA BASE PORTE.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. `valeurConfirmee` était
+ * déclarée dans le type, promise DEUX FOIS en commentaire — « en cas d'échec,
+ * cette action rend la valeur RÉELLEMENT en base, pour que l'écran y revienne »
+ * — et renseignée NULLE PART. `grep` n'en trouvait qu'une occurrence : la
+ * déclaration elle-même. C'est L-014 dans un contrat de fonction.
+ *
+ * CE QUE L'ABSENCE COÛTAIT : l'éditeur revenait à SA dernière valeur confirmée,
+ * qui est locale à l'onglet. Avec deux onglets — un vendeur qui compare deux
+ * commandes, cas ordinaire à 200 commandes par semaine — l'onglet B revenait à
+ * une valeur que l'onglet A avait déjà remplacée. L'interface affirmait alors un
+ * état que la base n'avait pas : le principe XII exactement à l'envers.
+ *
+ * POUR L'ÉPROUVER, IL FAUT UNE ÉCRITURE QUI ÉCHOUE POUR DE VRAI. On retire donc
+ * le DROIT D'ÉCRITURE sur la colonne, le temps du contrôle, par la connexion de
+ * catalogue — c'est-à-dire en cassant le PRODUIT et non le test. Un `finally`
+ * le repose quoi qu'il arrive : une suite qui laisserait une colonne fermée
+ * derrière elle ferait échouer tout ce qui suit, sans rapport apparent.
+ */
+describe("L'échec d'écriture rend l'état confirmé", () => {
+  let catalogue: Client;
+
+  beforeAll(async () => {
+    catalogue = await ouvrirConnexionCatalogue();
+  }, 60_000);
+
+  afterAll(async () => {
+    await catalogue.end();
+  });
+
+  test("le motif « ecriture » porte la valeur réellement en base", async () => {
+    // On pose une valeur connue, PAR LE CHEMIN NORMAL : c'est elle que le
+    // serveur devra rendre quand l'écriture suivante échouera.
+    const posee = await ecrire(alice, commande, "customer_label", "Valeur en base");
+    expect(posee.statut, "la mise en place a échoué : la sonde ne mesure rien").toBe("ok");
+
+    await interroger(
+      catalogue,
+      "revoke update (customer_label) on public.orders from authenticated",
+    );
+    try {
+      const echec = await ecrire(alice, commande, "customer_label", "Valeur qui ne passera pas");
+
+      expect(echec.statut, "l'écriture a réussi alors que le droit est retiré").toBe("echec");
+      if (echec.statut !== "echec") return;
+      expect(echec.motif).toBe("ecriture");
+      expect(
+        echec.valeurConfirmee,
+        "l'échec ne rend pas la valeur en base : l'écran reviendrait à ce que CET onglet a vu en dernier",
+      ).toBe("Valeur en base");
+    } finally {
+      await interroger(
+        catalogue,
+        "grant update (customer_label) on public.orders to authenticated",
+      );
+    }
+  });
+
+  test("contre-test : le droit est bien rendu, l'écriture repasse", async () => {
+    // Sans lui, un `finally` qui aurait échoué laisserait la colonne fermée et
+    // toutes les suites suivantes échoueraient sans qu'on sache pourquoi.
+    const apres = await ecrire(alice, commande, "customer_label", "Après restitution");
+    expect(apres.statut, "le droit d'écriture n'a pas été rendu").toBe("ok");
   });
 });

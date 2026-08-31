@@ -121,8 +121,24 @@ export function Editeur({
         return;
       }
 
-      // Retour à l'état confirmé, ET on le dit.
-      setValeurs((v) => ({ ...v, [champ]: confirmees.current[champ] }));
+      /*
+       * RETOUR À L'ÉTAT CONFIRMÉ, ET ON LE DIT.
+       *
+       * ⚠️ « CONFIRMÉ » VEUT DIRE « CE QUE LA BASE PORTE », PAS « CE QUE CET
+       * ONGLET A VU EN DERNIER ». Le serveur rend désormais `valeurConfirmee`
+       * quand il l'a relue ; on la préfère à la mémoire locale, qui peut être
+       * périmée dès qu'un second onglet est ouvert — cas ordinaire pour un
+       * vendeur qui compare deux commandes.
+       *
+       * Sans valeur relue, on retombe sur la mémoire locale : c'est le
+       * comportement d'avant, et il vaut mieux que rien.
+       */
+      const confirmee =
+        "valeurConfirmee" in resultat && typeof resultat.valeurConfirmee === "string"
+          ? resultat.valeurConfirmee
+          : confirmees.current[champ];
+      confirmees.current = { ...confirmees.current, [champ]: confirmee };
+      setValeurs((v) => ({ ...v, [champ]: confirmee }));
       setEtat("echec");
       setChampsEnEchec((precedents) =>
         precedents.includes(champ) ? precedents : [...precedents, champ],

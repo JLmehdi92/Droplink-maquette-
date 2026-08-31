@@ -46,6 +46,25 @@ export type ResultatEnregistrement =
       readonly valeurConfirmee?: string;
     };
 
+/**
+ * Relit la valeur d'UN champ, pour la rendre à l'écran quand l'écriture a
+ * échoué. Rend `{}` si la relecture échoue à son tour : l'appelant retombe
+ * alors sur son propre état confirmé, qui n'est pas pire qu'avant.
+ */
+async function relire(
+  supabase: ClientEcriture,
+  id: string,
+  champ: string,
+): Promise<{ valeurConfirmee?: string }> {
+  try {
+    const { data } = await supabase.from("orders").select(champ).eq("id", id).maybeSingle();
+    const valeur = (data as Record<string, unknown> | null)?.[champ];
+    return typeof valeur === "string" ? { valeurConfirmee: valeur } : {};
+  } catch {
+    return {};
+  }
+}
+
 const Enregistrement = z.object({
   id: z.string().uuid(),
   champ: z.enum(Object.keys(CHAMPS) as [NomChamp, ...NomChamp[]]),
@@ -121,13 +140,38 @@ export async function appliquerChamp(
     .maybeSingle();
 
   if (error !== null) {
-    return { statut: "echec", motif: "ecriture", champ: nom };
+    /*
+     * ⚠️ `valeurConfirmee` ÉTAIT DÉCLARÉE, DOCUMENTÉE DEUX FOIS, ET RENSEIGNÉE
+     * NULLE PART.
+     *
+     * DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. Le champ existait dans le
+     * type, le commentaire de `enregistrerChamp` promettait « en cas d'échec,
+     * cette action rend la valeur RÉELLEMENT en base, pour que l'écran y
+     * revienne », et `grep` n'en trouvait qu'une occurrence : la déclaration.
+     * C'est L-014 dans un contrat de fonction.
+     *
+     * CE QUE L'ABSENCE COÛTAIT, ET SEULEMENT LÀ : l'écran revenait à SA dernière
+     * valeur confirmée, qui est locale à l'onglet. Avec deux onglets ouverts —
+     * un vendeur qui compare deux commandes, cas ordinaire à 200 commandes par
+     * semaine — l'onglet B revenait à une valeur que l'onglet A avait déjà
+     * remplacée. L'interface affirmait alors un état que la base n'avait pas,
+     * ce qui est le principe XII exactement à l'envers.
+     *
+     * LA RELECTURE EST BORNÉE : une seule ligne, un seul champ, et son propre
+     * échec est avalé — on est déjà sur un chemin d'échec, et lever ici
+     * masquerait la cause première derrière un second incident. Sans valeur
+     * relue, l'écran retombe sur son comportement d'avant, qui n'est pas pire.
+     */
+    return { statut: "echec", motif: "ecriture", champ: nom, ...(await relire(supabase, analyse.data.id, nom)) };
   }
 
   // `maybeSingle` rend `null` quand la RLS a filtré la ligne : la commande
   // existe peut-être, mais pas pour cet appelant. On ne distingue pas les deux —
   // le dire reviendrait à confirmer l'existence d'une commande d'un autre.
   if (data === null) {
+    // Pas de relecture ici : `maybeSingle` a rendu `null` parce que la RLS a
+    // filtré la ligne. Relire donnerait le même vide, et insister ferait deux
+    // requêtes pour la même réponse.
     return { statut: "echec", motif: "introuvable", champ: nom };
   }
 
