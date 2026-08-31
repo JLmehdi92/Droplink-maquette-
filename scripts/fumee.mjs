@@ -248,9 +248,29 @@ const cas = [
   { chemin: "/fr/conditions", statut: 200, libelle: "conditions" },
   { chemin: "/fr/confidentialite", statut: 200, libelle: "confidentialite" },
   {
+    /*
+     * ⚠️ CE CAS ATTENDAIT 404 EN DUR, ET IL A ROUGI LE JOUR OU LE PRODUIT A EU
+     * RAISON.
+     *
+     * `abus@droplink.fr` a ete configure le 01/09/2026 : la page rend
+     * legitimement 200, et ce controle a accuse le produit d un defaut qui
+     * etait une CORRECTION. Il n encodait pas la regle, il encodait l ETAT du
+     * jour ou il a ete ecrit — c est le meme travers que L-014, transpose dans
+     * une sonde.
+     *
+     * LA REGLE, ELLE, EST : la page rend 200 quand le canal existe, 404 sinon,
+     * et JAMAIS AUTRE CHOSE. On borne donc les deux etats legitimes ici, et la
+     * COHERENCE entre la page et les liens du pied de page est eprouvee plus
+     * bas, dans les deux sens, par le bloc « Le recours de signalement ».
+     *
+     * Ce n est pas un affaiblissement : avant, un 500 ou une redirection
+     * passaient inapercus des que l adresse etait posee, puisque le bloc du bas
+     * se contente de lire `statut === 200` pour decider si le canal est ouvert.
+     * Un 500 s y lisait donc comme « canal ferme ». Il echoue maintenant ici.
+     */
     chemin: "/fr/signalement",
-    statut: 404,
-    libelle: "signalement SANS adresse d'abus configuree",
+    statuts: [200, 404],
+    libelle: "signalement rend 200 (canal ouvert) ou 404 (canal ferme), jamais autre chose",
   },
   // L espace vendeur, sans session : la liste ne doit JAMAIS repondre 200 a un
   // visiteur anonyme. On suit la chaine et on verifie l etat FINAL — une
@@ -307,15 +327,24 @@ const cas = [
 let echecs = 0;
 
 console.log("— Statuts —");
-for (const { chemin, statut, final, libelle } of cas) {
+for (const { chemin, statut, statuts, final, libelle } of cas) {
   const r = await suivre(chemin);
-  const statutOk = r.statut === statut;
+  // `statuts` borne un ensemble d etats LEGITIMES ; `statut` en exige un seul.
+  // L un des deux, jamais les deux — un cas qui n en porte aucun ne prouverait
+  // rien tout en s affichant vert.
+  const attendus = statuts ?? (statut === undefined ? [] : [statut]);
+  if (attendus.length === 0) {
+    echecs += 1;
+    console.log(`ECHEC ${chemin.padEnd(20)} cas sans statut attendu : il ne prouve rien`);
+    continue;
+  }
+  const statutOk = attendus.includes(r.statut);
   const finalOk = final === undefined || r.final === final;
   const ok = statutOk && finalOk;
   if (!ok) echecs += 1;
   console.log(
     `${ok ? "OK   " : "ECHEC"} ${chemin.padEnd(20)} ${r.chaine.join("  ->  ").padEnd(34)} ` +
-      `${ok ? "" : `attendu ${statut}${final === undefined ? "" : ` sur ${final}`} — `}${libelle}`,
+      `${ok ? "" : `attendu ${attendus.join(" ou ")}${final === undefined ? "" : ` sur ${final}`} — `}${libelle}`,
   );
 }
 
