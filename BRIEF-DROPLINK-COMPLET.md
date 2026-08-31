@@ -546,7 +546,14 @@ parametres_admis    cle, minimum, maximum, raison — (aucune policy) inventaire
                     TypeScript ; un admin appelant la RPC hors du formulaire
                     écrivait n'importe quelle clé, hors bornes
 
-scheduler_heartbeat source, beat_at
+scheduler_heartbeat source, beat_at, premier_battement, detail
+                    `premier_battement` n'est JAMAIS réécrit : c'est l'âge du
+                    veilleur qui distingue « pas encore passée » de « jamais
+                    déployée »
+
+alertes_envoyees    cle, envoye_at — (aucune policy) repos entre deux alertes du
+                    veilleur. Poser une ligne le fait TAIRE, en effacer une le
+                    fait réémettre : les deux droits restent hors de portée
 
 rate_limit          (aucune policy — atteignable uniquement par consommer_quota)
 

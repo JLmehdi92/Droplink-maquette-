@@ -125,6 +125,16 @@ describe("Matcher du middleware", () => {
         "404 plutôt que 401 pour ne pas révéler l'existence de la surface.",
     ],
     [
+      "/api/veille",
+      "Second planificateur — la veille mutuelle. `/api` est exclu du matcher : " +
+        "elle porte SA garde, la même que la cadence (`lib/taches/secret.ts`), " +
+        "secret comparé à TEMPS CONSTANT, refus si le secret n'est pas " +
+        "configuré, et 404 plutôt que 401 pour ne pas révéler l'existence de la " +
+        "surface. Elle doit être appelée par un planificateur DIFFÉRENT de " +
+        "celui de la cadence : deux tâches sur le même planificateur ne " +
+        "veillent rien, elles s'arrêtent ensemble.",
+    ],
+    [
       "/api/commandes/export",
       "Export CSV des commandes du vendeur connecté. Route handler et non Server " +
         "Action parce qu'un téléchargement exige `Content-Disposition`, que la " +

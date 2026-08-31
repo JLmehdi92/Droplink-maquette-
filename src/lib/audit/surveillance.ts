@@ -1,6 +1,7 @@
 import "server-only";
 import type { ClientAdmin } from "@/lib/audit/comptes";
 import type { EtatTache } from "@/lib/audit/panneau";
+import { TACHES_ATTENDUES } from "@/lib/veille/taches";
 
 /**
  * L'ÉCRAN DE SURVEILLANCE.
@@ -49,18 +50,19 @@ export const NON_MESURE: readonly string[] = [
 /**
  * LES TÂCHES DE FOND QUE LE PRODUIT DÉPLOIE.
  *
- * ⚠️ UNE SEULE AUJOURD'HUI, et c'est un fait, pas un oubli : `cadence-suivi` est
- * la seule source qui appelle `battre`. La « veille mutuelle entre deux
- * planificateurs » est une décision du brief (§3, décision 11) qui n'est PAS
- * implémentée — l'afficher reviendrait à annoncer une protection qui n'existe
- * pas, et c'est la forme de mensonge la plus coûteuse sur un écran de
- * surveillance.
+ * ⚠️ LA LISTE A DÉMÉNAGÉ dans `lib/veille/taches.ts`, et ce n'est pas du
+ * rangement. Elle a désormais DEUX lecteurs — cet écran, et le veilleur qui
+ * envoie les alertes. Deux copies se seraient séparées le jour où une tâche est
+ * ajoutée à l'une, et la panne non vue aurait été celle que la seconde liste
+ * devait couvrir. Elle est ré-exportée ici pour que les appelants existants ne
+ * changent pas, jamais redéfinie.
  *
- * CETTE LISTE EST CE QUI REND LE TROISIÈME ÉTAT POSSIBLE. `scheduler_heartbeat`
- * ne porte que les sources ayant DÉJÀ battu : sans inventaire, une tâche jamais
- * exécutée est invisible, donc indiscernable d'une tâche qui n'existe pas.
+ * Ce commentaire disait aussi qu'il n'y avait qu'UNE tâche, et que la « veille
+ * mutuelle entre deux planificateurs » du brief (§3, décision 11) n'était pas
+ * implémentée. Elle l'est depuis les migrations 128 et 129 : `veille-mutuelle`
+ * est la seconde, et l'écran la montre désormais avec son propre état.
  */
-export const TACHES_ATTENDUES: readonly string[] = ["cadence-suivi"] as const;
+export { TACHES_ATTENDUES };
 
 /** Une tâche telle que l'écran la montre : trois états, jamais deux. */
 export interface TacheSurveillee {

@@ -52,6 +52,17 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "alertes_envoyees",
+      "Repos entre deux alertes du veilleur. AUCUNE POLICY : la table n'est " +
+        "atteignable que par `reserver_alerte` et `liberer_alerte`, toutes deux " +
+        "en `security definer` et ouvertes au seul `service_role`. Les deux " +
+        "droits qu'une policy accorderait sont exactement ceux qu'il ne faut " +
+        "pas donner : POSER une ligne fait TAIRE le veilleur pour la durée du " +
+        "repos, et EFFACER une ligne lui fait réémettre autant d'emails qu'on " +
+        "veut. Le premier est une panne silencieuse, le second apprend à " +
+        "ignorer l'expéditeur — deux façons d'obtenir le même résultat final.",
+    ],
+    [
       "parametres_admis",
       "Inventaire FERMÉ des paramètres système et de leurs bornes. AUCUNE " +
         "POLICY : la table n'est lue que par `ecrire_parametre`, en " +

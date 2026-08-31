@@ -67,5 +67,20 @@ describe("Les portes couvrent scripts/", () => {
         ).toBeDefined();
       }
     }
-  });
+    /*
+     * ⚠️ DÉLAI EXPLICITE, ET NON UN RELANCEMENT JUSQU'AU VERT.
+     *
+     * Ce test a expiré au défaut de 5 s alors qu'ESLint mettait 6,1 s. Ce n'est
+     * pas une intermittence à ignorer : `calculateConfigForFile` construit la
+     * configuration complète du dépôt au premier appel, et ce coût croît avec
+     * le nombre de blocs `files` — il vient d'augmenter en déclarant la cloison
+     * de `lib/veille`. Le contrôle mesurait donc, sans le dire, la TAILLE de la
+     * configuration autant que sa substance.
+     *
+     * « Un test qui échoue par intermittence doit être BORNÉ, pas relancé
+     * jusqu'au vert. » Le voici borné : soixante secondes couvrent largement
+     * une machine chargée, et un dépassement signalerait alors une vraie
+     * dégradation plutôt qu'un aléa d'ordonnancement.
+     */
+  }, 60_000);
 });

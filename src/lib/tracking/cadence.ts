@@ -6,6 +6,8 @@ import { dixSeptTrack } from "./provider/dix-sept-track";
 import { ingererEtat } from "./ingestion";
 import { prendreEnCharge } from "./prise-en-charge";
 import { decider, type EtatColis } from "./schedule";
+import { veillerSur } from "@/lib/veille/passer";
+import { TACHE_CADENCE } from "@/lib/veille/taches";
 import { decrireSilence } from "./silence";
 
 /**
@@ -227,8 +229,31 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
   }
   const purgee = purge?.[0];
 
+  /*
+   * L'AUTRE MOITIÉ DE LA VEILLE MUTUELLE.
+   *
+   * La cadence regarde `veille-mutuelle`, exactement comme celle-ci la regarde.
+   * Sans ce sens-là, la mort du second planificateur ne serait constatée par
+   * personne — et l'on ne s'en apercevrait qu'au moment où la cadence tombe à
+   * son tour, c'est-à-dire quand plus rien ne peut le dire.
+   *
+   * ⚠️ SON ÉCHEC N'ANNULE PAS LE PASSAGE. Le suivi vient d'être fait ; le
+   * perdre parce qu'une alerte n'est pas partie ferait payer le travail utile
+   * par un défaut du mécanisme censé le protéger. L'échec est NOMMÉ, jamais
+   * avalé — un `catch` muet ici rendrait une veille en panne indiscernable
+   * d'une veille qui n'a rien trouvé.
+   */
+  try {
+    await veillerSur(TACHE_CADENCE, maintenant);
+  } catch (erreur) {
+    console.error(
+      "[suivi] cadence : la veille sur l'autre planificateur a échoué — " +
+        (erreur instanceof Error ? erreur.message : String(erreur)),
+    );
+  }
+
   await systeme.rpc("battre", {
-    p_source: "cadence-suivi",
+    p_source: TACHE_CADENCE,
     p_detail: {
       // ÉCRIT DANS LE BATTEMENT : sans lui, un passage coupé et un passage sans
       // rien à faire produisent exactement la même trace, et l'on ne pourrait

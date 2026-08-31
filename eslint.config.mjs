@@ -146,6 +146,10 @@ const eslintConfig = [
       "src/lib/limitation/**/*.ts",
       "src/lib/tracking/**/*.ts",
       "src/lib/instrumentation/**/*.ts",
+      // La veille mutuelle : elle ne lit QUE des battements de tâches et le
+      // seuil de retard — aucune donnée de vendeur, donc rien à auditer. Elle
+      // tourne appelée par un planificateur, jamais par quelqu'un.
+      "src/lib/veille/**/*.ts",
     ],
     rules: { "no-restricted-imports": ["error", { patterns: sauf("systeme") }] },
   },

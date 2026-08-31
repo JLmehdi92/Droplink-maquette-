@@ -1,46 +1,27 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import { secretDeTacheValide } from "@/lib/taches/secret";
 import { passerLaCadence } from "@/lib/tracking/cadence";
 
 /**
  * LE DÉCLENCHEUR DE LA TÂCHE DE FOND.
  *
- * ⚠️ `/api` est exclu du matcher du middleware : cette route n'est protégée par
- * RIEN d'autre que ce qui est écrit ici. Et ce qu'elle déclenche COÛTE DE
- * L'ARGENT — chaque passage interroge le fournisseur. Une route de tâche de fond
- * laissée ouverte est un robinet que n'importe qui peut ouvrir à nos frais.
+ * ⚠️ `/api` est exclu du matcher du middleware : cette route n'est protégée que
+ * par sa propre garde. Et ce qu'elle déclenche COÛTE DE L'ARGENT — chaque
+ * passage interroge le fournisseur. Une route de tâche de fond laissée ouverte
+ * est un robinet que n'importe qui peut ouvrir à nos frais.
  *
- * LE SECRET EST COMPARÉ À TEMPS CONSTANT, pour la même raison que la signature
- * des notifications : une comparaison de chaînes s'arrête au premier octet
- * différent, et cet écart se mesure.
- *
- * SANS SECRET CONFIGURÉ, LA ROUTE REFUSE. Elle ne « passe pas en mode ouvert
- * pour le développement » : un défaut de configuration qui ouvre une porte est
- * exactement celui qu'on ne remarque pas, parce que tout continue de marcher.
+ * La garde — comparaison à temps constant, refus si le secret n'est pas
+ * configuré, 404 plutôt que 401 — est passée dans `lib/taches/secret.ts` le
+ * jour où la veille mutuelle en a eu besoin à l'identique. Elle n'est pas
+ * affaiblie : elle est la MÊME, et il n'en existe plus qu'un exemplaire.
  */
 
 export const dynamic = "force-dynamic";
 /** Un passage traite au plus cinquante colis ; il doit tenir largement. */
 export const maxDuration = 60;
 
-function autorise(requete: Request): boolean {
-  const attendu = process.env["CRON_SECRET"] ?? "";
-  if (attendu.trim().length < 16) return false;
-
-  const entete = requete.headers.get("authorization") ?? "";
-  const fourni = entete.startsWith("Bearer ") ? entete.slice(7) : entete;
-
-  const a = Buffer.from(attendu.trim(), "utf8");
-  const b = Buffer.from(fourni.trim(), "utf8");
-
-  // `timingSafeEqual` LÈVE sur des longueurs différentes, et l'exception
-  // révélerait par sa seule existence que la longueur ne correspondait pas.
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
-
 export async function POST(requete: Request): Promise<NextResponse> {
-  if (!autorise(requete)) {
+  if (!secretDeTacheValide(requete)) {
     // 404 et non 401 : ne pas révéler l'existence de la surface. Une route de
     // tâche de fond dont on sait qu'elle existe est une route qu'on essaiera.
     return NextResponse.json({ erreur: "introuvable" }, { status: 404 });

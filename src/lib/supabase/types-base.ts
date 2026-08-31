@@ -74,6 +74,21 @@ export type Database = {
           },
         ]
       }
+      alertes_envoyees: {
+        Row: {
+          cle: string
+          envoye_at: string
+        }
+        Insert: {
+          cle: string
+          envoye_at?: string
+        }
+        Update: {
+          cle?: string
+          envoye_at?: string
+        }
+        Relationships: []
+      }
       link_views: {
         Row: {
           country: string | null
@@ -446,16 +461,19 @@ export type Database = {
         Row: {
           beat_at: string
           detail: Json
+          premier_battement: string
           source: string
         }
         Insert: {
           beat_at?: string
           detail?: Json
+          premier_battement?: string
           source: string
         }
         Update: {
           beat_at?: string
           detail?: Json
+          premier_battement?: string
           source?: string
         }
         Relationships: []
@@ -886,6 +904,16 @@ export type Database = {
         Returns: boolean
       }
       est_admin: { Args: never; Returns: boolean }
+      etat_veille: {
+        Args: { p_retard_minutes: number; p_sources: string[] }
+        Returns: {
+          dernier_battement: string
+          etat: string
+          minutes: number
+          premier_battement: string
+          source: string
+        }[]
+      }
       etat_veilleur: {
         Args: { p_retard_minutes: number }
         Returns: {
@@ -925,6 +953,7 @@ export type Database = {
         Args: { p_order_id: string; p_payload?: Json; p_type: string }
         Returns: string
       }
+      liberer_alerte: { Args: { p_cle: string }; Returns: undefined }
       liberer_evenement_creation: {
         Args: { p_order_id: string }
         Returns: boolean
@@ -1027,6 +1056,7 @@ export type Database = {
         }[]
       }
       lire_plafond_commandes: { Args: never; Returns: number }
+      lire_retard_veilleur_minutes: { Args: never; Returns: number }
       lire_suivi_actif: { Args: never; Returns: boolean }
       lire_suivi_public: {
         Args: { p_jeton: string }
@@ -1129,6 +1159,10 @@ export type Database = {
       reordonner_medias: {
         Args: { p_ids: string[]; p_order_id: string }
         Returns: number
+      }
+      reserver_alerte: {
+        Args: { p_cle: string; p_repos_minutes: number }
+        Returns: boolean
       }
       sans_accents: { Args: { p_texte: string }; Returns: string }
       sante_infrastructure: {
