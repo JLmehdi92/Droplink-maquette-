@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { estLangueSupportee } from "@/i18n/config";
-import { TraductionsClient } from "@/components/traductions-client";
 import { NavigationAdmin, type EntreeAdmin } from "@/components/admin/navigation-admin";
 
 /**
@@ -186,7 +185,7 @@ export default async function LayoutAdmin({
 
         {/* --- LE CONTENU, et la barre d'onglets sous lui au téléphone --- */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <TraductionsClient espaces={["erreurs"]}>{children}</TraductionsClient>
+          {children}
 
           {/* L'espace n'existe qu'au téléphone : il colle la barre d'onglets au
               bas de l'écran quand la page est courte, sans la rendre fixe — une

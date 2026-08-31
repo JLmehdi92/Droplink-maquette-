@@ -166,10 +166,61 @@ export function Visionneur({
   useEffect(() => {
     if (index === null) return;
 
+    /*
+     * ⚠️ LE FOCUS SORTAIT DERRIÈRE LA COUCHE PLEIN ÉCRAN.
+     *
+     * DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. `role="dialog"` et
+     * `aria-modal` étaient bien posés, Échap fermait, `autoFocus` amenait le
+     * focus sur la fermeture — mais RIEN ne retenait la tabulation. Au clavier,
+     * elle sortait du visionneur après la pellicule et parcourait la galerie,
+     * l'arbitrage QC et le pied de page DERRIÈRE la couche opaque : le focus
+     * devenait invisible, et le visiteur pilotait une page qu'il ne voyait plus.
+     *
+     * `aria-modal` masque le fond au lecteur d'écran ; il ne contraint PAS le
+     * Tab. Les deux propriétés se ressemblent assez pour qu'on croie l'une
+     * acquise en posant l'autre.
+     *
+     * ET LE FOCUS EST RENDU À SA VIGNETTE. Il retombait sur `<body>`, donc sur
+     * une galerie de vingt médias il fallait tout retraverser pour rouvrir la
+     * suivante — le genre de coût qu'on ne mesure jamais parce qu'on ne le paie
+     * pas soi-même.
+     */
+    const declencheur = document.activeElement;
+
+    const focalisables = (): HTMLElement[] => {
+      const boite = dialogue.current;
+      if (boite === null) return [];
+      return [
+        ...boite.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), video[controls], [tabindex]:not([tabindex="-1"])',
+        ),
+      ].filter((e) => e.offsetParent !== null || e === document.activeElement);
+    };
+
     const surTouche = (evenement: KeyboardEvent): void => {
       if (evenement.key === "Escape") fermer();
       if (evenement.key === "ArrowRight") aller(1);
       if (evenement.key === "ArrowLeft") aller(-1);
+      if (evenement.key !== "Tab") return;
+
+      // LA BOUCLE EST FERMÉE À LA MAIN plutôt que par `inert` sur le fond : le
+      // visionneur est monté DANS le flux de la page, et rendre inerte tout ce
+      // qui l'entoure demanderait de connaître ses frères — c'est-à-dire de
+      // savoir ce que la page publique contient, ce que cet îlot ne doit pas
+      // avoir à savoir.
+      const liste = focalisables();
+      const premier = liste[0];
+      const dernier = liste[liste.length - 1];
+      if (premier === undefined || dernier === undefined) return;
+
+      const actif = document.activeElement;
+      if (evenement.shiftKey && (actif === premier || !liste.includes(actif as HTMLElement))) {
+        evenement.preventDefault();
+        dernier.focus();
+      } else if (!evenement.shiftKey && actif === dernier) {
+        evenement.preventDefault();
+        premier.focus();
+      }
     };
     window.addEventListener("keydown", surTouche);
 
@@ -182,6 +233,8 @@ export function Visionneur({
     return () => {
       window.removeEventListener("keydown", surTouche);
       document.body.style.overflow = avant;
+      // Rendu à la vignette d'où l'on vient, si elle est toujours là.
+      if (declencheur instanceof HTMLElement && declencheur.isConnected) declencheur.focus();
     };
   }, [index, fermer, aller]);
 
@@ -196,6 +249,8 @@ export function Visionneur({
    * Le départ est mémorisé dans une ref et non dans un état : un `setState` par
    * `touchmove` re-rendrait la couche plein écran à chaque pixel.
    */
+  /** Le conteneur du plein écran, pour y borner la tabulation. */
+  const dialogue = useRef<HTMLDivElement | null>(null);
   const departX = useRef<number | null>(null);
 
   const surDebutToucher = (e: React.TouchEvent): void => {
@@ -323,6 +378,7 @@ export function Visionneur({
 
       {courant !== undefined ? (
         <div
+          ref={dialogue}
           role="dialog"
           aria-modal="true"
           aria-label={libelles.position

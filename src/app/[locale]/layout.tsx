@@ -5,6 +5,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
+import { TraductionsClient } from "@/components/traductions-client";
 
 /*
  * `next/font` télécharge les polices AU BUILD et les sert depuis notre domaine.
@@ -79,8 +80,19 @@ export default async function LayoutLangue({
          * Chaque page enveloppe donc elle-même ses composants clients dans
          * `<TraductionsClient espaces={[...]}>`, si bien que le coût d'un
          * nouvel écran reste sur ce nouvel écran.
+         *
+         * ⚠️ UNE SEULE EXCEPTION, ET ELLE EST GLOBALE PAR NÉCESSITÉ : l'espace
+         * `erreurs`, quatre libellés. Une frontière d'erreur DOIT être un Client
+         * Component — elle ne peut donc pas appeler `getTranslations()` et ne
+         * reçoit aucune propriété —, et il en faut une sur CHAQUE segment, y
+         * compris les surfaces publiques qui n'en avaient aucune : une erreur de
+         * rendu y servait la page générique de Next, en anglais.
+         *
+         * La poser ici plutôt que dans chaque page est ce qui COÛTE LE MOINS :
+         * `(app)` et `admin` portaient déjà ce même espace, chacun le sien. Ils
+         * ne le portent plus, le voici une fois pour toutes.
          */}
-        {children}
+        <TraductionsClient espaces={["erreurs"]}>{children}</TraductionsClient>
       </body>
     </html>
   );
