@@ -394,11 +394,31 @@ base**, audit **atomique** avec la lecture qu'il trace.
 - **Racine de mise en page distincte.** Ce n'est pas de l'organisation, **c'est le
   budget** : la racine de l'espace vendeur monte tout ce dont un tableau de bord a
   besoin ; cette page est vue une fois, en 4G, sur un appareil d'entrée de gamme.
-- **Aucun provider i18n client** : la langue est distribuée aux Server Components sans
-  expédier le catalogue. Le visionneur plein écran reçoit ses libellés **en
+- **Le catalogue n'est pas expédié au navigateur** : la langue est distribuée aux
+  Server Components, et le visionneur plein écran reçoit ses libellés **en
   propriétés**.
-- **Deux îlots clients seulement** : le visionneur plein écran (**~1 Ko**, écrit à la
-  main contre 40-90 Ko pour une bibliothèque) et la balise de consultation.
+  > ⚠️ **AMENDÉ LE 31/08/2026.** Cette ligne disait « aucun provider i18n
+  > client ». Il y en a désormais UN, restreint à **trois libellés**
+  > (`page-publique.erreur`), et il existe pour une raison que la règle
+  > n'avait pas prévue : **une frontière d'erreur DOIT être un Client
+  > Component**. Elle ne peut donc ni appeler `getTranslations()`, ni recevoir
+  > de propriétés — le provider est la seule voie qui ne mette pas deux phrases
+  > en dur sur la page que reçoit le client d'un vendeur.
+  >
+  > **Le surcoût a été mesuré avant d'être accepté** : `/p/[token]` reste à
+  > **118 kB** de premier chargement, la brique next-intl étant déjà dans le
+  > socle partagé. Ce que la règle protégeait — ne pas expédier le catalogue —
+  > reste vrai ; c'est sa formulation qui interdisait trop.
+- **Trois îlots clients**, pas deux : le visionneur plein écran (écrit à la main
+  contre 40-90 Ko pour une bibliothèque), la balise de consultation, et
+  l'arbitrage QC — ce dernier n'étant monté que si la commande porte au moins un
+  média.
+  > ⚠️ **AMENDÉ LE 31/08/2026.** Cette ligne disait « deux îlots seulement ».
+  > `arbitrage-qc.tsx` porte `"use client"` depuis qu'il existe : le chiffre
+  > était faux, pas le principe. Il est corrigé plutôt que rangé, parce qu'un
+  > décompte qu'on ne vérifie pas devient l'argument avec lequel on refusera le
+  > quatrième îlot — ou avec lequel on l'acceptera en croyant qu'il est le
+  > troisième.
 - **Pas de glassmorphism / backdrop-blur** : c'est ce qui rame le plus sur les appareils
   d'entrée de gamme. Sur un aplat uni, un blanc à 70 % flouté donne exactement la même
   couleur qu'un blanc opaque — **le flou n'a rien à flouter**.
@@ -916,7 +936,15 @@ un jeton valide, **60** dépôts. La fenêtre se lit **en base**, pas sur l'horl
   gamme en 4G throttlée**. Une mesure desktop non throttlée ne veut rien dire ici.
 - Socle Next/React incompressible : **~102 Ko**. Il reste donc ~198 Ko pour tout le
   reste. Un composant client de 40-90 Ko consommerait la moitié de la marge à lui seul.
-- Total mesuré atteignable : **~116 Ko**.
+- Total **RÉELLEMENT mesuré le 31/08/2026** sur un build de production servi,
+  page à 14 médias, sous-ressources comprises : **176 Ko compressés**
+  (615 Ko bruts). Dans le budget de 300 Ko, avec 124 Ko de marge.
+  > ⚠️ **AMENDÉ.** Cette ligne annonçait « ~116 Ko atteignable », et personne ne
+  > l'avait confrontée à une page servie. Le contrôle de fumée qui portait ce
+  > budget ne pesait que le HTML — 26 Ko contre un seuil de 300 : il ne pouvait
+  > pas devenir rouge pour la chose que le budget protège. Il pèse désormais la
+  > page entière, sous-ressources comprises, et refuse de mesurer si elle n'en
+  > référence aucune.
 - **À 20 médias : page complète < 1 Mo.**
 - **Décalage cumulé < 0,1.**
 

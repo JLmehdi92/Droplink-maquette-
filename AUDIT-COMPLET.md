@@ -12,13 +12,19 @@
 
 ## 1. RÉSUMÉ EXÉCUTIF
 
-**Vingt-cinq défauts confirmés**, dont deux à impact direct sur le coût du
-produit et un sur ce que le client voit. **Dix-sept corrigés**, chacun avec sa
-sonde et sa falsification vue en rouge ; **huit laissés**, dont trois sont des
-arbitrages produit qui appartiennent à Wassim et non à moi.
+**Trente-quatre défauts confirmés, trente-deux corrigés.** Deux restent, et
+aucun des deux ne dépend du code : la cadence et le veilleur attendent le
+déploiement et une clé d'envoi. Un seul point demeure un **arbitrage produit**,
+et il est posé nettement au § 6.1.
 
-Deux des vingt-cinq ont été **introduits par cet audit**, et attrapés par les
-portes du projet — ils sont racontés au § 5.4 plutôt que passés sous silence.
+L'audit s'est fait en **deux passes**. La première a trouvé vingt-cinq défauts et
+en a laissé huit. La seconde a repris les huit un par un : **six sont fermés**,
+un a été **réfuté par la mesure** (le canevas donne raison au code), et elle a
+trouvé **neuf défauts de plus** — dont six révélés par les corrections
+elles-mêmes.
+
+Trois des trente-quatre ont été **introduits par cet audit**, et attrapés par les
+portes du projet — ils sont racontés au § 6ter plutôt que passés sous silence.
 
 Les quatre qui comptent le plus :
 
@@ -187,9 +193,35 @@ pas n'a rien à faire dans une porte — surtout pas dans celle qui compte.*
 
 ---
 
-## 6. CE QUI N'A PAS ÉTÉ CORRIGÉ, ET POURQUOI
+## 6. LA SECONDE PASSE — LES HUIT « LAISSÉS » REPRIS UN PAR UN
 
-### 6.1 Trois arbitrages qui appartiennent à Wassim
+Les huit défauts que la première passe avait laissés ont été repris. **Six sont
+fermés, deux restent — et ils ne dépendent plus du code.**
+
+| Laissé en première passe | Ce qu'il est devenu |
+|---|---|
+| `shop_id` dans le HTML public — « arbitrage à Wassim » | **TOUJOURS OUVERT, et c'est bien un arbitrage.** Voir § 6.1 : la seule correction possible retirerait la garde la plus forte du stockage |
+| `arbitrer_qc` déplace `updated_at` — « arbitrage » | **TRANCHÉ ET FERMÉ** par la définition que la migration 090 avait déjà écrite : `updated_at` répond à « quand le VENDEUR a-t-il touché cette commande ». Migration 127 |
+| Le dégradé deux fois sur la landing — « le canevas fait foi » | **RÉFUTÉ PAR MESURE.** Les planches sont sur le disque : `Main.dc.html` et `LandingMobile.dc.html` portent **deux** `class="grad"` et **deux** boutons « Créer ma première commande ». Notre landing est conforme ; c'est le constat qui était faux |
+| Plafond 60 s vidéo déclaratif | **NOMMÉ ET INSTRUMENTÉ.** Il ne peut pas être enforcé sans le transcodeur que le brief refuse, ni rendu obligatoire sans contredire « refuser une vidéo qu'on n'a pas su décoder ferait payer au vendeur une limite qui est la nôtre ». Une vidéo acceptée **sans durée déclarée** est désormais comptée : on saura si le cas est marginal au lieu de le supposer |
+| Pas de frontière d'erreur sur `/p/` ni `[locale]` | **FERMÉ, à coût nul.** Le provider client restreint à trois libellés coûte **250 octets** — mesuré : `/p/[token]` reste à 118 kB de premier chargement. L'objection de budget ne tenait pas |
+| Piège de focus du visionneur | **FERMÉ.** La tabulation est bornée au dialogue et le focus rendu à sa vignette |
+| La cadence n'a aucun appelant | **TOUJOURS OUVERT** — bloqué sur le premier déploiement |
+| Le veilleur n'envoie rien | **TOUJOURS OUVERT** — bloqué sur `RESEND_API_KEY` |
+
+**Et les deux zones « NON MESURÉ » ont été mesurées.** Le banc sème déjà au
+plafond : c'est là que la question se tranchait.
+
+| Question laissée ouverte | Réponse, mesurée à 9 600 commandes |
+|---|---|
+| L'index `(shop_id, created_at)` manquant coûte-t-il à chaque création de commande ? | **NON. 0,9 ms, 734 lignes lues, index employé.** Le planificateur se sert d'un index non partiel existant. **Aucun index n'a été posé** — L-017 avait raison de l'exiger avant |
+| Les quatre agrégats des Analyses tiennent-ils au plafond ? | **OUI.** `analyser_activite` 3,4 ms · `compter_commandes_par_semaine` 28,1 ms · `compter_commandes_par_etat` 5,2 ms — seuil 400 ms |
+
+---
+
+## 6bis. CE QUI RESTE OUVERT, ET POURQUOI
+
+### 6.1 Le seul arbitrage qui reste à Wassim
 
 1. **Le `shop_id` et l'`order_id` sortent dans le HTML de la page publique.**
    **PROUVÉ PAR EXÉCUTION** sur un build servi. Ils voyagent dans le *chemin* des
@@ -205,53 +237,58 @@ pas n'a rien à faire dans une porte — surtout pas dans celle qui compte.*
    l'exception est désormais **déclarée et bornée** — les identifiants ne doivent
    apparaître **que** dans une URL signée, et le test échoue dans les deux sens.
 
-2. **`arbitrer_qc` déplace aussi `updated_at`.** Contrairement à la consultation,
-   une décision de contrôle qualité change réellement l'état de la commande.
-   Faut-il qu'elle remonte la commande dans le tri « modifiées » du vendeur ?
-   C'est un choix, pas un défaut — il est signalé dans la migration 120 plutôt
-   que tranché en silence.
+### 6.2 Ce qui est bloqué sur autre chose
 
-3. **Le dégradé de marque apparaît deux fois sur la landing** (haut et bas de
-   page, même action). Le brief dit « une seule action principale par écran ».
-   Les 43 planches vivent hors du dépôt et **le canevas fait foi** : je ne
-   tranche pas sans les avoir ouvertes.
-
-### 6.2 Ce qui ne peut pas être corrigé sans changer une décision produit
-
-4. **Le plafond de 60 s par vidéo est déclaratif.** `dureeSecondes` est optionnel
-   et vient de `video.duration` lu dans le navigateur ; l'omettre, ou envoyer un
-   fichier que le navigateur ne sait pas décoder, contourne le contrôle. Le
-   rendre obligatoire **contredirait une décision existante** — « refuser une
-   vidéo parce qu'on n'a pas su en extraire une image ferait payer au vendeur une
-   limite qui est la nôtre » — et le mesurer côté serveur exigerait le
-   transcodeur que le brief refuse. **Le plafond qui borne réellement le coût est
-   celui de la taille (20 Mo), lui relu côté serveur.** À dire, pas à maquiller.
-
-5. **Il n'existe aucune frontière d'erreur sur `/p/[token]` ni sur les surfaces
-   publiques `[locale]`.** Une erreur de rendu y sert la page générique de Next,
-   en anglais, **au client d'un vendeur**. La correction n'est pas triviale : une
-   frontière d'erreur est un Client Component, et le segment public n'expédie
-   **délibérément aucun provider i18n** — tout texte y serait une chaîne en dur,
-   c'est-à-dire la règle que le projet fait respecter partout ailleurs. C'est un
-   arbitrage entre deux règles, pas un oubli à réparer.
-
-6. **Le visionneur plein écran ne piège pas le focus et ne le restitue pas.**
-   `role="dialog" aria-modal` est posé, Échap ferme, le focus entre — mais la
-   tabulation sort derrière la couche opaque. Correction réelle, non faite faute
-   de pouvoir la mesurer dans un navigateur au cours de cette passe.
-
-### 6.3 Ce qui est bloqué sur autre chose
-
-7. **La cadence de suivi n'a aucun appelant.** `CRON_SECRET` est absent, aucun
+2. **La cadence de suivi n'a aucun appelant.** `CRON_SECRET` est absent, aucun
    planificateur n'existe dans le dépôt : aucune interrogation, aucun abandon,
    aucune marque d'immobilité, **et aucune purge à 90 jours**. Bloqué sur le
    premier déploiement.
 
-8. **Le veilleur n'envoie rien.** Il n'y a **aucun module d'envoi d'email** dans
+3. **Le veilleur n'envoie rien.** Il n'y a **aucun module d'envoi d'email** dans
    le dépôt et `resend` n'est pas dans `package.json` : la réponse à « silence,
    erreur visible ou fausse réussite ? » est *aucun des trois*. Le seul canal est
    un badge sur un écran que personne n'ouvre — ce que L-022 désigne nommément
    comme insuffisant. Bloqué sur `RESEND_API_KEY`.
+
+### 6.3 Ce que la seconde passe a trouvé EN PLUS, et fermé
+
+Neuf défauts que la première passe n'avait pas vus, dont six révélés **par les
+corrections elles-mêmes** :
+
+| Défaut | Comment il est apparu |
+|---|---|
+| Le plafond de débit ne protégeait pas la lecture du **layout** de `/p/` : il lisait la commande sans condition, donc un balayeur ayant brûlé ses vingt essais faisait toujours payer un `orders ⨝ shops ⨝ profiles` | relecture du chemin après la première passe |
+| Un **corps JSON invalide** sur un jeton VALIDE armait le compteur des jetons inconnus : un client légitime dont l'îlot bogue voyait **sa propre page** devenir 404 | idem |
+| `arbitrer_qc` **journalisait à chaque appel**, décision identique comprise : 14 400 lignes/jour possibles dans l'historique d'une commande, sur la pièce qu'un vendeur produirait en cas de litige | idem |
+| Cinq symboles **morts** : `EnTete`, `PiedDePage`, `teinteQc`, `jwks.ts` (deux exports) — dont un module entier documentant une vérification de signature que le produit ne fait pas | inventaire vérifié un par un |
+| **Dix entrées de catalogue mortes**, dont le namespace `pied` entier | révélées par la suppression des composants morts — la sonde a rougi aussitôt |
+| **Dix-huit familles de clés** passaient pour vivantes **par collision de dernier segment** (`expedie`, `Ko`, `nom`…) | révélé en restreignant la recherche aux fichiers qui déclarent l'espace |
+| `valeurConfirmee` : capacité **déclarée, promise deux fois, écrite nulle part** — l'éditeur revenait à l'état de SON onglet, pas à celui de la base | inventaire des contrats |
+| Le banc de mesure **compressait douze mois en 6,6 jours** (1 450 colis/jour pour une boutique) : il mesurait sa propre compression | révélé par le plafond de colis, qui a refusé le semis |
+| La sonde des variables CSS **criait au loup** : elle signalait `var(--x, repli)` comme « peignant dans le vide », alors qu'un repli est une valeur | révélé par la suppression d'un composant mort |
+
+---
+
+## 6ter. LES TROIS DÉFAUTS QUE CET AUDIT S'EST INFLIGÉS
+
+Les portes les ont attrapés tous les trois. Ils sont ici parce qu'un rapport qui
+ne montre que les défauts des autres donne une fausse idée de la fiabilité du
+procédé.
+
+1. **La migration 121 a rendu périmée la réparation d'`arbitrer_qc`** du
+   falsificateur : réparer aurait REMIS l'attribution fausse pendant que le
+   script annonce avoir réparé. Attrapé par `falsificateur-a-jour`.
+2. **Le premier plancher de contrôles de fumée était faux** — posé à 170 sur un
+   nombre supposé (183 lignes imprimées) alors que le tableau n'en porte que
+   143. Il a accusé le produit d'avoir sauté quarante contrôles qui avaient
+   tourné.
+3. **La suppression de `TEINTE_QC` a emporté trois déclarations voisines**, parce
+   que je découpais sur `\n};\n`. Attrapé par `pnpm typecheck` en dix secondes.
+
+*Et une chose que je n'ai pas su expliquer : une interception de `console.log`
+pour compter les lignes réellement imprimées rendait 0 alors que 183 sortaient.
+Écrite, puis retirée. Un mécanisme qu'on ne comprend pas n'a rien à faire dans
+une porte — surtout pas dans celle qui compte.*
 
 ---
 
@@ -262,10 +299,10 @@ pas n'a rien à faire dans une porte — surtout pas dans celle qui compte.*
 | `pnpm typecheck` | vert |
 | `pnpm lint` | vert |
 | `pnpm build` | vert — `/p/[token]` à **118 kB** de premier chargement JS |
-| `pnpm test` | **423/423**, 0 sauté, 0 todo |
-| `pnpm test:rls` | **622/622**, 0 sauté, 0 todo |
-| `pnpm fumee` | **183 lignes de contrôle, 0 échec**, 143 contrôles empilés pour un plancher de 140 |
-| `pnpm test:perf` *(hors portes)* | **49/49**, 11 min 51 |
+| `pnpm test` | **432/432**, 0 sauté, 0 todo |
+| `pnpm test:rls` | **626/626**, 0 sauté, 0 todo |
+| `pnpm fumee` | **0 échec**, 145 contrôles empilés pour un plancher de 140 |
+| `pnpm test:perf` *(hors portes)* | **51/51**, 10 min 14 — les deux mesures ajoutées comprises |
 | `pnpm check:r2` *(hors portes)* | **13/13**, bucket réel |
 
 ### Le poids réel de la page publique, mesuré
@@ -282,12 +319,13 @@ Budget du brief    : 300 Ko hors médias
 
 - Le chiffre du brief — « total mesuré atteignable : ~116 Ko » — est **périmé**.
   Le vrai est 177 Ko compressés.
-- **Le contrôle de fumée qui porte ce budget ne mesure que le HTML.** Étiqueté
-  « poids du HTML public (budget 300) », il compare 44 Ko à 300 : il ne peut pas
-  devenir rouge pour la chose que le budget protège. Une bibliothèque de
-  carrousel de 90 Ko — le cas exact que le brief redoute — passerait sans un mot.
-  **Signalé, non corrigé** : mesurer les sous-ressources depuis la fumée demande
-  de rejouer la résolution des chunks, ce qui mérite sa propre passe.
+- **Le contrôle de fumée pèse désormais la page entière.** Il ne mesurait que le
+  HTML — 26 Ko contre un seuil de 300 : il ne pouvait pas devenir rouge pour la
+  chose que le budget protège, et une bibliothèque de carrousel de 90 Ko, le cas
+  exact que le brief redoute, serait passée sans un mot. Il additionne
+  maintenant le HTML et chaque sous-ressource `_next/static` référencée, et
+  **refuse de mesurer** s'il n'en trouve aucune. Relevé à chaque passage :
+  **176,2 Ko compressés, budget 300**.
 
 ---
 
@@ -366,43 +404,36 @@ donne une fausse idée de la fiabilité du procédé.
 | Les 113 tests eux-mêmes | ✅ | ✅ | — | — | **CORRIGÉ** |
 | Les 6 scripts de porte | ✅ | ✅ | ✅ | — | **CORRIGÉ** |
 | Performance — dashboard, envois, échelle | — | ✅ | ✅ | — | PASS (49/49) |
-| Performance — écran Analyses | — | ❌ | ❌ | — | **NON MESURÉ** |
-| Coût du déclencheur de plafond | — | ❌ | ❌ | — | **NON MESURÉ** |
+| Performance — écran Analyses | — | ✅ | ✅ | — | **PASS** — 3,4 / 28,1 / 5,2 ms au plafond |
+| Coût du déclencheur de plafond | — | ✅ | ✅ | — | **PASS** — 0,9 ms, index employé |
+| Frontières d'erreur (4 surfaces) | ✅ | ✅ | ✅ | — | **CORRIGÉ** |
+| Piège de focus du visionneur | ✅ | ❌ | ❌ | — | **CORRIGÉ**, non couvert par un test *(pas de DOM dans le projet `unit`)* |
 
-**Aucune case n'est vide.** Les trois `NON MESURÉ` sont expliqués au § 11.
+**Aucune case n'est vide, et il ne reste aucun `NON MESURÉ`.** Les deux qui y
+figuraient à la première passe ont été mesurés au banc, et tous deux répondent
+NON au soupçon qui les avait fait inscrire.
 
 ---
 
 ## 11. CE QUI N'A PAS PU ÊTRE VÉRIFIÉ, ET POURQUOI
 
-1. **Le coût réel du déclencheur de plafond de commandes.** Il compte les
-   commandes du mois sans prédicat sur `archived_at` ; aucun des quatre index
-   partiels ne peut le servir, et l'index non partiel que trois migrations
-   invoquent **n'existe pas**. Le fait structurel est établi ; **le coût ne
-   l'est pas** : la base ne porte que 7 commandes, et à cette volumétrie le
-   planificateur choisit un parcours séquentiel — la mesure ne dirait rien.
-   *Une mesure impossible se dit impossible.* Il faut l'ajouter au banc, qui
-   sème déjà au plafond.
-
-2. **Les quatre agrégats de l'écran Analyses.** Le banc n'en mesure qu'un sur
-   quatre. `analyser_activite` filtre sur **deux fois** la fenêtre demandée et
-   agrège neuf compteurs sans qu'aucun index-only soit possible. Personne ne sait
-   ce que cet écran coûte au plafond.
-
-3. **LCP et décalage cumulé.** Exigent un navigateur throttlé. Le poids, lui, est
+1. **LCP et décalage cumulé.** Exigent un navigateur throttlé. Le poids, lui, est
    mesuré (§ 7).
 
-4. **Le prévol CORS du bucket R2.** Il vit chez Cloudflare, hors du dépôt. C'est
+2. **Le prévol CORS du bucket R2.** Il vit chez Cloudflare, hors du dépôt. C'est
    le point que le brief désigne comme « celui qui casse en silence ».
 
-5. **Le comportement réel de 17TRACK.** Nom d'en-tête de signature, forme d'un
+3. **Le comportement réel de 17TRACK.** Nom d'en-tête de signature, forme d'un
    `NotFound`, code de quota épuisé. Le protocole des dix numéros réels reste le
    seul juge.
 
-6. **Le rendu visuel.** Aucun navigateur n'a été piloté : pas de contraste
-   photographié, pas de focus observé, pas de conformité au canevas évaluée.
+4. **Le rendu visuel.** Aucun navigateur n'a été piloté : pas de contraste
+   photographié, **pas de piège de focus observé** — il est implémenté et non
+   testé, le projet `unit` n'ayant délibérément pas de DOM. La conformité au
+   canevas n'a été évaluée que sur le point du dégradé, où les planches du
+   disque ont tranché.
 
-7. **Le binaire SWC natif ne se charge pas sur cette machine** (« DLL
+5. **Le binaire SWC natif ne se charge pas sur cette machine** (« DLL
    initialization routine failed ») : Next retombe sur son moteur de secours. Le
    build est produit, mais **il n'est pas produit par la même chaîne qu'en CI**.
    À garder en tête avant de tirer une conclusion d'un poids mesuré ici.
@@ -415,19 +446,23 @@ donne une fausse idée de la fiabilité du procédé.
 PRÊT POUR LA PRODUCTION : NON — et le blocage n'est pas dans le code.
 
 BLOQUANTS CRITIQUES     : 0
-RISQUES ÉLEVÉS          : 0 restant (2 fermés)
-RISQUES MOYENS          : 5 signalés (§ 6)
-RISQUES FAIBLES         : 3 signalés
+RISQUES ÉLEVÉS          : 0 restant (3 fermés)
+RISQUES MOYENS          : 0 restant — les 5 de la première passe sont fermés
+RISQUES FAIBLES         : 0 restant
 
-DÉFAUTS CONFIRMÉS       : 25  — 17 corrigés, 8 signalés
-  (dont 2 introduits par cet audit lui-même, attrapés par les portes)
-ZONES NON VÉRIFIÉES     : 7   — toutes nommées, aucune masquée
+DÉFAUTS CONFIRMÉS       : 34  — 32 corrigés, 2 restants
+  (dont 3 introduits par cet audit lui-même, attrapés par les portes)
+ARBITRAGE À WASSIM      : 1   — la corrélation par URL signée (§ 6.1)
+BLOQUÉS AILLEURS        : 2   — cadence et veilleur, sur le déploiement
+ZONES NON VÉRIFIÉES     : 5   — toutes nommées ; 2 des 7 ont été MESURÉES
 
-TESTS AUTOMATISÉS       : 423 unitaires + 622 RLS + 13 R2 + 49 mesures — 0 sauté
+TESTS AUTOMATISÉS       : 432 unitaires + 626 RLS + 13 R2 + 51 mesures — 0 sauté
 RLS                     : 17/17 tables, 0 escalade possible
 R2                      : de bout en bout, bucket réel
-PERFORMANCE             : 49/49 ; deux chemins non mesurés et nommés
-RUNTIME                 : build servi, 183 contrôles de fumée
+PERFORMANCE             : 51/51 ; les deux chemins non mesurés le sont enfin,
+                          et tous deux répondent NON au soupçon
+RUNTIME                 : build servi, 145 contrôles empilés, page pesée
+                          en entier — 176,2 Ko compressés sur 300
 SÉCURITÉ                : 5 fonctions atteignables par anon, toutes gardées par jeton
 ```
 
