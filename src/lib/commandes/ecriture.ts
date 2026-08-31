@@ -54,7 +54,12 @@ export type ResultatEnregistrement =
 async function relire(
   supabase: ClientEcriture,
   id: string,
-  champ: string,
+  // `NomChamp` ET NON `string` : ce nom de colonne part dans un `select`, donc
+  // c'est le TYPAGE qui doit borner ce qu'il peut valoir, pas la discipline de
+  // l'appelant. Il vaut aujourd'hui l'une des sept clés de `CHAMPS`, validée par
+  // une énumération Zod juste au-dessus — mais un futur appel depuis un autre
+  // chemin ne repasserait pas forcément par elle.
+  champ: NomChamp,
 ): Promise<{ valeurConfirmee?: string }> {
   try {
     const { data } = await supabase.from("orders").select(champ).eq("id", id).maybeSingle();
