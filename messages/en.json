@@ -7,7 +7,6 @@
   "navigation": {
     "seConnecter": "Log in",
     "allerAuContenu": "Skip to content",
-    "creerUnCompte": "Sign up",
     "retourAccueil": "Back to home",
     "mesCommandes": "Orders",
     "maMarque": "My brand",
@@ -74,12 +73,6 @@
       "confidentialite": "Privacy",
       "signalement": "Report"
     }
-  },
-  "pied": {
-    "conditions": "Terms of use",
-    "confidentialite": "Privacy",
-    "signaler": "Report content",
-    "droits": "All rights reserved."
   },
   "legal": {
     "conditionsTitre": "Terms of use",
@@ -468,7 +461,6 @@
     "copierLien": "Copy the link for {client}",
     "ouvrirPage": "Open the page for {client}",
     "copieEchouee": "Copy refused by the browser",
-    "pageSuivante": "Next page",
     "pageSuivanteDisponible": "More orders follow.",
     "finDeListe": "End of list.",
     "statut": {
@@ -703,16 +695,6 @@
     "aideOrdreTelephone": "Press and hold the handle to move a photo."
   },
   "actions": {
-    "titre": "Link and order",
-    "lien": "Link to send to your customer",
-    "copie": "Link copied",
-    "copieEchouee": "Copy refused by the browser. Select the link manually.",
-    "dupliquer": "Duplicate as a template",
-    "archiver": "Archive",
-    "desarchiver": "Remove from archives",
-    "archivage": {
-      "echec": "Could not archive. Nothing changed."
-    },
     "revocation": {
       "titre": "Revoke the link",
       "explication": "The old link will stop working for good, including for anyone who already has it. A new link will be created.",
@@ -785,7 +767,12 @@
       "note": "Links open in a new tab."
     },
     "lienInvalideTitre": "This link is no longer valid",
-    "lienInvalideTexte": "Ask the person who sent it to you for a new link."
+    "lienInvalideTexte": "Ask the person who sent it to you for a new link.",
+    "erreur": {
+      "titre": "This page could not be displayed",
+      "texte": "Something went wrong on our side. Try again in a moment — your link is still valid.",
+      "reessayer": "Try again"
+    }
   },
   "admin": {
     "navigation": "Administration",

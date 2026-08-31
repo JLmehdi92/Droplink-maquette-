@@ -98,15 +98,3 @@ async function exigerAdminSansMemo(): Promise<Administrateur> {
   return { profilId: profil.profilId, email: profil.email };
 }
 
-/**
- * Vrai si l'appelant est administrateur, sans interrompre.
- *
- * Réservé aux endroits qui doivent DÉCIDER plutôt que refuser — afficher ou non
- * une entrée de navigation, par exemple. Ne jamais l'employer pour protéger une
- * lecture : `exigerAdmin()` est la garde, celle-ci n'est qu'un renseignement.
- */
-export async function estAdmin(): Promise<boolean> {
-  const supabase = await creerClientServeur();
-  const { data, error } = await supabase.rpc("est_admin");
-  return error === null && data === true;
-}

@@ -30,12 +30,6 @@ const TEINTE_STATUT: Record<LigneCommande["statut"], Teinte> = {
   livre: "succes",
 };
 
-const TEINTE_QC: Record<LigneCommande["qc"], Teinte> = {
-  en_attente: "neutre",
-  approuve: "succes",
-  refuse: "alerte",
-};
-
 function classes(teinte: Teinte): { fond: string; point: string } {
   switch (teinte) {
     case "info":
@@ -96,8 +90,4 @@ export function BadgeStatut({
 
 export function teinteExpedition(statut: LigneCommande["statut"]): Teinte {
   return TEINTE_STATUT[statut];
-}
-
-export function teinteQc(statut: LigneCommande["qc"]): Teinte {
-  return TEINTE_QC[statut];
 }

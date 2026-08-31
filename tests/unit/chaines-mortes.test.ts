@@ -37,6 +37,35 @@ import { join } from "node:path";
  * l'on range ce qu'on ne veut pas expliquer, et le contrôle ne prouve plus rien.
  */
 const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
+  /*
+   * ⚠️ CES DIX-HUIT FAMILLES ONT ÉTÉ RÉVÉLÉES LE 31/08/2026, quand la recherche a
+   * cessé de porter sur TOUT le code pour ne porter que sur les fichiers qui
+   * déclarent l'espace. Elles passaient jusque-là par COLLISION : leur dernier
+   * segment — `expedie`, `livre`, `Ko`, `nom`, `refuse` — apparaît ailleurs dans
+   * le code pour de tout autres raisons.
+   *
+   * Elles étaient donc « vivantes » sans que personne ne l'ait établi, et la
+   * même collision protégeait des clés RÉELLEMENT mortes. Les déclarer, c'est
+   * échanger une couverture illusoire contre une couverture connue.
+   */
+  ["onboarding.logoErreur.", "composé depuis le motif de refus d'un logo — onboarding"],
+  ["marque.logoErreur.", "composé depuis le motif de refus d'un logo — réglages de marque"],
+  ["envois.etat.", "composé depuis l'état du colis rendu par `compter_envois`"],
+  ["envois.tri.", "composé depuis le tri choisi — tableau des envois"],
+  ["analyses.sousTitre.", "composé depuis la période choisie — écran Analyses"],
+  ["analyses.periode.", "composé depuis la période choisie — sélecteur des Analyses"],
+  ["commandes.statut.", "composé depuis `orders.status` — badge de la liste"],
+  ["commandes.tri.", "composé depuis le tri choisi — liste des commandes"],
+  ["commandes.lot.", "composé depuis le motif d'échec d'une action groupée"],
+  ["editeur.historique.types.", "composé depuis `order_events.type` — historique de la commande"],
+  ["editeur.statut.", "composé depuis `orders.status` — sélecteur de l'éditeur"],
+  ["editeur.qc.", "composé depuis `orders.qc_status` — sélecteur de l'éditeur"],
+  ["admin.boutiques.colonnes.", "composé depuis la colonne de tri — liste des boutiques"],
+  ["admin.boutiques.filtre.", "composé depuis `profiles.account_type` — filtre des boutiques"],
+  ["admin.unites.", "composé depuis l'unité rendue par `mettreOctetsALEchelle`"],
+  ["admin.surveillance.etat.", "composé depuis l'état du veilleur"],
+  ["admin.surveillance.tache.", "composé depuis `scheduler_heartbeat.source`"],
+  ["admin.surveillance.degradation.", "composé depuis la décision de `surPanne`"],
   [
     "admin.panneau.alerte.",
     "composé depuis le genre d'alerte rendu par `alertes_admin` — page admin",
@@ -98,6 +127,32 @@ function cles(objet: unknown, prefixe = ""): string[] {
   );
 }
 
+/** Un fichier source, dépollué, et les espaces de traduction qu'il DÉCLARE. */
+type FichierSource = { readonly code: string; readonly espaces: ReadonlySet<string> };
+
+const FICHIERS: FichierSource[] = [];
+
+/**
+ * Les espaces qu'un fichier demande explicitement.
+ *
+ * Quatre formes, toutes présentes dans le produit : `useTranslations("x")`,
+ * `getTranslations("x")`, `getTranslations({ namespace: "x" })`, et
+ * `espaces={["x", "y"]}` — celle de `TraductionsClient`.
+ */
+function espacesDeclares(code: string): Set<string> {
+  const trouves = new Set<string>();
+  for (const m of code.matchAll(/(?:use|get)Translations\s*\(\s*["'`]([^"'`]+)["'`]/g)) {
+    trouves.add(m[1] as string);
+  }
+  for (const m of code.matchAll(/namespace\s*:\s*["'`]([^"'`]+)["'`]/g)) {
+    trouves.add(m[1] as string);
+  }
+  for (const m of code.matchAll(/espaces=\{\[([^\]]*)\]/g)) {
+    for (const e of (m[1] as string).matchAll(/["'`]([^"'`]+)["'`]/g)) trouves.add(e[1] as string);
+  }
+  return trouves;
+}
+
 /** Tout le code source, concaténé, commentaires RETIRÉS. */
 function sourceComplete(): string {
   const morceaux: string[] = [];
@@ -108,7 +163,12 @@ function sourceComplete(): string {
       if (statSync(chemin).isDirectory()) {
         parcourir(chemin);
       } else if (/\.(ts|tsx)$/.test(entree)) {
-        morceaux.push(readFileSync(chemin, "utf8"));
+        const brut = readFileSync(chemin, "utf8");
+        const code = brut
+          .replace(/\/\*[\s\S]*?\*\//g, " ")
+          .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+        FICHIERS.push({ code, espaces: espacesDeclares(code) });
+        morceaux.push(brut);
       }
     }
   };
@@ -146,7 +206,41 @@ function atteignable(chemin: string): boolean {
   const dernier = segments[segments.length - 1] ?? "";
   // Encadré par un guillemet ou un point : sans cela, `titre` serait trouvé
   // dans `metaTitre` et une clé morte passerait pour vivante.
-  return new RegExp(`["'\`.]${dernier}["'\`]`).test(SOURCE);
+  const motif = new RegExp(`["'\`.]${dernier}["'\`]`);
+
+  /*
+   * ⚠️ ON NE CHERCHE PLUS DANS TOUT LE CODE, MAIS DANS LES FICHIERS QUI
+   * DEMANDENT L'ESPACE.
+   *
+   * DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. Chercher le dernier segment
+   * dans la source ENTIÈRE déclare une clé vivante dès que ce mot apparaît
+   * n'importe où, pour n'importe quelle raison. Trois cas mesurés :
+   *
+   *   pied.droits          ← `id: "droits"` dans confidentialite/page.tsx
+   *   pied.conditions      ← le tableau de routes de la landing
+   *   pied.confidentialite ← le même tableau
+   *
+   * Les trois auraient survécu à la suppression de leur composant sans qu'aucun
+   * appelant n'existe — et c'est exactement ce qui s'est passé : `PiedDePage`
+   * était mort depuis un moment, et seule `pied.signaler` a été signalée.
+   * Toutes les clés dont le dernier segment est `titre`, `nom`, `annuler` ou
+   * `valider` étaient structurellement inattaquables.
+   *
+   * LE REPLI EST DÉLIBÉRÉ : quand AUCUN fichier ne déclare l'espace, on
+   * retombe sur la recherche globale. Une clé peut être lue par `t.raw()` puis
+   * passée en propriété, ou résolue dans un module sans `useTranslations` — la
+   * restriction produirait alors un faux mort, ce qui est le défaut symétrique
+   * et coûte plus cher : on retire une chaîne qui s'affiche.
+   */
+  const candidats = FICHIERS.filter((f) => {
+    for (let i = 1; i <= segments.length - 1; i += 1) {
+      if (f.espaces.has(segments.slice(0, i).join("."))) return true;
+    }
+    return false;
+  });
+
+  if (candidats.length === 0) return motif.test(SOURCE);
+  return candidats.some((f) => motif.test(f.code));
 }
 
 describe("Les chaînes de traduction", () => {

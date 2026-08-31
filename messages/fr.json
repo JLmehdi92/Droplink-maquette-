@@ -7,7 +7,6 @@
   "navigation": {
     "seConnecter": "Se connecter",
     "allerAuContenu": "Aller au contenu",
-    "creerUnCompte": "Créer un compte",
     "retourAccueil": "Retour à l'accueil",
     "mesCommandes": "Commandes",
     "maMarque": "Ma marque",
@@ -74,12 +73,6 @@
       "confidentialite": "Confidentialité",
       "signalement": "Signaler"
     }
-  },
-  "pied": {
-    "conditions": "Conditions d'utilisation",
-    "confidentialite": "Confidentialité",
-    "signaler": "Signaler un contenu",
-    "droits": "Tous droits réservés."
   },
   "legal": {
     "conditionsTitre": "Conditions d'utilisation",
@@ -468,7 +461,6 @@
     "copierLien": "Copier le lien de {client}",
     "ouvrirPage": "Ouvrir la page de {client}",
     "copieEchouee": "Copie refusée par le navigateur",
-    "pageSuivante": "Page suivante",
     "pageSuivanteDisponible": "D’autres commandes suivent.",
     "finDeListe": "Fin de la liste.",
     "statut": {
@@ -703,16 +695,6 @@
     "aideOrdreTelephone": "Appuyez longuement sur la poignée pour déplacer une photo."
   },
   "actions": {
-    "titre": "Le lien et la commande",
-    "lien": "Lien à envoyer à votre client",
-    "copie": "Lien copié",
-    "copieEchouee": "Copie refusée par le navigateur. Sélectionnez le lien à la main.",
-    "dupliquer": "Dupliquer comme modèle",
-    "archiver": "Archiver",
-    "desarchiver": "Sortir des archives",
-    "archivage": {
-      "echec": "Archivage impossible. Rien n’a changé."
-    },
     "revocation": {
       "titre": "Révoquer le lien",
       "explication": "L’ancien lien cessera définitivement de fonctionner, y compris pour qui l’a déjà reçu. Un nouveau lien sera créé.",
@@ -785,7 +767,12 @@
       "note": "Les liens s’ouvrent dans un nouvel onglet."
     },
     "lienInvalideTitre": "Ce lien n'est plus valable",
-    "lienInvalideTexte": "Demandez un nouveau lien à la personne qui vous a envoyé celui-ci."
+    "lienInvalideTexte": "Demandez un nouveau lien à la personne qui vous a envoyé celui-ci.",
+    "erreur": {
+      "titre": "Cette page n'a pas pu s'afficher",
+      "texte": "Une erreur est survenue de notre côté. Réessayez dans un instant : votre lien, lui, reste valable.",
+      "reessayer": "Réessayer"
+    }
   },
   "admin": {
     "navigation": "Administration",
