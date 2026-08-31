@@ -46,7 +46,28 @@ export const ArbitrageDemande = z.object({
 
 export type Arbitrage =
   | { readonly statut: "ok"; readonly qc: Decision }
-  | { readonly statut: "refuse" };
+  /**
+   * Le jeton n'ouvre rien : inconnu, révoqué, ou compte suspendu. Les trois
+   * sont indiscernables, et doivent le rester.
+   */
+  | { readonly statut: "refuse" }
+  /**
+   * LE JETON EST BON, C'EST LA DEMANDE QUI NE L'EST PAS.
+   *
+   * ⚠️ CES DEUX CAS ÉTAIENT CONFONDUS, et la confusion se payait du mauvais
+   * côté. Un client légitime dont le corps est malformé — un îlot qui bogue,
+   * une extension, un proxy qui réécrit — armait le compteur des jetons
+   * INCONNUS. À vingt essais, `verifierQuotaPublique()` refuse, et **sa propre
+   * page devient un 404 pour lui** pendant toute la fenêtre.
+   *
+   * Le motif du refus ne remontait pas jusqu'au point qui décide d'armer le
+   * compteur : c'est l'appelant qui doit pouvoir distinguer « ce jeton
+   * n'existe pas » de « ce corps est illisible ».
+   *
+   * IL NE FUITE RIEN : la route rend le MÊME 404, avec le même corps. Seule
+   * change la décision d'incrémenter un compteur que le visiteur ne voit pas.
+   */
+  | { readonly statut: "demande-invalide" };
 
 /**
  * Arbitre le QC d'une commande désignée par son jeton.
@@ -61,8 +82,12 @@ export async function arbitrerQc(
   demande: unknown,
 ): Promise<Arbitrage> {
   const jeton = JetonPublic.safeParse(jetonBrut);
+  if (!jeton.success) return { statut: "refuse" };
+
+  // La forme du jeton est bonne : un corps illisible n'est donc plus un indice
+  // sur l'existence du jeton, et ne doit pas coûter un essai au visiteur.
   const corps = ArbitrageDemande.safeParse(demande);
-  if (!jeton.success || !corps.success) return { statut: "refuse" };
+  if (!corps.success) return { statut: "demande-invalide" };
 
   const supabase = creerClientAnonyme();
   const { data, error } = await supabase.rpc("arbitrer_qc", {

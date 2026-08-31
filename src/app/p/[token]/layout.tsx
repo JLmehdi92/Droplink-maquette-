@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { TraductionsClient } from "@/components/traductions-client";
 import { lireCommandePublique } from "@/lib/page-publique/lecture";
+import { verifierQuotaPublique } from "@/lib/limitation/quota";
 import "../../globals.css";
 
 /**
@@ -58,6 +61,30 @@ export default async function LayoutPagePublique({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
+
+  /*
+   * ⚠️ LE PLAFOND DOIT PASSER ICI AUSSI, ET IL N'Y ÉTAIT PAS.
+   *
+   * DÉFAUT RÉEL, TROUVÉ À L'AUDIT DU 31/08/2026. La page pose bien le plafond
+   * avant sa lecture, et son commentaire dit pourquoi : « c'est la lecture
+   * qu'elle protège ». Mais CE layout s'exécute pour chaque requête `/p/…`, y
+   * compris celles que la page refusera ensuite, et il appelait
+   * `lireCommandePublique` sans condition.
+   *
+   * `cache()` déduplique les deux appels, mais dans le sens qui dessert : la
+   * lecture avait lieu de toute façon. Un balayeur ayant brûlé ses vingt essais
+   * continuait donc de faire payer un aller-retour `orders ⨝ shops ⨝ profiles`
+   * à chaque requête — c'est-à-dire exactement la dépense que le seuil « jeton
+   * inconnu » existe pour éviter. Le plafond s'appliquait après la dépense
+   * qu'il prétend éviter.
+   *
+   * LE REFUS EMPRUNTE LE MÊME CHEMIN QUE TOUT LE RESTE : `notFound()`, donc la
+   * page « lien invalide », donc rien qui distingue un refus de quota d'un
+   * jeton qui n'existe pas.
+   */
+  const quota = await verifierQuotaPublique();
+  if (!quota.autorise) notFound();
+
   const commande = await lireCommandePublique(token);
 
   return (
@@ -85,7 +112,26 @@ export default async function LayoutPagePublique({
         style={{ backgroundColor: "var(--color-surface-container-lowest)" }}
         className="min-h-dvh text-on-surface antialiased"
       >
-        {children}
+        {/*
+          LE SEUL PROVIDER CLIENT DE CETTE PAGE, ET IL NE PORTE QUE TROIS
+          LIBELLÉS.
+
+          ⚠️ POURQUOI IL A FALLU EN POSER UN ICI, alors que cette racine s'en
+          était toujours passée. Il n'existait AUCUNE frontière d'erreur sur
+          `/p/[token]` : une erreur de rendu y servait la page générique de
+          Next, en anglais, non brandée — au CLIENT d'un vendeur, c'est-à-dire à
+          quelqu'un qui ne peut ni la comprendre ni la signaler. `not-found.tsx`
+          traite le lien mort avec soin ; l'asymétrie était un oubli.
+
+          Et une frontière d'erreur DOIT être un Client Component : elle ne peut
+          donc pas appeler `getTranslations()`, et ne reçoit aucune propriété.
+          Le provider est la seule voie qui ne mette pas de chaîne en dur.
+
+          IL EST RESTREINT À `page-publique.erreur` — trois clés — et le surcoût
+          a été MESURÉ sur le build avant d'être accepté, parce que le budget de
+          cette page est la raison même pour laquelle cette racine est distincte.
+        */}
+        <TraductionsClient espaces={["page-publique.erreur"]}>{children}</TraductionsClient>
       </body>
     </html>
   );

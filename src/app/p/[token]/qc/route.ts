@@ -47,7 +47,16 @@ export async function POST(
      * contre la même chose : il borne le volume d'écritures, pas la découverte
      * de jetons.
      */
-    await signalerJetonInconnu();
+    /*
+     * ⚠️ LE COMPTEUR N'EST ARMÉ QUE POUR UN JETON, JAMAIS POUR UN CORPS.
+     *
+     * Les deux cas rendaient `refuse`, donc les deux armaient le compteur des
+     * jetons inconnus. Un client légitime dont le corps est malformé brûlait
+     * ainsi son budget, et sa propre page devenait un 404 pour lui au bout de
+     * vingt essais. La réponse, elle, reste rigoureusement identique : même
+     * statut, même corps. Ce qui change n'est pas visible du visiteur.
+     */
+    if (resultat.statut !== "demande-invalide") await signalerJetonInconnu();
     return NextResponse.json({ erreur: "introuvable" }, { status: 404 });
   }
 

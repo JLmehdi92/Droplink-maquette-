@@ -23,7 +23,7 @@ import { signalerJetonInconnu, verifierQuotaPublique } from "@/lib/limitation/qu
  * publiques sans compteur : le commentaire ci-dessus affirmait qu'elle portait
  * SA garde et n'en nommait qu'une. Sans plafond, un détenteur d'un seul lien
  * — légitime, ou fuité, le jeton étant immuable à vie — pouvait boucler dessus
- * et faire émettre des milliers d'URL signées valables une heure, dont chacune
+ * et faire émettre des milliers d'URL signées valables quinze minutes, dont chacune
  * SURVIT à une suspension du compte : la fonction en base cesse d'en émettre,
  * mais R2 ne révoque pas celles déjà signées.
  */
