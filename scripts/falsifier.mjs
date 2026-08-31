@@ -377,7 +377,7 @@ const SQL = {
       // apres l ecriture de la 121 : reparer depuis la 069 aurait remis
       // l attribution du QC dans son etat FAUX — une revision du client
       // reattribuee au vendeur — pendant que le script annonce avoir repare.
-      fichier: "121_une_revision_du_client_reste_du_client.sql",
+      fichier: "127_l_arbitrage_du_client_ne_touche_ni_la_date_ni_le_journal_sans_raison.sql",
       depuis: "create or replace function public.arbitrer_qc",
     },
   },

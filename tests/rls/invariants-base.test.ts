@@ -512,4 +512,99 @@ describe("Qui a arbitré le contrôle qualité", () => {
       "une révision du CLIENT est attribuée au vendeur : la page publique dirait « vous avez validé » à qui n'a rien validé",
     ).toBe("client");
   });
+
+  /**
+   * L'ARBITRAGE D'UN CLIENT NE « MODIFIE » PAS LA COMMANDE AU SENS DU VENDEUR.
+   *
+   * `updated_at` répond à « quand le VENDEUR a-t-il touché cette commande »
+   * (migration 090). La 120 a fermé le chemin de la consultation et a LAISSÉ
+   * celui de l'arbitrage comme arbitrage produit ; la 127 le tranche par la
+   * définition : un client qui approuve ses photos n'est pas le vendeur, et le
+   * tri « modifiées » est son outil de travail, pas un fil d'actualité.
+   *
+   * Le vendeur ne perd rien : `qc_status` porte la décision, l'historique porte
+   * sa date et son auteur, et l'écran Commandes a un filtre QC dédié.
+   */
+  test("l'arbitrage du client ne déplace pas updated_at, mais applique bien la décision", async () => {
+    const commande = await creerCommande(alice);
+    const j = (
+      await interroger<{ j: string }>(
+        catalogue,
+        "select public_token as j from public.orders where id = $1",
+        [commande],
+      )
+    )[0]?.j;
+
+    const avant = await interroger<{ maj: string }>(
+      catalogue,
+      "select updated_at::text as maj from public.orders where id = $1",
+      [commande],
+    );
+
+    await interroger(catalogue, "select public.arbitrer_qc($1, 'approuve', null)", [j ?? ""]);
+
+    const apres = await interroger<{ maj: string; statut: string }>(
+      catalogue,
+      "select updated_at::text as maj, qc_status::text as statut from public.orders where id = $1",
+      [commande],
+    );
+
+    // CONTRE-TEST : la décision est bien passée. Sans lui, un `arbitrer_qc` qui
+    // ne ferait plus rien du tout passerait l'assertion suivante.
+    expect(apres[0]?.statut, "la décision n'a pas été appliquée").toBe("approuve");
+    expect(
+      apres[0]?.maj,
+      "l'arbitrage d'un client a déplacé updated_at : le tri « modifiées » du vendeur remonte ce qu'il n'a pas fait",
+    ).toBe(avant[0]?.maj);
+  });
+
+  /**
+   * LE JOURNAL N'ENREGISTRE QUE CE QUI DIT QUELQUE CHOSE.
+   *
+   * ⚠️ DÉFAUT RÉEL : `arbitrer_qc` journalisait à CHAQUE appel, y compris pour
+   * une décision identique à la précédente. Le jeton étant immuable à vie — un
+   * lien fuité compris — quiconque le détient pouvait inscrire 14 400 lignes par
+   * jour dans `order_events` en restant sous le plafond d'écriture publique.
+   * Le seul frein était un DÉBIT, jamais un CUMUL, et l'historique est la pièce
+   * qu'un vendeur produirait en cas de litige.
+   */
+  test("réaffirmer la MÊME décision n'écrit rien ; en changer écrit une ligne", async () => {
+    const commande = await creerCommande(alice);
+    const j = (
+      await interroger<{ j: string }>(
+        catalogue,
+        "select public_token as j from public.orders where id = $1",
+        [commande],
+      )
+    )[0]?.j ?? "";
+
+    const compter = async (): Promise<number> => {
+      const l = await interroger<{ n: string }>(
+        catalogue,
+        `select count(*)::text as n from public.order_events
+          where order_id = $1 and type in ('qc_approuve', 'qc_refuse')`,
+        [commande],
+      );
+      return Number.parseInt(l[0]?.n ?? "-1", 10);
+    };
+
+    expect(await compter(), "la commande neuve porte déjà des arbitrages").toBe(0);
+
+    // CONTRE-TEST POSITIF D'ABORD : une décision QUI CHANGE écrit bien.
+    await interroger(catalogue, "select public.arbitrer_qc($1, 'approuve', null)", [j]);
+    expect(await compter(), "la première décision n'a rien écrit : la sonde vise à côté").toBe(1);
+
+    // Puis trois fois la MÊME : le journal ne doit pas bouger.
+    for (let i = 0; i < 3; i += 1) {
+      await interroger(catalogue, "select public.arbitrer_qc($1, 'approuve', null)", [j]);
+    }
+    expect(
+      await compter(),
+      "réaffirmer la même décision écrit au journal : quiconque détient le lien peut le noyer",
+    ).toBe(1);
+
+    // Et un vrai changement écrit de nouveau.
+    await interroger(catalogue, "select public.arbitrer_qc($1, 'refuse', null)", [j]);
+    expect(await compter(), "un changement de décision n'a pas été enregistré").toBe(2);
+  });
 });
