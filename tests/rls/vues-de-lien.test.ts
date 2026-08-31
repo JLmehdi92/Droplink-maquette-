@@ -342,6 +342,56 @@ describe("Qui peut écrire, qui peut lire", () => {
     expect((autre.data ?? []).length, "un vendeur lit les vues d'un autre").toBe(0);
   });
 
+  /**
+   * UNE CONSULTATION N'EST PAS UNE MODIFICATION.
+   *
+   * ⚠️ DÉFAUT RÉEL, PROUVÉ PAR EXÉCUTION LE 31/08/2026, puis fermé par la
+   * migration 120. `compter_vue()` émet un `update public.orders` pour
+   * incrémenter `views_count` ; le déclencheur `orders_toucher_updated_at` le
+   * voyait comme n'importe quelle écriture et posait `now()`.
+   *
+   * Chaque ouverture de lien par un client — dédupliquée par visiteur et par
+   * jour, donc parfaitement normale — remontait la commande en tête du tri
+   * « modifiées » du vendeur et lui affichait une date de modification qu'il
+   * n'avait pas produite. La migration 090 avait écrit ce symptôme mot pour mot
+   * en fermant le chemin du TRANSPORTEUR ; celui du CLIENT est né hors de son
+   * champ de vision (L-025).
+   *
+   * LE CONTRE-TEST VIENT EN PREMIER, et il est indispensable : sans lui, un
+   * déclencheur qui aurait cessé de compter les vues passerait ce test à 100 %.
+   */
+  test("la consultation d'un client ne déplace PAS updated_at, mais compte bien la vue", async () => {
+    const avant = await interroger<{ maj: string; vues: number }>(
+      catalogue,
+      "select updated_at::text as maj, views_count as vues from public.orders where id = $1",
+      [commande],
+    );
+    const majAvant = avant[0]?.maj;
+    const vuesAvant = avant[0]?.vues ?? -1;
+    expect(majAvant, "la commande de la sonde est introuvable").toBeDefined();
+
+    const pose = await enregistrer(jeton, emp("maj-ip"), emp("maj-agent"));
+    expect(pose, "la vue n'a pas été enregistrée : la sonde ne mesure rien").toBe(true);
+
+    const apres = await interroger<{ maj: string; vues: number }>(
+      catalogue,
+      "select updated_at::text as maj, views_count as vues from public.orders where id = $1",
+      [commande],
+    );
+
+    // CONTRE-TEST : le compteur a bien bougé. C'est ce qui distingue « la vue
+    // ne modifie pas la commande » de « rien ne s'est passé ».
+    expect(
+      apres[0]?.vues,
+      "le compteur de vues n'a pas bougé : le déclencheur ne s'exécute plus",
+    ).toBe(vuesAvant + 1);
+
+    expect(
+      apres[0]?.maj,
+      "la consultation d'un client a déplacé updated_at : le tri « modifiées » du vendeur se réordonne tout seul",
+    ).toBe(majAvant);
+  });
+
   test("un vendeur ne peut pas écrire de vues, même sur ses propres commandes", async () => {
     // Un vendeur qui peut s'ajouter des vues peut se fabriquer une preuve
     // d'usage — sur un produit dont le livrable EST la donnée d'usage.

@@ -372,7 +372,12 @@ const SQL = {
         return v_statut;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "069_qui_a_arbitre_le_qc.sql",
+      // ⚠️ LA REPARATION VISAIT LA 069, QUE LA 121 A REDEFINIE. C est la sonde
+      // `falsificateur-a-jour` qui l a attrape, au premier passage des portes
+      // apres l ecriture de la 121 : reparer depuis la 069 aurait remis
+      // l attribution du QC dans son etat FAUX — une revision du client
+      // reattribuee au vendeur — pendant que le script annonce avoir repare.
+      fichier: "121_une_revision_du_client_reste_du_client.sql",
       depuis: "create or replace function public.arbitrer_qc",
     },
   },
@@ -2969,6 +2974,18 @@ if (sql === undefined && action === "casser" && SQL[cible].casserDepuisMigration
     await client.end();
     process.exit(1);
   }
+  // ⚠️ LA DECLARATION VIENT AVANT SA LECTURE, et elle ne le faisait pas.
+  //
+  // DEFAUT REEL, TROUVE A L AUDIT DU 31/08/2026 : ce `const fin` etait declare
+  // APRES le controle qui le lit, donc dans sa zone morte temporelle. Les SIX
+  // cibles qui declarent `jusqua` — plafond-commandes-en-dur,
+  // plafond-commandes-sans-defaut, immobilite-resignalee,
+  // immobilite-datee-du-dernier-passage, premier-scan-a-chaque-fois,
+  // premier-scan-sur-date-changee — levaient donc `ReferenceError: Cannot
+  // access 'fin' before initialization` AVANT de rien casser. Le falsificateur
+  // annoncait une falsification qu il n avait pas faite : la branche de
+  // reparation, elle, declarait bien `fin` en premier.
+  const fin = jusqua ? contenu.indexOf(jusqua, index) : -1;
   if (jusqua !== undefined && fin === -1) {
     console.error(
       `Borne introuvable : « ${jusqua} » n'est pas dans ${fichier} apres « ${depuis} ». ` +
@@ -2977,7 +2994,6 @@ if (sql === undefined && action === "casser" && SQL[cible].casserDepuisMigration
     await client.end();
     process.exit(1);
   }
-  const fin = jusqua ? contenu.indexOf(jusqua, index) : -1;
   const corps = contenu
     .slice(index, fin === -1 ? undefined : fin)
     .replace("create function", "create or replace function");

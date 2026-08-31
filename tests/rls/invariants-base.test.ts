@@ -457,4 +457,59 @@ describe("Qui a arbitré le contrôle qualité", () => {
     );
     expect(l[0]?.par, "la décision du client est attribuée au vendeur").toBe("client");
   });
+
+  /**
+   * UN CLIENT QUI CHANGE D'AVIS RESTE UN CLIENT.
+   *
+   * ⚠️ DÉFAUT RÉEL, PROUVÉ PAR EXÉCUTION LE 31/08/2026, fermé par la migration
+   * 121. Le déclencheur de la 069 testait `new.qc_decide_par is not distinct
+   * from old.qc_decide_par` là où son propre commentaire disait « l'auteur n'a
+   * pas été DÉCLARÉ dans la même instruction ». Réécrire la même valeur est
+   * indiscernable de ne pas y toucher :
+   *
+   *     1re décision (approuve) → 'client'   ✅ — old vaut NULL, donc distinct
+   *     RÉVISION   (refuse)     → 'vendeur'  ❌ — old et new valent 'client'
+   *
+   * LES DEUX TESTS CI-DESSUS NE POUVAIENT PAS LE VOIR : tous deux s'arrêtaient à
+   * la première décision, c'est-à-dire au seul cas où la comparaison donnait par
+   * hasard le bon résultat. C'est L-025 — le garde regarde là où le défaut n'est
+   * pas — et le défaut était LATENT, puisque aucun écran ne lit encore cette
+   * colonne : il aurait mordu bien après que la donnée fausse se soit accumulée.
+   *
+   * La réversibilité est une décision produit de la migration 024 : « un client
+   * qui regarde mieux ses photos et change d'avis est un cas normal ».
+   */
+  test("une RÉVISION par le client reste attribuée au client", async () => {
+    const commande = await creerCommande(alice);
+    const jeton = await interroger<{ j: string }>(
+      catalogue,
+      "select public_token as j from public.orders where id = $1",
+      [commande],
+    );
+    const j = jeton[0]?.j ?? "";
+
+    await interroger(catalogue, "select public.arbitrer_qc($1, 'approuve', null)", [j]);
+    const premiere = await interroger<{ par: string | null }>(
+      catalogue,
+      "select qc_decide_par as par from public.orders where id = $1",
+      [commande],
+    );
+    expect(premiere[0]?.par, "la première décision n'est déjà pas au client").toBe("client");
+
+    // LA RÉVISION — le cas que les deux tests précédents n'atteignaient pas.
+    await interroger(catalogue, "select public.arbitrer_qc($1, 'refuse', null)", [j]);
+    const revision = await interroger<{ par: string | null; statut: string }>(
+      catalogue,
+      "select qc_decide_par as par, qc_status::text as statut from public.orders where id = $1",
+      [commande],
+    );
+
+    // CONTRE-TEST : la révision a bien eu lieu. Sans lui, un `arbitrer_qc` qui
+    // refuserait toute seconde décision passerait l'assertion suivante.
+    expect(revision[0]?.statut, "la révision n'a pas été appliquée").toBe("refuse");
+    expect(
+      revision[0]?.par,
+      "une révision du CLIENT est attribuée au vendeur : la page publique dirait « vous avez validé » à qui n'a rien validé",
+    ).toBe("client");
+  });
 });
