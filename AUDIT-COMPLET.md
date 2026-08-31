@@ -205,7 +205,7 @@ fermés, deux restent — et ils ne dépendent plus du code.**
 | Le dégradé deux fois sur la landing — « le canevas fait foi » | **RÉFUTÉ PAR MESURE.** Les planches sont sur le disque : `Main.dc.html` et `LandingMobile.dc.html` portent **deux** `class="grad"` et **deux** boutons « Créer ma première commande ». Notre landing est conforme ; c'est le constat qui était faux |
 | Plafond 60 s vidéo déclaratif | **NOMMÉ ET INSTRUMENTÉ.** Il ne peut pas être enforcé sans le transcodeur que le brief refuse, ni rendu obligatoire sans contredire « refuser une vidéo qu'on n'a pas su décoder ferait payer au vendeur une limite qui est la nôtre ». Une vidéo acceptée **sans durée déclarée** est désormais comptée : on saura si le cas est marginal au lieu de le supposer |
 | Pas de frontière d'erreur sur `/p/` ni `[locale]` | **FERMÉ, à coût nul.** Le provider client restreint à trois libellés coûte **250 octets** — mesuré : `/p/[token]` reste à 118 kB de premier chargement. L'objection de budget ne tenait pas |
-| Piège de focus du visionneur | **FERMÉ.** La tabulation est bornée au dialogue et le focus rendu à sa vignette |
+| Piège de focus du visionneur | **FERMÉ — mais la moitié « focus rendu » était FAUSSE**, et la troisième passe l'a montrée en écrivant le test. L'effet lisait `document.activeElement` APRÈS que React eut appliqué `autoFocus` : il mémorisait donc le bouton « fermer » du dialogue comme point de retour, bouton qui n'existe plus à la fermeture. Le focus retombait sur `<body>`. Le déclencheur est désormais retenu à l'instant du CLIC |
 | La cadence n'a aucun appelant | **TOUJOURS OUVERT** — bloqué sur le premier déploiement |
 | Le veilleur n'envoie rien | **TOUJOURS OUVERT** — bloqué sur `RESEND_API_KEY` |
 
@@ -239,16 +239,47 @@ plafond : c'est là que la question se tranchait.
 
 ### 6.2 Ce qui est bloqué sur autre chose
 
+> ⚠️ **TROISIÈME PASSE, 31/08 AU SOIR — LES DEUX POINTS CI-DESSOUS ONT ÉTÉ
+> REPRIS**, et la partie qui dépendait du code est faite. Migrations 128 et 129,
+> `lib/veille/`, `lib/email/`, `/api/veille`. Ce qui reste est écrit sous chaque
+> point, et ne dépend plus que du déploiement.
+>
+> **Et un défaut de plus a été trouvé au passage** : l'alerte existante
+> (`alertes_admin`, migration 058) **ne pouvait pas signaler une tâche jamais
+> déployée** — son `from scheduler_heartbeat` exige une ligne pour être en
+> retard. Le veilleur ne savait alerter que sur la panne de ce qui avait déjà
+> fonctionné. La requête est correcte ; c'est son point de départ qui était faux.
+
 2. **La cadence de suivi n'a aucun appelant.** `CRON_SECRET` est absent, aucun
    planificateur n'existe dans le dépôt : aucune interrogation, aucun abandon,
    aucune marque d'immobilité, **et aucune purge à 90 jours**. Bloqué sur le
    premier déploiement.
 
-3. **Le veilleur n'envoie rien.** Il n'y a **aucun module d'envoi d'email** dans
-   le dépôt et `resend` n'est pas dans `package.json` : la réponse à « silence,
-   erreur visible ou fausse réussite ? » est *aucun des trois*. Le seul canal est
-   un badge sur un écran que personne n'ouvre — ce que L-022 désigne nommément
-   comme insuffisant. Bloqué sur `RESEND_API_KEY`.
+   **Ce qui a changé** : sa mort est désormais CONSTATÉE par un second passage
+   indépendant (`/api/veille`), et réciproquement. Ce qu'aucun mécanisme interne
+   ne peut couvrir — et qui est dit plutôt que tu — c'est la mort SIMULTANÉE des
+   deux : aucun code du dépôt ne s'exécute alors, donc aucune alerte ne part. La
+   veille mutuelle couvre la mort de L'UN des deux, qui est le cas réel après
+   déploiement. **Il faut donc DEUX planificateurs distincts**, pas deux entrées
+   du même.
+
+3. **Le veilleur n'envoie rien.** ~~Il n'y a aucun module d'envoi d'email dans le
+   dépôt~~ — **il y en a un** : `lib/email/port.ts` + son unique adaptateur
+   `resend.ts`, sans SDK (l'envoi est un POST, et une dépendance qui échoue sur
+   ce chemin ferait disparaître le message censé nous prévenir).
+
+   La réponse à « silence, erreur visible ou fausse réussite ? » est désormais
+   **erreur visible** : `non_configure` est une issue DISTINCTE de `refuse`, elle
+   NOMME les variables manquantes, elle est journalisée bruyamment, elle
+   **libère la réservation** pour que l'alerte reparte le jour où la clé est
+   posée, et elle est écrite dans le battement — un veilleur qui tourne mais qui
+   est MUET se lit sur l'écran d'administration au lieu de ressembler à un
+   veilleur qui n'a rien à signaler.
+
+   **Reste bloqué sur trois variables** : `RESEND_API_KEY`, `EMAIL_ALERTES_DE`,
+   `EMAIL_ALERTES_A`. Toutes trois validées pour leur SUBSTANCE et non pour leur
+   présence — `alertes@exemple.fr` est une adresse parfaitement bien formée et
+   parfaitement inutile (L-026).
 
 ### 6.3 Ce que la seconde passe a trouvé EN PLUS, et fermé
 
@@ -397,7 +428,7 @@ donne une fausse idée de la fiabilité du procédé.
 | Instrumentation — 28 sites d'émission | ✅ | — | ✅ | ✅ | PASS |
 | i18n — 920 clés, variables ICU | ✅ | ✅ | ✅ | — | **CORRIGÉ** |
 | Contraste dynamique | ✅ | ✅ | ✅ | — | **CORRIGÉ** |
-| Accessibilité | ✅ | partiel | ✅ | — | **CORRIGÉ** *(piège de focus : SIGNALÉ)* |
+| Accessibilité | ✅ | ✅ | ✅ | ✅ | **CORRIGÉ ET ÉPROUVÉ** *(piège de focus : couvert, et un second défaut trouvé par le test)* |
 | Contraintes produit (paiement, vocabulaire, WebGL) | ✅ | ✅ | ✅ | — | PASS |
 | Écrans secondaires (analyses, envois, marque) | ✅ | — | ✅ | ✅ | **CORRIGÉ** |
 | Landing, pages légales, signalement | ✅ | ✅ | ✅ | — | **CORRIGÉ** |
@@ -407,7 +438,7 @@ donne une fausse idée de la fiabilité du procédé.
 | Performance — écran Analyses | — | ✅ | ✅ | — | **PASS** — 3,4 / 28,1 / 5,2 ms au plafond |
 | Coût du déclencheur de plafond | — | ✅ | ✅ | — | **PASS** — 0,9 ms, index employé |
 | Frontières d'erreur (4 surfaces) | ✅ | ✅ | ✅ | — | **CORRIGÉ** |
-| Piège de focus du visionneur | ✅ | ❌ | ❌ | — | **CORRIGÉ**, non couvert par un test *(pas de DOM dans le projet `unit`)* |
+| Piège de focus du visionneur | ✅ | ✅ | ✅ | ✅ | **CORRIGÉ ET COUVERT** *(31/08 au soir — environnement `happy-dom` choisi PAR FICHIER, pas de quatrième projet vitest ; le test a révélé que la restitution du focus ne marchait pas)* |
 
 **Aucune case n'est vide, et il ne reste aucun `NON MESURÉ`.** Les deux qui y
 figuraient à la première passe ont été mesurés au banc, et tous deux répondent
@@ -428,8 +459,11 @@ NON au soupçon qui les avait fait inscrire.
    seul juge.
 
 4. **Le rendu visuel.** Aucun navigateur n'a été piloté : pas de contraste
-   photographié, **pas de piège de focus observé** — il est implémenté et non
-   testé, le projet `unit` n'ayant délibérément pas de DOM. La conformité au
+   photographié. ⚠️ **Le piège de focus, lui, N'EST PLUS DANS CETTE ZONE** : il
+   est éprouvé depuis le 31/08 au soir sous `happy-dom`, et le test a trouvé que
+   sa moitié « focus rendu » ne marchait pas. Ce qui reste hors de portée d'un
+   DOM simulé est nommé dans le fichier de test : `offsetParent` y vaut toujours
+   `null`, donc le tri entre éléments visibles et masqués n'est pas éprouvé. La conformité au
    canevas n'a été évaluée que sur le point du dégradé, où les planches du
    disque ont tranché.
 
