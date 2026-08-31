@@ -173,7 +173,25 @@ async function mesurerGlobalSerieuse(sql: string): Promise<Mesure> {
 
 /** Rodage jeté, puis deux séries. Rend la PIRE — jamais la meilleure. */
 async function mesurerSerieuse(utilisateur: UtilisateurDeTest, sql: string): Promise<Mesure> {
+  /*
+   * ⚠️ DEUX RODAGES, ET NON UN. MESURÉ LE 31/08/2026.
+   *
+   * Un passage du banc a échoué sur sa PROPRE garde de discordance :
+   * « Séries discordantes : 18,5 ms puis 0,4 ms ». Le premier appel des deux
+   * séries payait encore un accès disque que le rodage unique n'avait pas
+   * absorbé — la seconde série, elle, rendait la vraie valeur.
+   *
+   * LA RÈGLE DU PROJET EST DE BORNER, PAS DE RELANCER JUSQU'AU VERT. On ne
+   * touche donc NI au seuil de discordance, NI aux assertions : le seul
+   * changement est un second rodage, jeté comme le premier. Ce qui est mesuré
+   * et ce qui est exigé restent identiques ; c'est la mise en condition qui
+   * était insuffisante.
+   *
+   * Si la discordance revient malgré cela, elle décrira autre chose qu'un cache
+   * froid — et il faudra le chercher là, pas ici.
+   */
   await mesurer(utilisateur, sql);
+  await mesurer(utilisateur, sql); // second rodage, jeté lui aussi
   const a = await mesurer(utilisateur, sql);
   const b = await mesurer(utilisateur, sql);
 
@@ -208,7 +226,20 @@ async function semer(utilisateur: UtilisateurDeTest, etiquette: string): Promise
        3011,
        (array['preparation','expedie','en_transit','livre'])[1 + (i % 4)]::public.parcel_status,
        case when i % 10 = 0 then null else now() - (i || ' hours')::interval end,
-       now() - (i || ' minutes')::interval
+       -- LA CREATION EST ETALEE SUR DOUZE MOIS, ET ELLE NE L ETAIT PAS.
+       --
+       -- Le semis posait « now() - i minutes » : 9 600 colis en 6,6 jours, soit
+       -- 1 450 par jour pour UNE boutique. Aucun vendeur ne fait cela — ce
+       -- fichier le dit d ailleurs plus bas a propos des compteurs : « en usage
+       -- reel, ces increments sont etales, quelques centaines par compte et par
+       -- MOIS ». Le jeu decrivait donc une forme qui n existe pas.
+       --
+       -- Le plafond mensuel de colis (migration 125) l a rendu visible en
+       -- refusant l insertion : un banc qui compresse douze mois en une semaine
+       -- ne mesure pas le produit, il mesure sa propre compression. i * 55
+       -- minutes couvre 366 jours et reste monotone en i, donc l ordre que les
+       -- mesures de pagination supposent est conserve.
+       now() - ((i * 55) || ' minutes')::interval
      from generate_series(1, $3) as i`,
     [utilisateur.shopId, etiquette, COLIS],
   );

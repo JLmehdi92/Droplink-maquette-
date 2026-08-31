@@ -113,7 +113,25 @@ async function mesurer(utilisateur: UtilisateurDeTest, sql: string): Promise<Mes
 
 /** Rodage jeté, puis deux séries. Rend la PIRE des deux — jamais la meilleure. */
 async function mesurerSerieuse(utilisateur: UtilisateurDeTest, sql: string): Promise<Mesure> {
-  await mesurer(utilisateur, sql); // rodage, jeté
+  /*
+   * ⚠️ DEUX RODAGES, ET NON UN. MESURÉ LE 31/08/2026.
+   *
+   * Un passage du banc a échoué sur sa PROPRE garde de discordance :
+   * « Séries discordantes : 18,5 ms puis 0,4 ms ». Le premier appel des deux
+   * séries payait encore un accès disque que le rodage unique n'avait pas
+   * absorbé — la seconde série, elle, rendait la vraie valeur.
+   *
+   * LA RÈGLE DU PROJET EST DE BORNER, PAS DE RELANCER JUSQU'AU VERT. On ne
+   * touche donc NI au seuil de discordance, NI aux assertions : le seul
+   * changement est un second rodage, jeté comme le premier. Ce qui est mesuré
+   * et ce qui est exigé restent identiques ; c'est la mise en condition qui
+   * était insuffisante.
+   *
+   * Si la discordance revient malgré cela, elle décrira autre chose qu'un cache
+   * froid — et il faudra le chercher là, pas ici.
+   */
+  await mesurer(utilisateur, sql);
+  await mesurer(utilisateur, sql); // second rodage, jeté lui aussi
   const a = await mesurer(utilisateur, sql);
   const b = await mesurer(utilisateur, sql);
 
@@ -485,5 +503,108 @@ describe("Les compteurs de tête", () => {
       m.lignesLues,
       "les compteurs ne lisent presque rien : le jeu de mesure a disparu",
     ).toBeGreaterThan(PLAFOND_COMMANDES / 2);
+  });
+});
+
+
+/**
+ * LES DEUX CHEMINS QUE PERSONNE N'AVAIT CHIFFRÉS.
+ *
+ * ⚠️ L'AUDIT DU 31/08/2026 a établi deux FAITS STRUCTURELS et n'a pas pu les
+ * chiffrer : la base de développement ne portait que sept commandes, et à cette
+ * volumétrie le planificateur choisit un parcours séquentiel — la mesure
+ * n'aurait rien dit. *Une mesure impossible se dit impossible.* Le banc, lui,
+ * sème déjà au plafond : c'est ici que la question se tranche.
+ *
+ * FAIT 1 — L'INDEX QUE TROIS MIGRATIONS INVOQUENT N'EXISTE PAS. La 011 a
+ * SUPPRIMÉ `orders_tri_defaut_idx` et l'a remplacé par deux index PARTIELS
+ * (`where archived_at is null` / `is not null`). Or `verifier_plafond_commandes`
+ * compte les commandes du mois SANS prédicat sur `archived_at` : aucun des deux
+ * partiels ne peut le servir, Postgres exigeant que le prédicat de l'index soit
+ * impliqué par la requête. Les migrations 077, 095 et 096 affirment pourtant
+ * toutes les trois s'appuyer sur « l'index (shop_id, created_at) posé pour le
+ * dashboard ». C'est L-014 : trois documents affirment un état que personne n'a
+ * exécuté.
+ *
+ * Le chemin s'exécute à CHAQUE insertion de commande, c'est-à-dire sur l'action
+ * centrale du produit.
+ *
+ * FAIT 2 — L'ÉCRAN ANALYSES LANCE QUATRE AGRÉGATS et un seul est mesuré
+ * (`compter_envois`, dans `envois.test.ts`). `analyser_activite` filtre sur
+ * `created_at >= p_precedent`, soit DEUX FOIS la fenêtre demandée, et produit
+ * neuf compteurs sur des colonnes qu'aucun index ne couvre.
+ *
+ * ⚠️ ON NE POSE AUCUN INDEX AVANT D'AVOIR LU LE PLAN (L-017) : « un seuil
+ * dépassé ne veut pas dire qu'il manque un index — vérifier d'abord que la
+ * requête ne demande pas plus que nécessaire ». Ces mesures existent pour
+ * répondre à cette question-là, pas pour justifier une correction décidée
+ * d'avance.
+ */
+describe("Les chemins que l'audit n'a pas pu chiffrer", () => {
+  /*
+   * SEUILS ÉCRITS AVANT LA PREMIÈRE EXÉCUTION.
+   *
+   * `PLAFOND_MS` vaut 40 : ce contrôle s'ajoute à CHAQUE création de commande,
+   * et un fournisseur qui en crée deux cents par semaine le paie deux cents
+   * fois. Au-delà, l'écriture cesse d'être instantanée.
+   *
+   * `AGREGAT_MS` vaut 400 : l'écran Analyses n'est pas ouvert en boucle, mais
+   * au-delà d'une demi-seconde il donne l'impression de ne pas répondre.
+   */
+  const PLAFOND_MS = 40;
+  const AGREGAT_MS = 400;
+
+  test("le comptage du plafond mensuel, à chaque création de commande", async () => {
+    const m = await mesurerSerieuse(
+      alice,
+      `select count(*) from public.orders
+        where shop_id = '${alice.shopId}'
+          and created_at >= date_trunc('month', now())`,
+    );
+
+    // TOUTE MESURE PORTE UNE ASSERTION SUR LE JEU QU'ELLE DÉCRIT : sans elle,
+    // une purge accidentelle ferait consigner une amélioration spectaculaire.
+    const total = await bd.query<{ n: string }>(
+      `select count(*)::text as n from public.orders where shop_id = $1`,
+      [alice.shopId],
+    );
+    expect(
+      Number.parseInt(total.rows[0]?.n ?? "0", 10),
+      "le jeu de mesure a disparu : la mesure ne décrit rien",
+    ).toBeGreaterThan(PLAFOND_COMMANDES / 2);
+
+    console.log(
+      `  plafond mensuel : ${m.ms.toFixed(1)} ms, ${m.lignesLues} ligne(s) lue(s) ` +
+        `sur ${PLAFOND_COMMANDES} au compte`,
+    );
+    console.log(`  index employé : ${/Index (Only )?Scan/.test(m.plan) ? "oui" : "NON"}`);
+
+    expect(
+      m.ms,
+      `${m.ms.toFixed(1)} ms à chaque création de commande — au-dessus du seuil de ${PLAFOND_MS} ms`,
+    ).toBeLessThan(PLAFOND_MS);
+  });
+
+  test("les trois agrégats de l'écran Analyses que le banc ignorait", async () => {
+    const appels: ReadonlyArray<readonly [string, string]> = [
+      [
+        "analyser_activite",
+        "select * from public.analyser_activite(now() - interval '90 days', now() - interval '180 days')",
+      ],
+      [
+        "compter_commandes_par_semaine",
+        "select * from public.compter_commandes_par_semaine(now(), 26)",
+      ],
+      ["compter_commandes_par_etat", "select * from public.compter_commandes_par_etat()"],
+    ];
+
+    for (const [nom, sql] of appels) {
+      const m = await mesurerSerieuse(alice, sql);
+      console.log(`  ${nom.padEnd(30)} ${m.ms.toFixed(1)} ms, ${m.lignesLues} ligne(s) lue(s)`);
+      expect(
+        m.ms,
+        `${nom} : ${m.ms.toFixed(1)} ms au-dessus du seuil de ${AGREGAT_MS} ms`,
+      ).toBeLessThan(AGREGAT_MS);
+    }
   });
 });

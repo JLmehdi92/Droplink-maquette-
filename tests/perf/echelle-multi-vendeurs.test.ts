@@ -126,7 +126,25 @@ async function mesurer(utilisateur: UtilisateurDeTest, sql: string): Promise<Mes
 
 /** Rodage JETÉ, puis deux séries CONCORDANTES, la pire retenue. */
 async function mesurerSerieuse(utilisateur: UtilisateurDeTest, sql: string): Promise<Mesure> {
+  /*
+   * ⚠️ DEUX RODAGES, ET NON UN. MESURÉ LE 31/08/2026.
+   *
+   * Un passage du banc a échoué sur sa PROPRE garde de discordance :
+   * « Séries discordantes : 18,5 ms puis 0,4 ms ». Le premier appel des deux
+   * séries payait encore un accès disque que le rodage unique n'avait pas
+   * absorbé — la seconde série, elle, rendait la vraie valeur.
+   *
+   * LA RÈGLE DU PROJET EST DE BORNER, PAS DE RELANCER JUSQU'AU VERT. On ne
+   * touche donc NI au seuil de discordance, NI aux assertions : le seul
+   * changement est un second rodage, jeté comme le premier. Ce qui est mesuré
+   * et ce qui est exigé restent identiques ; c'est la mise en condition qui
+   * était insuffisante.
+   *
+   * Si la discordance revient malgré cela, elle décrira autre chose qu'un cache
+   * froid — et il faudra le chercher là, pas ici.
+   */
   await mesurer(utilisateur, sql);
+  await mesurer(utilisateur, sql); // second rodage, jeté lui aussi
   const a = await mesurer(utilisateur, sql);
   const b = await mesurer(utilisateur, sql);
   const ecart = Math.abs(a.ms - b.ms) / Math.max(a.ms, b.ms);
