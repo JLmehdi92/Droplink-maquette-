@@ -1358,3 +1358,139 @@ describe("Sonde H — l'état des déclencheurs du journal d'audit", () => {
     ).toEqual([]);
   });
 });
+
+describe("Sonde I — qui peut poser un drapeau de session", () => {
+  /**
+   * L'IMMUABILITÉ DU JETON TIENT À UN DRAPEAU, ET LE DRAPEAU À UN INVENTAIRE.
+   *
+   * Le déclencheur `orders_jeton_public_immuable` refuse tout changement de
+   * `public_token` SAUF si la session porte `droplink.rotation_jeton = 'oui'`.
+   * Son propre commentaire dit : « la seule porte : un drapeau de session que
+   * seule la fonction de rotation pose ».
+   *
+   * ⚠️ C'EST LA PHRASE-TYPE D'UNE PROTECTION QUI TIENT À UNE ABSENCE. Elle est
+   * vraie aujourd'hui — vérifié : une seule fonction du schéma pose ce
+   * drapeau-là. Mais rien ne l'exigeait, et le Principe V dit que ce jeton ne
+   * transfère pas une donnée, il transfère une CAPACITÉ, définitivement.
+   *
+   * DEUX PROPRIÉTÉS SONT ÉPROUVÉES ICI, et la seconde compte autant :
+   *
+   *  1. L'inventaire des fonctions qui touchent un GUC `droplink.*` est FERMÉ,
+   *     et vérifié dans les deux sens.
+   *  2. Aucune ne construit le NOM ni la VALEUR du drapeau depuis un ARGUMENT.
+   *     Une fonction générique — `poser_drapeau(p_cle, p_valeur)` — passerait
+   *     l'inventaire en n'étant qu'une ligne de plus, et donnerait à son
+   *     appelant la clé du déclencheur.
+   *
+   * Le drapeau est toujours posé avec `set_config(…, true)` : LOCAL à la
+   * transaction. Sans ce troisième argument, la valeur survivrait à la requête
+   * et fuiterait d'un appel à l'autre à travers le pool de connexions de
+   * PostgREST — un `updated_at` figé, ou un arbitrage QC attribué au client au
+   * lieu du vendeur, sur la requête d'après.
+   */
+  const TOUCHENT_UN_DRAPEAU: ReadonlyMap<string, string> = new Map([
+    [
+      "regenerer_jeton_public",
+      "LA SEULE qui pose `droplink.rotation_jeton`. C'est la porte de la " +
+        "révocation, le seul geste que le brief autorise à changer le jeton.",
+    ],
+    [
+      "arbitrer_qc",
+      "Pose `droplink.arbitrage_du_client` : l'écriture vient d'un visiteur SANS " +
+        "compte, et le déclencheur d'historique doit l'attribuer au client et " +
+        "non au vendeur.",
+    ],
+    [
+      "appliquer_etat_colis",
+      "Pose `droplink.ecriture_hors_vendeur` : la mise à jour vient du " +
+        "transporteur, et ne doit pas faire bouger `updated_at`, qui mesure " +
+        "l'activité DU VENDEUR.",
+    ],
+    [
+      "compter_vue",
+      "Même raison : une consultation par le client d'un vendeur n'est pas une " +
+        "modification de la commande.",
+    ],
+    [
+      "jeton_public_immuable",
+      "LIT le drapeau — c'est le déclencheur qui refuse la mutation du jeton.",
+    ],
+    [
+      "qui_a_arbitre_le_qc",
+      "LIT le drapeau d'arbitrage pour attribuer l'événement au bon acteur.",
+    ],
+    [
+      "toucher_updated_at_commande",
+      "LIT le drapeau d'écriture hors vendeur pour ne pas toucher `updated_at`.",
+    ],
+  ]);
+
+  test("l'inventaire des fonctions qui touchent un drapeau est fermé", async () => {
+    const trouvees = await interroger<{ nom: string }>(
+      bd,
+      `select p.proname as nom
+         from pg_proc p
+         join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public' and p.prosrc ~ 'droplink\.'
+        order by 1`,
+    );
+
+    // Un ensemble vide passe tout : si le motif cessait de trouver quoi que ce
+    // soit, l'inventaire serait « fermé » sur zéro fonction.
+    expect(
+      trouvees.length,
+      "Aucune fonction ne touche un drapeau `droplink.*` : la sonde n'inspecte " +
+        "plus rien, alors que l'immuabilité du jeton en dépend.",
+    ).toBeGreaterThan(0);
+
+    const inconnues = trouvees.map((f) => f.nom).filter((nom) => !TOUCHENT_UN_DRAPEAU.has(nom));
+    expect(
+      inconnues,
+      `Fonctions qui touchent un drapeau de session sans être déclarées : ` +
+        `${inconnues.join(", ")}. Le déclencheur d'immuabilité du jeton s'ouvre ` +
+        "à qui sait poser `droplink.rotation_jeton`.",
+    ).toEqual([]);
+
+    // L'AUTRE SENS : une déclaration périmée masquerait la prochaine.
+    const disparues = [...TOUCHENT_UN_DRAPEAU.keys()].filter(
+      (nom) => !trouvees.some((f) => f.nom === nom),
+    );
+    expect(
+      disparues,
+      `Fonctions déclarées qui ne touchent plus aucun drapeau : ${disparues.join(", ")}.`,
+    ).toEqual([]);
+  });
+
+  test("aucune ne construit son drapeau depuis un argument", async () => {
+    const poseuses = await interroger<{ nom: string; corps: string }>(
+      bd,
+      `select p.proname as nom, p.prosrc as corps
+         from pg_proc p
+         join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public' and p.prosrc ~ 'set_config'
+        order by 1`,
+    );
+
+    expect(poseuses.length, "Aucune poseuse trouvée : la sonde est vide.").toBeGreaterThan(0);
+
+    const suspectes: string[] = [];
+    for (const f of poseuses) {
+      for (const appel of f.corps.matchAll(/set_config\s*\(([^;]*?)\)\s*;/g)) {
+        const args = appel[1] ?? "";
+        // Les deux premiers arguments doivent être des LITTÉRAUX. Une référence
+        // à un paramètre (`p_…`) ou à une variable (`v_…`) rendrait le drapeau
+        // choisi par l'appelant.
+        if (/\b[pv]_\w+/.test(args)) suspectes.push(`${f.nom} : set_config(${args.trim()})`);
+        // Et le troisième argument doit être `true` : sinon la valeur survit à
+        // la transaction et voyage dans le pool de connexions.
+        if (!/,\s*true\s*$/.test(args)) suspectes.push(`${f.nom} : drapeau NON LOCAL (${args.trim()})`);
+      }
+    }
+
+    expect(
+      suspectes,
+      "Des drapeaux de session sont construits depuis un argument, ou ne sont " +
+        `pas locaux à la transaction :\n${suspectes.join("\n")}`,
+    ).toEqual([]);
+  });
+});
