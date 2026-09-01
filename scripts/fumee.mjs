@@ -1742,6 +1742,152 @@ try {
         ],
       );
 
+      /*
+       * ── ET LA PREUVE QU ELLE ECRIT ──
+       *
+       * ⚠️ TOUT CE QUI PRECEDE N EXERCE QUE `colis === 0`. Le numero pousse
+       * n existe pas en base, donc la route repond 200 sans rien ecrire — et
+       * elle repondrait EXACTEMENT pareil si l ingestion entiere etait retiree.
+       * « Il repond » est la propriete que tous les residus possedent : ce bloc
+       * manquait, et c est celui qui certifie la seule chose que le suivi
+       * promet, ecrire ce que le transporteur annonce.
+       *
+       * C est aussi la REPETITION de l etape qui suivra le deploiement —
+       * relever une vraie notification et constater qu elle atterrit — et elle
+       * ne coute AUCUN quota chez le fournisseur : rien ici ne l appelle.
+       *
+       * Le mode de defaillance vise est nomme dans la route elle-meme : si la
+       * chaine signature → lecture → ingestion se rompait, le suivi cesserait
+       * de se mettre a jour EN SILENCE, et rien dans les journaux ne le dirait.
+       */
+      const { data: shopEcriture } = await service
+        .from("shops")
+        .select("id")
+        .eq("owner_id", profilFumee)
+        .maybeSingle();
+
+      if (shopEcriture?.id && commandeFumee) {
+        // Un numero propre a l execution : deux passages concurrents ne doivent
+        // pas se disputer la meme ligne, et l unicite est (shop_id, numero).
+        const numeroEcriture = `FUMEE-${Date.now().toString(36).toUpperCase()}`;
+        const { data: colisFumee, error: erreurColis } = await service
+          .from("tracked_parcels")
+          .insert({ shop_id: shopEcriture.id, tracking_number: numeroEcriture })
+          .select("id, normalized_status")
+          .single();
+
+        if (erreurColis || !colisFumee) {
+          echecs += 1;
+          console.log(
+            `ECHEC colis de fumee non cree : ${erreurColis?.message ?? "aucune ligne"}`,
+          );
+        } else {
+          await service
+            .from("order_parcels")
+            .insert({ order_id: commandeFumee, parcel_id: colisFumee.id });
+
+          // CONTRE-TEST D ETAT INITIAL. Sans lui, un colis qui naitrait deja
+          // « en transit » ferait passer l assertion d avancement sans qu aucune
+          // ecriture n ait eu lieu.
+          controles.push([
+            colisFumee.normalized_status === "preparation",
+            `le colis de fumee nait en preparation (${colisFumee.normalized_status})`,
+          ]);
+
+          const corpsEcrit = JSON.stringify({
+            event: "TRACKING_UPDATED",
+            data: {
+              number: numeroEcriture,
+              carrier: 3011,
+              track_info: {
+                latest_status: { status: "InTransit" },
+                latest_event: {
+                  time_utc: "2026-09-01T10:00:00Z",
+                  description: "Departed from facility",
+                  location: "SHENZHEN",
+                },
+                milestone: [{ key_stage: "Departure", time_utc: "2026-09-01T10:00:00Z" }],
+              },
+            },
+          });
+          const signatureEcrit = createHash("sha256")
+            .update(corpsEcrit + "/" + CLE_SUIVI, "utf8")
+            .digest("hex");
+
+          const ecrite = await fetch(`${base}/api/suivi/notification`, {
+            method: "POST",
+            headers: { "content-type": "application/json", sign: signatureEcrit },
+            body: corpsEcrit,
+          });
+          const corpsReponse = ecrite.ok ? await ecrite.json() : null;
+
+          const { data: passages } = await service
+            .from("parcel_checkpoints")
+            .select("description, location, occurred_at")
+            .eq("parcel_id", colisFumee.id);
+
+          const { data: apresEcriture } = await service
+            .from("tracked_parcels")
+            .select("normalized_status, last_movement_at")
+            .eq("id", colisFumee.id)
+            .maybeSingle();
+
+          /*
+           * LE REJEU, EPROUVE DANS LA FOULEE. Le fournisseur reemet ; sans
+           * deduplication, chaque renvoi repaierait un appel et ferait avancer
+           * les compteurs de cout. La marque porte sur les octets EXACTS signes,
+           * donc le meme corps redonne la meme empreinte.
+           */
+          const rejouee = await fetch(`${base}/api/suivi/notification`, {
+            method: "POST",
+            headers: { "content-type": "application/json", sign: signatureEcrit },
+            body: corpsEcrit,
+          });
+          const corpsRejeu = rejouee.ok ? await rejouee.json() : null;
+
+          const { count: passagesApresRejeu } = await service
+            .from("parcel_checkpoints")
+            .select("id", { count: "exact", head: true })
+            .eq("parcel_id", colisFumee.id);
+
+          controles.push(
+            [
+              corpsReponse !== null && corpsReponse.statut === "applique",
+              `une notification signee sur un numero CONNU est appliquee (${corpsReponse?.statut ?? ecrite.status})`,
+            ],
+            [
+              corpsReponse !== null && corpsReponse.colis >= 1,
+              `elle dit avoir touche au moins un colis (${corpsReponse?.colis ?? "aucun corps"})`,
+            ],
+            [
+              Array.isArray(passages) && passages.length >= 1,
+              `le point de passage est REELLEMENT en base (${passages?.length ?? 0} ligne(s))`,
+            ],
+            [
+              Array.isArray(passages) &&
+                passages.some((p) => p.description === "Departed from facility"),
+              "et il porte la description annoncee par le transporteur",
+            ],
+            [
+              apresEcriture !== null && apresEcriture.normalized_status !== "preparation",
+              `l etape du colis a AVANCE (${apresEcriture?.normalized_status ?? "illisible"})`,
+            ],
+            [
+              apresEcriture !== null && apresEcriture.last_movement_at !== null,
+              "la date du dernier mouvement est posee — c est elle qui nomme le silence",
+            ],
+            [
+              corpsRejeu !== null && corpsRejeu.statut === "ignore",
+              `le MEME corps rejoue est ignore (${corpsRejeu?.statut ?? rejouee.status})`,
+            ],
+            [
+              passagesApresRejeu === (passages?.length ?? -1),
+              `et le rejeu n ajoute aucun point (${passages?.length ?? "?"} puis ${passagesApresRejeu})`,
+            ],
+          );
+        }
+      }
+
       // Jeton inconnu : meme sortie, aucune divulgation.
       const inconnu = await fetch(`${base}/p/aaaaaaaaaaaaaaaaaaaaa`, { redirect: "manual" });
       controles.push([inconnu.status === 404, "un jeton inconnu rend 404"]);
