@@ -973,7 +973,31 @@ describe("Sonde F — chemin de recherche des fonctions `security definer`", () 
     // peut laisser son appelant décider des objets qu'elle touche.
   ]);
 
-  test("toute fonction `security definer` épingle son `search_path` à vide", async () => {
+  /*
+   * ⚠️ CETTE SONDE NE VOYAIT QUE LES FONCTIONS `security definer`, ET C'ÉTAIT
+   * UN ANGLE MORT MESURÉ.
+   *
+   * Le filtre `and p.prosecdef` la rendait aveugle aux 20 fonctions `security
+   * invoker` du schéma. Deux d'entre elles portaient un écart réel, relevé le
+   * 01/09/2026 en interrogeant `pg_proc` À LA MAIN :
+   *
+   *   compter_commandes_par_etat  →  search_path = public, pg_temp
+   *   refuser_truncate_audit      →  proconfig NUL, aucun chemin du tout
+   *
+   * Aucune des deux n'était exploitable — la première qualifie ses relations,
+   * la seconde n'en référence aucune. Mais `pg_temp` dans un chemin de
+   * recherche est une porte que n'importe quel rôle peut franchir en créant une
+   * table temporaire du bon nom, et la protection tenait donc à ce que personne
+   * ne dé-qualifie jamais une référence. Surtout : la seconde est la fonction
+   * qui garde le JOURNAL D'AUDIT — une exception dans l'inventaire est ce qui
+   * fait qu'on cesse de lire l'inventaire.
+   *
+   * Le filtre est retiré. Le raisonnement qui l'avait posé — « seule une
+   * fonction privilégiée peut être détournée » — est juste sur la GRAVITÉ et
+   * faux sur l'INVENTAIRE : c'est en ne regardant qu'une moitié qu'on laisse
+   * une valeur aberrante s'installer dans l'autre, puis migrer.
+   */
+  test("toute fonction du schéma épingle son `search_path` à vide", async () => {
     const fonctions = await interroger<{
       nom: string;
       signature: string;
@@ -985,14 +1009,14 @@ describe("Sonde F — chemin de recherche des fonctions `security definer`", () 
               p.proconfig as config
        from pg_proc p
        join pg_namespace n on n.oid = p.pronamespace
-       where n.nspname = 'public' and p.prosecdef
+       where n.nspname = 'public' and p.prokind = 'f'
        order by 1, 2`,
     );
 
     expect(
       fonctions.length,
-      "Aucune fonction `security definer` trouvée dans public. La sonde " +
-        "n'inspecte rien, et un ensemble vide passe tout.",
+      "Aucune fonction trouvée dans public. La sonde n'inspecte rien, et un " +
+        "ensemble vide passe tout.",
     ).toBeGreaterThan(0);
 
     const defauts = fonctions
@@ -1006,7 +1030,7 @@ describe("Sonde F — chemin de recherche des fonctions `security definer`", () 
 
     expect(
       defauts,
-      "Fonctions privilégiées dont le chemin de recherche n'est pas épinglé à " +
+      "Fonctions dont le chemin de recherche n'est pas épinglé à " +
         `vide : ${defauts.join(" | ")}. L'appelant peut leur substituer ses ` +
         "propres objets.",
     ).toEqual([]);
@@ -1033,9 +1057,18 @@ describe("Sonde F — chemin de recherche des fonctions `security definer`", () 
      */
     await bd.query("begin");
     try {
+      /*
+       * ⚠️ LE TÉMOIN EST `security INVOKER`, ET C'EST TOUT L'INTÉRÊT.
+       *
+       * Il était `security definer` — donc il aurait été trouvé même par
+       * l'ancienne requête, qui filtrait `prosecdef`. Un contre-test qui passe
+       * avec ET sans le filtre ne prouve rien sur le filtre : il faut qu'il
+       * échoue quand la sonde se rétrécit, sinon il valide l'angle mort qu'on
+       * vient de fermer.
+       */
       await bd.query(
         "create function public.temoin_sans_chemin() returns int " +
-          "language sql security definer as 'select 1'",
+          "language sql as 'select 1'",
       );
 
       const trouvees = await interroger<{ nom: string }>(
@@ -1043,15 +1076,15 @@ describe("Sonde F — chemin de recherche des fonctions `security definer`", () 
         `select p.proname as nom
          from pg_proc p
          join pg_namespace n on n.oid = p.pronamespace
-         where n.nspname = 'public' and p.prosecdef
+         where n.nspname = 'public' and p.prokind = 'f'
            and not (coalesce(p.proconfig, '{}') @> array['search_path=""'])`,
       );
 
       expect(
         trouvees.map((f) => f.nom),
-        "La sonde n'a pas vu une fonction `security definer` sans chemin de " +
-          "recherche alors qu'elle venait d'être créée sous ses yeux. Son vert " +
-          "ne prouvait donc rien.",
+        "La sonde n'a pas vu une fonction sans chemin de recherche alors " +
+          "qu'elle venait d'être créée sous ses yeux. Son vert ne prouvait " +
+          "donc rien.",
       ).toContain("temoin_sans_chemin");
     } finally {
       await bd.query("rollback");
@@ -1266,5 +1299,62 @@ describe("Sonde H — toute policy d'écriture porte un `WITH CHECK` explicite",
     } finally {
       await bd.query("rollback");
     }
+  });
+});
+
+describe("Sonde H — l'état des déclencheurs du journal d'audit", () => {
+  /**
+   * L'APPEND-ONLY DU JOURNAL NE VAUT QUE PAR L'ÉTAT DE SES DÉCLENCHEURS.
+   *
+   * `admin_audit_log` porte deux déclencheurs qui interdisent la modification et
+   * le vidage. Ils sont la seule chose qui rende le journal opposable : c'est la
+   * pièce qu'on produirait en cas de litige sur une suspension.
+   *
+   * ⚠️ UN DÉCLENCHEUR « ORIGIN » NE S'EXÉCUTE PAS quand la session pose
+   * `session_replication_role = 'replica'`. Mesuré le 01/09/2026, trois fois,
+   * chacune en transaction annulée : `authenticated` et `service_role` se voient
+   * refuser ce réglage (42501), mais le rôle des migrations, lui, l'obtient sans
+   * erreur. Le journal était donc réécrivable SANS DDL — donc sans qu'aucun
+   * déclencheur d'événement ne voie passer quoi que ce soit.
+   *
+   * La migration 131 les passe en `ALWAYS`. Elle n'arrête pas un adversaire
+   * déterminé — le propriétaire de la table peut toujours `drop trigger` — mais
+   * elle force un DDL VISIBLE plutôt qu'un `set` silencieux.
+   *
+   * ⚠️ CETTE SONDE EXISTE PARCE QUE LA FALSIFICATION EST RESTÉE VERTE. Après la
+   * migration, remettre un déclencheur en `ORIGIN` n'a fait rougir AUCUN test :
+   * rien n'inventoriait `tgenabled`. Un durcissement que personne ne surveille
+   * est un durcissement qui sera défait sans qu'on le sache.
+   */
+  const ATTENDUS = ["admin_audit_log_append_only", "admin_audit_log_no_truncate"] as const;
+
+  test("les deux déclencheurs du journal sont ALWAYS, pas ORIGIN", async () => {
+    const etats = await interroger<{ nom: string; etat: string }>(
+      bd,
+      `select t.tgname as nom, t.tgenabled as etat
+         from pg_trigger t
+         join pg_class c on c.oid = t.tgrelid
+         join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'public' and c.relname = 'admin_audit_log'
+          and not t.tgisinternal
+        order by 1`,
+    );
+
+    // Un ensemble vide passe tout : un `drop trigger` ferait disparaître les
+    // deux lignes, et un contrôle qui ne vérifie que l'état des lignes trouvées
+    // serait vert sur un journal devenu librement modifiable.
+    expect(
+      etats.map((e) => e.nom).sort(),
+      "Les déclencheurs du journal d'audit ont disparu : il n'est plus " +
+        "append-only du tout.",
+    ).toEqual([...ATTENDUS].sort());
+
+    const affaiblis = etats.filter((e) => e.etat !== "A");
+    expect(
+      affaiblis.map((e) => `${e.nom} (tgenabled=${e.etat})`),
+      "Des déclencheurs du journal ne sont plus `ALWAYS` : une session qui pose " +
+        "`session_replication_role = 'replica'` les contourne, sans DDL, donc " +
+        "sans laisser de trace.",
+    ).toEqual([]);
   });
 });
