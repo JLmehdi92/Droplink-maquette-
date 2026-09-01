@@ -1765,6 +1765,61 @@ try {
         [battement !== null, "elle a ecrit son battement — un passage sans battement n a pas veille"],
       );
 
+      // ── L AUTRE MOITIE DE LA VEILLE MUTUELLE ──
+      //
+      // ⚠️ CETTE ROUTE N ETAIT ATTEINTE PAR RIEN. Ni sonde, ni test : les suites
+      // eprouvent `veillerSur`, la fonction, jamais `/api/veille`, le cablage.
+      // Sa garde est partagee avec la cadence — donc eprouvee —, mais un
+      // `maxDuration` mal ecrit, un import casse, un `passerLaVeille` qui leve,
+      // et la route rend 500 en silence. Le planificateur le verrait ; personne
+      // d autre.
+      //
+      // C est la moitie qui constate la mort de la CADENCE. Une veille muette
+      // rend le silence de la cadence indiscernable d un fonctionnement normal,
+      // et c est exactement ce que L-022 interdit.
+      //
+      // ⚠️ L ORDRE COMPTE : la cadence vient de battre, quelques lignes plus
+      // haut. La veille doit donc OBSERVER ce battement. Sans ce controle, une
+      // veille qui n observe rien passerait — un ensemble vide passe tout, et
+      // c est precisement l etat qu on ne peut pas distinguer d une panne.
+      const veilleSansSecret = await fetch(`${base}/api/veille`, { method: "POST" });
+      const veilleMauvais = await fetch(`${base}/api/veille`, {
+        method: "POST",
+        headers: { authorization: "Bearer mauvais-secret-0123456789" },
+      });
+      const veilleGet = await fetch(`${base}/api/veille`);
+      const veilleOk = await fetch(`${base}/api/veille`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${SECRET_CRON}` },
+      });
+      const bilanVeille = veilleOk.ok ? await veilleOk.json() : null;
+
+      const { data: battementVeille } = await service
+        .from("scheduler_heartbeat")
+        .select("source, beat_at")
+        .eq("source", "veille-mutuelle")
+        .maybeSingle();
+
+      controles.push(
+        [veilleSansSecret.status === 404, "la veille sans secret rend 404"],
+        [veilleMauvais.status === 404, "la veille avec un MAUVAIS secret rend 404"],
+        [veilleGet.status === 404, "un GET sur la veille est refuse explicitement"],
+        [veilleOk.status === 200, `la veille s ouvre avec le bon secret (${veilleOk.status})`],
+        [
+          bilanVeille !== null && typeof bilanVeille.observees === "number",
+          "elle rend un bilan chiffre",
+        ],
+        [
+          bilanVeille !== null && bilanVeille.observees >= 1,
+          `elle a VU la cadence battre (${bilanVeille?.observees ?? "aucun bilan"} source(s) observee(s)) — ` +
+            "un veilleur qui n observe rien ne se distingue pas d un veilleur en panne",
+        ],
+        [
+          battementVeille !== null,
+          "elle a ecrit SON battement, apres avoir veille — c est lui que la cadence regardera",
+        ],
+      );
+
       // LE POINT DE RECEPTION. Sans signature, n importe qui pourrait annoncer au
       // client d un vendeur inconnu que son colis est livre.
       const corpsSuivi = JSON.stringify({
