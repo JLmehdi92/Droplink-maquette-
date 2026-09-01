@@ -123,6 +123,69 @@ export async function effacerLesBattements(): Promise<void> {
 }
 
 /**
+ * Compte ce qui reste de la veille AVANT de l'effacer, et le DIT.
+ *
+ * ⚠️ CE COMPTEUR EST LE DÉTECTEUR, l'effacement n'est que le remède. Trouver des
+ * résidus À L'ENTRÉE signifie que l'exécution PRÉCÉDENTE n'a pas nettoyé —
+ * interruption, plantage, ou un chemin d'écriture qu'on n'avait pas vu. Sans
+ * cette ligne, le nettoyage d'entrée masque la fuite qu'il répare : on
+ * effacerait indéfiniment quelque chose qui n'aurait jamais dû exister, et la
+ * cause resterait invisible.
+ *
+ * C'est ce qui s'est produit le 01/09/2026 : les résidus étaient là depuis des
+ * mois, inoffensifs tant que rien ne pouvait partir, et ils ont produit une
+ * VRAIE alerte fausse le jour où l'expéditeur d'emails a marché.
+ */
+export async function signalerLesResidusDeVeille(): Promise<number> {
+  const service = clientService();
+  const [battements, alertes] = await Promise.all([
+    service.from("scheduler_heartbeat").select("source", { count: "exact", head: true }),
+    service.from("alertes_envoyees").select("cle", { count: "exact", head: true }),
+  ]);
+
+  const total = (battements.count ?? 0) + (alertes.count ?? 0);
+  if (total > 0) {
+    console.warn(
+      `[harnais] ${total} résidu(s) de veille trouvé(s) À L'ENTRÉE ` +
+        `(${battements.count ?? 0} battement(s), ${alertes.count ?? 0} réservation(s)). ` +
+        "L'exécution PRÉCÉDENTE n'a pas nettoyé : un battement résiduel fait passer " +
+        "une tâche de « jamais déployée » à « en retard », donc d'un constat à une " +
+        "ALERTE — et depuis que l'expéditeur fonctionne, cette alerte PART.",
+    );
+  }
+  return total;
+}
+
+/**
+ * Efface les RÉSERVATIONS D'ALERTE laissées par les suites.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ LE 01/09/2026 PARCE QU'IL A MORDU POUR DE VRAI. Une
+ * alerte est arrivée dans la boîte de Wassim — « Tâche en retard :
+ * veille-mutuelle », 301 minutes de retard — quelques minutes après que le
+ * domaine d'envoi a été vérifié. Personne ne l'avait demandée, et elle était
+ * FAUSSE : `veille-mutuelle` n'a jamais tourné, son battement vieux de cinq
+ * heures était un résidu de suite.
+ *
+ * C'est très exactement ce que `effacerLesBattements` décrit et ne suffisait
+ * pas à empêcher : le nettoyage n'avait lieu QU'À L'ENTRÉE. Entre deux
+ * exécutions, la base gardait donc des battements que personne n'avait voulus —
+ * inoffensifs tant que rien ne pouvait partir, et transformés en ALERTE le jour
+ * où l'expéditeur a marché.
+ *
+ * ⚠️ ET LA RÉSERVATION EST LE DÉFAUT SYMÉTRIQUE, plus discret. Une ligne posée
+ * ici FAIT TAIRE l'alerte correspondante pendant toute la durée du repos : un
+ * résidu de test peut donc étouffer une alerte GENUINE. L'un crie à tort,
+ * l'autre se tait à tort — et le second ne se remarque pas.
+ */
+export async function effacerLesReservationsDAlerte(): Promise<void> {
+  const service = clientService();
+  const { error } = await service.from("alertes_envoyees").delete().neq("cle", "");
+  if (error !== null) {
+    console.warn("[harnais] effacement des réservations d'alerte impossible : " + error.message);
+  }
+}
+
+/**
  * La taille de la base, en octets.
  *
  * Elle passe par une connexion Postgres DIRECTE : `pg_database_size` n'est pas

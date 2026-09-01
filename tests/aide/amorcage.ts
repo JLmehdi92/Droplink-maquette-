@@ -25,11 +25,21 @@ config({ path: ".env.local", quiet: true });
 const PLAFOND_BASE = 300 * 1024 * 1024;
 
 export async function setup(projet?: { readonly name?: string }): Promise<void> {
-  const { purgerResidusDeTest, rendreLesParametresAuDefaut, effacerLesBattements, tailleBase, rendreLEspace } =
-    await import("./purger-residus");
+  const {
+    purgerResidusDeTest,
+    rendreLesParametresAuDefaut,
+    effacerLesBattements,
+    effacerLesReservationsDAlerte,
+    signalerLesResidusDeVeille,
+    tailleBase,
+    rendreLEspace,
+  } = await import("./purger-residus");
   await purgerResidusDeTest();
   await rendreLesParametresAuDefaut();
+  // COMPTER AVANT D'EFFACER : sinon le remède masque la fuite qu'il répare.
+  await signalerLesResidusDeVeille();
   await effacerLesBattements();
+  await effacerLesReservationsDAlerte();
 
   /*
    * LE BANC DE MESURE RESTITUE À CHAQUE PASSAGE, sans condition de taille.
@@ -90,4 +100,33 @@ export async function setup(projet?: { readonly name?: string }): Promise<void> 
       );
     }
   }
+}
+
+/**
+ * LE NETTOYAGE DE SORTIE — ET POURQUOI L'ENTRÉE NE SUFFISAIT PAS.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ LE 01/09/2026 PARCE QU'IL A MORDU. Quelques minutes
+ * après la vérification du domaine d'envoi, une VRAIE alerte est arrivée dans
+ * la boîte de Wassim : « Tâche en retard : veille-mutuelle, 301 minutes ».
+ * Personne ne l'avait demandée, et elle était FAUSSE — `veille-mutuelle` n'a
+ * jamais tourné, son battement de cinq heures était un résidu de suite.
+ *
+ * Le nettoyage n'avait lieu qu'à l'ENTRÉE. Entre deux exécutions, la base
+ * gardait donc l'état laissé par la précédente : inoffensif tant que rien ne
+ * pouvait partir, et transformé en alerte le jour où l'expéditeur a marché.
+ *
+ * ⚠️ CE N'EST PAS UN DÉTAIL D'HYGIÈNE. `scheduler_heartbeat` est GLOBALE et
+ * l'ABSENCE de ligne y est l'information : elle distingue « jamais déployée »
+ * d'« en retard », c'est-à-dire un CONSTAT d'une ALERTE. Un résidu déplace le
+ * produit d'un état vers l'autre, et « une alerte qui se trompe est une alerte
+ * qu'on apprend à ignorer ».
+ *
+ * L'ENTRÉE EST CONSERVÉE malgré tout : une exécution interrompue — Ctrl-C,
+ * plantage — ne passe jamais par la sortie, et la suivante doit quand même
+ * partir propre.
+ */
+export async function teardown(): Promise<void> {
+  const { effacerLesBattements, effacerLesReservationsDAlerte } = await import("./purger-residus");
+  await effacerLesBattements();
+  await effacerLesReservationsDAlerte();
 }

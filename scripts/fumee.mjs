@@ -191,6 +191,34 @@ const serveur = spawn("pnpm", ["start", "--port", String(port)], {
      * en restant credible.
      */
     NEXT_PUBLIC_POSTHOG_KEY: "",
+    /*
+     * ⚠️ ET L EXPEDITEUR AUSSI — LE TROISIEME, TROUVE PARCE QU IL A MORDU.
+     *
+     * Le 01/09/2026, quelques minutes apres la verification du domaine d envoi,
+     * une VRAIE alerte est arrivee dans la boite de Wassim : « Tache en retard :
+     * veille-mutuelle », emise par `cadence-suivi`. Personne ne l avait demandee.
+     *
+     * Elle venait d ICI. Cette sonde appelle `/api/suivi/cadence`, la cadence
+     * veille sur l autre planificateur, et le serveur heritait de la vraie cle
+     * Resend. Chaque `pnpm gates` aurait donc envoye une alerte — et « une
+     * alerte qui se trompe est une alerte qu on apprend a ignorer ». Le veilleur
+     * serait devenu inaudible avant d avoir jamais servi.
+     *
+     * ⚠️ CE QUE CET INCIDENT A PROUVE, ET QU IL FAUT GARDER : la chaine complete
+     * FONCTIONNE. Etat des battements → decision → reservation → email recu.
+     * C est L-022 etablie par execution, une fois, pour de vrai. Elle n a pas
+     * besoin de l etre a chaque passage.
+     *
+     * La voie d envoi reste eprouvable a la demande par `pnpm check:email`,
+     * hors des portes, comme `pnpm check:r2`.
+     *
+     * ⚠️ ICI LA NEUTRALISATION EST LA SEULE GARDE, et il faut le dire : ce
+     * serveur est un PROCESSUS SEPARE, il n installe pas le transport du harnais
+     * et ne peut donc pas refuser l appel. C est une protection qui tient a une
+     * absence — moins solide que celle de la suite, et c est assume faute de
+     * levier qui ne deforme pas le produit.
+     */
+    RESEND_API_KEY: "",
   },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -2000,6 +2028,29 @@ try {
     const { data: p } = await service.from("profiles").select("user_id").eq("id", profilFumee).maybeSingle();
     if (p?.user_id) await service.auth.admin.deleteUser(p.user_id);
   }
+
+  /*
+   * ⚠️ LES BATTEMENTS AUSSI — ET CE N EST PAS DE L HYGIENE.
+   *
+   * Cette sonde appelle `/api/suivi/cadence`, qui ECRIT un vrai battement et
+   * fait veiller la cadence sur l autre planificateur. Les laisser derriere
+   * elle a produit, le 01/09/2026, une VRAIE alerte dans la boite de Wassim :
+   * « Tache en retard : veille-mutuelle, 301 minutes ». Elle etait FAUSSE —
+   * `veille-mutuelle` n a jamais tourne, son battement etait un residu.
+   *
+   * `scheduler_heartbeat` est GLOBALE et l ABSENCE de ligne y est
+   * l information : elle distingue « jamais deployee » d « en retard »,
+   * c est-a-dire un CONSTAT d une ALERTE. Un residu deplace le produit d un
+   * etat vers l autre, et une alerte qui se trompe est une alerte qu on apprend
+   * a ignorer.
+   *
+   * La reservation d alerte part avec, pour le defaut SYMETRIQUE : une ligne
+   * laissee la FAIT TAIRE l alerte correspondante pendant tout son repos, donc
+   * un residu de sonde peut etouffer une alerte genuine. Celui-la ne se
+   * remarque pas.
+   */
+  await service.from("scheduler_heartbeat").delete().neq("source", "");
+  await service.from("alertes_envoyees").delete().neq("cle", "");
 }
 
 console.log("\n— Contenu rendu —");
