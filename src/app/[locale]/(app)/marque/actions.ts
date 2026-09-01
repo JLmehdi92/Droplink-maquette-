@@ -6,9 +6,12 @@ import { emettreApres } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { appliquerReglagesMarque, ReglagesMarque } from "@/lib/boutique/reglages";
 import {
+  CleDeposee,
   confirmerDepotDeLogo,
   preparerDepotDeLogo,
   retirerLogo,
+  TailleDemandee,
+  TypeMimeDemande,
   type PreparationLogo,
 } from "@/lib/boutique/logo";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -112,22 +115,31 @@ export async function enregistrerMarque(
 }
 
 export async function preparerLogo(
-  typeMime: string,
-  tailleOctets: number,
+  entreeType: unknown,
+  entreeTaille: unknown,
 ): Promise<PreparationLogo | { statut: "erreur"; motif: "session" }> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
     return { statut: "erreur", motif: "session" };
   }
-  return preparerDepotDeLogo(profil.shopId, typeMime, tailleOctets);
+
+  const type = TypeMimeDemande.safeParse(entreeType);
+  if (!type.success) return { statut: "erreur", motif: "type" };
+  const taille = TailleDemandee.safeParse(entreeTaille);
+  if (!taille.success) return { statut: "erreur", motif: "taille" };
+
+  return preparerDepotDeLogo(profil.shopId, type.data, taille.data);
 }
 
-export async function confirmerLogo(cle: string): Promise<{ statut: "ok" | "erreur" }> {
+export async function confirmerLogo(entree: unknown): Promise<{ statut: "ok" | "erreur" }> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") return { statut: "erreur" };
 
+  const saisie = CleDeposee.safeParse(entree);
+  if (!saisie.success) return { statut: "erreur" };
+
   const supabase = await creerClientServeur();
-  const ok = await confirmerDepotDeLogo(supabase, profil.shopId, cle);
+  const ok = await confirmerDepotDeLogo(supabase, profil.shopId, saisie.data);
   if (!ok) return { statut: "erreur" };
 
   revalidatePath(`/${profil.langue}/marque`);

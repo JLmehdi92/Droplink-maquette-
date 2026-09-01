@@ -7,7 +7,13 @@ import { emettreApres } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { appliquerReglagesMarque } from "@/lib/boutique/reglages";
-import { confirmerDepotDeLogo, preparerDepotDeLogo } from "@/lib/boutique/logo";
+import {
+  CleDeposee,
+  confirmerDepotDeLogo,
+  preparerDepotDeLogo,
+  TailleDemandee,
+  TypeMimeDemande,
+} from "@/lib/boutique/logo";
 
 /**
  * Onboarding — soixante secondes, quatre décisions.
@@ -181,18 +187,27 @@ export type ResultatDepotLogo =
  * l'utilisateur. Tout vendeur sait exporter un PNG.
  */
 export async function preparerDepotLogo(
-  typeMime: string,
-  tailleOctets: number,
+  entreeType: unknown,
+  entreeTaille: unknown,
 ): Promise<ResultatDepotLogo> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
     return { statut: "erreur", motif: "session" };
   }
 
+  // LES ARGUMENTS VIENNENT DU NAVIGATEUR, et TypeScript ne les garantit pas :
+  // ses annotations sont effacées à l'exécution. Sans ces deux contrôles,
+  // `typeMime.split(…)` levait sur une valeur non textuelle et l'action rendait
+  // 500 au lieu du refus nommé qui existe déjà.
+  const type = TypeMimeDemande.safeParse(entreeType);
+  if (!type.success) return { statut: "erreur", motif: "type" };
+  const taille = TailleDemandee.safeParse(entreeTaille);
+  if (!taille.success) return { statut: "erreur", motif: "taille" };
+
   // Même geste que les réglages de marque, donc même code. La duplication qui
   // vivait ici est ce qui a permis à la traversée de chemin de survivre dans un
   // chemin pendant qu'on regardait l'autre.
-  return preparerDepotDeLogo(profil.shopId, typeMime, tailleOctets);
+  return preparerDepotDeLogo(profil.shopId, type.data, taille.data);
 }
 
 export type ResultatConfirmationLogo = { statut: "ok"; cle: string } | { statut: "erreur" };
@@ -205,9 +220,17 @@ export type ResultatConfirmationLogo = { statut: "ok"; cle: string } | { statut:
  * relecture est ce qui rend la borne VÉRIFIÉE plutôt que supposée, et elle
  * attrape aussi le cas où rien n'est arrivé.
  */
-export async function confirmerDepotLogo(cle: string): Promise<ResultatConfirmationLogo> {
+export async function confirmerDepotLogo(entree: unknown): Promise<ResultatConfirmationLogo> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") return { statut: "erreur" };
+
+  // Une clé non textuelle faisait lever `cleAppartientAuShop`, et une clé
+  // textuelle mais NON CANONIQUE — `logos/{monShop}/x`, qui franchit pourtant
+  // le contrôle de propriété — faisait lever `exigerCleCanonique` plus bas.
+  // Dans les deux cas 500, alors que le refus existe et porte un nom.
+  const saisie = CleDeposee.safeParse(entree);
+  if (!saisie.success) return { statut: "erreur" };
+  const cle = saisie.data;
 
   // ⚠️ DÉLÉGATION VOLONTAIRE, ET C'EST LA CORRECTION.
   //

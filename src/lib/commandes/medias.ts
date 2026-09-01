@@ -602,8 +602,8 @@ export async function confirmerDepot(
  */
 export async function supprimerMedia(
   supabase: ClientMedias,
-  orderId: string,
-  mediaId: string,
+  orderId: unknown,
+  mediaId: unknown,
 ): Promise<{ statut: "ok" } | { statut: "echec"; motif: "introuvable" }> {
   const analyse = z
     .object({ orderId: z.string().uuid(), mediaId: z.string().uuid() })
@@ -613,8 +613,8 @@ export async function supprimerMedia(
   const { data, error } = await supabase
     .from("order_media")
     .delete()
-    .eq("id", mediaId)
-    .eq("order_id", orderId)
+    .eq("id", analyse.data.mediaId)
+    .eq("order_id", analyse.data.orderId)
     .select("cle")
     .maybeSingle();
 
@@ -637,8 +637,8 @@ export async function supprimerMedia(
  */
 export async function reordonnerMedias(
   supabase: ClientMedias,
-  orderId: string,
-  ids: readonly string[],
+  orderId: unknown,
+  ids: unknown,
 ): Promise<{ statut: "ok"; nombre: number } | { statut: "echec"; motif: string }> {
   const analyse = z
     .object({ orderId: z.string().uuid(), ids: z.array(z.string().uuid()).max(50) })

@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import {
@@ -77,8 +78,8 @@ export async function demanderDepotCouverture(
 }
 
 export async function retirerMedia(
-  orderId: string,
-  mediaId: string,
+  orderId: unknown,
+  mediaId: unknown,
 ): Promise<{ statut: "ok" } | { statut: "echec"; motif: string }> {
   const c = await contexte();
   if (c === null) return REFUS;
@@ -86,8 +87,8 @@ export async function retirerMedia(
 }
 
 export async function ordonnerMedias(
-  orderId: string,
-  ids: readonly string[],
+  orderId: unknown,
+  ids: unknown,
 ): Promise<{ statut: "ok"; nombre: number } | { statut: "echec"; motif: string }> {
   const c = await contexte();
   if (c === null) return REFUS;
@@ -107,26 +108,37 @@ export async function ordonnerMedias(
  * existe », pas « il est à vous ».
  */
 export async function definirCouverture(
-  orderId: string,
-  mediaId: string | null,
+  orderId: unknown,
+  mediaId: unknown,
 ): Promise<{ statut: "ok" } | { statut: "echec"; motif: string }> {
   const c = await contexte();
   if (c === null) return REFUS;
 
-  if (mediaId !== null) {
+  // LES DEUX ARGUMENTS VIENNENT DU NAVIGATEUR. Ils partaient tels quels dans
+  // `.eq()` : une valeur non textuelle produisait une erreur de syntaxe côté
+  // base plutôt qu'un refus nommé, et `mediaId` pouvait valoir n'importe quoi
+  // pourvu que ce ne soit pas exactement `null`. Le contrôle d'appartenance qui
+  // suit reste la vraie garde — celui-ci ne fait que borner la FORME.
+  const saisie = z
+    .object({ orderId: z.string().uuid(), mediaId: z.string().uuid().nullable() })
+    .safeParse({ orderId, mediaId: mediaId ?? null });
+  if (!saisie.success) return { statut: "echec", motif: "introuvable" };
+  const { orderId: commande, mediaId: media } = saisie.data;
+
+  if (media !== null) {
     const { data } = await c.supabase
       .from("order_media")
       .select("id")
-      .eq("id", mediaId)
-      .eq("order_id", orderId)
+      .eq("id", media)
+      .eq("order_id", commande)
       .maybeSingle();
     if (data === null) return { statut: "echec", motif: "introuvable" };
   }
 
   const { data, error } = await c.supabase
     .from("orders")
-    .update({ cover_media_id: mediaId })
-    .eq("id", orderId)
+    .update({ cover_media_id: media })
+    .eq("id", commande)
     .select("id")
     .maybeSingle();
 

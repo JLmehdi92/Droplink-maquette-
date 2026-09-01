@@ -40,7 +40,7 @@ export type Revocation =
 export async function revoquerLien(
   supabase: ClientCycle,
   profilId: string,
-  orderId: string,
+  orderId: unknown,
 ): Promise<Revocation> {
   const analyse = Identifiant.safeParse(orderId);
   if (!analyse.success) return { statut: "echec", motif: "saisie" };
@@ -97,7 +97,7 @@ export async function dupliquerCommande(
   supabase: ClientCycle,
   profilId: string,
   shopId: string,
-  orderId: string,
+  orderId: unknown,
 ): Promise<Duplication> {
   const analyse = Identifiant.safeParse(orderId);
   if (!analyse.success) return { statut: "echec", motif: "saisie" };
@@ -156,7 +156,7 @@ export type Archivage =
 export async function archiverCommande(
   supabase: ClientCycle,
   profilId: string,
-  orderId: string,
+  orderId: unknown,
   archiver: boolean,
 ): Promise<Archivage> {
   const analyse = Identifiant.safeParse(orderId);

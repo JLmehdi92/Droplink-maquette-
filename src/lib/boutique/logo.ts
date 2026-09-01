@@ -1,5 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
 import { cleLogo } from "@/lib/storage/cles";
@@ -21,6 +22,31 @@ import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
  */
 
 export const TYPES_LOGO_ACCEPTES = ["image/png", "image/jpeg", "image/webp"] as const;
+
+/**
+ * LA FORME DES ARGUMENTS QUI VIENNENT DU NAVIGATEUR.
+ *
+ * ⚠️ CES TROIS SCHÉMAS NE REMPLACENT AUCUNE RÈGLE MÉTIER — le type accepté, le
+ * plafond de taille et la forme canonique de la clé restent décidés plus bas,
+ * là où ils étaient. Ils ne garantissent que le TYPE, et c'est précisément ce
+ * que TypeScript ne garantit pas : les annotations sont effacées à l'exécution,
+ * et l'appelant d'une Server Action est le navigateur.
+ *
+ * ⚠️ DÉFAUT MESURÉ LE 01/09/2026. Les actions de logo déclaraient
+ * `typeMime: string` et `cle: string`, et personne ne les vérifiait :
+ *   - `preparerLogo(null, 1)` levait sur `.split` ;
+ *   - `confirmerLogo("logos/{monShop}/x")` franchissait le contrôle de
+ *     PROPRIÉTÉ — trois segments, le bon shop — puis `exigerCleCanonique`
+ *     levait, et rien ne l'attrapait.
+ * Dans les deux cas la Server Action rendait 500. Un point d'entrée qui plante
+ * sur une requête forgée apprend à qui la forge qu'il a planté, et il écrit une
+ * trace d'erreur à chaque tentative : de quoi noyer un journal à volonté. La
+ * route `commandes/geste` porte cette règle depuis toujours ; les Server
+ * Actions l'avaient perdue.
+ */
+export const TypeMimeDemande = z.string().max(120);
+export const TailleDemandee = z.number();
+export const CleDeposee = z.string().max(300);
 
 export type PreparationLogo =
   | { statut: "pret"; url: string; cle: string; enTetes: Record<string, string> }

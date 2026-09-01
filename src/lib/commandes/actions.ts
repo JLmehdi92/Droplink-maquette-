@@ -3,6 +3,17 @@
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
+
+/**
+ * LA FORME D UN JETON RENVOYÉ PAR LE NAVIGATEUR.
+ *
+ * Il ne sert JAMAIS à autoriser quoi que ce soit — l autorisation vient du
+ * profil et de la RLS. Il ne sert qu à nommer l entrée de cache à invalider.
+ * On borne donc sa forme, sans plus : une valeur non textuelle ferait lever
+ * l invalidation après une mutation déjà écrite en base, et le vendeur
+ * conclurait à un échec devant une opération réussie.
+ */
+const Jeton = z.string().max(200);
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
@@ -97,13 +108,13 @@ export async function creerBrouillon(donnees: FormData): Promise<void> {
  * revienne au lieu de laisser à l'affichage une saisie que personne n'a gardée.
  */
 export async function enregistrerChamp(
-  id: string,
-  champ: string,
-  valeur: string,
+  id: unknown,
+  champ: unknown,
+  valeur: unknown,
 ): Promise<ResultatEnregistrement> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
-    return { statut: "echec", motif: "session", champ };
+    return { statut: "echec", motif: "session", champ: typeof champ === "string" ? champ : "" };
   }
 
   const supabase = await creerClientServeur();
@@ -118,8 +129,8 @@ export async function enregistrerChamp(
  * la révocation, qui existe précisément pour ça, n'aurait rien coupé.
  */
 export async function revoquerLienPublic(
-  orderId: string,
-  ancienJeton: string,
+  orderId: unknown,
+  ancienJeton: unknown,
 ): Promise<Revocation | { statut: "echec"; motif: "session" }> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
@@ -130,7 +141,12 @@ export async function revoquerLienPublic(
   const resultat = await revoquerLien(supabase, profil.profilId, orderId);
 
   if (resultat.statut === "ok") {
-    revalidateTag(etiquetteCommandePublique(ancienJeton));
+    // L ANCIEN JETON VIENT DU NAVIGATEUR. Il ne sert qu à invalider une entrée
+    // de cache : une valeur non textuelle ne doit pas faire lever la révocation
+    // APRÈS que la base a déjà tourné le jeton — le vendeur croirait avoir
+    // échoué alors que son lien est bel et bien coupé.
+    const ancien = Jeton.safeParse(ancienJeton);
+    if (ancien.success) revalidateTag(etiquetteCommandePublique(ancien.data));
     revalidateTag(etiquetteCommandePublique(resultat.nouveauJeton));
   }
 
@@ -138,8 +154,8 @@ export async function revoquerLienPublic(
 }
 
 export async function dupliquer(
-  orderId: string,
-  langue: string,
+  orderId: unknown,
+  langue: unknown,
 ): Promise<Duplication | { statut: "echec"; motif: "session" }> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
@@ -150,6 +166,8 @@ export async function dupliquer(
   const resultat = await dupliquerCommande(supabase, profil.profilId, profil.shopId, orderId);
 
   if (resultat.statut === "ok") {
+    // Ensemble FERMÉ : tout ce qui n est pas exactement « en » vaut « fr ».
+    // Une langue venue du navigateur ne peut donc porter aucun chemin.
     redirect("/" + (langue === "en" ? "en" : "fr") + "/commandes/" + resultat.nouvelleCommande);
   }
 
@@ -157,9 +175,9 @@ export async function dupliquer(
 }
 
 export async function archiver(
-  orderId: string,
-  jeton: string,
-  archiver: boolean,
+  orderId: unknown,
+  jeton: unknown,
+  archiver: unknown,
 ): Promise<Archivage | { statut: "echec"; motif: "session" }> {
   const profil = await lireProfilVendeur();
   if (profil === null || profil.statut !== "active") {
@@ -167,12 +185,15 @@ export async function archiver(
   }
 
   const supabase = await creerClientServeur();
-  const resultat = await archiverCommande(supabase, profil.profilId, orderId, archiver);
+  const resultat = await archiverCommande(supabase, profil.profilId, orderId, archiver === true);
 
   // Archiver ne retire PAS la page, mais l'invalidation reste juste : la vue
   // publique lit d'autres colonnes de la même ligne, et un cache tenu pour une
   // mutation près finirait par l'être pour toutes.
-  if (resultat.statut === "ok") revalidateTag(etiquetteCommandePublique(jeton));
+  const cible = Jeton.safeParse(jeton);
+  if (resultat.statut === "ok" && cible.success) {
+    revalidateTag(etiquetteCommandePublique(cible.data));
+  }
 
   return resultat;
 }

@@ -87,13 +87,17 @@ const Enregistrement = z.object({
 export async function appliquerChamp(
   supabase: ClientEcriture,
   profilId: string,
-  id: string,
-  champ: string,
-  valeur: string,
+  id: unknown,
+  champ: unknown,
+  valeur: unknown,
 ): Promise<ResultatEnregistrement> {
   const analyse = Enregistrement.safeParse({ id, champ, valeur });
   if (!analyse.success) {
-    return { statut: "echec", motif: "saisie", champ };
+    // ON NE RENVOIE PAS LA VALEUR BRUTE. Le témoin de l'éditeur NOMME le champ
+    // en échec, et ce nom vient de l'appelant : le rendre tel quel renverrait à
+    // l'écran ce qu'on vient de refuser. Un champ inconnu n'a de toute façon pas
+    // de témoin à allumer.
+    return { statut: "echec", motif: "saisie", champ: typeof champ === "string" ? champ : "" };
   }
 
   const nom = analyse.data.champ;

@@ -206,3 +206,121 @@ describe("Inventaire des Server Actions", () => {
     }
   });
 });
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LA MOITIÉ SYMÉTRIQUE : CE QUI ENTRE
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Le bloc ci-dessus exige de chaque action une IDENTITÉ vérifiée. Rien
+ * n'exigeait qu'elle valide son ENTRÉE — et c'est la même faiblesse, écrite
+ * dans l'autre sens.
+ *
+ * ⚠️ POURQUOI UNE ANNOTATION TYPESCRIPT EST UN MENSONGE ICI. `confirmerLogo(cle:
+ * string)` se lit comme une garantie. Elle n'en est pas une : les types sont
+ * effacés à l'exécution, et l'appelant d'une Server Action est le NAVIGATEUR.
+ * Rien n'oblige la valeur reçue à être une chaîne.
+ *
+ * ⚠️ CE QUE ÇA A COÛTÉ, MESURÉ LE 01/09/2026 :
+ *   - `preparerLogo(null, 1)` levait sur `.split` ;
+ *   - `confirmerLogo("logos/{monShop}/x")` franchissait le contrôle de
+ *     PROPRIÉTÉ — trois segments, le bon vendeur — puis `exigerCleCanonique`
+ *     levait, et rien ne l'attrapait ;
+ *   - `definirCouverture` envoyait ses deux arguments bruts dans `.eq()` ;
+ *   - `supprimerMedia` validait ses arguments PUIS interrogeait la base avec
+ *     les valeurs brutes — le typage masquait l'écart.
+ * Dans les trois premiers cas la réponse était 500. Un point d'entrée qui plante
+ * sur une requête forgée apprend à qui la forge qu'il a planté, et il écrit une
+ * trace d'erreur à chaque tentative : de quoi noyer un journal à volonté.
+ *
+ * LA RÈGLE : un paramètre d'action est `unknown` ou `FormData`, jamais un type
+ * concret. `unknown` force la validation — on ne peut rien en faire sans
+ * l'analyser. `FormData` est ce que Next construit lui-même pour un formulaire.
+ * Tout le reste est une promesse que personne ne tient.
+ */
+
+/** Les paramètres qu'une action a le droit de déclarer. */
+const TYPES_ADMIS = new Set(["unknown", "FormData"]);
+
+/**
+ * Les paramètres dispensés, avec leur raison.
+ *
+ * `useActionState` renvoie l'état PRÉCÉDENT au serveur, donc il vient bien du
+ * navigateur — mais aucune de nos actions ne le lit : toutes le nomment
+ * `_precedent`, et le préfixe `_` est ce que le lint impose pour un paramètre
+ * inutilisé. Une valeur qu'on ne lit pas ne peut rien casser.
+ */
+const PARAMETRES_DISPENSES: ReadonlyMap<string, string> = new Map([
+  [
+    "_precedent",
+    "État précédent de `useActionState`. Il vient du navigateur, mais AUCUNE " +
+      "action ne le lit — le préfixe `_` est ce qui le prouve, et le lint le " +
+      "refuserait s'il était utilisé.",
+  ],
+]);
+
+function parametres(corps: string): readonly { readonly nom: string; readonly type: string }[] {
+  const entete = /^(?:export\s+)?(?:async\s+)?function\s+\w+\s*\(([\s\S]*?)\)\s*:/m.exec(corps);
+  if (entete === null) return [];
+  const brut = (entete[1] ?? "").trim();
+  if (brut === "") return [];
+  return brut
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p !== "")
+    .map((p) => {
+      const [nom, ...reste] = p.split(":");
+      return { nom: (nom ?? "").trim(), type: reste.join(":").trim() };
+    });
+}
+
+describe("Ce qui ENTRE dans une Server Action", () => {
+  test("la sonde lit réellement des paramètres", () => {
+    const tous = MODULES.flatMap(({ code }) => fonctions(code))
+      .filter((f) => f.exportee)
+      .flatMap((f) => parametres(f.corps));
+    // Un ensemble vide passe tout : si le découpage cessait de trouver des
+    // paramètres, la règle ci-dessous serait verte sur zéro objet inspecté.
+    expect(
+      tous.length,
+      "Aucun paramètre trouvé sur aucune action : le découpage ne lit plus rien.",
+    ).toBeGreaterThan(8);
+  });
+
+  test("aucun paramètre d'action ne déclare un type concret", () => {
+    const defauts: string[] = [];
+
+    for (const { chemin, code } of MODULES) {
+      const relatif = chemin.slice(process.cwd().length + 1);
+      for (const f of fonctions(code).filter((x) => x.exportee)) {
+        for (const p of parametres(f.corps)) {
+          if (PARAMETRES_DISPENSES.has(p.nom)) continue;
+          if (TYPES_ADMIS.has(p.type)) continue;
+          defauts.push(
+            `${relatif} — ${f.nom}(${p.nom}: ${p.type}) : ce type est effacé à ` +
+              "l'exécution. L'appelant est le navigateur ; déclarer `unknown` " +
+              "et analyser.",
+          );
+        }
+      }
+    }
+
+    expect(defauts, `Paramètres d'action non validables :\n${defauts.join("\n")}`).toEqual([]);
+  });
+
+  test("chaque dispense de paramètre s'explique, et sert encore", () => {
+    const vus = new Set(
+      MODULES.flatMap(({ code }) => fonctions(code))
+        .filter((f) => f.exportee)
+        .flatMap((f) => parametres(f.corps))
+        .map((p) => p.nom),
+    );
+
+    for (const [nom, raison] of PARAMETRES_DISPENSES) {
+      expect(raison.length, `La dispense de « ${nom} » n'explique rien`).toBeGreaterThan(80);
+      // L'AUTRE SENS : une dispense périmée couvrirait le jour où le nom
+      // revient sur un paramètre qu'on lit, lui.
+      expect(vus.has(nom), `« ${nom} » est dispensé mais n'existe plus nulle part`).toBe(true);
+    }
+  });
+});
