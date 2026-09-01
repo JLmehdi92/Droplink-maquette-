@@ -73,6 +73,7 @@ const DECISION_DU_BRIEF: Readonly<Record<string, "autorise" | "refuse">> = {
   // compteur en panne ne doit pas rendre le bourrage d'identifiants gratuit,
   // c'est-à-dire précisément le jour où l'on est le moins capable de le voir.
   "auth-mdp-ip": "refuse",
+  "auth-mdp-couple": "refuse",
   "auth-mdp-email": "refuse",
   // Un point d'ingestion machine sans plafond nous fait calculer des signatures
   // à l'infini.

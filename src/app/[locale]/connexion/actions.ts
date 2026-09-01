@@ -42,13 +42,26 @@ import { creerClientServeur } from "@/lib/supabase/server";
  * « mot de passe faux » se distingueraient au millième de seconde près, quel
  * que soit le soin mis à écrire le même message pour les deux.
  *
- * ⚠️ UNE EXCEPTION, ASSUMÉE ET ÉCRITE AU §9 DU BRIEF : L'INSCRIPTION.
- * La confirmation d'email étant désactivée (décision de Wassim), `signUp` sur
- * une adresse déjà inscrite rend « User already registered ». Ce n'est pas
- * rattrapable ici — une inscription réussie ouvre une session, un doublon non,
- * et la différence est observable quoi qu'on affiche. Elle est BORNÉE par les
- * compteurs, et refermable en réactivant la confirmation d'email, qui fait
- * obfusquer le serveur d'authentification.
+ * ⚠️ UNE EXCEPTION, ASSUMÉE ET ÉCRITE AU §9 DU BRIEF : L'INSCRIPTION — MAIS
+ * SEULEMENT DANS UN DES DEUX RÉGLAGES.
+ *
+ * Ce paragraphe a d'abord dit « la confirmation d'email étant désactivée
+ * (décision de Wassim) ». C'était le réglage VOULU, pas le réglage EN VIGUEUR :
+ * mesuré, la confirmation est ACTIVE (`mailer_autoconfirm: false`, et
+ * `signInWithPassword` sur un compte non confirmé rend `email_not_confirmed`).
+ * Un commentaire qui affirme un état que personne n'a exécuté est exactement ce
+ * que ce projet traque, et celui-ci décrivait comme ouvert un trou déjà fermé.
+ *
+ *   - confirmation ACTIVE (aujourd'hui) : `signUp` sur une adresse déjà
+ *     inscrite rend un utilisateur OBFUSQUÉ sans session, et n'envoie rien. Le
+ *     doublon est indiscernable d'une inscription réussie. Pas d'oracle.
+ *   - confirmation DÉSACTIVÉE (ce que Wassim a tranché) : elle rend « User
+ *     already registered ». L'oracle existe alors, il n'est pas rattrapable ici
+ *     — une inscription réussie ouvre une session, un doublon non — et il est
+ *     BORNÉ par les compteurs.
+ *
+ * Ce fichier gère les deux, parce qu'il ne peut pas savoir lequel est en
+ * vigueur : le réglage vit dans le tableau de bord, hors du dépôt.
  */
 
 const Langue = z.enum(["fr", "en"]);
@@ -274,7 +287,29 @@ export async function sInscrire(
   await attendrePlancher(debut);
 
   if (error !== null) {
-    if (error.status === 429) return { statut: "erreur", motif: "trop_de_tentatives" };
+    /*
+     * ⚠️ LE 429 DU SERVEUR D'AUTHENTIFICATION EST UN ORACLE ICI AUSSI, EN SENS
+     * INVERSE — et je l'avais laissé passer en « trop de tentatives ».
+     *
+     * MESURÉ LE 02/09/2026, budget d'emails épuisé :
+     *
+     *     adresse AVEC compte → obfusquée, aucun envoi → 303 vers `confirmez`
+     *     adresse SANS compte → un envoi est TENTÉ    → 429 → « trop de tentatives »
+     *
+     * Discrimination binaire parfaite, et elle ne se referme PAS en rejouant sur
+     * la confirmation d'email : elle est structurelle au fait qu'un envoi n'est
+     * tenté que pour les adresses NEUVES. Le seul moyen de la fermer est de ne
+     * pas laisser la classe d'erreur d'envoi transparaître dans la forme de la
+     * réponse — donc d'emprunter la MÊME sortie que l'adresse déjà inscrite.
+     *
+     * Le compte a bel et bien été créé dans ce cas : seul l'email de
+     * confirmation manque. Le libellé de `confirmez` couvre les trois cas sans
+     * dire lequel s'applique, et le journal, lui, porte la vraie cause.
+     */
+    if (error.status === 429) {
+      console.error("[auth] confirmation d'inscription non envoyée — " + error.message);
+      redirect(`/${locale}/connexion?erreur=confirmez`);
+    }
     /*
      * ⚠️ ICI VIT L'ORACLE, ET IL EST NOMMÉ PLUTÔT QUE MAQUILLÉ.
      *
@@ -377,13 +412,29 @@ export async function demanderReinitialisation(
 
   await attendrePlancher(debut);
 
-  if (error !== null && error.status === 429) {
-    return { statut: "erreur", motif: "trop_de_tentatives" };
-  }
-
   if (error !== null) {
-    // Le journal sait, l'écran non. Une panne d'envoi ne doit pas devenir un
-    // moyen de distinguer une adresse inscrite d'une adresse inconnue.
+    /*
+     * ⚠️ AUCUNE ERREUR D'ENVOI NE REMONTE À L'ÉCRAN, PAS MÊME LA LIMITE DE DÉBIT.
+     *
+     * DÉFAUT RÉEL, MESURÉ LE 02/09/2026, ET IL M'A ÉCHAPPÉ À L'ÉCRITURE. Je
+     * laissais passer `429` en « trop de tentatives », en me disant que ce motif
+     * « ne dépend pas de l'existence d'un compte ». C'EST FAUX ICI, et pour une
+     * raison qui ne se voit qu'en observant le serveur d'authentification :
+     *
+     *     adresse AVEC compte  → un envoi est TENTÉ → 429 (budget épuisé)
+     *     adresse SANS compte  → aucun envoi tenté  → 200 muet
+     *
+     * L'envoi n'est tenté que pour une CLASSE d'adresses. Son refus est donc un
+     * oracle parfait dès que le budget d'emails du projet est plein — état
+     * courant, puisqu'il vaut quelques messages par heure sans SMTP dédié, et
+     * qu'un attaquant le force en deux requêtes. Relevé : 10 adresses mêlées,
+     * 10/10 correctement classées à la longueur du corps.
+     *
+     * UNE SEULE ISSUE, DONC, quoi qu'il arrive après le plancher. La limite de
+     * débit qui PEUT être dite est celle de NOS compteurs, plus haut : elle est
+     * consommée avant l'appel, donc avant que l'existence du compte ait pu jouer
+     * le moindre rôle.
+     */
     console.error("[auth] envoi de réinitialisation en échec — " + error.message);
   }
 

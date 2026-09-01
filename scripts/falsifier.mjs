@@ -87,10 +87,17 @@ const SQL = {
     // réparation recopiée à la main dérive du dépôt sans que rien ne le dise,
     // et l'on croirait alors avoir restauré l'état de référence en ayant
     // restauré une copie périmée.
+    //
+    // ⚠️ ELLE POINTAIT SUR LA 021, ET LA 132 A REDEFINI LA FONCTION DEPUIS.
+    // Reparer depuis la 021 aurait donc RAMENE le defaut que la 132 corrige —
+    // une purge qui efface les compteurs des autres surfaces —, en silence, a
+    // la fin de chaque falsification. C est `falsificateur-a-jour` qui l a dit :
+    // une sonde qui compare la migration citee a la DERNIERE qui redefinit la
+    // fonction, et qui existe exactement pour ce cas.
     reparerDepuisMigration: {
-      fichier: "021_fenetre_partagee.sql",
+      fichier: "132_la_purge_du_compteur_effacait_les_autres_fenetres.sql",
       depuis: "create or replace function public.consommer_quota",
-      jusqua: "create or replace function public.quota_depasse",
+      jusqua: "revoke all on function public.consommer_quota",
     },
   },
 

@@ -148,6 +148,36 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
   // et `lib/audit/garde.ts`, qui portent les vraies gardes.
   const { data } = await supabase.auth.getSession();
 
+  const viseLAdmin = viseAdmin(requete.nextUrl.pathname);
+
+  /*
+   * ⚠️ SUR `/admin` SEULEMENT, ON VALIDE LA SESSION AUPRÈS DU SERVEUR D'AUTH.
+   *
+   * DÉFAUT MESURÉ LE 02/09/2026, par la TAILLE des corps de refus : le 404 du
+   * middleware est vide, celui d'`exigerAdmin()` ne l'est pas.
+   *
+   *     sans cookie        404, 0 o       ← arrêté par le middleware
+   *     cookie illisible   404, 0 o       ← arrêté par le middleware
+   *     cookie RÉVOQUÉ     404, 7 982 o   ← a FRANCHI le middleware
+   *
+   * `getSession()` ne fait aucun appel réseau tant que le jeton n'a pas expiré :
+   * un jeton révoqué le franchit pendant une heure. Aucune donnée n'est sortie —
+   * `exigerAdmin()` tient, et c'est lui qui fait autorité — mais la défense en
+   * profondeur que le brief exige tombait alors à UNE couche, et chaque requête
+   * coûtait un quota, une lecture de profil et une vérification de rôle en base.
+   *
+   * ⚠️ ET SEULEMENT SUR `/admin`. Poser cette validation partout ajouterait un
+   * aller-retour vers le serveur d'authentification à CHAQUE requête du produit,
+   * landing comprise — c'est-à-dire la page qui doit être la plus rapide. Le
+   * trafic d'administration, lui, se compte en dizaines de requêtes par jour.
+   */
+  if (viseLAdmin && data.session !== null) {
+    const { data: utilisateur, error } = await supabase.auth.getUser();
+    if (error !== null || utilisateur.user === null) {
+      return new NextResponse(null, { status: 404 });
+    }
+  }
+
   /*
    * PREMIÈRE COUCHE SUR `/admin`, ET RIEN DE PLUS.
    *
@@ -163,7 +193,7 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
    * faille » de « il n'y a rien ». Le corps de la réponse est vide pour la même
    * raison : une page d'erreur reconnaissable serait un aveu.
    */
-  if (data.session === null && viseAdmin(requete.nextUrl.pathname)) {
+  if (data.session === null && viseLAdmin) {
     return new NextResponse(null, { status: 404 });
   }
 

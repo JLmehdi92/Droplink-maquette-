@@ -11,7 +11,7 @@ import { STATUTS_EXPEDITION, STATUTS_QC } from "@/lib/commandes/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
-import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { resoudreAccent } from "@/lib/design/contraste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
@@ -99,12 +99,21 @@ export default async function EditeurCommande({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
+  /*
+   * ⚠️ LA GARDE PASSE AVANT LA LECTURE. Cet écran porte les NOTES INTERNES —
+   * qui contiennent le prix d'achat — et le `public_token`. La redirection du
+   * layout arrive trop tard : Next a déjà engagé la réponse quand elle tombe, et
+   * la charge de la page part avec le 307. Mesuré avec un cookie révoqué : les
+   * deux sentinelles sortaient.
+   */
+  const profil = await exigerVendeur(langue);
+
   const supabase = await creerClientServeur();
   const { data, error } = await lireCommandeEditee(id);
 
   if (error !== null || data === null) notFound();
 
-  const [origine, profil] = await Promise.all([origineDuSite(), lireProfilVendeur()]);
+  const origine = await origineDuSite();
 
   /*
    * Les médias, avec des URL de lecture SIGNÉES ET À EXPIRATION.
@@ -152,11 +161,14 @@ export default async function EditeurCommande({
    * `accent_color` est NON NULLE avec un défaut en base : il n'existe aucun état
    * « couleur non configurée » à détecter.
    */
-  const accent = resoudreAccent(profil?.couleurAccent ?? "");
+  // `profil` NE PEUT PLUS ÊTRE NUL ici : `exigerVendeur` a déjà redirigé. Les
+  // trois branches de repli qui vivaient là étaient précisément ce qui laissait
+  // la page se rendre quand il l'était.
+  const accent = resoudreAccent(profil.couleurAccent);
   const logoUrl =
-    profil?.logoUrl == null ? null : await signerLecture(profil.logoUrl).catch(() => null);
+    profil.logoUrl === null ? null : await signerLecture(profil.logoUrl).catch(() => null);
 
-  if (profil !== null) {
+  {
     // `order_editor_opened` mesure l'OUVERTURE, `order_created` mesure le
     // premier contenu réel. L'écart entre les deux est l'information : un
     // brouillon ouvert puis abandonné est exactement le cas « teste une ou deux

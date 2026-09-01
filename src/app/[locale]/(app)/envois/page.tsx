@@ -3,7 +3,8 @@ import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { TableauEnvois } from "@/components/envois/tableau-envois";
-import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
+import { onboardingAFaire } from "@/lib/comptes/profil";
+import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { analyserParametres, compterEnvois, lireEnvois } from "@/lib/envois/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
@@ -45,8 +46,11 @@ export default async function Envois({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const profil = await lireProfilVendeur();
-  if (profil === null) redirect(`/${langue}/connexion?erreur=session`);
+  // ⚠️ `exigerVendeur` REMPLACE une garde qui ne regardait que `profil === null`.
+  // Elle laissait donc passer un compte SUSPENDU, dont le tableau de bord
+  // continuait de répondre — la coupure ne tenait que sur `/p/[token]`, et c'est
+  // elle qui fonde notre statut d'hébergeur.
+  const profil = await exigerVendeur(langue);
   if (onboardingAFaire(profil)) redirect(`/${langue}/bienvenue`);
 
   const parametres = analyserParametres(await searchParams);

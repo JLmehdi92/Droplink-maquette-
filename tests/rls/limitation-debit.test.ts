@@ -27,6 +27,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await catalogue.query("delete from public.rate_limit where cle like 'test-%'");
+  await catalogue.query("delete from public.rate_limit where cle like 'test-purge-%'");
   await catalogue.end();
 });
 
@@ -339,5 +340,97 @@ describe("Consulter un compteur sans le consommer", () => {
       .map((l) => l.beneficiaire)
       .filter((r) => r === "PUBLIC" || r === "anon" || r === "authenticated");
     expect(ouverts, "le compteur est consultable par un client").toEqual([]);
+  });
+});
+
+describe("La purge ne franchit pas la frontière des surfaces", () => {
+  /*
+   * ═══════════════════════════════════════════════════════════════════════════
+   * LE DÉFAUT QUI A MOTIVÉ CETTE SUITE — ET QUI RENDAIT TOUS LES PLAFONDS
+   * D'AUTHENTIFICATION INEXISTANTS EN PRODUCTION
+   * ═══════════════════════════════════════════════════════════════════════════
+   *
+   * `consommer_quota` purge les lignes périmées à son premier appel de fenêtre,
+   * et c'est nécessaire — sans purge, le coût de chaque appel croîtrait avec le
+   * trafic passé. Mais elle jugeait les lignes de TOUT LE MONDE avec la fenêtre
+   * de L'APPELANT.
+   *
+   * Les surfaces n'ont pas la même fenêtre : la page publique compte par MINUTE,
+   * l'authentification par HEURE. Un seul appel venu de la page publique posait
+   * donc le seuil à « il y a deux minutes » et supprimait des compteurs
+   * d'authentification vieux de cinquante minutes — c'est-à-dire parfaitement
+   * vivants.
+   *
+   * ⚠️ CE QUE ÇA COÛTAIT : la page publique est le cœur du produit, ouverte en
+   * permanence par de vrais clients. Chaque ouverture remettait à zéro les
+   * plafonds d'authentification. Les 30 tentatives par heure et par adresse IP
+   * N'EXISTAIENT PAS — et rien ne le disait, parce qu'éprouvés SEULS, en base
+   * calme, les compteurs fonctionnaient parfaitement. C'est le trafic légitime
+   * qui les effaçait.
+   *
+   * Aucune sonde ne pouvait le voir sans faire ce que fait celle-ci : mêler DEUX
+   * surfaces de fenêtres différentes dans la même base, comme la production.
+   */
+
+  const AUTH = "test-purge-auth:temoin";
+  const PUBLIQUE = "test-purge-publique:appelant";
+  const VIEUX_PUBLIQUE = "test-purge-publique:perime";
+
+  test("un appel à fenêtre COURTE n'efface pas un compteur à fenêtre LONGUE", async () => {
+    await catalogue.query("delete from public.rate_limit where cle like 'test-purge-%'");
+
+    // Une ligne d'authentification de la fenêtre horaire précédente : vieille de
+    // 90 minutes, donc périmée POUR SA PROPRE SURFACE aussi. C'est le pire cas —
+    // si même celle-là survit à un appel d'une autre surface, la frontière tient.
+    await catalogue.query(
+      "insert into public.rate_limit(cle, fenetre_debut, compte) values ($1, now() - interval '90 minutes', 5)",
+      [AUTH],
+    );
+
+    // Un appel de la page publique : fenêtre de 60 s, premier de sa fenêtre,
+    // donc il déclenche la purge.
+    await catalogue.query("select public.consommer_quota($1, 120, 60)", [PUBLIQUE]);
+
+    const restant = await interroger<{ cle: string }>(
+      catalogue,
+      "select cle from public.rate_limit where cle = $1",
+      [AUTH],
+    );
+
+    expect(
+      restant.length,
+      "Un appel de la page publique a supprimé un compteur d'authentification. " +
+        "Le trafic légitime efface donc les plafonds d'authentification, en " +
+        "continu, sans que rien ne le signale.",
+    ).toBe(1);
+  });
+
+  test("CONTRE-TEST : elle purge toujours DANS sa propre surface", async () => {
+    /*
+     * Sans ce contre-test, on refermerait le défaut en supprimant la purge — et
+     * la suite ci-dessus passerait à 100 %. Le coût de chaque appel se mettrait
+     * alors à croître avec tout le trafic passé, sur le chemin de CHAQUE requête
+     * protégée du produit. Une protection qui casse ce qu'elle protège n'en est
+     * pas une.
+     */
+    await catalogue.query("delete from public.rate_limit where cle like 'test-purge-%'");
+
+    await catalogue.query(
+      "insert into public.rate_limit(cle, fenetre_debut, compte) values ($1, now() - interval '10 minutes', 3)",
+      [VIEUX_PUBLIQUE],
+    );
+
+    await catalogue.query("select public.consommer_quota($1, 120, 60)", [PUBLIQUE]);
+
+    const restant = await interroger<{ cle: string }>(
+      catalogue,
+      "select cle from public.rate_limit where cle = $1",
+      [VIEUX_PUBLIQUE],
+    );
+
+    expect(
+      restant.length,
+      "La purge ne purge plus rien : le compteur va grossir sans borne.",
+    ).toBe(0);
   });
 });

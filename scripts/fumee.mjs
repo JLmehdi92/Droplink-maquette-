@@ -1251,6 +1251,49 @@ try {
           redirect: "manual",
         });
 
+        /*
+         * ⚠️ LA CHARGE RSC, ET PAS SEULEMENT LE DOCUMENT.
+         *
+         * DEFAUT REEL, TROUVE LE 02/09/2026 : trois pages vendeur s en
+         * remettaient a la redirection du LAYOUT. Elle tombe apres que Next a
+         * engage la reponse — le `location:` part, et la charge de la page part
+         * avec. Un navigateur suit le 307 et jette le corps ; un script, non.
+         *
+         * Le controle sur le STATUT ne voyait donc rien : il lisait 307, ce qui
+         * ressemble a un refus. Ce qui compte est le CORPS, et il portait les
+         * notes internes — le prix d achat — et le `public_token`, qui transfere
+         * une CAPACITE a vie.
+         *
+         * On demande donc la charge RSC de l editeur, avant et apres, et on y
+         * cherche les sentinelles PAR VALEUR.
+         */
+        const rscEditeur = (entetes) =>
+          fetch(`${base}/fr/commandes/${commandeFumee}`, {
+            headers: { ...entetes, RSC: "1" },
+            redirect: "manual",
+          });
+
+        const chargeAvant = await (await rscEditeur(entetesSortie)).text();
+
+        /*
+         * UNE SESSION ORDINAIRE N OUVRE PAS L ECRAN DE NOUVEAU MOT DE PASSE.
+         *
+         * DEFAUT REEL, TROUVE LE 02/09/2026 : cet ecran n exigeait qu UNE
+         * session, pas une session de RECUPERATION. Avec le cookie de quelqu un
+         * simplement connecte par mot de passe — donc avec un cookie VOLE —, il
+         * rendait le formulaire, et l action changeait le mot de passe SANS
+         * connaitre l ancien. Puis le `signOut({scope:"others"})` qui suit
+         * ejectait le vrai proprietaire : un acces temporaire devenait une prise
+         * de compte definitive.
+         *
+         * Ce cookie-ci vient d un `signInWithPassword` : c est exactement la
+         * session qui doit etre refusee.
+         */
+        const ecranMotDePasse = await fetch(`${base}/fr/nouveau-mot-de-passe`, {
+          headers: entetesSortie,
+          redirect: "manual",
+        });
+
         // GARDE CSRF : un POST sans `Origin` est refuse. Elle echoue FERMEE —
         // « ce serait ouvert si quelqu un omettait l en-tete » n est pas une
         // protection.
@@ -1285,6 +1328,7 @@ try {
           headers: entetesSortie,
           redirect: "manual",
         });
+        const chargeApres = await (await rscEditeur(entetesSortie)).text();
 
         controles.push(
           [
@@ -1327,6 +1371,24 @@ try {
           [
             apres.status !== 200,
             `LE MEME COOKIE ne rouvre plus /fr/commandes apres deconnexion (statut ${apres.status})`,
+          ],
+          // CONTRE-TEST D ABORD : sans lui, « la sentinelle est absente » serait
+          // indistinguable de « cette requete n a jamais rien rendu ».
+          [
+            chargeAvant.includes(NOTE_SENTINELLE),
+            `CONTRE-TEST : AVANT, la charge RSC de l editeur porte bien la note interne (${chargeAvant.length} o)`,
+          ],
+          [
+            !chargeApres.includes(NOTE_SENTINELLE),
+            `et APRES, la charge RSC (${chargeApres.length} o) ne porte plus la NOTE INTERNE`,
+          ],
+          [
+            jetonFumee === null || !chargeApres.includes(jetonFumee),
+            "ni le jeton public, qui transfere une capacite a vie",
+          ],
+          [
+            ecranMotDePasse.status !== 200,
+            `une session ORDINAIRE n ouvre pas l ecran de nouveau mot de passe (statut ${ecranMotDePasse.status}, il faut un lien recu par email)`,
           ],
         );
       }

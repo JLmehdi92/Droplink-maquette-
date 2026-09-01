@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
+import { sessionParEmail } from "@/lib/auth/recuperation";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -11,12 +12,14 @@ import { creerClientServeur } from "@/lib/supabase/server";
 /**
  * CHOISIR UN NOUVEAU MOT DE PASSE.
  *
- * ⚠️ CETTE ACTION N'EST PAS PROTÉGÉE PAR UN JETON QU'ELLE VÉRIFIERAIT — elle est
- * protégée par le fait qu'à cet instant, une SESSION existe déjà. C'est ainsi
- * que fonctionne la récupération : le lien reçu par email authentifie, la route
- * de retour échange son code, et l'écran de saisie s'ouvre sur une session
- * ordinaire. Ce qui sépare cet écran de n'importe qui est donc la possession de
- * la boîte mail, exactement comme pour le lien magique d'avant.
+ * ⚠️ CE COMMENTAIRE DISAIT « ce qui sépare cet écran de n'importe qui est la
+ * possession de la boîte mail ». C'ÉTAIT FAUX, et le défaut était exactement là :
+ * c'était la possession de la SESSION, n'importe laquelle. Un cookie volé en est
+ * une, et il changeait le mot de passe sans connaître l'ancien.
+ *
+ * La récupération authentifie par le lien, donc la session existe déjà quand
+ * l'écran s'ouvre — c'est vrai. Mais l'action doit vérifier COMMENT elle a été
+ * obtenue, pas seulement qu'elle existe : voir `sessionParEmail` plus bas.
  *
  * ⚠️ ET C'EST POURQUOI ELLE REVÉRIFIE L'IDENTITÉ ELLE-MÊME. Dans un module
  * `"use server"`, chaque export est un point d'entrée atteignable par une
@@ -67,6 +70,23 @@ export async function changerMotDePasse(
   }
 
   const supabase = await creerClientServeur();
+
+  /*
+   * ⚠️ UNE SESSION NE SUFFIT PAS : IL EN FAUT UNE OBTENUE PAR EMAIL.
+   *
+   * DÉFAUT RÉEL, MESURÉ LE 02/09/2026. Cette action n'exigeait qu'une session
+   * valide, donc n'importe laquelle — et un cookie volé en est une. Elle
+   * changeait le mot de passe SANS l'ancien, puis le `signOut({scope:"others"})`
+   * ci-dessous éjectait le vrai propriétaire. Un accès temporaire à un poste
+   * déverrouillé devenait une prise de compte définitive.
+   *
+   * La raison complète, et ce que `amr` distingue exactement, sont dans
+   * `lib/auth/recuperation`.
+   */
+  if (!(await sessionParEmail(supabase))) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "session" };
+  }
 
   const brut = donnees.get("motDePasse");
   const analyse = Saisie.safeParse({ motDePasse: brut, locale: langue });

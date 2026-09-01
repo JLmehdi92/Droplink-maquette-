@@ -187,7 +187,7 @@
       "indisponible": "Google sign-in is temporarily unavailable. Use the email link below.",
       "trop": "Too many attempts from this device. Please wait a few minutes.",
       "fermees": "Sign-ups are closed for now. Existing accounts are unaffected.",
-      "confirmez": "Open your inbox: if this address did not already have an account, a confirmation link has just been sent there. If you already had one, log in below."
+      "confirmez": "Open your inbox: if a confirmation link is waiting there, it completes your account. If you already had an account, log in below."
     },
     "apercuTitre": "Your order",
     "apercuBoutique": "Atelier Nord",
@@ -198,7 +198,8 @@
     "erreurIdentifiants": "Incorrect address or password.",
     "erreurIndisponible": "Log-in failed. Try again in a moment.",
     "info": {
-      "deconnecte": "You are logged out. See you soon."
+      "deconnecte": "You are logged out. See you soon.",
+      "deconnexion-partielle": "You are logged out on this device, but we could not confirm it with the server. On a shared device, log in again and log out once more."
     }
   },
   "inscription": {
@@ -1207,7 +1208,7 @@
     "bouton": "Send the link",
     "boutonEnCours": "Sending…",
     "envoyeTitre": "Check your inbox",
-    "envoyeTexte": "If an account exists for this address, a link has just been sent. Remember to check your spam folder.",
+    "envoyeTexte": "If an account exists for this address, a reset link will reach you there. Remember to check your spam folder.",
     "retourConnexion": "Back to log in",
     "nouveauTitre": "New password",
     "nouveauSousTitre": "Choose a new one for <adresse>{email}</adresse>.",

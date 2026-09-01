@@ -84,15 +84,32 @@ export async function POST(
    * qui se déconnecte d'un appareil qu'il ne possède pas — et c'est la seule
    * portée qui rende le geste utile sur le téléphone prêté.
    *
-   * L'ÉCHEC NE RETIENT PAS L'UTILISATEUR. Si le serveur d'authentification est
-   * injoignable, les cookies sont tout de même effacés et l'on redirige : garder
-   * quelqu'un connecté parce qu'on n'a pas pu enregistrer sa déconnexion serait
-   * le pire des deux mondes. Le journal porte la trace, pour qu'une révocation
-   * qui échoue en série ne passe pas inaperçue.
+   * ⚠️ L'ÉCHEC NE RETIENT PAS L'UTILISATEUR, MAIS IL NE SE TAIT PLUS.
+   *
+   * DÉFAUT RÉEL, MESURÉ LE 02/09/2026 : sur douze déconnexions, DEUX ont vu leur
+   * révocation échouer sur un aléa réseau. Le produit écrivait une ligne de
+   * journal et redirigeait quand même — l'écran annonçait « vous êtes
+   * déconnecté », le cookie disparaissait de CE navigateur, et la session
+   * restait ouverte jusqu'à soixante minutes pour qui en détenait une copie.
+   * C'est le principe XII : l'interface n'affirme jamais ce que la base n'a pas
+   * enregistré.
+   *
+   * DEUX TENTATIVES, puis on le DIT. Garder quelqu'un connecté parce qu'on n'a
+   * pas su enregistrer sa déconnexion serait le pire des deux mondes ; le lui
+   * cacher aussi. On efface les cookies dans tous les cas — c'est acquis — et
+   * l'écran de connexion porte alors un message qui distingue les deux issues.
    */
-  const { error } = await supabase.auth.signOut();
+  let { error } = await supabase.auth.signOut();
   if (error !== null) {
-    console.error("[auth] déconnexion incomplète — " + error.message);
+    console.error("[auth] déconnexion refusée, seconde tentative — " + error.message);
+    ({ error } = await supabase.auth.signOut());
+  }
+  if (error !== null) {
+    console.error("[auth] déconnexion INCOMPLÈTE, la session survit — " + error.message);
+    return NextResponse.redirect(
+      new URL(`/${langue}/connexion?info=deconnexion-partielle`, requete.url),
+      303,
+    );
   }
 
   /*

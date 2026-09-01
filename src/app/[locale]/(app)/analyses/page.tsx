@@ -2,7 +2,8 @@ import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
+import { onboardingAFaire } from "@/lib/comptes/profil";
+import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { CompteursAnalyses } from "@/components/analyses/compteurs-analyses";
 import { FriseSemaines } from "@/components/analyses/frise-semaines";
 import { PlusConsultees } from "@/components/analyses/plus-consultees";
@@ -70,8 +71,11 @@ export default async function Analyses({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const profil = await lireProfilVendeur();
-  if (profil === null) redirect(`/${langue}/connexion?erreur=session`);
+  // ⚠️ `exigerVendeur` REMPLACE une garde qui ne regardait que `profil === null`.
+  // Elle laissait donc passer un compte SUSPENDU, dont le tableau de bord
+  // continuait de répondre — la coupure ne tenait que sur `/p/[token]`, et c'est
+  // elle qui fonde notre statut d'hébergeur.
+  const profil = await exigerVendeur(langue);
   if (onboardingAFaire(profil)) redirect(`/${langue}/bienvenue`);
 
   const { periode } = analyserParametres(await searchParams);

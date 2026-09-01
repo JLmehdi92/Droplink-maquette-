@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { exigerVendeur } from "@/lib/comptes/apres-session";
+import { estLangueSupportee } from "@/i18n/config";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -46,9 +48,23 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 export default async function VersLaPageClient({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { locale, id } = await params;
+  const langue = estLangueSupportee(locale) ? locale : "fr";
+
+  /*
+   * ⚠️ LA GARDE PASSE AVANT LA LECTURE, ET C'EST TOUT LE POINT.
+   *
+   * Cette page ne rend rien : elle lit le `public_token` et redirige. Le jeton
+   * partait donc dans l'en-tête `location:` — et la RLS ne suffisait pas à
+   * l'empêcher, puisqu'un jeton d'accès révoqué reste valable une heure aux yeux
+   * de PostgREST. Mesuré avec un cookie révoqué : le jeton sortait.
+   *
+   * Et ce n'est pas une donnée de plus : le `public_token` transfère une
+   * CAPACITÉ, définitivement, puisqu'il est immuable à vie.
+   */
+  await exigerVendeur(langue);
 
   const supabase = await creerClientServeur();
   const { data, error } = await supabase

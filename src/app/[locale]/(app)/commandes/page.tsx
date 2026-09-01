@@ -9,6 +9,7 @@ import { TableauCommandes } from "@/components/commandes/tableau-commandes";
 import { analyserParametres, compterParEtat, lireCommandes } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
+import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { EtatLot, NombreLot } from "@/lib/commandes/lot";
 
 export async function generateMetadata({
@@ -37,10 +38,19 @@ export async function generateMetadata({
  * des formulaires `GET` : rien à télécharger, rien à réhydrater, et l'URL décrit
  * exactement ce qui est affiché.
  *
- * LA PROTECTION EST LA RLS, pas ce fichier. Aucune requête d'ici n'écrit de
- * `shop_id` : c'est la policy qui le pose. Le layout de `(app)` a déjà écarté
- * les visiteurs sans session et les comptes suspendus, mais il n'est que la
- * première couche — la lecture, elle, est bornée en base.
+ * ⚠️ CE COMMENTAIRE DISAIT « la protection est la RLS, pas ce fichier ; le
+ * layout a déjà écarté les visiteurs sans session et les comptes suspendus ».
+ * LES DEUX MOITIÉS ÉTAIENT FAUSSES, et c'est ce qui a fait fuir cette page :
+ *
+ *   - la RLS ne protège pas d'un jeton RÉVOQUÉ. PostgREST ne valide qu'une
+ *     signature et une date : un jeton révoqué lui reste bon UNE HEURE ;
+ *   - le layout n'écarte personne à temps. Sa redirection tombe après que Next
+ *     a engagé la réponse, et la charge part avec le 307.
+ *
+ * L'isolation ENTRE VENDEURS, elle, vient bien de la base — aucune requête
+ * d'ici n'écrit de `shop_id`, c'est la policy qui le pose. Mais l'isolation
+ * entre un vendeur et QUELQU'UN QUI N'EN EST PLUS UN se joue ici, dans
+ * `exigerVendeur`, avant la première lecture.
  */
 export default async function Commandes({
   params,
@@ -52,6 +62,19 @@ export default async function Commandes({
   const { locale } = await params;
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
+
+  /*
+   * ⚠️ LA GARDE PASSE AVANT TOUTE LECTURE, et cette page n'en avait AUCUNE.
+   *
+   * Elle s'en remettait à la RLS et à la redirection du layout. Mais la RLS
+   * accepte un jeton d'accès RÉVOQUÉ pendant une heure — PostgREST ne valide
+   * qu'une signature et une date —, et la redirection du layout arrive après
+   * que Next a engagé la réponse : la charge part avec le 307.
+   *
+   * Mesuré avec un cookie révoqué : le nom du client et le `public_token`
+   * sortaient. Contre-test : sans cookie, aucune occurrence.
+   */
+  await exigerVendeur(langue);
 
   const requete = await searchParams;
   const parametres = analyserParametres(requete);

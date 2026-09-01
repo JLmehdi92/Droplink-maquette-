@@ -5,6 +5,8 @@ import { FormulaireNouveauMotDePasse } from "@/components/formulaire-nouveau-mot
 import { TraductionsClient } from "@/components/traductions-client";
 import { PanneauAcces } from "@/components/panneau-acces";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { sessionParEmail } from "@/lib/auth/recuperation";
+import { creerClientServeur } from "@/lib/supabase/server";
 import { cheminDeRefus } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { routing } from "@/i18n/routing";
@@ -62,6 +64,22 @@ export default async function NouveauMotDePasse({
   }
   if (profil.statut === "suspended") {
     redirect(cheminDeRefus(langue, "suspendu"));
+  }
+
+  /*
+   * ⚠️ UNE SESSION ORDINAIRE N'A RIEN À FAIRE ICI, et c'est le défaut que cet
+   * écran portait : il s'ouvrait pour n'importe quelle session valide, donc pour
+   * un cookie volé. Mesuré — formulaire rendu en 200 avec le cookie de quelqu'un
+   * simplement connecté par mot de passe.
+   *
+   * La page n'est PAS la protection — l'action revérifie de son côté, parce
+   * qu'elle est atteignable par requête forgée. Mais laisser l'écran s'ouvrir
+   * inviterait à taper un mot de passe qui serait ensuite refusé, ce qui est la
+   * pire façon de dire non.
+   */
+  const supabase = await creerClientServeur();
+  if (!(await sessionParEmail(supabase))) {
+    redirect(cheminDeRefus(langue, "profil"));
   }
 
   const t = await getTranslations("motDePasse");

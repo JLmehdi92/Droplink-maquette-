@@ -187,7 +187,7 @@
       "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
       "session": "Votre session a expiré. Reconnectez-vous pour continuer.",
       "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés.",
-      "confirmez": "Ouvrez votre boîte mail : si cette adresse n’avait pas encore de compte, un lien de confirmation vient d’y partir. Si vous en aviez déjà un, connectez-vous ci-dessous."
+      "confirmez": "Ouvrez votre boîte mail : si un lien de confirmation vous y attend, il termine la création de votre compte. Si vous aviez déjà un compte, connectez-vous ci-dessous."
     },
     "apercuTitre": "Votre commande",
     "apercuBoutique": "Atelier Nord",
@@ -198,7 +198,8 @@
     "erreurIdentifiants": "Adresse ou mot de passe incorrect.",
     "erreurIndisponible": "La connexion a échoué. Réessayez dans un instant.",
     "info": {
-      "deconnecte": "Vous êtes déconnecté. À bientôt."
+      "deconnecte": "Vous êtes déconnecté. À bientôt.",
+      "deconnexion-partielle": "Vous êtes déconnecté de cet appareil, mais nous n’avons pas pu le confirmer auprès du serveur. Sur un appareil partagé, reconnectez-vous et redemandez la déconnexion."
     }
   },
   "inscription": {
@@ -1207,7 +1208,7 @@
     "bouton": "Envoyer le lien",
     "boutonEnCours": "Envoi…",
     "envoyeTitre": "Regardez votre boîte mail",
-    "envoyeTexte": "Si un compte existe pour cette adresse, un lien vient de partir. Pensez à regarder dans les indésirables.",
+    "envoyeTexte": "Si un compte existe pour cette adresse, un lien de réinitialisation vous parviendra. Pensez à regarder dans les indésirables.",
     "retourConnexion": "Revenir à la connexion",
     "nouveauTitre": "Nouveau mot de passe",
     "nouveauSousTitre": "Choisissez-en un nouveau pour <adresse>{email}</adresse>.",

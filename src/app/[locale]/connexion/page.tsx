@@ -81,7 +81,7 @@ function motifConnu(brut: string | undefined): (typeof MOTIFS)[number] | null {
  * SÉPARÉ, parce qu'un encart rouge sur une déconnexion réussie annoncerait un
  * échec à quelqu'un dont le geste vient de fonctionner.
  */
-const INFOS = ["deconnecte"] as const;
+const INFOS = ["deconnecte", "deconnexion-partielle"] as const;
 
 function infoConnue(brut: string | undefined): (typeof INFOS)[number] | null {
   return INFOS.find((i) => i === brut) ?? null;

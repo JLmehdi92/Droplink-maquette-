@@ -3,6 +3,7 @@ import { creerClientServeur } from "@/lib/supabase/server";
 import { lireProfilAvec } from "@/lib/comptes/profil";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
+import { verifierQuotaAuthAdresse } from "@/lib/limitation/quota";
 
 /**
  * Retour d'un aller-retour d'authentification portant un code PKCE.
@@ -43,6 +44,31 @@ export async function GET(
   // technique : la personne n'a rien fait de mal et n'a qu'une action utile.
   if (code === null) {
     return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=lien`, requete.url));
+  }
+
+  /*
+   * ⚠️ CETTE ROUTE N'AVAIT AUCUN PLAFOND, et c'était le SEUL chemin du produit
+   * à la fois non authentifié et sans compteur.
+   *
+   * Mesuré le 02/09/2026 : 60 appels parallèles avec des codes inventés, tous
+   * traités, aucun refus. Chacun déclenche un `exchangeCodeForSession` — donc
+   * nous fait payer un échange PKCE chez le fournisseur d'authentification, et
+   * ronge la limite de requêtes qu'il nous impose par adresse IP. Un point
+   * d'entrée gratuit à solliciter et coûteux à servir.
+   *
+   * LE COMPTEUR EST CELUI DES ENVOIS (`auth-ip`), pas un quatrième : on arrive
+   * ici APRÈS avoir cliqué un lien reçu par email, donc dans la continuité du
+   * geste que ce compteur borne déjà. Un compteur à part offrirait un budget de
+   * plus à qui alterne les deux.
+   *
+   * LE REFUS EMPRUNTE LE CHEMIN DES LIENS PÉRIMÉS : un code refusé pour cause de
+   * quota et un code réellement expiré se réparent de la même façon — en
+   * redemandant un lien — et les distinguer n'apprendrait rien d'utile à qui a
+   * cliqué, tout en renseignant qui sonde.
+   */
+  const quota = await verifierQuotaAuthAdresse();
+  if (!quota.autorise) {
+    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=expire`, requete.url));
   }
 
   const supabase = await creerClientServeur();

@@ -205,3 +205,84 @@ describe("Garde structurel sur l'énumération de comptes", () => {
     ).toBe(true);
   });
 });
+
+describe("Le refus d'ENVOI d'email ne dit pas si le compte existe", () => {
+  const SOURCE = join(process.cwd(), "src", "app", "[locale]", "connexion", "actions.ts");
+
+  function corpsDe(nom: string): string {
+    const code = readFileSync(SOURCE, "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
+    const debut = code.indexOf(`export async function ${nom}(`);
+    if (debut === -1) return "";
+    let i = code.indexOf("{", debut);
+    let profondeur = 0;
+    for (; i < code.length; i++) {
+      if (code[i] === "{") profondeur++;
+      else if (code[i] === "}") {
+        profondeur--;
+        if (profondeur === 0) return code.slice(debut, i + 1);
+      }
+    }
+    return "";
+  }
+
+  /*
+   * ═══════════════════════════════════════════════════════════════════════════
+   * LE DÉFAUT, ET POURQUOI IL M'AVAIT ÉCHAPPÉ
+   * ═══════════════════════════════════════════════════════════════════════════
+   *
+   * J'avais écrit, dans les deux actions, que la limite de débit « ne dépend pas
+   * de l'existence d'un compte, elle ne divulgue donc rien ». C'est vrai de NOS
+   * compteurs — consommés AVANT l'appel, donc avant que l'existence puisse jouer
+   * — et FAUX de celui du serveur d'authentification, qui borne les ENVOIS.
+   *
+   * Un envoi n'est tenté que pour une CLASSE d'adresses, et pas la même selon
+   * l'action. Mesuré le 02/09/2026, budget d'emails épuisé :
+   *
+   *     réinitialisation   AVEC compte → envoi tenté → 429   |  SANS compte → 200 muet
+   *     inscription        SANS compte → envoi tenté → 429   |  AVEC compte → obfusqué
+   *
+   * Deux oracles binaires, en sens inverse, à 10/10 sur un balayage mêlé. Et ils
+   * ne se referment PAS en rejouant sur la confirmation d'email : ils sont
+   * structurels au fait qu'un envoi ne concerne qu'une partie des adresses.
+   *
+   * LA SEULE FERMETURE EST DE NE PAS LAISSER LA CLASSE D'ERREUR D'ENVOI CHANGER
+   * LA FORME DE LA RÉPONSE. C'est ce que ce contrôle exige.
+   */
+
+  test("la sonde lit réellement les deux actions", () => {
+    // Un ensemble vide passe tout : sans cette borne, un renommage rendrait les
+    // deux contrôles suivants verts en ne regardant plus rien.
+    expect(corpsDe("demanderReinitialisation").length).toBeGreaterThan(200);
+    expect(corpsDe("sInscrire").length).toBeGreaterThan(200);
+  });
+
+  test("la réinitialisation n'inspecte plus le statut de l'erreur d'envoi", () => {
+    const c = corpsDe("demanderReinitialisation");
+    const apresAppel = c.slice(c.indexOf("resetPasswordForEmail"));
+    expect(
+      /error\.status/.test(apresAppel),
+      "Après l'envoi, l'action lit le statut de l'erreur : un 429 du serveur " +
+        "d'authentification ne survient QUE pour une adresse qui a un compte, " +
+        "donc toute réponse qui en dépend révèle l'existence du compte.",
+    ).toBe(false);
+  });
+
+  test("l'inscription ne rend AUCUN motif propre au refus d'envoi", () => {
+    const c = corpsDe("sInscrire");
+    const apresAppel = c.slice(c.indexOf("auth.signUp"));
+    // Le 429 doit emprunter la MÊME sortie que l'adresse déjà inscrite — une
+    // redirection vers `confirmez` — et non un motif à lui.
+    expect(
+      /error\.status === 429\s*\)?\s*(return|\?)/.test(apresAppel),
+      "Un 429 à l'inscription rend un motif distinct. Or l'envoi n'est tenté " +
+        "que pour les adresses NEUVES : ce motif dit donc que l'adresse n'avait " +
+        "pas de compte.",
+    ).toBe(false);
+    expect(
+      /erreur=confirmez/.test(apresAppel),
+      "la sortie commune aux deux cas a disparu : la sonde ne prouve plus rien",
+    ).toBe(true);
+  });
+});

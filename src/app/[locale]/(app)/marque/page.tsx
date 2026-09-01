@@ -4,7 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { FormulaireMarque } from "@/components/marque/formulaire-marque";
 import { TraductionsClient } from "@/components/traductions-client";
-import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
+import { onboardingAFaire } from "@/lib/comptes/profil";
+import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { signerLecture } from "@/lib/storage/r2";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -39,8 +40,11 @@ export default async function Marque({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const profil = await lireProfilVendeur();
-  if (profil === null) redirect(`/${langue}/connexion?erreur=session`);
+  // ⚠️ `exigerVendeur` REMPLACE une garde qui ne regardait que `profil === null`.
+  // Elle laissait donc passer un compte SUSPENDU, dont le tableau de bord
+  // continuait de répondre — la coupure ne tenait que sur `/p/[token]`, et c'est
+  // elle qui fonde notre statut d'hébergeur.
+  const profil = await exigerVendeur(langue);
   // Un vendeur qui n'a pas fini son onboarding y est renvoyé : les deux écrans
   // règlent les mêmes colonnes, et les laisser ouverts en parallèle produirait
   // deux vérités concurrentes sur la même boutique.

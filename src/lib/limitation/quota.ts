@@ -33,7 +33,17 @@ export type Surface =
    * où plusieurs personnes se connectent derrière une seule adresse.
    */
   | "auth-mdp-ip"
-  /** La vérification d'un mot de passe, par adresse email : l'acharnement sur UN compte. */
+  /**
+   * La vérification d'un mot de passe, par COUPLE (adresse IP, adresse email).
+   *
+   * ⚠️ C'EST LE COMPTEUR QUI MORD LE PLUS TÔT, ET C'EST VOULU. Il borne le seul
+   * bourrage qui vaille quelque chose — s'acharner sur UN compte depuis UNE
+   * source — sans donner à un tiers le moyen d'enfermer quelqu'un dehors :
+   * épuiser le couple d'un attaquant ne consomme rien du budget de la victime,
+   * qui n'a pas la même adresse IP.
+   */
+  | "auth-mdp-couple"
+  /** La vérification d'un mot de passe, par adresse email : l'acharnement DISTRIBUÉ sur UN compte. */
   | "auth-mdp-email"
   /** Toutes les requêtes de la page publique, par adresse. */
   | "publique-requetes"
@@ -80,6 +90,7 @@ export const DEGRADATION: Readonly<Record<Surface, "autorise" | "refuse">> = {
   "auth-ip": "refuse",
   "auth-email": "refuse",
   "auth-mdp-ip": "refuse",
+  "auth-mdp-couple": "refuse",
   "auth-mdp-email": "refuse",
   "publique-requetes": "autorise",
   "publique-inconnu": "autorise",
@@ -141,31 +152,61 @@ export function seuil(surface: Surface): { plafond: number; fenetreSecondes: num
         fenetreSecondes: 3600,
       };
     /*
-     * LES DEUX PLAFONDS DU MOT DE PASSE SONT PLUS HAUTS QUE CEUX DE L'EMAIL,
-     * et c'est le contraire d'un relâchement : ils bornent une opération dont
-     * le coût est nul pour nous et fréquent pour l'utilisateur.
+     * ═══════════════════════════════════════════════════════════════════════
+     * LES TROIS PLAFONDS DU MOT DE PASSE — ET POURQUOI IL EN FAUT TROIS
+     * ═══════════════════════════════════════════════════════════════════════
      *
-     * 100 par heure et par adresse IP : de quoi laisser travailler un réseau
-     * partagé, et très loin de ce qu'exige un bourrage d'identifiants — qui se
-     * compte en milliers d'essais par liste, pas en dizaines.
+     * ⚠️ IL N'Y EN AVAIT QUE DEUX, ET J'AVAIS ÉCRIT ICI « aucun verrouillage de
+     * compte : bloquer après N échecs transformerait ces compteurs en arme ».
+     * LE PLAFOND PAR ADRESSE ÉTAIT DÉJÀ CETTE ARME, simplement horaire au lieu
+     * de permanent. Mesuré le 02/09/2026, avec contre-test :
      *
-     * 20 par heure et par adresse email : quelqu'un qui hésite entre trois mots
-     * de passe en a largement assez ; quelqu'un qui en essaie mille sur UN
-     * compte est arrêté au vingtième.
+     *     attaquant  198.51.100.1  24 mauvais mots de passe → bascule au 21ᵉ
+     *     victime    203.0.113.77  LE BON mot de passe      → REFUS-QUOTA
+     *     témoin     203.0.113.77  autre adresse, bon mdp   → passe
      *
-     * ⚠️ AUCUN VERROUILLAGE DE COMPTE. Bloquer un compte après N échecs
-     * transformerait ces compteurs en arme : il suffirait de tenter vingt mots
-     * de passe faux sur l'adresse de quelqu'un pour l'enfermer dehors. On
-     * ralentit, on ne condamne pas — et la fenêtre glisse toute seule.
+     * Vingt requêtes, onze secondes, depuis n'importe où, pour tenir un vendeur
+     * hors de son tableau de bord — et réitérable à chaque fenêtre. Sur le
+     * persona de Guangzhou, dont l'adresse circule dans le vertical, pendant
+     * qu'il traite ses deux cents commandes de la semaine.
+     *
+     * LA SORTIE N'EST PAS DE CHOISIR ENTRE BOURRAGE ET VERROUILLAGE, c'est de
+     * séparer les deux menaces, qui n'ont pas la même signature :
+     *
+     *   - `auth-mdp-couple` 10/h — s'acharner sur UN compte depuis UNE source.
+     *     C'est la forme la plus rentable du bourrage, et c'est la seule que
+     *     l'on peut brider serré SANS armer personne : épuiser le couple d'un
+     *     attaquant ne touche pas le budget de la victime, qui a une autre IP.
+     *   - `auth-mdp-ip` 100/h — balayer PLUSIEURS comptes depuis une source.
+     *     Généreux, parce qu'un réseau partagé légitime existe.
+     *   - `auth-mdp-email` 60/h — s'acharner sur un compte depuis PLUSIEURS
+     *     sources. Il reste nécessaire (sinon mille IP donnent mille × 10), mais
+     *     il est relevé de 20 à 60 : enfermer quelqu'un dehors coûte désormais
+     *     60 requêtes venues d'au moins SIX adresses IP, au lieu de 20 depuis
+     *     une seule. Et personne de légitime ne se trompe soixante fois en une
+     *     heure.
+     *
+     * Le compromis est meilleur des deux côtés : le bourrage ciblé passe de 20
+     * à 10 essais par heure, et le déni de service ciblé devient six fois plus
+     * cher. Ce qui empire — 60 essais/h au lieu de 20 pour un attaquant
+     * DISTRIBUÉ — ne mord pas sur un mot de passe de douze caractères.
+     *
+     * ⚠️ ET TOUJOURS AUCUN VERROUILLAGE APRÈS N ÉCHECS : la fenêtre glisse
+     * toute seule, aucun compte n'est jamais condamné.
      */
     case "auth-mdp-ip":
       return {
         plafond: entierEnv("QUOTA_AUTH_MDP_IP_PAR_HEURE", 100),
         fenetreSecondes: 3600,
       };
+    case "auth-mdp-couple":
+      return {
+        plafond: entierEnv("QUOTA_AUTH_MDP_COUPLE_PAR_HEURE", 10),
+        fenetreSecondes: 3600,
+      };
     case "auth-mdp-email":
       return {
-        plafond: entierEnv("QUOTA_AUTH_MDP_EMAIL_PAR_HEURE", 20),
+        plafond: entierEnv("QUOTA_AUTH_MDP_EMAIL_PAR_HEURE", 60),
         fenetreSecondes: 3600,
       };
     case "publique-requetes":
@@ -338,13 +379,29 @@ export async function verifierQuotaAuth(email: string): Promise<Verdict> {
  * on saurait qu'on a été balayé sans l'avoir empêché.
  */
 export async function verifierQuotaMotDePasse(email: string): Promise<Verdict> {
+  // L'adresse est normalisée avant empreinte, sinon « A@B.com » et « a@b.com »
+  // recevraient deux budgets distincts pour un seul compte.
+  const adresse = email.trim().toLowerCase();
   const ip = await adresseAppelant();
+
   if (ip !== null) {
     const parIp = await consommer(empreinte(ip), "auth-mdp-ip");
     if (!parIp.autorise) return parIp;
+
+    /*
+     * LE COUPLE PASSE AVANT LE COMPTEUR PAR ADRESSE, et l'ordre compte.
+     *
+     * Le couple est celui qui mord le plus tôt (10/h) : le placer en second
+     * ferait consommer le budget de la VICTIME avant de constater que
+     * l'attaquant a déjà épuisé le sien. C'est la même règle que partout dans ce
+     * module — on s'arrête au premier refus, sinon on fait payer à quelqu'un le
+     * quota d'un autre.
+     */
+    const parCouple = await consommer(empreinte(ip + "|" + adresse), "auth-mdp-couple");
+    if (!parCouple.autorise) return parCouple;
   }
 
-  return consommer(empreinte(email.trim().toLowerCase()), "auth-mdp-email");
+  return consommer(empreinte(adresse), "auth-mdp-email");
 }
 
 /**

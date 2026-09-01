@@ -1,6 +1,12 @@
 import "server-only";
+import { redirect } from "next/navigation";
 import type { creerClientServeur } from "@/lib/supabase/server";
-import { lireProfilAvec, onboardingAFaire } from "@/lib/comptes/profil";
+import {
+  lireProfilAvec,
+  lireProfilVendeur,
+  onboardingAFaire,
+  type ProfilVendeur,
+} from "@/lib/comptes/profil";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { emettre } from "@/lib/instrumentation/emettre";
 
@@ -142,4 +148,60 @@ export async function suivreApresSession(
  */
 export function cheminDeRefus(langue: "fr" | "en", motif: "profil" | "suspendu" | "fermees"): string {
   return `/${langue}/connexion?erreur=${motif}`;
+}
+
+/**
+ * LA GARDE DE CHAQUE PAGE DE L'ESPACE VENDEUR.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ POURQUOI ELLE EXISTE : LE LAYOUT ARRIVE TROP TARD
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * DÉFAUT RÉEL, MESURÉ LE 02/09/2026 EN ÉPROUVANT LA DÉCONNEXION. Le layout de
+ * `(app)` redirige bien quand le profil est introuvable ou le compte suspendu.
+ * Mais Next a DÉJÀ ENGAGÉ LA RÉPONSE quand cette redirection tombe : l'en-tête
+ * `location:` part, **et la charge de la page part avec**.
+ *
+ * Un navigateur suit le 307 et jette le corps. `curl`, un script, un aspirateur,
+ * non. Relevé avec un cookie RÉVOQUÉ, sentinelles à l'appui :
+ *
+ *     cookie révoqué   RSC /fr/commandes/[id] → 200, 19 344 o
+ *                      "internal_notes":"SENTINELLE-NOTE-4471"
+ *                      "tracking_number":"SENTINELLESUIVI7788"
+ *     sans cookie      même route             → 200, 11 686 o, 0 occurrence
+ *
+ * Les trois pages qui fuyaient — la liste, l'éditeur, l'aperçu client — sont
+ * exactement celles qui portent les **notes internes**, qui contiennent le prix
+ * d'achat, et le **`public_token`**, qui ne transfère pas une donnée mais une
+ * CAPACITÉ, définitivement, puisqu'il est immuable à vie. `envois`, `analyses`
+ * et `marque` portaient déjà leur propre garde et ne fuyaient pas : c'est ce qui
+ * a permis d'attribuer le défaut sans rien deviner.
+ *
+ * ⚠️ MÊME CAUSE POUR LA SUSPENSION : un compte suspendu gardait son tableau de
+ * bord. La coupure tenait sur `/p/[token]` — qui rend bien 404 — et pas ici.
+ * Elle fonde notre statut d'hébergeur.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * `lireProfilVendeur` est MÉMOÏSÉE pour la durée de la requête : appeler cette
+ * garde dans chaque page ne coûte **aucun aller-retour de plus** que la lecture
+ * que le layout fait déjà. La redondance est gratuite ; c'est son absence qui
+ * coûtait.
+ *
+ * ⚠️ ET `tests/unit/pages-gardees.test.ts` INVENTORIE les pages de `(app)` pour
+ * exiger cet appel — dans les deux sens. Une page ajoutée sans garde ne passe
+ * pas, et une exception déclarée qui ne désigne plus rien non plus. C'est ce
+ * qui empêche le défaut de revenir par la porte de la page suivante.
+ */
+export async function exigerVendeur(langue: "fr" | "en"): Promise<ProfilVendeur> {
+  const profil = await lireProfilVendeur();
+
+  if (profil === null) {
+    redirect(cheminDeRefus(langue, "profil"));
+  }
+  if (profil.statut === "suspended") {
+    redirect(cheminDeRefus(langue, "suspendu"));
+  }
+
+  return profil;
 }
