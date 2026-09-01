@@ -395,6 +395,7 @@ describe("Les appels sortants qui coûtent sont REFUSÉS", () => {
       "https://eu.i.posthog.com/batch/",
       "https://app.posthog.com/capture/",
       "https://posthog.com/x",
+      "https://api.resend.com/emails",
     ]) {
       expect(refusDHote(url), `${url} n'est pas refusé`).not.toBeNull();
       expect(refusDHote(url)?.message).toMatch(/APPEL SORTANT REFUSÉ/);

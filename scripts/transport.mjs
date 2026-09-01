@@ -162,6 +162,14 @@ const HOTES_INTERDITS = [
   // L'analytics : chaque événement de test fausse la métrique de verdict.
   "posthog.com",
   "i.posthog.com",
+  /*
+   * L'expéditeur d'emails. Ajouté AVANT que le défaut se produise, et c'est
+   * délibéré : aujourd'hui il refuse tout, le domaine d'envoi n'étant pas
+   * encore vérifié. Le jour où il le sera — c'est-à-dire au moment où plus
+   * personne n'y pensera —, une suite qui l'atteindrait enverrait de vrais
+   * emails à chaque exécution, et consommerait un quota d'envoi.
+   */
+  "api.resend.com",
 ];
 
 /** Vrai si l'hôte est interdit, sous-domaines compris. */

@@ -41,7 +41,7 @@ installerTransportResilient();
  * depot d'objets, que `pnpm check:r2` eprouve de bout en bout avec de vrais
  * identifiants. On ne coupe que ce dont un appel COUTE ou POLLUE.
  */
-const TIERS_DEBRANCHES = ["TRACKING_API_KEY", "NEXT_PUBLIC_POSTHOG_KEY"];
+const TIERS_DEBRANCHES = ["TRACKING_API_KEY", "NEXT_PUBLIC_POSTHOG_KEY", "RESEND_API_KEY"];
 
 const debranches = TIERS_DEBRANCHES.filter((nom) => {
   const valeur = process.env[nom];
