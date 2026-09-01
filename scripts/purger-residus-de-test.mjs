@@ -32,6 +32,7 @@
  */
 import { config } from "dotenv";
 import pg from "pg";
+import { SEUIL_RESTITUTION_OCTETS, tablesARendre } from "./espace.mjs";
 
 config({ path: ".env.local", quiet: true });
 
@@ -130,12 +131,6 @@ console.log(
     `${c.vues} vue(s), ${c.medias} média(s).`,
 );
 
-if (Number(c.comptes) === 0) {
-  console.log("Rien à purger.");
-  await client.end();
-  process.exit(0);
-}
-
 // GARDE 2 — voir avant de faire.
 if (!confirmer) {
   console.log("\nRien n'a été supprimé. Relancer avec --confirmer pour exécuter.");
@@ -143,18 +138,71 @@ if (!confirmer) {
   process.exit(0);
 }
 
-console.time("suppression");
-const supprimes = await client.query("delete from auth.users where email like $1", [
-  `%${DOMAINE_DE_TEST}`,
-]);
-console.timeEnd("suppression");
-console.log(`${supprimes.rowCount} compte(s) supprimé(s).`);
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PHASE 1 — SUPPRIMER LES COMPTES DE TEST
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ SON ABSENCE N'ARRÊTE PLUS LE SCRIPT, ET C'ÉTAIT UN DÉFAUT RÉEL.
+ *
+ * Le script sortait ici sur « Rien à purger » dès que le compte valait zéro —
+ * c'est-à-dire EXACTEMENT dans l'état où on l'appelle. `pnpm test:perf` nettoie
+ * ses propres comptes et laisse le GONFLEMENT : mesuré le 01/09/2026, la base à
+ * 265 Mo dont 163 Mo pour NEUF lignes d'`orders`, et le script annonçait « Rien
+ * à purger » puis rendait la main sans rien compacter.
+ *
+ * Supprimer des LIGNES et rendre de l'ESPACE sont deux travaux différents. Les
+ * enchaîner sous une seule condition faisait dépendre le second d'une question
+ * qui ne le concerne pas — et le seul remède documenté à une base qui approche
+ * la lecture seule refusait d'agir précisément quand elle en avait besoin.
+ */
+if (Number(c.comptes) === 0) {
+  console.log("Aucun compte de test à supprimer — on passe à la restitution d'espace.");
+} else {
+  console.time("suppression");
+  const supprimes = await client.query("delete from auth.users where email like $1", [
+    `%${DOMAINE_DE_TEST}`,
+  ]);
+  console.timeEnd("suppression");
+  console.log(`${supprimes.rowCount} compte(s) supprimé(s).`);
+}
 
-// `delete` rend l'espace à la table, pas au système de fichiers : sans
-// `vacuum full`, la base resterait à sa taille et donc en lecture seule. C'est
-// exactement le genre d'étape qu'on oublie, et dont l'oubli laisse croire que la
-// purge n'a servi à rien.
-for (const table of ["order_events", "orders", "link_views", "order_media", "tracked_parcels"]) {
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PHASE 2 — RENDRE L'ESPACE, INVENTAIRE À L'APPUI
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * `delete` rend l'espace à la table, pas au système de fichiers : sans
+ * `vacuum full`, la base reste à sa taille et donc en lecture seule.
+ *
+ * ⚠️ LA LISTE DES TABLES ÉTAIT ÉCRITE EN DUR, À CINQ NOMS, et laissait `shops`
+ * (4976 kB pour 3 lignes) et `usage_counters` (3272 kB pour 4) intactes. Une
+ * sélection ne connaît que ce que son auteur avait sous les yeux le jour où il
+ * l'a écrite ; le schéma, lui, continue de grandir. On INVENTORIE donc, et
+ * `tablesARendre` ne fait que trancher sur un seuil.
+ */
+const inventaire = await client.query(
+  `select c.relname as table, pg_total_relation_size(c.oid)::bigint as octets
+     from pg_class c join pg_namespace n on n.oid = c.relnamespace
+    where c.relkind = 'r' and n.nspname = 'public'
+    order by octets desc`,
+);
+
+// TOUT GARDE DOIT PROUVER QU'IL INSPECTE QUELQUE CHOSE. Un inventaire vide
+// ferait passer la phase pour un succès alors qu'elle n'aurait rien regardé.
+if (inventaire.rows.length === 0) {
+  console.error("Inventaire des tables VIDE : la restitution ne peut rien décider. Abandon.");
+  await client.end();
+  process.exit(1);
+}
+
+const aRendre = tablesARendre(inventaire.rows, SEUIL_RESTITUTION_OCTETS);
+console.log(
+  `${inventaire.rows.length} table(s) inventoriée(s), ${aRendre.length} au-dessus du seuil ` +
+    `de ${Math.round(SEUIL_RESTITUTION_OCTETS / 1024)} kio.`,
+);
+
+for (const table of aRendre) {
   console.time(`vacuum full ${table}`);
   await client.query(`vacuum full public.${table}`);
   console.timeEnd(`vacuum full ${table}`);
