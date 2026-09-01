@@ -238,7 +238,18 @@ Typographie inchangée : **Plus Jakarta Sans** (titres, 800, tracking -0.03em) +
 
 ## Migrations — règle absolue
 
-> **Une migration par sujet, numérotée à sa création, JAMAIS rouverte une fois appliquée.** L'ordre lexicographique **EST** l'ordre d'application. Les correctifs sont de **nouvelles** migrations.
+> **Une migration par sujet, numérotée à sa création, JAMAIS rouverte une fois appliquée.** L'ordre lexicographique **DOIT ÊTRE** l'ordre d'application. Les correctifs sont de **nouvelles** migrations.
+
+> ⚠️ **CE BLOC DISAIT « EST », ET C'ÉTAIT FAUX.** Mesuré le 01/09/2026 en
+> comparant `supabase_migrations.schema_migrations` triée par `version` à la
+> liste des fichiers triée : **la 088 a été appliquée AVANT la 087.** Deux
+> positions sur 130, jamais interrogées — les trois contrôles existants
+> comparaient des ENSEMBLES de noms et un contenu, jamais une SÉQUENCE.
+> L'inversion est inoffensive (aucun objet commun, vérifié), mais **une
+> reconstruction depuis zéro appliquerait un ordre que la production n'a jamais
+> exécuté**. `tests/rls/migrations.test.ts` compare désormais la séquence, avec
+> l'inversion connue déclarée comme exception et sa raison, et échoue **dans les
+> deux sens**.
 
 - `alter type ... add value` vit **SEUL** dans sa migration.
 - **Vérifier que les valeurs d'énumération citées dans les contrats existent réellement.** Une valeur citée mais absente fait échouer l'insertion, et la transaction étant partagée, **annule la mutation entière**.
