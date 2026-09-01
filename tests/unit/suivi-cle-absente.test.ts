@@ -169,10 +169,22 @@ describe("La prise en charge exige un accusé POSITIF", () => {
   });
 
   test("un numéro explicitement rejeté reste un REFUS, pas une indisponibilité", async () => {
-    // Les deux ne se confondent pas : un refus abandonne le suivi tout de suite,
-    // une indisponibilité le fait reprendre. Confondre l'un pour l'autre, c'est
-    // soit payer seize fois pour un numéro invalide, soit abandonner un colis
-    // valide sur une panne passagère.
+    /*
+     * Les deux ne se confondent pas : un refus abandonne le suivi tout de
+     * suite, une indisponibilité le fait reprendre.
+     *
+     * ⚠️ SA JUSTIFICATION A ÉTÉ CORRIGÉE LE 01/09/2026. Elle disait « payer
+     * seize fois pour un numéro invalide ». C'est FAUX : leur documentation dit
+     * « **Successfully** registering 1 tracking number equals 1 quota » — un
+     * enregistrement REJETÉ ne consomme rien, et réessayer est gratuit.
+     *
+     * La conclusion reste néanmoins la bonne, pour une autre raison : leur
+     * détection lit le FORMAT du numéro, qui ne changera pas en sept jours, et
+     * le vendeur doit apprendre TOUT DE SUITE qu'il faut préciser le
+     * transporteur. C'est ce test qui a rougi et rattrapé une classification
+     * trop permissive — les autres codes de rejet, eux, ont bien cessé d'être
+     * des refus (voir `suivi-rejets-et-arret`).
+     */
     repondre({
       code: 0,
       data: { accepted: [], rejected: [{ number: NUMERO, error: { code: -18019903 } }] },

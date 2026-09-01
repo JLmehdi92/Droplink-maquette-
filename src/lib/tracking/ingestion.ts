@@ -56,9 +56,63 @@ async function relacherLaMarque(
   await systeme.rpc("liberer_notification_vue", { p_cle: empreinte });
 }
 
+/**
+ * Ferme le suivi quand le FOURNISSEUR annonce qu'il cesse de regarder.
+ *
+ * ⚠️ APRÈS L'INGESTION DE L'ÉTAT, JAMAIS AVANT. Un `TRACKING_STOPPED` peut très
+ * bien accompagner un dernier état parfaitement valide — c'est même le cas
+ * après une livraison, qu'ils cessent de suivre au bout de quinze jours. Fermer
+ * d'abord ferait perdre la dernière chose qu'ils avaient à dire.
+ *
+ * ⚠️ SON ÉCHEC N'ANNULE RIEN. L'état vient d'être écrit ; le perdre parce que
+ * la fermeture n'a pas abouti ferait payer le travail utile par un défaut
+ * accessoire. L'échec est NOMMÉ — un `catch` muet ici laisserait la cadence
+ * interroger indéfiniment un numéro que plus personne ne suit, et rien ne le
+ * dirait.
+ */
+async function marquerArretEventuel(
+  systeme: ReturnType<typeof creerClientSysteme>,
+  numero: string,
+  reponse: { readonly arrete?: boolean },
+): Promise<void> {
+  if (reponse.arrete !== true) return;
+
+  const { data, error } = await systeme.rpc("arreter_suivi", {
+    p_numero: numero,
+    p_motif: "suivi-arrete-par-le-fournisseur",
+  });
+
+  if (error !== null) {
+    console.error(
+      "[suivi] arrêt annoncé par le fournisseur NON écrit pour " +
+        numero.slice(0, 4) +
+        " — la cadence continuera d'interroger un numéro qu'ils ne suivent plus. " +
+        error.message,
+    );
+    return;
+  }
+
+  // ZÉRO LIGNE TOUCHÉE EST UN ÉTAT LÉGITIME — colis déjà abandonné, ou numéro
+  // qui ne nous concerne pas — mais c'est AUSSI le symptôme d'une notification
+  // qui vise un numéro inconnu. On le dit sans en faire une erreur.
+  if ((data ?? 0) === 0) {
+    console.warn(
+      "[suivi] arrêt annoncé pour " + numero.slice(0, 4) + " : aucun colis actif ne portait ce numéro.",
+    );
+  }
+}
+
 export async function ingererEtat(
   numero: string,
-  reponse: ReponsePort,
+  /**
+   * ⚠️ `arrete` NE VIENT QUE DES NOTIFICATIONS, jamais de la cadence.
+   *
+   * C'est une propriété de la SOURCE — « je cesse de suivre ce numéro » — et
+   * seul le fournisseur peut l'annoncer. La cadence, elle, ne fait que
+   * demander : son silence ne prouve rien, et lui laisser fermer un suivi
+   * reviendrait à confondre « je n'ai rien vu » et « il n'y a plus rien à voir ».
+   */
+  reponse: ReponsePort & { readonly arrete?: boolean },
   /**
    * Empreinte de la notification reçue, pour n'en tenir compte qu'une fois.
    *
@@ -100,6 +154,7 @@ export async function ingererEtat(
     }
 
     await emettre(EVENEMENTS.INTERROGATION_VIDE, { sujet: "suivi:" + propre.slice(0, 4) });
+    await marquerArretEventuel(systeme, propre, reponse);
     return { statut: "vide", colis: data ?? 0 };
   }
 
@@ -235,6 +290,10 @@ export async function ingererEtat(
         ". Le colis n'a pas bougé d'étape — la valeur brute est conservée en base.",
     );
   }
+
+  // APRÈS l'écriture de l'état : un arrêt peut accompagner un dernier état
+  // valide, et le fermer d'abord ferait perdre ce qu'ils avaient à dire.
+  await marquerArretEventuel(systeme, propre, reponse);
 
   return { statut: "applique", colis, inconnu };
 }

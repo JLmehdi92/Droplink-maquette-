@@ -118,8 +118,17 @@ export interface FournisseurSuivi {
    */
   verifierNotification(corpsBrut: string, signature: string | null): boolean;
 
-  /** Extrait l'état d'une notification déjà VÉRIFIÉE. */
-  lireNotification(corpsBrut: string): ReponsePort & { readonly numero?: string };
+  /**
+   * Lit une notification déjà VÉRIFIÉE, poussée par le fournisseur.
+   *
+   * `arrete` dit que le FOURNISSEUR CESSE DE SUIVRE ce numéro — pas que le
+   * colis est arrivé. C'est une propriété de la SOURCE, pas du colis, et il
+   * fallait un champ distinct : un arrêt peut très bien accompagner un dernier
+   * état parfaitement valide, qu'il faut ingérer avant de fermer le suivi.
+   */
+  lireNotification(
+    corpsBrut: string,
+  ): ReponsePort & { readonly numero?: string; readonly arrete?: boolean };
 }
 
 /** L'étape que le produit affiche. Réexportée pour que le port se lise seul. */

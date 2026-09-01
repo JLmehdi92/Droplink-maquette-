@@ -138,3 +138,86 @@ describe("La réponse brute stockée ne porte aucune donnée personnelle", () =>
     expect(sansDonneesPersonnelles(varie)).toEqual(varie);
   });
 });
+
+/**
+ * ⚠️ LE CHEMIN QUE LA PREMIÈRE VERSION AVAIT MANQUÉ — RELEVÉ LE 01/09/2026.
+ *
+ * La liste ne couvrait que `shipping_info`. Or leur documentation place un
+ * objet `address` IDENTIQUE sur `latest_event` ET sur CHAQUE entrée de
+ * `tracking.providers[].events[]`. Sur l'événement de LIVRAISON, `street` et
+ * `coordinates` portent l'adresse du client d'un vendeur.
+ *
+ * L'arbitrage est écrit dans l'adaptateur et éprouvé ici : on retire ce qui
+ * désigne une PERSONNE (rue, coordonnées), on garde ce qui désigne un LIEU DE
+ * PASSAGE (pays, région, ville) — sans quoi on ne pourrait plus diagnostiquer
+ * un blocage en douane.
+ */
+describe("L'objet `address` des événements — la rue part, la ville reste", () => {
+  const charge = {
+    event: "TRACKING_UPDATED",
+    data: {
+      number: "RR123456789CN",
+      track_info: {
+        latest_event: {
+          description: "Delivered",
+          location: "MARLTON, NJ",
+          address: {
+            country: "US",
+            state: "NJ",
+            city: "MARLTON",
+            street: "12 rue de la Victime",
+            postal_code: "08053",
+            coordinates: { longitude: 2.3522, latitude: 48.8566 },
+          },
+        },
+        tracking: {
+          providers: [
+            {
+              events: [
+                {
+                  description: "Out for delivery",
+                  address: {
+                    city: "MARLTON",
+                    street: "12 rue de la Victime",
+                    coordinates: { longitude: 2.3522, latitude: 48.8566 },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  test("CONTRE-TEST : la charge d'origine porte BIEN la rue et les coordonnées", () => {
+    // Sans lui, un nettoyage qui ne ferait rien passerait le test suivant.
+    const texte = JSON.stringify(charge);
+    expect(texte).toContain("12 rue de la Victime");
+    expect(texte).toContain("48.8566");
+  });
+
+  test("CONTRÔLE PAR VALEUR : ni la rue ni les coordonnées ne survivent, À AUCUNE PROFONDEUR", () => {
+    const texte = JSON.stringify(sansDonneesPersonnelles(charge));
+    expect(texte, "la rue du destinataire a survécu").not.toContain("12 rue de la Victime");
+    expect(texte, "les coordonnées ont survécu").not.toContain("48.8566");
+    expect(texte, "les coordonnées ont survécu").not.toContain("2.3522");
+    expect(texte).not.toContain("street");
+    expect(texte).not.toContain("coordinates");
+  });
+
+  test("CONTRE-TEST POSITIF : le LIEU DE PASSAGE est conservé", () => {
+    /*
+     * C'est le test qui empêche la correction de dériver vers « on retire
+     * `address` en entier ». La réponse brute existe pour diagnostiquer : sans
+     * la ville, on ne peut plus expliquer où un colis s'est arrêté.
+     */
+    const texte = JSON.stringify(sansDonneesPersonnelles(charge));
+    expect(texte, "la ville a été retirée : on ne peut plus diagnostiquer").toContain("MARLTON");
+    expect(texte).toContain("\"country\":\"US\"");
+    expect(texte).toContain("\"state\":\"NJ\"");
+    expect(texte).toContain("08053");
+    // Et la description de l'événement, qui est la matière même du diagnostic.
+    expect(texte).toContain("Out for delivery");
+  });
+});

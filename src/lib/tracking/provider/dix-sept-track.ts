@@ -284,6 +284,35 @@ const CHAMPS_PERSONNELS = new Set([
   "phone_number",
   "phone_number_last_4",
   "cpf_or_cnpj",
+  /*
+   * ⚠️ AJOUTÉS LE 01/09/2026 — LA LISTE PASSAIT À CÔTÉ D'UN CHEMIN ENTIER.
+   *
+   * Elle ne couvrait que `shipping_info`. Or leur documentation place un objet
+   * `address` IDENTIQUE sur `latest_event` ET sur CHAQUE entrée de
+   * `tracking.providers[].events[]` :
+   *
+   *   "address": { "country":"US","state":"NJ","city":"MARLTON",
+   *                "street":null,"postal_code":"08053",
+   *                "coordinates":{"longitude":null,"latitude":null} }
+   *
+   * Sur la plupart des événements c'est un CENTRE DE TRI, sans valeur
+   * personnelle. Mais sur l'événement de LIVRAISON, `street` et `coordinates`
+   * portent l'adresse du CLIENT D'UN VENDEUR — la donnée que le produit
+   * s'interdit de collecter, écrite quatre-vingt-dix jours dans
+   * `tracking_snapshots.raw_payload`.
+   *
+   * ⚠️ ON NE RETIRE PAS `address` EN ENTIER, ET C'EST UN ARBITRAGE ASSUMÉ. La
+   * réponse brute existe pour DIAGNOSTIQUER, et savoir dans quelle VILLE un
+   * colis a été scanné en a la valeur — c'est même ce qui permet de comprendre
+   * un blocage en douane. Ce qui désigne une PERSONNE, c'est la rue et les
+   * coordonnées ; le pays, la région et la ville désignent un lieu de passage.
+   * On retire donc les deux clefs, à toute profondeur, et on garde le reste.
+   *
+   * Le produit, lui, n'a jamais lu que `location` — une chaîne grossière. Rien
+   * de ce qui est retiré ici n'atteignait un écran.
+   */
+  "street",
+  "coordinates",
 ]);
 
 /**
@@ -352,6 +381,69 @@ function estVide(etat: EtatColisPort): boolean {
   return sansStatut && sansPoint && sansJalonDate;
 }
 
+/**
+ * ⚠️ « DÉJÀ ENREGISTRÉ » N'EST PAS UN REFUS — C'EST UN SUCCÈS.
+ *
+ * DÉFAUT RÉEL, TROUVÉ LE 01/09/2026 EN LISANT LEUR TABLE DE CODES. Tout rejet
+ * était traduit en `refuse`, et `refuse` déclenche `marquer_prise_en_charge`
+ * avec `p_abandonne = true` : le colis est abandonné DÉFINITIVEMENT.
+ *
+ * Or `-18019901` signifie « Tracking number {0} is already registered ». Le
+ * colis EST suivi chez eux, et le quota EST déjà payé. Le cas n'a rien
+ * d'exotique : il survient dès qu'une prise en charge aboutit chez eux mais
+ * que notre écriture échoue ensuite, ou qu'un même numéro revient par un autre
+ * chemin. On abandonnait donc un suivi qui fonctionnait, après l'avoir payé, et
+ * le vendeur ne voyait qu'une page qui ne bouge plus.
+ */
+const CODE_DEJA_ENREGISTRE = -18019901;
+
+/**
+ * Les seuls rejets DÉFINITIFS — ceux qu'insister ne réparera jamais.
+ *
+ * ⚠️ LA LISTE EST COURTE, ET L'ASYMÉTRIE EST VOULUE. Les deux erreurs possibles
+ * n'ont pas le même prix :
+ *   - classer à tort en `refuse` abandonne un colis POUR TOUJOURS, et le client
+ *     d'un vendeur reste devant une page morte ;
+ *   - classer à tort en `indisponible` fait reprendre le colis, et la fenêtre
+ *     existante — 7 jours, 16 interrogations — l'abandonne de toute façon.
+ * Le premier est irréversible, le second est borné. **Tout code INCONNU part
+ * donc en `indisponible`.**
+ *
+ * ⚠️ ET LA RAISON QUI JUSTIFIAIT L'INVERSE ÉTAIT FAUSSE. Le commentaire de
+ * `prise-en-charge.ts` abandonnait tout de suite « plutôt que de le réessayer
+ * seize fois, [car] chaque tentative se paie ». Leur documentation dit le
+ * contraire, verbatim : « **Successfully** registering 1 tracking number equals
+ * 1 quota ». Un enregistrement REJETÉ ne consomme rien. Réessayer est gratuit.
+ *
+ * ⚠️ `-18019903` Y EST RESTÉ, APRÈS M'ÊTRE TROMPÉ DESSUS. Je l'en avais retiré
+ * en raisonnant que la détection « réussirait plus tard, une fois le numéro
+ * scanné ». C'est faux : leur détection lit le FORMAT du numéro, pas son
+ * historique de scans. Un format qu'ils ne reconnaissent pas aujourd'hui ne
+ * sera pas reconnu dans sept jours.
+ *
+ * Et la conséquence produit tranche dans le même sens : en refus, le vendeur
+ * apprend TOUT DE SUITE qu'il doit préciser le transporteur ; en
+ * indisponibilité, il attend une semaine de silence pour le même verdict. Le
+ * refus n'est pas la punition, c'est le retour d'information.
+ */
+const CODES_DEFINITIFS: ReadonlySet<number> = new Set([
+  -18010013, // « Submitted data is invalid » — le numéro est malformé.
+  -18019903, // Transporteur indétectable : c'est le FORMAT, il ne changera pas.
+  -18019910, // Code transporteur incorrect : le même envoi échouera toujours.
+]);
+
+function classerRejet(code: number | null | undefined, brut: unknown): ReponsePort {
+  if (code === CODE_DEJA_ENREGISTRE) {
+    // Succès sans état : la prise en charge n'a jamais rendu l'état du colis,
+    // il arrive ensuite par notification ou par interrogation.
+    return { statut: "vide", brut };
+  }
+  if (code !== null && code !== undefined && CODES_DEFINITIFS.has(code)) {
+    return { statut: "refuse", motif: "code-" + String(code) };
+  }
+  return { statut: "indisponible", motif: "code-" + String(code ?? "inconnu") };
+}
+
 async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
   const controleur = new AbortController();
   const minuterie = setTimeout(() => controleur.abort(), DELAI_MS);
@@ -407,7 +499,7 @@ async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
 
     const rejete = analyse.data.data?.rejected?.[0];
     if (rejete !== undefined) {
-      return { statut: "refuse", motif: "code-" + String(rejete.error?.code ?? "inconnu") };
+      return classerRejet(rejete.error?.code ?? null, brut);
     }
 
     if ((analyse.data.data?.accepted ?? []).length === 0) {
@@ -544,14 +636,39 @@ export const dixSeptTrack: FournisseurSuivi = {
     const numero = colis.number ?? undefined;
     const etat = versPort(colis);
 
-    // Une notification d'ARRÊT de suivi n'apporte aucun état : le fournisseur
-    // cesse simplement de regarder. La traiter comme un état vide serait juste ;
-    // la traiter comme une erreur ferait chercher une panne inexistante.
-    if (estVide(etat)) {
-      return numero === undefined ? { statut: "vide", brut } : { statut: "vide", brut, numero };
-    }
-    return numero === undefined
-      ? { statut: "ok", etat, brut }
-      : { statut: "ok", etat, brut, numero };
+    /*
+     * ⚠️ ON LIT ENFIN L'ÉVÉNEMENT, ET PAS SEULEMENT SA CHARGE UTILE.
+     *
+     * DÉFAUT RÉEL, RELEVÉ LE 01/09/2026. Ils poussent DEUX événements —
+     * `TRACKING_UPDATED` et `TRACKING_STOPPED` — et le champ `event` était lu
+     * par le schéma sans que personne ne branche dessus.
+     *
+     * L'arrêt n'était donc détecté qu'indirectement, par l'absence d'état (le
+     * `estVide` ci-dessous). Rien n'oblige un `TRACKING_STOPPED` à venir vide :
+     * accompagné du dernier état connu, il passait pour une mise à jour
+     * ordinaire. On continuait alors d'interroger un numéro que plus personne
+     * ne suit, et le silence affiché au client était imputé au TRANSPORTEUR
+     * alors que c'est la SOURCE qui s'était tue.
+     *
+     * La comparaison est insensible à la casse et aux séparateurs, comme
+     * partout ailleurs ici : parier sur `TRACKING_STOPPED` exactement, c'est
+     * accepter que le suivi s'éteigne en silence le jour où ils écrivent
+     * `Tracking_Stopped`.
+     */
+    const arrete =
+      (analyse.data.event ?? "").trim().toLowerCase().replace(/[\s_-]/g, "") === "trackingstopped";
+
+    const suffixe = {
+      ...(numero === undefined ? {} : { numero }),
+      // Le champ n'est POSÉ que lorsqu'il est vrai : `exactOptionalPropertyTypes`
+      // distingue « absent » de « vaut false », et l'appelant ne doit pas avoir
+      // à traiter un troisième cas qui ne veut rien dire.
+      ...(arrete ? { arrete: true as const } : {}),
+    };
+
+    // Un arrêt SANS état n'est pas une erreur : le fournisseur cesse simplement
+    // de regarder. Le traiter comme une panne ferait chercher ce qui n'existe pas.
+    if (estVide(etat)) return { statut: "vide", brut, ...suffixe };
+    return { statut: "ok", etat, brut, ...suffixe };
   },
 };

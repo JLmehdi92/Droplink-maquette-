@@ -802,6 +802,10 @@ export type Database = {
         Args: { p_archiver: boolean; p_ids: string[] }
         Returns: number
       }
+      arreter_suivi: {
+        Args: { p_motif: string; p_numero: string }
+        Returns: number
+      }
       attacher_colis: {
         Args: { p_numero: string; p_order_id: string; p_transporteur: string }
         Returns: {
