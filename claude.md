@@ -86,7 +86,7 @@ Next.js 15 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 > ⚠️ **STITCH EST SUPPRIMÉ — décision de Wassim, 26/08/2026.**
 > Ce fichier a longtemps dit « on implémente TOUS les écrans Stitch, c'est une décision produit, pas une suggestion ». **Cette phrase est morte, et le dossier avec elle** : `stitch_droplink_qc_tracking_portal/` a été effacé du dépôt le 26/08/2026, une fois les 20 routes portées sur le canevas. Si un commentaire du code cite encore une maquette Stitch, il parle d'une décision PASSÉE, jamais d'une référence à consulter.
 
-**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — **43 planches**, chaque écran en bureau ET téléphone, plus les planches d'états.
+**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — **47 planches**, chaque écran en bureau ET téléphone, plus les planches d'états.
 
 > ⚠️ **LE CANEVAS EST MODIFIABLE — décision de Wassim, 29/08/2026.** Quand un
 > écran a besoin de ce que la planche ne dessine pas, **on écrit d'abord DANS LA

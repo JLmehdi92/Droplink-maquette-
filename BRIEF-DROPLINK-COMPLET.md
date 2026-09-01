@@ -92,12 +92,28 @@ conservées pour la phase 2 ; le code viendra plus tard.
 trancher.**
 
 **Contrainte technique qui découle du profil fournisseur** : la connexion Google lui
-est **inaccessible** (Chine). Le lien magique par email est son unique porte d'entrée.
-Conséquence : ce chemin doit être irréprochable — renvoi possible sans blocage abusif,
-message d'erreur explicite si l'envoi échoue, durée de validité longue (24 h) pour
-absorber un délai de distribution. Et la délivrabilité vers les boîtes chinoises (QQ,
-163, 126) est un sujet d'infrastructure à traiter : sous-domaine d'envoi dédié, SPF,
-DKIM, DMARC.
+est **inaccessible** (Chine). Il entre donc par **email + mot de passe**.
+
+> ⚠️ **AMENDÉ LE 01/09/2026 — CE PARAGRAPHE DISAIT L'INVERSE.** Il affirmait
+> « le lien magique par email est son unique porte d'entrée », et en tirait que
+> ce chemin devait être irréprochable. **Décision de Wassim : le lien magique est
+> supprimé, remplacé par une authentification classique.**
+>
+> **Et le raisonnement d'origine se retourne contre sa conclusion.** Si la
+> délivrabilité vers les boîtes chinoises (QQ, 163, 126) est le point faible —
+> et c'est vrai —, alors le lien magique était le pire choix possible pour ce
+> persona : il faisait dépendre **CHAQUE connexion** d'un email qui doit
+> arriver. Un mot de passe n'en fait dépendre que la **réinitialisation**,
+> c'est-à-dire un cas rare. Pour Chen, l'authentification classique est donc
+> **plus** robuste, pas moins.
+>
+> Ce que le paragraphe protégeait reste vrai, et se déplace : la délivrabilité
+> est toujours un sujet d'infrastructure — sous-domaine d'envoi dédié, SPF,
+> DKIM, DMARC — mais elle ne porte plus l'accès quotidien, seulement le recours.
+
+La délivrabilité vers ces boîtes reste donc à traiter, pour la réinitialisation
+de mot de passe. Ce qui change : son échec coûte désormais un **recours**, pas
+**l'accès**.
 
 ### Personas
 
@@ -257,6 +273,22 @@ structurellement du marché gris.**
     remplacement ou une valeur inventée. Sur la page publique. **L'inverse vaut côté
     admin** : omettre le stockage ferait croire qu'il n'y a rien à surveiller, afficher
     « 0 o » ferait croire qu'on a mesuré. Un client consulte, un administrateur décide.
+
+### Accès au compte — tranché le 01/09/2026
+
+27. **Email + mot de passe. Le lien magique est SUPPRIMÉ**, pas gardé en secours :
+    un second chemin qui ouvre une session est une seconde surface où fermer
+    l'énumération, le bourrage et la limitation de débit. Google reste — le code
+    existe — mais il n'est configuré ni chez Google ni chez Supabase, donc il ne
+    sert personne aujourd'hui.
+28. **La confirmation d'email n'est PAS exigée** à l'inscription. Elle coûte le
+    clic dans un email que cette décision supprime, et elle le coûte au pire
+    moment : la première minute. **Son prix est écrit au §9** — la page
+    d'inscription devient un oracle d'existence de compte, borné mais réel.
+29. **La déconnexion existe sur les DEUX surfaces**, vendeur et administration.
+    Elle n'était pas une décision produit tant qu'il n'y avait pas de mot de
+    passe ; avec un mot de passe, son absence serait le premier retour d'un
+    utilisateur réel.
 
 ### Ce qu'on ne fait PAS — scope explicite
 
@@ -671,7 +703,9 @@ image ferait payer au vendeur une limite qui est la nôtre.
 
 | Écran | Maquette | Notes |
 |---|---|---|
-| **Connexion** | `droplink_connexion_acc_s_portail` | Email magic link + Google. Le lien email est l'unique porte pour les fournisseurs chinois |
+| **Connexion** | `droplink_connexion_acc_s_portail` | **Email + mot de passe**, plus Google. ⚠️ Cette case disait « Email magic link + Google. Le lien email est l'unique porte pour les fournisseurs chinois » — **amendé le 01/09/2026**, voir §2 |
+| **Mot de passe oublié** | *(aucune maquette Stitch)* | Réponse **identique** que l'adresse existe ou non. Lien à usage unique, durée courte |
+| **Nouveau mot de passe** | *(aucune maquette Stitch)* | Atteignable **uniquement** avec une session de récupération |
 | **Inscription** | `droplink_cr_ation_de_compte_inscription` | + onboarding 60 s : nom, logo, couleur, type de compte |
 | **Dashboard** | `droplink_tableau_de_bord_principal` (PNG corrompu, lire le HTML) | L'écran le plus utilisé. Détail ci-dessous |
 | **Créer / éditer une commande** | `droplink_cr_er_un_post_client` | **Correction obligatoire** : le bloc « Client Account » avec recherche et email est remplacé par un **simple champ texte libre**. Le destinataire n'a jamais de compte |
@@ -831,8 +865,9 @@ budget de performance de la page publique l'interdit de toute façon.
 > ⚠️ **REMPLACÉ LE 26/08/2026.** La base n'est plus `DESIGN.md` du zip Stitch,
 > **abandonné**. La source est le **canevas Claude Design validé par Wassim** :
 > `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af`
-> — **43 planches** (40 à l'origine, 41 après `Envois`, 43 après la passe du
-> 30/08), chaque écran en bureau ET téléphone, plus une page d'états.
+> — **47 planches** (40 à l'origine, 41 après `Envois`, 43 après la passe du
+> 30/08, 47 après l'authentification classique du 01/09), chaque écran en bureau
+> ET téléphone, plus une page d'états.
 >
 > ⚠️ **LE CANEVAS EST MODIFIABLE depuis le 29/08/2026** : quand un écran a besoin
 > de ce que la planche ne dessine pas, on écrit d'abord DANS LA PLANCHE, on
@@ -869,6 +904,42 @@ exécution de JavaScript, **aucun décalage de mise en page après le premier af
 
 <a id="9"></a>
 ## 9. SÉCURITÉ — RÈGLES DÉTAILLÉES
+
+### Mots de passe — surface ouverte le 01/09/2026
+
+Elle n'existait pas tant que le produit n'avait que le lien magique. **Aucune de
+ces règles n'a de valeur si elle n'est pas exécutée** : trois d'entre elles
+vivent dans le tableau de bord Supabase, où aucune relecture de code ne peut les
+voir — c'est L-028 appliqué à l'authentification.
+
+- **Longueur minimale 12 caractères**, imposée **des deux côtés** : par Zod chez
+  nous, et par le réglage du projet Supabase. Les deux sont nécessaires — Zod ne
+  voit pas `updateUser`, et le réglage Supabase ne voit pas nos messages.
+- **Refus des mots de passe des fuites connues** (option Supabase adossée à
+  HaveIBeenPwned). Sans elle, le bourrage d'identifiants est gratuit.
+- **Aucun message ne distingue un email inconnu d'un mot de passe faux**, et le
+  **délai non plus** : le hachage ne s'exécute que si le compte existe, donc
+  sans plancher le chronomètre répond à la place du message. Même discipline
+  que `/p/[token]`.
+- ⚠️ **L'INSCRIPTION, ELLE, RESTE UN ORACLE, ET C'EST ASSUMÉ.** Confirmation
+  d'email désactivée (décision de Wassim), `signUp` sur une adresse déjà
+  inscrite rend `User already registered` — la page dit donc qui a un compte
+  ici. **Ce n'est pas rattrapable en code** : une inscription réussie ouvre une
+  session, un doublon non, et la différence est observable quoi qu'on affiche.
+  Elle est **bornée** (30 essais/h par adresse IP, 6/h par adresse email) et
+  **refermable** en réactivant la confirmation d'email, qui fait obfusquer
+  Supabase.
+- **La réinitialisation est le nouveau vecteur de prise de compte** : lien à
+  usage unique, durée courte, réponse identique que l'adresse existe ou non, et
+  compteur d'envoi distinct de celui de la connexion.
+- **Aucun mot de passe** dans un journal, une trace d'erreur ou un événement
+  d'usage.
+- **La déconnexion est une propriété de sécurité, pas un confort.** Le cookie de
+  session vaut 400 jours et est rafraîchi par le middleware : sans elle, le
+  suivant qui ouvre un navigateur partagé a l'éditeur, l'export CSV et les
+  **notes internes, qui portent le prix d'achat**. Elle doit être atteignable
+  **sans JavaScript**, porter la **garde CSRF**, et être prouvée par une sonde
+  qui rejoue le **MÊME cookie** après coup.
 
 ### Isolation
 
