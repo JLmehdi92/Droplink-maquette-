@@ -58,15 +58,43 @@ import { executerGesteDeListe } from "@/lib/commandes/geste-liste";
  * L'origine de la requête est-elle la nôtre ?
  *
  * On compare `Origin` à l'hôte de la requête, comme le fait Next pour ses
- * propres Server Actions. `x-forwarded-host` passe avant `host` : derrière un
- * proxy, `host` porte le nom interne et la comparaison échouerait pour toutes
- * les requêtes légitimes.
+ * propres Server Actions.
+ *
+ * ⚠️ `x-forwarded-host` N'EST PLUS LU DU TOUT, et c'est une correction.
+ *
+ * Il passait avant `host`, inconditionnellement, avec pour raison « derrière un
+ * proxy, `host` porte le nom interne ». Mais rien ne distingue un
+ * `x-forwarded-host` posé par notre bord d'un `x-forwarded-host` posé par
+ * l'appelant : envoyer cet en-tête ET un `Origin` assorti faisait comparer la
+ * garde à elle-même, et elle passait.
+ *
+ * C'est le défaut déjà résolu pour l'adresse IP dans `lib/limitation/empreinte`,
+ * mot pour mot : « la protection tenait à ce que l'attaquant se donne la peine
+ * de poser un en-tête qu'il n'a aucune raison de poser ».
+ *
+ * ⚠️ LA PREMIÈRE CORRECTION NE SUFFISAIT PAS, et c'est la sonde qui l'a dit.
+ * Elle ne lisait `x-forwarded-host` qu'en mode `BORD_DE_CONFIANCE=xff` — or ce
+ * réglage existe pour `x-forwarded-for`, un AUTRE en-tête, et `xff` est
+ * justement le mode des sondes locales : la requête forgée passait encore.
+ * Faire dépendre une garde CSRF d'un réglage qui parle d'adresses IP, c'était
+ * relier deux choses qui n'ont en commun que le préfixe de leur nom.
+ *
+ * On ne le lit donc plus. Cloudflare — notre cible — préserve `Host` et ne pose
+ * pas cet en-tête ; aucun déploiement prévu n'en a besoin. Le jour où un bord
+ * réécrirait `Host`, ce serait à lui de se déclarer, explicitement, ici.
+ *
+ * ⚠️ CE N'ÉTAIT PAS EXPLOITABLE DEPUIS UN NAVIGATEUR — `x-forwarded-host` n'est
+ * pas un en-tête sûr au sens CORS, donc un formulaire ne peut pas le poser et
+ * un `fetch` déclencherait un prévol qu'aucun `OPTIONS` ne sert. On le corrige
+ * quand même : c'est la SEULE barrière qui restait devant la construction de
+ * redirection, et deux protections qui ne tiennent qu'ensemble finissent par
+ * tomber ensemble.
  */
 function memeOrigine(requete: NextRequest): boolean {
   const origine = requete.headers.get("origin");
   if (origine === null) return false;
 
-  const hote = requete.headers.get("x-forwarded-host") ?? requete.headers.get("host");
+  const hote = requete.headers.get("host");
   if (hote === null || hote === "") return false;
 
   try {
