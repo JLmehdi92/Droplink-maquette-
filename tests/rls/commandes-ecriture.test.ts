@@ -212,8 +212,18 @@ describe("Le premier contenu réel", () => {
      * définitives sur le NUMÉRATEUR de la métrique de verdict.
      *
      * Le produit REND désormais la marque quand l'émission n'est pas partie.
-     * Ici, l'analytics n'étant pas configuré, la marque doit donc être encore
-     * disponible : c'est la preuve que rien n'a été perdu en silence.
+     *
+     * ⚠️ ET L'ANALYTICS EST DÉBRANCHÉ PAR LE HARNAIS, PAS PAR HASARD. Cette
+     * ligne disait « l'analytics n'étant pas configuré », en décrivant l'état
+     * d'une machine où la clé était vide. Le 01/09/2026 la clé a été posée, et
+     * ce test est parti en rouge : la suite venait d'émettre 648 tests de
+     * VRAIS événements dans le projet d'analytics de production, `order_created`
+     * compris — c'est-à-dire qu'elle faussait la métrique de verdict de la
+     * phase avec ses propres tests. `charger-env.ts` débranche désormais les
+     * tiers payants, et le transport refuse tout appel vers eux.
+     *
+     * La marque doit donc être encore disponible : c'est la preuve que rien
+     * n'a été perdu en silence.
      *
      * CE QUE LE TEST ÉTABLIT MALGRÉ TOUT — et c'était sa vraie raison d'être :
      * que le chemin d'écriture emprunte bien la réclamation, au lieu de laisser

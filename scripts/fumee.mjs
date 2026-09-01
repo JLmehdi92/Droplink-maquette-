@@ -181,6 +181,16 @@ const serveur = spawn("pnpm", ["start", "--port", String(port)], {
     BORD_DE_CONFIANCE: "xff",
     CRON_SECRET: SECRET_CRON,
     TRACKING_API_KEY: CLE_SUIVI,
+    /*
+     * ⚠️ L ANALYTICS EST DEBRANCHE POUR CE SERVEUR, comme la cle de suivi juste
+     * au-dessus, et pour la meme raison : ce qu on eprouve est le SCHEMA, pas le
+     * service. Le 01/09/2026 la cle de production a ete posee dans `.env.local`,
+     * et cette sonde s est mise a emettre de VRAIS evenements d usage — dont
+     * `order_created`, qui est le denominateur du taux d activation. La metrique
+     * de verdict de la phase aurait ete faussee par sa propre sonde de fumee,
+     * en restant credible.
+     */
+    NEXT_PUBLIC_POSTHOG_KEY: "",
   },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -709,6 +719,23 @@ controles.push(
 //
 // Un controle sur le HTML SERVI est le seul qui voie ces defauts : le code
 // source, lui, aura toujours l air correct.
+/*
+ * LE TRANSPORT RESILIENT, POUR LES APPELS DE CETTE SONDE.
+ *
+ * ⚠️ POSE LE 01/09/2026 APRES UN ROUGE MAL ATTRIBUE. Une ecriture de mise en
+ * place — celle qui franchit l onboarding — a echoue sur un hoquet de
+ * transport. Son erreur n etait pas lue, la sonde a continue, et le defaut est
+ * ressorti DEUX CENTS LIGNES PLUS LOIN en accusant l editeur : « la session
+ * ouvre bien l editeur (307 vers /fr/bienvenue) » et deux titres vides.
+ *
+ * La suite de tests etait deja protegee ; ce script, lui, fabrique son propre
+ * client et ne l etait pas. Le remede vit desormais dans `scripts/transport.mjs`
+ * pour que les deux le lisent — une regle ecrite a deux endroits est une regle
+ * qu un seul des deux appliquera.
+ */
+const { installerTransportResilient } = await import("./transport.mjs");
+installerTransportResilient();
+
 const { createClient } = await import("@supabase/supabase-js");
 const service = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -812,10 +839,32 @@ try {
     // qui y mesure un titre lirait celui de l onboarding en croyant lire celui
     // de l editeur. La colonne est nullable SANS defaut, expres.
     if (profilFumee) {
-      await service
+      /*
+       * ⚠️ L ERREUR DE CETTE ECRITURE N ETAIT PAS LUE, ET C EST CE QUI A RENDU
+       * SA PANNE ILLISIBLE. Le 01/09/2026 elle a echoue, la sonde a continue, et
+       * le defaut est ressorti DEUX CENTS LIGNES PLUS LOIN sous la forme de trois
+       * ecarts qui accusaient l editeur : « la session ouvre bien l editeur
+       * (307 vers /fr/bienvenue) » et deux titres vides. On cherchait un defaut
+       * de titre alors que la mise en place n avait pas abouti.
+       *
+       * Une mise en place qui echoue doit le DIRE a l endroit ou elle echoue :
+       * sinon ce sont les controles suivants qui portent l accusation, et ils
+       * la portent contre le mauvais coupable.
+       */
+      const { error: erreurType } = await service
         .from("profiles")
         .update({ account_type: "reseller", locale: "fr" })
         .eq("id", profilFumee);
+
+      if (erreurType !== null) {
+        echecs += 1;
+        console.log(
+          `ECHEC onboarding de fumee non franchi : ${erreurType.message}. ` +
+            "Tant que `account_type` est nul, TOUTE page de l espace vendeur " +
+            "redirige vers /fr/bienvenue — les controles qui en dependent " +
+            "mesureront l onboarding en croyant mesurer l editeur.",
+        );
+      }
     }
 
     const { data: shop, error: erreurShop } = await service

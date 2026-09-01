@@ -108,12 +108,24 @@ describe("L'interrupteur du suivi coupe la dépense, avant l'appel", () => {
       "exception",
       "http",
       "reponse",
-      // ⚠️ CELUI-CI EST LE MOTIF RENDU DANS CET ENVIRONNEMENT, où `TRACKING_API_KEY`
-      // est absente — et il n'existait pas quand ce test a été écrit. L'adaptateur
-      // rendait alors `reseau` pour une clé manquante : le test passait, mais pour
-      // une raison qui était elle-même le défaut. Il est repris par sa CONSTANTE et
-      // non par sa chaîne, pour qu'un renommage casse ici plutôt que de retomber en
-      // silence dans le cas `reseau`.
+      /*
+       * ⚠️ CE MOTIF EST GARANTI PAR LE HARNAIS, IL N'EST PLUS SUBI.
+       *
+       * Il a longtemps été « le motif rendu dans cet environnement, où
+       * `TRACKING_API_KEY` est absente » — c'est-à-dire un ACCIDENT de machine
+       * érigé en propriété. Le 01/09/2026, la clé a été renseignée et ce test
+       * est parti en rouge en rendant `refuse` : il venait d'appeler POUR DE
+       * VRAI `/register` chez le fournisseur, dont le quota est de 200 prises
+       * en charge À VIE. Rien n'a été consommé — un enregistrement rejeté est
+       * gratuit, `quota_used: 0` relevé juste après — mais c'était de la chance.
+       *
+       * `charger-env.ts` débranche désormais les tiers payants pour la durée de
+       * la suite, et le transport REFUSE tout appel vers eux. Le motif attendu
+       * ici est donc une conséquence de cette règle, pas de la machine.
+       *
+       * Repris par sa CONSTANTE et non par sa chaîne : un renommage doit casser
+       * ici plutôt que de retomber en silence dans le cas `reseau`.
+       */
       MOTIF_CLE_ABSENTE,
     ];
     await poser("suivi_actif", 1);

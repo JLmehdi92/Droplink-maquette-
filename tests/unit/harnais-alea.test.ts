@@ -5,7 +5,7 @@ import {
   fetchResilient,
   malgreLAlea,
 } from "../aide/utilisateurs";
-import { installerTransportResilient } from "../aide/transport";
+import { hoteDe, installerTransportResilient, refusDHote } from "../aide/transport";
 
 /**
  * LA BORNE DU QUOTA D'AUTHENTIFICATION — éprouvée, pas déclarée.
@@ -347,6 +347,22 @@ describe("Le transport posé pour TOUT le processus", () => {
     expect(appels, "la coupure n'a pas été réessayée").toBe(3);
   }, 15_000);
 
+  test("⚠️ un appel vers un tiers PAYANT est refusé, et ne part PAS", async () => {
+    /*
+     * Ici l'enrobage est REELLEMENT en place — c'est le seul endroit du fichier
+     * où le `fetch` du processus est celui que l'installation a posé. Le refus
+     * doit venir AVANT le réessai : sinon un appel interdit partirait quatre
+     * fois au lieu d'être arrêté.
+     */
+    appels = 0;
+    comportement = async () => new Response("ne devrait jamais etre atteint");
+
+    await expect(fetch("https://api.17track.net/track/v2.4/register")).rejects.toThrow(
+      /APPEL SORTANT REFUSÉ/,
+    );
+    expect(appels, "l'appel interdit a atteint le réseau").toBe(0);
+  });
+
   test("CONTRE-TEST : une RÉPONSE d'erreur passe intacte, sans réessai", async () => {
     // Sans lui, cette pièce masquerait exactement les refus que les 648 tests
     // d'isolation cherchent à obtenir.
@@ -357,4 +373,66 @@ describe("Le transport posé pour TOUT le processus", () => {
     expect(r.status).toBe(403);
     expect(appels, "un refus légitime a été réessayé : il serait masqué").toBe(1);
   });
+});
+
+/**
+ * ⚠️ LE REFUS DES APPELS SORTANTS COÛTEUX — POSÉ LE 01/09/2026.
+ *
+ * Tant que `.env.local` était vide, la suite ne pouvait joindre personne. Les
+ * clés renseignées, la MÊME suite s'est mise à appeler `/register` chez le
+ * fournisseur de suivi — 200 prises en charge À VIE — et à émettre de VRAIS
+ * événements dans le projet d'analytics de production, dont `order_created`,
+ * qui est le dénominateur du taux d'activation.
+ *
+ * Rien n'a été perdu : mesuré après coup, `quota_used: 0`, parce qu'un
+ * enregistrement rejeté ne coûte rien. C'était de la CHANCE. Ces contrôles
+ * remplacent la chance par une règle.
+ */
+describe("Les appels sortants qui coûtent sont REFUSÉS", () => {
+  test("le fournisseur de suivi et l'analytics sont refusés, sous-domaines compris", () => {
+    for (const url of [
+      "https://api.17track.net/track/v2.4/register",
+      "https://eu.i.posthog.com/batch/",
+      "https://app.posthog.com/capture/",
+      "https://posthog.com/x",
+    ]) {
+      expect(refusDHote(url), `${url} n'est pas refusé`).not.toBeNull();
+      expect(refusDHote(url)?.message).toMatch(/APPEL SORTANT REFUSÉ/);
+    }
+  });
+
+  test("CONTRE-TEST : ce qui EST le système sous test passe", () => {
+    /*
+     * Sans lui, un refus trop large couperait Supabase — donc les 648 tests
+     * d'isolation — et le blocage passerait pour une réussite en n'ayant plus
+     * rien à mesurer. Un ensemble vide passe tout.
+     */
+    for (const url of [
+      "https://abcdefgh.supabase.co/rest/v1/orders",
+      "https://xyz.r2.cloudflarestorage.com/depot/objet",
+      "http://127.0.0.1:3000/p/abc",
+    ]) {
+      expect(refusDHote(url), `${url} est refusé à tort`).toBeNull();
+    }
+  });
+
+  test("les TROIS formes d'argument de `fetch` sont couvertes", () => {
+    /*
+     * `fetch` accepte une chaîne, une `URL` et une `Request`. N'en traiter
+     * qu'une laisserait les deux autres partir — et c'est précisément par un
+     * objet `Request` que passent les bibliothèques clientes.
+     */
+    const cible = "https://api.17track.net/track/v2.4/register";
+    expect(hoteDe(cible)).toBe("api.17track.net");
+    expect(hoteDe(new URL(cible))).toBe("api.17track.net");
+    expect(hoteDe(new Request(cible))).toBe("api.17track.net");
+    expect(refusDHote(new URL(cible))).not.toBeNull();
+    expect(refusDHote(new Request(cible))).not.toBeNull();
+  });
+
+  test("une URL relative n'a pas d'hôte et ne peut viser aucun tiers", () => {
+    expect(hoteDe("/api/suivi/cadence")).toBeNull();
+    expect(refusDHote("/api/suivi/cadence")).toBeNull();
+  });
+
 });
