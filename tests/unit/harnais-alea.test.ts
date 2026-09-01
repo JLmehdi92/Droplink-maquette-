@@ -1,10 +1,11 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import {
   estQuotaAtteint,
   estReseauInstable,
   fetchResilient,
   malgreLAlea,
 } from "../aide/utilisateurs";
+import { installerTransportResilient } from "../aide/transport";
 
 /**
  * LA BORNE DU QUOTA D'AUTHENTIFICATION — éprouvée, pas déclarée.
@@ -285,5 +286,75 @@ describe("Le transport du harnais", () => {
     await expect(fetchResilient("pas-une-url", undefined, [1, 1])).rejects.toThrow(/Invalid URL/);
     expect(faux).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
+  });
+});
+
+/**
+ * ⚠️ LE TRANSPORT POSÉ POUR TOUT LE PROCESSUS — AJOUTÉ LE 01/09/2026.
+ *
+ * La première version du remède ne couvrait que les clients fabriqués par le
+ * harnais, et son commentaire l'affirmait : « les clients du produit gardent le
+ * `fetch` par défaut ». Le lendemain, `tests/rls/veille.test.ts` est parti en
+ * rouge sur le même `fetch failed`, mais À L'INTÉRIEUR de `veillerSur` —
+ * c'est-à-dire dans un client que le PRODUIT fabrique et qu'aucune injection
+ * n'atteint. La garde regardait là où le défaut n'est plus : L-025, appliqué au
+ * harnais lui-même.
+ *
+ * Ces trois contrôles portent ce qui ne se voit pas en relisant :
+ *   1. l'enrobage est bien POSÉ — sans quoi il ne protégerait rien ;
+ *   2. il ne s'appelle pas LUI-MÊME — la base est capturée avant substitution,
+ *      et l'oublier produirait une pile pleine à la première requête ;
+ *   3. il ne réessaie toujours PAS une réponse — le contre-test qui empêche
+ *      cette pièce de devenir une machine à cacher les défauts.
+ */
+describe("Le transport posé pour TOUT le processus", () => {
+  const origine = globalThis.fetch;
+  let base: typeof globalThis.fetch;
+  let appels = 0;
+  let comportement: () => Promise<Response> = async () => new Response("ok");
+
+  beforeAll(() => {
+    base = (async () => {
+      appels += 1;
+      return comportement();
+    }) as typeof globalThis.fetch;
+    globalThis.fetch = base;
+    installerTransportResilient();
+  });
+
+  afterAll(() => {
+    globalThis.fetch = origine;
+  });
+
+  test("il REMPLACE le `fetch` ambiant — sinon il ne protège rien", () => {
+    expect(
+      globalThis.fetch,
+      "le `fetch` du processus est resté celui d'avant : l'installation n'a rien posé",
+    ).not.toBe(base);
+  });
+
+  test("une coupure est réessayée, et l'enrobage n'appelle pas LUI-MÊME", async () => {
+    appels = 0;
+    comportement = async () => {
+      if (appels < 3) throw new TypeError("fetch failed");
+      return new Response("ok", { status: 200 });
+    };
+
+    // S'il relisait `globalThis.fetch` au lieu de la base capturée, cet appel
+    // récurserait jusqu'à la pile pleine au lieu de rendre 200.
+    const r = await fetch("https://exemple.invalid/rest");
+    expect(r.status).toBe(200);
+    expect(appels, "la coupure n'a pas été réessayée").toBe(3);
+  }, 15_000);
+
+  test("CONTRE-TEST : une RÉPONSE d'erreur passe intacte, sans réessai", async () => {
+    // Sans lui, cette pièce masquerait exactement les refus que les 648 tests
+    // d'isolation cherchent à obtenir.
+    appels = 0;
+    comportement = async () => new Response("refusé par la RLS", { status: 403 });
+
+    const r = await fetch("https://exemple.invalid/rest");
+    expect(r.status).toBe(403);
+    expect(appels, "un refus légitime a été réessayé : il serait masqué").toBe(1);
   });
 });
