@@ -1153,6 +1153,31 @@ try {
             !corpsRetrograde.includes(titreAdmin),
             "et le corps du refus ne laisse pas fuir le titre de la surface",
           ],
+          /*
+           * ⚠️ LE TITRE N EST PAS LA SEULE CHOSE QUI PEUT FUIR — ET LE
+           * SQUELETTE N EN PORTE AUCUN.
+           *
+           * `admin/loading.tsx` est le repli Suspense du segment. Next peut le
+           * diffuser PENDANT que le layout resout son `await exigerAdmin()`,
+           * donc AVANT de savoir si l appelant a le droit. Un tel debut de
+           * reponse ne contient aucun texte — il est `aria-hidden`, ses blocs
+           * sont vides — donc le controle du titre ci-dessus resterait vert
+           * pendant qu un vendeur ordinaire apprendrait que la surface existe.
+           * C est le champ de vision de la correction, pas celui du probleme.
+           *
+           * On controle donc la MARQUE de la surface elle-meme, `bg-admin`,
+           * que portent le chrome sombre du layout ET le squelette. Le
+           * contre-test qui precede est obligatoire : sans lui, un renommage
+           * de la classe rendrait ce controle vert a vide.
+           */
+          [
+            htmlPromu.includes("bg-admin"),
+            "CONTRE-TEST : la surface admin porte bien la marque `bg-admin` quand elle est SERVIE",
+          ],
+          [
+            !corpsRetrograde.includes("bg-admin"),
+            `ni le squelette : le corps du refus (${corpsRetrograde.length} octets) ne porte aucune marque de la surface`,
+          ],
         );
       }
 

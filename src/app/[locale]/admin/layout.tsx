@@ -24,6 +24,19 @@ import { NavigationAdmin, type EntreeAdmin } from "@/components/admin/navigation
  * ressemblent assez pour qu'on s'y trompe, et une action d'administration lancée
  * en croyant être chez soi serait tracée au nom de son auteur sans qu'il l'ait
  * voulu.
+ *
+ * ⚠️ ET CE SEGMENT N'A PAS DE `loading.tsx` — NE PAS EN REMETTRE UN. Il en a eu
+ * un, et il FUYAIT. Next sérialise le repli Suspense d'un segment pendant qu'il
+ * résout ce layout : un vendeur ordinaire, connecté, recevait un 404 dont le
+ * corps portait le squelette de cette surface. La règle « 404, jamais 403 »
+ * existe pour ne pas révéler que l'administration existe ; un squelette la
+ * révèle tout aussi bien qu'un 403, et sans un mot de texte — c'est pourquoi le
+ * contrôle qui cherchait le TITRE dans le corps du refus restait vert.
+ *
+ * La seule présence d'un squelette suffit à distinguer cette adresse d'une
+ * adresse inventée : renommer ses classes n'y changerait rien. `pnpm fumee`
+ * échoue si la marque `bg-admin` reparaît dans un corps de refus, avec son
+ * contre-test qui exige de la trouver quand la surface est SERVIE.
  */
 export default async function LayoutAdmin({
   children,
