@@ -2499,6 +2499,68 @@ controles.push(
   ],
 );
 
+// --- LA PAGE CLIENT PORTE UN TITRE ---
+//
+// ⚠️ ELLE N EN PORTAIT AUCUN. Mesure sur le HTML servi : ZERO balise `<title>`,
+// contre une sur la landing. Personne ne l avait vu parce qu aucune sonde ne le
+// demandait a CETTE page — celles qui existent portent sur l espace vendeur.
+//
+// Ce n est pas qu un defaut d accessibilite, meme si « Page Titled » est un
+// critere de NIVEAU A et que c est la seule page que tous les clients de tous
+// les vendeurs ouvrent. Sans titre, l onglet et l historique du navigateur
+// affichent L URL — et cette URL PORTE la capacite, immuable a vie.
+//
+// LE TITRE EST NEUTRE, et le controle l exige : ni le pseudo du client, ni la
+// reference du produit. Ce qui apparait hors de la page apparait a qui n a pas
+// ouvert le lien — c est la raison qui interdit deja l image de partage.
+{
+  // ⚠️ ON DECODE LES ENTITES. Le titre est servi echappe — « Ce lien
+  // n&#x27;est plus valable » — et comparer du texte brut a du HTML echappe
+  // faisait rougir la sonde sur un produit correct. Un controle qui ne parle
+  // pas la langue de ce qu il lit accuse toujours le mauvais coupable.
+  const decoder = (t) =>
+    t === null
+      ? null
+      : t
+          .replace(/&#x27;|&apos;/g, "'")
+          .replace(/&quot;/g, '"')
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&#x2F;/g, "/")
+          .replace(/&amp;/g, "&");
+  const titreDe = (html) =>
+    decoder((/<title[^>]*>([^<]*)<\/title>/i.exec(html) ?? [, null])[1]);
+  const titrePublique = titreDe(htmlPagePublique ?? "");
+  const titreLienMort = titreDe(corpsLienMort);
+  const attendu = catalogue["page-publique"].titre;
+  const attenduMort = catalogue["page-publique"].lienInvalideTitre;
+
+  controles.push(
+    [
+      titrePublique === attendu,
+      `la page client porte son titre « ${attendu} » (servi : ${titrePublique === null ? "AUCUN" : `« ${titrePublique} »`})`,
+    ],
+    // Le pseudo du client et la reference produit sont sur la PAGE — c est leur
+    // place, celui qui la lit est le client. Dans le TITRE, ils sortiraient de
+    // la page : onglet, historique, capture d ecran.
+    [
+      titrePublique !== null && !titrePublique.includes("Client de fumee"),
+      "et il ne porte pas le pseudo du client",
+    ],
+    [
+      titrePublique !== null && !titrePublique.includes("REF-FUMEE"),
+      "ni la reference du produit",
+    ],
+    // L AUTRE SENS : le lien mort porte le titre de l ecran de lien mort, celui
+    // que le produit affiche deja pour inconnu, revoque ET suspendu. Le titre ne
+    // distingue donc pas ce que le corps ne distingue pas.
+    [
+      titreLienMort === attenduMort,
+      `le lien mort porte le sien « ${attenduMort} » (servi : ${titreLienMort === null ? "AUCUN" : `« ${titreLienMort} »`})`,
+    ],
+  );
+}
+
 // --- Aucune page ne montre un IDENTIFIANT de traduction ---
 //
 // ⚠️ CONSTATE EN DIRECT LE 27/08/2026 : la page publique a servi

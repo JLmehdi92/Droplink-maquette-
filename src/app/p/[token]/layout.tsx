@@ -26,6 +26,20 @@ import "../../globals.css";
  */
 
 export const metadata: Metadata = {
+  /*
+   * LE TITRE PAR DÉFAUT DE LA SURFACE, ET IL EST CELUI DU LIEN MORT.
+   *
+   * `generateMetadata` de la page l'écrase dès qu'une commande est lue. Il ne
+   * reste donc visible que sur l'écran de lien mort — qui passe par
+   * `notFound()`, donc par une frontière dont les métadonnées de la page sont
+   * écartées. C'est la seule façon de lui donner un titre.
+   *
+   * EN FRANÇAIS, pour la même raison que le `lang` de cet écran : il n'y a pas
+   * de vendeur, donc pas de langue de vendeur. Et il ne dit RIEN de plus que ce
+   * que l'écran affiche déjà — inconnu, révoqué et suspendu portent le même,
+   * comme ils portent le même corps.
+   */
+  title: "Ce lien n'est plus valable",
   // `noindex` PARTOUT sur cette surface : chaque lien est privé et isolé, il n'y
   // a ni galerie publique ni moteur de recherche interne.
   robots: { index: false, follow: false, nocache: true },

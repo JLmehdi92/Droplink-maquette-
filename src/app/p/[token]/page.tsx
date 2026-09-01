@@ -61,9 +61,52 @@ import { substituer } from "@/lib/format/gabarit";
  * cette information » se dit en n'affichant rien.
  */
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false, nocache: true },
-};
+/**
+ * ⚠️ CETTE PAGE NE PORTAIT AUCUN `<title>` — mesuré sur le HTML servi : ZÉRO
+ * balise, là où la landing en sert une.
+ *
+ * Ce n'est pas qu'un défaut d'accessibilité, même si c'en est un — « Page
+ * Titled » est un critère de NIVEAU A, et c'est la seule page du produit que
+ * tous les clients de tous les vendeurs ouvrent.
+ *
+ * CE QUI COMPTE DAVANTAGE : sans titre, l'onglet et l'entrée d'historique du
+ * navigateur affichent L'URL. Or l'URL de cette page PORTE la capacité, et elle
+ * est immuable à vie. Un titre ne fuite donc pas — il RETIRE le jeton de ce que
+ * le navigateur montre par-dessus l'épaule, dans la liste des onglets, et dans
+ * une capture d'écran d'historique.
+ *
+ * LE TITRE EST NEUTRE, ET C'EST DÉLIBÉRÉ. Il ne porte ni le pseudo du client ni
+ * la référence du produit — c'est la même raison qui interdit l'image de
+ * partage : ce qui apparaît hors de la page apparaît à qui n'a pas ouvert le
+ * lien. Il vient du catalogue, dans la langue DU VENDEUR, comme le reste.
+ *
+ * ⚠️ IL NE COÛTE AUCUNE REQUÊTE. `lireCommandePublique` est enveloppée dans
+ * `cache()` : `generateMetadata` et le rendu partagent la même lecture. C'est
+ * exactement le montage déjà éprouvé sur le titre de l'éditeur, où trois
+ * chargements ont produit trois lectures, compteur posé puis retiré.
+ *
+ * ⚠️ ET IL NE DIT RIEN DU JETON. Un lien inconnu, révoqué ou suspendu rend le
+ * MÊME titre que l'écran de lien mort que le produit affiche déjà pour les
+ * trois : le titre ne distingue pas ce que le corps ne distingue pas.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  const commande = await lireCommandePublique(token);
+  const langue =
+    commande !== null && estLangueSupportee(commande.boutique.langue)
+      ? commande.boutique.langue
+      : "fr";
+  const t = await getTranslations({ locale: langue, namespace: "page-publique" });
+
+  return {
+    title: commande === null ? t("lienInvalideTitre") : t("titre"),
+    robots: { index: false, follow: false, nocache: true },
+  };
+}
 
 /**
  * Le conteneur du canevas : 1 240 px de large, 18 px de marge au téléphone,
