@@ -226,12 +226,25 @@ const Notification = z
   .object({ event: z.string().nullish(), data: Colis })
   .passthrough();
 
-const Enregistrement = z
+/**
+ * LEUR ENVELOPPE, LA MÊME POUR `/register` ET POUR `/gettrackinfo`.
+ *
+ * ⚠️ ELLE ÉTAIT DÉDOUBLÉE, ET C'EST CE DÉDOUBLEMENT QUI A PRODUIT LE DÉFAUT.
+ * `appeler` analysait `code` + `accepted` + `rejected` ; `interroger` avait son
+ * propre schéma en ligne, qui ne regardait que `data.accepted`. Les deux points
+ * d'appel du même fournisseur lisaient donc deux formes différentes d'une seule
+ * réponse, et la moitié des champs n'était consultée que d'un côté.
+ *
+ * `accepted` porte `Colis` et non un couple `{number, carrier}` : `Colis` est
+ * en `passthrough` et tous ses champs sont facultatifs, donc il analyse aussi
+ * bien l'accusé maigre de `/register` que l'état complet de `/gettrackinfo`.
+ */
+const Enveloppe = z
   .object({
     code: z.number().nullish(),
     data: z
       .object({
-        accepted: z.array(z.object({ number: z.string().nullish(), carrier: z.number().nullish() }).passthrough()).nullish(),
+        accepted: z.array(Colis).nullish(),
         rejected: z
           .array(
             z
@@ -432,16 +445,69 @@ const CODES_DEFINITIFS: ReadonlySet<number> = new Set([
   -18019910, // Code transporteur incorrect : le même envoi échouera toujours.
 ]);
 
+/**
+ * `-18019909` — « aucune information disponible pour l'instant ».
+ *
+ * C'EST LE VIDE LÉGITIME, celui que le brief décrit mot pour mot : « un numéro
+ * fraîchement collé n'est souvent pas encore scanné ». Il est rendu par
+ * l'interrogation, jamais par la prise en charge, et il doit rester `vide` —
+ * donc compter dans le coût sans être une erreur.
+ *
+ * Le classer `indisponible` avec les pannes de compte serait le défaut
+ * SYMÉTRIQUE de celui que ce fichier vient de fermer : `empty_count`
+ * n'avancerait plus, la fenêtre d'abandon ne se refermerait jamais, et un
+ * numéro erroné serait interrogé indéfiniment, à nos frais.
+ */
+const CODE_SANS_INFO_POUR_L_INSTANT = -18019909;
+
+/** Les deux codes qui disent « rien de neuf », et non « quelque chose ne va pas ». */
+const CODES_SANS_ETAT: ReadonlySet<number> = new Set([
+  CODE_DEJA_ENREGISTRE,
+  CODE_SANS_INFO_POUR_L_INSTANT,
+]);
+
 function classerRejet(code: number | null | undefined, brut: unknown): ReponsePort {
-  if (code === CODE_DEJA_ENREGISTRE) {
-    // Succès sans état : la prise en charge n'a jamais rendu l'état du colis,
-    // il arrive ensuite par notification ou par interrogation.
+  if (code !== null && code !== undefined && CODES_SANS_ETAT.has(code)) {
+    // Succès sans état : ni la prise en charge ni une interrogation trop
+    // précoce ne rendent l'état du colis. Il arrive ensuite, par notification
+    // ou au passage suivant de la cadence.
     return { statut: "vide", brut };
   }
   if (code !== null && code !== undefined && CODES_DEFINITIFS.has(code)) {
     return { statut: "refuse", motif: "code-" + String(code) };
   }
   return { statut: "indisponible", motif: "code-" + String(code ?? "inconnu") };
+}
+
+/**
+ * LE CODE DE NIVEAU COMPTE — quota épuisé, clé révoquée, IP hors liste blanche,
+ * compte désactivé. Il vaut pour LES DEUX points d'appel.
+ *
+ * ⚠️ DÉFAUT RÉEL, TROUVÉ LE 01/09/2026. Cette règle n'existait qu'en un seul
+ * endroit — dans `appeler`, qui ne sert que `/register` — parce que la garde de
+ * L-024 avait été écrite depuis le champ de vision de sa CORRECTION.
+ * `interroger` fait son propre appel et ne lisait pas `code` : leur réponse
+ * d'erreur de compte étant un HTTP **200** portant `data: null`, `accepted`
+ * valait `undefined` et l'interrogation rendait « vide ».
+ *
+ * Ce que « vide » déclenche : `compter_interrogation_vide`, donc `empty_count`
+ * incrémenté ET un appel imputé au vendeur ; et `schedule.ts` abandonne à SEIZE
+ * vides, c'est-à-dire en deux jours à trois heures d'intervalle. Une liste
+ * blanche d'IP oubliée dans leur console — le piège numéro un du déploiement
+ * sur des adresses de sortie dynamiques — abandonnait donc DÉFINITIVEMENT le
+ * suivi de tous les colis de tous les vendeurs en quarante-huit heures, en
+ * gonflant le seul compteur de coût du produit, sans que rien ne nomme la
+ * cause : « vide » est une réponse parfaitement normale.
+ *
+ * Elle vit maintenant dans UNE fonction, appelée par les deux chemins. Une
+ * règle écrite à deux endroits est une règle qu'un seul des deux appliquera.
+ */
+function refusDeCompte(code: number | null | undefined): ReponsePort | null {
+  // 0 dans leur doc v2.4, 200 dans une autre page officielle : les deux
+  // conventions circulent, on ne parie sur aucune et on ne refuse que ce qui
+  // n'est visiblement ni l'une ni l'autre.
+  if (code === null || code === undefined || code === 0 || code === 200) return null;
+  return { statut: "indisponible", motif: "code-" + String(code) };
 }
 
 async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
@@ -465,7 +531,7 @@ async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
     }
 
     const brut: unknown = sansDonneesPersonnelles(await reponse.json());
-    const analyse = Enregistrement.safeParse(brut);
+    const analyse = Enveloppe.safeParse(brut);
     if (!analyse.success) return { statut: "indisponible", motif: "reponse-illisible" };
 
     /*
@@ -489,13 +555,8 @@ async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
      * nulle, et le colis est repris tel quel quand le quota est rechargé. Un
      * refus l'aurait abandonné pour de bon.
      */
-    const code = analyse.data.code;
-    // 0 dans leur doc v2.4, 200 dans une autre page officielle : les deux
-    // conventions circulent, on ne parie sur aucune et on ne refuse que ce qui
-    // n'est visiblement ni l'une ni l'autre.
-    if (code !== null && code !== undefined && code !== 0 && code !== 200) {
-      return { statut: "indisponible", motif: "code-" + String(code) };
-    }
+    const panne = refusDeCompte(analyse.data.code);
+    if (panne !== null) return panne;
 
     const rejete = analyse.data.data?.rejected?.[0];
     if (rejete !== undefined) {
@@ -543,14 +604,27 @@ export const dixSeptTrack: FournisseurSuivi = {
       if (!reponse.ok) return { statut: "indisponible", motif: "http-" + String(reponse.status) };
 
       const brut: unknown = sansDonneesPersonnelles(await reponse.json());
-      const accepte = z
-        .object({ data: z.object({ accepted: z.array(Colis).nullish() }).passthrough().nullish() })
-        .passthrough()
-        .safeParse(brut);
+      const analyse = Enveloppe.safeParse(brut);
+      if (!analyse.success) return { statut: "indisponible", motif: "reponse-illisible" };
 
-      if (!accepte.success) return { statut: "indisponible", motif: "reponse-illisible" };
+      /*
+       * ⚠️ L'INTERROGATION AUSSI EXIGE UN ACCUSÉ, ET C'EST NEUF.
+       *
+       * Ces deux contrôles n'existaient que sur la prise en charge. Sans eux,
+       * une panne de COMPTE — quota, clé, IP hors liste blanche — se présentait
+       * ici comme un colis « pas encore scanné », et la cadence l'abandonnait
+       * définitivement en deux jours. Voir `refusDeCompte`.
+       *
+       * L'ordre est celui de la prise en charge : le compte d'abord, parce
+       * qu'une panne de compte ne dit rien du colis, puis le rejet du numéro.
+       */
+      const panne = refusDeCompte(analyse.data.code);
+      if (panne !== null) return panne;
 
-      const colis = accepte.data.data?.accepted?.[0];
+      const rejete = analyse.data.data?.rejected?.[0];
+      if (rejete !== undefined) return classerRejet(rejete.error?.code ?? null, brut);
+
+      const colis = analyse.data.data?.accepted?.[0];
       if (colis === undefined) return { statut: "vide", brut };
 
       const etat = versPort(colis);
