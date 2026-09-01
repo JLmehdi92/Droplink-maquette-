@@ -10,10 +10,27 @@ import { signalerJetonInconnu, verifierQuotaEcriturePublique } from "@/lib/limit
  * arbitrage EN BASE de ce que le jeton désigne. Le middleware ne protège aucune
  * donnée à lui seul.
  *
- * DEUX RÉPONSES SEULEMENT. `200` avec le nouveau statut, `404` pour tout le
- * reste : jeton inconnu, jeton révoqué, compte suspendu, corps invalide. Un code
- * par cas dirait au visiteur lequel il vient de rencontrer, et c'est exactement
- * ce qu'un balayage cherche à apprendre.
+ * UN SEUL CHEMIN DE SORTIE POUR TOUT CE QUI TOUCHE AU JETON. `200` avec le
+ * nouveau statut, `404` pour tout le reste : jeton inconnu, jeton révoqué,
+ * compte suspendu, corps invalide. Un code par cas dirait au visiteur lequel il
+ * vient de rencontrer, et c'est exactement ce qu'un balayage cherche à
+ * apprendre.
+ *
+ * ⚠️ CETTE EN-TÊTE DISAIT « DEUX RÉPONSES SEULEMENT », ET LE FICHIER EN PRODUIT
+ * TROIS. Le dépassement de quota rend `429`, dix-huit lignes plus bas. La
+ * phrase était fausse depuis toujours, et fausse sur la propriété la plus
+ * sensible de cette surface — celle qu'on relit précisément pour se rassurer.
+ *
+ * LE `429` EST DÉLIBÉRÉ, ET IL N'EST PAS UN ORACLE : les compteurs d'écriture
+ * publique sont indexés par ADRESSE, jamais par jeton. Un balayeur qui le
+ * reçoit apprend qu'il va trop vite, pas qu'il a touché quelque chose
+ * d'existant. Et le client d'un vendeur DOIT le recevoir : son bouton se
+ * réactive et l'échec lui est dit, plutôt que de faire passer un refus de débit
+ * pour une commande disparue.
+ *
+ * ⚠️ LA PAGE, ELLE, REND `404` SUR LE MÊME DÉPASSEMENT — et c'est cohérent, pas
+ * contradictoire. Elle est atteignable par un jeton DEVINÉ : distinguer y
+ * apprendrait quelque chose. Ici, il faut déjà détenir le lien pour écrire.
  */
 export async function POST(
   requete: Request,
