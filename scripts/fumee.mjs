@@ -1235,6 +1235,27 @@ try {
       headers: { origin: "https://collecteur.exemple.test" },
     });
 
+    /*
+     * L ORIGINE ETRANGERE QUI SE DECLARE ELLE-MEME COMME NOTRE HOTE.
+     *
+     * ⚠️ DEFAUT REEL, CORRIGE LE 01/09/2026. `memeOrigine` lisait
+     * `x-forwarded-host` AVANT `host`, sans condition, avec pour raison
+     * « derriere un proxy, `host` porte le nom interne ». Rien ne distinguait
+     * alors un en-tete pose par notre bord d un en-tete pose par l appelant :
+     * envoyer les DEUX faisait comparer la garde a elle-meme, et elle passait.
+     *
+     * Le controle precedent ne pouvait pas le voir — il n envoie qu un `Origin`
+     * etranger, donc il regarde exactement la ou le defaut n etait pas.
+     */
+    const origineAutoProclamee = await fetch(chemin, {
+      method: "POST",
+      redirect: "manual",
+      headers: {
+        origin: "https://collecteur.exemple.test",
+        "x-forwarded-host": "collecteur.exemple.test",
+      },
+    });
+
     controles.push(
       // ELLE ECHOUE FERMEE. Tout navigateur envoie `Origin` sur un POST ; ne pas
       // l exiger laisserait la porte ouverte a qui sait simplement l omettre.
@@ -1245,6 +1266,11 @@ try {
       [
         origineEtrangere.status === 403,
         `le geste de liste refuse une origine etrangere (statut ${origineEtrangere.status}, attendu 403)`,
+      ],
+      [
+        origineAutoProclamee.status === 403,
+        `il la refuse AUSSI quand elle se declare elle-meme comme notre hote via ` +
+          `x-forwarded-host (statut ${origineAutoProclamee.status}, attendu 403)`,
       ],
       [
         (await sansOrigine.text()) === "",
@@ -2142,6 +2168,15 @@ console.log("\n— Contenu rendu —");
 const enTetesPublique = (await fetch(`${base}/p/inexistant-pour-les-entetes`)).headers;
 const enTetesLanding = (await fetch(`${base}/fr`)).headers;
 
+/** Six mois : le plancher en dessous duquel HSTS ne protege plus grand-chose. */
+const HSTS_MINIMUM_S = 15_552_000;
+
+function ageHsts(entetes) {
+  const brut = entetes.get("strict-transport-security") ?? "";
+  const trouve = /max-age=(\d+)/i.exec(brut);
+  return trouve === null ? -1 : Number(trouve[1]);
+}
+
 controles.push(
   [enTetesLanding.get("x-content-type-options") === "nosniff", "nosniff sur la landing"],
   [enTetesLanding.get("x-frame-options") === "DENY", "cadrage refuse sur la landing"],
@@ -2155,6 +2190,32 @@ controles.push(
   [
     (enTetesLanding.get("referrer-policy") ?? "") === "strict-origin-when-cross-origin",
     "referent borne ailleurs que sur la page publique",
+  ],
+  /*
+   * HSTS — SUR LES DEUX SURFACES, ET SURTOUT SUR LA PAGE PUBLIQUE.
+   *
+   * L URL de `/p/{jeton}` PORTE la capacite, et elle est ouverte depuis un DM,
+   * souvent sans schema. Une interception sur un reseau partage transfere un
+   * acces DEFINITIF, sans laisser de trace : personne ne pensera a revoquer.
+   *
+   * On le mesure sur la reponse SERVIE et non dans `next.config.ts` : l en-tete
+   * n est ajoute qu en production, et c est precisement le genre de condition
+   * qui peut cesser d etre vraie sans que rien ne casse.
+   */
+  /*
+   * ⚠️ ON LIT LA VALEUR, PAS LA PRESENCE. Le premier controle ecrit ici se
+   * contentait de `startsWith("max-age=")` — il aurait donc ete VERT sur
+   * `max-age=0`, qui DESACTIVE HSTS et efface l epinglage deja acquis. Un
+   * controle incapable de distinguer une protection de son contraire est pire
+   * qu absent : il occupe la place.
+   */
+  [
+    ageHsts(enTetesLanding) >= HSTS_MINIMUM_S,
+    `HSTS sur la landing (max-age ${ageHsts(enTetesLanding)} s, minimum ${HSTS_MINIMUM_S})`,
+  ],
+  [
+    ageHsts(enTetesPublique) >= HSTS_MINIMUM_S,
+    `HSTS sur la page publique (max-age ${ageHsts(enTetesPublique)} s) — c est son URL qui porte la capacite`,
   ],
 );
 

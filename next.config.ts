@@ -20,6 +20,33 @@ import type { NextConfig } from "next";
  * `no-referrer` SUR LA PAGE PUBLIQUE, et pas ailleurs : c'est la seule surface
  * dont l'URL porte un secret.
  */
+/**
+ * HSTS — ET POURQUOI IL N'EST POSÉ QU'EN PRODUCTION.
+ *
+ * ⚠️ CE QU'IL PROTÈGE ICI EST PARTICULIER. Sur la plupart des produits, une
+ * première visite en clair coûte une session. Ici, l'URL de `/p/{jeton}` PORTE
+ * LA CAPACITÉ : le jeton est immuable à vie, et un lien collé dans un DM Snap
+ * ou WhatsApp est régulièrement ouvert sans schéma. Une seule interception sur
+ * un réseau partagé transfère un accès définitif aux photos et au pseudo du
+ * client — et ne laisse aucune trace, donc personne ne pensera à révoquer.
+ *
+ * `Referrer-Policy: no-referrer` posé plus bas protège le canal SORTANT ; il ne
+ * sert à rien si le canal ENTRANT est en clair.
+ *
+ * ⚠️ JAMAIS EN DÉVELOPPEMENT. Un navigateur qui reçoit cet en-tête sur
+ * `http://localhost` épingle l'hôte et refuse ensuite toute connexion en clair —
+ * y compris pour d'autres projets servis sur le même hôte, et l'épinglage
+ * survit au redémarrage. Le remède se trouve alors dans les réglages internes
+ * du navigateur, ce qui est exactement le genre de dette qu'on ne relie jamais
+ * à sa cause.
+ *
+ * Cloudflare peut le poser au bord, et le domaine y est délégué. On ne s'en
+ * remet pas à une case cochée ailleurs : rien dans ce dépôt ne pourrait dire si
+ * elle est décochée, et une protection dont on ne peut pas constater l'absence
+ * n'en est pas une.
+ */
+const HSTS = { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" };
+
 const enTetesCommuns = [
   // Le type déclaré fait foi : sans cela, un navigateur peut « deviner » qu'un
   // fichier servi en `image/jpeg` est en réalité du HTML et l'exécuter.
@@ -29,6 +56,7 @@ const enTetesCommuns = [
   // Le produit ne demande ni caméra, ni micro, ni position. Le dire ferme ces
   // capacités pour tout ce que la page charge, y compris un cadre tiers.
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  ...(process.env.NODE_ENV === "production" ? [HSTS] : []),
 ];
 
 const nextConfig: NextConfig = {
