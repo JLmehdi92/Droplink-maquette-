@@ -43,7 +43,16 @@ function destination(brut: string, defaut: string): string {
   try {
     const resolue = new URL(brut, BASE);
     if (resolue.origin !== BASE) return defaut;
-    return resolue.pathname + resolue.search;
+
+    const chemin = resolue.pathname + resolue.search;
+
+    // LA SECONDE RÉSOLUTION. La route résout une SECONDE fois ce qui sort
+    // d'ici : on refait donc ici la même analyse. Sans cela,
+    // `/..//exemple.test` sort en `//exemple.test`, que le second analyseur
+    // lit comme un autre hôte.
+    if (new URL(chemin, BASE).origin !== BASE) return defaut;
+
+    return chemin;
   } catch {
     return defaut;
   }
@@ -69,6 +78,31 @@ const EVASIONS = [
   "/\\\\exemple.test",
   "https://exemple.test/x",
   "javascript:alert(1)",
+];
+
+/**
+ * ⚠️ LES ÉVASIONS EN DEUX TEMPS — LA CLASSE QUE LA LISTE CI-DESSUS NE POUVAIT
+ * PAS CONTENIR.
+ *
+ * Celles-ci ne s'échappent PAS à la première résolution : `new URL(brut, BASE)`
+ * garde bien notre origine, donc le contrôle d'origine les laisse passer. Mais
+ * leur `pathname` vaut `//exemple.test`, et c'est CETTE CHAÎNE qui sort d'ici
+ * pour être résolue une SECONDE fois par la route, contre l'URL de la requête.
+ * La normalisation du premier analyseur FABRIQUE l'évasion que le second suit.
+ *
+ * Mesuré : `/..//exemple.test` sortait en `Location: https://exemple.test/`.
+ *
+ * Elles ne pouvaient pas rejoindre `EVASIONS` : le contre-test de cette liste
+ * exige qu'une forme s'échappe DÈS la première résolution, et celles-ci ne le
+ * font pas. Les y forcer aurait fait échouer le contre-test — c'est-à-dire que
+ * le test disait vrai sur son propre jeu tout en étant aveugle à côté.
+ */
+const EVASIONS_EN_DEUX_TEMPS = [
+  "/..//exemple.test",
+  "/.//exemple.test",
+  "/../..//exemple.test",
+  "/a/../..//exemple.test",
+  "/..//exemple.test?x=1",
 ];
 
 /*
@@ -124,11 +158,48 @@ describe("Le champ `retour` ne peut pas emmener le vendeur ailleurs", () => {
     expect(destination("/en/commandes?q=cr%C3%A8me", DEFAUT)).toBe("/en/commandes?q=cr%C3%A8me");
   });
 
+  test("CONTRE-TEST : les évasions en deux temps ne s'échappent PAS du premier coup", () => {
+    // Sans ce contrôle, on ne saurait pas qu'elles forment une classe distincte :
+    // si l'une d'elles s'échappait dès la première résolution, elle serait déjà
+    // couverte par `EVASIONS` et n'apprendrait rien.
+    for (const forme of EVASIONS_EN_DEUX_TEMPS) {
+      expect(
+        new URL(forme, BASE).origin,
+        `« ${forme} » s'échappe dès la première résolution : elle appartient à EVASIONS`,
+      ).toBe(BASE);
+    }
+  });
+
+  test("CONTRE-TEST : et leur chemin, LUI, s'échappe à la seconde", () => {
+    // C'est la moitié qui rend la classe dangereuse. Sans elle, la liste
+    // pourrait ne contenir que des chemins inoffensifs et tout passerait.
+    for (const forme of EVASIONS_EN_DEUX_TEMPS) {
+      const chemin = new URL(forme, BASE).pathname;
+      expect(
+        new URL(chemin, BASE).origin,
+        `« ${forme} » rend « ${chemin} », qui ne s'échappe pas : elle ne prouve rien`,
+      ).not.toBe(BASE);
+    }
+  });
+
+  test("les évasions en deux temps sont ramenées au défaut", () => {
+    for (const forme of EVASIONS_EN_DEUX_TEMPS) {
+      expect(destination(forme, DEFAUT), `« ${forme} » n'est pas ramenée au défaut`).toBe(DEFAUT);
+    }
+  });
+
   test("ce qui SORT ne peut plus porter d'hôte", () => {
     // La propriété qui compte vraiment : quelle que soit l'entrée, la sortie est
     // un chemin. Elle tient même si un jour quelqu'un ajoute une forme d'évasion
     // à laquelle personne n'a pensé.
-    for (const brut of [...EVASIONS, "/fr/commandes", "", "pas-un-chemin", "?q=x"]) {
+    for (const brut of [
+      ...EVASIONS,
+      ...EVASIONS_EN_DEUX_TEMPS,
+      "/fr/commandes",
+      "",
+      "pas-un-chemin",
+      "?q=x",
+    ]) {
       const sortie = destination(brut, DEFAUT);
       expect(sortie.startsWith("/"), `« ${brut} » rend « ${sortie} », qui n'est pas un chemin`).toBe(
         true,
@@ -162,5 +233,18 @@ describe("Le champ `retour` ne peut pas emmener le vendeur ailleurs", () => {
       source,
       "le contrôle par préfixe est revenu : il est franchissable par un antislash",
     ).not.toMatch(/startsWith\("\/\/"\)/);
+
+    /*
+     * ⚠️ LA SECONDE RÉSOLUTION EST LA MOITIÉ QUI MANQUAIT, et sans ce contrôle
+     * la copie ci-dessus pourrait la porter pendant que le module l'aurait
+     * perdue — le test resterait vert sur du code redevenu vulnérable.
+     */
+    expect(
+      source,
+      "le module ne re-résout plus ce qu'il rend : l'évasion en deux temps rouvre",
+    ).toMatch(/new URL\(chemin,\s*BASE_DE_RESOLUTION\)/);
+    expect(source, "le module ne compare plus l'origine de sa SORTIE").toMatch(
+      /new URL\(chemin,\s*BASE_DE_RESOLUTION\)\.origin !== BASE_DE_RESOLUTION/,
+    );
   });
 });

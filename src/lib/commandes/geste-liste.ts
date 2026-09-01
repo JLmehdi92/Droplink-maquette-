@@ -91,8 +91,30 @@ const BASE_DE_RESOLUTION = "http://retour.invalid";
  *
  * → CONTRÔLE PAR VALEUR, PAS PAR FORME. On résout la chaîne avec le MÊME
  * analyseur que celui qui construira la redirection, et on exige que l'origine
- * obtenue soit restée la nôtre. Puis on ne rend que `pathname + search` : ce qui
- * sort d'ici ne peut plus porter d'hôte, quelle qu'ait été l'entrée.
+ * obtenue soit restée la nôtre.
+ *
+ * ⚠️ ET CELA NE SUFFISAIT PAS — LE CORRECTIF AFFIRMAIT LE CONTRAIRE. Cette
+ * en-tête disait « ce qui sort d'ici ne peut plus porter d'hôte, quelle qu'ait
+ * été l'entrée ». Mesuré : `/..//exemple.test` sortait en
+ * `Location: https://exemple.test/`.
+ *
+ * Le mécanisme n'est pas une forme oubliée, c'est qu'il y a DEUX analyses. La
+ * première garde bien notre origine — donc le contrôle passe — mais son
+ * `pathname` vaut `//exemple.test`, et c'est cette chaîne que la route résout
+ * une SECONDE fois contre l'URL de la requête. **La normalisation du premier
+ * analyseur FABRIQUE l'évasion que le second suit.** Aucune liste de formes
+ * interdites n'aurait fermé la classe : c'est la sortie qu'il faut contraindre,
+ * pas l'entrée.
+ *
+ * → ON RE-RÉSOUT DONC CE QU'ON REND, et on exige que l'origine soit ENCORE la
+ * nôtre. C'est exactement l'analyse que fera la route ; la faire ici, c'est
+ * refuser de rendre une chaîne dont on sait qu'elle s'échappera ensuite.
+ *
+ * ⚠️ UNE CONDITION D'IDEMPOTENCE A ÉTÉ ÉCRITE ICI PUIS RETIRÉE. Elle exigeait
+ * en plus que la sortie se rende elle-même. Falsifiée, elle n'a rien fait
+ * rougir : la seconde comparaison d'origine attrape déjà toute la classe. Une
+ * ligne de garde que rien n'exerce est une ligne qu'on croira protectrice le
+ * jour où elle ne le sera pas.
  */
 function destination(donnees: FormData, defaut: string): string {
   const brut = Retour.parse(donnees.get("retour"));
@@ -101,7 +123,12 @@ function destination(donnees: FormData, defaut: string): string {
   try {
     const resolue = new URL(brut, BASE_DE_RESOLUTION);
     if (resolue.origin !== BASE_DE_RESOLUTION) return defaut;
-    return resolue.pathname + resolue.search;
+
+    const chemin = resolue.pathname + resolue.search;
+
+    if (new URL(chemin, BASE_DE_RESOLUTION).origin !== BASE_DE_RESOLUTION) return defaut;
+
+    return chemin;
   } catch {
     return defaut;
   }
