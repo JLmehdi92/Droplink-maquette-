@@ -6,7 +6,39 @@ import {
 } from "../aide/utilisateurs";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { appliquerChamp, type ClientEcriture } from "@/lib/commandes/ecriture";
+
+/**
+ * LES CHAMPS ÉDITABLES, LUS DANS LE PRODUIT — jamais recopiés.
+ *
+ * ⚠️ CE TEST COMPTAIT SON PROPRE TABLEAU. Il jouait sept mutations puis
+ * vérifiait `mutations.length === 7`, ce qui est vrai par construction : le
+ * nombre venait de la liste elle-même, pas du produit. Il détectait donc le
+ * RETRAIT d'un champ, jamais son AJOUT — et le brief exige précisément que le
+ * test de non-régression du jeton soit « étendu à chaque nouvelle mutation ».
+ * L'extension reposait sur la mémoire du prochain rédacteur.
+ *
+ * `CHAMPS` n'est pas exporté — et il ne doit pas l'être : chaque export d'un
+ * module atteignable est une surface. On lit donc la SOURCE, comme le font les
+ * autres gardes de ce dépôt, et l'on exige la couverture DANS LES DEUX SENS.
+ */
+function champsEditablesDuProduit(): readonly string[] {
+  const source = readFileSync(
+    join(process.cwd(), "src", "lib", "commandes", "ecriture.ts"),
+    "utf8",
+  );
+  const bloc = /const CHAMPS = \{([\s\S]*?)\n\} as const;/.exec(source);
+  if (bloc === null) {
+    throw new Error(
+      "Le bloc `const CHAMPS = { … } as const;` est introuvable dans " +
+        "`ecriture.ts`. La sonde ne peut plus inventorier les champs éditables, " +
+        "et un inventaire vide passerait tout.",
+    );
+  }
+  return [...(bloc[1] ?? "").matchAll(/^\s{2}(\w+):/gm)].map((m) => m[1] as string);
+}
 
 /**
  * LES ÉCRITURES DE L'ÉDITEUR, éprouvées sur la fonction que la Server Action
@@ -52,7 +84,7 @@ afterAll(async () => {
 });
 
 describe("Le jeton public survit à TOUTES les mutations de l'éditeur", () => {
-  test("aucun des sept champs éditables ne le change", async () => {
+  test("aucun champ éditable du produit ne le change", async () => {
     const mutations: ReadonlyArray<readonly [string, string]> = [
       ["customer_label", "Yanis"],
       ["product_ref", "REF-9"],
@@ -63,9 +95,33 @@ describe("Le jeton public survit à TOUTES les mutations de l'éditeur", () => {
       ["qc_status", "approuve"],
     ];
 
-    // Un ensemble vide passe tout : sans cette borne, « aucune mutation ne
-    // change le jeton » serait vrai parce qu'aucune n'aurait été jouée.
-    expect(mutations.length).toBe(7);
+    /*
+     * LA COUVERTURE EST EXIGÉE DANS LES DEUX SENS, contre la liste du PRODUIT :
+     * un champ éditable que ce test ne joue pas, et un champ joué ici qui
+     * n'existe plus. Sans cela, la borne `length === 7` se contentait de
+     * recompter le tableau qu'on venait d'écrire.
+     */
+    const duProduit = champsEditablesDuProduit();
+    expect(
+      duProduit.length,
+      "Aucun champ éditable inventorié : un ensemble vide passe tout.",
+    ).toBeGreaterThan(0);
+
+    const joues = mutations.map(([champ]) => champ);
+    const oublies = duProduit.filter((c) => !joues.includes(c));
+    expect(
+      oublies,
+      `Champs éditables du produit que ce test NE JOUE PAS : ${oublies.join(", ")}. ` +
+        "Le jeton est immuable à vie : toute nouvelle mutation doit être " +
+        "éprouvée contre lui, sans quoi la promesse ne tient que par habitude.",
+    ).toEqual([]);
+
+    const disparus = joues.filter((c) => !duProduit.includes(c));
+    expect(
+      disparus,
+      `Champs joués ici qui ne sont plus éditables : ${disparus.join(", ")}. ` +
+        "Un test qui exerce un champ mort occupe la place sans rien prouver.",
+    ).toEqual([]);
 
     for (const [champ, valeur] of mutations) {
       const resultat = await ecrire(alice, commande, champ, valeur);
