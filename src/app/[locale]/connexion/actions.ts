@@ -297,11 +297,22 @@ export async function sInscrire(
      * C'est la façon documentée de le savoir depuis le client, sans clé de
      * service. Wassim a tranché « pas de confirmation », donc ce cas ne devrait
      * pas se produire — mais le réglage vit dans le tableau de bord, hors du
-     * dépôt, et personne ici ne peut le garantir. Le traiter comme une panne
-     * serait faux : le compte EST créé, et un email de confirmation EST parti.
+     * dépôt, et personne ici ne peut le garantir.
      *
-     * On renvoie donc vers la connexion, où l'utilisateur lira un message qui
-     * dit exactement ce qui s'est passé.
+     * ⚠️ CETTE BRANCHE COUVRE DEUX CAS QU'ON NE DOIT PAS DISTINGUER, et c'est
+     * un défaut trouvé en pilotant le produit au navigateur :
+     *
+     *   1. l'adresse était libre : le compte est créé, un email est parti ;
+     *   2. l'adresse avait DÉJÀ un compte : le serveur d'authentification rend
+     *      un utilisateur OBFUSQUÉ, sans session, et n'envoie RIEN.
+     *
+     * Les deux sont indiscernables ici, exprès — c'est la protection contre
+     * l'énumération que la confirmation d'email apporte. Le message affichait
+     * pourtant « votre compte est créé, ouvrez l'email que nous venons de vous
+     * envoyer » : faux dans le second cas, où rien n'a été créé ni envoyé.
+     * L'interface n'affirme jamais ce que la base n'a pas enregistré.
+     *
+     * Le libellé couvre donc les deux sans dire lequel s'applique.
      */
     redirect(`/${locale}/connexion?erreur=confirmez`);
   }

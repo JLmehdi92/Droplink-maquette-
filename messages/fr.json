@@ -187,7 +187,7 @@
       "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
       "session": "Votre session a expiré. Reconnectez-vous pour continuer.",
       "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés.",
-      "confirmez": "Votre compte est créé. Ouvrez l’email que nous venons de vous envoyer pour confirmer votre adresse, puis connectez-vous."
+      "confirmez": "Ouvrez votre boîte mail : si cette adresse n’avait pas encore de compte, un lien de confirmation vient d’y partir. Si vous en aviez déjà un, connectez-vous ci-dessous."
     },
     "apercuTitre": "Votre commande",
     "apercuBoutique": "Atelier Nord",

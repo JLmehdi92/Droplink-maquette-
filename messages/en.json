@@ -187,7 +187,7 @@
       "indisponible": "Google sign-in is temporarily unavailable. Use the email link below.",
       "trop": "Too many attempts from this device. Please wait a few minutes.",
       "fermees": "Sign-ups are closed for now. Existing accounts are unaffected.",
-      "confirmez": "Your account is created. Open the email we just sent to confirm your address, then log in."
+      "confirmez": "Open your inbox: if this address did not already have an account, a confirmation link has just been sent there. If you already had one, log in below."
     },
     "apercuTitre": "Your order",
     "apercuBoutique": "Atelier Nord",

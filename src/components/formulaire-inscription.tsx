@@ -23,13 +23,21 @@ import {
  * après un refus. Une règle qu'on découvre en échouant se lit comme un caprice ;
  * annoncée, elle se lit comme une consigne. La planche la dessine ainsi.
  *
- * CE COMPOSANT DIT « UN COMPTE EXISTE DÉJÀ », ET C'EST UN ORACLE ASSUMÉ. La
- * confirmation d'email étant désactivée, le serveur d'authentification rend
- * l'information et rien ici ne peut la retenir : une inscription réussie ouvre
- * une session, un doublon non, et la différence est observable quoi qu'on
- * affiche. Le taire coûterait donc la fuite ET l'utilisateur — qui ne saurait
- * pas qu'il lui suffit d'aller se connecter. Le prix, les bornes et la façon de
- * refermer sont écrits au §9 du brief.
+ * ⚠️ « UN COMPTE EXISTE DÉJÀ » NE S'AFFICHE QUE DANS UN DES DEUX RÉGLAGES, et
+ * la différence n'est pas un détail :
+ *
+ *   - confirmation d'email DÉSACTIVÉE (le choix de Wassim) : le serveur rend
+ *     « User already registered ». L'oracle existe, il est ASSUMÉ, borné par
+ *     les compteurs, et le taire coûterait la fuite ET l'utilisateur — qui ne
+ *     saurait pas qu'il lui suffit d'aller se connecter ;
+ *   - confirmation ACTIVÉE : le serveur rend un utilisateur OBFUSQUÉ sans
+ *     session, et n'envoie rien. Le doublon devient indiscernable d'une
+ *     inscription réussie, et l'écran de connexion affiche alors un message
+ *     écrit pour couvrir les DEUX cas sans dire lequel s'applique.
+ *
+ * Le réglage vit dans le tableau de bord, hors du dépôt : ce composant gère les
+ * deux, parce qu'il ne peut pas savoir lequel est en vigueur. Le prix, les
+ * bornes et la façon de refermer sont écrits au §9 du brief.
  */
 
 const INITIAL: ResultatInscription = { statut: "inactif" };
@@ -59,6 +67,20 @@ export function FormulaireInscription({ locale }: { readonly locale: string }) {
                   : t("erreurIndisponible")
       : null;
 
+  /*
+   * ⚠️ CHAQUE CHAMP NE PORTE QUE LES REFUS QUI LE CONCERNENT.
+   *
+   * DÉFAUT TROUVÉ EN PILOTANT AU NAVIGATEUR : les deux champs portaient
+   * `aria-invalid` dès qu'une erreur existait, quelle qu'elle soit. Un mot de
+   * passe trop court faisait donc annoncer « adresse email, invalide » à qui
+   * emploie un lecteur d'écran — on lui désignait le champ juste. Le défaut est
+   * strictement invisible à l'œil, puisque le message affiché, lui, était bon.
+   */
+  const motif = resultat.statut === "erreur" ? resultat.motif : null;
+  const emailEnCause = motif === "email_invalide" || motif === "deja_inscrit";
+  const motDePasseEnCause =
+    motif === "mdp_trop_court" || motif === "mdp_trop_long" || motif === "mdp_contient_email";
+
   return (
     <form action={action} className="flex flex-col gap-4 md:gap-[18px]" noValidate>
       <input type="hidden" name="locale" value={locale} />
@@ -77,8 +99,8 @@ export function FormulaireInscription({ locale }: { readonly locale: string }) {
           value={email}
           onChange={(evenement) => setEmail(evenement.target.value)}
           placeholder={t("placeholderEmail")}
-          aria-invalid={messageErreur !== null}
-          aria-describedby={messageErreur !== null ? "erreur-inscription" : undefined}
+          aria-invalid={emailEnCause}
+          aria-describedby={emailEnCause ? "erreur-inscription" : undefined}
           className={CLASSE_CHAMP}
         />
       </div>
@@ -95,8 +117,8 @@ export function FormulaireInscription({ locale }: { readonly locale: string }) {
           // gestionnaire, au lieu de remplir celui d'un autre compte.
           autoComplete="new-password"
           required
-          aria-invalid={messageErreur !== null}
-          aria-describedby="aide-mot-de-passe"
+          aria-invalid={motDePasseEnCause}
+          aria-describedby={motDePasseEnCause ? "aide-mot-de-passe erreur-inscription" : "aide-mot-de-passe"}
           className={CLASSE_CHAMP}
         />
         <p
