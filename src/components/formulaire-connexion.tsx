@@ -1,99 +1,47 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { useFormStatus } from "react-dom";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
-import {
-  envoyerLienConnexion,
-  type ResultatConnexion,
-} from "@/app/[locale]/connexion/actions";
+import { seConnecter, type ResultatConnexion } from "@/app/[locale]/connexion/actions";
 import { suggererCorrection } from "@/lib/email/domaines";
-import { Icone } from "@/components/icone";
+import {
+  BoutonPrincipal,
+  CLASSE_CHAMP,
+  CLASSE_LIBELLE,
+  MessageErreur,
+} from "@/components/acces-champs";
 
 /**
- * Formulaire d'accès par lien email, partagé par la connexion et l'inscription.
+ * SE CONNECTER — adresse et mot de passe.
  *
- * PAS DE MOT DE PASSE, PAS DE SSO. La maquette Stitch montrait « Corporate
- * Email », un champ mot de passe et un bouton « Enterprise SSO » : ce sont les
- * codes d'un produit d'entreprise, pas de celui-ci.
+ * ⚠️ CE COMPOSANT SERVAIT AUSSI L'INSCRIPTION jusqu'au 01/09/2026, avec une
+ * propriété `intention` qui ne changeait que le libellé du bouton. C'était juste
+ * tant que le serveur faisait la même chose des deux côtés — envoyer un lien à
+ * une adresse. Avec un mot de passe, l'un vérifie et l'autre crée : garder un
+ * composant unique aurait fait passer par le même chemin deux gestes qui n'ont
+ * plus ni les mêmes champs, ni les mêmes refus, ni les mêmes compteurs.
  *
- * Le lien email n'est pas un confort, c'est l'UNIQUE porte d'entrée du
- * fournisseur en Chine, pour qui la connexion Google est inaccessible.
+ * IL N'Y A AUCUN ÉTAT DE SUCCÈS. Une connexion réussie REDIRIGE — la Server
+ * Action lève, ce composant ne se réaffiche jamais. C'est ce qui remplace
+ * l'écran « regardez votre boîte mail » du lien magique, et c'est tout ce que
+ * Wassim demandait : on tape, on entre.
  *
- * UN SEUL COMPOSANT POUR LES DEUX ÉCRANS, parce que le serveur fait strictement
- * la même chose dans les deux cas — et qu'il doit continuer à le faire. Deux
- * formulaires distincts dériveraient l'un de l'autre, et la première différence
- * de comportement serait un moyen de savoir si une adresse a un compte.
- *
- * La suggestion de faute de frappe vit ICI, à la saisie, sans qu'aucune requête
- * ne parte. C'est ce qui permet au serveur de répondre la même chose à tout le
- * monde sans que l'utilisateur y perde : les deux besoins sont traités là où ils
- * se produisent.
+ * La suggestion de faute de frappe reste, et reste LOCALE : quelques dizaines de
+ * comparaisons sur des chaînes courtes, aucune requête, donc aucun moyen
+ * d'apprendre quoi que ce soit sur nos comptes en observant le réseau. C'est
+ * elle qui permet au serveur de répondre la même chose à tout le monde sans que
+ * l'utilisateur y perde.
  */
-
-function BoutonEnvoi({ libelle, libelleEnCours }: { libelle: string; libelleEnCours: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="degrade-marque flex h-13 w-full items-center justify-center gap-[9px] rounded-[13px] font-headline-md text-[15px] leading-5 font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-90 disabled:opacity-60"
-    >
-      <span>{pending ? libelleEnCours : libelle}</span>
-      {pending ? null : <Icone nom="arrow_forward" className="text-[15px]" />}
-    </button>
-  );
-}
 
 const INITIAL: ResultatConnexion = { statut: "inactif" };
 
-export function FormulaireConnexion({
-  locale,
-  intention = "connexion",
-  aide,
-}: {
-  locale: string;
-  intention?: "connexion" | "inscription";
-  /**
-   * Phrase rendue SOUS le champ, avant le bouton — la planche d'inscription y
-   * annonce la durée de validité du lien. Optionnelle : la planche de connexion
-   * n'en pose aucune, et écrire deux fois la même chose sur deux écrans que
-   * l'utilisateur enchaîne serait du bruit.
-   */
-  aide?: string;
-}) {
+export function FormulaireConnexion({ locale }: { readonly locale: string }) {
   const t = useTranslations("connexion");
-  const [resultat, action] = useActionState(envoyerLienConnexion, INITIAL);
+  const [resultat, action] = useActionState(seConnecter, INITIAL);
   const [email, setEmail] = useState("");
 
-  // Le calcul est purement local et borné : quelques dizaines de comparaisons
-  // sur des chaînes courtes. Aucune requête, donc aucun moyen d'apprendre quoi
-  // que ce soit sur nos comptes en observant le réseau.
   const suggestion = useMemo(() => suggererCorrection(email), [email]);
-
-  if (resultat.statut === "envoye") {
-    return (
-      <div role="status" className="flex flex-col gap-3">
-        <h2 className="font-headline-md text-headline-md-mobile text-on-surface">
-          {t("succesTitre")}
-        </h2>
-        <p className="font-body-md text-body-md text-on-surface-variant">
-          {t("succesTexte", { email: resultat.email })}
-        </p>
-        <form action={action}>
-          <input type="hidden" name="locale" value={locale} />
-          <input type="hidden" name="intention" value={intention} />
-          <input type="hidden" name="email" value={resultat.email} />
-          <button
-            type="submit"
-            className="mt-2 self-start font-label-md text-label-md text-[var(--accent-texte)] underline"
-          >
-            {t("renvoyer")}
-          </button>
-        </form>
-      </div>
-    );
-  }
 
   const messageErreur =
     resultat.statut === "erreur"
@@ -101,49 +49,70 @@ export function FormulaireConnexion({
         ? t("erreurEmailInvalide")
         : resultat.motif === "trop_de_tentatives"
           ? t("erreurTropDeTentatives")
-          : t("erreurEnvoi")
+          : resultat.motif === "indisponible"
+            ? t("erreurIndisponible")
+            : t("erreurIdentifiants")
       : null;
 
   return (
     <form action={action} className="flex flex-col gap-4 md:gap-[18px]" noValidate>
       <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="intention" value={intention} />
+
       <div>
-        <label
-          htmlFor="email"
-          className="mb-2 block font-headline-md text-[13px] leading-4 font-semibold text-on-surface"
-        >
+        <label htmlFor="email" className={CLASSE_LIBELLE + " mb-2"}>
           {t("labelEmail")}
         </label>
-        {/* ⚠️ PAS D'ICÔNE DANS LE CHAMP. Elle venait de la spécification
-            Stitch ; les deux planches du canevas posent un champ nu, et
-            l'enveloppe n'apprenait rien que le libellé ne dise déjà. */}
-        <div>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            required
-            value={email}
-            onChange={(evenement) => setEmail(evenement.target.value)}
-            placeholder={t("placeholderEmail")}
-            aria-invalid={messageErreur !== null}
-            aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
-            className="h-13 w-full rounded-[13px] border border-filet-controle bg-surface-container-low px-4 font-body-md text-[15px] text-on-surface transition-colors focus:border-violet focus:outline-none focus:ring-2 focus:ring-violet/30"
-          />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="username"
+          inputMode="email"
+          required
+          value={email}
+          onChange={(evenement) => setEmail(evenement.target.value)}
+          placeholder={t("placeholderEmail")}
+          aria-invalid={messageErreur !== null}
+          aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
+          className={CLASSE_CHAMP}
+        />
+      </div>
+
+      <div>
+        {/* LE LIEN D'OUBLI EST SUR LA LIGNE DU LIBELLÉ, comme la planche le
+            dessine. Sous le champ, il se lirait comme une aide à la saisie ;
+            ici, il se lit comme l'autre chose qu'on peut faire de son mot de
+            passe. */}
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <label htmlFor="motDePasse" className={CLASSE_LIBELLE}>
+            {t("labelMotDePasse")}
+          </label>
+          <Link
+            href={`/${locale}/mot-de-passe-oublie`}
+            className="font-headline-md text-[12px] leading-4 font-semibold text-violet hover:underline"
+          >
+            {t("motDePasseOublie")}
+          </Link>
         </div>
-        {aide === undefined ? null : (
-          <p className="mt-2 font-body-sm text-[12px] leading-[18px] text-sourdine">{aide}</p>
-        )}
+        <input
+          id="motDePasse"
+          name="motDePasse"
+          type="password"
+          // `current-password` et non `new-password` : c'est ce qui fait
+          // proposer au gestionnaire de mots de passe celui qui est enregistré,
+          // au lieu d'en suggérer un nouveau sur un écran de connexion.
+          autoComplete="current-password"
+          required
+          aria-invalid={messageErreur !== null}
+          aria-describedby={messageErreur !== null ? "erreur-connexion" : undefined}
+          className={CLASSE_CHAMP}
+        />
       </div>
 
       {suggestion !== null ? (
         // On SUGGÈRE, on ne corrige jamais d'office : réécrire une adresse rare
-        // mais légitime enverrait le lien d'accès au compte à quelqu'un d'autre.
-        // Le coût d'une suggestion ignorée est nul, celui d'une correction
-        // erronée est un compte livré à un tiers.
+        // mais légitime ferait tenter la connexion au compte de quelqu'un
+        // d'autre, et le compteur d'échecs serait consommé sur SA boîte.
         <p className="font-body-sm text-body-sm text-on-surface-variant" aria-live="polite">
           {t("suggestionPrefixe")}{" "}
           <button
@@ -158,15 +127,10 @@ export function FormulaireConnexion({
       ) : null}
 
       {messageErreur !== null ? (
-        <p id="erreur-connexion" role="alert" className="font-body-sm text-body-sm text-error">
-          {messageErreur}
-        </p>
+        <MessageErreur id="erreur-connexion" texte={messageErreur} />
       ) : null}
 
-      <BoutonEnvoi
-        libelle={intention === "inscription" ? t("envoyerInscription") : t("envoyer")}
-        libelleEnCours={t("envoiEnCours")}
-      />
+      <BoutonPrincipal libelle={t("bouton")} libelleEnCours={t("boutonEnCours")} />
     </form>
   );
 }

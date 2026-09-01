@@ -21,6 +21,20 @@ import { adresseAppelant, bordDeConfiance, empreinte } from "./empreinte";
 export type Surface =
   | "auth-ip"
   | "auth-email"
+  /**
+   * LA VÉRIFICATION D'UN MOT DE PASSE, par adresse IP. Distincte de `auth-ip`,
+   * qui borne l'ENVOI D'UN EMAIL.
+   *
+   * ⚠️ RÉUTILISER `auth-ip` AURAIT ENFERMÉ DEHORS EXACTEMENT QUI IL PROTÉGEAIT.
+   * Son plafond de 30 par heure a été choisi pour des envois d'emails, avec sa
+   * raison écrite plus bas : « nul n'a besoin de six liens par heure ». Une
+   * tentative de connexion n'est pas un envoi — on se trompe de mot de passe,
+   * on recommence, et le fournisseur de Guangzhou passe par un réseau partagé
+   * où plusieurs personnes se connectent derrière une seule adresse.
+   */
+  | "auth-mdp-ip"
+  /** La vérification d'un mot de passe, par adresse email : l'acharnement sur UN compte. */
+  | "auth-mdp-email"
   /** Toutes les requêtes de la page publique, par adresse. */
   | "publique-requetes"
   /** Les seules requêtes portant un jeton INCONNU, par adresse. */
@@ -65,6 +79,8 @@ export type Verdict = { autorise: true } | { autorise: false; motif: "quota" | "
 export const DEGRADATION: Readonly<Record<Surface, "autorise" | "refuse">> = {
   "auth-ip": "refuse",
   "auth-email": "refuse",
+  "auth-mdp-ip": "refuse",
+  "auth-mdp-email": "refuse",
   "publique-requetes": "autorise",
   "publique-inconnu": "autorise",
   "publique-ecriture": "refuse",
@@ -122,6 +138,34 @@ export function seuil(surface: Surface): { plafond: number; fenetreSecondes: num
     case "auth-email":
       return {
         plafond: entierEnv("QUOTA_AUTH_EMAIL_PAR_HEURE", 6),
+        fenetreSecondes: 3600,
+      };
+    /*
+     * LES DEUX PLAFONDS DU MOT DE PASSE SONT PLUS HAUTS QUE CEUX DE L'EMAIL,
+     * et c'est le contraire d'un relâchement : ils bornent une opération dont
+     * le coût est nul pour nous et fréquent pour l'utilisateur.
+     *
+     * 100 par heure et par adresse IP : de quoi laisser travailler un réseau
+     * partagé, et très loin de ce qu'exige un bourrage d'identifiants — qui se
+     * compte en milliers d'essais par liste, pas en dizaines.
+     *
+     * 20 par heure et par adresse email : quelqu'un qui hésite entre trois mots
+     * de passe en a largement assez ; quelqu'un qui en essaie mille sur UN
+     * compte est arrêté au vingtième.
+     *
+     * ⚠️ AUCUN VERROUILLAGE DE COMPTE. Bloquer un compte après N échecs
+     * transformerait ces compteurs en arme : il suffirait de tenter vingt mots
+     * de passe faux sur l'adresse de quelqu'un pour l'enfermer dehors. On
+     * ralentit, on ne condamne pas — et la fenêtre glisse toute seule.
+     */
+    case "auth-mdp-ip":
+      return {
+        plafond: entierEnv("QUOTA_AUTH_MDP_IP_PAR_HEURE", 100),
+        fenetreSecondes: 3600,
+      };
+    case "auth-mdp-email":
+      return {
+        plafond: entierEnv("QUOTA_AUTH_MDP_EMAIL_PAR_HEURE", 20),
         fenetreSecondes: 3600,
       };
     case "publique-requetes":
@@ -279,6 +323,28 @@ export async function verifierQuotaAuth(email: string): Promise<Verdict> {
   // L'adresse est normalisée avant empreinte, sinon « A@B.com » et « a@b.com »
   // recevraient deux quotas distincts pour une seule boîte.
   return consommer(empreinte(email.trim().toLowerCase()), "auth-email");
+}
+
+/**
+ * Les deux seuils d'une VÉRIFICATION DE MOT DE PASSE.
+ *
+ * Même forme que `verifierQuotaAuth`, compteurs différents — voir le type
+ * `Surface` pour la raison. L'ordre est le même, et pour la même raison :
+ * consommer le compteur de l'adresse email après avoir déjà refusé sur l'IP
+ * ferait payer à une boîte le quota d'une adresse qui n'est pas la sienne, et
+ * c'est précisément ce qui permettrait d'enfermer quelqu'un dehors.
+ *
+ * ⚠️ CONSOMMÉ AVANT L'APPEL, comme partout ailleurs sur cette surface. Après,
+ * on saurait qu'on a été balayé sans l'avoir empêché.
+ */
+export async function verifierQuotaMotDePasse(email: string): Promise<Verdict> {
+  const ip = await adresseAppelant();
+  if (ip !== null) {
+    const parIp = await consommer(empreinte(ip), "auth-mdp-ip");
+    if (!parIp.autorise) return parIp;
+  }
+
+  return consommer(empreinte(email.trim().toLowerCase()), "auth-mdp-email");
 }
 
 /**

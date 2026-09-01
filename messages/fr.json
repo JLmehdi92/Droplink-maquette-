@@ -16,7 +16,8 @@
     "lancement": {
       "titre": "Phase de lancement",
       "texte": "Tout est gratuit et sans limite pendant cette période."
-    }
+    },
+    "seDeconnecter": "Se déconnecter"
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",
@@ -159,22 +160,15 @@
   },
   "connexion": {
     "titre": "Content de vous revoir",
-    "sousTitre": "Entrez votre adresse : nous vous envoyons un lien de connexion. Pas de mot de passe à retenir.",
-    "sousTitreCourt": "Nous vous envoyons un lien de connexion. Pas de mot de passe.",
+    "sousTitre": "Entrez votre adresse et votre mot de passe pour retrouver vos commandes.",
+    "sousTitreCourt": "Votre adresse et votre mot de passe.",
     "labelEmail": "Adresse email",
     "placeholderEmail": "vous@exemple.com",
-    "envoyer": "Recevoir mon lien",
-    "envoiEnCours": "Envoi…",
-    "renvoyer": "Renvoyer le lien",
-    "succesTitre": "Regardez votre boîte mail",
-    "succesTexte": "Nous avons envoyé un lien de connexion à {email}. Il reste valable 24 heures. Pensez à regarder dans les indésirables.",
     "erreurEmailInvalide": "Cette adresse ne semble pas valide.",
-    "erreurEnvoi": "L'envoi a échoué. Nous n'avons pas pu joindre votre boîte mail — réessayez dans un instant.",
     "erreurTropDeTentatives": "Trop de demandes en peu de temps. Patientez une minute avant de réessayer.",
     "pasDeCompteTitre": "Pas encore de compte ?",
     "suggestionPrefixe": "Vouliez-vous dire",
     "suggestionSuffixe": " ?",
-    "envoyerInscription": "Créer mon compte",
     "panneauTitre": "Votre client ouvre le lien et voit tout.",
     "panneauTexte": "Aucun compte à créer de son côté, aucune application à installer.",
     "cgvAvant": "En continuant, vous acceptez nos",
@@ -192,10 +186,20 @@
       "indisponible": "La connexion Google est momentanément indisponible. Utilisez le lien par email ci-dessous.",
       "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
       "session": "Votre session a expiré. Reconnectez-vous pour continuer.",
-      "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés."
+      "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés.",
+      "confirmez": "Votre compte est créé. Ouvrez l’email que nous venons de vous envoyer pour confirmer votre adresse, puis connectez-vous."
     },
     "apercuTitre": "Votre commande",
-    "apercuBoutique": "Atelier Nord"
+    "apercuBoutique": "Atelier Nord",
+    "labelMotDePasse": "Mot de passe",
+    "motDePasseOublie": "Mot de passe oublié ?",
+    "bouton": "Se connecter",
+    "boutonEnCours": "Connexion…",
+    "erreurIdentifiants": "Adresse ou mot de passe incorrect.",
+    "erreurIndisponible": "La connexion a échoué. Réessayez dans un instant.",
+    "info": {
+      "deconnecte": "Vous êtes déconnecté. À bientôt."
+    }
   },
   "inscription": {
     "titre": "Créer un compte",
@@ -206,8 +210,14 @@
     "argument2": "Votre client n’a jamais besoin de créer un compte",
     "argument3": "Vos pages restent à votre nom et à vos couleurs",
     "formulaireTitre": "Créer mon compte",
-    "aideEmail": "Nous envoyons un lien de connexion à cette adresse. Valable 24 heures.",
-    "dejaCompteTexte": "Vous avez déjà un compte ?"
+    "dejaCompteTexte": "Vous avez déjà un compte ?",
+    "bouton": "Créer mon compte",
+    "boutonEnCours": "Création…",
+    "aideMotDePasse": "12 caractères minimum. Prenez plutôt une phrase qu’un mot compliqué.",
+    "erreurMdpTropCourt": "Votre mot de passe doit faire au moins 12 caractères.",
+    "erreurMdpTropLong": "Votre mot de passe est trop long. Raccourcissez-le un peu.",
+    "erreurMdpContientEmail": "Votre mot de passe ne doit pas contenir votre adresse email.",
+    "erreurDejaInscrit": "Un compte existe déjà pour cette adresse. Connectez-vous."
   },
   "onboarding": {
     "titre": "Mettons votre nom sur la page",
@@ -1189,5 +1199,21 @@
     "texte": "Une erreur est survenue de notre côté. Vos données ne sont pas touchées : rien n'a été enregistré ni supprimé.",
     "reessayer": "Réessayer",
     "reference": "Référence de l'incident : {ref}"
+  },
+  "motDePasse": {
+    "oublieTitre": "Mot de passe oublié",
+    "oublieSousTitre": "Entrez votre adresse. Si un compte existe, vous recevez un lien pour en choisir un nouveau.",
+    "oublieSousTitreCourt": "Si un compte existe pour cette adresse, vous recevez un lien.",
+    "bouton": "Envoyer le lien",
+    "boutonEnCours": "Envoi…",
+    "envoyeTitre": "Regardez votre boîte mail",
+    "envoyeTexte": "Si un compte existe pour cette adresse, un lien vient de partir. Pensez à regarder dans les indésirables.",
+    "retourConnexion": "Revenir à la connexion",
+    "nouveauTitre": "Nouveau mot de passe",
+    "nouveauSousTitre": "Choisissez-en un nouveau pour <adresse>{email}</adresse>.",
+    "avertissement": "Ce lien ne servira qu’une fois, et vos autres appareils devront se reconnecter.",
+    "labelNouveau": "Nouveau mot de passe",
+    "boutonEnregistrer": "Enregistrer et me connecter",
+    "erreurSession": "Ce lien n’est plus valable. Demandez-en un nouveau."
   }
 }

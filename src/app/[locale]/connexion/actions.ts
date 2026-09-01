@@ -4,127 +4,379 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { fournisseurActif } from "@/lib/auth/fournisseurs";
-import { verifierQuotaAuth, verifierQuotaAuthAdresse } from "@/lib/limitation/quota";
+import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
+import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
+import {
+  verifierQuotaAuth,
+  verifierQuotaAuthAdresse,
+  verifierQuotaMotDePasse,
+} from "@/lib/limitation/quota";
 import { origineDuSite } from "@/lib/site";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
- * Envoi du lien de connexion, CÔTÉ SERVEUR.
+ * L'ACCÈS AU COMPTE — email et mot de passe.
  *
- * UN SEUL GESTE POUR S'INSCRIRE ET POUR SE CONNECTER. Avec un lien magique, la
- * distinction n'existe pas techniquement : on envoie un lien à une adresse. Deux
- * écrans existent parce que deux intentions existent, mais ils appellent la même
- * action et le serveur se comporte exactement pareil.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CE QUI A CHANGÉ LE 01/09/2026, ET CE QUI N'A PAS CHANGÉ
+ * ═══════════════════════════════════════════════════════════════════════════
  *
- * CE QUI EST DÉLIBÉRÉ ICI, ET POURQUOI.
+ * Ce fichier n'avait qu'une action, `envoyerLienConnexion`, et son en-tête
+ * expliquait pourquoi l'inscription et la connexion ne pouvaient PAS être
+ * distinguées : avec un lien magique, il n'y a qu'un geste — on envoie un lien
+ * à une adresse. Deux écrans, une action, et une propriété `intention` qui ne
+ * changeait QUE le libellé du bouton.
  *
- * `shouldCreateUser` vaut TOUJOURS `true`. L'alternative — refuser la création
- * sur l'écran de connexion pour dire « aucun compte pour cette adresse » — a été
- * mesurée sur le vrai projet :
+ * Avec un mot de passe, ce sont deux gestes différents : l'un vérifie, l'autre
+ * crée. Le fork qui n'existait pas est ici.
  *
- *     email SANS compte : 422 `otp_disabled`      en  49 ms
- *     email AVEC compte : autre code              en 778 ms
+ * CE QUI SURVIT INTACT, ET QUI COMPTE PLUS QUE LE RESTE : le refus de laisser
+ * fuir l'existence d'un compte. La mesure qui l'avait imposé tient toujours —
+ * un chemin qui court-circuite répond seize fois plus vite qu'un chemin qui
+ * travaille, et le chronomètre parle même quand les messages se taisent. Le
+ * plancher de 1 200 ms s'applique donc à TOUTES les sorties de TOUTES les
+ * actions de ce fichier, succès compris.
  *
- * Deux oracles, pas un. Même en uniformisant les codes d'erreur, l'écart de
- * seize fois sur le délai reste lisible depuis l'extérieur : n'importe qui
- * pourrait balayer des adresses et apprendre lesquelles ont un compte ici. Sur
- * un produit qui sert ce marché, cette liste a une valeur marchande — c'est
- * exactement ce qui a été extrait de Pandabuy.
+ * Avec le mot de passe, la raison devient encore plus littérale : le hachage ne
+ * s'exécute QUE si le compte existe. Sans plancher, « adresse inconnue » et
+ * « mot de passe faux » se distingueraient au millième de seconde près, quel
+ * que soit le soin mis à écrire le même message pour les deux.
  *
- * La faute de frappe, elle, est traitée à la SAISIE (`lib/email/domaines`), sans
- * qu'aucune requête ne parte. Les deux besoins ne vivent pas au même endroit, on
- * ne sacrifie donc ni l'un ni l'autre.
- *
- * Le seul endroit où l'on peut dire « tu n'avais pas encore de compte » est
- * l'email lui-même : il n'est lu que par le propriétaire de la boîte.
+ * ⚠️ UNE EXCEPTION, ASSUMÉE ET ÉCRITE AU §9 DU BRIEF : L'INSCRIPTION.
+ * La confirmation d'email étant désactivée (décision de Wassim), `signUp` sur
+ * une adresse déjà inscrite rend « User already registered ». Ce n'est pas
+ * rattrapable ici — une inscription réussie ouvre une session, un doublon non,
+ * et la différence est observable quoi qu'on affiche. Elle est BORNÉE par les
+ * compteurs, et refermable en réactivant la confirmation d'email, qui fait
+ * obfusquer le serveur d'authentification.
  */
 
-const Saisie = z.object({
-  // La langue voyage avec le formulaire : le lien reçu par email doit ramener
-  // l'utilisateur dans la langue où il était, pas dans celle par défaut.
-  locale: z.enum(["fr", "en"]),
-  // Zod sur toute entrée externe, y compris ce qui « vient de notre
-  // formulaire » : le formulaire n'est qu'une suggestion, la requête est ce qui
-  // arrive vraiment.
+const Langue = z.enum(["fr", "en"]);
+
+/*
+ * Zod sur toute entrée externe, y compris ce qui « vient de notre formulaire » :
+ * le formulaire n'est qu'une suggestion, la requête est ce qui arrive vraiment.
+ */
+const Identifiants = z.object({
+  locale: Langue,
   email: z.string().trim().min(3).max(254).email(),
-  // N'influence QUE le libellé affiché. Aucun effet sur le comportement du
-  // serveur — sans quoi elle redeviendrait un canal de distinction.
-  intention: z.enum(["connexion", "inscription"]).default("connexion"),
+  // AUCUNE CONTRAINTE DE LONGUEUR À LA CONNEXION, et c'est voulu. Refuser ici un
+  // mot de passe trop court dirait qu'il ne peut pas être le bon — donc que le
+  // compte, s'il existe, en a un plus long. On laisse le serveur d'auth
+  // répondre, toujours la même chose.
+  motDePasse: z.string().min(1).max(1024),
+});
+
+const Inscription = z.object({
+  locale: Langue,
+  email: z.string().trim().min(3).max(254).email(),
+  motDePasse: MotDePasse,
+});
+
+const Adresse = z.object({
+  locale: Langue,
+  email: z.string().trim().min(3).max(254).email(),
 });
 
 export type ResultatConnexion =
   | { statut: "inactif" }
-  | { statut: "envoye"; email: string }
-  | { statut: "erreur"; motif: "email_invalide" | "trop_de_tentatives" | "envoi" };
+  | {
+      statut: "erreur";
+      motif: "identifiants" | "email_invalide" | "trop_de_tentatives" | "indisponible";
+    };
 
-export async function envoyerLienConnexion(
+export type ResultatInscription =
+  | { statut: "inactif" }
+  | {
+      statut: "erreur";
+      motif:
+        | "email_invalide"
+        | "mdp_trop_court"
+        | "mdp_trop_long"
+        | "mdp_contient_email"
+        | "deja_inscrit"
+        | "trop_de_tentatives"
+        | "indisponible";
+    };
+
+export type ResultatReinitialisation =
+  | { statut: "inactif" }
+  | { statut: "envoye" }
+  | { statut: "erreur"; motif: "email_invalide" | "trop_de_tentatives" };
+
+/**
+ * SE CONNECTER.
+ *
+ * UN SEUL MESSAGE D'ÉCHEC POUR TOUTES LES CAUSES D'IDENTIFIANTS : adresse
+ * inconnue, mot de passe faux, compte non confirmé. Les trois se corrigent de la
+ * même façon du point de vue de qui possède le compte, et les distinguer
+ * renseignerait qui ne le possède pas.
+ */
+export async function seConnecter(
   _precedent: ResultatConnexion,
-  donnees: FormData,
+  donnees: unknown,
 ): Promise<ResultatConnexion> {
   const debut = Date.now();
 
-  const analyse = Saisie.safeParse({
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "indisponible" };
+
+  const analyse = Identifiants.safeParse({
     email: donnees.get("email"),
+    motDePasse: donnees.get("motDePasse"),
     locale: donnees.get("locale"),
-    intention: donnees.get("intention") ?? undefined,
   });
   if (!analyse.success) {
-    // Un format d'adresse invalide ne dit rien de l'existence d'un compte : ce
-    // refus peut être immédiat sans rien divulguer.
+    // Une adresse mal FORMÉE ne dit rien de l'existence d'un compte : ce refus
+    // peut être immédiat sans rien divulguer.
     return { statut: "erreur", motif: "email_invalide" };
   }
 
-  // LE QUOTA EST CONSOMMÉ AVANT L'APPEL À SUPABASE, et c'est tout l'intérêt.
-  // Mesuré sur ce projet : une demande crée `auth.users`, `profiles` ET `shops`
-  // immédiatement, avant que quiconque ait cliqué. Vérifier après coup laisserait
-  // donc les comptes fantômes se créer — on saurait qu'on a été balayé sans
-  // l'avoir empêché.
-  const quota = await verifierQuotaAuth(analyse.data.email);
+  const { email, motDePasse, locale } = analyse.data;
+
+  // LE QUOTA EST CONSOMMÉ AVANT L'APPEL. Vérifier après coup laisserait le
+  // bourrage se dérouler : on saurait qu'on a été balayé sans l'avoir empêché.
+  const quota = await verifierQuotaMotDePasse(email);
   if (!quota.autorise) {
     await attendrePlancher(debut);
-    // Le motif est le MÊME dans les deux cas côté utilisateur : lui dire que
-    // notre compteur est en panne ne lui apprend rien d'actionnable, et
-    // distinguer les deux réponses renseignerait un attaquant sur notre état.
+    // Le motif est le MÊME que le compteur ait dit « plein » ou soit tombé :
+    // dire qu'il est en panne ne donne rien d'actionnable à un utilisateur, et
+    // renseigne un attaquant sur notre état.
+    return { statut: "erreur", motif: "trop_de_tentatives" };
+  }
+
+  const supabase = await creerClientServeur();
+  const { error } = await supabase.auth.signInWithPassword({ email, password: motDePasse });
+
+  /*
+   * LE PLANCHER EST ATTENDU ICI, INCONDITIONNELLEMENT, AVANT TOUT BRANCHEMENT.
+   *
+   * Le répéter dans chaque branche donnerait le même résultat aujourd'hui et
+   * serait faux demain : la branche qu'on ajoute est celle qu'on oublie. La
+   * sonde structurelle exige donc cet ordre — appel, plancher, branchement — et
+   * c'est elle qui a rattrapé la première version de cette action.
+   */
+  await attendrePlancher(debut);
+
+  if (error !== null) {
+    return {
+      statut: "erreur",
+      // On distingue la limite de débit du reste, et seulement elle : dire
+      // « réessayez » à quelqu'un que le serveur d'auth vient de limiter le
+      // ferait réessayer aussitôt, échouer à nouveau, et conclure que le
+      // produit est cassé. Cette distinction ne dépend pas de l'existence d'un
+      // compte, elle ne divulgue donc rien.
+      motif: error.status === 429 ? "trop_de_tentatives" : "identifiants",
+    };
+  }
+
+  const suite = await suivreApresSession(locale, supabase);
+
+  /*
+   * ⚠️ `redirect()` LÈVE — c'est ainsi qu'il fonctionne en Next 15. Il est donc
+   * hors de tout `try` : un `catch` qui l'entourerait avalerait la redirection
+   * et laisserait l'utilisateur sur le formulaire, connecté sans le savoir.
+   */
+  redirect(suite.ok ? suite.chemin : cheminDeRefus(locale, suite.motif));
+}
+
+/**
+ * CRÉER UN COMPTE.
+ *
+ * ⚠️ LE COMPTE NAÎT AVEC SA BOUTIQUE, PAR UN DÉCLENCHEUR EN BASE
+ * (`creer_profil_et_shop` sur `auth.users`). Rien n'est à créer ici, et surtout
+ * rien ne doit l'être : un second chemin de création ferait naître, le jour où
+ * il divergerait, un compte sans boutique — et tout l'espace vendeur suppose
+ * qu'il en a une.
+ */
+export async function sInscrire(
+  _precedent: ResultatInscription,
+  donnees: unknown,
+): Promise<ResultatInscription> {
+  const debut = Date.now();
+
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "indisponible" };
+
+  const brutEmail = donnees.get("email");
+  const brutMotDePasse = donnees.get("motDePasse");
+
+  const analyse = Inscription.safeParse({
+    email: brutEmail,
+    motDePasse: brutMotDePasse,
+    locale: donnees.get("locale"),
+  });
+
+  if (!analyse.success) {
+    /*
+     * LE REFUS EST NOMMÉ, PAS GÉNÉRIQUE. Un mot de passe refusé sans qu'on dise
+     * lequel des trois motifs a mordu se corrige au hasard — et le troisième
+     * (« contient votre adresse ») ne se devine pas du tout.
+     *
+     * Aucun de ces motifs ne dit quoi que ce soit sur l'existence d'un compte :
+     * ils portent tous sur ce que la personne vient de taper.
+     */
+    if (typeof brutEmail !== "string" || !Adresse.shape.email.safeParse(brutEmail).success) {
+      return { statut: "erreur", motif: "email_invalide" };
+    }
+    if (typeof brutMotDePasse !== "string") {
+      return { statut: "erreur", motif: "mdp_trop_court" };
+    }
+    const refus = refusDuMotDePasse(brutMotDePasse, brutEmail.trim());
+    if (refus.includes("trop_long")) return { statut: "erreur", motif: "mdp_trop_long" };
+    return { statut: "erreur", motif: "mdp_trop_court" };
+  }
+
+  const { email, motDePasse, locale } = analyse.data;
+
+  // LE CONTRÔLE QUI A BESOIN DES DEUX CHAMPS, donc qui ne peut pas vivre dans le
+  // schéma : un mot de passe qui contient l'identité qu'il protège.
+  const refus = refusDuMotDePasse(motDePasse, email);
+  if (refus.includes("contient_email")) {
+    return { statut: "erreur", motif: "mdp_contient_email" };
+  }
+
+  /*
+   * LE COMPTEUR D'ENVOI D'EMAIL, PAS CELUI DU MOT DE PASSE.
+   *
+   * Deux raisons, et la seconde est la vraie. La première : selon le réglage du
+   * projet, `signUp` envoie un email de confirmation — c'est donc bien la
+   * surface « envoi ». La seconde : ce compteur est ce qui BORNE l'oracle
+   * d'existence de compte décrit en tête de fichier. 6 essais par heure et par
+   * adresse, 30 par heure et par adresse IP : de quoi créer son compte, pas de
+   * quoi balayer une liste.
+   */
+  const quota = await verifierQuotaAuth(email);
+  if (!quota.autorise) {
+    await attendrePlancher(debut);
     return { statut: "erreur", motif: "trop_de_tentatives" };
   }
 
   const origine = await origineDuSite();
   if (origine === null) {
     // Sans origine fiable on ne construit pas d'URL de retour : deviner
-    // produirait un lien qui mène ailleurs que là où l'utilisateur se trouve.
+    // produirait un lien qui mène ailleurs que là où la personne se trouve.
     await attendrePlancher(debut);
-    return { statut: "erreur", motif: "envoi" };
+    return { statut: "erreur", motif: "indisponible" };
   }
 
   const supabase = await creerClientServeur();
-  const { error } = await supabase.auth.signInWithOtp({
-    email: analyse.data.email,
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: motDePasse,
     options: {
-      emailRedirectTo: `${origine}/${analyse.data.locale}/auth/retour`,
-      shouldCreateUser: true,
+      // Sert UNIQUEMENT si la confirmation d'email est réactivée un jour. La
+      // poser maintenant coûte une ligne ; l'oublier ce jour-là enverrait les
+      // gens sur la racine du site avec un code qu'aucune route ne consomme.
+      emailRedirectTo: `${origine}/${locale}/auth/retour`,
     },
   });
 
-  // LE PLANCHER S'APPLIQUE À TOUS LES CHEMINS QUI ONT TOUCHÉ SUPABASE, succès
-  // comme échec. L'appliquer au seul succès rendrait l'échec reconnaissable à sa
-  // rapidité, ce qui reconstituerait l'oracle qu'on vient de supprimer.
+  // Même règle que la connexion : plancher inconditionnel, puis branchement.
   await attendrePlancher(debut);
 
   if (error !== null) {
-    // On distingue la limite de débit du reste : dire « réessayez » à quelqu'un
-    // qui vient d'être limité le ferait réessayer aussitôt, donc échouer à
-    // nouveau, et conclure que le produit est cassé. Cette distinction ne
-    // dépend pas de l'existence d'un compte, elle ne divulgue donc rien.
-    return {
-      statut: "erreur",
-      motif: error.status === 429 ? "trop_de_tentatives" : "envoi",
-    };
+    if (error.status === 429) return { statut: "erreur", motif: "trop_de_tentatives" };
+    /*
+     * ⚠️ ICI VIT L'ORACLE, ET IL EST NOMMÉ PLUTÔT QUE MAQUILLÉ.
+     *
+     * Le message est reconnu sur le CODE quand il existe, et sur le texte
+     * sinon — le serveur d'authentification n'a pas toujours porté de code
+     * pour ce cas. Se contenter du texte serait fragile ; l'ignorer
+     * renverrait « une erreur est survenue » à quelqu'un dont le seul tort est
+     * d'avoir déjà un compte, et qui ne saurait pas qu'il lui suffit de se
+     * connecter.
+     */
+    const dejaInscrit =
+      error.code === "user_already_exists" || /already\s+(registered|exists)/i.test(error.message);
+    return { statut: "erreur", motif: dejaInscrit ? "deja_inscrit" : "indisponible" };
   }
 
-  // L'état « envoyé » n'est rendu qu'APRÈS une réponse sans erreur. L'annoncer
-  // avant serait un pari sur le serveur, et un pari perdu laisserait
-  // l'utilisateur attendre un email qui n'est jamais parti.
-  return { statut: "envoye", email: analyse.data.email };
+  if (data.session === null) {
+    /*
+     * PAS DE SESSION : LA CONFIRMATION D'EMAIL EST ACTIVE SUR LE PROJET.
+     *
+     * C'est la façon documentée de le savoir depuis le client, sans clé de
+     * service. Wassim a tranché « pas de confirmation », donc ce cas ne devrait
+     * pas se produire — mais le réglage vit dans le tableau de bord, hors du
+     * dépôt, et personne ici ne peut le garantir. Le traiter comme une panne
+     * serait faux : le compte EST créé, et un email de confirmation EST parti.
+     *
+     * On renvoie donc vers la connexion, où l'utilisateur lira un message qui
+     * dit exactement ce qui s'est passé.
+     */
+    redirect(`/${locale}/connexion?erreur=confirmez`);
+  }
+
+  const suite = await suivreApresSession(locale, supabase);
+
+  redirect(suite.ok ? suite.chemin : cheminDeRefus(locale, suite.motif));
+}
+
+/**
+ * DEMANDER UNE RÉINITIALISATION.
+ *
+ * ⚠️ LA RÉPONSE EST LA MÊME QUE L'ADRESSE EXISTE OU NON. C'est ici que le lien
+ * par email revient dans le produit, et c'est le nouveau vecteur de prise de
+ * compte : il devient le seul recours en cas d'oubli, donc la seule chose qui
+ * sépare un compte de quelqu'un qui saurait lire sa boîte.
+ *
+ * Le serveur d'authentification rend d'ailleurs déjà « succès » pour une adresse
+ * inconnue. On ne s'en remet pas à lui : le plancher couvre le délai, et le
+ * message est écrit une seule fois, pour les deux cas.
+ */
+export async function demanderReinitialisation(
+  _precedent: ResultatReinitialisation,
+  donnees: unknown,
+): Promise<ResultatReinitialisation> {
+  const debut = Date.now();
+
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "email_invalide" };
+
+  const analyse = Adresse.safeParse({
+    email: donnees.get("email"),
+    locale: donnees.get("locale"),
+  });
+  if (!analyse.success) return { statut: "erreur", motif: "email_invalide" };
+
+  const { email, locale } = analyse.data;
+
+  const quota = await verifierQuotaAuth(email);
+  if (!quota.autorise) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "trop_de_tentatives" };
+  }
+
+  const origine = await origineDuSite();
+  if (origine === null) {
+    await attendrePlancher(debut);
+    // MÊME RÉPONSE QUE LE SUCCÈS, et c'est délibéré : dire « indisponible »
+    // ici distinguerait une panne de notre côté d'une adresse inconnue pour
+    // quelqu'un qui teste les deux. Le journal, lui, portera la vraie cause.
+    console.error("[auth] réinitialisation impossible : aucune origine fiable");
+    return { statut: "envoye" };
+  }
+
+  const supabase = await creerClientServeur();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // La route de retour échange le code contre une session de récupération,
+    // puis renvoie vers l'écran de saisie. La MÊME route que Google : dupliquer
+    // l'échange aurait fait diverger les deux, et c'est le second qu'on oublie
+    // de corriger.
+    redirectTo: `${origine}/${locale}/auth/retour?suite=mot-de-passe`,
+  });
+
+  await attendrePlancher(debut);
+
+  if (error !== null && error.status === 429) {
+    return { statut: "erreur", motif: "trop_de_tentatives" };
+  }
+
+  if (error !== null) {
+    // Le journal sait, l'écran non. Une panne d'envoi ne doit pas devenir un
+    // moyen de distinguer une adresse inscrite d'une adresse inconnue.
+    console.error("[auth] envoi de réinitialisation en échec — " + error.message);
+  }
+
+  return { statut: "envoye" };
 }
 
 /**
@@ -143,13 +395,15 @@ export async function envoyerLienConnexion(
  * Google avec des identifiants vides — l'utilisateur atterrirait sur une erreur
  * Google, chez Google, en concluant que c'est nous qui sommes cassés.
  *
- * LE QUOTA EST CELUI DU LIEN MAGIQUE, pas un second. Deux compteurs distincts
- * offriraient un budget doublé à qui alterne les deux chemins.
+ * LE QUOTA EST CELUI DES ENVOIS, pas un troisième. Deux compteurs distincts
+ * offriraient un budget doublé à qui alterne les chemins.
  */
-const DepartExterne = z.object({ locale: z.enum(["fr", "en"]) });
+const DepartExterne = z.object({ locale: Langue });
 
-export async function partirVersGoogle(donnees: FormData): Promise<void> {
-  const analyse = DepartExterne.safeParse({ locale: donnees.get("locale") });
+export async function partirVersGoogle(donnees: unknown): Promise<void> {
+  const analyse = DepartExterne.safeParse({
+    locale: donnees instanceof FormData ? donnees.get("locale") : null,
+  });
   const langue = analyse.success ? analyse.data.locale : "fr";
 
   if (!fournisseurActif("google")) {
@@ -170,11 +424,9 @@ export async function partirVersGoogle(donnees: FormData): Promise<void> {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      // LA MÊME ROUTE DE RETOUR QUE LE LIEN MAGIQUE. Elle échange déjà le code
-      // contre une session, vérifie le profil, refuse un compte suspendu et
-      // compte l'inscription au premier passage : dupliquer cette logique pour
-      // Google aurait fait diverger les deux chemins, et c'est le second qu'on
-      // oublie de corriger.
+      // LA MÊME ROUTE DE RETOUR QUE LA RÉINITIALISATION. Elle échange déjà le
+      // code contre une session, vérifie le profil, refuse un compte suspendu
+      // et compte l'inscription au premier passage.
       redirectTo: `${origine}/${langue}/auth/retour`,
       skipBrowserRedirect: true,
     },

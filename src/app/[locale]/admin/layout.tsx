@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationAdmin, type EntreeAdmin } from "@/components/admin/navigation-admin";
+import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 
 /**
  * ENVELOPPE DE L'ADMINISTRATION.
@@ -152,10 +153,18 @@ export default async function LayoutAdmin({
                 avec initiale. C'est une variante d'écran que cette coque
                 partagée ne peut pas exprimer — écart connu et nommé, plutôt que
                 silencieux. */}
-            <span
-              aria-hidden="true"
-              className="h-10 w-10 shrink-0 rounded-full bg-white/[0.14] md:hidden"
-            />
+            {/* AU TÉLÉPHONE, LA DÉCONNEXION EST ICI : la colonne sombre y est
+                devenue une bande supérieure, et son bloc d'identité — qui porte
+                le bouton au bureau — n'y est pas rendu. L'avatar reste à 40 px
+                parce qu'il ne se clique pas ; le bouton est à 44, la cible
+                tactile minimale du produit. */}
+            <div className="flex items-center gap-2 md:hidden">
+              <span
+                aria-hidden="true"
+                className="h-10 w-10 shrink-0 rounded-full bg-white/[0.14]"
+              />
+              <BoutonDeconnexion langue={langue} variante="sombre-mobile" />
+            </div>
           </div>
 
           <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="colonne" />
@@ -175,12 +184,19 @@ export default async function LayoutAdmin({
               </p>
             </div>
 
+            {/*
+              LA DÉCONNEXION COMPTE PLUS ICI QU'AILLEURS. C'est la seule surface
+              où l'on lit les données de quelqu'un d'autre, et chaque lecture est
+              tracée AU NOM de qui est connecté. Une session d'administration
+              laissée ouverte fait donc signer à quelqu'un des consultations
+              qu'il n'a pas faites — et le journal est append-only.
+            */}
             <div className="mt-3.5 flex items-center gap-2.5 p-2">
               <span
                 aria-hidden="true"
                 className="h-8 w-8 shrink-0 rounded-full bg-white/[0.14]"
               />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-grow">
                 {/* L'ADRESSE, PAS UN PRÉNOM. Le compte est identifié par son
                     email dans le journal ; afficher autre chose ici obligerait à
                     faire la correspondance de tête au moment de relire une
@@ -192,6 +208,7 @@ export default async function LayoutAdmin({
                   {t("roleAdministrateur")}
                 </p>
               </div>
+              <BoutonDeconnexion langue={langue} variante="sombre" />
             </div>
           </div>
         </div>

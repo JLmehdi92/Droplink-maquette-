@@ -33,16 +33,34 @@ export function EnTeteEcran({
   sousTitre,
   actions,
   dessous,
+  actionMobile,
 }: {
   readonly titre: string;
   readonly sousTitre?: string;
   readonly actions?: React.ReactNode;
   /** Rendu sous la ligne du titre, pleine largeur — la recherche au téléphone. */
   readonly dessous?: React.ReactNode;
+  /**
+   * Rendu à droite du titre AU TÉLÉPHONE SEULEMENT.
+   *
+   * Un seul écran s'en sert : Commandes, qui y porte la déconnexion. C'est la
+   * seule planche téléphone du canevas à dessiner quelque chose à cet endroit —
+   * un rond que le produit ne rendait pas — et l'espace vendeur n'a aucune autre
+   * place où poser un geste de compte quand la barre latérale n'existe pas.
+   *
+   * ⚠️ FACULTATIF, ET IL DOIT LE RESTER. Le rendre obligatoire mettrait un
+   * bouton de déconnexion en tête des cinq écrans, alors que les quatre autres
+   * planches n'en dessinent aucun.
+   */
+  readonly actionMobile?: React.ReactNode;
 }) {
   return (
     <header className="border-b border-outline-variant bg-surface-container-lowest px-margin-mobile pt-4 pb-3.5 md:border-0 md:bg-transparent md:px-[30px] md:pt-[26px] md:pb-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
+        {/* `justify-between` du parent suffit à repousser l'action à droite :
+            un `flex-1` ici n'ajoutait rien, et son `md:flex-none` ne produisait
+            aucune règle — donc une classe écrite sans effet, que seule la sonde
+            de classes mortes pouvait voir. */}
         <div className="min-w-0">
           <h1 className="font-headline-lg text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[28px] md:leading-[35px]">
             {titre}
@@ -53,6 +71,9 @@ export function EnTeteEcran({
             </p>
           ) : null}
         </div>
+        {actionMobile === undefined ? null : (
+          <div className="md:hidden">{actionMobile}</div>
+        )}
         {actions}
       </div>
       {dessous}

@@ -1,20 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
-import { EVENEMENTS } from "@/lib/instrumentation/evenements";
-import { emettre } from "@/lib/instrumentation/emettre";
+import { lireProfilAvec } from "@/lib/comptes/profil";
+import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 
 /**
- * Retour du lien de connexion envoye par email.
+ * Retour d'un aller-retour d'authentification portant un code PKCE.
+ *
+ * DEUX CHEMINS Y ARRIVENT DEPUIS LE 01/09/2026, et un troisième l'a quittée :
+ *
+ *   - Google, qui rend la main ici après avoir identifié la personne ;
+ *   - la RÉINITIALISATION de mot de passe, qui y arrive avec `suite=mot-de-passe` ;
+ *   - le lien magique, SUPPRIMÉ. Il n'existe plus de `signInWithOtp` dans le
+ *     produit.
  *
  * Route handler et non Server Action : c'est le navigateur qui arrive ici par
- * une navigation, avec un code dans l'URL. Le brief reserve les route handlers
+ * une navigation, avec un code dans l'URL. Le brief réserve les route handlers
  * aux webhooks ET aux callbacks d'authentification — celui-ci en est un.
  *
  * ⚠️ La surface /api est exclue du middleware, mais celle-ci ne l'est pas :
- * elle vit sous [locale] precisement pour que la langue du destinataire soit
- * conservee entre le clic dans l'email et l'arrivee dans l'application.
+ * elle vit sous [locale] précisément pour que la langue du destinataire soit
+ * conservée entre le clic dans l'email et l'arrivée dans l'application.
+ *
+ * ⚠️ CE FICHIER PORTAIT SEUL DEUX GARDES DE TOUT LE PRODUIT — l'interrupteur
+ * d'inscription et le comptage des inscriptions. Elles vivent désormais dans
+ * `lib/comptes/apres-session`, appelée par les trois chemins qui ouvrent une
+ * session. La raison complète y est écrite ; en deux mots : elles sont restées
+ * ici tant qu'il n'y avait qu'un chemin, et ce n'est plus le cas.
  */
 export async function GET(
   requete: NextRequest,
@@ -24,10 +36,11 @@ export async function GET(
   const langue = estLangueSupportee(locale) ? locale : "fr";
 
   const code = requete.nextUrl.searchParams.get("code");
+  const versMotDePasse = requete.nextUrl.searchParams.get("suite") === "mot-de-passe";
 
-  // Un lien sans code est un lien tronque par une messagerie, ou une visite
-  // directe. On renvoie vers la connexion plutot que d'afficher une erreur
-  // technique : l'utilisateur n'a rien fait de mal et n'a qu'une action utile.
+  // Un lien sans code est un lien tronqué par une messagerie, ou une visite
+  // directe. On renvoie vers la connexion plutôt que d'afficher une erreur
+  // technique : la personne n'a rien fait de mal et n'a qu'une action utile.
   if (code === null) {
     return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=lien`, requete.url));
   }
@@ -36,89 +49,39 @@ export async function GET(
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error !== null) {
-    // Lien expire, deja consomme, ou emis pour un autre navigateur. Les trois
-    // se corrigent de la meme facon : en redemandant un lien.
+    // Lien expiré, déjà consommé, ou émis pour un autre navigateur. Les trois
+    // se corrigent de la même façon : en redemandant un lien.
     return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=expire`, requete.url));
   }
 
-  const profil = await lireProfilVendeur();
-  if (profil === null) {
-    // La session existe mais le profil est introuvable : le declencheur de
-    // creation n'a pas tourne, ou la ligne a ete supprimee. On ne laisse pas
-    // l'utilisateur dans un espace authentifie sans profil, ou chaque ecran
-    // echouerait separement sans expliquer pourquoi.
-    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=profil`, requete.url));
-  }
-
-  if (profil.statut === "suspended") {
-    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=suspendu`, requete.url));
-  }
-
-  if (onboardingAFaire(profil)) {
+  if (versMotDePasse) {
     /*
-     * ⚠️ LA PORTE D'ENTRÉE SE FERME ICI, ET NULLE PART AILLEURS.
+     * RÉINITIALISATION : ON NE PASSE PAS PAR `suivreApresSession`.
      *
-     * Le geste naturel serait `shouldCreateUser: false` à l'envoi du lien. Il
-     * est INTERDIT sur ce produit, et la mesure le dit : un email sans compte
-     * rend 422 `otp_disabled` en 49 ms, un email avec compte autre chose en
-     * 778 ms. Seize fois d'écart, lisible depuis l'extérieur même après
-     * uniformisation des codes — n'importe qui pourrait balayer des adresses et
-     * apprendre lesquelles ont un compte ici, ce qui est exactement la liste que
-     * ce marché achète.
+     * Elle enverrait vers les commandes ou vers l'onboarding — c'est-à-dire
+     * partout sauf à l'écran de saisie que cette personne vient d'ouvrir un
+     * email pour atteindre. Les deux gardes qui comptent ici sont reprises
+     * telles quelles : un compte introuvable ou suspendu ne choisit pas de
+     * nouveau mot de passe.
      *
-     * Ici, la personne a cliqué : elle possède la boîte, et aucun balayage
-     * anonyme n'atteint ce chemin. Fermer coûte donc un message à quelqu'un de
-     * réel, et rien à personne d'autre.
-     *
-     * LA LECTURE QUI ÉCHOUE LAISSE ENTRER. Le défaut de la fonction en base est
-     * « ouvert » ; le répéter ici évite qu'une base momentanément illisible
-     * ferme le produit sans que personne l'ait décidé.
+     * ⚠️ ET LA SESSION EST DÉJÀ OUVERTE À CET INSTANT. C'est ainsi que
+     * fonctionne la récupération : le lien AUTHENTIFIE. L'écran de saisie n'est
+     * donc pas protégé par un jeton qu'il faudrait vérifier, mais par le fait
+     * que seul le possesseur de la boîte a pu arriver jusqu'ici.
      */
-    const { data: ouvertes, error: erreurPorte } = await supabase.rpc(
-      "lire_inscriptions_ouvertes",
-    );
-    if (erreurPorte !== null) {
-      console.error("[auth] interrupteur d'inscription illisible — " + erreurPorte.message);
-    } else if (ouvertes === false) {
-      return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=fermees`, requete.url));
+    const profil = await lireProfilAvec(supabase);
+    if (profil === null) {
+      return NextResponse.redirect(new URL(cheminDeRefus(langue, "profil"), requete.url));
     }
-
-    /*
-     * L'INSCRIPTION EST COMPTÉE ICI, UNE SEULE FOIS, ET LA MARQUE EST EN BASE.
-     *
-     * Pas au moment de la demande de lien : mesuré sur ce projet, une demande
-     * crée `auth.users`, `profiles` et `shops` AVANT tout clic. Compter là
-     * gonflerait le dénombrement de toutes les fautes de frappe et de tout
-     * balayage d'adresses.
-     *
-     * Ici, la personne a prouvé qu'elle possède la boîte : elle a cliqué.
-     *
-     * MAIS LE CRITÈRE « ONBOARDING À FAIRE » NE RENDAIT PAS L'ÉMISSION UNIQUE,
-     * contrairement à ce qui était écrit ici. Il vaut `account_type is null`,
-     * donc il reste vrai tant que l'onboarding n'est pas soumis : un vendeur qui
-     * clique son lien trois jours de suite avant de le remplir produisait TROIS
-     * inscriptions pour UN compte. Sur un DÉNOMINATEUR, cela fait baisser le
-     * taux d'activation — et le biais est corrélé au comportement mesuré, donc
-     * il amplifie sa propre erreur.
-     *
-     * La marque est donc réclamée en base, et RENDUE si l'émission échoue : une
-     * marque consommée avant une opération qui peut échouer perd l'événement
-     * définitivement.
-     */
-    const supabaseMarque = await creerClientServeur();
-    const { data: reclamee } = await supabaseMarque.rpc("reclamer_evenement_inscription");
-
-    if (reclamee === true) {
-      const parti = await emettre(EVENEMENTS.INSCRIPTION, { sujet: profil.profilId }, { langue });
-      if (!parti) {
-        await supabaseMarque.rpc("liberer_evenement_inscription");
-      }
+    if (profil.statut === "suspended") {
+      return NextResponse.redirect(new URL(cheminDeRefus(langue, "suspendu"), requete.url));
     }
-
-    return NextResponse.redirect(new URL(`/${langue}/bienvenue`, requete.url));
+    return NextResponse.redirect(new URL(`/${langue}/nouveau-mot-de-passe`, requete.url));
   }
 
-  // Un vendeur qui se connecte veut ses commandes, pas la page de presentation
-  // du produit qu'il utilise deja.
-  return NextResponse.redirect(new URL(`/${langue}/commandes`, requete.url));
+  const suite = await suivreApresSession(langue, supabase);
+
+  return NextResponse.redirect(
+    new URL(suite.ok ? suite.chemin : cheminDeRefus(langue, suite.motif), requete.url),
+  );
 }

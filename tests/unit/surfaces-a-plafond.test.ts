@@ -69,6 +69,11 @@ const DECISION_DU_BRIEF: Readonly<Record<string, "autorise" | "refuse">> = {
   // incident de base est exactement ce qu'un attaquant attend.
   "auth-ip": "refuse",
   "auth-email": "refuse",
+  // La vérification d'un mot de passe dégrade comme le reste de la porte : un
+  // compteur en panne ne doit pas rendre le bourrage d'identifiants gratuit,
+  // c'est-à-dire précisément le jour où l'on est le moins capable de le voir.
+  "auth-mdp-ip": "refuse",
+  "auth-mdp-email": "refuse",
   // Un point d'ingestion machine sans plafond nous fait calculer des signatures
   // à l'infini.
   "suivi-notification": "refuse",

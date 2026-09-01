@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
+import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 
 /**
  * Enveloppe de l'espace authentifié.
@@ -140,9 +141,18 @@ export default async function LayoutApplication({
             </p>
           </div>
 
+          {/*
+            LE BLOC DE COMPTE PORTE LA DÉCONNEXION, et c'est le seul endroit
+            possible au bureau : c'est le seul de l'écran qui dise QUI est
+            connecté. Un bouton posé ailleurs obligerait à se demander quel
+            compte il ferme.
+
+            Au téléphone cette barre latérale n'existe pas — la déconnexion y
+            vit dans l'en-tête de Commandes, l'écran d'accueil du vendeur.
+          */}
           <div className="flex items-center gap-2.5 rounded-[11px] p-2">
             <span className="h-8 w-8 shrink-0 rounded-full bg-surface-container-highest" />
-            <div className="min-w-0">
+            <div className="min-w-0 flex-grow">
               {profil.nomBoutique !== null ? (
                 <p className="truncate font-label-md text-[13px] font-semibold text-on-surface">
                   {profil.nomBoutique}
@@ -152,6 +162,7 @@ export default async function LayoutApplication({
                 {profil.email}
               </p>
             </div>
+            <BoutonDeconnexion langue={langue} variante="cote" />
           </div>
         </aside>
 

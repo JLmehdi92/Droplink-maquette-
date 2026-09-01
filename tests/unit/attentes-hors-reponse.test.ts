@@ -50,7 +50,14 @@ const ATTENTES_ADMISES: ReadonlyMap<string, string> = new Map([
       "par `after`.",
   ],
   [
-    "retour/route.ts → emettre",
+    // ⚠️ CETTE DÉCLARATION DISAIT `retour/route.ts` JUSQU'AU 01/09/2026. Le
+    // comptage des inscriptions ne vivait que dans le retour du lien magique,
+    // c'est-à-dire dans le SEUL chemin qui ouvrait une session. Avec le mot de
+    // passe il y en a trois : l'émission est descendue dans `apres-session`, que
+    // les trois appellent. Le déplacement a été signalé par ce test, dans les
+    // deux sens — attente non déclarée d'un côté, déclaration orpheline de
+    // l'autre.
+    "apres-session.ts → emettre",
     "l'inscription RÉCLAME une marque à usage unique en base et la REND si " +
       "l'événement n'est pas parti. Sans le retour, la marque serait consommée " +
       "pour un événement perdu, sans réémission possible — et l'inscription est " +

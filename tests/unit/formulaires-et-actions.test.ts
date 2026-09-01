@@ -210,6 +210,26 @@ for (const couple of couples) {
   }
 }
 
+/**
+ * Les formulaires en POST natif qui n'envoient AUCUN champ, avec leur raison.
+ *
+ * Le contrat vérifié par ce fichier est celui du `FormData` : ce que le
+ * composant envoie doit être lu quelque part. Un formulaire sans champ ne promet
+ * rien, donc il n'a rien à tenir — mais l'admettre en silence ferait passer pour
+ * normal le jour où un formulaire perd ses champs par accident. On le déclare,
+ * avec sa raison, et le test échoue DANS LES DEUX SENS : une dispense qui
+ * désigne un formulaire devenu bavard, et une dispense qui ne désigne plus rien.
+ */
+const SANS_CHAMP_ADMIS: ReadonlyMap<string, string> = new Map([
+  [
+    join("src", "components", "bouton-deconnexion.tsx"),
+    "La déconnexion ne transporte AUCUNE donnée : la route ne lit même pas le " +
+      "corps de la requête. Tout ce dont elle a besoin — la session et " +
+      "l'origine — voyage dans les en-têtes. Lui inventer un champ caché " +
+      "donnerait au client une prise sur un geste qui n'en demande aucune.",
+  ],
+]);
+
 describe("Le contrat FormData tient des deux côtés", () => {
   test("CONTRE-TEST : la sonde voit des formulaires ET des clés", () => {
     // Un ensemble vide passe tout. Si le repérage des composants ou des actions
@@ -250,12 +270,39 @@ describe("Le contrat FormData tient des deux côtés", () => {
 
     for (const fichier of enPost) {
       const nom = relative(RACINE, fichier);
+      const raison = SANS_CHAMP_ADMIS.get(nom);
+      if (raison !== undefined) {
+        expect(raison.length, `La dispense de ${nom} n'explique rien`).toBeGreaterThan(80);
+        // La dispense ne vaut QUE pour un formulaire réellement vide. Le jour où
+        // ce composant se met à envoyer un champ, il rentre dans le contrat
+        // ordinaire — sans quoi la dispense deviendrait l'endroit où l'on range
+        // ce qu'on ne veut pas vérifier.
+        expect(
+          champsDesFormulairesPilotes(code(fichier)).size,
+          `${nom} est dispensé de contrat mais envoie désormais des champs`,
+        ).toBe(0);
+        continue;
+      }
+
       const couple = couples.find((c) => c.composant === nom);
       expect(couple, `${nom} poste un formulaire et n'est pas dans l'inventaire`).toBeDefined();
       expect(
         couple?.envoie.size ?? 0,
         `${nom} poste un formulaire sans qu'aucun champ soit relevé`,
       ).toBeGreaterThan(0);
+    }
+  });
+
+  // L'AUTRE SENS : une dispense qui ne désigne plus aucun fichier couvrirait
+  // silencieusement le jour où le chemin revient sur un composant différent.
+  test("chaque dispense de contrat désigne encore un formulaire réel", () => {
+    const enPost = new Set(
+      fichiers(join(RACINE, "src"), ".tsx")
+        .filter((f) => /method="post"/i.test(code(f)))
+        .map((f) => relative(RACINE, f)),
+    );
+    for (const nom of SANS_CHAMP_ADMIS.keys()) {
+      expect(enPost.has(nom), `${nom} est dispensé mais ne poste plus rien`).toBe(true);
     }
   });
 

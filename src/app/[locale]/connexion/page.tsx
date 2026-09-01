@@ -10,11 +10,14 @@ import { routing } from "@/i18n/routing";
 /**
  * CONNEXION — deux volets dans la carte-page du canevas.
  *
- * PAS DE CHAMP MOT DE PASSE, ni de « mot de passe oublié » : il n'existe pas de
- * mot de passe dans ce produit. Le lien envoyé par email EST le mode d'accès,
- * et c'est la SEULE porte d'un fournisseur en Chine, à qui Google est
- * inaccessible. Tout ce qui pourrait le faire passer pour secondaire est donc
- * écarté : il est en premier, en grand, et le bouton Google vient après.
+ * ⚠️ CE COMMENTAIRE DISAIT « PAS DE CHAMP MOT DE PASSE » — décision renversée
+ * par Wassim le 01/09/2026. Le lien magique est supprimé du produit : email et
+ * mot de passe, et le bouton Google vient après.
+ *
+ * Ce que l'ancienne rédaction protégeait reste vrai et se déplace : le
+ * fournisseur en Chine n'a pas accès à Google, donc le formulaire est en
+ * premier et en grand. Mais il n'a plus besoin qu'un email ARRIVE pour entrer —
+ * seulement pour réparer un oubli. Voir §2 du brief, amendé le même jour.
  *
  * LA CARTE DE VERRE A DISPARU avec le reste du flou. Le formulaire n'est plus
  * dans une carte du tout : à cette largeur, un cadre autour d'un seul champ
@@ -54,10 +57,34 @@ const MOTIFS = [
   "indisponible",
   "trop",
   "fermees",
+  /*
+   * `confirmez` : `signUp` a rendu un utilisateur SANS session, ce qui est la
+   * façon documentée d'apprendre que la confirmation d'email est active sur le
+   * projet. Wassim l'a tranchée à « désactivée », donc ce motif ne devrait
+   * jamais s'afficher — mais le réglage vit dans le tableau de bord, hors du
+   * dépôt, et personne ici ne peut le garantir. Sans ce motif, l'inscription
+   * ramènerait à un écran de connexion muet après avoir bel et bien créé le
+   * compte et envoyé l'email.
+   */
+  "confirmez",
 ] as const;
 
 function motifConnu(brut: string | undefined): (typeof MOTIFS)[number] | null {
   return MOTIFS.find((m) => m === brut) ?? null;
+}
+
+/**
+ * Ce que la page sait ANNONCER, par opposition à ce qu'elle sait expliquer.
+ *
+ * Inventaire clos comme celui des motifs d'échec, et pour la même raison : une
+ * valeur forgée dans l'URL n'affiche rien plutôt qu'une clé brute. Mais il est
+ * SÉPARÉ, parce qu'un encart rouge sur une déconnexion réussie annoncerait un
+ * échec à quelqu'un dont le geste vient de fonctionner.
+ */
+const INFOS = ["deconnecte"] as const;
+
+function infoConnue(brut: string | undefined): (typeof INFOS)[number] | null {
+  return INFOS.find((i) => i === brut) ?? null;
 }
 
 export default async function Connexion({
@@ -71,8 +98,11 @@ export default async function Connexion({
   setRequestLocale(locale);
   const t = await getTranslations("connexion");
 
-  const brut = (await searchParams)["erreur"];
+  const parametres = await searchParams;
+  const brut = parametres["erreur"];
   const motif = motifConnu(typeof brut === "string" ? brut : undefined);
+  const brutInfo = parametres["info"];
+  const info = infoConnue(typeof brutInfo === "string" ? brutInfo : undefined);
 
   return (
     <div className="min-h-dvh bg-canvas p-3 md:p-7">
@@ -115,16 +145,30 @@ export default async function Connexion({
               </p>
             )}
 
+            {/* NEUTRE, PAS ROUGE. Une déconnexion réussie est une confirmation :
+                `role="status"` et non `alert`, filet ordinaire et non filet
+                d'erreur. Elle est annoncée parce que l'écran de connexion
+                ressemble beaucoup à celui qu'on quitte — sans un mot, on peut
+                croire que le bouton n'a rien fait. */}
+            {info === null ? null : (
+              <p
+                role="status"
+                className="mt-6 rounded-md border border-outline-variant bg-surface-container-low p-4 font-body-sm text-body-sm text-on-surface-variant"
+              >
+                {t(`info.${info}`)}
+              </p>
+            )}
+
             <div className="mt-7 md:mt-[34px]">
               <TraductionsClient espaces={["connexion"]}>
                 <FormulaireConnexion locale={locale} />
               </TraductionsClient>
             </div>
 
-            {/* APRÈS le lien magique, et non avant : c'est la seule porte du
-                fournisseur en Chine, Google lui étant inaccessible. Le placer en
-                tête ferait passer pour secondaire le chemin qui, pour toute une
-                part des utilisateurs, est le seul qui existe. */}
+            {/* APRÈS le formulaire, et non avant : Google est inaccessible au
+                fournisseur en Chine. Le placer en tête ferait passer pour
+                secondaire le chemin qui, pour toute une part des utilisateurs,
+                est le seul qui existe. */}
             <BoutonGoogle locale={locale} />
 
             <p className="mt-[26px] text-center font-body-md text-[14px] leading-[22px] text-sourdine md:mt-[30px] md:text-left md:text-[13px] md:leading-[21px]">

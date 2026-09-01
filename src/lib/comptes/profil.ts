@@ -71,16 +71,77 @@ export type ProfilVendeur = {
  * manquait ici, où il paie le plus.
  */
 export const lireProfilVendeur = cache(async (): Promise<ProfilVendeur | null> => {
-  const supabase = await creerClientServeur();
+  return lireProfilAvec(await creerClientServeur());
+});
 
-  // Une seule requête, jointure comprise : deux allers-retours par page
-  // authentifiée doubleraient la latence de l'écran le plus utilisé du produit.
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url)",
-    )
-    .maybeSingle();
+/**
+ * La même lecture, mais AVEC UN CLIENT DÉJÀ EN MAIN.
+ *
+ * ⚠️ ELLE EXISTE POUR L'INSTANT QUI SUIT L'OUVERTURE D'UNE SESSION, et pour lui
+ * seul. `creerClientServeur()` construit son client à partir des COOKIES ; or
+ * dans la Server Action qui vient d'appeler `signInWithPassword`, la session
+ * n'existe encore que dans l'instance qui l'a obtenue et dans des cookies posés
+ * à la même milliseconde. Refaire un client à ce moment-là, c'est parier sur le
+ * fait qu'un cookie écrit pendant la requête se relit dans la même requête —
+ * un pari qui, perdu, rendrait `null` et enverrait un utilisateur parfaitement
+ * authentifié sur « votre compte n'a pas pu être ouvert ».
+ *
+ * On ne parie pas : on passe le client qui SAIT.
+ *
+ * ⚠️ ET ELLE N'EST PAS MÉMOÏSÉE, contrairement à `lireProfilVendeur`. Deux
+ * clients différents peuvent porter deux sessions différentes dans la même
+ * requête — c'est exactement le cas ici, avant et après la connexion. Une
+ * mémoïsation partagée servirait la réponse de l'un à l'autre.
+ */
+export async function lireProfilAvec(
+  supabase: Awaited<ReturnType<typeof creerClientServeur>>,
+): Promise<ProfilVendeur | null> {
+  /*
+   * ⚠️ LA SESSION EST VALIDÉE PAR LE SERVEUR D'AUTHENTIFICATION, PAS SEULEMENT
+   * PAR LA RLS. DÉFAUT RÉEL, MESURÉ LE 01/09/2026 EN ÉPROUVANT LA DÉCONNEXION.
+   *
+   * Ce qui a été relevé, en interrogeant les deux services avec le MÊME jeton,
+   * avant et après un `signOut()` :
+   *
+   *     avant   /rest/v1/profiles → 200      /auth/v1/user → 200
+   *     après   /rest/v1/profiles → 200      /auth/v1/user → 403 session_not_found
+   *
+   * PostgREST ne valide qu'une SIGNATURE et une DATE D'EXPIRATION. Il ne sait
+   * rien des sessions : un jeton d'accès révoqué reste parfaitement valide à ses
+   * yeux jusqu'à son expiration, soit une heure par défaut.
+   *
+   * CONSÉQUENCE, SI CETTE FONCTION S'ÉTAIT CONTENTÉE DE LA RLS : la déconnexion
+   * aurait effacé le cookie du navigateur et RIEN D'AUTRE. Quelqu'un qui aurait
+   * copié le cookie — le cas même qui justifie ce bouton, le téléphone prêté —
+   * aurait gardé l'éditeur, l'export CSV et les notes internes pendant une heure
+   * de plus. L'écran aurait dit « déconnecté », la base n'aurait rien dit, et
+   * aucun test n'aurait rougi. C'est la sonde de fumée qui l'a attrapé, en
+   * REJOUANT LE MÊME COOKIE.
+   *
+   * LES DEUX APPELS PARTENT EN PARALLÈLE : la latence ajoutée est celle du plus
+   * lent des deux, pas leur somme. Le commentaire ci-dessous — « deux
+   * allers-retours doubleraient la latence de l'écran le plus utilisé » — reste
+   * donc vrai, et c'est précisément pourquoi on ne les enchaîne pas.
+   */
+  const [session, profil] = await Promise.all([
+    supabase.auth.getUser(),
+    // Une seule requête, jointure comprise : deux allers-retours EN SÉRIE par
+    // page authentifiée doubleraient la latence de l'écran le plus utilisé.
+    supabase
+      .from("profiles")
+      .select(
+        "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url)",
+      )
+      .maybeSingle(),
+  ]);
+
+  // ÉCHOUE FERMÉE. Une session que le serveur d'authentification refuse est une
+  // session révoquée, expirée, ou dont le compte a disparu — les trois se
+  // traitent de la même façon, et l'appelant les traite déjà comme « pas de
+  // session ».
+  if (session.error !== null || session.data.user === null) return null;
+
+  const { data, error } = profil;
 
   if (error !== null || data === null) return null;
 
@@ -123,7 +184,7 @@ export const lireProfilVendeur = cache(async (): Promise<ProfilVendeur | null> =
       whatsapp: s.whatsapp_url,
     },
   };
-});
+}
 
 /**
  * Vrai quand l'onboarding reste à faire.

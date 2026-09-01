@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BoutonGoogle } from "@/components/bouton-google";
-import { FormulaireConnexion } from "@/components/formulaire-connexion";
+import { FormulaireInscription } from "@/components/formulaire-inscription";
 import { Icone } from "@/components/icone";
 import { TraductionsClient } from "@/components/traductions-client";
 import { routing } from "@/i18n/routing";
@@ -154,8 +154,14 @@ export default async function Inscription({
               {t("formulaireTitre")}
             </h2>
 
-            <TraductionsClient espaces={["connexion"]}>
-              <FormulaireConnexion locale={locale} intention="inscription" aide={t("aideEmail")} />
+            {/* ⚠️ CE N'EST PLUS LE MÊME COMPOSANT QUE LA CONNEXION. Il l'était,
+                avec une propriété `intention` qui ne changeait que le libellé du
+                bouton — parce qu'avec un lien magique le serveur faisait
+                strictement la même chose des deux côtés. Depuis le mot de passe,
+                l'un vérifie et l'autre crée : ils ont deux jeux de refus, deux
+                compteurs et deux actions. */}
+            <TraductionsClient espaces={["connexion", "inscription"]}>
+              <FormulaireInscription locale={locale} />
             </TraductionsClient>
 
             <BoutonGoogle locale={locale} />

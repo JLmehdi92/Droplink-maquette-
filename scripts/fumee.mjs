@@ -689,12 +689,32 @@ const controles = [
 ];
 
 // L inscription ne doit reprendre AUCUN des codes de la maquette Stitch : ni
-// mot de passe, ni SSO, ni certification qu on ne possede pas. Le controle
-// porte sur le HTML SERVI, pas sur le fichier source, parce que c est le HTML
-// que le visiteur recoit.
+// SSO, ni certification qu on ne possede pas. Le controle porte sur le HTML
+// SERVI, pas sur le fichier source, parce que c est le HTML que le visiteur
+// recoit.
+//
+// ⚠️ LE CONTROLE « AUCUN CHAMP MOT DE PASSE » A ETE RETOURNE LE 01/09/2026.
+// Il exigeait l ABSENCE du champ, parce que le produit n avait que le lien
+// magique et que la maquette Stitch en montrait un. Wassim a tranche l inverse.
+// Il n est pas supprime : il exige desormais sa PRESENCE, sur les DEUX ecrans.
+// Une page d inscription qui perdrait son champ creerait des comptes sans mot
+// de passe choisi, donc inaccessibles autrement que par une reinitialisation —
+// et rien ne leverait.
 const inscription = await (await fetch(`${base}/fr/inscription`)).text();
+const connexion = await (await fetch(`${base}/fr/connexion`)).text();
 controles.push(
-  [!/type="password"/.test(inscription), "aucun champ mot de passe"],
+  [/type="password"/.test(inscription), "l inscription porte un champ mot de passe"],
+  [/type="password"/.test(connexion), "la connexion porte un champ mot de passe"],
+  // `autocomplete` N EST PAS UN DETAIL D ERGONOMIE. `new-password` fait
+  // PROPOSER un mot de passe au gestionnaire ; `current-password` fait remplir
+  // celui qui est enregistre. Les intervertir fait suggerer un mot de passe neuf
+  // sur un ecran de connexion — donc pousse a ecraser un compte qui marche.
+  [/autocomplete="new-password"/i.test(inscription), "l inscription demande un mot de passe NEUF"],
+  [/autocomplete="current-password"/i.test(connexion), "la connexion demande le mot de passe ENREGISTRE"],
+  [connexion.includes("/fr/mot-de-passe-oublie"), "la connexion mene au mot de passe oublie"],
+  // CONTRE-TEST : le lien magique a bien disparu du produit SERVI, pas seulement
+  // du code. Sans lui, un reste de l ancien formulaire passerait inapercu.
+  [!/Recevoir mon lien|Send me the link/.test(connexion), "plus aucun envoi de lien de connexion"],
   // FRONTIERES DE MOT OBLIGATOIRES, et pas de `/i` sur les acronymes. Le motif
   // precedent, `/SSO|SOC2|Enterprise/i`, matchait « crossOrigin » et
   // « associer » : deux faux positifs sur une page parfaitement
@@ -816,9 +836,24 @@ try {
   }
 
   const courriel = `fumee-${Date.now()}@exemple.test`;
+  /*
+   * LE COMPTE DE SONDE A UN MOT DE PASSE DEPUIS LE 01/09/2026.
+   *
+   * Il n en avait pas : le produit n en avait pas non plus, et la session etait
+   * fabriquee par un lien magique. Le lien magique supprime, continuer a
+   * l employer aurait fait valider par la sonde un chemin que le produit n a
+   * plus — c est L-032, « il repond » est la propriete que tous les residus
+   * possedent.
+   *
+   * AUCUN RAPPORT AVEC L ADRESSE, deliberement : la politique refuse un mot de
+   * passe qui contient la partie locale de l adresse, et une sonde qui se ferait
+   * refuser pour cette raison ferait chercher un defaut inexistant.
+   */
+  const motDePasseFumee = "Chariot-Lilas-Tempete-91";
   const { data: utilisateur, error: erreurCompte } = await service.auth.admin.createUser({
     email: courriel,
     email_confirm: true,
+    password: motDePasseFumee,
   });
 
   /*
@@ -950,26 +985,31 @@ try {
       // Un titre d onglet faux a vecu la, invisible : « Nouvelle commande » sur
       // toutes les commandes, y compris remplies et expediees.
       //
-      // La session est fabriquee par un lien magique genere en service-role puis
-      // verifie avec la cle publiable : c est le VRAI chemin d authentification
-      // du produit, pas un jeton bricole. Le cookie est celui qu attend
-      // `@supabase/ssr`.
-      const { data: lienMagique } = await service.auth.admin.generateLink({
-        type: "magiclink",
-        email: courriel,
-      });
-
+      // La session est ouverte par le VRAI chemin d authentification du produit
+      // — email et mot de passe, avec la cle publiable —, pas par un jeton
+      // bricole. Le cookie est celui qu attend `@supabase/ssr`.
+      //
+      // ⚠️ ELLE PASSAIT PAR UN LIEN MAGIQUE JUSQU AU 01/09/2026. Le garder
+      // aurait fait valider par la sonde un chemin que le produit n a plus : la
+      // session aurait ete parfaitement valide, les controles suivants
+      // parfaitement verts, et `signInWithPassword` jamais exerce par personne.
       let cookieVendeur = null;
-      if (lienMagique?.properties?.hashed_token) {
+      {
         const publiable = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL,
           process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
           { auth: { persistSession: false } },
         );
-        const { data: verif } = await publiable.auth.verifyOtp({
-          token_hash: lienMagique.properties.hashed_token,
-          type: "magiclink",
+        const { data: verif, error: erreurMdp } = await publiable.auth.signInWithPassword({
+          email: courriel,
+          password: motDePasseFumee,
         });
+        if (erreurMdp !== null) {
+          // Le motif est DIT. Sans lui, le plancher de controles signale que
+          // quelque chose manque sans jamais dire quoi.
+          console.error(`ECHEC ouverture de session par mot de passe : ${erreurMdp.message}`);
+          echecs += 1;
+        }
         if (verif?.session) {
           const ref = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname.split(".")[0];
           // Reduite au strict necessaire : au-dela d environ 3180 octets
@@ -1177,6 +1217,116 @@ try {
           [
             !corpsRetrograde.includes("bg-admin"),
             `ni le squelette : le corps du refus (${corpsRetrograde.length} octets) ne porte aucune marque de la surface`,
+          ],
+        );
+      }
+
+      /*
+       * ══════════════════════════════════════════════════════════════════════
+       * LA DECONNEXION — ET ELLE PASSE EN DERNIER, DELIBEREMENT
+       * ══════════════════════════════════════════════════════════════════════
+       *
+       * La portee du `signOut` est GLOBALE : toutes les sessions du compte
+       * tombent. Tout controle place apres celui-ci travaillerait donc avec un
+       * cookie mort et echouerait pour une raison qui n a rien a voir avec lui.
+       *
+       * CE QUE CETTE SONDE PROUVE, ET QUE RIEN D AUTRE NE PEUT PROUVER : une
+       * deconnexion qui VIDE L ECRAN sans invalider la session passerait pour
+       * bonne partout ailleurs. Le pilotage au navigateur montrerait un ecran de
+       * connexion, la base ne dirait rien, aucun test ne rougirait — et le
+       * cookie continuerait d ouvrir l editeur, l export CSV et les notes
+       * internes, qui portent le prix d achat.
+       *
+       * ⚠️ LE CONTRE-TEST VIENT EN PREMIER. Sans lui, « le cookie ne rouvre plus
+       * /fr/commandes » serait indistinguable de « ce cookie n a jamais rien
+       * ouvert » — et une sonde ou tout est refuse passe a 100 % sans rien
+       * prouver.
+       */
+      if (cookieVendeur) {
+        const entetesSortie = { cookie: cookieVendeur, ...visiteur(43) };
+        const origineNotre = new URL(base).origin;
+
+        const avant = await fetch(`${base}/fr/commandes`, {
+          headers: entetesSortie,
+          redirect: "manual",
+        });
+
+        // GARDE CSRF : un POST sans `Origin` est refuse. Elle echoue FERMEE —
+        // « ce serait ouvert si quelqu un omettait l en-tete » n est pas une
+        // protection.
+        const sansOrigine = await fetch(`${base}/fr/deconnexion`, {
+          method: "POST",
+          headers: entetesSortie,
+          redirect: "manual",
+        });
+
+        // ORIGINE ETRANGERE : le cas reel du formulaire poste depuis un tiers.
+        const origineTierce = await fetch(`${base}/fr/deconnexion`, {
+          method: "POST",
+          headers: { ...entetesSortie, origin: "https://exemple.test" },
+          redirect: "manual",
+        });
+
+        // AUCUNE METHODE `GET` : une deconnexion atteignable par une simple
+        // navigation se declencherait sur un prechargement de lien ou un
+        // `<img src>` pose dans une page tierce.
+        const enGet = await fetch(`${base}/fr/deconnexion`, {
+          headers: entetesSortie,
+          redirect: "manual",
+        });
+
+        const sortie = await fetch(`${base}/fr/deconnexion`, {
+          method: "POST",
+          headers: { ...entetesSortie, origin: origineNotre },
+          redirect: "manual",
+        });
+
+        const apres = await fetch(`${base}/fr/commandes`, {
+          headers: entetesSortie,
+          redirect: "manual",
+        });
+
+        controles.push(
+          [
+            avant.status === 200,
+            `CONTRE-TEST : AVANT la deconnexion, ce cookie ouvre /fr/commandes (statut ${avant.status})`,
+          ],
+          [
+            sansOrigine.status === 403,
+            `la deconnexion refuse un POST sans Origin (statut ${sansOrigine.status}, attendu 403)`,
+          ],
+          [
+            origineTierce.status === 403,
+            `et un POST venu d une autre origine (statut ${origineTierce.status}, attendu 403)`,
+          ],
+          [
+            enGet.status === 405,
+            `aucune deconnexion par simple navigation (GET rend ${enGet.status}, attendu 405)`,
+          ],
+          [
+            sortie.status === 303,
+            `la deconnexion rend un 303, jamais un 307 (statut ${sortie.status})`,
+          ],
+          [
+            (sortie.headers.get("location") ?? "").includes("/fr/connexion?info=deconnecte"),
+            `et renvoie a la connexion en l ANNONCANT (vers ${sortie.headers.get("location")})`,
+          ],
+          // LE COOKIE EST BIEN EFFACE DANS LA REPONSE. Necessaire, pas
+          // suffisant : c est le controle suivant qui fait autorite.
+          [
+            /sb-[^=]*auth-token[^;]*=;|Max-Age=0/i.test(sortie.headers.get("set-cookie") ?? ""),
+            "la reponse efface le cookie de session",
+          ],
+          /*
+           * LE CONTROLE QUI FAIT AUTORITE. Le MEME cookie, rejoue apres coup.
+           *
+           * Effacer un cookie ne protege que le navigateur qui l a recu ; ce qui
+           * protege le compte est la REVOCATION cote serveur. Un attaquant qui
+           * aurait copie le cookie ne le rendra pas parce qu on le lui demande.
+           */
+          [
+            apres.status !== 200,
+            `LE MEME COOKIE ne rouvre plus /fr/commandes apres deconnexion (statut ${apres.status})`,
           ],
         );
       }

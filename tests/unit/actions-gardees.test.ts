@@ -40,17 +40,32 @@ const GARDES = ["lireProfilVendeur", "exigerAdmin"] as const;
  */
 const SANS_IDENTITE_ADMISES: ReadonlyMap<string, string> = new Map([
   [
-    "envoyerLienConnexion",
+    "seConnecter",
     "La porte d'entrée elle-même : elle s'adresse à qui n'a pas encore de " +
       "session, et c'est tout son objet. Sa protection est un QUOTA, pas une " +
-      "identité — et ce quota est consommé AVANT l'appel à Supabase, parce " +
-      "qu'une demande crée `auth.users`, `profiles` ET `shops` immédiatement.",
+      "identité — consommé AVANT l'appel, sans quoi le bourrage d'identifiants " +
+      "se déroulerait et l'on saurait seulement après coup qu'on l'a subi.",
+  ],
+  [
+    "sInscrire",
+    "Elle CRÉE le compte : exiger une identité vérifiée en base serait exiger " +
+      "ce qu'elle fabrique. Sa protection est le quota d'ENVOI, consommé avant " +
+      "l'appel parce qu'une inscription crée `auth.users`, `profiles` ET " +
+      "`shops` immédiatement — et parce que c'est lui qui borne l'oracle " +
+      "d'existence de compte décrit au §9 du brief.",
+  ],
+  [
+    "demanderReinitialisation",
+    "Elle s'adresse à qui a PERDU son accès : lui demander de prouver son " +
+      "identité serait lui demander ce qu'il vient réclamer. Sa protection est " +
+      "le quota d'envoi, partagé avec l'inscription pour qu'alterner les deux " +
+      "chemins ne double pas le budget d'envoi vers une même boîte.",
   ],
   [
     "partirVersGoogle",
-    "Même porte, autre fournisseur. Le quota est celui du lien magique et non " +
-      "un second : deux compteurs distincts offriraient un budget doublé à qui " +
-      "alterne les deux chemins.",
+    "Même porte, autre fournisseur. Le quota est celui des envois et non un " +
+      "troisième : des compteurs distincts offriraient un budget multiplié à " +
+      "qui alterne les chemins.",
   ],
 ]);
 

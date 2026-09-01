@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { estLangueSupportee } from "@/i18n/config";
+import { memeOrigine } from "@/lib/auth/meme-origine";
 import { executerGesteDeListe } from "@/lib/commandes/geste-liste";
 
 /**
@@ -54,57 +55,13 @@ import { executerGesteDeListe } from "@/lib/commandes/geste-liste";
  * POST-redirect-GET, et c'est précisément ce qu'il existe pour empêcher.
  */
 
-/**
- * L'origine de la requête est-elle la nôtre ?
+/*
+ * LA GARDE CSRF VIT DANS `lib/auth/meme-origine`, PAS ICI.
  *
- * On compare `Origin` à l'hôte de la requête, comme le fait Next pour ses
- * propres Server Actions.
- *
- * ⚠️ `x-forwarded-host` N'EST PLUS LU DU TOUT, et c'est une correction.
- *
- * Il passait avant `host`, inconditionnellement, avec pour raison « derrière un
- * proxy, `host` porte le nom interne ». Mais rien ne distingue un
- * `x-forwarded-host` posé par notre bord d'un `x-forwarded-host` posé par
- * l'appelant : envoyer cet en-tête ET un `Origin` assorti faisait comparer la
- * garde à elle-même, et elle passait.
- *
- * C'est le défaut déjà résolu pour l'adresse IP dans `lib/limitation/empreinte`,
- * mot pour mot : « la protection tenait à ce que l'attaquant se donne la peine
- * de poser un en-tête qu'il n'a aucune raison de poser ».
- *
- * ⚠️ LA PREMIÈRE CORRECTION NE SUFFISAIT PAS, et c'est la sonde qui l'a dit.
- * Elle ne lisait `x-forwarded-host` qu'en mode `BORD_DE_CONFIANCE=xff` — or ce
- * réglage existe pour `x-forwarded-for`, un AUTRE en-tête, et `xff` est
- * justement le mode des sondes locales : la requête forgée passait encore.
- * Faire dépendre une garde CSRF d'un réglage qui parle d'adresses IP, c'était
- * relier deux choses qui n'ont en commun que le préfixe de leur nom.
- *
- * On ne le lit donc plus. Cloudflare — notre cible — préserve `Host` et ne pose
- * pas cet en-tête ; aucun déploiement prévu n'en a besoin. Le jour où un bord
- * réécrirait `Host`, ce serait à lui de se déclarer, explicitement, ici.
- *
- * ⚠️ CE N'ÉTAIT PAS EXPLOITABLE DEPUIS UN NAVIGATEUR — `x-forwarded-host` n'est
- * pas un en-tête sûr au sens CORS, donc un formulaire ne peut pas le poser et
- * un `fetch` déclencherait un prévol qu'aucun `OPTIONS` ne sert. On le corrige
- * quand même : c'est la SEULE barrière qui restait devant la construction de
- * redirection, et deux protections qui ne tiennent qu'ensemble finissent par
- * tomber ensemble.
+ * Elle y est partie le 01/09/2026, quand la déconnexion a eu besoin de la même :
+ * deux copies d'une garde qu'il a déjà fallu corriger DEUX FOIS auraient
+ * divergé à la troisième. L'historique complet de ces corrections y est écrit.
  */
-function memeOrigine(requete: NextRequest): boolean {
-  const origine = requete.headers.get("origin");
-  if (origine === null) return false;
-
-  const hote = requete.headers.get("host");
-  if (hote === null || hote === "") return false;
-
-  try {
-    return new URL(origine).host === hote;
-  } catch {
-    // `Origin` illisible : on refuse. Un en-tête malformé n'est pas une origine
-    // valide, et le laisser passer reviendrait à ne pas vérifier du tout.
-    return false;
-  }
-}
 
 export async function POST(
   requete: NextRequest,

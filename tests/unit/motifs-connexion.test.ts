@@ -49,14 +49,45 @@ function source(): string {
 
 const SOURCE = source();
 
-/** Les motifs que le produit envoie réellement dans l'URL. */
+/**
+ * Les motifs que le produit envoie réellement dans l'URL.
+ *
+ * DEUX SOURCES, ET LA SECONDE A ÉTÉ AJOUTÉE PARCE QUE CE TEST EST PARTI EN
+ * ROUGE. Le 01/09/2026, la construction des URL de refus est descendue dans
+ * `cheminDeRefus` — un seul endroit qui les fabrique, au lieu de chaînes
+ * recopiées dans chaque appelant. Le motif littéral `connexion?erreur=profil` a
+ * donc disparu du code au profit de `connexion?erreur=${motif}`, et cette sonde
+ * a immédiatement déclaré `profil` et `fermees` orphelins.
+ *
+ * Elle avait raison de le dire : ce qu'elle lisait n'existait plus. La
+ * correction n'est pas de la faire taire mais de lui apprendre la seconde forme
+ * — l'inventaire des motifs que `cheminDeRefus` accepte, lu dans sa SIGNATURE,
+ * qui est exhaustive par le type. Un motif ajouté à la fonction sans être
+ * reconnu par la page fera donc échouer, comme avant.
+ */
 function motifsEmis(): string[] {
   const trouves = new Set<string>();
   for (const m of SOURCE.matchAll(/connexion\?erreur=([a-z_]+)/g)) {
     const motif = m[1];
     if (motif !== undefined) trouves.add(motif);
   }
+  for (const motif of motifsDeCheminDeRefus()) trouves.add(motif);
   return [...trouves].sort();
+}
+
+/** Les motifs admis par `cheminDeRefus`, lus dans le type de son paramètre. */
+function motifsDeCheminDeRefus(): string[] {
+  const fichier = readFileSync(
+    join(process.cwd(), "src", "lib", "comptes", "apres-session.ts"),
+    "utf8",
+  );
+  const signature = /export function cheminDeRefus\(([\s\S]*?)\): string/.exec(fichier);
+  if (signature === null || signature[1] === undefined) return [];
+  const union = /motif:\s*([^)]+)/.exec(signature[1]);
+  if (union === null || union[1] === undefined) return [];
+  return [...union[1].matchAll(/"([a-z_]+)"/g)]
+    .map((m) => m[1])
+    .filter((m): m is string => m !== undefined);
 }
 
 /** Les motifs que la page de connexion sait reconnaître. */
@@ -90,6 +121,14 @@ describe("Les motifs d'échec de connexion", () => {
     expect(motifsReconnus().length, "la liste de la page n'a pas été lue").toBeGreaterThanOrEqual(
       4,
     );
+    // LA SECONDE SOURCE PORTE SA PROPRE BORNE. Sans elle, un changement de forme
+    // de `cheminDeRefus` la rendrait vide, les motifs qu'elle seule apporte
+    // repasseraient pour orphelins — et l'on retirerait de la page des cas
+    // parfaitement vivants.
+    expect(
+      motifsDeCheminDeRefus().length,
+      "la signature de `cheminDeRefus` n'a pas été lue : la sonde vise à côté",
+    ).toBeGreaterThanOrEqual(3);
   });
 
   test("chaque motif ÉMIS est reconnu par la page de connexion", () => {
