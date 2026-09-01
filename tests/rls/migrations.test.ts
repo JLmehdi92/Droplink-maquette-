@@ -100,9 +100,10 @@ describe("Accord dépôt / base", () => {
   });
 
   test("l'ordre lexicographique des fichiers est un ordre total sans doublon de numéro", async () => {
-    // L'ordre lexicographique EST l'ordre d'application. Deux fichiers portant
-    // le même préfixe numérique rendraient cet ordre dépendant du reste du nom,
-    // donc du hasard.
+    // L'ordre lexicographique est censé ÊTRE l'ordre d'application — voir le
+    // test suivant, qui mesure à quel point ce « censé » est fragile. Deux
+    // fichiers portant le même préfixe numérique rendraient cet ordre dépendant
+    // du reste du nom, donc du hasard.
     const prefixes = migrationsDuDepot().map((m) => m.split("_")[0] ?? "");
     const doublons = prefixes.filter((p, i) => prefixes.indexOf(p) !== i);
     expect(doublons, `Préfixes de migration dupliqués : ${doublons.join(", ")}`).toEqual([]);
@@ -111,6 +112,92 @@ describe("Accord dépôt / base", () => {
     expect(nonNumerotees, `Migrations sans numéro à trois chiffres : ${nonNumerotees.join(", ")}`).toEqual(
       [],
     );
+  });
+
+  /**
+   * ⚠️ L'ORDRE LEXICOGRAPHIQUE N'EST **PAS** L'ORDRE D'APPLIQUÉ SUR CETTE BASE.
+   *
+   * `CLAUDE.md` et le brief l'affirmaient tous les deux, en capitales. Mesuré :
+   * la **088** a été appliquée AVANT la **087**. Deux positions sur cent trente,
+   * et personne ne l'avait jamais interrogé — les trois contrôles ci-dessus
+   * comparent des ENSEMBLES de noms et un contenu, jamais une SÉQUENCE.
+   *
+   * Ce que cela coûterait : une reconstruction depuis zéro applique l'ordre des
+   * fichiers, c'est-à-dire un ordre que la production n'a jamais exécuté. Si
+   * deux migrations inversées touchaient le même objet, l'environnement neuf
+   * divergerait de la production sans qu'aucune porte ne rougisse — et le
+   * désaccord n'apparaîtrait qu'au premier déploiement propre.
+   *
+   * L'inversion connue est INOFFENSIVE, et c'est vérifié plutôt qu'espéré : la
+   * 087 crée `parametres_admis` et remplace `ecrire_parametre`, la 088 remplace
+   * `compter_prise_en_charge`. Aucun objet commun, donc aucun ordre requis entre
+   * elles. Elle est déclarée ici comme exception AVEC sa raison ; toute NOUVELLE
+   * divergence fait rougir, dans les deux sens.
+   */
+  /*
+   * ⚠️ UNE INVERSION DE DEUX VOISINES PRODUIT **DEUX** POSITIONS DIVERGENTES,
+   * pas une. Ne déclarer que la première laissait la seconde faire rougir le
+   * contrôle, ce qui est le bon comportement : c'est l'écriture de l'exception
+   * qui était incomplète, pas la mesure.
+   */
+  const INVERSIONS_ADMISES: ReadonlyArray<readonly [string, string]> = [
+    [
+      "088_compteur_de_prise_en_charge_sur_insertion",
+      "087_bornes_des_parametres_en_base",
+    ],
+    [
+      "087_bornes_des_parametres_en_base",
+      "088_compteur_de_prise_en_charge_sur_insertion",
+    ],
+  ];
+
+  test("l'ordre d'application en base est celui du dépôt, aux inversions déclarées près", async () => {
+    const enBase = (
+      await interroger<{ name: string | null }>(
+        bd,
+        "select name from supabase_migrations.schema_migrations " +
+          "where name is not null order by version",
+      )
+    ).map((r) => r.name as string);
+
+    const auDepot = migrationsDuDepot();
+
+    // Un ensemble vide passe tout : sans ce plancher, une table de suivi vidée
+    // rendrait ce contrôle vert en n'ayant comparé aucune séquence.
+    expect(enBase.length, "aucune migration en base : la sonde ne compare rien").toBeGreaterThan(
+      100,
+    );
+    expect(enBase.length, "les deux côtés n'ont pas le même nombre de migrations").toBe(
+      auDepot.length,
+    );
+
+    const divergences: Array<readonly [string, string]> = [];
+    for (let i = 0; i < enBase.length; i += 1) {
+      const base = enBase[i] ?? "";
+      const depot = auDepot[i] ?? "";
+      if (base !== depot) divergences.push([base, depot]);
+    }
+
+    const inattendues = divergences.filter(
+      ([base, depot]) =>
+        !INVERSIONS_ADMISES.some(([b, d]) => b === base && d === depot),
+    );
+    expect(
+      inattendues,
+      "Des migrations ont été appliquées dans un ordre que le dépôt ne reproduira pas :\n" +
+        inattendues.map(([b, d]) => `  base « ${b} » là où le dépôt a « ${d} »`).join("\n"),
+    ).toEqual([]);
+
+    // ET L'AUTRE SENS. Une exception qui ne correspond plus à rien laisserait
+    // croire qu'on surveille une inversion déjà résolue — et masquerait la
+    // prochaine si on l'écrivait par-dessus.
+    const perimees = INVERSIONS_ADMISES.filter(
+      ([b, d]) => !divergences.some(([base, depot]) => base === b && depot === d),
+    );
+    expect(
+      perimees,
+      `Inversions déclarées qui n'existent plus : ${perimees.map(([b]) => b).join(", ")}`,
+    ).toEqual([]);
   });
 
   /**

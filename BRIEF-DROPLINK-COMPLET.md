@@ -1073,8 +1073,17 @@ par un avocat avant tout lancement public.
 
 > **Une migration par sujet, numérotée à sa création, JAMAIS rouverte une fois
 > appliquée.** Modifier un fichier appliqué fait diverger silencieusement les
-> environnements. L'ordre lexicographique **EST** l'ordre d'application. Les correctifs
-> sont de **nouvelles** migrations.
+> environnements. L'ordre lexicographique **DOIT ÊTRE** l'ordre d'application. Les
+> correctifs sont de **nouvelles** migrations.
+
+> ⚠️ **AMENDÉ LE 01/09/2026 — il disait « EST », et la base disait le contraire.**
+> `supabase_migrations.schema_migrations` triée par `version` place la **088 avant
+> la 087**. Inoffensif ici (aucun objet commun entre les deux), mais une
+> reconstruction depuis zéro appliquerait un ordre jamais exécuté en production,
+> et rien ne le disait : les contrôles comparaient des ensembles de noms, pas une
+> séquence. La séquence est désormais comparée, avec l'inversion connue déclarée
+> et sa raison. C'est L-014 dans sa forme exacte — *un document affirme un état
+> que personne n'a exécuté*.
 
 - `alter type ... add value` vit **SEUL** dans sa migration (Postgres interdit d'employer
   une valeur dans la transaction qui l'ajoute).
