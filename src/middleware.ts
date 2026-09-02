@@ -176,6 +176,52 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
     if (error !== null || utilisateur.user === null) {
       return new NextResponse(null, { status: 404 });
     }
+
+    /*
+     * ⚠️ ET LE RÔLE AUSSI, DEPUIS LE 02/09/2026 — parce que le corps du 404
+     * D'APRÈS énumérait la surface.
+     *
+     * DÉFAUT MESURÉ avec le cookie d'un vendeur ORDINAIRE (`role = user`,
+     * jamais admin). Le refus venait alors d'`exigerAdmin()`, c'est-à-dire
+     * APRÈS que Next a composé la page — et sa charge d'hydratation nomme le
+     * fichier de code de l'écran demandé :
+     *
+     *   /fr/admin               404  7 956 o  …/admin/page-bd9a7fb78….js
+     *   /fr/admin/comptes       404  8 429 o  …/admin/comptes/page-….js
+     *   /fr/admin/comptes/{id}  404  9 020 o  …/admin/comptes/%5Bid%5D/….js
+     *   /fr/admin/facturation   404  5 547 o  aucun
+     *   /fr/nexistepas-du-tout  404  5 547 o  aucun
+     *
+     * La règle « 404, jamais 403 » était donc tenue sur le STATUT et rompue
+     * sur le CORPS : un vendeur ordinaire distinguait une route admin réelle
+     * d'une route inventée, et reconstituait les six écrans plus le segment
+     * `[id]`. Le préalable est une session quelconque — l'inscription est
+     * ouverte et sans confirmation d'email, donc trente secondes.
+     *
+     * ⚠️ LE COMMENTAIRE CI-DESSOUS DISAIT QUE LIRE LE RÔLE ICI « ajouterait un
+     * aller-retour vers la base à TOUTES les pages du produit ». Ce n'est plus
+     * vrai depuis que la validation est bornée à `/admin` : le coût est payé
+     * par les seules requêtes d'administration, qui se comptent en dizaines par
+     * jour, et jamais par la landing ni par la page client.
+     *
+     * CELA NE FAIT PAS DU MIDDLEWARE LA GARDE QUI FAIT AUTORITÉ. `exigerAdmin()`
+     * reste indispensable et reste la seule qui compte : les Server Actions ne
+     * passent jamais par ici. C'est une couche de plus, et elle sert à ce que le
+     * refus arrive AVANT que la page existe.
+     *
+     * FAIL-CLOSED. Une lecture de rôle qui échoue rend 404 : côté
+     * administration, un refus injustifié ne coûte qu'une nouvelle tentative,
+     * et ne pénalise que nous.
+     */
+    const { data: profil, error: erreurProfil } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", utilisateur.user.id)
+      .maybeSingle();
+
+    if (erreurProfil !== null || profil === null || profil.role !== "admin") {
+      return new NextResponse(null, { status: 404 });
+    }
   }
 
   /*

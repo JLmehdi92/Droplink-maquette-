@@ -1228,6 +1228,15 @@ try {
         });
         const corpsRetrograde = await retrograde.text();
 
+        // Une route admin qui N EXISTE PAS, demandee avec le MEME cookie : c est
+        // l etalon auquel le refus doit ressembler. Sans elle, on ne pourrait
+        // que constater que le corps est court, jamais qu il est INDISCERNABLE.
+        const inventee = await fetch(`${base}/fr/admin/cet-ecran-n-existe-pas`, {
+          headers: entetesAdmin,
+          redirect: "manual",
+        });
+        const corpsInvente = await inventee.text();
+
         controles.push(
           [
             promu.status === 200,
@@ -1284,6 +1293,41 @@ try {
           [
             !corpsRetrograde.includes("bg-admin"),
             `ni le squelette : le corps du refus (${corpsRetrograde.length} octets) ne porte aucune marque de la surface`,
+          ],
+          /*
+           * ⚠️ ET LA TROISIEME CHOSE QUI FUYAIT : LE NOM DU FICHIER DE CODE.
+           *
+           * Defaut mesure le 02/09/2026, avec le cookie d un vendeur ORDINAIRE.
+           * Le refus venait alors d `exigerAdmin()`, donc APRES que Next a
+           * compose la page — et sa charge d hydratation nomme le chunk de
+           * l ecran demande :
+           *
+           *   /fr/admin               404  7 956 o  …/admin/page-bd9a7fb78….js
+           *   /fr/admin/comptes       404  8 429 o  …/admin/comptes/page-….js
+           *   /fr/admin/facturation   404  5 547 o  aucun
+           *   /fr/nexistepas-du-tout  404  5 547 o  aucun
+           *
+           * La regle « 404 jamais 403 » etait donc tenue sur le STATUT et
+           * rompue sur le CORPS : un vendeur ordinaire distinguait une route
+           * admin REELLE d une route inventee, et reconstituait les six ecrans
+           * plus le segment `[id]`.
+           *
+           * LES DEUX CONTROLES PRECEDENTS RESTAIENT VERTS : ce corps ne portait
+           * ni le titre, ni `bg-admin`. C est L-025 — le garde regardait la ou
+           * le defaut n etait plus.
+           */
+          [
+            !/static\/chunks\/app\/[^"\\]*admin/.test(corpsRetrograde),
+            "ni le nom du fichier de code de l ecran demande",
+          ],
+          /*
+           * ET LE REFUS DOIT ETRE INDISCERNABLE D UNE ROUTE QUI N EXISTE PAS.
+           * La TAILLE est un canal a elle seule : 7 956 octets pour un ecran
+           * reel contre 5 547 pour une route inventee se lisait a l oeil.
+           */
+          [
+            corpsRetrograde.length === corpsInvente.length,
+            `le refus (${corpsRetrograde.length} o) pese comme une route admin inventee (${corpsInvente.length} o)`,
           ],
         );
       }
