@@ -117,3 +117,129 @@ describe("Le brief décrit la base qui existe", () => {
     ).toEqual([]);
   });
 });
+
+/**
+ * ET LES COLONNES — DANS UN SEUL SENS, DÉLIBÉRÉMENT.
+ *
+ * ⚠️ LA DÉRIVE EST REVENUE, DANS LA COLONNE AU LIEU DE LA TABLE. Le brief
+ * décrivait `parcel_checkpoints.raw` : mesuré le 02/09/2026 contre
+ * `information_schema.columns`, cette colonne n'existe pas, et aucun fichier du
+ * dépôt ne la mentionne. C'est exactement la récidive de `notifications_sent`,
+ * un cran plus bas — et la sonde posée après cette dérive-là avait hérité du
+ * champ de vision de la correction : elle regarde les TABLES, la dérive
+ * suivante est arrivée dans les colonnes (L-025).
+ *
+ * L'EFFET N'EST PAS COSMÉTIQUE. La décision §3-5 — « purge des réponses brutes
+ * 90 jours après le dernier mouvement » — se lisait, avec cette colonne, comme
+ * si chaque point de passage portait sa réponse brute. Elle est en réalité dans
+ * `tracking_snapshots.raw_payload`, PAR INTERROGATION. Un diagnostic écrit
+ * contre `checkpoints.raw` échouerait à la compilation ; une décision produit
+ * prise sur cette lecture (« on a le brut par point de passage, on peut
+ * rejouer ») serait fausse sans jamais rien casser.
+ *
+ * ⚠️ UN SEUL SENS, ET C'EST UN CHOIX. Exiger que TOUTE colonne réelle soit
+ * décrite ferait du brief une seconde source de vérité à tenir à jour —
+ * exactement le défaut qu'il corrige, et il compte 149 colonnes. Le brief dit
+ * lui-même que ses descriptions de colonnes sont indicatives et que les vraies
+ * vivent dans `supabase/migrations/`. Ce qui est dangereux, c'est le sens
+ * INVERSE : une colonne DÉCRITE et ABSENTE est une promesse sur laquelle
+ * quelqu'un s'appuiera.
+ */
+describe("Les colonnes que le brief NOMME existent", () => {
+  /** Les `table.colonne` cités dans le bloc « Les tables » du brief. */
+  function colonnesDuBrief(): Array<{ table: string; colonne: string }> {
+    const texte = readFileSync(BRIEF, "utf8");
+    const debut = texte.indexOf("### Les tables — RLS activée sur TOUTES");
+    const ouvre = texte.indexOf("```", debut);
+    const ferme = texte.indexOf("```", ouvre + 3);
+    const bloc = texte.slice(ouvre + 3, ferme);
+
+    const paires: Array<{ table: string; colonne: string }> = [];
+    let table: string | null = null;
+
+    for (const ligne of bloc.split("\n")) {
+      // `\s|$` ET NON `\s` SEUL — la même précaution que `tablesDuBrief`, et je
+      // l'avais oubliée : un nom de table trop long pour tenir avec sa
+      // description occupe sa ligne entière. Sans elle, `rate_limit` héritait
+      // de la table suivante comme si c'était une de ses colonnes.
+      const nom = /^([a-z_]+)(?:\s|$)/.exec(ligne);
+      if (nom !== null) table = nom[1] as string;
+      if (table === null) continue;
+
+      /*
+       * ⚠️ ON NE LIT QUE LES LIGNES QUI SONT PUREMENT DU SCHÉMA.
+       *
+       * Le bloc du brief mêle des listes de colonnes et de la PROSE — des
+       * avertissements, des raisons, des renvois à d'autres tables. Une sonde
+       * qui découpe tout sur les virgules fabrique des colonnes inexistantes
+       * (« et », « la », « peut ») et accuse alors le brief de ce qu'elle a mal
+       * lu. Une sonde qui se trompe rend un rapport exactement aussi crédible
+       * qu'une vraie dérive : c'est le pire des deux mondes.
+       *
+       * Le critère est donc net : après retrait des annotations entre
+       * parenthèses, la ligne doit être une liste d'identifiants et RIEN
+       * d'autre. Tout le reste est de la prose, et la prose n'est pas jugée.
+       */
+      const sansAnnotation = (nom === null ? ligne : ligne.slice((nom[1] as string).length))
+        .replace(/\([^)]*\)/g, "")
+        // La virgule de continuation ET l'espace qu'elle laisse : retirer la
+        // virgule sans re-couper les blancs faisait échouer le motif sur la
+        // ligne la plus importante du bloc, celle qui porte `public_token`.
+        .replace(/\s*,\s*$/, "")
+        .trim();
+      if (sansAnnotation === "") continue;
+      if (!/^[a-z][a-z0-9_]*(\s*,\s*[a-z][a-z0-9_]*)*$/.test(sansAnnotation)) continue;
+
+      for (const brut of sansAnnotation.split(",")) {
+        const c = brut.trim();
+        if (c.length > 1) paires.push({ table, colonne: c });
+      }
+    }
+    return paires;
+  }
+
+  test("la sonde lit réellement des colonnes", () => {
+    // UN ENSEMBLE VIDE PASSE TOUT : un bloc renommé rendrait cette suite verte
+    // et muette, ce qui est précisément le défaut qu'elle corrige.
+    const lues = colonnesDuBrief();
+    expect(lues.length, "aucune colonne lue dans le brief").toBeGreaterThan(60);
+    expect(lues.some((c) => c.table === "orders" && c.colonne === "public_token")).toBe(true);
+  });
+
+  test("aucune colonne décrite au brief n'est absente de la base", async () => {
+    const reelles = new Set(
+      (
+        await interroger<{ table_name: string; column_name: string }>(
+          bd,
+          `select table_name, column_name from information_schema.columns
+            where table_schema = 'public'`,
+        )
+      ).map((l) => `${l.table_name}.${l.column_name}`),
+    );
+
+    const tables = new Set(
+      (
+        await interroger<{ tablename: string }>(
+          bd,
+          "select tablename from pg_tables where schemaname = 'public'",
+        )
+      ).map((l) => l.tablename),
+    );
+
+    const fantomes = colonnesDuBrief()
+      // On ne juge que les colonnes des tables qui existent : une table absente
+      // est déjà signalée par la suite au-dessus, et la signaler deux fois
+      // brouillerait l'attribution.
+      .filter((c) => tables.has(c.table))
+      .filter((c) => !reelles.has(`${c.table}.${c.colonne}`))
+      .map((c) => `${c.table}.${c.colonne}`);
+
+    expect(
+      [...new Set(fantomes)],
+      "Colonnes décrites au brief mais ABSENTES de la base. Le brief est ce " +
+        "qu'on relit avant d'écrire une migration : une colonne qui n'existe " +
+        "que là est une promesse sur laquelle quelqu'un s'appuiera — c'est " +
+        "ainsi que `parcel_checkpoints.raw` a survécu.",
+    ).toEqual([]);
+  });
+});

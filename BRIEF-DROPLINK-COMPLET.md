@@ -414,7 +414,7 @@ base**, audit **atomique** avec la lecture qu'il trace.
 | Surface | Accès | Règle |
 |---|---|---|
 | `/[locale]/(app)/*` | Authentifié, RLS | Client serveur **avec** session, jamais service-role |
-| `/p/[token]` | **Jamais authentifié** | Lecture par jeton via vue restreinte. `noindex`. **Hors du segment `[locale]`** |
+| `/p/[token]` | **Jamais authentifié** | Lecture par jeton via **fonctions `security definer`**, jamais une vue. `noindex`. **Hors du segment `[locale]`** |
 | `/[locale]/admin/*` | Rôle vérifié **en base** | Défense en profondeur + audit de **toute consultation** |
 | `/api/*` | Machine | **Exclue du middleware** — chaque route porte sa propre garde |
 
@@ -556,7 +556,17 @@ tracked_parcels     id, shop_id, tracking_number, carrier_code, normalized_statu
 
 order_parcels       order_id, parcel_id
 
-parcel_checkpoints  id, parcel_id, occurred_at, location, description, raw
+parcel_checkpoints  id, parcel_id, occurred_at, location, description, stage,
+                    created_at
+                    ⚠️ IL N'Y A PAS DE COLONNE `raw` ICI, ET IL N'Y EN A JAMAIS
+                    EU. Ce bloc en décrivait une — mesuré le 02/09/2026 contre
+                    `information_schema.columns`, et aucun fichier du dépôt ne
+                    la mentionne. La réponse brute du fournisseur vit dans
+                    `tracking_snapshots.raw_payload`, PAR INTERROGATION, pas par
+                    point de passage. La décision §3-5 (« purge des réponses
+                    brutes 90 jours après le dernier mouvement ») porte donc sur
+                    `tracking_snapshots` ; lue ici, elle laissait croire qu'on
+                    peut rejouer l'historique point par point
 
 tracking_snapshots  id, parcel_id, raw_payload, normalized_status, fetched_at
 
@@ -642,7 +652,28 @@ tracking_notifications_vues
   (ligne fraîche). Sans le premier, un veilleur jamais déployé se présenterait comme
   « en retard » et on chercherait une panne dans un mécanisme inexistant.
 
-### La vue de lecture publique
+### La lecture publique — QUATRE FONCTIONS, AUCUNE VUE
+
+> ⚠️ **CE BLOC S'INTITULAIT « LA VUE DE LECTURE PUBLIQUE », ET CET OBJET N'A
+> JAMAIS EXISTÉ.** Mesuré le 02/09/2026 : `pg_class` ne contient **aucune vue ni
+> vue matérialisée** dans `public`, tous schémas confondus. La lecture publique
+> est faite de **quatre fonctions `security definer`** — `lire_commande_publique`,
+> `lire_medias_publics`, `lire_suivi_public`, `lire_passages_publics` — et
+> `tests/rls/catalogue.test.ts` le dit noir sur blanc depuis longtemps : « le
+> dépôt ne contient AUCUNE vue, et c'est délibéré : la lecture publique est une
+> FONCTION qui exige le jeton, précisément parce qu'une vue **se parcourt** ».
+>
+> **ET CE N'ÉTAIT PAS UN DÉTAIL DE VOCABULAIRE.** Les deux documents qu'on relit
+> AVANT d'écrire une migration envoyaient écrire un `create view` dans `public` —
+> or une vue s'exécute avec les droits de **celui qui l'a créée**, donc sans la
+> RLS de l'appelant. Un `create view mes_commandes as select * from orders`
+> accordé à `authenticated` rendrait **toutes les commandes de tous les
+> vendeurs**, `internal_notes` et `public_token` compris. Le document pointait
+> droit sur le trou que le test garde.
+>
+> La consigne de falsification « filtrer une colonne dans la vue » portait donc
+> sur un objet inexistant : appliquée à la lettre, elle ne casse rien, la suite
+> reste verte, et l'on croit avoir éprouvé la garde.
 
 Filtre `profiles.status = 'active'` et **ne contient pas `internal_notes`**.
 `archived_at` n'est **pas** dans le filtre : **archiver ne retire pas la page** —
@@ -1121,7 +1152,7 @@ On ne touche à aucun paiement → risque PSP nul en phase 1. Le risque restant 
 > **C'est de là que vient l'importance disproportionnée de la coupure de suspension** :
 > c'est la capacité technique qui fonde notre statut d'hébergeur.
 >
-> La chaîne est : `suspension en base → la vue publique filtre → invalidation du cache →
+> La chaîne est : `suspension en base → la fonction de lecture publique filtre → invalidation du cache →
 > la page cesse de répondre`. **Le mode de défaillance est SILENCIEUX** : si
 > l'invalidation est mal câblée, elle n'échoue pas, elle ne trouve simplement rien à
 > invalider. La suspension s'enregistre, l'audit la consigne, l'écran affiche
@@ -1192,7 +1223,7 @@ par un avocat avant tout lancement public.
 ### Tests — la discipline qui a le plus payé
 
 **Falsifier en cassant LE PRODUIT, pas les tests.** Retirer la garde, désactiver
-`unaccent`, filtrer une colonne dans la vue, ajouter la colonne interdite à l'export.
+`unaccent`, filtrer une colonne dans une **fonction de lecture publique**, ajouter la colonne interdite à l'export.
 **Si la suite reste verte, elle ne prouvait rien.**
 
 **Falsifier HORS du cas motivant.** Le falsifier sur son cas d'origine ne prouve que ce
