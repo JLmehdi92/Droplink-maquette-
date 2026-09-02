@@ -285,6 +285,7 @@ export default async function PagePublique({
   const libellesEtat = {
     titre: t("etat.titre"),
     arriveeEstimee: t("etat.arriveeEstimee"),
+    statut: t("etat.statut"),
     silenceTitre: t.raw("suivi.silenceTitre"),
     silenceTexte: t("suivi.silence"),
     etapes: {
@@ -408,6 +409,8 @@ export default async function PagePublique({
               doux={accent.surRemplissageDoux}
               arriveeEstimee={t("etat.arriveeEstimee")}
               estimation={estimation}
+              statut={libellesEtat.etapes[statutAffiche]}
+              surFaible={accent.surRemplissageFaible}
             />
           </div>
         </header>
@@ -422,6 +425,13 @@ export default async function PagePublique({
               doux="var(--color-on-surface-variant)"
               arriveeEstimee={t("etat.arriveeEstimee")}
               estimation={estimation}
+              statut={libellesEtat.etapes[statutAffiche]}
+              /* SANS EN-TÊTE, LE FOND EST BLANC — pas l'aplat d'accent. Y poser
+                 `surRemplissageFaible` rendrait la pastille INVISIBLE une fois
+                 sur deux : cette valeur vaut un blanc translucide dès que
+                 l'accent est sombre. Le filet neutre est ce que dessine
+                 `PageClientSansEntete`, dont toutes les surfaces sont blanches. */
+              surFaible="var(--color-surface-container-high)"
             />
           </div>
         </div>
@@ -536,7 +546,9 @@ export default async function PagePublique({
               />
             )}
           </div>
+        </div>
 
+        <div className="lg:flex lg:flex-col lg:gap-4">
           {/*
             L'ARBITRAGE QC vient JUSTE APRÈS CE QU'IL JUGE : on ne demande pas à
             quelqu'un de se prononcer sur des photos avant de les lui avoir
@@ -546,9 +558,23 @@ export default async function PagePublique({
             correspondent-elles ? » devant une galerie vide n'appelle aucune
             réponse sensée, et une décision prise là-dessus serait écrite au
             journal comme les autres.
+
+            ⚠️ IL EST DANS LA COLONNE DE DROITE, REMIS EN DERNIER PAR
+            `lg:order-last`. Sous la galerie, la colonne gauche mesurait 980 px
+            et la droite 572 : 403 px de blanc à droite, et une page 195 px plus
+            haute pour rien — mesuré au navigateur sur les DEUX planches bureau,
+            donc y compris celle qui a des passages. Ici les deux colonnes se
+            terminent à 4 px près.
+
+            L'ORDRE DE LA SOURCE RESTE CELUI DU TÉLÉPHONE — validation juste
+            après la galerie qu'elle juge, avant le détail du transport — parce
+            que c'est lui que lisent la grande majorité des visiteurs et tout
+            lecteur d'écran. `order` ne déplace que le rendu visuel, et cette
+            carte porte les SEULS éléments focalisables de la colonne : le
+            parcours au clavier est donc identique dans les deux largeurs.
           */}
           {commande.medias.length > 0 ? (
-            <div className="px-[18px] py-[26px] lg:mt-[26px] lg:rounded-[18px] lg:border lg:border-outline-variant lg:px-6 lg:py-6">
+            <div className="px-[18px] py-[26px] lg:order-last lg:rounded-[18px] lg:border lg:border-outline-variant lg:px-6 lg:py-6">
               <p className={surTitre + " mb-[13px] lg:mb-3.5"}>{t("qc.titre")}</p>
               <ArbitrageQc
                 jeton={commande.jeton}
@@ -577,9 +603,6 @@ export default async function PagePublique({
               />
             </div>
           ) : null}
-        </div>
-
-        <div className="lg:flex lg:flex-col lg:gap-4">
           {/* LA CARTE « EXPÉDITION » — grand écran uniquement. Elle est ici, en
               tête de la colonne de droite, et non dans un bloc à part : c'est
               ce qui garde la grille à une seule rangée. */}
@@ -604,6 +627,8 @@ export default async function PagePublique({
                 libelles={{
                   numero: t("suivi.numero"),
                   arrete: t("suivi.arrete"),
+                  attenteTitre: t("suivi.attenteTitre"),
+                  attenteTexte: t("suivi.attenteTexte"),
                 }}
               />
             </section>
@@ -700,6 +725,8 @@ function EnTeteTitre({
   doux,
   arriveeEstimee,
   estimation,
+  statut,
+  surFaible,
 }: {
   readonly titre: string;
   readonly client: string | null;
@@ -708,6 +735,10 @@ function EnTeteTitre({
   readonly doux: string;
   readonly arriveeEstimee: string;
   readonly estimation: string | null;
+  /** Le nom de l'étape, montré à la place de l'arrivée quand elle est inconnue. */
+  readonly statut: string;
+  /** Le fond de la pastille, déjà accordé à l'accent par `resoudreAccent()`. */
+  readonly surFaible: string;
 }) {
   const pour = client === null ? null : substituer(pourClient, "{nom}", client);
 
@@ -742,7 +773,33 @@ function EnTeteTitre({
             {estimation}
           </p>
         </div>
-      ) : null}
+      ) : (
+        /*
+          PAS D'ARRIVÉE CALCULABLE : LA PASTILLE DE STATUT PREND SA PLACE —
+          planche `PageClientAttenteDesktop`.
+
+          ⚠️ CE COIN RESTAIT VIDE, et c'est le coin haut droit du premier écran.
+          Le bandeau perdait son seul contre-poids : un titre à gauche, rien à
+          droite, sur toute la largeur d'un écran de bureau.
+
+          ON N'INVENTE PAS DE DATE POUR AUTANT. Le statut, LUI, est connu — le
+          vendeur l'a posé — et c'est tout ce que la pastille affirme. Ses
+          couleurs viennent de `resoudreAccent()` : aucun blanc en dur, sinon un
+          accent clair rendrait cette pastille illisible.
+        */
+        <div className="hidden shrink-0 pb-1 lg:block">
+          <span
+            className="inline-flex items-center gap-2 rounded-full px-4 py-[9px] font-label-md text-[14px] font-bold"
+            style={{ backgroundColor: surFaible }}
+          >
+            <span
+              className="h-[7px] w-[7px] rounded-full"
+              style={{ backgroundColor: "currentColor" }}
+            />
+            {statut}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

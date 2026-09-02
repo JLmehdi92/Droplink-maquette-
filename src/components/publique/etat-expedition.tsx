@@ -35,6 +35,8 @@ import type { Silence } from "@/lib/tracking/silence";
 export interface LibellesEtat {
   readonly titre: string;
   readonly arriveeEstimee: string;
+  /** Le surtitre quand l'arrivée n'est pas calculable — « Statut ». */
+  readonly statut: string;
   readonly silenceTitre: string;
   readonly silenceTexte: string;
   readonly etapes: Readonly<Record<"preparation" | "expedie" | "en_transit" | "livre", string>>;
@@ -154,19 +156,30 @@ export function EtatExpedition({
       className="rounded-[18px] p-5"
       style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
     >
-      {estimation !== null ? (
-        <>
-          <p
-            className="mb-1.5 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] uppercase"
-            style={{ color: accent.surRemplissageDoux }}
-          >
-            {libelles.arriveeEstimee}
-          </p>
-          <p className="mb-[3px] font-headline-lg text-[27px] leading-[33px] font-extrabold tracking-[-0.03em]">
-            {estimation}
-          </p>
-        </>
-      ) : null}
+      {/*
+        SANS ARRIVÉE CALCULABLE, LA CARTE MONTRE LE STATUT — planche
+        `PageClientAttente`.
+
+        ⚠️ ELLE NE MONTRAIT RIEN. Le surtitre et la grande ligne étaient tous
+        deux conditionnés à l'estimation : un colis tout juste expédié, dont le
+        transporteur n'a encore rien scanné, réduisait cette carte à une seule
+        ligne sourdine sur un aplat de la couleur du vendeur. C'est l'état de
+        CHAQUE commande dans ses premiers jours, donc le premier objet que
+        voient la plupart des clients — et il ressemblait à un bloc raté.
+
+        ON NE FABRIQUE PAS DE DATE POUR AUTANT : on affiche ce qui EST connu,
+        l'étape posée par le vendeur, et la ligne du dessous dit en clair que
+        le transporteur n'a rien rapporté.
+      */}
+      <p
+        className="mb-1.5 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] uppercase"
+        style={{ color: accent.surRemplissageDoux }}
+      >
+        {estimation !== null ? libelles.arriveeEstimee : libelles.statut}
+      </p>
+      <p className="mb-[3px] font-headline-lg text-[27px] leading-[33px] font-extrabold tracking-[-0.03em]">
+        {estimation !== null ? estimation : libelles.etapes[statut]}
+      </p>
       <p
         className="font-body-md text-[14px] leading-[20px]"
         style={{ color: accent.surRemplissageDoux }}

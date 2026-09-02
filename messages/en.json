@@ -780,12 +780,15 @@
       "silence": "The parcel is registered and tracked. Such a delay is not unusual at customs — we keep querying the carrier every day.",
       "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
       "silenceTitre": "No movement for {n} days",
-      "anciennete": "{n} days ago"
+      "anciennete": "{n} days ago",
+      "attenteTitre": "Waiting for the carrier",
+      "attenteTexte": "The parcel has been handed to the carrier. Its first scan has not arrived yet — this is common in the first few days. Detailed tracking will appear here automatically."
     },
     "pourClient": "for {nom}",
     "etat": {
       "arriveeEstimee": "Estimated arrival",
-      "titre": "Shipping"
+      "titre": "Shipping",
+      "statut": "Status"
     },
     "reseaux": {
       "titre": "Find {nom}",

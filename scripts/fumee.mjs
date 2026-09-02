@@ -2898,6 +2898,64 @@ try {
             .from("order_parcels")
             .insert({ order_id: commandeFumee, parcel_id: colisFumee.id });
 
+          /*
+           * L ETAT « EXPEDIE, PAS ENCORE SCANNE », SUR LA PAGE REELLEMENT
+           * SERVIE — et son basculement quand le transporteur parle enfin.
+           *
+           * ⚠️ RIEN NE COUVRAIT CET ETAT, qui est celui de CHAQUE commande dans
+           * ses premiers jours : numero colle, zero passage. La carte « Suivi »
+           * s y reduisait a un numero seul, et la carte d etat perdait son
+           * titre. Un ecran qu on peut retirer sans qu aucune porte ne rougisse
+           * est un ecran qui finira par etre retire.
+           *
+           * LE CONTROLE EST A DEUX SENS, et c est le point : ici le bloc d
+           * attente DOIT etre la et la frise des passages ABSENTE ; apres la
+           * notification, l inverse. Une sonde qui n exigerait que la presence
+           * passerait sur une page qui affiche les DEUX.
+           *
+           * ET IL ETABLIT LA MISE A JOUR AUTOMATIQUE PAR EXECUTION : la meme
+           * URL, sans invalidation de cache ni action du vendeur, rend un autre
+           * contenu une fois le transporteur passe. C est la promesse du
+           * produit, mesuree sur le HTML servi et non sur une intention.
+           */
+          const avantScan = await (
+            await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(21) })
+          ).text();
+          controles.push(
+            [
+              avantScan.includes(numeroEcriture),
+              "CONTRE-TEST : la carte de suivi est bien rendue (le numero y est)",
+            ],
+            [
+              avantScan.includes("En attente du transporteur"),
+              "sans aucun passage, la page NOMME l attente au lieu d un numero seul",
+            ],
+            [
+              !avantScan.includes("Departed from facility"),
+              "et elle n annonce evidemment aucun passage",
+            ],
+
+            /*
+             * LA CARTE D ETAT NE PEUT PAS RESTER MUETTE.
+             *
+             * ⚠️ SANS ARRIVEE CALCULABLE, son surtitre ET sa grande ligne
+             * etaient tous deux conditionnes a l estimation : la carte se
+             * reduisait a une ligne sourdine sur l aplat de la couleur du
+             * vendeur — le PREMIER objet de la page au telephone. Le surtitre
+             * « Statut » n existe que dans ce cas ; sa presence prouve que la
+             * branche est prise, et « Arrivee estimee » prouve qu on n a rien
+             * invente pour la remplir.
+             */
+            [
+              avantScan.includes(">Statut<"),
+              "sans arrivee calculable, la carte d etat porte le surtitre « Statut »",
+            ],
+            [
+              !avantScan.includes("Arrivée estimée"),
+              "et AUCUNE arrivee n est annoncee — on ne fabrique pas de date",
+            ],
+          );
+
           // CONTRE-TEST D ETAT INITIAL. Sans lui, un colis qui naitrait deja
           // « en transit » ferait passer l assertion d avancement sans qu aucune
           // ecriture n ait eu lieu.
@@ -2995,6 +3053,73 @@ try {
             [
               passagesApresRejeu === (passages?.length ?? -1),
               `et le rejeu n ajoute aucun point (${passages?.length ?? "?"} puis ${passagesApresRejeu})`,
+            ],
+          );
+
+          // LE MEME LIEN, APRES LE PASSAGE DU TRANSPORTEUR. Aucune invalidation
+          // n est declenchee entre les deux lectures : la fraicheur tient a ce
+          // que cette page est DYNAMIQUE, et c est cette propriete-la qui est
+          // mesuree ici, sur le contenu servi et non sur un en-tete.
+          const apresScan = await (
+            await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(22) })
+          ).text();
+          controles.push(
+            [
+              apresScan.includes("Departed from facility"),
+              "le MEME lien rend le passage du transporteur, sans que personne n ait invalide quoi que ce soit",
+            ],
+            [
+              !apresScan.includes("En attente du transporteur"),
+              "et le bloc d attente a disparu — les deux etats ne coexistent jamais",
+            ],
+          );
+
+          /*
+           * LE CONTRE-TEST DE LA CARTE D ETAT : une arrivee ANNONCEE.
+           *
+           * Sans lui, « le surtitre Statut est la » serait vrai d une page qui
+           * l afficherait TOUJOURS, y compris par-dessus une vraie date — et
+           * c est precisement la substitution que la decision 26 interdit. Une
+           * troisieme notification, portant cette fois une fourchette
+           * d arrivee, doit faire basculer la carte dans l autre sens.
+           */
+          const corpsEta = JSON.stringify({
+            event: "TRACKING_UPDATED",
+            data: {
+              number: numeroEcriture,
+              carrier: 3011,
+              track_info: {
+                latest_status: { status: "InTransit" },
+                latest_event: {
+                  time_utc: "2026-09-02T08:00:00Z",
+                  description: "Arrived at destination country",
+                  location: "PARIS",
+                },
+                time_metrics: {
+                  estimated_delivery_date: { from: "2026-09-09", to: "2026-09-12" },
+                },
+              },
+            },
+          });
+          const signatureEta = createHash("sha256")
+            .update(corpsEta + "/" + CLE_SUIVI, "utf8")
+            .digest("hex");
+          await fetch(`${base}/api/suivi/notification`, {
+            method: "POST",
+            headers: { "content-type": "application/json", sign: signatureEta },
+            body: corpsEta,
+          });
+          const avecEta = await (
+            await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(23) })
+          ).text();
+          controles.push(
+            [
+              avecEta.includes("Arrivée estimée"),
+              "CONTRE-TEST : quand le transporteur annonce une arrivee, la carte la porte",
+            ],
+            [
+              !avecEta.includes(">Statut<"),
+              "et le surtitre « Statut » cede la place — il ne recouvre jamais une vraie date",
             ],
           );
         }

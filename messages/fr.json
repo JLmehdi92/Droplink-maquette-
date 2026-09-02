@@ -780,12 +780,15 @@
       "silence": "Le colis est enregistré et suivi. Ce délai n’est pas rare au passage en douane — nous continuons d’interroger le transporteur chaque jour.",
       "arrete": "Le transporteur ne donne plus d’information sur ce numéro. Contactez le vendeur si vous n’avez rien reçu.",
       "silenceTitre": "Aucun mouvement depuis {n} jours",
-      "anciennete": "il y a {n} jours"
+      "anciennete": "il y a {n} jours",
+      "attenteTitre": "En attente du transporteur",
+      "attenteTexte": "Le colis a été confié au transporteur. Son premier scan n’est pas encore arrivé — c’est fréquent les premiers jours. Le suivi détaillé s’affichera ici automatiquement."
     },
     "pourClient": "pour {nom}",
     "etat": {
       "arriveeEstimee": "Arrivée estimée",
-      "titre": "Expédition"
+      "titre": "Expédition",
+      "statut": "Statut"
     },
     "reseaux": {
       "titre": "Retrouvez {nom}",
