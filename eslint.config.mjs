@@ -48,12 +48,35 @@ const MESSAGE_SYSTEME =
   "sans écrire d'audit : l'employer sur un écran ferait lire les données d'un " +
   "tiers en silence. Depuis une page ou une Server Action, utiliser `server.ts`.";
 
+/*
+ * ⚠️ LA FORME FRÈRE — `./admin` — N'ÉTAIT COUVERTE PAR AUCUN MOTIF.
+ *
+ * Trouvé le 02/09/2026. Le motif en double étoile attrape
+ * `../supabase/admin` mais PAS `./admin`, qui ne contient pas le segment
+ * `supabase`. Or c'est
+ * exactement la forme qu'un fichier de `src/lib/supabase/` écrirait — le seul
+ * dossier d'où le raccourci est naturel, et le seul où les trois clients sont
+ * à portée de main. La faille et l'exception qui la doublait vivaient donc au
+ * même endroit.
+ *
+ * C'est L-029 une seconde fois, sur le paragraphe qui l'invoquait déjà : le
+ * commentaire ci-dessus dit avoir fermé le chemin relatif, et il n'en avait
+ * fermé qu'une écriture sur deux.
+ */
 const CLOISONS = [
-  { nom: "admin", group: ["**/supabase/admin", "@/lib/supabase/admin"], message: MESSAGE_ADMIN },
-  { nom: "anon", group: ["**/supabase/anon", "@/lib/supabase/anon"], message: MESSAGE_ANON },
+  {
+    nom: "admin",
+    group: ["**/supabase/admin", "@/lib/supabase/admin", "./admin"],
+    message: MESSAGE_ADMIN,
+  },
+  {
+    nom: "anon",
+    group: ["**/supabase/anon", "@/lib/supabase/anon", "./anon"],
+    message: MESSAGE_ANON,
+  },
   {
     nom: "systeme",
-    group: ["**/supabase/system", "@/lib/supabase/system"],
+    group: ["**/supabase/system", "@/lib/supabase/system", "./system"],
     message: MESSAGE_SYSTEME,
   },
 ];
@@ -154,10 +177,29 @@ const eslintConfig = [
     rules: { "no-restricted-imports": ["error", { patterns: sauf("systeme") }] },
   },
   {
-    // Les modules eux-mêmes. Sans cette exception, `admin.ts` échouerait sur sa
-    // propre existence.
+    /*
+     * Les modules eux-mêmes.
+     *
+     * ⚠️ CETTE EXCEPTION DISAIT `"off"`, ET C'EST LE DÉFAUT QUE LE BLOC
+     * CI-DESSUS DÉCRIT — resté sur la dernière exception du fichier. `"off"`
+     * désarme TOUS les motifs à la fois : dans le seul dossier où les trois
+     * clients sont voisins, n'importe lequel pouvait importer n'importe quel
+     * autre. `anon.ts`, celui que sert la page publique à un visiteur non
+     * authentifié, pouvait importer la clé service-role sans un mot.
+     *
+     * ⚠️ ET SA RAISON ÉTAIT FAUSSE. « Sans cette exception, `admin.ts`
+     * échouerait sur sa propre existence » : vérifié fichier par fichier, aucun
+     * des cinq clients n'importe un autre client. Ils importent `./config` et
+     * `./types-base`, qui ne sont pas des cloisons. La règle complète passe
+     * donc ici sans rien casser — et l'exception protégeait un problème qui
+     * n'existait pas, en ouvrant un problème qui existait.
+     *
+     * Elle reste déclarée plutôt que supprimée : le jour où un client devra
+     * réellement en importer un autre, c'est ici que la dispense se discutera,
+     * motif par motif.
+     */
     files: ["src/lib/supabase/**/*.ts"],
-    rules: { "no-restricted-imports": "off" },
+    rules: { "no-restricted-imports": ["error", { patterns: sauf() }] },
   },
 ];
 

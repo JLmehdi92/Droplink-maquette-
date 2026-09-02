@@ -1119,6 +1119,29 @@ try {
         // compte de fumee est neuf a chaque passage, donc son compteur part de zero.
         {
           const entetesExport = { cookie: cookieVendeur, ...visiteur(44) };
+
+          /*
+           * ⚠️ LE COMPTEUR EST REMIS A ZERO AVANT LA MESURE, ET C EST NECESSAIRE.
+           *
+           * Sa fenetre est d UNE HEURE, et le compte de fumee peut survivre a un
+           * passage — le script ramasse les comptes abandonnes plutot que d en
+           * creer un a chaque fois. Deux executions rapprochees trouvaient donc
+           * le plafond DEJA epuise, et la porte rougissait sur QUATRE controles
+           * sans qu aucun defaut produit n existe. Observe une fois.
+           *
+           * Un controle qui echoue par intermittence se BORNE, il ne se relance
+           * pas jusqu au vert. On efface donc la seule ligne de ce vendeur —
+           * jamais la table — pour que la mesure parte d un etat connu.
+           *
+           * ⚠️ CELA N AFFAIBLIT RIEN : ce qui est eprouve est que douze requetes
+           * consecutives se heurtent au plafond, pas que la table etait vide. La
+           * cle est composee comme le module la compose, `surface:cle`.
+           */
+          await service
+            .from("rate_limit")
+            .delete()
+            .eq("cle", `export-csv:${profilFumee}`);
+
           const statuts = [];
           // Le plafond vaut 10 par heure ; on tire douze fois pour voir la coupure
           // ET la voir tenir apres.
