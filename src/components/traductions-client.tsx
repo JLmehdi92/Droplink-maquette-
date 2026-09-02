@@ -108,14 +108,43 @@ export function restreindre(
 
 export async function TraductionsClient({
   espaces,
+  langue,
   children,
 }: {
   readonly espaces: readonly string[];
+  /**
+   * LA LANGUE, QUAND ELLE N'EST PAS CELLE DE L'URL.
+   *
+   * ⚠️ DÉFAUT MESURÉ LE 02/09/2026 SUR `/p/[token]`. Cette page vit HORS du
+   * segment `[locale]` — la langue est celle du VENDEUR, pas de l'URL — donc
+   * `requestLocale` est absent et `getMessages()` retombe sur la langue par
+   * défaut du routage, le français. Boutique passée en anglais, page servie :
+   *
+   *   lang="en", titre « Your order », corps intégralement anglais
+   *   charge d'hydratation : "titre":"Cette page n'a pas pu s'afficher"
+   *
+   * En cas d'erreur de rendu, le client d'un vendeur anglophone recevait donc
+   * une page en FRANÇAIS dans un document `lang="en"` — le miroir exact du
+   * défaut que cette frontière d'erreur a été créée pour fermer.
+   *
+   * Omise, on garde le comportement d'avant : la langue de la requête. C'est
+   * le bon défaut pour toutes les surfaces qui vivent SOUS `[locale]`, où
+   * l'URL porte déjà la réponse.
+   */
+  readonly langue?: string;
   readonly children: React.ReactNode;
 }) {
-  const complet = (await getMessages()) as unknown as Record<string, unknown>;
+  const complet = (await getMessages(
+    langue === undefined ? undefined : { locale: langue },
+  )) as unknown as Record<string, unknown>;
   return (
-    <NextIntlClientProvider messages={restreindre(complet, espaces)}>
+    <NextIntlClientProvider
+      // `exactOptionalPropertyTypes` interdit d'y passer `undefined`
+      // explicitement : on n'ajoute la propriété que lorsqu'on en a une, et le
+      // provider retombe alors sur la langue de la requête, comme avant.
+      {...(langue === undefined ? {} : { locale: langue })}
+      messages={restreindre(complet, espaces)}
+    >
       {children}
     </NextIntlClientProvider>
   );

@@ -1879,6 +1879,69 @@ try {
 
           await service.from("rate_limit").delete().like("cle", cleQuota);
         }
+        /*
+         * ═══════════════════════════════════════════════════════════════════
+         * LA PAGE CLIENT PARLE LA LANGUE DU VENDEUR — Y COMPRIS QUAND ELLE
+         * TOMBE EN ERREUR
+         * ═══════════════════════════════════════════════════════════════════
+         *
+         * Defaut mesure le 02/09/2026. Cette page vit HORS du segment
+         * `[locale]` — la langue est celle du VENDEUR, pas de l URL — donc
+         * `requestLocale` est absent et le catalogue expedie a la frontiere
+         * d erreur retombait sur la langue par defaut du routage, le francais.
+         * Boutique en anglais, page servie : `lang="en"`, corps integralement
+         * anglais, et dans la charge d hydratation « Cette page n a pas pu s
+         * afficher ».
+         *
+         * Le client d un vendeur anglophone recevait donc, en cas d erreur de
+         * rendu, une page en FRANCAIS dans un document `lang="en"` — le miroir
+         * exact du defaut que cette frontiere a ete creee pour fermer.
+         *
+         * ⚠️ ON EPROUVE LES DEUX SENS. Verifier seulement l anglais laisserait
+         * passer une correction qui forcerait TOUT en anglais.
+         */
+        {
+          const langueDe = async () => {
+            const r = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(14) });
+            const html = await r.text();
+            return {
+              statut: r.status,
+              lang: (html.match(/<html lang="([^"]*)"/) ?? [])[1] ?? "",
+              fr: /Cette page n'a pas pu s.afficher/.test(html),
+              en: /This page could not be displayed/.test(html),
+            };
+          };
+
+          const { data: boutiqueFumee } = await service
+            .from("shops")
+            .select("id, default_language")
+            .eq("owner_id", profilFumee)
+            .single();
+          const langueOrigine = boutiqueFumee?.default_language ?? "fr";
+
+          await service.from("shops").update({ default_language: "en" }).eq("id", boutiqueFumee.id);
+          const enAnglais = await langueDe();
+          await service.from("shops").update({ default_language: "fr" }).eq("id", boutiqueFumee.id);
+          const enFrancais = await langueDe();
+          await service
+            .from("shops")
+            .update({ default_language: langueOrigine })
+            .eq("id", boutiqueFumee.id);
+
+          controles.push(
+            [
+              enAnglais.lang === "en" && enAnglais.en && !enAnglais.fr,
+              `boutique en anglais : lang="${enAnglais.lang}" et la frontiere d erreur est en anglais`,
+            ],
+            // L AUTRE SENS, et il est obligatoire : une correction qui forcerait
+            // tout en anglais passerait le controle ci-dessus a 100 %.
+            [
+              enFrancais.lang === "fr" && enFrancais.fr && !enFrancais.en,
+              `boutique en francais : lang="${enFrancais.lang}" et la frontiere d erreur est en francais`,
+            ],
+          );
+        }
+
         const avantCoupure = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(13) });
 
         const departCoupure = Date.now();
@@ -3047,5 +3110,25 @@ if (controles.length < PLANCHER_CONTROLES) {
 }
 
 arreter();
+/*
+ * ⚠️ QUAND UN CONTROLE ECHOUE, ON MONTRE CE QUE LE SERVEUR A DIT.
+ *
+ * Le journal du serveur n etait imprime que s il ne DEMARRAIT pas. Un echec de
+ * controle, lui, restait opaque : le 02/09/2026, `/fr/admin` a rendu 500 a un
+ * administrateur pendant une passe de portes, et deux passes suivantes sont
+ * revenues vertes. Sans la trace du serveur, il ne restait qu a choisir entre
+ * « regression » et « incident » — c est-a-dire a deviner, ou a relancer
+ * jusqu au vert, ce que ce projet interdit.
+ *
+ * On n elargit PAS le transport resilient a la place : sa liste est
+ * volontairement etroite, et y ajouter le 500 transformerait l enrobage en
+ * machine a cacher les defauts. Un 500 est aussi la forme d une vraie erreur
+ * applicative. Ce qu il faut, ce n est pas le retenter — c est le LIRE.
+ */
+if (echecs > 0 && journal.trim() !== "") {
+  console.log("\n— Fin du journal du serveur, pour attribuer les echecs ci-dessus —");
+  console.log(journal.slice(-3000));
+}
+
 console.log(echecs === 0 ? "\nTout est vert." : `\n${echecs} ecart(s).`);
 process.exit(echecs === 0 ? 0 : 1);

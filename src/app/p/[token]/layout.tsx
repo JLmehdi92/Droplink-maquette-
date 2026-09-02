@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TraductionsClient } from "@/components/traductions-client";
+import { estLangueSupportee } from "@/i18n/config";
 import { lireCommandePublique } from "@/lib/page-publique/lecture";
 import { verifierQuotaPublique } from "@/lib/limitation/quota";
 import "../../globals.css";
@@ -101,8 +102,33 @@ export default async function LayoutPagePublique({
 
   const commande = await lireCommandePublique(token);
 
+  /*
+   * LA LANGUE, VALIDÉE ICI ET UNE SEULE FOIS.
+   *
+   * ⚠️ ELLE NE L'ÉTAIT PAS. Ce fichier écrivait `commande?.boutique.langue ??
+   * "fr"` directement dans `lang`, alors que la page, deux fichiers plus loin,
+   * la fait passer par `estLangueSupportee`. Mesuré en retirant la contrainte
+   * `shops_langue_supportee` et en écrivant `default_language = 'zz'` : la page
+   * répond 200 avec `<html lang="zz">` et un corps en français. Une étiquette
+   * BCP-47 invalide sur un document qui n'est pas dans cette langue trompe les
+   * lecteurs d'écran et la traduction automatique — et c'est strictement
+   * invisible à l'œil.
+   *
+   * La protection tenait ENTIÈREMENT à une contrainte `CHECK` que ce fichier ne
+   * mentionne nulle part : « ce serait faux si quelqu'un écrivait en base
+   * autrement » était donc la phrase juste, c'est-à-dire L-029.
+   *
+   * ET ELLE SERT DEUX FOIS : l'attribut `lang` du document, et le catalogue
+   * expédié à la frontière d'erreur. Les deux doivent dire la même chose, sans
+   * quoi la page annonce une langue et en parle une autre.
+   */
+  const langue =
+    commande !== null && estLangueSupportee(commande.boutique.langue)
+      ? commande.boutique.langue
+      : "fr";
+
   return (
-    <html lang={commande?.boutique.langue ?? "fr"}>
+    <html lang={langue}>
       {/*
         LE FOND EST BLANC, pas le gris de l'espace vendeur. Les six planches de
         la page client déclarent toutes `body { background: #ffffff }` : cette
@@ -145,7 +171,9 @@ export default async function LayoutPagePublique({
           a été MESURÉ sur le build avant d'être accepté, parce que le budget de
           cette page est la raison même pour laquelle cette racine est distincte.
         */}
-        <TraductionsClient espaces={["page-publique.erreur"]}>{children}</TraductionsClient>
+        <TraductionsClient espaces={["page-publique.erreur"]} langue={langue}>
+          {children}
+        </TraductionsClient>
       </body>
     </html>
   );
