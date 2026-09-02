@@ -23,13 +23,36 @@ import { attacherColis } from "@/lib/tracking/attache";
 
 export type ClientEcriture = Awaited<ReturnType<typeof creerClientServeur>>;
 
-/** Champs que l'éditeur peut écrire. Toute colonne absente d'ici est hors de portée. */
+/**
+ * Champs que l'éditeur peut écrire. Toute colonne absente d'ici est hors de
+ * portée.
+ *
+ * ⚠️ LES PLAFONDS SONT CEUX DE LA BASE, ET C'EST UN CONTRAT VÉRIFIÉ.
+ * `tests/rls/bornes-de-saisie-concordantes` compare ces valeurs aux `CHECK` du
+ * catalogue, colonne par colonne, et refuse un écart DANS LES DEUX SENS.
+ *
+ * TROIS DIVERGEAIENT, mesurées le 02/09/2026 : `customer_label` 80 contre 120,
+ * `product_ref` 80 contre 200, `internal_notes` 2000 contre 5000. Aucune ne
+ * cassait rien — une valeur trop longue était refusée proprement, son champ
+ * nommé — et c'est précisément pourquoi elles ont vécu : le plafond le plus bas
+ * gagnait en silence, et rien ne pouvait rougir.
+ *
+ * Ce n'est pas anodin sur `product_ref` : la première des trois features du
+ * brief est l'import depuis un LIEN de commande agent, et 80 caractères ne
+ * suffisent pas à un tel lien. La base avait prévu 200 ; le produit refusait à
+ * 80 sans que personne ait décidé de ce chiffre.
+ *
+ * ⚠️ ET LE SENS INVERSE SERAIT PIRE. Un plafond Zod PLUS LARGE que la base
+ * ferait annoncer à l'écran un enregistrement que la base refuse, avec une
+ * erreur Postgres brute à l'arrivée — le principe XII à l'envers. C'est ce que
+ * le contrôle ferme pour l'avenir, pas seulement l'écart d'aujourd'hui.
+ */
 const CHAMPS = {
-  customer_label: z.string().trim().max(80),
-  product_ref: z.string().trim().max(80),
+  customer_label: z.string().trim().max(120),
+  product_ref: z.string().trim().max(200),
   tracking_number: z.string().trim().max(64),
   carrier_code: z.string().trim().max(32),
-  internal_notes: z.string().trim().max(2000),
+  internal_notes: z.string().trim().max(5000),
   status: z.enum(STATUTS_EXPEDITION),
   qc_status: z.enum(STATUTS_QC),
 } as const;
