@@ -9,7 +9,7 @@ import { TraductionsClient } from "@/components/traductions-client";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
 import { lireCompte } from "@/lib/audit/comptes";
-import { lireSeuils, PLAFOND_COMMANDES_MENSUEL_DEFAUT } from "@/lib/audit/panneau";
+import { lireSeuils } from "@/lib/audit/panneau";
 import { MOTIF_MIN } from "@/lib/audit/suspension";
 import { mettreOctetsALEchelle } from "@/lib/format/octets";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -275,11 +275,11 @@ export default async function FicheCompte({
                     <span className="font-body-md text-[14px] leading-[18px] text-sourdine">
                       {t("fiche.surPlafond", {
                         valeur: format.number(fiche.commandesCeMois),
-                        plafond: format.number(PLAFOND_COMMANDES_MENSUEL_DEFAUT),
+                        plafond: format.number(seuils.plafondCommandes),
                       })}
                     </span>
                   </div>
-                  {barre(fiche.commandesCeMois / PLAFOND_COMMANDES_MENSUEL_DEFAUT, false)}
+                  {barre(fiche.commandesCeMois / seuils.plafondCommandes, false)}
                 </div>
               </div>
             </section>

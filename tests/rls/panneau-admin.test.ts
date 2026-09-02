@@ -2,7 +2,12 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
-import { lirePanneau, lireSeuils, SEUIL_COLIS_DEFAUT } from "@/lib/audit/panneau";
+import {
+  lirePanneau,
+  lireSeuils,
+  PLAFOND_COMMANDES_MENSUEL_DEFAUT,
+  SEUIL_COLIS_DEFAUT,
+} from "@/lib/audit/panneau";
 
 /**
  * LE PANNEAU D'ADMINISTRATION.
@@ -436,5 +441,101 @@ describe("Les compteurs de comptes décrivent la population qu'ils annoncent", (
     await interroger(catalogue, "update public.profiles set status = 'active' where id = $1", [
       vendeur.profilId,
     ]);
+  }, 30_000);
+});
+
+/**
+ * LE PLAFOND AFFICHÉ EST CELUI QUE LA BASE APPLIQUE.
+ *
+ * ⚠️ DÉFAUT MESURÉ LE 02/09/2026. La fiche de compte dessinait sa barre sur
+ * `PLAFOND_COMMANDES_MENSUEL_DEFAUT`, une CONSTANTE, alors que l'application du
+ * plafond passe par `lire_plafond_commandes()`, qui lit `system_settings`. Le
+ * jour où un administrateur écrit `plafond_commandes_mensuel = 500` par l'écran
+ * des paramètres — ce que `parametres_admis` autorise entre 100 et 100 000 — la
+ * base refuse les commandes au-delà de 500 et la fiche continue de dessiner la
+ * barre sur 3 000 : « 520 / 3 000 », soit 17 % d'une jauge, pour un compte dont
+ * les écritures sont refusées.
+ *
+ * LE BRIEF POSE LA RÈGLE INVERSE : « les signalements portent leur valeur —
+ * "1 840 colis sur un seuil de 1 200", pas "ce compte dépasse" ». Ici le chiffre
+ * était porté ET faux, ce qui est strictement pire que l'absence : l'admin
+ * cherche la panne du côté du vendeur, pas du côté du réglage qu'il vient
+ * lui-même de poser.
+ *
+ * ET LE MODULE LE DIT DÉJÀ, dans son propre en-tête : « CHAQUE VALEUR EST LUE À
+ * SA SOURCE, JAMAIS RECOPIÉE. Un écran qui réécrirait « 20 » de son côté
+ * resterait juste tant que personne ne change la configuration, puis afficherait
+ * un plafond que le produit n'applique plus — et c'est le pire état possible
+ * pour un tableau de bord, PARCE QU'IL RASSURE. »
+ */
+describe("Le plafond de commandes affiché suit le réglage", () => {
+  test("`lireSeuils` rend la valeur ÉCRITE en base, pas la constante", async () => {
+    const [avant] = await interroger<{ value: number | null }>(
+      catalogue,
+      "select value from public.system_settings where key = 'plafond_commandes_mensuel'",
+    );
+
+    // On écrit une valeur qui ne peut pas être confondue avec le défaut.
+    await interroger(
+      catalogue,
+      `insert into public.system_settings (key, value) values ('plafond_commandes_mensuel', to_jsonb(512))
+         on conflict (key) do update set value = excluded.value`,
+    );
+
+    const seuils = await lireSeuils(admin.client);
+    expect(
+      seuils.plafondCommandes,
+      "l'écran afficherait un plafond que la base n'applique pas",
+    ).toBe(512);
+
+    // Restitution à l'identique : ce réglage est partagé, et le laisser à 512
+    // ferait refuser des commandes à tout le monde.
+    if (avant?.value == null) {
+      await interroger(
+        catalogue,
+        "delete from public.system_settings where key = 'plafond_commandes_mensuel'",
+      );
+    } else {
+      await interroger(
+        catalogue,
+        "update public.system_settings set value = to_jsonb($1::int) where key = 'plafond_commandes_mensuel'",
+        [avant.value],
+      );
+    }
+  }, 30_000);
+
+  test("CONTRE-TEST : sans réglage écrit, c'est bien le défaut qui est rendu", async () => {
+    /*
+     * Sans lui, une implémentation qui rendrait TOUJOURS la valeur en base
+     * passerait le contrôle ci-dessus — et rendrait `null` ou zéro le jour où
+     * personne n'a rien réglé, c'est-à-dire aujourd'hui, en production.
+     *
+     * ⚠️ ET IL PROUVE LE COMPORTEMENT, PAS LE REPLI TYPESCRIPT. Mesuré en
+     * falsifiant : remplacer le repli par zéro ne le fait PAS rougir, parce que
+     * `lire_parametre_entier` rend elle-même le défaut qu'on lui passe — le
+     * repli côté application n'est emprunté que si la RPC ÉCHOUE, ce qu'aucune
+     * de ces deux épreuves ne provoque. Je le dis plutôt que de laisser croire
+     * que ce contre-test garde une branche qu'il ne visite jamais.
+     */
+    const [avant] = await interroger<{ value: number | null }>(
+      catalogue,
+      "select value from public.system_settings where key = 'plafond_commandes_mensuel'",
+    );
+    await interroger(
+      catalogue,
+      "delete from public.system_settings where key = 'plafond_commandes_mensuel'",
+    );
+
+    const seuils = await lireSeuils(admin.client);
+    expect(seuils.plafondCommandes).toBe(PLAFOND_COMMANDES_MENSUEL_DEFAUT);
+
+    if (avant?.value != null) {
+      await interroger(
+        catalogue,
+        `insert into public.system_settings (key, value) values ('plafond_commandes_mensuel', to_jsonb($1::int))
+           on conflict (key) do update set value = excluded.value`,
+        [avant.value],
+      );
+    }
   }, 30_000);
 });
