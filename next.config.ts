@@ -47,6 +47,63 @@ import type { NextConfig } from "next";
  */
 const HSTS = { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" };
 
+/**
+ * CONTENT-SECURITY-POLICY — DÉFENSE EN PROFONDEUR CONTRE L'XSS.
+ *
+ * ⚠️ POURQUOI `'unsafe-inline'` SUR LES SCRIPTS ET NON UN NONCE. Le motif à
+ * nonce recommandé par Next EXIGE le rendu dynamique de chaque page — la doc le
+ * dit noir sur blanc : « une page statique est générée au build, sans requête,
+ * donc le nonce ne peut pas y être injecté ». Or la landing, la connexion et
+ * SURTOUT `/p/{jeton}` sont rendues STATIQUEMENT, précisément pour tenir le
+ * budget LCP < 2 s sur mobile 4G qui est un avantage produit. Forcer le
+ * dynamique pour un nonce dégraderait ce que la CSP est censée protéger sans
+ * rien apporter : le vrai risque XSS ici est déjà quasi nul — zéro
+ * `dangerouslySetInnerHTML`, aucun script tiers, React échappe tout.
+ *
+ * CE QUE CETTE CSP APPORTE MALGRÉ TOUT, et ce n'est pas rien :
+ *   - `script-src 'self' 'unsafe-inline'` bloque le chargement d'un script
+ *     EXTERNE injecté (`<script src="//evil">`) — le vecteur d'escalade le plus
+ *     courant d'une faille d'injection ;
+ *   - `object-src 'none'`, `base-uri 'self'`, `form-action 'self'` ferment
+ *     l'injection de greffon, de balise `<base>` et le détournement de
+ *     formulaire — trois vecteurs réels, à coût de rupture nul ;
+ *   - `img-src`/`connect-src` bornent d'où viennent médias et connexions.
+ *
+ * ⚠️ LES DEUX SEULES ORIGINES TIERCES LÉGITIMES SONT DÉCLARÉES : R2 (médias
+ * signés, uploads directs navigateur) et Supabase (auth, réinitialisation). Les
+ * omettre casserait la galerie et la connexion — c'est le mode de rupture qu'on
+ * vérifie au navigateur avant de livrer, pas à la relecture.
+ *
+ * ⚠️ PRODUCTION SEULEMENT, comme HSTS. En développement, `upgrade`/`connect`
+ * stricts gêneraient le rechargement à chaud et les assets servis en clair.
+ */
+function politiqueCSP(): string {
+  const r2 = "https://*.r2.cloudflarestorage.com";
+  let supabase = "";
+  try {
+    supabase = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").origin;
+  } catch {
+    // URL absente ou illisible au build : on n'ajoute pas d'origine plutôt que
+    // d'en inventer une. `connect-src 'self'` reste, et un build sans Supabase
+    // n'a de toute façon pas d'auth à joindre.
+    supabase = "";
+  }
+  return [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob: ${r2}`,
+    "font-src 'self'",
+    `connect-src 'self' ${supabase} ${r2}`.replace(/\s+/g, " ").trim(),
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join("; ");
+}
+
+const CSP_ACTIVE = process.env.NODE_ENV === "production";
+
 const enTetesCommuns = [
   // Le type déclaré fait foi : sans cela, un navigateur peut « deviner » qu'un
   // fichier servi en `image/jpeg` est en réalité du HTML et l'exécuter.
@@ -57,6 +114,9 @@ const enTetesCommuns = [
   // capacités pour tout ce que la page charge, y compris un cadre tiers.
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
   ...(process.env.NODE_ENV === "production" ? [HSTS] : []),
+  // La CSP par défaut, sur toutes les surfaces sauf la page publique qui la
+  // redéclare pour garder `no-referrer`.
+  ...(CSP_ACTIVE ? [{ key: "Content-Security-Policy", value: politiqueCSP() }] : []),
 ];
 
 const nextConfig: NextConfig = {
@@ -91,9 +151,14 @@ const nextConfig: NextConfig = {
          */
         source: "/p/:path*",
         headers: [
-          ...enTetesCommuns.filter((h) => h.key !== "Referrer-Policy"),
+          // On retire Referrer-Policy ET la CSP de base pour les redéclarer :
+          // `no-referrer` (l'URL porte le jeton), et la même CSP complète —
+          // qui inclut déjà `frame-ancestors 'none'`, sans doublon d'en-tête.
+          ...enTetesCommuns.filter(
+            (h) => h.key !== "Referrer-Policy" && h.key !== "Content-Security-Policy",
+          ),
           { key: "Referrer-Policy", value: "no-referrer" },
-          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+          ...(CSP_ACTIVE ? [{ key: "Content-Security-Policy", value: politiqueCSP() }] : []),
         ],
       },
     ];

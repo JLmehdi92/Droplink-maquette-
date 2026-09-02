@@ -3130,6 +3130,47 @@ controles.push(
     (enTetesPublique.get("content-security-policy") ?? "").includes("frame-ancestors 'none'"),
     "page publique non cadrable — l arbitrage QC ne peut pas etre vole au clic",
   ],
+  // ── LA CSP DE DÉFENSE EN PROFONDEUR EST SERVIE, SUR LES DEUX SURFACES ──
+  //
+  // ⚠️ AJOUTÉE APRÈS COUP : la surface n avait AUCUNE CSP `script-src` avant le
+  // 02/09/2026. Ces directives ferment le chargement d un script EXTERNE
+  // injecté, l injection de `<base>`, le détournement de formulaire et le
+  // greffon. Vérifié au navigateur route par route (zéro violation) ; ce
+  // contrôle empêche seulement qu elle DISPARAISSE en silence — l en-tête est
+  // gated production, donc actif sur ce serveur de fumée (`next start`).
+  //
+  // ⚠️ ON N EXIGE PAS DE NONCE : la page publique et la connexion sont rendues
+  // STATIQUEMENT pour le budget LCP, et le nonce de Next force le dynamique.
+  // C est un arbitrage assumé, pas un oubli — d où `'unsafe-inline'`, borné par
+  // l absence totale de `dangerouslySetInnerHTML` et de script tiers.
+  ...(() => {
+    const attendues = [
+      "default-src 'self'",
+      "script-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ];
+    return [enTetesLanding, enTetesPublique].flatMap((entetes, i) => {
+      const surface = i === 0 ? "landing" : "page publique";
+      const csp = entetes.get("content-security-policy") ?? "";
+      const manquantes = attendues.filter((d) => !csp.includes(d));
+      return [
+        [
+          manquantes.length === 0,
+          `CSP complète sur la ${surface}` +
+            (manquantes.length ? ` — manque : ${manquantes.join(", ")}` : ""),
+        ],
+        // ⚠️ LES DEUX ORIGINES TIERCES LÉGITIMES SONT DÉCLARÉES : sans elles, la
+        // galerie (R2) et l auth (Supabase) casseraient. Les retirer par
+        // mégarde doit rougir ici, pas se découvrir chez un client.
+        [
+          csp.includes("r2.cloudflarestorage.com") && /connect-src[^;]*supabase/.test(csp),
+          `CSP ${surface} : R2 (médias) et Supabase (auth) autorisés`,
+        ],
+      ];
+    });
+  })(),
   [
     (enTetesLanding.get("referrer-policy") ?? "") === "strict-origin-when-cross-origin",
     "referent borne ailleurs que sur la page publique",
