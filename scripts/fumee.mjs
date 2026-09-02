@@ -2210,7 +2210,14 @@ try {
             derniere?.payload?.commentaire === "La couture est de travers",
             "le commentaire est retenu",
           ],
-          [invalide.status === 404, "une decision inventee ne se distingue pas d un jeton inconnu"],
+          [
+            invalide.status === 404,
+            // LE SIGNALEMENT PORTE SA VALEUR. Sans le statut observe, un echec ici
+            // ne dit pas si la route a repondu 200 (defaut reel), 429 (plafond
+            // atteint par les controles precedents) ou autre chose — et l on
+            // choisit alors entre « regression » et « incident » en devinant.
+            `une decision inventee ne se distingue pas d un jeton inconnu (statut ${invalide.status})`,
+          ],
         );
 
         // LES DEUX SEUILS. On epuise le plafond depuis UNE adresse, puis on
