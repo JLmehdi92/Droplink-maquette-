@@ -605,6 +605,7 @@
         "commande_creee": "Commande créée",
         "commande_modifiee": "Champ modifié",
         "commande_archivee": "Commande archivée",
+        "commande_desarchivee": "Commande sortie des archives",
         "commande_dupliquee": "Commande dupliquée",
         "media_ajoute": "Média ajouté",
         "media_supprime": "Média supprimé",

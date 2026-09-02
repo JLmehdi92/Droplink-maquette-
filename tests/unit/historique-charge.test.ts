@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { resumerCharge } from "@/lib/commandes/historique";
+import { resumerCharge, typeAffiche } from "@/lib/commandes/historique";
 
 /**
  * LA CHARGE UTILE DU JOURNAL NE S'ÉCHAPPE PAS À L'ÉCRAN.
@@ -52,5 +52,59 @@ describe("Résumé d'une charge de journal", () => {
     // seulement est sûr.
     expect(resumerCharge({ champ: "x".repeat(41) })).toBeNull();
     expect(resumerCharge({ champ: "x".repeat(40) })).toBe("x".repeat(40));
+  });
+});
+
+/**
+ * L'HISTORIQUE NE DOIT PAS DIRE L'INVERSE DE CE QUI S'EST PASSÉ.
+ *
+ * ⚠️ DÉFAUT MESURÉ LE 02/09/2026, sur dix bascules archiver / désarchiver. La
+ * base écrit bien les deux sens :
+ *
+ *   {"type":"commande_archivee","payload":{"archivee":true}}
+ *   {"type":"commande_archivee","payload":{"archivee":false}}
+ *
+ * et l'écran affichait « Commande archivée » DIX FOIS, y compris pour les cinq
+ * fois où la commande avait été SORTIE des archives. L'information existait,
+ * l'écran la jetait : la clé `archivee` n'était pas nommée dans le schéma de
+ * charge, donc elle était ignorée avec toutes les autres.
+ *
+ * ET C'EST UNE INCOHÉRENCE INTERNE, pas une lacune de vocabulaire : la liste
+ * des commandes sait déjà dire « Sortir des archives ». L'historique est ce
+ * qu'on regarde en cas de litige avec un client — un journal qui dit le
+ * contraire d'un fait enregistré est pire qu'un journal absent.
+ */
+describe("Le sens du geste d'archivage", () => {
+  test("archiver reste « archivée »", () => {
+    expect(typeAffiche("commande_archivee", { archivee: true })).toBe("commande_archivee");
+  });
+
+  test("désarchiver devient un type d'affichage distinct", () => {
+    expect(typeAffiche("commande_archivee", { archivee: false })).toBe("commande_desarchivee");
+  });
+
+  test("une charge sans le drapeau n'invente pas le geste inverse", () => {
+    /*
+     * Les événements écrits AVANT ce drapeau n'en portent pas. Basculer sur
+     * l'ABSENCE transformerait tout l'historique ancien en « sortie des
+     * archives » — c'est-à-dire remplacerait un libellé approximatif par un
+     * libellé faux, ce qui est strictement pire.
+     */
+    for (const charge of [{}, null, undefined, { champ: "statut" }, "pas un objet"]) {
+      expect(typeAffiche("commande_archivee", charge)).toBe("commande_archivee");
+    }
+  });
+
+  test("CONTRE-TEST : aucun autre type n'est réécrit", () => {
+    // Sans lui, une bascule trop large renommerait des événements qui n'ont
+    // rien à voir avec l'archivage, et le journal mentirait sur autre chose.
+    for (const t of [
+      "commande_creee",
+      "commande_modifiee",
+      "media_ajoute",
+      "lien_revoque",
+    ] as const) {
+      expect(typeAffiche(t, { archivee: false })).toBe(t);
+    }
   });
 });

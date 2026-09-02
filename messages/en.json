@@ -605,6 +605,7 @@
         "commande_creee": "Order created",
         "commande_modifiee": "Field edited",
         "commande_archivee": "Order archived",
+        "commande_desarchivee": "Order restored from archive",
         "commande_dupliquee": "Order duplicated",
         "media_ajoute": "Media added",
         "media_supprime": "Media removed",

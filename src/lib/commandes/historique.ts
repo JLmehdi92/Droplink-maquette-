@@ -24,7 +24,14 @@ import { creerClientServeur } from "@/lib/supabase/server";
 /** Ce qu'une ligne d'historique rend à l'écran. */
 export interface LigneHistorique {
   readonly id: string;
-  readonly type: TypeEvenement;
+  /**
+   * Le type tel qu'il est AFFICHÉ, qui n'est pas toujours celui de la base.
+   *
+   * Un seul écart aujourd'hui : `commande_archivee` porte les deux sens du
+   * geste dans sa charge utile, et l'écran doit les distinguer. Le type en base
+   * ne bouge pas — le contrat des événements non plus.
+   */
+  readonly type: TypeAffiche;
   readonly quand: string;
   /**
    * Le détail affichable, déjà réduit à des valeurs simples.
@@ -50,7 +57,47 @@ const Charge = z.object({
   champ: z.string().max(40).optional(),
   nombre: z.number().int().optional(),
   lot: z.number().int().optional(),
+  /**
+   * ⚠️ LE SENS DU GESTE D'ARCHIVAGE, ET IL ÉTAIT JETÉ.
+   *
+   * La base écrit `{"archivee": true}` ou `{"archivee": false}` sous le MÊME
+   * type d'événement, `commande_archivee`. Ce schéma ne nommait pas cette clé,
+   * donc `resumerCharge` la laissait tomber, et l'écran affichait « Commande
+   * archivée » dix fois de suite — y compris pour les cinq fois où la commande
+   * avait été SORTIE des archives.
+   *
+   * L'information existait, l'écran la jetait. Et l'historique est ce qu'on
+   * regarde en cas de litige avec un client : un journal qui dit le contraire
+   * d'un fait enregistré est pire qu'un journal absent. La liste, elle, sait
+   * déjà dire « Sortir des archives » — c'était une incohérence interne, pas
+   * une lacune de vocabulaire.
+   */
+  archivee: z.boolean().optional(),
 });
+
+/**
+ * Le type d'AFFICHAGE : celui de la base, sauf pour le geste qui en porte deux.
+ *
+ * `commande_desarchivee` n'existe PAS en base et ne doit pas y exister : la
+ * distinction est dans la charge utile, pas dans le type, et ajouter une valeur
+ * d'énumération pour un affichage ferait porter à la base une décision d'écran.
+ */
+export type TypeAffiche = TypeEvenement | "commande_desarchivee";
+
+/**
+ * Rend le type à afficher pour un événement et sa charge.
+ *
+ * PURE ET EXPORTÉE : c'est cette décision qui était fausse, et elle s'éprouve
+ * sans base ni composant.
+ */
+export function typeAffiche(type: TypeEvenement, brut: unknown): TypeAffiche {
+  if (type !== "commande_archivee") return type;
+  const analyse = Charge.safeParse(brut);
+  // ⚠️ SEUL UN `false` EXPLICITE FAIT BASCULER. Une charge illisible, vide, ou
+  // écrite par une version antérieure à ce drapeau n'affirme rien : elle garde
+  // le libellé d'origine plutôt que d'inventer le geste inverse.
+  return analyse.success && analyse.data.archivee === false ? "commande_desarchivee" : type;
+}
 
 /**
  * Réduit une charge utile à une phrase courte, ou à rien.
@@ -105,7 +152,11 @@ export async function lireHistorique(
     .filter((l) => connus.has(l.type))
     .map((l) => ({
       id: l.id,
-      type: l.type as TypeEvenement,
+      // LE TYPE D'ÉVÉNEMENT NE CHANGE PAS EN BASE — il reste
+      // `commande_archivee`, et le contrat des événements avec lui. C'est
+      // l'AFFICHAGE qui distingue les deux sens, parce que c'est lui qui
+      // mentait.
+      type: typeAffiche(l.type as TypeEvenement, l.payload),
       quand: l.occurred_at,
       detail: resumerCharge(l.payload),
     }));
