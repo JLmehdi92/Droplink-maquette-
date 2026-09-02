@@ -1113,6 +1113,77 @@ try {
 
         const entetes = { cookie: cookieVendeur, ...visiteur(41) };
 
+        // ══════════════════════════════════════════════════════════════════════════
+        // ET LE GESTE FAIT-IL CE QU IL DIT ? — LE CONTRE-TEST POSITIF QUI MANQUAIT
+        // ══════════════════════════════════════════════════════════════════════════
+        //
+        // ⚠️ TOUT CE QUI PRECEDE EPROUVE DES REFUS. La garde CSRF refuse, la garde
+        // de session refuse, le GET est refuse, le corps vide est refuse. Une
+        // suite ou tout est refuse passe a 100 % sans rien prouver : ces controles
+        // resteraient TOUS VERTS si le geste, une fois passe, n archivait rien.
+        //
+        // ⚠️ ET C EST EXACTEMENT LA QUE VIT LE DEFAUT LE PLUS GRAVE DU PROJET. Sur
+        // la surface authentifiee, en build de PRODUCTION, une navigation qui garde
+        // le meme chemin a deja ete ABANDONNEE en silence — 16 pistes fermees par
+        // mesure. Le mode de defaillance n est pas une erreur : c est un 303 qui
+        // part, un ecran qui revient, et une base qui n a pas bouge.
+        //
+        // ON LIT DONC LA BASE, AVANT ET APRES, sur les DEUX transitions. Le geste
+        // inverse n est pas du zele : archiver puis desarchiver ramene la commande
+        // de fumee a son etat de depart, donc les controles suivants — la page
+        // publique, le suivi — mesurent ce qu ils croient mesurer.
+        if (commandeFumee) {
+          const entetesGeste = {
+            cookie: cookieVendeur,
+            ...visiteur(46),
+            origin: base,
+            "content-type": "application/x-www-form-urlencoded",
+          };
+          const archivee = async () => {
+            const { data } = await service
+              .from("orders")
+              .select("archived_at")
+              .eq("id", commandeFumee)
+              .single();
+            return data?.archived_at !== null && data?.archived_at !== undefined;
+          };
+          const geste = async (archiver) =>
+            fetch(`${base}/fr/commandes/geste`, {
+              method: "POST",
+              redirect: "manual",
+              headers: entetesGeste,
+              body: new URLSearchParams({
+                geste: "archiver",
+                id: commandeFumee,
+                archiver: archiver ? "1" : "0",
+                retour: "/fr/commandes",
+              }),
+            });
+
+          const avant = await archivee();
+          const rArchive = await geste(true);
+          const apresArchive = await archivee();
+          const rRetour = await geste(false);
+          const apresRetour = await archivee();
+
+          controles.push(
+            // CONTRE-TEST D ABORD : si elle etait DEJA archivee, « elle l est apres »
+            // serait vrai sans que le geste ait rien fait.
+            [avant === false, `CONTRE-TEST : la commande n est pas archivee au depart (${avant})`],
+            [
+              rArchive.status === 303,
+              `le geste d archivage repond 303 (statut ${rArchive.status})`,
+            ],
+            // LA MOITIE QUI MANQUAIT, ET LA SEULE QUI PROUVE QUELQUE CHOSE.
+            [apresArchive === true, "et la commande est REELLEMENT archivee EN BASE"],
+            [
+              rRetour.status === 303 && apresRetour === false,
+              `le geste inverse la sort des archives, en base (statut ${rRetour.status}, archivee ${apresRetour})`,
+            ],
+          );
+        }
+
+
         // ── LE PLAFOND DE L EXPORT, EPROUVE PAR EPUISEMENT ──
         //
         // ⚠️ IL N EXISTAIT PAS. L export etait le SEUL chemin du produit a produire
@@ -1983,6 +2054,7 @@ try {
       enGet.status === 405,
       `le geste de liste n existe qu en POST (GET : statut ${enGet.status}, attendu 405)`,
     ]);
+
   }
 
   if (jetonFumee) {
