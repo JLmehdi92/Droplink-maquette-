@@ -1174,7 +1174,8 @@
       "enRetardAide": "Last run {n} minutes ago · alert threshold: {seuil} minutes",
       "jamaisExecuteeAide": "No run recorded. This job has never run since it was deployed — that is not a failure, and not an alert.",
       "tache": {
-        "cadence-suivi": "Carrier polling"
+        "cadence-suivi": "Carrier polling",
+        "veille-mutuelle": "Mutual task watch"
       },
       "surface": {
         "publique-requetes": "Public pages",

@@ -1174,7 +1174,8 @@
       "enRetardAide": "Dernier passage il y a {n} minutes · seuil d'alerte : {seuil} minutes",
       "jamaisExecuteeAide": "Aucun passage enregistré. La tâche n'a jamais tourné depuis son déploiement — ce n'est pas une panne, et ce n'est pas une alerte.",
       "tache": {
-        "cadence-suivi": "Interrogation des transporteurs"
+        "cadence-suivi": "Interrogation des transporteurs",
+        "veille-mutuelle": "Veille mutuelle des tâches"
       },
       "surface": {
         "publique-requetes": "Pages publiques",
