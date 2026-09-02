@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { resoudreAccent } from "../../src/lib/design/contraste";
+import { apercuDe } from "@/components/publique/visionneur";
 import { ReseauxVendeur } from "../../src/components/publique/reseaux-vendeur";
 import { sansCommentaires } from "../aide/source";
 
@@ -219,5 +220,71 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     const serialise = JSON.stringify(rendu);
     expect(serialise).toContain("https://instagram.com/atelier.nord");
     expect(serialise).toContain("noopener");
+  });
+});
+
+/**
+ * UN MÉDIA SANS APERÇU DOIT SE VOIR, PAS DISPARAÎTRE.
+ *
+ * DÉFAUT MESURÉ LE 02/09/2026 : la page publique annonçait « 2 éléments » et ne
+ * rendait AUCUNE image — tuiles vides, couverture vide. Le client lit ça comme
+ * « c'est cassé », sur la seule page que le produit existe pour montrer. Et son
+ * vendeur, lui, voit une icône de repli dans son éditeur : il ne peut même pas
+ * reproduire ce qu'on lui décrit.
+ *
+ * CE N'EST PAS UN ACCIDENT RARE. La vignette est produite dans le NAVIGATEUR du
+ * vendeur et son échec est délibérément non bloquant ; `cle_vignette` nullable
+ * est un cas normal, le brief le dit.
+ *
+ * ⚠️ LE JSX D'UN COMPOSANT À ÉTAT NE S'ÉPROUVE PAS SANS NAVIGATEUR, et c'est
+ * pour ça que la décision a été sortie en fonction pure : ce qui était faux,
+ * c'était la DÉCISION, pas le dessin. On l'interroge donc directement, dans les
+ * portes, à chaque commit.
+ */
+describe("Ce qu'une tuile de la page client doit montrer", () => {
+  const VIGNETTE = "https://exemple.test/v.webp?sig=1";
+  const COUVERTURE = "https://exemple.test/c.webp?sig=2";
+
+  test("une photo avec vignette montre sa vignette", () => {
+    expect(apercuDe({ type: "photo", urlVignette: VIGNETTE })).toEqual({ url: VIGNETTE });
+  });
+
+  test("la couverture prime sur la vignette quand elle existe", () => {
+    expect(apercuDe({ type: "photo", urlVignette: VIGNETTE, urlCouverture: COUVERTURE })).toEqual({
+      url: COUVERTURE,
+    });
+  });
+
+  test("une photo SANS vignette montre un repli, jamais rien", () => {
+    expect(apercuDe({ type: "photo", urlVignette: null })).toEqual({ repli: "photo" });
+    expect(apercuDe({ type: "photo", urlVignette: null, urlCouverture: null })).toEqual({
+      repli: "photo",
+    });
+    // `urlCouverture` est OPTIONNELLE, et son absence ne doit pas être confondue
+    // avec une URL. `exactOptionalPropertyTypes` interdit de passer `undefined`
+    // explicitement, donc on éprouve ce que la vraie forme produit : la
+    // propriété absente, qui est le cas de tout média déposé avant que la
+    // dérivée 900 px existe.
+    expect(apercuDe({ type: "video", urlVignette: null })).toEqual({ repli: "video" });
+  });
+
+  test("une vidéo SANS capture montre le repli VIDÉO, pas le repli photo", () => {
+    // Les deux replis ne disent pas la même chose au client : l'un annonce une
+    // image, l'autre quelque chose qui se lit.
+    expect(apercuDe({ type: "video", urlVignette: null })).toEqual({ repli: "video" });
+  });
+
+  test("CONTRE-TEST : le repli ne remplace JAMAIS un aperçu qui existe", () => {
+    /*
+     * Sans lui, une correction qui rendrait le repli partout passerait tous les
+     * cas ci-dessus — en cachant les photos que le vendeur a effectivement
+     * déposées, c'est-à-dire en aggravant exactement le défaut qu'on corrige.
+     */
+    for (const type of ["photo", "video"] as const) {
+      expect(apercuDe({ type, urlVignette: VIGNETTE })).toEqual({ url: VIGNETTE });
+      expect(apercuDe({ type, urlVignette: null, urlCouverture: COUVERTURE })).toEqual({
+        url: COUVERTURE,
+      });
+    }
   });
 });

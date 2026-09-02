@@ -81,6 +81,67 @@ function PastilleLecture({ taille = 22 }: { readonly taille?: number }) {
   );
 }
 
+/**
+ * CE QUI S'AFFICHE QUAND UN MÉDIA N'A PAS D'APERÇU.
+ *
+ * ⚠️ DÉFAUT MESURÉ LE 02/09/2026 : la page annonçait « 2 éléments » et ne
+ * rendait AUCUNE image. La tuile était un carré vide, la couverture aussi. Le
+ * client lit ça comme « c'est cassé », sur la seule page que le produit existe
+ * pour montrer — et son vendeur, lui, voit une icône de repli dans son éditeur,
+ * donc il ne peut même pas reproduire ce qu'on lui décrit.
+ *
+ * ET CE N'EST PAS UN ACCIDENT RARE : la vignette est produite dans le
+ * NAVIGATEUR du vendeur, et son échec est délibérément non bloquant — refuser
+ * un média parce qu'on n'a pas su en faire une vignette ferait payer au vendeur
+ * une limite qui est la nôtre. `cle_vignette` nullable est donc, comme le brief
+ * l'écrit, un cas NORMAL.
+ *
+ * ON N'INVENTE RIEN ET ON NE CACHE RIEN. Le média EXISTE : le compteur qui
+ * l'annonce dit vrai, et le clic ouvre bien la photo en plein écran, signée à
+ * l'ouverture. Seul son aperçu manque, et c'est exactement ce que ce repli dit.
+ *
+ * PAS DE REPLI SUR LA PHOTO PLEINE, malgré la tentation : elle pèse cent fois
+ * la vignette, et surtout la mettre dans le document distribuerait une capacité
+ * de plus à qui lit la source — c'est la règle que le visionneur applique
+ * partout ailleurs.
+ *
+ * Le tracé est le même que celui de l'éditeur du vendeur : une image pour une
+ * photo, un triangle de lecture pour une vidéo. Les deux écrans disent la même
+ * chose du même média.
+ *
+ * CE QU'UNE TUILE DOIT MONTRER — la décision, séparée du rendu.
+ *
+ * Elle vit ici plutôt que dans le JSX pour une raison : c'est cette décision-là
+ * qui était fausse, et le JSX d'un composant à état ne s'éprouve pas sans
+ * navigateur. Sortie en fonction pure, elle s'interroge par l'EFFET, dans les
+ * portes, à chaque commit.
+ */
+export function apercuDe(media: {
+  readonly type: "photo" | "video";
+  readonly urlVignette: string | null;
+  readonly urlCouverture?: string | null;
+}): { readonly url: string } | { readonly repli: "photo" | "video" } {
+  const url = media.urlCouverture ?? media.urlVignette;
+  return url !== null && url !== undefined ? { url } : { repli: media.type };
+}
+
+function ApercuIndisponible({ video }: { readonly video: boolean }) {
+  return (
+    <span
+      className="pointer-events-none absolute inset-0 flex items-center justify-center text-gris-inactif"
+      aria-hidden="true"
+    >
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+        {video ? (
+          <path d="M8 5v14l11-7z" />
+        ) : (
+          <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 13h12l-3.6-4.8-2.9 3.6-2-2.4L6 17zm2.5-6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+        )}
+      </svg>
+    </span>
+  );
+}
+
 export function Visionneur({
   jeton,
   medias,
@@ -115,6 +176,7 @@ export function Visionneur({
   const courant = index === null ? undefined : medias[index];
   const premier = medias[0];
   const tuiles = medias.slice(1, TUILES_BUREAU + 1);
+  const apercuPremier = premier === undefined ? { repli: "photo" as const } : apercuDe(premier);
 
   // L'URL pleine est demandée à CHAQUE ouverture, et jetée à la fermeture : une
   // URL signée a une durée de vie, la garder en mémoire ferait échouer une
@@ -329,12 +391,12 @@ export function Visionneur({
             className="relative block aspect-[4/3] w-full overflow-hidden bg-fond-avatar lg:aspect-[16/10] lg:rounded-lg"
             aria-label={libelles.ouvrir + " 1"}
           >
-            {(premier.urlCouverture ?? premier.urlVignette) !== null ? (
+            {"url" in apercuPremier ? (
               /* eslint-disable-next-line @next/next/no-img-element -- URL
                  signée à expiration : l'optimiseur la mettrait en cache
                  au-delà de sa validité et servirait des images mortes. */
               <img
-                src={premier.urlCouverture ?? (premier.urlVignette as string)}
+                src={apercuPremier.url}
                 alt=""
                 // Les dimensions déclarées SUIVENT la source réellement
                 // servie. Annoncer 200 × 200 pour une image de 900 px ferait
@@ -349,8 +411,12 @@ export function Visionneur({
                 decoding="async"
                 className="h-full w-full object-cover"
               />
+            ) : (
+              <ApercuIndisponible video={apercuPremier.repli === "video"} />
+            )}
+            {premier.type === "video" && "url" in apercuPremier ? (
+              <PastilleLecture taille={34} />
             ) : null}
-            {premier.type === "video" ? <PastilleLecture taille={34} /> : null}
             {filigrane !== null ? (
               <span className="pointer-events-none absolute right-3 bottom-3 select-none font-label-md text-label-md text-white drop-shadow">
                 {filigrane}
@@ -364,6 +430,7 @@ export function Visionneur({
                 const rang = decalage + 1;
                 const resteTelephone = medias.length - TUILES_TELEPHONE - 1;
                 const resteBureau = medias.length - TUILES_BUREAU - 1;
+                const apercu = apercuDe(media);
 
                 return (
                   <li
@@ -376,12 +443,12 @@ export function Visionneur({
                       className="relative block aspect-square w-full overflow-hidden bg-fond-avatar lg:rounded"
                       aria-label={libelles.ouvrir + " " + (rang + 1)}
                     >
-                      {media.urlVignette !== null ? (
+                      {"url" in apercu ? (
                         /* eslint-disable-next-line @next/next/no-img-element --
                            même raison : URL signée à expiration, et une
                            vignette de 200 px n'a rien à optimiser. */
                         <img
-                          src={media.urlVignette}
+                          src={apercu.url}
                           alt=""
                           width={200}
                           height={200}
@@ -389,8 +456,12 @@ export function Visionneur({
                           decoding="async"
                           className="h-full w-full object-cover"
                         />
+                      ) : (
+                        <ApercuIndisponible video={apercu.repli === "video"} />
+                      )}
+                      {media.type === "video" && "url" in apercu ? (
+                        <PastilleLecture />
                       ) : null}
-                      {media.type === "video" ? <PastilleLecture /> : null}
 
                       {rang === TUILES_TELEPHONE && resteTelephone > 0 ? (
                         <span className="absolute inset-0 flex items-center justify-center bg-surface-container-high/90 font-headline-md text-[15px] font-extrabold text-ardoise lg:hidden">
