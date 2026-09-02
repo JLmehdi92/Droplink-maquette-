@@ -78,6 +78,14 @@ const DECISION_DU_BRIEF: Readonly<Record<string, "autorise" | "refuse">> = {
   // Un point d'ingestion machine sans plafond nous fait calculer des signatures
   // à l'infini.
   "suivi-notification": "refuse",
+  // Le seul chemin qui signe des URL d'ÉCRITURE vers le stockage. Un refus
+  // injustifié coûte au vendeur de redéposer un fichier qu'il a toujours.
+  depot: "refuse",
+  // L'export fait sortir des `public_token`, qui sont immuables à vie : ce
+  // n'est pas une donnée qu'on relira, c'est une capacité qu'on ne reprend
+  // plus. Laisser passer pendant une panne du compteur ouvrirait en grand le
+  // seul chemin d'exfiltration du produit.
+  "export-csv": "refuse",
 };
 
 describe("l'inventaire des surfaces à plafond est complet", () => {
@@ -100,10 +108,35 @@ describe("l'inventaire des surfaces à plafond est complet", () => {
     ).toEqual([]);
   });
 
+  /*
+   * ⚠️ TROU RÉEL DE CE FICHIER, TROUVÉ LE 02/09/2026 EN Y AJOUTANT UNE SURFACE.
+   *
+   * `DECISION_DU_BRIEF` n'était lue que dans UN sens : chacune de ses entrées
+   * devait correspondre à `DEGRADATION`. Rien n'exigeait l'inverse — une
+   * surface nouvelle pouvait donc naître avec n'importe quel comportement en
+   * panne sans que la table de RELECTURE, celle qui existe précisément pour
+   * forcer à décider plutôt qu'à subir, ne s'en aperçoive.
+   *
+   * Ce n'est pas théorique : `depot` existait depuis l'audit du 26/08 et n'y
+   * figurait pas. La duplication voulue de ce fichier ne servait donc à rien
+   * pour cette surface-là — les deux « sources indépendantes » n'en étaient
+   * qu'une.
+   */
+  test("chaque surface a une décision RELUE À PART, pas seulement une décision", () => {
+    const sans = surfaces.filter((s) => !(s in DECISION_DU_BRIEF));
+    expect(
+      sans,
+      "Surfaces dont la dégradation n'a jamais été relue contre le brief : la " +
+        "table du produit se vérifie alors elle-même, ce qui ne prouve rien.",
+    ).toEqual([]);
+  });
+
   // L'AUTRE SENS : une décision qui ne correspond plus à aucune surface.
   test("aucune décision ne survit à la surface qu'elle décrivait", () => {
     const orphelines = Object.keys(DEGRADATION).filter((s) => !surfaces.includes(s));
     expect(orphelines, "Décisions de dégradation devenues sans objet").toEqual([]);
+    const reluesEnTrop = Object.keys(DECISION_DU_BRIEF).filter((s) => !surfaces.includes(s));
+    expect(reluesEnTrop, "Relectures du brief devenues sans objet").toEqual([]);
   });
 
   test("chaque surface a un seuil, et le seuil est atteignable", () => {

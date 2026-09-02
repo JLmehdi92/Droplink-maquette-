@@ -25,12 +25,22 @@ export async function generateMetadata({
 /**
  * LES SURFACES QUE L'ÉCRAN MONTRE.
  *
- * Trois sur sept, et c'est un choix : ce sont celles dont la saturation change
- * ce qu'on fait. Une saturation de la page publique peut être un vendeur qui
- * perce ; un pic de jetons INCONNUS est une aspiration ; l'administration qui
- * sature, c'est nous. Les quatre autres — authentification par IP et par email,
- * écriture publique, notifications de suivi — sont comptées et protégées, elles
- * n'appellent simplement aucune décision de surveillance.
+ * ⚠️ CE COMMENTAIRE DISAIT « TROIS SUR SEPT ». Il y en a douze — trois pour le
+ * mot de passe depuis le 01/09, une pour l'export depuis le 02/09 — et le
+ * chiffre n'avait été relu à aucun de ces ajouts. C'est le motif que le brief
+ * nomme : *les décomptes se périment à chaque session, les remplacer par la
+ * requête qui les produit*. Aucun décompte n'est donc réécrit ici ; la liste
+ * ci-dessous EST l'inventaire, et `Surface` reste la seule source du reste.
+ *
+ * Ce qui est affiché est un CHOIX, et il ne change pas : ce sont les surfaces
+ * dont la saturation change ce qu'on fait. Une saturation de la page publique
+ * peut être un vendeur qui perce ; un pic de jetons INCONNUS est une
+ * aspiration ; l'administration qui sature, c'est nous.
+ *
+ * Toutes les autres sont comptées et protégées — le contrôle d'inventaire
+ * `tests/unit/surfaces-a-plafond` l'établit surface par surface, dans les deux
+ * sens — elles n'appellent simplement aucune décision de surveillance : leur
+ * saturation se règle toute seule en refusant.
  */
 const SURFACES_AFFICHEES: readonly Surface[] = [
   "publique-requetes",

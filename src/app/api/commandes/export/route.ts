@@ -5,6 +5,7 @@ import { ParametresListe } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
+import { verifierQuotaExport } from "@/lib/limitation/quota";
 
 /**
  * L'EXPORT CSV DES COMMANDES DU VENDEUR CONNECTÉ.
@@ -37,6 +38,32 @@ export async function GET(requete: NextRequest): Promise<NextResponse> {
    */
   if (profil === null || profil.statut !== "active") {
     return new NextResponse(null, { status: 404 });
+  }
+
+  /*
+   * LE PLAFOND VIENT APRÈS L'IDENTITÉ, ET AVANT TOUT TRAVAIL.
+   *
+   * Après, parce que la clé est le vendeur : compter avant de savoir qui
+   * appelle obligerait à compter par adresse, donc à faire partager un plafond
+   * à tous les comptes d'un réseau partagé — le persona fournisseur.
+   *
+   * Avant le reste, parce que ce qu'on borne coûte 5 000 lignes lues et fait
+   * sortir jusqu'à 5 000 liens publics : les payer puis refuser n'aurait borné
+   * que la bande passante.
+   *
+   * ⚠️ 429 ET NON 404. La règle du 404 plus haut protège l'EXISTENCE de la
+   * route contre qui n'a rien à y faire ; ici l'appelant est un vendeur
+   * authentifié, à qui la route est connue et légitime. Lui répondre 404 le
+   * ferait conclure que son export est cassé, et il recommencerait — ce qui est
+   * exactement le comportement que le plafond cherche à décourager.
+   */
+  const quota = await verifierQuotaExport(profil.profilId);
+  if (!quota.autorise) {
+    return new NextResponse(null, {
+      status: 429,
+      // La fenêtre est d'une heure ; l'en-tête évite au client de deviner.
+      headers: { "retry-after": "3600" },
+    });
   }
 
   const origine = await origineDuSite();

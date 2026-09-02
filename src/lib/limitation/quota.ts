@@ -56,6 +56,21 @@ export type Surface =
   | "suivi-notification"
   /** La demande d'une URL de dépôt de média, par VENDEUR. */
   | "depot"
+  /**
+   * L'EXPORT CSV, par VENDEUR.
+   *
+   * ⚠️ CE N'EST PAS D'ABORD UN SEUIL DE COÛT. Le fichier porte les LIENS
+   * PUBLICS des commandes — jusqu'à 5 000 par requête, et un `public_token` est
+   * immuable à vie : ce que l'export fait sortir, ce sont des CAPACITÉS
+   * permanentes, pas des données périssables. C'est le seul chemin du produit
+   * qui produise un fichier quittant l'application, et il n'avait aucun
+   * plafond. Une session volée pouvait en tirer l'intégralité des jetons d'un
+   * compte en autant de requêtes qu'elle voulait.
+   *
+   * Le coût vient ensuite, et il est réel : 5 000 lignes lues par requête,
+   * autant de fois par minute qu'on le demande.
+   */
+  | "export-csv"
   /** Toute requête visant la surface d'administration, par adresse. */
   | "admin";
 
@@ -98,6 +113,7 @@ export const DEGRADATION: Readonly<Record<Surface, "autorise" | "refuse">> = {
   "publique-ecriture": "refuse",
   "suivi-notification": "refuse",
   depot: "refuse",
+  "export-csv": "refuse",
   admin: "refuse",
 };
 
@@ -227,6 +243,31 @@ export function seuil(surface: Surface): { plafond: number; fenetreSecondes: num
       return {
         plafond: entierEnv("QUOTA_PUBLIQUE_ECRITURE_PAR_MINUTE", 10),
         fenetreSecondes: 60,
+      };
+    case "export-csv":
+      /*
+       * L'EXPORT CSV — DIX PAR HEURE, PAR VENDEUR.
+       *
+       * LA FENÊTRE EST UNE HEURE, PAS UNE MINUTE, et c'est le seul seuil du
+       * module dans ce cas avec ceux de l'authentification. Les plafonds à la
+       * minute bornent un DÉBIT ; celui-ci borne une EXFILTRATION. Une minute
+       * suffirait à tirer 300 000 lignes en cinq minutes tout en restant sous
+       * un plafond de dix — c'est-à-dire à ne rien borner du tout.
+       *
+       * DIX EST TRÈS AU-DESSUS DE L'USAGE RÉEL. Un vendeur exporte pour ouvrir
+       * un tableur ; les actions groupées lui permettent d'exporter plusieurs
+       * sélections de suite, d'où dix plutôt que trois. À 5 000 lignes par
+       * fichier, dix couvrent 50 000 commandes par heure, soit plus de cinq
+       * fois le plafond annuel du plus gros vendeur décrit au brief.
+       *
+       * ⚠️ LA CLÉ EST LE VENDEUR, PAS L'ADRESSE — comme `depot`, et pour la
+       * même raison : ce qu'on borne est l'épuisement d'UN compte, et le
+       * fournisseur en Chine passe par un réseau partagé où compter par adresse
+       * couperait plusieurs comptes légitimes ensemble.
+       */
+      return {
+        plafond: entierEnv("QUOTA_EXPORT_PAR_HEURE", 10),
+        fenetreSecondes: 3600,
       };
     case "admin":
       /*
@@ -556,6 +597,29 @@ export async function verifierQuotaDepot(profilId: string): Promise<Verdict> {
   // où l'on cherche quel compte dépose sans arrêt — et c'est le seul moment où
   // cette table sert à quelque chose.
   return consommer(profilId, "depot");
+}
+
+/**
+ * Le quota de l'EXPORT CSV, par vendeur.
+ *
+ * ⚠️ LE FICHIER EXPORTÉ PORTE LES LIENS PUBLICS DES COMMANDES. Un
+ * `public_token` est immuable à vie : ce qui sort d'ici n'est pas une donnée
+ * périssable, c'est une CAPACITÉ permanente sur la page d'un client, jusqu'à
+ * 5 000 d'un coup. C'est le seul chemin du produit qui produise un fichier
+ * quittant l'application, et il n'avait aucun plafond — une session volée
+ * pouvait en tirer tous les jetons d'un compte, en autant de requêtes qu'elle
+ * voulait, sans qu'aucun compteur ne bouge.
+ *
+ * ELLE REFUSE EN CAS DE PANNE DU COMPTEUR, comme `depot`. Un refus injustifié
+ * coûte au vendeur de recliquer sur un bouton ; l'autorisation par défaut
+ * rouvrirait ce chemin en grand pendant toute la durée de la panne.
+ *
+ * L'identifiant n'est pas empreinté : un UUID ne se retrouve pas par force
+ * brute, et le garder en clair rend le compteur lisible le jour où l'on cherche
+ * quel compte exporte sans arrêt.
+ */
+export async function verifierQuotaExport(profilId: string): Promise<Verdict> {
+  return consommer(profilId, "export-csv");
 }
 
 /**

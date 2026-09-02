@@ -1103,6 +1103,55 @@ try {
         const libelleBrouillon = catalogue.editeur.titre;
 
         const entetes = { cookie: cookieVendeur, ...visiteur(41) };
+
+        // ── LE PLAFOND DE L EXPORT, EPROUVE PAR EPUISEMENT ──
+        //
+        // ⚠️ IL N EXISTAIT PAS. L export etait le SEUL chemin du produit a produire
+        // un fichier quittant l application, et le seul sans compteur de debit. Le
+        // fichier porte les LIENS PUBLICS des commandes — jusqu a 5 000 par
+        // requete, et un `public_token` est immuable a vie : ce qui sort n est pas
+        // une donnee qu on relira, c est une CAPACITE qu on ne reprend plus. Une
+        // session volee pouvait en tirer tous les jetons d un compte, en autant de
+        // requetes qu elle voulait.
+        //
+        // ON L EPUISE POUR DE VRAI plutot que de lire une constante : un plafond
+        // qu on n a jamais vu mordre est une declaration, pas une garde (L-018). Le
+        // compte de fumee est neuf a chaque passage, donc son compteur part de zero.
+        {
+          const entetesExport = { cookie: cookieVendeur, ...visiteur(44) };
+          const statuts = [];
+          // Le plafond vaut 10 par heure ; on tire douze fois pour voir la coupure
+          // ET la voir tenir apres.
+          for (let i = 0; i < 12; i += 1) {
+            const r = await fetch(`${base}/api/commandes/export`, { headers: entetesExport });
+            statuts.push(r.status);
+          }
+          const passes = statuts.filter((s) => s === 200).length;
+          const coupes = statuts.filter((s) => s === 429).length;
+          const premierRefus = statuts.indexOf(429);
+
+          controles.push(
+            // CONTRE-TEST D ABORD : une suite ou tout est refuse passe a 100 % sans
+            // rien prouver. Le vendeur doit d abord pouvoir exporter.
+            [passes > 0, `CONTRE-TEST : l export repond 200 a un vendeur legitime (${passes} fois)`],
+            [
+              coupes > 0,
+              `le plafond de l export MORD (${coupes} refus sur 12, statuts ${statuts.join(",")})`,
+            ],
+            // LA COUPURE EST AU BON ENDROIT, pas seulement quelque part : un
+            // plafond qui mordrait des la premiere requete casserait le produit, et
+            // un plafond qui ne mordrait qu a la douzieme ne bornerait rien.
+            [
+              premierRefus >= 5 && premierRefus <= 11,
+              `la coupure tombe apres ${premierRefus} exports, pas des le premier`,
+            ],
+            // ET ELLE TIENT : une fois coupe, ca reste coupe dans la fenetre.
+            [
+              statuts.slice(premierRefus).every((s) => s === 429),
+              "une fois coupe, le compteur ne se rouvre pas dans la meme fenetre",
+            ],
+          );
+        }
         const titreDe = (html) => (html.match(/<title[^>]*>([^<]*)<\/title>/i) ?? [])[1] ?? "";
 
         const remplie = await fetch(`${base}/fr/commandes/${commandeFumee}`, {
@@ -1643,6 +1692,7 @@ try {
       enPost.status === 405,
       `l export refuse explicitement les autres methodes (statut ${enPost.status})`,
     ]);
+
   }
 
   {
