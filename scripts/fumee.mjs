@@ -23,7 +23,7 @@
 //
 // Il exige un `.next` a jour, donc il vient APRES `pnpm build` dans la chaine.
 import { spawn, execSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createServer } from "node:net";
 import { gzipSync } from "node:zlib";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -797,6 +797,7 @@ let jetonFumee = null;
 // de fumee est supprimee dans le `finally`, donc la page ne repond plus.
 let htmlPagePublique = null;
 let commandeFumee = null;
+let shopFumee = null;
 let brouillonFumee = null;
 let profilFumee = null;
 
@@ -957,6 +958,7 @@ try {
         .single();
 
       commandeFumee = commande?.id ?? null;
+      shopFumee = shop.id;
       jetonFumee = commande?.public_token ?? null;
 
       // La boutique de fumee n a PAS de nom — `shops.name` est nullable et la
@@ -974,6 +976,41 @@ try {
         .eq("id", shop.id);
       if (erreurReseau) {
         console.error(`ECHEC impossible de poser le reseau de fumee : ${erreurReseau.message}`);
+        echecs += 1;
+      }
+
+      // ── UN MEDIA, PARCE QUE SANS LUI LA PAGE PUBLIQUE N A AUCUNE URL SIGNEE ──
+      //
+      // ⚠️ TROU REEL DE CETTE SONDE, TROUVE LE 02/09/2026. La commande de fumee
+      // n a JAMAIS porte de media. Consequences, deux, et la seconde est la
+      // pire :
+      //
+      //   1. le chemin le plus visite du produit — la galerie — n etait rendu
+      //      par aucun controle de bout en bout ;
+      //   2. le controle par VALEUR pose ci-dessous aurait ete VRAI SANS RIEN
+      //      REGARDER. Un ensemble vide passe tout : chercher un identifiant
+      //      dans une page qui ne porte aucune URL signee ne prouve rien, et se
+      //      lit exactement comme une garde qui tient.
+      //
+      // La cle a la FORME que le declencheur `verifier_cles_media` (055) exige :
+      // `medias/{shop}/{commande}/{media}.{ext}`. L objet n existe pas dans R2 —
+      // signer une cle ne demande pas que l objet existe, et ce qu on mesure ici
+      // est le HTML rendu, pas le telechargement.
+      const idMediaFumee = randomUUID();
+      const cleFumee = `medias/${shop.id}/${commandeFumee}/${idMediaFumee}.jpg`;
+      const { error: erreurMedia } = await service.from("order_media").insert({
+        id: idMediaFumee,
+        order_id: commandeFumee,
+        type: "photo",
+        cle: cleFumee,
+        cle_vignette: `medias/${shop.id}/${commandeFumee}/${idMediaFumee}.vignette.webp`,
+        largeur: 1200,
+        hauteur: 1600,
+        taille_octets: 240000,
+        position: 0,
+      });
+      if (erreurMedia) {
+        console.error(`ECHEC impossible de poser le media de fumee : ${erreurMedia.message}`);
         echecs += 1;
       }
 
@@ -1755,6 +1792,81 @@ try {
             !html.includes(commande?.unsubscribe_token ?? "|impossible|"),
             "le jeton de desabonnement n apparait pas — un jeton, un pouvoir",
           ],
+
+          // ── LES IDENTIFIANTS INTERNES, BORNES LA OU LA FUITE SE PRODUIT ──
+          //
+          // ⚠️ CETTE BORNE N EXISTAIT QUE SUR L OBJET DE LECTURE.
+          // `tests/rls/page-publique.test.ts` la tient sur ce que rend
+          // `lire_commande_publique` ; RIEN ne la tenait sur le HTML REELLEMENT
+          // SERVI. Un attribut de donnee ajoute a un composant, une charge d
+          // hydratation, un identifiant passe en propriete a un ilot client :
+          // aucun de ces chemins ne traverse l objet de lecture, et aucune garde
+          // ne les regardait.
+          //
+          // FAIT MESURE LE 02/09/2026 SUR UN BUILD SERVI, sur une vraie commande
+          // a un media : 28 occurrences du `shop_id` et 25 de l `order_id` dans
+          // le HTML, et ZERO hors des chemins d objet R2. La propriete tient
+          // donc aujourd hui — c est precisement le moment de la border, avant
+          // qu un ecran suivant ne la perde sans que personne ne le voie.
+          //
+          // L EXCEPTION EST DECLAREE ET BORNEE, pas subie : une signature S3/R2
+          // ne peut pas ne pas porter la cle d objet qu elle signe, et la forme
+          // de cette cle est la garde qui empeche un vendeur d ecraser le media
+          // d un autre (declencheur `verifier_cles_media`, migration 055). La
+          // rendre opaque retirerait la protection la plus forte du stockage
+          // pour masquer un UUID sans signification hors de notre base.
+          // L arbitrage — deux liens du meme vendeur restent correlables — est a
+          // Wassim, et il est ecrit dans le test RLS.
+          ...(() => {
+            const signees = (html.match(/https?:\/\/[^"'\\\s]+/g) ?? []).filter((u) =>
+              u.includes("X-Amz-Signature"),
+            );
+            /*
+             * ON RETIRE LE CHEMIN D OBJET, PAS « L URL SIGNEE ».
+             *
+             * Premier jet : decouper sur les URL entieres portant
+             * `X-Amz-Signature`. Il a laisse UNE occurrence de chaque
+             * identifiant, et le contexte imprime a montre qu elle etait
+             * pourtant dans une URL R2 — la meme adresse voyage sous PLUSIEURS
+             * ecritures dans la meme page (`&` dans la charge d hydratation,
+             * `&amp;` dans un attribut, encodages differents), donc un
+             * decoupage par CHAINE EXACTE en manque toujours une.
+             *
+             * L exception declaree porte sur le CHEMIN — `medias/{shop}/…`,
+             * `logos/{shop}/…` — et c est donc lui qu on retire, quelle que
+             * soit l ecriture de ce qui l entoure.
+             */
+            const sansUrl = html.replace(
+              /(medias|logos)(\/|%2F)[0-9a-f-]{36}(\/|%2F)[0-9a-f-]{36}((\/|%2F)[0-9a-f-]{36})?/gi,
+              "[chemin-objet]",
+            );
+            const compter = (v) => (v ? sansUrl.split(v).length - 1 : -1);
+            // UN CONTROLE QUI ECHOUE DOIT DIRE CE QU IL A VU. Sans le contexte,
+            // « 1 ailleurs » envoie relire tout un HTML de 50 Ko a la main.
+            const ou = (v) => {
+              const k = v ? sansUrl.indexOf(v) : -1;
+              return k === -1
+                ? ""
+                : ` — …${sansUrl.slice(Math.max(0, k - 90), k + 40).replace(/\s+/g, " ")}`;
+            };
+            return [
+              // CONTRE-TEST D ABORD, ET IL EST LA RAISON DU MEDIA DE FUMEE :
+              // sans une seule URL signee, les deux controles suivants seraient
+              // vrais en n ayant rien retire et rien regarde.
+              [
+                signees.length > 0,
+                `CONTRE-TEST : ${signees.length} URL signee(s) dans le HTML servi`,
+              ],
+              [
+                compter(shopFumee) === 0,
+                `le shop_id n apparait QUE dans les chemins d objet (${compter(shopFumee)} ailleurs)${ou(shopFumee)}`,
+              ],
+              [
+                compter(commandeFumee) === 0,
+                `l order_id n apparait QUE dans les chemins d objet (${compter(commandeFumee)} ailleurs)${ou(commandeFumee)}`,
+              ],
+            ];
+          })(),
 
           // Sur un aplat uni, un blanc a 70 % floute rend la meme couleur qu un
           // blanc opaque : le flou n a rien a flouter, et c est ce qui rame le
