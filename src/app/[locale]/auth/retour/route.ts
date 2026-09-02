@@ -37,12 +37,31 @@ export async function GET(
   const langue = estLangueSupportee(locale) ? locale : "fr";
 
   const code = requete.nextUrl.searchParams.get("code");
+  /*
+   * ⚠️ DEUX FORMES DE PREUVE ARRIVENT ICI, ET LA SECONDE MANQUAIT.
+   *
+   * DÉFAUT MESURÉ LE 02/09/2026 en suivant un vrai lien de récupération :
+   * `/auth/v1/verify` de Supabase répond `303` vers notre route avec le jeton
+   * dans un **FRAGMENT** — `#access_token=…`. Un fragment n'est JAMAIS envoyé au
+   * serveur : la route ne voyait donc rien et répondait « lien incomplet ».
+   *
+   * Le `code` PKCE, lui, n'arrive que si le lien est ouvert DANS LE MÊME
+   * NAVIGATEUR que la demande : le vérificateur vit dans un cookie posé à ce
+   * moment-là. Or on demande une réinitialisation sur son ordinateur et on ouvre
+   * ses mails sur son téléphone — c'est même le cas le plus courant.
+   *
+   * `token_hash` est la forme que Supabase documente POUR LE SERVEUR : elle
+   * voyage dans la requête, elle ne dépend d'aucun cookie, donc elle traverse
+   * les appareils. On accepte les deux, et on refuse toujours ce qui n'est ni
+   * l'un ni l'autre.
+   */
+  const empreinteJeton = requete.nextUrl.searchParams.get("token_hash");
   const versMotDePasse = requete.nextUrl.searchParams.get("suite") === "mot-de-passe";
 
-  // Un lien sans code est un lien tronqué par une messagerie, ou une visite
+  // Un lien sans preuve est un lien tronqué par une messagerie, ou une visite
   // directe. On renvoie vers la connexion plutôt que d'afficher une erreur
   // technique : la personne n'a rien fait de mal et n'a qu'une action utile.
-  if (code === null) {
+  if (code === null && empreinteJeton === null) {
     return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=lien`, requete.url));
   }
 
@@ -72,11 +91,24 @@ export async function GET(
   }
 
   const supabase = await creerClientServeur();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  /*
+   * UNE SEULE SORTIE D'ÉCHEC POUR LES DEUX FORMES. Lien expiré, déjà consommé,
+   * émis pour un autre navigateur, ou empreinte inconnue : les quatre se
+   * corrigent de la même façon — en redemandant un lien — et les distinguer
+   * n'apprendrait rien à qui a cliqué, tout en renseignant qui sonde.
+   */
+  const { error } =
+    empreinteJeton !== null
+      ? await supabase.auth.verifyOtp({
+          token_hash: empreinteJeton,
+          // `recovery` sur le chemin du mot de passe, `email` sinon — c'est le
+          // type que Supabase attend pour une confirmation d'inscription.
+          type: versMotDePasse ? "recovery" : "email",
+        })
+      : await supabase.auth.exchangeCodeForSession(code ?? "");
 
   if (error !== null) {
-    // Lien expiré, déjà consommé, ou émis pour un autre navigateur. Les trois
-    // se corrigent de la même façon : en redemandant un lien.
     return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=expire`, requete.url));
   }
 
