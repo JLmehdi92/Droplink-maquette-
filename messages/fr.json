@@ -983,7 +983,7 @@
       "ceMoisCi": "ce mois-ci",
       "commandes": "Commandes créées",
       "commandesCourt": "Commandes",
-      "comptesDont": "dont {suspendus} suspendus, {sansType} sans type",
+      "comptesDont": "dont {sansType} sans type · {suspendus} suspendus, hors de ce total",
       "dernieresActions": "Dernières actions d'administration",
       "toutLeJournal": "Tout le journal",
       "alerteDetail": {

@@ -983,7 +983,7 @@
       "ceMoisCi": "this month",
       "commandes": "Orders created",
       "commandesCourt": "Orders",
-      "comptesDont": "including {suspendus} suspended, {sansType} with no type",
+      "comptesDont": "of which {sansType} with no type · {suspendus} suspended, outside this total",
       "dernieresActions": "Latest administration actions",
       "toutLeJournal": "Full log",
       "alerteDetail": {

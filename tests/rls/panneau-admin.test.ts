@@ -337,3 +337,104 @@ describe("Les commandes créées du mois sont comptées", () => {
     ).toBeGreaterThan(0);
   });
 });
+
+/**
+ * LE MOT « DONT » DOIT ÊTRE VRAI.
+ *
+ * ⚠️ DÉFAUT MESURÉ LE 02/09/2026, écran et base à la même minute :
+ *
+ *   écran : « Comptes actifs | 12 | dont 2 suspendus, 10 sans type »
+ *   base  : actifs 12 · suspendus 2 · sans_type 10 · dont ACTIFS 8
+ *
+ * Le mot « dont » était faux deux fois. Les 2 suspendus ne sont pas parmi les
+ * 12 actifs — le total des inscrits est 14, et ce nombre n'apparaissait nulle
+ * part. Et sur les 12 actifs, 8 seulement étaient sans type : le compteur
+ * portait sur TOUTE la table, suspendus compris.
+ *
+ * ⚠️ CE SONT DEUX CHIFFRES DE LA PHASE DE VALIDATION. Le brief dit que la
+ * segmentation d'usage EST le livrable de cette phase, et que `account_type` est
+ * nullable SANS DÉFAUT pour rendre le manque visible plutôt que silencieux. Une
+ * métrique de verdict légèrement faussée est pire qu'une métrique cassée, parce
+ * qu'elle reste crédible.
+ *
+ * ⚠️ LE CONTRÔLE COMPARE LE COMPTEUR À LA POPULATION QU'IL PRÉTEND DÉCRIRE,
+ * pas à un nombre écrit d'avance : un nombre attendu se périme à la première
+ * exécution du banc, et se corrige alors en le réécrivant — c'est-à-dire en
+ * effaçant le défaut au lieu de le voir.
+ */
+describe("Les compteurs de comptes décrivent la population qu'ils annoncent", () => {
+  test("« sans type » porte sur les comptes ACTIFS, pas sur toute la table", async () => {
+    // On fabrique l'écart : un compte SUSPENDU et SANS TYPE. Avant la
+    // correction, il gonflait « sans type » sans entrer dans « actifs ».
+    await interroger(
+      catalogue,
+      "update public.profiles set status = 'suspended', account_type = null where id = $1",
+      [vendeur.profilId],
+    );
+
+    const [reel] = await interroger<{
+      actifs: string;
+      sans_type_actifs: string;
+      sans_type_partout: string;
+    }>(
+      catalogue,
+      `select (select count(*) from public.profiles where status = 'active') as actifs,
+              (select count(*) from public.profiles
+                where status = 'active' and account_type is null) as sans_type_actifs,
+              (select count(*) from public.profiles where account_type is null) as sans_type_partout`,
+    );
+
+    const panneau = await lirePanneau(admin.client, SEUILS);
+
+    // `noUncheckedIndexedAccess` : la ligne peut manquer, et une comparaison
+    // faite sur `undefined` passerait sans rien mesurer.
+    expect(reel, "la lecture des populations n a rien rendu").toBeDefined();
+    if (reel === undefined) return;
+
+    // CONTRE-TEST, EN PREMIER : l'écart existe-t-il vraiment dans le jeu ?
+    // Sans lui, l'égalité ci-dessous serait vraie parce que les deux
+    // populations coïncident — et ne prouverait rien.
+    expect(
+      Number(reel.sans_type_partout),
+      "aucun compte suspendu sans type : le contrôle ne discriminerait rien",
+    ).toBeGreaterThan(Number(reel.sans_type_actifs));
+
+    expect(
+      panneau.compteurs.comptesSansType,
+      "« dont N sans type » compte des comptes qui ne sont pas dans le total annoncé",
+    ).toBe(Number(reel.sans_type_actifs));
+
+    expect(panneau.compteurs.comptesActifs).toBe(Number(reel.actifs));
+
+    await interroger(
+      catalogue,
+      "update public.profiles set status = 'active', account_type = 'reseller' where id = $1",
+      [vendeur.profilId],
+    );
+  }, 30_000);
+
+  test("« suspendus » porte bien sur toute la table, lui", async () => {
+    // L'AUTRE SENS : ce compteur-là ne doit PAS être restreint aux actifs, ce
+    // qui le rendrait toujours nul. C'est le libellé qui dit qu'ils sont hors
+    // du total, pas le chiffre qui doit se cacher.
+    await interroger(catalogue, "update public.profiles set status = 'suspended' where id = $1", [
+      vendeur.profilId,
+    ]);
+
+    const [reel] = await interroger<{ n: string }>(
+      catalogue,
+      "select count(*) as n from public.profiles where status = 'suspended'",
+    );
+    const panneau = await lirePanneau(admin.client, SEUILS);
+
+    expect(reel, "la lecture des suspendus n a rien rendu").toBeDefined();
+    if (reel === undefined) return;
+
+    expect(Number(reel.n), "aucun suspendu : le contrôle passerait à vide").toBeGreaterThan(0);
+    expect(panneau.compteurs.comptesSuspendus).toBe(Number(reel.n));
+
+    await interroger(catalogue, "update public.profiles set status = 'active' where id = $1", [
+      vendeur.profilId,
+    ]);
+  }, 30_000);
+});
