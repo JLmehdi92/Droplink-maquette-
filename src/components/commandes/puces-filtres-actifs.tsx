@@ -27,18 +27,26 @@ export async function PucesFiltresActifs({
   readonly base: string;
   readonly parametres: ParametresListe;
 }) {
-  // LE TRI COMPTE ICI, ALORS QU'IL NE COMPTE PAS DANS `listeFiltree`.
-  //
-  // Deux des cinq tris RESTREIGNENT en plus d'ordonner : « jamais ouvertes »
-  // n'affiche que les commandes à zéro vue, « bloquées » que les colis en transit
-  // dont le mouvement s'est arrêté. Sans puce, un vendeur qui tombe sur zéro
-  // résultat avec l'un des deux n'a aucun moyen de revenir en arrière depuis
-  // l'écran vide — la planche `CommandesFiltreVide` n'y dessine pas les pilules.
-  //
-  // `listeFiltree` reste inchangée pour autant : elle sert à ouvrir le panneau de
-  // filtres, et un raccourci de vue n'a pas à déplier un panneau.
-  const triRestreint = parametres.tri === "jamais-ouvert" || parametres.tri === "bloquees";
-  if (!listeFiltree(parametres) && !triRestreint) return null;
+  /*
+   * ⚠️ IL Y AVAIT ICI UNE PUCE POUR LE TRI, ET ELLE FAISAIT DOUBLON.
+   *
+   * Deux des cinq tris RESTREIGNENT en plus d'ordonner — « jamais ouvertes »,
+   * « bloquées » — et cette rangée en portait une puce. La raison écrite était
+   * qu'un vendeur tombé sur zéro résultat n'avait aucun moyen de revenir,
+   * « la planche `CommandesFiltreVide` n'y dessinant pas les pilules ».
+   *
+   * CETTE PRÉMISSE EST MORTE, et c'est le correctif du 02/09/2026 qui l'a tuée :
+   * la planche porte désormais la rangée de vues sur l'écran vide, et le code
+   * la rend. Le vendeur voit donc la pilule « Jamais ouvertes » SURLIGNÉE et
+   * « Toutes » à un clic — et par-dessus, une puce qui redisait la même chose.
+   *
+   * LE VOCABULAIRE DU CANEVAS TRANCHE AUSSI : cette rangée s'intitule
+   * « Filtres actifs », et les planches n'y dessinent que des FILTRES —
+   * recherche, statut, période. Un tri est une VUE, et une vue se dit par sa
+   * pilule. La puce s'annonçait d'ailleurs « Vue : … » dans une rangée de
+   * filtres, ce qui était l'aveu du problème.
+   */
+  if (!listeFiltree(parametres)) return null;
 
   const t = await getTranslations("commandes");
   const format = await getFormatter();
@@ -97,13 +105,6 @@ export async function PucesFiltresActifs({
           clef: "archivees",
           libelle: t("puce.archivees"),
           href: lienListe(base, parametres, { archivees: false }),
-        }
-      : null,
-    triRestreint
-      ? {
-          clef: "tri",
-          libelle: t("puce.tri", { valeur: t("tri." + parametres.tri) }),
-          href: lienListe(base, parametres, { tri: "recentes" }),
         }
       : null,
   ].filter((p) => p !== null);

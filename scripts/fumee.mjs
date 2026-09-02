@@ -1404,13 +1404,42 @@ try {
         );
         const htmlFiltree = filtree.status === 200 ? await filtree.text() : "";
 
+        // UN TRI RESTREINT, SANS AUCUN FILTRE : le cas ou la puce en doublon
+        // apparaissait. Aucun `q`, aucune periode — la rangee de puces ne doit
+        // donc pas exister du tout.
+        const triSeul = await fetch(`${base}/fr/commandes?tri=jamais-ouvert`, {
+          headers: entetes,
+          redirect: "manual",
+        });
+        const htmlTriSeul = triSeul.status === 200 ? await triSeul.text() : "";
+
+        /*
+         * ⚠️ CHERCHER UN LIBELLE DANS LE HTML BRUT NE PROUVE RIEN ICI.
+         *
+         * L espace vendeur EXPEDIE SON CATALOGUE DE TRADUCTION au navigateur —
+         * contrairement a la page publique, qui ne le fait deliberement pas.
+         * Chaque libelle de cet ecran est donc present dans la charge
+         * d hydratation, RENDU OU NON. Le controle du tri seul ci-dessous est
+         * ne rouge pour cette raison exacte, et les trois qui le precedent
+         * passaient peut-etre pour la meme mauvaise raison.
+         *
+         * On retire donc les `<script>` avant de chercher : ce qui reste est ce
+         * qui est REELLEMENT rendu. C est L-020 — interroger l effet, pas le
+         * mot — et sa variante L-031, appliquer le motif au contenu debarrasse
+         * de ce qui n est pas du contenu.
+         */
+        const rendu = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, "");
+        const htmlPleineRendu = rendu(htmlPleine);
+        const htmlFiltreeRendu = rendu(htmlFiltree);
+        const htmlTriSeulRendu = rendu(htmlTriSeul);
+
         const tous = (html, liste) => liste.every((v) => html.includes(v));
         const aucun = (html, liste) => liste.every((v) => !html.includes(v));
 
         controles.push(
           // CONTRE-TEST, EN PREMIER : la liste pleine porte bien les deux.
           [
-            pleine.status === 200 && tous(htmlPleine, pilules) && tous(htmlPleine, cartes),
+            pleine.status === 200 && tous(htmlPleineRendu, pilules) && tous(htmlPleineRendu, cartes),
             `la liste pleine porte ses ${pilules.length} vues et ses ${cartes.length} compteurs`,
           ],
           // ET LE RESULTAT VIDE EN EST BIEN UN — sans ca, les deux controles
@@ -1420,12 +1449,40 @@ try {
             `le filtre introuvable ne rend aucune ligne (statut ${filtree.status})`,
           ],
           [
-            tous(htmlFiltree, pilules),
+            tous(htmlFiltreeRendu, pilules),
             `un resultat VIDE garde ses ${pilules.length} vues cliquables`,
           ],
           [
-            tous(htmlFiltree, cartes),
+            tous(htmlFiltreeRendu, cartes),
             `un resultat VIDE garde ses ${cartes.length} compteurs`,
+          ],
+
+          /*
+           * UN TRI NE PRODUIT PAS DE PUCE DE FILTRE.
+           *
+           * ⚠️ IL EN PRODUISAIT UNE, EN DOUBLON DE SA PROPRE PILULE : l ecran
+           * montrait « Jamais ouvertes » surligne dans la rangee de vues ET,
+           * au-dessus, une puce « Vue : jamais ouvertes » dans une rangee
+           * intitulee « Filtres actifs ». Les planches n y dessinent que des
+           * filtres — recherche, statut, periode ; un tri est une VUE.
+           *
+           * LE CONTRE-TEST VIENT D ABORD, sinon « aucune rangee de puces »
+           * serait vrai d un ecran qui n en rendrait JAMAIS, y compris sur une
+           * vraie recherche — et c est cette rangee-la qui donne au vendeur le
+           * moyen de retirer un critere sans tout effacer.
+           */
+          [
+            htmlFiltreeRendu.includes(catalogue.commandes.filtresActifsLabel),
+            "CONTRE-TEST : une recherche rend bien la rangee « Filtres actifs »",
+          ],
+          [
+            triSeul.status === 200 &&
+              !htmlTriSeulRendu.includes(catalogue.commandes.filtresActifsLabel),
+            `un TRI seul ne rend AUCUNE rangee de puces (statut ${triSeul.status})`,
+          ],
+          [
+            tous(htmlTriSeulRendu, [vues.jamaisOuvertes]),
+            "et sa pilule de vue est bien la, seule a nommer la restriction",
           ],
           // L AUTRE SENS : ce qui n a rien a outiller reste cache.
           [

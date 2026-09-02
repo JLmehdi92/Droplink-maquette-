@@ -595,8 +595,7 @@
       "periodeEntre": "Period: {du} to {au}",
       "periodeDepuis": "Period: from {du}",
       "periodeJusqua": "Period: until {au}",
-      "archivees": "Archive",
-      "tri": "View: {valeur}"
+      "archivees": "Archive"
     },
     "statutSansMouvement": "No movement · {jours} d",
     "sousTitreArchives": "You are viewing your archive. The links still work."
