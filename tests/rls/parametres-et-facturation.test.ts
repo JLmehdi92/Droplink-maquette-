@@ -155,6 +155,51 @@ describe("les bornes des paramètres sont vérifiées EN BASE", () => {
         "côté est une borne qu'un chemin de code contourne.",
     ).toEqual(dansLeCode);
   });
+
+  test("aucune raison ne décrit un mécanisme que le produit n'a plus", async () => {
+    /*
+     * ⚠️ DÉRIVE RÉELLE, TROUVÉE LE 02/09/2026. La raison d'`inscriptions_ouvertes`
+     * disait : « La fermeture agit APRÈS le clic sur le LIEN MAGIQUE, jamais à
+     * son envoi ». Le lien magique est supprimé du produit depuis le
+     * 01/09/2026, et depuis la migration 141 la fermeture agit AVANT `signUp` —
+     * la phrase décrivait donc l'inverse du comportement.
+     *
+     * ⚠️ ET CE N'EST PAS DE LA COSMÉTIQUE. C'est le seul endroit du produit où
+     * la raison d'un réglage est écrite À CÔTÉ du réglage, donc celui qui fait
+     * autorité. Quelqu'un qui la lit et constate le comportement d'aujourd'hui
+     * conclut à un défaut et le « corrige » en remettant la garde après
+     * `signUp` — c'est-à-dire en réintroduisant celui qu'on vient de fermer.
+     * C'est L-014 dans sa variante la plus coûteuse : le document ne se contente
+     * pas d'être faux, il donne les instructions de la régression.
+     *
+     * LA LISTE EST ÉTROITE ET NE VISE QUE CETTE COLONNE. Un lint de contenu qui
+     * chercherait ces mots dans tout le dépôt échouerait sur les commentaires
+     * qui en parlent AU PASSÉ, lesquels sont légitimes et nombreux — c'est
+     * L-008, un lint de contenu échoue sur ses propres listes noires. Ici, en
+     * revanche, aucune raison de réglage n'a de motif d'évoquer un mécanisme
+     * qui n'existe plus : elles décrivent ce que le produit FAIT.
+     */
+    const DISPARUS = [/lien magique/i, /magic ?link/i, /signInWithOtp/i];
+
+    const { rows } = await bd.query<{ cle: string; raison: string }>(
+      "select cle, raison from public.parametres_admis order by cle",
+    );
+    // UN ENSEMBLE VIDE PASSE TOUT, et une colonne vide aussi.
+    expect(rows.length, "l'inventaire en base est vide").toBeGreaterThan(0);
+    expect(
+      rows.filter((r) => r.raison.trim().length > 40).length,
+      "les raisons sont vides ou trop courtes : le contrôle ne porte sur rien",
+    ).toBe(rows.length);
+
+    const fautives = rows
+      .filter((r) => DISPARUS.some((m) => m.test(r.raison)))
+      .map((r) => r.cle);
+    expect(
+      fautives,
+      "Raisons décrivant un mécanisme supprimé du produit. Elles font autorité : " +
+        "les laisser, c'est écrire le mode d'emploi de la régression.",
+    ).toEqual([]);
+  });
 });
 
 describe("le compteur facturable compte une prise en charge, et une seule", () => {
