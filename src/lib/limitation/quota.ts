@@ -371,7 +371,15 @@ async function consommer(cle: string, surface: Surface): Promise<Verdict> {
 }
 
 /**
- * Vérifie les deux seuils d'une demande de lien de connexion.
+ * Vérifie les seuils d'un chemin qui ENVOIE UN EMAIL.
+ *
+ * ⚠️ CETTE LIGNE DISAIT « une demande de lien de connexion ». Le lien magique
+ * est supprimé du produit depuis le 01/09/2026 : ce que cette fonction borne
+ * aujourd'hui, c'est l'inscription et la réinitialisation de mot de passe —
+ * les deux gestes qui font partir un email. C'est pour cela que ses plafonds
+ * sont dimensionnés en envois (« nul n'a besoin de six liens par heure ») et
+ * qu'ils ne conviendraient PAS à une vérification de mot de passe, qui a ses
+ * compteurs à elle.
  *
  * Les compteurs sont consommés dans l'ordre IP puis email, et l'on s'arrête au
  * premier refus : consommer le second après avoir déjà refusé ferait payer à une
@@ -409,7 +417,17 @@ export async function verifierQuotaAuth(email: string): Promise<Verdict> {
 }
 
 /**
- * Les deux seuils d'une VÉRIFICATION DE MOT DE PASSE.
+ * Les seuils d'une VÉRIFICATION DE MOT DE PASSE.
+ *
+ * ⚠️ CETTE LIGNE DISAIT « LES DEUX SEUILS », ET LA FONCTION EN CONSOMME TROIS —
+ * adresse IP, couple (IP, email), puis email. Le commentaire du `switch` qui
+ * les définit s'intitule pourtant « LES TROIS PLAFONDS DU MOT DE PASSE, ET
+ * POURQUOI IL EN FAUT TROIS » : le fichier se contredisait à trois cents lignes
+ * d'écart. Le troisième — le couple, celui qui mord le plus tôt — a été ajouté
+ * le 02/09/2026 avec sa raison, et cet en-tête n'a pas suivi.
+ *
+ * Aucun décompte n'est réécrit à la place : c'est le corps de la fonction qui
+ * fait foi, et il les nomme dans l'ordre où il les consomme.
  *
  * Même forme que `verifierQuotaAuth`, compteurs différents — voir le type
  * `Surface` pour la raison. L'ordre est le même, et pour la même raison :

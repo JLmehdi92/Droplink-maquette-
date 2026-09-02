@@ -57,10 +57,22 @@ export interface DefinitionParametre {
 /**
  * L'inventaire. Toute clé absente d'ici est REFUSÉE à l'écriture.
  *
- * Les deux entrées correspondent exactement aux deux seuils que `lireSeuils()`
- * consulte : c'est ce qui garantit qu'un réglage modifiable est un réglage lu.
- * Ajouter une entrée ici sans ajouter sa lecture ailleurs produirait précisément
- * le défaut que ce module existe pour empêcher.
+ * ⚠️ CE BLOC DISAIT « LES DEUX ENTRÉES CORRESPONDENT EXACTEMENT AUX DEUX SEUILS
+ * QUE `lireSeuils()` CONSULTE ». Il y en a CINQ ici, et `lireSeuils()` en lit
+ * TROIS — les deux interrupteurs sont lus ailleurs, par leurs fonctions
+ * dédiées. Deux nombres faux, et une correspondance qui n'a jamais existé sous
+ * cette forme. Relevé le 02/09/2026.
+ *
+ * LA PROPRIÉTÉ QU'IL PROMETTAIT, ELLE, EST VRAIE — et c'est la seule chose qui
+ * compte : **un réglage modifiable est un réglage lu**. Un paramètre écrivable
+ * que rien ne consulte est le pire des deux mondes : l'administrateur le change,
+ * la trace le consigne, l'écran affiche la nouvelle valeur, et le produit
+ * continue exactement comme avant.
+ *
+ * Ce qui change ici : elle n'est plus AFFIRMÉE par un décompte que personne ne
+ * revérifie, elle est ÉPROUVÉE — `tests/unit/reglages-reellement-lus.test.ts`
+ * exige de chaque clé une consommation réelle hors du formulaire, et échoue
+ * dans les deux sens.
  */
 export const PARAMETRES: readonly DefinitionParametre[] = [
   {
