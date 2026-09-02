@@ -441,16 +441,34 @@ base**, audit **atomique** avec la lecture qu'il trace.
   > **118 kB** de premier chargement, la brique next-intl étant déjà dans le
   > socle partagé. Ce que la règle protégeait — ne pas expédier le catalogue —
   > reste vrai ; c'est sa formulation qui interdisait trop.
-- **Trois îlots clients**, pas deux : le visionneur plein écran (écrit à la main
-  contre 40-90 Ko pour une bibliothèque), la balise de consultation, et
-  l'arbitrage QC — ce dernier n'étant monté que si la commande porte au moins un
-  média.
-  > ⚠️ **AMENDÉ LE 31/08/2026.** Cette ligne disait « deux îlots seulement ».
-  > `arbitrage-qc.tsx` porte `"use client"` depuis qu'il existe : le chiffre
-  > était faux, pas le principe. Il est corrigé plutôt que rangé, parce qu'un
-  > décompte qu'on ne vérifie pas devient l'argument avec lequel on refusera le
-  > quatrième îlot — ou avec lequel on l'acceptera en croyant qu'il est le
-  > troisième.
+- **Les îlots clients de la page publique sont un INVENTAIRE DÉCLARÉ, pas un
+  décompte.** Chacun est nommé avec sa raison, et
+  `tests/unit/ilots-page-publique.test.ts` compare cette liste aux fichiers qui
+  portent réellement `"use client"`, **dans les deux sens** :
+  - `visionneur.tsx` — le plein écran, écrit à la main contre 40 à 90 Ko pour
+    une bibliothèque ;
+  - `balise-vue.tsx` — le comptage de consultation, **après** le rendu ;
+  - `arbitrage-qc.tsx` — l'approbation, montée seulement si la commande porte
+    au moins un média ;
+  - `app/p/[token]/error.tsx` — la frontière d'erreur, qui **ne peut pas** être
+    un Server Component : c'est une contrainte de React, pas un choix.
+  > ⚠️ **AMENDÉ DEUX FOIS, ET LA SECONDE FOIS PARCE QUE LA PREMIÈRE S'ÉTAIT
+  > TROMPÉE.** Cette ligne a dit « deux îlots seulement », puis « trois îlots,
+  > pas deux » le 31/08/2026. Elle en oubliait toujours un : **il y en a
+  > quatre**, relevé le 02/09/2026 en comptant les fichiers.
+  >
+  > Le quatrième est `error.tsx` — et le paragraphe qui le précède
+  > immédiatement dans ce même document explique pourquoi il DOIT porter
+  > `"use client"`. L'amendement du 31/08 a donc corrigé le chiffre en oubliant
+  > l'îlot que sa propre voisine venait d'introduire : c'est L-025, un correctif
+  > qui hérite du champ de vision de la correction plutôt que du problème.
+  >
+  > Il avait écrit sa propre épitaphe : *« un décompte qu'on ne vérifie pas
+  > devient l'argument avec lequel on refusera le quatrième îlot — ou avec
+  > lequel on l'acceptera en croyant qu'il est le troisième »*. Le quatrième
+  > existait déjà quand la phrase a été écrite. **Le décompte est donc remplacé
+  > par la liste, et la liste par une requête qui la vérifie** — c'est la règle
+  > du §13 appliquée à elle-même.
 - **Pas de glassmorphism / backdrop-blur** : c'est ce qui rame le plus sur les appareils
   d'entrée de gamme. Sur un aplat uni, un blanc à 70 % flouté donne exactement la même
   couleur qu'un blanc opaque — **le flou n'a rien à flouter**.
