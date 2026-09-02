@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
 import { BaliseVue } from "@/components/publique/balise-vue";
 import { EtatExpedition } from "@/components/publique/etat-expedition";
+import { estimationVisible } from "@/lib/page-publique/estimation";
 import { ReseauxVendeur } from "@/components/publique/reseaux-vendeur";
 import { Suivi } from "@/components/publique/suivi";
 import { Visionneur } from "@/components/publique/visionneur";
@@ -215,15 +216,44 @@ export default async function PagePublique({
    *
    * ELLE DISPARAÎT AUSSI QUAND LE COLIS SE TAIT depuis plus de dix jours. Une
    * date d'arrivée qu'on sait dépassée est pire qu'une absence de date.
+   *
+   * ⚠️ ET CETTE PHRASE-LÀ N'ÉTAIT PAS APPLIQUÉE, elle n'était qu'écrite. Deux
+   * cas mesurés le 02/09/2026 sur la page servie :
+   *
+   *   colis en transit, ETA du 24 au 27 août, mouvement il y a 2 jours
+   *     → « Arrivée estimée 24 août — 27 août », SIX JOURS DANS LE PASSÉ
+   *   colis LIVRÉ hier, ETA du 6 au 9 septembre
+   *     → « Arrivée estimée 6 — 9 septembre », à côté d'une frise « Livré »
+   *
+   * La règle du silence ne rattrapait ni l'un ni l'autre : elle attend DIX
+   * jours sans mouvement, et un colis qui bouge tous les trois jours mais qui
+   * est en retard garde sa date morte indéfiniment. Or c'est exactement le
+   * colis en retard qui produit le message « c'est où mon colis » que la
+   * deuxième feature du produit existe pour tuer.
+   *
+   * LA BORNE HAUTE EST CELLE QUI COMPTE : tant qu'elle n'est pas passée, la
+   * fourchette reste vraie même si son début l'est. Et une fois le colis
+   * LIVRÉ, l'estimation n'a plus d'objet — ce n'est plus une prévision, c'est
+   * un fait, et il est déjà écrit dans la frise.
+   *
+   * ⚠️ LA COMPARAISON SE FAIT AU JOUR, PAS À LA SECONDE. Le transporteur annonce
+   * une DATE, pas un horaire : traiter « aujourd'hui » comme dépassé ferait
+   * disparaître l'estimation le matin même du jour annoncé, c'est-à-dire au
+   * moment où elle intéresse le plus.
    */
   const du = suivi?.estimationDu == null ? null : new Date(suivi.estimationDu);
   const au = suivi?.estimationAu == null ? null : new Date(suivi.estimationAu);
-  const estimation =
-    du === null || silence.etat === "silencieux"
-      ? null
-      : au === null || jour(au) === jour(du)
-        ? jour(du)
-        : jour(du) + " — " + jour(au);
+  const estimation = !estimationVisible({
+    du,
+    au,
+    etape: statutAffiche,
+    silencieux: silence.etat === "silencieux",
+    maintenant,
+  })
+    ? null
+    : du === null || au === null || jour(au) === jour(du)
+      ? jour(du as Date)
+      : jour(du) + " — " + jour(au);
 
   /*
    * `t.raw` ET NON `t` POUR LES CHAÎNES À PARAMÈTRE.
