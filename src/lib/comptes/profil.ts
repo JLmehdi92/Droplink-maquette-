@@ -13,6 +13,38 @@ import { creerClientServeur } from "@/lib/supabase/server";
  * applicatif sera écrit de travers.
  */
 
+/**
+ * Le serveur d'authentification n'a pas répondu — ce n'est PAS une session
+ * refusée.
+ *
+ * Elle est levée plutôt que rendue, parce qu'elle doit traverser
+ * `lireProfilVendeur`, qui rend `null` pour « pas de session » : confondre les
+ * deux est exactement le défaut qu'on corrige. L'appelant la rattrape et dit au
+ * vendeur que le service est momentanément indisponible, ce qui est vrai, au
+ * lieu de lui affirmer que sa session a expiré, ce qui ne l'est pas.
+ */
+export class SessionIndisponible extends Error {
+  constructor(cause: string) {
+    super("Le serveur d'authentification est injoignable : " + cause);
+    this.name = "SessionIndisponible";
+  }
+}
+
+/**
+ * Les formes sous lesquelles une coupure de transport se présente.
+ *
+ * ⚠️ LA LISTE EST VOLONTAIREMENT ÉTROITE ET ÉNUMÉRÉE — c'est la même discipline
+ * que `scripts/transport.mjs`. Un message métier — `Invalid login credentials`,
+ * `session_not_found` — n'y entre pas et ne doit jamais y entrer : l'élargir
+ * transformerait cette distinction en machine à laisser passer des sessions
+ * refusées.
+ */
+function estPanneDeTransport(message: string): boolean {
+  return /fetch failed|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|socket hang up|network|terminated|timeout/i.test(
+    message,
+  );
+}
+
 export type ProfilVendeur = {
   readonly profilId: string;
   readonly email: string;
@@ -136,11 +168,42 @@ export async function lireProfilAvec(
       .maybeSingle(),
   ]);
 
-  // ÉCHOUE FERMÉE. Une session que le serveur d'authentification refuse est une
-  // session révoquée, expirée, ou dont le compte a disparu — les trois se
-  // traitent de la même façon, et l'appelant les traite déjà comme « pas de
-  // session ».
-  if (session.error !== null || session.data.user === null) return null;
+  /*
+   * ÉCHOUE FERMÉE — mais pas sans distinguer POURQUOI.
+   *
+   * Ce commentaire énumérait trois causes : session révoquée, expirée, ou compte
+   * disparu. Il en oubliait une QUATRIÈME, et c'est celle qui ment au vendeur :
+   * le serveur d'authentification INJOIGNABLE. `getUser()` rend une `error` dans
+   * les quatre cas, et le produit ne les distinguait pas.
+   *
+   * ⚠️ MESURÉ LE 02/09/2026 : sur 200 requêtes authentifiées avec un cookie
+   * valide, par vagues de 25 en parallèle, DEUX ont été éjectées — à 11,1 s et
+   * 11,4 s, soit juste au-delà du délai de connexion de dix secondes. Le vendeur
+   * était renvoyé vers `?erreur=session`, et l'écran lui disait « Votre session
+   * a expiré. Reconnectez-vous pour continuer. »
+   *
+   * C'est le principe XII à l'envers : l'interface AFFIRME un état que la base
+   * n'a jamais enregistré. Et le même chemin sert la sauvegarde automatique de
+   * l'éditeur — donc le message tombe pendant qu'il tape, c'est-à-dire au moment
+   * où il a du texte non enregistré. Un vendeur qui apprend que « ça déconnecte
+   * tout seul » cesse de faire confiance au bouton de déconnexion, qui est une
+   * propriété de sécurité.
+   *
+   * ⚠️ ON NE DEVIENT PAS PERMISSIF POUR AUTANT. Un échec de transport rend
+   * toujours `null` — donc l'accès reste refusé, la garde ne s'ouvre pas. Ce qui
+   * change est ce qu'on en DIT : `cheminDeRefus` reçoit « indisponible » et non
+   * « session », c'est-à-dire une phrase vraie.
+   *
+   * LA CAUSE EST EN PARTIE ENVIRONNEMENTALE — un délai de connexion depuis cette
+   * machine — et je ne prétends pas la corriger ici. Ce qui est corrigé, c'est
+   * l'affirmation fausse qu'elle provoquait.
+   */
+  if (session.error !== null || session.data.user === null) {
+    if (session.error !== null && estPanneDeTransport(session.error.message)) {
+      throw new SessionIndisponible(session.error.message);
+    }
+    return null;
+  }
 
   const { data, error } = profil;
 

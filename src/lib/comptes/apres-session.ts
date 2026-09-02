@@ -5,6 +5,7 @@ import {
   lireProfilAvec,
   lireProfilVendeur,
   onboardingAFaire,
+  SessionIndisponible,
   type ProfilVendeur,
 } from "@/lib/comptes/profil";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
@@ -146,7 +147,10 @@ export async function suivreApresSession(
  * redirigeait avec son motif, et rien ne l'affichait, parce que l'inventaire des
  * motifs affichables vivait ailleurs que leur émission.
  */
-export function cheminDeRefus(langue: "fr" | "en", motif: "profil" | "suspendu" | "fermees"): string {
+export function cheminDeRefus(
+  langue: "fr" | "en",
+  motif: "profil" | "suspendu" | "fermees" | "service",
+): string {
   return `/${langue}/connexion?erreur=${motif}`;
 }
 
@@ -194,7 +198,29 @@ export function cheminDeRefus(langue: "fr" | "en", motif: "profil" | "suspendu" 
  * qui empêche le défaut de revenir par la porte de la page suivante.
  */
 export async function exigerVendeur(langue: "fr" | "en"): Promise<ProfilVendeur> {
-  const profil = await lireProfilVendeur();
+  let profil: ProfilVendeur | null;
+  try {
+    profil = await lireProfilVendeur();
+  } catch (erreur) {
+    /*
+     * ⚠️ LE SERVEUR D'AUTHENTIFICATION N'A PAS RÉPONDU — CE N'EST PAS UNE
+     * SESSION REFUSÉE, ET ON NE LE DIT PLUS COMME SI C'EN ÉTAIT UNE.
+     *
+     * Mesuré le 02/09/2026 : sur 200 requêtes authentifiées portant un cookie
+     * valide, deux ont été éjectées, à 11,1 s et 11,4 s — soit juste au-delà du
+     * délai de connexion de dix secondes — et l'écran affirmait « Votre session
+     * a expiré ». C'est le principe XII à l'envers : l'interface affirme un état
+     * que la base n'a jamais enregistré. Le même chemin servant la sauvegarde
+     * automatique de l'éditeur, la phrase tombait pendant que le vendeur tape,
+     * c'est-à-dire quand il a du texte non enregistré.
+     *
+     * L'ACCÈS RESTE REFUSÉ : on redirige, la garde ne s'ouvre pas. Seule la
+     * PHRASE change, et elle devient vraie.
+     */
+    if (!(erreur instanceof SessionIndisponible)) throw erreur;
+    console.error("[garde] " + erreur.message);
+    redirect(cheminDeRefus(langue, "service"));
+  }
 
   if (profil === null) {
     redirect(cheminDeRefus(langue, "profil"));

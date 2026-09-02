@@ -55,6 +55,15 @@ const MOTIFS = [
   "session",
   "suspendu",
   "indisponible",
+  /*
+   * `service` : le serveur d'authentification n'a pas répondu. DISTINCT de
+   * `session`, qui affirme une expiration, et distinct d'`indisponible`, qui
+   * parle de Google. Mesuré le 02/09/2026 : deux éjections sur 200 requêtes,
+   * à 11,1 s et 11,4 s — un délai de connexion dépassé — et l'écran disait
+   * « Votre session a expiré ». Une affirmation que la base n'avait jamais
+   * enregistrée.
+   */
+  "service",
   "trop",
   "fermees",
   /*

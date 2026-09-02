@@ -182,6 +182,7 @@
       "lien": "This link is incomplete. Some email apps cut it short — request a new one below.",
       "expire": "This link has expired or has already been used. Request a new one below.",
       "profil": "Your account could not be opened. Try again, and write to us if it happens again.",
+      "service": "The service is momentarily unreachable. Your session is intact: try again in a moment.",
       "session": "Your session has expired. Sign in again to continue.",
       "suspendu": "This account is suspended. Write to us to find out why.",
       "indisponible": "Google sign-in is temporarily unavailable. Use the email link below.",

@@ -186,6 +186,7 @@
       "indisponible": "La connexion Google est momentanément indisponible. Utilisez le lien par email ci-dessous.",
       "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
       "session": "Votre session a expiré. Reconnectez-vous pour continuer.",
+      "service": "Le service est momentanément injoignable. Votre session est intacte : réessayez dans un instant.",
       "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés.",
       "confirmez": "Ouvrez votre boîte mail : si un lien de confirmation vous y attend, il termine la création de votre compte. Si vous aviez déjà un compte, connectez-vous ci-dessous."
     },
