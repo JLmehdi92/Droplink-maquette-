@@ -322,3 +322,105 @@ describe("La révocation écrit son événement", () => {
     }
   });
 });
+
+/**
+ * UN COMMENTAIRE HOSTILE NE DOIT PAS FAIRE PERDRE LA DÉCISION DU CLIENT.
+ *
+ * DÉFAUT MESURÉ LE 02/09/2026. La troncature du commentaire compte des
+ * CARACTÈRES ; la contrainte du journal compte le JSON RENDU. Un caractère de
+ * contrôle s'échappe en six caractères — mille d'entre eux rendaient 6 019 pour
+ * un plafond de 4 000. `journaliser()` étant appelée DANS la transaction
+ * d'`arbitrer_qc`, son refus emportait l'`update orders` : la décision était
+ * annulée et le client recevait le message réservé au lien mort.
+ *
+ * ⚠️ ET IL ÉTAIT COMPTÉ COMME BALAYEUR DE JETONS. Ce 404-là sort par la branche
+ * des jetons inconnus, donc le compteur `publique-inconnu` s'armait. À vingt
+ * armements, sa PROPRE page de commande devenait un 404 pour lui.
+ *
+ * ⚠️ CE TEST N'INTERROGE PAS LE TEXTE DE LA FONCTION, IL INTERROGE L'EFFET :
+ * il appelle l'arbitrage avec chaque charge et regarde ce que la commande
+ * retient. Un contrôle qui chercherait `regexp_replace` dans le corps prouverait
+ * qu'une expression existe, jamais qu'elle décide.
+ */
+describe("Le commentaire du client ne peut pas annuler sa décision", () => {
+  async function arbitrerAvec(commentaire: string): Promise<{
+    rendu: string | null;
+    qc: string;
+    stocke: string | null;
+  }> {
+    // On repart d'un état neutre : sans changement de décision, le journal
+    // n'écrit rien, et le test ne mesurerait plus la charge utile.
+    await alice.client.from("orders").update({ qc_status: "en_attente" }).eq("id", commande);
+
+    // ⚠️ LE JETON EST RELU, PAS REPRIS DE LA VARIABLE DU MODULE : un describe
+    // precedent de ce meme fichier revoque le lien, et la valeur d origine ne
+    // vaut plus rien. Un test qui echoue pour cette raison-la ferait conclure a
+    // un defaut du produit qui n existe pas.
+    const { data: courant } = await alice.client
+      .from("orders")
+      .select("public_token")
+      .eq("id", commande)
+      .single();
+
+    const anonyme = clientAnonyme();
+    const { data, error } = await anonyme.rpc("arbitrer_qc", {
+      p_jeton: (courant as { public_token: string }).public_token,
+      p_decision: "approuve",
+      p_commentaire: commentaire,
+    });
+
+    const { data: apres } = await alice.client
+      .from("orders")
+      .select("qc_status")
+      .eq("id", commande)
+      .single();
+
+    const lignes = await interroger<{ c: string | null }>(
+      catalogue,
+      "select payload->>'commentaire' as c from public.order_events" +
+        " where order_id = $1 order by occurred_at desc limit 1",
+      [commande],
+    );
+
+    return {
+      rendu: error !== null ? null : ((data as string | null) ?? null),
+      qc: (apres as { qc_status: string }).qc_status,
+      stocke: lignes[0]?.c ?? null,
+    };
+  }
+
+  const HOSTILES: ReadonlyArray<readonly [string, string]> = [
+    ["mille caractères de contrôle U+0001", "\u0001".repeat(1000)],
+    ["mille caractères de contrôle U+0007", "\u0007".repeat(1000)],
+    ["mille guillemets", '"'.repeat(1000)],
+    ["mille antislashs", "\\".repeat(1000)],
+    ["mélange guillemet + antislash + contrôle", ('"' + "\\" + "\u0001").repeat(400)],
+  ];
+
+  test("la liste des charges hostiles n'est pas vide", () => {
+    // Un ensemble vide passe tout : on dit ce qu'on éprouve avant de l'éprouver.
+    expect(HOSTILES.length).toBeGreaterThanOrEqual(5);
+  });
+
+  test.each(HOSTILES)("%s : la décision est quand même enregistrée", async (_nom, charge) => {
+    const r = await arbitrerAvec(charge);
+    expect(r.rendu, "l'arbitrage a été refusé").toBe("approuve");
+    expect(r.qc, "la décision du client n'a pas été retenue").toBe("approuve");
+  });
+
+  test("CONTRE-TEST : un commentaire ordinaire est stocké tel quel, accents et emoji compris", async () => {
+    /*
+     * Sans lui, une correction qui viderait TOUS les commentaires passerait les
+     * cas ci-dessus à 100 % — en supprimant la seule chose que le client avait
+     * à dire à son vendeur.
+     */
+    const r = await arbitrerAvec("Reçu 👍 nickel\nmerci beaucoup");
+    expect(r.rendu).toBe("approuve");
+    expect(r.stocke, "le commentaire légitime n'a pas survécu").toBe("Reçu 👍 nickel\nmerci beaucoup");
+  });
+
+  test("les caractères de contrôle sont RETIRÉS, pas remplacés par du bruit", async () => {
+    const r = await arbitrerAvec("bon\u0001jour\u0007 tout va bien");
+    expect(r.stocke).toBe("bonjour tout va bien");
+  });
+});

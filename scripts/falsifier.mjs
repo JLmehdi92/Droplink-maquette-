@@ -384,7 +384,7 @@ const SQL = {
       // apres l ecriture de la 121 : reparer depuis la 069 aurait remis
       // l attribution du QC dans son etat FAUX — une revision du client
       // reattribuee au vendeur — pendant que le script annonce avoir repare.
-      fichier: "127_l_arbitrage_du_client_ne_touche_ni_la_date_ni_le_journal_sans_raison.sql",
+      fichier: "135_le_commentaire_du_client_perdait_sa_decision.sql",
       depuis: "create or replace function public.arbitrer_qc",
     },
   },
@@ -665,7 +665,7 @@ const SQL = {
         return query select v_parcel, true;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "032_attacher_colis.sql",
+      fichier: "136_l_attache_a_un_colis_deja_suivi_n_heritait_de_rien.sql",
       depuis: "create function public.attacher_colis",
       jusqua: "comment on function",
     },
@@ -709,7 +709,7 @@ const SQL = {
         return query select v_parcel, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "032_attacher_colis.sql",
+      fichier: "136_l_attache_a_un_colis_deja_suivi_n_heritait_de_rien.sql",
       depuis: "create function public.attacher_colis",
       jusqua: "comment on function",
     },
