@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { creerClientSysteme } from "@/lib/supabase/system";
 import { adresseAppelant, bordDeConfiance, empreinte } from "./empreinte";
 
@@ -420,7 +421,7 @@ export async function verifierQuotaMotDePasse(email: string): Promise<Verdict> {
  * d'un vendeur pour un incident qui ne les concerne pas. Le seul dommage d'un
  * refus injustifié est porté par quelqu'un qui n'a rien à voir avec l'incident.
  */
-export async function verifierQuotaPublique(): Promise<Verdict> {
+async function verifierQuotaPubliqueSansMemo(): Promise<Verdict> {
   const ip = await adresseAppelant();
   // Sans adresse exploitable, il n'y a rien à compter — et compter tout le monde
   // sous une clé commune reviendrait à laisser un seul balayeur couper la page
@@ -448,6 +449,34 @@ export async function verifierQuotaPublique(): Promise<Verdict> {
   }
   return verdict;
 }
+
+/**
+ * ⚠️ MÉMOÏSÉE POUR LE RENDU, ET C'EST UNE CORRECTION, PAS UNE OPTIMISATION.
+ *
+ * DÉFAUT MESURÉ LE 02/09/2026 : chaque chargement de `/p/[token]` consommait
+ * **DEUX** unités du plafond au lieu d'une — 2,00 par appel, relevé sur huit
+ * chargements avec une adresse neuve, page valide comme jeton inconnu. La
+ * mise en page racine appelle cette fonction pour poser le plafond AVANT la
+ * dépense qu'il prétend éviter, et la page l'appelle à son tour : deux appels
+ * pour une seule requête HTTP.
+ *
+ * LE PLAFOND RÉEL ÉTAIT DONC DE 60 CHARGEMENTS PAR MINUTE, PAS 120. Et la
+ * sanction est un 404 rigoureusement identique à un lien mort : le client
+ * conclut que son vendeur lui a envoyé un lien cassé. La cible de cette page
+ * est le téléphone en 4G, c'est-à-dire le CGNAT d'un opérateur où des dizaines
+ * d'abonnés partagent une adresse — et le persona fournisseur est décrit dans
+ * le brief comme partageant la sienne.
+ *
+ * `cache()` de React ne vit que le temps d'UN rendu : deux requêtes HTTP
+ * restent deux comptages, et c'est bien ce qu'on veut compter. Les route
+ * handlers (`/vue`, `/media/[id]`) ont chacun leur propre contexte, donc leur
+ * propre unité — ils comptent une fois, comme avant.
+ *
+ * ⚠️ ET L'ÉCRAN DE SURVEILLANCE LISAIT CE CHIFFRE. Il compare le pic au plafond
+ * annoncé : un pic doublé contre un plafond de 120 donnait une lecture fausse
+ * de la moitié, dans le sens rassurant.
+ */
+export const verifierQuotaPublique = cache(verifierQuotaPubliqueSansMemo);
 
 /**
  * Comptabilise un jeton inconnu. Appelée APRÈS la lecture, jamais avant.

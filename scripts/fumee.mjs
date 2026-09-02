@@ -1777,6 +1777,64 @@ try {
         // serait vrai pour n importe quelle raison — un jeton mal recopie, une
         // commande jamais creee — et l on prouverait une coupure qui n a jamais
         // eu lieu.
+        /*
+         * ═══════════════════════════════════════════════════════════════════
+         * UNE REQUETE, UNE UNITE DE PLAFOND — PAS DEUX
+         * ═══════════════════════════════════════════════════════════════════
+         *
+         * Defaut mesure le 02/09/2026 : chaque chargement de la page publique
+         * consommait DEUX unites du plafond au lieu d une. La mise en page
+         * racine pose le plafond AVANT la depense qu il previent, et la page
+         * l appelle a son tour : deux appels pour une seule requete HTTP.
+         *
+         * LE PLAFOND REEL ETAIT DONC DE 60 CHARGEMENTS PAR MINUTE, PAS 120, et
+         * la sanction est un 404 identique a un lien mort — le client conclut
+         * que son vendeur lui a envoye un lien casse. La cible de cette page
+         * est le telephone en 4G, donc une adresse partagee par des dizaines
+         * d abonnes.
+         *
+         * ⚠️ LA SONDE COMPTE EN BASE, pas dans le code : c est le compteur qui
+         * fait autorite, et c est lui que le plafond consulte. Un controle qui
+         * chercherait un appel a  dans la source prouverait qu une
+         * expression existe, jamais qu une unite est consommee.
+         */
+        {
+          // ⚠️ `x-forwarded-for`, PAS `cf-connecting-ip` : ce serveur tourne en
+          // `BORD_DE_CONFIANCE=xff` (voir plus haut). En mode `cloudflare`,
+          // seul `cf-connecting-ip` est cru, et une sonde qui poserait le mauvais
+          // en-tete ne compterait RIEN — donc mesurerait zero unite et
+          // conclurait a une sous-consommation.
+          const adresseQuota = {
+            "x-forwarded-for": `10.${port % 250}.201.7`,
+            "user-agent": "sonde-fumee/quota",
+          };
+          const cleQuota = "publique-requetes:%";
+          await service.from("rate_limit").delete().like("cle", cleQuota);
+
+          const APPELS = 6;
+          for (let i = 0; i < APPELS; i++) {
+            await fetch(`${base}/p/${jetonFumee}`, { headers: adresseQuota });
+          }
+
+          const { data: lignes } = await service
+            .from("rate_limit")
+            .select("compte")
+            .like("cle", cleQuota);
+          const unites = (lignes ?? []).reduce((t, l) => t + l.compte, 0);
+
+          controles.push(
+            // CONTRE-TEST, EN PREMIER : la sonde compte-t-elle quelque chose ?
+            // A zero, l egalite ci-dessous serait fausse mais le diagnostic le
+            // serait aussi — on croirait a une sous-consommation.
+            [unites > 0, `le compteur public enregistre bien les requetes (${unites} unites)`],
+            [
+              unites === APPELS,
+              `${APPELS} chargements consomment ${APPELS} unites de plafond, pas ${unites}`,
+            ],
+          );
+
+          await service.from("rate_limit").delete().like("cle", cleQuota);
+        }
         const avantCoupure = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(13) });
 
         const departCoupure = Date.now();
