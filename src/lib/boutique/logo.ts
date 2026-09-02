@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import { TYPES_LOGO_ACCEPTES } from "./types-logo";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
 import { cleLogo } from "@/lib/storage/cles";
@@ -21,7 +22,7 @@ import { lireTaille, signerDepot, supprimer } from "@/lib/storage/r2";
  * l'accepter reviendrait à héberger du script fourni par l'utilisateur.
  */
 
-export const TYPES_LOGO_ACCEPTES = ["image/png", "image/jpeg", "image/webp"] as const;
+export { TYPES_LOGO_ACCEPTES } from "./types-logo";
 
 /**
  * LA FORME DES ARGUMENTS QUI VIENNENT DU NAVIGATEUR.

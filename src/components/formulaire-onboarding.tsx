@@ -1,5 +1,7 @@
 "use client";
 
+import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
+
 import { useActionState, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -345,7 +347,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
         <input
           ref={champFichier}
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          accept={ACCEPT_LOGO}
           className="sr-only"
           onChange={(e) => {
             const fichier = e.target.files?.[0];

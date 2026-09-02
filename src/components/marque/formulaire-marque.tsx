@@ -1,5 +1,7 @@
 "use client";
 
+import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
+
 import { normaliserLien } from "@/lib/boutique/normaliser-lien";
 import { useActionState, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -481,7 +483,7 @@ export function FormulaireMarque({
             <input
               ref={champFichier}
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept={ACCEPT_LOGO}
               className="sr-only"
               onChange={(e) => {
                 const fichier = e.target.files?.[0];
