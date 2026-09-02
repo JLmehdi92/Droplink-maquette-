@@ -490,3 +490,94 @@ describe("La marque d'immobilité", () => {
     expect(await reclamer(unB), "le colis de Bob a été marqué par celui d'Alice").toBe(true);
   });
 });
+
+/**
+ * LA COUTURE ENTRE LA RÉSERVATION ET LA DÉCISION.
+ *
+ * ⚠️ C'EST LE GARDE QUI MANQUAIT, ET SON ABSENCE A LAISSÉ LA CADENCE MORTE.
+ *
+ * DÉFAUT MESURÉ LE 02/09/2026 : `colis_a_interroger` réservait en écrivant
+ * `last_query_at = now()`, puis rendait la valeur d'APRÈS. `decider` recevait
+ * donc, pour chaque colis, une « dernière interrogation » vieille de zéro
+ * seconde, et concluait « attendre » — toujours, pour tous les colis, y compris
+ * pour celui dont le vendeur venait de coller le numéro et qui attendait devant
+ * son écran. Aucun colis n'a jamais été interrogé par la cadence.
+ *
+ * ⚠️ LES DEUX MOITIÉS ÉTAIENT DÉJÀ ÉPROUVÉES, ET CHACUNE PASSAIT. Le test
+ * au-dessus vérifie que la RÉSERVATION tient ; `tests/unit/tracking` vérifie
+ * que `decider` décide bien — sur des dates FABRIQUÉES À LA MAIN. Personne ne
+ * confrontait la ligne que la base REND à la fonction qui la consomme. C'est
+ * L-018 : constater qu'une déclaration existe ne prouve jamais que son absence
+ * bloque.
+ *
+ * CE TEST PREND LA LIGNE RENDUE, telle quelle, et la donne à `decider`. Il
+ * échoue si l'on remet `returning p.last_query_at`.
+ */
+describe("Ce que la réservation rend doit rester décidable", () => {
+  test("un colis jamais interrogé ressort avec une date NULLE, et se décide en « interroger »", async () => {
+    const numero = numeroNeuf();
+    const id = await enregistrerColis(alice, numero);
+
+    const [ligne] = await interroger<{
+      id: string;
+      registered_at: string | null;
+      last_movement_at: string | null;
+      last_query_at: string | null;
+      empty_count: number;
+      normalized_status: string;
+    }>(catalogue, "select * from public.colis_a_interroger(200) where id = $1", [id]);
+
+    expect(ligne, "le colis neuf n'a pas été proposé à l'interrogation").toBeDefined();
+    if (ligne === undefined) return;
+
+    // LE CŒUR DU TEST. La réservation a bien eu lieu — le test au-dessus le
+    // prouve — mais la valeur RENDUE doit être celle d'AVANT.
+    expect(
+      ligne.last_query_at,
+      "la réservation a écrasé la date rendue : `decider` croira que le colis vient d'être interrogé",
+    ).toBeNull();
+
+    const { decider } = await import("@/lib/tracking/schedule");
+    const decision = decider(
+      {
+        enregistreLe: ligne.registered_at === null ? null : new Date(ligne.registered_at),
+        dernierMouvement:
+          ligne.last_movement_at === null ? null : new Date(ligne.last_movement_at),
+        derniereInterrogation:
+          ligne.last_query_at === null ? null : new Date(ligne.last_query_at),
+        interrogationsVides: ligne.empty_count,
+        etape: ligne.normalized_status as "preparation",
+        abandonneLe: null,
+      },
+      new Date(),
+    );
+
+    expect(
+      decision.action,
+      `la cadence n'interrogerait pas ce colis (décision « ${decision.action} »)`,
+    ).toBe("interroger");
+  });
+
+  test("CONTRE-TEST : un colis interrogé il y a une minute se décide bien en « attendre »", async () => {
+    /*
+     * Sans lui, une fonction qui rendrait TOUJOURS `null` passerait le contrôle
+     * ci-dessus à 100 % — et ferait interroger le fournisseur à chaque passage,
+     * pour chaque colis, c'est-à-dire exactement le défaut inverse : celui qui
+     * coûte de l'argent au lieu d'en faire perdre.
+     */
+    const { decider } = await import("@/lib/tracking/schedule");
+    const ilYaUneMinute = new Date(Date.now() - 60_000);
+    const decision = decider(
+      {
+        enregistreLe: new Date(Date.now() - 2 * 24 * 3600_000),
+        dernierMouvement: new Date(Date.now() - 24 * 3600_000),
+        derniereInterrogation: ilYaUneMinute,
+        interrogationsVides: 0,
+        etape: "en_transit",
+        abandonneLe: null,
+      },
+      new Date(),
+    );
+    expect(decision.action, "un colis tout juste interrogé serait réinterrogé").toBe("attendre");
+  });
+});
