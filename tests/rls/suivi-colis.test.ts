@@ -581,3 +581,104 @@ describe("Ce que la réservation rend doit rester décidable", () => {
     expect(decision.action, "un colis tout juste interrogé serait réinterrogé").toBe("attendre");
   });
 });
+
+/**
+ * UNE COMMANDE ATTACHÉE À UN COLIS DÉJÀ SUIVI DOIT HÉRITER DE SON ÉTAT.
+ *
+ * DÉFAUT MESURÉ LE 02/09/2026 : `attacher_colis` posait le lien et rien
+ * d'autre. La descente colis → commande vit sur le chemin de l'INGESTION, et un
+ * colis `livre` n'est plus jamais interrogé — aucune ingestion ne venait donc,
+ * et la page du client restait fausse DÉFINITIVEMENT : « aucun mouvement depuis
+ * 32 jours, passage en douane, nous continuons », pour un colis livré depuis un
+ * mois.
+ *
+ * ⚠️ CE N'EST PAS UN CAS LIMITE. Le brief fonde `tracked_parcels` sur le fait
+ * qu'un même numéro porte plusieurs commandes : la DEUXIÈME commande d'un envoi
+ * groupé tombe exactement ici, et toutes les suivantes.
+ */
+describe("Attacher une commande à un colis déjà suivi", () => {
+  async function attacher(u: UtilisateurDeTest, commandeId: string, numero: string): Promise<void> {
+    const { error } = await u.client.rpc("attacher_colis", {
+      p_order_id: commandeId,
+      p_numero: numero,
+      p_transporteur: "",
+    });
+    if (error !== null) throw new Error("attache refusée : " + error.message);
+  }
+
+  async function creerCommande(u: UtilisateurDeTest, statut: string): Promise<string> {
+    const l = await interroger<{ id: string }>(
+      catalogue,
+      "insert into public.orders (shop_id, customer_label, status) values ($1,$2,$3) returning id",
+      [u.shopId, "@heritage", statut],
+    );
+    const id = l[0]?.id;
+    if (id === undefined) throw new Error("commande non créée");
+    return id;
+  }
+
+  async function etatCommande(id: string): Promise<{ statut: string; mouvement: string | null }> {
+    const l = await interroger<{ status: string; parcel_last_movement_at: string | null }>(
+      catalogue,
+      "select status, parcel_last_movement_at from public.orders where id = $1",
+      [id],
+    );
+    return {
+      statut: l[0]?.status ?? "",
+      mouvement: l[0]?.parcel_last_movement_at ?? null,
+    };
+  }
+
+  test("l'état d'un colis DÉJÀ LIVRÉ descend dans la commande neuve", async () => {
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+    // Le colis a vécu sa vie AVANT que cette commande n'existe : c'est le cas
+    // du groupage, et c'est celui qu'aucune ingestion ne viendra rattraper.
+    await interroger(
+      catalogue,
+      `update public.tracked_parcels
+          set normalized_status = 'livre',
+              last_movement_at = now() - interval '32 days'
+        where tracking_number = $1`,
+      [numero],
+    );
+
+    const commande = await creerCommande(alice, "preparation");
+    expect((await etatCommande(commande)).statut, "état de départ inattendu").toBe("preparation");
+
+    await attacher(alice, commande, numero);
+
+    const apres = await etatCommande(commande);
+    expect(apres.statut, "la commande n'a pas hérité de l'état du colis").toBe("livre");
+    expect(apres.mouvement, "la date du dernier mouvement n'est pas descendue").not.toBeNull();
+  });
+
+  test("l'héritage est MONOTONE : un colis en préparation ne fait pas reculer une commande expédiée", async () => {
+    /*
+     * CONTRE-TEST ESSENTIEL. Une descente qui écraserait sans condition
+     * passerait le test ci-dessus à 100 % — et ferait reculer le statut chez le
+     * client, ce que la décision 2 du brief interdit formellement : le vendeur
+     * prime AVANT la remise au transporteur, le transporteur après.
+     */
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+
+    const commande = await creerCommande(alice, "expedie");
+    await attacher(alice, commande, numero);
+
+    expect((await etatCommande(commande)).statut, "le statut du vendeur a reculé").toBe("expedie");
+  });
+
+  test("CONTRE-TEST : un colis neuf n'invente aucune date de mouvement", async () => {
+    // Sans lui, une descente qui poserait `now()` par défaut passerait les deux
+    // contrôles précédents en affirmant un mouvement que personne n'a observé.
+    const numero = numeroNeuf();
+    await enregistrerColis(alice, numero);
+    const commande = await creerCommande(alice, "preparation");
+    await attacher(alice, commande, numero);
+
+    const apres = await etatCommande(commande);
+    expect(apres.statut).toBe("preparation");
+    expect(apres.mouvement, "une date de mouvement a été inventée").toBeNull();
+  });
+});

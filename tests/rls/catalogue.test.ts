@@ -1419,6 +1419,14 @@ describe("Sonde I — qui peut poser un drapeau de session", () => {
         "modification de la commande.",
     ],
     [
+      "attacher_colis",
+      "Pose `droplink.maj_transporteur` depuis la migration 136 : attacher une " +
+        "commande à un colis DÉJÀ suivi y descend son état, et cette écriture-là " +
+        "vient du transporteur, pas du vendeur. Sans le drapeau, coller un " +
+        "numéro de suivi remonterait la commande en tête du tableau de bord " +
+        "comme si le vendeur venait de la modifier.",
+    ],
+    [
       "jeton_public_immuable",
       "LIT le drapeau — c'est le déclencheur qui refuse la mutation du jeton.",
     ],
