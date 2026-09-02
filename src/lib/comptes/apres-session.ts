@@ -30,10 +30,13 @@ import { emettre } from "@/lib/instrumentation/emettre";
  * mesuré par recherche sur `src/` avant d'écrire une ligne :
  *
  *   - `lire_inscriptions_ouvertes` : UNE occurrence. L'interrupteur par lequel
- *     un administrateur ferme les inscriptions n'aurait plus rien fermé. Il
- *     l'aurait baissé, l'écran d'administration aurait dit « fermées », et les
- *     comptes auraient continué de naître. Une garde qui ment est pire qu'une
- *     garde absente : on cesse de la surveiller.
+ *     un administrateur ferme les inscriptions n'aurait plus rien fermé.
+ *     ⚠️ ET IL NE FERMAIT DÉJÀ RIEN, ce que ce module n'a vu qu'au 02/09/2026 :
+ *     posé ici, il s'exécutait APRÈS `signUp`, donc après la naissance du
+ *     compte. Il vit désormais dans `sInscrire`, avant l'appel — voir le bloc
+ *     qui remplace sa lecture plus bas. Ce paragraphe reste parce que sa
+ *     conclusion tient : une garde qui ment est pire qu'une garde absente, on
+ *     cesse de la surveiller. Elle mentait.
  *
  *   - `reclamer_evenement_inscription` : UNE occurrence. Plus AUCUNE
  *     inscription n'aurait été comptée. C'est le DÉNOMINATEUR du taux
@@ -50,7 +53,17 @@ import { emettre } from "@/lib/instrumentation/emettre";
 /** Où envoyer la personne, et pourquoi. */
 export type Destination =
   | { readonly ok: true; readonly chemin: string }
-  | { readonly ok: false; readonly motif: "profil" | "suspendu" | "fermees" };
+  /*
+   * ⚠️ `fermees` N'EST PLUS UNE DESTINATION, et son absence ici est le contrôle.
+   *
+   * Ce module ne décide plus de la fermeture des inscriptions : elle est lue
+   * dans `sInscrire`, AVANT `signUp`, seul endroit où l'intention est connue et
+   * où fermer empêche réellement le compte de naître. Le motif reste connu de
+   * `cheminDeRefus` — l'écran doit toujours savoir l'expliquer — mais aucun
+   * chemin passant par ici ne peut plus le produire. Le remettre dans cette
+   * union ferait de nouveau dépendre la CONNEXION d'un réglage d'INSCRIPTION.
+   */
+  | { readonly ok: false; readonly motif: "profil" | "suspendu" };
 
 /**
  * Décide de la suite, et émet ce qui doit l'être.
@@ -90,28 +103,35 @@ export async function suivreApresSession(
   }
 
   /*
-   * L'INTERRUPTEUR D'INSCRIPTION SE LIT ICI, PAS AVANT.
+   * ⚠️ L'INTERRUPTEUR D'INSCRIPTION NE SE LIT PLUS ICI — ET CE BLOC DISAIT LE
+   * CONTRAIRE, AVEC UNE RAISON QUE LA MESURE A RÉFUTÉE.
    *
-   * ⚠️ ET C'EST UNE FERMETURE APRÈS COUP, ASSUMÉE. Le compte est déjà créé à cet
-   * instant — `signUp` comme le lien magique créent `auth.users`, `profiles` et
-   * `shops` d'un bloc. Ce que l'interrupteur empêche n'est donc pas la
-   * naissance de la ligne, c'est l'ENTRÉE dans le produit.
+   * Il affirmait deux choses, mesurées le 02/09/2026 sur un serveur servi, en
+   * rejouant le VRAI formulaire :
    *
-   * Le fermer plus tôt, à la soumission du formulaire, coûterait exactement ce
-   * que ce projet a déjà refusé une fois : un refus rendu AVANT l'appel à
-   * Supabase se distingue par sa rapidité, et redonnerait à qui balaie des
-   * adresses un oracle qu'on a payé cher pour fermer.
+   *   1. « Ce que l'interrupteur empêche n'est pas la naissance de la ligne,
+   *      c'est l'ENTRÉE dans le produit. » Vrai, et c'est le défaut : avec les
+   *      inscriptions FERMÉES, une soumission rend bien `?erreur=fermees` et
+   *      crée quand même 1 `auth.users`, 1 `profiles` et 1 `shops`. Un
+   *      interrupteur qu'on baisse pour arrêter un afflux ne l'arrête pas.
    *
-   * LA LECTURE QUI ÉCHOUE LAISSE ENTRER. Le défaut de la fonction en base est
-   * « ouvert » ; le répéter ici évite qu'une base momentanément illisible ferme
-   * le produit sans que personne l'ait décidé.
+   *   2. « Un refus rendu AVANT l'appel à Supabase se distingue par sa
+   *      rapidité. » FAUX ici : le plancher d'authentification est
+   *      INCONDITIONNEL sur les deux chemins. Mesuré, inscriptions ouvertes :
+   *      adresse inconnue 1 249 ms, adresse connue 1 387 ms. Refuser plus tôt
+   *      puis attendre le plancher ne se distingue donc de rien.
+   *
+   * ET IL VERROUILLAIT DEHORS DES COMPTES EXISTANTS. Lu après
+   * `onboardingAFaire`, il ne frappait pas tout le monde — mesuré : onboarding
+   * terminé, la connexion passe (`/commandes`) ; onboarding NON terminé, elle
+   * rend `?erreur=fermees`. Le verrou visait donc exactement les inscrits les
+   * plus récents, c'est-à-dire ceux qu'une fermeture ne cherche jamais à
+   * exclure, et la seule population qui ne pouvait pas comprendre pourquoi.
+   *
+   * LA FERMETURE VIT DÉSORMAIS DANS `sInscrire`, AVANT `signUp` : c'est le seul
+   * endroit où l'intention est connue avec certitude, et le seul où fermer
+   * empêche réellement quelque chose.
    */
-  const { data: ouvertes, error: erreurPorte } = await supabase.rpc("lire_inscriptions_ouvertes");
-  if (erreurPorte !== null) {
-    console.error("[auth] interrupteur d'inscription illisible — " + erreurPorte.message);
-  } else if (ouvertes === false) {
-    return { ok: false, motif: "fermees" };
-  }
 
   /*
    * L'INSCRIPTION EST COMPTÉE ICI, UNE SEULE FOIS, ET LA MARQUE EST EN BASE.

@@ -272,6 +272,49 @@ export async function sInscrire(
   }
 
   const supabase = await creerClientServeur();
+
+  /*
+   * ═══════════════════════════════════════════════════════════════════════════
+   * L'INTERRUPTEUR D'INSCRIPTION SE LIT ICI, AVANT `signUp`.
+   * ═══════════════════════════════════════════════════════════════════════════
+   *
+   * ⚠️ IL SE LISAIT DANS `suivreApresSession`, DONC APRÈS. MESURÉ LE 02/09/2026
+   * SUR UN SERVEUR SERVI, en rejouant le vrai formulaire : inscriptions
+   * fermées, la réponse est bien `303 → ?erreur=fermees`, ET le compte est créé
+   * quand même — 1 `auth.users`, 1 `profiles`, 1 `shops`. L'administrateur
+   * baissait la manette, l'écran disait « fermées », et les comptes
+   * continuaient de naître. C'est mot pour mot ce que le module qui portait
+   * cette garde dit avoir empêché.
+   *
+   * ⚠️ ET LA RAISON QUI L'Y RETENAIT EST FAUSSE. Elle disait qu'un refus rendu
+   * avant l'appel à Supabase « se distingue par sa rapidité », donc rouvrirait
+   * un oracle d'existence. Le plancher est INCONDITIONNEL sur ce chemin — il
+   * est attendu ci-dessous quoi qu'il arrive, et les deux sorties d'erreur
+   * au-dessus l'attendent déjà. Mesuré sur la connexion, même discipline :
+   * adresse inconnue 1 249 ms, adresse connue 1 387 ms.
+   *
+   * ⚠️ ET IL N'Y A RIEN À DIVULGUER ICI. Le refus est le MÊME pour toute
+   * adresse, existante ou non : il ne dépend que d'un réglage global. Un oracle
+   * naît d'une réponse qui varie avec l'adresse ; celle-ci n'en dépend pas.
+   *
+   * LA LECTURE QUI ÉCHOUE LAISSE ENTRER. Le défaut de la fonction en base est
+   * « ouvert » ; le répéter ici évite qu'une base momentanément illisible ferme
+   * le produit sans que personne l'ait décidé.
+   */
+  const { data: ouvertes, error: erreurPorte } = await supabase.rpc(
+    "lire_inscriptions_ouvertes",
+  );
+  if (erreurPorte !== null) {
+    console.error("[auth] interrupteur d'inscription illisible — " + erreurPorte.message);
+  } else if (ouvertes === false) {
+    await attendrePlancher(debut);
+    // UN SEUL ENDROIT CONSTRUIT CES URL : écrire le chemin à la main ici, c'est
+    // exactement ce qui a déjà coûté quatre motifs muets sur l'écran de
+    // connexion — l'émission d'un côté, l'inventaire des motifs affichables de
+    // l'autre.
+    redirect(cheminDeRefus(locale, "fermees"));
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password: motDePasse,

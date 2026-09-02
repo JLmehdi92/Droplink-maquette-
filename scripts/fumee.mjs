@@ -798,6 +798,15 @@ let jetonFumee = null;
 let htmlPagePublique = null;
 let commandeFumee = null;
 let shopFumee = null;
+/*
+ * LES ADRESSES CREEES PAR LES SONDES, A EFFACER QUOI QU IL ARRIVE.
+ *
+ * Une sonde qui cree un compte et sort par un chemin d echec le laisse derriere
+ * elle. Ces comptes-la ne sont pas seulement du desordre : ils comptent dans
+ * `orders_created`, dans les compteurs du panneau admin et dans le denominateur
+ * du taux d activation, c est-a-dire dans la metrique de verdict de la phase.
+ */
+const comptesJetables = [];
 let brouillonFumee = null;
 let profilFumee = null;
 
@@ -1716,6 +1725,150 @@ try {
       `l export refuse explicitement les autres methodes (statut ${enPost.status})`,
     ]);
 
+  }
+
+  {
+    // ══════════════════════════════════════════════════════════════════════════
+    // L INTERRUPTEUR D INSCRIPTION FERME-T-IL QUELQUE CHOSE ?
+    // ══════════════════════════════════════════════════════════════════════════
+    //
+    // ⚠️ DEUX DEFAUTS MESURES LE 02/09/2026 EN REJOUANT LE VRAI FORMULAIRE.
+    //
+    //   1. Il ne fermait RIEN. Lu dans `suivreApresSession`, donc APRES
+    //      `signUp` : la reponse etait bien `?erreur=fermees` et le compte
+    //      naissait quand meme — 1 `auth.users`, 1 `profiles`, 1 `shops`.
+    //
+    //   2. Il VERROUILLAIT DEHORS des comptes existants. Lu apres
+    //      `onboardingAFaire`, il frappait exactement ceux qui n avaient pas
+    //      fini leur onboarding — les inscrits les plus recents, c est-a-dire
+    //      la population qu une fermeture ne cherche jamais a exclure.
+    //
+    // ⚠️ ET LA CORRECTION A ECHOUE EN SILENCE AU PREMIER JET, pour une raison
+    // qu aucune relecture ne pouvait voir : `anon` n avait pas `EXECUTE` sur
+    // `lire_inscriptions_ouvertes`. Appelee apres `signUp` la session existait ;
+    // appelee avant, l appelant est `anon` — le seul role qui puisse jamais
+    // s inscrire. L appel echouait, la branche de repli laissait entrer, et
+    // l ecran se comportait comme si l interrupteur etait ouvert. C est L-027,
+    // et c est pour ce genre de defaut que ce controle s EXECUTE.
+    const interrupteur = async (valeur) => {
+      if (valeur === null) {
+        await service.from("system_settings").delete().eq("key", "inscriptions_ouvertes");
+      } else {
+        await service
+          .from("system_settings")
+          .upsert({ key: "inscriptions_ouvertes", value: valeur }, { onConflict: "key" });
+      }
+    };
+
+    // Le formulaire poste en `multipart/form-data` avec ses champs caches : on
+    // les rejoue tels quels. C est le chemin SANS JAVASCRIPT du produit, donc
+    // exactement ce qu un navigateur envoie.
+    const deHtml = (v) =>
+      v
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;/g, "'")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&amp;/g, "&");
+    const champsDuFormulaire = async (chemin) => {
+      const page = await (await fetch(`${base}${chemin}`)).text();
+      const bloc = /<form[\s\S]*?<\/form>/.exec(page)?.[0] ?? "";
+      return [...bloc.matchAll(/<input type="hidden" name="([^"]+)"(?: value="([^"]*)")?/g)].map(
+        (m) => [deHtml(m[1]), deHtml(m[2] ?? "")],
+      );
+    };
+    const soumettre = async (chemin, champs, valeurs) => {
+      const corps = new FormData();
+      for (const [n, v] of champs) corps.set(n, v);
+      for (const [n, v] of Object.entries(valeurs)) corps.set(n, v);
+      const r = await fetch(`${base}${chemin}`, {
+        method: "POST",
+        headers: { origin: base, ...visiteur(45) },
+        body: corps,
+        redirect: "manual",
+      });
+      return r.headers.get("location") ?? `(statut ${r.status}, pas de redirection)`;
+    };
+
+    const champsInscription = await champsDuFormulaire("/fr/inscription");
+    const MDP = "Chariot-Lilas-Tempete-91";
+    const adresseFermee = `fumee-ferme-${Date.now()}@exemple.test`;
+    const adresseOuverte = `fumee-ouvert-${Date.now()}@exemple.test`;
+    comptesJetables.push(adresseFermee, adresseOuverte);
+
+    const comptes = async (adresse) => {
+      const { data } = await service.auth.admin.listUsers({ perPage: 200 });
+      return (data?.users ?? []).filter((u) => u.email === adresse).length;
+    };
+
+    controles.push([
+      champsInscription.length > 0,
+      `CONTRE-TEST : le formulaire d inscription porte ses champs caches (${champsInscription.length})`,
+    ]);
+
+    if (champsInscription.length > 0) {
+      await interrupteur(0);
+      const refus = await soumettre("/fr/inscription", champsInscription, {
+        email: adresseFermee,
+        motDePasse: MDP,
+      });
+      const nesPendantFermeture = await comptes(adresseFermee);
+
+      const champsConnexion = await champsDuFormulaire("/fr/connexion");
+
+      await interrupteur(1);
+      const succes = await soumettre("/fr/inscription", champsInscription, {
+        email: adresseOuverte,
+        motDePasse: MDP,
+      });
+      const nesPendantOuverture = await comptes(adresseOuverte);
+
+      // CE COMPTE N A PAS FAIT SON ONBOARDING : c est exactement celui que
+      // l ancien interrupteur verrouillait dehors.
+      await interrupteur(0);
+      const entree = await soumettre("/fr/connexion", champsConnexion, {
+        email: adresseOuverte,
+        motDePasse: MDP,
+      });
+      await interrupteur(null);
+
+      controles.push(
+        // CONTRE-TEST D ABORD : sans une inscription qui REUSSIT, « aucun compte
+        // n est cree » serait vrai d un formulaire completement casse.
+        [
+          succes.includes("/bienvenue") && nesPendantOuverture === 1,
+          `CONTRE-TEST : inscriptions OUVERTES, le compte est cree (${succes}, ${nesPendantOuverture} compte)`,
+        ],
+        [
+          refus.includes("erreur=fermees"),
+          `inscriptions FERMEES : la soumission est refusee (${refus})`,
+        ],
+        // LA MOITIE QUI MANQUAIT. Le refus a l ecran etait deja vrai AVANT la
+        // correction ; ce qui ne l etait pas, c est que rien ne naisse.
+        [
+          nesPendantFermeture === 0,
+          `inscriptions FERMEES : AUCUN compte n est cree (${nesPendantFermeture} trouve)`,
+        ],
+        /*
+         * ⚠️ CE CONTROLE CHERCHAIT LE MOT `erreur=fermees`, ET IL A LAISSE
+         * PASSER SA PROPRE FALSIFICATION.
+         *
+         * En remettant le verrou dans `suivreApresSession` sous un AUTRE motif,
+         * le vendeur etait de nouveau renvoye a la porte — et le controle
+         * restait vert, parce que le mot qu il cherchait avait change. C est
+         * L-020 : *un controle qui cherche un MOT ne prouve rien, il faut
+         * interroger l EFFET.*
+         *
+         * L effet, ici, c est ENTRER : la destination doit etre un ecran du
+         * produit. On l exige positivement plutot que d enumerer les refus —
+         * une liste de refus se perime a chaque motif ajoute.
+         */
+        [
+          /\/(bienvenue|commandes)(\?|$)/.test(entree),
+          `fermer les INSCRIPTIONS ne ferme pas la CONNEXION d un compte existant (${entree})`,
+        ],
+      );
+    }
   }
 
   {
@@ -2838,6 +2991,20 @@ try {
     const { data: p } = await service.from("profiles").select("user_id").eq("id", profilFumee).maybeSingle();
     if (p?.user_id) await service.auth.admin.deleteUser(p.user_id);
   }
+
+  // LES COMPTES DES SONDES, ET L INTERRUPTEUR QU ELLES ONT BAISSE. Le laisser a
+  // zero fermerait les inscriptions du projet jusqu a ce que quelqu un s en
+  // apercoive — c est-a-dire jusqu a ce qu un vrai vendeur n arrive pas a
+  // s inscrire, sans que rien ne le signale.
+  if (comptesJetables.length > 0) {
+    const { data: tous } = await service.auth.admin.listUsers({ perPage: 200 });
+    for (const u of tous?.users ?? []) {
+      if (u.email && comptesJetables.includes(u.email)) {
+        await service.auth.admin.deleteUser(u.id);
+      }
+    }
+  }
+  await service.from("system_settings").delete().eq("key", "inscriptions_ouvertes");
 
   /*
    * ⚠️ LES BATTEMENTS AUSSI — ET CE N EST PAS DE L HYGIENE.
