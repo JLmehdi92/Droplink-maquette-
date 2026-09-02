@@ -1,5 +1,6 @@
 "use client";
 
+import { normaliserLien } from "@/lib/boutique/normaliser-lien";
 import { useActionState, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -88,6 +89,7 @@ export function FormulaireMarque({
       readonly instagram: string | null;
       readonly tiktok: string | null;
       readonly whatsapp: string | null;
+      readonly site: string | null;
     };
   };
 }) {
@@ -109,10 +111,11 @@ export function FormulaireMarque({
    * contrôlé rendrait un aperçu qui ne bouge jamais — donc un aperçu qui ment
    * sur la seule chose qu'il promet de montrer.
    */
-  const [reseaux, setReseaux] = useState<Record<"instagram" | "tiktok" | "whatsapp", string>>({
+  const [reseaux, setReseaux] = useState<Record<"instagram" | "tiktok" | "whatsapp" | "site", string>>({
     instagram: initial.reseaux.instagram ?? "",
     tiktok: initial.reseaux.tiktok ?? "",
     whatsapp: initial.reseaux.whatsapp ?? "",
+    site: initial.reseaux.site ?? "",
   });
   const champFichier = useRef<HTMLInputElement>(null);
 
@@ -234,6 +237,20 @@ export function FormulaireMarque({
       encre: "#1da851",
       trace:
         "M12 3.5a8.4 8.4 0 0 0-7.2 12.7L3.6 20.4l4.3-1.1A8.4 8.4 0 1 0 12 3.5zm4.8 11.9c-.2.6-1.2 1.1-1.7 1.1-.4 0-1 .1-3-.8-2.5-1.1-4.1-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.8.9-2 .2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.5l-.3.4c-.1.2-.3.3-.1.6.2.3.7 1.1 1.4 1.8.9.8 1.7 1.1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.7.8c.2.1.4.2.4.3.1.2.1.7-.1 1.4z",
+    },
+    /*
+     * LE SITE DU VENDEUR, quatrième ligne de la même carte — c'est ce que
+     * dessine la planche depuis le 02/09/2026, sous le titre « Vos réseaux et
+     * votre site ». Il n'a pas de marque à lui, donc pas de teinte à emprunter :
+     * il porte le violet DropLink, la seule couleur du système qui ne prétende
+     * appartenir à personne d'autre.
+     */
+    {
+      clef: "site",
+      fond: "#f1eefe",
+      encre: "#7c5cf5",
+      trace:
+        "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.6 15.6 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.1 1.4 2.5 1.8 4h-3.6c.4-1.5 1-2.9 1.8-4zM4.3 14a8 8 0 0 1 0-4h3.3a17 17 0 0 0 0 4H4.3zm.8 2h2.9c.3 1.3.8 2.5 1.4 3.6A8 8 0 0 1 5.1 16zm2.9-8H5.1a8 8 0 0 1 4.3-3.6A15.6 15.6 0 0 0 8 8zM12 20c-.8-1.1-1.4-2.5-1.8-4h3.6c-.4 1.5-1 2.9-1.8 4zm2.2-6H9.8a15 15 0 0 1 0-4h4.4a15 15 0 0 1 0 4zm.4 5.6c.6-1.1 1.1-2.3 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zm1.8-5.6a17 17 0 0 0 0-4h3.3a8 8 0 0 1 0 4h-3.3z",
     },
   ] as const;
 
@@ -679,19 +696,59 @@ export function FormulaireMarque({
                     <input
                       id={reseau.clef}
                       name={reseau.clef}
-                      type="url"
+                      /*
+                       * ⚠️ `type="text"`, PAS `type="url"` — ET LA PLANCHE LE
+                       * DISAIT DÉJÀ.
+                       *
+                       * DÉFAUT RÉEL, TROUVÉ PAR WASSIM LE 02/09/2026 : il a
+                       * collé `www.tiktok.com/@laplanque92`, l'adresse de son
+                       * propre compte recopiée depuis sa barre d'adresse, et le
+                       * NAVIGATEUR l'a refusée avant même l'envoi — « Veuillez
+                       * saisir une URL ». Aucune trace serveur, aucun journal :
+                       * le refus vient du contrôle natif de `type="url"`, qui
+                       * exige un schéma.
+                       *
+                       * `Marque.dc.html` dessine `type="text"` avec la valeur
+                       * `@ateliernord`, et pour WhatsApp le substitut « Numéro
+                       * au format international ». La planche décrivait donc un
+                       * champ qui accepte un pseudo et un numéro ; c'est le code
+                       * qui avait ajouté l'exigence. `inputMode="url"` reste :
+                       * il choisit le clavier, il ne refuse rien.
+                       */
+                      type="text"
                       inputMode="url"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       maxLength={200}
                       value={reseaux[reseau.clef]}
                       onChange={(e) =>
                         setReseaux((actuels) => ({ ...actuels, [reseau.clef]: e.target.value }))
+                      }
+                      /*
+                       * LA NORMALISATION SE VOIT, ET ELLE SE VOIT AU MOMENT OÙ
+                       * L'ON QUITTE LE CHAMP.
+                       *
+                       * Le serveur normalise de toute façon — c'est lui qui fait
+                       * autorité. Mais si l'écran gardait `@laplanque92` pendant
+                       * que la base reçoit `https://www.tiktok.com/@laplanque92`,
+                       * il affirmerait autre chose que ce qui est enregistré :
+                       * exactement le principe XII à l'envers. Normaliser à
+                       * CHAQUE frappe serait pire — le curseur sauterait au
+                       * troisième caractère tapé.
+                       */
+                      onBlur={(e) =>
+                        setReseaux((actuels) => ({
+                          ...actuels,
+                          [reseau.clef]: normaliserLien(reseau.clef, e.target.value),
+                        }))
                       }
                       placeholder={t("reseauExemple." + reseau.clef)}
                       className={champReseau}
                     />
                     {champsEnEchec.includes(reseau.clef) ? (
                       <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
-                        {t("reseauInvalide")}
+                        {t("reseauInvalide." + reseau.clef)}
                       </p>
                     ) : null}
                   </div>

@@ -1,5 +1,12 @@
-import { MOTIFS_RESEAUX } from "@/lib/boutique/reglages";
+import { MOTIFS_RESEAUX, MOTIF_SITE } from "@/lib/boutique/reglages";
 import type { Boutique } from "@/lib/page-publique/lecture";
+
+/**
+ * Les quatre motifs, en une seule table indexée par la même clef que la
+ * boutique. Un lien dont la clef n'a pas de motif ne peut pas exister : c'est
+ * le TYPE qui l'exige, pas une relecture.
+ */
+const MOTIFS = { ...MOTIFS_RESEAUX, site: MOTIF_SITE } as const;
 
 /**
  * LES RÉSEAUX DU VENDEUR, en bas de la page client.
@@ -63,12 +70,27 @@ const RESEAUX = [
     trace:
       "M12 3.5a8.4 8.4 0 0 0-7.2 12.7L3.6 20.4l4.3-1.1A8.4 8.4 0 1 0 12 3.5zm4.8 11.9c-.2.6-1.2 1.1-1.7 1.1-.4 0-1 .1-3-.8-2.5-1.1-4.1-3.7-4.2-3.9-.1-.2-1-1.3-1-2.5 0-1.2.6-1.8.9-2 .2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.5l-.3.4c-.1.2-.3.3-.1.6.2.3.7 1.1 1.4 1.8.9.8 1.7 1.1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.7.8c.2.1.4.2.4.3.1.2.1.7-.1 1.4z",
   },
+  /*
+   * LE SITE DU VENDEUR — quatrième et dernier. Il n'a pas de marque, donc pas
+   * de couleur à lui : il porte le violet DropLink, la seule teinte du système
+   * qui ne prétende être celle de personne d'autre. Et son libellé, contrairement
+   * aux trois noms propres au-dessus, est une chaîne TRADUITE — il arrive donc
+   * en propriété, comme le titre et la note.
+   */
+  {
+    clef: "site",
+    libelle: null,
+    couleur: "#7c5cf5",
+    trace:
+      "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.6 15.6 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.1 1.4 2.5 1.8 4h-3.6c.4-1.5 1-2.9 1.8-4zM4.3 14a8 8 0 0 1 0-4h3.3a17 17 0 0 0 0 4H4.3zm.8 2h2.9c.3 1.3.8 2.5 1.4 3.6A8 8 0 0 1 5.1 16zm2.9-8H5.1a8 8 0 0 1 4.3-3.6A15.6 15.6 0 0 0 8 8zM12 20c-.8-1.1-1.4-2.5-1.8-4h3.6c-.4 1.5-1 2.9-1.8 4zm2.2-6H9.8a15 15 0 0 1 0-4h4.4a15 15 0 0 1 0 4zm.4 5.6c.6-1.1 1.1-2.3 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zm1.8-5.6a17 17 0 0 0 0-4h3.3a8 8 0 0 1 0 4h-3.3z",
+  },
 ] as const;
 
 export function ReseauxVendeur({
   boutique,
   titre,
   note,
+  libelleSite,
 }: {
   readonly boutique: Boutique;
   /**
@@ -88,13 +110,16 @@ export function ReseauxVendeur({
   readonly titre: string | null;
   /** « Les liens s'ouvrent dans un nouvel onglet. » — rendue sur grand écran seulement. */
   readonly note: string;
+  /** « Site web » — le seul libellé traduisible des quatre. */
+  readonly libelleSite: string;
 }) {
   const liens = RESEAUX.map((reseau) => ({
     ...reseau,
+    libelle: reseau.libelle ?? libelleSite,
     href: boutique[reseau.clef],
   })).filter(
-    (r): r is (typeof RESEAUX)[number] & { href: string } =>
-      r.href !== null && MOTIFS_RESEAUX[r.clef].test(r.href),
+    (r): r is (typeof RESEAUX)[number] & { libelle: string; href: string } =>
+      r.href !== null && MOTIFS[r.clef].test(r.href),
   );
 
   if (liens.length === 0) return null;

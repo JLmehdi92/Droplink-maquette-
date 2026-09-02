@@ -740,12 +740,13 @@ const SQL = {
                      couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
-                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text)
+                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
+                     boutique_site text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language, s.watermark_enabled,
-             s.instagram_url, s.tiktok_url, s.whatsapp_url
+             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -754,7 +755,7 @@ const SQL = {
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
     reparerDepuisMigration: {
-      fichier: "085_reseaux_du_vendeur.sql",
+      fichier: "133_le_site_web_du_vendeur.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
@@ -782,12 +783,13 @@ const SQL = {
                      couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
-                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text)
+                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
+                     boutique_site text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, 'fr'::text, (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
-             s.instagram_url, s.tiktok_url, s.whatsapp_url
+             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -796,7 +798,7 @@ const SQL = {
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
     reparerDepuisMigration: {
-      fichier: "085_reseaux_du_vendeur.sql",
+      fichier: "133_le_site_web_du_vendeur.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
@@ -1029,13 +1031,14 @@ const SQL = {
                      couverture uuid, creee_le timestamptz, modifiee_le timestamptz,
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
-                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text)
+                     boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
+                     boutique_site text)
       language sql stable security definer set search_path = '' as $$
         select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
                o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
                o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language,
                (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
-               s.instagram_url, s.tiktok_url, s.whatsapp_url
+               s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url
         from public.orders o
         join public.shops s on s.id = o.shop_id
         join public.profiles p on p.id = s.owner_id
@@ -1044,7 +1047,7 @@ const SQL = {
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
     reparerDepuisMigration: {
-      fichier: "085_reseaux_du_vendeur.sql",
+      fichier: "133_le_site_web_du_vendeur.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction

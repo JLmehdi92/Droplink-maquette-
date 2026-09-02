@@ -63,6 +63,7 @@ export async function enregistrerMarque(
     instagram: donnees.get("instagram") ?? undefined,
     tiktok: donnees.get("tiktok") ?? undefined,
     whatsapp: donnees.get("whatsapp") ?? undefined,
+    site: donnees.get("site") ?? undefined,
   });
 
   if (!analyse.success) {
@@ -100,8 +101,12 @@ export async function enregistrerMarque(
       // COMBIEN de réseaux, jamais LESQUELS ni leurs adresses : le compte d'un
       // vendeur lui appartient, le fait qu'il en configure appartient au
       // produit — c'est ce dernier qui dit si l'écran sert à quelque chose.
-      reseaux_configures: [analyse.data.instagram, analyse.data.tiktok, analyse.data.whatsapp]
-        .filter((v) => v !== undefined && v.trim() !== "").length,
+      reseaux_configures: [
+        analyse.data.instagram,
+        analyse.data.tiktok,
+        analyse.data.whatsapp,
+        analyse.data.site,
+      ].filter((v) => v !== undefined && v.trim() !== "").length,
     },
   );
 

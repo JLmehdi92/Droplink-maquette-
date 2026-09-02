@@ -307,19 +307,26 @@
       "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
       "ecriture": "Rien n'a été enregistré. Réessayez dans un instant."
     },
-    "reseauxTitre": "Vos réseaux",
+    "reseauxTitre": "Vos réseaux et votre site",
     "reseauxAide": "Un champ laissé vide n’apparaît pas sur la page de votre client. Rien de configuré, aucun bloc affiché.",
     "reseau": {
       "instagram": "Instagram",
       "tiktok": "TikTok",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "site": "Site web"
     },
     "reseauExemple": {
-      "instagram": "https://instagram.com/votrecompte",
-      "tiktok": "https://tiktok.com/@votrecompte",
-      "whatsapp": "https://wa.me/33612345678"
+      "instagram": "@votrecompte",
+      "tiktok": "@votrecompte",
+      "whatsapp": "Numéro au format international",
+      "site": "votresite.fr"
     },
-    "reseauInvalide": "Ce lien n’est pas reconnu. Collez l’adresse complète depuis votre navigateur.",
+    "reseauInvalide": {
+      "instagram": "Nom de compte ou adresse Instagram — par exemple @votrecompte.",
+      "tiktok": "Nom de compte ou adresse TikTok — par exemple @votrecompte.",
+      "whatsapp": "Numéro au format international, avec l’indicatif du pays — par exemple +33 6 12 34 56 78.",
+      "site": "Adresse de votre site — par exemple votresite.fr. Seules les adresses en https sont acceptées."
+    },
     "logoTitre": "Logo",
     "contrasteConforme": "Contraste conforme",
     "contrasteCourt": "Conforme",
@@ -775,7 +782,8 @@
     },
     "reseaux": {
       "titre": "Retrouvez {nom}",
-      "note": "Les liens s’ouvrent dans un nouvel onglet."
+      "note": "Les liens s’ouvrent dans un nouvel onglet.",
+      "site": "Site web"
     },
     "lienInvalideTitre": "Ce lien n'est plus valable",
     "lienInvalideTexte": "Demandez un nouveau lien à la personne qui vous a envoyé celui-ci.",

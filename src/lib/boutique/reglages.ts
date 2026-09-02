@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
+import { normaliserLien, type CleLien } from "@/lib/boutique/normaliser-lien";
 
 /**
  * LES RÉGLAGES DE MARQUE — ce qui habille TOUTES les pages publiques d'un
@@ -50,19 +51,48 @@ export const MOTIFS_RESEAUX = {
 } as const;
 
 /**
- * Un lien de réseau : vide vaut ABSENCE, et l'absence est `null` en base.
+ * LE SITE DU VENDEUR — le seul lien dont l'hôte n'est pas contraint, parce que
+ * c'est le sien. Ce qui tient à la place du domaine attendu : `https` en
+ * toutes lettres (donc `javascript:` et `data:` fermés par le fait qu'UN SEUL
+ * schéma est autorisé, jamais par une liste d'interdits), et **aucune arobase
+ * dans l'autorité** — sans quoi `https://instagram.com@attaquant.example/x`
+ * s'afficherait comme Instagram et mènerait ailleurs.
+ *
+ * LE MÊME MOTIF EXISTE EN CONTRAINTE DE BASE (migration 133), et les deux ne
+ * remplacent pas le même défaut : celui-ci EXPLIQUE au vendeur, celle-là
+ * EMPÊCHE quel que soit le chemin d'écriture.
+ */
+export const MOTIF_SITE =
+  /^https:\/\/[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+(\/[A-Za-z0-9._~:/?#=@!$&'()*+,;%-]{0,180})?$/;
+
+/**
+ * Un lien : vide vaut ABSENCE, et l'absence est `null` en base.
  *
  * La chaîne vide est acceptée à la SAISIE — c'est ainsi qu'un vendeur retire un
  * lien — puis convertie en `null` à l'écriture. La refuser obligerait à un
  * bouton « supprimer » distinct pour un geste qui est naturellement « effacer
  * le champ ».
+ *
+ * ⚠️ LA NORMALISATION VIENT AVANT LE MOTIF, ET NE LE REMPLACE PAS.
+ *
+ * `.transform()` s'exécute avant `.refine()` : la saisie est mise en forme
+ * canonique, PUIS confrontée au motif ancré aux deux bouts. Un vendeur qui
+ * colle `www.tiktok.com/@laplanque92` obtient donc un lien valide, et
+ * `https://instagram.com.attaquant.example/x` reste refusé — la normalisation
+ * ne sait pas fabriquer ce domaine-là, elle le rend inchangé et le motif
+ * tranche. Le détail des cas couverts est dans `normaliser-lien`.
+ *
+ * `.max(200)` est appliqué APRÈS la normalisation parce que c'est la valeur
+ * NORMALISÉE qui est écrite en base, donc elle qui doit tenir dans la borne de
+ * la contrainte.
  */
-const lienReseau = (motif: RegExp) =>
+const lienNormalise = (clef: CleLien, motif: RegExp) =>
   z
     .string()
     .trim()
-    .max(200)
-    .refine((v) => v === "" || motif.test(v), "lien de réseau attendu")
+    .transform((v) => normaliserLien(clef, v))
+    .refine((v) => v.length <= 200, "lien trop long")
+    .refine((v) => v === "" || motif.test(v), "lien attendu")
     .optional();
 
 export const ReglagesMarque = z.object({
@@ -76,9 +106,10 @@ export const ReglagesMarque = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, "couleur hexadécimale à six chiffres attendue"),
   languePublique: z.enum(["fr", "en"]),
   filigrane: z.boolean(),
-  instagram: lienReseau(MOTIFS_RESEAUX.instagram),
-  tiktok: lienReseau(MOTIFS_RESEAUX.tiktok),
-  whatsapp: lienReseau(MOTIFS_RESEAUX.whatsapp),
+  instagram: lienNormalise("instagram", MOTIFS_RESEAUX.instagram),
+  tiktok: lienNormalise("tiktok", MOTIFS_RESEAUX.tiktok),
+  whatsapp: lienNormalise("whatsapp", MOTIFS_RESEAUX.whatsapp),
+  site: lienNormalise("site", MOTIF_SITE),
 });
 
 export type ReglagesMarque = z.infer<typeof ReglagesMarque>;
@@ -115,6 +146,7 @@ export async function appliquerReglagesMarque(
       instagram_url: vide(reglages.instagram),
       tiktok_url: vide(reglages.tiktok),
       whatsapp_url: vide(reglages.whatsapp),
+      site_url: vide(reglages.site),
     })
     .eq("id", shopId);
 

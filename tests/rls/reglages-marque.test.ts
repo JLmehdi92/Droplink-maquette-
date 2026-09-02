@@ -253,3 +253,98 @@ describe("Le contrat de saisie", () => {
     ).toBe(false);
   });
 });
+
+/**
+ * LA CONTRAINTE DE BASE ET LE MOTIF TYPESCRIPT DOIVENT DIRE LA MÊME CHOSE.
+ *
+ * Ils sont écrits DEUX FOIS — dans `reglages.ts` et dans les migrations 085 et
+ * 133 — et c'est délibéré : l'un EXPLIQUE au vendeur quel champ ne va pas,
+ * l'autre EMPÊCHE quel que soit le chemin d'écriture. Mais deux copies d'une
+ * même règle divergent en silence, et la divergence a exactement deux formes,
+ * toutes deux invisibles :
+ *
+ *   - la BASE plus stricte que Zod → le vendeur voit son formulaire accepter,
+ *     puis « rien n'a été enregistré », sans savoir quel champ ;
+ *   - la BASE plus permissive que Zod → un second chemin d'écriture (une
+ *     migration corrective, un import, la console d'administration) pose une
+ *     valeur que la page publique n'aurait jamais dû recevoir.
+ *
+ * ⚠️ ON N'INTERROGE PAS LE TEXTE DE LA CONTRAINTE, ON L'INTERROGE PAR L'EFFET :
+ * on ÉCRIT chaque valeur et on regarde si Postgres la refuse. Un contrôle qui
+ * comparerait deux expressions régulières prouverait qu'elles se ressemblent,
+ * jamais qu'elles décident pareil.
+ */
+describe("La contrainte de base décide comme le motif applicatif", () => {
+  const COLONNES = {
+    instagram: "instagram_url",
+    tiktok: "tiktok_url",
+    whatsapp: "whatsapp_url",
+    site: "site_url",
+  } as const;
+
+  // Des valeurs DÉJÀ NORMALISÉES : c'est ce que la base reçoit réellement, et
+  // c'est donc sur celles-là que les deux règles doivent concorder.
+  const VALEURS: ReadonlyArray<readonly [keyof typeof COLONNES, string]> = [
+    ["instagram", "https://instagram.com/atelier.nord"],
+    ["instagram", "https://www.instagram.com/atelier.nord"],
+    ["instagram", "https://instagram.com.attaquant.example/x"],
+    ["instagram", "https://instagram.com@attaquant.example/x"],
+    ["instagram", "javascript:alert(1)"],
+    ["tiktok", "https://www.tiktok.com/@atelier.nord"],
+    ["tiktok", "https://tiktok.com/@x?_t=8k&_r=1"],
+    ["tiktok", "https://tiktok.com/atelier"],
+    ["whatsapp", "https://wa.me/33612345678"],
+    ["whatsapp", "https://api.whatsapp.com/send?phone=33612345678"],
+    ["whatsapp", "https://wa.me.attaquant.example/33612"],
+    ["site", "https://laplanque.fr"],
+    ["site", "https://www.laplanque.fr/boutique"],
+    ["site", "http://laplanque.fr"],
+    ["site", "https://laplanque.fr@attaquant.example/x"],
+    ["site", "https://laplanque"],
+    ["site", "javascript:alert(1)"],
+  ];
+
+  test("le jeu de valeurs couvre les quatre colonnes", () => {
+    // UN ENSEMBLE VIDE PASSE TOUT : on dit ce qu'on inspecte avant d'inspecter.
+    expect(VALEURS.length).toBeGreaterThanOrEqual(15);
+    expect(new Set(VALEURS.map(([c]) => c))).toEqual(
+      new Set(Object.keys(COLONNES) as Array<keyof typeof COLONNES>),
+    );
+  });
+
+  test.each(VALEURS)(
+    "%s = « %s » : la base et le motif tranchent pareil",
+    async (clef, valeur) => {
+      const motifAccepte = ReglagesMarque.safeParse({
+        couleurAccent: "#0058be",
+        languePublique: "fr",
+        filigrane: false,
+        [clef]: valeur,
+      }).success;
+
+      const { error } = await alice.client
+        .from("shops")
+        .update({ [COLONNES[clef]]: valeur })
+        .eq("id", alice.shopId);
+
+      const baseAccepte = error === null;
+
+      // On rend la boutique à son état neutre quoi qu'il arrive : les tests qui
+      // suivent lisent la même ligne.
+      if (baseAccepte) {
+        await alice.client
+          .from("shops")
+          .update({ [COLONNES[clef]]: null })
+          .eq("id", alice.shopId);
+      }
+
+      expect(
+        baseAccepte,
+        `le motif ${motifAccepte ? "accepte" : "refuse"} « ${valeur} », la base ${
+          baseAccepte ? "accepte" : "refuse"
+        }`,
+      ).toBe(motifAccepte);
+    },
+    30_000,
+  );
+});

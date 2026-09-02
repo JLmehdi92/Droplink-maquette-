@@ -669,6 +669,13 @@ describe("Sonde C — privilèges de colonne", () => {
     "shops.instagram_url",
     "shops.tiktok_url",
     "shops.whatsapp_url",
+    // Le site du vendeur (migration 133). ⚠️ C'est le SEUL lien du produit dont
+    // l'hôte n'est pas contraint — c'est son domaine à lui. Ce qui tient à la
+    // place : `https` en toutes lettres, donc UN SEUL schéma autorisé plutôt
+    // qu'une liste d'interdits, et aucune arobase dans l'autorité, sans quoi
+    // `https://instagram.com@attaquant.example/x` s'afficherait comme Instagram
+    // sur la page que le client d'un vendeur croit être la sienne.
+    "shops.site_url",
     // `orders` — sont volontairement ABSENTES : `public_token` et
     // `unsubscribe_token` (immuables, et deux pouvoirs distincts), `shop_id`
     // (aucun transfert entre comptes), `created_at`, `updated_at` (tenue par

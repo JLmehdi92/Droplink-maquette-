@@ -51,6 +51,7 @@ export interface Boutique {
   readonly instagram: string | null;
   readonly tiktok: string | null;
   readonly whatsapp: string | null;
+  readonly site: string | null;
 }
 
 export interface MediaPublic {
@@ -182,6 +183,7 @@ async function lireCommandePubliqueSansMemo(
       instagram: ligne.boutique_instagram,
       tiktok: ligne.boutique_tiktok,
       whatsapp: ligne.boutique_whatsapp,
+      site: ligne.boutique_site,
     },
     medias: rendus,
     couverture: ligne.couverture,

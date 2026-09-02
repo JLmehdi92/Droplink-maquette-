@@ -618,6 +618,7 @@ export default async function PagePublique({
       <ReseauxVendeur
         boutique={commande.boutique}
         note={t("reseaux.note")}
+        libelleSite={t("reseaux.site")}
         titre={
           commande.boutique.nom === null
             ? null

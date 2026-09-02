@@ -307,19 +307,26 @@
       "session": "Your session has expired. Sign in again, then retry.",
       "ecriture": "Nothing was saved. Please retry in a moment."
     },
-    "reseauxTitre": "Your socials",
+    "reseauxTitre": "Your socials and website",
     "reseauxAide": "A field left empty does not appear on your customer’s page. Nothing set, no block shown.",
     "reseau": {
       "instagram": "Instagram",
       "tiktok": "TikTok",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "site": "Website"
     },
     "reseauExemple": {
-      "instagram": "https://instagram.com/youraccount",
-      "tiktok": "https://tiktok.com/@youraccount",
-      "whatsapp": "https://wa.me/33612345678"
+      "instagram": "@youraccount",
+      "tiktok": "@youraccount",
+      "whatsapp": "Phone number in international format",
+      "site": "yoursite.com"
     },
-    "reseauInvalide": "This link is not recognised. Paste the full address from your browser.",
+    "reseauInvalide": {
+      "instagram": "Instagram handle or address — for example @youraccount.",
+      "tiktok": "TikTok handle or address — for example @youraccount.",
+      "whatsapp": "Phone number in international format, including the country code — for example +33 6 12 34 56 78.",
+      "site": "Your site address — for example yoursite.com. Only https addresses are accepted."
+    },
     "logoTitre": "Logo",
     "contrasteConforme": "Contrast compliant",
     "contrasteCourt": "Compliant",
@@ -775,7 +782,8 @@
     },
     "reseaux": {
       "titre": "Find {nom}",
-      "note": "Links open in a new tab."
+      "note": "Links open in a new tab.",
+      "site": "Website"
     },
     "lienInvalideTitre": "This link is no longer valid",
     "lienInvalideTexte": "Ask the person who sent it to you for a new link.",

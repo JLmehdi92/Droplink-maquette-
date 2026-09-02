@@ -166,6 +166,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
    */
   /** La note du pied de page bureau — sans effet sur ce que ce test éprouve. */
   const NOTE = "Les liens s'ouvrent dans un nouvel onglet.";
+  const SITE = "Site web";
 
   const BOUTIQUE = {
     nom: "Atelier Nord",
@@ -176,6 +177,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     instagram: null,
     tiktok: null,
     whatsapp: null,
+    site: null,
   };
 
   test("un lien exécutable stocké en base n'est PAS rendu", () => {
@@ -183,6 +185,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
       boutique: { ...BOUTIQUE, instagram: "javascript:alert(1)" },
       titre: "Retrouvez Atelier Nord",
       note: NOTE,
+      libelleSite: SITE,
     });
 
     // Les trois liens invalides : le bloc entier disparaît, sans un mot au
@@ -197,7 +200,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     ["data:text/html,<script>", "charge inline"],
   ])("« %s » (%s) n'est pas rendu", (valeur) => {
     expect(
-      ReseauxVendeur({ boutique: { ...BOUTIQUE, instagram: valeur }, titre: "t", note: NOTE }),
+      ReseauxVendeur({ boutique: { ...BOUTIQUE, instagram: valeur }, titre: "t", note: NOTE, libelleSite: SITE }),
     ).toBeNull();
   });
 
@@ -209,6 +212,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
       boutique: { ...BOUTIQUE, instagram: "https://instagram.com/atelier.nord" },
       titre: "Retrouvez Atelier Nord",
       note: NOTE,
+      libelleSite: SITE,
     });
 
     expect(rendu).not.toBeNull();

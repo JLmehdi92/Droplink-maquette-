@@ -35,6 +35,7 @@ export type ProfilVendeur = {
     readonly instagram: string | null;
     readonly tiktok: string | null;
     readonly whatsapp: string | null;
+    readonly site: string | null;
   };
 };
 
@@ -130,7 +131,7 @@ export async function lireProfilAvec(
     supabase
       .from("profiles")
       .select(
-        "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url)",
+        "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
       )
       .maybeSingle(),
   ]);
@@ -161,6 +162,7 @@ export async function lireProfilAvec(
     instagram_url: string | null;
     tiktok_url: string | null;
     whatsapp_url: string | null;
+    site_url: string | null;
   };
 
   return {
@@ -182,6 +184,7 @@ export async function lireProfilAvec(
       instagram: s.instagram_url,
       tiktok: s.tiktok_url,
       whatsapp: s.whatsapp_url,
+      site: s.site_url,
     },
   };
 }
