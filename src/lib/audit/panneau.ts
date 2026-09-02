@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
+import { estPanneDeTransport } from "@/lib/reseau/panne";
 
 /**
  * LE PANNEAU D'ADMINISTRATION.
@@ -157,8 +158,37 @@ export async function lirePanneau(
   if (taches.error !== null) {
     throw new Error("lecture des tâches impossible : " + taches.error.message);
   }
+  /*
+   * ⚠️ UNE COUPURE DE TRANSPORT NE DOIT PAS EMPORTER TOUT LE PANNEAU.
+   *
+   * DÉFAUT MESURÉ LE 02/09/2026, pendant une passe de portes : la sonde a lu un
+   * 500 sur `/fr/admin` pour un administrateur légitime, et la trace du serveur
+   * a nommé la cause — `lecture du stockage impossible : TypeError: fetch
+   * failed`. Ce `throw` faisait tomber l'écran ENTIER : les alertes, les
+   * compteurs et l'état des tâches partaient avec le stockage.
+   *
+   * C'est le pire moment possible pour perdre cet écran. Une coupure réseau est
+   * exactement la circonstance où on l'ouvre, et le brief le range en tête :
+   * « les alertes avant les compteurs — un panneau qui les enterre oblige à
+   * chercher ce qui devrait sauter aux yeux ». Un 500 les enterre toutes.
+   *
+   * LE BRIEF AVAIT DÉJÀ TRANCHÉ CE CAS, et le champ existait pour le dire : le
+   * stockage s'affiche « indisponible » tant qu'il n'est pas mesurable, JAMAIS
+   * « 0 o » — parce que zéro affirmerait qu'on a mesuré. Une lecture qui n'a
+   * pas abouti est exactement « pas mesurable en ce moment ».
+   *
+   * ⚠️ ET SEULEMENT POUR UNE PANNE DE TRANSPORT. Une erreur applicative — droit
+   * manquant, fonction absente, contrainte violée — continue de lever : la
+   * dégrader silencieusement ferait vivre un panneau qui affiche
+   * « indisponible » pour toujours sans que personne ne cherche pourquoi.
+   */
+  let stockageMesurable = true;
   if (stockage.error !== null) {
-    throw new Error("lecture du stockage impossible : " + stockage.error.message);
+    if (!estPanneDeTransport(stockage.error.message)) {
+      throw new Error("lecture du stockage impossible : " + stockage.error.message);
+    }
+    console.error("[admin] stockage momentanément illisible — " + stockage.error.message);
+    stockageMesurable = false;
   }
 
   const c = (compteurs.data ?? [])[0];
@@ -193,8 +223,10 @@ export async function lirePanneau(
     // LE MÉCANISME EXISTE DEPUIS LA 049 : les octets sont tenus à l'écriture,
     // boutique par boutique, à partir de la taille RELUE CÔTÉ SERVEUR au dépôt.
     // C'est ce qui autorise à afficher un chiffre plutôt qu'« indisponible ».
-    stockageMesurable: true,
-    stockageOctets: Number(stockage.data ?? 0),
+    // Il reste vrai EN CONFIGURATION ; ce qui peut le faire basculer, c'est une
+    // lecture qui n'aboutit pas — voir le bloc de transport plus haut.
+    stockageMesurable,
+    stockageOctets: stockageMesurable ? Number(stockage.data ?? 0) : null,
   };
 }
 

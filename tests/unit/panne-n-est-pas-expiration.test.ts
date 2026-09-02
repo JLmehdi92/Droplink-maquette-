@@ -36,12 +36,9 @@ import { join } from "node:path";
  * messages réels, pas sa présence.
  */
 function motifDeTransport(): RegExp {
-  const source = readFileSync(
-    join(process.cwd(), "src", "lib", "comptes", "profil.ts"),
-    "utf8",
-  );
+  const source = readFileSync(join(process.cwd(), "src", "lib", "reseau", "panne.ts"), "utf8");
   const trouve = /return \/(.+?)\/i\.test\(/.exec(source);
-  expect(trouve, "le motif de panne de transport a disparu de `profil.ts`").not.toBeNull();
+  expect(trouve, "le motif de panne de transport a disparu de `lib/reseau/panne.ts`").not.toBeNull();
   return new RegExp(trouve?.[1] ?? "$^", "i");
 }
 
@@ -138,6 +135,7 @@ function codeSansCommentaires(...chemin: string[]): string {
 describe("La distinction est CÂBLÉE, pas seulement déclarée", () => {
   const profil = codeSansCommentaires("src", "lib", "comptes", "profil.ts");
   const garde = codeSansCommentaires("src", "lib", "comptes", "apres-session.ts");
+  const panneau = codeSansCommentaires("src", "lib", "audit", "panneau.ts");
 
   test("le retrait des commentaires n'a pas vidé les fichiers", () => {
     // UN ENSEMBLE VIDE PASSE TOUT — et ces deux fichiers sont très commentés :
@@ -165,5 +163,24 @@ describe("La distinction est CÂBLÉE, pas seulement déclarée", () => {
      * fausse posée pour en corriger une première.
      */
     expect(garde).toMatch(/if\s*\(!\(erreur instanceof SessionIndisponible\)\)\s*throw erreur;/);
+  });
+
+  test("le panneau admin DÉGRADE le stockage au lieu de tomber en 500", () => {
+    /*
+     * ⚠️ SECOND CONSOMMATEUR, TROUVÉ LE 02/09/2026 PAR LA TRACE DU SERVEUR.
+     * `lirePanneau` levait sur toute erreur de lecture du stockage : un
+     * `TypeError: fetch failed` rendait le panneau ENTIER en 500 — alertes,
+     * compteurs et tâches comprises, c'est-à-dire ce qu'on vient y chercher
+     * quand le réseau va mal.
+     *
+     * C'est ce qui a justifié d'extraire le motif dans `lib/reseau/panne.ts` :
+     * le même défaut sur deux surfaces qui ne se ressemblent pas.
+     */
+    expect(panneau).toMatch(/estPanneDeTransport\(\s*stockage\.error\.message\s*\)/);
+    // ET IL LÈVE TOUJOURS SUR LE RESTE : dégrader une erreur applicative ferait
+    // vivre un panneau « indisponible » pour toujours sans que personne cherche.
+    expect(panneau).toMatch(/throw new Error\("lecture du stockage impossible/);
+    // ET LE CHIFFRE DEVIENT `null`, JAMAIS ZÉRO — zéro affirmerait qu'on a mesuré.
+    expect(panneau).toMatch(/stockageMesurable \? Number\(stockage\.data \?\? 0\) : null/);
   });
 });

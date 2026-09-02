@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { estPanneDeTransport } from "@/lib/reseau/panne";
 
 /**
  * Lecture du profil et de la boutique du vendeur connecté.
@@ -30,20 +31,6 @@ export class SessionIndisponible extends Error {
   }
 }
 
-/**
- * Les formes sous lesquelles une coupure de transport se présente.
- *
- * ⚠️ LA LISTE EST VOLONTAIREMENT ÉTROITE ET ÉNUMÉRÉE — c'est la même discipline
- * que `scripts/transport.mjs`. Un message métier — `Invalid login credentials`,
- * `session_not_found` — n'y entre pas et ne doit jamais y entrer : l'élargir
- * transformerait cette distinction en machine à laisser passer des sessions
- * refusées.
- */
-function estPanneDeTransport(message: string): boolean {
-  return /fetch failed|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|socket hang up|network|terminated|timeout/i.test(
-    message,
-  );
-}
 
 export type ProfilVendeur = {
   readonly profilId: string;
