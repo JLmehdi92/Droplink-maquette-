@@ -580,6 +580,11 @@
     "dupliquer": "Duplicate as template",
     "archiverCourt": "Archive",
     "desarchiverCourt": "Restore from archive",
+    "introuvable": {
+      "titre": "This order no longer exists",
+      "texte": "The link you followed points to an order that was deleted, or that never existed.",
+      "retour": "Back to my orders"
+    },
     "filtresActifsLabel": "Active filters:",
     "retirerFiltre": "Remove filter: {filtre}",
     "puce": {

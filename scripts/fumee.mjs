@@ -1133,6 +1133,74 @@ try {
          * resteraient vrais apres un renommage et la sonde passerait au vert
          * sur des chaines que le produit n emploie plus.
          */
+        /*
+         * ═════════════════════════════════════════════════════════════════════
+         * UNE COMMANDE INTROUVABLE NE S APPELLE PAS « NOUVELLE COMMANDE »
+         * ═════════════════════════════════════════════════════════════════════
+         *
+         * Defaut mesure le 02/09/2026, avec une vraie session :
+         *
+         *   /fr/commandes/00000000-…   200 · titre « Nouvelle commande »
+         *   /fr/commandes/pas-un-uuid  200 · titre « Nouvelle commande »
+         *
+         * Trois choses fausses d un coup. Le TITRE affirmait une commande neuve
+         * — le libelle ecrit pour l instant qui SUIT une creation. Le CORPS
+         * servait la page d erreur native de Next, « This page could not be
+         * found », en anglais en dur et hors du canevas, sur une locale
+         * francaise. Et sans JavaScript, le squelette de chargement restait a l
+         * ecran sans jamais se resoudre.
+         *
+         * Le cas n est pas theorique : une URL d editeur perimee est un lien
+         * colle dans une conversation, ou un onglet garde ouvert apres une
+         * suppression.
+         *
+         * ⚠️ LES DEUX LANGUES SONT EPROUVEES, et dans les deux sens. Une page
+         * qui rendrait toujours le francais passerait un controle mono-langue —
+         * c est exactement le defaut voisin corrige le meme jour sur la page
+         * client, ou la frontiere d erreur parlait francais a un vendeur
+         * anglophone.
+         */
+        {
+          const absente = "00000000-0000-0000-0000-000000000000";
+          const lire = async (langue) => {
+            const r = await fetch(`${base}/${langue}/commandes/${absente}`, {
+              headers: entetes,
+              redirect: "manual",
+            });
+            const html = r.status === 200 ? await r.text() : "";
+            return { statut: r.status, titre: titreDe(html), html };
+          };
+
+          const introuvableFr = catalogue.commandes.introuvable;
+          const introuvableEn = JSON.parse(
+            readFileSync(join(racine, "messages", "en.json"), "utf8"),
+          ).commandes.introuvable;
+
+          const sansFr = await lire("fr");
+          const sansEn = await lire("en");
+
+          controles.push(
+            [
+              sansFr.titre === introuvableFr.titre,
+              `une commande absente porte son propre titre (titre servi : « ${sansFr.titre} »)`,
+            ],
+            [
+              sansFr.html.includes(introuvableFr.texte),
+              "et son corps est la page traduite, pas celle de Next",
+            ],
+            [
+              sansEn.titre === introuvableEn.titre,
+              `en anglais aussi (titre servi : « ${sansEn.titre} »)`,
+            ],
+            // L AUTRE SENS. Sans lui, une page qui rendrait TOUJOURS le francais
+            // passerait les trois controles ci-dessus.
+            [
+              !sansEn.html.includes(introuvableFr.texte),
+              "et la version anglaise ne porte pas le texte francais",
+            ],
+          );
+        }
+
         const vues = catalogue.commandes.vues;
         const compteursListe = catalogue.commandes.compteurs;
         const pilules = [vues.toutes, vues.enTransit, vues.jamaisOuvertes];

@@ -580,6 +580,11 @@
     "dupliquer": "Dupliquer comme gabarit",
     "archiverCourt": "Archiver",
     "desarchiverCourt": "Sortir des archives",
+    "introuvable": {
+      "titre": "Cette commande n’existe plus",
+      "texte": "Le lien que vous avez suivi pointe vers une commande supprimée, ou qui n’a jamais existé.",
+      "retour": "Revenir à mes commandes"
+    },
     "filtresActifsLabel": "Filtres actifs :",
     "retirerFiltre": "Retirer le filtre : {filtre}",
     "puce": {

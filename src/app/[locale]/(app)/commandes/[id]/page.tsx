@@ -63,8 +63,27 @@ export async function generateMetadata({
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: "editeur" });
   const { data } = await lireCommandeEditee(id);
+
+  /*
+   * ⚠️ UNE COMMANDE INTROUVABLE NE S'INTITULE PAS « NOUVELLE COMMANDE ».
+   *
+   * DÉFAUT MESURÉ LE 02/09/2026 : `/fr/commandes/00000000-…` rendait l'onglet
+   * « Nouvelle commande », c'est-à-dire le libellé écrit pour l'instant qui SUIT
+   * une création. La page, elle, appelle bien `notFound()` — mais
+   * `generateMetadata` s'exécute avant, et `titreDeCommande` retombe sur son
+   * défaut dès que le nom du client est absent, sans distinguer « pas encore de
+   * client » de « pas de commande du tout ».
+   *
+   * C'est le même défaut que celui corrigé le 30/08 sur les commandes remplies,
+   * une case plus loin : la règle vivait à deux endroits et un seul l'appliquait.
+   */
+  if (data === null) {
+    const c = await getTranslations({ locale, namespace: "commandes" });
+    return { title: c("introuvable.titre"), robots: { index: false, follow: false } };
+  }
+
   return {
-    title: titreDeCommande(data?.customer_label, t("titre")),
+    title: titreDeCommande(data.customer_label, t("titre")),
     robots: { index: false, follow: false },
   };
 }
