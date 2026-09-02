@@ -1109,6 +1109,73 @@ try {
             `l onglet d une commande SANS client dit bien « ${libelleBrouillon} » (titre « ${titreVide} »)`,
           ],
         );
+
+        /*
+         * ═════════════════════════════════════════════════════════════════════
+         * UN FILTRE QUI NE RENVOIE RIEN NE DOIT PAS VIDER L ECRAN ENTIER
+         * ═════════════════════════════════════════════════════════════════════
+         *
+         * Defaut montre en capture par Wassim le 02/09/2026 : sur un resultat
+         * vide, l ecran retirait la rangee de vues ET les quatre compteurs, et
+         * basculait sur un etat vide pleine page — « c est comme si ca ouvrait
+         * une deuxieme page ». On perdait le contexte, et surtout la
+         * possibilite de cliquer une AUTRE vue sans repasser par « tout
+         * effacer ».
+         *
+         * ⚠️ IL FAUT LES DEUX SENS, ET LE CONTRE-TEST VIENT EN PREMIER. Une
+         * sonde qui verifierait seulement la presence des pilules sur la liste
+         * vide passerait aussi si elles etaient rendues PARTOUT, y compris la
+         * ou la planche `CommandesVide` les interdit — c est-a-dire sur un
+         * compte qui n a aucune commande, ou quatre zeros seraient la premiere
+         * chose qu un nouveau vendeur verrait du produit.
+         *
+         * Les libelles sont LUS DANS LE CATALOGUE : recopies ici, ils
+         * resteraient vrais apres un renommage et la sonde passerait au vert
+         * sur des chaines que le produit n emploie plus.
+         */
+        const vues = catalogue.commandes.vues;
+        const compteursListe = catalogue.commandes.compteurs;
+        const pilules = [vues.toutes, vues.enTransit, vues.jamaisOuvertes];
+        const cartes = [compteursListe.preparation, compteursListe.enTransit, compteursListe.livrees];
+
+        const pleine = await fetch(`${base}/fr/commandes`, { headers: entetes, redirect: "manual" });
+        const htmlPleine = pleine.status === 200 ? await pleine.text() : "";
+
+        const filtree = await fetch(
+          `${base}/fr/commandes?q=zzz-aucune-commande-ne-porte-ceci-zzz`,
+          { headers: entetes, redirect: "manual" },
+        );
+        const htmlFiltree = filtree.status === 200 ? await filtree.text() : "";
+
+        const tous = (html, liste) => liste.every((v) => html.includes(v));
+        const aucun = (html, liste) => liste.every((v) => !html.includes(v));
+
+        controles.push(
+          // CONTRE-TEST, EN PREMIER : la liste pleine porte bien les deux.
+          [
+            pleine.status === 200 && tous(htmlPleine, pilules) && tous(htmlPleine, cartes),
+            `la liste pleine porte ses ${pilules.length} vues et ses ${cartes.length} compteurs`,
+          ],
+          // ET LE RESULTAT VIDE EN EST BIEN UN — sans ca, les deux controles
+          // ci-dessous mesureraient deux fois la meme page.
+          [
+            filtree.status === 200 && !htmlFiltree.includes("<tbody"),
+            `le filtre introuvable ne rend aucune ligne (statut ${filtree.status})`,
+          ],
+          [
+            tous(htmlFiltree, pilules),
+            `un resultat VIDE garde ses ${pilules.length} vues cliquables`,
+          ],
+          [
+            tous(htmlFiltree, cartes),
+            `un resultat VIDE garde ses ${cartes.length} compteurs`,
+          ],
+          // L AUTRE SENS : ce qui n a rien a outiller reste cache.
+          [
+            aucun(htmlFiltree, [catalogue.commandes.lot.exporter]),
+            "un resultat VIDE n offre pas d export — il n y a rien a exporter",
+          ],
+        );
       }
 
       /*

@@ -102,7 +102,6 @@ export default async function Commandes({
   // rien à chercher dans rien, et quatre zéros en tête d'écran seraient la
   // première chose qu'un nouveau vendeur verrait du produit.
   const compteVide = page.diagnostic === "aucune-commande";
-  const listeVide = page.lignes.length === 0;
 
   /*
    * LES COMPTEURS DÉCRIVENT LES COMMANDES ACTIVES. Dans la vue des archives, ils
@@ -113,7 +112,27 @@ export default async function Commandes({
    * Les deux planches d'écran vide n'en portent pas non plus : il n'y a rien à
    * compter au-dessus de rien.
    */
-  const compteursVisibles = compteurs !== null && !compteVide && !listeVide && !parametres.archivees;
+  /*
+   * ⚠️ `listeVide` A ÉTÉ RETIRÉ DE CETTE CONDITION, ET C'EST LE DÉFAUT QUE
+   * WASSIM A MONTRÉ EN CAPTURE le 02/09/2026.
+   *
+   * Quand un filtre ne renvoyait RIEN, l'écran retirait la rangée de vues ET
+   * les quatre compteurs, et basculait sur un état vide pleine page : « c'est
+   * comme si ça ouvrait une deuxième page ». On perdait le contexte, et surtout
+   * la possibilité de cliquer une AUTRE vue sans repasser par « tout effacer ».
+   * Mesuré avant correction sur `?q=zzzzintrouvable` : zéro pilule, zéro
+   * compteur.
+   *
+   * Et les compteurs restent JUSTES dans ce cas : ils décrivent les commandes
+   * ACTIVES du compte, pas le résultat du filtre — c'est même l'information la
+   * plus utile ici, puisqu'elle dit que les commandes sont toujours là.
+   *
+   * LES DEUX AUTRES CONDITIONS RESTENT, et pour des raisons différentes :
+   * `compteVide` est le compte qui n'a RIEN, où quatre zéros seraient la
+   * première chose qu'un nouveau vendeur verrait ; `archivees` est la vue où
+   * les compteurs décriraient exactement ce qui n'est PAS affiché.
+   */
+  const compteursVisibles = compteurs !== null && !compteVide && !parametres.archivees;
 
   /*
    * LE SOUS-TITRE EST UN CHIFFRE, PAS UNE PHRASE.

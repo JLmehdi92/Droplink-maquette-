@@ -127,14 +127,25 @@ export async function TableauCommandes({
       ) : null}
 
       {/*
-        LA BARRE D'OUTILS NE SE REND QUE S'IL Y A UNE LISTE À OUTILLER, et c'est
-        la planche `CommandesFiltreVide` qui le dit : elle ne dessine ni pilules
-        ni export au-dessus de son écran vide. Il n'y a rien à exporter, et les
-        raccourcis de vue mèneraient tous au même néant. La sortie se fait par
-        les puces de critères, au-dessus de la carte, où chacun se retire seul.
+        ⚠️ LES PILULES DE VUE RESTENT SUR UN RÉSULTAT VIDE, ET C'EST UN DÉFAUT
+        QUE WASSIM A MONTRÉ EN CAPTURE le 02/09/2026.
+
+        Ce commentaire disait « la barre d'outils ne se rend que s'il y a une
+        liste à outiller », et s'appuyait sur la planche `CommandesFiltreVide`,
+        qui en effet n'en dessinait pas. La planche a été corrigée d'abord : elle
+        porte désormais les compteurs ET la rangée de vues, et ne vide que la
+        zone du tableau.
+
+        La raison est celle qu'il a donnée : sans elles, « c'est comme si ça
+        ouvrait une deuxième page ». On perd le contexte, et surtout la
+        possibilité de cliquer une AUTRE vue — il fallait repasser par « tout
+        effacer » puis re-filtrer, alors que la vue qu'on cherche est là, à
+        portée de clic.
+
+        CE QUI RESTE CACHÉ, EN REVANCHE : l'export et le panneau de filtres. Il
+        n'y a littéralement rien à exporter, et un fichier vide qui porte
+        l'avertissement sur les liens publics est pire qu'un bouton absent.
       */}
-      {vide ? null : (
-      <>
       {/* ⚠️ LE DÉFILEMENT TIENT JUSQU'À `lg`, pas jusqu'à `md`. Sous 1024 px, six
           contrôles ne tiennent pas sur la largeur restante : « Exporter »
           dépassait de 103 px, mesurés, et la carte-page le coupait. Le
@@ -143,6 +154,8 @@ export async function TableauCommandes({
       <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-0 lg:relative lg:mb-4 lg:overflow-visible">
         <PilulesFiltres base={base} parametres={parametres} />
 
+        {vide ? null : (
+          <>
         <span className="hidden flex-grow lg:block" />
 
         <PanneauFiltres base={base} parametres={parametres} />
@@ -192,9 +205,9 @@ export async function TableauCommandes({
             </a>
           </div>
         </details>
+          </>
+        )}
       </div>
-      </>
-      )}
 
       {vide ? (
         <FiltreSansResultat
@@ -276,7 +289,14 @@ export async function TableauCommandes({
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr>
-                    <th scope="col" className={enTete + " w-[34px]"}>
+                    {/* ⚠️ 48 ET NON 34 : LA VIGNETTE NE DOIT PAS TOUCHER LE NOM.
+                        Relevé par Wassim le 02/09/2026, capture à l'appui —
+                        « l'image de la commande colle le nom ». Mesuré : l'écart
+                        rendu était de ZÉRO pixel, la colonne faisant exactement
+                        la largeur de la tuile. La planche `Commandes` disait la
+                        même chose, elle a donc été corrigée d'abord : 48 ici,
+                        `pr-3.5` sur la cellule, soit 14 px de respiration. */}
+                    <th scope="col" className={enTete + " w-[48px]"}>
                       <span className="sr-only">{t("lot.titre")}</span>
                     </th>
                     {["client", "reference", "statutCourt", "photos", "vues", "modifiee"].map(
@@ -299,7 +319,7 @@ export async function TableauCommandes({
                     const nom = ligne.client ?? t("sansNom");
                     return (
                       <tr key={ligne.id} className="group/ligne">
-                        <td className={cellule}>
+                        <td className={cellule + " pr-3.5"}>
                           <VignetteEtSelection ligne={ligne} nom={nom} libelle={t("selectionner", { client: nom })} />
                         </td>
 
