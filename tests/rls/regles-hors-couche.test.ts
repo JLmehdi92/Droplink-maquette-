@@ -181,6 +181,17 @@ const TOLEREES: ReadonlyMap<string, string> = new Map([
     "`prefers-reduced-motion` : il DOIT battre tout le reste, c'est un réglage " +
       "système et non une préférence de design.",
   ],
+  [
+    "@view-transition",
+    "la transition de vue entre documents, et son extinction sous " +
+      "`prefers-reduced-motion`. Elle NE PEUT PAS vivre dans une `@layer` — la " +
+      "spécification l'exige au premier niveau — et elle ne cible aucun " +
+      "sélecteur, donc elle ne peut battre aucun utilitaire : le mode de " +
+      "défaillance que cette suite garde ne s'applique pas à elle. Elle est " +
+      "ici parce qu'elle rend INVISIBLE le rechargement qu'on ne peut pas " +
+      "supprimer : le routeur de Next avale les navigations qui gardent le " +
+      "même chemin, donc chaque clic de filtre part en navigation native.",
+  ],
 ]);
 
 describe("Les règles CSS écrites hors d'une couche", () => {

@@ -1537,25 +1537,133 @@ try {
         );
 
         /*
-           * LA SURFACE ANGLAISE, BALAYEE PAR VALEUR ET NON PAR NOM.
-           *
-           * Le produit est bilingue depuis le premier jour et le persona
-           * fournisseur est anglophone : l espace vendeur en anglais est un
-           * ecran de travail, pas une politesse. Rien ne le verifiait ailleurs
-           * que sur trois pages publiques.
-           *
-           * CHAQUE LIBELLE DONT LA VERSION FRANCAISE DIFFERE DE L ANGLAISE EST
-           * UNE SENTINELLE. S il apparait dans le RENDU d une page `/en`, c est
-           * du francais servi a un anglophone — et reciproquement. On cherche
-           * hors des `<script>` : cette surface EXPEDIE son catalogue, donc le
-           * HTML brut porte les deux langues par construction, et un controle
-           * sur le brut serait vert quoi qu il arrive.
-           *
-           * LE CONTRE-TEST VIENT EN PREMIER, et il est indispensable : sans
-           * lui, « aucun libelle de l autre langue » serait vrai d une page
-           * VIDE, ou d un jeu de sentinelles qui ne correspond a rien de ce que
-           * l ecran affiche. On exige donc d abord d en RECONNAITRE.
+         * LES CONTROLES DE FILTRE NE PERDENT PAS LES AUTRES CRITERES.
+         *
+         * ⚠️ DEFAUT DECRIT PAR WASSIM LE 03/09/2026 : « des fois ça enlève les
+         * autres filtres ». Mesure sur `?q=veste&tri=anciennes&statut=en_transit` :
+         * de tous les controles de l ecran, la pilule « Bloquees » etait LA
+         * SEULE a effacer un critere qu elle ne pretend pas changer — elle
+         * posait `statut: null` — alors que sa jumelle « Jamais ouvertes »,
+         * batie sur le meme mecanisme de tri, conservait tout. Et le MEME tri
+         * choisi depuis le menu gardait ce statut : deux controles, un effet,
+         * deux comportements.
+         *
+         * LE CONTRE-TEST EST ICI OBLIGATOIRE ET IL EST PARTICULIER : certains
+         * controles DOIVENT perdre un critere — chaque puce retire le sien,
+         * « Tout effacer » retire tout, « Toutes » est la vue de remise a zero,
+         * et le tri par defaut se selectionne en RETIRANT `tri`. Une sonde qui
+         * exigerait « aucun lien ne perd rien » serait donc rouge sur un produit
+         * juste. On exige les deux sens : les retraits legitimes ont lieu, les
+         * autres non.
+         */
+        {
+          const r = await fetch(`${base}/fr/commandes?q=veste&tri=anciennes&statut=en_transit`, {
+            headers: entetes,
+            redirect: "manual",
+          });
+          const vu = rendu(r.status === 200 ? await r.text() : "");
+          const attendus = ["q", "tri", "statut"];
+
+          /*
+           * ⚠️ LES `&` DES `href` SONT ECHAPPES EN `&amp;` DANS LE HTML SERVI,
+           * et la premiere version de cette sonde ne les decodait pas : chaque
+           * lien se lisait alors comme portant une cle `amp;statut`, donc comme
+           * ayant PERDU le critere. Elle est nee rouge sur un produit juste, et
+           * son contre-test — « combien de vues ai-je inspectees » — est ce qui
+           * l a dit : zero.
            */
+          const balises = [...vu.matchAll(/<a\s[^>]*href="(\/fr\/commandes(?:\?[^"]*)?)"[^>]*>/g)]
+            .map((m) => ({ balise: m[0], href: m[1].replace(/&amp;/g, "&") }))
+            .filter((b) => !/[0-9a-f]{8}-[0-9a-f]{4}/.test(b.href));
+          const liens = balises.map((b) => b.href);
+
+          /*
+           * ⚠️ LES PUCES DE CRITERE SONT ECARTEES PAR LEUR `aria-label`, PAS PAR
+           * LA FORME DE LEUR URL. Une premiere version les confondait avec les
+           * vues : elles portent `tri=` comme elles, et retirent `statut` — ce
+           * qui est precisement leur metier. La sonde les denoncait donc en
+           * meme temps que le vrai defaut. On emploie ce que le produit dit
+           * d elles : le libelle « Retirer le filtre : … » du catalogue.
+           */
+          const prefixeRetrait = catalogue.commandes.retirerFiltre.split("{")[0].trim();
+          const nonPuces = balises.filter((b) => !b.balise.includes(prefixeRetrait));
+
+          const manquants = (h) => {
+            const p = new URLSearchParams(h.split("?")[1] ?? "");
+            return attendus.filter((c) => !p.has(c));
+          };
+
+          // Ceux qui retirent quelque chose : puces, « tout effacer », vue de
+          // remise a zero, tri par defaut. Leur existence est le contre-test.
+          const retirants = liens.filter((h) => manquants(h).length > 0);
+
+          /*
+           * ⚠️ LA REGLE DOIT ETRE EXACTE, PAS APPROXIMATIVE. Une premiere
+           * version tolerait la perte d UN critere, pour laisser passer le tri
+           * par defaut — qui se selectionne justement en RETIRANT `tri`. Elle
+           * laissait donc passer le defaut lui-meme : « Bloquees » ne perdait
+           * qu un critere, `statut`. Falsifiee, elle est restee VERTE sur le
+           * produit casse. La regle est donc nommee cas par cas :
+           *
+           *   un lien qui POSE `tri=`     doit porter `statut` ET `q` ;
+           *   un lien qui pose `statut=`  sans `tri` EST le tri par defaut,
+           *                               et n a le droit d omettre que `tri`.
+           */
+          const vuesEtTris = nonPuces
+            .map((b) => b.href)
+            .filter(
+              (h) => /[?&](statut|tri)=/.test(h) && new URLSearchParams(h.split("?")[1] ?? "").has("q"),
+            );
+          const fautifs = vuesEtTris.filter((h) => {
+            const absents = manquants(h);
+            if (/[?&]tri=/.test(h)) return absents.length > 0;
+            return absents.join(",") !== "tri";
+          });
+
+          controles.push(
+            [
+              r.status === 200 && liens.length >= 10,
+              `CONTRE-TEST : l ecran filtre rend ${liens.length} liens de navigation (statut ${r.status})`,
+            ],
+            [
+              retirants.length > 0,
+              `CONTRE-TEST : ${retirants.length} lien(s) retirent bien un critere — puces et remises a zero`,
+            ],
+            // Le seuil dit « l ensemble n est pas vide », pas « il en fait
+            // exactement tant » : un decompte fortuit deviendrait un test de la
+            // liste de vues plutot que de la preservation des criteres.
+            [
+              vuesEtTris.length >= 3,
+              `CONTRE-TEST : ${vuesEtTris.length} vues et tris inspectes`,
+            ],
+            [
+              fautifs.length === 0,
+              "aucune vue ni aucun tri n efface un critere qu il ne change pas" +
+                (fautifs.length === 0 ? "" : ` (${fautifs.join(" | ")})`),
+            ],
+          );
+        }
+
+        /*
+        * LA SURFACE ANGLAISE, BALAYEE PAR VALEUR ET NON PAR NOM.
+        *
+        * Le produit est bilingue depuis le premier jour et le persona
+        * fournisseur est anglophone : l espace vendeur en anglais est un
+        * ecran de travail, pas une politesse. Rien ne le verifiait ailleurs
+        * que sur trois pages publiques.
+        *
+        * CHAQUE LIBELLE DONT LA VERSION FRANCAISE DIFFERE DE L ANGLAISE EST
+        * UNE SENTINELLE. S il apparait dans le RENDU d une page `/en`, c est
+        * du francais servi a un anglophone — et reciproquement. On cherche
+        * hors des `<script>` : cette surface EXPEDIE son catalogue, donc le
+        * HTML brut porte les deux langues par construction, et un controle
+        * sur le brut serait vert quoi qu il arrive.
+        *
+        * LE CONTRE-TEST VIENT EN PREMIER, et il est indispensable : sans
+        * lui, « aucun libelle de l autre langue » serait vrai d une page
+        * VIDE, ou d un jeu de sentinelles qui ne correspond a rien de ce que
+        * l ecran affiche. On exige donc d abord d en RECONNAITRE.
+        */
           {
             const feuilles = (o, prefixe = "") =>
               Object.entries(o).flatMap(([k, v]) =>
@@ -3587,6 +3695,31 @@ const rayonPublic = valeur("page-publique");
 
 controles.push(
   [rayonAuth === "24", `carte-page authentifiee servie a 24px (lu : ${rayonAuth ?? "AUCUNE VALEUR"})`],
+  /*
+   * LA TRANSITION DE VUE ENTRE DOCUMENTS, ET SON EXTINCTION SOUS MOUVEMENT
+   * REDUIT — les deux dans la feuille SERVIE.
+   *
+   * ⚠️ ELLE N EST PAS DECORATIVE : elle est ce qui rend INVISIBLE un
+   * rechargement qu on ne peut pas supprimer. Le routeur de Next avale les
+   * navigations qui gardent le meme chemin, donc chaque clic de filtre part en
+   * navigation NATIVE — et le prix visible en etait une page qui blanchit.
+   * Sans cette regle, le defaut que Wassim a decrit par « ça reload la page »
+   * revient tel quel, et rien ne le dirait.
+   *
+   * L EXTINCTION EST EXIGEE DANS LE MEME SOUFFLE, parce que le selecteur `*` du
+   * bloc `prefers-reduced-motion` N ATTEINT PAS les pseudo-elements de la
+   * transition : sans une redeclaration explicite, on croirait le mouvement
+   * couvert alors qu il ne l est pas.
+   */
+  [
+    /@view-transition\{navigation:auto\}/.test(cssCompact),
+    "la transition de vue entre documents est SERVIE (le rechargement ne se voit plus)",
+  ],
+  [
+    cssCompact.includes("@media(prefers-reduced-motion:reduce){") &&
+      /@media\(prefers-reduced-motion:reduce\)\{[^@]*(?:@[^v][^}]*\})*[^@]*@view-transition\{navigation:none\}/.test(cssCompact),
+    "et elle est ETEINTE sous mouvement reduit, pseudo-elements compris",
+  ],
   [rayonPublic === "28", `carte-page publique servie a 28px (lu : ${rayonPublic ?? "AUCUNE VALEUR"})`],
   // LES DEUX SENS : si quelqu un ramene une valeur unique, les deux tokens
   // resteraient definis et les deux controles ci-dessus pourraient rester verts

@@ -54,9 +54,23 @@ export async function PilulesFiltres({
        *
        * Elle repose sur le TRI et non sur un filtre de statut : le statut dit
        * « en transit », il ne dit pas depuis combien de temps rien ne bouge.
+       *
+       * ⚠️ ELLE POSAIT `statut: null`, ET C'ÉTAIT LE DÉFAUT QUE WASSIM A DÉCRIT
+       * PAR « des fois ça enlève les autres filtres ». Mesuré le 03/09/2026 sur
+       * `?q=veste&tri=anciennes&statut=en_transit` : de tous les contrôles de
+       * l'écran, elle était LA SEULE à perdre un critère qu'elle ne prétend pas
+       * changer — sa jumelle « Jamais ouvertes », bâtie sur le même mécanisme de
+       * tri, conservait tout.
+       *
+       * L'intention était bonne : « bloquées » restreint déjà aux colis en
+       * transit, donc garder le statut est redondant. Mais l'écran EFFAÇAIT en
+       * silence un filtre que le vendeur avait posé, et le même tri gardait ce
+       * statut quand on le choisissait depuis le MENU de tri. Deux contrôles,
+       * un seul effet, deux comportements : c'est l'incohérence qui se voit,
+       * pas la redondance qu'elle évitait.
        */
       clef: "bloquees",
-      href: lienListe(base, parametres, { tri: "bloquees", statut: null }),
+      href: lienListe(base, parametres, { tri: "bloquees" }),
       actif: parametres.tri === "bloquees",
     },
   ] as const;
