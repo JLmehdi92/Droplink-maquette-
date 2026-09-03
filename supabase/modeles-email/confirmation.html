@@ -1,0 +1,73 @@
+<!--
+  MODÈLE SUPABASE — « Confirm signup ».
+  À coller dans : Authentication → Emails → Confirm signup.
+
+  ⚠️ CE MODÈLE NE SERT À RIEN TANT QUE « Confirm email » EST DÉSACTIVÉ, et
+  c'est la décision 28 du brief : la confirmation coûte un clic dans un email
+  au pire moment, la première minute. Il est écrit AVANT d'en avoir besoin
+  pour une raison précise — le jour où Wassim réactivera la confirmation, ce
+  sera pour REFERMER l'oracle d'existence de compte de la page d'inscription,
+  c'est-à-dire dans un moment où l'on ne veut pas découvrir qu'il n'existe
+  aucun gabarit.
+
+  ⚠️ MÊME LIEN QUE LA RÉINITIALISATION, MÊME RAISON : `token_hash` et non
+  `{{ .ConfirmationURL }}`, dont le jeton part dans un FRAGMENT que le serveur
+  ne reçoit jamais. Et pas de `suite=mot-de-passe` ici — c'est ce paramètre,
+  et lui seul, qui fait choisir `recovery` plutôt que `email` à la route.
+-->
+<div style="margin:0;padding:36px 20px;background:#eceaf4;font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;color:#0e0e13">
+  <div style="max-width:600px;margin:0 auto">
+
+    <div style="text-align:center;padding-bottom:22px">
+      <span style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:#0e0e13">DropLink</span>
+    </div>
+
+    <div style="background:#ffffff;border-radius:20px;padding:40px 40px 34px">
+      <h1 style="margin:0 0 10px;font-size:24px;line-height:31px;font-weight:800;letter-spacing:-0.03em;color:#0e0e13">
+        Confirmez votre adresse
+      </h1>
+      <p style="margin:0 0 26px;font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:24px;color:#3f4048">
+        Une dernière étape et votre compte est ouvert. Ce lien confirme que
+        cette adresse est bien la vôtre.
+      </p>
+
+      <div style="text-align:center;padding:2px 0 28px">
+        <a href="{{ .SiteURL }}/auth/retour?token_hash={{ .TokenHash }}"
+           style="display:inline-block;padding:15px 30px;border-radius:13px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;background:linear-gradient(97deg,#7c5cf5 0%,#f2765e 100%)">
+          Confirmer mon adresse
+        </a>
+      </div>
+
+      <hr style="height:1px;background:#ececf0;border:0;margin:26px 0">
+
+      <!-- CE QUI SE PASSE ENSUITE, dit ici plutôt que découvert à l'écran :
+           la première minute est celle où l'on abandonne. -->
+      <p style="margin:0 0 14px;font-size:14px;font-weight:700;color:#0e0e13">Ensuite, en trois minutes :</p>
+      <table style="border-collapse:collapse;width:100%;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#3f4048">
+        <tr>
+          <td style="width:34px;vertical-align:top;padding-bottom:12px"><span style="display:inline-block;width:22px;height:22px;border-radius:9999px;background:#efedfb;color:#7c5cf5;font-size:12px;font-weight:700;text-align:center;line-height:22px">1</span></td>
+          <td style="padding-bottom:12px">Votre nom et votre couleur — vos pages porteront votre marque.</td>
+        </tr>
+        <tr>
+          <td style="width:34px;vertical-align:top;padding-bottom:12px"><span style="display:inline-block;width:22px;height:22px;border-radius:9999px;background:#efedfb;color:#7c5cf5;font-size:12px;font-weight:700;text-align:center;line-height:22px">2</span></td>
+          <td style="padding-bottom:12px">Vos photos de contrôle, déposées d'un glissement.</td>
+        </tr>
+        <tr>
+          <td style="width:34px;vertical-align:top"><span style="display:inline-block;width:22px;height:22px;border-radius:9999px;background:#efedfb;color:#7c5cf5;font-size:12px;font-weight:700;text-align:center;line-height:22px">3</span></td>
+          <td>Un seul lien à envoyer. Votre client n'a aucun compte à créer.</td>
+        </tr>
+      </table>
+
+      <hr style="height:1px;background:#ececf0;border:0;margin:26px 0">
+
+      <p style="margin:0;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+        Si vous n'êtes pas à l'origine de cette inscription, ignorez ce message :
+        sans cette confirmation, aucun compte ne sera ouvert.
+      </p>
+    </div>
+
+    <p style="text-align:center;margin:20px 0 0;font-family:Inter,system-ui,sans-serif;font-size:12px;color:#83858f">
+      DropLink — une page privée par commande.
+    </p>
+  </div>
+</div>

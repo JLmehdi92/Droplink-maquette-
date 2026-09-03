@@ -1,0 +1,82 @@
+<!--
+  MODÈLE SUPABASE — « Reset Password ».
+  À coller dans : Authentication → Emails → Reset Password.
+
+  ⚠️ CE FICHIER N'EST PAS DU CODE APPLICATIF, ET C'EST TOUT LE PROBLÈME.
+  Il vit dans le tableau de bord Supabase, où aucune relecture de code ne peut
+  le voir et où aucune porte ne passe — L-028. On le versionne ici pour qu'il
+  existe quelque part de relisible, et `tests/unit/modeles-email.test.ts`
+  vérifie qu'il porte le lien que le produit sait réellement consommer.
+
+  ⚠️ LE LIEN N'EST PAS `{{ .ConfirmationURL }}`, ET CE N'EST PAS UN DÉTAIL DE
+  STYLE. Mesuré le 02/09/2026 en suivant un vrai lien : `/auth/v1/verify` rend
+  un `303` avec le jeton dans un FRAGMENT — `#access_token=…`. Un fragment
+  n'est JAMAIS envoyé au serveur : notre route ne voit rien et répond « lien
+  incomplet ». `token_hash` est la forme documentée POUR LE SERVEUR ; elle
+  voyage dans la requête, ne dépend d'aucun cookie, et traverse donc les
+  appareils — on demande la réinitialisation sur son ordinateur et on ouvre ses
+  mails sur son téléphone, qui est le cas le plus courant.
+
+  ⚠️ AUCUN PRÉFIXE DE LANGUE DANS L'URL, DÉLIBÉRÉMENT. Supabase ne connaît pas
+  la langue du vendeur. Vérifié par exécution : `/auth/retour?token_hash=…&suite=…`
+  répond `307` vers `/fr/auth/retour?token_hash=…&suite=…` — les deux paramètres
+  survivent, et c'est le middleware qui négocie la langue depuis le navigateur
+  de celui qui ouvre. Figer `/fr/` enverrait un vendeur anglophone sur un écran
+  français.
+-->
+<div style="margin:0;padding:36px 20px;background:#eceaf4;font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;color:#0e0e13">
+  <div style="max-width:600px;margin:0 auto">
+
+    <div style="text-align:center;padding-bottom:22px">
+      <span style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:#0e0e13">DropLink</span>
+    </div>
+
+    <div style="background:#ffffff;border-radius:20px;padding:40px 40px 34px">
+      <h1 style="margin:0 0 10px;font-size:24px;line-height:31px;font-weight:800;letter-spacing:-0.03em;color:#0e0e13">
+        Choisissez un nouveau mot de passe
+      </h1>
+      <p style="margin:0 0 26px;font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:24px;color:#3f4048">
+        Vous avez demandé à réinitialiser le mot de passe de votre compte DropLink.
+        Ce lien vous y mène directement.
+      </p>
+
+      <div style="text-align:center;padding:2px 0 26px">
+        <a href="{{ .SiteURL }}/auth/retour?token_hash={{ .TokenHash }}&amp;suite=mot-de-passe"
+           style="display:inline-block;padding:15px 30px;border-radius:13px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;background:linear-gradient(97deg,#7c5cf5 0%,#f2765e 100%)">
+          Choisir un nouveau mot de passe
+        </a>
+      </div>
+
+      <p style="margin:0 0 6px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+        Ce lien est valable <strong style="color:#3f4048">une heure</strong> et ne fonctionne qu'une seule fois.
+      </p>
+
+      <hr style="height:1px;background:#ececf0;border:0;margin:28px 0">
+
+      <!-- ⚠️ CE PARAGRAPHE N'EST PAS DE LA POLITESSE. Une demande non
+           sollicitée est le premier signe visible d'une tentative de prise de
+           compte : le destinataire doit savoir qu'il n'a rien à faire, et que
+           son mot de passe actuel reste valable. -->
+      <p style="margin:0 0 4px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#3f4048">
+        <strong>Vous n'avez rien demandé ?</strong>
+      </p>
+      <p style="margin:0 0 24px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+        Ignorez ce message. Votre mot de passe actuel reste valable et personne
+        n'a pu accéder à votre compte.
+      </p>
+
+      <!-- Certains clients de messagerie n'affichent pas les boutons, et une
+           réinitialisation qu'on ne peut pas ouvrir n'existe pas. -->
+      <p style="margin:0 0 6px;font-family:Inter,system-ui,sans-serif;font-size:12px;line-height:20px;color:#a3a4ad">
+        Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur :
+      </p>
+      <p style="margin:0;font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:20px;color:#83858f;word-break:break-all">
+        {{ .SiteURL }}/auth/retour?token_hash={{ .TokenHash }}&amp;suite=mot-de-passe
+      </p>
+    </div>
+
+    <p style="text-align:center;margin:20px 0 0;font-family:Inter,system-ui,sans-serif;font-size:12px;color:#83858f">
+      DropLink — une page privée par commande.
+    </p>
+  </div>
+</div>
