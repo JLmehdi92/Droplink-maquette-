@@ -1,0 +1,79 @@
+# Configuration HawkScan (DAST) — analyse dynamique du produit EN MARCHE.
+#
+# Elle complète les portes existantes, elle ne les remplace pas : un scanner
+# dynamique ne voit NI l'isolation RLS, NI les droits d'exécution Postgres, NI
+# les réglages du tableau de bord Supabase. Ce qu'il voit, c'est ce qu'un
+# attaquant voit depuis le réseau.
+#
+# ⚠️ AUCUN SECRET DANS CE FICHIER. Le cookie de session est injecté par la
+# variable `DROPLINK_COOKIE` au lancement — le commiter donnerait une session
+# vendeur valide à quiconque lit le dépôt, qui est PUBLIC.
+
+app:
+  applicationId: ${APP_ID:c6078c2d-6281-4922-b46d-8a4f01ff3fb9}
+  env: ${APP_ENV:Development}
+  host: ${APP_HOST:http://localhost:3000}
+
+  # La déconnexion est une route POST qui INVALIDE la session côté Supabase.
+  # Laissée dans le périmètre, le scanner se déconnecterait lui-même au milieu
+  # du parcours et le reste de l'analyse porterait sur un anonyme — sans que
+  # rien ne le signale, puisque les pages répondraient toujours 200 (celui de
+  # la connexion, après redirection).
+  excludePaths:
+    - "/fr/deconnexion"
+    - "/en/deconnexion"
+
+  authentication:
+    # COOKIE et pas « form login » : la connexion de DropLink est une Server
+    # Action Next, c'est-à-dire un POST porteur d'un en-tête `Next-Action` et
+    # d'un corps que seul le client React sait former. Aucune recette de
+    # formulaire ne peut la rejouer. Le cookie est donc fabriqué en amont par
+    # le VRAI chemin mot de passe (`signInWithPassword`), exactement comme le
+    # fait `scripts/fumee.mjs`.
+    #
+    # ⚠️ LA FORME COURTE `external: {type, value}` EST DOCUMENTÉE PAR
+    # `hawk config show` ET ELLE N'EST PAS APPLIQUÉE. Écrite ainsi,
+    # `hawk validate config` répond « looks good » avec le code 0 tout en
+    # glissant, au milieu du dump, « Unknown property "external.value" will be
+    # ignored » — le scan serait donc parti ANONYME en se croyant authentifié,
+    # et le rapport aurait couvert la seule surface publique en prétendant
+    # couvrir tout le produit. Seule la forme longue `values[]` est lue.
+    external:
+      values:
+        - type: COOKIE
+          value:
+            name: ${DROPLINK_COOKIE_NOM}
+            val: ${DROPLINK_COOKIE_VAL}
+
+    # Volontairement inertes, sur consigne de `hawk config show` : avec
+    # `external` il n'existe aucun chemin de ré-authentification, donc un
+    # indicateur qui se déclenche ne récupère rien et double les requêtes.
+    # C'est `testPath` qui fait foi.
+    loggedInIndicator: ".*"
+    loggedOutIndicator: "$^"
+
+    testPath:
+      path: /fr/commandes
+      type: BODY
+      # « Phase de lancement » est l'encart de la barre latérale vendeur :
+      # présent 1 fois avec la session, 0 fois sans (mesuré). Un motif choisi
+      # au jugé aurait pu figurer dans les deux corps et rendre le contrôle
+      # incapable de devenir rouge.
+      success: ".*Phase de lancement.*"
+
+hawk:
+  spider:
+    # L'espace vendeur navigue par `<a>` nus — contournement d'un défaut du
+    # routeur Next documenté dans `src/components/lien-ecran.tsx`. Les liens
+    # sont donc dans le HTML et l'araignée classique les suit. L'araignée Ajax
+    # reste activée pour les îlots clients (visionneur, arbitrage QC).
+    ajax: true
+    maxDurationMinutes: 12
+
+tags:
+  - name: _STACKHAWK_AGENT
+    value: ${HAWK_AGENT:none}
+  - name: _STACKHAWK_GIT_COMMIT_SHA
+    value: ${COMMIT_SHA:none}
+  - name: _STACKHAWK_GIT_BRANCH
+    value: ${BRANCH_NAME:none}
