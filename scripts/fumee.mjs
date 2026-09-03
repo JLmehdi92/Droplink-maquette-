@@ -3564,6 +3564,53 @@ function ageHsts(entetes) {
   return trouve === null ? -1 : Number(trouve[1]);
 }
 
+// ── CE QUE LE SERVEUR RACONTE DE LUI-MÊME ─────────────────────────────────
+//
+// ⚠️ POSÉ APRÈS UN CONSTAT, PAS PAR PRÉCAUTION. Le scan HawkScan du
+// 03/09/2026 a relevé `X-Powered-By: Next.js` sur 15 chemins — dont
+// `/robots.txt`, `/sitemap.xml` et les pages légales, c'est-à-dire ce qu'un
+// inconnu atteint en premier. Next le pose par DÉFAUT ; l'absence de
+// `poweredByHeader: false` suffisait, et aucun contrôle ne pouvait le voir.
+//
+// ⚠️ ET C'EST UNE PROTECTION QUI TIENT À UNE LIGNE DE CONFIGURATION, donc
+// exactement le genre qui disparaît sans bruit à la prochaine réécriture de
+// `next.config.ts` (L-029). D'où un contrôle qui INTERROGE LA RÉPONSE.
+//
+// L'inventaire est délibérément varié : une page rendue, deux fichiers
+// statiques, la page publique et une redirection. Le défaut a été relevé sur
+// des chemins qu'aucun contrôle « page d'accueil » n'aurait touchés.
+{
+  const chemins = [
+    "/fr",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/fr/conditions",
+    "/p/inexistant-pour-les-entetes",
+    "/fr/commandes",
+  ];
+  const reponses = await Promise.all(
+    chemins.map(async (c) => [c, (await fetch(`${base}${c}`, { redirect: "manual" })).headers]),
+  );
+  const bavards = reponses.filter(([, h]) => h.get("x-powered-by") !== null).map(([c]) => c);
+
+  // ⚠️ LE CONTRE-TEST VIENT EN PREMIER. « Aucun en-tête interdit » est vrai
+  // d'un serveur éteint, d'une URL fautive et d'une liste vide. Il faut donc
+  // d'abord établir que ces réponses PORTENT des en-têtes qu'on sait présents.
+  const muettes = reponses
+    .filter(([, h]) => h.get("x-content-type-options") !== "nosniff")
+    .map(([c]) => c);
+  controles.push([
+    chemins.length > 0 && muettes.length === 0,
+    `CONTRE-TEST : les ${chemins.length} reponses inspectees portent bien nosniff` +
+      (muettes.length ? ` — MANQUANT sur ${muettes.join(", ")}` : ""),
+  ]);
+  controles.push([
+    bavards.length === 0,
+    "aucune reponse ne nomme le framework (x-powered-by)" +
+      (bavards.length ? ` — ENCORE PRESENT sur ${bavards.join(", ")}` : ""),
+  ]);
+}
+
 controles.push(
   [enTetesLanding.get("x-content-type-options") === "nosniff", "nosniff sur la landing"],
   [enTetesLanding.get("x-frame-options") === "DENY", "cadrage refuse sur la landing"],

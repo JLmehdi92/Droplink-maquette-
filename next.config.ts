@@ -147,6 +147,23 @@ const nextConfig: NextConfig = {
    * fichier qu'elle active ; le produit revient alors à la page anglaise.
    */
   experimental: { globalNotFound: true },
+  /*
+   * `X-Powered-By: Next.js` PART SUR CHAQUE RÉPONSE, ET IL EST À `true` PAR
+   * DÉFAUT.
+   *
+   * Relevé le 03/09/2026 par le scan HawkScan, sur 15 chemins — dont
+   * `/robots.txt`, `/sitemap.xml` et les pages légales, c'est-à-dire les
+   * surfaces qu'un inconnu atteint en premier.
+   *
+   * Ce n'est pas une faille, c'est de la reconnaissance offerte : il nomme le
+   * framework, donc la liste des CVE à essayer, avant même qu'on ait sondé
+   * quoi que ce soit. Le retirer ne protège de rien à lui seul — il oblige
+   * simplement à travailler pour obtenir ce qui était donné.
+   *
+   * Il ne remplace AUCUN des en-têtes posés ci-dessus : ceux-là défendent, ce
+   * drapeau-ci se contente de ne plus renseigner.
+   */
+  poweredByHeader: false,
   // Racine epinglee : un `package-lock.json` traine dans le dossier
   // utilisateur, et Next.js l'elisait comme racine d'espace de travail. La
   // resolution des modules serait alors partie d'un dossier sans rapport.
