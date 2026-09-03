@@ -1535,6 +1535,107 @@ try {
             "un resultat VIDE n offre pas d export — il n y a rien a exporter",
           ],
         );
+
+        /*
+           * LA SURFACE ANGLAISE, BALAYEE PAR VALEUR ET NON PAR NOM.
+           *
+           * Le produit est bilingue depuis le premier jour et le persona
+           * fournisseur est anglophone : l espace vendeur en anglais est un
+           * ecran de travail, pas une politesse. Rien ne le verifiait ailleurs
+           * que sur trois pages publiques.
+           *
+           * CHAQUE LIBELLE DONT LA VERSION FRANCAISE DIFFERE DE L ANGLAISE EST
+           * UNE SENTINELLE. S il apparait dans le RENDU d une page `/en`, c est
+           * du francais servi a un anglophone — et reciproquement. On cherche
+           * hors des `<script>` : cette surface EXPEDIE son catalogue, donc le
+           * HTML brut porte les deux langues par construction, et un controle
+           * sur le brut serait vert quoi qu il arrive.
+           *
+           * LE CONTRE-TEST VIENT EN PREMIER, et il est indispensable : sans
+           * lui, « aucun libelle de l autre langue » serait vrai d une page
+           * VIDE, ou d un jeu de sentinelles qui ne correspond a rien de ce que
+           * l ecran affiche. On exige donc d abord d en RECONNAITRE.
+           */
+          {
+            const feuilles = (o, prefixe = "") =>
+              Object.entries(o).flatMap(([k, v]) =>
+                typeof v === "string" ? [[prefixe + k, v]] : feuilles(v, prefixe + k + "."),
+              );
+            const catalogueEn = JSON.parse(
+              readFileSync(join(racine, "messages", "en.json"), "utf8"),
+            );
+            const parCle = new Map(feuilles(catalogueEn));
+            const sentinelles = feuilles(catalogue)
+              .map(([cle, vFr]) => ({ cle, fr: vFr, en: parCle.get(cle) }))
+              .filter(
+                (x) =>
+                  typeof x.en === "string" &&
+                  x.en !== x.fr &&
+                  x.fr.length >= 14 &&
+                  x.en.length >= 14 &&
+                  !x.fr.includes("{") &&
+                  !x.en.includes("{"),
+              );
+
+            const ecrans = ["/commandes", "/envois", "/analyses", "/marque"];
+            const bilan = [];
+            for (const ecran of ecrans) {
+              for (const langue of ["fr", "en"]) {
+                const r = await fetch(`${base}/${langue}${ecran}`, {
+                  headers: entetes,
+                  redirect: "manual",
+                });
+                const html = r.status === 200 ? await r.text() : "";
+                const vu = rendu(html);
+                const attendue = langue === "fr" ? "fr" : "en";
+                const interdite = langue === "fr" ? "en" : "fr";
+                bilan.push({
+                  ecran,
+                  langue,
+                  statut: r.status,
+                  lang: (/<html[^>]*lang="([a-z-]+)"/.exec(html) ?? [, "?"])[1],
+                  reconnus: sentinelles.filter((x) => vu.includes(x[attendue])).length,
+                  fuites: sentinelles.filter(
+                    (x) => vu.includes(x[interdite]) && !vu.includes(x[attendue]),
+                  ),
+                });
+              }
+            }
+
+            const totalReconnus = bilan.reduce((n, b) => n + b.reconnus, 0);
+            const fuites = bilan.flatMap((b) =>
+              b.fuites.map((f) => `${b.langue}${b.ecran} : ${f.cle}`),
+            );
+            const langsFaux = bilan.filter((b) => b.lang !== b.langue);
+            const nonServis = bilan.filter((b) => b.statut !== 200);
+
+            controles.push(
+              [
+                nonServis.length === 0,
+                `les ${bilan.length} pages du balayage bilingue repondent 200` +
+                  (nonServis.length === 0
+                    ? ""
+                    : ` (fautives : ${nonServis.map((b) => b.langue + b.ecran + "=" + b.statut).join(", ")})`),
+              ],
+              [
+                sentinelles.length > 200 && totalReconnus > 0,
+                `CONTRE-TEST : ${sentinelles.length} sentinelles comparables, ${totalReconnus} reconnues dans les rendus`,
+              ],
+              [
+                langsFaux.length === 0,
+                `chaque page porte l attribut lang de son URL` +
+                  (langsFaux.length === 0
+                    ? ""
+                    : ` (fautives : ${langsFaux.map((b) => b.langue + b.ecran + '=' + b.lang).join(", ")})`),
+              ],
+              [
+                fuites.length === 0,
+                `aucune page ne sert un libelle de l AUTRE langue` +
+                  (fuites.length === 0 ? "" : ` (${fuites.slice(0, 6).join(" | ")})`),
+              ],
+            );
+          }
+
       }
 
       /*
