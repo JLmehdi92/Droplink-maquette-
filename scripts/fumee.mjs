@@ -3611,6 +3611,45 @@ function ageHsts(entetes) {
   ]);
 }
 
+// ── LE COOKIE DE LANGUE N'EST PAS LISIBLE EN JAVASCRIPT ────────────────────
+//
+// ⚠️ RELEVÉ PAR LE MÊME SCAN, sur 18 chemins : `NEXT_LOCALE` partait sans
+// `HttpOnly`. Le justifier par « il ne contient qu'une langue » serait L-029 ;
+// ce qui a été établi, c'est que RIEN ne l'écrit ni ne le lit côté navigateur.
+// Le pourquoi complet, et ce qui casserait le jour où un sélecteur de langue
+// arrive, sont dans `src/middleware.ts`.
+//
+// ⚠️ L'ORDRE DES DEUX CONTRÔLES EST LA MOITIÉ DU TRAVAIL : « aucun cookie sans
+// HttpOnly » est trivialement vrai d'une réponse qui ne pose AUCUN cookie. Si
+// next-intl cessait de le poser — ou si notre middleware cessait d'être
+// atteint — la garde resterait verte sur un produit changé.
+{
+  const posesFr = (await fetch(`${base}/fr`, { redirect: "manual" })).headers.getSetCookie();
+  const posesEn = (await fetch(`${base}/en`, { redirect: "manual" })).headers.getSetCookie();
+  const langueFr = posesFr.find((c) => c.startsWith("NEXT_LOCALE="));
+  const langueEn = posesEn.find((c) => c.startsWith("NEXT_LOCALE="));
+
+  controles.push([
+    langueFr !== undefined && langueEn !== undefined,
+    "CONTRE-TEST : le cookie de langue est bien pose sur /fr ET sur /en",
+  ]);
+  controles.push([
+    langueFr?.startsWith("NEXT_LOCALE=fr") === true && langueEn?.startsWith("NEXT_LOCALE=en") === true,
+    "CONTRE-TEST : il porte la langue de l URL, donc la detection marche encore",
+  ]);
+  controles.push([
+    /;\s*HttpOnly/i.test(langueFr ?? "") && /;\s*HttpOnly/i.test(langueEn ?? ""),
+    "le cookie de langue est HttpOnly sur les deux langues",
+  ]);
+  // `SameSite=lax` est un DÉFAUT de next-intl qu'on écrase en reposant le
+  // cookie : sans ce contrôle, l'oublier dans `middleware.ts` le ferait
+  // silencieusement retomber sur le défaut du navigateur.
+  controles.push([
+    /;\s*SameSite=lax/i.test(langueFr ?? "") && /;\s*SameSite=lax/i.test(langueEn ?? ""),
+    "le cookie de langue garde SameSite=lax en le reposant",
+  ]);
+}
+
 controles.push(
   [enTetesLanding.get("x-content-type-options") === "nosniff", "nosniff sur la landing"],
   [enTetesLanding.get("x-frame-options") === "DENY", "cadrage refuse sur la landing"],

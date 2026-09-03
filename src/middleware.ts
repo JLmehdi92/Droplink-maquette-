@@ -120,6 +120,46 @@ function viseAdmin(chemin: string): boolean {
 export default async function middleware(requete: NextRequest): Promise<NextResponse> {
   const reponse = gestionLangue(requete);
 
+  /*
+   * `NEXT_LOCALE` PARTAIT SANS `HttpOnly` — relevé le 03/09/2026 par le scan
+   * HawkScan, sur 18 chemins.
+   *
+   * ⚠️ POURQUOI ICI ET PAS DANS `routing.ts`, QUI SERAIT L'ENDROIT ÉVIDENT :
+   * le type `CookieAttributes` de next-intl 4.13.7 est un `Pick` qui liste
+   * `maxAge, domain, partitioned, path, priority, sameSite, secure, name` —
+   * et EXCLUT `httpOnly`. Ce n'est pas un oubli de typage : la librairie
+   * réécrit ce cookie DEPUIS LE NAVIGATEUR quand on change de langue par son
+   * `<Link locale=…>` (`navigation/shared/syncLocaleCookie.js`), et un cookie
+   * `HttpOnly` ne peut pas être écrit par du JavaScript. Le passer quand même
+   * exigerait de forcer le type d'une librairie qui a de bonnes raisons de
+   * l'interdire.
+   *
+   * ⚠️ CE QUI REND LE GESTE SÛR EST MESURÉ, PAS SUPPOSÉ — le justifier par
+   * « ce cookie ne contient qu'une langue » serait L-029, une protection qui
+   * tient à ce que la valeur soit anodine AUJOURD'HUI. Ce qu'il fallait
+   * établir, c'est que RIEN ne l'écrit ni ne le lit côté navigateur :
+   *   - zéro import de `next-intl/navigation` dans `src/` ;
+   *   - `syncLocaleCookie` absent des 63 bundles servis — contre-test :
+   *     `useState` en trouve 16, donc la sonde inspectait bien quelque chose ;
+   *   - zéro occurrence de `NEXT_LOCALE` dans ces mêmes bundles.
+   *
+   * → LE JOUR OÙ UN SÉLECTEUR DE LANGUE EST AJOUTÉ AVEC LE `<Link>` DE
+   * NEXT-INTL, cette ligne le casse EN SILENCE : le clic ne persistera plus le
+   * choix, et rien ne lèvera d'erreur. Retirer cette ligne est alors le
+   * correctif, pas contourner le cookie.
+   *
+   * `secure` n'est pas posé : il casserait le cookie en développement, servi
+   * en clair. C'est une décision du premier déploiement, pas d'ici.
+   */
+  const langue = reponse.cookies.get("NEXT_LOCALE");
+  if (langue !== undefined) {
+    reponse.cookies.set("NEXT_LOCALE", langue.value, {
+      path: "/",
+      sameSite: "lax",
+      httpOnly: true,
+    });
+  }
+
   const supabase = createServerClient(urlSupabase(), clePubliable(), {
     // Le middleware REPOSE les cookies rafraîchis : sans les mêmes options ici,
     // chaque renouvellement de session réécrirait des cookies lisibles en
