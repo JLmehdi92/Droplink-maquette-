@@ -79,7 +79,29 @@ export async function PucesFiltresActifs({
           href: lienListe(base, parametres, { q: "" }),
         }
       : null,
-    parametres.statut !== null
+    /*
+     * ⚠️ PAS DE PUCE POUR UN STATUT QU'UNE PILULE DIT DÉJÀ.
+     *
+     * DÉFAUT MONTRÉ EN CAPTURE PAR WASSIM LE 03/09/2026 : cliquer « En transit »
+     * faisait apparaître une rangée « Filtres actifs » portant « Statut : En
+     * transit », alors que la pilule du même nom venait de s'allumer juste en
+     * dessous. Aucune des trois autres pilules ne produisait de rangée — elles
+     * posent un tri, pas un filtre. On voyait donc un contrôle sur quatre
+     * ouvrir une rangée de plus, sans raison lisible.
+     *
+     * LA PLANCHE LE DIT DEPUIS LE DÉBUT : `CommandesFiltreVide` dessine
+     * « Recherche », « Période » et « Statut : LIVRÉ » — un statut qui n'a PAS
+     * de pilule. Jamais « Statut : En transit ».
+     *
+     * C'est le même raisonnement qui a retiré la puce de tri la veille : la
+     * rangée ne montre que ce qu'aucun autre contrôle ne montre. Et la sortie
+     * reste à un clic — la pilule « Toutes » est dans la même barre.
+     *
+     * ⚠️ LES AUTRES STATUTS GARDENT LEUR PUCE, et c'est le point : « préparation »,
+     * « expédié » et « livré » viennent du panneau de filtres et n'ont aucune
+     * pilule. Sans leur puce, rien à l'écran ne dirait qu'ils sont posés.
+     */
+    parametres.statut !== null && parametres.statut !== "en_transit"
       ? {
           clef: "statut",
           libelle: t("puce.statut", { valeur: t("statut." + parametres.statut) }),
@@ -108,6 +130,20 @@ export async function PucesFiltresActifs({
         }
       : null,
   ].filter((p) => p !== null);
+
+  /*
+   * ⚠️ UNE RANGÉE SANS AUCUNE PUCE NE SE REND PAS.
+   *
+   * `listeFiltree` répond « oui, un filtre est posé » dès qu'un statut existe —
+   * mais depuis que « en transit » n'a plus de puce, ce critère peut être le
+   * SEUL, et la rangée rendait alors « Filtres actifs : » suivi de rien, puis
+   * « Tout effacer ». Une étiquette qui annonce une liste vide, exactement le
+   * genre de détail que Wassim voit et que rien ne signale.
+   *
+   * Ce garde est le pendant de la puce retirée juste au-dessus : les deux
+   * décisions se tiennent, et séparer l'une de l'autre rouvrirait le défaut.
+   */
+  if (puces.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-margin-mobile md:px-0">

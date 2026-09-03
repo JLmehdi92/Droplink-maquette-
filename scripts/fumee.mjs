@@ -1537,112 +1537,120 @@ try {
         );
 
         /*
-         * LES CONTROLES DE FILTRE NE PERDENT PAS LES AUTRES CRITERES.
+         * LES QUATRE VUES SONT UN CHOIX UNIQUE, ET ELLES GARDENT LA RECHERCHE.
          *
-         * ⚠️ DEFAUT DECRIT PAR WASSIM LE 03/09/2026 : « des fois ça enlève les
-         * autres filtres ». Mesure sur `?q=veste&tri=anciennes&statut=en_transit` :
-         * de tous les controles de l ecran, la pilule « Bloquees » etait LA
-         * SEULE a effacer un critere qu elle ne pretend pas changer — elle
-         * posait `statut: null` — alors que sa jumelle « Jamais ouvertes »,
-         * batie sur le meme mecanisme de tri, conservait tout. Et le MEME tri
-         * choisi depuis le menu gardait ce statut : deux controles, un effet,
-         * deux comportements.
+         * ⚠️ DEFAUT MONTRE EN CAPTURE PAR WASSIM LE 03/09/2026 : on clique
+         * « En transit », puis « Bloquees », et les DEUX pilules restent
+         * allumees, la rangee « Filtres actifs » apparait, et la liste affiche
+         * « Aucune commande ne correspond ». Les planches n en dessinent
+         * pourtant qu UNE allumee depuis le debut.
          *
-         * LE CONTRE-TEST EST ICI OBLIGATOIRE ET IL EST PARTICULIER : certains
-         * controles DOIVENT perdre un critere — chaque puce retire le sien,
-         * « Tout effacer » retire tout, « Toutes » est la vue de remise a zero,
-         * et le tri par defaut se selectionne en RETIRANT `tri`. Une sonde qui
-         * exigerait « aucun lien ne perd rien » serait donc rouge sur un produit
-         * juste. On exige les deux sens : les retraits legitimes ont lieu, les
-         * autres non.
+         * ⚠️ ET LA SONDE QUI OCCUPAIT CETTE PLACE ENCODAIT LA MAUVAISE REGLE.
+         * Elle exigeait qu une vue « ne perde aucun critere » — ce qui est faux
+         * d une vue : une vue REMPLACE une autre vue, donc elle DOIT effacer le
+         * statut ou le tri que la precedente avait pose. C est en la rendant
+         * verte que j ai retire le `statut: null` de « Bloquees », et donc que
+         * j ai casse l exclusivite. Une sonde qui decrit mal l invariant ne
+         * protege pas le produit : elle le tire vers son erreur.
+         *
+         * L INVARIANT JUSTE, EN TROIS MORCEAUX :
+         *   1. exactement UNE pilule est allumee, quoi qu on ait clique ;
+         *   2. les quatre pilules gardent ce qui ne leur appartient pas — la
+         *      recherche, la periode, les archives ;
+         *   3. aucune puce ne redit ce qu une pilule dit deja.
          */
         {
-          const r = await fetch(`${base}/fr/commandes?q=veste&tri=anciennes&statut=en_transit`, {
-            headers: entetes,
-            redirect: "manual",
-          });
-          const vu = rendu(r.status === 200 ? await r.text() : "");
-          const attendus = ["q", "tri", "statut"];
-
-          /*
-           * ⚠️ LES `&` DES `href` SONT ECHAPPES EN `&amp;` DANS LE HTML SERVI,
-           * et la premiere version de cette sonde ne les decodait pas : chaque
-           * lien se lisait alors comme portant une cle `amp;statut`, donc comme
-           * ayant PERDU le critere. Elle est nee rouge sur un produit juste, et
-           * son contre-test — « combien de vues ai-je inspectees » — est ce qui
-           * l a dit : zero.
-           */
-          const balises = [...vu.matchAll(/<a\s[^>]*href="(\/fr\/commandes(?:\?[^"]*)?)"[^>]*>/g)]
-            .map((m) => ({ balise: m[0], href: m[1].replace(/&amp;/g, "&") }))
-            .filter((b) => !/[0-9a-f]{8}-[0-9a-f]{4}/.test(b.href));
-          const liens = balises.map((b) => b.href);
-
-          /*
-           * ⚠️ LES PUCES DE CRITERE SONT ECARTEES PAR LEUR `aria-label`, PAS PAR
-           * LA FORME DE LEUR URL. Une premiere version les confondait avec les
-           * vues : elles portent `tri=` comme elles, et retirent `statut` — ce
-           * qui est precisement leur metier. La sonde les denoncait donc en
-           * meme temps que le vrai defaut. On emploie ce que le produit dit
-           * d elles : le libelle « Retirer le filtre : … » du catalogue.
-           */
-          const prefixeRetrait = catalogue.commandes.retirerFiltre.split("{")[0].trim();
-          const nonPuces = balises.filter((b) => !b.balise.includes(prefixeRetrait));
-
-          const manquants = (h) => {
-            const p = new URLSearchParams(h.split("?")[1] ?? "");
-            return attendus.filter((c) => !p.has(c));
+          const lireVues = async (params) => {
+            const r = await fetch(`${base}/fr/commandes?${params}`, {
+              headers: entetes,
+              redirect: "manual",
+            });
+            const html = r.status === 200 ? await r.text() : "";
+            const vu = rendu(html);
+            const balises = [
+              ...vu.matchAll(/<a\s[^>]*href="(\/fr\/commandes(?:\?[^"]*)?)"[^>]*>([^<]*)<\/a>/g),
+            ];
+            const libellesVues = Object.values(catalogue.commandes.vues);
+            return {
+              statut: r.status,
+              vu,
+              allumees: balises.filter((m) => m[0].includes('aria-current="true"')).length,
+              vues: balises
+                .filter((m) => libellesVues.includes(m[2].trim()))
+                .map((m) => m[1].replace(/&amp;/g, "&")),
+            };
           };
 
-          // Ceux qui retirent quelque chose : puces, « tout effacer », vue de
-          // remise a zero, tri par defaut. Leur existence est le contre-test.
-          const retirants = liens.filter((h) => manquants(h).length > 0);
-
+          const surTransit = await lireVues("q=veste&statut=en_transit");
+          const surLivre = await lireVues("q=veste&statut=livre");
+          // Le statut SEUL : c est le seul cas ou la liste de puces peut etre
+          // vide, donc le seul qui eprouve le garde-fou de la rangee.
+          const transitSeul = await lireVues("statut=en_transit");
           /*
-           * ⚠️ LA REGLE DOIT ETRE EXACTE, PAS APPROXIMATIVE. Une premiere
-           * version tolerait la perte d UN critere, pour laisser passer le tri
-           * par defaut — qui se selectionne justement en RETIRANT `tri`. Elle
-           * laissait donc passer le defaut lui-meme : « Bloquees » ne perdait
-           * qu un critere, `statut`. Falsifiee, elle est restee VERTE sur le
-           * produit casse. La regle est donc nommee cas par cas :
-           *
-           *   un lien qui POSE `tri=`     doit porter `statut` ET `q` ;
-           *   un lien qui pose `statut=`  sans `tri` EST le tri par defaut,
-           *                               et n a le droit d omettre que `tri`.
+           * ⚠️ L URL DES CAPTURES DE WASSIM, ET LA SEULE OU LE CUMUL SE VOIT :
+           * un statut ET un tri restrictif poses ensemble. Une premiere version
+           * de cette sonde n interrogeait que `?statut=en_transit`, ou aucune
+           * des deux pilules ne peut se disputer l allumage — falsifiee en
+           * rendant les vues cumulables, elle est restee VERTE. Un invariant ne
+           * se mesure que sur l etat qui peut le violer.
            */
-          const vuesEtTris = nonPuces
-            .map((b) => b.href)
-            .filter(
-              (h) => /[?&](statut|tri)=/.test(h) && new URLSearchParams(h.split("?")[1] ?? "").has("q"),
+          const cumul = await lireVues("statut=en_transit&tri=bloquees");
+
+          const libelleFiltres = catalogue.commandes.filtresActifsLabel;
+          const puceStatut = (v, valeur) =>
+            v.includes(
+              catalogue.commandes.puce.statut.replace(
+                "{valeur}",
+                catalogue.commandes.statut[valeur],
+              ),
             );
-          const fautifs = vuesEtTris.filter((h) => {
-            const absents = manquants(h);
-            if (/[?&]tri=/.test(h)) return absents.length > 0;
-            return absents.join(",") !== "tri";
-          });
 
           controles.push(
             [
-              r.status === 200 && liens.length >= 10,
-              `CONTRE-TEST : l ecran filtre rend ${liens.length} liens de navigation (statut ${r.status})`,
+              surTransit.statut === 200 && surTransit.vues.length === 4,
+              `CONTRE-TEST : les ${surTransit.vues.length} vues sont rendues (statut ${surTransit.statut})`,
             ],
             [
-              retirants.length > 0,
-              `CONTRE-TEST : ${retirants.length} lien(s) retirent bien un critere — puces et remises a zero`,
-            ],
-            // Le seuil dit « l ensemble n est pas vide », pas « il en fait
-            // exactement tant » : un decompte fortuit deviendrait un test de la
-            // liste de vues plutot que de la preservation des criteres.
-            [
-              vuesEtTris.length >= 3,
-              `CONTRE-TEST : ${vuesEtTris.length} vues et tris inspectes`,
+              surTransit.allumees === 1,
+              `exactement UNE pilule est allumee (${surTransit.allumees})`,
             ],
             [
-              fautifs.length === 0,
-              "aucune vue ni aucun tri n efface un critere qu il ne change pas" +
-                (fautifs.length === 0 ? "" : ` (${fautifs.join(" | ")})`),
+              cumul.statut === 200 && cumul.vues.length === 4,
+              `CONTRE-TEST : l etat qui cumule statut ET tri rend ses ${cumul.vues.length} vues (statut ${cumul.statut})`,
+            ],
+            [
+              cumul.allumees === 1,
+              `et meme la, UNE SEULE pilule est allumee (${cumul.allumees})`,
+            ],
+            [
+              surTransit.vues.every(
+                (h) => new URLSearchParams(h.split("?")[1] ?? "").get("q") === "veste",
+              ),
+              "et les quatre gardent la recherche, qui ne leur appartient pas",
+            ],
+            [
+              surLivre.statut === 200 && puceStatut(surLivre.vu, "livre"),
+              "CONTRE-TEST : un statut SANS pilule garde sa puce (« livre »)",
+            ],
+            [
+              surLivre.vu.includes(libelleFiltres),
+              "CONTRE-TEST : et la rangee des puces se rend bien",
+            ],
+            [
+              !puceStatut(surTransit.vu, "en_transit"),
+              "mais « en transit », qu une pilule allume deja, n a PAS de puce",
+            ],
+            [
+              transitSeul.statut === 200 && transitSeul.allumees === 1,
+              `CONTRE-TEST : le statut seul rend bien l ecran (statut ${transitSeul.statut}, ${transitSeul.allumees} pilule allumee)`,
+            ],
+            [
+              !transitSeul.vu.includes(libelleFiltres),
+              "et quand ce statut est le SEUL critere, la rangee des puces ne se rend pas du tout",
             ],
           );
         }
+
 
         /*
         * LA SURFACE ANGLAISE, BALAYEE PAR VALEUR ET NON PAR NOM.
