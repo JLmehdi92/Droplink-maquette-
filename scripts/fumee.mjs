@@ -1135,8 +1135,21 @@ try {
       // aurait fait valider par la sonde un chemin que le produit n a plus : la
       // session aurait ete parfaitement valide, les controles suivants
       // parfaitement verts, et `signInWithPassword` jamais exerce par personne.
-      let cookieVendeur = null;
-      {
+      /*
+       * FABRIQUER UNE SESSION VENDEUR — EN FONCTION, PARCE QU IL EN FAUT DEUX.
+       *
+       * ⚠️ ELLE ETAIT EN LIGNE, ET FABRIQUEE UNE SEULE FOIS EN TETE DE SUITE.
+       * Le jeton d acces Supabase vaut UNE HEURE ; la sonde en dure davantage.
+       * Les controles de suivi, tout a la fin, recevaient donc un cookie
+       * EXPIRE et lisaient 307 — c est-a-dire la connexion, pas l ecran.
+       * Leurs contre-tests l ont dit tout haut plutot que de laisser passer un
+       * vert : « l ecran Commandes repond a la session (statut 307) ».
+       *
+       * En fonction, chaque bloc ouvre la sienne au moment ou il en a besoin.
+       * Et elle passe TOUJOURS par le vrai chemin mot de passe : une session
+       * bricolee validerait un chemin que le produit n a pas.
+       */
+      async function ouvrirSessionVendeur() {
         const publiable = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL,
           process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
@@ -1147,43 +1160,43 @@ try {
           password: motDePasseFumee,
         });
         if (erreurMdp !== null) {
-          // Le motif est DIT. Sans lui, le plancher de controles signale que
-          // quelque chose manque sans jamais dire quoi.
           console.error(`ECHEC ouverture de session par mot de passe : ${erreurMdp.message}`);
           echecs += 1;
         }
-        if (verif?.session) {
-          const ref = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname.split(".")[0];
-          // Reduite au strict necessaire : au-dela d environ 3180 octets
-          // `@supabase/ssr` decoupe le cookie en `.0`, `.1`, … et une sonde qui
-          // ne decoupe pas enverrait un cookie tronque, donc pas de session —
-          // et le controle ci-dessous se croirait rouge pour la mauvaise raison.
-          const mince = {
-            access_token: verif.session.access_token,
-            refresh_token: verif.session.refresh_token,
-            token_type: verif.session.token_type,
-            expires_in: verif.session.expires_in,
-            expires_at: verif.session.expires_at,
-            user: {
-              id: verif.session.user.id,
-              aud: verif.session.user.aud,
-              role: verif.session.user.role,
-              email: verif.session.user.email,
-              app_metadata: {},
-              user_metadata: {},
-              created_at: verif.session.user.created_at,
-            },
-          };
-          const valeur = "base64-" + Buffer.from(JSON.stringify(mince)).toString("base64");
-          cookieVendeur =
-            valeur.length <= 3180
-              ? `sb-${ref}-auth-token=${valeur}`
-              : valeur
-                  .match(/.{1,3180}/g)
-                  .map((m, i) => `sb-${ref}-auth-token.${i}=${m}`)
-                  .join("; ");
-        }
+        if (!verif?.session) return null;
+
+        const ref = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname.split(".")[0];
+        // Reduite au strict necessaire : au-dela d environ 3180 octets
+        // `@supabase/ssr` decoupe le cookie en `.0`, `.1`, … et une sonde qui
+        // ne decoupe pas enverrait un cookie tronque, donc pas de session —
+        // et le controle se croirait rouge pour la mauvaise raison.
+        const s = verif.session;
+        const mince = {
+          access_token: s.access_token,
+          refresh_token: s.refresh_token,
+          token_type: s.token_type,
+          expires_in: s.expires_in,
+          expires_at: s.expires_at,
+          user: {
+            id: s.user.id,
+            aud: s.user.aud,
+            role: s.user.role,
+            email: s.user.email,
+            app_metadata: {},
+            user_metadata: {},
+            created_at: s.user.created_at,
+          },
+        };
+        const valeur = "base64-" + Buffer.from(JSON.stringify(mince)).toString("base64");
+        return valeur.length <= 3180
+          ? `sb-${ref}-auth-token=${valeur}`
+          : valeur
+              .match(/.{1,3180}/g)
+              .map((m, i) => `sb-${ref}-auth-token.${i}=${m}`)
+              .join("; ");
       }
+
+      const cookieVendeur = await ouvrirSessionVendeur();
 
       controles.push([
         cookieVendeur !== null,
@@ -3402,6 +3415,31 @@ try {
             .insert({ order_id: commandeFumee, parcel_id: colisFumee.id });
 
           /*
+           * ⚠️ ET LE NUMERO SUR LA COMMANDE, QUE CE JEU N AVAIT JAMAIS POSE.
+           *
+           * Le produit ne cree pas un colis a partir de rien : le vendeur TAPE
+           * le numero dans sa commande, et `lib/tracking/attache.ts` le RELIT
+           * la (`select("tracking_number, carrier_code")`) pour attacher le
+           * colis. La sonde, elle, inserait le colis directement et laissait
+           * `orders.tracking_number` vide — un etat que le produit ne peut pas
+           * produire.
+           *
+           * Consequence attrapee le 04/09/2026 : le controle « le vendeur
+           * retrouve sa commande en cherchant le numero de suivi » etait rouge,
+           * et il aurait ete lu comme un defaut de la RECHERCHE. C est
+           * l index d expression de la migration 008 qui indexe
+           * `coalesce(tracking_number, '')` SUR LA COMMANDE — il ne pouvait
+           * rien trouver puisque la colonne etait vide.
+           *
+           * Un jeu de mesure qui ne reproduit pas ce que le produit ecrit fait
+           * accuser le produit a sa place.
+           */
+          await service
+            .from("orders")
+            .update({ tracking_number: numeroEcriture })
+            .eq("id", commandeFumee);
+
+          /*
            * L ETAT « EXPEDIE, PAS ENCORE SCANNE », SUR LA PAGE REELLEMENT
            * SERVIE — et son basculement quand le transporteur parle enfin.
            *
@@ -3576,6 +3614,89 @@ try {
               "et le bloc d attente a disparu — les deux etats ne coexistent jamais",
             ],
           );
+
+          /*
+           * ── LE PASSAGE REMONTE-T-IL JUSQU AUX ECRANS DU VENDEUR ? ──────────
+           *
+           * ⚠️ CE BLOC MANQUAIT, ET C EST WASSIM QUI A POSE LA QUESTION le
+           * 04/09/2026 : « sois sur que quand un utilisateur met une commande
+           * avec le numero de suivi, ca auto-update sur la page finale client
+           * ET dans commandes ET dans envois cote utilisateur ».
+           *
+           * La sonde s arretait a la page CLIENT. Or la chaine ne s y arrete
+           * pas : `appliquer_etat_colis` (migration 090) ecrit aussi
+           * `orders.status`, avec un `greatest()` qui implemente EN BASE la
+           * regle « le statut ne recule jamais ». Rien ne verifiait cette
+           * seconde ecriture, ni son affichage — le vendeur aurait pu voir
+           * « Preparation » sur une commande que son client voit « en transit ».
+           *
+           * ⚠️ LES DEUX CONTRE-TESTS VIENNENT EN PREMIER, et ils ne sont pas
+           * decoratifs : « la page ne dit plus Preparation » est trivialement
+           * vrai d une page qui ne rend RIEN — une redirection vers la
+           * connexion, par exemple, ce qui est exactement ce qu on obtient si
+           * le cookie a expire en cours de sonde.
+           */
+          // ⚠️ UNE SESSION FRAICHE, PAS CELLE DU DEBUT DE SUITE. Le jeton
+          // d acces vaut une heure et ce bloc arrive bien plus tard : le
+          // cookie initial lisait 307, donc la connexion et non l ecran.
+          const cookieSuivi = await ouvrirSessionVendeur();
+          if (cookieSuivi) {
+            const entetesSuivi = { cookie: cookieSuivi, ...visiteur(24) };
+
+            const { data: commandeApres } = await service
+              .from("orders")
+              .select("status")
+              .eq("id", commandeFumee)
+              .maybeSingle();
+
+            const listeFiltree = await fetch(
+              `${base}/fr/commandes?q=${encodeURIComponent(numeroEcriture)}`,
+              { headers: entetesSuivi, redirect: "manual" },
+            );
+            const htmlListe = listeFiltree.status === 200 ? await listeFiltree.text() : "";
+
+            const envois = await fetch(`${base}/fr/envois`, {
+              headers: entetesSuivi,
+              redirect: "manual",
+            });
+            const htmlEnvois = envois.status === 200 ? await envois.text() : "";
+
+            controles.push(
+              [
+                listeFiltree.status === 200 && htmlListe.includes("Client de fumee"),
+                `CONTRE-TEST : l ecran Commandes repond a la session (statut ${listeFiltree.status})`,
+              ],
+              [
+                envois.status === 200 && htmlEnvois.length > 2000,
+                `CONTRE-TEST : l ecran Envois repond a la session (statut ${envois.status})`,
+              ],
+              /*
+               * LA SECONDE ECRITURE. Le colis a avance — c est deja verifie
+               * plus haut — mais c est la COMMANDE qu on regarde ici : sans
+               * cette ligne, le suivi vivrait dans `tracked_parcels` sans que
+               * la commande ne bouge, et les deux ecrans du vendeur mentiraient
+               * en accord parfait avec eux-memes.
+               */
+              [
+                commandeApres !== null && commandeApres.status !== "preparation",
+                `le suivi a fait AVANCER la commande elle-meme (${commandeApres?.status ?? "illisible"})`,
+              ],
+              /*
+               * Le numero de suivi est un critere de recherche declare au
+               * brief, au meme titre que le nom du client et la reference.
+               * Le verifier ici plutot qu ailleurs a un avantage : c est le
+               * SEUL moment de la sonde ou un vrai numero existe en base.
+               */
+              [
+                htmlListe.includes("Client de fumee"),
+                "et le vendeur retrouve sa commande EN CHERCHANT LE NUMERO DE SUIVI",
+              ],
+              [
+                htmlEnvois.includes(numeroEcriture),
+                "l ecran Envois porte le numero du colis suivi",
+              ],
+            );
+          }
 
           /*
            * LE CONTRE-TEST DE LA CARTE D ETAT : une arrivee ANNONCEE.
