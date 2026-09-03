@@ -4,6 +4,7 @@ import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
+import { signerLecture } from "@/lib/storage/r2";
 
 /**
  * Enveloppe de l'espace authentifié.
@@ -75,6 +76,11 @@ export default async function LayoutApplication({
   }
 
   const t = await getTranslations("navigation");
+
+  // Signée ici et pas dans chaque écran : ce bloc vit dans le layout, donc une
+  // signature par page serait une signature par navigation, pour la même image.
+  const logoSigne =
+    profil.logoUrl === null ? null : await signerLecture(profil.logoUrl).catch(() => null);
 
   const entrees: readonly EntreeNavigation[] = [
     { href: `/${langue}/commandes`, libelle: t("mesCommandes"), icone: "inventory_2" },
@@ -151,7 +157,50 @@ export default async function LayoutApplication({
             vit dans l'en-tête de Commandes, l'écran d'accueil du vendeur.
           */}
           <div className="flex items-center gap-2.5 rounded-[11px] p-2">
-            <span className="h-8 w-8 shrink-0 rounded-full bg-surface-container-highest" />
+            {/*
+              LE LOGO DU VENDEUR, LÀ OÙ IL Y AVAIT UN DISQUE GRIS.
+
+              ⚠️ MONTRÉ EN CAPTURE PAR WASSIM LE 03/09/2026 : « j'ai configuré
+              ma marque avec mon logo, ici je suis censé avoir mon logo sauf
+              que je ne l'ai pas ». Il avait raison, et la cause n'était pas où
+              on l'aurait cherchée.
+
+              LA PLANCHE N'EST PAS EN CAUSE, ET IL NE FALLAIT DONC PAS LA
+              MODIFIER. Les six planches qui portent ce bloc — `Commandes`,
+              `CommandesVide`, `CommandesFiltreVide`, `Envois`, `Analyses`,
+              `Marque` — dessinent un disque plein de 32 px en `#e4e2ee`,
+              sans image. Mais c'est AUSSI ce que dessinent les quatre planches
+              de la page client, où le code rend le vrai logo depuis toujours :
+              dans le vocabulaire du canevas, ce disque est l'EMPLACEMENT du
+              logo, pas un ornement. Le code était donc incohérent avec
+              lui-même, pas avec le dessin.
+
+              `profil.logoUrl` était déjà lu et rendu par `lireProfilVendeur`
+              — la donnée arrivait ici depuis le début, personne ne s'en
+              servait.
+
+              ⚠️ C'EST UNE CLÉ D'OBJET, PAS UNE URL. La rendre brute dans
+              `src` produirait une image cassée ET ferait sortir le `shop_id`
+              dans le HTML — c'est le défaut exact déjà corrigé sur la page
+              publique, dont `lib/page-publique/lecture.ts` garde la trace.
+              Même remède, même repli : une signature qui échoue rend `null`
+              et l'écran retombe sur le disque, plutôt que d'emporter la page.
+            */}
+            {logoSigne !== null ? (
+              /* eslint-disable-next-line @next/next/no-img-element --
+                 URL signée à expiration : l'optimiseur de Next la mettrait en
+                 cache sous une clé stable et servirait une image dont la
+                 signature a expiré. Même raison que partout ailleurs. */
+              <img
+                src={logoSigne}
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span className="h-8 w-8 shrink-0 rounded-full bg-surface-container-highest" />
+            )}
             <div className="min-w-0 flex-grow">
               {profil.nomBoutique !== null ? (
                 <p className="truncate font-label-md text-[13px] font-semibold text-on-surface">

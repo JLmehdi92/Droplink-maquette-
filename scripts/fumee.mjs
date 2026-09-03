@@ -1010,6 +1010,32 @@ try {
         echecs += 1;
       }
 
+      /*
+       * ── UN LOGO, PARCE QUE SANS LUI LA BARRE LATERALE N A RIEN A RENDRE ──
+       *
+       * ⚠️ TROU REEL, MONTRE EN CAPTURE PAR WASSIM LE 03/09/2026 : son bloc de
+       * compte affichait un disque gris alors que sa marque est configuree. Le
+       * layout vendeur ne rendait tout simplement JAMAIS `profil.logoUrl` —
+       * la donnee arrivait pourtant jusqu'a lui.
+       *
+       * La boutique de fumee n avait pas de logo, donc aucune sonde ne pouvait
+       * voir la difference entre « le logo est rendu » et « il n y en a pas ».
+       * C est le meme piege que le media de fumee : un ensemble vide passe tout.
+       *
+       * La cle a la FORME que le produit ecrit — `logos/{shop}/{uuid}.{ext}` —
+       * et l objet n existe pas dans R2 : ce qu on mesure ici est le HTML rendu
+       * et la SIGNATURE de l URL, pas le telechargement.
+       */
+      const cleLogoFumee = `logos/${shop.id}/${randomUUID()}.webp`;
+      const { error: erreurLogo } = await service
+        .from("shops")
+        .update({ logo_url: cleLogoFumee })
+        .eq("id", shop.id);
+      if (erreurLogo) {
+        console.error(`ECHEC impossible de poser le logo de fumee : ${erreurLogo.message}`);
+        echecs += 1;
+      }
+
       // ── UN MEDIA, PARCE QUE SANS LUI LA PAGE PUBLIQUE N A AUCUNE URL SIGNEE ──
       //
       // ⚠️ TROU REEL DE CETTE SONDE, TROUVE LE 02/09/2026. La commande de fumee
@@ -1506,6 +1532,51 @@ try {
 
         const pleine = await fetch(`${base}/fr/commandes`, { headers: entetes, redirect: "manual" });
         const htmlPleine = pleine.status === 200 ? await pleine.text() : "";
+
+        /*
+         * ── LE LOGO DU VENDEUR EST RENDU DANS SON BLOC DE COMPTE ────────────
+         *
+         * ⚠️ MONTRE EN CAPTURE PAR WASSIM : disque gris alors que sa marque est
+         * configuree. Le layout ne rendait jamais `profil.logoUrl`.
+         *
+         * ⚠️ ET IL FAUT VERIFIER LA SIGNATURE, PAS SEULEMENT LA PRESENCE.
+         * `shops.logo_url` porte une CLE d objet, pas une URL. La rendre brute
+         * afficherait une image cassee ET ferait sortir le `shop_id` dans le
+         * HTML — c est le defaut exact deja corrige sur la page publique
+         * (`lib/page-publique/lecture.ts`). Un controle qui se contenterait de
+         * « une balise img existe » serait donc vert sur la version fautive.
+         */
+        {
+          const srcs = [...htmlPleine.matchAll(/<img\b[^>]*?\ssrc="([^"]+)"/g)].map((m) => m[1]);
+          // ⚠️ SANS BARRE DE TETE. La cle brute s ecrit `logos/{shop}/…`, l URL
+          // signee `https://…/droplink-media/logos/{shop}/…`. Chercher
+          // « /logos/ » ne voyait donc QUE la forme correcte : falsifiee, la
+          // sonde annoncait « logo non rendu » au lieu de « cle brute rendue »
+          // — elle rougissait pour la mauvaise raison, ce qui envoie corriger
+          // au mauvais endroit.
+          const logos = srcs.filter((u) => u.includes("logos/"));
+          const bruts = logos.filter((u) => !u.includes("X-Amz-Signature"));
+
+          controles.push(
+            [
+              pleine.status === 200 && htmlPleine.includes(courriel),
+              // L adresse du compte connecte est rendue JUSTE SOUS le logo,
+              // dans le meme bloc. Si elle manque, ce n est pas le logo qui est
+              // en cause : c est que rien de ce bloc n a ete rendu, et les deux
+              // controles suivants ne prouveraient alors rien.
+              "CONTRE-TEST : le bloc de compte est bien rendu, adresse comprise",
+            ],
+            [
+              logos.length > 0,
+              `le logo du vendeur est rendu dans son bloc de compte (vu ${logos.length})`,
+            ],
+            [
+              logos.length > 0 && bruts.length === 0,
+              "et son URL est SIGNEE — la cle brute ferait sortir le shop_id" +
+                (bruts.length ? ` — ${bruts.length} URL non signee(s)` : ""),
+            ],
+          );
+        }
 
         const filtree = await fetch(
           `${base}/fr/commandes?q=zzz-aucune-commande-ne-porte-ceci-zzz`,
