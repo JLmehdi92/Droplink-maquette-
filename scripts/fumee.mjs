@@ -3703,31 +3703,6 @@ const rayonPublic = valeur("page-publique");
 
 controles.push(
   [rayonAuth === "24", `carte-page authentifiee servie a 24px (lu : ${rayonAuth ?? "AUCUNE VALEUR"})`],
-  /*
-   * LA TRANSITION DE VUE ENTRE DOCUMENTS, ET SON EXTINCTION SOUS MOUVEMENT
-   * REDUIT — les deux dans la feuille SERVIE.
-   *
-   * ⚠️ ELLE N EST PAS DECORATIVE : elle est ce qui rend INVISIBLE un
-   * rechargement qu on ne peut pas supprimer. Le routeur de Next avale les
-   * navigations qui gardent le meme chemin, donc chaque clic de filtre part en
-   * navigation NATIVE — et le prix visible en etait une page qui blanchit.
-   * Sans cette regle, le defaut que Wassim a decrit par « ça reload la page »
-   * revient tel quel, et rien ne le dirait.
-   *
-   * L EXTINCTION EST EXIGEE DANS LE MEME SOUFFLE, parce que le selecteur `*` du
-   * bloc `prefers-reduced-motion` N ATTEINT PAS les pseudo-elements de la
-   * transition : sans une redeclaration explicite, on croirait le mouvement
-   * couvert alors qu il ne l est pas.
-   */
-  [
-    /@view-transition\{navigation:auto\}/.test(cssCompact),
-    "la transition de vue entre documents est SERVIE (le rechargement ne se voit plus)",
-  ],
-  [
-    cssCompact.includes("@media(prefers-reduced-motion:reduce){") &&
-      /@media\(prefers-reduced-motion:reduce\)\{[^@]*(?:@[^v][^}]*\})*[^@]*@view-transition\{navigation:none\}/.test(cssCompact),
-    "et elle est ETEINTE sous mouvement reduit, pseudo-elements compris",
-  ],
   [rayonPublic === "28", `carte-page publique servie a 28px (lu : ${rayonPublic ?? "AUCUNE VALEUR"})`],
   // LES DEUX SENS : si quelqu un ramene une valeur unique, les deux tokens
   // resteraient definis et les deux controles ci-dessus pourraient rester verts

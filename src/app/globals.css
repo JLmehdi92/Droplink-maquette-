@@ -534,36 +534,6 @@ body {
   }
 }
 
-/*
- * LA TRANSITION DE VUE ENTRE DEUX DOCUMENTS — ce qui rend le rechargement
- * INVISIBLE, là où on ne peut pas le supprimer.
- *
- * ⚠️ ELLE EXISTE PARCE QUE LE ROUTEUR DE NEXT NE SAIT PAS NAVIGUER ICI. Sur
- * l'espace vendeur, un clic de filtre garde le même chemin et ne change que les
- * paramètres : cette navigation-là est avalée par le routeur — remesuré le
- * 03/09/2026, l'URL ne bouge même pas. Le produit emploie donc la navigation
- * NATIVE, la seule qui marche, et le prix visible en était une page qui
- * BLANCHIT entre deux clics. Le reproche était exact : « ça reload la page ».
- *
- * `navigation: auto` demande au navigateur de fondre l'ancien document dans le
- * nouveau. Le rechargement a toujours lieu — 34,8 Ko de document — mais il ne
- * se voit plus : plus de blanc, plus de saut. C'est une règle CSS, sans une
- * ligne de JavaScript et sans rien demander au routeur.
- *
- * ⚠️ ELLE NE S'APPLIQUE QU'À NOTRE PROPRE ORIGINE, par définition de la
- * spécification : une navigation vers un autre domaine n'en déclenche jamais.
- * Et un navigateur qui ne la connaît pas l'ignore — il n'anime pas, il ne casse
- * rien. Aucun repli à écrire.
- *
- * ⚠️ LE MOUVEMENT EST RÉDUIT AVEC LE RÉGLAGE SYSTÈME, dans le bloc ci-dessous :
- * une transition de vue est une animation, et le brief l'exige comme les
- * autres. Elle ne porte AUCUNE information — la retirer ne retire rien de ce
- * que l'écran dit.
- */
-@view-transition {
-  navigation: auto;
-}
-
 /* Respecter le réglage système : aucune animation imposée. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -575,20 +545,6 @@ body {
     scroll-behavior: auto !important;
   }
 
-  /*
-   * ⚠️ LE SÉLECTEUR `*` CI-DESSUS N'ATTEINT PAS LA TRANSITION DE VUE. Elle
-   * s'anime sur des pseudo-éléments de la racine — `::view-transition-old`,
-   * `::view-transition-new` —, que `*` ne matche pas. Sans cette redéclaration,
-   * le bloc au-dessus donnait l'impression de couvrir le mouvement et ne le
-   * couvrait pas : exactement le genre d'affirmation qui reste vraie sur le
-   * papier et fausse à l'écran.
-   *
-   * `navigation: none` est la façon que la spécification prévoit pour l'éteindre
-   * — pas une animation à zéro, une transition qui n'a pas lieu.
-   */
-  @view-transition {
-    navigation: none;
-  }
 }
 
 /*

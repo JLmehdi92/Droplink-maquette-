@@ -44,9 +44,15 @@
  * CE QUE ÇA COÛTE, MESURÉ : un document complet par clic —
  * `/fr/commandes` 121,6 Ko bruts / **34,8 Ko compressés**, `/fr/envois` 14,8 Ko,
  * `/fr/analyses` 15,5 Ko. Les feuilles de style et les scripts sont déjà en
- * cache : c'est le document seul qui repart. Ce qui se VOYAIT — la page qui
- * blanchit entre deux clics de filtre — est traité ailleurs, par la transition
- * de vue déclarée dans `globals.css`.
+ * cache : c'est le document seul qui repart.
+ *
+ * ⚠️ ET CE QUI SE VOIT — la page qui blanchit entre deux clics de filtre —
+ * N'EST PAS TRAITÉ, PAR DÉCISION DE WASSIM LE 03/09/2026. Une transition de vue
+ * entre documents (`@view-transition { navigation: auto }`) avait été posée et
+ * mesurée : elle fonctionnait, `pageswap` rapportait bien une transition
+ * activée. Il n'en voulait pas. Elle a été retirée avec ses deux contrôles de
+ * fumée et son exception d'inventaire. Le clignotement est donc ASSUMÉ, pas
+ * oublié — le rouvrir tient en trois lignes de CSS.
  *
  * À RETIRER LE JOUR OÙ LE DÉFAUT EST CORRIGÉ EN AMONT : c'est le seul endroit à
  * défaire.
