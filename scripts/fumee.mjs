@@ -412,6 +412,28 @@ const en = await (await fetch(`${base}/en`)).text();
  * rendu au lecteur.
  */
 const catalogue = JSON.parse(readFileSync(join(process.cwd(), "messages", "fr.json"), "utf8"));
+
+/*
+ * ⚠️ CHERCHER UN LIBELLE DANS LE HTML BRUT NE PROUVE RIEN SUR UNE PAGE
+ * AUTHENTIFIEE.
+ *
+ * L espace vendeur et l administration EXPEDIENT LEUR CATALOGUE DE TRADUCTION
+ * au navigateur — contrairement a `/p/{jeton}`, qui ne le fait deliberement
+ * pas. Chaque libelle de ces ecrans est donc dans la charge d hydratation,
+ * RENDU OU NON : un controle qui le cherche dans le HTML entier resterait vert
+ * apres que l element aurait disparu de l ecran.
+ *
+ * Trouve le 03/09/2026 en posant une sonde neuve, NEE ROUGE sur un produit
+ * deja corrige. C est L-020 — interroger l effet, pas le mot — et sa variante
+ * L-031, appliquer le motif au contenu debarrasse de ce qui n en est pas.
+ *
+ * A N EMPLOYER QUE POUR LES LIBELLES. Les controles qui visent justement la
+ * charge — la sentinelle des notes internes, le jeton — doivent continuer de
+ * lire le HTML ENTIER : c est la que la fuite se produirait.
+ */
+const rendu = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, "");
+
+
 const espaces = Object.keys(catalogue);
 // AUCUN ANTISLASH DANS CE MOTIF, ET C EST DELIBERE.
 //
@@ -1373,10 +1395,49 @@ try {
               sansFr.titre === introuvableFr.titre,
               `une commande absente porte son propre titre (titre servi : « ${sansFr.titre} »)`,
             ],
+            /*
+             * ⚠️ CE CONTROLE CHERCHE DANS LA REPONSE ENTIERE, ET C EST VOULU —
+             * mais il a fallu le MESURER pour le savoir.
+             *
+             * Ce segment porte un `loading.tsx`, donc Next l enveloppe d une
+             * frontiere de suspension et STREAME son contenu. Mesure du
+             * 03/09/2026 sur la reponse servie : le squelette ne contient ni
+             * `<main>` ni `<h1>` — 28 848 octets bruts, 7 706 hors `<script>`,
+             * et pas une ligne du corps de l ecran. L ecran arrive par la
+             * charge, et le navigateur le rend.
+             *
+             * Filtrer les `<script>` ici rendrait donc le controle rouge sur un
+             * produit qui marche. Ce qu il doit etablir est autre chose : que
+             * c est bien NOTRE page traduite qui est servie, et non celle de
+             * Next — « This page could not be found », en anglais en dur, hors
+             * canevas, sur une locale `fr`. C est la regression exacte que
+             * `not-found.tsx` a ete ecrit pour fermer.
+             *
+             * LE REFUS DE NEXT EST DONC EXIGE EN NEGATIF, dans la foulee : sans
+             * lui, une page qui servirait LES DEUX passerait le controle
+             * positif.
+             */
             [
               sansFr.html.includes(introuvableFr.texte),
-              "et son corps est la page traduite, pas celle de Next",
+              "et son corps est la page traduite (servie dans la charge, ce segment etant streame)",
             ],
+            /*
+             * ⚠️ J AI ESSAYE D EXIGER ICI QUE « This page could not be found »
+             * SOIT ABSENT DE LA REPONSE, ET C ETAIT FAUX.
+             *
+             * La chaine y est deux fois — mesure du 03/09/2026 — mais UNIQUEMENT
+             * dans la charge, jamais dans le squelette servi : c est le
+             * composant de repli que Next embarque dans l arbre de routage pour
+             * les segments SANS `not-found.tsx` a eux. Elle ne s affiche pas, et
+             * elle y serait encore si notre page etait parfaite.
+             *
+             * CE QUI DISTINGUE VRAIMENT NOTRE PAGE DE CELLE DE NEXT EST DEJA
+             * CONTROLE, et par egalite EXACTE : le titre servi. Celui de Next
+             * est « 404: This page could not be found. » — un titre different du
+             * notre fait echouer le controle du dessus, dans les deux langues.
+             * Un controle de plus, qui rougirait sur un artefact normal du
+             * cadre, serait une alerte qu on apprend a ignorer.
+             */
             [
               sansEn.titre === introuvableEn.titre,
               `en anglais aussi (titre servi : « ${sansEn.titre} »)`,
@@ -1384,7 +1445,7 @@ try {
             // L AUTRE SENS. Sans lui, une page qui rendrait TOUJOURS le francais
             // passerait les trois controles ci-dessus.
             [
-              !sansEn.html.includes(introuvableFr.texte),
+              !rendu(sansEn.html).includes(introuvableFr.texte),
               "et la version anglaise ne porte pas le texte francais",
             ],
           );
@@ -1413,22 +1474,6 @@ try {
         });
         const htmlTriSeul = triSeul.status === 200 ? await triSeul.text() : "";
 
-        /*
-         * ⚠️ CHERCHER UN LIBELLE DANS LE HTML BRUT NE PROUVE RIEN ICI.
-         *
-         * L espace vendeur EXPEDIE SON CATALOGUE DE TRADUCTION au navigateur —
-         * contrairement a la page publique, qui ne le fait deliberement pas.
-         * Chaque libelle de cet ecran est donc present dans la charge
-         * d hydratation, RENDU OU NON. Le controle du tri seul ci-dessous est
-         * ne rouge pour cette raison exacte, et les trois qui le precedent
-         * passaient peut-etre pour la meme mauvaise raison.
-         *
-         * On retire donc les `<script>` avant de chercher : ce qui reste est ce
-         * qui est REELLEMENT rendu. C est L-020 — interroger l effet, pas le
-         * mot — et sa variante L-031, appliquer le motif au contenu debarrasse
-         * de ce qui n est pas du contenu.
-         */
-        const rendu = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, "");
         const htmlPleineRendu = rendu(htmlPleine);
         const htmlFiltreeRendu = rendu(htmlFiltree);
         const htmlTriSeulRendu = rendu(htmlTriSeul);
@@ -1558,7 +1603,7 @@ try {
               `${promu.status === 200 ? "" : ", vers " + promu.headers.get("location")})`,
           ],
           [
-            htmlPromu.includes(titreAdmin),
+            rendu(htmlPromu).includes(titreAdmin),
             `et la page rendue porte bien son titre « ${titreAdmin} »`,
           ],
           // UNE PAGE QUI REPOND N EST PAS UNE PAGE QUI RENDT. Sans ce seuil,
