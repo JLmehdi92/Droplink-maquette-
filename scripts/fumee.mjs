@@ -3710,6 +3710,79 @@ controles.push(
   ],
 );
 
+/*
+ * L ADRESSE QUI N EXISTE PAS — DANS LES DEUX LANGUES.
+ *
+ * ⚠️ MESURE DU 03/09/2026 : `/fr/pas-une-route` et `/en/pas-une-route` rendaient
+ * la page generique de Next — « 404: This page could not be found », en ANGLAIS
+ * EN DUR, en Times New Roman, hors du canevas, y compris sous une locale `fr`.
+ * Le produit interdit pourtant toute chaine visible en dur.
+ *
+ * IL A FALLU `app/global-not-found.tsx` ET UN DRAPEAU EXPERIMENTAL, parce que
+ * ce depot n a pas de layout racine — deux racines distinctes, c est le budget
+ * de la page publique. Quatre autres montages ont ete essayes et mesures ; le
+ * detail est dans `src/app/global-not-found.tsx` et dans `next.config.ts`.
+ *
+ * CE CONTROLE EST DONC AUSSI CELUI DU DRAPEAU. Un drapeau experimental peut
+ * changer de nom ou disparaitre a la prochaine montee de Next : ce jour-la, le
+ * produit se remettrait a servir la page anglaise EN SILENCE, et c est
+ * exactement le genre de retour en arriere que personne ne remarque.
+ *
+ * ON INTERROGE LE RENDU, pas la charge : les libelles de l ecran vivent aussi
+ * dans le payload, et la page de Next y est embarquee comme composant de repli.
+ */
+const erreursFr = catalogue.erreurs;
+const erreursEn = JSON.parse(readFileSync(join(racine, "messages", "en.json"), "utf8")).erreurs;
+
+const lireIntrouvable = async (langue) => {
+  const r = await fetch(`${base}/${langue}/pas-une-route-du-tout`, { redirect: "manual" });
+  const html = await r.text();
+  const titre = (/<title[^>]*>([^<]*)<\/title>/i.exec(html) ?? [, ""])[1];
+  return { statut: r.status, html, rendu: rendu(html), titre };
+};
+const introuvableFrancais = await lireIntrouvable("fr");
+const introuvableAnglais = await lireIntrouvable("en");
+
+controles.push(
+  [
+    introuvableFrancais.statut === 404,
+    `une adresse inexistante rend 404 (statut ${introuvableFrancais.statut})`,
+  ],
+  [
+    introuvableFrancais.rendu.includes(erreursFr.introuvableTitre),
+    `et elle rend NOTRE ecran, pas celui de Next (titre servi : « ${introuvableFrancais.titre} »)`,
+  ],
+  // LE CONTROLE QUI GARDE LE DRAPEAU. La page de Next est en anglais en dur :
+  // si elle reapparait dans le RENDU, le montage est retombe.
+  [
+    !introuvableFrancais.rendu.includes("This page could not be found"),
+    "la page generique de Next n est plus RENDUE",
+  ],
+  // L AUTRE LANGUE, ET C EST LA MOITIE DU SUJET : c est une page ANGLAISE qui
+  // etait servie, donc un controle mono-langue laisserait passer l inverse du
+  // defaut — du francais servi a un visiteur `en`.
+  [
+    introuvableAnglais.rendu.includes(erreursEn.introuvableTitre),
+    `en anglais aussi (titre servi : « ${introuvableAnglais.titre} »)`,
+  ],
+  [
+    !introuvableAnglais.rendu.includes(erreursFr.introuvableTitre),
+    "et la version anglaise ne porte aucun mot de la francaise",
+  ],
+  // L ATTRIBUT `lang` SUIT, sinon un lecteur d ecran prononcerait l anglais
+  // avec la phonetique francaise. Il vient d un en-tete pose par le middleware :
+  // sans lui l ecran retomberait sur la langue par defaut, donc sur du francais
+  // servi a un anglophone — l exact miroir du defaut corrige.
+  [
+    /<html[^>]*lang="fr"/.test(introuvableFrancais.html),
+    "l attribut lang de l ecran francais vaut bien fr",
+  ],
+  [
+    /<html[^>]*lang="en"/.test(introuvableAnglais.html),
+    "et celui de l ecran anglais vaut en",
+  ],
+);
+
 // --- LA PAGE CLIENT PORTE UN TITRE ---
 //
 // ⚠️ ELLE N EN PORTAIT AUCUN. Mesure sur le HTML servi : ZERO balise `<title>`,

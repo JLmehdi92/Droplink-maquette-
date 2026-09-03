@@ -120,6 +120,33 @@ const enTetesCommuns = [
 ];
 
 const nextConfig: NextConfig = {
+  /*
+   * LE SEUL DRAPEAU EXPÉRIMENTAL DU PROJET, ET IL EST MESURÉ.
+   *
+   * Il active `app/global-not-found.tsx`, qui est le SEUL montage capable de
+   * rendre notre écran « page introuvable » ici : sans layout racine — décision
+   * délibérée, deux racines distinctes pour que `/p/{jeton}` ne monte pas le
+   * socle du tableau de bord — aucun `not-found.tsx` de segment n'est pris.
+   * Quatre montages ont été essayés et mesurés ; le pourquoi complet est dans
+   * `src/app/global-not-found.tsx`.
+   *
+   * ⚠️ RELEVÉ SUR HUIT URL, AVEC ET SANS, AVANT DE L'ACCEPTER :
+   *
+   *   /fr/pas-une-route       page anglaise de Next  →  notre écran, lang="fr"
+   *   /en/pas-une-route       page anglaise de Next  →  notre écran, lang="en"
+   *   /p/{jeton inconnu}      écran de lien mort     →  IDENTIQUE
+   *   /p/{vrai jeton}         page client            →  IDENTIQUE
+   *   /fr, /fr/conditions     200                    →  IDENTIQUE
+   *   /fr/commandes           307 vers connexion     →  IDENTIQUE
+   *   /pas-une-route          307 vers /fr/…         →  IDENTIQUE
+   *
+   * Rien d'autre que les deux 404 de langue ne bouge. C'est ce qui rend ce
+   * drapeau acceptable — et c'est aussi ce qu'il faudra REMESURER à chaque
+   * montée de version de Next, parce qu'un drapeau expérimental peut changer
+   * de nom, de comportement, ou disparaître. Le retirer coûte cette ligne et le
+   * fichier qu'elle active ; le produit revient alors à la page anglaise.
+   */
+  experimental: { globalNotFound: true },
   // Racine epinglee : un `package-lock.json` traine dans le dossier
   // utilisateur, et Next.js l'elisait comme racine d'espace de travail. La
   // resolution des modules serait alors partie d'un dossier sans rapport.

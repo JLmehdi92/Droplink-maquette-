@@ -1217,7 +1217,10 @@
     "titre": "This screen could not be displayed",
     "texte": "Something went wrong on our side. Your data is untouched: nothing was saved or deleted.",
     "reessayer": "Try again",
-    "reference": "Incident reference: {ref}"
+    "reference": "Incident reference: {ref}",
+    "introuvableTitre": "This page does not exist",
+    "introuvableTexte": "The address you followed leads nowhere. It may have been mistyped, or the page was removed.",
+    "introuvableRetour": "Back to the homepage"
   },
   "motDePasse": {
     "oublieTitre": "Forgotten password",

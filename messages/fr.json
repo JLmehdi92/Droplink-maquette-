@@ -1217,7 +1217,10 @@
     "titre": "Cet écran n'a pas pu s'afficher",
     "texte": "Une erreur est survenue de notre côté. Vos données ne sont pas touchées : rien n'a été enregistré ni supprimé.",
     "reessayer": "Réessayer",
-    "reference": "Référence de l'incident : {ref}"
+    "reference": "Référence de l'incident : {ref}",
+    "introuvableTitre": "Cette page n’existe pas",
+    "introuvableTexte": "L’adresse que vous avez suivie ne mène à rien. Elle a peut-être été mal recopiée, ou la page a été retirée.",
+    "introuvableRetour": "Revenir à l’accueil"
   },
   "motDePasse": {
     "oublieTitre": "Mot de passe oublié",
