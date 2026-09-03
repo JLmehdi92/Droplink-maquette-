@@ -50,6 +50,14 @@ const ADMIS: ReadonlyMap<string, string> = new Map([
   ["next.config.ts", "Configuration de Next, lue au build."],
   ["package.json", "Les scripts et les dépendances."],
   ["postcss.config.mjs", "Configuration de PostCSS — Tailwind v4 passe par lui."],
+  [
+    "stackhawk.yml",
+    "La cible de l'analyse dynamique (HawkScan), lue par `hawk scan`. Elle vit " +
+      "à la racine parce que l'outil ne la cherche QUE là : les commandes de " +
+      "validation et de scan prennent un nom de fichier nu, jamais un chemin. " +
+      "Aucun secret dedans — le cookie de session passe par `DROPLINK_COOKIE_*`, " +
+      "le dépôt étant public.",
+  ],
   ["pnpm-lock.yaml", "Le verrou de dépendances — commité, pour que le build soit reproductible."],
   ["tsconfig.json", "Configuration de TypeScript, lue par `pnpm typecheck`."],
   ["vitest.config.mts", "Les deux projets de test, `unit` et `rls`."],

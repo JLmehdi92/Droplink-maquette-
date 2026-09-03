@@ -1035,6 +1035,21 @@ try {
         type: "photo",
         cle: cleFumee,
         cle_vignette: `medias/${shop.id}/${commandeFumee}/${idMediaFumee}.vignette.webp`,
+        /*
+         * ⚠️ LE MEDIA DE FUMEE N AVAIT PAS DE DERIVEE 900 PX, ET C EST CE QUI
+         * RENDAIT LA SONDE AVEUGLE AU DEFAUT DES TUILES.
+         *
+         * Sans `cle_couverture`, la page publique de fumee ne reference AUCUNE
+         * `.couverture.webp`. Le controle « la derivee 900 px n est demandee que
+         * par l en-tete » etait alors vrai en n ayant rien regarde — un ensemble
+         * vide passe tout. Son contre-test l a dit tout haut des le premier
+         * passage : « elle reference aussi la derivee 900 px (vu 0) ».
+         *
+         * Le jeu de fumee doit donc porter LES DEUX derivees, comme un vrai
+         * media depose depuis le navigateur : c est la seule configuration ou la
+         * question « laquelle va dans la tuile » a un sens.
+         */
+        cle_couverture: `medias/${shop.id}/${commandeFumee}/${idMediaFumee}.couverture.webp`,
         largeur: 1200,
         hauteur: 1600,
         taille_octets: 240000,
@@ -1042,6 +1057,39 @@ try {
       });
       if (erreurMedia) {
         console.error(`ECHEC impossible de poser le media de fumee : ${erreurMedia.message}`);
+        echecs += 1;
+      }
+
+      /*
+       * ⚠️ UN SECOND MEDIA, PARCE QU AVEC UN SEUL LA GRILLE N EXISTE PAS.
+       *
+       * La page client rend le PREMIER media en grand, puis les SUIVANTS en
+       * tuiles. Avec un media unique il n y a donc aucune tuile — et la sonde
+       * qui pretend garder ce que les tuiles telechargent ne regardait, depuis
+       * toujours, qu une page qui n en a pas. Son contre-test l a dit : « une
+       * balise img demande bien une vignette 200 px (vu 0) ».
+       *
+       * C est la meme faute que celle qu on vient de corriger dans le produit,
+       * commise cette fois dans le JEU DE MESURE : un ensemble vide passe tout.
+       * Deux medias sont le MINIMUM pour que la question « en-tete ou tuile »
+       * ait un sens, et le minimum est ce qu on pose — un jeu de fumee n est pas
+       * un jeu de charge.
+       */
+      const idMediaTuile = randomUUID();
+      const { error: erreurTuile } = await service.from("order_media").insert({
+        id: idMediaTuile,
+        order_id: commandeFumee,
+        type: "photo",
+        cle: `medias/${shop.id}/${commandeFumee}/${idMediaTuile}.jpg`,
+        cle_vignette: `medias/${shop.id}/${commandeFumee}/${idMediaTuile}.vignette.webp`,
+        cle_couverture: `medias/${shop.id}/${commandeFumee}/${idMediaTuile}.couverture.webp`,
+        largeur: 1200,
+        hauteur: 1600,
+        taille_octets: 240000,
+        position: 1,
+      });
+      if (erreurTuile) {
+        console.error(`ECHEC impossible de poser le second media de fumee : ${erreurTuile.message}`);
         echecs += 1;
       }
 
@@ -2380,6 +2428,71 @@ try {
         const reponse = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(11) });
         const html = await reponse.text();
         htmlPagePublique = html;
+
+        /*
+         * ── QUELLE DÉRIVÉE LA GRILLE TÉLÉCHARGE RÉELLEMENT ──────────────────
+         *
+         * ⚠️ POSÉ PARCE QUE LA GARDE EXISTANTE NE POUVAIT PAS VOIR LE DÉFAUT.
+         * `tests/unit/page-client-couleurs.test.ts` interroge `apercuDe()`, et
+         * le fichier source annonçait qu'elle « s'interroge par l'EFFET, dans
+         * les portes ». C'était faux : elle interroge une FONCTION. Tant que la
+         * fonction rendait la couverture aux deux surfaces, le test la
+         * confirmait et la page servait 900 px dans des tuiles de 197.
+         *
+         * MESURÉ AU NAVIGATEUR le 03/09/2026 : 77 à 89 Ko par tuile, contre un
+         * PLAFOND DUR de 20 Ko. Ce contrôle-ci lit ce que le HTML DEMANDE.
+         *
+         * ⚠️ LES DEUX CONTRE-TESTS VIENNENT EN PREMIER. « Aucune couverture
+         * dans les tuiles » est trivialement vrai d'une page sans tuile, et
+         * d'une page dont aucune dérivée n'existe. Il faut donc établir que
+         * les deux dérivées sont bien référencées avant de dire laquelle va où.
+         */
+        {
+          /*
+           * ⚠️ ON NE COMPTE QUE LES `src` DES BALISES `img`, ET LA PREMIERE
+           * VERSION DE CE CONTROLE COMPTAIT TOUT LE HTML — elle etait rouge sur
+           * un produit CORRIGE.
+           *
+           * L URL de couverture figure NECESSAIREMENT dans la charge
+           * d hydratation, en PROPRIETE : c est ainsi que le visionneur la
+           * recoit pour l ouvrir en grand. Une propriete ne telecharge rien.
+           * Compter les occurrences du texte confondait donc « reference » et
+           * « telecharge », et aurait fait corriger un produit qui n avait plus
+           * rien. C est L-020 : un controle qui cherche un MOT ne prouve rien,
+           * il faut interroger l EFFET — ici, ce que le navigateur ira chercher.
+           */
+          const srcs = [...html.matchAll(/<img\b[^>]*?\ssrc="([^"]+)"/g)].map((m) => m[1]);
+          const vignettes = srcs.filter((u) => u.includes(".vignette.webp")).length;
+          const couvertures = srcs.filter((u) => u.includes(".couverture.webp")).length;
+
+          controles.push(
+            [
+              vignettes > 0,
+              `CONTRE-TEST : une balise img demande bien une vignette 200 px (vu ${vignettes})`,
+            ],
+            [
+              couvertures > 0,
+              `CONTRE-TEST : une balise img demande bien la derivee 900 px (vu ${couvertures})`,
+            ],
+            /*
+             * LA COUVERTURE EST RENDUE UNE FOIS, ET UNE SEULE : la grande image
+             * d'en-tete. Toute occurrence supplementaire est une tuile qui
+             * telecharge 900 px pour en afficher 197 — c'est exactement la
+             * forme qu'avait le defaut, et la seule qui se voie sans navigateur.
+             */
+            [
+              couvertures <= 1,
+              `la derivee 900 px n est demandee QUE par l en-tete` +
+                (couvertures > 1
+                  ? ` — ${couvertures} demandes, donc ${couvertures - 1} tuile(s) servie(s) en 900 px`
+                  : ""),
+            ],
+            [
+              vignettes >= couvertures,
+              `les tuiles prennent la vignette, pas la couverture (vignettes ${vignettes}, couvertures ${couvertures})`,
+            ],
+          );
+        }
 
         controles.push(
           [reponse.status === 200, "la page publique repond sur un jeton valide"],

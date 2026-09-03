@@ -116,12 +116,49 @@ function PastilleLecture({ taille = 22 }: { readonly taille?: number }) {
  * navigateur. Sortie en fonction pure, elle s'interroge par l'EFFET, dans les
  * portes, à chaque commit.
  */
-export function apercuDe(media: {
-  readonly type: "photo" | "video";
-  readonly urlVignette: string | null;
-  readonly urlCouverture?: string | null;
-}): { readonly url: string } | { readonly repli: "photo" | "video" } {
-  const url = media.urlCouverture ?? media.urlVignette;
+export function apercuDe(
+  media: {
+    readonly type: "photo" | "video";
+    readonly urlVignette: string | null;
+    readonly urlCouverture?: string | null;
+  },
+  /*
+   * ⚠️ CE PARAMÈTRE N'EXISTAIT PAS, ET C'EST CE QUI FAISAIT LE DÉFAUT.
+   *
+   * Cette fonction sert DEUX surfaces qui ne veulent pas la même image : la
+   * grande image d'en-tête, large de 600 px, et les tuiles de la grille,
+   * larges de 197 px. Elle rendait la COUVERTURE aux deux.
+   *
+   * MESURÉ AU NAVIGATEUR LE 03/09/2026, page client réelle à 7 médias :
+   * chaque tuile de 197 px téléchargeait un `.couverture.webp` de 900 px
+   * pesant **77 à 89 Ko**, là où le brief fixe la vignette à **12 Ko de
+   * cible et 20 Ko de PLAFOND DUR** — quatre à sept fois le plafond, par
+   * tuile. À vingt médias la page dépasserait 1,9 Mo pour un budget de 1 Mo,
+   * sur la surface précisément décrite comme « ouverte en 4G depuis un DM,
+   * sur un mobile d'entrée de gamme ».
+   *
+   * ⚠️ ET LES VIGNETTES EXISTAIENT. La charge d'hydratation portait
+   * **14 URL `.vignette.webp` et 14 `.couverture.webp`, zéro vignette
+   * nulle** : le produit payait la génération au dépôt et la signature de
+   * lecture des 200 px, puis téléchargeait les 900 px à la place.
+   *
+   * ⚠️ SA GARDE VERROUILLAIT LE DÉFAUT — L-025 dans sa forme exacte.
+   * `tests/unit/page-client-couleurs.test.ts` EXIGEAIT que la couverture
+   * gagne dès que les deux existent. C'est juste pour l'en-tête, et c'est
+   * cela qu'on venait de corriger — la couverture était servie par une
+   * vignette étirée. La garde a donc hérité du champ de vision de LA
+   * CORRECTION et rendu la grille « correcte par test ».
+   *
+   * Le repli reste croisé dans les deux sens : mieux vaut une image trop
+   * lourde qu'une tuile vide, et c'est le cas d'une vidéo dont l'extraction
+   * de vignette a échoué — un échec délibérément non bloquant.
+   */
+  surface: "grille" | "large",
+): { readonly url: string } | { readonly repli: "photo" | "video" } {
+  const url =
+    surface === "grille"
+      ? (media.urlVignette ?? media.urlCouverture)
+      : (media.urlCouverture ?? media.urlVignette);
   return url !== null && url !== undefined ? { url } : { repli: media.type };
 }
 
@@ -176,7 +213,7 @@ export function Visionneur({
   const courant = index === null ? undefined : medias[index];
   const premier = medias[0];
   const tuiles = medias.slice(1, TUILES_BUREAU + 1);
-  const apercuPremier = premier === undefined ? { repli: "photo" as const } : apercuDe(premier);
+  const apercuPremier = premier === undefined ? { repli: "photo" as const } : apercuDe(premier, "large");
 
   // L'URL pleine est demandée à CHAQUE ouverture, et jetée à la fermeture : une
   // URL signée a une durée de vie, la garder en mémoire ferait échouer une
@@ -430,7 +467,7 @@ export function Visionneur({
                 const rang = decalage + 1;
                 const resteTelephone = medias.length - TUILES_TELEPHONE - 1;
                 const resteBureau = medias.length - TUILES_BUREAU - 1;
-                const apercu = apercuDe(media);
+                const apercu = apercuDe(media, "grille");
 
                 return (
                   <li

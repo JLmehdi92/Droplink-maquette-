@@ -245,19 +245,43 @@ describe("Ce qu'une tuile de la page client doit montrer", () => {
   const VIGNETTE = "https://exemple.test/v.webp?sig=1";
   const COUVERTURE = "https://exemple.test/c.webp?sig=2";
 
-  test("une photo avec vignette montre sa vignette", () => {
-    expect(apercuDe({ type: "photo", urlVignette: VIGNETTE })).toEqual({ url: VIGNETTE });
+  test("une photo avec vignette montre sa vignette, sur les deux surfaces", () => {
+    expect(apercuDe({ type: "photo", urlVignette: VIGNETTE }, "grille")).toEqual({ url: VIGNETTE });
+    expect(apercuDe({ type: "photo", urlVignette: VIGNETTE }, "large")).toEqual({ url: VIGNETTE });
   });
 
-  test("la couverture prime sur la vignette quand elle existe", () => {
-    expect(apercuDe({ type: "photo", urlVignette: VIGNETTE, urlCouverture: COUVERTURE })).toEqual({
+  /*
+   * ⚠️ CE BLOC N'AVAIT QU'UNE MOITIÉ, ET C'EST CETTE MOITIÉ QUI A VERROUILLÉ LE
+   * DÉFAUT PENDANT UNE JOURNÉE.
+   *
+   * Il s'intitulait « la couverture prime sur la vignette quand elle existe » et
+   * n'éprouvait qu'un seul appel — sans dire POUR QUELLE SURFACE. Or la fonction
+   * en sert deux. Il a été écrit juste après la correction de la couverture
+   * floue, donc il ne regardait que la couverture ; la grille, elle, recevait le
+   * même 900 px et devenait « correcte par test ».
+   *
+   * MESURÉ AU NAVIGATEUR le 03/09/2026 sur une page client réelle : chaque tuile
+   * de 197 px téléchargeait 77 à 89 Ko, contre un PLAFOND DUR de 20 Ko. C'est
+   * L-025 — un garde écrit après coup hérite du champ de vision de la
+   * CORRECTION, pas du problème.
+   *
+   * Les deux surfaces sont désormais éprouvées, et elles s'opposent : une
+   * correction qui rendrait la même chose aux deux fait rougir l'une des deux,
+   * quel que soit le sens de l'erreur.
+   */
+  test("chaque surface prend SA dérivée quand les deux existent", () => {
+    const media = { type: "photo" as const, urlVignette: VIGNETTE, urlCouverture: COUVERTURE };
+    expect(apercuDe(media, "large"), "l'en-tete fait 600 px : elle veut la couverture").toEqual({
       url: COUVERTURE,
+    });
+    expect(apercuDe(media, "grille"), "une tuile fait 197 px : elle veut la vignette").toEqual({
+      url: VIGNETTE,
     });
   });
 
   test("une photo SANS vignette montre un repli, jamais rien", () => {
-    expect(apercuDe({ type: "photo", urlVignette: null })).toEqual({ repli: "photo" });
-    expect(apercuDe({ type: "photo", urlVignette: null, urlCouverture: null })).toEqual({
+    expect(apercuDe({ type: "photo", urlVignette: null }, "grille")).toEqual({ repli: "photo" });
+    expect(apercuDe({ type: "photo", urlVignette: null, urlCouverture: null }, "grille")).toEqual({
       repli: "photo",
     });
     // `urlCouverture` est OPTIONNELLE, et son absence ne doit pas être confondue
@@ -265,13 +289,13 @@ describe("Ce qu'une tuile de la page client doit montrer", () => {
     // explicitement, donc on éprouve ce que la vraie forme produit : la
     // propriété absente, qui est le cas de tout média déposé avant que la
     // dérivée 900 px existe.
-    expect(apercuDe({ type: "video", urlVignette: null })).toEqual({ repli: "video" });
+    expect(apercuDe({ type: "video", urlVignette: null }, "grille")).toEqual({ repli: "video" });
   });
 
   test("une vidéo SANS capture montre le repli VIDÉO, pas le repli photo", () => {
     // Les deux replis ne disent pas la même chose au client : l'un annonce une
     // image, l'autre quelque chose qui se lit.
-    expect(apercuDe({ type: "video", urlVignette: null })).toEqual({ repli: "video" });
+    expect(apercuDe({ type: "video", urlVignette: null }, "grille")).toEqual({ repli: "video" });
   });
 
   test("CONTRE-TEST : le repli ne remplace JAMAIS un aperçu qui existe", () => {
@@ -281,8 +305,8 @@ describe("Ce qu'une tuile de la page client doit montrer", () => {
      * déposées, c'est-à-dire en aggravant exactement le défaut qu'on corrige.
      */
     for (const type of ["photo", "video"] as const) {
-      expect(apercuDe({ type, urlVignette: VIGNETTE })).toEqual({ url: VIGNETTE });
-      expect(apercuDe({ type, urlVignette: null, urlCouverture: COUVERTURE })).toEqual({
+      expect(apercuDe({ type, urlVignette: VIGNETTE }, "grille")).toEqual({ url: VIGNETTE });
+      expect(apercuDe({ type, urlVignette: null, urlCouverture: COUVERTURE }, "grille")).toEqual({
         url: COUVERTURE,
       });
     }
