@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# PLANIFICATEUR DE DROPLINK — à installer par `crontab -e` sur le VPS.
+#
+# ⚠️ SANS CES DEUX LIGNES, LE PRODUIT PARAÎT MARCHER ET NE MARCHE PAS.
+# Le suivi de colis ne se met à jour QUE si `/api/suivi/cadence` est appelée :
+# rien dans l'application ne se déclenche tout seul. Un vendeur verrait un
+# suivi figé, son client aussi, et aucun écran ne le signalerait — c'est le
+# mode de défaillance silencieux que le brief redoute le plus.
+#
+# LE CONTRAT DE CES ROUTES EST PROUVÉ, pas supposé. Mesuré le 04/09/2026 sur
+# un build de production servi :
+#
+#   POST + `Authorization: Bearer <CRON_SECRET>`  →  200
+#   POST sans en-tête                             →  404
+#   POST avec un mauvais secret                   →  404
+#   GET (ce que ferait un navigateur)             →  404
+#
+# 404 ET NON 401, DÉLIBÉRÉMENT : un 401 confirmerait l'existence de la route à
+# qui n'y a pas droit. Conséquence pratique pour toi : si tu testes dans un
+# navigateur et que tu obtiens 404, ce n'est pas une erreur — c'est la garde.
+#
+# ⚠️ POURQUOI QUINZE MINUTES, ET PAS UN CHIFFRE AU HASARD. Le veilleur déclare
+# une tâche « en retard » au-delà de `retard_veilleur_minutes`, dont le défaut
+# est 90 (réglable depuis l'admin, borné entre 5 et 10 080). À quinze minutes,
+# il faut SIX passages manqués d'affilée pour qu'une alerte parte : un incident
+# passager ne te réveille pas, une vraie panne oui. Descendre à une minute
+# ferait alerter sur du bruit ; monter au-delà de 45 minutes ferait passer une
+# panne pour un rythme normal — c'est exactement ce que la borne minimale de
+# 5 minutes protège.
+#
+# ⚠️ LES DEUX TÂCHES SONT DÉCALÉES DE CINQ MINUTES, et ce n'est pas cosmétique :
+# elles se surveillent MUTUELLEMENT. Lancées au même instant, une panne qui les
+# frappe toutes les deux ne laisse personne pour la constater.
+#
+# REMPLACER : `<SECRET>` par la valeur de `CRON_SECRET` (48 caractères ici), et
+# le port si `next start` n'écoute pas sur 3000.
+# ─────────────────────────────────────────────────────────────────────────────
+
+CRON_SECRET=<SECRET>
+
+# Le suivi des colis — interroge le fournisseur pour les colis qui le méritent.
+*/15 * * * * /usr/bin/curl -fsS -m 120 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000/api/suivi/cadence > /dev/null
+
+# La veille mutuelle — vérifie que la cadence bat, et se fait vérifier par elle.
+5,20,35,50 * * * * /usr/bin/curl -fsS -m 60 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000/api/veille > /dev/null
