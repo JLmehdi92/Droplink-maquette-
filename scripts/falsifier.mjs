@@ -762,7 +762,7 @@ const SQL = {
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      jusqua: "grant update (instagram_url",
+      jusqua: "grant update (site_url",
     },
   },
 
@@ -805,7 +805,7 @@ const SQL = {
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      jusqua: "grant update (instagram_url",
+      jusqua: "grant update (site_url",
     },
   },
 
@@ -1054,7 +1054,7 @@ const SQL = {
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      jusqua: "grant update (instagram_url",
+      jusqua: "grant update (site_url",
     },
   },
 

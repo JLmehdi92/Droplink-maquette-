@@ -66,6 +66,51 @@ function fonctionCitee(depuis: string): string | null {
   return /public\.([a-z_0-9]+)/.exec(depuis)?.[1] ?? null;
 }
 
+interface Reparation {
+  readonly cible: string;
+  readonly fichier: string;
+  readonly depuis: string;
+  readonly jusqua: string | null;
+}
+
+/**
+ * Les réparations, lues BLOC PAR BLOC plutôt qu'au fil du texte.
+ *
+ * ⚠️ POURQUOI PAS UNE SEULE EXPRESSION RÉGULIÈRE. Celle qui sert au contrôle
+ * des droits, plus bas, va de `depuis:` à `jusqua:` par un `[\s\S]*?`. Sur une
+ * cible qui ne DÉCLARE PAS de borne — et la borne est facultative — cette
+ * traversée ne s'arrête pas à la fin du bloc : elle continue jusqu'au `jusqua`
+ * de la cible SUIVANTE, et apparie une migration avec la borne d'une autre.
+ *
+ * On découpe donc sur les clés de cible, qui sont le seul délimiteur fiable.
+ */
+function reparations(): readonly Reparation[] {
+  const source = readFileSync(FALSIFICATEUR, "utf8");
+  const cles = [...source.matchAll(/^ {2}"([a-z0-9-]+)":\s*\{$/gm)];
+  const trouvees: Reparation[] = [];
+
+  for (const [i, cle] of cles.entries()) {
+    const debut = cle.index;
+    const fin = cles[i + 1]?.index ?? source.length;
+    const bloc = source.slice(debut, fin);
+
+    const brut = /reparerDepuisMigration:\s*\{([\s\S]*?)\n {4}\},/.exec(bloc)?.[1];
+    if (brut === undefined) continue;
+
+    const fichier = /fichier:\s*"([^"]+)"/.exec(brut)?.[1];
+    const depuis = /depuis:\s*"([^"]+)"/.exec(brut)?.[1];
+    if (fichier === undefined || depuis === undefined) continue;
+
+    trouvees.push({
+      cible: cle[1] as string,
+      fichier,
+      depuis,
+      jusqua: /jusqua:\s*"([^"]+)"/.exec(brut)?.[1] ?? null,
+    });
+  }
+  return trouvees;
+}
+
 describe("Le falsificateur répare vers le produit d'aujourd'hui", () => {
   const toutes = citations();
 
@@ -128,6 +173,48 @@ describe("Le falsificateur répare vers le produit d'aujourd'hui", () => {
       }
     }
 
+    expect(defauts, defauts.join(" | ")).toEqual([]);
+  });
+
+  /*
+   * ⚠️ UNE BORNE QUI N'EXISTE PLUS NE SE VOYAIT PAS — DÉFAUT RÉEL, 04/09/2026.
+   *
+   * Trois cibles bornaient leur découpe à « grant update (instagram_url », une
+   * ligne de la migration 085. Elles réparent depuis la 133, qui se termine par
+   * « grant update (site_url ». La borne n'était donc PLUS DANS LE FICHIER, et
+   * `node scripts/falsifier.mjs reparer suspension-ne-coupe-pas` a REFUSÉ de
+   * réparer — constaté sur un produit CASSÉ, en ligne, la coupure de suspension
+   * hors service le temps de trouver pourquoi.
+   *
+   * Et la suite était verte. Le contrôle des droits, juste en dessous,
+   * calculait `indexOf(jusqua)` et se rabattait SILENCIEUSEMENT sur la fin du
+   * fichier quand il rendait -1 : une borne absente lui donnait donc un extrait
+   * PLUS GRAND, contenant à coup sûr le `revoke` et le `grant` qu'il cherche.
+   * Le seul contrôle qui touchait aux bornes était structurellement incapable
+   * de voir une borne absente.
+   *
+   * C'est L-018 : constater qu'une déclaration existe ne prouve jamais que son
+   * absence bloque.
+   */
+  test("chaque borne déclarée se trouve encore dans sa migration", () => {
+    const bornees = reparations().filter((r) => r.jusqua !== null);
+    const defauts: string[] = [];
+
+    for (const r of bornees) {
+      const contenu = readFileSync(join(MIGRATIONS, r.fichier), "utf8");
+      const debut = contenu.indexOf(r.depuis);
+      if (debut === -1) continue; // déjà dit par le contrôle des ancres
+      if (contenu.indexOf(r.jusqua as string, debut) === -1) {
+        defauts.push(
+          `${r.cible} : la borne « ${r.jusqua} » n'est plus dans ${r.fichier} après son ancre — ` +
+            "la réparation refusera de tourner, et elle ne le dira qu'une fois le produit cassé",
+        );
+      }
+    }
+
+    // UN ENSEMBLE VIDE PASSE TOUT : sans ce plancher, une lecture devenue
+    // fausse rendrait ce contrôle vert et muet.
+    expect(bornees.length, "aucune borne à inspecter : la lecture est fausse").toBeGreaterThan(10);
     expect(defauts, defauts.join(" | ")).toEqual([]);
   });
 
