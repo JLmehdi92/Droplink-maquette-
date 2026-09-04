@@ -34,3 +34,43 @@ export function estPanneDeTransport(message: string): boolean {
     message,
   );
 }
+
+/**
+ * UNE LECTURE EST-ELLE MOMENTANÉMENT ILLISIBLE ? — la règle, en un seul endroit.
+ *
+ * ⚠️ ELLE VIT ICI PARCE QUE LE MÊME DÉFAUT A ÉTÉ CORRIGÉ QUATRE FOIS, dont
+ * trois sur le SEUL panneau d'administration :
+ *
+ *   02/09  `stockage_total_admin`  — 500 sur tout l'écran, correctif posé là.
+ *   04/09  `lire_journal_admin`    — même `Promise.all`, levait toujours.
+ *   04/09  `etat_veilleur`         — troisième lecture du même écran.
+ *   04/09  `lireSurveillance`      — l'écran voisin, trois lectures, aucune garde.
+ *
+ * Chaque correctif regardait là où le défaut venait d'apparaître : c'est L-025,
+ * *un garde écrit après coup hérite du champ de vision de la CORRECTION, pas du
+ * problème.* Recopier la condition une cinquième fois produirait une cinquième
+ * occurrence. Un concept, un endroit.
+ *
+ * CE QU'ELLE FAIT, ET CE QU'ELLE NE FAIT PAS : elle NOMME. Panne de transport →
+ * elle écrit dans le journal du serveur et rend `true`, l'appelant décidant de
+ * dégrader. Tout le reste → elle LÈVE. Ce n'est jamais un `catch` muet : une
+ * erreur applicative — droit manquant, fonction absente, contrainte violée —
+ * doit continuer de casser, sinon un écran vivrait « indisponible » pour
+ * toujours sans que personne cherche pourquoi.
+ *
+ * ⚠️ ET L'APPELANT DOIT RENDRE `null`, JAMAIS UNE VALEUR NEUTRE. Une liste vide
+ * affirme « il n'y a rien », un zéro affirme « on a compté » : ce sont des
+ * affirmations, et sur une lecture qui n'a pas abouti ce sont des affirmations
+ * fausses. C'est le principe XII appliqué à une base qui n'a rien répondu.
+ */
+export function lectureIllisible(
+  resultat: { readonly error: { readonly message: string } | null },
+  quoi: string,
+): boolean {
+  if (resultat.error === null) return false;
+  if (!estPanneDeTransport(resultat.error.message)) {
+    throw new Error(`lecture ${quoi} impossible : ` + resultat.error.message);
+  }
+  console.error(`[lecture] ${quoi} momentanément illisible — ` + resultat.error.message);
+  return true;
+}

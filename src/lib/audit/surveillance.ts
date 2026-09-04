@@ -2,6 +2,7 @@ import "server-only";
 import type { ClientAdmin } from "@/lib/audit/comptes";
 import type { EtatTache } from "@/lib/audit/panneau";
 import { TACHES_ATTENDUES } from "@/lib/veille/taches";
+import { lectureIllisible } from "@/lib/reseau/panne";
 
 /**
  * L'ÉCRAN DE SURVEILLANCE.
@@ -78,13 +79,30 @@ export interface JourDeColis {
   readonly n: number;
 }
 
+/**
+ * ⚠️ TROIS SECTIONS PEUVENT VALOIR `null` — « pas lisible en ce moment ».
+ *
+ * Cet écran est celui qu'on ouvre PRÉCISÉMENT quand quelque chose semble aller
+ * mal : le perdre entier parce qu'une de ses trois lectures a bronché est le
+ * pire moment possible. La règle est celle de `lib/reseau/panne.ts`, partagée
+ * avec le panneau — quatrième occurrence du même défaut, donc un seul endroit.
+ */
 export interface Surveillance {
-  readonly indicateurs: readonly Indicateur[];
-  readonly taches: readonly EtatTache[];
+  readonly indicateurs: readonly Indicateur[] | null;
+  readonly taches: readonly EtatTache[] | null;
   readonly nonMesure: readonly string[];
-  /** Les tâches ATTENDUES, chacune avec son état — y compris jamais exécutée. */
-  readonly surveillees: readonly TacheSurveillee[];
-  readonly colisParJour: readonly JourDeColis[];
+  /**
+   * Les tâches ATTENDUES, chacune avec son état — y compris jamais exécutée.
+   *
+   * ⚠️ `null` QUAND LES BATTEMENTS SONT ILLISIBLES, et c'est le contrôle qui
+   * distingue cet écran du panneau. La jointure est menée par l'inventaire :
+   * sur une liste vide, CHAQUE tâche attendue ressortirait « jamais exécutée ».
+   * Sur l'écran dont tout le rôle est de dire si les planificateurs battent, ce
+   * serait une alerte inventée — et *une alerte qui se trompe est une alerte
+   * qu'on apprend à ignorer.*
+   */
+  readonly surveillees: readonly TacheSurveillee[] | null;
+  readonly colisParJour: readonly JourDeColis[] | null;
 }
 
 /** Combien de jours la frise des colis couvre. La planche en dessine 14. */
@@ -102,42 +120,51 @@ export async function lireSurveillance(
     supabase.rpc("colis_par_jour_admin", { p_jours: JOURS_DE_FRISE }),
   ]);
 
-  // JAMAIS DE `catch` MUET, et surtout pas ici : un écran de surveillance qui
-  // affiche zéro au lieu d'une erreur ferait conclure que tout va bien. C'est
-  // exactement l'inverse de ce qu'il sert à établir.
-  if (sante.error !== null) {
-    throw new Error("lecture des indicateurs impossible : " + sante.error.message);
-  }
-  if (taches.error !== null) {
-    throw new Error("lecture des tâches impossible : " + taches.error.message);
-  }
-  if (colis.error !== null) {
-    throw new Error("lecture des colis par jour impossible : " + colis.error.message);
-  }
+  // JAMAIS DE `catch` MUET, et ce n'en est pas un : une panne de transport est
+  // ÉCRITE au journal et NOMMÉE à l'écran, tandis qu'une erreur applicative
+  // continue de lever. Un écran de surveillance qui afficherait zéro au lieu
+  // d'une erreur ferait conclure que tout va bien, ce qui est l'inverse exact
+  // de ce qu'il sert à établir.
+  const santeIllisible = lectureIllisible(sante, "des indicateurs");
+  const tachesIllisibles = lectureIllisible(taches, "des tâches");
+  const colisIllisibles = lectureIllisible(colis, "des colis par jour");
 
-  const lignesTaches: EtatTache[] = (taches.data ?? []).map((t) => ({
-    source: t.source,
-    dernierBattement: t.dernier_battement,
-    minutes: Number(t.minutes),
-    etat: t.etat === "en_retard" ? "en_retard" : "actif",
-  }));
+  const lignesTaches: EtatTache[] | null = tachesIllisibles
+    ? null
+    : (taches.data ?? []).map((t) => ({
+        source: t.source,
+        dernierBattement: t.dernier_battement,
+        minutes: Number(t.minutes),
+        etat: t.etat === "en_retard" ? "en_retard" : "actif",
+      }));
 
   return {
-    indicateurs: (sante.data ?? []).map((i) => ({
-      genre: i.genre,
-      indicateur: i.indicateur,
-      valeur: Number(i.valeur),
-    })),
+    indicateurs: santeIllisible
+      ? null
+      : (sante.data ?? []).map((i) => ({
+          genre: i.genre,
+          indicateur: i.indicateur,
+          valeur: Number(i.valeur),
+        })),
     taches: lignesTaches,
     nonMesure: NON_MESURE,
     // L'INVENTAIRE MÈNE LA JOINTURE, pas les battements : c'est ce qui fait
     // apparaître une tâche attendue dont aucune ligne n'existe.
-    surveillees: TACHES_ATTENDUES.map((source) => {
-      const vue = lignesTaches.find((t) => t.source === source);
-      return vue === undefined
-        ? { source, etat: "jamais_executee" as const, minutes: null }
-        : { source, etat: vue.etat, minutes: vue.minutes };
-    }),
-    colisParJour: (colis.data ?? []).map((j) => ({ jour: j.jour, n: Number(j.n) })),
+    //
+    // ⚠️ MAIS SEULEMENT SI LES BATTEMENTS ONT ÉTÉ LUS. Sur une lecture muette,
+    // cette même jointure affirmerait « jamais exécutée » pour CHAQUE tâche
+    // attendue — l'alerte inventée, sur l'écran fait pour les porter.
+    surveillees:
+      lignesTaches === null
+        ? null
+        : TACHES_ATTENDUES.map((source) => {
+            const vue = lignesTaches.find((t) => t.source === source);
+            return vue === undefined
+              ? { source, etat: "jamais_executee" as const, minutes: null }
+              : { source, etat: vue.etat, minutes: vue.minutes };
+          }),
+    colisParJour: colisIllisibles
+      ? null
+      : (colis.data ?? []).map((j) => ({ jour: j.jour, n: Number(j.n) })),
   };
 }

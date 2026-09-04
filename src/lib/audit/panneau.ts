@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
-import { estPanneDeTransport } from "@/lib/reseau/panne";
+import { lectureIllisible } from "@/lib/reseau/panne";
 
 /**
  * LE PANNEAU D'ADMINISTRATION.
@@ -187,18 +187,9 @@ export async function lirePanneau(
    * journal du serveur et NOMMÉE à l'écran. Un panneau qui afficherait zéro
    * alerte au lieu d'une erreur ferait conclure que tout va bien.
    */
-  const illisible = (r: { error: { message: string } | null }, quoi: string): boolean => {
-    if (r.error === null) return false;
-    if (!estPanneDeTransport(r.error.message)) {
-      throw new Error(`lecture ${quoi} impossible : ` + r.error.message);
-    }
-    console.error(`[admin] ${quoi} momentanément illisible — ` + r.error.message);
-    return true;
-  };
-
-  const alertesIllisibles = illisible(alertes, "des alertes");
-  const compteursIllisibles = illisible(compteurs, "des compteurs");
-  const tachesIllisibles = illisible(taches, "des tâches");
+  const alertesIllisibles = lectureIllisible(alertes, "des alertes");
+  const compteursIllisibles = lectureIllisible(compteurs, "des compteurs");
+  const tachesIllisibles = lectureIllisible(taches, "des tâches");
   /*
    * ⚠️ UNE COUPURE DE TRANSPORT NE DOIT PAS EMPORTER TOUT LE PANNEAU.
    *
@@ -223,14 +214,7 @@ export async function lirePanneau(
    * dégrader silencieusement ferait vivre un panneau qui affiche
    * « indisponible » pour toujours sans que personne ne cherche pourquoi.
    */
-  let stockageMesurable = true;
-  if (stockage.error !== null) {
-    if (!estPanneDeTransport(stockage.error.message)) {
-      throw new Error("lecture du stockage impossible : " + stockage.error.message);
-    }
-    console.error("[admin] stockage momentanément illisible — " + stockage.error.message);
-    stockageMesurable = false;
-  }
+  const stockageMesurable = !lectureIllisible(stockage, "du stockage");
 
   const c = (compteurs.data ?? [])[0];
   // UNE LECTURE QUI ABOUTIT SANS LIGNE RESTE UNE ERREUR : la fonction en base

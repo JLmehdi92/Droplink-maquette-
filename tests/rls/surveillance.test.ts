@@ -33,7 +33,7 @@ let catalogue: Client;
 const RETARD_MINUTES = 60;
 
 async function indicateur(u: UtilisateurDeTest, cle: string): Promise<number | undefined> {
-  const s = await lireSurveillance(u.client, RETARD_MINUTES);
+  const s = await surveillanceLisible(u.client, RETARD_MINUTES);
   return s.indicateurs.find((i) => i.indicateur === cle)?.valeur;
 }
 
@@ -65,13 +65,42 @@ afterAll(async () => {
   await catalogue.end();
 });
 
+/**
+ * LA SURVEILLANCE LUE, SES TROIS SECTIONS EXIGEES LISIBLES.
+ *
+ * Depuis le 04/09/2026 chaque section peut valoir `null` — « pas lisible en ce
+ * moment » — pour qu une coupure de transport n emporte plus l ecran entier.
+ * Ici la base repond pour de vrai : `null` serait un defaut, et le LEVER vaut
+ * mieux qu un `!` qui ferait passer une regression pour un detail de typage.
+ */
+async function surveillanceLisible(
+  client: Parameters<typeof lireSurveillance>[0],
+  retard: Parameters<typeof lireSurveillance>[1],
+) {
+  const s = await lireSurveillance(client, retard);
+  const { indicateurs, taches, surveillees, colisParJour } = s;
+  if (indicateurs === null || taches === null || surveillees === null || colisParJour === null) {
+    throw new Error(
+      "surveillance partiellement illisible alors que la base repond — indicateurs:" +
+        String(indicateurs === null) +
+        " taches:" +
+        String(taches === null) +
+        " surveillees:" +
+        String(surveillees === null) +
+        " colis:" +
+        String(colisParJour === null),
+    );
+  }
+  return { ...s, indicateurs, taches, surveillees, colisParJour };
+}
+
 describe("Qui peut lire la surveillance", () => {
   test("un vendeur est refusé, et n'apprend pas que la surface existe", async () => {
     await expect(lireSurveillance(vendeur.client, RETARD_MINUTES)).rejects.toThrow(/impossible/i);
   });
 
   test("contre-test positif : l'administrateur la lit", async () => {
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
     expect(s.indicateurs.length).toBeGreaterThan(0);
   });
 });
@@ -204,7 +233,7 @@ describe("Les surfaces de limitation ne se mélangent pas", () => {
        on conflict (cle, fenetre_debut) do update set compte = excluded.compte`,
     );
 
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
     const pics = new Map(s.indicateurs.map((i) => [i.indicateur, i.valeur]));
 
     expect(pics.get("pic_auth-ip"), "le pic d'authentification n'est pas remonté").toBeGreaterThanOrEqual(41);
@@ -249,7 +278,7 @@ describe("Ce qui n'est PAS mesuré est nommé", () => {
   test("la liste vient de la configuration, pas d'une valeur absente", async () => {
     // Déduire « pas de valeur donc pas mesuré » deviendrait faux le jour où une
     // grandeur vaut légitimement zéro. La liste est donc déclarée.
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
     expect(s.nonMesure).toEqual(NON_MESURE);
     expect(s.nonMesure.length, "un ensemble vide passerait tout").toBeGreaterThan(0);
   });
@@ -258,7 +287,7 @@ describe("Ce qui n'est PAS mesuré est nommé", () => {
     // La maquette affiche disponibilité, websockets, IOPS et latences. Le
     // produit n'en mesure aucune : les voir apparaître ici signifierait qu'on a
     // commencé à en inventer.
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
     const cles = s.indicateurs.map((i) => i.indicateur);
     for (const invente of NON_MESURE) {
       expect(cles, `« ${invente} » est rendu comme mesuré`).not.toContain(invente);
@@ -330,7 +359,7 @@ describe("La frise des colis, jour par jour", () => {
 describe("Les tâches attendues ont trois états", () => {
   test("sans battement : JAMAIS EXÉCUTÉE, et ce n'est pas un retard", async () => {
     await interroger(catalogue, "delete from public.scheduler_heartbeat");
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
 
     expect(s.surveillees.length, "l'inventaire est vide : la sonde n'inspecte rien").toBe(
       TACHES_ATTENDUES.length,
@@ -352,7 +381,7 @@ describe("Les tâches attendues ont trois états", () => {
         [source],
       );
     }
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
     expect(s.surveillees.every((t) => t.etat === "actif")).toBe(true);
   });
 
@@ -363,7 +392,7 @@ describe("Les tâches attendues ont trois états", () => {
       catalogue,
       "update public.scheduler_heartbeat set beat_at = now() - interval '5 hours'",
     );
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
     expect(s.surveillees.every((t) => t.etat === "en_retard")).toBe(true);
     expect(s.surveillees[0]?.minutes ?? 0).toBeGreaterThan(200);
   });
@@ -373,7 +402,7 @@ describe("Les tâches attendues ont trois états", () => {
       catalogue,
       "insert into public.scheduler_heartbeat (source, beat_at) values ('source-fantome', now())",
     );
-    const s = await lireSurveillance(admin.client, RETARD_MINUTES);
+    const s = await surveillanceLisible(admin.client, RETARD_MINUTES);
     // L'INVENTAIRE MÈNE, pas les battements : une source qui bat sans être
     // attendue n'est pas une tâche du produit, c'est un résidu.
     expect(s.surveillees.map((t) => t.source)).not.toContain("source-fantome");

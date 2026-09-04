@@ -165,22 +165,28 @@ describe("La distinction est CÂBLÉE, pas seulement déclarée", () => {
     expect(garde).toMatch(/if\s*\(!\(erreur instanceof SessionIndisponible\)\)\s*throw erreur;/);
   });
 
-  test("le panneau admin DÉGRADE le stockage au lieu de tomber en 500", () => {
+  test("le panneau admin passe par la RÈGLE PARTAGÉE, sans en recopier une variante", () => {
     /*
-     * ⚠️ SECOND CONSOMMATEUR, TROUVÉ LE 02/09/2026 PAR LA TRACE DU SERVEUR.
-     * `lirePanneau` levait sur toute erreur de lecture du stockage : un
-     * `TypeError: fetch failed` rendait le panneau ENTIER en 500 — alertes,
-     * compteurs et tâches comprises, c'est-à-dire ce qu'on vient y chercher
-     * quand le réseau va mal.
+     * ⚠️ CE CONTRÔLE A CHANGÉ DE FORME LE 04/09/2026, ET LA RAISON COMPTE.
      *
-     * C'est ce qui a justifié d'extraire le motif dans `lib/reseau/panne.ts` :
-     * le même défaut sur deux surfaces qui ne se ressemblent pas.
+     * Il cherchait `estPanneDeTransport(stockage.error.message)` — un MOTIF
+     * TEXTUEL, posé sur la seule lecture qui avait échoué le 02/09. Il est
+     * devenu ROUGE le jour où le produit s'est AMÉLIORÉ : les quatre lectures
+     * du panneau passent désormais par `lectureIllisible()`, règle unique
+     * extraite après que le même défaut a été corrigé QUATRE fois. *Une garde
+     * qui rougit sur un progrès gardait une forme, pas une propriété.*
+     *
+     * CE QU'IL VÉRIFIE MAINTENANT : que le panneau n'ait pas RECOPIÉ une
+     * variante locale — c'est la seule chose que le texte puisse établir ici, et
+     * c'est exactement par recopie que la règle a divergé quatre fois. La
+     * propriété, elle, est éprouvée PAR EXÉCUTION dans
+     * `panneau-degrade-le-journal.test.ts` et `surveillance-degrade.test.ts`,
+     * qui APPELLENT les fonctions au lieu de lire leur source.
      */
-    expect(panneau).toMatch(/estPanneDeTransport\(\s*stockage\.error\.message\s*\)/);
-    // ET IL LÈVE TOUJOURS SUR LE RESTE : dégrader une erreur applicative ferait
-    // vivre un panneau « indisponible » pour toujours sans que personne cherche.
-    expect(panneau).toMatch(/throw new Error\("lecture du stockage impossible/);
-    // ET LE CHIFFRE DEVIENT `null`, JAMAIS ZÉRO — zéro affirmerait qu'on a mesuré.
-    expect(panneau).toMatch(/stockageMesurable \? Number\(stockage\.data \?\? 0\) : null/);
+    expect(panneau).toContain("lectureIllisible");
+    expect(
+      panneau,
+      "le panneau a de nouveau sa propre copie de la règle : c'est ainsi qu'elle a divergé quatre fois",
+    ).not.toContain("if (!estPanneDeTransport(");
   });
 });

@@ -403,6 +403,7 @@
   },
   "analyses": {
     "titre": "Analyses",
+    "indisponible": "Cette section est illisible pour l’instant — ce n’est pas « aucune donnée ». Réessayez dans un instant.",
     "sousTitre": {
       "7j": "7 derniers jours",
       "30j": "30 derniers jours",
@@ -1148,6 +1149,9 @@
       "titre": "Surveillance",
       "sousTitre": "Ce qui tourne sans personne devant.",
       "taches": "Tâches de fond",
+      "tachesIndisponibles": "État des tâches illisible pour l’instant — ce n’est PAS « jamais exécutée ». Réessayer dans un instant.",
+      "indicateursIndisponibles": "Consommation illisible pour l’instant. Les tirets ne valent pas zéro.",
+      "friseIndisponible": "Historique des colis illisible pour l’instant.",
       "nonMesure": "Non mesuré",
       "nonMesureAide": "Aucun mécanisme ne relève ces grandeurs aujourd'hui. Elles apparaîtront ici avec le mécanisme qui les mesure, jamais avant : un chiffre inventé sur cet écran ferait douter de tous les autres.",
       "genre": {

@@ -403,6 +403,7 @@
   },
   "analyses": {
     "titre": "Analytics",
+    "indisponible": "This section is unreadable right now — this is not “no data”. Try again in a moment.",
     "sousTitre": {
       "7j": "Last 7 days",
       "30j": "Last 30 days",
@@ -1148,6 +1149,9 @@
       "titre": "Monitoring",
       "sousTitre": "What runs with nobody watching.",
       "taches": "Background tasks",
+      "tachesIndisponibles": "Task status unreadable right now — this is NOT “never ran”. Try again in a moment.",
+      "indicateursIndisponibles": "Usage unreadable right now. The dashes do not mean zero.",
+      "friseIndisponible": "Parcel history unreadable right now.",
       "nonMesure": "Not measured",
       "nonMesureAide": "Nothing currently records these figures. They will appear here together with the mechanism that measures them, never before: one invented number on this screen would cast doubt on all the others.",
       "genre": {

@@ -139,11 +139,22 @@ export default async function SurveillanceAdmin({
   const plafonds = new Map(
     SURFACES_AFFICHEES.map((surface) => [surface, seuil(surface).plafond] as const),
   );
-  const pic = (surface: string): number =>
-    surveillance.indicateurs.find((i) => i.indicateur === `pic_${surface}`)?.valeur ?? 0;
+  /**
+   * ⚠️ `null` N'EST PAS ZÉRO, ET C'EST TOUT L'ENJEU DE CET ÉCRAN.
+   *
+   * Un pic à 0 sur une lecture qui n'a pas abouti afficherait une barre vide,
+   * donc « aucune requête » — sur l'écran dont le rôle est de dire si les
+   * plafonds sont approchés. L'indisponibilité est donc NOMMÉE au-dessus des
+   * barres, et le chiffre devient un tiret plutôt qu'un zéro.
+   */
+  const pic = (surface: string): number | null =>
+    surveillance.indicateurs === null
+      ? null
+      : (surveillance.indicateurs.find((i) => i.indicateur === `pic_${surface}`)?.valeur ?? 0);
 
-  const maxColis = Math.max(1, ...surveillance.colisParJour.map((j) => j.n));
-  const dernierJour = surveillance.colisParJour.length - 1;
+  const colisParJour = surveillance.colisParJour ?? [];
+  const maxColis = Math.max(1, ...colisParJour.map((j) => j.n));
+  const dernierJour = colisParJour.length - 1;
 
   return (
     <main id="contenu" className="md:px-[30px] md:py-[26px]">
@@ -154,6 +165,14 @@ export default async function SurveillanceAdmin({
         <section aria-label={t("surveillance.taches")}>
           <p className={SUR_TITRE + " mb-3"}>{t("surveillance.taches")}</p>
 
+          {/* TROIS ÉTATS, PAS DEUX. Sur une lecture muette, la jointure ferait
+              afficher « jamais exécutée » pour CHAQUE tâche attendue : une
+              alerte inventée, sur l'écran fait pour les porter. */}
+          {surveillance.surveillees === null ? (
+            <p className={CARTE + " font-body-md text-body-md text-on-surface-variant"}>
+              {t("surveillance.tachesIndisponibles")}
+            </p>
+          ) : (
           <ul className="flex flex-col gap-2.5">
             {surveillance.surveillees.map((tache) => {
               const teinte = TEINTE_TACHE[tache.etat];
@@ -206,11 +225,21 @@ export default async function SurveillanceAdmin({
               );
             })}
           </ul>
+          )}
         </section>
 
         {/* --- LA CONSOMMATION --- */}
         <section aria-label={t("surveillance.consommation")} className="mt-7">
           <p className={SUR_TITRE + " mb-3"}>{t("surveillance.consommation")}</p>
+
+          {/* L'INDISPONIBILITÉ SE DIT. Des barres vides et des tirets se
+              liraient « aucune consommation », ce qui est une affirmation — et
+              une affirmation qu'on n'a pas mesurée. */}
+          {surveillance.indicateurs === null ? (
+            <p className="mb-2.5 font-body-md text-body-md text-on-surface-variant">
+              {t("surveillance.indicateursIndisponibles")}
+            </p>
+          ) : null}
 
           <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[1.5fr_1fr]">
             {/* --- LA FRISE DES COLIS --- */}
@@ -224,15 +253,20 @@ export default async function SurveillanceAdmin({
                 </span>
               </div>
 
+              {surveillance.colisParJour === null ? (
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  {t("surveillance.friseIndisponible")}
+                </p>
+              ) : (
               <div
                 role="img"
                 aria-label={t("surveillance.friseAide", { n: JOURS_DE_FRISE })}
                 className="grid h-[152px] items-end gap-2"
                 style={{
-                  gridTemplateColumns: `repeat(${Math.max(surveillance.colisParJour.length, 1)}, minmax(0, 1fr))`,
+                  gridTemplateColumns: `repeat(${Math.max(colisParJour.length, 1)}, minmax(0, 1fr))`,
                 }}
               >
-                {surveillance.colisParJour.map((j, rang) => (
+                {colisParJour.map((j, rang) => (
                   <div
                     key={j.jour}
                     // UNE HAUTEUR MINIMALE DE 2 %, pour qu'un jour à zéro reste
@@ -245,6 +279,7 @@ export default async function SurveillanceAdmin({
                   />
                 ))}
               </div>
+              )}
 
               <p className="mt-3 font-body-sm text-[12px] leading-[15px] text-sourdine">
                 {t("surveillance.friseLegende", { n: JOURS_DE_FRISE })}
@@ -272,8 +307,11 @@ export default async function SurveillanceAdmin({
                           {t(`surveillance.surface.${surface}`)}
                         </span>
                         <span className="font-body-sm text-[13px] leading-4 text-sourdine">
+                          {/* UN TIRET, JAMAIS UN ZÉRO : zéro affirmerait
+                              qu'on a mesuré, sur l'écran fait pour dire si un
+                              plafond est approché. */}
                           {t("surveillance.surPlafond", {
-                            valeur: format.number(valeur),
+                            valeur: valeur === null ? "—" : format.number(valeur),
                             plafond: format.number(plafond),
                           })}
                         </span>
@@ -282,7 +320,7 @@ export default async function SurveillanceAdmin({
                         <div
                           className="h-full rounded-full bg-violet"
                           style={{
-                            width: `${Math.round(Math.min(valeur / Math.max(plafond, 1), 1) * 100)}%`,
+                            width: `${valeur === null ? 0 : Math.round(Math.min(valeur / Math.max(plafond, 1), 1) * 100)}%`,
                           }}
                         />
                       </div>
