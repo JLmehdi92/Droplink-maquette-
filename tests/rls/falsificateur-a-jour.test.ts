@@ -76,11 +76,13 @@ interface Reparation {
 /**
  * Les réparations, lues BLOC PAR BLOC plutôt qu'au fil du texte.
  *
- * ⚠️ POURQUOI PAS UNE SEULE EXPRESSION RÉGULIÈRE. Celle qui sert au contrôle
- * des droits, plus bas, va de `depuis:` à `jusqua:` par un `[\s\S]*?`. Sur une
- * cible qui ne DÉCLARE PAS de borne — et la borne est facultative — cette
- * traversée ne s'arrête pas à la fin du bloc : elle continue jusqu'au `jusqua`
- * de la cible SUIVANTE, et apparie une migration avec la borne d'une autre.
+ * ⚠️ POURQUOI PAS UNE SEULE EXPRESSION RÉGULIÈRE. Celle qui servait au contrôle
+ * des droits allait de `depuis:` à `jusqua:` par un `[\s\S]*?`. Sur une cible
+ * qui ne DÉCLARE PAS de borne — et il en existe, la borne étant facultative —
+ * cette traversée ne s'arrête pas à la fin du bloc : elle continue jusqu'au
+ * `jusqua` de la cible SUIVANTE, et apparie une migration avec la borne d'une
+ * autre. Le contrôle inspecte alors un extrait qui n'existe pas, et il le fait
+ * en silence.
  *
  * On découpe donc sur les clés de cible, qui sont le seul délimiteur fiable.
  */
@@ -182,7 +184,7 @@ describe("Le falsificateur répare vers le produit d'aujourd'hui", () => {
    * Trois cibles bornaient leur découpe à « grant update (instagram_url », une
    * ligne de la migration 085. Elles réparent depuis la 133, qui se termine par
    * « grant update (site_url ». La borne n'était donc PLUS DANS LE FICHIER, et
-   * `node scripts/falsifier.mjs reparer suspension-ne-coupe-pas` a REFUSÉ de
+   * `node scripts/falsifier.mjs reparer suspension-ne-coupe-pas` refusait de
    * réparer — constaté sur un produit CASSÉ, en ligne, la coupure de suspension
    * hors service le temps de trouver pourquoi.
    *
@@ -197,7 +199,8 @@ describe("Le falsificateur répare vers le produit d'aujourd'hui", () => {
    * absence bloque.
    */
   test("chaque borne déclarée se trouve encore dans sa migration", () => {
-    const bornees = reparations().filter((r) => r.jusqua !== null);
+    const toutes = reparations();
+    const bornees = toutes.filter((r) => r.jusqua !== null);
     const defauts: string[] = [];
 
     for (const r of bornees) {
@@ -226,28 +229,34 @@ describe("Le falsificateur répare vers le produit d'aujourd'hui", () => {
    * fonction avec le défaut de Postgres, c'est-à-dire EXECUTE pour PUBLIC.
    */
   test("une réparation qui rejoue un drop repose aussi les droits", () => {
-    const source = readFileSync(FALSIFICATEUR, "utf8");
     const defauts: string[] = [];
-
-    const motif =
-      /reparerDepuisMigration:\s*\{\s*fichier:\s*"([^"]+)",\s*depuis:\s*"([^"]+)",(?:[\s\S]*?)jusqua:\s*"([^"]+)"/g;
-    let m: RegExpExecArray | null;
     let inspectees = 0;
 
-    while ((m = motif.exec(source)) !== null) {
-      const [, fichier, depuis, jusqua] = m as unknown as [string, string, string, string];
+    for (const r of reparations()) {
+      const { fichier, depuis, jusqua } = r;
       if (!depuis.startsWith("drop function")) continue;
       inspectees += 1;
 
       const contenu = readFileSync(join(MIGRATIONS, fichier), "utf8");
       const debut = contenu.indexOf(depuis);
-      const fin = contenu.indexOf(jusqua, debut);
+      // Une borne absente est signalée par le contrôle du dessus ; ici on la
+      // traite comme « jusqu'à la fin », qui est ce que fait le falsificateur.
+      const fin = jusqua === null ? -1 : contenu.indexOf(jusqua, debut);
       const extrait = contenu.slice(debut, fin === -1 ? undefined : fin);
 
       const fonction = fonctionCitee(depuis);
       if (fonction === null) continue;
 
-      if (!new RegExp(`revoke\\s+all\\s+on\\s+function\\s+public\\.${fonction}`).test(extrait)) {
+      // ⚠️ `revoke all` OU `revoke execute` : une fonction ne porte qu'UN seul
+      // privilège, EXECUTE, donc les deux écritures sont strictement
+      // équivalentes — et les migrations emploient les deux. N'accepter que la
+      // première faisait rejeter la 097, qui est correcte : une garde trop
+      // étroite accuse le produit au lieu de le protéger.
+      if (
+        !new RegExp(`revoke\\s+(all|execute)\\s+on\\s+function\\s+public\\.${fonction}`).test(
+          extrait,
+        )
+      ) {
         defauts.push(
           `${fichier} : la découpe de « ${fonction} » s'arrête avant son revoke — ` +
             "la réparation la recréerait exécutable par PUBLIC",
@@ -427,6 +436,13 @@ interface Recreation {
 /** Les noms de colonnes d'un bloc `returns table ( ... )`. */
 function colonnesDe(bloc: string): readonly string[] {
   return bloc
+    // ⚠️ LES COMMENTAIRES D'ABORD — c'est L-031 appliqué à une liste de
+    // colonnes. La 097 explique, EN PLEIN MILIEU de son `returns table`,
+    // pourquoi la dernière colonne s'appelle `rang` et non `position`. Sans ce
+    // retrait, la découpe rendait « -- » comme nom de colonne et « rang »
+    // passait pour absent : la garde accusait la falsification d'amputer une
+    // colonne qu'elle déclarait pourtant.
+    .replace(/--[^\n]*/g, "")
     .split(",")
     .map((c) => c.trim().split(/\s+/)[0] ?? "")
     .filter((c) => c !== "");

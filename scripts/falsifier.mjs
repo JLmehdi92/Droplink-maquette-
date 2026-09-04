@@ -1059,6 +1059,54 @@ const SQL = {
   },
 
   /**
+   * LA PAGE COUPE, LES MEDIAS NON — LA COUPURE A MOITIE FAITE.
+   *
+   * HORS du cas motivant, et c est tout l interet : `suspension-ne-coupe-pas`
+   * retire le filtre de `lire_commande_publique`, la fonction qui sert LA PAGE.
+   * Celle-ci le retire de `lire_medias_publics`, une fonction DISTINCTE, que la
+   * route `/p/<jeton>/media/<id>` appelle pour signer l URL de la photo pleine.
+   *
+   * Rien n oblige les deux a rester d accord, et le defaut qui en resulte est
+   * le plus difficile a voir : la page repond 404, l ecran d administration dit
+   * « suspendu », tout le monde conclut que le compte est coupe — et les photos
+   * restent atteignables par leur URL directe. Or c est l URL directe qui
+   * circule : un client enregistre une image, pas une page.
+   *
+   * Le corps casse est celui de la migration 097, a l identique, MOINS la
+   * ligne `and p.status = 'active'`. Il ne casse rien d autre : une
+   * falsification qui casse plus que ce qu elle annonce ne prouve pas ce
+   * qu elle pretend, puisqu on ne sait plus laquelle des deux ruptures a fait
+   * rougir la sonde.
+   */
+  "medias-sans-suspension": {
+    casser: `drop function if exists public.lire_medias_publics(text);
+      create function public.lire_medias_publics(p_jeton text)
+      returns table (id uuid, type public.media_type, cle text, cle_vignette text,
+                     cle_couverture text, largeur int, hauteur int, duree_s int, rang int)
+      language sql stable security definer set search_path = '' as $$
+        select m.id, m.type, m.cle, m.cle_vignette, m.cle_couverture,
+               m.largeur, m.hauteur, m.duree_s, m.position
+        from public.order_media m
+        join public.orders o on o.id = m.order_id
+        join public.shops s on s.id = o.shop_id
+        join public.profiles p on p.id = s.owner_id
+        where o.public_token = p_jeton
+        order by m.position asc
+      $$;
+      revoke execute on function public.lire_medias_publics(text) from public;
+      grant execute on function public.lire_medias_publics(text) to anon, authenticated;`,
+    reparerDepuisMigration: {
+      fichier: "097_la_couverture_a_sa_propre_derivee.sql",
+      depuis: "drop function public.lire_medias_publics",
+      // AUCUNE BORNE, DELIBEREMENT : le `grant execute` est la DERNIERE ligne
+      // du fichier. Une borne posee avant lui recreerait la fonction sans ses
+      // droits, et la page publique cesserait de rendre ses photos — l erreur
+      // porterait alors sur la fonction, jamais sur la reparation qui l a
+      // amputee.
+    },
+  },
+
+  /**
    * LA SUSPENSION SE FAIT SANS MOTIF.
    *
    * Hors du cas motivant : ce n est ni la coupure ni l isolation, c est la
