@@ -48,24 +48,51 @@ const url = `${base}/p/${jeton}`;
 const TIRS = 150;
 
 /**
- * Une série de requêtes, en séquence.
+ * Combien de requêtes en vol à la fois.
  *
- * ⚠️ EN SÉQUENCE ET NON EN PARALLÈLE. Le compteur est en base et la fenêtre s'y
- * lit : 150 requêtes lancées d'un coup se chevaucheraient sur deux fenêtres et
- * rendraient un décompte qu'aucune des deux ne décrit.
+ * Assez pour que les 150 tirs tiennent dans UNE fenêtre d'une minute — c'est la
+ * condition pour qu'un plafond par minute puisse mordre — et assez peu pour ne
+ * pas ressembler à une attaque contre son propre serveur.
+ */
+const CONCURRENCE = 25;
+
+/**
+ * Une série de requêtes, PAR VAGUES CONCURRENTES.
+ *
+ * ⚠️ CETTE FONCTION ÉTAIT SÉQUENTIELLE, ET C'EST CE QUI A FAIT MENTIR LA SONDE
+ * À SON PREMIER USAGE RÉEL, le 04/09/2026 contre la production.
+ *
+ * Son commentaire disait : « en séquence et non en parallèle — 150 requêtes
+ * lancées d'un coup se chevaucheraient sur deux fenêtres ». Le raisonnement
+ * était exactement à l'envers. Sur un réseau réel, 150 requêtes SÉQUENTIELLES
+ * prennent plus de deux minutes : elles s'étalent sur trois fenêtres d'une
+ * minute et n'atteignent JAMAIS le plafond de 120 dans aucune. Relevé en base
+ * ce jour-là — 49, puis 1, puis 2, sur trois fenêtres consécutives.
+ *
+ * La sonde a donc rendu « AUCUNE ADRESSE N'EST RÉSOLUE » sur un produit dont
+ * l'adresse était parfaitement résolue et le compteur parfaitement tenu. Une
+ * sonde qui crie au loup est pire qu'une absence de sonde : elle envoie
+ * chercher un défaut là où il n'y en a pas, et on finit par l'ignorer.
+ *
+ * Les vagues concurrentes font tenir la série dans UNE fenêtre — c'est la seule
+ * façon de faire mordre un plafond par minute.
  */
 async function serie(forger) {
   const statuts = new Map();
-  for (let i = 0; i < TIRS; i += 1) {
-    const enTetes = { "user-agent": "sonde-bord/1" };
-    if (forger) enTetes[enTete] = `203.0.113.${(i % 250) + 1}`;
-    let statut;
-    try {
-      statut = (await fetch(url, { headers: enTetes, redirect: "manual" })).status;
-    } catch (erreur) {
-      statut = `transport:${String(erreur)}`;
+  const compter = (s) => statuts.set(s, (statuts.get(s) ?? 0) + 1);
+
+  for (let debut = 0; debut < TIRS; debut += CONCURRENCE) {
+    const vague = [];
+    for (let i = debut; i < Math.min(debut + CONCURRENCE, TIRS); i += 1) {
+      const enTetes = { "user-agent": "sonde-bord/1" };
+      if (forger) enTetes[enTete] = `203.0.113.${(i % 250) + 1}`;
+      vague.push(
+        fetch(url, { headers: enTetes, redirect: "manual" })
+          .then((r) => r.status)
+          .catch((erreur) => `transport:${String(erreur)}`),
+      );
     }
-    statuts.set(statut, (statuts.get(statut) ?? 0) + 1);
+    for (const statut of await Promise.all(vague)) compter(statut);
   }
   return statuts;
 }
