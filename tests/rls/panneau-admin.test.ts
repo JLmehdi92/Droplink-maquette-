@@ -67,20 +67,51 @@ afterAll(async () => {
   await catalogue.end();
 });
 
+/**
+ * LE PANNEAU LU, SES TROIS SECTIONS EXIGEES LISIBLES.
+ *
+ * Depuis le 04/09/2026 chaque section peut valoir `null` — « pas lisible en ce
+ * moment » — pour qu'une coupure de transport n'emporte plus l'ecran entier.
+ * Ici la base repond pour de vrai : `null` serait un defaut, et l'exiger
+ * explicitement vaut mieux qu'un `!` qui ferait passer une regression pour un
+ * detail de typage.
+ */
+async function panneauLisible(
+  client: Parameters<typeof lirePanneau>[0],
+  seuils: Parameters<typeof lirePanneau>[1],
+) {
+  const p = await lirePanneau(client, seuils);
+  const { alertes, compteurs, taches } = p;
+  if (alertes === null || compteurs === null || taches === null) {
+    // On LEVE plutot que d assouplir le type : ici la base repond, donc une
+    // section illisible est un defaut, pas un cas a absorber. L absorber ferait
+    // passer toute cette suite au vert sur un panneau a moitie vide.
+    throw new Error(
+      "panneau partiellement illisible alors que la base repond — alertes:" +
+        String(alertes === null) +
+        " compteurs:" +
+        String(compteurs === null) +
+        " taches:" +
+        String(taches === null),
+    );
+  }
+  return { ...p, alertes, compteurs, taches };
+}
+
 describe("Qui peut lire le panneau", () => {
   test("un vendeur ordinaire ne lit rien, et n'apprend pas que la surface existe", async () => {
     await expect(lirePanneau(vendeur.client, SEUILS)).rejects.toThrow(/introuvable/i);
   });
 
   test("contre-test positif : l'administrateur le lit", async () => {
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     expect(p.compteurs.comptes).toBeGreaterThan(0);
   });
 });
 
 describe("Les alertes portent leur VALEUR", () => {
   test("le compte au-dessus du seuil est signalé, avec le chiffre et le seuil", async () => {
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     const alerte = p.alertes.find((a) => a.sujet === gros.email);
 
     expect(alerte, "le compte au-dessus du seuil n'est pas signalé").toBeDefined();
@@ -93,14 +124,14 @@ describe("Les alertes portent leur VALEUR", () => {
   test("le compte en dessous n'est PAS signalé", async () => {
     // Sans ce contrôle, une fonction qui signalerait tout le monde passerait le
     // test précédent sans rien prouver.
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     expect(p.alertes.map((a) => a.sujet)).not.toContain(vendeur.email);
   });
 
   test("un seuil plus haut fait taire l'alerte", async () => {
     // Le seuil est bien LU, pas ignoré : sans ce contrôle, une fonction qui
     // signalerait sur une constante en dur passerait les deux tests précédents.
-    const p = await lirePanneau(admin.client, { colis: 100, retardMinutes: 60 });
+    const p = await panneauLisible(admin.client, { colis: 100, retardMinutes: 60 });
     expect(p.alertes.map((a) => a.sujet)).not.toContain(gros.email);
   });
 });
@@ -109,7 +140,7 @@ describe("Le veilleur a TROIS états, pas deux", () => {
   test("aucune tâche déployée : ce n'est pas une alerte", async () => {
     await interroger(catalogue, "delete from public.scheduler_heartbeat");
 
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
 
     expect(p.aucuneTacheDeployee, "l'absence de tâche n'est pas reconnue").toBe(true);
     expect(p.taches.length).toBe(0);
@@ -127,7 +158,7 @@ describe("Le veilleur a TROIS états, pas deux", () => {
       "insert into public.scheduler_heartbeat (source, beat_at) values ('cadence', now())",
     );
 
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     expect(p.aucuneTacheDeployee).toBe(false);
     expect(p.taches[0]?.etat).toBe("actif");
     expect(p.alertes.filter((a) => a.genre === "veilleur_en_retard")).toEqual([]);
@@ -141,7 +172,7 @@ describe("Le veilleur a TROIS états, pas deux", () => {
       "update public.scheduler_heartbeat set beat_at = now() - interval '5 hours'",
     );
 
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     expect(p.taches[0]?.etat).toBe("en_retard");
 
     const alerte = p.alertes.find((a) => a.genre === "veilleur_en_retard");
@@ -160,14 +191,14 @@ describe("Ce que le panneau refuse d'affirmer", () => {
     // l'écriture — jamais d'une valeur observée. Déduire « zéro donc pas
     // mesuré » serait faux pour toute installation neuve, donc dès le premier
     // jour.
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     expect(p.stockageMesurable).toBe(true);
     expect(p.stockageOctets, "mesurable mais sans valeur : l'écran n'aurait rien à écrire")
       .not.toBeNull();
   });
 
   test("le total est la somme réelle des boutiques, pas une estimation", async () => {
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     const somme = await interroger<{ s: string | null }>(
       catalogue,
       "select sum(stockage_octets) as s from public.shops",
@@ -176,7 +207,7 @@ describe("Ce que le panneau refuse d'affirmer", () => {
   });
 
   test("les compteurs de comptes sont exacts, jamais estimés", async () => {
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     const reel = await interroger<{ n: string }>(
       catalogue,
       "select count(*) as n from public.profiles",
@@ -327,7 +358,7 @@ describe("Les commandes créées du mois sont comptées", () => {
   });
 
   test("le panneau rend ce compteur, et c'est la somme réelle", async () => {
-    const p = await lirePanneau(admin.client, SEUILS);
+    const p = await panneauLisible(admin.client, SEUILS);
     const somme = await interroger<{ s: string | null }>(
       catalogue,
       `select sum(orders_created) as s from public.usage_counters
@@ -389,7 +420,7 @@ describe("Les compteurs de comptes décrivent la population qu'ils annoncent", (
               (select count(*) from public.profiles where account_type is null) as sans_type_partout`,
     );
 
-    const panneau = await lirePanneau(admin.client, SEUILS);
+    const panneau = await panneauLisible(admin.client, SEUILS);
 
     // `noUncheckedIndexedAccess` : la ligne peut manquer, et une comparaison
     // faite sur `undefined` passerait sans rien mesurer.
@@ -430,7 +461,7 @@ describe("Les compteurs de comptes décrivent la population qu'ils annoncent", (
       catalogue,
       "select count(*) as n from public.profiles where status = 'suspended'",
     );
-    const panneau = await lirePanneau(admin.client, SEUILS);
+    const panneau = await panneauLisible(admin.client, SEUILS);
 
     expect(reel, "la lecture des suspendus n a rien rendu").toBeDefined();
     if (reel === undefined) return;

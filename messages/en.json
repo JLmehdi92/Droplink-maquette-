@@ -973,6 +973,8 @@
     "panneau": {
       "titre": "Dashboard",
       "aucuneAlerte": "No alerts. Nothing is over the thresholds, and background tasks are beating normally.",
+      "alertesIndisponibles": "Alerts unreadable right now — this is NOT “no alerts”. Try again in a moment.",
+      "compteursIndisponibles": "Counters unreadable right now. The dashes do not mean zero.",
       "alerte": {
         "colis_au_dessus_du_seuil": "One account is over the parcel ceiling: {valeur} against a threshold of {seuil}",
         "veilleur_en_retard": "A background job has not beaten for {valeur} minutes"

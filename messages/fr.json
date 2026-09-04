@@ -973,6 +973,8 @@
     "panneau": {
       "titre": "Panneau",
       "aucuneAlerte": "Aucune alerte. Rien ne dépasse les seuils, et les tâches de fond battent normalement.",
+      "alertesIndisponibles": "Alertes illisibles pour l’instant — ce n’est PAS « aucune alerte ». Réessayer dans un instant.",
+      "compteursIndisponibles": "Compteurs illisibles pour l’instant. Les tirets ne valent pas zéro.",
       "alerte": {
         "colis_au_dessus_du_seuil": "Un compte dépasse le plafond de colis : {valeur} sur un seuil de {seuil}",
         "veilleur_en_retard": "Une tâche de fond n'a pas battu depuis {valeur} minutes"

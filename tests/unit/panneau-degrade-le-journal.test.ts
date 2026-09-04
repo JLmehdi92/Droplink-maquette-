@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { lireDernieresActions } from "@/lib/audit/comptes";
+import { lirePanneau } from "@/lib/audit/panneau";
 
 /**
  * LE PANNEAU NE TOMBE PAS ENTIER PARCE QUE SA CARTE D'APERÇU N'A PAS RÉPONDU.
@@ -98,5 +99,127 @@ describe("L'aperçu du journal sur le panneau admin", () => {
 
   test("une réponse VIDE sans erreur lève encore : ce n'est pas une panne nommée", async () => {
     await expect(lireDernieresActions(client(null, null), 4)).rejects.toThrow(/reponse vide/);
+  });
+});
+
+/**
+ * L'INVENTAIRE DES LECTURES DU PANNEAU — et non celle qui vient d'échouer.
+ *
+ * ⚠️ CE BLOC EXISTE PARCE QUE LE MÊME DÉFAUT A ÉTÉ CORRIGÉ TROIS FOIS SUR CET
+ * ÉCRAN, CHAQUE FOIS SUR LA SEULE LECTURE QUI VENAIT DE TOMBER :
+ *
+ *   02/09 — `stockage_total_admin` : `fetch failed` → 500 sur tout l'écran.
+ *           Correctif posé sur cette lecture-là. Message du commit : « la garde
+ *           couvre désormais les deux consommateurs ».
+ *   04/09 — `lire_journal_admin`, appelée dans le MÊME `Promise.all`, levait
+ *           toujours. Correctif posé sur celle-là.
+ *   04/09, une heure plus tard — `etat_veilleur`, TROISIÈME lecture du même
+ *           écran, a rendu `lecture des tâches impossible : fetch failed`.
+ *
+ * Trois fois L-025 : *un garde écrit après coup hérite du champ de vision de la
+ * CORRECTION, pas du problème.* La quatrième se produira aussi longtemps qu'on
+ * traitera une lecture à la fois.
+ *
+ * D'OÙ UN INVENTAIRE, PAS UNE SÉLECTION. La sonde énumère TOUTES les fonctions
+ * que le panneau interroge, et exige de chacune les DEUX propriétés. Une lecture
+ * ajoutée demain sans dégradation fait rougir ce test sans que personne ait
+ * pensé à elle — c'est tout ce qu'on lui demande.
+ */
+const LECTURES_DU_PANNEAU = [
+  "alertes_admin",
+  "compteurs_admin",
+  "etat_veilleur",
+  "stockage_total_admin",
+] as const;
+
+/** Un client dont UNE seule fonction échoue, les autres répondant normalement. */
+function panneauAvec(enEchec: string, message: string) {
+  const reponses: Record<string, unknown> = {
+    alertes_admin: [],
+    compteurs_admin: [
+      {
+        colis_pris_en_charge_ce_mois: 0,
+        comptes_actifs: 0,
+        comptes_suspendus: 0,
+        comptes_sans_type: 0,
+        commandes_creees_ce_mois: 0,
+      },
+    ],
+    etat_veilleur: [],
+    stockage_total_admin: 0,
+  };
+  return {
+    rpc: (nom: string) =>
+      Promise.resolve(
+        nom === enEchec
+          ? { data: null, error: { message } }
+          : { data: reponses[nom] ?? null, error: null },
+      ),
+  } as never;
+}
+
+const SEUILS = { colis: 1200, retardMinutes: 90 };
+
+describe("Le panneau admin, lecture par lecture", () => {
+  test("CONTRE-TEST : sans aucune panne, le panneau se lit entièrement", async () => {
+    // ⚠️ EN PREMIER. Sans lui, « ne lève pas » serait vrai d'un panneau mort.
+    const p = await lirePanneau(panneauAvec("aucune", ""), SEUILS);
+    expect(p.alertes).not.toBeNull();
+    expect(p.compteurs).not.toBeNull();
+    expect(p.taches).not.toBeNull();
+    expect(p.stockageMesurable).toBe(true);
+  });
+
+  test("la sonde inventorie réellement quelque chose", () => {
+    expect(LECTURES_DU_PANNEAU.length).toBeGreaterThanOrEqual(4);
+  });
+
+  test("AUCUNE lecture en panne de transport n'emporte l'écran entier", async () => {
+    for (const lecture of LECTURES_DU_PANNEAU) {
+      const p = await lirePanneau(panneauAvec(lecture, "TypeError: fetch failed"), SEUILS).catch(
+        (e: unknown) => e as Error,
+      );
+      expect(
+        p instanceof Error,
+        `« ${lecture} » en panne fait tomber TOUT le panneau : ${p instanceof Error ? p.message : ""}`,
+      ).toBe(false);
+    }
+  });
+
+  test("et la section touchée est NOMMÉE illisible, jamais remplie d'une valeur inventée", async () => {
+    /*
+     * `[]` sur les alertes dirait « tout va bien » — le brief l'interdit
+     * explicitement : *un panneau qui affiche zéro alerte au lieu d'une erreur
+     * ferait conclure que tout va bien.* Zéro sur les compteurs affirmerait
+     * qu'on a compté. Et `taches: []` se confondrait avec « jamais déployé »,
+     * qui enverrait chercher une panne dans un mécanisme inexistant.
+     */
+    const sansAlertes = await lirePanneau(panneauAvec("alertes_admin", "fetch failed"), SEUILS);
+    expect(sansAlertes.alertes).toBeNull();
+    expect(sansAlertes.alertes).not.toEqual([]);
+
+    const sansCompteurs = await lirePanneau(panneauAvec("compteurs_admin", "fetch failed"), SEUILS);
+    expect(sansCompteurs.compteurs).toBeNull();
+
+    const sansTaches = await lirePanneau(panneauAvec("etat_veilleur", "fetch failed"), SEUILS);
+    expect(sansTaches.taches).toBeNull();
+    // ⚠️ ET SURTOUT PAS « aucune tâche déployée » : ce serait affirmer que rien
+    // n'a jamais tourné, sur la foi d'une lecture qui n'a pas abouti.
+    expect(sansTaches.aucuneTacheDeployee).toBe(false);
+
+    const sansStockage = await lirePanneau(panneauAvec("stockage_total_admin", "fetch failed"), SEUILS);
+    expect(sansStockage.stockageMesurable).toBe(false);
+    expect(sansStockage.stockageOctets).toBeNull();
+  });
+
+  test("L'AUTRE SENS : une erreur APPLICATIVE continue de lever, sur chaque lecture", async () => {
+    // Sans ce sens-là, un droit retiré ferait vivre un panneau « indisponible »
+    // pour toujours, et personne n'irait chercher pourquoi.
+    for (const lecture of LECTURES_DU_PANNEAU) {
+      await expect(
+        lirePanneau(panneauAvec(lecture, "permission denied for function " + lecture), SEUILS),
+        `« ${lecture} » avale une erreur applicative comme une panne réseau`,
+      ).rejects.toThrow();
+    }
   });
 });

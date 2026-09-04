@@ -120,6 +120,16 @@ export default async function PanneauAdmin({
 
   const critique = (a: { gravite: string }): boolean => a.gravite === "critique";
 
+  /**
+   * UN TIRET, JAMAIS UN ZERO.
+   *
+   * Zero affirmerait qu'on a compte. C'est la meme regle que le stockage, qui
+   * s'affiche « indisponible » et jamais « 0 o » — et elle vaut pour la meme
+   * raison : sur cet ecran, un chiffre est une piece a l'appui d'une decision.
+   * La ligne qui NOMME l'indisponibilite est au-dessus des cartes.
+   */
+  const chiffre = (n: number | undefined): string => (n === undefined ? "—" : format.number(n));
+
   const ouExaminer = (genre: string, sujet: string): string =>
     genre === "veilleur_en_retard"
       ? `/${langue}/admin/surveillance`
@@ -134,7 +144,14 @@ export default async function PanneauAdmin({
         <section aria-label={t("panneau.decision")}>
           <p className={SUR_TITRE + " mb-3"}>{t("panneau.decision")}</p>
 
-          {panneau.alertes.length === 0 ? (
+          {/* TROIS ÉTATS, PAS DEUX. « Aucune alerte » sur une lecture qui n'a
+              pas abouti ferait conclure que tout va bien — c'est exactement ce
+              que le brief interdit, et sur la section qu'il range en tête. */}
+          {panneau.alertes === null ? (
+            <p className={CARTE + " font-body-md text-body-md text-on-surface-variant"}>
+              {t("panneau.alertesIndisponibles")}
+            </p>
+          ) : panneau.alertes.length === 0 ? (
             <p className={CARTE + " font-body-md text-body-md text-on-surface-variant"}>
               {t("panneau.aucuneAlerte")}
             </p>
@@ -220,6 +237,16 @@ export default async function PanneauAdmin({
         <section aria-label={t("panneau.volumes")} className="mt-5 md:mt-7">
           <p className={SUR_TITRE + " mb-3"}>{t("panneau.volumes")}</p>
 
+          {/* L'INDISPONIBILITÉ SE DIT, elle ne se devine pas à quatre tirets.
+              Un tiret seul se lirait comme « zéro mal affiché » ; cette ligne
+              est ce qui distingue « on n'a pas pu compter » de « il n'y a
+              rien », et c'est la distinction qui compte pour qui décide. */}
+          {panneau.compteurs === null ? (
+            <p className="mb-2.5 font-body-md text-body-md text-on-surface-variant">
+              {t("panneau.compteursIndisponibles")}
+            </p>
+          ) : null}
+
           <div className="flex flex-col gap-2.5 xl:grid xl:grid-cols-4 xl:gap-3">
             {/* `parcels_registered` EN TÊTE ET ENCADRÉ : c'est le seul compteur
                 du produit qui corresponde à une FACTURE. Le noyer parmi les
@@ -235,7 +262,7 @@ export default async function PanneauAdmin({
                 </span>
               </div>
               <p className="font-headline-xl text-[30px] leading-[38px] font-extrabold tracking-[-0.035em] text-violet-sombre">
-                {format.number(panneau.compteurs.colisPrisEnChargeCeMois)}
+                {chiffre(panneau.compteurs?.colisPrisEnChargeCeMois)}
               </p>
               <p className="mt-[5px] font-headline-md text-[12px] leading-[15px] font-normal text-violet-encre md:mt-1.5">
                 {t("panneau.ceMoisCi")}
@@ -248,7 +275,7 @@ export default async function PanneauAdmin({
                   {t("panneau.comptesActifs")}
                 </p>
                 <p className="font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[30px] md:leading-[38px] md:tracking-[-0.035em]">
-                  {format.number(panneau.compteurs.comptesActifs)}
+                  {chiffre(panneau.compteurs?.comptesActifs)}
                 </p>
                 {/* LES DEUX AUTRES ÉTATS DE COMPTE TIENNENT DANS CETTE LIGNE.
                     La planche n'en met qu'un ; sortir « sans type » de l'écran
@@ -257,8 +284,8 @@ export default async function PanneauAdmin({
                     et cette colonne existe précisément pour être mesurée. */}
                 <p className="mt-1.5 hidden font-body-sm text-[12px] leading-[15px] text-sourdine md:block">
                   {t("panneau.comptesDont", {
-                    suspendus: format.number(panneau.compteurs.comptesSuspendus),
-                    sansType: format.number(panneau.compteurs.comptesSansType),
+                    suspendus: chiffre(panneau.compteurs?.comptesSuspendus),
+                    sansType: chiffre(panneau.compteurs?.comptesSansType),
                   })}
                 </p>
               </div>
@@ -269,7 +296,7 @@ export default async function PanneauAdmin({
                   <span className="hidden md:inline">{t("panneau.commandes")}</span>
                 </p>
                 <p className="font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[30px] md:leading-[38px] md:tracking-[-0.035em]">
-                  {format.number(panneau.compteurs.commandesCreeesCeMois)}
+                  {chiffre(panneau.compteurs?.commandesCreeesCeMois)}
                 </p>
                 <p className="mt-1.5 hidden font-body-sm text-[12px] leading-[15px] text-sourdine md:block">
                   {t("panneau.ceMoisCi")}

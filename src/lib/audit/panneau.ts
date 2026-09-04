@@ -74,16 +74,42 @@ export interface EtatTache {
   readonly etat: "actif" | "en_retard";
 }
 
+/**
+ * ⚠️ CHAQUE SECTION PEUT VALOIR `null` — « pas lisible en ce moment », et le
+ * TYPE l'exige de tout consommateur.
+ *
+ * TROIS FOIS LE MÊME DÉFAUT SUR CET ÉCRAN, chaque fois corrigé sur la seule
+ * lecture qui venait de tomber : le stockage le 02/09, l'aperçu du journal le
+ * 04/09, l'état des tâches une heure plus tard. C'est L-025 en série — *un
+ * garde écrit après coup hérite du champ de vision de la CORRECTION, pas du
+ * problème* — et la quatrième occurrence était garantie tant qu'on traitait
+ * une lecture à la fois.
+ *
+ * `null` ET NON UNE VALEUR NEUTRE, sur les trois. Le brief l'écrit pour les
+ * alertes : *un panneau qui affiche zéro alerte au lieu d'une erreur ferait
+ * conclure que tout va bien.* Zéro sur les compteurs affirmerait qu'on a
+ * compté. Et une liste de tâches vide se confondrait avec « jamais déployé »,
+ * qui envoie chercher une panne dans un mécanisme inexistant.
+ *
+ * C'est la règle de l'administration, l'inverse de celle de la page publique :
+ * ici une information absente est NOMMÉE, jamais omise. Un client consulte, un
+ * administrateur décide.
+ */
 export interface Panneau {
-  readonly alertes: readonly Alerte[];
-  readonly compteurs: CompteursAdmin;
-  readonly taches: readonly EtatTache[];
+  readonly alertes: readonly Alerte[] | null;
+  readonly compteurs: CompteursAdmin | null;
+  readonly taches: readonly EtatTache[] | null;
   /**
    * Vrai quand AUCUNE tâche n'a jamais battu.
    *
    * Ce n'est pas une alerte, c'est un CONSTAT : rien n'a été déployé. Le
    * distinguer d'un retard évite d'envoyer chercher une panne là où il n'y a
    * simplement rien à trouver.
+   *
+   * ⚠️ FAUX QUAND `taches` VAUT `null`. Une lecture qui n'a pas abouti ne dit
+   * rien du déploiement : affirmer « rien n'a jamais tourné » sur cette foi-là
+   * serait la pire des trois lectures possibles, puisqu'elle enverrait chercher
+   * une panne inexistante au moment précis où le réseau en cache une vraie.
    */
   readonly aucuneTacheDeployee: boolean;
   /**
@@ -147,17 +173,32 @@ export async function lirePanneau(
     supabase.rpc("stockage_total_admin"),
   ]);
 
-  // JAMAIS DE `catch` MUET, et surtout pas ici : un panneau qui affiche zéro
-  // alerte au lieu d'une erreur ferait conclure que tout va bien.
-  if (alertes.error !== null) {
-    throw new Error("lecture des alertes impossible : " + alertes.error.message);
-  }
-  if (compteurs.error !== null) {
-    throw new Error("lecture des compteurs impossible : " + compteurs.error.message);
-  }
-  if (taches.error !== null) {
-    throw new Error("lecture des tâches impossible : " + taches.error.message);
-  }
+  /**
+   * UNE SEULE RÈGLE POUR LES QUATRE LECTURES — c'est le point de cette
+   * fonction, et ce n'était pas le cas jusqu'au 04/09/2026.
+   *
+   * Panne de TRANSPORT : la section devient `null`, l'écran se rend, et
+   * l'indisponibilité est nommée. Tout le reste : on lève. Dégrader une erreur
+   * applicative ferait vivre un panneau « indisponible » pour toujours sans que
+   * personne cherche pourquoi — c'est le défaut symétrique, et il est pire,
+   * parce qu'il est définitif.
+   *
+   * ⚠️ JAMAIS DE `catch` MUET. Ce n'en est pas un : la panne est ÉCRITE dans le
+   * journal du serveur et NOMMÉE à l'écran. Un panneau qui afficherait zéro
+   * alerte au lieu d'une erreur ferait conclure que tout va bien.
+   */
+  const illisible = (r: { error: { message: string } | null }, quoi: string): boolean => {
+    if (r.error === null) return false;
+    if (!estPanneDeTransport(r.error.message)) {
+      throw new Error(`lecture ${quoi} impossible : ` + r.error.message);
+    }
+    console.error(`[admin] ${quoi} momentanément illisible — ` + r.error.message);
+    return true;
+  };
+
+  const alertesIllisibles = illisible(alertes, "des alertes");
+  const compteursIllisibles = illisible(compteurs, "des compteurs");
+  const tachesIllisibles = illisible(taches, "des tâches");
   /*
    * ⚠️ UNE COUPURE DE TRANSPORT NE DOIT PAS EMPORTER TOUT LE PANNEAU.
    *
@@ -192,34 +233,49 @@ export async function lirePanneau(
   }
 
   const c = (compteurs.data ?? [])[0];
-  if (c === undefined) throw new Error("compteurs illisibles : aucune ligne");
+  // UNE LECTURE QUI ABOUTIT SANS LIGNE RESTE UNE ERREUR : la fonction en base
+  // en rend toujours une. Ce n'est pas le cas d'une lecture qui n'a pas abouti,
+  // laquelle est déjà nommée juste au-dessus.
+  if (!compteursIllisibles && c === undefined) {
+    throw new Error("compteurs illisibles : aucune ligne");
+  }
 
-  const lignesTaches: EtatTache[] = (taches.data ?? []).map((t) => ({
-    source: t.source,
-    dernierBattement: t.dernier_battement,
-    minutes: Number(t.minutes),
-    etat: t.etat === "en_retard" ? "en_retard" : "actif",
-  }));
+  const lignesTaches: EtatTache[] | null = tachesIllisibles
+    ? null
+    : (taches.data ?? []).map((t) => ({
+        source: t.source,
+        dernierBattement: t.dernier_battement,
+        minutes: Number(t.minutes),
+        etat: t.etat === "en_retard" ? "en_retard" : "actif",
+      }));
 
   return {
-    alertes: (alertes.data ?? []).map((a) => ({
-      genre: a.genre,
-      gravite: a.gravite === "critique" ? "critique" : "attention",
-      sujet: a.sujet,
-      valeur: Number(a.valeur),
-      seuil: Number(a.seuil),
-    })),
-    compteurs: {
-      comptes: Number(c.comptes),
-      comptesActifs: Number(c.comptes_actifs),
-      comptesSuspendus: Number(c.comptes_suspendus),
-      comptesSansType: Number(c.comptes_sans_type),
-      colisPrisEnChargeCeMois: Number(c.colis_pris_en_charge_ce_mois),
-      colisAbandonnesCeMois: Number(c.colis_abandonnes_ce_mois),
-      commandesCreeesCeMois: Number(c.commandes_creees_ce_mois),
-    },
+    alertes: alertesIllisibles
+      ? null
+      : (alertes.data ?? []).map((a) => ({
+          genre: a.genre,
+          gravite: a.gravite === "critique" ? "critique" : "attention",
+          sujet: a.sujet,
+          valeur: Number(a.valeur),
+          seuil: Number(a.seuil),
+        })),
+    compteurs:
+      c === undefined
+        ? null
+        : {
+            comptes: Number(c.comptes),
+            comptesActifs: Number(c.comptes_actifs),
+            comptesSuspendus: Number(c.comptes_suspendus),
+            comptesSansType: Number(c.comptes_sans_type),
+            colisPrisEnChargeCeMois: Number(c.colis_pris_en_charge_ce_mois),
+            colisAbandonnesCeMois: Number(c.colis_abandonnes_ce_mois),
+            commandesCreeesCeMois: Number(c.commandes_creees_ce_mois),
+          },
     taches: lignesTaches,
-    aucuneTacheDeployee: lignesTaches.length === 0,
+    // ⚠️ `false` QUAND LA LECTURE N'A PAS ABOUTI. « Aucune tâche déployée »
+    // enverrait chercher une panne dans un mécanisme inexistant, sur la foi
+    // d'une lecture qui n'a rien rapporté du tout.
+    aucuneTacheDeployee: lignesTaches !== null && lignesTaches.length === 0,
     // LE MÉCANISME EXISTE DEPUIS LA 049 : les octets sont tenus à l'écriture,
     // boutique par boutique, à partir de la taille RELUE CÔTÉ SERVEUR au dépôt.
     // C'est ce qui autorise à afficher un chiffre plutôt qu'« indisponible ».
