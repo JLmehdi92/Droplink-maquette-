@@ -90,7 +90,7 @@ function visiteur(n) {
   // lancements, c est-a-dire de relancer jusqu au vert.
   const serie = port % 250;
   return {
-    "x-forwarded-for": `10.${serie}.${n}.1`,
+    "x-real-ip": `10.${serie}.${n}.1`,
     "user-agent": `sonde-fumee/${serie}-${n}`,
   };
 }
@@ -172,13 +172,19 @@ const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   env: {
     ...process.env,
     QUOTA_PUBLIQUE_PAR_MINUTE: String(PLAFOND_PUBLIC),
-    // LE MODE DE CONFIANCE EST DECLARE, comme il devra l etre en production.
-    // Le defaut est `cloudflare` — seul `cf-connecting-ip` est cru — et il n y a
-    // pas de Cloudflare devant ce serveur : sans ce reglage, aucune adresse ne
-    // serait lisible, donc AUCUN QUOTA NE SERAIT CONSOMME, et les controles de
-    // limitation passeraient tous en ne mesurant rien. Un ensemble vide passe
-    // tout.
-    BORD_DE_CONFIANCE: "xff",
+    // LE MODE DE CONFIANCE EST CELUI DE LA CIBLE DE DEPLOIEMENT, PAS UN MODE DE
+    // COMMODITE. Le defaut est `cloudflare` — seul `cf-connecting-ip` est cru —
+    // et il n y a pas de Cloudflare devant ce serveur : sans reglage, aucune
+    // adresse ne serait lisible, donc AUCUN QUOTA NE SERAIT CONSOMME, et les
+    // controles de limitation passeraient tous en ne mesurant rien. Un ensemble
+    // vide passe tout.
+    //
+    // ⚠️ `railway` ET NON `xff` DEPUIS LE 04/09/2026. Le produit est deploye sur
+    // Railway, dont le bord pose `x-real-ip`. Eprouver le produit sous un autre
+    // mode que celui qu il servira laisserait le chemin de resolution REELLEMENT
+    // employe hors de portee de la sonde — et c est ce chemin qui decide si une
+    // vue est enregistree ou si un quota est consomme.
+    BORD_DE_CONFIANCE: "railway",
     CRON_SECRET: SECRET_CRON,
     TRACKING_API_KEY: CLE_SUIVI,
     /*
@@ -2837,13 +2843,13 @@ try {
          * expression existe, jamais qu une unite est consommee.
          */
         {
-          // ⚠️ `x-forwarded-for`, PAS `cf-connecting-ip` : ce serveur tourne en
-          // `BORD_DE_CONFIANCE=xff` (voir plus haut). En mode `cloudflare`,
-          // seul `cf-connecting-ip` est cru, et une sonde qui poserait le mauvais
-          // en-tete ne compterait RIEN — donc mesurerait zero unite et
-          // conclurait a une sous-consommation.
+          // ⚠️ `x-real-ip`, PAS `cf-connecting-ip` : ce serveur tourne en
+          // `BORD_DE_CONFIANCE=railway` (voir plus haut), le mode de la cible de
+          // deploiement. Chaque mode ne croit QU UN en-tete et ne se replie sur
+          // aucun autre : une sonde qui poserait le mauvais ne compterait RIEN —
+          // donc mesurerait zero unite et conclurait a une sous-consommation.
           const adresseQuota = {
-            "x-forwarded-for": `10.${port % 250}.201.7`,
+            "x-real-ip": `10.${port % 250}.201.7`,
             "user-agent": "sonde-fumee/quota",
           };
           const cleQuota = "publique-requetes:%";
@@ -3027,7 +3033,7 @@ try {
       if (jetonFumee) {
         // LA BALISE DE CONSULTATION, de bout en bout.
         //
-        // `x-forwarded-for` est pose ici parce que c est ce que fait le bord en
+        // `x-real-ip` est pose ici parce que c est ce que fait le bord en
         // production. Sans adresse exploitable, le produit REFUSE d ecrire
         // plutot que de fusionner tous les visiteurs sous une cle commune : le
         // controle passerait alors sur un comportement qui n est pas celui qui

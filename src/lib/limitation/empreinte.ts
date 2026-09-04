@@ -42,9 +42,28 @@ export function empreinte(valeur: string): string {
  * `cloudflare` (défaut) — seul `cf-connecting-ip` est cru. Cet en-tête est
  *   RÉÉCRIT par Cloudflare à chaque requête : ce que le client envoie sous ce
  *   nom est écrasé, donc infalsifiable depuis l'extérieur.
+ * `railway` — seul `x-real-ip`, que le bord de Railway pose pour identifier le
+ *   client. C'est le mode de NOTRE cible de déploiement.
  * `xff` — la première entrée de `x-forwarded-for`. À ne poser que derrière un
  *   bord qui la réécrit lui aussi. C'est le mode des sondes locales.
  * `aucun` — aucune adresse n'est déduite d'un en-tête.
+ *
+ * ⚠️ LE MODE `railway` A ÉTÉ AJOUTÉ LE 04/09/2026, EN PRÉPARANT LE DÉPLOIEMENT,
+ * ET IL FERME UN DÉFAUT QUI SERAIT PARTI EN PRODUCTION. Railway ne pose pas
+ * `cf-connecting-ip` : sans ce mode, la valeur en vigueur là-bas aurait été le
+ * défaut strict, donc AUCUNE adresse résolue. Trois conséquences, toutes
+ * silencieuses — les six écrans admin en 404 pour un vrai administrateur, la
+ * limitation publique tombée en « autorise », et surtout `enregistrerVue` qui
+ * REFUSE d'écrire, donc `link_views` vide à jamais. « Vues de lien par commande
+ * > 3 » est une métrique de VERDICT : le produit aurait tourné des semaines en
+ * paraissant marcher, et la donnée qu'on est venu chercher n'aurait pas existé.
+ *
+ * ⚠️ CE QUE CE FICHIER NE PEUT PAS ÉTABLIR : que le bord RÉÉCRIT l'en-tête
+ * qu'il pose, plutôt que de laisser passer celui du client. C'est une propriété
+ * du bord, mesurable seulement contre le déploiement réel —
+ * `scripts/verifier-bord.mjs` le fait en boîte noire, et il est à lancer UNE
+ * FOIS EN LIGNE. Se tromper de mode ne peut jamais ouvrir plus qu'aujourd'hui :
+ * un en-tête absent rend `null`, exactement comme avant.
  *
  * POURQUOI CE RÉGLAGE EXISTE. `x-forwarded-for` était cru SANS CONDITION : c'est
  * une LISTE que n'importe quel intermédiaire rallonge et que le client peut
@@ -65,11 +84,27 @@ export function empreinte(valeur: string): string {
  * cible de déploiement. Un défaut permissif serait la valeur en vigueur partout
  * où personne n'a lu ce fichier.
  */
-type BordDeConfiance = "cloudflare" | "xff" | "aucun";
+type BordDeConfiance = "cloudflare" | "railway" | "xff" | "aucun";
+
+/**
+ * L'EN-TÊTE DE CHAQUE BORD — UN SEUL, ET AUCUN REPLI.
+ *
+ * C'est une table et non une cascade de `if`, pour que le typage exige une
+ * décision à chaque mode ajouté : un mode sans en-tête déclaré ne compile pas.
+ * Le repli est précisément le défaut d'origine de ce fichier — « l'en-tête de
+ * notre bord quand il existe, et SEULEMENT À DÉFAUT `x-forwarded-for` » — où il
+ * suffisait de ne pas poser le premier pour que le second, que le client
+ * contrôle, fasse autorité.
+ */
+const EN_TETE_DU_BORD = {
+  cloudflare: "cf-connecting-ip",
+  railway: "x-real-ip",
+  xff: "x-forwarded-for",
+} as const satisfies Record<Exclude<BordDeConfiance, "aucun">, string>;
 
 export function bordDeConfiance(): BordDeConfiance {
   const brut = (process.env["BORD_DE_CONFIANCE"] ?? "").trim().toLowerCase();
-  if (brut === "xff" || brut === "aucun") return brut;
+  if (brut === "railway" || brut === "xff" || brut === "aucun") return brut;
   // Toute autre valeur — absente, mal orthographiée, héritée d'un copier-coller
   // — retombe sur le mode strict. Une configuration illisible ne doit jamais
   // ouvrir quelque chose ; c'est le sens de la lecture qui compte, pas la
@@ -88,21 +123,15 @@ export async function adresseAppelant(): Promise<string | null> {
   const mode = bordDeConfiance();
   if (mode === "aucun") return null;
 
-  const enTetes = await headers();
+  const brut = (await headers()).get(EN_TETE_DU_BORD[mode]);
+  if (brut === null) return null;
 
-  const cloudflare = enTetes.get("cf-connecting-ip");
-  if (cloudflare !== null && cloudflare.trim() !== "") return cloudflare.trim();
-
-  // PAS DE REPLI EN MODE `cloudflare`. C'était le défaut : l'absence de
-  // `cf-connecting-ip` rouvrait `x-forwarded-for`, que l'appelant contrôle.
-  if (mode !== "xff") return null;
-
-  const transmis = enTetes.get("x-forwarded-for");
-  if (transmis !== null) {
-    const premiere = transmis.split(",")[0]?.trim();
-    if (premiere !== undefined && premiere !== "") return premiere;
-  }
-  return null;
+  // `x-forwarded-for` est une LISTE que chaque intermédiaire rallonge par la
+  // droite ; la première entrée est celle qu'a écrite le bord le plus proche du
+  // client. Découper est inoffensif sur les deux autres en-têtes, qui n'en
+  // portent qu'une : un seul chemin, donc aucun mode ne peut être oublié ici.
+  const premiere = brut.split(",")[0]?.trim();
+  return premiere !== undefined && premiere !== "" ? premiere : null;
 }
 
 /** Le pays que le bord rapporte, quand il en rapporte un. */
