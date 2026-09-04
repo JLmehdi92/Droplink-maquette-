@@ -132,9 +132,24 @@ afterAll(async () => {
   await catalogue.end();
 });
 
+/**
+ * LES LECTURES D ANALYSES, EXIGEES LISIBLES.
+ *
+ * Depuis le 04/09/2026 chacune rend `null` quand le transport a lache — la
+ * regle partagee de `lib/reseau/panne.ts`, posee apres cinq occurrences du meme
+ * defaut. Ici la base repond pour de vrai : `null` serait un defaut, et le
+ * LEVER vaut mieux qu un `!` qui ferait passer une regression pour un detail
+ * de typage.
+ */
+async function lisible<T>(promesse: Promise<T | null>, quoi: string): Promise<T> {
+  const valeur = await promesse;
+  if (valeur === null) throw new Error(quoi + " illisible alors que la base repond");
+  return valeur;
+}
+
 describe("Ce que le vendeur voit de son activité", () => {
   test("ses commandes de la période, et uniquement les siennes", async () => {
-    const a = await lireActivite(alice.client, "30j", MAINTENANT);
+    const a = await lisible(lireActivite(alice.client, "30j", MAINTENANT), "lireActivite");
 
     expect(a.commandesCreees, "les commandes de Bob sont comptées chez Alice").toBe(4);
     expect(a.commandesOuvertes).toBe(3);
@@ -144,7 +159,7 @@ describe("Ce que le vendeur voit de son activité", () => {
   test("contre-test positif : Bob a bien ses propres chiffres", async () => {
     // Sans lui, une fonction qui rendrait toujours zéro passerait le test
     // précédent sans rien prouver.
-    const b = await lireActivite(bob.client, "30j", MAINTENANT);
+    const b = await lisible(lireActivite(bob.client, "30j", MAINTENANT), "lireActivite");
     expect(b.commandesCreees).toBe(5);
     expect(b.vuesTotales).toBe(15);
   });
@@ -153,9 +168,9 @@ describe("Ce que le vendeur voit de son activité", () => {
     // Sans ce test, une borne inversée ou ignorée passerait : les autres
     // chiffres seraient corrects, et seul le total varierait — sans que rien ne
     // le signale.
-    const sept = await lireActivite(alice.client, "7j", MAINTENANT);
-    const trente = await lireActivite(alice.client, "30j", MAINTENANT);
-    const quatreVingtDix = await lireActivite(alice.client, "90j", MAINTENANT);
+    const sept = await lisible(lireActivite(alice.client, "7j", MAINTENANT), "lireActivite");
+    const trente = await lisible(lireActivite(alice.client, "30j", MAINTENANT), "lireActivite");
+    const quatreVingtDix = await lisible(lireActivite(alice.client, "90j", MAINTENANT), "lireActivite");
 
     expect(sept.commandesCreees).toBe(3);
     expect(trente.commandesCreees).toBe(4);
@@ -170,7 +185,7 @@ describe("Ce que le vendeur voit de son activité", () => {
     // « En attente » est COMPTÉ, pas déduit par soustraction : une déduction
     // produirait un total faux le jour où une valeur d'énumération s'ajoute, et
     // les trois chiffres continueraient de s'afficher sans erreur.
-    const a = await lireActivite(alice.client, "30j", MAINTENANT);
+    const a = await lisible(lireActivite(alice.client, "30j", MAINTENANT), "lireActivite");
     expect(a.qcApprouve + a.qcRefuse + a.qcEnAttente).toBe(a.commandesCreees);
     expect(a.qcApprouve).toBe(2);
     expect(a.qcRefuse).toBe(1);
@@ -178,7 +193,7 @@ describe("Ce que le vendeur voit de son activité", () => {
   });
 
   test("le suivi se compte sur la période, pas sur le compte entier", async () => {
-    const a = await lireActivite(alice.client, "30j", MAINTENANT);
+    const a = await lisible(lireActivite(alice.client, "30j", MAINTENANT), "lireActivite");
     expect(a.avecSuivi).toBe(2);
     expect(partAvecSuivi(a)).toBe(50);
   });
@@ -201,7 +216,7 @@ describe("Ce que le vendeur voit de son activité", () => {
  */
 describe("La comparaison avec la période précédente", () => {
   test("elle est fermée EN HAUT : la période courante n'y est pas", async () => {
-    const a = await lireActivite(alice.client, "7j", MAINTENANT);
+    const a = await lisible(lireActivite(alice.client, "7j", MAINTENANT), "lireActivite");
     // 3 commandes dans les 7 jours, 1 seule dans les 7 d'avant (celle de 10 j).
     expect(a.creeesPeriodePrecedente).toBe(1);
     expect(ecartPeriodePrecedente(a)).toBe(2);
@@ -211,7 +226,7 @@ describe("La comparaison avec la période précédente", () => {
     // La fenêtre précédente de 90 jours s'arrête à 180 : la commande de 200
     // jours en est dehors. Sans borne basse, elle y serait, et un vendeur
     // ancien lirait une baisse à chaque période.
-    const a = await lireActivite(alice.client, "90j", MAINTENANT);
+    const a = await lisible(lireActivite(alice.client, "90j", MAINTENANT), "lireActivite");
     expect(a.creeesPeriodePrecedente).toBe(0);
     expect(ecartPeriodePrecedente(a)).toBe(5);
   });
@@ -247,7 +262,7 @@ describe("La comparaison avec la période précédente", () => {
  */
 describe("La frise des commandes par semaine", () => {
   test("elle rend AUTANT de semaines que demandé, vides comprises", async () => {
-    const s = await lireSemaines(alice.client, MAINTENANT, 12);
+    const s = await lisible(lireSemaines(alice.client, MAINTENANT, 12), "lireSemaines");
     expect(s).toHaveLength(12);
 
     // Le jeu d'Alice n'a rien entre la 45ᵉ et la 10ᵉ journée : il y a donc des
@@ -257,7 +272,7 @@ describe("La frise des commandes par semaine", () => {
   });
 
   test("une semaine vide vaut ZÉRO, pas un", async () => {
-    const s = await lireSemaines(alice.client, MAINTENANT, 12);
+    const s = await lisible(lireSemaines(alice.client, MAINTENANT, 12), "lireSemaines");
     for (const semaine of s) {
       expect(Number.isInteger(semaine.total)).toBe(true);
       expect(semaine.total).toBeGreaterThanOrEqual(0);
@@ -269,7 +284,7 @@ describe("La frise des commandes par semaine", () => {
   });
 
   test("les semaines sont ordonnées, et distantes d'exactement sept jours", async () => {
-    const s = await lireSemaines(alice.client, MAINTENANT, 12);
+    const s = await lisible(lireSemaines(alice.client, MAINTENANT, 12), "lireSemaines");
     const debuts = s.map((x) => x.debut.getTime());
     for (let i = 1; i < debuts.length; i += 1) {
       expect((debuts[i] ?? 0) - (debuts[i - 1] ?? 0)).toBe(7 * 86_400_000);
@@ -277,7 +292,7 @@ describe("La frise des commandes par semaine", () => {
   });
 
   test("contre-test d'isolation : Bob ne voit que ses cinq commandes", async () => {
-    const s = await lireSemaines(bob.client, MAINTENANT, 12);
+    const s = await lisible(lireSemaines(bob.client, MAINTENANT, 12), "lireSemaines");
     expect(s.reduce((n, x) => n + x.total, 0)).toBe(5);
   });
 });
@@ -291,7 +306,7 @@ describe("La frise des commandes par semaine", () => {
  */
 describe("Les commandes les plus consultées", () => {
   test("elles sont triées par vues et bornées à la période", async () => {
-    const c = await lirePlusConsultees(alice.client, "30j", MAINTENANT, 3);
+    const c = await lisible(lirePlusConsultees(alice.client, "30j", MAINTENANT, 3), "lirePlusConsultees");
 
     expect(c.map((x) => x.vues)).toEqual([5, 2, 1]);
     // La commande de 45 jours porte 7 vues : elle serait EN TÊTE si la période
@@ -303,7 +318,7 @@ describe("Les commandes les plus consultées", () => {
     // Sur 90 jours Alice a QUATRE commandes consultées ; la limite en rend
     // trois, et ce sont les trois PREMIÈRES — un `limit` posé avant le tri
     // rendrait trois lignes parfaitement crédibles, prises au hasard.
-    const c = await lirePlusConsultees(alice.client, "90j", MAINTENANT, 3);
+    const c = await lisible(lirePlusConsultees(alice.client, "90j", MAINTENANT, 3), "lirePlusConsultees");
     expect(c.map((x) => x.vues)).toEqual([7, 5, 2]);
   });
 
@@ -311,13 +326,13 @@ describe("Les commandes les plus consultées", () => {
     // Alice a une commande à zéro vue dans la fenêtre. Sans le filtre, elle
     // remplirait une ligne du classement d'un compte qui débute — et un
     // classement dont la dernière ligne dit « 0 » n'est plus un classement.
-    const c = await lirePlusConsultees(alice.client, "30j", MAINTENANT, 10);
+    const c = await lisible(lirePlusConsultees(alice.client, "30j", MAINTENANT, 10), "lirePlusConsultees");
     expect(c).toHaveLength(3);
     expect(c.every((x) => x.vues > 0)).toBe(true);
   });
 
   test("contre-test d'isolation : Bob ne voit jamais les commandes d'Alice", async () => {
-    const c = await lirePlusConsultees(bob.client, "30j", MAINTENANT, 10);
+    const c = await lisible(lirePlusConsultees(bob.client, "30j", MAINTENANT, 10), "lirePlusConsultees");
     expect(c).toHaveLength(5);
     expect(c.every((x) => x.vues === 3)).toBe(true);
   });

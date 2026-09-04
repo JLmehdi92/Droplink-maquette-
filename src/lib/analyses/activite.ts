@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
 import { signerLecture } from "@/lib/storage/r2";
+import { lectureIllisible } from "@/lib/reseau/panne";
 
 /**
  * LES ANALYSES — ce que le vendeur apprend sur son propre usage.
@@ -160,15 +161,19 @@ export async function lireActivite(
   supabase: ClientLecture,
   periode: Periode,
   maintenant: Date,
-): Promise<Activite> {
+): Promise<Activite | null> {
   const { data, error } = await supabase.rpc("analyser_activite", {
     p_depuis: debutPeriode(periode, maintenant).toISOString(),
     p_precedent: debutPeriodePrecedente(periode, maintenant).toISOString(),
   });
 
+  // ⚠️ NI ZÉRO, NI 500. Le commentaire d'origine avait raison sur la moitié
+  // du problème : *afficher des zéros ferait croire à un vendeur actif qu'il
+  // n'a rien fait*. Mais lever emporte les TROIS autres lectures de l'écran,
+  // qui n'ont rien à voir. La règle partagée nomme la panne et rend `null` ;
+  // toute autre erreur continue de remonter.
+  if (lectureIllisible({ error }, "de l'activité")) return null;
   if (error !== null || data === null) {
-    // Jamais de `catch` muet : un échec de lecture doit remonter. Afficher des
-    // zéros à la place ferait croire à un vendeur actif qu'il n'a rien fait.
     throw new Error("lecture de l'activité impossible : " + (error?.message ?? "réponse vide"));
   }
 
@@ -206,12 +211,13 @@ export async function lireSemaines(
   supabase: ClientLecture,
   maintenant: Date,
   semaines: number = SEMAINES_FRISE,
-): Promise<readonly SemaineCreee[]> {
+): Promise<readonly SemaineCreee[] | null> {
   const { data, error } = await supabase.rpc("compter_commandes_par_semaine", {
     p_fin: maintenant.toISOString(),
     p_semaines: semaines,
   });
 
+  if (lectureIllisible({ error }, "de la frise")) return null;
   if (error !== null || data === null) {
     throw new Error("lecture de la frise impossible : " + (error?.message ?? "réponse vide"));
   }
@@ -234,7 +240,7 @@ export async function lirePlusConsultees(
   periode: Periode,
   maintenant: Date,
   limite: number = PLUS_CONSULTEES,
-): Promise<readonly CommandeConsultee[]> {
+): Promise<readonly CommandeConsultee[] | null> {
   const { data, error } = await supabase
     .from("orders")
     .select("id, customer_label, product_ref, views_count, cover_media_id, media_count")
@@ -248,6 +254,7 @@ export async function lirePlusConsultees(
     .order("created_at", { ascending: false })
     .limit(limite);
 
+  if (lectureIllisible({ error }, "des plus consultées")) return null;
   if (error !== null || data === null) {
     throw new Error("lecture des plus consultées impossible : " + (error?.message ?? "vide"));
   }

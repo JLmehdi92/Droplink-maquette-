@@ -70,6 +70,25 @@ export default async function Envois({
 
   const t = await getTranslations("envois");
 
+  /*
+   * ⚠️ CET ÉCRAN NE DÉGRADE PAS, ET C'EST UNE DÉCISION, pas un oubli.
+   *
+   * `compterEnvois` rend `null` quand le transport a lâché — c'est la règle
+   * partagée de `lib/reseau/panne.ts`, posée après cinq occurrences du même
+   * défaut. Mais ici les compteurs ne sont pas une section : ils alimentent le
+   * SOUS-TITRE et les pilules de filtre du tableau. Un écran d'envois sans eux
+   * n'est pas un écran dégradé, c'est un écran faux.
+   *
+   * On relève donc, et la frontière d'erreur de l'espace vendeur fait ce
+   * qu'elle sait faire : une page en français, dans la mise en page, avec un
+   * bouton « réessayer ». C'est le bon mécanisme pour une lecture QUI EST
+   * l'écran — contrairement à Analyses, dont les quatre lectures sont quatre
+   * sections indépendantes.
+   */
+  if (compteurs === null) {
+    throw new Error("comptage des envois momentanément illisible");
+  }
+
   return (
     <>
       {/* LE NOMBRE EST DANS LE SOUS-TITRE, et pas seulement dans la carte

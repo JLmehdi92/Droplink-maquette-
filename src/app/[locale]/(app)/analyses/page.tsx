@@ -99,7 +99,20 @@ export default async function Analyses({
   const format = await getFormatter();
   const base = `/${langue}/analyses`;
 
-  const qcTotal = activite.qcApprouve + activite.qcRefuse + activite.qcEnAttente;
+  /**
+   * ⚠️ CHAQUE SECTION SE REND OU SE NOMME, JAMAIS N'INVENTE.
+   *
+   * Les quatre lectures sont indépendantes ; une seule qui bronche emportait
+   * tout l'écran. Défaut vu en vrai : `/fr/analyses` en 500 après 10,7 s le
+   * 03/09. Et le zéro n'est pas une porte de sortie non plus — le module le
+   * disait déjà : *afficher des zéros ferait croire à un vendeur actif qu'il
+   * n'a rien fait.*
+   */
+  const INDISPONIBLE =
+    "rounded-lg border border-outline-variant bg-surface-container-lowest p-[18px] font-body-md text-body-md text-on-surface-variant lg:rounded-[18px] lg:p-[22px]";
+
+  const qcTotal =
+    activite === null ? 0 : activite.qcApprouve + activite.qcRefuse + activite.qcEnAttente;
 
   /*
    * LE BOUTON DE PÉRIODE ACTIF EST NOIR, PAS VIOLET.
@@ -151,17 +164,33 @@ export default async function Analyses({
         id="contenu"
         className="flex flex-col gap-3 px-margin-mobile pt-3.5 pb-5 lg:gap-4 lg:px-[30px] lg:pt-0 lg:pb-[26px]"
       >
-        <CompteursAnalyses activite={activite} />
+        {activite === null ? (
+          <p className={INDISPONIBLE}>{t("indisponible")}</p>
+        ) : (
+          <CompteursAnalyses activite={activite} />
+        )}
 
         {/* 1,6fr / 1fr sur la planche. La frise garde la place : c'est elle
             qu'on lit en premier, et quatre barres de progression n'ont pas
             besoin de plus de largeur qu'un libellé et un chiffre. */}
         <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[1.6fr_minmax(0,1fr)] lg:gap-4">
-          <FriseSemaines semaines={semaines} />
-          <RepartitionColis compteurs={colis} />
+          {semaines === null ? (
+            <p className={INDISPONIBLE}>{t("indisponible")}</p>
+          ) : (
+            <FriseSemaines semaines={semaines} />
+          )}
+          {colis === null ? (
+            <p className={INDISPONIBLE}>{t("indisponible")}</p>
+          ) : (
+            <RepartitionColis compteurs={colis} />
+          )}
         </div>
 
-        <PlusConsultees commandes={consultees} />
+        {consultees === null ? (
+          <p className={INDISPONIBLE}>{t("indisponible")}</p>
+        ) : (
+          <PlusConsultees commandes={consultees} />
+        )}
 
         <section
           aria-label={t("qc.titre")}
@@ -180,9 +209,9 @@ export default async function Analyses({
             <ul className="flex flex-col gap-[15px] lg:gap-4">
               {(
                 [
-                  { cle: "approuve", valeur: activite.qcApprouve, barre: "bg-succes" },
-                  { cle: "refuse", valeur: activite.qcRefuse, barre: "bg-alerte-puce" },
-                  { cle: "enAttente", valeur: activite.qcEnAttente, barre: "bg-gris-inactif" },
+                  { cle: "approuve", valeur: activite?.qcApprouve ?? 0, barre: "bg-succes" },
+                  { cle: "refuse", valeur: activite?.qcRefuse ?? 0, barre: "bg-alerte-puce" },
+                  { cle: "enAttente", valeur: activite?.qcEnAttente ?? 0, barre: "bg-gris-inactif" },
                 ] as const
               ).map((part) => (
                 <li key={part.cle}>

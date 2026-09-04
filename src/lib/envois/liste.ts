@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
 import { SEUIL_SILENCE_JOURS } from "@/lib/tracking/silence";
+import { lectureIllisible } from "@/lib/reseau/panne";
 
 /**
  * LA LISTE DES ENVOIS — les colis du vendeur, pas ses commandes.
@@ -282,11 +283,15 @@ export async function lireEnvois(
  * de 10 jours », pas « des colis sont en retard ». Un chiffre se vérifie, une
  * appréciation se discute.
  */
-export async function compterEnvois(supabase: ClientLecture): Promise<CompteursEnvois> {
+export async function compterEnvois(
+  supabase: ClientLecture,
+): Promise<CompteursEnvois | null> {
   const { data, error } = await supabase.rpc("compter_envois", {
     p_silence_jours: SEUIL_SILENCE_JOURS,
   });
 
+  // Une panne de transport NOMME la section illisible ; tout le reste lève.
+  if (lectureIllisible({ error }, "du comptage des envois")) return null;
   if (error !== null || data === null) {
     throw new Error("comptage des envois impossible : " + (error?.message ?? "réponse vide"));
   }

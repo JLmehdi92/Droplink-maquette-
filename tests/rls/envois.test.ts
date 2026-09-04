@@ -134,6 +134,21 @@ afterAll(async () => {
   await catalogue.end();
 });
 
+/**
+ * LES LECTURES D ANALYSES, EXIGEES LISIBLES.
+ *
+ * Depuis le 04/09/2026 chacune rend `null` quand le transport a lache — la
+ * regle partagee de `lib/reseau/panne.ts`, posee apres cinq occurrences du meme
+ * defaut. Ici la base repond pour de vrai : `null` serait un defaut, et le
+ * LEVER vaut mieux qu un `!` qui ferait passer une regression pour un detail
+ * de typage.
+ */
+async function lisible<T>(promesse: Promise<T | null>, quoi: string): Promise<T> {
+  const valeur = await promesse;
+  if (valeur === null) throw new Error(quoi + " illisible alors que la base repond");
+  return valeur;
+}
+
 describe("Ce que le vendeur voit", () => {
   test("ses colis, et uniquement les siens", async () => {
     const page = await lireEnvois(alice.client, DEFAUTS, MAINTENANT);
@@ -328,7 +343,7 @@ describe("Le silence : la liste et le compteur disent la même chose", () => {
     // C'est la propriété qui compte : deux définitions du seuil divergeraient au
     // premier ajustement, et l'écran annoncerait un chiffre qu'aucune liste ne
     // confirme.
-    const compteurs = await compterEnvois(alice.client);
+    const compteurs = await lisible(compterEnvois(alice.client), "compterEnvois");
     const page = await lireEnvois(
       alice.client,
       ParametresEnvois.parse({ silencieux: "oui" }),
@@ -373,8 +388,8 @@ describe("Le silence : la liste et le compteur disent la même chose", () => {
 
 describe("Les compteurs", () => {
   test("ils comptent la boutique de l'appelant, pas la base entière", async () => {
-    const chezAlice = await compterEnvois(alice.client);
-    const chezBob = await compterEnvois(bob.client);
+    const chezAlice = await lisible(compterEnvois(alice.client), "compterEnvois");
+    const chezBob = await lisible(compterEnvois(bob.client), "compterEnvois");
 
     expect(chezBob.total, "Bob compte les colis d'Alice").toBe(1);
     expect(chezAlice.total).toBeGreaterThan(1);
@@ -382,7 +397,7 @@ describe("Les compteurs", () => {
 
   test("un colis abandonné est compté comme tel", async () => {
     await poserColis(alice, "AL-ABANDONNE", { etat: "en_transit", abandonne: true });
-    const compteurs = await compterEnvois(alice.client);
+    const compteurs = await lisible(compterEnvois(alice.client), "compterEnvois");
     expect(compteurs.abandonnes).toBeGreaterThan(0);
 
     // ET IL N'EST PAS COMPTÉ COMME SILENCIEUX : on a cessé de l'interroger, donc
