@@ -730,6 +730,60 @@ const controles = [
 // et rien ne leverait.
 const inscription = await (await fetch(`${base}/fr/inscription`)).text();
 const connexion = await (await fetch(`${base}/fr/connexion`)).text();
+/*
+ * ═════════════════════════════════════════════════════════════════════════
+ * LE MIDDLEWARE PORTE-T-IL SA CONFIGURATION ? — sur l ARTEFACT, pas la source
+ * ═════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ DEFAUT DE PRODUCTION, TROUVE AU PREMIER DEPLOIEMENT, LE 04/09/2026. Le
+ * middleware levait a CHAQUE requete :
+ *
+ *     Error: Variable d environnement NEXT_PUBLIC_SUPABASE_URL absente.
+ *
+ * alors que la variable ETAIT posee sur la plateforme. `lireVariable(nom)`
+ * lisait `process.env[nom]` — une cle DYNAMIQUE, que le bundler ne sait pas
+ * analyser, donc rien n etait inline. Or l execution « edge » ne recoit PAS
+ * l environnement ambiant du conteneur : elle ne voit que l inline et ce qu un
+ * fichier `.env` a charge.
+ *
+ * ⚠️ ET C EST POURQUOI AUCUNE PORTE NE L A VU. En local, Next charge
+ * `.env.local` et le transmet au bac a sable : le middleware marchait. Le
+ * defaut n existait QUE la ou il n y a pas de fichier `.env`, c est-a-dire en
+ * production. Une garde qui lirait la SOURCE ne verrait rien non plus — c est
+ * l ARTEFACT qu il faut interroger.
+ *
+ * LE CONTRE-TEST EST LE PLUS IMPORTANT DES DEUX : la cle service-role ne doit
+ * JAMAIS etre figee dans ce bundle. Elle donnerait un acces total, RLS
+ * contournee, a toutes les donnees de tous les vendeurs.
+ */
+{
+  const middleware = readFileSync(join(".next", "server", "src", "middleware.js"), "utf8");
+  const lu = (nom) => (process.env[nom] ?? "").trim();
+
+  controles.push(
+    [
+      middleware.length > 10_000,
+      `CONTRE-TEST : le bundle du middleware est lu (${(middleware.length / 1024).toFixed(0)} Ko)`,
+    ],
+    [
+      lu("NEXT_PUBLIC_SUPABASE_URL") !== "" && middleware.includes(lu("NEXT_PUBLIC_SUPABASE_URL")),
+      "l URL Supabase est FIGEE dans le middleware — sans quoi l execution edge ne la verra pas en production",
+    ],
+    [
+      lu("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") !== "" &&
+        middleware.includes(lu("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")),
+      "la cle publiable aussi",
+    ],
+    // ⚠️ L AUTRE SENS, et il pese plus lourd que les deux precedents.
+    [
+      lu("SUPABASE_SERVICE_ROLE_KEY") !== "" &&
+        !middleware.includes(lu("SUPABASE_SERVICE_ROLE_KEY")),
+      "CONTRE-TEST : la cle service-role n est PAS figee dans le bundle",
+    ],
+  );
+}
+
+
 controles.push(
   [/type="password"/.test(inscription), "l inscription porte un champ mot de passe"],
   [/type="password"/.test(connexion), "la connexion porte un champ mot de passe"],
