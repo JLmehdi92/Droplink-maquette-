@@ -93,12 +93,12 @@ describe("L'aperçu du journal sur le panneau admin", () => {
       await expect(
         lireDernieresActions(client({ message }), 4),
         `« ${message} » a été avalé comme une panne réseau`,
-      ).rejects.toThrow(/lecture des dernieres actions impossible/);
+      ).rejects.toThrow(/lecture des dernières actions impossible/);
     }
   });
 
   test("une réponse VIDE sans erreur lève encore : ce n'est pas une panne nommée", async () => {
-    await expect(lireDernieresActions(client(null, null), 4)).rejects.toThrow(/reponse vide/);
+    await expect(lireDernieresActions(client(null, null), 4)).rejects.toThrow(/réponse vide/);
   });
 });
 

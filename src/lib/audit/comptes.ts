@@ -2,7 +2,7 @@ import "server-only";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
-import { estPanneDeTransport } from "@/lib/reseau/panne";
+import { lectureIllisible } from "@/lib/reseau/panne";
 
 /**
  * LA LECTURE DES COMPTES PAR L'ADMINISTRATION.
@@ -354,11 +354,11 @@ export async function lireDernieresActions(
     .neq("action", ACTION_EXCLUE_DE_L_APERCU)
     .limit(limite);
 
-  if (error !== null && estPanneDeTransport(error.message)) return null;
+  if (lectureIllisible({ error }, "des dernières actions")) return null;
 
   if (error !== null || data === null) {
     throw new Error(
-      "lecture des dernieres actions impossible : " + (error?.message ?? "reponse vide"),
+      "lecture des dernières actions impossible : " + (error?.message ?? "réponse vide"),
     );
   }
 

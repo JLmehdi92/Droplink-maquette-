@@ -1,6 +1,6 @@
-import { describe, expect, test } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { describe, expect, test } from "vitest";
 
 /**
  * UNE PANNE DE TRANSPORT NE SE DIT PAS « VOTRE SESSION A EXPIRÉ ».
@@ -188,5 +188,118 @@ describe("La distinction est CÂBLÉE, pas seulement déclarée", () => {
       panneau,
       "le panneau a de nouveau sa propre copie de la règle : c'est ainsi qu'elle a divergé quatre fois",
     ).not.toContain("if (!estPanneDeTransport(");
+  });
+});
+
+/**
+ * PERSONNE NE RECOPIE LA RÈGLE — inventaire, pas sélection.
+ *
+ * ⚠️ CE BLOC EXISTE PARCE QUE LA RECOPIE EST LE MÉCANISME EXACT DE LA PANNE.
+ * Le même défaut a été corrigé CINQ fois entre le 02/09 et le 04/09 — stockage,
+ * aperçu du journal, état des tâches, surveillance, analyses — et chaque fois
+ * en écrivant sur place une variante de la même condition. Une garde nominative
+ * sur `panneau.ts` aurait laissé passer la sixième.
+ *
+ * `estPanneDeTransport` ne doit donc être appelée QUE depuis `panne.ts`. Partout
+ * ailleurs on passe par `lectureIllisible()`, qui décide, journalise et lève de
+ * la même façon pour tout le monde.
+ */
+describe("La règle de dégradation n'a qu'un seul exemplaire", () => {
+  const RACINE = join(process.cwd(), "src", "lib");
+
+  /** Tous les `.ts` de `src/lib`, code seul — commentaires retirés (L-031). */
+  function sources(): readonly { readonly chemin: string; readonly code: string }[] {
+    const sortie: { chemin: string; code: string }[] = [];
+    const parcourir = (dossier: string): void => {
+      for (const e of readdirSync(dossier, { withFileTypes: true })) {
+        const complet = join(dossier, e.name);
+        if (e.isDirectory()) parcourir(complet);
+        else if (e.name.endsWith(".ts")) {
+          sortie.push({
+            chemin: complet,
+            code: readFileSync(complet, "utf8")
+              .replace(/\/\*[\s\S]*?\*\//g, "")
+              .replace(/(^|[^:])\/\/.*$/gm, "$1"),
+          });
+        }
+      }
+    };
+    parcourir(RACINE);
+    return sortie;
+  }
+
+  const fichiers = sources();
+
+  test("la sonde lit réellement le dépôt", () => {
+    // ⚠️ EN PREMIER : un ensemble vide passe tout.
+    expect(fichiers.length).toBeGreaterThan(40);
+    expect(
+      fichiers.some((f) => f.chemin.endsWith(join("reseau", "panne.ts"))),
+      "la sonde ne trouve même pas le module qu'elle garde",
+    ).toBe(true);
+  });
+
+  test("CONTRE-TEST : la règle EST employée, et par plusieurs modules", () => {
+    // Sans lui, « personne ne la recopie » serait aussi vrai d'une règle que
+    // personne n'appelle — c'est-à-dire d'un produit qui ne dégrade nulle part.
+    const appelants = fichiers.filter((f) => f.code.includes("lectureIllisible("));
+    expect(
+      appelants.length,
+      "moins de trois modules dégradent : la règle ne sert presque personne",
+    ).toBeGreaterThanOrEqual(3);
+  });
+
+  /**
+   * L'INVENTAIRE DÉCLARE SES EXCEPTIONS AVEC LEUR RAISON, et il échoue DANS LES
+   * DEUX SENS.
+   *
+   * ⚠️ CETTE EXCEPTION A ÉTÉ TROUVÉE PAR LA SONDE ELLE-MÊME, au premier
+   * passage : j'ignorais que `comptes/profil.ts` employait la primitive. C'est
+   * tout l'argument de l'inventaire — *un contrôle ne doit pas dépendre de ce
+   * que son auteur a pensé à inspecter.*
+   *
+   * Et ce n'est PAS une recopie : ce module ne dégrade pas une section d'écran,
+   * il distingue « session expirée » de « service injoignable » pour lever
+   * `SessionIndisponible`. Les deux usages n'ont que le prédicat en commun.
+   */
+  const EXCEPTIONS: ReadonlyMap<string, string> = new Map([
+    [
+      join("comptes", "profil.ts"),
+      "Il ne lit pas une section d'écran : il distingue une session expirée d'un " +
+        "service injoignable, pour lever SessionIndisponible plutôt que de renvoyer " +
+        "un vendeur connecté vers la page de connexion. Deux éjections mesurées sur " +
+        "200 requêtes, à 11,1 s et 11,4 s.",
+    ],
+  ]);
+
+  test("chaque exception déclarée porte une raison, pas seulement un nom", () => {
+    for (const [nom, raison] of EXCEPTIONS) {
+      expect(raison.length, nom + " : raison trop courte pour être une raison").toBeGreaterThan(80);
+    }
+  });
+
+  test("seul `panne.ts` appelle `estPanneDeTransport`, hors exceptions déclarées", () => {
+    const intrus = fichiers
+      .filter((f) => !f.chemin.endsWith(join("reseau", "panne.ts")))
+      .filter((f) => ![...EXCEPTIONS.keys()].some((e) => f.chemin.endsWith(e)))
+      .filter((f) => f.code.includes("estPanneDeTransport("))
+      .map((f) => f.chemin.replace(process.cwd(), ""));
+    expect(
+      intrus,
+      "ces modules recopient la règle au lieu de l'appeler — c'est ainsi qu'elle a divergé cinq fois",
+    ).toEqual([]);
+  });
+
+  test("L'AUTRE SENS : une exception déclarée qui n'emploierait plus la primitive", () => {
+    // Une liste qui garde des noms morts finit par tout autoriser, parce que
+    // plus personne ne la relit.
+    for (const nom of EXCEPTIONS.keys()) {
+      const fichier = fichiers.find((f) => f.chemin.endsWith(nom));
+      expect(fichier, "exception déclarée pour " + nom + ", qui n'existe plus").toBeDefined();
+      expect(
+        (fichier?.code ?? "").includes("estPanneDeTransport("),
+        nom + " n'appelle plus la primitive : l'exception est périmée",
+      ).toBe(true);
+    }
   });
 });
