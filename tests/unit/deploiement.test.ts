@@ -147,6 +147,35 @@ describe("Le planificateur Railway", () => {
     }
   });
 
+  test("un service planifié ne lance PAS le build de Next", () => {
+    /*
+     * ⚠️ DÉFAUT ATTRAPÉ LE 04/09, APRÈS COUP ET APRÈS LE PUSH. Les deux
+     * configurations planifiées déclaraient `buildCommand: pnpm build`, copié
+     * du service web sans réfléchir. Or `next build` LÈVE si les variables
+     * Supabase sont absentes — `lib/supabase/config.ts` refuse de construire un
+     * client sur une configuration incomplète, délibérément.
+     *
+     * Les services planifiés ne reçoivent que `CRON_SECRET` et
+     * `PLANIFICATEUR_BASE_URL` : leur build aurait donc échoué, et le
+     * planificateur n'aurait JAMAIS tourné. Le suivi serait resté figé, le
+     * veilleur muet — et le produit aurait eu l'air déployé.
+     *
+     * Ils n'ont aucun besoin du build : leur commande de démarrage est un
+     * script Node qui n'importe rien de l'application.
+     */
+    for (const { nom, json } of configsPlanifiees()) {
+      const build = (json["build"] ?? {}) as Record<string, unknown>;
+      expect(
+        String(build["buildCommand"] ?? ""),
+        `${nom} : lance le build de Next, qui exige des variables que ce service n'a pas`,
+      ).not.toContain("next build");
+      expect(
+        String(build["buildCommand"] ?? ""),
+        `${nom} : lance \`pnpm build\`, c'est-à-dire le build de Next`,
+      ).not.toMatch(/pnpm\s+build/);
+    }
+  });
+
   test("le script sort en ERREUR quand l'appel échoue", () => {
     // Sans code de sortie non nul, une faute de frappe dans le secret
     // produirait des passages « réussis » à jamais : la route répond 404 à un
