@@ -3297,6 +3297,75 @@ try {
         ],
       );
 
+      /*
+       * ═══════════════════════════════════════════════════════════════════
+       * LE PLANIFICATEUR EST LANCE POUR DE VRAI — pas inspecte, EXECUTE
+       * ═══════════════════════════════════════════════════════════════════
+       *
+       * ⚠️ RIEN N EXECUTAIT `deploiement/planificateur.mjs` AVANT LE 04/09/2026.
+       * `tests/unit/deploiement.test.ts` lit sa SOURCE : que les routes existent,
+       * que les deux services portent des taches distinctes, qu il sorte en
+       * erreur. Aucun de ces controles ne prouve qu un passage ABOUTIT — *un
+       * test qui constate qu une declaration existe ne prouve jamais que son
+       * absence bloque* (L-018).
+       *
+       * Or ce fichier est le SEUL lien entre Railway et le produit : c est lui,
+       * et rien d autre, qui fait avancer le suivi de tous les vendeurs. Une
+       * faute dedans ne casse aucune porte, ne leve nulle part, et se lit comme
+       * un produit qui marche avec un suivi fige.
+       *
+       * ON LANCE DONC LE VRAI FICHIER, avec la vraie commande, contre ce serveur.
+       * Les deux taches, et le CONTRE-TEST du mauvais secret : sans lui, « sort
+       * en succes » serait aussi vrai d un script qui ne regarde jamais la
+       * reponse.
+       */
+      {
+        const lancer = (tache, secret) => {
+          try {
+            return {
+              code: 0,
+              sortie: execSync(`node ${join("deploiement", "planificateur.mjs")} ${tache}`, {
+                encoding: "utf8",
+                stdio: "pipe",
+                env: { ...process.env, PLANIFICATEUR_BASE_URL: base, CRON_SECRET: secret },
+              }),
+            };
+          } catch (e) {
+            return { code: e.status ?? -1, sortie: String(e.stdout ?? "") + String(e.stderr ?? "") };
+          }
+        };
+
+        for (const tache of ["cadence", "veille"]) {
+          const bon = lancer(tache, SECRET_CRON);
+          const faux = lancer(tache, "ce-secret-n-est-pas-le-bon");
+          controles.push(
+            [bon.code === 0, `planificateur ${tache} : un passage aboutit (code ${bon.code})`],
+            [
+              bon.sortie.includes("[planificateur] " + tache + " : 200 en") &&
+                              bon.sortie.includes(" ms"),
+              `planificateur ${tache} : il ecrit la ligne qu on cherchera dans les journaux Railway`,
+            ],
+            // CONTRE-TEST. Le 404 d un secret refuse est identique a celui d une
+            // route inconnue, par conception : sans code de sortie non nul, une
+            // faute de frappe dans le secret produirait des passages « reussis »
+            // a jamais.
+            [faux.code === 1, `planificateur ${tache} : un MAUVAIS secret sort en ERREUR (code ${faux.code})`],
+            [
+              faux.sortie.includes("statut 404") && faux.sortie.includes("secret refus"),
+              `planificateur ${tache} : le 404 est NOMME « secret refuse », jamais pris pour une route disparue`,
+            ],
+          );
+        }
+
+        // Une tache inconnue sort en 2, DISTINCT de l echec d appel : les deux
+        // se corrigent a des endroits differents.
+        const inconnue = lancer("cadance", SECRET_CRON);
+        controles.push([
+          inconnue.code === 2,
+          `planificateur : une tache mal orthographiee sort en 2, jamais en 0 (code ${inconnue.code})`,
+        ]);
+      }
+
       // LE POINT DE RECEPTION. Sans signature, n importe qui pourrait annoncer au
       // client d un vendeur inconnu que son colis est livre.
       const corpsSuivi = JSON.stringify({
