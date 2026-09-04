@@ -56,6 +56,7 @@
 
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import { fetchResilient } from "./transport.mjs";
 
 config({ path: ".env.local", quiet: true });
 
@@ -94,8 +95,19 @@ const constate = (ok, libelle) => controles.push([ok, libelle]);
  */
 const visiteur = { "user-agent": "sonde-coupure/1", accept: "text/html" };
 
+/*
+ * ⚠️ `fetchResilient` ET NON `fetch` — un contrôle qui échoue par intermittence
+ * doit être BORNÉ, pas relancé jusqu'au vert. Ici un hoquet de transport lève,
+ * donc il INTERROMPT la mesure : la sonde rendrait un écart en n'ayant rien
+ * mesuré, et l'interruption tomberait entre la suspension et la réactivation,
+ * c'est-à-dire à l'endroit le moins lisible du parcours.
+ *
+ * Le module ne réessaie qu'une COUPURE de transport — quand `fetch` rejette,
+ * sans aucune réponse HTTP. Un 404 est une RÉPONSE, et c'est exactement celle
+ * qu'on mesure : la réessayer masquerait le défaut au lieu de l'aléa.
+ */
 const lire = async (chemin) => {
-  const r = await fetch(`${base}${chemin}`, { headers: visiteur, redirect: "manual" });
+  const r = await fetchResilient(`${base}${chemin}`, { headers: visiteur, redirect: "manual" });
   // Le corps doit être consommé, sinon la connexion reste ouverte et les
   // mesures de délai suivantes paient l'attente de la précédente.
   await r.arrayBuffer().catch(() => undefined);
