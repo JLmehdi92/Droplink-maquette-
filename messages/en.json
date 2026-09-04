@@ -993,6 +993,7 @@
       "commandesCourt": "Orders",
       "comptesDont": "of which {sansType} with no type · {suspendus} suspended, outside this total",
       "dernieresActions": "Latest administration actions",
+      "dernieresActionsIndisponibles": "Preview unavailable right now. The full log is still readable.",
       "toutLeJournal": "Full log",
       "alerteDetail": {
         "colis_au_dessus_du_seuil": "{sujet} · Every parcel taken over is billed to us.",

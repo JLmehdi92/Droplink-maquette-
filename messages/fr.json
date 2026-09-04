@@ -993,6 +993,7 @@
       "commandesCourt": "Commandes",
       "comptesDont": "dont {sansType} sans type · {suspendus} suspendus, hors de ce total",
       "dernieresActions": "Dernières actions d'administration",
+      "dernieresActionsIndisponibles": "Aperçu indisponible pour l’instant. Le journal complet reste consultable.",
       "toutLeJournal": "Tout le journal",
       "alerteDetail": {
         "colis_au_dessus_du_seuil": "{sujet} · Chaque colis pris en charge nous est facturé.",

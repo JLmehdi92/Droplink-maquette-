@@ -340,7 +340,17 @@ export default async function PanneauAdmin({
               </Link>
             </div>
 
-            {actions.length === 0 ? (
+            {/* TROIS ÉTATS, PAS DEUX. « Aucune entrée » sur un journal qu'on
+                n'a PAS PU LIRE serait une affirmation fausse, et posée sur
+                l'écran dont tout le rôle est de porter des faits vérifiables.
+                Côté administration une information absente se NOMME — c'est
+                l'inverse de la page publique, et c'est voulu : un client
+                consulte, un administrateur décide. */}
+            {actions === null ? (
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                {t("panneau.dernieresActionsIndisponibles")}
+              </p>
+            ) : actions.length === 0 ? (
               <p className="font-body-md text-body-md text-on-surface-variant">
                 {t("journal.vide")}
               </p>

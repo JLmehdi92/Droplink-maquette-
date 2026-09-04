@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
+import { estPanneDeTransport } from "@/lib/reseau/panne";
 
 /**
  * LA LECTURE DES COMPTES PAR L'ADMINISTRATION.
@@ -308,10 +309,34 @@ export const ACTION_EXCLUE_DE_L_APERCU = "panneau.alertes";
  */
 const FENETRE_APERCU = 100;
 
+/**
+ * REND `null` QUAND LE TRANSPORT A LÂCHÉ — jamais un tableau vide.
+ *
+ * ⚠️ DÉFAUT TROUVÉ LE 04/09/2026 PAR UNE PASSE DE FUMÉE, DANS LA NATURE :
+ * `⨯ Error: lecture des dernieres actions impossible : TypeError: fetch failed`,
+ * et `/fr/admin` en 500 pour un administrateur légitime, pendant que l'écran
+ * Journal répondait 200 juste après. Le rôle, la session et la base allaient
+ * bien : une seule lecture avait bronché, et elle emportait tout — les alertes
+ * en tête, c'est-à-dire ce qu'on vient chercher quand le réseau va mal.
+ *
+ * ⚠️ C'EST L-025 DANS SA FORME EXACTE. Le 02/09, le même défaut a été fermé sur
+ * `lirePanneau` (lecture du stockage) et le motif extrait dans
+ * `lib/reseau/panne.ts` — puis posé sur cette lecture-là SEULEMENT. Cette
+ * fonction-ci est appelée dans le MÊME `Promise.all`, sur le MÊME écran.
+ *
+ * `null` ET NON `[]` : un tableau vide se lit « il ne s'est rien passé », ce
+ * qui est une affirmation, et une affirmation fausse. C'est le principe XII
+ * appliqué à une base qui n'a rien répondu du tout.
+ *
+ * SEULEMENT POUR UNE PANNE DE TRANSPORT. Un droit manquant, une fonction
+ * absente, une contrainte violée continuent de lever : dégrader silencieusement
+ * ferait vivre une carte « indisponible » pour toujours sans que personne
+ * cherche pourquoi.
+ */
 export async function lireDernieresActions(
   supabase: ClientAdmin,
   limite: number,
-): Promise<readonly LigneJournal[]> {
+): Promise<readonly LigneJournal[] | null> {
   const { data, error } = await supabase
     .rpc("lire_journal_admin", {
       // NI FILTRE NI FENÊTRE : l'aperçu du panneau montre ce qui vient
@@ -328,6 +353,8 @@ export async function lireDernieresActions(
     // pur.
     .neq("action", ACTION_EXCLUE_DE_L_APERCU)
     .limit(limite);
+
+  if (error !== null && estPanneDeTransport(error.message)) return null;
 
   if (error !== null || data === null) {
     throw new Error(
