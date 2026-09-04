@@ -2739,6 +2739,26 @@ try {
         }
         const ko = (n) => (n / 1024).toFixed(1);
 
+        /*
+         * ⚠️ LE RAPPORTEUR D ERREURS N ATTEINT PAS CETTE PAGE — mesure sur les
+         * OCTETS SERVIS, pas sur la source.
+         *
+         * Sentry est installe cote serveur depuis le 04/09/2026, et toute la
+         * justification de ce choix est le budget de cette page : son SDK
+         * navigateur couterait 30 a 40 Ko sur 300 dont 102 de socle, pour une
+         * page vue une fois, en 4G, depuis un DM. Deux gestes suffiraient a l y
+         * faire entrer sans que personne le remarque — creer un
+         * `instrumentation-client`, ou envelopper `next.config.ts`.
+         *
+         * `tests/unit/sentry-ne-fuite-pas.test.ts` verifie qu aucun des deux
+         * n existe : c est un controle sur le DEPOT. Celui-ci interroge ce que
+         * le navigateur telecharge vraiment, ce qu aucune lecture de source ne
+         * peut etablir — *un controle qui cherche un MOT ne prouve rien.*
+         */
+        const contenuDesRefs = [];
+        for (const u of refs) contenuDesRefs.push(await (await fetch(base + u)).text());
+        const scripts = contenuDesRefs.join("");
+
         controles.push(
           [
             refs.length >= 3,
@@ -2748,6 +2768,16 @@ try {
             compresse / 1024 < 300,
             `poids TOTAL hors medias : ${ko(compresse)} Ko compresses ` +
               `(${ko(brut)} Ko bruts) — budget 300`,
+          ],
+          // CONTRE-TEST : la sonde lit-elle seulement quelque chose ? A vide,
+          // « aucune trace de Sentry » serait vrai de fichiers jamais telecharges.
+          [
+            scripts.length > 50_000,
+            `CONTRE-TEST : ${ko(Buffer.byteLength(scripts))} Ko de script reellement lus`,
+          ],
+          [
+            !/sentry/i.test(scripts) && !/sentry/i.test(html),
+            "aucun octet de Sentry n atteint le navigateur sur la page client",
           ],
         );
       }
