@@ -1,0 +1,99 @@
+/**
+ * UN PASSAGE DE PLANIFICATEUR, POUR RAILWAY.
+ *
+ * Railway ne fait pas d'appel HTTP planifié : il RELANCE la commande de
+ * démarrage d'un service, qui doit se terminer proprement. Ce script est donc
+ * cette commande — il appelle UNE route, dit ce qu'il a obtenu, et sort.
+ *
+ * ⚠️ UN SEUL PASSAGE PAR APPEL, ET C'EST UNE EXIGENCE DU BRIEF, PAS UNE
+ * COMMODITÉ. « Le veilleur doit être hors du planificateur veillé : une tâche
+ * qui surveille les tâches s'arrête avec elles. » Un script unique qui
+ * appellerait la cadence PUIS la veille les ferait tomber ensemble, et il ne
+ * resterait personne pour le constater. D'où deux services Railway distincts,
+ * `railway-cadence.json` et `railway-veille.json`, qui invoquent ce même
+ * fichier avec un argument différent.
+ *
+ * ⚠️ IL SORT EN ERREUR QUAND L'APPEL ÉCHOUE, et c'est tout ce qui rend une
+ * panne visible ici. Le contrat de ces routes a été MESURÉ le 04/09/2026 sur
+ * un build servi :
+ *
+ *   POST + `Authorization: Bearer <CRON_SECRET>`  →  200
+ *   POST sans en-tête                             →  404
+ *   POST avec un mauvais secret                   →  404
+ *   GET                                           →  404
+ *
+ * Le 404 est délibéré — un 401 confirmerait l'existence de la route à qui n'y
+ * a pas droit — mais il a une conséquence ici : un appel mal formé ressemble
+ * exactement à une route inexistante. Sans code de sortie non nul, une faute
+ * de frappe dans le secret produirait des passages « réussis » à jamais.
+ */
+
+const ROUTES = Object.freeze({
+  cadence: "/api/suivi/cadence",
+  veille: "/api/veille",
+});
+
+const tache = process.argv[2];
+const chemin = ROUTES[tache];
+
+if (chemin === undefined) {
+  console.error(
+    `[planificateur] tâche inconnue : « ${tache ?? "(aucune)"} ». ` +
+      `Attendu : ${Object.keys(ROUTES).join(" ou ")}.`,
+  );
+  process.exit(2);
+}
+
+/*
+ * L'ADRESSE VIENT DE L'ENVIRONNEMENT, JAMAIS D'UN DÉFAUT. Un repli sur
+ * `localhost` marcherait sur cette machine et appellerait, en production, un
+ * serveur qui n'est pas le produit — le genre de succès qui ne prouve rien.
+ */
+const base = (process.env["PLANIFICATEUR_BASE_URL"] ?? "").trim().replace(/\/+$/, "");
+const secret = (process.env["CRON_SECRET"] ?? "").trim();
+
+const manquantes = [
+  base === "" ? "PLANIFICATEUR_BASE_URL" : null,
+  secret === "" ? "CRON_SECRET" : null,
+].filter((v) => v !== null);
+
+if (manquantes.length > 0) {
+  console.error(`[planificateur] variable(s) absente(s) : ${manquantes.join(", ")}`);
+  process.exit(2);
+}
+
+const debut = Date.now();
+let reponse;
+try {
+  reponse = await fetch(`${base}${chemin}`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${secret}` },
+    signal: AbortSignal.timeout(120_000),
+  });
+} catch (erreur) {
+  // On NOMME le transport. « Échec » sans motif envoie chercher un défaut du
+  // produit là où c'est le réseau qui n'a pas répondu.
+  console.error(`[planificateur] ${tache} : transport en échec — ${String(erreur)}`);
+  process.exit(1);
+}
+
+const duree = Date.now() - debut;
+
+if (!reponse.ok) {
+  /*
+   * Le 404 est le cas le plus probable, et le plus trompeur : il ne veut pas
+   * dire « la route n'existe pas », il veut dire « le secret n'a pas été
+   * accepté » — c'est la même réponse par conception. On le dit, parce que
+   * chercher une route disparue quand c'est une variable mal recopiée fait
+   * perdre exactement le temps qu'un planificateur doit faire gagner.
+   */
+  const indice =
+    reponse.status === 404
+      ? " — 404 signifie ici « secret refusé », pas « route absente » : vérifier CRON_SECRET"
+      : "";
+  console.error(`[planificateur] ${tache} : statut ${reponse.status} en ${duree} ms${indice}`);
+  process.exit(1);
+}
+
+const corps = await reponse.text();
+console.log(`[planificateur] ${tache} : 200 en ${duree} ms — ${corps.slice(0, 300)}`);

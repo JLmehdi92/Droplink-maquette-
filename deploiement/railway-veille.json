@@ -1,0 +1,9 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": { "builder": "RAILPACK", "buildCommand": "pnpm build" },
+  "deploy": {
+    "startCommand": "node deploiement/planificateur.mjs veille",
+    "cronSchedule": "5,20,35,50 * * * *",
+    "restartPolicyType": "NEVER"
+  }
+}

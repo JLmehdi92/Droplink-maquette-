@@ -49,6 +49,14 @@ const ADMIS: ReadonlyMap<string, string> = new Map([
   ["eslint.config.mjs", "Configuration d'ESLint, lue par `pnpm lint`."],
   ["next.config.ts", "Configuration de Next, lue au build."],
   ["package.json", "Les scripts et les dépendances."],
+  [
+    "railway.json",
+    "La cible de deploiement, lue par Railway au build. Elle vit a la racine " +
+      "parce que Railway ne la cherche que la. Elle ne decrit QUE le service " +
+      "web : les deux services planifies ont leurs propres fichiers dans " +
+      "`deploiement/`, et c'est deliberе — le veilleur doit vivre hors du " +
+      "planificateur qu'il veille.",
+  ],
   ["postcss.config.mjs", "Configuration de PostCSS — Tailwind v4 passe par lui."],
   [
     "stackhawk.yml",
