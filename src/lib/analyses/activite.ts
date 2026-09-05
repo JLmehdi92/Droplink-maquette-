@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
 import { signerLecture } from "@/lib/storage/r2";
+import { cleDApercu } from "@/lib/medias/apercu";
 import { lectureIllisible } from "@/lib/reseau/panne";
 
 /**
@@ -293,7 +294,9 @@ async function lireVignettes(
 
   let requete = supabase
     .from("order_media")
-    .select("id, order_id, cle_vignette")
+    // `type` ET `cle` EN PLUS : la cle d apercu peut retomber sur l image
+    // pleine quand la derivee manque. Voir `cleDApercu`.
+    .select("id, order_id, type, cle, cle_vignette")
     .in(
       "order_id",
       avecMedia.map((c) => c.id),
@@ -316,7 +319,8 @@ async function lireVignettes(
         ? undefined
         : data.find((m) => m.id === commande.cover_media_id);
     const retenu = couverture ?? data.find((m) => m.order_id === commande.id);
-    if (retenu?.cle_vignette != null) cles.set(commande.id, retenu.cle_vignette);
+    const cle = retenu === undefined ? null : cleDApercu(retenu);
+    if (cle !== null) cles.set(commande.id, cle);
   }
 
   const signees = await Promise.all(

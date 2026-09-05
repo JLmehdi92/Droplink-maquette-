@@ -7,6 +7,7 @@ import { Editeur } from "@/components/commandes/editeur";
 import type { MediaAffiche } from "@/components/commandes/carte-medias";
 import { plafondsAffichables } from "@/lib/commandes/medias";
 import { signerLecture } from "@/lib/storage/r2";
+import { cleDApercu } from "@/lib/medias/apercu";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "@/lib/commandes/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { emettreApres } from "@/lib/instrumentation/emettre";
@@ -173,15 +174,12 @@ export default async function EditeurCommande({
    */
   const medias: MediaAffiche[] = await Promise.all(
     (lignesMedias ?? []).map(async (m) => {
-      const pleine =
-        m.type === "photo" ? await signerLecture(m.cle).catch(() => null) : null;
+      // MÊME RÈGLE QUE PARTOUT AILLEURS, et elle n a qu un seul domicile.
+      const apercu = cleDApercu(m);
       return {
         id: m.id,
         type: m.type,
-        urlVignette:
-          m.cle_vignette === null
-            ? pleine
-            : ((await signerLecture(m.cle_vignette).catch(() => null)) ?? pleine),
+        urlVignette: apercu === null ? null : await signerLecture(apercu).catch(() => null),
         estCouverture: m.id === data.cover_media_id,
         dureeS: m.duree_s,
       };

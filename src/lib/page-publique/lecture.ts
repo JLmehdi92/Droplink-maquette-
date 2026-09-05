@@ -3,6 +3,7 @@ import { cache } from "react";
 import { z } from "zod";
 import { creerClientAnonyme } from "@/lib/supabase/anon";
 import { signerLecture } from "@/lib/storage/r2";
+import { cleDApercu } from "@/lib/medias/apercu";
 
 /**
  * LA LECTURE DE LA PAGE PUBLIQUE.
@@ -158,19 +159,16 @@ async function lireCommandePubliqueSansMemo(
        * garde donc son `null`, et le visionneur sait déjà le traiter — sa
        * capture est explicitement « échec non bloquant » au dépôt.
        */
-      const pleine =
-        m.type === "photo" ? await signerLecture(m.cle).catch(() => null) : null;
+      // LA RÈGLE VIT DANS `cleDApercu`, PAS ICI : elle était écrite quatre
+      // fois, et deux des quatre copies étaient fausses.
+      const vignette = cleDApercu(m);
+      const couverture = cleDApercu({ ...m, cle_vignette: m.cle_couverture });
       return {
         id: m.id,
         type: m.type,
-        urlVignette:
-          m.cle_vignette === null
-            ? pleine
-            : ((await signerLecture(m.cle_vignette).catch(() => null)) ?? pleine),
+        urlVignette: vignette === null ? null : await signerLecture(vignette).catch(() => null),
         urlCouverture:
-          m.cle_couverture === null
-            ? pleine
-            : ((await signerLecture(m.cle_couverture).catch(() => null)) ?? pleine),
+          couverture === null ? null : await signerLecture(couverture).catch(() => null),
         largeur: m.largeur,
         hauteur: m.hauteur,
         dureeSecondes: m.duree_s,
