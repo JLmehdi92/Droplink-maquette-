@@ -32,8 +32,23 @@ const MS_PAR_JOUR = 24 * 60 * 60 * 1000;
 export type Silence =
   /** Aucun mouvement n'a JAMAIS été rapporté. Ce n'est pas un silence, c'est un début. */
   | { readonly etat: "aucun-mouvement" }
+  /**
+   * L'étape du colis rend la question sans objet : il n'est pas encore parti,
+   * ou il est arrivé. Distinct de `recent`, qui affirme un mouvement récent.
+   */
+  | { readonly etat: "sans-objet"; readonly jours: number }
   | { readonly etat: "recent"; readonly jours: number }
   | { readonly etat: "silencieux"; readonly jours: number };
+
+/**
+ * L'étape du colis, telle que la frise la connaît.
+ *
+ * ⚠️ ELLE EST EXIGÉE, ET C'EST TOUT L'OBJET DU CORRECTIF DU 05/09/2026. Un
+ * paramètre facultatif aurait laissé les appelants existants garder leur défaut
+ * sans qu'une seule ligne ne change : c'est le TYPAGE qui doit forcer chaque
+ * point d'appel à dire de quel colis il parle.
+ */
+export type EtapeColis = "preparation" | "expedie" | "en_transit" | "livre";
 
 /**
  * Décrit le silence d'un colis à un instant donné.
@@ -42,7 +57,11 @@ export type Silence =
  * jours et 20 heures est exact au sens où on l'entend en français, alors
  * qu'arrondir à 4 affirmerait un jour qui n'a pas eu lieu.
  */
-export function decrireSilence(dernierMouvement: Date | null, maintenant: Date): Silence {
+export function decrireSilence(
+  dernierMouvement: Date | null,
+  maintenant: Date,
+  etape: EtapeColis,
+): Silence {
   if (dernierMouvement === null) return { etat: "aucun-mouvement" };
 
   const ecart = maintenant.getTime() - dernierMouvement.getTime();
@@ -52,6 +71,28 @@ export function decrireSilence(dernierMouvement: Date | null, maintenant: Date):
   // quelques heures traverse régulièrement minuit. On le ramène à zéro plutôt
   // que de rendre un nombre de jours négatif, qui s'afficherait tel quel.
   const jours = Math.max(0, Math.floor(ecart / MS_PAR_JOUR));
+
+  /*
+   * ⚠️ UN COLIS LIVRÉ N'EST PAS IMMOBILE : IL A FINI DE BOUGER.
+   *
+   * DÉFAUT VU PAR WASSIM SUR UNE VRAIE PAGE, le 05/09/2026. Un Colissimo livré
+   * le 18 août affichait « Aucun mouvement depuis 18 jours — nous continuons
+   * d'interroger le transporteur chaque jour », juste au-dessus de la frise qui
+   * disait « Livré » et de la ligne « Votre colis est livré dans votre boîte
+   * aux lettres ». La page s'inquiétait d'un colis arrivé, et promettait des
+   * interrogations quotidiennes qui n'ont plus lieu d'être.
+   *
+   * Même chose avant le départ : un colis en PRÉPARATION n'a aucun mouvement à
+   * attendre, et compter les jours depuis un mouvement qui n'existe pas encore
+   * n'informe personne.
+   *
+   * ⚠️ LA RÈGLE EXISTAIT DÉJÀ — DANS DEUX APPELANTS SUR QUATRE. La liste des
+   * commandes écartait `livre` et `preparation` avant d'appeler, à deux
+   * endroits ; la page publique et l'écran Envois ne le faisaient pas. Une
+   * règle qui vit chez les appelants n'est appliquée que par ceux qui y ont
+   * pensé — c'est pourquoi elle descend ici, au seul endroit qui décide.
+   */
+  if (etape === "livre" || etape === "preparation") return { etat: "sans-objet", jours };
 
   return jours >= SEUIL_SILENCE_JOURS
     ? { etat: "silencieux", jours }

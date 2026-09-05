@@ -454,12 +454,18 @@ export async function TableauCommandes({
                  * La planche est explicite : sa seule carte en alerte est celle
                  * dont la puce dit « Sans mouvement ».
                  */
+                /*
+                 * LA GARDE « ni livre ni preparation » A ETE RETIREE D ICI le
+                 * 05/09/2026 : elle vit desormais dans `decrireSilence`, qui
+                 * exige l etape. La repeter au point d appel etait exactement
+                 * la cause du defaut voisin — deux appelants sur quatre y
+                 * pensaient, deux l oubliaient.
+                 */
                 const enAlerte =
-                  ligne.statut !== "livre" &&
-                  ligne.statut !== "preparation" &&
                   decrireSilence(
                     ligne.colisBougeLe === null ? null : new Date(ligne.colisBougeLe),
                     maintenant,
+                    ligne.statut,
                   ).etat === "silencieux";
                 return (
                   <li key={ligne.id}>
@@ -580,10 +586,12 @@ function PuceExpedition({
   readonly libelles: (clef: string, valeurs?: Record<string, number | string>) => string;
   readonly taille?: "bureau" | "telephone";
 }) {
-  const silence =
-    ligne.statut === "livre" || ligne.statut === "preparation"
-      ? { etat: "recent" as const, jours: 0 }
-      : decrireSilence(ligne.colisBougeLe === null ? null : new Date(ligne.colisBougeLe), maintenant);
+  // MEME RAISON QU AU-DESSUS : l etape est passee, la regle n est plus recopiee.
+  const silence = decrireSilence(
+    ligne.colisBougeLe === null ? null : new Date(ligne.colisBougeLe),
+    maintenant,
+    ligne.statut,
+  );
 
   if (silence.etat === "silencieux") {
     return (

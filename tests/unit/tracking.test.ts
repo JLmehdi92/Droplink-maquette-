@@ -207,18 +207,18 @@ describe("Le silence", () => {
   const MAINTENANT = new Date(Date.UTC(2026, 7, 20, 12));
 
   test("aucun mouvement n'est pas un silence, c'est un début", () => {
-    expect(decrireSilence(null, MAINTENANT)).toEqual({ etat: "aucun-mouvement" });
+    expect(decrireSilence(null, MAINTENANT, "en_transit")).toEqual({ etat: "aucun-mouvement" });
   });
 
   test("en deçà du seuil, le silence n'est pas nommé", () => {
-    const s = decrireSilence(T(SEUIL_SILENCE_JOURS - 1), MAINTENANT);
+    const s = decrireSilence(T(SEUIL_SILENCE_JOURS - 1), MAINTENANT, "en_transit");
     expect(s.etat).toBe("recent");
   });
 
   test("AU SEUIL EXACT, il l'est", () => {
     // La borne est vérifiée des deux côtés : un seuil testé d'un seul côté laisse
     // passer un décalage d'un jour, qui est exactement l'erreur qu'on fait.
-    const s = decrireSilence(T(SEUIL_SILENCE_JOURS), MAINTENANT);
+    const s = decrireSilence(T(SEUIL_SILENCE_JOURS), MAINTENANT, "en_transit");
     expect(s.etat).toBe("silencieux");
     expect(s.etat === "silencieux" ? s.jours : -1).toBe(SEUIL_SILENCE_JOURS);
   });
@@ -228,15 +228,46 @@ describe("Le silence", () => {
     // jour qui n'a pas eu lieu, sur le seul élément de la page qui change
     // quotidiennement.
     const presque = new Date(MAINTENANT.getTime() - (3 * 86_400_000 + 20 * 3_600_000));
-    const s = decrireSilence(presque, MAINTENANT);
+    const s = decrireSilence(presque, MAINTENANT, "en_transit");
     expect(s.etat === "recent" ? s.jours : -1).toBe(3);
+  });
+
+  /*
+   * ⚠️ UN COLIS LIVRÉ N'EST PAS IMMOBILE — DÉFAUT VU SUR UNE VRAIE PAGE le
+   * 05/09/2026. Un Colissimo livré le 18 août affichait « Aucun mouvement
+   * depuis 18 jours — nous continuons d'interroger le transporteur chaque
+   * jour », au-dessus d'une frise qui disait « Livré » et d'une ligne « Votre
+   * colis est livré dans votre boîte aux lettres ».
+   *
+   * La règle existait DÉJÀ, mais chez les appelants : la liste des commandes
+   * écartait `livre` et `preparation` avant d'appeler, à deux endroits ; la
+   * page publique et l'écran Envois l'oubliaient. Elle vit désormais ici.
+   */
+  test("un colis LIVRÉ n'est jamais silencieux, même après des semaines", () => {
+    const s = decrireSilence(T(60), MAINTENANT, "livre");
+    expect(s.etat).toBe("sans-objet");
+    // L'ANCIENNETÉ RESTE JUSTE ET UTILE : « livré il y a 60 jours » informe.
+    // Ce qui était faux n'est pas la date, c'est le cadre inquiet.
+    expect(s.etat === "sans-objet" ? s.jours : -1).toBe(60);
+  });
+
+  test("un colis EN PRÉPARATION non plus : il n'a rien à attendre encore", () => {
+    expect(decrireSilence(T(60), MAINTENANT, "preparation").etat).toBe("sans-objet");
+  });
+
+  test("CONTRE-TEST : le même écart, en transit, EST silencieux", () => {
+    // Sans lui, « livré n'est pas silencieux » serait vrai d'une fonction qui
+    // ne nommerait plus JAMAIS un silence — c'est-à-dire du défaut inverse,
+    // celui que ce module existe pour empêcher.
+    expect(decrireSilence(T(60), MAINTENANT, "en_transit").etat).toBe("silencieux");
+    expect(decrireSilence(T(60), MAINTENANT, "expedie").etat).toBe("silencieux");
   });
 
   test("un scan daté dans le futur ne rend pas un nombre négatif", () => {
     // Les transporteurs datent dans leur fuseau, et un décalage traverse
     // régulièrement minuit. « il y a -1 jour » s'afficherait tel quel.
     const futur = new Date(MAINTENANT.getTime() + 5 * 3_600_000);
-    const s = decrireSilence(futur, MAINTENANT);
+    const s = decrireSilence(futur, MAINTENANT, "en_transit");
     expect(s.etat === "recent" ? s.jours : -1).toBe(0);
   });
 });

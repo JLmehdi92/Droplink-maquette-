@@ -108,7 +108,7 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
      * liraient tous deux « jamais signalé » et émettraient tous deux. La base
      * tranche en une seule instruction et dit qui a gagné.
      */
-    const silence = decrireSilence(etat.dernierMouvement, maintenant);
+    const silence = decrireSilence(etat.dernierMouvement, maintenant, etat.etape);
     if (silence.etat === "silencieux") {
       const { data: reclame, error: erreurMarque } = await systeme.rpc("reclamer_immobilite", {
         p_parcel_id: colis.id,

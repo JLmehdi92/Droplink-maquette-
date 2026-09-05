@@ -170,6 +170,7 @@ export async function TableauEnvois({
     const silence = decrireSilence(
       ligne.dernierMouvement === null ? null : new Date(ligne.dernierMouvement),
       maintenant,
+      ligne.etat,
     );
     const silencieux = silence.etat === "silencieux";
 

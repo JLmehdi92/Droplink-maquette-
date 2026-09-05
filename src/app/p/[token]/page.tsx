@@ -204,7 +204,9 @@ export default async function PagePublique({
    */
   const dernier =
     suivi === null || suivi.dernierMouvement === null ? null : new Date(suivi.dernierMouvement);
-  const silence = decrireSilence(dernier, maintenant);
+  // L ETAPE AFFICHEE, pas le statut brut de la commande : c est celle que le
+  // client voit sur la frise, et le silence doit s accorder avec elle.
+  const silence = decrireSilence(dernier, maintenant, statutAffiche);
 
   const jour = (instant: Date): string => format.dateTime(instant, { day: "numeric", month: "long" });
 
