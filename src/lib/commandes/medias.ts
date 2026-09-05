@@ -504,6 +504,40 @@ export async function confirmerDepot(
    * casser de l'existant — aucun média déjà déposé n'en a, et nous n'avons aucun
    * encodeur côté serveur pour les rattraper.
    */
+  /*
+   * ⚠️ UNE DÉRIVÉE ABSENTE SE DIT. Elle ne se disait PAS, et ce silence est ce
+   * qui a laissé une page de client entièrement vide atteindre un vrai
+   * destinataire le 05/09/2026.
+   *
+   * Le chemin est fait pour ne pas bloquer — c'est correct, une photo vaut
+   * mieux qu'un refus. Mais « non bloquant » avait glissé en « invisible » :
+   * `cle_vignette` restait nulle et RIEN, nulle part, ne disait qu'une dérivée
+   * attendue n'était jamais arrivée. Le trop-lourd, lui, était déjà nommé —
+   * l'absence pure ne l'était pas, alors que c'est le cas le plus fréquent
+   * puisqu'il couvre AUSSI le refus de signature côté client, avalé sans
+   * branche d'erreur.
+   *
+   * On le NOMME sans refuser : le vendeur garde son média, et nous savons.
+   * Le journal du serveur est ce qui se lit AUJOURD'HUI ; l'événement d'usage
+   * ne portera que le jour où l'instrumentation sera branchée.
+   *
+   * Seulement pour les PHOTOS : une vidéo n'a pas de couverture par
+   * conception, et sa capture d'aperçu est explicitement « échec non
+   * bloquant » — la signaler ferait chercher un défaut qui n'existe pas.
+   */
+  const estPhoto = typeMime.startsWith("image/");
+  if (estPhoto && tailleVignette === null) {
+    console.warn(
+      "[medias] vignette absente pour un média accepté — la tuile retombera sur " +
+        "l'image pleine. Dépôt de la dérivée refusé ou jamais parvenu.",
+    );
+    emettreApres(
+      EVENEMENTS.MEDIA_REFUSE,
+      { sujet: profilId },
+      { motif: "vignette_absente", taille: tailleReelle },
+    );
+  }
+
   const cleDeCouverture = cleCouverture(cle);
   const tailleCouverture = await lireTaille(cleDeCouverture);
   const plafondCouverture = limites().couvertureOctets;

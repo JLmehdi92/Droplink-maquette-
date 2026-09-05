@@ -92,6 +92,51 @@ export function dimensionsBornees(
 const QUALITES_LOGO = [0.9, 0.8, 0.7, 0.6] as const;
 
 /**
+ * ENCODE LA TOILE, ET VÉRIFIE CE QU'ON A OBTENU.
+ *
+ * ⚠️ CE CONTRÔLE MANQUAIT, ET C'EST CE QUI A VIDÉ LA PAGE D'UN VRAI CLIENT LE
+ * 05/09/2026. Les quatre encodages du module demandaient `image/webp` et
+ * gardaient le résultat SANS REGARDER CE QU'IL ÉTAIT.
+ *
+ * Or `toBlob` ne rend pas `null` quand un format n'est pas encodable : la
+ * spécification HTML impose à l'agent de se rabattre sur `image/png`. Le blob
+ * arrive donc bien, la fonction le rend, tout paraît normal — et une vignette
+ * PNG de 200 × 200 pèse 60 à 110 Ko contre un plafond DUR de 20 Ko, une
+ * couverture PNG de 900 px pèse près d'un mégaoctet contre 90 Ko. Les deux
+ * dérivées sont refusées par le serveur, et le refus n'est écrit nulle part.
+ *
+ * Pire pour la couverture : sa boucle baisse la qualité palier par palier pour
+ * tenir sous le plafond. Le PNG étant SANS PERTE, le paramètre de qualité y est
+ * ignoré — les quatre paliers rendent le même poids, et la boucle qui existe
+ * pour rattraper l'excès ne peut structurellement pas le rattraper.
+ *
+ * ⚠️ LE REPLI DIFFÈRE SELON CE QU'ON ENCODE, et ce n'est pas un détail : JPEG
+ * n'a pas de couche alpha. Il convient à une photo, jamais à un logo — un logo
+ * transparent réencodé en JPEG sort sur fond noir. Le logo se replie donc sur
+ * PNG, plus lourd et fidèle ; c'est au serveur de refuser s'il dépasse.
+ *
+ * ⚠️ EXPORTÉE POUR ÊTRE ÉPROUVÉE, et c'est la seule raison. Tout le reste de ce
+ * module tient au canevas, qui n'existe pas sous Node : c'est précisément
+ * pourquoi le défaut a pu vivre ici sans qu'aucune suite ne le voie. Celle-ci
+ * ne prend qu'une TOILE — n'importe quel objet qui sait `toBlob` — donc elle
+ * s'éprouve avec un encodeur de substitution qui imite un navigateur sans WebP.
+ */
+export async function encoder(
+  toile: Pick<HTMLCanvasElement, "toBlob">,
+  qualite: number,
+  repli: "image/jpeg" | "image/png",
+): Promise<Blob | null> {
+  const webp = await new Promise<Blob | null>((resoudre) => {
+    toile.toBlob(resoudre, "image/webp", qualite);
+  });
+  if (webp !== null && webp.type === "image/webp") return webp;
+
+  return await new Promise<Blob | null>((resoudre) => {
+    toile.toBlob(resoudre, repli, qualite);
+  });
+}
+
+/**
  * Réduit un logo dans le navigateur, avant l'envoi.
  *
  * Rend `null` si le navigateur ne sait pas décoder le fichier. L'APPELANT DÉCIDE
@@ -130,9 +175,7 @@ export async function logoReduit(
 
     let dernier: Blob | null = null;
     for (const qualite of QUALITES_LOGO) {
-      const blob = await new Promise<Blob | null>((resoudre) => {
-        toile.toBlob(resoudre, "image/webp", qualite);
-      });
+      const blob = await encoder(toile, qualite, "image/png");
       if (blob === null) break;
       dernier = blob;
       if (blob.size <= plafondOctets) return blob;
@@ -200,11 +243,10 @@ export async function vignetteDepuisImage(
     contexte.imageSmoothingQuality = "high";
     contexte.drawImage(image, x, y, cote, cote, 0, 0, COTE_VIGNETTE, COTE_VIGNETTE);
 
-    const blob = await new Promise<Blob | null>((resoudre) => {
-      // WebP quel que soit le format d'origine : la vignette est produite par
-      // nous, son format est donc notre décision et non celle du fichier déposé.
-      toile.toBlob(resoudre, "image/webp", 0.82);
-    });
+    // WebP quand le navigateur sait l'encoder, JPEG sinon : la vignette est
+    // produite par nous, son format est donc notre décision — mais elle se
+    // CONSTATE, elle ne se suppose pas. Voir `encoder`.
+    const blob = await encoder(toile, 0.82, "image/jpeg");
 
     if (blob === null) return null;
 
@@ -273,8 +315,23 @@ export function dimensionsLargeurBornee(
  * 56 à 89 Ko à q0,75. On s'arrête à la PREMIÈRE qui tient sous le plafond, donc
  * la plupart des photos gardent 0,82 et seules les plus détaillées descendent.
  * Fixer une qualité unique aurait payé le pire cas sur toutes les photos.
+ *
+ * ⚠️ CES QUATRE PALIERS ONT ÉTÉ MESURÉS EN WEBP, ET L'ÉCHELLE S'ARRÊTAIT LÀ.
+ * Sur un navigateur sans encodeur WebP, la dérivée sort en JPEG — nettement
+ * moins efficace à qualité égale — et les quatre paliers restaient TOUS
+ * au-dessus du plafond de 90 Ko. Constaté au navigateur le 05/09/2026, encodeur
+ * WebP neutralisé, sur une photo réelle de 2,2 Mo : le `PUT` de la couverture
+ * n'était même pas tenté, la signature ayant été refusée pour dépassement — et
+ * ce refus n'était écrit nulle part.
+ *
+ * Les trois paliers ajoutés ne coûtent RIEN au cas normal : en WebP la boucle
+ * rend dès le premier palier qui tient, donc elle ne les atteint jamais. Ils
+ * n'existent que pour le repli, où une couverture un peu plus compressée vaut
+ * infiniment mieux qu'une couverture absente — l'absence faisant retomber la
+ * page du client sur l'image PLEINE, soit deux mégaoctets sur le plus gros
+ * élément de la page.
  */
-const QUALITES_COUVERTURE = [0.82, 0.75, 0.7, 0.62] as const;
+const QUALITES_COUVERTURE = [0.82, 0.75, 0.7, 0.62, 0.52, 0.42, 0.32] as const;
 
 /**
  * Produit la couverture d'une image — la version 900 px servie sur la page
@@ -320,9 +377,7 @@ export async function couvertureDepuisImage(
 
     let dernier: Blob | null = null;
     for (const qualite of QUALITES_COUVERTURE) {
-      const blob = await new Promise<Blob | null>((resoudre) => {
-        toile.toBlob(resoudre, "image/webp", qualite);
-      });
+      const blob = await encoder(toile, qualite, "image/jpeg");
       if (blob === null) break;
       dernier = blob;
       if (blob.size <= plafondOctets) return { blob, largeur, hauteur };
@@ -395,9 +450,7 @@ export async function apercuDepuisVideo(
       COTE_VIGNETTE,
     );
 
-    const blob = await new Promise<Blob | null>((resoudre) => {
-      toile.toBlob(resoudre, "image/webp", 0.82);
-    });
+    const blob = await encoder(toile, 0.82, "image/jpeg");
 
     return {
       vignette:
