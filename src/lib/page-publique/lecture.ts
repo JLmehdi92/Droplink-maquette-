@@ -125,20 +125,57 @@ async function lireCommandePubliqueSansMemo(
 
   const { data: medias } = await supabase.rpc("lire_medias_publics", { p_jeton: jeton });
 
+  /*
+   * ⚠️ UNE PHOTO SANS DÉRIVÉE ÉTAIT INVISIBLE. DÉFAUT TROUVÉ CHEZ UN VRAI
+   * CLIENT, LE 05/09/2026.
+   *
+   * `cle_vignette` est NULLABLE, et le modèle de données le dit en toutes
+   * lettres : « l'absence de vignette est un cas normal ». Ce code l'ignorait —
+   * il ne signait QUE les dérivées, donc `urlVignette` valait `null`, et la
+   * grille comme le visionneur n'avaient plus rien à rendre. Cinq photos
+   * déposées, présentes dans R2, servies en `200 image/jpeg` à qui demandait
+   * leur URL — et une page de client entièrement vide.
+   *
+   * Le défaut est né du correctif du 03/09 : la grille téléchargeait la dérivée
+   * 900 px dans des tuiles de 197 px, on l'a fait passer sur la vignette, et
+   * personne n'a demandé ce qui arrive quand la vignette n'existe pas. C'est
+   * L-025 — un garde écrit après coup hérite du champ de vision de la
+   * CORRECTION, pas du problème.
+   *
+   * ⚠️ LE REPLI COÛTE CHER, ET C'EST DÉLIBÉRÉ. Servir l'image pleine dans une
+   * tuile, c'est exactement ce que le correctif du 03/09 avait supprimé : 217 Ko
+   * au lieu de 12. Mais une photo lourde qui S'AFFICHE bat une photo légère qui
+   * n'existe pas, et le surcoût est BORNÉ au cas dégradé — dès qu'une dérivée
+   * existe, elle reprend la main. Le budget de page protège une expérience ; une
+   * galerie vide n'en est pas une.
+   */
   const rendus: MediaPublic[] = await Promise.all(
-    (medias ?? []).map(async (m) => ({
-      id: m.id,
-      type: m.type,
-      urlVignette:
-        m.cle_vignette === null ? null : await signerLecture(m.cle_vignette).catch(() => null),
-      urlCouverture:
-        m.cle_couverture === null
-          ? null
-          : await signerLecture(m.cle_couverture).catch(() => null),
-      largeur: m.largeur,
-      hauteur: m.hauteur,
-      dureeSecondes: m.duree_s,
-    })),
+    (medias ?? []).map(async (m) => {
+      /*
+       * ⚠️ LE REPLI NE VAUT QUE POUR LES PHOTOS. La clé d'une VIDÉO désigne le
+       * fichier vidéo : la donner à une balise image rendrait une image cassée,
+       * c'est-à-dire pire que la case vide qu'on répare. Une vidéo sans aperçu
+       * garde donc son `null`, et le visionneur sait déjà le traiter — sa
+       * capture est explicitement « échec non bloquant » au dépôt.
+       */
+      const pleine =
+        m.type === "photo" ? await signerLecture(m.cle).catch(() => null) : null;
+      return {
+        id: m.id,
+        type: m.type,
+        urlVignette:
+          m.cle_vignette === null
+            ? pleine
+            : ((await signerLecture(m.cle_vignette).catch(() => null)) ?? pleine),
+        urlCouverture:
+          m.cle_couverture === null
+            ? pleine
+            : ((await signerLecture(m.cle_couverture).catch(() => null)) ?? pleine),
+        largeur: m.largeur,
+        hauteur: m.hauteur,
+        dureeSecondes: m.duree_s,
+      };
+    }),
   );
 
   /*

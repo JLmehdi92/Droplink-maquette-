@@ -142,13 +142,17 @@ export default async function EditeurCommande({
    * effet — une URL enregistrée périme dans la colonne, et l'écran se met à
    * afficher des images mortes sans qu'aucune erreur ne remonte.
    *
-   * On signe la VIGNETTE, pas le média : la grille de l'éditeur n'a besoin que
-   * de 200 × 200. Signer les originaux ferait télécharger vingt photos pleines
-   * pour dessiner des carrés de deux cents pixels.
+   * On signe la VIGNETTE quand elle existe : la grille de l'éditeur n'a besoin
+   * que de 200 × 200, et signer les originaux ferait télécharger vingt photos
+   * pleines pour dessiner des carrés de deux cents pixels.
+   *
+   * ⚠️ « QUAND ELLE EXISTE » MANQUAIT, et cette phrase a coûté une page de
+   * client entièrement vide. La clé pleine est donc lue AUSSI — elle ne sert
+   * qu'au repli, et elle ne coûte rien tant qu'aucune dérivée ne manque.
    */
   const { data: lignesMedias } = await supabase
     .from("order_media")
-    .select("id, type, cle_vignette, duree_s")
+    .select("id, type, cle, cle_vignette, duree_s")
     .eq("order_id", id)
     .order("position", { ascending: true });
 
@@ -158,15 +162,30 @@ export default async function EditeurCommande({
   // produit où l'historique d'un tiers serait atteignable.
   const historique = await lireHistorique(supabase, id);
 
+  /*
+   * ⚠️ MÊME REPLI QUE LA PAGE CLIENT, ET POUR LA MÊME RAISON. Une photo sans
+   * vignette était une case grise ici aussi — le vendeur voyait donc EXACTEMENT
+   * ce que voyait son client, sans qu'aucun des deux écrans ne dise pourquoi.
+   * `cle_vignette` est nullable par conception ; c'est le rendu qui l'ignorait.
+   *
+   * Le repli est borné aux PHOTOS : la clé d'une vidéo désigne le fichier
+   * vidéo, et une balise image le rendrait cassé.
+   */
   const medias: MediaAffiche[] = await Promise.all(
-    (lignesMedias ?? []).map(async (m) => ({
-      id: m.id,
-      type: m.type,
-      urlVignette:
-        m.cle_vignette === null ? null : await signerLecture(m.cle_vignette).catch(() => null),
-      estCouverture: m.id === data.cover_media_id,
-      dureeS: m.duree_s,
-    })),
+    (lignesMedias ?? []).map(async (m) => {
+      const pleine =
+        m.type === "photo" ? await signerLecture(m.cle).catch(() => null) : null;
+      return {
+        id: m.id,
+        type: m.type,
+        urlVignette:
+          m.cle_vignette === null
+            ? pleine
+            : ((await signerLecture(m.cle_vignette).catch(() => null)) ?? pleine),
+        estCouverture: m.id === data.cover_media_id,
+        dureeS: m.duree_s,
+      };
+    }),
   );
 
   const plafonds = plafondsAffichables();

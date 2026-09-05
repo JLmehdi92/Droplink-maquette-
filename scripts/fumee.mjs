@@ -1179,6 +1179,38 @@ try {
         echecs += 1;
       }
 
+      /*
+       * ── UN TROISIEME MEDIA, SANS AUCUNE DERIVEE ──
+       *
+       * ⚠️ CE CAS A RENDU UNE PAGE DE CLIENT ENTIEREMENT VIDE, LE 05/09/2026.
+       * `cle_vignette` est NULLABLE et le modele de donnees dit que son absence
+       * est « un cas normal » ; le rendu, lui, ne signait QUE les derivees. Cinq
+       * photos deposees, presentes dans R2, servies en 200 image/jpeg a qui
+       * demandait leur URL — et rien a l ecran, ni chez le vendeur ni chez son
+       * client.
+       *
+       * LE JEU DE FUMEE N EN PORTAIT AUCUN. Les deux medias ci-dessus ont leurs
+       * deux derivees, donc la question « que rend-on quand il n y en a pas »
+       * n etait posee nulle part : un ensemble vide passe tout.
+       */
+      const idMediaNu = randomUUID();
+      const cleNue = `medias/${shop.id}/${commandeFumee}/${idMediaNu}.jpg`;
+      const { error: erreurNu } = await service.from("order_media").insert({
+        id: idMediaNu,
+        order_id: commandeFumee,
+        type: "photo",
+        cle: cleNue,
+        // NI VIGNETTE NI COUVERTURE : c est tout l objet de ce media.
+        largeur: 1200,
+        hauteur: 1600,
+        taille_octets: 210000,
+        position: 2,
+      });
+      if (erreurNu) {
+        console.error(`ECHEC impossible de poser le media sans derivee : ${erreurNu.message}`);
+        echecs += 1;
+      }
+
       // ── UNE SESSION VENDEUR REELLE ──
       //
       // ⚠️ JUSQU AU 29/08/2026 CETTE SONDE NE VOYAIT RIEN DERRIERE UNE SESSION.
@@ -2634,6 +2666,30 @@ try {
             [
               vignettes >= couvertures,
               `les tuiles prennent la vignette, pas la couverture (vignettes ${vignettes}, couvertures ${couvertures})`,
+            ],
+            /*
+             * ⚠️ UNE PHOTO SANS DERIVEE DOIT QUAND MEME S AFFICHER.
+             *
+             * Le jeu porte un troisieme media depourvu de vignette ET de
+             * couverture. Avant le 05/09/2026 il ne produisait AUCUNE balise
+             * img : la page servait une case vide, et c est ce qu un vrai
+             * client a recu. Le repli sert l image pleine — plus lourde, et
+             * infiniment preferable a rien.
+             */
+            [
+              srcs.some((u) => u.includes(`${idMediaNu}.jpg`)),
+              `une photo SANS derivee est servie par son image pleine (repli)`,
+            ],
+            /*
+             * ET LE REPLI RESTE BORNE AU CAS DEGRADE. Sans ce controle, servir
+             * l image pleine PARTOUT passerait le controle ci-dessus a 100 % —
+             * et rendrait exactement le defaut du 03/09, ou la grille
+             * telechargeait 900 px pour dessiner 197. On exige donc qu UNE
+             * SEULE image pleine soit demandee : celle qui n a pas le choix.
+             */
+            [
+              srcs.filter((u) => /\.jpg(\?|$)/.test(u)).length === 1,
+              `le repli ne touche QUE le media sans derivee (images pleines demandees : ${srcs.filter((u) => /\.jpg(\?|$)/.test(u)).length})`,
             ],
           );
         }
