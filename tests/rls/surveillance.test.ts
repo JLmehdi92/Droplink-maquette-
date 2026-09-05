@@ -314,31 +314,99 @@ describe("La frise des colis, jour par jour", () => {
     expect(data?.length, "la frise ne rend pas 14 jours").toBe(14);
   });
 
+  /*
+   * ⚠️ CE TEST EFFAÇAIT DE VRAIES DONNÉES DE PRODUCTION — CONSTATÉ LE
+   * 05/09/2026, SUR LA COMMANDE D'UN VRAI CLIENT.
+   *
+   * Il faisait `delete from tracked_parcels where registered_at >= now() -
+   * interval '30 days'` pour rendre la fenêtre creuse, et son commentaire
+   * l'assumait : « c'est le seul état où le piège de count(*) se voit ». C'était
+   * sans conséquence quand la base ne servait personne. **Elle sert désormais de
+   * vrais vendeurs**, et un simple `pnpm gates` a supprimé les deux colis d'une
+   * commande réelle — avec leurs liens et leurs points de passage, emportés par
+   * la cascade. Les numéros de suivi, eux, sont restés sur `orders` : la perte
+   * était donc SILENCIEUSE côté vendeur, et sa page repassait simplement en
+   * « en attente du transporteur ».
+   *
+   * ⚠️ UNE SUITE NE SUPPRIME QUE CE QU'ELLE A CRÉÉ. C'est la règle qui manquait,
+   * et aucune borne de prudence ne la remplace : `registered_at >= now() - 30
+   * jours` ne désigne pas « les données de test », il désigne « les données
+   * récentes », c'est-à-dire exactement celles qui comptent.
+   *
+   * LA FENÊTRE CREUSE S'OBTIENT SANS RIEN DÉTRUIRE. `colis_par_jour_admin`
+   * borne `p_jours` à 90 : sur une telle fenêtre, il existe forcément des jours
+   * sans aucune prise en charge, et c'est là que le piège se voit. On EXIGE
+   * qu'il y en ait au moins un — sans quoi le contrôle serait vrai en n'ayant
+   * rien regardé.
+   */
   test("un jour sans colis vaut ZÉRO, jamais un", async () => {
-    // On vide la fenêtre pour que tous les jours soient creux : c'est le seul
-    // état où le piège de `count(*)` se voit.
-    await interroger(
-      catalogue,
-      "delete from public.tracked_parcels where registered_at >= now() - interval '30 days'",
-    );
-    const { data } = await admin.client.rpc("colis_par_jour_admin", { p_jours: 7 });
-    for (const j of data ?? []) {
-      expect(Number(j.n), `le jour ${j.jour} vaut ${j.n} au lieu de 0`).toBe(0);
-    }
+    const { data, error } = await admin.client.rpc("colis_par_jour_admin", { p_jours: 90 });
+    expect(error).toBeNull();
+
+    // Le type de retour d une RPC `returns table` n est pas inferable ici : on
+    // le NOMME plutot que de laisser un `any` implicite passer.
+    const jours = (data ?? []) as readonly { readonly jour: string; readonly n: number }[];
+    const vides = jours.filter((j) => Number(j.n) === 0);
+    const aUn = jours.filter((j) => Number(j.n) === 1);
+
+    // LE PLANCHER, ET IL EST LE CŒUR DU CONTRÔLE : sans un seul jour creux dans
+    // la fenêtre, « aucun jour ne vaut 1 à tort » serait vrai d'une fonction
+    // cassée. Sur 90 jours, l'absence totale de jour vide signalerait un jeu
+    // anormal, pas un produit sain.
+    expect(
+      vides.length,
+      `aucun jour creux dans 90 : le piège de count(*) ne peut pas se voir ` +
+        `(jours à 1 : ${aUn.length})`,
+    ).toBeGreaterThan(0);
+
+    // Sur une jointure externe, `count(*)` compte la LIGNE PRODUITE PAR LA
+    // JOINTURE : un jour sans colis rendrait 1. Il n'y a donc rien à effacer —
+    // il suffit de regarder une fenêtre assez large pour en contenir.
+    expect(
+      jours.every((j) => Number.isInteger(Number(j.n)) && Number(j.n) >= 0),
+      "la frise rend une valeur qui n'est pas un compte",
+    ).toBe(true);
   });
 
+  /*
+   * ⚠️ CE CONTRE-TEST EXIGEAIT « EXACTEMENT 1 », donc il supposait la table
+   * VIDE — c'est-à-dire qu'il dépendait de la suppression destructrice du test
+   * précédent. Une fois celle-ci retirée, il rougissait en annonçant `9` :
+   * l'assertion ne décrivait pas le produit, elle décrivait un effet de bord.
+   *
+   * Il compte désormais un ÉCART : combien de colis le jour porte avant, et
+   * combien après. Ce qui est vrai quel que soit l'état de la base, donc vrai
+   * aussi en production.
+   *
+   * ⚠️ ET IL RAMASSE SA PROPRE LIGNE. `FRISE-1` n'était nettoyé nulle part :
+   * c'est la suppression du test voisin qui l'emportait par accident. Sans
+   * elle, chaque passage des portes laissait un colis de plus dans les écrans
+   * d'administration d'un produit en service.
+   */
   test("contre-test : un colis pris en charge aujourd'hui apparaît au dernier jour", async () => {
-    await interroger(
-      catalogue,
-      `insert into public.tracked_parcels (shop_id, tracking_number, registered_at)
-       values ($1, 'FRISE-1', now())`,
-      [vendeur.shopId],
-    );
-    const { data } = await admin.client.rpc("colis_par_jour_admin", { p_jours: 7 });
-    const dernier = (data ?? [])[(data ?? []).length - 1];
-    // Sans ce contrôle, « tous les jours valent zéro » serait vrai pour une
-    // fonction qui ne compterait jamais rien.
-    expect(Number(dernier?.n), "le colis du jour n'est pas compté").toBe(1);
+    const dernierDe = async () => {
+      const { data } = await admin.client.rpc("colis_par_jour_admin", { p_jours: 7 });
+      const jours = (data ?? []) as readonly { readonly n: number }[];
+      return Number(jours[jours.length - 1]?.n ?? -1);
+    };
+
+    const avant = await dernierDe();
+    try {
+      await interroger(
+        catalogue,
+        `insert into public.tracked_parcels (shop_id, tracking_number, registered_at)
+         values ($1, 'FRISE-1', now())`,
+        [vendeur.shopId],
+      );
+      // Sans ce contrôle, « aucun jour ne vaut 1 à tort » serait vrai d'une
+      // fonction qui ne compterait JAMAIS rien.
+      expect(await dernierDe(), "le colis du jour n'est pas compté").toBe(avant + 1);
+    } finally {
+      await interroger(
+        catalogue,
+        "delete from public.tracked_parcels where tracking_number = 'FRISE-1'",
+      );
+    }
   });
 
   test("un vendeur ne lit pas la frise, et n'apprend pas qu'elle existe", async () => {
