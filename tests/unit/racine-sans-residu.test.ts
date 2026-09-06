@@ -29,6 +29,19 @@ import { describe, expect, test } from "vitest";
 
 /** Ce que la racine a le droit de porter, et rien d'autre. */
 const ADMIS: ReadonlyMap<string, string> = new Map([
+  [
+    ".env.example",
+    "L'INVENTAIRE DES VARIABLES, et le seul endroit où la RAISON de chacune est " +
+      "écrite : pourquoi `CRON_SECRET` refuse plutôt que de s'ouvrir, pourquoi " +
+      "aucune variable R2 ne porte `NEXT_PUBLIC`, ce que décide " +
+      "`BORD_DE_CONFIANCE`. Il vit à la racine parce que c'est là qu'on le " +
+      "cherche, à côté du `.env.local` qu'il décrit. Il a été versionné le " +
+      "06/09/2026 : le motif `.env*` du .gitignore par défaut de Next " +
+      "l'attrapait, donc ce document n'existait que sur une seule machine, et " +
+      "un redéploiement depuis un clone frais n'avait aucun moyen de savoir " +
+      "quoi poser. Vérifié ligne à ligne avant : il ne porte AUCUNE valeur " +
+      "sensible, seulement deux mots-clés publics.",
+  ],
   [".gitattributes", "Normalisation des fins de ligne — le dépôt vit sous Windows."],
   [".gitignore", "Ce que le dépôt n'emporte pas."],
   [
