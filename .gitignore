@@ -32,6 +32,14 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ⚠️ SAUF L INVENTAIRE. `.env.example` ne porte AUCUNE valeur — verifie ligne a
+# ligne le 06/09/2026, seules `NEXT_PUBLIC_POSTHOG_HOST` et `BORD_DE_CONFIANCE`
+# ont une valeur, et ce sont des mots-cles publics. Il porte en revanche la
+# RAISON de chaque variable : pourquoi `CRON_SECRET` refuse plutot que d ouvrir,
+# pourquoi aucune variable R2 ne porte NEXT_PUBLIC, ce que `BORD_DE_CONFIANCE`
+# decide. Ignore, ce document n existait que sur une seule machine — donc un
+# redeploiement depuis un clone frais n avait aucun moyen de savoir quoi poser.
+!.env.example
 
 # vercel
 .vercel
