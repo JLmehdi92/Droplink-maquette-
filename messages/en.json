@@ -15,7 +15,7 @@
     "mesAnalyses": "Analytics",
     "lancement": {
       "titre": "Launch phase",
-      "texte": "Everything is free and unlimited during this period."
+      "texte": "Everything is free during this period."
     },
     "seDeconnecter": "Log out"
   },
@@ -185,7 +185,7 @@
       "service": "The service is momentarily unreachable. Your session is intact: try again in a moment.",
       "session": "Your session has expired. Sign in again to continue.",
       "suspendu": "This account is suspended. Write to us to find out why.",
-      "indisponible": "Google sign-in is temporarily unavailable. Use the email link below.",
+      "indisponible": "Google sign-in is temporarily unavailable. Sign in with your email address and password below.",
       "trop": "Too many attempts from this device. Please wait a few minutes.",
       "fermees": "Sign-ups are closed for now. Existing accounts are unaffected.",
       "confirmez": "Open your inbox: if a confirmation link is waiting there, it completes your account. If you already had an account, log in below."
@@ -348,7 +348,7 @@
   },
   "envois": {
     "titre": "Shipments",
-    "sousTitre": "{n} tracked parcels, all carriers together",
+    "sousTitre": "{n, plural, one {# tracked parcel} other {# tracked parcels}}, across all carriers",
     "compteurs": {
       "titre": "Overview",
       "total": "Tracked parcels",
@@ -534,7 +534,7 @@
       },
       "marqueQuestion": "Haven’t set up your brand yet?",
       "marqueLien": "Add your name and your colour",
-      "filtreTexteChiffre": "Your {total} orders are still there. It is these criteria, together, that return nothing.",
+      "filtreTexteChiffre": "{total, plural, one {Your order is still there} other {Your # orders are still there}}. It is these criteria, together, that return nothing.",
       "accents": "Search ignores accents: “creme” also finds “Crème”."
     },
     "jamaisOuvert": "Never opened",
@@ -575,7 +575,7 @@
     "sousTitreVide": "Your space is ready",
     "rechercherExempleCourt": "Customer, reference, tracking…",
     "nouvelleCourt": "New",
-    "photosEtVues": "{photos} photos · {vues} views",
+    "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# view} other {# views}}",
     "surTotal": "{n} of {total}",
     "chargerLaSuite": "Load more",
     "plusDActions": "More actions for {client}",
@@ -606,7 +606,7 @@
       "titre": "History",
       "aucun": "Nothing has happened on this order yet.",
       "jamaisOuvert": "Your customer has not opened the link yet.",
-      "derniereOuverture": "Last opened by your customer on {quand} — {vues} views.",
+      "derniereOuverture": "Last opened by your customer on {quand} — {vues, plural, one {# view} other {# views}}.",
       "types": {
         "commande_creee": "Order created",
         "commande_modifiee": "Field edited",
@@ -617,8 +617,8 @@
         "media_supprime": "Media removed",
         "medias_reordonnes": "Media reordered",
         "lien_revoque": "Link revoked and regenerated",
-        "qc_approuve": "Check approved by customer",
-        "qc_refuse": "Check declined by customer"
+        "qc_approuve": "Photos approved by the customer",
+        "qc_refuse": "Photos rejected by the customer"
       }
     },
     "titre": "New order",
@@ -903,10 +903,10 @@
       "stockage": "Storage",
       "langue": "Language",
       "plafonds": "Ceilings",
-      "plafondColis": "Parcels taken over",
+      "plafondColis": "Parcels registered",
       "plafondCommandes": "Orders this month",
       "surPlafond": "{valeur} of {plafond}",
-      "depassementColis": "Over by {ecart}. Every parcel taken over is billed to us by the tracking provider.",
+      "depassementColis": "Over by {ecart}. Every parcel registered is billed to us by the tracking provider.",
       "activite": "What this account has done",
       "activiteAide": "The vendor's events, not yours, and only their counts. No order content appears here.",
       "activiteVide": "This account has done nothing yet.",
@@ -980,7 +980,7 @@
         "colis_au_dessus_du_seuil": "One account is over the parcel ceiling: {valeur} against a threshold of {seuil}",
         "veilleur_en_retard": "A background job has not beaten for {valeur} minutes"
       },
-      "colisFactures": "Parcels taken over",
+      "colisFactures": "Parcels registered",
       "comptesActifs": "Active accounts",
       "stockage": "Media storage",
       "stockageIndisponible": "Unavailable",
@@ -999,7 +999,7 @@
       "dernieresActionsIndisponibles": "Preview unavailable right now. The full log is still readable.",
       "toutLeJournal": "Full log",
       "alerteDetail": {
-        "colis_au_dessus_du_seuil": "{sujet} · Every parcel taken over is billed to us.",
+        "colis_au_dessus_du_seuil": "{sujet} · Every parcel registered is billed to us.",
         "veilleur_en_retard": "Alert threshold: {seuil} minutes. Job concerned: {sujet}."
       }
     },
@@ -1163,7 +1163,7 @@
         "colis_pris_en_charge_ce_mois": "Parcels registered this month",
         "abandons_ce_mois": "Tracking given up this month",
         "pic_auth-ip": "Peak — sign-ins per address",
-        "pic_auth-email": "Peak — links per email address",
+        "pic_auth-email": "Peak — password resets per email address",
         "pic_publique-requetes": "Peak — public page requests",
         "pic_publique-inconnu": "Peak — unknown links",
         "pic_publique-ecriture": "Peak — QC responses"
@@ -1175,10 +1175,10 @@
         "erreurs_5xx": "Server errors"
       },
       "consommation": "Consumption",
-      "colisParJour": "Parcels taken over per day",
+      "colisParJour": "Parcels registered per day",
       "seulPosteFacture": "the only billed item",
       "friseLegende": "Last {n} days · the orange bar is today",
-      "friseAide": "Parcels taken over each day over the last {n} days",
+      "friseAide": "Parcels registered each day over the last {n} days",
       "limitation": "Rate limiting",
       "surPlafond": "{valeur} / {plafond} per minute",
       "etat": {
@@ -1186,7 +1186,7 @@
         "en_retard": "Late",
         "jamais_executee": "Never ran"
       },
-      "actifAide": "Last run {n} minutes ago",
+      "actifAide": "{n, plural, =0 {Last run just now} one {Last run # minute ago} other {Last run # minutes ago}}",
       "enRetardAide": "Last run {n} minutes ago · alert threshold: {seuil} minutes",
       "jamaisExecuteeAide": "No run recorded. This job has never run since it was deployed — that is not a failure, and not an alert.",
       "tache": {

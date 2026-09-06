@@ -15,7 +15,7 @@
     "mesAnalyses": "Analyses",
     "lancement": {
       "titre": "Phase de lancement",
-      "texte": "Tout est gratuit et sans limite pendant cette période."
+      "texte": "Tout est gratuit pendant cette période."
     },
     "seDeconnecter": "Se déconnecter"
   },
@@ -183,7 +183,7 @@
       "expire": "Ce lien a expiré ou a déjà servi. Demandez-en un nouveau ci-dessous.",
       "profil": "Votre compte n'a pas pu être ouvert. Réessayez, et écrivez-nous si cela se reproduit.",
       "suspendu": "Ce compte est suspendu. Écrivez-nous pour en connaître la raison.",
-      "indisponible": "La connexion Google est momentanément indisponible. Utilisez le lien par email ci-dessous.",
+      "indisponible": "La connexion Google est momentanément indisponible. Connectez-vous avec votre adresse et votre mot de passe ci-dessous.",
       "trop": "Trop de tentatives depuis cet appareil. Patientez quelques minutes.",
       "session": "Votre session a expiré. Reconnectez-vous pour continuer.",
       "service": "Le service est momentanément injoignable. Votre session est intacte : réessayez dans un instant.",
@@ -348,7 +348,7 @@
   },
   "envois": {
     "titre": "Envois",
-    "sousTitre": "{n} colis suivis, tous transporteurs confondus",
+    "sousTitre": "{n, plural, one {# colis suivi} other {# colis suivis}}, tous transporteurs confondus",
     "compteurs": {
       "titre": "Vue d’ensemble",
       "total": "Colis suivis",
@@ -534,7 +534,7 @@
       },
       "marqueQuestion": "Vous n’avez pas encore configuré votre marque ?",
       "marqueLien": "Ajoutez votre nom et votre couleur",
-      "filtreTexteChiffre": "Vos {total} commandes sont toujours là. Ce sont ces critères, ensemble, qui ne renvoient rien.",
+      "filtreTexteChiffre": "{total, plural, one {Votre commande est toujours là} other {Vos # commandes sont toujours là}}. Ce sont ces critères, ensemble, qui ne renvoient rien.",
       "accents": "La recherche ignore les accents : « creme » trouve aussi « Crème »."
     },
     "jamaisOuvert": "Jamais ouvert",
@@ -545,13 +545,13 @@
     "selectionner": "Sélectionner {client}",
     "lot": {
       "titre": "Actions groupées",
-      "aide": "Cochez des commandes, puis choisissez. Chaque lot est tout ou rien.",
+      "aide": "Cochez des commandes, puis choisissez. Chaque action groupée est tout ou rien.",
       "archiver": "Archiver la sélection",
       "desarchiver": "Sortir la sélection des archives",
       "ok": "{n, plural, one {# commande traitée} other {# commandes traitées}}.",
       "vide": "Aucune commande sélectionnée.",
-      "partiel": "Lot refusé : rien n’a été modifié. Certaines commandes ne sont plus accessibles — rechargez la liste.",
-      "ecriture": "Le lot n’a pas pu être traité. Rien n’a été modifié.",
+      "partiel": "Action groupée refusée : rien n’a été modifié. Certaines commandes ne sont plus accessibles — rechargez la liste.",
+      "ecriture": "L’action groupée n’a pas pu être traitée. Rien n’a été modifié.",
       "exporter": "Exporter",
       "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients.",
       "exportTelecharger": "Télécharger le CSV"
@@ -575,7 +575,7 @@
     "sousTitreVide": "Votre espace est prêt",
     "rechercherExempleCourt": "Client, référence, suivi…",
     "nouvelleCourt": "Nouvelle",
-    "photosEtVues": "{photos} photos · {vues} vues",
+    "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# vue} other {# vues}}",
     "surTotal": "{n} sur {total}",
     "chargerLaSuite": "Charger la suite",
     "plusDActions": "Plus d’actions pour {client}",
@@ -606,7 +606,7 @@
       "titre": "Historique",
       "aucun": "Rien ne s'est encore passé sur cette commande.",
       "jamaisOuvert": "Votre client n'a pas encore ouvert le lien.",
-      "derniereOuverture": "Dernière ouverture par votre client le {quand} — {vues} consultations.",
+      "derniereOuverture": "Dernière ouverture par votre client le {quand} — {vues, plural, one {# consultation} other {# consultations}}.",
       "types": {
         "commande_creee": "Commande créée",
         "commande_modifiee": "Champ modifié",
@@ -1163,7 +1163,7 @@
         "colis_pris_en_charge_ce_mois": "Colis pris en charge ce mois",
         "abandons_ce_mois": "Suivis abandonnés ce mois",
         "pic_auth-ip": "Pic — connexions par adresse",
-        "pic_auth-email": "Pic — liens par adresse email",
+        "pic_auth-email": "Pic — réinitialisations par adresse email",
         "pic_publique-requetes": "Pic — requêtes de page publique",
         "pic_publique-inconnu": "Pic — liens inconnus",
         "pic_publique-ecriture": "Pic — réponses QC"
@@ -1186,7 +1186,7 @@
         "en_retard": "En retard",
         "jamais_executee": "Jamais exécutée"
       },
-      "actifAide": "Dernier passage il y a {n} minutes",
+      "actifAide": "{n, plural, =0 {Dernier passage à l’instant} one {Dernier passage il y a # minute} other {Dernier passage il y a # minutes}}",
       "enRetardAide": "Dernier passage il y a {n} minutes · seuil d'alerte : {seuil} minutes",
       "jamaisExecuteeAide": "Aucun passage enregistré. La tâche n'a jamais tourné depuis son déploiement — ce n'est pas une panne, et ce n'est pas une alerte.",
       "tache": {
