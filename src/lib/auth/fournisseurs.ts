@@ -13,9 +13,20 @@ import "server-only";
  *     surtout leur plateforme ouverte exige une ENTITÉ COMMERCIALE CHINOISE
  *     enregistrée. Tant que cette entité n'existe pas, la question ne se pose
  *     pas — et c'est précisément le fournisseur chinois qui en aurait eu
- *     l'usage, Google lui étant inaccessible. Pour lui, le lien magique par
- *     email reste l'unique porte, et c'est la délivrabilité de cet email qui
- *     décide de tout.
+ *     l'usage, Google lui étant inaccessible.
+ *
+ *     ⚠️ CETTE LIGNE DISAIT « pour lui, le lien magique par email reste
+ *     l'unique porte, et c'est la délivrabilité de cet email qui décide de
+ *     tout ». LE LIEN MAGIQUE EST SUPPRIMÉ depuis le 01/09/2026, et le
+ *     raisonnement se retournait déjà contre lui-même : si la délivrabilité
+ *     vers les boîtes chinoises est le point faible — et elle l'est —, alors
+ *     faire dépendre CHAQUE connexion d'un email était le pire choix
+ *     possible. Le fournisseur entre par email + mot de passe, comme tout le
+ *     monde ; la délivrabilité ne porte plus que le RECOURS.
+ *
+ *     C'est le fichier qu'on relit au moment d'activer Google : y lire qu'une
+ *     autre porte existe pour ce persona ferait renoncer à celle-ci sans
+ *     raison.
  *   - Les réseaux sociaux grand public sont techniquement disponibles et
  *     écartés : un bouton de connexion dit en une seconde à qui s'adresse le
  *     produit, et celui-ci s'adresse aussi à des entreprises établies.

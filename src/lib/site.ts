@@ -6,12 +6,20 @@ import { headers } from "next/headers";
  *
  * POURQUOI NE PAS SE CONTENTER DE L'EN-TÊTE `Origin` OU `Host`.
  *
- * L'URL de retour d'un lien magique porte le pouvoir d'ouvrir un compte. La
- * construire à partir d'un en-tête de requête revient à laisser l'appelant
- * choisir où le lien atterrira : une requête forgée avec `Host: exemple-mal.tld`
- * produirait un email, envoyé à la VRAIE adresse de la victime, dont le lien
- * mène chez l'attaquant. La victime clique un lien qui vient bien de nous, et
- * son jeton part ailleurs.
+ * L'URL de retour d'un email d'authentification porte le pouvoir d'ouvrir un
+ * compte. La construire à partir d'un en-tête de requête revient à laisser
+ * l'appelant choisir où le lien atterrira : une requête forgée avec
+ * `Host: exemple-mal.tld` produirait un email, envoyé à la VRAIE adresse de la
+ * victime, dont le lien mène chez l'attaquant. La victime clique un lien qui
+ * vient bien de nous, et son jeton part ailleurs.
+ *
+ * ⚠️ CE PARAGRAPHE DISAIT « d'un lien magique », ET CE MÉCANISME N'EXISTE PLUS
+ * — supprimé le 01/09/2026, décision de Wassim. La menace, elle, n'a pas
+ * disparu : elle a CHANGÉ DE PORTEUR. L'email qui ouvre encore un compte est
+ * celui de la RÉINITIALISATION, et il est devenu le seul recours d'un
+ * utilisateur enfermé dehors — donc la seule chose qui sépare un compte de qui
+ * saurait lire sa boîte. Nommer un mécanisme retiré laissait conclure que cette
+ * variable ne protégeait plus rien.
  *
  * Deux barrières, et l'ordre compte :
  *   1. Supabase refuse toute redirection absente de sa liste d'autorisation.
@@ -67,8 +75,8 @@ export async function origineDuSite(): Promise<string | null> {
   if (process.env["NODE_ENV"] === "production") {
     console.error(
       "[site] NEXT_PUBLIC_SITE_URL absente ou invalide en production. " +
-        "L'URL de retour d'un lien magique porte le pouvoir d'ouvrir un compte : " +
-        "on refuse de la déduire d'un en-tête de requête.",
+        "L'URL de retour d'une réinitialisation de mot de passe porte le pouvoir " +
+        "d'ouvrir un compte : on refuse de la déduire d'un en-tête de requête.",
     );
     return null;
   }
