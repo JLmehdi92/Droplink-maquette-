@@ -19,6 +19,7 @@
     "falsifier": "node scripts/falsifier.mjs",
     "check:r2": "vitest run --project r2",
     "check:email": "node scripts/check-email.mjs",
+    "check:google": "node scripts/check-google.mjs",
     "purge:test": "node scripts/purger-residus-de-test.mjs"
   },
   "dependencies": {
