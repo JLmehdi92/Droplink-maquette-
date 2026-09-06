@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type { Client } from "pg";
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "vitest";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
+import { clientService } from "../aide/utilisateurs";
 import { PARAMETRES } from "@/lib/audit/parametres";
 import { PURGE_JOURS } from "@/lib/audit/reglages-constates";
 import { prendreEnCharge } from "@/lib/tracking/prise-en-charge";
@@ -210,5 +211,123 @@ describe("Tout réglage modifiable a sa rangée à l'écran", () => {
 
   test("chaque réglage de l'inventaire est affiché, et réciproquement", () => {
     expect([...citees].sort()).toEqual([...PARAMETRES.map((p) => p.cle)].sort());
+  });
+});
+
+describe("La fermeture ferme la NAISSANCE du compte, pas seulement le formulaire", () => {
+  /*
+   * ⚠️ CE BLOC EXISTE PARCE QUE LA GARDE PRÉCÉDENTE REGARDAIT LÀ OÙ LE DÉFAUT
+   * N'ÉTAIT PLUS (L-025).
+   *
+   * `scripts/fumee.mjs` éprouve déjà qu'une fermeture refuse le formulaire
+   * d'inscription ET qu'aucun compte n'en naît. C'est vrai, et c'est la
+   * correction de la migration 141 — dont la lecture vit dans `sInscrire`.
+   *
+   * Mesuré le 06/09/2026, interrupteur à 0, par un chemin qui ne traverse PAS
+   * ce formulaire : `auth.users` 1, `profiles` 1, `shops` 1. Un compte complet
+   * naissait pendant une fermeture. La garde couvrait le chemin corrigé, pas la
+   * propriété — *aucun compte ne doit naître*.
+   *
+   * ⚠️ ET LE CHEMIN QUI MANQUAIT EST DATÉ. La connexion Google est écrite et
+   * inerte (`external.google = false`, `AUTH_GOOGLE_ACTIF` absent, mesurés le
+   * 06/09) ; son activation est la mission suivante. Au retour, le fournisseur
+   * insère dans `auth.users` sans jamais passer par `sInscrire`. La porte
+   * n'était donc fermée que par une ABSENCE, et cette absence a une date de
+   * péremption : c'est L-029 mot pour mot.
+   *
+   * La migration 143 descend l'invariant dans `creer_profil_et_shop`, seul
+   * passage obligé de toute naissance de compte. Ce test l'éprouve LÀ, par le
+   * chemin le plus bas — pas par un formulaire.
+   */
+  const DOMAINE_JETABLE = "@droplink-test.invalid";
+
+  /** Tente une naissance de compte hors formulaire, et rend ce qui a été écrit. */
+  async function tenterNaissance(
+    etiquette: string,
+  ): Promise<{ refus: string | null; users: number; profils: number; shops: number }> {
+    const service = clientService();
+    const email = `interrupteur-${etiquette}-${Date.now()}${DOMAINE_JETABLE}`;
+    const { data, error } = await service.auth.admin.createUser({
+      email,
+      password: `Mdp-de-test-${Math.random().toString(36).slice(2)}-9!`,
+      email_confirm: true,
+    });
+
+    const userId = data?.user?.id ?? null;
+    try {
+      const profils = await interroger<{ id: string }>(
+        bd,
+        "select id from public.profiles where email = $1",
+        [email],
+      );
+      const shops =
+        profils[0] === undefined
+          ? []
+          : await interroger<{ id: string }>(bd, "select id from public.shops where owner_id = $1", [
+              profils[0].id,
+            ]);
+      return {
+        refus: error === null ? null : error.message,
+        users: userId === null ? 0 : 1,
+        profils: profils.length,
+        shops: shops.length,
+      };
+    } finally {
+      // ⚠️ NETTOYAGE INCONDITIONNEL. Un compte de test survivant a déjà mis
+      // cette base en LECTURE SEULE une fois — voir `purger-residus`.
+      if (userId !== null) await service.auth.admin.deleteUser(userId);
+    }
+  }
+
+  test("CONTRE-TEST : inscriptions ouvertes, le compte naît en entier", async () => {
+    /*
+     * IL VIENT EN PREMIER, ET CE N'EST PAS UN ORDRE DE CONFORT. « Aucun compte
+     * ne naît » serait vrai d'un déclencheur complètement cassé — c'est-à-dire
+     * d'un produit où PERSONNE ne peut plus s'inscrire. Une suite où tout est
+     * refusé passe à 100 % sans rien prouver.
+     */
+    await poser("inscriptions_ouvertes", 1);
+    const r = await tenterNaissance("ouvert");
+    expect(r.refus, "la création est refusée alors que les inscriptions sont OUVERTES").toBeNull();
+    expect(
+      [r.users, r.profils, r.shops],
+      "le déclencheur ne crée plus le profil et le shop : plus personne ne peut s'inscrire",
+    ).toEqual([1, 1, 1]);
+  });
+
+  test("fermées : RIEN ne naît, par un chemin qui n'est pas le formulaire", async () => {
+    await poser("inscriptions_ouvertes", 0);
+    const r = await tenterNaissance("ferme");
+    expect(r.refus, "la naissance du compte n'a pas été refusée").not.toBeNull();
+    expect(
+      [r.users, r.profils, r.shops],
+      "un compte est né pendant une fermeture — la garde ne couvre que le formulaire",
+    ).toEqual([0, 0, 0]);
+  });
+
+  test("la garde vit dans le déclencheur, pas dans un appelant", async () => {
+    /*
+     * ⚠️ L'AUTRE SENS, ET C'EST LUI QUI PROTÈGE DU RETOUR DU DÉFAUT.
+     *
+     * Les deux tests ci-dessus resteraient verts si quelqu'un remettait la
+     * lecture dans un appelant — par exemple dans le harnais de test lui-même —
+     * tout en la retirant de la base. Ce qu'on veut tenir, c'est que le SEUL
+     * passage obligé la porte : c'est ce qui rend inutile de la recopier dans
+     * chaque chemin futur, Google compris.
+     *
+     * On interroge donc le catalogue, pas le fichier de migration : un fichier
+     * prouve qu'un texte existe, jamais qu'une capacité est en place (L-020).
+     */
+    const lignes = await interroger<{ corps: string }>(
+      bd,
+      `select pg_get_functiondef(p.oid) as corps
+       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public' and p.proname = 'creer_profil_et_shop'`,
+    );
+    expect(lignes, "déclencheur de création introuvable : la sonde vise à côté").toHaveLength(1);
+    expect(
+      lignes[0]?.corps,
+      "le déclencheur ne consulte plus l'interrupteur : la fermeture est redevenue applicative",
+    ).toContain("lire_inscriptions_ouvertes");
   });
 });

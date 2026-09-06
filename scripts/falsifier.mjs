@@ -2748,6 +2748,57 @@ $$;
                      where o.id = order_events.order_id and p.user_id = (select auth.uid())));`,
   },
 
+  /**
+   * LA FERMETURE DES INSCRIPTIONS NE FERME PLUS QUE LE FORMULAIRE.
+   *
+   * Le cas motivant, exactement. La lecture reste dans `sInscrire`, donc la
+   * fumee continue de constater qu une soumission refusee ne cree rien — et
+   * TOUT AUTRE chemin en cree un, dont le retour Google qu on s apprete a
+   * activer. C est ce qui a ete mesure le 06/09/2026 : auth.users 1,
+   * profiles 1, shops 1, interrupteur a 0.
+   */
+  "porte-inscription-formulaire-seul": {
+    casserDepuisMigration: {
+      fichier: "143_la_fermeture_des_inscriptions_ne_fermait_qu_un_formulaire.sql",
+      depuis: "create or replace function public.creer_profil_et_shop",
+      jusqua: "comment on function",
+      remplacer: "if v_ouvertes = false then",
+      par: "if false then",
+    },
+    reparerDepuisMigration: {
+      fichier: "143_la_fermeture_des_inscriptions_ne_fermait_qu_un_formulaire.sql",
+      depuis: "create or replace function public.creer_profil_et_shop",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * HORS du cas motivant : la porte est fermee POUR TOUJOURS.
+   *
+   * Le defaut symetrique, et il est plus grave que celui qu on repare : plus
+   * personne ne peut s inscrire, quel que soit l interrupteur. Une suite qui
+   * ne verifierait que le refus passerait a 100 % sur ce produit-la — elle
+   * certifierait un SaaS ou l inscription est morte.
+   *
+   * Il est aussi le mode de defaillance REEL de cette migration : la lecture
+   * de l interrupteur est enrobee, et un enrobage qui se tromperait de sens
+   * ferme tout sans rien dire.
+   */
+  "porte-inscription-toujours-fermee": {
+    casserDepuisMigration: {
+      fichier: "143_la_fermeture_des_inscriptions_ne_fermait_qu_un_formulaire.sql",
+      depuis: "create or replace function public.creer_profil_et_shop",
+      jusqua: "comment on function",
+      remplacer: "if v_ouvertes = false then",
+      par: "if true then",
+    },
+    reparerDepuisMigration: {
+      fichier: "143_la_fermeture_des_inscriptions_ne_fermait_qu_un_formulaire.sql",
+      depuis: "create or replace function public.creer_profil_et_shop",
+      jusqua: "comment on function",
+    },
+  },
+
 };
 
 /**
