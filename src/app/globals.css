@@ -231,17 +231,40 @@
   --spacing-margin-desktop: 40px;
   --spacing-container-max: 1440px;
 
-  /* ----- Familles : inchangées, servies par next/font, jamais un CDN ------- */
-  --font-headline-xl: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-headline-lg: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-headline-lg-mobile: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-headline-md: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-headline-md-mobile: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-body-lg: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-body-md: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-body-sm: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-label-md: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-label-sm: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* ----- Familles : inchangées, servies par next/font, jamais un CDN -------
+   *
+   * ⚠️ AUCUNE DES DEUX POLICES NE COUVRE LES IDÉOGRAMMES. Mesuré le 06/09/2026
+   * sur le CSS produit par le build : aucune `unicode-range` de Plus Jakarta
+   * Sans ni d'Inter ne touche U+4E00–U+9FFF. En chinois, le navigateur
+   * substitue donc — et il substitue ce qu'il veut, souvent une police à
+   * empattements qui jure avec tout le reste.
+   *
+   * ON NE CHARGE PAS DE POLICE CJK, ET C'EST UNE DÉCISION DE BUDGET. Une
+   * famille chinoise complète pèse plusieurs mégaoctets, découpée en cent et
+   * quelques tranches ; la page client vit sous un plafond de 300 Ko hors
+   * médias, vue en 4G depuis un message privé. `p/[token]` ne charge d'ailleurs
+   * AUCUNE police, délibérément.
+   *
+   * On NOMME donc les polices système CJK dans la pile, à la suite. Elles sont
+   * déjà installées chez le lecteur : le coût est nul, et le rendu cesse de
+   * dépendre du hasard de la substitution.
+   *   `PingFang SC`        macOS et iOS
+   *   `Hiragino Sans GB`   macOS ancien
+   *   `Microsoft YaHei`    Windows
+   *   `Source Han Sans SC` / `Noto Sans CJK SC`  Linux et Android
+   * ------------------------------------------------------------------------ */
+  --pile-cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
+    "Noto Sans CJK SC", "WenQuanYi Micro Hei";
+  --font-headline-xl: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-headline-lg: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-headline-lg-mobile: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-headline-md: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-headline-md-mobile: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-body-lg: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-body-md: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-body-sm: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-label-md: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-label-sm: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
 
   /*
    * ----- Échelle typographique -------------------------------------------
@@ -647,5 +670,56 @@ body {
   .anim-anneau,
   .anim-halo {
     animation: none;
+  }
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TYPOGRAPHIE CHINOISE — ce que le canevas ne dessine pas
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * L'échelle du canevas serre les titres — `tracking-[-0.03em]`, graisse 800 —
+ * et c'est ce qui lui donne sa densité. C'est juste pour du latin, où
+ * l'espacement négatif rapproche des lettres qui ont chacune leur chasse.
+ *
+ * ⚠️ SUR DES IDÉOGRAMMES, LES DEUX SE RETOURNENT.
+ *
+ *   - Le chinois s'écrit en chasse FIXE, sans espaces entre les mots. Un
+ *     resserrement de 3 % fait donc SE TOUCHER les caractères, au lieu de
+ *     rapprocher des lettres qui respiraient.
+ *   - Aucune police système CJK n'a de graisse 800. Le navigateur la SYNTHÉTISE
+ *     en épaississant les traits — sur un idéogramme dense, les traits internes
+ *     se rejoignent et le caractère devient une tache.
+ *
+ * ⚠️ MA PREMIÈRE VERSION VISAIT `.font-headline-*` ET NE SERVAIT À RIEN.
+ * Mesuré dans le CSS SERVI : `.font-headline-xl` ne porte que
+ * `font-family: var(--font-headline-xl)`. Le serrage vient de
+ * `tracking-[-0.03em]`, écrite à la main dans le markup — 24 fois pour
+ * `-0.03em`, 24 pour `-0.02em` — et la graisse de `font-extrabold`, 59 fois.
+ * La règle était donc inopérante, et rien ne l'aurait dit : elle s'appliquait
+ * proprement à des classes qui ne portent pas ces propriétés.
+ *
+ * C'est `tests/rls/regles-hors-couche` qui l'a fait découvrir, en refusant des
+ * règles écrites hors de toute couche — celles-là l'emportent sur TOUT
+ * utilitaire, sur chaque élément qu'elles touchent, sans que rien n'échoue.
+ * Elles vivent donc dans `utilities`, la couche de ce qu'elles corrigent.
+ *
+ * ⚠️ CIBLÉ PAR `:lang()`, PAS PAR UNE CLASSE. L'attribut est posé sur `<html>`
+ * à partir de la langue réelle de la page — celle du VENDEUR sur `/p/[token]`,
+ * celle de l'URL ailleurs. Une classe posée à la main aurait été oubliée sur le
+ * prochain écran ; `:lang()` suit l'attribut, et l'attribut suit la donnée.
+ */
+@layer utilities {
+  :lang(zh-CN) .tracking-\[-0\.01em\],
+  :lang(zh-CN) .tracking-\[-0\.015em\],
+  :lang(zh-CN) .tracking-\[-0\.02em\],
+  :lang(zh-CN) .tracking-\[-0\.025em\],
+  :lang(zh-CN) .tracking-\[-0\.03em\],
+  :lang(zh-CN) .tracking-\[-0\.05em\] {
+    letter-spacing: 0;
+  }
+
+  :lang(zh-CN) .font-extrabold {
+    font-weight: 700;
   }
 }

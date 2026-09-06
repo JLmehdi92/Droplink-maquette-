@@ -4501,6 +4501,30 @@ controles.push(
     /rounded-page-publique\{border-radius:var\(--radius-page-publique\)\}/.test(css),
     "la classe du rayon public existe et pointe sur son token",
   ],
+
+  /*
+   * --- LA TYPOGRAPHIE CHINOISE SURVIT AU BUILD ---
+   *
+   * ⚠️ CES DEUX REGLES SONT LE GENRE QU UNE PURGE EFFACE SANS BRUIT. Elles ne
+   * sont referencees par aucune classe du markup : `:lang(zh-CN)` ne
+   * ressemble a rien que Tailwind reconnaisse, et une famille declaree dans
+   * une variable ne s emploie que par `var()`. Les perdre ne casse RIEN — ca
+   * rend seulement le chinois en police substituee, avec des ideogrammes qui
+   * se touchent et une graisse synthetique. Personne ne le verrait avant un
+   * vrai lecteur chinois.
+   *
+   * On les cherche donc dans le CSS SERVI, pas dans `globals.css` : un fichier
+   * source prouve qu un texte existe, jamais qu il est arrive jusqu au
+   * navigateur (L-032).
+   */
+  [
+    css.includes("PingFang SC"),
+    "la pile de polices CJK est dans le CSS servi (aucune de nos deux polices ne couvre les ideogrammes)",
+  ],
+  [
+    /lang\(zh-CN\)/.test(css) && /letter-spacing:0/.test(css),
+    "la regle typographique chinoise est servie : l espacement negatif ferait SE TOUCHER les ideogrammes",
+  ],
 );
 
 // --- Aucune classe ne peint dans le vide ---
