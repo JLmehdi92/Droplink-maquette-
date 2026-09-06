@@ -1,4 +1,5 @@
 import "server-only";
+import { LANGUE_DEFAUT, estLangueSupportee, type Langue } from "@/i18n/config";
 import { cache } from "react";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estPanneDeTransport } from "@/lib/reseau/panne";
@@ -48,7 +49,7 @@ export type ProfilVendeur = {
    * l'interface du vendeur. Un fournisseur peut travailler en anglais et livrer
    * en France ; confondre les deux ne se voit jamais côté vendeur.
    */
-  readonly languePublique: "fr" | "en";
+  readonly languePublique: Langue;
   /** Les trois réseaux, `null` chacun quand il n'est pas configuré. */
   readonly reseaux: {
     readonly instagram: string | null;
@@ -226,10 +227,30 @@ export async function lireProfilAvec(
     logoUrl: s.logo_url,
     couleurAccent: s.accent_color,
     filigrane: s.watermark_enabled,
-    // La contrainte `shops_langue_supportee` borne la colonne aux deux valeurs.
-    // Le repli n'est donc pas un choix produit mais ce que le TYPAGE exige : la
-    // base rend du `text`, et parier dessus sans contrôle serait un `as` déguisé.
-    languePublique: s.default_language === "en" ? "en" : "fr",
+    /*
+     * ⚠️ CETTE LIGNE DISAIT `=== "en" ? "en" : "fr"`, ET SA JUSTIFICATION S'EST
+     * RETOURNÉE CONTRE ELLE.
+     *
+     * Elle s'appuyait sur « la contrainte borne la colonne aux DEUX valeurs ».
+     * C'était vrai jusqu'à la migration 144, qui en admet une troisième. Le
+     * ternaire, lui, n'aurait pas bougé — et le compilateur n'avait rien à en
+     * dire, puisque la base rend du `text` et que la sortie restait bien typée.
+     *
+     * CE QUE ÇA AURAIT COÛTÉ, en silence : une boutique réglée en `zh-CN` se
+     * serait relue en `fr`. L'écran de marque aurait affiché « Français » à un
+     * vendeur qui a choisi le chinois, et le prochain enregistrement aurait
+     * ÉCRASÉ son choix avec ce qu'il croyait voir. C'est L-029 — une
+     * protection qui tient à ce que la base reste plus stricte qu'elle ne le
+     * sera — et le principe XII : l'interface aurait affirmé ce que la base ne
+     * portait pas.
+     *
+     * `estLangueSupportee` dérive de `LANGUES` : elle suit l'inventaire au lieu
+     * de le recopier. Le repli reste, parce que la colonne est du `text` et
+     * qu'y parier sans contrôle serait un `as` déguisé.
+     */
+    languePublique: estLangueSupportee(s.default_language)
+      ? s.default_language
+      : LANGUE_DEFAUT,
     reseaux: {
       instagram: s.instagram_url,
       tiktok: s.tiktok_url,

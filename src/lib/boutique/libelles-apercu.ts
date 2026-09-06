@@ -1,6 +1,6 @@
 import "server-only";
 import { getTranslations } from "next-intl/server";
-import type { Langue } from "@/i18n/config";
+import { LANGUES, type Langue } from "@/i18n/config";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 
 /**
@@ -78,4 +78,23 @@ export async function libellesApercu(langue: Langue): Promise<LibellesApercu> {
     statut: client("frise.en_transit"),
     reseauxGabarit: client.raw("reseaux.titre"),
   };
+}
+
+/**
+ * Les libellés d'aperçu dans TOUTES les langues du produit.
+ *
+ * ⚠️ ENGENDRÉS PAR `LANGUES`, JAMAIS ÉNUMÉRÉS. L'écran de marque les recevait
+ * sous la forme `{ fr: …, en: … }`, écrite à la main : ajouter une troisième
+ * langue aurait laissé son aperçu vide, ou pire, l'aurait figé dans une langue
+ * que le vendeur n'avait pas choisie. Le compilateur l'a attrapé cette fois —
+ * `Record<Langue, …>` l'exige — mais seulement parce que le type est dérivé.
+ *
+ * Le coût est celui de N appels à `getTranslations`, sur un écran rendu une
+ * fois par visite et déjà servi par le cache de traduction de next-intl.
+ */
+export async function tousLesLibellesApercu(): Promise<Record<Langue, LibellesApercu>> {
+  const paires = await Promise.all(
+    LANGUES.map(async (langue) => [langue, await libellesApercu(langue)] as const),
+  );
+  return Object.fromEntries(paires) as Record<Langue, LibellesApercu>;
 }

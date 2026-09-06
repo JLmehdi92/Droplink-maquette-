@@ -83,6 +83,15 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
     "composé depuis `profiles.locale` — fiche de compte",
   ],
   [
+    "marque.langue.",
+    "composé depuis `LANGUES` — le sélecteur de langue des pages client. Les " +
+      "options étaient ÉNUMÉRÉES jusqu'au 06/09/2026 : une troisième langue " +
+      "serait entrée dans le produit sans jamais apparaître dans cette liste, " +
+      "et un `<select>` dont la valeur ne correspond à aucune option affiche " +
+      "la PREMIÈRE — un vendeur réglé en chinois aurait lu « Français », et " +
+      "son prochain enregistrement aurait écrasé son propre choix.",
+  ],
+  [
     "admin.journal.fenetre.",
     "composé depuis FENETRES_JOURNAL — filtres du journal d'audit",
   ],

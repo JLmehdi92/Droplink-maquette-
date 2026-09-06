@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { SchemaLangue } from "@/i18n/schema";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
@@ -45,7 +46,7 @@ const Onboarding = z.object({
     .string()
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "couleur hexadécimale à six chiffres attendue"),
-  locale: z.enum(["fr", "en"]),
+  locale: SchemaLangue,
 });
 
 export type ResultatOnboarding =

@@ -1,6 +1,8 @@
 import "server-only";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
+import { LANGUE_DEFAUT } from "@/i18n/config";
+import { SchemaLangue } from "@/i18n/schema";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
@@ -170,7 +172,7 @@ async function archiverUne(donnees: FormData, profilId: string): Promise<string>
 }
 
 async function dupliquerUne(donnees: FormData, profilId: string, shopId: string): Promise<string> {
-  const langue = z.enum(["fr", "en"]).catch("fr").parse(donnees.get("langue"));
+  const langue = SchemaLangue.catch(LANGUE_DEFAUT).parse(donnees.get("langue"));
   const retour = destination(donnees, "/" + langue + "/commandes");
 
   const id = Identifiant.safeParse(donnees.get("id"));

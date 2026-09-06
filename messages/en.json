@@ -290,7 +290,8 @@
     "langueAide": "Your customers always see this language, wherever they are.",
     "langue": {
       "fr": "French",
-      "en": "English"
+      "en": "English",
+      "zh-CN": "Simplified Chinese"
     },
     "filigraneTitre": "Watermark on photos",
     "filigraneLabel": "Show my shop name on the photos",
@@ -1207,7 +1208,8 @@
     },
     "langues": {
       "fr": "French",
-      "en": "English"
+      "en": "English",
+      "zh-CN": "Simplified Chinese"
     }
   },
   "erreurs": {

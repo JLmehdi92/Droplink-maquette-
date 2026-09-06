@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
+import { LANGUE_DEFAUT } from "@/i18n/config";
+import { SchemaLangue } from "@/i18n/schema";
 
 /**
  * LA FORME D UN JETON RENVOYÉ PAR LE NAVIGATEUR.
@@ -54,7 +56,7 @@ export async function creerBrouillon(donnees: FormData): Promise<void> {
     redirect("/fr/connexion?erreur=session");
   }
 
-  const langue = z.enum(["fr", "en"]).catch("fr").parse(donnees.get("langue"));
+  const langue = SchemaLangue.catch(LANGUE_DEFAUT).parse(donnees.get("langue"));
 
   const supabase = await creerClientServeur();
 

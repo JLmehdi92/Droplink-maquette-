@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { SchemaLangue } from "@/i18n/schema";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
 import { sessionParEmail } from "@/lib/auth/recuperation";
@@ -36,7 +37,7 @@ import { creerClientServeur } from "@/lib/supabase/server";
  */
 
 const Saisie = z.object({
-  locale: z.enum(["fr", "en"]),
+  locale: SchemaLangue,
   motDePasse: MotDePasse,
 });
 

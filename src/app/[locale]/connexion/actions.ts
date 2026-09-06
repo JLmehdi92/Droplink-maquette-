@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { SchemaLangue } from "@/i18n/schema";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { fournisseurActif } from "@/lib/auth/fournisseurs";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
@@ -64,7 +65,7 @@ import { creerClientServeur } from "@/lib/supabase/server";
  * vigueur : le réglage vit dans le tableau de bord, hors du dépôt.
  */
 
-const Langue = z.enum(["fr", "en"]);
+const Langue = SchemaLangue;
 
 /*
  * Zod sur toute entrée externe, y compris ce qui « vient de notre formulaire » :

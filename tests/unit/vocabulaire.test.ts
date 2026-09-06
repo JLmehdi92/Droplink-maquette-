@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { LANGUES } from "@/i18n/config";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -136,7 +137,37 @@ function mots(texte: string): string[] {
     .filter((m) => m !== "");
 }
 
-const CATALOGUES = ["fr", "en"] as const;
+/*
+ * ⚠️ TOUTES LES LANGUES, PAS DEUX. Cette constante valait `["fr", "en"]` :
+ * un catalogue chinois n'aurait été inspecté par RIEN.
+ */
+const CATALOGUES = LANGUES;
+
+/**
+ * LES INTERDITS QUI NE S'ÉCRIVENT PAS EN LETTRES.
+ *
+ * ⚠️ LE TOKENISEUR CI-DESSOUS DÉCOUPE SUR `[^a-z0-9]+` : sur un texte en
+ * idéogrammes il rend le TABLEAU VIDE. Mesuré — « 集装箱正在港口清关 » (le
+ * conteneur est en dédouanement au port) donne `[]`. Un catalogue chinois
+ * entier serait donc passé à 100 % **en n'inspectant rien**, et c'est la porte
+ * qui tient le principe II du brief et la mitigation du risque hébergeur.
+ * *Un ensemble vide passe tout*, posé au pire endroit possible.
+ *
+ * Ces termes-ci sont donc cherchés par SOUS-CHAÎNE, puisque le chinois écrit
+ * sans espaces et qu'aucun découpage en mots n'a de sens ici.
+ */
+const INTERDITS_SANS_MOTS: ReadonlyMap<string, string> = new Map([
+  ["集装箱", "conteneur — vocabulaire de fret"],
+  ["托盘", "palette — vocabulaire de fret"],
+  ["报关", "dédouanement — vocabulaire de fret"],
+  ["清关", "dédouanement — vocabulaire de fret"],
+  ["货代", "transitaire — vocabulaire de fret"],
+  ["批次", "lot / batch — interdit par le brief"],
+  ["复刻", "replica — jargon du vertical reps"],
+  ["仿品", "contrefaçon — jargon du vertical reps"],
+  ["高仿", "contrefaçon haut de gamme — jargon du vertical reps"],
+  ["莆田", "Putian — désigne l'origine des reps"],
+]);
 
 function lireCatalogue(langue: string): [string, string][] {
   const brut = readFileSync(join(process.cwd(), "messages", `${langue}.json`), "utf8");
@@ -156,6 +187,28 @@ describe("Le vocabulaire des chaînes visibles", () => {
         lues.every(([, v]) => typeof v === "string"),
         "l'aplatissement ne rend pas que des chaînes",
       ).toBe(true);
+
+      /*
+       * ⚠️ COMPTER LES CHAÎNES NE SUFFISAIT PAS, ET C'EST LE DÉFAUT QUE CE
+       * BLOC FERME. Le contrôle vérifiait `lues.length > 400` — le nombre de
+       * VALEURS lues — jamais le nombre d'unités réellement examinées. Sur un
+       * catalogue en idéogrammes, les 400 chaînes étaient bien là et le
+       * tokeniseur rendait `[]` pour chacune : la sonde passait en n'ayant
+       * rien inspecté du tout.
+       *
+       * On exige donc que CHAQUE catalogue livre des unités : soit des mots
+       * latins, soit des caractères CJK. Un catalogue qui n'en donnerait
+       * aucune ferait rougir ici, au lieu de rendre le contrôle suivant muet.
+       */
+      const unites = lues.reduce(
+        (n, [, v]) => n + mots(v).length + [...v].filter((c) => c >= "　").length,
+        0,
+      );
+      expect(
+        unites,
+        `catalogue ${langue} : la sonde n'a extrait AUCUNE unité inspectable. ` +
+          "Le découpage en mots ne mord-il pas sur cette écriture ?",
+      ).toBeGreaterThan(1000);
     }
   });
 
@@ -174,6 +227,15 @@ describe("Le vocabulaire des chaînes visibles", () => {
           if (EXCEPTIONS.has(`${chemin}:${mot}`)) continue;
 
           trouves.push(`${langue}/${chemin} → « ${mot} » (${motif}) : ${texte.slice(0, 90)}`);
+        }
+
+        // LES TERMES SANS ESPACES, cherchés tels quels : aucun découpage en
+        // mots ne peut les isoler, et c'est précisément pour cela qu'ils
+        // passaient inaperçus.
+        for (const [terme, motif] of INTERDITS_SANS_MOTS) {
+          if (!texte.includes(terme)) continue;
+          if (EXCEPTIONS.has(`${chemin}:${terme}`)) continue;
+          trouves.push(`${langue}/${chemin} → « ${terme} » (${motif}) : ${texte.slice(0, 90)}`);
         }
       }
     }
@@ -207,12 +269,26 @@ describe("Le vocabulaire des chaînes visibles", () => {
     ).toEqual([]);
   });
 
-  test("les deux catalogues portent exactement les mêmes clés", () => {
-    // La parité est vérifiée ailleurs, mais elle conditionne CE contrôle : une
-    // clé présente dans une seule langue échapperait à l'inspection de l'autre.
-    const cles = CATALOGUES.map((l) => new Set(lireCatalogue(l).map(([c]) => c)));
-    const [fr, en] = cles;
-    expect([...(fr ?? [])].filter((c) => !(en ?? new Set()).has(c))).toEqual([]);
-    expect([...(en ?? [])].filter((c) => !(fr ?? new Set()).has(c))).toEqual([]);
+  test("tous les catalogues portent exactement les mêmes clés", () => {
+    /*
+     * La parité est vérifiée ailleurs, mais elle conditionne CE contrôle : une
+     * clé présente dans une seule langue échapperait à l'inspection des autres.
+     *
+     * ⚠️ CE TEST FAISAIT `const [fr, en] = cles` — DEUX LANGUES, EN DUR. Une
+     * troisième n'aurait été comparée à rien, et ses clés propres n'auraient
+     * donc jamais été inspectées pour le vocabulaire interdit.
+     */
+    const reference = new Set(lireCatalogue(CATALOGUES[0]).map(([c]) => c));
+    for (const langue of CATALOGUES.slice(1)) {
+      const autres = new Set(lireCatalogue(langue).map(([c]) => c));
+      expect(
+        [...reference].filter((c) => !autres.has(c)),
+        `clés présentes en ${CATALOGUES[0]} et absentes en ${langue}`,
+      ).toEqual([]);
+      expect(
+        [...autres].filter((c) => !reference.has(c)),
+        `clés présentes en ${langue} et absentes en ${CATALOGUES[0]}`,
+      ).toEqual([]);
+    }
   });
 });

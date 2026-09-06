@@ -2910,7 +2910,14 @@ const DEPOT = {
    * dont on ne teste que la couche interne n'a plus qu'une couche.
    */
   "middleware-aveugle-a-admin": {
-    fichier: "src/middleware.ts",
+    // ⚠️ LE MOTIF A DEMENAGE LE 06/09/2026, et ce garde l a attrape : il exige
+    // que chaque cible designe un fichier existant et un motif present UNE
+    // fois. `viseAdmin` vivait dans le middleware, ou RIEN ne l exercait —
+    // zero occurrence dans `tests/`. L importer pour la tester entrainait tout
+    // `next-intl/middleware`, qui ne se resout pas hors d un contexte Next.
+    // Une fonction de correspondance de chemin n a besoin d aucun de ces
+    // modules : elle vit desormais dans un module pur, et elle est eprouvee.
+    fichier: "src/lib/routes/vise-admin.ts",
     remplacer: "  return /^\\/(?:[a-z]{2}(?:-[a-z]{2})?\\/)?admin(?:\\/|$)/i.test(chemin);",
     par: "  void chemin;\n  return false;",
   },

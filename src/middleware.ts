@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { viseAdmin } from "@/lib/routes/vise-admin";
 import { OPTIONS_COOKIES } from "@/lib/auth/cookies";
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
@@ -113,9 +114,6 @@ const gestionLangue = createMiddleware(routing);
  * filtre. Ils ne mèneraient nulle part aujourd'hui — mais une protection qui
  * tient à ce qu'une redirection ait lieu D'ABORD n'est pas une protection.
  */
-function viseAdmin(chemin: string): boolean {
-  return /^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?admin(?:\/|$)/i.test(chemin);
-}
 
 export default async function middleware(requete: NextRequest): Promise<NextResponse> {
   const reponse = gestionLangue(requete);

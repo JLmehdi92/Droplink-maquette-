@@ -106,20 +106,37 @@ describe("Parité des catalogues", () => {
     expect(defauts, defauts.join(" | ")).toEqual([]);
   });
 
-  test("les deux catalogues portent bien des textes DIFFÉRENTS", () => {
-    // Contre-test positif : un `cp fr.json en.json` produirait une parité
-    // parfaite et un anglais entièrement français. La parité seule ne dit rien
-    // de la traduction.
-    const fr = aplatir(chargerCatalogue("fr"));
-    const en = aplatir(chargerCatalogue("en"));
-    const identiques = [...fr.entries()].filter(([c, v]) => en.get(c) === v);
-    const proportion = identiques.length / fr.size;
-    expect(
-      proportion,
-      `${identiques.length}/${fr.size} valeurs identiques entre fr et en : ` +
-        `${identiques.map(([c]) => c).join(", ")}. Le catalogue anglais a-t-il ` +
-        "été copié depuis le français ?",
-    ).toBeLessThan(0.3);
+  test("les catalogues portent bien des textes DIFFÉRENTS, deux à deux", () => {
+    /*
+     * Contre-test positif : un `cp fr.json en.json` produirait une parité
+     * parfaite et un anglais entièrement français. La parité seule ne dit rien
+     * de la traduction.
+     *
+     * ⚠️ IL ÉTAIT CÂBLÉ SUR `fr` ET `en`, EN DUR — seul test du fichier à ne
+     * pas itérer sur `LANGUES`. Un `cp en.json zh-CN.json` serait passé par
+     * TOUTE la suite : parité parfaite, aucune valeur vide, aucun marqueur de
+     * traduction en attente. Un produit « chinois » entièrement en anglais,
+     * vert de bout en bout — sur la page que voit le client d'un fournisseur,
+     * c'est-à-dire exactement la crédibilité que ce produit vend.
+     *
+     * Il compare donc CHAQUE PAIRE. Le seuil reste le même pour toutes : une
+     * paire est suspecte dès qu'un tiers des valeurs coïncident.
+     */
+    for (let i = 0; i < LANGUES.length; i += 1) {
+      for (let j = i + 1; j < LANGUES.length; j += 1) {
+        const a = LANGUES[i] as string;
+        const b = LANGUES[j] as string;
+        const ca = aplatir(chargerCatalogue(a));
+        const cb = aplatir(chargerCatalogue(b));
+        const identiques = [...ca.entries()].filter(([c, v]) => cb.get(c) === v);
+        expect(
+          identiques.length / ca.size,
+          `${identiques.length}/${ca.size} valeurs identiques entre ${a} et ${b} : ` +
+            `${identiques.map(([c]) => c).slice(0, 12).join(", ")}. Le catalogue ` +
+            `${b} a-t-il été copié depuis ${a} ?`,
+        ).toBeLessThan(0.3);
+      }
+    }
   });
 });
 

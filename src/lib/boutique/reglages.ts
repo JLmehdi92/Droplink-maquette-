@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { SchemaLangue } from "@/i18n/schema";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
 import { normaliserLien, type CleLien } from "@/lib/boutique/normaliser-lien";
@@ -104,7 +105,7 @@ export const ReglagesMarque = z.object({
     .string()
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "couleur hexadécimale à six chiffres attendue"),
-  languePublique: z.enum(["fr", "en"]),
+  languePublique: SchemaLangue,
   filigrane: z.boolean(),
   instagram: lienNormalise("instagram", MOTIFS_RESEAUX.instagram),
   tiktok: lienNormalise("tiktok", MOTIFS_RESEAUX.tiktok),

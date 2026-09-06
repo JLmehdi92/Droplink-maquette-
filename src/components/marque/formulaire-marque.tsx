@@ -6,6 +6,7 @@ import { normaliserLien } from "@/lib/boutique/normaliser-lien";
 import { useActionState, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
+import { LANGUES, estLangueSupportee, type Langue } from "@/i18n/config";
 import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import {
   confirmerLogo,
@@ -91,11 +92,11 @@ export function FormulaireMarque({
    * aller-retour serveur par changement de `<select>` serait absurde pour six
    * chaînes ; les deux jeux pèsent quelques centaines d'octets.
    */
-  readonly libelles: Record<"fr" | "en", LibellesApercu>;
+  readonly libelles: Record<Langue, LibellesApercu>;
   readonly initial: {
     readonly nom: string;
     readonly couleur: string;
-    readonly languePublique: "fr" | "en";
+    readonly languePublique: Langue;
     readonly filigrane: boolean;
     readonly logoUrl: string | null;
     readonly reseaux: {
@@ -111,7 +112,7 @@ export function FormulaireMarque({
 
   const [nom, setNom] = useState(initial.nom);
   const [couleur, setCouleur] = useState(initial.couleur);
-  const [langue, setLangue] = useState<"fr" | "en">(initial.languePublique);
+  const [langue, setLangue] = useState<Langue>(initial.languePublique);
   /*
    * CE QUE VERRONT LES CLIENTS, dans la langue que le vendeur est en train de
    * choisir — jamais dans celle de son interface. `t(...)` reste employé partout
@@ -865,17 +866,33 @@ export function FormulaireMarque({
                   {t("langueAide")}
                 </p>
               </div>
-              {/* UNE LISTE, ET NON DEUX BOUTONS RADIO : deux options
-                  aujourd'hui, et la planche dessine une liste — une troisième
-                  langue ne redessinerait pas l'écran. */}
+              {/* UNE LISTE, ET NON DES BOUTONS RADIO : la planche dessine une
+                  liste, et elle a accueilli la troisième langue sans être
+                  redessinée — ce que son commentaire d'origine annonçait.
+
+                  ⚠️ LES OPTIONS SONT ENGENDRÉES PAR `LANGUES`, ELLES NE SONT
+                  PLUS ÉNUMÉRÉES. Elles l'étaient, et le `onChange` portait
+                  `e.target.value === "en" ? "en" : "fr"` : une valeur inconnue
+                  y retombait sur le français EN SILENCE. Pire, un `<select>`
+                  dont la `value` ne correspond à aucune `<option>` affiche la
+                  PREMIÈRE — un vendeur réglé en chinois aurait donc lu
+                  « Français », et son prochain enregistrement aurait écrasé son
+                  propre choix. Rien, dans aucun de ces deux défauts, n'aurait
+                  fait rougir le compilateur. */}
               <select
                 aria-label={t("langueTitre")}
                 value={langue}
-                onChange={(e) => setLangue(e.target.value === "en" ? "en" : "fr")}
+                onChange={(e) => {
+                  const choisie = e.target.value;
+                  if (estLangueSupportee(choisie)) setLangue(choisie);
+                }}
                 className={champ + " champ-liste mt-2.5 cursor-pointer lg:mt-0 lg:w-[150px]"}
               >
-                <option value="fr">{t("langue.fr")}</option>
-                <option value="en">{t("langue.en")}</option>
+                {LANGUES.map((code) => (
+                  <option key={code} value={code}>
+                    {t(`langue.${code}`)}
+                  </option>
+                ))}
               </select>
             </div>
           </section>

@@ -290,7 +290,8 @@
     "langueAide": "Vos clients voient toujours cette langue, où qu’ils soient.",
     "langue": {
       "fr": "Français",
-      "en": "Anglais"
+      "en": "Anglais",
+      "zh-CN": "Chinois simplifié"
     },
     "filigraneTitre": "Filigrane sur les photos",
     "filigraneLabel": "Afficher le nom de ma boutique sur les photos",
@@ -1207,7 +1208,8 @@
     },
     "langues": {
       "fr": "Français",
-      "en": "Anglais"
+      "en": "Anglais",
+      "zh-CN": "Chinois simplifié"
     }
   },
   "erreurs": {

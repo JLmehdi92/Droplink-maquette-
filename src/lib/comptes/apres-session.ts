@@ -8,6 +8,16 @@ import {
   SessionIndisponible,
   type ProfilVendeur,
 } from "@/lib/comptes/profil";
+/*
+ * ⚠️ `Langue` PLUTÔT QUE `"fr" | "en"` ÉCRIT À LA MAIN. Ces trois signatures
+ * portaient l'union en clair, et c'est ce qui a fait rougir le compilateur en
+ * TREIZE endroits le jour où une troisième langue est entrée dans `LANGUES`.
+ *
+ * Ce rouge est le bon comportement : il a désigné exactement les appelants qui
+ * dépendaient d'une hypothèse à deux langues, sans qu'aucune relecture n'ait à
+ * les chercher. Le type dérivé de `LANGUES` est la seule forme qui se propage.
+ */
+import type { Langue } from "@/i18n/config";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { emettre } from "@/lib/instrumentation/emettre";
 
@@ -79,7 +89,7 @@ export type Destination =
  * pas qu'elle existe, il en décrit la suite.
  */
 export async function suivreApresSession(
-  langue: "fr" | "en",
+  langue: Langue,
   supabase: Awaited<ReturnType<typeof creerClientServeur>>,
 ): Promise<Destination> {
   const profil = await lireProfilAvec(supabase);
@@ -168,7 +178,7 @@ export async function suivreApresSession(
  * motifs affichables vivait ailleurs que leur émission.
  */
 export function cheminDeRefus(
-  langue: "fr" | "en",
+  langue: Langue,
   motif: "profil" | "suspendu" | "fermees" | "service",
 ): string {
   return `/${langue}/connexion?erreur=${motif}`;
@@ -217,7 +227,7 @@ export function cheminDeRefus(
  * pas, et une exception déclarée qui ne désigne plus rien non plus. C'est ce
  * qui empêche le défaut de revenir par la porte de la page suivante.
  */
-export async function exigerVendeur(langue: "fr" | "en"): Promise<ProfilVendeur> {
+export async function exigerVendeur(langue: Langue): Promise<ProfilVendeur> {
   let profil: ProfilVendeur | null;
   try {
     profil = await lireProfilVendeur();
