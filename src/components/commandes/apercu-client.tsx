@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import type { MediaAffiche } from "./carte-medias";
 
 /**
@@ -39,12 +40,23 @@ export function ApercuClient({
   palette,
   client,
   medias,
+  libelles,
 }: {
   readonly nomBoutique: string | null;
   readonly logoUrl: string | null;
   readonly palette: PaletteApercu;
   readonly client: string;
   readonly medias: readonly MediaAffiche[];
+  /*
+   * ⚠️ LES PHRASES DE LA MAQUETTE ARRIVENT RÉSOLUES, DANS LA LANGUE DE LA
+   * BOUTIQUE — pas dans celle de l'URL. `useTranslations` reste juste au-dessus
+   * pour le CADRE, qui parle au VENDEUR ; ce qui est montré COMME étant la page
+   * du client doit être dans la langue du client, sinon cet encart affirme le
+   * contraire de ce que le lien produira. Mesuré le 06/09/2026 : sur `/en`, il
+   * annonçait « What your customer sees » puis « Your order » pour une boutique
+   * en français.
+   */
+  readonly libelles: LibellesApercu;
 }) {
   const t = useTranslations("editeur");
 
@@ -98,14 +110,14 @@ export function ApercuClient({
           </div>
 
           <p className="mt-2 mb-px font-headline-md text-[17px] font-extrabold tracking-[-0.02em]">
-            {t("apercuVotreCommande")}
+            {libelles.commande}
           </p>
 
           {/* UNE INFORMATION ABSENTE EST OMISE, jamais remplacée par un texte
               inventé : sans nom de client, la ligne « pour … » disparaît. */}
           {nom !== "" ? (
             <p className="truncate font-body-sm text-[11px]" style={{ color: palette.surRemplissageDoux }}>
-              {t("apercuPour", { client: nom })}
+              {substituerNom(libelles.pourGabarit, nom)}
             </p>
           ) : null}
         </div>
@@ -152,7 +164,7 @@ export function ApercuClient({
             className="flex h-9 items-center justify-center rounded-[9px]"
             style={{ backgroundColor: palette.remplissage, color: palette.surRemplissage }}
           >
-            <span className="font-label-md text-[12px] font-bold">{t("apercuApprouver")}</span>
+            <span className="font-label-md text-[12px] font-bold">{libelles.approuver}</span>
           </div>
         </div>
       </div>

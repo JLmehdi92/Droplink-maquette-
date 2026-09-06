@@ -6,6 +6,7 @@ import { normaliserLien } from "@/lib/boutique/normaliser-lien";
 import { useActionState, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
+import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import {
   confirmerLogo,
   enregistrerMarque,
@@ -80,7 +81,17 @@ function BoutonEnregistrer({ libelle, enCours }: { libelle: string; enCours: str
 
 export function FormulaireMarque({
   initial,
+  libelles,
 }: {
+  /*
+   * ⚠️ LES DEUX LANGUES ARRIVENT, PAS UNE. Cet écran porte le sélecteur qui
+   * DÉCIDE de la langue des pages client : son aperçu doit basculer sous les
+   * yeux du vendeur au moment où il choisit, sinon le réglage reste abstrait —
+   * et c'est précisément ce qui a produit le malentendu du 06/09/2026. Un
+   * aller-retour serveur par changement de `<select>` serait absurde pour six
+   * chaînes ; les deux jeux pèsent quelques centaines d'octets.
+   */
+  readonly libelles: Record<"fr" | "en", LibellesApercu>;
   readonly initial: {
     readonly nom: string;
     readonly couleur: string;
@@ -101,6 +112,12 @@ export function FormulaireMarque({
   const [nom, setNom] = useState(initial.nom);
   const [couleur, setCouleur] = useState(initial.couleur);
   const [langue, setLangue] = useState<"fr" | "en">(initial.languePublique);
+  /*
+   * CE QUE VERRONT LES CLIENTS, dans la langue que le vendeur est en train de
+   * choisir — jamais dans celle de son interface. `t(...)` reste employé partout
+   * ailleurs sur cet écran : il parle au VENDEUR.
+   */
+  const phrasesClient = libelles[langue];
   const [filigrane, setFiligrane] = useState(initial.filigrane);
   const [logo, setLogo] = useState<EtatLogo>(
     initial.logoUrl === null ? { phase: "aucun" } : { phase: "existant", url: initial.logoUrl },
@@ -345,10 +362,10 @@ export function FormulaireMarque({
               (aUnEnTete ? "mt-2 mb-px lg:mt-[9px]" : "mb-px")
             }
           >
-            {t("apercuCommande")}
+            {phrasesClient.commande}
           </p>
           <p className="font-body-sm text-[11px]" style={{ color: accent.surRemplissageDoux }}>
-            {t("apercuPour")}
+            {phrasesClient.pourGenerique}
           </p>
         </div>
 
@@ -384,7 +401,7 @@ export function FormulaireMarque({
             style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
           >
             <span className="font-label-md text-[12px] font-bold lg:text-[13px]">
-              {t("apercuApprouver")}
+              {phrasesClient.approuver}
             </span>
           </div>
 
@@ -395,7 +412,7 @@ export function FormulaireMarque({
             <div className="border-t border-filet-section pt-3 text-center lg:pt-[13px]">
               {nom.trim() !== "" ? (
                 <p className="mb-[7px] font-body-sm text-[10px] text-on-surface-variant lg:mb-2">
-                  {t("apercuReseaux", { nom })}
+                  {substituerNom(phrasesClient.reseauxGabarit, nom)}
                 </p>
               ) : null}
               <div className="flex justify-center gap-[7px] lg:gap-2">
@@ -618,7 +635,7 @@ export function FormulaireMarque({
                   className="font-headline-md text-[15px] font-bold"
                   style={{ color: accent.texte }}
                 >
-                  {t("apercuStatut")}
+                  {phrasesClient.statut}
                 </p>
                 <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoTexteSeuil")}</p>
               </div>
@@ -633,7 +650,7 @@ export function FormulaireMarque({
                   }}
                 >
                   <span className="font-label-md text-[12px] font-bold">
-                    {t("apercuApprouver")}
+                    {phrasesClient.approuver}
                   </span>
                 </div>
                 <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoBoutonSeuil")}</p>
@@ -649,7 +666,7 @@ export function FormulaireMarque({
                   }}
                 >
                   <span className="truncate font-label-md text-[11px] font-bold">
-                    {nom.trim() === "" ? t("apercuCommande") : nom}
+                    {nom.trim() === "" ? phrasesClient.commande : nom}
                   </span>
                 </div>
                 <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoBandeauSeuil")}</p>

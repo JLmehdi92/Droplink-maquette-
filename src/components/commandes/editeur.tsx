@@ -9,6 +9,7 @@ import { titreDeCommande } from "@/lib/commandes/titre";
 import { CarteMedias, type MediaAffiche } from "./carte-medias";
 import { CarteRevocation } from "./carte-revocation";
 import { ApercuClient, type PaletteApercu } from "./apercu-client";
+import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 
 /**
  * L'éditeur d'une commande — sauvegarde automatique, sans bouton « enregistrer ».
@@ -82,6 +83,13 @@ export function Editeur({
     readonly nom: string | null;
     readonly logoUrl: string | null;
     readonly palette: PaletteApercu;
+    /*
+     * Les phrases de l'aperçu, résolues dans la LANGUE DES PAGES CLIENT de
+     * cette boutique — voir `lib/boutique/libelles-apercu`. Elles vivent sous
+     * `boutique` et non à côté parce qu'elles en dépendent : c'est son réglage
+     * de langue qui les a produites, pas celui de l'URL.
+     */
+    readonly libellesApercu: LibellesApercu;
   };
   /** Rendu par le SERVEUR : ses libellés ne voyagent pas dans l'hydratation. */
   readonly historique: React.ReactNode;
@@ -254,6 +262,7 @@ export function Editeur({
             palette={boutique.palette}
             client={valeurs.customer_label}
             medias={mediasCourants}
+            libelles={boutique.libellesApercu}
           />
           {historique}
         </div>

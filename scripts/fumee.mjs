@@ -1914,8 +1914,41 @@ try {
                   x.fr.length >= 14 &&
                   x.en.length >= 14 &&
                   !x.fr.includes("{") &&
-                  !x.en.includes("{"),
+                  !x.en.includes("{") &&
+                  /*
+                   * ⚠️ UNE SEULE EXCEPTION, ET ELLE EST LE CONTRAIRE D UN TROU.
+                   *
+                   * `marque.apercuPour` est le libelle de l APERCU « ce que voit
+                   * le client » de l ecran de marque. Depuis le 06/09/2026 il est
+                   * rendu dans la langue de `shops.default_language`, PAS dans
+                   * celle de l URL — c est la correction du defaut rapporte par
+                   * Wassim, ou trois surfaces disaient « anglais » et la page
+                   * client rendait « francais ».
+                   *
+                   * Le balayage ci-dessous cherche des FUITES : un libelle de
+                   * l autre langue la ou il n a rien a faire. Celui-la n est pas
+                   * une fuite, c est le contenu qu on montre DELIBEREMENT dans la
+                   * langue du client. Le laisser ici ferait rougir la sonde sur le
+                   * produit corrige — et on apprendrait a l ignorer.
+                   *
+                   * IL N EST PAS SIMPLEMENT RETIRE : le controle dedie qui suit
+                   * ce balayage EXIGE qu il suive la boutique, dans les DEUX SENS,
+                   * en basculant reellement `default_language`. Une exception
+                   * muette aurait ouvert une porte ; celle-ci la referme plus
+                   * fort qu elle ne l ouvre.
+                   */
+                  x.cle !== "marque.apercuPour",
               );
+
+            /*
+             * LUES DANS LES CATALOGUES, JAMAIS RECOPIEES. Une sentinelle ecrite
+             * en dur survit a la retraduction de la cle qu elle surveille : le
+             * controle cesse alors de mordre sans jamais echouer. Ce projet l a
+             * deja paye — une falsification a menti dans le sens rassurant parce
+             * que la sentinelle avait ete recopiee de memoire.
+             */
+            const APERCU_FR = catalogue.marque.apercuPour;
+            const APERCU_EN = catalogueEn.marque.apercuPour;
 
             const ecrans = ["/commandes", "/envois", "/analyses", "/marque"];
             const bilan = [];
@@ -1974,6 +2007,72 @@ try {
                   (fuites.length === 0 ? "" : ` (${fuites.slice(0, 6).join(" | ")})`),
               ],
             );
+
+            /*
+             * ═══════════════════════════════════════════════════════════════
+             * L APERCU « CE QUE VOIT LE CLIENT » SUIT LA BOUTIQUE, PAS L URL
+             * ═══════════════════════════════════════════════════════════════
+             *
+             * ⚠️ DEFAUT RAPPORTE PAR WASSIM LE 06/09/2026 : « quand je suis sur
+             * le SaaS anglais et que je clique sur la page client, ca me
+             * redirige vers la page client en francais ».
+             *
+             * La page client etait JUSTE — elle vit hors du segment [locale] et
+             * prend `shops.default_language`. Ce qui mentait, ce sont les ecrans
+             * qui promettent de la montrer : sur `/en/marque`, un selecteur
+             * intitule « Customer page language » regle sur « French », et a
+             * vingt pixels un apercu affichant « Your order ».
+             *
+             * CE CONTROLE BASCULE REELLEMENT `default_language` ET EPROUVE LES
+             * DEUX SENS. Verifier seulement que `/en/marque` rend du francais
+             * laisserait passer une correction qui figerait tout en francais —
+             * c est-a-dire un produit ou le reglage ne servirait a rien.
+             */
+            {
+              const apercuDe = async (urlLangue) => {
+                const r = await fetch(`${base}/${urlLangue}/marque`, {
+                  headers: entetes,
+                  redirect: "manual",
+                });
+                const vu = rendu(r.status === 200 ? await r.text() : "");
+                return { statut: r.status, fr: vu.includes(APERCU_FR), en: vu.includes(APERCU_EN) };
+              };
+
+              const { data: boutique } = await service
+                .from("shops")
+                .select("id, default_language")
+                .eq("owner_id", profilFumee)
+                .single();
+              const origine = boutique?.default_language ?? "fr";
+
+              await service.from("shops").update({ default_language: "en" }).eq("id", boutique.id);
+              // URL FRANCAISE, BOUTIQUE ANGLAISE : l apercu doit dire l anglais.
+              const urlFrBoutiqueEn = await apercuDe("fr");
+
+              await service.from("shops").update({ default_language: "fr" }).eq("id", boutique.id);
+              // URL ANGLAISE, BOUTIQUE FRANCAISE : c est le cas exact de Wassim.
+              const urlEnBoutiqueFr = await apercuDe("en");
+
+              await service
+                .from("shops")
+                .update({ default_language: origine })
+                .eq("id", boutique.id);
+
+              controles.push(
+                [
+                  urlFrBoutiqueEn.statut === 200 && urlEnBoutiqueFr.statut === 200,
+                  `CONTRE-TEST : les deux ecrans de marque repondent 200 (${urlFrBoutiqueEn.statut}, ${urlEnBoutiqueFr.statut})`,
+                ],
+                [
+                  urlFrBoutiqueEn.en && !urlFrBoutiqueEn.fr,
+                  `URL /fr, boutique en ANGLAIS : l apercu montre l anglais (en=${urlFrBoutiqueEn.en}, fr=${urlFrBoutiqueEn.fr})`,
+                ],
+                [
+                  urlEnBoutiqueFr.fr && !urlEnBoutiqueFr.en,
+                  `URL /en, boutique en FRANCAIS : l apercu montre le francais (fr=${urlEnBoutiqueFr.fr}, en=${urlEnBoutiqueFr.en})`,
+                ],
+              );
+            }
           }
 
       }

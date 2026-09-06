@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { FormulaireOnboarding } from "@/components/formulaire-onboarding";
+import { libellesApercu } from "@/lib/boutique/libelles-apercu";
 import { TraductionsClient } from "@/components/traductions-client";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
@@ -61,7 +62,7 @@ export default async function Bienvenue({
         className="mx-auto w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:rounded-page-publique"
       >
         <TraductionsClient espaces={["onboarding"]}>
-          <FormulaireOnboarding locale={langue} />
+          <FormulaireOnboarding locale={langue} libelles={await libellesApercu(langue)} />
         </TraductionsClient>
       </main>
     </div>

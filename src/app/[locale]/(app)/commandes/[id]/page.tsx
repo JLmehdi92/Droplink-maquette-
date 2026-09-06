@@ -13,6 +13,7 @@ import { creerClientServeur } from "@/lib/supabase/server";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
+import { libellesApercu } from "@/lib/boutique/libelles-apercu";
 import { resoudreAccent } from "@/lib/design/contraste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
@@ -259,6 +260,15 @@ export default async function EditeurCommande({
           boutique={{
             nom: profil?.nomBoutique ?? null,
             logoUrl,
+            /*
+             * ⚠️ `profil.languePublique`, PAS `langue`. La première est le
+             * réglage de la boutique, celle que verront ses clients ; la
+             * seconde est le segment de l'URL vendeur. Les confondre est
+             * exactement le défaut mesuré le 06/09/2026 — un aperçu titré
+             * « ce que voit le client » qui montrait autre chose que ce que le
+             * client verra.
+             */
+            libellesApercu: await libellesApercu(profil.languePublique),
             palette: {
               remplissage: accent.remplissage,
               surRemplissage: accent.surRemplissage,

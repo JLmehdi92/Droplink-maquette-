@@ -3,6 +3,7 @@ import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { FormulaireMarque } from "@/components/marque/formulaire-marque";
+import { libellesApercu } from "@/lib/boutique/libelles-apercu";
 import { TraductionsClient } from "@/components/traductions-client";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
@@ -70,6 +71,13 @@ export default async function Marque({
         <div>
         <TraductionsClient espaces={["marque"]}>
           <FormulaireMarque
+            /*
+             * ⚠️ LES DEUX JEUX, RÉSOLUS CÔTÉ SERVEUR. Le `<select>` de langue
+             * bascule côté client : l'aperçu doit donc pouvoir changer de langue
+             * sans aller-retour. Et aucun des deux ne vient de `locale` — ce que
+             * verront les clients ne dépend pas de l'URL du vendeur.
+             */
+            libelles={{ fr: await libellesApercu("fr"), en: await libellesApercu("en") }}
             initial={{
               // La chaîne vide représente l'absence CÔTÉ FORMULAIRE : un champ
               // texte ne peut pas porter `null`. La conversion inverse se fait à

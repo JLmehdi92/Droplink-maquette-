@@ -5,6 +5,7 @@ import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
 import { useActionState, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
+import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import {
   confirmerDepotLogo,
   preparerDepotLogo,
@@ -84,7 +85,26 @@ type EtatLogo =
   | { phase: "pose"; apercu: string; nom: string; octets: number }
   | { phase: "erreur"; motif: string };
 
-export function FormulaireOnboarding({ locale }: { locale: string }) {
+export function FormulaireOnboarding({
+  locale,
+  libelles,
+}: {
+  readonly locale: string;
+  /*
+   * ⚠️ LES PHRASES DE L'APERÇU ARRIVENT RÉSOLUES, comme dans l'éditeur et dans
+   * « Ma marque » — voir `lib/boutique/libelles-apercu`.
+   *
+   * ICI LA LANGUE COÏNCIDE AVEC CELLE DE L'URL, ET CE N'EST PAS UNE RAISON DE
+   * S'EN PASSER. `bienvenue/actions` écrit `shops.default_language` avec cette
+   * même locale : à cet instant précis, les deux sont égales par construction,
+   * donc le défaut des deux autres aperçus n'est pas observable ici. Ce qui
+   * l'est, c'est la DUPLICATION : ces phrases étaient recopiées dans
+   * `onboarding.*` alors que la page client les porte déjà. Une règle écrite
+   * trois fois n'est corrigée qu'aux endroits qu'on a sous les yeux — le
+   * projet l'a payé le 05/09/2026 sur la commande d'un vrai client.
+   */
+  readonly libelles: LibellesApercu;
+}) {
   const t = useTranslations("onboarding");
   const [resultat, action] = useActionState(terminerOnboarding, INITIAL);
 
@@ -417,7 +437,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
                 className="mt-2.5 mb-0.5 font-headline-md text-[19px] leading-6 font-extrabold tracking-[-0.02em]"
                 style={{ color: "var(--apercu-sur-remplissage)" }}
               >
-                {t("apercuCommande")}
+                {libelles.commande}
               </p>
               <p
                 className="font-body-sm text-[12px] leading-[15px]"
@@ -425,7 +445,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
                   color: "color-mix(in srgb, var(--apercu-sur-remplissage) 78%, transparent)",
                 }}
               >
-                {t("apercuPour")}
+                {libelles.pourGenerique}
               </p>
             </div>
 
@@ -457,7 +477,7 @@ export function FormulaireOnboarding({ locale }: { locale: string }) {
                   className="font-headline-md text-[13px] leading-4 font-bold"
                   style={{ color: "var(--apercu-sur-remplissage)" }}
                 >
-                  {t("apercuApprouver")}
+                  {libelles.approuver}
                 </span>
               </div>
             </div>

@@ -258,9 +258,6 @@
     "erreurSession": "Your session expired. Sign in again.",
     "erreurEcriture": "Saving failed. Try again.",
     "apercuTitre": "WHAT YOUR CUSTOMER WILL SEE",
-    "apercuCommande": "Your order",
-    "apercuPour": "for your customer",
-    "apercuApprouver": "Approve",
     "sansNom": "Your shop"
   },
   "marque": {
@@ -300,7 +297,6 @@
     "filigraneAide": "Your name appears discreetly on every enlarged photo. It discourages reuse, but does not prevent it.",
     "filigraneSansNom": "Give your shop a name first: without one there is nothing to write on the photos.",
     "apercuTitre": "Preview",
-    "apercuStatut": "In transit",
     "enregistrer": "Save",
     "enregistrement": "Saving…",
     "enregistre": "Saved.",
@@ -341,10 +337,7 @@
     "reseauxNouvelOnglet": "These links open outside your customer’s page, in a new tab. They create no account and ask your customer for nothing.",
     "optionsTitre": "Options",
     "apercuDirect": "live",
-    "apercuCommande": "Your order",
-    "apercuPour": "for your customer",
-    "apercuApprouver": "Approve",
-    "apercuReseaux": "Find {nom}"
+    "apercuPour": "for your customer"
   },
   "envois": {
     "titre": "Shipments",
@@ -669,10 +662,7 @@
     "copieEchouee": "Copy refused by the browser",
     "qcAide": "Fill this in if your customer answers you outside their page.",
     "apercuTitre": "What your customer sees",
-    "apercuDirect": "live",
-    "apercuVotreCommande": "Your order",
-    "apercuPour": "for {client}",
-    "apercuApprouver": "Approve"
+    "apercuDirect": "live"
   },
   "medias": {
     "titre": "Photos and videos",

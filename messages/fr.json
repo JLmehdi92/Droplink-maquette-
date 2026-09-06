@@ -258,9 +258,6 @@
     "erreurSession": "Votre session a expiré. Reconnectez-vous.",
     "erreurEcriture": "L’enregistrement a échoué. Réessayez.",
     "apercuTitre": "CE QUE VOTRE CLIENT VERRA",
-    "apercuCommande": "Votre commande",
-    "apercuPour": "pour votre client",
-    "apercuApprouver": "Approuver",
     "sansNom": "Votre boutique"
   },
   "marque": {
@@ -300,7 +297,6 @@
     "filigraneAide": "Votre nom apparaît en discret sur chaque photo agrandie. Cela décourage la réutilisation, mais ne l’empêche pas.",
     "filigraneSansNom": "Donnez d'abord un nom à votre boutique : sans lui, il n'y a rien à écrire sur les photos.",
     "apercuTitre": "Aperçu",
-    "apercuStatut": "En transit",
     "enregistrer": "Enregistrer",
     "enregistrement": "Enregistrement…",
     "enregistre": "Enregistré.",
@@ -341,10 +337,7 @@
     "reseauxNouvelOnglet": "Ces liens s’ouvrent hors de la page de votre client, dans un nouvel onglet. Ils ne créent aucun compte et ne demandent rien à votre client.",
     "optionsTitre": "Options",
     "apercuDirect": "en direct",
-    "apercuCommande": "Votre commande",
-    "apercuPour": "pour votre client",
-    "apercuApprouver": "Approuver",
-    "apercuReseaux": "Retrouvez {nom}"
+    "apercuPour": "pour votre client"
   },
   "envois": {
     "titre": "Envois",
@@ -669,10 +662,7 @@
     "copieEchouee": "Copie refusée par le navigateur",
     "qcAide": "À renseigner si votre client vous répond ailleurs que sur sa page.",
     "apercuTitre": "Ce que voit le client",
-    "apercuDirect": "en direct",
-    "apercuVotreCommande": "Votre commande",
-    "apercuPour": "pour {client}",
-    "apercuApprouver": "Approuver"
+    "apercuDirect": "en direct"
   },
   "medias": {
     "titre": "Photos et vidéos",
