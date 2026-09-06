@@ -33,7 +33,7 @@ pnpm db:migrate       # applique les migrations
 pnpm db:types         # régénère les types Supabase
 pnpm fumee            # le produit doit RÉPONDRE : serveur réel, statuts et HTML servi
 pnpm falsifier        # casse le produit EN BASE, de façon réversible, pour éprouver les sondes
-pnpm gates            # les six portes ci-dessus, enchaînées
+pnpm gates            # les six portes ci-dessus, sur la BASE DE TESTS (voir plus bas)
 pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 ```
 
@@ -58,16 +58,47 @@ pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 > est exclu : son `describe.runIf` est délibéré, il ne peut pas tourner sans
 > identifiants Cloudflare.
 >
+> ⚠️ **LES SUITES TOURNENT SUR UN SECOND PROJET SUPABASE — `droplink-tests`,
+> créé le 06/09/2026.** Elles ont tourné sur la PRODUCTION jusque-là, et ce
+> n'était pas un accident ponctuel : c'était l'architecture. Le 05/09, un test
+> portait un `delete from public.tracked_parcels where registered_at >= now() -
+> interval '30 days'` — chaque `pnpm gates` effaçait les colis réellement pris
+> en charge du mois, dont ceux d'un vrai client, et chacun coûte 1 des **200
+> prises en charge À VIE** du fournisseur de suivi.
+>
+> La configuration vit dans **`.env.test.local`** (ignoré par git, comme tout
+> `.env*`). Elle ne suffit pas et ne prétend pas suffire : `pnpm gates` passe
+> par `scripts/portes.mjs`, qui **REFUSE de démarrer** si le fichier manque ou
+> si la cible est la production — et `tests/aide/base-de-tests.ts` exige, avant
+> la première purge, que la base **se déclare elle-même** base de tests par un
+> commentaire posé dessus. Une marque en base ne se recopie pas par accident
+> dans un `.env`.
+>
+> ⚠️ **LE BUILD FAIT PARTIE DES PORTES, ET C'EST POURQUOI ELLES PARTAGENT UN
+> SEUL ENVIRONNEMENT.** Les variables `NEXT_PUBLIC_*` sont **inlinées dans le
+> bundle** : un build fait sur `.env.local` puis une fumée lancée contre la base
+> de tests servirait de VRAIES données à 293 contrôles convaincus de mesurer une
+> base jetable — et tout serait vert (L-032).
+>
+> ⚠️ **CE QUE LA SÉPARATION COÛTE, ET IL FAUT LE SAVOIR : plus aucune suite ne
+> regarde la PRODUCTION.** Les contrôles d'accord dépôt/base — ordre des
+> migrations, catalogue des fonctions, droits d'exécution — ne la visent plus.
+> C'est le prix assumé, et il appelle une suite de contrôles de production en
+> lecture seule qui **n'existe pas encore**.
+
 > ⚠️ **NE JAMAIS LANCER UNE PORTE DANS UN TUYAU.** `pnpm test:rls | grep …` rend
 > le statut de `grep`, pas celui de la suite : l'enchaînement `&&` continue sur
 > du rouge. Lancer `pnpm gates`, et **relever le décompte**, pas la couleur.
 
 Après toute modif de schéma : `pnpm db:migrate && pnpm db:types`, sinon les types sont périmés.
 
-**Portes de qualité avant chaque commit :**
+**Portes de qualité avant chaque commit** — les six, dans cet ordre, sous un
+seul environnement :
 ```
-pnpm typecheck && pnpm lint && pnpm build && pnpm test && pnpm test:rls && pnpm fumee
+pnpm typecheck · pnpm lint · pnpm build · pnpm test · pnpm test:rls · pnpm fumee
 ```
+**Ne pas les enchaîner à la main : `scripts/portes.mjs` les lance, et c'est lui
+qui garantit qu'elles visent toutes la même base.**
 
 **Ne jamais commiter par-dessus des portes rouges**, même si la cause est ailleurs — c'est comme ça qu'on s'habitue au rouge.
 

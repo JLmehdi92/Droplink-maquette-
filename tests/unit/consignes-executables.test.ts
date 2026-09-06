@@ -95,10 +95,33 @@ describe("Les consignes désignent des choses qui existent", () => {
     const gates = paquet.scripts?.["gates"] ?? "";
     expect(gates.length, "le script `gates` a disparu").toBeGreaterThan(0);
 
+    /*
+     * ⚠️ LA LISTE A DEMENAGE LE 06/09/2026, ET CE CONTROLE L A ATTRAPE.
+     *
+     * `gates` était une chaîne de `&&` dans `package.json` ; il délègue
+     * désormais à `scripts/portes.mjs`, qui charge `.env.test.local` AVANT le
+     * build. C'était nécessaire : les variables `NEXT_PUBLIC_*` sont inlinées
+     * dans le bundle, donc un build fait sur la production suivi d'une fumée
+     * pointée sur la base de tests aurait mesuré un serveur servant de vraies
+     * données — et tout aurait été vert (L-032).
+     *
+     * La sonde lit donc la liste LÀ OÙ ELLE EST, et elle accepte les deux
+     * formes : une porte qui reste écrite dans `package.json` compte encore.
+     * Sans ce second endroit, elle rendait 0 porte et accusait un script
+     * parfaitement correct.
+     */
+    const source = gates.includes("scripts/portes.mjs") ? lire("scripts/portes.mjs") : gates;
     const enchainees = new Set(
-      [...gates.matchAll(/pnpm\s+([a-z][a-z0-9]*(?::[a-z0-9]+)?)/g)].map((t) => t[1] ?? ""),
+      gates.includes("scripts/portes.mjs")
+        ? [...(/const PORTES = \[([^\]]*)\]/.exec(source)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map(
+            (t) => t[1] ?? "",
+          )
+        : [...source.matchAll(/pnpm\s+([a-z][a-z0-9]*(?::[a-z0-9]+)?)/g)].map((t) => t[1] ?? ""),
     );
-    expect(enchainees.size, "`gates` n'enchaîne aucune porte").toBeGreaterThan(3);
+    expect(
+      enchainees.size,
+      "`gates` n'enchaîne aucune porte : la liste a-t-elle encore déménagé ?",
+    ).toBeGreaterThan(3);
 
     const bloc = lire("CLAUDE.md");
     const debut = bloc.indexOf("Portes de qualité avant chaque commit");

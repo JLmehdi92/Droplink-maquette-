@@ -1,6 +1,26 @@
 import { config } from "dotenv";
 import { installerTransportResilient } from "./transport";
 
+/*
+ * ⚠️ LA BASE DES TESTS D ABORD, LA PRODUCTION JAMAIS.
+ *
+ * `.env.test.local` est charge EN PREMIER et `dotenv` ne remplace pas une
+ * variable deja posee : ses valeurs gagnent donc sur celles de `.env.local`,
+ * qui ne sert plus qu au complement (cle de hachage, bord de confiance, etc.).
+ *
+ * Jusqu au 06/09/2026 il n y avait qu un projet Supabase, et les suites
+ * ecrivaient dans la PRODUCTION. Une d elles a efface de vrais colis le 05/09,
+ * chacun valant 1 des 200 prises en charge A VIE du fournisseur de suivi.
+ *
+ * ⚠️ CE FICHIER NE SUFFIT PAS, ET IL NE PRETEND PAS SUFFIRE. S il disparait,
+ * les suites repartiraient sur la production en silence. Ce qui l interdit
+ * vraiment est `exigerBaseDeTests()`, appelee par l amorcage global : elle
+ * refuse la production NOMMEMENT et exige que la base se declare elle-meme.
+ * Le present chargement est une commodite ; la garde est ailleurs, et elle
+ * echoue ferme.
+ */
+config({ path: ".env.test.local", quiet: true });
+
 // Les sondes lisent la base reelle : sans .env.local elles echoueraient sur une
 // absence de configuration plutot que sur une propriete de securite, ce qui est
 // exactement le genre d'echec qu'on apprend a ignorer.

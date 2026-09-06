@@ -11,6 +11,11 @@ import { config } from "dotenv";
  * `globalSetup` tourne dans son propre contexte : les fichiers de `setupFiles`
  * n'y ont pas encore chargé l'environnement, il faut donc le charger ici.
  */
+/*
+ * MEME ORDRE QUE `charger-env` : la base de TESTS prime, `dotenv` ne remplace
+ * pas ce qui est deja pose.
+ */
+config({ path: ".env.test.local", quiet: true });
 config({ path: ".env.local", quiet: true });
 
 /**
@@ -25,6 +30,18 @@ config({ path: ".env.local", quiet: true });
 const PLAFOND_BASE = 300 * 1024 * 1024;
 
 export async function setup(projet?: { readonly name?: string }): Promise<void> {
+  /*
+   * ⚠️ AVANT TOUT LE RESTE, ET SURTOUT AVANT LA PURGE.
+   *
+   * La premiere chose que fait cet amorcage est d EFFACER : comptes de test,
+   * parametres, battements, reservations d alerte. Lance par erreur sur la
+   * production, il detruirait. La garde vient donc avant le premier `delete`,
+   * pas apres — et elle echoue ferme, en refusant tout ce qui n est pas la
+   * base de tests PROUVEE.
+   */
+  const { exigerBaseDeTests } = await import("./base-de-tests");
+  await exigerBaseDeTests();
+
   const {
     purgerResidusDeTest,
     rendreLesParametresAuDefaut,

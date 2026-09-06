@@ -188,16 +188,56 @@ describe("Accord dépôt / base", () => {
         inattendues.map(([b, d]) => `  base « ${b} » là où le dépôt a « ${d} »`).join("\n"),
     ).toEqual([]);
 
-    // ET L'AUTRE SENS. Une exception qui ne correspond plus à rien laisserait
-    // croire qu'on surveille une inversion déjà résolue — et masquerait la
-    // prochaine si on l'écrivait par-dessus.
-    const perimees = INVERSIONS_ADMISES.filter(
-      ([b, d]) => !divergences.some(([base, depot]) => base === b && depot === d),
-    );
-    expect(
-      perimees,
-      `Inversions déclarées qui n'existent plus : ${perimees.map(([b]) => b).join(", ")}`,
-    ).toEqual([]);
+    /*
+     * ET L'AUTRE SENS — MAIS IL DÉPEND DE LA BASE VISÉE, ET C'EST UNE
+     * DÉCOUVERTE DU 06/09/2026.
+     *
+     * L'inversion 087/088 est un fait HISTORIQUE de la production : elle y a
+     * été appliquée dans cet ordre, une fois, et rien ne peut le défaire. Sur
+     * une base RECONSTRUITE depuis le dépôt, l'ordre est forcément
+     * lexicographique — l'inversion n'existe pas, et son absence n'est pas une
+     * dérive : c'est la preuve que la reconstruction est plus propre que
+     * l'histoire.
+     *
+     * ⚠️ LE CONTRÔLE DEVIENT DONC PLUS STRICT, PAS PLUS SOUPLE. Sur la base de
+     * tests, on n'admet AUCUNE inversion : `divergences` doit être vide. Une
+     * migration appliquée hors séquence sur une base neuve n'aurait aucune
+     * excuse historique, et c'est exactement ce qu'on veut interdire.
+     *
+     * Sur toute autre base, les inversions déclarées restent tolérées ET
+     * exigées : une exception qui ne correspond plus à rien laisserait croire
+     * qu'on surveille une inversion résolue, et masquerait la prochaine.
+     *
+     * ⚠️ CE QUE CE DÉPLACEMENT COÛTE, ET IL FAUT LE DIRE : depuis que les
+     * suites visent la base de tests, PLUS AUCUNE ne regarde l'ordre réel de la
+     * PRODUCTION. La branche ci-dessous n'y sera plus exécutée. Ce n'est pas un
+     * oubli, c'est le prix de la séparation — et il appelle une suite de
+     * contrôles de production en lecture seule, qui n'existe pas encore.
+     */
+    const marque = (
+      await interroger<{ m: string | null }>(
+        bd,
+        "select shobj_description(oid, 'pg_database') as m from pg_database where datname = current_database()",
+      )
+    )[0]?.m;
+    const surBaseDeTests = (marque ?? "").includes("BASE DE TESTS");
+
+    if (surBaseDeTests) {
+      expect(
+        divergences,
+        "Une base RECONSTRUITE depuis le dépôt doit appliquer l'ordre " +
+          "lexicographique exact : aucune inversion n'y a d'excuse historique. " +
+          divergences.map(([b, d]) => `base « ${b} » là où le dépôt a « ${d} »`).join(" | "),
+      ).toEqual([]);
+    } else {
+      const perimees = INVERSIONS_ADMISES.filter(
+        ([b, d]) => !divergences.some(([base, depot]) => base === b && depot === d),
+      );
+      expect(
+        perimees,
+        `Inversions déclarées qui n'existent plus : ${perimees.map(([b]) => b).join(", ")}`,
+      ).toEqual([]);
+    }
   });
 
   /**
