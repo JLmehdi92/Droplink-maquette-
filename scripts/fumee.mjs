@@ -285,6 +285,19 @@ async function suivre(chemin) {
 const cas = [
   { chemin: "/fr", statut: 200, libelle: "landing francaise" },
   { chemin: "/en", statut: 200, libelle: "landing anglaise" },
+  /*
+   * ⚠️ LE CHINOIS EST SERVI, ET IL FAUT L EXECUTER POUR LE SAVOIR.
+   *
+   * `zh-CN` est entre dans `LANGUES` le 06/09/2026 et les portes sont passees
+   * au vert sans qu AUCUNE page `/zh-CN` ne soit jamais rendue : la fumee
+   * codait `fr` et `en` en dur en dix points. Un routage casse par le sous-tag
+   * — le seul code de langue du produit qui en porte un — n aurait ete vu par
+   * personne. C est « une affirmation trop vague pour etre fausse ne peut pas
+   * non plus etre vraie », appliquee a une langue entiere.
+   */
+  { chemin: "/zh-CN", statut: 200, libelle: "landing chinoise" },
+  { chemin: "/zh-CN/connexion", statut: 200, libelle: "connexion chinoise" },
+  { chemin: "/zh-CN/inscription", statut: 200, libelle: "inscription chinoise" },
   { chemin: "/fr/connexion", statut: 200, libelle: "connexion" },
   { chemin: "/en/connexion", statut: 200, libelle: "connexion anglaise" },
   { chemin: "/fr/inscription", statut: 200, libelle: "inscription" },
@@ -460,6 +473,10 @@ const motifCle = new RegExp("(?:^|[^A-Za-z0-9_-])(" + espaces.join("|") + ")[.][
 const ECRANS_SANS_SESSION = [
   "/fr",
   "/en",
+  // Le chinois passe par le meme balayage : un identifiant non resolu s y
+  // verrait autant, et personne ne le regardait.
+  "/zh-CN",
+  "/zh-CN/connexion",
   "/fr/connexion",
   "/en/connexion",
   "/fr/inscription",
@@ -619,7 +636,7 @@ if (routesVendeur.length < 5 || routesEprouvees < routesVendeur.length) {
 console.log("");
 console.log("— Le recours de signalement —");
 
-const PAGES_A_PIED = ["/fr", "/en", "/fr/conditions", "/fr/confidentialite"];
+const PAGES_A_PIED = ["/fr", "/en", "/zh-CN", "/fr/conditions", "/fr/confidentialite"];
 
 const signalementServi = (await fetch(`${base}/fr/signalement`, { redirect: "manual" })).status;
 const canalOuvert = signalementServi === 200;
@@ -639,7 +656,9 @@ for (const chemin of PAGES_A_PIED) {
   }
 
   const html = await r.text();
-  const langue = chemin.startsWith("/en") ? "en" : "fr";
+  // ⚠️ L ORDRE COMPTE : `/zh-CN` d abord, sinon un `startsWith("/en")` ne le
+  // verrait pas et l attribut `lang` serait compare a la mauvaise valeur.
+  const langue = chemin.startsWith("/zh-CN") ? "zh-CN" : chemin.startsWith("/en") ? "en" : "fr";
 
   // La preuve que la sonde regarde un vrai pied de page. Sans elle, « aucun
   // lien de signalement » serait vrai sur une page qui n en a aucun.
@@ -1904,17 +1923,45 @@ try {
             const catalogueEn = JSON.parse(
               readFileSync(join(racine, "messages", "en.json"), "utf8"),
             );
+            /*
+             * ⚠️ TROIS CATALOGUES. Les sentinelles ne portaient que `fr` et
+             * `en` : la boucle ci-dessous, etendue au chinois, aurait cherche
+             * `undefined` dans le HTML rendu — un controle qui ne peut pas
+             * mordre est pire qu aucun controle, il occupe la place.
+             *
+             * ⚠️ ET LE SEUIL DE LONGUEUR EST PLUS BAS EN CHINOIS, PAR NATURE :
+             * un ideogramme porte ce qu un mot latin met cinq a six caracteres
+             * a dire. Exiger 14 caracteres d une chaine chinoise ecarterait la
+             * quasi-totalite du catalogue, et le balayage n aurait plus rien a
+             * reconnaitre. Le plancher est donc de 5 pour elle — mesure, pas
+             * devine : sous ce seuil, une chaine devient assez courte pour
+             * apparaitre par hasard dans une autre.
+             */
+            const catalogueZh = JSON.parse(
+              readFileSync(join(racine, "messages", "zh-CN.json"), "utf8"),
+            );
             const parCle = new Map(feuilles(catalogueEn));
+            const parCleZh = new Map(feuilles(catalogueZh));
             const sentinelles = feuilles(catalogue)
-              .map(([cle, vFr]) => ({ cle, fr: vFr, en: parCle.get(cle) }))
+              .map(([cle, vFr]) => ({
+                cle,
+                fr: vFr,
+                en: parCle.get(cle),
+                "zh-CN": parCleZh.get(cle),
+              }))
               .filter(
                 (x) =>
                   typeof x.en === "string" &&
+                  typeof x["zh-CN"] === "string" &&
                   x.en !== x.fr &&
+                  x["zh-CN"] !== x.fr &&
+                  x["zh-CN"] !== x.en &&
                   x.fr.length >= 14 &&
                   x.en.length >= 14 &&
+                  x["zh-CN"].length >= 5 &&
                   !x.fr.includes("{") &&
                   !x.en.includes("{") &&
+                  !x["zh-CN"].includes("{") &&
                   /*
                    * ⚠️ UNE SEULE EXCEPTION, ET ELLE EST LE CONTRAIRE D UN TROU.
                    *
@@ -1953,20 +2000,48 @@ try {
             const ecrans = ["/commandes", "/envois", "/analyses", "/marque"];
             const bilan = [];
             for (const ecran of ecrans) {
-              for (const langue of ["fr", "en"]) {
+              /*
+               * ⚠️ TROIS LANGUES, PAS DEUX. Le chinois est entre dans `LANGUES`
+               * le 06/09/2026 et AUCUN ecran authentifie n avait jamais ete
+               * rendu dans cette langue : ce sont pourtant eux qui portent la
+               * quasi-totalite du catalogue. Un ecran qui aurait cesse de se
+               * rendre en `zh-CN` — routage, sous-tag, cle manquante — serait
+               * passe inapercu, portes vertes.
+               */
+              for (const langue of ["fr", "en", "zh-CN"]) {
                 const r = await fetch(`${base}/${langue}${ecran}`, {
                   headers: entetes,
                   redirect: "manual",
                 });
                 const html = r.status === 200 ? await r.text() : "";
                 const vu = rendu(html);
-                const attendue = langue === "fr" ? "fr" : "en";
+                /*
+                 * ⚠️ CE TERNAIRE ETAIT BINAIRE — `langue === "fr" ? "fr" : "en"`.
+                 * Avec une troisieme langue il aurait attendu de l ANGLAIS sur
+                 * un ecran chinois, et le controle serait devenu du bruit.
+                 * La sentinelle interdite est celle d une AUTRE langue, choisie
+                 * explicitement : on cherche une fuite, pas une coincidence.
+                 */
+                const attendue = langue;
                 const interdite = langue === "fr" ? "en" : "fr";
                 bilan.push({
                   ecran,
                   langue,
                   statut: r.status,
-                  lang: (/<html[^>]*lang="([a-z-]+)"/.exec(html) ?? [, "?"])[1],
+                  /*
+                   * ⚠️ CE MOTIF N ACCEPTAIT QUE DES MINUSCULES — `[a-z-]+` — et
+                   * il a ACCUSE UN PRODUIT CORRECT. Sur `lang="zh-CN"` il ne
+                   * trouve rien, rend « ? », et la sonde a declare fautifs les
+                   * quatre ecrans authentifies chinois alors qu ils repondaient
+                   * 200 et portaient le bon attribut.
+                   *
+                   * C est le pire genre de rouge : il DESIGNE un coupable, et
+                   * il aurait envoye chercher un defaut de routage la ou il n y
+                   * en avait pas. Le sous-tag de region s ecrit en majuscules
+                   * par convention (BCP 47) — le seul code de langue du produit
+                   * qui en porte un est justement celui qu on vient d ajouter.
+                   */
+                  lang: (/<html[^>]*lang="([A-Za-z-]+)"/.exec(html) ?? [, "?"])[1],
                   reconnus: sentinelles.filter((x) => vu.includes(x[attendue])).length,
                   fuites: sentinelles.filter(
                     (x) => vu.includes(x[interdite]) && !vu.includes(x[attendue]),
