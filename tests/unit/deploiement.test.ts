@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -300,6 +301,50 @@ describe("Le planificateur Railway", () => {
         `valeurs dans l'onglet Settings du service, PUIS supprimer le fichier — jamais ` +
         `l'inverse : tant qu'il existe, il écrase ce que l'interface affiche.`,
     ).toBeGreaterThan(MARGE_JOURS);
+  });
+
+  test("le script REFUSE une variable que Railway n'a pas substituée", () => {
+    /*
+     * ⚠️ UNE VARIABLE PRÉSENTE N'EST PAS UNE VARIABLE SUBSTITUÉE (L-026).
+     *
+     * `CRON_SECRET` se pose sur les services planifiés comme une référence au
+     * service web — `${{droplink2.CRON_SECRET}}` — et c'est la bonne façon :
+     * la valeur n'est jamais recopiée, donc jamais mal recopiée. Mais si le nom
+     * du service est faux d'une lettre, Railway ne résout rien et transmet LA
+     * CHAÎNE. Elle est non vide, elle franchit le contrôle de présence, elle
+     * part dans l'en-tête — et la route répond 404, exactement comme à un
+     * inconnu, parce que c'est ainsi qu'elle est conçue.
+     *
+     * ⚠️ ET CE CONTRÔLE EXÉCUTE LE SCRIPT, il ne lit pas sa source. Chercher le
+     * motif `${{` dans le fichier prouverait qu'un texte existe, jamais qu'une
+     * capacité est en place (L-020) — et le commentaire ci-dessus contient
+     * justement ce motif, donc une recherche textuelle se satisferait de lui.
+     */
+    const lancer = (env: Record<string, string>) => {
+      const r = spawnSync(process.execPath, [SCRIPT, "cadence"], {
+        env: { ...process.env, ...env },
+        encoding: "utf8",
+      });
+      return { code: r.status, sortie: `${r.stdout}${r.stderr}` };
+    };
+
+    for (const variable of ["CRON_SECRET", "PLANIFICATEUR_BASE_URL"]) {
+      const sain = { PLANIFICATEUR_BASE_URL: "https://exemple.invalide", CRON_SECRET: "un-vrai-secret" };
+      const r = lancer({ ...sain, [variable]: "${{droplink2.UNE_VARIABLE}}" });
+      expect(r.code, `${variable} non substituée : le script aurait dû refuser`).toBe(2);
+      expect(r.sortie, `${variable} : le refus ne nomme pas la cause`).toContain("NON SUBSTITUÉE");
+      expect(r.sortie, `${variable} : le refus ne nomme pas la variable fautive`).toContain(variable);
+    }
+
+    /*
+     * CONTRE-TEST — SANS LUI, UN SCRIPT QUI REFUSE TOUT PASSERAIT À 100 %.
+     * L'adresse n'est volontairement pas une URL : `fetch` échoue au parsing,
+     * donc ce contrôle n'ouvre AUCUNE connexion — le projet `unit` doit rester
+     * exécutable sans réseau.
+     */
+    const passant = lancer({ PLANIFICATEUR_BASE_URL: "pas-une-url", CRON_SECRET: "un-vrai-secret" });
+    expect(passant.code, "deux valeurs saines auraient dû dépasser la garde de substitution").toBe(1);
+    expect(passant.sortie, "la garde de substitution a mordu sur des valeurs saines").not.toContain("NON SUBSTITUÉE");
   });
 
   test("le script sort en ERREUR quand l'appel échoue", () => {

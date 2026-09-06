@@ -92,6 +92,21 @@ export type ServicePlanifie = {
    * à un secret refusé exactement comme à un inconnu — c'est délibéré, un 401
    * confirmerait leur existence. Le planificateur le dit dans son message
    * d'échec, et c'est la seule chose qui distingue les deux cas.
+   *
+   * IL NE SE RECOPIE DONC PAS À LA MAIN. Railway sait faire emprunter à un
+   * service la valeur d'un autre du même projet, et c'est la forme à saisir :
+   *
+   *     CRON_SECRET = ${{<nom du service web>.CRON_SECRET}}
+   *
+   * Une valeur qu'on ne recopie pas est une valeur qu'on ne peut pas mal
+   * recopier, et la régénérer d'un seul côté la propage.
+   *
+   * ⚠️ MAIS UNE RÉFÉRENCE EST ELLE AUSSI FAILLIBLE, ET SILENCIEUSEMENT : si le
+   * nom du service est faux d'une lettre, Railway ne résout rien et transmet la
+   * CHAÎNE `${{…}}`. Elle est non vide, elle franchit tout contrôle de
+   * présence, et la route répond 404 — on chercherait une route disparue là où
+   * c'est une substitution qui n'a pas eu lieu. C'est L-026, et le planificateur
+   * refuse désormais de partir dans ce cas, en nommant la variable fautive.
    */
   readonly variables: readonly string[];
 };

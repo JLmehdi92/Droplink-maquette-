@@ -68,6 +68,40 @@ if (manquantes.length > 0) {
   process.exit(2);
 }
 
+/*
+ * ⚠️ UNE VARIABLE PRÉSENTE N'EST PAS UNE VARIABLE SUBSTITUÉE (L-026).
+ *
+ * Railway laisse un service emprunter la valeur d'un autre :
+ * `CRON_SECRET=${{droplink2.CRON_SECRET}}`. C'est la bonne façon de la poser —
+ * elle n'est jamais recopiée à la main, donc jamais mal recopiée, et la
+ * régénérer d'un côté la propage de l'autre.
+ *
+ * Mais si le nom du service est faux d'une lettre, Railway ne résout rien et
+ * transmet la CHAÎNE ELLE-MÊME. Elle est non vide, elle passe le contrôle
+ * ci-dessus, elle part dans l'en-tête — et la route répond 404, exactement
+ * comme à un inconnu, parce que c'est ainsi qu'elle est conçue. On chercherait
+ * alors une route disparue là où c'est une référence qui n'a pas pris.
+ *
+ * Le motif `${{ … }}` n'a aucun sens dans une valeur substituée : sa seule
+ * présence ici prouve que la substitution n'a pas eu lieu.
+ */
+const nonSubstituees = [
+  ["PLANIFICATEUR_BASE_URL", base],
+  ["CRON_SECRET", secret],
+]
+  .filter(([, valeur]) => valeur.includes("${{"))
+  .map(([nom]) => nom);
+
+if (nonSubstituees.length > 0) {
+  console.error(
+    `[planificateur] variable(s) NON SUBSTITUÉE(S) : ${nonSubstituees.join(", ")} — ` +
+      `Railway a transmis la référence au lieu de sa valeur. Le nom du service ` +
+      `cité entre \${{ }} ne correspond à aucun service de ce projet : le vérifier ` +
+      `au caractère près, majuscules comprises.`,
+  );
+  process.exit(2);
+}
+
 const debut = Date.now();
 let reponse;
 try {
