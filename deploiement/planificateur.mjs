@@ -10,8 +10,14 @@
  * qui surveille les tâches s'arrête avec elles. » Un script unique qui
  * appellerait la cadence PUIS la veille les ferait tomber ensemble, et il ne
  * resterait personne pour le constater. D'où deux services Railway distincts,
- * `railway-cadence.json` et `railway-veille.json`, qui invoquent ce même
- * fichier avec un argument différent.
+ * qui invoquent ce même fichier avec un argument différent.
+ *
+ * ⚠️ CES DEUX SERVICES SE SAISISSENT À LA MAIN, DANS L'INTERFACE DE RAILWAY,
+ * et le dépôt ne peut rien y faire : « New services cannot opt into Config as
+ * Code » (docs.railway.com, relevé le 06/09/2026). Ce qu'il faut y taper —
+ * commandes, horaires, politique de redémarrage, variables — est tenu à jour
+ * dans `deploiement/services-planifies.ts`, que `tests/unit/deploiement.test.ts`
+ * compare à ce fichier-ci dans les deux sens.
  *
  * ⚠️ IL SORT EN ERREUR QUAND L'APPEL ÉCHOUE, et c'est tout ce qui rend une
  * panne visible ici. Le contrat de ces routes a été MESURÉ le 04/09/2026 sur
