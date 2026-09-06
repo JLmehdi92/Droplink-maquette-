@@ -36,6 +36,9 @@
            style="display:inline-block;padding:15px 30px;border-radius:13px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;background:linear-gradient(97deg,#7c5cf5 0%,#f2765e 100%)">
           Confirmer mon adresse
         </a>
+        <p lang="en" style="margin:9px 0 0;font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:20px;color:#83858f">
+          Confirm my email address
+        </p>
       </div>
 
       <hr style="height:1px;background:#ececf0;border:0;margin:26px 0">
@@ -60,9 +63,33 @@
 
       <hr style="height:1px;background:#ececf0;border:0;margin:26px 0">
 
-      <p style="margin:0;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+      <!-- ⚠️ LE BLOC ANGLAIS N'EST PAS UNE POLITESSE. Le produit est bilingue
+           depuis le premier jour, et cet email était intégralement en français.
+           Supabase n'accepte QU'UN modèle par type : il ne connaît pas la
+           langue du destinataire, et `profiles.locale` ne lui est pas
+           accessible. Un email bilingue est donc la seule forme qui atteigne
+           tout le monde sans construire un port d'envoi qui n'existe pas
+           (`lib/email/port.ts` le dit : il n'a qu'un correspondant possible,
+           et c'est nous).
+
+           UN SEUL BOUTON, plus haut : deux boutons identiques feraient
+           hésiter sur un lien à usage unique. -->
+      <p lang="en" style="margin:0 0 8px;font-family:Inter,system-ui,sans-serif;font-size:11px;line-height:16px;letter-spacing:0.06em;text-transform:uppercase;color:#a3a4ad">
+        English
+      </p>
+      <p lang="en" style="margin:0 0 12px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#3f4048">
+        One last step and your account is open — use the button above to confirm this
+        address is yours. Then, in three minutes: your name and colour, your quality
+        photos, and a single link to send. Your customer has no account to create.
+      </p>
+
+      <p style="margin:0 0 10px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
         Si vous n'êtes pas à l'origine de cette inscription, ignorez ce message :
         sans cette confirmation, aucun compte ne sera ouvert.
+      </p>
+      <p lang="en" style="margin:0;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+        If you did not sign up, ignore this message: without this confirmation, no
+        account will be opened.
       </p>
     </div>
 

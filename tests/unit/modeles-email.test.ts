@@ -180,4 +180,50 @@ describe("Les modèles d'email de Supabase", () => {
     expect(liens.length, "le modèle doit porter le bouton ET son repli").toBeGreaterThanOrEqual(2);
     expect(new Set(liens).size, `deux adresses différentes : ${liens.join(" | ")}`).toBe(1);
   });
+
+  test("chaque modèle parle AUSSI anglais", () => {
+    /*
+     * ⚠️ DÉFAUT MESURÉ LE 06/09/2026 : les deux modèles étaient INTÉGRALEMENT
+     * en français, en dur, sans le moindre attribut de langue. Le produit est
+     * bilingue depuis le premier jour.
+     *
+     * CE QUE ÇA COÛTAIT : depuis la suppression du lien magique le 01/09, la
+     * réinitialisation est le SEUL recours d'un vendeur enfermé dehors. Un
+     * anglophone recevait, pour tout secours, un email qu'il ne comprenait pas.
+     * Le brief §9 le dit : « la réinitialisation est le nouveau vecteur de
+     * prise de compte » — un recours illisible est un recours qui échoue.
+     *
+     * ⚠️ POURQUOI BILINGUE ET NON TRADUIT. Supabase n'accepte QU'UN modèle par
+     * type et ne connaît pas la langue du destinataire ; `profiles.locale` ne
+     * lui est pas accessible. Un envoi par langue exigerait notre propre port
+     * d'envoi, que `lib/email/port.ts` déclare explicitement ne pas être.
+     *
+     * ⚠️ ET CETTE SUITE NE PROUVE TOUJOURS PAS CE QUI EST COLLÉ DANS SUPABASE.
+     * Elle garde la version de référence, celle qu'on relit et qu'on copie.
+     * Le collage reste un geste humain — c'est L-028, et le dire vaut mieux
+     * que de laisser croire l'inverse.
+     */
+    for (const [fichier] of ATTENDUS) {
+      const contenu = lire(fichier);
+      const blocs = [...contenu.matchAll(/lang="en"/g)].length;
+      expect(
+        blocs,
+        `${fichier} ne porte aucun bloc \`lang="en"\` : un vendeur anglophone ` +
+          "reçoit son SEUL recours d'accès dans une langue qu'il ne lit pas.",
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  test("CONTRE-TEST : le français n'a pas disparu au passage", () => {
+    // Sans lui, « chaque modèle parle anglais » serait vrai d'un modèle
+    // entièrement traduit — c'est-à-dire du défaut inverse, appliqué au
+    // persona majoritaire. Une bascule n'est pas une correction.
+    for (const [fichier] of ATTENDUS) {
+      const contenu = lire(fichier);
+      expect(
+        /[àâçéèêëîïôùûüœ]/i.test(contenu),
+        `${fichier} ne porte plus aucun accent : le français a-t-il été remplacé ?`,
+      ).toBe(true);
+    }
+  });
 });

@@ -45,13 +45,42 @@
            style="display:inline-block;padding:15px 30px;border-radius:13px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;background:linear-gradient(97deg,#7c5cf5 0%,#f2765e 100%)">
           Choisir un nouveau mot de passe
         </a>
+        <p lang="en" style="margin:9px 0 0;font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:20px;color:#83858f">
+          Set a new password
+        </p>
       </div>
 
       <p style="margin:0 0 6px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
         Ce lien est valable <strong style="color:#3f4048">une heure</strong> et ne fonctionne qu'une seule fois.
       </p>
 
-      <hr style="height:1px;background:#ececf0;border:0;margin:28px 0">
+      <hr style="height:1px;background:#ececf0;border:0;margin:24px 0">
+
+      <!-- ⚠️ LE BLOC ANGLAIS N'EST PAS UNE POLITESSE : C'EST LE SEUL RECOURS
+           D'ACCÈS. Depuis la suppression du lien magique le 01/09/2026, un
+           vendeur qui a oublié son mot de passe n'a plus que cet email. Il
+           était intégralement en français, et le produit est bilingue depuis
+           le premier jour.
+
+           SUPABASE N'ACCEPTE QU'UN MODÈLE PAR TYPE — il ne connaît pas la
+           langue du destinataire, et notre `profiles.locale` ne lui est pas
+           accessible. Un email bilingue est donc la seule forme qui atteigne
+           tout le monde sans construire un port d'envoi qui n'existe pas.
+
+           UN SEUL BOUTON, ET IL EST PLUS HAUT. Deux boutons identiques
+           feraient hésiter, et l'hésitation sur un lien à usage unique coûte
+           une seconde demande. -->
+      <p lang="en" style="margin:0 0 8px;font-family:Inter,system-ui,sans-serif;font-size:11px;line-height:16px;letter-spacing:0.06em;text-transform:uppercase;color:#a3a4ad">
+        English
+      </p>
+      <p lang="en" style="margin:0 0 6px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#3f4048">
+        You asked to reset the password for your DropLink account. Use the button above to choose a new one.
+      </p>
+      <p lang="en" style="margin:0;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+        This link is valid for <strong style="color:#3f4048">one hour</strong> and works only once.
+      </p>
+
+      <hr style="height:1px;background:#ececf0;border:0;margin:24px 0">
 
       <!-- ⚠️ CE PARAGRAPHE N'EST PAS DE LA POLITESSE. Une demande non
            sollicitée est le premier signe visible d'une tentative de prise de
@@ -60,15 +89,20 @@
       <p style="margin:0 0 4px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#3f4048">
         <strong>Vous n'avez rien demandé ?</strong>
       </p>
-      <p style="margin:0 0 24px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+      <p style="margin:0 0 10px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
         Ignorez ce message. Votre mot de passe actuel reste valable et personne
         n'a pu accéder à votre compte.
+      </p>
+      <p lang="en" style="margin:0 0 24px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+        <strong style="color:#3f4048">Didn't ask for this?</strong> Ignore this message. Your current
+        password still works and nobody was able to access your account.
       </p>
 
       <!-- Certains clients de messagerie n'affichent pas les boutons, et une
            réinitialisation qu'on ne peut pas ouvrir n'existe pas. -->
       <p style="margin:0 0 6px;font-family:Inter,system-ui,sans-serif;font-size:12px;line-height:20px;color:#a3a4ad">
-        Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur :
+        Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur —
+        <span lang="en">if the button doesn't work, copy this address into your browser:</span>
       </p>
       <p style="margin:0;font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:20px;color:#83858f;word-break:break-all">
         {{ .SiteURL }}/auth/retour?token_hash={{ .TokenHash }}&amp;suite=mot-de-passe
