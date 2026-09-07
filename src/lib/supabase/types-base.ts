@@ -595,6 +595,7 @@ export type Database = {
           query_count: number
           raw_status: string | null
           registered_at: string | null
+          reserve_at: string | null
           shop_id: string
           tracking_number: string
           updated_at: string
@@ -618,6 +619,7 @@ export type Database = {
           query_count?: number
           raw_status?: string | null
           registered_at?: string | null
+          reserve_at?: string | null
           shop_id: string
           tracking_number: string
           updated_at?: string
@@ -641,6 +643,7 @@ export type Database = {
           query_count?: number
           raw_status?: string | null
           registered_at?: string | null
+          reserve_at?: string | null
           shop_id?: string
           tracking_number?: string
           updated_at?: string
