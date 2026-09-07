@@ -682,3 +682,152 @@ describe("Attacher une commande à un colis déjà suivi", () => {
     expect(apres.mouvement, "une date de mouvement a été inventée").toBeNull();
   });
 });
+
+/**
+ * DEUX PASSAGES CONSÉCUTIFS — LE GARDE QUE LA 134 N'AVAIT PAS POSÉ.
+ *
+ * ⚠️ CE CONTRÔLE EXISTE PARCE QU'UN DÉFAUT A SURVÉCU À SA PROPRE CORRECTION.
+ *
+ * La 134 a réparé la moitié LISIBLE de la confusion — la valeur rendue — et le
+ * garde ci-dessus la protège. Il ne regarde qu'UN passage, sur un colis NEUF.
+ * L'autre moitié, l'ÉCRITURE, est restée en place quatre jours de plus, et elle
+ * s'observe seulement en enchaînant deux passages sur un colis DÉJÀ interrogé :
+ *
+ *   `colis_a_interroger` posait `last_query_at = now()` pour tout colis rendu,
+ *   y compris ceux que `decider` allait mettre en attente. Le filtre SQL vaut
+ *   trois heures ; l'intervalle réel en vaut six dès qu'un colis dort depuis
+ *   plus d'un jour. La date était donc repoussée toutes les trois heures et
+ *   n'atteignait jamais six — le colis était examiné à chaque tour, interrogé
+ *   plus jamais.
+ *
+ * MESURÉ EN PRODUCTION dans la nuit du 06 au 07/09/2026, sur le colis réel d'un
+ * client : deux passages « examines:1 interroges:0 » d'affilée, puis trois
+ * « interroges:1 » APRÈS qu'une notification du transporteur eut rafraîchi
+ * `last_movement_at` et fait retomber l'intervalle à trois heures. Sans ce
+ * hasard, le colis ne serait plus jamais interrogé.
+ *
+ * C'est L-025 : le garde écrit après coup hérite du champ de vision de la
+ * correction, pas du problème. Celui-ci regarde l'écriture, pas la lecture.
+ */
+describe("Réserver un colis n'est pas l'avoir interrogé", () => {
+  /** Pose un état d'ancienneté choisi, sans dépendre de l'horloge du test. */
+  async function vieillir(id: string, heuresDepuisInterrogation: number, joursDeSilence: number) {
+    await interroger(
+      catalogue,
+      `update public.tracked_parcels
+          set last_query_at = now() - make_interval(hours => $2),
+              last_movement_at = now() - make_interval(days => $3),
+              normalized_status = 'en_transit',
+              registered_at = now() - make_interval(days => $3)
+        where id = $1`,
+      [id, heuresDepuisInterrogation, joursDeSilence],
+    );
+  }
+
+  /**
+   * Les instants, en millisecondes — jamais les objets rendus par le pilote.
+   * `pg` rend des `Date` : deux `Date` de même valeur ne sont pas la MÊME, et
+   * une comparaison d identite echouerait en annoncant « aucune difference
+   * visible », ce qui est le pire message possible pour un garde.
+   */
+  async function dates(id: string): Promise<{ interroge: number | null; reserve: number | null }> {
+    const l = await interroger<{ last_query_at: Date | null; reserve_at: Date | null }>(
+      catalogue,
+      "select last_query_at, reserve_at from public.tracked_parcels where id = $1",
+      [id],
+    );
+    const ms = (v: Date | null | undefined): number | null => (v === null || v === undefined ? null : new Date(v).getTime());
+    return { interroge: ms(l[0]?.last_query_at), reserve: ms(l[0]?.reserve_at) };
+  }
+
+  test("un colis SEULEMENT examiné ne voit pas sa date d'interrogation avancer", async () => {
+    const id = await enregistrerColis(alice, numeroNeuf());
+    // Cinq heures depuis l'interrogation, deux jours de silence : la fonction
+    // SQL le rend (filtre 3 h), et `decider` répond « attendre » (intervalle
+    // 6 h). C'est très exactement le cas où le défaut mordait.
+    await vieillir(id, 5, 2);
+    const avant = await dates(id);
+
+    const [ligne] = await interroger<{ last_query_at: string | null }>(
+      catalogue,
+      "select last_query_at from public.colis_a_interroger(200) where id = $1",
+      [id],
+    );
+    expect(ligne, "le colis mûr pour trois heures n'a pas été proposé").toBeDefined();
+
+    const apres = await dates(id);
+    expect(
+      apres.interroge,
+      "la RÉSERVATION a écrit la date d'interrogation. Elle sera repoussée de " +
+        "trois heures en trois heures et n'atteindra jamais l'intervalle réel : " +
+        "le colis est examiné à chaque passage et interrogé plus jamais.",
+    ).toBe(avant.interroge);
+  });
+
+  test("la réservation est enregistrée AILLEURS, sinon elle ne protège plus rien", async () => {
+    // CONTRE-TEST STRUCTUREL. Le contrôle précédent passerait aussi si la
+    // sélection n'écrivait plus RIEN — et deux passages concurrents
+    // paieraient alors deux fois le même colis (défaut de la 074).
+    const id = await enregistrerColis(alice, numeroNeuf());
+    await vieillir(id, 5, 2);
+    expect((await dates(id)).reserve, "réservation déjà posée avant tout passage").toBeNull();
+
+    await interroger(catalogue, "select 1 from public.colis_a_interroger(200) where id = $1", [id]);
+
+    expect(
+      (await dates(id)).reserve,
+      "la sélection n'a rien réservé : deux passages concurrents rendraient le même colis",
+    ).not.toBeNull();
+  });
+
+  test("CONTRE-TEST : `marquer_interroge`, elle, avance bien la date", async () => {
+    // Sans lui, une fonction qui n'écrirait JAMAIS la date passerait le premier
+    // contrôle à 100 % — et le suivi n'espacerait plus rien du tout.
+    const id = await enregistrerColis(alice, numeroNeuf());
+    await vieillir(id, 5, 2);
+    const avant = await dates(id);
+
+    await interroger(catalogue, "select public.marquer_interroge($1)", [id]);
+
+    const apres = await dates(id);
+    expect(apres.interroge, "la date d'interrogation n'a pas été posée").not.toBe(avant.interroge);
+    expect(apres.interroge as number, "la date d'interrogation a reculé").toBeGreaterThan(
+      avant.interroge as number,
+    );
+  });
+
+  test("DEUX PASSAGES D'AFFILÉE : l'ancienneté rendue GRANDIT, elle ne repart pas à zéro", async () => {
+    /*
+     * LE CONTRÔLE QUI DÉCRIT LE DÉFAUT TEL QU'IL S'EST PRODUIT. Les précédents
+     * regardent la base ; celui-ci regarde ce que la CADENCE reçoit, deux fois
+     * de suite, comme elle le reçoit en production.
+     */
+    const id = await enregistrerColis(alice, numeroNeuf());
+    await vieillir(id, 5, 2);
+
+    const lire = async (): Promise<number> => {
+      const [l] = await interroger<{ last_query_at: Date | null }>(
+        catalogue,
+        "select last_query_at from public.colis_a_interroger(200) where id = $1",
+        [id],
+      );
+      const v = l?.last_query_at;
+      if (v === undefined || v === null) throw new Error("colis non rendu par la sélection");
+      return Date.now() - new Date(v).getTime();
+    };
+
+    const premier = await lire();
+    // La réservation expire en dix minutes ; on la lève pour rejouer le passage
+    // suivant sans attendre — c'est le SEUL raccourci, la date d'interrogation
+    // n'est pas touchée.
+    await interroger(catalogue, "update public.tracked_parcels set reserve_at = null where id = $1", [id]);
+    const second = await lire();
+
+    expect(
+      second,
+      `l'ancienneté rendue est retombée (${Math.round(premier / 60000)} min puis ` +
+        `${Math.round(second / 60000)} min) : chaque passage repousse la date, et ` +
+        "l'intervalle réel ne sera jamais atteint",
+    ).toBeGreaterThanOrEqual(premier);
+  });
+});
