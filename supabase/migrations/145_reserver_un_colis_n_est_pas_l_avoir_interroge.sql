@@ -68,10 +68,9 @@
  * sont deux faits différents, portés jusqu'ici par la même colonne. Les
  * séparer suffit :
  *
- *   `reserve_at`     — posée par la sélection. Elle ne sert QU'À empêcher deux
- *                      passages concurrents de rendre le même colis, et elle
- *                      expire vite : un passage complet dure trois secondes
- *                      (mesuré), dix minutes couvrent largement un incident.
+ *   `reserve_at`     — posée par la sélection. Elle ne sert QU'À espacer les
+ *                      passages et à empêcher deux passages concurrents de
+ *                      rendre le même colis.
  *   `last_query_at`  — posée UNIQUEMENT par `marquer_interroge`, c'est-à-dire
  *                      seulement quand on va réellement appeler le
  *                      fournisseur. Elle redevient ce que son nom dit.
@@ -80,12 +79,31 @@
  * locked` plus une réservation datée. Ce qui change, c'est qu'un colis
  * seulement EXAMINÉ ne voit plus sa date d'interrogation avancer.
  *
- * ⚠️ CONSÉQUENCE ASSUMÉE : un colis dont l'intervalle réel dépasse trois heures
- * sera désormais rendu à CHAQUE passage jusqu'à maturité, au lieu d'un passage
- * sur douze. Il sera donc examiné plus souvent — mais un examen ne coûte rien
- * chez le fournisseur, seule l'interrogation se paie, et c'est elle que
- * `decider` continue de borner. On échange des lectures de base gratuites
- * contre des colis qui ne disparaissent plus.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ POURQUOI LA RÉSERVATION DURE TROIS HEURES ET NON DIX MINUTES
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Dix minutes suffiraient à sa fonction — un passage complet dure trois
+ * secondes, mesuré. Mais la fenêtre ne décide pas que de la concurrence : elle
+ * décide de la FRÉQUENCE À LAQUELLE UN COLIS EST RÉÉCRIT.
+ *
+ * `tracked_parcels` porte un déclencheur `BEFORE UPDATE` qui touche
+ * `updated_at` à chaque écriture, et l'écran Envois trie PAR DÉFAUT sur
+ * `updated_at` décroissant. Avec dix minutes, un colis mûr serait rendu à
+ * chaque passage du planificateur — toutes les quinze minutes — au lieu d'une
+ * fois toutes les trois heures : ses colis les plus IMMOBILES remonteraient en
+ * tête de « plus récent » douze fois plus souvent, sans que rien n'ait changé
+ * pour eux. Ce serait échanger un défaut de suivi contre un défaut d'écran.
+ *
+ * Trois heures alignent la réservation sur le filtre juste au-dessus. La charge
+ * et les effets de bord redeviennent EXACTEMENT ceux d'avant cette migration —
+ * un passage sur douze touche la ligne, comme la réservation le faisait déjà.
+ * Seule change la colonne écrite, et c'est tout le correctif.
+ *
+ * CE QUE ÇA COÛTE, ET C'EST ACCEPTÉ : un colis qui atteint sa maturité juste
+ * après un passage attendra jusqu'à trois heures de plus. L'intervalle est déjà
+ * une approximation (3, 6, 12, 24 h), et l'alternative était de ne l'interroger
+ * jamais.
  *
  * Le `returning` garde la forme de la 134 — la valeur capturée dans la
  * sous-requête — bien qu'elle soit désormais redondante, puisque l'`update` ne
@@ -99,11 +117,13 @@ alter table public.tracked_parcels
   add column reserve_at timestamptz;
 
 comment on column public.tracked_parcels.reserve_at is
-  'Instant où un passage de cadence a PRIS ce colis. Sert uniquement à ce que '
-  'deux passages concurrents ne le rendent pas tous les deux, et expire en dix '
-  'minutes. NE PAS confondre avec last_query_at, qui date la dernière '
-  'interrogation RÉELLE du fournisseur : les avoir confondues faisait sortir du '
-  'suivi tout colis silencieux depuis plus de 24 h (migration 145).';
+  'Instant où un passage de cadence a PRIS ce colis. Sert à espacer les '
+  'passages et à ce que deux passages concurrents ne le rendent pas tous les '
+  'deux ; expire en trois heures, alignée sur le filtre de la sélection pour '
+  'que la ligne ne soit pas réécrite plus souvent qu''avant. NE PAS confondre '
+  'avec last_query_at, qui date la dernière interrogation RÉELLE du '
+  'fournisseur : les avoir confondues faisait sortir du suivi tout colis '
+  'silencieux depuis plus de 24 h (migration 145).';
 
 -- DROP EXPLICITE, même si la signature ne change pas : un `create or replace`
 -- qui rencontrerait une liste de retour différente créerait une SECONDE
@@ -139,11 +159,11 @@ as $$
        -- finement ici dupliquerait la décision, et deux copies d'une même
        -- décision divergent au premier ajustement de l'une des deux.
        and (c.last_query_at is null or c.last_query_at < now() - interval '3 hours')
-       -- LA RÉSERVATION, ET RIEN D'AUTRE. Dix minutes : un passage complet dure
-       -- trois secondes (mesuré le 07/09), et le planificateur repasse toutes
-       -- les quinze minutes — une réservation abandonnée par un passage mort
-       -- est donc reprise au tour suivant, jamais perdue.
-       and (c.reserve_at is null or c.reserve_at < now() - interval '10 minutes')
+       -- LA RÉSERVATION, ET RIEN D'AUTRE. Trois heures, alignées sur le filtre
+       -- ci-dessus : voir l'en-tête. Une fenêtre plus courte ferait réécrire la
+       -- ligne à chaque passage, donc remonter les colis les plus immobiles en
+       -- tête de l'écran Envois, qui trie sur `updated_at`.
+       and (c.reserve_at is null or c.reserve_at < now() - interval '3 hours')
      -- `nulls first` n'est pas un détail d'ordre : un colis JAMAIS interrogé est
      -- celui dont le vendeur vient de coller le numéro, et il attend devant son
      -- écran. Le servir en dernier serait servir en dernier le seul qui regarde.
