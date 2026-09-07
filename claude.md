@@ -249,6 +249,35 @@ Typographie inchangée : **Plus Jakarta Sans** (titres, 800, tracking -0.03em) +
 - Index sur `(shop_id, created_at)`, `(shop_id, status)`, **et sur le tri par défaut** (facile à oublier, invisible à faible volumétrie).
 - Recherche **insensible aux accents** — index d'EXPRESSION avec `unaccent`. « creme » doit trouver « Crème », c'est le cas majoritaire.
 
+### ⚠️ LA RÉGION DU SERVICE RAILWAY EST UNE PROPRIÉTÉ DE PERFORMANCE
+
+Mesuré le 07/09/2026, sur le produit servi. Le service tournait en **US West**
+(la région PAR DÉFAUT de Railway) pendant que la base Supabase est en
+**eu-west-3, Paris**. Chaque appel du serveur vers sa base faisait donc un
+aller-retour transatlantique — **~150 ms au lieu de ~10**.
+
+|  | US West | EU West |
+|---|---|---|
+| Landing (statique, aucun appel) | ~190 ms | **25 ms** |
+| Page client | — | 182 ms |
+| Panneau admin | 2 216 ms | **540 ms** |
+| Les six écrans admin | 9 378 ms | **2 472 ms** |
+
+⚠️ **CE DÉFAUT EST INVISIBLE DEPUIS UNE MACHINE DE DÉVELOPPEMENT** : en local,
+la latence vers Supabase est de ~15 ms, et toutes les sondes du dépôt tournent
+en local. Aucune porte ne pouvait le voir. Il a été signalé par Wassim, qui a
+trouvé le panneau admin lent — l'écran le plus lourd, donc celui où un surcoût
+réparti sur tout le produit devient perceptible.
+
+⚠️ **LA BASE N'Y ÉTAIT POUR RIEN** : les douze fonctions SQL de l'admin
+répondent en **4 à 11 ms**, mesurées en production. Un seuil de temps de page
+qui aurait conclu « il manque un index » aurait dégradé le produit en croyant
+l'améliorer (L-017).
+
+**Tout service créé pour ce produit doit être en `EU West`**, région à régler
+dans `Settings → Regions`. Le changement est sans interruption tant qu'aucun
+volume n'est attaché — ce qui est notre cas, les médias vivant chez R2.
+
 **Protocole de mesure :** mesurer le **PLAN**, pas le chronomètre. Seuils fixés **AVANT**. Rodage jeté, puis **deux séries concordantes**. Toute mesure **porte une assertion sur le jeu qu'elle décrit**. Mesurer ce que l'écran appelle réellement, **au plafond**, avec un **compte voisin** dans le jeu.
 
 ---
