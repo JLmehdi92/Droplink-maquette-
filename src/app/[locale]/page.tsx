@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Icone } from "@/components/icone";
 import { routing } from "@/i18n/routing";
 import { signalementDisponible } from "@/lib/contact";
-import { alternatesDe } from "@/lib/seo/alternates";
+import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
+import { donneesStructurees } from "@/lib/seo/donnees-structurees";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 
 /**
@@ -71,6 +72,10 @@ export async function generateMetadata({
     title: t("metaTitre"),
     description: t("metaDescription"),
     alternates: alternatesDe(langue, ""),
+    openGraph: openGraphDe(langue, "", {
+      titre: t("metaTitre"),
+      description: t("metaDescription"),
+    }),
   };
 }
 
@@ -81,6 +86,7 @@ export default async function Accueil({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
   const t = await getTranslations("landing");
   const nav = await getTranslations("navigation");
 
@@ -101,8 +107,37 @@ export default async function Accueil({
 
   const sections = ["fonctionnement", "clientVoit", "tarif"] as const;
 
+  /*
+   * LE GRAPHE JSON-LD, RENDU CÔTÉ SERVEUR.
+   *
+   * ⚠️ CÔTÉ SERVEUR N'EST PAS UN DÉTAIL D'IMPLÉMENTATION. Google traite les
+   * données structurées injectées par JavaScript avec un retard qui se compte
+   * en jours, et ne rend pas du tout le JS sur une page en statut non-200. Un
+   * graphe posé par un effet client existerait pour un navigateur et pour
+   * personne d'autre.
+   *
+   * ⚠️ ET `dangerouslySetInnerHTML` EST ICI LE SEUL CHEMIN CORRECT, alors que
+   * le reste du produit n'en contient aucun. React échapperait `<`, `>` et `&`
+   * en entités dans un nœud texte — le JSON-LD deviendrait illisible pour un
+   * analyseur. La valeur ne vient d'aucune entrée utilisateur : elle est
+   * construite ici à partir du catalogue et de la configuration. Le seul
+   * caractère à neutraliser est `<`, qui pourrait fermer la balise.
+   */
+  const graphe = donneesStructurees(langue, {
+    nom: "DropLink",
+    description: t("metaDescription"),
+  });
+
   return (
     <div className="bg-canvas p-3 md:p-7">
+      {graphe === null ? null : (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(graphe).replace(/</g, "\u003c"),
+          }}
+        />
+      )}
       <div className="mx-auto w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:rounded-page-publique">
         {/* ---- NAVIGATION ------------------------------------------------ */}
         <header className="flex items-center justify-between gap-6 px-5 py-[18px] md:px-10 md:py-[22px]">

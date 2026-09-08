@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { PageLegale, type SectionLegale } from "@/components/page-legale";
 import { routing } from "@/i18n/routing";
-import { alternatesDe } from "@/lib/seo/alternates";
+import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 
 export function generateStaticParams(): Array<{ locale: string }> {
@@ -21,6 +21,10 @@ export async function generateMetadata({
     title: t("confidentialiteMetaTitre"),
     description: t("confidentialiteMetaDescription"),
     alternates: alternatesDe(langue, "/confidentialite"),
+    openGraph: openGraphDe(langue, "/confidentialite", {
+      titre: t("confidentialiteMetaTitre"),
+      description: t("confidentialiteMetaDescription"),
+    }),
   };
 }
 

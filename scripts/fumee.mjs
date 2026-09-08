@@ -4612,6 +4612,126 @@ function ageHsts(entetes) {
     !publique.includes('rel="alternate"'),
     "ni hreflang : sa langue est celle du VENDEUR, elle n a pas de traduction",
   ]);
+
+  // ── LES DONNEES STRUCTUREES ET L APERCU DE PARTAGE ───────────────────────
+  //
+  // ⚠️ MESURE AVANT CETTE PASSE : `application/ld+json` apparaissait ZERO fois
+  // dans le HTML servi, et il n y avait aucune balise Open Graph.
+  //
+  // ⚠️ ON EXIGE QUE LE GRAPHE SOIT PARSABLE, PAS QU IL SOIT PRESENT. Un bloc
+  // `<script type="application/ld+json">` qui contient du JSON casse est
+  // strictement equivalent a pas de bloc du tout pour un moteur — mais un
+  // controle de presence le declarerait bon. C est la difference entre chercher
+  // un mot et interroger un effet.
+  {
+    const parLangue = await Promise.all(
+      LANGUES_SERVIES.map(async (l) => [l, await (await fetch(`${base}/${l}`)).text()]),
+    );
+
+    const graphes = [];
+    const casses = [];
+    for (const [langue, html] of parLangue) {
+      const bloc = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html);
+      if (bloc === null) {
+        casses.push(`${langue}:ABSENT`);
+        continue;
+      }
+      try {
+        graphes.push([langue, JSON.parse(bloc[1])]);
+      } catch {
+        casses.push(`${langue}:JSON INVALIDE`);
+      }
+    }
+
+    controles.push([
+      casses.length === 0 && graphes.length === LANGUES_SERVIES.length,
+      `les ${LANGUES_SERVIES.length} landings portent un JSON-LD PARSABLE` +
+        (casses.length ? ` — ${casses.join(", ")}` : ""),
+    ]);
+
+    // Les trois entites, et leurs liens. Un graphe qui decrit trois choses sans
+    // relation ne repond pas a « qui edite ce site ».
+    const incomplets = graphes
+      .filter(([, g]) => {
+        const types = (g["@graph"] ?? []).map((x) => x["@type"]);
+        return !["Organization", "WebSite", "SoftwareApplication"].every((t) => types.includes(t));
+      })
+      .map(([l]) => l);
+    controles.push([
+      graphes.length > 0 && incomplets.length === 0,
+      "chaque graphe porte Organization + WebSite + SoftwareApplication" +
+        (incomplets.length ? ` — INCOMPLET sur ${incomplets.join(", ")}` : ""),
+    ]);
+
+    // LA LANGUE DU GRAPHE SUIT CELLE DE LA PAGE. Un graphe qui annonce `fr` sur
+    // la page chinoise contredirait hreflang, et deux signaux qui se
+    // contredisent valent moins qu un seul.
+    const languesFausses = graphes
+      .filter(([langue, g]) => {
+        const site = (g["@graph"] ?? []).find((x) => x["@type"] === "WebSite");
+        const declarees = site?.inLanguage ?? [];
+        return declarees[0] !== langue;
+      })
+      .map(([l]) => l);
+    controles.push([
+      languesFausses.length === 0,
+      "le graphe annonce la langue de SA page en premier" +
+        (languesFausses.length ? ` — FAUX sur ${languesFausses.join(", ")}` : ""),
+    ]);
+
+    /*
+     * ⚠️ AUCUN PRIX DANS LES DONNEES STRUCTUREES, ET CE CONTROLE EST UNE
+     * PROTECTION DE PRODUIT AUTANT QUE DE SEO.
+     *
+     * Google demande un bloc `offers` pour ses resultats enrichis, donc la
+     * pression pour l ajouter est reelle et reviendra. Le produit ne connait
+     * AUCUNE notion de prix — ni table, ni code de facturation, c est une
+     * contrainte verrouillee. Declarer « price: 0 » affirmerait dans un format
+     * lisible par une machine ce que la base n a jamais enregistre, et cette
+     * affirmation deviendrait fausse en phase 2 AVANT que quiconque pense a la
+     * relire. Une donnee structuree perimee circule ; une absence, non.
+     */
+    const avecPrix = graphes
+      .filter(([, g]) => JSON.stringify(g).includes('"offers"') || JSON.stringify(g).includes('"price"'))
+      .map(([l]) => l);
+    controles.push([
+      avecPrix.length === 0,
+      "aucun prix declare dans le JSON-LD (le produit n en connait aucun)" +
+        (avecPrix.length ? ` — PRESENT sur ${avecPrix.join(", ")}` : ""),
+    ]);
+
+    // L APERCU DE PARTAGE, SUR LES DOUZE PAGES INDEXABLES.
+    const sansApercu = pages
+      .filter(([, html]) => !html.includes('property="og:title"'))
+      .map(([c]) => c);
+    controles.push([
+      sansApercu.length === 0,
+      `les ${pages.length} pages indexables portent un apercu de partage` +
+        (sansApercu.length ? ` — MANQUANT sur ${sansApercu.join(", ")}` : ""),
+    ]);
+
+    // ⚠️ LE FORMAT D OPEN GRAPH N EST PAS CELUI DE HREFLANG, et la confusion
+    // est le defaut ordinaire du sujet : `zh_CN` avec un souligne ici, `zh-CN`
+    // avec un tiret la-bas. Un format errone fait ignorer la balise en silence.
+    const LOCALES_ATTENDUES = { fr: "fr_FR", en: "en_US", "zh-CN": "zh_CN" };
+    const localesFausses = pages
+      .filter(([chemin, html]) => {
+        const langue = chemin.split("/")[1];
+        return !html.includes(`content="${LOCALES_ATTENDUES[langue]}"`);
+      })
+      .map(([c]) => c);
+    controles.push([
+      localesFausses.length === 0,
+      "chaque apercu declare sa locale au format Open Graph (souligne)" +
+        (localesFausses.length ? ` — FAUSSE sur ${localesFausses.join(", ")}` : ""),
+    ]);
+
+    // CONTRE-TEST : la page publique ne doit porter AUCUN graphe non plus.
+    controles.push([
+      !publique.includes("application/ld+json"),
+      "la page publique ne porte aucun JSON-LD (elle ne se decrit a personne)",
+    ]);
+  }
 }
 
 // ── LE COOKIE DE LANGUE N'EST PAS LISIBLE EN JAVASCRIPT ────────────────────

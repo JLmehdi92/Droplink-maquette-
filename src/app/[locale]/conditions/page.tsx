@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PageLegale, type SectionLegale } from "@/components/page-legale";
 import { routing } from "@/i18n/routing";
 import { signalementDisponible } from "@/lib/contact";
-import { alternatesDe } from "@/lib/seo/alternates";
+import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 
 export function generateStaticParams(): Array<{ locale: string }> {
@@ -22,6 +22,10 @@ export async function generateMetadata({
     title: t("conditionsMetaTitre"),
     description: t("conditionsMetaDescription"),
     alternates: alternatesDe(langue, "/conditions"),
+    openGraph: openGraphDe(langue, "/conditions", {
+      titre: t("conditionsMetaTitre"),
+      description: t("conditionsMetaDescription"),
+    }),
   };
 }
 

@@ -85,3 +85,55 @@ export function alternatesDe(langue: Langue, chemin: string): Metadata["alternat
 
   return { canonical: url(langue), languages };
 }
+
+/**
+ * Le format de langue attendu par Open Graph : `langue_RÉGION`, souligné.
+ *
+ * ⚠️ CE N'EST PAS LE MÊME FORMAT QUE HREFLANG, ET LA CONFUSION EST LE DÉFAUT
+ * ORDINAIRE DU SUJET. Hreflang veut `zh-CN` (tiret, ISO 639-1 + ISO 3166-1) ;
+ * Open Graph veut `zh_CN` (souligné). Écrire `fr` seul, ou `fr-FR`, fait
+ * ignorer la balise en silence — elle reste dans la page, et rien ne la lit.
+ *
+ * La table est EXHAUSTIVE PAR LE TYPE : `Record<Langue, string>` ne compile
+ * plus si une langue est ajoutée à `LANGUES` sans réponse ici. Un `??` de repli
+ * aurait laissé la langue suivante partir avec une valeur muette.
+ */
+const LOCALE_OPEN_GRAPH: Record<Langue, string> = {
+  fr: "fr_FR",
+  en: "en_US",
+  "zh-CN": "zh_CN",
+};
+
+/**
+ * L'aperçu de partage d'une surface DropLink.
+ *
+ * ⚠️ À N'APPELER QUE SUR NOS PROPRES SURFACES. La page `/p/[token]` n'en a
+ * JAMAIS (décision 23) : un aperçu enrichi montrerait la photo ou le pseudo du
+ * client DANS la conversation, donc à qui n'ouvre pas le lien — et les
+ * messageries le mettent en cache sur leurs serveurs. Fuite silencieuse et
+ * définitive. Deux gardes l'exigent, une sur le code et une sur le HTML servi.
+ *
+ * ⚠️ AUCUNE IMAGE, ET C'EST UNE OMISSION DÉLIBÉRÉE : `public/` ne contient que
+ * les polices, il n'existe aucun fichier de logo. Déclarer une `og:image` qui
+ * rend 404 produirait un aperçu CASSÉ là où son absence produit un aperçu
+ * sobre — et le second vaut mieux que le premier.
+ */
+export function openGraphDe(
+  langue: Langue,
+  chemin: string,
+  textes: { readonly titre: string; readonly description: string },
+): Metadata["openGraph"] {
+  const origine = origineConfiguree();
+  if (origine === null) return undefined;
+
+  return {
+    type: "website",
+    siteName: "DropLink",
+    title: textes.titre,
+    description: textes.description,
+    url: `${origine}/${langue}${chemin}`,
+    locale: LOCALE_OPEN_GRAPH[langue],
+    // Les autres langues, pour qu'un aperçu partagé sache qu'elles existent.
+    alternateLocale: LANGUES.filter((l) => l !== langue).map((l) => LOCALE_OPEN_GRAPH[l]),
+  };
+}

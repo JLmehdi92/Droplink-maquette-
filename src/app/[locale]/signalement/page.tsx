@@ -8,7 +8,7 @@ import { TraductionsClient } from "@/components/traductions-client";
 import { Icone } from "@/components/icone";
 import { adresseAbus } from "@/lib/contact";
 import { routing } from "@/i18n/routing";
-import { alternatesDe } from "@/lib/seo/alternates";
+import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 
 export function generateStaticParams(): Array<{ locale: string }> {
@@ -27,6 +27,10 @@ export async function generateMetadata({
     title: t("signalementMetaTitre"),
     description: t("signalementMetaDescription"),
     alternates: alternatesDe(langue, "/signalement"),
+    openGraph: openGraphDe(langue, "/signalement", {
+      titre: t("signalementMetaTitre"),
+      description: t("signalementMetaDescription"),
+    }),
   };
 }
 

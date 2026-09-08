@@ -212,6 +212,31 @@ describe("Le SEO : chaque page est soit déclarée, soit fermée", () => {
     }
   });
 
+  test("les données structurées ne déclarent AUCUN prix", () => {
+    /*
+     * ⚠️ PROTECTION DE PRODUIT AUTANT QUE DE SEO, ET LA PRESSION REVIENDRA.
+     *
+     * Google demande un bloc `offers` pour ses résultats enrichis de
+     * `SoftwareApplication` : l'ajouter paraîtra toujours être une amélioration
+     * gratuite. Le produit ne connaît AUCUNE notion de prix — ni table, ni code
+     * de facturation, c'est une contrainte verrouillée du brief.
+     *
+     * Déclarer « price: 0 » affirmerait dans un format lisible par une machine
+     * ce que la base n'a jamais enregistré (principe XII), et cette affirmation
+     * deviendrait fausse en phase 2 **avant que quiconque pense à la relire**.
+     * Une absence se corrige ; une donnée structurée périmée circule.
+     *
+     * La fumée le vérifie aussi, sur le graphe servi. Celui-ci attrape plus tôt
+     * — au typecheck plutôt qu'après un build.
+     */
+    const code = codeSansCommentaires(join(process.cwd(), "src", "lib", "seo", "donnees-structurees.ts"));
+    expect(code.length, "le dépouilleur a vidé le fichier").toBeGreaterThan(300);
+    expect(code, "le graphe doit rester construit ici").toContain("SoftwareApplication");
+    for (const interdit of ["offers", "price", "priceCurrency"]) {
+      expect(code.includes(interdit), `le graphe déclare « ${interdit} »`).toBe(false);
+    }
+  });
+
   test("le plan de site et les alternates couvrent les mêmes langues", () => {
     // Une langue ajoutée à `LANGUES` doit se propager aux deux, sinon le
     // maillage devient asymétrique — et un maillage asymétrique invalide le
