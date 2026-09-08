@@ -2,6 +2,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { PageLegale, type SectionLegale } from "@/components/page-legale";
 import { routing } from "@/i18n/routing";
+import { alternatesDe } from "@/lib/seo/alternates";
+import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 
 export function generateStaticParams(): Array<{ locale: string }> {
   return routing.locales.map((locale) => ({ locale }));
@@ -14,7 +16,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "legal" });
-  return { title: t("confidentialiteTitre") };
+  const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
+  return {
+    title: t("confidentialiteMetaTitre"),
+    description: t("confidentialiteMetaDescription"),
+    alternates: alternatesDe(langue, "/confidentialite"),
+  };
 }
 
 export default async function Confidentialite({

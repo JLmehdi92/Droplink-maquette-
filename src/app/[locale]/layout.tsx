@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
+import { origineConfiguree } from "@/lib/site";
 import "../globals.css";
 import { TraductionsClient } from "@/components/traductions-client";
 
@@ -33,6 +34,25 @@ export function generateStaticParams(): Array<{ locale: string }> {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+/**
+ * ⚠️ `metadataBase` VIT ICI, ET IL EST LE PRÉALABLE DE TOUT LE RESTE.
+ *
+ * Mesuré le 08/09/2026 : il n'apparaissait NULLE PART dans `src/` (0
+ * occurrence). Sans lui, Next ne peut construire aucune URL absolue — donc ni
+ * canonique, ni hreflang, ni Open Graph. Ce n'est pas un réglage de confort,
+ * c'est ce qui rend les trois autres possibles.
+ *
+ * ⚠️ IL LIT `origineConfiguree()` ET NON `origineDuSite()`. La seconde peut
+ * atteindre `headers()` sur son chemin de repli, ce qui basculerait cette page
+ * — et donc TOUTE l'application — en rendu à la demande. La landing est
+ * prérendue et répond en 25 ms depuis l'Europe : ce budget partirait sans
+ * qu'aucune porte ne le voie.
+ *
+ * ⚠️ AUCUN `title.template` ICI, DÉLIBÉRÉMENT. Un gabarit global suffixerait
+ * AUSSI les écrans vendeur et admin, dont plusieurs titres sont éprouvés au
+ * caractère près par `scripts/fumee.mjs`. Les titres complets sont écrits au
+ * catalogue, page par page : plus verbeux, sans effet de bord hors périmètre.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -40,7 +60,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "landing" });
+  const origine = origineConfiguree();
   return {
+    // `null` en développement, où la variable est souvent absente : on ne
+    // devine pas une base, on n'en pose simplement aucune.
+    metadataBase: origine === null ? null : new URL(origine),
     title: t("metaTitre"),
     description: t("metaDescription"),
   };

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Icone } from "@/components/icone";
 import { routing } from "@/i18n/routing";
 import { signalementDisponible } from "@/lib/contact";
+import { alternatesDe } from "@/lib/seo/alternates";
+import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
 
 /**
  * LA LANDING, portée sur `Main` (bureau) et `LandingMobile` (téléphone).
@@ -64,7 +66,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "landing" });
-  return { title: t("metaTitre"), description: t("metaDescription") };
+  const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
+  return {
+    title: t("metaTitre"),
+    description: t("metaDescription"),
+    alternates: alternatesDe(langue, ""),
+  };
 }
 
 export default async function Accueil({

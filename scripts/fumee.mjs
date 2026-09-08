@@ -4356,10 +4356,41 @@ function ageHsts(entetes) {
     "/p/inexistant-pour-les-entetes",
     "/fr/commandes",
   ];
-  const reponses = await Promise.all(
-    chemins.map(async (c) => [c, (await fetch(`${base}${c}`, { redirect: "manual" })).headers]),
+  const brutes = await Promise.all(
+    chemins.map(async (c) => [c, await fetch(`${base}${c}`, { redirect: "manual" })]),
   );
+  const reponses = brutes.map(([c, r]) => [c, r.headers]);
   const bavards = reponses.filter(([, h]) => h.get("x-powered-by") !== null).map(([c]) => c);
+
+  /*
+   * ⚠️ CE CONTRE-TEST MANQUAIT, ET IL A COUTE CHER. Jusqu au 08/09/2026 ce
+   * bloc lisait les en-tetes de `/robots.txt` et `/sitemap.xml` SANS JAMAIS
+   * REGARDER LEUR STATUT — et les deux repondaient 404 en production depuis le
+   * premier deploiement. Il inspectait donc consciencieusement les en-tetes
+   * d une page d ERREUR, en se croyant sur les fichiers, et il etait VERT.
+   *
+   * C est la forme la plus courante du defaut sur ce projet : un controle qui
+   * ne peut pas devenir rouge pour la chose qu il touche. Les statuts attendus
+   * sont declares ici, chemin par chemin.
+   */
+  const STATUTS_ATTENDUS = new Map([
+    ["/fr", 200],
+    ["/robots.txt", 200],
+    ["/sitemap.xml", 200],
+    ["/fr/conditions", 200],
+    // Un jeton inconnu rend 404 : c est le contrat de la page publique.
+    ["/p/inexistant-pour-les-entetes", 404],
+    // Sans session, l espace vendeur renvoie vers la connexion.
+    ["/fr/commandes", 307],
+  ]);
+  const inattendus = brutes
+    .filter(([c, r]) => r.status !== STATUTS_ATTENDUS.get(c))
+    .map(([c, r]) => `${c}:${r.status} (attendu ${STATUTS_ATTENDUS.get(c)})`);
+  controles.push([
+    inattendus.length === 0,
+    `CONTRE-TEST : les ${chemins.length} chemins inspectes rendent le statut attendu` +
+      (inattendus.length ? ` — ECART sur ${inattendus.join(", ")}` : ""),
+  ]);
 
   // ⚠️ LE CONTRE-TEST VIENT EN PREMIER. « Aucun en-tête interdit » est vrai
   // d'un serveur éteint, d'une URL fautive et d'une liste vide. Il faut donc
@@ -4376,6 +4407,210 @@ function ageHsts(entetes) {
     bavards.length === 0,
     "aucune reponse ne nomme le framework (x-powered-by)" +
       (bavards.length ? ` — ENCORE PRESENT sur ${bavards.join(", ")}` : ""),
+  ]);
+}
+
+// ── LE SEO EST-IL REELLEMENT SERVI ? ───────────────────────────────────────
+//
+// ⚠️ TOUT CE BLOC MESURE UN ETAT QUI N EXISTAIT PAS AVANT LE 08/09/2026.
+// Releve sur la production : `/robots.txt` 404, `/sitemap.xml` 404, zero
+// `canonical`, zero `hreflang`, zero JSON-LD. Le produit servait trois langues
+// sans jamais dire a un moteur qu elles sont les traductions les unes des
+// autres — donc Google en choisissait UNE et la servait a tout le monde.
+//
+// ⚠️ CE QUI EST MESURE ICI EST L EFFET, PAS LE MOTIF. Une suite Vitest verifie
+// que le CODE pose ces balises ; elle ne peut pas voir ce que Next en fait au
+// rendu. Les deux sont necessaires et aucune ne remplace l autre — une
+// regression de configuration ne touche pas une ligne de code source.
+{
+  const CHEMINS_INDEXABLES = ["", "/conditions", "/confidentialite", "/signalement"];
+  const LANGUES_SERVIES = ["fr", "en", "zh-CN"];
+
+  const robots = await fetch(`${base}/robots.txt`);
+  const corpsRobots = await robots.text();
+  const plan = await fetch(`${base}/sitemap.xml`);
+  const corpsPlan = await plan.text();
+
+  controles.push(
+    [robots.status === 200, `robots.txt repond 200 (statut ${robots.status})`],
+    [plan.status === 200, `sitemap.xml repond 200 (statut ${plan.status})`],
+    // CONTRE-TEST : un 200 qui rendrait la page d erreur du produit passerait
+    // le controle ci-dessus sans etre un fichier robots.
+    [
+      /^\s*User-Agent:/im.test(corpsRobots) && corpsRobots.includes("Sitemap:"),
+      `CONTRE-TEST : robots.txt est un VRAI robots (${corpsRobots.length} o, porte User-Agent et Sitemap)`,
+    ],
+    [
+      corpsRobots.includes("Disallow: /api/"),
+      "robots.txt ferme /api/, qui ne porte aucune balise ou ecrire un noindex",
+    ],
+  );
+
+  // LE PLAN DE SITE CONTIENT EXACTEMENT LES URL ATTENDUES, NI PLUS NI MOINS.
+  const urlsPlan = [...corpsPlan.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  const attendues = CHEMINS_INDEXABLES.flatMap((c) =>
+    LANGUES_SERVIES.map((l) => `/${l}${c}`),
+  ).sort();
+  const trouvees = urlsPlan
+    .map((u) => {
+      try {
+        return new URL(u).pathname;
+      } catch {
+        return u;
+      }
+    })
+    .sort();
+  controles.push([
+    trouvees.length === attendues.length && trouvees.every((v, i) => v === attendues[i]),
+    `le plan de site liste EXACTEMENT les ${attendues.length} URL indexables` +
+      (trouvees.length === attendues.length ? "" : ` — trouve ${trouvees.length}`),
+  ]);
+
+  /*
+   * ⚠️ LE CONTROLE QUI COMPTE LE PLUS DE TOUT CE BLOC.
+   *
+   * Chaque `public_token` donne acces A VIE aux photos d un client. Le publier
+   * dans un plan de site reviendrait a publier la liste des jetons — une fuite
+   * definitive, indexee, et hors de notre portee une fois aspiree.
+   *
+   * Il ne cherche pas seulement « /p/ » : il verifie qu AUCUNE des surfaces
+   * privees n y figure, chacune nommee. Un motif unique se ferait contourner
+   * par la premiere surface privee ajoutee sous un autre prefixe.
+   */
+  /*
+   * ⚠️ ON COMPARE DES CHEMINS EXTRAITS, PAS DES SOUS-CHAINES DU XML.
+   *
+   * La premiere version cherchait la sous-chaine « /p/ » dans le document. Une
+   * falsification a montre qu elle laissait passer : un chemin declare « /p »
+   * produit les URL `/fr/p`, `/en/p`, `/zh-CN/p` — aucune ne contient « /p/ ».
+   * La garde censee empecher la publication des jetons se serait tue sur la
+   * forme exacte du defaut qu elle vise.
+   *
+   * Les segments sont donc compares APRES le prefixe de langue, et l egalite
+   * compte autant que le prefixe : « /p » comme « /p/quelquechose ».
+   */
+  const SEGMENTS_INTERDITS = ["p", "commandes", "admin", "connexion", "inscription", "bienvenue", "api"];
+  const fuites = trouvees
+    .map((chemin) => chemin.split("/").filter((x) => x !== ""))
+    .filter((seg) => seg.length >= 2 && SEGMENTS_INTERDITS.includes(seg[1]))
+    .map((seg) => `/${seg.join("/")}`);
+  controles.push([
+    fuites.length === 0,
+    "AUCUNE surface privee dans le plan de site" +
+      (fuites.length ? ` — FUITE : ${fuites.join(", ")}` : ""),
+  ]);
+
+  // CANONIQUE ET HREFLANG SUR CHAQUE PAGE INDEXABLE, DANS CHAQUE LANGUE.
+  const pages = await Promise.all(
+    CHEMINS_INDEXABLES.flatMap((c) =>
+      LANGUES_SERVIES.map(async (l) => {
+        const chemin = `/${l}${c}`;
+        return [chemin, await (await fetch(`${base}${chemin}`)).text()];
+      }),
+    ),
+  );
+
+  const sansCanonique = pages.filter(([, h]) => !h.includes('rel="canonical"')).map(([c]) => c);
+  controles.push([
+    pages.length === 12 && sansCanonique.length === 0,
+    `les ${pages.length} pages indexables portent une canonique` +
+      (sansCanonique.length ? ` — MANQUANTE sur ${sansCanonique.join(", ")}` : ""),
+  ]);
+
+  /*
+   * L AUTO-REFERENCE ET LA RECIPROCITE, EPROUVEES SUR LE HTML SERVI.
+   *
+   * Sans auto-reference, Google n ignore pas la ligne : il ignore le JEU
+   * ENTIER. C est la panne la plus silencieuse du sujet — tout parait en place
+   * et rien ne s applique. On exige donc, sur chaque page : les trois langues,
+   * le x-default, ET que la page se cite ELLE-MEME.
+   */
+  const hreflangIncomplets = pages
+    .filter(([chemin, html]) => {
+      const langue = chemin.split("/")[1];
+      /*
+       * ⚠️ LE DRAPEAU `i` N EST PAS UNE COMMODITE : SANS LUI CETTE SONDE EST
+       * FAUSSE, et elle l a ete a sa premiere execution.
+       *
+       * Next rend l attribut React `hrefLang` TEL QUEL dans le HTML —
+       * `<link rel="alternate" hrefLang="fr" ...>`, avec un L majuscule. Ma
+       * premiere version cherchait `hreflang="` en minuscules et a declare les
+       * DOUZE pages incompletes, sur un produit parfaitement correct.
+       *
+       * C est valide : HTML5 traite les noms d attributs sans tenir compte de
+       * la casse, donc un navigateur comme un moteur lisent `hreflang`. Le
+       * defaut etait dans la mesure, pas dans le produit — et une sonde qui se
+       * trompe dans le sens ALARMISTE fait perdre autant de temps qu une sonde
+       * qui se trompe dans le sens rassurant, avec en prime le risque qu on
+       * « corrige » un produit qui n avait rien.
+       */
+      const vus = [...html.matchAll(/hreflang="([^"]+)"/gi)].map((m) => m[1]);
+      const toutes = LANGUES_SERVIES.every((l) => vus.includes(l));
+      return !(toutes && vus.includes("x-default") && vus.includes(langue));
+    })
+    .map(([c]) => c);
+  controles.push([
+    hreflangIncomplets.length === 0,
+    "chaque page cite les 3 langues, le x-default ET ELLE-MEME (auto-reference)" +
+      (hreflangIncomplets.length ? ` — INCOMPLET sur ${hreflangIncomplets.join(", ")}` : ""),
+  ]);
+
+  // UN SEUL <h1> PAR PAGE. Zero est une occasion perdue, deux brouillent le
+  // sujet de la page — et les deux ne se voient que sur le HTML rendu.
+  const h1Fautifs = pages
+    .map(([c, h]) => [c, (h.match(/<h1[\s>]/g) ?? []).length])
+    .filter(([, n]) => n !== 1)
+    .map(([c, n]) => `${c}:${n}`);
+  controles.push([
+    h1Fautifs.length === 0,
+    "exactement un <h1> par page indexable" +
+      (h1Fautifs.length ? ` — ECART : ${h1Fautifs.join(", ")}` : ""),
+  ]);
+
+  // DESCRIPTIONS UNIQUES. Avant le 08/09, les trois pages legales HERITAIENT
+  // de celle de la landing : Google affichait « Reunissez photos, videos et
+  // suivi du colis... » sous « Conditions d utilisation ».
+  const parLangue = new Map();
+  for (const [chemin, html] of pages) {
+    const langue = chemin.split("/")[1];
+    const d = /<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? "";
+    if (!parLangue.has(langue)) parLangue.set(langue, []);
+    parLangue.get(langue).push([chemin, d]);
+  }
+  const doublons = [];
+  for (const liste of parLangue.values()) {
+    const vues = new Map();
+    for (const [chemin, d] of liste) {
+      if (d === "") doublons.push(`${chemin}:VIDE`);
+      else if (vues.has(d)) doublons.push(`${chemin} = ${vues.get(d)}`);
+      else vues.set(d, chemin);
+    }
+  }
+  controles.push([
+    doublons.length === 0,
+    "chaque page a sa PROPRE description, dans chaque langue" +
+      (doublons.length ? ` — PARTAGEE : ${doublons.join(" | ")}` : ""),
+  ]);
+
+  /*
+   * ⚠️ LA PAGE PUBLIQUE NE DOIT RIEN GAGNER DE TOUT CECI.
+   *
+   * Decision 23 du brief : aucune image de partage sur `/p/[token]`. Un apercu
+   * enrichi montrerait la photo ou le pseudo du client DANS la conversation,
+   * donc a qui n ouvre pas le lien — et les messageries le mettent en cache sur
+   * leurs serveurs. Fuite silencieuse, hors de notre portee.
+   *
+   * Une passe SEO est exactement le moment ou quelqu un ajoute un Open Graph
+   * « pour bien faire ». Ce controle existe pour que ce jour-la soit ROUGE.
+   */
+  const publique = await (await fetch(`${base}/p/inexistant-pour-le-seo`)).text();
+  controles.push([
+    !publique.includes('property="og:') && !publique.includes('name="twitter:'),
+    "la page publique ne porte AUCUN Open Graph ni Twitter Card (decision 23)",
+  ]);
+  controles.push([
+    !publique.includes('rel="alternate"'),
+    "ni hreflang : sa langue est celle du VENDEUR, elle n a pas de traduction",
   ]);
 }
 

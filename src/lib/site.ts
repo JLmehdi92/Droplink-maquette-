@@ -34,7 +34,23 @@ import { headers } from "next/headers";
  * vigueur.
  */
 
-function origineConfiguree(): string | null {
+/**
+ * L'origine configurée, ou `null`.
+ *
+ * ⚠️ EXPORTÉE DEPUIS LE 08/09/2026 POUR LES MÉTADONNÉES, ET C'EST DÉLIBÉRÉMENT
+ * ELLE PLUTÔT QUE `origineDuSite()`.
+ *
+ * `metadataBase` est lue pendant `generateMetadata`, y compris sur la landing —
+ * qui est PRÉRENDUE et répond en 25 ms depuis l'Europe. `origineDuSite()` peut
+ * atteindre `headers()` sur son chemin de repli : Next bascule alors la page en
+ * rendu à la demande, et le budget de performance de la page la plus vue du
+ * produit partirait sans qu'aucune porte ne le signale.
+ *
+ * Celle-ci ne lit qu'une variable d'environnement. Elle applique EXACTEMENT la
+ * même validation — une seule définition de ce qu'est une origine acceptable,
+ * plutôt qu'une seconde recopiée à côté qui divergerait au premier ajustement.
+ */
+export function origineConfiguree(): string | null {
   const brut = process.env["NEXT_PUBLIC_SITE_URL"];
   if (brut === undefined || brut.trim() === "") return null;
   try {

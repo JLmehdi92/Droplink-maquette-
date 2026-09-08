@@ -156,7 +156,13 @@
       "envoyer": "生成举报邮件",
       "ouvreMessagerie": "此按钮会打开您的邮件客户端，内容已经填好。在您亲自发送之前，什么都不会被发出。",
       "adresseDirecte": "或直接写信至"
-    }
+    },
+    "conditionsMetaTitre": "使用条款 — DropLink",
+    "conditionsMetaDescription": "DropLink 的使用条款：本服务提供什么、不托管什么，以及每位卖家在创建账户时所接受的规则。",
+    "confidentialiteMetaTitre": "隐私政策 — DropLink",
+    "confidentialiteMetaDescription": "DropLink 保存哪些数据、保存多久，以及为什么收到链接的客户在我们这里从不需要账户和密码。",
+    "signalementMetaTitre": "举报内容 — DropLink",
+    "signalementMetaDescription": "举报 DropLink 上托管的内容。请说明相关链接和原因：每一条举报都会被查看，页面可以被立即关闭。"
   },
   "connexion": {
     "titre": "欢迎回来",

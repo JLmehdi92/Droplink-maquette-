@@ -156,7 +156,13 @@
       "envoyer": "Prepare the report",
       "ouvreMessagerie": "This button opens your email client with the message already filled in. Nothing is sent until you send it yourself.",
       "adresseDirecte": "Or write directly to"
-    }
+    },
+    "conditionsMetaTitre": "Terms of use — DropLink",
+    "conditionsMetaDescription": "DropLink's terms of use: what the service does, what it does not host, and the rules every seller accepts when creating an account.",
+    "confidentialiteMetaTitre": "Privacy policy — DropLink",
+    "confidentialiteMetaDescription": "What data DropLink keeps, for how long, and why the person who receives a link never has an account or a password with us.",
+    "signalementMetaTitre": "Report content — DropLink",
+    "signalementMetaDescription": "Report content hosted on DropLink. Describe the link and the reason: every report is read, and a page can be taken down without delay."
   },
   "connexion": {
     "titre": "Good to see you again",

@@ -156,7 +156,13 @@
       "envoyer": "Préparer le signalement",
       "ouvreMessagerie": "Ce bouton ouvre votre messagerie avec le message déjà rempli. Rien n'est envoyé tant que vous ne l'envoyez pas vous-même.",
       "adresseDirecte": "Ou écrivez directement à"
-    }
+    },
+    "conditionsMetaTitre": "Conditions d'utilisation — DropLink",
+    "conditionsMetaDescription": "Les conditions d'utilisation de DropLink : ce que le service fait, ce qu'il n'héberge pas, et les règles que chaque vendeur accepte en créant un compte.",
+    "confidentialiteMetaTitre": "Politique de confidentialité — DropLink",
+    "confidentialiteMetaDescription": "Quelles données DropLink conserve, combien de temps, et pourquoi le destinataire d'un lien n'a jamais de compte ni de mot de passe chez nous.",
+    "signalementMetaTitre": "Signaler un contenu — DropLink",
+    "signalementMetaDescription": "Signaler un contenu hébergé sur DropLink. Décrivez le lien concerné et le motif : chaque signalement est lu, et une page peut être coupée sans délai."
   },
   "connexion": {
     "titre": "Content de vous revoir",
