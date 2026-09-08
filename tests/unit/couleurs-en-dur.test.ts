@@ -24,7 +24,7 @@ import { sansCommentaires } from "../aide/source";
 
 const RACINE = join(process.cwd(), "src");
 
-/** Relevé sur les 41 planches. Une couleur du canevas est toujours recevable. */
+/** Relevé sur les planches du canevas. Une couleur du canevas est toujours recevable. */
 /**
  * L'INVENTAIRE EXACT des 91 couleurs distinctes des 41 planches, et non les 32
  * plus fréquentes. ⚠️ La première version de ce test ne portait que le top 32,
@@ -45,6 +45,18 @@ const DU_CANEVAS = new Set([
   "#f4f4f8", "#f4f4fa", "#f6d9d2", "#f7f7fb", "#f8f6ff", "#f9fcfa", "#faedd2", "#fafafc",
   "#fbbc05", "#fbd9d0", "#fdded6", "#fdeeea", "#fdeef6", "#ffeee9", "#fff4f1", "#fff8f6",
   "#fffaf0", "#fffaf9", "#ffffff",
+  // ── AJOUTÉES LE 08/09/2026 AVEC LES QUATRE PLANCHES DU BLOG ──
+  // Le canevas est passé de 56 à 60 planches (Blog, BlogMobile, BlogArticle,
+  // BlogArticleMobile). Ces deux couleurs y sont dessinées, donc elles sont
+  // « du canevas » au sens de ce test — elles n'ont pas à devenir des
+  // exceptions.
+  //
+  // ⚠️ ET C'EST BIEN CE TEST QUI LES A EXIGÉES : il a refusé les deux au
+  // premier passage des portes. L'inventaire est figé par construction ; il
+  // doit être étendu à la main chaque fois que le canevas l'est, sinon il
+  // cesse de décrire ce qu'il prétend décrire.
+  "#d7d3f8", // bordure d'une carte d'article au survol
+  "#2c2d33", // l'encre du chapeau, un cran au-dessus du corps de texte
   // Le noir pur ne vient pas des planches, mais aucune couleur ne peut le
   // remplacer : il sert de repli de contraste, calculé et non dessiné.
   "#000000",

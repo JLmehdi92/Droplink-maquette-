@@ -106,3 +106,52 @@ export function donneesStructurees(
     ],
   };
 }
+
+/**
+ * Le graphe d'un article de blog.
+ *
+ * ⚠️ `Article` ET NON `BlogPosting`, ET C'EST DÉLIBÉRÉ. Les deux sont valides ;
+ * `BlogPosting` est plus précis, et c'est justement le problème — il promet un
+ * flux régulier. Cinq articles publiés le même jour, sans engagement de
+ * cadence, décrivent mieux une base de connaissances qu'un blog vivant. On
+ * pourra resserrer le jour où la cadence existe ; l'inverse (avoir promis un
+ * blog et l'abandonner) ne se rattrape pas.
+ *
+ * ⚠️ AUCUN `author` NOMMÉ. Le brief interdit d'exposer une personne, et une
+ * organisation suffit à répondre à « qui dit ça » — c'est la question que les
+ * moteurs de réponse posent. Inventer un nom d'auteur pour cocher une case
+ * serait exactement le genre de donnée structurée fausse qui circule.
+ */
+export function donneesArticle(
+  langue: Langue,
+  article: {
+    readonly slug: string;
+    readonly titre: string;
+    readonly description: string;
+    readonly date: string;
+  },
+): Record<string, unknown> | null {
+  const origine = origineConfiguree();
+  if (origine === null) return null;
+
+  const url = `${origine}/${langue}/blog/${article.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": url,
+    headline: article.titre,
+    description: article.description,
+    inLanguage: langue,
+    datePublished: article.date,
+    /*
+     * ⚠️ `dateModified` VAUT LA DATE DE PUBLICATION, PAS « MAINTENANT ».
+     * Une date engendrée à la volée annoncerait un article remanié à chaque
+     * requête — c'est le principe XII appliqué aux moteurs : on n'affirme pas
+     * une fraîcheur que rien n'a enregistrée. Google traite d'ailleurs une
+     * `dateModified` non fiable comme du bruit et cesse de la lire.
+     */
+    dateModified: article.date,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    publisher: { "@id": `${origine}/#organisation` },
+  };
+}

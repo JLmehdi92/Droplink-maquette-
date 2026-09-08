@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { LANGUES, LANGUE_DEFAUT } from "@/i18n/config";
+import { slugs } from "@/lib/blog/articles";
 import { origineConfiguree } from "@/lib/site";
 
 /**
@@ -40,8 +41,25 @@ import { origineConfiguree } from "@/lib/site";
  * la lire.
  */
 
-/** Les chemins indexables, SANS préfixe de langue. Liste FERMÉE. */
+/** Les chemins indexables DANS LES TROIS LANGUES, sans préfixe. Liste FERMÉE. */
 const CHEMINS_INDEXABLES = ["", "/conditions", "/confidentialite", "/signalement"] as const;
+
+/**
+ * Les chemins qui n'existent QU'EN FRANÇAIS.
+ *
+ * ⚠️ DEUX LISTES ET NON UNE, PARCE QUE LE BLOG N'EST PAS TRADUIT — décision de
+ * Wassim du 08/09/2026 : on écrit chaque article une fois, on regarde lesquels
+ * remontent, et on traduit ceux-là.
+ *
+ * Les mettre dans la première liste engendrerait `/en/blog` et `/zh-CN/blog`
+ * dans le plan de site ET dans les jeux hreflang. Or ces pages rendent 404 : on
+ * annoncerait aux moteurs des adresses qui n'existent pas, ce qui abîme la
+ * confiance accordée au plan ENTIER — pas seulement à ces trois lignes.
+ */
+const CHEMINS_FRANCAIS_SEULEMENT = [
+  "/blog",
+  ...slugs().map((slug) => `/blog/${slug}`),
+] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const origine = origineConfiguree();
@@ -75,7 +93,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const url = (langue: string, chemin: string): string => `${origine}/${langue}${chemin}`;
 
-  return CHEMINS_INDEXABLES.flatMap((chemin) => {
+  /*
+   * LE BLOG : UNE SEULE LANGUE, DONC UN JEU HREFLANG D'UNE SEULE ENTRÉE.
+   * Elle se cite elle-même et sert de `x-default` — c'est la forme juste pour
+   * une page qui n'a pas de traduction, et elle reste une auto-référence
+   * valide.
+   */
+  const francais: MetadataRoute.Sitemap = CHEMINS_FRANCAIS_SEULEMENT.map((chemin) => {
+    const adresse = url(LANGUE_DEFAUT, chemin);
+    return {
+      url: adresse,
+      alternates: { languages: { [LANGUE_DEFAUT]: adresse, "x-default": adresse } },
+      priority: chemin === "/blog" ? 0.7 : 0.6,
+    };
+  });
+
+  const trilingues = CHEMINS_INDEXABLES.flatMap((chemin) => {
     const languages: Record<string, string> = {};
     for (const l of LANGUES) languages[l] = url(l, chemin);
     languages["x-default"] = url(LANGUE_DEFAUT, chemin);
@@ -88,4 +121,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: chemin === "" ? 1 : 0.5,
     }));
   });
+
+  return [...trilingues, ...francais];
 }

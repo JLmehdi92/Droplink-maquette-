@@ -4448,9 +4448,24 @@ function ageHsts(entetes) {
 
   // LE PLAN DE SITE CONTIENT EXACTEMENT LES URL ATTENDUES, NI PLUS NI MOINS.
   const urlsPlan = [...corpsPlan.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  const attendues = CHEMINS_INDEXABLES.flatMap((c) =>
-    LANGUES_SERVIES.map((l) => `/${l}${c}`),
-  ).sort();
+  /*
+   * ⚠️ DEUX REGIMES DEPUIS LE BLOG (08/09/2026) : douze URL trilingues, plus
+   * six qui n existent QU EN FRANCAIS. Les compter ensemble ferait passer ce
+   * controle de 12 a 18 sans que personne ne relise pourquoi — on les declare
+   * donc separement, pour que l ajout d une langue au blog se voie ici.
+   */
+  const CHEMINS_FRANCAIS = [
+    "/blog",
+    "/blog/envoyer-photos-client-sans-lien-qui-expire",
+    "/blog/suivre-un-colis-sans-boutique-en-ligne",
+    "/blog/cest-ou-mon-colis-arreter-de-repondre",
+    "/blog/photos-controle-sans-dossier-partage",
+    "/blog/vendre-sans-boutique-ce-quil-faut-vraiment",
+  ];
+  const attendues = [
+    ...CHEMINS_INDEXABLES.flatMap((c) => LANGUES_SERVIES.map((l) => `/${l}${c}`)),
+    ...CHEMINS_FRANCAIS.map((c) => `/fr${c}`),
+  ].sort();
   const trouvees = urlsPlan
     .map((u) => {
       try {
@@ -4612,6 +4627,167 @@ function ageHsts(entetes) {
     !publique.includes('rel="alternate"'),
     "ni hreflang : sa langue est celle du VENDEUR, elle n a pas de traduction",
   ]);
+  // ── LE BLOG : SERVI EN FRANCAIS, ET REFUSE AILLEURS ──────────────────────
+  //
+  // ⚠️ LE BLOG EXISTE PARCE QUE LE SEO TECHNIQUE NE SUFFIT PAS. Le socle pose
+  // le 08/09/2026 rend le site ELIGIBLE ; ce qui decide du classement est le
+  // contenu. Le produit avait douze URL et aucune page qui reponde a une
+  // question.
+  //
+  // ⚠️ ET IL N EXISTE QU EN FRANCAIS, ce qui est la contrainte la plus facile a
+  // casser sans s en apercevoir. Declarer `hreflang="en"` sur un article
+  // pointerait vers une URL qui rend 404 — et Google n ignore pas la ligne
+  // fautive, il ignore le JEU ENTIER. Une suite unitaire garde le MOTIF dans le
+  // code ; ce bloc-ci mesure ce qui est REELLEMENT servi.
+  {
+    const SLUGS = [
+      "envoyer-photos-client-sans-lien-qui-expire",
+      "suivre-un-colis-sans-boutique-en-ligne",
+      "cest-ou-mon-colis-arreter-de-repondre",
+      "photos-controle-sans-dossier-partage",
+      "vendre-sans-boutique-ce-quil-faut-vraiment",
+    ];
+
+    const index = await fetch(`${base}/fr/blog`, { redirect: "manual" });
+    controles.push([index.status === 200, `/fr/blog repond 200 (statut ${index.status})`]);
+
+    // ⚠️ LE REFUS DES AUTRES LANGUES EST LA PROPRIETE, PAS UN EFFET DE BORD.
+    // Servir le francais sous /en/blog serait pire que refuser : une page
+    // indexable qui ment sur sa langue, dans un <html lang="en">.
+    const autres = await Promise.all(
+      ["en", "zh-CN"].map(async (l) => [l, await fetch(`${base}/${l}/blog`, { redirect: "manual" })]),
+    );
+    const servies = autres.filter(([, r]) => r.status !== 404).map(([l, r]) => `${l}:${r.status}`);
+    controles.push([
+      servies.length === 0,
+      "le blog REFUSE les langues qu il ne parle pas (404)" +
+        (servies.length ? ` — SERVI sur ${servies.join(", ")}` : ""),
+    ]);
+
+    // LES CINQ ARTICLES REPONDENT, ET UN SLUG INCONNU REND 404.
+    const articles = await Promise.all(
+      SLUGS.map(async (s) => [s, await fetch(`${base}/fr/blog/${s}`, { redirect: "manual" })]),
+    );
+    const absents = articles.filter(([, r]) => r.status !== 200).map(([s, r]) => `${s}:${r.status}`);
+    controles.push([
+      absents.length === 0,
+      `les ${SLUGS.length} articles repondent 200` + (absents.length ? ` — ${absents.join(", ")}` : ""),
+    ]);
+    const inconnu = await fetch(`${base}/fr/blog/ce-slug-n-existe-pas`, { redirect: "manual" });
+    controles.push([
+      inconnu.status === 404,
+      `CONTRE-TEST : un slug inconnu rend 404 (statut ${inconnu.status})`,
+    ]);
+
+    // LE HTML DE CHAQUE ARTICLE.
+    const pagesArticles = await Promise.all(
+      SLUGS.map(async (s) => [s, await (await fetch(`${base}/fr/blog/${s}`)).text()]),
+    );
+
+    const h1Fautifs = pagesArticles
+      .map(([s, h]) => [s, (h.match(/<h1[\s>]/g) ?? []).length])
+      .filter(([, n]) => n !== 1)
+      .map(([s, n]) => `${s}:${n}`);
+    controles.push([
+      h1Fautifs.length === 0,
+      "exactement un <h1> par article" + (h1Fautifs.length ? ` — ECART : ${h1Fautifs.join(", ")}` : ""),
+    ]);
+
+    /*
+     * ⚠️ LE TITRE DE RECHERCHE TIENT EN 60 CARACTERES.
+     *
+     * Mesure sur les cinq premiers articles : TROIS depassaient une fois le
+     * suffixe ajoute, dont deux a 83 et 84. Google tronque autour de 60, et il
+     * tronque LA FIN — l endroit ou l on met naturellement le mot vise. D ou un
+     * `titreMeta` distinct du <h1>, qui n a pas cette contrainte.
+     */
+    /*
+     * ⚠️ ON DECODE AVANT DE COMPTER, ET LA PREMIERE VERSION NE LE FAISAIT PAS.
+     * Elle a declare deux titres trop longs (68 et 61) alors qu ils font 57 et
+     * 55 : le HTML ecrit chaque apostrophe `&#x27;`, soit SIX caracteres au
+     * lieu d un. Google, lui, decode avant d afficher. La sonde mesurait donc
+     * l encodage, pas le titre — et se trompait dans le sens ALARMISTE, ce qui
+     * pousse a « corriger » un texte qui n avait rien.
+     */
+    const decode = (t) =>
+      t
+        .replace(/&#x27;/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&nbsp;/g, " ");
+    const tropLongs = pagesArticles
+      .map(([s, h]) => [s, decode(/<title>([^<]*)<\/title>/.exec(h)?.[1] ?? "").length])
+      .filter(([, n]) => n > 60)
+      .map(([s, n]) => `${s} (${n})`);
+    controles.push([
+      tropLongs.length === 0,
+      "aucun titre d article ne depasse 60 caracteres" +
+        (tropLongs.length ? ` — TRONQUE : ${tropLongs.join(", ")}` : ""),
+    ]);
+
+    // UN SEUL HREFLANG PAR ARTICLE, PLUS LE X-DEFAULT : la page se cite
+    // elle-meme et sert de repli, sans promettre de traduction.
+    const hreflangFautifs = pagesArticles
+      .filter(([, h]) => {
+        const vus = [...h.matchAll(/hreflang="([^"]+)"/gi)].map((m) => m[1]);
+        return !(vus.includes("fr") && vus.includes("x-default") && !vus.includes("en") && !vus.includes("zh-CN"));
+      })
+      .map(([s]) => s);
+    controles.push([
+      hreflangFautifs.length === 0,
+      "chaque article declare fr + x-default, et AUCUNE autre langue" +
+        (hreflangFautifs.length ? ` — FAUX sur ${hreflangFautifs.join(", ")}` : ""),
+    ]);
+
+    // LE GRAPHE D ARTICLE EST PARSABLE, ET IL NE NOMME PERSONNE.
+    const graphesCasses = [];
+    const avecAuteur = [];
+    for (const [s, h] of pagesArticles) {
+      const bloc = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(h);
+      if (bloc === null) {
+        graphesCasses.push(`${s}:ABSENT`);
+        continue;
+      }
+      try {
+        const g = JSON.parse(bloc[1]);
+        if (g["@type"] !== "Article") graphesCasses.push(`${s}:@type=${g["@type"]}`);
+        if ("author" in g) avecAuteur.push(s);
+      } catch {
+        graphesCasses.push(`${s}:JSON INVALIDE`);
+      }
+    }
+    controles.push([
+      graphesCasses.length === 0,
+      `les ${SLUGS.length} articles portent un graphe Article PARSABLE` +
+        (graphesCasses.length ? ` — ${graphesCasses.join(", ")}` : ""),
+    ]);
+    // Le brief interdit d exposer une personne ; l organisation suffit a
+    // repondre a « qui dit ca ».
+    controles.push([
+      avecAuteur.length === 0,
+      "aucun graphe ne nomme un auteur" + (avecAuteur.length ? ` — ${avecAuteur.join(", ")}` : ""),
+    ]);
+
+    // LE PLAN DE SITE ANNONCE LE BLOG EN FRANCAIS, ET SEULEMENT EN FRANCAIS.
+    const planBlog = [...corpsPlan.matchAll(/<loc>([^<]+)<\/loc>/g)]
+      .map((m) => {
+        try {
+          return new URL(m[1]).pathname;
+        } catch {
+          return m[1];
+        }
+      })
+      .filter((c) => c.includes("/blog"));
+    const attenduBlog = ["/fr/blog", ...SLUGS.map((s) => `/fr/blog/${s}`)].sort();
+    controles.push([
+      planBlog.length === attenduBlog.length && [...planBlog].sort().every((v, i) => v === attenduBlog[i]),
+      `le plan de site annonce les ${attenduBlog.length} URL du blog, toutes en francais` +
+        (planBlog.length === attenduBlog.length ? "" : ` — trouve ${planBlog.length}`),
+    ]);
+  }
 
   // ── LES DONNEES STRUCTUREES ET L APERCU DE PARTAGE ───────────────────────
   //
@@ -5072,7 +5248,18 @@ function fichiersSources(dossier) {
 // genere la classe citee en exemple — dont la variable etait alors signalee
 // orpheline par la sonde d a cote. C est L-008 : un controle de contenu qui
 // scanne le code trebuche sur ses propres exemples.
-const MOTIF_CLASSE = /\b(?:bg|text|border|ring|fill|stroke|divide|decoration|outline|accent|shadow|from|via|to)-[a-z][a-z0-9]*(?:-[a-z0-9]+)*\b/g;
+/*
+ * ⚠️ LA VALEUR ARBITRAIRE FAIT PARTIE DU NOM, ET L OUBLIER RENDAIT LA SONDE
+ * FAUSSE — releve le 08/09/2026 en ecrivant `border-l-[3px]`, la PREMIERE
+ * classe de cette forme du projet.
+ *
+ * Sans le second groupe, le motif s arretait au `[` et inventoriait
+ * « border-l » : une classe que PERSONNE n a ecrite, que Tailwind n a donc
+ * aucune raison de servir, et que la sonde reclamait au serveur. Elle criait
+ * au loup sur du code correct — le meme defaut que le commentaire cite en
+ * L-031, dans l autre sens.
+ */
+const MOTIF_CLASSE = /\b(?:bg|text|border|ring|fill|stroke|divide|decoration|outline|accent|shadow|from|via|to)-[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:-\[[^\]\s]+\])?/g;
 
 /**
  * LES COMMENTAIRES SONT RETIRES AVANT LA RECHERCHE — L-031. Un commentaire qui
@@ -5099,7 +5286,15 @@ for (const fichier of fichiersSources(pathSonde.join(racine, "src"))) {
 // dans le CSS produit et non supposees : une regle nue, un modificateur
 // d opacite echappe, une pseudo-classe, un combinateur.
 const SUITES_SERVIES = ["{", "\\", ":", ">", ","];
-const servie = (c) => SUITES_SERVIES.some((suite) => css.includes(`${c}${suite}`));
+
+/*
+ * ⚠️ TAILWIND ECHAPPE LES CARACTERES QU UN SELECTEUR CSS NE PEUT PAS PORTER
+ * NUS. `border-l-[3px]` s ecrit `.border-l-\[3px\]` dans la feuille produite —
+ * chercher le nom tel qu il est ecrit dans le code ne trouverait jamais rien,
+ * et la sonde declarerait « jamais servie » une classe parfaitement servie.
+ */
+const echappee = (c) => c.replace(/[[\]().%#!,:>+~*/]/g, (x) => "\\" + x);
+const servie = (c) => SUITES_SERVIES.some((suite) => css.includes(`${echappee(c)}${suite}`));
 
 // Ce que le code ecrit sans que Tailwind ait a le servir. Chaque exception
 // porte sa raison, et le controle suivant verifie qu elle sert encore.

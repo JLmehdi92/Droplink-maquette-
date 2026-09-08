@@ -164,6 +164,20 @@ describe("Le SEO : chaque page est soit déclarée, soit fermée", () => {
         cheminUrl !== null && (CHEMINS_ATTENDUS as readonly string[]).includes(cheminUrl);
       if (seDeclareIndexable) continue;
 
+      /*
+       * ⚠️ TROISIÈME CATÉGORIE, AJOUTÉE LE 08/09/2026 AVEC LE BLOG, ET CE TEST
+       * L'A EXIGÉE : il a déclaré les deux pages du blog « ni indexables ni
+       * fermées », ce qui était exact — elles sont indexables MAIS dans une
+       * seule langue.
+       *
+       * Elles n'entrent pas dans `CHEMINS_ATTENDUS`, qui décrit ce qui existe
+       * en trois langues, et elles ne portent pas de `noindex` puisqu'on veut
+       * qu'elles soient trouvées. La marque de cette catégorie est l'appel à
+       * `alternatesUneSeuleLangue` — celui-là même qui empêche de déclarer des
+       * traductions inexistantes.
+       */
+      if (code.includes("alternatesUneSeuleLangue(")) continue;
+
       // `index: false` sous n'importe quelle forme d'écriture.
       const ferme = /index:\s*false/.test(code);
       if (!ferme) ouvertes.push(relatif);
@@ -252,5 +266,77 @@ describe("Le SEO : chaque page est soit déclarée, soit fermée", () => {
       ).toBe(true);
       expect(source, "x-default absent").toContain("x-default");
     }
+  });
+});
+
+/**
+ * LE BLOG N'EXISTE QU'EN FRANÇAIS — et c'est la contrainte la plus facile à
+ * casser sans s'en apercevoir.
+ *
+ * Décision de Wassim du 08/09/2026 : un article est écrit une fois, on regarde
+ * lesquels remontent, on traduit ceux-là. Tant que c'est le cas, déclarer
+ * `hreflang="en"` sur une page de blog pointerait vers une URL qui rend 404 —
+ * et Google n'ignore pas la ligne fautive, il ignore le JEU ENTIER.
+ */
+describe("Le blog ne promet pas de traductions qui n'existent pas", () => {
+  const PAGES_BLOG = ["[locale]/blog/page.tsx", "[locale]/blog/[slug]/page.tsx"] as const;
+
+  test("les pages du blog existent et sont lues", () => {
+    // UN ENSEMBLE VIDE PASSE TOUT : un renommage de dossier rendrait les
+    // contrôles suivants verts en n'inspectant rien.
+    for (const p of PAGES_BLOG) {
+      const code = codeSansCommentaires(join(RACINE_APP, p));
+      expect(code.length, `${p} : introuvable ou vidé`).toBeGreaterThan(400);
+    }
+  });
+
+  test("aucune page du blog n'emploie les alternates TRILINGUES", () => {
+    for (const p of PAGES_BLOG) {
+      const code = codeSansCommentaires(join(RACINE_APP, p));
+      expect(
+        /alternatesDe\(/.test(code),
+        `${p} emploie alternatesDe() : il déclarerait des traductions ` +
+          "inexistantes, et Google ignorerait le jeu hreflang ENTIER",
+      ).toBe(false);
+      expect(code, `${p} n'emploie pas alternatesUneSeuleLangue()`).toContain(
+        "alternatesUneSeuleLangue(",
+      );
+    }
+  });
+
+  test("chaque page du blog REFUSE les autres langues", () => {
+    /*
+     * Servir le français sous `/en/blog` serait pire que refuser : une page
+     * indexable qui ment sur sa langue, dans un `<html lang="en">`. Le refus
+     * doit donc être explicite dans le code, pas seulement dans l'intention.
+     */
+    for (const p of PAGES_BLOG) {
+      const code = codeSansCommentaires(join(RACINE_APP, p));
+      expect(code, `${p} ne vérifie pas la langue`).toContain("estLangueDuBlog(");
+      expect(code, `${p} ne rend pas 404 hors de sa langue`).toContain("notFound()");
+    }
+  });
+
+  test("aucun titre de recherche ne dépasse 60 caractères", () => {
+    /*
+     * ⚠️ MESURÉ SUR LES CINQ PREMIERS ARTICLES : trois `<title>` dépassaient,
+     * dont deux à 83 et 84 caractères. Google tronque autour de 60 — et il
+     * tronque LA FIN, c'est-à-dire l'endroit où l'on met le mot qu'on vise.
+     *
+     * D'où `titreMeta`, distinct du `<h1>` : le titre de la page peut rester
+     * long et expressif, celui du résultat de recherche doit tenir.
+     */
+    const SUFFIXE = " — DropLink";
+    const trop: string[] = [];
+    for (const fichier of readdirSync(join(process.cwd(), "src", "contenu", "blog"))) {
+      const source = readFileSync(join(process.cwd(), "src", "contenu", "blog", fichier), "utf8");
+      const meta = /titreMeta:\s*"([^"]+)"/.exec(source)?.[1];
+      const titre = /\n  titre:\s*"([^"]+)"/.exec(source)?.[1];
+      const retenu = meta ?? titre;
+      expect(retenu, `${fichier} : aucun titre lisible`).toBeDefined();
+      const longueur = (retenu ?? "").length + SUFFIXE.length;
+      if (longueur > 60) trop.push(`${fichier} (${longueur})`);
+    }
+    expect(trop, "Ces titres seront tronqués par Google, en perdant leur fin.").toEqual([]);
   });
 });

@@ -137,3 +137,30 @@ export function openGraphDe(
     alternateLocale: LANGUES.filter((l) => l !== langue).map((l) => LOCALE_OPEN_GRAPH[l]),
   };
 }
+
+/**
+ * Les alternates d'une page qui n'existe QUE dans une langue.
+ *
+ * ⚠️ POURQUOI UNE SECONDE FONCTION PLUTÔT QU'UN DRAPEAU SUR LA PREMIÈRE.
+ * `alternatesDe()` engendre les trois langues depuis `LANGUES`, et c'est
+ * exactement ce qu'on veut partout ailleurs : la langue ajoutée demain se
+ * propage sans que personne y pense. Ici il faut l'inverse — et un drapeau
+ * booléen sur la même fonction se serait oublié au premier appel copié.
+ *
+ * ⚠️ CE QU'ON ÉVITE, PRÉCISÉMENT. Déclarer `hreflang="en"` vers une page qui
+ * n'existe pas ne dégrade pas un peu le signal : Google ignore le JEU ENTIER
+ * dès qu'une URL du jeu ne répond pas. On perdrait le hreflang de la page **et**
+ * on enverrait des lecteurs sur des 404. Une seule langue déclarée, plus le
+ * `x-default` qui pointe vers elle, est la forme juste — elle dit « cette page
+ * existe dans cette langue, et c'est aussi le repli ».
+ */
+export function alternatesUneSeuleLangue(
+  langue: Langue,
+  chemin: string,
+): Metadata["alternates"] {
+  const origine = origineConfiguree();
+  if (origine === null) return undefined;
+
+  const url = `${origine}/${langue}${chemin}`;
+  return { canonical: url, languages: { [langue]: url, "x-default": url } };
+}
