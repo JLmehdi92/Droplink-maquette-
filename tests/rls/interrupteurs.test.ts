@@ -228,12 +228,17 @@ describe("La fermeture ferme la NAISSANCE du compte, pas seulement le formulaire
    * naissait pendant une fermeture. La garde couvrait le chemin corrigé, pas la
    * propriété — *aucun compte ne doit naître*.
    *
-   * ⚠️ ET LE CHEMIN QUI MANQUAIT EST DATÉ. La connexion Google est écrite et
-   * inerte (`external.google = false`, `AUTH_GOOGLE_ACTIF` absent, mesurés le
-   * 06/09) ; son activation est la mission suivante. Au retour, le fournisseur
-   * insère dans `auth.users` sans jamais passer par `sInscrire`. La porte
-   * n'était donc fermée que par une ABSENCE, et cette absence a une date de
-   * péremption : c'est L-029 mot pour mot.
+   * ⚠️ ET LE CHEMIN QUI MANQUAIT ÉTAIT DATÉ — LA DATE EST ÉCHUE. Ce paragraphe
+   * a dit, du 06 au 08/09/2026, que la connexion Google était « écrite et
+   * inerte (`external.google = false`, `AUTH_GOOGLE_ACTIF` absent) » et que son
+   * activation serait « la mission suivante ». Elle a eu lieu le 08/09 :
+   * `external.google = true`, `/authorize` rend 302 vers `accounts.google.com`,
+   * et le bouton est servi sur `https://droplink.fr/fr/connexion`.
+   *
+   * Au retour, le fournisseur insère dans `auth.users` sans jamais passer par
+   * `sInscrire`. La porte n'était donc fermée que par une ABSENCE, et cette
+   * absence avait une date de péremption : c'est L-029 mot pour mot, arrivé à
+   * échéance. Ce test n'est plus une anticipation, il garde un chemin VIVANT.
    *
    * La migration 143 descend l'invariant dans `creer_profil_et_shop`, seul
    * passage obligé de toute naissance de compte. Ce test l'éprouve LÀ, par le
