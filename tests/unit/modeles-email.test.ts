@@ -214,6 +214,70 @@ describe("Les modèles d'email de Supabase", () => {
     }
   });
 
+  test("chaque modèle parle AUSSI chinois", () => {
+    /*
+     * ⚠️ DÉFAUT MESURÉ LE 08/09/2026, EN RÉPONDANT À UNE QUESTION DE WASSIM
+     * (« les trois langues sont-elles parfaitement implémentées ? »).
+     *
+     * Le catalogue est irréprochable — 948 clés dans les trois langues, zéro
+     * manquante, zéro vide. Mais CES DEUX MODÈLES N'EN PARLAIENT QUE DEUX : le
+     * produit est trilingue depuis le 06/09, eux étaient restés bilingues.
+     *
+     * ⚠️ ET LE CHINOIS EST LE PERSONA LE PLUS EXPOSÉ DES TROIS, pas le moins.
+     * La connexion Google, activée le 08/09, lui est INACCESSIBLE depuis la
+     * Chine — c'est écrit noir sur blanc dans le brief §2. Un fournisseur
+     * chinois n'a donc que le mot de passe, et pour seul recours cet email.
+     * Il le recevait dans deux langues qu'il ne lit pas.
+     *
+     * Le test précédent avait exactement le bon raisonnement — *« un recours
+     * illisible est un recours qui échoue »* — appliqué à une langue de moins
+     * que le produit n'en parle. C'est L-007 : un amendement de spec doit se
+     * propager à TOUTES les exigences liées, et l'ajout du chinois ne s'était
+     * pas propagé jusqu'ici.
+     */
+    for (const [fichier] of ATTENDUS) {
+      const contenu = lire(fichier);
+      expect(
+        [...contenu.matchAll(/lang="zh-CN"/g)].length,
+        `${fichier} ne porte aucun bloc \`lang="zh-CN"\` : un vendeur sinophone ` +
+          "reçoit son SEUL recours d'accès dans une langue qu'il ne lit pas — " +
+          "et c'est lui qui ne peut pas employer Google.",
+      ).toBeGreaterThan(0);
+
+      // CONTRE-TEST DE L'ATTRIBUT : `lang="zh-CN"` sur un paragraphe vide
+      // passerait le contrôle ci-dessus sans traduire quoi que ce soit.
+      expect(
+        [...contenu.matchAll(/[一-鿿]/g)].length,
+        `${fichier} porte l'attribut zh-CN mais AUCUN idéogramme`,
+      ).toBeGreaterThan(30);
+    }
+  });
+
+  test("le chinois porte sa pile de polices, sinon il s'affiche de travers", () => {
+    /*
+     * NI PLUS JAKARTA SANS NI INTER NE COUVRENT LES IDÉOGRAMMES, et un client
+     * de messagerie n'a pas nos variables CSS : la pile doit être écrite en
+     * toutes lettres, dans le style INLINE de chaque bloc chinois.
+     *
+     * ⚠️ SANS ELLE, LE DÉFAUT EST SILENCIEUX PLUTÔT QUE VISIBLE. Le client
+     * choisit un repli au hasard — souvent une police japonaise, largement
+     * installée : les glyphes existent, le texte s'affiche, mais plusieurs
+     * caractères ont un dessin différent du chinois simplifié. Ça se lit « de
+     * travers » sans être illisible, donc personne ne le signale.
+     */
+    for (const [fichier] of ATTENDUS) {
+      const contenu = lire(fichier);
+      const blocs = [...contenu.matchAll(/lang="zh-CN"[^>]*/g)].map((m) => m[0]);
+      expect(blocs.length, `${fichier} : aucun bloc zh-CN à inspecter`).toBeGreaterThan(0);
+
+      const sansPile = blocs.filter((b) => !b.includes("PingFang SC"));
+      expect(
+        sansPile,
+        `${fichier} : des blocs chinois n'ont pas la pile CJK dans leur style inline`,
+      ).toEqual([]);
+    }
+  });
+
   test("CONTRE-TEST : le français n'a pas disparu au passage", () => {
     // Sans lui, « chaque modèle parle anglais » serait vrai d'un modèle
     // entièrement traduit — c'est-à-dire du défaut inverse, appliqué au

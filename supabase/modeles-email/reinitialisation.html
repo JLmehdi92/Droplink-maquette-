@@ -48,6 +48,9 @@
         <p lang="en" style="margin:9px 0 0;font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:20px;color:#83858f">
           Set a new password
         </p>
+        <p lang="zh-CN" style="margin:4px 0 0;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","WenQuanYi Micro Hei",sans-serif;font-size:13px;line-height:20px;color:#83858f">
+          设置新密码
+        </p>
       </div>
 
       <p style="margin:0 0 6px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
@@ -82,6 +85,31 @@
 
       <hr style="height:1px;background:#ececf0;border:0;margin:24px 0">
 
+      <!-- ⚠️ LE CHINOIS MANQUAIT, ET C'ÉTAIT LE PERSONA LE PLUS EXPOSÉ.
+           Relevé le 08/09/2026 : le produit parle trois langues depuis le
+           06/09, ces modèles n'en parlaient que deux. Or le fournisseur chinois
+           est justement celui qui ne peut PAS employer Google — la connexion
+           lui est inaccessible depuis la Chine. Son seul recours d'accès est
+           donc cet email, et il le recevait dans deux langues qu'il ne lit pas.
+
+           LA PILE DE POLICES EST ÉCRITE EN TOUTES LETTRES : ni Plus Jakarta
+           Sans ni Inter ne couvrent les idéogrammes, et un client de
+           messagerie n'a pas nos variables CSS. Sans elle, le repli du client
+           choisit une police au hasard, souvent japonaise — les glyphes
+           diffèrent, et le texte se lit « de travers » sans être illisible,
+           donc sans que personne ne le signale. -->
+      <p lang="zh-CN" style="margin:0 0 8px;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","WenQuanYi Micro Hei",sans-serif;font-size:11px;line-height:16px;letter-spacing:0.06em;color:#a3a4ad">
+        中文
+      </p>
+      <p lang="zh-CN" style="margin:0 0 6px;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","WenQuanYi Micro Hei",sans-serif;font-size:14px;line-height:24px;color:#3f4048">
+        您申请重置 DropLink 账户的密码。请点击上方按钮设置新密码。
+      </p>
+      <p lang="zh-CN" style="margin:0;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","WenQuanYi Micro Hei",sans-serif;font-size:14px;line-height:24px;color:#83858f">
+        此链接的有效期为 <strong style="color:#3f4048">一小时</strong>，并且只能使用一次。
+      </p>
+
+      <hr style="height:1px;background:#ececf0;border:0;margin:24px 0">
+
       <!-- ⚠️ CE PARAGRAPHE N'EST PAS DE LA POLITESSE. Une demande non
            sollicitée est le premier signe visible d'une tentative de prise de
            compte : le destinataire doit savoir qu'il n'a rien à faire, et que
@@ -93,9 +121,12 @@
         Ignorez ce message. Votre mot de passe actuel reste valable et personne
         n'a pu accéder à votre compte.
       </p>
-      <p lang="en" style="margin:0 0 24px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
+      <p lang="en" style="margin:0 0 8px;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:22px;color:#83858f">
         <strong style="color:#3f4048">Didn't ask for this?</strong> Ignore this message. Your current
         password still works and nobody was able to access your account.
+      </p>
+      <p lang="zh-CN" style="margin:0 0 24px;font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","WenQuanYi Micro Hei",sans-serif;font-size:14px;line-height:24px;color:#83858f">
+        <strong style="color:#3f4048">不是您本人申请的？</strong>请忽略此邮件。您当前的密码仍然有效，没有人能够访问您的账户。
       </p>
 
       <!-- Certains clients de messagerie n'affichent pas les boutons, et une
@@ -103,6 +134,7 @@
       <p style="margin:0 0 6px;font-family:Inter,system-ui,sans-serif;font-size:12px;line-height:20px;color:#a3a4ad">
         Si le bouton ne fonctionne pas, copiez cette adresse dans votre navigateur —
         <span lang="en">if the button doesn't work, copy this address into your browser:</span>
+        <span lang="zh-CN" style="font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","WenQuanYi Micro Hei",sans-serif">如果按钮无法使用，请将此地址复制到浏览器中打开：</span>
       </p>
       <p style="margin:0;font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:20px;color:#83858f;word-break:break-all">
         {{ .SiteURL }}/auth/retour?token_hash={{ .TokenHash }}&amp;suite=mot-de-passe
