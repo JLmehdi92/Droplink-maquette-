@@ -22,8 +22,8 @@
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",
     "metaDescription": "Réunissez photos, vidéos et suivi du colis sur une page à vos couleurs. Vos clients consultent tout eux-mêmes, sans compte et sans application.",
-    "heroTitre": "Un seul lien pour toute la commande",
-    "heroSousTitre": "Déposez les photos, collez le suivi, envoyez le lien. Votre client consulte tout lui-même, sans créer de compte.",
+    "heroTitre": "Photos et suivi en un seul lien",
+    "heroSousTitre": "Déposez les photos, collez le suivi, envoyez le lien. Sans boutique en ligne : votre client consulte tout lui-même, sans créer de compte.",
     "ctaPrincipal": "Créer ma première commande",
     "gratuitPourLInstant": "Gratuit pendant la phase de lancement. Aucune carte demandée.",
     "fonctionnalites": {
@@ -66,7 +66,7 @@
       "confidentialite": "Confidentialité",
       "signalement": "Signaler un contenu"
     },
-    "heroSousTitreCourt": "Déposez les photos, collez le suivi, envoyez le lien. Votre client consulte tout lui-même.",
+    "heroSousTitreCourt": "Déposez les photos, collez le suivi, envoyez le lien. Sans boutique en ligne : votre client consulte tout lui-même.",
     "finalTitreCourt": "Votre prochaine commande mérite mieux",
     "gratuitPourLInstantCourt": "Gratuit pendant le lancement. Aucune carte demandée.",
     "piedCourt": {

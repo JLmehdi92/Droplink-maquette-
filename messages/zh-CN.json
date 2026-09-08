@@ -22,8 +22,8 @@
   "landing": {
     "metaTitre": "DropLink — 每笔订单一个页面，用您的品牌呈现",
     "metaDescription": "把照片、视频和物流信息集中到一个用您配色的页面上。客户自己查看，无需注册，也不用安装应用。",
-    "heroTitre": "一个链接，涵盖整笔订单",
-    "heroSousTitre": "上传照片，粘贴运单号，发出链接。客户自己查看全部内容，无需创建账户。",
+    "heroTitre": "照片与物流，集中在一个链接",
+    "heroSousTitre": "上传照片，粘贴运单号，发出链接。无需网店：客户自己查看全部内容，无需创建账户。",
     "ctaPrincipal": "创建我的第一笔订单",
     "gratuitPourLInstant": "上线初期免费。无需绑定银行卡。",
     "fonctionnalites": {
@@ -66,7 +66,7 @@
       "confidentialite": "隐私政策",
       "signalement": "举报内容"
     },
-    "heroSousTitreCourt": "上传照片，粘贴运单号，发出链接。客户自己查看全部内容。",
+    "heroSousTitreCourt": "上传照片，粘贴运单号，发出链接。无需网店：客户自己查看全部内容。",
     "finalTitreCourt": "您的下一笔订单值得更好的呈现",
     "gratuitPourLInstantCourt": "上线初期免费。无需绑定银行卡。",
     "piedCourt": {

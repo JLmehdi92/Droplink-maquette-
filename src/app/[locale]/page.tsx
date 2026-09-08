@@ -226,11 +226,32 @@ export default async function Accueil({
             </div>
           </section>
 
-          {/* ---- LA SCÈNE DU TÉLÉPHONE ----------------------------------- */}
+          {/* ---- CE QUE VOIT LE CLIENT : LE TITRE, PUIS LA SCÈNE ---------
+           *
+           * ⚠️ CE TITRE N'EXISTAIT QUE COMME `aria-label`, ET C'ÉTAIT UN TROU.
+           * La section occupe 500 px, elle est citée dans le menu de
+           * navigation — et elle n'annonçait son sujet à personne d'autre
+           * qu'un lecteur d'écran. Ni un visiteur pressé ni un moteur ne
+           * pouvaient savoir ce qu'ils regardaient.
+           *
+           * Les deux planches le portent depuis le 08/09/2026 : le canevas
+           * d'abord, l'implémentation ensuite — jamais l'inverse.
+           *
+           * ⚠️ `aria-labelledby` REMPLACE `aria-label`, IL NE S'Y AJOUTE PAS.
+           * Garder les deux ferait exister deux sources pour le même nom, qui
+           * divergeraient au premier ajustement de l'une — et c'est celle
+           * qu'on ne voit pas qui gagnerait.
+           */}
+          <h2
+            id="titre-client-voit"
+            className="mx-auto mt-[34px] max-w-[700px] px-5 text-center font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface md:mt-10 md:px-0 md:text-[38px] md:leading-[44px]"
+          >
+            {t("destinataireTitre")}
+          </h2>
           <section
             id="clientVoit"
-            aria-label={t("destinataireTitre")}
-            className="relative mt-[30px] h-[386px] overflow-hidden md:mt-9 md:h-[500px]"
+            aria-labelledby="titre-client-voit"
+            className="relative mt-[18px] h-[386px] overflow-hidden md:mt-[22px] md:h-[500px]"
           >
             {/* DÉCOR. Purement décoratif, entièrement `aria-hidden`. */}
             <div aria-hidden="true">
