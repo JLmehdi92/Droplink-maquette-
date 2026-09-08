@@ -57,9 +57,15 @@ export default function robots(): MetadataRoute.Robots {
         disallow: "/api/",
       },
     ],
-    // Sans origine configurée, on n'annonce PAS de plan de site plutôt que d'en
-    // annoncer un à une adresse devinée : un `Sitemap:` qui pointe ailleurs est
-    // pire que pas de ligne du tout.
+    /*
+     * Sans origine configuree, on n annonce PAS de plan de site plutot que
+     * d en annoncer un a une adresse devinee : un `Sitemap:` qui pointe
+     * ailleurs est pire que pas de ligne du tout.
+     *
+     * ⚠️ ET ON LE DIT. Le silence est le mode de defaillance de ce fichier :
+     * un robots.txt sans ligne `Sitemap:` reste parfaitement valide, donc
+     * indetectable a la lecture. Voir la note detaillee dans `sitemap.ts`.
+     */
     ...(origine === null ? {} : { sitemap: `${origine}/sitemap.xml`, host: origine }),
   };
 }

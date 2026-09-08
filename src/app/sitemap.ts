@@ -46,9 +46,32 @@ const CHEMINS_INDEXABLES = ["", "/conditions", "/confidentialite", "/signalement
 export default function sitemap(): MetadataRoute.Sitemap {
   const origine = origineConfiguree();
 
-  // Sans origine, pas de plan de site : une URL absolue devinée enverrait les
-  // moteurs vers un hôte qui n'est pas le nôtre.
-  if (origine === null) return [];
+  /*
+   * ⚠️ UNE ABSENCE D ORIGINE DOIT SE VOIR, PAS SE TAIRE.
+   *
+   * `NEXT_PUBLIC_SITE_URL` est bien posee en production — prouve
+   * indirectement le 08/09/2026 : `partirVersGoogle` redirige vers
+   * `?erreur=indisponible` quand elle manque, et une vraie connexion Google a
+   * abouti sur `/bienvenue`. Supabase, de son cote, n accepte que
+   * `https://droplink.fr/**` : un `localhost` aurait ete refuse.
+   *
+   * Mais le jour ou quelqu un la retire, ce fichier rendrait une liste VIDE
+   * avec un statut 200 — un plan de site parfaitement valide qui n annonce
+   * rien. Les moteurs cesseraient de decouvrir les pages, et aucune porte ne
+   * pourrait le voir : elles tournent toutes en local, ou la variable est
+   * presente. C est le meme angle mort que les redirections vers
+   * `localhost:8080` et que la region Railway.
+   *
+   * On ne peut pas echouer ici — un 500 sur `/sitemap.xml` serait pire — donc
+   * on JOURNALISE, comme `lib/site.ts` le fait deja pour la meme cause.
+   */
+  if (origine === null) {
+    console.error(
+      "[seo] NEXT_PUBLIC_SITE_URL absente : le plan de site est VIDE. " +
+        "Les moteurs ne decouvriront plus aucune page.",
+    );
+    return [];
+  }
 
   const url = (langue: string, chemin: string): string => `${origine}/${langue}${chemin}`;
 
