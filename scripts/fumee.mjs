@@ -2660,6 +2660,80 @@ try {
   }
 
   {
+    /*
+     * LES REDIRECTIONS DES ROUTE HANDLERS SONT-ELLES RELATIVES ?
+     *
+     * ⚠️ DEFAUT MESURE EN PRODUCTION LE 08/09/2026, SUR LA PREMIERE CONNEXION
+     * GOOGLE REELLE. Wassim a atterri sur `localhost:8080`,
+     * `ERR_CONNECTION_REFUSED`. Les TROIS route handlers redirigeaient vers la
+     * machine interne du conteneur :
+     *
+     *   GET  /fr/auth/retour     -> https://localhost:8080/fr/connexion?erreur=lien
+     *   POST /fr/deconnexion     -> https://localhost:8080/fr/connexion?info=deconnecte
+     *   POST /fr/commandes/geste -> https://localhost:8080/fr/connexion?erreur=session
+     *
+     * `NextResponse.redirect()` exige une URL ABSOLUE, donc une base, et la
+     * seule disponible etait `requete.url` : l adresse par laquelle le
+     * CONTENEUR a ete joint, jamais celle que le navigateur a demandee.
+     *
+     * ⚠️ CE BLOC EXISTE PARCE QUE LA SONDE QUI REGARDAIT DEJA CE `Location`
+     * EST RESTEE VERTE. Elle verifiait que l en-tete CONTIENT
+     * `/fr/connexion?info=deconnecte` — et
+     * `https://localhost:8080/fr/connexion?info=deconnecte` le contient. Un
+     * controle d inclusion ne peut pas voir un prefixe de trop.
+     *
+     * ⚠️ ET IL NE POUVAIT PAS NON PLUS SE CONTENTER DE COMPARER L HOTE : ici,
+     * en local, il n y a pas de proxy, `requete.url` porte le BON hote, et une
+     * assertion « l hote est le notre » resterait verte sur le produit casse.
+     * La seule propriete verifiable depuis une machine de developpement est
+     * que le `Location` ne porte AUCUN hote — c est-a-dire qu il est RELATIF,
+     * et que c est le navigateur qui le resout contre l adresse qu il a
+     * demandee. C est L-032 : il faut mesurer une propriete que l artefact
+     * local partage avec la production.
+     */
+    const origineNotre = new URL(base).origin;
+    const relatives = [
+      ["GET /fr/auth/retour", await fetch(`${base}/fr/auth/retour`, { redirect: "manual" })],
+      [
+        "POST /fr/deconnexion",
+        await fetch(`${base}/fr/deconnexion`, {
+          method: "POST",
+          headers: { origin: origineNotre },
+          redirect: "manual",
+        }),
+      ],
+      [
+        "POST /fr/commandes/geste",
+        await fetch(`${base}/fr/commandes/geste`, {
+          method: "POST",
+          headers: { origin: origineNotre, "content-type": "application/x-www-form-urlencoded" },
+          body: "locale=fr&geste=archiver&id=00000000-0000-0000-0000-000000000000",
+          redirect: "manual",
+        }),
+      ],
+    ];
+
+    // CONTRE-TEST D ABORD. Sans lui, « aucun Location absolu » serait
+    // indistinguable de « aucune de ces routes n a redirige » — et un ensemble
+    // vide passe tout.
+    const redirigent = relatives.filter(([, r]) => r.status >= 300 && r.status < 400);
+    controles.push([
+      redirigent.length === relatives.length,
+      `CONTRE-TEST : les ${relatives.length} route handlers redirigent bien (${relatives
+        .map(([nom, r]) => `${nom}:${r.status}`)
+        .join(", ")})`,
+    ]);
+
+    for (const [nom, reponse] of relatives) {
+      const lieu = reponse.headers.get("location") ?? "";
+      controles.push([
+        lieu.startsWith("/") && !lieu.startsWith("//"),
+        `${nom} redirige RELATIVEMENT, sans hote (location: ${lieu || "(absent)"})`,
+      ]);
+    }
+  }
+
+  {
     // LES GESTES DE LA LISTE — POST NATIF, DONC CSRF A NOTRE CHARGE.
     //
     // ⚠️ EN QUITTANT LES SERVER ACTIONS, ON A PERDU LA PROTECTION QUE NEXT

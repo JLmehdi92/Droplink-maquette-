@@ -4,6 +4,7 @@ import { lireProfilAvec } from "@/lib/comptes/profil";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { verifierQuotaAuthAdresse } from "@/lib/limitation/quota";
+import { redirigerVers } from "@/lib/http/rediriger";
 
 /**
  * Retour d'un aller-retour d'authentification portant un code PKCE.
@@ -62,7 +63,7 @@ export async function GET(
   // directe. On renvoie vers la connexion plutôt que d'afficher une erreur
   // technique : la personne n'a rien fait de mal et n'a qu'une action utile.
   if (code === null && empreinteJeton === null) {
-    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=lien`, requete.url));
+    return redirigerVers(`/${langue}/connexion?erreur=lien`);
   }
 
   /*
@@ -87,7 +88,7 @@ export async function GET(
    */
   const quota = await verifierQuotaAuthAdresse();
   if (!quota.autorise) {
-    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=expire`, requete.url));
+    return redirigerVers(`/${langue}/connexion?erreur=expire`);
   }
 
   const supabase = await creerClientServeur();
@@ -109,7 +110,7 @@ export async function GET(
       : await supabase.auth.exchangeCodeForSession(code ?? "");
 
   if (error !== null) {
-    return NextResponse.redirect(new URL(`/${langue}/connexion?erreur=expire`, requete.url));
+    return redirigerVers(`/${langue}/connexion?erreur=expire`);
   }
 
   if (versMotDePasse) {
@@ -129,17 +130,15 @@ export async function GET(
      */
     const profil = await lireProfilAvec(supabase);
     if (profil === null) {
-      return NextResponse.redirect(new URL(cheminDeRefus(langue, "profil"), requete.url));
+      return redirigerVers(cheminDeRefus(langue, "profil"));
     }
     if (profil.statut === "suspended") {
-      return NextResponse.redirect(new URL(cheminDeRefus(langue, "suspendu"), requete.url));
+      return redirigerVers(cheminDeRefus(langue, "suspendu"));
     }
-    return NextResponse.redirect(new URL(`/${langue}/nouveau-mot-de-passe`, requete.url));
+    return redirigerVers(`/${langue}/nouveau-mot-de-passe`);
   }
 
   const suite = await suivreApresSession(langue, supabase);
 
-  return NextResponse.redirect(
-    new URL(suite.ok ? suite.chemin : cheminDeRefus(langue, suite.motif), requete.url),
-  );
+  return redirigerVers(suite.ok ? suite.chemin : cheminDeRefus(langue, suite.motif));
 }

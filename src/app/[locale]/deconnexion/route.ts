@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { estLangueSupportee } from "@/i18n/config";
 import { memeOrigine } from "@/lib/auth/meme-origine";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { redirigerVers } from "@/lib/http/rediriger";
 
 /**
  * SE DÉCONNECTER.
@@ -106,10 +107,7 @@ export async function POST(
   }
   if (error !== null) {
     console.error("[auth] déconnexion INCOMPLÈTE, la session survit — " + error.message);
-    return NextResponse.redirect(
-      new URL(`/${langue}/connexion?info=deconnexion-partielle`, requete.url),
-      303,
-    );
+    return redirigerVers(`/${langue}/connexion?info=deconnexion-partielle`, 303);
   }
 
   /*
@@ -125,5 +123,5 @@ export async function POST(
    * deux traitements — et l'inventaire des valeurs admises est clos des deux
    * côtés, donc un motif forgé dans l'URL n'affiche rien.
    */
-  return NextResponse.redirect(new URL(`/${langue}/connexion?info=deconnecte`, requete.url), 303);
+  return redirigerVers(`/${langue}/connexion?info=deconnecte`, 303);
 }

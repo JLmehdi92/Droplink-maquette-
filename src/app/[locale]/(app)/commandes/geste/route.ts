@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { estLangueSupportee } from "@/i18n/config";
 import { memeOrigine } from "@/lib/auth/meme-origine";
 import { executerGesteDeListe } from "@/lib/commandes/geste-liste";
+import { redirigerVers } from "@/lib/http/rediriger";
 
 /**
  * LES GESTES DE LA LISTE DES COMMANDES, reçus par un POST NATIF.
@@ -98,17 +99,14 @@ export async function POST(
   const resultat = await executerGesteDeListe(donnees);
 
   if (resultat.statut === "session") {
-    return NextResponse.redirect(
-      new URL("/" + langue + "/connexion?erreur=session", requete.url),
-      303,
-    );
+    return redirigerVers("/" + langue + "/connexion?erreur=session", 303);
   }
 
   if (resultat.statut === "geste-inconnu") {
     // On revient à la liste plutôt que d'afficher une erreur technique : le
     // vendeur n'a rien fait de mal, et il n'a qu'une action utile.
-    return NextResponse.redirect(new URL("/" + langue + "/commandes", requete.url), 303);
+    return redirigerVers("/" + langue + "/commandes", 303);
   }
 
-  return NextResponse.redirect(new URL(resultat.destination, requete.url), 303);
+  return redirigerVers(resultat.destination, 303);
 }
