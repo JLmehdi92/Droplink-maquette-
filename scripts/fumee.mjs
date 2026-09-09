@@ -5321,6 +5321,60 @@ controles.push(
 );
 
 
+// --- LES CIBLES TACTILES DU PIED SONT SERVIES, PAS SEULEMENT ECRITES ---
+//
+// ⚠️ LE CONTROLE UNITAIRE GARDE LE CODE ; CELUI-CI GARDE L EFFET. Les trois
+// pieds de page portent `min-h-11` et une marge negative qui annule le surplus
+// dans le flux — mais aucune des deux n entre dans MOTIF_CLASSE ci-dessus, qui
+// ne connait que les prefixes de couleur et de bordure. Si Tailwind cessait de
+// produire `-my-[14.5px]`, une valeur ARBITRAIRE, la marge disparaitrait, le
+// pied gonflerait de 29 px et la suite unitaire resterait verte : elle lit le
+// code, pas la feuille. C est exactement L-032 — « il repond » est la propriete
+// que tous les residus possedent.
+//
+// MESURE D ORIGINE, au navigateur pilote le 09/09/2026 a 390 px reels : les
+// liens legaux rendaient 15 px de haut sur la landing et 16 sur les autres
+// surfaces, contre les 44 points qu impose le brief §8. Les LARGEURS, elles,
+// depassaient deja 44 partout — seule la hauteur manquait.
+//
+// ⚠️ ET LA REGLE GLOBALE DE `globals.css` NE POUVAIT PAS LES COUVRIR : son
+// `@media (pointer: coarse)` vise `button`, `a[role="button"]`, `[role="tab"]`
+// et les cases a cocher, jamais un `<a>` de navigation. L etendre a tout `a`
+// donnerait 44 px de haut au moindre lien INLINE dans le corps des conditions,
+// et casserait la mise en page du texte qu il traverse.
+{
+  const CLASSES_TACTILES = ["min-h-11", "-my-3.5", "-my-[14.5px]"];
+  const absentes = CLASSES_TACTILES.filter((c) => !servie(c));
+  controles.push([
+    absentes.length === 0,
+    absentes.length === 0
+      ? `les ${CLASSES_TACTILES.length} classes de cible tactile du pied sont SERVIES par la feuille`
+      : `cible tactile ECRITE mais NON SERVIE (le pied gonflerait en silence) : ${absentes.join(", ")}`,
+  ]);
+
+  // Et elles sont bien portees par les liens REELLEMENT servis. On lit le pied
+  // du HTML rendu, pas le composant : c est la seule facon d etablir que la
+  // classe a traverse le rendu jusqu au navigateur du client.
+  const surfaces = ["/fr", "/fr/conditions", "/fr/blog"];
+  const sansPlancher = [];
+  for (const chemin of surfaces) {
+    const html = await (await fetch(`${base}${chemin}`)).text();
+    const debutPied = html.lastIndexOf("<footer");
+    const pied = debutPied === -1 ? "" : html.slice(debutPied, html.indexOf("</footer>", debutPied));
+    const liens = [...pied.matchAll(/<a\b[^>]*>/g)].map((m) => m[0]);
+    const nus = liens.filter((l) => !l.includes("min-h-11"));
+    if (debutPied === -1 || liens.length === 0) sansPlancher.push(`${chemin}:AUCUN LIEN DE PIED`);
+    else if (nus.length > 0) sansPlancher.push(`${chemin}:${nus.length}/${liens.length} sans plancher`);
+  }
+  controles.push([
+    sansPlancher.length === 0,
+    sansPlancher.length === 0
+      ? `les liens de pied des ${surfaces.length} surfaces publiques portent le plancher de 44 px`
+      : `liens de pied SANS plancher tactile : ${sansPlancher.join(", ")}`,
+  ]);
+}
+
+
 // --- Le lien mort rend NOTRE ecran, pas celui de Next ---
 //
 // ⚠️ IL RENDAIT CELUI DE NEXT. `notFound()` etait appele sans qu aucun

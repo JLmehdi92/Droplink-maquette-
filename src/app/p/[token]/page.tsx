@@ -688,12 +688,24 @@ export default async function PagePublique({
           « Powered by DropLink », avec ses trois garde-fous : secondaire
           visuellement, jamais confondable avec l'expéditeur, et ouverture HORS
           de la page — le client est venu voir sa commande, pas nous.
+
+          ⚠️ `min-h-11` EST LE PLANCHER TACTILE DU BRIEF §8 (44 points), ET LA
+          MARGE NÉGATIVE EN EST LA MOITIÉ INDISSOCIABLE. Mesuré au navigateur le
+          09/09/2026 à 390 px : ce lien rendait 16 px de haut. `-my-3.5` vaut
+          (44 − 16) / 2 et rend au flux sa hauteur exacte — sans elle le pied
+          grandirait de 28 px. Vérifié : hauteur du pied inchangée, texte déplacé
+          de 0,0 px.
+
+          ⚠️ C'EST LA SURFACE LA PLUS VUE DU PRODUIT, et c'est celle qu'on
+          oublie : elle a son propre pied, distinct de la landing et de la coque
+          publique, donc aucune correction faite ailleurs ne l'atteint. Elle est
+          restée hors du premier relevé pour cette seule raison.
         */}
         <a
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-body-sm text-[12px] text-on-surface-variant hover:underline"
+          className="-my-3.5 inline-flex min-h-11 items-center font-body-sm text-[12px] text-on-surface-variant hover:underline"
         >
           {t("propulsePar")}
         </a>

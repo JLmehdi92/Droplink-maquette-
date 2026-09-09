@@ -38,8 +38,27 @@ export async function CoquePublique({
   const l = await getTranslations("legal");
   const signalable = signalementDisponible();
 
+  /**
+   * ⚠️ `min-h-11` EST LE PLANCHER TACTILE DU BRIEF §8 (44 points), ET LA MARGE
+   * NÉGATIVE EN EST LA MOITIÉ INDISSOCIABLE. Mesuré au navigateur le
+   * 09/09/2026 à 390 px : ces liens rendaient 16 px de haut. Leur largeur, en
+   * revanche, dépassait déjà 44 partout — seule la hauteur manquait, d'où une
+   * correction purement verticale, qui évite au passage de faire se chevaucher
+   * des cibles espacées de 18 px seulement.
+   *
+   * `-my-3.5` vaut (44 − 16) / 2 et rend au flux la hauteur exacte qu'il avait :
+   * sans elle le pied grandirait de 28 px et la planche du canevas cesserait de
+   * décrire le rendu réel. Vérifié après coup : hauteur du pied inchangée,
+   * texte déplacé de 0,0 px.
+   *
+   * ⚠️ LA RÈGLE `@media (pointer: coarse)` DE `globals.css` NE PEUT PAS S'EN
+   * CHARGER : elle vise `button` et `a[role="button"]`, jamais un lien de
+   * navigation. L'étendre à tout `a` donnerait 44 px de haut au moindre lien
+   * INLINE dans le corps des conditions, et disloquerait le texte qu'il
+   * traverse.
+   */
   const lienPied =
-    "font-body-sm text-[12px] leading-4 font-medium text-sourdine transition-colors hover:text-on-surface md:text-[13px]";
+    "-my-3.5 inline-flex min-h-11 items-center font-body-sm text-[12px] leading-4 font-medium text-sourdine transition-colors hover:text-on-surface md:text-[13px]";
 
   return (
     <div className="min-h-screen bg-canvas px-3 py-3 md:px-7 md:py-7">

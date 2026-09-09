@@ -514,10 +514,27 @@ export default async function Accueil({
                   : []),
               ] as const
             ).map(([clef, href]) => (
+              /*
+                ⚠️ `min-h-11` EST LE PLANCHER TACTILE DU BRIEF §8 (44 points), ET
+                LA MARGE NÉGATIVE EN EST LA MOITIÉ INDISSOCIABLE. Mesuré au
+                navigateur le 09/09/2026 à 390 px : ces trois liens rendaient
+                15 px de haut. Leur largeur dépassait déjà 44 — seule la hauteur
+                manquait, d'où une correction purement verticale.
+
+                ⚠️ ET LES DEUX VALEURS DIFFÈRENT PARCE QUE LES INTERLIGNES
+                DIFFÈRENT : (44 − 15) / 2 = 14,5 au téléphone, où l'interligne
+                est de 15 px, mais (44 − 16) / 2 = 14 au bureau, où `md:leading-4`
+                le porte à 16. Recopier la même valeur des deux côtés ferait
+                bouger le pied d'un pixel sur l'une des deux tailles.
+
+                La marge rend au flux la hauteur exacte qu'il avait : sans elle
+                le pied grandirait de 29 px et la planche cesserait de décrire le
+                rendu. Vérifié : hauteur inchangée, texte déplacé de 0,0 px.
+              */
               <Link
                 key={clef}
                 href={href}
-                className="font-body-sm text-[12px] leading-[15px] font-medium text-sourdine transition-colors hover:text-violet md:font-headline-md md:text-[13px] md:leading-4 md:text-ardoise"
+                className="-my-[14.5px] inline-flex min-h-11 items-center font-body-sm text-[12px] leading-[15px] font-medium text-sourdine transition-colors hover:text-violet md:-my-3.5 md:font-headline-md md:text-[13px] md:leading-4 md:text-ardoise"
               >
                 <span className="md:hidden">{t("piedCourt." + clef)}</span>
                 <span className="hidden md:inline">{t("pied." + clef)}</span>
