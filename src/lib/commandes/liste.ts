@@ -4,6 +4,19 @@ import { creerClientServeur } from "@/lib/supabase/server";
 import { signerLecture } from "@/lib/storage/r2";
 import { cleDApercu } from "@/lib/medias/apercu";
 import type { Database } from "@/lib/supabase/types-base";
+import { SEUIL_SILENCE_JOURS } from "@/lib/tracking/silence";
+
+/**
+ * L instant AVANT lequel un dernier mouvement vaut « silence ».
+ *
+ * ⚠️ ELLE DERIVE DU SEUIL DU PRODUIT, elle n en pose pas un second. Recopier
+ * « 10 » ici ferait deux verites : le jour ou le seuil bouge, la page du client
+ * dirait « bloque » sur des commandes que la liste du vendeur n afficherait
+ * plus — et rien ne le signalerait.
+ */
+function borneDuSilence(): string {
+  return new Date(Date.now() - SEUIL_SILENCE_JOURS * 24 * 60 * 60 * 1000).toISOString();
+}
 
 type StatutExpedition = Database["public"]["Enums"]["order_status"];
 type StatutQc = Database["public"]["Enums"]["qc_status"];
@@ -37,6 +50,27 @@ export const STATUTS_QC = [
  * encore parti. Les mélanger noierait les vrais blocages sous les commandes
  * fraîchement expédiées, c'est-à-dire supprimerait l'information que ce tri
  * existe pour donner.
+ *
+ * ⚠️ ET IL EXIGE AUSSI QUE LE SILENCE DURE, ce qui manquait jusqu'au
+ * 09/09/2026. Il ne posait AUCUN seuil de temps : toute commande en transit
+ * ayant bougé une fois apparaissait sous « Bloquées », même un colis scanné
+ * cinq minutes plus tôt. Elles étaient seulement ORDONNÉES du mouvement le plus
+ * ancien au plus récent — un tri, pas une réponse.
+ *
+ * DÉFAUT MONTRÉ EN CAPTURE PAR WASSIM : il ouvre « Bloquées » et y trouve une
+ * commande « En transit » qui bouge normalement. Une pilule qui répond « quels
+ * colis dois-je relancer » et qui liste des colis parfaitement en route ne dit
+ * rien ; pire, elle apprend à ne plus la regarder.
+ *
+ * LE SEUIL EST CELUI DU PRODUIT, PAS UN NOUVEAU. `SEUIL_SILENCE_JOURS` est la
+ * même valeur qui fait écrire « aucun mouvement depuis N jours » sur la page du
+ * client (décision 8 du brief). Les deux écrans doivent parler du même
+ * ensemble : un vendeur qui lit « bloqué » chez son client et ne le retrouve
+ * pas dans sa liste ne saurait plus lequel des deux croire.
+ *
+ * L'INDEX RESTE UTILISABLE : `orders_bloquees_idx` porte
+ * `(shop_id, parcel_last_movement_at asc, id asc)` et la borne est une
+ * comparaison sur cette même colonne, donc un parcours d'intervalle.
  */
 export const TRIS = ["recentes", "anciennes", "modifiees", "jamais-ouvert", "bloquees"] as const;
 export type Tri = (typeof TRIS)[number];
@@ -534,7 +568,11 @@ export async function lireCommandes(
   // curseur ne sait pas ordonner un NULL, et une page dont la frontière tombe
   // sur une valeur absente sauterait des lignes en silence.
   if (parametres.tri === "bloquees") {
-    requete = requete.eq("status", "en_transit").not("parcel_last_movement_at", "is", null);
+    requete = requete
+      .eq("status", "en_transit")
+      .not("parcel_last_movement_at", "is", null)
+      // La borne du silence : plus rien n'a bougé depuis au moins ce délai.
+      .lt("parcel_last_movement_at", borneDuSilence());
   }
 
   // LA PÉRIODE PORTE SUR LA CRÉATION, pas sur la modification. C'est ainsi que le

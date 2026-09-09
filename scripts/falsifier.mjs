@@ -2986,10 +2986,28 @@ const DEPOT = {
    * ordonner une valeur absente, donc une page dont la frontiere tombe sur un
    * NULL saute des lignes en silence.
    */
+  /*
+   * ⚠️ CETTE CIBLE A ETE REECRITE LE 09/09/2026, et c est la garde
+   * `falsificateur-a-jour` qui l a exige : son motif ne correspondait plus a
+   * une ligne du depot, donc elle annoncait casser ce qu elle ne cassait plus.
+   * Un falsificateur perime est pire qu absent — il fait croire qu une sonde a
+   * ete eprouvee.
+   */
   "tri-bloquees-sans-mouvement": {
     fichier: "src/lib/commandes/liste.ts",
-    remplacer: 'requete = requete.eq("status", "en_transit").not("parcel_last_movement_at", "is", null);',
-    par: 'requete = requete.eq("status", "en_transit");',
+    remplacer: '.not("parcel_last_movement_at", "is", null)',
+    par: "",
+  },
+  /*
+   * LA BORNE DU SILENCE, RETIREE. C est le defaut que Wassim a montre en
+   * capture le 09/09/2026 : sans elle, « Bloquees » liste toute commande en
+   * transit ayant bouge une fois, meme cinq minutes plus tot. La sonde qui doit
+   * mordre ici est `tests/unit/pilule-bloquees.test.ts`.
+   */
+  "tri-bloquees-sans-seuil": {
+    fichier: "src/lib/commandes/liste.ts",
+    remplacer: '.lt("parcel_last_movement_at", borneDuSilence())',
+    par: "",
   },
 };
 
