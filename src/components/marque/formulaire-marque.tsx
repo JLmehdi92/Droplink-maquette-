@@ -5,6 +5,7 @@ import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
 import { normaliserLien } from "@/lib/boutique/normaliser-lien";
 import { useActionState, useMemo, useRef, useState } from "react";
 import { BoutonAction, type LibellesBoutonAction } from "@/components/bouton-action";
+import { Icone } from "@/components/icone";
 import { useTranslations } from "next-intl";
 import { LANGUES, estLangueSupportee, type Langue } from "@/i18n/config";
 import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
@@ -919,18 +920,35 @@ export function FormulaireMarque({
           */}
           <div className="flex flex-col gap-2 pt-1 lg:flex-row lg:items-center lg:justify-end lg:gap-3">
             {/*
-              ⚠️ LE TÉMOIN DE RÉUSSITE A ÉTÉ RETIRÉ, PAS OUBLIÉ. Il disait
-              « Enregistré. » à côté d'un bouton qui dit désormais la même chose :
-              deux fois à l'œil, et deux annonces pour un lecteur d'écran, le
-              `role="status"` de l'un et l'`aria-live` de l'autre. C'est le bouton
-              qui le porte maintenant — c'est là que le regard est au moment du
-              clic, et c'est ce que la planche `BoutonEtats` dessine.
+              LA CONFIRMATION EST UNE PILULE VERTE, ET C'EST UNE DEMANDE DE
+              WASSIM, LE 09/09/2026 : « faudrait qu'il mette un petit message en
+              vert quand on clique et que ça enregistre vraiment ».
 
-              LE TÉMOIN D'ERREUR RESTE, et la dissymétrie est voulue : le bouton
-              ne peut dire que « Réessayer », jamais POURQUOI. Un échec de session
-              et un échec d'écriture n'appellent pas le même geste, et cette
-              phrase-là est la seule à faire la différence.
+              ⚠️ ELLE NE FAIT PAS DOUBLON AVEC LE BOUTON, parce que le bouton ne
+              dit plus « Enregistré » : son libellé de réussite est celui du
+              repos. Un « Enregistré » écrit DANS le bouton violet se lit comme un
+              libellé d'action, pas comme une confirmation. Une version
+              intermédiaire avait les deux, et c'était deux fois la même phrase —
+              à l'œil, et pour un lecteur d'écran.
+
+              ⚠️ LE MOTIF N'EST PAS NEUF : c'est la pilule de l'indicateur de
+              sauvegarde de l'éditeur, mêmes jetons `succes-fond` et `succes`.
+              Deux écrans qui confirment une écriture doivent le dire pareil —
+              c'est la règle du vocabulaire du canevas.
+
+              `role="status"` et non `role="alert"` : une réussite s'annonce quand
+              le lecteur d'écran a fini sa phrase en cours, elle ne l'interrompt
+              pas.
             */}
+            {resultat.statut === "enregistre" ? (
+              <p
+                role="status"
+                className="inline-flex items-center gap-[7px] self-center rounded-full bg-succes-fond px-[13px] py-[7px] font-label-md text-[13px] font-semibold text-succes lg:self-auto"
+              >
+                <Icone nom="done" className="h-[14px] w-[14px]" />
+                {t("enregistre")}
+              </p>
+            ) : null}
             {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
               <p role="alert" className="font-body-sm text-body-sm text-error">
                 {t(`erreur.${resultat.motif}`)}
@@ -940,7 +958,9 @@ export function FormulaireMarque({
               libelles={{
                 repos: t("enregistrer"),
                 enCours: t("enregistrement"),
-                reussi: t("enregistre"),
+                // ⚠️ LE MEME LIBELLE QU AU REPOS, DELIBEREMENT : la pilule verte
+                // porte la confirmation, le bouton redevient simplement cliquable.
+                reussi: t("enregistrer"),
                 echoue: t("reessayer"),
               }}
               statut={resultat.statut}
