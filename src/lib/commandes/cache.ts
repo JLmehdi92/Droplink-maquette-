@@ -1,4 +1,5 @@
 import "server-only";
+import { revalidateTag } from "next/cache";
 
 /**
  * ÉTIQUETTES DE CACHE DES PAGES PUBLIQUES.
@@ -29,4 +30,35 @@ import "server-only";
  */
 export function etiquetteCommandePublique(jeton: string): string {
   return "commande-publique:" + jeton;
+}
+
+/**
+ * INVALIDE LA PAGE PUBLIQUE D'UNE COMMANDE.
+ *
+ * ⚠️ LE PROFIL EST `{ expire: 0 }`, ET CE N'EST PAS INTERCHANGEABLE. Next 16 a
+ * rendu obligatoire un second argument à `revalidateTag`, et sa documentation
+ * recommande `"max"` — c'est-à-dire : servir le contenu périmé pendant un an
+ * pendant que la revalidation tourne en arrière-plan. Ce défaut-là est
+ * excellent pour un catalogue ou un billet de blog.
+ *
+ * IL SERAIT ICI EXACTEMENT LE MODE DE DÉFAILLANCE QUE LE BRIEF §12 DÉCRIT. Ces
+ * étiquettes servent la coupure de suspension — la capacité technique qui fonde
+ * notre statut d'hébergeur — et la révocation d'un lien fuité. Avec `"max"`, un
+ * compte suspendu continuerait d'être servi depuis le cache, un lien révoqué
+ * resterait ouvert, et RIEN NE LE DIRAIT : la suspension s'enregistre, l'audit
+ * la consigne, l'écran affiche « suspendu ». Tout dit que le compte est coupé.
+ * Il ne l'est pas.
+ *
+ * `{ expire: 0 }` est le seul profil qui reproduise le comportement de Next 15 :
+ * le contenu périmé n'est jamais servi, la requête suivante attend la
+ * revalidation. Sur une page vue une fois par un client, cette attente ne coûte
+ * rien ; l'inverse coûterait notre statut d'hébergeur.
+ *
+ * ⚠️ ET CE FICHIER NE PROTÈGE TOUJOURS RIEN À LUI SEUL — voir la note ci-dessus :
+ * aucune étiquette n'est posée aujourd'hui, ces appels sont corrects et sans
+ * effet. Ce qui tient la promesse est la sonde de fumée qui compare le CONTENU
+ * SERVI après mutation. Le profil est choisi pour le jour où un cache existera.
+ */
+export function invaliderCommandePublique(jeton: string): void {
+  revalidateTag(etiquetteCommandePublique(jeton), { expire: 0 });
 }

@@ -776,10 +776,41 @@ const connexion = await (await fetch(`${base}/fr/connexion`)).text();
  * contournee, a toutes les donnees de tous les vendeurs.
  */
 {
-  const middleware = readFileSync(join(".next", "server", "src", "middleware.js"), "utf8");
+  /*
+   * ⚠️ LE BUNDLE EST TROUVE PAR SON MANIFESTE, PAS PAR UN CHEMIN DEVINE.
+   *
+   * Il vivait dans `.next/server/src/middleware.js` jusqu a Next 15. Next 16 l
+   * eclate en PLUSIEURS morceaux sous `.next/server/edge/chunks/`, aux noms
+   * haches. Le chemin en dur a donc fait tomber la fumee entiere sur un
+   * `ENOENT` — et c est le meilleur des deux echecs possibles : un chemin qui
+   * n existe plus se voit tout de suite, la ou un fichier VIDE aurait laisse
+   * passer les trois controles suivants en croyant les avoir faits.
+   *
+   * `middleware-manifest.json` est la source de verite de Next lui-meme : il
+   * liste les fichiers du bundle, quelle que soit la version. On les concatene
+   * tous, parce que la cle service-role figee dans N IMPORTE LEQUEL d entre eux
+   * serait une fuite.
+   */
+  const manifeste = JSON.parse(
+    readFileSync(join(".next", "server", "middleware-manifest.json"), "utf8"),
+  );
+  const morceaux = Object.values(manifeste.middleware ?? {}).flatMap((m) => m.files ?? []);
+  const middleware = morceaux
+    .map((f) => {
+      try {
+        return readFileSync(join(".next", f), "utf8");
+      } catch {
+        return "";
+      }
+    })
+    .join("\n");
   const lu = (nom) => (process.env[nom] ?? "").trim();
 
   controles.push(
+    [
+      morceaux.length > 0,
+      `CONTRE-TEST : le manifeste declare ${morceaux.length} morceau(x) de bundle`,
+    ],
     [
       middleware.length > 10_000,
       `CONTRE-TEST : le bundle du middleware est lu (${(middleware.length / 1024).toFixed(0)} Ko)`,
@@ -2352,8 +2383,22 @@ try {
          * On demande donc la charge RSC de l editeur, avant et apres, et on y
          * cherche les sentinelles PAR VALEUR.
          */
+        /*
+         * ⚠️ `?_rsc` EN PLUS DE L EN-TETE, ET C EST NEXT 16 QUI L IMPOSE.
+         *
+         * Jusqu a Next 15, l en-tete `RSC: 1` suffisait a obtenir la charge.
+         * Next 16 repond a cet en-tete seul par un `307` vers la MEME adresse
+         * suffixee de `?_rsc` — et la sonde, qui suit ses redirections a la
+         * main (`redirect: "manual"`, voulu pour les autres controles), lisait
+         * donc un corps VIDE. Elle cherchait ses sentinelles dans zero octet :
+         * le controle « la note interne ne fuit pas » serait passe au vert sans
+         * avoir rien lu, et c est le contre-test de taille qui l a dit.
+         *
+         * On demande donc l adresse finale directement. L en-tete reste : les
+         * deux ensemble marchent sur les deux versions.
+         */
         const rscEditeur = (entetes) =>
-          fetch(`${base}/fr/commandes/${commandeFumee}`, {
+          fetch(`${base}/fr/commandes/${commandeFumee}?_rsc`, {
             headers: { ...entetes, RSC: "1" },
             redirect: "manual",
           });
@@ -5040,7 +5085,19 @@ controles.push(
 // v4 qui n arrive pas jusqu au CSS ne casse rien, il rend simplement un coin
 // carre, sans une erreur nulle part. C est le meme piege que `--color-admin`,
 // et il ne se voit qu ici, sur ce que le serveur repond.
-const feuilles = [...fr.matchAll(/href="(\/_next\/static\/css\/[^"]+)"/g)].map((m) => m[1]);
+/*
+ * ⚠️ LE MOTIF NE PRESUME PLUS DU DOSSIER, ET C EST NEXT 16 QUI L A APPRIS.
+ *
+ * Les feuilles etaient servies depuis `/_next/static/css/` ; Next 16 les emet
+ * sous `/_next/static/chunks/`. Le motif d origine n a alors plus rien trouve,
+ * et TOUS les controles de style qui suivent se sont mis a mesurer une chaine
+ * vide — sans une seule erreur. Seul le contre-test « 0 feuille(s) servie(s) »
+ * a parle, et c est exactement ce pour quoi il existe.
+ *
+ * On cherche donc n importe quel `.css` sous `/_next/static/`, quel que soit le
+ * dossier que la prochaine version choisira.
+ */
+const feuilles = [...fr.matchAll(/href="(\/_next\/static\/[^"]+\.css)"/g)].map((m) => m[1]);
 const css = (
   await Promise.all(feuilles.map(async (f) => (await fetch(`${base}${f}`)).text()))
 ).join("\n");

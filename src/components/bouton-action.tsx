@@ -112,8 +112,15 @@ export function BoutonAction({
   readonly disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
-  const [attenteVisible, setAttenteVisible] = useState(false);
-  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  // L instant ou l attente a commence, ou null quand rien ne tourne. La
+  // VISIBILITE en est deduite plus bas : elle n est jamais stockee deux fois.
+  const [attente, setAttente] = useState(false);
+  // ⚠️ L INSTANT EST PRIS DANS L EFFET, JAMAIS PENDANT LE RENDU. `Date.now()` est
+  // impur : deux rendus du meme etat rendraient deux valeurs differentes, et
+  // React s autorise a rejouer un rendu. La regle `react-hooks/purity` de Next 16
+  // l a signale, et elle avait raison.
+  const depuisQuand = useRef(0);
+  const [confirmationExpiree, setConfirmationExpiree] = useState(false);
 
   /*
    * L'anneau s'allume dès que l'action part, et ne s'éteint qu'une fois la
@@ -125,24 +132,36 @@ export function BoutonAction({
    * à « Enregistré » — est piloté par la réponse du serveur, pas par ce
    * minuteur.
    */
-  const departAttente = useRef<number | null>(null);
+  /*
+   * ⚠️ L'ÉTAT EST AJUSTÉ PENDANT LE RENDU, PAS DANS UN EFFET, et ce n'est pas un
+   * contournement de règle de lint : c'est le motif que React recommande pour
+   * synchroniser un état avec une propriété qu'on ne contrôle pas — ici le
+   * `pending` de `useFormStatus`. Un `setState` synchrone dans le corps d'un
+   * effet peint d'abord l'écran intermédiaire, puis re-rend : l'anneau
+   * clignoterait à l'endroit précis où l'on cherche à supprimer un clignotement.
+   * Ajusté pendant le rendu, React recalcule avant de peindre quoi que ce soit.
+   *
+   * Next 16 a rendu la règle `react-hooks/set-state-in-effect` bloquante, et
+   * elle avait raison sur les trois occurrences qu'elle a signalées ici.
+   */
+  if (pending && !attente) setAttente(true);
+  if (!pending && confirmationExpiree && resultat !== "reussi") setConfirmationExpiree(false);
 
+  /*
+   * L'extinction, elle, est bien un effet : elle dépend du temps, pas du rendu.
+   * Le `setState` y est appelé DANS un minuteur, donc de façon asynchrone — ce
+   * que la règle autorise, et qui ne produit aucune cascade.
+   */
   useEffect(() => {
     if (pending) {
-      departAttente.current = Date.now();
-      setAttenteVisible(true);
+      depuisQuand.current = Date.now();
       return;
     }
-    const reste = resteAvantExtinction(departAttente.current, Date.now());
-    if (departAttente.current === null) return;
-    departAttente.current = null;
-    if (reste === 0) {
-      setAttenteVisible(false);
-      return;
-    }
-    const minuteur = setTimeout(() => setAttenteVisible(false), reste);
+    if (!attente) return;
+    const reste = resteAvantExtinction(depuisQuand.current, Date.now());
+    const minuteur = setTimeout(() => setAttente(false), reste);
     return () => clearTimeout(minuteur);
-  }, [pending]);
+  }, [pending, attente]);
 
   /*
    * ⚠️ SEULE LA RÉUSSITE S'EFFACE TOUTE SEULE. Un échec qui disparaîtrait au
@@ -151,14 +170,13 @@ export function BoutonAction({
    * prochaine tentative.
    */
   useEffect(() => {
-    if (resultat !== "reussi") {
-      setConfirmationVisible(false);
-      return;
-    }
-    setConfirmationVisible(true);
-    const minuteur = setTimeout(() => setConfirmationVisible(false), DUREE_CONFIRMATION_MS);
+    if (resultat !== "reussi") return;
+    const minuteur = setTimeout(() => setConfirmationExpiree(true), DUREE_CONFIRMATION_MS);
     return () => clearTimeout(minuteur);
   }, [resultat]);
+
+  const attenteVisible = attente;
+  const confirmationVisible = resultat === "reussi" && !confirmationExpiree;
 
   const etat: Etat = attenteVisible
     ? "enCours"
@@ -242,27 +260,4 @@ function Anneau() {
       <path d="M12 3a9 9 0 0 1 9 9" />
     </svg>
   );
-}
-
-/**
- * Le minuteur de réinitialisation d'un résultat, pour les appelants qui gardent
- * la réponse du serveur dans un état local.
- *
- * Extrait ici plutôt que recopié : trois écrans en auront besoin, et trois
- * copies d'un même minuteur divergent toujours par celle qu'on oublie de
- * corriger.
- */
-export function useOubliDuResultat(
-  resultat: "reussi" | "echoue" | null,
-  oublier: () => void,
-  delaiMs = DUREE_CONFIRMATION_MS,
-): void {
-  const oublierRef = useRef(oublier);
-  oublierRef.current = oublier;
-
-  useEffect(() => {
-    if (resultat !== "reussi") return;
-    const minuteur = setTimeout(() => oublierRef.current(), delaiMs);
-    return () => clearTimeout(minuteur);
-  }, [resultat, delaiMs]);
 }

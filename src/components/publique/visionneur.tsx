@@ -209,25 +209,42 @@ export function Visionneur({
   const [index, setIndex] = useState<number | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [echec, setEchec] = useState(false);
+  /** À quel média `url` et `echec` correspondent, pour les remettre à zéro quand il change. */
+  const [mediaCharge, setMediaCharge] = useState<string | null>(null);
 
   const courant = index === null ? undefined : medias[index];
   const premier = medias[0];
   const tuiles = medias.slice(1, TUILES_BUREAU + 1);
   const apercuPremier = premier === undefined ? { repli: "photo" as const } : apercuDe(premier, "large");
 
+  /*
+   * ⚠️ LA REMISE À ZÉRO SE FAIT PENDANT LE RENDU, PLUS DANS L'EFFET.
+   *
+   * Elle vivait dans le corps de l'effet ci-dessous, et Next 16 l'a signalée :
+   * un `setState` synchrone dans un effet fait PEINDRE l'écran intermédiaire
+   * avant de re-rendre. Concrètement, en changeant de média, l'ancienne photo
+   * restait visible une image de plus sous le nouveau titre — le défaut est
+   * discret, mais c'est exactement celui qu'on prétend éviter en jetant l'URL.
+   *
+   * Le motif employé est celui que React documente pour ajuster un état quand
+   * une propriété change : comparer à la valeur précédente GARDÉE EN ÉTAT (et
+   * non dans une `ref`, qu'on n'a pas le droit de muter pendant un rendu), puis
+   * corriger. React recalcule alors avant de peindre quoi que ce soit.
+   */
+  const idCourant = courant?.id ?? null;
+  if (mediaCharge !== idCourant) {
+    setMediaCharge(idCourant);
+    setUrl(null);
+    setEchec(false);
+  }
+
   // L'URL pleine est demandée à CHAQUE ouverture, et jetée à la fermeture : une
   // URL signée a une durée de vie, la garder en mémoire ferait échouer une
   // réouverture tardive sans rien dire.
   useEffect(() => {
-    if (courant === undefined) {
-      setUrl(null);
-      setEchec(false);
-      return;
-    }
+    if (courant === undefined) return;
 
     let abandonne = false;
-    setUrl(null);
-    setEchec(false);
 
     fetch("/p/" + encodeURIComponent(jeton) + "/media/" + encodeURIComponent(courant.id))
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))

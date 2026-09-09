@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { LANGUE_DEFAUT } from "@/i18n/config";
 import { SchemaLangue } from "@/i18n/schema";
@@ -20,7 +19,7 @@ import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
 import { appliquerChamp, type ResultatEnregistrement } from "./ecriture";
-import { etiquetteCommandePublique } from "./cache";
+import { invaliderCommandePublique } from "./cache";
 import {
   archiverCommande,
   dupliquerCommande,
@@ -148,8 +147,8 @@ export async function revoquerLienPublic(
     // APRÈS que la base a déjà tourné le jeton — le vendeur croirait avoir
     // échoué alors que son lien est bel et bien coupé.
     const ancien = Jeton.safeParse(ancienJeton);
-    if (ancien.success) revalidateTag(etiquetteCommandePublique(ancien.data));
-    revalidateTag(etiquetteCommandePublique(resultat.nouveauJeton));
+    if (ancien.success) invaliderCommandePublique(ancien.data);
+    invaliderCommandePublique(resultat.nouveauJeton);
   }
 
   return resultat;
@@ -194,7 +193,7 @@ export async function archiver(
   // mutation près finirait par l'être pour toutes.
   const cible = Jeton.safeParse(jeton);
   if (resultat.statut === "ok" && cible.success) {
-    revalidateTag(etiquetteCommandePublique(cible.data));
+    invaliderCommandePublique(cible.data);
   }
 
   return resultat;

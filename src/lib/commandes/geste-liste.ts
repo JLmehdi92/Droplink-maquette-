@@ -1,5 +1,5 @@
 import "server-only";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { LANGUE_DEFAUT } from "@/i18n/config";
 import { SchemaLangue } from "@/i18n/schema";
@@ -7,7 +7,7 @@ import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { etiquetteCommandePublique } from "./cache";
+import { invaliderCommandePublique } from "./cache";
 import { archiverCommande, dupliquerCommande } from "./cycle";
 
 /**
@@ -164,7 +164,7 @@ async function archiverUne(donnees: FormData, profilId: string): Promise<string>
   const resultat = await archiverCommande(supabase, profilId, id.data, archiver);
 
   if (resultat.statut === "ok" && jeton.success && jeton.data !== "") {
-    revalidateTag(etiquetteCommandePublique(jeton.data));
+    invaliderCommandePublique(jeton.data);
   }
 
   invaliderRetour(retour);

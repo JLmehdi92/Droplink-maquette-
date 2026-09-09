@@ -1,12 +1,11 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
 import tseslint from "typescript-eslint";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({ baseDirectory: __dirname });
+// `tsconfigRootDir` en a besoin plus bas ; un module ES n'a pas de `__dirname`.
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Message porté par la restriction d'import du client admin. Il dit le POURQUOI,
@@ -89,7 +88,18 @@ const sauf = (...autorises) =>
   }));
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  /*
+   * ⚠️ IMPORT DIRECT, ET NON PLUS `compat.extends(…)`.
+   *
+   * `eslint-config-next` est passé en flat config native en version 16 : le
+   * faire traverser `FlatCompat` — qui sert à convertir une config ANCIENNE —
+   * produit une structure circulaire, et ESLint tombe sur un
+   * `Converting circular structure to JSON` avant d'avoir lu une seule ligne de
+   * code. Le lint ne signalait donc plus rien du tout, ce qui est la pire des
+   * pannes pour une porte : elle ne devient pas rouge, elle disparaît.
+   */
+  ...nextCoreWebVitals,
+  ...nextTypeScript,
 
   {
     // ⚠️ `scripts/**` NE FIGURE PLUS ICI, et c'est délibéré.

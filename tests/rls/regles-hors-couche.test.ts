@@ -125,8 +125,35 @@ export function selecteursHorsCouche(css: string): readonly string[] {
      * rouge à chaque build sans qu'aucune règle n'ait bougé. On les replie
      * donc sur un nom stable — elles restent DANS l'inventaire, avec leur
      * raison, elles n'en sortent pas.
+     *
+     * ⚠️ DEUX FORMATS, PARCE QUE NEXT 16 A CHANGÉ LE SIEN. Jusqu'à Next 15 :
+     * `.__className_1a2b3c`. Depuis Next 16 :
+     * `.inter_93f8105e-module__S0HThW__className`, où le nom de la famille est
+     * en tête et deux hachages encadrent le suffixe. Le second motif reconnaît
+     * cette forme et la replie sur le MÊME nom stable : l'inventaire ne dépend
+     * pas de la façon dont Next fabrique ses noms.
      */
-    trouves.add(selecteur.replace(/\.__(className|variable)_[0-9a-f]+/g, ".__$1_*"));
+    const replie = selecteur
+      .replace(/\.__(className|variable)_[0-9a-f]+/g, ".__$1_*")
+      .replace(/\.[a-z_0-9]+-module__[A-Za-z0-9_]+__(className|variable)/g, ".__$1_*");
+
+    /*
+     * ⚠️ LES PARTIES D'UN SÉLECTEUR COMPOSÉ SONT TRIÉES, ET C'EST CE QUI REND
+     * CET INVENTAIRE STABLE. Next 16 a émis `*,:before,:after` là où Next 15
+     * écrivait `*,:after,:before`, et réordonné les quatre `.anim-*` : trois
+     * lignes de l'inventaire sont devenues fausses sans qu'une seule règle CSS
+     * ait changé de sens. Un contrôle qui dépend de l'ordre d'écriture d'un
+     * compilateur mesure le compilateur, pas le produit.
+     */
+    trouves.add(
+      replie.includes(",")
+        ? replie
+            .split(",")
+            .map((p) => p.trim())
+            .sort()
+            .join(",")
+        : replie,
+    );
   }
   return [...trouves].sort();
 }

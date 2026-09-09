@@ -1,61 +1,63 @@
+import Link from "next/link";
+
 /**
  * UN LIEN VERS L'ÉCRAN COURANT — filtres, tris, vues, archives, pagination.
  *
- * ⚠️ CONTOURNEMENT D'UN DÉFAUT MESURÉ DANS LE ROUTEUR DE NEXT 15.5.23, PAS UNE
- * PRÉFÉRENCE DE STYLE. Toute navigation cliente qui garde le MÊME chemin et
- * change les paramètres de recherche est ABANDONNÉE. Remesuré le 03/09/2026 sur
- * un build de production avec une session réelle, en remettant un `<Link>` :
- * l'URL ne bouge même pas, la liste reste à ses cinq lignes non filtrées,
- * aucune puce n'apparaît. Et le clic n'est pas perdu en route — écoute en
- * capture puis en bulle : `defaultPrevented` passe de `false` à `true`. Le
- * routeur INTERCEPTE, empêche la navigation native, puis ne fait rien.
+ * ⚠️ CE COMPOSANT A ÉTÉ UN `<a>` NU PENDANT ONZE JOURS, ET IL NE L'EST PLUS.
  *
- * LE SERVEUR, LUI, EST IRRÉPROCHABLE : la charge RSC demandée à la main répond
- * 200 et pèse 66 945 octets pour `?statut=en_transit` contre 81 243 pour l'URL
- * nue — trois lignes au lieu de cinq. Le défaut est entièrement dans le
- * routeur client.
+ * LE DÉFAUT QU'IL CONTOURNAIT : dans Next 15.5.23, toute navigation cliente qui
+ * gardait le MÊME chemin en changeant les paramètres de recherche était
+ * ABANDONNÉE. Le clic était intercepté — `defaultPrevented` passait de `false` à
+ * `true` — puis rien : l'URL ne bougeait pas, la liste restait à ses cinq lignes
+ * non filtrées, aucune puce n'apparaissait. Le serveur, lui, était irréprochable.
+ * Le défaut vivait entièrement dans le routeur client.
  *
- * CE QUI A ÉTÉ ÉCARTÉ PAR MESURE, pour qu'on ne le refasse pas :
- *   `loading.tsx` retiré · `NextIntlClientProvider` sorti du layout ·
- *   `experimental.clientSegmentCache` · `experimental.staleTimes: 0` ·
- *   Next 15.5.24 · le préchargement du chemin nu · le groupe `(app)` ·
- *   `generateMetadata`, `EnTeteEcran`, `Icone`, les lectures Supabase ·
- *   **`export const dynamic = "force-dynamic"`** (03/09 : sans effet, le clic
- *   reste avalé). Une page minimale sous EXACTEMENT les mêmes layouts navigue,
- *   elle, parfaitement.
+ * DIX PISTES ONT ÉTÉ ESSAYÉES ET MESURÉES avant d'y renoncer : `loading.tsx`
+ * retiré, `NextIntlClientProvider` sorti du layout, `experimental
+ * .clientSegmentCache`, `experimental.staleTimes: 0`, le préchargement du chemin
+ * nu, le groupe `(app)`, `generateMetadata`, `EnTeteEcran`, `Icone`, les
+ * lectures Supabase, `export const dynamic = "force-dynamic"`,
+ * `history.pushState` + `router.refresh()` dans les deux ordres, et les versions
+ * 15.5.24 puis 15.5.25. Aucune n'a rien changé.
  *
- * ⚠️ CE COMPOSANT A LONGTEMPS ÉTÉ UN `<a>` NU, donc un RECHARGEMENT COMPLET du
- * document à chaque clic de filtre — 34,8 Ko compressés, la page qui blanchit,
- * et le défilement qui remonte en haut. Ça marchait, et ça se voyait.
+ * ✅ NEXT 16 LE CORRIGE, ET C'EST MESURÉ, PAS ESPÉRÉ. Test du 09/09/2026 sur un
+ * build de production, avec une session réelle et une liste de 11 commandes, en
+ * cliquant la pilule « En transit » par un vrai clic souris :
  *
- * ⚠️ ET `history.pushState` + `router.refresh()` NE MARCHE PAS NON PLUS —
- * essayé et mesuré le 03/09/2026, dans les deux ordres. `pushState` seul fait
- * bien ce qu'on lui demande : l'URL passe à `?statut=en_transit` SANS
- * rechargement. Mais `refresh()`, appelé juste après puis décalé d'un tour de
- * boucle, rafraîchit l'ANCIENNE adresse : cinq lignes non filtrées, aucune
- * puce, la pilule « Toutes » toujours active. Le routeur garde donc sa propre
- * idée de l'URL, et c'est la même que celle qui avale les clics.
+ *   Next 15.5.23 + <Link> → 🔴 URL figée sur `/fr/commandes`, 11 lignes sur 11.
+ *   Next 16.3.4  + <Link> → ✅ `/fr/commandes?statut=en_transit`, 11 → 5 lignes,
+ *                            ET le marqueur posé dans `window` SURVIT au clic.
  *
- * CE QUI RESTE, ET QUI MARCHE : la navigation NATIVE du navigateur. Le
- * formulaire `GET` du panneau de filtres n'a jamais été touché par le défaut,
- * parce que React n'intercepte que les formulaires dont l'action est une
- * FONCTION. Un `<a>` nu n'est pas davantage intercepté.
+ * Le contre-test est ce qui rend la conclusion solide : même composant, même
+ * code, même base, même clic — SEULE la version de Next changeait.
  *
- * CE QUE ÇA COÛTE, MESURÉ : un document complet par clic —
- * `/fr/commandes` 121,6 Ko bruts / **34,8 Ko compressés**, `/fr/envois` 14,8 Ko,
- * `/fr/analyses` 15,5 Ko. Les feuilles de style et les scripts sont déjà en
- * cache : c'est le document seul qui repart.
+ * CE QUE LE CONTOURNEMENT COÛTAIT, ET QUI EST RENDU : un document complet à
+ * chaque clic de filtre — `/fr/commandes` 121,6 Ko bruts, 34,8 Ko compressés —
+ * la page qui blanchit, et le défilement qui remonte en haut. C'est ce que
+ * Wassim décrivait par « c'est trop chiant, ça actualise tout le temps ».
  *
- * ⚠️ ET CE QUI SE VOIT — la page qui blanchit entre deux clics de filtre —
- * N'EST PAS TRAITÉ, PAR DÉCISION DE WASSIM LE 03/09/2026. Une transition de vue
- * entre documents (`@view-transition { navigation: auto }`) avait été posée et
- * mesurée : elle fonctionnait, `pageswap` rapportait bien une transition
- * activée. Il n'en voulait pas. Elle a été retirée avec ses deux contrôles de
- * fumée et son exception d'inventaire. Le clignotement est donc ASSUMÉ, pas
- * oublié — le rouvrir tient en trois lignes de CSS.
+ * ⚠️ CE COMPOSANT RESTE, ALORS QU'IL NE FAIT PLUS QUE DÉLÉGUER. Il pourrait être
+ * remplacé par `<Link>` dans les onze fichiers qui l'emploient ; il est conservé
+ * parce qu'il est le point unique où cette histoire est écrite, et parce que le
+ * jour où un défaut de navigation reviendra, il n'y aura de nouveau qu'un seul
+ * endroit à changer. Un composant qui ne fait rien mais qui documente pourquoi
+ * il ne fait rien vaut mieux qu'une leçon dispersée dans onze fichiers.
+ */
+/**
+ * ⚠️ LES PROPRIÉTÉS SONT ÉNUMÉRÉES, PAS HÉRITÉES DE `AnchorHTMLAttributes`.
  *
- * À RETIRER LE JOUR OÙ LE DÉFAUT EST CORRIGÉ EN AMONT : c'est le seul endroit à
- * défaire.
+ * Le composant acceptait auparavant les 280 attributs d'une ancre, par un
+ * `Omit<React.AnchorHTMLAttributes<…>>`. Sur un `<a>` nu, TypeScript s'en
+ * accommodait ; sur un `<Link>`, avec l'`exactOptionalPropertyTypes: true` de ce
+ * projet, il ne le peut plus : une propriété déclarée `T | undefined` n'est pas
+ * assignable à une propriété simplement optionnelle, et `onMouseEnter` a suffi à
+ * faire tomber le build.
+ *
+ * On aurait pu élargir le type, ou le taire par une assertion. Énumérer est
+ * meilleur : relevé sur les onze fichiers qui l'emploient, ils ne passent QUE
+ * `href`, `className`, `key` et `aria-current`. Un type qui décrit ce que le
+ * produit fait vraiment se lit ; un type qui décrit tout ce qui serait possible
+ * ne dit rien. Un attribut de plus se déclarera ici, en une ligne.
  */
 export function LienEcran({
   href,
@@ -66,10 +68,13 @@ export function LienEcran({
   readonly href: string;
   readonly className?: string;
   readonly children: React.ReactNode;
-} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "className" | "children">) {
+  readonly "aria-current"?: React.AriaAttributes["aria-current"];
+  readonly "aria-label"?: string;
+  readonly title?: string;
+}) {
   return (
-    <a href={href} className={className} {...reste}>
+    <Link href={href} className={className} {...reste}>
       {children}
-    </a>
+    </Link>
   );
 }

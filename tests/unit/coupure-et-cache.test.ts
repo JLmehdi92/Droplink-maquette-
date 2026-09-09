@@ -3,6 +3,22 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 /**
+ * CE QUI COMPTE COMME « INVALIDER LA PAGE PUBLIQUE ».
+ *
+ * ⚠️ DEUX FORMES, ET LA SECONDE EST ARRIVÉE AVEC NEXT 16. Les modules appelaient
+ * `revalidateTag` directement ; la version 16 exige un second argument, et ce
+ * second argument est une DÉCISION DE SÉCURITÉ — `{ expire: 0 }`, sans quoi une
+ * suspension cesserait de couper la page. Une décision pareille ne se recopie
+ * pas à quatre endroits : elle vit dans `invaliderCommandePublique`, et les
+ * modules passent par lui.
+ *
+ * Accepter l'intermédiaire ne suffit pas : un test plus bas vérifie que CE
+ * helper appelle réellement `revalidateTag`, et avec le bon profil. Sans lui, la
+ * porte se franchirait avec une fonction vide portant le bon nom.
+ */
+const INVALIDE = /(?:revalidateTag|invaliderCommandePublique)\s*\(/;
+
+/**
  * LA COUPURE DE SUSPENSION SURVIVRA-T-ELLE AU PREMIER CACHE ?
  *
  * C'est la capacité technique qui fonde notre statut d'hébergeur : suspendre un
@@ -456,10 +472,67 @@ describe("toute mutation visible du client est inventoriée, pas sélectionnée"
       const fichier = ECRIVAINS.find((f) => f.nom === couvreur);
       expect(fichier, `${nom} déclare être couvert par ${couvreur}, introuvable`).toBeDefined();
       expect(
-        /revalidateTag\s*\(/.test(fichier?.source ?? ""),
+        INVALIDE.test(fichier?.source ?? ""),
         `${nom} déclare être couvert par ${couvreur}, qui n'invalide rien`,
       ).toBe(true);
     }
+  });
+
+  /**
+   * ⚠️ LE CONTRÔLE CI-DESSUS ACCEPTE UN INTERMÉDIAIRE ; CELUI-CI VÉRIFIE QUE
+   * L'INTERMÉDIAIRE INVALIDE POUR DE BON.
+   *
+   * Sans lui, la porte serait franchissable en créant n'importe quelle fonction
+   * nommée `invaliderCommandePublique` qui ne fait rien — le motif la
+   * reconnaîtrait, la couverture serait déclarée, et la coupure de suspension ne
+   * couperait plus. C'est exactement le mode de défaillance du brief §12 : la
+   * mutation réussit, l'audit la consigne, l'écran affiche « suspendu », et la
+   * page publique continue d'être servie.
+   *
+   * DÉFAUT ÉVITÉ LE 09/09/2026, PENDANT LA MIGRATION VERS NEXT 16. Les quatre
+   * appels directs à `revalidateTag` ont été centralisés dans ce helper — parce
+   * que Next 16 exige un second argument, et que le profil est une décision de
+   * sécurité qui ne doit pas être recopiée quatre fois. Le contrôle précédent
+   * est alors parti ROUGE, et il avait raison : il ne voyait plus personne
+   * invalider. L'élargir sans ce second contrôle aurait affaibli la garde qui
+   * protège le mécanisme le plus critique du produit.
+   */
+  test("l intermediaire d invalidation appelle REELLEMENT revalidateTag", () => {
+    /*
+     * ⚠️ LES COMMENTAIRES SONT RETIRÉS, ET CE N'EST PAS UNE PRÉCAUTION DE STYLE.
+     *
+     * DÉFAUT DE CE CONTRÔLE, ATTRAPÉ PAR SA PROPRE FALSIFICATION le 09/09/2026 :
+     * lu brut, le fichier contient `{ expire: 0 }` DANS le commentaire qui
+     * explique pourquoi ce profil est obligatoire. En remplaçant le profil du
+     * CODE par `"max"`, le contrôle restait VERT — il lisait sa propre
+     * description. C'est L-031 dans sa forme exacte, et sur la garde qui protège
+     * la coupure de suspension.
+     */
+    const cache = sansCommentaires(
+      readFileSync(join(process.cwd(), "src/lib/commandes/cache.ts"), "utf8"),
+    );
+    expect(
+      /export function invaliderCommandePublique/.test(cache),
+      "le helper d'invalidation a disparu de `commandes/cache.ts`",
+    ).toBe(true);
+    expect(
+      /revalidateTag\s*\(/.test(cache),
+      "`invaliderCommandePublique` n'appelle plus `revalidateTag` : la couverture " +
+        "déclarée par les modules qui s'appuient dessus est devenue imaginaire.",
+    ).toBe(true);
+    /*
+     * ⚠️ ET LE PROFIL EST GARDÉ, PAS SEULEMENT L'APPEL. Next 16 recommande
+     * `"max"` — servir la page en cache pendant un an pendant la revalidation.
+     * Sur ces étiquettes-là, un compte suspendu resterait servi. Seul
+     * `{ expire: 0 }` reproduit le comportement de Next 15.
+     */
+    expect(
+      // `[^)]*` ne conviendrait pas : l'étiquette est elle-même un appel, et le
+      // motif s'arrêterait à SA parenthèse fermante.
+      /revalidateTag\([\s\S]*?\{\s*expire:\s*0\s*\}/.test(cache),
+      "le profil de revalidation n'est plus `{ expire: 0 }` : avec un profil qui " +
+        "sert du périmé, une suspension cesserait de couper la page publique.",
+    ).toBe(true);
   });
 
   test("SI un cache apparaît, aucune mutation visible ne peut rester muette", () => {
