@@ -344,7 +344,8 @@
     "reseauxNouvelOnglet": "Ces liens s’ouvrent hors de la page de votre client, dans un nouvel onglet. Ils ne créent aucun compte et ne demandent rien à votre client.",
     "optionsTitre": "Options",
     "apercuDirect": "en direct",
-    "apercuPour": "pour votre client"
+    "apercuPour": "pour votre client",
+    "reessayer": "Réessayer"
   },
   "envois": {
     "titre": "Envois",

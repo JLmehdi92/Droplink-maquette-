@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, useReducedMotion } from "motion/react";
 import { LienEcran } from "@/components/lien-ecran";
 import { Icone } from "@/components/icone";
 import type { NomIcone } from "@/lib/design/traces-icones";
@@ -74,6 +75,7 @@ export function NavigationVendeur({
   readonly etiquette: string;
 }) {
   const chemin = usePathname();
+  const mouvementReduit = useReducedMotion();
 
   if (variante === "bas") {
     /*
@@ -129,15 +131,48 @@ export function NavigationVendeur({
           const active = estActive(chemin, entree.href);
           const Composant = active ? LienEcran : Link;
           return (
-            <li key={entree.href}>
+            <li key={entree.href} className="relative">
+              {/*
+                LA PASTILLE ACTIVE GLISSE D'UNE RUBRIQUE À L'AUTRE.
+
+                ⚠️ ELLE EST UN ÉLÉMENT À PART, PAS UN FOND SUR LE LIEN, et c'est
+                toute l'astuce. Un `bg-violet-fond` posé sur l'entrée active
+                disparaît d'un endroit et réapparaît à un autre : il n'y a rien
+                à animer entre les deux, puisque ce sont deux boîtes
+                différentes. Extrait en un seul élément porteur d'un `layoutId`,
+                il devient LE MÊME élément d'un rendu au suivant — Motion mesure
+                alors les deux positions et anime la trajectoire.
+
+                ⚠️ CELA NE MARCHE QUE PARCE QUE LE DOCUMENT SURVIT AU CLIC.
+                Mesuré le 09/09/2026 : passer d'une rubrique à une autre est une
+                navigation CLIENTE, l'arbre React est conservé. Cliquer la
+                rubrique où l'on est déjà, en revanche, détruit le document
+                (voir `LienEcran`) — aucune animation ne traverse ça, et il n'y
+                en a d'ailleurs rien à animer puisque la pastille ne bouge pas.
+
+                ⚠️ ET ELLE NE PORTE AUCUNE INFORMATION : `aria-current` reste sur
+                le lien, la couleur du texte change aussi. Un vendeur qui a coupé
+                les animations voit la pastille se poser sans glisser, et sait
+                exactement où il est.
+              */}
+              {active ? (
+                <motion.span
+                  layoutId="pastille-navigation-vendeur"
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-[11px] bg-violet-fond"
+                  transition={
+                    mouvementReduit === true
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 420, damping: 34 }
+                  }
+                />
+              ) : null}
               <Composant
                 href={entree.href}
                 aria-current={active ? "page" : undefined}
                 className={
-                  "flex h-[42px] items-center gap-[11px] rounded-[11px] px-[13px] font-label-md text-[14px] font-semibold transition-colors " +
-                  (active
-                    ? "bg-violet-fond text-violet"
-                    : "text-on-surface-variant hover:bg-surface-container")
+                  "relative flex h-[42px] items-center gap-[11px] rounded-[11px] px-[13px] font-label-md text-[14px] font-semibold transition-colors " +
+                  (active ? "text-violet" : "text-on-surface-variant hover:bg-surface-container")
                 }
               >
                 <Icone nom={entree.icone} className="h-[18px] w-[18px]" />

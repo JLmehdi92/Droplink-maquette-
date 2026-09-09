@@ -4,7 +4,7 @@ import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
 
 import { normaliserLien } from "@/lib/boutique/normaliser-lien";
 import { useActionState, useMemo, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { BoutonAction, type LibellesBoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
 import { LANGUES, estLangueSupportee, type Langue } from "@/i18n/config";
 import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
@@ -67,16 +67,26 @@ type EtatLogo =
  * colonne qu'on parcourt au pouce. La coincer à droite en ferait la plus petite
  * cible d'une page qui n'en a qu'une.
  */
-function BoutonEnregistrer({ libelle, enCours }: { libelle: string; enCours: string }) {
-  const { pending } = useFormStatus();
+/**
+ * ⚠️ L'ÉTAT DE RÉUSSITE VIENT DU SERVEUR, PAS DU CLIC. `statut` est ce que
+ * `enregistrerMarque` a RÉPONDU : « enregistre » n'existe que si l'écriture a
+ * abouti. C'est le principe XII — l'interface n'affirme jamais ce que la base
+ * n'a pas enregistré — et c'est la raison pour laquelle ce mappage vit ici,
+ * dans le seul endroit qui connaît la réponse, plutôt que dans le bouton.
+ */
+function BoutonEnregistrer({
+  libelles,
+  statut,
+}: {
+  readonly libelles: LibellesBoutonAction;
+  readonly statut: ResultatMarque["statut"];
+}) {
   return (
-    <button
-      type="submit"
-      disabled={pending}
+    <BoutonAction
+      libelles={libelles}
+      resultat={statut === "enregistre" ? "reussi" : statut === "erreur" ? "echoue" : null}
       className="degrade-marque flex min-h-12 w-full items-center justify-center rounded-[12px] font-label-md text-[15px] font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90 disabled:opacity-60 lg:h-[42px] lg:min-h-0 lg:w-auto lg:rounded-[11px] lg:px-[18px] lg:text-[14px] lg:shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)]"
-    >
-      {pending ? enCours : libelle}
-    </button>
+    />
   );
 }
 
@@ -908,20 +918,33 @@ export function FormulaireMarque({
             touche, elle, qu'une commande que personne ne regarde à cet instant.
           */}
           <div className="flex flex-col gap-2 pt-1 lg:flex-row lg:items-center lg:justify-end lg:gap-3">
-            {/* LE TÉMOIN N'AFFIRME QUE CE QUE LE SERVEUR A CONFIRMÉ :
-                « enregistré » n'apparaît qu'au retour de l'action, jamais à la
-                soumission. */}
-            {resultat.statut === "enregistre" ? (
-              <p role="status" className="font-body-sm text-body-sm text-on-surface-variant">
-                {t("enregistre")}
-              </p>
-            ) : null}
+            {/*
+              ⚠️ LE TÉMOIN DE RÉUSSITE A ÉTÉ RETIRÉ, PAS OUBLIÉ. Il disait
+              « Enregistré. » à côté d'un bouton qui dit désormais la même chose :
+              deux fois à l'œil, et deux annonces pour un lecteur d'écran, le
+              `role="status"` de l'un et l'`aria-live` de l'autre. C'est le bouton
+              qui le porte maintenant — c'est là que le regard est au moment du
+              clic, et c'est ce que la planche `BoutonEtats` dessine.
+
+              LE TÉMOIN D'ERREUR RESTE, et la dissymétrie est voulue : le bouton
+              ne peut dire que « Réessayer », jamais POURQUOI. Un échec de session
+              et un échec d'écriture n'appellent pas le même geste, et cette
+              phrase-là est la seule à faire la différence.
+            */}
             {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
               <p role="alert" className="font-body-sm text-body-sm text-error">
                 {t(`erreur.${resultat.motif}`)}
               </p>
             ) : null}
-            <BoutonEnregistrer libelle={t("enregistrer")} enCours={t("enregistrement")} />
+            <BoutonEnregistrer
+              libelles={{
+                repos: t("enregistrer"),
+                enCours: t("enregistrement"),
+                reussi: t("enregistre"),
+                echoue: t("reessayer"),
+              }}
+              statut={resultat.statut}
+            />
           </div>
         </div>
       </div>

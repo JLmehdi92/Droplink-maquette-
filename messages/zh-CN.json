@@ -344,7 +344,8 @@
     "reseauxNouvelOnglet": "这些链接会在新标签页中打开，离开客户页面。它们不会创建任何账户，也不会向您的客户索取任何信息。",
     "optionsTitre": "选项",
     "apercuDirect": "实时",
-    "apercuPour": "致您的客户"
+    "apercuPour": "致您的客户",
+    "reessayer": "重试"
   },
   "envois": {
     "titre": "发货",

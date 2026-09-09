@@ -344,7 +344,8 @@
     "reseauxNouvelOnglet": "These links open outside your customer’s page, in a new tab. They create no account and ask your customer for nothing.",
     "optionsTitre": "Options",
     "apercuDirect": "live",
-    "apercuPour": "for your customer"
+    "apercuPour": "for your customer",
+    "reessayer": "Try again"
   },
   "envois": {
     "titre": "Shipments",
