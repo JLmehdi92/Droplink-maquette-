@@ -66,7 +66,7 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
       action={
         <Link
           href={`/${locale}`}
-          className="font-headline-md text-[13px] leading-4 font-semibold text-ardoise transition-colors hover:text-on-surface md:text-[14px]"
+          className="-my-3.5 inline-flex min-h-11 items-center font-headline-md text-[13px] leading-4 font-semibold text-ardoise transition-colors hover:text-on-surface md:text-[14px]"
         >
           Découvrir DropLink
         </Link>

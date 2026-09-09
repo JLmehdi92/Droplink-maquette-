@@ -72,7 +72,7 @@ export default async function ArticleDuBlog({
       action={
         <Link
           href={`/${locale}/blog`}
-          className="font-headline-md text-[13px] leading-4 font-semibold text-ardoise transition-colors hover:text-on-surface md:text-[14px]"
+          className="-my-3.5 inline-flex min-h-11 items-center font-headline-md text-[13px] leading-4 font-semibold text-ardoise transition-colors hover:text-on-surface md:text-[14px]"
         >
           Le blog
         </Link>
@@ -96,7 +96,7 @@ export default async function ArticleDuBlog({
         <div className="mx-auto max-w-[720px]">
           <Link
             href={`/${locale}/blog`}
-            className="font-headline-md text-[12px] font-semibold text-sourdine transition-colors hover:text-violet md:text-[13px]"
+            className="-my-[14.5px] inline-flex min-h-11 items-center font-headline-md text-[12px] font-semibold text-sourdine transition-colors hover:text-violet md:text-[13px]"
           >
             ← Le blog
           </Link>

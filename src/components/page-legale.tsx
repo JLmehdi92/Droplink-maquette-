@@ -90,7 +90,7 @@ export async function PageLegale({
       </p>
       <Link
         href={`/${locale}/signalement`}
-        className="font-headline-md text-[14px] font-bold text-violet md:text-[13px]"
+        className="-my-[13px] inline-flex min-h-11 items-center font-headline-md text-[14px] font-bold text-violet md:text-[13px]"
       >
         {t("encartSignalerLien")}
       </Link>

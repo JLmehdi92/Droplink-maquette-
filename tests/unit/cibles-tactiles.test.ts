@@ -188,3 +188,138 @@ describe("les cibles tactiles des pieds de page", () => {
     ).toEqual([]);
   });
 });
+
+/**
+ * LES CIBLES AUTONOMES HORS DES PIEDS — UN INVENTAIRE DÉCLARÉ.
+ *
+ * ⚠️ POURQUOI UNE LISTE ICI, ALORS QUE LES PIEDS SONT BALAYÉS. Un balayage
+ * suppose un critère mécanique, et il n'en existe aucun pour distinguer une
+ * cible AUTONOME d'un lien EN FLUX DE TEXTE — la distinction qui décide si les
+ * 44 points s'appliquent. WCAG 2.5.8 exempte nommément le second cas, et pour
+ * une bonne raison : donner 44 px de haut au lien « conditions d'utilisation »
+ * посреди d'une phrase de consentement disloquerait le paragraphe.
+ *
+ * ⚠️ ET J'AI ESSAYÉ DE MÉCANISER LE CRITÈRE, IL S'EST TROMPÉ. La première
+ * version demandait « le parent porte-t-il du texte hors du lien ? » en
+ * comptant les ÉLÉMENTS frères : les trois liens du pied se déclaraient alors
+ * inline les uns par les autres, et « Mot de passe oublié ? » l'était par le
+ * `<label>` posé à côté. Le critère exemptait 22 cibles sur 25, dont celles
+ * qu'on venait de corriger. Corrigé en ne comptant que les nœuds TEXTE
+ * directs, il donne le bon classement — mais il vit dans une sonde de
+ * navigateur, et les portes n'en ont pas.
+ *
+ * D'où une liste, avec la raison de chaque entrée, qui échoue DANS LES DEUX
+ * SENS : une cible déclarée qui perd son plancher, et une déclaration qui ne
+ * désigne plus rien.
+ */
+const AUTONOMES: ReadonlyArray<{
+  readonly fichier: string;
+  readonly repere: string;
+  readonly raison: string;
+}> = [
+  {
+    fichier: "src/components/coque-publique.tsx",
+    repere: "text-[17px] leading-[22px] font-extrabold",
+    raison: "Le logo d'en-tête : seul dans sa barre, il ramène à l'accueil. 22 px mesurés.",
+  },
+  {
+    fichier: "src/app/[locale]/connexion/page.tsx",
+    repere: "text-[17px] leading-[22px] font-extrabold",
+    raison: "Le logo d'en-tête de la connexion.",
+  },
+  {
+    fichier: "src/app/[locale]/inscription/page.tsx",
+    repere: "text-[17px] leading-[22px] font-extrabold",
+    raison:
+      "Le logo d'en-tête de l'inscription. Il porte sa propre marge basse : la " +
+      "compensation y est asymétrique (-11 en haut, 26-11 en bas) pour ne pas l'écraser.",
+  },
+  {
+    fichier: "src/app/[locale]/mot-de-passe-oublie/page.tsx",
+    repere: "text-[17px] leading-[22px] font-extrabold",
+    raison: "Le logo d'en-tête de la réinitialisation.",
+  },
+  {
+    fichier: "src/app/[locale]/mot-de-passe-oublie/page.tsx",
+    repere: "font-semibold text-violet hover:underline",
+    raison:
+      "« Revenir à la connexion » : SEUL dans son paragraphe, donc autonome et " +
+      "non un lien en flux de texte. Interligne hérité du <p>, 22 px.",
+  },
+  {
+    fichier: "src/app/[locale]/blog/page.tsx",
+    repere: "font-semibold text-ardoise transition-colors hover:text-on-surface",
+    raison: "« Découvrir DropLink », l'action d'en-tête de l'index du blog.",
+  },
+  {
+    fichier: "src/app/[locale]/blog/[slug]/page.tsx",
+    repere: "font-semibold text-ardoise transition-colors hover:text-on-surface",
+    raison: "« Le blog », l'action d'en-tête d'un article.",
+  },
+  {
+    fichier: "src/app/[locale]/blog/[slug]/page.tsx",
+    repere: "font-semibold text-sourdine transition-colors hover:text-violet",
+    raison: "« ← Le blog », le retour en tête du corps de l'article.",
+  },
+  {
+    fichier: "src/components/page-legale.tsx",
+    repere: "font-bold text-violet",
+    raison: "« Signaler un contenu », l'encart des pages légales. 18 px mesurés.",
+  },
+  {
+    fichier: "src/components/formulaire-connexion.tsx",
+    repere: "font-semibold text-violet after:absolute",
+    raison:
+      "« Mot de passe oublié ? ». ⚠️ SEULE CIBLE POSÉE PAR UN PSEUDO-ÉLÉMENT, et " +
+      "ce n'est pas un caprice : son parent est en `items-baseline`, et un " +
+      "`inline-flex` de 44 px y porte sa baseline au centre de sa boîte — le lien " +
+      "descendait de 55 px et entraînait la page. Le pseudo-élément agrandit ce " +
+      "que le doigt touche sans exister dans le flux. Prouvé au navigateur par " +
+      "`elementFromPoint` : à 20 px au-dessus et en dessous c'est le lien qui " +
+      "répond, à 40 px c'est l'input.",
+  },
+];
+
+/** `min-h-11` pour une cible dans le flux, `after:h-11` pour un pseudo-élément. */
+const PLANCHERS = ["min-h-11", "after:h-11"];
+
+describe("les cibles tactiles autonomes hors des pieds", () => {
+  test("chaque cible declaree existe encore, et porte son plancher de 44 px", () => {
+    const introuvables: string[] = [];
+    const sansPlancher: string[] = [];
+
+    for (const cible of AUTONOMES) {
+      const code = codeSeul(readFileSync(join(process.cwd(), cible.fichier), "utf8"));
+      // La classe complète qui contient le repère : on lit la vraie déclaration,
+      // pas le voisinage.
+      const debut = code.indexOf(cible.repere);
+      if (debut === -1) {
+        introuvables.push(`${cible.fichier} — repère « ${cible.repere} » introuvable`);
+        continue;
+      }
+      const ouverture = code.lastIndexOf('className="', debut);
+      const fermeture = code.indexOf('"', ouverture + 'className="'.length);
+      const classes = ouverture === -1 ? "" : code.slice(ouverture, fermeture);
+      if (!PLANCHERS.some((p) => classes.includes(p))) {
+        sansPlancher.push(`${cible.fichier} — ${cible.raison.slice(0, 60)}`);
+      }
+    }
+
+    expect(
+      introuvables,
+      "Ces déclarations ne désignent plus rien : la cible a été renommée, déplacée " +
+        "ou supprimée. Une liste qui ne pointe nulle part ne garde rien.",
+    ).toEqual([]);
+    expect(
+      sansPlancher,
+      `Ces cibles autonomes n'imposent aucun plancher (${PLANCHERS.join(" ou ")}). ` +
+        "Le brief §8 exige 44 points en tactile.",
+    ).toEqual([]);
+  });
+
+  test("CONTRE-TEST : l'inventaire declare porte reellement des entrees", () => {
+    expect(AUTONOMES.length, "inventaire vide : le contrôle ne garderait rien").toBeGreaterThanOrEqual(10);
+    const fichiers = [...new Set(AUTONOMES.map((c) => c.fichier))];
+    expect(fichiers.length).toBeGreaterThanOrEqual(6);
+  });
+});

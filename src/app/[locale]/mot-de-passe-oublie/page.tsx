@@ -55,7 +55,7 @@ export default async function MotDePasseOublie({
         <div className="flex flex-col px-[22px] pt-7 pb-[26px] md:px-[76px] md:py-10">
           <Link
             href={`/${locale}`}
-            className="font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:text-[18px] md:leading-[23px]"
+            className="-my-[11px] inline-flex min-h-11 items-center font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:-my-[10.5px] md:text-[18px] md:leading-[23px]"
           >
             DropLink
           </Link>
@@ -78,7 +78,7 @@ export default async function MotDePasseOublie({
             <p className="mt-[26px] text-center font-body-md text-[14px] leading-[22px] text-sourdine md:mt-[30px] md:text-left md:text-[13px] md:leading-[21px]">
               <Link
                 href={`/${locale}/connexion`}
-                className="font-semibold text-violet hover:underline"
+                className="-my-[11px] inline-flex min-h-11 items-center font-semibold text-violet hover:underline"
               >
                 {t("retourConnexion")}
               </Link>

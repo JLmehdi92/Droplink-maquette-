@@ -87,9 +87,26 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
           <label htmlFor="motDePasse" className={CLASSE_LIBELLE}>
             {t("labelMotDePasse")}
           </label>
+          {/*
+            ⚠️ LA ZONE TACTILE PASSE PAR UN PSEUDO-ÉLÉMENT, ET C'EST LA SEULE DU
+            PRODUIT DANS CE CAS. Le brief §8 exige 44 points ; ce lien en
+            mesurait 16. La recette employée partout ailleurs — un plancher
+            "min-h-11" plus une marge négative qui le compense — casse ICI : le
+            conteneur est en "items-baseline", et un "inline-flex" de 44 px porte
+            sa baseline au CENTRE de sa boîte. La marge compense bien la hauteur,
+            jamais la baseline : mesuré, le lien descendait de 55 px et entraînait
+            toute la page avec lui.
+
+            Un pseudo-élément en position absolue agrandit ce que le doigt touche
+            sans rien peser dans le flux ni déplacer une baseline. Et il est
+            prouvé au navigateur par "elementFromPoint", pas par sa classe — un
+            pseudo-élément n'apparaît dans le rectangle d'aucun élément, donc
+            aucune mesure de boîte ne peut l'établir : à 20 px au-dessus et en
+            dessous c'est le lien qui répond, à 40 px c'est l'input.
+          */}
           <Link
             href={`/${locale}/mot-de-passe-oublie`}
-            className="font-headline-md text-[12px] leading-4 font-semibold text-violet hover:underline"
+            className="relative font-headline-md text-[12px] leading-4 font-semibold text-violet after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[''] hover:underline"
           >
             {t("motDePasseOublie")}
           </Link>

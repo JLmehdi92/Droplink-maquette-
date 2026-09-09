@@ -105,9 +105,21 @@ export default async function Inscription({
         id="contenu"
         className="mx-auto flex min-h-[calc(100dvh-24px)] w-full max-w-[1384px] flex-col rounded-[24px] bg-surface-container-lowest px-5 pt-[26px] pb-[22px] md:min-h-[calc(100dvh-56px)] md:rounded-page-publique md:px-0 md:pt-0 md:pb-0"
       >
+        {/*
+          ⚠️ COMPENSATION ASYMÉTRIQUE, ET ELLE EST OBLIGATOIRE ICI. Le plancher
+          tactile de 44 points (brief §8) fait grandir ce logo de 22 px, donc il
+          faut en reprendre 11 en haut et 11 en bas. Mais ce logo porte DÉJÀ sa
+          marge basse de 26 px, qu'un "-my-" écraserait purement et simplement :
+          on écrit donc "-mt-[11px]" d'un côté et "mb-[15px]" de l'autre, soit
+          26 moins 11. Première tentative, sans compensation du tout : la page
+          raccourcissait de 80 px. Mesuré après correction : hauteur inchangée.
+
+          En bureau, "md:py-[26px]" porte déjà la boîte bien au-delà de 44 px —
+          le plancher n'y change rien, d'où "md:mt-0 md:mb-0".
+        */}
         <Link
           href={`/${locale}`}
-          className="mb-[26px] font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:mb-0 md:px-10 md:py-[26px] md:text-[18px] md:leading-[23px]"
+          className="-mt-[11px] mb-[15px] inline-flex min-h-11 items-center font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:mt-0 md:mb-0 md:px-10 md:py-[26px] md:text-[18px] md:leading-[23px]"
         >
           DropLink
         </Link>
