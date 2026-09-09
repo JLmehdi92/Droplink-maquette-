@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { ParametresListe } from "@/lib/commandes/liste";
 import { lienListe } from "@/lib/commandes/url";
-import { LienEcran } from "@/components/lien-ecran";
+import { PilulesFiltresAnimees } from "./pilules-filtres-animees";
 
 /**
  * LES QUATRE VUES QU'ON OUVRE VINGT FOIS PAR JOUR, en pilules.
@@ -106,25 +106,27 @@ export async function PilulesFiltres({
     },
   ] as const;
 
+  /*
+   * ⚠️ LE RENDU EST DÉLÉGUÉ À UN COMPOSANT CLIENT, LA DÉCISION RESTE ICI.
+   *
+   * Ce fichier garde ce qui compte — quel couple `(statut, tri)` chaque vue
+   * pose, et laquelle est allumée. Le composant client ne fait que peindre, et
+   * il reçoit ses libellés DÉJÀ RÉSOLUS : aucun catalogue de traduction ne part
+   * dans le navigateur, comme pour la barre de navigation du vendeur.
+   *
+   * Ce qu'il apporte : la pastille d'accent GLISSE d'une pilule à l'autre au
+   * lieu de sauter. Elle ne le pouvait pas avant le 09/09/2026 — sous Next 15,
+   * cliquer une pilule détruisait le document, et il n'y avait pas deux rendus
+   * entre lesquels animer quoi que ce soit.
+   */
   return (
-    <>
-      {vues.map((vue) => (
-        <LienEcran
-          key={vue.clef}
-          href={vue.href}
-          aria-current={vue.actif ? "true" : undefined}
-          className={
-            // 44 px au doigt, 34 px à la souris : la planche téléphone écrit
-            // `min-height: 44px` là où la planche bureau écrit `height: 34px`.
-            "flex min-h-11 shrink-0 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors md:h-[34px] md:min-h-0 " +
-            (vue.actif
-              ? "border-primary bg-primary text-on-primary"
-              : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
-          }
-        >
-          {t("vues." + vue.clef)}
-        </LienEcran>
-      ))}
-    </>
+    <PilulesFiltresAnimees
+      vues={vues.map((vue) => ({
+        clef: vue.clef,
+        href: vue.href,
+        actif: vue.actif,
+        libelle: t("vues." + vue.clef),
+      }))}
+    />
   );
 }

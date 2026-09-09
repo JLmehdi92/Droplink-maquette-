@@ -71,6 +71,13 @@ export function LienEcran({
   readonly "aria-current"?: React.AriaAttributes["aria-current"];
   readonly "aria-label"?: string;
   readonly title?: string;
+  /**
+   * Marque la pilule de vue active, pour que la pastille des filtres sache où
+   * se poser. Déclaré ici parce que ce composant énumère ses propriétés : un
+   * `data-*` passe le typage sans être déclaré, et il deviendrait invisible à
+   * qui lit ce fichier pour savoir ce qu'on peut lui donner.
+   */
+  readonly "data-vue-active"?: "true" | undefined;
 }) {
   return (
     <Link href={href} className={className} {...reste}>
