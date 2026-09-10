@@ -104,7 +104,7 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
             step={1}
             defaultValue={apres === null ? reglage.valeur : apres.valeur}
             onChange={() => setModifie(true)}
-            className="h-[42px] w-[120px] rounded-[11px] border border-filet-controle bg-[#fafafc] px-[13px] text-right font-mono text-[14px] text-on-surface"
+            className="h-[42px] min-h-11 w-[120px] rounded-[11px] border border-filet-controle bg-[#fafafc] px-[13px] text-right font-mono text-[14px] text-on-surface md:min-h-0"
           />
           {modifie ? (
             <button

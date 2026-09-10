@@ -54,7 +54,7 @@ export function RechercheAdmin({
 
       <button
         type="submit"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-full focus:right-0 focus:z-10 focus:mt-1 focus:rounded-[11px] focus:border focus:border-filet-controle focus:bg-surface-container-lowest focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-surface"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-full focus:right-0 focus:z-10 focus:mt-1 focus:flex focus:min-h-11 focus:items-center focus:rounded-[11px] focus:border focus:border-filet-controle focus:bg-surface-container-lowest focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-surface"
       >
         {chercher}
       </button>

@@ -550,7 +550,19 @@ body {
      * d'envoi du champ de recherche de l'administration, qui debordait de
      * 27 px a droite du telephone.
      */
-    .sr-only {
+    /*
+     * ⚠️ LES TROIS SÉLECTEURS SONT NÉCESSAIRES, ET LE PREMIER SEUL NE SUFFISAIT
+     * PAS. Mesuré le 10/09/2026, navigateur piloté avec `pointer: coarse`
+     * réellement émulé : `input[type="checkbox"].sr-only` de « Ma marque »
+     * rendait une boîte de 44 × 44. `.sr-only` pèse (0,1,0) quand
+     * `input[type="checkbox"]` pèse (0,1,1) — l'exception PERDAIT, et
+     * silencieusement, puisqu'une zone cliquable invisible ne se voit pas.
+     * L'interrupteur de filigrane posait donc un carré de 44 px par-dessus la
+     * mise en page voisine. La forme composée pèse (0,2,1) et l'emporte.
+     */
+    .sr-only,
+    input[type="checkbox"].sr-only,
+    input[type="radio"].sr-only {
       min-height: 0;
       min-width: 0;
     }

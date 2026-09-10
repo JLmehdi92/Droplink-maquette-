@@ -121,7 +121,7 @@ export default async function FicheCompte({
         <Link
           href={`/${langue}/admin/comptes`}
           aria-label={t("fiche.retour")}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-white/20 bg-white/10 text-white md:border-filet-controle md:bg-surface-container-lowest md:text-on-surface"
+          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-white/20 bg-white/10 text-white before:absolute before:-inset-[3px] before:content-[''] md:border-filet-controle md:bg-surface-container-lowest md:text-on-surface"
         >
           <Icone nom="arrow_back" className="text-[18px]" />
         </Link>

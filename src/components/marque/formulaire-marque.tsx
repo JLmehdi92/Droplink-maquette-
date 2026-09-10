@@ -838,6 +838,7 @@ export function FormulaireMarque({
               <label
                 className={
                   "relative inline-flex h-[27px] w-[46px] shrink-0 items-center rounded-full px-[3px] transition-colors " +
+                  "before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] " +
                   (filigranePossible ? "cursor-pointer" : "cursor-not-allowed opacity-50")
                 }
                 style={{

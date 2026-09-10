@@ -197,7 +197,7 @@ describe("les cibles tactiles des pieds de page", () => {
  * cible AUTONOME d'un lien EN FLUX DE TEXTE — la distinction qui décide si les
  * 44 points s'appliquent. WCAG 2.5.8 exempte nommément le second cas, et pour
  * une bonne raison : donner 44 px de haut au lien « conditions d'utilisation »
- * посреди d'une phrase de consentement disloquerait le paragraphe.
+ * au milieu d'une phrase de consentement disloquerait le paragraphe.
  *
  * ⚠️ ET J'AI ESSAYÉ DE MÉCANISER LE CRITÈRE, IL S'EST TROMPÉ. La première
  * version demandait « le parent porte-t-il du texte hors du lien ? » en
@@ -321,5 +321,215 @@ describe("les cibles tactiles autonomes hors des pieds", () => {
     expect(AUTONOMES.length, "inventaire vide : le contrôle ne garderait rien").toBeGreaterThanOrEqual(10);
     const fichiers = [...new Set(AUTONOMES.map((c) => c.fichier))];
     expect(fichiers.length).toBeGreaterThanOrEqual(6);
+  });
+});
+
+/**
+ * LES CIBLES DES SURFACES AUTHENTIFIÉES — RELEVÉES LE 10/09/2026.
+ *
+ * ⚠️ ELLES N'AVAIENT JAMAIS ÉTÉ MESURÉES. La passe du 09/09 a porté les 22
+ * cibles des surfaces PUBLIQUES à 44 px et s'est arrêtée là. Or ce sont les
+ * écrans authentifiés qui portent les actions : commandes, éditeur, envois,
+ * analyses, marque, et les six écrans d'administration.
+ *
+ * Relevé au navigateur piloté, à 390 px, sur un build de production servi
+ * contre la base de tests, avec une vraie session — 192 cibles inventoriées sur
+ * 14 écrans. CINQ contrôles manquaient les 44 points :
+ *
+ *   le lien « Aller au contenu » des deux racines       80 × 32 (focalisé)
+ *   le bouton « Rechercher » de la recherche admin      80 × 34 (focalisé)
+ *   l'interrupteur de filigrane de « Ma marque »        46 × 27
+ *   les trois champs nombre des paramètres système     120 × 42
+ *   le retour « à la liste des comptes »                40 × 40
+ *
+ * ⚠️ ET IL A FALLU DEUX CAMPAGNES, PARCE QUE LA PREMIÈRE MESURAIT LE MAUVAIS
+ * APPAREIL. `Emulation.setDeviceMetricsOverride({mobile: true})` change la mise
+ * en page, PAS la nature du pointeur : `@media (pointer: coarse)` ne
+ * s'appliquait donc pas, et `globals.css` y pose justement un plancher de 44 px
+ * sur `button`, `a[role=button]`, `[role=tab]`, `input[type=checkbox]` et
+ * `input[type=radio]`. La première campagne a compté HUIT défauts en mesurant
+ * un rendu à la souris ; trois d'entre eux — les deux interrupteurs des
+ * paramètres, qui sont des `<button>`, et la case de révocation, qui est une
+ * `input[type=checkbox]` — sont déjà protégés et n'ont PAS été touchés.
+ * `setTouchEmulationEnabled` rend `matchMedia("(pointer: coarse)")` vrai, et
+ * c'est cette mesure-là qui fait foi.
+ *
+ * ⚠️ CE QUI RESTE EST EXACTEMENT CE QUE LA RÈGLE GLOBALE NE COUVRE PAS : un
+ * `<a>` sans `role="button"`, un `<label>` qui porte le dessin d'un
+ * interrupteur, un `input[type=number]`, et tout ce qui porte `sr-only`.
+ *
+ * ⚠️ CE QUE CE CONTRÔLE PROUVE, ET CE QU'IL NE PROUVE PAS. Comme celui des
+ * pieds, il garde le MOYEN — la classe qui produit les 44 px — et pas la
+ * géométrie : les portes n'ont pas de navigateur. Le lien moyen → effet a été
+ * établi une fois, par la mesure ci-dessus. Ce qu'il attrape réellement : un
+ * plancher retiré d'un de ces huit contrôles.
+ *
+ * ⚠️ DEUX EXCEPTIONS DÉCLARÉES, mesurées et écartées volontairement :
+ *   - `formulaire-marque.tsx` porte un `<input type="file">` en `sr-only`,
+ *     déclenché par un bouton visible qui, lui, dépasse 44 px. L'input n'est
+ *     jamais visé par un doigt.
+ *   - le `<input type="color">` du même écran est en `sr-only` DANS un
+ *     `<label>` de 46 × 46 qui est la pastille de couleur. C'est le label que
+ *     l'on touche.
+ */
+const AUTHENTIFIEES: ReadonlyArray<{
+  readonly fichier: string;
+  readonly repere: string;
+  readonly plancher: string;
+  readonly raison: string;
+}> = [
+  {
+    fichier: "src/app/[locale]/(app)/layout.tsx",
+    repere: "focus:not-sr-only focus:absolute focus:top-4",
+    plancher: "focus:min-h-11",
+    raison:
+      "« Aller au contenu » de l'espace vendeur. Positionné en absolu une fois " +
+      "focalisé : l'agrandir ne déplace aucun pixel du flux.",
+  },
+  {
+    fichier: "src/app/[locale]/admin/layout.tsx",
+    repere: "focus:not-sr-only focus:absolute focus:top-4",
+    plancher: "focus:min-h-11",
+    raison: "« Aller au contenu » de l'administration.",
+  },
+  {
+    fichier: "src/components/admin/recherche-admin.tsx",
+    repere: "focus:not-sr-only focus:absolute focus:top-full",
+    plancher: "focus:min-h-11",
+    raison:
+      "Le bouton « Rechercher », révélé au clavier sur les écrans Comptes et " +
+      "Boutiques. 34 px mesurés une fois focalisé.",
+  },
+  {
+    fichier: "src/app/[locale]/admin/comptes/[id]/page.tsx",
+    repere: "flex h-10 w-10 shrink-0",
+    plancher: "before:-inset-[3px]",
+    raison:
+      "Le retour vers la liste des comptes. La planche AdminCompteDetailMobile " +
+      "le dessine à 40 × 40 : c'est donc un pseudo-élément transparent qui " +
+      "porte la zone à 46, sans qu'un pixel visible bouge.",
+  },
+  {
+    fichier: "src/components/marque/formulaire-marque.tsx",
+    repere: "inline-flex h-[27px] w-[46px]",
+    plancher: "before:h-11",
+    raison:
+      "L'interrupteur de filigrane de « Ma marque ». ⚠️ C'est un <label>, et " +
+      "c'est pour cela qu'il échappe au plancher de `globals.css`, qui ne vise " +
+      "que button, a[role=button], [role=tab] et les cases. Le contrôle DESSINÉ " +
+      "fait 46 × 27 : l'agrandir changerait le dessin de la planche, donc la " +
+      "zone passe par un pseudo-élément transparent. Les deux interrupteurs des " +
+      "paramètres système, eux, sont des <button> et n'ont RIEN eu à changer.",
+  },
+  {
+    fichier: "src/components/admin/reglage-nombre.tsx",
+    repere: "w-[120px] rounded-[11px]",
+    plancher: "min-h-11",
+    raison:
+      "Les trois champs nombre des paramètres système, mesurés à 42 px. Le " +
+      "plancher est levé à partir de `md`, où la planche AdminParametres — qui " +
+      "n'a PAS de variante téléphone — redevient la référence.",
+  },
+];
+
+describe("les cibles tactiles des surfaces authentifiees", () => {
+  test("chaque cible relevee le 10/09 porte encore son plancher de 44 px", () => {
+    const introuvables: string[] = [];
+    const sansPlancher: string[] = [];
+
+    for (const cible of AUTHENTIFIEES) {
+      const code = codeSeul(readFileSync(join(process.cwd(), cible.fichier), "utf8"));
+      const debut = code.indexOf(cible.repere);
+      if (debut === -1) {
+        introuvables.push(`${cible.fichier} — repère « ${cible.repere} » introuvable`);
+        continue;
+      }
+      /*
+       * ⚠️ UNE FENÊTRE, ET PAS L'ATTRIBUT ENTIER. Deux de ces classes sont
+       * BÂTIES PAR CONCATÉNATION (`className={"…" + (actif ? … : …)}`) : y
+       * chercher l'ouverture `className="` ne trouverait rien, et le contrôle
+       * se déclarerait vert en n'ayant rien lu. La fenêtre est volontairement
+       * courte — le plancher est toujours écrit dans la même classe que son
+       * repère, jamais chez un voisin.
+       */
+      const fenetre = code.slice(Math.max(0, debut - 200), debut + 400);
+      if (!fenetre.includes(cible.plancher)) {
+        sansPlancher.push(`${cible.fichier} — ${cible.raison.slice(0, 64)}`);
+      }
+    }
+
+    expect(
+      introuvables,
+      "Ces déclarations ne désignent plus rien : la cible a été renommée, déplacée " +
+        "ou supprimée. Une liste qui ne pointe nulle part ne garde rien.",
+    ).toEqual([]);
+    expect(
+      sansPlancher,
+      "Ces cibles des surfaces authentifiées n'imposent plus leur plancher de 44 px. " +
+        "Le brief §8 exige 44 points en tactile ; mesuré le 10/09/2026 avec " +
+        "`pointer: coarse` réellement émulé, cinq contrôles allaient de 27 à 42 px.",
+    ).toEqual([]);
+  });
+
+  test("CONTRE-TEST : l'inventaire authentifie porte reellement des entrees", () => {
+    expect(
+      AUTHENTIFIEES.length,
+      "inventaire vide : le contrôle ne garderait rien",
+    ).toBeGreaterThanOrEqual(6);
+    const fichiers = [...new Set(AUTHENTIFIEES.map((c) => c.fichier))];
+    expect(fichiers.length, "un seul fichier gardé : le relevé en couvrait six").toBeGreaterThanOrEqual(6);
+  });
+
+  /**
+   * ⚠️ L'EXCEPTION `sr-only` DU PLANCHER GLOBAL DOIT COUVRIR LES CASES, ET ELLE
+   * NE LES COUVRAIT PAS.
+   *
+   * `globals.css` impose 44 px sous `pointer: coarse` puis exempte `.sr-only` —
+   * sans quoi tout contrôle visuellement masqué devient une zone cliquable
+   * invisible. Mais `.sr-only` pèse (0,1,0) et `input[type="checkbox"]` pèse
+   * (0,1,1) : l'exception PERDAIT. Mesuré le 10/09/2026 sur « Ma marque », la
+   * case du filigrane rendait une boîte de 44 × 44 au lieu de 1 × 1.
+   *
+   * C'est un défaut qui ne se voit pas — une zone cliquable transparente — et
+   * qu'aucune relecture ne signale, puisque la règle et son exception sont
+   * toutes deux écrites et toutes deux correctes prises séparément.
+   */
+  test("l exception sr-only du plancher global couvre AUSSI les cases et les radios", () => {
+    /*
+     * ⚠️ COMMENTAIRES RETIRÉS — L-031, ET IL M'A REPRIS ICI MÊME. Le
+     * commentaire qui explique la règle, juste au-dessus d'elle, CITE
+     * `input[type="checkbox"].sr-only`. Sans ce nettoyage, retirer le sélecteur
+     * laissait le contrôle VERT : il gardait sa propre description. Constaté en
+     * falsifiant, pas en relisant.
+     */
+    const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8").replace(
+      /\/\*[\s\S]*?\*\//g,
+      " ",
+    );
+    const bloc = /@media \(pointer: coarse\)[\s\S]*?\n  \}/.exec(css)?.[0] ?? "";
+    expect(bloc.length, "le bloc `pointer: coarse` est introuvable : ce contrôle n'inspecte rien").toBeGreaterThan(200);
+    for (const forme of ['input[type="checkbox"].sr-only', 'input[type="radio"].sr-only']) {
+      expect(
+        bloc.includes(forme),
+        `L'exception ne porte pas « ${forme} ». Sans elle, la spécificité de ` +
+          "`input[type=...]` l'emporte sur `.sr-only` et chaque case masquée " +
+          "devient une cible invisible de 44 px.",
+      ).toBe(true);
+    }
+  });
+
+  /**
+   * ⚠️ SANS CE CONTRÔLE, LE PRÉCÉDENT PASSE SUR UNE FENÊTRE VIDE. Si
+   * `codeSeul` cessait de rendre du texte — extension changée, fichier
+   * déplacé —, `indexOf` rendrait -1 partout et la première assertion
+   * signalerait « introuvable », ce qui est le bon comportement. Mais si la
+   * fenêtre était trop LARGE, le plancher d'un voisin suffirait. On vérifie
+   * donc qu'elle reste petite devant le fichier qu'elle découpe.
+   */
+  test("CONTRE-TEST : la fenetre de lecture reste plus petite que les fichiers", () => {
+    for (const cible of AUTHENTIFIEES) {
+      const code = codeSeul(readFileSync(join(process.cwd(), cible.fichier), "utf8"));
+      expect(code.length, `${cible.fichier} est plus court que la fenêtre de lecture`).toBeGreaterThan(600);
+    }
   });
 });
