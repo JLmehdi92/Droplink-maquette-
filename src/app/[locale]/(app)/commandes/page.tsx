@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { BoutonAction } from "@/components/bouton-action";
 import { Icone } from "@/components/icone";
 import { EnTeteEcran } from "@/components/app/en-tete-ecran";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
@@ -205,13 +206,31 @@ export default async function Commandes({
                   seule action principale par page. */}
               <form action={creerBrouillon}>
                 <input type="hidden" name="langue" value={langue} />
-                <button
-                  type="submit"
+                <BoutonAction
+                  libelles={{
+                    repos: (
+                      <>
+                        <Icone nom="add" className="text-[15px]" />
+                        {t("nouvelle")}
+                      </>
+                    ),
+                    enCours: t("nouvelleEnCours"),
+                    reussi: (
+                      <>
+                        <Icone nom="add" className="text-[15px]" />
+                        {t("nouvelle")}
+                      </>
+                    ),
+                    echoue: (
+                      <>
+                        <Icone nom="add" className="text-[15px]" />
+                        {t("nouvelle")}
+                      </>
+                    ),
+                  }}
+                  gapLibelle="gap-2"
                   className="degrade-marque flex h-[42px] items-center gap-2 rounded-[11px] px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
-                >
-                  <Icone nom="add" className="text-[15px]" />
-                  {t("nouvelle")}
-                </button>
+                />
               </form>
             </div>
           )
@@ -316,13 +335,46 @@ export default async function Commandes({
       {compteVide ? null : (
         <form action={creerBrouillon} className="fixed right-4 bottom-[102px] z-20 md:hidden">
           <input type="hidden" name="langue" value={langue} />
-          <button
-            type="submit"
+          {/* ⚠️ C'EST LE BOUTON LE PLUS CLIQUÉ DU PRODUIT AU TÉLÉPHONE, et
+              celui où l'absence de retour se paie le plus cher : il est fixe,
+              donc rien autour de lui ne bouge au clic — l'écran reste
+              exactement tel qu'il était, et c'est très exactement ce que
+              Wassim a décrit par « c'est sec ».
+
+              ⚠️ ET C'EST LE SEUL BOUTON DU PRODUIT OÙ L'ATTENTE GARDE LE MOT DU
+              REPOS AU LIEU DE LE REMPLACER. Mesuré : avec « Création… » en
+              libellé d'attente, ce bouton passait de 132,7 à 144,8 px de large
+              AU REPOS — la grille interne réserve la largeur du libellé le plus
+              long, et le plus long devenait celui qu'on ne voit presque jamais.
+              Douze pixels sur un bouton flottant que la planche `CommandesMobile`
+              dessine, pour un mot affiché un tiers de seconde. L'anneau prend
+              donc la place du « + », à largeur constante, et c'est `aria-busy`
+              — posé par le composant — qui porte l'état à qui ne le voit pas. */}
+          <BoutonAction
+            libelles={{
+              repos: (
+                <>
+                  <Icone nom="add" className="text-[16px]" />
+                  {t("nouvelleCourt")}
+                </>
+              ),
+              enCours: t("nouvelleCourt"),
+              reussi: (
+                <>
+                  <Icone nom="add" className="text-[16px]" />
+                  {t("nouvelleCourt")}
+                </>
+              ),
+              echoue: (
+                <>
+                  <Icone nom="add" className="text-[16px]" />
+                  {t("nouvelleCourt")}
+                </>
+              ),
+            }}
+            gapLibelle="gap-2"
             className="degrade-marque flex h-[52px] items-center gap-2 rounded-full px-[22px] font-label-md text-[15px] font-bold shadow-[0_14px_28px_-10px_rgba(124,92,245,0.7)]"
-          >
-            <Icone nom="add" className="text-[16px]" />
-            {t("nouvelleCourt")}
-          </button>
+          />
         </form>
       )}
     </>

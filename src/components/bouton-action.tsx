@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 
 /**
@@ -84,12 +84,21 @@ export function resteAvantExtinction(
  */
 const DUREE_CONFIRMATION_MS = 1800;
 
+/**
+ * Ce que le bouton dit dans chacun de ses quatre états.
+ *
+ * ⚠️ DES NŒUDS, PAS DES CHAÎNES, et ce n'est pas de la généralité gratuite :
+ * plusieurs actions principales portent une icône devant leur mot — le « + » de
+ * « Nouvelle commande », par exemple, que la planche dessine. Contraindre à une
+ * chaîne obligerait à choisir entre l'anneau et l'icône, c'est-à-dire entre
+ * l'attente et la conformité au canevas.
+ */
 export interface LibellesBoutonAction {
   /** Au repos. C'est aussi lui qui fixe la largeur. */
-  readonly repos: string;
-  readonly enCours: string;
-  readonly reussi: string;
-  readonly echoue: string;
+  readonly repos: ReactNode;
+  readonly enCours: ReactNode;
+  readonly reussi: ReactNode;
+  readonly echoue: ReactNode;
 }
 
 export function BoutonAction({
@@ -99,6 +108,10 @@ export function BoutonAction({
   type = "submit",
   onClick,
   disabled,
+  name,
+  value,
+  enAttente,
+  gapLibelle = "gap-[9px]",
 }: {
   readonly libelles: LibellesBoutonAction;
   /**
@@ -110,8 +123,43 @@ export function BoutonAction({
   readonly type?: "submit" | "button";
   readonly onClick?: () => void;
   readonly disabled?: boolean;
+  /**
+   * L'attente, quand elle ne vient PAS d'un formulaire.
+   *
+   * ⚠️ `useFormStatus` ne rend `true` que sous un `<form action={…}>`. Les
+   * actions déclenchées à la main — révoquer un lien, suspendre un compte — sont
+   * des `onClick` qui attendent une promesse : ce crochet y rend toujours
+   * `false`, et le bouton resterait au repos pendant tout l'aller-retour. Ces
+   * appelants passent donc leur propre booléen, et les deux sources se
+   * combinent : un bouton peut être dans un formulaire ET porter son état.
+   */
+  readonly enAttente?: boolean;
+  /**
+   * `name` et `value` d'un bouton de soumission, quand ils font partie des
+   * données du formulaire.
+   *
+   * ⚠️ CE N'EST PAS DE LA COMMODITÉ. L'archivage groupé de `/commandes` envoie
+   * `archiver=1` ou `archiver=0` PAR LE BOUTON : sans ces deux attributs, le
+   * formulaire part sans dire s'il faut archiver ou désarchiver, et l'action
+   * refuse. Un composant de bouton qui les avale casse le formulaire en
+   * silence — la soumission a bien lieu, elle est simplement incomplète.
+   */
+  readonly name?: string;
+  readonly value?: string;
+  /**
+   * L'écart entre l'anneau (ou l'icône) et le mot.
+   *
+   * ⚠️ IL DOIT ÊTRE RÉGLABLE, ET CE N'EST PAS UN DÉTAIL DE GOÛT. Les libellés
+   * vivent dans une grille INTERNE au bouton : le `gap-*` que l'appelant écrit
+   * sur le bouton lui-même ne s'applique plus qu'à cette grille, donc à un seul
+   * enfant, donc à rien. Sans cette propriété, tout bouton repris passait
+   * silencieusement de son écart déclaré à 9 px — un pixel sur les deux boutons
+   * de création, que la règle de conformité au canevas ne tolère pas.
+   */
+  readonly gapLibelle?: string;
 }) {
   const { pending } = useFormStatus();
+  const travaille = pending || enAttente === true;
   // L instant ou l attente a commence, ou null quand rien ne tourne. La
   // VISIBILITE en est deduite plus bas : elle n est jamais stockee deux fois.
   const [attente, setAttente] = useState(false);
@@ -136,7 +184,8 @@ export function BoutonAction({
    * ⚠️ L'ÉTAT EST AJUSTÉ PENDANT LE RENDU, PAS DANS UN EFFET, et ce n'est pas un
    * contournement de règle de lint : c'est le motif que React recommande pour
    * synchroniser un état avec une propriété qu'on ne contrôle pas — ici le
-   * `pending` de `useFormStatus`. Un `setState` synchrone dans le corps d'un
+   * `travaille`, tiré de `useFormStatus` ou de l'appelant. Un `setState`
+   * synchrone dans le corps d'un
    * effet peint d'abord l'écran intermédiaire, puis re-rend : l'anneau
    * clignoterait à l'endroit précis où l'on cherche à supprimer un clignotement.
    * Ajusté pendant le rendu, React recalcule avant de peindre quoi que ce soit.
@@ -144,8 +193,8 @@ export function BoutonAction({
    * Next 16 a rendu la règle `react-hooks/set-state-in-effect` bloquante, et
    * elle avait raison sur les trois occurrences qu'elle a signalées ici.
    */
-  if (pending && !attente) setAttente(true);
-  if (!pending && confirmationExpiree && resultat !== "reussi") setConfirmationExpiree(false);
+  if (travaille && !attente) setAttente(true);
+  if (!travaille && confirmationExpiree && resultat !== "reussi") setConfirmationExpiree(false);
 
   /*
    * L'extinction, elle, est bien un effet : elle dépend du temps, pas du rendu.
@@ -153,7 +202,7 @@ export function BoutonAction({
    * que la règle autorise, et qui ne produit aucune cascade.
    */
   useEffect(() => {
-    if (pending) {
+    if (travaille) {
       depuisQuand.current = Date.now();
       return;
     }
@@ -161,7 +210,7 @@ export function BoutonAction({
     const reste = resteAvantExtinction(depuisQuand.current, Date.now());
     const minuteur = setTimeout(() => setAttente(false), reste);
     return () => clearTimeout(minuteur);
-  }, [pending, attente]);
+  }, [travaille, attente]);
 
   /*
    * ⚠️ SEULE LA RÉUSSITE S'EFFACE TOUTE SEULE. Un échec qui disparaîtrait au
@@ -189,14 +238,16 @@ export function BoutonAction({
   return (
     <button
       type={type}
+      name={name}
+      value={value}
       onClick={onClick}
-      disabled={disabled === true || pending}
+      disabled={disabled === true || travaille}
       /*
        * `aria-busy` et `aria-live` portent l'information à qui n'a pas d'yeux
        * pour l'anneau. Le libellé change vraiment dans le DOM : ce n'est pas
        * l'animation qui informe, elle ne fait qu'accompagner.
        */
-      aria-busy={pending}
+      aria-busy={travaille}
       aria-live="polite"
       className={className}
     >
@@ -216,11 +267,11 @@ export function BoutonAction({
               key={clef}
               aria-hidden={!courant}
               className={
-                "col-start-1 row-start-1 inline-flex items-center gap-[9px] whitespace-nowrap " +
+                "col-start-1 row-start-1 inline-flex items-center whitespace-nowrap " + gapLibelle + " " +
                 (courant ? "" : "invisible")
               }
             >
-              {clef === "enCours" ? <Anneau /> : null}
+              {clef === "enCours" ? <Anneau anime={courant} /> : null}
               {libelles[clef]}
             </span>
           );
@@ -242,8 +293,17 @@ export function BoutonAction({
  * projet coupe les animations dans `globals.css` pour qui le demande. Rien à
  * rajouter ici — et rien ne disparaît quand le mouvement s'arrête, puisque le
  * libellé dit déjà l'état en toutes lettres.
+ *
+ * ⚠️ IL NE TOURNE QUE QUAND ON LE VOIT, ET CE N'EST PAS UNE MICRO-OPTIMISATION.
+ * Les quatre libellés sont empilés dans la même cellule de grille pour que la
+ * largeur ne saute pas : l'anneau est donc DANS LE DOCUMENT en permanence,
+ * simplement `invisible`. Mesuré le 10/09/2026 sur `/fr/commandes` : TROIS
+ * `animate-spin` tournaient avant le moindre clic, et rien ne les arrêtait
+ * jamais. Sur l'écran qu'un fournisseur laisse ouvert sa journée, au téléphone,
+ * c'est une animation permanente pour zéro pixel affiché. La boîte reste — c'est
+ * elle qui réserve la largeur — seule l'animation s'arrête.
  */
-function Anneau() {
+export function Anneau({ anime = true }: { readonly anime?: boolean }) {
   return (
     <svg
       width="15"
@@ -254,7 +314,7 @@ function Anneau() {
       strokeWidth="2.6"
       strokeLinecap="round"
       aria-hidden="true"
-      className="animate-spin"
+      className={anime ? "animate-spin" : undefined}
     >
       <circle cx="12" cy="12" r="9" opacity="0.3" />
       <path d="M12 3a9 9 0 0 1 9 9" />

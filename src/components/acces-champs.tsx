@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import { Anneau } from "@/components/bouton-action";
 import { Icone } from "@/components/icone";
 
 /**
@@ -37,6 +38,16 @@ export const CLASSE_LIBELLE =
  *
  * `useFormStatus` doit être lu depuis un composant ENFANT du formulaire : lu
  * dans le formulaire lui-même, il rendrait toujours `false`.
+ *
+ * ⚠️ IL CHANGEAIT DÉJÀ DE LIBELLÉ, ET CE N'ÉTAIT PAS SUFFISANT. Sur les quatre
+ * écrans d'accès, l'attente ne se lisait qu'en relisant le mot — or on ne relit
+ * pas un bouton qu'on vient de cliquer, on le REGARDE. L'anneau est le même que
+ * celui de `BoutonAction`, validé par Wassim le 09/09 : `animate-spin` en CSS
+ * pur, aucune couleur qui change, et il ne porte aucune information que le
+ * libellé ne porte pas — d'où son `aria-hidden`.
+ *
+ * ⚠️ LA FLÈCHE CÈDE SA PLACE À L'ANNEAU, elle ne s'y ajoute pas : les deux
+ * ensemble élargiraient le bouton au moment précis du clic.
  */
 export function BoutonPrincipal({
   libelle,
@@ -52,6 +63,7 @@ export function BoutonPrincipal({
       disabled={pending}
       className="degrade-marque flex h-13 w-full items-center justify-center gap-[9px] rounded-[13px] font-headline-md text-[15px] leading-5 font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-90 disabled:opacity-60"
     >
+      {pending ? <Anneau /> : null}
       <span>{pending ? libelleEnCours : libelle}</span>
       {pending ? null : <Icone nom="arrow_forward" className="text-[15px]" />}
     </button>

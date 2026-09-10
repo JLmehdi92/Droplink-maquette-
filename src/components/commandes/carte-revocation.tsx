@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { revoquerLienPublic } from "@/lib/commandes/actions";
+import { BoutonAction } from "@/components/bouton-action";
 
 /**
  * « Révoquer le lien » — la carte en alerte du bas de la colonne d'édition.
@@ -88,14 +89,33 @@ export function CarteRevocation({
         </p>
       ) : null}
 
-      <button
+      {/*
+        ⚠️ CE BOUTON N'EST PAS DANS UN `<form action={…}>` : il attend une
+        promesse déclenchée à la main, donc `useFormStatus` y rendrait toujours
+        `false`. Il passe son propre `enAttente` — et c'est précisément pour ces
+        actions-là que `BoutonAction` l'accepte.
+
+        ⚠️ NI « RÉUSSI » NI « ÉCHOUÉ » NE SONT ANNONCÉS PAR LE BOUTON, et les
+        deux libellés répètent donc celui du repos. En cas de succès, c'est la
+        carte entière qui change — le nouveau lien apparaît, copiable
+        immédiatement ; en cas d'échec, le paragraphe `role="alert"` ci-dessus
+        le dit, et il dit AUSSI ce qui reste vrai : « l'ancien lien reste
+        actif ». Un « Échec » sur le bouton ne porterait pas cette seconde
+        moitié, qui est la seule qui compte pour décider quoi faire ensuite.
+      */}
+      <BoutonAction
         type="button"
-        disabled={!compris || enCours}
+        enAttente={enCours}
+        disabled={!compris}
         onClick={() => void revoquer()}
-        className="min-h-[46px] w-full rounded-xl border border-alerte-bordure bg-surface-container-lowest px-[18px] font-label-md text-[14px] font-bold text-alerte transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:h-[42px] lg:min-h-0 lg:w-auto lg:rounded-[11px]"
-      >
-        {enCours ? t("revocation.enCours") : t("revocation.confirmer")}
-      </button>
+        libelles={{
+          repos: t("revocation.confirmer"),
+          enCours: t("revocation.enCours"),
+          reussi: t("revocation.confirmer"),
+          echoue: t("revocation.confirmer"),
+        }}
+        className="flex min-h-[46px] w-full items-center justify-center rounded-xl border border-alerte-bordure bg-surface-container-lowest px-[18px] font-label-md text-[14px] font-bold text-alerte transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:h-[42px] lg:min-h-0 lg:w-auto lg:rounded-[11px]"
+      />
     </section>
   );
 }

@@ -555,7 +555,8 @@
       "ecriture": "L’action groupée n’a pas pu être traitée. Rien n’a été modifié.",
       "exporter": "Exporter",
       "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients.",
-      "exportTelecharger": "Télécharger le CSV"
+      "exportTelecharger": "Télécharger le CSV",
+      "enCours": "En cours…"
     },
     "vues": {
       "toutes": "Toutes",
@@ -600,7 +601,8 @@
       "archivees": "Archives"
     },
     "statutSansMouvement": "Sans mouvement · {jours} j",
-    "sousTitreArchives": "Vous consultez vos archives. Les liens continuent de fonctionner."
+    "sousTitreArchives": "Vous consultez vos archives. Les liens continuent de fonctionner.",
+    "nouvelleEnCours": "Création…"
   },
   "editeur": {
     "historique": {

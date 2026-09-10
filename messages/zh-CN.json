@@ -555,7 +555,8 @@
       "ecriture": "批量操作未能完成。没有任何改动。",
       "exporter": "导出",
       "exportAvertissement": "该文件包含您订单的公开链接：拿到文件的人就能打开您客户的页面。",
-      "exportTelecharger": "下载 CSV"
+      "exportTelecharger": "下载 CSV",
+      "enCours": "处理中…"
     },
     "vues": {
       "toutes": "全部",
@@ -600,7 +601,8 @@
       "archivees": "归档"
     },
     "statutSansMouvement": "无更新 · {jours} 天",
-    "sousTitreArchives": "您正在查看归档。客户的链接依然有效。"
+    "sousTitreArchives": "您正在查看归档。客户的链接依然有效。",
+    "nouvelleEnCours": "正在创建…"
   },
   "editeur": {
     "historique": {

@@ -555,7 +555,8 @@
       "ecriture": "The bulk action could not be processed. Nothing was changed.",
       "exporter": "Export",
       "exportAvertissement": "The file contains your orders’ public links: anyone who opens it can open your customers’ pages.",
-      "exportTelecharger": "Download the CSV"
+      "exportTelecharger": "Download the CSV",
+      "enCours": "Working…"
     },
     "vues": {
       "toutes": "All",
@@ -600,7 +601,8 @@
       "archivees": "Archive"
     },
     "statutSansMouvement": "No movement · {jours} d",
-    "sousTitreArchives": "You are viewing your archive. The links still work."
+    "sousTitreArchives": "You are viewing your archive. The links still work.",
+    "nouvelleEnCours": "Creating…"
   },
   "editeur": {
     "historique": {

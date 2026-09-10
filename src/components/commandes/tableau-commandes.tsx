@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LienEcran } from "@/components/lien-ecran";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { BoutonAction } from "@/components/bouton-action";
 import { Icone } from "@/components/icone";
 import { TraductionsClient } from "@/components/traductions-client";
 import { ActionsLigne } from "./actions-ligne";
@@ -247,14 +248,28 @@ export async function TableauCommandes({
             */}
             <div className="mb-3.5 hidden flex-wrap items-center gap-3 px-margin-mobile group-has-[input:checked]/lot:flex md:px-0">
               <span className="font-label-sm text-[12px] text-sourdine">{t("lot.aide")}</span>
-              <button
-                type="submit"
+              {/*
+                ⚠️ `name` ET `value` SONT LES DONNÉES, PAS DE LA DÉCORATION :
+                c'est ce bouton qui dit s'il faut archiver ou désarchiver. Un
+                composant qui les avalerait enverrait un formulaire incomplet,
+                et l'action refuserait — sans que rien ne l'explique à l'écran.
+
+                ⚠️ ET C'EST L'ACTION LA PLUS LONGUE DE L'ÉCRAN : elle est
+                TOUT-OU-RIEN sur toute la sélection. C'est donc celle où
+                l'absence de retour coûte le plus — un vendeur qui ne voit rien
+                reclique, sur une action de lot.
+              */}
+              <BoutonAction
                 name="archiver"
                 value={parametres.archivees ? "0" : "1"}
+                libelles={{
+                  repos: parametres.archivees ? t("lot.desarchiver") : t("lot.archiver"),
+                  enCours: t("lot.enCours"),
+                  reussi: parametres.archivees ? t("lot.desarchiver") : t("lot.archiver"),
+                  echoue: parametres.archivees ? t("lot.desarchiver") : t("lot.archiver"),
+                }}
                 className="flex h-[34px] items-center rounded-full border border-primary bg-primary px-3.5 font-label-md text-[13px] font-semibold text-on-primary"
-              >
-                {parametres.archivees ? t("lot.desarchiver") : t("lot.archiver")}
-              </button>
+              />
             </div>
 
             {/* ---------- BUREAU : LE TABLEAU, À PARTIR DE 1024 px ---------- */}
@@ -807,13 +822,37 @@ async function AccueilCompteVide({ langue }: { readonly langue: string }) {
             page qui écrirait au rendu. */}
         <form action={creerBrouillon}>
           <input type="hidden" name="langue" value={langue} />
-          <button
-            type="submit"
+          {/*
+            ⚠️ L'ICÔNE « + » RESTE, ET C'EST POURQUOI LES LIBELLÉS SONT DES
+            NŒUDS. La planche dessine un plus devant le mot ; le remplacer par
+            du texte nu ferait diverger l'écran de sa planche pour une raison
+            purement interne. Pendant l'attente, l'anneau prend la place du
+            plus — jamais les deux, qui élargiraient le bouton au clic.
+          */}
+          <BoutonAction
+            libelles={{
+              repos: (
+                <>
+                  <Icone nom="add" className="text-[16px]" />
+                  {t("nouvelle")}
+                </>
+              ),
+              enCours: t("nouvelleEnCours"),
+              reussi: (
+                <>
+                  <Icone nom="add" className="text-[16px]" />
+                  {t("nouvelle")}
+                </>
+              ),
+              echoue: (
+                <>
+                  <Icone nom="add" className="text-[16px]" />
+                  {t("nouvelle")}
+                </>
+              ),
+            }}
             className="degrade-marque mx-auto flex h-[50px] items-center gap-[9px] rounded-[13px] px-[26px] font-label-md text-[15px] font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
-          >
-            <Icone nom="add" className="text-[16px]" />
-            {t("nouvelle")}
-          </button>
+          />
         </form>
 
         <p className="mt-[18px] font-body-sm text-[13px] text-sourdine">

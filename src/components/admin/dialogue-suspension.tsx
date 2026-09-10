@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { BoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
 import {
   reactiver,
@@ -61,7 +62,21 @@ import {
 
 const INITIAL: EtatSuspension = { statut: "inactif" };
 
-function BoutonAction({
+/**
+ * LE BOUTON DE CONFIRMATION DE LA MODALE.
+ *
+ * ⚠️ IL S'APPELAIT `BoutonAction`, ET C'ÉTAIT UN HOMONYME DU COMPOSANT PARTAGÉ.
+ * Deux composants du même nom, l'un local et l'autre dans
+ * `@/components/bouton-action`, avec des propriétés différentes : relever « qui
+ * porte un état d'attente » par une recherche du nom donnait un faux positif
+ * ici. Renommé, et son travail délégué au vrai.
+ *
+ * ⚠️ IL N'ANNONCE NI RÉUSSITE NI ÉCHEC, et ses deux libellés répètent celui du
+ * repos. Une suspension réussie FERME la modale et redessine la fiche ; un échec
+ * s'affiche dans le message de la modale, qui nomme le motif. Un « Échoué » sur
+ * le bouton remplacerait un motif par un constat.
+ */
+function BoutonConfirmation({
   libelle,
   enCours,
   danger,
@@ -77,17 +92,17 @@ function BoutonAction({
   readonly onConfirmer: () => void;
 }) {
   return (
-    <button
+    <BoutonAction
       type="button"
-      disabled={desactive || travaille}
+      enAttente={travaille}
+      disabled={desactive}
       onClick={onConfirmer}
+      libelles={{ repos: libelle, enCours, reussi: libelle, echoue: libelle }}
       className={
-        "min-h-[44px] rounded-lg px-4 font-label-md text-label-md disabled:opacity-50 " +
+        "flex min-h-[44px] items-center justify-center rounded-lg px-4 font-label-md text-label-md disabled:opacity-50 " +
         (danger ? "bg-error text-on-error" : "bg-primary text-on-primary")
       }
-    >
-      {travaille ? enCours : libelle}
-    </button>
+    />
   );
 }
 
@@ -264,7 +279,7 @@ export function DialogueSuspension({
           >
             {t("annuler")}
           </button>
-          <BoutonAction
+          <BoutonConfirmation
             libelle={suspendu ? t("confirmerReactivation") : t("confirmerSuspension")}
             enCours={t("enCours")}
             danger={!suspendu}
