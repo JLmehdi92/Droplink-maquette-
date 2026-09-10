@@ -519,6 +519,48 @@ describe("les cibles tactiles des surfaces authentifiees", () => {
   });
 
   /**
+   * ⚠️ LA SONDE QUI A PRODUIT CES CHIFFRES DOIT SURVIVRE, ET ELLE A FAILLI NE
+   * PAS SURVIVRE.
+   *
+   * La mémoire du projet affirmait « la sonde CDP existe et se réutilise telle
+   * quelle ». Vérifié le 10/09/2026 : elle vivait dans un dossier TEMPORAIRE de
+   * session et dans `out/`, qui est ignoré par git. Elle allait disparaître avec
+   * la session, en laissant l'affirmation derrière elle — L-014 dans sa forme
+   * exacte, un document qui affirme un état que personne n'a vérifié.
+   *
+   * Elle est donc dans `scripts/`, et ce contrôle rend l'affirmation
+   * VÉRIFIABLE. Il garde aussi la leçon la plus chère de la journée : sans
+   * `setTouchEmulationEnabled`, `@media (pointer: coarse)` ne s'applique pas, et
+   * la sonde mesure un rendu À LA SOURIS en croyant tenir le téléphone — trois
+   * défauts comptés qui n'existaient pas.
+   */
+  test("la sonde de mesure existe encore, et elle EMULE bien le tactile", () => {
+    const sonde = readFileSync(
+      join(process.cwd(), "scripts/mesurer-cibles-tactiles.mjs"),
+      "utf8",
+    );
+    expect(sonde.length, "la sonde a disparu de `scripts/`").toBeGreaterThan(2000);
+    expect(
+      /setTouchEmulationEnabled/.test(sonde),
+      "La sonde n'émule plus le tactile : `@media (pointer: coarse)` ne " +
+        "s'appliquerait pas, et elle mesurerait un rendu à la souris en croyant " +
+        "tenir le téléphone. C'est l'erreur qui a fait compter trois défauts " +
+        "inexistants le 10/09/2026.",
+    ).toBe(true);
+    expect(
+      /pointer: coarse/.test(sonde),
+      "La sonde ne vérifie plus que `matchMedia(\"(pointer: coarse)\")` est " +
+        "vrai : elle ne pourrait plus dire quel appareil elle décrit.",
+    ).toBe(true);
+    expect(
+      /scrollIntoView/.test(sonde),
+      "La sonde ne fait plus défiler ses cibles au centre : tout ce qui est " +
+        "sous la ligne de flottaison sortirait du cadre et se déclarerait " +
+        "« recouvert » — 67 contrôles parfaitement bons signalés à tort.",
+    ).toBe(true);
+  });
+
+  /**
    * ⚠️ SANS CE CONTRÔLE, LE PRÉCÉDENT PASSE SUR UNE FENÊTRE VIDE. Si
    * `codeSeul` cessait de rendre du texte — extension changée, fichier
    * déplacé —, `indexOf` rendrait -1 partout et la première assertion
