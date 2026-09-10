@@ -80,11 +80,32 @@ pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 > de tests servirait de VRAIES données à 293 contrôles convaincus de mesurer une
 > base jetable — et tout serait vert (L-032).
 >
-> ⚠️ **CE QUE LA SÉPARATION COÛTE, ET IL FAUT LE SAVOIR : plus aucune suite ne
-> regarde la PRODUCTION.** Les contrôles d'accord dépôt/base — ordre des
-> migrations, catalogue des fonctions, droits d'exécution — ne la visent plus.
-> C'est le prix assumé, et il appelle une suite de contrôles de production en
-> lecture seule qui **n'existe pas encore**.
+> ⚠️ **CE QUE LA SÉPARATION A COÛTÉ, ET CE QUI LE COMBLE DEPUIS LE 10/09/2026.**
+> Le jour où les suites ont cessé de viser la production, plus aucun contrôle
+> n'a regardé la base qui sert les clients : ordre des migrations, catalogue des
+> fonctions, droits d'exécution étaient éprouvés sur une base jetable, et rien
+> ne disait que la production lui ressemblait encore.
+>
+> **`pnpm verif:prod` répond à cette question, et à elle seule.** Il ne
+> re-déclare AUCUNE règle : il compare la PRODUCTION à la BASE DE TESTS,
+> catalogue contre catalogue — tables et RLS, fonctions avec leur arité et leur
+> `security definer`, droits d'exécution ouverts, droits de table de `anon`,
+> colonnes écrivables, policies, valeurs d'énumération, index, déclencheurs — et
+> il y ajoute l'accord entre les migrations du DÉPÔT et celles réellement
+> appliquées, dans les deux sens et dans l'ordre. Recopier les règles ici aurait
+> créé une seconde source de vérité, qui aurait divergé au premier oubli ; une
+> comparaison n'a rien à oublier.
+>
+> ⚠️ **IL N'EST PAS DANS LES PORTES, ET C'EST DÉLIBÉRÉ** : les six portes
+> partagent un environnement, et c'est la base de TESTS. Celui-ci vise la
+> production — il se lance à part, à chaque reprise de séance et avant tout
+> déploiement.
+>
+> ⚠️ **SA LECTURE SEULE EST GARANTIE PAR POSTGRES, PAS PAR SA DISCIPLINE
+> D'ÉCRITURE.** Tout se passe dans une transaction `READ ONLY`, et la garantie
+> est ÉPROUVÉE au démarrage : le script tente une écriture triviale et s'arrête
+> si elle PASSE. Une protection qu'on n'a pas vue refuser n'est pas une
+> protection.
 
 > ⚠️ **NE JAMAIS LANCER UNE PORTE DANS UN TUYAU.** `pnpm test:rls | grep …` rend
 > le statut de `grep`, pas celui de la suite : l'enchaînement `&&` continue sur
