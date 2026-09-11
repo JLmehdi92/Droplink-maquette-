@@ -61,3 +61,6 @@ photos-qc-reelles/
 # dans Claude Design. Le dépôt PUBLIC n'a pas à porter la référence de design, et
 # une référence versionnée ici divergerait de la source au premier aller-retour.
 .claude/skills/droplink-design/
+
+# Le port ephemere ecrit par `scripts/servir-contre-tests.mjs` a chaque lancement.
+port.txt
