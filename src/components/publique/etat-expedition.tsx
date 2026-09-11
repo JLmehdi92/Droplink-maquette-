@@ -99,7 +99,7 @@ export function EtatExpedition({
 
   if (silencieux) {
     return (
-      <section className="rounded-[18px] border border-attention-filet bg-attention-fond p-5 lg:p-6">
+      <section className="rounded-ds-card-lg border border-attention-filet bg-attention-fond p-5 lg:p-6">
         <div className="flex items-start gap-3">
           <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-attention-puce">
             <svg
@@ -134,7 +134,7 @@ export function EtatExpedition({
 
   if (variante === "carte") {
     return (
-      <section className="rounded-[18px] border border-outline-variant p-6">
+      <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card">
         <p className="mb-3.5 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-gris-entete uppercase">
           {libelles.titre}
         </p>
@@ -153,7 +153,7 @@ export function EtatExpedition({
 
   return (
     <section
-      className="rounded-[18px] p-5"
+      className="rounded-ds-card-lg p-5"
       style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
     >
       {/*

@@ -485,6 +485,17 @@
   --degrade-ds-marque-calme: linear-gradient(120deg, #6C5CFB 0%, #8E63F0 60%, #B368E4 100%);
   --degrade-ds-page: linear-gradient(180deg, #E9E7FC 0%, #F4F3FE 38%, #FBFBFE 100%);
   --degrade-ds-teinte: linear-gradient(135deg, #F1F0FE 0%, #FAF6FE 100%);
+  /*
+   * Le fond de la page client. Il n'est PAS dans `tokens/colors.css` : le kit
+   * `client_link` l'écrit en dur, parce qu'il ne sert qu'à cette page. Mesuré
+   * sur la référence servie plutôt que recopié depuis son source.
+   *
+   * ⚠️ IL DIFFÈRE DE `--degrade-ds-page`, ET DE PEU : celui de l'application va
+   * de `#E9E7FC` à `#FBFBFE` en trois arrêts verticaux ; celui-ci est diagonal
+   * et plus clair d'un bout à l'autre. Deux lavandes voisines ne se distinguent
+   * pas à l'œil — d'où deux noms, pour qu'on ne prenne jamais l'un pour l'autre.
+   */
+  --degrade-ds-page-client: linear-gradient(135deg, #F6F4FE 0%, #FBFAFE 44%, #F8F3FD 100%);
   --anneau-ds-focus: 0 0 0 3px rgba(91, 75, 245, 0.22);
 }
 

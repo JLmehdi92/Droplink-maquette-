@@ -135,7 +135,15 @@ export async function generateMetadata({
  * La bande de couleur du vendeur reste PLEINE LARGEUR : elle est posée sur le
  * `<header>`, pas ici. C'est sa marque, pas un bloc de contenu.
  */
-const CONTENEUR = "mx-auto w-full max-w-[600px] px-[18px] lg:max-w-[1240px] lg:px-14";
+/*
+ * ⚠️ MIGRÉ SUR LE DESIGN SYSTEM LE 11/09/2026 — 1180 et non 1240, gouttière 24
+ * et non 56. Mesuré sur la référence servie : `max-width: 1180px`, padding
+ * `0 24px 40px`, et la grille interne rend 704 + 18 + 410 = 1132, soit
+ * exactement 1180 moins ses deux gouttières. Les trois nombres se vérifient
+ * l'un l'autre ; recopier 1240 aurait laissé 60 px de vide qu'aucune mesure
+ * n'aurait signalés.
+ */
+const CONTENEUR = "mx-auto w-full max-w-[600px] px-[18px] lg:max-w-[1180px] lg:px-6";
 
 export default async function PagePublique({
   params,
@@ -313,9 +321,22 @@ export default async function PagePublique({
    * deux traits et retire seize pixels à ce qu'il y a dedans. Un filet en tête
    * de section sépare aussi bien pour rien.
    */
+  /*
+   * ⚠️ LE PLEIN-CADRE DU TÉLÉPHONE EST CONSERVÉ, ET C'EST UNE CONSIGNE EXPLICITE
+   * de Wassim : « au téléphone, encadrer coûte 16 px de chaque côté sur une
+   * largeur de 390 — un dixième de la ligne, pris à ce qu'il y a dedans ». La
+   * référence dessine des cartes à toutes les largeurs ; le produit garde sa
+   * section pleine largeur sous `lg`, et migre le dessin du BUREAU.
+   *
+   * Valeurs mesurées sur la référence servie : rayon 20 (`--radius-card-lg`,
+   * pas `--radius-card` qui vaut 16), filet 1px `#ECECF5`, ombre
+   * `rgba(28,22,78,.06) 0 4px 16px`, padding 24 — et non 24/26, qui n'est celui
+   * que de la carte d'en-tête.
+   */
   const section =
     "border-t border-filet-section px-[18px] py-[26px] " +
-    "lg:rounded-[18px] lg:border lg:border-outline-variant lg:px-6 lg:py-6";
+    "lg:rounded-ds-card-lg lg:border lg:border-ds-filet lg:bg-ds-surface-carte " +
+    "lg:p-6 lg:shadow-ds-card";
 
   // LE RENDU EST COMPTÉ CÔTÉ SERVEUR, la VUE côté client, et les deux ne se
   // confondent pas : `rendus ≥ vues réelles ≥ vues enregistrées`. Sans la borne
@@ -372,7 +393,16 @@ export default async function PagePublique({
   );
 
   return (
-    <div lang={langue} className="flex min-h-dvh flex-col bg-surface-container-lowest">
+    <div
+      lang={langue}
+      /*
+       * ⚠️ LE FOND LAVANDE N'APPARAÎT QU'À PARTIR DE `md`, et c'est un motif à
+       * conserver, pas un oubli : au téléphone la page est déjà pleine largeur,
+       * un fond teinté n'y encadrerait rien et ferait payer un dégradé à
+       * l'appareil le plus lent du parc.
+       */
+      className="flex min-h-dvh flex-col bg-ds-surface-carte md:bg-[image:var(--degrade-ds-page-client)]"
+    >
       {/*
         L'EN-TÊTE À LA COULEUR DU VENDEUR. Il porte aussi le titre et le nom du
         destinataire : sans lui, le bandeau serait une bande de couleur qui
@@ -457,7 +487,14 @@ export default async function PagePublique({
       */}
       <main
         id="contenu"
-        className="mx-auto w-full max-w-[600px] flex-grow lg:grid lg:max-w-[1240px] lg:grid-cols-[1.55fr_1fr] lg:items-start lg:gap-[30px] lg:px-14 lg:pt-[34px]"
+        className={
+          // ⚠️ 1,717 ET NON 1,55 : la référence rend 704 et 410, soit un rapport
+          // de 1,7171. L'écart paraît minime et ne l'est pas — à 1180 de large
+          // il déplace la colonne de droite de 30 px, assez pour que la galerie
+          // change de nombre de colonnes.
+          "mx-auto w-full max-w-[600px] flex-grow lg:grid lg:max-w-[1180px] " +
+          "lg:grid-cols-[1.717fr_1fr] lg:items-start lg:gap-[18px] lg:px-6 lg:pt-[34px]"
+        }
       >
         {/* LA CARTE À LA COULEUR DU VENDEUR — téléphone uniquement. */}
         <div className={"px-[18px] lg:hidden " + (aUnEnTete ? "pt-4" : "pt-5")}>
@@ -576,7 +613,7 @@ export default async function PagePublique({
             parcours au clavier est donc identique dans les deux largeurs.
           */}
           {commande.medias.length > 0 ? (
-            <div className="px-[18px] py-[26px] lg:order-last lg:rounded-[18px] lg:border lg:border-outline-variant lg:px-6 lg:py-6">
+            <div className="px-[18px] py-[26px] lg:order-last lg:rounded-ds-card-lg lg:border lg:border-ds-filet lg:bg-ds-surface-carte lg:p-6 lg:shadow-ds-card">
               <p className={surTitre + " mb-[13px] lg:mb-3.5"}>{t("qc.titre")}</p>
               <ArbitrageQc
                 jeton={commande.jeton}
