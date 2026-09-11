@@ -55,3 +55,9 @@ supabase/.temp/
 # Elles appartiennent aux vendeurs et à leurs clients, pas au dépôt de code.
 qc photo/
 photos-qc-reelles/
+
+# Le design system, posé en compétence Claude Code — décision de Wassim, 11/09/2026.
+# Il ne doit PAS entrer dans le dépôt : 13 Mo d'assets, et il vit sa propre vie
+# dans Claude Design. Le dépôt PUBLIC n'a pas à porter la référence de design, et
+# une référence versionnée ici divergerait de la source au premier aller-retour.
+.claude/skills/droplink-design/

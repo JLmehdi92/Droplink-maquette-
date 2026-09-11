@@ -111,7 +111,23 @@ const eslintConfig = [
     // le falsificateur laisse le produit CASSÉ EN BASE pendant que le script
     // annonce l'avoir réparé : le seul défaut du dépôt dont la conséquence est
     // une base durablement fausse.
-    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"],
+    // ⚠️ `.claude/**` EST IGNORÉ, ET CE N'EST PAS UN CONFORT.
+    //
+    // Ce dossier porte la configuration de l'outil et, depuis le 11/09/2026, le
+    // DESIGN SYSTEM — des pages et des composants de RÉFÉRENCE, écrits pour être
+    // lus et mesurés dans un navigateur, jamais compilés par ce produit. ESLint
+    // s'y est mis à rendre 614 erreurs (`'Flag' is not defined`, `'React' is not
+    // defined`) sur du JSX volontairement incomplet : la porte `lint` est
+    // devenue rouge, et comme elle passe AVANT les cinq autres, plus aucune ne
+    // s'exécutait. Une référence de design ne se linte pas — elle se compare.
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "build/**",
+      ".claude/**",
+      "next-env.d.ts",
+    ],
   },
 
   // Règles à typage requis. Le brief les exige nommément : `foo()` et

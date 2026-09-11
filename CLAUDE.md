@@ -135,67 +135,230 @@ Next.js 15 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 
 ## Assets design
 
-> ⚠️ **STITCH EST SUPPRIMÉ — décision de Wassim, 26/08/2026.**
-> Ce fichier a longtemps dit « on implémente TOUS les écrans Stitch, c'est une décision produit, pas une suggestion ». **Cette phrase est morte, et le dossier avec elle** : `stitch_droplink_qc_tracking_portal/` a été effacé du dépôt le 26/08/2026, une fois les 20 routes portées sur le canevas. Si un commentaire du code cite encore une maquette Stitch, il parle d'une décision PASSÉE, jamais d'une référence à consulter.
+> ⚠️ **LE CANEVAS DES 47 PLANCHES N'EST PLUS LA RÉFÉRENCE — décision de Wassim,
+> 11/09/2026.** Ce fichier a longtemps dit « la source du design est le canevas
+> Claude Design, en cas de désaccord c'est la planche qui gagne ». **Cette phrase
+> est morte.** Si un commentaire du code cite encore une planche, il parle d'une
+> décision PASSÉE, jamais d'une référence à consulter. Le dossier
+> `C:/Users/mehdi/Desktop/canevas-droplink/` est un historique, pas une source.
 
-**La source du design est le canevas Claude Design**, validé écran par écran : `https://claude.ai/code/artifact/044de325-d272-4e9e-b3ab-1c345e7121af` — **47 planches**, chaque écran en bureau ET téléphone, plus les planches d'états.
+**La source du design est le design system DropLink**, construit écran par écran
+et validé : **10 écrans, chacun en bureau et en téléphone, en trois langues.**
 
-> ⚠️ **LE CANEVAS EST MODIFIABLE — décision de Wassim, 29/08/2026.** Quand un
-> écran a besoin de ce que la planche ne dessine pas, **on écrit d'abord DANS LA
-> PLANCHE**, on republie, puis on implémente. L'ordre est la règle : implémenter
-> d'abord ferait du code la référence, c'est-à-dire plus de référence du tout.
-> Et on écrit dans le VOCABULAIRE du canevas — avant d'ajouter un motif,
-> chercher lequel des écrans existants le porte déjà.
+Il se consulte comme du code, pas comme une image :
+
+```
+styles.css              point d'entrée, @import uniquement
+tokens/                 colors typography spacing radius elevation motion fonts base
+components/core/        Avatar Badge Button Card Checkbox Eyebrow Icon IconButton
+                        IconTile Input Logo
+components/app/         FilterTabs MetricTile OrderRow Pagination ProgressTracker
+                        ShareLinkField SidebarItem StatCard TrackingTimeline UnderlineTabs
+components/marketing/   FeatureCard FloatingChip SectionHeading StepCard TestimonialCard
+ui_kits/                marketing_site auth seller_app client_link admin docs legal
+guidelines/             fondations visuelles, règles de contenu, SEO, lexique
+mobile.html             les 10 écrans en cadre téléphone, bascule fr/en/zh
+readme.md               le guide complet
+```
+
+> ⚠️ **CE SONT DE VRAIES PAGES HTML, PAS DES MAQUETTES.** Elles portent toutes les
+> valeurs en clair et se mesurent dans un navigateur. On ne compare donc pas une
+> impression, on compare des nombres. `mobile.html` rend les dix écrans côte à
+> côte à 390 px : c'est là qu'on vérifie le téléphone, pas en redimensionnant une
+> fenêtre.
+
+> **RÈGLE DE CONFORMITÉ.** Chaque écran doit correspondre à sa page de référence
+> **au pixel près**. On ne passe pas à l'écran suivant tant que celui en cours
+> n'est pas exactement conforme. Cela vaut pour **tous** les écrans, landing et
+> admin comprises. En cas de désaccord entre ce fichier et le design system,
+> **c'est le design system qui gagne** — et on corrige ce fichier dans le même
+> commit, pour qu'il n'y ait jamais deux sources.
+
+> ⚠️ **LE DESIGN SYSTEM EST MODIFIABLE, ET DANS CET ORDRE.** Quand un écran a
+> besoin de ce que le design system ne porte pas, **on l'écrit d'abord dedans**,
+> puis on implémente. Implémenter d'abord ferait du code la référence,
+> c'est-à-dire plus de référence du tout. Et on écrit dans son VOCABULAIRE :
+> avant d'ajouter un motif, chercher lequel des 26 composants le porte déjà.
+
+### Les valeurs font foi, pas la prose
+
+```
+accent primaire        #5B4BF5     survol            #4B3AE0
+DÉGRADÉ DE MARQUE      violet #6C5CFB → magenta #A855E0 → corail #FB7C7F
+                       (TROIS arrêts, pas deux)
+                       ⚠️ SES DEUX EXTRÉMITÉS NE SONT PAS L'ACCENT. Le violet
+                       du dégradé est plus clair que #5B4BF5, et son corail plus
+                       clair que le corail de l'ancien canevas. Relevé dans
+                       `tokens/colors.css` (`--gradient-brand`), qui fait foi.
+
+fond de page           #FBFBFE     carte             #FFFFFF
+teinte violette        #F1F0FE     creux             #F6F6FA
+encre                  #0B0B18     corps             #6B6F8C
+sourdine               #8B90A8     estompé           #A9AEC4
+filet                  #ECECF5     filet appuyé      #DEDEEA
+
+succès #12A87A · erreur #EF4B57 · avertissement #E08A18 · info #4F46E5
+
+rayons    xs 6 · sm 10 · md 12 · lg 14 · xl 18 · 2xl 24 · 3xl 32 · pilule 9999
+          carte 16 · carte-lg 20 · contrôle 12 · BOUTON 9999 · fenêtre 18
+
+ombres    TOUJOURS teintées violet, jamais noir neutre
+          xs     0 1px 2px rgba(28,22,78,.05)
+          carte  0 4px 16px rgba(28,22,78,.06)
+          md     0 10px 26px rgba(28,22,78,.08)
+          lg     0 20px 48px rgba(28,22,78,.10)
+          marque 0 10px 26px rgba(91,75,245,.30)
+          focus  0 0 0 3px rgba(91,75,245,.22)
+
+mouvement ease standard cubic-bezier(.4,0,.2,1) · out cubic-bezier(.16,1,.3,1)
+          instant 90ms · rapide 160ms · normal 240ms · lent 420ms
+          survol carte translateY(-2px) · appui scale(.98)
+```
+
+> ⚠️ **SIX VALEURS CHANGENT PAR RAPPORT À L'ANCIEN CANEVAS.** Ce ne sont pas des
+> arrondis, et un écran à moitié migré se voit :
 >
-> ⚠️ **LES PLANCHES SONT EN `content-box`.** `height: 38px` sur une boîte à filet
-> REND 40 ; `width: 620px; padding: 18px` REND 658. **Ne jamais recopier un
-> nombre depuis le style d'une planche** : l'ouvrir et mesurer la boîte rendue.
-> Et une planche téléphone plus haute que sa fenêtre perd 15 px à sa barre de
-> défilement — la mesurer dans une fenêtre de **405**, jamais de 390.
+> | | Ancien canevas | Design system |
+> |---|---|---|
+> | Accent | `#7c5cf5` | **`#5B4BF5`** |
+> | Dégradé | `97deg`, 2 arrêts, `#7c5cf5 → #f2765e` | **3 arrêts, `#6C5CFB → #A855E0 → #FB7C7F`** |
+> | Rayon carte-page | 28 public / 24 authentifié | **16-20, sans distinction** |
+> | Chrome admin | sombre `#111117` | **clair, comme le reste** |
+> | Cadre extérieur | carte blanche sur `#c5cbfb` | **aucun cadre** |
+> | Polices | Plus Jakarta Sans + Inter | **Inter seule** |
+>
+> **La migration se fait écran par écran, jamais par un chercher-remplacer sur les
+> tokens.** Les deux systèmes ne partagent aucune valeur d'accent : un remplacement
+> global laisserait des écrans conformes à un dégradé qui n'existe plus, et rien ne
+> le dirait.
 
-**Les planches sont EXTRAITES sur le disque : `C:/Users/mehdi/Desktop/canevas-droplink/`** (fichiers `.dc.html` + `canvas.json`, hors du dépôt). Ce sont de vraies pages HTML qui portent **toutes les valeurs en clair** : on ne compare donc pas une impression, on compare des nombres. Ré-extraction si le canevas change : `Artifact action:"read"` sur l'URL, puis `node "<skill design>/seed-canvas.mjs" --extract <fichier> --to <dossier vide>`.
+### Typographie
 
-> **RÈGLE DE CONFORMITÉ — décision de Wassim, 27/08/2026.** Chaque écran doit
-> correspondre à sa planche **au millimètre près**. On ne passe pas à l'écran
-> suivant tant que celui en cours n'est pas exactement conforme. Cela vaut pour
-> **tous** les écrans, **landing comprise**. En cas de désaccord entre ce
-> fichier et une planche, **c'est la planche qui gagne**.
-
-**Design system — les valeurs font foi, pas la prose :**
+**Inter seule**, servie par `next/font/google`. **Plus Jakarta Sans est retirée.**
+Jamais de `<link>` vers un CDN de polices.
 
 ```
-canvas (extérieur)  #c5cbfb    carte-page  #ffffff
-app (dashboard)     #f7f7fb    encre       #0e0e13
-sourdine            #83858f    filet       #ececf0
-pilule noire        #111117    admin       #111117 (chrome sombre)
-DÉGRADÉ DE MARQUE   linear-gradient(97deg, #7c5cf5 0%, #f2765e 100%)
-rayons              carte 16 · contrôle 12-13 · pilule 9999
-
-RAYON DE LA CARTE-PAGE — DEUX VALEURS, SELON LA SURFACE
-  28  surfaces PUBLIQUES  : landing, connexion, inscription, onboarding,
-                            conditions, confidentialité, signalement
-  24  surfaces AUTHENTIFIÉES : commandes, éditeur, envois, analyses, marque,
-                            et les six écrans admin
+hero        64px / 800 / interligne 0.98 / tracking -0.045em
+section     44px / 800 / tracking -0.045em
+h2          30px / 800        h3 22px / 700        titre carte 18px / 700
+corps       16px / 400 / interligne 1.55
+petit       14px    légende 13px    micro 11px
+eyebrow     11px / 800 / majuscules / tracking 0.12em
 ```
 
-> ⚠️ Ce bloc disait « carte-page rayon 28 », valeur unique. **C'était
-> incomplet, et le code a suivi la prose plutôt que le canevas** : `/fr/commandes`
-> rendait 28 là où sa planche dit 24. Relevé le 27/08/2026 en comparant les 41
-> planches extraites : **15 planches à 24, 6 à 28**, et la coupure est nette —
-> elle sépare le public de l'authentifié. Le canevas fait foi ; ce fichier ne
-> fait que le rapporter.
+**En `zh-CN`, ajouter `Noto Sans SC, PingFang SC, Microsoft YaHei` ET forcer
+`letter-spacing: 0`.** Le tracking négatif de l'anglais colle les idéogrammes —
+constaté sur les dix écrans, corrigé par une règle unique
+`html[lang^="zh"] *{letter-spacing:0}`.
 
-Typographie inchangée : **Plus Jakarta Sans** (titres, 800, tracking -0.03em) + **Inter** (corps), servies par `next/font/google` — **jamais de `<link>` vers un CDN de polices**.
+### Les cinq règles qui survivent à tout changement de design
 
-**Le dégradé est réservé à UNE SEULE action principale par écran, et uniquement sur les surfaces DropLink** (landing, connexion, inscription, dashboard). Il **n'apparaît jamais** sur `/p/[token]` : cette page porte la couleur DU VENDEUR, pas la nôtre.
+Les quatre premières sont **inchangées** : elles sont architecturales, pas
+esthétiques, et le nouveau design ne les touche pas.
 
-**Quatre règles qui survivent à tout changement de design :**
-1. **La couleur d'accent est une VARIABLE pilotée par le vendeur**, jamais en dur. Contraste obtenu **automatiquement** par `resoudreAccent()` : 4,5:1 sur le texte, 3:1 sur l'interface. **Sur un aplat d'accent, le texte prend `surRemplissage`, jamais `#ffffff` en dur** — un accent clair rendrait le blanc illisible.
-2. **Pas de glassmorphism ni backdrop-blur sur la page publique.** Sur un aplat uni le flou n'a rien à flouter, et c'est ce qui rame le plus sur mobile bas de gamme.
-3. **Le vocabulaire de fret disparaît partout** : conteneur, palette, dédouanement, inspecteur QC, lot, tolérances, généalogie. → commande, colis, photos, suivi, client.
-4. **Toute animation respecte `prefers-reduced-motion`**, et ne porte jamais d'information.
+1. **La couleur d'accent est une VARIABLE pilotée par le vendeur**, jamais en dur.
+   Contraste obtenu **automatiquement** par `resoudreAccent()` : 4,5:1 sur le
+   texte, 3:1 sur l'interface. Sur un aplat d'accent, le texte prend
+   `surRemplissage`, **jamais `#ffffff` en dur**. `#5B4BF5` n'est que le DÉFAUT.
+2. **Pas de glassmorphism ni `backdrop-blur` sur `/p/[token]`.** Sur un aplat uni
+   le flou n'a rien à flouter, et c'est ce qui rame le plus sur mobile bas de
+   gamme. *(Le design system emploie `backdrop-filter` sur l'en-tête de la landing
+   et sur le badge du hero — c'est autorisé là, jamais sur la page client.)*
+3. **Le dégradé est réservé à UNE SEULE action principale par écran**, et
+   uniquement sur les surfaces DropLink. Il **n'apparaît jamais** sur
+   `/p/[token]` : cette page porte la couleur DU VENDEUR, pas la nôtre.
+4. **Toute animation respecte `prefers-reduced-motion`** et ne porte jamais
+   d'information.
+5. **Cible tactile 44 px minimum, police 11,5 px minimum sur téléphone** —
+   nouveauté du 11/09/2026. Les liens **en ligne dans la prose** restent à leur
+   hauteur de texte : les agrandir casserait l'interligne du paragraphe.
 
-**Réseaux sociaux du vendeur** (Instagram, TikTok, WhatsApp — **et ces trois-là seulement** : Snapchat et Telegram écartés par Wassim) : facultatifs, stockés sur `shops`, rendus sur la page client **uniquement s'ils sont configurés**. Aucun bloc, aucun logo grisé quand il n'y en a pas.
+### Iconographie
+
+**Lucide**, trait 1,8-1,9. Aucune icône dessinée à la main, **aucun emoji dans
+l'interface**. Les logos de marques tierces (Google, Instagram, TikTok, WhatsApp,
+transporteurs) viennent de leurs SVG officiels — jamais reconstitués de mémoire.
+
+> ⚠️ **L'ANCIEN CODE EMPLOIE DES NOMS D'ICÔNES `material-symbols`**
+> (`inventory_2`, `local_shipping`, `monitoring`, `palette` dans
+> `(app)/layout.tsx`). Le design system est en Lucide. La correspondance se fait
+> à la migration de chaque écran, pas en bloc : `inventory_2 → package`,
+> `local_shipping → truck`, `monitoring → bar-chart-3`, `palette → palette`.
+
+### Réseaux sociaux du vendeur
+
+**Instagram, TikTok, WhatsApp — et ces trois-là seulement** (Snapchat et Telegram
+écartés par Wassim). Facultatifs, stockés sur `shops`, rendus sur la page client
+**uniquement s'ils sont configurés.** Aucun bloc, aucun logo grisé quand il n'y en
+a pas.
+
+> ⚠️ **LE DESIGN SYSTEM DESSINE UN QUATRIÈME CHAMP « site web ».** Il n'est pas
+> dans `shops` et **n'est pas une autorisation** : soit on l'ajoute par une
+> migration et une décision produit, soit on retire le champ du design system.
+> Ne pas l'implémenter en silence au motif qu'il est dessiné.
+
+### Périmètre — ce que le design system couvre, et ce qu'il ne couvre pas
+
+**Couvert, à migrer** : landing · connexion · inscription · commandes · détail et
+éditeur de commande · envois · analyses · marque · `/p/[token]` · conditions ·
+confidentialité · les deux pages d'erreur de lien (expiré, introuvable).
+
+**Écrans du dépôt que le design system ne dessine pas** — ils gardent leur
+habillage actuel jusqu'à ce qu'ils soient dessinés, et on le dit plutôt que
+d'improviser : `/bienvenue` (onboarding) · `/blog` et `/blog/[slug]` ·
+`/signalement` · `/mot-de-passe-oublie` · `/nouveau-mot-de-passe` · l'arbitrage QC
+de la page client.
+
+**Écrans dessinés que le dépôt n'a pas** : une page d'accueil de dashboard, un
+écran de paramètres vendeur, `/docs`. Ce sont des routes à créer, donc des
+décisions produit — pas de la migration.
+
+> ⚠️ **L'ADMIN : SIX ÉCRANS EN CODE, DIX DESSINÉS.** Les six existants
+> (`/admin`, `boutiques`, `comptes`, `comptes/[id]`, `journal`, `parametres`,
+> `surveillance`) se migrent. Des quatre autres, **trois sont de la phase 2 et ne
+> doivent PAS être implémentés** (voir ci-dessous) ; seul « Statistiques » est un
+> écran de phase 1 à arbitrer, sachant que `surveillance` en couvre déjà une
+> partie.
+
+> ⚠️ **LE DESIGN SYSTEM CONTIENT DES ÉCRANS DE FACTURATION, ET LA CONTRAINTE N°1
+> LES INTERDIT.** Admin → Paiements (390 paiements, 12 358 €), Admin →
+> Abonnements (386 abonnements), un plan Pro à 19,90 €/mois, les CTA « Passez au
+> Pro », et le tableau tarifaire de `/docs`. **Aucune ligne de code.** Ces
+> planches sont conservées pour la phase 2, exactement comme l'étaient les
+> anciennes maquettes de facturation. La barre latérale continue d'annoncer la
+> gratuité de la phase de validation.
+
+### Multilingue
+
+Le design system fournit les trois langues complètes. **Les traductions se
+reprennent, elles ne se refont pas.** Elles vivent dans `messages/fr.json`,
+`en.json`, `zh-CN.json` — **`zh-CN`, jamais `zh-Hans`** : le filtre du middleware
+n'accepte qu'un sous-tag de deux lettres, et `zh-Hans` ferait disparaître le 404
+de l'admin sans un seul signal.
+
+Ne se traduisent pas : marques et transporteurs, noms de personnes, références
+(`#DLK7842`), endpoints. Se traduisent **par règle** et non entrée par entrée :
+les dates, les heures, et les chaînes composées du type « 30 % du total »,
+« Affichage de 1 à 10 sur 1 248 commandes ».
+
+### Comment on vérifie un écran migré
+
+Dans cet ordre, et on ne passe pas au suivant avant que les cinq passent :
+
+1. **Bureau** — comparer à la page de référence, valeur par valeur, dans un
+   navigateur. Pas une impression : des nombres.
+2. **Téléphone à 390 px** — `scrollWidth === clientWidth`, aucun texte tronqué,
+   aucune cible sous 44 px, aucune police sous 11,5 px.
+3. **Les trois langues** — le chinois allonge les libellés courts et raccourcit
+   les longs ; c'est là que les colonnes de tableau cassent.
+4. **`prefers-reduced-motion`** activé : rien ne disparaît, rien ne devient
+   illisible.
+5. **Les six portes** — `pnpm gates`, et on relève le décompte, pas la couleur.
+
+> ⚠️ **NE JAMAIS VÉRIFIER UN ÉCRAN À LA LARGEUR DE SA FENÊTRE.** À 900 px, les
+> paliers 760 et 640 ne se déclenchent pas : cinq débordements s'y étaient cachés,
+> jusqu'à 287 px sur l'espace vendeur, tous invisibles jusqu'à la mesure à 390.
+> L'outil est `mobile.html`.
 
 ---
 
