@@ -547,7 +547,47 @@ Liste complète des 32 leçons dans @BRIEF-DROPLINK-COMPLET.md §13.
 
 ## Workflow
 
-- **Plan mode d'abord** sur toute tâche qui touche plus de 2 fichiers. Propose le plan, attends validation.
+### ⚠️ LE PILOTE AUTOMATIQUE — consigne de Wassim, 11/09/2026
+
+> « tu vas être constamment en **auto pilote**, tu vas implémenter tout le design
+> parfaitement et quand y'a des erreurs tu les corriges **toutes** et tu passes à
+> la partie suivante et ainsi de suite »
+>
+> « quand tu dois faire un choix, quand tu **rencontres un problème**, raisonne
+> bien correctement et ensuite tu prends la **meilleure solution possible**, tu le
+> corriges et tu continues »
+
+**Ce que ça change, concrètement :**
+
+1. **Un obstacle ne suspend pas le travail, il se résout.** Une garde rouge, une
+   valeur qui manque, deux sources qui se contredisent : on raisonne, on tranche,
+   on corrige, on enchaîne. On ne revient pas demander l'arbitrage d'un choix
+   qu'on est en position de faire.
+2. **Mais on ÉCRIT le raisonnement**, dans le commit et dans le code. Un choix
+   pris en silence est un choix que personne ne pourra contredire plus tard — et
+   c'est exactement ce que ce dépôt refuse partout ailleurs.
+3. **On enchaîne écran par écran**, et un écran migré est un écran **vérifié** :
+   mesuré au navigateur, aux trois langues, à 390 px tactile émulé, portes vertes.
+   Commiter un écran à moitié fait est pire que ne pas l'avoir commencé.
+
+**⚠️ CE QUI NE PASSE JAMAIS EN PILOTE AUTOMATIQUE, et la liste est courte :**
+
+- **POUSSER.** Jamais sans sa demande explicite. Le pilote automatique porte sur
+  le travail, pas sur sa mise en ligne.
+- **Une écriture en production.** La coupure de suspension a été éprouvée le
+  11/09 sur son seul compte — après avoir POSÉ la question et obtenu un oui.
+- **Une contrainte produit verrouillée.** Les 26 décisions du brief et les
+  contraintes du §« Contraintes produit » ne sont pas des arbitrages de design :
+  quand le design system les contredit — facturation, marketplaces, chiffres
+  inventés, plancher de mot de passe — **c'est le produit qui gagne**, et on le
+  dit dans le commit.
+- **Un geste irréversible** : supprimer un compte, régénérer un jeton, effacer
+  des données.
+
+> *Le pilote automatique n'est pas « décider vite », c'est « décider soi-même et
+> laisser une trace de pourquoi ». Les deux moitiés comptent.*
+
+- **Plan mode d'abord** sur toute tâche qui touche plus de 2 fichiers. Propose le plan, attends validation. ⚠️ **Sauf en pilote automatique**, où le plan s'écrit dans le commit plutôt qu'avant.
 - **Passes séquentielles à propriétaire unique** sur les sujets couplés, **jamais de fan-out parallèle**. Le dashboard, l'éditeur, la page publique et l'admin partagent le modèle de données et le jeton : des agents isolés casseraient leurs hypothèses mutuelles.
 - Un commit = un changement logique. Titre à l'impératif, corps expliquant **le pourquoi**, notamment les défauts trouvés.
 - **⚠️ NE JAMAIS POUSSER SANS DEMANDER.** Wassim décide.
