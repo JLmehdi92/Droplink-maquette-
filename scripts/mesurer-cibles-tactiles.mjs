@@ -174,8 +174,24 @@ const { data: cmd } = await service
   .select("id")
   .single();
 
-const rapport = [];
-for (const chemin of [
+/*
+ * Les ecrans a mesurer.
+ *
+ * ⚠️ LA LISTE EST SURCHARGEABLE PAR LE QUATRIEME ARGUMENT, et c est la refonte
+ * du design qui l a exigee : elle migre ecran par ecran, et chaque ecran veut
+ * etre mesure SEUL — mesurer les quatorze a chaque fois noierait le seul
+ * resultat qui compte sous treize deja connus. Sans argument, on retombe sur
+ * l inventaire complet des surfaces authentifiees, qui reste la campagne de
+ * reference.
+ *
+ * `node scripts/mesurer-cibles-tactiles.mjs <base> 390 /fr/connexion,/fr/inscription`
+ */
+const ecransDemandes = (process.argv[4] ?? "")
+  .split(",")
+  .map((c) => c.trim())
+  .filter(Boolean);
+
+const ECRANS_AUTHENTIFIES = [
   "/fr/commandes",
   `/fr/commandes/${cmd.id}`,
   "/fr/envois",
@@ -188,7 +204,10 @@ for (const chemin of [
   "/fr/admin/journal",
   "/fr/admin/surveillance",
   "/fr/admin/parametres",
-]) {
+];
+
+const rapport = [];
+for (const chemin of ecransDemandes.length > 0 ? ecransDemandes : ECRANS_AUTHENTIFIES) {
   const { targetId } = await brut("Target.createTarget", { url: "about:blank" });
   const { sessionId } = await brut("Target.attachToTarget", { targetId, flatten: true });
   const envoyer = (m, p) => brut(m, p, sessionId);

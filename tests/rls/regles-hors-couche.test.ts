@@ -175,6 +175,14 @@ const TOLEREES: ReadonlyMap<string, string> = new Map([
   [".defilement-discret", "masque la barre de défilement Windows sur les rangées de pilules."],
   [".defilement-discret::-webkit-scrollbar", "le même, côté WebKit."],
   [".degrade-marque", "le dégradé de marque, une seule action principale par écran."],
+  [
+    ".degrade-ds-marque",
+    "le dégradé du design system, pour les écrans migrés. ⚠️ Il ne pose AUCUNE " +
+      "couleur de texte, contrairement à son aîné qui force `#ffffff` : sur un " +
+      "aplat d'accent le texte prend `surRemplissage`, jamais un blanc en dur. " +
+      "Il vit hors couche comme elle, pour la même raison — une classe de " +
+      "composant que rien ne surcharge.",
+  ],
   [".champ", "le champ de saisie du canevas."],
   [".champ:focus", "son état de focus, piloté par l'accent du vendeur."],
   [".champ-app", "le champ de l'espace vendeur."],

@@ -141,6 +141,7 @@ const CIBLES = fichiersSource(RACINE).flatMap((chemin) => {
             ` — ${(/>\s*\{?([^<>{}\n]{2,40})/.exec(balise)?.[1] ?? "").trim()}`) ||
             ""),
         classes: classesDe(balise, code),
+        balise,
       };
     });
   });
@@ -165,11 +166,76 @@ describe("les cibles tactiles des pieds de page", () => {
     // raison. C'est ce qu'un contre-test est censé faire.
     expect(CIBLES.length, "aucune cible tactile trouvée dans les pieds").toBeGreaterThanOrEqual(5);
   });
+});
 
+/**
+ * LES LIENS EN FLUX DE TEXTE, EXEMPTÉS NOMMÉMENT.
+ *
+ * ⚠️ CETTE LISTE EXISTE PARCE QUE LE BALAYAGE NE SAIT PAS LIRE UNE PHRASE. Il
+ * attrape tout `<a>` d'un `<footer>` ; or WCAG 2.5.8 exempte le lien EN FLUX DE
+ * TEXTE, et la règle 5 du design system le redit : « les liens en ligne dans la
+ * prose restent à leur hauteur de texte, les agrandir casserait l'interligne du
+ * paragraphe ». Donner 44 px au lien « conditions d'utilisation » au milieu
+ * d'une phrase de consentement disloquerait ce paragraphe.
+ *
+ * ⚠️ ELLE EST APPARUE LE 11/09/2026, ET PAS PAR CONFORT. La migration de
+ * `/connexion` sur le design system a mis la phrase légale dans un vrai
+ * `<footer>` — elle vivait dans un `<p>` libre, donc hors du balayage. Le
+ * contrôle est parti rouge sur deux liens qui n'ont jamais changé de nature :
+ * ce n'est pas le lien qui est devenu fautif, c'est le balayage qui a cessé de
+ * l'ignorer par accident. Une exemption ACCIDENTELLE n'en est pas une.
+ *
+ * ⚠️ CHAQUE ENTRÉE PORTE SON COMPTE, et c'est ce qui la fait échouer dans les
+ * DEUX SENS : un repère qui ne désigne plus rien, et un repère qui en désigne
+ * soudain un de plus — un troisième lien glissé dans la même phrase serait
+ * exempté en silence sans cette vérification.
+ */
+const EN_FLUX: ReadonlyArray<{
+  readonly fichier: string;
+  readonly repere: string;
+  readonly nombre: number;
+  readonly raison: string;
+}> = [
+  {
+    fichier: "src/app/[locale]/connexion/page.tsx",
+    repere: "text-ds-texte-lien hover:underline",
+    nombre: 2,
+    raison:
+      "« conditions d'utilisation » et « politique de confidentialité », au " +
+      "milieu de la phrase de consentement du pied. Mesurés 16 px de haut à " +
+      "390 px, tactile émulé — et c'est la hauteur voulue.",
+  },
+];
+
+/** Les cibles d'un pied qui ne sont PAS exemptées comme liens de prose. */
+const CIBLES_AUTONOMES_DES_PIEDS = CIBLES.filter(
+  (c) => !EN_FLUX.some((e) => c.fichier === e.fichier && c.balise.includes(e.repere)),
+);
+
+describe("les liens en flux de texte sont exemptés, et seulement eux", () => {
+  test("chaque exemption désigne exactement le nombre de liens déclaré", () => {
+    const ecarts = EN_FLUX.map((e) => {
+      const trouves = CIBLES.filter(
+        (c) => c.fichier === e.fichier && c.balise.includes(e.repere),
+      ).length;
+      return trouves === e.nombre
+        ? null
+        : `${e.fichier} — « ${e.repere} » désigne ${trouves} lien(s), ${e.nombre} déclaré(s)`;
+    }).filter((x): x is string => x !== null);
+
+    expect(
+      ecarts,
+      "Une exemption qui ne désigne plus le bon nombre de liens n'exempte plus " +
+        "ce qu'on croyait, et exempte peut-être ce qu'on n'a jamais voulu.",
+    ).toEqual([]);
+  });
+});
+
+describe("les cibles tactiles des pieds de page (suite)", () => {
   test("chaque cible d'un pied atteint les 44 points du brief §8", () => {
-    const fautives = CIBLES.filter((c) => !c.classes.includes(CLASSE_MINIMALE)).map(
-      (c) => c.libelle,
-    );
+    const fautives = CIBLES_AUTONOMES_DES_PIEDS.filter(
+      (c) => !c.classes.includes(CLASSE_MINIMALE),
+    ).map((c) => c.libelle);
     expect(
       fautives,
       `Ces cibles n'imposent pas ${CLASSE_MINIMALE} (44 px). Le brief §8 exige 44 points ` +
@@ -224,8 +290,12 @@ const AUTONOMES: ReadonlyArray<{
   },
   {
     fichier: "src/app/[locale]/connexion/page.tsx",
-    repere: "text-[17px] leading-[22px] font-extrabold",
-    raison: "Le logo d'en-tête de la connexion.",
+    repere: "LogoMarque hauteur={44}",
+    raison:
+      "Le logo d'en-tête de la connexion, migré le 11/09/2026. Ce n'est plus " +
+      "du texte agrandi par un plancher mais une IMAGE de 44 px de haut : la " +
+      "cible vient de sa hauteur propre, donc `min-h-11` n'a plus rien à y " +
+      "imposer. Mesuré à 390 px, tactile émulé.",
   },
   {
     fichier: "src/app/[locale]/inscription/page.tsx",
@@ -268,7 +338,7 @@ const AUTONOMES: ReadonlyArray<{
   },
   {
     fichier: "src/components/formulaire-connexion.tsx",
-    repere: "font-semibold text-violet after:absolute",
+    repere: "text-ds-texte-lien underline after:absolute",
     raison:
       "« Mot de passe oublié ? ». ⚠️ SEULE CIBLE POSÉE PAR UN PSEUDO-ÉLÉMENT, et " +
       "ce n'est pas un caprice : son parent est en `items-baseline`, et un " +

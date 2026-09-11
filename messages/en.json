@@ -165,9 +165,8 @@
     "signalementMetaDescription": "Report content hosted on DropLink. Describe the link and the reason: every report is read, and a page can be taken down without delay."
   },
   "connexion": {
-    "titre": "Good to see you again",
-    "sousTitre": "Enter your address and your password to find your orders again.",
-    "sousTitreCourt": "Your address and your password.",
+    "titre": "Welcome back",
+    "sousTitre": "Pick up your orders and customer tracking links.",
     "labelEmail": "Email address",
     "placeholderEmail": "you@example.com",
     "erreurEmailInvalide": "That address does not look valid.",
@@ -207,7 +206,20 @@
     "info": {
       "deconnecte": "You are logged out. See you soon.",
       "deconnexion-partielle": "You are logged out on this device, but we could not confirm it with the server. On a shared device, log in again and log out once more."
-    }
+    },
+    "argumentTitreA": "One tracking link for the whole ",
+    "argumentTitreB": "order",
+    "argumentTexteFort": "One tracking link per order",
+    "argumentTexteSuite": ": your customers stop asking where their parcel is.",
+    "atoutTitre1": "Fast and simple",
+    "atoutTexte1": "Create your orders in a few clicks.",
+    "atoutTitre2": "Everything in one place",
+    "atoutTexte2": "Photos, tracking, status, customer — all centralised.",
+    "atoutTitre3": "Built for sellers",
+    "atoutTexte3": "An experience built by and for online sellers.",
+    "ouAvec": "or continue with",
+    "placeholderMotDePasse": "Your password",
+    "noteSecurite": "Your data is secure and confidential."
   },
   "inscription": {
     "titre": "Create an account",

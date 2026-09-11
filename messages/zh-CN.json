@@ -166,8 +166,7 @@
   },
   "connexion": {
     "titre": "欢迎回来",
-    "sousTitre": "输入您的邮箱和密码，即可回到您的订单。",
-    "sousTitreCourt": "您的邮箱和密码。",
+    "sousTitre": "查看您的订单与客户物流链接。",
     "labelEmail": "邮箱地址",
     "placeholderEmail": "you@example.com",
     "erreurEmailInvalide": "这个邮箱地址似乎不正确。",
@@ -207,10 +206,23 @@
     "info": {
       "deconnecte": "您已退出登录。期待下次再见。",
       "deconnexion-partielle": "此设备已退出登录，但我们无法向服务器确认。如果这是共用设备，请重新登录后再次退出。"
-    }
+    },
+    "argumentTitreA": "一个物流链接，搞定整个",
+    "argumentTitreB": "订单",
+    "argumentTexteFort": "每笔订单一个物流链接",
+    "argumentTexteSuite": "：客户不再追问包裹到哪了。",
+    "atoutTitre1": "快速简单",
+    "atoutTexte1": "几次点击即可创建订单。",
+    "atoutTitre2": "全部集中在一处",
+    "atoutTexte2": "照片、物流、状态、客户，统一管理。",
+    "atoutTitre3": "为卖家而生",
+    "atoutTexte3": "由电商卖家打造，服务电商卖家。",
+    "ouAvec": "或使用以下方式",
+    "placeholderMotDePasse": "请输入密码",
+    "noteSecurite": "您的数据安全且保密。"
   },
   "inscription": {
-    "titre": "创建账户",
+    "titre": "注册账号",
     "badge": "上线初期免费",
     "accroche": "三分钟发出第一个订单页面",
     "sousTitre": "创建账户，设置您的店名和主色，发出第一个链接。",
@@ -218,7 +230,7 @@
     "argument2": "您的客户始终无需注册账户",
     "argument3": "页面始终使用您的店名和配色",
     "formulaireTitre": "创建我的账户",
-    "dejaCompteTexte": "已经有账户了？",
+    "dejaCompteTexte": "已有账号？",
     "bouton": "创建我的账户",
     "boutonEnCours": "正在创建…",
     "aideMotDePasse": "至少 12 个字符。建议用一句话，而不是一个复杂的词。",

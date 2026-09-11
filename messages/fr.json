@@ -165,9 +165,8 @@
     "signalementMetaDescription": "Signaler un contenu hébergé sur DropLink. Décrivez le lien concerné et le motif : chaque signalement est lu, et une page peut être coupée sans délai."
   },
   "connexion": {
-    "titre": "Content de vous revoir",
-    "sousTitre": "Entrez votre adresse et votre mot de passe pour retrouver vos commandes.",
-    "sousTitreCourt": "Votre adresse et votre mot de passe.",
+    "titre": "Bon retour",
+    "sousTitre": "Retrouvez vos commandes et vos liens de suivi client.",
     "labelEmail": "Adresse email",
     "placeholderEmail": "vous@exemple.com",
     "erreurEmailInvalide": "Cette adresse ne semble pas valide.",
@@ -207,7 +206,20 @@
     "info": {
       "deconnecte": "Vous êtes déconnecté. À bientôt.",
       "deconnexion-partielle": "Vous êtes déconnecté de cet appareil, mais nous n’avons pas pu le confirmer auprès du serveur. Sur un appareil partagé, reconnectez-vous et redemandez la déconnexion."
-    }
+    },
+    "argumentTitreA": "Un seul lien de suivi pour toute la ",
+    "argumentTitreB": "commande",
+    "argumentTexteFort": "Un lien de suivi par commande",
+    "argumentTexteSuite": " : vos clients arrêtent de vous demander où en est leur colis.",
+    "atoutTitre1": "Rapide et simple",
+    "atoutTexte1": "Créez vos commandes en quelques clics.",
+    "atoutTitre2": "Tout au même endroit",
+    "atoutTexte2": "Photos, suivi, statut, client… tout est centralisé.",
+    "atoutTitre3": "Conçu pour les vendeurs",
+    "atoutTexte3": "Une expérience pensée par et pour les e-commerçants.",
+    "ouAvec": "ou continuer avec",
+    "placeholderMotDePasse": "Votre mot de passe",
+    "noteSecurite": "Vos données sont sécurisées et confidentielles."
   },
   "inscription": {
     "titre": "Créer un compte",
@@ -218,7 +230,7 @@
     "argument2": "Votre client n’a jamais besoin de créer un compte",
     "argument3": "Vos pages restent à votre nom et à vos couleurs",
     "formulaireTitre": "Créer mon compte",
-    "dejaCompteTexte": "Vous avez déjà un compte ?",
+    "dejaCompteTexte": "Déjà un compte ?",
     "bouton": "Créer mon compte",
     "boutonEnCours": "Création…",
     "aideMotDePasse": "12 caractères minimum. Prenez plutôt une phrase qu’un mot compliqué.",

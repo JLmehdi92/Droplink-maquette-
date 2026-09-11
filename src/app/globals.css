@@ -569,6 +569,21 @@ body {
 }
 
 /*
+ * Le dégradé du design system, pour les écrans migrés.
+ *
+ * ⚠️ IL NE POSE AUCUNE COULEUR DE TEXTE, contrairement à son aîné ci-dessus qui
+ * force `#ffffff`. Le brief l'interdit : sur un aplat d'accent le texte prend
+ * `surRemplissage`, jamais un blanc en dur — la couleur d'accent est une
+ * variable pilotée par le vendeur, et un blanc figé deviendrait illisible sur
+ * un accent clair. Ici le dégradé est celui de DropLink, donc toujours sombre,
+ * mais la règle ne souffre pas d'exception locale : c'est ainsi qu'elle survit
+ * au copier-coller vers un écran où elle compte.
+ */
+.degrade-ds-marque {
+  background-image: var(--degrade-ds-marque);
+}
+
+/*
  * Champs de saisie. Fond légèrement en retrait de la carte, filet au repos,
  * accent et halo au focus.
  *
@@ -881,13 +896,33 @@ body {
  * celle de l'URL ailleurs. Une classe posée à la main aurait été oubliée sur le
  * prochain écran ; `:lang()` suit l'attribut, et l'attribut suit la donnée.
  */
+/*
+ * ⚠️ CETTE RÈGLE ÉTAIT UNE LISTE ÉNUMÉRÉE, ET ELLE S'EST PÉRIMÉE EN SILENCE.
+ *
+ * Elle nommait six valeurs — `-0.01em` à `-0.05em` — parce que c'étaient celles
+ * écrites dans le markup le jour où elle a été posée. Le 11/09/2026, la
+ * migration de l'écran de connexion sur le design system a introduit
+ * `-0.045em` et `-0.04em` : deux valeurs de plus, absentes de la liste, donc
+ * NON neutralisées. Mesuré dans Chrome sur `/zh-CN/connexion` servi — le titre
+ * rendait `-1.8px` et le sous-titre `-1.12px`, c'est-à-dire des idéogrammes
+ * collés, exactement ce que la règle existait pour empêcher.
+ *
+ * ⚠️ ET RIEN N'AURAIT PU LE DIRE. Une liste d'exceptions ne sait pas qu'il lui
+ * en manque une : elle s'applique correctement à ce qu'elle nomme, et se tait
+ * sur le reste. C'est la forme la plus coûteuse de garde — celle qui reste
+ * verte pendant que le défaut qu'elle vise réapparaît à côté.
+ *
+ * Elle est donc remplacée par une règle qui ne PEUT PAS se périmer : en
+ * chinois, aucun élément ne porte d'interlettrage, quelle que soit la classe
+ * qui l'a demandé. C'est aussi ce que le design system prescrit —
+ * `html[lang^="zh"] *{letter-spacing:0}`.
+ *
+ * Le serrage NÉGATIF colle les idéogrammes ; l'ESPACEMENT positif de l'eyebrow
+ * les disperse tout autant, un idéogramme portant déjà sa propre chasse. Les
+ * deux tombent, et c'est voulu.
+ */
 @layer utilities {
-  :lang(zh-CN) .tracking-\[-0\.01em\],
-  :lang(zh-CN) .tracking-\[-0\.015em\],
-  :lang(zh-CN) .tracking-\[-0\.02em\],
-  :lang(zh-CN) .tracking-\[-0\.025em\],
-  :lang(zh-CN) .tracking-\[-0\.03em\],
-  :lang(zh-CN) .tracking-\[-0\.05em\] {
+  :lang(zh-CN) * {
     letter-spacing: 0;
   }
 

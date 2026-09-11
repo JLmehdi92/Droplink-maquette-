@@ -4,7 +4,14 @@ import Link from "next/link";
 import { FormulaireConnexion } from "@/components/formulaire-connexion";
 import { BoutonGoogle } from "@/components/bouton-google";
 import { TraductionsClient } from "@/components/traductions-client";
-import { PanneauAcces } from "@/components/panneau-acces";
+import { ArrowRight } from "lucide-react";
+import {
+  ArgumentAcces,
+  FondAcces,
+  LogoMarque,
+  NoteSecurite,
+  SeparateurAcces,
+} from "@/components/acces/coque-acces";
 import { routing } from "@/i18n/routing";
 
 /**
@@ -114,27 +121,61 @@ export default async function Connexion({
   const info = infoConnue(typeof brutInfo === "string" ? brutInfo : undefined);
 
   return (
-    <div className="min-h-dvh bg-canvas p-3 md:p-7">
-      <main
-        id="contenu"
-        className="mx-auto grid min-h-[calc(100dvh-24px)] w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-page-publique lg:grid-cols-2"
-      >
-        <div className="flex flex-col px-[22px] pt-7 pb-[26px] md:px-[76px] md:py-10">
-          <Link
-            href={`/${locale}`}
-            className="-my-[11px] inline-flex min-h-11 items-center font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:-my-[10.5px] md:text-[18px] md:leading-[23px]"
-          >
-            DropLink
+    <>
+      <FondAcces />
+      {/*
+       * LA PAGE, SUR LA GÉOMÉTRIE DE LA RÉFÉRENCE : padding 40/56/32 au bureau,
+       * resserré au téléphone où encadrer coûterait un dixième de la largeur.
+       */}
+      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 md:px-14 md:pt-10 md:pb-8">
+        <header className="flex flex-wrap items-center gap-3">
+          {/*
+            ⚠️ `min-h-11` MALGRÉ UNE IMAGE DÉJÀ HAUTE DE 44 PX, et ce n'est pas
+            une redondance : si le logo ne se charge pas — 404, réseau coupé,
+            format refusé — le lien s'effondre à la hauteur de son texte
+            alternatif, et la cible disparaît avec lui. Le plancher tient
+            indépendamment de ce que le réseau rend.
+          */}
+          <Link href={`/${locale}`} className="inline-flex min-h-11 items-center">
+            <LogoMarque hauteur={44} className="md:h-13 md:w-auto" />
           </Link>
+          <span className="flex-1" />
+          <span className="hidden text-[14px] text-ds-texte-corps sm:inline md:mr-[18px]">
+            {t("pasDeCompteTitre")}
+          </span>
+          {/* L'action secondaire de l'en-tête : pilule, 52 px, dégradé de marque.
+              C'est la SEULE action au dégradé de cet écran avec le bouton du
+              formulaire — or la règle en autorise UNE. Celle-ci est donc en
+              contour, et le dégradé reste au formulaire, qui est ce qu'on vient
+              faire ici. */}
+          <Link
+            href={`/${locale}/inscription`}
+            className="inline-flex h-13 items-center gap-2 rounded-ds-pill border border-ds-filet-appuye bg-ds-surface-carte px-5 text-[15px] font-semibold text-ds-texte-fort transition-shadow hover:shadow-ds-sm"
+          >
+            {t("lienCreerCompte")}
+            <ArrowRight aria-hidden="true" size={18} strokeWidth={1.8} />
+          </Link>
+        </header>
 
-          <div className="flex max-w-[400px] flex-grow flex-col justify-center py-[30px]">
-            <h1 className="font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
-              {t("titre")}
-            </h1>
-            <p className="mt-2.5 font-body-md text-[15px] leading-6 text-sourdine">
-              <span className="md:hidden">{t("sousTitreCourt")}</span>
-              <span className="hidden md:inline">{t("sousTitre")}</span>
-            </p>
+        <main
+          id="contenu"
+          className="grid flex-1 items-center gap-20 py-12 lg:grid-cols-[minmax(0,1fr)_520px]"
+        >
+          {/* MASQUÉ SOUS `lg`, ET C'EST LE POINT. Cette colonne ne porte aucune
+              information dont la connexion dépende : sur un écran étroit elle
+              disparaît entièrement, sans que rien ne manque. */}
+          <div className="hidden lg:block">
+            <ArgumentAcces />
+          </div>
+
+          <div className="mx-auto flex w-full max-w-[520px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-12 md:py-11">
+            <div className="flex flex-col items-center gap-[14px]">
+              <LogoMarque hauteur={46} />
+              <h2 className="text-[28px] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
+                {t("titre")}
+              </h2>
+              <p className="text-center text-[15px] text-ds-texte-corps">{t("sousTitre")}</p>
+            </div>
 
             {/* CE QUI A ÉCHOUÉ EST DIT. La route de retour redirige ici avec son
                 motif depuis le premier jour, et rien ne l'affichait : un lien
@@ -148,7 +189,7 @@ export default async function Connexion({
             {motif === null ? null : (
               <p
                 role="alert"
-                className="mt-6 rounded-md border border-error bg-error-container p-4 font-body-sm text-body-sm text-on-error-container"
+                className="rounded-ds-card border border-ds-erreur bg-ds-erreur-fond p-4 text-[14px] text-ds-erreur"
               >
                 {t(`motif.${motif}`)}
               </p>
@@ -162,17 +203,17 @@ export default async function Connexion({
             {info === null ? null : (
               <p
                 role="status"
-                className="mt-6 rounded-md border border-outline-variant bg-surface-container-low p-4 font-body-sm text-body-sm text-on-surface-variant"
+                className="rounded-ds-card border border-ds-filet bg-ds-surface-creux p-4 text-[14px] text-ds-texte-corps"
               >
                 {t(`info.${info}`)}
               </p>
             )}
 
-            <div className="mt-7 md:mt-[34px]">
-              <TraductionsClient espaces={["connexion"]}>
-                <FormulaireConnexion locale={locale} />
-              </TraductionsClient>
-            </div>
+            <TraductionsClient espaces={["connexion"]}>
+              <FormulaireConnexion locale={locale} />
+            </TraductionsClient>
+
+            <SeparateurAcces libelle={t("ouAvec")} />
 
             {/* APRÈS le formulaire, et non avant : Google est inaccessible au
                 fournisseur en Chine. Le placer en tête ferait passer pour
@@ -180,32 +221,37 @@ export default async function Connexion({
                 est le seul qui existe. */}
             <BoutonGoogle locale={locale} />
 
-            <p className="mt-[26px] text-center font-body-md text-[14px] leading-[22px] text-sourdine md:mt-[30px] md:text-left md:text-[13px] md:leading-[21px]">
+            <p className="text-center text-[14px] text-ds-texte-corps">
               {t("pasDeCompteTitre")}{" "}
               <Link
                 href={`/${locale}/inscription`}
-                className="font-semibold text-violet hover:underline"
+                className="font-bold text-ds-texte-lien hover:underline"
               >
                 {t("lienCreerCompte")}
               </Link>
             </p>
-          </div>
 
-          <p className="text-center font-body-sm text-[11px] leading-[18px] text-sourdine md:text-left md:text-[12px] md:leading-[15px]">
+            <NoteSecurite />
+          </div>
+        </main>
+
+        <footer>
+          <p className="text-center text-[12px] leading-[18px] text-ds-texte-tenu md:text-left">
             {t("cgvAvant")}{" "}
-            <Link href={`/${locale}/conditions`} className="text-violet hover:underline">
+            <Link href={`/${locale}/conditions`} className="text-ds-texte-lien hover:underline">
               {t("cgvConditions")}
             </Link>{" "}
             {t("cgvEt")}{" "}
-            <Link href={`/${locale}/confidentialite`} className="text-violet hover:underline">
+            <Link
+              href={`/${locale}/confidentialite`}
+              className="text-ds-texte-lien hover:underline"
+            >
               {t("cgvConfidentialite")}
             </Link>
             .
           </p>
-        </div>
-
-        <PanneauAcces />
-      </main>
-    </div>
+        </footer>
+      </div>
+    </>
   );
 }

@@ -73,6 +73,21 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#34a853", "logo Google"],
   ["#c13584", "logo Instagram"],
   ["#1da851", "logo WhatsApp"],
+  /*
+   * ⚠️ LES TROIS ARRÊTS DU FOND DES ÉCRANS D'ACCÈS, ET POURQUOI ILS N'ONT PAS
+   * DE TOKEN. Le design system pose ce dégradé EN DUR dans son `AuthBackdrop` :
+   * `linear-gradient(135deg,#F3F1FE 0%,#FAF8FE 42%,#F7F2FC 100%)`. Il ne le
+   * range pas dans `tokens/colors.css` parce qu'il ne sert qu'à ces deux
+   * écrans — trois teintes de lavande à peine distinctes, qui n'ont de sens
+   * qu'ensemble et dans cet ordre.
+   *
+   * Les nommer ici les rend RELUES plutôt que tolérées : si un troisième écran
+   * les employait, ce serait le signe qu'elles méritent un token, et cette
+   * ligne est l'endroit où on s'en apercevrait.
+   */
+  ["#f3f1fe", "fond des écrans d'accès — arrêt 0 %, repris du design system"],
+  ["#faf8fe", "fond des écrans d'accès — arrêt 42 %"],
+  ["#f7f2fc", "fond des écrans d'accès — arrêt 100 %"],
 ];
 const tolerees = new Map(EXCEPTIONS);
 
