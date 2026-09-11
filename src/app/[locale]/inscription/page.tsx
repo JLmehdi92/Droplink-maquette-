@@ -1,10 +1,16 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BoutonGoogle } from "@/components/bouton-google";
 import { FormulaireInscription } from "@/components/formulaire-inscription";
-import { Icone } from "@/components/icone";
+import { BoutonGoogle } from "@/components/bouton-google";
 import { TraductionsClient } from "@/components/traductions-client";
+import {
+  ArgumentAcces,
+  FondAcces,
+  LogoMarque,
+  NoteSecurite,
+  SeparateurAcces,
+} from "@/components/acces/coque-acces";
 import { routing } from "@/i18n/routing";
 
 /**
@@ -78,125 +84,84 @@ export default async function Inscription({
   setRequestLocale(locale);
   const t = await getTranslations("inscription");
   const tc = await getTranslations("connexion");
-  const nav = await getTranslations("navigation");
-
-  // Trois appels littéraux, et non une clé composée : la sonde des chaînes
-  // mortes ne voit pas ce qu'un `+` assemble, et une phrase d'argumentaire
-  // retirée du catalogue ne se signalerait alors nulle part.
-  const arguments_ = [t("argument1"), t("argument2"), t("argument3")];
-
-  const mention = (
-    <p className="text-center font-body-sm text-[11px] leading-[17px] text-sourdine">
-      {tc("cgvAvant")}{" "}
-      <Link href={`/${locale}/conditions`} className="text-violet hover:underline">
-        {tc("cgvConditions")}
-      </Link>{" "}
-      {tc("cgvEt")}{" "}
-      <Link href={`/${locale}/confidentialite`} className="text-violet hover:underline">
-        {tc("cgvConfidentialite")}
-      </Link>
-      .
-    </p>
-  );
-
   return (
-    <div className="min-h-dvh bg-canvas p-3 md:p-7">
-      <main
-        id="contenu"
-        className="mx-auto flex min-h-[calc(100dvh-24px)] w-full max-w-[1384px] flex-col rounded-[24px] bg-surface-container-lowest px-5 pt-[26px] pb-[22px] md:min-h-[calc(100dvh-56px)] md:rounded-page-publique md:px-0 md:pt-0 md:pb-0"
-      >
-        {/*
-          ⚠️ COMPENSATION ASYMÉTRIQUE, ET ELLE EST OBLIGATOIRE ICI. Le plancher
-          tactile de 44 points (brief §8) fait grandir ce logo de 22 px, donc il
-          faut en reprendre 11 en haut et 11 en bas. Mais ce logo porte DÉJÀ sa
-          marge basse de 26 px, qu'un "-my-" écraserait purement et simplement :
-          on écrit donc "-mt-[11px]" d'un côté et "mb-[15px]" de l'autre, soit
-          26 moins 11. Première tentative, sans compensation du tout : la page
-          raccourcissait de 80 px. Mesuré après correction : hauteur inchangée.
-
-          En bureau, "md:py-[26px]" porte déjà la boîte bien au-delà de 44 px —
-          le plancher n'y change rien, d'où "md:mt-0 md:mb-0".
-        */}
-        <Link
-          href={`/${locale}`}
-          className="-mt-[11px] mb-[15px] inline-flex min-h-11 items-center font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:mt-0 md:mb-0 md:px-10 md:py-[26px] md:text-[18px] md:leading-[23px]"
+    <>
+      <FondAcces />
+      {/*
+       * ⚠️ LA GRILLE DE L'INSCRIPTION N'EST PAS CELLE DE LA CONNEXION. La
+       * référence donne 620 px à la carte au lieu de 520, un espacement de 72
+       * au lieu de 80, et aligne les deux colonnes en HAUT et non au centre :
+       * le formulaire y est plus long que l'argument, donc un centrage
+       * laisserait la colonne de gauche flotter au milieu du vide.
+       */}
+      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 md:px-14 md:pt-10 md:pb-8">
+        <main
+          id="contenu"
+          className="grid flex-1 items-start gap-[72px] py-4 lg:grid-cols-[minmax(0,1fr)_620px]"
         >
-          DropLink
-        </Link>
-
-        <div className="flex flex-grow flex-col md:grid md:grid-cols-2 md:items-center md:gap-[90px] md:px-24 md:pb-10">
-          {/* ---- L'ARGUMENTAIRE ------------------------------------------ */}
-          <div className="contents md:block">
-            <span className="mb-4 inline-flex self-start items-center gap-[7px] rounded-full border border-filet-controle px-3 py-1.5 font-headline-md text-[10px] leading-3 font-bold tracking-[0.05em] text-ardoise md:mb-0 md:gap-2 md:px-3.5 md:py-[7px] md:text-[11px] md:leading-[13px] md:font-semibold">
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-succes" />
-              {t("badge")}
-            </span>
-
-            <h1 className="mb-3 font-headline-xl text-[30px] leading-[35px] font-extrabold tracking-[-0.035em] text-on-surface md:mt-[22px] md:mb-4 md:text-[46px] md:leading-[52px]">
-              {t("accroche")}
-            </h1>
-
-            {/* La planche mobile SUPPRIME ce paragraphe : les trois arguments
-                qui suivent disent déjà ce qu'il annonçait, et l'écran doit tenir
-                sans défilement jusqu'au champ email. */}
-            <p className="hidden font-body-lg text-[16px] leading-[26px] text-sourdine md:mb-[34px] md:block">
-              {t("sousTitre")}
-            </p>
-
-            <ul className="mb-[26px] flex flex-col gap-[11px] md:mb-0 md:gap-4">
-              {arguments_.map((argument) => (
-                <li key={argument} className="flex items-start gap-[11px]">
-                  <span
-                    aria-hidden="true"
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-succes-fond"
-                  >
-                    <Icone nom="done" className="text-[12px] text-succes" />
-                  </span>
-                  <span className="font-headline-md text-[14px] leading-[21px] text-on-surface md:text-[15px] md:leading-[22px]">
-                    {argument}
-                  </span>
-                </li>
-              ))}
-            </ul>
+          <div className="hidden flex-col gap-[34px] pt-1 lg:flex">
+            <Link href={`/${locale}`} className="inline-flex min-h-11 items-center self-start">
+              <LogoMarque hauteur={52} />
+            </Link>
+            <ArgumentAcces variante="inscription" />
           </div>
 
-          {/* ---- LE FORMULAIRE, dans sa propre carte au bureau ------------ */}
-          <div className="contents md:block md:rounded-[22px] md:border md:border-outline-variant md:bg-surface-container-low md:p-[38px]">
-            <h2 className="hidden font-headline-md text-[24px] leading-[30px] font-bold tracking-[-0.02em] text-on-surface md:mb-[26px] md:block">
-              {t("formulaireTitre")}
-            </h2>
-
-            {/* ⚠️ CE N'EST PLUS LE MÊME COMPOSANT QUE LA CONNEXION. Il l'était,
-                avec une propriété `intention` qui ne changeait que le libellé du
-                bouton — parce qu'avec un lien magique le serveur faisait
-                strictement la même chose des deux côtés. Depuis le mot de passe,
-                l'un vérifie et l'autre crée : ils ont deux jeux de refus, deux
-                compteurs et deux actions. */}
-            <TraductionsClient espaces={["connexion", "inscription"]}>
-              <FormulaireInscription locale={locale} />
-            </TraductionsClient>
-
-            <BoutonGoogle locale={locale} />
-
-            <p className="mt-6 text-center font-body-md text-[14px] leading-[22px] text-sourdine md:mt-6 md:text-[13px] md:leading-[21px]">
+          <div className="mx-auto flex w-full max-w-[620px] flex-col gap-5 rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-11 md:pt-[30px] md:pb-10">
+            <p className="text-right text-[14px] text-ds-texte-corps">
               {t("dejaCompteTexte")}{" "}
               <Link
                 href={`/${locale}/connexion`}
-                className="font-semibold text-violet hover:underline"
+                className="font-semibold text-ds-texte-lien underline hover:text-ds-texte-lien-survol"
               >
-                {nav("seConnecter")}
+                {t("lienSeConnecter")}
               </Link>
             </p>
+
+            <div className="flex flex-col items-center gap-2.5">
+              <LogoMarque hauteur={48} />
+              <h1 className="text-[26px] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[32px]">
+                {t("titreCarte")}
+              </h1>
+              <p className="text-center text-[15px] text-ds-texte-corps">{t("sousTitreCarte")}</p>
+            </div>
+
+            {/* ⚠️ GOOGLE EN PREMIER ICI, ET APRÈS LE FORMULAIRE SUR LA CONNEXION —
+                ce n'est pas une incohérence, c'est la référence. S'INSCRIRE par
+                Google évite de choisir un mot de passe ; SE CONNECTER par Google
+                suppose de l'avoir déjà fait. Et le fournisseur en Chine, pour qui
+                Google est inaccessible, trouve le formulaire juste en dessous. */}
+            <BoutonGoogle locale={locale} />
+
+            <SeparateurAcces libelle={tc("ou")} />
+
+            <TraductionsClient espaces={["inscription", "connexion"]}>
+              <FormulaireInscription locale={locale} />
+            </TraductionsClient>
+
+            {/* ⚠️ LA RÉFÉRENCE EN FAIT UNE CASE À COCHER QUI BLOQUE LE BOUTON.
+                Le produit consent PAR LA CONTINUATION, et passer à un
+                consentement bloquant est un changement de PRODUIT, pas de
+                design : c'est une étape de plus sur le seul écran qui doit être
+                court, et rien dans le brief ne la demande. La phrase reste. */}
+            <p className="text-center text-[12px] leading-[18px] text-ds-texte-tenu">
+              {tc("cgvAvant")}{" "}
+              <Link href={`/${locale}/conditions`} className="text-ds-texte-lien hover:underline">
+                {tc("cgvConditions")}
+              </Link>{" "}
+              {tc("cgvEt")}{" "}
+              <Link
+                href={`/${locale}/confidentialite`}
+                className="text-ds-texte-lien hover:underline"
+              >
+                {tc("cgvConfidentialite")}
+              </Link>
+              .
+            </p>
+
+            <NoteSecurite />
           </div>
-
-          {/* Au téléphone, la mention légale est poussée en bas de carte par
-              l'espace qui reste ; au bureau elle ferme la page sous les deux
-              colonnes. */}
-          <div className="mt-auto pt-5 md:hidden">{mention}</div>
-        </div>
-
-        <div className="hidden md:block md:px-24 md:pb-10">{mention}</div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 }

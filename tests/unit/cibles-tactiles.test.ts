@@ -299,10 +299,13 @@ const AUTONOMES: ReadonlyArray<{
   },
   {
     fichier: "src/app/[locale]/inscription/page.tsx",
-    repere: "text-[17px] leading-[22px] font-extrabold",
+    repere: "LogoMarque hauteur={52}",
     raison:
-      "Le logo d'en-tête de l'inscription. Il porte sa propre marge basse : la " +
-      "compensation y est asymétrique (-11 en haut, 26-11 en bas) pour ne pas l'écraser.",
+      "Le logo de l'inscription, migré le 11/09/2026. Ce n'est plus du texte " +
+      "agrandi par un plancher mais une IMAGE de 52 px : la cible vient de sa " +
+      "hauteur propre. `min-h-11` reste posé quand même — si l'image ne se " +
+      "charge pas, le lien s'effondrerait à la hauteur de son texte alternatif " +
+      "et la cible disparaîtrait avec elle.",
   },
   {
     fichier: "src/app/[locale]/mot-de-passe-oublie/page.tsx",

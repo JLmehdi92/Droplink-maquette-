@@ -223,13 +223,8 @@
   },
   "inscription": {
     "titre": "注册账号",
-    "badge": "上线初期免费",
-    "accroche": "三分钟发出第一个订单页面",
-    "sousTitre": "创建账户，设置您的店名和主色，发出第一个链接。",
-    "argument1": "无需绑定银行卡",
-    "argument2": "您的客户始终无需注册账户",
-    "argument3": "页面始终使用您的店名和配色",
-    "formulaireTitre": "创建我的账户",
+    "badge": "加入数千位卖家",
+    "accroche": "注册账号后即可创建第一个客户物流链接：照片、运单号、承运商状态，一分钟内完成。",
     "dejaCompteTexte": "已有账号？",
     "bouton": "创建我的账户",
     "boutonEnCours": "正在创建…",
@@ -237,7 +232,12 @@
     "erreurMdpTropCourt": "密码至少需要 12 个字符。",
     "erreurMdpTropLong": "密码太长了，请稍微缩短。",
     "erreurMdpContientEmail": "密码不能包含您的邮箱地址。",
-    "erreurDejaInscrit": "该邮箱已注册。请直接登录。"
+    "erreurDejaInscrit": "该邮箱已注册。请直接登录。",
+    "titreCarte": "注册账号",
+    "sousTitreCarte": "免费开始，一分钟内完成。",
+    "lienSeConnecter": "登录",
+    "atoutTitre1": "快速上手",
+    "atoutTexte1": "一分钟内完成注册。"
   },
   "onboarding": {
     "titre": "把您的名字放到页面上",

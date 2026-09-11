@@ -223,13 +223,8 @@
   },
   "inscription": {
     "titre": "Create an account",
-    "badge": "FREE DURING LAUNCH",
-    "accroche": "Your first order in three minutes",
-    "sousTitre": "Create your account, set your name and your colour, send your first link.",
-    "argument1": "No bank card required",
-    "argument2": "Your customer never needs to create an account",
-    "argument3": "Your pages keep your name and your colours",
-    "formulaireTitre": "Create my account",
+    "badge": "Join thousands of sellers",
+    "accroche": "Create your account, then your first customer tracking link: photos, tracking number, carrier status — in under a minute.",
     "dejaCompteTexte": "Already have an account?",
     "bouton": "Create my account",
     "boutonEnCours": "Creating…",
@@ -237,7 +232,12 @@
     "erreurMdpTropCourt": "Your password must be at least 12 characters long.",
     "erreurMdpTropLong": "Your password is too long. Shorten it a little.",
     "erreurMdpContientEmail": "Your password must not contain your email address.",
-    "erreurDejaInscrit": "An account already exists for this address. Log in instead."
+    "erreurDejaInscrit": "An account already exists for this address. Log in instead.",
+    "titreCarte": "Create an account",
+    "sousTitreCarte": "Start free, in under a minute.",
+    "lienSeConnecter": "Log in",
+    "atoutTitre1": "Quick to set up",
+    "atoutTexte1": "Create your account in under a minute."
   },
   "onboarding": {
     "titre": "Let’s put your name on the page",

@@ -248,16 +248,27 @@ export function MessageErreur({ id, texte }: { readonly id: string; readonly tex
 export function BoutonPrincipalDs({
   libelle,
   libelleEnCours,
+  /**
+   * 58 sur la connexion, 60 sur l'inscription — mesuré sur la référence, et pas
+   * arrondi. Deux pixels ne se voient pas seuls ; ils se voient quand les deux
+   * écrans se succèdent et que le bouton saute.
+   */
+  hauteur = 58,
 }: {
   readonly libelle: string;
   readonly libelleEnCours: string;
+  readonly hauteur?: 58 | 60;
 }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={pending}
-      className="degrade-ds-marque flex h-[58px] w-full items-center justify-center gap-[10px] rounded-ds-card text-[16px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover disabled:opacity-60"
+      className={
+        `degrade-ds-marque flex w-full items-center justify-center gap-[10px] rounded-ds-card ` +
+        `text-[16px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow ` +
+        `hover:shadow-ds-brand-hover disabled:opacity-60 ${hauteur === 60 ? "h-[60px]" : "h-[58px]"}`
+      }
     >
       {pending ? <Anneau /> : null}
       <span>{pending ? libelleEnCours : libelle}</span>

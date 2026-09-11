@@ -171,9 +171,9 @@ export default async function Connexion({
           <div className="mx-auto flex w-full max-w-[520px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-12 md:py-11">
             <div className="flex flex-col items-center gap-[14px]">
               <LogoMarque hauteur={46} />
-              <h2 className="text-[28px] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
+              <h1 className="text-[28px] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
                 {t("titre")}
-              </h2>
+              </h1>
               <p className="text-center text-[15px] text-ds-texte-corps">{t("sousTitre")}</p>
             </div>
 

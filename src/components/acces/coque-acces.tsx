@@ -127,33 +127,78 @@ export async function NoteSecurite() {
  *
  * Ce qui reste est vérifiable, et c'est le seul critère.
  */
-export async function ArgumentAcces() {
+export async function ArgumentAcces({
+  variante = "connexion",
+}: {
+  readonly variante?: "connexion" | "inscription";
+} = {}) {
   const t = await getTranslations("connexion");
+  const ti = await getTranslations("inscription");
+  const inscription = variante === "inscription";
 
+  /*
+   * ⚠️ LE PREMIER ATOUT CHANGE ENTRE LES DEUX ÉCRANS, LES DEUX AUTRES NON.
+   * La référence le fait exprès : sur la connexion il vend la RAPIDITÉ D'USAGE
+   * (« Créez vos commandes en quelques clics »), sur l'inscription la RAPIDITÉ
+   * D'ENTRÉE (« Créez votre compte en moins d'une minute »). On arrive sur ces
+   * deux écrans avec une question différente ; y répondre par la même phrase
+   * serait plus simple et moins juste.
+   */
   const atouts: ReadonlyArray<{ icone: LucideIcon; titre: string; texte: string }> = [
-    { icone: Zap, titre: t("atoutTitre1"), texte: t("atoutTexte1") },
+    inscription
+      ? { icone: Zap, titre: ti("atoutTitre1"), texte: ti("atoutTexte1") }
+      : { icone: Zap, titre: t("atoutTitre1"), texte: t("atoutTexte1") },
     { icone: Package, titre: t("atoutTitre2"), texte: t("atoutTexte2") },
     { icone: BarChart3, titre: t("atoutTitre3"), texte: t("atoutTexte3") },
   ];
 
   return (
-    <div className="flex max-w-[460px] flex-col gap-9">
+    <div className={`flex flex-col ${inscription ? "gap-[34px]" : "gap-9"} max-w-[460px]`}>
       <div>
+        {inscription ? (
+          <span className="mb-5 inline-flex rounded-ds-pill border border-ds-filet bg-white/[0.78] px-4 py-2 text-[11px] font-bold tracking-[0.1em] text-ds-ink-600 uppercase">
+            {ti("badge")}
+          </span>
+        ) : null}
         {/*
          * ⚠️ 58 px, PAS 64. Le design system pose le hero à 64 ; la référence
          * `auth` rend 58 — mesuré sur sa page servie à 1440. Recopier la valeur
          * du token aurait donné un titre trop grand de six pixels sur le seul
          * écran qui le porte.
          */}
-        <h1 className="text-[40px] leading-[0.98] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[58px]">
+        {/*
+         * ⚠️ UN `<p>`, PAS UN `<h1>`, ET C'EST UNE CORRECTION DE STRUCTURE.
+         * La référence met son grand titre ici et un `<h2>` dans la carte. Mais
+         * cette colonne DISPARAÎT sous `lg` : au téléphone, la page se
+         * retrouvait sans aucun `<h1>`, et au bureau elle en portait DEUX —
+         * relevé en mesurant les titres rendus, jamais visible à l'œil puisque
+         * les deux sont dessinés pareil.
+         *
+         * Le `<h1>` est donc le titre de la CARTE, qui est présent à toutes les
+         * largeurs. Celui-ci garde son dessin au pixel près et rend sa balise.
+         */}
+        <p
+          className={
+            "font-extrabold tracking-[-0.045em] text-ds-texte-titre " +
+            (inscription
+              ? "text-[36px] leading-[1.0] md:text-[52px]"
+              : "text-[40px] leading-[0.98] md:text-[58px]")
+          }
+        >
           {t("argumentTitreA")}
           <span className="degrade-ds-marque bg-clip-text text-transparent">
             {t("argumentTitreB")}
           </span>
-        </h1>
-        <p className="mt-5 text-[17px] leading-[1.5] text-ds-texte-corps">
-          <strong className="font-bold text-ds-texte-fort">{t("argumentTexteFort")}</strong>
-          {t("argumentTexteSuite")}
+        </p>
+        <p className="mt-[18px] text-[17px] leading-[1.5] text-ds-texte-corps">
+          {inscription ? (
+            ti("accroche")
+          ) : (
+            <>
+              <strong className="font-bold text-ds-texte-fort">{t("argumentTexteFort")}</strong>
+              {t("argumentTexteSuite")}
+            </>
+          )}
         </p>
       </div>
 

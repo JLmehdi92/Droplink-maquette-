@@ -223,13 +223,8 @@
   },
   "inscription": {
     "titre": "Créer un compte",
-    "badge": "GRATUIT PENDANT LE LANCEMENT",
-    "accroche": "Votre première commande en trois minutes",
-    "sousTitre": "Créez votre compte, configurez votre nom et votre couleur, envoyez votre premier lien.",
-    "argument1": "Aucune carte bancaire demandée",
-    "argument2": "Votre client n’a jamais besoin de créer un compte",
-    "argument3": "Vos pages restent à votre nom et à vos couleurs",
-    "formulaireTitre": "Créer mon compte",
+    "badge": "Rejoignez des milliers de vendeurs",
+    "accroche": "Créez votre compte, puis votre premier lien de suivi client : photos, numéro de suivi, statut transporteur, en moins d'une minute.",
     "dejaCompteTexte": "Déjà un compte ?",
     "bouton": "Créer mon compte",
     "boutonEnCours": "Création…",
@@ -237,7 +232,12 @@
     "erreurMdpTropCourt": "Votre mot de passe doit faire au moins 12 caractères.",
     "erreurMdpTropLong": "Votre mot de passe est trop long. Raccourcissez-le un peu.",
     "erreurMdpContientEmail": "Votre mot de passe ne doit pas contenir votre adresse email.",
-    "erreurDejaInscrit": "Un compte existe déjà pour cette adresse. Connectez-vous."
+    "erreurDejaInscrit": "Un compte existe déjà pour cette adresse. Connectez-vous.",
+    "titreCarte": "Créer un compte",
+    "sousTitreCarte": "Commencez gratuitement et en moins d'une minute.",
+    "lienSeConnecter": "Se connecter",
+    "atoutTitre1": "Rapide à mettre en place",
+    "atoutTexte1": "Créez votre compte en moins d'une minute."
   },
   "onboarding": {
     "titre": "Mettons votre nom sur la page",

@@ -4,11 +4,11 @@ import { useActionState, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { sInscrire, type ResultatInscription } from "@/app/[locale]/connexion/actions";
 import { suggererCorrection } from "@/lib/email/domaines";
+import { Lock, Mail } from "lucide-react";
 import {
-  BoutonPrincipal,
-  CLASSE_CHAMP,
-  CLASSE_LIBELLE,
-  MessageErreur,
+  BoutonPrincipalDs,
+  ChampAcces,
+  MessageErreurDs,
 } from "@/components/acces-champs";
 
 /**
@@ -82,60 +82,56 @@ export function FormulaireInscription({ locale }: { readonly locale: string }) {
     motif === "mdp_trop_court" || motif === "mdp_trop_long" || motif === "mdp_contient_email";
 
   return (
-    <form action={action} className="flex flex-col gap-4 md:gap-[18px]" noValidate>
+    <form action={action} className="flex flex-col gap-5" noValidate>
       <input type="hidden" name="locale" value={locale} />
 
-      <div>
-        <label htmlFor="email-inscription" className={CLASSE_LIBELLE + " mb-2"}>
-          {t("labelEmail")}
-        </label>
-        <input
-          id="email-inscription"
-          name="email"
-          type="email"
-          autoComplete="username"
-          inputMode="email"
-          required
-          value={email}
-          onChange={(evenement) => setEmail(evenement.target.value)}
-          placeholder={t("placeholderEmail")}
-          aria-invalid={emailEnCause}
-          aria-describedby={emailEnCause ? "erreur-inscription" : undefined}
-          className={CLASSE_CHAMP}
-        />
-      </div>
+      <ChampAcces
+        id="email-inscription"
+        nom="email"
+        type="email"
+        libelle={t("labelEmail")}
+        icone={Mail}
+        placeholder={t("placeholderEmail")}
+        autoComplete="username"
+        modeSaisie="email"
+        valeur={email}
+        surChangement={setEmail}
+        invalide={emailEnCause}
+        {...(emailEnCause ? { decritPar: "erreur-inscription" } : {})}
+      />
 
       <div>
-        <label htmlFor="motDePasse-inscription" className={CLASSE_LIBELLE + " mb-2"}>
-          {t("labelMotDePasse")}
-        </label>
-        <input
+        <ChampAcces
           id="motDePasse-inscription"
-          name="motDePasse"
+          nom="motDePasse"
           type="password"
+          libelle={t("labelMotDePasse")}
+          icone={Lock}
           // `new-password` : c'est ce qui fait PROPOSER un mot de passe au
           // gestionnaire, au lieu de remplir celui d'un autre compte.
           autoComplete="new-password"
-          required
-          aria-invalid={motDePasseEnCause}
-          aria-describedby={motDePasseEnCause ? "aide-mot-de-passe erreur-inscription" : "aide-mot-de-passe"}
-          className={CLASSE_CHAMP}
+          invalide={motDePasseEnCause}
+          decritPar={
+            motDePasseEnCause ? "aide-mot-de-passe erreur-inscription" : "aide-mot-de-passe"
+          }
         />
-        <p
-          id="aide-mot-de-passe"
-          className="mt-2 font-body-sm text-[12px] leading-[18px] text-sourdine"
-        >
+        {/* ⚠️ DOUZE, ET LA RÉFÉRENCE DIT HUIT. Son placeholder annonce
+            « Minimum 8 caractères » ; `LONGUEUR_MINIMALE` vaut DOUZE, imposé par
+            Zod ET par le réglage Supabase. Afficher 8 promettrait un mot de
+            passe que le serveur refuse — l'écart le plus coûteux qu'une copie
+            de design puisse introduire, puisqu'il ne se voit qu'à l'échec. */}
+        <p id="aide-mot-de-passe" className="mt-2 text-[12px] leading-[18px] text-ds-texte-tenu">
           {ti("aideMotDePasse")}
         </p>
       </div>
 
       {suggestion !== null ? (
-        <p className="font-body-sm text-body-sm text-on-surface-variant" aria-live="polite">
+        <p className="text-[14px] text-ds-texte-corps" aria-live="polite">
           {t("suggestionPrefixe")}{" "}
           <button
             type="button"
             onClick={() => setEmail(suggestion.adresse)}
-            className="font-label-md text-label-md text-[var(--accent-texte)] underline"
+            className="font-semibold text-ds-texte-lien underline"
           >
             {suggestion.adresse}
           </button>
@@ -144,10 +140,14 @@ export function FormulaireInscription({ locale }: { readonly locale: string }) {
       ) : null}
 
       {messageErreur !== null ? (
-        <MessageErreur id="erreur-inscription" texte={messageErreur} />
+        <MessageErreurDs id="erreur-inscription" texte={messageErreur} />
       ) : null}
 
-      <BoutonPrincipal libelle={ti("bouton")} libelleEnCours={ti("boutonEnCours")} />
+      <BoutonPrincipalDs
+        libelle={ti("bouton")}
+        libelleEnCours={ti("boutonEnCours")}
+        hauteur={60}
+      />
     </form>
   );
 }
