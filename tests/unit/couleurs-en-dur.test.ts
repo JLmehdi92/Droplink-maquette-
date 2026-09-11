@@ -88,6 +88,27 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#f3f1fe", "fond des écrans d'accès — arrêt 0 %, repris du design system"],
   ["#faf8fe", "fond des écrans d'accès — arrêt 42 %"],
   ["#f7f2fc", "fond des écrans d'accès — arrêt 100 %"],
+  /*
+   * ⚠️ LE FOND DE L'ESPACE VENDEUR, ET C'EST UN QUATRIÈME LAVANDE. Le design
+   * system en pose un par surface, tous voisins et tous différents :
+   *   accès          #F3F1FE → #FAF8FE → #F7F2FC
+   *   page client    #F6F4FE → #FBFAFE → #F8F3FD
+   *   espace vendeur #F7F5FE → #FBFAFE → #F8F4FD
+   *
+   * Deux d'entre eux partagent leur arrêt médian et aucun n'a les mêmes bornes.
+   * À l'œil ils sont indiscernables ; c'est précisément pourquoi ils sont
+   * NOMMÉS ici plutôt que tolérés : le jour où l'un est recopié sur la mauvaise
+   * surface, cette liste est le seul endroit où l'écart se lit.
+   */
+  ["#f7f5fe", "fond de l'espace vendeur — arrêt 0 %"],
+  [
+    "#fbfafe",
+    "l'arrêt MÉDIAN, partagé par la page client et l'espace vendeur. Le seul " +
+      "des onze arrêts que deux surfaces emploient réellement — et je l'avais " +
+      "décrit dans le commentaire ci-dessus sans le déclarer : le contrôle l'a " +
+      "dit, la relecture ne l'avait pas vu.",
+  ],
+  ["#f8f4fd", "fond de l'espace vendeur — arrêt 100 %"],
 ];
 const tolerees = new Map(EXCEPTIONS);
 

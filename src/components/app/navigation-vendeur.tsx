@@ -159,7 +159,7 @@ export function NavigationVendeur({
                 <motion.span
                   layoutId="pastille-navigation-vendeur"
                   aria-hidden="true"
-                  className="absolute inset-0 rounded-[11px] bg-violet-fond"
+                  className="absolute inset-0 rounded-ds-card bg-ds-surface-teinte"
                   transition={
                     mouvementReduit === true
                       ? { duration: 0 }
@@ -171,8 +171,15 @@ export function NavigationVendeur({
                 href={entree.href}
                 aria-current={active ? "page" : undefined}
                 className={
-                  "relative flex h-[42px] items-center gap-[11px] rounded-[11px] px-[13px] font-label-md text-[14px] font-semibold transition-colors " +
-                  (active ? "text-violet" : "text-on-surface-variant hover:bg-surface-container")
+                  // ⚠️ 48 ET NON 42, GAP 14 ET NON 11, RAYON 16 ET NON 11 —
+                  // mesuré sur la référence servie. Et la graisse CHANGE avec
+                  // l'état : 700 quand l'entrée est active, 500 sinon. Le
+                  // produit posait `font-semibold` des deux côtés, donc l'entrée
+                  // courante ne se distinguait que par sa couleur.
+                  "relative flex h-12 items-center gap-[14px] rounded-ds-card px-[14px] text-[15px] transition-colors " +
+                  (active
+                    ? "font-bold text-ds-accent-encre"
+                    : "font-medium text-ds-texte-corps hover:bg-ds-surface-creux")
                 }
               >
                 <Icone nom={entree.icone} className="h-[18px] w-[18px]" />

@@ -82,14 +82,65 @@ describe("Le rayon de la carte-page", () => {
    * dossier rendrait cette suite verte et muette.
    */
   test("la sonde inspecte réellement des cartes-pages", () => {
-    expect(inventaire.length).toBeGreaterThanOrEqual(6);
+    /*
+     * ⚠️ CE PLANCHER DESCEND AVEC LA MIGRATION, ET C'EST VOULU. Le design
+     * system abolit la carte-page : plus de cadre extérieur, plus de rayon 24
+     * contre 28. Chaque écran migré en retire une, et ce nombre finira à ZÉRO —
+     * jour où cette suite entière devra être supprimée, pas assouplie.
+     *
+     * Il reste 6 cartes-pages le 11/09/2026. Le plancher est donc à 5 : assez
+     * bas pour qu'une migration ne le fasse pas rougir à tort, assez haut pour
+     * qu'une DISPARITION du balayage — un composant renommé, une extension qui
+     * change — se voie encore.
+     */
+    expect(
+      inventaire.length,
+      "moins de cinq cartes-pages : soit la migration est plus avancée que ce " +
+        "que cette suite déclare, soit le balayage est cassé. Les deux se " +
+        "corrigent ICI, jamais en baissant le nombre.",
+    ).toBeGreaterThanOrEqual(5);
   });
 
-  test("elle en voit des DEUX familles", () => {
-    // Une suite qui ne verrait que des surfaces publiques passerait à 100 %
-    // pendant que tout l'espace vendeur rendrait la mauvaise valeur.
-    expect(inventaire.filter((c) => c.authentifiee).length).toBeGreaterThanOrEqual(2);
-    expect(inventaire.filter((c) => !c.authentifiee).length).toBeGreaterThanOrEqual(4);
+  /**
+   * ⚠️ CE CONTRÔLE EXIGEAIT « DEUX FAMILLES », ET LA MIGRATION LE REND FAUX.
+   *
+   * Sa raison d'origine tient toujours : une suite qui ne verrait que des
+   * surfaces publiques passerait à 100 % pendant que tout l'espace vendeur
+   * rendrait la mauvaise valeur. Mais l'espace vendeur a PERDU sa carte-page le
+   * 11/09/2026 — le design system supprime le cadre extérieur — et il n'en
+   * reste qu'une seule authentifiée : l'admin, pas encore migré.
+   *
+   * Un plancher de « au moins une » aurait tenu sans rien prouver. On DÉCLARE
+   * donc ce qui reste, nommément : la liste échoue dans les DEUX SENS — une
+   * carte-page authentifiée qui disparaît sans qu'on raye sa ligne, et une
+   * nouvelle qui apparaîtrait sans être déclarée. Quand la liste sera vide,
+   * cette suite n'aura plus d'objet et devra être SUPPRIMÉE.
+   */
+  const AUTHENTIFIEES_RESTANTES: ReadonlyArray<readonly [string, string]> = [
+    [
+      "[locale]/admin/layout.tsx",
+      "Le chrome de l'administration. Il garde la carte-page tant que les six " +
+        "écrans admin ne sont pas migrés — le design system les dessine en clair, " +
+        "sans cadre, mais aucun n'est encore porté.",
+    ],
+  ];
+
+  test("les cartes-pages authentifiées restantes sont exactement celles déclarées", () => {
+    const trouvees = inventaire.filter((c) => c.authentifiee).map((c) => c.fichier).sort();
+    const declarees = AUTHENTIFIEES_RESTANTES.map(([f]) => f).sort();
+    expect(
+      trouvees,
+      "La liste des cartes-pages authentifiées ne décrit plus le dépôt. Un écran " +
+        "migré retire sa ligne ; un écran qui en ajoute une doit la déclarer avec " +
+        "sa raison.",
+    ).toEqual(declarees);
+
+    // Les surfaces publiques, elles, ne sont pas encore touchées.
+    expect(
+      inventaire.filter((c) => !c.authentifiee).length,
+      "les surfaces publiques ont perdu leurs cartes-pages sans que cette suite " +
+        "le sache",
+    ).toBeGreaterThanOrEqual(4);
   });
 
   test("chaque carte-page porte le rayon de SA surface", () => {

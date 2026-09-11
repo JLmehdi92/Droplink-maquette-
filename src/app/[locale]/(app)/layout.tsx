@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { FondApplication } from "@/components/app/fond-application";
+import { LogoMarque } from "@/components/acces/coque-acces";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
@@ -102,7 +104,8 @@ export default async function LayoutApplication({
    * dixième de la ligne, pris à ce qu'il y a dedans.
    */
   return (
-    <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
+    <div className="min-h-dvh bg-ds-surface-carte md:bg-transparent">
+      <FondApplication />
       {/*
         ⚠️ CE LIEN MANQUAIT ICI, ALORS QU'IL EXISTE DANS L'ADMIN.
         Trouvé à l'audit du 31/08/2026. Les deux racines sont structurellement
@@ -118,10 +121,18 @@ export default async function LayoutApplication({
       >
         {t("allerAuContenu")}
       </a>
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:flex-row md:overflow-hidden md:rounded-page">
-        <aside className="hidden border-r border-outline-variant bg-surface-container-lowest px-4 py-[22px] md:flex md:w-[236px] md:shrink-0 md:flex-col">
-          <span className="mb-[26px] px-2 font-headline-md text-[17px] font-extrabold tracking-[-0.02em] text-on-surface">
-            DropLink
+      {/*
+        ⚠️ PLUS DE CARTE-PAGE NI DE CADRE LAVANDE. Le design system les supprime
+        — c'est l'un des six changements declares. La colonne laterale touche
+        desormais le bord de l'ecran, et le fond teinte vient de `FondApplication`
+        plutot que d'une marge de 20 px autour d'une carte blanche.
+      */}
+      <div className="relative mx-auto flex w-full flex-col md:min-h-dvh md:flex-row">
+        <aside className="hidden border-r border-ds-filet bg-ds-surface-carte px-[18px] pt-[26px] pb-5 md:flex md:w-[264px] md:shrink-0 md:flex-col md:gap-1.5">
+          {/* Logo de 38 px avec un retrait de 8 et 24 px sous lui — mesure sur
+              la reference, ou il remplace le mot « DropLink » ecrit en dur. */}
+          <span className="px-2 pb-6">
+            <LogoMarque hauteur={38} />
           </span>
 
           <NavigationVendeur entrees={entrees} variante="cote" etiquette={t("espaceVendeur")} />
@@ -134,7 +145,7 @@ export default async function LayoutApplication({
             rien dire laisserait un vendeur découvrir un jour une facture qu'il
             n'attendait pas, ou craindre une limite qui n'existe pas.
           */}
-          <div className="mb-3.5 rounded-[15px] bg-violet-fond p-4">
+          <div className="mb-3.5 rounded-ds-card bg-ds-surface-teinte p-4">
             {/* LE TITRE EST À L'ENCRE, PAS AU VIOLET. La planche n'écrit aucune
                 couleur dessus : il hérite de `#0e0e13`. En violet sur fond
                 violet clair, il se lisait comme un lien — dans un encart qui
@@ -156,7 +167,7 @@ export default async function LayoutApplication({
             Au téléphone cette barre latérale n'existe pas — la déconnexion y
             vit dans l'en-tête de Commandes, l'écran d'accueil du vendeur.
           */}
-          <div className="flex items-center gap-2.5 rounded-[11px] p-2">
+          <div className="flex items-center gap-2.5 rounded-ds-card p-2">
             {/*
               LE LOGO DU VENDEUR, LÀ OÙ IL Y AVAIT UN DISQUE GRIS.
 
