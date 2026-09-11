@@ -329,6 +329,166 @@
   --shadow-lg: 0 18px 40px rgba(14, 14, 19, 0.1);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LE DESIGN SYSTEM DROPLINK — posé le 11/09/2026, EN PARALLÈLE de l'ancien.
+ *
+ * ⚠️ POURQUOI UN SECOND BLOC ET UN INFIXE `ds`, PLUTÔT QU'UN REMPLACEMENT.
+ * La consigne est « écran par écran, jamais un chercher-remplacer sur les
+ * tokens » — or les tokens sont GLOBAUX : réécrire le bloc au-dessus migrerait
+ * les vingt écrans d'un coup, donc sans qu'aucun ne soit vérifié.
+ *
+ * Et ce n'est pas théorique : NEUF noms entrent réellement en collision, tous
+ * avec des valeurs DIFFÉRENTES — `--radius-md` 13→12, `--radius-xl` 28→18,
+ * `--text-body-lg` 17→18, et les trois ombres passent d'un noir neutre à un
+ * violet teinté. Un écran à moitié migré se verrait ; pire, il ne se verrait
+ * PAS sur les deux violets voisins.
+ *
+ * L'infixe rend donc la migration LISIBLE : `grep -l "ds-" src/app/…` répond à
+ * « quels écrans sont migrés ». Il disparaîtra au dernier écran, quand le bloc
+ * du dessus mourra.
+ *
+ * ⚠️ CES VALEURS SONT GÉNÉRÉES, PAS RECOPIÉES. `scripts/generer-tokens-design-system.mjs` les
+ * lit dans `tokens/*.css` du design system et résout les `var()` en littéraux.
+ * Quatre-vingts valeurs transcrites à la main, c'est quatre-vingts occasions de
+ * se tromper d'un caractère — et un violet voisin ne se voit pas.
+ *
+ * ⚠️ LES COULEURS DE TEXTE SONT NOMMÉES `--color-ds-texte-*`, PAS `--text-*`,
+ * ET C'EST UN DÉFAUT DU DESIGN SYSTEM QU'ON NE REPRODUIT PAS. Chez lui,
+ * `--text-body` est déclaré DEUX FOIS : couleur dans `colors.css`, taille
+ * `16px` dans `typography.css`, importé après — donc la taille gagne. Son
+ * propre `base.css` écrit `color: var(--text-body)`, c'est-à-dire `color: 16px`,
+ * déclaration invalide. MESURÉ sur sa page `auth` servie en HTTP et montée :
+ * `body` rend `rgb(0, 0, 0)` au lieu de `#6B6F8C`, et cinq blocs de copie sur
+ * vingt-sept sortent en noir pur. Tailwind réserve `--text-*` aux tailles ;
+ * nommer les couleurs autrement ferme le piège ici.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+@theme {
+  --color-ds-violet-50: #F4F3FE;
+  --color-ds-violet-100: #EDEBFE;
+  --color-ds-violet-200: #DCD8FD;
+  --color-ds-violet-300: #C0B8FB;
+  --color-ds-violet-400: #8C7EF9;
+  --color-ds-violet-500: #5B4BF5;
+  --color-ds-violet-600: #4B3AE0;
+  --color-ds-violet-700: #3D2FBB;
+  --color-ds-magenta-400: #C05AC8;
+  --color-ds-magenta-500: #A855E0;
+  --color-ds-pink-500: #E75A8B;
+  --color-ds-coral-300: #FDA3A5;
+  --color-ds-coral-400: #FB7C7F;
+  --color-ds-coral-500: #F2555A;
+  --color-ds-ink-900: #0B0B18;
+  --color-ds-ink-800: #14162A;
+  --color-ds-ink-700: #2A2D45;
+  --color-ds-ink-600: #4A4E68;
+  --color-ds-ink-500: #6B6F8C;
+  --color-ds-ink-400: #8B90A8;
+  --color-ds-ink-300: #A9AEC4;
+  --color-ds-ink-200: #DEDEEA;
+  --color-ds-ink-100: #ECECF5;
+  --color-ds-ink-50: #F6F6FA;
+  --color-ds-white: #FFFFFF;
+  --color-ds-lavender-page: #FBFBFE;
+  --color-ds-lavender-100: #F1F0FE;
+  --color-ds-lavender-200: #EEEDFD;
+  --color-ds-lavender-300: #E4E1FC;
+  --color-ds-green-500: #12A87A;
+  --color-ds-green-100: #E6F7F0;
+  --color-ds-red-500: #EF4B57;
+  --color-ds-red-100: #FDECEC;
+  --color-ds-blue-500: #4F46E5;
+  --color-ds-blue-100: #ECEBFE;
+  --color-ds-amber-500: #E08A18;
+  --color-ds-amber-100: #FCF3E3;
+  --color-ds-accent: #5B4BF5;
+  --color-ds-accent-survol: #4B3AE0;
+  --color-ds-accent-doux: #EDEBFE;
+  --color-ds-accent-encre: #4B3AE0;
+  --color-ds-surface-page: #FBFBFE;
+  --color-ds-surface-carte: #FFFFFF;
+  --color-ds-surface-teinte: #F1F0FE;
+  --color-ds-surface-creux: #F6F6FA;
+  --color-ds-surface-inverse: #0B0B18;
+  --color-ds-surface-lavande: #EEEDFD;
+  --color-ds-filet: #ECECF5;
+  --color-ds-filet-appuye: #DEDEEA;
+  --color-ds-filet-marque: #C0B8FB;
+  --color-ds-filet-focus: #5B4BF5;
+  --color-ds-texte-fort: #0B0B18;
+  --color-ds-texte-titre: #0B0B18;
+  --color-ds-texte-corps: #6B6F8C;
+  --color-ds-texte-sourdine: #8B90A8;
+  --color-ds-texte-tenu: #A9AEC4;
+  --color-ds-texte-sur-marque: #FFFFFF;
+  --color-ds-texte-lien: #5B4BF5;
+  --color-ds-texte-lien-survol: #4B3AE0;
+  --color-ds-succes: #12A87A;
+  --color-ds-succes-fond: #E6F7F0;
+  --color-ds-erreur: #EF4B57;
+  --color-ds-erreur-fond: #FDECEC;
+  --color-ds-info: #4F46E5;
+  --color-ds-info-fond: #ECEBFE;
+  --color-ds-alerte: #E08A18;
+  --color-ds-alerte-fond: #FCF3E3;
+  --radius-ds-xs: 6px;
+  --radius-ds-sm: 10px;
+  --radius-ds-md: 12px;
+  --radius-ds-lg: 14px;
+  --radius-ds-xl: 18px;
+  --radius-ds-2xl: 24px;
+  --radius-ds-3xl: 32px;
+  --radius-ds-pill: 999px;
+  --radius-ds-card: 16px;
+  --radius-ds-card-lg: 20px;
+  --radius-ds-control: 12px;
+  --radius-ds-button: 999px;
+  --radius-ds-icon-tile: 12px;
+  --radius-ds-window: 18px;
+  --shadow-ds-none: none;
+  --shadow-ds-xs: 0 1px 2px rgba(28,22,78,.05);
+  --shadow-ds-sm: 0 2px 8px rgba(28,22,78,.06);
+  --shadow-ds-card: 0 4px 16px rgba(28,22,78,.06);
+  --shadow-ds-md: 0 10px 26px rgba(28,22,78,.08);
+  --shadow-ds-lg: 0 20px 48px rgba(28,22,78,.10);
+  --shadow-ds-window: 0 30px 80px rgba(28,22,78,.16);
+  --shadow-ds-brand: 0 10px 26px rgba(91,75,245,.30);
+  --shadow-ds-brand-hover: 0 14px 32px rgba(91,75,245,.38);
+  --text-ds-display-xl: 64px;
+  --text-ds-display: 52px;
+  --text-ds-h1: 44px;
+  --text-ds-h2: 30px;
+  --text-ds-h3: 22px;
+  --text-ds-h4: 18px;
+  --text-ds-body-lg: 18px;
+  --text-ds-body: 16px;
+  --text-ds-body-sm: 14px;
+  --text-ds-caption: 13px;
+  --text-ds-micro: 11px;
+  --ease-ds-standard: cubic-bezier(.4,0,.2,1);
+  --ease-ds-out: cubic-bezier(.16,1,.3,1);
+  --ease-ds-in-out: cubic-bezier(.65,0,.35,1);
+
+  /* Familles : Inter est DÉJÀ chargée par `next/font` — aucun téléchargement de
+   * plus. Plus Jakarta Sans reste servie tant qu'un écran non migré s'en sert. */
+  --font-ds-display: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-ds-body: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Les dégradés n'appartiennent à aucun espace Tailwind : ils vivent en
+ * propriétés, et s'emploient en `bg-[image:var(--degrade-ds-marque)]`.
+ * ⚠️ SES DEUX EXTRÉMITÉS NE SONT PAS L'ACCENT : le violet du dégradé est plus
+ * clair que `#5B4BF5`, le corail plus clair que `#F2555A`. */
+:root {
+  --degrade-ds-marque: linear-gradient(90deg, #6C5CFB 0%, #A855E0 52%, #FB7C7F 100%);
+  --degrade-ds-marque-diagonal: linear-gradient(120deg, #6C5CFB 0%, #A855E0 55%, #FB7C7F 100%);
+  --degrade-ds-marque-vertical: linear-gradient(180deg, #6C5CFB 0%, #A855E0 52%, #FB7C7F 100%);
+  --degrade-ds-marque-calme: linear-gradient(120deg, #6C5CFB 0%, #8E63F0 60%, #B368E4 100%);
+  --degrade-ds-page: linear-gradient(180deg, #E9E7FC 0%, #F4F3FE 38%, #FBFBFE 100%);
+  --degrade-ds-teinte: linear-gradient(135deg, #F1F0FE 0%, #FAF6FE 100%);
+  --anneau-ds-focus: 0 0 0 3px rgba(91, 75, 245, 0.22);
+}
+
+
 :root {
   /*
    * Le dégradé de marque. Une seule action principale par écran, et
