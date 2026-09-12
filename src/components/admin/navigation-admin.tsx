@@ -62,15 +62,40 @@ export interface EntreeAdmin {
 
 /**
  * Une entrée est courante si l'URL EST la sienne, ou commence par elle suivie
- * d'une barre.
+ * d'une barre — SAUF la racine, qui n'est courante que sur elle-même.
  *
- * Le test naïf `pathname.startsWith(href)` allumerait la racine `/fr/admin` sur
- * TOUS les écrans, puisqu'elle est le préfixe de chacun. Et un `startsWith` sans
- * la barre allumerait `/fr/admin/comptes` sur `/fr/admin/comptes-archives` si
- * une telle route naissait un jour.
+ * ⚠️ DÉFAUT MESURÉ LE 12/09/2026, ET IL AVAIT SON PROPRE COMMENTAIRE QUI SE
+ * TROMPAIT. Celui-ci disait : « le test naïf `pathname.startsWith(href)`
+ * allumerait la racine `/fr/admin` sur TOUS les écrans », et prétendait le
+ * corriger en ajoutant une barre. Mais `/fr/admin` + `/` est encore le préfixe
+ * de `/fr/admin/surveillance` : la racine restait allumée PARTOUT, en même
+ * temps que l'écran réel. DEUX entrées courantes, et un `aria-current="page"`
+ * en double.
+ *
+ * Il est resté invisible tant que le chrome était sombre — les deux états ne
+ * différaient que par un `bg-white/10`. Le design system peint l'entrée
+ * courante du DÉGRADÉ DE MARQUE, et deux dégradés côte à côte se voient à
+ * l'autre bout de la pièce. *Une correction qui décrit son intention plutôt
+ * que son effet est un mensonge en attente.*
+ *
+ * La racine est reconnue par le fait qu'AUCUNE autre entrée ne la contient :
+ * on ne la nomme pas, on la déduit de la liste. Nommer `/fr/admin` ici
+ * casserait le jour où le préfixe de langue change.
  */
-function estCourante(chemin: string, href: string): boolean {
+function estCourante(chemin: string, href: string, racine: boolean): boolean {
+  if (racine) return chemin === href;
   return chemin === href || chemin.startsWith(href + "/");
+}
+
+/**
+ * La RACINE d'une liste d'entrées : celle dont le chemin est préfixe de toutes
+ * les autres. Sur la navigation d'administration c'est `/<langue>/admin`.
+ */
+function hrefRacine(entrees: readonly EntreeAdmin[]): string | null {
+  for (const e of entrees) {
+    if (entrees.every((a) => a === e || a.href.startsWith(e.href + "/"))) return e.href;
+  }
+  return null;
 }
 
 export function NavigationAdmin({
@@ -83,6 +108,7 @@ export function NavigationAdmin({
   readonly variante: "colonne" | "onglets";
 }) {
   const chemin = usePathname();
+  const racine = hrefRacine(entrees);
 
   if (variante === "onglets") {
     return (
@@ -91,7 +117,7 @@ export function NavigationAdmin({
         className="sticky bottom-0 z-20 flex justify-between border-t border-ds-filet bg-ds-surface-carte px-2 pt-2 pb-[18px] md:hidden"
       >
         {entrees.map((entree) => {
-          const courante = estCourante(chemin, entree.href);
+          const courante = estCourante(chemin, entree.href, entree.href === racine);
           const Icone = ICONES[entree.icone];
           // Voir `LienEcran` : l'entrée courante vise le chemin déjà occupé.
           const Composant = courante ? LienEcran : Link;
@@ -133,7 +159,7 @@ export function NavigationAdmin({
       */}
       <ul className="flex flex-col gap-1">
         {entrees.map((entree) => {
-          const courante = estCourante(chemin, entree.href);
+          const courante = estCourante(chemin, entree.href, entree.href === racine);
           const Icone = ICONES[entree.icone];
           const Composant = courante ? LienEcran : Link;
           return (

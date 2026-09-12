@@ -2249,6 +2249,34 @@ try {
           headers: entetesAdmin,
           redirect: "manual",
         });
+        const htmlJournal = journalPromu.status === 200 ? await journalPromu.text() : "";
+
+        /*
+         * ⚠️ COMBIEN D ENTREES DE NAVIGATION SONT ALLUMEES — defaut mesure le
+         * 12/09/2026, et il vivait la depuis toujours.
+         *
+         * `estCourante` faisait `chemin === href || chemin.startsWith(href + "/")`.
+         * Sur `/fr/admin/journal`, l entree RACINE `/fr/admin` satisfait la
+         * seconde branche : DEUX entrees etaient courantes, et deux
+         * `aria-current="page"` partaient dans le HTML. Le commentaire du code
+         * affirmait pourtant corriger exactement ce cas.
+         *
+         * Rien ne pouvait le voir tant que le chrome etait sombre : les deux
+         * etats ne differaient que par un `bg-white/10`. Le design system peint
+         * l entree courante du degrade de marque, et deux degrades cote a cote
+         * sautent aux yeux — mais une sonde ne regarde pas, elle compte.
+         *
+         * DEUX COLONNES SONT RENDUES sur cet ecran, celle du bureau et la barre
+         * d onglets du telephone : l entree courante y apparait donc DEUX fois.
+         * C est ce nombre-la qu on attend, et le CONTRE-TEST ci-dessous etablit
+         * qu on a bien trouve des entrees avant de compter celles qui brillent.
+         */
+        const entreesJournal = [
+          ...htmlJournal.matchAll(/<a\s[^>]*href="\/fr\/admin(?:\/[a-z-]+)?"[^>]*>/g),
+        ];
+        const allumeesJournal = entreesJournal.filter((m) =>
+          m[0].includes('aria-current="page"'),
+        ).length;
 
         await service.from("profiles").update({ role: "user" }).eq("id", profilFumee);
         const retrograde = await fetch(`${base}/fr/admin`, {
@@ -2287,6 +2315,14 @@ try {
           [
             journalPromu.status === 200,
             `le journal d audit repond aussi a un administrateur (statut ${journalPromu.status})`,
+          ],
+          [
+            entreesJournal.length >= 12,
+            `CONTRE-TEST : ${entreesJournal.length} entrees de navigation admin trouvees dans le journal rendu`,
+          ],
+          [
+            allumeesJournal === 2,
+            `exactement UNE entree est courante, dans chacune des deux navigations (${allumeesJournal} marques)`,
           ],
           // L AUTRE SENS, AVEC LA MEME SESSION. C est ici que se prouve que le
           // role est relu EN BASE a chaque requete, et non porte par le jeton.
