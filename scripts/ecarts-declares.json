@@ -498,11 +498,6 @@
         "raison": "Quatre pixels de boite et une position. Le nom vient du catalogue officiel du fournisseur de suivi, le kit l ecrit a la main dans sa demonstration ; la boite suit la largeur de sa colonne."
       },
       {
-        "texte": "8 sept. 2025",
-        "motif": "donnee",
-        "raison": "Le kit empile la date et l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous — « il y a 3 jours » plutot que « a 14:32 ». C est la seule chose de l ecran qui change tous les jours quand le colis ne bouge pas, et c est ce que le vendeur vient verifier."
-      },
-      {
         "texte": "Livré",
         "motif": "donnee",
         "raison": "Rendu deux fois chez nous, une seule chez le kit : « Livre » est a la fois une OPTION du menu de statut — que le `<details>` porte en clair, la ou le `<select>` du kit garde les siennes dans des `<option>` invisibles a l inventaire — et la pastille du colis livre du jeu de mesure."
@@ -526,6 +521,16 @@
         "texte": "Colis livré",
         "motif": "donnee",
         "raison": "Largeur de colonne et abscisse. Le texte est le meme — c est ce que la colonne « Prochaine etape » rend quand le colis est arrive — mais nous alignons DIX colonnes la ou le kit en aligne dix AUTRES : il a une case a cocher et « Actions », nous « Dernier point » et « Interrogations ». Les proportions du kit sont conservees, les largeurs absolues ne peuvent donc pas coincider."
+      },
+      {
+        "texte": "Actions",
+        "motif": "donnee",
+        "raison": "Huit pixels de place. La colonne est la derniere des deux cotes ; la notre commence 8 px plus a droite parce que le kit ouvre sa rangee par une case a cocher de 38 px que nous ne reprenons pas — voir le raisonnement dans `tableau-envois.tsx`."
+      },
+      {
+        "texte": "7 sept. 2025",
+        "motif": "donnee",
+        "raison": "Le kit empile la date et l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous. Meme declaration que « 8 sept. 2025 », pour la deuxieme ligne du kit."
       }
     ],
     "manquants": [
@@ -570,13 +575,6 @@
         ],
         "motif": "donnee",
         "raison": "Deux tuiles dont le produit rend l equivalent sous un autre libelle : « Livres ce mois » (notre compteur est mensuel, celui du kit ne dit pas sur quelle periode) et « Sans mouvement > 10 j ». « Probleme » supposerait que le transporteur declare un incident ; ce que nous savons, c est qu un colis ne bouge plus — la meme information sans le jugement."
-      },
-      {
-        "textes": [
-          "Actions"
-        ],
-        "motif": "donnee",
-        "raison": "La colonne de menus par ligne. Le produit n a pas d action par colis sur cet ecran — ni duplication, ni archivage, qui appartiennent a la commande — et une colonne de « … » qui n ouvre rien serait un mensonge d interface."
       },
       {
         "textes": [
@@ -671,20 +669,10 @@
       },
       {
         "textes": [
-          "Dernier point",
-          "Interrogations"
-        ],
-        "motif": "donnee",
-        "raison": "Anciens libelles de colonnes et colonnes propres au produit. « Dernier point » occupe la place de « Prochaine etape » et « Interrogations » celle d « Actions » — le nombre d interrogations explique pourquoi un colis reste muet, ce qu aucune autre colonne ne dit."
-      },
-      {
-        "textes": [
           "DLKMESURE0002CN",
           "Cliente en preparation",
           "Client de verification",
-          "Sans mouvement · 14 j",
-          "Colis enregistre",
-          "Colis arrive au centre de tri internatio"
+          "Sans mouvement · 14 j"
         ],
         "motif": "donnee",
         "raison": "LES DEUX COLIS DU JEU DE MESURE, avec leurs numeros, leurs destinataires, leurs dates et leurs points de passage. Le kit en rend huit, inventes. LES REFERENCES ET LES DATES SONT DECLAREES PAR MOTIF, et pour deux raisons distinctes : la reference courte est DERIVEE de l identifiant de la commande, tire au hasard a chaque jeu, et les dates sont RELATIVES a l instant du passage — c est la lecon de la sonde de fumee qui avait une date de peremption. Les motifs sont ancres aux deux bouts : ils ne peuvent pas couvrir un libelle d interface.",
@@ -733,8 +721,7 @@
         "textes": [
           "DHL Express",
           "DH",
-          "Client expedie",
-          "Pas encore d’information du transporteur"
+          "Client expedie"
         ],
         "motifs": [
           "^DLKMESURE\\d+[A-Z]{2}$",
@@ -743,6 +730,16 @@
         ],
         "motif": "donnee",
         "raison": "LE TROISIEME COLIS DU JEU DE MESURE ET LE BADGE D EVOLUTION. Le colis date du MOIS DERNIER, et il existe pour une raison de verification : sans lui, le badge « ce mois-ci » ne s affiche jamais — la regle du produit le retire quand le mois precedent est vide — et rien ne distinguerait « la regle s applique » de « le calcul est casse ». Le badge et l anciennete sont declares PAR MOTIF : leur valeur depend du jour ou la mesure tourne."
+      },
+      {
+        "textes": [
+          "Ouvrir le site du transporteur"
+        ],
+        "motifs": [
+          "^Voir la commande #[0-9A-F]{6}$"
+        ],
+        "motif": "structure",
+        "raison": "LES DEUX GESTES DU MENU « ACTIONS », rendus dans le document parce qu un `<details>` porte ses entrees en clair. Le kit dessine trois points sans dire ce qu ils ouvrent — son menu est une demonstration, le notre mene quelque part : la commande rattachee, et le site officiel du transporteur. Les references sont declarees PAR MOTIF, elles sont derivees d identifiants tires au hasard a chaque jeu de mesure."
       }
     ]
   }

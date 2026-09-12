@@ -14,6 +14,8 @@ import {
   ChevronDown,
   CircleCheck,
   Info,
+  ExternalLink,
+  MoreHorizontal,
   Package,
   PackageOpen,
   Search,
@@ -295,19 +297,57 @@ export async function TableauEnvois({
        * pour rien. Le défaut avait été vu par Wassim sur une vraie page le
        * 05/09 ; il n'est pas réintroduit ici.
        */
+      /*
+       * LES GESTES DE LA LIGNE. Une commande rattachée se rouvre, un
+       * transporteur se consulte. Rien d'autre n'est VRAI : « resynchroniser »
+       * coûterait une interrogation facturée, et « supprimer » n'existe pas sur
+       * un colis — il appartient aux commandes qui le portent.
+       */
+      actions: (() => {
+        const liste: { href: string; libelle: string; externe: boolean }[] = [];
+        for (const c of ligne.commandesLiees.slice(0, 3)) {
+          liste.push({
+            href: `${base.replace(/\/envois$/, "/commandes")}/${c.id}`,
+            libelle: t("actions.voirCommande", { reference: c.reference }),
+            externe: false,
+          });
+        }
+        const site = lireTransporteur(ligne.transporteur)?.site ?? null;
+        if (site !== null) {
+          liste.push({ href: site, libelle: t("actions.siteTransporteur"), externe: true });
+        }
+        return liste;
+      })(),
+
       prochaine: (() => {
+        /*
+         * ⚠️ UNE SEULE COLONNE POUR LE TEXTE DU TRANSPORTEUR, COMME LE KIT — et
+         * il y a eu DEUX colonnes pendant un tour de mesure.
+         *
+         * Le kit écrit « Arrivée en France », « Colis livré », « Livraison
+         * prévue aujourd'hui » dans SA colonne « Prochaine étape » : c'est
+         * tantôt un point de passage, tantôt une prévision. Nous avions séparé
+         * les deux — « Dernier point » et « Prochaine étape » — ce qui faisait
+         * ONZE colonnes contre dix, et le résultat s'est vu à la mesure : les
+         * en-têtes « Dernière mise à jour » et « Dernier point » se touchaient,
+         * et « DHL Express » était tronqué en « DHL Expr… ».
+         *
+         * La colonne dit donc, dans l'ordre de ce qui est le plus utile : ce qui
+         * VA arriver quand le transporteur l'annonce, ce qu'il a DIT en dernier
+         * sinon.
+         */
         if (ligne.etat === "livre") return t("prochaine.livre");
-        if (silencieux) return null;
+        if (silencieux) return ligne.dernierPoint;
         const du = ligne.arriveeDu === null ? null : new Date(ligne.arriveeDu);
         const au = ligne.arriveeAu === null ? null : new Date(ligne.arriveeAu);
         const borne = au ?? du;
-        if (borne === null || Number.isNaN(borne.getTime())) return null;
+        if (borne === null || Number.isNaN(borne.getTime())) return ligne.dernierPoint;
         // AU JOUR, PAS À LA SECONDE : le transporteur annonce une journée, et
         // comparer des instants ferait basculer « aujourd'hui » à midi.
         const jour = (x: Date) => Date.UTC(x.getFullYear(), x.getMonth(), x.getDate());
         const ecart = Math.round((jour(borne) - jour(maintenant)) / 86_400_000);
         if (ecart === 0) return t("prochaine.aujourdhui");
-        if (ecart < 0) return null;
+        if (ecart < 0) return ligne.dernierPoint;
         return t("prochaine.le", {
           date: format.dateTime(borne, { day: "numeric", month: "short" }),
         });
@@ -754,20 +794,35 @@ export async function TableauEnvois({
             */}
             <table className="w-full table-fixed border-collapse">
               {/*
-                LES DIX COLONNES, AUX PIXELS DES BOÎTES DE CONTENU DU KIT.
+                LES NEUF COLONNES, AUX PIXELS DES BOÎTES DE CONTENU DU KIT.
 
                 Mesurées sur la référence SERVIE, ses dix colonnes rendent 38,
                 174, 116, 139, 145, 128, 116, 122, 145 et 56 px de contenu, à
                 l'écart de 14 dans une rangée de 1345 au remplissage `14px 20px`.
 
-                UNE SEULE N'EXISTE PAS CHEZ NOUS : la case à cocher (38 px). Il
-                n'y a pas d'action groupée sur cet écran, et une colonne de cases
-                qui ne commandent rien est pire qu'absente. « Interrogations »
-                occupe la place d'« Actions » (56) : le nombre d'interrogations
-                explique pourquoi un colis reste muet, ce qu'aucune autre colonne
-                ne dit. Et « Dernier point » s'ajoute, que le kit n'a pas : ce que
-                le transporteur a DIT et ce qu'il ANNONCE sont deux informations,
-                pas une.
+                ⚠️ UNE SEULE N'EST PAS REPRISE : LA CASE À COCHER DE TÊTE DE
+                LIGNE (38 px), ET CE N'EST PAS UN RENONCEMENT DE CONFORT.
+
+                Une case à cocher est la PROMESSE d'une action groupée, et les
+                trois seules candidates sont mauvaises :
+
+                  · « resynchroniser » dépenserait le palier de 200 prises en
+                    charge À VIE au rythme des clics, et court-circuiterait la
+                    cadence de `lib/tracking` qui existe pour les espacer ;
+                  · « archiver » ne veut rien dire sur un colis — ce sont les
+                    COMMANDES qui s'archivent, et un colis en porte plusieurs ;
+                  · « exporter » ouvrirait une SECONDE surface de sortie de
+                    données, alors que l'export des commandes contient déjà ces
+                    colis. Cet export porte les liens publics : chaque surface de
+                    plus est une fuite de plus à surveiller.
+
+                Une case qui ne commande rien est pire qu'une case absente.
+
+                CONSÉQUENCE MESURÉE ET ASSUMÉE : les huit colonnes suivantes
+                commencent 52 px plus à gauche que chez le kit — 38 de case plus
+                14 d'écart. Et malgré ce décalage, « Prochaine étape » tombe à
+                x=1407, exactement comme lui : la preuve que les proportions sont
+                justes et que seul le point de départ diffère.
 
                 ⚠️ DIX `<col>` POUR DIX `<th>`. Il y en a eu neuf pendant un tour
                 de mesure, et le résultat ne s'est pas vu à la lecture du code :
@@ -805,16 +860,15 @@ export async function TableauEnvois({
                 Somme : 1345, exactement la largeur de la carte.
               */}
               <colgroup>
-                <col className="w-[14.066%]" />
-                <col className="w-[8.734%]" />
-                <col className="w-[10.260%]" />
-                <col className="w-[10.658%]" />
-                <col className="w-[9.530%]" />
-                <col className="w-[8.734%]" />
-                <col className="w-[9.132%]" />
-                <col className="w-[10.658%]" />
-                <col className="w-[10.658%]" />
-                <col className="w-[7.572%]" />
+                <col className="w-[16.180%]" />
+                <col className="w-[10.143%]" />
+                <col className="w-[11.948%]" />
+                <col className="w-[12.419%]" />
+                <col className="w-[11.085%]" />
+                <col className="w-[10.143%]" />
+                <col className="w-[10.614%]" />
+                <col className="w-[12.419%]" />
+                <col className="w-[5.048%]" />
               </colgroup>
               <thead>
                 <tr>
@@ -848,13 +902,10 @@ export async function TableauEnvois({
                     <span className="block leading-[18px]">{t("colonnes.mouvement")}</span>
                   </th>
                   <th scope="col" className={enTete}>
-                    <span className="block leading-[18px]">{t("colonnes.point")}</span>
-                  </th>
-                  <th scope="col" className={enTete}>
                     <span className="block leading-[18px]">{t("colonnes.prochaine")}</span>
                   </th>
-                  <th scope="col" className={enTete + bordDroit + " text-right"}>
-                    <span className="block leading-[18px]">{t("colonnes.interrogations")}</span>
+                  <th scope="col" className={enTete + bordDroit + " text-center"}>
+                    <span className="block leading-[18px]">{t("colonnes.actions")}</span>
                   </th>
                 </tr>
               </thead>
@@ -991,15 +1042,6 @@ export async function TableauEnvois({
                           </span>
                         )}
                       </td>
-                      <td
-                        className={
-                          cellule +
-                          " " +
-                          (ligne.dernierPoint === null ? "text-ds-texte-sourdine" : "text-ds-texte-fort")
-                        }
-                      >
-                        {ligne.dernierPoint ?? t("mouvement.aucun")}
-                      </td>
 
                       {/*
                         LA PROCHAINE ÉTAPE. Le kit la peint en rouge quand le
@@ -1018,8 +1060,63 @@ export async function TableauEnvois({
                         </span>
                       </td>
 
-                      <td className={cellule + bordDroit + " text-right text-ds-texte-sourdine"}>
-                        {format.number(ligne.interrogations)}
+
+                      {/*
+                        LA COLONNE « ACTIONS » DU KIT — un menu par ligne.
+
+                        ⚠️ DEUX GESTES SEULEMENT, ET LES DEUX SONT VRAIS. Le kit
+                        dessine trois points sans dire ce qu'ils ouvrent ; un
+                        menu qui n'ouvre rien serait un mensonge d'interface, et
+                        une colonne vide un aveu. Les deux entrées mènent quelque
+                        part : la commande rattachée, et le site du transporteur.
+
+                        ⚠️ AUCUNE ACTION QUI COÛTE. « Resynchroniser » aurait été
+                        l'entrée évidente : elle est écartée, parce qu'une
+                        interrogation se paie sur un palier de 200 prises en
+                        charge À VIE et que la cadence de `lib/tracking` existe
+                        pour les espacer. Un menu ne doit pas contourner une
+                        règle que le produit s'impose ailleurs.
+
+                        Rendu par un `<details>`, comme les filtres : zéro
+                        JavaScript, Échap ferme.
+                      */}
+                      <td className={cellule + bordDroit + " text-center"}>
+                        {d.actions.length === 0 ? null : (
+                          <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
+                            <summary
+                              aria-label={t("colonnes.actions")}
+                              className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-ds-sm text-ds-texte-tenu transition-colors hover:bg-ds-ink-50 hover:text-ds-texte-corps"
+                            >
+                              <MoreHorizontal aria-hidden="true" size={20} strokeWidth={1.9} />
+                            </summary>
+                            <ul
+                              className={
+                                PANNEAU_OUTIL_DS +
+                                " right-0 left-auto flex flex-col gap-0.5 lg:w-[248px] lg:max-w-none lg:p-1.5"
+                              }
+                            >
+                              {d.actions.map((action) => (
+                                <li key={action.href}>
+                                  {action.externe ? (
+                                    <a
+                                      href={action.href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={optionMenu(false) + " justify-between"}
+                                    >
+                                      {action.libelle}
+                                      <ExternalLink aria-hidden="true" size={13} className="text-ds-texte-tenu" />
+                                    </a>
+                                  ) : (
+                                    <LienEcran href={action.href} className={optionMenu(false)}>
+                                      {action.libelle}
+                                    </LienEcran>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
                       </td>
                     </tr>
                   );

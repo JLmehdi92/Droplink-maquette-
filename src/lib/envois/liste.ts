@@ -132,6 +132,11 @@ export interface LigneEnvoi {
    */
   readonly references: readonly string[];
   /**
+   * Les commandes rattachées, avec leur identifiant — pour que le menu d'actions
+   * de la ligne puisse y MENER, pas seulement les nommer.
+   */
+  readonly commandesLiees: readonly { readonly id: string; readonly reference: string }[];
+  /**
    * La dernière chose que le transporteur a dite. Tenue par un déclencheur
    * (migration 104), donc jamais recalculée à la lecture.
    */
@@ -331,6 +336,10 @@ export async function lireEnvois(
       .map((op) => op.orders?.id ?? null)
       .filter((id): id is string => id !== null)
       .map(referenceCourte),
+    commandesLiees: l.order_parcels
+      .map((op) => op.orders?.id ?? null)
+      .filter((id): id is string => id !== null)
+      .map((id) => ({ id, reference: referenceCourte(id) })),
     dernierPoint: l.dernier_point,
     arriveeDu: l.estimated_from,
     arriveeAu: l.estimated_to,

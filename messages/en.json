@@ -404,9 +404,8 @@
       "etat": "Status",
       "progression": "Progress",
       "mouvement": "Last updated",
-      "point": "Last checkpoint",
       "prochaine": "Next step",
-      "interrogations": "Queries"
+      "actions": "Actions"
     },
     "mouvement": {
       "aucun": "No carrier information yet",
@@ -435,6 +434,10 @@
       "livre": "Parcel delivered",
       "aujourdhui": "Delivery expected today",
       "le": "Delivery expected {date}"
+    },
+    "actions": {
+      "voirCommande": "View order {reference}",
+      "siteTransporteur": "Open the carrier's website"
     }
   },
   "analyses": {

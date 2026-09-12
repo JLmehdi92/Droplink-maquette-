@@ -26,15 +26,16 @@ import catalogue from "./transporteurs.json";
  * chez un tiers échouerait en silence derrière un pare-feu, et la colonne
  * disparaîtrait sans que rien ne le dise.
  *
- * Le poids — 98 Ko — ne coûte rien au navigateur : les deux écrans qui s'en
+ * Le poids — 157 Ko — ne coûte rien au navigateur : les deux écrans qui s'en
  * servent sont rendus entièrement côté serveur.
  */
 /*
- * ⚠️ LE JSON EST TYPÉ `string[]`, PAS `[string, string]`, et le forcer d'un
- * trait serait un mensonge de typage : TypeScript ne peut pas savoir que chaque
- * entrée porte exactement deux éléments. On lit donc les cases une par une, en
- * traitant l'absence comme un cas normal — si une entrée était malformée, la
- * fonction rendrait `null` plutôt que `undefined` déguisé en `string`.
+ * ⚠️ LE JSON EST TYPÉ `string[]`, PAS UN TRIPLET, et le forcer d'un trait serait
+ * un mensonge de typage : TypeScript ne peut pas savoir que chaque entrée porte
+ * exactement trois éléments — nom, pays, site. On lit donc les cases une par
+ * une, en traitant l'absence comme un cas normal : si une entrée était
+ * malformée, la fonction rendrait `null` plutôt qu'un `undefined` déguisé en
+ * `string`.
  */
 const TABLE = catalogue as Record<string, readonly string[]>;
 
@@ -42,6 +43,21 @@ export interface Transporteur {
   readonly nom: string;
   /** Code pays ISO du transporteur, quand la source le donne. */
   readonly pays: string | null;
+  /**
+   * Le site officiel du transporteur, quand la source en donne un EN HTTPS.
+   *
+   * ⚠️ C'EST LE SITE, PAS LA PAGE DU COLIS, et le libellé de l'écran doit le
+   * dire. Aucune source ne donne le gabarit d'URL de suivi par transporteur ;
+   * fabriquer « site + /track?n=NUMÉRO » marcherait pour trois transporteurs et
+   * produirait une page d'erreur pour les 3 499 autres. Le lien mène donc à
+   * l'accueil, et le vendeur y recolle son numéro — ce qu'il fait déjà
+   * aujourd'hui, à ceci près qu'il n'a plus à chercher le bon site.
+   *
+   * ⚠️ ET SEULEMENT EN HTTPS : 1 913 entrées sur 3 502. Un lien en clair depuis
+   * une page authentifiée serait bloqué par la politique de sécurité du
+   * document, sans rien afficher au vendeur.
+   */
+  readonly site: string | null;
 }
 
 /**
@@ -59,7 +75,12 @@ export function lireTransporteur(code: number | null): Transporteur | null {
   const nom = e[0];
   if (nom === undefined || nom === "") return null;
   const pays = e[1];
-  return { nom, pays: pays === undefined || pays === "" ? null : pays };
+  const site = e[2];
+  return {
+    nom,
+    pays: pays === undefined || pays === "" ? null : pays,
+    site: site === undefined || site === "" ? null : site,
+  };
 }
 
 /**

@@ -404,9 +404,8 @@
       "etat": "状态",
       "progression": "进度",
       "mouvement": "最后更新",
-      "point": "最新节点",
       "prochaine": "下一步",
-      "interrogations": "查询次数"
+      "actions": "操作"
     },
     "mouvement": {
       "aucun": "承运商尚未提供物流信息",
@@ -435,6 +434,10 @@
       "livre": "包裹已送达",
       "aujourdhui": "预计今日送达",
       "le": "预计 {date} 送达"
+    },
+    "actions": {
+      "voirCommande": "查看订单 {reference}",
+      "siteTransporteur": "打开承运商网站"
     }
   },
   "analyses": {

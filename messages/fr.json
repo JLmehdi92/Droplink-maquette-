@@ -404,9 +404,8 @@
       "etat": "Statut",
       "progression": "Progression",
       "mouvement": "Dernière mise à jour",
-      "point": "Dernier point",
       "prochaine": "Prochaine étape",
-      "interrogations": "Interrogations"
+      "actions": "Actions"
     },
     "mouvement": {
       "aucun": "Pas encore d’information du transporteur",
@@ -435,6 +434,10 @@
       "livre": "Colis livré",
       "aujourdhui": "Livraison prévue aujourd’hui",
       "le": "Livraison prévue le {date}"
+    },
+    "actions": {
+      "voirCommande": "Voir la commande {reference}",
+      "siteTransporteur": "Ouvrir le site du transporteur"
     }
   },
   "analyses": {
