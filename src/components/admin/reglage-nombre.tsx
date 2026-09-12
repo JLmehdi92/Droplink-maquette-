@@ -72,16 +72,16 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
   };
 
   return (
-    <div className="border-t border-filet-ligne py-4">
+    <div className="border-t border-ds-filet py-4">
       <div className="flex items-center justify-between gap-6">
         <div className="min-w-0">
           <label
             htmlFor={champ}
-            className="block font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface"
+            className="block text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
           >
             {t(`cles.${reglage.cle}.titre`)}
           </label>
-          <p className="mt-[2px] font-body-sm text-[12px] leading-[15px] text-sourdine">
+          <p className="mt-[2px] text-[12px] leading-[15px] text-ds-texte-sourdine">
             {t(`cles.${reglage.cle}.aide`)}
           </p>
         </div>
@@ -104,14 +104,14 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
             step={1}
             defaultValue={apres === null ? reglage.valeur : apres.valeur}
             onChange={() => setModifie(true)}
-            className="h-[42px] min-h-11 w-[120px] rounded-[11px] border border-filet-controle bg-[#fafafc] px-[13px] text-right font-mono text-[14px] text-on-surface md:min-h-0"
+            className="h-[42px] min-h-11 w-[120px] rounded-ds-control border border-ds-filet-appuye bg-[#fafafc] px-[13px] text-right font-mono text-[14px] text-ds-texte-fort md:min-h-0"
           />
           {modifie ? (
             <button
               type="button"
               disabled={enCours}
               onClick={() => void enregistrer()}
-              className="h-[42px] shrink-0 rounded-[11px] bg-admin px-[14px] text-[13px] leading-[17px] font-semibold text-white disabled:opacity-60"
+              className="h-12 shrink-0 rounded-ds-card bg-ds-accent px-[18px] text-[14px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol disabled:opacity-60"
             >
               {enCours ? t("enCours") : t("enregistrer")}
             </button>
@@ -124,7 +124,7 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
           refaite côté serveur. Les afficher évite de découvrir la limite par un
           refus ; les afficher en permanence noierait la prose de la planche. */}
       {modifie ? (
-        <p className="mt-[6px] font-body-sm text-[12px] leading-[15px] text-sourdine">
+        <p className="mt-[6px] text-[12px] leading-[15px] text-ds-texte-sourdine">
           {t("bornes", { min: reglage.min, max: reglage.max, defaut: reglage.defaut })}
         </p>
       ) : null}
@@ -134,16 +134,16 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
           n'appellent pas la même décision. Rien ne s'affiche tant que personne
           n'a décidé — c'est l'état du produit neuf, et celui de la planche. */}
       {ecrit ? (
-        <p className="mt-[6px] font-body-sm text-[12px] leading-[15px] text-sourdine">
+        <p className="mt-[6px] text-[12px] leading-[15px] text-ds-texte-sourdine">
           {origine}
         </p>
       ) : null}
 
-      <p aria-live="polite" className="font-body-sm text-[12px] leading-[16px] empty:hidden">
+      <p aria-live="polite" className="text-[12px] leading-[16px] empty:hidden">
         {etat.statut === "ok" ? (
-          <span className="mt-[6px] block text-on-surface">{t("fait")}</span>
+          <span className="mt-[6px] block text-ds-texte-fort">{t("fait")}</span>
         ) : etat.statut === "erreur" ? (
-          <span className="mt-[6px] block text-alerte">{t(`erreur.${etat.motif}`)}</span>
+          <span className="mt-[6px] block text-ds-erreur">{t(`erreur.${etat.motif}`)}</span>
         ) : null}
       </p>
     </div>

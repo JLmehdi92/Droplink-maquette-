@@ -48,14 +48,14 @@ export function EnTeteAdmin({
   readonly children?: ReactNode;
 }) {
   return (
-    <div className="bg-admin px-4 pb-5 md:bg-transparent md:px-0 md:pb-0 xl:flex xl:items-center xl:justify-between xl:gap-8">
+    <div className="px-margin-mobile pt-4 pb-3.5 md:px-0 md:pt-[30px] md:pb-[26px] xl:flex xl:items-center xl:justify-between xl:gap-8">
       <div className="min-w-0">
-        <h1 className="font-headline-xl text-[26px] leading-[33px] font-extrabold tracking-[-0.03em] text-white md:text-[28px] md:leading-[35px] md:text-on-surface">
+        <h1 className="text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] md:text-[40px]">
           {titre}
         </h1>
         <p
           className={
-            "font-headline-md text-[13px] leading-4 font-normal text-white/50 md:mt-[5px] md:font-body-sm md:text-[14px] md:leading-[17px] md:text-sourdine " +
+            "mt-2 text-[14px] leading-[19px] text-ds-texte-corps md:text-[15px] md:leading-[1.55] " +
             (sousTitreAuBureauSeulement ? "hidden md:block" : "mt-1")
           }
         >

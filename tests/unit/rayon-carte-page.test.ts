@@ -88,17 +88,18 @@ describe("Le rayon de la carte-page", () => {
      * contre 28. Chaque écran migré en retire une, et ce nombre finira à ZÉRO —
      * jour où cette suite entière devra être supprimée, pas assouplie.
      *
-     * Il reste 6 cartes-pages le 11/09/2026. Le plancher est donc à 5 : assez
-     * bas pour qu'une migration ne le fasse pas rougir à tort, assez haut pour
-     * qu'une DISPARITION du balayage — un composant renommé, une extension qui
-     * change — se voie encore.
+     * Il restait 6 cartes-pages le 11/09/2026, puis 5 ; l'administration a
+     * perdu la sienne le 12/09 et il n'en reste QUE LES QUATRE PUBLIQUES. Le
+     * plancher descend donc à 4, et il ne descendra plus sans que la surface
+     * publique soit migrée — ce qui supprimera cette suite plutôt que de
+     * l'assouplir.
      */
     expect(
       inventaire.length,
-      "moins de cinq cartes-pages : soit la migration est plus avancée que ce " +
+      "moins de quatre cartes-pages : soit la migration est plus avancée que ce " +
         "que cette suite déclare, soit le balayage est cassé. Les deux se " +
         "corrigent ICI, jamais en baissant le nombre.",
-    ).toBeGreaterThanOrEqual(5);
+    ).toBeGreaterThanOrEqual(4);
   });
 
   /**
@@ -107,23 +108,20 @@ describe("Le rayon de la carte-page", () => {
    * Sa raison d'origine tient toujours : une suite qui ne verrait que des
    * surfaces publiques passerait à 100 % pendant que tout l'espace vendeur
    * rendrait la mauvaise valeur. Mais l'espace vendeur a PERDU sa carte-page le
-   * 11/09/2026 — le design system supprime le cadre extérieur — et il n'en
-   * reste qu'une seule authentifiée : l'admin, pas encore migré.
+   * 11/09/2026, et l'ADMINISTRATION la sienne le 12/09 : il n'en reste AUCUNE
+   * derrière session.
    *
-   * Un plancher de « au moins une » aurait tenu sans rien prouver. On DÉCLARE
-   * donc ce qui reste, nommément : la liste échoue dans les DEUX SENS — une
-   * carte-page authentifiée qui disparaît sans qu'on raye sa ligne, et une
-   * nouvelle qui apparaîtrait sans être déclarée. Quand la liste sera vide,
-   * cette suite n'aura plus d'objet et devra être SUPPRIMÉE.
+   * ⚠️ LA LISTE VIDE N'EST PAS UN AFFAIBLISSEMENT, ET C'EST TOUT L'INTÉRÊT DE
+   * L'AVOIR ÉCRITE COMME UNE LISTE : elle échoue toujours DANS LES DEUX SENS.
+   * Une carte-page authentifiée qui reparaîtrait — un écran repris à l'ancien
+   * canevas, un composant recopié — ferait rougir ce contrôle sans que
+   * personne ait à y penser. C'est la seule chose qui reste à garder du côté
+   * authentifié, et c'est la bonne.
+   *
+   * Le jour où les QUATRE surfaces publiques perdront la leur, cette suite
+   * n'aura plus d'objet et devra être SUPPRIMÉE, pas assouplie.
    */
-  const AUTHENTIFIEES_RESTANTES: ReadonlyArray<readonly [string, string]> = [
-    [
-      "[locale]/admin/layout.tsx",
-      "Le chrome de l'administration. Il garde la carte-page tant que les six " +
-        "écrans admin ne sont pas migrés — le design system les dessine en clair, " +
-        "sans cadre, mais aucun n'est encore porté.",
-    ],
-  ];
+  const AUTHENTIFIEES_RESTANTES: ReadonlyArray<readonly [string, string]> = [];
 
   test("les cartes-pages authentifiées restantes sont exactement celles déclarées", () => {
     const trouvees = inventaire.filter((c) => c.authentifiee).map((c) => c.fichier).sort();

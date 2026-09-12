@@ -28,9 +28,9 @@ export async function generateMetadata({
 /** Combien de lignes du journal la planche pose sous les volumes. */
 const DERNIERES_ACTIONS = 4;
 
-const CARTE = "rounded-[16px] border border-outline-variant bg-surface-container-lowest p-4 md:rounded-[18px] md:p-5";
+const CARTE = "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-6";
 const SUR_TITRE =
-  "font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.08em] text-gris-entete uppercase";
+  "text-[11.5px] leading-[13px] font-bold tracking-[0.08em] text-ds-texte-sourdine uppercase";
 
 /**
  * LA PASTILLE D'UNE LIGNE DE JOURNAL, par famille d'action.
@@ -40,10 +40,10 @@ const SUR_TITRE =
  * de quelle action il s'agit. C'est un repère de balayage, pas un code.
  */
 const PASTILLE = {
-  suspension: "bg-alerte-puce",
-  reactivation: "bg-succes",
-  parametre: "bg-violet",
-  consultation: "bg-gris-inactif",
+  suspension: "bg-ds-erreur",
+  reactivation: "bg-ds-succes",
+  parametre: "bg-ds-accent",
+  consultation: "bg-ds-ink-200",
 } as const;
 
 function couleurPastille(action: string): string {
@@ -136,7 +136,7 @@ export default async function PanneauAdmin({
       : `/${langue}/admin/comptes?q=${encodeURIComponent(sujet)}`;
 
   return (
-    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin titre={t("panneau.titre")} sousTitre={t("panneau.sousTitre")} />
 
       <div className="p-4 md:mt-[22px] md:p-0">
@@ -148,11 +148,11 @@ export default async function PanneauAdmin({
               pas abouti ferait conclure que tout va bien — c'est exactement ce
               que le brief interdit, et sur la section qu'il range en tête. */}
           {panneau.alertes === null ? (
-            <p className={CARTE + " font-body-md text-body-md text-on-surface-variant"}>
+            <p className={CARTE + " text-ds-texte-corps"}>
               {t("panneau.alertesIndisponibles")}
             </p>
           ) : panneau.alertes.length === 0 ? (
-            <p className={CARTE + " font-body-md text-body-md text-on-surface-variant"}>
+            <p className={CARTE + " text-ds-texte-corps"}>
               {t("panneau.aucuneAlerte")}
             </p>
           ) : (
@@ -161,10 +161,10 @@ export default async function PanneauAdmin({
                 <li
                   key={a.genre + a.sujet}
                   className={
-                    "flex flex-col gap-[13px] rounded-[16px] border p-4 md:flex-row md:items-start md:rounded-[15px] md:px-[18px] md:py-4 " +
+                    "flex flex-col gap-[13px] rounded-ds-card border p-4 md:flex-row md:items-start md:rounded-ds-card md:px-[18px] md:py-4 " +
                     (critique(a)
-                      ? "border-alerte-filet bg-alerte-fond-carte"
-                      : "border-attention-filet bg-attention-fond")
+                      ? "border-ds-erreur bg-ds-erreur-fond"
+                      : "border-ds-alerte bg-ds-alerte-fond")
                   }
                 >
                   <div className="flex gap-[11px] md:flex-grow md:gap-[13px]">
@@ -174,10 +174,10 @@ export default async function PanneauAdmin({
                     <span
                       aria-hidden="true"
                       className={
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] md:h-[34px] md:w-[34px] " +
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-ds-sm md:h-[34px] md:w-[34px] " +
                         (critique(a)
-                          ? "bg-alerte-puce-fond text-alerte"
-                          : "bg-attention-puce text-attention-icone")
+                          ? "bg-alerte-puce-fond text-ds-erreur"
+                          : "bg-ds-alerte text-ds-alerte")
                       }
                     >
                       <Icone
@@ -193,8 +193,8 @@ export default async function PanneauAdmin({
                           vérifier. */}
                       <p
                         className={
-                          "font-headline-md text-[14px] leading-5 font-bold md:text-[15px] md:leading-[19px] " +
-                          (critique(a) ? "text-alerte-titre" : "text-attention")
+                          "text-[14px] leading-5 font-bold md:text-[15px] md:leading-[19px] " +
+                          (critique(a) ? "text-alerte-titre" : "text-ds-alerte")
                         }
                       >
                         {t(`panneau.alerte.${a.genre}`, {
@@ -204,8 +204,8 @@ export default async function PanneauAdmin({
                       </p>
                       <p
                         className={
-                          "mt-[3px] font-headline-md text-[13px] leading-[19px] font-normal md:leading-5 " +
-                          (critique(a) ? "text-alerte-texte" : "text-attention-doux")
+                          "mt-[3px] text-[13px] leading-[19px] font-normal md:leading-5 " +
+                          (critique(a) ? "text-ds-erreur" : "text-ds-alerte")
                         }
                       >
                         {t(`panneau.alerteDetail.${a.genre}`, {
@@ -219,10 +219,10 @@ export default async function PanneauAdmin({
                   <Link
                     href={ouExaminer(a.genre, a.sujet)}
                     className={
-                      "flex min-h-11 shrink-0 items-center justify-center rounded-[11px] border bg-surface-container-lowest px-[15px] font-headline-md text-[14px] leading-[18px] font-bold md:h-[38px] md:min-h-0 md:rounded-[10px] md:text-[13px] md:leading-4 " +
+                      "flex min-h-11 shrink-0 items-center justify-center rounded-ds-control border bg-ds-surface-carte px-[15px] text-[14px] leading-[18px] font-bold md:h-[38px] md:min-h-0 md:rounded-ds-sm md:text-[13px] md:leading-4 " +
                       (critique(a)
-                        ? "border-alerte-bordure text-alerte"
-                        : "border-attention-bordure text-attention")
+                        ? "border-alerte-bordure text-ds-erreur"
+                        : "border-attention-bordure text-ds-alerte")
                     }
                   >
                     {t("panneau.examiner")}
@@ -242,7 +242,7 @@ export default async function PanneauAdmin({
               est ce qui distingue « on n'a pas pu compter » de « il n'y a
               rien », et c'est la distinction qui compte pour qui décide. */}
           {panneau.compteurs === null ? (
-            <p className="mb-2.5 font-body-md text-body-md text-on-surface-variant">
+            <p className="mb-2.5 text-ds-texte-corps">
               {t("panneau.compteursIndisponibles")}
             </p>
           ) : null}
@@ -252,29 +252,29 @@ export default async function PanneauAdmin({
                 du produit qui corresponde à une FACTURE. Le noyer parmi les
                 autres reviendrait à traiter notre seul coût variable comme une
                 statistique de plus. */}
-            <div className={CARTE + " border-violet-filet bg-violet-carte md:border-violet-filet"}>
+            <div className={CARTE + " border-ds-accent-doux bg-ds-surface-teinte md:border-ds-accent-doux"}>
               <div className="mb-[7px] flex items-center gap-[7px] md:mb-2">
-                <p className="font-headline-md text-[12px] leading-[15px] font-bold text-violet-encre">
+                <p className="text-[12px] leading-[15px] font-bold text-ds-accent-encre">
                   {t("panneau.colisFactures")}
                 </p>
-                <span className="rounded-full bg-violet px-1.5 py-0.5 font-headline-md text-[9px] leading-[11px] font-bold text-white md:px-[7px] md:text-[10px] md:leading-3">
+                <span className="rounded-ds-pill bg-ds-accent px-2 py-0.5 text-[11.5px] leading-[15px] font-bold text-ds-texte-sur-marque">
                   {t("panneau.facture")}
                 </span>
               </div>
-              <p className="font-headline-xl text-[30px] leading-[38px] font-extrabold tracking-[-0.035em] text-violet-sombre">
+              <p className="text-[30px] leading-[38px] font-extrabold tracking-[-0.035em] text-ds-accent-encre">
                 {chiffre(panneau.compteurs?.colisPrisEnChargeCeMois)}
               </p>
-              <p className="mt-[5px] font-headline-md text-[12px] leading-[15px] font-normal text-violet-encre md:mt-1.5">
+              <p className="mt-[5px] text-[12px] leading-[15px] font-normal text-ds-accent-encre md:mt-1.5">
                 {t("panneau.ceMoisCi")}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 xl:contents">
               <div className={CARTE}>
-                <p className="mb-1.5 font-body-sm text-[12px] leading-[15px] text-sourdine md:mb-2">
+                <p className="mb-1.5 text-[12px] leading-[15px] text-ds-texte-sourdine md:mb-2">
                   {t("panneau.comptesActifs")}
                 </p>
-                <p className="font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[30px] md:leading-[38px] md:tracking-[-0.035em]">
+                <p className="text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-ds-texte-fort md:text-[30px] md:leading-[38px] md:tracking-[-0.035em]">
                   {chiffre(panneau.compteurs?.comptesActifs)}
                 </p>
                 {/* LES DEUX AUTRES ÉTATS DE COMPTE TIENNENT DANS CETTE LIGNE.
@@ -282,7 +282,7 @@ export default async function PanneauAdmin({
                     aurait fait disparaître le seul endroit où l'on voit d'un
                     coup combien d'inscrits n'ont jamais fini leur onboarding —
                     et cette colonne existe précisément pour être mesurée. */}
-                <p className="mt-1.5 hidden font-body-sm text-[12px] leading-[15px] text-sourdine md:block">
+                <p className="mt-1.5 hidden text-[12px] leading-[15px] text-ds-texte-sourdine md:block">
                   {t("panneau.comptesDont", {
                     suspendus: chiffre(panneau.compteurs?.comptesSuspendus),
                     sansType: chiffre(panneau.compteurs?.comptesSansType),
@@ -291,14 +291,14 @@ export default async function PanneauAdmin({
               </div>
 
               <div className={CARTE}>
-                <p className="mb-1.5 font-body-sm text-[12px] leading-[15px] text-sourdine md:mb-2">
+                <p className="mb-1.5 text-[12px] leading-[15px] text-ds-texte-sourdine md:mb-2">
                   <span className="md:hidden">{t("panneau.commandesCourt")}</span>
                   <span className="hidden md:inline">{t("panneau.commandes")}</span>
                 </p>
-                <p className="font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[30px] md:leading-[38px] md:tracking-[-0.035em]">
+                <p className="text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-ds-texte-fort md:text-[30px] md:leading-[38px] md:tracking-[-0.035em]">
                   {chiffre(panneau.compteurs?.commandesCreeesCeMois)}
                 </p>
-                <p className="mt-1.5 hidden font-body-sm text-[12px] leading-[15px] text-sourdine md:block">
+                <p className="mt-1.5 hidden text-[12px] leading-[15px] text-ds-texte-sourdine md:block">
                   {t("panneau.ceMoisCi")}
                 </p>
               </div>
@@ -319,15 +319,15 @@ export default async function PanneauAdmin({
                 là une information absente est OMISE, ici elle est NOMMÉE. Un
                 client consulte, un administrateur décide. */}
             <div className={CARTE}>
-              <p className="mb-1.5 font-body-sm text-[12px] leading-[15px] text-sourdine md:mb-2">
+              <p className="mb-1.5 text-[12px] leading-[15px] text-ds-texte-sourdine md:mb-2">
                 {t("panneau.stockage")}
               </p>
               {taille === null ? (
-                <p className="font-headline-md text-[19px] leading-6 font-bold tracking-[-0.02em] text-sourdine md:text-[22px] md:leading-7">
+                <p className="text-[19px] leading-6 font-bold tracking-[-0.02em] text-ds-texte-sourdine md:text-[22px] md:leading-7">
                   {t("panneau.stockageIndisponible")}
                 </p>
               ) : (
-                <p className="font-headline-md text-[19px] leading-6 font-bold tracking-[-0.02em] text-on-surface md:text-[22px] md:leading-7">
+                <p className="text-[19px] leading-6 font-bold tracking-[-0.02em] text-ds-texte-fort md:text-[22px] md:leading-7">
                   {t("panneau.stockageValeur", {
                     valeur: format.number(taille.valeur, {
                       minimumFractionDigits: taille.decimales,
@@ -337,7 +337,7 @@ export default async function PanneauAdmin({
                   })}
                 </p>
               )}
-              <p className="mt-[5px] font-body-sm text-[12px] leading-[18px] text-sourdine md:mt-1.5 md:leading-[17px]">
+              <p className="mt-[5px] text-[12px] leading-[18px] text-ds-texte-sourdine md:mt-1.5 md:leading-[17px]">
                 {t("panneau.stockageAide")}
               </p>
             </div>
@@ -354,14 +354,14 @@ export default async function PanneauAdmin({
             donc PostgREST l'exécute en transaction lecture seule : le panneau ne
             peut pas se remplir de sa propre consultation. */}
         <section aria-label={t("panneau.dernieresActions")} className="mt-4 hidden md:block">
-          <div className="rounded-[16px] border border-outline-variant bg-surface-container-lowest p-4 md:rounded-[18px] md:p-[22px]">
+          <div className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-4 md:rounded-ds-card-lg md:p-[22px]">
             <div className="mb-4 flex items-center justify-between gap-4">
-              <h2 className="font-headline-md text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-on-surface">
+              <h2 className="text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-ds-texte-fort">
                 {t("panneau.dernieresActions")}
               </h2>
               <Link
                 href={`/${langue}/admin/journal`}
-                className="shrink-0 font-headline-md text-[13px] leading-4 font-semibold text-violet hover:text-violet-survol"
+                className="shrink-0 text-[13px] leading-4 font-semibold text-ds-accent hover:text-ds-accent-survol"
               >
                 {t("panneau.toutLeJournal")}
               </Link>
@@ -374,11 +374,11 @@ export default async function PanneauAdmin({
                 l'inverse de la page publique, et c'est voulu : un client
                 consulte, un administrateur décide. */}
             {actions === null ? (
-              <p className="font-body-md text-body-md text-on-surface-variant">
+              <p className="text-ds-texte-corps">
                 {t("panneau.dernieresActionsIndisponibles")}
               </p>
             ) : actions.length === 0 ? (
-              <p className="font-body-md text-body-md text-on-surface-variant">
+              <p className="text-ds-texte-corps">
                 {t("journal.vide")}
               </p>
             ) : (
@@ -388,10 +388,10 @@ export default async function PanneauAdmin({
                     <span
                       aria-hidden="true"
                       className={
-                        "h-[7px] w-[7px] shrink-0 rounded-full " + couleurPastille(ligne.action)
+                        "h-[7px] w-[7px] shrink-0 rounded-ds-pill " + couleurPastille(ligne.action)
                       }
                     />
-                    <span className="min-w-0 flex-grow truncate font-headline-md text-[14px] leading-[18px] font-normal text-on-surface">
+                    <span className="min-w-0 flex-grow truncate text-[14px] leading-[18px] font-normal text-ds-texte-fort">
                       {/* Le point devient un souligné : next-intl le traite comme
                           un séparateur de NIVEAU, et `journal.actions.compte.suspension`
                           irait chercher une clé imbriquée qui n'existe pas. */}
@@ -405,7 +405,7 @@ export default async function PanneauAdmin({
                         </>
                       ) : null}
                     </span>
-                    <span className="shrink-0 font-body-sm text-[13px] leading-4 text-sourdine">
+                    <span className="shrink-0 text-[13px] leading-4 text-ds-texte-sourdine">
                       {format.relativeTime(new Date(ligne.quand), {
                         now: maintenant,
                         style: "short",

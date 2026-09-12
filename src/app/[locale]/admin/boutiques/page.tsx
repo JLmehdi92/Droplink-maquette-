@@ -33,8 +33,8 @@ export async function generateMetadata({
 }
 
 const PILULE =
-  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-headline-md text-[12px] leading-[15px] font-semibold";
-const PILULE_NEUTRE = PILULE + " bg-fond-neutre text-ardoise";
+  "inline-flex items-center gap-1.5 rounded-ds-pill px-2.5 py-1 text-[12px] leading-[15px] font-semibold";
+const PILULE_NEUTRE = PILULE + " bg-ds-surface-creux text-ds-texte-corps";
 
 /**
  * LES BOUTIQUES — ce que chaque compte OCCUPE.
@@ -119,7 +119,7 @@ export default async function AdminBoutiques({
   const auDessus = (b: LigneBoutique): boolean => b.colisCeMois > seuils.colis;
 
   return (
-    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin
         titre={t("boutiques.titre")}
         sousTitre={t("boutiques.decompte", { total: compteurs.comptes })}
@@ -159,10 +159,10 @@ export default async function AdminBoutiques({
                     className={
                       // 44 px au doigt, 40 à la souris : la planche écrit `height: 38px` sur une
                       // boîte en `content-box`, donc elle REND 40 avec son filet.
-                      "inline-flex min-h-11 items-center rounded-full border px-3.5 font-headline-md text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:h-10 md:min-h-0 " +
+                      "inline-flex min-h-11 items-center rounded-ds-pill border px-3.5 text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:h-10 md:min-h-0 " +
                       (actif
                         ? "border-primary bg-primary text-on-primary"
-                        : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
+                        : "border-ds-filet-appuye bg-ds-surface-carte text-ds-texte-corps hover:bg-ds-surface-creux")
                     }
                   >
                     {t(`boutiques.filtre.${type === "" ? "toutes" : type}`)}
@@ -176,7 +176,7 @@ export default async function AdminBoutiques({
         {page.lignes.length === 0 ? (
           /* DEUX ÉTATS VIDES DISTINCTS. Annoncer « aucune boutique » à qui vient
              de filtrer une base pleine est une perte de confiance immédiate. */
-          <p className="rounded-[16px] border border-outline-variant bg-surface-container-lowest p-6 text-center font-body-md text-body-md text-on-surface-variant">
+          <p className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-6 text-center text-ds-texte-corps">
             {parametres.q === "" && parametres.type === ""
               ? t("boutiques.videTout")
               : t("boutiques.videRecherche")}
@@ -188,7 +188,7 @@ export default async function AdminBoutiques({
               return (
                 <li
                   key={b.id}
-                  className="min-w-0 rounded-[16px] border border-outline-variant bg-surface-container-lowest p-[18px]"
+                  className="min-w-0 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[18px]"
                 >
                   <div className="mb-4 flex items-center gap-3">
                     {/* LA PASTILLE PORTE LA COULEUR DU VENDEUR quand il en a
@@ -197,8 +197,8 @@ export default async function AdminBoutiques({
                     <span
                       aria-hidden="true"
                       className={
-                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] " +
-                        (b.nom === null ? "bg-fond-neutre" : "")
+                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-control " +
+                        (b.nom === null ? "bg-ds-surface-creux" : "")
                       }
                       {...(b.nom === null ? {} : { style: { backgroundColor: b.accent } })}
                     >
@@ -207,19 +207,19 @@ export default async function AdminBoutiques({
                           couleur, qui se suffit. Le carré était rendu vide —
                           une pastille grise sans rien dedans se lit comme un
                           média qui n'a pas chargé. */}
-                      {b.nom === null ? <Icone nom="storefront" className="text-[18px] text-gris-inactif" /> : null}
+                      {b.nom === null ? <Icone nom="storefront" className="text-[18px] text-ds-texte-tenu" /> : null}
                     </span>
                     <div className="min-w-0 flex-grow">
                       {b.nom === null ? (
-                        <p className="truncate font-body-md text-[15px] leading-[19px] font-semibold italic text-sourdine">
+                        <p className="truncate text-[15px] leading-[19px] font-semibold italic text-ds-texte-sourdine">
                           {t("boutiques.nonConfiguree")}
                         </p>
                       ) : (
-                        <p className="truncate font-headline-md text-[15px] leading-[19px] font-bold text-on-surface">
+                        <p className="truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort">
                           {b.nom}
                         </p>
                       )}
-                      <p className="mt-px truncate font-body-sm text-[12px] leading-[15px] text-sourdine">
+                      <p className="mt-px truncate text-[12px] leading-[15px] text-ds-texte-sourdine">
                         {b.email}
                       </p>
                     </div>
@@ -236,21 +236,21 @@ export default async function AdminBoutiques({
                         pas besoin qu'on le lui dise : elle ne prend plus rien en
                         charge. */}
                     {suspendue(b) ? (
-                      <span className={PILULE + " bg-alerte-fond-vif text-alerte"}>
+                      <span className={PILULE + " bg-ds-erreur text-ds-erreur"}>
                         {t("boutiques.suspendue")}
                       </span>
                     ) : auDessus(b) ? (
-                      <span className={PILULE + " bg-alerte-fond-vif text-alerte"}>
+                      <span className={PILULE + " bg-ds-erreur text-ds-erreur"}>
                         {t("boutiques.plafondDepasse")}
                       </span>
                     ) : (
-                      <span className={PILULE + " bg-succes-fond text-succes"}>
+                      <span className={PILULE + " bg-ds-succes-fond text-ds-succes"}>
                         {t("boutiques.activeEtat")}
                       </span>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2 border-t border-filet-ligne pt-3.5">
+                  <div className="grid grid-cols-4 gap-2 border-t border-ds-filet pt-3.5">
                     {(
                       [
                         { cle: "commandes", valeur: format.number(b.commandes), alerte: false },
@@ -274,13 +274,13 @@ export default async function AdminBoutiques({
                       ] as const
                     ).map((s) => (
                       <div key={s.cle} className="min-w-0">
-                        <p className="mb-0.5 font-body-sm text-[11px] leading-[14px] text-sourdine">
+                        <p className="mb-0.5 text-[11.5px] leading-[14px] text-ds-texte-sourdine">
                           {t(`boutiques.colonnes.${s.cle}`)}
                         </p>
                         <p
                           className={
-                            "truncate font-headline-md text-[15px] leading-[19px] font-bold " +
-                            (s.alerte ? "text-alerte" : "text-on-surface")
+                            "truncate text-[15px] leading-[19px] font-bold " +
+                            (s.alerte ? "text-ds-erreur" : "text-ds-texte-fort")
                           }
                         >
                           {s.valeur}
@@ -300,13 +300,13 @@ export default async function AdminBoutiques({
                 posés sur des boîtes à filet rendent 192 et 40. Tailwind est en
                 `border-box` : recopier 190 et 38 rendait deux pixels de moins. */}
             {lienSuivant === null ? null : (
-              <li className="flex min-h-[192px] flex-col items-center justify-center rounded-[16px] border border-dashed border-outline-variant bg-surface-container-lowest p-[18px]">
+              <li className="flex min-h-[192px] flex-col items-center justify-center rounded-ds-card border border-dashed border-ds-filet bg-ds-surface-carte p-[18px]">
                 {/* LE DÉCOMPTE N'EST EXACT QUE SUR LA PREMIÈRE PAGE. La
                     pagination est par curseur : passé la première page, rien ne
                     dit combien de lignes ont déjà défilé, et « autres » serait
                     un nombre inventé. Une information absente est OMISE. */}
                 {parametres.curseur === null ? (
-                  <p className="mb-1 font-body-md text-[14px] leading-[18px] text-sourdine">
+                  <p className="mb-1 text-[14px] leading-[18px] text-ds-texte-sourdine">
                     {t("boutiques.autres", {
                       restantes: Math.max(0, compteurs.comptes - page.lignes.length),
                     })}
@@ -314,7 +314,7 @@ export default async function AdminBoutiques({
                 ) : null}
                 <LienEcran
                   href={lienSuivant}
-                  className="inline-flex h-10 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-4 font-headline-md text-[13px] leading-4 font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
+                  className="inline-flex h-10 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
                 >
                   {t("boutiques.pageSuivante")}
                 </LienEcran>

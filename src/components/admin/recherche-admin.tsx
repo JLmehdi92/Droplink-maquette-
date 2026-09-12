@@ -40,7 +40,7 @@ export function RechercheAdmin({
 
       <Icone
         nom="search"
-        className="pointer-events-none absolute top-[14px] left-[13px] text-[16px] text-white/45 md:top-[13px] md:text-gris-inactif"
+        className="pointer-events-none absolute top-[14px] left-[13px] text-[16px] text-ds-texte-tenu md:top-[13px]"
       />
 
       <input
@@ -49,12 +49,16 @@ export function RechercheAdmin({
         type="search"
         defaultValue={valeur}
         placeholder={exemple}
-        className="h-11 w-full rounded-[12px] border border-white/[0.16] bg-white/[0.08] pr-[14px] pl-[38px] font-body-md text-[15px] text-white placeholder:text-white/45 md:h-[42px] md:w-[320px] md:rounded-[11px] md:border-filet-controle md:bg-surface-container-lowest md:text-[14px] md:text-on-surface md:placeholder:text-gris-inactif"
+        /* LA MÊME PEAU AUX DEUX LARGEURS DEPUIS QUE LE CHROME EST CLAIR. Elle en
+           avait deux : blanc translucide sur la bande sombre du téléphone,
+           surface de carte au bureau. La bande n'est plus sombre, et deux
+           peaux pour un seul champ sont deux valeurs à garder justes. */
+        className="h-11 w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte pr-[14px] pl-[38px] text-[15px] text-ds-texte-fort transition-shadow outline-none placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)] md:w-80 md:text-[14px]"
       />
 
       <button
         type="submit"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-full focus:right-0 focus:z-10 focus:mt-1 focus:flex focus:min-h-11 focus:items-center focus:rounded-[11px] focus:border focus:border-filet-controle focus:bg-surface-container-lowest focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-surface"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-full focus:right-0 focus:z-10 focus:mt-1 focus:flex focus:min-h-11 focus:items-center focus:rounded-ds-control focus:border focus:border-ds-filet-appuye focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:focus:focus:text-ds-texte-fort"
       >
         {chercher}
       </button>

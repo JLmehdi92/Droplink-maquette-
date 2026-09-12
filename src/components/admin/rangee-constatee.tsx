@@ -40,13 +40,13 @@ export function RangeeConstatee({
   readonly etat: FormeConstatee;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6 border-t border-filet-ligne py-4">
+    <div className="flex items-center justify-between gap-6 border-t border-ds-filet py-4">
       <div className="min-w-0">
-        <p className="font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface">
+        <p className="text-[14px] leading-[18px] font-semibold text-ds-texte-fort">
           {titre}
         </p>
         {aide === undefined ? null : (
-          <p className="mt-[2px] font-body-sm text-[12px] leading-[15px] text-sourdine">{aide}</p>
+          <p className="mt-[2px] text-[12px] leading-[15px] text-ds-texte-sourdine">{aide}</p>
         )}
       </div>
 
@@ -54,19 +54,19 @@ export function RangeeConstatee({
         // MÊME GÉOMÉTRIE QUE LE CHAMP DE LA PLANCHE — 120 × 42, rayon 11, chiffre
         // à droite — mais un fond neutre et aucune bordure de contrôle : rien
         // n'invite à cliquer là où rien ne se saisit.
-        <span className="flex h-[42px] w-[120px] shrink-0 items-center justify-end rounded-[11px] bg-fond-neutre px-[13px] font-mono text-[14px] text-sourdine">
+        <span className="flex h-[42px] w-[120px] shrink-0 items-center justify-end rounded-ds-control bg-ds-surface-creux px-[13px] font-mono text-[14px] text-ds-texte-sourdine">
           {etat.valeur}
         </span>
       ) : etat.forme === "absent" ? (
-        <span className="flex h-[42px] w-[120px] shrink-0 items-center justify-end rounded-[11px] bg-fond-neutre px-[13px] font-body-sm text-[12px] leading-[16px] text-sourdine">
+        <span className="flex h-[42px] w-[120px] shrink-0 items-center justify-end rounded-ds-control bg-ds-surface-creux px-[13px] text-[12px] leading-[16px] text-ds-texte-sourdine">
           {etat.mention}
         </span>
       ) : (
         <span
           aria-hidden="true"
-          className="flex h-[27px] w-[46px] shrink-0 items-center justify-start rounded-full bg-[#dcdce4] px-[3px]"
+          className="flex h-[27px] w-[46px] shrink-0 items-center justify-start rounded-ds-pill bg-[#dcdce4] px-[3px]"
         >
-          <span className="block h-[21px] w-[21px] rounded-full bg-white" />
+          <span className="block h-[21px] w-[21px] rounded-ds-pill bg-white" />
         </span>
       )}
     </div>

@@ -33,12 +33,12 @@ export async function generateMetadata({
   return { title: t("fiche.titre"), robots: { index: false, follow: false } };
 }
 
-const CARTE = "rounded-[18px] border border-outline-variant bg-surface-container-lowest p-4 md:p-[22px]";
+const CARTE = "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-6";
 const SUR_TITRE =
-  "font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.09em] text-gris-entete uppercase";
-const LIGNE = "flex items-baseline justify-between gap-4 border-t border-filet-ligne py-[11px]";
-const ETIQUETTE = "font-body-md text-[14px] leading-[18px] text-sourdine";
-const VALEUR = "text-right font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface";
+  "text-[11.5px] leading-[13px] font-bold tracking-[0.09em] text-ds-texte-sourdine uppercase";
+const LIGNE = "flex items-baseline justify-between gap-4 border-t border-ds-filet py-[11px]";
+const ETIQUETTE = "text-[14px] leading-[18px] text-ds-texte-sourdine";
+const VALEUR = "text-right text-[14px] leading-[18px] font-semibold text-ds-texte-fort";
 
 /**
  * LA FICHE D'UN COMPTE.
@@ -102,26 +102,26 @@ export default async function FicheCompte({
    * conteneur ne dit pas « beaucoup », elle dit « le gabarit est cassé ».
    */
   const barre = (part: number, alerte: boolean) => (
-    <div className="h-2 overflow-hidden rounded-full bg-filet-ligne">
+    <div className="h-2 overflow-hidden rounded-ds-pill bg-ds-filet">
       <div
-        className={"h-full rounded-full " + (alerte ? "bg-alerte-puce" : "bg-violet")}
+        className={"h-full rounded-ds-pill " + (alerte ? "bg-ds-erreur" : "bg-ds-accent")}
         style={{ width: `${Math.round(Math.min(Math.max(part, 0), 1) * 100)}%` }}
       />
     </div>
   );
 
   return (
-    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       {/* --- L'IDENTITÉ, EN TÊTE ---
 
           Le retour vers la liste est un LIEN, pas un bouton d'historique : un
           administrateur arrive souvent ici depuis une recherche, et
           `history.back()` lui rendrait une page qu'il n'a pas demandée. */}
-      <div className="flex items-start gap-3 bg-admin px-4 pb-5 md:items-center md:gap-4 md:bg-transparent md:px-0 md:pb-0">
+      <div className="flex items-start gap-3 px-margin-mobile pt-4 pb-3.5 md:items-center md:gap-4 md:px-0 md:pt-[30px] md:pb-[26px]">
         <Link
           href={`/${langue}/admin/comptes`}
           aria-label={t("fiche.retour")}
-          className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] border border-white/20 bg-white/10 text-white before:absolute before:-inset-[3px] before:content-[''] md:border-filet-controle md:bg-surface-container-lowest md:text-on-surface"
+          className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte text-ds-texte-fort shadow-ds-xs transition-colors before:absolute before:-inset-[3px] before:content-[''] hover:bg-ds-surface-teinte"
         >
           <Icone nom="arrow_back" className="text-[18px]" />
         </Link>
@@ -131,29 +131,29 @@ export default async function FicheCompte({
             reconnaître un compte qu'on a déjà ouvert. */}
         <span
           aria-hidden="true"
-          className="hidden h-12 w-12 shrink-0 rounded-[13px] md:block"
+          className="hidden h-12 w-12 shrink-0 rounded-ds-control md:block"
           style={{ backgroundColor: fiche.accent ?? "#7c5cf5" }}
         />
 
         <div className="min-w-0 flex-grow">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-headline-xl text-[22px] leading-7 font-extrabold tracking-[-0.03em] text-white md:text-[26px] md:leading-[33px] md:text-on-surface">
+            <h1 className="text-[24px] leading-7 font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[40px] md:leading-[1.05]">
               {fiche.boutique ?? t("comptes.sansNom")}
             </h1>
             <span
               className={
-                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-headline-md text-[12px] leading-[15px] font-semibold " +
-                (suspendu ? "bg-alerte-fond-vif text-alerte" : "bg-succes-fond text-succes")
+                "inline-flex items-center gap-1.5 rounded-ds-pill px-2.5 py-1 text-[12px] leading-[15px] font-semibold " +
+                (suspendu ? "bg-ds-erreur text-ds-erreur" : "bg-ds-succes-fond text-ds-succes")
               }
             >
               <span
                 aria-hidden="true"
-                className={"h-1.5 w-1.5 rounded-full " + (suspendu ? "bg-alerte-puce" : "bg-succes")}
+                className={"h-1.5 w-1.5 rounded-ds-pill " + (suspendu ? "bg-ds-erreur" : "bg-ds-succes")}
               />
               {t(`comptes.statuts.${fiche.statut}`)}
             </span>
           </div>
-          <p className="mt-[3px] font-headline-md text-[13px] leading-[18px] font-normal text-white/50 md:font-body-sm md:text-[14px] md:leading-[17px] md:text-sourdine">
+          <p className="mt-2 text-[14px] leading-[19px] text-ds-texte-corps md:text-[15px] md:leading-[1.55]">
             {t("fiche.resume", {
               email: fiche.email,
               type: typeLisible,
@@ -175,16 +175,16 @@ export default async function FicheCompte({
               <div className="grid grid-cols-2 gap-3.5 xl:grid-cols-4">
                 {/* LE COMPTEUR FACTURÉ EN TÊTE ET ENCADRÉ : c'est le seul poste
                     du produit qui corresponde à une facture. */}
-                <div className="rounded-[14px] border border-violet-filet bg-violet-carte p-[15px]">
+                <div className="rounded-ds-card border border-ds-accent-doux bg-ds-surface-teinte p-[15px]">
                   <div className="mb-[7px] flex items-center gap-1.5">
-                    <p className="font-headline-md text-[11px] leading-[14px] font-bold text-violet-encre">
+                    <p className="text-[11.5px] leading-[14px] font-bold text-ds-accent-encre">
                       {t("fiche.colis")}
                     </p>
-                    <span className="rounded-full bg-violet px-1.5 py-0.5 font-headline-md text-[9px] leading-[11px] font-bold text-white">
+                    <span className="rounded-ds-pill bg-ds-accent px-2 py-0.5 text-[11.5px] leading-[15px] font-bold text-ds-texte-sur-marque">
                       {t("panneau.facture")}
                     </span>
                   </div>
-                  <p className="font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-violet-sombre">
+                  <p className="text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-ds-accent-encre">
                     {format.number(fiche.colisCeMois)}
                   </p>
                 </div>
@@ -197,12 +197,12 @@ export default async function FicheCompte({
                 ).map((v) => (
                   <div
                     key={v.cle}
-                    className="rounded-[14px] border border-outline-variant p-[15px]"
+                    className="rounded-ds-card border border-ds-filet p-[15px]"
                   >
-                    <p className="mb-[7px] font-body-sm text-[11px] leading-[14px] text-sourdine">
+                    <p className="mb-[7px] text-[11.5px] leading-[14px] text-ds-texte-sourdine">
                       {t(`fiche.${v.cle}`)}
                     </p>
-                    <p className="font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface">
+                    <p className="text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-ds-texte-fort">
                       {format.number(v.valeur)}
                     </p>
                   </div>
@@ -212,11 +212,11 @@ export default async function FicheCompte({
                     planche écrit encore « Indisponible » : elle a été dessinée
                     quand rien ne le mesurait, et le garder aujourd'hui
                     affirmerait qu'on ne sait pas ce qu'on sait. */}
-                <div className="rounded-[14px] border border-outline-variant p-[15px]">
-                  <p className="mb-[7px] font-body-sm text-[11px] leading-[14px] text-sourdine">
+                <div className="rounded-ds-card border border-ds-filet p-[15px]">
+                  <p className="mb-[7px] text-[11.5px] leading-[14px] text-ds-texte-sourdine">
                     {t("fiche.stockage")}
                   </p>
-                  <p className="font-headline-md text-[15px] leading-5 font-bold tracking-[-0.01em] text-on-surface">
+                  <p className="text-[15px] leading-5 font-bold tracking-[-0.01em] text-ds-texte-fort">
                     {t("panneau.stockageValeur", {
                       valeur: format.number(taille.valeur, {
                         minimumFractionDigits: taille.decimales,
@@ -237,16 +237,16 @@ export default async function FicheCompte({
                   <div className="mb-[7px] flex flex-wrap justify-between gap-2">
                     <span
                       className={
-                        "font-headline-md text-[14px] leading-[18px] font-semibold " +
-                        (colisAuDessus ? "text-alerte" : "text-on-surface")
+                        "text-[14px] leading-[18px] font-semibold " +
+                        (colisAuDessus ? "text-ds-erreur" : "text-ds-texte-fort")
                       }
                     >
                       {t("fiche.plafondColis")}
                     </span>
                     <span
                       className={
-                        "font-headline-md text-[14px] leading-[18px] " +
-                        (colisAuDessus ? "font-bold text-alerte" : "font-normal text-sourdine")
+                        "text-[14px] leading-[18px] " +
+                        (colisAuDessus ? "font-bold text-ds-erreur" : "font-normal text-ds-texte-sourdine")
                       }
                     >
                       {t("fiche.surPlafond", {
@@ -259,7 +259,7 @@ export default async function FicheCompte({
                   {/* LE DÉPASSEMENT PORTE SON CHIFFRE : « dépassé de 640 » se
                       vérifie, « au-dessus du seuil » se discute. */}
                   {colisAuDessus ? (
-                    <p className="mt-[7px] font-headline-md text-[12px] leading-[18px] font-normal text-alerte-texte">
+                    <p className="mt-[7px] text-[12px] leading-[18px] font-normal text-ds-erreur">
                       {t("fiche.depassementColis", {
                         ecart: format.number(fiche.colisCeMois - seuils.colis),
                       })}
@@ -269,10 +269,10 @@ export default async function FicheCompte({
 
                 <div>
                   <div className="mb-[7px] flex flex-wrap justify-between gap-2">
-                    <span className="font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface">
+                    <span className="text-[14px] leading-[18px] font-semibold text-ds-texte-fort">
                       {t("fiche.plafondCommandes")}
                     </span>
-                    <span className="font-body-md text-[14px] leading-[18px] text-sourdine">
+                    <span className="text-[14px] leading-[18px] text-ds-texte-sourdine">
                       {t("fiche.surPlafond", {
                         valeur: format.number(fiche.commandesCeMois),
                         plafond: format.number(seuils.plafondCommandes),
@@ -287,12 +287,12 @@ export default async function FicheCompte({
             {/* --- CE QUE CE COMPTE A FAIT --- */}
             <section className={CARTE} aria-label={t("fiche.activite")}>
               <p className={SUR_TITRE + " mb-2"}>{t("fiche.activite")}</p>
-              <p className="mb-4 font-body-sm text-[13px] leading-5 text-sourdine">
+              <p className="mb-4 text-[13px] leading-5 text-ds-texte-sourdine">
                 {t("fiche.activiteAide")}
               </p>
 
               {fiche.activite.length === 0 ? (
-                <p className="font-body-md text-body-md text-on-surface-variant">
+                <p className="text-ds-texte-corps">
                   {t("fiche.activiteVide")}
                 </p>
               ) : (
@@ -301,9 +301,9 @@ export default async function FicheCompte({
                     <li key={a.type + a.jour} className="flex items-center gap-3">
                       <span
                         aria-hidden="true"
-                        className="h-[7px] w-[7px] shrink-0 rounded-full bg-violet"
+                        className="h-[7px] w-[7px] shrink-0 rounded-ds-pill bg-ds-accent"
                       />
-                      <span className="min-w-0 flex-grow font-headline-md text-[14px] leading-[18px] font-normal text-on-surface">
+                      <span className="min-w-0 flex-grow text-[14px] leading-[18px] font-normal text-ds-texte-fort">
                         {t("fiche.activiteLigne", {
                           n: a.n,
                           quoi: t.has(`fiche.evenement.${a.type}`)
@@ -311,7 +311,7 @@ export default async function FicheCompte({
                             : a.type,
                         })}
                       </span>
-                      <span className="shrink-0 font-body-sm text-[13px] leading-4 text-sourdine">
+                      <span className="shrink-0 text-[13px] leading-4 text-ds-texte-sourdine">
                         {format.dateTime(new Date(a.jour), { dateStyle: "medium" })}
                       </span>
                     </li>
@@ -370,16 +370,16 @@ export default async function FicheCompte({
               <div className="mb-4 flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="h-11 w-11 shrink-0 rounded-[12px]"
+                  className="h-11 w-11 shrink-0 rounded-ds-control"
                   style={{ backgroundColor: fiche.accent ?? "#7c5cf5" }}
                 />
                 <div className="min-w-0">
-                  <p className="truncate font-headline-md text-[15px] leading-[19px] font-bold text-on-surface">
+                  <p className="truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort">
                     {fiche.boutique ?? t("fiche.boutiqueNonConfiguree")}
                   </p>
                   {/* LA VALEUR EXACTE, EN CHASSE FIXE. Un aplat de couleur ne se
                       recopie pas dans un message ; un code hexadécimal, si. */}
-                  <p className="mt-px font-mono text-[13px] leading-4 text-sourdine">
+                  <p className="mt-px font-mono text-[13px] leading-4 text-ds-texte-sourdine">
                     {fiche.accent ?? t("fiche.boutiqueNonConfiguree")}
                   </p>
                 </div>
@@ -407,14 +407,14 @@ export default async function FicheCompte({
 
             {/* --- CE QUE CETTE PAGE NE PERMET PAS --- */}
             <section
-              className={CARTE + " bg-surface-container-low"}
+              className={CARTE + " bg-ds-surface-creux"}
               aria-label={t("fiche.interdits")}
             >
               <p className={SUR_TITRE + " mb-4"}>{t("fiche.interdits")}</p>
               <ul className="flex flex-col gap-3">
                 {(["suppression", "usurpation", "commandes"] as const).map((cle) => (
-                  <li key={cle} className="font-body-sm text-[13px] leading-5 text-sourdine">
-                    <strong className="font-headline-md font-bold text-on-surface">
+                  <li key={cle} className="text-[13px] leading-5 text-ds-texte-sourdine">
+                    <strong className="font-bold text-ds-texte-fort">
                       {t(`fiche.interdit.${cle}.quoi`)}
                     </strong>{" "}
                     {t(`fiche.interdit.${cle}.pourquoi`)}

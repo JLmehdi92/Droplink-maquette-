@@ -475,12 +475,14 @@ const AUTHENTIFIEES: ReadonlyArray<{
   },
   {
     fichier: "src/app/[locale]/admin/comptes/[id]/page.tsx",
-    repere: "flex h-10 w-10 shrink-0",
+    repere: "flex h-11 w-11 shrink-0",
     plancher: "before:-inset-[3px]",
     raison:
-      "Le retour vers la liste des comptes. La planche AdminCompteDetailMobile " +
-      "le dessine à 40 × 40 : c'est donc un pseudo-élément transparent qui " +
-      "porte la zone à 46, sans qu'un pixel visible bouge.",
+      "Le retour vers la liste des comptes. Il faisait 40 × 40 et gagnait ses " +
+      "44 px par un pseudo-élément transparent ; la migration du 12/09 l'a porté " +
+      "à 44 pour de bon — le kit dessine ses boutons d'action à 48. Le " +
+      "pseudo-élément reste : il donne 50 de zone au doigt là où le bouton en " +
+      "montre 44, et c'est gratuit.",
   },
   {
     fichier: "src/components/marque/formulaire-marque.tsx",
@@ -496,7 +498,7 @@ const AUTHENTIFIEES: ReadonlyArray<{
   },
   {
     fichier: "src/components/admin/reglage-nombre.tsx",
-    repere: "w-[120px] rounded-[11px]",
+    repere: "w-[120px] rounded-ds-control",
     plancher: "min-h-11",
     raison:
       "Les trois champs nombre des paramètres système, mesurés à 42 px. Le " +

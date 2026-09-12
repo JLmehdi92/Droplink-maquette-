@@ -249,7 +249,7 @@ export default async function ParametresAdmin({
     ));
 
   return (
-    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin titre={t("titre")} sousTitre={t("sousTitre")} />
 
       {/* ⚠️ SANS CE PROVIDER, L'ÉCRAN LÈVE AU RENDU. Les deux composants de
@@ -271,13 +271,13 @@ export default async function ParametresAdmin({
             {/* CE QUI N'EST PAS ICI EST DIT, plutôt que laissé à deviner. Un
                 écran de paramètres muet sur les secrets laisse chercher où les
                 régler — et la recherche finit par une clé collée quelque part. */}
-            <section className="flex gap-3 rounded-[16px] border border-violet-filet-doux bg-violet-carte p-4 md:rounded-[18px] md:p-[22px]">
-              <Icone nom="lock" className="mt-px shrink-0 text-[18px] text-violet-encre" />
+            <section className="flex gap-3 rounded-ds-card border border-ds-filet bg-ds-surface-teinte p-4 md:rounded-ds-card-lg md:p-[22px]">
+              <Icone nom="lock" className="mt-px shrink-0 text-[18px] text-ds-accent-encre" />
               <div>
-                <p className="text-[14px] font-bold leading-[18px] text-violet-sombre">
+                <p className="text-[14px] font-bold leading-[18px] text-ds-accent-encre">
                   {t("secretsTitre")}
                 </p>
-                <p className="mt-1 font-body-sm text-[13px] leading-[20px] text-violet-encre">
+                <p className="mt-1 text-[13px] leading-[20px] text-ds-accent-encre">
                   {t("secretsAide")}
                 </p>
               </div>

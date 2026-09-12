@@ -99,7 +99,7 @@ function BoutonConfirmation({
       onClick={onConfirmer}
       libelles={{ repos: libelle, enCours, reussi: libelle, echoue: libelle }}
       className={
-        "flex min-h-[44px] items-center justify-center rounded-lg px-4 font-label-md text-label-md disabled:opacity-50 " +
+        "flex min-h-[44px] items-center justify-center rounded-ds-sm px-4 disabled:opacity-50 " +
         (danger ? "bg-error text-on-error" : "bg-primary text-on-primary")
       }
     />
@@ -171,16 +171,16 @@ export function DialogueSuspension({
           type="button"
           onClick={() => setOuvert(true)}
           className={
-            "flex min-h-11 w-full items-center justify-center rounded-[11px] border bg-surface-container-lowest px-[18px] font-headline-md text-[14px] leading-[18px] font-bold transition-colors md:min-h-0 md:h-[42px] " +
+            "flex min-h-11 w-full items-center justify-center rounded-ds-control border bg-ds-surface-carte px-[18px] text-[14px] leading-[18px] font-bold transition-colors md:min-h-0 md:h-[42px] " +
             (suspendu
-              ? "border-filet-controle text-on-surface hover:bg-fond-neutre"
-              : "border-alerte-bordure text-alerte hover:bg-alerte-fond-carte")
+              ? "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux"
+              : "border-alerte-bordure text-ds-erreur hover:bg-ds-erreur-fond")
           }
         >
           {suspendu ? t("rouvrir") : t("ouvrir")}
         </button>
         {etat.statut === "ok" ? (
-          <p role="status" className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
+          <p role="status" className="mt-2 text-ds-texte-corps">
             {t("fait")}
           </p>
         ) : null}
@@ -195,14 +195,14 @@ export function DialogueSuspension({
         // Échap ferme. La sortie doit toujours être plus facile que l'action.
         if (e.key === "Escape") fermer();
       }}
-      className="rounded-lg border border-outline-variant bg-surface-container-low p-4"
+      className="rounded-ds-sm border border-ds-filet bg-ds-surface-creux p-4"
     >
       <div className="flex flex-col gap-4">
         <div>
-          <h3 className="font-headline-md text-headline-md-mobile text-on-surface">
+          <h3 className="text-headline-md-mobile text-ds-texte-fort">
             {suspendu ? t("titreReactivation") : t("titreSuspension")}
           </h3>
-          <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+          <p className="mt-1 text-ds-texte-corps">
             {suspendu ? t("aideReactivation") : t("aideSuspension")}
           </p>
         </div>
@@ -210,7 +210,7 @@ export function DialogueSuspension({
         <div>
           <label
             htmlFor="motif"
-            className="mb-2 block font-label-md text-label-md text-on-surface"
+            className="mb-2 block text-ds-texte-fort"
           >
             {t("motif")}
           </label>
@@ -223,9 +223,9 @@ export function DialogueSuspension({
             rows={3}
             value={motif}
             onChange={(e) => setMotif(e.target.value)}
-            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-3 font-body-md text-body-md text-on-surface"
+            className="w-full rounded-ds-sm border border-ds-filet bg-ds-surface-carte p-3 text-ds-texte-fort"
           />
-          <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+          <p className="mt-1 text-ds-texte-corps">
             {t("motifAide", { n: motifMin })}
           </p>
         </div>
@@ -234,11 +234,11 @@ export function DialogueSuspension({
           <div>
             <label
               htmlFor="confirmation"
-              className="mb-2 block font-label-md text-label-md text-on-surface"
+              className="mb-2 block text-ds-texte-fort"
             >
               {t("recopier")}
             </label>
-            <p className="mb-2 select-none font-mono text-body-md text-on-surface">{email}</p>
+            <p className="mb-2 select-none font-mono text-ds-texte-fort">{email}</p>
             <input
               id="confirmation"
               name="confirmation"
@@ -255,16 +255,16 @@ export function DialogueSuspension({
                 e.preventDefault();
                 setColle(true);
               }}
-              className="min-h-[44px] w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-mono text-body-md text-on-surface"
+              className="min-h-[44px] w-full rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 font-mono text-ds-texte-fort"
             />
-            <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
+            <p className="mt-2 text-ds-texte-corps">
               {colle ? t("collageRefuse") : t("collageAide")}
             </p>
           </div>
         ) : null}
 
         {etat.statut === "erreur" ? (
-          <p role="alert" className="font-body-sm text-body-sm text-error">
+          <p role="alert" className="text-ds-erreur">
             {t(`erreur.${etat.motif}`)}
           </p>
         ) : null}
@@ -275,7 +275,7 @@ export function DialogueSuspension({
           <button
             type="button"
             onClick={fermer}
-            className="min-h-[44px] px-4 font-label-md text-label-md text-on-surface-variant"
+            className="min-h-[44px] px-4 text-ds-texte-corps"
           >
             {t("annuler")}
           </button>

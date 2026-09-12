@@ -31,24 +31,24 @@ export default function Erreur({
   return (
     <main
       id="contenu"
-      className="flex flex-1 items-center justify-center px-margin-mobile py-10 md:px-[30px]"
+      className="flex flex-1 items-center justify-center px-margin-mobile py-10 md:px-8"
     >
       <div className="max-w-[520px] text-center">
-        <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface">
+        <h1 className="text-[24px] font-extrabold tracking-[-0.03em] text-ds-texte-fort">
           {t("titre")}
         </h1>
-        <p className="mt-3 font-body-md text-body-md text-on-surface-variant">{t("texte")}</p>
+        <p className="mt-3 text-ds-texte-corps">{t("texte")}</p>
 
         <button
           type="button"
           onClick={reset}
-          className="mt-6 min-h-[44px] rounded-md bg-surface-container-lowest px-5 font-label-md text-label-md text-admin"
+          className="mt-6 min-h-[44px] rounded-ds-control bg-ds-surface-carte px-5 text-admin"
         >
           {t("reessayer")}
         </button>
 
         {error.digest !== undefined && (
-          <p className="mt-6 font-body-sm text-body-sm text-sourdine">
+          <p className="mt-6 text-ds-texte-sourdine">
             {t("reference", { ref: error.digest })}
           </p>
         )}

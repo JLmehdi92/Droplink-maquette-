@@ -49,11 +49,11 @@ const SURFACES_AFFICHEES: readonly Surface[] = [
 ] as const;
 
 const SUR_TITRE =
-  "font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.08em] text-gris-entete uppercase";
+  "text-[11.5px] leading-[13px] font-bold tracking-[0.08em] text-ds-texte-sourdine uppercase";
 const CARTE =
-  "rounded-[18px] border border-outline-variant bg-surface-container-lowest p-4 md:p-[22px]";
+  "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-6";
 const PILULE_ETAT =
-  "shrink-0 rounded-full px-3 py-[5px] font-headline-md text-[12px] leading-[15px] font-bold";
+  "shrink-0 rounded-ds-pill px-3 py-[5px] text-[12px] leading-[15px] font-bold";
 
 /**
  * L'HABILLAGE D'UNE TÂCHE, PAR ÉTAT. Trois états, trois teintes — et le vert
@@ -64,33 +64,33 @@ const PILULE_ETAT =
  */
 const TEINTE_TACHE = {
   actif: {
-    carte: "border-outline-variant bg-surface-container-lowest",
-    point: "bg-succes",
-    titre: "text-on-surface",
+    carte: "border-ds-filet bg-ds-surface-carte",
+    point: "bg-ds-succes",
+    titre: "text-ds-texte-fort",
     // LA PLANCHE MET CE DÉTAIL EN INTER (classe `.mut`) sur les deux états
     // neutres, et en Plus Jakarta Sans sur le seul état en retard — la ligne
     // qui doit se lire comme une alerte porte la police des titres.
-    detail: "font-body-sm leading-4 text-sourdine",
-    pilule: "bg-succes-fond text-succes",
+    detail: "leading-4 text-ds-texte-sourdine",
+    pilule: "bg-ds-succes-fond text-ds-succes",
   },
   en_retard: {
-    carte: "border-attention-filet bg-attention-fond",
+    carte: "border-ds-alerte bg-ds-alerte-fond",
     // ⚠️ PAS `attention-icone` (#a97b1e) : la planche peint cette pastille en
     // #d19a20, plus clair. L'ambre foncé est celui du TEXTE ; réemployer un
     // token voisin parce qu'il est ambre est invisible à toute relecture.
-    point: "bg-attention-pastille",
-    titre: "text-attention",
-    detail: "font-headline-md leading-4 text-attention-doux",
-    pilule: "bg-attention-puce text-attention",
+    point: "bg-ds-alerte-fond",
+    titre: "text-ds-alerte",
+    detail: "leading-4 text-ds-alerte",
+    pilule: "bg-ds-alerte text-ds-alerte",
   },
   jamais_executee: {
-    carte: "border-outline-variant bg-surface-container-lowest",
+    carte: "border-ds-filet bg-ds-surface-carte",
     point: "bg-gris-illustration",
-    titre: "text-on-surface",
+    titre: "text-ds-texte-fort",
     // 20 px, et déclaré comme tel dans la planche : c'est le seul détail qui
     // tienne sur deux lignes, donc le seul où l'interlignage se voie.
-    detail: "font-body-sm leading-5 text-sourdine",
-    pilule: "bg-fond-neutre text-sourdine",
+    detail: "leading-5 text-ds-texte-sourdine",
+    pilule: "bg-ds-surface-creux text-ds-texte-sourdine",
   },
 } as const;
 
@@ -157,7 +157,7 @@ export default async function SurveillanceAdmin({
   const dernierJour = colisParJour.length - 1;
 
   return (
-    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin titre={t("surveillance.titre")} sousTitre={t("surveillance.sousTitre")} />
 
       <div className="p-4 md:mt-[22px] md:p-0">
@@ -169,7 +169,7 @@ export default async function SurveillanceAdmin({
               afficher « jamais exécutée » pour CHAQUE tâche attendue : une
               alerte inventée, sur l'écran fait pour les porter. */}
           {surveillance.surveillees === null ? (
-            <p className={CARTE + " font-body-md text-body-md text-on-surface-variant"}>
+            <p className={CARTE + " text-ds-texte-corps"}>
               {t("surveillance.tachesIndisponibles")}
             </p>
           ) : (
@@ -180,7 +180,7 @@ export default async function SurveillanceAdmin({
                 <li
                   key={tache.source}
                   className={
-                    "flex items-center gap-3.5 rounded-[14px] border px-4 py-4 md:px-[18px] " +
+                    "flex items-center gap-3.5 rounded-ds-card border px-4 py-4 md:px-[18px] " +
                     teinte.carte
                   }
                 >
@@ -188,13 +188,13 @@ export default async function SurveillanceAdmin({
                       couleur seule ne se lit pas de la même façon selon les yeux. */}
                   <span
                     aria-hidden="true"
-                    className={"h-2.5 w-2.5 shrink-0 rounded-full " + teinte.point}
+                    className={"h-2.5 w-2.5 shrink-0 rounded-ds-pill " + teinte.point}
                   />
 
                   <div className="min-w-0 flex-grow">
                     <p
                       className={
-                        "mb-0.5 font-headline-md text-[15px] leading-[19px] font-bold " +
+                        "mb-0.5 text-[15px] leading-[19px] font-bold " +
                         teinte.titre
                       }
                     >
@@ -236,7 +236,7 @@ export default async function SurveillanceAdmin({
               liraient « aucune consommation », ce qui est une affirmation — et
               une affirmation qu'on n'a pas mesurée. */}
           {surveillance.indicateurs === null ? (
-            <p className="mb-2.5 font-body-md text-body-md text-on-surface-variant">
+            <p className="mb-2.5 text-ds-texte-corps">
               {t("surveillance.indicateursIndisponibles")}
             </p>
           ) : null}
@@ -245,16 +245,16 @@ export default async function SurveillanceAdmin({
             {/* --- LA FRISE DES COLIS --- */}
             <div className={CARTE}>
               <div className="mb-5 flex items-baseline justify-between gap-4">
-                <h2 className="font-headline-md text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-on-surface">
+                <h2 className="text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-ds-texte-fort">
                   {t("surveillance.colisParJour")}
                 </h2>
-                <span className="shrink-0 font-body-sm text-[12px] leading-[15px] text-sourdine">
+                <span className="shrink-0 text-[12px] leading-[15px] text-ds-texte-sourdine">
                   {t("surveillance.seulPosteFacture")}
                 </span>
               </div>
 
               {surveillance.colisParJour === null ? (
-                <p className="font-body-md text-body-md text-on-surface-variant">
+                <p className="text-ds-texte-corps">
                   {t("surveillance.friseIndisponible")}
                 </p>
               ) : (
@@ -274,21 +274,21 @@ export default async function SurveillanceAdmin({
                     // jour qui n'aurait pas été mesuré.
                     style={{ height: `${Math.max(2, Math.round((j.n / maxColis) * 100))}%` }}
                     className={
-                      "rounded-t-[4px] " + (rang === dernierJour ? "bg-corail" : "bg-violet")
+                      "rounded-t-[4px] " + (rang === dernierJour ? "bg-corail" : "bg-ds-accent")
                     }
                   />
                 ))}
               </div>
               )}
 
-              <p className="mt-3 font-body-sm text-[12px] leading-[15px] text-sourdine">
+              <p className="mt-3 text-[12px] leading-[15px] text-ds-texte-sourdine">
                 {t("surveillance.friseLegende", { n: JOURS_DE_FRISE })}
               </p>
             </div>
 
             {/* --- LA LIMITATION DE DÉBIT --- */}
             <div className={CARTE}>
-              <h2 className="mb-5 font-headline-md text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-on-surface">
+              <h2 className="mb-5 text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-ds-texte-fort">
                 {t("surveillance.limitation")}
               </h2>
 
@@ -303,10 +303,10 @@ export default async function SurveillanceAdmin({
                   return (
                     <div key={surface}>
                       <div className="mb-[7px] flex flex-wrap justify-between gap-2">
-                        <span className="font-headline-md text-[13px] leading-4 font-semibold text-on-surface">
+                        <span className="text-[13px] leading-4 font-semibold text-ds-texte-fort">
                           {t(`surveillance.surface.${surface}`)}
                         </span>
-                        <span className="font-body-sm text-[13px] leading-4 text-sourdine">
+                        <span className="text-[13px] leading-4 text-ds-texte-sourdine">
                           {/* UN TIRET, JAMAIS UN ZÉRO : zéro affirmerait
                               qu'on a mesuré, sur l'écran fait pour dire si un
                               plafond est approché. */}
@@ -316,9 +316,9 @@ export default async function SurveillanceAdmin({
                           })}
                         </span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-filet-ligne">
+                      <div className="h-2 overflow-hidden rounded-ds-pill bg-ds-filet">
                         <div
-                          className="h-full rounded-full bg-violet"
+                          className="h-full rounded-ds-pill bg-ds-accent"
                           style={{
                             width: `${valeur === null ? 0 : Math.round(Math.min(valeur / Math.max(plafond, 1), 1) * 100)}%`,
                           }}
@@ -330,7 +330,7 @@ export default async function SurveillanceAdmin({
                           concerne pas ; l'administration REFUSE, ça ne pénalise
                           que nous. */}
                       {nouvelleRegle ? (
-                        <p className="mt-[7px] font-body-sm text-[11px] leading-[17px] text-sourdine">
+                        <p className="mt-[7px] text-[11.5px] leading-[17px] text-ds-texte-sourdine">
                           {t(`surveillance.degradation.${DEGRADATION[surface]}`)}
                         </p>
                       ) : null}
@@ -346,14 +346,14 @@ export default async function SurveillanceAdmin({
         <section aria-label={t("surveillance.nonMesure")} className="mt-7">
           <p className={SUR_TITRE + " mb-3"}>{t("surveillance.nonMesure")}</p>
           <div className={CARTE}>
-            <p className="font-body-sm text-[13px] leading-5 text-sourdine">
+            <p className="text-[13px] leading-5 text-ds-texte-sourdine">
               {t("surveillance.nonMesureAide")}
             </p>
             <ul className="mt-3.5 flex flex-wrap gap-2">
               {surveillance.nonMesure.map((cle) => (
                 <li
                   key={cle}
-                  className="rounded-full border border-filet-controle px-3 py-1 font-headline-md text-[12px] leading-[15px] font-semibold text-sourdine"
+                  className="rounded-ds-pill border border-ds-filet-appuye px-3 py-1 text-[12px] leading-[15px] font-semibold text-ds-texte-sourdine"
                 >
                   {t(`surveillance.absent.${cle}`)}
                 </li>

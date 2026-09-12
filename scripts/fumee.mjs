@@ -30,6 +30,19 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+/**
+ * LA MARQUE DE LA SURFACE D ADMINISTRATION, et sa seule raison d exister.
+ *
+ * Elle sert a distinguer un refus d administration d une adresse inventee : si
+ * le corps du 404 la porte, un vendeur ordinaire apprend que la surface existe.
+ * Elle est posee sur la racine du layout d administration et sur rien d autre.
+ *
+ * ⚠️ NE JAMAIS LA REMPLACER PAR UNE VALEUR D APPARENCE. Elle etait la classe
+ * de couleur du chrome sombre, et la migration de ce chrome l a effacee du depot
+ * en silence le 12/09/2026 — le controle serait devenu vert a vide.
+ */
+const MARQUE_ADMIN = 'data-surface="administration"';
+
 // Le serveur enfant lit `.env.local` lui-meme ; ce script, non. Sans ce
 // chargement, la sonde qui cree une commande de test echouerait sur une
 // variable absente — et l echec ressemblerait a un defaut du produit.
@@ -2297,17 +2310,25 @@ try {
            * pendant qu un vendeur ordinaire apprendrait que la surface existe.
            * C est le champ de vision de la correction, pas celui du probleme.
            *
-           * On controle donc la MARQUE de la surface elle-meme, `bg-admin`,
-           * que portent le chrome sombre du layout ET le squelette. Le
-           * contre-test qui precede est obligatoire : sans lui, un renommage
-           * de la classe rendrait ce controle vert a vide.
+           * On controle donc la MARQUE de la surface elle-meme, que portent
+           * le layout ET le squelette. Le contre-test qui precede est
+           * obligatoire : sans lui, un renommage de la marque rendrait ce
+           * controle vert a vide.
+           *
+           * ⚠️ CETTE MARQUE ETAIT `bg-admin`, UNE CLASSE DE COULEUR, ET ELLE A
+           * DISPARU LE 12/09/2026 quand le chrome sombre de l administration
+           * est passe au design system. Le controle serait devenu vert a vide ;
+           * c est son contre-test qui l a attrape. Une sentinelle qui est aussi
+           * une valeur d apparence s efface le jour ou l apparence change. La
+           * marque est desormais `data-surface="administration"`, qui n a pas
+           * d autre emploi que d etre trouvee.
            */
           [
-            htmlPromu.includes("bg-admin"),
-            "CONTRE-TEST : la surface admin porte bien la marque `bg-admin` quand elle est SERVIE",
+            htmlPromu.includes(MARQUE_ADMIN),
+            `CONTRE-TEST : la surface admin porte bien la marque ${MARQUE_ADMIN} quand elle est SERVIE`,
           ],
           [
-            !corpsRetrograde.includes("bg-admin"),
+            !corpsRetrograde.includes(MARQUE_ADMIN),
             `ni le squelette : le corps du refus (${corpsRetrograde.length} octets) ne porte aucune marque de la surface`,
           ],
           /*

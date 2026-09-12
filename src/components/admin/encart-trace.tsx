@@ -15,12 +15,12 @@ import { Icone } from "@/components/icone";
  */
 export function EncartTrace({ texte }: { readonly texte: string }) {
   return (
-    <p className="flex items-start gap-[9px] rounded-[12px] border border-violet-filet-doux bg-violet-fond px-3.5 py-3 md:items-center md:gap-2.5">
+    <p className="flex items-start gap-[9px] rounded-ds-control border border-ds-filet bg-ds-surface-teinte px-3.5 py-3 md:items-center md:gap-2.5">
       <Icone
         nom="error"
-        className="mt-px shrink-0 text-[15px] text-violet-encre md:mt-0 md:text-[16px]"
+        className="mt-px shrink-0 text-[15px] text-ds-accent-encre md:mt-0 md:text-[16px]"
       />
-      <span className="font-headline-md text-[12px] leading-[18px] font-normal text-violet-sombre md:text-[13px] md:leading-4">
+      <span className="text-[12px] leading-[18px] font-normal text-ds-accent-encre md:text-[13px] md:leading-4">
         {texte}
       </span>
     </p>

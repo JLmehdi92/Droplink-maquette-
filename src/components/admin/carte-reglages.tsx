@@ -18,11 +18,11 @@ export function CarteReglages({
   readonly children: ReactNode;
 }) {
   return (
-    <section className="rounded-[16px] border border-outline-variant bg-surface-container-lowest p-4 md:rounded-[18px] md:p-[22px]">
-      <h2 className="font-headline-md text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-on-surface">
+    <section className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-4 md:rounded-ds-card-lg md:p-[22px]">
+      <h2 className="text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-ds-texte-fort">
         {titre}
       </h2>
-      <p className="mt-1 mb-2 font-body-sm text-[13px] leading-4 text-sourdine">
+      <p className="mt-1 mb-2 text-[13px] leading-4 text-ds-texte-sourdine">
         {sousTitre}
       </p>
       {children}

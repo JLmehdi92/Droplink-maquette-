@@ -36,8 +36,16 @@ import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
  *
  * La seule présence d'un squelette suffit à distinguer cette adresse d'une
  * adresse inventée : renommer ses classes n'y changerait rien. `pnpm fumee`
- * échoue si la marque `bg-admin` reparaît dans un corps de refus, avec son
+ * échoue si la marque de la surface reparaît dans un corps de refus, avec son
  * contre-test qui exige de la trouver quand la surface est SERVIE.
+ *
+ * ⚠️ CETTE MARQUE EST `data-surface="administration"` DEPUIS LE 12/09/2026, ET
+ * ELLE ÉTAIT `bg-admin`. La migration du chrome sombre vers le design system a
+ * effacé cette classe de tout le dépôt — et avec elle la sentinelle, en
+ * silence : le contrôle serait resté vert à vide si son contre-test ne l'avait
+ * pas attrapé. *Une sentinelle qui est aussi une valeur d'apparence disparaît
+ * le jour où l'apparence change.* Celle-ci n'a pas d'autre emploi que d'être
+ * trouvée, donc rien ne peut la faire disparaître par effet de bord.
  */
 export default async function LayoutAdmin({
   children,
@@ -59,47 +67,54 @@ export default async function LayoutAdmin({
       href: `/${langue}/admin`,
       libelle: t("panneau.titre"),
       court: t("onglets.panneau"),
-      icone: "dashboard",
+      icone: "panneau",
     },
     {
       href: `/${langue}/admin/comptes`,
       libelle: t("comptes.titre"),
       court: t("onglets.comptes"),
-      icone: "person",
+      icone: "comptes",
     },
     {
       href: `/${langue}/admin/boutiques`,
       libelle: t("boutiques.titre"),
       court: t("onglets.boutiques"),
-      icone: "storefront",
+      icone: "boutiques",
     },
     {
       href: `/${langue}/admin/journal`,
       libelle: t("journal.titre"),
       court: t("onglets.journal"),
-      icone: "bookmark",
+      icone: "journal",
     },
     {
       href: `/${langue}/admin/surveillance`,
       libelle: t("surveillance.titre"),
       court: t("onglets.surveillance"),
-      icone: "monitoring",
+      icone: "veille",
     },
     {
       href: `/${langue}/admin/parametres`,
       libelle: t("parametres.titre"),
       court: t("onglets.parametres"),
-      icone: "settings",
+      icone: "reglages",
     },
   ];
 
   /*
-   * LA COQUILLE DE L'ADMINISTRATION — chrome SOMBRE, et ce n'est pas décoratif.
+   * LA COQUILLE DE L'ADMINISTRATION — chrome CLAIR DEPUIS LE 12/09/2026.
    *
-   * Les deux surfaces montrent des tableaux qui se ressemblent, et savoir en
-   * permanence lequel on regarde évite d'agir sur les données de quelqu'un
-   * d'autre en croyant toucher les siennes. Le noir est ce qui rend la confusion
-   * impossible à un coup d'œil.
+   * ⚠️ CE BLOC DISAIT « chrome SOMBRE, et ce n'est pas décoratif », et
+   * argumentait que le noir rendait impossible de confondre l'administration
+   * avec l'espace vendeur. L'argument était bon ; le noir vient de l'ANCIEN
+   * canevas, et `CLAUDE.md` le déclare mort — « Chrome admin : sombre `#111117`
+   * → clair, comme le reste ». C'était le DERNIER aplat sombre du produit.
+   *
+   * CE QUI REND LA CONFUSION IMPOSSIBLE DANS LE NOUVEAU DESSIN, et le kit le
+   * mesure : la colonne porte un eyebrow « ADMINISTRATION » en 11,5/700 à
+   * l'interlettrage de 0,12em au-dessus de ses entrées, et l'entrée courante y
+   * est peinte du DÉGRADÉ DE MARQUE là où l'espace vendeur emploie un aplat
+   * teinté. Ce ne sont pas les mêmes objets, et ils ne se ressemblent pas.
    *
    * L'ENCART « TOUT EST TRACÉ » EST UN RAPPEL PERMANENT, pas une décoration :
    * chaque consultation de données d'un vendeur écrit une ligne au journal, y
@@ -118,68 +133,74 @@ export default async function LayoutAdmin({
    * inaccessible n'est pas un écart de dessin, c'est une fonction perdue.
    */
   return (
-    <div className="min-h-dvh bg-surface md:bg-canvas md:p-5">
+    <div data-surface="administration" className="min-h-dvh bg-ds-surface-page">
       {/* PREMIER ÉLÉMENT FOCUSABLE DE LA PAGE. Au bureau, la colonne pose six
           liens avant le contenu ; les traverser à chaque écran au clavier est
           le genre de coût qu'on ne mesure jamais parce qu'on ne le paie pas
           soi-même. */}
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-lg focus:bg-surface-container-lowest focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-surface focus:shadow-md"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-ds-sm focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:text-[14px] focus:font-semibold focus:text-ds-texte-fort focus:shadow-ds-md"
       >
         {t("allerAuContenu")}
       </a>
-      <div className="mx-auto flex w-full min-h-dvh flex-col bg-surface md:min-h-[calc(100dvh-40px)] md:w-full md:max-w-[1400px] md:flex-row md:overflow-hidden md:rounded-page">
-        {/* --- LA MARQUE : bande supérieure au téléphone, colonne au bureau --- */}
-        <div className="flex flex-col bg-admin px-4 pt-4 md:w-[236px] md:shrink-0 md:py-[22px]">
-          <div className="mb-4 flex items-center justify-between md:mb-[26px] md:block md:px-2">
+
+      <div className="flex min-h-dvh w-full flex-col md:flex-row">
+        {/* --- LA COLONNE : bande supérieure au téléphone, colonne au bureau ---
+
+            VALEURS MESURÉES SUR LE KIT SERVI À 1690 px : 240 de large, fond de
+            carte, `padding 24px 16px 18px`, filet à droite. */}
+        <div className="flex flex-col border-b border-ds-filet bg-ds-surface-carte px-4 pt-4 md:w-60 md:shrink-0 md:border-r md:border-b-0 md:px-4 md:pt-6 md:pb-[18px]">
+          <div className="mb-4 flex items-center justify-between md:mb-5 md:block md:px-1.5">
             <div>
-              <span className="block font-headline-md text-[16px] leading-[21px] font-extrabold tracking-[-0.02em] text-white md:text-[17px] md:leading-[22px]">
+              <span className="block text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre">
                 DropLink
               </span>
-              <span className="mt-0.5 block font-headline-md text-[10px] leading-[13px] font-bold tracking-[0.1em] text-corail md:mt-[3px] md:text-[11px] md:leading-[13px]">
+              {/* ⚠️ 11,5 px ET NON 10. Le kit écrit cet eyebrow à 11 ; le
+                  plancher de la règle 5 est 11,5 au téléphone, et cette bande y
+                  est rendue. L'interlettrage de 0,12em est celui du design
+                  system pour les eyebrows. */}
+              <span className="mt-1 block text-[11.5px] leading-[15px] font-bold tracking-[0.12em] text-ds-texte-tenu uppercase">
                 {t("bandeau")}
               </span>
             </div>
-            {/* ⚠️ UN ROND VIDE, ET C'EST CE QUE LES PLANCHES DESSINENT — les
-                sept, bandeau du téléphone comme colonne du bureau. Il portait
-                l'initiale de l'administrateur connecté, au motif que savoir qui
-                l'on est vaut mieux qu'un rond ; sauf que l'adresse complète est
-                déjà écrite juste à côté, dans le même bloc. L'initiale ne
-                répétait qu'une seule lettre de ce qui est déjà lisible.
 
-                `AdminCompteDetailMobile` fait exception dans le canevas : son
-                bandeau y porte un avatar de 34 px, fond rgba(255,255,255,.1),
-                avec initiale. C'est une variante d'écran que cette coque
-                partagée ne peut pas exprimer — écart connu et nommé, plutôt que
-                silencieux. */}
-            {/* AU TÉLÉPHONE, LA DÉCONNEXION EST ICI : la colonne sombre y est
-                devenue une bande supérieure, et son bloc d'identité — qui porte
-                le bouton au bureau — n'y est pas rendu. L'avatar reste à 40 px
-                parce qu'il ne se clique pas ; le bouton est à 44, la cible
-                tactile minimale du produit. */}
+            {/* AU TÉLÉPHONE, LA DÉCONNEXION EST ICI : la colonne est devenue une
+                bande supérieure, et son bloc d'identité — qui porte le bouton au
+                bureau — n'y est pas rendu. */}
             <div className="flex items-center gap-2 md:hidden">
-              <span
-                aria-hidden="true"
-                className="h-10 w-10 shrink-0 rounded-full bg-white/[0.14]"
-              />
               <BoutonDeconnexion langue={langue} variante="sombre-mobile" />
             </div>
           </div>
 
           <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="colonne" />
 
-          {/* L'espace pousse le rappel et l'identité en bas de colonne, comme la
-              planche : ce sont les deux choses qu'on relit, pas celles qu'on
+          {/* L'espace pousse le rappel et l'identité en bas de colonne, comme le
+              kit : ce sont les deux choses qu'on relit, pas celles qu'on
               parcourt. */}
           <div className="hidden md:block md:flex-grow" />
 
           <div className="hidden md:block">
-            <div className="rounded-[13px] bg-[rgba(242,118,94,0.14)] p-[13px]">
-              <p className="font-headline-md text-[12px] leading-[15px] font-bold text-corail">
+            {/*
+              L'ENCART « TOUT EST TRACÉ » EST UN RAPPEL PERMANENT, pas une
+              décoration : chaque consultation de données d'un vendeur écrit une
+              ligne au journal, y compris les LECTURES. Celui qui regarde doit le
+              savoir AVANT de regarder, pas le découvrir dans le journal.
+
+              ⚠️ LE KIT MET ICI UNE CARTE DÉCORATIVE — « DropLink Admin / Tout
+              sous contrôle » avec une illustration. On garde SA GÉOMÉTRIE (207
+              de large, rayon 20, teinte lavande — le kit y pose un dégradé de
+              `#F1F0FE` à `#FAF6FE`, deux valeurs que l oeil ne separe pas sur
+              136 px de haut, et l aplat du jeton les vaut —, titre
+              15/800, texte 12,5/400) et NOTRE CONTENU : à cet endroit précis, la
+              seule phrase qui mérite d'être relue est celle qui dit que tout est
+              tracé.
+            */}
+            <div className="rounded-ds-card-lg bg-ds-surface-teinte p-4">
+              <p className="text-[15px] leading-5 font-extrabold text-ds-texte-titre">
                 {t("traceTitre")}
               </p>
-              <p className="mt-1 font-headline-md text-[11px] leading-[17px] font-normal text-white/50">
+              <p className="mt-1 text-[12.5px] leading-[17px] text-ds-texte-corps">
                 {t("traceTexte")}
               </p>
             </div>
@@ -191,20 +212,22 @@ export default async function LayoutAdmin({
               laissée ouverte fait donc signer à quelqu'un des consultations
               qu'il n'a pas faites — et le journal est append-only.
             */}
-            <div className="mt-3.5 flex items-center gap-2.5 p-2">
+            <div className="mt-3.5 flex items-center gap-2.5 pt-3.5">
               <span
                 aria-hidden="true"
-                className="h-8 w-8 shrink-0 rounded-full bg-white/[0.14]"
-              />
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent text-[13px] font-bold text-ds-texte-sur-marque"
+              >
+                {(admin.email ?? "?").slice(0, 1).toUpperCase()}
+              </span>
               <div className="min-w-0 flex-grow">
                 {/* L'ADRESSE, PAS UN PRÉNOM. Le compte est identifié par son
                     email dans le journal ; afficher autre chose ici obligerait à
                     faire la correspondance de tête au moment de relire une
                     trace. */}
-                <p className="truncate font-headline-md text-[13px] leading-4 font-semibold text-white">
+                <p className="truncate text-[13.5px] leading-[18px] font-bold text-ds-texte-fort">
                   {admin.email}
                 </p>
-                <p className="font-headline-md text-[11px] leading-[13px] font-normal text-white/[0.44]">
+                <p className="text-[12px] leading-4 text-ds-texte-sourdine">
                   {t("roleAdministrateur")}
                 </p>
               </div>
@@ -218,8 +241,7 @@ export default async function LayoutAdmin({
           {children}
 
           {/* L'espace n'existe qu'au téléphone : il colle la barre d'onglets au
-              bas de l'écran quand la page est courte, sans la rendre fixe — une
-              barre fixe masquerait la dernière ligne de tous les tableaux. */}
+              bas de l'écran quand la page est courte. */}
           <div className="flex-grow md:hidden" />
           <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="onglets" />
         </div>

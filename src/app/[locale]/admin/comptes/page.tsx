@@ -28,12 +28,12 @@ export async function generateMetadata({
 }
 
 const EN_TETE_COLONNE =
-  "pb-3 text-left font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.05em] text-gris-entete uppercase";
-const CELLULE = "border-t border-filet-ligne py-3.5 font-headline-md text-[14px] leading-[18px] font-normal";
+  "pb-3 text-left text-[11.5px] leading-[13px] font-bold tracking-[0.05em] text-ds-texte-sourdine uppercase";
+const CELLULE = "border-t border-ds-filet py-3.5 text-[14px] leading-[18px] font-normal";
 const PILULE =
-  "inline-flex items-center gap-[5px] rounded-full px-[9px] py-[3px] font-headline-md text-[11px] leading-[13px] font-semibold " +
+  "inline-flex items-center gap-[5px] rounded-ds-pill px-[9px] py-[3px] text-[11.5px] leading-[13px] font-semibold " +
   "xl:gap-1.5 xl:px-2.5 xl:py-1 xl:text-[12px] xl:leading-[15px]";
-const PILULE_NEUTRE = PILULE + " bg-fond-neutre text-ardoise";
+const PILULE_NEUTRE = PILULE + " bg-ds-surface-creux text-ds-texte-corps";
 
 /**
  * GESTION DES COMPTES — surface d'administration.
@@ -110,7 +110,7 @@ export default async function AdminComptes({
   /** Le nom de boutique, ou le fait qu'il n'y en ait pas — jamais une invention. */
   const nom = (l: LigneCompte, style: string): React.ReactNode =>
     l.boutique === null ? (
-      <span className={style + " font-body-md italic text-sourdine"}>{t("comptes.sansNom")}</span>
+      <span className={style + " italic text-ds-texte-sourdine"}>{t("comptes.sansNom")}</span>
     ) : (
       <span className={style}>{l.boutique}</span>
     );
@@ -121,14 +121,14 @@ export default async function AdminComptes({
       className={
         PILULE +
         " shrink-0 " +
-        (suspendu(l) ? "bg-alerte-fond-vif text-alerte" : "bg-succes-fond text-succes")
+        (suspendu(l) ? "bg-ds-erreur text-ds-erreur" : "bg-ds-succes-fond text-ds-succes")
       }
     >
       <span
         aria-hidden="true"
         className={
-          "h-[5px] w-[5px] rounded-full xl:h-1.5 xl:w-1.5 " +
-          (suspendu(l) ? "bg-alerte-puce" : "bg-succes")
+          "h-[5px] w-[5px] rounded-ds-pill xl:h-1.5 xl:w-1.5 " +
+          (suspendu(l) ? "bg-ds-erreur" : "bg-ds-succes")
         }
       />
       {t(`comptes.statuts.${l.statut}`)}
@@ -143,7 +143,7 @@ export default async function AdminComptes({
     l.typeDeCompte === null ? t("comptes.typeNonDeclare") : t(`comptes.type.${l.typeDeCompte}`);
 
   return (
-    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin
         titre={t("comptes.titre")}
         sousTitre={t("comptes.decompte", {
@@ -172,7 +172,7 @@ export default async function AdminComptes({
         <EncartTrace texte={t("comptes.trace")} />
 
         {page.lignes.length === 0 ? (
-          <p className="rounded-[16px] border border-outline-variant bg-surface-container-lowest p-6 text-center font-body-md text-body-md text-on-surface-variant md:rounded-[18px]">
+          <p className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-6 text-center text-ds-texte-corps md:rounded-ds-card-lg">
             {parametres.q === "" ? t("comptes.videCompte") : t("comptes.videRecherche")}
           </p>
         ) : (
@@ -183,7 +183,7 @@ export default async function AdminComptes({
                 colonne de navigation de 236 px : à 768 il resterait 472 px, soit
                 67 par colonne, et « 1 840 / 1 200 » en réclame 90 à lui seul. Le
                 même calcul a déjà fait basculer Envois, Analyses et le Panneau. */}
-            <div className="hidden rounded-[18px] border border-outline-variant bg-surface-container-lowest px-[22px] py-5 xl:block">
+            <div className="hidden rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card xl:block">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
@@ -215,20 +215,20 @@ export default async function AdminComptes({
                     <tr key={ligne.id}>
                       <td className={CELLULE}>
                         <span className="flex items-center gap-2">
-                          {nom(ligne, "font-semibold text-on-surface")}
+                          {nom(ligne, "font-semibold text-ds-texte-fort")}
                           {ligne.role === "admin" ? (
                             <span className={PILULE_NEUTRE}>{t("comptes.roles.admin")}</span>
                           ) : null}
                         </span>
-                        <span className="mt-0.5 block font-body-sm text-[12px] leading-[15px] text-sourdine">
+                        <span className="mt-0.5 block text-[12px] leading-[15px] text-ds-texte-sourdine">
                           {ligne.email}
                         </span>
                       </td>
-                      <td className={CELLULE + " font-body-md text-sourdine"}>
+                      <td className={CELLULE + " text-ds-texte-sourdine"}>
                         {typeLisible(ligne)}
                       </td>
                       <td className={CELLULE}>{pilluleEtat(ligne)}</td>
-                      <td className={CELLULE + " text-on-surface"}>
+                      <td className={CELLULE + " text-ds-texte-fort"}>
                         {format.number(ligne.commandes)}
                       </td>
                       {/* LE COLIS PORTE SON SEUIL quand il le dépasse : « 1 840 /
@@ -236,7 +236,7 @@ export default async function AdminComptes({
                           discute, et l'on finit par ne plus le lire. */}
                       <td
                         className={
-                          CELLULE + (auDessus(ligne) ? " font-bold text-alerte" : " text-on-surface")
+                          CELLULE + (auDessus(ligne) ? " font-bold text-ds-erreur" : " text-ds-texte-fort")
                         }
                       >
                         {auDessus(ligne)
@@ -246,13 +246,13 @@ export default async function AdminComptes({
                             })
                           : format.number(ligne.colisCeMois)}
                       </td>
-                      <td className={CELLULE + " font-body-md text-sourdine"}>
+                      <td className={CELLULE + " text-ds-texte-sourdine"}>
                         {format.dateTime(new Date(ligne.creeLe), { dateStyle: "medium" })}
                       </td>
                       <td className={CELLULE + " text-right"}>
                         <Link
                           href={`${base}/${ligne.id}`}
-                          className="inline-flex h-[34px] items-center rounded-[9px] border border-filet-controle bg-surface-container-lowest px-[13px] font-headline-md text-[13px] leading-4 font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
+                          className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet-appuye bg-ds-surface-carte px-[13px] text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
                         >
                           {t("comptes.ouvrir")}
                         </Link>
@@ -269,16 +269,16 @@ export default async function AdminComptes({
                 <li
                   key={ligne.id}
                   className={
-                    "rounded-[16px] border p-4 " +
+                    "rounded-ds-card border p-4 " +
                     (suspendu(ligne)
-                      ? "border-alerte-filet bg-alerte-fond-doux"
-                      : "border-outline-variant bg-surface-container-lowest")
+                      ? "border-ds-erreur bg-ds-erreur-fond"
+                      : "border-ds-filet bg-ds-surface-carte")
                   }
                 >
                   <div className="mb-2.5 flex items-center justify-between gap-2.5">
                     <div className="min-w-0">
-                      {nom(ligne, "block truncate font-headline-md text-[15px] leading-[19px] font-bold text-on-surface")}
-                      <span className="mt-px block truncate font-body-sm text-[12px] leading-[15px] text-sourdine">
+                      {nom(ligne, "block truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort")}
+                      <span className="mt-px block truncate text-[12px] leading-[15px] text-ds-texte-sourdine">
                         {ligne.email}
                       </span>
                     </div>
@@ -291,7 +291,7 @@ export default async function AdminComptes({
                       <span className={PILULE_NEUTRE}>{t("comptes.roles.admin")}</span>
                     ) : null}
                     {auDessus(ligne) ? (
-                      <span className={PILULE + " bg-alerte-fond-vif text-alerte"}>
+                      <span className={PILULE + " bg-ds-erreur text-ds-erreur"}>
                         {t("comptes.colisSurSeuilLong", {
                           valeur: format.number(ligne.colisCeMois),
                           seuil: format.number(seuils.colis),
@@ -306,7 +306,7 @@ export default async function AdminComptes({
 
                   <Link
                     href={`${base}/${ligne.id}`}
-                    className="flex min-h-11 w-full items-center justify-center rounded-[11px] border border-filet-controle bg-surface-container-lowest font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface"
+                    className="flex min-h-11 w-full items-center justify-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
                   >
                     {t("comptes.ouvrir")}
                   </Link>
@@ -319,7 +319,7 @@ export default async function AdminComptes({
         {lienSuivant === null ? null : (
           <LienEcran
             href={lienSuivant}
-            className="mx-auto inline-flex min-h-11 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-6 font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface"
+            className="mx-auto inline-flex min-h-11 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-6 text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
           >
             {t("comptes.pageSuivante")}
           </LienEcran>

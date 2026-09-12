@@ -36,15 +36,21 @@ type Variante = "cote" | "sombre" | "sombre-mobile" | "rond" | "menu";
 
 const CLASSES: Readonly<Record<Variante, string>> = {
   /*
-   * ⚠️ LES DEUX VARIANTES VENDEUR SONT PASSÉES AU DESIGN SYSTEM, LES DEUX
-   * VARIANTES ADMIN NON. La coque vendeur et l'écran Commandes sont migrés ;
-   * l'administration ne l'est pas, et son chrome est encore sombre. Poser des
-   * surfaces claires du design system dans une colonne noire y ferait un trou
-   * blanc. Elles suivront avec leurs six écrans.
+   * ⚠️ LES CINQ VARIANTES SONT AU DESIGN SYSTEM DEPUIS LE 12/09/2026. Ce bloc
+   * annonçait que les deux variantes d'administration « suivront avec leurs six
+   * écrans », parce que poser des surfaces claires dans une colonne noire y
+   * aurait fait un trou blanc. La colonne n'est plus noire.
+   *
+   * ⚠️ LEURS NOMS RESTENT `sombre` ET `sombre-mobile`, et ce n'est pas un
+   * oubli : les renommer toucherait les deux appels du layout d'administration
+   * pour ne rien changer au rendu, et un nom hérité qui dit d'où vient une
+   * valeur vaut mieux qu'un renommage qui efface l'histoire. Ce qu'ils
+   * désignent est le bloc d'identité de la colonne et la bande du téléphone.
    */
   cote: "h-9 w-9 shrink-0 rounded-ds-sm text-ds-texte-tenu hover:bg-ds-surface-teinte hover:text-ds-texte-fort",
-  sombre: "h-8 w-8 shrink-0 rounded-[9px] text-white/60 hover:bg-white/10",
-  "sombre-mobile": "h-11 w-11 shrink-0 rounded-[11px] text-white/60 hover:bg-white/10",
+  sombre: "h-8 w-8 shrink-0 rounded-ds-sm text-ds-texte-tenu hover:bg-ds-surface-teinte hover:text-ds-texte-fort",
+  "sombre-mobile":
+    "h-11 w-11 shrink-0 rounded-ds-sm text-ds-texte-tenu hover:bg-ds-surface-teinte hover:text-ds-texte-fort",
   // 44 px : la cible tactile minimale du produit. Le rond décoratif que cette
   // pastille remplace n'en faisait que 40, parce qu'il ne se cliquait pas.
   rond: "h-11 w-11 shrink-0 rounded-ds-pill bg-ds-surface-teinte text-ds-accent-encre hover:bg-ds-lavender-200",

@@ -42,7 +42,7 @@ export async function generateMetadata({
  * l'attribut et le rendu ne disent pas la même chose.
  */
 const PILULE_FILTRE =
-  "inline-flex min-h-11 items-center rounded-full border px-[13px] font-headline-md text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:rounded-[11px]";
+  "inline-flex min-h-11 items-center rounded-ds-pill border px-[13px] text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:rounded-ds-control";
 
 /**
  * LE JOURNAL D'AUDIT.
@@ -137,18 +137,18 @@ export default async function AdminJournal({
    * sert au filtre, et la base range tout `compte.%` sous « suspension ».
    */
   const TEINTE = {
-    suspension: "bg-alerte-fond-vif text-alerte",
-    reactivation: "bg-succes-fond text-succes",
-    parametre: "bg-violet-fond text-violet-encre",
-    consultation: "bg-fond-neutre text-ardoise",
+    suspension: "bg-ds-erreur text-ds-erreur",
+    reactivation: "bg-ds-succes-fond text-ds-succes",
+    parametre: "bg-ds-surface-teinte text-ds-accent-encre",
+    consultation: "bg-ds-surface-creux text-ds-texte-corps",
   } as const;
 
   /** Le filet de gauche de l'encart de motif, teinté comme la pilule. */
   const MOTIF = {
-    suspension: "border-alerte-puce bg-alerte-fond-doux",
-    reactivation: "border-succes bg-succes-fond-doux",
-    parametre: "border-violet bg-violet-fond",
-    consultation: "border-gris-inactif bg-fond-neutre",
+    suspension: "border-alerte-puce bg-ds-erreur-fond",
+    reactivation: "border-ds-succes bg-succes-fond-doux",
+    parametre: "border-ds-accent bg-ds-surface-teinte",
+    consultation: "border-ds-ink-200 bg-ds-surface-creux",
   } as const;
 
   const libelleAction = (l: LigneJournal): string =>
@@ -160,7 +160,7 @@ export default async function AdminJournal({
       : l.action;
 
   return (
-    <main id="contenu" className="md:px-[30px] md:py-[26px]">
+    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin
         titre={t("journal.titre")}
         sousTitre={t("journal.portee")}
@@ -194,7 +194,7 @@ export default async function AdminJournal({
                       " " +
                       (actif
                         ? "border-primary bg-primary text-on-primary"
-                        : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
+                        : "border-ds-filet-appuye bg-ds-surface-carte text-ds-texte-corps hover:bg-ds-surface-creux")
                     }
                   >
                     {t(`journal.famille.${f === "" ? "toutes" : f}`)}
@@ -222,7 +222,7 @@ export default async function AdminJournal({
                       // d’état actif dans tout le produit.
                       (actif
                         ? "border-primary bg-primary text-on-primary"
-                        : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
+                        : "border-ds-filet-appuye bg-ds-surface-carte text-ds-texte-corps hover:bg-ds-surface-creux")
                     }
                   >
                     {t(`journal.fenetre.${j}`)}
@@ -239,15 +239,15 @@ export default async function AdminJournal({
             AU BUREAU SEULEMENT : la planche du téléphone met cette même
             garantie dans le sous-titre, faute de place. L'encart s'y affichait
             AUSSI, donc la phrase était dite deux fois à l'écran le plus étroit. */}
-        <p className="hidden items-center gap-2.5 rounded-[12px] border border-outline-variant bg-surface-container-lowest px-3.5 py-3 md:flex">
-          <Icone nom="shield_lock" className="shrink-0 text-[16px] text-sourdine" />
-          <span className="font-body-sm text-[13px] leading-4 text-sourdine">
+        <p className="hidden items-center gap-2.5 rounded-ds-control border border-ds-filet bg-ds-surface-carte px-3.5 py-3 md:flex">
+          <Icone nom="shield_lock" className="shrink-0 text-[16px] text-ds-texte-sourdine" />
+          <span className="text-[13px] leading-4 text-ds-texte-sourdine">
             {t("journal.garantie")}
           </span>
         </p>
 
         {page.lignes.length === 0 ? (
-          <p className="rounded-[18px] border border-outline-variant bg-surface-container-lowest p-6 text-center font-body-md text-body-md text-on-surface-variant">
+          <p className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 text-center text-[14px] text-ds-texte-corps shadow-ds-card">
             {parametres.famille === "" && parametres.jours === 0
               ? t("journal.vide")
               : t("journal.videFiltre")}
@@ -256,14 +256,14 @@ export default async function AdminJournal({
           /* LA CARTE N'EXISTE QU'AU BUREAU. La planche du téléphone pose des
              cartes LIBRES, sans conteneur : le filet portait donc un second
              filet autour de lui, visible sur le seul écran où la place manque. */
-          <div className="md:rounded-[18px] md:border md:border-outline-variant md:bg-surface-container-lowest md:px-6 md:py-5">
+          <div className="md:rounded-ds-card-lg md:border md:border-ds-filet md:bg-ds-surface-carte md:px-6 md:py-5">
             {/* Les en-têtes de colonne n'existent qu'au bureau : sur une carte,
                 « QUAND » au-dessus d'une heure n'apprend rien. */}
             <div className="hidden gap-[18px] pb-3 xl:grid xl:grid-cols-[132px_minmax(0,1fr)_168px]">
               {(["quand", "quoi", "qui"] as const).map((c) => (
                 <span
                   key={c}
-                  className="font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.05em] text-gris-entete uppercase"
+                  className="text-[11.5px] leading-[13px] font-bold tracking-[0.05em] text-ds-texte-sourdine uppercase"
                 >
                   {t(`journal.colonnes.${c}`)}
                 </span>
@@ -276,13 +276,13 @@ export default async function AdminJournal({
                 return (
                   <li
                     key={l.id}
-                    className="rounded-[16px] border border-outline-variant bg-surface-container-lowest p-4 md:rounded-none md:border-0 md:border-t md:border-filet-ligne md:p-0 md:py-[15px] xl:grid xl:grid-cols-[132px_minmax(0,1fr)_168px] xl:items-start xl:gap-[18px]"
+                    className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-4 md:rounded-none md:border-0 md:border-t md:border-ds-filet md:p-0 md:py-[15px] xl:grid xl:grid-cols-[132px_minmax(0,1fr)_168px] xl:items-start xl:gap-[18px]"
                   >
                     {/* --- QUAND ---
                         La date sur une ligne, l'heure sur la suivante : au
                         téléphone la planche ne garde que l'heure, à droite de la
                         pilule, parce que la carte est déjà datée par sa place. */}
-                    <span className="hidden font-body-sm text-[13px] leading-4 text-sourdine xl:block">
+                    <span className="hidden text-[13px] leading-4 text-ds-texte-sourdine xl:block">
                       {format.dateTime(new Date(l.quand), { dateStyle: "medium" })}
                       <br />
                       {format.dateTime(new Date(l.quand), { timeStyle: "short" })}
@@ -292,13 +292,13 @@ export default async function AdminJournal({
                       <div className="mb-[11px] flex items-center justify-between gap-2.5 md:mb-[7px] md:justify-start">
                         <span
                           className={
-                            "inline-flex items-center gap-1.5 rounded-full px-[9px] py-1 font-headline-md text-[11px] leading-[14px] font-bold md:px-2.5 md:text-[12px] md:leading-[15px] md:font-semibold " +
+                            "inline-flex items-center gap-1.5 rounded-ds-pill px-[9px] py-1 text-[11.5px] leading-[14px] font-bold md:px-2.5 md:text-[12px] md:leading-[15px] md:font-semibold " +
                             TEINTE[f]
                           }
                         >
                           {libelleAction(l)}
                         </span>
-                        <span className="shrink-0 font-body-sm text-[12px] leading-[15px] text-sourdine xl:hidden">
+                        <span className="shrink-0 text-[12px] leading-[15px] text-ds-texte-sourdine xl:hidden">
                           {format.dateTime(new Date(l.quand), {
                             dateStyle: "short",
                             timeStyle: "short",
@@ -312,7 +312,7 @@ export default async function AdminJournal({
                           consulté quelque chose », exactement quand on en a le
                           plus besoin. */}
                       {l.cibleEmail !== null ? (
-                        <p className="font-headline-md text-[14px] leading-[21px] font-normal text-on-surface">
+                        <p className="text-[14px] leading-[21px] font-normal text-ds-texte-fort">
                           {t("journal.cibleAvant")}{" "}
                           <strong className="font-bold">{l.cibleEmail}</strong>
                         </p>
@@ -322,7 +322,7 @@ export default async function AdminJournal({
                           ligne dit « le seuil vaut maintenant 1 200 » — ce que la
                           table dit déjà. */}
                       {l.apres !== null ? (
-                        <p className="font-headline-md text-[14px] leading-[21px] font-normal text-on-surface">
+                        <p className="text-[14px] leading-[21px] font-normal text-ds-texte-fort">
                           {l.idRessource === null ? null : (
                             <>
                               {t.has(`parametres.cles.${l.idRessource}.titre`)
@@ -332,8 +332,8 @@ export default async function AdminJournal({
                           )}
                           {l.avant === null ? null : (
                             <>
-                              <span className="text-sourdine">{l.avant}</span>{" "}
-                              <span aria-hidden="true" className="text-sourdine">
+                              <span className="text-ds-texte-sourdine">{l.avant}</span>{" "}
+                              <span aria-hidden="true" className="text-ds-texte-sourdine">
                                 →
                               </span>{" "}
                             </>
@@ -345,7 +345,7 @@ export default async function AdminJournal({
                       {l.motif !== null ? (
                         <p
                           className={
-                            "mt-[5px] rounded-r-lg border-l-2 px-3 py-[9px] font-headline-md text-[13px] leading-5 font-normal text-on-surface " +
+                            "mt-[5px] rounded-r-lg border-l-2 px-3 py-[9px] text-[13px] leading-5 font-normal text-ds-texte-fort " +
                             MOTIF[f]
                           }
                         >
@@ -358,7 +358,7 @@ export default async function AdminJournal({
                         L'adresse, jamais un prénom : c'est elle qui identifie un
                         compte partout ailleurs, et deux administrateurs peuvent
                         partager un prénom. */}
-                    <p className="mt-[11px] font-body-sm text-[12px] leading-[15px] text-sourdine md:mt-2 xl:mt-0 xl:break-all">
+                    <p className="mt-[11px] text-[12px] leading-[15px] text-ds-texte-sourdine md:mt-2 xl:mt-0 xl:break-all">
                       <span className="xl:hidden">{t("journal.parQui")} </span>
                       {l.adminEmail}
                     </p>
@@ -375,15 +375,15 @@ export default async function AdminJournal({
                 reste dix lignes ou dix mille ; le total est déjà compté par
                 `compter_journal_admin`, il ne coûte rien de plus ici. */}
             {lienSuivant === null ? null : (
-              <div className="mt-[18px] flex flex-col gap-3 border-t border-filet-ligne px-4 pt-4 md:flex-row md:items-center md:justify-between md:px-0">
-                <p className="font-body-sm text-[13px] leading-4 text-sourdine">
+              <div className="mt-[18px] flex flex-col gap-3 border-t border-ds-filet px-4 pt-4 md:flex-row md:items-center md:justify-between md:px-0">
+                <p className="text-[13px] leading-4 text-ds-texte-sourdine">
                   {depasse
                     ? t("journal.surTotalAuDela", { affichees: page.lignes.length, total })
                     : t("journal.surTotal", { affichees: page.lignes.length, total })}
                 </p>
                 <LienEcran
                   href={lienSuivant}
-                  className="inline-flex min-h-12 items-center justify-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-[18px] font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface md:h-10 md:min-h-0"
+                  className="inline-flex min-h-12 items-center justify-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-[18px] text-[14px] leading-[18px] font-semibold text-ds-texte-fort md:h-10 md:min-h-0"
                 >
                   {t("journal.pageSuivante")}
                 </LienEcran>

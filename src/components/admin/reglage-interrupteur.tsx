@@ -90,13 +90,13 @@ export function ReglageInterrupteur({ reglage }: { reglage: InterrupteurVu }) {
   };
 
   return (
-    <div className="border-t border-filet-ligne py-4">
+    <div className="border-t border-ds-filet py-4">
       <div className="flex items-center justify-between gap-6">
         <div className="min-w-0">
-          <p className="font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface">
+          <p className="text-[14px] leading-[18px] font-semibold text-ds-texte-fort">
             {t(`cles.${reglage.cle}.titre`)}
           </p>
-          <p className="mt-[2px] font-body-sm text-[12px] leading-[15px] text-sourdine">
+          <p className="mt-[2px] text-[12px] leading-[15px] text-ds-texte-sourdine">
             {t(`cles.${reglage.cle}.aide`)}
           </p>
         </div>
@@ -119,26 +119,26 @@ export function ReglageInterrupteur({ reglage }: { reglage: InterrupteurVu }) {
         >
           <span
             className={
-              "flex h-[27px] w-[46px] items-center rounded-full px-[3px] " +
-              (actif ? "justify-end bg-violet" : "justify-start bg-[#dcdce4]")
+              "flex h-[27px] w-[46px] items-center rounded-ds-pill px-[3px] " +
+              (actif ? "justify-end bg-ds-accent" : "justify-start bg-[#dcdce4]")
             }
           >
-            <span className="block h-[21px] w-[21px] rounded-full bg-white" />
+            <span className="block h-[21px] w-[21px] rounded-ds-pill bg-white" />
           </span>
         </button>
       </div>
 
       {ecrit ? (
-        <p className="mt-[6px] font-body-sm text-[12px] leading-[15px] text-sourdine">
+        <p className="mt-[6px] text-[12px] leading-[15px] text-ds-texte-sourdine">
           {origine}
         </p>
       ) : null}
 
-      <p aria-live="polite" className="font-body-sm text-[12px] leading-[16px] empty:hidden">
+      <p aria-live="polite" className="text-[12px] leading-[16px] empty:hidden">
         {etat.statut === "ok" ? (
-          <span className="mt-[6px] block text-on-surface">{t("fait")}</span>
+          <span className="mt-[6px] block text-ds-texte-fort">{t("fait")}</span>
         ) : etat.statut === "erreur" ? (
-          <span className="mt-[6px] block text-alerte">{t(`erreur.${etat.motif}`)}</span>
+          <span className="mt-[6px] block text-ds-erreur">{t(`erreur.${etat.motif}`)}</span>
         ) : null}
       </p>
     </div>
