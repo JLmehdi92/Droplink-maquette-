@@ -324,6 +324,22 @@ const RELEVE = `(() => {
   const rayons = {}; for (const r of cartes) rayons[r] = (rayons[r] || 0) + 1;
   return {
     coarse: matchMedia('(pointer: coarse)').matches,
+    /*
+     * ⚠️ CE QU ON A REELLEMENT SOUS LES YEUX, ET POURQUOI IL FAUT LE DEMANDER.
+     * La sonde a mesure QUATRE ecrans d administration qui rendaient le 404
+     * generique de Next, et son rapport a annonce pour chacun « aucun
+     * debordement, aucune police sous 11,5 px, aucune cible sous 44 ». C etait
+     * vrai : une page de 404 ne deborde pas. La cause n etait pas un defaut du
+     * produit mais le PLAFOND DE DEBIT de l administration, que douze requetes
+     * enchainees declenchent — le refus est deliberé, c est la mesure qui le
+     * prenait pour un ecran.
+     *
+     * Meme famille que le jeu de mesure muet : des chiffres coherents et faux.
+     * Un titre et un decompte de balises suffisent a le dire, et l appelant en
+     * fait une ERREUR plutot qu une ligne de rapport.
+     */
+    titre: document.title.slice(0, 80),
+    corps_utile: document.body.innerText.trim().length,
     largeur_doc: de.scrollWidth, largeur_vue: de.clientWidth,
     debordement: de.scrollWidth > de.clientWidth,
     h1: document.querySelectorAll('h1').length,
@@ -424,7 +440,32 @@ for (const modele of routes) {
       expression: RELEVE,
       returnByValue: true,
     });
-    rapport.push({ chemin, largeur, ...result.value });
+    /*
+     * ⚠️ UN ECRAN QUI N EST PAS L ECRAN ARRETE LA SONDE.
+     *
+     * Quatre ecrans d administration ont ete mesures alors qu ils rendaient le
+     * 404 generique de Next, et le rapport a annonce pour chacun « aucun
+     * debordement, aucune police sous 11,5 px, aucune cible sous 44 ». C etait
+     * vrai — une page de 404 ne deborde pas. La cause n etait meme pas un
+     * defaut : le PLAFOND DE DEBIT de l administration refuse douze requetes
+     * enchainees, et ce refus est deliberé. C est la mesure qui prenait un
+     * refus pour un ecran.
+     *
+     * On ne DEVINE pas quel ecran on regarde : on exige un document qui porte
+     * du contenu et un titre qui n est pas celui d une page d erreur.
+     */
+    const vu = result.value;
+    const estErreur =
+      /^404|This page could not be found|n.existe pas|does not exist/i.test(vu.titre ?? "") ||
+      vu.corps_utile < 120;
+    if (estErreur) {
+      throw new Error(
+        `ARRET : ${chemin} a ${largeur} px ne rend pas l ecran attendu — titre ` +
+          `${JSON.stringify(vu.titre)}, ${vu.corps_utile} caracteres de contenu. ` +
+          `Sur /admin, c est le plafond de debit : mesurer moins d ecrans a la fois.`,
+      );
+    }
+    rapport.push({ chemin, largeur, ...vu });
     if (dossierCaptures !== null) {
       // `captureBeyondViewport` : sans lui on ne capture que le premier ecran,
       // et c est exactement la moitie qu on a deja regardee en la mesurant.
