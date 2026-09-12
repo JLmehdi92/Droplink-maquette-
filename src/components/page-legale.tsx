@@ -171,7 +171,7 @@ export async function PageLegale({
         </aside>
 
         <div className="md:max-w-[700px]">
-          <p className="mb-2.5 font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.09em] text-gris-entete md:mb-3">
+          <p className="mb-2.5 text-[11.5px] leading-[15px] font-bold tracking-[0.09em] text-ds-texte-sourdine md:mb-3">
             {surTitre}
           </p>
           <h1 className="mb-2.5 font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.035em] text-on-surface md:mb-3 md:text-[42px] md:leading-[48px]">

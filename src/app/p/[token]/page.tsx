@@ -313,7 +313,7 @@ export default async function PagePublique({
   const aUnEnTete = commande.boutique.nom !== null || commande.boutique.logo !== null;
 
   const surTitre =
-    "font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] uppercase text-gris-entete";
+    "font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] uppercase text-gris-entete";
 
   /*
    * SECTION AU TÉLÉPHONE, CARTE SUR GRAND ÉCRAN — et c'est la largeur qui

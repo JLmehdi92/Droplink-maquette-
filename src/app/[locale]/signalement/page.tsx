@@ -89,7 +89,10 @@ export default async function Signalement({
       action={
         <Link
           href={`/${locale}/conditions`}
-          className="font-headline-md text-[13px] leading-4 font-semibold text-ardoise transition-colors hover:text-on-surface md:text-[14px]"
+          /* LA CIBLE MONTE A 44 px PAR UN REMPLISSAGE COMPENSE : ce lien vit
+             SEUL dans l en-tete, il n est pas en ligne dans une prose, donc
+             l exception de la regle 5 ne le couvre pas. Mesure a 390 : 69 x 16. */
+          className="-my-3.5 inline-flex min-h-11 items-center py-3.5 text-[13px] leading-4 font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort md:text-[14px]"
         >
           {t("piedConditions")}
         </Link>
@@ -97,7 +100,7 @@ export default async function Signalement({
     >
       <div className="grid grid-cols-1 gap-8 px-5 pt-7 pb-8 md:grid-cols-2 md:gap-20 md:px-[88px] md:py-[52px]">
         <div>
-          <p className="mb-2.5 font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.09em] text-gris-entete md:mb-3">
+          <p className="mb-2.5 text-[11.5px] leading-[15px] font-bold tracking-[0.09em] text-ds-texte-sourdine md:mb-3">
             {t("signalementSurTitre")}
           </p>
           <h1 className="mb-3 font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.035em] text-on-surface md:mb-4 md:text-[42px] md:leading-[48px]">

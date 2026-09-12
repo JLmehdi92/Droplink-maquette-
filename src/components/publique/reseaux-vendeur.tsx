@@ -141,7 +141,7 @@ export function ReseauxVendeur({
       <div className="mx-auto flex max-w-[1240px] flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-[30px]">
         {titre !== null ? (
           <div>
-            <p className="font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-gris-entete uppercase">
+            <p className="font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] text-gris-entete uppercase">
               {titre}
             </p>
             <p className="mt-[5px] hidden font-body-md text-[14px] text-on-surface-variant lg:block">

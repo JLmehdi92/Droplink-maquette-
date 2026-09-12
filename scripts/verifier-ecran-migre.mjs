@@ -394,11 +394,36 @@ const RELEVE = `(() => {
      * definition. Le compter parmi les cibles trop petites ferait signaler un
      * defaut a chaque ecran, et treize faux positifs apprennent a ignorer le
      * quatorzieme, qui serait vrai.
+     *
+     * ⚠️ DEUX AUTRES ECARTS, MESURES ET NON SUPPOSES, AJOUTES LE 12/09/2026 :
+     *
+     *  1. UN CHAMP ENVELOPPE PAR SON \`<label>\`. La zone reellement touchable
+     *     est alors celle du LABEL, pas celle de l \`<input>\` : toucher le
+     *     filet, le padding ou l icone met le champ au clavier. La sonde
+     *     relevait l input nu — 254 x 23 sur l ecran de connexion — pendant que
+     *     la boite fait 56, et \`acces-champs.tsx\` porte le raisonnement en
+     *     toutes lettres depuis le 11/09. On ne CROIT pas le commentaire : on
+     *     remonte au label et on le MESURE.
+     *  2. UN LIEN EN LIGNE DANS LA PROSE. La regle 5 l ecarte explicitement —
+     *     « les liens en ligne dans la prose restent a leur hauteur de texte :
+     *     les agrandir casserait l interligne du paragraphe ». Le test n est
+     *     pas le nom de la balise parente mais la PRESENCE DE TEXTE autour du
+     *     lien : « En continuant, vous acceptez nos conditions d utilisation »
+     *     en porte, un bouton isole dans sa cellule n en porte pas.
      */
     cibles_sous_44: interactifs
       .filter((e) => { const c = getComputedStyle(e);
-        return !(c.position === 'absolute' && parseFloat(c.width) <= 2) &&
-               !/(^|\s)sr-only(\s|$)/.test(e.className || ''); })
+        if (c.position === 'absolute' && parseFloat(c.width) <= 2) return false;
+        if (/(^|\s)sr-only(\s|$)/.test(e.className || '')) return false;
+        const label = e.closest('label');
+        if (label !== null && label.getBoundingClientRect().height >= 44) return false;
+        if (e.tagName === 'A') {
+          const p = e.parentElement;
+          const autour = p === null ? '' : [...p.childNodes]
+            .filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join('');
+          if (autour.length > 2) return false;
+        }
+        return true; })
       .map((e) => ({ quoi: (e.textContent || e.getAttribute('aria-label') || e.id || e.tagName).trim().slice(0, 30), ...boite(e) }))
       .filter((c) => c.h > 0 && c.h < 44),
     barre_laterale: aside ? { ...boite(aside), filet: getComputedStyle(aside).borderRightColor } : null,

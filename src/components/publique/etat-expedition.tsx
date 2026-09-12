@@ -135,7 +135,7 @@ export function EtatExpedition({
   if (variante === "carte") {
     return (
       <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card">
-        <p className="mb-3.5 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] text-gris-entete uppercase">
+        <p className="mb-3.5 font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] text-gris-entete uppercase">
           {libelles.titre}
         </p>
         <div className="mb-3.5 flex items-baseline justify-between gap-4">
@@ -172,7 +172,7 @@ export function EtatExpedition({
         le transporteur n'a rien rapporté.
       */}
       <p
-        className="mb-1.5 font-body-sm text-[11px] leading-[15px] font-bold tracking-[0.09em] uppercase"
+        className="mb-1.5 font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] uppercase"
         style={{ color: accent.surRemplissageDoux }}
       >
         {estimation !== null ? libelles.arriveeEstimee : libelles.statut}
