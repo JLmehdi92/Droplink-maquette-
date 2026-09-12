@@ -165,6 +165,14 @@ export interface LigneCommande {
   readonly client: string | null;
   readonly reference: string | null;
   readonly numeroSuivi: string | null;
+  /**
+   * Le code du transporteur, sous la colonne du numéro de suivi.
+   *
+   * Le kit écrit « La Poste » sous « CJ123456789FR » : un numéro de suivi seul
+   * ne dit pas OÙ aller le vérifier, et c est la première chose qu on cherche
+   * quand un client demande où en est son colis.
+   */
+  readonly transporteur: string | null;
   readonly statut: StatutExpedition;
   readonly qc: StatutQc;
   readonly creeeLe: string;
@@ -203,7 +211,7 @@ export interface LigneCommande {
    * différence visible obligerait à affirmer laquelle, et deux d'entre elles ne
    * regardent pas le vendeur.
    */
-  readonly vignette: string | null;
+  readonly vignettes: readonly string[];
 }
 
 /**
@@ -262,7 +270,7 @@ export interface PageCommandes {
  * sur un type d'erreur — le typage cesse alors de vérifier quoi que ce soit.
  */
 export const COLONNES =
-  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at, media_count, cover_media_id";
+  "id, public_token, customer_label, product_ref, tracking_number, carrier_code, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at, media_count, cover_media_id";
 
 /**
  * La valeur de tri d'une ligne, pour le curseur.
@@ -478,8 +486,8 @@ export type ClientLecture = Awaited<ReturnType<typeof creerClientServeur>>;
 async function lireVignettes(
   client: ClientLecture,
   commandes: readonly { id: string; cover_media_id: string | null; media_count: number }[],
-): Promise<Map<string, string>> {
-  const parVignette = new Map<string, string>();
+): Promise<Map<string, string[]>> {
+  const parVignette = new Map<string, string[]>();
 
   // Aucune commande ne porte de média : rien à demander. Interroger quand même
   // enverrait un aller-retour pour un `in ()` vide sur l'écran le plus ouvert du
@@ -503,23 +511,41 @@ async function lireVignettes(
   // un ensemble vide. Le cas est courant — aucune couverture désignée sur les
   // cinquante lignes — et il aurait fait échouer la lecture des vignettes de
   // tout un écran.
+  /*
+   * ⚠️ DEUX POSITIONS ET NON UNE, PARCE QUE LA COLONNE « Produits » EN MONTRE
+   * DEUX. Le kit pose deux vignettes de 38 px puis une pastille « +N ». La
+   * borne reste dure : au pire TROIS lignes par commande — les positions 0 et
+   * 1, plus la couverture si elle est ailleurs — soit 150 lignes pour en
+   * afficher cinquante, là où une jointure PostgREST en rendrait mille.
+   */
   requete =
     couvertures.length === 0
-      ? requete.eq("position", 0)
-      : requete.or("position.eq.0,id.in.(" + couvertures.join(",") + ")");
+      ? requete.lt("position", 2)
+      : requete.or("position.lt.2,id.in.(" + couvertures.join(",") + ")");
 
   const { data, error } = await requete;
   if (error !== null || data === null) return parVignette;
 
-  const cles = new Map<string, string>();
+  /*
+   * LA COUVERTURE D ABORD, PUIS L ORDRE DU VENDEUR. Choisir une couverture est
+   * un geste explicite de l éditeur : la reléguer en deuxième vignette ferait
+   * mentir la liste sur ce que le client verra en tête de sa page.
+   */
+  const cles = new Map<string, string[]>();
   for (const commande of avecMedia) {
+    const siens = data.filter((m) => m.order_id === commande.id);
     const couverture =
       commande.cover_media_id === null
         ? undefined
-        : data.find((m) => m.id === commande.cover_media_id);
-    const retenu = couverture ?? data.find((m) => m.order_id === commande.id);
-    const cle = retenu === undefined ? null : cleDApercu(retenu);
-    if (cle !== null) cles.set(commande.id, cle);
+        : siens.find((m) => m.id === commande.cover_media_id);
+    const ordonnes = [
+      ...(couverture === undefined ? [] : [couverture]),
+      ...siens.filter((m) => m.id !== couverture?.id),
+    ].slice(0, 2);
+    const leurs = ordonnes
+      .map((m) => cleDApercu(m))
+      .filter((c): c is string => c !== null);
+    if (leurs.length > 0) cles.set(commande.id, leurs);
   }
 
   // La signature est locale — un HMAC, aucun appel réseau — donc cinquante
@@ -527,11 +553,18 @@ async function lireVignettes(
   // menées ensemble plutôt qu'en série : une boucle `await` ferait cinquante
   // micro-tâches là où une suffit.
   const signees = await Promise.all(
-    [...cles].map(async ([id, cle]) => [id, await signerLecture(cle).catch(() => null)] as const),
+    [...cles].map(
+      async ([id, leurs]) =>
+        [
+          id,
+          await Promise.all(leurs.map((c) => signerLecture(c).catch(() => null))),
+        ] as const,
+    ),
   );
 
-  for (const [id, url] of signees) {
-    if (url !== null) parVignette.set(id, url);
+  for (const [id, urls] of signees) {
+    const valides = urls.filter((u): u is string => u !== null);
+    if (valides.length > 0) parVignette.set(id, valides);
   }
 
   return parVignette;
@@ -639,6 +672,7 @@ export async function lireCommandes(
     client: l.customer_label,
     reference: l.product_ref,
     numeroSuivi: l.tracking_number,
+    transporteur: l.carrier_code,
     statut: l.status,
     qc: l.qc_status,
     creeeLe: l.created_at,
@@ -648,7 +682,7 @@ export async function lireCommandes(
     derniereVueLe: l.last_viewed_at,
     colisBougeLe: l.parcel_last_movement_at,
     photos: l.media_count,
-    vignette: vignettes.get(l.id) ?? null,
+    vignettes: vignettes.get(l.id) ?? [],
   }));
 
   const derniere = lignes[lignes.length - 1];

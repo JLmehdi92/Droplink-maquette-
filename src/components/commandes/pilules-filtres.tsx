@@ -24,9 +24,20 @@ import { PilulesFiltresAnimees } from "./pilules-filtres-animees";
 export async function PilulesFiltres({
   base,
   parametres,
+  compteurs,
 }: {
   readonly base: string;
   readonly parametres: ParametresListe;
+  /**
+   * Les compteurs de tête, ou `null` si la lecture a échoué.
+   *
+   * ⚠️ ILS NE SONT PAS RELUS ICI. La coque et l'écran les demandent déjà, et
+   * `compterParEtat` passe par `cache` de React : les redemander rendrait le
+   * même résultat sans coûter un aller-retour de plus. Mais les recevoir en
+   * propriété dit la dépendance à qui lit ce fichier, là où un appel caché la
+   * tairait.
+   */
+  readonly compteurs: { readonly total: number; readonly enTransit: number; readonly jamaisOuvertes: number } | null;
 }) {
   const t = await getTranslations("commandes");
 
@@ -78,16 +89,19 @@ export async function PilulesFiltres({
       clef: "toutes",
       href: lienListe(base, parametres, { statut: null, ...sortirDuRestrictif }),
       actif: parametres.statut === null && !restrictif,
+      compte: compteurs?.total,
     },
     {
       clef: "enTransit",
       href: lienListe(base, parametres, { statut: "en_transit", ...sortirDuRestrictif }),
       actif: parametres.statut === "en_transit" && !restrictif,
+      compte: compteurs?.enTransit,
     },
     {
       clef: "jamaisOuvertes",
       href: lienListe(base, parametres, { tri: "jamais-ouvert", statut: null }),
       actif: parametres.tri === "jamais-ouvert",
+      compte: compteurs?.jamaisOuvertes,
     },
     {
       /*
@@ -103,6 +117,15 @@ export async function PilulesFiltres({
       clef: "bloquees",
       href: lienListe(base, parametres, { tri: "bloquees", statut: null }),
       actif: parametres.tri === "bloquees",
+      /*
+       * ⚠️ AUCUN COMPTE ICI, ET C'EST DELIBÉRÉ. « Bloquées » ne désigne pas un
+       * statut mais un SILENCE : les commandes dont le colis n'a pas bougé
+       * depuis dix jours. `compter_commandes_par_etat` ne le compte pas — il
+       * faudrait une seconde version de la fonction. Une pastille inventée, ou
+       * un zéro, serait pire qu'une pastille absente : l'une ne dit rien,
+       * l'autre dit quelque chose de faux.
+       */
+      compte: undefined,
     },
   ] as const;
 
@@ -126,6 +149,7 @@ export async function PilulesFiltres({
         href: vue.href,
         actif: vue.actif,
         libelle: t("vues." + vue.clef),
+        ...(vue.compte === undefined ? {} : { compte: vue.compte }),
       }))}
     />
   );

@@ -65,6 +65,16 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ],
   ["marque.reseauExemple.site", "Exemple d'adresse de site."],
   ["analyses.partSur", "Deux variables et une barre oblique."],
+  [
+    "commandes.plusMedias",
+    "Un signe plus et un nombre : la pastille « +N » de la colonne des " +
+      "produits ne porte aucun mot, dans aucune langue.",
+  ],
+  [
+    "commandes.periodeEntreCourt",
+    "Deux dates et un tiret demi-cadratin. Les dates sont format\u00e9es par " +
+      "`Intl`, donc d\u00e9j\u00e0 localis\u00e9es : \u00e9crire un mot autour les redirait.",
+  ],
   ["commandes.surTotal", "Deux variables et une barre oblique."],
   ["medias.compteur", "Deux variables et une barre oblique."],
   ["admin.comptes.colisSurSeuil", "Deux variables et une barre oblique."],

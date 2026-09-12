@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Copy,
   Download,
+  ExternalLink,
   MoreHorizontal,
   Plus,
   Search,
@@ -15,6 +16,7 @@ import {
 import { TraductionsClient } from "@/components/traductions-client";
 import { ActionsLigne } from "./actions-ligne";
 import { BadgeStatut, ICONE_SILENCE, iconeExpedition, teinteExpedition } from "./badge-statut";
+import { FriseSuivi } from "./frise-suivi";
 import { PilulesFiltres } from "./pilules-filtres";
 import { PanneauFiltres } from "./panneau-filtres";
 import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
@@ -58,6 +60,7 @@ export async function TableauCommandes({
   page,
   lot,
   total,
+  compteurs,
 }: {
   readonly base: string;
   readonly langue: string;
@@ -81,6 +84,12 @@ export async function TableauCommandes({
    * phrase qui ne compte pas : on n'invente pas un dénominateur.
    */
   readonly total: number | null;
+  /** Les compteurs de tête, pour les pastilles des onglets. */
+  readonly compteurs: {
+    readonly total: number;
+    readonly enTransit: number;
+    readonly jamaisOuvertes: number;
+  } | null;
 }) {
   const t = await getTranslations("commandes");
   const format = await getFormatter();
@@ -215,7 +224,7 @@ export async function TableauCommandes({
           exactement comme `OrdersView` le pose en neutralisant la bordure de
           `UnderlineTabs`. */}
       <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-5 md:pt-4 lg:relative lg:overflow-visible">
-        <PilulesFiltres base={base} parametres={parametres} />
+        <PilulesFiltres base={base} parametres={parametres} compteurs={compteurs} />
 
         {vide ? null : (
           <>
@@ -364,27 +373,42 @@ export async function TableauCommandes({
             */}
             <div className="hidden lg:block">
               <table className="w-full border-collapse text-left">
+                {/*
+                  LES NEUF COLONNES DU KIT, DANS SES PROPORTIONS.
+
+                  `COLS = "38px 1.45fr .85fr 1fr 1.05fr 1.35fr 1.1fr 2.15fr 42px"`,
+                  écart 14. Ici l écart est un `padding` de cellule plutôt qu un
+                  `gap` de grille — un `<table>` n en a pas — donc chaque largeur
+                  le contient. Rapportées à la largeur intérieure de la carte
+                  mesurée à 1690 px (1 307 px), les neuf colonnes font 52, 194,
+                  120, 139, 145, 182, 151, 282 et 42 px. En pourcentage, elles
+                  gardent ces proportions à toute largeur.
+                */}
+                <colgroup>
+                  <col className="w-[3.98%]" />
+                  <col className="w-[14.84%]" />
+                  <col className="w-[9.18%]" />
+                  <col className="w-[10.63%]" />
+                  <col className="w-[11.09%]" />
+                  <col className="w-[13.92%]" />
+                  <col className="w-[11.55%]" />
+                  <col className="w-[21.58%]" />
+                  <col className="w-[3.21%]" />
+                </colgroup>
                 <thead>
                   <tr>
-                    {/* ⚠️ 48 ET NON 34 : LA VIGNETTE NE DOIT PAS TOUCHER LE NOM.
-                        Relevé par Wassim le 02/09/2026, capture à l'appui —
-                        « l'image de la commande colle le nom ». Mesuré : l'écart
-                        rendu était de ZÉRO pixel, la colonne faisant exactement
-                        la largeur de la tuile. La planche `Commandes` disait la
-                        même chose, elle a donc été corrigée d'abord : 48 ici,
-                        `pr-3.5` sur la cellule, soit 14 px de respiration. */}
-                    <th scope="col" className={enTete + bordGauche + " w-[74px]"}>
+                    <th scope="col" className={enTete + bordGauche}>
                       <span className="sr-only">{t("lot.titre")}</span>
                     </th>
-                    {["client", "reference", "statutCourt", "photos", "vues", "modifiee"].map(
+                    {["commande", "date", "client", "produits", "numeroSuivi", "statutCourt", "suivi"].map(
                       (clef) => (
                         <th key={clef} scope="col" className={enTete}>
                           {t("colonne." + clef)}
                         </th>
                       ),
                     )}
-                    <th scope="col" className={enTeteFin + " text-right"}>
-                      {t("colonne.actions")}
+                    <th scope="col" className={enTeteFin + " text-center"}>
+                      <span className="sr-only">{t("colonne.actions")}</span>
                     </th>
                   </tr>
                 </thead>
@@ -397,76 +421,164 @@ export async function TableauCommandes({
                     return (
                       <tr key={ligne.id} className="group/ligne transition-colors hover:bg-ds-ink-50">
                         <td className={cellule + bordGauche}>
-                          <VignetteEtSelection ligne={ligne} nom={nom} libelle={t("selectionner", { client: nom })} />
+                          {/*
+                            ⚠️ LA CASE EST VISIBLE, ALORS QU ELLE ÉTAIT CACHÉE.
+                            L ancien dessin la superposait à la vignette et ne la
+                            révélait qu au survol, faute de colonne pour elle. Le
+                            kit lui en donne une, de 38 px, en tête de ligne : les
+                            actions groupées cessent donc d être un geste qu on
+                            découvre par accident.
+                          */}
+                          <input
+                            type="checkbox"
+                            name="selection"
+                            value={ligne.id}
+                            aria-label={t("selectionner", { client: nom })}
+                            className="h-[18px] w-[18px] cursor-pointer rounded-ds-xs border border-ds-filet-appuye accent-ds-accent outline-offset-2"
+                          />
                         </td>
 
-                        <td className={cellule + " font-bold text-ds-texte-fort"}>
+                        {/* COMMANDE : la vignette de 40 au rayon `sm`, la
+                            référence courte en 14/700 et la flèche qui ouvre. */}
+                        <td className={cellule}>
                           <Link
                             href={base + "/" + ligne.id}
-                            className="transition-colors group-hover/ligne:text-ds-accent-encre hover:underline"
+                            className="flex items-center gap-3"
+                            title={t("ouvrirCommande", { reference: referenceCourte(ligne.id) })}
                           >
-                            {nom}
+                            <Vignette url={ligne.vignettes[0] ?? null} taille={40} rayon={10} alt={nom} />
+                            <span className="inline-flex items-center gap-1.5 font-bold text-ds-texte-fort transition-colors group-hover/ligne:text-ds-accent-encre">
+                              {referenceCourte(ligne.id)}
+                              <ExternalLink
+                                aria-hidden="true"
+                                size={13}
+                                strokeWidth={2}
+                                className="text-ds-accent"
+                              />
+                            </span>
                           </Link>
                         </td>
 
-                        <td className={cellule + " text-ds-texte-corps"}>{ligne.reference ?? "—"}</td>
+                        {/* DATE : le jour au-dessus, l heure dessous en couleur
+                            sourdine — deux lignes de 13 px, comme le kit. */}
+                        <td className={cellule + " text-ds-texte-corps"}>
+                          <span className="flex flex-col">
+                            <span className="whitespace-nowrap text-[13px]">
+                              {format.dateTime(new Date(ligne.creeeLe), {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <span className="whitespace-nowrap text-[13px] text-ds-texte-sourdine">
+                              {format.dateTime(new Date(ligne.creeeLe), {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </span>
+                        </td>
+
+                        {/*
+                          CLIENT — ET LE SIGNAL QUI COMPTE, SOUS SON NOM.
+
+                          ⚠️ LE KIT MET UN DRAPEAU DE PAYS ICI, ET LE PRODUIT N EN A
+                          PAS. `customer_label` est un TEXTE LIBRE : il n existe
+                          aucun pays à afficher, et `flagcdn.com` est de toute
+                          façon bloqué par la CSP. La place sert donc à ce que le
+                          produit a et que le kit n a pas : savoir si le client a
+                          ouvert son lien. C est la seule question pour laquelle
+                          on ouvre cet écran, et elle avait sa propre colonne
+                          avant que le kit la supprime.
+                        */}
+                        <td className={cellule}>
+                          <span className="flex flex-col">
+                            <span className="truncate text-[14px] font-medium text-ds-texte-fort">
+                              {nom}
+                            </span>
+                            {ligne.vues === 0 ? (
+                              <span
+                                className="truncate text-[12px] font-bold text-ds-erreur"
+                                title={t("jamaisOuvertAide", { client: nom })}
+                              >
+                                {t("jamaisOuvert")}
+                              </span>
+                            ) : (
+                              <span
+                                className="truncate text-[12px] text-ds-texte-sourdine"
+                                title={
+                                  ligne.derniereVueLe === null
+                                    ? undefined
+                                    : t("derniereVue", {
+                                        date: format.dateTime(new Date(ligne.derniereVueLe), {
+                                          day: "numeric",
+                                          month: "short",
+                                          year: "numeric",
+                                        }),
+                                      })
+                                }
+                              >
+                                {t("vuesCourt", { n: ligne.vues })}
+                              </span>
+                            )}
+                          </span>
+                        </td>
+
+                        {/* PRODUITS : deux vignettes de 38 puis « +N ». Le
+                            compte restant vient de `media_count`, porté par la
+                            commande — il n est pas déduit des vignettes lues. */}
+                        <td className={cellule}>
+                          <span className="flex items-center gap-[7px]">
+                            {ligne.vignettes.map((url, rang) => (
+                              <Vignette key={url} url={url} taille={38} rayon={10} alt={nom + " " + String(rang + 1)} />
+                            ))}
+                            {ligne.photos > ligne.vignettes.length ? (
+                              <span className="inline-flex h-[38px] min-w-[34px] items-center justify-center rounded-ds-sm bg-ds-surface-creux px-2 text-[12px] font-bold text-ds-texte-sourdine">
+                                {t("plusMedias", { n: ligne.photos - ligne.vignettes.length })}
+                              </span>
+                            ) : null}
+                            {ligne.photos === 0 ? (
+                              <span className="text-[14px] text-ds-texte-tenu">—</span>
+                            ) : null}
+                          </span>
+                        </td>
+
+                        {/* NUMÉRO DE SUIVI : le numéro en 13/600, le transporteur
+                            dessous en 12/400. Un numéro seul ne dit pas OÙ aller
+                            le vérifier. */}
+                        <td className={cellule}>
+                          {ligne.numeroSuivi === null ? (
+                            <span className="text-[14px] text-ds-texte-tenu">—</span>
+                          ) : (
+                            <span className="flex min-w-0 flex-col">
+                              <span className="truncate text-[13px] font-semibold text-ds-texte-fort">
+                                {ligne.numeroSuivi}
+                              </span>
+                              <span className="truncate text-[12px] text-ds-texte-sourdine">
+                                {ligne.transporteur ?? t("sansTransporteur")}
+                              </span>
+                            </span>
+                          )}
+                        </td>
 
                         <td className={cellule}>
                           <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
                         </td>
 
-                        <td className={cellule + " text-ds-texte-corps"}>{ligne.photos}</td>
-
-                        {/* LE COMPTEUR DE VUES, et surtout le ZÉRO. C'est
-                            l'information pour laquelle le vendeur ouvre cet
-                            écran : savoir qui n'a pas encore regardé ses photos.
-                            La planche l'écrit en rouge et en gras — c'est le seul
-                            nombre de la ligne qui appelle une action. */}
-                        <td
-                          className={
-                            cellule +
-                            " whitespace-nowrap " +
-                            (ligne.vues === 0 ? "font-bold text-ds-erreur" : "text-ds-texte-corps")
-                          }
-                          title={
-                            ligne.vues === 0
-                              ? t("jamaisOuvertAide", { client: nom })
-                              : ligne.derniereVueLe === null
-                                ? undefined
-                                : t("derniereVue", {
-                                    date: format.dateTime(new Date(ligne.derniereVueLe), {
-                                      day: "numeric",
-                                      month: "short",
-                                      year: "numeric",
-                                    }),
-                                  })
-                          }
-                        >
-                          {ligne.vues}
+                        <td className={cellule}>
+                          <FriseSuivi
+                            statut={ligne.statut}
+                            libelles={{
+                              preparation: t("statut.preparation"),
+                              expedie: t("statut.expedie"),
+                              en_transit: t("statut.en_transit"),
+                              livre: t("statut.livre"),
+                            }}
+                          />
                         </td>
 
-                        <td
-                          className={cellule + " whitespace-nowrap text-ds-texte-sourdine"}
-                          title={format.dateTime(new Date(ligne.modifieeLe), {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "numeric",
-                          })}
-                        >
-                          {depuis(ligne.modifieeLe)}
-                        </td>
-
-                        <td className={celluleFin + " text-right"}>
-                          <div className="flex items-center justify-end gap-0.5">
-                            <TraductionsClient espaces={["commandes"]}>
-                              <ActionsLigne
-                                lien={origine + "/p/" + ligne.jetonPublic}
-                                nomClient={nom}
-                              />
-                            </TraductionsClient>
-
+                        <td className={celluleFin + " text-center"}>
+                          <div className="flex items-center justify-center">
                             {/*
                               LE MENU « … » DE LA PLANCHE, en `<details>` : trois
                               boutons au repos, pas cinq. Sans JavaScript, sans
@@ -484,7 +596,26 @@ export async function TableauCommandes({
                                   {t("plusDActions", { client: nom })}
                                 </span>
                               </summary>
-                              <div className="absolute top-full right-0 z-10 mt-1 flex w-56 flex-col rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1 shadow-ds-lg">
+                              <div className="absolute top-full right-0 z-10 mt-1 flex w-64 flex-col rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1 shadow-ds-lg">
+                                {/*
+                                  ⚠️ COPIER ET OUVRIR DESCENDENT DANS LE MENU, ET
+                                  C EST LE KIT QUI LE DIT : sa colonne d actions
+                                  fait 42 px et ne porte qu un « ••• ». Les trois
+                                  boutons à nu du produit en demandaient 110.
+
+                                  Ce que le geste perd en immediateté, il le gagne
+                                  en NOM : « Copier le lien » écrit vaut mieux
+                                  qu une icône de presse-papiers que le vendeur
+                                  confondait avec « Dupliquer ». Et la flèche de
+                                  la colonne « Commande » ouvre toujours l éditeur
+                                  en un clic.
+                                */}
+                                <TraductionsClient espaces={["commandes"]}>
+                                  <ActionsLigne
+                                    lien={origine + "/p/" + ligne.jetonPublic}
+                                    nomClient={nom}
+                                  />
+                                </TraductionsClient>
                                 <button
                                   type="submit"
                                   form={"dup-" + ligne.id}
@@ -568,7 +699,7 @@ export async function TableauCommandes({
                           : "border-ds-filet bg-ds-surface-carte hover:bg-ds-ink-50")
                       }
                     >
-                      <Vignette url={ligne.vignette} taille={52} rayon={10} />
+                      <Vignette url={ligne.vignettes[0] ?? null} taille={52} rayon={10} />
 
                       <span className="min-w-0 flex-grow">
                         <span className="flex items-center justify-between gap-2">
@@ -641,6 +772,28 @@ export async function TableauCommandes({
 }
 
 /**
+ * LA RÉFÉRENCE COURTE D'UNE COMMANDE — ce que le kit écrit « #DLK7842 ».
+ *
+ * ⚠️ ELLE EST DÉRIVÉE DE L'IDENTIFIANT, PAS STOCKÉE, ET C'EST UN ARBITRAGE.
+ * Un numéro séquentiel par boutique se lirait mieux — « commande 42 » se dit au
+ * téléphone — mais il exige une colonne, un compteur par boutique pour éviter
+ * la course à l'insertion, un reprise de l'existant, et une migration qui ne
+ * serait appliquée en production que le jour d'un déploiement. Pour un gain de
+ * LISIBILITÉ sur une référence qu'on copie plus qu'on ne récite, c'est cher.
+ *
+ * Les six derniers caractères de l'identifiant sont STABLES à VIE — aucune
+ * édition ne les change — et ils ne divulguent rien : cet identifiant est déjà
+ * dans l'URL que le vendeur a sous les yeux. Ce n'est pas le `public_token`, qui
+ * transfère une capacité et ne doit jamais servir d'étiquette.
+ *
+ * Le jour où un numéro séquentiel sera décidé, il remplace cette fonction sans
+ * toucher à une seule colonne de l'écran.
+ */
+export function referenceCourte(id: string): string {
+  return "#" + id.replace(/-/g, "").slice(-6).toUpperCase();
+}
+
+/**
  * LA PUCE D'EXPÉDITION — ET LE CINQUIÈME ÉTAT QUE LA BASE NE PORTE PAS.
  *
  * Les planches dessinent quatre statuts et un cinquième libellé : « Sans
@@ -692,47 +845,6 @@ function PuceExpedition({
       teinte={teinteExpedition(ligne.statut)}
       Icone={iconeExpedition(ligne.statut)}
     />
-  );
-}
-
-/**
- * La tuile de 40 px du kit (`Thumb`, rayon `--radius-sm`), et la case de
- * sélection par-dessus.
- *
- * ⚠️ ÉCART ASSUMÉ, ET IL EST DÉLIBÉRÉ. La planche ne dessine aucune case à
- * cocher : sa première colonne ne porte que la vignette. Mais le brief §7 exige
- * les actions groupées — « chaque lot est tout ou tout rien » — et le serveur
- * qui les traite existe, est testé, et resterait injoignable.
- *
- * La case est donc là SANS OCCUPER DE PLACE : invisible et intouchable au
- * repos, elle apparaît au survol de la ligne, au focus clavier, et dès qu'une
- * case est cochée quelque part. L'écran au repos est celui de la planche, au
- * pixel près, et le geste reste possible.
- *
- * `pointer-events-none` AU REPOS N'EST PAS DÉCORATIF : sans lui, un clic sur la
- * vignette cocherait une case qu'on ne voit pas, et le vendeur archiverait en
- * lot une commande qu'il n'a jamais désignée.
- */
-function VignetteEtSelection({
-  ligne,
-  nom,
-  libelle,
-}: {
-  readonly ligne: { readonly id: string; readonly vignette: string | null };
-  readonly nom: string;
-  readonly libelle: string;
-}) {
-  return (
-    <span className="relative block h-10 w-10">
-      <Vignette url={ligne.vignette} taille={40} rayon={10} alt={nom} />
-      <input
-        type="checkbox"
-        name="selection"
-        value={ligne.id}
-        aria-label={libelle}
-        className="pointer-events-none absolute inset-0 m-auto h-[18px] w-[18px] cursor-pointer opacity-0 accent-ds-accent outline-offset-2 group-hover/ligne:pointer-events-auto group-hover/ligne:opacity-100 group-has-[input:checked]/lot:pointer-events-auto group-has-[input:checked]/lot:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100 checked:pointer-events-auto checked:opacity-100"
-      />
-    </span>
   );
 }
 

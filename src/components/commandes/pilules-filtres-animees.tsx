@@ -44,6 +44,16 @@ export interface VuePilule {
   readonly href: string;
   readonly actif: boolean;
   readonly libelle: string;
+  /**
+   * Le compte affiché à droite du libellé, quand il est CONNU.
+   *
+   * ⚠️ FACULTATIF, ET C'EST TOUT LE POINT. Le kit pose un compte sur ses cinq
+   * onglets parce qu'il les a tous ; le produit en a trois sur quatre. Afficher
+   * un zéro, ou un nombre approché, sur celui qui manque serait affirmer ce que
+   * la base n'a pas compté — une pastille absente ne dit rien, une pastille
+   * fausse dit quelque chose de faux.
+   */
+  readonly compte?: number;
 }
 
 /**
@@ -157,6 +167,21 @@ export function PilulesFiltresAnimees({ vues }: { readonly vues: readonly VuePil
           data-vue-active={vue.actif ? "true" : undefined}
         >
           {vue.libelle}
+          {vue.compte === undefined ? null : (
+            /* `UnderlineTabs` : `padding: 2px 8px`, rayon pilule, 11/700. Teinté
+               et à l'encre d'accent sur l'onglet regardé, creux et sourdine
+               ailleurs. */
+            <span
+              className={
+                "ms-2 shrink-0 rounded-ds-pill px-2 py-0.5 text-[11px] font-bold " +
+                (vue.actif
+                  ? "bg-ds-surface-teinte text-ds-accent-encre"
+                  : "bg-ds-surface-creux text-ds-texte-sourdine")
+              }
+            >
+              {vue.compte}
+            </span>
+          )}
         </LienEcran>
       ))}
     </div>

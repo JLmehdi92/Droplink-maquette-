@@ -518,12 +518,14 @@
     },
     "colonne": {
       "client": "Customer",
-      "reference": "Reference",
       "statutCourt": "Status",
       "photos": "Photos",
-      "vues": "Views",
-      "modifiee": "Updated",
-      "actions": "Actions"
+      "actions": "Actions",
+      "commande": "Order",
+      "date": "Date",
+      "produits": "Products",
+      "numeroSuivi": "Tracking number",
+      "suivi": "Progress"
     },
     "vide": {
       "compteTitre": "Create your first order",
@@ -616,7 +618,15 @@
     },
     "statutSansMouvement": "No movement · {jours} d",
     "sousTitreArchives": "You are viewing your archive. The links still work.",
-    "nouvelleEnCours": "Creating…"
+    "nouvelleEnCours": "Creating…",
+    "plusMedias": "+{n}",
+    "vuesCourt": "{n, plural, one {# view} other {# views}}",
+    "ouvrirCommande": "Open order {reference}",
+    "sansTransporteur": "Unknown carrier",
+    "periodeToutes": "All dates",
+    "periodeEntreCourt": "{du} – {au}",
+    "periodeDepuisCourt": "From {du}",
+    "periodeJusquaCourt": "Until {au}"
   },
   "editeur": {
     "historique": {

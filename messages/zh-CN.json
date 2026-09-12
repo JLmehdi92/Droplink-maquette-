@@ -518,12 +518,14 @@
     },
     "colonne": {
       "client": "客户",
-      "reference": "商品编号",
       "statutCourt": "状态",
       "photos": "照片",
-      "vues": "浏览",
-      "modifiee": "修改于",
-      "actions": "操作"
+      "actions": "操作",
+      "commande": "订单",
+      "date": "日期",
+      "produits": "商品",
+      "numeroSuivi": "运单号",
+      "suivi": "进度"
     },
     "vide": {
       "compteTitre": "创建您的第一笔订单",
@@ -616,7 +618,15 @@
     },
     "statutSansMouvement": "无更新 · {jours} 天",
     "sousTitreArchives": "您正在查看归档。客户的链接依然有效。",
-    "nouvelleEnCours": "正在创建…"
+    "nouvelleEnCours": "正在创建…",
+    "plusMedias": "+{n}",
+    "vuesCourt": "{n} 次查看",
+    "ouvrirCommande": "打开订单 {reference}",
+    "sansTransporteur": "承运商未知",
+    "periodeToutes": "全部时间",
+    "periodeEntreCourt": "{du} – {au}",
+    "periodeDepuisCourt": "自 {du} 起",
+    "periodeJusquaCourt": "至 {au}"
   },
   "editeur": {
     "historique": {

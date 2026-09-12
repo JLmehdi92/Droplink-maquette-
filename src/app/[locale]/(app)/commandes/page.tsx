@@ -8,6 +8,7 @@ import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 import { PucesFiltresActifs } from "@/components/commandes/puces-filtres-actifs";
 import { creerBrouillon } from "@/lib/commandes/actions";
 import { TableauCommandes } from "@/components/commandes/tableau-commandes";
+import { SelecteurPeriode } from "@/components/commandes/selecteur-periode";
 import { analyserParametres, compterParEtat, lireCommandes } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
@@ -185,7 +186,15 @@ export default async function Commandes({
         actionMobile={<BoutonDeconnexion langue={langue} variante="rond" />}
         actions={
           compteVide ? undefined : (
-            <div className="hidden shrink-0 items-center gap-2.5 md:flex">
+            <div className="hidden shrink-0 items-center gap-3 md:flex">
+              {/* Le kit pose la période à gauche de l action principale, à 12 px
+                  d elle. Elle ne se rend qu à partir de `lg` : sous 1 024 px,
+                  257 px de bouton plus 224 de bouton principal ne tiennent pas
+                  à côté du titre — c est la même mesure qui avait déjà fait
+                  descendre la recherche. */}
+              <span className="hidden lg:block">
+                <SelecteurPeriode base={base} parametres={parametres} />
+              </span>
               {/*
                 ⚠️ LA RECHERCHE A QUITTÉ CET EN-TÊTE POUR LA BARRE SUPÉRIEURE.
                 Le kit n en dessine qu une par écran, et elle est en haut ; deux
@@ -326,6 +335,7 @@ export default async function Commandes({
           page={page}
           lot={lot}
           total={compteurs?.total ?? null}
+          compteurs={compteurs}
         />
       </main>
 

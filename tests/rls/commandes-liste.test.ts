@@ -184,7 +184,6 @@ describe("Ce que la liste rend", () => {
       ["unsubscribe_token", "un jeton, un pouvoir — il n'ouvre pas la page"],
       ["notify_email", "donnée de contact, inutile à la liste"],
       ["shop_id", "posé par la RLS, jamais lu ni réécrit par l'écran"],
-      ["carrier_code", "la liste affiche le numéro de suivi, pas le transporteur"],
       ["first_content_at", "sert à l'instrumentation, pas à l'affichage"],
       ["created_event_at", "trace d'émission de order_created : une mesure, pas une donnée d'écran"],
       [

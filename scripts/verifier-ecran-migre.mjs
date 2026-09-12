@@ -294,9 +294,22 @@ const RELEVE = `(() => {
       const bp = pan ? pan.getBoundingClientRect() : null;
       d.open = ouvert;
       if (!bs || !bp || bp.width === 0) return null;
+      /*
+       * ⚠️ UN RECOUVREMENT EST UNE INTERSECTION, PAS UN « PLUS HAUT QUE ».
+       * La premiere version comparait le haut du panneau au bas du bouton, et
+       * signalait donc TOUS les panneaux qui s ouvrent VERS LE HAUT — le menu
+       * de compte du bas de colonne, par construction. Un faux positif a chaque
+       * ecran apprend a ignorer le vrai, qui est exactement ce que cette sonde
+       * existe pour attraper.
+       */
+      const chevauche =
+        bp.top < bs.bottom - 1 &&
+        bp.bottom > bs.top + 1 &&
+        bp.left < bs.right - 1 &&
+        bp.right > bs.left + 1;
       return {
         quoi: (s.textContent || '').trim().slice(0, 20),
-        recouvre_son_bouton: bp.top < bs.bottom - 1,
+        recouvre_son_bouton: chevauche,
         hors_fenetre: bp.right > de.clientWidth + 1 || bp.left < -1,
         largeur: Math.round(bp.width),
       };

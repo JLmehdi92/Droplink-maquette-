@@ -1841,16 +1841,27 @@ try {
             });
             const html = r.status === 200 ? await r.text() : "";
             const vu = rendu(html);
+            /*
+             * ⚠️ LE CONTENU DE L ONGLET N EST PLUS DU TEXTE NU. Depuis que trois
+             * des quatre vues portent une pastille de compte, le lien contient
+             * un `<span>` : le motif `([^<]*)</a>` ne trouvait plus AUCUNE
+             * balise, et les quatre controles de cette section tombaient en
+             * bloc. Le motif accepte donc du balisage a l interieur, et le
+             * libelle se lit AVANT la premiere balise — sinon « Toutes » et son
+             * compte se colleraient en « Toutes4 », qui ne correspondrait a
+             * aucune entree du catalogue.
+             */
             const balises = [
-              ...vu.matchAll(/<a\s[^>]*href="(\/fr\/commandes(?:\?[^"]*)?)"[^>]*>([^<]*)<\/a>/g),
+              ...vu.matchAll(/<a\s[^>]*href="(\/fr\/commandes(?:\?[^"]*)?)"[^>]*>(.*?)<\/a>/gs),
             ];
             const libellesVues = Object.values(catalogue.commandes.vues);
+            const libelleDe = (interieur) => interieur.split("<")[0].trim();
             return {
               statut: r.status,
               vu,
               allumees: balises.filter((m) => m[0].includes('aria-current="true"')).length,
               vues: balises
-                .filter((m) => libellesVues.includes(m[2].trim()))
+                .filter((m) => libellesVues.includes(libelleDe(m[2])))
                 .map((m) => m[1].replace(/&amp;/g, "&")),
             };
           };

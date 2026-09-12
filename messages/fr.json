@@ -518,12 +518,14 @@
     },
     "colonne": {
       "client": "Client",
-      "reference": "Référence",
       "statutCourt": "Statut",
       "photos": "Photos",
-      "vues": "Vues",
-      "modifiee": "Modifiée",
-      "actions": "Actions"
+      "actions": "Actions",
+      "commande": "Commande",
+      "date": "Date",
+      "produits": "Produits",
+      "numeroSuivi": "Numéro de suivi",
+      "suivi": "Suivi"
     },
     "vide": {
       "compteTitre": "Créez votre première commande",
@@ -616,7 +618,15 @@
     },
     "statutSansMouvement": "Sans mouvement · {jours} j",
     "sousTitreArchives": "Vous consultez vos archives. Les liens continuent de fonctionner.",
-    "nouvelleEnCours": "Création…"
+    "nouvelleEnCours": "Création…",
+    "plusMedias": "+{n}",
+    "vuesCourt": "{n, plural, one {# vue} other {# vues}}",
+    "ouvrirCommande": "Ouvrir la commande {reference}",
+    "sansTransporteur": "Transporteur inconnu",
+    "periodeToutes": "Toutes les périodes",
+    "periodeEntreCourt": "{du} – {au}",
+    "periodeDepuisCourt": "À partir du {du}",
+    "periodeJusquaCourt": "Jusqu’au {au}"
   },
   "editeur": {
     "historique": {

@@ -239,7 +239,7 @@ describe("La vignette de tête de ligne", () => {
     const sansMedia = page.lignes.find((l) => l.id === commandeB);
     expect(sansMedia, "la commande témoin a disparu de la liste").toBeDefined();
     expect(sansMedia?.photos).toBe(0);
-    expect(sansMedia?.vignette).toBeNull();
+    expect(sansMedia?.vignettes).toEqual([]);
   });
 });
 
