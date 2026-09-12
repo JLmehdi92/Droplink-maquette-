@@ -101,15 +101,16 @@ const { data: commandes } = await service
   .from("orders")
   .insert(
     [
-      ["Client de verification", "REF-V", "en_transit"],
-      ["Cliente en preparation", "REF-P", "preparation"],
-      ["Client expedie", "REF-E", "expedie"],
-      ["Cliente livree", "REF-L", "livre"],
-    ].map(([customer_label, product_ref, status]) => ({
+      ["Client de verification", "REF-V", "en_transit", "DLKMESURE0001FR"],
+      ["Cliente en preparation", "REF-P", "preparation", ""],
+      ["Client expedie", "REF-E", "expedie", ""],
+      ["Cliente livree", "REF-L", "livre", "DLKMESURE0002CN"],
+    ].map(([customer_label, product_ref, status, tracking_number]) => ({
       shop_id: shop.id,
       customer_label,
       product_ref,
       status,
+      tracking_number,
     })),
   )
   .select("id, public_token");
@@ -181,7 +182,48 @@ const { error: eLien } = await service.from("order_parcels").insert(
   colis.map((c, i) => ({ order_id: commandes[i % commandes.length].id, parcel_id: c.id })),
 );
 if (eLien) throw new Error("jeu de mesure : colis non rattaches — " + eLien.message);
-console.error(`[jeu] ${commandes.length} commandes, ${colis.length} colis dont un silencieux.`);
+/*
+ * ⚠️ DES POINTS DE PASSAGE, SINON LA FRISE DE L EDITEUR MESURE SON CAS VIDE.
+ *
+ * Le jeu creait deux colis SANS aucun `parcel_checkpoints`. La frise verticale
+ * de `/fr/commandes/{commande}` rend alors ses quatre etapes sans date et sans
+ * note — c est-a-dire exactement ce qu elle rend pour une commande neuve. La
+ * sonde ne pouvait donc rougir ni sur un chevauchement de date, ni sur une note
+ * trop longue, ni sur une etape mal datee : elle certifiait le vide, et c est la
+ * meme famille que le `carrier_code` refuse en silence juste au-dessus.
+ *
+ * Les etapes sont DANS LE DESORDRE a l insertion, volontairement : c est la
+ * lecture qui doit les ordonner, et une lecture qui compte sur l ordre
+ * d insertion marche jusqu au jour ou deux scans arrivent dans le mauvais sens.
+ */
+const { error: ePoints } = await service.from("parcel_checkpoints").insert([
+  {
+    parcel_id: colis[0].id,
+    occurred_at: jours(1),
+    location: "Roissy, France",
+    description: "Colis arrive au centre de tri international et pris en charge",
+    stage: "en_transit",
+  },
+  {
+    parcel_id: colis[0].id,
+    occurred_at: jours(3),
+    location: "Guangzhou, Chine",
+    description: "Colis remis au transporteur",
+    stage: "expedie",
+  },
+  {
+    parcel_id: colis[1].id,
+    occurred_at: jours(21),
+    location: null,
+    description: "Colis enregistre",
+    stage: "expedie",
+  },
+]);
+if (ePoints) throw new Error("jeu de mesure : points de passage non crees — " + ePoints.message);
+
+console.error(
+  `[jeu] ${commandes.length} commandes, ${colis.length} colis dont un silencieux, 3 points de passage.`,
+);
 
 const { data: sess } = await publiable.auth.signInWithPassword({
   email: courriel,
