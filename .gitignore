@@ -64,3 +64,9 @@ photos-qc-reelles/
 
 # Le port ephemere ecrit par `scripts/servir-contre-tests.mjs` a chaque lancement.
 port.txt
+
+# Scripts de diagnostic jetables, ecrits a la racine le temps d une mesure.
+# ⚠️ `out-diag.mjs` a ete commite par accident le 12/09/2026 — le meme geste que
+# `port.txt` la veille. Un fichier jetable ecrit a la racine finit dans un
+# commit ; le motif le rattrape desormais avant git.
+out-*.mjs
