@@ -396,10 +396,12 @@
       "numero": "物流",
       "commande": "订单",
       "client": "客户",
+      "transporteur": "承运商",
       "etat": "状态",
       "progression": "进度",
       "mouvement": "最后更新",
       "point": "最新节点",
+      "prochaine": "下一步",
       "interrogations": "查询次数"
     },
     "mouvement": {
@@ -424,7 +426,12 @@
     "aideCourte": "刚粘贴的运单号往往还没有被扫描。这不是故障。",
     "actualiser": "刷新",
     "derniereMaj": "最后更新",
-    "compteurPage": "显示第 {de}–{a} 条，共 {total} 条发货"
+    "compteurPage": "显示第 {de}–{a} 条，共 {total} 条发货",
+    "prochaine": {
+      "livre": "包裹已送达",
+      "aujourdhui": "预计今日送达",
+      "le": "预计 {date} 送达"
+    }
   },
   "analyses": {
     "titre": "数据分析",

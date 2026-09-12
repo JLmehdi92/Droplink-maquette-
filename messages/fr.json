@@ -396,10 +396,12 @@
       "numero": "Suivi",
       "commande": "Commande",
       "client": "Client",
+      "transporteur": "Transporteur",
       "etat": "Statut",
       "progression": "Progression",
       "mouvement": "Dernière mise à jour",
       "point": "Dernier point",
+      "prochaine": "Prochaine étape",
       "interrogations": "Interrogations"
     },
     "mouvement": {
@@ -424,7 +426,12 @@
     "aideCourte": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur.",
     "actualiser": "Actualiser",
     "derniereMaj": "Dernière mise à jour",
-    "compteurPage": "Affichage de {de} à {a} sur {total, plural, one {# envoi} other {# envois}}"
+    "compteurPage": "Affichage de {de} à {a} sur {total, plural, one {# envoi} other {# envois}}",
+    "prochaine": {
+      "livre": "Colis livré",
+      "aujourdhui": "Livraison prévue aujourd’hui",
+      "le": "Livraison prévue le {date}"
+    }
   },
   "analyses": {
     "titre": "Analyses",

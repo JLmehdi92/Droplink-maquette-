@@ -16,6 +16,7 @@ import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/component
 import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
 import { FriseCompacte } from "@/components/commandes/frise-suivi";
 import { LienEcran } from "@/components/lien-ecran";
+import { lireTransporteur, monogramme } from "@/lib/tracking/transporteurs";
 
 /**
  * L'ÉCRAN DES ENVOIS, porté sur `Envois` et `EnvoisMobile`.
@@ -30,11 +31,18 @@ import { LienEcran } from "@/components/lien-ecran";
  * envois depuis un téléphone bas de gamme sur un réseau lent n'a pas à attendre
  * qu'un composant s'hydrate pour voir où en sont ses colis.
  *
- * LE CODE TRANSPORTEUR N'EST PAS AFFICHÉ. C'est un identifiant numérique du
- * fournisseur de suivi, et nous n'avons aucune table de correspondance vers un
- * nom lisible. Afficher « 3011 » n'apprendrait rien à personne ; inventer un
- * libellé serait pire. Une information qu'on ne sait pas rendre lisible est
- * omise — la même règle que sur la page publique.
+ * ⚠️ LE TRANSPORTEUR EST AFFICHÉ DEPUIS LE 12/09/2026, ET CE PARAGRAPHE DISAIT
+ * LE CONTRAIRE PENDANT DES SEMAINES. Il affirmait : « nous n'avons aucune table
+ * de correspondance vers un nom lisible ». C'était vrai — le code est un
+ * identifiant numérique du fournisseur de suivi, « 3011 », « 100003 » — mais ce
+ * n'était pas une fatalité : la correspondance est PUBLIÉE par le fournisseur,
+ * et elle vit désormais dans `lib/tracking/transporteurs.json`, 3 502 entrées
+ * figées dans le dépôt. *Une affirmation d'impossibilité que personne n'a
+ * exécutée n'est pas une impossibilité.*
+ *
+ * Ce qui reste vrai : un code que le catalogue ne connaît pas ne produit RIEN.
+ * Ni « 3011 », ni « Transporteur inconnu » — une information absente est omise,
+ * jamais remplacée, la même règle que sur la page publique.
  *
  * ⚠️ « RESYNCHRONISER » N'EST TOUJOURS PAS PORTÉ, ET CE PARAGRAPHE A ÉTÉ REPRIS
  * LE 12/09/2026 PARCE QU'IL ÉTAIT DEVENU À MOITIÉ FAUX. Il disait « le produit
@@ -275,6 +283,46 @@ export async function TableauEnvois({
       ) : (
         <Puce {...PEAU[ligne.etat]}>{t(`etat.${ligne.etat}`)}</Puce>
       ),
+
+      // LE TRANSPORTEUR, traduit depuis le catalogue officiel du fournisseur de
+      // suivi. `null` quand le code est absent ou inconnu : on n'écrit rien.
+      transporteur: (() => {
+        const c = lireTransporteur(ligne.transporteur);
+        return c === null ? null : { nom: c.nom, monogramme: monogramme(c.nom) };
+      })(),
+
+      /*
+       * LA PROCHAINE ÉTAPE, telle que le transporteur l'annonce.
+       *
+       * ⚠️ TROIS CAS, ET LE TROISIÈME EST LE PLUS IMPORTANT : quand rien n'est
+       * annoncé, la cellule reste VIDE. Le kit écrit une phrase sur chacune de
+       * ses huit lignes parce que ses données sont inventées ; nous n'écrivons
+       * que ce que le transporteur a dit.
+       *
+       * ⚠️ ET LA PRÉVISION DISPARAÎT QUAND LE COLIS EST SILENCIEUX. C'est la
+       * règle de `lib/tracking/silence` : au-delà de dix jours sans mouvement,
+       * une date d'arrivée annoncée il y a deux semaines n'est plus une
+       * prévision, c'est un souvenir — et l'afficher ferait attendre le vendeur
+       * pour rien. Le défaut avait été vu par Wassim sur une vraie page le
+       * 05/09 ; il n'est pas réintroduit ici.
+       */
+      prochaine: (() => {
+        if (ligne.etat === "livre") return t("prochaine.livre");
+        if (silencieux) return null;
+        const du = ligne.arriveeDu === null ? null : new Date(ligne.arriveeDu);
+        const au = ligne.arriveeAu === null ? null : new Date(ligne.arriveeAu);
+        const borne = au ?? du;
+        if (borne === null || Number.isNaN(borne.getTime())) return null;
+        // AU JOUR, PAS À LA SECONDE : le transporteur annonce une journée, et
+        // comparer des instants ferait basculer « aujourd'hui » à midi.
+        const jour = (x: Date) => Date.UTC(x.getFullYear(), x.getMonth(), x.getDate());
+        const ecart = Math.round((jour(borne) - jour(maintenant)) / 86_400_000);
+        if (ecart === 0) return t("prochaine.aujourdhui");
+        if (ecart < 0) return null;
+        return t("prochaine.le", {
+          date: format.dateTime(borne, { day: "numeric", month: "short" }),
+        });
+      })(),
     };
   };
 
@@ -534,25 +582,49 @@ export async function TableauEnvois({
             */}
             <table className="w-full table-fixed border-collapse">
               {/*
-                LES HUIT COLONNES, AUX PIXELS DES BOÎTES DE CONTENU DU KIT.
+                LES DIX COLONNES, AUX PIXELS DES BOÎTES DE CONTENU DU KIT.
 
                 Mesurées sur la référence SERVIE, ses dix colonnes rendent 38,
                 174, 116, 139, 145, 128, 116, 122, 145 et 56 px de contenu, à
                 l'écart de 14 dans une rangée de 1345 au remplissage `14px 20px`.
 
-                DEUX N'EXISTENT PAS CHEZ NOUS et ne sont donc pas reprises :
-                  · la case à cocher (38) — il n'y a pas d'action groupée sur cet
-                    écran, et une colonne de cases qui ne commandent rien est
-                    pire qu'absente ;
-                  · « Transporteur » (145) — `carrier_code` est l'identifiant
-                    NUMÉRIQUE du fournisseur de suivi, pas un nom, et aucun
-                    catalogue ne le traduit. Même arbitrage que sur `/commandes`,
-                    écrit au même endroit : « 100003 » n'apprend rien, et
-                    « Transporteur inconnu » sur chaque ligne vaut moins que rien.
+                UNE SEULE N'EXISTE PAS CHEZ NOUS : la case à cocher (38 px). Il
+                n'y a pas d'action groupée sur cet écran, et une colonne de cases
+                qui ne commandent rien est pire qu'absente. « Interrogations »
+                occupe la place d'« Actions » (56) : le nombre d'interrogations
+                explique pourquoi un colis reste muet, ce qu'aucune autre colonne
+                ne dit. Et « Dernier point » s'ajoute, que le kit n'a pas : ce que
+                le transporteur a DIT et ce qu'il ANNONCE sont deux informations,
+                pas une.
 
-                Les 183 px libérés sont redistribués AU PRORATA des colonnes qui
+                ⚠️ DIX `<col>` POUR DIX `<th>`. Il y en a eu neuf pendant un tour
+                de mesure, et le résultat ne s'est pas vu à la lecture du code :
+                la dernière colonne, privée de largeur, a poussé le tableau
+                HORS de la carte — « Interrogatio » coupé au bord, les compteurs
+                dans le vide, et `debordement: true` sur toute la page. Un
+                `colgroup` trop court ne proteste pas ; il laisse déborder.
+
+                ⚠️ « TRANSPORTEUR » ET « PROCHAINE ÉTAPE » ÉTAIENT DÉCLARÉES
+                IMPOSSIBLES, ET ELLES NE L'ÉTAIENT PAS. La première attendait un
+                catalogue de codes — il est publié par le fournisseur de suivi et
+                vit désormais dans `lib/tracking/transporteurs.json` ; la seconde
+                attendait une prévision d'arrivée — `estimated_from` et
+                `estimated_to` existent depuis la migration 029 et sont déjà
+                alimentées. Deux affirmations que personne n'avait exécutées.
+
+                Les 38 px libérés sont redistribués AU PRORATA des colonnes qui
                 restent, pas donnés à la plus large : le kit a réglé l'importance
                 relative de ses colonnes, et c'est elle qu'on conserve.
+
+                ⚠️ SAUF LA DERNIÈRE, QUI EST DIMENSIONNÉE PAR SON LIBELLÉ.
+                « Interrogations » mesure 81,58 px en Inter 12/600 — mesuré au
+                canvas, pas estimé — là où le kit loge « Actions » dans 56. Lui
+                donner la proportion du kit faisait CHEVAUCHER les deux derniers
+                en-têtes : la capture rendait « Prochaine étapeInterrogatio », et
+                les compteurs sortaient de la carte. Un `<col>` en pourcentage ne
+                proteste pas quand son contenu ne rentre pas : il le laisse
+                déborder. Sa colonne porte donc 82 + 20 de marge, et les 26 px de
+                plus sont repris au prorata sur les huit autres.
 
                 Un `<table>` n'a pas de `gap` : l'écart de 14 est le
                 `padding-right` de chaque cellule et les 20 px de marge sont
@@ -561,14 +633,16 @@ export async function TableauEnvois({
                 Somme : 1345, exactement la largeur de la carte.
               */}
               <colgroup>
-                <col className="w-[18.205%]" />
-                <col className="w-[11.493%]" />
-                <col className="w-[13.565%]" />
-                <col className="w-[12.574%]" />
-                <col className="w-[11.493%]" />
-                <col className="w-[12.033%]" />
-                <col className="w-[14.105%]" />
-                <col className="w-[6.533%]" />
+                <col className="w-[14.066%]" />
+                <col className="w-[8.734%]" />
+                <col className="w-[10.260%]" />
+                <col className="w-[10.658%]" />
+                <col className="w-[9.530%]" />
+                <col className="w-[8.734%]" />
+                <col className="w-[9.132%]" />
+                <col className="w-[10.658%]" />
+                <col className="w-[10.658%]" />
+                <col className="w-[7.572%]" />
               </colgroup>
               <thead>
                 <tr>
@@ -587,6 +661,9 @@ export async function TableauEnvois({
                     <span className="block leading-[18px]">{t("colonnes.client")}</span>
                   </th>
                   <th scope="col" className={enTete}>
+                    <span className="block leading-[18px]">{t("colonnes.transporteur")}</span>
+                  </th>
+                  <th scope="col" className={enTete}>
                     <span className="block leading-[18px]">{t("colonnes.etat")}</span>
                   </th>
                   {/* LA PROGRESSION, comme sur la référence : la frise se BALAIE
@@ -600,6 +677,9 @@ export async function TableauEnvois({
                   </th>
                   <th scope="col" className={enTete}>
                     <span className="block leading-[18px]">{t("colonnes.point")}</span>
+                  </th>
+                  <th scope="col" className={enTete}>
+                    <span className="block leading-[18px]">{t("colonnes.prochaine")}</span>
                   </th>
                   <th scope="col" className={enTete + bordDroit + " text-right"}>
                     <span className="block leading-[18px]">{t("colonnes.interrogations")}</span>
@@ -661,6 +741,45 @@ export async function TableauEnvois({
                           </span>
                         )}
                       </td>
+
+                      {/*
+                        LE TRANSPORTEUR, avec son monogramme — le kit pose une
+                        tuile de 32 px portant deux ou trois initiales, puis le
+                        nom.
+
+                        ⚠️ RIEN N'EST RENDU QUAND LE CODE EST INCONNU. 17TRACK
+                        ajoute des transporteurs ; un code absent du catalogue
+                        figé ne doit pas produire « Transporteur inconnu » sur la
+                        ligne. *Une information absente est OMISE, jamais
+                        remplacée par un texte de remplacement.*
+                      */}
+                      <td className={cellule}>
+                        {d.transporteur === null ? null : (
+                          <span className="flex min-w-0 items-center gap-[11px]">
+                            <span
+                              className={
+                                "inline-flex h-8 w-8 flex-none items-center justify-center rounded-ds-sm text-[11px] font-extrabold tracking-[-0.02em] " +
+                                (d.transporteur.monogramme.fond === null
+                                  ? "bg-ds-surface-creux text-ds-texte-corps"
+                                  : "")
+                              }
+                              style={
+                                d.transporteur.monogramme.fond === null
+                                  ? undefined
+                                  : {
+                                      background: d.transporteur.monogramme.fond,
+                                      color: d.transporteur.monogramme.encre ?? undefined,
+                                    }
+                              }
+                            >
+                              {d.transporteur.monogramme.court}
+                            </span>
+                            <span className="truncate font-medium text-ds-texte-fort">
+                              {d.transporteur.nom}
+                            </span>
+                          </span>
+                        )}
+                      </td>
                       <td className={cellule}>{d.puce}</td>
 
                       <td className={cellule}>
@@ -709,6 +828,16 @@ export async function TableauEnvois({
                       >
                         {ligne.dernierPoint ?? t("mouvement.aucun")}
                       </td>
+
+                      {/*
+                        LA PROCHAINE ÉTAPE. Le kit la peint en rouge quand le
+                        colis a un problème ; ici c'est l'ambre du silence qui
+                        joue ce rôle, et elle est déjà portée par la pastille de
+                        statut et par le fond de la ligne. La peindre une
+                        troisième fois n'ajouterait rien.
+                      */}
+                      <td className={cellule + " text-ds-texte-corps"}>{d.prochaine}</td>
+
                       <td className={cellule + bordDroit + " text-right text-ds-texte-sourdine"}>
                         {format.number(ligne.interrogations)}
                       </td>

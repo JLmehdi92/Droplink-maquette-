@@ -74,6 +74,34 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#c13584", "logo Instagram"],
   ["#1da851", "logo WhatsApp"],
   /*
+   * ⚠️ LES NEUF MONOGRAMMES DE TRANSPORTEUR, ET POURQUOI CE NE SONT PAS DES
+   * LOGOS RECONSTITUÉS.
+   *
+   * Le design system le dit dans son propre source, en anglais et en toutes
+   * lettres : « No carrier logos were supplied, so each is a coloured tile with
+   * its initials ». Ces neuf couples de couleurs sont donc un DESSIN DU KIT,
+   * relevé dans `ui_kits/seller_app/ShippingView.jsx`, et repris à l'identique —
+   * pas une marque redessinée de mémoire, ce que la règle d'iconographie
+   * interdit.
+   *
+   * Ils n'ont pas de token parce qu'ils ne décrivent pas le produit : ils
+   * appartiennent à des tiers, ils ne suivent ni le thème ni la couleur d'accent
+   * du vendeur, et un token les ferait entrer dans une palette qu'ils n'ont
+   * aucune raison d'habiter. Un transporteur que le kit ne dessine pas prend son
+   * repli — fond creux, encre de corps — qui, lui, passe par les classes.
+   */
+  ["#ffd400", "monogramme La Poste / Colissimo — dessin du kit, pas un logo"],
+  ["#0b0b18", "encre des monogrammes La Poste, Colissimo et SF Express — dessin du kit"],
+  ["#ffcc00", "monogramme DHL — dessin du kit"],
+  ["#d40511", "encre du monogramme DHL — dessin du kit"],
+  ["#dc0032", "monogramme DPD — dessin du kit"],
+  ["#00a3e0", "monogramme Chronopost — dessin du kit"],
+  ["#351c15", "monogramme UPS — dessin du kit"],
+  ["#ffb500", "encre du monogramme UPS — dessin du kit"],
+  ["#8cc63f", "monogramme Relais Colis — dessin du kit"],
+  ["#4d148c", "monogramme FedEx — dessin du kit"],
+  ["#ff6600", "encre du monogramme FedEx — dessin du kit"],
+  /*
    * ⚠️ LES TROIS ARRÊTS DU FOND DES ÉCRANS D'ACCÈS, ET POURQUOI ILS N'ONT PAS
    * DE TOKEN. Le design system pose ce dégradé EN DUR dans son `AuthBackdrop` :
    * `linear-gradient(135deg,#F3F1FE 0%,#FAF8FE 42%,#F7F2FC 100%)`. Il ne le

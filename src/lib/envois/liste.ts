@@ -100,6 +100,21 @@ export interface LigneEnvoi {
    * (migration 104), donc jamais recalculée à la lecture.
    */
   readonly dernierPoint: string | null;
+  /**
+   * LA FOURCHETTE D'ARRIVÉE ANNONCÉE PAR LE TRANSPORTEUR — ce que le kit écrit
+   * « Livraison prévue aujourd'hui » dans sa colonne « Prochaine étape ».
+   *
+   * ⚠️ ELLE ÉTAIT DÉJÀ EN BASE, ET DEUX ÉCRANS LA DISAIENT ABSENTE. Les colonnes
+   * `estimated_from` et `estimated_to` existent depuis la migration 029 et sont
+   * alimentées par l'ingestion ; la page client s'en sert déjà. Le tableau des
+   * envois déclarait pourtant « la base ne porte aucune prédiction » — une
+   * affirmation que personne n'avait exécutée.
+   *
+   * Les deux bornes peuvent être nulles : un transporteur n'annonce pas
+   * toujours. Dans ce cas l'écran n'écrit rien, il n'invente pas une date.
+   */
+  readonly arriveeDu: string | null;
+  readonly arriveeAu: string | null;
 }
 
 export interface PageEnvois {
@@ -137,7 +152,7 @@ export interface CompteursEnvois {
  * lecture : le compte doit rester exact.
  */
 const COLONNES =
-  "id, tracking_number, carrier_code, normalized_status, immobile_depuis, updated_at, first_movement_at, last_movement_at, abandoned_at, query_count, dernier_point, order_parcels(orders(id, customer_label))";
+  "id, tracking_number, carrier_code, normalized_status, immobile_depuis, updated_at, first_movement_at, last_movement_at, abandoned_at, query_count, dernier_point, estimated_from, estimated_to, order_parcels(orders(id, customer_label))";
 
 /** La colonne de tri, et son sens. */
 function ordre(tri: Tri): { colonne: "immobile_depuis" | "updated_at"; croissant: boolean } {
@@ -277,6 +292,8 @@ export async function lireEnvois(
       .filter((id): id is string => id !== null)
       .map(referenceCourte),
     dernierPoint: l.dernier_point,
+    arriveeDu: l.estimated_from,
+    arriveeAu: l.estimated_to,
   }));
 
   const dernier = trop ? visibles[visibles.length - 1] : undefined;

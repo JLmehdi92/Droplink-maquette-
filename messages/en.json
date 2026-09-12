@@ -396,10 +396,12 @@
       "numero": "Tracking",
       "commande": "Order",
       "client": "Customer",
+      "transporteur": "Carrier",
       "etat": "Status",
       "progression": "Progress",
       "mouvement": "Last updated",
       "point": "Last checkpoint",
+      "prochaine": "Next step",
       "interrogations": "Queries"
     },
     "mouvement": {
@@ -424,7 +426,12 @@
     "aideCourte": "A number you have just pasted is often not scanned yet. This is not an error.",
     "actualiser": "Refresh",
     "derniereMaj": "Last updated",
-    "compteurPage": "Showing {de} to {a} of {total, plural, one {# shipment} other {# shipments}}"
+    "compteurPage": "Showing {de} to {a} of {total, plural, one {# shipment} other {# shipments}}",
+    "prochaine": {
+      "livre": "Parcel delivered",
+      "aujourdhui": "Delivery expected today",
+      "le": "Delivery expected {date}"
+    }
   },
   "analyses": {
     "titre": "Analytics",

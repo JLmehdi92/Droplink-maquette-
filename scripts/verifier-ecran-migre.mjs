@@ -162,6 +162,19 @@ const { data: colis, error: eColis } = await service
       first_movement_at: jours(3),
       last_movement_at: jours(1),
       query_count: 4,
+      /*
+       * UNE ARRIVEE ANNONCEE, POUR QUE LA COLONNE « PROCHAINE ETAPE » AIT
+       * QUELQUE CHOSE A RENDRE.
+       *
+       * ⚠️ RELATIVE A L INSTANT DU PASSAGE, jamais ecrite en dur. Une sonde de
+       * fumee portait « 2026-09-02 » et a EXPIRE le 12/09 : son dernier
+       * mouvement avait alors dix jours, soit le seuil du silence, la page a
+       * retire la prevision comme elle le doit, et le contre-test est passe au
+       * rouge sans qu aucun defaut du produit soit en cause. Une valeur de jeu
+       * de mesure qui depend du calendrier ne mesure pas ce qu elle croit.
+       */
+      estimated_from: jours(-1),
+      estimated_to: jours(-2),
     },
     {
       shop_id: shop.id,

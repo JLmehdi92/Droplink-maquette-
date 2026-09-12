@@ -465,11 +465,6 @@
         "raison": "Meme cause : « Livre » est une PILULE DE FILTRE chez nous et une pastille de statut chez le kit, qui n a pas de pilules."
       },
       {
-        "texte": "8 sept. 2025  <span>",
-        "motif": "donnee",
-        "raison": "Le kit empile la date et l heure dans un seul bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous — « il y a 3 jours » plutot que « a 14:32 ». C est la seule chose de l ecran qui change tous les jours quand le colis ne bouge pas, et c est ce que le vendeur vient verifier. L heure d un scan ne lui apprend rien."
-      },
-      {
         "texte": "8 sept. 2025  <nombre d'occurrences>",
         "motif": "donnee",
         "raison": "Le kit rend huit lignes a la meme date, le jeu de mesure en rend une."
@@ -483,6 +478,31 @@
         "texte": "© 2025 DropLink. Tous droits réservés.  <footer>",
         "motif": "donnee",
         "raison": "Position verticale seule : la page du kit porte huit lignes de tableau, celle du jeu de mesure deux. Le pied est plus haut d autant."
+      },
+      {
+        "texte": "Transporteur",
+        "motif": "donnee",
+        "raison": "Largeur de colonne et abscisse. Nous rendons DIX colonnes la ou le kit en rend dix aussi, mais pas les memes : il a une case a cocher et « Actions », nous « Dernier point » et « Interrogations ». Les proportions du kit sont conservees, les largeurs absolues ne peuvent donc pas coincider."
+      },
+      {
+        "texte": "Prochaine étape",
+        "motif": "donnee",
+        "raison": "Meme cause que « Transporteur » : dix colonnes de part et d autre, mais pas les memes."
+      },
+      {
+        "texte": "FX",
+        "motif": "donnee",
+        "raison": "Position seule : le monogramme suit sa colonne, et la colonne « Transporteur » n est pas a la meme abscisse — voir sa declaration."
+      },
+      {
+        "texte": "FedEx",
+        "motif": "donnee",
+        "raison": "Quatre pixels de boite et une position. Le nom vient du catalogue officiel du fournisseur de suivi, le kit l ecrit a la main dans sa demonstration ; la boite suit la largeur de sa colonne."
+      },
+      {
+        "texte": "7 sept. 2025",
+        "motif": "donnee",
+        "raison": "Le kit empile la date et l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous. Meme declaration que « 8 sept. 2025 », pour la deuxieme ligne du kit."
       }
     ],
     "manquants": [
@@ -539,39 +559,6 @@
       },
       {
         "textes": [
-          "Transporteur",
-          "La Poste",
-          "DHL",
-          "DPD",
-          "Chronopost",
-          "UPS",
-          "Relais Colis",
-          "SF Express",
-          "FedEx",
-          "LP",
-          "CP",
-          "RC",
-          "SF",
-          "FX"
-        ],
-        "motif": "donnee",
-        "raison": "LA COLONNE TRANSPORTEUR ET SES MONOGRAMMES. `carrier_code` est l identifiant NUMERIQUE du fournisseur de suivi, pas un nom, et aucun catalogue ne le traduit. Rendu tel quel il afficherait « 100003 » ; avec un repli, « Transporteur inconnu » sur CHAQUE ligne. Les deux valent moins que rien. Meme arbitrage que sur `/commandes`, ecrit au meme endroit dans le code."
-      },
-      {
-        "textes": [
-          "Prochaine étape",
-          "Livraison prévue aujourd'hui",
-          "Arrivée en France",
-          "Colis livré",
-          "En cours d'acheminement",
-          "Prise en charge par le transporteur",
-          "Colis en attente (voir détails)"
-        ],
-        "motif": "donnee",
-        "raison": "LA COLONNE « PROCHAINE ETAPE » EST UNE PREDICTION, et la base n en porte aucune. Ce que le transporteur nous dit est le DERNIER point de passage, pas le prochain. Le produit rend donc « Dernier point » a la meme place : la meme colonne, orientee vers ce qui est verifiable."
-      },
-      {
-        "textes": [
           "Actions"
         ],
         "motif": "donnee",
@@ -602,6 +589,29 @@
         ],
         "motif": "donnee",
         "raison": "LES HUIT ENVOIS DE DEMONSTRATION du kit. Le jeu de mesure en porte deux, avec ses propres numeros, ses propres destinataires et ses propres statuts. Ce sont des donnees, pas du dessin."
+      },
+      {
+        "textes": [
+          "Livraison prévue aujourd'hui",
+          "Arrivée en France",
+          "Colis livré",
+          "En cours d'acheminement",
+          "Prise en charge par le transporteur",
+          "Colis en attente (voir détails)",
+          "La Poste",
+          "DHL",
+          "DPD",
+          "Chronopost",
+          "UPS",
+          "Relais Colis",
+          "SF Express",
+          "LP",
+          "CP",
+          "RC",
+          "SF"
+        ],
+        "motif": "donnee",
+        "raison": "LES VALEURS DE DEMONSTRATION DES DEUX COLONNES QUE NOUS RENDONS DESORMAIS. Le kit invente huit transporteurs et huit phrases d etape ; le jeu de mesure porte 4PX et FedEx, et la seule arrivee annoncee par le transporteur. Les colonnes existent des deux cotes — ce sont leurs CONTENUS qui different, et ils doivent differer : les notres viennent de la base."
       }
     ],
     "enTrop": [
@@ -696,6 +706,17 @@
         ],
         "motif": "donnee",
         "raison": "LE BANDEAU D AIDE, en pied de liste. Il existe pour une seule phrase, et cette phrase evite un message au support : un numero tout juste colle n est pas encore scanne, et l ecran affiche alors « pas encore d information du transporteur ». C est la decision 7 du brief rendue visible — le message ne dit JAMAIS « numero introuvable »."
+      },
+      {
+        "textes": [
+          "4PX",
+          "4P"
+        ],
+        "motifs": [
+          "^Livraison prévue le .+$"
+        ],
+        "motif": "donnee",
+        "raison": "LE TRANSPORTEUR ET L ARRIVEE ANNONCEE DU JEU DE MESURE. Le kit rend huit envois chez La Poste, DHL, DPD… ; le jeu en rend deux, chez 4PX et FedEx, avec les monogrammes correspondants. « Livraison prevue le … » est declaree PAR MOTIF : la date est RELATIVE a l instant du passage, comme toutes les dates du jeu depuis qu une sonde de fumee a expire pour avoir ete ecrite en dur."
       }
     ]
   }
