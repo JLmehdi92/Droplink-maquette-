@@ -367,7 +367,25 @@ les dates, les heures, et les chaînes composées du type « 30 % du total »,
 l'exécution — et surtout, **lire un composant ne montre pas ce qui manque
 autour de lui.**
 
-#### Les quatre gestes, dans cet ordre
+#### ⚠️ LA RÈGLE D'ARRÊT — CONSIGNE DE WASSIM, 12/09/2026
+
+> « tu vas les re re comparer avec les écrans de Claude Design et tant que c'est
+> **1:1, pixel par pixel**, tu passes pas à l'écran suivant, on va faire comme
+> ça maintenant »
+
+**UN ÉCRAN N'EST PAS FINI TANT QUE LA SOUSTRACTION N'EST PAS VIDE.** Le rapport
+de `soustraire-inventaires.mjs` doit ne plus contenir, dans ses trois listes,
+que des lignes **DÉCLARÉES** avec leur raison — contrainte verrouillée, donnée
+que la base n'a pas, ou jeu de données différent. Tout le reste se corrige
+**avant** de regarder l'écran suivant.
+
+**Et « mesuré au pixel » ne s'écrit dans un commit qu'après avoir lancé la
+soustraction.** Huit messages de commit l'ont affirmé sans elle : le quatrième
+geste n'était pas outillé, il se faisait à l'œil, donc sur ce qu'on pensait à
+regarder. *Une affirmation de conformité qui n'a pas été exécutée est une
+affirmation fausse, et elle coûte plus cher que l'absence d'affirmation.*
+
+#### Les cinq gestes, dans cet ordre
 
 ```
 1.  npx --yes http-server -p 8123 -s .      # dans .claude/skills/droplink-design/
@@ -378,9 +396,23 @@ autour de lui.**
 3.  node scripts/build-contre-tests.mjs && node scripts/servir-contre-tests.mjs
     MSYS_NO_PATHCONV=1 node scripts/verifier-ecran-migre.mjs       http://localhost:<port> "/fr/envois" 1690,390 <dossier de captures>
 
-4.  Comparer les DEUX captures côte à côte, et les deux inventaires par
-    soustraction. L'écart se lit, il ne se devine pas.
+4.  MSYS_NO_PATHCONV=1 INVENTAIRE=<dossier> node scripts/verifier-ecran-migre.mjs \
+      http://localhost:<port> "/fr/envois" 1690 <dossier de captures>
+
+5.  node scripts/soustraire-inventaires.mjs <kit.json> <produit.json>
+    ET regarder les deux captures côte à côte. Les deux, pas l'un OU l'autre :
+    la soustraction voit ce qui diffère, les captures voient ce qui manque
+    autour.
 ```
+
+`soustraire-inventaires.mjs` rend trois listes — ce que le kit rend et que le
+produit ne rend pas, ce que le produit rend en plus, et pour chaque texte commun
+les propriétés qui diffèrent (taille, graisse, interligne, interlettrage,
+couleur, fond, rayon, filet, ombre, remplissage, écart, boîte). **Il apparie par
+le TEXTE, jamais par la position** — apparier par position reviendrait à
+supposer la réponse, puisque la position est justement ce qu'on mesure — et il
+**normalise les chiffres en `#`**, sinon chaque date et chaque compteur des deux
+jeux de données ressortirait comme « absent ».
 
 `comparer-au-kit.mjs` rend, pour chaque élément RÉELLEMENT RENDU : boîte,
 position, police, graisse, interlettrage, interligne, couleur, fond, image de
