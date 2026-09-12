@@ -9,13 +9,21 @@ import { CompteursAnalyses } from "@/components/analyses/compteurs-analyses";
 import { FriseSemaines } from "@/components/analyses/frise-semaines";
 import { PlusConsultees } from "@/components/analyses/plus-consultees";
 import { RepartitionColis } from "@/components/analyses/repartition-colis";
+import { ActiviteRecente } from "@/components/analyses/activite-recente";
+import { BandeauAnalyses } from "@/components/analyses/bandeau-analyses";
+import { LiensParJour } from "@/components/analyses/liens-par-jour";
+import { PartsTransporteurs } from "@/components/analyses/parts-transporteurs";
 import {
   analyserParametres,
   lireActivite,
+  lireDelaiLivraison,
+  lireOuverturesParJour,
   lirePlusConsultees,
   lireSemaines,
+  lireTransporteurs,
   PERIODES,
 } from "@/lib/analyses/activite";
+import { lireActiviteRecente } from "@/lib/analyses/recente";
 import { compterEnvois } from "@/lib/envois/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
@@ -87,14 +95,19 @@ export default async function Analyses({
   // base, pas d'une requête bien rédigée.
   const supabase = await creerClientServeur();
 
-  // Les quatre lectures sont indépendantes : les enchaîner multiplierait par
-  // quatre la latence de l'écran pour rien.
-  const [activite, semaines, colis, consultees] = await Promise.all([
-    lireActivite(supabase, periode, maintenant),
-    lireSemaines(supabase, maintenant),
-    compterEnvois(supabase),
-    lirePlusConsultees(supabase, periode, maintenant),
-  ]);
+  // Les huit lectures sont indépendantes : les enchaîner multiplierait par huit
+  // la latence de l'écran pour rien.
+  const [activite, semaines, colis, consultees, transporteurs, delai, ouvertures, recente] =
+    await Promise.all([
+      lireActivite(supabase, periode, maintenant),
+      lireSemaines(supabase, maintenant),
+      compterEnvois(supabase),
+      lirePlusConsultees(supabase, periode, maintenant),
+      lireTransporteurs(supabase, periode, maintenant),
+      lireDelaiLivraison(supabase, periode, maintenant),
+      lireOuverturesParJour(supabase, periode, maintenant),
+      lireActiviteRecente(supabase, periode, maintenant),
+    ]);
 
   const t = await getTranslations("analyses");
   const format = await getFormatter();
@@ -141,7 +154,7 @@ export default async function Analyses({
     <>
       <EnTeteEcranDs
         titre={t("titre")}
-        sousTitre={t(`sousTitre.${periode}`)}
+        sousTitre={t("sousTitreEcran")}
         actions={
           <nav
             aria-label={t("periode.titre")}
@@ -171,7 +184,7 @@ export default async function Analyses({
         {activite === null ? (
           <p className={INDISPONIBLE}>{t("indisponible")}</p>
         ) : (
-          <CompteursAnalyses activite={activite} />
+          <CompteursAnalyses activite={activite} delai={delai} />
         )}
 
         {/* 1,6fr / 1fr sur la planche. La frise garde la place : c'est elle
@@ -187,6 +200,26 @@ export default async function Analyses({
             <p className={INDISPONIBLE}>{t("indisponible")}</p>
           ) : (
             <RepartitionColis compteurs={colis} />
+          )}
+        </div>
+
+        {/* LA DERNIÈRE RANGÉE DU KIT : trois colonnes égales — les ouvertures
+            de liens, les transporteurs, l'activité récente. */}
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-3 lg:items-start lg:gap-4">
+          {ouvertures === null || activite === null ? (
+            <p className={INDISPONIBLE}>{t("indisponible")}</p>
+          ) : (
+            <LiensParJour jours={ouvertures} total={activite.vuesTotales} />
+          )}
+          {transporteurs === null ? (
+            <p className={INDISPONIBLE}>{t("indisponible")}</p>
+          ) : (
+            <PartsTransporteurs parts={transporteurs} />
+          )}
+          {recente === null ? (
+            <p className={INDISPONIBLE}>{t("indisponible")}</p>
+          ) : (
+            <ActiviteRecente faits={recente} langue={langue} />
           )}
         </div>
 
@@ -233,6 +266,9 @@ export default async function Analyses({
             </ul>
           )}
         </Panneau>
+
+        {/* LE BANDEAU DE PIED DU KIT, en dernier comme chez lui. */}
+        <BandeauAnalyses />
       </main>
     </>
   );

@@ -449,11 +449,6 @@
   "analyses": {
     "titre": "Analyses",
     "indisponible": "Cette section est illisible pour l’instant — ce n’est pas « aucune donnée ». Réessayez dans un instant.",
-    "sousTitre": {
-      "7j": "7 derniers jours",
-      "30j": "30 derniers jours",
-      "90j": "90 derniers jours"
-    },
     "periode": {
       "titre": "Période",
       "7j": "7 jours",
@@ -463,38 +458,32 @@
     "compteurs": "Vue d’ensemble",
     "carte": {
       "commandesCreees": "Commandes créées",
-      "vuesMoyennes": "Vues par commande",
-      "avecSuivi": "Commandes avec suivi",
-      "jamaisOuvertes": "Jamais ouvertes"
+      "commandesLivrees": "Commandes livrées",
+      "liensOuverts": "Liens clients ouverts",
+      "tauxValidation": "Taux de validation des photos",
+      "delaiLivraison": "Temps moyen de livraison"
     },
     "carteCourt": {
-      "commandesCreees": "Commandes créées",
-      "vuesMoyennes": "Vues par commande",
-      "avecSuivi": "Avec suivi",
-      "jamaisOuvertes": "Jamais ouvertes"
+      "commandesCreees": "Commandes créées"
     },
     "ecartPrecedent": "{n} vs période précédente",
     "aucuneComparaison": "rien à comparer",
     "leClientRevient": "le client revient plusieurs fois",
-    "leClientRevientCourt": "le client revient",
-    "partSur": "{n} sur {total}",
-    "aRelancer": "à relancer",
-    "toutesOuvertes": "toutes ont été ouvertes",
     "frise": {
-      "titre": "Commandes créées par semaine",
+      "titre": "Évolution des commandes",
       "fenetre": "{n} dernières semaines",
       "barre": "Semaine du {semaine} : {n, plural, =0 {aucune commande} one {# commande} other {# commandes}}",
       "vide": "Aucune commande créée sur ces douze semaines.",
       "aide": "Nombre de commandes créées par semaine."
     },
     "colis": {
-      "titre": "Où en sont vos colis",
+      "titre": "Répartition des statuts",
       "enTransit": "En transit",
       "livre": "Livrés",
       "preparation": "Pas encore scannés",
       "silencieux": "Sans mouvement",
       "vide": "Aucun colis suivi pour le moment.",
-      "aide": "État actuel de vos envois."
+      "aide": "Statut actuel de vos envois."
     },
     "consultees": {
       "titre": "Vos commandes les plus consultées",
@@ -509,7 +498,42 @@
       "refuse": "Refusé",
       "enAttente": "Sans réponse",
       "vide": "Aucune commande sur cette période."
-    }
+    },
+    "sousTitreEcran": "Suivez les performances de votre activité et l'efficacité de vos envois.",
+    "livreesSur": "{n} sur {total} créées",
+    "reponsesSur": "{n} réponse{s} sur {total}",
+    "surColisLivres": "sur {n} colis livré{s}",
+    "jours": "{n} jours",
+    "evolution": {
+      "titre": "Évolution des commandes",
+      "aide": "Nombre de commandes créées sur la période sélectionnée."
+    },
+    "liens": {
+      "titre": "Liens clients",
+      "aide": "Nombre d'ouvertures des liens de suivi.",
+      "aucun": "Aucun lien n'a été ouvert sur cette période."
+    },
+    "transporteurs": {
+      "titre": "Transporteurs les plus utilisés",
+      "aide": "Répartition de vos envois par transporteur.",
+      "autres": "Autres",
+      "inconnu": "Transporteur non identifié",
+      "aucun": "Aucun colis pris en charge sur cette période."
+    },
+    "activite": {
+      "titre": "Activité récente",
+      "voirTout": "Voir tout",
+      "aucune": "Rien ne s'est encore passé sur cette période.",
+      "commande": "Commande"
+    },
+    "bandeau": {
+      "titre": "Des analyses simples et utiles",
+      "aide": "Suivez l'efficacité de vos envois et améliorez l'expérience de vos clients.",
+      "propulse": "Propulsé par",
+      "slogan": "Des liens de suivi simples et puissants."
+    },
+    "vuesParCommande": "{n} vues par commande ouverte",
+    "ouverturesLe": "{n} ouverture(s) le {jour}"
   },
   "commandes": {
     "titre": "Commandes",

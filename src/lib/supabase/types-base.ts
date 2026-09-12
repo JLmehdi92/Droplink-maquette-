@@ -775,6 +775,7 @@ export type Database = {
           archivees: number
           avec_suivi: number
           commandes_creees: number
+          commandes_livrees: number
           commandes_ouvertes: number
           creees_periode_precedente: number
           qc_approuve: number
@@ -883,6 +884,13 @@ export type Database = {
         Args: { p_depuis_jours: number; p_famille: string; p_plafond: number }
         Returns: number
       }
+      compter_ouvertures_par_jour: {
+        Args: { p_depuis: string; p_jusqu_a: string }
+        Returns: {
+          jour: string
+          total: number
+        }[]
+      }
       compteurs_admin: {
         Args: never
         Returns: {
@@ -898,6 +906,13 @@ export type Database = {
       consommer_quota: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
+      }
+      delai_moyen_livraison: {
+        Args: { p_depuis: string }
+        Returns: {
+          colis: number
+          jours: number
+        }[]
       }
       ecrire_parametre: {
         Args: { p_cle: string; p_valeur: Json }
@@ -1170,6 +1185,13 @@ export type Database = {
       reordonner_medias: {
         Args: { p_ids: string[]; p_order_id: string }
         Returns: number
+      }
+      repartir_transporteurs: {
+        Args: { p_depuis: string }
+        Returns: {
+          carrier_code: number
+          nombre: number
+        }[]
       }
       reserver_alerte: {
         Args: { p_cle: string; p_repos_minutes: number }

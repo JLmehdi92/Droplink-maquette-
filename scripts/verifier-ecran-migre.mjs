@@ -233,6 +233,30 @@ const { data: colis, error: eColis } = await service
       last_movement_at: jours(14),
       query_count: 12,
     },
+    {
+      /*
+       * ⚠️ UN COLIS LIVRE DANS LA FENETRE, POUR QUE LE TEMPS MOYEN DE LIVRAISON
+       * AIT QUELQUE CHOSE A MOYENNER.
+       *
+       * Le seul autre colis livre du jeu nait le MOIS DERNIER — il sert au badge
+       * d evolution des envois —, donc il tombe hors des fenetres de 7 et 30
+       * jours de l ecran des analyses. Sans celui-ci, `delai_moyen_livraison`
+       * rend `null` sur deux periodes sur trois et la tuile est legitimement
+       * absente : on ne pouvait pas distinguer « la regle s applique » de « le
+       * calcul est casse ».
+       *
+       * Six jours entre le premier et le dernier mouvement : une valeur qui se
+       * lit, et qui n est pas un compte rond.
+       */
+      shop_id: shop.id,
+      tracking_number: "DLKMESURE0004FR",
+      carrier_code: 100003,
+      normalized_status: "livre",
+      created_at: jours(9),
+      first_movement_at: jours(9),
+      last_movement_at: jours(3),
+      query_count: 5,
+    },
   ])
   .select("id");
 
@@ -358,9 +382,59 @@ const { error: eEvts } = await service.from("order_events").insert([
 ]);
 if (eEvts) throw new Error("jeu de mesure : evenements non crees — " + eEvts.message);
 
+/*
+ * ⚠️ DES OUVERTURES DE LIENS, ETALEES SUR PLUSIEURS JOURS.
+ *
+ * Le graphe « Liens clients » de l ecran des analyses compte une ligne par
+ * visiteur ET PAR JOUR — c est la definition de la metrique, pas un detail
+ * d implementation (migration 018). Sans ces lignes il rend une grille de
+ * barres a zero : la sonde ne peut alors rougir ni sur une barre trop haute,
+ * ni sur un axe mal date, ni sur le compteur qui les surmonte.
+ *
+ * Les empreintes sont DISTINCTES par ligne : l unicite porte sur
+ * (commande, ip, agent, jour), et quatre lignes identiques n en feraient
+ * qu une — le graphe serait plat et on croirait le calcul faux.
+ *
+ * `views_count` de la commande suit par declencheur : c est lui que lisent les
+ * tuiles et le classement des plus consultees, et le poser a la main ici en
+ * ferait une seconde source.
+ */
+const { error: eVues } = await service.from("link_views").insert(
+  [1, 2, 2, 3, 5, 5, 5, 6].map((quand, i) => ({
+    order_id: commandes[i % 2].id,
+    viewed_at: jours(quand),
+    ip_hash: `mesure-ip-${i}`,
+    user_agent_hash: `mesure-ua-${i}`,
+    country: i % 2 === 0 ? "FR" : "BE",
+  })),
+);
+if (eVues) throw new Error("jeu de mesure : vues non creees — " + eVues.message);
+
+/*
+ * ⚠️ DEUX ARBITRAGES DE CONTROLE QUALITE, SINON LA TUILE « TAUX DE VALIDATION »
+ * RESTE A « — » ET NE PROUVE RIEN.
+ *
+ * Le taux se calcule sur ce qui a ete REPONDU — approuve plus refuse —, et les
+ * quatre commandes du jeu naissent en `en_attente`. La tuile rendait donc
+ * legitimement un tiret, et rien ne distinguait « la regle du null s applique »
+ * de « le calcul est casse ». Un refus ET une approbation : un taux de 50 %,
+ * qui n est ni 0 ni 100, donc qui ne peut pas coincider par hasard avec une
+ * borne.
+ */
+const { error: eQc } = await service
+  .from("orders")
+  .update({ qc_status: "approuve" })
+  .eq("id", commandes[0].id);
+if (eQc) throw new Error("jeu de mesure : qc non pose — " + eQc.message);
+const { error: eQc2 } = await service
+  .from("orders")
+  .update({ qc_status: "refuse" })
+  .eq("id", commandes[1].id);
+if (eQc2) throw new Error("jeu de mesure : qc non pose — " + eQc2.message);
+
 console.error(
   `[jeu] ${commandes.length} commandes, ${colis.length} colis dont un silencieux, 3 points de passage, ` +
-    `${medias.length} medias dont une couverture, 4 evenements.`,
+    `${medias.length} medias dont une couverture, 4 evenements, 8 ouvertures de lien.`,
 );
 
 const { data: sess } = await publiable.auth.signInWithPassword({

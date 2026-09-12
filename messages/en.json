@@ -449,11 +449,6 @@
   "analyses": {
     "titre": "Analytics",
     "indisponible": "This section is unreadable right now — this is not “no data”. Try again in a moment.",
-    "sousTitre": {
-      "7j": "Last 7 days",
-      "30j": "Last 30 days",
-      "90j": "Last 90 days"
-    },
     "periode": {
       "titre": "Period",
       "7j": "7 days",
@@ -463,38 +458,32 @@
     "compteurs": "Overview",
     "carte": {
       "commandesCreees": "Orders created",
-      "vuesMoyennes": "Views per order",
-      "avecSuivi": "Orders with tracking",
-      "jamaisOuvertes": "Never opened"
+      "commandesLivrees": "Orders delivered",
+      "liensOuverts": "Customer links opened",
+      "tauxValidation": "Photo completion rate",
+      "delaiLivraison": "Average delivery time"
     },
     "carteCourt": {
-      "commandesCreees": "Orders created",
-      "vuesMoyennes": "Views per order",
-      "avecSuivi": "With tracking",
-      "jamaisOuvertes": "Never opened"
+      "commandesCreees": "Orders created"
     },
     "ecartPrecedent": "{n} vs previous period",
     "aucuneComparaison": "nothing to compare",
     "leClientRevient": "the customer comes back",
-    "leClientRevientCourt": "the customer returns",
-    "partSur": "{n} of {total}",
-    "aRelancer": "worth a reminder",
-    "toutesOuvertes": "all of them were opened",
     "frise": {
-      "titre": "Orders created per week",
+      "titre": "Order trend",
       "fenetre": "last {n} weeks",
       "barre": "Week of {semaine}: {n, plural, =0 {no order} one {# order} other {# orders}}",
       "vide": "No order created over these twelve weeks.",
       "aide": "Orders created each week."
     },
     "colis": {
-      "titre": "Where your parcels are",
+      "titre": "Status breakdown",
       "enTransit": "In transit",
       "livre": "Delivered",
       "preparation": "Not scanned yet",
       "silencieux": "No movement",
       "vide": "No tracked parcel yet.",
-      "aide": "Current state of your shipments."
+      "aide": "Current status of your shipments."
     },
     "consultees": {
       "titre": "Your most viewed orders",
@@ -509,7 +498,42 @@
       "refuse": "Declined",
       "enAttente": "No reply",
       "vide": "No order over this period."
-    }
+    },
+    "sousTitreEcran": "Track your performance and the effectiveness of your shipments.",
+    "livreesSur": "{n} of {total} created",
+    "reponsesSur": "{n} repl{s} of {total}",
+    "surColisLivres": "across {n} delivered parcel{s}",
+    "jours": "{n} days",
+    "evolution": {
+      "titre": "Order trend",
+      "aide": "Orders created over the selected period."
+    },
+    "liens": {
+      "titre": "Customer links",
+      "aide": "Number of tracking-link opens.",
+      "aucun": "No link was opened over this period."
+    },
+    "transporteurs": {
+      "titre": "Most used carriers",
+      "aide": "Breakdown of your shipments by carrier.",
+      "autres": "Other",
+      "inconnu": "Carrier not identified",
+      "aucun": "No parcel registered over this period."
+    },
+    "activite": {
+      "titre": "Recent activity",
+      "voirTout": "See all",
+      "aucune": "Nothing has happened over this period yet.",
+      "commande": "Order"
+    },
+    "bandeau": {
+      "titre": "Simple, useful analytics",
+      "aide": "Track how well your shipments perform and improve your customers' experience.",
+      "propulse": "Powered by",
+      "slogan": "Tracking links, simple and powerful."
+    },
+    "vuesParCommande": "{n} views per opened order",
+    "ouverturesLe": "{n} open(s) on {jour}"
   },
   "commandes": {
     "titre": "Orders",

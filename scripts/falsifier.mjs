@@ -846,15 +846,19 @@ const SQL = {
    * credibles. Une metrique legerement faussee est pire qu une metrique cassee.
    */
   "analyses-hors-rls": {
-    // ⚠️ LA SIGNATURE DOIT ÊTRE CELLE D'AUJOURD'HUI, à DEUX arguments. Avec
-    // l'ancienne, `create or replace` aurait créé une SECONDE fonction, le
-    // produit aurait continué d'appeler la bonne, et la falsification n'aurait
-    // rien cassé — un vert qui ne prouve rien.
+    // ⚠️ LA SIGNATURE DOIT ÊTRE CELLE D'AUJOURD'HUI, à DEUX arguments ET DIX
+    // COLONNES DE RETOUR. Avec une liste d'arguments périmée, `create or
+    // replace` aurait créé une SECONDE fonction, le produit aurait continué
+    // d'appeler la bonne, et la falsification n'aurait rien cassé — un vert qui
+    // ne prouve rien. Avec une table de RETOUR périmée, elle échoue carrément :
+    // `create or replace` ne peut pas la changer. La 146 ajoute
+    // `commandes_livrees`, et ce corps la suit.
     casser: `create or replace function public.analyser_activite(
         p_depuis timestamptz, p_precedent timestamptz)
       returns table (commandes_creees bigint, commandes_ouvertes bigint, vues_totales bigint,
                      qc_approuve bigint, qc_refuse bigint, qc_en_attente bigint,
-                     avec_suivi bigint, archivees bigint, creees_periode_precedente bigint)
+                     avec_suivi bigint, archivees bigint, creees_periode_precedente bigint,
+                     commandes_livrees bigint)
       language sql stable security definer set search_path = '' as $$
         select count(*) filter (where o.created_at >= p_depuis),
                count(*) filter (where o.created_at >= p_depuis and o.views_count > 0),
@@ -865,12 +869,18 @@ const SQL = {
                count(*) filter (where o.created_at >= p_depuis
                                   and o.tracking_number is not null and o.tracking_number <> ''),
                count(*) filter (where o.created_at >= p_depuis and o.archived_at is not null),
-               count(*) filter (where o.created_at < p_depuis)
+               count(*) filter (where o.created_at < p_depuis),
+               count(*) filter (where o.created_at >= p_depuis and o.status = 'livre')
         from public.orders o
         where o.created_at >= p_precedent and o.first_content_at is not null
       $$;`,
     reparerDepuisMigration: {
-      fichier: "106_la_periode_precedente_est_un_chiffre.sql",
+      // ⚠️ LA 146, PAS LA 106. La 146 redefinit `analyser_activite` pour y
+      // ajouter `commandes_livrees` : reparer depuis la 106 aurait remis en
+      // place une fonction a NEUF colonnes, et l ecran des analyses aurait
+      // cesse de repondre — une reparation qui casse est pire que la
+      // falsification.
+      fichier: "146_les_analyses_savent_enfin_compter.sql",
       depuis: "create function public.analyser_activite",
       jusqua: "comment on function",
     },
@@ -895,7 +905,8 @@ const SQL = {
         p_depuis timestamptz, p_precedent timestamptz)
       returns table (commandes_creees bigint, commandes_ouvertes bigint, vues_totales bigint,
                      qc_approuve bigint, qc_refuse bigint, qc_en_attente bigint,
-                     avec_suivi bigint, archivees bigint, creees_periode_precedente bigint)
+                     avec_suivi bigint, archivees bigint, creees_periode_precedente bigint,
+                     commandes_livrees bigint)
       language sql stable security invoker set search_path = '' as $$
         select count(*),
                count(*) filter (where o.views_count > 0),
@@ -905,12 +916,18 @@ const SQL = {
                count(*) filter (where o.qc_status = 'en_attente'),
                count(*) filter (where o.tracking_number is not null and o.tracking_number <> ''),
                count(*) filter (where o.archived_at is not null),
-               count(*) filter (where o.created_at < p_depuis)
+               count(*) filter (where o.created_at < p_depuis),
+               count(*) filter (where o.status = 'livre')
         from public.orders o
         where o.created_at >= p_precedent and o.first_content_at is not null
       $$;`,
     reparerDepuisMigration: {
-      fichier: "106_la_periode_precedente_est_un_chiffre.sql",
+      // ⚠️ LA 146, PAS LA 106. La 146 redefinit `analyser_activite` pour y
+      // ajouter `commandes_livrees` : reparer depuis la 106 aurait remis en
+      // place une fonction a NEUF colonnes, et l ecran des analyses aurait
+      // cesse de repondre — une reparation qui casse est pire que la
+      // falsification.
+      fichier: "146_les_analyses_savent_enfin_compter.sql",
       depuis: "create function public.analyser_activite",
       jusqua: "comment on function",
     },

@@ -16,10 +16,28 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { config } from "dotenv";
 
+/**
+ * ⚠️ DEUX CIBLES, COMME `db-migrate`. Sans argument, les types viennent de la
+ * PRODUCTION. `--tests` les prend sur la base jetable — le seul cas ou c est
+ * la bonne source : quand une migration est ecrite et appliquee aux tests mais
+ * PAS ENCORE a la production, la production ne connait pas encore les
+ * fonctions, et regenerer depuis elle effacerait les types du code qu on vient
+ * d ecrire.
+ *
+ * La reference du projet se DEDUIT de l URL, parce que `.env.test.local` ne
+ * porte pas `SUPABASE_PROJECT_REF` : cette variable-la designe la production
+ * partout ailleurs dans l outillage, et lui donner deux sens serait le meilleur
+ * moyen de viser la mauvaise base un jour.
+ */
+const VERS_TESTS = process.argv.includes("--tests");
+
+if (VERS_TESTS) config({ path: ".env.test.local", quiet: true });
 config({ path: ".env.local", quiet: true });
 
 const jeton = process.env.SUPABASE_ACCESS_TOKEN;
-const projet = process.env.SUPABASE_PROJECT_REF;
+const projet = VERS_TESTS
+  ? (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").match(/https:\/\/([a-z]+)\./)?.[1]
+  : process.env.SUPABASE_PROJECT_REF;
 
 if (!jeton || !projet) {
   console.error(

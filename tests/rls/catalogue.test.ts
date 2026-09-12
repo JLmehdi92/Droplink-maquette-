@@ -536,6 +536,38 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "par visiteur ET par jour.",
     ],
     [
+      "repartir_transporteurs",
+      "Répartition des colis par transporteur, écran des analyses. " +
+        "`SECURITY INVOKER` — donc exécutée sous la RLS de l'appelant : elle ne " +
+        "peut structurellement compter que les colis de sa propre boutique, et il " +
+        "n'y a aucun filtre de propriété à écrire dans son corps, donc aucun à " +
+        "oublier. Elle rend le CODE du transporteur, jamais son nom : la " +
+        "traduction vit dans le dépôt, et l'écrire en base la figerait à la date " +
+        "de la migration. Elle existe parce que les agrégats groupés de " +
+        "PostgREST sont DÉSACTIVÉS sur ce projet — mesuré : regrouper côté " +
+        "application aurait exigé de rapatrier tous les colis de la période, ou " +
+        "de les plafonner et de rendre une distribution tronquée présentée " +
+        "comme complète.",
+    ],
+    [
+      "delai_moyen_livraison",
+      "Durée moyenne de livraison, écran des analyses. `SECURITY INVOKER` — " +
+        "même raison que ci-dessus. Elle rend `null` plutôt que zéro quand aucun " +
+        "colis n'est livré : « 0 jour » affirmerait une livraison instantanée, " +
+        "et l'absence de colis livré n'est pas une performance.",
+    ],
+    [
+      "compter_ouvertures_par_jour",
+      "Ouvertures de liens par jour, écran des analyses. `SECURITY INVOKER` — " +
+        "la policy de `link_views` remonte à `orders → shops → profiles`, donc " +
+        "un vendeur ne voit que les ouvertures de ses propres commandes. " +
+        "⚠️ C'EST LA SEULE LECTURE DU PRODUIT QUI AGRÈGE `link_views`, la table " +
+        "qui grossit le plus vite — une ligne par visiteur ET par jour. Elle est " +
+        "bornée à la période choisie, à une boutique par la RLS, et un index " +
+        "couvre exactement sa jointure. Elle rend les JOURS VIDES : un graphe qui " +
+        "les saute fait lire une semaine morte comme une semaine pleine.",
+    ],
+    [
       "compter_commandes_par_semaine",
       "Frise hebdomadaire de l'écran des analyses. `SECURITY INVOKER` — donc " +
         "exécutée sous la RLS de l'appelant : la jointure externe sur `orders` " +

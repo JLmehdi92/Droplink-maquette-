@@ -77,7 +77,6 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
       "forme utile au persona visé.",
   ],
   ["marque.reseauExemple.site", "Exemple d'adresse de site."],
-  ["analyses.partSur", "Deux variables et une barre oblique."],
   [
     "commandes.plusMedias",
     "Un signe plus et un nombre : la pastille « +N » de la colonne des " +

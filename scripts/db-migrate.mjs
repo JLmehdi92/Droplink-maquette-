@@ -17,6 +17,25 @@ import { join } from "node:path";
 import { config } from "dotenv";
 import pg from "pg";
 
+/**
+ * ⚠️ DEUX CIBLES, ET UNE SEULE EST ATTEIGNABLE PAR DEFAUT.
+ *
+ * Sans argument, ce script applique les migrations a la PRODUCTION : c est
+ * `.env.local` qui porte `SUPABASE_DB_URL`, et c est la base qui sert les
+ * clients. Ce geste n est JAMAIS en pilote automatique — il est dans la courte
+ * liste des choses que Wassim decide lui-meme.
+ *
+ * `--tests` vise la base jetable, et c est le chemin que l outillage de mesure
+ * emprunte : `.env.test.local` est charge EN PREMIER, et dotenv ne remplace pas
+ * une variable deja posee — le meme ordre que `build-contre-tests`, pour la
+ * meme raison. Le garde ci-dessous refuse de continuer si l URL resolue n est
+ * pas celle du projet de tests : un ordre de chargement est une convention, un
+ * refus est une protection.
+ */
+const VERS_TESTS = process.argv.includes("--tests");
+const REF_TESTS = "djvjaocvndqhqqgilrof";
+
+if (VERS_TESTS) config({ path: ".env.test.local", quiet: true });
 config({ path: ".env.local", quiet: true });
 
 const DOSSIER = join(process.cwd(), "supabase", "migrations");
@@ -65,6 +84,16 @@ function versionSuivante(derniere) {
 }
 
 const url = process.env.SUPABASE_DB_URL;
+if (VERS_TESTS && url !== undefined && !url.includes(REF_TESTS)) {
+  console.error(
+    "ARRET : --tests demande la base de tests, et l URL resolue ne la designe " +
+      "pas. Rien n a ete applique.\n" +
+      "C est probablement `.env.test.local` qui manque ou qui ne porte pas " +
+      "`SUPABASE_DB_URL` : sans elle, c est `.env.local` qui gagne, donc la " +
+      "PRODUCTION.",
+  );
+  process.exit(1);
+}
 if (!url) {
   console.error(
     "SUPABASE_DB_URL absente. Refus d'exécuter : appliquer des migrations sur " +
@@ -80,6 +109,11 @@ const client = new pg.Client({
 });
 
 await client.connect();
+console.log(
+  VERS_TESTS
+    ? `cible : la base de TESTS (${REF_TESTS}).`
+    : "cible : la PRODUCTION. Ce geste n est jamais automatique.",
+);
 
 await client.query("create schema if not exists supabase_migrations");
 await client.query(

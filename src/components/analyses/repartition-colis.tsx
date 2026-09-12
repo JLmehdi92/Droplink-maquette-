@@ -49,8 +49,12 @@ export async function RepartitionColis({
             <li key={l.cle}>
               <div className="mb-1.5 flex items-baseline justify-between gap-3 lg:mb-[7px]">
                 <span
+                  /* 14/500, comme la légende de l'anneau du kit : notre liste de
+                     barres remplace son anneau, mais ses libellés sont les
+                     mêmes et se lisent à la même taille. Mesuré à 13/600 avant
+                     correction. */
                   className={
-                    "text-[13px] leading-4 font-semibold " +
+                    "text-[14px] leading-[normal] font-medium " +
                     (l.alerte ? "text-ds-alerte" : "text-ds-texte-fort")
                   }
                 >

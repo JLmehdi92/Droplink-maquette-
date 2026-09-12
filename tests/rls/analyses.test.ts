@@ -43,6 +43,7 @@ const activite = (partiel: Partial<Activite>): Activite => ({
   qcEnAttente: 0,
   avecSuivi: 0,
   archivees: 0,
+  commandesLivrees: 0,
   creeesPeriodePrecedente: 0,
   ...partiel,
 });

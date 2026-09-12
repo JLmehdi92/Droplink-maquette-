@@ -449,11 +449,6 @@
   "analyses": {
     "titre": "数据分析",
     "indisponible": "此板块暂时无法读取——这不等于「没有数据」。请稍后重试。",
-    "sousTitre": {
-      "7j": "最近 7 天",
-      "30j": "最近 30 天",
-      "90j": "最近 90 天"
-    },
     "periode": {
       "titre": "时间范围",
       "7j": "7 天",
@@ -463,38 +458,32 @@
     "compteurs": "总览",
     "carte": {
       "commandesCreees": "新建订单",
-      "vuesMoyennes": "每笔订单浏览量",
-      "avecSuivi": "含运单号的订单",
-      "jamaisOuvertes": "从未打开"
+      "commandesLivrees": "已送达订单",
+      "liensOuverts": "客户链接打开数",
+      "tauxValidation": "照片完成率",
+      "delaiLivraison": "平均送达时长"
     },
     "carteCourt": {
-      "commandesCreees": "新建订单",
-      "vuesMoyennes": "每笔订单浏览量",
-      "avecSuivi": "含运单号",
-      "jamaisOuvertes": "从未打开"
+      "commandesCreees": "新建订单"
     },
     "ecartPrecedent": "{n}，与上一时段相比",
     "aucuneComparaison": "暂无可比数据",
     "leClientRevient": "客户会反复回来查看",
-    "leClientRevientCourt": "客户会回来查看",
-    "partSur": "{n} / {total}",
-    "aRelancer": "需要跟进",
-    "toutesOuvertes": "全部已被打开",
     "frise": {
-      "titre": "每周新建订单",
+      "titre": "订单趋势",
       "fenetre": "最近 {n} 周",
       "barre": "{semaine} 那一周：{n, plural, =0 {没有订单} other {# 笔订单}}",
       "vide": "最近这十二周没有创建任何订单。",
       "aide": "每周创建的订单数量。"
     },
     "colis": {
-      "titre": "您的包裹进展",
+      "titre": "状态分布",
       "enTransit": "运输中",
       "livre": "已送达",
       "preparation": "尚未扫描",
       "silencieux": "无更新",
       "vide": "目前没有跟踪中的包裹。",
-      "aide": "您的包裹当前状态。"
+      "aide": "当前发货状态。"
     },
     "consultees": {
       "titre": "浏览最多的订单",
@@ -509,7 +498,42 @@
       "refuse": "有问题",
       "enAttente": "未回复",
       "vide": "此时段内没有订单。"
-    }
+    },
+    "sousTitreEcran": "追踪业务表现与发货效率。",
+    "livreesSur": "{total} 单中的 {n} 单",
+    "reponsesSur": "{total} 单中有 {n} 单已回复",
+    "surColisLivres": "基于 {n} 个已送达包裹",
+    "jours": "{n} 天",
+    "evolution": {
+      "titre": "订单趋势",
+      "aide": "所选周期内创建的订单数。"
+    },
+    "liens": {
+      "titre": "客户链接",
+      "aide": "物流链接打开次数。",
+      "aucun": "本周期内没有链接被打开。"
+    },
+    "transporteurs": {
+      "titre": "最常用承运商",
+      "aide": "按承运商划分的发货分布。",
+      "autres": "其他",
+      "inconnu": "未识别的承运商",
+      "aucun": "本周期内没有包裹。"
+    },
+    "activite": {
+      "titre": "近期动态",
+      "voirTout": "查看全部",
+      "aucune": "本周期内还没有动态。",
+      "commande": "订单"
+    },
+    "bandeau": {
+      "titre": "简洁实用的数据分析",
+      "aide": "追踪发货效果，提升客户体验。",
+      "propulse": "技术支持",
+      "slogan": "简单而强大的物流链接。"
+    },
+    "vuesParCommande": "每个已打开订单 {n} 次浏览",
+    "ouverturesLe": "{jour} 打开 {n} 次"
   },
   "commandes": {
     "titre": "订单",

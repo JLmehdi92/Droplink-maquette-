@@ -21,7 +21,9 @@
     "check:r2": "vitest run --project r2",
     "check:email": "node scripts/check-email.mjs",
     "check:google": "node scripts/check-google.mjs",
-    "purge:test": "node scripts/purger-residus-de-test.mjs"
+    "purge:test": "node scripts/purger-residus-de-test.mjs",
+    "db:migrate:tests": "node scripts/db-migrate.mjs --tests",
+    "db:types:tests": "node scripts/db-types.mjs --tests"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",

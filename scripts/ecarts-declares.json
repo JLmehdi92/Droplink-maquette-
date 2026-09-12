@@ -243,13 +243,15 @@
       {
         "textes": [
           "Alertes",
-          "4 commandes jamais ouvertes",
           "Le client n’a pas encore ouvert son lien",
-          "1 colis sans mouvement",
           "Plus de dix jours sans information du tr"
         ],
         "motif": "donnee",
-        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et applique ici la regle du panneau d administration : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux."
+        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et applique ici la regle du panneau d administration : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ]
       },
       {
         "textes": [
@@ -352,6 +354,13 @@
         "texte": "+3",
         "motif": "structure",
         "raison": "LA PASTILLE DE SURPLUS DE VIGNETTES, ET C EST UN ARTEFACT DE SONDE, PAS UN ECART VISUEL. Le kit ecrit `+{order.extra}` en JSX, ce qui produit DEUX noeuds de texte — « + » puis « 2 » — que le releve joint par une espace : il relit donc « + 2 ». Nous interpolons une seule chaine, « +3 ». Les deux pastilles ont la meme boite, la meme graisse et le meme fond ; seule la decoupe du balisage differe. Voir la declaration symetrique de « + 2 » dans les manquants.\n⚠️ ELLE N APPARAISSAIT PAS AVANT LE 12/09 AU SOIR : le jeu de mesure ne creait AUCUN media, donc aucune commande n avait de surplus a montrer. L enrichir a fait surgir un element que l ecran rendait depuis toujours sans qu aucune mesure ne le voie."
+      },
+      {
+        "motifs": [
+          "^\\d+ vues?$"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTEUR DE VUES D UNE LIGNE. Il n apparaissait pas avant le 12/09 au soir : aucune commande du jeu de mesure n avait jamais ete ouverte, donc la colonne ne rendait que la pastille « Jamais ouvert ». Ajouter des ouvertures au jeu a fait surgir un element que l ecran rendait depuis toujours sans qu aucune mesure ne le voie. Le kit, lui, ne compte pas les ouvertures."
       }
     ]
   },
@@ -511,6 +520,21 @@
         "texte": "8 sept. 2025",
         "motif": "donnee",
         "raison": "Le kit empile la date ET l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous — « il y a 3 jours » plutot que « a 14:32 ». C est la seule chose de l ecran qui change tous les jours quand le colis ne bouge pas, et c est ce que le vendeur vient verifier. L heure d un scan ne lui apprend rien. Les six pixels d abscisse viennent de l arrondi des pourcentages de colonne, qui cumule un pixel par colonne — la premiere, « Suivi », tombe exactement a x=369 comme le kit."
+      },
+      {
+        "texte": "Actualiser  <button>",
+        "motif": "donnee",
+        "raison": "Sept pixels de position. Le bouton est pousse par le bloc de fraicheur a sa gauche, dont le texte depend de l age du dernier mouvement du jeu de mesure."
+      },
+      {
+        "texte": "Tous les envois  <span>",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur : le libelle est etire par son compteur, passe de trois a quatre colis depuis que le jeu de mesure en pose un quatrieme, livre."
+      },
+      {
+        "texte": "7 sept. 2025 [2/2]  <span>",
+        "motif": "donnee",
+        "raison": "Seize pixels de hauteur. Le kit met la date ET l heure dans une cellule de deux lignes ; la notre n a qu une date sur cette ligne-la. L appariement au plus proche rapproche donc une cellule de deux lignes d une cellule d une seule — meme famille que « 8 sept. 2025 », declaree au-dessus."
       }
     ],
     "manquants": [
@@ -621,13 +645,15 @@
       {
         "textes": [
           "Alertes",
-          "4 commandes jamais ouvertes",
           "Le client n’a pas encore ouvert son lien",
-          "1 colis sans mouvement",
           "Plus de dix jours sans information du tr"
         ],
         "motif": "donnee",
-        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas et que le produit rend au-dessus des compteurs. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et c est la regle du panneau d administration appliquee ici : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux."
+        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas et que le produit rend au-dessus des compteurs. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et c est la regle du panneau d administration appliquee ici : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ]
       },
       {
         "textes": [
@@ -720,6 +746,11 @@
         ],
         "motif": "structure",
         "raison": "LES DEUX GESTES DU MENU « ACTIONS », rendus dans le document parce qu un `<details>` porte ses entrees en clair. Le kit dessine trois points sans dire ce qu ils ouvrent — son menu est une demonstration, le notre mene quelque part : la commande rattachee, et le site officiel du transporteur. Les references sont declarees PAR MOTIF, elles sont derivees d identifiants tires au hasard a chaque jeu de mesure."
+      },
+      {
+        "texte": "Cliente livree",
+        "motif": "donnee",
+        "raison": "LE DESTINATAIRE DE LA QUATRIEME COMMANDE DU JEU DE MESURE, rendu dans la colonne « Commande » depuis qu un quatrieme colis lui est rattache. Meme famille que les trois autres, declares juste au-dessus."
       }
     ]
   },
@@ -935,13 +966,15 @@
       {
         "textes": [
           "Alertes",
-          "4 commandes jamais ouvertes",
           "Le client n’a pas encore ouvert son lien",
-          "1 colis sans mouvement",
           "Plus de dix jours sans information du tr"
         ],
         "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il porte deux faits mesures et appartient a la coque, pas a cet ecran — meme declaration que sur /commandes."
+        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il porte deux faits mesures et appartient a la coque, pas a cet ecran — meme declaration que sur /commandes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ]
       },
       {
         "motifs": [
@@ -960,11 +993,10 @@
           "Client de verification",
           "REF-V",
           "DLKMESURE0001FR",
-          "FedEx",
-          "Jamais ouvert"
+          "FedEx"
         ],
         "motif": "donnee",
-        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit."
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
       },
       {
         "textes": [
@@ -1057,6 +1089,327 @@
         ],
         "motif": "contrainte",
         "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      },
+      {
+        "motifs": [
+          "^\\d+ consultations?$"
+        ],
+        "motif": "donnee",
+        "raison": "LA VALEUR DE LA TUILE « VUES DU LIEN », dans son etat NON VIDE. Elle rendait « Jamais ouvert » tant que le jeu de mesure ne posait aucune ouverture : la tuile existait, mais un seul de ses deux etats etait exerce. Voir la declaration de « Vues du lien »."
+      }
+    ]
+  },
+  "fr-analyses": {
+    "valeurs": [
+      {
+        "textes": [
+          "Suivi d'envois",
+          "Analyses",
+          "Ma marque"
+        ],
+        "motif": "contrainte",
+        "raison": "Position seule. Le kit pose une entree « Tableau de bord » au-dessus de « Commandes » ; cette route n existe pas, et une entree de navigation qui mene a un 404 est pire qu une entree absente."
+      },
+      {
+        "texte": "Commandes",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur et la position : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree absente."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu, et notre page porte deux panneaux que le kit ne dessine pas."
+      },
+      {
+        "textes": [
+          "Commandes créées",
+          "Liens clients ouverts"
+        ],
+        "motif": "donnee",
+        "raison": "Vingt-huit pixels de largeur sur deux libelles de tuile. Le libelle s etire a la colonne de texte de sa tuile, et la notre est plus large : le kit met son badge d evolution SUR LA MEME LIGNE que le nombre, nous le mettons dessous. Voir la declaration de « +12% »."
+      },
+      {
+        "textes": [
+          "Évolution des commandes",
+          "Répartition des statuts",
+          "Statut actuel de vos envois.",
+          "Liens clients",
+          "Nombre d'ouvertures des liens de suivi.",
+          "Transporteurs les plus utilisés",
+          "Répartition de vos envois par transporte",
+          "Activité récente",
+          "Voir tout",
+          "Commande",
+          "Commande créée",
+          "Des analyses simples et utiles",
+          "Suivez l'efficacité de vos envois et amé",
+          "Propulsé par",
+          "DropLink",
+          "Des liens de suivi simples et puissants."
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR DE COLONNE, UNE SEULE CAUSE. Le kit pose le selecteur de periode DANS deux de ses cartes, en plus de l en-tete ; nous n en avons qu un, dans l en-tete, et nos cartes commencent donc plus haut. Et notre page porte deux panneaux de plus — « Vos commandes les plus consultees » et « Reponses de vos clients » —, donc le bandeau de pied descend d autant. Les largeurs suivent : un titre s etire a sa colonne, et la rangee de trois ne partage pas ses colonnes comme celle du kit."
+      },
+      {
+        "textes": [
+          "90 jours",
+          "30 jours",
+          "7 jours"
+        ],
+        "motif": "contrainte",
+        "raison": "LE KIT REND SES TROIS PILULES DE PERIODE TROIS FOIS — une fois dans l en-tete et une fois dans chacune des deux cartes a graphe. Le produit n en a qu UN JEU, dans l en-tete, et il pilote les huit lectures de l ecran : trois selecteurs pour une meme fenetre, c est trois endroits ou lire une periode qui peut differer. L appariement au plus proche rapproche alors une pilule d en-tete d une pilule de carte, d ou les ecarts de taille."
+      },
+      {
+        "textes": [
+          "18 ( 12 %)",
+          "42 ( 27 %)",
+          "28 ( 18 %)"
+        ],
+        "motif": "donnee",
+        "raison": "LE KIT ECRIT « N (P %) » ONZE FOIS — cinq dans la legende de son anneau, six dans ses transporteurs. Nous l ecrivons deux fois : le jeu de mesure n a que deux transporteurs, et notre repartition des statuts ne porte PAS de pourcentage. Elle ne le peut pas : ses quatre categories se RECOUVRENT — « sans mouvement » qualifie des colis qui sont aussi en transit —, et des parts qui se recouvrent additionnent plus de cent sans que rien ne le dise."
+      },
+      {
+        "texte": "En transit",
+        "motif": "structure",
+        "raison": "Largeur seule, et c est le balisage qui differe : la legende de l anneau du kit est une grille dont la premiere colonne s etire, notre liste de barres met le libelle a sa largeur naturelle et donne le reste a la piste. La taille, la graisse et la couleur sont desormais celles du kit."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Tableau de bord",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "Deux routes que le depot n a pas. Ce sont des ecrans a CREER, pas a migrer."
+      },
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      },
+      {
+        "texte": "1 sept. 2025 - 8 sept. 2025",
+        "motif": "contrainte",
+        "raison": "LE SELECTEUR DE PLAGE DE DATES. Le produit pose trois fenetres fixes — 7, 30, 90 jours — et la raison est ecrite dans `lib/analyses/activite` : chaque fenetre doit avoir une PERIODE PRECEDENTE de meme longueur a laquelle se comparer, sans quoi le premier compteur de l ecran (« + N vs periode precedente ») serait vide une fois sur deux. Une plage libre n en a pas."
+      },
+      {
+        "textes": [
+          "+12%",
+          "-18%",
+          "ce mois-ci"
+        ],
+        "motif": "donnee",
+        "raison": "LES BADGES DE VARIATION EN POURCENTAGE, sur quatre tuiles, avec des chiffres inventes pour la demonstration. Le produit compare bien a la periode precedente — c est la premiere tuile —, mais il l ecrit en ABSOLU : « +4 » plutot que « +400 % ». La regle vient de l ecran des envois, ou elle a ete posee le 12/09 : passer de 0 a 5 n est pas « +500 % », et un pourcentage calcule sur une base minuscule est le type meme de la metrique credible et fausse. « ce mois-ci » serait faux en plus : la fenetre vaut 7, 30 ou 90 jours, jamais un mois."
+      },
+      {
+        "textes": [
+          "96%",
+          "6,2 jours"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de demonstration des deux dernieres tuiles. Elles EXISTENT desormais — la migration 146 les calcule — et rendent celles du jeu de mesure : « 50 % » et « 6 jours »."
+      },
+      {
+        "texte": "Nombre de commandes créées sur la périod",
+        "motif": "donnee",
+        "raison": "LE SOUS-TITRE DU GRAPHE, et il dirait FAUX chez nous. Notre frise couvre DOUZE SEMAINES et ne suit pas la periode choisie — c est deliberement ecrit dans `lireSemaines` : une frise reduite a une semaine quand le vendeur clique « 7 jours » ne montrerait plus une tendance mais une barre. Le sous-titre dit donc ce que la frise couvre reellement."
+      },
+      {
+        "texte": "1 sept.",
+        "motif": "donnee",
+        "raison": "Les dates de l axe du graphe du kit, une par jour de sa plage. Le notre porte les debuts de semaine au format « JJ/MM », douze fois."
+      },
+      {
+        "texte": "envois",
+        "motif": "structure",
+        "raison": "LE LIBELLE AU CENTRE DE L ANNEAU. Notre repartition des statuts est une liste de barres et non un anneau, et pour une raison mesurable : ses quatre categories se RECOUVRENT, et un anneau affirme par construction que ses parts font un tout."
+      },
+      {
+        "textes": [
+          "Commandée",
+          "En livraison",
+          "Livrée",
+          "Problème"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DES ETATS EST VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et « Probleme » suppose un etat que la base ne porte pas. Nos quatre libelles sont declares symetriquement dans les elements en trop."
+      },
+      {
+        "textes": [
+          "LP",
+          "La Poste",
+          "DHL",
+          "CP",
+          "Chronopost",
+          "UPS",
+          "DPD",
+          "Autres"
+        ],
+        "motif": "donnee",
+        "raison": "LES SIX TRANSPORTEURS DE DEMONSTRATION du kit, monogrammes compris. Le panneau EXISTE desormais et rend ceux du jeu de mesure — « FedEx » et « 4PX », avec leurs monogrammes « FX » et « 4P ». « Autres » n apparait qu au-dela de cinq transporteurs distincts."
+      },
+      {
+        "textes": [
+          "Colis livré",
+          "Nouveau lien ouvert",
+          "Colis en transit"
+        ],
+        "motif": "donnee",
+        "raison": "TROIS FAITS QUE LA BASE N ENREGISTRE PAS. `order_events` porte dix types, tous emis par une mutation du VENDEUR ou une reponse de son client ; l ingestion du suivi n en ecrit aucun. Les rendre afficherait un journal que la base n a pas tenu, sur l ecran qui sert precisement a decider."
+      },
+      {
+        "texte": "#DLK7842",
+        "motif": "donnee",
+        "raison": "La reference de demonstration. La notre est DERIVEE de l identifiant de la commande, et le panneau la rend bien."
+      },
+      {
+        "texte": "Il y a 1h",
+        "motif": "donnee",
+        "raison": "L anciennete des faits du kit. Le panneau rend les notres — « il y a 1 j », « il y a 2 j » — avec le formateur de `next-intl`, qui ecrit la minuscule."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
+      },
+      {
+        "textes": [
+          "Alertes",
+          "Le client n’a pas encore ouvert son lien",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. C est aussi la ou vit « jamais ouvertes », qui etait une tuile avant la reprise : une metrique qui appelle un geste appartient aux alertes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ]
+      },
+      {
+        "texte": "+4 vs période précédente",
+        "motif": "donnee",
+        "raison": "NOTRE BADGE D EVOLUTION, en absolu la ou le kit ecrit un pourcentage — voir la declaration symetrique de « +12% »."
+      },
+      {
+        "textes": [
+          "1 sur 4 créées",
+          "4 vues par commande ouverte",
+          "2 réponses sur 4",
+          "sur 1 colis livré"
+        ],
+        "motif": "donnee",
+        "raison": "LES SOUS-LIGNES DE NOS QUATRE AUTRES TUILES. Le kit y met un pourcentage d evolution ; nous y mettons ce qui rend le nombre du dessus lisible — un denominateur, ou la metrique de verdict du brief. « N,N vues par commande ouverte » est le signal « le destinataire REVIENT » (§11), qu un total d ouvertures ne distingue pas d un grand nombre de commandes."
+      },
+      {
+        "texte": "50 %",
+        "motif": "donnee",
+        "raison": "Le taux de validation du jeu de mesure — deux reponses sur quatre commandes, dont une approuvee. Le kit affiche « 96% »."
+      },
+      {
+        "textes": [
+          "Nombre de commandes créées par semaine.",
+          "12 dernières semaines"
+        ],
+        "motif": "donnee",
+        "raison": "Le sous-titre et la fenetre de NOTRE frise — voir la declaration symetrique de « Nombre de commandes creees sur la periode selectionnee »."
+      },
+      {
+        "texte": "22/06",
+        "motif": "donnee",
+        "raison": "Les debuts de semaine de notre frise, au format « JJ/MM » — voir la declaration symetrique de « 1 sept. »."
+      },
+      {
+        "textes": [
+          "Livrés",
+          "Pas encore scannés",
+          "Sans mouvement"
+        ],
+        "motif": "contrainte",
+        "raison": "LES ETATS DE NOTRE REPARTITION, verrouilles par la decision 4 — voir la declaration symetrique de « Commandee », « En livraison », « Livree » et « Probleme ». « Sans mouvement » n est pas un etat de plus : c est le silence nomme au-dela de dix jours (decision 8), et il qualifie des colis qui sont AUSSI dans un autre etat."
+      },
+      {
+        "textes": [
+          "FX",
+          "FedEx",
+          "4P",
+          "4PX"
+        ],
+        "motif": "donnee",
+        "raison": "Les deux transporteurs du jeu de mesure et leurs monogrammes, la ou le kit en montre six inventes."
+      },
+      {
+        "textes": [
+          "Contrôle approuvé par le client",
+          "Commande modifiée",
+          "Média ajouté"
+        ],
+        "motif": "donnee",
+        "raison": "Trois de nos dix types d evenements, face aux cinq faits inventes du kit."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Nos references courtes, DERIVEES de l identifiant de la commande, donc differentes a chaque passage."
+      },
+      {
+        "motif": "donnee",
+        "raison": "L anciennete de nos faits, ecrite par le formateur de `next-intl` — voir la declaration symetrique de « Il y a 1h ». Le motif porte une espace INSECABLE, celle que le formateur pose entre le nombre et l unite : une espace ordinaire ne designerait rien, et la declaration serait morte en paraissant juste.",
+        "motifs": [
+          "^il y a \\d+ j$"
+        ]
+      },
+      {
+        "textes": [
+          "Vos commandes les plus consultées",
+          "Un client qui revient plusieurs fois sur",
+          "Client de verification",
+          "REF-V",
+          "Cliente en preparation",
+          "REF-P"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CLASSEMENT DES PLUS CONSULTEES, que le kit ne dessine pas. « Vues de lien par commande > 3 » est une metrique de VERDICT du brief (§11) : c est le signal que le destinataire revient, et le seul endroit du produit qui dise QUELLES commandes il revoit. Retirer une mesure de verdict parce qu un dessin ne la montre pas serait une regression, pas une mise en conformite."
+      },
+      {
+        "textes": [
+          "Réponses de vos clients",
+          "Ce que vos clients ont répondu après avo",
+          "Approuvé",
+          "Refusé",
+          "Sans réponse"
+        ],
+        "motif": "contrainte",
+        "raison": "L ARBITRAGE DU CONTROLE QUALITE, que le kit ne dessine pas. C est le seul endroit du produit ou le vendeur voit ce que ses clients ont repondu apres avoir vu les photos, et l approbation est une fonction verrouillee du brief (§7). Le kit en resume le taux dans une tuile — que nous rendons aussi — mais le detail n a pas d autre domicile."
       }
     ]
   }

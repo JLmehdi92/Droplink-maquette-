@@ -59,6 +59,44 @@ export interface Activite {
   readonly archivees: number;
   /** Les commandes de la fenêtre de même longueur qui précède celle affichée. */
   readonly creeesPeriodePrecedente: number;
+  /**
+   * Les commandes LIVRÉES de la période — la deuxième tuile du kit.
+   *
+   * Comptée sur `orders.status`, comme tout le reste de cette lecture : c'est
+   * la position qui fait foi, le colis l'écrit quand il bouge et le vendeur
+   * l'amorce avant la remise. La chercher sur `tracked_parcels` ferait
+   * disparaître du compte les commandes sans colis attaché — la moitié d'entre
+   * elles.
+   */
+  readonly commandesLivrees: number;
+}
+
+/** Une part du panneau « Transporteurs les plus utilisés ». */
+export interface PartTransporteur {
+  /** Le code du fournisseur de suivi, ou `null` s'il n'a pas été identifié. */
+  readonly code: number | null;
+  readonly nombre: number;
+}
+
+/** Ce que rend le panneau « Liens clients », jour par jour. */
+export interface OuverturesDuJour {
+  /** Le jour, en `AAAA-MM-JJ` : c'est la forme que rend la colonne générée. */
+  readonly jour: string;
+  readonly total: number;
+}
+
+/** Le temps moyen de livraison, et sur combien de colis il est calculé. */
+export interface DelaiLivraison {
+  /**
+   * La moyenne en jours, à une décimale — `null` quand aucun colis n'a été
+   * livré sur la période.
+   *
+   * `null` PLUTÔT QUE ZÉRO : « 0 jour » affirmerait une livraison instantanée,
+   * l'absence de colis livré n'est pas une performance. Les deux se ressemblent
+   * dans une tuile et se confondent d'une période à l'autre.
+   */
+  readonly jours: number | null;
+  readonly colis: number;
 }
 
 /** Une semaine de la frise : son lundi, et ce qui y a été créé. */
@@ -196,7 +234,107 @@ export async function lireActivite(
     avecSuivi: Number(l.avec_suivi),
     archivees: Number(l.archivees),
     creeesPeriodePrecedente: Number(l.creees_periode_precedente),
+    commandesLivrees: Number(l.commandes_livrees),
   };
+}
+
+/**
+ * LA RÉPARTITION PAR TRANSPORTEUR — le panneau que le kit dessine et que
+ * l'écran n'avait pas.
+ *
+ * ⚠️ ELLE PASSE PAR UNE FONCTION SQL, ET CE N'EST PAS UN CONFORT. Les agrégats
+ * groupés de PostgREST sont DÉSACTIVÉS sur ce projet — mesuré : un
+ * `select=carrier_code,count()` répond « Use of aggregate functions is not
+ * allowed ». Il ne restait qu'à lire les colis un par un pour les regrouper
+ * ici, c'est-à-dire des dizaines de milliers de lignes au plafond du brief —
+ * ou à les plafonner, et rendre une distribution TRONQUÉE présentée comme
+ * complète. Le §11 nomme ce résultat : une métrique légèrement faussée est pire
+ * qu'une métrique cassée, parce qu'elle reste crédible.
+ *
+ * LE NOM SE RÉSOUT DANS LE DÉPÔT, jamais en base : `carrier_code` est
+ * l'identifiant numérique du fournisseur, et sa traduction vit dans
+ * `lib/tracking/transporteurs.json`. L'écrire en base la figerait à la date de
+ * la migration, alors que 17TRACK en ajoute.
+ */
+export async function lireTransporteurs(
+  supabase: ClientLecture,
+  periode: Periode,
+  maintenant: Date,
+): Promise<readonly PartTransporteur[] | null> {
+  const { data, error } = await supabase.rpc("repartir_transporteurs", {
+    p_depuis: debutPeriode(periode, maintenant).toISOString(),
+  });
+
+  if (lectureIllisible({ error }, "des transporteurs")) return null;
+  if (error !== null || data === null) {
+    throw new Error("lecture des transporteurs impossible : " + (error?.message ?? "vide"));
+  }
+
+  return data.map((l) => ({ code: l.carrier_code, nombre: Number(l.nombre) }));
+}
+
+/**
+ * LE TEMPS MOYEN DE LIVRAISON — la cinquième tuile du kit.
+ *
+ * Mesuré entre le PREMIER et le DERNIER mouvement d'un colis livré, et pas
+ * depuis la création de la commande : le vendeur peut coller un numéro trois
+ * jours plus tard, et on mesurerait alors sa procrastination plutôt que le
+ * trajet du colis.
+ */
+export async function lireDelaiLivraison(
+  supabase: ClientLecture,
+  periode: Periode,
+  maintenant: Date,
+): Promise<DelaiLivraison | null> {
+  const { data, error } = await supabase.rpc("delai_moyen_livraison", {
+    p_depuis: debutPeriode(periode, maintenant).toISOString(),
+  });
+
+  if (lectureIllisible({ error }, "du délai de livraison")) return null;
+  if (error !== null || data === null) {
+    throw new Error("lecture du délai impossible : " + (error?.message ?? "vide"));
+  }
+
+  const l = Array.isArray(data) ? data[0] : null;
+  if (l === undefined || l === null) return { jours: null, colis: 0 };
+  return { jours: l.jours === null ? null : Number(l.jours), colis: Number(l.colis) };
+}
+
+/**
+ * LES OUVERTURES DE LIENS, JOUR PAR JOUR — le graphe « Liens clients ».
+ *
+ * ⚠️ LES JOURS SANS OUVERTURE SONT RENDUS, et c'est tout l'intérêt. Un graphe
+ * qui saute les jours vides n'est plus un graphe : ses barres deviennent
+ * équidistantes alors que le temps ne l'est pas, et une semaine morte se lit
+ * comme une semaine pleine. C'est la fonction SQL qui pose la grille, pas ce
+ * module — la remplir ici demanderait de connaître le fuseau de la base.
+ *
+ * ⚠️ C'EST LA LECTURE LA PLUS LOURDE DE L'ÉCRAN, et sa borne est écrite dans la
+ * migration 146 : la période choisie, une seule boutique par la RLS, et un
+ * index qui couvre exactement sa jointure. L'écran des analyses n'est pas le
+ * chemin chaud du produit — la liste des commandes l'est.
+ */
+export async function lireOuverturesParJour(
+  supabase: ClientLecture,
+  periode: Periode,
+  maintenant: Date,
+): Promise<readonly OuverturesDuJour[] | null> {
+  /* LA BORNE EST UNE DATE, PAS UN INSTANT : `viewed_on` est une colonne
+     générée qui porte un JOUR, et lui comparer un `timestamptz` ferait
+     retomber la moitié des lignes du premier jour hors de la fenêtre. */
+  const jour = (d: Date): string => d.toISOString().slice(0, 10);
+
+  const { data, error } = await supabase.rpc("compter_ouvertures_par_jour", {
+    p_depuis: jour(debutPeriode(periode, maintenant)),
+    p_jusqu_a: jour(maintenant),
+  });
+
+  if (lectureIllisible({ error }, "des ouvertures")) return null;
+  if (error !== null || data === null) {
+    throw new Error("lecture des ouvertures impossible : " + (error?.message ?? "vide"));
+  }
+
+  return data.map((l) => ({ jour: l.jour, total: Number(l.total) }));
 }
 
 /**

@@ -57,7 +57,6 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   ["docs.faqQ", "composé depuis le rang de la question — documentation"],
   ["docs.faqR", "composé depuis le rang de la question — documentation"],
   ["envois.tri.", "composé depuis le tri choisi — tableau des envois"],
-  ["analyses.sousTitre.", "composé depuis la période choisie — écran Analyses"],
   ["analyses.periode.", "composé depuis la période choisie — sélecteur des Analyses"],
   ["commandes.statut.", "composé depuis `orders.status` — badge de la liste"],
   ["commandes.tri.", "composé depuis le tri choisi — liste des commandes"],
