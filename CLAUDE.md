@@ -372,18 +372,45 @@ autour de lui.**
 > « tu vas les re re comparer avec les écrans de Claude Design et tant que c'est
 > **1:1, pixel par pixel**, tu passes pas à l'écran suivant, on va faire comme
 > ça maintenant »
+>
+> « tu dois **constamment comparer le vrai design et celui que tu codes**, et tu
+> passes pas à l'écran suivant tant que l'écran en cours n'est pas **parfait** »
+>
+> « **tu as tous les assets** pour faire tous les écrans »
 
-**UN ÉCRAN N'EST PAS FINI TANT QUE LA SOUSTRACTION N'EST PAS VIDE.** Le rapport
-de `soustraire-inventaires.mjs` doit ne plus contenir, dans ses trois listes,
-que des lignes **DÉCLARÉES** avec leur raison — contrainte verrouillée, donnée
-que la base n'a pas, ou jeu de données différent. Tout le reste se corrige
-**avant** de regarder l'écran suivant.
+**⚠️ IL N'Y A AUCUNE EXCUSE D'ASSET, ET IL FAUT LE DIRE EN PREMIER.** Le design
+system est COMPLET dans le dépôt, sous `.claude/skills/droplink-design/` : les
+dix écrans en vraies pages HTML (`ui_kits/`), les tokens, les 26 composants, les
+trois langues, le rendu téléphone (`mobile.html`). Rien n'est à demander, rien
+n'est à deviner, rien n'est « pas fourni ». Un écran qui ne ressemble pas à sa
+référence n'a qu'une cause possible : on ne l'a pas comparé.
+
+**UN ÉCRAN N'EST PAS FINI TANT QUE LA SOUSTRACTION N'EST PAS VIDE.**
+`node scripts/soustraire-inventaires.mjs <kit.json> <produit.json>` doit **sortir
+en code 0**. Il y sort quand il ne reste plus un seul écart non déclaré — et il
+refuse aussi une déclaration qui ne désigne plus rien, sans quoi la liste
+grossirait jusqu'à tout couvrir et « c'est vide » voudrait dire « j'ai tout
+déclaré ».
+
+**LA COMPARAISON EST CONSTANTE, PAS FINALE.** On ne code pas un écran puis on
+mesure : on mesure, on corrige, on re-mesure, et on recommence jusqu'à zéro. Sur
+`/commandes`, il a fallu **six tours** ; le premier rendait 41 écarts, dont un
+`colgroup` entier sans effet faute de `table-fixed`.
 
 **Et « mesuré au pixel » ne s'écrit dans un commit qu'après avoir lancé la
 soustraction.** Huit messages de commit l'ont affirmé sans elle : le quatrième
 geste n'était pas outillé, il se faisait à l'œil, donc sur ce qu'on pensait à
 regarder. *Une affirmation de conformité qui n'a pas été exécutée est une
 affirmation fausse, et elle coûte plus cher que l'absence d'affirmation.*
+
+**LES TROIS SEULS MOTIFS DE DÉCLARATION**, écrits dans
+`scripts/ecarts-declares.json` avec leur raison, jamais ailleurs :
+
+| motif | ce qu'il couvre |
+|---|---|
+| `contrainte` | le kit contredit une décision verrouillée — facturation, route inexistante, vocabulaire du brief. **Le produit gagne** |
+| `donnee` | la base ne porte pas ce que le kit montre, ou le jeu de mesure n'a pas ses huit lignes |
+| `structure` | **le même rendu par un balisage différent** — un écart de l'outil, pas de l'écran. À employer avec méfiance : c'est le motif qui permet de tout excuser |
 
 #### Les cinq gestes, dans cet ordre
 
@@ -501,6 +528,20 @@ disent dans le commit à chaque fois :**
 > séquentiel se lirait mieux, mais il exigerait une colonne, un compteur par
 > boutique, une reprise de l'existant et une migration en attente de
 > déploiement — pour une référence qu'on copie plus qu'on ne récite.*
+
+#### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
+
+**`/commandes` est le premier écran passé à la règle d'arrêt** — verdict
+`0 écart de valeur non déclaré`, 26 écarts déclarés avec leur motif.
+
+**▶️ PROCHAIN ÉCRAN : `/envois`**, contre `ShippingView` du kit vendeur
+(`CLIC_KIT="Suivi d'envois"`). Dernier relevé avant la règle : 67 manquants,
+42 en trop, 10 écarts de valeur. **On n'ouvre pas `/analyses` avant qu'il sorte
+en code 0.**
+
+Puis, dans cet ordre : l'éditeur de commande · `/analyses` · `/marque` · les
+SIX écrans admin · la landing · `/p/[token]`. Tous ont déjà eu une passe de
+jetons et de règle 5 ; **aucun n'a eu la soustraction.**
 
 ### Comment on vérifie un écran migré
 
