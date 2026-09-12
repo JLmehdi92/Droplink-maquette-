@@ -28,8 +28,8 @@ export default async function LienInvalide() {
   const t = await getTranslations({ locale: "fr", namespace: "page-publique" });
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-surface-container-lowest px-6 py-8">
-      <div className="mb-[26px] flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-fond-neutre">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-ds-surface-carte px-6 py-8">
+      <div className="mb-[26px] flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-ds-surface-creux">
         {/* Un maillon rompu. Il ne dit pas POURQUOI le lien ne marche plus —
             c'est exactement ce qu'on ne doit pas dire. */}
         <svg
@@ -41,7 +41,7 @@ export default async function LienInvalide() {
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-gris-inactif"
+          className="text-ds-texte-tenu"
           aria-hidden="true"
         >
           <path d="M9 17H7A5 5 0 0 1 7 7h2" />
@@ -50,11 +50,11 @@ export default async function LienInvalide() {
         </svg>
       </div>
 
-      <h1 className="mb-3 text-center text-[26px] leading-[32px] font-extrabold tracking-[-0.03em] text-on-surface">
+      <h1 className="mb-3 text-center text-[26px] leading-[32px] font-extrabold tracking-[-0.03em] text-ds-texte-fort">
         {t("lienInvalideTitre")}
       </h1>
 
-      <p className="max-w-[300px] text-center font-body-md text-[15px] leading-[24px] text-sourdine">
+      <p className="max-w-[300px] text-center text-[15px] leading-[24px] text-ds-texte-sourdine">
         {t("lienInvalideTexte")}
       </p>
 
@@ -69,7 +69,7 @@ export default async function LienInvalide() {
         href="/"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-[12px] text-sourdine transition-colors hover:text-on-surface"
+        className="text-[12px] text-ds-texte-sourdine transition-colors hover:text-ds-texte-fort"
       >
         {t("propulsePar")}
       </a>

@@ -139,7 +139,7 @@ export default async function LayoutPagePublique({
       <body
         /*
          * ⚠️ LE FOND EST POSÉ EN STYLE EN LIGNE, ET C'EST NÉCESSAIRE. La classe
-         * `bg-surface-container-lowest` était bien écrite ici, et elle ne
+         * `bg-ds-surface-carte` était bien écrite ici, et elle ne
          * s'appliquait PAS : `globals.css` porte une règle `body { background:
          * var(--color-surface) }` HORS de toute couche, et une règle non
          * couchée l'emporte sur un utilitaire Tailwind. Mesuré dans Chrome :
@@ -149,8 +149,8 @@ export default async function LayoutPagePublique({
          * Il se voit au rebond de défilement sur iOS, c'est-à-dire exactement
          * sur l'appareil pour lequel cette page est écrite.
          */
-        style={{ backgroundColor: "var(--color-surface-container-lowest)" }}
-        className="min-h-dvh text-on-surface antialiased"
+        style={{ backgroundColor: "var(--color-ds-surface-carte)" }}
+        className="min-h-dvh text-ds-texte-fort antialiased"
       >
         {/*
           LE SEUL PROVIDER CLIENT DE CETTE PAGE, ET IL NE PORTE QUE TROIS

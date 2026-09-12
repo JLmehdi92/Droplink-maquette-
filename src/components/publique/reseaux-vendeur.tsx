@@ -137,14 +137,14 @@ export function ReseauxVendeur({
       que le clic va faire ; sur 390 px elle prendrait une ligne entière pour
       une information qu'un pouce découvre en une seconde.
     */
-    <section className="border-t border-filet-section px-[18px] py-[26px] lg:px-14 lg:pt-7 lg:pb-[34px]">
+    <section className="border-t border-ds-filet px-[18px] py-[26px] lg:px-14 lg:pt-7 lg:pb-[34px]">
       <div className="mx-auto flex max-w-[1240px] flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-[30px]">
         {titre !== null ? (
           <div>
-            <p className="font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] text-gris-entete uppercase">
+            <p className="text-[11.5px] leading-[16px] font-bold tracking-[0.09em] text-ds-texte-sourdine uppercase">
               {titre}
             </p>
-            <p className="mt-[5px] hidden font-body-md text-[14px] text-on-surface-variant lg:block">
+            <p className="mt-[5px] hidden text-[14px] text-ds-texte-corps lg:block">
               {note}
             </p>
           </div>
@@ -156,7 +156,7 @@ export function ReseauxVendeur({
                 href={lien.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-h-[52px] flex-col items-center justify-center gap-1.5 rounded-md border border-filet-controle font-label-md text-[12px] font-semibold text-ardoise-doux transition-colors hover:border-outline hover:bg-surface-container-low hover:text-on-surface lg:min-h-12 lg:flex-row lg:gap-2.5 lg:px-5 lg:text-[14px]"
+                className="flex min-h-[52px] flex-col items-center justify-center gap-1.5 rounded-ds-control border border-ds-filet-appuye text-[12px] font-semibold text-ds-texte-corps transition-colors hover:border-ds-filet-appuye hover:bg-ds-surface-creux hover:text-ds-texte-fort lg:min-h-12 lg:flex-row lg:gap-2.5 lg:px-5 lg:text-[14px]"
               >
                 <svg
                   width="20"

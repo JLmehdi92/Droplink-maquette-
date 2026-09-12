@@ -71,7 +71,7 @@ const SEUIL_BALAYAGE_PX = 40;
 function PastilleLecture({ taille = 22 }: { readonly taille?: number }) {
   return (
     <span
-      className="pointer-events-none absolute inset-0 flex items-center justify-center text-ardoise"
+      className="pointer-events-none absolute inset-0 flex items-center justify-center text-ds-texte-corps"
       aria-hidden="true"
     >
       <svg width={taille} height={taille} viewBox="0 0 24 24" fill="currentColor">
@@ -165,7 +165,7 @@ export function apercuDe(
 function ApercuIndisponible({ video }: { readonly video: boolean }) {
   return (
     <span
-      className="pointer-events-none absolute inset-0 flex items-center justify-center text-gris-inactif"
+      className="pointer-events-none absolute inset-0 flex items-center justify-center text-ds-texte-tenu"
       aria-hidden="true"
     >
       <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
@@ -442,7 +442,7 @@ export function Visionneur({
           <button
             type="button"
             onClick={() => ouvrirA(0)}
-            className="relative block aspect-[4/3] w-full overflow-hidden bg-fond-avatar lg:aspect-[16/10] lg:rounded-lg"
+            className="relative block aspect-[4/3] w-full overflow-hidden bg-ds-surface-creux lg:aspect-[16/10] lg:rounded-ds-sm"
             aria-label={libelles.ouvrir + " 1"}
           >
             {"url" in apercuPremier ? (
@@ -472,7 +472,7 @@ export function Visionneur({
               <PastilleLecture taille={34} />
             ) : null}
             {filigrane !== null ? (
-              <span className="pointer-events-none absolute right-3 bottom-3 select-none font-label-md text-label-md text-white drop-shadow">
+              <span className="pointer-events-none absolute right-3 bottom-3 select-none text-white drop-shadow">
                 {filigrane}
               </span>
             ) : null}
@@ -494,7 +494,7 @@ export function Visionneur({
                     <button
                       type="button"
                       onClick={() => ouvrirA(rang)}
-                      className="relative block aspect-square w-full overflow-hidden bg-fond-avatar lg:rounded"
+                      className="relative block aspect-square w-full overflow-hidden bg-ds-surface-creux lg:rounded"
                       aria-label={libelles.ouvrir + " " + (rang + 1)}
                     >
                       {"url" in apercu ? (
@@ -518,12 +518,12 @@ export function Visionneur({
                       ) : null}
 
                       {rang === TUILES_TELEPHONE && resteTelephone > 0 ? (
-                        <span className="absolute inset-0 flex items-center justify-center bg-surface-container-high/90 font-headline-md text-[15px] font-extrabold text-ardoise lg:hidden">
+                        <span className="absolute inset-0 flex items-center justify-center bg-ds-surface-creux/90 text-[15px] font-extrabold text-ds-texte-corps lg:hidden">
                           {"+" + resteTelephone}
                         </span>
                       ) : null}
                       {rang === TUILES_BUREAU && resteBureau > 0 ? (
-                        <span className="absolute inset-0 hidden items-center justify-center bg-surface-container-high/90 font-headline-md text-[16px] font-extrabold text-ardoise lg:flex">
+                        <span className="absolute inset-0 hidden items-center justify-center bg-ds-surface-creux/90 text-[16px] font-extrabold text-ds-texte-corps lg:flex">
                           {"+" + resteBureau}
                         </span>
                       ) : null}
@@ -579,7 +579,7 @@ export function Visionneur({
                 ne lit pas l'écran. */}
             <span
               aria-hidden="true"
-              className="font-label-md text-[14px] font-bold tracking-[0.02em]"
+              className="text-[14px] font-bold tracking-[0.02em]"
             >
               {(index ?? 0) + 1} / {medias.length}
             </span>
@@ -605,9 +605,9 @@ export function Visionneur({
             onTouchEnd={surFinToucher}
           >
             {echec ? (
-              <p className="font-body-md text-body-md text-white">{libelles.indisponible}</p>
+              <p className="text-white">{libelles.indisponible}</p>
             ) : url === null ? (
-              <p className="font-body-md text-body-md text-white">{libelles.chargement}</p>
+              <p className="text-white">{libelles.chargement}</p>
             ) : courant.type === "video" ? (
               // `preload="none"` : la vidéo ne se télécharge qu'au moment où on
               // demande à la lire. Le poster est la vignette déjà en cache.
@@ -642,7 +642,7 @@ export function Visionneur({
                 `pointer-events-none` : sans lui, la couche intercepterait le
                 balayage. Aucune police n'est chargée pour lui. */}
             {filigrane !== null && url !== null && !echec ? (
-              <span className="pointer-events-none absolute right-5 bottom-5 select-none font-label-md text-[13px] font-bold tracking-[0.02em] text-white/40">
+              <span className="pointer-events-none absolute right-5 bottom-5 select-none text-[13px] font-bold tracking-[0.02em] text-white/40">
                 {filigrane}
               </span>
             ) : null}
@@ -671,7 +671,7 @@ export function Visionneur({
                 <path d="m15 6-6 6 6 6" />
               </svg>
             </button>
-            <span className="font-body-sm text-[13px] text-white/50 lg:hidden">
+            <span className="text-[13px] text-white/50 lg:hidden">
               {libelles.balayez}
             </span>
             <button
@@ -722,7 +722,7 @@ export function Visionneur({
                         : undefined
                     }
                     className={
-                      /* ⚠️ `rounded-lg` VAUT 16 DANS CE THÈME, la planche dit 8.
+                      /* ⚠️ `rounded-ds-sm` VAUT 16 DANS CE THÈME, la planche dit 8.
                          Un token de rayon NOMMÉ n'est pas une valeur de rayon :
                          c'est le même piège que les trois boutons de la liste
                          des commandes, qui portaient 28 pour 12. */

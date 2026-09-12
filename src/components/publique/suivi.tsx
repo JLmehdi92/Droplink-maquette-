@@ -49,8 +49,8 @@ export function Suivi({
           abandon, attente — portent maintenant chacun leur contenu, et il n'y
           a plus d'état où ce trait ne séparerait rien. */}
       <dl className="mb-[18px] flex items-baseline justify-between gap-4 lg:border-b lg:border-filet-ligne lg:pb-4">
-        <dt className="font-body-md text-[14px] text-on-surface-variant">{libelles.numero}</dt>
-        <dd className="text-right font-label-md text-[14px] font-bold break-all text-on-surface">
+        <dt className="text-[14px] text-ds-texte-corps">{libelles.numero}</dt>
+        <dd className="text-right text-[14px] font-bold break-all text-ds-texte-fort">
           {suivi.numero}
         </dd>
       </dl>
@@ -58,7 +58,7 @@ export function Suivi({
       {/* Le fournisseur a cessé de suivre ce numéro. C'est DIT : un suivi qui
           s'arrête sans le dire se lit comme un suivi qui ne marche pas. */}
       {suivi.abandonne ? (
-        <p className="mb-[18px] rounded-lg border border-attention-filet bg-attention-fond p-3 font-body-sm text-body-sm text-attention-doux">
+        <p className="mb-[18px] rounded-ds-sm border border-ds-alerte bg-ds-alerte-fond p-3 text-ds-alerte">
           {libelles.arrete}
         </p>
       ) : null}
@@ -82,8 +82,8 @@ export function Suivi({
         encore d'information du transporteur », jamais « numéro introuvable ».
       */}
       {suivi.passages.length === 0 && !suivi.abandonne ? (
-        <div className="flex items-start gap-3 rounded-xl bg-surface p-[15px] lg:gap-[13px] lg:p-4">
-          <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-surface-container-high lg:h-9 lg:w-9">
+        <div className="flex items-start gap-3 rounded-ds-card bg-ds-surface-page p-[15px] lg:gap-[13px] lg:p-4">
+          <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-ds-sm bg-ds-surface-creux lg:h-9 lg:w-9">
             <svg
               width="17"
               height="17"
@@ -93,7 +93,7 @@ export function Suivi({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-sourdine lg:h-[18px] lg:w-[18px]"
+              className="text-ds-texte-sourdine lg:h-[18px] lg:w-[18px]"
               aria-hidden="true"
             >
               <circle cx="12" cy="12" r="9" />
@@ -101,10 +101,10 @@ export function Suivi({
             </svg>
           </span>
           <div>
-            <p className="mb-1 font-headline-md text-[15px] font-bold tracking-[-0.01em] text-on-surface">
+            <p className="mb-1 text-[15px] font-bold tracking-[-0.01em] text-ds-texte-fort">
               {libelles.attenteTitre}
             </p>
-            <p className="font-body-md text-[14px] leading-[21px] text-on-surface-variant">
+            <p className="text-[14px] leading-[21px] text-ds-texte-corps">
               {libelles.attenteTexte}
             </p>
           </div>
@@ -125,13 +125,13 @@ export function Suivi({
               <div>
                 <p
                   className={
-                    "font-body-md text-[15px] leading-[21px] text-on-surface " +
+                    "text-[15px] leading-[21px] text-ds-texte-fort " +
                     (rang === 0 ? "font-semibold" : "")
                   }
                 >
                   {p.description}
                 </p>
-                <p className="mt-0.5 font-body-sm text-[13px] text-on-surface-variant">
+                <p className="mt-0.5 text-[13px] text-ds-texte-corps">
                   {formaterDate(new Date(p.instant))}
                   {p.lieu !== null ? " · " + p.lieu : ""}
                 </p>

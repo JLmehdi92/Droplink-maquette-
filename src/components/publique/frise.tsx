@@ -61,7 +61,7 @@ export function Frise({
               style={{ backgroundColor: rang <= courante ? rempli : vide }}
             />
             <span
-              className="mt-[9px] block font-body-sm text-[11.5px] leading-[15px] lg:mt-2.5 lg:leading-[16px]"
+              className="mt-[9px] block text-[11.5px] leading-[15px] lg:mt-2.5 lg:leading-[16px]"
               style={{
                 color: active ? texteAtteint : texteAVenir,
                 fontWeight: active ? 700 : 400,

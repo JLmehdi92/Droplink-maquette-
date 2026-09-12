@@ -313,7 +313,7 @@ export default async function PagePublique({
   const aUnEnTete = commande.boutique.nom !== null || commande.boutique.logo !== null;
 
   const surTitre =
-    "font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] uppercase text-gris-entete";
+    "text-[11.5px] leading-[16px] font-bold tracking-[0.09em] uppercase text-ds-texte-sourdine";
 
   /*
    * SECTION AU TÉLÉPHONE, CARTE SUR GRAND ÉCRAN — et c'est la largeur qui
@@ -334,7 +334,7 @@ export default async function PagePublique({
    * que de la carte d'en-tête.
    */
   const section =
-    "border-t border-filet-section px-[18px] py-[26px] " +
+    "border-t border-ds-filet px-[18px] py-[26px] " +
     "lg:rounded-ds-card-lg lg:border lg:border-ds-filet lg:bg-ds-surface-carte " +
     "lg:p-6 lg:shadow-ds-card";
 
@@ -428,7 +428,7 @@ export default async function PagePublique({
                 />
               ) : null}
               {commande.boutique.nom !== null ? (
-                <span className="font-headline-md text-[16px] leading-5 font-bold tracking-[-0.01em] lg:text-[18px] lg:leading-[23px]">
+                <span className="text-[16px] leading-5 font-bold tracking-[-0.01em] lg:text-[18px] lg:leading-[23px]">
                   {commande.boutique.nom}
                 </span>
               ) : null}
@@ -454,7 +454,7 @@ export default async function PagePublique({
               client={commande.client}
               reference={commande.reference}
               pourClient={t.raw("pourClient")}
-              doux="var(--color-on-surface-variant)"
+              doux="var(--color-ds-texte-corps)"
               arriveeEstimee={t("etat.arriveeEstimee")}
               estimation={estimation}
               statut={libellesEtat.etapes[statutAffiche]}
@@ -463,7 +463,7 @@ export default async function PagePublique({
                  sur deux : cette valeur vaut un blanc translucide dès que
                  l'accent est sombre. Le filet neutre est ce que dessine
                  `PageClientSansEntete`, dont toutes les surfaces sont blanches. */
-              surFaible="var(--color-surface-container-high)"
+              surFaible="var(--color-ds-filet)"
             />
           </div>
         </div>
@@ -513,10 +513,10 @@ export default async function PagePublique({
                   {/* Le nombre nu au téléphone, nommé sur grand écran : la
                       place n'est pas la même, et « 7 éléments » sur 390 px
                       pousse le titre de la section. */}
-                  <span className="font-body-md text-[12px] text-on-surface-variant lg:hidden">
+                  <span className="text-[12px] text-ds-texte-corps lg:hidden">
                     {format.number(commande.medias.length)}
                   </span>
-                  <span className="hidden font-body-md text-[13px] text-on-surface-variant lg:inline">
+                  <span className="hidden text-[13px] text-ds-texte-corps lg:inline">
                     {t("galerie.compte", { n: commande.medias.length })}
                   </span>
                 </>
@@ -530,7 +530,7 @@ export default async function PagePublique({
                  la forme d'un état voulu plutôt que celle d'un chargement qui
                  n'a pas abouti. */
               <div className="px-[18px] lg:px-0">
-                <div className="rounded-lg border border-dashed border-filet-vide px-5 py-8 text-center">
+                <div className="rounded-ds-sm border border-dashed border-ds-filet-appuye px-5 py-8 text-center">
                   <svg
                     width="26"
                     height="26"
@@ -547,10 +547,10 @@ export default async function PagePublique({
                     <circle cx="8.5" cy="8.5" r="1.6" />
                     <path d="m21 15-5-5L5 21" />
                   </svg>
-                  <p className="font-body-md text-[15px] font-semibold text-on-surface">
+                  <p className="text-[15px] font-semibold text-ds-texte-fort">
                     {t("galerie.videTitre")}
                   </p>
-                  <p className="mt-1 font-body-md text-[14px] leading-[21px] text-on-surface-variant">
+                  <p className="mt-1 text-[14px] leading-[21px] text-ds-texte-corps">
                     {t("galerie.videTexte")}
                   </p>
                 </div>
@@ -681,20 +681,20 @@ export default async function PagePublique({
               <dl className="flex flex-col gap-[13px]">
                 {commande.reference !== null ? (
                   <div className="flex items-baseline justify-between gap-4">
-                    <dt className="font-body-md text-[14px] text-on-surface-variant">
+                    <dt className="text-[14px] text-ds-texte-corps">
                       {t("details.reference")}
                     </dt>
-                    <dd className="text-right font-label-md text-[14px] font-bold text-on-surface">
+                    <dd className="text-right text-[14px] font-bold text-ds-texte-fort">
                       {commande.reference}
                     </dd>
                   </div>
                 ) : null}
                 {commande.client !== null ? (
                   <div className="flex items-baseline justify-between gap-4">
-                    <dt className="font-body-md text-[14px] text-on-surface-variant">
+                    <dt className="text-[14px] text-ds-texte-corps">
                       {t("details.destinataire")}
                     </dt>
-                    <dd className="text-right font-label-md text-[14px] font-bold text-on-surface">
+                    <dd className="text-right text-[14px] font-bold text-ds-texte-fort">
                       {commande.client}
                     </dd>
                   </div>
@@ -720,7 +720,7 @@ export default async function PagePublique({
         }
       />
 
-      <footer className="border-t border-filet-section px-[18px] pt-[22px] pb-[26px] text-center lg:px-14 lg:py-[26px]">
+      <footer className="border-t border-ds-filet px-[18px] pt-[22px] pb-[26px] text-center lg:px-14 lg:py-[26px]">
         {/*
           « Powered by DropLink », avec ses trois garde-fous : secondaire
           visuellement, jamais confondable avec l'expéditeur, et ouverture HORS
@@ -742,7 +742,7 @@ export default async function PagePublique({
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="-my-3.5 inline-flex min-h-11 items-center font-body-sm text-[12px] text-on-surface-variant hover:underline"
+          className="-my-3.5 inline-flex min-h-11 items-center text-[12px] text-ds-texte-corps hover:underline"
         >
           {t("propulsePar")}
         </a>
@@ -796,12 +796,12 @@ function EnTeteTitre({
   return (
     <div className="lg:flex lg:items-end lg:justify-between lg:gap-10">
       <div className="min-w-0">
-        <h1 className="font-headline-lg text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] lg:text-[44px] lg:leading-[50px] lg:tracking-[-0.035em]">
+        <h1 className="text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] lg:text-[44px] lg:leading-[50px] lg:tracking-[-0.035em]">
           {titre}
         </h1>
         {pour !== null || reference !== null ? (
           <p
-            className="mt-1.5 font-body-md text-[15px] leading-[22px] lg:mt-2 lg:text-[17px] lg:leading-[26px]"
+            className="mt-1.5 text-[15px] leading-[22px] lg:mt-2 lg:text-[17px] lg:leading-[26px]"
             style={{ color: doux }}
           >
             {pour}
@@ -817,10 +817,10 @@ function EnTeteTitre({
           reste dans la carte à la couleur du vendeur, en tête de page. */}
       {estimation !== null ? (
         <div className="hidden shrink-0 text-right lg:block">
-          <p className="mb-1 font-body-sm text-[13px]" style={{ color: doux }}>
+          <p className="mb-1 text-[13px]" style={{ color: doux }}>
             {arriveeEstimee}
           </p>
-          <p className="font-headline-md text-[24px] leading-[30px] font-extrabold tracking-[-0.025em]">
+          <p className="text-[24px] leading-[30px] font-extrabold tracking-[-0.025em]">
             {estimation}
           </p>
         </div>
@@ -840,7 +840,7 @@ function EnTeteTitre({
         */
         <div className="hidden shrink-0 pb-1 lg:block">
           <span
-            className="inline-flex items-center gap-2 rounded-full px-4 py-[9px] font-label-md text-[14px] font-bold"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-[9px] text-[14px] font-bold"
             style={{ backgroundColor: surFaible }}
           >
             <span

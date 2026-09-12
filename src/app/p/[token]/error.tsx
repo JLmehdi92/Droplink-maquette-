@@ -31,8 +31,8 @@ export default function ErreurPagePublique({ reset }: { readonly reset: () => vo
   const t = useTranslations("page-publique.erreur");
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-surface-container-lowest px-6 py-8">
-      <div className="mb-[26px] flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-fond-neutre">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-ds-surface-carte px-6 py-8">
+      <div className="mb-[26px] flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-ds-surface-creux">
         {/* Un point d'attention, pas un maillon rompu : le lien n'est pas en
             cause, et le dire par le dessin autant que par le texte évite de
             faire croire au visiteur qu'il doit en redemander un. */}
@@ -45,7 +45,7 @@ export default function ErreurPagePublique({ reset }: { readonly reset: () => vo
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-gris-inactif"
+          className="text-ds-texte-tenu"
           aria-hidden="true"
         >
           <path d="M12 9v4" />
@@ -54,18 +54,18 @@ export default function ErreurPagePublique({ reset }: { readonly reset: () => vo
         </svg>
       </div>
 
-      <h1 className="mb-3 text-center text-[26px] leading-[32px] font-extrabold tracking-[-0.03em] text-on-surface">
+      <h1 className="mb-3 text-center text-[26px] leading-[32px] font-extrabold tracking-[-0.03em] text-ds-texte-fort">
         {t("titre")}
       </h1>
 
-      <p className="max-w-[320px] text-center font-body-md text-[15px] leading-[24px] text-sourdine">
+      <p className="max-w-[320px] text-center text-[15px] leading-[24px] text-ds-texte-sourdine">
         {t("texte")}
       </p>
 
       <button
         type="button"
         onClick={reset}
-        className="mt-7 min-h-[44px] rounded-md bg-primary px-6 font-label-md text-[15px] font-bold text-surface-container-lowest"
+        className="mt-7 inline-flex min-h-11 items-center rounded-ds-card bg-ds-accent px-6 text-[15px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol"
       >
         {t("reessayer")}
       </button>

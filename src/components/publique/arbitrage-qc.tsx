@@ -106,21 +106,21 @@ export function ArbitrageQc({
   const decide = etat !== "en_attente" && !rouvert;
 
   const boutonPlein =
-    "min-h-[50px] rounded-md px-6 font-label-md text-[15px] font-bold disabled:opacity-50";
+    "min-h-[50px] rounded-ds-control px-6 text-[15px] font-bold disabled:opacity-50";
   const boutonBorde =
-    "min-h-[50px] rounded-md border border-filet-controle px-[22px] font-label-md text-[15px] " +
-    "font-bold text-ardoise disabled:opacity-50 lg:px-[26px]";
+    "min-h-[50px] rounded-ds-control border border-ds-filet-appuye px-[22px] text-[15px] " +
+    "font-bold text-ds-texte-corps disabled:opacity-50 lg:px-[26px]";
 
   if (decide) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="font-body-md text-[15px] leading-[23px] text-on-surface lg:text-[16px] lg:leading-6">
+        <p className="text-[15px] leading-[23px] text-ds-texte-fort lg:text-[16px] lg:leading-6">
           {etat === "approuve" ? libelles.approuve : libelles.refuse}
         </p>
         <button
           type="button"
           onClick={() => setRouvert(true)}
-          className="min-h-11 self-start font-label-md text-label-md text-on-surface-variant underline"
+          className="min-h-11 self-start text-ds-texte-corps underline"
         >
           {libelles.modifier}
         </button>
@@ -143,7 +143,7 @@ export function ArbitrageQc({
     return (
       <div className="flex flex-col gap-4">
         <label className="flex flex-col gap-2">
-          <span className="font-label-md text-label-md text-on-surface">
+          <span className="text-ds-texte-fort">
             {libelles.commentaire}
           </span>
           <textarea
@@ -155,7 +155,7 @@ export function ArbitrageQc({
             // défaut.
             maxLength={1000}
             rows={3}
-            className="champ-app w-full rounded-md p-3 font-body-md text-body-md text-on-surface"
+            className="w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte p-3 text-[14px] text-ds-texte-fort transition-shadow outline-none placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"
           />
         </label>
 
@@ -184,7 +184,7 @@ export function ArbitrageQc({
         </div>
 
         {echec ? (
-          <p role="alert" className="font-body-sm text-body-sm text-error">
+          <p role="alert" className="text-error">
             {libelles.echec}
           </p>
         ) : null}
@@ -194,7 +194,7 @@ export function ArbitrageQc({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-body-md text-[15px] leading-[23px] text-on-surface lg:text-[16px] lg:leading-6">
+      <p className="text-[15px] leading-[23px] text-ds-texte-fort lg:text-[16px] lg:leading-6">
         {libelles.texte}
       </p>
 
@@ -225,7 +225,7 @@ export function ArbitrageQc({
       {/* L'échec est DIT. Un pari perdu qui ne se dit pas laisse le visiteur
           croire que sa décision est enregistrée. */}
       {echec ? (
-        <p role="alert" className="font-body-sm text-body-sm text-error">
+        <p role="alert" className="text-error">
           {libelles.echec}
         </p>
       ) : null}

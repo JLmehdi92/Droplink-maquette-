@@ -83,7 +83,7 @@ export function EtatExpedition({
       }
       vide={
         silencieux || variante === "carte"
-          ? "var(--color-outline-variant)"
+          ? "var(--color-ds-filet)"
           : accent.surRemplissageFaible
       }
       texteAtteint={
@@ -91,7 +91,7 @@ export function EtatExpedition({
       }
       texteAVenir={
         silencieux || variante === "carte"
-          ? "var(--color-gris-entete)"
+          ? "var(--color-ds-texte-sourdine)"
           : accent.surRemplissageDoux
       }
     />
@@ -99,9 +99,9 @@ export function EtatExpedition({
 
   if (silencieux) {
     return (
-      <section className="rounded-ds-card-lg border border-attention-filet bg-attention-fond p-5 lg:p-6">
+      <section className="rounded-ds-card-lg border border-ds-alerte bg-ds-alerte-fond p-5 lg:p-6">
         <div className="flex items-start gap-3">
-          <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-attention-puce">
+          <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-ds-sm bg-ds-alerte-fond">
             <svg
               width="17"
               height="17"
@@ -111,7 +111,7 @@ export function EtatExpedition({
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-attention-icone"
+              className="text-ds-alerte"
               aria-hidden="true"
             >
               <circle cx="12" cy="12" r="9" />
@@ -119,10 +119,10 @@ export function EtatExpedition({
             </svg>
           </span>
           <div>
-            <p className="font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-attention">
+            <p className="text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-alerte">
               {libelles.silenceTitre.replace("{n}", String(silence.jours))}
             </p>
-            <p className="mt-[5px] font-body-sm text-[14px] leading-[22px] text-attention-doux">
+            <p className="mt-[5px] text-[14px] leading-[22px] text-ds-alerte">
               {libelles.silenceTexte}
             </p>
           </div>
@@ -135,14 +135,14 @@ export function EtatExpedition({
   if (variante === "carte") {
     return (
       <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card">
-        <p className="mb-3.5 font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] text-gris-entete uppercase">
+        <p className="mb-3.5 text-[11.5px] leading-[16px] font-bold tracking-[0.09em] text-ds-texte-sourdine uppercase">
           {libelles.titre}
         </p>
         <div className="mb-3.5 flex items-baseline justify-between gap-4">
-          <span className="font-headline-md text-[18px] leading-[23px] font-extrabold tracking-[-0.02em] text-on-surface">
+          <span className="text-[18px] leading-[23px] font-extrabold tracking-[-0.02em] text-ds-texte-fort">
             {libelles.etapes[statut]}
           </span>
-          <span className="shrink-0 font-body-sm text-[13px] text-on-surface-variant">
+          <span className="shrink-0 text-[13px] text-ds-texte-corps">
             {ancienneteCourte}
           </span>
         </div>
@@ -172,16 +172,16 @@ export function EtatExpedition({
         le transporteur n'a rien rapporté.
       */}
       <p
-        className="mb-1.5 font-body-sm text-[11.5px] leading-[16px] font-bold tracking-[0.09em] uppercase"
+        className="mb-1.5 text-[11.5px] leading-[16px] font-bold tracking-[0.09em] uppercase"
         style={{ color: accent.surRemplissageDoux }}
       >
         {estimation !== null ? libelles.arriveeEstimee : libelles.statut}
       </p>
-      <p className="mb-[3px] font-headline-lg text-[27px] leading-[33px] font-extrabold tracking-[-0.03em]">
+      <p className="mb-[3px] text-[27px] leading-[33px] font-extrabold tracking-[-0.03em]">
         {estimation !== null ? estimation : libelles.etapes[statut]}
       </p>
       <p
-        className="font-body-md text-[14px] leading-[20px]"
+        className="text-[14px] leading-[20px]"
         style={{ color: accent.surRemplissageDoux }}
       >
         {anciennete}
