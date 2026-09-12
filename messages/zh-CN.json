@@ -1269,5 +1269,18 @@
     "labelNouveau": "新密码",
     "boutonEnregistrer": "保存并登录",
     "erreurSession": "此链接已失效。请重新申请一封邮件。"
+  },
+  "alertes": {
+    "titre": "提醒",
+    "titreAvec": "提醒（{n}）",
+    "rien": "暂无需要处理的事项。",
+    "jamaisOuvertes": {
+      "titre": "{n} 笔订单从未被打开",
+      "texte": "客户还没有打开链接，也许从未收到。"
+    },
+    "silencieux": {
+      "titre": "{n} 件包裹无更新",
+      "texte": "超过十天没有承运商信息。"
+    }
   }
 }

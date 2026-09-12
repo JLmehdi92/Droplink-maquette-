@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
@@ -283,7 +284,15 @@ export async function lireEnvois(
  * de 10 jours », pas « des colis sont en retard ». Un chiffre se vérifie, une
  * appréciation se discute.
  */
-export async function compterEnvois(
+/**
+ * ⚠️ MÉMORISÉ SUR LA REQUÊTE. Depuis que la cloche de la barre supérieure porte
+ * le nombre de colis silencieux, DEUX appelants demandent ces compteurs pour un
+ * seul rendu de `/envois` : la coque et l écran. `cache` de React les ramène à
+ * UN appel par requête.
+ */
+export const compterEnvois = cache(compterEnvoisSansCache);
+
+async function compterEnvoisSansCache(
   supabase: ClientLecture,
 ): Promise<CompteursEnvois | null> {
   const { data, error } = await supabase.rpc("compter_envois", {

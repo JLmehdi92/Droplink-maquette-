@@ -1269,5 +1269,18 @@
     "labelNouveau": "New password",
     "boutonEnregistrer": "Save and log me in",
     "erreurSession": "This link is no longer valid. Request a new one."
+  },
+  "alertes": {
+    "titre": "Alerts",
+    "titreAvec": "Alerts ({n})",
+    "rien": "Nothing needs your attention.",
+    "jamaisOuvertes": {
+      "titre": "{n, plural, one {# order never opened} other {# orders never opened}}",
+      "texte": "The customer has not opened their link yet. They may never have received it."
+    },
+    "silencieux": {
+      "titre": "{n, plural, one {# parcel with no movement} other {# parcels with no movement}}",
+      "texte": "More than ten days without an update from the carrier."
+    }
   }
 }

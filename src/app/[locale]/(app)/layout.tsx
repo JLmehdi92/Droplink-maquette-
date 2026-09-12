@@ -9,6 +9,8 @@ import { ChevronDown, Zap } from "lucide-react";
 import { BarreSuperieure } from "@/components/app/barre-superieure";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 import { compterParEtat } from "@/lib/commandes/liste";
+import { compterEnvois } from "@/lib/envois/liste";
+import { creerClientServeur } from "@/lib/supabase/server";
 import { signerLecture } from "@/lib/storage/r2";
 
 /**
@@ -95,7 +97,16 @@ export default async function LayoutApplication({
    * même règle que le sous-titre de l écran des commandes, et pour la même
    * raison — un nombre crédible et faux fait décider de travers.
    */
-  const compteurs = await compterParEtat();
+  /*
+   * ⚠️ LES DEUX LECTURES SONT MENÉES ENSEMBLE, PAS L UNE APRÈS L AUTRE. En série,
+   * la coque de CHAQUE écran vendeur payerait deux allers-retours au lieu d un ;
+   * elles ne dépendent pas l une de l autre. Et toutes deux passent par `cache`
+   * de React : l écran qui les redemande ne paie rien.
+   */
+  const [compteurs, envois] = await Promise.all([
+    compterParEtat(),
+    compterEnvois(await creerClientServeur()).catch(() => null),
+  ]);
 
   const entrees: readonly EntreeNavigation[] = [
     {
@@ -284,6 +295,8 @@ export default async function LayoutApplication({
             email={profil.email}
             nomBoutique={profil.nomBoutique}
             logoSigne={logoSigne}
+            jamaisOuvertes={compteurs?.jamaisOuvertes ?? null}
+            colisSilencieux={envois?.silencieux ?? null}
           />
           {children}
           {/* Le pied du kit : 64 de haut, 12 px, couleur tenue, centré. Il ne

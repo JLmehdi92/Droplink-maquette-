@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { ChevronDown } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
+import { ClocheAlertes } from "./cloche-alertes";
 import { RechercheGlobale } from "./recherche-globale";
 
 /**
@@ -31,11 +32,15 @@ export async function BarreSuperieure({
   email,
   nomBoutique,
   logoSigne,
+  jamaisOuvertes,
+  colisSilencieux,
 }: {
   readonly langue: string;
   readonly email: string;
   readonly nomBoutique: string | null;
   readonly logoSigne: string | null;
+  readonly jamaisOuvertes: number | null;
+  readonly colisSilencieux: number | null;
 }) {
   const t = await getTranslations("navigation");
   const tc = await getTranslations("commandes");
@@ -53,6 +58,12 @@ export async function BarreSuperieure({
       </Suspense>
 
       <span className="flex-1" />
+
+      <ClocheAlertes
+        langue={langue}
+        jamaisOuvertes={jamaisOuvertes}
+        colisSilencieux={colisSilencieux}
+      />
 
       <span aria-hidden="true" className="h-[26px] w-px shrink-0 bg-ds-filet" />
 

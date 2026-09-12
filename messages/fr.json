@@ -1269,5 +1269,18 @@
     "labelNouveau": "Nouveau mot de passe",
     "boutonEnregistrer": "Enregistrer et me connecter",
     "erreurSession": "Ce lien n’est plus valable. Demandez-en un nouveau."
+  },
+  "alertes": {
+    "titre": "Alertes",
+    "titreAvec": "Alertes ({n})",
+    "rien": "Rien ne demande votre attention.",
+    "jamaisOuvertes": {
+      "titre": "{n, plural, one {# commande jamais ouverte} other {# commandes jamais ouvertes}}",
+      "texte": "Le client n’a pas encore ouvert son lien. Il ne l’a peut-être jamais reçu."
+    },
+    "silencieux": {
+      "titre": "{n, plural, one {# colis sans mouvement} other {# colis sans mouvement}}",
+      "texte": "Plus de dix jours sans information du transporteur."
+    }
   }
 }
