@@ -97,19 +97,31 @@ await service.from("shops").update({ name: "Atelier de verification" }).eq("id",
  * teinte oubliee ni sur un chiffre a deux caracteres. Un jeu qui n exerce qu un
  * cas certifie ce cas et se tait sur les autres.
  */
-await service.from("orders").insert(
-  [
-    ["Client de verification", "REF-V", "en_transit"],
-    ["Cliente en preparation", "REF-P", "preparation"],
-    ["Client expedie", "REF-E", "expedie"],
-    ["Cliente livree", "REF-L", "livre"],
-  ].map(([customer_label, product_ref, status]) => ({
-    shop_id: shop.id,
-    customer_label,
-    product_ref,
-    status,
-  })),
-);
+const { data: commandes } = await service
+  .from("orders")
+  .insert(
+    [
+      ["Client de verification", "REF-V", "en_transit"],
+      ["Cliente en preparation", "REF-P", "preparation"],
+      ["Client expedie", "REF-E", "expedie"],
+      ["Cliente livree", "REF-L", "livre"],
+    ].map(([customer_label, product_ref, status]) => ({
+      shop_id: shop.id,
+      customer_label,
+      product_ref,
+      status,
+    })),
+  )
+  .select("id");
+
+/*
+ * ⚠️ LES ECRANS DE DETAIL ONT UN IDENTIFIANT DANS LEUR URL, et on ne peut pas
+ * l ecrire a l avance. Le jeton `{commande}` dans une route est remplace par
+ * l identifiant de la premiere commande creee : sans lui, `/fr/commandes/[id]`
+ * — l editeur, l ecran le plus dense du produit — n etait tout simplement pas
+ * mesurable par cet outil.
+ */
+const idCommande = commandes?.[0]?.id ?? "";
 
 const { data: sess } = await publiable.auth.signInWithPassword({
   email: courriel,
@@ -265,7 +277,8 @@ const RELEVE = `(() => {
 })()`;
 
 const rapport = [];
-for (const chemin of routes) {
+for (const modele of routes) {
+  const chemin = modele.replaceAll("{commande}", idCommande);
   for (const largeur of largeurs) {
     const { targetId } = await brut("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await brut("Target.attachToTarget", { targetId, flatten: true });

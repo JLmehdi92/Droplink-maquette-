@@ -64,12 +64,12 @@ export function ApercuClient({
   const vignettes = medias.slice(0, 3);
 
   return (
-    <section className="carte rounded-lg p-[18px] lg:rounded-[18px]">
+    <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card">
       <div className="mb-3.5 flex items-center justify-between gap-3">
-        <h2 className="font-headline-md text-[14px] font-bold text-on-surface">
+        <h2 className="text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
           {t("apercuTitre")}
         </h2>
-        <span className="font-body-sm text-[11px] text-sourdine">{t("apercuDirect")}</span>
+        <span className="text-[13px] text-ds-texte-sourdine">{t("apercuDirect")}</span>
       </div>
 
       {/* `aria-hidden` : c'est une IMAGE de la page, pas la page. Un lecteur
@@ -77,7 +77,7 @@ export function ApercuClient({
           bouton « Approuver » sur lequel il n'y a rien à approuver ici. */}
       <div
         aria-hidden="true"
-        className="overflow-hidden rounded-[15px] border border-outline-variant"
+        className="overflow-hidden rounded-ds-card border border-ds-filet"
       >
         <div
           className="px-3.5 py-4"
@@ -105,18 +105,20 @@ export function ApercuClient({
               disparaît, et il ne reste que la pastille.
             */}
             {nomBoutique !== null ? (
-              <span className="truncate font-label-sm text-[11px] font-bold">{nomBoutique}</span>
+              <span className="truncate text-[11px] font-bold">{nomBoutique}</span>
             ) : null}
           </div>
 
-          <p className="mt-2 mb-px font-headline-md text-[17px] font-extrabold tracking-[-0.02em]">
+          {/* Inter, comme la vraie page client depuis sa migration : l'aperçu doit
+              porter la MÊME police que ce qu'il annonce montrer. */}
+          <p className="mt-2 mb-px text-[17px] font-extrabold tracking-[-0.03em]">
             {libelles.commande}
           </p>
 
           {/* UNE INFORMATION ABSENTE EST OMISE, jamais remplacée par un texte
               inventé : sans nom de client, la ligne « pour … » disparaît. */}
           {nom !== "" ? (
-            <p className="truncate font-body-sm text-[11px]" style={{ color: palette.surRemplissageDoux }}>
+            <p className="truncate text-[11px]" style={{ color: palette.surRemplissageDoux }}>
               {substituerNom(libelles.pourGabarit, nom)}
             </p>
           ) : null}
@@ -149,12 +151,12 @@ export function ApercuClient({
                   key={media.id}
                   src={media.urlVignette}
                   alt=""
-                  className="aspect-square w-full rounded-[7px] object-cover"
+                  className="aspect-square w-full rounded-ds-xs object-cover"
                 />
               ) : (
                 <span
                   key={"vide-" + rang}
-                  className="aspect-square w-full rounded-[7px] bg-fond-avatar"
+                  className="aspect-square w-full rounded-ds-xs bg-ds-surface-creux"
                 />
               );
             })}
@@ -164,7 +166,7 @@ export function ApercuClient({
             className="flex h-9 items-center justify-center rounded-[9px]"
             style={{ backgroundColor: palette.remplissage, color: palette.surRemplissage }}
           >
-            <span className="font-label-md text-[12px] font-bold">{libelles.approuver}</span>
+            <span className="text-[12px] font-bold">{libelles.approuver}</span>
           </div>
         </div>
       </div>

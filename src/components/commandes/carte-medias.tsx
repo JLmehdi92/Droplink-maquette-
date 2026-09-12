@@ -20,7 +20,16 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Icone } from "@/components/icone";
+import {
+  CircleCheck,
+  GripVertical,
+  Image as ImageIcon,
+  Info,
+  Play,
+  TriangleAlert,
+  Upload,
+  X,
+} from "lucide-react";
 import {
   definirCouverture,
   demanderDepot,
@@ -449,15 +458,15 @@ export function CarteMedias({
   const videos = medias.filter((m) => m.type === "video").length;
 
   return (
-    <section className="carte rounded-lg p-[18px] lg:rounded-[18px] lg:p-[22px]">
+    <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card lg:p-6">
       <div className="mb-3.5 flex items-center justify-between gap-3 lg:mb-4">
-        <h2 className="font-headline-md text-[15px] font-bold tracking-[-0.015em] text-on-surface lg:text-[16px]">
+        <h2 className="text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
           {t("titre")}
         </h2>
         {/* LE COMPTE DES VIDEOS N'EST DIT QU'AU BUREAU. La planche telephone
             ecrit « 7 sur 20 » et rien de plus : la ligne n'a pas la place, et
             c'est le plafond global qu'on approche en premier. */}
-        <span className="shrink-0 font-body-sm text-[12px] text-sourdine">
+        <span className="shrink-0 text-[13px] text-ds-texte-sourdine">
           {t("compteur", { n: medias.length, max: plafondMedias })}
           <span className="hidden lg:inline">
             {" \u00b7 "}
@@ -473,7 +482,7 @@ export function CarteMedias({
       {echecAction !== null && (
         <p
           role="alert"
-          className="mb-3.5 rounded-[12px] border border-alerte-filet bg-alerte-fond-doux px-4 py-3.5 font-body-sm text-[13px] leading-5 text-alerte"
+          className="mb-3.5 rounded-ds-card border border-transparent bg-ds-erreur-fond px-4 py-3.5 text-[13px] leading-5 text-ds-erreur"
         >
           {echecAction}
         </p>
@@ -554,35 +563,33 @@ export function CarteMedias({
             {enCours.map((e) => (
               <li
                 key={e.cleLocale}
-                className="flex aspect-square flex-col items-center justify-center gap-2 rounded-[11px] border border-outline-variant bg-surface-container-low p-2"
+                className="flex aspect-square flex-col items-center justify-center gap-2 rounded-ds-card border border-ds-filet bg-ds-surface-creux p-2"
               >
                 {e.echec === null ? (
                   <>
-                    <Icone nom="upload" className="text-[20px] text-gris-inactif" />
+                    <Upload aria-hidden="true" size={20} strokeWidth={1.8} className="text-ds-texte-tenu" />
                     <div
                       role="progressbar"
                       aria-valuenow={e.progression}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-label={t("enCours", { nom: e.nom })}
-                      className="h-1.5 w-full overflow-hidden rounded-full bg-fond-barre"
+                      className="h-1.5 w-full overflow-hidden rounded-ds-pill bg-ds-ink-100"
                     >
                       <div
-                        className="h-full rounded-full bg-violet transition-[width]"
+                        className="h-full rounded-ds-pill bg-ds-accent transition-[width]"
                         style={{ width: e.progression + "%" }}
                       />
                     </div>
-                    <span className="font-body-sm text-[11px] text-sourdine">
-                      {e.progression} %
-                    </span>
+                    <span className="text-[11.5px] text-ds-texte-sourdine">{e.progression} %</span>
                   </>
                 ) : (
                   <>
-                    <Icone nom="error" className="text-[20px] text-alerte" />
+                    <TriangleAlert aria-hidden="true" size={20} strokeWidth={1.9} className="text-ds-erreur" />
                     {/* LE MOTIF ET LA TAILLE REELLE, TOUJOURS LES DEUX : sans la
                         taille, le vendeur ne sait pas de combien il s'est
                         trompe, donc ne sait pas quoi faire du fichier. */}
-                    <p className="text-center font-body-sm text-[11px] leading-4 text-alerte">
+                    <p className="text-center text-[11.5px] leading-4 text-ds-erreur">
                       {e.echec}
                     </p>
                     <button
@@ -590,7 +597,7 @@ export function CarteMedias({
                       onClick={() =>
                         setEnCours((liste) => liste.filter((x) => x.cleLocale !== e.cleLocale))
                       }
-                      className="font-label-sm text-[11px] font-semibold text-alerte underline"
+                      className="text-[11.5px] font-semibold text-ds-erreur underline"
                     >
                       {t("ecarter")}
                     </button>
@@ -607,14 +614,16 @@ export function CarteMedias({
                   aria-label={t("deposer")}
                   title={t("formats", { videos: plafondVideos })}
                   className={
-                    "flex aspect-square w-full flex-col items-center justify-center gap-[5px] rounded-[11px] border border-dashed transition-colors " +
+                    // `Dropzone` du kit : filet POINTILLÉ de marque sur fond
+                    // teinté, et le violet plein dès qu'un fichier survole.
+                    "flex aspect-square w-full flex-col items-center justify-center gap-1.5 rounded-ds-card border border-dashed transition-colors " +
                     (survol
-                      ? "border-violet bg-violet-fond"
-                      : "border-filet-depot bg-surface-container-low hover:bg-fond-neutre")
+                      ? "border-ds-accent bg-ds-violet-100"
+                      : "border-ds-filet-marque bg-ds-surface-teinte hover:bg-ds-lavender-200")
                   }
                 >
-                  <Icone nom="add" className="text-[19px] text-gris-inactif" />
-                  <span className="font-label-sm text-[10px] font-semibold text-sourdine">
+                  <Upload aria-hidden="true" size={20} strokeWidth={1.8} className="text-ds-accent" />
+                  <span className="text-[11.5px] font-bold text-ds-accent-encre">
                     {t("ajouter")}
                   </span>
                 </button>
@@ -625,18 +634,18 @@ export function CarteMedias({
       </DndContext>
 
       {complet ? (
-        <p className="mt-3.5 font-body-sm text-[12px] text-alerte">{t("plein")}</p>
+        <p className="mt-3.5 text-[13px] text-ds-alerte">{t("plein")}</p>
       ) : null}
 
       {/* L'AIDE AU DEPLACEMENT, et elle ne dit pas la meme chose selon l'engin :
           au doigt, il faut MAINTENIR la poignee 200 ms avant que le deplacement
           demarre — sans quoi chaque effleurement de la grille pendant qu'on fait
           defiler la page deplacerait une photo. */}
-      <div className="mt-3.5 hidden items-center gap-[9px] rounded-[11px] bg-surface-container-low px-[13px] py-[11px] lg:flex">
-        <Icone nom="error" className="shrink-0 text-[15px] text-sourdine" />
-        <span className="font-body-sm text-[12px] text-sourdine">{t("aideOrdre")}</span>
+      <div className="mt-3.5 hidden items-center gap-[9px] rounded-ds-card bg-ds-surface-creux px-[13px] py-[11px] lg:flex">
+        <Info aria-hidden="true" size={16} strokeWidth={1.8} className="shrink-0 text-ds-texte-tenu" />
+        <span className="text-[13px] text-ds-texte-corps">{t("aideOrdre")}</span>
       </div>
-      <p className="mt-3 font-body-sm text-[11px] leading-[17px] text-sourdine lg:hidden">
+      <p className="mt-3 text-[13px] leading-[18px] text-ds-texte-sourdine lg:hidden">
         {t("aideOrdreTelephone")}
       </p>
     </section>
@@ -682,16 +691,16 @@ function Case({
   // 24 px au bureau, 26 au téléphone : les deux planches ne posent pas la même
   // valeur, et au doigt deux pixels de plus se sentent.
   const coin =
-    "absolute flex h-[26px] w-[26px] items-center justify-center rounded-[8px] bg-white/94 lg:h-6 lg:w-6 lg:rounded-[7px] lg:bg-white/92";
+    "absolute flex h-[26px] w-[26px] items-center justify-center rounded-ds-xs bg-white/94 lg:h-6 lg:w-6 lg:bg-white/92";
 
   return (
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={
-        "group/case relative aspect-square overflow-hidden rounded-[11px] bg-fond-avatar " +
-        (media.estCouverture ? "shadow-[0_0_0_2px_var(--color-violet)] " : "") +
-        (isDragging ? "z-10 opacity-80 shadow-lg" : "")
+        "group/case relative aspect-square overflow-hidden rounded-ds-card bg-ds-surface-creux " +
+        (media.estCouverture ? "shadow-[0_0_0_2px_var(--color-ds-accent)] " : "") +
+        (isDragging ? "z-10 opacity-80 shadow-ds-lg" : "")
       }
     >
       {media.urlVignette !== null ? (
@@ -709,16 +718,21 @@ function Case({
           loading="lazy"
         />
       ) : (
-        <span className="flex h-full w-full items-center justify-center text-gris-inactif">
-          <Icone nom={media.type === "video" ? "play_arrow" : "image"} className="text-[24px]" />
+        <span className="flex h-full w-full items-center justify-center text-ds-texte-tenu">
+          {media.type === "video" ? (
+            <Play aria-hidden="true" size={24} strokeWidth={1.8} />
+          ) : (
+            <ImageIcon aria-hidden="true" size={24} strokeWidth={1.8} />
+          )}
         </span>
       )}
 
       {media.type === "video" ? (
         <>
           {media.urlVignette !== null ? (
-            <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(14,14,19,0.6)]">
-              <Icone nom="play_arrow" className="text-[24px]" titre={t("estUneVideo")} />
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(11,11,24,0.6)]">
+              <Play aria-hidden="true" size={24} strokeWidth={2} fill="currentColor" />
+              <span className="sr-only">{t("estUneVideo")}</span>
             </span>
           ) : null}
 
@@ -726,7 +740,7 @@ function Case({
               capture a échoué n'a pas de durée connue, et « 0:00 » affirmerait
               une mesure qu'on n'a pas faite. */}
           {media.dureeS !== null ? (
-            <span className="absolute right-[5px] bottom-[5px] rounded-[5px] bg-[rgba(14,14,19,0.72)] px-[6px] py-[2px] font-label-sm text-[9px] font-bold text-white lg:right-1.5 lg:bottom-1.5 lg:rounded-md lg:px-[7px] lg:text-[10px]">
+            <span className="absolute right-[5px] bottom-[5px] rounded-ds-xs bg-[rgba(11,11,24,0.72)] px-[6px] py-[2px] text-[11.5px] font-bold text-white lg:right-1.5 lg:bottom-1.5">
               {duree(media.dureeS)}
             </span>
           ) : null}
@@ -734,7 +748,7 @@ function Case({
       ) : null}
 
       {media.estCouverture ? (
-        <span className="absolute bottom-[5px] left-[5px] rounded-full bg-violet px-[7px] py-[3px] font-label-sm text-[9px] font-bold text-white lg:bottom-1.5 lg:left-1.5 lg:px-2 lg:text-[10px]">
+        <span className="absolute bottom-[5px] left-[5px] rounded-ds-pill bg-ds-accent px-[7px] py-[3px] text-[11.5px] font-bold text-ds-texte-sur-marque lg:bottom-1.5 lg:left-1.5 lg:px-2">
           {t("couverture")}
         </span>
       ) : (
@@ -743,11 +757,12 @@ function Case({
           onClick={onCouvrir}
           className={
             coin +
-            " bottom-[5px] left-[5px] text-ardoise opacity-0 transition-opacity group-hover/case:opacity-100 focus-visible:opacity-100 lg:bottom-1.5 lg:left-1.5"
+            " bottom-[5px] left-[5px] text-ds-texte-corps opacity-0 transition-opacity group-hover/case:opacity-100 focus-visible:opacity-100 lg:bottom-1.5 lg:left-1.5"
           }
           title={t("definirCouverture")}
         >
-          <Icone nom="check_circle" className="text-[13px]" titre={t("definirCouverture")} />
+          <CircleCheck aria-hidden="true" size={14} strokeWidth={2} />
+          <span className="sr-only">{t("definirCouverture")}</span>
         </button>
       )}
 
@@ -755,23 +770,21 @@ function Case({
         type="button"
         {...attributes}
         {...listeners}
-        className={coin + " top-[5px] left-[5px] cursor-grab text-ardoise lg:top-1.5 lg:left-1.5"}
+        className={coin + " top-[5px] left-[5px] cursor-grab text-ds-texte-corps lg:top-1.5 lg:left-1.5"}
         title={t("deplacer", { position: index + 1 })}
       >
-        <Icone
-          nom="drag_indicator"
-          className="text-[13px]"
-          titre={t("deplacer", { position: index + 1 })}
-        />
+        <GripVertical aria-hidden="true" size={14} strokeWidth={2} />
+        <span className="sr-only">{t("deplacer", { position: index + 1 })}</span>
       </button>
 
       <button
         type="button"
         onClick={onSupprimer}
-        className={coin + " top-[5px] right-[5px] text-alerte lg:top-1.5 lg:right-1.5"}
+        className={coin + " top-[5px] right-[5px] text-ds-erreur lg:top-1.5 lg:right-1.5"}
         title={t("supprimer")}
       >
-        <Icone nom="close" className="text-[12px]" titre={t("supprimer")} />
+        <X aria-hidden="true" size={14} strokeWidth={2.4} />
+        <span className="sr-only">{t("supprimer")}</span>
       </button>
     </li>
   );

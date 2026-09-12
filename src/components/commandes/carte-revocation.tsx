@@ -63,11 +63,11 @@ export function CarteRevocation({
   }, [orderId, jeton, onNouveauJeton, t]);
 
   return (
-    <section className="rounded-lg border border-alerte-filet bg-alerte-fond-doux p-[18px] lg:rounded-[18px] lg:p-[22px]">
-      <h2 className="mb-1.5 font-headline-md text-[15px] font-bold tracking-[-0.015em] text-alerte lg:text-[16px]">
+    <section className="rounded-ds-card-lg border border-transparent bg-ds-erreur-fond p-5 lg:p-6">
+      <h2 className="mb-1.5 text-[18px] font-bold tracking-[-0.025em] text-ds-erreur">
         {t("revocation.titre")}
       </h2>
-      <p className="mb-3 font-body-sm text-[13px] leading-5 text-sourdine lg:mb-3.5 lg:leading-[21px]">
+      <p className="mb-3 text-[13px] leading-5 text-ds-texte-corps lg:mb-3.5 lg:leading-[21px]">
         {t("revocation.explication")}
       </p>
 
@@ -76,15 +76,15 @@ export function CarteRevocation({
           type="checkbox"
           checked={compris}
           onChange={(e) => setCompris(e.target.checked)}
-          className="mt-px h-[18px] w-[18px] shrink-0 accent-alerte"
+          className="mt-px h-[18px] w-[18px] shrink-0 accent-ds-erreur"
         />
-        <span className="font-body-sm text-[13px] leading-5 text-on-surface">
+        <span className="text-[13px] leading-5 text-ds-texte-fort">
           {t("revocation.jeComprends")}
         </span>
       </label>
 
       {echec !== null ? (
-        <p role="alert" className="mb-3 font-body-sm text-[13px] text-alerte">
+        <p role="alert" className="mb-3 text-[13px] font-semibold text-ds-erreur">
           {echec}
         </p>
       ) : null}
@@ -114,7 +114,7 @@ export function CarteRevocation({
           reussi: t("revocation.confirmer"),
           echoue: t("revocation.confirmer"),
         }}
-        className="flex min-h-[46px] w-full items-center justify-center rounded-xl border border-alerte-bordure bg-surface-container-lowest px-[18px] font-label-md text-[14px] font-bold text-alerte transition-opacity disabled:cursor-not-allowed disabled:opacity-45 lg:h-[42px] lg:min-h-0 lg:w-auto lg:rounded-[11px]"
+        className="flex min-h-12 w-full items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-erreur shadow-ds-xs transition-shadow hover:shadow-ds-md disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-ds-xs lg:h-12 lg:min-h-0 lg:w-auto"
       />
     </section>
   );

@@ -75,8 +75,8 @@ export async function HistoriqueCommande({
     CHAMPS.has(detail) ? tEditeur("nomChamp." + detail) : detail;
 
   return (
-    <section className="carte rounded-lg p-[18px] lg:rounded-[18px]">
-      <h2 className="mb-3.5 font-headline-md text-[14px] font-bold text-on-surface">
+    <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card">
+      <h2 className="mb-4 text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
         {t("titre")}
       </h2>
 
@@ -87,7 +87,7 @@ export async function HistoriqueCommande({
         Elle est lue sur la commande, jamais agrégée : mesuré, l'agrégat lisait
         vingt fois plus de lignes.
       */}
-      <p className="mb-3.5 border-b border-filet-ligne pb-3.5 font-body-sm text-[13px] leading-[19px] text-on-surface">
+      <p className="mb-3.5 border-b border-ds-filet pb-3.5 text-[13px] leading-[19px] text-ds-texte-fort">
         {derniereVueLe === null
           ? t("jamaisOuvert")
           : t("derniereOuverture", { quand: quand(derniereVueLe), vues })}
@@ -97,7 +97,7 @@ export async function HistoriqueCommande({
         // ÉTAT VIDE DISTINCT : une commande neuve n'a rien à montrer, et ce
         // n'est pas une anomalie. Afficher un bloc vide sans le dire laisserait
         // croire à un échec de chargement.
-        <p className="font-body-sm text-[13px] text-sourdine">{t("aucun")}</p>
+        <p className="text-[13px] text-ds-texte-sourdine">{t("aucun")}</p>
       ) : (
         <ol className="flex flex-col gap-[13px]">
           {lignes.map((ligne, index) => (
@@ -109,17 +109,17 @@ export async function HistoriqueCommande({
               <span
                 className={
                   "mt-1.5 h-[7px] w-[7px] shrink-0 rounded-full " +
-                  (index === 0 ? "bg-violet" : "bg-fond-barre")
+                  (index === 0 ? "bg-ds-accent" : "bg-ds-ink-200")
                 }
               />
               <div className="min-w-0">
-                <p className="font-body-md text-[13px] leading-[19px] text-on-surface">
+                <p className="text-[13px] leading-[19px] text-ds-texte-fort">
                   {t(`types.${ligne.type}`)}
                   {ligne.detail !== null ? " " + lisible(ligne.detail) : ""}
                 </p>
                 <time
                   dateTime={ligne.quand}
-                  className="mt-px block font-body-sm text-[11px] text-sourdine"
+                  className="mt-px block text-[12px] text-ds-texte-sourdine"
                 >
                   {quand(ligne.quand)}
                 </time>

@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Icone } from "@/components/icone";
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  Clock,
+  Copy,
+  ExternalLink,
+  TriangleAlert,
+} from "lucide-react";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
 import { titreDeCommande } from "@/lib/commandes/titre";
 import { CarteMedias, type MediaAffiche } from "./carte-medias";
@@ -271,16 +279,16 @@ export function Editeur({
       {/* LA BANDE D'ACTION DU TÉLÉPHONE, collée en bas comme sur la planche : à
           390 px, la barre haute a déjà le titre et le témoin, et « voir la page
           publique » est le geste qui termine le travail. */}
-      <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-outline-variant bg-surface-container-lowest px-4 pt-3 pb-5 lg:hidden">
+      <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-ds-filet bg-ds-surface-carte px-4 pt-3 pb-5 lg:hidden">
         <BoutonCopier lien={lienPublic} compact />
         <a
           href={versPageClient}
           target="_blank"
           rel="noopener noreferrer"
-          className="degrade-marque flex min-h-[50px] flex-grow items-center justify-center gap-2 rounded-[13px] font-label-md text-[15px] font-bold shadow-[0_10px_22px_-10px_rgba(124,92,245,0.7)]"
+          className="degrade-ds-marque flex min-h-12 flex-grow items-center justify-center gap-2 rounded-ds-card text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand"
         >
           {t("voirPage")}
-          <Icone nom="open_in_new" className="text-[15px]" />
+          <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
         </a>
       </div>
 
@@ -290,16 +298,16 @@ export function Editeur({
       {etat === "echec" ? (
         <div
           role="alert"
-          className="fixed inset-x-0 bottom-0 z-20 border-t border-alerte-filet bg-alerte-fond-doux px-4 py-3.5 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:max-w-[420px] lg:rounded-[12px] lg:border"
+          className="fixed inset-x-0 bottom-0 z-20 border-t border-transparent bg-ds-erreur-fond px-4 py-3.5 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:max-w-[420px] lg:rounded-ds-card-lg lg:border lg:shadow-ds-lg"
         >
-          <p className="font-label-md text-[14px] font-bold text-alerte">
+          <p className="text-[14px] font-bold text-ds-erreur">
             {t("echec", { champs: champsEnEchec.map((c) => t("nomChamp." + c)).join(", ") })}
           </p>
-          <p className="mt-1 font-body-sm text-[13px] leading-5 text-alerte">{t("echecReste")}</p>
+          <p className="mt-1 text-[13px] leading-5 text-ds-erreur">{t("echecReste")}</p>
           <button
             type="button"
             onClick={relancer}
-            className="mt-3 h-[38px] rounded-[10px] border border-alerte-bordure bg-surface-container-lowest px-[15px] font-label-md text-[13px] font-bold text-alerte"
+            className="mt-3 min-h-11 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[13px] font-semibold text-ds-erreur shadow-ds-xs transition-shadow hover:shadow-ds-md lg:h-10 lg:min-h-0"
           >
             {t("reessayer")}
           </button>
@@ -335,23 +343,24 @@ function BarreHaute({
   const t = useTranslations("editeur");
 
   return (
-    <header className="sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-outline-variant bg-surface-container-lowest px-4 py-3 lg:gap-[18px] lg:px-[26px] lg:py-3.5">
+    <header className="sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-ds-filet bg-ds-surface-carte px-4 py-3 lg:gap-[18px] lg:px-[26px] lg:py-3.5">
       {/* 44 px au doigt sur fond gris, 38 px bordé à la souris : les deux
           planches ne dessinent pas le même bouton de retour. */}
       <Link
         href={"/" + langue + "/commandes"}
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[11px] bg-fond-neutre text-on-surface transition-colors hover:bg-surface-container-high lg:h-[38px] lg:w-[38px] lg:rounded-[10px] lg:border lg:border-filet-controle lg:bg-surface-container-lowest"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-card bg-ds-surface-teinte text-ds-accent-encre transition-colors hover:bg-ds-lavender-200 lg:h-10 lg:w-10 lg:border lg:border-ds-filet lg:bg-ds-surface-carte lg:text-ds-texte-corps lg:hover:bg-ds-surface-teinte lg:hover:text-ds-texte-fort"
         title={t("retour")}
       >
-        <Icone nom="arrow_back" className="text-[18px] lg:text-[17px]" titre={t("retour")} />
+        <ArrowLeft aria-hidden="true" size={18} strokeWidth={1.9} />
+        <span className="sr-only">{t("retour")}</span>
       </Link>
 
       <div className="min-w-0 flex-grow lg:flex-grow-0">
-        <h1 className="truncate font-headline-md text-[16px] font-extrabold tracking-[-0.02em] text-on-surface lg:text-[17px]">
+        <h1 className="truncate text-[16px] font-bold tracking-[-0.025em] text-ds-texte-titre lg:text-[18px]">
           {titre}
         </h1>
         {reference.trim() !== "" ? (
-          <p className="truncate font-body-sm text-[12px] text-sourdine">{reference}</p>
+          <p className="truncate text-[13px] text-ds-texte-corps">{reference}</p>
         ) : null}
       </div>
 
@@ -365,10 +374,10 @@ function BarreHaute({
           href={versPageClient}
           target="_blank"
           rel="noopener noreferrer"
-          className="degrade-marque flex h-10 items-center gap-2 rounded-[11px] px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
+          className="degrade-ds-marque flex h-12 items-center gap-2 rounded-ds-card px-[18px] text-[14px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
         >
           {t("voirPage")}
-          <Icone nom="open_in_new" className="text-[14px]" />
+          <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
         </a>
       </div>
     </header>
@@ -389,10 +398,10 @@ function TemoinSauvegarde({ etat }: { readonly etat: Etat }) {
 
   const contenu =
     etat === "encours"
-      ? { icone: "schedule" as const, texte: t("enregistrement"), classe: "bg-fond-neutre text-ardoise" }
+      ? { Icone: Clock, texte: t("enregistrement"), classe: "bg-ds-surface-creux text-ds-texte-corps" }
       : etat === "echec"
-        ? { icone: "error" as const, texte: t("nonEnregistre"), classe: "bg-alerte-fond-vif text-alerte" }
-        : { icone: "done" as const, texte: t("enregistre"), classe: "bg-succes-fond text-succes" };
+        ? { Icone: TriangleAlert, texte: t("nonEnregistre"), classe: "bg-ds-erreur-fond text-ds-erreur" }
+        : { Icone: Check, texte: t("enregistre"), classe: "bg-ds-succes-fond text-ds-succes" };
 
   return (
     <span
@@ -400,14 +409,25 @@ function TemoinSauvegarde({ etat }: { readonly etat: Etat }) {
       // temporisée, une annonce impérative couperait la parole en continu.
       aria-live="polite"
       className={
-        "flex shrink-0 items-center gap-[5px] rounded-full px-2.5 py-1.5 font-label-sm text-[11px] font-bold whitespace-nowrap lg:gap-[7px] lg:px-3 lg:text-[12px] lg:font-semibold " +
+        // `Badge` du design system : rayon pilule, 12 px, gras, `padding: 5px 11px`.
+        // 12 px et non 11 : la règle 5 pose 11,5 px comme plancher au téléphone,
+        // et cette pilule y est rendue.
+        "flex shrink-0 items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[12px] font-bold whitespace-nowrap " +
         contenu.classe
       }
     >
-      <Icone nom={contenu.icone} className="text-[13px]" />
+      <contenu.Icone aria-hidden="true" size={13} strokeWidth={2.2} />
       {contenu.texte}
     </span>
   );
+}
+
+/** L'icône du bouton de copie — trois états, un seul endroit où ils sont écrits. */
+function IconeCopie({ etat }: { readonly etat: "repos" | "copie" | "echec" }) {
+  if (etat === "copie")
+    return <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes" />;
+  if (etat === "echec") return <TriangleAlert aria-hidden="true" size={16} strokeWidth={2} />;
+  return <Copy aria-hidden="true" size={16} strokeWidth={1.9} />;
 }
 
 /** Copier le lien public. Le presse-papiers n'a pas d'équivalent en HTML. */
@@ -436,30 +456,49 @@ function BoutonCopier({ lien, compact = false }: { readonly lien: string; readon
       onClick={() => void copier()}
       title={etat === "echec" ? t("copieEchouee") : t("copierLien")}
       className={
-        "flex items-center justify-center gap-2 rounded-[13px] border border-filet-controle bg-surface-container-lowest font-label-md text-[14px] font-semibold transition-colors hover:bg-fond-neutre lg:h-10 lg:rounded-[11px] " +
-        (compact ? "min-h-[50px] w-[52px] shrink-0 lg:w-auto lg:px-[15px] " : "h-10 px-[15px] ") +
-        (etat === "echec" ? "text-alerte" : "text-on-surface")
+        // `DetailAction` du kit : 48 px, `padding: 0 18px`, rayon de carte,
+        // filet, fond carte, 14/600, ombre xs, icône à l'accent.
+        "flex items-center justify-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte " +
+        "text-[14px] font-semibold shadow-ds-xs transition-colors hover:bg-ds-surface-teinte lg:h-12 " +
+        (compact ? "min-h-12 w-[52px] shrink-0 lg:w-auto lg:px-[18px] " : "h-12 px-[18px] ") +
+        (etat === "echec" ? "text-ds-erreur" : "text-ds-texte-fort")
       }
     >
       {/* L'icône est NOMMÉE quand elle est seule, muette quand un texte
           l'accompagne — sinon un lecteur d'écran annonce deux fois la même
           chose. */}
+      <IconeCopie etat={etat} />
       {compact ? (
-        <Icone
-          nom={etat === "copie" ? "done" : etat === "echec" ? "error" : "content_copy"}
-          className="text-[18px]"
-          titre={t("copierLien")}
-        />
+        <span className="sr-only">{t("copierLien")}</span>
       ) : (
-        <>
-          <Icone
-            nom={etat === "copie" ? "done" : etat === "echec" ? "error" : "content_copy"}
-            className="text-[15px]"
-          />
-          <span>{etat === "copie" ? t("lienCopie") : t("copierLien")}</span>
-        </>
+        <span>{etat === "copie" ? t("lienCopie") : t("copierLien")}</span>
       )}
     </button>
+  );
+}
+
+/**
+ * LE CHEVRON D'UNE LISTE DÉROULANTE, DANS LE BALISAGE ET NON DANS UNE IMAGE DE
+ * FOND — c'est ce que fait `SelectControl` dans le kit.
+ *
+ * L'ancienne façon peignait un SVG encodé en `background-image`, avec sa couleur
+ * écrite EN DUR dans l'URL : elle ne pouvait suivre aucun token, et personne
+ * n'aurait vu sa dérive. Ici il porte la couleur tenue du design system, comme
+ * tous les autres chevrons de l'écran.
+ */
+const CLASSE_LISTE = "cursor-pointer appearance-none pe-11 font-semibold";
+
+function ChampListe({ children }: { readonly children: React.ReactNode }) {
+  return (
+    <span className="relative block">
+      {children}
+      <ChevronDown
+        aria-hidden="true"
+        size={17}
+        strokeWidth={1.8}
+        className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-ds-texte-tenu"
+      />
+    </span>
   );
 }
 
@@ -494,21 +533,38 @@ function CarteCommande({
 }) {
   const t = useTranslations("editeur");
 
-  const etiquette = "mb-[7px] block font-label-sm text-[12px] font-bold text-ardoise";
-  // La taille du texte vient de `.champ-editeur`, qui la fait varier avec la
-  // largeur : la répéter ici en classe utilitaire serait la répéter là où elle
-  // ne gagnerait pas.
+  /* `Field` du kit : 13 px, graisse moyenne, couleur de CORPS — pas d'encre
+     forte. L'ancien libellé était en 12 px gras ardoise ; le design system fait
+     du libellé une indication et du contenu la matière. */
+  const etiquette = "mb-[9px] block text-[13px] font-medium text-ds-texte-corps";
+  /*
+   * ⚠️ PLUS DE `champ-editeur` NI DE `champ-liste`, ET POUR LA MÊME RAISON QUE
+   * `champ-app` SUR L'ÉCRAN VOISIN. Ces classes sont déclarées HORS de toute
+   * `@layer` dans `globals.css` ; Tailwind range ses utilitaires dans
+   * `@layer utilities`, et une règle sans couche l'emporte sur une règle en
+   * couche. Elles auraient écrasé le fond, le filet, la taille et la marge
+   * droite du design system sans que rien ne le signale : les classes existent,
+   * sont servies, et les gardes restent vertes. Le chevron de la liste
+   * déroulante redescend donc dans le balisage, en icône Lucide — ce que fait
+   * d'ailleurs `SelectControl` dans le kit.
+   *
+   * `CONTROL` du kit : 48 px, `padding: 0 16px`, rayon de contrôle, filet
+   * appuyé, fond carte, 14 px en graisse moyenne.
+   */
   const base =
-    "champ-editeur w-full rounded-xl px-3.5 font-body-md text-on-surface lg:rounded-[11px]";
-  const hauteur = "h-12 lg:h-11";
-  const enEchec = "border-alerte-puce shadow-[0_0_0_3px_rgba(224,103,74,0.12)]";
+    "w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[14px] " +
+    "font-medium text-ds-texte-fort transition-shadow outline-none placeholder:font-normal " +
+    "placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
+  const hauteur = "h-12";
+  const enEchec = "border-ds-erreur focus:border-ds-erreur";
 
   const classe = (champ: keyof ValeursCommande): string =>
     base + " " + hauteur + (champsEnEchec.includes(champ) ? " " + enEchec : "");
 
   return (
-    <section className="carte rounded-lg p-[18px] lg:rounded-[18px] lg:p-[22px]">
-      <h2 className="mb-4 font-headline-md text-[15px] font-bold tracking-[-0.015em] text-on-surface lg:mb-[18px] lg:text-[16px]">
+    <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card lg:p-6">
+      {/* `Panel` du kit : titre 18 px, gras, tracking -0,025em, 20 px sous lui. */}
+      <h2 className="mb-5 text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
         {t("sectionCommande")}
       </h2>
 
@@ -525,7 +581,7 @@ function CarteCommande({
             value={valeurs.customer_label}
             onChange={(e) => onChanger("customer_label", e.target.value, false)}
           />
-          <p className="mt-1.5 font-body-sm text-[11px] text-sourdine">{t("clientAide")}</p>
+          <p className="mt-1.5 text-[13px] text-ds-texte-sourdine">{t("clientAide")}</p>
         </div>
 
         <div>
@@ -579,7 +635,7 @@ function CarteCommande({
           */}
           <p
             id="tracking_number-aide"
-            className="mt-2 font-body-sm text-[12px] leading-4 text-sourdine"
+            className="mt-2 text-[13px] leading-[18px] text-ds-texte-sourdine"
           >
             {t("suiviAide")}
           </p>
@@ -593,37 +649,41 @@ function CarteCommande({
               valeur parmi quatre, et la planche lui donne la place d'un champ —
               pas d'une carte. Le changement part IMMÉDIATEMENT : c'est une
               décision, pas de la saisie. */}
-          <select
-            id="status"
-            className={classe("status") + " champ-liste"}
-            value={valeurs.status}
-            onChange={(e) => onChanger("status", e.target.value, true)}
-          >
-            {statuts.map((s) => (
-              <option key={s} value={s}>
-                {t("statut." + s)}
-              </option>
-            ))}
-          </select>
+          <ChampListe>
+            <select
+              id="status"
+              className={classe("status") + " " + CLASSE_LISTE}
+              value={valeurs.status}
+              onChange={(e) => onChanger("status", e.target.value, true)}
+            >
+              {statuts.map((s) => (
+                <option key={s} value={s}>
+                  {t("statut." + s)}
+                </option>
+              ))}
+            </select>
+          </ChampListe>
         </div>
 
         <div>
           <label className={etiquette} htmlFor="qc_status">
             {t("sectionQc")}
           </label>
-          <select
-            id="qc_status"
-            className={classe("qc_status") + " champ-liste"}
-            value={valeurs.qc_status}
-            onChange={(e) => onChanger("qc_status", e.target.value, true)}
-          >
-            {qcs.map((q) => (
-              <option key={q} value={q}>
-                {t("qc." + q)}
-              </option>
-            ))}
-          </select>
-          <p className="mt-1.5 font-body-sm text-[11px] text-sourdine">{t("qcAide")}</p>
+          <ChampListe>
+            <select
+              id="qc_status"
+              className={classe("qc_status") + " " + CLASSE_LISTE}
+              value={valeurs.qc_status}
+              onChange={(e) => onChanger("qc_status", e.target.value, true)}
+            >
+              {qcs.map((q) => (
+                <option key={q} value={q}>
+                  {t("qc." + q)}
+                </option>
+              ))}
+            </select>
+          </ChampListe>
+          <p className="mt-1.5 text-[13px] text-ds-texte-sourdine">{t("qcAide")}</p>
         </div>
       </div>
 
@@ -635,14 +695,14 @@ function CarteCommande({
           id="internal_notes"
           className={
             base +
-            " h-[72px] resize-none py-[11px] leading-[21px] lg:h-[74px]" +
+            " h-[84px] resize-none py-3 leading-[22px]" +
             (champsEnEchec.includes("internal_notes") ? " " + enEchec : "")
           }
           placeholder={t("notesExemple")}
           value={valeurs.internal_notes}
           onChange={(e) => onChanger("internal_notes", e.target.value, false)}
         />
-        <p className="mt-1.5 font-body-sm text-[11px] text-sourdine">{t("notesPrivees")}</p>
+        <p className="mt-1.5 text-[13px] text-ds-texte-sourdine">{t("notesPrivees")}</p>
       </div>
     </section>
   );
