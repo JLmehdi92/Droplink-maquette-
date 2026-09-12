@@ -378,11 +378,6 @@
         "raison": "Meme cause que « Analyses »."
       },
       {
-        "texte": "Actualiser  <button>",
-        "motif": "donnee",
-        "raison": "Six pixels de largeur. Le bouton du kit est COMPRIME par son conteneur flex, que la date plus longue du produit ne contraint pas de la meme facon : « Actualiser » mesure 68,53 px en Inter 14/600 dans LES DEUX pages — verifie au canvas — et le kit ne lui en laisse que 63. Meme remplissage, meme ecart, meme rayon, meme hauteur, meme place."
-      },
-      {
         "texte": "Dernière mise à jour [1/2]  <span>",
         "motif": "donnee",
         "raison": "Largeur de boite. Le bloc est dimensionne par la DATE qu il surmonte, pas par ce libelle : « 8 septembre 2025 a 14:32 » chez le kit contre « 12 septembre 2026 a 15:32 » dans le jeu de mesure, un caractere de plus. Le texte lui-meme mesure 113,99 px des deux cotes. Les deux blocs finissent au MEME bord droit, x=1643."
