@@ -45,17 +45,45 @@ interface Citation {
  * l'importe — il se connecte à la base et lit `process.argv`. Le lire comme du
  * TEXTE est la seule façon de l'inspecter sans le lancer.
  */
+/**
+ * Le nom de la cible qui precede une position dans le source.
+ *
+ * ⚠️ IL S'ANCRE SUR L'INDENTATION, PAS SUR L'ABSENCE D'ACCOLADE. La version
+ * precedente cherchait `"<nom>": {` suivi d'aucune accolade jusqu'a la
+ * position — ce qui echouait des qu'un corps SQL en contenait une, et
+ * `'{}'::jsonb` en contient. La cible etait alors rendue « cible inconnue »,
+ * et le message d'erreur designait la mauvaise.
+ *
+ * Les cibles sont declarees a DEUX espaces d'indentation, seules sur leur
+ * ligne : c'est un ancrage que le contenu d'un corps ne peut pas imiter.
+ */
+function nomDeCible(avant: string): string {
+  const lignes = avant.split(/\r?\n/);
+  for (let i = lignes.length - 1; i >= 0; i -= 1) {
+    const m = /^ {2}"([a-z0-9-]+)": \{$/.exec(lignes[i] ?? "");
+    if (m !== null) return m[1] as string;
+  }
+  return "cible inconnue";
+}
+
 function citations(): readonly Citation[] {
   const source = readFileSync(FALSIFICATEUR, "utf8");
   const trouvees: Citation[] = [];
 
   // Chaque bloc `reparerDepuisMigration` est précédé, dans le même objet, du
   // nom de la cible. On remonte au nom de cible le plus proche en amont.
-  const motif = /reparerDepuisMigration:\s*\{\s*fichier:\s*"([^"]+)",\s*depuis:\s*"([^"]+)"/g;
+  /*
+   * ⚠️ NI `fichier:` NI `depuis:` NE SONT FORCEMENT LES PREMIERES CLES, et ce
+   * motif l'exigeait. Un commentaire ou une cle `avant:` glisses entre
+   * l'accolade et `fichier:` rendaient le bloc INVISIBLE a cette sonde : elle
+   * ne le comparait plus a rien, en silence. Mesure du 13/09/2026 : six blocs
+   * sur cinquante-cinq etaient dans ce cas.
+   */
+  const motif = /reparerDepuisMigration:\s*\{[^}]*?fichier:\s*"([^"]+)"[^}]*?depuis:\s*"([^"]+)"/g;
   let m: RegExpExecArray | null;
   while ((m = motif.exec(source)) !== null) {
     const avant = source.slice(0, m.index);
-    const cible = /"([a-z0-9-]+)":\s*\{[^{]*$/.exec(avant)?.[1] ?? "cible inconnue";
+    const cible = nomDeCible(avant);
     trouvees.push({ cible, fichier: m[1] as string, depuis: m[2] as string });
   }
   return trouvees;
@@ -461,13 +489,30 @@ function recreations(): readonly Recreation[] {
   let m: RegExpExecArray | null;
   while ((m = motif.exec(source)) !== null) {
     const avant = source.slice(0, m.index);
-    const cible = /"([a-z0-9-]+)":\s*\{[^{]*$/.exec(avant)?.[1] ?? null;
-    if (cible === null) continue;
+    const cible = nomDeCible(avant);
+    if (cible === "cible inconnue") continue;
 
-    // Le fichier de migration cité par la réparation de CETTE cible : on
-    // repart du nom de cible pour ne pas confondre deux blocs voisins.
+    /*
+     * Le fichier de migration cité par la réparation de CETTE cible : on
+     * repart du nom de cible pour ne pas confondre deux blocs voisins.
+     *
+     * ⚠️ `fichier:` N'EST PAS FORCÉMENT LA PREMIÈRE CLÉ, et ce motif l'exigeait.
+     * Il s'écrivait `reparerDepuisMigration:\s*\{\s*fichier:` — donc un
+     * commentaire ou une clé `avant:` glissés entre l'accolade et `fichier:`
+     * le faisaient SAUTER AU BLOC SUIVANT, et la sonde comparait alors une
+     * cible à la migration d'une autre. Mesuré le 13/09/2026 : trois cibles de
+     * `lire_commande_publique` se sont vues attribuer `038_socle_admin.sql` et
+     * `097_la_couverture_a_sa_propre_derivee.sql`, où la fonction n'est pas
+     * définie. Le message était juste — « la citation ne pointe plus sur la
+     * définition » — et il désignait la mauvaise citation.
+     *
+     * On borne donc la recherche au BLOC de réparation, et on y cherche
+     * `fichier:` où qu'il soit. Le `[^}]*` s'arrête à la première accolade
+     * fermante, c'est-à-dire à la fin du bloc.
+     */
     const apres = source.slice(m.index);
-    const fichier = /reparerDepuisMigration:\s*\{\s*fichier:\s*"([^"]+)"/.exec(apres)?.[1] ?? null;
+    const fichier =
+      /reparerDepuisMigration:\s*\{[^}]*?fichier:\s*"([^"]+)"/.exec(apres)?.[1] ?? null;
     if (fichier === null) continue;
 
     trouvees.push({

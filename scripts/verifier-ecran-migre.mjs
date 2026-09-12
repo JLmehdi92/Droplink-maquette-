@@ -90,7 +90,13 @@ const { data: profil } = await service
   .single();
 await service.from("profiles").update({ account_type: "reseller", role: "admin" }).eq("id", profil.id);
 const { data: shop } = await service.from("shops").select("id").eq("owner_id", profil.id).single();
-await service.from("shops").update({ name: "Atelier de verification" }).eq("id", shop.id);
+/* ⚠️ LA DESCRIPTION EST POSEE, SINON LE CHAMP MESURE SON CAS VIDE. Elle
+   apparait sur l ecran de marque ET dans l en-tete de la page client : sans
+   elle, ni le compteur ni la deuxieme ligne de l en-tete ne sont exerces. */
+await service
+  .from("shops")
+  .update({ name: "Atelier de verification", description: "Vetements · Sneakers · Accessoires" })
+  .eq("id", shop.id);
 /*
  * ⚠️ QUATRE COMMANDES, UNE PAR STATUT, ET PAS UNE SEULE.
  *

@@ -708,6 +708,14 @@ describe("Sonde C — privilèges de colonne", () => {
     // `https://instagram.com@attaquant.example/x` s'afficherait comme Instagram
     // sur la page que le client d'un vendeur croit être la sienne.
     "shops.site_url",
+    // La description de la boutique (migration 147) : une ligne sous son nom,
+    // sur la page du client. ⚠️ ELLE EST BORNÉE EN BASE à 150 caractères, pas
+    // seulement dans le formulaire — une règle applicative s'oublie dans un
+    // nouveau chemin d'écriture, une contrainte de colonne non. `null` vaut
+    // « non configurée » et la page client OMET alors la ligne : c'est la
+    // décision 26, et c'est la fonction de lecture publique qui la fait
+    // respecter, pas le rendu.
+    "shops.description",
     // `orders` — sont volontairement ABSENTES : `public_token` et
     // `unsubscribe_token` (immuables, et deux pouvoirs distincts), `shop_id`
     // (aucun transfert entre comptes), `created_at`, `updated_at` (tenue par

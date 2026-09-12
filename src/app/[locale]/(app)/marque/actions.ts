@@ -54,6 +54,7 @@ export async function enregistrerMarque(
 
   const analyse = ReglagesMarque.safeParse({
     nom: donnees.get("nom") ?? undefined,
+    description: donnees.get("description") ?? undefined,
     couleurAccent: donnees.get("couleurAccent"),
     languePublique: donnees.get("languePublique"),
     // Une case non cochée n'est PAS transmise par le navigateur : son absence

@@ -1412,5 +1412,283 @@
         "raison": "L ARBITRAGE DU CONTROLE QUALITE, que le kit ne dessine pas. C est le seul endroit du produit ou le vendeur voit ce que ses clients ont repondu apres avoir vu les photos, et l approbation est une fonction verrouillee du brief (§7). Le kit en resume le taux dans une tuile — que nous rendons aussi — mais le detail n a pas d autre domicile."
       }
     ]
+  },
+  "fr-marque": {
+    "valeurs": [
+      {
+        "textes": [
+          "Suivi d'envois",
+          "Analyses",
+          "Ma marque"
+        ],
+        "motif": "contrainte",
+        "raison": "Position seule. Le kit pose une entree « Tableau de bord » au-dessus de « Commandes » ; cette route n existe pas, et une entree de navigation qui mene a un 404 est pire qu une entree absente."
+      },
+      {
+        "texte": "Commandes",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur et la position : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree absente."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu, et nos sections portent des aides que le kit n ecrit pas."
+      },
+      {
+        "textes": [
+          "Logo de la marque",
+          "Nom de la boutique",
+          "Description (optionnelle)",
+          "Couleur principale",
+          "Instagram",
+          "TikTok",
+          "WhatsApp",
+          "Site web (optionnel)"
+        ],
+        "motif": "structure",
+        "raison": "LARGEUR DES ETIQUETTES DE CHAMP, ET UNE SEULE CAUSE. Une etiquette est un bloc : elle s etire a sa colonne. Le kit met ses champs dans une grille de deux colonnes EGALES, nous mettons le logo dans une colonne qui se dimensionne sur son contenu et le reste dans l autre — sans quoi le bloc du logo, large de 180 px, occuperait la moitie de la section. Les tailles, graisses, couleurs et interlignes sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Ajoutez les informations principales de ",
+          "Choisissez les couleurs qui représentent",
+          "Ajoutez vos réseaux sociaux pour qu'ils ",
+          "Choisissez les éléments à afficher sur v",
+          "Personnalisez votre lien pour un rendu p",
+          "Voici un aperçu de ce que verront vos cl"
+        ],
+        "motif": "structure",
+        "raison": "LARGEUR DES SOUS-TITRES DE SECTION. Le kit laisse le sien occuper toute la largeur de l en-tete ; le notre partage cette ligne avec une action — le badge de contraste, la mention « facultatif », « en direct » — et se replie donc une ligne plus tot. L interligne est desormais celui du kit (1,55)."
+      },
+      {
+        "texte": "34 / 150",
+        "motif": "structure",
+        "raison": "Six pixels de largeur et la teinte du compteur de description. Le kit le pose DANS le champ, en bas a droite, sur la teinte estompee ; le notre est en sourdine — un cran plus lisible, parce qu il est le seul a dire pourquoi la saisie s arretera."
+      },
+      {
+        "textes": [
+          "Aperçu de votre page client",
+          "(Pro)",
+          "Pro",
+          "Fonctionnalité Pro",
+          "Avec un lien personnalisé à votre marque",
+          "Enregistrer les modifications"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION, ET UNE SEULE CAUSE POUR CES LIGNES. Nos sections portent des phrases d aide que le kit n ecrit pas — ce que devient une page sans nom ni logo, ou va la description, ce que font les liens des reseaux, pourquoi la couleur est ajustee. Chacune est une decision du produit rendue lisible, et elles allongent la colonne. Le bouton d enregistrement, lui, est rendu DEUX fois chez nous : une barre collee au telephone, une flottante au bureau — le kit n en dessine qu une, et aucune des deux planches ne dessine la notre."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Tableau de bord",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "Deux routes que le depot n a pas. Ce sont des ecrans a CREER, pas a migrer."
+      },
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      },
+      {
+        "texte": "Voir ma page client",
+        "motif": "contrainte",
+        "raison": "UN BOUTON QUI NE MENE NULLE PART. Il n existe AUCUNE page client de la boutique : le produit fait une page PAR COMMANDE, chacune derriere son jeton. Le faire pointer vers la derniere commande serait inventer une destination — et compter une vue sur la commande d un vrai client (decision 22). Une entree qui mene a un 404 est pire qu une entree absente."
+      },
+      {
+        "textes": [
+          "1 . Identité de la marque",
+          "2 . Personnalisation",
+          "3 . Réseaux sociaux",
+          "4 . Options d'affichage",
+          "5 . Lien personnalisé"
+        ],
+        "motif": "structure",
+        "raison": "ARTEFACT DE SONDE, PAS ECART VISUEL. Le kit ecrit `{step}. {title}` en JSX, ce qui produit DEUX noeuds de texte — « 1 » puis « . Identite de la marque » — que le releve joint par une espace : il relit donc « 1 . ». Nous ecrivons une seule chaine. Meme taille, meme graisse, meme interlettrage, meme boite — voir les declarations symetriques dans les elements en trop."
+      },
+      {
+        "textes": [
+          "LaPlanque",
+          "Vêtements · Sneakers · Accessoires"
+        ],
+        "motif": "donnee",
+        "raison": "Le nom et la description de la boutique de demonstration. Les deux champs EXISTENT desormais — la description est arrivee avec la migration 147 — et rendent les valeurs du jeu de mesure."
+      },
+      {
+        "texte": "Changer le logo",
+        "motif": "donnee",
+        "raison": "L ETAT PEUPLE DU BOUTON DE LOGO. Le kit montre une boutique qui a deja un logo ; le compte du jeu de mesure n en a pas, et le bouton dit alors « Choisir une image ». Les deux etats existent, et « Changer » sur un emplacement vide serait faux."
+      },
+      {
+        "texte": "PNG, JPG ou SVG · Max 2 Mo",
+        "motif": "donnee",
+        "raison": "LES FORMATS ET LE PLAFOND SONT CEUX DU PRODUIT, PAS CEUX DU DESSIN. Le depot accepte PNG, JPG et WebP — pas le SVG, qui est un document capable de porter du script et qu il faudrait assainir avant stockage. Et le plafond vient de la configuration (`DEPOT_LOGO_MAX_KO`), pas d une phrase : ecrire « 2 Mo » promettrait une limite que le depot refuserait, et le vendeur ne le decouvrirait qu au refus."
+      },
+      {
+        "texte": "Couleur secondaire",
+        "motif": "contrainte",
+        "raison": "IL N Y A QU UNE COULEUR, ET C EST LA REGLE 1 DU DESIGN SYSTEM. L accent est UNE variable pilotee par le vendeur, dont le contraste est resolu automatiquement — 4,5:1 sur le texte, 3:1 sur l interface. Une seconde couleur demanderait sa propre resolution de contraste ET un endroit ou elle s applique : la page client n en emploie aucune. Un champ dessine n est pas une autorisation."
+      },
+      {
+        "textes": [
+          "Afficher le logo",
+          "Afficher les photos de la commande",
+          "Afficher la description",
+          "Afficher le suivi en temps réel",
+          "Afficher les réseaux sociaux",
+          "Afficher un bouton de contact"
+        ],
+        "motif": "contrainte",
+        "raison": "LES SIX INTERRUPTEURS D AFFICHAGE N ONT AUCUNE COLONNE, et `CLAUDE.md` le dit nommement : « elles ne s implementent pas au motif qu elles sont dessinees ». `shops` ne porte que `watermark_enabled`. Et le produit applique deja la regle qu ils decriraient : un champ laisse vide n apparait pas sur la page du client — rien de configure, aucun bloc affiche. Six interrupteurs pour choisir de cacher ce qui est deja absent seraient six reglages sans effet."
+      },
+      {
+        "texte": "https://droplink.fr/",
+        "motif": "donnee",
+        "raison": "L origine du kit dans le champ verrouille de la section 5. Le notre porte celle du serveur mesure."
+      },
+      {
+        "textes": [
+          "Desktop",
+          "Mobile"
+        ],
+        "motif": "structure",
+        "raison": "LA BASCULE DE L APERCU, ET ELLE NE CHANGERAIT RIEN CHEZ NOUS. Le kit rend son apercu dans une iframe vers sa vraie page client, dont les deux largeurs different ; le notre est une MAQUETTE a l echelle, identique aux deux. Ce qui change entre un bureau et un telephone sur la page client, c est l ORDRE des blocs — la galerie passe avant l expedition —, pas la marque. Deux boutons qui ne changent rien seraient pires que pas de boutons : on clique, rien ne bouge, on conclut que l apercu est casse."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
+      },
+      {
+        "textes": [
+          "Alertes",
+          "Le client n’a pas encore ouvert son lien",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les deux compteurs sont declares par MOTIF : ecrits en toutes lettres, ils mouraient au premier changement de jeu de mesure."
+      },
+      {
+        "textes": [
+          "1. Identité de la marque",
+          "2. Personnalisation",
+          "3. Réseaux sociaux",
+          "4. Options d'affichage",
+          "5. Lien personnalisé"
+        ],
+        "motif": "structure",
+        "raison": "LES MEMES CINQ TITRES, EN UNE SEULE CHAINE. Voir la declaration symetrique dans les manquants : c est le releve qui joint les deux noeuds de texte du kit par une espace, pas l ecran qui differe."
+      },
+      {
+        "texte": "Vetements · Sneakers · Accessoires",
+        "motif": "donnee",
+        "raison": "La description du jeu de mesure, rendue dans l apercu. Celle du kit porte les accents ; le compte jetable est cree sans, pour que son nom traverse sans encombre les journaux et les adresses."
+      },
+      {
+        "textes": [
+          "en direct",
+          "Votre commande",
+          "pour votre client",
+          "Approuver"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CONTENU DE L APERCU. Le kit rend une iframe vers sa vraie page client ; le notre est une MAQUETTE a l echelle — reutiliser les vrais composants ferait entrer tout le poids de la page cliente dans cet ecran, et une iframe vers `/p/<jeton>` compterait une vue sur la commande d un vrai client. « en direct » dit la seule propriete que cet encart promet : il suit la frappe."
+      },
+      {
+        "textes": [
+          "Choisir une image",
+          "PNG, JPG ou WebP · Max 20 Ko"
+        ],
+        "motif": "donnee",
+        "raison": "L etat VIDE du bouton de logo et les formats reellement acceptes — voir les declarations symetriques de « Changer le logo » et « PNG, JPG ou SVG · Max 2 Mo »."
+      },
+      {
+        "textes": [
+          "Sans nom ni logo, la page de votre clien",
+          "Une ligne sous votre nom, sur la page de",
+          "Sur la page de vos clients, le texte pos",
+          "Ces liens s’ouvrent hors de la page de v",
+          "Votre nom apparaît en discret sur chaque",
+          "Vos clients voient toujours cette langue"
+        ],
+        "motif": "contrainte",
+        "raison": "LES AIDES SOUS LES CHAMPS, que le kit n ecrit pas. Chacune porte une decision du produit qui se voit autrement chez le client : l en-tete est OMIS sans nom ni logo (decision 24), la description suit le nom, la couleur stockee n est jamais reecrite (regle 1), les liens s ouvrent hors de la page, le filigrane decourage sans empecher, et la langue des pages client est celle du VENDEUR et non celle de l URL. Un reglage dont on ne dit pas l effet est un reglage qu on regle au hasard."
+      },
+      {
+        "textes": [
+          "Contraste conforme",
+          "Texte sur blanc",
+          "En transit",
+          "4,5:1 minimum",
+          "Bouton",
+          "3:1 minimum",
+          "Bandeau",
+          "Texte inversé"
+        ],
+        "motif": "contrainte",
+        "raison": "LA DEMONSTRATION DE CONTRASTE, exigee par la regle 1 : « la conformite doit etre obtenue AUTOMATIQUEMENT, sans que le vendeur ait a chercher une couleur qui marche ». Le kit lui laisse choisir deux couleurs et ne montre ni l une ni l autre appliquee ; nous montrons les trois surfaces ou la sienne atterrit, avec le seuil que chacune doit tenir. C est ce qui rend la regle verifiable par celui qui choisit."
+      },
+      {
+        "texte": "facultatif",
+        "motif": "contrainte",
+        "raison": "Les quatre reseaux sont FACULTATIFS, et le dire en tete de section evite de le repeter quatre fois. Le kit ne le dit qu au champ « Site web (optionnel) »."
+      },
+      {
+        "textes": [
+          "Filigrane sur les photos",
+          "Langue des pages client"
+        ],
+        "motif": "contrainte",
+        "raison": "LES DEUX SEULES OPTIONS QUI EXISTENT EN BASE, la ou le kit en dessine six qui n ont aucune colonne. `watermark_enabled` et `default_language` sont des reglages REELS, et la langue des pages client est une decision produit verrouillee — celle du vendeur, jamais celle de l URL."
+      },
+      {
+        "motifs": [
+          "^[a-z0-9.-]+(:\\d+)?/$"
+        ],
+        "motif": "donnee",
+        "raison": "L origine du serveur de mesure dans le champ verrouille de la section 5 — voir la declaration symetrique de « https://droplink.fr/ ». Le motif est ancre aux deux bouts et ne couvre qu une origine suivie d une barre oblique."
+      },
+      {
+        "textes": [
+          "Enregistrement…",
+          "Réessayer"
+        ],
+        "motif": "contrainte",
+        "raison": "LES DEUX AUTRES ETATS DU BOUTON D ENREGISTREMENT. Un bouton qui ne dit pas qu il travaille se fait cliquer deux fois, et un echec muet laisse croire que c est enregistre — ici un seul geste rhabille TOUTES les pages du vendeur, y compris les liens deja envoyes."
+      }
+    ]
   }
 }

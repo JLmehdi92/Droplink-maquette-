@@ -9,6 +9,8 @@ import { onboardingAFaire } from "@/lib/comptes/profil";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { signerLecture } from "@/lib/storage/r2";
 import { estLangueSupportee } from "@/i18n/config";
+import { origineDuSite } from "@/lib/site";
+import { limites } from "@/lib/storage/limites";
 
 export async function generateMetadata({
   params,
@@ -84,6 +86,9 @@ export default async function Marque({
               // l'écriture, où la chaîne vide redevient `null` en base — c'est
               // `null` qui fait omettre l'en-tête sur la page publique.
               nom: profil.nomBoutique ?? "",
+              description: profil.description ?? "",
+              origine: (await origineDuSite()) ?? "",
+              plafondLogoKo: Math.round(limites().logoOctets / 1024),
               couleur: profil.couleurAccent,
               languePublique: profil.languePublique,
               filigrane: profil.filigrane,

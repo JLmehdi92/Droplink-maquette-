@@ -26,7 +26,14 @@ import { normaliserLien, type CleLien } from "@/lib/boutique/normaliser-lien";
  * requête est bien écrite.
  */
 
-export const NOM_MAX = 60;
+/*
+ * LES BORNES VIVENT DANS `bornes.ts`, ET ELLES Y SONT ALLEES POUR UNE RAISON
+ * MESUREE : ce module est `server-only`, et le compteur du formulaire — un
+ * composant client — en a besoin. Le build refusait, ce qui est exactement ce
+ * que cette barriere doit faire.
+ */
+export { NOM_MAX, DESCRIPTION_MAX } from "./bornes";
+import { NOM_MAX, DESCRIPTION_MAX } from "./bornes";
 
 /**
  * LES TROIS RÉSEAUX, ET LEUR DOMAINE ATTENDU.
@@ -101,6 +108,15 @@ export const ReglagesMarque = z.object({
   // nommé sa boutique : la page publique OMET alors l'en-tête, et c'est le cas
   // le plus fréquent en début de vie d'un compte, pas un repli dégradé.
   nom: z.string().trim().max(NOM_MAX).optional(),
+  /*
+   * LA DESCRIPTION — une ligne sous le nom, sur la page du client.
+   *
+   * ⚠️ LA BORNE EST LA MÊME QU'EN BASE (migration 147) ET QUE CELLE DU
+   * COMPTEUR DU KIT : 150. Trois endroits, une seule valeur — `DESCRIPTION_MAX`
+   * la porte, et la contrainte de colonne la fait respecter même par un chemin
+   * d'écriture qu'on n'aurait pas prévu.
+   */
+  description: z.string().trim().max(DESCRIPTION_MAX).optional(),
   couleurAccent: z
     .string()
     .trim()
@@ -138,6 +154,9 @@ export async function appliquerReglagesMarque(
       // d'omettre l'en-tête sur `null`, et un nom vide produirait une barre de
       // titre vide plutôt que pas de barre du tout.
       name: nom === undefined || nom === "" ? null : nom,
+      // Même règle que le nom : la chaîne vide vaut ABSENCE, et la page client
+      // omet alors la ligne plutôt que d'en rendre une vide (décision 26).
+      description: vide(reglages.description),
       accent_color: reglages.couleurAccent.toLowerCase(),
       default_language: reglages.languePublique,
       watermark_enabled: reglages.filigrane,

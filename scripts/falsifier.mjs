@@ -413,14 +413,20 @@ const SQL = {
                else jsonb_build_object('commentaire', v_commentaire) end);
         return v_statut;
       end; $$;`,
+    // ⚠️ LA REPARATION VISAIT LA 069, QUE LA 121 A REDEFINIE. C est la sonde
+    // `falsificateur-a-jour` qui l a attrape, au premier passage des portes
+    // apres l ecriture de la 121 : reparer depuis la 069 aurait remis
+    // l attribution du QC dans son etat FAUX — une revision du client
+    // reattribuee au vendeur — pendant que le script annonce avoir repare.
     reparerDepuisMigration: {
-      // ⚠️ LA REPARATION VISAIT LA 069, QUE LA 121 A REDEFINIE. C est la sonde
-      // `falsificateur-a-jour` qui l a attrape, au premier passage des portes
-      // apres l ecriture de la 121 : reparer depuis la 069 aurait remis
-      // l attribution du QC dans son etat FAUX — une revision du client
-      // reattribuee au vendeur — pendant que le script annonce avoir repare.
       fichier: "135_le_commentaire_du_client_perdait_sa_decision.sql",
-      depuis: "create or replace function public.arbitrer_qc",
+      // ⚠️ `create function`, PAS `create or replace`. La 135 DROPE la fonction
+      // d abord puis la recree : l ancre citait une forme qui n a jamais existe
+      // dans ce fichier, et la reparation aurait echoue en disant « introuvable ».
+      // Le defaut etait INVISIBLE a la sonde `falsificateur-a-jour` jusqu au
+      // 13/09 : son motif exigeait `fichier:` juste apres l accolade, et un
+      // commentaire pose au-dessus faisait sauter ce bloc en entier.
+      depuis: "create function public.arbitrer_qc",
     },
   },
 
@@ -776,12 +782,12 @@ const SQL = {
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
-                     boutique_site text)
+                     boutique_site text, boutique_description text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language, s.watermark_enabled,
-             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url
+             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -789,15 +795,23 @@ const SQL = {
       $$;
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
+    // ⚠️ LA 147, PAS LA 133. La 147 redefinit `lire_commande_publique` pour y
+    // ajouter la description de la boutique : reparer depuis la 133 aurait
+    // remis en place une fonction a DIX-NEUF colonnes, et la page client
+    // aurait cesse de repondre — une reparation qui casse est pire que la
+    // falsification.
     reparerDepuisMigration: {
-      fichier: "133_le_site_web_du_vendeur.sql",
+      fichier: "147_la_description_de_la_boutique.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      jusqua: "grant update (site_url",
+      // ⚠️ PLUS DE BORNE HAUTE : dans la 147, la fonction et ses DROITS vont
+      // jusqu a la fin du fichier. La borne existait pour que la decoupe
+      // couvre le `revoke all` et le `grant execute to anon` — les droits ne
+      // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
     },
   },
 
@@ -819,12 +833,12 @@ const SQL = {
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
-                     boutique_site text)
+                     boutique_site text, boutique_description text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, 'fr'::text, (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
-             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url
+             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -832,15 +846,23 @@ const SQL = {
       $$;
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
+    // ⚠️ LA 147, PAS LA 133. La 147 redefinit `lire_commande_publique` pour y
+    // ajouter la description de la boutique : reparer depuis la 133 aurait
+    // remis en place une fonction a DIX-NEUF colonnes, et la page client
+    // aurait cesse de repondre — une reparation qui casse est pire que la
+    // falsification.
     reparerDepuisMigration: {
-      fichier: "133_le_site_web_du_vendeur.sql",
+      fichier: "147_la_description_de_la_boutique.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      jusqua: "grant update (site_url",
+      // ⚠️ PLUS DE BORNE HAUTE : dans la 147, la fonction et ses DROITS vont
+      // jusqu a la fin du fichier. La borne existait pour que la decoupe
+      // couvre le `revoke all` et le `grant execute to anon` — les droits ne
+      // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
     },
   },
 
@@ -909,12 +931,12 @@ const SQL = {
         from public.orders o
         where o.created_at >= p_precedent and o.first_content_at is not null
       $$;`,
+    // ⚠️ LA 146, PAS LA 106. La 146 redefinit `analyser_activite` pour y
+    // ajouter `commandes_livrees` : reparer depuis la 106 aurait remis en
+    // place une fonction a NEUF colonnes, et l ecran des analyses aurait
+    // cesse de repondre — une reparation qui casse est pire que la
+    // falsification.
     reparerDepuisMigration: {
-      // ⚠️ LA 146, PAS LA 106. La 146 redefinit `analyser_activite` pour y
-      // ajouter `commandes_livrees` : reparer depuis la 106 aurait remis en
-      // place une fonction a NEUF colonnes, et l ecran des analyses aurait
-      // cesse de repondre — une reparation qui casse est pire que la
-      // falsification.
       fichier: "146_les_analyses_savent_enfin_compter.sql",
       depuis: "create function public.analyser_activite",
       jusqua: "comment on function",
@@ -956,12 +978,12 @@ const SQL = {
         from public.orders o
         where o.created_at >= p_precedent and o.first_content_at is not null
       $$;`,
+    // ⚠️ LA 146, PAS LA 106. La 146 redefinit `analyser_activite` pour y
+    // ajouter `commandes_livrees` : reparer depuis la 106 aurait remis en
+    // place une fonction a NEUF colonnes, et l ecran des analyses aurait
+    // cesse de repondre — une reparation qui casse est pire que la
+    // falsification.
     reparerDepuisMigration: {
-      // ⚠️ LA 146, PAS LA 106. La 146 redefinit `analyser_activite` pour y
-      // ajouter `commandes_livrees` : reparer depuis la 106 aurait remis en
-      // place une fonction a NEUF colonnes, et l ecran des analyses aurait
-      // cesse de repondre — une reparation qui casse est pire que la
-      // falsification.
       fichier: "146_les_analyses_savent_enfin_compter.sql",
       depuis: "create function public.analyser_activite",
       jusqua: "comment on function",
@@ -1084,13 +1106,13 @@ const SQL = {
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
-                     boutique_site text)
+                     boutique_site text, boutique_description text)
       language sql stable security definer set search_path = '' as $$
         select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
                o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
                o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language,
                (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
-               s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url
+               s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description
         from public.orders o
         join public.shops s on s.id = o.shop_id
         join public.profiles p on p.id = s.owner_id
@@ -1098,15 +1120,23 @@ const SQL = {
       $$;
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
+    // ⚠️ LA 147, PAS LA 133. La 147 redefinit `lire_commande_publique` pour y
+    // ajouter la description de la boutique : reparer depuis la 133 aurait
+    // remis en place une fonction a DIX-NEUF colonnes, et la page client
+    // aurait cesse de repondre — une reparation qui casse est pire que la
+    // falsification.
     reparerDepuisMigration: {
-      fichier: "133_le_site_web_du_vendeur.sql",
+      fichier: "147_la_description_de_la_boutique.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      jusqua: "grant update (site_url",
+      // ⚠️ PLUS DE BORNE HAUTE : dans la 147, la fonction et ses DROITS vont
+      // jusqu a la fin du fichier. La borne existait pour que la decoupe
+      // couvre le `revoke all` et le `grant execute to anon` — les droits ne
+      // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
     },
   },
 

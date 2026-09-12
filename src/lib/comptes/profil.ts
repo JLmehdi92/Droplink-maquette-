@@ -41,6 +41,8 @@ export type ProfilVendeur = {
   readonly langue: string;
   readonly shopId: string;
   readonly nomBoutique: string | null;
+  /** La ligne sous le nom, sur la page du client. `null` = non configurée. */
+  readonly description: string | null;
   readonly logoUrl: string | null;
   readonly couleurAccent: string;
   readonly filigrane: boolean;
@@ -151,7 +153,7 @@ export async function lireProfilAvec(
     supabase
       .from("profiles")
       .select(
-        "id, email, account_type, status, locale, shops(id, name, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
+        "id, email, account_type, status, locale, shops(id, name, description, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
       )
       .maybeSingle(),
   ]);
@@ -206,6 +208,7 @@ export async function lireProfilAvec(
   const s = shop as {
     id: string;
     name: string | null;
+    description: string | null;
     logo_url: string | null;
     accent_color: string;
     watermark_enabled: boolean;
@@ -224,6 +227,7 @@ export async function lireProfilAvec(
     langue: data.locale,
     shopId: s.id,
     nomBoutique: s.name,
+    description: s.description,
     logoUrl: s.logo_url,
     couleurAccent: s.accent_color,
     filigrane: s.watermark_enabled,

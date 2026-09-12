@@ -88,6 +88,14 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
       "`Intl`, donc d\u00e9j\u00e0 localis\u00e9es : \u00e9crire un mot autour les redirait.",
   ],
   ["medias.compteur", "Deux variables et une barre oblique."],
+  ["marque.descriptionCompteur", "Deux variables et une barre oblique."],
+  /* Trois mots de l'écran de marque qui ne se traduisent pas : « Pro » est le
+     nom du plan, et l'exemple de lien doit montrer la FORME attendue — un
+     segment d'URL en lettres latines, parce que c'est ce qu'une adresse
+     accepte. */
+  ["marque.lienPro", "Le nom du plan, entre parenthèses pleine largeur."],
+  ["marque.lienProBadge", "Le nom du plan, seul."],
+  ["marque.lienPlaceholder", "Un exemple de segment d'URL : il doit ressembler à une adresse."],
   ["admin.comptes.colisSurSeuil", "Deux variables et une barre oblique."],
   ["admin.fiche.surPlafond", "Deux variables et une barre oblique."],
   [

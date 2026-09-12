@@ -428,8 +428,29 @@ export default async function PagePublique({
                 />
               ) : null}
               {commande.boutique.nom !== null ? (
-                <span className="text-[16px] leading-5 font-bold tracking-[-0.01em] lg:text-[18px] lg:leading-[23px]">
-                  {commande.boutique.nom}
+                <span className="flex min-w-0 flex-col">
+                  <span className="text-[16px] leading-5 font-bold tracking-[-0.01em] lg:text-[18px] lg:leading-[23px]">
+                    {commande.boutique.nom}
+                  </span>
+                  {/*
+                    LA DESCRIPTION DE LA BOUTIQUE — la deuxième ligne de
+                    l'en-tête du kit : « Vêtements · Sneakers · Accessoires ».
+
+                    ⚠️ ELLE EST OMISE QUAND ELLE N'EST PAS CONFIGURÉE, jamais
+                    remplacée par un texte d'attente : décision 26, et c'est la
+                    page que voit le CLIENT — celle où une information inventée
+                    coûte le plus cher. La condition « pas de nom, pas de
+                    description » est résolue EN BASE, pas ici : une règle
+                    applicative s'oublie dans un nouveau chemin de lecture.
+                  */}
+                  {commande.boutique.description === null ? null : (
+                    <span
+                      className="text-[12px] leading-[16px] lg:text-[13px] lg:leading-[17px]"
+                      style={{ color: accent.surRemplissageDoux }}
+                    >
+                      {commande.boutique.description}
+                    </span>
+                  )}
                 </span>
               ) : null}
             </div>

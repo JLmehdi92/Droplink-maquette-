@@ -32,6 +32,13 @@ export const JetonPublic = z.string().regex(/^[0-9A-Za-z]{16,64}$/);
 
 export interface Boutique {
   readonly nom: string | null;
+  /**
+   * La ligne sous le nom. `null` quand elle n'est pas configurée — et AUSSI
+   * quand il n'y a pas de nom : c'est la base qui résout la condition
+   * (migration 147), parce qu'une description seule flotterait au-dessus du
+   * contenu sans dire de qui elle parle.
+   */
+  readonly description: string | null;
   readonly logo: string | null;
   readonly couleur: string;
   readonly langue: string;
@@ -211,6 +218,7 @@ async function lireCommandePubliqueSansMemo(
     modifieeLe: ligne.modifiee_le,
     boutique: {
       nom: ligne.boutique_nom,
+      description: ligne.boutique_description,
       logo: logoSigne,
       couleur: ligne.boutique_couleur,
       langue: ligne.boutique_langue,

@@ -171,6 +171,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
 
   const BOUTIQUE = {
     nom: "Atelier Nord",
+    description: null,
     logo: null,
     couleur: "#0058be",
     langue: "fr",

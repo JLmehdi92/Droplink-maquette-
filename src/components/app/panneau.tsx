@@ -31,6 +31,7 @@ export function Panneau({
   action,
   children,
   className,
+  taille = "panneau",
 }: {
   readonly titre: ReactNode;
   readonly sousTitre?: string;
@@ -45,6 +46,20 @@ export function Panneau({
   readonly action?: ReactNode;
   readonly children: ReactNode;
   readonly className?: string;
+  /**
+   * LA TAILLE DU TITRE — deux valeurs, et ce n'est pas un réglage esthétique.
+   *
+   * ⚠️ LE KIT EMPLOIE DEUX COMPOSANTS DIFFÉRENTS. `Panel` porte un titre de
+   * 19 px en -0,03em : c'est celui des écrans qui MONTRENT — commandes, envois,
+   * analyses, détail. `SectionCard` en porte un de 17 px en -0,025em : c'est
+   * celui des écrans qui font REMPLIR un formulaire en étapes numérotées, et
+   * `BrandView` n'emploie que celui-là. Mesuré sur la page servie : 17/700,
+   * interligne 18,7 px, interlettrage -0,425 px.
+   *
+   * Les rendre tous à 19 faisait dépasser les cinq titres de `/marque` de deux
+   * pixels, et l'écart se propage à toute la colonne.
+   */
+  readonly taille?: "panneau" | "section";
 }) {
   return (
     <section
@@ -69,11 +84,21 @@ export function Panneau({
             kit en rend 21. Huit pixels par titre, six titres : c'est la
             hauteur d'une ligne de contenu qui se décale sur toute la page.
           */}
-          <h2 className="text-[18px] leading-[1.1] font-bold tracking-[-0.03em] text-ds-texte-titre lg:text-[19px]">
+          <h2
+            className={
+              "leading-[1.1] font-bold text-ds-texte-titre " +
+              (taille === "section"
+                ? "text-[16px] tracking-[-0.025em] lg:text-[17px]"
+                : "text-[18px] tracking-[-0.03em] lg:text-[19px]")
+            }
+          >
             {titre}
           </h2>
+          {/* 1,55 d'interligne, comme le kit : 20,15 px sur 13. Notre corps de
+              page impose 1,5, soit 19,5 — le sous-titre se replie alors une
+              ligne plus tôt sur les phrases longues. */}
           {sousTitre === undefined ? null : (
-            <p className="mt-1 text-[13px] text-ds-texte-corps">{sousTitre}</p>
+            <p className="mt-1 text-[13px] leading-[1.55] text-ds-texte-corps">{sousTitre}</p>
           )}
         </div>
         <span className="flex-1" />

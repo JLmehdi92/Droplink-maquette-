@@ -484,6 +484,7 @@ export type Database = {
           commandes_reelles: number
           created_at: string
           default_language: string
+          description: string | null
           id: string
           instagram_url: string | null
           logo_url: string | null
@@ -503,6 +504,7 @@ export type Database = {
           commandes_reelles?: number
           created_at?: string
           default_language?: string
+          description?: string | null
           id?: string
           instagram_url?: string | null
           logo_url?: string | null
@@ -522,6 +524,7 @@ export type Database = {
           commandes_reelles?: number
           created_at?: string
           default_language?: string
+          description?: string | null
           id?: string
           instagram_url?: string | null
           logo_url?: string | null
@@ -989,6 +992,7 @@ export type Database = {
         Args: { p_jeton: string }
         Returns: {
           boutique_couleur: string
+          boutique_description: string
           boutique_filigrane: boolean
           boutique_instagram: string
           boutique_langue: string

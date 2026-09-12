@@ -19,6 +19,7 @@ import {
   type ResultatMarque,
 } from "@/app/[locale]/(app)/marque/actions";
 import { resoudreAccent } from "@/lib/design/contraste";
+import { DESCRIPTION_MAX } from "@/lib/boutique/bornes";
 import { logoReduit } from "@/lib/medias/vignette";
 import { limites } from "@/lib/storage/limites";
 
@@ -112,6 +113,18 @@ export function FormulaireMarque({
   readonly libelles: Record<Langue, LibellesApercu>;
   readonly initial: {
     readonly nom: string;
+    readonly description: string;
+    /** L'origine publique du site, pour le champ verrouillé de la section 5. */
+    readonly origine: string;
+    /**
+     * Le plafond du logo, en kilo-octets, tel que la configuration le pose.
+     *
+     * ⚠️ IL DESCEND DU SERVEUR PLUTOT QUE D ETRE ECRIT ICI : il vient de
+     * `DEPOT_LOGO_MAX_KO`, donc il change sans que ce fichier bouge. Un
+     * nombre recopie dans une phrase promettrait au vendeur une limite que
+     * le depot refuserait — et il ne le decouvrirait qu au refus.
+     */
+    readonly plafondLogoKo: number;
     readonly couleur: string;
     readonly languePublique: Langue;
     readonly filigrane: boolean;
@@ -128,6 +141,18 @@ export function FormulaireMarque({
   const [resultat, action] = useActionState(enregistrerMarque, INITIAL);
 
   const [nom, setNom] = useState(initial.nom);
+  /*
+   * L'ORIGINE MONTRÉE DANS LE CHAMP VERROUILLÉ DE LA SECTION 5.
+   *
+   * ⚠️ ELLE VIENT DU SERVEUR, jamais de `window.location` : cet écran est un
+   * îlot client, et lire l'origine du navigateur ferait afficher
+   * `localhost:3000` sur une capture de développement et le domaine réel
+   * ailleurs — deux vérités pour un seul texte. Vide, on n'affiche que la
+   * barre oblique plutôt qu'un domaine inventé.
+   */
+  const origineLisible =
+    initial.origine === "" ? "/" : initial.origine.replace(/^https?:\/\//, "") + "/";
+  const [description, setDescription] = useState(initial.description);
   const [couleur, setCouleur] = useState(initial.couleur);
   const [langue, setLangue] = useState<Langue>(initial.languePublique);
   /*
@@ -316,7 +341,12 @@ export function FormulaireMarque({
   // textes d'aide en 13/400 sur la même encre. Douze en gras était l'ancien
   // canevas — deux graisses pour deux rôles que le design system distingue par
   // la TAILLE, pas par le poids.
-  const etiquette = "mb-[9px] block text-[13px] font-medium text-ds-texte-corps";
+  /* ⚠️ `leading-[normal]` ET NON `leading-normal` : le second vaut 1,5 dans
+     l'échelle Tailwind, exactement ce qu'on corrige. Le kit laisse ses
+     étiquettes de champ sur le `normal` du CSS — 16 px de boîte au lieu
+     de 20. */
+  const etiquette =
+    "mb-[9px] block text-[13px] leading-[normal] font-medium text-ds-texte-corps";
   const aide = "text-[13px] leading-[19px] text-ds-texte-sourdine";
 
   const aUnEnTete = nom.trim() !== "" || apercuLogo !== null;
@@ -339,6 +369,19 @@ export function FormulaireMarque({
       titre={t("apercuTitre")}
       sousTitre={t("apercuAide")}
       action={
+        /*
+          ⚠️ CE N'EST PAS UNE BASCULE DE LARGEUR, ET LE KIT NON PLUS N'EN FAIT
+          PAS UNE. Ses deux boutons « Desktop » et « Mobile » changent le CADRE
+          de l'aperçu ; le nôtre est déjà une maquette à l'échelle qui se rend
+          identiquement aux deux largeurs — ce qui change entre un bureau et un
+          téléphone, sur la page client, c'est l'ORDRE des blocs (la galerie
+          passe avant l'expédition), pas la marque.
+
+          Rendre deux boutons qui ne changeraient rien serait pire que ne rien
+          rendre : le vendeur cliquerait, rien ne bougerait, et il conclurait
+          que l'aperçu est cassé. On garde donc la mention « en direct », qui
+          dit une propriété VRAIE de cet encart — il suit la frappe.
+        */
         <span className="shrink-0 pt-1 text-[13px] text-ds-texte-sourdine">
           {t("apercuDirect")}
         </span>
@@ -378,8 +421,25 @@ export function FormulaireMarque({
                 />
               )}
               {nom.trim() !== "" ? (
-                <span className="truncate text-[12px] font-bold lg:text-[12px]">
-                  {nom}
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate text-[12px] font-bold lg:text-[12px]">{nom}</span>
+                  {/* LA DESCRIPTION SUIT LE NOM, ET SEULEMENT LUI. Sans nom,
+                      l'en-tête est omis en entier (décision 24) : une
+                      description seule flotterait au-dessus du contenu sans
+                      dire de qui elle parle. C'est la même règle que la
+                      fonction de lecture publique applique en base. */}
+                  {description.trim() === "" ? null : (
+                    <span
+                      /* 10,5 px AU BUREAU, comme la maquette ; 11,5 en dessous,
+                         plancher de la regle 5. L apercu est `aria-hidden`, mais
+                         c est du texte qu un oeil lit quand meme — et la regle
+                         protege l oeil, pas le lecteur d ecran. */
+                      className="truncate text-[11.5px] leading-[normal] lg:text-[10.5px]"
+                      style={{ color: accent.surRemplissageDoux }}
+                    >
+                      {description}
+                    </span>
+                  )}
                 </span>
               ) : null}
             </div>
@@ -498,30 +558,19 @@ export function FormulaireMarque({
 
         <div className="flex flex-col gap-3 lg:gap-4 xl:col-start-1 xl:row-start-1">
           {/* --- Identité ------------------------------------------------ */}
-          <Panneau titre={t("identiteTitre")} sousTitre={t("identiteAide")} icone={IdCard}>
+          <Panneau titre={t("identiteTitre")} sousTitre={t("identiteAide")} icone={IdCard} taille="section">
+            {/*
+              DEUX COLONNES AU BUREAU, comme le kit : le logo à gauche, le nom et
+              la description à droite. En une seule colonne, chaque étiquette
+              s'étirait sur 614 px pour trois mots, et la section faisait deux
+              fois la hauteur de celle du kit.
 
-            <label htmlFor="nom" className={etiquette}>
-              {t("nomTitre")}
-            </label>
-            <input
-              id="nom"
-              name="nom"
-              type="text"
-              maxLength={60}
-              value={nom}
-              onChange={(e) => setNom(e.target.value)}
-              placeholder={t("nomPlaceholder")}
-              className={champ}
-            />
-            <p className={"mt-1.5 " + aide + " text-[12px]"}>{t("nomAide")}</p>
-            {champsEnEchec.includes("nom") ? (
-              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
-                {t("erreurNom")}
-              </p>
-            ) : null}
-
-            <div className="h-[18px] lg:h-5" />
-
+              ⚠️ LE LOGO EST PREMIER DANS LA SOURCE parce que c'est sa place au
+              téléphone : c'est l'élément qu'on reconnaît d'un coup d'œil, et
+              c'est celui que le kit met en tête de sa colonne gauche.
+            */}
+            <div className="grid gap-x-4 gap-y-[18px] lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)] lg:gap-y-5">
+              <div className="min-w-0">
             <span className={etiquette}>{t("logoTitre")}</span>
             <input
               ref={champFichier}
@@ -571,19 +620,85 @@ export function FormulaireMarque({
             {/* LES FORMATS SONT ÉNUMÉRÉS, ET LE SVG N'Y EST PAS. Il est refusé
                 côté serveur parce qu'un SVG est un document capable de porter du
                 script ; l'annoncer ici évite un refus après téléversement. */}
-            <p className={"mt-2 " + aide + " text-[12px]"}>{t("depotFormats")}</p>
+            <p className={"mt-2 " + aide + " text-[12px]"}>{t("depotFormats", { n: initial.plafondLogoKo })}</p>
 
             {logo.phase === "erreur" ? (
               <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
                 {logo.motif}
               </p>
             ) : null}
+              </div>
+              <div className="min-w-0">
+
+            <label htmlFor="nom" className={etiquette}>
+              {t("nomTitre")}
+            </label>
+            <input
+              id="nom"
+              name="nom"
+              type="text"
+              maxLength={60}
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              placeholder={t("nomPlaceholder")}
+              className={champ}
+            />
+            <p className={"mt-1.5 " + aide + " text-[12px]"}>{t("nomAide")}</p>
+            {champsEnEchec.includes("nom") ? (
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+                {t("erreurNom")}
+              </p>
+            ) : null}
+
+            <div className="h-[18px] lg:h-5" />
+
+            {/*
+              LA DESCRIPTION — une ligne sous le nom, sur la page du client.
+
+              ⚠️ SON COMPTEUR N'EST PAS DÉCORATIF. Le champ est borné à 150 par
+              `maxLength`, donc la saisie s'arrête d'elle-même ; sans compteur,
+              elle s'arrête SANS RIEN DIRE, et le vendeur croit à un clavier qui
+              saute des touches. Le compteur est la seule chose qui transforme
+              une limite silencieuse en limite lisible — c'est ce que fait le
+              kit, et c'est de lui que vient le nombre.
+            */}
+            <label htmlFor="description" className={etiquette}>
+              {t("descriptionTitre")}
+            </label>
+            <span className="relative block">
+              <textarea
+                id="description"
+                name="description"
+                rows={2}
+                maxLength={DESCRIPTION_MAX}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t("descriptionPlaceholder")}
+                className={champ + " min-h-[84px] resize-y py-3 pb-7"}
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute end-3.5 bottom-2.5 text-[11.5px] leading-[normal] text-ds-texte-sourdine lg:text-[11px]"
+              >
+                {t("descriptionCompteur", { n: description.length, max: DESCRIPTION_MAX })}
+              </span>
+            </span>
+            <p className={"mt-1.5 " + aide + " text-[12px]"}>{t("descriptionAide")}</p>
+            {champsEnEchec.includes("description") ? (
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+                {t("erreurDescription", { max: DESCRIPTION_MAX })}
+              </p>
+            ) : null}
+
+              </div>
+            </div>
           </Panneau>
 
           {/* --- Couleur ------------------------------------------------- */}
           <Panneau
             titre={t("couleurTitre")}
             sousTitre={t("couleurAide")}
+            taille="section"
             icone={Palette}
             /*
               LE BADGE DIT CE QUE LA MACHINE A ÉTABLI, pas ce qu'on espère.
@@ -614,6 +729,16 @@ export function FormulaireMarque({
             }
           >
 
+            {/*
+              ⚠️ LE LIBELLE ETAIT `sr-only`, ET LE KIT L'ECRIT EN CLAIR. « Code
+              de la couleur » ne vivait que pour les lecteurs d'écran : à l'œil,
+              la pastille et le champ hexadécimal flottaient sans titre, seuls
+              champs de l'écran dans ce cas. Le kit pose « Couleur principale »
+              au-dessus, comme tous ses autres champs.
+            */}
+            <label htmlFor="couleurTexte" className={etiquette}>
+              {t("couleurPrincipale")}
+            </label>
             <div className="mb-2.5 flex items-center gap-2.5 lg:mb-[18px] lg:gap-3">
               <label
                 className="h-[46px] w-[46px] shrink-0 cursor-pointer rounded-ds-md border border-ds-filet"
@@ -711,6 +836,7 @@ export function FormulaireMarque({
           <Panneau
             titre={t("reseauxTitre")}
             sousTitre={t("reseauxAide")}
+            taille="section"
             icone={LinkIcon}
             action={
               <span className="shrink-0 pt-1 text-[13px] text-ds-texte-sourdine">
@@ -719,7 +845,13 @@ export function FormulaireMarque({
             }
           >
 
-            <div className="flex flex-col gap-3.5 lg:gap-3">
+            {/*
+              DEUX COLONNES AU BUREAU, comme le kit : Instagram | TikTok, puis
+              WhatsApp | Site web. En une seule colonne, chaque étiquette
+              s'étirait sur 562 px pour un mot de neuf caractères, et la section
+              faisait deux fois la hauteur de celle du kit.
+            */}
+            <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-3">
               {RESEAUX.map((reseau) => (
                 <div key={reseau.clef} className="flex items-end gap-[11px] lg:gap-3">
                   <span
@@ -824,7 +956,7 @@ export function FormulaireMarque({
           </Panneau>
 
           {/* --- Options ------------------------------------------------- */}
-          <Panneau titre={t("optionsTitre")} sousTitre={t("optionsAide")} icone={Eye}>
+          <Panneau titre={t("optionsTitre")} sousTitre={t("optionsAide")} icone={Eye} taille="section">
 
             <div className="mt-3 flex items-center justify-between gap-4 border-t border-ds-filet py-3.5 lg:mt-0 lg:border-t-0 lg:border-b lg:pt-0 lg:pb-4">
               <div>
@@ -914,6 +1046,71 @@ export function FormulaireMarque({
                   </option>
                 ))}
               </select>
+            </div>
+          </Panneau>
+
+          {/*
+            5. LE LIEN PERSONNALISÉ — AFFICHÉ, JAMAIS APPLIQUÉ.
+
+            ⚠️ C'EST LA DÉCISION DE WASSIM DU 12/09 : les plans se MONTRENT,
+            aucun plafond ne s'applique, et il n'existe toujours aucune ligne de
+            code de facturation — la contrainte n°1 tient. Le kit dessine cette
+            section verrouillée, avec son champ inerte et sa carte « Pro » ; on
+            la rend telle quelle.
+
+            ⚠️ ET LE CHAMP EST RÉELLEMENT INERTE, pas seulement grisé : il est
+            `disabled` et ne porte AUCUN `name`, donc rien ne part au serveur et
+            rien ne serait accepté s'il partait. Un champ désactivé à l'écran mais
+            soumis quand même est la façon la plus courante de croire qu'on a
+            fermé une porte.
+
+            ⚠️ ELLE NE PROMET RIEN DE DATÉ. Le kit n'écrit aucune échéance, et
+            nous n'en inventons pas : une fonctionnalité annoncée pour une date
+            est une dette qu'on ne peut pas tenir depuis un écran.
+          */}
+          <Panneau
+            titre={
+              <>
+                {t("lienTitre")}{" "}
+                <span className="font-medium text-ds-texte-sourdine">{t("lienPro")}</span>
+              </>
+            }
+            sousTitre={t("lienAide")}
+            taille="section"
+            icone={LinkIcon}
+          >
+            <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
+              <span className="flex min-w-0 items-stretch overflow-hidden rounded-ds-control border border-ds-filet bg-ds-surface-carte">
+                <span className="flex flex-none items-center bg-ds-surface-creux px-3.5 text-[14px] leading-[normal] text-ds-texte-sourdine">
+                  {origineLisible}
+                </span>
+                <input
+                  type="text"
+                  disabled
+                  defaultValue=""
+                  placeholder={t("lienPlaceholder")}
+                  aria-label={t("lienTitre")}
+                  /* 44 px AU TELEPHONE : la sonde compte ce champ comme une
+                     cible parce qu il porte un nom accessible, et un champ de
+                     formulaire sous le plancher se rate au pouce — qu il soit
+                     desactive aujourd hui n y change rien, il ne le sera pas
+                     toujours. */
+                  className="min-h-11 min-w-0 flex-1 bg-transparent px-3.5 py-3 text-[14px] leading-[normal] font-semibold text-ds-texte-fort placeholder:font-normal placeholder:text-ds-texte-tenu lg:min-h-0"
+                />
+              </span>
+              <span className="flex items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">
+                <span className="inline-flex flex-none items-center rounded-ds-pill bg-ds-accent px-2.5 py-1 text-[11.5px] leading-[normal] font-bold text-ds-texte-sur-marque lg:text-[11px]">
+                  {t("lienProBadge")}
+                </span>
+                <span className="flex min-w-0 flex-col">
+                  <span className="text-[14px] leading-[normal] font-bold text-ds-accent-encre">
+                    {t("lienProTitre")}
+                  </span>
+                  <span className="text-[12px] leading-[normal] text-ds-texte-corps">
+                    {t("lienProAide")}
+                  </span>
+                </span>
+              </span>
             </div>
           </Panneau>
 
