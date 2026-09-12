@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { Panneau } from "@/components/app/panneau";
 import type { CommandeConsultee } from "@/lib/analyses/activite";
 
 /**
@@ -30,19 +31,10 @@ export async function PlusConsultees({
   const maximum = commandes.reduce((m, c) => Math.max(m, c.vues), 0);
 
   return (
-    <section
-      aria-label={t("consultees.titre")}
-      className="rounded-lg border border-outline-variant bg-surface-container-lowest p-[18px] lg:rounded-[18px] lg:p-[22px]"
-    >
-      <h2 className="mb-1 font-headline-md text-[15px] leading-[19px] font-bold tracking-normal text-on-surface lg:mb-1.5 lg:text-[16px] lg:leading-[21px] lg:tracking-[-0.015em]">
-        {t("consultees.titre")}
-      </h2>
-      <p className="mb-4 font-body-sm text-[13px] leading-[19px] text-sourdine lg:mb-[18px] lg:leading-4">
-        {t("consultees.aide")}
-      </p>
+    <Panneau titre={t("consultees.titre")} sousTitre={t("consultees.aide")}>
 
       {commandes.length === 0 ? (
-        <p className="font-body-md text-[14px] text-on-surface-variant">{t("consultees.vide")}</p>
+        <p className="text-[14px] text-ds-texte-corps">{t("consultees.vide")}</p>
       ) : (
         <ul className="flex flex-col gap-[13px] lg:gap-3">
           {commandes.map((c) => (
@@ -50,7 +42,7 @@ export async function PlusConsultees({
               {c.vignette === null ? (
                 <span
                   aria-hidden="true"
-                  className="h-10 w-10 shrink-0 rounded-[10px] bg-fond-avatar"
+                  className="h-10 w-10 shrink-0 rounded-ds-sm bg-ds-surface-creux"
                 />
               ) : (
                 // `next/image` optimiserait une URL signée à expiration : le
@@ -65,7 +57,7 @@ export async function PlusConsultees({
                   height={40}
                   loading="lazy"
                   decoding="async"
-                  className="h-10 w-10 shrink-0 rounded-[10px] object-cover"
+                  className="h-10 w-10 shrink-0 rounded-ds-sm object-cover"
                 />
               )}
 
@@ -76,13 +68,13 @@ export async function PlusConsultees({
                     DÉCIDE — une ligne sans libellé lui ferait chercher laquelle
                     de ses commandes il regarde. Le champ est un texte libre et
                     facultatif : ne rien écrire laisserait la ligne muette. */}
-                <p className="truncate font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface">
+                <p className="truncate text-[14px] leading-[18px] font-semibold text-ds-texte-fort">
                   {c.client === null || c.client.trim() === ""
                     ? t("consultees.sansNom")
                     : c.client}
                 </p>
                 {c.reference === null || c.reference.trim() === "" ? null : (
-                  <p className="mt-px truncate font-body-sm text-[12px] leading-[15px] text-sourdine">
+                  <p className="mt-px truncate text-[12.5px] leading-[16px] text-ds-texte-sourdine">
                     {c.reference}
                   </p>
                 )}
@@ -90,21 +82,21 @@ export async function PlusConsultees({
 
               <div
                 aria-hidden="true"
-                className="hidden h-2 w-[200px] shrink-0 overflow-hidden rounded-full bg-filet-ligne lg:block"
+                className="hidden h-2 w-[200px] shrink-0 overflow-hidden rounded-ds-pill bg-ds-surface-creux lg:block"
               >
                 <span
-                  className="block h-full rounded-full bg-violet"
+                  className="block h-full rounded-ds-pill bg-ds-accent"
                   style={{ width: (maximum === 0 ? 0 : (c.vues / maximum) * 100) + "%" }}
                 />
               </div>
 
-              <span className="shrink-0 text-right font-headline-md text-[15px] leading-5 font-extrabold text-on-surface lg:w-11 lg:text-[14px] lg:font-bold">
+              <span className="shrink-0 text-right text-[15px] leading-5 font-extrabold text-ds-texte-fort lg:w-11 lg:text-[14px] lg:font-bold">
                 {format.number(c.vues)}
               </span>
             </li>
           ))}
         </ul>
       )}
-    </section>
+    </Panneau>
   );
 }

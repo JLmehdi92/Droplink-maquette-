@@ -1,4 +1,6 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { Eye, Link as LinkIcon, Package, Truck } from "lucide-react";
+import { TuileMetrique } from "@/components/app/tuile-metrique";
 import {
   ecartPeriodePrecedente,
   jamaisOuvertes,
@@ -57,89 +59,77 @@ export async function CompteursAnalyses({ activite }: { readonly activite: Activ
   const cartes = [
     {
       cle: "commandesCreees",
+      Icone: Package,
+      teinte: "marque" as const,
       valeur: format.number(activite.commandesCreees),
       court: ecart === null ? t("aucuneComparaison") : signe,
       long: ecart === null ? t("aucuneComparaison") : t("ecartPrecedent", { n: signe }),
       // Le sens de la variation est une COULEUR, parce que c'est la seule
       // information de l'écran qui dise une direction. Une baisse rendue du
       // même vert qu'une hausse serait une métrique faussée du côté rassurant.
-      teinte: ecart === null ? "sourdine" : ecart > 0 ? "succes" : ecart < 0 ? "alerte" : "sourdine",
+      encre:
+        ecart === null
+          ? "text-ds-texte-sourdine"
+          : ecart > 0
+            ? "font-semibold text-ds-succes"
+            : ecart < 0
+              ? "font-semibold text-ds-alerte"
+              : "text-ds-texte-sourdine",
       alerte: false,
     },
     {
       cle: "vuesMoyennes",
+      Icone: Eye,
+      teinte: "info" as const,
       valeur: nombreOuTiret(vuesParCommandeOuverte(activite)),
       court: t("leClientRevientCourt"),
       long: t("leClientRevient"),
-      teinte: "sourdine",
+      encre: "text-ds-texte-sourdine",
       alerte: false,
     },
     {
       cle: "avecSuivi",
+      Icone: Truck,
+      teinte: "succes" as const,
       valeur: nombreOuTiret(partAvecSuivi(activite), " %"),
       court: t("partSur", { n: activite.avecSuivi, total: activite.commandesCreees }),
       long: t("partSur", { n: activite.avecSuivi, total: activite.commandesCreees }),
-      teinte: "sourdine",
+      encre: "text-ds-texte-sourdine",
       alerte: false,
     },
     {
       cle: "jamaisOuvertes",
+      Icone: LinkIcon,
+      teinte: (enAlerte ? "alerte" : "marque") as "alerte" | "marque",
       valeur: nombreOuTiret(jamais),
       court: enAlerte ? t("aRelancer") : t("toutesOuvertes"),
       long: enAlerte ? t("aRelancer") : t("toutesOuvertes"),
-      teinte: enAlerte ? "alerte" : "sourdine",
+      encre: enAlerte ? "font-semibold text-ds-alerte" : "text-ds-texte-sourdine",
       alerte: enAlerte,
     },
-  ] as const;
-
-  const TEINTE: Record<string, string> = {
-    succes: "font-headline-md font-semibold text-succes",
-    alerte: "font-headline-md text-alerte",
-    sourdine: "font-body-sm text-sourdine",
-  };
+  ];
 
   return (
     <section
       aria-label={t("compteurs")}
-      className="grid grid-cols-2 gap-2.5 lg:gap-3 xl:grid-cols-4"
+      className="grid grid-cols-1 gap-3 min-[560px]:grid-cols-2 min-[1180px]:grid-cols-4 lg:gap-4"
     >
       {cartes.map((c) => (
-        <div
+        <TuileMetrique
           key={c.cle}
-          className={
-            "rounded-lg border p-[18px] lg:rounded-[18px] lg:p-5 " +
-            (c.alerte
-              ? "border-alerte-filet bg-alerte-fond"
-              : "border-outline-variant bg-surface-container-lowest")
-          }
-        >
-          <p
-            className={
-              "mb-[7px] font-body-sm text-[12px] leading-[15px] lg:mb-2 " +
-              (c.alerte ? "text-alerte" : "text-sourdine")
-            }
-          >
-            <span className="lg:hidden">{t(`carteCourt.${c.cle}`)}</span>
-            <span className="hidden lg:inline">{t(`carte.${c.cle}`)}</span>
-          </p>
-          <p
-            className={
-              "font-headline-lg text-[27px] leading-[34px] font-extrabold tracking-[-0.035em] lg:text-[32px] lg:leading-10 " +
-              (c.alerte ? "text-alerte" : "text-on-surface")
-            }
-          >
-            {c.valeur}
-          </p>
-          <p
-            className={
-              "mt-1.5 text-[12px] leading-[15px] lg:mt-[7px] " +
-              (c.alerte ? "font-headline-md text-alerte" : (TEINTE[c.teinte] ?? "font-body-sm text-sourdine"))
-            }
-          >
-            <span className="lg:hidden">{c.court}</span>
-            <span className="hidden lg:inline">{c.long}</span>
-          </p>
-        </div>
+          Icone={c.Icone}
+          teinte={c.teinte}
+          valeurEnAlerte={c.alerte}
+          valeur={c.valeur}
+          /*
+            ⚠️ DEUX LIBELLÉS, PAS UN LIBELLÉ COUPÉ, et la raison n'a pas changé
+            avec le design : à 390 px la phrase longue passe sur deux lignes et
+            fait grandir la tuile. Couper au milieu d'un mot est ce qu'on
+            obtiendrait en laissant la version longue déborder.
+          */
+          libelle={t(`carte.${c.cle}`)}
+          dessous={{ texte: c.long, classe: c.encre }}
+        />
       ))}
     </section>
   );

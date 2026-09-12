@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { Panneau } from "@/components/app/panneau";
 import type { CompteursEnvois } from "@/lib/envois/liste";
 
 /**
@@ -38,16 +39,10 @@ export async function RepartitionColis({
   const maximum = lignes.reduce((m, l) => Math.max(m, l.valeur), 0);
 
   return (
-    <section
-      aria-label={t("colis.titre")}
-      className="rounded-lg border border-outline-variant bg-surface-container-lowest p-[18px] lg:rounded-[18px] lg:p-[22px]"
-    >
-      <h2 className="mb-[18px] font-headline-md text-[15px] leading-[19px] font-bold tracking-normal text-on-surface lg:mb-5 lg:text-[16px] lg:leading-[21px] lg:tracking-[-0.015em]">
-        {t("colis.titre")}
-      </h2>
+    <Panneau titre={t("colis.titre")} sousTitre={t("colis.aide")}>
 
       {compteurs.total === 0 ? (
-        <p className="font-body-md text-[14px] text-on-surface-variant">{t("colis.vide")}</p>
+        <p className="text-[14px] text-ds-texte-corps">{t("colis.vide")}</p>
       ) : (
         <ul className="flex flex-col gap-[15px] lg:gap-4">
           {lignes.map((l) => (
@@ -55,13 +50,13 @@ export async function RepartitionColis({
               <div className="mb-1.5 flex items-baseline justify-between gap-3 lg:mb-[7px]">
                 <span
                   className={
-                    "font-headline-md text-[13px] leading-4 font-semibold " +
-                    (l.alerte ? "text-alerte" : "text-on-surface")
+                    "text-[13px] leading-4 font-semibold " +
+                    (l.alerte ? "text-ds-alerte" : "text-ds-texte-fort")
                   }
                 >
                   {t(`colis.${l.cle}`)}
                 </span>
-                <span className="font-body-sm text-[13px] leading-4 text-sourdine">
+                <span className="text-[13px] leading-4 font-semibold text-ds-texte-sourdine">
                   {format.number(l.valeur)}
                 </span>
               </div>
@@ -69,10 +64,10 @@ export async function RepartitionColis({
                   l'information, elle n'a rien à annoncer de plus. */}
               <div
                 aria-hidden="true"
-                className="h-2 overflow-hidden rounded-full bg-filet-ligne"
+                className="h-2 overflow-hidden rounded-ds-pill bg-ds-surface-creux"
               >
                 <span
-                  className={"block h-full rounded-full " + (l.alerte ? "bg-alerte-puce" : "bg-violet")}
+                  className={"block h-full rounded-ds-pill " + (l.alerte ? "bg-ds-alerte" : "bg-ds-accent")}
                   style={{ width: (maximum === 0 ? 0 : (l.valeur / maximum) * 100) + "%" }}
                 />
               </div>
@@ -80,6 +75,6 @@ export async function RepartitionColis({
           ))}
         </ul>
       )}
-    </section>
+    </Panneau>
   );
 }

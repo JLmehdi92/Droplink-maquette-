@@ -455,7 +455,8 @@
       "titre": "Commandes créées par semaine",
       "fenetre": "{n} dernières semaines",
       "barre": "Semaine du {semaine} : {n, plural, =0 {aucune commande} one {# commande} other {# commandes}}",
-      "vide": "Aucune commande créée sur ces douze semaines."
+      "vide": "Aucune commande créée sur ces douze semaines.",
+      "aide": "Nombre de commandes créées par semaine."
     },
     "colis": {
       "titre": "Où en sont vos colis",
@@ -463,7 +464,8 @@
       "livre": "Livrés",
       "preparation": "Pas encore scannés",
       "silencieux": "Sans mouvement",
-      "vide": "Aucun colis suivi pour le moment."
+      "vide": "Aucun colis suivi pour le moment.",
+      "aide": "État actuel de vos envois."
     },
     "consultees": {
       "titre": "Vos commandes les plus consultées",

@@ -455,7 +455,8 @@
       "titre": "每周新建订单",
       "fenetre": "最近 {n} 周",
       "barre": "{semaine} 那一周：{n, plural, =0 {没有订单} other {# 笔订单}}",
-      "vide": "最近这十二周没有创建任何订单。"
+      "vide": "最近这十二周没有创建任何订单。",
+      "aide": "每周创建的订单数量。"
     },
     "colis": {
       "titre": "您的包裹进展",
@@ -463,7 +464,8 @@
       "livre": "已送达",
       "preparation": "尚未扫描",
       "silencieux": "无更新",
-      "vide": "目前没有跟踪中的包裹。"
+      "vide": "目前没有跟踪中的包裹。",
+      "aide": "您的包裹当前状态。"
     },
     "consultees": {
       "titre": "浏览最多的订单",

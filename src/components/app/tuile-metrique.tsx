@@ -49,6 +49,7 @@ export function TuileMetrique({
   libelle,
   teinte = "marque",
   valeurEnAlerte = false,
+  dessous,
 }: {
   readonly Icone: LucideIcon;
   readonly valeur: number | string;
@@ -69,6 +70,17 @@ export function TuileMetrique({
    * apprend à ignorer*.
    */
   readonly valeurEnAlerte?: boolean;
+  /**
+   * LA TROISIÈME LIGNE DE `MetricTile` — ce que le kit écrit « +12 % ce mois-ci ».
+   *
+   * ⚠️ ELLE N'EXISTAIT PAS SUR LA PREMIÈRE VERSION DE CETTE TUILE, et son
+   * absence était justifiée : sur `/commandes` et `/envois`, aucune des valeurs
+   * n'a de point de comparaison en base. Sur `/analyses`, si — `activite`
+   * calcule déjà l'écart avec la période précédente, et l'écran l'affichait
+   * avant la migration. Facultative, donc : une tuile sans comparaison n'en
+   * fabrique pas une.
+   */
+  readonly dessous?: { readonly texte: string; readonly classe?: string };
 }) {
   const peau = TEINTES[teinte];
   return (
@@ -106,6 +118,16 @@ export function TuileMetrique({
           {valeur}
         </span>
         <span className="text-[13px] leading-[1.35] text-ds-texte-corps">{libelle}</span>
+        {dessous === undefined ? null : (
+          <span
+            className={
+              "text-[12.5px] leading-[1.35] " +
+              (dessous.classe ?? "text-ds-texte-sourdine")
+            }
+          >
+            {dessous.texte}
+          </span>
+        )}
       </span>
     </div>
   );

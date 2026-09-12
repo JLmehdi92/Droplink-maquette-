@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { Panneau } from "@/components/app/panneau";
 import type { SemaineCreee } from "@/lib/analyses/activite";
 
 /**
@@ -41,21 +42,18 @@ export async function FriseSemaines({ semaines }: { readonly semaines: readonly 
   const maximum = semaines.reduce((m, s) => Math.max(m, s.total), 0);
 
   return (
-    <section
-      aria-label={t("frise.titre")}
-      className="rounded-lg border border-outline-variant bg-surface-container-lowest p-[18px] lg:rounded-[18px] lg:p-[22px]"
-    >
-      <div className="mb-[18px] flex items-baseline justify-between gap-3 lg:mb-[22px]">
-        <h2 className="font-headline-md text-[15px] leading-[19px] font-bold tracking-normal text-on-surface lg:text-[16px] lg:leading-[21px] lg:tracking-[-0.015em]">
-          {t("frise.titre")}
-        </h2>
-        <span className="hidden font-body-sm text-[12px] leading-[15px] text-sourdine lg:inline">
+    <Panneau
+      titre={t("frise.titre")}
+      sousTitre={t("frise.aide")}
+      action={
+        <span className="hidden pt-1 text-[13px] text-ds-texte-sourdine lg:inline">
           {t("frise.fenetre", { n: semaines.length })}
         </span>
-      </div>
+      }
+    >
 
       {maximum === 0 ? (
-        <p className="font-body-md text-[14px] text-on-surface-variant">{t("frise.vide")}</p>
+        <p className="text-[14px] text-ds-texte-corps">{t("frise.vide")}</p>
       ) : (
         <>
           {/*
@@ -72,7 +70,7 @@ export async function FriseSemaines({ semaines }: { readonly semaines: readonly 
                 <li
                   key={s.debut.toISOString()}
                   className={
-                    "rounded-t-[4px] bg-violet " +
+                    "rounded-t-[4px] bg-ds-accent " +
                     (i < MASQUEES_AU_TELEPHONE ? "hidden xl:block" : "")
                   }
                   style={{ height: part + "%" }}
@@ -96,7 +94,7 @@ export async function FriseSemaines({ semaines }: { readonly semaines: readonly 
               <span
                 key={s.debut.toISOString()}
                 className={
-                  "text-center font-body-sm text-[10px] leading-3 text-sourdine " +
+                  "text-center text-[11.5px] leading-[15px] text-ds-texte-sourdine " +
                   (i < MASQUEES_AU_TELEPHONE ? "hidden xl:block" : "")
                 }
               >
@@ -106,6 +104,6 @@ export async function FriseSemaines({ semaines }: { readonly semaines: readonly 
           </div>
         </>
       )}
-    </section>
+    </Panneau>
   );
 }

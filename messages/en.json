@@ -455,7 +455,8 @@
       "titre": "Orders created per week",
       "fenetre": "last {n} weeks",
       "barre": "Week of {semaine}: {n, plural, =0 {no order} one {# order} other {# orders}}",
-      "vide": "No order created over these twelve weeks."
+      "vide": "No order created over these twelve weeks.",
+      "aide": "Orders created each week."
     },
     "colis": {
       "titre": "Where your parcels are",
@@ -463,7 +464,8 @@
       "livre": "Delivered",
       "preparation": "Not scanned yet",
       "silencieux": "No movement",
-      "vide": "No tracked parcel yet."
+      "vide": "No tracked parcel yet.",
+      "aide": "Current state of your shipments."
     },
     "consultees": {
       "titre": "Your most viewed orders",

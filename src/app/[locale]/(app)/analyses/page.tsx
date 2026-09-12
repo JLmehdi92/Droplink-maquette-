@@ -1,4 +1,5 @@
-import { EnTeteEcran } from "@/components/app/en-tete-ecran";
+import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
+import { Panneau } from "@/components/app/panneau";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
@@ -109,33 +110,36 @@ export default async function Analyses({
    * n'a rien fait.*
    */
   const INDISPONIBLE =
-    "rounded-lg border border-outline-variant bg-surface-container-lowest p-[18px] font-body-md text-body-md text-on-surface-variant lg:rounded-[18px] lg:p-[22px]";
+    "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 text-[14px] text-ds-texte-corps shadow-ds-card lg:p-6";
 
   const qcTotal =
     activite === null ? 0 : activite.qcApprouve + activite.qcRefuse + activite.qcEnAttente;
 
   /*
-   * LE BOUTON DE PÉRIODE ACTIF EST NOIR, PAS VIOLET.
+   * LE BOUTON DE PÉRIODE ACTIF EST À L'ACCENT, ET IL ÉTAIT NOIR.
    *
-   * Les deux planches posent `#111117` sur fond noir et texte blanc — c'est la
-   * pilule noire du canevas, l'action neutre. Le produit y mettait le violet
-   * clair de la navigation : la même peau qu'un onglet de barre latérale, donc
-   * deux choses différentes rendues pareil sur le même écran.
+   * ⚠️ CE NOIR ÉTAIT L'ANCIEN CANEVAS, `#111117`, celui dont `CLAUDE.md` dit que
+   * le chrome sombre est mort. Il a survécu à la migration des quatre autres
+   * écrans parce que rien ne le cherchait : il était écrit en tokens
+   * (`bg-primary` / `text-on-primary`), donc aucune garde de couleur en dur ne
+   * pouvait le voir, et il restait le seul aplat noir de tout le produit.
    *
-   * ⚠️ LA HAUTEUR CHANGE AVEC LA LARGEUR : 44 px au téléphone, 38 au bureau.
-   * Ce sont des liens, pas des boutons — la règle de cible tactile de la
-   * feuille de base ne les couvre pas, et un lien de 38 px de haut se rate au
-   * pouce.
+   * Le kit rend ces onglets à 38 px de haut, rayon 10, `padding 0 15`, en 13/700
+   * blanc sur accent quand ils sont actifs, 13/500 corps sur carte bordée sinon.
+   *
+   * ⚠️ LA HAUTEUR MONTE À 44 AU TÉLÉPHONE. Ce sont des liens, pas des boutons —
+   * la règle de cible tactile de la feuille de base ne les couvre pas, et les
+   * 38 px du kit se ratent au pouce.
    */
   const pilule = (actif: boolean): string =>
-    "inline-flex h-11 items-center rounded-full border px-3.5 font-headline-md text-[13px] leading-4 font-semibold transition-colors lg:h-[38px] " +
+    "inline-flex h-11 items-center rounded-ds-sm border px-[15px] text-[13px] leading-4 transition-colors lg:h-[38px] " +
     (actif
-      ? "border-primary bg-primary text-on-primary"
-      : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre");
+      ? "border-transparent bg-ds-accent font-bold text-ds-texte-sur-marque"
+      : "border-ds-filet bg-ds-surface-carte font-medium text-ds-texte-corps shadow-ds-xs hover:bg-ds-surface-teinte");
 
   return (
     <>
-      <EnTeteEcran
+      <EnTeteEcranDs
         titre={t("titre")}
         sousTitre={t(`sousTitre.${periode}`)}
         actions={
@@ -144,7 +148,7 @@ export default async function Analyses({
             /* −2 px pour retrouver les 14 px de la planche quand la barre passe
                à la ligne au téléphone : l'écart de rangée de l'en-tête est de
                16. Au bureau la barre ne passe pas à la ligne, donc rien. */
-            className="-mt-0.5 flex flex-wrap gap-2 lg:mt-0"
+            className="flex flex-wrap gap-2"
           >
             {PERIODES.map((p) => (
               <LienEcran
@@ -162,7 +166,7 @@ export default async function Analyses({
 
       <main
         id="contenu"
-        className="flex flex-col gap-3 px-margin-mobile pt-3.5 pb-5 lg:gap-4 lg:px-[30px] lg:pt-0 lg:pb-[26px]"
+        className="flex flex-col gap-3 px-margin-mobile pt-3.5 pb-6 lg:gap-[18px] lg:px-8 lg:pt-0 lg:pb-8"
       >
         {activite === null ? (
           <p className={INDISPONIBLE}>{t("indisponible")}</p>
@@ -192,42 +196,35 @@ export default async function Analyses({
           <PlusConsultees commandes={consultees} />
         )}
 
-        <section
-          aria-label={t("qc.titre")}
-          className="rounded-lg border border-outline-variant bg-surface-container-lowest p-[18px] lg:rounded-[18px] lg:p-[22px]"
-        >
-          <h2 className="font-headline-md text-[15px] leading-[19px] font-bold tracking-normal text-on-surface lg:text-[16px] lg:leading-[21px] lg:tracking-[-0.015em]">
-            {t("qc.titre")}
-          </h2>
-          <p className="mt-1 mb-4 font-body-sm text-[13px] leading-[19px] text-sourdine lg:mt-1.5 lg:mb-[18px] lg:leading-4">
-            {t("qc.aide")}
-          </p>
-
+        <Panneau titre={t("qc.titre")} sousTitre={t("qc.aide")}>
           {qcTotal === 0 ? (
-            <p className="font-body-md text-[14px] text-on-surface-variant">{t("qc.vide")}</p>
+            <p className="text-[14px] text-ds-texte-corps">{t("qc.vide")}</p>
           ) : (
             <ul className="flex flex-col gap-[15px] lg:gap-4">
               {(
                 [
-                  { cle: "approuve", valeur: activite?.qcApprouve ?? 0, barre: "bg-succes" },
-                  { cle: "refuse", valeur: activite?.qcRefuse ?? 0, barre: "bg-alerte-puce" },
-                  { cle: "enAttente", valeur: activite?.qcEnAttente ?? 0, barre: "bg-gris-inactif" },
+                  { cle: "approuve", valeur: activite?.qcApprouve ?? 0, barre: "bg-ds-succes" },
+                  { cle: "refuse", valeur: activite?.qcRefuse ?? 0, barre: "bg-ds-erreur" },
+                  { cle: "enAttente", valeur: activite?.qcEnAttente ?? 0, barre: "bg-ds-ink-200" },
                 ] as const
               ).map((part) => (
                 <li key={part.cle}>
                   <div className="mb-1.5 flex items-baseline justify-between gap-3 lg:mb-[7px]">
-                    <span className="font-headline-md text-[13px] leading-4 font-semibold text-on-surface">
+                    <span className="text-[13px] leading-4 font-semibold text-ds-texte-fort">
                       {t(`qc.${part.cle}`)}
                     </span>
-                    <span className="font-body-sm text-[13px] leading-4 text-sourdine">
+                    <span className="text-[13px] leading-4 font-semibold text-ds-texte-sourdine">
                       {format.number(part.valeur)}
                     </span>
                   </div>
                   {/* La piste est décorative : le chiffre au-dessus porte
                       l'information, elle n'a rien à annoncer de plus. */}
-                  <div aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-filet-ligne">
+                  <div
+                    aria-hidden="true"
+                    className="h-2 overflow-hidden rounded-ds-pill bg-ds-surface-creux"
+                  >
                     <span
-                      className={"block h-full rounded-full " + part.barre}
+                      className={"block h-full rounded-ds-pill " + part.barre}
                       style={{ width: `${(part.valeur / qcTotal) * 100}%` }}
                     />
                   </div>
@@ -235,7 +232,7 @@ export default async function Analyses({
               ))}
             </ul>
           )}
-        </section>
+        </Panneau>
       </main>
     </>
   );
