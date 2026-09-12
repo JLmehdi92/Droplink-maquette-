@@ -359,7 +359,10 @@
     "optionsTitre": "Options",
     "apercuDirect": "live",
     "apercuPour": "for your customer",
-    "reessayer": "Try again"
+    "reessayer": "Try again",
+    "identiteAide": "The name and logo that open your customer's page.",
+    "optionsAide": "What appears on your customer's page, and in which language.",
+    "apercuAide": "What your customers will see, updated as you type."
   },
   "envois": {
     "titre": "Shipments",

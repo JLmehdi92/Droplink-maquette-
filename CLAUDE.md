@@ -292,10 +292,20 @@ transporteurs) viennent de leurs SVG officiels — jamais reconstitués de mémo
 **uniquement s'ils sont configurés.** Aucun bloc, aucun logo grisé quand il n'y en
 a pas.
 
-> ⚠️ **LE DESIGN SYSTEM DESSINE UN QUATRIÈME CHAMP « site web ».** Il n'est pas
-> dans `shops` et **n'est pas une autorisation** : soit on l'ajoute par une
-> migration et une décision produit, soit on retire le champ du design system.
-> Ne pas l'implémenter en silence au motif qu'il est dessiné.
+> ⚠️ **LE QUATRIÈME CHAMP « site web » EXISTE, ET CE BLOC DISAIT LE CONTRAIRE.**
+> Il affirmait « il n'est pas dans `shops` et n'est pas une autorisation ».
+> Mesuré le 12/09/2026 contre le catalogue : `shops.site_url` est posée par la
+> **migration 133**, contrainte de forme comprise, elle est lue par
+> `lib/comptes/profil.ts` et écrite par `lib/boutique/reglages.ts`, et l'écran
+> `/marque` la saisit depuis. La décision produit A été prise ; c'est cet
+> avertissement qui ne l'avait pas suivie — L-014 dans sa forme exacte, *un
+> document affirme un état que personne n'a exécuté*.
+>
+> **Ce qui reste vrai et qui motivait l'avertissement :** un champ dessiné n'est
+> pas une autorisation. Les **options d'affichage** du kit — six interrupteurs
+> « Afficher le logo », « Afficher la description », « Afficher les photos »… —
+> n'ont aucune colonne, et `shops` ne porte que `watermark_enabled`. Elles ne
+> s'implémentent pas au motif qu'elles sont dessinées.
 
 ### Périmètre — ce que le design system couvre, et ce qu'il ne couvre pas
 

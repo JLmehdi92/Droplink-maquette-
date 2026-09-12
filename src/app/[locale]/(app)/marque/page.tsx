@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { EnTeteEcran } from "@/components/app/en-tete-ecran";
+import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { FormulaireMarque } from "@/components/marque/formulaire-marque";
@@ -65,9 +65,9 @@ export default async function Marque({
 
   return (
     <>
-      <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre")} />
+      <EnTeteEcranDs titre={t("titre")} sousTitre={t("sousTitre")} />
 
-      <main id="contenu" className="px-margin-mobile py-5 md:px-[30px] md:pt-0 md:pb-[26px]">
+      <main id="contenu" className="px-margin-mobile py-5 md:px-8 md:pt-0 md:pb-8">
         <div>
         <TraductionsClient espaces={["marque"]}>
           <FormulaireMarque

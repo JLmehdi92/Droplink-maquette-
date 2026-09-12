@@ -7,6 +7,8 @@ import { useActionState, useMemo, useRef, useState } from "react";
 import { BoutonAction, type LibellesBoutonAction } from "@/components/bouton-action";
 import { Icone } from "@/components/icone";
 import { useTranslations } from "next-intl";
+import { Eye, IdCard, Link as LinkIcon, Palette } from "lucide-react";
+import { Panneau } from "@/components/app/panneau";
 import { LANGUES, estLangueSupportee, type Langue } from "@/i18n/config";
 import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import {
@@ -86,7 +88,11 @@ function BoutonEnregistrer({
     <BoutonAction
       libelles={libelles}
       resultat={statut === "enregistre" ? "reussi" : statut === "erreur" ? "echoue" : null}
-      className="degrade-marque flex min-h-12 w-full items-center justify-center rounded-[12px] font-label-md text-[15px] font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90 disabled:opacity-60 lg:h-[42px] lg:min-h-0 lg:w-auto lg:rounded-[11px] lg:px-[18px] lg:text-[14px] lg:shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)]"
+      /* 48 px et rayon de CARTE : c'est le bouton principal du kit, le même que
+         « Voir la page publique » de l'éditeur. Son ombre était écrite en dur sur
+         l'ANCIEN violet `#7c5cf5` ; `shadow-ds-brand` la porte sur `#5B4BF5`,
+         donc sur l'accent réel. */
+      className="degrade-ds-marque flex h-12 w-full items-center justify-center gap-2 rounded-ds-card px-[18px] text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover disabled:opacity-60 lg:w-auto"
     />
   );
 }
@@ -285,22 +291,33 @@ export function FormulaireMarque({
     },
   ] as const;
 
-  const carte = "carte rounded-lg p-[18px] lg:rounded-[18px] lg:p-6";
-  const titreCarte =
-    "font-headline-md text-[15px] leading-[19px] font-bold text-on-surface lg:text-[16px] lg:leading-5 lg:tracking-[-0.015em]";
   /*
-   * ⚠️ `rounded-xl` VAUT 28 DANS CE THÈME. La planche dit 12 pour un champ.
+   * ⚠️ PLUS DE `champ-app`, ET C'EST LE QUATRIÈME PIÈGE DE LA MÉTHODE PAYÉ ICI.
+   * Cette classe est déclarée HORS de toute `@layer` dans `globals.css` ;
+   * Tailwind range ses utilitaires dans `@layer utilities`, et une règle sans
+   * couche l'emporte sur une règle en couche quelle que soit la spécificité.
+   * Elle écrasait donc en silence le fond, le filet et la taille du design
+   * system sur chacun des sept champs de cet écran — et les deux gardes qui la
+   * surveillent restaient vertes, parce qu'elles vérifient qu'une classe existe
+   * et pointe sur une variable définie, jamais qui GAGNE la cascade.
    *
-   * ⚠️ ET LA HAUTEUR EST SORTIE DE LA BASE. Écrire `champ + " h-11 lg:h-[42px]"`
+   * ⚠️ LA HAUTEUR RESTE SORTIE DE LA BASE. Écrire `champ + " h-11 lg:h-[42px]"`
    * laissait DEUX `lg:h-[…]` sur le même élément, et c'est l'ordre dans la
    * FEUILLE qui tranche, pas l'ordre dans l'attribut : mesuré, les champs de
-   * réseaux rendaient 46 px là où la planche en dessine 42.
+   * réseaux rendaient 46 px là où le kit en dessine 42.
    */
-  const champBase = "champ-app w-full rounded-[12px] px-3.5 text-on-surface";
-  const champ = champBase + " h-12 lg:h-[46px]";
-  const champReseau = champBase + " h-11 lg:h-[42px]";
-  const etiquette = "mb-[7px] block font-label-md text-[12px] font-bold text-ardoise";
-  const aide = "font-body-sm text-[12px] leading-[18px] text-on-surface-variant";
+  const champBase =
+    "w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[14px] " +
+    "font-medium text-ds-texte-fort transition-shadow outline-none placeholder:font-normal " +
+    "placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
+  const champ = champBase + " h-12";
+  const champReseau = champBase + " h-11 lg:h-[46px]";
+  // Le kit écrit ses étiquettes de champ en 13/500 sur l'encre de corps, et ses
+  // textes d'aide en 13/400 sur la même encre. Douze en gras était l'ancien
+  // canevas — deux graisses pour deux rôles que le design system distingue par
+  // la TAILLE, pas par le poids.
+  const etiquette = "mb-[9px] block text-[13px] font-medium text-ds-texte-corps";
+  const aide = "text-[13px] leading-[19px] text-ds-texte-sourdine";
 
   const aUnEnTete = nom.trim() !== "" || apercuLogo !== null;
   const reseauxConfigures = RESEAUX.filter((r) => reseaux[r.clef].trim() !== "");
@@ -318,22 +335,22 @@ export function FormulaireMarque({
    * couleur qui marche ».
    */
   const apercu = (
-    <section className={carte + " lg:p-[18px]"} aria-labelledby="titre-apercu">
-      <div className="mb-3.5 flex items-center justify-between gap-3">
-        <h2 id="titre-apercu" className="font-headline-md text-[14px] font-bold text-on-surface">
-          {t("apercuTitre")}
-        </h2>
-        <span className="font-body-sm text-[11px] text-on-surface-variant">
+    <Panneau
+      titre={t("apercuTitre")}
+      sousTitre={t("apercuAide")}
+      action={
+        <span className="shrink-0 pt-1 text-[13px] text-ds-texte-sourdine">
           {t("apercuDirect")}
         </span>
-      </div>
+      }
+    >
 
       {/* `aria-hidden` : c'est une IMAGE de la page, pas la page. Un lecteur
           d'écran y annoncerait un bouton « Approuver » sur lequel il n'y a
           rien à approuver. */}
       <div
         aria-hidden="true"
-        className="overflow-hidden rounded-[14px] border border-outline-variant lg:rounded-[15px]"
+        className="overflow-hidden rounded-ds-card border border-ds-filet lg:rounded-ds-card"
       >
         {/* L'EN-TÊTE EST OMIS QUAND IL N'Y A NI NOM NI LOGO — exactement comme
             sur la page publique. L'aperçu doit montrer l'ABSENCE de barre, pas
@@ -361,7 +378,7 @@ export function FormulaireMarque({
                 />
               )}
               {nom.trim() !== "" ? (
-                <span className="truncate font-label-md text-[11px] font-bold lg:text-[12px]">
+                <span className="truncate text-[12px] font-bold lg:text-[12px]">
                   {nom}
                 </span>
               ) : null}
@@ -370,13 +387,13 @@ export function FormulaireMarque({
 
           <p
             className={
-              "font-headline-md text-[17px] font-extrabold tracking-[-0.02em] lg:text-[18px] " +
+              "text-[17px] font-extrabold tracking-[-0.02em] lg:text-[18px] " +
               (aUnEnTete ? "mt-2 mb-px lg:mt-[9px]" : "mb-px")
             }
           >
             {phrasesClient.commande}
           </p>
-          <p className="font-body-sm text-[11px]" style={{ color: accent.surRemplissageDoux }}>
+          <p className="text-[12px]" style={{ color: accent.surRemplissageDoux }}>
             {phrasesClient.pourGenerique}
           </p>
         </div>
@@ -389,7 +406,7 @@ export function FormulaireMarque({
                 className="h-[5px] rounded-full"
                 style={{
                   backgroundColor:
-                    etape < 3 ? accent.remplissage : "var(--color-outline-variant)",
+                    etape < 3 ? accent.remplissage : "var(--color-ds-ink-200)",
                 }}
               />
             ))}
@@ -398,11 +415,11 @@ export function FormulaireMarque({
           {/* Trois vignettes au téléphone, quatre sur grand écran : la colonne
               d'aperçu est plus étroite que la carte pleine largeur. */}
           <div className="mb-3 grid grid-cols-3 gap-[5px] lg:mb-[13px] lg:grid-cols-2">
-            {["bg-fond-avatar", "bg-[#eee4e0]", "bg-[#e0e4ee]", "bg-[#eaeaef] hidden lg:block"].map(
+            {["bg-ds-surface-creux", "bg-[#eee4e0]", "bg-[#e0e4ee]", "bg-[#eaeaef] hidden lg:block"].map(
               (fond, rang) => (
                 <span
                   key={rang}
-                  className={"aspect-square w-full rounded-[8px] lg:rounded-[9px] " + fond}
+                  className={"aspect-square w-full rounded-ds-sm " + fond}
                 />
               ),
             )}
@@ -412,7 +429,7 @@ export function FormulaireMarque({
             className="mb-[13px] flex h-[38px] items-center justify-center rounded-[10px] lg:mb-3.5 lg:h-10"
             style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
           >
-            <span className="font-label-md text-[12px] font-bold lg:text-[13px]">
+            <span className="text-[12px] font-bold lg:text-[13px]">
               {phrasesClient.approuver}
             </span>
           </div>
@@ -423,7 +440,7 @@ export function FormulaireMarque({
           {reseauxConfigures.length > 0 ? (
             <div className="border-t border-filet-section pt-3 text-center lg:pt-[13px]">
               {nom.trim() !== "" ? (
-                <p className="mb-[7px] font-body-sm text-[10px] text-on-surface-variant lg:mb-2">
+                <p className="mb-[7px] text-[10px] text-ds-texte-corps lg:mb-2">
                   {substituerNom(phrasesClient.reseauxGabarit, nom)}
                 </p>
               ) : null}
@@ -431,7 +448,7 @@ export function FormulaireMarque({
                 {reseauxConfigures.map((reseau) => (
                   <span
                     key={reseau.clef}
-                    className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-fond-neutre text-ardoise-doux lg:h-[30px] lg:w-[30px] lg:rounded-[9px]"
+                    className="flex h-[30px] w-[30px] items-center justify-center rounded-ds-sm bg-ds-surface-creux text-ds-texte-sourdine"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d={reseau.trace} />
@@ -443,7 +460,7 @@ export function FormulaireMarque({
           ) : null}
         </div>
       </div>
-    </section>
+    </Panneau>
   );
 
   return (
@@ -476,15 +493,12 @@ export function FormulaireMarque({
         contenu minimum, et c'est exactement ce plancher qui produisait le
         débordement.
       */}
-      <div className="flex flex-col gap-3 lg:gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_372px] xl:items-start xl:gap-[18px]">
+      <div className="flex flex-col gap-3 lg:gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:items-start xl:gap-5">
         <div className="xl:col-start-2 xl:row-start-1">{apercu}</div>
 
         <div className="flex flex-col gap-3 lg:gap-4 xl:col-start-1 xl:row-start-1">
           {/* --- Identité ------------------------------------------------ */}
-          <section className={carte} aria-labelledby="titre-identite">
-            <h2 id="titre-identite" className={titreCarte + " mb-4 lg:mb-5"}>
-              {t("identiteTitre")}
-            </h2>
+          <Panneau titre={t("identiteTitre")} sousTitre={t("identiteAide")} icone={IdCard}>
 
             <label htmlFor="nom" className={etiquette}>
               {t("nomTitre")}
@@ -499,9 +513,9 @@ export function FormulaireMarque({
               placeholder={t("nomPlaceholder")}
               className={champ}
             />
-            <p className={"mt-1.5 " + aide + " text-[11px]"}>{t("nomAide")}</p>
+            <p className={"mt-1.5 " + aide + " text-[12px]"}>{t("nomAide")}</p>
             {champsEnEchec.includes("nom") ? (
-              <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
                 {t("erreurNom")}
               </p>
             ) : null}
@@ -520,7 +534,7 @@ export function FormulaireMarque({
               }}
             />
             <div className="flex flex-wrap items-center gap-3 lg:gap-3.5">
-              <span className="flex h-[54px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-fond-avatar lg:h-[60px] lg:w-[60px] lg:rounded-[15px]">
+              <span className="flex h-[54px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-ds-card bg-ds-surface-creux lg:h-[60px] lg:w-[60px] lg:rounded-ds-card">
                 {apercuLogo !== null ? (
                   /* eslint-disable-next-line @next/next/no-img-element -- URL
                      signée à expiration, ou aperçu local `blob:`. */
@@ -531,7 +545,7 @@ export function FormulaireMarque({
                 <button
                   type="button"
                   onClick={() => champFichier.current?.click()}
-                  className="min-h-11 rounded-[12px] border border-filet-controle px-4 font-label-md text-[14px] font-semibold text-on-surface lg:h-10 lg:min-h-0 lg:rounded-[11px] lg:px-[15px]"
+                  className="inline-flex h-12 shrink-0 items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs transition-colors hover:bg-ds-surface-teinte"
                 >
                   {logo.phase === "envoi"
                     ? t("logoEnvoi")
@@ -547,7 +561,7 @@ export function FormulaireMarque({
                   <button
                     type="button"
                     onClick={() => void retirer()}
-                    className="min-h-11 rounded-[12px] border border-filet-controle px-4 font-label-md text-[14px] font-semibold text-alerte lg:h-10 lg:min-h-0 lg:rounded-[11px] lg:px-[15px]"
+                    className="inline-flex h-12 shrink-0 items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-erreur shadow-ds-xs transition-colors hover:bg-ds-surface-teinte"
                   >
                     {t("logoRetirer")}
                   </button>
@@ -557,30 +571,30 @@ export function FormulaireMarque({
             {/* LES FORMATS SONT ÉNUMÉRÉS, ET LE SVG N'Y EST PAS. Il est refusé
                 côté serveur parce qu'un SVG est un document capable de porter du
                 script ; l'annoncer ici évite un refus après téléversement. */}
-            <p className={"mt-2 " + aide + " text-[11px]"}>{t("depotFormats")}</p>
+            <p className={"mt-2 " + aide + " text-[12px]"}>{t("depotFormats")}</p>
 
             {logo.phase === "erreur" ? (
-              <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
                 {logo.motif}
               </p>
             ) : null}
-          </section>
+          </Panneau>
 
           {/* --- Couleur ------------------------------------------------- */}
-          <section className={carte} aria-labelledby="titre-couleur">
-            <div className="mb-3.5 flex items-center justify-between gap-3 lg:mb-[18px]">
-              <h2 id="titre-couleur" className={titreCarte}>
-                {t("couleurTitre")}
-              </h2>
-              {/*
-                LE BADGE DIT CE QUE LA MACHINE A ÉTABLI, pas ce qu'on espère.
-                `resoudreAccent()` garantit 4,5:1 sur le texte et 3:1 sur
-                l'interface pour N'IMPORTE QUELLE valeur — y compris invalide,
-                où elle retombe sur le défaut. Le badge n'est donc jamais rouge :
-                il rappelle au vendeur qu'il n'a pas à chercher une couleur qui
-                marche.
-              */}
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-succes-fond px-2.5 py-1 font-label-md text-[11px] font-bold text-succes">
+          <Panneau
+            titre={t("couleurTitre")}
+            sousTitre={t("couleurAide")}
+            icone={Palette}
+            /*
+              LE BADGE DIT CE QUE LA MACHINE A ÉTABLI, pas ce qu'on espère.
+              `resoudreAccent()` garantit 4,5:1 sur le texte et 3:1 sur
+              l'interface pour N'IMPORTE QUELLE valeur — y compris invalide, où
+              elle retombe sur le défaut. Le badge n'est donc jamais rouge : il
+              rappelle au vendeur qu'il n'a pas à chercher une couleur qui
+              marche.
+            */
+            action={
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill bg-ds-succes-fond px-2.5 py-1 text-[12px] font-bold text-ds-succes">
                 <svg
                   width="11"
                   height="11"
@@ -597,11 +611,12 @@ export function FormulaireMarque({
                 <span className="lg:hidden">{t("contrasteCourt")}</span>
                 <span className="hidden lg:inline">{t("contrasteConforme")}</span>
               </span>
-            </div>
+            }
+          >
 
             <div className="mb-2.5 flex items-center gap-2.5 lg:mb-[18px] lg:gap-3">
               <label
-                className="h-[46px] w-[46px] shrink-0 cursor-pointer rounded-[13px] border border-outline-variant"
+                className="h-[46px] w-[46px] shrink-0 cursor-pointer rounded-ds-md border border-ds-filet"
                 style={{ backgroundColor: couleur }}
               >
                 <span className="sr-only">{t("couleurHex")}</span>
@@ -621,12 +636,10 @@ export function FormulaireMarque({
                 placeholder="#000000"
                 className={champ + " font-mono text-[14px] lg:w-40"}
               />
-              <span className={"hidden lg:block " + aide}>{t("couleurAide")}</span>
             </div>
-            <p className={"lg:hidden " + aide}>{t("couleurAide")}</p>
 
             {champsEnEchec.includes("couleurAccent") ? (
-              <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
                 {t("erreurCouleur")}
               </p>
             ) : null}
@@ -641,10 +654,10 @@ export function FormulaireMarque({
               vendeur peut choisir la couleur qu'il veut.
             */}
             <div className="mt-4 hidden grid-cols-3 gap-2.5 lg:grid">
-              <div className="rounded-[12px] border border-outline-variant p-3">
-                <p className={"mb-2 " + aide + " text-[11px]"}>{t("demoTexte")}</p>
+              <div className="rounded-ds-control border border-ds-filet p-3">
+                <p className={"mb-2 " + aide + " text-[12px]"}>{t("demoTexte")}</p>
                 <p
-                  className="font-headline-md text-[15px] font-bold"
+                  className="text-[15px] font-bold"
                   style={{ color: accent.texte }}
                 >
                   {phrasesClient.statut}
@@ -652,32 +665,32 @@ export function FormulaireMarque({
                 <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoTexteSeuil")}</p>
               </div>
 
-              <div className="rounded-[12px] border border-outline-variant p-3">
-                <p className={"mb-2 " + aide + " text-[11px]"}>{t("demoBouton")}</p>
+              <div className="rounded-ds-control border border-ds-filet p-3">
+                <p className={"mb-2 " + aide + " text-[12px]"}>{t("demoBouton")}</p>
                 <div
-                  className="flex h-[30px] items-center justify-center rounded-[8px]"
+                  className="flex h-[30px] items-center justify-center rounded-ds-sm"
                   style={{
                     backgroundColor: accent.remplissage,
                     color: accent.surRemplissage,
                   }}
                 >
-                  <span className="font-label-md text-[12px] font-bold">
+                  <span className="text-[12px] font-bold">
                     {phrasesClient.approuver}
                   </span>
                 </div>
                 <p className={"mt-1.5 " + aide + " text-[10px]"}>{t("demoBoutonSeuil")}</p>
               </div>
 
-              <div className="rounded-[12px] border border-outline-variant p-3">
-                <p className={"mb-2 " + aide + " text-[11px]"}>{t("demoBandeau")}</p>
+              <div className="rounded-ds-control border border-ds-filet p-3">
+                <p className={"mb-2 " + aide + " text-[12px]"}>{t("demoBandeau")}</p>
                 <div
-                  className="flex h-[30px] items-center overflow-hidden rounded-[8px] px-2.5"
+                  className="flex h-[30px] items-center overflow-hidden rounded-ds-sm px-2.5"
                   style={{
                     backgroundColor: accent.remplissage,
                     color: accent.surRemplissage,
                   }}
                 >
-                  <span className="truncate font-label-md text-[11px] font-bold">
+                  <span className="truncate text-[12px] font-bold">
                     {nom.trim() === "" ? phrasesClient.commande : nom}
                   </span>
                 </div>
@@ -692,27 +705,25 @@ export function FormulaireMarque({
               // explication croit à un bogue.
               <p className={"mt-3 " + aide}>{t("couleurAjustee")}</p>
             ) : null}
-          </section>
+          </Panneau>
 
           {/* --- Réseaux ------------------------------------------------- */}
-          <section className={carte} aria-labelledby="titre-reseaux">
-            <div className="mb-1 flex items-baseline justify-between gap-3">
-              <h2 id="titre-reseaux" className={titreCarte}>
-                {t("reseauxTitre")}
-              </h2>
-              <span className="shrink-0 font-body-sm text-[12px] text-on-surface-variant">
+          <Panneau
+            titre={t("reseauxTitre")}
+            sousTitre={t("reseauxAide")}
+            icone={LinkIcon}
+            action={
+              <span className="shrink-0 pt-1 text-[13px] text-ds-texte-sourdine">
                 {t("reseauxFacultatif")}
               </span>
-            </div>
-            <p className="mb-4 font-body-sm text-[13px] leading-5 text-on-surface-variant lg:mb-[18px]">
-              {t("reseauxAide")}
-            </p>
+            }
+          >
 
             <div className="flex flex-col gap-3.5 lg:gap-3">
               {RESEAUX.map((reseau) => (
                 <div key={reseau.clef} className="flex items-end gap-[11px] lg:gap-3">
                   <span
-                    className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[12px] lg:mb-px lg:h-10 lg:w-10"
+                    className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-ds-control lg:mb-px lg:h-10 lg:w-10"
                     style={{ backgroundColor: reseau.fond, color: reseau.encre }}
                     aria-hidden="true"
                   >
@@ -778,7 +789,7 @@ export function FormulaireMarque({
                       className={champReseau}
                     />
                     {champsEnEchec.includes(reseau.clef) ? (
-                      <p role="alert" className="mt-2 font-body-sm text-body-sm text-error">
+                      <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
                         {t("reseauInvalide." + reseau.clef)}
                       </p>
                     ) : null}
@@ -791,7 +802,7 @@ export function FormulaireMarque({
                 la page, il ne crée aucun compte et ne demande rien au client —
                 c'est la promesse centrale du produit, elle mérite d'être écrite
                 là où le vendeur colle ses adresses. */}
-            <div className="mt-4 flex items-start gap-2.5 rounded-[11px] bg-surface-container-low px-3.5 py-3">
+            <div className="mt-4 flex items-start gap-2.5 rounded-ds-control bg-ds-surface-creux px-3.5 py-3">
               <svg
                 width="15"
                 height="15"
@@ -802,7 +813,7 @@ export function FormulaireMarque({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden="true"
-                className="mt-px shrink-0 text-sourdine"
+                className="mt-px shrink-0 text-ds-texte-sourdine"
               >
                 <circle cx="12" cy="12" r="9" />
                 <path d="M12 16v-4" />
@@ -810,20 +821,17 @@ export function FormulaireMarque({
               </svg>
               <span className={aide}>{t("reseauxNouvelOnglet")}</span>
             </div>
-          </section>
+          </Panneau>
 
           {/* --- Options ------------------------------------------------- */}
-          <section className={carte} aria-labelledby="titre-options">
-            <h2 id="titre-options" className={titreCarte + " mb-1 lg:mb-[18px]"}>
-              {t("optionsTitre")}
-            </h2>
+          <Panneau titre={t("optionsTitre")} sousTitre={t("optionsAide")} icone={Eye}>
 
-            <div className="mt-3 flex items-center justify-between gap-4 border-t border-filet-ligne py-3.5 lg:mt-0 lg:border-t-0 lg:border-b lg:pt-0 lg:pb-4">
+            <div className="mt-3 flex items-center justify-between gap-4 border-t border-ds-filet py-3.5 lg:mt-0 lg:border-t-0 lg:border-b lg:pt-0 lg:pb-4">
               <div>
-                <p className="mb-0.5 font-body-md text-[15px] font-semibold text-on-surface">
+                <p className="mb-0.5 text-[15px] font-semibold text-ds-texte-fort">
                   {t("filigraneTitre")}
                 </p>
-                <p className="font-body-sm text-[13px] leading-5 text-on-surface-variant">
+                <p className="text-[13px] leading-5 text-ds-texte-corps">
                   {filigranePossible ? t("filigraneAide") : t("filigraneSansNom")}
                 </p>
               </div>
@@ -862,19 +870,19 @@ export function FormulaireMarque({
                     backgroundColor:
                       filigrane && filigranePossible
                         ? accent.surRemplissage
-                        : "var(--color-surface-container-lowest)",
+                        : "var(--color-ds-surface-carte)",
                   }}
                 />
                 <span className="sr-only">{t("filigraneLabel")}</span>
               </label>
             </div>
 
-            <div className="border-t border-filet-ligne pt-3.5 lg:flex lg:items-center lg:justify-between lg:gap-5 lg:border-t-0 lg:pt-4">
+            <div className="border-t border-ds-filet pt-3.5 lg:flex lg:items-center lg:justify-between lg:gap-5 lg:border-t-0 lg:pt-4">
               <div>
-                <p className="mb-0.5 font-body-md text-[15px] font-semibold text-on-surface">
+                <p className="mb-0.5 text-[15px] font-semibold text-ds-texte-fort">
                   {t("langueTitre")}
                 </p>
-                <p className="font-body-sm text-[13px] leading-5 text-on-surface-variant">
+                <p className="text-[13px] leading-5 text-ds-texte-corps">
                   {t("langueAide")}
                 </p>
               </div>
@@ -907,7 +915,7 @@ export function FormulaireMarque({
                 ))}
               </select>
             </div>
-          </section>
+          </Panneau>
 
           {/*
             LA BARRE D'ENREGISTREMENT.
@@ -919,7 +927,10 @@ export function FormulaireMarque({
             tape un code hexadécimal. La sauvegarde automatique de l'éditeur ne
             touche, elle, qu'une commande que personne ne regarde à cet instant.
           */}
-          <div className="flex flex-col gap-2 pt-1 lg:flex-row lg:items-center lg:justify-end lg:gap-3">
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 pt-1 lg:flex-row lg:items-center lg:justify-end lg:gap-3">
             {/*
               LA CONFIRMATION EST UNE PILULE VERTE, ET C'EST UNE DEMANDE DE
               WASSIM, LE 09/09/2026 : « faudrait qu'il mette un petit message en
@@ -944,14 +955,14 @@ export function FormulaireMarque({
             {resultat.statut === "enregistre" ? (
               <p
                 role="status"
-                className="inline-flex items-center gap-[7px] self-center rounded-full bg-succes-fond px-[13px] py-[7px] font-label-md text-[13px] font-semibold text-succes lg:self-auto"
+                className="inline-flex items-center gap-[7px] self-center rounded-full bg-ds-succes-fond px-[13px] py-[7px] text-[13px] font-semibold text-ds-succes lg:self-auto"
               >
                 <Icone nom="done" className="h-[14px] w-[14px]" />
                 {t("enregistre")}
               </p>
             ) : null}
             {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
-              <p role="alert" className="font-body-sm text-body-sm text-error">
+              <p role="alert" className="text-[13px] text-ds-erreur">
                 {t(`erreur.${resultat.motif}`)}
               </p>
             ) : null}
@@ -967,8 +978,6 @@ export function FormulaireMarque({
               statut={resultat.statut}
             />
           </div>
-        </div>
-      </div>
     </form>
   );
 }

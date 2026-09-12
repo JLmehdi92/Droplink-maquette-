@@ -359,7 +359,10 @@
     "optionsTitre": "Options",
     "apercuDirect": "en direct",
     "apercuPour": "pour votre client",
-    "reessayer": "Réessayer"
+    "reessayer": "Réessayer",
+    "identiteAide": "Le nom et le logo qui ouvrent la page de votre client.",
+    "optionsAide": "Ce qui apparaît sur la page de votre client, et dans quelle langue.",
+    "apercuAide": "Ce que verront vos clients, mis à jour à chaque frappe."
   },
   "envois": {
     "titre": "Envois",

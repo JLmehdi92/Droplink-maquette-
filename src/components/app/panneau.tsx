@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
@@ -26,12 +27,21 @@ import Link from "next/link";
 export function Panneau({
   titre,
   sousTitre,
+  icone: Icone,
   action,
   children,
   className,
 }: {
   readonly titre: ReactNode;
   readonly sousTitre?: string;
+  /**
+   * LA PASTILLE D'EN-TÊTE — 44 au rayon pilule, fond teinté, icône 20 à
+   * l'accent. C'est celle de `SummaryTile`, que le kit reprend en tête de
+   * chaque section de « Ma marque ». Facultative : les panneaux de `/analyses`
+   * et du détail de commande n'en portent pas, et en poser une partout ferait
+   * de l'icône une décoration plutôt qu'un repère.
+   */
+  readonly icone?: LucideIcon;
   readonly action?: ReactNode;
   readonly children: ReactNode;
   readonly className?: string;
@@ -44,6 +54,11 @@ export function Panneau({
       }
     >
       <header className="mb-4 flex flex-wrap items-start gap-4 lg:mb-5">
+        {Icone === undefined ? null : (
+          <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-ds-accent">
+            <Icone aria-hidden="true" size={20} strokeWidth={1.9} />
+          </span>
+        )}
         <div className="min-w-0 flex-[1_1_210px]">
           <h2 className="text-[18px] font-bold tracking-[-0.03em] text-ds-texte-titre lg:text-[19px]">
             {titre}
