@@ -851,6 +851,24 @@ Liste complète des 32 leçons dans @BRIEF-DROPLINK-COMPLET.md §13.
 
 ## Workflow
 
+> ⚠️ **UN MESSAGE DE COMMIT NE SE PASSE JAMAIS PAR `-m "…"`, ET ÇA A COÛTÉ UNE
+> ÉCRITURE EN PRODUCTION.** Le 13/09/2026, un message contenant des rétro-quotes
+> autour de noms de commandes — `` `pnpm db:migrate` ``, `` `railway.json` `` —
+> a été passé à `git commit -m` entre guillemets doubles. Bash y a vu des
+> **substitutions de commande** et les a EXÉCUTÉES : `pnpm db:migrate` a tourné,
+> et la migration 146 s'est appliquée à la base qui sert les clients.
+>
+> Le geste était dans la courte liste de ce qui n'est jamais automatique, et
+> personne ne l'avait décidé. Il s'est trouvé sans conséquence — la migration
+> était additive, `verif:prod` rend 29/29 et la production répond — mais c'est
+> une chance, pas une protection : le même message aurait pu porter
+> `` `pnpm falsifier casser …` ``.
+>
+> **Toujours `git commit -F -` avec un heredoc à délimiteur QUOTÉ** (`<<'FIN'`),
+> qui n'interprète rien. C'est la même famille que « les heredocs abîment les
+> échappements » : ce n'est pas le contenu qui est dangereux, c'est la couche
+> qui le lit avant sa destination.
+
 ### ⚠️ LE PILOTE AUTOMATIQUE — consigne de Wassim, 11/09/2026
 
 > « tu vas être constamment en **auto pilote**, tu vas implémenter tout le design
