@@ -4556,7 +4556,7 @@ function ageHsts(entetes) {
 // rendu. Les deux sont necessaires et aucune ne remplace l autre — une
 // regression de configuration ne touche pas une ligne de code source.
 {
-  const CHEMINS_INDEXABLES = ["", "/conditions", "/confidentialite", "/signalement"];
+  const CHEMINS_INDEXABLES = ["", "/conditions", "/confidentialite", "/signalement", "/docs"];
   const LANGUES_SERVIES = ["fr", "en", "zh-CN"];
 
   const robots = await fetch(`${base}/robots.txt`);
@@ -4660,7 +4660,7 @@ function ageHsts(entetes) {
 
   const sansCanonique = pages.filter(([, h]) => !h.includes('rel="canonical"')).map(([c]) => c);
   controles.push([
-    pages.length === 12 && sansCanonique.length === 0,
+    pages.length === CHEMINS_INDEXABLES.length * LANGUES_SERVIES.length && sansCanonique.length === 0,
     `les ${pages.length} pages indexables portent une canonique` +
       (sansCanonique.length ? ` — MANQUANTE sur ${sansCanonique.join(", ")}` : ""),
   ]);

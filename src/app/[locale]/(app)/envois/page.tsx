@@ -5,7 +5,13 @@ import type { Metadata } from "next";
 import { TableauEnvois } from "@/components/envois/tableau-envois";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
-import { analyserParametres, compterEnvois, lireEnvois, lireFraicheur } from "@/lib/envois/liste";
+import {
+  analyserParametres,
+  compterEnvois,
+  lireEnvois,
+  lireEvolution,
+  lireFraicheur,
+} from "@/lib/envois/liste";
 import { EnTeteEnvois } from "@/components/envois/en-tete-envois";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
@@ -65,10 +71,11 @@ export default async function Envois({
   // Les trois lectures sont indépendantes : les enchaîner tripleraient la
   // latence de l'écran pour rien, et la fraîcheur n'est qu'un ornement
   // d'en-tête — elle n'a aucune raison d'attendre son tour.
-  const [page, compteurs, fraicheur] = await Promise.all([
+  const [page, compteurs, fraicheur, evolution] = await Promise.all([
     lireEnvois(supabase, parametres, maintenant),
     compterEnvois(supabase),
     lireFraicheur(supabase),
+    lireEvolution(supabase, maintenant),
   ]);
 
   const t = await getTranslations("envois");
@@ -130,6 +137,7 @@ export default async function Envois({
           parametres={parametres}
           page={page}
           compteurs={compteurs}
+          evolution={evolution}
           maintenant={maintenant}
         />
       </div>

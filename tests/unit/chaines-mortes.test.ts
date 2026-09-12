@@ -51,6 +51,11 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   ["onboarding.logoErreur.", "composé depuis le motif de refus d'un logo — onboarding"],
   ["marque.logoErreur.", "composé depuis le motif de refus d'un logo — réglages de marque"],
   ["envois.etat.", "composé depuis l'état du colis rendu par `compter_envois`"],
+  /* Les six questions de la documentation sont rendues par une boucle sur
+     `[1..6]`, qui compose `faqQ${n}` et `faqR${n}`. Les écrire à plat aurait
+     donné douze appels identiques à une ligne près. */
+  ["docs.faqQ", "composé depuis le rang de la question — documentation"],
+  ["docs.faqR", "composé depuis le rang de la question — documentation"],
   ["envois.tri.", "composé depuis le tri choisi — tableau des envois"],
   ["analyses.sousTitre.", "composé depuis la période choisie — écran Analyses"],
   ["analyses.periode.", "composé depuis la période choisie — sélecteur des Analyses"],

@@ -48,6 +48,12 @@ const IDEOGRAMME = /[一-鿿]/;
  */
 const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["legal.signalement.lienExemple", "Un début d'URL, montré tel quel."],
+  /* La documentation emploie trois mots qui ne se traduisent pas : « Logo » est
+     international, et les unités de stockage s'écrivent en lettres latines en
+     chinois comme ailleurs. */
+  ["docs.regLogo", "« Logo » s'écrit ainsi en chinois."],
+  ["docs.plStockageG", "Une unité de stockage : « 1 GB »."],
+  ["docs.plStockageP", "Une unité de stockage : « 50 GB »."],
   ["connexion.placeholderEmail", "Un exemple d'adresse : il doit ressembler à une adresse."],
   [
     "connexion.suggestionSuffixe",

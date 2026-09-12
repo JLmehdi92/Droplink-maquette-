@@ -97,18 +97,24 @@
         "texte": "Plus récentes",
         "motif": "structure",
         "raison": "MEME CAUSE, ROLE INVERSE : « Plus recentes » est a la fois le DECLENCHEUR du menu de tri et l OPTION selectionnee a l interieur, que le produit rend dans le document. Le kit n a qu un menu ferme. L outil apparie l option violette (219x36, fond teinte) au declencheur blanc borde du kit (137x42) — deux elements qui ne jouent pas le meme role."
+      },
+      {
+        "texte": "Passez au Pro",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Plus de fonctionnalités, plus de possibi",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Upgrade",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Passez au Pro",
-          "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CONTRAINTE PRODUIT N°1 : aucun code de facturation en phase 1. La barre laterale annonce a la place la gratuite de la phase de validation. Ces planches sont conservees pour la phase 2, sans une ligne de code."
-      },
       {
         "textes": [
           "Tableau de bord",
@@ -222,14 +228,6 @@
       }
     ],
     "enTrop": [
-      {
-        "textes": [
-          "Phase de lancement",
-          "Tout est gratuit pendant cette période."
-        ],
-        "motif": "contrainte",
-        "raison": "LE PENDANT DE « PASSEZ AU PRO ». La contrainte n°1 interdit la facturation en phase 1 ; la barre laterale annonce a la place la gratuite de la phase de validation, au meme endroit et dans le meme encart."
-      },
       {
         "textes": [
           "AD",
@@ -500,21 +498,37 @@
         "raison": "Quatre pixels de boite et une position. Le nom vient du catalogue officiel du fournisseur de suivi, le kit l ecrit a la main dans sa demonstration ; la boite suit la largeur de sa colonne."
       },
       {
-        "texte": "7 sept. 2025",
+        "texte": "8 sept. 2025",
         "motif": "donnee",
-        "raison": "Le kit empile la date et l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous. Meme declaration que « 8 sept. 2025 », pour la deuxieme ligne du kit."
+        "raison": "Le kit empile la date et l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous — « il y a 3 jours » plutot que « a 14:32 ». C est la seule chose de l ecran qui change tous les jours quand le colis ne bouge pas, et c est ce que le vendeur vient verifier."
+      },
+      {
+        "texte": "Livré",
+        "motif": "donnee",
+        "raison": "Rendu deux fois chez nous, une seule chez le kit : « Livre » est a la fois une OPTION du menu de statut — que le `<details>` porte en clair, la ou le `<select>` du kit garde les siennes dans des `<option>` invisibles a l inventaire — et la pastille du colis livre du jeu de mesure."
+      },
+      {
+        "texte": "Passez au Pro",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Plus de fonctionnalités, plus de possibi",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Upgrade",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Colis livré",
+        "motif": "donnee",
+        "raison": "Largeur de colonne et abscisse. Le texte est le meme — c est ce que la colonne « Prochaine etape » rend quand le colis est arrive — mais nous alignons DIX colonnes la ou le kit en aligne dix AUTRES : il a une case a cocher et « Actions », nous « Dernier point » et « Interrogations ». Les proportions du kit sont conservees, les largeurs absolues ne peuvent donc pas coincider."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Passez au Pro",
-          "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CONTRAINTE PRODUIT N°1 : aucun code de facturation en phase 1. Le kit pose un encart « Passez au Pro » en bas de barre laterale ; le produit y annonce la gratuite de la phase de validation. Ces planches sont conservees pour la phase 2, sans une ligne de code."
-      },
       {
         "textes": [
           "Tableau de bord",
@@ -594,7 +608,6 @@
         "textes": [
           "Livraison prévue aujourd'hui",
           "Arrivée en France",
-          "Colis livré",
           "En cours d'acheminement",
           "Prise en charge par le transporteur",
           "Colis en attente (voir détails)",
@@ -615,14 +628,6 @@
       }
     ],
     "enTrop": [
-      {
-        "textes": [
-          "Phase de lancement",
-          "Tout est gratuit pendant cette période."
-        ],
-        "motif": "contrainte",
-        "raison": "LE PENDANT DE « PASSEZ AU PRO ». La contrainte n°1 interdit la facturation en phase 1, et la barre laterale annonce a la place la gratuite de la phase de validation. C est la meme place, le meme encart, le message que le produit peut tenir."
-      },
       {
         "textes": [
           "AD",
@@ -675,7 +680,6 @@
       {
         "textes": [
           "DLKMESURE0002CN",
-          "DLKMESURE0001FR",
           "Cliente en preparation",
           "Client de verification",
           "Sans mouvement · 14 j",
@@ -724,6 +728,21 @@
         ],
         "motif": "donnee",
         "raison": "LES OPTIONS DE NOTRE MENU DE STATUT, rendues dans le document parce qu un `<details>` porte ses entrees en clair — le `<select>` du kit garde les siennes dans des `<option>` que l inventaire ne releve pas. Et ce sont NOS etats : la frise est verrouillee a quatre par la decision 4 du brief, et « Sans mouvement » remplace le « Probleme » du kit, qui supposerait que le transporteur declare un incident."
+      },
+      {
+        "textes": [
+          "DHL Express",
+          "DH",
+          "Client expedie",
+          "Pas encore d’information du transporteur"
+        ],
+        "motifs": [
+          "^DLKMESURE\\d+[A-Z]{2}$",
+          "^il y a \\d+ jours?$",
+          "^[+-]?\\d+ % ce mois-ci$"
+        ],
+        "motif": "donnee",
+        "raison": "LE TROISIEME COLIS DU JEU DE MESURE ET LE BADGE D EVOLUTION. Le colis date du MOIS DERNIER, et il existe pour une raison de verification : sans lui, le badge « ce mois-ci » ne s affiche jamais — la regle du produit le retire quand le mois precedent est vide — et rien ne distinguerait « la regle s applique » de « le calcul est casse ». Le badge et l anciennete sont declares PAR MOTIF : leur valeur depend du jour ou la mesure tourne."
       }
     ]
   }

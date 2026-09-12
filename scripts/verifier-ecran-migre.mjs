@@ -141,6 +141,19 @@ const jetonPublic = commandes?.[0]?.public_token ?? "";
  */
 const jours = (n) => new Date(Date.now() - n * 86400000).toISOString();
 /*
+ * LE MEME JOUR, LE MOIS DERNIER — relatif, jamais ecrit en dur.
+ *
+ * Il sert au badge d evolution, qui compare le mois en cours au MEME intervalle
+ * du mois precedent. Une date fixe aurait expire comme celle de la sonde de
+ * fumee, qui a bascule le 12/09 au matin parce que son dernier mouvement avait
+ * atteint le seuil du silence.
+ */
+const moisDernier = () => {
+  const d = new Date();
+  d.setUTCMonth(d.getUTCMonth() - 1);
+  return d.toISOString();
+};
+/*
  * ⚠️ UNE INSERTION DE JEU DE MESURE QUI ECHOUE DOIT ARRETER LA SONDE.
  *
  * Celle-ci ignorait son erreur : `carrier_code` de `tracked_parcels` est un
@@ -159,6 +172,13 @@ const { data: colis, error: eColis } = await service
       tracking_number: "DLKMESURE0001FR",
       carrier_code: 100003,
       normalized_status: "en_transit",
+      // ⚠️ `created_at` EST POSE SUR LES TROIS COLIS, PAS SEULEMENT SUR CELUI
+      // QUI EN A BESOIN. PostgREST construit son INSERT par lot sur l UNION des
+      // cles de toutes les lignes, et met NULL partout ou une ligne ne porte pas
+      // la colonne : ajouter la date au seul troisieme colis faisait echouer
+      // l insertion des deux premiers sur la contrainte `not null`. Le message
+      // designe alors la colonne, jamais la ligne fautive.
+      created_at: jours(3),
       first_movement_at: jours(3),
       last_movement_at: jours(1),
       query_count: 4,
@@ -177,10 +197,36 @@ const { data: colis, error: eColis } = await service
       estimated_to: jours(-2),
     },
     {
+      /*
+       * UN COLIS DU MOIS DERNIER, POUR QUE LE BADGE D EVOLUTION AIT DE QUOI SE
+       * CALCULER.
+       *
+       * ⚠️ SANS LUI, LE BADGE NE S AFFICHE JAMAIS ET ON NE PEUT PAS PROUVER
+       * QU IL FONCTIONNE. La regle du produit veut qu une evolution disparaisse
+       * quand le mois precedent est vide — passer de 0 a 5 n est pas « +500 % ».
+       * Le jeu de mesure creait donc tous ses colis le meme jour, le badge etait
+       * legitimement absent, et rien ne distinguait « la regle s applique » de
+       * « le calcul est casse ». Un contre-test qui ne rend jamais l element
+       * qu il verifie ne verifie rien.
+       *
+       * `created_at` est FORCE : la colonne porte un `default now()`, et sans
+       * valeur explicite ce colis naitrait ce mois-ci comme les autres.
+       */
+      shop_id: shop.id,
+      tracking_number: "DLKMESURE0003FR",
+      carrier_code: 100001,
+      normalized_status: "livre",
+      created_at: moisDernier(),
+      first_movement_at: moisDernier(),
+      last_movement_at: moisDernier(),
+      query_count: 7,
+    },
+    {
       shop_id: shop.id,
       tracking_number: "DLKMESURE0002CN",
       carrier_code: 190094,
       normalized_status: "en_transit",
+      created_at: jours(21),
       first_movement_at: jours(21),
       last_movement_at: jours(14),
       query_count: 12,

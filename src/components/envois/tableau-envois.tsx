@@ -1,6 +1,12 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { decrireSilence } from "@/lib/tracking/silence";
-import type { CompteursEnvois, Etat, PageEnvois, ParametresEnvois } from "@/lib/envois/liste";
+import type {
+  CompteursEnvois,
+  Etat,
+  EvolutionEnvois,
+  PageEnvois,
+  ParametresEnvois,
+} from "@/lib/envois/liste";
 import { ETATS, TRIS } from "@/lib/envois/liste";
 import {
   AlertCircle,
@@ -156,12 +162,14 @@ export async function TableauEnvois({
   parametres,
   page,
   compteurs,
+  evolution,
   maintenant,
 }: {
   readonly base: string;
   readonly parametres: ParametresEnvois;
   readonly page: PageEnvois;
   readonly compteurs: CompteursEnvois;
+  readonly evolution: EvolutionEnvois;
   readonly maintenant: Date;
 }) {
   const t = await getTranslations("envois");
@@ -607,6 +615,20 @@ export async function TableauEnvois({
               teinte: "marque",
               alerte: false,
               mobile: false,
+              /*
+               * LE BADGE D'ÉVOLUTION DU KIT, « +12 % ce mois-ci » — ET IL N'EST
+               * POSÉ QUE SUR CETTE TUILE-CI.
+               *
+               * Les colis PRIS EN CHARGE sont un flux : ce mois se compare au
+               * même intervalle du mois précédent. Les trois tuiles suivantes
+               * sont des ÉTATS INSTANTANÉS, et un état ne se compare à aucune
+               * période — « +12 % de colis en transit » ne voudrait rien dire.
+               * Le kit peut en poser cinq parce que ses chiffres sont inventés.
+               *
+               * ⚠️ ET IL DISPARAÎT QUAND LE MOIS PRÉCÉDENT EST VIDE : passer de
+               * 0 à 5 n'est pas « +500 % », c'est un premier mois.
+               */
+              evolution: evolution.pris,
             },
             {
               cle: "preparation",
@@ -616,6 +638,7 @@ export async function TableauEnvois({
               teinte: "neutre",
               alerte: false,
               mobile: false,
+              evolution: null,
             },
             {
               cle: "enTransit",
@@ -625,6 +648,7 @@ export async function TableauEnvois({
               teinte: "info",
               alerte: false,
               mobile: true,
+              evolution: null,
             },
             {
               cle: "silencieux",
@@ -634,6 +658,7 @@ export async function TableauEnvois({
               teinte: "alerte",
               alerte: true,
               mobile: true,
+              evolution: null,
             },
             {
               cle: "livresCeMois",
@@ -643,6 +668,7 @@ export async function TableauEnvois({
               teinte: "succes",
               alerte: false,
               mobile: false,
+              evolution: null,
             },
           ] as const
         ).map((c) => (
@@ -662,6 +688,22 @@ export async function TableauEnvois({
               libelle={t(`compteurs.${c.cle}`)}
               teinte={c.teinte satisfies TeinteTuile}
               valeurEnAlerte={c.alerte && c.valeur > 0}
+              {...(c.evolution === null
+                ? {}
+                : {
+                    dessous: {
+                      texte:
+                        (c.evolution > 0 ? "+" : "") +
+                        format.number(c.evolution) +
+                        " % " +
+                        t("compteurs.ceMois"),
+                      /* Vert à la hausse, rouge à la baisse — les deux teintes
+                         du kit. Un volume qui monte est une bonne nouvelle pour
+                         un vendeur ; c'est le seul endroit de l'écran où la
+                         couleur porte un jugement, et il est mérité. */
+                      classe: c.evolution >= 0 ? "text-ds-succes" : "text-ds-erreur",
+                    },
+                  })}
             />
           </LienEcran>
         ))}
@@ -966,7 +1008,15 @@ export async function TableauEnvois({
                         statut et par le fond de la ligne. La peindre une
                         troisième fois n'ajouterait rien.
                       */}
-                      <td className={cellule + " text-ds-texte-corps"}>{d.prochaine}</td>
+                      <td className={cellule}>
+                        {/* Le kit rend ce texte dans un `<span>` d'une grille ;
+                            sans enveloppe, on comparerait sa boîte de texte à
+                            notre cellule et à son remplissage — 18 px contre 71.
+                            Même correction que pour les en-têtes de colonne. */}
+                        <span className="block text-[13px] leading-[1.4] text-ds-texte-corps">
+                          {d.prochaine}
+                        </span>
+                      </td>
 
                       <td className={cellule + bordDroit + " text-right text-ds-texte-sourdine"}>
                         {format.number(ligne.interrogations)}

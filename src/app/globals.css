@@ -400,6 +400,11 @@
   --color-ds-blue-100: #ECEBFE;
   --color-ds-amber-500: #E08A18;
   --color-ds-amber-100: #FCF3E3;
+  /* Le filet des encarts d'avertissement, relevé sur le `Note` du kit `docs` :
+     `1px solid #F3DFB4`. Le design system porte la valeur sans la ranger dans
+     ses tokens — il l'écrit en dur dans le composant — donc elle entre ici, où
+     le produit range ses couleurs. */
+  --color-ds-amber-200: #F3DFB4;
   --color-ds-accent: #5B4BF5;
   --color-ds-accent-survol: #4B3AE0;
   --color-ds-accent-doux: #EDEBFE;

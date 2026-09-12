@@ -62,7 +62,18 @@ const RACINE_APP = join(process.cwd(), "src", "app");
  * autres passerait — et c'est exactement ce qu'on ferait en « corrigeant » une
  * divergence sans réfléchir.
  */
-const CHEMINS_ATTENDUS = ["", "/conditions", "/confidentialite", "/signalement"] as const;
+/*
+ * ⚠️ `/docs` A ÉTÉ AJOUTÉ EN CONSCIENCE LE 12/09/2026, et voici la relecture que
+ * cette liste réclame. C'est une page PUBLIQUE de documentation : elle décrit le
+ * fonctionnement du produit, ne porte aucune donnée de compte, aucun jeton,
+ * aucun nom de client. Le design system lui assigne d'ailleurs sa propre
+ * canonique — `droplink.fr/fr/docs` — et ses trois hreflang.
+ *
+ * Elle est aussi la seule page de contenu que le produit publie en dehors du
+ * blog, donc la seule qui puisse répondre à « comment fonctionne DropLink »
+ * dans un moteur. L'indexer est l'intention, pas un effet de bord.
+ */
+const CHEMINS_ATTENDUS = ["", "/conditions", "/confidentialite", "/signalement", "/docs"] as const;
 
 /** Les chemins réellement déclarés dans `src/app/sitemap.ts`, lus dans le fichier. */
 function cheminsDuSitemap(): string[] {

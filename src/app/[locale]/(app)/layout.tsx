@@ -5,7 +5,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
-import { ChevronDown, Zap } from "lucide-react";
+import { ArrowRight, ChevronDown, Zap } from "lucide-react";
+import { LienEcran } from "@/components/lien-ecran";
 import { BarreSuperieure } from "@/components/app/barre-superieure";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 import { compterParEtat } from "@/lib/commandes/liste";
@@ -178,24 +179,36 @@ export default async function LayoutApplication({
             L ENCART DU BAS DE COLONNE, AU DESSIN DU KIT : fond teinté, filet
             `violet-200`, rayon carte-lg, `padding: 18`, écart 6, titre de 15 px
             en 700 à l encre d accent précédé d un éclair de 17, texte de 13 px
-            en interligne 1,45.
+            en interligne 1,45, bouton de 42 au dégradé de marque.
 
-            ⚠️ LE KIT Y MET « Passez au Pro » ET UN BOUTON « Upgrade ». LA
-            CONTRAINTE N°1 L INTERDIT : aucun code de facturation, aucune phase.
-            L emplacement, lui, est le bon — c est le seul de la colonne qui
-            parle du compte à son propriétaire. Il dit donc ce que le produit a
-            de vrai à dire : la phase de validation est gratuite. Le bouton
-            disparaît parce qu il n y a rien à acheter, et un bouton qui ne
-            mène nulle part serait pire qu une case vide.
+            ⚠️ CE BLOC A LONGTEMPS DIT « Phase de lancement », ET C ÉTAIT LA
+            BONNE DÉCISION JUSQU AU 12/09/2026. Il portait : « le kit y met
+            Passez au Pro et un bouton Upgrade, la contrainte n°1 l interdit ».
+            Wassim a tranché ce jour-là — « jcompte mettre un pricing genre un
+            gratuit et un pro » — et l encart reprend donc le dessin du kit.
+
+            ⚠️ CE QUI N A PAS CHANGÉ : AUCUN CODE DE PAIEMENT. Le bouton mène à
+            la section « Gratuit et Pro » de la documentation, exactement comme
+            la navigation de la landing du design system envoie « Tarifs » sur
+            `/docs#plans`. Il n y a ni Stripe, ni table d abonnement, ni plafond
+            appliqué : les limites affichées là-bas ne sont vérifiées nulle part,
+            et la page le dit en toutes lettres. *Un bouton qui ne mène nulle
+            part serait pire qu une case vide* — celui-ci mène à une page qui
+            existe.
           */}
           <div className="flex flex-col gap-1.5 rounded-ds-card-lg border border-ds-violet-200 bg-ds-surface-teinte p-[18px]">
-            <span className="flex items-center gap-[9px] text-[15px] font-bold text-ds-accent-encre">
+            <span className="flex items-center gap-[9px] text-[15px] leading-[normal] font-bold text-ds-accent-encre">
               <Zap aria-hidden="true" size={17} strokeWidth={2.2} />
-              {t("lancement.titre")}
+              {t("pro.titre")}
             </span>
-            <span className="text-[13px] leading-[1.45] text-ds-texte-corps">
-              {t("lancement.texte")}
-            </span>
+            <span className="text-[13px] leading-[1.45] text-ds-texte-corps">{t("pro.texte")}</span>
+            <LienEcran
+              href={`/${langue}/docs#plans`}
+              className="degrade-ds-marque mt-2 flex h-[42px] items-center justify-center gap-2 rounded-ds-pill border border-transparent px-[22px] text-[14px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+            >
+              {t("pro.bouton")}
+              <ArrowRight aria-hidden="true" size={16} strokeWidth={2.2} />
+            </LienEcran>
           </div>
 
           {/*

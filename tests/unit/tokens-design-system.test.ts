@@ -83,6 +83,12 @@ const TOKENS_DU_DESIGN_SYSTEM: ReadonlyArray<readonly [string, string]> = [
   ["--color-ds-blue-500", "#4F46E5"],
   ["--color-ds-blue-100", "#ECEBFE"],
   ["--color-ds-amber-500", "#E08A18"],
+  /* Le filet des encarts d'avertissement. Il n'était PAS dans `tokens/colors.css`
+     avant le 12/09/2026 : le kit `docs` l'écrivait en dur dans son composant
+     `Note`. Il y a été ajouté AVANT d'entrer ici — l'ordre compte, c'est le
+     design system qui fait référence, et implémenter d'abord ferait du code la
+     source. */
+  ["--color-ds-amber-200", "#F3DFB4"],
   ["--color-ds-amber-100", "#FCF3E3"],
   ["--color-ds-accent", "#5B4BF5"],
   ["--color-ds-accent-survol", "#4B3AE0"],

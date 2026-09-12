@@ -436,6 +436,71 @@ export async function lireFraicheur(supabase: ClientLecture): Promise<Date | nul
   return new Date(data.updated_at);
 }
 
+/**
+ * L'ÉVOLUTION D'UN MOIS SUR L'AUTRE — ce que le kit écrit « +12 % ce mois-ci ».
+ *
+ * ⚠️ ELLE N'EST CALCULÉE QUE LÀ OÙ ELLE A UN SENS, ET C'EST LA MOITIÉ DES
+ * TUILES. Le kit pose un badge sur ses cinq compteurs ; trois des nôtres sont
+ * des ÉTATS INSTANTANÉS — « en transit », « pas encore scanné », « sans
+ * mouvement » — et un état ne se compare pas à une période. « +12 % de colis en
+ * transit » par rapport à quoi : hier, le mois dernier ? Il faudrait un
+ * historique d'état que la base ne tient pas, et le fabriquer reviendrait à
+ * inventer le chiffre que le badge prétend mesurer.
+ *
+ * Restent deux comptes qui SONT des flux : les colis pris en charge, et les
+ * livraisons. Ceux-là se comparent au même intervalle du mois précédent, et le
+ * badge dit alors quelque chose de vrai.
+ *
+ * ⚠️ LE MOIS PRÉCÉDENT EST BORNÉ AU MÊME JOUR, pas au mois entier. Le 3 du mois,
+ * comparer trois jours à trente-et-un rendrait « -90 % » tous les débuts de
+ * mois — un badge alarmant qui ne décrirait que le calendrier.
+ */
+export interface EvolutionEnvois {
+  readonly pris: number | null;
+  readonly livres: number | null;
+}
+
+export async function lireEvolution(
+  supabase: ClientLecture,
+  maintenant: Date,
+): Promise<EvolutionEnvois> {
+  const debutCeMois = new Date(
+    Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), 1),
+  );
+  const debutMoisDernier = new Date(
+    Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth() - 1, 1),
+  );
+  // La même position dans le mois précédent : le 12 septembre se compare au
+  // 1er-12 août, pas à tout le mois d'août.
+  const memeJourMoisDernier = new Date(
+    debutMoisDernier.getTime() + (maintenant.getTime() - debutCeMois.getTime()),
+  );
+
+  const compter = async (de: Date, a: Date): Promise<number | null> => {
+    const { count, error } = await supabase
+      .from("tracked_parcels")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", de.toISOString())
+      .lt("created_at", a.toISOString());
+    return error !== null || count === null ? null : count;
+  };
+
+  const [ceMois, moisDernier] = await Promise.all([
+    compter(debutCeMois, maintenant),
+    compter(debutMoisDernier, memeJourMoisDernier),
+  ]);
+
+  /* ⚠️ AUCUNE ÉVOLUTION QUAND LE MOIS PRÉCÉDENT EST VIDE. Passer de 0 à 5 n'est
+     pas « +500 % », c'est un premier mois — et un compte neuf afficherait un
+     badge triomphal sur sa première commande. Le badge disparaît alors. */
+  const variation = (avant: number | null, apres: number | null): number | null =>
+    avant === null || apres === null || avant === 0
+      ? null
+      : Math.round(((apres - avant) / avant) * 100);
+
+  return { pris: variation(moisDernier, ceMois), livres: null };
+}
+
 /** Lit les paramètres depuis l'URL. */
 export function analyserParametres(
   recherche: Record<string, string | string[] | undefined>,
