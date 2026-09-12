@@ -268,27 +268,116 @@ const nomEcran = cheminProduit
   .split(/[\\/]/)
   .pop()
   .replace(/-\d+\.json$/, "");
-const declares = declaresTous[nomEcran] ?? [];
-const vus = new Set();
+/*
+ * ⚠️ LES TROIS LISTES SE DECLARENT, PAS SEULEMENT LA TROISIEME.
+ *
+ * L outil n a longtemps echoue que sur les ecarts de VALEUR. Un ecran qui ne
+ * rendait rien n avait donc aucun texte commun avec le kit, donc aucun ecart, et
+ * il sortait en code 0 : « un ensemble vide passe tout », la regle du depot
+ * retournee contre l outil cense la faire respecter. C est le defaut que Wassim
+ * avait vu a l oeil nu quand les nombres disaient que tout allait bien — il
+ * manquait une barre superieure entiere et quatre colonnes de tableau.
+ *
+ * Le fichier de declarations porte donc trois listes par ecran :
+ *   valeurs    ce qui differe sur un texte rendu des deux cotes
+ *   manquants  ce que le kit rend et que le produit ne rend pas
+ *   enTrop     ce que le produit rend et que le kit ne rend pas
+ *
+ * Une entree peut couvrir PLUSIEURS textes (`textes: [...]`) quand ils partagent
+ * la meme raison — cinq libelles de facturation ne meritent pas cinq fois la
+ * meme phrase — mais chacun reste NOMME : declarer par prefixe large laisserait
+ * passer ce qui n a pas ete regarde.
+ */
+const brut = declaresTous[nomEcran];
+if (brut !== undefined && Array.isArray(brut)) {
+  console.error(
+    `ARRET : les declarations de « ${nomEcran} » sont encore une simple liste.\n` +
+      "Elles doivent porter les trois listes : { valeurs, manquants, enTrop }.\n" +
+      "Sans « manquants », un ecran qui ne rend RIEN sort en code 0.",
+  );
+  process.exit(1);
+}
+const dec = brut ?? {};
+const listeDe = (nom) => (Array.isArray(dec[nom]) ? dec[nom] : []);
+const textesDe = (d) => (Array.isArray(d.textes) ? d.textes : d.texte === undefined ? [] : [d.texte]);
 
-const estDeclare = (texte) => {
-  for (const d of declares) {
-    if (texte === d.texte || texte.startsWith(d.texte + " [") || texte.startsWith(d.texte + "  ")) {
-      vus.add(d.texte);
-      return d;
+/*
+ * ⚠️ LE MOTIF, RESERVE A CE QUI VARIE PAR CONSTRUCTION — ET A RIEN D AUTRE.
+ *
+ * Le jeu de mesure fabrique un compte jetable a chaque passage : son adresse
+ * change, et les references de commande sont DERIVEES d identifiants tires au
+ * hasard. Aucune declaration litterale ne peut donc etre stable, et la
+ * soustraction redeviendrait rouge a chaque execution pour la seule raison que
+ * la base a rendu d autres octets.
+ *
+ * Un motif est une porte : il couvre ce qu on n a pas lu. Il est donc borne —
+ * il doit etre ANCRE aux deux bouts — et sa raison doit dire POURQUOI la valeur
+ * varie. Un motif qui couvrirait un libelle d interface serait un abus : ces
+ * libelles-la ne changent pas d une execution a l autre.
+ */
+const motifsDe = (d) => (Array.isArray(d.motifs) ? d.motifs.map((m) => new RegExp(m)) : []);
+
+/** Construit un chercheur sur une liste de declarations, et retient ce qui a servi. */
+const chercheur = (declarations) => {
+  const vus = new Set();
+  const trouver = (texte) => {
+    for (const d of declarations) {
+      for (const cible of textesDe(d)) {
+        if (
+          texte === cible ||
+          texte.startsWith(cible + " [") ||
+          texte.startsWith(cible + "  ")
+        ) {
+          vus.add(cible);
+          return d;
+        }
+      }
+      for (const m of motifsDe(d)) {
+        // Le texte releve porte parfois un suffixe de role (« [1/3] », «  <span> ») :
+        // le motif est confronte a la partie utile, avant ce suffixe.
+        const nu = texte.split("  <")[0].replace(/ \[\d+\/\d+\]$/, "");
+        if (m.test(nu)) {
+          vus.add(m.source);
+          return d;
+        }
+      }
     }
-  }
-  return null;
+    return null;
+  };
+  /* Les declarations qui n ont rien designe : l echec dans l autre sens. Sans
+     lui, la liste grossirait jusqu a tout couvrir et « la soustraction est
+     vide » voudrait dire « j ai tout declare ». */
+  const mortes = () => {
+    const restes = [];
+    for (const d of declarations) {
+      for (const cible of textesDe(d)) {
+        if (!vus.has(cible)) restes.push({ texte: cible, motif: d.motif });
+      }
+      for (const m of motifsDe(d)) {
+        if (!vus.has(m.source)) restes.push({ texte: `/${m.source}/`, motif: d.motif });
+      }
+    }
+    return restes;
+  };
+  return { trouver, mortes };
 };
+
+const cValeurs = chercheur(listeDe("valeurs"));
+const cManquants = chercheur(listeDe("manquants"));
+const cEnTrop = chercheur(listeDe("enTrop"));
 
 const restants = [];
 const ecartesDeclares = [];
 for (const e of ecarts) {
-  const d = estDeclare(e.texte);
+  const d = cValeurs.trouver(e.texte);
   if (d === null) restants.push(e);
   else ecartesDeclares.push({ ...e, motif: d.motif });
 }
-const declarationsMortes = declares.filter((d) => !vus.has(d.texte));
+
+const manquantsNonDeclares = manquants.filter((m) => cManquants.trouver(m.exemple.txt) === null);
+const enTropNonDeclares = enTrop.filter((m) => cEnTrop.trouver(m.exemple.txt) === null);
+
+const declarationsMortes = [...cValeurs.mortes(), ...cManquants.mortes(), ...cEnTrop.mortes()];
 
 const bloc = (titre, lignes) => {
   console.log(`\n${titre} (${lignes.length})`);
@@ -322,8 +411,9 @@ if (declarationsMortes.length > 0) {
 
 console.log(
   `\n[soustraction] ${nomEcran} : kit ${kit.length} elements, produit ${produit.length} ; ` +
-    `${manquants.length} manquants, ${enTrop.length} en trop, ` +
-    `${restants.length} ecarts NON DECLARES (${ecartesDeclares.length} declares).`,
+    `${manquants.length} manquants (${manquantsNonDeclares.length} NON DECLARES), ` +
+    `${enTrop.length} en trop (${enTropNonDeclares.length} NON DECLARES), ` +
+    `${restants.length} ecarts de valeur NON DECLARES (${ecartesDeclares.length} declares).`,
 );
 
 /*
@@ -331,4 +421,24 @@ console.log(
  * peut se lire vite ; un code de sortie arrete la chaine. L ecran n est fini
  * que quand il vaut zero.
  */
-if (restants.length > 0 || declarationsMortes.length > 0) process.exit(1);
+if (manquantsNonDeclares.length > 0) {
+  console.error(
+    `\nARRET : ${manquantsNonDeclares.length} element(s) que le KIT rend et que le produit ne rend pas ne sont pas declares :`,
+  );
+  for (const m of manquantsNonDeclares) console.error(`  « ${m.exemple.txt} »`);
+}
+if (enTropNonDeclares.length > 0) {
+  console.error(
+    `\nARRET : ${enTropNonDeclares.length} element(s) que le PRODUIT rend en plus ne sont pas declares :`,
+  );
+  for (const m of enTropNonDeclares) console.error(`  « ${m.exemple.txt} »`);
+}
+
+if (
+  restants.length > 0 ||
+  manquantsNonDeclares.length > 0 ||
+  enTropNonDeclares.length > 0 ||
+  declarationsMortes.length > 0
+) {
+  process.exit(1);
+}

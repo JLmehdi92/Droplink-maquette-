@@ -423,7 +423,8 @@
     "aide": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur : le transporteur n’a simplement rien publié.",
     "aideCourte": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur.",
     "actualiser": "Actualiser",
-    "derniereMaj": "Dernière mise à jour"
+    "derniereMaj": "Dernière mise à jour",
+    "compteurPage": "Affichage de {de} à {a} sur {total, plural, one {# envoi} other {# envois}}"
   },
   "analyses": {
     "titre": "Analyses",

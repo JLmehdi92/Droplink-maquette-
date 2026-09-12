@@ -16,76 +16,427 @@
     "mesure differe du sien), `structure` (le meme rendu par un balisage",
     "different — un ecart de l outil, pas de l ecran)."
   ],
-  "fr-commandes": [
-    {
-      "texte": "Commandes [1/2]  <h1>",
-      "motif": "structure",
-      "raison": "Le titre du kit s etire sur toute la largeur de son conteneur, le notre se limite a son texte. Aucun fond, aucun filet : les deux boites rendent le meme dessin."
-    },
-    {
-      "texte": "Commandes [2/2]  <span>",
-      "motif": "donnee",
-      "raison": "Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure. Quatorze pixels d ecart, tous dans le badge."
-    },
-    {
-      "texte": "Analyses  <span>",
-      "motif": "contrainte",
-      "raison": "Position seule. Le kit place une entree « Tableau de bord » au-dessus ; cette route n existe pas, et une entree de navigation vers un 404 est pire qu une entree absente."
-    },
-    {
-      "texte": "Ma marque  <span>",
-      "motif": "contrainte",
-      "raison": "Meme cause que « Analyses » : l entree « Tableau de bord » du kit decale toute la colonne de 54 px."
-    },
-    {
-      "texte": "Suivi d'envois  <span>",
-      "motif": "contrainte",
-      "raison": "Meme cause que « Analyses » et « Ma marque » : l entree « Tableau de bord » du kit decale toute la colonne de 53 px. L ecart n apparaissait pas tant que notre entree s appelait « Envois » — deux textes differents ne s apparient pas. Elle porte desormais le libelle du design system, donc elle s apparie, et elle herite du decalage deja declare pour ses voisines."
-    },
-    {
-      "texte": "Ctrl  <kbd>",
-      "motif": "donnee",
-      "raison": "Six pixels de place. Le champ de recherche du kit porte un texte d invite plus long, qui deplace la pastille du raccourci."
-    },
-    {
-      "texte": "En transit",
-      "motif": "donnee",
-      "raison": "Le kit rend huit commandes, le jeu de mesure quatre. Les graisses et les couleurs des libelles de frise disent QUELLE etape est atteinte : elles suivent les donnees, pas le dessin. Et le vocabulaire des quatre etapes est verrouille par la decision 4 du brief — preparation, expedie, en transit, livre — la ou le kit ecrit commande, en transit, en livraison, livree."
-    },
-    {
-      "texte": "Livrées",
-      "motif": "contrainte",
-      "raison": "Le kit pose cinq onglets — Toutes, En attente, En transit, Livrees, Problemes. Le produit en pose quatre, dont « Jamais ouvertes » et « Bloquees » qui n existent pas chez lui, et pas de « Problemes » : la base ne porte que quatre etats d expedition."
-    },
-    {
-      "texte": "Livré",
-      "motif": "donnee",
-      "raison": "Meme cause que « En transit » : huit lignes chez le kit contre quatre, et l appariement rapproche alors une pastille de statut d un libelle de frise."
-    },
-    {
-      "texte": "Filtres  <button>",
-      "motif": "structure",
-      "raison": "Trois pixels. Le bouton du kit se COMPRIME dans sa rangee, plus chargee que la notre — son `flex` vaut `0 1 auto`. Mesure directe de son bouton a sa largeur naturelle : 120,19 px, exactement la notre."
-    },
-    {
-      "texte": "8 sept. 2025",
-      "motif": "structure",
-      "raison": "Le kit met la date et l heure dans UN span de 34 px dont le texte direct est la date ; nous mettons deux spans de 17 dans une colonne. Meme rendu, deux balisages."
-    },
-    {
-      "texte": "14:32",
-      "motif": "donnee",
-      "raison": "Huit lignes chez le kit, quatre dans le jeu de mesure."
-    },
-    {
-      "texte": "7 sept. 2025",
-      "motif": "structure",
-      "raison": "Meme cause que « 8 sept. 2025 » : le kit met la date et l heure dans UN span de 34 px, nous en mettons deux de 17."
-    },
-    {
-      "texte": "© 2025 DropLink. Tous droits réservés.",
-      "motif": "donnee",
-      "raison": "Position seule. Le pied vient APRES le contenu : huit lignes de tableau chez le kit contre quatre dans le jeu de mesure, soit 130 px de page en moins."
-    }
-  ]
+  "fr-commandes": {
+    "valeurs": [
+      {
+        "texte": "Commandes [1/2]  <h1>",
+        "motif": "structure",
+        "raison": "Le titre du kit s etire sur toute la largeur de son conteneur, le notre se limite a son texte. Aucun fond, aucun filet : les deux boites rendent le meme dessin."
+      },
+      {
+        "texte": "Commandes [2/2]  <span>",
+        "motif": "donnee",
+        "raison": "Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure. Quatorze pixels d ecart, tous dans le badge."
+      },
+      {
+        "texte": "Analyses  <span>",
+        "motif": "contrainte",
+        "raison": "Position seule. Le kit place une entree « Tableau de bord » au-dessus ; cette route n existe pas, et une entree de navigation vers un 404 est pire qu une entree absente."
+      },
+      {
+        "texte": "Ma marque  <span>",
+        "motif": "contrainte",
+        "raison": "Meme cause que « Analyses » : l entree « Tableau de bord » du kit decale toute la colonne de 54 px."
+      },
+      {
+        "texte": "Suivi d'envois  <span>",
+        "motif": "contrainte",
+        "raison": "Meme cause que « Analyses » et « Ma marque » : l entree « Tableau de bord » du kit decale toute la colonne de 53 px. L ecart n apparaissait pas tant que notre entree s appelait « Envois » — deux textes differents ne s apparient pas. Elle porte desormais le libelle du design system, donc elle s apparie, et elle herite du decalage deja declare pour ses voisines."
+      },
+      {
+        "texte": "Ctrl  <kbd>",
+        "motif": "donnee",
+        "raison": "Six pixels de place. Le champ de recherche du kit porte un texte d invite plus long, qui deplace la pastille du raccourci."
+      },
+      {
+        "texte": "En transit",
+        "motif": "donnee",
+        "raison": "Le kit rend huit commandes, le jeu de mesure quatre. Les graisses et les couleurs des libelles de frise disent QUELLE etape est atteinte : elles suivent les donnees, pas le dessin. Et le vocabulaire des quatre etapes est verrouille par la decision 4 du brief — preparation, expedie, en transit, livre — la ou le kit ecrit commande, en transit, en livraison, livree."
+      },
+      {
+        "texte": "Livrées",
+        "motif": "contrainte",
+        "raison": "Le kit pose cinq onglets — Toutes, En attente, En transit, Livrees, Problemes. Le produit en pose quatre, dont « Jamais ouvertes » et « Bloquees » qui n existent pas chez lui, et pas de « Problemes » : la base ne porte que quatre etats d expedition."
+      },
+      {
+        "texte": "Livré",
+        "motif": "donnee",
+        "raison": "Meme cause que « En transit » : huit lignes chez le kit contre quatre, et l appariement rapproche alors une pastille de statut d un libelle de frise."
+      },
+      {
+        "texte": "Filtres  <button>",
+        "motif": "structure",
+        "raison": "Trois pixels. Le bouton du kit se COMPRIME dans sa rangee, plus chargee que la notre — son `flex` vaut `0 1 auto`. Mesure directe de son bouton a sa largeur naturelle : 120,19 px, exactement la notre."
+      },
+      {
+        "texte": "8 sept. 2025",
+        "motif": "structure",
+        "raison": "Le kit met la date et l heure dans UN span de 34 px dont le texte direct est la date ; nous mettons deux spans de 17 dans une colonne. Meme rendu, deux balisages."
+      },
+      {
+        "texte": "14:32",
+        "motif": "donnee",
+        "raison": "Huit lignes chez le kit, quatre dans le jeu de mesure."
+      },
+      {
+        "texte": "7 sept. 2025",
+        "motif": "structure",
+        "raison": "Meme cause que « 8 sept. 2025 » : le kit met la date et l heure dans UN span de 34 px, nous en mettons deux de 17."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu : huit lignes de tableau chez le kit contre quatre dans le jeu de mesure, soit 130 px de page en moins."
+      }
+    ],
+    "manquants": [],
+    "enTrop": []
+  },
+  "fr-envois": {
+    "valeurs": [
+      {
+        "texte": "Commandes  <span>",
+        "motif": "donnee",
+        "raison": "Largeur seule. Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure."
+      },
+      {
+        "texte": "Suivi d'envois [2/2]  <span>",
+        "motif": "contrainte",
+        "raison": "Position seule. Le kit place une entree « Tableau de bord » au-dessus de la colonne ; cette route n existe pas, et une entree de navigation qui mene a un 404 est pire qu une entree absente. Les 53 px se repercutent sur toutes les entrees suivantes."
+      },
+      {
+        "texte": "Analyses  <span>",
+        "motif": "contrainte",
+        "raison": "Meme cause que « Suivi d envois » : l entree « Tableau de bord » du kit decale toute la colonne."
+      },
+      {
+        "texte": "Ma marque  <span>",
+        "motif": "contrainte",
+        "raison": "Meme cause que « Analyses »."
+      },
+      {
+        "texte": "Ctrl  <kbd>",
+        "motif": "donnee",
+        "raison": "Six pixels de place. Le champ de recherche du kit porte un texte d invite plus long que le notre, ce qui deplace la pastille du raccourci."
+      },
+      {
+        "texte": "Suivi d'envois [1/2]  <h1>",
+        "motif": "structure",
+        "raison": "Largeur de boite seule. Le bloc de titre du kit est borne a 780 px ET subit le retrait de son conteneur flex, donc il rend 728 ; le notre prend la largeur de son contenu, 780. Meme police, meme taille, meme place, une seule ligne des deux cotes : le dessin est identique."
+      },
+      {
+        "texte": "Suivez tous vos colis en temps réel. Les  <p>",
+        "motif": "structure",
+        "raison": "Meme cause que le titre : c est la boite du bloc qui differe, pas le texte. Il tient sur une ligne des deux cotes, au meme x et au meme y."
+      },
+      {
+        "texte": "Actualiser  <button>",
+        "motif": "donnee",
+        "raison": "Six pixels de largeur. Le bouton du kit est COMPRIME par son conteneur flex, que la date plus longue du produit ne contraint pas de la meme facon : « Actualiser » mesure 68,53 px en Inter 14/600 dans LES DEUX pages — verifie au canvas — et le kit ne lui en laisse que 63. Meme remplissage, meme ecart, meme rayon, meme hauteur, meme place."
+      },
+      {
+        "texte": "Dernière mise à jour [1/2]  <span>",
+        "motif": "donnee",
+        "raison": "Largeur de boite. Le bloc est dimensionne par la DATE qu il surmonte, pas par ce libelle : « 8 septembre 2025 a 14:32 » chez le kit contre « 12 septembre 2026 a 15:32 » dans le jeu de mesure, un caractere de plus. Le texte lui-meme mesure 113,99 px des deux cotes. Les deux blocs finissent au MEME bord droit, x=1643."
+      },
+      {
+        "texte": "Dernière mise à jour [2/2]  <span>",
+        "motif": "donnee",
+        "raison": "L EN-TETE DE COLONNE, et non le libelle de l en-tete de page — le meme texte sert aux deux endroits. Meme cause que « Suivi » : huit colonnes contre dix, largeurs redistribuees au prorata des deux colonnes que la base ne permet pas de rendre."
+      },
+      {
+        "texte": "8 septembre 2025 à 14:32  <span>",
+        "motif": "donnee",
+        "raison": "Meme cause : la date du jeu de mesure est plus longue d un caractere que celle du kit. Interligne, hauteur et position sont desormais identiques."
+      },
+      {
+        "texte": "Tous les envois  <span>",
+        "motif": "donnee",
+        "raison": "Cinq pixels de boite. Le libelle partage sa tuile avec un nombre : « 156 » chez le kit, « 2 » dans le jeu de mesure, et la boite du texte s ajuste a ce qui reste."
+      },
+      {
+        "texte": "Suivi  <span>",
+        "motif": "donnee",
+        "raison": "DEUX COLONNES DU KIT N EXISTENT PAS ICI, et les autres se partagent leur place. Le kit en aligne dix : une case a cocher (38 px) qu aucune action groupee ne commanderait, et « Transporteur » (145 px) dont la base ne porte pas le nom — `carrier_code` est l identifiant NUMERIQUE du fournisseur de suivi, sans catalogue. Les 183 px liberes sont redistribues AU PRORATA des huit colonnes restantes, ce qui conserve leur importance relative mais decale forcement leurs largeurs et leurs abscisses."
+      },
+      {
+        "texte": "Commande  <span>",
+        "motif": "donnee",
+        "raison": "Meme cause que « Suivi » : huit colonnes contre dix, largeurs redistribuees au prorata."
+      },
+      {
+        "texte": "Client  <span>",
+        "motif": "donnee",
+        "raison": "Meme cause que « Suivi »."
+      },
+      {
+        "texte": "Statut  <span>",
+        "motif": "donnee",
+        "raison": "Meme cause que « Suivi »."
+      },
+      {
+        "texte": "Progression  <span>",
+        "motif": "donnee",
+        "raison": "Meme cause que « Suivi »."
+      },
+      {
+        "texte": "En transit  <nombre d'occurrences>",
+        "motif": "donnee",
+        "raison": "Le kit rend huit envois, le jeu de mesure en rend deux. Le nombre d occurrences d un statut suit les donnees, pas le dessin."
+      },
+      {
+        "texte": "En transit [1/3]  <span>",
+        "motif": "donnee",
+        "raison": "Apparie a une PILULE DE FILTRE du produit, pas a une pastille de statut : le kit n a pas de pilules — il filtre par menus deroulants — donc le texte « En transit » n a pas le meme role des deux cotes. Voir la declaration de la barre de filtres."
+      },
+      {
+        "texte": "En transit [2/3]  <span>",
+        "motif": "donnee",
+        "raison": "Position seule, et elle suit le nombre de lignes : deux envois contre huit."
+      },
+      {
+        "texte": "En transit [3/3]  <span>",
+        "motif": "donnee",
+        "raison": "Apparie a l en-tete de colonne ou a une pilule selon le tour ; le kit rend quatre « En transit » et le produit trois. Les roles ne se correspondent pas un a un."
+      },
+      {
+        "texte": "Livré  <span>",
+        "motif": "donnee",
+        "raison": "Meme cause : « Livre » est une PILULE DE FILTRE chez nous et une pastille de statut chez le kit, qui n a pas de pilules."
+      },
+      {
+        "texte": "8 sept. 2025  <span>",
+        "motif": "donnee",
+        "raison": "Le kit empile la date et l heure dans un seul bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous — « il y a 3 jours » plutot que « a 14:32 ». C est la seule chose de l ecran qui change tous les jours quand le colis ne bouge pas, et c est ce que le vendeur vient verifier. L heure d un scan ne lui apprend rien."
+      },
+      {
+        "texte": "8 sept. 2025  <nombre d'occurrences>",
+        "motif": "donnee",
+        "raison": "Le kit rend huit lignes a la meme date, le jeu de mesure en rend une."
+      },
+      {
+        "texte": "Affichage de 1 à 8 sur 156 envois  <span>",
+        "motif": "donnee",
+        "raison": "Meme phrase, chiffres du jeu de mesure : « 1 a 2 sur 2 » contre « 1 a 8 sur 156 ». La largeur de la boite suit le texte."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.  <footer>",
+        "motif": "donnee",
+        "raison": "Position verticale seule : la page du kit porte huit lignes de tableau, celle du jeu de mesure deux. Le pied est plus haut d autant."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CONTRAINTE PRODUIT N°1 : aucun code de facturation en phase 1. Le kit pose un encart « Passez au Pro » en bas de barre laterale ; le produit y annonce la gratuite de la phase de validation. Ces planches sont conservees pour la phase 2, sans une ligne de code."
+      },
+      {
+        "textes": [
+          "Tableau de bord",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "Deux routes que le depot n a pas. Une entree de navigation qui mene a un 404 est pire qu une entree absente. Ce sont des ecrans a CREER, donc des decisions produit, pas de la migration."
+      },
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit. Le produit rend celle du compte connecte — le jeu de mesure affiche « Atelier de verification » et son adresse. Le bloc de compte existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "+12%",
+          "-5%",
+          "ce mois-ci"
+        ],
+        "motif": "donnee",
+        "raison": "Des variations inventees pour la demonstration. Le produit ne mesure AUCUNE evolution d une periode a l autre sur cet ecran : il n existe ni serie temporelle, ni periode de reference, ni requete qui les produise. Les rendre exigerait de les inventer, ce que le principe XII interdit."
+      },
+      {
+        "textes": [
+          "En livraison"
+        ],
+        "motif": "contrainte",
+        "raison": "La frise du produit est verrouillee a QUATRE etapes par la decision 4 du brief — preparation, expedie, en transit, livre — et la granularite fine vit dans le detail du suivi, pas dans la frise. La tuile correspondante porte « Pas encore scanne », l etape ou le vendeur a quelque chose a faire."
+      },
+      {
+        "textes": [
+          "Livrés",
+          "Problèmes"
+        ],
+        "motif": "donnee",
+        "raison": "Deux tuiles dont le produit rend l equivalent sous un autre libelle : « Livres ce mois » (notre compteur est mensuel, celui du kit ne dit pas sur quelle periode) et « Sans mouvement > 10 j ». « Probleme » supposerait que le transporteur declare un incident ; ce que nous savons, c est qu un colis ne bouge plus — la meme information sans le jugement."
+      },
+      {
+        "textes": [
+          "Transporteur",
+          "La Poste",
+          "DHL",
+          "DPD",
+          "Chronopost",
+          "UPS",
+          "Relais Colis",
+          "SF Express",
+          "FedEx",
+          "LP",
+          "CP",
+          "RC",
+          "SF",
+          "FX"
+        ],
+        "motif": "donnee",
+        "raison": "LA COLONNE TRANSPORTEUR ET SES MONOGRAMMES. `carrier_code` est l identifiant NUMERIQUE du fournisseur de suivi, pas un nom, et aucun catalogue ne le traduit. Rendu tel quel il afficherait « 100003 » ; avec un repli, « Transporteur inconnu » sur CHAQUE ligne. Les deux valent moins que rien. Meme arbitrage que sur `/commandes`, ecrit au meme endroit dans le code."
+      },
+      {
+        "textes": [
+          "Prochaine étape",
+          "Livraison prévue aujourd'hui",
+          "Arrivée en France",
+          "Colis livré",
+          "En cours d'acheminement",
+          "Prise en charge par le transporteur",
+          "Colis en attente (voir détails)"
+        ],
+        "motif": "donnee",
+        "raison": "LA COLONNE « PROCHAINE ETAPE » EST UNE PREDICTION, et la base n en porte aucune. Ce que le transporteur nous dit est le DERNIER point de passage, pas le prochain. Le produit rend donc « Dernier point » a la meme place : la meme colonne, orientee vers ce qui est verifiable."
+      },
+      {
+        "textes": [
+          "Actions"
+        ],
+        "motif": "donnee",
+        "raison": "La colonne de menus par ligne. Le produit n a pas d action par colis sur cet ecran — ni duplication, ni archivage, qui appartiennent a la commande — et une colonne de « … » qui n ouvre rien serait un mensonge d interface."
+      },
+      {
+        "textes": [
+          "CJ123456789FR",
+          "EV987654321CN",
+          "LP123456789DE",
+          "LV987654321FR",
+          "UA123456789CN",
+          "RN987654321FR",
+          "SF123456789CN",
+          "FR987654321FR",
+          "#DLK7842",
+          "Lucas M.",
+          "Yanis B.",
+          "Sofiane A.",
+          "Inès K.",
+          "Thomas R.",
+          "Mehdi T.",
+          "Adam C.",
+          "Nour E.",
+          "Commandée",
+          "Problème",
+          "à 14:32"
+        ],
+        "motif": "donnee",
+        "raison": "LES HUIT ENVOIS DE DEMONSTRATION du kit. Le jeu de mesure en porte deux, avec ses propres numeros, ses propres destinataires et ses propres statuts. Ce sont des donnees, pas du dessin."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "Phase de lancement",
+          "Tout est gratuit pendant cette période."
+        ],
+        "motif": "contrainte",
+        "raison": "LE PENDANT DE « PASSEZ AU PRO ». La contrainte n°1 interdit la facturation en phase 1, et la barre laterale annonce a la place la gratuite de la phase de validation. C est la meme place, le meme encart, le message que le produit peut tenir."
+      },
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat. L ADRESSE EST DECLAREE PAR MOTIF : le jeu de mesure fabrique un compte jetable a chaque passage, dont la partie locale est tiree au hasard. Un texte litteral rendrait la soustraction rouge a la prochaine execution pour la seule raison que la base a rendu d autres octets.",
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ]
+      },
+      {
+        "textes": [
+          "Alertes",
+          "4 commandes jamais ouvertes",
+          "Le client n’a pas encore ouvert son lien",
+          "1 colis sans mouvement",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas et que le produit rend au-dessus des compteurs. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et c est la regle du panneau d administration appliquee ici : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux."
+      },
+      {
+        "textes": [
+          "Sans mouvement > 10 j",
+          "Livrés ce mois",
+          "Pas encore scanné"
+        ],
+        "motif": "donnee",
+        "raison": "Les libelles de NOS cinq tuiles, face a ceux du kit. Meme forme, meme place, meme nombre : ce sont les quatre etats de notre frise plus l alerte, contre les quatre du kit plus la sienne."
+      },
+      {
+        "textes": [
+          "Tous",
+          "Expédié",
+          "Sans mouvement"
+        ],
+        "motif": "structure",
+        "raison": "LA BARRE DE FILTRES. Le kit filtre par MENUS DEROULANTS (« Tous les statuts », « Tous les transporteurs », « Tous les pays ») ; le produit filtre par PILULES, comme le kit lui-meme le fait sur `/commandes`. Le design system n est donc pas univoque sur ce point, et la coherence entre nos deux ecrans prime : les pilules montrent d un coup quels etats existent, un menu ferme les cache. Deux de ses trois menus seraient de toute facon vides — pas de catalogue de transporteurs, pas de pays en base."
+      },
+      {
+        "textes": [
+          "Ce qui ne bouge plus",
+          "Mis à jour récemment",
+          "Mis à jour il y a longtemps"
+        ],
+        "motif": "donnee",
+        "raison": "Les trois tris du produit, face aux trois du kit (« Plus recent », « Plus ancien », « Par statut »). Meme contröle, meme place, a droite de la barre. Le tri par defaut differe et c est delibere : ce que le vendeur vient chercher ici, c est ce qui est bloque."
+      },
+      {
+        "textes": [
+          "Dernier point",
+          "Interrogations"
+        ],
+        "motif": "donnee",
+        "raison": "Anciens libelles de colonnes et colonnes propres au produit. « Dernier point » occupe la place de « Prochaine etape » et « Interrogations » celle d « Actions » — le nombre d interrogations explique pourquoi un colis reste muet, ce qu aucune autre colonne ne dit."
+      },
+      {
+        "textes": [
+          "DLKMESURE0002CN",
+          "DLKMESURE0001FR",
+          "Cliente en preparation",
+          "Client de verification",
+          "Sans mouvement · 14 j",
+          "Colis enregistre",
+          "Colis arrive au centre de tri internatio"
+        ],
+        "motif": "donnee",
+        "raison": "LES DEUX COLIS DU JEU DE MESURE, avec leurs numeros, leurs destinataires, leurs dates et leurs points de passage. Le kit en rend huit, inventes. LES REFERENCES ET LES DATES SONT DECLAREES PAR MOTIF, et pour deux raisons distinctes : la reference courte est DERIVEE de l identifiant de la commande, tire au hasard a chaque jeu, et les dates sont RELATIVES a l instant du passage — c est la lecon de la sonde de fumee qui avait une date de peremption. Les motifs sont ancres aux deux bouts : ils ne peuvent pas couvrir un libelle d interface.",
+        "motifs": [
+          "^#[0-9A-F]{6}$",
+          "^\\d{1,2} [a-zéû]+\\.? \\d{4}$",
+          "^\\d{1,2} [a-zéû]+$",
+          "^Hier$"
+        ]
+      },
+      {
+        "textes": [
+          "Un numéro tout juste collé n’est souvent"
+        ],
+        "motif": "donnee",
+        "raison": "LE BANDEAU D AIDE, en pied de liste. Il existe pour une seule phrase, et cette phrase evite un message au support : un numero tout juste colle n est pas encore scanne, et l ecran affiche alors « pas encore d information du transporteur ». C est la decision 7 du brief rendue visible — le message ne dit JAMAIS « numero introuvable »."
+      }
+    ]
+  }
 }

@@ -94,19 +94,26 @@ export function EnTeteEnvois({
       </button>
 
       {/*
-        ⚠️ `leading-normal` SUR CHAQUE LIGNE, ET NON SUR LEUR PARENT. La date
-        rendait 19,5 px de haut là où le kit en rend 17, et le poser sur le
-        conteneur n'y a rien changé : en Tailwind v4, `text-[13px]` emporte SA
-        PROPRE hauteur de ligne, qui écrase celle héritée du parent. Une classe
-        posée au bon endroit mais au mauvais niveau est une classe servie qui ne
-        gagne pas — même famille que les règles hors couche de `globals.css`.
+        ⚠️ `leading-[normal]` ET NON `leading-normal` — DEUX CHOSES DIFFÉRENTES,
+        et c'est le piège le plus discret de cette migration.
+
+        `leading-normal` est une valeur de l'échelle Tailwind : elle vaut **1,5**.
+        Le `line-height: normal` du CSS, celui que pose le kit, s'écrit
+        `leading-[normal]` entre crochets. La date rendait donc 19,5 px de haut
+        au lieu de 17 — et l'écrire `leading-normal` ne changeait rien, puisque
+        1,5 était déjà la valeur héritée.
+
+        Et il faut la poser sur CHAQUE ligne, pas sur leur parent : en Tailwind
+        v4, `text-[13px]` emporte sa propre hauteur de ligne, qui écrase celle du
+        parent. Une classe juste, posée au mauvais niveau, est une classe servie
+        qui ne gagne pas.
       */}
       {fraicheur === null ? null : (
         <span className="hidden flex-col gap-0.5 text-right md:flex">
-          <span className="text-[12px] leading-normal text-ds-texte-sourdine">
+          <span className="text-[12px] leading-[normal] text-ds-texte-sourdine">
             {libelleFraicheur}
           </span>
-          <span className="text-[13px] leading-normal font-medium text-ds-texte-corps">
+          <span className="text-[13px] leading-[normal] font-medium text-ds-texte-corps">
             {fraicheur}
           </span>
         </span>

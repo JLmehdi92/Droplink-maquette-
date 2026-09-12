@@ -423,7 +423,8 @@
     "aide": "A number you have just pasted is often not scanned yet. This is not an error: the carrier simply has not published anything.",
     "aideCourte": "A number you have just pasted is often not scanned yet. This is not an error.",
     "actualiser": "Refresh",
-    "derniereMaj": "Last updated"
+    "derniereMaj": "Last updated",
+    "compteurPage": "Showing {de} to {a} of {total, plural, one {# shipment} other {# shipments}}"
   },
   "analyses": {
     "titre": "Analytics",

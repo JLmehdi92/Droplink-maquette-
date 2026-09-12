@@ -423,7 +423,8 @@
     "aide": "刚粘贴的运单号往往还没有被扫描。这不是故障：只是承运商还没有发布任何信息。",
     "aideCourte": "刚粘贴的运单号往往还没有被扫描。这不是故障。",
     "actualiser": "刷新",
-    "derniereMaj": "最后更新"
+    "derniereMaj": "最后更新",
+    "compteurPage": "显示第 {de}–{a} 条，共 {total} 条发货"
   },
   "analyses": {
     "titre": "数据分析",

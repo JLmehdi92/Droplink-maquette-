@@ -36,13 +36,18 @@ import { LienEcran } from "@/components/lien-ecran";
  * libellé serait pire. Une information qu'on ne sait pas rendre lisible est
  * omise — la même règle que sur la page publique.
  *
- * ⚠️ « RESYNCHRONISER » N'EST PAS PORTÉ, et c'est délibéré. Les deux planches
- * dessinent le bouton ; le produit n'a AUCUNE action de resynchronisation, et
- * en poser une reviendrait à déclencher des interrogations chez un fournisseur
- * de suivi qui facture À LA PRISE EN CHARGE et qui n'est pas encore choisi
- * (§14 du brief : le sujet est bloqué sur Wassim). Un bouton qui ne fait rien
- * serait un mensonge d'interface ; un bouton qui coûte à chaque clic sans
- * limite de débit serait pire.
+ * ⚠️ « RESYNCHRONISER » N'EST TOUJOURS PAS PORTÉ, ET CE PARAGRAPHE A ÉTÉ REPRIS
+ * LE 12/09/2026 PARCE QU'IL ÉTAIT DEVENU À MOITIÉ FAUX. Il disait « le produit
+ * n'a aucun bouton » ; l'en-tête en porte un depuis, « Actualiser », et il ne
+ * fait PAS ce que ce paragraphe interdit — voir `en-tete-envois.tsx`, qui
+ * rejoue le rendu serveur sans toucher au fournisseur de suivi.
+ *
+ * Ce qui reste vrai, et qui est la vraie raison : déclencher une interrogation
+ * depuis un bouton reviendrait à dépenser le palier de 200 prises en charge À
+ * VIE au rythme des clics d'un vendeur impatient, et à court-circuiter la
+ * cadence de `lib/tracking`, qui existe pour les espacer selon l'âge du colis.
+ * Un bouton qui ne fait rien serait un mensonge d'interface ; un bouton qui
+ * coûte à chaque clic sans limite de débit serait pire.
  */
 
 /** Construit un lien de filtre en conservant les autres paramètres. */
@@ -110,9 +115,17 @@ function Puce({
   return (
     <span
       className={
-        // `Badge` du design system : rayon pilule, 12 px gras, `padding: 5px 11px`.
-        // 12 px et non 11 : la règle 5 pose 11,5 px comme plancher au téléphone.
-        "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[12px] font-bold " +
+        // `Badge` du design system, AUX VALEURS DE CET ÉCRAN-CI : `ShippingView`
+        // pose explicitement `fontSize: 12, padding: "7px 12px"` sur le sien,
+        // plus grand que le `5px 11px` du composant nu. Mesuré sur la page
+        // servie : 30 px de haut, pas 26. Le même composant n'a pas les mêmes
+        // valeurs partout — c'est le troisième piège de la méthode, et il vaut
+        // aussi pour le remplissage, pas seulement pour les libellés.
+        // ⚠️ `tracking-[-0.02em]` : le kit resserre ses pastilles de statut, relevé
+        // -0,24 px sur 12. Le même oubli avait été trouvé sur `/commandes`,
+        // où la valeur écrite était -0,01em. C'est le genre de détail qu'on ne
+        // voit jamais à l'œil et qui décale la largeur de chaque pastille.
+        "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-3 py-[7px] text-[12px] font-bold tracking-[-0.02em] " +
         fond +
         " " +
         encre
@@ -173,7 +186,7 @@ export async function TableauEnvois({
    * seize pixels de dérive cumulée jusqu'au bord droit.
    */
   const enTete =
-    "pt-4 pb-4 pr-[14px] text-left text-[12px] leading-[18px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
+    "pt-4 pb-4 pr-[14px] text-left text-[12px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
   const cellule = "border-t border-ds-filet py-[14px] pr-[14px] text-[14px]";
   const bordGauche = " pl-5";
   const bordDroit = " pr-5";
@@ -565,31 +578,31 @@ export async function TableauEnvois({
                       mots que rien n'obligeait à inventer — le design system
                       fournit son vocabulaire dans les trois langues. */}
                   <th scope="col" className={enTete + bordGauche}>
-                    {t("colonnes.numero")}
+                    <span className="block leading-[18px]">{t("colonnes.numero")}</span>
                   </th>
                   <th scope="col" className={enTete}>
-                    {t("colonnes.commande")}
+                    <span className="block leading-[18px]">{t("colonnes.commande")}</span>
                   </th>
                   <th scope="col" className={enTete}>
-                    {t("colonnes.client")}
+                    <span className="block leading-[18px]">{t("colonnes.client")}</span>
                   </th>
                   <th scope="col" className={enTete}>
-                    {t("colonnes.etat")}
+                    <span className="block leading-[18px]">{t("colonnes.etat")}</span>
                   </th>
                   {/* LA PROGRESSION, comme sur la référence : la frise se BALAIE
                       là où la pastille se LIT. Sur une colonne de quarante colis,
                       c est ce qui permet de voir d un coup ce qui avance. */}
                   <th scope="col" className={enTete}>
-                    {t("colonnes.progression")}
+                    <span className="block leading-[18px]">{t("colonnes.progression")}</span>
                   </th>
                   <th scope="col" className={enTete}>
-                    {t("colonnes.mouvement")}
+                    <span className="block leading-[18px]">{t("colonnes.mouvement")}</span>
                   </th>
                   <th scope="col" className={enTete}>
-                    {t("colonnes.point")}
+                    <span className="block leading-[18px]">{t("colonnes.point")}</span>
                   </th>
                   <th scope="col" className={enTete + bordDroit + " text-right"}>
-                    {t("colonnes.interrogations")}
+                    <span className="block leading-[18px]">{t("colonnes.interrogations")}</span>
                   </th>
                 </tr>
               </thead>
@@ -662,8 +675,14 @@ export async function TableauEnvois({
                         {ligne.dernierMouvement === null ? (
                           <span className="text-ds-texte-tenu">—</span>
                         ) : (
-                          <span className="flex flex-col">
-                            <span className="text-[13px] text-ds-texte-corps">
+                          /* ⚠️ `leading-[normal]`, PAS `leading-normal` : le
+                             second est une valeur de l'échelle Tailwind qui vaut
+                             1,5, c'est-à-dire exactement ce qu'on cherchait à
+                             corriger. Le kit laisse `line-height: normal` sur ces
+                             deux lignes, et la date rendait 19,5 px au lieu de
+                             17. */
+                          <span className="flex flex-col leading-[normal]">
+                            <span className="text-[13px] leading-[normal] text-ds-texte-corps">
                               {format.dateTime(new Date(ligne.dernierMouvement), {
                                 day: "numeric",
                                 month: "short",
@@ -672,7 +691,7 @@ export async function TableauEnvois({
                             </span>
                             <span
                               className={
-                                "text-[12px] " +
+                                "text-[12px] leading-[normal] " +
                                 (d.silencieux ? "font-bold text-ds-alerte" : "text-ds-texte-sourdine")
                               }
                             >
@@ -757,14 +776,37 @@ export async function TableauEnvois({
         </>
       )}
 
-      {page.curseurSuivant !== null ? (
-        <LienEcran
-          href={lien(base, parametres, { curseur: page.curseurSuivant })}
-          className="mx-auto inline-flex min-h-11 items-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-6 text-[13px] font-medium text-ds-texte-corps shadow-ds-xs transition-colors hover:bg-ds-surface-teinte lg:h-9 lg:min-h-0"
-        >
-          {t("pageSuivante")}
-        </LienEcran>
-      ) : null}
+      {/*
+        LE COMPTEUR DE PAGE, comme le kit — « Affichage de 1 à 8 sur 156 envois ».
+
+        ⚠️ SANS SES NUMÉROS DE PAGE, ET C'EST UNE CONTRAINTE, PAS UN OUBLI. Le kit
+        aligne vingt pastilles numérotées ; la pagination du produit est PAR
+        CURSEUR, parce qu'à la page 40 d'un jeu de 9 600 un `offset` lit 2 000
+        lignes pour en rendre 50. Un curseur ne sait pas sauter à la page 17 :
+        poser les numéros exigerait de revenir au décalage, donc de dégrader
+        précisément celui qui a le plus de données.
+
+        Le COMPTEUR, lui, ne coûte rien — le total est déjà lu pour les tuiles —
+        et c'est la moitié utile du bloc : elle dit où l'on en est.
+      */}
+      <div className="flex flex-wrap items-center justify-between gap-4 px-5 pb-1">
+        <span className="text-[13px] leading-[normal] text-ds-texte-corps">
+          {t("compteurPage", {
+            de: page.lignes.length === 0 ? 0 : 1,
+            a: page.lignes.length,
+            total: compteurs.total,
+          })}
+        </span>
+
+        {page.curseurSuivant !== null ? (
+          <LienEcran
+            href={lien(base, parametres, { curseur: page.curseurSuivant })}
+            className="inline-flex min-h-11 items-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-6 text-[13px] font-medium text-ds-texte-corps shadow-ds-xs transition-colors hover:bg-ds-surface-teinte lg:h-9 lg:min-h-0"
+          >
+            {t("pageSuivante")}
+          </LienEcran>
+        ) : null}
+      </div>
     </div>
   );
 }
