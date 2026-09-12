@@ -19,7 +19,8 @@
     },
     "seDeconnecter": "退出登录",
     "monCompte": "我的账户",
-    "piedDePage": "© {annee} DropLink。版权所有。"
+    "piedDePage": "© {annee} DropLink。版权所有。",
+    "creerCompte": "注册账号"
   },
   "landing": {
     "metaTitre": "DropLink — 每笔订单一个页面，用您的品牌呈现",

@@ -88,18 +88,23 @@ describe("Le rayon de la carte-page", () => {
      * contre 28. Chaque écran migré en retire une, et ce nombre finira à ZÉRO —
      * jour où cette suite entière devra être supprimée, pas assouplie.
      *
-     * Il restait 6 cartes-pages le 11/09/2026, puis 5 ; l'administration a
-     * perdu la sienne le 12/09 et il n'en reste QUE LES QUATRE PUBLIQUES. Le
-     * plancher descend donc à 4, et il ne descendra plus sans que la surface
-     * publique soit migrée — ce qui supprimera cette suite plutôt que de
-     * l'assouplir.
+     * Il restait 6 cartes-pages le 11/09/2026, puis 5 ; l'administration a perdu
+     * la sienne le 12/09, la LANDING dans la foulée, et il n'en reste QUE
+     * TROIS. Le plancher descend donc à 3.
+     *
+     * ⚠️ ET CES TROIS-LÀ NE DESCENDRONT PAS TOUTES SEULES : ce sont exactement
+     * les écrans que le design system NE DESSINE PAS — `/bienvenue`,
+     * `/mot-de-passe-oublie`, `/nouveau-mot-de-passe` —, et `CLAUDE.md` dit
+     * qu'ils gardent leur habillage actuel jusqu'à ce qu'ils soient dessinés.
+     * Le jour où ils le seront, cette suite n'aura plus d'objet et devra être
+     * SUPPRIMÉE, pas assouplie.
      */
     expect(
       inventaire.length,
-      "moins de quatre cartes-pages : soit la migration est plus avancée que ce " +
+      "moins de trois cartes-pages : soit la migration est plus avancée que ce " +
         "que cette suite déclare, soit le balayage est cassé. Les deux se " +
         "corrigent ICI, jamais en baissant le nombre.",
-    ).toBeGreaterThanOrEqual(4);
+    ).toBeGreaterThanOrEqual(3);
   });
 
   /**
@@ -123,6 +128,24 @@ describe("Le rayon de la carte-page", () => {
    */
   const AUTHENTIFIEES_RESTANTES: ReadonlyArray<readonly [string, string]> = [];
 
+  /**
+   * LES TROIS CARTES-PAGES PUBLIQUES QUI RESTENT, et la raison est la même pour
+   * les trois : `CLAUDE.md` range ces écrans parmi ceux que le design system NE
+   * DESSINE PAS, et dit qu'ils gardent leur habillage actuel jusqu'à ce qu'ils
+   * soient dessinés. Ce ne sont pas des oublis de migration.
+   */
+  const PUBLIQUES_RESTANTES: ReadonlyArray<readonly [string, string]> = [
+    ["[locale]/bienvenue/page.tsx", "L'onboarding — non dessiné par le design system."],
+    [
+      "[locale]/mot-de-passe-oublie/page.tsx",
+      "La demande de réinitialisation — non dessinée par le design system.",
+    ],
+    [
+      "[locale]/nouveau-mot-de-passe/page.tsx",
+      "La saisie du nouveau mot de passe — non dessinée par le design system.",
+    ],
+  ];
+
   test("les cartes-pages authentifiées restantes sont exactement celles déclarées", () => {
     const trouvees = inventaire.filter((c) => c.authentifiee).map((c) => c.fichier).sort();
     const declarees = AUTHENTIFIEES_RESTANTES.map(([f]) => f).sort();
@@ -133,12 +156,22 @@ describe("Le rayon de la carte-page", () => {
         "sa raison.",
     ).toEqual(declarees);
 
-    // Les surfaces publiques, elles, ne sont pas encore touchées.
+    /*
+     * ⚠️ LES PUBLIQUES SONT DÉCLARÉES NOMMÉMENT, PLUS COMPTÉES. Un plancher
+     * « au moins quatre » disait combien il en restait, jamais LESQUELLES : la
+     * landing a perdu la sienne le 12/09, et un simple décompte n'aurait pas
+     * distingué cette migration voulue d'un balayage cassé. Les trois qui
+     * restent sont exactement les écrans que le design system ne dessine pas.
+     */
+    const publiquesTrouvees = inventaire
+      .filter((c) => !c.authentifiee)
+      .map((c) => c.fichier)
+      .sort();
     expect(
-      inventaire.filter((c) => !c.authentifiee).length,
-      "les surfaces publiques ont perdu leurs cartes-pages sans que cette suite " +
-        "le sache",
-    ).toBeGreaterThanOrEqual(4);
+      publiquesTrouvees,
+      "La liste des cartes-pages publiques ne décrit plus le dépôt. Un écran " +
+        "migré retire sa ligne ; un écran qui en ajoute une doit la déclarer.",
+    ).toEqual(PUBLIQUES_RESTANTES.map(([f]) => f).sort());
   });
 
   test("chaque carte-page porte le rayon de SA surface", () => {

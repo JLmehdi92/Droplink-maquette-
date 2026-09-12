@@ -19,7 +19,8 @@
     },
     "seDeconnecter": "Log out",
     "monCompte": "My account",
-    "piedDePage": "© {annee} DropLink. All rights reserved."
+    "piedDePage": "© {annee} DropLink. All rights reserved.",
+    "creerCompte": "Create an account"
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, under your brand",

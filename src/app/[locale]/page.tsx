@@ -90,8 +90,16 @@ export default async function Accueil({
   const t = await getTranslations("landing");
   const nav = await getTranslations("navigation");
 
+  /*
+   * L EYEBROW DU KIT, MESURE SUR SA PAGE SERVIE : 11/700 a l interlettrage de
+   * 0,12em, en accent-encre sur la teinte lavande, rayon pilule, padding
+   * 6px 14px. Il etait ici en 10/600 sur une carte bordee, a 0,04em.
+   *
+   * ⚠️ 11,5 px ET NON 11. Le kit ecrit 11 ; le plancher de la regle 5 est 11,5
+   * au telephone, et cette pilule y est rendue.
+   */
   const pilule =
-    "inline-flex items-center gap-[7px] rounded-full border border-filet-controle bg-surface-container-lowest px-[13px] py-[7px] font-headline-md text-[10px] leading-3 font-semibold tracking-[0.04em] text-ardoise md:px-3.5 md:text-[11px] md:leading-[13px]";
+    "inline-flex items-center gap-[7px] rounded-ds-pill bg-ds-surface-teinte px-3.5 py-1.5 text-[11.5px] leading-[15px] font-bold tracking-[0.12em] text-ds-accent-encre uppercase";
 
   /*
    * L'ACTION PRINCIPALE EST PLEINE LARGEUR AU TÉLÉPHONE. `LandingMobile` pose
@@ -100,10 +108,10 @@ export default async function Accueil({
    * exact où le pouce arrive.
    */
   const actionPrincipale =
-    "degrade-marque flex min-h-13 w-full items-center justify-center gap-[9px] rounded-full px-[30px] font-headline-md text-[15px] font-bold shadow-[0_10px_26px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-90 md:inline-flex md:h-13 md:w-auto md:min-h-0 md:shadow-[0_10px_26px_-10px_rgba(124,92,245,0.65)]";
+    "degrade-ds-marque flex min-h-13 w-full items-center justify-center gap-[9px] rounded-full px-[30px] text-[15px] font-bold shadow-[0_10px_26px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-90 md:inline-flex md:h-13 md:w-auto md:min-h-0 md:shadow-[0_10px_26px_-10px_rgba(124,92,245,0.65)]";
 
   const lienMenu =
-    "font-headline-md text-[14px] leading-[18px] font-medium text-ardoise transition-colors hover:text-violet";
+    "text-[14px] leading-[18px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent";
 
   const sections = ["fonctionnement", "clientVoit", "tarif"] as const;
 
@@ -129,7 +137,7 @@ export default async function Accueil({
   });
 
   return (
-    <div className="bg-canvas p-3 md:p-7">
+    <div className="bg-ds-surface-page">
       {graphe === null ? null : (
         <script
           type="application/ld+json"
@@ -138,10 +146,14 @@ export default async function Accueil({
           }}
         />
       )}
-      <div className="mx-auto w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:rounded-page-publique">
+      {/* ⚠️ PLUS DE CARTE-PAGE. Le design system supprime le cadre exterieur —
+          « carte blanche sur `#c5cbfb` → aucun cadre ». La largeur bornee reste :
+          le kit compose sa landing sur 1347 px de contenu a 1690 de fenetre, et
+          une ligne de prose qui traverse un ecran large ne se lit pas. */}
+      <div className="mx-auto w-full max-w-[1384px] overflow-hidden bg-ds-surface-page">
         {/* ---- NAVIGATION ------------------------------------------------ */}
         <header className="flex items-center justify-between gap-6 px-5 py-[18px] md:px-10 md:py-[22px]">
-          <span className="font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:text-[18px] md:leading-[23px]">
+          <span className="text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre md:text-[18px] md:leading-[23px]">
             DropLink
           </span>
 
@@ -153,13 +165,37 @@ export default async function Accueil({
             ))}
           </nav>
 
-          <Link
-            href={`/${locale}/connexion`}
-            className="hidden h-10 items-center gap-2 rounded-full bg-primary px-[18px] font-headline-md text-[13px] font-semibold text-on-primary transition-opacity hover:opacity-90 md:inline-flex"
-          >
-            {nav("seConnecter")}
-            <Icone nom="open_in_new" className="text-[13px]" />
-          </Link>
+          {/*
+            DEUX BOUTONS, ET C EST LE KIT QUI LES COMPTE. Il pose « Se
+            connecter » en pilule BLANCHE bordee et « Créer un compte » en
+            pilule DEGRADEE, toutes deux a 36 px de haut, `padding 0 16px`,
+            13/600 en -0,02em. Il n y en avait qu un, en pilule NOIRE — le
+            chrome de l ancien canevas, dont `CLAUDE.md` dit qu il est mort.
+
+            ⚠️ ILS PASSENT A 44 px AU TELEPHONE. Le kit dessine 36 ; ces deux
+            liens y sont rendus, et 36 se rate au pouce. C est la regle 5, et
+            elle prime sur la valeur du kit partout ou les deux se contredisent.
+
+            « CRÉER UN COMPTE » MENE A UNE ROUTE QUI EXISTE — `/inscription`.
+            C est la difference avec « Tarifs » et « Documentation », que le kit
+            dessine aussi et qui ne menent nulle part chez nous : une entree de
+            navigation vers un 404 est pire qu une entree absente.
+          */}
+          <div className="hidden items-center gap-2.5 md:flex">
+            <Link
+              href={`/${locale}/connexion`}
+              className="inline-flex h-11 items-center rounded-ds-pill border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-xs transition-colors hover:bg-ds-surface-teinte"
+            >
+              {nav("seConnecter")}
+            </Link>
+            <Link
+              href={`/${locale}/inscription`}
+              className="degrade-ds-marque inline-flex h-11 items-center gap-2 rounded-ds-pill px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+            >
+              {nav("creerCompte")}
+              <Icone nom="arrow_forward" className="text-[13px]" />
+            </Link>
+          </div>
 
           {/*
             LE MENU DU TÉLÉPHONE, en `<details>` et sans une ligne de
@@ -169,25 +205,25 @@ export default async function Accueil({
             — ce qui compte sur la page qu'on ouvre depuis un message privé.
           */}
           <details name="menu-landing" className="relative md:hidden">
-            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-fond-neutre text-on-surface [&::-webkit-details-marker]:hidden">
+            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-ds-surface-creux text-ds-texte-titre [&::-webkit-details-marker]:hidden">
               <Icone nom="menu" titre={nav("espaceVendeur")} className="text-[18px]" />
             </summary>
             <nav
               aria-label={nav("espaceVendeur")}
-              className="absolute right-0 z-20 mt-2 flex w-60 flex-col gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest p-2 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)]"
+              className="absolute right-0 z-20 mt-2 flex w-60 flex-col gap-1 rounded-lg border border-ds-filet bg-ds-surface-carte p-2 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)]"
             >
               {sections.map((clef) => (
                 <a
                   key={clef}
                   href={"#" + clef}
-                  className="flex min-h-11 items-center rounded-md px-3 font-headline-md text-[14px] font-medium text-ardoise"
+                  className="flex min-h-11 items-center rounded-md px-3 text-[14px] font-medium text-ds-texte-corps"
                 >
                   {t("menu." + clef)}
                 </a>
               ))}
               <Link
                 href={`/${locale}/connexion`}
-                className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-[18px] font-headline-md text-[13px] font-semibold text-on-primary"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-[18px] text-[13px] font-semibold text-on-primary"
               >
                 {nav("seConnecter")}
                 <Icone nom="open_in_new" className="text-[13px]" />
@@ -204,18 +240,18 @@ export default async function Accueil({
                 faire d'un décor typographique. Absent de la planche mobile. */}
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-[78px] hidden text-center font-headline-xl text-[216px] leading-none font-extrabold tracking-[-0.05em] text-fond-neutre select-none md:block"
+              className="pointer-events-none absolute inset-x-0 top-[78px] hidden text-center text-[216px] leading-none font-extrabold tracking-[-0.05em] text-ds-surface-creux select-none md:block"
             >
               DROPLINK
             </span>
 
             <div className="relative">
-              <h1 className="mx-auto max-w-[830px] font-headline-xl text-[38px] leading-[42px] font-extrabold tracking-[-0.035em] text-on-surface md:text-[66px] md:leading-[70px]">
+              <h1 className="mx-auto max-w-[830px] text-[38px] leading-[1.02] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[64px] md:leading-[0.98]">
                 {t("heroTitre")}
               </h1>
               {/* Deux textes, pas un texte coupé : la planche mobile RÉÉCRIT
                   la phrase plus court, elle ne la tronque pas. */}
-              <p className="mx-auto mt-4 mb-6 max-w-[520px] font-body-lg text-[15px] leading-6 text-sourdine md:mt-5 md:mb-[30px] md:text-[17px] md:leading-[27px]">
+              <p className="mx-auto mt-4 mb-6 max-w-[540px] text-[15px] leading-[1.55] text-ds-texte-corps md:mt-5 md:mb-[30px] md:text-[17px] md:leading-[1.55]">
                 <span className="md:hidden">{t("heroSousTitreCourt")}</span>
                 <span className="hidden md:inline">{t("heroSousTitre")}</span>
               </p>
@@ -244,7 +280,7 @@ export default async function Accueil({
            */}
           <h2
             id="titre-client-voit"
-            className="mx-auto mt-[34px] max-w-[700px] px-5 text-center font-headline-xl text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] text-on-surface md:mt-10 md:px-0 md:text-[38px] md:leading-[44px]"
+            className="mx-auto mt-[34px] max-w-[760px] px-5 text-center text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:mt-10 md:px-0 md:text-[44px]"
           >
             {t("destinataireTitre")}
           </h2>
@@ -288,25 +324,25 @@ export default async function Accueil({
               chose de cette page qu'on ne pourrait pas tenir.
             */}
             <div className="absolute top-0 left-1/2 h-[434px] w-[228px] -translate-x-1/2 rounded-[34px] bg-primary p-[7px] shadow-[0_30px_60px_-24px_rgba(14,14,19,0.5)] md:h-[578px] md:w-[330px] md:rounded-[42px] md:p-[9px] md:shadow-[0_40px_80px_-30px_rgba(14,14,19,0.45)]">
-              <div className="h-full w-full overflow-hidden rounded-[28px] bg-surface-container-lowest md:rounded-[34px]">
-                <div className="degrade-marque h-[74px] px-3.5 pt-[22px] md:h-[92px] md:px-[18px] md:pt-[30px]">
+              <div className="h-full w-full overflow-hidden rounded-[28px] bg-ds-surface-carte md:rounded-[34px]">
+                <div className="degrade-ds-marque h-[74px] px-3.5 pt-[22px] md:h-[92px] md:px-[18px] md:pt-[30px]">
                   <div className="flex items-center gap-[7px] md:gap-2">
                     <span className="h-[19px] w-[19px] rounded-full bg-white/30 md:h-6 md:w-6" />
-                    <span className="font-headline-md text-[11px] leading-[13px] font-bold text-white md:text-[13px] md:leading-4">
+                    <span className="text-[11.5px] leading-[15px] font-bold text-white md:text-[13px] md:leading-4">
                       {t("apercuBoutique")}
                     </span>
                   </div>
-                  <p className="mt-[7px] font-headline-md text-[16px] leading-[21px] font-extrabold tracking-[-0.02em] text-white md:mt-[9px] md:text-[19px] md:leading-6">
+                  <p className="mt-[7px] text-[16px] leading-[21px] font-extrabold tracking-[-0.02em] text-white md:mt-[9px] md:text-[19px] md:leading-6">
                     {t("apercuTitre")}
                   </p>
                 </div>
 
                 <div className="p-[11px] md:px-3.5 md:pt-3.5">
                   <div className="mb-2.5 grid grid-cols-4 gap-[3px] md:mb-3 md:gap-1">
-                    <span className="h-1 rounded-full bg-violet" />
-                    <span className="h-1 rounded-full bg-violet" />
-                    <span className="h-1 rounded-full bg-violet" />
-                    <span className="h-1 rounded-full bg-fond-barre" />
+                    <span className="h-1 rounded-full bg-ds-accent" />
+                    <span className="h-1 rounded-full bg-ds-accent" />
+                    <span className="h-1 rounded-full bg-ds-accent" />
+                    <span className="h-1 rounded-full bg-ds-surface-creux" />
                   </div>
                   <div className="grid grid-cols-2 gap-[5px] md:gap-1.5">
                     {["#e4e2ee", "#eee4e0", "#e0e4ee", "#eaeaef"].map((teinte) => (
@@ -336,23 +372,23 @@ export default async function Accueil({
               et 1 279 le téléphone est déjà à sa taille de bureau sans que la
               carte-page soit assez large pour les loger.
             */}
-            <div className="anim-flot absolute top-24 left-2.5 flex items-center gap-[9px] rounded-[13px] bg-surface-container-lowest px-3 py-2.5 shadow-[0_16px_34px_-12px_rgba(14,14,19,0.26)] md:hidden">
-              <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-violet-fond">
-                <Icone nom="image" className="text-[16px] text-violet" />
+            <div className="anim-flot absolute top-24 left-2.5 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-[0_16px_34px_-12px_rgba(14,14,19,0.26)] md:hidden">
+              <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ds-surface-teinte">
+                <Icone nom="image" className="text-[16px] text-ds-accent" />
               </span>
-              <span className="font-headline-md text-[12px] leading-[15px] font-bold text-on-surface">
+              <span className="text-[12px] leading-[15px] font-bold text-ds-texte-titre">
                 {t("flottant.photosCourt")}
               </span>
             </div>
 
             <div
-              className="anim-flot absolute top-[210px] right-2 flex items-center gap-[9px] rounded-[13px] bg-surface-container-lowest px-3 py-2.5 shadow-[0_16px_34px_-12px_rgba(14,14,19,0.26)] md:hidden"
+              className="anim-flot absolute top-[210px] right-2 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-[0_16px_34px_-12px_rgba(14,14,19,0.26)] md:hidden"
               style={{ animationDelay: "1.6s" }}
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-corail-fond">
-                <Icone nom="local_shipping" className="text-[16px] text-corail" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ds-erreur-fond">
+                <Icone nom="local_shipping" className="text-[16px] text-ds-erreur" />
               </span>
-              <span className="font-headline-md text-[12px] leading-[15px] font-bold text-on-surface">
+              <span className="text-[12px] leading-[15px] font-bold text-ds-texte-titre">
                 {t("flottant.transitCourt")}
               </span>
             </div>
@@ -362,21 +398,21 @@ export default async function Accueil({
                 {
                   clef: "photos",
                   icone: "image",
-                  peau: "bg-violet-fond text-violet",
+                  peau: "bg-ds-surface-teinte text-ds-accent",
                   place: "top-[150px] left-[calc(50%-460px)] w-[264px]",
                   delai: "0s",
                 },
                 {
                   clef: "transit",
                   icone: "local_shipping",
-                  peau: "bg-corail-fond text-corail",
+                  peau: "bg-ds-erreur-fond text-ds-erreur",
                   place: "top-[262px] right-[calc(50%-484px)] w-[274px]",
                   delai: "1.6s",
                 },
                 {
                   clef: "valide",
                   icone: "done",
-                  peau: "bg-succes-pastel text-succes",
+                  peau: "bg-ds-succes-fond text-ds-succes",
                   place: "bottom-[34px] left-[calc(50%-424px)] w-[242px]",
                   delai: "3.2s",
                 },
@@ -385,7 +421,7 @@ export default async function Accueil({
               <div
                 key={carte.clef}
                 className={
-                  "anim-flot absolute hidden items-center gap-[11px] rounded-[14px] bg-surface-container-lowest px-3.5 py-3 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)] xl:flex " +
+                  "anim-flot absolute hidden items-center gap-[11px] rounded-[14px] bg-ds-surface-carte px-3.5 py-3 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)] xl:flex " +
                   carte.place
                 }
                 style={{ animationDelay: carte.delai }}
@@ -399,10 +435,10 @@ export default async function Accueil({
                   <Icone nom={carte.icone} className="text-[19px]" />
                 </span>
                 <span>
-                  <span className="block font-headline-md text-[13px] leading-4 font-bold text-on-surface">
+                  <span className="block text-[13px] leading-4 font-bold text-ds-texte-titre">
                     {t("flottant." + carte.clef + "Titre")}
                   </span>
-                  <span className="mt-px block font-body-sm text-[11px] leading-[13px] text-sourdine">
+                  <span className="mt-px block text-[11.5px] leading-[15px] text-ds-texte-corps">
                     {t("flottant." + carte.clef + "Texte")}
                   </span>
                 </span>
@@ -413,16 +449,16 @@ export default async function Accueil({
           {/* ---- BÉNÉFICES ----------------------------------------------- */}
           <section
             id="fonctionnement"
-            className="bg-surface-container-low px-5 pt-11 pb-12 md:px-10 md:pt-[66px] md:pb-[74px]"
+            className="bg-ds-surface-creux px-5 pt-11 pb-12 md:px-10 md:pt-[66px] md:pb-[74px]"
           >
             <div className="text-center">
               <span className={pilule}>{t("beneficesPilule")}</span>
-              <h2 className="mt-4 mb-7 font-headline-xl text-[30px] leading-[35px] font-extrabold tracking-[-0.03em] text-on-surface md:mt-5 md:mb-0 md:text-[46px] md:leading-[52px]">
+              <h2 className="mt-4 mb-7 text-[30px] leading-[35px] font-extrabold tracking-[-0.03em] text-ds-texte-titre md:mt-5 md:mb-0 md:text-[46px] md:leading-[52px]">
                 {t("beneficesTitre")}
               </h2>
               {/* La planche mobile SUPPRIME ce paragraphe : trois cartes qui se
                   suivent en colonne disent déjà ce qu'il annonçait. */}
-              <p className="mx-auto mt-4 mb-11 hidden max-w-[560px] font-body-lg text-[16px] leading-[26px] text-sourdine md:block">
+              <p className="mx-auto mt-4 mb-11 hidden max-w-[560px] text-[16px] leading-[26px] text-ds-texte-corps md:block">
                 {t("beneficesTexte")}
               </p>
             </div>
@@ -430,17 +466,17 @@ export default async function Accueil({
             <ul className="grid gap-3.5 text-left md:grid-cols-3 md:gap-5">
               {(
                 [
-                  ["medias", "download", "bg-violet-fond text-violet"],
-                  ["suivi", "schedule", "bg-corail-fond text-corail"],
+                  ["medias", "download", "bg-ds-surface-teinte text-ds-accent"],
+                  ["suivi", "schedule", "bg-ds-erreur-fond text-ds-erreur"],
                   // ⚠️ LE TROISIÈME EST VERT sur les deux planches. Le code le
                   // rendait GRIS, faute de famille verte dans l'ancien thème —
                   // elle existe désormais (`succes-pastel` / `succes`).
-                  ["marque", "link", "bg-succes-pastel text-succes"],
+                  ["marque", "link", "bg-ds-succes-fond text-ds-succes"],
                 ] as const
               ).map(([clef, icone, teinte]) => (
                 <li
                   key={clef}
-                  className="rounded-lg border border-outline-variant bg-surface-container-lowest p-[22px] md:p-[26px]"
+                  className="rounded-lg border border-ds-filet bg-ds-surface-carte p-[22px] md:p-[26px]"
                 >
                   <span
                     className={
@@ -450,10 +486,10 @@ export default async function Accueil({
                   >
                     <Icone nom={icone} className="text-[20px] md:text-[21px]" />
                   </span>
-                  <h3 className="mt-4 mb-[7px] font-headline-md text-[17px] leading-[22px] font-bold tracking-[-0.015em] text-on-surface md:mt-[18px] md:mb-2 md:text-[18px] md:leading-[23px]">
+                  <h3 className="mt-4 mb-[7px] text-[17px] leading-[22px] font-bold tracking-[-0.015em] text-ds-texte-titre md:mt-[18px] md:mb-2 md:text-[18px] md:leading-[23px]">
                     {t("fonctionnalites." + clef + "Titre")}
                   </h3>
-                  <p className="font-body-md text-[14px] leading-[22px] text-sourdine">
+                  <p className="text-[14px] leading-[22px] text-ds-texte-corps">
                     <span className="md:hidden">{t("fonctionnalites." + clef + "TexteCourt")}</span>
                     <span className="hidden md:inline">{t("fonctionnalites." + clef + "Texte")}</span>
                   </p>
@@ -464,11 +500,11 @@ export default async function Accueil({
 
           {/* ---- APPEL FINAL --------------------------------------------- */}
           <section id="tarif" className="px-5 py-12 text-center md:px-10 md:py-[76px]">
-            <h2 className="mb-3 font-headline-xl text-[28px] leading-[34px] font-extrabold tracking-[-0.03em] text-on-surface md:mb-3.5 md:text-[42px] md:leading-[48px]">
+            <h2 className="mb-3 text-[28px] leading-[34px] font-extrabold tracking-[-0.03em] text-ds-texte-titre md:mb-3.5 md:text-[42px] md:leading-[48px]">
               <span className="md:hidden">{t("finalTitreCourt")}</span>
               <span className="hidden md:inline">{t("finalTitre")}</span>
             </h2>
-            <p className="mb-6 font-body-lg text-[15px] leading-6 text-sourdine md:mb-[30px] md:text-[16px] md:leading-[26px]">
+            <p className="mb-6 text-[15px] leading-6 text-ds-texte-corps md:mb-[30px] md:text-[16px] md:leading-[26px]">
               <span className="md:hidden">{t("gratuitPourLInstantCourt")}</span>
               <span className="hidden md:inline">{t("gratuitPourLInstant")}</span>
             </p>
@@ -480,8 +516,8 @@ export default async function Accueil({
         </main>
 
         {/* ---- PIED ------------------------------------------------------ */}
-        <footer className="flex flex-col items-center gap-3.5 border-t border-outline-variant px-5 py-[22px] md:flex-row md:justify-between md:px-10 md:py-7">
-          <span className="font-headline-md text-[15px] leading-[19px] font-extrabold tracking-[-0.02em] text-on-surface">
+        <footer className="flex flex-col items-center gap-3.5 border-t border-ds-filet px-5 py-[22px] md:flex-row md:justify-between md:px-10 md:py-7">
+          <span className="text-[15px] leading-[19px] font-extrabold tracking-[-0.02em] text-ds-texte-titre">
             DropLink
           </span>
           {/*
@@ -534,7 +570,7 @@ export default async function Accueil({
               <Link
                 key={clef}
                 href={href}
-                className="-my-[14.5px] inline-flex min-h-11 items-center font-body-sm text-[12px] leading-[15px] font-medium text-sourdine transition-colors hover:text-violet md:-my-3.5 md:font-headline-md md:text-[13px] md:leading-4 md:text-ardoise"
+                className="-my-[14.5px] inline-flex min-h-11 items-center text-[12px] leading-[15px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent md:-my-3.5 md:md:text-[13px] md:leading-4 md:text-ds-texte-corps"
               >
                 <span className="md:hidden">{t("piedCourt." + clef)}</span>
                 <span className="hidden md:inline">{t("pied." + clef)}</span>

@@ -19,7 +19,8 @@
     },
     "seDeconnecter": "Se déconnecter",
     "monCompte": "Mon compte",
-    "piedDePage": "© {annee} DropLink. Tous droits réservés."
+    "piedDePage": "© {annee} DropLink. Tous droits réservés.",
+    "creerCompte": "Créer un compte"
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",
