@@ -29,10 +29,12 @@ pnpm typecheck        # tsc --noEmit — zéro erreur tolérée
 pnpm test             # projet unit — REFUSE un test sauté, todo, ou une suite vide
 pnpm test:rls         # suites BLOQUANTES d'isolation — jamais désactivables
 pnpm test:perf        # mesures (~10 min) — PAS une porte de commit, voir ci-dessous
-pnpm db:migrate       # applique les migrations
-pnpm db:types         # régénère les types Supabase
+pnpm db:migrate       # applique les migrations — ⚠️ EN PRODUCTION
+pnpm db:migrate:tests # les applique à la base de TESTS (refuse toute autre cible)
+pnpm db:types         # régénère les types Supabase — depuis la PRODUCTION
+pnpm db:types:tests   # les régénère depuis la base de tests
 pnpm fumee            # le produit doit RÉPONDRE : serveur réel, statuts et HTML servi
-pnpm falsifier        # casse le produit EN BASE, de façon réversible, pour éprouver les sondes
+pnpm falsifier        # casse le produit EN BASE (base de TESTS), de façon réversible
 pnpm gates            # les six portes ci-dessus, sur la BASE DE TESTS (voir plus bas)
 pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 ```
@@ -112,6 +114,36 @@ pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 > du rouge. Lancer `pnpm gates`, et **relever le décompte**, pas la couleur.
 
 Après toute modif de schéma : `pnpm db:migrate && pnpm db:types`, sinon les types sont périmés.
+
+> ⚠️ **UNE MIGRATION ÉCRITE N'EST PAS UNE MIGRATION DÉPLOYÉE, ET `railway.json`
+> NE LES APPLIQUE PAS.** Le déploiement lance `pnpm build` puis `pnpm start`,
+> rien d'autre : les migrations s'appliquent **à la main**, et `pnpm db:migrate`
+> vise la PRODUCTION — donc il n'est jamais en pilote automatique.
+>
+> **Le chemin de travail est `pnpm db:migrate:tests`** : il charge
+> `.env.test.local` en premier et **REFUSE de démarrer** si l'URL résolue ne
+> désigne pas le projet de tests. `pnpm db:types:tests` régénère les types
+> depuis cette même base — sans quoi on régénérerait depuis une production qui
+> ne connaît pas encore les fonctions qu'on vient d'écrire, et les types du code
+> tout neuf disparaîtraient.
+>
+> ⚠️ **CONSÉQUENCE À DIRE À CHAQUE FOIS** : entre le déploiement du code et la
+> migration de la production, l'écran qui appelle la nouvelle fonction rend
+> **500**. L'ordre est donc `pnpm db:migrate` PUIS le déploiement, et c'est la
+> décision de Wassim, pas la nôtre.
+
+> ⚠️ **`pnpm falsifier` VISAIT LA PRODUCTION JUSQU'AU 13/09/2026.** Il retire des
+> policies RLS, remplace des fonctions de lecture publique par des versions
+> `security definer`, supprime des bornes de période — **délibérément**. Sur la
+> base qui sert les clients, « casser » ouvrait donc réellement les données de
+> tous les vendeurs jusqu'à la réparation. Il vise désormais la base de TESTS et
+> refuse toute autre cible ; **aucun drapeau ne permet de viser la production**,
+> parce qu'un drapeau qui l'autoriserait finirait par être tapé.
+>
+> Ce n'était même pas ce qu'il devait mesurer : les suites qui doivent rougir
+> tournent sur `droplink-tests` depuis le 06/09. *Falsifier ailleurs que là où
+> les gardes s'exécutent ne prouve rien — on casse une base, on en regarde une
+> autre.*
 
 **Portes de qualité avant chaque commit** — les six, dans cet ordre, sous un
 seul environnement :
@@ -557,14 +589,15 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**TROIS ÉCRANS SORTENT EN CODE 0**, tous remesurés le 12/09 au soir contre un
-kit qui rend enfin sa vraie police (neuvième piège) :
+**QUATRE ÉCRANS SORTENT EN CODE 0**, tous remesurés contre un kit qui rend enfin
+sa vraie police (neuvième piège) :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
-| `/commandes` | `OrdersView`, sans `CLIC_KIT` | 39 (0 non déclarés) | 42 (0) | **0** |
-| `/envois` | `CLIC_KIT="Suivi d'envois"` | 48 (0) | 43 (0) | **0** |
+| `/commandes` | `OrdersView`, sans `CLIC_KIT` | 39 (0 non déclarés) | 43 (0) | **0** |
+| `/envois` | `CLIC_KIT="Suivi d'envois"` | 48 (0) | 46 (0) | **0** |
 | **l'éditeur** `/commandes/[id]` | `CLIC_KIT="#DLK7842"` | 26 (0) | 48 (0) | **0** |
+| `/analyses` | `CLIC_KIT="Analyses"` | 32 (0) | 41 (0) | **0** |
 
 ⚠️ **LE PRODUIT NE SE MESURE PAS TOUJOURS À LA MÊME LARGEUR QUE LE KIT.** Les
 deux relevés doivent porter la même largeur UTILE — 1675 —, et c'est la barre de
@@ -580,10 +613,31 @@ vers `/commandes/<id>`, et la décision 16 interdit le bouton d'enregistrement.
 La référence est donc `OrderDetail`, et la disposition emprunte à `CreateOrder`
 son couple formulaire + aperçu, qui vient en premier.
 
-**▶️ PROCHAIN ÉCRAN : `/analyses`**, contre `AnalyticsView` du kit vendeur.
+⚠️ **UN JEU DE MESURE PAUVRE FABRIQUE DE FAUX « ÉCARTS DE DONNÉE ».** Il ne
+créait ni média, ni événement de commande, ni ouverture de lien, ni colis livré
+dans la fenêtre, et aucune commande n'avait d'arbitrage qualité. Six panneaux
+rendaient donc leur état VIDE, et rien ne distinguait « la règle du `null`
+s'applique » de « le calcul est cassé » — la tentation étant alors de déclarer
+« la base ne le porte pas ». L'enrichir a fait surgir **trois éléments que les
+écrans rendaient depuis toujours sans qu'aucune mesure ne les voie.**
 
-Puis, dans cet ordre : `/marque` · les SIX écrans admin · la landing ·
-`/p/[token]` · l'authentification · les pages légales. Tous ont déjà eu une
+⚠️ **ET IL A ROUVERT LES TROIS ÉCRANS DÉJÀ VERTS.** Deux compteurs d'alerte
+étaient déclarés EN TOUTES LETTRES — « 4 commandes jamais ouvertes » — sur un
+chiffre que le jeu produit. *Une déclaration littérale posée sur une valeur du
+jeu de mesure meurt au premier changement de jeu, et l'écran sort rouge sans
+qu'aucun défaut soit en cause.* Ces valeurs-là se déclarent par MOTIF.
+
+⚠️ **`/analyses` A DEMANDÉ UNE MIGRATION, ET C'EST UNE DÉCISION DE WASSIM.** Les
+agrégats groupés de PostgREST sont **désactivés** sur ce projet — mesuré :
+`select=carrier_code,count()` répond « Use of aggregate functions is not
+allowed ». Cinq panneaux du kit exigeaient donc une fonction SQL. Voir
+`pnpm db:migrate:tests` plus haut : le code est écrit et appliqué à la base de
+tests ; **la production attend `pnpm db:migrate`, AVANT le déploiement.**
+
+**▶️ PROCHAIN ÉCRAN : `/marque`**, contre `BrandView` du kit vendeur.
+
+Puis, dans cet ordre : les SIX écrans admin · la landing · `/p/[token]` ·
+l'authentification · les pages légales. Tous ont déjà eu une
 passe de jetons et de règle 5 ; **aucun n'a eu la soustraction.** Et deux écrans
 sont à CRÉER, pas à migrer : le tableau de bord (`DashboardHome.jsx`) et les
 paramètres vendeur (`SettingsView.jsx`).
