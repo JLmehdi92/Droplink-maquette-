@@ -8,6 +8,24 @@
  * coup hérite du champ de vision de la correction, pas du problème.
  *
  * Usage : node scripts/falsifier.mjs <casser|reparer> <cible>
+ *
+ * ⚠️ IL VISAIT LA PRODUCTION, ET PENDANT LONGTEMPS. Mesure du 13/09/2026 :
+ * `SUPABASE_DB_URL` venait de `.env.local`, c est-a-dire de la base qui SERT
+ * LES CLIENTS. Cet outil retire des policies RLS, remplace des fonctions de
+ * lecture publique par des versions `security definer`, supprime des bornes de
+ * periode — deliberement. Sur la production, « casser » ouvrait donc reellement
+ * les donnees de tous les vendeurs jusqu a la reparation, et une reparation qui
+ * echoue les y laisse.
+ *
+ * Ce n est meme pas ce qu on veut mesurer : les suites qui doivent ROUGIR
+ * tournent sur `droplink-tests` depuis le 06/09. Falsifier ailleurs que la ou
+ * les gardes s executent ne prouve rien — on casse une base, on regarde une
+ * autre.
+ *
+ * Il vise donc la base de TESTS, et il REFUSE de demarrer si l URL resolue ne
+ * la designe pas. Il n existe aucun drapeau pour viser la production : une
+ * falsification volontaire de la base qui sert les clients n a pas de cas
+ * d usage legitime, et un drapeau qui l autoriserait finirait par etre tape.
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -15,7 +33,24 @@ import { join } from "node:path";
 import { config } from "dotenv";
 import pg from "pg";
 
+/* ⚠️ `.env.test.local` EN PREMIER, et dotenv ne remplace pas une variable deja
+   posee : c est donc lui qui gagne. Le meme ordre que `build-contre-tests`,
+   pour la meme raison. `.env.local` reste charge derriere pour tout ce qui n a
+   pas d equivalent de test. */
+config({ path: ".env.test.local", quiet: true });
 config({ path: ".env.local", quiet: true });
+
+const REF_TESTS = "djvjaocvndqhqqgilrof";
+if (!(process.env.SUPABASE_DB_URL ?? "").includes(REF_TESTS)) {
+  console.error(
+    "ARRET : le falsificateur ne vise pas la base de tests. RIEN N A ETE CASSE. " +
+      "Cet outil retire des protections en base — policies RLS, gardes de lecture " +
+      "publique, bornes de periode. Sur la production, il ouvrirait reellement les " +
+      "donnees des vendeurs jusqu a la reparation. Cause probable : " +
+      "`.env.test.local` manque, ou ne porte pas `SUPABASE_DB_URL`.",
+  );
+  process.exit(1);
+}
 
 const POLICY_LECTURE_SHOPS = `create policy shops_lecture_du_sien on public.shops
   for select to authenticated
