@@ -378,8 +378,10 @@
       "preparation": "Pas encore scanné"
     },
     "filtres": {
-      "tous": "Tous",
-      "silencieux": "Sans mouvement"
+      "silencieux": "Sans mouvement",
+      "tousStatuts": "Tous les statuts",
+      "tousTransporteurs": "Tous les transporteurs",
+      "rechercher": "Rechercher un envoi…"
     },
     "etat": {
       "preparation": "Pas encore scanné",

@@ -57,6 +57,42 @@ export const ParametresEnvois = z.object({
     z.boolean().nullable(),
   ),
   silencieux: z.preprocess((v) => v === "oui" || v === true, z.boolean()),
+  /*
+   * LE TRANSPORTEUR, filtre par son CODE et non par son nom.
+   *
+   * ⚠️ `catch(null)` ET NON UN REFUS : une URL se retape a la main, et un code
+   * fantaisiste doit rendre la liste entiere plutot que casser l ecran. La
+   * coercition est ici, dans le schema, pas chez l appelant — c est la lecon du
+   * filtre « silencieux », dont un `z.boolean()` nu rejetait silencieusement la
+   * chaine « oui » qui arrive vraiment de l URL, faisant disparaitre le filtre
+   * sans bruit.
+   */
+  /*
+   * LA RECHERCHE, SUR LE NUMERO DE SUIVI.
+   *
+   * ⚠️ LES CARACTERES DE LA GRAMMAIRE POSTGREST SONT RETIRES, PAS ECHAPPES. La
+   * valeur part dans un `ilike`, dont la syntaxe emploie la virgule, le point,
+   * les parentheses et le pourcentage ; `decoderCurseur` a deja paye cette
+   * lecon pour le curseur. On ne garde donc que ce qu un numero de suivi peut
+   * contenir — lettres, chiffres, tiret — et le reste disparait. Un filtre qui
+   * ne trouve rien est meilleur qu un filtre qui prolonge l expression du
+   * serveur.
+   *
+   * La RLS resterait la derniere ligne, mais *une protection qui tient a ce
+   * qu une AUTRE couche rattrape n est pas une protection*.
+   */
+  q: z.preprocess(
+    (v) => {
+      if (typeof v !== "string") return null;
+      const propre = v.replace(/[^A-Za-z0-9-]/g, "").slice(0, 40);
+      return propre === "" ? null : propre;
+    },
+    z.string().nullable().catch(null),
+  ),
+  transporteur: z.preprocess(
+    (v) => (typeof v === "string" && /^\d{1,9}$/.test(v) ? Number(v) : null),
+    z.number().int().positive().nullable().catch(null),
+  ),
   curseur: z.string().max(120).nullable().catch(null),
 });
 
@@ -225,6 +261,10 @@ export async function lireEnvois(
   let requete = supabase.from("tracked_parcels").select(COLONNES);
 
   if (parametres.etat !== null) requete = requete.eq("normalized_status", parametres.etat);
+  if (parametres.transporteur !== null)
+    requete = requete.eq("carrier_code", parametres.transporteur);
+  // `ilike` et non `eq` : le vendeur colle souvent un fragment de numero.
+  if (parametres.q !== null) requete = requete.ilike("tracking_number", `%${parametres.q}%`);
 
   if (parametres.abandonnes === true) requete = requete.not("abandoned_at", "is", null);
   if (parametres.abandonnes === false) requete = requete.is("abandoned_at", null);
@@ -409,6 +449,8 @@ export function analyserParametres(
   // créerait un second endroit où « oui » peut cesser de vouloir dire oui.
   return ParametresEnvois.parse({
     tri: seul("tri"),
+    transporteur: seul("transporteur"),
+    q: seul("q"),
     etat: seul("etat") ?? null,
     abandonnes: seul("abandonnes"),
     silencieux: seul("silencieux"),

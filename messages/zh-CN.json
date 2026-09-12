@@ -378,8 +378,10 @@
       "preparation": "尚未扫描"
     },
     "filtres": {
-      "tous": "全部",
-      "silencieux": "无更新"
+      "silencieux": "无更新",
+      "tousStatuts": "全部状态",
+      "tousTransporteurs": "全部承运商",
+      "rechercher": "搜索发货…"
     },
     "etat": {
       "preparation": "尚未扫描",

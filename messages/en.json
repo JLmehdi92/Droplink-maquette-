@@ -378,8 +378,10 @@
       "preparation": "Not scanned yet"
     },
     "filtres": {
-      "tous": "All",
-      "silencieux": "No movement"
+      "silencieux": "No movement",
+      "tousStatuts": "All statuses",
+      "tousTransporteurs": "All carriers",
+      "rechercher": "Search a shipment…"
     },
     "etat": {
       "preparation": "Not scanned yet",

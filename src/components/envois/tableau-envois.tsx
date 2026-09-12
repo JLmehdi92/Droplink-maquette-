@@ -10,9 +10,10 @@ import {
   Info,
   Package,
   PackageOpen,
+  Search,
   Truck,
 } from "lucide-react";
-import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
+import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS } from "@/components/panneau-outil";
 import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
 import { FriseCompacte } from "@/components/commandes/frise-suivi";
 import { LienEcran } from "@/components/lien-ecran";
@@ -64,6 +65,11 @@ function lien(base: string, actuels: ParametresEnvois, modif: Record<string, str
 
   if (actuels.tri !== "immobiles") p.set("tri", actuels.tri);
   if (actuels.etat !== null) p.set("etat", actuels.etat);
+  // ⚠️ LA RECHERCHE ET LE TRANSPORTEUR VOYAGENT AVEC LES AUTRES FILTRES. Sans
+  // eux, cliquer « En transit » effacerait le numero cherche — en silence, et
+  // le vendeur conclurait que sa recherche n a rien donne.
+  if (actuels.q !== null) p.set("q", actuels.q);
+  if (actuels.transporteur !== null) p.set("transporteur", String(actuels.transporteur));
   if (actuels.silencieux) p.set("silencieux", "oui");
   if (actuels.abandonnes !== null) p.set("abandonnes", actuels.abandonnes ? "oui" : "non");
 
@@ -162,7 +168,11 @@ export async function TableauEnvois({
   const format = await getFormatter();
 
   const aUnFiltre =
-    parametres.etat !== null || parametres.silencieux || parametres.abandonnes !== null;
+    parametres.etat !== null ||
+    parametres.silencieux ||
+    parametres.abandonnes !== null ||
+    parametres.transporteur !== null ||
+    parametres.q !== null;
 
   /*
    * ⚠️ LES COLONNES S'ÉCARTENT, ALORS QUE LA PLANCHE N'ÉCARTE RIEN.
@@ -198,35 +208,6 @@ export async function TableauEnvois({
   const cellule = "border-t border-ds-filet py-[14px] pr-[14px] text-[14px]";
   const bordGauche = " pl-5";
   const bordDroit = " pr-5";
-
-  /**
-   * LA PILULE DE VUE, celle du canevas : bordée, noire quand elle est active.
-   *
-   * ⚠️ ELLE ÉTAIT VIOLETTE SANS BORDURE, et elle ne l'est nulle part ailleurs.
-   * La planche pose `background: #111117` ET `border: 1px solid #111117` sur
-   * l'active, blanc bordé `#e6e6ec` sur les autres — c'est ce que rend déjà
-   * `PilulesFiltres` sur Commandes. Deux écrans voisins qui dessinent
-   * différemment le même contrôle apprennent au vendeur qu'ils sont deux
-   * produits.
-   *
-   * 44 px au doigt, 34 px à la souris : la planche téléphone écrit
-   * `min-height: 44px` là où la planche bureau écrit `height: 34px`.
-   */
-  /*
-   * `FilterTabs` du design system : 36 px, `padding: 0 16px`, rayon pilule,
-   * 13 px gras. L'active prend la SURFACE INVERSE — l'encre, pas l'accent — avec
-   * son ombre ; les autres restent des cartes bordées.
-   *
-   * ⚠️ L'ÉCRAN COMMANDES EMPLOIE DES ONGLETS SOULIGNÉS ET CELUI-CI DES PILULES,
-   * ET CE N'EST PAS UNE INCOHÉRENCE : le kit dessine l'un avec `UnderlineTabs`
-   * DANS la carte du tableau, l'autre avec une rangée de filtres AU-DESSUS. Les
-   * deux idiomes existent chez lui, chacun à sa place.
-   */
-  const pilule = (actif: boolean): string =>
-    "flex min-h-11 shrink-0 items-center rounded-ds-pill border px-4 text-[13px] font-bold whitespace-nowrap transition-colors lg:h-9 lg:min-h-0 " +
-    (actif
-      ? "border-transparent bg-ds-surface-inverse text-ds-texte-sur-marque shadow-ds-sm"
-      : "border-ds-filet bg-ds-surface-carte text-ds-texte-corps hover:bg-ds-surface-teinte");
 
   /**
    * Tout ce qu'une ligne dit de son colis, calculé UNE FOIS et servi aux deux
@@ -341,48 +322,202 @@ export async function TableauEnvois({
    * rangée d'états n'a pas besoin qu'on annonce que ce sont des états. Le tri,
    * lui, se nomme dans son propre bouton.
    */
+  /*
+   * LA BARRE DE FILTRES DU KIT — un menu par critere, pas une rangee de pilules.
+   *
+   * `ShippingView` pose un champ de recherche et trois menus deroulants
+   * (« Tous les statuts », « Tous les transporteurs », « Tous les pays »), puis
+   * le tri a droite. `/commandes` filtre par pilules, et c est le MEME design
+   * system : deux ecrans, deux motifs. C est l ecran en cours qui fait foi, pas
+   * son voisin.
+   *
+   * ⚠️ LA MECANIQUE RESTE `<details>` + LIENS. Le kit emploie des `<select>`
+   * dont le `onChange` navigue ; cet ecran est rendu entierement cote serveur et
+   * fonctionne SANS JavaScript. On reprend l apparence, pas la dependance : un
+   * fournisseur qui consulte ses colis depuis un telephone bas de gamme sur un
+   * reseau lent n a pas a attendre qu un composant s hydrate pour filtrer.
+   *
+   * ⚠️ ET LE MENU FAIT 46 px DE HAUT ICI, 42 SUR `/commandes`. Mesure sur les
+   * deux pages servies : le meme composant n a pas les memes valeurs partout —
+   * troisieme piege de la methode. `MENU_ENVOIS` est donc local a cet ecran, et
+   * ne touche pas `PILULE_OUTIL_DS`, que `/commandes` mesure a zero ecart.
+   *
+   * ⚠️ « TOUS LES PAYS » N EST PAS REPRIS : aucune colonne ne porte le pays de
+   * destination. Un menu a une seule option serait un contrôle qui ne commande
+   * rien.
+   */
+  const MENU_ENVOIS =
+    "flex min-h-11 w-fit cursor-pointer list-none items-center gap-2.5 rounded-ds-card border " +
+    "border-ds-filet bg-ds-surface-carte px-[14px] text-[14px] font-medium whitespace-nowrap " +
+    "text-ds-texte-fort shadow-ds-xs transition-colors hover:bg-ds-surface-teinte " +
+    "lg:h-[46px] lg:min-h-0";
+
+  /** Une option de menu : lien, etat courant, meme dessin partout. */
+  const optionMenu = (actif: boolean) =>
+    "flex min-h-11 items-center rounded-ds-sm px-3 text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
+    (actif
+      ? "bg-ds-surface-teinte font-bold text-ds-accent-encre"
+      : "font-medium text-ds-texte-corps hover:bg-ds-ink-50");
+
+  /*
+   * LE LIBELLE DU MENU DE STATUT DIT CE QUI EST FILTRE, comme le kit : « Tous
+   * les statuts » au repos, le statut choisi sinon. Un menu qui affiche toujours
+   * le meme mot oblige a l ouvrir pour savoir ou l on en est.
+   */
+  const libelleStatut = parametres.silencieux
+    ? t("filtres.silencieux")
+    : parametres.etat === null
+      ? t("filtres.tousStatuts")
+      : t(`etat.${parametres.etat}`);
+
+  const transporteursVus = [
+    ...new Map(
+      page.lignes
+        .map((l) => lireTransporteur(l.transporteur))
+        .filter((c): c is NonNullable<typeof c> => c !== null)
+        .map((c) => [c.nom, c] as const),
+    ).values(),
+  ].sort((a, b) => a.nom.localeCompare(b.nom));
+
   const barreOutils = (
-    <div className="defilement-discret -mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-0.5 lg:mx-0 lg:mb-4 lg:overflow-visible lg:px-0 lg:pb-0">
-      <LienEcran
-        href={lien(base, parametres, { etat: null, silencieux: null })}
-        aria-current={parametres.etat === null && !parametres.silencieux ? "true" : undefined}
-        className={pilule(parametres.etat === null && !parametres.silencieux)}
-      >
-        {t("filtres.tous")}
-      </LienEcran>
+    <div className="defilement-discret -mx-4 flex items-center gap-3.5 overflow-x-auto px-4 pb-0.5 lg:mx-0 lg:mb-4 lg:overflow-visible lg:px-0 lg:pb-0">
+      {/*
+        LE CHAMP DE RECHERCHE, premier element de la barre du kit — 310 px de
+        large, 46 de haut, une loupe de 17 a gauche.
 
-      {ETATS.map((etat: Etat) => (
-        <LienEcran
-          key={etat}
-          href={lien(base, parametres, { etat, silencieux: null })}
-          aria-current={parametres.etat === etat ? "true" : undefined}
-          className={pilule(parametres.etat === etat)}
+        ⚠️ UN `<form method="get">`, PAS UN CHAMP QUI NAVIGUE A CHAQUE FRAPPE.
+        Le kit filtre a la volee parce que ses huit lignes vivent en memoire ;
+        ici chaque frappe serait une requete. Le formulaire soumet a l entree,
+        l ecran reste rendu cote serveur, et il fonctionne SANS JavaScript.
+
+        ⚠️ ET LES AUTRES FILTRES VOYAGENT EN CHAMPS CACHES. Un formulaire GET
+        REMPLACE la chaine de requete : sans eux, chercher un numero effacerait
+        le statut et le tri choisis, en silence.
+      */}
+      <form method="get" action={base} className="contents">
+        {parametres.etat === null ? null : (
+          <input type="hidden" name="etat" value={parametres.etat} />
+        )}
+        {!parametres.silencieux ? null : <input type="hidden" name="silencieux" value="oui" />}
+        {parametres.tri === "immobiles" ? null : (
+          <input type="hidden" name="tri" value={parametres.tri} />
+        )}
+        {parametres.transporteur === null ? null : (
+          <input type="hidden" name="transporteur" value={String(parametres.transporteur)} />
+        )}
+        {/*
+          ⚠️ UN `<label>` ET NON UN `<span>`, ET C'EST LA CIBLE TACTILE. L'input
+          nu fait 21 px de haut ; c'est son enveloppe qui en fait 44. Tant
+          qu'elle était un `<span>`, le doigt n'avait que 21 px utiles — et la
+          sonde l'a vu au téléphone, dans les trois langues. Enveloppé d'un
+          `<label>`, le champ prend le focus depuis n'importe quel point de la
+          boîte, loupe comprise : la cible EST la boîte.
+        */}
+        <label
+          className={
+            "flex min-h-11 shrink-0 cursor-text items-center gap-[11px] rounded-ds-card border border-ds-filet " +
+            "bg-ds-surface-carte px-4 shadow-ds-xs lg:h-[46px] lg:min-h-0 lg:w-[310px]"
+          }
         >
-          {t(`etat.${etat}`)}
-        </LienEcran>
-      ))}
+          <Search aria-hidden="true" size={17} strokeWidth={1.8} className="shrink-0 text-ds-texte-sourdine" />
+          <input
+            type="search"
+            name="q"
+            defaultValue={parametres.q ?? ""}
+            placeholder={t("filtres.rechercher")}
+            aria-label={t("filtres.rechercher")}
+            className="min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort outline-none placeholder:text-ds-texte-sourdine"
+          />
+        </label>
+      </form>
 
-      {/* LE SILENCE EST UNE PILULE D'ALERTE, et c'est le seul filtre qui appelle
-          un geste. Le peindre comme les autres l'aurait noyé ; peindre les
-          autres comme lui n'aurait rien mis en avant. */}
-      <LienEcran
-        href={lien(base, parametres, { silencieux: parametres.silencieux ? null : "oui", etat: null })}
-        aria-current={parametres.silencieux ? "true" : undefined}
-        className={
-          /*
-            ⚠️ L'ACTIVE PREND L'ENCRE COMME LES AUTRES, PAS L'AMBRE PLEINE. Un
-            aplat `--status-warning` porte du blanc à 2,6:1 — sous le plancher de
-            4,5:1 que le produit s'impose partout ailleurs. L'emphase passe donc
-            par le REPOS, qui reste ambré là où les autres pilules sont blanches.
-          */
-          "flex min-h-11 shrink-0 items-center rounded-ds-pill border px-4 text-[13px] font-bold whitespace-nowrap transition-colors lg:h-9 lg:min-h-0 " +
-          (parametres.silencieux
-            ? "border-transparent bg-ds-surface-inverse text-ds-texte-sur-marque shadow-ds-sm"
-            : "border-transparent bg-ds-alerte-fond text-ds-alerte hover:bg-ds-amber-100")
-        }
-      >
-        {t("filtres.silencieux")}
-      </LienEcran>
+      {/* ------------------------------------------------ LE STATUT */}
+      <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
+        <summary className={MENU_ENVOIS + " lg:min-w-[190px]"}>
+          <span className="flex-1">{libelleStatut}</span>
+          <ChevronDown aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
+        </summary>
+        <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
+          <li>
+            <LienEcran
+              href={lien(base, parametres, { etat: null, silencieux: null })}
+              aria-current={parametres.etat === null && !parametres.silencieux ? "true" : undefined}
+              className={optionMenu(parametres.etat === null && !parametres.silencieux)}
+            >
+              {t("filtres.tousStatuts")}
+            </LienEcran>
+          </li>
+          {ETATS.map((etat: Etat) => (
+            <li key={etat}>
+              <LienEcran
+                href={lien(base, parametres, { etat, silencieux: null })}
+                aria-current={parametres.etat === etat ? "true" : undefined}
+                className={optionMenu(parametres.etat === etat)}
+              >
+                {t(`etat.${etat}`)}
+              </LienEcran>
+            </li>
+          ))}
+          {/* LE SILENCE RESTE DISTINCT, ET AMBRE : c est le seul filtre qui
+              appelle un geste. Il etait une pilule a part ; il est desormais la
+              derniere entree du menu, peinte comme elle. */}
+          <li>
+            <LienEcran
+              href={lien(base, parametres, { silencieux: "oui", etat: null })}
+              aria-current={parametres.silencieux ? "true" : undefined}
+              className={
+                "flex min-h-11 items-center rounded-ds-sm px-3 text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
+                (parametres.silencieux
+                  ? "bg-ds-alerte-fond font-bold text-ds-alerte"
+                  : "font-medium text-ds-alerte hover:bg-ds-alerte-fond")
+              }
+            >
+              {t("filtres.silencieux")}
+            </LienEcran>
+          </li>
+        </ul>
+      </details>
+
+      {/* ------------------------------------------ LE TRANSPORTEUR */}
+      {transporteursVus.length === 0 ? null : (
+        <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
+          <summary className={MENU_ENVOIS + " lg:min-w-[215px]"}>
+            <span className="flex-1">
+              {parametres.transporteur === null
+                ? t("filtres.tousTransporteurs")
+                : (lireTransporteur(parametres.transporteur)?.nom ?? t("filtres.tousTransporteurs"))}
+            </span>
+            <ChevronDown aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
+          </summary>
+          <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
+            <li>
+              <LienEcran
+                href={lien(base, parametres, { transporteur: null })}
+                aria-current={parametres.transporteur === null ? "true" : undefined}
+                className={optionMenu(parametres.transporteur === null)}
+              >
+                {t("filtres.tousTransporteurs")}
+              </LienEcran>
+            </li>
+            {transporteursVus.map((c) => {
+              const code = page.lignes.find(
+                (l) => lireTransporteur(l.transporteur)?.nom === c.nom,
+              )?.transporteur;
+              return code === null || code === undefined ? null : (
+                <li key={c.nom}>
+                  <LienEcran
+                    href={lien(base, parametres, { transporteur: String(code) })}
+                    aria-current={parametres.transporteur === code ? "true" : undefined}
+                    className={optionMenu(parametres.transporteur === code)}
+                  >
+                    {c.nom}
+                  </LienEcran>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
 
       <span className="hidden flex-grow lg:block" />
 
@@ -401,10 +536,10 @@ export async function TableauEnvois({
         ancré au bureau.
       */}
       <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
-        <summary className={PILULE_OUTIL_DS}>
+        <summary className={MENU_ENVOIS + " lg:min-w-[160px]"}>
           <ArrowUpDown aria-hidden="true" size={16} strokeWidth={1.8} />
-          {t(`tri.${parametres.tri}`)}
-          <ChevronDown aria-hidden="true" size={15} strokeWidth={1.8} className="text-ds-texte-tenu" />
+          <span className="flex-1">{t(`tri.${parametres.tri}`)}</span>
+          <ChevronDown aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
         </summary>
         <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
           {TRIS.map((tri) => (
@@ -412,12 +547,7 @@ export async function TableauEnvois({
               <LienEcran
                 href={lien(base, parametres, { tri: tri === "immobiles" ? "" : tri })}
                 aria-current={parametres.tri === tri ? "true" : undefined}
-                className={
-                  "flex min-h-11 items-center rounded-ds-sm px-3 text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
-                  (parametres.tri === tri
-                    ? "bg-ds-surface-teinte font-bold text-ds-accent-encre"
-                    : "font-medium text-ds-texte-corps hover:bg-ds-ink-50")
-                }
+                className={optionMenu(parametres.tri === tri)}
               >
                 {t(`tri.${tri}`)}
               </LienEcran>

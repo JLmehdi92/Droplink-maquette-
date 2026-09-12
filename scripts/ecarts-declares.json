@@ -657,15 +657,6 @@
       },
       {
         "textes": [
-          "Tous",
-          "Expédié",
-          "Sans mouvement"
-        ],
-        "motif": "structure",
-        "raison": "LA BARRE DE FILTRES. Le kit filtre par MENUS DEROULANTS (« Tous les statuts », « Tous les transporteurs », « Tous les pays ») ; le produit filtre par PILULES, comme le kit lui-meme le fait sur `/commandes`. Le design system n est donc pas univoque sur ce point, et la coherence entre nos deux ecrans prime : les pilules montrent d un coup quels etats existent, un menu ferme les cache. Deux de ses trois menus seraient de toute facon vides — pas de catalogue de transporteurs, pas de pays en base."
-      },
-      {
-        "textes": [
           "Ce qui ne bouge plus",
           "Mis à jour récemment",
           "Mis à jour il y a longtemps"
@@ -717,6 +708,22 @@
         ],
         "motif": "donnee",
         "raison": "LE TRANSPORTEUR ET L ARRIVEE ANNONCEE DU JEU DE MESURE. Le kit rend huit envois chez La Poste, DHL, DPD… ; le jeu en rend deux, chez 4PX et FedEx, avec les monogrammes correspondants. « Livraison prevue le … » est declaree PAR MOTIF : la date est RELATIVE a l instant du passage, comme toutes les dates du jeu depuis qu une sonde de fumee a expire pour avoir ete ecrite en dur."
+      },
+      {
+        "textes": [
+          "Tous les statuts",
+          "Tous les transporteurs"
+        ],
+        "motif": "structure",
+        "raison": "LE KIT LES AFFICHE AUSSI — L INVENTAIRE NE PEUT PAS LES VOIR. Ses deux menus sont des `<select>` natifs, et le texte de l option SELECTIONNEE n est pas un noeud texte du document : la sonde releve les enfants textuels de chaque element, donc elle lit le contröle vide. Le produit emploie un `<details>` dont le libelle EST un noeud texte, et il ressort en trop. Meme dessin, meme place, meme libelle a l ecran — c est la mecanique qui differe, parce que la notre fonctionne sans JavaScript la ou celle du kit exige un `onChange`."
+      },
+      {
+        "textes": [
+          "Expédié",
+          "Sans mouvement"
+        ],
+        "motif": "donnee",
+        "raison": "LES OPTIONS DE NOTRE MENU DE STATUT, rendues dans le document parce qu un `<details>` porte ses entrees en clair — le `<select>` du kit garde les siennes dans des `<option>` que l inventaire ne releve pas. Et ce sont NOS etats : la frise est verrouillee a quatre par la decision 4 du brief, et « Sans mouvement » remplace le « Probleme » du kit, qui supposerait que le transporteur declare un incident."
       }
     ]
   }
