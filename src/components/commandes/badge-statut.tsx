@@ -75,7 +75,10 @@ export function BadgeStatut({
         // `whitespace-nowrap` : le tableau se rétrécit au lieu de défiler, et
         // « Sans mouvement · 14 j » se replierait en deux lignes dans une pilule.
         "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-3 py-[7px] " +
-        "text-[12px] leading-[1.25] font-bold tracking-[-0.01em] whitespace-nowrap " +
+        // ⚠️ -0,02em ET NON -0,01. Mesuré sur le kit servi : ses pastilles de statut
+    // rendent `letter-spacing: -0.24px` à 12 px, soit -0,02em. La nôtre en
+    // rendait -0,12 — quatre pixels de large en plus sur « En transit ».
+    "text-[12px] leading-[1.25] font-bold tracking-[-0.02em] whitespace-nowrap " +
         TEINTES[teinte]
       }
     >

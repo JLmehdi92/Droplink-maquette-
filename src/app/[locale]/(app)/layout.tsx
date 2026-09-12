@@ -303,7 +303,10 @@ export default async function LayoutApplication({
               se rend qu au bureau — au téléphone la barre d onglets occupe déjà
               le bas de l écran, et une mention légale sous elle serait hors de
               portée du pouce comme du regard. */}
-          <footer className="mt-auto hidden h-16 shrink-0 items-center justify-center text-[12px] text-ds-texte-tenu md:flex">
+          {/* ⚠️ `26px 32px 22px`, MESURÉ SUR LE KIT. Nous posions une hauteur fixe de
+              64 sans remplissage : le pied tombait 128 px trop haut sur un écran
+              rempli, et sa ligne ne s'alignait sur rien. */}
+          <footer className="mt-auto hidden shrink-0 items-center justify-center px-8 pt-[26px] pb-[22px] text-[12px] text-ds-texte-tenu md:flex">
             {t("piedDePage", { annee: new Date().getFullYear() })}
           </footer>
         </div>

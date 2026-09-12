@@ -102,10 +102,22 @@ export function RechercheGlobale({
           `aria-hidden` parce qu'elles décrivent un geste, pas un contenu — un
           lecteur d'écran annoncerait « Ctrl K » au milieu d'un champ de saisie. */}
       <span aria-hidden="true" className="hidden shrink-0 items-center gap-1 lg:flex">
-        <kbd className="rounded-ds-xs border border-ds-filet bg-ds-surface-creux px-[7px] py-[3px] font-sans text-[11px] font-semibold text-ds-texte-sourdine">
+        <kbd /* ⚠️ `font-[inherit]` ET NON `font-sans`. Le defaut d un `<kbd>` est le
+             MONOSPACE du navigateur, et `font-sans` de Tailwind pointe sur la pile
+             SYSTEME — pas sur Inter, qui arrive par la variable de `next/font`.
+             Mesure : ces deux pastilles rendaient en `-apple-system` quand tout le
+             reste de l ecran rend en Inter. La soustraction l a vu du premier coup,
+             l oeil jamais — a onze pixels, deux sans-serif se ressemblent. */
+          className="rounded-ds-xs border border-ds-filet bg-ds-surface-creux px-2 py-[3px] font-[inherit] text-[11px] leading-[normal] font-semibold text-ds-texte-sourdine">
           Ctrl
         </kbd>
-        <kbd className="rounded-ds-xs border border-ds-filet bg-ds-surface-creux px-[7px] py-[3px] font-sans text-[11px] font-semibold text-ds-texte-sourdine">
+        <kbd /* ⚠️ `font-[inherit]` ET NON `font-sans`. Le defaut d un `<kbd>` est le
+             MONOSPACE du navigateur, et `font-sans` de Tailwind pointe sur la pile
+             SYSTEME — pas sur Inter, qui arrive par la variable de `next/font`.
+             Mesure : ces deux pastilles rendaient en `-apple-system` quand tout le
+             reste de l ecran rend en Inter. La soustraction l a vu du premier coup,
+             l oeil jamais — a onze pixels, deux sans-serif se ressemblent. */
+          className="rounded-ds-xs border border-ds-filet bg-ds-surface-creux px-2 py-[3px] font-[inherit] text-[11px] leading-[normal] font-semibold text-ds-texte-sourdine">
           K
         </kbd>
       </span>

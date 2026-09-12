@@ -142,7 +142,9 @@ export function PilulesFiltresAnimees({ vues }: { readonly vues: readonly VuePil
         ref={pastille}
         aria-hidden="true"
         style={{ opacity: 0 }}
-        className="pointer-events-none absolute bottom-0 left-0 h-0.5 rounded-sm bg-ds-accent transition-[transform,width] duration-[260ms] ease-out"
+        /* ⚠️ RAYON 2 px, ET NON `rounded-sm` QUI EN VAUT 10. Mesure sur le kit
+           servi : le soulignement rend `border-radius: 2px`. */
+        className="pointer-events-none absolute bottom-0 left-0 h-0.5 rounded-[2px] bg-ds-accent transition-[transform,width] duration-[260ms] ease-out"
       />
       {vues.map((vue) => (
         <LienEcran
@@ -154,12 +156,20 @@ export function PilulesFiltresAnimees({ vues }: { readonly vues: readonly VuePil
               `UnderlineTabs` : `padding: 0 16px 14px`, 14 px, gras quand
               l'onglet est celui qu'on regarde, moyen sinon.
 
+              ⚠️ L'ÉCART DE 8 px ENTRE LE LIBELLÉ ET SON COMPTEUR MANQUAIT. Le
+              kit pose `gap: 8px` ; sans lui le compteur se colle au mot, et
+              l'onglet rend 4 px de moins — mesuré à 1675 px : « Toutes » faisait
+              110 contre 118, « En transit » 124 contre 128.
+
+              ⚠️ ET L'INTERLIGNE : le corps pose 1,5, le kit laisse `normal`. La
+              rangée rendait 35 px de haut au lieu de 33.
+
               44 px AU DOIGT, et le kit ne le dit pas : il n'a pas de version
-              tactile de ses onglets, et 34 px passerait sous le plancher que sa
+              tactile de ses onglets, et 33 px passerait sous le plancher que sa
               propre règle 5 impose.
             */
-            "relative flex min-h-11 shrink-0 items-center px-4 pb-3.5 text-[14px] " +
-            "whitespace-nowrap transition-colors lg:min-h-0 " +
+            "relative flex min-h-11 shrink-0 items-center gap-2 px-4 pb-3.5 text-[14px] " +
+            "leading-[normal] whitespace-nowrap transition-colors lg:min-h-0 " +
             (vue.actif
               ? "font-bold text-ds-accent-encre"
               : "font-medium text-ds-texte-corps hover:text-ds-texte-fort")

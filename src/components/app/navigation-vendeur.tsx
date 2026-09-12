@@ -226,7 +226,11 @@ export function NavigationVendeur({
                 {/* 20 px, trait 2,1 quand l entrée est active et 1,8 sinon —
                     c est le kit qui épaissit le trait avec la graisse. */}
                 <IconeDe cle={entree.icone} actif={active} taille={20} />
-                <span className="min-w-0 flex-1 truncate">{entree.libelle}</span>
+                {/* ⚠️ `leading-[normal]` ET NON L INTERLIGNE HERITEE. Le corps du
+                    produit pose 1,5 ; le kit laisse `line-height: normal`, soit
+                    ~1,21 pour Inter. Mesure a 1675 px : nos libelles rendaient une
+                    boite de 23 px la ou le kit en rend 20, sur les trois entrees. */}
+                <span className="min-w-0 flex-1 truncate leading-[normal]">{entree.libelle}</span>
                 {entree.compte === undefined ? null : (
                   /* Pastille du kit : `padding: 2px 9px`, rayon pilule, 11/700.
                      Sur l entrée active elle prend l accent plein ; ailleurs, le

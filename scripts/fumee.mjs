@@ -43,6 +43,26 @@ import { fileURLToPath } from "node:url";
  */
 const MARQUE_ADMIN = 'data-surface="administration"';
 
+/**
+ * LES DATES DU SCENARIO DE SUIVI, RELATIVES A MAINTENANT.
+ *
+ * ⚠️ ELLES ETAIENT ECRITES EN DUR, ET ELLES ONT PERIME. Le scenario posait un
+ * dernier mouvement au « 2026-09-02 » et une arrivee annoncee « du 09 au 12 ».
+ * Le 12/09/2026, ce dernier mouvement a eu DIX JOURS — le seuil du silence du
+ * brief — la page a donc NOMME le silence et retire la prevision, comme elle
+ * doit le faire, et le contre-test « quand le transporteur annonce une arrivee,
+ * la carte la porte » est devenu ROUGE. Pas a cause d un defaut du produit : a
+ * cause d une sonde qui avait une date de peremption.
+ *
+ * Une sonde qui depend du calendrier ne mesure pas ce qu elle croit mesurer.
+ * Celle-ci fabrique donc ses dates depuis l instant du passage : le dernier
+ * mouvement a TOUJOURS deux jours, l arrivee annoncee encadre TOUJOURS
+ * aujourd hui.
+ */
+const jourISO = (decalage) => new Date(Date.now() + decalage * 86400000).toISOString().slice(0, 10);
+const instantISO = (decalage) =>
+  new Date(Date.now() + decalage * 86400000).toISOString().replace(/\.\d+Z$/, "Z");
+
 // Le serveur enfant lit `.env.local` lui-meme ; ce script, non. Sans ce
 // chargement, la sonde qui cree une commande de test echouerait sur une
 // variable absente — et l echec ressemblerait a un defaut du produit.
@@ -4089,11 +4109,11 @@ try {
               track_info: {
                 latest_status: { status: "InTransit" },
                 latest_event: {
-                  time_utc: "2026-09-01T10:00:00Z",
+                  time_utc: instantISO(-3),
                   description: "Departed from facility",
                   location: "SHENZHEN",
                 },
-                milestone: [{ key_stage: "Departure", time_utc: "2026-09-01T10:00:00Z" }],
+                milestone: [{ key_stage: "Departure", time_utc: instantISO(-3) }],
               },
             },
           });
@@ -4291,12 +4311,12 @@ try {
               track_info: {
                 latest_status: { status: "InTransit" },
                 latest_event: {
-                  time_utc: "2026-09-02T08:00:00Z",
+                  time_utc: instantISO(-2),
                   description: "Arrived at destination country",
                   location: "PARIS",
                 },
                 time_metrics: {
-                  estimated_delivery_date: { from: "2026-09-09", to: "2026-09-12" },
+                  estimated_delivery_date: { from: jourISO(-1), to: jourISO(2) },
                 },
               },
             },

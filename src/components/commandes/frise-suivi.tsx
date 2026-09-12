@@ -124,7 +124,10 @@ export function FriseSuivi({
             />
             <span
               className={
-                "mt-[7px] whitespace-nowrap text-[10px] " +
+                // ⚠️ 14 px D INTERLIGNE, MESURES SUR LE KIT SERVI. Le corps pose 1,5
+                // — nos libelles rendaient 15 px de haut — et `normal` en rend 12.
+                // Le kit en rend 14 : ni l un ni l autre, la valeur se releve.
+                "mt-[7px] leading-[14px] whitespace-nowrap text-[10px] " +
                 (atteinte ? "font-semibold text-ds-accent-encre" : "text-ds-texte-tenu")
               }
             >

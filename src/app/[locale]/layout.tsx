@@ -23,6 +23,15 @@ const titre = Plus_Jakarta_Sans({
 const corps = Inter({
   variable: "--font-corps",
   subsets: ["latin"],
+  /*
+   * ⚠️ L AXE OPTIQUE, PARCE QUE LE KIT LE DEMANDE. Sa feuille charge
+   * `Inter:ital,opsz,wght@0,14..32,300..900` ; sans `opsz`, le navigateur rend
+   * toutes les tailles au dessin optique de 14, et les mots sortent quelques
+   * pixels plus larges des 16 px. Mesure a 1675 px : nos libelles rendaient 3 a
+   * 4 px de plus que ceux du kit, a taille et graisse IDENTIQUES — un ecart qui
+   * se lit comme un defaut de mise en page alors que c est un axe de police.
+   */
+  axes: ["opsz"],
   display: "swap",
 });
 

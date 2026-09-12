@@ -137,7 +137,7 @@ export async function TableauCommandes({
    * au même endroit et ne séparent pas les lignes pareil.
    */
   const enTete =
-    "pt-3 pb-3 pe-3.5 text-left text-[12px] leading-[16px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
+    "pt-3 pb-3 pe-3.5 text-left text-[12px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-sourdine";
   const cellule = "border-t border-ds-filet py-3.5 pe-3.5 text-[14px]";
   /*
    * La première et la dernière colonne portent la marge de bord de la carte.
@@ -150,7 +150,7 @@ export async function TableauCommandes({
    */
   const bordGauche = " ps-5";
   const enTeteFin =
-    "pt-3 pb-3 pe-5 text-left text-[12px] leading-[16px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
+    "pt-3 pb-3 pe-5 text-left text-[12px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-sourdine";
   const celluleFin = "border-t border-ds-filet py-3.5 pe-5 text-[14px]";
 
   if (compteVide) {
@@ -224,13 +224,26 @@ export async function TableauCommandes({
           le filet SUPÉRIEUR de l'en-tête de colonnes qui sépare les deux bandes,
           exactement comme `OrdersView` le pose en neutralisant la bordure de
           `UnderlineTabs`. */}
-      <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-5 md:pt-4 lg:relative lg:overflow-visible">
+      {/* ⚠️ ÉCART DE 16, ET NON DE 8. Mesuré sur le kit servi : sa barre d'outils
+          rend `gap: 16px` et 72 px de haut, la nôtre en rendait 8 et 58. Les
+          14 px manquants venaient du remplissage BAS de la colonne de droite,
+          posé ci-dessous : sans lui, les onglets et tout le tableau
+          remontaient de 8 px et aucune ligne ne tombait à la hauteur du kit. */}
+      <div className="defilement-discret flex items-center gap-4 overflow-x-auto px-margin-mobile md:px-5 md:pt-4 lg:relative lg:overflow-visible">
         <PilulesFiltres base={base} parametres={parametres} compteurs={compteurs} />
 
         {vide ? null : (
           <>
         <span className="hidden flex-grow lg:block" />
 
+        {/* ⚠️ LES CONTRÔLES DE DROITE SONT GROUPÉS, ET LE GROUPE PORTE 14 px SOUS
+            LUI. C'est ce que le kit mesure : sa colonne de droite rend 56 px de
+            haut — 42 de contrôle plus 14 de remplissage bas — pendant que ses
+            onglets en font 33, centrés dedans. Sans ce groupe, notre rangée
+            faisait 58 px au lieu de 72, les onglets remontaient de 8 px, et
+            l'en-tête des colonnes avec eux : aucune ligne du tableau ne tombait
+            à la hauteur du kit. L'écart entre les deux contrôles est de 10. */}
+        <div className="flex items-center gap-2.5 lg:pb-[14px]">
         <PanneauFiltres base={base} parametres={parametres} />
 
         {/*
@@ -278,6 +291,7 @@ export async function TableauCommandes({
             </a>
           </div>
         </details>
+        </div>
           </>
         )}
       </div>
@@ -373,28 +387,43 @@ export async function TableauCommandes({
               voisine.
             */}
             <div className="hidden lg:block">
-              <table className="w-full border-collapse text-left">
+              {/* ⚠️ `table-fixed` : SANS LUI, LES `<col>` NE SONT QUE DES SUGGESTIONS.
+                Le navigateur dimensionne alors par le contenu, et les neuf
+                largeurs calculees sur le kit ne s appliquaient pas — mesure a
+                1675 px : la colonne « Client » rendait 162 px au lieu de 124, et
+                « Suivi » commencait 8 px trop a droite. Le `colgroup` etait la,
+                servi, juste, et sans effet. */}
+              <table className="w-full table-fixed border-collapse text-left">
                 {/*
-                  LES NEUF COLONNES DU KIT, DANS SES PROPORTIONS.
+                  LES NEUF COLONNES DU KIT, AUX PIXELS DE SES BOÎTES DE CONTENU.
 
-                  `COLS = "38px 1.45fr .85fr 1fr 1.05fr 1.35fr 1.1fr 2.15fr 42px"`,
-                  écart 14. Ici l écart est un `padding` de cellule plutôt qu un
-                  `gap` de grille — un `<table>` n en a pas — donc chaque largeur
-                  le contient. Rapportées à la largeur intérieure de la carte
-                  mesurée à 1690 px (1 307 px), les neuf colonnes font 52, 194,
-                  120, 139, 145, 182, 151, 282 et 42 px. En pourcentage, elles
-                  gardent ces proportions à toute largeur.
+                  ⚠️ CES PROPORTIONS ÉTAIENT DÉDUITES DU SOURCE DU KIT, ET ELLES
+                  ÉTAIENT FAUSSES. Elles venaient de son
+                  `COLS = "38px 1.45fr .85fr …"` transposé à la main. Mesurées sur
+                  la page SERVIE à 1675 px utiles, ses neuf colonnes rendent 38,
+                  180, 106, 124, 131, 168, 137, 267 et 42 px de CONTENU, à
+                  l'écart de 14 et dans une rangée de 1345 au remplissage
+                  `12px 20px`. Les nôtres rendaient 19, 195, 121, 162, 141, 184,
+                  152, 280 et 56 — la colonne « Client » débordait de 38 px et la
+                  case à cocher en perdait 19. La colonne « Suivi » commençait
+                  71 px trop à droite.
+
+                  Un `<table>` n'a pas de `gap` : l'écart de 14 est ici le
+                  `padding-right` de chaque cellule, et les 20 px de marge sont
+                  portés par la première et la dernière. Chaque largeur ci-dessous
+                  vaut donc « contenu du kit + 14 », et les deux extrêmes
+                  « + 20 ». Somme : 1345, soit exactement la largeur de la carte.
                 */}
                 <colgroup>
-                  <col className="w-[3.98%]" />
-                  <col className="w-[14.84%]" />
-                  <col className="w-[9.18%]" />
-                  <col className="w-[10.63%]" />
-                  <col className="w-[11.09%]" />
-                  <col className="w-[13.92%]" />
-                  <col className="w-[11.55%]" />
-                  <col className="w-[21.58%]" />
-                  <col className="w-[3.21%]" />
+                  <col className="w-[5.353%]" />
+                  <col className="w-[14.424%]" />
+                  <col className="w-[8.922%]" />
+                  <col className="w-[10.260%]" />
+                  <col className="w-[10.781%]" />
+                  <col className="w-[13.532%]" />
+                  <col className="w-[11.227%]" />
+                  <col className="w-[20.892%]" />
+                  <col className="w-[4.609%]" />
                 </colgroup>
                 <thead>
                   <tr>
@@ -404,7 +433,15 @@ export async function TableauCommandes({
                     {["commande", "date", "client", "produits", "numeroSuivi", "statutCourt", "suivi"].map(
                       (clef) => (
                         <th key={clef} scope="col" className={enTete}>
-                          {t("colonne." + clef)}
+                          {/* ⚠️ LE LIBELLÉ DANS UN `<span>`, COMME LE KIT. Sa rangée
+                              d en-tête est une GRILLE : chaque libellé y est un span
+                              sans remplissage, et l écart de 14 vient du `gap`. Un
+                              `<table>` n a pas de `gap` — le 14 est donc notre
+                              `padding-right` —, et sans ce span la boîte mesurée
+                              portait ce remplissage : 194 px là où le kit en rend
+                              180, pour un contenu pourtant identique. La
+                              soustraction comparait deux choses différentes. */}
+                          <span className="block leading-[18px]">{t("colonne." + clef)}</span>
                         </th>
                       ),
                     )}
@@ -461,17 +498,22 @@ export async function TableauCommandes({
                         </td>
 
                         {/* DATE : le jour au-dessus, l heure dessous en couleur
-                            sourdine — deux lignes de 13 px, comme le kit. */}
+                            sourdine — deux lignes de 13 px, comme le kit.
+
+                            ⚠️ INTERLIGNE 17, MESURÉE. Le corps du produit pose 1,5,
+                            soit 19,5 px par ligne : le bloc rendait 40 px de haut là
+                            où le kit en rend 34. Deux lignes, six pixels — et toutes
+                            les lignes du tableau décalées d'autant. */}
                         <td className={cellule + " text-ds-texte-corps"}>
                           <span className="flex flex-col">
-                            <span className="whitespace-nowrap text-[13px]">
+                            <span className="whitespace-nowrap text-[13px] leading-[17px]">
                               {format.dateTime(new Date(ligne.creeeLe), {
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",
                               })}
                             </span>
-                            <span className="whitespace-nowrap text-[13px] text-ds-texte-sourdine">
+                            <span className="whitespace-nowrap text-[13px] leading-[17px] text-ds-texte-sourdine">
                               {format.dateTime(new Date(ligne.creeeLe), {
                                 hour: "2-digit",
                                 minute: "2-digit",

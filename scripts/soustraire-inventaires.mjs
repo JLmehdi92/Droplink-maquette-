@@ -32,6 +32,25 @@
 import { readFileSync } from "node:fs";
 
 const [cheminKit, cheminProduit, seuilBrut] = process.argv.slice(2);
+
+/**
+ * LES ECARTS DECLARES, ET POURQUOI ILS SONT DANS UN FICHIER.
+ *
+ * La regle d arret dit qu un ecran n est fini que quand la soustraction est
+ * VIDE. Sans declaration, elle ne peut JAMAIS l etre : le kit et le produit ne
+ * montrent pas les memes donnees, le produit refuse ce que des contraintes
+ * verrouillees interdisent, et la base ne porte pas tout ce que le kit dessine.
+ * « Il reste trente ecarts, mais ce sont les bons » n est pas une mesure — c est
+ * une opinion, et elle se re-argumente a chaque passage.
+ *
+ * ⚠️ ET LA LISTE ECHOUE DANS LES DEUX SENS. Une declaration qui ne designe plus
+ * rien est signalee : sans ca elle grossirait jusqu a tout couvrir, et la
+ * soustraction serait vide parce qu on aurait tout declare. C est la meme regle
+ * que pour les exceptions des suites de tests.
+ */
+const declaresTous = JSON.parse(
+  readFileSync(new URL("./ecarts-declares.json", import.meta.url), "utf8"),
+);
 if (cheminKit === undefined || cheminProduit === undefined) {
   console.error(
     "usage : node scripts/soustraire-inventaires.mjs <kit.json> <produit.json> [seuil px]",
@@ -41,7 +60,31 @@ if (cheminKit === undefined || cheminProduit === undefined) {
 /** En dessous, un ecart de boite ne se voit pas et noierait le reste. */
 const SEUIL = Number(seuilBrut ?? 2);
 
-const lire = (chemin) => JSON.parse(readFileSync(chemin, "utf8")).lignes;
+const lireTout = (chemin) => JSON.parse(readFileSync(chemin, "utf8"));
+
+/**
+ * ⚠️ LES DEUX RELEVES DOIVENT AVOIR LA MEME LARGEUR UTILE, ET C EST UN PIEGE
+ * PAYE LE 12/09.
+ *
+ * Le kit est plus haut que sa fenetre : il porte donc une BARRE DE DEFILEMENT,
+ * et son `clientWidth` vaut 1675 la ou le produit, plus court ce jour-la, rend
+ * 1690. Quinze pixels d ecart sur toute la largeur — et chaque colonne, chaque
+ * onglet, chaque position en x ressort alors comme un defaut de mise en page.
+ *
+ * C est la meme famille que la planche telephone qui se mesure dans une fenetre
+ * de 405 et non de 390. On REFUSE de soustraire deux releves qui ne portent pas
+ * sur la meme largeur : comparer deux largeurs differentes ne compare rien.
+ */
+const verifierLargeurs = (a, b) => {
+  if (a.largeur_vue === b.largeur_vue) return;
+  console.error(
+    `ARRET : le kit est releve sur ${a.largeur_vue} px utiles et le produit sur ` +
+      `${b.largeur_vue}. Une barre de defilement presente d un seul cote decale ` +
+      `TOUTES les positions et toutes les largeurs. Remesurer le produit a ` +
+      `${a.largeur_vue} px, ou lui donner de quoi defiler.`,
+  );
+  process.exit(1);
+};
 
 /**
  * LA CLE D APPARIEMENT EST LE TEXTE, PAS LA POSITION.
@@ -93,8 +136,11 @@ const indexer = (lignes) => {
   return par;
 };
 
-const kit = lire(cheminKit);
-const produit = lire(cheminProduit);
+const kitTout = lireTout(cheminKit);
+const produitTout = lireTout(cheminProduit);
+verifierLargeurs(kitTout, produitTout);
+const kit = kitTout.lignes;
+const produit = produitTout.lignes;
 const iKit = indexer(kit);
 const iProduit = indexer(produit);
 
@@ -173,7 +219,17 @@ for (const [cle, lignesKit] of iKit) {
   for (const [a, b] of couples) {
     rang += 1;
     const differences = [];
+    /*
+     * ⚠️ `line-height: normal` ET UNE VALEUR EN PIXELS PEUVENT ETRE LA MEME
+     * CHOSE. Le kit laisse `normal` sur ses libelles d en-tete, nous posons
+     * `18px` — et les deux rendent une boite de 18. Comparer les CHAINES
+     * signalait sept ecarts qui ne designaient rien. L interligne ne se voit
+     * que par la boite qu il produit : on ne le signale donc que si la HAUTEUR
+     * differe aussi.
+     */
+    const memeHauteur = Math.abs(a.h - b.h) <= SEUIL;
     for (const [champ, libelle] of PROPRIETES) {
+      if (champ === "interligne" && memeHauteur) continue;
       const va = champ === "filet" ? filetUtile(a[champ]) : String(a[champ]);
       const vb = champ === "filet" ? filetUtile(b[champ]) : String(b[champ]);
       if (va !== vb) differences.push(`${libelle} ${va || "—"} → ${vb || "—"}`);
@@ -202,6 +258,38 @@ for (const [cle, lignesKit] of iKit) {
   }
 }
 
+/*
+ * L ECRAN se deduit du nom du fichier de releve : `fr-commandes-1675.json` →
+ * `fr-commandes`. On ne le passe pas en argument — un argument qu on peut se
+ * tromper d ecrire est un argument qui fera declarer les ecarts d un autre
+ * ecran.
+ */
+const nomEcran = cheminProduit
+  .split(/[\\/]/)
+  .pop()
+  .replace(/-\d+\.json$/, "");
+const declares = declaresTous[nomEcran] ?? [];
+const vus = new Set();
+
+const estDeclare = (texte) => {
+  for (const d of declares) {
+    if (texte === d.texte || texte.startsWith(d.texte + " [") || texte.startsWith(d.texte + "  ")) {
+      vus.add(d.texte);
+      return d;
+    }
+  }
+  return null;
+};
+
+const restants = [];
+const ecartesDeclares = [];
+for (const e of ecarts) {
+  const d = estDeclare(e.texte);
+  if (d === null) restants.push(e);
+  else ecartesDeclares.push({ ...e, motif: d.motif });
+}
+const declarationsMortes = declares.filter((d) => !vus.has(d.texte));
+
 const bloc = (titre, lignes) => {
   console.log(`\n${titre} (${lignes.length})`);
   console.log("─".repeat(78));
@@ -217,11 +305,30 @@ bloc(
   enTrop.map((m) => `  « ${m.exemple.txt} »  ${m.exemple.police}/${m.exemple.graisse}`),
 );
 bloc(
-  "③ MEME TEXTE, VALEURS DIFFERENTES",
-  ecarts.map((e) => `  « ${e.texte} »\n      ${e.differences.join("\n      ")}`),
+  "③ MEME TEXTE, VALEURS DIFFERENTES — NON DECLARE",
+  restants.map((e) => `  « ${e.texte} »\n      ${e.differences.join("\n      ")}`),
+);
+bloc(
+  "④ DECLARE, AVEC SA RAISON",
+  ecartesDeclares.map((e) => `  [${e.motif}] « ${e.texte} »`),
 );
 
+if (declarationsMortes.length > 0) {
+  bloc(
+    "⑤ DECLARATIONS QUI NE DESIGNENT PLUS RIEN — A RETIRER",
+    declarationsMortes.map((d) => `  « ${d.texte} » — ${d.motif}`),
+  );
+}
+
 console.log(
-  `\n[soustraction] kit ${kit.length} elements, produit ${produit.length} ; ` +
-    `${manquants.length} manquants, ${enTrop.length} en trop, ${ecarts.length} ecarts de valeur.`,
+  `\n[soustraction] ${nomEcran} : kit ${kit.length} elements, produit ${produit.length} ; ` +
+    `${manquants.length} manquants, ${enTrop.length} en trop, ` +
+    `${restants.length} ecarts NON DECLARES (${ecartesDeclares.length} declares).`,
 );
+
+/*
+ * ⚠️ LE VERDICT EST UN CODE DE SORTIE, PAS UNE PHRASE. Un rapport qu on lit
+ * peut se lire vite ; un code de sortie arrete la chaine. L ecran n est fini
+ * que quand il vaut zero.
+ */
+if (restants.length > 0 || declarationsMortes.length > 0) process.exit(1);

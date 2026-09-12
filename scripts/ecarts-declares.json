@@ -1,0 +1,86 @@
+{
+  "_lisezMoi": [
+    "LES ECARTS AU KIT QUI NE SONT PAS DES DEFAUTS, ECRAN PAR ECRAN.",
+    "",
+    "La regle d arret de CLAUDE.md dit qu un ecran n est fini que quand la",
+    "soustraction est VIDE. Sans ce fichier, elle ne peut jamais l etre : le kit",
+    "et le produit ne montrent pas les memes DONNEES, le produit refuse certaines",
+    "choses que le kit dessine, et la base n a pas tout ce qu il montre.",
+    "",
+    "Chaque entree porte donc sa RAISON, et l outil echoue DANS LES DEUX SENS :",
+    "un ecart non declare rougit, et une declaration qui ne designe plus rien",
+    "rougit aussi — sinon la liste grossirait jusqu a tout couvrir.",
+    "",
+    "Trois motifs seulement, ceux de CLAUDE.md : `contrainte` (le produit gagne",
+    "sur le kit), `donnee` (la base ne porte pas ce qu il montre, ou le jeu de",
+    "mesure differe du sien), `structure` (le meme rendu par un balisage",
+    "different — un ecart de l outil, pas de l ecran)."
+  ],
+  "fr-commandes": [
+    {
+      "texte": "Commandes [1/2]  <h1>",
+      "motif": "structure",
+      "raison": "Le titre du kit s etire sur toute la largeur de son conteneur, le notre se limite a son texte. Aucun fond, aucun filet : les deux boites rendent le meme dessin."
+    },
+    {
+      "texte": "Commandes [2/2]  <span>",
+      "motif": "donnee",
+      "raison": "Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure. Quatorze pixels d ecart, tous dans le badge."
+    },
+    {
+      "texte": "Analyses  <span>",
+      "motif": "contrainte",
+      "raison": "Position seule. Le kit place une entree « Tableau de bord » au-dessus ; cette route n existe pas, et une entree de navigation vers un 404 est pire qu une entree absente."
+    },
+    {
+      "texte": "Ma marque  <span>",
+      "motif": "contrainte",
+      "raison": "Meme cause que « Analyses » : l entree « Tableau de bord » du kit decale toute la colonne de 54 px."
+    },
+    {
+      "texte": "Ctrl  <kbd>",
+      "motif": "donnee",
+      "raison": "Six pixels de place. Le champ de recherche du kit porte un texte d invite plus long, qui deplace la pastille du raccourci."
+    },
+    {
+      "texte": "En transit",
+      "motif": "donnee",
+      "raison": "Le kit rend huit commandes, le jeu de mesure quatre. Les graisses et les couleurs des libelles de frise disent QUELLE etape est atteinte : elles suivent les donnees, pas le dessin. Et le vocabulaire des quatre etapes est verrouille par la decision 4 du brief — preparation, expedie, en transit, livre — la ou le kit ecrit commande, en transit, en livraison, livree."
+    },
+    {
+      "texte": "Livrées",
+      "motif": "contrainte",
+      "raison": "Le kit pose cinq onglets — Toutes, En attente, En transit, Livrees, Problemes. Le produit en pose quatre, dont « Jamais ouvertes » et « Bloquees » qui n existent pas chez lui, et pas de « Problemes » : la base ne porte que quatre etats d expedition."
+    },
+    {
+      "texte": "Livré",
+      "motif": "donnee",
+      "raison": "Meme cause que « En transit » : huit lignes chez le kit contre quatre, et l appariement rapproche alors une pastille de statut d un libelle de frise."
+    },
+    {
+      "texte": "Filtres  <button>",
+      "motif": "structure",
+      "raison": "Trois pixels. Le bouton du kit se COMPRIME dans sa rangee, plus chargee que la notre — son `flex` vaut `0 1 auto`. Mesure directe de son bouton a sa largeur naturelle : 120,19 px, exactement la notre."
+    },
+    {
+      "texte": "8 sept. 2025",
+      "motif": "structure",
+      "raison": "Le kit met la date et l heure dans UN span de 34 px dont le texte direct est la date ; nous mettons deux spans de 17 dans une colonne. Meme rendu, deux balisages."
+    },
+    {
+      "texte": "14:32",
+      "motif": "donnee",
+      "raison": "Huit lignes chez le kit, quatre dans le jeu de mesure."
+    },
+    {
+      "texte": "7 sept. 2025",
+      "motif": "structure",
+      "raison": "Meme cause que « 8 sept. 2025 » : le kit met la date et l heure dans UN span de 34 px, nous en mettons deux de 17."
+    },
+    {
+      "texte": "© 2025 DropLink. Tous droits réservés.",
+      "motif": "donnee",
+      "raison": "Position seule. Le pied vient APRES le contenu : huit lignes de tableau chez le kit contre quatre dans le jeu de mesure, soit 130 px de page en moins."
+    }
+  ]
+}
