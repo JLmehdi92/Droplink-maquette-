@@ -147,12 +147,14 @@ export async function PucesFiltresActifs({
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-margin-mobile md:px-0">
-      <span className="mr-0.5 font-body-sm text-[13px] text-sourdine">{t("filtresActifsLabel")}</span>
+      <span className="mr-0.5 text-[13px] text-ds-texte-corps">{t("filtresActifsLabel")}</span>
 
       {puces.map((puce) => (
         <span
           key={puce.clef}
-          className="inline-flex h-[34px] items-center gap-[7px] rounded-full border border-violet bg-violet-fond pr-2 pl-[13px] font-label-md text-[13px] font-semibold text-violet-encre"
+          /* Le `Badge tone="brand"` du design system : fond teinté, encre d'accent,
+             AUCUN filet — le kit ne borde pas ses surfaces teintées. */
+          className="inline-flex h-[34px] items-center gap-[7px] rounded-ds-pill bg-ds-surface-teinte pr-2 pl-[13px] text-[13px] font-bold text-ds-accent-encre"
         >
           {puce.libelle}
           <LienEcran
@@ -166,7 +168,7 @@ export async function PucesFiltresActifs({
             // exactement le `gap` de la rangée. À 12 px, la zone de clic mordait
             // de quatre pixels sur la puce SUIVANTE : viser le bord gauche d'un
             // critère retirait le précédent, et rien à l'écran ne l'expliquait.
-            className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet/[0.18] transition-colors after:absolute after:-inset-x-2 after:-inset-y-3 after:content-[''] hover:bg-violet/30"
+            className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent/[0.16] transition-colors after:absolute after:-inset-x-2 after:-inset-y-3 after:content-[''] hover:bg-ds-accent/30"
             aria-label={t("retirerFiltre", { filtre: puce.libelle })}
           >
             <svg
@@ -188,7 +190,7 @@ export async function PucesFiltresActifs({
 
       <LienEcran
         href={base}
-        className="ml-1 font-label-md text-[13px] font-bold text-violet hover:text-violet-survol"
+        className="ml-1 text-[13px] font-bold text-ds-texte-lien underline-offset-2 hover:text-ds-texte-lien-survol hover:underline"
       >
         {t("toutEffacer")}
       </LienEcran>

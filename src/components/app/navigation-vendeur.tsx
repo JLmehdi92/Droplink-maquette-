@@ -114,7 +114,17 @@ export function NavigationVendeur({
                   }
                 >
                   <Icone nom={entree.icone} className="h-[21px] w-[21px]" />
-                  <span className="font-label-sm text-[10px] font-bold">{entree.libelle}</span>
+                  {/*
+                    ⚠️ 11,5 px ET NON 10, ET C EST LA MESURE QUI L A DIT. La
+                    règle 5 du design system pose 11,5 px comme plancher sur
+                    téléphone, et ces quatre libellés — les seules destinations
+                    du produit au doigt — étaient à 10. Aucune garde ne pouvait
+                    le voir : la sonde qui balaie les polices comptait aussi les
+                    éléments MASQUÉS, donc elle signalait ces quatre libellés à
+                    1440 px où ils ne sont pas rendus, et ses cinq faux positifs
+                    couvraient le vrai.
+                  */}
+                  <span className="text-[11.5px] font-bold">{entree.libelle}</span>
                 </Composant>
               </li>
             );

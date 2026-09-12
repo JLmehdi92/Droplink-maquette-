@@ -4,7 +4,10 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { LienEcran } from "@/components/lien-ecran";
 
 /**
- * LES PILULES DE VUES, AVEC LA PASTILLE QUI GLISSE DE L'UNE À L'AUTRE.
+ * LES ONGLETS DE VUES, AVEC LE TRAIT QUI GLISSE DE L'UN À L'AUTRE.
+ *
+ * C'est `UnderlineTabs` du design system : un trait d'accent de 2 px sous
+ * l'onglet regardé, à la place de la pastille pleine de l'ancien dessin.
  *
  * ⚠️ CETTE ANIMATION N'A PU EXISTER QU'APRÈS LE PASSAGE À NEXT 16. Sous Next 15,
  * cliquer une pilule détruisait le document entier : il n'y avait pas deux
@@ -43,6 +46,20 @@ export interface VuePilule {
   readonly libelle: string;
 }
 
+/**
+ * ⚠️ LE TRAIT EST RENTRÉ DE 8 PX DE CHAQUE CÔTÉ, comme `UnderlineTabs` le pose
+ * (`left: 8, right: 8`). Il ne souligne donc pas la ZONE cliquable de l'onglet
+ * mais son LIBELLÉ — un trait qui court jusqu'au bord de la zone tactile
+ * toucherait celui du voisin dès que l'écart tombe à 4 px, qui est l'écart du
+ * kit.
+ */
+const RENTRE = 8;
+
+function poser(marque: HTMLElement, actif: HTMLElement): void {
+  marque.style.transform = `translateX(${actif.offsetLeft + RENTRE}px)`;
+  marque.style.width = `${Math.max(0, actif.offsetWidth - RENTRE * 2)}px`;
+}
+
 export function PilulesFiltresAnimees({ vues }: { readonly vues: readonly VuePilule[] }) {
   const rangee = useRef<HTMLDivElement>(null);
   const pastille = useRef<HTMLSpanElement>(null);
@@ -76,8 +93,7 @@ export function PilulesFiltresAnimees({ vues }: { readonly vues: readonly VuePil
 
     if (!dejaPlacee.current) marque.style.transition = "none";
     marque.style.opacity = "1";
-    marque.style.transform = `translateX(${actif.offsetLeft}px)`;
-    marque.style.width = `${actif.offsetWidth}px`;
+    poser(marque, actif);
 
     if (!dejaPlacee.current) {
       // Une image plus tard, la transition est rendue : les placements SUIVANTS
@@ -104,20 +120,19 @@ export function PilulesFiltresAnimees({ vues }: { readonly vues: readonly VuePil
       const marque = pastille.current;
       const actif = boite.querySelector<HTMLElement>("[data-vue-active='true']");
       if (marque === null || actif === null) return;
-      marque.style.transform = `translateX(${actif.offsetLeft}px)`;
-      marque.style.width = `${actif.offsetWidth}px`;
+      poser(marque, actif);
     });
     observateur.observe(boite);
     return () => observateur.disconnect();
   }, []);
 
   return (
-    <div ref={rangee} className="relative flex shrink-0 gap-2">
+    <div ref={rangee} className="relative flex shrink-0 gap-1">
       <span
         ref={pastille}
         aria-hidden="true"
         style={{ opacity: 0 }}
-        className="pointer-events-none absolute top-0 left-0 h-full rounded-full border border-primary bg-primary transition-[transform,width] duration-[260ms] ease-out"
+        className="pointer-events-none absolute bottom-0 left-0 h-0.5 rounded-sm bg-ds-accent transition-[transform,width] duration-[260ms] ease-out"
       />
       {vues.map((vue) => (
         <LienEcran
@@ -125,12 +140,19 @@ export function PilulesFiltresAnimees({ vues }: { readonly vues: readonly VuePil
           href={vue.href}
           aria-current={vue.actif ? "true" : undefined}
           className={
-            // 44 px au doigt, 34 px à la souris : la planche téléphone écrit
-            // `min-height: 44px` là où la planche bureau écrit `height: 34px`.
-            "relative flex min-h-11 shrink-0 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors md:h-[34px] md:min-h-0 " +
+            /*
+              `UnderlineTabs` : `padding: 0 16px 14px`, 14 px, gras quand
+              l'onglet est celui qu'on regarde, moyen sinon.
+
+              44 px AU DOIGT, et le kit ne le dit pas : il n'a pas de version
+              tactile de ses onglets, et 34 px passerait sous le plancher que sa
+              propre règle 5 impose.
+            */
+            "relative flex min-h-11 shrink-0 items-center px-4 pb-3.5 text-[14px] " +
+            "whitespace-nowrap transition-colors lg:min-h-0 " +
             (vue.actif
-              ? "border-transparent text-on-primary"
-              : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre")
+              ? "font-bold text-ds-accent-encre"
+              : "font-medium text-ds-texte-corps hover:text-ds-texte-fort")
           }
           data-vue-active={vue.actif ? "true" : undefined}
         >

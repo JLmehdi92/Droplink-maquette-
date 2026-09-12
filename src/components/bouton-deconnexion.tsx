@@ -35,12 +35,19 @@ import { Icone } from "@/components/icone";
 type Variante = "cote" | "sombre" | "sombre-mobile" | "rond";
 
 const CLASSES: Readonly<Record<Variante, string>> = {
-  cote: "h-8 w-8 shrink-0 rounded-[9px] text-on-surface-variant hover:bg-surface-container-high",
+  /*
+   * ⚠️ LES DEUX VARIANTES VENDEUR SONT PASSÉES AU DESIGN SYSTEM, LES DEUX
+   * VARIANTES ADMIN NON. La coque vendeur et l'écran Commandes sont migrés ;
+   * l'administration ne l'est pas, et son chrome est encore sombre. Poser des
+   * surfaces claires du design system dans une colonne noire y ferait un trou
+   * blanc. Elles suivront avec leurs six écrans.
+   */
+  cote: "h-9 w-9 shrink-0 rounded-ds-sm text-ds-texte-tenu hover:bg-ds-surface-teinte hover:text-ds-texte-fort",
   sombre: "h-8 w-8 shrink-0 rounded-[9px] text-white/60 hover:bg-white/10",
   "sombre-mobile": "h-11 w-11 shrink-0 rounded-[11px] text-white/60 hover:bg-white/10",
   // 44 px : la cible tactile minimale du produit. Le rond décoratif que cette
   // pastille remplace n'en faisait que 40, parce qu'il ne se cliquait pas.
-  rond: "h-11 w-11 shrink-0 rounded-full bg-surface-container-high text-ardoise hover:bg-surface-container-highest",
+  rond: "h-11 w-11 shrink-0 rounded-ds-pill bg-ds-surface-teinte text-ds-accent-encre hover:bg-ds-lavender-200",
 };
 
 export async function BoutonDeconnexion({

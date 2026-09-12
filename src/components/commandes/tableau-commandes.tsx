@@ -2,13 +2,22 @@ import Link from "next/link";
 import { LienEcran } from "@/components/lien-ecran";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { BoutonAction } from "@/components/bouton-action";
-import { Icone } from "@/components/icone";
+import {
+  Archive,
+  ArchiveRestore,
+  ChevronDown,
+  Copy,
+  Download,
+  MoreHorizontal,
+  Plus,
+  Search,
+} from "lucide-react";
 import { TraductionsClient } from "@/components/traductions-client";
 import { ActionsLigne } from "./actions-ligne";
-import { BadgeStatut, teinteExpedition } from "./badge-statut";
+import { BadgeStatut, ICONE_SILENCE, iconeExpedition, teinteExpedition } from "./badge-statut";
 import { PilulesFiltres } from "./pilules-filtres";
 import { PanneauFiltres } from "./panneau-filtres";
-import { DETAILS_OUTIL, PANNEAU_OUTIL, PILULE_OUTIL } from "@/components/panneau-outil";
+import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
 import type {
   DiagnosticListeVide,
   LigneCommande,
@@ -99,16 +108,61 @@ export async function TableauCommandes({
   // d'accueil offrirait quatre raccourcis vers le même néant.
   const compteVide = page.diagnostic === "aucune-commande";
 
+  /*
+   * L'EN-TÊTE DE COLONNE DU DESIGN SYSTEM : 12 px, demi-gras, couleur sourdine,
+   * `padding: 12px 20px`.
+   *
+   * ⚠️ IL N'EST PLUS EN CAPITALES, ET CE N'EST PAS UN DÉTAIL. L'ancien dessin
+   * écrivait 11 px en majuscules avec un tracking de 0,05em — le motif « eyebrow »
+   * du canevas condamné. Le design system réserve les capitales à ses eyebrows de
+   * marketing ; ses en-têtes de tableau sont du texte ordinaire. Et 11 px passait
+   * sous le plancher de 11,5 px que sa propre règle 5 impose.
+   */
+  /*
+   * ⚠️ LA MARGE DE 20 PX EST SUR LES CELLULES DE BORD, PAS SUR LE CONTENEUR DU
+   * TABLEAU, ET C'EST VISIBLE À L'ŒIL. Posée sur le conteneur, elle rentrait le
+   * filet de séparation de chaque ligne de 20 px de chaque côté ; le kit pose
+   * son `borderTop` sur la LIGNE — qui va d'un bord à l'autre de la carte — et
+   * son `padding: 14px 20px` À L'INTÉRIEUR. Les deux rendus alignent le texte
+   * au même endroit et ne séparent pas les lignes pareil.
+   */
   const enTete =
-    "pb-3 text-left font-label-sm text-[11px] leading-[14px] font-bold tracking-[0.05em] whitespace-nowrap text-gris-entete uppercase";
-  const cellule = "border-t border-filet-ligne py-3.5 font-body-md text-[14px]";
+    "pt-3 pb-3 pe-3.5 text-left text-[12px] leading-[16px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
+  const cellule = "border-t border-ds-filet py-3.5 pe-3.5 text-[14px]";
+  /*
+   * La première et la dernière colonne portent la marge de bord de la carte.
+   *
+   * ⚠️ LA DERNIÈRE EST ÉCRITE EN ENTIER PLUTÔT QU'EN AJOUTANT `pe-5` À
+   * `cellule`. Deux utilitaires qui règlent la MÊME propriété — `pe-3.5` et
+   * `pe-5` — se départagent par l'ordre de la feuille produite, pas par l'ordre
+   * de l'attribut `class` : lequel gagne ne se lit pas dans le code. On vient de
+   * payer exactement ça sur les paliers de la rangée de compteurs.
+   */
+  const bordGauche = " ps-5";
+  const enTeteFin =
+    "pt-3 pb-3 pe-5 text-left text-[12px] leading-[16px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
+  const celluleFin = "border-t border-ds-filet py-3.5 pe-5 text-[14px]";
 
   if (compteVide) {
     return <AccueilCompteVide langue={langue} />;
   }
 
+  /*
+   * LA CARTE DU DESIGN SYSTEM : fond carte, filet, rayon carte-lg, ombre carte.
+   *
+   * ⚠️ SANS `overflow-hidden`, ALORS QUE LE KIT EN POSE UN. Le menu « … » de
+   * chaque ligne est un `<details>` ancré SOUS sa ligne : un conteneur qui rogne
+   * a déjà coûté ses deux gestes — dupliquer et archiver — à la dernière commande
+   * de chaque page, mesurés à 87 px hors cadre. Le kit peut se le permettre parce
+   * que son « ••• » n'ouvre rien. Rien n'a besoin d'être rogné ici : ni les
+   * lignes ni les onglets ne portent de fond qui déborderait des angles.
+   *
+   * LES BANDES PORTENT LEUR PROPRE MARGE — 20 px à gauche et à droite, comme le
+   * kit — plutôt que la carte, parce que les filets de séparation doivent aller
+   * d'un bord à l'autre.
+   */
   return (
-    <section className="flex flex-col md:mx-0 md:rounded-[18px] md:border md:border-outline-variant md:bg-surface-container-lowest md:px-[22px] md:py-5">
+    <section className="flex flex-col md:mx-0 md:rounded-ds-card-lg md:border md:border-ds-filet md:bg-ds-surface-carte md:shadow-ds-card">
       {/* LE RÉSULTAT DU DERNIER LOT, DIT. Un lot refusé et un lot en panne ne se
           disent pas pareil : le premier se refait à l'identique, le second non.
           Et « rien n'a été modifié » est une information — sans elle, le vendeur
@@ -117,10 +171,13 @@ export async function TableauCommandes({
         <p
           role="status"
           className={
-            "mx-margin-mobile mb-3.5 rounded-[11px] border px-4 py-3 font-body-md text-[13px] md:mx-0 " +
+            "mx-margin-mobile mb-3.5 rounded-ds-card border px-4 py-3 text-[13px] md:mx-5 md:mt-5 md:mb-0 " +
             (lot.etat === "ok"
-              ? "border-outline-variant bg-fond-neutre text-on-surface"
-              : "border-alerte-filet bg-alerte-fond-doux text-alerte")
+              ? "border-ds-filet bg-ds-surface-creux text-ds-texte-fort"
+              : // Le design system ne borde pas ses surfaces teintées : le fond
+                // ambré suffit à les détacher, et un filet de plus les ferait
+                // ressembler à un champ de saisie.
+                "border-transparent bg-ds-alerte-fond text-ds-alerte")
           }
         >
           {lot.etat === "ok" ? t("lot.ok", { n: lot.nombre }) : t("lot." + lot.etat)}
@@ -152,7 +209,12 @@ export async function TableauCommandes({
           dépassait de 103 px, mesurés, et la carte-page le coupait. Le
           repoussoir qui écarte l'export des pilules n'apparaît donc qu'avec la
           place de l'accueillir. */}
-      <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-0 lg:relative lg:mb-4 lg:overflow-visible">
+      {/* LA BARRE D'OUTILS DU KIT : `padding: 16px 20px 0`, les onglets à
+          gauche et les contrôles à droite. Aucun filet sous les onglets — c'est
+          le filet SUPÉRIEUR de l'en-tête de colonnes qui sépare les deux bandes,
+          exactement comme `OrdersView` le pose en neutralisant la bordure de
+          `UnderlineTabs`. */}
+      <div className="defilement-discret flex items-center gap-2 overflow-x-auto px-margin-mobile md:px-5 md:pt-4 lg:relative lg:overflow-visible">
         <PilulesFiltres base={base} parametres={parametres} />
 
         {vide ? null : (
@@ -181,15 +243,15 @@ export async function TableauCommandes({
           et le téléchargement n'existe qu'à l'intérieur. Deux gestes, comme la
           révocation d'un lien, et pour exactement la même raison.
         */}
-        <details className={DETAILS_OUTIL + " lg:open:static"}>
-          <summary className={PILULE_OUTIL}>
-            <Icone nom="download" className="text-[14px]" />
+        <details className={DETAILS_OUTIL_DS + " lg:open:static"}>
+          <summary className={PILULE_OUTIL_DS}>
+            <Download aria-hidden="true" size={16} strokeWidth={1.8} />
             {t("lot.exporter")}
-            <Icone nom="expand_more" className="text-[14px]" />
+            <ChevronDown aria-hidden="true" size={15} strokeWidth={1.8} className="text-ds-texte-tenu" />
           </summary>
 
-          <div className={PANNEAU_OUTIL + " lg:w-[368px]"}>
-            <p className="mb-3.5 font-body-sm text-[13px] leading-5 text-sourdine">
+          <div className={PANNEAU_OUTIL_DS + " lg:w-[368px]"}>
+            <p className="mb-3.5 text-[13px] leading-5 text-ds-texte-corps">
               {t("lot.exportAvertissement")}
             </p>
             <a
@@ -199,9 +261,9 @@ export async function TableauCommandes({
               // divergent au premier filtre ajouté — le vendeur exporterait
               // alors autre chose que ce qu'il regarde, sans s'en apercevoir.
               href={lienListe("/api/commandes/export", { ...parametres, curseur: null }, {})}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-[11px] bg-primary px-4 font-label-md text-[14px] font-bold text-on-primary transition-opacity hover:opacity-90 lg:h-[42px] lg:min-h-0"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-ds-card bg-ds-accent px-4 text-[14px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol lg:h-[42px] lg:min-h-0"
             >
-              <Icone nom="download" className="text-[15px]" />
+              <Download aria-hidden="true" size={16} strokeWidth={1.8} />
               {t("lot.exportTelecharger")}
             </a>
           </div>
@@ -246,8 +308,8 @@ export async function TableauCommandes({
               planche ne dessine aucune barre d'actions groupées ; elle n'a donc
               pas à occuper une ligne tant qu'il n'y a rien à grouper.
             */}
-            <div className="mb-3.5 hidden flex-wrap items-center gap-3 px-margin-mobile group-has-[input:checked]/lot:flex md:px-0">
-              <span className="font-label-sm text-[12px] text-sourdine">{t("lot.aide")}</span>
+            <div className="mb-3.5 hidden flex-wrap items-center gap-3 px-margin-mobile group-has-[input:checked]/lot:flex md:mt-4 md:px-5">
+              <span className="text-[12px] text-ds-texte-corps">{t("lot.aide")}</span>
               {/*
                 ⚠️ `name` ET `value` SONT LES DONNÉES, PAS DE LA DÉCORATION :
                 c'est ce bouton qui dit s'il faut archiver ou désarchiver. Un
@@ -268,7 +330,7 @@ export async function TableauCommandes({
                   reussi: parametres.archivees ? t("lot.desarchiver") : t("lot.archiver"),
                   echoue: parametres.archivees ? t("lot.desarchiver") : t("lot.archiver"),
                 }}
-                className="flex h-[34px] items-center rounded-full border border-primary bg-primary px-3.5 font-label-md text-[13px] font-semibold text-on-primary"
+                className="flex min-h-11 items-center rounded-ds-pill bg-ds-accent px-4 text-[13px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol lg:h-[36px] lg:min-h-0"
               />
             </div>
 
@@ -311,7 +373,7 @@ export async function TableauCommandes({
                         la largeur de la tuile. La planche `Commandes` disait la
                         même chose, elle a donc été corrigée d'abord : 48 ici,
                         `pr-3.5` sur la cellule, soit 14 px de respiration. */}
-                    <th scope="col" className={enTete + " w-[48px]"}>
+                    <th scope="col" className={enTete + bordGauche + " w-[74px]"}>
                       <span className="sr-only">{t("lot.titre")}</span>
                     </th>
                     {["client", "reference", "statutCourt", "photos", "vues", "modifiee"].map(
@@ -321,7 +383,7 @@ export async function TableauCommandes({
                         </th>
                       ),
                     )}
-                    <th scope="col" className={enTete + " text-right"}>
+                    <th scope="col" className={enTeteFin + " text-right"}>
                       {t("colonne.actions")}
                     </th>
                   </tr>
@@ -333,24 +395,27 @@ export async function TableauCommandes({
                     // inventé : on le nomme pour ce qu'il est.
                     const nom = ligne.client ?? t("sansNom");
                     return (
-                      <tr key={ligne.id} className="group/ligne">
-                        <td className={cellule + " pr-3.5"}>
+                      <tr key={ligne.id} className="group/ligne transition-colors hover:bg-ds-ink-50">
+                        <td className={cellule + bordGauche}>
                           <VignetteEtSelection ligne={ligne} nom={nom} libelle={t("selectionner", { client: nom })} />
                         </td>
 
-                        <td className={cellule + " font-semibold text-on-surface"}>
-                          <Link href={base + "/" + ligne.id} className="hover:underline">
+                        <td className={cellule + " font-bold text-ds-texte-fort"}>
+                          <Link
+                            href={base + "/" + ligne.id}
+                            className="transition-colors group-hover/ligne:text-ds-accent-encre hover:underline"
+                          >
                             {nom}
                           </Link>
                         </td>
 
-                        <td className={cellule + " text-on-surface"}>{ligne.reference ?? "—"}</td>
+                        <td className={cellule + " text-ds-texte-corps"}>{ligne.reference ?? "—"}</td>
 
                         <td className={cellule}>
                           <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
                         </td>
 
-                        <td className={cellule + " text-on-surface"}>{ligne.photos}</td>
+                        <td className={cellule + " text-ds-texte-corps"}>{ligne.photos}</td>
 
                         {/* LE COMPTEUR DE VUES, et surtout le ZÉRO. C'est
                             l'information pour laquelle le vendeur ouvre cet
@@ -361,7 +426,7 @@ export async function TableauCommandes({
                           className={
                             cellule +
                             " whitespace-nowrap " +
-                            (ligne.vues === 0 ? "font-semibold text-alerte" : "text-on-surface")
+                            (ligne.vues === 0 ? "font-bold text-ds-erreur" : "text-ds-texte-corps")
                           }
                           title={
                             ligne.vues === 0
@@ -381,7 +446,7 @@ export async function TableauCommandes({
                         </td>
 
                         <td
-                          className={cellule + " whitespace-nowrap text-sourdine"}
+                          className={cellule + " whitespace-nowrap text-ds-texte-sourdine"}
                           title={format.dateTime(new Date(ligne.modifieeLe), {
                             day: "numeric",
                             month: "long",
@@ -393,7 +458,7 @@ export async function TableauCommandes({
                           {depuis(ligne.modifieeLe)}
                         </td>
 
-                        <td className={cellule + " text-right"}>
+                        <td className={celluleFin + " text-right"}>
                           <div className="flex items-center justify-end gap-0.5">
                             <TraductionsClient espaces={["commandes"]}>
                               <ActionsLigne
@@ -413,31 +478,41 @@ export async function TableauCommandes({
                                 lui, cinquante menus peuvent rester ouverts en
                                 même temps. Aucun JavaScript. */}
                             <details name="actions-commande" className="relative">
-                              <summary className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-fond-neutre hover:text-on-surface">
-                                <Icone
-                                  nom="more_vert"
-                                  className="text-[16px]"
-                                  titre={t("plusDActions", { client: nom })}
-                                />
+                              <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-ds-sm text-ds-texte-tenu transition-colors hover:bg-ds-surface-teinte hover:text-ds-texte-fort">
+                                <MoreHorizontal size={20} strokeWidth={1.8} aria-hidden="true" />
+                                <span className="sr-only">
+                                  {t("plusDActions", { client: nom })}
+                                </span>
                               </summary>
-                              <div className="absolute top-full right-0 z-10 mt-1 flex w-56 flex-col rounded-[11px] border border-outline-variant bg-surface-container-lowest p-1 shadow-[0_12px_30px_-12px_rgba(14,14,19,0.35)]">
+                              <div className="absolute top-full right-0 z-10 mt-1 flex w-56 flex-col rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1 shadow-ds-lg">
                                 <button
                                   type="submit"
                                   form={"dup-" + ligne.id}
-                                  className="flex min-h-11 items-center gap-2.5 rounded-[9px] px-3 text-left font-label-md text-[13px] font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
+                                  className="flex min-h-11 items-center gap-2.5 rounded-ds-sm px-3 text-left text-[13px] font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-teinte"
                                 >
-                                  <Icone nom="file_copy" className="text-[16px] text-sourdine" />
+                                  <Copy aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
                                   {t("dupliquer")}
                                 </button>
                                 <button
                                   type="submit"
                                   form={"arch-" + ligne.id}
-                                  className="flex min-h-11 items-center gap-2.5 rounded-[9px] px-3 text-left font-label-md text-[13px] font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
+                                  className="flex min-h-11 items-center gap-2.5 rounded-ds-sm px-3 text-left text-[13px] font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-teinte"
                                 >
-                                  <Icone
-                                    nom={ligne.archiveeLe === null ? "inventory_2" : "unarchive"}
-                                    className="text-[16px] text-sourdine"
-                                  />
+                                  {ligne.archiveeLe === null ? (
+                                    <Archive
+                                      aria-hidden="true"
+                                      size={16}
+                                      strokeWidth={1.8}
+                                      className="text-ds-texte-tenu"
+                                    />
+                                  ) : (
+                                    <ArchiveRestore
+                                      aria-hidden="true"
+                                      size={16}
+                                      strokeWidth={1.8}
+                                      className="text-ds-texte-tenu"
+                                    />
+                                  )}
                                   {ligne.archiveeLe === null ? t("archiverCourt") : t("desarchiverCourt")}
                                 </button>
                               </div>
@@ -452,7 +527,7 @@ export async function TableauCommandes({
             </div>
 
             {/* ---------- TÉLÉPHONE : LA LISTE DE CARTES ---------- */}
-            <ul className="flex flex-col gap-2.5 px-margin-mobile md:px-0 lg:hidden">
+            <ul className="flex flex-col gap-2.5 px-margin-mobile md:px-5 md:pb-1 lg:hidden">
               {page.lignes.map((ligne) => {
                 const nom = ligne.client ?? t("sansNom");
                 const jamaisOuverte = ligne.vues === 0;
@@ -487,41 +562,36 @@ export async function TableauCommandes({
                     <Link
                       href={base + "/" + ligne.id}
                       className={
-                        "flex items-center gap-[13px] rounded-lg border p-3.5 " +
+                        "flex items-center gap-[13px] rounded-ds-card border p-3.5 transition-colors " +
                         (enAlerte
-                          ? "border-alerte-filet bg-alerte-fond-doux"
-                          : "border-outline-variant bg-surface-container-lowest")
+                          ? "border-transparent bg-ds-alerte-fond"
+                          : "border-ds-filet bg-ds-surface-carte hover:bg-ds-ink-50")
                       }
                     >
-                      <Vignette url={ligne.vignette} taille={52} rayon={12} />
+                      <Vignette url={ligne.vignette} taille={52} rayon={10} />
 
                       <span className="min-w-0 flex-grow">
                         <span className="flex items-center justify-between gap-2">
-                          <span className="truncate font-label-md text-[15px] leading-[19px] font-bold text-on-surface">
+                          <span className="truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort">
                             {nom}
                           </span>
-                          <span className="shrink-0 font-body-sm text-[12px] leading-[15px] text-sourdine">
+                          <span className="shrink-0 text-[12px] leading-[15px] text-ds-texte-sourdine">
                             {depuis(ligne.modifieeLe)}
                           </span>
                         </span>
 
-                        <span className="mt-0.5 mb-[7px] block truncate font-body-sm text-[13px] leading-[17px] text-sourdine">
+                        <span className="mt-0.5 mb-[7px] block truncate text-[13px] leading-[17px] text-ds-texte-corps">
                           {ligne.reference ?? "—"}
                         </span>
 
                         <span className="flex items-center gap-2">
-                          <PuceExpedition
-                            ligne={ligne}
-                            maintenant={maintenant}
-                            libelles={t}
-                            taille="telephone"
-                          />
+                          <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
                           {jamaisOuverte ? (
-                            <span className="font-label-sm text-[12px] leading-[15px] font-semibold text-alerte">
+                            <span className="text-[12px] leading-[15px] font-bold text-ds-erreur">
                               {t("jamaisOuvert")}
                             </span>
                           ) : (
-                            <span className="truncate font-body-sm text-[12px] leading-[15px] text-sourdine">
+                            <span className="truncate text-[12px] leading-[15px] text-ds-texte-sourdine">
                               {t("photosEtVues", { photos: ligne.photos, vues: ligne.vues })}
                             </span>
                           )}
@@ -591,7 +661,6 @@ function PuceExpedition({
   ligne,
   maintenant,
   libelles,
-  taille = "bureau",
 }: {
   readonly ligne: {
     readonly statut: LigneCommande["statut"];
@@ -599,7 +668,6 @@ function PuceExpedition({
   };
   readonly maintenant: Date;
   readonly libelles: (clef: string, valeurs?: Record<string, number | string>) => string;
-  readonly taille?: "bureau" | "telephone";
 }) {
   // MEME RAISON QU AU-DESSUS : l etape est passee, la regle n est plus recopiee.
   const silence = decrireSilence(
@@ -613,7 +681,7 @@ function PuceExpedition({
       <BadgeStatut
         libelle={libelles("statutSansMouvement", { jours: silence.jours })}
         teinte="alerte"
-        taille={taille}
+        Icone={ICONE_SILENCE}
       />
     );
   }
@@ -622,13 +690,14 @@ function PuceExpedition({
     <BadgeStatut
       libelle={libelles("statut." + ligne.statut)}
       teinte={teinteExpedition(ligne.statut)}
-      taille={taille}
+      Icone={iconeExpedition(ligne.statut)}
     />
   );
 }
 
 /**
- * La tuile de 34 px de la planche, et la case de sélection par-dessus.
+ * La tuile de 40 px du kit (`Thumb`, rayon `--radius-sm`), et la case de
+ * sélection par-dessus.
  *
  * ⚠️ ÉCART ASSUMÉ, ET IL EST DÉLIBÉRÉ. La planche ne dessine aucune case à
  * cocher : sa première colonne ne porte que la vignette. Mais le brief §7 exige
@@ -654,14 +723,14 @@ function VignetteEtSelection({
   readonly libelle: string;
 }) {
   return (
-    <span className="relative block h-[34px] w-[34px]">
-      <Vignette url={ligne.vignette} taille={34} rayon={9} alt={nom} />
+    <span className="relative block h-10 w-10">
+      <Vignette url={ligne.vignette} taille={40} rayon={10} alt={nom} />
       <input
         type="checkbox"
         name="selection"
         value={ligne.id}
         aria-label={libelle}
-        className="pointer-events-none absolute inset-0 m-auto h-[18px] w-[18px] cursor-pointer opacity-0 accent-primary outline-offset-2 group-hover/ligne:pointer-events-auto group-hover/ligne:opacity-100 group-has-[input:checked]/lot:pointer-events-auto group-has-[input:checked]/lot:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100 checked:pointer-events-auto checked:opacity-100"
+        className="pointer-events-none absolute inset-0 m-auto h-[18px] w-[18px] cursor-pointer opacity-0 accent-ds-accent outline-offset-2 group-hover/ligne:pointer-events-auto group-hover/ligne:opacity-100 group-has-[input:checked]/lot:pointer-events-auto group-has-[input:checked]/lot:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100 checked:pointer-events-auto checked:opacity-100"
       />
     </span>
   );
@@ -689,7 +758,7 @@ function Vignette({
 }) {
   const style = { width: taille, height: taille, borderRadius: rayon };
   if (url === null) {
-    return <span className="block shrink-0 bg-fond-avatar" style={style} />;
+    return <span className="block shrink-0 bg-ds-surface-creux" style={style} />;
   }
   // URL R2 SIGNÉE, À EXPIRATION : `next/image` la remettrait en cache derrière sa
   // propre adresse, donc la servirait encore après l'expiration de la signature —
@@ -750,8 +819,8 @@ async function PiedDeListe({
   const archives = parametres.archivees;
 
   return (
-    <div className="mt-[18px] flex items-center justify-between gap-4 border-t border-filet-ligne px-margin-mobile pt-4 md:px-0">
-      <p className="font-body-sm text-[13px] text-sourdine">
+    <div className="mt-[18px] flex items-center justify-between gap-4 border-t border-ds-filet px-margin-mobile pt-4 md:mt-0 md:px-5 md:py-4">
+      <p className="text-[13px] text-ds-texte-corps">
         {/* ON NE COMPOSE PAS UN DÉNOMINATEUR QU'ON N'A PAS. Quand le compte a
             échoué, la phrase dit s'il reste des commandes, sans prétendre savoir
             combien il y en a. */}
@@ -765,7 +834,7 @@ async function PiedDeListe({
       {suivant !== null ? (
         <LienEcran
           href={lienListe(base, parametres, { curseur: suivant })}
-          className="flex min-h-11 items-center rounded-[11px] border border-filet-controle bg-surface-container-lowest px-[18px] font-label-md text-[14px] font-semibold whitespace-nowrap text-on-surface transition-colors hover:bg-fond-neutre md:h-[38px] md:min-h-0"
+          className="flex min-h-11 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13px] font-medium whitespace-nowrap text-ds-texte-corps transition-colors hover:bg-ds-surface-teinte lg:h-9 lg:min-h-0"
         >
           {t("chargerLaSuite")}
         </LienEcran>
@@ -788,29 +857,29 @@ async function AccueilCompteVide({ langue }: { readonly langue: string }) {
 
   return (
     <section className="flex flex-grow items-center justify-center px-margin-mobile md:px-0">
-      <div className="w-full max-w-[620px] rounded-[22px] border border-outline-variant bg-surface-container-lowest px-6 py-9 text-center md:px-12 md:py-11">
-        <span className="degrade-marque mx-auto mb-[22px] flex h-[62px] w-[62px] items-center justify-center rounded-[18px] shadow-[0_14px_30px_-12px_rgba(124,92,245,0.7)]">
-          <Icone nom="add" className="text-[27px]" />
+      <div className="w-full max-w-[620px] rounded-ds-3xl border border-ds-filet bg-ds-surface-carte px-6 py-9 text-center shadow-ds-card md:px-12 md:py-11">
+        <span className="degrade-ds-marque mx-auto mb-[22px] flex h-[62px] w-[62px] items-center justify-center rounded-ds-icon-tile text-ds-texte-sur-marque shadow-ds-brand">
+          <Plus aria-hidden="true" size={28} strokeWidth={2} />
         </span>
 
-        <h2 className="font-headline-lg text-[26px] leading-8 font-extrabold tracking-[-0.03em] text-on-surface">
+        <h2 className="text-[30px] leading-[1.15] font-extrabold tracking-[-0.045em] text-ds-texte-titre">
           {t("vide.compteTitre")}
         </h2>
-        <p className="mt-2.5 font-body-md text-[15px] leading-6 text-sourdine">
+        <p className="mt-2.5 text-[16px] leading-[1.55] text-ds-texte-corps">
           {t("vide.compteTexte")}
         </p>
 
         <ol className="mt-8 mb-8 flex flex-col gap-[18px] text-left">
           {etapes.map((etape, index) => (
             <li key={etape} className="flex items-start gap-3.5">
-              <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-violet-fond font-label-md text-[13px] font-extrabold text-violet">
+              <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-[13px] font-extrabold text-ds-accent">
                 {index + 1}
               </span>
               <span>
-                <span className="block font-label-md text-[15px] font-bold text-on-surface">
+                <span className="block text-[15px] font-bold text-ds-texte-fort">
                   {t("vide.etapes." + etape + ".titre")}
                 </span>
-                <span className="mt-0.5 block font-body-md text-[14px] leading-[21px] text-sourdine">
+                <span className="mt-0.5 block text-[14px] leading-[21px] text-ds-texte-corps">
                   {t("vide.etapes." + etape + ".texte")}
                 </span>
               </span>
@@ -833,33 +902,33 @@ async function AccueilCompteVide({ langue }: { readonly langue: string }) {
             libelles={{
               repos: (
                 <>
-                  <Icone nom="add" className="text-[16px]" />
+                  <Plus aria-hidden="true" size={17} strokeWidth={2} />
                   {t("nouvelle")}
                 </>
               ),
               enCours: t("nouvelleEnCours"),
               reussi: (
                 <>
-                  <Icone nom="add" className="text-[16px]" />
+                  <Plus aria-hidden="true" size={17} strokeWidth={2} />
                   {t("nouvelle")}
                 </>
               ),
               echoue: (
                 <>
-                  <Icone nom="add" className="text-[16px]" />
+                  <Plus aria-hidden="true" size={17} strokeWidth={2} />
                   {t("nouvelle")}
                 </>
               ),
             }}
-            className="degrade-marque mx-auto flex h-[50px] items-center gap-[9px] rounded-[13px] px-[26px] font-label-md text-[15px] font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
+            className="degrade-ds-marque mx-auto flex h-[50px] items-center gap-2 rounded-ds-card px-7 text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
           />
         </form>
 
-        <p className="mt-[18px] font-body-sm text-[13px] text-sourdine">
+        <p className="mt-[18px] text-[13px] text-ds-texte-corps">
           {t("vide.marqueQuestion")}{" "}
           <Link
             href={"/" + langue + "/marque"}
-            className="font-semibold text-violet hover:text-violet-survol"
+            className="font-semibold text-ds-texte-lien underline-offset-2 hover:text-ds-texte-lien-survol hover:underline"
           >
             {t("vide.marqueLien")}
           </Link>
@@ -906,19 +975,20 @@ async function FiltreSansResultat({
   const filtree = listeFiltree(parametres);
 
   return (
-    <div className="flex flex-grow items-center justify-center border-y border-outline-variant bg-surface-container-lowest px-6 py-12 text-center md:rounded-[18px] md:border md:p-10">
+    <div className="flex flex-grow items-center justify-center border-y border-ds-filet bg-ds-surface-carte px-6 py-12 text-center md:mt-4 md:rounded-none md:border-x-0 md:border-b-0 md:p-10">
       <div className="max-w-[460px]">
-        <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-[16px] bg-fond-neutre">
-          <Icone
-            nom={toutArchive ? "inventory_2" : "search"}
-            className="text-[24px] text-gris-inactif"
-          />
+        <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-ds-icon-tile bg-ds-surface-creux text-ds-texte-tenu">
+          {toutArchive ? (
+            <Archive aria-hidden="true" size={24} strokeWidth={1.8} />
+          ) : (
+            <Search aria-hidden="true" size={24} strokeWidth={1.8} />
+          )}
         </span>
 
-        <h2 className="font-headline-md text-[22px] leading-7 font-extrabold tracking-[-0.025em] text-on-surface">
+        <h2 className="text-[22px] leading-7 font-bold tracking-[-0.02em] text-ds-texte-titre">
           {toutArchive ? t("vide.archiveTitre") : t("vide.filtreTitre")}
         </h2>
-        <p className="mt-2.5 font-body-md text-[15px] leading-6 text-sourdine">
+        <p className="mt-2.5 text-[15px] leading-6 text-ds-texte-corps">
           {toutArchive
             ? t("vide.archiveTexte")
             : total === null
@@ -929,14 +999,14 @@ async function FiltreSansResultat({
         {toutArchive ? (
           <LienEcran
             href={lienListe(base, parametres, { archivees: true })}
-            className="mt-6 inline-flex min-h-11 items-center rounded-[12px] border border-filet-controle bg-surface-container-lowest px-[22px] font-label-md text-[15px] font-bold text-on-surface transition-colors hover:bg-fond-neutre md:h-[46px] md:min-h-0"
+            className="mt-6 inline-flex min-h-11 items-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[22px] text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs transition-shadow hover:shadow-ds-md md:h-11 md:min-h-0"
           >
             {t("vide.voirArchives")}
           </LienEcran>
         ) : filtree ? (
           <LienEcran
             href={base}
-            className="mt-6 inline-flex min-h-11 items-center rounded-[12px] border border-filet-controle bg-surface-container-lowest px-[22px] font-label-md text-[15px] font-bold text-on-surface transition-colors hover:bg-fond-neutre md:h-[46px] md:min-h-0"
+            className="mt-6 inline-flex min-h-11 items-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[22px] text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs transition-shadow hover:shadow-ds-md md:h-11 md:min-h-0"
           >
             {t("toutEffacer")}
           </LienEcran>
@@ -946,7 +1016,7 @@ async function FiltreSansResultat({
             personne devant cet écran vient probablement de chercher un mot
             accentué. */}
         {parametres.q !== "" ? (
-          <p className="mt-5 font-body-sm text-[13px] leading-5 text-sourdine">
+          <p className="mt-5 text-[13px] leading-5 text-ds-texte-corps">
             {t("vide.accents")}
           </p>
         ) : null}

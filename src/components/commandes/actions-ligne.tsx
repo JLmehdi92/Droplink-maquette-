@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Icone } from "@/components/icone";
+import { Check, Copy, ExternalLink, TriangleAlert } from "lucide-react";
 
 /**
  * Actions rapides d'une ligne : copier le lien public, l'ouvrir.
@@ -44,34 +44,35 @@ export function ActionsLigne({
       <button
         type="button"
         onClick={() => void copier()}
-        // 32 x 32, rayon 9, fond transparent au repos, `#f4f4f8` au survol : la
-        // géométrie exacte de `.icobtn` des planches.
-        className="flex h-8 w-8 items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-fond-neutre hover:text-on-surface"
+        /* 36 x 36, rayon `--radius-sm`, survol sur la teinte violette : le
+           `IconButton` du design system. L'ancien carré de 32 venait du canevas
+           condamné. */
+        className="flex h-9 w-9 items-center justify-center rounded-ds-sm text-ds-texte-tenu transition-colors hover:bg-ds-surface-teinte hover:text-ds-texte-fort"
         title={t("copierLien", { client: nomClient })}
       >
-        <Icone
-          nom={etat === "copie" ? "done" : etat === "echec" ? "error" : "content_copy"}
-          className="text-[16px]"
-          titre={t("copierLien", { client: nomClient })}
-        />
+        {etat === "copie" ? (
+          <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes" />
+        ) : etat === "echec" ? (
+          <TriangleAlert aria-hidden="true" size={16} strokeWidth={2} className="text-ds-erreur" />
+        ) : (
+          <Copy aria-hidden="true" size={16} strokeWidth={1.8} />
+        )}
+        <span className="sr-only">{t("copierLien", { client: nomClient })}</span>
       </button>
 
       <a
         href={lien}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex h-8 w-8 items-center justify-center rounded-[9px] text-sourdine transition-colors hover:bg-fond-neutre hover:text-on-surface"
+        className="flex h-9 w-9 items-center justify-center rounded-ds-sm text-ds-texte-tenu transition-colors hover:bg-ds-surface-teinte hover:text-ds-texte-fort"
         title={t("ouvrirPage", { client: nomClient })}
       >
-        <Icone
-          nom="open_in_new"
-          className="text-[16px]"
-          titre={t("ouvrirPage", { client: nomClient })}
-        />
+        <ExternalLink aria-hidden="true" size={16} strokeWidth={1.8} />
+        <span className="sr-only">{t("ouvrirPage", { client: nomClient })}</span>
       </a>
 
       {etat === "echec" ? (
-        <span className="font-label-sm text-label-sm text-error">{t("copieEchouee")}</span>
+        <span className="text-[12px] font-semibold text-ds-erreur">{t("copieEchouee")}</span>
       ) : null}
     </div>
   );

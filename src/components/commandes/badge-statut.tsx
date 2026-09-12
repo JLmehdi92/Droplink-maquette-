@@ -1,27 +1,48 @@
+import { AlertTriangle, CircleCheck, CircleDot, Clock, Truck, type LucideIcon } from "lucide-react";
 import type { LigneCommande } from "@/lib/commandes/liste";
 
 /**
- * Pastille de statut, reprise de la maquette `gestion_d_inventaire_envois` :
- * `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full` avec un point de
- * couleur devant le libellé.
+ * LA PASTILLE DE STATUT — le `Badge` du design system, tel que `OrdersView` le
+ * pose : `padding: 7px 12px`, 12 px, gras, rayon pilule, ET UNE ICÔNE.
  *
- * Les couleurs viennent des tokens du thème, JAMAIS de l'accent du vendeur : un
- * statut doit se lire pareil chez tout le monde. Un vendeur qui choisit un rouge
- * saturé verrait sinon « livré » et « en transit » porter la même couleur que
- * « refusé ».
+ * ⚠️ UNE ICÔNE, PLUS UN POINT DE COULEUR. L'ancienne pastille portait une puce
+ * ronde de 6 px : elle disait « il y a un statut », l'icône dit LEQUEL. C'est le
+ * seul endroit de la ligne où l'information tient sans être lue.
+ *
+ * Les couleurs viennent des tokens du design system, JAMAIS de l'accent du
+ * vendeur : un statut doit se lire pareil chez tout le monde. Un vendeur qui
+ * choisit un rouge saturé verrait sinon « livré » et « en transit » porter la
+ * même couleur que « bloqué ».
+ *
+ * ⚠️ UNE SEULE TAILLE, LÀ OÙ IL Y EN AVAIT DEUX. Les anciennes planches
+ * dessinaient une pastille plus petite au téléphone (11 px) ; le design system
+ * n'en dessine qu'une, et 11 px passerait sous le plancher de 11,5 px que sa
+ * propre règle 5 impose. La pastille de 12 px tient sur la carte de 390 px —
+ * mesuré — parce que la ligne qu'elle partage ne porte plus qu'un texte court.
+ *
+ * ⚠️ « PRÉPARATION » RESTE NEUTRE ALORS QUE LE KIT PEINT SON « EN ATTENTE » EN
+ * AMBRE, et c'est une divergence assumée. Dans le kit, « En attente » est un
+ * statut parmi cinq d'une liste de démonstration. Dans le produit, TOUTE
+ * commande fraîchement créée est en préparation : peindre ce statut en ambre
+ * peindrait la majorité de la liste, et noierait le seul signal qui appelle
+ * vraiment un geste — « sans mouvement ». C'est la règle du produit appliquée à
+ * son propre dessin : *une alerte qui se déclenche partout est une alerte qu'on
+ * apprend à ignorer*.
  */
+
 const TEINTES = {
-  neutre: "bg-fond-neutre text-ardoise",
-  pointNeutre: "bg-gris-inactif",
-  info: "bg-violet-fond text-violet-encre",
-  pointInfo: "bg-violet",
-  succes: "bg-succes-fond text-succes",
-  pointSucces: "bg-succes",
-  alerte: "bg-alerte-fond-vif text-alerte",
-  pointAlerte: "bg-alerte-puce",
+  neutre: "bg-ds-surface-creux text-ds-texte-corps",
+  info: "bg-ds-info-fond text-ds-info",
+  succes: "bg-ds-succes-fond text-ds-succes",
+  /*
+   * AMBRE, PAS ROUGE. Un colis immobile n'est pas une erreur : c'est une
+   * attente qu'il faut relancer. Le rouge du design system (`ds-erreur`) est
+   * réservé à ce qui a ÉCHOUÉ.
+   */
+  alerte: "bg-ds-alerte-fond text-ds-alerte",
 } as const;
 
-type Teinte = "neutre" | "info" | "succes" | "alerte";
+type Teinte = keyof typeof TEINTES;
 
 const TEINTE_STATUT: Record<LigneCommande["statut"], Teinte> = {
   preparation: "neutre",
@@ -30,59 +51,35 @@ const TEINTE_STATUT: Record<LigneCommande["statut"], Teinte> = {
   livre: "succes",
 };
 
-function classes(teinte: Teinte): { fond: string; point: string } {
-  switch (teinte) {
-    case "info":
-      return { fond: TEINTES.info, point: TEINTES.pointInfo };
-    case "succes":
-      return { fond: TEINTES.succes, point: TEINTES.pointSucces };
-    case "alerte":
-      return { fond: TEINTES.alerte, point: TEINTES.pointAlerte };
-    case "neutre":
-      return { fond: TEINTES.neutre, point: TEINTES.pointNeutre };
-  }
-}
+/** Les icônes de `STATUS` dans `ui_kits/seller_app/OrdersView`, portées sur nos
+ *  quatre étapes plus le silence. */
+const ICONE_STATUT: Record<LigneCommande["statut"], LucideIcon> = {
+  preparation: Clock,
+  expedie: Truck,
+  en_transit: CircleDot,
+  livre: CircleCheck,
+};
 
-/**
- * DEUX TAILLES, PARCE QUE LES DEUX PLANCHES EN DESSINENT DEUX.
- *
- *   bureau   `padding: 4px 10px`, 12 px, point de 6 px, écart de 6 px ;
- *   téléphone `padding: 3px 9px`,  11 px, point de 5 px, écart de 5 px.
- *
- * Ce n'est pas de la coquetterie : sur la carte de 390 px, la puce partage sa
- * ligne avec « 7 photos · 12 vues », et la version bureau y déborde.
- */
 export function BadgeStatut({
   libelle,
   teinte,
-  taille = "bureau",
+  Icone,
 }: {
   readonly libelle: string;
   readonly teinte: Teinte;
-  readonly taille?: "bureau" | "telephone";
+  readonly Icone: LucideIcon;
 }) {
-  const { fond, point } = classes(teinte);
-  const petit = taille === "telephone";
   return (
     <span
       className={
-        // `whitespace-nowrap` : le tableau se rétrécit désormais au lieu de
-        // défiler, et « Sans mouvement · 14 j » se replierait en deux lignes
-        // dans une puce arrondie de 26 px de haut.
-        "inline-flex shrink-0 items-center rounded-full font-label-sm font-semibold whitespace-nowrap " +
-        // La hauteur de ligne est celle du rendu naturel, comme sur la planche :
-        // avec les 1,5 du corps de texte, la puce passait de 23 à 26 px.
-        (petit
-          ? "gap-[5px] px-[9px] py-[3px] text-[11px] leading-[1.25] "
-          : "gap-1.5 px-2.5 py-1 text-[12px] leading-[1.25] ") +
-        fond
+        // `whitespace-nowrap` : le tableau se rétrécit au lieu de défiler, et
+        // « Sans mouvement · 14 j » se replierait en deux lignes dans une pilule.
+        "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-3 py-[7px] " +
+        "text-[12px] leading-[1.25] font-bold tracking-[-0.01em] whitespace-nowrap " +
+        TEINTES[teinte]
       }
     >
-      <span
-        className={
-          (petit ? "h-[5px] w-[5px] " : "h-1.5 w-1.5 ") + "shrink-0 rounded-full " + point
-        }
-      />
+      <Icone aria-hidden="true" size={13} strokeWidth={2.2} />
       {libelle}
     </span>
   );
@@ -91,3 +88,11 @@ export function BadgeStatut({
 export function teinteExpedition(statut: LigneCommande["statut"]): Teinte {
   return TEINTE_STATUT[statut];
 }
+
+export function iconeExpedition(statut: LigneCommande["statut"]): LucideIcon {
+  return ICONE_STATUT[statut];
+}
+
+/** Le silence n'est pas une étape de l'énumération : c'est le statut courant
+ *  PLUS une durée. Son icône dit l'attente, pas l'échec. */
+export const ICONE_SILENCE: LucideIcon = AlertTriangle;

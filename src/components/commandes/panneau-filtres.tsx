@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
-import { Icone } from "@/components/icone";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { STATUTS_EXPEDITION, STATUTS_QC, TRIS, type ParametresListe } from "@/lib/commandes/liste";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
 import { LienEcran } from "@/components/lien-ecran";
-import { DETAILS_OUTIL, PANNEAU_OUTIL, PILULE_OUTIL } from "@/components/panneau-outil";
+import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
 
 /**
  * LE PANNEAU DE FILTRES COMPLET, replié dans la barre d'outils du tableau.
@@ -45,20 +45,40 @@ export async function PanneauFiltres({
   const t = await getTranslations("commandes");
   const filtree = listeFiltree(parametres);
 
+  /*
+   * ⚠️ PLUS DE `champ-app`, ET CE N'ÉTAIT PAS UN NETTOYAGE DE CONFORT.
+   *
+   * `.champ-app` est déclarée HORS de toute `@layer` dans `globals.css`, et
+   * Tailwind v4 range ses utilitaires dans `@layer utilities`. Or une règle SANS
+   * couche l'emporte sur une règle EN couche, quelle que soit sa spécificité :
+   * elle écrasait donc `bg-ds-surface-carte`, `border-ds-filet` et `text-[14px]`
+   * par le fond, le filet et les 15 px de l'ancien thème.
+   *
+   * Le défaut est parfaitement silencieux : les classes du design system sont
+   * bien ÉCRITES, bien SERVIES, et les deux gardes qui les surveillent restent
+   * vertes — elles vérifient qu'une classe existe et qu'elle pointe sur une
+   * variable définie, jamais qui gagne la cascade. Seul le champ rendu le dit.
+   *
+   * Les deux autres appelants de `.champ-app` — l'éditeur de marque et
+   * l'arbitrage QC — la gardent : ils ne sont pas migrés, et c'est encore leur
+   * dessin.
+   */
   const champ =
-    "champ-app min-h-11 w-full rounded-[11px] border border-filet-controle px-3 font-body-md text-[14px] text-on-surface outline-none lg:h-[42px] lg:min-h-0";
+    "min-h-11 w-full rounded-ds-control border border-ds-filet bg-ds-surface-carte px-3 text-[14px] " +
+    "text-ds-texte-fort transition-shadow outline-none " +
+    "focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)] lg:h-[42px] lg:min-h-0";
 
   return (
-    <details className={DETAILS_OUTIL + " lg:open:static"}>
-      <summary className={PILULE_OUTIL}>
-        <Icone nom="filter_list" className="text-[14px]" />
+    <details className={DETAILS_OUTIL_DS + " lg:open:static"}>
+      <summary className={PILULE_OUTIL_DS}>
+        <SlidersHorizontal aria-hidden="true" size={16} strokeWidth={1.8} />
         {t("filtres")}
-        <Icone nom="expand_more" className="text-[14px]" />
+        <ChevronDown aria-hidden="true" size={15} strokeWidth={1.8} className="text-ds-texte-tenu" />
       </summary>
 
       <div
         className={
-          PANNEAU_OUTIL +
+          PANNEAU_OUTIL_DS +
           " flex flex-col gap-5 lg:grid lg:w-[666px] lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-[22px]"
         }
       >
@@ -74,7 +94,7 @@ export async function PanneauFiltres({
           <div>
             <label
               htmlFor="statut"
-              className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
+              className="mb-1.5 block text-[12px] leading-[15px] font-semibold text-ds-texte-corps"
             >
               {t("statutExpedition")}
             </label>
@@ -91,7 +111,7 @@ export async function PanneauFiltres({
           <div>
             <label
               htmlFor="qc"
-              className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
+              className="mb-1.5 block text-[12px] leading-[15px] font-semibold text-ds-texte-corps"
             >
               {t("statutQc")}
             </label>
@@ -124,7 +144,7 @@ export async function PanneauFiltres({
             <div>
               <label
                 htmlFor="du"
-                className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
+                className="mb-1.5 block text-[12px] leading-[15px] font-semibold text-ds-texte-corps"
               >
                 {t("periodeDu")}
               </label>
@@ -140,7 +160,7 @@ export async function PanneauFiltres({
             <div>
               <label
                 htmlFor="au"
-                className="mb-1.5 block font-label-md text-[12px] leading-[15px] font-semibold text-ardoise"
+                className="mb-1.5 block text-[12px] leading-[15px] font-semibold text-ds-texte-corps"
               >
                 {t("periodeAu")}
               </label>
@@ -155,13 +175,13 @@ export async function PanneauFiltres({
             </div>
           </div>
 
-          <label className="flex min-h-11 items-center gap-2.5 font-body-md text-[14px] text-on-surface lg:min-h-0 lg:leading-[18px]">
+          <label className="flex min-h-11 items-center gap-2.5 text-[14px] text-ds-texte-fort lg:min-h-0 lg:leading-[18px]">
             <input
               type="checkbox"
               name="archivees"
               value="1"
               defaultChecked={parametres.archivees}
-              className="h-4 w-4 rounded-[5px] border-outline-variant accent-[var(--accent-interface)]"
+              className="h-4 w-4 rounded-ds-xs border-ds-filet-appuye accent-ds-accent"
             />
             {t("voirArchivees")}
           </label>
@@ -169,7 +189,7 @@ export async function PanneauFiltres({
           <div className="flex items-center gap-3.5 lg:mt-0.5">
             <button
               type="submit"
-              className="flex min-h-11 items-center rounded-[11px] bg-primary px-[22px] font-label-md text-[14px] font-bold text-on-primary transition-opacity hover:opacity-90 lg:h-[42px] lg:min-h-0"
+              className="flex min-h-11 items-center rounded-ds-card bg-ds-accent px-[22px] text-[14px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol lg:h-[42px] lg:min-h-0"
             >
               {t("appliquer")}
             </button>
@@ -177,7 +197,7 @@ export async function PanneauFiltres({
             {filtree ? (
               <LienEcran
                 href={base}
-                className="font-label-md text-[13px] font-bold text-violet hover:underline"
+                className="text-[13px] font-bold text-ds-texte-lien underline-offset-2 hover:text-ds-texte-lien-survol hover:underline"
               >
                 {t("toutEffacer")}
               </LienEcran>
@@ -190,8 +210,11 @@ export async function PanneauFiltres({
           d'un geste et se lit dans l'URL ; le passer par « Appliquer » ferait
           payer deux gestes pour un réglage qu'on change en parcourant la liste.
         */}
-        <div className="border-t border-filet-ligne pt-4 lg:border-t-0 lg:border-s lg:pt-0 lg:ps-5">
-          <h2 className="mb-3 font-label-sm text-[11px] font-bold tracking-[0.05em] text-gris-entete uppercase">
+        <div className="border-t border-ds-filet pt-4 lg:border-t-0 lg:border-s lg:border-ds-filet lg:pt-0 lg:ps-5">
+          {/* 12 px, demi-gras, sourdine — comme les en-têtes de colonnes du kit.
+              Les capitales de 11 px de l'ancien dessin passaient sous le
+              plancher de 11,5 px de la règle 5. */}
+          <h2 className="mb-3 text-[12px] font-semibold text-ds-texte-sourdine">
             {t("trier")}
           </h2>
           <ul className="flex flex-col gap-0.5">
@@ -203,10 +226,10 @@ export async function PanneauFiltres({
                     href={lienListe(base, parametres, { tri })}
                     aria-current={actif ? "true" : undefined}
                     className={
-                      "flex min-h-11 items-center rounded-[8px] px-3 font-body-md text-[14px] transition-colors lg:min-h-9 " +
+                      "flex min-h-11 items-center rounded-ds-sm px-3 text-[14px] transition-colors lg:min-h-9 " +
                       (actif
-                        ? "bg-violet-fond font-semibold text-violet"
-                        : "text-ardoise hover:bg-surface-container")
+                        ? "bg-ds-surface-teinte font-bold text-ds-accent-encre"
+                        : "font-medium text-ds-texte-corps hover:bg-ds-ink-50")
                     }
                   >
                     {t("tri." + tri)}

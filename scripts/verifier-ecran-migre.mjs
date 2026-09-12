@@ -19,10 +19,12 @@
  * est une propriete de securite, pas un detail (L-032).
  *
  * Usage :
- *   node scripts/verifier-ecran-migre.mjs <base> "<routes>" [largeurs]
+ *   node scripts/verifier-ecran-migre.mjs <base> "<routes>" [largeurs] [dossier de captures]
  *   node scripts/verifier-ecran-migre.mjs http://localhost:3000 "/fr/commandes" 1440,390
  */
 import { config } from "dotenv";
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
 config({ path: ".env.test.local", quiet: true });
@@ -33,6 +35,18 @@ const routes = (process.argv[3] ?? "")
   .split(",")
   .map((r) => r.trim())
   .filter(Boolean);
+/*
+ * ⚠️ LA CAPTURE EXISTE PARCE QUE LES NOMBRES NE DISENT PAS TOUT. Le rapport
+ * etablit qu un ecran ne deborde pas, qu il a un seul `h1` et aucune cible sous
+ * 44 px — il ne dit RIEN de sa ressemblance avec la reference, qui est
+ * pourtant la consigne : « comparer a la page de reference, valeur par valeur ».
+ * Deux fois deja, un ecran a passe tous les seuils en rendant autre chose que
+ * ce qui etait dessine.
+ *
+ * Elle est FACULTATIVE et hors du chemin par defaut : une capture ne se compare
+ * pas toute seule, c est un oeil qui la lit.
+ */
+const dossierCaptures = process.argv[5] ?? null;
 const largeurs = (process.argv[4] ?? "1440,390")
   .split(",")
   .map((l) => Number(l.trim()))
@@ -75,12 +89,27 @@ const { data: profil } = await service
 await service.from("profiles").update({ account_type: "reseller", role: "admin" }).eq("id", profil.id);
 const { data: shop } = await service.from("shops").select("id").eq("owner_id", profil.id).single();
 await service.from("shops").update({ name: "Atelier de verification" }).eq("id", shop.id);
-await service.from("orders").insert({
-  shop_id: shop.id,
-  customer_label: "Client de verification",
-  product_ref: "REF-V",
-  status: "en_transit",
-});
+/*
+ * ⚠️ QUATRE COMMANDES, UNE PAR STATUT, ET PAS UNE SEULE.
+ *
+ * Avec une seule ligne en transit, la sonde ne voyait qu UNE pastille de statut
+ * sur quatre et des compteurs a zero — donc elle ne pouvait pas rougir sur une
+ * teinte oubliee ni sur un chiffre a deux caracteres. Un jeu qui n exerce qu un
+ * cas certifie ce cas et se tait sur les autres.
+ */
+await service.from("orders").insert(
+  [
+    ["Client de verification", "REF-V", "en_transit"],
+    ["Cliente en preparation", "REF-P", "preparation"],
+    ["Client expedie", "REF-E", "expedie"],
+    ["Cliente livree", "REF-L", "livre"],
+  ].map(([customer_label, product_ref, status]) => ({
+    shop_id: shop.id,
+    customer_label,
+    product_ref,
+    status,
+  })),
+);
 
 const { data: sess } = await publiable.auth.signInWithPassword({
   email: courriel,
@@ -153,9 +182,23 @@ const brut = (methode, params, sessionId) =>
  */
 const RELEVE = `(() => {
   const de = document.documentElement;
+  /*
+   * ⚠️ CE QUI N EST PAS RENDU N EST PAS UNE POLICE TROP PETITE. La sonde
+   * comptait les feuilles de TOUT le document, masquees comprises : a 390 px
+   * elle signalait les 11 px du bloc de compte de la barre laterale, qui est en
+   * \`display: none\` a cette largeur, et a 1440 px les 10 px de la barre
+   * d onglets du telephone, masquee elle aussi. Cinq faux positifs a chaque
+   * ecran, aux DEUX largeurs — et cinq faux positifs apprennent a ignorer le
+   * sixieme, qui serait vrai.
+   *
+   * \`getClientRects().length === 0\` est le test qui le dit : il vaut zero pour
+   * tout ce que la mise en page ne place pas, sans qu il faille enumerer les
+   * facons de masquer un element.
+   */
+  const rendu = (e) => e.getClientRects().length > 0;
   const feuilles = [...document.querySelectorAll('body *')].filter(
     (e) => e.children.length === 0 && (e.textContent || '').trim().length > 1 &&
-           !['SCRIPT','STYLE','TITLE'].includes(e.tagName));
+           !['SCRIPT','STYLE','TITLE'].includes(e.tagName) && rendu(e));
   const interactifs = [...document.querySelectorAll('a,button,input,select,textarea')];
   const boite = (e) => { const r = e.getBoundingClientRect(); return { l: Math.round(r.width), h: Math.round(r.height) }; };
   const aside = document.querySelector('aside');
@@ -173,6 +216,33 @@ const RELEVE = `(() => {
     polices_sous_11_5: feuilles
       .map((e) => ({ texte: (e.textContent || '').trim().slice(0, 30), px: parseFloat(getComputedStyle(e).fontSize) }))
       .filter((x) => x.px < 11.5),
+    /*
+     * ⚠️ LES PANNEAUX QUI S OUVRENT SONT MESURES OUVERTS, PARCE QU UNE SONDE
+     * QUI NE REGARDE QUE L ETAT DE REPOS NE VOIT JAMAIS LEUR GEOMETRIE.
+     *
+     * Ce depot a deja paye deux fois a cet endroit : un panneau ancre sur un
+     * NOMBRE qui recouvrait sa propre pilule — donc le seul geste qui le
+     * referme au doigt — et un autre qui sortait de la carte par la gauche sans
+     * sortir de la fenetre, donc sans que rien ne le signale. Les deux se
+     * lisent en une mesure : le haut du panneau est-il SOUS le bas de son
+     * bouton, et reste-t-il dans la fenetre.
+     */
+    panneaux: [...document.querySelectorAll('details')].map((d) => {
+      const s = d.querySelector('summary');
+      const ouvert = d.open;
+      d.open = true;
+      const pan = [...d.children].find((e) => e !== s);
+      const bs = s ? s.getBoundingClientRect() : null;
+      const bp = pan ? pan.getBoundingClientRect() : null;
+      d.open = ouvert;
+      if (!bs || !bp || bp.width === 0) return null;
+      return {
+        quoi: (s.textContent || '').trim().slice(0, 20),
+        recouvre_son_bouton: bp.top < bs.bottom - 1,
+        hors_fenetre: bp.right > de.clientWidth + 1 || bp.left < -1,
+        largeur: Math.round(bp.width),
+      };
+    }).filter((x) => x !== null && (x.recouvre_son_bouton || x.hors_fenetre)),
     interlettrage_non_nul: [...document.querySelectorAll('body *')]
       .filter((e) => { const v = getComputedStyle(e).letterSpacing; return v !== 'normal' && v !== '0px'; }).length,
     /*
@@ -225,6 +295,17 @@ for (const chemin of routes) {
       returnByValue: true,
     });
     rapport.push({ chemin, largeur, ...result.value });
+    if (dossierCaptures !== null) {
+      // `captureBeyondViewport` : sans lui on ne capture que le premier ecran,
+      // et c est exactement la moitie qu on a deja regardee en la mesurant.
+      const { data } = await envoyer("Page.captureScreenshot", {
+        format: "png",
+        captureBeyondViewport: true,
+      });
+      const nom = chemin.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + largeur + ".png";
+      await writeFile(join(dossierCaptures, nom), Buffer.from(data, "base64"));
+      console.error("[capture] " + nom);
+    }
     await envoyer("Target.closeTarget", { targetId });
   }
 }

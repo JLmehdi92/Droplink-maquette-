@@ -1,8 +1,9 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { CircleCheck, Clock, EyeOff, Plus, Search, Truck } from "lucide-react";
 import { BoutonAction } from "@/components/bouton-action";
-import { Icone } from "@/components/icone";
-import { EnTeteEcran } from "@/components/app/en-tete-ecran";
+import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
+import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 import { PucesFiltresActifs } from "@/components/commandes/puces-filtres-actifs";
 import { creerBrouillon } from "@/lib/commandes/actions";
@@ -167,7 +168,7 @@ export default async function Commandes({
         L'EN-TÊTE EST CELUI DE TOUS LES ÉCRANS DE L'ESPACE VENDEUR. Cette page
         recopiait le sien, et la copie avait déjà divergé sur trois valeurs.
       */}
-      <EnTeteEcran
+      <EnTeteEcranDs
         titre={t("titre")}
         {...(sousTitre !== null ? { sousTitre } : {})}
         /*
@@ -208,28 +209,17 @@ export default async function Commandes({
                 <input type="hidden" name="langue" value={langue} />
                 <BoutonAction
                   libelles={{
-                    repos: (
-                      <>
-                        <Icone nom="add" className="text-[15px]" />
-                        {t("nouvelle")}
-                      </>
-                    ),
+                    repos: <LibelleNouvelle libelle={t("nouvelle")} />,
                     enCours: t("nouvelleEnCours"),
-                    reussi: (
-                      <>
-                        <Icone nom="add" className="text-[15px]" />
-                        {t("nouvelle")}
-                      </>
-                    ),
-                    echoue: (
-                      <>
-                        <Icone nom="add" className="text-[15px]" />
-                        {t("nouvelle")}
-                      </>
-                    ),
+                    reussi: <LibelleNouvelle libelle={t("nouvelle")} />,
+                    echoue: <LibelleNouvelle libelle={t("nouvelle")} />,
                   }}
                   gapLibelle="gap-2"
-                  className="degrade-marque flex h-[42px] items-center gap-2 rounded-[11px] px-[18px] font-label-md text-[14px] font-bold shadow-[0_8px_20px_-8px_rgba(124,92,245,0.66)] transition-opacity hover:opacity-90"
+                  /* `Button variant="primary" size="lg"` du kit, avec les deux
+                     surcharges que `OrdersView` lui pose : 50 px de haut et le
+                     rayon de CARTE au lieu de la pilule. Le dégradé reste
+                     l'action principale UNIQUE de l'écran. */
+                  className="degrade-ds-marque flex h-[50px] items-center gap-2 rounded-ds-card px-7 text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
                 />
               </form>
             </div>
@@ -261,40 +251,61 @@ export default async function Commandes({
           qui appelle une action : une commande que le client n'a pas regardée est
           un lien qu'il n'a peut-être jamais reçu.
         */}
+        {/*
+          ⚠️ LE NOMBRE DE COLONNES SUIT LA LARGEUR DU CONTENU, PAS CELLE DE LA
+          FENÊTRE, ET C'EST POURQUOI LE PALIER EST À 1 424.
+
+          Le kit exprime ses paliers en requêtes de CONTENEUR : sa rangée passe à
+          deux colonnes quand la zone de contenu descend sous 1 100 px. Chez
+          nous la barre latérale vaut 264 px fixes dès `md`, et la zone de
+          contenu porte 30 px de marge de chaque côté : la zone tombe donc sous
+          1 100 px quand la FENÊTRE passe sous 1 424. Traduire le palier plutôt
+          que de le recopier est le seul moyen d'obtenir le même dessin — un
+          `2xl:` (1 536) laisserait deux colonnes sur toute la plage 1 424–1 535,
+          là où le kit en montre quatre.
+
+          ⚠️ DEUX COLONNES AU TÉLÉPHONE, ALORS QUE LE KIT N'EN MET QU'UNE, ET
+          C'EST UNE DIVERGENCE MESURÉE. En une colonne, les quatre tuiles
+          occupent 760 px de haut : sur un écran de 844, la première commande
+          n'est visible qu'après avoir fait défiler tout l'écran — sur la vue la
+          plus ouverte du produit, celle qu'un fournisseur consulte vingt fois
+          par jour. Le kit peut se le permettre parce que SES tuiles portent un
+          badge d'évolution en haut à droite, qui leur impose une largeur que
+          les nôtres n'ont pas : on l'a retiré, faute de donnée à y mettre. À
+          deux colonnes il reste 171 px par tuile, dont 107 pour le texte après
+          la pastille de 48 et son écart — mesuré, le plus long des quatre
+          libellés y tient sur deux lignes sans être tronqué, dans les trois
+          langues.
+
+          ⚠️ ET LES DEUX PALIERS SONT ÉCRITS DANS LA MÊME FAMILLE, `min-[…]`,
+          PARCE QU'EN MÉLANGER DEUX A DONNÉ UN ÉCRAN FAUX. Écrit
+          `md:grid-cols-2 min-[1424px]:grid-cols-4`, la rangée rendait DEUX
+          colonnes à 1 440 px. Mesuré dans la feuille servie : Tailwind émet le
+          bloc `min-width:1424px` à l'octet 71 505 et un bloc `min-width:48rem`
+          à l'octet 71 763 — la règle du palier le plus LARGE arrive donc en
+          PREMIER, et celle du palier le plus étroit l'écrase. Rien ne le
+          signale : les deux classes existent, sont servies, et les gardes qui
+          les surveillent restent vertes ; seul le rendu le dit. Deux paliers de
+          la même famille se trient entre eux par leur valeur.
+        */}
         {compteursVisibles && compteurs !== null ? (
-          <ul className="grid grid-cols-2 gap-3 px-margin-mobile md:grid-cols-4 md:px-0">
+          <ul className="grid grid-cols-2 gap-3 px-margin-mobile min-[768px]:gap-4 min-[768px]:px-0 min-[1424px]:grid-cols-4">
             {(
               [
-                ["preparation", compteurs.preparation, false],
-                ["enTransit", compteurs.enTransit, false],
-                ["jamaisOuvertes", compteurs.jamaisOuvertes, true],
-                ["livrees", compteurs.livrees, false],
+                ["preparation", compteurs.preparation, Clock, "alerte", false],
+                ["enTransit", compteurs.enTransit, Truck, "info", false],
+                ["jamaisOuvertes", compteurs.jamaisOuvertes, EyeOff, "erreur", true],
+                ["livrees", compteurs.livrees, CircleCheck, "succes", false],
               ] as const
-            ).map(([clef, valeur, alerte]) => (
-              <li
-                key={clef}
-                className={
-                  "rounded-lg border px-5 py-[18px] " +
-                  (alerte && valeur > 0
-                    ? "border-alerte-filet bg-alerte-fond"
-                    : "border-outline-variant bg-surface-container-lowest")
-                }
-              >
-                <p
-                  className={
-                    "font-body-sm text-[12px] " + (alerte && valeur > 0 ? "text-alerte" : "text-sourdine")
-                  }
-                >
-                  {t("compteurs." + clef)}
-                </p>
-                <p
-                  className={
-                    "mt-1.5 font-headline-lg text-[26px] font-extrabold tracking-[-0.03em] " +
-                    (alerte && valeur > 0 ? "text-alerte" : "text-on-surface")
-                  }
-                >
-                  {valeur}
-                </p>
+            ).map(([clef, valeur, IconeTuile, teinte, alerte]) => (
+              <li key={clef}>
+                <TuileMetrique
+                  Icone={IconeTuile}
+                  valeur={valeur}
+                  libelle={t("compteurs." + clef)}
+                  teinte={teinte satisfies TeinteTuile}
+                  valeurEnAlerte={alerte && valeur > 0}
+                />
               </li>
             ))}
           </ul>
@@ -352,28 +363,13 @@ export default async function Commandes({
               — posé par le composant — qui porte l'état à qui ne le voit pas. */}
           <BoutonAction
             libelles={{
-              repos: (
-                <>
-                  <Icone nom="add" className="text-[16px]" />
-                  {t("nouvelleCourt")}
-                </>
-              ),
+              repos: <LibelleNouvelle libelle={t("nouvelleCourt")} />,
               enCours: t("nouvelleCourt"),
-              reussi: (
-                <>
-                  <Icone nom="add" className="text-[16px]" />
-                  {t("nouvelleCourt")}
-                </>
-              ),
-              echoue: (
-                <>
-                  <Icone nom="add" className="text-[16px]" />
-                  {t("nouvelleCourt")}
-                </>
-              ),
+              reussi: <LibelleNouvelle libelle={t("nouvelleCourt")} />,
+              echoue: <LibelleNouvelle libelle={t("nouvelleCourt")} />,
             }}
             gapLibelle="gap-2"
-            className="degrade-marque flex h-[52px] items-center gap-2 rounded-full px-[22px] font-label-md text-[15px] font-bold shadow-[0_14px_28px_-10px_rgba(124,92,245,0.7)]"
+            className="degrade-ds-marque flex h-[52px] items-center gap-2 rounded-ds-pill px-[22px] text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand"
           />
         </form>
       )}
@@ -415,9 +411,11 @@ function FormulaireRecherche({
       {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
       {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
 
-      <Icone
-        nom="search"
-        className="pointer-events-none absolute top-1/2 left-[13px] -translate-y-1/2 text-[16px] text-gris-inactif"
+      <Search
+        aria-hidden="true"
+        size={17}
+        strokeWidth={1.8}
+        className="pointer-events-none absolute top-1/2 left-[14px] -translate-y-1/2 text-ds-texte-tenu"
       />
       <input
         type="search"
@@ -426,16 +424,43 @@ function FormulaireRecherche({
         placeholder={libelles(telephone ? "rechercherExempleCourt" : "rechercherExemple")}
         aria-label={libelles("rechercher")}
         className={
-          // La planche bureau pose le champ sur du BLANC — il est seul sur le
-          // gris de la zone de travail. La planche téléphone le pose sur
-          // `#fafafc`, parce qu'il est déjà dans la barre blanche : un blanc sur
-          // blanc n'aurait plus de bord.
-          "rounded-[11px] border border-filet-controle pr-3.5 pl-[38px] font-body-md text-on-surface " +
+          /*
+            LE CHAMP DE RECHERCHE DU KIT — `dl-topsearch` : 42 px de haut, rayon
+            de carte, filet `--border-subtle`, fond carte.
+
+            AU TÉLÉPHONE IL RESTE SUR LE CREUX, et c'est la même raison qu'avant
+            la migration : il vit alors DANS la barre blanche de l'en-tête, et un
+            blanc posé sur du blanc n'aurait plus de bord. 44 px au doigt.
+          */
+          "rounded-ds-card border border-ds-filet pr-3.5 pl-[40px] text-ds-texte-fort " +
+          "placeholder:text-ds-texte-tenu focus-visible:outline-none " +
+          "focus-visible:shadow-[var(--anneau-ds-focus)] " +
           (telephone
-            ? "h-11 w-full rounded-[12px] bg-surface-container-low text-[15px]"
-            : "h-[42px] w-[290px] bg-surface-container-lowest text-[14px]")
+            ? "h-11 w-full bg-ds-surface-creux text-[15px]"
+            : "h-[42px] w-[290px] bg-ds-surface-carte text-[14px]")
         }
       />
     </form>
+  );
+}
+
+/**
+ * Le libellé du bouton « nouvelle commande » — l'icône et le mot.
+ *
+ * IL EXISTE PARCE QU'IL ÉTAIT ÉCRIT HUIT FOIS : `BoutonAction` prend quatre
+ * libellés, et l'écran porte deux boutons. Huit copies d'un même fragment
+ * divergent à la première retouche, et c'est déjà arrivé sur cet écran — la
+ * taille d'icône valait 15 au bureau, 16 au téléphone, sans raison.
+ *
+ * ⚠️ LE « + » RESTE PENDANT L'ATTENTE — NON, IL EST REMPLACÉ, et c'est mesuré :
+ * l'anneau prend sa place à largeur constante. Les deux ensemble élargiraient le
+ * bouton au clic, et sur l'action flottante du téléphone cela vaut douze pixels.
+ */
+function LibelleNouvelle({ libelle }: { readonly libelle: string }) {
+  return (
+    <>
+      <Plus aria-hidden="true" size={17} strokeWidth={2} />
+      {libelle}
+    </>
   );
 }
