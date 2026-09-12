@@ -471,6 +471,11 @@ const INVENTAIRE = `(() => {
       h: Math.round(r.height),
       x: Math.round(r.x),
       y: Math.round(r.y),
+      // ⚠️ LA FAMILLE COMPTE AUTANT QUE LA TAILLE. Deux textes de meme taille
+      // et de meme graisse dans deux polices differentes n ont PAS la meme
+      // largeur — et une largeur qui differe de cinq pixels partout se lit
+      // comme un defaut de mise en page alors que c est une police de repli.
+      famille: c.fontFamily.split(",")[0].replace(/["']/g, ""),
       police: parseFloat(c.fontSize),
       graisse: c.fontWeight,
       interligne: c.lineHeight,

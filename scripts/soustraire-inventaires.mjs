@@ -64,10 +64,27 @@ const forme = (txt) =>
     .replace(/\s+/g, " ")
     .trim();
 
+/**
+ * ⚠️ UN FILET DE ZERO PIXEL N EST PAS UN FILET, QUEL QUE SOIT SON STYLE.
+ *
+ * `getComputedStyle` rend `0px none rgb(...)` quand aucun filet n est declare et
+ * `0px solid rgb(...)` quand une couleur l est sans largeur. Les deux ne peignent
+ * RIEN. Comparees telles quelles, elles produisaient un ecart sur quinze lignes
+ * du premier ecran mesure — et quinze faux ecarts cachent le vrai, qui est
+ * exactement ce que cet outil existe pour trouver.
+ */
+const filetUtile = (f) => (String(f).startsWith("0px") ? "aucun" : f);
+
+/**
+ * ⚠️ ON N INDEXE PAS CE QUI NE SE VOIT PAS. Un `sr-only` mesure 1 x 1 : apparie
+ * avec le vrai element du meme texte, il rendait « largeur 123 → 1 » et faisait
+ * passer un element pour une regression. Sous 4 px de cote, rien n est peint.
+ */
 const indexer = (lignes) => {
   const par = new Map();
   for (const l of lignes) {
     if (l.txt === "") continue;
+    if (l.l < 4 || l.h < 4) continue;
     const cle = forme(l.txt);
     if (cle.length < 2) continue;
     if (!par.has(cle)) par.set(cle, []);
@@ -83,6 +100,7 @@ const iProduit = indexer(produit);
 
 /** Les proprietes comparees, et le libelle sous lequel l ecart se lit. */
 const PROPRIETES = [
+  ["famille", "police"],
   ["police", "taille"],
   ["graisse", "graisse"],
   ["interligne", "interligne"],
@@ -105,23 +123,83 @@ for (const [cle, lignes] of iProduit) {
   if (!iKit.has(cle)) enTrop.push({ cle, exemple: lignes[0] });
 }
 
+/**
+ * ⚠️ ON APPARIE PAR PROXIMITE, NI « LE PREMIER AVEC LE PREMIER », NI PAR RANG.
+ *
+ * « En transit » apparait sept fois sur l ecran des commandes : dans un onglet,
+ * dans une pastille de ligne, dans une frise. Comparer le premier du kit au
+ * premier du produit rapprochait une pastille de tableau d un libelle de frise —
+ * deux elements qui n ont aucune raison d avoir la meme largeur.
+ *
+ * Le rang dans l ordre du document ne suffit pas non plus : la barre laterale et
+ * le contenu principal s entrelacent differemment d un document a l autre, et
+ * trier par `y` mettait le titre `<h1>` du kit en face d une entree de
+ * navigation du produit.
+ *
+ * ⚠️ CE QUI APPARIE VRAIMENT, C EST LA PLACE. Un element garde sa region entre
+ * une reference et son implementation — une entree de barre laterale reste a
+ * gauche, une pastille de tableau reste dans le tableau. On apparie donc au PLUS
+ * PROCHE, glouton, en commencant par les couples les moins ambigus. La distance
+ * est une mesure, pas une supposition.
+ */
+const apparier = (aKit, aProduit) => {
+  const couples = [];
+  const libres = new Set(aProduit.keys());
+  const candidats = [];
+  for (let i = 0; i < aKit.length; i += 1) {
+    for (let j = 0; j < aProduit.length; j += 1) {
+      const dx = aKit[i].x - aProduit[j].x;
+      const dy = aKit[i].y - aProduit[j].y;
+      candidats.push({ i, j, d: Math.hypot(dx, dy) });
+    }
+  }
+  candidats.sort((u, v) => u.d - v.d);
+  const prisKit = new Set();
+  for (const c of candidats) {
+    if (prisKit.has(c.i) || !libres.has(c.j)) continue;
+    prisKit.add(c.i);
+    libres.delete(c.j);
+    couples.push([aKit[c.i], aProduit[c.j]]);
+  }
+  return couples;
+};
+
 const ecarts = [];
 for (const [cle, lignesKit] of iKit) {
   const lignesProduit = iProduit.get(cle);
   if (lignesProduit === undefined) continue;
-  // Le premier de chaque cote : quand un texte apparait plusieurs fois, ses
-  // occurrences partagent leur style dans les deux documents.
-  const a = lignesKit[0];
-  const b = lignesProduit[0];
-  const differences = [];
-  for (const [champ, libelle] of PROPRIETES) {
-    if (String(a[champ]) !== String(b[champ])) {
-      differences.push(`${libelle} ${a[champ] || "—"} → ${b[champ] || "—"}`);
+  const couples = apparier(lignesKit, lignesProduit);
+  let rang = 0;
+  for (const [a, b] of couples) {
+    rang += 1;
+    const differences = [];
+    for (const [champ, libelle] of PROPRIETES) {
+      const va = champ === "filet" ? filetUtile(a[champ]) : String(a[champ]);
+      const vb = champ === "filet" ? filetUtile(b[champ]) : String(b[champ]);
+      if (va !== vb) differences.push(`${libelle} ${va || "—"} → ${vb || "—"}`);
+    }
+    if (Math.abs(a.l - b.l) > SEUIL) differences.push(`largeur ${a.l} → ${b.l}`);
+    if (Math.abs(a.h - b.h) > SEUIL) differences.push(`hauteur ${a.h} → ${b.h}`);
+    if (Math.abs(a.x - b.x) > SEUIL || Math.abs(a.y - b.y) > SEUIL) {
+      differences.push(`place (${a.x},${a.y}) → (${b.x},${b.y})`);
+    }
+    if (differences.length > 0) {
+      const n = couples.length > 1 ? ` [${rang}/${couples.length}]` : "";
+      ecarts.push({ texte: `${a.txt}${n}  <${a.t}>`, differences });
     }
   }
-  if (Math.abs(a.l - b.l) > SEUIL) differences.push(`largeur ${a.l} → ${b.l}`);
-  if (Math.abs(a.h - b.h) > SEUIL) differences.push(`hauteur ${a.h} → ${b.h}`);
-  if (differences.length > 0) ecarts.push({ texte: a.txt, differences });
+  /*
+   * ⚠️ ET LE NOMBRE D OCCURRENCES EST LUI-MEME UN ECART. Un libelle rendu six
+   * fois par le kit et deux fois par le produit signale quatre lignes, quatre
+   * cellules ou quatre pastilles absentes — que la liste ① ne voit pas, puisque
+   * le texte, lui, est bien present quelque part.
+   */
+  if (lignesKit.length !== lignesProduit.length) {
+    ecarts.push({
+      texte: `${lignesKit[0].txt}  <nombre d'occurrences>`,
+      differences: [`rendu ${lignesKit.length} fois → ${lignesProduit.length} fois`],
+    });
+  }
 }
 
 const bloc = (titre, lignes) => {
