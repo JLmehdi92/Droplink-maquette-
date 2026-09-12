@@ -377,7 +377,7 @@ position, police, graisse, interlettrage, interligne, couleur, fond, image de
 fond, rayon, filet, ombre, marge, écart. **C'est un inventaire, pas une
 sélection** : la comparaison trie, pas la sonde.
 
-#### ⚠️ LES CINQ PIÈGES, TOUS PAYÉS UNE FOIS
+#### ⚠️ LES SIX PIÈGES, TOUS PAYÉS UNE FOIS
 
 1. **LE KIT EST DESSINÉ À 1690 px, PAS 1440.** C'est écrit dans l'en-tête de
    chacune de ses pages : `viewport="1690x1010"`. Mesurer le produit à 1440 et
@@ -406,6 +406,17 @@ sélection** : la comparaison trie, pas la sonde.
    l'octet 71 505 et un bloc `min-width:48rem` à l'octet 71 763 — le palier le
    plus LARGE arrive en PREMIER et le plus étroit l'écrase. Deux paliers de la
    **même** famille se trient par leur valeur.
+6. **LE FICHIER QUI PORTE LE NOM DE L'ÉCRAN N'EST PAS CELUI QUI LE REND.**
+   `OrderDetail.jsx` écrit `fontSize: 18` et `letterSpacing: -0.025em` pour son
+   `Panel` ; le navigateur rend **19 px et -0,03em**. Les huit écrans vendeur
+   sont chargés dans un seul document, `AnalyticsView.jsx` **après**
+   `OrderDetail.jsx`, et les deux déclarent un `function Panel` au niveau
+   global : la seconde déclaration écrase la première, donc l'écran de détail
+   rend le `Panel` des **ANALYSES**. Rien ne le signale — pas d'erreur, pas
+   d'avertissement, et les deux composants se ressemblent assez pour que la
+   transposition paraisse juste. *Une valeur lue dans un source n'est une valeur
+   que si ce source est celui qui s'exécute ; le navigateur, lui, ne peut pas se
+   tromper de composant.*
 
 #### ⚠️ ET CE QUE LA MÉTHODE NE DISPENSE PAS DE DÉCIDER
 
