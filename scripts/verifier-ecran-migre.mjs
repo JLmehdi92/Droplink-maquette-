@@ -432,6 +432,69 @@ const RELEVE = `(() => {
   };
 })()`;
 
+/**
+ * L INVENTAIRE COMPLET DE L ECRAN — le MEME releve que `comparer-au-kit.mjs`,
+ * mot pour mot, parce que deux inventaires qui ne relevent pas les memes champs
+ * ne se soustraient pas.
+ *
+ * ⚠️ IL N EXISTAIT PAS, ET C EST CE QUI A PERMIS DE TRICHER SANS LE VOULOIR.
+ * `CLAUDE.md` prescrit de comparer les deux inventaires PAR SOUSTRACTION ; le
+ * cote kit etait outille, le cote produit non. La soustraction se faisait donc
+ * A L OEIL — c est-a-dire sur ce qu on pense a regarder — et des ecrans ont ete
+ * declares « mesures au pixel » sans qu une seule taille de texte ait ete
+ * comparee.
+ *
+ * Il ne se rend que sur demande (`INVENTAIRE=<dossier>`) : les rapports de
+ * regle n en ont pas besoin, et un fichier de 400 Ko par ecran et par largeur
+ * noierait le reste.
+ */
+const INVENTAIRE = `(() => {
+  const norm = (c) => c.replace(/\\s+/g, "");
+  const rendu = (e) => e.getClientRects().length > 0;
+  const lignes = [];
+  for (const e of document.querySelectorAll("body *")) {
+    if (!rendu(e)) continue;
+    if (["SCRIPT", "STYLE", "SVG", "PATH", "CIRCLE", "LINE", "RECT", "POLYLINE"].includes(e.tagName)) continue;
+    const r = e.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) continue;
+    const c = getComputedStyle(e);
+    const texte = [...e.childNodes]
+      .filter((n) => n.nodeType === 3)
+      .map((n) => n.textContent.trim())
+      .join(" ")
+      .trim()
+      .slice(0, 40);
+    lignes.push({
+      t: e.tagName.toLowerCase(),
+      txt: texte,
+      l: Math.round(r.width),
+      h: Math.round(r.height),
+      x: Math.round(r.x),
+      y: Math.round(r.y),
+      police: parseFloat(c.fontSize),
+      graisse: c.fontWeight,
+      interligne: c.lineHeight,
+      tracking: c.letterSpacing,
+      couleur: norm(c.color),
+      fond: norm(c.backgroundColor),
+      image: c.backgroundImage === "none" ? "" : c.backgroundImage.slice(0, 90),
+      rayon: c.borderRadius,
+      filet: norm(c.borderTopWidth + " " + c.borderTopStyle + " " + c.borderTopColor),
+      ombre: c.boxShadow === "none" ? "" : c.boxShadow.slice(0, 80),
+      marge: c.padding,
+      ecart: c.gap === "normal" ? "" : c.gap,
+    });
+  }
+  return {
+    largeur_vue: document.documentElement.clientWidth,
+    debordement: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    hauteur: document.documentElement.scrollHeight,
+    lignes,
+  };
+})()`;
+
+const dossierInventaire = process.env["INVENTAIRE"] ?? null;
+
 const rapport = [];
 for (const modele of routes) {
   const chemin = modele
@@ -491,6 +554,16 @@ for (const modele of routes) {
       );
     }
     rapport.push({ chemin, largeur, ...vu });
+    if (dossierInventaire !== null) {
+      const { result: inv } = await envoyer("Runtime.evaluate", {
+        expression: INVENTAIRE,
+        returnByValue: true,
+      });
+      const nomInv =
+        chemin.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + largeur + ".json";
+      await writeFile(join(dossierInventaire, nomInv), JSON.stringify(inv.value, null, 1), "utf8");
+      console.error("[inventaire] " + nomInv + " — " + inv.value.lignes.length + " elements");
+    }
     if (dossierCaptures !== null) {
       // `captureBeyondViewport` : sans lui on ne capture que le premier ecran,
       // et c est exactement la moitie qu on a deja regardee en la mesurant.
