@@ -341,12 +341,98 @@ Ne se traduisent pas : marques et transporteurs, noms de personnes, références
 les dates, les heures, et les chaînes composées du type « 30 % du total »,
 « Affichage de 1 à 10 sur 1 248 commandes ».
 
+### ⚠️ LA MÉTHODE DU PIXEL PRÈS — ON SERT LE KIT, ON NE LE LIT PAS
+
+> **Établie le 12/09/2026, après avoir migré quatre écrans à l'envers.**
+> Les quatre premières migrations ont LU les valeurs dans le source du kit
+> (`height: 48`, `gap: 14`, `--radius-card`) et les ont transposées à la main.
+> Le résultat passait toutes les portes, ne débordait nulle part, et ne
+> ressemblait PAS à la référence : il manquait une barre supérieure entière,
+> quatre colonnes de tableau, les compteurs d'onglets et le pied de page.
+> Wassim l'a vu en une phrase : « y'a rien qui est parfait sur toutes les pages ».
+
+**Lire le source d'un kit ne dit pas ce que le navigateur rend.** Il est en
+`border-box` ici et en `content-box` ailleurs, ses `padding` s'ajoutent, ses
+`gap` se replient, la moitié de ses valeurs vient de variables résolues à
+l'exécution — et surtout, **lire un composant ne montre pas ce qui manque
+autour de lui.**
+
+#### Les quatre gestes, dans cet ordre
+
+```
+1.  npx --yes http-server -p 8123 -s .      # dans .claude/skills/droplink-design/
+    chrome --remote-debugging-port=9223 --headless=new
+
+2.  CLIC_KIT="Suivi d'envois" node scripts/comparer-au-kit.mjs       "http://127.0.0.1:8123/ui_kits/seller_app/index.html" 1690       kit-envois.json KIT-envois-1690.png
+
+3.  node scripts/build-contre-tests.mjs && node scripts/servir-contre-tests.mjs
+    MSYS_NO_PATHCONV=1 node scripts/verifier-ecran-migre.mjs       http://localhost:<port> "/fr/envois" 1690,390 <dossier de captures>
+
+4.  Comparer les DEUX captures côte à côte, et les deux inventaires par
+    soustraction. L'écart se lit, il ne se devine pas.
+```
+
+`comparer-au-kit.mjs` rend, pour chaque élément RÉELLEMENT RENDU : boîte,
+position, police, graisse, interlettrage, interligne, couleur, fond, image de
+fond, rayon, filet, ombre, marge, écart. **C'est un inventaire, pas une
+sélection** : la comparaison trie, pas la sonde.
+
+#### ⚠️ LES CINQ PIÈGES, TOUS PAYÉS UNE FOIS
+
+1. **LE KIT EST DESSINÉ À 1690 px, PAS 1440.** C'est écrit dans l'en-tête de
+   chacune de ses pages : `viewport="1690x1010"`. Mesurer le produit à 1440 et
+   le comparer à des valeurs relevées à 1690 compare deux choses différentes,
+   et l'écart se lit comme une erreur d'implémentation alors que c'est une
+   erreur de protocole.
+2. **LE KIT EST UNE APPLICATION À ÉTAT, PAS SIX PAGES.** Ses six écrans vendeur
+   vivent dans un seul document et se choisissent par un `setView` de React :
+   aucune URL ne les distingue. Sans `CLIC_KIT`, toutes les comparaisons
+   porteraient sur le même écran — celui par défaut.
+3. **LE MÊME COMPOSANT N'EST PAS LE MÊME PARTOUT.** Le kit pose
+   `ProgressTracker` avec ses libellés sur Commandes et `MiniProgress` SANS
+   libellé sur Envois. Posée aux deux endroits, la première faisait chevaucher
+   nos libellés : « Pas encore scannéExpédié ».
+4. **UNE CLASSE SERVIE N'EST PAS UNE CLASSE QUI GAGNE.** `.champ-app`,
+   `.champ-editeur` et `.champ-liste` sont déclarées HORS de toute `@layer` dans
+   `globals.css` ; Tailwind range ses utilitaires dans `@layer utilities`, et
+   **une règle sans couche l'emporte sur une règle en couche.** Elles écrasaient
+   le fond, le filet et la taille du design system en silence : les classes
+   existent, sont servies, et les deux gardes qui les surveillent restent vertes
+   — elles vérifient qu'une classe existe et pointe sur une variable définie,
+   jamais qui GAGNE la cascade.
+5. **DEUX PALIERS DE FAMILLES DIFFÉRENTES NE SE TRIENT PAS.**
+   `md:grid-cols-2 min-[1424px]:grid-cols-4` rendait DEUX colonnes à 1440 px :
+   mesuré dans la feuille servie, Tailwind émet le bloc `min-width:1424px` à
+   l'octet 71 505 et un bloc `min-width:48rem` à l'octet 71 763 — le palier le
+   plus LARGE arrive en PREMIER et le plus étroit l'écrase. Deux paliers de la
+   **même** famille se trient par leur valeur.
+
+#### ⚠️ ET CE QUE LA MÉTHODE NE DISPENSE PAS DE DÉCIDER
+
+Un écart au kit n'est pas toujours un défaut. **Trois familles, et elles se
+disent dans le commit à chaque fois :**
+
+| L'écart | Ce qu'on fait |
+|---|---|
+| Le kit contredit une **contrainte verrouillée** — « Passez au Pro », pagination numérotée | **Le produit gagne**, et on écrit pourquoi |
+| Le kit montre une donnée **que la base n'a pas** — badges « +12 % », drapeau de pays, nom de transporteur | **On n'affiche rien.** Un repli sur chaque ligne (« Transporteur inconnu ») vaut moins que rien |
+| Le kit dessine un écran **que le dépôt n'a pas** — Tableau de bord, Paramètres | Une entrée de navigation qui mène à un 404 est pire qu'une entrée absente |
+
+> *Le numéro de commande du kit, `#DLK7842`, illustre la troisième voie : la
+> référence courte est DÉRIVÉE de l'identifiant plutôt que stockée. Un numéro
+> séquentiel se lirait mieux, mais il exigerait une colonne, un compteur par
+> boutique, une reprise de l'existant et une migration en attente de
+> déploiement — pour une référence qu'on copie plus qu'on ne récite.*
+
 ### Comment on vérifie un écran migré
 
 Dans cet ordre, et on ne passe pas au suivant avant que les cinq passent :
 
-1. **Bureau** — comparer à la page de référence, valeur par valeur, dans un
-   navigateur. Pas une impression : des nombres.
+1. **Bureau, À 1690 px** — comparer à la page de référence SERVIE, valeur par
+   valeur, par la méthode ci-dessus. Pas une impression : deux inventaires et
+   une soustraction. **Et regarder les deux captures côte à côte** : les
+   nombres établissent qu'un écran ne déborde pas, ils ne disent rien de ce qui
+   MANQUE autour.
 2. **Téléphone à 390 px** — `scrollWidth === clientWidth`, aucun texte tronqué,
    aucune cible sous 44 px, aucune police sous 11,5 px.
 3. **Les trois langues** — le chinois allonge les libellés courts et raccourcit
