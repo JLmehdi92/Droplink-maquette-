@@ -31,6 +31,54 @@ import type { LigneCommande } from "@/lib/commandes/liste";
 
 const ETAPES = ["preparation", "expedie", "en_transit", "livre"] as const;
 
+/**
+ * LA VERSION COMPACTE — `MiniProgress` de `ShippingView`.
+ *
+ * ⚠️ CE N'EST PAS LA MÊME FRISE, ET LE KIT EN EMPLOIE BIEN DEUX. Sur l'écran des
+ * commandes il pose `ProgressTracker`, avec ses libellés sous chaque pastille ;
+ * sur celui des envois il pose `MiniProgress`, quatre pastilles reliées SANS
+ * AUCUN libellé. La raison se voit à la mesure : la colonne « Suivi » des
+ * commandes fait 2,15fr, celle des envois bien moins, et nos libellés d'état de
+ * colis sont plus longs que ceux du kit — « Pas encore scanné » contre
+ * « Commandé ». Mis dans la colonne étroite, ils se CHEVAUCHAIENT, mesuré : le
+ * rendu affichait « Pas encore scannéExpédié ».
+ *
+ * LES VALEURS DE `MiniProgress` : pastille 10 × 10, trait 14 × 2, et la série
+ * passe au VERT quand la dernière étape est atteinte — c'est le seul endroit du
+ * produit où « livré » se lit sans lire un mot.
+ */
+export function FriseCompacte({
+  statut,
+  etiquette,
+}: {
+  readonly statut: (typeof ETAPES)[number];
+  /** Le mot que la frise remplace, pour qui ne voit pas les pastilles. */
+  readonly etiquette: string;
+}) {
+  const courante = ETAPES.indexOf(statut);
+  const livre = courante === ETAPES.length - 1;
+  const teinte = livre ? "bg-ds-succes" : "bg-ds-accent";
+
+  return (
+    <span className="inline-flex items-center">
+      <span className="sr-only">{etiquette}</span>
+      {ETAPES.map((etape, i) => (
+        <span key={etape} aria-hidden="true" className="inline-flex items-center">
+          {i > 0 ? (
+            <span className={"h-0.5 w-[14px] " + (i <= courante ? teinte : "bg-ds-ink-200")} />
+          ) : null}
+          <span
+            className={
+              "inline-block h-2.5 w-2.5 rounded-ds-pill " +
+              (i <= courante ? teinte : "border-2 border-ds-ink-200 bg-ds-surface-carte")
+            }
+          />
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function FriseSuivi({
   statut,
   libelles,

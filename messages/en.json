@@ -393,7 +393,8 @@
       "mouvement": "Last movement",
       "commandes": "Linked orders",
       "point": "Last checkpoint",
-      "interrogations": "Queries"
+      "interrogations": "Queries",
+      "progression": "Progress"
     },
     "mouvement": {
       "aucun": "No carrier information yet",
@@ -622,7 +623,6 @@
     "plusMedias": "+{n}",
     "vuesCourt": "{n, plural, one {# view} other {# views}}",
     "ouvrirCommande": "Open order {reference}",
-    "sansTransporteur": "Unknown carrier",
     "periodeToutes": "All dates",
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "From {du}",

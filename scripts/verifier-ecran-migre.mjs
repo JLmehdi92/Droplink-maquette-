@@ -139,13 +139,24 @@ const jetonPublic = commandes?.[0]?.public_token ?? "";
  * jours du brief, donc il declenche reellement la famille ambree du silence.
  */
 const jours = (n) => new Date(Date.now() - n * 86400000).toISOString();
-const { data: colis } = await service
+/*
+ * ⚠️ UNE INSERTION DE JEU DE MESURE QUI ECHOUE DOIT ARRETER LA SONDE.
+ *
+ * Celle-ci ignorait son erreur : `carrier_code` de `tracked_parcels` est un
+ * ENTIER — l identifiant du fournisseur de suivi — et on y ecrivait le texte
+ * « la-poste ». Postgres refusait (22P02), la sonde continuait, l ecran des
+ * envois rendait son etat VIDE, et le rapport disait « aucun debordement,
+ * aucune cible trop petite » — sur un tableau qui n existait pas. C est la
+ * meme famille que la sonde qui mesurait l ecran de connexion en croyant
+ * mesurer le tableau de bord : des chiffres coherents et faux.
+ */
+const { data: colis, error: eColis } = await service
   .from("tracked_parcels")
   .insert([
     {
       shop_id: shop.id,
       tracking_number: "DLKMESURE0001FR",
-      carrier_code: "la-poste",
+      carrier_code: 100003,
       normalized_status: "en_transit",
       first_movement_at: jours(3),
       last_movement_at: jours(1),
@@ -154,7 +165,7 @@ const { data: colis } = await service
     {
       shop_id: shop.id,
       tracking_number: "DLKMESURE0002CN",
-      carrier_code: "ems",
+      carrier_code: 190094,
       normalized_status: "en_transit",
       first_movement_at: jours(21),
       last_movement_at: jours(14),
@@ -163,11 +174,14 @@ const { data: colis } = await service
   ])
   .select("id");
 
-if (colis !== null && commandes !== null) {
-  await service.from("order_parcels").insert(
-    colis.map((c, i) => ({ order_id: commandes[i % commandes.length].id, parcel_id: c.id })),
-  );
-}
+if (eColis) throw new Error("jeu de mesure : colis non crees — " + eColis.message);
+if (colis === null || commandes === null) throw new Error("jeu de mesure : lecture vide");
+
+const { error: eLien } = await service.from("order_parcels").insert(
+  colis.map((c, i) => ({ order_id: commandes[i % commandes.length].id, parcel_id: c.id })),
+);
+if (eLien) throw new Error("jeu de mesure : colis non rattaches — " + eLien.message);
+console.error(`[jeu] ${commandes.length} commandes, ${colis.length} colis dont un silencieux.`);
 
 const { data: sess } = await publiable.auth.signInWithPassword({
   email: courriel,

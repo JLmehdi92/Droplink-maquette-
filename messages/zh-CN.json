@@ -393,7 +393,8 @@
       "mouvement": "最近更新",
       "commandes": "关联订单",
       "point": "最新节点",
-      "interrogations": "查询次数"
+      "interrogations": "查询次数",
+      "progression": "进度"
     },
     "mouvement": {
       "aucun": "承运商尚未提供物流信息",
@@ -622,7 +623,6 @@
     "plusMedias": "+{n}",
     "vuesCourt": "{n} 次查看",
     "ouvrirCommande": "打开订单 {reference}",
-    "sansTransporteur": "承运商未知",
     "periodeToutes": "全部时间",
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "自 {du} 起",

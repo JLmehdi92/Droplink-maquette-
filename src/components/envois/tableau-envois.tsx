@@ -5,6 +5,7 @@ import { ETATS, TRIS } from "@/lib/envois/liste";
 import { AlertCircle, ArrowUpDown, ChevronDown, CircleCheck, Info, Package, Truck } from "lucide-react";
 import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
 import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
+import { FriseCompacte } from "@/components/commandes/frise-suivi";
 import { LienEcran } from "@/components/lien-ecran";
 
 /**
@@ -146,9 +147,16 @@ export async function TableauEnvois({
   /* En-tête de colonne du design system : 12 px, demi-gras, sourdine, SANS
      capitales — les majuscules y sont réservées aux eyebrows de marketing, et
      11 px passait sous le plancher de la règle 5. */
+  /*
+   * LES BANDES PORTENT LEUR MARGE DE 20 px, comme sur l écran des commandes : le
+   * filet de séparation doit aller d un bord à l autre de la carte, ce qu une
+   * marge posée sur le conteneur du tableau lui interdit.
+   */
   const enTete =
-    "pb-3 pr-4 text-left text-[12px] leading-4 font-semibold whitespace-nowrap text-ds-texte-sourdine last:pr-0";
-  const cellule = "border-t border-ds-filet py-[15px] pr-4 text-[14px] last:pr-0";
+    "pt-4 pb-3 pr-4 text-left text-[12px] leading-4 font-semibold whitespace-nowrap text-ds-texte-sourdine";
+  const cellule = "border-t border-ds-filet py-[15px] pr-4 text-[14px]";
+  const bordGauche = " pl-5";
+  const bordDroit = " pr-5";
 
   /**
    * LA PILULE DE VUE, celle du canevas : bordée, noire quand elle est active.
@@ -442,13 +450,21 @@ export async function TableauEnvois({
         </>
       ) : (
         <>
+          {/*
+            ⚠️ LA BARRE D OUTILS EST AU-DESSUS DE LA CARTE, PAS DEDANS. Le kit
+            pose sa rangée de filtres entre les tuiles et la carte du tableau,
+            et garde la carte pour les seules données. C est aussi ce qui permet
+            à la même rangée de servir les DEUX mises en page — tableau au bureau,
+            cartes au téléphone — au lieu d être écrite deux fois.
+          */}
+          {barreOutils}
+
           {/* --- LE TABLEAU, à partir de `lg` ---------------------------- */}
-          <div className={"hidden xl:block " + CARTE + " xl:px-[22px] xl:py-5"}>
-            {barreOutils}
+          <div className={"hidden xl:block " + CARTE + " xl:p-0"}>
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th scope="col" className={enTete}>
+                  <th scope="col" className={enTete + bordGauche}>
                     {t("colonnes.numero")}
                   </th>
                   <th scope="col" className={enTete}>
@@ -457,13 +473,19 @@ export async function TableauEnvois({
                   <th scope="col" className={enTete}>
                     {t("colonnes.etat")}
                   </th>
+                  {/* LA PROGRESSION, comme sur la référence : la frise se BALAIE
+                      là où la pastille se LIT. Sur une colonne de quarante colis,
+                      c est ce qui permet de voir d un coup ce qui avance. */}
+                  <th scope="col" className={enTete}>
+                    {t("colonnes.progression")}
+                  </th>
                   <th scope="col" className={enTete}>
                     {t("colonnes.mouvement")}
                   </th>
                   <th scope="col" className={enTete}>
                     {t("colonnes.point")}
                   </th>
-                  <th scope="col" className={enTete + " text-right"}>
+                  <th scope="col" className={enTete + bordDroit + " text-right"}>
                     {t("colonnes.interrogations")}
                   </th>
                 </tr>
@@ -478,7 +500,7 @@ export async function TableauEnvois({
                         d.silencieux ? "bg-ds-alerte-fond" : "transition-colors hover:bg-ds-ink-50"
                       }
                     >
-                      <td className={cellule + " font-mono text-[13px] font-semibold text-ds-texte-fort"}>
+                      <td className={cellule + bordGauche + " font-mono text-[13px] font-semibold text-ds-texte-fort"}>
                         {ligne.numero}
                         {ligne.abandonneLe !== null ? (
                           /* ON DIT QUE NOUS AVONS CESSÉ D'INTERROGER, pas que le
@@ -498,14 +520,37 @@ export async function TableauEnvois({
                         )}
                       </td>
                       <td className={cellule}>{d.puce}</td>
-                      <td
-                        className={
-                          cellule +
-                          " whitespace-nowrap " +
-                          (d.silencieux ? "font-bold text-ds-alerte" : "text-ds-texte-sourdine")
-                        }
-                      >
-                        {d.anciennete ?? "—"}
+
+                      <td className={cellule}>
+                        <FriseCompacte statut={ligne.etat} etiquette={t(`etat.${ligne.etat}`)} />
+                      </td>
+
+                      {/* LA DERNIÈRE MISE À JOUR SUR DEUX LIGNES, comme le kit : la
+                          date au-dessus, l ancienneté dessous. Le kit met l heure ;
+                          ici l âge est plus utile — c est la seule chose de l écran
+                          qui change tous les jours quand le colis ne bouge pas. */}
+                      <td className={cellule + " whitespace-nowrap"}>
+                        {ligne.dernierMouvement === null ? (
+                          <span className="text-ds-texte-tenu">—</span>
+                        ) : (
+                          <span className="flex flex-col">
+                            <span className="text-[13px] text-ds-texte-corps">
+                              {format.dateTime(new Date(ligne.dernierMouvement), {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <span
+                              className={
+                                "text-[12px] " +
+                                (d.silencieux ? "font-bold text-ds-alerte" : "text-ds-texte-sourdine")
+                              }
+                            >
+                              {d.anciennete ?? ""}
+                            </span>
+                          </span>
+                        )}
                       </td>
                       <td
                         className={
@@ -516,7 +561,7 @@ export async function TableauEnvois({
                       >
                         {ligne.dernierPoint ?? t("mouvement.aucun")}
                       </td>
-                      <td className={cellule + " text-right text-ds-texte-sourdine"}>
+                      <td className={cellule + bordDroit + " text-right text-ds-texte-sourdine"}>
                         {format.number(ligne.interrogations)}
                       </td>
                     </tr>
@@ -529,8 +574,7 @@ export async function TableauEnvois({
           </div>
 
           {/* --- LES CARTES, en dessous de `lg` -------------------------- */}
-          <div className="xl:hidden">{barreOutils}</div>
-          <ul className="mt-2.5 flex flex-col gap-2.5 xl:hidden">
+          <ul className="flex flex-col gap-2.5 xl:hidden">
             {page.lignes.map((ligne) => {
               const d = decrire(ligne);
               return (

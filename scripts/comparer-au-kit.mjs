@@ -29,6 +29,14 @@ const largeur = Number(process.argv[3] ?? 1690);
 const sortie = process.argv[4];
 const capture = process.argv[5] ?? null;
 const cookiesBrut = process.env["COOKIES_MESURE"] ?? "[]";
+/*
+ * ⚠️ LE KIT EST UNE APPLICATION A ETAT, PAS SIX PAGES. Ses six ecrans vendeur
+ * vivent dans un seul document et se choisissent par un `setView` de React :
+ * aucune URL ne les distingue. Sans ce clic, toutes les comparaisons d ecran
+ * porteraient sur le MEME ecran — celui par defaut — et l ecart se lirait comme
+ * une erreur d implementation alors qu on n aurait jamais ouvert la bonne page.
+ */
+const clic = process.env["CLIC_KIT"] ?? "";
 
 if (url === undefined || sortie === undefined) {
   console.error("usage : node scripts/comparer-au-kit.mjs <url> <largeur> <sortie.json> [capture.png]");
@@ -131,6 +139,23 @@ await envoyer("Page.navigate", { url });
 // Le kit monte son propre paquet et compile ses composants a l execution : il
 // lui faut plus qu un chargement de document.
 await new Promise((r) => setTimeout(r, 5000));
+
+if (clic !== "") {
+  const { result: ouvert } = await envoyer("Runtime.evaluate", {
+    expression:
+      "(() => { const c = [...document.querySelectorAll('button,a')]" +
+      ".find((e) => (e.textContent || '').trim().startsWith(" +
+      JSON.stringify(clic) +
+      ")); if (!c) return 'INTROUVABLE'; c.click(); return c.textContent.trim().slice(0, 30); })()",
+    returnByValue: true,
+  });
+  if (ouvert.value === "INTROUVABLE") {
+    console.error(`ARRET : aucun controle ne commence par ${JSON.stringify(clic)}.`);
+    process.exit(1);
+  }
+  console.error(`[kit] ouvert : ${ouvert.value}`);
+  await new Promise((r) => setTimeout(r, 2500));
+}
 
 const { result } = await envoyer("Runtime.evaluate", { expression: RELEVE, returnByValue: true });
 await writeFile(sortie, JSON.stringify(result.value, null, 1), "utf8");

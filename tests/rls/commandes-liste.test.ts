@@ -184,6 +184,13 @@ describe("Ce que la liste rend", () => {
       ["unsubscribe_token", "un jeton, un pouvoir — il n'ouvre pas la page"],
       ["notify_email", "donnée de contact, inutile à la liste"],
       ["shop_id", "posé par la RLS, jamais lu ni réécrit par l'écran"],
+      [
+        "carrier_code",
+        "un identifiant NUMÉRIQUE de fournisseur de suivi, stocké en texte et relu " +
+          "par `parseInt` avant l'appel à 17TRACK — pas un nom de transporteur. " +
+          "Aucun catalogue ne le traduit, aucun écran ne permet de le saisir : rendu, " +
+          "il afficherait « 100003 »",
+      ],
       ["first_content_at", "sert à l'instrumentation, pas à l'affichage"],
       ["created_event_at", "trace d'émission de order_created : une mesure, pas une donnée d'écran"],
       [

@@ -165,14 +165,6 @@ export interface LigneCommande {
   readonly client: string | null;
   readonly reference: string | null;
   readonly numeroSuivi: string | null;
-  /**
-   * Le code du transporteur, sous la colonne du numéro de suivi.
-   *
-   * Le kit écrit « La Poste » sous « CJ123456789FR » : un numéro de suivi seul
-   * ne dit pas OÙ aller le vérifier, et c est la première chose qu on cherche
-   * quand un client demande où en est son colis.
-   */
-  readonly transporteur: string | null;
   readonly statut: StatutExpedition;
   readonly qc: StatutQc;
   readonly creeeLe: string;
@@ -270,7 +262,7 @@ export interface PageCommandes {
  * sur un type d'erreur — le typage cesse alors de vérifier quoi que ce soit.
  */
 export const COLONNES =
-  "id, public_token, customer_label, product_ref, tracking_number, carrier_code, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at, media_count, cover_media_id";
+  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at, media_count, cover_media_id";
 
 /**
  * La valeur de tri d'une ligne, pour le curseur.
@@ -672,7 +664,6 @@ export async function lireCommandes(
     client: l.customer_label,
     reference: l.product_ref,
     numeroSuivi: l.tracking_number,
-    transporteur: l.carrier_code,
     statut: l.status,
     qc: l.qc_status,
     creeeLe: l.created_at,

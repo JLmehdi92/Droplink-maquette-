@@ -543,20 +543,28 @@ export async function TableauCommandes({
                           </span>
                         </td>
 
-                        {/* NUMÉRO DE SUIVI : le numéro en 13/600, le transporteur
-                            dessous en 12/400. Un numéro seul ne dit pas OÙ aller
-                            le vérifier. */}
+                        {/*
+                          NUMÉRO DE SUIVI.
+
+                          ⚠️ LE KIT ÉCRIT « La Poste » SOUS LE NUMÉRO, ET LE PRODUIT
+                          NE PEUT PAS. `orders.carrier_code` n'est pas un nom de
+                          transporteur : c'est l'identifiant NUMÉRIQUE du
+                          fournisseur de suivi, stocké en texte et relu par
+                          `Number.parseInt` avant d'être envoyé à 17TRACK. Aucun
+                          catalogue ne le traduit, et aucun écran ne permet de le
+                          saisir. Rendu tel quel il afficherait « 100003 » ; rendu
+                          avec un repli il afficherait « Transporteur inconnu » sur
+                          CHAQUE ligne. Les deux valent moins que rien.
+
+                          Le jour où un catalogue de transporteurs existera, la
+                          sous-ligne se rajoute ici sans toucher à la colonne.
+                        */}
                         <td className={cellule}>
                           {ligne.numeroSuivi === null ? (
                             <span className="text-[14px] text-ds-texte-tenu">—</span>
                           ) : (
-                            <span className="flex min-w-0 flex-col">
-                              <span className="truncate text-[13px] font-semibold text-ds-texte-fort">
-                                {ligne.numeroSuivi}
-                              </span>
-                              <span className="truncate text-[12px] text-ds-texte-sourdine">
-                                {ligne.transporteur ?? t("sansTransporteur")}
-                              </span>
+                            <span className="block truncate text-[13px] font-semibold text-ds-texte-fort">
+                              {ligne.numeroSuivi}
                             </span>
                           )}
                         </td>
