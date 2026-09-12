@@ -25,7 +25,9 @@
 import { config } from "dotenv";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { VERDICT_POLICES, exigerPolices } from "./sonde-polices.mjs";
 
 config({ path: ".env.test.local", quiet: true });
 config({ path: ".env.local", quiet: true });
@@ -280,8 +282,85 @@ const { error: ePoints } = await service.from("parcel_checkpoints").insert([
 ]);
 if (ePoints) throw new Error("jeu de mesure : points de passage non crees — " + ePoints.message);
 
+/*
+ * ⚠️ DES MEDIAS ET DES EVENEMENTS, SINON L EDITEUR MESURE SES DEUX PANNEAUX
+ * VIDES — ET ON DECLARERAIT COMME « DONNEE ABSENTE » CE QUI N EST QU UN JEU DE
+ * MESURE PAUVRE.
+ *
+ * `/fr/commandes/{commande}` porte une grille de vignettes et un journal. Sans
+ * une seule ligne dans `order_media` ni dans `order_events`, les deux rendent
+ * leur etat vide : la soustraction au kit signalait alors cinq vignettes et
+ * quatre lignes de journal comme MANQUANTES, et la tentation etait de les
+ * declarer « la base ne les porte pas » — alors que la base les porte depuis
+ * les migrations 013 et 023. C est le meme defaut que les deux colis absents
+ * du 12/09, une table plus loin.
+ *
+ * Les cles designent des objets qui N EXISTENT PAS dans le bucket, et c est
+ * sans consequence : la signature est calculee hors ligne, la boite de la
+ * vignette est rendue et mesuree, seul le pixel de l image manque. On mesure de
+ * la geometrie, pas des photos.
+ */
+const { data: medias, error: eMedias } = await service
+  .from("order_media")
+  .insert(
+    [0, 1, 2, 3, 4].map((i) => {
+      /*
+       * ⚠️ DEUX REGLES EN BASE BORNENT CETTE CLE, ET AUCUNE N EST DANS LE CODE
+       * QUI ECRIT. Un declencheur (098) verifie l APPARTENANCE — le prefixe
+       * `medias/<boutique>/<commande>/` — et une contrainte (097) verifie la
+       * FORME : trois UUID puis une extension connue, la vignette devant etre
+       * DERIVEE de la cle du media. Inventer une cle « qui a l air bonne »
+       * echoue sur `DL039` ou sur `order_media_cle_canonique`. C est
+       * exactement l interet de les avoir mises en base.
+       */
+      const base = `medias/${shop.id}/${commandes[0].id}/${randomUUID()}`;
+      return {
+        order_id: commandes[0].id,
+        type: i === 4 ? "video" : "photo",
+        cle: base + (i === 4 ? ".mp4" : ".jpg"),
+        cle_vignette: base + ".vignette.webp",
+        largeur: 1200,
+        hauteur: 1200,
+        taille_octets: 120000 + i,
+        // ⚠️ POSE SUR LES CINQ LIGNES : PostgREST construit son INSERT par lot
+        // sur l UNION des cles, et une seule ligne porteuse mettrait NULL
+        // ailleurs.
+        duree_s: i === 4 ? 42 : null,
+        position: i,
+      };
+    }),
+  )
+  .select("id");
+if (eMedias) throw new Error("jeu de mesure : medias non crees — " + eMedias.message);
+
+/* La couverture est une PROPRIETE DE LA COMMANDE, pas du media : l editeur
+   dessine sa pastille depuis `orders.cover_media_id`, et sans elle aucune des
+   cinq vignettes ne rend l etat « couverture ». */
+const { error: eCouverture } = await service
+  .from("orders")
+  .update({ cover_media_id: medias[0].id })
+  .eq("id", commandes[0].id);
+if (eCouverture) throw new Error("jeu de mesure : couverture non posee — " + eCouverture.message);
+
+/*
+ * QUATRE EVENEMENTS, COMME LE KIT — et de QUATRE TYPES DIFFERENTS.
+ *
+ * Quatre lignes du meme type ne prouveraient qu un gabarit. Chacune porte ici
+ * une charge utile distincte, parce que c est la charge qui fait varier le
+ * detail affiche — et le detail est la seule partie de la ligne qui peut
+ * deborder.
+ */
+const { error: eEvts } = await service.from("order_events").insert([
+  { order_id: commandes[0].id, type: "commande_creee", actor: "vendeur", occurred_at: jours(3), payload: {} },
+  { order_id: commandes[0].id, type: "media_ajoute", actor: "vendeur", occurred_at: jours(3), payload: { nombre: 5 } },
+  { order_id: commandes[0].id, type: "commande_modifiee", actor: "vendeur", occurred_at: jours(2), payload: { champ: "tracking_number" } },
+  { order_id: commandes[0].id, type: "qc_approuve", actor: "client", occurred_at: jours(1), payload: {} },
+]);
+if (eEvts) throw new Error("jeu de mesure : evenements non crees — " + eEvts.message);
+
 console.error(
-  `[jeu] ${commandes.length} commandes, ${colis.length} colis dont un silencieux, 3 points de passage.`,
+  `[jeu] ${commandes.length} commandes, ${colis.length} colis dont un silencieux, 3 points de passage, ` +
+    `${medias.length} medias dont une couverture, 4 evenements.`,
 );
 
 const { data: sess } = await publiable.auth.signInWithPassword({
@@ -586,11 +665,32 @@ for (const modele of routes) {
   const chemin = modele
     .replaceAll("{commande}", idCommande)
     .replaceAll("{jeton}", jetonPublic);
+  /*
+   * ⚠️ LE NOM DE L INVENTAIRE VIENT DU GABARIT, PAS DE L URL SUBSTITUEE — ET
+   * C EST UN DEFAUT PAYE LE 12/09 SUR L EDITEUR.
+   *
+   * `soustraire-inventaires.mjs` deduit l ECRAN du nom du fichier de releve,
+   * et c est sous ce nom que les ecarts se declarent. Nommer d apres l URL
+   * servie faisait entrer dans ce nom l identifiant de la commande, tire au
+   * hasard a chaque passage : `fr-commandes-3f244afa-…-1675.json` ce coup-ci,
+   * un autre le suivant. Aucune declaration n aurait jamais ete relue — la
+   * soustraction serait repartie de zero a chaque execution, en silence, et
+   * l ecran serait sorti en code 1 pour une raison qui n a rien a voir avec
+   * lui.
+   *
+   * Le gabarit, lui, ne varie pas : `/fr/commandes/{commande}` rend toujours
+   * `fr-commandes-commande`.
+   */
+  const nomEcran = modele.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
   for (const largeur of largeurs) {
     const { targetId } = await brut("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await brut("Target.attachToTarget", { targetId, flatten: true });
     const envoyer = (m, p) => brut(m, p, sessionId);
     await envoyer("Network.enable", {});
+    /* ⚠️ SANS CECI, LA SONDE MESURE LES FEUILLES DU PASSAGE PRECEDENT. Le cache
+       du navigateur survit d une cible a l autre, et une correction restait
+       invisible : on remesurait indefiniment le meme ecart. */
+    await envoyer("Network.setCacheDisabled", { cacheDisabled: true });
     // L admin refuse toute requete sans adresse d appelant exploitable.
     await envoyer("Network.setExtraHTTPHeaders", { headers: { "x-real-ip": "203.0.113.7" } });
     await envoyer("Emulation.setDeviceMetricsOverride", {
@@ -639,14 +739,24 @@ for (const modele of routes) {
           `Sur /admin, c est le plafond de debit : mesurer moins d ecrans a la fois.`,
       );
     }
+    /* ⚠️ LA POLICE AVANT TOUT LE RESTE. Un ecran rendu dans la police de repli
+       donne des largeurs fausses d environ 7 %, et rien ne le dit : c est le
+       defaut du 12/09, cote kit. Il vaut ici aussi — `next/font` sert Inter
+       depuis notre domaine, mais un build sans ses fichiers la perdrait. */
+    {
+      const { result: v } = await envoyer("Runtime.evaluate", {
+        expression: VERDICT_POLICES,
+        returnByValue: true,
+      });
+      exigerPolices(v.value, `${chemin} a ${largeur} px`);
+    }
     rapport.push({ chemin, largeur, ...vu });
     if (dossierInventaire !== null) {
       const { result: inv } = await envoyer("Runtime.evaluate", {
         expression: INVENTAIRE,
         returnByValue: true,
       });
-      const nomInv =
-        chemin.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + largeur + ".json";
+      const nomInv = nomEcran + "-" + largeur + ".json";
       await writeFile(join(dossierInventaire, nomInv), JSON.stringify(inv.value, null, 1), "utf8");
       console.error("[inventaire] " + nomInv + " — " + inv.value.lignes.length + " elements");
     }
@@ -657,7 +767,7 @@ for (const modele of routes) {
         format: "png",
         captureBeyondViewport: true,
       });
-      const nom = chemin.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + largeur + ".png";
+      const nom = nomEcran + "-" + largeur + ".png";
       await writeFile(join(dossierCaptures, nom), Buffer.from(data, "base64"));
       console.error("[capture] " + nom);
     }

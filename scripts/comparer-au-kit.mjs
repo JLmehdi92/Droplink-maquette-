@@ -23,6 +23,7 @@
  *   node scripts/comparer-au-kit.mjs <url> <largeur> <fichier de sortie> [capture.png]
  */
 import { writeFile } from "node:fs/promises";
+import { VERDICT_POLICES, exigerPolices } from "./sonde-polices.mjs";
 
 const url = process.argv[2];
 const largeur = Number(process.argv[3] ?? 1690);
@@ -147,6 +148,11 @@ const { sessionId } = await brut("Target.attachToTarget", { targetId, flatten: t
 const envoyer = (m, p) => brut(m, p, sessionId);
 
 await envoyer("Network.enable", {});
+/* ⚠️ SANS CECI, LA SONDE MESURE LA FEUILLE DE STYLE DU PASSAGE PRECEDENT.
+   Le cache du navigateur survit d une cible a l autre : une correction
+   apportee au design system restait invisible, et l on remesurait
+   indefiniment le meme ecart. */
+await envoyer("Network.setCacheDisabled", { cacheDisabled: true });
 await envoyer("Network.setExtraHTTPHeaders", { headers: { "x-real-ip": "203.0.113.7" } });
 await envoyer("Emulation.setDeviceMetricsOverride", {
   width: largeur,
@@ -182,6 +188,14 @@ if (clic !== "") {
   }
   console.error(`[kit] ouvert : ${ouvert.value}`);
   await new Promise((r) => setTimeout(r, 2500));
+}
+
+{
+  const { result: v } = await envoyer("Runtime.evaluate", {
+    expression: VERDICT_POLICES,
+    returnByValue: true,
+  });
+  exigerPolices(v.value, `le kit (${url})`);
 }
 
 const { result } = await envoyer("Runtime.evaluate", { expression: RELEVE, returnByValue: true });
