@@ -387,7 +387,7 @@ position, police, graisse, interlettrage, interligne, couleur, fond, image de
 fond, rayon, filet, ombre, marge, écart. **C'est un inventaire, pas une
 sélection** : la comparaison trie, pas la sonde.
 
-#### ⚠️ LES SIX PIÈGES, TOUS PAYÉS UNE FOIS
+#### ⚠️ LES HUIT PIÈGES, TOUS PAYÉS UNE FOIS
 
 1. **LE KIT EST DESSINÉ À 1690 px, PAS 1440.** C'est écrit dans l'en-tête de
    chacune de ses pages : `viewport="1690x1010"`. Mesurer le produit à 1440 et
@@ -427,6 +427,31 @@ sélection** : la comparaison trie, pas la sonde.
    transposition paraisse juste. *Une valeur lue dans un source n'est une valeur
    que si ce source est celui qui s'exécute ; le navigateur, lui, ne peut pas se
    tromper de composant.*
+
+7. **UNE SONDE QUI MESURE UN 404 CERTIFIE LE 404.** Le plafond de débit de
+   l'administration refuse douze requêtes enchaînées — c'est la décision 13,
+   « côté admin on REFUSE ». La sonde envoyait six routes × deux largeurs,
+   recevait des 404, et rapportait pour chacun « aucun débordement, aucune
+   police sous 11,5 px, aucune cible sous 44 ». **C'était vrai : une page de
+   404 ne déborde pas.** `verifier-ecran-migre.mjs` relève désormais le
+   `titre` et la longueur du contenu, et **LÈVE** plutôt que de pousser une
+   ligne de rapport. **Sur `/admin`, mesurer DEUX écrans à la fois, pas six.**
+8. **UN SERVEUR DE MESURE NE SURVIT PAS À `pnpm gates`.** Les portes
+   **reconstruisent `.next` sous le serveur qui tourne** : les noms de morceaux
+   changent, les feuilles de style répondent 404 et 500, et l'écran mesuré se
+   rend **SANS AUCUN CSS**. Dix minutes passées à croire à un défaut de
+   production sur l'administration. ⚠️ **Après chaque `pnpm gates`, tuer le
+   serveur et le relancer** — et le vérifier par `Get-CimInstance` : quatorze
+   processus `node` étaient encore vivants ce jour-là.
+
+> ⚠️ **ET LA SONDE PEUT APPRENDRE À IGNORER SES PROPRES ALERTES.** Elle
+> signalait onze cibles sous 44 px sur connexion + inscription, dont **aucune
+> n'en était une** : quatre champs **enveloppés par leur `<label>`** — la cible
+> est alors le label, 56 px, pas l'`<input>` nu de 23 — et quatre **liens en
+> ligne dans la prose**, que la règle 5 écarte explicitement. Onze faux
+> positifs apprennent à ignorer le douzième, qui serait vrai. Elle les écarte
+> désormais **par mesure** — hauteur du `<label>` le plus proche, présence de
+> texte autour du lien — jamais par exception nommée.
 
 #### ⚠️ ET CE QUE LA MÉTHODE NE DISPENSE PAS DE DÉCIDER
 
