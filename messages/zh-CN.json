@@ -438,6 +438,12 @@
     "actions": {
       "voirCommande": "查看订单 {reference}",
       "siteTransporteur": "打开承运商网站"
+    },
+    "lot": {
+      "titre": "选择",
+      "selectionner": "选择包裹 {numero}",
+      "aide": "已选包裹",
+      "exporter": "导出所选"
     }
   },
   "analyses": {

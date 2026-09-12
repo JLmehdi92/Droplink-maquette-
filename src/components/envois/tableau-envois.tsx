@@ -783,7 +783,31 @@ export async function TableauEnvois({
           {barreOutils}
 
           {/* --- LE TABLEAU, à partir de `lg` ---------------------------- */}
-          <div className={"hidden xl:block " + CARTE + " xl:p-0"}>
+          {/*
+            ⚠️ UN `<form method="get">` AUTOUR DU TABLEAU, ET LA BARRE DE LOT NE
+            PARAÎT QUE SI QUELQUE CHOSE EST COCHÉ — en CSS, par
+            `group-has-[input:checked]`, sans une ligne de JavaScript. C'est la
+            mécanique déjà employée sur `/commandes`, reprise plutôt que
+            réinventée.
+
+            En GET parce qu'un export est une LECTURE : la sélection part dans
+            l'URL, le navigateur télécharge, et rien n'est modifié. Un POST
+            aurait exigé une garde CSRF pour une opération qui n'écrit rien.
+          */}
+          <form
+            method="get"
+            action="/api/envois/export"
+            className={"group hidden xl:block " + CARTE + " xl:p-0"}
+          >
+            <div className="hidden flex-wrap items-center gap-3 border-b border-ds-filet px-5 py-3 group-has-[input:checked]:flex">
+              <span className="text-[12px] text-ds-texte-corps">{t("lot.aide")}</span>
+              <button
+                type="submit"
+                className="flex min-h-11 items-center rounded-ds-pill bg-ds-accent px-4 text-[13px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol lg:h-[36px] lg:min-h-0"
+              >
+                {t("lot.exporter")}
+              </button>
+            </div>
             {/*
               ⚠️ `table-fixed` : SANS LUI, LES `<col>` NE SONT QUE DES
               SUGGESTIONS. C'est le défaut qui a coûté le plus cher sur
@@ -794,35 +818,35 @@ export async function TableauEnvois({
             */}
             <table className="w-full table-fixed border-collapse">
               {/*
-                LES NEUF COLONNES, AUX PIXELS DES BOÎTES DE CONTENU DU KIT.
+                LES DIX COLONNES, AUX PIXELS DES BOÎTES DE CONTENU DU KIT.
 
                 Mesurées sur la référence SERVIE, ses dix colonnes rendent 38,
                 174, 116, 139, 145, 128, 116, 122, 145 et 56 px de contenu, à
                 l'écart de 14 dans une rangée de 1345 au remplissage `14px 20px`.
 
-                ⚠️ UNE SEULE N'EST PAS REPRISE : LA CASE À COCHER DE TÊTE DE
-                LIGNE (38 px), ET CE N'EST PAS UN RENONCEMENT DE CONFORT.
+                ⚠️ LA CASE À COCHER A D'ABORD ÉTÉ ÉCARTÉE, PUIS POSÉE — ET LE
+                RAISONNEMENT QUI L'ÉCARTAIT ÉTAIT FAUX SUR UN POINT.
 
-                Une case à cocher est la PROMESSE d'une action groupée, et les
-                trois seules candidates sont mauvaises :
+                Une case à cocher est la PROMESSE d'une action groupée. Trois
+                candidates existaient, et deux restent mauvaises :
 
                   · « resynchroniser » dépenserait le palier de 200 prises en
                     charge À VIE au rythme des clics, et court-circuiterait la
                     cadence de `lib/tracking` qui existe pour les espacer ;
                   · « archiver » ne veut rien dire sur un colis — ce sont les
-                    COMMANDES qui s'archivent, et un colis en porte plusieurs ;
-                  · « exporter » ouvrirait une SECONDE surface de sortie de
-                    données, alors que l'export des commandes contient déjà ces
-                    colis. Cet export porte les liens publics : chaque surface de
-                    plus est une fuite de plus à surveiller.
+                    COMMANDES qui s'archivent, et un colis en porte plusieurs.
 
-                Une case qui ne commande rien est pire qu'une case absente.
+                La troisième, « exporter », avait été refusée au motif qu'elle
+                « ouvrirait une seconde surface de sortie de données ». C'était
+                inexact : ce qui rend l'export des COMMANDES sensible, ce sont les
+                `public_token` qu'il contient — des capacités, immuables à vie.
+                Un export de COLIS porte un numéro de suivi que le transporteur
+                et le client connaissent déjà, un nom de transporteur et des
+                dates. Il est donc MOINS exposant que celui qui existe, pas plus.
 
-                CONSÉQUENCE MESURÉE ET ASSUMÉE : les huit colonnes suivantes
-                commencent 52 px plus à gauche que chez le kit — 38 de case plus
-                14 d'écart. Et malgré ce décalage, « Prochaine étape » tombe à
-                x=1407, exactement comme lui : la preuve que les proportions sont
-                justes et que seul le point de départ diffère.
+                La case commande donc l'export de la sélection, et la barre
+                n'apparaît que lorsqu'une case est cochée — en CSS, par
+                `:has(:checked)`, sans une ligne de JavaScript.
 
                 ⚠️ DIX `<col>` POUR DIX `<th>`. Il y en a eu neuf pendant un tour
                 de mesure, et le résultat ne s'est pas vu à la lecture du code :
@@ -860,14 +884,15 @@ export async function TableauEnvois({
                 Somme : 1345, exactement la largeur de la carte.
               */}
               <colgroup>
-                <col className="w-[16.180%]" />
-                <col className="w-[10.143%]" />
-                <col className="w-[11.948%]" />
-                <col className="w-[12.419%]" />
-                <col className="w-[11.085%]" />
-                <col className="w-[10.143%]" />
-                <col className="w-[10.614%]" />
-                <col className="w-[12.419%]" />
+                <col className="w-[5.370%]" />
+                <col className="w-[14.072%]" />
+                <col className="w-[9.728%]" />
+                <col className="w-[11.450%]" />
+                <col className="w-[11.900%]" />
+                <col className="w-[10.627%]" />
+                <col className="w-[9.728%]" />
+                <col className="w-[10.177%]" />
+                <col className="w-[11.900%]" />
                 <col className="w-[5.048%]" />
               </colgroup>
               <thead>
@@ -877,7 +902,17 @@ export async function TableauEnvois({
                       « Dernière mise à jour » et non « Dernier mouvement ». Trois
                       mots que rien n'obligeait à inventer — le design system
                       fournit son vocabulaire dans les trois langues. */}
+                  {/*
+                    LA COLONNE DE SÉLECTION, 38 px, comme le kit. Son en-tête ne
+                    porte pas de case « tout cocher » : sans JavaScript elle ne
+                    pourrait rien cocher, et une case inerte en tête de tableau
+                    est le plus visible des mensonges d'interface. Le libellé y
+                    est, pour les lecteurs d'écran.
+                  */}
                   <th scope="col" className={enTete + bordGauche}>
+                    <span className="sr-only">{t("lot.titre")}</span>
+                  </th>
+                  <th scope="col" className={enTete}>
                     <span className="block leading-[18px]">{t("colonnes.numero")}</span>
                   </th>
                   <th scope="col" className={enTete}>
@@ -919,7 +954,16 @@ export async function TableauEnvois({
                         d.silencieux ? "bg-ds-alerte-fond" : "transition-colors hover:bg-ds-ink-50"
                       }
                     >
-                      <td className={cellule + bordGauche + " font-mono text-[13px] font-semibold text-ds-texte-fort"}>
+                      <td className={cellule + bordGauche}>
+                        <input
+                          type="checkbox"
+                          name="selection"
+                          value={ligne.id}
+                          aria-label={t("lot.selectionner", { numero: ligne.numero })}
+                          className="h-[18px] w-[18px] cursor-pointer rounded-ds-xs border border-ds-filet-appuye accent-ds-accent outline-offset-2"
+                        />
+                      </td>
+                      <td className={cellule + " font-mono text-[13px] font-semibold text-ds-texte-fort"}>
                         {ligne.numero}
                         {ligne.abandonneLe !== null ? (
                           /* ON DIT QUE NOUS AVONS CESSÉ D'INTERROGER, pas que le
@@ -1125,7 +1169,7 @@ export async function TableauEnvois({
             </table>
 
             <BandeauAide texte={t("aide")} />
-          </div>
+          </form>
 
           {/* --- LES CARTES, en dessous de `lg` -------------------------- */}
           <ul className="flex flex-col gap-2.5 xl:hidden">

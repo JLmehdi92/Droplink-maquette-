@@ -1513,6 +1513,53 @@ try {
             const r = await fetch(`${base}/api/commandes/export`, { headers: entetesExport });
             statuts.push(r.status);
           }
+          /*
+           * L EXPORT DES COLIS, POSE LE 12/09/2026 AVEC LA CASE A COCHER DE
+           * L ECRAN ENVOIS. Il est verifie ICI parce que c est le seul bloc qui
+           * porte un cookie de vendeur : une garde ne se contröle qu avec les
+           * deux cas, et le refus sans session est deja mesure plus bas.
+           *
+           * ⚠️ LE CONTRÖLE QUI COMPTE LE PLUS EST LE DERNIER : ce fichier ne doit
+           * porter AUCUN lien public. C est ce qui distingue cet export de celui
+           * des commandes — et ce qui justifie qu il n ait pas de plafond de
+           * debit. Le jour ou quelqu un ajouterait la colonne par commodite,
+           * cette ligne deviendrait rouge.
+           */
+          const exportColis = await fetch(`${base}/api/envois/export`, { headers: entetesExport });
+          /*
+           * ⚠️ LES OCTETS, PAS LE TEXTE — ET C EST LA GARDE QUI L A REVELE.
+           *
+           * `Response.text()` decode en UTF-8 avec `ignoreBOM: false`, donc il
+           * RETIRE le BOM : `csv.startsWith("﻿")` est faux meme quand le
+           * fichier le porte. Le contröle passait donc au rouge sur un export
+           * correct. On lit les trois premiers octets — EF BB BF — qui sont ce
+           * qu Excel regarde vraiment.
+           */
+          const octetsColis = exportColis.ok
+            ? new Uint8Array(await exportColis.clone().arrayBuffer())
+            : new Uint8Array();
+          const bomColis =
+            octetsColis[0] === 0xef && octetsColis[1] === 0xbb && octetsColis[2] === 0xbf;
+          const csvColis = exportColis.ok ? await exportColis.text() : "";
+          controles.push(
+            [
+              exportColis.status === 200,
+              `CONTRE-TEST : l export des colis repond 200 a un vendeur legitime (statut ${exportColis.status})`,
+            ],
+            [
+              (exportColis.headers.get("content-disposition") ?? "").includes("droplink-envois-"),
+              "l export des colis propose un telechargement nomme",
+            ],
+            [
+              bomColis && csvColis.includes("numero_de_suivi"),
+              "le CSV des colis porte le BOM (EF BB BF) et son en-tete de colonnes",
+            ],
+            [
+              csvColis !== "" && !csvColis.includes("/p/") && !csvColis.includes("lien_public"),
+              "AUCUN lien public ne sort dans l export des colis",
+            ],
+          );
+
           const passes = statuts.filter((s) => s === 200).length;
           const coupes = statuts.filter((s) => s === 429).length;
           const premierRefus = statuts.indexOf(429);
@@ -2644,6 +2691,24 @@ try {
     controles.push([
       enPost.status === 405,
       `l export refuse explicitement les autres methodes (statut ${enPost.status})`,
+    ]);
+
+    /*
+     * L EXPORT DES COLIS, POSE LE 12/09/2026 AVEC LA CASE A COCHER DE L ECRAN
+     * ENVOIS. Il a sa propre garde, dans son propre fichier : la verifier ici
+     * plutot que de supposer qu elle ressemble a celle des commandes est la
+     * seule facon de savoir qu elle existe.
+     *
+     * ⚠️ ET SURTOUT LE CONTRE-TEST POSITIF. Une garde qui refuse tout passe a
+     * 100 % sans rien prouver : on verifie d abord qu un vendeur legitime
+     * OBTIENT son fichier, avec le bon type et le bon en-tete de
+     * telechargement. Sans cela, une route cassee serait indistinguable d une
+     * route bien gardee.
+     */
+    const envoisSansSession = await fetch(`${base}/api/envois/export`, { redirect: "manual" });
+    controles.push([
+      envoisSansSession.status === 404,
+      `l export des colis refuse sans session (statut ${envoisSansSession.status}, attendu 404)`,
     ]);
 
   }

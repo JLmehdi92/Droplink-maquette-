@@ -528,9 +528,9 @@
         "raison": "Huit pixels de place. La colonne est la derniere des deux cotes ; la notre commence 8 px plus a droite parce que le kit ouvre sa rangee par une case a cocher de 38 px que nous ne reprenons pas — voir le raisonnement dans `tableau-envois.tsx`."
       },
       {
-        "texte": "7 sept. 2025",
+        "texte": "8 sept. 2025",
         "motif": "donnee",
-        "raison": "Le kit empile la date et l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous. Meme declaration que « 8 sept. 2025 », pour la deuxieme ligne du kit."
+        "raison": "Le kit empile la date ET l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous — « il y a 3 jours » plutot que « a 14:32 ». C est la seule chose de l ecran qui change tous les jours quand le colis ne bouge pas, et c est ce que le vendeur vient verifier. L heure d un scan ne lui apprend rien. Les six pixels d abscisse viennent de l arrondi des pourcentages de colonne, qui cumule un pixel par colonne — la premiere, « Suivi », tombe exactement a x=369 comme le kit."
       }
     ],
     "manquants": [

@@ -438,6 +438,12 @@
     "actions": {
       "voirCommande": "Voir la commande {reference}",
       "siteTransporteur": "Ouvrir le site du transporteur"
+    },
+    "lot": {
+      "titre": "Sélection",
+      "selectionner": "Sélectionner le colis {numero}",
+      "aide": "Colis sélectionnés",
+      "exporter": "Exporter la sélection"
     }
   },
   "analyses": {

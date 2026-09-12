@@ -147,6 +147,19 @@ describe("Matcher du middleware", () => {
         "produit un fichier qui SORT de l'application.",
     ],
     [
+      "/api/envois/export",
+      "Export CSV des COLIS du vendeur connecté, posé le 12/09/2026 avec la case " +
+        "à cocher de l'écran Envois. Même raison d'être un route handler que " +
+        "l'export des commandes : `Content-Disposition`. Elle porte SA garde, " +
+        "qui lit le profil EN BASE et répond 404 — jamais 401 — à qui n'a pas de " +
+        "session active. La lecture se fait sous RLS AVEC LA SESSION. " +
+        "⚠️ ET ELLE N'A PAS DE PLAFOND DE DÉBIT, CONTRAIREMENT À CELLE DES " +
+        "COMMANDES, parce qu'elle ne fait sortir AUCUN `public_token` : un " +
+        "numéro de suivi est déjà connu du transporteur et du client, là où un " +
+        "lien public transfère une capacité immuable à vie. Le plafond de LIGNES " +
+        "reste, lui : il protège la mémoire du serveur, pas le vendeur.",
+    ],
+    [
       "/api/suivi/notification",
       "Point de réception des notifications de suivi. `/api` est exclu du " +
         "matcher, et son préfixe donnerait l'impression contraire à qui la " +

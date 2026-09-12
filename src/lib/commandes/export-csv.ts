@@ -73,7 +73,19 @@ function neutraliserFormule(valeur: string): string {
   return /^[=+\-@\t\r]/.test(valeur) ? "'" + valeur : valeur;
 }
 
-/** Échappe une cellule au format CSV, séparateur virgule. */
+/**
+ * Échappe une cellule au format CSV, séparateur virgule.
+ *
+ * ⚠️ EXPORTÉE POUR L'EXPORT DES ENVOIS, ET SURTOUT PAS RECOPIÉE LÀ-BAS. Elle
+ * porte la neutralisation des formules ci-dessus, qui est une protection, pas
+ * une commodité : une seconde copie aurait divergé au premier ajustement, et
+ * c'est le genre de divergence qu'on ne découvre qu'en ouvrant un fichier chez
+ * quelqu'un d'autre.
+ */
+export function celluleCsv(valeur: string | number | null): string {
+  return cellule(valeur);
+}
+
 function cellule(valeur: string | number | null): string {
   if (valeur === null) return "";
   const texte = neutraliserFormule(String(valeur));
