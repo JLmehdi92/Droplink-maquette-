@@ -504,7 +504,7 @@
     "toutEffacer": "全部清除",
     "rechercher": "搜索订单",
     "rechercherExemple": "客户、商品编号、运单号…",
-    "nouvelle": "新建订单",
+    "nouvelle": "创建订单",
     "copierLien": "复制 {client} 的链接",
     "ouvrirPage": "打开 {client} 的页面",
     "copieEchouee": "浏览器拒绝了复制",
@@ -522,8 +522,8 @@
       "refuse": "有问题"
     },
     "tri": {
-      "recentes": "最新的",
-      "anciennes": "最早的",
+      "recentes": "最新优先",
+      "anciennes": "最早优先",
       "modifiees": "最近修改",
       "jamais-ouvert": "客户从未打开",
       "bloquees": "运输中停滞"
@@ -606,7 +606,7 @@
     "rechercherExempleCourt": "客户、编号、运单号…",
     "nouvelleCourt": "新建",
     "photosEtVues": "{photos, plural, other {# 张照片}} · {vues, plural, other {# 次浏览}}",
-    "surTotal": "{n} / {total}",
+    "surTotal": "显示 {n} 条，共 {total} 条订单",
     "chargerLaSuite": "加载更多",
     "plusDActions": "{client} 的更多操作",
     "dupliquer": "复制为模板",

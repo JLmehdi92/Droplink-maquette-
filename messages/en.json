@@ -504,7 +504,7 @@
     "toutEffacer": "Clear all",
     "rechercher": "Search orders",
     "rechercherExemple": "Customer, reference, tracking number…",
-    "nouvelle": "New order",
+    "nouvelle": "Create an order",
     "copierLien": "Copy the link for {client}",
     "ouvrirPage": "Open the page for {client}",
     "copieEchouee": "Copy refused by the browser",
@@ -522,8 +522,8 @@
       "refuse": "Rejected"
     },
     "tri": {
-      "recentes": "Newest first",
-      "anciennes": "Oldest first",
+      "recentes": "Most recent",
+      "anciennes": "Oldest",
       "modifiees": "Recently edited",
       "jamais-ouvert": "Never opened by the customer",
       "bloquees": "Stuck in transit"
@@ -606,7 +606,7 @@
     "rechercherExempleCourt": "Customer, reference, tracking…",
     "nouvelleCourt": "New",
     "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# view} other {# views}}",
-    "surTotal": "{n} of {total}",
+    "surTotal": "Showing {n} of {total, plural, one {# order} other {# orders}}",
     "chargerLaSuite": "Load more",
     "plusDActions": "More actions for {client}",
     "dupliquer": "Duplicate as template",

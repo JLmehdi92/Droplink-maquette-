@@ -504,7 +504,7 @@
     "toutEffacer": "Tout effacer",
     "rechercher": "Rechercher une commande",
     "rechercherExemple": "Client, référence, numéro de suivi…",
-    "nouvelle": "Nouvelle commande",
+    "nouvelle": "Créer une commande",
     "copierLien": "Copier le lien de {client}",
     "ouvrirPage": "Ouvrir la page de {client}",
     "copieEchouee": "Copie refusée par le navigateur",
@@ -522,8 +522,8 @@
       "refuse": "Refusées"
     },
     "tri": {
-      "recentes": "Les plus récentes",
-      "anciennes": "Les plus anciennes",
+      "recentes": "Plus récentes",
+      "anciennes": "Plus anciennes",
       "modifiees": "Modifiées en dernier",
       "jamais-ouvert": "Jamais ouvertes par le client",
       "bloquees": "Bloquées en transit"
@@ -606,7 +606,7 @@
     "rechercherExempleCourt": "Client, référence, suivi…",
     "nouvelleCourt": "Nouvelle",
     "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# vue} other {# vues}}",
-    "surTotal": "{n} sur {total}",
+    "surTotal": "Affichage de {n} sur {total, plural, one {# commande} other {# commandes}}",
     "chargerLaSuite": "Charger la suite",
     "plusDActions": "Plus d’actions pour {client}",
     "dupliquer": "Dupliquer comme gabarit",

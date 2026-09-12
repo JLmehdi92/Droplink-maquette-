@@ -87,10 +87,270 @@
         "texte": "© 2025 DropLink. Tous droits réservés.",
         "motif": "donnee",
         "raison": "Position seule. Le pied vient APRES le contenu : huit lignes de tableau chez le kit contre quatre dans le jeu de mesure, soit 130 px de page en moins."
+      },
+      {
+        "texte": "Créer une commande",
+        "motif": "structure",
+        "raison": "LE MEME TEXTE EST RENDU TROIS FOIS CHEZ NOUS ET UNE SEULE FOIS DANS LE KIT, donc l appariement au plus proche tombe sur le mauvais element. Le produit rend le bouton principal en DEUX variantes — bureau et telephone, dont une seule est visible a la fois — plus son etat d attente « Creation… ». Le vrai bouton porte bien le degrade de marque, son rayon de 16 et l ombre marque ; c est le `<span>` du libelle, haut de 23 px, qui se fait apparier au bouton de 50 du kit."
+      },
+      {
+        "texte": "Plus récentes",
+        "motif": "structure",
+        "raison": "MEME CAUSE, ROLE INVERSE : « Plus recentes » est a la fois le DECLENCHEUR du menu de tri et l OPTION selectionnee a l interieur, que le produit rend dans le document. Le kit n a qu un menu ferme. L outil apparie l option violette (219x36, fond teinte) au declencheur blanc borde du kit (137x42) — deux elements qui ne jouent pas le meme role."
       }
     ],
-    "manquants": [],
-    "enTrop": []
+    "manquants": [
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CONTRAINTE PRODUIT N°1 : aucun code de facturation en phase 1. La barre laterale annonce a la place la gratuite de la phase de validation. Ces planches sont conservees pour la phase 2, sans une ligne de code."
+      },
+      {
+        "textes": [
+          "Tableau de bord",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "Deux routes que le depot n a pas. Une entree de navigation qui mene a un 404 est pire qu une entree absente : ce sont des ecrans a CREER, donc des decisions produit, pas de la migration."
+      },
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc de compte existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "Suivez toutes vos commandes et leur stat"
+        ],
+        "motif": "donnee",
+        "raison": "Le sous-titre du kit est une phrase fixe ; le notre porte un DECOMPTE — « 4 commandes, 4 creees cette semaine ». Les deux occupent la meme place, a la meme taille. Contrairement a `/envois`, ou le total a une tuile ou demenager, cet ecran n en a pas : le chiffre n aurait nulle part ou aller."
+      },
+      {
+        "textes": [
+          "1 sept. 2025 - 8 sept. 2025"
+        ],
+        "motif": "donnee",
+        "raison": "Le selecteur de periode du kit affiche une plage figee ; le notre affiche l etat reel du filtre, « Toutes les periodes » par defaut. Meme contröle, meme place — et la valeur du kit serait un mensonge chez nous, puisque aucune periode n est filtree au chargement."
+      },
+      {
+        "textes": [
+          "Total des commandes",
+          "En attente",
+          "Problèmes"
+        ],
+        "motif": "donnee",
+        "raison": "Les libelles des tuiles du kit, face aux notres. « En attente » et « Problemes » supposent des etats que la base ne porte pas : nos quatre compteurs disent « En preparation », « En transit », « Jamais ouvertes » et « Livrees » — quatre faits verifiables. « Jamais ouvertes » n a pas d equivalent chez le kit et c est la metrique de verdict du produit."
+      },
+      {
+        "textes": [
+          "+12%",
+          "-20%"
+        ],
+        "motif": "donnee",
+        "raison": "Des variations inventees pour la demonstration. Le produit ne mesure aucune evolution d une periode a l autre sur cet ecran : ni serie temporelle, ni periode de reference, ni requete qui les produise. Les rendre exigerait de les inventer, ce que le principe XII interdit."
+      },
+      {
+        "textes": [
+          "•••"
+        ],
+        "motif": "structure",
+        "raison": "Le menu par ligne. Il EXISTE chez nous, mais son declencheur porte un libelle accessible et ses deux gestes sont rendus dans le document — « Dupliquer comme gabarit » et « Archiver » apparaissent dans la liste des elements en trop, ce qui le prouve. Le kit dessine trois points typographiques la ou nous posons une icone."
+      },
+      {
+        "textes": [
+          "La Poste",
+          "UPS",
+          "EMS",
+          "Colissimo"
+        ],
+        "motif": "donnee",
+        "raison": "LES NOMS DE TRANSPORTEUR. `carrier_code` est l identifiant NUMERIQUE du fournisseur de suivi, pas un nom, et aucun catalogue ne le traduit. Rendu tel quel il afficherait « 100003 » ; avec un repli, « Transporteur inconnu » sur chaque ligne. Les deux valent moins que rien."
+      },
+      {
+        "textes": [
+          "Commandé",
+          "En livraison"
+        ],
+        "motif": "contrainte",
+        "raison": "Le vocabulaire des etapes de la frise est VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et la granularite fine vit dans le detail du suivi. Le kit ecrit « Commande » et « En livraison », deux etapes que notre frise ne connait pas."
+      },
+      {
+        "textes": [
+          "Livrée",
+          "Problème"
+        ],
+        "motif": "donnee",
+        "raison": "Statuts de lignes du kit. « Livree » existe chez nous au singulier feminin dans une autre casse de phrase ; « Probleme » supposerait que le transporteur declare un incident, ce qu il ne fait pas — nous savons seulement qu un colis ne bouge plus, et nous le disons ainsi."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "Lucas M.",
+          "+ 2",
+          "CJ123456789FR",
+          "Sarah B.",
+          "Adam K.",
+          "129F8V6X1234567890",
+          "Enzo D.",
+          "EV123456789CN",
+          "Lina T.",
+          "FR9876543210",
+          "Mehdi R.",
+          "Chloé P.",
+          "Tom G.",
+          "LV123456789CN"
+        ],
+        "motif": "donnee",
+        "raison": "LES HUIT COMMANDES DE DEMONSTRATION du kit, avec leurs references, leurs destinataires et leurs numeros de suivi. Le jeu de mesure en porte quatre, avec les siennes."
+      },
+      {
+        "textes": [
+          "Affichage de 1 à 8 sur 124 commandes",
+          "Afficher"
+        ],
+        "motif": "donnee",
+        "raison": "Le pied de pagination avec les chiffres du kit. Le produit rend desormais la meme phrase — « Affichage de 4 sur 4 commandes » — mais SANS les numeros de page : sa pagination est par CURSEUR, et un curseur ne sait pas sauter a la page 17. Poser les numeros exigerait de revenir au decalage, donc de degrader precisement celui qui a le plus de donnees."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "Phase de lancement",
+          "Tout est gratuit pendant cette période."
+        ],
+        "motif": "contrainte",
+        "raison": "LE PENDANT DE « PASSEZ AU PRO ». La contrainte n°1 interdit la facturation en phase 1 ; la barre laterale annonce a la place la gratuite de la phase de validation, au meme endroit et dans le meme encart."
+      },
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat.",
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ]
+      },
+      {
+        "textes": [
+          "Alertes",
+          "4 commandes jamais ouvertes",
+          "Le client n’a pas encore ouvert son lien",
+          "1 colis sans mouvement",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et applique ici la regle du panneau d administration : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux."
+      },
+      {
+        "textes": [
+          "4 commandes, 4 créées cette semaine"
+        ],
+        "motif": "donnee",
+        "raison": "Notre sous-titre, face a la phrase fixe du kit — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "textes": [
+          "Toutes les périodes",
+          "Créées à partir du",
+          "Jusqu'au",
+          "Appliquer"
+        ],
+        "motif": "donnee",
+        "raison": "Le selecteur de periode OUVERT : le kit n en montre que la valeur fermee. ⚠️ Le libelle « Jusqu au » porte une decision : la borne haute d une periode vaut MINUIT, donc « jusqu a aujourd hui » exclurait toute la journee en cours si elle n etait pas corrigee."
+      },
+      {
+        "textes": [
+          "Création…"
+        ],
+        "motif": "donnee",
+        "raison": "L etat d attente du bouton principal, que le kit ne dessine pas. Il existe parce qu un bouton qui ne dit pas qu il travaille se fait cliquer deux fois, et une commande en double est visible par le client."
+      },
+      {
+        "textes": [
+          "En préparation",
+          "Jamais ouvertes",
+          "Bloquées"
+        ],
+        "motif": "donnee",
+        "raison": "Les libelles de NOS pilules de filtre, face aux tuiles du kit — voir la declaration symetrique dans les manquants. « Jamais ouvertes » est la metrique de verdict du produit : le kit n a rien de tel."
+      },
+      {
+        "textes": [
+          "Trier",
+          "Plus anciennes",
+          "Modifiées en dernier",
+          "Jamais ouvertes par le client",
+          "Bloquées en transit"
+        ],
+        "motif": "donnee",
+        "raison": "Le menu de tri OUVERT : le kit n en montre que la valeur selectionnee, « Plus recentes », que le produit affiche desormais a l identique. Les quatre autres options sont les notres ; deux d entre elles — « Jamais ouvertes par le client » et « Bloquees en transit » — repondent a la question que cet ecran existe pour poser."
+      },
+      {
+        "textes": [
+          "Exporter",
+          "Le fichier contient les liens publics de",
+          "Télécharger le CSV"
+        ],
+        "motif": "donnee",
+        "raison": "L EXPORT CSV, que le kit ne dessine pas. L avertissement n est pas decoratif : l export contient les LIENS PUBLICS des commandes, et un lien public transfere une capacite, definitivement. Les notes internes, qui portent le prix d achat, en sont exclues (decision 15)."
+      },
+      {
+        "textes": [
+          "Jamais ouvert"
+        ],
+        "motif": "donnee",
+        "raison": "La pastille « jamais ouvert » d une ligne : le kit ne compte pas les ouvertures de lien, le produit en fait une metrique de verdict."
+      },
+      {
+        "textes": [
+          "Préparation",
+          "Expédié"
+        ],
+        "motif": "contrainte",
+        "raison": "Les etapes de NOTRE frise, verrouillees par la decision 4 du brief — voir la declaration symetrique de « Commande » et « En livraison » dans les manquants."
+      },
+      {
+        "textes": [
+          "Dupliquer comme gabarit",
+          "Archiver"
+        ],
+        "motif": "structure",
+        "raison": "Les deux gestes du menu par ligne, rendus dans le document la ou le kit ne dessine que ses trois points. ⚠️ « Dupliquer comme GABARIT » porte la decision 14 : la duplication copie la reference produit et les notes internes, jamais les medias ni le NOM DU CLIENT — envoyer une page portant le pseudo d un autre est le defaut le plus visible que ce produit puisse produire."
+      },
+      {
+        "textes": [
+          "Cliente en preparation",
+          "Client expedie",
+          "Client de verification",
+          "Cliente livree"
+        ],
+        "motif": "donnee",
+        "raison": "LES QUATRE COMMANDES DU JEU DE MESURE, avec leurs destinataires, leurs references et leurs numeros. Le kit en rend huit, inventees.",
+        "motifs": [
+          "^#[0-9A-F]{6}$",
+          "^DLKMESURE\\d+[A-Z]{2}$"
+        ]
+      },
+      {
+        "textes": [
+          "Affichage de 4 sur 4 commandes"
+        ],
+        "motif": "donnee",
+        "raison": "Le compteur de page, avec les chiffres du jeu de mesure. Meme phrase que le kit, qui porte « 1 a 8 sur 124 »."
+      }
+    ]
   },
   "fr-envois": {
     "valeurs": [
