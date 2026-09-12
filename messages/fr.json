@@ -630,7 +630,7 @@
   },
   "editeur": {
     "historique": {
-      "titre": "Historique",
+      "titre": "Historique de la commande",
       "aucun": "Rien ne s'est encore passé sur cette commande.",
       "jamaisOuvert": "Votre client n'a pas encore ouvert le lien.",
       "derniereOuverture": "Dernière ouverture par votre client le {quand} — {vues, plural, one {# consultation} other {# consultations}}.",
@@ -696,7 +696,17 @@
     "copieEchouee": "Copie refusée par le navigateur",
     "qcAide": "À renseigner si votre client vous répond ailleurs que sur sa page.",
     "apercuTitre": "Ce que voit le client",
-    "apercuDirect": "en direct"
+    "apercuDirect": "en direct",
+    "creeeLe": "Créée le {quand}",
+    "suiviTitre": "Suivi de la commande",
+    "suiviAttente": "En attente",
+    "suiviArrete": "Le transporteur ne publie plus rien sur ce numéro.",
+    "infosTitre": "Informations de la commande",
+    "infosReference": "Référence",
+    "infosCreee": "Date de création",
+    "infosModifiee": "Dernière mise à jour",
+    "infosLien": "Lien client",
+    "infosSansSuivi": "Aucun numéro"
   },
   "medias": {
     "titre": "Photos et vidéos",

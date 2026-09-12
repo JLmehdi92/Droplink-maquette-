@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Panneau } from "@/components/app/panneau";
 import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import type { MediaAffiche } from "./carte-medias";
 
@@ -64,13 +65,10 @@ export function ApercuClient({
   const vignettes = medias.slice(0, 3);
 
   return (
-    <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card">
-      <div className="mb-3.5 flex items-center justify-between gap-3">
-        <h2 className="text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
-          {t("apercuTitre")}
-        </h2>
-        <span className="text-[13px] text-ds-texte-sourdine">{t("apercuDirect")}</span>
-      </div>
+    <Panneau
+      titre={t("apercuTitre")}
+      action={<span className="text-[13px] text-ds-texte-sourdine">{t("apercuDirect")}</span>}
+    >
 
       {/* `aria-hidden` : c'est une IMAGE de la page, pas la page. Un lecteur
           d'écran qui la parcourrait annoncerait deux fois le nom du client et un
@@ -170,6 +168,6 @@ export function ApercuClient({
           </div>
         </div>
       </div>
-    </section>
+    </Panneau>
   );
 }

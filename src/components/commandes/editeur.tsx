@@ -1,19 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  ArrowLeft,
-  Check,
-  ChevronDown,
-  Clock,
-  Copy,
-  ExternalLink,
-  TriangleAlert,
-} from "lucide-react";
+import { Check, ChevronDown, Clock, Copy, ExternalLink, TriangleAlert } from "lucide-react";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
-import { titreDeCommande } from "@/lib/commandes/titre";
+import { referenceCourte } from "@/lib/commandes/reference";
+import { ETAPES, type Etape } from "@/lib/tracking/normalize";
+import { Panneau, LienRetour, LigneInfo } from "@/components/app/panneau";
+import { FriseDetail } from "./frise-detail";
 import { CarteMedias, type MediaAffiche } from "./carte-medias";
 import { CarteRevocation } from "./carte-revocation";
 import { ApercuClient, type PaletteApercu } from "./apercu-client";
@@ -37,12 +31,23 @@ import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
  * laisse à l'écran une valeur que personne n'a gardée — le vendeur envoie alors
  * un lien dont il croit connaître le contenu.
  *
- * ⚠️ CE COMPOSANT PORTE LA BARRE HAUTE, ce qui n'était pas le cas. Les deux
- * planches y posent le témoin de sauvegarde en PILULE, à côté du nom du client.
- * Un témoin qui vit dans l'îlot d'édition et une barre rendue par le serveur ne
- * peuvent pas partager d'état : soit la barre descend ici, soit le témoin
- * remonte par un mécanisme qu'il faudrait inventer. Elle descend. Effet de bord
- * heureux : le titre suit la saisie, comme l'aperçu.
+ * ⚠️ CE COMPOSANT PORTE SON EN-TÊTE, ce qui n'était pas le cas. Le témoin de
+ * sauvegarde vit dans l'îlot d'édition ; une barre rendue par le serveur ne peut
+ * pas partager son état. Soit l'en-tête descend ici, soit le témoin remonte par
+ * un mécanisme qu'il faudrait inventer. Il descend.
+ *
+ * ⚠️ ET IL A CESSÉ D'ÊTRE UNE BARRE COLLANTE LE 12/09/2026. Il était rendu en
+ * `sticky` sous la barre supérieure de l'espace vendeur — donc DEUX barres
+ * empilées, dont une que le kit ne dessine pas. Dans le kit, le retour, le titre
+ * et les actions sont du CONTENU de page : ils défilent avec le reste, et les
+ * 89 px de la barre supérieure restent la seule chose qui ne bouge pas.
+ *
+ * ⚠️ LE TITRE EST DEVENU LA RÉFÉRENCE COURTE, pas le nom du client. C'est ce que
+ * le kit écrit (« #DLK7842 »), et c'est ce que la liste des commandes affiche
+ * depuis sa reprise : deux écrans qui nomment la même commande autrement forcent
+ * à retraduire mentalement à chaque aller-retour. Le nom du client n'est pas
+ * perdu — il est le premier champ de la carte, et il reste le titre de l'ONGLET,
+ * qui sert à retrouver une fenêtre parmi dix et non à identifier une ligne.
  */
 
 type Etat = "repos" | "encours" | "echec";
@@ -70,6 +75,8 @@ export function Editeur({
   statuts,
   qcs,
   medias,
+  suivi,
+  dates,
   boutique,
   historique,
 }: {
@@ -86,6 +93,28 @@ export function Editeur({
     readonly plafondMedias: number;
     readonly plafondVideos: number;
     readonly typesAcceptes: readonly string[];
+  };
+  /**
+   * LE SUIVI DU COLIS, tel que la base le porte au chargement.
+   *
+   * Les DATES et les NOTES sont déjà formatées par le serveur : le formateur de
+   * `next-intl` pèse plus que les quatre chaînes qu'il produirait ici, et cet
+   * écran est celui qu'un fournisseur à 200 commandes par semaine ouvre toute la
+   * journée. L'ÉTAPE COURANTE, elle, n'est pas passée : elle se lit sur
+   * `valeurs.status`, donc la frise suit la liste déroulante sans aller-retour.
+   */
+  readonly suivi: {
+    readonly numero: string | null;
+    readonly abandonne: boolean;
+    /** Par étape, la date à laquelle un point de passage l'a datée. */
+    readonly quand: Readonly<Partial<Record<Etape, string>>>;
+    /** Par étape, ce que le transporteur a dit en la franchissant. */
+    readonly notes: Readonly<Partial<Record<Etape, string>>>;
+  };
+  /** Les deux dates de la commande, formatées côté serveur pour la même raison. */
+  readonly dates: {
+    readonly creeLe: string;
+    readonly misAJourLe: string;
   };
   readonly boutique: {
     readonly nom: string | null;
@@ -213,66 +242,94 @@ export function Editeur({
 
   return (
     <>
-      <BarreHaute
-        langue={langue}
-        titre={titreDeCommande(valeurs.customer_label, t("titre"))}
-        reference={valeurs.product_ref}
-        etat={etat}
-        lienPublic={lienPublic}
-        versPageClient={versPageClient}
-      />
-
-      <div className="flex flex-col gap-3 px-margin-mobile py-3.5 lg:grid lg:grid-cols-[1fr_372px] lg:items-start lg:gap-[18px] lg:px-[26px] lg:py-5">
-        {/*
-          L'ORDRE DES CARTES N'EST PAS LE MÊME AU TÉLÉPHONE ET AU BUREAU, et les
-          planches sont explicites : au bureau « La commande » puis « Photos »,
-          au téléphone l'inverse. La raison tient au geste — sur 390 px, le
-          vendeur qui ouvre une commande vient déposer des photos ; au bureau, il
-          voit les deux cartes d'un coup et lit de haut en bas.
-        */}
-        <div className="flex flex-col gap-3 lg:gap-4">
-          <div className="order-2 lg:order-1">
-            <CarteCommande
-              valeurs={valeurs}
-              statuts={statuts}
-              qcs={qcs}
-              champsEnEchec={champsEnEchec}
-              onChanger={changer}
-            />
-          </div>
-
-          <div className="order-1 lg:order-2">
-            <CarteMedias
-              orderId={id}
-              initiaux={medias.initiaux}
-              plafondMedias={medias.plafondMedias}
-              plafondVideos={medias.plafondVideos}
-              typesAcceptes={medias.typesAcceptes}
-              onMedias={setMediasCourants}
-            />
-          </div>
-
-          <div className="order-3">
-            <CarteRevocation orderId={id} jeton={jetonCourant} onNouveauJeton={setJetonCourant} />
-          </div>
-        </div>
+      <div className="px-margin-mobile pt-4 pb-6 lg:px-8 lg:pt-[26px] lg:pb-8">
+        <EnTeteDetail
+          langue={langue}
+          reference={referenceCourte(id)}
+          creeLe={dates.creeLe}
+          etat={etat}
+          lienPublic={lienPublic}
+          versPageClient={versPageClient}
+        />
 
         {/*
-          L'APERÇU ET L'HISTORIQUE NE SE RENDENT PAS AU TÉLÉPHONE, et les
-          planches non plus. Sur 390 px, un aperçu de la page publique posé sous
-          les champs serait une seconde page à faire défiler avant d'atteindre
-          quoi que ce soit — et la vraie page est à un bouton, en bas de l'écran.
+          LES TROIS RANGÉES DU KIT, ET LEURS GRILLES EXACTES : deux rangées en
+          `minmax(0,1.35fr) minmax(0,1fr)` encadrant une rangée à trois colonnes
+          égales, toutes à l'écart de 18 px. Mesuré à 1690 px sur le kit servi :
+          1347 px de contenu, soit 763 + 18 + 566, et 437 × 3 + 18 × 2.
+
+          ⚠️ CHAQUE RANGÉE EST EN `display: contents` AU TÉLÉPHONE, et c'est ce
+          qui permet l'ordre mobile. Les cartes deviennent alors les enfants
+          directs de la colonne, donc `order` les classe une à une : les photos
+          d'abord — sur 390 px, le vendeur qui ouvre une commande vient en
+          déposer —, le lien à révoquer en dernier, une action irréversible ne se
+          rencontrant pas au milieu d'un formulaire. Une grille par rangée aurait
+          figé les cartes d'une même rangée l'une derrière l'autre.
         */}
-        <div className="hidden flex-col gap-4 lg:flex">
-          <ApercuClient
-            nomBoutique={boutique.nom}
-            logoUrl={boutique.logoUrl}
-            palette={boutique.palette}
-            client={valeurs.customer_label}
-            medias={mediasCourants}
-            libelles={boutique.libellesApercu}
-          />
-          {historique}
+        <div className="flex flex-col gap-3 lg:flex lg:flex-col lg:gap-[18px]">
+          <div className="contents lg:grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start lg:gap-[18px]">
+            <div className="order-2 lg:order-none">
+              <CarteCommande
+                valeurs={valeurs}
+                statuts={statuts}
+                qcs={qcs}
+                champsEnEchec={champsEnEchec}
+                onChanger={changer}
+              />
+            </div>
+
+            {/*
+              L'APERÇU NE SE REND PAS AU TÉLÉPHONE. Sur 390 px, une miniature de
+              la page publique posée sous les champs serait une seconde page à
+              faire défiler avant d'atteindre quoi que ce soit — et la vraie page
+              est à un bouton, en bas de l'écran.
+            */}
+            <div className="hidden lg:block">
+              <ApercuClient
+                nomBoutique={boutique.nom}
+                logoUrl={boutique.logoUrl}
+                palette={boutique.palette}
+                client={valeurs.customer_label}
+                medias={mediasCourants}
+                libelles={boutique.libellesApercu}
+              />
+            </div>
+          </div>
+
+          <div className="contents lg:grid lg:grid-cols-3 lg:items-start lg:gap-[18px]">
+            <div className="order-3 lg:order-none">
+              <PanneauSuivi suivi={suivi} statut={valeurs.status} />
+            </div>
+
+            <div className="order-4 lg:order-none">
+              <PanneauInformations
+                reference={referenceCourte(id)}
+                dates={dates}
+                numeroSuivi={valeurs.tracking_number}
+                lienPublic={lienPublic}
+                versPageClient={versPageClient}
+              />
+            </div>
+
+            <div className="order-5 lg:order-none">{historique}</div>
+          </div>
+
+          <div className="contents lg:grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start lg:gap-[18px]">
+            <div className="order-1 lg:order-none">
+              <CarteMedias
+                orderId={id}
+                initiaux={medias.initiaux}
+                plafondMedias={medias.plafondMedias}
+                plafondVideos={medias.plafondVideos}
+                typesAcceptes={medias.typesAcceptes}
+                onMedias={setMediasCourants}
+              />
+            </div>
+
+            <div className="order-6 lg:order-none">
+              <CarteRevocation orderId={id} jeton={jetonCourant} onNouveauJeton={setJetonCourant} />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -318,24 +375,43 @@ export function Editeur({
 }
 
 /**
- * LA BARRE HAUTE : d'où l'on vient, ce qu'on édite, l'état de la sauvegarde, et
- * les deux gestes qui suivent l'édition — copier le lien, l'ouvrir.
+ * L'EN-TÊTE DE L'ÉCRAN DE DÉTAIL — relevé au pixel sur le kit servi à 1690 px.
+ *
+ * Le retour est un LIEN EN TEXTE posé au-dessus du titre (14/500, écart 9),
+ * puis 14 px, puis le titre à 40/800 en -0,045em sur une interligne de 1,05,
+ * puis 8 px et la date de création à 15/400. À droite, les actions à 48 px de
+ * haut, à l'écart de 12, alignées sur le HAUT du titre.
  *
  * LE DÉGRADÉ EST SUR « VOIR LA PAGE PUBLIQUE » et sur rien d'autre. Une seule
  * action principale par écran : c'est celle qui termine le travail, celle qu'on
  * fait avant d'envoyer le lien à son client.
+ *
+ * ⚠️ TROIS CHOSES DU KIT NE SONT PAS ICI, ET CHACUNE POUR UNE RAISON :
+ *
+ *  1. LA PILULE D'ÉTAT sous les actions (« En transit », chevron). Chez nous
+ *     l'état est une liste déroulante du formulaire, 200 px plus bas. Deux
+ *     contrôles pour la même valeur, sur un écran qui enregistre à la frappe,
+ *     c'est deux endroits où lire un état qui peut momentanément différer.
+ *  2. LE BOUTON « ··· ». Le kit y range dupliquer et archiver ; ces deux gestes
+ *     vivent sur la LIGNE de la liste des commandes, pas ici. Un bouton de menu
+ *     qui ouvre un menu vide est pire qu'un bouton absent.
+ *  3. « MODIFIER LA COMMANDE ». Le kit sépare une vue de lecture d'un
+ *     formulaire (`CreateOrder.jsx`, avec son bouton « Enregistrer en
+ *     brouillon »). La décision 16 interdit le bouton d'enregistrement : notre
+ *     écran EST le formulaire, et son bouton « modifier » n'aurait mené qu'à
+ *     lui-même.
  */
-function BarreHaute({
+function EnTeteDetail({
   langue,
-  titre,
   reference,
+  creeLe,
   etat,
   lienPublic,
   versPageClient,
 }: {
   readonly langue: string;
-  readonly titre: string;
   readonly reference: string;
+  readonly creeLe: string;
   readonly etat: Etat;
   readonly lienPublic: string;
   readonly versPageClient: string;
@@ -343,44 +419,161 @@ function BarreHaute({
   const t = useTranslations("editeur");
 
   return (
-    <header className="sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-ds-filet bg-ds-surface-carte px-4 py-3 lg:gap-[18px] lg:px-[26px] lg:py-3.5">
-      {/* 44 px au doigt sur fond gris, 38 px bordé à la souris : les deux
-          planches ne dessinent pas le même bouton de retour. */}
-      <Link
-        href={"/" + langue + "/commandes"}
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-card bg-ds-surface-teinte text-ds-accent-encre transition-colors hover:bg-ds-lavender-200 lg:h-10 lg:w-10 lg:border lg:border-ds-filet lg:bg-ds-surface-carte lg:text-ds-texte-corps lg:hover:bg-ds-surface-teinte lg:hover:text-ds-texte-fort"
-        title={t("retour")}
-      >
-        <ArrowLeft aria-hidden="true" size={18} strokeWidth={1.9} />
-        <span className="sr-only">{t("retour")}</span>
-      </Link>
+    <header className="mb-[26px]">
+      <LienRetour href={"/" + langue + "/commandes"} libelle={t("retour")} />
 
-      <div className="min-w-0 flex-grow lg:flex-grow-0">
-        <h1 className="truncate text-[16px] font-bold tracking-[-0.025em] text-ds-texte-titre lg:text-[18px]">
-          {titre}
-        </h1>
-        {reference.trim() !== "" ? (
-          <p className="truncate text-[13px] text-ds-texte-corps">{reference}</p>
-        ) : null}
-      </div>
+      <div className="mt-3.5 flex flex-col items-start gap-4 lg:flex-row lg:gap-5">
+        <div className="min-w-0">
+          <h1 className="flex items-center gap-3 text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] lg:text-[40px]">
+            {reference}
+            {/* L'ICÔNE DU TITRE OUVRE LA PAGE CLIENT, elle n'est pas décorative :
+                c'est ce que le kit dessine, et une icône de lien qui ne lie pas
+                serait une promesse creuse. Elle porte donc son propre nom. */}
+            <a
+              href={versPageClient}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="-m-3 inline-flex p-3 text-ds-accent transition-colors hover:text-ds-accent-survol"
+            >
+              <ExternalLink aria-hidden="true" size={22} strokeWidth={2} />
+              <span className="sr-only">{t("voirPage")}</span>
+            </a>
+          </h1>
+          <p className="mt-2 text-[15px] leading-[1.55] text-ds-texte-corps">
+            {t("creeeLe", { quand: creeLe })}
+          </p>
+        </div>
 
-      <TemoinSauvegarde etat={etat} />
+        <span className="hidden flex-1 lg:block" />
 
-      <span className="hidden flex-grow lg:block" />
+        <div className="hidden flex-wrap items-center gap-3 lg:flex">
+          <TemoinSauvegarde etat={etat} />
+          <BoutonCopier lien={lienPublic} />
+          <a
+            href={versPageClient}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="degrade-ds-marque flex h-12 items-center gap-2 rounded-ds-card px-[18px] text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+          >
+            {t("voirPage")}
+            <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
+          </a>
+        </div>
 
-      <div className="hidden items-center gap-2.5 lg:flex">
-        <BoutonCopier lien={lienPublic} />
-        <a
-          href={versPageClient}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="degrade-ds-marque flex h-12 items-center gap-2 rounded-ds-card px-[18px] text-[14px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
-        >
-          {t("voirPage")}
-          <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
-        </a>
+        {/* AU TÉLÉPHONE, LE TÉMOIN SEUL : les deux actions vivent dans la bande
+            collée en bas, là où le pouce les atteint sans remonter. */}
+        <div className="lg:hidden">
+          <TemoinSauvegarde etat={etat} />
+        </div>
       </div>
     </header>
+  );
+}
+
+/**
+ * LE PANNEAU DE SUIVI — `Panel` + `DetailTimeline` du kit.
+ *
+ * ⚠️ L'ÉTAPE COURANTE VIENT DU FORMULAIRE, PAS DU COLIS. `orders.status` est la
+ * seule position qui fasse foi : le colis l'écrit quand il bouge (migration 090)
+ * et le vendeur l'amorce avant la remise au transporteur (décision 2). La lire
+ * ailleurs créerait une seconde source, et la frise montrerait autre chose que
+ * la liste déroulante posée juste à côté.
+ *
+ * ⚠️ ET LE PANNEAU SE REND MÊME SANS NUMÉRO DE SUIVI. C'est l'état de la moitié
+ * des commandes à leur création, et il est exact : « en préparation » est une
+ * information, pas un vide. Ce qui est omis, ce sont les DATES et les NOTES —
+ * elles n'existent que lorsqu'un transporteur les a publiées.
+ */
+function PanneauSuivi({
+  suivi,
+  statut,
+}: {
+  readonly suivi: {
+    readonly numero: string | null;
+    readonly abandonne: boolean;
+    readonly quand: Readonly<Partial<Record<Etape, string>>>;
+    readonly notes: Readonly<Partial<Record<Etape, string>>>;
+  };
+  readonly statut: string;
+}) {
+  const t = useTranslations("editeur");
+  const courante: Etape = (ETAPES as readonly string[]).includes(statut)
+    ? (statut as Etape)
+    : "preparation";
+
+  return (
+    <Panneau titre={t("suiviTitre")}>
+      {/* LE FOURNISSEUR A CESSÉ DE SUIVRE CE NUMÉRO, ET C'EST DIT. Un suivi qui
+          s'arrête sans le dire se lit comme un suivi qui ne marche pas. */}
+      {suivi.abandonne ? (
+        <p className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] font-medium text-ds-alerte">
+          {t("suiviArrete")}
+        </p>
+      ) : null}
+
+      <FriseDetail
+        courante={courante}
+        libelleAttente={t("suiviAttente")}
+        etapes={ETAPES.map((etape) => ({
+          etape,
+          libelle: t("statut." + etape),
+          quand: suivi.quand[etape] ?? null,
+          note: suivi.notes[etape] ?? null,
+        }))}
+      />
+    </Panneau>
+  );
+}
+
+/**
+ * LE PANNEAU D'INFORMATIONS — `Panel` + `InfoRow` du kit.
+ *
+ * ⚠️ IL MET LE LIEN CLIENT EN CLAIR, et c'est le vrai apport de ce panneau. Le
+ * lien n'existait à l'écran que derrière un bouton « copier » : un vendeur qui
+ * veut VÉRIFIER quel lien il s'apprête à envoyer devait donc le coller quelque
+ * part pour le voir. Après une révocation, c'est exactement la question qu'on
+ * se pose.
+ *
+ * ⚠️ IL EST DANS L'ÎLOT CLIENT, pas rendu par le serveur, et ce n'est pas une
+ * commodité : le numéro de suivi et le lien changent SOUS LES YEUX du vendeur —
+ * l'un à la frappe, l'autre à la révocation. Rendu au serveur, ce panneau
+ * afficherait la valeur du chargement, c'est-à-dire un lien mort au moment
+ * précis où l'on vient le vérifier.
+ *
+ * ⚠️ DEUX LIGNES DU KIT NE SONT PAS ICI. « Méthode d'expédition » nommerait un
+ * transporteur que la base porte en identifiant NUMÉRIQUE 17TRACK, jamais
+ * traduit ; « Pays de livraison » n'existe pas — le destinataire est un texte
+ * libre. Une ligne de repli répétée à chaque commande vaut moins que rien.
+ */
+function PanneauInformations({
+  reference,
+  dates,
+  numeroSuivi,
+  lienPublic,
+  versPageClient,
+}: {
+  readonly reference: string;
+  readonly dates: { readonly creeLe: string; readonly misAJourLe: string };
+  readonly numeroSuivi: string;
+  readonly lienPublic: string;
+  readonly versPageClient: string;
+}) {
+  const t = useTranslations("editeur");
+
+  return (
+    <Panneau titre={t("infosTitre")}>
+      <LigneInfo libelle={t("infosReference")} valeur={reference} href={versPageClient} />
+      <LigneInfo libelle={t("infosCreee")} valeur={dates.creeLe} />
+      <LigneInfo libelle={t("infosModifiee")} valeur={dates.misAJourLe} />
+      {/* UNE VALEUR ABSENTE EST NOMMÉE, pas laissée à un tiret. « Aucun numéro »
+          se lit ; « – » demande de deviner si la donnée manque ou si l'écran a
+          échoué. */}
+      <LigneInfo
+        libelle={t("suivi")}
+        valeur={numeroSuivi.trim() === "" ? t("infosSansSuivi") : numeroSuivi}
+      />
+      <LigneInfo libelle={t("infosLien")} valeur={lienPublic} href={versPageClient} />
+    </Panneau>
   );
 }
 
@@ -427,7 +620,10 @@ function IconeCopie({ etat }: { readonly etat: "repos" | "copie" | "echec" }) {
   if (etat === "copie")
     return <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes" />;
   if (etat === "echec") return <TriangleAlert aria-hidden="true" size={16} strokeWidth={2} />;
-  return <Copy aria-hidden="true" size={16} strokeWidth={1.9} />;
+  // À L'ACCENT, comme toutes les icônes de `DetailAction` : c'est ce qui
+  // distingue ces boutons des boutons neutres du reste du produit, et la mesure
+  // du kit servi le confirme — `color: var(--accent)` sur l'icône seule.
+  return <Copy aria-hidden="true" size={17} strokeWidth={1.9} className="text-ds-accent" />;
 }
 
 /** Copier le lien public. Le presse-papiers n'a pas d'équivalent en HTML. */
@@ -562,12 +758,7 @@ function CarteCommande({
     base + " " + hauteur + (champsEnEchec.includes(champ) ? " " + enEchec : "");
 
   return (
-    <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card lg:p-6">
-      {/* `Panel` du kit : titre 18 px, gras, tracking -0,025em, 20 px sous lui. */}
-      <h2 className="mb-5 text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
-        {t("sectionCommande")}
-      </h2>
-
+    <Panneau titre={t("sectionCommande")}>
       <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-2 lg:gap-4">
         <div>
           <label className={etiquette} htmlFor="customer_label">
@@ -704,6 +895,6 @@ function CarteCommande({
         />
         <p className="mt-1.5 text-[13px] text-ds-texte-sourdine">{t("notesPrivees")}</p>
       </div>
-    </section>
+    </Panneau>
   );
 }

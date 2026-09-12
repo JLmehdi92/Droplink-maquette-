@@ -630,7 +630,7 @@
   },
   "editeur": {
     "historique": {
-      "titre": "History",
+      "titre": "Order history",
       "aucun": "Nothing has happened on this order yet.",
       "jamaisOuvert": "Your customer has not opened the link yet.",
       "derniereOuverture": "Last opened by your customer on {quand} — {vues, plural, one {# view} other {# views}}.",
@@ -696,7 +696,17 @@
     "copieEchouee": "Copy refused by the browser",
     "qcAide": "Fill this in if your customer answers you outside their page.",
     "apercuTitre": "What your customer sees",
-    "apercuDirect": "live"
+    "apercuDirect": "live",
+    "creeeLe": "Created on {quand}",
+    "suiviTitre": "Order tracking",
+    "suiviAttente": "Pending",
+    "suiviArrete": "The carrier no longer publishes anything for this number.",
+    "infosTitre": "Order details",
+    "infosReference": "Reference",
+    "infosCreee": "Created",
+    "infosModifiee": "Last updated",
+    "infosLien": "Customer link",
+    "infosSansSuivi": "No number"
   },
   "medias": {
     "titre": "Photos and videos",

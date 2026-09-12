@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { TraductionsClient } from "@/components/traductions-client";
 import { Editeur } from "@/components/commandes/editeur";
@@ -18,6 +18,8 @@ import { resoudreAccent } from "@/lib/design/contraste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { lireHistorique } from "@/lib/commandes/historique";
+import { lireSuiviDeCommande, datesDesEtapes } from "@/lib/commandes/suivi-commande";
+import type { Etape } from "@/lib/tracking/normalize";
 import { titreDeCommande } from "@/lib/commandes/titre";
 import { HistoriqueCommande } from "@/components/commandes/historique-commande";
 
@@ -41,7 +43,7 @@ const lireCommandeEditee = cache(async (id: string) => {
       // ouverture porte sur un brouillon encore vide ou sur une commande déjà
       // remplie — la distinction que portait le second point d'émission qu'on
       // vient de retirer.
-      "id, public_token, customer_label, product_ref, tracking_number, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at",
+      "id, public_token, customer_label, product_ref, tracking_number, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at, created_at, updated_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -187,6 +189,61 @@ export default async function EditeurCommande({
     }),
   );
 
+  /*
+   * LE SUIVI DU COLIS, SOUS RLS COMME TOUT LE RESTE DE CET ÉCRAN.
+   *
+   * ⚠️ IL N'ÉTAIT NULLE PART, ET C'EST LE VRAI MANQUE QUE LA COMPARAISON AU KIT
+   * A TROUVÉ. L'écran portait le numéro de suivi en champ de saisie et rien
+   * d'autre : ni les dates, ni les points de passage, ni la position du colis.
+   * Le vendeur devait donc ouvrir l'écran des envois — ou la page de son client
+   * — pour voir ce que son client voit. La donnée existait depuis la
+   * migration 029.
+   *
+   * Une commande sur deux n'a pas de colis attaché, et la lecture rend alors
+   * `null` : la frise se rend quand même, sur le seul `orders.status`.
+   */
+  const suivi = await lireSuiviDeCommande(supabase, id);
+  const quandEtapes = suivi === null ? {} : datesDesEtapes(suivi.passages);
+
+  const format = await getFormatter();
+  const instant = (iso: string): string =>
+    format.dateTime(new Date(iso), {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  /*
+   * LA NOTE D'UNE ÉTAPE EST CELLE DU POINT DE PASSAGE QUI L'A DATÉE, jamais une
+   * phrase écrite d'avance. Le kit met de la prose sous chaque étape, y compris
+   * sous celles qu'aucun colis n'a franchies ; reprise telle quelle, elle
+   * affirmerait à chaque commande un fait que la base n'a pas enregistré.
+   */
+  const notesEtapes: Partial<Record<Etape, string>> = {};
+  for (const passage of suivi?.passages ?? []) {
+    if (passage.etape === null) continue;
+    if (quandEtapes[passage.etape] !== passage.instant) continue;
+    notesEtapes[passage.etape] =
+      passage.lieu === null ? passage.description : passage.description + " — " + passage.lieu;
+  }
+
+  const quandFormatees: Partial<Record<Etape, string>> = {};
+  for (const [etape, iso] of Object.entries(quandEtapes)) {
+    quandFormatees[etape as Etape] = instant(iso);
+  }
+
+  /*
+   * LA PREMIÈRE ÉTAPE EST DATÉE PAR LA CRÉATION DE LA COMMANDE, pas par un
+   * transporteur. « En préparation » commence quand le vendeur crée la page :
+   * c'est la seule étape des quatre dont nous sommes la source, et la seule que
+   * la frise laissait sans date. Un point de passage qui porterait cette étape
+   * — rare, mais possible — la remplace : il vient du transporteur, et le
+   * transporteur prime dès qu'il parle (décision 2).
+   */
+  quandFormatees.preparation ??= instant(data.created_at);
+
   const plafonds = plafondsAffichables();
 
   /*
@@ -251,6 +308,16 @@ export default async function EditeurCommande({
           versPageClient={versPageClient}
           statuts={STATUTS_EXPEDITION}
           qcs={STATUTS_QC}
+          suivi={{
+            numero: suivi?.numero ?? null,
+            abandonne: suivi?.abandonne ?? false,
+            quand: quandFormatees,
+            notes: notesEtapes,
+          }}
+          dates={{
+            creeLe: instant(data.created_at),
+            misAJourLe: instant(data.updated_at),
+          }}
           medias={{
             initiaux: medias,
             plafondMedias: plafonds.medias,

@@ -630,7 +630,7 @@
   },
   "editeur": {
     "historique": {
-      "titre": "操作记录",
+      "titre": "订单记录",
       "aucun": "这笔订单还没有发生任何事。",
       "jamaisOuvert": "您的客户还没有打开过链接。",
       "derniereOuverture": "客户最近一次打开是 {quand}——{vues, plural, other {共 # 次浏览}}。",
@@ -696,7 +696,17 @@
     "copieEchouee": "浏览器拒绝了复制",
     "qcAide": "如果客户是通过其他渠道回复您的，请在这里填写。",
     "apercuTitre": "客户看到的样子",
-    "apercuDirect": "实时"
+    "apercuDirect": "实时",
+    "creeeLe": "创建于 {quand}",
+    "suiviTitre": "订单物流追踪",
+    "suiviAttente": "等待中",
+    "suiviArrete": "承运商已不再发布该单号的信息。",
+    "infosTitre": "订单详情",
+    "infosReference": "编号",
+    "infosCreee": "创建时间",
+    "infosModifiee": "最后更新",
+    "infosLien": "客户链接",
+    "infosSansSuivi": "暂无单号"
   },
   "medias": {
     "titre": "照片和视频",

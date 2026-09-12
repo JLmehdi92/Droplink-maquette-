@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { LigneHistorique } from "@/lib/commandes/historique";
+import { Panneau } from "@/components/app/panneau";
 
 /**
  * L'HISTORIQUE D'UNE COMMANDE, porté sur la colonne de droite de la planche.
@@ -75,11 +76,7 @@ export async function HistoriqueCommande({
     CHAMPS.has(detail) ? tEditeur("nomChamp." + detail) : detail;
 
   return (
-    <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card">
-      <h2 className="mb-4 text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
-        {t("titre")}
-      </h2>
-
+    <Panneau titre={t("titre")}>
       {/*
         LA CONSULTATION DU CLIENT VIENT EN PREMIER, et c'est un choix.
         « Le client a-t-il ouvert le lien » est la question que le vendeur se
@@ -128,6 +125,6 @@ export async function HistoriqueCommande({
           ))}
         </ol>
       )}
-    </section>
+    </Panneau>
   );
 }
