@@ -187,17 +187,12 @@ export default async function Commandes({
           compteVide ? undefined : (
             <div className="hidden shrink-0 items-center gap-2.5 md:flex">
               {/*
-                ⚠️ LA RECHERCHE DE 290 px NE TIENT PAS À CÔTÉ DU BOUTON SOUS
-                1024 px. Mesuré : à 768 px, la barre latérale prend 236 px et il
-                reste 432 px à l'en-tête, pour un titre et 500 px de contrôles.
-                Le bouton principal sortait de la carte-page — qui porte
-                `overflow-hidden` — donc il était COUPÉ, pas repoussé. Sous `lg`,
-                la recherche descend en pleine largeur sous le titre.
+                ⚠️ LA RECHERCHE A QUITTÉ CET EN-TÊTE POUR LA BARRE SUPÉRIEURE.
+                Le kit n en dessine qu une par écran, et elle est en haut ; deux
+                champs qui cherchent la même chose à 200 px l un de l autre
+                posent une question à chaque écran. Elle reste ici AU TÉLÉPHONE,
+                où la barre supérieure ne se rend pas — voir `dessous`.
               */}
-              <span className="hidden lg:block">
-                <FormulaireRecherche base={base} parametres={parametres} libelles={t} />
-              </span>
-
               {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien
                   vers une page qui écrirait au rendu. Un lien serait suivi par
                   le préchargement du navigateur, par un aspirateur, par une
@@ -240,7 +235,7 @@ export default async function Commandes({
 
       <main
         id="contenu"
-        className="flex flex-grow flex-col gap-3.5 py-3.5 md:gap-5 md:px-[30px] md:pt-0 md:pb-[26px]"
+        className="flex flex-grow flex-col gap-3.5 py-3.5 md:gap-[22px] md:px-8 md:pt-0 md:pb-[26px]"
       >
         {/*
           LES QUATRE COMPTEURS. Omis en bloc si la lecture échoue : rendre des

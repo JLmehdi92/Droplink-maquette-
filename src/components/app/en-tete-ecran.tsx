@@ -99,6 +99,10 @@ export function EnTeteEcran({
  *   titre       40 px / 800 / interligne 1,05 / tracking -0,045em
  *   sous-titre  15 px, couleur de corps, 8 px sous le titre
  *   rangée      écart 20 px, 26 px sous l'en-tête
+ *   marges      32 px à gauche et à droite du contenu, 30 px au-dessus du
+ *               titre — mesuré sur la référence servie : la zone de contenu
+ *               commence à x=264 et le titre à x=296, la barre supérieure
+ *               finit à y=89 et le titre commence à y=119
  *   ≤ 760 px    l'en-tête passe en colonne, le titre tombe à 26 px
  *   ≤ 560 px    le titre tombe à 24 px
  *
@@ -133,7 +137,7 @@ export function EnTeteEcranDs({
   readonly actionMobile?: React.ReactNode;
 }) {
   return (
-    <header className="border-b border-ds-filet bg-ds-surface-carte px-margin-mobile pt-4 pb-3.5 md:border-0 md:bg-transparent md:px-[30px] md:pt-[26px] md:pb-[26px]">
+    <header className="border-b border-ds-filet bg-ds-surface-carte px-margin-mobile pt-4 pb-3.5 md:border-0 md:bg-transparent md:px-8 md:pt-[30px] md:pb-[26px]">
       <div className="flex flex-wrap items-center justify-between gap-5">
         <div className="min-w-0">
           <h1 className="text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] md:text-[40px]">

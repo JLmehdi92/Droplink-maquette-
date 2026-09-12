@@ -2,8 +2,9 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { decrireSilence } from "@/lib/tracking/silence";
 import type { CompteursEnvois, Etat, PageEnvois, ParametresEnvois } from "@/lib/envois/liste";
 import { ETATS, TRIS } from "@/lib/envois/liste";
-import { Icone } from "@/components/icone";
-import { DETAILS_OUTIL, PANNEAU_OUTIL, PILULE_OUTIL } from "@/components/panneau-outil";
+import { AlertCircle, ArrowUpDown, ChevronDown, CircleCheck, Info, Package, Truck } from "lucide-react";
+import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
+import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
 import { LienEcran } from "@/components/lien-ecran";
 
 /**
@@ -59,7 +60,7 @@ function lien(base: string, actuels: ParametresEnvois, modif: Record<string, str
 }
 
 const CARTE =
-  "rounded-lg border border-outline-variant bg-surface-container-lowest p-4 lg:rounded-[18px]";
+  "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card lg:p-5";
 
 /**
  * LA PEAU DE CHAQUE ÉTAT, relevée sur les planches.
@@ -70,16 +71,19 @@ const CARTE =
  * ajouté un code à retenir sans ajouter une information.
  */
 const PEAU: Readonly<Record<Etat, { fond: string; encre: string; pastille: string }>> = {
-  preparation: { fond: "bg-fond-neutre", encre: "text-ardoise", pastille: "bg-gris-inactif" },
-  expedie: { fond: "bg-violet-fond", encre: "text-violet-encre", pastille: "bg-violet" },
-  en_transit: { fond: "bg-violet-fond", encre: "text-violet-encre", pastille: "bg-violet" },
-  livre: { fond: "bg-succes-fond", encre: "text-succes", pastille: "bg-succes" },
+  preparation: { fond: "bg-ds-surface-creux", encre: "text-ds-texte-corps", pastille: "bg-ds-texte-tenu" },
+  expedie: { fond: "bg-ds-info-fond", encre: "text-ds-info", pastille: "bg-ds-info" },
+  en_transit: { fond: "bg-ds-info-fond", encre: "text-ds-info", pastille: "bg-ds-info" },
+  livre: { fond: "bg-ds-succes-fond", encre: "text-ds-succes", pastille: "bg-ds-succes" },
 };
 
+/* AMBRE, PAS ROUGE : un colis immobile n'est pas une erreur, c'est une attente
+   qu'il faut relancer. Même arbitrage que la pastille « sans mouvement » de
+   l'écran Commandes. */
 const ALERTE = {
-  fond: "bg-alerte-fond-vif",
-  encre: "text-alerte",
-  pastille: "bg-alerte-puce",
+  fond: "bg-ds-alerte-fond",
+  encre: "text-ds-alerte",
+  pastille: "bg-ds-alerte",
 } as const;
 
 function Puce({
@@ -96,13 +100,15 @@ function Puce({
   return (
     <span
       className={
-        "inline-flex shrink-0 items-center gap-[5px] rounded-full px-[9px] py-[3px] font-label-md text-[11px] font-semibold lg:gap-1.5 lg:px-2.5 lg:py-1 lg:text-[12px] " +
+        // `Badge` du design system : rayon pilule, 12 px gras, `padding: 5px 11px`.
+        // 12 px et non 11 : la règle 5 pose 11,5 px comme plancher au téléphone.
+        "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[12px] font-bold " +
         fond +
         " " +
         encre
       }
     >
-      <span className={"h-[5px] w-[5px] shrink-0 rounded-full lg:h-1.5 lg:w-1.5 " + pastille} />
+      <span className={"h-1.5 w-1.5 shrink-0 rounded-ds-pill " + pastille} />
       {children}
     </span>
   );
@@ -137,10 +143,12 @@ export async function TableauEnvois({
    * liste des commandes. La dernière colonne ne prend rien : elle est alignée à
    * droite, sur le bord de la carte.
    */
+  /* En-tête de colonne du design system : 12 px, demi-gras, sourdine, SANS
+     capitales — les majuscules y sont réservées aux eyebrows de marketing, et
+     11 px passait sous le plancher de la règle 5. */
   const enTete =
-    "pb-3 pr-4 text-left font-label-sm text-[11px] leading-[14px] font-bold tracking-[0.05em] whitespace-nowrap text-gris-entete uppercase last:pr-0";
-  const cellule =
-    "border-t border-filet-ligne py-[15px] pr-4 font-body-md text-[14px] last:pr-0";
+    "pb-3 pr-4 text-left text-[12px] leading-4 font-semibold whitespace-nowrap text-ds-texte-sourdine last:pr-0";
+  const cellule = "border-t border-ds-filet py-[15px] pr-4 text-[14px] last:pr-0";
 
   /**
    * LA PILULE DE VUE, celle du canevas : bordée, noire quand elle est active.
@@ -155,11 +163,21 @@ export async function TableauEnvois({
    * 44 px au doigt, 34 px à la souris : la planche téléphone écrit
    * `min-height: 44px` là où la planche bureau écrit `height: 34px`.
    */
+  /*
+   * `FilterTabs` du design system : 36 px, `padding: 0 16px`, rayon pilule,
+   * 13 px gras. L'active prend la SURFACE INVERSE — l'encre, pas l'accent — avec
+   * son ombre ; les autres restent des cartes bordées.
+   *
+   * ⚠️ L'ÉCRAN COMMANDES EMPLOIE DES ONGLETS SOULIGNÉS ET CELUI-CI DES PILULES,
+   * ET CE N'EST PAS UNE INCOHÉRENCE : le kit dessine l'un avec `UnderlineTabs`
+   * DANS la carte du tableau, l'autre avec une rangée de filtres AU-DESSUS. Les
+   * deux idiomes existent chez lui, chacun à sa place.
+   */
   const pilule = (actif: boolean): string =>
-    "flex min-h-11 shrink-0 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors lg:h-[34px] lg:min-h-0 " +
+    "flex min-h-11 shrink-0 items-center rounded-ds-pill border px-4 text-[13px] font-bold whitespace-nowrap transition-colors lg:h-9 lg:min-h-0 " +
     (actif
-      ? "border-primary bg-primary text-on-primary"
-      : "border-filet-controle bg-surface-container-lowest text-ardoise hover:bg-fond-neutre");
+      ? "border-transparent bg-ds-surface-inverse text-ds-texte-sur-marque shadow-ds-sm"
+      : "border-ds-filet bg-ds-surface-carte text-ds-texte-corps hover:bg-ds-surface-teinte");
 
   /**
    * Tout ce qu'une ligne dit de son colis, calculé UNE FOIS et servi aux deux
@@ -262,10 +280,16 @@ export async function TableauEnvois({
         href={lien(base, parametres, { silencieux: parametres.silencieux ? null : "oui", etat: null })}
         aria-current={parametres.silencieux ? "true" : undefined}
         className={
-          "flex min-h-11 shrink-0 items-center rounded-full border px-3.5 font-label-md text-[13px] font-semibold whitespace-nowrap transition-colors lg:h-[34px] lg:min-h-0 " +
+          /*
+            ⚠️ L'ACTIVE PREND L'ENCRE COMME LES AUTRES, PAS L'AMBRE PLEINE. Un
+            aplat `--status-warning` porte du blanc à 2,6:1 — sous le plancher de
+            4,5:1 que le produit s'impose partout ailleurs. L'emphase passe donc
+            par le REPOS, qui reste ambré là où les autres pilules sont blanches.
+          */
+          "flex min-h-11 shrink-0 items-center rounded-ds-pill border px-4 text-[13px] font-bold whitespace-nowrap transition-colors lg:h-9 lg:min-h-0 " +
           (parametres.silencieux
-            ? "border-alerte bg-alerte text-white"
-            : "border-alerte-filet bg-alerte-fond text-alerte hover:bg-alerte-fond-vif")
+            ? "border-transparent bg-ds-surface-inverse text-ds-texte-sur-marque shadow-ds-sm"
+            : "border-transparent bg-ds-alerte-fond text-ds-alerte hover:bg-ds-amber-100")
         }
       >
         {t("filtres.silencieux")}
@@ -287,23 +311,23 @@ export async function TableauEnvois({
         `PANNEAU_OUTIL`, avec `Commandes` : feuille du bas au téléphone, panneau
         ancré au bureau.
       */}
-      <details className={DETAILS_OUTIL + " lg:open:relative"}>
-        <summary className={PILULE_OUTIL}>
-          <Icone nom="schedule" className="text-[14px]" />
+      <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
+        <summary className={PILULE_OUTIL_DS}>
+          <ArrowUpDown aria-hidden="true" size={16} strokeWidth={1.8} />
           {t(`tri.${parametres.tri}`)}
-          <Icone nom="expand_more" className="text-[14px]" />
+          <ChevronDown aria-hidden="true" size={15} strokeWidth={1.8} className="text-ds-texte-tenu" />
         </summary>
-        <ul className={PANNEAU_OUTIL + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
+        <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
           {TRIS.map((tri) => (
             <li key={tri}>
               <LienEcran
                 href={lien(base, parametres, { tri: tri === "immobiles" ? "" : tri })}
                 aria-current={parametres.tri === tri ? "true" : undefined}
                 className={
-                  "flex min-h-11 items-center rounded-[9px] px-3 font-body-md text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
+                  "flex min-h-11 items-center rounded-ds-sm px-3 text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
                   (parametres.tri === tri
-                    ? "bg-violet-fond font-semibold text-violet"
-                    : "text-on-surface-variant hover:bg-surface-container")
+                    ? "bg-ds-surface-teinte font-bold text-ds-accent-encre"
+                    : "font-medium text-ds-texte-corps hover:bg-ds-ink-50")
                 }
               >
                 {t(`tri.${tri}`)}
@@ -331,15 +355,25 @@ export async function TableauEnvois({
       */}
       <section
         aria-label={t("compteurs.titre")}
-        className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-3"
+        className="grid grid-cols-2 gap-3 min-[1424px]:grid-cols-4 md:gap-4"
       >
         {(
           [
-            { cle: "total", valeur: compteurs.total, filtre: {}, alerte: false, mobile: false },
+            {
+              cle: "total",
+              valeur: compteurs.total,
+              filtre: {},
+              Icone: Package,
+              teinte: "marque",
+              alerte: false,
+              mobile: false,
+            },
             {
               cle: "enTransit",
               valeur: compteurs.enTransit,
               filtre: { etat: "en_transit" },
+              Icone: Truck,
+              teinte: "info",
               alerte: false,
               mobile: true,
             },
@@ -347,6 +381,8 @@ export async function TableauEnvois({
               cle: "silencieux",
               valeur: compteurs.silencieux,
               filtre: { silencieux: "oui" },
+              Icone: AlertCircle,
+              teinte: "alerte",
               alerte: true,
               mobile: true,
             },
@@ -354,6 +390,8 @@ export async function TableauEnvois({
               cle: "livresCeMois",
               valeur: compteurs.livresCeMois,
               filtre: { etat: "livre" },
+              Icone: CircleCheck,
+              teinte: "succes",
               alerte: false,
               mobile: false,
             },
@@ -367,30 +405,15 @@ export async function TableauEnvois({
               abandonnes: null,
               ...c.filtre,
             })}
-            className={
-              "rounded-lg border p-4 transition-colors lg:rounded-lg lg:px-5 lg:py-[18px] " +
-              (c.alerte
-                ? "border-alerte-filet bg-alerte-fond hover:bg-alerte-fond-doux"
-                : "border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low") +
-              (c.mobile ? "" : " hidden lg:block")
-            }
+            className={"group block h-full" + (c.mobile ? "" : " hidden lg:block")}
           >
-            <p
-              className={
-                "mb-1.5 font-body-sm text-[12px] " +
-                (c.alerte ? "text-alerte" : "text-on-surface-variant")
-              }
-            >
-              {t(`compteurs.${c.cle}`)}
-            </p>
-            <p
-              className={
-                "font-headline-lg text-[24px] leading-[30px] font-extrabold tracking-[-0.03em] lg:text-[26px] lg:leading-8 " +
-                (c.alerte ? "text-alerte" : "text-on-surface")
-              }
-            >
-              {format.number(c.valeur)}
-            </p>
+            <TuileMetrique
+              Icone={c.Icone}
+              valeur={format.number(c.valeur)}
+              libelle={t(`compteurs.${c.cle}`)}
+              teinte={c.teinte satisfies TeinteTuile}
+              valeurEnAlerte={c.alerte && c.valeur > 0}
+            />
           </LienEcran>
         ))}
       </section>
@@ -404,13 +427,13 @@ export async function TableauEnvois({
         <>
         {barreOutils}
         <div className={CARTE + " px-5 py-10 text-center"}>
-          <p className="font-body-md text-[14px] leading-5 text-on-surface-variant">
+          <p className="text-[14px] leading-5 text-ds-texte-corps">
             {aUnFiltre ? t("vide.filtre") : t("vide.compte")}
           </p>
           {aUnFiltre ? (
             <LienEcran
               href={base}
-              className="mt-3 inline-flex min-h-11 items-center font-label-md text-[14px] font-semibold text-on-surface underline"
+              className="mt-3 inline-flex min-h-11 items-center text-[14px] font-semibold text-ds-texte-lien underline underline-offset-2 hover:text-ds-texte-lien-survol"
             >
               {t("vide.effacer")}
             </LienEcran>
@@ -449,22 +472,27 @@ export async function TableauEnvois({
                 {page.lignes.map((ligne) => {
                   const d = decrire(ligne);
                   return (
-                    <tr key={ligne.id} className={d.silencieux ? "bg-alerte-fond-doux" : undefined}>
-                      <td className={cellule + " font-mono text-[13px] font-semibold text-on-surface"}>
+                    <tr
+                      key={ligne.id}
+                      className={
+                        d.silencieux ? "bg-ds-alerte-fond" : "transition-colors hover:bg-ds-ink-50"
+                      }
+                    >
+                      <td className={cellule + " font-mono text-[13px] font-semibold text-ds-texte-fort"}>
                         {ligne.numero}
                         {ligne.abandonneLe !== null ? (
                           /* ON DIT QUE NOUS AVONS CESSÉ D'INTERROGER, pas que le
                              colis est perdu. La différence compte : l'un est un
                              fait sur nous, l'autre une affirmation sur le colis
                              que nous ne pouvons pas soutenir. */
-                          <span className="ml-2 rounded-full bg-fond-neutre px-2 py-0.5 font-label-md text-[11px] font-semibold text-ardoise">
+                          <span className="ml-2 rounded-ds-pill bg-ds-surface-creux px-2 py-0.5 text-[12px] font-bold text-ds-texte-corps">
                             {t("abandonne")}
                           </span>
                         ) : null}
                       </td>
-                      <td className={cellule + " text-on-surface"}>
+                      <td className={cellule + " text-ds-texte-fort"}>
                         {d.clients ?? (
-                          <span className="text-on-surface-variant">
+                          <span className="text-ds-texte-sourdine">
                             {t("commandesRattachees", { n: ligne.commandes })}
                           </span>
                         )}
@@ -474,19 +502,21 @@ export async function TableauEnvois({
                         className={
                           cellule +
                           " whitespace-nowrap " +
-                          (d.silencieux ? "font-semibold text-alerte" : "text-on-surface-variant")
+                          (d.silencieux ? "font-bold text-ds-alerte" : "text-ds-texte-sourdine")
                         }
                       >
                         {d.anciennete ?? "—"}
                       </td>
                       <td
                         className={
-                          cellule + " " + (ligne.dernierPoint === null ? "text-on-surface-variant" : "text-on-surface")
+                          cellule +
+                          " " +
+                          (ligne.dernierPoint === null ? "text-ds-texte-sourdine" : "text-ds-texte-fort")
                         }
                       >
                         {ligne.dernierPoint ?? t("mouvement.aucun")}
                       </td>
-                      <td className={cellule + " text-right text-on-surface-variant"}>
+                      <td className={cellule + " text-right text-ds-texte-sourdine"}>
                         {format.number(ligne.interrogations)}
                       </td>
                     </tr>
@@ -507,22 +537,22 @@ export async function TableauEnvois({
                 <li
                   key={ligne.id}
                   className={
-                    "rounded-lg border p-4 " +
+                    "rounded-ds-card border p-4 " +
                     (d.silencieux
-                      ? "border-alerte-filet bg-alerte-fond-doux"
-                      : "border-outline-variant bg-surface-container-lowest")
+                      ? "border-transparent bg-ds-alerte-fond"
+                      : "border-ds-filet bg-ds-surface-carte shadow-ds-xs")
                   }
                 >
                   <div className="mb-[9px] flex items-center justify-between gap-2.5">
-                    <span className="truncate font-mono text-[13px] font-semibold text-on-surface">
+                    <span className="truncate font-mono text-[13px] font-semibold text-ds-texte-fort">
                       {ligne.numero}
                     </span>
                     {d.puce}
                   </div>
                   <p
                     className={
-                      "mb-[3px] font-body-md text-[14px] leading-5 " +
-                      (ligne.dernierPoint === null ? "text-on-surface-variant" : "text-on-surface")
+                      "mb-[3px] text-[14px] leading-5 " +
+                      (ligne.dernierPoint === null ? "text-ds-texte-sourdine" : "text-ds-texte-fort")
                     }
                   >
                     {ligne.dernierPoint ?? t("mouvement.aucun")}
@@ -530,7 +560,7 @@ export async function TableauEnvois({
                   {/* LES TROIS FAITS SECONDAIRES SUR UNE SEULE LIGNE, séparés par
                       des points médians : c'est ce que fait la planche, et cela
                       évite trois libellés pour trois valeurs courtes. */}
-                  <p className="font-body-sm text-[12px] text-on-surface-variant">
+                  <p className="text-[12px] text-ds-texte-sourdine">
                     {[
                       // LE COMPTE PREND LE RELAIS DES NOMS, comme dans le
                       // tableau : une commande sans destinataire nommé existe,
@@ -557,7 +587,7 @@ export async function TableauEnvois({
       {page.curseurSuivant !== null ? (
         <LienEcran
           href={lien(base, parametres, { curseur: page.curseurSuivant })}
-          className="mx-auto inline-flex min-h-11 items-center rounded-[11px] border border-filet-controle px-6 font-label-md text-[14px] font-semibold text-on-surface transition-colors hover:bg-surface-container-low"
+          className="mx-auto inline-flex min-h-11 items-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-6 text-[13px] font-medium text-ds-texte-corps shadow-ds-xs transition-colors hover:bg-ds-surface-teinte lg:h-9 lg:min-h-0"
         >
           {t("pageSuivante")}
         </LienEcran>
@@ -579,29 +609,17 @@ function BandeauAide({ texte, encadre = false }: { readonly texte: string; reado
   return (
     <div
       className={
-        "mt-4 flex items-start gap-2.5 rounded-[12px] px-3.5 py-3 lg:mt-[18px] " +
+        "mt-4 flex items-start gap-2.5 rounded-ds-card px-3.5 py-3 lg:mt-[18px] " +
         (encadre
-          ? "mt-0 border border-outline-variant bg-surface-container-lowest"
-          : "bg-surface-container-low")
+          ? "mt-0 border border-ds-filet bg-ds-surface-carte"
+          : "bg-ds-surface-creux")
       }
     >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className="mt-px shrink-0 text-sourdine"
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 16v-4" />
-        <path d="M12 8h.01" />
-      </svg>
-      <span className="font-body-sm text-[12px] leading-[18px] text-on-surface-variant">
+      {/* L'icône dessinée à la main devient celle de Lucide : le design system
+          impose son jeu, et un cercle redessiné diverge dès qu'on touche au
+          trait. */}
+      <Info aria-hidden="true" size={16} strokeWidth={1.8} className="mt-px shrink-0 text-ds-texte-tenu" />
+      <span className="text-[13px] leading-[18px] text-ds-texte-corps">
         {texte}
       </span>
     </div>

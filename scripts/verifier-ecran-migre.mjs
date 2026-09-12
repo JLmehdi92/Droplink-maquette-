@@ -112,7 +112,7 @@ const { data: commandes } = await service
       status,
     })),
   )
-  .select("id");
+  .select("id, public_token");
 
 /*
  * ⚠️ LES ECRANS DE DETAIL ONT UN IDENTIFIANT DANS LEUR URL, et on ne peut pas
@@ -122,6 +122,52 @@ const { data: commandes } = await service
  * mesurable par cet outil.
  */
 const idCommande = commandes?.[0]?.id ?? "";
+/* Le jeton public de la meme commande, pour mesurer `/p/[token]` dans la
+   foulee : c est la seule page du produit dont l URL n est pas devinable. */
+const jetonPublic = commandes?.[0]?.public_token ?? "";
+
+/*
+ * ⚠️ DEUX COLIS, DONT UN SILENCIEUX, PARCE QU UN ECRAN VIDE NE MESURE RIEN.
+ *
+ * Sans eux, `/envois` rendait son etat vide : la sonde y voyait une carte et une
+ * phrase, donc elle ne pouvait rougir ni sur une pastille d etat, ni sur une
+ * ligne de tableau, ni sur la carte ambree du silence — c est-a-dire sur tout ce
+ * que cet ecran existe pour montrer. Un jeu qui n exerce que le cas vide
+ * certifie le cas vide.
+ *
+ * Le second colis n a pas bouge depuis 14 jours : c est au-dela du seuil de dix
+ * jours du brief, donc il declenche reellement la famille ambree du silence.
+ */
+const jours = (n) => new Date(Date.now() - n * 86400000).toISOString();
+const { data: colis } = await service
+  .from("tracked_parcels")
+  .insert([
+    {
+      shop_id: shop.id,
+      tracking_number: "DLKMESURE0001FR",
+      carrier_code: "la-poste",
+      normalized_status: "en_transit",
+      first_movement_at: jours(3),
+      last_movement_at: jours(1),
+      query_count: 4,
+    },
+    {
+      shop_id: shop.id,
+      tracking_number: "DLKMESURE0002CN",
+      carrier_code: "ems",
+      normalized_status: "en_transit",
+      first_movement_at: jours(21),
+      last_movement_at: jours(14),
+      query_count: 12,
+    },
+  ])
+  .select("id");
+
+if (colis !== null && commandes !== null) {
+  await service.from("order_parcels").insert(
+    colis.map((c, i) => ({ order_id: commandes[i % commandes.length].id, parcel_id: c.id })),
+  );
+}
 
 const { data: sess } = await publiable.auth.signInWithPassword({
   email: courriel,
@@ -278,7 +324,9 @@ const RELEVE = `(() => {
 
 const rapport = [];
 for (const modele of routes) {
-  const chemin = modele.replaceAll("{commande}", idCommande);
+  const chemin = modele
+    .replaceAll("{commande}", idCommande)
+    .replaceAll("{jeton}", jetonPublic);
   for (const largeur of largeurs) {
     const { targetId } = await brut("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await brut("Target.attachToTarget", { targetId, flatten: true });

@@ -4,8 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { LienEcran } from "@/components/lien-ecran";
-import { Icone } from "@/components/icone";
-import type { NomIcone } from "@/lib/design/traces-icones";
+import { BarChart3, Briefcase, Shield, Truck, type LucideIcon } from "lucide-react";
 
 /**
  * LA NAVIGATION DE L'ESPACE VENDEUR — colonne sur grand écran, onglets en bas
@@ -26,10 +25,38 @@ import type { NomIcone } from "@/lib/design/traces-icones";
  * doit pas tirer un catalogue de traduction dans le navigateur.
  */
 
+/**
+ * ⚠️ L ICÔNE VOYAGE EN CLÉ, PAS EN COMPOSANT. Ce fichier est un îlot client et
+ * la coque qui le rend est un composant serveur : une référence de fonction ne
+ * traverse pas cette frontière. La clé se résout ici, dans le navigateur.
+ *
+ * LES QUATRE ICÔNES SONT CELLES DU KIT, relevées dans son `NAV` :
+ * `briefcase`, `truck`, `bar-chart-3`, `shield`. L ancienne correspondance
+ * écrite dans `CLAUDE.md` — `inventory_2 → package`, `palette → palette` —
+ * datait du canevas condamné : le kit ne dessine ni paquet ni palette.
+ */
+export type CleIcone = "commandes" | "envois" | "analyses" | "marque";
+
+const ICONES: Record<CleIcone, LucideIcon> = {
+  commandes: Briefcase,
+  envois: Truck,
+  analyses: BarChart3,
+  marque: Shield,
+};
+
 export interface EntreeNavigation {
   readonly href: string;
   readonly libelle: string;
-  readonly icone: NomIcone;
+  readonly icone: CleIcone;
+  /**
+   * Le compte affiché en pastille à droite de l entrée.
+   *
+   * ⚠️ FACULTATIF, ET IL DOIT LE RESTER. Le kit n en pose qu UNE, sur
+   * « Commandes ». Une pastille sur chaque entrée ferait quatre nombres à
+   * lire là où le dessin en met un seul, et le seul qui compte est le volume
+   * de l écran qu on ouvre vingt fois par jour.
+   */
+  readonly compte?: number;
 }
 
 /**
@@ -97,7 +124,7 @@ export function NavigationVendeur({
     return (
       <nav
         aria-label={etiquette}
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-outline-variant bg-surface-container-lowest px-5 pt-2 pb-[18px] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-ds-filet bg-ds-surface-carte px-5 pt-2 pb-[18px] md:hidden"
       >
         <ul className="flex justify-between">
           {entrees.map((entree) => {
@@ -110,10 +137,10 @@ export function NavigationVendeur({
                   aria-current={active ? "page" : undefined}
                   className={
                     "flex min-h-11 min-w-11 flex-col items-center justify-center gap-1 " +
-                    (active ? "text-violet" : "text-sourdine")
+                    (active ? "text-ds-accent-encre" : "text-ds-texte-corps")
                   }
                 >
-                  <Icone nom={entree.icone} className="h-[21px] w-[21px]" />
+                  <IconeDe cle={entree.icone} actif={active} taille={21} />
                   {/*
                     ⚠️ 11,5 px ET NON 10, ET C EST LA MESURE QUI L A DIT. La
                     règle 5 du design system pose 11,5 px comme plancher sur
@@ -136,7 +163,8 @@ export function NavigationVendeur({
 
   return (
     <nav aria-label={etiquette}>
-      <ul className="flex flex-col gap-[3px]">
+      {/* Écart de 6 px entre les entrées — `gap: 6` sur l `aside` du kit. */}
+      <ul className="flex flex-col gap-1.5">
         {entrees.map((entree) => {
           const active = estActive(chemin, entree.href);
           const Composant = active ? LienEcran : Link;
@@ -186,14 +214,34 @@ export function NavigationVendeur({
                   // l'état : 700 quand l'entrée est active, 500 sinon. Le
                   // produit posait `font-semibold` des deux côtés, donc l'entrée
                   // courante ne se distinguait que par sa couleur.
+                  // `SidebarItem` du kit : 48 de haut, `padding: 0 14px`, écart 14,
+                  // rayon de carte, 15 px, graisse 700 quand l entrée est active
+                  // et 500 sinon, survol sur `--ink-50`.
                   "relative flex h-12 items-center gap-[14px] rounded-ds-card px-[14px] text-[15px] transition-colors " +
                   (active
                     ? "font-bold text-ds-accent-encre"
-                    : "font-medium text-ds-texte-corps hover:bg-ds-surface-creux")
+                    : "font-medium text-ds-texte-corps hover:bg-ds-ink-50")
                 }
               >
-                <Icone nom={entree.icone} className="h-[18px] w-[18px]" />
-                {entree.libelle}
+                {/* 20 px, trait 2,1 quand l entrée est active et 1,8 sinon —
+                    c est le kit qui épaissit le trait avec la graisse. */}
+                <IconeDe cle={entree.icone} actif={active} taille={20} />
+                <span className="min-w-0 flex-1 truncate">{entree.libelle}</span>
+                {entree.compte === undefined ? null : (
+                  /* Pastille du kit : `padding: 2px 9px`, rayon pilule, 11/700.
+                     Sur l entrée active elle prend l accent plein ; ailleurs, le
+                     creux et la couleur sourdine. */
+                  <span
+                    className={
+                      "shrink-0 rounded-ds-pill px-[9px] py-0.5 text-[11px] font-bold " +
+                      (active
+                        ? "bg-ds-accent text-ds-texte-sur-marque"
+                        : "bg-ds-surface-creux text-ds-texte-sourdine")
+                    }
+                  >
+                    {entree.compte}
+                  </span>
+                )}
               </Composant>
             </li>
           );
@@ -201,4 +249,19 @@ export function NavigationVendeur({
       </ul>
     </nav>
   );
+}
+
+/** Résout la clé d icône et épaissit son trait quand l entrée est celle qu on
+ *  regarde — 2,1 contre 1,8, comme `SidebarItem`. */
+function IconeDe({
+  cle,
+  actif,
+  taille,
+}: {
+  readonly cle: CleIcone;
+  readonly actif: boolean;
+  readonly taille: number;
+}) {
+  const Dessin = ICONES[cle];
+  return <Dessin aria-hidden="true" size={taille} strokeWidth={actif ? 2.1 : 1.8} />;
 }

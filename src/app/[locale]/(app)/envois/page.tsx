@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { EnTeteEcran } from "@/components/app/en-tete-ecran";
+import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { TableauEnvois } from "@/components/envois/tableau-envois";
@@ -94,9 +94,9 @@ export default async function Envois({
       {/* LE NOMBRE EST DANS LE SOUS-TITRE, et pas seulement dans la carte
           « Colis suivis » : celle-ci n'est pas rendue au téléphone, où la
           planche `EnvoisMobile` ne garde que deux compteurs sur quatre. */}
-      <EnTeteEcran titre={t("titre")} sousTitre={t("sousTitre", { n: compteurs.total })} />
+      <EnTeteEcranDs titre={t("titre")} sousTitre={t("sousTitre", { n: compteurs.total })} />
 
-      <main id="contenu" className="px-margin-mobile pt-3.5 pb-5 md:px-[30px] md:pt-0 md:pb-[26px]">
+      <main id="contenu" className="px-margin-mobile pt-3.5 pb-5 md:px-8 md:pt-0 md:pb-[26px]">
         <div>
         <TableauEnvois
           base={`/${langue}/envois`}

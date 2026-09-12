@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { z } from "zod";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { signerLecture } from "@/lib/storage/r2";
@@ -754,7 +755,18 @@ export interface CompteursListe {
   readonly creeesCetteSemaine: number;
 }
 
-export async function compterParEtat(
+/**
+ * ⚠️ MÉMORISÉ SUR LA REQUÊTE, ET CE N EST PAS UNE OPTIMISATION GRATUITE.
+ *
+ * Depuis que la barre latérale porte la pastille de volume, DEUX appelants
+ * demandent ces compteurs pour un seul rendu de `/commandes` : la coque et
+ * l écran. `cache` de React les ramène à UN appel par requête — mêmes
+ * arguments, même résultat. Sans lui, l écran le plus ouvert du produit paierait
+ * un agrégat de plus à chaque navigation.
+ */
+export const compterParEtat = cache(compterParEtatSansCache);
+
+async function compterParEtatSansCache(
   // Injecté UNIQUEMENT par les tests, pour la même raison que `lireCommandes` :
   // ces compteurs sont `security invoker`, donc ce qu'ils rendent DÉPEND de
   // l'appelant. Les éprouver avec un client service-role prouverait qu'ils

@@ -17,7 +17,9 @@
       "titre": "Phase de lancement",
       "texte": "Tout est gratuit pendant cette période."
     },
-    "seDeconnecter": "Se déconnecter"
+    "seDeconnecter": "Se déconnecter",
+    "monCompte": "Mon compte",
+    "piedDePage": "© {annee} DropLink. Tous droits réservés."
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",

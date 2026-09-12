@@ -5,7 +5,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
+import { ChevronDown, Zap } from "lucide-react";
+import { BarreSuperieure } from "@/components/app/barre-superieure";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
+import { compterParEtat } from "@/lib/commandes/liste";
 import { signerLecture } from "@/lib/storage/r2";
 
 /**
@@ -84,11 +87,26 @@ export default async function LayoutApplication({
   const logoSigne =
     profil.logoUrl === null ? null : await signerLecture(profil.logoUrl).catch(() => null);
 
+  /*
+   * LE VOLUME DE COMMANDES, EN PASTILLE SUR L ENTRÉE « Commandes ».
+   *
+   * ⚠️ UNE LECTURE QUI ÉCHOUE N AFFICHE PAS ZÉRO. Un « 0 » affirme qu on a
+   * compté et trouvé rien ; l absence de pastille n affirme rien. C est la
+   * même règle que le sous-titre de l écran des commandes, et pour la même
+   * raison — un nombre crédible et faux fait décider de travers.
+   */
+  const compteurs = await compterParEtat();
+
   const entrees: readonly EntreeNavigation[] = [
-    { href: `/${langue}/commandes`, libelle: t("mesCommandes"), icone: "inventory_2" },
-    { href: `/${langue}/envois`, libelle: t("mesEnvois"), icone: "local_shipping" },
-    { href: `/${langue}/analyses`, libelle: t("mesAnalyses"), icone: "monitoring" },
-    { href: `/${langue}/marque`, libelle: t("maMarque"), icone: "palette" },
+    {
+      href: `/${langue}/commandes`,
+      libelle: t("mesCommandes"),
+      icone: "commandes",
+      ...(compteurs === null ? {} : { compte: compteurs.total }),
+    },
+    { href: `/${langue}/envois`, libelle: t("mesEnvois"), icone: "envois" },
+    { href: `/${langue}/analyses`, libelle: t("mesAnalyses"), icone: "analyses" },
+    { href: `/${langue}/marque`, libelle: t("maMarque"), icone: "marque" },
   ];
 
   /*
@@ -145,17 +163,28 @@ export default async function LayoutApplication({
             rien dire laisserait un vendeur découvrir un jour une facture qu'il
             n'attendait pas, ou craindre une limite qui n'existe pas.
           */}
-          <div className="mb-3.5 rounded-ds-card bg-ds-surface-teinte p-4">
-            {/* LE TITRE EST À L'ENCRE, PAS AU VIOLET. La planche n'écrit aucune
-                couleur dessus : il hérite de `#0e0e13`. En violet sur fond
-                violet clair, il se lisait comme un lien — dans un encart qui
-                n'en contient aucun. */}
-            <p className="font-label-md text-[13px] font-bold text-on-surface">
+          {/*
+            L ENCART DU BAS DE COLONNE, AU DESSIN DU KIT : fond teinté, filet
+            `violet-200`, rayon carte-lg, `padding: 18`, écart 6, titre de 15 px
+            en 700 à l encre d accent précédé d un éclair de 17, texte de 13 px
+            en interligne 1,45.
+
+            ⚠️ LE KIT Y MET « Passez au Pro » ET UN BOUTON « Upgrade ». LA
+            CONTRAINTE N°1 L INTERDIT : aucun code de facturation, aucune phase.
+            L emplacement, lui, est le bon — c est le seul de la colonne qui
+            parle du compte à son propriétaire. Il dit donc ce que le produit a
+            de vrai à dire : la phase de validation est gratuite. Le bouton
+            disparaît parce qu il n y a rien à acheter, et un bouton qui ne
+            mène nulle part serait pire qu une case vide.
+          */}
+          <div className="flex flex-col gap-1.5 rounded-ds-card-lg border border-ds-violet-200 bg-ds-surface-teinte p-[18px]">
+            <span className="flex items-center gap-[9px] text-[15px] font-bold text-ds-accent-encre">
+              <Zap aria-hidden="true" size={17} strokeWidth={2.2} />
               {t("lancement.titre")}
-            </p>
-            <p className="mt-[5px] font-body-sm text-[12px] leading-[18px] text-sourdine">
+            </span>
+            <span className="text-[13px] leading-[1.45] text-ds-texte-corps">
               {t("lancement.texte")}
-            </p>
+            </span>
           </div>
 
           {/*
@@ -167,7 +196,19 @@ export default async function LayoutApplication({
             Au téléphone cette barre latérale n'existe pas — la déconnexion y
             vit dans l'en-tête de Commandes, l'écran d'accueil du vendeur.
           */}
-          <div className="flex items-center gap-2.5 rounded-ds-card p-2">
+          <details className="group relative mt-3">
+            {/*
+              LE BLOC DE COMPTE DU KIT : bouton pleine largeur, `padding: 12`,
+              rayon de carte, filet, fond carte, écart 12, pastille de 38 et
+              chevron de 16.
+
+              ⚠️ LE CHEVRON N EST PAS DÉCORATIF — IL OUVRE. Le kit dessine un
+              menu ; le produit n en avait aucun et posait la déconnexion à
+              nu, c est-à-dire un geste destructif à portée de clic accidentel
+              dans le coin le plus survolé de l écran. Un `<details>` le range
+              derrière un geste, sans une ligne de JavaScript.
+            */}
+            <summary className="flex w-full cursor-pointer list-none items-center gap-3 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-3 text-left transition-colors hover:bg-ds-surface-teinte">
             {/*
               LE LOGO DU VENDEUR, LÀ OÙ IL Y AVAIT UN DISQUE GRIS.
 
@@ -205,35 +246,72 @@ export default async function LayoutApplication({
               <img
                 src={logoSigne}
                 alt=""
-                width={32}
-                height={32}
-                className="h-8 w-8 shrink-0 rounded-full object-cover"
+                width={38}
+                height={38}
+                className="h-[38px] w-[38px] shrink-0 rounded-ds-pill object-cover"
               />
             ) : (
-              <span className="h-8 w-8 shrink-0 rounded-full bg-surface-container-highest" />
+              /* Sans logo, les initiales sur l accent — l `Avatar` du kit. Un
+                 disque gris vide ne dit pas à qui appartient le compte. */
+              <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent text-[14px] font-bold text-ds-texte-sur-marque">
+                {initiales(profil.nomBoutique ?? profil.email)}
+              </span>
             )}
-            <div className="min-w-0 flex-grow">
-              {profil.nomBoutique !== null ? (
-                <p className="truncate font-label-md text-[13px] font-semibold text-on-surface">
-                  {profil.nomBoutique}
-                </p>
-              ) : null}
-              <p className="truncate font-body-sm text-[11px] text-on-surface-variant">
-                {profil.email}
-              </p>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-[14px] font-bold text-ds-texte-fort">
+                {profil.nomBoutique ?? t("monCompte")}
+              </span>
+              <span className="truncate text-[12px] text-ds-texte-sourdine">{profil.email}</span>
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              size={16}
+              strokeWidth={1.8}
+              className="shrink-0 text-ds-texte-tenu transition-transform group-open:rotate-180"
+            />
+            </summary>
+            <div className="absolute right-0 bottom-full left-0 z-20 mb-1.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1.5 shadow-ds-lg">
+              <BoutonDeconnexion langue={langue} variante="menu" />
             </div>
-            <BoutonDeconnexion langue={langue} variante="cote" />
-          </div>
+          </details>
         </aside>
 
         {/* La marge basse laisse la place à la barre d'onglets, qui est fixe :
             sans elle, la dernière ligne de chaque écran est inatteignable. */}
         <div className="flex min-w-0 flex-1 flex-col pb-[86px] md:pb-0">
+          <BarreSuperieure
+            langue={langue}
+            email={profil.email}
+            nomBoutique={profil.nomBoutique}
+            logoSigne={logoSigne}
+          />
           {children}
+          {/* Le pied du kit : 64 de haut, 12 px, couleur tenue, centré. Il ne
+              se rend qu au bureau — au téléphone la barre d onglets occupe déjà
+              le bas de l écran, et une mention légale sous elle serait hors de
+              portée du pouce comme du regard. */}
+          <footer className="mt-auto hidden h-16 shrink-0 items-center justify-center text-[12px] text-ds-texte-tenu md:flex">
+            {t("piedDePage", { annee: new Date().getFullYear() })}
+          </footer>
         </div>
       </div>
 
       <NavigationVendeur entrees={entrees} variante="bas" etiquette={t("espaceVendeur")} />
     </div>
   );
+}
+
+/**
+ * Les initiales d un nom de boutique, ou de l adresse à défaut.
+ *
+ * Deux lettres au plus : `Avatar` du kit en dessine deux, et trois déborderaient
+ * d un disque de 38 px en 14 px de corps.
+ */
+function initiales(source: string): string {
+  const mots = source
+    .replace(/@.*$/, "")
+    .split(/[\s._-]+/)
+    .filter((m) => m !== "");
+  const lettres = mots.slice(0, 2).map((m) => m.charAt(0));
+  return lettres.join("").toUpperCase() || "?";
 }

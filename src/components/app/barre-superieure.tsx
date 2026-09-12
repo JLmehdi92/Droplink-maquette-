@@ -1,0 +1,120 @@
+import { Suspense } from "react";
+import { ChevronDown } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
+import { RechercheGlobale } from "./recherche-globale";
+
+/**
+ * LA BARRE SUPÉRIEURE DE L'ESPACE VENDEUR — `Topbar` du kit.
+ *
+ * Elle n'existait pas : le produit posait sa recherche dans l'en-tête de
+ * l'écran des commandes, et l'identité du compte uniquement en bas de la
+ * colonne. Le kit en fait une bande à part, commune aux six écrans, qui porte
+ * ce qui ne dépend pas de l'écran ouvert — chercher, et savoir qui l'on est.
+ *
+ * LES VALEURS, RELEVÉES SUR LA RÉFÉRENCE SERVIE À 1690 px :
+ *   bande        89 px de haut, 32 px de marge à gauche et à droite
+ *   recherche    551 × 46, rayon de carte, filet, fond carte, ombre xs
+ *   séparateur   1 × 26, couleur de filet, 20 px de chaque côté
+ *   pastille     52 de haut, rayon pilule, avatar 38, nom 14/600, chevron 16
+ *
+ * ⚠️ ELLE NE SE REND PAS AU TÉLÉPHONE, et ce n'est pas un abandon. Le kit y
+ * pose une barre avec un menu hamburger parce que sa colonne latérale devient
+ * un tiroir ; le produit a choisi une barre d'ONGLETS EN BAS, où les quatre
+ * destinations sont visibles en permanence. Lui ajouter une bande en haut
+ * prendrait 89 px de hauteur sur 844 — un dixième de l'écran — pour redire ce
+ * que le bas montre déjà. La recherche reste donc dans l'en-tête au téléphone,
+ * là où elle est atteignable au pouce.
+ */
+export async function BarreSuperieure({
+  langue,
+  email,
+  nomBoutique,
+  logoSigne,
+}: {
+  readonly langue: string;
+  readonly email: string;
+  readonly nomBoutique: string | null;
+  readonly logoSigne: string | null;
+}) {
+  const t = await getTranslations("navigation");
+  const tc = await getTranslations("commandes");
+
+  return (
+    <header className="hidden h-[89px] shrink-0 items-center gap-5 px-8 md:flex">
+      {/* `useSearchParams` fait sortir son porteur du rendu statique : la
+          frontière le borne à ce seul champ plutôt qu à toute la coque. */}
+      <Suspense fallback={<span className="h-[46px] w-full max-w-[551px]" />}>
+        <RechercheGlobale
+          action={`/${langue}/commandes`}
+          placeholder={tc("rechercherExemple")}
+          etiquette={tc("rechercher")}
+        />
+      </Suspense>
+
+      <span className="flex-1" />
+
+      <span aria-hidden="true" className="h-[26px] w-px shrink-0 bg-ds-filet" />
+
+      <details className="group relative shrink-0">
+        <summary className="flex cursor-pointer list-none items-center gap-[11px] rounded-ds-pill py-[7px] pr-3 pl-[7px] transition-colors hover:bg-ds-surface-teinte">
+          <Avatar logoSigne={logoSigne} source={nomBoutique ?? email} />
+          <span className="hidden max-w-[180px] truncate text-[14px] font-semibold text-ds-texte-fort lg:block">
+            {nomBoutique ?? t("monCompte")}
+          </span>
+          <ChevronDown
+            aria-hidden="true"
+            size={16}
+            strokeWidth={1.8}
+            className="shrink-0 text-ds-texte-tenu transition-transform group-open:rotate-180"
+          />
+          <span className="sr-only">{t("monCompte")}</span>
+        </summary>
+        <div className="absolute end-0 top-full z-30 mt-1.5 w-64 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1.5 shadow-ds-lg">
+          <p className="truncate px-3 py-2 text-[12px] text-ds-texte-sourdine">{email}</p>
+          <BoutonDeconnexion langue={langue} variante="menu" />
+        </div>
+      </details>
+    </header>
+  );
+}
+
+/**
+ * Le logo de la boutique, ou ses initiales sur l'accent.
+ *
+ * ⚠️ PAS DE DISQUE GRIS VIDE. Le kit dessine un avatar d'initiales quand il n'y
+ * a pas d'image ; un rond gris ne dit pas à qui appartient le compte, et c'est
+ * la seule chose que ce coin de l'écran a à dire.
+ */
+function Avatar({
+  logoSigne,
+  source,
+}: {
+  readonly logoSigne: string | null;
+  readonly source: string;
+}) {
+  if (logoSigne !== null) {
+    return (
+      /* eslint-disable-next-line @next/next/no-img-element --
+         URL signée à expiration : l'optimiseur de Next la mettrait en cache sous
+         une clé stable et servirait une image dont la signature a expiré. */
+      <img
+        src={logoSigne}
+        alt=""
+        width={38}
+        height={38}
+        className="h-[38px] w-[38px] shrink-0 rounded-ds-pill object-cover"
+      />
+    );
+  }
+  const mots = source
+    .replace(/@.*$/, "")
+    .split(/[\s._-]+/)
+    .filter((m) => m !== "");
+  const lettres = mots.slice(0, 2).map((m) => m.charAt(0));
+  return (
+    <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent text-[14px] font-bold text-ds-texte-sur-marque">
+      {lettres.join("").toUpperCase() || "?"}
+    </span>
+  );
+}

@@ -17,7 +17,9 @@
       "titre": "Launch phase",
       "texte": "Everything is free during this period."
     },
-    "seDeconnecter": "Log out"
+    "seDeconnecter": "Log out",
+    "monCompte": "My account",
+    "piedDePage": "© {annee} DropLink. All rights reserved."
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, under your brand",

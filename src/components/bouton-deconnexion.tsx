@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Icone } from "@/components/icone";
+import { LogOut } from "lucide-react";
 
 /**
  * LE BOUTON DE DÉCONNEXION — vendeur et administration.
@@ -32,7 +32,7 @@ import { Icone } from "@/components/icone";
  * annoncerait « bouton », sans dire lequel — sur le geste qui ferme la session.
  */
 
-type Variante = "cote" | "sombre" | "sombre-mobile" | "rond";
+type Variante = "cote" | "sombre" | "sombre-mobile" | "rond" | "menu";
 
 const CLASSES: Readonly<Record<Variante, string>> = {
   /*
@@ -48,6 +48,13 @@ const CLASSES: Readonly<Record<Variante, string>> = {
   // 44 px : la cible tactile minimale du produit. Le rond décoratif que cette
   // pastille remplace n'en faisait que 40, parce qu'il ne se cliquait pas.
   rond: "h-11 w-11 shrink-0 rounded-ds-pill bg-ds-surface-teinte text-ds-accent-encre hover:bg-ds-lavender-200",
+  /*
+   * ⚠️ LA SEULE VARIANTE QUI PORTE SON MOT. Les quatre autres sont des icônes
+   * seules, parce qu elles vivent dans une barre ou un coin ; celle-ci vit dans
+   * un menu déroulant, où une icône nue obligerait à deviner ce qu on ouvre
+   * juste avant de fermer sa session.
+   */
+  menu: "min-h-11 w-full justify-start gap-2.5 rounded-ds-sm px-3 text-[13px] font-semibold text-ds-texte-fort hover:bg-ds-surface-teinte",
 };
 
 export async function BoutonDeconnexion({
@@ -60,17 +67,30 @@ export async function BoutonDeconnexion({
   const t = await getTranslations("navigation");
   const libelle = t("seDeconnecter");
 
+  const dansUnMenu = variante === "menu";
+
   return (
-    <form action={`/${langue}/deconnexion`} method="post" className="shrink-0">
+    <form
+      action={`/${langue}/deconnexion`}
+      method="post"
+      className={dansUnMenu ? "w-full" : "shrink-0"}
+    >
       <button
         type="submit"
         title={libelle}
-        aria-label={libelle}
+        /*
+         * ⚠️ PAS D `aria-label` QUAND LE MOT EST ÉCRIT. Un libellé accessible
+         * posé par-dessus un texte visible REMPLACE ce texte : un lecteur
+         * d écran annoncerait alors le libellé et jamais le contenu, et les deux
+         * pourraient diverger sans que personne le voie.
+         */
+        {...(dansUnMenu ? {} : { "aria-label": libelle })}
         className={
           "flex items-center justify-center transition-colors " + CLASSES[variante]
         }
       >
-        <Icone nom="logout" className="text-[17px]" />
+        <LogOut aria-hidden="true" size={17} strokeWidth={1.9} />
+        {dansUnMenu ? <span>{libelle}</span> : null}
       </button>
     </form>
   );
