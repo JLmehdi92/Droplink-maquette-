@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { TableauEnvois } from "@/components/envois/tableau-envois";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
-import { analyserParametres, compterEnvois, lireEnvois } from "@/lib/envois/liste";
+import { analyserParametres, compterEnvois, lireEnvois, lireFraicheur } from "@/lib/envois/liste";
+import { EnTeteEnvois } from "@/components/envois/en-tete-envois";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -61,14 +62,17 @@ export default async function Envois({
   // requête bien rédigée.
   const supabase = await creerClientServeur();
 
-  // Les deux lectures sont indépendantes : les enchaîner doublerait la latence
-  // de l'écran pour rien.
-  const [page, compteurs] = await Promise.all([
+  // Les trois lectures sont indépendantes : les enchaîner tripleraient la
+  // latence de l'écran pour rien, et la fraîcheur n'est qu'un ornement
+  // d'en-tête — elle n'a aucune raison d'attendre son tour.
+  const [page, compteurs, fraicheur] = await Promise.all([
     lireEnvois(supabase, parametres, maintenant),
     compterEnvois(supabase),
+    lireFraicheur(supabase),
   ]);
 
   const t = await getTranslations("envois");
+  const format = await getFormatter();
 
   /*
    * ⚠️ CET ÉCRAN NE DÉGRADE PAS, ET C'EST UNE DÉCISION, pas un oubli.
@@ -91,10 +95,33 @@ export default async function Envois({
 
   return (
     <>
-      {/* LE NOMBRE EST DANS LE SOUS-TITRE, et pas seulement dans la carte
-          « Colis suivis » : celle-ci n'est pas rendue au téléphone, où la
-          planche `EnvoisMobile` ne garde que deux compteurs sur quatre. */}
-      <EnTeteEcranDs titre={t("titre")} sousTitre={t("sousTitre", { n: compteurs.total })} />
+      {/*
+        LE SOUS-TITRE EST CELUI DU KIT, ET LE DÉCOMPTE A DÉMÉNAGÉ DANS LA TUILE.
+
+        Il a longtemps porté « n colis suivis, tous transporteurs confondus » —
+        un nombre, donc, là où la référence explique à quoi sert l'écran. Le kit
+        met le total dans sa première tuile, « Tous les envois », et c'est mieux
+        placé : un chiffre isolé sous un titre ne dit pas ce qu'on peut faire de
+        la page, et il disparaissait de toute façon au téléphone.
+      */}
+      <EnTeteEcranDs
+        titre={t("titre")}
+        sousTitre={t("sousTitre")}
+        actions={
+          <EnTeteEnvois
+            libelleActualiser={t("actualiser")}
+            libelleFraicheur={t("derniereMaj")}
+            fraicheur={
+              fraicheur === null
+                ? null
+                : format.dateTime(fraicheur, {
+                    dateStyle: "long",
+                    timeStyle: "short",
+                  })
+            }
+          />
+        }
+      />
 
       <main id="contenu" className="px-margin-mobile pt-3.5 pb-5 md:px-8 md:pt-0 md:pb-[26px]">
         <div>

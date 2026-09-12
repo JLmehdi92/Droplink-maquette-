@@ -11,7 +11,7 @@
     "mesCommandes": "Commandes",
     "maMarque": "Ma marque",
     "espaceVendeur": "Espace vendeur",
-    "mesEnvois": "Envois",
+    "mesEnvois": "Suivi d'envois",
     "mesAnalyses": "Analyses",
     "lancement": {
       "titre": "Phase de lancement",
@@ -366,15 +366,16 @@
     "apercuAide": "Ce que verront vos clients, mis à jour à chaque frappe."
   },
   "envois": {
-    "titre": "Envois",
-    "sousTitre": "{n, plural, one {# colis suivi} other {# colis suivis}}, tous transporteurs confondus",
+    "titre": "Suivi d'envois",
+    "sousTitre": "Suivez tous vos colis en temps réel. Les informations sont automatiquement mises à jour par les transporteurs.",
     "compteurs": {
       "titre": "Vue d’ensemble",
-      "total": "Colis suivis",
+      "total": "Tous les envois",
       "enTransit": "En transit",
       "silencieux": "Sans mouvement > 10 j",
       "abandonnes": "Suivi arrêté",
-      "livresCeMois": "Livrés ce mois"
+      "livresCeMois": "Livrés ce mois",
+      "preparation": "Pas encore scanné"
     },
     "filtres": {
       "tous": "Tous",
@@ -392,13 +393,14 @@
       "anciens": "Mis à jour il y a longtemps"
     },
     "colonnes": {
-      "numero": "Numéro",
-      "etat": "État",
-      "mouvement": "Dernier mouvement",
-      "commandes": "Commandes liées",
+      "numero": "Suivi",
+      "commande": "Commande",
+      "client": "Client",
+      "etat": "Statut",
+      "progression": "Progression",
+      "mouvement": "Dernière mise à jour",
       "point": "Dernier point",
-      "interrogations": "Interrogations",
-      "progression": "Progression"
+      "interrogations": "Interrogations"
     },
     "mouvement": {
       "aucun": "Pas encore d’information du transporteur",
@@ -419,7 +421,9 @@
     },
     "interrogationsFaites": "{n, plural, one {# interrogation} other {# interrogations}}",
     "aide": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur : le transporteur n’a simplement rien publié.",
-    "aideCourte": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur."
+    "aideCourte": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur.",
+    "actualiser": "Actualiser",
+    "derniereMaj": "Dernière mise à jour"
   },
   "analyses": {
     "titre": "Analyses",

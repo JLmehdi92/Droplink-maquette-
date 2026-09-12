@@ -38,6 +38,11 @@
       "raison": "Meme cause que « Analyses » : l entree « Tableau de bord » du kit decale toute la colonne de 54 px."
     },
     {
+      "texte": "Suivi d'envois  <span>",
+      "motif": "contrainte",
+      "raison": "Meme cause que « Analyses » et « Ma marque » : l entree « Tableau de bord » du kit decale toute la colonne de 53 px. L ecart n apparaissait pas tant que notre entree s appelait « Envois » — deux textes differents ne s apparient pas. Elle porte desormais le libelle du design system, donc elle s apparie, et elle herite du decalage deja declare pour ses voisines."
+    },
+    {
       "texte": "Ctrl  <kbd>",
       "motif": "donnee",
       "raison": "Six pixels de place. Le champ de recherche du kit porte un texte d invite plus long, qui deplace la pastille du raccourci."

@@ -25,7 +25,7 @@ import type { LucideIcon } from "lucide-react";
  * son absence est l'information juste.
  */
 
-export type TeinteTuile = "marque" | "alerte" | "info" | "succes" | "erreur";
+export type TeinteTuile = "marque" | "alerte" | "info" | "succes" | "erreur" | "neutre";
 
 /**
  * Les cinq teintes du kit, chacune en DEUX classes complètes.
@@ -41,6 +41,20 @@ const TEINTES: Record<TeinteTuile, { readonly pastille: string; readonly encre: 
   info: { pastille: "bg-ds-info-fond text-ds-info", encre: "text-ds-info" },
   succes: { pastille: "bg-ds-succes-fond text-ds-succes", encre: "text-ds-succes" },
   erreur: { pastille: "bg-ds-erreur-fond text-ds-erreur", encre: "text-ds-erreur" },
+  /*
+   * LA TEINTE DE CE QUI NE S'EST PAS ENCORE PASSÉ.
+   *
+   * Elle manquait, et son absence forçait un choix faux : « Pas encore scanné »
+   * n'est ni une alerte ni une réussite, c'est une attente normale. Faute de
+   * neutre, il aurait fallu l'ambre — et l'écran aurait alors porté DEUX ambres,
+   * dont une sur le seul compteur qui appelle vraiment un geste. *Une alerte qui
+   * se déclenche partout est une alerte qu'on apprend à ignorer.*
+   *
+   * Les deux classes sont celles que ce même état porte déjà dans le tableau
+   * (`PEAU.preparation`) : l'écran dit la même chose de la même couleur, en haut
+   * comme en bas.
+   */
+  neutre: { pastille: "bg-ds-surface-creux text-ds-texte-corps", encre: "text-ds-texte-corps" },
 };
 
 export function TuileMetrique({

@@ -2,7 +2,16 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { decrireSilence } from "@/lib/tracking/silence";
 import type { CompteursEnvois, Etat, PageEnvois, ParametresEnvois } from "@/lib/envois/liste";
 import { ETATS, TRIS } from "@/lib/envois/liste";
-import { AlertCircle, ArrowUpDown, ChevronDown, CircleCheck, Info, Package, Truck } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowUpDown,
+  ChevronDown,
+  CircleCheck,
+  Info,
+  Package,
+  PackageOpen,
+  Truck,
+} from "lucide-react";
 import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
 import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
 import { FriseCompacte } from "@/components/commandes/frise-suivi";
@@ -152,9 +161,20 @@ export async function TableauEnvois({
    * filet de séparation doit aller d un bord à l autre de la carte, ce qu une
    * marge posée sur le conteneur du tableau lui interdit.
    */
+  /*
+   * ⚠️ LES TROIS VALEURS DU KIT, MESURÉES, ET NON CELLES QU'ON AVAIT DÉDUITES.
+   *
+   *   en-tête   remplissage `16px 20px`, libellé 12 / 600, hauteur de ligne 18
+   *   rangée    remplissage `14px 20px`, écart 14, texte 14
+   *
+   * L'en-tête rendait `pb-3` (12) et une hauteur de ligne de 16 : deux pixels
+   * par libellé, et toute la grille du tableau décalée d'autant. La rangée
+   * rendait `py-[15px]` et un écart de 16 au lieu de 14 — sur huit colonnes,
+   * seize pixels de dérive cumulée jusqu'au bord droit.
+   */
   const enTete =
-    "pt-4 pb-3 pr-4 text-left text-[12px] leading-4 font-semibold whitespace-nowrap text-ds-texte-sourdine";
-  const cellule = "border-t border-ds-filet py-[15px] pr-4 text-[14px]";
+    "pt-4 pb-4 pr-[14px] text-left text-[12px] leading-[18px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
+  const cellule = "border-t border-ds-filet py-[14px] pr-[14px] text-[14px]";
   const bordGauche = " pl-5";
   const bordDroit = " pr-5";
 
@@ -361,9 +381,30 @@ export async function TableauEnvois({
         que « En transit » et « Sans mouvement ». Le total est déjà sous le titre
         et « livrés ce mois » ne se regarde pas depuis un téléphone.
       */}
+      {/*
+        ⚠️ CINQ TUILES, PAS QUATRE — le kit en pose cinq, et il avait raison de
+        les compter ainsi : quatre états de frise plus l'alerte.
+
+        Les siennes sont « Tous les envois · En transit · En livraison · Livrés ·
+        Problèmes ». Deux ne peuvent pas être reprises telles quelles :
+
+          « En livraison »  n'est pas une étape de NOTRE frise. La décision 4 du
+                            brief la verrouille à quatre — préparation, expédié,
+                            en transit, livré — et la granularité fine vit dans
+                            le détail du suivi, pas dans la frise. La tuile prend
+                            donc « Pas encore scanné », l'étape que le kit
+                            n'affiche pas et qui est celle où le vendeur a
+                            quelque chose à faire : vérifier qu'il a collé le bon
+                            numéro.
+          « Problèmes »     supposerait que le transporteur déclare un incident.
+                            Il ne le fait pas : ce que nous savons, c'est qu'un
+                            colis ne bouge plus. « Sans mouvement » est la même
+                            information sans le jugement — et c'est déjà le
+                            vocabulaire de l'écran.
+      */}
       <section
         aria-label={t("compteurs.titre")}
-        className="grid grid-cols-2 gap-3 min-[1424px]:grid-cols-4 md:gap-4"
+        className="grid grid-cols-2 gap-3 min-[1424px]:grid-cols-5 md:gap-4"
       >
         {(
           [
@@ -373,6 +414,15 @@ export async function TableauEnvois({
               filtre: {},
               Icone: Package,
               teinte: "marque",
+              alerte: false,
+              mobile: false,
+            },
+            {
+              cle: "preparation",
+              valeur: compteurs.preparation,
+              filtre: { etat: "preparation" },
+              Icone: PackageOpen,
+              teinte: "neutre",
               alerte: false,
               mobile: false,
             },
@@ -461,14 +511,67 @@ export async function TableauEnvois({
 
           {/* --- LE TABLEAU, à partir de `lg` ---------------------------- */}
           <div className={"hidden xl:block " + CARTE + " xl:p-0"}>
-            <table className="w-full border-collapse">
+            {/*
+              ⚠️ `table-fixed` : SANS LUI, LES `<col>` NE SONT QUE DES
+              SUGGESTIONS. C'est le défaut qui a coûté le plus cher sur
+              `/commandes` — le `colgroup` y était posé, servi, juste, et sans
+              aucun effet, le navigateur dimensionnant par le contenu. Ce
+              tableau-ci n'avait même pas de `colgroup` : ses colonnes tombaient
+              où le texte les poussait.
+            */}
+            <table className="w-full table-fixed border-collapse">
+              {/*
+                LES HUIT COLONNES, AUX PIXELS DES BOÎTES DE CONTENU DU KIT.
+
+                Mesurées sur la référence SERVIE, ses dix colonnes rendent 38,
+                174, 116, 139, 145, 128, 116, 122, 145 et 56 px de contenu, à
+                l'écart de 14 dans une rangée de 1345 au remplissage `14px 20px`.
+
+                DEUX N'EXISTENT PAS CHEZ NOUS et ne sont donc pas reprises :
+                  · la case à cocher (38) — il n'y a pas d'action groupée sur cet
+                    écran, et une colonne de cases qui ne commandent rien est
+                    pire qu'absente ;
+                  · « Transporteur » (145) — `carrier_code` est l'identifiant
+                    NUMÉRIQUE du fournisseur de suivi, pas un nom, et aucun
+                    catalogue ne le traduit. Même arbitrage que sur `/commandes`,
+                    écrit au même endroit : « 100003 » n'apprend rien, et
+                    « Transporteur inconnu » sur chaque ligne vaut moins que rien.
+
+                Les 183 px libérés sont redistribués AU PRORATA des colonnes qui
+                restent, pas donnés à la plus large : le kit a réglé l'importance
+                relative de ses colonnes, et c'est elle qu'on conserve.
+
+                Un `<table>` n'a pas de `gap` : l'écart de 14 est le
+                `padding-right` de chaque cellule et les 20 px de marge sont
+                portés par la première et la dernière. Chaque largeur vaut donc
+                « contenu redistribué + 14 », les deux extrêmes « + 20 ».
+                Somme : 1345, exactement la largeur de la carte.
+              */}
+              <colgroup>
+                <col className="w-[18.205%]" />
+                <col className="w-[11.493%]" />
+                <col className="w-[13.565%]" />
+                <col className="w-[12.574%]" />
+                <col className="w-[11.493%]" />
+                <col className="w-[12.033%]" />
+                <col className="w-[14.105%]" />
+                <col className="w-[6.533%]" />
+              </colgroup>
               <thead>
                 <tr>
+                  {/* LES LIBELLÉS SONT CEUX DU KIT, ET C'EST LUI QUI FAIT FOI :
+                      « Suivi » et non « Numéro », « Statut » et non « État »,
+                      « Dernière mise à jour » et non « Dernier mouvement ». Trois
+                      mots que rien n'obligeait à inventer — le design system
+                      fournit son vocabulaire dans les trois langues. */}
                   <th scope="col" className={enTete + bordGauche}>
                     {t("colonnes.numero")}
                   </th>
                   <th scope="col" className={enTete}>
-                    {t("colonnes.commandes")}
+                    {t("colonnes.commande")}
+                  </th>
+                  <th scope="col" className={enTete}>
+                    {t("colonnes.client")}
                   </th>
                   <th scope="col" className={enTete}>
                     {t("colonnes.etat")}
@@ -511,6 +614,32 @@ export async function TableauEnvois({
                             {t("abandonne")}
                           </span>
                         ) : null}
+                      </td>
+                      {/*
+                        LA COMMANDE, PUIS LE CLIENT — deux colonnes, comme le
+                        kit, et non plus une seule qui mélangeait les deux.
+
+                        Elle affichait le destinataire sous l'en-tête
+                        « Commandes liées », avec un repli sur « 2 commandes »
+                        quand aucun nom n'était saisi. Un colis groupé y
+                        perdait donc la seule chose qui permet de le retrouver :
+                        SA commande. La référence est dérivée de l'identifiant
+                        (jamais stockée), et au-delà de deux on compte le reste
+                        plutôt que d'étirer la colonne.
+                      */}
+                      <td className={cellule + " text-ds-texte-fort"}>
+                        {ligne.references.length === 0 ? (
+                          <span className="text-ds-texte-tenu">—</span>
+                        ) : (
+                          <span className="block truncate font-medium">
+                            {ligne.references.slice(0, 2).join(", ")}
+                            {ligne.references.length > 2 ? (
+                              <span className="text-ds-texte-sourdine">
+                                {" +" + String(ligne.references.length - 2)}
+                              </span>
+                            ) : null}
+                          </span>
+                        )}
                       </td>
                       <td className={cellule + " text-ds-texte-fort"}>
                         {d.clients ?? (

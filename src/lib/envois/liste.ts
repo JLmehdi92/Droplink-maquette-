@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { z } from "zod";
+import { referenceCourte } from "@/lib/commandes/reference";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
 import { SEUIL_SILENCE_JOURS } from "@/lib/tracking/silence";
@@ -83,6 +84,18 @@ export interface LigneEnvoi {
    */
   readonly clients: readonly string[];
   /**
+   * Les références COURTES des commandes rattachées — ce que le kit écrit
+   * « #DLK7842 ».
+   *
+   * ⚠️ DÉRIVÉE DE L'IDENTIFIANT, JAMAIS STOCKÉE. Un numéro séquentiel se lirait
+   * mieux, mais il exigerait une colonne, un compteur par boutique, une reprise
+   * de l'existant et une migration en attente de déploiement — pour une
+   * référence qu'on copie plus qu'on ne récite. Le même arbitrage que sur
+   * l'écran Commandes, et la même fonction : une seule définition de la
+   * référence dans tout le produit.
+   */
+  readonly references: readonly string[];
+  /**
    * La dernière chose que le transporteur a dite. Tenue par un déclencheur
    * (migration 104), donc jamais recalculée à la lecture.
    */
@@ -124,7 +137,7 @@ export interface CompteursEnvois {
  * lecture : le compte doit rester exact.
  */
 const COLONNES =
-  "id, tracking_number, carrier_code, normalized_status, immobile_depuis, updated_at, first_movement_at, last_movement_at, abandoned_at, query_count, dernier_point, order_parcels(orders(customer_label))";
+  "id, tracking_number, carrier_code, normalized_status, immobile_depuis, updated_at, first_movement_at, last_movement_at, abandoned_at, query_count, dernier_point, order_parcels(orders(id, customer_label))";
 
 /** La colonne de tri, et son sens. */
 function ordre(tri: Tri): { colonne: "immobile_depuis" | "updated_at"; croissant: boolean } {
@@ -257,6 +270,12 @@ export async function lireEnvois(
     clients: l.order_parcels
       .map((op) => op.orders?.customer_label ?? null)
       .filter((nom): nom is string => nom !== null && nom.trim() !== ""),
+    // Les références, elles, ne se filtrent pas : un identifiant existe
+    // toujours. C'est le NOM du destinataire qui est facultatif.
+    references: l.order_parcels
+      .map((op) => op.orders?.id ?? null)
+      .filter((id): id is string => id !== null)
+      .map(referenceCourte),
     dernierPoint: l.dernier_point,
   }));
 
@@ -323,6 +342,41 @@ async function compterEnvoisSansCache(
     abandonnes: Number(l.abandonnes),
     livresCeMois: Number(l.livres_ce_mois),
   };
+}
+
+/**
+ * LA FRAÎCHEUR DES DONNÉES — ce que le kit écrit « Dernière mise à jour ».
+ *
+ * ⚠️ C'EST `updated_at` ET NON `last_movement_at`, et la nuance est le sens même
+ * de la phrase. `last_movement_at` dit quand le COLIS a bougé ; la question que
+ * pose l'en-tête est « de quand datent ces informations », c'est-à-dire quand
+ * NOUS avons regardé. Un colis immobile depuis douze jours a été réinterrogé ce
+ * matin : afficher son dernier mouvement ferait croire l'écran périmé de douze
+ * jours alors qu'il est à jour de deux heures.
+ *
+ * ⚠️ ET C'EST LA COLONNE INDEXÉE. `tracked_parcels_shop_idx` porte
+ * `(shop_id, updated_at desc)` — la RLS filtre sur `shop_id`, le tri suit
+ * l'index, et `limit 1` s'arrête à la première ligne. Trier sur
+ * `last_movement_at`, qui n'a aucun index, aurait lu toutes les lignes du
+ * vendeur pour n'en rendre qu'une, et le coût aurait grandi avec le volume —
+ * invisible sur un compte de test, sensible à 9 600.
+ *
+ * Rend `null` quand le vendeur n'a aucun colis, ce qui n'est pas une erreur :
+ * l'en-tête omet alors la ligne plutôt que d'inventer une date.
+ */
+export async function lireFraicheur(supabase: ClientLecture): Promise<Date | null> {
+  const { data, error } = await supabase
+    .from("tracked_parcels")
+    .select("updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // La fraîcheur est un ORNEMENT de l'en-tête, pas l'écran : une panne de
+  // transport la fait disparaître, elle ne fait pas tomber la page. C'est
+  // l'inverse des compteurs, qui EUX sont l'écran (voir la page).
+  if (error !== null || data === null) return null;
+  return new Date(data.updated_at);
 }
 
 /** Lit les paramètres depuis l'URL. */

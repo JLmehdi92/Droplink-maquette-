@@ -450,6 +450,28 @@ const RELEVE = `(() => {
  */
 const INVENTAIRE = `(() => {
   const norm = (c) => c.replace(/\\s+/g, "");
+  /*
+   * L OMBRE, DEBARRASSEE DE SES COUCHES VIDES.
+   *
+   * Tailwind empile TROIS couches dans box-shadow — anneau de decalage, anneau,
+   * puis l ombre — et les deux premieres valent « rgba(0, 0, 0, 0) 0px 0px 0px
+   * 0px » tant qu aucun anneau n est pose. Elles pesent 70 caracteres a elles
+   * seules : la troncature a 80 ne laissait donc passer que du vide suivi du
+   * debut d une couleur, et l ombre REELLE du produit n etait jamais comparee.
+   *
+   * Une couche qui ne peint rien n est pas une ombre, exactement comme un filet
+   * de zero pixel n est pas un filet. On la retire AVANT de tronquer.
+   */
+  const ombreUtile = (v) => {
+    if (v === "none" || !v) return "";
+    // On ne coupe que sur les virgules HORS parentheses : chaque rgba() en
+    // contient trois, et les separer casserait les couleurs.
+    const couches = v.split(/,(?![^(]*\\))/).map((s) => s.trim());
+    const utiles = couches.filter(
+      (s) => !/^rgba\\(0,\\s*0,\\s*0,\\s*0\\)(\\s+0px){3,4}$/.test(s),
+    );
+    return utiles.join(", ").slice(0, 80);
+  };
   const rendu = (e) => e.getClientRects().length > 0;
   const lignes = [];
   for (const e of document.querySelectorAll("body *")) {
@@ -485,7 +507,7 @@ const INVENTAIRE = `(() => {
       image: c.backgroundImage === "none" ? "" : c.backgroundImage.slice(0, 90),
       rayon: c.borderRadius,
       filet: norm(c.borderTopWidth + " " + c.borderTopStyle + " " + c.borderTopColor),
-      ombre: c.boxShadow === "none" ? "" : c.boxShadow.slice(0, 80),
+      ombre: ombreUtile(c.boxShadow),
       marge: c.padding,
       ecart: c.gap === "normal" ? "" : c.gap,
     });

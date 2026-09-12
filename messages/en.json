@@ -367,14 +367,15 @@
   },
   "envois": {
     "titre": "Shipments",
-    "sousTitre": "{n, plural, one {# tracked parcel} other {# tracked parcels}}, across all carriers",
+    "sousTitre": "Follow every parcel in real time. The information is updated automatically by the carriers.",
     "compteurs": {
       "titre": "Overview",
-      "total": "Tracked parcels",
+      "total": "All shipments",
       "enTransit": "In transit",
       "silencieux": "No movement > 10 d",
       "abandonnes": "Tracking stopped",
-      "livresCeMois": "Delivered this month"
+      "livresCeMois": "Delivered this month",
+      "preparation": "Not scanned yet"
     },
     "filtres": {
       "tous": "All",
@@ -392,13 +393,14 @@
       "anciens": "Updated long ago"
     },
     "colonnes": {
-      "numero": "Number",
+      "numero": "Tracking",
+      "commande": "Order",
+      "client": "Customer",
       "etat": "Status",
-      "mouvement": "Last movement",
-      "commandes": "Linked orders",
+      "progression": "Progress",
+      "mouvement": "Last updated",
       "point": "Last checkpoint",
-      "interrogations": "Queries",
-      "progression": "Progress"
+      "interrogations": "Queries"
     },
     "mouvement": {
       "aucun": "No carrier information yet",
@@ -419,7 +421,9 @@
     },
     "interrogationsFaites": "{n, plural, one {# query} other {# queries}}",
     "aide": "A number you have just pasted is often not scanned yet. This is not an error: the carrier simply has not published anything.",
-    "aideCourte": "A number you have just pasted is often not scanned yet. This is not an error."
+    "aideCourte": "A number you have just pasted is often not scanned yet. This is not an error.",
+    "actualiser": "Refresh",
+    "derniereMaj": "Last updated"
   },
   "analyses": {
     "titre": "Analytics",

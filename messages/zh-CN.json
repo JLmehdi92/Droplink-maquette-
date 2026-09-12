@@ -11,7 +11,7 @@
     "mesCommandes": "订单",
     "maMarque": "我的品牌",
     "espaceVendeur": "卖家中心",
-    "mesEnvois": "发货",
+    "mesEnvois": "物流追踪",
     "mesAnalyses": "数据分析",
     "lancement": {
       "titre": "上线初期",
@@ -366,15 +366,16 @@
     "apercuAide": "您的客户将看到的样子，随输入实时更新。"
   },
   "envois": {
-    "titre": "发货",
-    "sousTitre": "{n, plural, other {共跟踪 # 个包裹}}，涵盖所有承运商",
+    "titre": "物流追踪",
+    "sousTitre": "实时追踪所有包裹。信息由承运商自动更新。",
     "compteurs": {
       "titre": "总览",
-      "total": "跟踪中的包裹",
+      "total": "全部发货",
       "enTransit": "运输中",
       "silencieux": "超过 10 天无更新",
       "abandonnes": "已停止跟踪",
-      "livresCeMois": "本月已送达"
+      "livresCeMois": "本月已送达",
+      "preparation": "尚未扫描"
     },
     "filtres": {
       "tous": "全部",
@@ -392,13 +393,14 @@
       "anciens": "很久没有更新"
     },
     "colonnes": {
-      "numero": "运单号",
+      "numero": "物流",
+      "commande": "订单",
+      "client": "客户",
       "etat": "状态",
-      "mouvement": "最近更新",
-      "commandes": "关联订单",
+      "progression": "进度",
+      "mouvement": "最后更新",
       "point": "最新节点",
-      "interrogations": "查询次数",
-      "progression": "进度"
+      "interrogations": "查询次数"
     },
     "mouvement": {
       "aucun": "承运商尚未提供物流信息",
@@ -419,7 +421,9 @@
     },
     "interrogationsFaites": "{n, plural, other {已查询 # 次}}",
     "aide": "刚粘贴的运单号往往还没有被扫描。这不是故障：只是承运商还没有发布任何信息。",
-    "aideCourte": "刚粘贴的运单号往往还没有被扫描。这不是故障。"
+    "aideCourte": "刚粘贴的运单号往往还没有被扫描。这不是故障。",
+    "actualiser": "刷新",
+    "derniereMaj": "最后更新"
   },
   "analyses": {
     "titre": "数据分析",

@@ -143,8 +143,22 @@ export function EnTeteEcranDs({
           <h1 className="text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] md:text-[40px]">
             {titre}
           </h1>
+          {/*
+            ⚠️ 1,55 ET NON 1,45 — mesuré, pas transposé. Le `PageHeader` du kit
+            ne pose AUCUNE `line-height` sur ce paragraphe : il hérite du corps
+            de texte du design system, qui vaut 1,55. Sur la référence servie, le
+            sous-titre de 15 px rend donc 23,25 px de haut, quand le nôtre en
+            rendait 21,75 — un pixel et demi qui remontait toute la rangée de
+            compteurs et, avec elle, le tableau.
+
+            La soustraction de `/commandes` ne pouvait pas l'attraper : elle
+            apparie par le TEXTE, et nos deux sous-titres ne disent pas la même
+            chose que ceux du kit. Le défaut était donc commun aux deux écrans et
+            invisible à l'outil — c'est le geste « regarder les deux captures »
+            qui le rattrape, pas les nombres.
+          */}
           {sousTitre !== undefined ? (
-            <p className="mt-2 text-[15px] leading-[1.45] text-ds-texte-corps">{sousTitre}</p>
+            <p className="mt-2 text-[15px] leading-[1.55] text-ds-texte-corps">{sousTitre}</p>
           ) : null}
         </div>
         {actionMobile === undefined ? null : <div className="md:hidden">{actionMobile}</div>}
