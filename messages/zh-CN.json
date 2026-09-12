@@ -663,11 +663,10 @@
     "historique": {
       "titre": "订单记录",
       "aucun": "这笔订单还没有发生任何事。",
-      "jamaisOuvert": "您的客户还没有打开过链接。",
-      "derniereOuverture": "客户最近一次打开是 {quand}——{vues, plural, other {共 # 次浏览}}。",
+      "aHeure": "{heure}",
       "types": {
         "commande_creee": "订单已创建",
-        "commande_modifiee": "字段已修改",
+        "commande_modifiee": "订单已修改",
         "commande_archivee": "订单已归档",
         "commande_desarchivee": "订单已移出归档",
         "commande_dupliquee": "订单已复制",
@@ -680,7 +679,7 @@
       }
     },
     "titre": "新建订单",
-    "retour": "返回我的订单",
+    "retour": "返回订单列表",
     "voirPage": "查看客户页面",
     "sectionCommande": "订单信息",
     "sectionExpedition": "状态",
@@ -723,11 +722,11 @@
     "reessayer": "重试",
     "echecReste": "订单的其余部分已是最新。这些字段显示的是最后确认的值。",
     "copierLien": "复制链接",
+    "partager": "分享",
     "lienCopie": "链接已复制",
     "copieEchouee": "浏览器拒绝了复制",
     "qcAide": "如果客户是通过其他渠道回复您的，请在这里填写。",
-    "apercuTitre": "客户看到的样子",
-    "apercuDirect": "实时",
+    "apercuTitre": "客户页面预览",
     "creeeLe": "创建于 {quand}",
     "suiviTitre": "订单物流追踪",
     "suiviAttente": "等待中",
@@ -736,8 +735,17 @@
     "infosReference": "编号",
     "infosCreee": "创建时间",
     "infosModifiee": "最后更新",
+    "infosExpedition": "配送方式",
+    "infosSansTransporteur": "无承运商",
     "infosLien": "客户链接",
-    "infosSansSuivi": "暂无单号"
+    "infosSansSuivi": "暂无单号",
+    "tuileClient": "客户",
+    "tuileReference": "产品编号",
+    "tuileVues": "链接浏览",
+    "tuileVuesAucune": "尚未打开",
+    "tuileVuesNombre": "{n, plural, other {# 次浏览}}",
+    "tuileSuivi": "物流跟踪",
+    "tuileVide": "–"
   },
   "medias": {
     "titre": "照片和视频",
@@ -781,6 +789,7 @@
     "echecOrdre": "新的排序未能保存。已恢复为之前的顺序。",
     "videos": "{n, plural, other {# 个视频}} / {max}",
     "ajouter": "添加",
+    "ajouterFichiers": "添加文件",
     "aideOrdre": "拖动缩略图上的手柄即可调整顺序。封面是您客户看到的第一张图。",
     "aideOrdreTelephone": "长按手柄即可移动照片。"
   },

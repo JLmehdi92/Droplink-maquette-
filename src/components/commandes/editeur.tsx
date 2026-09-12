@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, ChevronDown, Clock, Copy, ExternalLink, TriangleAlert } from "lucide-react";
+import { Check, ChevronDown, Clock, ExternalLink, Share2, TriangleAlert } from "lucide-react";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
 import { referenceCourte } from "@/lib/commandes/reference";
 import { ETAPES, type Etape } from "@/lib/tracking/normalize";
@@ -11,6 +11,7 @@ import { FriseDetail } from "./frise-detail";
 import { CarteMedias, type MediaAffiche } from "./carte-medias";
 import { CarteRevocation } from "./carte-revocation";
 import { ApercuClient, type PaletteApercu } from "./apercu-client";
+import { TuilesResume } from "./tuiles-resume";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 
 /**
@@ -77,6 +78,7 @@ export function Editeur({
   medias,
   suivi,
   dates,
+  resume,
   boutique,
   historique,
 }: {
@@ -115,6 +117,18 @@ export function Editeur({
   readonly dates: {
     readonly creeLe: string;
     readonly misAJourLe: string;
+  };
+  /**
+   * CE QUE LA RANGÉE DE TUILES MONTRE ET QUE LE FORMULAIRE NE PORTE PAS.
+   *
+   * Le client, la référence et le numéro de suivi viennent de `valeurs` : ils
+   * changent à la frappe, et une tuile qui les lirait ailleurs afficherait
+   * autre chose que le champ posé quinze pixels plus bas.
+   */
+  readonly resume: {
+    readonly transporteur: string | null;
+    readonly vues: number;
+    readonly derniereVueLe: string | null;
   };
   readonly boutique: {
     readonly nom: string | null;
@@ -253,6 +267,20 @@ export function Editeur({
         />
 
         {/*
+          LA RANGÉE DE RÉSUMÉ DU KIT, et elle manquait entièrement. Elle vient
+          AVANT les panneaux, comme dans `OrderDetail.jsx` : quatre faits d'un
+          coup d'œil, sans avoir à lire un formulaire pour les retrouver.
+        */}
+        <TuilesResume
+          client={valeurs.customer_label}
+          reference={valeurs.product_ref}
+          numeroSuivi={valeurs.tracking_number}
+          transporteur={resume.transporteur}
+          vues={resume.vues}
+          derniereVueLe={resume.derniereVueLe}
+        />
+
+        {/*
           LES TROIS RANGÉES DU KIT, ET LEURS GRILLES EXACTES : deux rangées en
           `minmax(0,1.35fr) minmax(0,1fr)` encadrant une rangée à trois colonnes
           égales, toutes à l'écart de 18 px. Mesuré à 1690 px sur le kit servi :
@@ -291,6 +319,7 @@ export function Editeur({
                 palette={boutique.palette}
                 client={valeurs.customer_label}
                 medias={mediasCourants}
+                versPageClient={versPageClient}
                 libelles={boutique.libellesApercu}
               />
             </div>
@@ -306,6 +335,7 @@ export function Editeur({
                 reference={referenceCourte(id)}
                 dates={dates}
                 numeroSuivi={valeurs.tracking_number}
+                transporteur={resume.transporteur}
                 lienPublic={lienPublic}
                 versPageClient={versPageClient}
               />
@@ -433,7 +463,7 @@ function EnTeteDetail({
               href={versPageClient}
               target="_blank"
               rel="noopener noreferrer"
-              className="-m-3 inline-flex p-3 text-ds-accent transition-colors hover:text-ds-accent-survol"
+              className="-m-3 inline-flex min-h-11 min-w-11 items-center justify-center p-3 text-ds-accent transition-colors hover:text-ds-accent-survol lg:min-h-0 lg:min-w-0"
             >
               <ExternalLink aria-hidden="true" size={22} strokeWidth={2} />
               <span className="sr-only">{t("voirPage")}</span>
@@ -540,21 +570,33 @@ function PanneauSuivi({
  * afficherait la valeur du chargement, c'est-à-dire un lien mort au moment
  * précis où l'on vient le vérifier.
  *
- * ⚠️ DEUX LIGNES DU KIT NE SONT PAS ICI. « Méthode d'expédition » nommerait un
- * transporteur que la base porte en identifiant NUMÉRIQUE 17TRACK, jamais
- * traduit ; « Pays de livraison » n'existe pas — le destinataire est un texte
- * libre. Une ligne de repli répétée à chaque commande vaut moins que rien.
+ * ⚠️ CE BLOC AFFIRMAIT DEUX IMPOSSIBILITÉS, ET L'UNE ÉTAIT FAUSSE. Il disait
+ * que « Méthode d'expédition » nommerait « un transporteur que la base porte en
+ * identifiant NUMÉRIQUE 17TRACK, jamais traduit ». Le raisonnement tenait, la
+ * conclusion non : 17TRACK PUBLIE son catalogue, il est figé dans le dépôt
+ * depuis le 12/09 (3 502 entrées, `lib/tracking/transporteurs.json`), et la
+ * ligne existe donc désormais. C'est L-014 dans sa forme la plus coûteuse — un
+ * commentaire de code qui affirme un état que personne n'a exécuté, et qui a
+ * servi d'excuse pour ne pas faire.
+ *
+ * CE QUI RESTE VRAI : « Pays de livraison » n'existe nulle part. Le destinataire
+ * est un texte libre sans compte ni adresse (principe III) ; il n'y a aucune
+ * adresse d'où tirer un pays, et une ligne de repli répétée à chaque commande
+ * vaudrait moins que rien.
  */
 function PanneauInformations({
   reference,
   dates,
   numeroSuivi,
+  transporteur,
   lienPublic,
   versPageClient,
 }: {
   readonly reference: string;
   readonly dates: { readonly creeLe: string; readonly misAJourLe: string };
   readonly numeroSuivi: string;
+  /** Le NOM du transporteur, résolu côté serveur, ou `null` s'il est inconnu. */
+  readonly transporteur: string | null;
   readonly lienPublic: string;
   readonly versPageClient: string;
 }) {
@@ -565,6 +607,10 @@ function PanneauInformations({
       <LigneInfo libelle={t("infosReference")} valeur={reference} href={versPageClient} />
       <LigneInfo libelle={t("infosCreee")} valeur={dates.creeLe} />
       <LigneInfo libelle={t("infosModifiee")} valeur={dates.misAJourLe} />
+      <LigneInfo
+        libelle={t("infosExpedition")}
+        valeur={transporteur ?? t("infosSansTransporteur")}
+      />
       {/* UNE VALEUR ABSENTE EST NOMMÉE, pas laissée à un tiret. « Aucun numéro »
           se lit ; « – » demande de deviner si la donnée manque ou si l'écran a
           échoué. */}
@@ -623,7 +669,11 @@ function IconeCopie({ etat }: { readonly etat: "repos" | "copie" | "echec" }) {
   // À L'ACCENT, comme toutes les icônes de `DetailAction` : c'est ce qui
   // distingue ces boutons des boutons neutres du reste du produit, et la mesure
   // du kit servi le confirme — `color: var(--accent)` sur l'icône seule.
-  return <Copy aria-hidden="true" size={17} strokeWidth={1.9} className="text-ds-accent" />;
+  //
+  // `share-2` ET NON `copy` : c'est celle que le kit pose sur ce bouton, et
+  // elle suit le libellé. Une icône de copie sous le mot « Partager » dirait
+  // deux gestes différents pour un seul bouton.
+  return <Share2 aria-hidden="true" size={17} strokeWidth={1.9} className="text-ds-accent" />;
 }
 
 /** Copier le lien public. Le presse-papiers n'a pas d'équivalent en HTML. */
@@ -664,10 +714,32 @@ function BoutonCopier({ lien, compact = false }: { readonly lien: string; readon
           l'accompagne — sinon un lecteur d'écran annonce deux fois la même
           chose. */}
       <IconeCopie etat={etat} />
+      {/*
+        ⚠️ LE LIBELLE VISIBLE EST CELUI DU KIT — « Partager » —, MAIS LE NOM
+        ACCESSIBLE ET L'INFOBULLE DISENT LE GESTE EXACT.
+
+        Le kit pose « Partager » sur ce bouton ; le nôtre copie le lien dans le
+        presse-papiers, ce qui EST le geste de partage de ce produit — on envoie
+        un lien dans une conversation, il n'y a rien d'autre à partager. Mais
+        « Partager » ne dit pas ce qui va se passer, et c'est précisément ce
+        qu'un lecteur d'écran doit annoncer : l'infobulle et le nom accessible
+        gardent donc « Copier le lien ». Le retour de succès, lui, reste
+        « Lien copié » — l'interface n'affirme que ce qui a eu lieu.
+      */}
+      {/*
+        ⚠️ LE LIBELLÉ EST UN NŒUD DE TEXTE DU BOUTON, PAS UN `<span>`. Le kit
+        écrit `<button>…Partager</button>` ; enveloppé, le texte devient un
+        élément de 58 × 21 sans fond ni filet, et c'est LUI que la sonde
+        apparie au bouton de 123 × 48 du kit. Huit propriétés d'écart sur un
+        bouton parfaitement conforme : l'inventaire relève l'élément qui PORTE
+        le texte, donc le balisage change ce qu'on compare.
+      */}
       {compact ? (
         <span className="sr-only">{t("copierLien")}</span>
+      ) : etat === "copie" ? (
+        t("lienCopie")
       ) : (
-        <span>{etat === "copie" ? t("lienCopie") : t("copierLien")}</span>
+        t("partager")
       )}
     </button>
   );

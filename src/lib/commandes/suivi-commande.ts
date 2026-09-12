@@ -30,6 +30,18 @@ export interface PassageCommande {
 
 export interface SuiviDeLaCommande {
   readonly numero: string;
+  /**
+   * Le code TRANSPORTEUR du fournisseur de suivi, ou `null`.
+   *
+   * ⚠️ IL EST LU PARCE QU'IL EST TRADUISIBLE, et deux ecrans ont longtemps
+   * affirme le contraire. `carrier_code` est un identifiant numerique — 3011,
+   * 100003 — et l on en concluait qu il n apprenait rien a personne ; la
+   * correspondance existe, 17TRACK la publie, et elle est figee dans le depot
+   * (`lib/tracking/transporteurs.json`). C est `lireTransporteur` qui la lit,
+   * cote serveur : ce module ne rend que le code, il n a pas a connaitre le
+   * catalogue.
+   */
+  readonly codeTransporteur: number | null;
   readonly dernierMouvement: string | null;
   readonly abandonne: boolean;
   readonly passages: readonly PassageCommande[];
@@ -62,7 +74,7 @@ export async function lireSuiviDeCommande(
 ): Promise<SuiviDeLaCommande | null> {
   const { data: attaches } = await supabase
     .from("order_parcels")
-    .select("parcel_id, tracked_parcels(tracking_number, last_movement_at, abandoned_at)")
+    .select("parcel_id, tracked_parcels(tracking_number, carrier_code, last_movement_at, abandoned_at)")
     .eq("order_id", orderId)
     .limit(1);
 
@@ -85,6 +97,7 @@ export async function lireSuiviDeCommande(
 
   return {
     numero: colis.tracking_number,
+    codeTransporteur: colis.carrier_code,
     dernierMouvement: colis.last_movement_at,
     abandonne: colis.abandoned_at !== null,
     passages: (points ?? []).map((p) => ({

@@ -22,6 +22,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   CircleCheck,
+  CirclePlus,
   GripVertical,
   Image as ImageIcon,
   Info,
@@ -42,6 +43,7 @@ import {
 import { apercuDepuisVideo, couvertureDepuisImage, vignetteDepuisImage } from "@/lib/medias/vignette";
 import { limites } from "@/lib/storage/limites";
 import { creerSuiviDeCouverture } from "@/lib/commandes/suivi-couverture";
+import { CLASSE_ACTION_DETAIL } from "@/components/app/panneau";
 
 /**
  * La carte des médias, porté sur le canevas Claude Design : zone de
@@ -459,10 +461,26 @@ export function CarteMedias({
 
   return (
     <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card lg:p-6">
-      <div className="mb-3.5 flex items-center justify-between gap-3 lg:mb-4">
-        <h2 className="text-[18px] font-bold tracking-[-0.025em] text-ds-texte-titre">
-          {t("titre")}
-        </h2>
+      {/*
+        L'EN-TETE DU `Panel` DU KIT : `flex-wrap`, ecart 16, 20 px en dessous,
+        titre a gauche, action a droite. Le repli n'est pas decoratif — en
+        chinois le titre est court et le libelle du bouton long, en francais
+        c'est l'inverse, et c'est lui qui evite la troncature.
+      */}
+      <div className="mb-4 flex flex-wrap items-center gap-4 lg:mb-5">
+        {/*
+          ⚠️ 18 px EN -0,025em ETAIENT LES VALEURS DU SOURCE, PAS CELLES DU
+          RENDU. Ce titre est le seul de l'ecran a ne pas passer par `Panneau` :
+          il portait donc, seul, les valeurs lues dans `OrderDetail.jsx` — que
+          le sixieme piege rend fausses. Le kit SERVI rend 19 px en -0,03em sur
+          une interligne de 1,1, comme les cinq autres panneaux.
+        */}
+        <div className="min-w-0 flex-[1_1_210px]">
+          <h2 className="text-[18px] leading-[1.1] font-bold tracking-[-0.03em] text-ds-texte-titre lg:text-[19px]">
+            {t("titre")}
+          </h2>
+        </div>
+        <span className="flex-1" />
         {/* LE COMPTE DES VIDEOS N'EST DIT QU'AU BUREAU. La planche telephone
             ecrit « 7 sur 20 » et rien de plus : la ligne n'a pas la place, et
             c'est le plafond global qu'on approche en premier. */}
@@ -473,6 +491,28 @@ export function CarteMedias({
             {t("videos", { n: videos, max: plafondVideos })}
           </span>
         </span>
+        {/*
+          « AJOUTER DES FICHIERS » — le `DetailAction` que le kit pose dans
+          l'en-tete de ce panneau, et qui manquait.
+
+          Il DOUBLE la case « + Ajouter » de la grille, et le kit les dessine
+          tous les deux : a vingt medias, la case de depot est en bas d'une
+          grille de quatre rangees, donc hors de vue au moment meme ou l'on
+          decide d'ajouter. Le bouton d'en-tete, lui, ne bouge pas.
+
+          Au telephone il n'est pas rendu : la bande d'action collee en bas de
+          l'ecran porte deja les deux gestes que le pouce doit atteindre, et un
+          troisieme bouton pleine largeur y pousserait la grille hors de vue.
+        */}
+        <button
+          type="button"
+          onClick={() => champFichier.current?.click()}
+          disabled={complet}
+          className={CLASSE_ACTION_DETAIL + " hidden shrink-0 disabled:opacity-50 lg:flex"}
+        >
+          <CirclePlus aria-hidden="true" size={17} strokeWidth={1.9} className="text-ds-accent" />
+          {t("ajouterFichiers")}
+        </button>
       </div>
 
       {/* L'ECHEC EST DIT, ET IL EST DIT ICI — au-dessus de la grille, pas
@@ -623,7 +663,11 @@ export function CarteMedias({
                   }
                 >
                   <Upload aria-hidden="true" size={20} strokeWidth={1.8} className="text-ds-accent" />
-                  <span className="text-[11.5px] font-bold text-ds-accent-encre">
+                  {/* 12/600 AU BUREAU, comme le kit ; 11,5 en dessous, plancher
+                      de la règle 5. Les deux valeurs sont justes, chacune à sa
+                      largeur — 12 px n'est pas sous le plancher, mais la graisse
+                      700 compensait une taille trop petite qu'on n'avait pas. */}
+                  <span className="text-[11.5px] leading-[normal] font-bold text-ds-accent-encre lg:text-[12px] lg:font-semibold">
                     {t("ajouter")}
                   </span>
                 </button>

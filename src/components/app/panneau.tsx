@@ -60,7 +60,16 @@ export function Panneau({
           </span>
         )}
         <div className="min-w-0 flex-[1_1_210px]">
-          <h2 className="text-[18px] font-bold tracking-[-0.03em] text-ds-texte-titre lg:text-[19px]">
+          {/*
+            ⚠️ L'INTERLIGNE FAIT PARTIE DE LA MESURE, ET IL MANQUAIT. La taille
+            et l'interlettrage avaient bien été relevés sur le kit servi ; pas
+            la hauteur de ligne. Le kit laisse ses titres sur la règle de sa
+            feuille — 1,1 —, Tailwind applique 1,5 par défaut, et les six
+            panneaux de l'éditeur rendaient donc une boîte de 29 px là où le
+            kit en rend 21. Huit pixels par titre, six titres : c'est la
+            hauteur d'une ligne de contenu qui se décale sur toute la page.
+          */}
+          <h2 className="text-[18px] leading-[1.1] font-bold tracking-[-0.03em] text-ds-texte-titre lg:text-[19px]">
             {titre}
           </h2>
           {sousTitre === undefined ? null : (
@@ -76,16 +85,36 @@ export function Panneau({
 }
 
 /**
- * ⚠️ `DetailAction` DU KIT N'A PAS DE COMPOSANT ICI, ET C'EST DÉLIBÉRÉ. Sa
- * géométrie exacte — 48 px de haut, `padding: 0 18px`, écart 10, ombre xs,
- * icône à l'accent — vit dans `BoutonCopier` de l'éditeur, seul bouton de cette
- * famille sur l'écran. Un second exemplaire exporté et jamais monté serait une
- * valeur de plus à garder juste, sans rien pour signaler qu'elle a dérivé. Il
- * naîtra ici le jour où un deuxième écran en pose un.
+ * `DetailAction` DU KIT — 48 px de haut, `padding: 0 18px`, écart 10, rayon de
+ * carte, filet, fond carte, ombre xs, 14/600, icône 17 à l'accent.
+ *
+ * ⚠️ CE BLOC DISAIT « PAS DE COMPOSANT ICI, ET C'EST DÉLIBÉRÉ », au motif qu'un
+ * seul bouton de cette famille existait — celui qui copie le lien. L'éditeur en
+ * pose désormais TROIS : copier, partager, et « ajouter des fichiers » dans
+ * l'en-tête du panneau des médias. La condition que cette note posait
+ * elle-même — « il naîtra le jour où un deuxième écran en pose un » — est donc
+ * remplie, et trois copies de la même géométrie, c'est trois endroits où elle
+ * peut dériver sans que rien ne le dise.
+ *
+ * C'est une CLASSE et non un composant : les trois boutons n'ont ni le même
+ * contenu ni le même comportement — l'un a trois états, l'autre ouvre un
+ * sélecteur de fichiers — et un composant qui les couvrirait tous porterait
+ * plus d'options que de géométrie.
  */
+export const CLASSE_ACTION_DETAIL =
+  "flex h-12 items-center justify-center gap-2.5 rounded-ds-card border border-ds-filet " +
+  "bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs " +
+  "transition-colors hover:bg-ds-surface-teinte";
 
 /**
  * Le lien de retour — `BackLink`, 14/500, écart 9, flèche 17 au trait 1,9.
+ *
+ * ⚠️ LE PLANCHER TACTILE EST UN `min-height`, PAS UN REMPLISSAGE — ET LA
+ * DIFFÉRENCE A COÛTÉ TROIS CIBLES À 43 px. Le remplissage de 2 × 12 px donnait
+ * 45 px tant que le texte occupait une boîte de 21 ; en posant l'interligne du
+ * kit (`normal`, donc 17 px), la même cible est tombée à 43. Une cible calculée
+ * par addition dépend de tout ce qui l'entoure ; un plancher déclaré ne dépend
+ * de rien.
  *
  * C'est un LIEN EN TEXTE, pas un bouton carré. La distinction compte : posé
  * au-dessus du titre, il fait partie du fil de lecture, là où un bouton bordé
@@ -99,7 +128,17 @@ export function LienRetour({ href, libelle }: { readonly href: string; readonly 
   return (
     <Link
       href={href}
-      className="-my-3 inline-flex items-center gap-[9px] py-3 text-[14px] font-medium text-ds-texte-corps transition-colors hover:text-ds-texte-fort"
+      /*
+        ⚠️ `leading-[normal]` ET NON `leading-normal` : le second est une valeur
+        de l'échelle Tailwind qui vaut 1,5, c'est-à-dire exactement ce qu'on
+        corrige. Le kit laisse ses libellés d'interface sur le `normal` du CSS,
+        et notre corps de page impose 1,5 : 21 px de boîte au lieu de 17.
+
+        ⚠️ ET LE REMPLISSAGE TACTILE NE VAUT QU'AU TÉLÉPHONE. Il porte la cible
+        à 44 px — règle 5 — mais au bureau il donnait 45 px de haut à un lien
+        que le kit rend en 17. La règle protège un doigt, pas une souris.
+      */
+      className="-my-3 inline-flex min-h-11 items-center gap-[9px] py-3 text-[14px] leading-[normal] font-medium text-ds-texte-corps transition-colors hover:text-ds-texte-fort lg:my-0 lg:min-h-0 lg:py-0"
     >
       <ArrowLeft aria-hidden="true" size={17} strokeWidth={1.9} />
       {libelle}
@@ -139,10 +178,10 @@ export function LigneInfo({
 
   return (
     <div className="flex items-center gap-4 border-b border-ds-filet py-[13px] last:border-b-0">
-      <span className="shrink-0 text-[14px] text-ds-texte-corps">{libelle}</span>
+      <span className="shrink-0 text-[14px] leading-[normal] text-ds-texte-corps">{libelle}</span>
       <span className="flex-1" />
       {href === undefined ? (
-        <span className="min-w-0 text-right text-[14px] font-semibold text-ds-texte-fort">
+        <span className="min-w-0 text-right text-[14px] leading-[normal] font-semibold text-ds-texte-fort">
           {valeur}
         </span>
       ) : (
@@ -156,7 +195,7 @@ export function LigneInfo({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="-my-[13px] inline-flex min-w-0 items-center gap-[7px] py-[13px] text-[14px] font-semibold text-ds-texte-lien hover:underline"
+          className="-my-[13px] inline-flex min-h-11 min-w-0 items-center gap-[7px] py-[13px] text-[14px] leading-[normal] font-semibold text-ds-texte-lien hover:underline lg:min-h-0"
         >
           {texte}
         </a>

@@ -319,7 +319,7 @@ export default async function LayoutApplication({
           {/* ⚠️ `26px 32px 22px`, MESURÉ SUR LE KIT. Nous posions une hauteur fixe de
               64 sans remplissage : le pied tombait 128 px trop haut sur un écran
               rempli, et sa ligne ne s'alignait sur rien. */}
-          <footer className="mt-auto hidden shrink-0 items-center justify-center px-8 pt-[26px] pb-[22px] text-[12px] text-ds-texte-tenu md:flex">
+          <footer className="mt-auto hidden shrink-0 items-center justify-center px-8 pt-[26px] pb-[22px] text-[12px] leading-[normal] text-ds-texte-tenu md:flex">
             {t("piedDePage", { annee: new Date().getFullYear() })}
           </footer>
         </div>

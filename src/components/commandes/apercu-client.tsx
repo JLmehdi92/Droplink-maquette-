@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ExternalLink } from "lucide-react";
 import { Panneau } from "@/components/app/panneau";
 import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import type { MediaAffiche } from "./carte-medias";
@@ -41,6 +42,7 @@ export function ApercuClient({
   palette,
   client,
   medias,
+  versPageClient,
   libelles,
 }: {
   readonly nomBoutique: string | null;
@@ -48,6 +50,8 @@ export function ApercuClient({
   readonly palette: PaletteApercu;
   readonly client: string;
   readonly medias: readonly MediaAffiche[];
+  /** Vers la vraie page, pour l action d en-tete du kit. */
+  readonly versPageClient: string;
   /*
    * ⚠️ LES PHRASES DE LA MAQUETTE ARRIVENT RÉSOLUES, DANS LA LANGUE DE LA
    * BOUTIQUE — pas dans celle de l'URL. `useTranslations` reste juste au-dessus
@@ -67,7 +71,24 @@ export function ApercuClient({
   return (
     <Panneau
       titre={t("apercuTitre")}
-      action={<span className="text-[13px] text-ds-texte-sourdine">{t("apercuDirect")}</span>}
+      /*
+        ⚠️ L ACTION D EN-TETE ETAIT LE MOT « en direct », LE KIT Y MET UNE
+        ICONE DE LIEN. Et « en direct » n apprenait rien qui ne se voie : la
+        maquette se met a jour a la frappe, sous les yeux de celui qui tape.
+        L icone, elle, ouvre la VRAIE page — le seul geste que cet encart ne
+        peut pas rendre, puisqu il est une image de la page et non la page.
+      */
+      action={
+        <a
+          href={versPageClient}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="-m-3 inline-flex min-h-11 min-w-11 items-center justify-center p-3 text-ds-accent transition-colors hover:text-ds-accent-survol lg:min-h-0 lg:min-w-0"
+        >
+          <ExternalLink aria-hidden="true" size={18} strokeWidth={1.9} />
+          <span className="sr-only">{t("voirPage")}</span>
+        </a>
+      }
     >
 
       {/* `aria-hidden` : c'est une IMAGE de la page, pas la page. Un lecteur

@@ -19,6 +19,7 @@ import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { lireHistorique } from "@/lib/commandes/historique";
 import { lireSuiviDeCommande, datesDesEtapes } from "@/lib/commandes/suivi-commande";
+import { lireTransporteur } from "@/lib/tracking/transporteurs";
 import type { Etape } from "@/lib/tracking/normalize";
 import { titreDeCommande } from "@/lib/commandes/titre";
 import { HistoriqueCommande } from "@/components/commandes/historique-commande";
@@ -318,6 +319,19 @@ export default async function EditeurCommande({
             creeLe: instant(data.created_at),
             misAJourLe: instant(data.updated_at),
           }}
+          /*
+           * LE NOM DU TRANSPORTEUR EST RÉSOLU ICI, côté serveur : le catalogue
+           * pèse 157 Ko et il est `server-only`. L'îlot d'édition ne reçoit
+           * qu'une chaîne, ou `null` quand aucun colis n'est rattaché — ou
+           * quand le code est absent du catalogue, ce qui arrive : 17TRACK en
+           * ajoute. La ligne est alors OMISE, jamais remplacée.
+           */
+          resume={{
+            transporteur:
+              suivi === null ? null : (lireTransporteur(suivi.codeTransporteur)?.nom ?? null),
+            vues: data.views_count,
+            derniereVueLe: data.last_viewed_at === null ? null : instant(data.last_viewed_at),
+          }}
           medias={{
             initiaux: medias,
             plafondMedias: plafonds.medias,
@@ -349,11 +363,7 @@ export default async function EditeurCommande({
             la charge d'hydratation, pour un bloc que personne n'interroge.
           */
           historique={
-            <HistoriqueCommande
-              lignes={historique}
-              vues={data.views_count}
-              derniereVueLe={data.last_viewed_at}
-            />
+            <HistoriqueCommande lignes={historique} />
           }
           initiales={{
             customer_label: data.customer_label ?? "",

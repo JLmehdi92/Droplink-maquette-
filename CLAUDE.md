@@ -446,7 +446,7 @@ position, police, graisse, interlettrage, interligne, couleur, fond, image de
 fond, rayon, filet, ombre, marge, écart. **C'est un inventaire, pas une
 sélection** : la comparaison trie, pas la sonde.
 
-#### ⚠️ LES HUIT PIÈGES, TOUS PAYÉS UNE FOIS
+#### ⚠️ LES NEUF PIÈGES, TOUS PAYÉS UNE FOIS
 
 1. **LE KIT EST DESSINÉ À 1690 px, PAS 1440.** C'est écrit dans l'en-tête de
    chacune de ses pages : `viewport="1690x1010"`. Mesurer le produit à 1440 et
@@ -503,6 +503,32 @@ sélection** : la comparaison trie, pas la sonde.
    serveur et le relancer** — et le vérifier par `Get-CimInstance` : quatorze
    processus `node` étaient encore vivants ce jour-là.
 
+9. **LE KIT PEUT RENDRE SON TEXTE DANS LA POLICE DE REPLI, ET RIEN NE LE DIT.**
+   Mesuré le 12/09/2026 : la face latine d'Inter, que `tokens/fonts.css` va
+   chercher chez `fonts.gstatic.com`, rendait un `NetworkError` **reproductible**
+   dans le Chrome sans fenêtre — pendant que `document.fonts.status` valait
+   « loaded » et que `getComputedStyle(...).fontFamily` répondait « Inter ». Le
+   kit rendait donc TOUT son texte en Segoe UI. « Retour aux commandes » :
+   **149,8 px chez le kit, 157,9 px chez le produit**, même chaîne, même taille,
+   même graisse. **Sept pour cent d'écart sur chaque largeur de texte, dans le
+   sens qui fait passer le produit pour fautif** — et irréparable par
+   construction : on ne rétrécit pas du texte pour rattraper une police.
+   - **Le kit sert désormais Inter depuis le dépôt du design system**
+     (`assets/fonts/inter-latin-variable.woff2`, sha256 dans `tokens/fonts.css`).
+     ⚠️ **Ce dossier est GITIGNORÉ** — décision du 11/09 — donc la correction ne
+     voyage PAS : sur une autre machine, il faut la refaire, et `tokens/fonts.css`
+     porte la source exacte et la marche à suivre.
+   - **Les deux sondes LÈVENT plutôt que de mesurer** (`scripts/sonde-polices.mjs`,
+     falsifié aux deux points d'appel) : aucun inventaire n'est écrit si la page
+     n'a pas rendu son texte en Inter. *Une sonde qui mesure une police de repli
+     certifie la police de repli.*
+   - **Elles désactivent aussi le cache HTTP.** Sans ça, une correction apportée
+     au design system restait invisible d'un passage à l'autre : on remesurait
+     le même écart indéfiniment.
+   - ⚠️ **Et la correction a rendu CONFORMES quatre écarts déjà déclarés** sur
+     `/commandes` et `/envois` : leurs déclarations ne désignaient plus rien, et
+     c'est le contrôle « dans l'autre sens » qui les a sorties.
+
 > ⚠️ **ET LA SONDE PEUT APPRENDRE À IGNORER SES PROPRES ALERTES.** Elle
 > signalait onze cibles sous 44 px sur connexion + inscription, dont **aucune
 > n'en était une** : quatre champs **enveloppés par leur `<label>`** — la cible
@@ -531,17 +557,36 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**`/commandes` est le premier écran passé à la règle d'arrêt** — verdict
-`0 écart de valeur non déclaré`, 26 écarts déclarés avec leur motif.
+**TROIS ÉCRANS SORTENT EN CODE 0**, tous remesurés le 12/09 au soir contre un
+kit qui rend enfin sa vraie police (neuvième piège) :
 
-**▶️ PROCHAIN ÉCRAN : `/envois`**, contre `ShippingView` du kit vendeur
-(`CLIC_KIT="Suivi d'envois"`). Dernier relevé avant la règle : 67 manquants,
-42 en trop, 10 écarts de valeur. **On n'ouvre pas `/analyses` avant qu'il sorte
-en code 0.**
+| écran | relevé kit | manquants | en trop | écarts de valeur |
+|---|---|---|---|---|
+| `/commandes` | `OrdersView`, sans `CLIC_KIT` | 39 (0 non déclarés) | 42 (0) | **0** |
+| `/envois` | `CLIC_KIT="Suivi d'envois"` | 48 (0) | 43 (0) | **0** |
+| **l'éditeur** `/commandes/[id]` | `CLIC_KIT="#DLK7842"` | 26 (0) | 48 (0) | **0** |
 
-Puis, dans cet ordre : l'éditeur de commande · `/analyses` · `/marque` · les
-SIX écrans admin · la landing · `/p/[token]`. Tous ont déjà eu une passe de
-jetons et de règle 5 ; **aucun n'a eu la soustraction.**
+⚠️ **LE PRODUIT NE SE MESURE PAS TOUJOURS À LA MÊME LARGEUR QUE LE KIT.** Les
+deux relevés doivent porter la même largeur UTILE — 1675 —, et c'est la barre de
+défilement qui décide : le kit l'a toujours, donc il se sert à **1690** ; le
+produit ne l'a que sur les pages assez hautes. `/commandes` et `/envois` se
+mesurent donc à **1675**, l'éditeur à **1690**. L'outil refuse de soustraire deux
+largeurs différentes, et c'est lui qui le dit.
+
+⚠️ **L'ÉDITEUR EST LE SEUL ÉCRAN À RÉPONDRE À DEUX PLANCHES.** Le kit sépare une
+vue de LECTURE (`OrderDetail.jsx`) d'un FORMULAIRE (`CreateOrder.jsx`) ; le dépôt
+n'a **aucune route de création** — la Server Action crée la ligne et redirige
+vers `/commandes/<id>`, et la décision 16 interdit le bouton d'enregistrement.
+La référence est donc `OrderDetail`, et la disposition emprunte à `CreateOrder`
+son couple formulaire + aperçu, qui vient en premier.
+
+**▶️ PROCHAIN ÉCRAN : `/analyses`**, contre `AnalyticsView` du kit vendeur.
+
+Puis, dans cet ordre : `/marque` · les SIX écrans admin · la landing ·
+`/p/[token]` · l'authentification · les pages légales. Tous ont déjà eu une
+passe de jetons et de règle 5 ; **aucun n'a eu la soustraction.** Et deux écrans
+sont à CRÉER, pas à migrer : le tableau de bord (`DashboardHome.jsx`) et les
+paramètres vendeur (`SettingsView.jsx`).
 
 ### Comment on vérifie un écran migré
 

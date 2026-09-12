@@ -48,6 +48,13 @@ const IDEOGRAMME = /[一-鿿]/;
  */
 const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["legal.signalement.lienExemple", "Un début d'URL, montré tel quel."],
+  /* Deux gabarits de l'éditeur, composés d'une variable ou d'un signe seul.
+     « à 09:15 » n'a pas d'équivalent chinois : l'heure s'écrit nue à côté de sa
+     date, et ajouter un idéogramme pour satisfaire ce garde mettrait un mot
+     dans une colonne de 92 px qui n'en a pas la place. Le tiret d'une valeur
+     absente, lui, est le signe que le kit emploie lui-même. */
+  ["editeur.historique.aHeure", "L'heure seule : le chinois n'introduit pas l'heure par un mot."],
+  ["editeur.tuileVide", "Le tiret d'une valeur absente, identique dans les trois langues."],
   /* La documentation emploie trois mots qui ne se traduisent pas : « Logo » est
      international, et les unités de stockage s'écrivent en lettres latines en
      chinois comme ailleurs. */

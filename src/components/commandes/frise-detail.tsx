@@ -16,11 +16,16 @@ import { ETAPES, type Etape } from "@/lib/tracking/normalize";
  * libellé 15/700, date 13/400 sourdine, note 13/400 corps, 22 px sous chaque
  * bloc sauf le dernier.
  *
- * ⚠️ LE BADGE « EN ATTENTE » EST À 11,5 px, PAS À 10. Le kit l'écrit à 10 dans
- * son source ET LE REMONTE LUI-MÊME À 11,5 par une règle `!important` de sa page
- * (`span[style*="font-size: 10px"]{font-size:11.5px!important}`) : c'est la règle
- * 5 du projet, appliquée par le kit à son propre dessin. La valeur SERVIE fait
- * foi, pas celle écrite.
+ * ⚠️ LE BADGE « EN ATTENTE » VAUT 10 px AU BUREAU ET 11,5 AU TÉLÉPHONE, ET CE
+ * BLOC N'EN DISAIT QUE LA MOITIÉ. Il affirmait « 11,5 px, PAS 10 », au motif que
+ * le kit remonte lui-même la valeur par un `!important`. C'est vrai — mais cette
+ * règle vit dans `@media (max-width:760px)` : mesuré à 1690 px sur la page
+ * servie, le kit rend bien 10/700 en -0,2px. La correction avait donc appliqué
+ * la valeur TÉLÉPHONE à toutes les largeurs.
+ *
+ * Les deux valeurs sont justes, chacune à sa largeur, et c'est ce que le badge
+ * porte désormais. La règle 5 — plancher de 11,5 px sur téléphone — reste
+ * tenue : c'est le kit lui-même qui l'applique à son propre dessin.
  */
 export interface EtapeFrise {
   readonly etape: Etape;
@@ -88,7 +93,7 @@ export function FriseDetail({
               <div className="flex flex-wrap items-center gap-[9px]">
                 <span
                   className={
-                    "text-[15px] font-bold " +
+                    "text-[15px] leading-[normal] font-bold " +
                     (encours
                       ? "text-ds-accent-encre"
                       : faite
@@ -99,7 +104,19 @@ export function FriseDetail({
                   {e.libelle}
                 </span>
                 {faite ? null : (
-                  <span className="rounded-ds-pill bg-ds-accent-doux px-2 py-[3px] text-[11.5px] font-semibold text-ds-accent-encre">
+                  /*
+                    LE `Badge` DU KIT, dans sa variante de frise : ton `brand`,
+                    rayon pilule, `3px 8px`, écart 6, 10/700 en -0,2px. Mesuré
+                    sur la page servie — l'appel du kit surcharge la taille par
+                    défaut du composant.
+
+                    ⚠️ 10 px SEULEMENT AU-DESSUS DE `lg`. La règle 5 du design
+                    system pose un plancher de 11,5 px sur téléphone, et il ne
+                    se négocie pas contre une valeur de maquette bureau : c'est
+                    la seule des cinq règles qui protège quelqu'un qui n'a pas
+                    le choix de son écran.
+                  */
+                  <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-accent-doux px-2 py-[3px] text-[11.5px] leading-[normal] font-bold tracking-[-0.2px] text-ds-accent-encre lg:text-[10px]">
                     {libelleAttente}
                   </span>
                 )}
@@ -113,10 +130,10 @@ export function FriseDetail({
                 la base n'a pas enregistré — principe XII.
               */}
               {e.quand === null ? null : (
-                <div className="mt-[3px] text-[13px] text-ds-texte-sourdine">{e.quand}</div>
+                <div className="mt-[3px] text-[13px] leading-[normal] text-ds-texte-sourdine">{e.quand}</div>
               )}
               {e.note === null ? null : (
-                <div className="mt-1 text-[13px] text-ds-texte-corps">{e.note}</div>
+                <div className="mt-1 text-[13px] leading-[normal] text-ds-texte-corps">{e.note}</div>
               )}
             </div>
           </li>
