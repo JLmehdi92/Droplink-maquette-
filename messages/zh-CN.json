@@ -108,16 +108,14 @@
   },
   "legal": {
     "conditionsTitre": "使用条款",
-    "conditionsSurTitre": "一般条款",
     "confidentialiteTitre": "隐私政策",
-    "confidentialiteSurTitre": "个人信息",
     "confidentialiteChapeau": "我们收集什么、为什么收集，以及保存多久。",
     "signalementTitre": "举报内容",
     "signalementSurTitre": "通知与下架",
     "misAJourLe": "最近更新",
     "avertissementTitre": "本文需由律师撰写并审核后方可正式对外公开。",
     "avertissementTexte": "以下内容描述的是预期结构，并非最终的法律文本。",
-    "sommaireTitre": "本页内容",
+    "sommaireTitre": "目录",
     "encartSignalerTitre": "有内容需要举报？",
     "encartSignalerTexte": "请使用专门的表单：我们会处理每一条举报。",
     "encartSignalerLien": "举报内容",
@@ -193,7 +191,11 @@
     "confidentialiteMetaTitre": "隐私政策 — DropLink",
     "confidentialiteMetaDescription": "DropLink 保存哪些数据、保存多久，以及为什么收到链接的客户在我们这里从不需要账户和密码。",
     "signalementMetaTitre": "举报内容 — DropLink",
-    "signalementMetaDescription": "举报 DropLink 上托管的内容。请说明相关链接和原因：每一条举报都会被查看，页面可以被立即关闭。"
+    "signalementMetaDescription": "举报 DropLink 上托管的内容。请说明相关链接和原因：每一条举报都会被查看，页面可以被立即关闭。",
+    "pastille": "法律",
+    "accueil": "首页",
+    "editeur": "发布方：",
+    "editeurLacune": "公司名称待补充"
   },
   "connexion": {
     "titre": "欢迎回来",

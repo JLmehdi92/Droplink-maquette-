@@ -1,23 +1,21 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Icone } from "./icone";
-import { CoquePublique } from "./coque-publique";
+import { AlertTriangle, ArrowRight, Building2, CalendarDays, FileText, Shield } from "lucide-react";
+import { LogoMarque } from "@/components/acces/coque-acces";
 import { signalementDisponible } from "@/lib/contact";
 
 export interface SectionLegale {
   readonly id: string;
   readonly titre: string;
-  /** Un ou plusieurs paragraphes. Les planches en posent deux par section. */
+  /** Un ou plusieurs paragraphes. */
   readonly paragraphes: readonly string[];
   /**
    * Ce qui reste À FAIRE RÉDIGER dans cette section.
    *
-   * ⚠️ CE N'EST PAS UN OUBLI, C'EST LA PLANCHE. Elle écrit « [DROIT APPLICABLE
-   * ET JURIDICTION À FIXER AVEC L'AVOCAT] » en toutes lettres, et c'est plus
-   * honnête que d'inventer une clause : un texte juridique présenté comme
-   * complet alors qu'il ne l'est pas engage davantage que le même texte annoncé
-   * comme incomplet. La lacune est donc RENDUE, dans un style qui interdit de la
-   * confondre avec le corps du document.
+   * ⚠️ CE N'EST PAS UN OUBLI. Un texte juridique présenté comme complet alors
+   * qu'il ne l'est pas engage davantage que le même texte annoncé comme
+   * incomplet. La lacune est donc RENDUE — dans la pastille jaune pointillée du
+   * kit `legal`, qui interdit de la confondre avec le corps du document.
    */
   readonly lacune?: string;
 }
@@ -26,29 +24,37 @@ export interface SectionLegale {
  * Date de dernière rédaction de ces textes.
  *
  * Elle est écrite ici et non dans les catalogues : c'est un FAIT, pas une chaîne
- * à traduire, et le même fait doit valoir dans les deux langues. La mettre à
+ * à traduire, et le même fait doit valoir dans toutes les langues. La mettre à
  * jour est le geste qui accompagne toute modification du contenu légal — une
  * date figée sur un texte modifié affirme un état qui n'existe plus.
  */
 const DERNIERE_MAJ = new Date("2026-08-29T00:00:00Z");
 
+/** La mention « à compléter » du kit : pastille jaune au filet pointillé. */
+function Lacune({ children }: { readonly children: string }) {
+  return (
+    <span className="inline-block rounded-ds-xs border border-dashed border-[#E3C67E] bg-ds-alerte-fond px-[7px] py-px text-[13.5px] font-bold text-[#8A6212]">
+      {children}
+    </span>
+  );
+}
+
 /**
- * LES PAGES LÉGALES, portées sur leurs planches.
+ * LES PAGES LÉGALES, portées sur le kit `legal`.
  *
- * ⚠️ CE GABARIT RENDAIT DES CARTES ; LA PLANCHE REND UN DOCUMENT. L'ancienne
- * version disposait chaque section dans une carte à icône, sur une grille de
- * deux colonnes. Les planches Conditions — bureau et téléphone — dessinent un
- * texte suivi : sur-titre, grand titre, avertissement, puis huit sections en
- * prose, avec un sommaire collant à gauche au bureau. Ce n'est pas une nuance de
- * goût : un document juridique se LIT dans l'ordre, et une grille de cartes en
- * casse la lecture en huit fragments sans début ni fin.
+ * ⚠️ ON PORTE LA COQUE ET LA TYPOGRAPHIE DU KIT, PAS SON TEXTE. Le kit rédige
+ * ses conditions comme un gabarit : un plan Pro à 19,90 € par mois, un
+ * prélèvement automatique, l'authentification Apple et la double
+ * authentification. La contrainte n° 1 interdit la première moitié ; la seconde
+ * décrit des capacités que le produit n'a pas. Le texte du produit reste le
+ * sien — il décrit ce que le service fait réellement, et le brief exige qu'il
+ * soit validé par un avocat avant toute ouverture publique.
  *
- * LE SOMMAIRE EST UN VRAI SOMMAIRE : ses liens visent les ancres des sections,
- * il disparaît au téléphone — où la planche ne le dessine pas — et la première
- * entrée n'y est PAS marquée « active » à l'arrivée. La planche la peint en
- * violet, mais un marquage figé sur la première section ment dès qu'on défile,
- * et le suivre en JavaScript coûterait un observateur sur une page dont c'est
- * précisément ce qu'on ne veut pas.
+ * LE SOMMAIRE EST UN VRAI SOMMAIRE, SANS ENTRÉE « ACTIVE ». Le kit suit le
+ * défilement en JavaScript pour surligner la section courante ; un marquage
+ * figé sur la première ment dès qu'on défile, et le suivi coûterait un îlot
+ * client sur une page de texte. Au téléphone il passe au-dessus du document,
+ * comme au kit, et chaque lien y fait 44 px.
  *
  * Ces pages restent indexables — contrairement aux pages de commande. Un
  * hébergeur dont les conditions ne sont pas consultables se prive du statut
@@ -56,19 +62,21 @@ const DERNIERE_MAJ = new Date("2026-08-29T00:00:00Z");
  */
 export async function PageLegale({
   locale,
-  surTitre,
+  sorte,
   titre,
   chapeau,
   sections,
 }: {
   readonly locale: string;
-  readonly surTitre: string;
+  /** Les conditions ou la politique de confidentialité : l'icône et la pastille en dépendent. */
+  readonly sorte: "conditions" | "confidentialite";
   readonly titre: string;
   readonly chapeau?: string;
   readonly sections: readonly SectionLegale[];
 }) {
   const t = await getTranslations("legal");
   const nav = await getTranslations("navigation");
+  const landing = await getTranslations("landing");
   const format = await getFormatter();
   const dateMaj = format.dateTime(DERNIERE_MAJ, {
     year: "numeric",
@@ -76,21 +84,23 @@ export async function PageLegale({
     day: "numeric",
     timeZone: "UTC",
   });
+  const signalable = signalementDisponible();
 
-  const corps =
-    "font-body-md text-[15px] leading-[25px] text-ardoise-doux md:text-[16px] md:leading-[27px]";
+  /* LES LIENS D'EN-TÊTE ET DE PIED SONT DES CIBLES TACTILES : 44 px au
+     téléphone, compensés par la marge négative, et la hauteur de leur texte au
+     bureau, comme au kit. */
+  const lienEntete =
+    "-my-3.5 hidden min-h-11 items-center text-[14.5px] font-medium text-ds-texte-corps hover:text-ds-accent-encre sm:inline-flex md:my-0 md:min-h-0";
 
-  const encartSignalement = signalementDisponible() ? (
-    <div className="rounded-[14px] border border-outline-variant bg-[#fafafc] p-[18px] md:p-4">
-      <p className="font-headline-md text-[14px] leading-[18px] font-bold text-on-surface md:text-[13px]">
-        {t("encartSignalerTitre")}
-      </p>
-      <p className="mt-1.5 mb-3 font-body-sm text-[13px] leading-5 text-sourdine">
+  const encartSignalement = signalable ? (
+    <div className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4">
+      <p className="text-[14px] font-bold text-ds-texte-fort">{t("encartSignalerTitre")}</p>
+      <p className="mt-1.5 mb-3 text-[13px] leading-[1.5] text-ds-texte-corps">
         {t("encartSignalerTexte")}
       </p>
       <Link
         href={`/${locale}/signalement`}
-        className="-my-[13px] inline-flex min-h-11 items-center font-headline-md text-[14px] font-bold text-violet md:text-[13px]"
+        className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] font-semibold text-ds-texte-lien hover:text-ds-accent-encre"
       >
         {t("encartSignalerLien")}
       </Link>
@@ -98,132 +108,191 @@ export async function PageLegale({
   ) : null;
 
   return (
-    <CoquePublique
-      locale={locale}
-      action={
-        <>
-          {/*
-            ⚠️ LE TÉLÉPHONE PORTE UN HAMBURGER, PAS LA PILULE — c'est la planche
-            mobile qui le dit, et elle a raison : à 390, une pilule « Se
-            connecter » dans l'en-tête d'un document juridique propose la seule
-            chose que le lecteur n'est pas venu faire.
+    <div className="flex min-h-screen flex-col bg-[linear-gradient(180deg,#FAF9FE_0%,#FBFAFE_60%,#F8F3FD_100%)] bg-fixed leading-[normal]">
+      {/*
+        L'EN-TÊTE DU KIT, COLLANT ET TRANSLUCIDE. Le flou est autorisé ici : la
+        règle 2 ne l'interdit que sur `/p/[token]`, et cette surface est la
+        nôtre.
+      */}
+      <header className="sticky top-0 z-10 flex flex-wrap items-center gap-2.5 border-b border-ds-filet bg-[rgba(255,255,255,0.82)] px-3.5 py-2.5 backdrop-blur-[12px] md:gap-5 md:px-[34px] md:py-4">
+        {/* Le saut au contenu doit rester le premier élément focusable. */}
+        <a
+          href="#contenu"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-ds-sm focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:text-ds-texte-fort focus:shadow-ds-md"
+        >
+          {nav("allerAuContenu")}
+        </a>
+        <Link href={`/${locale}`} className="inline-flex min-h-11 items-center md:min-h-0">
+          <LogoMarque hauteur={30} />
+        </Link>
+        <span className="rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-[11px] py-[5px] text-[12px] font-bold text-ds-accent-encre">
+          {t("pastille")}
+        </span>
+        <span className="flex-1" />
+        <Link href={`/${locale}/docs`} className={lienEntete}>
+          {landing("menu.docs")}
+        </Link>
+        <Link href={`/${locale}`} className={lienEntete}>
+          {t("accueil")}
+        </Link>
+        {/* LE SEUL DÉGRADÉ DE L'ÉCRAN — règle 3. */}
+        <Link
+          href={`/${locale}/inscription`}
+          className="degrade-ds-marque inline-flex h-11 items-center gap-2 rounded-ds-pill border border-transparent px-[22px] text-[14px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+        >
+          {nav("creerCompte")}
+          <ArrowRight aria-hidden="true" size={16} strokeWidth={1.9} />
+        </Link>
+      </header>
 
-            IL OUVRE LE SOMMAIRE, et c'est ce qui le sauve d'être un bouton
-            mort. La planche mobile retire le sommaire du corps sans dire où il
-            passe ; le mettre ici le rend atteignable au téléphone, sur un
-            document de huit sections où l'on cherche presque toujours une
-            section précise. En `<details>`, donc sans une ligne de JavaScript :
-            Échap le referme, le clavier l'atteint, et il fonctionne avant
-            l'hydratation.
-          */}
-          <details name="sommaire-legal" className="relative md:hidden">
-            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-fond-neutre text-on-surface [&::-webkit-details-marker]:hidden">
-              <Icone nom="menu" titre={t("sommaireTitre")} className="text-[18px]" />
-            </summary>
-            <nav
-              aria-label={t("sommaireTitre")}
-              className="absolute right-0 z-20 mt-2 flex w-[280px] flex-col rounded-[14px] border border-outline-variant bg-surface-container-lowest p-2 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)]"
-            >
-              {sections.map((s, i) => (
-                <a
-                  key={s.id}
-                  href={`#${s.id}`}
-                  className="flex min-h-11 items-center rounded-[9px] px-3 font-headline-md text-[14px] leading-[22px] font-medium text-ardoise"
-                >
-                  {i + 1}. {s.titre}
-                </a>
-              ))}
-            </nav>
-          </details>
-
-          <Link
-            href={`/${locale}/connexion`}
-            className="hidden h-10 items-center gap-2 rounded-full bg-primary px-[18px] font-headline-md text-[13px] font-semibold text-on-primary transition-opacity hover:opacity-90 md:inline-flex"
-          >
-            {nav("seConnecter")}
-            <Icone nom="open_in_new" className="text-[13px]" />
-          </Link>
-        </>
-      }
-    >
-      <div className="px-5 pt-[30px] pb-9 md:grid md:grid-cols-[268px_minmax(0,1fr)] md:gap-[60px] md:px-10 md:pt-11 md:pb-[60px]">
-        {/* LE SOMMAIRE — collant, et absent du téléphone comme sur la planche. */}
-        <aside className="hidden self-start md:sticky md:top-10 md:block">
-          <p className="mb-3 ml-3 font-headline-md text-[11px] leading-[13px] font-bold tracking-[0.08em] text-gris-entete">
-            {t("sommaireTitre")}
-          </p>
-          <nav aria-label={t("sommaireTitre")}>
-            <ul>
-              {sections.map((s, i) => (
-                <li key={s.id}>
-                  <a
-                    href={`#${s.id}`}
-                    className="block rounded-[9px] px-3 py-[7px] font-headline-md text-[14px] leading-[22px] font-medium text-ardoise transition-colors hover:bg-violet-fond hover:text-violet"
-                  >
-                    {i + 1}. {s.titre}
-                  </a>
-                </li>
-              ))}
-            </ul>
+      <main className="mx-auto grid w-full max-w-[1240px] flex-1 grid-cols-[minmax(0,1fr)] items-start gap-7 px-4 pt-6 pb-12 min-[980px]:grid-cols-[268px_minmax(0,1fr)] min-[980px]:gap-12 min-[980px]:px-[34px] min-[980px]:pt-10 min-[980px]:pb-20">
+        <aside className="border-b border-ds-filet pb-2.5 min-[980px]:sticky min-[980px]:top-24 min-[980px]:border-b-0 min-[980px]:pb-0">
+          <nav aria-label={t("sommaireTitre")} className="flex flex-col gap-[3px]">
+            <span className="px-3 pb-1.5 text-[11.5px] font-bold tracking-[0.08em] text-ds-texte-tenu uppercase">
+              {t("sommaireTitre")}
+            </span>
+            {sections.map((s, i) => (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                className="flex min-h-11 items-center rounded-ds-sm px-3 py-2 text-[14px] font-medium text-ds-texte-corps transition-colors hover:bg-ds-surface-teinte hover:text-ds-accent-encre md:block md:min-h-0"
+              >
+                {`${i + 1}. ${s.titre}`}
+              </a>
+            ))}
+            <div className="mt-[18px] flex flex-col gap-2 border-t border-ds-filet px-3 pt-4">
+              <Link
+                href={`/${locale}/conditions`}
+                className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+              >
+                {t("conditionsTitre")}
+              </Link>
+              <Link
+                href={`/${locale}/confidentialite`}
+                className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+              >
+                {t("confidentialiteTitre")}
+              </Link>
+            </div>
           </nav>
 
-          {encartSignalement === null ? null : <div className="mt-[22px]">{encartSignalement}</div>}
+          {/* L'ENCART DE SIGNALEMENT, que le kit n'a pas : la procédure de
+              notification et retrait fonde notre statut d'hébergeur (brief
+              §12), et c'est ici, à côté des conditions, qu'on la cherche. */}
+          {encartSignalement === null ? null : (
+            <div className="mt-[22px] hidden min-[980px]:block">{encartSignalement}</div>
+          )}
         </aside>
 
-        <div className="md:max-w-[700px]">
-          <p className="mb-2.5 text-[11.5px] leading-[15px] font-bold tracking-[0.09em] text-ds-texte-sourdine md:mb-3">
-            {surTitre}
-          </p>
-          <h1 className="mb-2.5 font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.035em] text-on-surface md:mb-3 md:text-[42px] md:leading-[48px]">
+        <article id="contenu" className="max-w-[780px] min-w-0">
+          <span className="inline-flex items-center gap-2 rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-3.5 py-[7px] text-[12.5px] font-bold text-ds-accent-encre">
+            {sorte === "conditions" ? (
+              <FileText aria-hidden="true" size={14} strokeWidth={2} />
+            ) : (
+              <Shield aria-hidden="true" size={14} strokeWidth={2} />
+            )}
+            {sorte === "conditions" ? t("conditionsTitre") : t("confidentialiteTitre")}
+          </span>
+          <h1 className="mt-5 text-[27px] leading-[1.06] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort sm:text-[32px] md:text-[44px]">
             {titre}
           </h1>
-          <p className={corps}>
-            {t("misAJourLe")} : {dateMaj}
-            {chapeau === undefined ? "" : ` — ${chapeau}`}
-          </p>
+
+          <div className="mt-[18px] mb-[22px] flex flex-wrap items-center gap-4 border-y border-ds-filet pt-3.5 pb-1 text-[12.5px] text-ds-texte-sourdine">
+            <span className="flex items-center gap-[7px]">
+              <CalendarDays aria-hidden="true" size={14} strokeWidth={1.9} />
+              {t("misAJourLe")} : {dateMaj}
+            </span>
+            <span className="flex items-center gap-[7px]">
+              <Building2 aria-hidden="true" size={14} strokeWidth={1.9} />
+              {t("editeur")} <Lacune>{t("editeurLacune")}</Lacune>
+            </span>
+          </div>
+
+          {chapeau === undefined ? null : (
+            <p className="mb-3.5 text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps">{chapeau}</p>
+          )}
 
           {/* L'AVERTISSEMENT EST AMBRE, pas décoratif : un document juridique
               présenté comme définitif alors qu'il ne l'est pas engage plus que
               le même document annoncé comme provisoire. */}
           <aside
             role="note"
-            className="mt-[22px] flex gap-[11px] rounded-[14px] border border-attention-filet bg-[#fffaf0] px-4 py-[15px] md:mt-6 md:gap-3 md:px-[18px] md:py-4"
+            className="my-5 flex gap-[13px] rounded-ds-card-lg border border-[#F3DFB4] bg-ds-alerte-fond px-[18px] py-4"
           >
-            <Icone
-              nom="warning"
-              className="mt-0.5 shrink-0 text-[17px] text-attention-icone md:text-[18px]"
+            <AlertTriangle
+              aria-hidden="true"
+              size={18}
+              strokeWidth={2}
+              className="mt-px shrink-0 text-ds-alerte"
             />
-            <p className="font-body-sm text-[13px] leading-[21px] text-[#8a6415] md:text-[14px] md:leading-[22px]">
-              <strong className="font-semibold">{t("avertissementTitre")}</strong>{" "}
-              {t("avertissementTexte")}
-            </p>
+            <div className="min-w-0">
+              <p className="mb-[3px] text-[14.5px] font-bold text-ds-texte-fort">{t("avertissementTitre")}</p>
+              <p className="text-[14.5px] leading-[1.6] text-ds-texte-corps">{t("avertissementTexte")}</p>
+            </div>
           </aside>
 
           {sections.map((s, i) => (
-            <section key={s.id} id={s.id} className="scroll-mt-6">
-              <h2 className="mt-8 mb-2.5 font-headline-lg text-[19px] leading-[24px] font-bold tracking-[-0.02em] text-on-surface md:mt-10 md:mb-3 md:text-[22px] md:leading-7">
-                {i + 1}. {s.titre}
+            <section key={s.id}>
+              <h2
+                id={s.id}
+                className="mt-12 mb-3.5 scroll-mt-24 text-[21px] leading-[1.1] font-extrabold tracking-[-0.035em] text-balance text-ds-texte-fort sm:text-[23px] md:text-[28px]"
+              >
+                {`${i + 1}. ${s.titre}`}
               </h2>
               {s.paragraphes.map((p) => (
-                <p key={p.slice(0, 40)} className={corps}>
+                <p
+                  key={p.slice(0, 40)}
+                  className="mb-3.5 text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps"
+                >
                   {p}
                 </p>
               ))}
               {s.lacune === undefined ? null : (
-                <p className={`${corps} text-gris-entete`}>[{s.lacune}]</p>
+                <p className="mb-3.5 text-[15.5px] leading-[1.7] text-ds-texte-corps">
+                  <Lacune>{s.lacune}</Lacune>
+                </p>
               )}
             </section>
           ))}
 
-          {/* AU TÉLÉPHONE L'ENCART DE SIGNALEMENT VIENT EN FIN DE DOCUMENT, là
-              où la planche mobile le place : il n'y a pas de colonne pour le
-              porter, et le mettre en tête retarderait le texte qu'on vient
-              lire. */}
+          {/* AU TÉLÉPHONE L'ENCART DE SIGNALEMENT VIENT EN FIN DE DOCUMENT : il
+              n'y a pas de colonne pour le porter, et le mettre en tête
+              retarderait le texte qu'on vient lire. */}
           {encartSignalement === null ? null : (
-            <div className="mt-[34px] md:hidden">{encartSignalement}</div>
+            <div className="mt-[34px] min-[980px]:hidden">{encartSignalement}</div>
           )}
-        </div>
-      </div>
-    </CoquePublique>
+        </article>
+      </main>
+
+      <footer className="flex flex-wrap items-center gap-[18px] border-t border-ds-filet px-4 py-[26px] md:px-[34px]">
+        <LogoMarque hauteur={22} />
+        <span className="min-w-20 flex-1" />
+        <nav aria-label={t("piedTitre")} className="flex flex-wrap gap-x-[18px]">
+          <Link
+            href={`/${locale}/conditions`}
+            className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+          >
+            {t("piedConditions")}
+          </Link>
+          <Link
+            href={`/${locale}/confidentialite`}
+            className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+          >
+            {t("piedConfidentialite")}
+          </Link>
+          {signalable ? (
+            <Link
+              href={`/${locale}/signalement`}
+              className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+            >
+              {t("piedSignaler")}
+            </Link>
+          ) : null}
+        </nav>
+        <span className="text-[13px] text-ds-texte-sourdine">
+          {nav("piedDePage", { annee: new Date().getFullYear() })}
+        </span>
+      </footer>
+    </div>
   );
 }

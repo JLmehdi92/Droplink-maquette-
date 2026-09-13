@@ -108,16 +108,14 @@
   },
   "legal": {
     "conditionsTitre": "Terms of use",
-    "conditionsSurTitre": "TERMS AND CONDITIONS",
     "confidentialiteTitre": "Privacy policy",
-    "confidentialiteSurTitre": "PERSONAL DATA",
     "confidentialiteChapeau": "what we collect, why, and for how long.",
     "signalementTitre": "Report content",
     "signalementSurTitre": "NOTICE AND TAKEDOWN",
     "misAJourLe": "Last updated",
     "avertissementTitre": "This text must be drafted and reviewed by a lawyer before any public launch.",
     "avertissementTexte": "What follows describes the intended structure, not a final legal text.",
-    "sommaireTitre": "ON THIS PAGE",
+    "sommaireTitre": "Contents",
     "encartSignalerTitre": "Content to report?",
     "encartSignalerTexte": "Use the dedicated form: every report is reviewed.",
     "encartSignalerLien": "Report content",
@@ -193,7 +191,11 @@
     "confidentialiteMetaTitre": "Privacy policy — DropLink",
     "confidentialiteMetaDescription": "What data DropLink keeps, for how long, and why the person who receives a link never has an account or a password with us.",
     "signalementMetaTitre": "Report content — DropLink",
-    "signalementMetaDescription": "Report content hosted on DropLink. Describe the link and the reason: every report is read, and a page can be taken down without delay."
+    "signalementMetaDescription": "Report content hosted on DropLink. Describe the link and the reason: every report is read, and a page can be taken down without delay.",
+    "pastille": "Legal",
+    "accueil": "Home",
+    "editeur": "Publisher:",
+    "editeurLacune": "company name to be completed"
   },
   "connexion": {
     "titre": "Welcome back",

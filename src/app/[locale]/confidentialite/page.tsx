@@ -70,7 +70,7 @@ export default async function Confidentialite({
   return (
     <PageLegale
       locale={locale}
-      surTitre={t("confidentialiteSurTitre")}
+      sorte="confidentialite"
       titre={t("confidentialiteTitre")}
       chapeau={t("confidentialiteChapeau")}
       sections={sections}

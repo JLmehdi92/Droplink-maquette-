@@ -117,6 +117,16 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#faf8fe", "fond des écrans d'accès — arrêt 42 %"],
   ["#f7f2fc", "fond des écrans d'accès — arrêt 100 %"],
   /*
+   * LES PAGES LÉGALES, portées sur le kit `legal` le 13/09/2026. Trois couleurs
+   * que le kit écrit en dur et qu'aucun token ne porte : la pastille « à
+   * compléter » — filet pointillé et encre ambre — et le filet de l'encadré
+   * d'avertissement. Elles ne servent qu'à dire qu'un texte juridique est
+   * INCOMPLET, et c'est la seule raison de les garder hors de la palette.
+   */
+  ["#e3c67e", "filet pointillé de la mention « à compléter » des pages légales — kit legal"],
+  ["#8a6212", "encre de la mention « à compléter » des pages légales — kit legal"],
+  ["#f3dfb4", "filet de l'encadré d'avertissement des pages légales — kit legal"],
+  /*
    * ⚠️ LE FOND DE L'ESPACE VENDEUR, ET C'EST UN QUATRIÈME LAVANDE. Le design
    * system en pose un par surface, tous voisins et tous différents :
    *   accès          #F3F1FE → #FAF8FE → #F7F2FC

@@ -333,8 +333,10 @@ const AUTONOMES: ReadonlyArray<{
   },
   {
     fichier: "src/components/page-legale.tsx",
-    repere: "font-bold text-violet",
-    raison: "« Signaler un contenu », l'encart des pages légales. 18 px mesurés.",
+    repere: "text-[13.5px] font-semibold text-ds-texte-lien",
+    raison:
+      "« Signaler un contenu », l'encart des pages légales, porté sur le kit " +
+      "`legal` le 13/09/2026. 18 px de texte, 44 par son plancher.",
   },
   {
     fichier: "src/components/formulaire-connexion.tsx",

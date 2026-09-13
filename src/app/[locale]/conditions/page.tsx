@@ -122,7 +122,7 @@ export default async function Conditions({
   return (
     <PageLegale
       locale={locale}
-      surTitre={t("conditionsSurTitre")}
+      sorte="conditions"
       titre={t("conditionsTitre")}
       sections={sections}
     />
