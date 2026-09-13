@@ -702,10 +702,55 @@ pour en changer la signature RÉÉCRIT tout son corps, donc elle hérite de la
 responsabilité de TOUTES les corrections passées de ce corps.* La 150 existe
 parce que ce n'était pas fait.
 
-**▶️ PROCHAINS ÉCRANS : la landing**, puis `/p/[token]` · l'authentification ·
-les pages légales. Tous ont déjà eu une passe de jetons et de règle 5 ;
-**aucun n'a eu la soustraction.** Et deux écrans sont à CRÉER, pas à migrer : le
-tableau de bord (`DashboardHome.jsx`) et les paramètres vendeur
+**LA LANDING SORT AUSSI EN CODE 0**, contre `marketing_site` à **1280** —
+105 manquants, 31 en trop, 31 écarts de valeur, tous déclarés. Elle passe de
+115 éléments rendus à 191 : les trois promesses du héros, une section « comment
+ça marche » en trois étapes, six cartes de fonctionnalité, un pied en colonnes,
+et la bannière d'appel dégradée du kit.
+
+**▶️ PROCHAIN ÉCRAN : `/p/[token]`**, contre `client_link` à **1440**. Il est
+DÉJÀ MESURÉ, et voici de quoi reprendre sans re-découvrir :
+
+```
+node scripts/comparer-au-kit.mjs   "http://127.0.0.1:8123/ui_kits/client_link/index.html" 1440   out/editeur/kit-client.json out/editeur/KIT-client.png
+
+MSYS_NO_PATHCONV=1 INVENTAIRE=out/editeur node scripts/verifier-ecran-migre.mjs   http://localhost:<port> "/p/{jeton}" 1440 out/editeur
+```
+
+Dernier relevé : **kit 277 éléments, produit 93 ; 57 manquants, 27 en trop,
+5 écarts de valeur.** Les trois listes sont dans
+`out/editeur/listes-client.json`.
+
+⚠️ **CE N'EST PAS UNE PASSE DE DÉTAIL : LA STRUCTURE DIFFÈRE.** Le kit compose
+une page BLANCHE avec une carte d'identité de boutique (« Une commande de » +
+logo rond + nom + description + réseaux), une carte « Votre commande #REF » avec
+une frise à quatre étapes DATÉES, une carte « Informations de livraison »
+(transporteur, numéro, pays, date estimée), une carte « Historique du suivi » à
+cinq entrées, et une carte « Une question ? ». Le produit peint un BANDEAU à la
+couleur du vendeur et range tout en deux colonnes. La base porte déjà presque
+tout ce qui manque — `shops.description` depuis la migration 147, les points de
+passage, le transporteur, l'estimation.
+
+⚠️ **ET CE QUE LE KIT MONTRE QU'ON NE FERA PAS** : ses trois gages de confiance
+(« Qualité 1:1 · Produits premium ») — le principe II interdit « 1:1 », qui est
+du vocabulaire de rep, et les deux autres sont des promesses que la base ne
+porte pas ; sa carte « Notifications automatiques », qui affirme au client qu'il
+sera prévenu alors que rien ne l'y abonne (décision 3 : pas de formulaire sur
+cette page) ; sa carte promotionnelle « Découvrir DropLink », alors que la
+décision 25 exige une mention SECONDAIRE, jamais confondable avec l'expéditeur ;
+son sélecteur de langue, la langue étant celle du VENDEUR ; et son lien « Aide »,
+qui ne mène nulle part.
+
+⚠️ **C'EST LA PAGE LA PLUS CONTRAINTE DU PRODUIT**, et un port qui les oublierait
+casserait ce qu'aucune porte ne mesure : LCP sous 2 s, 300 Ko hors médias (on est
+à **212,5**), galerie AVANT le détail au téléphone, vignettes en deux colonnes,
+photo pleine hors du document tant que le visionneur est fermé, aucun
+`backdrop-blur`, arbitrage QC juste après ce qu'il juge, et la couleur résolue
+par `resoudreAccent()` — le kit est dessiné pour l'accent PAR DÉFAUT, le produit
+doit tenir avec un jaune vif.
+
+Puis : l'authentification · les pages légales. Et deux écrans sont à CRÉER, pas à
+migrer : le tableau de bord (`DashboardHome.jsx`) et les paramètres vendeur
 (`SettingsView.jsx`).
 
 ### Comment on vérifie un écran migré
