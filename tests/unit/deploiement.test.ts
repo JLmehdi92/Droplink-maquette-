@@ -204,6 +204,16 @@ describe("Le planificateur Railway", () => {
         `${service.nom} : lance le build de Next, qui exige des variables que ce service n'a pas`,
       ).not.toContain("next build");
       expect(service.commandeDeBuild, `${service.nom} : lance \`pnpm build\``).not.toMatch(/pnpm\s+build/);
+      /*
+       * ⚠️ AUCUN GUILLEMET, ET C'EST UNE PANNE DE PRODUCTION DU 12/09/2026.
+       * La commande était `node -e "console.log('…')"`. Railpack l'a passée à
+       * `sh -c` en perdant les apostrophes : « Unterminated quoted string »,
+       * build rouge, et les DEUX planificateurs ont cessé de tourner — suivi
+       * figé, veilleur muet — pendant plus d'un jour, sans autre signal qu'un
+       * email de Railway. Une commande sans guillemets ne dépend d'aucune couche
+       * qui les réinterprète.
+       */
+      expect(service.commandeDeBuild, `${service.nom} : porte des guillemets`).not.toMatch(/['"`]/);
     }
   });
 

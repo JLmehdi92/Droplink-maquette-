@@ -129,7 +129,7 @@ export const SERVICES_PLANIFIES: readonly ServicePlanifie[] = [
   {
     nom: "cadence",
     tache: "cadence",
-    commandeDeBuild: `node -e "console.log('planificateur : aucun build Next necessaire')"`,
+    commandeDeBuild: "echo planificateur-sans-build-next",
     commandeDeDemarrage: "node deploiement/planificateur.mjs cadence",
     horaire: "*/15 * * * *",
     politiqueDeRedemarrage: "NEVER",
@@ -138,7 +138,7 @@ export const SERVICES_PLANIFIES: readonly ServicePlanifie[] = [
   {
     nom: "veille",
     tache: "veille",
-    commandeDeBuild: `node -e "console.log('planificateur : aucun build Next necessaire')"`,
+    commandeDeBuild: "echo planificateur-sans-build-next",
     commandeDeDemarrage: "node deploiement/planificateur.mjs veille",
     horaire: "5,20,35,50 * * * *",
     politiqueDeRedemarrage: "NEVER",
