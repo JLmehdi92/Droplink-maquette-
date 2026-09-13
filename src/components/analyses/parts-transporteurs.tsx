@@ -25,7 +25,17 @@ import type { PartTransporteur } from "@/lib/analyses/activite";
  */
 const LIGNES = 5;
 
-export async function PartsTransporteurs({ parts }: { readonly parts: readonly PartTransporteur[] }) {
+export async function PartsTransporteurs({
+  parts,
+  taille = "panneau",
+}: {
+  readonly parts: readonly PartTransporteur[];
+  /**
+   * `section` sur le tableau de bord : le kit y dessine ses panneaux avec un
+   * titre de 17 px (`DashPanel`), là où les analyses en posent 19.
+   */
+  readonly taille?: "panneau" | "section";
+}) {
   const t = await getTranslations("analyses");
   const format = await getFormatter();
 
@@ -53,7 +63,7 @@ export async function PartsTransporteurs({ parts }: { readonly parts: readonly P
   const maximum = lignes.reduce((m, l) => Math.max(m, l.nombre), 0);
 
   return (
-    <Panneau titre={t("transporteurs.titre")} sousTitre={t("transporteurs.aide")}>
+    <Panneau taille={taille} serre={taille === "section"} titre={t("transporteurs.titre")} sousTitre={t("transporteurs.aide")}>
       {total === 0 ? (
         <p className="text-[14px] text-ds-texte-corps">{t("transporteurs.aucun")}</p>
       ) : (

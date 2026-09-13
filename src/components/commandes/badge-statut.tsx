@@ -64,11 +64,30 @@ export function BadgeStatut({
   libelle,
   teinte,
   Icone,
+  compacte = false,
 }: {
   readonly libelle: string;
   readonly teinte: Teinte;
   readonly Icone: LucideIcon;
+  /**
+   * La pastille des « Dernières commandes » du tableau de bord : le `Badge` du
+   * kit à 11 / 700, `padding 5px 11px`, SANS icône — la ligne porte déjà une
+   * vignette, une référence et un nom.
+   */
+  readonly compacte?: boolean;
 }) {
+  if (compacte) {
+    return (
+      <span
+        className={
+          "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[11.5px] leading-[normal] lg:text-[11px] font-bold tracking-[-0.02em] whitespace-nowrap " +
+          TEINTES[teinte]
+        }
+      >
+        {libelle}
+      </span>
+    );
+  }
   return (
     <span
       className={

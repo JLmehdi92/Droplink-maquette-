@@ -21,7 +21,9 @@
       "titre": "升级专业版",
       "texte": "更多功能，更多可能。",
       "bouton": "立即升级"
-    }
+    },
+    "tableauDeBord": "仪表盘",
+    "tableauDeBordCourt": "首页"
   },
   "landing": {
     "metaTitre": "DropLink — 每笔订单一个页面，用您的品牌呈现",
@@ -1622,5 +1624,27 @@
     "plStockageG": "1 GB",
     "plStockageP": "50 GB",
     "metaDescription": "DropLink 完整指南：创建订单、上传照片、填写运单号并分享客户链接。"
+  },
+  "tableau": {
+    "titre": "仪表盘",
+    "bonjour": "您好！",
+    "bonjourNom": "{nom}，您好！",
+    "sousTitre": "这里是您在 DropLink 上的业务概览。",
+    "lancement": {
+      "titre": "准备好扩展您的业务了吗？",
+      "texte": "创建订单、上传照片，只需分享一个链接：客户无需注册即可自行查看全部信息。"
+    },
+    "dernieres": {
+      "titre": "最新订单",
+      "voirTout": "查看全部",
+      "vide": "暂无订单。",
+      "sansNom": "未命名"
+    },
+    "actions": {
+      "titre": "快捷操作",
+      "marque": "自定义客户页面",
+      "envois": "查看物流",
+      "analyses": "查看数据分析"
+    }
   }
 }

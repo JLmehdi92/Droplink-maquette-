@@ -395,6 +395,14 @@ const cas = [
     final: "/fr/connexion?erreur=session",
     libelle: "analyses SANS session renvoyees vers la connexion",
   },
+  // LE TABLEAU DE BORD, cree le 13/09/2026 : une route de plus derriere la
+  // session, donc une porte de plus a eprouver sans elle.
+  {
+    chemin: "/fr/tableau-de-bord",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "tableau de bord SANS session renvoye vers la connexion",
+  },
   {
     chemin: "/fr/marque",
     statut: 200,
@@ -2142,7 +2150,7 @@ try {
             const APERCU_FR = catalogue.marque.apercuPour;
             const APERCU_EN = catalogueEn.marque.apercuPour;
 
-            const ecrans = ["/commandes", "/envois", "/analyses", "/marque"];
+            const ecrans = ["/tableau-de-bord", "/commandes", "/envois", "/analyses", "/marque"];
             const bilan = [];
             for (const ecran of ecrans) {
               /*

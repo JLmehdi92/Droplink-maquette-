@@ -110,6 +110,14 @@ export default async function LayoutApplication({
   ]);
 
   const entrees: readonly EntreeNavigation[] = [
+    /* LE TABLEAU DE BORD EN TÊTE, comme au kit — mais la connexion mène
+       toujours aux commandes : voir `tableau-de-bord/page.tsx`. */
+    {
+      href: `/${langue}/tableau-de-bord`,
+      libelle: t("tableauDeBord"),
+      libelleCourt: t("tableauDeBordCourt"),
+      icone: "tableau",
+    },
     {
       href: `/${langue}/commandes`,
       libelle: t("mesCommandes"),

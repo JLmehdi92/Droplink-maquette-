@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { LienEcran } from "@/components/lien-ecran";
-import { BarChart3, Briefcase, Shield, Truck, type LucideIcon } from "lucide-react";
+import { BarChart3, Briefcase, House, Shield, Truck, type LucideIcon } from "lucide-react";
 
 /**
  * LA NAVIGATION DE L'ESPACE VENDEUR — colonne sur grand écran, onglets en bas
@@ -35,9 +35,11 @@ import { BarChart3, Briefcase, Shield, Truck, type LucideIcon } from "lucide-rea
  * écrite dans `CLAUDE.md` — `inventory_2 → package`, `palette → palette` —
  * datait du canevas condamné : le kit ne dessine ni paquet ni palette.
  */
-export type CleIcone = "commandes" | "envois" | "analyses" | "marque";
+export type CleIcone = "tableau" | "commandes" | "envois" | "analyses" | "marque";
 
 const ICONES: Record<CleIcone, LucideIcon> = {
+  // `house` : l icône du tableau de bord dans le `NAV` du kit.
+  tableau: House,
   commandes: Briefcase,
   envois: Truck,
   analyses: BarChart3,
@@ -47,6 +49,12 @@ const ICONES: Record<CleIcone, LucideIcon> = {
 export interface EntreeNavigation {
   readonly href: string;
   readonly libelle: string;
+  /**
+   * Le libellé de la barre d'onglets du téléphone, quand le complet n'y tient
+   * pas. ⚠️ CINQ ONGLETS À 11,5 PX DANS 390 : « Tableau de bord » en prenait 90
+   * à lui seul, et la barre débordait.
+   */
+  readonly libelleCourt?: string;
   readonly icone: CleIcone;
   /**
    * Le compte affiché en pastille à droite de l entrée.
@@ -151,7 +159,7 @@ export function NavigationVendeur({
                     1440 px où ils ne sont pas rendus, et ses cinq faux positifs
                     couvraient le vrai.
                   */}
-                  <span className="text-[11.5px] font-bold">{entree.libelle}</span>
+                  <span className="text-[11.5px] font-bold">{entree.libelleCourt ?? entree.libelle}</span>
                 </Composant>
               </li>
             );

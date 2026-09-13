@@ -23,8 +23,14 @@ import type { CompteursEnvois } from "@/lib/envois/liste";
  */
 export async function RepartitionColis({
   compteurs,
+  taille = "panneau",
 }: {
   readonly compteurs: CompteursEnvois;
+  /**
+   * `section` sur le tableau de bord : le kit y dessine ses panneaux avec un
+   * titre de 17 px (`DashPanel`), là où les analyses en posent 19.
+   */
+  readonly taille?: "panneau" | "section";
 }) {
   const t = await getTranslations("analyses");
   const format = await getFormatter();
@@ -39,7 +45,7 @@ export async function RepartitionColis({
   const maximum = lignes.reduce((m, l) => Math.max(m, l.valeur), 0);
 
   return (
-    <Panneau titre={t("colis.titre")} sousTitre={t("colis.aide")}>
+    <Panneau taille={taille} serre={taille === "section"} titre={t("colis.titre")} sousTitre={t("colis.aide")}>
 
       {compteurs.total === 0 ? (
         <p className="text-[14px] text-ds-texte-corps">{t("colis.vide")}</p>

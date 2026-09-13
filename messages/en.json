@@ -21,7 +21,9 @@
       "titre": "Go Pro",
       "texte": "More features, more possibilities.",
       "bouton": "Upgrade"
-    }
+    },
+    "tableauDeBord": "Dashboard",
+    "tableauDeBordCourt": "Home"
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, under your brand",
@@ -1622,5 +1624,27 @@
     "plStockageG": "1 GB",
     "plStockageP": "50 GB",
     "metaDescription": "The complete DropLink guide: create an order, add your photos, paste the tracking number and share a customer link."
+  },
+  "tableau": {
+    "titre": "Dashboard",
+    "bonjour": "Hello!",
+    "bonjourNom": "Hello {nom}!",
+    "sousTitre": "Here is a quick overview of your activity on DropLink.",
+    "lancement": {
+      "titre": "Ready to grow your business?",
+      "texte": "Create an order, drop in your photos and share a single link: your customer follows everything on their own, with no account."
+    },
+    "dernieres": {
+      "titre": "Latest orders",
+      "voirTout": "See all",
+      "vide": "No orders yet.",
+      "sansNom": "Unnamed"
+    },
+    "actions": {
+      "titre": "Quick actions",
+      "marque": "Customise my customer page",
+      "envois": "View my shipments",
+      "analyses": "Open analytics"
+    }
   }
 }

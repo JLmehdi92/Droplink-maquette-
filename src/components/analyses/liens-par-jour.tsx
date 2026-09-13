@@ -34,10 +34,16 @@ const LIBELLES_MAX = 8;
 export async function LiensParJour({
   jours,
   total,
+  taille = "panneau",
 }: {
   readonly jours: readonly OuverturesDuJour[];
   /** Le total de la période, affiché en gros au-dessus comme sur le kit. */
   readonly total: number;
+  /**
+   * `section` sur le tableau de bord : le kit y dessine ses panneaux avec un
+   * titre de 17 px (`DashPanel`), là où les analyses en posent 19.
+   */
+  readonly taille?: "panneau" | "section";
 }) {
   const t = await getTranslations("analyses");
   const format = await getFormatter();
@@ -53,7 +59,7 @@ export async function LiensParJour({
   ];
 
   return (
-    <Panneau titre={t("liens.titre")} sousTitre={t("liens.aide")}>
+    <Panneau taille={taille} serre={taille === "section"} titre={t("liens.titre")} sousTitre={t("liens.aide")}>
       {jours.length === 0 ? (
         <p className="text-[14px] text-ds-texte-corps">{t("liens.aucun")}</p>
       ) : (

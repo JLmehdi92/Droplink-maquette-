@@ -21,7 +21,9 @@
       "titre": "Passez au Pro",
       "texte": "Plus de fonctionnalités, plus de possibilités.",
       "bouton": "Upgrade"
-    }
+    },
+    "tableauDeBord": "Tableau de bord",
+    "tableauDeBordCourt": "Accueil"
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",
@@ -1622,5 +1624,27 @@
     "plStockageG": "1 Go",
     "plStockageP": "50 Go",
     "metaDescription": "Le guide complet de DropLink : créer une commande, ajouter ses photos, coller le numéro de suivi et partager un lien client."
+  },
+  "tableau": {
+    "titre": "Tableau de bord",
+    "bonjour": "Bonjour !",
+    "bonjourNom": "Bonjour {nom} !",
+    "sousTitre": "Voici un aperçu rapide de votre activité sur DropLink.",
+    "lancement": {
+      "titre": "Prêt à faire grandir votre activité ?",
+      "texte": "Créez une commande, déposez vos photos et partagez un seul lien : votre client suit tout lui-même, sans compte."
+    },
+    "dernieres": {
+      "titre": "Dernières commandes",
+      "voirTout": "Voir tout",
+      "vide": "Aucune commande pour l'instant.",
+      "sansNom": "Sans nom"
+    },
+    "actions": {
+      "titre": "Actions rapides",
+      "marque": "Personnaliser ma page client",
+      "envois": "Voir mes envois",
+      "analyses": "Accéder aux analyses"
+    }
   }
 }

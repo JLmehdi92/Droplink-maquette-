@@ -29,21 +29,6 @@
         "raison": "Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure. Quatorze pixels d ecart, tous dans le badge."
       },
       {
-        "texte": "Analyses  <span>",
-        "motif": "contrainte",
-        "raison": "Position seule. Le kit place une entree « Tableau de bord » au-dessus ; cette route n existe pas, et une entree de navigation vers un 404 est pire qu une entree absente."
-      },
-      {
-        "texte": "Ma marque  <span>",
-        "motif": "contrainte",
-        "raison": "Meme cause que « Analyses » : l entree « Tableau de bord » du kit decale toute la colonne de 54 px."
-      },
-      {
-        "texte": "Suivi d'envois  <span>",
-        "motif": "contrainte",
-        "raison": "Meme cause que « Analyses » et « Ma marque » : l entree « Tableau de bord » du kit decale toute la colonne de 53 px. L ecart n apparaissait pas tant que notre entree s appelait « Envois » — deux textes differents ne s apparient pas. Elle porte desormais le libelle du design system, donc elle s apparie, et elle herite du decalage deja declare pour ses voisines."
-      },
-      {
         "texte": "En transit",
         "motif": "donnee",
         "raison": "Le kit rend huit commandes, le jeu de mesure quatre. Les graisses et les couleurs des libelles de frise disent QUELLE etape est atteinte : elles suivent les donnees, pas le dessin. Et le vocabulaire des quatre etapes est verrouille par la decision 4 du brief — preparation, expedie, en transit, livre — la ou le kit ecrit commande, en transit, en livraison, livree."
@@ -96,17 +81,17 @@
       {
         "texte": "Passez au Pro",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
       {
         "texte": "Plus de fonctionnalités, plus de possibi",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
       {
         "texte": "Upgrade",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
       {
         "texte": "Toutes  <button>",
@@ -117,7 +102,6 @@
     "manquants": [
       {
         "textes": [
-          "Tableau de bord",
           "Paramètres"
         ],
         "motif": "contrainte",
@@ -372,21 +356,6 @@
         "raison": "Largeur seule. Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure."
       },
       {
-        "texte": "Suivi d'envois [2/2]  <span>",
-        "motif": "contrainte",
-        "raison": "Position seule. Le kit place une entree « Tableau de bord » au-dessus de la colonne ; cette route n existe pas, et une entree de navigation qui mene a un 404 est pire qu une entree absente. Les 53 px se repercutent sur toutes les entrees suivantes."
-      },
-      {
-        "texte": "Analyses  <span>",
-        "motif": "contrainte",
-        "raison": "Meme cause que « Suivi d envois » : l entree « Tableau de bord » du kit decale toute la colonne."
-      },
-      {
-        "texte": "Ma marque  <span>",
-        "motif": "contrainte",
-        "raison": "Meme cause que « Analyses »."
-      },
-      {
         "texte": "Dernière mise à jour [1/2]  <span>",
         "motif": "donnee",
         "raison": "Largeur de boite. Le bloc est dimensionne par la DATE qu il surmonte, pas par ce libelle : « 8 septembre 2025 a 14:32 » chez le kit contre « 12 septembre 2026 a 15:32 » dans le jeu de mesure, un caractere de plus. Le texte lui-meme mesure 113,99 px des deux cotes. Les deux blocs finissent au MEME bord droit, x=1643."
@@ -494,17 +463,17 @@
       {
         "texte": "Passez au Pro",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
       {
         "texte": "Plus de fonctionnalités, plus de possibi",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
       {
         "texte": "Upgrade",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place deux entrees de plus — « Tableau de bord » et « Parametres » — dont les routes n existent pas encore. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
       {
         "texte": "Colis livré",
@@ -540,7 +509,6 @@
     "manquants": [
       {
         "textes": [
-          "Tableau de bord",
           "Paramètres"
         ],
         "motif": "contrainte",
@@ -757,15 +725,6 @@
   "fr-commandes-commande": {
     "valeurs": [
       {
-        "textes": [
-          "Suivi d'envois",
-          "Analyses",
-          "Ma marque"
-        ],
-        "motif": "contrainte",
-        "raison": "Position seule. Le kit pose une entree « Tableau de bord » au-dessus de « Commandes » ; cette route n existe pas, et une entree de navigation qui mene a un 404 est pire qu une entree absente. Les 54 px qu elle occupe decalent toute la colonne. Meme declaration que sur /commandes."
-      },
-      {
         "texte": "Commandes",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur et la position. Le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree « Tableau de bord » absente."
@@ -861,7 +820,6 @@
     "manquants": [
       {
         "textes": [
-          "Tableau de bord",
           "Paramètres"
         ],
         "motif": "contrainte",
@@ -1102,15 +1060,6 @@
   "fr-analyses": {
     "valeurs": [
       {
-        "textes": [
-          "Suivi d'envois",
-          "Analyses",
-          "Ma marque"
-        ],
-        "motif": "contrainte",
-        "raison": "Position seule. Le kit pose une entree « Tableau de bord » au-dessus de « Commandes » ; cette route n existe pas, et une entree de navigation qui mene a un 404 est pire qu une entree absente."
-      },
-      {
         "texte": "Commandes",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur et la position : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree absente."
@@ -1186,7 +1135,6 @@
     "manquants": [
       {
         "textes": [
-          "Tableau de bord",
           "Paramètres"
         ],
         "motif": "contrainte",
@@ -1416,15 +1364,6 @@
   "fr-marque": {
     "valeurs": [
       {
-        "textes": [
-          "Suivi d'envois",
-          "Analyses",
-          "Ma marque"
-        ],
-        "motif": "contrainte",
-        "raison": "Position seule. Le kit pose une entree « Tableau de bord » au-dessus de « Commandes » ; cette route n existe pas, et une entree de navigation qui mene a un 404 est pire qu une entree absente."
-      },
-      {
         "texte": "Commandes",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur et la position : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree absente."
@@ -1490,7 +1429,6 @@
     "manquants": [
       {
         "textes": [
-          "Tableau de bord",
           "Paramètres"
         ],
         "motif": "contrainte",
@@ -4225,6 +4163,459 @@
         ],
         "motif": "contrainte",
         "raison": "UNE SEULE PAGE POUR TROIS CAUSES, ET ELLE NE DIT QUE CE QUI EST VRAI DES TROIS. Jeton inconnu, jeton revoque, compte suspendu rendent la MEME reponse : les distinguer dirait a qui balaie des jetons lesquels ont existe, et une suspension ne se divulgue pas au client d un vendeur. Le kit ecrit « Cette commande est introuvable — ce lien a ete supprime, ou la commande n existe plus chez le vendeur » : c est faux d un lien revoque, dont la commande existe, et d un compte suspendu. « Ce lien n est plus valable » est vrai des trois. La planche « lien expire » n est pas portee pour la meme raison : le jeton n expire jamais."
+      }
+    ]
+  },
+  "fr-tableau-de-bord": {
+    "valeurs": [
+      {
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur et la position : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree absente.",
+        "textes": [
+          "Commandes"
+        ]
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+      },
+      {
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu, et notre page porte deux panneaux que le kit ne dessine pas.",
+        "textes": [
+          "© 2025 DropLink. Tous droits réservés."
+        ]
+      },
+      {
+        "textes": [
+          "Commandes créées",
+          "Liens clients ouverts"
+        ],
+        "motif": "donnee",
+        "raison": "Vingt-huit pixels de largeur sur deux libelles de tuile. Le libelle s etire a la colonne de texte de sa tuile, et la notre est plus large : le kit met son badge d evolution SUR LA MEME LIGNE que le nombre, nous le mettons dessous. Voir la declaration de « +12% »."
+      },
+      {
+        "textes": [
+          "Voici un aperçu rapide de votre activité"
+        ],
+        "motif": "structure",
+        "raison": "LE SOUS-TITRE PREND LA LARGEUR DE L EN-TETE, comme sur tous les ecrans vendeur : le kit le pose dans un bloc a la largeur de son titre. Meme texte, meme taille, meme couleur."
+      },
+      {
+        "textes": [
+          "Commandes livrées",
+          "Temps moyen de livraison"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, DE 4 PX. Les tuiles sont celles des Analyses : leur ligne de detail n est pas celle du kit (« 1 sur 4 creees » contre « +20 % ce mois-ci »), et la tuile centre son contenu verticalement."
+      },
+      {
+        "textes": [
+          "En transit [1/2]",
+          "En transit [2/2]",
+          "En transit  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LE MEME MOT A D AUTRES PLACES. Le kit ecrit « En transit » dans la legende d un anneau et dans sa tuile de compteur ; le produit l ecrit dans la repartition des statuts des Analyses et dans la pastille d une commande du jeu de mesure. Sa ligne dans les dernieres commandes depend de l ordre des commandes du jeu, creees a quelques millisecondes d intervalle : elle change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Créer une commande [2/2]",
+          "Créer une commande  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ATTENTE PORTE SON LIBELLE DANS UN SPAN — celui qui change de texte pendant la creation. La sonde mesure donc le mot et non le bouton de 52 px, rayon de carte, degrade, qui le porte. Le mot figure quatre fois : la carte d appel et l action rapide, plus leurs libelles d attente masques."
+      },
+      {
+        "textes": [
+          "90 jours [1/3]",
+          "30 jours [2/3]",
+          "7 jours [3/3]",
+          "7 jours  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LA PERIODE EST CELLE DE L ECRAN, PAS D UN SEUL GRAPHIQUE. Le kit pose une bascule 7 / 30 / 90 jours dans le panneau d evolution et un selecteur de dates dans l en-tete ; le produit pose une seule periode, celle des Analyses, qui gouverne les compteurs, les ouvertures, les transporteurs et l activite. Les appariements sur « 30 jours » (une tuile de « 6 jours ») sont un effet de la normalisation des chiffres."
+      },
+      {
+        "textes": [
+          "Dernières commandes",
+          "Actions rapides"
+        ],
+        "motif": "structure",
+        "raison": "LE TITRE DE PANNEAU PREND LA LARGEUR DE SON TEXTE, ET LE KIT CELLE DE SON BLOC. Meme taille, graisse et interlettrage — 17 / 700 / -0,025em."
+      },
+      {
+        "textes": [
+          "Voir tout [2/2]",
+          "Voir tout  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LA SECONDE RANGEE A TROIS PANNEAUX, PAS QUATRE, puisque la carte « Passez au Pro » n est pas rendue : chaque panneau y est plus large que chez le kit, et ce qui y est pose en largeur de colonne s allonge. Tailles, graisses et couleurs sont celles du kit. « Voir tout » figure deux fois et non trois : « Derniers envois » est ici le panneau des transporteurs des Analyses, sans lien."
+      },
+      {
+        "textes": [
+          "42 ( 27 %) [1/2]",
+          "28 ( 18 %) [2/2]",
+          "18 ( 12 %)  <nombre d'occurrences>",
+          "Commande [1/4]",
+          "Commande [2/4]",
+          "Commande [3/4]",
+          "Commande [4/4]",
+          "Commande  <nombre d'occurrences>",
+          "Répartition de vos envois par transporte",
+          "Activité récente",
+          "Commande créée"
+        ],
+        "motif": "structure",
+        "raison": "LA SECONDE RANGEE A TROIS PANNEAUX, PAS QUATRE, puisque la carte « Passez au Pro » n est pas rendue : chaque panneau y est plus large que chez le kit, et ce qui y est pose en largeur de colonne s allonge. Tailles, graisses et couleurs sont celles du kit."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "Deux routes que le depot n a pas. Ce sont des ecrans a CREER, pas a migrer."
+      },
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      },
+      {
+        "motif": "contrainte",
+        "raison": "LE SELECTEUR DE PLAGE DE DATES. Le produit pose trois fenetres fixes — 7, 30, 90 jours — et la raison est ecrite dans `lib/analyses/activite` : chaque fenetre doit avoir une PERIODE PRECEDENTE de meme longueur a laquelle se comparer, sans quoi le premier compteur de l ecran (« + N vs periode precedente ») serait vide une fois sur deux. Une plage libre n en a pas.",
+        "textes": [
+          "1 sept. 2025 - 8 sept. 2025"
+        ]
+      },
+      {
+        "textes": [
+          "+12%",
+          "-18%",
+          "ce mois-ci"
+        ],
+        "motif": "donnee",
+        "raison": "LES BADGES DE VARIATION EN POURCENTAGE, sur quatre tuiles, avec des chiffres inventes pour la demonstration. Le produit compare bien a la periode precedente — c est la premiere tuile —, mais il l ecrit en ABSOLU : « +4 » plutot que « +400 % ». La regle vient de l ecran des envois, ou elle a ete posee le 12/09 : passer de 0 a 5 n est pas « +500 % », et un pourcentage calcule sur une base minuscule est le type meme de la metrique credible et fausse. « ce mois-ci » serait faux en plus : la fenetre vaut 7, 30 ou 90 jours, jamais un mois."
+      },
+      {
+        "textes": [
+          "6,2 jours"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de demonstration des deux dernieres tuiles. Elles EXISTENT desormais — la migration 146 les calcule — et rendent celles du jeu de mesure : « 50 % » et « 6 jours »."
+      },
+      {
+        "motif": "donnee",
+        "raison": "Les dates de l axe du graphe du kit, une par jour de sa plage. Le notre porte les debuts de semaine au format « JJ/MM », douze fois.",
+        "textes": [
+          "1 sept."
+        ]
+      },
+      {
+        "motif": "structure",
+        "raison": "LE LIBELLE AU CENTRE DE L ANNEAU. Notre repartition des statuts est une liste de barres et non un anneau, et pour une raison mesurable : ses quatre categories se RECOUVRENT, et un anneau affirme par construction que ses parts font un tout.",
+        "textes": [
+          "envois"
+        ]
+      },
+      {
+        "textes": [
+          "Commandée",
+          "En livraison",
+          "Livrée",
+          "Problème"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DES ETATS EST VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et « Probleme » suppose un etat que la base ne porte pas. Nos quatre libelles sont declares symetriquement dans les elements en trop."
+      },
+      {
+        "textes": [
+          "LP",
+          "La Poste",
+          "DHL",
+          "CP",
+          "Chronopost",
+          "UPS",
+          "DPD",
+          "Autres"
+        ],
+        "motif": "donnee",
+        "raison": "LES SIX TRANSPORTEURS DE DEMONSTRATION du kit, monogrammes compris. Le panneau EXISTE desormais et rend ceux du jeu de mesure — « FedEx » et « 4PX », avec leurs monogrammes « FX » et « 4P ». « Autres » n apparait qu au-dela de cinq transporteurs distincts."
+      },
+      {
+        "textes": [
+          "Colis livré",
+          "Nouveau lien ouvert",
+          "Colis en transit"
+        ],
+        "motif": "donnee",
+        "raison": "TROIS FAITS QUE LA BASE N ENREGISTRE PAS. `order_events` porte dix types, tous emis par une mutation du VENDEUR ou une reponse de son client ; l ingestion du suivi n en ecrit aucun. Les rendre afficherait un journal que la base n a pas tenu, sur l ecran qui sert precisement a decider."
+      },
+      {
+        "motif": "donnee",
+        "raison": "La reference de demonstration. La notre est DERIVEE de l identifiant de la commande, et le panneau la rend bien.",
+        "textes": [
+          "#DLK7842"
+        ]
+      },
+      {
+        "motif": "donnee",
+        "raison": "L anciennete des faits du kit. Le panneau rend les notres — « il y a 1 j », « il y a 2 j » — avec le formateur de `next-intl`, qui ecrit la minuscule.",
+        "textes": [
+          "Il y a 1h"
+        ]
+      },
+      {
+        "textes": [
+          "Bonjour Nassim !"
+        ],
+        "motif": "donnee",
+        "raison": "LE PRODUIT NE STOCKE AUCUN NOM DE VENDEUR, seulement celui de sa boutique : c est elle qui est saluee, et « Bonjour ! » quand elle n en a pas."
+      },
+      {
+        "textes": [
+          "Créez une commande, partagez le lien et "
+        ],
+        "motif": "contrainte",
+        "raison": "« SUIVEZ VOS ENVOIS EN TEMPS REEL. DROPLINK SIMPLIFIE TOUTE VOTRE LOGISTIQUE » : le suivi est interroge a une cadence de plusieurs heures, et le produit ne touche a aucune logistique — le brief l exclut en toutes lettres (principes II et XII). La phrase dit ce que le produit fait."
+      },
+      {
+        "textes": [
+          "Évolution de votre activité",
+          "Nombre de commandes créées sur les 7 der",
+          "Statut des envois",
+          "Ouvertures de liens clients",
+          "Nombre d'ouvertures de vos liens de suiv",
+          "Derniers envois"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PANNEAUX DES ANALYSES, REPRIS TELS QUELS. Le tableau de bord ne calcule aucun chiffre : chaque panneau vient de la lecture que /analyses fait deja, avec ses titres et ses aides. Un tableau de bord qui renommerait « Repartition des statuts » en « Statut des envois » montrerait au vendeur deux noms pour le meme panneau, a deux clics l un de l autre. Leur dessin, lui, suit le tableau de bord du kit : titre de 17, remplissage de 22."
+      },
+      {
+        "textes": [
+          "Yanis B.",
+          "Sofia M.",
+          "Amine K.",
+          "Luca R.",
+          "Chloé D."
+        ],
+        "motif": "donnee",
+        "raison": "Les clients de demonstration du kit ; le jeu de mesure a les siens, declares dans les elements en trop."
+      },
+      {
+        "textes": [
+          "Gérer mes liens clients"
+        ],
+        "motif": "contrainte",
+        "raison": "IL N EXISTE PAS D ECRAN DE GESTION DES LIENS : un lien vit dans sa commande. Le raccourci mene, comme au kit, a l ecran de marque, et le dit — « Personnaliser ma page client »."
+      },
+      {
+        "textes": [
+          "Lien personnalisé",
+          "Statistiques avancées",
+          "Support prioritaire",
+          "Plus de fonctionnalités",
+          "Découvrir les offres"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CARTE « PASSEZ AU PRO » N EST PAS RENDUE : aucune offre n existe, la contrainte n° 1 interdit tout code de facturation, et son « Decouvrir les offres » menerait a un 404. L encart de la barre laterale, deja present sur tous les ecrans, garde son libelle."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
+      },
+      {
+        "textes": [
+          "Alertes",
+          "Le client n’a pas encore ouvert son lien",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. C est aussi la ou vit « jamais ouvertes », qui etait une tuile avant la reprise : une metrique qui appelle un geste appartient aux alertes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ]
+      },
+      {
+        "motif": "donnee",
+        "raison": "NOTRE BADGE D EVOLUTION, en absolu la ou le kit ecrit un pourcentage — voir la declaration symetrique de « +12% ».",
+        "textes": [
+          "+4 vs période précédente"
+        ]
+      },
+      {
+        "textes": [
+          "1 sur 4 créées",
+          "4 vues par commande ouverte",
+          "2 réponses sur 4",
+          "sur 1 colis livré"
+        ],
+        "motif": "donnee",
+        "raison": "LES SOUS-LIGNES DE NOS QUATRE AUTRES TUILES. Le kit y met un pourcentage d evolution ; nous y mettons ce qui rend le nombre du dessus lisible — un denominateur, ou la metrique de verdict du brief. « N,N vues par commande ouverte » est le signal « le destinataire REVIENT » (§11), qu un total d ouvertures ne distingue pas d un grand nombre de commandes."
+      },
+      {
+        "motif": "donnee",
+        "raison": "Le taux de validation du jeu de mesure — deux reponses sur quatre commandes, dont une approuvee. Le kit affiche « 96% ».",
+        "textes": [
+          "50 %"
+        ]
+      },
+      {
+        "textes": [
+          "Nombre de commandes créées par semaine.",
+          "12 dernières semaines"
+        ],
+        "motif": "donnee",
+        "raison": "Le sous-titre et la fenetre de NOTRE frise — voir la declaration symetrique de « Nombre de commandes creees sur la periode selectionnee »."
+      },
+      {
+        "motif": "donnee",
+        "raison": "Les debuts de semaine de notre frise, au format « JJ/MM » — voir la declaration symetrique de « 1 sept. ».",
+        "textes": [
+          "22/06"
+        ]
+      },
+      {
+        "textes": [
+          "Livrés",
+          "Pas encore scannés",
+          "Sans mouvement"
+        ],
+        "motif": "contrainte",
+        "raison": "LES ETATS DE NOTRE REPARTITION, verrouilles par la decision 4 — voir la declaration symetrique de « Commandee », « En livraison », « Livree » et « Probleme ». « Sans mouvement » n est pas un etat de plus : c est le silence nomme au-dela de dix jours (decision 8), et il qualifie des colis qui sont AUSSI dans un autre etat."
+      },
+      {
+        "textes": [
+          "FX",
+          "FedEx",
+          "4P",
+          "4PX"
+        ],
+        "motif": "donnee",
+        "raison": "Les deux transporteurs du jeu de mesure et leurs monogrammes, la ou le kit en montre six inventes."
+      },
+      {
+        "textes": [
+          "Contrôle approuvé par le client",
+          "Commande modifiée",
+          "Média ajouté"
+        ],
+        "motif": "donnee",
+        "raison": "Trois de nos dix types d evenements, face aux cinq faits inventes du kit."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Nos references courtes, DERIVEES de l identifiant de la commande, donc differentes a chaque passage."
+      },
+      {
+        "motif": "donnee",
+        "raison": "L anciennete de nos faits, ecrite par le formateur de `next-intl` — voir la declaration symetrique de « Il y a 1h ». Le motif porte une espace INSECABLE, celle que le formateur pose entre le nombre et l unite : une espace ordinaire ne designerait rien, et la declaration serait morte en paraissant juste.",
+        "motifs": [
+          "^il y a \\d+ j$"
+        ]
+      },
+      {
+        "textes": [
+          "Bonjour Atelier de verification !"
+        ],
+        "motif": "donnee",
+        "raison": "Le nom de la boutique du jeu de mesure, salue a la place du prenom que le produit ne stocke pas."
+      },
+      {
+        "textes": [
+          "Taux de validation des photos"
+        ],
+        "motif": "contrainte",
+        "raison": "LES CINQ TUILES DES ANALYSES. Le kit met « En transit » a cette place ; le produit garde la reponse des clients a leurs photos, qui est l une des trois fonctions du brief et le seul endroit ou le vendeur la lit en chiffres."
+      },
+      {
+        "textes": [
+          "Créez une commande, déposez vos photos e"
+        ],
+        "motif": "contrainte",
+        "raison": "La phrase vraie qui remplace « temps reel » et « toute votre logistique » — voir la declaration symetrique."
+      },
+      {
+        "textes": [
+          "Création…"
+        ],
+        "motif": "structure",
+        "raison": "Le libelle d attente du bouton de creation, rendu masque pour que le bouton ne change pas de largeur au clic."
+      },
+      {
+        "textes": [
+          "Évolution des commandes",
+          "Répartition des statuts",
+          "Statut actuel de vos envois.",
+          "Liens clients",
+          "Nombre d'ouvertures des liens de suivi.",
+          "Transporteurs les plus utilisés"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PANNEAUX DES ANALYSES, REPRIS TELS QUELS. Le tableau de bord ne calcule aucun chiffre : chaque panneau vient de la lecture que /analyses fait deja, avec ses titres et ses aides. Un tableau de bord qui renommerait « Repartition des statuts » en « Statut des envois » montrerait au vendeur deux noms pour le meme panneau, a deux clics l un de l autre. Leur dessin, lui, suit le tableau de bord du kit : titre de 17, remplissage de 22."
+      },
+      {
+        "textes": [
+          "Cliente livree",
+          "Client expedie",
+          "Client de verification",
+          "Cliente en preparation"
+        ],
+        "motif": "donnee",
+        "raison": "Les clients du jeu de mesure dans les dernieres commandes."
+      },
+      {
+        "textes": [
+          "Livré",
+          "Expédié",
+          "Préparation"
+        ],
+        "motif": "contrainte",
+        "raison": "LES ETAPES DE LA DECISION 4 — preparation, expedie, en transit, livre — dans les pastilles des dernieres commandes, la ou le kit ecrit « Commandee », « En livraison », « Livree »."
+      },
+      {
+        "textes": [
+          "Personnaliser ma page client"
+        ],
+        "motif": "contrainte",
+        "raison": "Le raccourci vers l ecran de marque, nomme pour ce qu il ouvre — voir la declaration symetrique."
+      },
+      {
+        "motifs": [
+          "^il y a \\d+\\s(s|min|h|j)$"
+        ],
+        "motif": "donnee",
+        "raison": "L anciennete des commandes du jeu de mesure, creees a l instant par la sonde : elle change a chaque passage."
       }
     ]
   }

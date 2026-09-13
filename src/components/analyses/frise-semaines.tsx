@@ -35,7 +35,17 @@ const PART_MINIMALE = 2;
 /** Les quatre premières disparaissent au téléphone : 12 − 8. */
 const MASQUEES_AU_TELEPHONE = 4;
 
-export async function FriseSemaines({ semaines }: { readonly semaines: readonly SemaineCreee[] }) {
+export async function FriseSemaines({
+  semaines,
+  taille = "panneau",
+}: {
+  readonly semaines: readonly SemaineCreee[];
+  /**
+   * `section` sur le tableau de bord : le kit y dessine ses panneaux avec un
+   * titre de 17 px (`DashPanel`), là où les analyses en posent 19.
+   */
+  readonly taille?: "panneau" | "section";
+}) {
   const t = await getTranslations("analyses");
   const format = await getFormatter();
 
@@ -43,6 +53,7 @@ export async function FriseSemaines({ semaines }: { readonly semaines: readonly 
 
   return (
     <Panneau
+      taille={taille} serre={taille === "section"}
       titre={t("frise.titre")}
       sousTitre={t("frise.aide")}
       action={

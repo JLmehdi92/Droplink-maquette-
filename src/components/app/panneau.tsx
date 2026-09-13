@@ -32,6 +32,7 @@ export function Panneau({
   children,
   className,
   taille = "panneau",
+  serre = false,
 }: {
   readonly titre: ReactNode;
   readonly sousTitre?: string;
@@ -60,15 +61,22 @@ export function Panneau({
    * pixels, et l'écart se propage à toute la colonne.
    */
   readonly taille?: "panneau" | "section";
+  /**
+   * LE `DashPanel` DU TABLEAU DE BORD : remplissage 22 et 16 px sous l'en-tête,
+   * là où les autres écrans du kit posent 24 et 20. Deux pixels par bord sur
+   * sept panneaux, c'est ce qui décalait chaque ligne de contenu.
+   */
+  readonly serre?: boolean;
 }) {
   return (
     <section
       className={
-        "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card lg:p-6" +
+        "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card " +
+        (serre ? "lg:p-[22px]" : "lg:p-6") +
         (className === undefined ? "" : " " + className)
       }
     >
-      <header className="mb-4 flex flex-wrap items-start gap-4 lg:mb-5">
+      <header className={"mb-4 flex flex-wrap items-start gap-4 " + (serre ? "" : "lg:mb-5")}>
         {Icone === undefined ? null : (
           <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-ds-accent">
             <Icone aria-hidden="true" size={20} strokeWidth={1.9} />
