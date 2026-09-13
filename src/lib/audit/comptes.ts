@@ -446,6 +446,52 @@ export async function compterJournal(
   return { total: Math.min(compte, plafond), depasse: compte > plafond };
 }
 
+/** La répartition du journal par famille, bornée au même plafond. */
+export interface RepartitionJournal {
+  readonly total: number;
+  readonly suspensions: number;
+  readonly parametres: number;
+  readonly consultations: number;
+}
+
+/**
+ * Combien d'entrées, et de quelle sorte, sur la fenêtre demandée.
+ *
+ * ⚠️ LE MÊME PLAFOND QUE `compterJournal`, ET C'EST OBLIGATOIRE. Deux bornes
+ * différentes sur la même carte feraient un total qui n'est pas la somme de ses
+ * parts, et personne ne saurait laquelle des deux mentait.
+ *
+ * ⚠️ ET PAS DE `+1` ICI, contrairement à `compterJournal`. Ce « un de plus »
+ * sert à distinguer « exactement N » de « au moins N+1 » sur le décompte annoncé ;
+ * l'anneau, lui, ne montre que des PARTS. Un dépassement d'une unité ne change
+ * pas une part, et le décompte au-dessus le dit déjà.
+ *
+ * `null` sur une panne de TRANSPORT : le panneau se nomme indisponible, l'écran
+ * se rend.
+ */
+export async function repartirJournal(
+  supabase: ClientAdmin,
+  jours: number,
+  plafond: number,
+): Promise<RepartitionJournal | null> {
+  const reponse = await supabase.rpc("repartir_journal_admin", {
+    p_depuis_jours: jours,
+    p_plafond: plafond,
+  });
+  if (lectureIllisible(reponse, "de la répartition du journal")) return null;
+  if (reponse.error !== null) {
+    throw new Error("répartition du journal impossible : " + reponse.error.message);
+  }
+  const r = (reponse.data ?? [])[0];
+  if (r === undefined) return null;
+  return {
+    total: Number(r.total),
+    suspensions: Number(r.suspensions),
+    parametres: Number(r.parametres),
+    consultations: Number(r.consultations),
+  };
+}
+
 export async function lireJournal(
   supabase: ClientAdmin,
   parametres: ParametresJournal,

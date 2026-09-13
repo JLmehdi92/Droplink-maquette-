@@ -2533,5 +2533,287 @@
         "raison": "Les boutiques, volumes et dates du jeu de mesure."
       }
     ]
+  },
+  "fr-admin-journal": {
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble",
+          "Boutiques"
+        ],
+        "motif": "structure",
+        "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13 et hauteur 44 sont ceux de l entree entiere. Le decompte de « Boutiques » differe pour la meme raison que partout : le kit ecrit ce mot dans une seconde unite d anneau, celle du panneau de plan, que rien ne peut remplir."
+      },
+      {
+        "textes": [
+          "Paramètres"
+        ],
+        "motif": "structure",
+        "raison": "DEUX OBJETS DIFFERENTS SOUS LE MEME MOT. Le kit ecrit « Parametres » une fois, en entree de navigation ; nous l ecrivons deux fois, et jamais la : c est une OPTION de la liste deroulante des familles d action, et une option est un lien de 44 px de haut. Notre entree de navigation, elle, s appelle « Parametres systeme » — voir la declaration de vocabulaire dans les manquants."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "structure",
+        "raison": "Position et largeur. Le kit ecrit le role dans sa barre superieure, en haut a droite ; nous l ecrivons dans le bloc d identite au BAS de la colonne, ou il tient toute la largeur de celle-ci."
+      },
+      {
+        "textes": [
+          "10 926",
+          "10 926",
+          "12 842"
+        ],
+        "motif": "donnee",
+        "raison": "LES VOLUMES DU JEU DE MESURE, ET UN PLAFOND ASSUME. Le kit affiche 12 842 logs exactement ; notre journal est BORNE a 10 000 — compter au-dela couterait le parcours de toute la table a chaque ouverture, pour une precision dont personne ne decide. L ecran ecrit donc « plus de 10 000 », et le meme nombre revient dans la tuile, l anneau et le pied de liste. Les largeurs et les decomptes d occurrences suivent."
+      },
+      {
+        "textes": [
+          "Réinitialiser"
+        ],
+        "motif": "donnee",
+        "raison": "Position seule. Le bouton est pousse au bout d une barre de filtres qui porte DEUX selecteurs au lieu de quatre — le kit filtre par niveau, categorie, utilisateur et date, quatre dimensions declarees plus bas. Hauteur 42, remplissage 0/18, rayon sm, filet et 13,5/600 en encre d accent sont ceux du kit."
+      },
+      {
+        "textes": [
+          "7 %",
+          "4 %",
+          "85 %  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION, ET TROIS PARTS LA OU LE KIT EN A QUATRE. Son anneau range les logs par NIVEAU — succes, erreurs, avertissements, infos — ce qui decrit un journal technique. Le notre consigne des GESTES D ADMINISTRATION : ses parts sont les familles du filtre, et il n y en a que trois. Le reste de l ecart est du decalage : nos sections ne sont ni les memes ni dans le meme ordre."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Commandes",
+          "Statistiques",
+          "Support"
+        ],
+        "motif": "contrainte",
+        "raison": "Trois ecrans du kit admin que le depot n a pas, donc trois entrees de navigation qui meneraient a un 404 — pire qu une entree absente."
+      },
+      {
+        "textes": [
+          "Abonnements",
+          "Paiements",
+          "Échec de paiement",
+          "Carte refusée — Inès K."
+        ],
+        "motif": "contrainte",
+        "raison": "LA CONTRAINTE N°1 INTERDIT TOUT CODE DE FACTURATION en phase 1 : ni ecran, ni table, ni ligne de journal. Un echec de paiement ne peut pas apparaitre dans un produit qui n encaisse rien."
+      },
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Logs système",
+          "Total des logs",
+          "Liste des logs",
+          "12 842 logs au total",
+          "Répartition des logs",
+          "logs",
+          "Consultez toutes les activités et événem",
+          "Date",
+          "Actions",
+          "Voir"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DU PRODUIT GAGNE, ET LE BRIEF LE DEMANDE EXPLICITEMENT POUR CET ECRAN : il note que le titre de la maquette d origine — « QC Master Logs » — est a refaire, personne n inspectant de controle qualite chez nous. « Journal d audit » dit ce que l ecran est : une piece qu on produit en cas de litige, inalterable, et dont la LECTURE n ecrit rien. « Logs » dirait une trace technique, et « Date » seule ne dit pas que la colonne porte aussi l heure — « Quand » si."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "1 sept. 2025 – 8 sept. 2025",
+          "admin@droplink.fr"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE DU KIT N EST PAS PORTEE, comme sur les trois autres ecrans de liste. « Ctrl K » annonce une recherche transverse qui n existe pas ; le selecteur de dates ferait doublon avec la fenetre, qui est deja un filtre de cet ecran et entre dans la trace. La carte decorative garde sa geometrie en bas de colonne et porte notre contenu."
+      },
+      {
+        "textes": [
+          "Exporter"
+        ],
+        "motif": "contrainte",
+        "raison": "EXPORTER LE JOURNAL D AUDIT EST UNE DECISION, PAS UN BOUTON. Le journal porte des adresses de vendeurs, des motifs de suspension et des valeurs de parametres ; un fichier qui sort tout cela de l application demanderait de trancher ce qu il contient, qui peut le produire, et ce que son propre audit consigne — « le vendeur ne decide pas de la fuite, il decide d un export »."
+      },
+      {
+        "textes": [
+          "+18%",
+          "vs période précédente",
+          "85% du total",
+          "-8%",
+          "Temps de réponse",
+          "120 ms",
+          "en moyenne"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUN COMPTEUR DU PRODUIT NE PORTE SON HISTORIQUE, et le journal ne mesure aucune latence. `admin_audit_log` consigne QUI a fait QUOI et QUAND ; il n y a ni code de retour, ni duree, ni valeur de periode precedente. Un « 120 ms en moyenne » calcule sur rien aurait la FORME d une mesure sur l ecran dont tout le role est de porter des faits verifiables."
+      },
+      {
+        "textes": [
+          "Actions réussies",
+          "Erreurs",
+          "Avertissements",
+          "Niveau",
+          "Infos",
+          "Activité des logs",
+          "10 août",
+          "3 sept."
+        ],
+        "motif": "donnee",
+        "raison": "LE JOURNAL N A PAS DE NIVEAU, et c est structurel. Il consigne des GESTES D ADMINISTRATION, tous reussis par construction : une action refusee ne produit aucune entree, puisque l audit et la lecture vivent dans la MEME transaction et qu un audit qui echoue refuse l acces. Quatre tuiles, une colonne et une courbe du kit reposent sur cette dimension inexistante ; ses familles a lui — suspension, parametre, consultation — sont celles que nous rendons."
+      },
+      {
+        "textes": [
+          "Catégorie",
+          "Utilisateur",
+          "Message",
+          "IP"
+        ],
+        "motif": "contrainte",
+        "raison": "QUATRE COLONNES, QUATRE RAISONS. « Categorie » et « Message » sont chez nous UNE colonne — « Ce qui a ete fait » — parce que la pilule d action EST la categorie et que la phrase qui la suit porte deja l avant et l apres. « Utilisateur » designe chez le kit la personne SUBIE par l action ; chez nous la ligne nomme sa cible en clair dans la phrase, et la colonne de droite dit QUI A AGI — ce qu on vient chercher dans un journal d audit. Et « IP » ne peut pas s afficher : `admin_audit_log.ip_hash` porte une EMPREINTE SALEE, jamais l adresse. Sans sel, une IPv4 se retrouve en quelques secondes par force brute, et un journal de securite deviendrait lui-meme un fichier d adresses en clair."
+      },
+      {
+        "textes": [
+          "08/09/2025",
+          "14:32:18",
+          "Succès",
+          "Authentification",
+          "Yanis B.",
+          "Connexion réussie",
+          "92.184.3.21",
+          "Avertissement",
+          "Inès K.",
+          "Tentative de création de commande sans p",
+          "Erreur",
+          "API",
+          "Échec de la requête /v1/orders — délai d",
+          "Samir A.",
+          "Mise à jour de l'abonnement — passage au",
+          "Info",
+          "Système",
+          "Nettoyage des fichiers temporaires termi",
+          "Léa M.",
+          "Profil mis à jour",
+          "Échec du paiement — carte refusée par l'",
+          "Sécurité",
+          "Tentative de connexion suspecte — 5 éche",
+          "Thomas R.",
+          "Création d'une nouvelle boutique",
+          "Requête GET /api/store — limite de débit"
+        ],
+        "motif": "donnee",
+        "raison": "Les dix lignes de demonstration du kit — un journal d application, avec ses requetes, ses codes et ses adresses. Le notre porte les gestes que la sonde a elle-meme poses : creations de parametres, consultations, suspensions et reactivations."
+      },
+      {
+        "textes": [
+          "Affichage de 1 à 10 sur 12 842 logs",
+          "Afficher"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PAGINATION EST PAR CURSEUR, JAMAIS PAR DECALAGE. Un curseur ne sait pas dire « 1 a 10 sur 12 842 » — le savoir exigerait un comptage complet a chaque page, c est-a-dire exactement ce qu il evite. L ecran rend un lien « Voir la suite », et il dit combien de lignes il montre sur combien."
+      },
+      {
+        "textes": [
+          "Derniers événements critiques",
+          "Voir tout",
+          "Il y a 12 min",
+          "Tentative de connexion suspecte",
+          "IP 203.0.113.42 — 5 échecs",
+          "Erreur API",
+          "/v1/orders — 500",
+          "Il y a 1 h",
+          "Échec d'upload",
+          "Fichier trop volumineux — 82 Mo",
+          "Limite API atteinte",
+          "Thomas R. — 1 000 req/h"
+        ],
+        "motif": "donnee",
+        "raison": "LES « EVENEMENTS CRITIQUES » DU KIT SONT DES INCIDENTS TECHNIQUES, et le journal d audit n en consigne aucun : il ne sait rien des requetes, des depots refuses ni des plafonds de debit. Ce que le produit sait de son infrastructure vit sur l ecran SURVEILLANCE, a un onglet, ou il est mesure plutot qu illustre. Le repeter ici ferait deux endroits ou lire la meme chose, et un jour deux reponses."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et son encart de trace, qui occupe la geometrie de la carte decorative du kit."
+      },
+      {
+        "motifs": [
+          "^(ecran|fumee|test-param-admin|test-susp-admin|test-susp-vendeur)[-0-9]*[a-z0-9@.-]*$"
+        ],
+        "motif": "donnee",
+        "raison": "Les identites du jeu de mesure — le compte de la sonde, et les comptes jetables que les suites ont suspendus, reactives et parametres. Elles changent a chaque passage : un motif ancre, jamais une liste d adresses qui serait morte des la mesure suivante."
+      },
+      {
+        "textes": [
+          "Consultez toutes les actions d'administr",
+          "Entrées au journal",
+          "sur la fenêtre choisie",
+          "Suspensions et réactivations",
+          "12 % du total",
+          "Paramètres modifiés",
+          "Consultations de données",
+          "Liste des entrées",
+          "plus de 10000 entrées",
+          "Répartition du journal",
+          "entrées",
+          "Quand",
+          "Ce qui a été fait",
+          "Par qui",
+          "50 sur plus de 10 000 entrées",
+          "Voir la suite",
+          "Ce journal ne peut être ni modifié ni ef"
+        ],
+        "motif": "contrainte",
+        "raison": "NOS TUILES, NOS COLONNES ET NOTRE VOCABULAIRE — voir la declaration symetrique dans les manquants. Une ligne merite sa propre phrase : la garantie d inalterabilite. Un journal dont on ignore qu il ne peut etre ni modifie ni efface n a pas la valeur d un journal, et c est la premiere chose a savoir avant de le lire — le kit ne la dit nulle part."
+      },
+      {
+        "textes": [
+          "Toutes",
+          "Suspensions",
+          "Consultations",
+          "Depuis le début",
+          "7 derniers jours"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS DES DEUX SELECTEURS, REPLIEES. Le kit rend les siennes dans des `select` natifs, dont la sonde lit les `option` ; les notres sont des liens dans des `details` fermes, que la sonde releve aussi. L oeil n en voit qu une de chaque cote. Leurs libelles different parce que les filtres different : le kit filtre par niveau, categorie, utilisateur et date — quatre dimensions declarees plus haut — la ou nous filtrons par FAMILLE D ACTION et par FENETRE."
+      },
+      {
+        "textes": [
+          "13 sept. 2026 03:36",
+          "Modification d’un paramètre système",
+          "Inscriptions ouvertes",
+          "systeme",
+          "Création d’un paramètre système",
+          "Consultation des alertes du panneau",
+          "Commandes par mois",
+          "Interrogation des transporteurs",
+          "Seuil d'alerte colis",
+          "Tâche en retard après",
+          "Réactivation d’un compte",
+          "Suspension d’un compte",
+          "Compte visé :",
+          "Motif :  Retrait du signalement, dossier",
+          "Motif :  Contenu signale par un ayant dr",
+          "Motif :  Motif distinctif 1789263285770"
+        ],
+        "motif": "donnee",
+        "raison": "Les entrees que la sonde et les suites ont elles-memes ecrites. Deux d entre elles portent une decision : le MOTIF d une suspension s affiche EN CLAIR sur la ligne, jamais replie derriere un detail que personne n ouvre — c est la piece qu on demanderait en cas de litige ; et l AVANT d un parametre est rendu a cote de l apres, sans quoi la ligne dirait « le seuil vaut maintenant 1 200 », ce que la table dit deja."
+      }
+    ]
   }
 }

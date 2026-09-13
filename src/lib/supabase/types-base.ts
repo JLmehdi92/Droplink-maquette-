@@ -1214,6 +1214,15 @@ export type Database = {
           total: number
         }[]
       }
+      repartir_journal_admin: {
+        Args: { p_depuis_jours: number; p_plafond: number }
+        Returns: {
+          consultations: number
+          parametres: number
+          suspensions: number
+          total: number
+        }[]
+      }
       repartir_transporteurs: {
         Args: { p_depuis: string }
         Returns: {

@@ -472,6 +472,17 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "ouverture.",
     ],
     [
+      "repartir_journal_admin",
+      "Répartition du journal d'audit par famille, pour l'anneau et les tuiles de " +
+        "son écran. Garde interne `est_admin()`. Elle ne lit que `admin_audit_log`, " +
+        "donc NOS PROPRES GESTES : le journal ne contient aucune donnée de vendeur, " +
+        "il contient ce que les administrateurs ont fait. La lire n'écrit donc rien " +
+        "— indispensable ici plus qu'ailleurs, un compteur qui s'incrémenterait en " +
+        "se lisant rendrait le journal illisible dès la deuxième ouverture. Bornee " +
+        "au même plafond que `compter_journal_admin` : deux bornes différentes sur " +
+        "la même carte feraient un total qui n'est pas la somme de ses parts.",
+    ],
+    [
       "compter_inscriptions_admin",
       "Comptes inscrits sur une fenêtre, pour la tuile « nouveaux inscrits » de la " +
         "liste des comptes. Garde interne `est_admin()`, et rien d'autre qu'un " +

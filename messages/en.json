@@ -991,7 +991,6 @@
       "pageSuivante": "Show more",
       "decompteAuDela": "More than {total, number} entries · neither editable nor erasable",
       "decompte": "{total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
-      "portee": "Every administrator access to a seller’s data, including views",
       "garantie": "This log can be neither edited nor erased, and it outlives the deletion of the accounts it describes. Reading it writes nothing to it.",
       "filtres": "Filter the log",
       "famille": {
@@ -1013,7 +1012,24 @@
       "cibleAvant": "Account concerned:",
       "motifAvant": "Reason:",
       "parQui": "By",
-      "videFiltre": "No entry matches this filter."
+      "videFiltre": "No entry matches this filter.",
+      "sousTitreListe": "Review every administration action recorded on DropLink.",
+      "tuileTotal": "Log entries",
+      "tuileSuspensions": "Suspensions and reactivations",
+      "tuileParametres": "Settings changed",
+      "tuileConsultations": "Data lookups",
+      "partDuTotal": "{part}% of total",
+      "surLaFenetre": "over the selected window",
+      "liste": "Entry list",
+      "listeTotal": "{total, plural, one {# entry in total} other {# entries in total}}",
+      "listeTotalAuDela": "more than {total} entries",
+      "repartition": "Log breakdown",
+      "unite": "entries",
+      "part": "{part}%",
+      "repartitionIndisponible": "Breakdown unavailable.",
+      "filtreFamille": "Filter by action family",
+      "filtreFenetre": "Choose the window",
+      "reinitialiser": "Reset"
     },
     "fiche": {
       "identite": "Identity",

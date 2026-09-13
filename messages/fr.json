@@ -991,7 +991,6 @@
       "pageSuivante": "Voir la suite",
       "decompteAuDela": "Plus de {total, number} entrées · ni modifiables ni effaçables",
       "decompte": "{total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
-      "portee": "Chaque accès administrateur à des données d’un vendeur, consultations comprises",
       "garantie": "Ce journal ne peut être ni modifié ni effacé, et il survit à la suppression des comptes concernés. Le consulter n'y écrit rien.",
       "filtres": "Filtrer le journal",
       "famille": {
@@ -1013,7 +1012,24 @@
       "cibleAvant": "Compte visé :",
       "motifAvant": "Motif :",
       "parQui": "Par",
-      "videFiltre": "Aucune entrée ne correspond à ce filtre."
+      "videFiltre": "Aucune entrée ne correspond à ce filtre.",
+      "sousTitreListe": "Consultez toutes les actions d'administration enregistrées sur DropLink.",
+      "tuileTotal": "Entrées au journal",
+      "tuileSuspensions": "Suspensions et réactivations",
+      "tuileParametres": "Paramètres modifiés",
+      "tuileConsultations": "Consultations de données",
+      "partDuTotal": "{part} % du total",
+      "surLaFenetre": "sur la fenêtre choisie",
+      "liste": "Liste des entrées",
+      "listeTotal": "{total, plural, one {# entrée au total} other {# entrées au total}}",
+      "listeTotalAuDela": "plus de {total} entrées",
+      "repartition": "Répartition du journal",
+      "unite": "entrées",
+      "part": "{part} %",
+      "repartitionIndisponible": "Répartition indisponible.",
+      "filtreFamille": "Filtrer par famille d'action",
+      "filtreFenetre": "Choisir la fenêtre",
+      "reinitialiser": "Réinitialiser"
     },
     "fiche": {
       "identite": "Identité",

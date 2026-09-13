@@ -31,7 +31,24 @@ import { getFormatter } from "next-intl/server";
  * 150 px de base, contre 37 dans le panneau étroit de la vue d'ensemble, où
  * tronquer rendrait « A » et « S. ».
  */
-const COTES = { panneau: 190, liste: 165 } as const;
+const COTES = { panneau: 190, liste: 165, compact: 124 } as const;
+
+/*
+ * LES DEUX POLICES DU CENTRE SONT CALCULÉES, PAS ÉCRITES. Le kit les dérive de
+ * la taille de l'anneau — `max(15, rond(cote × 0,16))` pour le total,
+ * `max(9,5, rond(cote × 0,072))` pour l'unité — et il en pose TROIS tailles
+ * d'anneau. Recopier six nombres aurait fait six occasions de se tromper ; la
+ * règle, elle, tient en deux lignes et suit la prochaine taille toute seule.
+ */
+const policeTotal = (cote: number): number => Math.max(15, Math.round(cote * 0.16));
+/*
+ * ⚠️ LE PLANCHER EST 11,5 ET NON 9,5, ET C'EST LA RÈGLE 5 QUI GAGNE. Le kit
+ * pose 9,5 comme minimum ; sur son plus petit anneau (124), l'unité y tombe
+ * donc à 9,5 px — mesuré sous le plancher de 11,5 px du téléphone, qui est
+ * architectural et non esthétique. Les deux autres tailles rendent 12 et 14 :
+ * elles ne bougent pas.
+ */
+const policeUnite = (cote: number): number => Math.max(11.5, Math.round(cote * 0.072));
 
 export interface PartAnneau {
   readonly cle: string;
@@ -54,7 +71,10 @@ export async function Anneau({
   readonly unite: string;
   /** Le gabarit d'une part, « {part} % » — la langue décide de l'espace. */
   readonly part: (pourcent: number) => string;
-  /** `panneau` sur la vue d'ensemble, `liste` sur les écrans de liste. */
+  /**
+   * `panneau` sur la vue d'ensemble, `liste` sur les écrans de liste, `compact`
+   * quand l'anneau partage sa colonne avec deux autres panneaux.
+   */
   readonly variante?: keyof typeof COTES;
 }) {
   const format = await getFormatter();
@@ -63,7 +83,9 @@ export async function Anneau({
   const RAYON = COTE * 0.37;
   const EPAISSEUR = COTE * 0.155;
   const CIRCONFERENCE = 2 * Math.PI * RAYON;
-  const liste = variante === "liste";
+  /* La légende du kit a deux formes seulement : large sur la vue d'ensemble,
+     `SplitLegend` partout ailleurs — quelle que soit la taille de l'anneau. */
+  const liste = variante !== "panneau";
 
   /* Les segments sont calculés AVANT le rendu : un cumul tenu pendant le `map`
      serait une écriture après rendu, et React n'en garantit pas l'ordre. */
@@ -97,17 +119,14 @@ export async function Anneau({
         </svg>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span
-            className={
-              "leading-[1.15] font-extrabold tracking-[-0.045em] text-ds-texte-titre " +
-              (liste ? "text-[26px]" : "text-[30px]")
-            }
+            className="leading-[1.15] font-extrabold tracking-[-0.045em] text-ds-texte-titre"
+            style={{ fontSize: policeTotal(COTE) }}
           >
             {format.number(total)}
           </span>
           <span
-            className={
-              "leading-[1.2] text-ds-texte-sourdine " + (liste ? "text-[12px]" : "text-[14px]")
-            }
+            className="leading-[1.2] text-ds-texte-sourdine"
+            style={{ fontSize: policeUnite(COTE) }}
           >
             {unite}
           </span>

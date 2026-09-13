@@ -81,7 +81,7 @@ const TEINTE_TACHE = {
     point: "bg-ds-alerte-fond",
     titre: "text-ds-alerte",
     detail: "leading-4 text-ds-alerte",
-    pilule: "bg-ds-alerte text-ds-alerte",
+    pilule: "bg-ds-alerte-fond text-ds-alerte",
   },
   jamais_executee: {
     carte: "border-ds-filet bg-ds-surface-carte",

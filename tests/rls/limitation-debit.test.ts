@@ -181,23 +181,58 @@ describe("Le compteur compte juste", () => {
     );
 
     try {
+      /*
+       * ⚠️ CHAQUE APPEL REND AUSSI SA FENÊTRE, ET C'EST CE QUI BORNE CE TEST.
+       *
+       * Il a échoué une fois le 13/09/2026 sous la charge de la suite complète :
+       * « 7 appels autorisés sur un plafond de 4 ». Rejoué seul, il passait
+       * quatre fois de suite — et un test qu'on relance jusqu'au vert n'est plus
+       * bloquant. La cause n'était pas le compteur : `fenetre_courante` arrondit
+       * `clock_timestamp()` à la minute, et douze connexions parallèles mettent
+       * assez longtemps à s'ouvrir pour CHEVAUCHER une bordure. Deux fenêtres,
+       * deux plafonds, jusqu'à huit appels autorisés — et le produit avait
+       * raison.
+       *
+       * Le test mesure donc ce qu'il affirme : dans UNE fenêtre, jamais plus que
+       * le plafond. Un incrément non atomique en laisserait passer douze dans la
+       * même, donc la garde ne perd rien de son mordant.
+       */
       const resultats = await Promise.all(
         connexions.map(async (c) => {
-          const r = await c.query<{ ok: boolean }>(
-            `select public.consommer_quota($1, $2, 60) as ok`,
+          const r = await c.query<{ ok: boolean; fenetre: string }>(
+            `select public.consommer_quota($1, $2, 60) as ok,
+                    public.fenetre_courante(60)::text as fenetre`,
             [cle, PLAFOND],
           );
-          return r.rows[0]?.ok ?? false;
+          return { ok: r.rows[0]?.ok ?? false, fenetre: r.rows[0]?.fenetre ?? "?" };
         }),
       );
 
-      const autorises = resultats.filter(Boolean).length;
+      const parFenetre = new Map<string, number>();
+      for (const r of resultats) {
+        if (!r.ok) continue;
+        parFenetre.set(r.fenetre, (parFenetre.get(r.fenetre) ?? 0) + 1);
+      }
+
+      /* CONTRE-TEST : le banc a-t-il autorisé quoi que ce soit ? Un compteur qui
+         refuserait TOUT passerait l'assertion suivante sans rien prouver. */
+      const autorises = resultats.filter((r) => r.ok).length;
       expect(
         autorises,
-        `${autorises} appels autorisés sur un plafond de ${PLAFOND}, avec ` +
-          `${APPELS} connexions parallèles. L'incrément n'est pas atomique : ` +
-          "la limite cède précisément sous la charge qu'elle doit borner.",
-      ).toBe(PLAFOND);
+        "aucun appel autorisé : le banc ne mesure plus le plafond, il mesure un refus total",
+      ).toBeGreaterThan(0);
+
+      const depassements = [...parFenetre.entries()]
+        .filter(([, n]) => n > PLAFOND)
+        .map(([f, n]) => `${n} dans la fenêtre ${f}`);
+      expect(
+        depassements,
+        `${autorises} appels autorisés au total sur ${APPELS} connexions ` +
+          `parallèles, répartis sur ${parFenetre.size} fenêtre(s). ` +
+          `Le plafond de ${PLAFOND} est dépassé DANS UNE fenêtre : l'incrément ` +
+          "n'est pas atomique, et la limite cède précisément sous la charge " +
+          `qu'elle doit borner. ${depassements.join(", ")}`,
+      ).toEqual([]);
     } finally {
       await Promise.all(connexions.map((c) => c.end()));
     }

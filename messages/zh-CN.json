@@ -991,7 +991,6 @@
       "pageSuivante": "查看更多",
       "decompteAuDela": "超过 {total, number} 条记录 · 不可修改，也不可删除",
       "decompte": "{total, plural, other {# 条记录}} · 不可修改，也不可删除",
-      "portee": "管理员对卖家数据的每一次访问，包括仅查看",
       "garantie": "本日志不可修改也不可删除，并且在相关账户被删除后依然保留。查看它不会写入任何内容。",
       "filtres": "筛选日志",
       "famille": {
@@ -1013,7 +1012,24 @@
       "cibleAvant": "涉及账户：",
       "motifAvant": "原因：",
       "parQui": "操作人",
-      "videFiltre": "没有符合该筛选条件的记录。"
+      "videFiltre": "没有符合该筛选条件的记录。",
+      "sousTitreListe": "查看 DropLink 上记录的所有后台操作。",
+      "tuileTotal": "日志条目",
+      "tuileSuspensions": "停用与恢复",
+      "tuileParametres": "参数修改",
+      "tuileConsultations": "数据查阅",
+      "partDuTotal": "占总数 {part}%",
+      "surLaFenetre": "所选时间窗内",
+      "liste": "条目列表",
+      "listeTotal": "共 {total} 条",
+      "listeTotalAuDela": "超过 {total} 条",
+      "repartition": "日志分布",
+      "unite": "条",
+      "part": "{part}%",
+      "repartitionIndisponible": "分布不可用。",
+      "filtreFamille": "按操作类别筛选",
+      "filtreFenetre": "选择时间窗",
+      "reinitialiser": "重置"
     },
     "fiche": {
       "identite": "基本信息",

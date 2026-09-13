@@ -6,6 +6,7 @@ import { exigerAdmin } from "@/lib/audit/garde";
 import { natureDAction } from "@/lib/admin/nature-d-action";
 import {
   compterJournal,
+  repartirJournal,
   PLAFOND_COMPTAGE_JOURNAL,
   lireJournal,
   FAMILLES_JOURNAL,
@@ -16,6 +17,11 @@ import {
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 import { LienEcran } from "@/components/lien-ecran";
+import Link from "next/link";
+import { Anneau } from "@/components/admin/anneau";
+import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
+import { TuileVolume } from "@/components/admin/tuile-volume";
+import { Eye, ScrollText, SlidersHorizontal, UserX } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -31,18 +37,6 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "admin" });
   return { title: t("journal.titre"), robots: { index: false, follow: false } };
 }
-
-/**
- * LA PILULE DE FILTRE DU JOURNAL — un rectangle arrondi, et non une pilule
- * pleine : elle occupe la place des deux listes déroulantes que la planche
- * posait là, et en garde la géométrie.
- *
- * ⚠️ 44 px, PAS 42. La planche écrit `height: 42px` sur une boîte en
- * `content-box` : avec son filet, elle REND 44. Quatrième fois cette séance que
- * l'attribut et le rendu ne disent pas la même chose.
- */
-const PILULE_FILTRE =
-  "inline-flex min-h-11 items-center rounded-ds-pill border px-[13px] text-[13px] leading-4 font-semibold whitespace-nowrap transition-colors md:rounded-ds-control";
 
 /**
  * LE JOURNAL D'AUDIT.
@@ -95,9 +89,13 @@ export default async function AdminJournal({
   });
 
   const supabase = await creerClientServeur();
-  const [page, decompte] = await Promise.all([
+  const [page, decompte, repartition] = await Promise.all([
     lireJournal(supabase, parametres),
     compterJournal(supabase, parametres, PLAFOND_COMPTAGE_JOURNAL),
+    // LA RÉPARTITION IGNORE LA FAMILLE ET SUIT LA FENÊTRE : un anneau filtré sur
+    // une seule famille n'aurait qu'une part, et dirait 100 % de ce qu'on vient
+    // de sélectionner. C'est la répartition DE LA PÉRIODE qu'on vient y lire.
+    repartirJournal(supabase, parametres.jours, PLAFOND_COMPTAGE_JOURNAL),
   ]);
   const { total, depasse } = decompte;
 
@@ -137,7 +135,7 @@ export default async function AdminJournal({
    * sert au filtre, et la base range tout `compte.%` sous « suspension ».
    */
   const TEINTE = {
-    suspension: "bg-ds-erreur text-ds-erreur",
+    suspension: "bg-ds-erreur-fond text-ds-erreur",
     reactivation: "bg-ds-succes-fond text-ds-succes",
     parametre: "bg-ds-surface-teinte text-ds-accent-encre",
     consultation: "bg-ds-surface-creux text-ds-texte-corps",
@@ -151,6 +149,19 @@ export default async function AdminJournal({
     consultation: "border-ds-ink-200 bg-ds-surface-creux",
   } as const;
 
+  /* Le panneau du kit admin — les memes valeurs que sur les trois autres ecrans. */
+  const PANNEAU =
+    "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
+  const PANNEAU_TITRE =
+    "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
+  const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps";
+
+  /** La part d'une famille dans le total de la fenetre. */
+  const part = (n: number): number =>
+    repartition === null || repartition.total === 0
+      ? 0
+      : Math.round((n / repartition.total) * 100);
+
   const libelleAction = (l: LigneJournal): string =>
     // LE POINT DEVIENT UN SOULIGNÉ : next-intl traite le point comme un
     // séparateur de NIVEAU, donc `journal.actions.compte.suspension` irait
@@ -163,75 +174,118 @@ export default async function AdminJournal({
     <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin
         titre={t("journal.titre")}
-        sousTitre={t("journal.portee")}
+        // LE SOUS-TITRE DIT À QUOI SERT L'ÉCRAN, comme le kit ; la PORÉE du
+        // journal — « chaque accès administrateur à des données d'un vendeur » —
+        // est dite par l'encart de garantie, juste en dessous, là où elle a la
+        // place d'être lue.
+        sousTitre={t("journal.sousTitreListe")}
         sousTitreMobile={
           depasse ? t("journal.decompteAuDela", { total }) : t("journal.decompte", { total })
         }
       />
 
       <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-4 md:px-0 md:py-0">
-        {/* --- LES FILTRES ---
+        {/* --- LES VOLUMES ---
 
-            DES LIENS, PAS DES LISTES DÉROULANTES. La planche du bureau pose deux
-            `select` ; ils exigeraient du JavaScript pour naviguer au changement,
-            et un `select` sans soumission est un contrôle qui ne fait rien tant
-            qu'on n'a pas trouvé le bouton. Les pilules du téléphone, elles, sont
-            des liens — la même chose partout coûte moins cher à comprendre. */}
-        <nav aria-label={t("journal.filtres")} className="-mx-4 px-4 md:mx-0 md:px-0">
-          {/* `gap-y-4` AU BUREAU : les deux rangées vivent dans une seule liste
-              qui se replie, donc le `gap` de 8 px servait aussi d'espace VERTICAL
-              entre elles. La planche en met 16. */}
-          <ul className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:gap-y-4 md:overflow-visible md:pb-0">
-            {(["", ...FAMILLES_JOURNAL] as const).map((f) => {
-              const actif = parametres.famille === f;
-              return (
-                <li key={f === "" ? "toutes" : f}>
-                  <LienEcran
-                    href={lien(f, parametres.jours)}
-                    aria-current={actif ? "true" : undefined}
-                    className={
-                      PILULE_FILTRE +
-                      " " +
-                      (actif
-                        ? "border-primary bg-primary text-on-primary"
-                        : "border-ds-filet-appuye bg-ds-surface-carte text-ds-texte-corps hover:bg-ds-surface-creux")
-                    }
-                  >
-                    {t(`journal.famille.${f === "" ? "toutes" : f}`)}
-                  </LienEcran>
-                </li>
-              );
+            Le kit en pose CINQ : total, actions réussies, erreurs, avertissements
+            et temps de réponse moyen. Les quatre dernières décrivent un journal
+            TECHNIQUE — celui d'une application qui consigne ses requêtes. Le
+            nôtre consigne des GESTES D'ADMINISTRATION : il n'a ni niveau, ni
+            code de retour, ni latence. Ses familles sont donc les siennes, et
+            elles sont exactement celles du filtre juste en dessous. */}
+        <div className="flex flex-col gap-2.5 xl:grid xl:grid-cols-4 xl:gap-[18px]">
+          <TuileVolume
+            icone={ScrollText}
+            compacte
+            libelle={t("journal.tuileTotal")}
+            valeurEnSourdine={repartition === null}
+            valeur={
+              repartition === null
+                ? t("panneau.stockageIndisponible")
+                : format.number(repartition.total)
+            }
+            complement={t("journal.surLaFenetre")}
+          />
+          <TuileVolume
+            icone={UserX}
+            compacte
+            teinte="alerte"
+            libelle={t("journal.tuileSuspensions")}
+            valeurEnSourdine={repartition === null}
+            valeur={
+              repartition === null ? "—" : format.number(repartition.suspensions)
+            }
+            complement={t("journal.partDuTotal", {
+              part: part(repartition?.suspensions ?? 0),
             })}
-
-            <li aria-hidden="true" className="w-2 shrink-0 md:basis-full md:w-0" />
-
-            {FENETRES_JOURNAL.map((j) => {
-              const actif = parametres.jours === j;
-              return (
-                <li key={j}>
-                  <LienEcran
-                    href={lien(parametres.famille, j)}
-                    aria-current={actif ? "true" : undefined}
-                    className={
-                      PILULE_FILTRE +
-                      " " +
-                      // ⚠️ LE MÊME NOIR QUE LA RANGÉE DU DESSUS. Cette rangée
-                      // peignait son actif en ardoise (#5b5d68) : deux états
-                      // « actif » de deux teintes dans le même contrôle, et le
-                      // second se lisait comme désactivé. Une seule couleur
-                      // d’état actif dans tout le produit.
-                      (actif
-                        ? "border-primary bg-primary text-on-primary"
-                        : "border-ds-filet-appuye bg-ds-surface-carte text-ds-texte-corps hover:bg-ds-surface-creux")
-                    }
-                  >
-                    {t(`journal.fenetre.${j}`)}
-                  </LienEcran>
-                </li>
-              );
+          />
+          <TuileVolume
+            icone={SlidersHorizontal}
+            compacte
+            teinte="info"
+            libelle={t("journal.tuileParametres")}
+            valeurEnSourdine={repartition === null}
+            valeur={repartition === null ? "—" : format.number(repartition.parametres)}
+            complement={t("journal.partDuTotal", {
+              part: part(repartition?.parametres ?? 0),
             })}
-          </ul>
-        </nav>
+          />
+          <TuileVolume
+            icone={Eye}
+            compacte
+            teinte="succes"
+            libelle={t("journal.tuileConsultations")}
+            valeurEnSourdine={repartition === null}
+            valeur={
+              repartition === null ? "—" : format.number(repartition.consultations)
+            }
+            complement={t("journal.partDuTotal", {
+              part: part(repartition?.consultations ?? 0),
+            })}
+          />
+        </div>
+
+        {/* --- LA BARRE DE FILTRES ---
+
+            ⚠️ LES DEUX RANGÉES DE PILULES SONT DEVENUES DEUX LISTES DÉROULANTES,
+            comme le kit. Elles disaient la même chose et faisaient la même
+            chose ; ce qu'elles faisaient de PLUS, c'était sept pilules sur deux
+            rangées, qui repoussaient la première ligne du journal hors de l'écran
+            d'ouverture au téléphone.
+
+            CE SONT TOUJOURS DES LIENS : le filtre vit dans l'URL, il se partage,
+            se recharge et revient avec le bouton retour. Un `select` exigerait du
+            JavaScript pour naviguer au changement, ou un bouton qu'il faut
+            trouver. */}
+        <div
+          aria-label={t("journal.filtres")}
+          className="flex flex-wrap items-center gap-3 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3.5 shadow-ds-card"
+        >
+          <SelecteurAdmin
+            etiquette={t("journal.filtreFamille")}
+            courant={parametres.famille}
+            options={(["", ...FAMILLES_JOURNAL] as const).map((f) => ({
+              valeur: f,
+              libelle: t(`journal.famille.${f === "" ? "toutes" : f}`),
+              href: lien(f, parametres.jours),
+            }))}
+          />
+          <SelecteurAdmin
+            etiquette={t("journal.filtreFenetre")}
+            courant={String(parametres.jours)}
+            options={FENETRES_JOURNAL.map((j) => ({
+              valeur: String(j),
+              libelle: t(`journal.fenetre.${j}`),
+              href: lien(parametres.famille, j),
+            }))}
+          />
+          <Link
+            href={base}
+            className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
+          >
+            {t("journal.reinitialiser")}
+          </Link>
+        </div>
 
         {/* CE QUE CE JOURNAL GARANTIT, dit avant qu'on le lise. Un journal dont
             on ignore qu'il est inaltérable n'a pas la valeur d'un journal.
@@ -246,24 +300,44 @@ export default async function AdminJournal({
           </span>
         </p>
 
+        {/* --- LA LISTE, ET L'ANNEAU DE RÉPARTITION À SA DROITE ---
+
+            ⚠️ LE KIT POSE TROIS PANNEAUX À DROITE. Le nôtre n'en porte qu'un : sa
+            courbe « activité des logs » tracerait quatre niveaux techniques que
+            notre journal n'a pas, et ses « derniers événements critiques »
+            nomment des vendeurs tiers à chaque ouverture. */}
+        <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] xl:items-start">
+          <section className={PANNEAU}>
+            <header className="mb-[18px]">
+              <h2 className={PANNEAU_TITRE}>{t("journal.liste")}</h2>
+              <p className={PANNEAU_AIDE}>
+                {depasse
+                  ? t("journal.listeTotalAuDela", { total })
+                  : t("journal.listeTotal", { total })}
+              </p>
+            </header>
+
         {page.lignes.length === 0 ? (
-          <p className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 text-center text-[14px] text-ds-texte-corps shadow-ds-card">
+          <p className="py-6 text-center text-[14px] text-ds-texte-corps">
             {parametres.famille === "" && parametres.jours === 0
               ? t("journal.vide")
               : t("journal.videFiltre")}
           </p>
         ) : (
-          /* LA CARTE N'EXISTE QU'AU BUREAU. La planche du téléphone pose des
-             cartes LIBRES, sans conteneur : le filet portait donc un second
-             filet autour de lui, visible sur le seul écran où la place manque. */
-          <div className="md:rounded-ds-card-lg md:border md:border-ds-filet md:bg-ds-surface-carte md:px-6 md:py-5">
+          /* LA CARTE INTÉRIEURE A DISPARU : c'est le PANNEAU qui la porte depuis
+             que l'écran a pris la mise en page du kit. Elle faisait un second
+             filet autour du premier. */
+          <div>
             {/* Les en-têtes de colonne n'existent qu'au bureau : sur une carte,
                 « QUAND » au-dessus d'une heure n'apprend rien. */}
             <div className="hidden gap-[18px] pb-3 xl:grid xl:grid-cols-[132px_minmax(0,1fr)_168px]">
               {(["quand", "quoi", "qui"] as const).map((c) => (
                 <span
                   key={c}
-                  className="text-[11.5px] leading-[13px] font-bold tracking-[0.05em] text-ds-texte-sourdine uppercase"
+                  /* 12,5/600 EN CASSE NORMALE, comme le kit. Les majuscules a
+                     l interlettrage 0,05em venaient de l ancien canevas, et
+                     faisaient lire ces entetes comme des eyebrows de section. */
+                  className="text-[12.5px] leading-[normal] font-semibold text-ds-texte-sourdine"
                 >
                   {t(`journal.colonnes.${c}`)}
                 </span>
@@ -391,6 +465,46 @@ export default async function AdminJournal({
             )}
           </div>
         )}
+          </section>
+
+          <section className={PANNEAU}>
+            <header className="mb-[18px]">
+              <h2 className={PANNEAU_TITRE}>{t("journal.repartition")}</h2>
+            </header>
+            {repartition === null ? (
+              <p className="text-[14px] text-ds-texte-corps">
+                {t("journal.repartitionIndisponible")}
+              </p>
+            ) : (
+              <Anneau
+                variante="compact"
+                total={repartition.total}
+                unite={t("journal.unite")}
+                part={(pourcent) => t("journal.part", { part: pourcent })}
+                parts={[
+                  {
+                    cle: "consultation",
+                    libelle: t("journal.famille.consultation"),
+                    valeur: repartition.consultations,
+                    trait: "var(--color-ds-succes)",
+                  },
+                  {
+                    cle: "parametre",
+                    libelle: t("journal.famille.parametre"),
+                    valeur: repartition.parametres,
+                    trait: "var(--color-ds-info)",
+                  },
+                  {
+                    cle: "suspension",
+                    libelle: t("journal.famille.suspension"),
+                    valeur: repartition.suspensions,
+                    trait: "var(--color-ds-alerte)",
+                  },
+                ]}
+              />
+            )}
+          </section>
+        </div>
       </div>
     </main>
   );

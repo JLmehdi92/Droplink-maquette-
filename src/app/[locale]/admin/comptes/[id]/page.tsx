@@ -143,7 +143,7 @@ export default async function FicheCompte({
             <span
               className={
                 "inline-flex items-center gap-1.5 rounded-ds-pill px-2.5 py-1 text-[12px] leading-[15px] font-semibold " +
-                (suspendu ? "bg-ds-erreur text-ds-erreur" : "bg-ds-succes-fond text-ds-succes")
+                (suspendu ? "bg-ds-erreur-fond text-ds-erreur" : "bg-ds-succes-fond text-ds-succes")
               }
             >
               <span

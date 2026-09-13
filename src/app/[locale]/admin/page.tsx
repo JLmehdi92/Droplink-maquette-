@@ -222,7 +222,7 @@ export default async function PanneauAdmin({
                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-ds-sm md:h-[34px] md:w-[34px] " +
                         (critique(a)
                           ? "bg-alerte-puce-fond text-ds-erreur"
-                          : "bg-ds-alerte text-ds-alerte")
+                          : "bg-ds-alerte-fond text-ds-alerte")
                       }
                     >
                       <Icone

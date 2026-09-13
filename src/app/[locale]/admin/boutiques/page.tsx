@@ -426,7 +426,7 @@ export default async function AdminBoutiques({
                           </td>
                           <td className={CELLULE}>
                             {suspendue(b) ? (
-                              <span className={PILULE + " bg-ds-erreur text-ds-erreur"}>
+                              <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur"}>
                                 {t("boutiques.suspendue")}
                               </span>
                             ) : (
@@ -488,11 +488,11 @@ export default async function AdminBoutiques({
                             plafond n'a pas besoin qu'on le lui dise : elle ne
                             prend plus rien en charge. */}
                         {suspendue(b) ? (
-                          <span className={PILULE + " bg-ds-erreur text-ds-erreur"}>
+                          <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur"}>
                             {t("boutiques.suspendue")}
                           </span>
                         ) : auDessus(b) ? (
-                          <span className={PILULE + " bg-ds-erreur text-ds-erreur"}>
+                          <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur"}>
                             {t("boutiques.plafondDepasse")}
                           </span>
                         ) : (
