@@ -65,6 +65,7 @@ export function BadgeStatut({
   teinte,
   Icone,
   compacte = false,
+  largeurFixe = false,
 }: {
   readonly libelle: string;
   readonly teinte: Teinte;
@@ -75,12 +76,19 @@ export function BadgeStatut({
    * vignette, une référence et un nom.
    */
   readonly compacte?: boolean;
+  /**
+   * Les cartes de statut de la documentation : 104 px de large, libellé centré —
+   * le `minWidth: 104` que le kit pose sur la pastille elle-même, pour que les
+   * quatre textes voisins commencent à la même abscisse.
+   */
+  readonly largeurFixe?: boolean;
 }) {
   if (compacte) {
     return (
       <span
         className={
           "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[11.5px] leading-[normal] lg:text-[11px] font-bold tracking-[-0.02em] whitespace-nowrap " +
+          (largeurFixe ? "min-w-[104px] justify-center " : "") +
           TEINTES[teinte]
         }
       >

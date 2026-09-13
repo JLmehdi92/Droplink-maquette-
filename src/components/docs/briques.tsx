@@ -1,48 +1,53 @@
-import { BookOpen, Calendar, CheckCircle, Clock, Info, TriangleAlert } from "lucide-react";
+import { BookOpen, Calendar, Check, Clock, Info, TriangleAlert } from "lucide-react";
 
 /**
- * LES BRIQUES DE LA DOCUMENTATION — `ui_kits/docs` du design system.
+ * LES BRIQUES DE LA DOCUMENTATION — `DocsParts.jsx` du kit `docs`, servi à 1280.
  *
- * LES VALEURS SONT CELLES DU KIT, RELEVÉES SUR SA PAGE SERVIE À 1280 px :
+ * ⚠️ LES VALEURS ONT ÉTÉ REPRISES DU KIT LE 14/09/2026, ET CE N'ÉTAIT PAS UNE
+ * RETOUCHE. Le port du 12/09 transposait à l'œil — titres à 26 contre 28, marges
+ * de 38 contre 48, paragraphes à 15 contre 15,5, cercles cochés à la place des
+ * coches — et il n'avait jamais été soustrait : 108 écarts de valeur au premier
+ * relevé. Chaque valeur ci-dessous vient de la soustraction, pas de la lecture.
  *
- *   colonne de texte   780 px au plus
- *   h1                 46 / 800 / interligne 1,05 / tracking -0,045em
- *   h2                 26 / 800 / tracking -0,03em, 38 px au-dessus
- *   h3                 17,5 / 700, 24 au-dessus, 8 en dessous
- *   paragraphe         15 / 400 / interligne 1,72, couleur de corps
- *   encart             `16px 18px`, rayon carte-lg, filet teinté, écart 13
- *   étape              pastille 28 au dégradé de marque, titre 15 / 700
- *   tableau            en-tête 13 / 700 sur fond creux, cellules 14 / 1,55
- *   question           `16px 18px`, rayon carte-lg, filet, ombre xs, 15,5 / 700
- *
- * ⚠️ CES BRIQUES NE SONT PAS DANS `components/core` DU DESIGN SYSTEM : elles
- * vivent dans le kit `docs`, qui les déclare pour lui seul. Les poser dans le
- * dossier partagé laisserait croire qu'elles servent ailleurs, et le premier
- * écran qui les emploierait hériterait de valeurs réglées pour une page de
- * documentation.
+ * `leading-[normal]` est posé sur la page : le kit n'écrit aucun interligne hors
+ * du texte courant, et Tailwind en imposerait un.
  */
 
+/** `H2` du kit : 28/800, -0,035em, 48 px au-dessus, ancré sous l'en-tête collant. */
 export function TitreSection({ id, children }: { readonly id: string; readonly children: React.ReactNode }) {
   return (
     <h2
       id={id}
-      className="mt-[38px] mb-3 scroll-mt-24 text-[26px] leading-[1.2] font-extrabold tracking-[-0.03em] text-ds-texte-titre"
+      className="mt-12 mb-3.5 scroll-mt-24 text-[28px] leading-[1.1] font-extrabold tracking-[-0.035em] text-balance text-ds-texte-fort max-[760px]:text-[23px] max-[560px]:text-[21px]"
     >
       {children}
     </h2>
   );
 }
 
-export function Paragraphe({ children }: { readonly children: React.ReactNode }) {
-  return <p className="my-3 text-[15px] leading-[1.72] text-ds-texte-corps">{children}</p>;
+/** `H3` du kit : 18/700, -0,02em. */
+export function SousTitre({ children }: { readonly children: React.ReactNode }) {
+  return (
+    <h3 className="mt-7 mb-2.5 text-[18px] leading-[1.1] font-bold tracking-[-0.02em] text-balance text-ds-texte-fort">
+      {children}
+    </h3>
+  );
 }
 
-export function Liste({ items }: { readonly items: readonly string[] }) {
+/** `P` du kit : 15,5 en interligne 1,7. */
+export function Paragraphe({ children }: { readonly children: React.ReactNode }) {
+  return <p className="mb-3.5 text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps">{children}</p>;
+}
+
+/** `UL` du kit : une coche simple à l'accent, trait 2,6 — pas un cercle coché. */
+export function Liste({ items }: { readonly items: readonly React.ReactNode[] }) {
   return (
-    <ul className="my-4 flex flex-col gap-2.5">
-      {items.map((item) => (
-        <li key={item} className="flex gap-2.5 text-[15px] leading-[1.6] text-ds-texte-corps">
-          <CheckCircle aria-hidden="true" size={17} strokeWidth={2} className="mt-[3px] flex-none text-ds-accent" />
+    // `pl-10` : le retrait par défaut du navigateur, que le kit ne remet pas à zéro
+    // — et c'est ce qu'il rend. Mesuré : ses coches commencent 40 px plus à droite.
+    <ul className="mb-4 flex flex-col gap-[9px] pl-10 max-[560px]:pl-4">
+      {items.map((item, i) => (
+        <li key={i} className="flex gap-2.5 text-[15.5px] leading-[1.6] text-ds-texte-corps">
+          <Check aria-hidden="true" size={16} strokeWidth={2.6} className="mt-1 flex-none text-ds-accent" />
           <span className="min-w-0">{item}</span>
         </li>
       ))}
@@ -50,13 +55,6 @@ export function Liste({ items }: { readonly items: readonly string[] }) {
   );
 }
 
-/**
- * L'ENCART, EN TROIS TONS.
- *
- * ⚠️ LE TON N'EST PAS DÉCORATIF : `alerte` dit « ceci peut vous surprendre »,
- * `info` dit « voici un détail utile ». Les peindre tous pareil reviendrait à
- * n'en signaler aucun.
- */
 export function Encart({
   ton = "info",
   titre,
@@ -68,7 +66,7 @@ export function Encart({
 }) {
   const peau =
     ton === "alerte"
-      ? { boite: "bg-ds-alerte-fond border-ds-amber-200", encre: "text-ds-alerte", Icone: TriangleAlert }
+      ? { boite: "bg-ds-alerte-fond border-[#F3DFB4]", encre: "text-ds-alerte", Icone: TriangleAlert }
       : { boite: "bg-ds-surface-teinte border-ds-violet-200", encre: "text-ds-accent", Icone: Info };
   const { Icone } = peau;
   return (
@@ -85,10 +83,10 @@ export function Encart({
 export function Etapes({
   items,
 }: {
-  readonly items: readonly { readonly titre: string; readonly texte: string }[];
+  readonly items: readonly { readonly titre: string; readonly texte: React.ReactNode }[];
 }) {
   return (
-    <ol className="my-5 flex list-none flex-col gap-3.5">
+    <ol className="my-5 flex list-none flex-col gap-3.5 pl-10 max-[560px]:pl-4">
       {items.map((e, i) => (
         <li key={e.titre} className="flex gap-3.5">
           <span className="grid h-7 w-7 flex-none place-items-center rounded-ds-pill degrade-ds-marque text-[13px] font-bold text-ds-texte-sur-marque">
@@ -105,9 +103,10 @@ export function Etapes({
 }
 
 /**
- * ⚠️ `table-fixed` ET UN `<colgroup>`, MÊME ICI. Sans `table-layout: fixed`, les
- * largeurs ne sont que des suggestions et le navigateur dimensionne par le
- * contenu — le défaut qui a coûté le plus cher sur l'écran des commandes.
+ * `Table` du kit — une grille, pas un `<table>`. Les rôles ARIA gardent la
+ * lecture tabulaire aux lecteurs d'écran ; la grille donne l'écart de 14 px
+ * entre colonnes que la référence porte, et que les bordures d'une table ne
+ * savent pas rendre. Sous 560 px les cellules s'empilent, comme au kit.
  */
 export function Tableau({
   entetes,
@@ -116,46 +115,51 @@ export function Tableau({
   readonly entetes: readonly string[];
   readonly lignes: readonly (readonly string[])[];
 }) {
-  const largeur = Math.round(100 / entetes.length);
+  const colonnes = { gridTemplateColumns: `repeat(${entetes.length},minmax(0,1fr))` };
   return (
-    <div className="my-5 overflow-x-auto">
-      <table className="w-full table-fixed border-collapse overflow-hidden rounded-ds-card border border-ds-filet text-left">
-        <colgroup>
-          {entetes.map((e) => (
-            <col key={e} style={{ width: `${largeur}%` }} />
+    <div role="table" className="my-5 overflow-hidden rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte">
+      <div
+        role="row"
+        style={colonnes}
+        className="grid gap-3.5 bg-ds-surface-page px-[18px] py-3 text-[12.5px] font-bold text-ds-texte-sourdine max-[560px]:hidden"
+      >
+        {entetes.map((e, i) => (
+          <span key={i} role="columnheader">
+            {e}
+          </span>
+        ))}
+      </div>
+      {lignes.map((l, n) => (
+        <div
+          key={n}
+          role="row"
+          style={colonnes}
+          className="grid items-center gap-3.5 border-t border-ds-filet px-[18px] py-[13px] text-[14px] text-ds-texte-corps max-[560px]:block max-[560px]:px-3.5 max-[560px]:py-3"
+        >
+          {l.map((c, i) => (
+            <span
+              key={i}
+              role="cell"
+              className={
+                "min-w-0 max-[560px]:block max-[560px]:py-[3px] " +
+                (i === 0 ? "font-semibold text-ds-texte-fort" : "text-ds-texte-corps")
+              }
+            >
+              {c}
+            </span>
           ))}
-        </colgroup>
-        <thead>
-          <tr className="bg-ds-surface-creux">
-            {entetes.map((e, i) => (
-              <th
-                key={i}
-                scope="col"
-                className="border-b border-ds-filet px-[14px] py-2.5 text-[13px] leading-[18px] font-bold text-ds-texte-fort"
-              >
-                {e}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {lignes.map((l) => (
-            <tr key={l[0]} className="border-t border-ds-filet">
-              {l.map((c, i) => (
-                <td
-                  key={i}
-                  className={
-                    "px-[14px] py-2.5 text-[14px] leading-[1.55] " +
-                    (i === 0 ? "font-semibold text-ds-texte-fort" : "text-ds-texte-corps")
-                  }
-                >
-                  {c}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** La carte d'un statut : pastille à gauche, sens à droite — la liste de statuts du kit. */
+export function CarteStatut({ pastille, texte }: { readonly pastille: React.ReactNode; readonly texte: string }) {
+  return (
+    <div className="flex items-center gap-3.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-4 py-3.5 max-[560px]:flex-wrap">
+      {pastille}
+      <span className="min-w-0 text-[14.5px] leading-[1.5] text-ds-texte-corps">{texte}</span>
     </div>
   );
 }
@@ -186,11 +190,11 @@ export function LigneAuteur({
 }: {
   readonly auteur: string;
   readonly source: string;
-  readonly misAJour: string;
+  readonly misAJour: React.ReactNode;
   readonly duree: string;
 }) {
   return (
-    <div className="my-[18px] flex flex-wrap items-center gap-3.5 border-y border-ds-filet pt-3.5 pb-1">
+    <div className="mt-[18px] mb-[22px] flex flex-wrap items-center gap-3.5 border-y border-ds-filet pt-3.5 pb-1">
       <span className="flex items-center gap-[9px]">
         <span className="grid h-8 w-8 place-items-center rounded-ds-pill degrade-ds-marque text-[13px] font-extrabold text-ds-texte-sur-marque">
           D
