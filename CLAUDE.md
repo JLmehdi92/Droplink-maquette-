@@ -612,8 +612,8 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**DIX-SEPT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur et le
-tableau de bord créé, les cinq que le kit admin dessine, la page client et son
+**DIX-HUIT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+tableau de bord et les paramètres créés, les cinq que le kit admin dessine, la page client et son
 lien mort, la connexion, l'inscription et les deux pages légales :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
@@ -635,6 +635,7 @@ lien mort, la connexion, l'inscription et les deux pages légales :
 | `/confidentialite` | `legal/confidentialite.html` à 1280 | 116 (0) | 18 (0) | **0** |
 | lien mort `/p/<inconnu>` | `client_link/not-found.html` à 1440 | 2 (0) | 2 (0) | **0** |
 | `/tableau-de-bord` (CRÉÉ) | `CLIC_KIT="Tableau de bord"` à 1690 | 48 (0) | 52 (0) | **0** |
+| `/parametres` (CRÉÉ) | `CLIC_KIT="Paramètres"` à 1690 | 49 (0) | 18 (0) | **0** |
 
 > ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
 > QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
@@ -805,19 +806,47 @@ panneaux est celui des Analyses, sous la même RLS, dans une taille « section �
 et un remplissage serré que le kit lui donne. Il n'est PAS la page d'arrivée —
 la connexion mène toujours aux commandes, l'écran où l'on passe sa journée.
 
-⚠️ **AJOUTER UNE ENTRÉE DE NAVIGATION ROUVRE LES CINQ ÉCRANS VENDEUR.** Leurs
+⚠️ **AJOUTER UNE ENTRÉE DE NAVIGATION ROUVRE LES ÉCRANS VENDEUR.** Leurs
 déclarations de décalage de la barre latérale citaient l'entrée « Tableau de
 bord » absente ; une fois créée, vingt d'entre elles ne désignaient plus rien.
-Le jour où « Paramètres » existera, il faudra refaire la même passe.
+« Paramètres » a refait la même passe sur six écrans.
 
-**▶️ RESTE : les paramètres vendeur** (`SettingsView.jsx`). Le kit y dessine
-presque uniquement des capacités que le produit n'a pas — nom, téléphone,
-photo, fuseau, préférences de notification, 2FA, sessions, suppression de
-compte et de données, abonnement, intégrations. Ce qui existe déjà en base :
-l'adresse du compte, `profiles.locale`, `profiles.account_type`, la
-déconnexion. Changer d'adresse ou de mot de passe depuis une session ouvre une
-surface de sécurité (brief §9). **Le périmètre de cet écran est une décision de
-Wassim.**
+**LES PARAMÈTRES SONT CRÉÉS — décision de Wassim : « tu ajoutes les features
+mais bien sécurisé ».** Première phase : nom affiché, adresse, mot de passe,
+langue de l'interface, sessions actives. **La double authentification, l'export
+et la suppression des données et du compte viennent aux phases suivantes.**
+
+⚠️ **TOUT CE QUI PROTÈGE LE COMPTE EXIGE LE MOT DE PASSE ACTUEL.** Une session ne
+suffit pas : un cookie volé en est une. `lib/auth/reauthentification.ts`
+consomme le quota du mot de passe AVANT de vérifier, lit l'adresse EN BASE, et
+ferme aussitôt la session de vérification, ouverte sur un client dédié
+(`lib/supabase/verification.ts`, sa propre cloison) — `server.ts` aurait
+remplacé la session du vendeur. Plancher de 1,2 s sur chaque geste.
+
+⚠️ **UNE CONSTANTE EXPORTÉE D'UN MODULE `"use client"` ARRIVE VIDE DANS UN
+COMPOSANT SERVEUR.** Ce qu'il reçoit est une RÉFÉRENCE client, pas la chaîne :
+les boutons et les champs de l'écran sortaient sans filet ni fond, typecheck,
+lint et tests verts. Seule la capture l'a montré.
+
+⚠️ **SUPABASE ENREGISTRAIT « node » COMME APPAREIL DE CHAQUE SESSION.** Une
+session s'ouvre depuis une Server Action : c'est notre serveur qui appelle
+l'authentification. `server.ts` transmet désormais l'agent du navigateur —
+sans quoi « Voir les sessions » n'aurait reconnu aucun appareil, en production
+comme en local.
+
+⚠️ **UNE DATE DU JEU DE MESURE NE DOIT PAS ÊTRE « MAINTENANT ».** La date de
+mise à jour des colis déplaçait « Actualiser » de 0 à 13 px d'une minute à
+l'autre, et sa déclaration mourait un passage sur deux. `verifier-ecran-migre`
+la fixe en fin de jeu sur celle du kit, en suspendant le déclencheur qui la
+réécrit, dans une transaction.
+
+**La production attend `pnpm db:migrate` pour 147 à 155, AVANT le
+déploiement.**
+
+**▶️ RESTE : la double authentification** (enrôlement TOTP, défi à la connexion,
+policies exigeant `aal2` quand un facteur existe), **puis l'export et la
+suppression** — gestes irréversibles, qui exigent confirmation recopiée, mot de
+passe actuel, purge R2 et trace.
 
 ### Comment on vérifie un écran migré
 
