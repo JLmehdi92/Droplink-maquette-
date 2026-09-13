@@ -612,8 +612,8 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**DIX-HUIT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
-tableau de bord et les paramètres créés, les cinq que le kit admin dessine, la page client et son
+**DIX-NEUF ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+tableau de bord, les paramètres et la vérification en deux étapes créés, les cinq que le kit admin dessine, la page client et son
 lien mort, la connexion, l'inscription et les deux pages légales :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
@@ -635,7 +635,8 @@ lien mort, la connexion, l'inscription et les deux pages légales :
 | `/confidentialite` | `legal/confidentialite.html` à 1280 | 116 (0) | 18 (0) | **0** |
 | lien mort `/p/<inconnu>` | `client_link/not-found.html` à 1440 | 2 (0) | 2 (0) | **0** |
 | `/tableau-de-bord` (CRÉÉ) | `CLIC_KIT="Tableau de bord"` à 1690 | 48 (0) | 52 (0) | **0** |
-| `/parametres` (CRÉÉ) | `CLIC_KIT="Paramètres"` à 1690 | 49 (0) | 18 (0) | **0** |
+| `/parametres` (CRÉÉ) | `CLIC_KIT="Paramètres"` à 1690 | 46 (0) | 18 (0) | **0** |
+| `/verification` (CRÉÉ) | `auth/index.html#verification` à **1440**, `DEUX_ETAPES=1` | 0 (0) | 0 (0) | **0** |
 
 > ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
 > QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
@@ -840,13 +841,44 @@ l'autre, et sa déclaration mourait un passage sur deux. `verifier-ecran-migre`
 la fixe en fin de jeu sur celle du kit, en suspendant le déclencheur qui la
 réécrit, dans une transaction.
 
-**La production attend `pnpm db:migrate` pour 147 à 155, AVANT le
+**LA DOUBLE AUTHENTIFICATION EST EN PLACE, ET ELLE TIENT EN BASE.**
+
+⚠️ **UNE REDIRECTION NE PROTÈGE RIEN CONTRE QUI CONNAÎT LE MOT DE PASSE.** Il
+obtient une session `aal1` valide et appelle PostgREST à la main. La migration
+156 pose un **crochet `db_pre_request`** (`exiger_aal_du_compte`), exécuté avant
+CHAQUE requête — tables ET fonctions `security definer`, que des policies
+restrictives n'auraient pas couvertes. Éprouvé avec de vrais facteurs TOTP
+(`tests/aide/totp.ts`), falsifié trois fois. `pnpm verif:prod` ne compare pas
+les réglages de rôle : après `db:migrate`, vérifier à la main que
+`authenticator` porte `pgrst.db_pre_request`.
+
+⚠️ **LE PROFIL REND UN ÉTAT, PAS `null`.** `lireEtatDuCompte()` distingue
+`profil`, `aucun` et `verification` ; `lireProfilVendeur()` rend toujours
+`null` pour les deux derniers, donc tout appelant existant refuse, fermé. Les
+gardes qui ORIENTENT — layout vendeur, pages, suite de connexion, `/bienvenue`,
+récupération — lisent l'état. ⚠️ **Le layout redirige EN PARALLÈLE de la page,
+et sa redirection gagne** : le brancher seul sur la page envoyait une session
+`aal1` vers la connexion, en boucle.
+
+⚠️ **ÉCRAN ÉCRIT DANS LE KIT D'ABORD** (`VerifyScreen` dans `ui_kits/auth`, le
+panneau d'activation dans `SettingsView`) — et **le design system est
+gitignoré** : ces planches ne voyagent pas avec le dépôt. La planche ne défile
+pas : elle se mesure à **1440**, pas à 1425.
+
+⚠️ **APPAREIL PERDU ET MOT DE PASSE OUBLIÉ : AUCUN RECOURS EN LIBRE-SERVICE.**
+Supabase refuse en `aal1` le changement de mot de passe et le retrait du
+facteur. La clé de secours montrée à l'activation est le recours ; au-delà,
+seul un geste de service retire le facteur — décision de Wassim s'il faut
+l'outiller côté administration.
+
+**La production attend `pnpm db:migrate` pour 147 à 156, AVANT le
 déploiement.**
 
-**▶️ RESTE : la double authentification** (enrôlement TOTP, défi à la connexion,
-policies exigeant `aal2` quand un facteur existe), **puis l'export et la
-suppression** — gestes irréversibles, qui exigent confirmation recopiée, mot de
-passe actuel, purge R2 et trace.
+**▶️ RESTE : l'export des données, puis la suppression** des données et du
+compte — gestes irréversibles, qui exigent confirmation recopiée, mot de passe
+actuel, purge R2 et trace. ⚠️ La décision 9 du brief interdit la suppression de
+compte **par l'administration** ; une suppression par le vendeur lui-même est
+une autre question.
 
 ### Comment on vérifie un écran migré
 
