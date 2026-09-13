@@ -612,8 +612,8 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**DIX ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, puis les cinq
-que le kit admin dessine :
+**ONZE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, les cinq
+que le kit admin dessine, et la page client :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -627,6 +627,7 @@ que le kit admin dessine :
 | `/admin/boutiques` | `AdminShops` | 78 (0) | 53 (0) | **0** |
 | `/admin/journal` | `AdminLogs` | 84 (0) | 51 (0) | **0** |
 | `/admin/parametres` | `AdminSettings` | 92 (0) | 49 (0) | **0** |
+| `/p/[token]` | `ClientPage`, kit **client_link** à 1440 | 39 (0) | 23 (0) | **0** |
 
 > ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
 > QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
@@ -708,50 +709,51 @@ parce que ce n'était pas fait.
 ça marche » en trois étapes, six cartes de fonctionnalité, un pied en colonnes,
 et la bannière d'appel dégradée du kit.
 
-**▶️ PROCHAIN ÉCRAN : `/p/[token]`**, contre `client_link` à **1440**. Il est
-DÉJÀ MESURÉ, et voici de quoi reprendre sans re-découvrir :
+**LA PAGE CLIENT `/p/[token]` SORT EN CODE 0**, contre `client_link` à
+**1440** — 39 manquants, 23 en trop, 22 écarts de valeur, tous déclarés. Elle
+passe de 93 éléments rendus à 201, et vérifiée à 390 px en fr, en et zh-CN.
 
 ```
 node scripts/comparer-au-kit.mjs   "http://127.0.0.1:8123/ui_kits/client_link/index.html" 1440   out/editeur/kit-client.json out/editeur/KIT-client.png
-
 MSYS_NO_PATHCONV=1 INVENTAIRE=out/editeur node scripts/verifier-ecran-migre.mjs   http://localhost:<port> "/p/{jeton}" 1440 out/editeur
+LANGUE_BOUTIQUE=en MSYS_NO_PATHCONV=1 node scripts/verifier-ecran-migre.mjs   http://localhost:<port> "/p/{jeton}" 390 <dossier>
 ```
 
-Dernier relevé : **kit 277 éléments, produit 93 ; 57 manquants, 27 en trop,
-5 écarts de valeur.** Les trois listes sont dans
-`out/editeur/listes-client.json`.
+⚠️ **CE N'ÉTAIT PAS UNE PASSE DE DÉTAIL, ET ELLE A DEMANDÉ UNE MIGRATION.** Le
+bandeau à la couleur du vendeur a laissé place aux cartes du kit : identité de
+la boutique, « Votre commande » avec sa référence et une frise à quatre étapes
+datées, galerie en grille uniforme, validation, historique, livraison, contact.
+La référence courte (« #A1B2C3 ») n'était pas lisible par la page — la lecture
+publique ne rend pas l'identifiant, et c'est délibéré : **la migration 153** la
+calcule EN BASE, par la formule de `referenceCourte()`, et
+`tests/rls/page-publique.test.ts` compare les deux sur une vraie commande.
+**La production attend `pnpm db:migrate` pour 147 à 153, AVANT le déploiement** ;
+sans la 153, la carte omet sa référence plutôt que d'écrire « undefined ».
 
-⚠️ **CE N'EST PAS UNE PASSE DE DÉTAIL : LA STRUCTURE DIFFÈRE.** Le kit compose
-une page BLANCHE avec une carte d'identité de boutique (« Une commande de » +
-logo rond + nom + description + réseaux), une carte « Votre commande #REF » avec
-une frise à quatre étapes DATÉES, une carte « Informations de livraison »
-(transporteur, numéro, pays, date estimée), une carte « Historique du suivi » à
-cinq entrées, et une carte « Une question ? ». Le produit peint un BANDEAU à la
-couleur du vendeur et range tout en deux colonnes. La base porte déjà presque
-tout ce qui manque — `shops.description` depuis la migration 147, les points de
-passage, le transporteur, l'estimation.
+⚠️ **LA PAGE LIT `LANGUE_BOUTIQUE`, PAS SON URL.** Elle vit hors de `[locale]` :
+la sonde ne peut la vérifier en anglais ou en chinois qu'en réglant la langue de
+la boutique du jeu, et c'est ce que fait cette variable.
 
-⚠️ **ET CE QUE LE KIT MONTRE QU'ON NE FERA PAS** : ses trois gages de confiance
-(« Qualité 1:1 · Produits premium ») — le principe II interdit « 1:1 », qui est
-du vocabulaire de rep, et les deux autres sont des promesses que la base ne
-porte pas ; sa carte « Notifications automatiques », qui affirme au client qu'il
-sera prévenu alors que rien ne l'y abonne (décision 3 : pas de formulaire sur
-cette page) ; sa carte promotionnelle « Découvrir DropLink », alors que la
-décision 25 exige une mention SECONDAIRE, jamais confondable avec l'expéditeur ;
-son sélecteur de langue, la langue étant celle du VENDEUR ; et son lien « Aide »,
-qui ne mène nulle part.
+⚠️ **LE BANDEAU ÉCRIT SUR UNE TEINTE, ET `texte` NE SUFFISAIT PAS.** `texte` vise
+4,5:1 contre le fond de page ; une teinte à 10 % est plus sombre. `resoudreAccent`
+rend désormais `teinte` et `surTeinte`, re-mesurée contre la teinte, et
+`tests/unit/contraste.test.ts` l'éprouve sur les couleurs extrêmes. Le gris de
+corps du kit sur cette teinte tombait à 4,3:1 : le bandeau écrit un cran plus
+foncé.
 
-⚠️ **C'EST LA PAGE LA PLUS CONTRAINTE DU PRODUIT**, et un port qui les oublierait
-casserait ce qu'aucune porte ne mesure : LCP sous 2 s, 300 Ko hors médias (on est
-à **212,5**), galerie AVANT le détail au téléphone, vignettes en deux colonnes,
-photo pleine hors du document tant que le visionneur est fermé, aucun
-`backdrop-blur`, arbitrage QC juste après ce qu'il juge, et la couleur résolue
-par `resoudreAccent()` — le kit est dessiné pour l'accent PAR DÉFAUT, le produit
-doit tenir avec un jaune vif.
+**CE QUE LA PAGE NE PORTE PAS, ET QUI EST DÉCLARÉ** : les gages « Qualité 1:1 »
+(principe II) et leurs promesses, la carte « Notifications automatiques »
+(décision 3), la carte « Découvrir DropLink » et le « © DropLink » du pied
+(décision 25), le sélecteur de langue, le lien « Aide », le pays de livraison
+(la base n'a pas d'adresse), le bouton « Voir tout » (36 px, sous la cible
+tactile), et « en temps réel », qui n'est pas vrai.
 
-Puis : l'authentification · les pages légales. Et deux écrans sont à CRÉER, pas à
-migrer : le tableau de bord (`DashboardHome.jsx`) et les paramètres vendeur
-(`SettingsView.jsx`).
+**▶️ PROCHAIN ÉCRAN : l'authentification** (connexion, inscription) contre le kit
+`auth`, puis les pages légales contre `legal`, puis les deux pages de lien mort
+(`client_link/link-expired.html`, `not-found.html`).
+
+Et deux écrans sont à CRÉER, pas à migrer : le tableau de bord
+(`DashboardHome.jsx`) et les paramètres vendeur (`SettingsView.jsx`).
 
 ### Comment on vérifie un écran migré
 
