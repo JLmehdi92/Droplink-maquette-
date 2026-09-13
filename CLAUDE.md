@@ -612,8 +612,8 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**ONZE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, les cinq
-que le kit admin dessine, et la page client :
+**TREIZE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, les cinq
+que le kit admin dessine, la page client, la connexion et l'inscription :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -628,6 +628,8 @@ que le kit admin dessine, et la page client :
 | `/admin/journal` | `AdminLogs` | 84 (0) | 51 (0) | **0** |
 | `/admin/parametres` | `AdminSettings` | 92 (0) | 49 (0) | **0** |
 | `/p/[token]` | `ClientPage`, kit **client_link** à 1440 | 39 (0) | 23 (0) | **0** |
+| `/connexion` | `LoginScreen`, kit **auth** à 1425 | 13 (0) | 1 (0) | **0** |
+| `/inscription` | `CLIC_KIT="Créer un compte"` | 46 (0) | 2 (0) | **0** |
 
 > ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
 > QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
@@ -748,8 +750,32 @@ foncé.
 (la base n'a pas d'adresse), le bouton « Voir tout » (36 px, sous la cible
 tactile), et « en temps réel », qui n'est pas vrai.
 
-**▶️ PROCHAIN ÉCRAN : l'authentification** (connexion, inscription) contre le kit
-`auth`, puis les pages légales contre `legal`, puis les deux pages de lien mort
+**LA CONNEXION ET L'INSCRIPTION SORTENT EN CODE 0** contre le kit `auth`, à
+**1425** : sa page porte une barre de défilement, et l'outil refuse de soustraire
+deux largeurs utiles différentes. Vérifiées à 390 px dans les trois langues.
+
+```
+node scripts/comparer-au-kit.mjs "http://127.0.0.1:8123/ui_kits/auth/index.html" 1440 out/editeur/kit-connexion.json
+CLIC_KIT="Créer un compte" node scripts/comparer-au-kit.mjs "http://127.0.0.1:8123/ui_kits/auth/index.html" 1440 out/editeur/kit-inscription.json
+AUTH_GOOGLE_ACTIF=1 node scripts/servir-contre-tests.mjs
+MSYS_NO_PATHCONV=1 INVENTAIRE=out/editeur node scripts/verifier-ecran-migre.mjs http://localhost:<port> "/fr/connexion,/fr/inscription" 1425 out/editeur
+```
+
+⚠️ **LE SERVEUR DE MESURE DOIT ÊTRE LANCÉ AVEC `AUTH_GOOGLE_ACTIF=1`.** Sans lui
+le bouton Google rend `null`, et la mesure se fait sur une carte que la
+production ne sert pas. C'est exactement ainsi qu'est resté caché le défaut de
+cette passe : le bouton porte son séparateur « ou », les deux pages en posaient
+un SECOND — deux « ou » empilés en production, un « ou continuer avec » suivi de
+rien partout ailleurs. Le séparateur vit désormais dans `bouton-google.tsx`, non
+exporté.
+
+⚠️ **UNE GRILLE SANS COLONNE DÉCLARÉE N'EST PAS UNE GRILLE À UNE COLONNE.** Sa
+piste implicite est `auto`, qui prend la largeur MINIMALE de son contenu : la
+carte d'accès débordait de 8 px à 390, parce qu'un champ mot de passe réclamait
+330 px. `grid-cols-[minmax(0,1fr)]` sous le palier.
+
+**▶️ PROCHAIN ÉCRAN : les pages légales** (`/conditions`, `/confidentialite`)
+contre le kit `legal`, puis les deux pages de lien mort
 (`client_link/link-expired.html`, `not-found.html`).
 
 Et deux écrans sont à CRÉER, pas à migrer : le tableau de bord
