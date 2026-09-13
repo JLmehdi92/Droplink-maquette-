@@ -2815,5 +2815,271 @@
         "raison": "Les entrees que la sonde et les suites ont elles-memes ecrites. Deux d entre elles portent une decision : le MOTIF d une suspension s affiche EN CLAIR sur la ligne, jamais replie derriere un detail que personne n ouvre — c est la piece qu on demanderait en cas de litige ; et l AVANT d un parametre est rendu a cote de l apres, sans quoi la ligne dirait « le seuil vaut maintenant 1 200 », ce que la table dit deja."
       }
     ]
+  },
+  "fr-admin-parametres": {
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble",
+          "Boutiques"
+        ],
+        "motif": "structure",
+        "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13 et hauteur 44 sont ceux de l entree entiere."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "structure",
+        "raison": "Position et largeur. Le kit ecrit le role dans sa barre superieure, en haut a droite ; nous l ecrivons dans le bloc d identite au BAS de la colonne."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Commandes",
+          "Statistiques",
+          "Support"
+        ],
+        "motif": "contrainte",
+        "raison": "Trois ecrans du kit admin que le depot n a pas, donc trois entrees de navigation qui meneraient a un 404 — pire qu une entree absente."
+      },
+      {
+        "textes": [
+          "Abonnements",
+          "Paiements",
+          "Plan par défaut",
+          "Limite de commandes (plan gratuit)",
+          "Nouveaux abonnements",
+          "Paiements échoués"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CONTRAINTE N°1 INTERDIT TOUT CODE DE FACTURATION en phase 1, et il n existe aucune colonne de plan. Un « plan par defaut » et une « limite de commandes du plan gratuit » reglent une facturation qui n existe pas ; les notifications d abonnement et de paiement echoue n ont rien a annoncer."
+      },
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Logs système",
+          "Paramètres",
+          "Nouveaux utilisateurs",
+          "Tickets support",
+          "Gérez la configuration globale de DropLi"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DU PRODUIT GAGNE, ET IL EST LE MEME PARTOUT. « Parametres systeme » dit ce que l ecran regle : les seuils de la plateforme, pas les preferences de celui qui regarde. Et notre sous-titre dit ce que l ecran FAIT de chaque geste — « chaque modification est ecrite au journal d audit, avec l ancienne et la nouvelle valeur » — parce que c est la seule chose qu on veut avoir lue avant de toucher a un chiffre."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "admin@droplink.fr"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE DU KIT N EST PAS PORTEE, comme sur les quatre autres ecrans d administration. « Ctrl K » annonce une recherche transverse qui n existe pas. La carte decorative garde sa geometrie en bas de colonne et porte notre contenu."
+      },
+      {
+        "textes": [
+          "Général",
+          "Emails",
+          "Sécurité",
+          "Intégrations",
+          "Apparence",
+          "Système"
+        ],
+        "motif": "contrainte",
+        "raison": "SIX ONGLETS POUR SIX SOUS-ECRANS QUE LE DEPOT N A PAS. Le kit repartit ses reglages sur sept pages ; nous n en avons qu une, et elle porte TOUT ce qui est reellement reglable. Des onglets qui menent a six pages vides seraient pires que leur absence — et le decoupage suivrait le dessin plutot que ce que la base contient."
+      },
+      {
+        "textes": [
+          "Informations de l'application",
+          "Paramètres généraux de votre plateforme.",
+          "Nom de l'application",
+          "Description",
+          "URL du site",
+          "Email de contact",
+          "Logo actuel",
+          "Formats acceptés : PNG, JPG, SVG Taille ",
+          "Changer le logo",
+          "Fuseau horaire et langue",
+          "Paramètres régionaux de la plateforme.",
+          "Fuseau horaire",
+          "Langue par défaut",
+          "Format de date",
+          "Format de nombre"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUNE DE CES VALEURS N EXISTE EN BASE, ET `parametres_admis` EST UN INVENTAIRE FERME. La table qui autorise les cles de `system_settings` porte une ligne par reglage, avec ses bornes et sa raison : ecrire un nom d application, une URL, un logo ou un fuseau demanderait d abord d y ajouter des lignes, donc de decider que ce sont des reglages. Ils ne le sont pas — la langue vient du VENDEUR, le fuseau du navigateur, et le nom du produit ne se reconfigure pas depuis le produit."
+      },
+      {
+        "textes": [
+          "Maintenance",
+          "Mode maintenance et accès à la plateform",
+          "Mode maintenance",
+          "Quand le mode maintenance est activé, se",
+          "Message de maintenance",
+          "Nous effectuons actuellement une mainten"
+        ],
+        "motif": "donnee",
+        "raison": "IL N EXISTE AUCUN MODE MAINTENANCE, et ce n est pas un oubli d ecran : il faudrait que CHAQUE surface le lise avant de rendre quoi que ce soit, page publique comprise. Un interrupteur qui n eteindrait rien serait le pire des deux mondes — il a la forme d une coupure. La coupure qui EXISTE est celle des comptes, et elle vit sur l ecran des comptes."
+      },
+      {
+        "textes": [
+          "Configuration par défaut",
+          "Paramètres par défaut pour les nouveaux ",
+          "Stockage par défaut",
+          "Durée de conservation des données"
+        ],
+        "motif": "donnee",
+        "raison": "DEUX DE CES QUATRE REGLAGES SONT SUR L ECRAN, MAIS COMME CONSTATS et non comme champs : le stockage par compte n a AUCUN plafond applique — l ecran l ecrit « Aucun » plutot que d afficher un nombre qui ne refuserait rien — et la duree de conservation est celle de la PURGE DES REPONSES BRUTES, 90 jours apres le dernier mouvement, figee dans le code de la tache. Les rendre modifiables demanderait de les ajouter a `parametres_admis` avec leurs bornes, donc de decider de leur plage."
+      },
+      {
+        "textes": [
+          "Notifications administrateur",
+          "Recevez des notifications importantes.",
+          "Erreurs système",
+          "Rapport quotidien",
+          "Enregistrer"
+        ],
+        "motif": "donnee",
+        "raison": "LES NOTIFICATIONS D ADMINISTRATION N EXISTENT PAS ENCORE, et l ecran le DIT plutot que de les dessiner : son interrupteur « Notifications par email » porte « Non deployees : rien n est envoye ». Le seul envoi reel du produit est l alerte du veilleur mutuel, qui part par email sans reglage — une alerte qu on peut eteindre depuis l ecran qu elle surveille n est plus une alerte. Le bouton « Enregistrer » suit : chaque reglage s ecrit ici INDIVIDUELLEMENT, parce que la trace est posee par un declencheur qui consigne l ancienne et la nouvelle valeur — un enregistrement groupe rendrait UNE ligne de journal pour quatre changements."
+      },
+      {
+        "textes": [
+          "Zone dangereuse",
+          "Actions irréversibles sur la plateforme.",
+          "Vider les logs",
+          "Supprime définitivement tous les logs sy",
+          "Réinitialiser la plateforme",
+          "Cette action supprimera toutes les donné",
+          "Réinitialiser"
+        ],
+        "motif": "contrainte",
+        "raison": "LA « ZONE DANGEREUSE » EST EXACTEMENT CE QUE LE BRIEF INTERDIT. Le journal d audit est APPEND-ONLY : ni modifiable, ni effacable, y compris par un administrateur — c est ce qui lui donne sa valeur de piece en cas de litige, et un bouton « vider les logs » detruirait la seule chose que cet ecran garantit. La decision 9 ferme de meme toute suppression : suspendre est REVERSIBLE, et la lecture tracee suffit au diagnostic. Un bouton « reinitialiser la plateforme » n existera jamais."
+      },
+      {
+        "textes": [
+          "Statut des services",
+          "État actuel des services DropLink.",
+          "Application web",
+          "Opérationnel",
+          "API",
+          "Base de données",
+          "Stockage fichiers",
+          "Service emails",
+          "Service de suivi",
+          "Sauvegardes",
+          "Gestion des sauvegardes de la plateforme",
+          "Dernière sauvegarde",
+          "8 sept. 2025 à 03:24",
+          "Réussie",
+          "Lancer une sauvegarde maintenant",
+          "Sauvegardes automatiques",
+          "Tous les jours à 03:00"
+        ],
+        "motif": "contrainte",
+        "raison": "L ETAT DES SERVICES VIT SUR L ECRAN SURVEILLANCE, a un onglet, ou il est MESURE — battements des taches de fond, sante de l infrastructure — plutot qu illustre par six pastilles vertes. Le repeter ici ferait deux endroits ou lire la meme chose, et un jour deux reponses. Les SAUVEGARDES, elles, sont celles de Supabase : elles ne se declenchent ni ne se lisent depuis le produit, et un bouton « lancer une sauvegarde » qui ne lancerait rien serait pire que son absence."
+      },
+      {
+        "textes": [
+          "Informations système",
+          "Détails techniques de votre installation",
+          "Version",
+          "v1.2.4",
+          "Environnement",
+          "Production",
+          "Framework",
+          "Next.js 14.2.1",
+          "PostgreSQL 15.3",
+          "Stockage",
+          "Supabase Storage",
+          "Dernière mise à jour"
+        ],
+        "motif": "donnee",
+        "raison": "UNE CARTE DE VERSIONS ECRITES EN DUR EST UN MENSONGE EN ATTENTE. Le kit annonce « Next.js 14.2.1 » et « Supabase Storage » ; le produit tourne sur Next 16 et stocke chez Cloudflare R2 — la carte de reference est deja fausse de deux lignes sur six. Les rendre justes demanderait de les LIRE a l execution, et aucune des six ne fonde une decision : ce qui compte sur cette surface, c est ce qui est regle et ce qui est trace."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend",
+          "Chaque modification est écrite au journa"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT et le sous-titre de l ecran — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte d administration cree par la sonde, differente a chaque passage. Un motif ancre plutot que la valeur relevee."
+      },
+      {
+        "textes": [
+          "Plafonds par compte",
+          "Vérifiés en base, pas seulement dans l'i",
+          "Commandes par mois",
+          "Au-delà, la création est refusée",
+          "Stockage par compte",
+          "Aucun plafond n'est appliqué",
+          "Aucun",
+          "Médias par commande",
+          "Dont 3 vidéos au maximum",
+          "Poids maximum d'une vidéo",
+          "En mégaoctets · provisoire, à calibrer",
+          "Suivi des colis",
+          "Le seul poste de coût variable du produi",
+          "Seuil d'alerte colis",
+          "Signale un compte au-delà de ce nombre",
+          "Silence nommé après",
+          "En jours sans mouvement",
+          "Abandon du suivi après",
+          "En jours, ou 16 interrogations vides",
+          "Purge des réponses brutes",
+          "En jours après le dernier mouvement",
+          "Tâche en retard après",
+          "En minutes sans battement",
+          "Limitation de débit",
+          "Par fenêtre d'une minute, comptée en bas",
+          "Jeton inconnu",
+          "Jeton valide",
+          "Dépôts de médias",
+          "Interrupteurs",
+          "Effet immédiat sur toute la plateforme.",
+          "Inscriptions ouvertes",
+          "Fermer n'affecte pas les comptes existan",
+          "Interrogation des transporteurs",
+          "Couper arrête la facturation à la prise ",
+          "Notifications par email",
+          "Non déployées : rien n'est envoyé"
+        ],
+        "motif": "contrainte",
+        "raison": "CE QUE LE PRODUIT REGLE REELLEMENT, et le kit n en dessine rien. Ses sept onglets reglent une application generique — nom, logo, fuseau, plans, sauvegardes ; les quatre cartes d ici reglent LES SEULS SEUILS QUI EXISTENT, et `parametres_admis` en est l inventaire ferme, bornes comprises. Chaque sous-titre dit ce que la carte GARANTIT plutot que ce qu elle contient — « verifies en base, pas seulement dans l interface », « effet immediat sur toute la plateforme » — et chaque aide dit la consequence du chiffre, pas sa definition : « couper arrete la facturation a la prise en charge » est la seule phrase qui compte au-dessus de cet interrupteur. Les valeurs grisees sont des CONSTATS, non des champs : elles vivent dans le code et se changent au deploiement, et l ecran le dit plutot que de faire croire l inverse."
+      },
+      {
+        "motifs": [
+          "^Modifié le \\d{1,2} [a-zéû]+ \\d{4} à \\d{2}:\\d{2}"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D HISTORIQUE D UN REGLAGE, ecrite par le jeu de mesure. Elle dit QUAND le seuil a ete change et PAR QUI — et « le compte auteur n existe plus » quand la cle etrangere s est denouee, parce que `system_settings` survit a la suppression de son auteur. Le kit n a pas d equivalent : ses champs ne disent pas d ou vient leur valeur."
+      },
+      {
+        "textes": [
+          "Les secrets ne sont pas ici",
+          "Clés d'API, jeton de stockage et clé de "
+        ],
+        "motif": "contrainte",
+        "raison": "CE QUI N EST PAS ICI EST DIT, plutot que laisse a deviner. Un ecran de parametres muet sur les secrets laisse chercher ou les regler — et la recherche finit par une cle collee quelque part. La cle de service ne quitte jamais le serveur : c est le principe VI, et cet encart est le seul endroit du produit ou il se lit."
+      }
+    ]
   }
 }

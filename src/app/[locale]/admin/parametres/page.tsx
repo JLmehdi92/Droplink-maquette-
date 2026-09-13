@@ -4,8 +4,9 @@ import {
   setRequestLocale,
 } from "next-intl/server";
 import type { Metadata } from "next";
-import { Icone } from "@/components/icone";
 import { CarteReglages } from "@/components/admin/carte-reglages";
+import type { LucideIcon } from "lucide-react";
+import { Gauge, Lock, Timer, ToggleRight, Truck } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { RangeeConstatee, type FormeConstatee } from "@/components/admin/rangee-constatee";
 import { ReglageInterrupteur } from "@/components/admin/reglage-interrupteur";
@@ -86,14 +87,22 @@ type Rangee =
   | { readonly genre: "absent"; readonly id: string }
   | { readonly genre: "eteint"; readonly id: string };
 
+/*
+ * L ICÔNE DE CHAQUE CARTE, comme le kit en pose une. Elle ne porte AUCUNE
+ * information — le titre juste à côté dit tout — et elle est `aria-hidden` :
+ * c est un repère de balayage entre quatre cartes qui se ressemblent, rien de
+ * plus.
+ */
 const CARTES: readonly {
   readonly id: string;
   readonly colonne: "gauche" | "droite";
+  readonly icone: LucideIcon;
   readonly rangees: readonly Rangee[];
 }[] = [
   {
     id: "plafonds",
     colonne: "gauche",
+    icone: Gauge,
     rangees: [
       { genre: "reglage", cle: "plafond_commandes_mensuel" },
       { genre: "absent", id: "stockage_par_compte" },
@@ -104,6 +113,7 @@ const CARTES: readonly {
   {
     id: "suivi",
     colonne: "gauche",
+    icone: Truck,
     rangees: [
       { genre: "reglage", cle: "seuil_colis_par_compte" },
       { genre: "constate", id: "silence_jours" },
@@ -118,6 +128,7 @@ const CARTES: readonly {
   {
     id: "debit",
     colonne: "droite",
+    icone: Timer,
     rangees: [
       { genre: "constate", id: "debit_inconnu", sansAide: true },
       { genre: "constate", id: "debit_valide", sansAide: true },
@@ -127,6 +138,7 @@ const CARTES: readonly {
   {
     id: "interrupteurs",
     colonne: "droite",
+    icone: ToggleRight,
     rangees: [
       { genre: "reglage", cle: "inscriptions_ouvertes" },
       { genre: "reglage", cle: "suivi_actif" },
@@ -243,6 +255,7 @@ export default async function ParametresAdmin({
         key={c.id}
         titre={t("carte." + c.id + ".titre")}
         sousTitre={t("carte." + c.id + ".sousTitre")}
+        icone={c.icone}
       >
         {c.rangees.map(rendreRangee)}
       </CarteReglages>
@@ -272,7 +285,7 @@ export default async function ParametresAdmin({
                 écran de paramètres muet sur les secrets laisse chercher où les
                 régler — et la recherche finit par une clé collée quelque part. */}
             <section className="flex gap-3 rounded-ds-card border border-ds-filet bg-ds-surface-teinte p-4 md:rounded-ds-card-lg md:p-[22px]">
-              <Icone nom="lock" className="mt-px shrink-0 text-[18px] text-ds-accent-encre" />
+              <Lock size={18} strokeWidth={1.9} aria-hidden="true" className="mt-px shrink-0 text-ds-accent-encre" />
               <div>
                 <p className="text-[14px] font-bold leading-[18px] text-ds-accent-encre">
                   {t("secretsTitre")}
