@@ -561,6 +561,29 @@ sélection** : la comparaison trie, pas la sonde.
      `/commandes` et `/envois` : leurs déclarations ne désignaient plus rien, et
      c'est le contrôle « dans l'autre sens » qui les a sorties.
 
+9. **UN FOND ET UN TEXTE DE LA MÊME VALEUR NE RENDENT RIEN, ET AUCUNE PORTE NE
+   POUVAIT LE VOIR.** `bg-ds-erreur text-ds-erreur` est une classe VALIDE,
+   servie, et le jeton existe : les deux gardes de couleurs vérifient qu'une
+   classe pointe sur une variable définie, jamais que le résultat se LIT. La
+   pilule « Suspension d'un compte » du journal d'audit rendait donc un aplat
+   rouge **sans une lettre dedans** — et le même défaut vivait **neuf fois**,
+   sur cinq écrans d'administration. Il est resté invisible parce que le jeu de
+   mesure n'a ni compte suspendu, ni boutique au-dessus de son plafond, ni
+   alerte : exactement les trois états qui déclenchent ces pilules.
+   `tests/unit/pilules-lisibles.test.ts` compare désormais des **valeurs**, pas
+   des noms — les deux jetons sont résolus dans `globals.css` avant d'être
+   comparés (L-020).
+
+> ⚠️ **ET UN TEST QUI ÉCHOUE SOUS LA CHARGE N'ACCUSE PAS TOUJOURS LE PRODUIT.**
+> `limitation-debit` a rendu « 7 appels autorisés sur un plafond de 4 » une
+> seule fois, sous la suite complète, et passait rejoué seul. La cause n'était
+> pas le compteur : `fenetre_courante` arrondit `clock_timestamp()` à la
+> minute, et douze connexions parallèles mettent assez longtemps à s'ouvrir
+> pour CHEVAUCHER une bordure — deux fenêtres, deux plafonds, jusqu'à huit
+> appels. Le test groupe donc ses résultats **par fenêtre**. *Un test
+> intermittent se BORNE, il ne se relance pas jusqu'au vert* — et il garde son
+> mordant : falsifié avec `quota-non-atomique`, il rend 7 dans UNE fenêtre.
+
 > ⚠️ **ET LA SONDE PEUT APPRENDRE À IGNORER SES PROPRES ALERTES.** Elle
 > signalait onze cibles sous 44 px sur connexion + inscription, dont **aucune
 > n'en était une** : quatre champs **enveloppés par leur `<label>`** — la cible
@@ -589,8 +612,8 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**CINQ ÉCRANS SORTENT EN CODE 0**, tous remesurés contre un kit qui rend enfin
-sa vraie police (neuvième piège) :
+**DIX ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, puis les cinq
+que le kit admin dessine :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -599,6 +622,41 @@ sa vraie police (neuvième piège) :
 | **l'éditeur** `/commandes/[id]` | `CLIC_KIT="#DLK7842"` | 26 (0) | 48 (0) | **0** |
 | `/analyses` | `CLIC_KIT="Analyses"` | 32 (0) | 41 (0) | **0** |
 | `/marque` | `CLIC_KIT="Ma marque"` | 26 (0) | 41 (0) | **0** |
+| `/admin` | `Overview`, kit **admin** | 55 (0) | 29 (0) | **0** |
+| `/admin/comptes` | `AdminUsers` | 99 (0) | 54 (0) | **0** |
+| `/admin/boutiques` | `AdminShops` | 78 (0) | 53 (0) | **0** |
+| `/admin/journal` | `AdminLogs` | 84 (0) | 51 (0) | **0** |
+| `/admin/parametres` | `AdminSettings` | 92 (0) | 49 (0) | **0** |
+
+> ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
+> QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
+> le propre texte annonce « l'activité, les dernières commandes et les derniers
+> envois s'ajouteront ici quand la fiche complète sera maquettée » — et dont le
+> bouton mène à notre page. `/admin/surveillance` : le kit admin n'a pas
+> d'écran d'infrastructure du tout. Les deux gardent donc leur habillage, qui
+> est celui du design system, et ils sont vérifiés à 390 px dans les trois
+> langues. **Il n'y a rien à soustraire contre rien.**
+
+> ⚠️ **LE KIT ADMIN SE SERT À 1560, PAS À 1690.** C'est écrit dans l'en-tête de
+> sa page — `viewport="1560x1040"` — et la largeur UTILE est donc 1545. Mesurer
+> l'administration à 1690 comparerait deux choses différentes, et l'écart se
+> lirait comme une erreur d'implémentation.
+
+> ⚠️ **LE KIT ADMIN A DEUX TUILES ET TROIS ANNEAUX, ET LES CONFONDRE FAIT UN
+> ÉCRAN CONFORME À LA MAUVAISE RÉFÉRENCE.** `AdminStat` — vue d'ensemble, icône
+> 52, remplissage 20/22, libellé 14, valeur 28 — contre `OrderKpi` — écrans de
+> liste, icône 44, remplissage 16/18, libellé 13 en interligne 1,35, valeur 23.
+> Et `AdminDonut` se pose à **190** sur la vue d'ensemble, **165** sur les
+> écrans de liste, **124** quand il partage sa colonne avec deux autres
+> panneaux ; ses deux polices de centre en DÉRIVENT (`max(15, rond(côté ×
+> 0,16))` et `max(9,5, rond(côté × 0,072))`), donc les recopier revient à se
+> tromper six fois. `TuileVolume` et `Anneau` portent les variantes.
+
+> ⚠️ **UN `<details>` REPLIÉ EST MESURÉ COMME UN `<select>` OUVERT.** Les
+> sélecteurs d'administration sont des `details` — le filtre vit dans l'URL,
+> donc pas d'îlot client. L'œil ne voit qu'un libellé, la sonde relève TOUTES
+> les options : leurs libellés se déclarent là où ils diffèrent de ceux du kit.
+> Un commentaire du dépôt a affirmé le contraire pendant une heure.
 
 ⚠️ **LE PRODUIT NE SE MESURE PAS TOUJOURS À LA MÊME LARGEUR QUE LE KIT.** Les
 deux relevés doivent porter la même largeur UTILE — 1675 —, et c'est la barre de
@@ -635,13 +693,20 @@ allowed ». Cinq panneaux du kit exigeaient donc une fonction SQL. Voir
 `pnpm db:migrate:tests` plus haut : le code est écrit et appliqué à la base de
 tests ; **la production attend `pnpm db:migrate`, AVANT le déploiement.**
 
-**▶️ PROCHAINS ÉCRANS : les SIX de l'administration.**
+⚠️ **L'ADMINISTRATION A DEMANDÉ CINQ MIGRATIONS, ET DEUX D'ENTRE ELLES SONT DES
+CORRECTIFS DE MES PROPRES MIGRATIONS.** 148 (boutiques et répartition par
+statut), 149 (commandes jour par jour), 150 (le « dont N sans type » que la 148
+avait reperdu), 151 (filtre de statut sur la liste des comptes, et inscriptions
+récentes), 152 (répartition du journal). *Une migration qui recrée une fonction
+pour en changer la signature RÉÉCRIT tout son corps, donc elle hérite de la
+responsabilité de TOUTES les corrections passées de ce corps.* La 150 existe
+parce que ce n'était pas fait.
 
-Puis, dans cet ordre : la landing · la landing · `/p/[token]` ·
-l'authentification · les pages légales. Tous ont déjà eu une
-passe de jetons et de règle 5 ; **aucun n'a eu la soustraction.** Et deux écrans
-sont à CRÉER, pas à migrer : le tableau de bord (`DashboardHome.jsx`) et les
-paramètres vendeur (`SettingsView.jsx`).
+**▶️ PROCHAINS ÉCRANS : la landing**, puis `/p/[token]` · l'authentification ·
+les pages légales. Tous ont déjà eu une passe de jetons et de règle 5 ;
+**aucun n'a eu la soustraction.** Et deux écrans sont à CRÉER, pas à migrer : le
+tableau de bord (`DashboardHome.jsx`) et les paramètres vendeur
+(`SettingsView.jsx`).
 
 ### Comment on vérifie un écran migré
 
