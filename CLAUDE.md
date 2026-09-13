@@ -577,7 +577,7 @@ sélection** : la comparaison trie, pas la sonde.
 > ⚠️ **ET UN TEST QUI ÉCHOUE SOUS LA CHARGE N'ACCUSE PAS TOUJOURS LE PRODUIT.**
 > `limitation-debit` a rendu « 7 appels autorisés sur un plafond de 4 » une
 > seule fois, sous la suite complète, et passait rejoué seul. La cause n'était
-> pas le compteur : `fenetre_courante` arrondit `clock_timestamp()` à la
+> pas le compteur : `fenetre_courante` arrondit `clock_timestamp` à la
 > minute, et douze connexions parallèles mettent assez longtemps à s'ouvrir
 > pour CHEVAUCHER une bordure — deux fenêtres, deux plafonds, jusqu'à huit
 > appels. Le test groupe donc ses résultats **par fenêtre**. *Un test
