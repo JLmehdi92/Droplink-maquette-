@@ -9,6 +9,7 @@ import { ArrowRight, ChevronDown, Zap } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
 import { BarreSuperieure } from "@/components/app/barre-superieure";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
+import { LienParametres } from "@/components/app/lien-parametres";
 import { compterParEtat } from "@/lib/commandes/liste";
 import { compterEnvois } from "@/lib/envois/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -127,6 +128,12 @@ export default async function LayoutApplication({
     { href: `/${langue}/envois`, libelle: t("mesEnvois"), icone: "envois" },
     { href: `/${langue}/analyses`, libelle: t("mesAnalyses"), icone: "analyses" },
     { href: `/${langue}/marque`, libelle: t("maMarque"), icone: "marque" },
+    {
+      href: `/${langue}/parametres`,
+      libelle: t("parametres"),
+      icone: "parametres",
+      auTelephone: false,
+    },
   ];
 
   /*
@@ -303,6 +310,7 @@ export default async function LayoutApplication({
             />
             </summary>
             <div className="absolute right-0 bottom-full left-0 z-20 mb-1.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1.5 shadow-ds-lg">
+              <LienParametres langue={langue} variante="menu" />
               <BoutonDeconnexion langue={langue} variante="menu" />
             </div>
           </details>

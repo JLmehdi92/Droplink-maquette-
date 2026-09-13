@@ -387,6 +387,16 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "le moteur refusera toute écriture qu'on y ajouterait.",
     ],
     [
+      "lister_mes_sessions",
+      "« Voir les sessions » de l'écran Paramètres (migration 155). `auth.sessions` " +
+        "est hors du schéma exposé, et doit le rester : la fonction rend les " +
+        "sessions de `auth.uid()` et AUCUN argument ne désigne un compte, donc " +
+        "aucun argument ne peut en désigner un autre. Ni adresse IP — une session " +
+        "volée afficherait le domicile du propriétaire —, ni jeton, ni clé : rien " +
+        "qui permette de rejouer une session. Refusée à `anon`, qui n'a rien à " +
+        "lister. `stable`.",
+    ],
+    [
       "lister_boutiques_admin",
       "Liste des boutiques pour l'administration. UN HUMAIN Y LIT LES DONNÉES " +
         "D'UN TIERS : elle écrit donc UNE entrée d'audit par page, portant ses " +
@@ -727,6 +737,9 @@ describe("Sonde C — privilèges de colonne", () => {
   const COLONNES_MODIFIABLES_ATTENDUES = new Set([
     "profiles.account_type",
     "profiles.locale",
+    // Migration 154 : le nom affiché dans l'espace vendeur. Un libellé libre,
+    // borné par une contrainte de longueur, qui ne commande aucun accès.
+    "profiles.nom_affiche",
     "shops.name",
     // `shops.slug` a été RETIRÉ par la migration 004 : la colonne est unique et
     // aucune fonctionnalité ne l'utilise, donc l'ouvrir en écriture offrait un

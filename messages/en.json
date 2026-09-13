@@ -23,7 +23,8 @@
       "bouton": "Upgrade"
     },
     "tableauDeBord": "Dashboard",
-    "tableauDeBordCourt": "Home"
+    "tableauDeBordCourt": "Home",
+    "parametres": "Settings"
   },
   "landing": {
     "metaTitre": "DropLink — one page per order, under your brand",
@@ -1645,6 +1646,87 @@
       "marque": "Customise my customer page",
       "envois": "View my shipments",
       "analyses": "Open analytics"
+    }
+  },
+  "parametres": {
+    "titre": "Settings",
+    "sousTitre": "Manage your account, your preferences and your DropLink setup.",
+    "compte": {
+      "titre": "Account details",
+      "aide": "Manage your personal information and your account.",
+      "nom": "Full name",
+      "enregistrer": "Save",
+      "enregistrement": "Saving…",
+      "enregistre": "Saved.",
+      "adresse": "Email address",
+      "modifier": "Edit",
+      "nouvelleAdresse": "New email address",
+      "motDePasse": "Password",
+      "actuel": "Current password",
+      "nouveau": "New password",
+      "nouveauAide": "12 characters minimum. A phrase beats a complicated word.",
+      "envoyerLien": "Send the confirmation link",
+      "envoi": "Sending…",
+      "adresseEnvoyee": "If this address can receive email, a confirmation link has just been sent to it. Your address only changes once that link is followed.",
+      "adresseSuivie": "Link followed. If a second confirmation is requested on your old address, follow it too: the address shown here is the one your account really has.",
+      "changerMotDePasse": "Change password",
+      "changement": "Changing…",
+      "motDePasseChange": "Password changed. Your other devices have been signed out.",
+      "sansMotDePasse": "Signing in with Google? Set a password first with Forgot password.",
+      "annuler": "Cancel"
+    },
+    "preferences": {
+      "titre": "Preferences",
+      "aide": "Tailor your DropLink experience.",
+      "langue": "Language",
+      "appliquer": "Apply",
+      "languePubliqueAide": "The language of the pages your customers see is set in My brand."
+    },
+    "securite": {
+      "titre": "Security",
+      "aide": "Protect your account and your data.",
+      "sessions": "Active sessions",
+      "sessionsAide": "Manage your signed-in devices.",
+      "fermer": "Sign out other devices",
+      "fermeture": "Signing out…",
+      "ferme": "Your other devices have been signed out.",
+      "voir": "View sessions",
+      "masquer": "Hide sessions",
+      "cetAppareil": "This device",
+      "activeLe": "Last active: {date}",
+      "appareilInconnu": "Unrecognised device",
+      "lectureImpossible": "Your sessions can't be read right now. Please try again.",
+      "fermerAide": "Sign out all your other devices. This one stays signed in."
+    },
+    "abonnement": {
+      "titre": "Subscription",
+      "aide": "Your plan during the validation phase.",
+      "planActuel": "Current plan",
+      "gratuit": "Free",
+      "gratuitAide": "During the validation phase, DropLink is free and unlimited.",
+      "inclus1": "Customer pages in your colours",
+      "inclus2": "Inspection photos and videos",
+      "inclus3": "Automatic parcel tracking",
+      "inclus4": "Analytics on your activity"
+    },
+    "support": {
+      "titre": "Support",
+      "aide": "Need help?",
+      "centre": "Help centre",
+      "centreAide": "Browse our guides and tutorials.",
+      "ouvrir": "Open"
+    },
+    "erreurs": {
+      "session": "Your session has expired. Please sign in again.",
+      "invalide": "Please check what you entered.",
+      "motDePasseActuel": "Current password is incorrect.",
+      "trop": "Too many attempts. Try again in a few minutes.",
+      "mdpTropCourt": "12 characters minimum.",
+      "mdpTropLong": "This password is too long.",
+      "mdpContientEmail": "The password must not contain your email address.",
+      "mdpIdentique": "The new password must differ from the current one.",
+      "adresseIdentique": "This is already your account's address.",
+      "indisponible": "The service is temporarily unavailable. Please try again."
     }
   }
 }

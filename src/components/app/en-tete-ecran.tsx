@@ -127,6 +127,7 @@ export function EnTeteEcranDs({
   actions,
   dessous,
   actionMobile,
+  pleineLargeur = false,
 }: {
   readonly titre: string;
   readonly sousTitre?: string;
@@ -135,11 +136,25 @@ export function EnTeteEcranDs({
   readonly dessous?: React.ReactNode;
   /** Rendu à droite du titre AU TÉLÉPHONE SEULEMENT. Voir `EnTeteEcran`. */
   readonly actionMobile?: React.ReactNode;
+  /**
+   * LE BLOC DU TITRE PREND TOUTE LA LIGNE. `SettingsView` pose son titre dans
+   * un simple bloc, sans rangée d'actions : il mesure 1 347 px de large chez le
+   * kit, et 488 dans notre rangée flexible. Et ce bloc n'a que 24 px dessous
+   * (`marginBottom: 24`), quand le `PageHeader` des autres écrans en rend 26.
+   * Facultatif, parce que `/marque` — déjà à zéro écart — mesure le sien à la
+   * largeur de son contenu.
+   */
+  readonly pleineLargeur?: boolean;
 }) {
   return (
-    <header className="border-b border-ds-filet bg-ds-surface-carte px-margin-mobile pt-4 pb-3.5 md:border-0 md:bg-transparent md:px-8 md:pt-[30px] md:pb-[26px]">
+    <header
+      className={
+        "border-b border-ds-filet bg-ds-surface-carte px-margin-mobile pt-4 pb-3.5 md:border-0 md:bg-transparent md:px-8 md:pt-[30px] " +
+        (pleineLargeur ? "md:pb-6" : "md:pb-[26px]")
+      }
+    >
       <div className="flex flex-wrap items-center justify-between gap-5">
-        <div className="min-w-0">
+        <div className={pleineLargeur ? "min-w-0 flex-1" : "min-w-0"}>
           <h1 className="text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] md:text-[40px]">
             {titre}
           </h1>

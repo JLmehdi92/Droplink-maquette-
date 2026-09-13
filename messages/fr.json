@@ -23,7 +23,8 @@
       "bouton": "Upgrade"
     },
     "tableauDeBord": "Tableau de bord",
-    "tableauDeBordCourt": "Accueil"
+    "tableauDeBordCourt": "Accueil",
+    "parametres": "Paramètres"
   },
   "landing": {
     "metaTitre": "DropLink — une page par commande, à votre marque",
@@ -1645,6 +1646,87 @@
       "marque": "Personnaliser ma page client",
       "envois": "Voir mes envois",
       "analyses": "Accéder aux analyses"
+    }
+  },
+  "parametres": {
+    "titre": "Paramètres",
+    "sousTitre": "Gérez votre compte, vos préférences et la configuration de DropLink.",
+    "compte": {
+      "titre": "Informations du compte",
+      "aide": "Gérez vos informations personnelles et votre compte.",
+      "nom": "Nom complet",
+      "enregistrer": "Enregistrer",
+      "enregistrement": "Enregistrement…",
+      "enregistre": "Enregistré.",
+      "adresse": "Adresse e-mail",
+      "modifier": "Modifier",
+      "nouvelleAdresse": "Nouvelle adresse e-mail",
+      "motDePasse": "Mot de passe",
+      "actuel": "Mot de passe actuel",
+      "nouveau": "Nouveau mot de passe",
+      "nouveauAide": "12 caractères minimum. Une phrase vaut mieux qu'un mot compliqué.",
+      "envoyerLien": "Envoyer le lien de confirmation",
+      "envoi": "Envoi…",
+      "adresseEnvoyee": "Si cette adresse peut recevoir un e-mail, un lien de confirmation vient d'y être envoyé. Votre adresse ne change qu'une fois ce lien suivi.",
+      "adresseSuivie": "Lien suivi. Si une seconde confirmation vous est demandée sur votre ancienne adresse, suivez-la aussi : l'adresse affichée ici est celle que votre compte porte réellement.",
+      "changerMotDePasse": "Changer le mot de passe",
+      "changement": "Changement…",
+      "motDePasseChange": "Mot de passe modifié. Vos autres appareils ont été déconnectés.",
+      "sansMotDePasse": "Vous vous connectez avec Google ? Définissez d'abord un mot de passe avec « Mot de passe oublié ».",
+      "annuler": "Annuler"
+    },
+    "preferences": {
+      "titre": "Préférences",
+      "aide": "Personnalisez votre expérience sur DropLink.",
+      "langue": "Langue",
+      "appliquer": "Appliquer",
+      "languePubliqueAide": "La langue des pages que voient vos clients se règle dans Ma marque."
+    },
+    "securite": {
+      "titre": "Sécurité",
+      "aide": "Protégez votre compte et vos données.",
+      "sessions": "Sessions actives",
+      "sessionsAide": "Gérez vos appareils connectés.",
+      "fermer": "Déconnecter les autres appareils",
+      "fermeture": "Déconnexion…",
+      "ferme": "Vos autres appareils ont été déconnectés.",
+      "voir": "Voir les sessions",
+      "masquer": "Masquer les sessions",
+      "cetAppareil": "Cet appareil",
+      "activeLe": "Dernière activité : {date}",
+      "appareilInconnu": "Appareil non reconnu",
+      "lectureImpossible": "Impossible de lire vos sessions pour le moment. Réessayez.",
+      "fermerAide": "Déconnectez tous vos autres appareils. Celui-ci reste connecté."
+    },
+    "abonnement": {
+      "titre": "Abonnement",
+      "aide": "Votre plan pendant la phase de validation.",
+      "planActuel": "Plan actuel",
+      "gratuit": "Gratuit",
+      "gratuitAide": "Pendant la phase de validation, DropLink est gratuit et sans limite.",
+      "inclus1": "Pages client à vos couleurs",
+      "inclus2": "Photos et vidéos de contrôle",
+      "inclus3": "Suivi automatique des colis",
+      "inclus4": "Analyses de votre activité"
+    },
+    "support": {
+      "titre": "Support",
+      "aide": "Besoin d'aide ?",
+      "centre": "Centre d'aide",
+      "centreAide": "Consultez nos guides et tutoriels.",
+      "ouvrir": "Ouvrir"
+    },
+    "erreurs": {
+      "session": "Votre session a expiré. Reconnectez-vous.",
+      "invalide": "Vérifiez les informations saisies.",
+      "motDePasseActuel": "Mot de passe actuel incorrect.",
+      "trop": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "mdpTropCourt": "12 caractères minimum.",
+      "mdpTropLong": "Ce mot de passe est trop long.",
+      "mdpContientEmail": "Le mot de passe ne doit pas contenir votre adresse e-mail.",
+      "mdpIdentique": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "adresseIdentique": "C'est déjà l'adresse de votre compte.",
+      "indisponible": "Le service est momentanément indisponible. Réessayez."
     }
   }
 }

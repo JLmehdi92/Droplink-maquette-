@@ -97,16 +97,14 @@
         "texte": "Toutes  <button>",
         "motif": "donnee",
         "raison": "Quatre pixels de largeur. L onglet est etire par son compteur : « 124 » chez le kit, « 4 » dans le jeu de mesure. Meme cause que « Livrees », declaree juste au-dessus."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "contrainte",
-        "raison": "Deux routes que le depot n a pas. Une entree de navigation qui mene a un 404 est pire qu une entree absente : ce sont des ecrans a CREER, donc des decisions produit, pas de la migration."
-      },
       {
         "textes": [
           "NB",
@@ -356,19 +354,9 @@
         "raison": "Largeur seule. Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure."
       },
       {
-        "texte": "Dernière mise à jour [1/2]  <span>",
-        "motif": "donnee",
-        "raison": "Largeur de boite. Le bloc est dimensionne par la DATE qu il surmonte, pas par ce libelle : « 8 septembre 2025 a 14:32 » chez le kit contre « 12 septembre 2026 a 15:32 » dans le jeu de mesure, un caractere de plus. Le texte lui-meme mesure 113,99 px des deux cotes. Les deux blocs finissent au MEME bord droit, x=1643."
-      },
-      {
         "texte": "Dernière mise à jour [2/2]  <span>",
         "motif": "donnee",
         "raison": "L EN-TETE DE COLONNE, et non le libelle de l en-tete de page — le meme texte sert aux deux endroits. Meme cause que « Suivi » : huit colonnes contre dix, largeurs redistribuees au prorata des deux colonnes que la base ne permet pas de rendre."
-      },
-      {
-        "texte": "8 septembre 2025 à 14:32  <span>",
-        "motif": "donnee",
-        "raison": "Meme cause : la date du jeu de mesure est plus longue d un caractere que celle du kit. Interligne, hauteur et position sont desormais identiques."
       },
       {
         "texte": "Suivi  <span>",
@@ -491,11 +479,6 @@
         "raison": "Le kit empile la date ET l heure dans un bloc de 34 px ; le produit met la date sur une ligne et l ANCIENNETE en dessous — « il y a 3 jours » plutot que « a 14:32 ». C est la seule chose de l ecran qui change tous les jours quand le colis ne bouge pas, et c est ce que le vendeur vient verifier. L heure d un scan ne lui apprend rien. Les six pixels d abscisse viennent de l arrondi des pourcentages de colonne, qui cumule un pixel par colonne — la premiere, « Suivi », tombe exactement a x=369 comme le kit."
       },
       {
-        "texte": "Actualiser  <button>",
-        "motif": "donnee",
-        "raison": "Sept pixels de position. Le bouton est pousse par le bloc de fraicheur a sa gauche, dont le texte depend de l age du dernier mouvement du jeu de mesure."
-      },
-      {
         "texte": "Tous les envois  <span>",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur : le libelle est etire par son compteur, passe de trois a quatre colis depuis que le jeu de mesure en pose un quatrieme, livre."
@@ -504,16 +487,14 @@
         "texte": "7 sept. 2025 [2/2]  <span>",
         "motif": "donnee",
         "raison": "Seize pixels de hauteur. Le kit met la date ET l heure dans une cellule de deux lignes ; la notre n a qu une date sur cette ligne-la. L appariement au plus proche rapproche donc une cellule de deux lignes d une cellule d une seule — meme famille que « 8 sept. 2025 », declaree au-dessus."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "contrainte",
-        "raison": "Deux routes que le depot n a pas. Une entree de navigation qui mene a un 404 est pire qu une entree absente. Ce sont des ecrans a CREER, donc des decisions produit, pas de la migration."
-      },
       {
         "textes": [
           "NB",
@@ -815,16 +796,14 @@
         "texte": "Numéro de suivi",
         "motif": "contrainte",
         "raison": "Rendu une fois par le kit — la ligne du panneau d informations —, trois fois chez nous : le kit le met en CHAMP sur un autre ecran (`CreateOrder`), nous l avons sur celui-ci. L appariement au plus proche tombe donc sur l etiquette du formulaire (13/500) et la compare a la ligne du kit (14/400)."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "contrainte",
-        "raison": "Deux routes que le depot n a pas. Une entree de navigation qui mene a un 404 est pire qu une entree absente : ce sont des ecrans a CREER, pas a migrer. Meme declaration que sur /commandes et /envois."
-      },
       {
         "textes": [
           "NB",
@@ -1130,16 +1109,14 @@
         "texte": "En transit",
         "motif": "structure",
         "raison": "Largeur seule, et c est le balisage qui differe : la legende de l anneau du kit est une grille dont la premiere colonne s etire, notre liste de barres met le libelle a sa largeur naturelle et donne le reste a la piste. La taille, la graisse et la couleur sont desormais celles du kit."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "contrainte",
-        "raison": "Deux routes que le depot n a pas. Ce sont des ecrans a CREER, pas a migrer."
-      },
       {
         "textes": [
           "NB",
@@ -1424,16 +1401,14 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION, ET UNE SEULE CAUSE POUR CES LIGNES. Nos sections portent des phrases d aide que le kit n ecrit pas — ce que devient une page sans nom ni logo, ou va la description, ce que font les liens des reseaux, pourquoi la couleur est ajustee. Chacune est une decision du produit rendue lisible, et elles allongent la colonne. Le bouton d enregistrement, lui, est rendu DEUX fois chez nous : une barre collee au telephone, une flottante au bureau — le kit n en dessine qu une, et aucune des deux planches ne dessine la notre."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "contrainte",
-        "raison": "Deux routes que le depot n a pas. Ce sont des ecrans a CREER, pas a migrer."
-      },
       {
         "textes": [
           "NB",
@@ -4216,12 +4191,10 @@
       },
       {
         "textes": [
-          "En transit [1/2]",
-          "En transit [2/2]",
-          "En transit  <nombre d'occurrences>"
+          "En transit"
         ],
         "motif": "donnee",
-        "raison": "LE MEME MOT A D AUTRES PLACES. Le kit ecrit « En transit » dans la legende d un anneau et dans sa tuile de compteur ; le produit l ecrit dans la repartition des statuts des Analyses et dans la pastille d une commande du jeu de mesure. Sa ligne dans les dernieres commandes depend de l ordre des commandes du jeu, creees a quelques millisecondes d intervalle : elle change d un passage a l autre."
+        "raison": "LE MEME MOT A D AUTRES PLACES. Le kit ecrit « En transit » dans la legende d un anneau et dans sa tuile de compteur ; le produit l ecrit dans la repartition des statuts des Analyses et dans la pastille d une commande du jeu de mesure. Sa ligne dans les dernieres commandes depend de l ordre des commandes du jeu, creees a quelques millisecondes d intervalle : elle change d un passage a l autre. Declare par son texte NU, qui couvre ses trois variantes (« [1/2] », « [2/2] », le nombre d occurrences) : lequel des trois ressort depend de cet ordre, et une declaration par variante mourait un passage sur deux."
       },
       {
         "textes": [
@@ -4273,16 +4246,14 @@
         ],
         "motif": "structure",
         "raison": "LA SECONDE RANGEE A TROIS PANNEAUX, PAS QUATRE, puisque la carte « Passez au Pro » n est pas rendue : chaque panneau y est plus large que chez le kit, et ce qui y est pose en largeur de colonne s allonge. Tailles, graisses et couleurs sont celles du kit."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "contrainte",
-        "raison": "Deux routes que le depot n a pas. Ce sont des ecrans a CREER, pas a migrer."
-      },
       {
         "textes": [
           "NB",
@@ -4616,6 +4587,230 @@
         ],
         "motif": "donnee",
         "raison": "L anciennete des commandes du jeu de mesure, creees a l instant par la sonde : elle change a chaque passage."
+      }
+    ]
+  },
+  "fr-parametres": {
+    "valeurs": [
+      {
+        "texte": "Commandes  <span>",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "Rendu quatre fois contre deux : l entree de la barre laterale et le titre de l ecran, comme le kit, PLUS une entree dans chacun des deux menus de compte — barre laterale et barre superieure — que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support »."
+      },
+      {
+        "textes": [
+          "Mot de passe  <span>",
+          "Modifier  <button>"
+        ],
+        "motif": "contrainte",
+        "raison": "LE TELEPHONE N EST PAS RENDU, donc le mot de passe prend sa place dans la grille — premiere colonne de la seconde rangee au lieu de la seconde. Aucune fonction du produit ne se sert d un numero : le collecter serait ce que la minimisation interdit. Le « Modifier » du mot de passe suit son champ."
+      },
+      {
+        "textes": [
+          "Modifier  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "« Modifier » rendu deux fois contre une : le kit rend l adresse e-mail EDITABLE en place, le produit la protege derriere le meme bouton que le mot de passe. Changer d adresse exige le mot de passe actuel et une confirmation par lien — une session ne suffit pas a changer ce qui protege le compte, un cookie vole en est une."
+      },
+      {
+        "textes": [
+          "Sécurité",
+          "Protégez votre compte et vos données.",
+          "Sessions actives",
+          "Gérez vos appareils connectés.",
+          "Voir les sessions"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, et une seule cause pour ces lignes : la colonne de gauche est plus courte que celle du kit. La carte « Préférences » n a pas les quatre interrupteurs de notification — le produit n envoie AUCUNE notification au vendeur, et un interrupteur sans effet est un mensonge (principe XII) —, ni le fuseau horaire, qu aucun formatage n applique. La carte « Données » vient avec l export et la suppression, qui ne sont pas encore ecrits. Tailles, graisses, couleurs et largeurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "Support",
+          "Besoin d'aide ?",
+          "Centre d'aide",
+          "Consultez nos guides et tutoriels.",
+          "Ouvrir"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE : la colonne de droite n a ni la liste des fonctions « Pro » barrees ni le bouton « Passer au Pro » (contrainte n° 1, aucune facturation), ni la carte « Integrations » — Shopify, Google Sheets et Webhook n existent pas, et le kit les marque lui-meme « UI seule ». « Support » remonte d autant."
+      },
+      {
+        "textes": [
+          "© 2025 DropLink. Tous droits réservés."
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule : la page est plus courte, pour les raisons ecrites sur « Securite » et « Support »."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      },
+      {
+        "textes": [
+          "Téléphone (optionnel)"
+        ],
+        "motif": "contrainte",
+        "raison": "LE TELEPHONE. Aucune fonction du produit ne s en sert — aucun envoi, aucun contact, aucune verification. Collecter une donnee personnelle qu aucune fonction n emploie est ce que la minimisation interdit, et la migration 154 ne pose donc pas de colonne."
+      },
+      {
+        "textes": [
+          "Fuseau horaire",
+          "Recevoir des notifications par e-mail",
+          "Soyez informé des nouvelles commandes et",
+          "Résumé quotidien",
+          "Recevez un résumé de votre activité chaq",
+          "Recevoir des notifications push",
+          "Notifications dans votre navigateur.",
+          "Offres et nouveautés",
+          "Soyez informé des nouvelles fonctionnali"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
+      },
+      {
+        "textes": [
+          "Authentification à deux facteurs (2FA)",
+          "Sécurisez votre compte avec un code de v",
+          "Activer"
+        ],
+        "motif": "donnee",
+        "raison": "LA DOUBLE AUTHENTIFICATION. La base ne porte encore aucun facteur : l enrolement TOTP, le defi a la connexion et les policies qui exigent le niveau aal2 sont la phase suivante de cet ecran. Une bascule posee avant eux activerait une protection qui ne protege rien."
+      },
+      {
+        "textes": [
+          "Supprimer le compte",
+          "Supprimez définitivement votre compte et",
+          "Supprimer",
+          "Données",
+          "Gérez vos données et exportez vos inform",
+          "Exporter mes données",
+          "Téléchargez toutes vos données (commande",
+          "Exporter",
+          "Supprimer toutes les données",
+          "Supprimez toutes vos données de manière "
+        ],
+        "motif": "donnee",
+        "raison": "LA SUPPRESSION DU COMPTE ET LA CARTE « DONNEES » — export, suppression de toutes les donnees. Ce sont des gestes IRREVERSIBLES et ils ne sont pas encore ecrits : confirmation recopiee, mot de passe actuel, purge des medias R2, trace. Un bouton « Supprimer » qui ne supprime pas, ou qui supprime sans ces garanties, serait pire que son absence."
+      },
+      {
+        "textes": [
+          "Gérez votre abonnement et accédez à plus",
+          "Découvrez DropLink et ses fonctionnalité",
+          "Suivi des commandes",
+          "Page client personnalisable",
+          "Jusqu'à 50 commandes/mois",
+          "Lien personnalisé",
+          "Statistiques avancées",
+          "Support prioritaire",
+          "Passer au Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
+      },
+      {
+        "textes": [
+          "Intégrations",
+          "Connectez vos outils préférés.",
+          "Shopify",
+          "UI seule",
+          "Importez vos commandes depuis Shopify.",
+          "Connecter",
+          "Google Sheets",
+          "Synchronisez vos données avec Google She",
+          "Webhook",
+          "Recevez des notifications en temps réel.",
+          "Configurer"
+        ],
+        "motif": "contrainte",
+        "raison": "LES INTEGRATIONS. Shopify, Google Sheets et Webhook n existent pas, et le kit les marque lui-meme « UI seule ». Un bouton « Connecter » qui ne connecte rien est une promesse non tenue."
+      },
+      {
+        "textes": [
+          "Nous contacter",
+          "Notre équipe est là pour vous aider."
+        ],
+        "motif": "contrainte",
+        "raison": "« NOUS CONTACTER ». La seule adresse du produit est celle des signalements d abus (`NEXT_PUBLIC_CONTACT_ABUS`), qui fonde le statut d hebergeur. En faire un canal d assistance melangerait les deux : un signalement noye dans les questions est un signalement en retard."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
+      },
+      {
+        "textes": [
+          "Alertes",
+          "Le client n’a pas encore ouvert son lien",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
+      },
+      {
+        "textes": [
+          "••••••••••"
+        ],
+        "motif": "structure",
+        "raison": "Le meme rendu par un autre balisage : le kit pose son mot de passe masque dans la VALEUR d un <input type=password>, que la sonde ne releve pas ; le produit ne met jamais un mot de passe, meme factice, dans un champ — il rend des points dans un texte masque aux lecteurs d ecran."
+      },
+      {
+        "textes": [
+          "Appliquer",
+          "La langue des pages que voient vos clien"
+        ],
+        "motif": "contrainte",
+        "raison": "« APPLIQUER » ET SON AIDE. Changer la langue recharge l ecran a une autre adresse : le faire au simple changement du menu naviguerait a chaque fleche du clavier, et un changement de contexte sur une simple saisie est ce que le critere WCAG 3.2.2 interdit. L aide dit ou se regle la langue que voient les CLIENTS — la confusion entre les deux langues a deja ete rapportee par Wassim le 06/09."
+      },
+      {
+        "textes": [
+          "Votre plan pendant la phase de validatio",
+          "Pendant la phase de validation, DropLink",
+          "Pages client à vos couleurs",
+          "Photos et vidéos de contrôle",
+          "Suivi automatique des colis",
+          "Analyses de votre activité"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
       }
     ]
   }

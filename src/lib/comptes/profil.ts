@@ -36,6 +36,8 @@ export class SessionIndisponible extends Error {
 export type ProfilVendeur = {
   readonly profilId: string;
   readonly email: string;
+  /** Le nom que le vendeur s'est donné dans les paramètres. `null` = non renseigné. */
+  readonly nomAffiche: string | null;
   readonly typeDeCompte: "supplier" | "reseller" | null;
   readonly statut: "active" | "suspended";
   readonly langue: string;
@@ -153,7 +155,7 @@ export async function lireProfilAvec(
     supabase
       .from("profiles")
       .select(
-        "id, email, account_type, status, locale, shops(id, name, description, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
+        "id, email, nom_affiche, account_type, status, locale, shops(id, name, description, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
       )
       .maybeSingle(),
   ]);
@@ -222,6 +224,7 @@ export async function lireProfilAvec(
   return {
     profilId: data.id,
     email: data.email,
+    nomAffiche: data.nom_affiche,
     typeDeCompte: data.account_type,
     statut: data.status,
     langue: data.locale,

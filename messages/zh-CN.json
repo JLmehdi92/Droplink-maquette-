@@ -23,7 +23,8 @@
       "bouton": "立即升级"
     },
     "tableauDeBord": "仪表盘",
-    "tableauDeBordCourt": "首页"
+    "tableauDeBordCourt": "首页",
+    "parametres": "设置"
   },
   "landing": {
     "metaTitre": "DropLink — 每笔订单一个页面，用您的品牌呈现",
@@ -1645,6 +1646,87 @@
       "marque": "自定义客户页面",
       "envois": "查看物流",
       "analyses": "查看数据分析"
+    }
+  },
+  "parametres": {
+    "titre": "设置",
+    "sousTitre": "管理账号、偏好设置与 DropLink 配置。",
+    "compte": {
+      "titre": "账号信息",
+      "aide": "管理个人信息与账号。",
+      "nom": "姓名",
+      "enregistrer": "保存",
+      "enregistrement": "正在保存…",
+      "enregistre": "已保存。",
+      "adresse": "邮箱地址",
+      "modifier": "编辑",
+      "nouvelleAdresse": "新的电子邮箱",
+      "motDePasse": "密码",
+      "actuel": "当前密码",
+      "nouveau": "新密码",
+      "nouveauAide": "至少 12 个字符。一句话比复杂的单词更安全。",
+      "envoyerLien": "发送确认链接",
+      "envoi": "正在发送…",
+      "adresseEnvoyee": "如果该邮箱可以接收邮件，确认链接已发送至该邮箱。点击链接后，您的邮箱才会更改。",
+      "adresseSuivie": "链接已确认。如果旧邮箱还需要二次确认，请一并完成：此处显示的邮箱即为您账户当前实际使用的邮箱。",
+      "changerMotDePasse": "修改密码",
+      "changement": "正在修改…",
+      "motDePasseChange": "密码已修改，您的其他设备已退出登录。",
+      "sansMotDePasse": "使用 Google 登录？请先通过「忘记密码」设置密码。",
+      "annuler": "取消"
+    },
+    "preferences": {
+      "titre": "偏好设置",
+      "aide": "定制您的 DropLink 使用体验。",
+      "langue": "语言",
+      "appliquer": "应用",
+      "languePubliqueAide": "客户所见页面的语言在「我的品牌」中设置。"
+    },
+    "securite": {
+      "titre": "安全",
+      "aide": "保护您的账号与数据。",
+      "sessions": "活跃会话",
+      "sessionsAide": "管理已登录设备。",
+      "fermer": "退出其他设备",
+      "fermeture": "正在退出…",
+      "ferme": "您的其他设备已退出登录。",
+      "voir": "查看会话",
+      "masquer": "收起会话",
+      "cetAppareil": "本设备",
+      "activeLe": "最近活动：{date}",
+      "appareilInconnu": "未识别的设备",
+      "lectureImpossible": "暂时无法读取您的会话，请重试。",
+      "fermerAide": "退出您的其他所有设备，本设备保持登录。"
+    },
+    "abonnement": {
+      "titre": "订阅",
+      "aide": "验证阶段期间的套餐。",
+      "planActuel": "当前套餐",
+      "gratuit": "免费版",
+      "gratuitAide": "验证阶段期间，DropLink 免费且不限量。",
+      "inclus1": "品牌定制的客户页面",
+      "inclus2": "质检照片与视频",
+      "inclus3": "自动包裹追踪",
+      "inclus4": "业务数据分析"
+    },
+    "support": {
+      "titre": "客服支持",
+      "aide": "需要帮助？",
+      "centre": "帮助中心",
+      "centreAide": "查看我们的指南与教程。",
+      "ouvrir": "打开"
+    },
+    "erreurs": {
+      "session": "您的会话已过期，请重新登录。",
+      "invalide": "请检查您填写的信息。",
+      "motDePasseActuel": "当前密码不正确。",
+      "trop": "尝试次数过多，请几分钟后再试。",
+      "mdpTropCourt": "至少 12 个字符。",
+      "mdpTropLong": "密码过长。",
+      "mdpContientEmail": "密码不能包含您的电子邮箱。",
+      "mdpIdentique": "新密码必须与当前密码不同。",
+      "adresseIdentique": "这已经是您账户的邮箱。",
+      "indisponible": "服务暂时不可用，请重试。"
     }
   }
 }

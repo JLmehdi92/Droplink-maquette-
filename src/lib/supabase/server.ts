@@ -2,7 +2,7 @@ import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
 import { OPTIONS_COOKIES } from "@/lib/auth/cookies";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { Database } from "./types-base";
 import { clePubliable, urlSupabase } from "./config";
 
@@ -14,9 +14,24 @@ import { clePubliable, urlSupabase } from "./config";
  * c'est le signe qu'une policy manque, pas qu'il faut contourner l'isolation.
  */
 export async function creerClientServeur() {
-  const magasin = await cookies();
+  const [magasin, enTetes] = await Promise.all([cookies(), headers()]);
+  const agent = (enTetes.get("user-agent") ?? "").slice(0, 400);
 
   return createServerClient<Database>(urlSupabase(), clePubliable(), {
+    /*
+     * ⚠️ L'AGENT UTILISATEUR DU NAVIGATEUR, TRANSMIS AU SERVEUR D'AUTHENTIFICATION.
+     *
+     * Une session s'ouvre depuis une Server Action : c'est donc NOTRE serveur
+     * qui appelle Supabase, et Supabase enregistre SON agent. Mesuré le
+     * 13/09/2026 dans `auth.sessions` : « node » pour chaque session, quel que
+     * soit l'appareil. « Voir les sessions » aurait rendu « Appareil non
+     * reconnu » sur chaque ligne, à chaque vendeur — une liste qui ne permet de
+     * reconnaître aucun appareil ne permet pas de décider lequel déconnecter.
+     *
+     * L'en-tête vient du navigateur du vendeur et ne décrit que lui ; il n'ouvre
+     * rien et ne prouve rien. Borné à 400 caractères comme sa lecture.
+     */
+    ...(agent === "" ? {} : { global: { headers: { "user-agent": agent } } }),
     // Les jetons de session ne doivent JAMAIS être lisibles en JavaScript :
     // la bibliothèque les pose `httpOnly:false` par défaut.
     cookieOptions: OPTIONS_COOKIES,

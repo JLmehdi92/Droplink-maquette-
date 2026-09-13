@@ -403,6 +403,14 @@ const cas = [
     final: "/fr/connexion?erreur=session",
     libelle: "tableau de bord SANS session renvoye vers la connexion",
   },
+  // LES PARAMETRES, crees le 13/09/2026 : ils changent l adresse et le mot de
+  // passe du compte, donc c est la porte qu il faut le moins laisser entrouverte.
+  {
+    chemin: "/fr/parametres",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "parametres SANS session renvoyes vers la connexion",
+  },
   {
     chemin: "/fr/marque",
     statut: 200,
@@ -2150,7 +2158,7 @@ try {
             const APERCU_FR = catalogue.marque.apercuPour;
             const APERCU_EN = catalogueEn.marque.apercuPour;
 
-            const ecrans = ["/tableau-de-bord", "/commandes", "/envois", "/analyses", "/marque"];
+            const ecrans = ["/tableau-de-bord", "/commandes", "/envois", "/analyses", "/marque", "/parametres"];
             const bilan = [];
             for (const ecran of ecrans) {
               /*

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
+import { LienParametres } from "@/components/app/lien-parametres";
 import { LienEcran } from "@/components/lien-ecran";
 import { CompteursAnalyses } from "@/components/analyses/compteurs-analyses";
 import { FriseSemaines } from "@/components/analyses/frise-semaines";
@@ -121,9 +122,14 @@ export default async function TableauDeBord({
     <>
       <EnTeteEcranDs
         titre={
-          profil.nomBoutique === null ? t("bonjour") : t("bonjourNom", { nom: profil.nomBoutique })
+          /* Le nom que le vendeur s'est donné dans ses paramètres, sinon celui de
+             sa boutique, sinon personne. */
+          (profil.nomAffiche ?? profil.nomBoutique) === null
+            ? t("bonjour")
+            : t("bonjourNom", { nom: profil.nomAffiche ?? profil.nomBoutique ?? "" })
         }
         sousTitre={t("sousTitre")}
+        actionMobile={<LienParametres langue={langue} variante="rond" />}
         actions={
           <nav aria-label={ta("periode.titre")} className="flex flex-wrap gap-2">
             {PERIODES.map((p) => (

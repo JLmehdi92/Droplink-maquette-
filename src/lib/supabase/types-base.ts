@@ -410,6 +410,7 @@ export type Database = {
           email: string
           id: string
           locale: string
+          nom_affiche: string | null
           role: Database["public"]["Enums"]["user_role"]
           signup_event_at: string | null
           status: Database["public"]["Enums"]["account_status"]
@@ -421,6 +422,7 @@ export type Database = {
           email: string
           id?: string
           locale?: string
+          nom_affiche?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           signup_event_at?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -432,6 +434,7 @@ export type Database = {
           email?: string
           id?: string
           locale?: string
+          nom_affiche?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           signup_event_at?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -1157,6 +1160,16 @@ export type Database = {
           id: string
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["account_status"]
+        }[]
+      }
+      lister_mes_sessions: {
+        Args: never
+        Returns: {
+          active_le: string
+          agent: string
+          cet_appareil: boolean
+          creee_le: string
+          id: string
         }[]
       }
       lister_parametres: {

@@ -62,6 +62,12 @@ const MESSAGE_SYSTEME =
  * commentaire ci-dessus dit avoir fermé le chemin relatif, et il n'en avait
  * fermé qu'une écriture sur deux.
  */
+const MESSAGE_VERIFICATION =
+  "Le client `verification.ts` ne s'importe que depuis `src/lib/auth/`. Il ouvre " +
+  "une session jetable pour vérifier un mot de passe AVANT un geste sensible ; " +
+  "ailleurs, il servirait à tester des mots de passe sans passer par les quotas " +
+  "et le plancher de temps que `lib/auth/reauthentification.ts` applique.";
+
 const CLOISONS = [
   {
     nom: "admin",
@@ -77,6 +83,11 @@ const CLOISONS = [
     nom: "systeme",
     group: ["**/supabase/system", "@/lib/supabase/system", "./system"],
     message: MESSAGE_SYSTEME,
+  },
+  {
+    nom: "verification",
+    group: ["**/supabase/verification", "@/lib/supabase/verification", "./verification"],
+    message: MESSAGE_VERIFICATION,
   },
 ];
 
@@ -201,6 +212,12 @@ const eslintConfig = [
       "src/lib/veille/**/*.ts",
     ],
     rules: { "no-restricted-imports": ["error", { patterns: sauf("systeme") }] },
+  },
+  {
+    // La ré-authentification : le seul endroit où un mot de passe se vérifie
+    // depuis une session déjà ouverte, derrière son quota et son plancher.
+    files: ["src/lib/auth/**/*.ts"],
+    rules: { "no-restricted-imports": ["error", { patterns: sauf("verification") }] },
   },
   {
     /*

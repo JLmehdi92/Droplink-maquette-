@@ -58,6 +58,16 @@ export async function GET(
    */
   const empreinteJeton = requete.nextUrl.searchParams.get("token_hash");
   const versMotDePasse = requete.nextUrl.searchParams.get("suite") === "mot-de-passe";
+  /*
+   * LA CONFIRMATION D'UNE NOUVELLE ADRESSE, demandée depuis les paramètres.
+   *
+   * Elle ne connecte personne de nouveau : elle termine un geste fait depuis
+   * une session. Le retour se fait donc vers l'écran d'où il est parti, et
+   * c'est cet écran qui LIT l'adresse en base pour dire si la bascule est faite
+   * — le serveur d'authentification peut exiger une seconde confirmation, sur
+   * l'ancienne adresse, et l'écran n'affirme que ce que la base porte.
+   */
+  const versAdresse = requete.nextUrl.searchParams.get("suite") === "adresse";
 
   // Un lien sans preuve est un lien tronqué par une messagerie, ou une visite
   // directe. On renvoie vers la connexion plutôt que d'afficher une erreur
@@ -105,12 +115,16 @@ export async function GET(
           token_hash: empreinteJeton,
           // `recovery` sur le chemin du mot de passe, `email` sinon — c'est le
           // type que Supabase attend pour une confirmation d'inscription.
-          type: versMotDePasse ? "recovery" : "email",
+          type: versMotDePasse ? "recovery" : versAdresse ? "email_change" : "email",
         })
       : await supabase.auth.exchangeCodeForSession(code ?? "");
 
   if (error !== null) {
     return redirigerVers(`/${langue}/connexion?erreur=expire`);
+  }
+
+  if (versAdresse) {
+    return redirigerVers(`/${langue}/parametres?adresse=suivie`);
   }
 
   if (versMotDePasse) {

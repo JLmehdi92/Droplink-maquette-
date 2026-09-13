@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { LienEcran } from "@/components/lien-ecran";
-import { BarChart3, Briefcase, House, Shield, Truck, type LucideIcon } from "lucide-react";
+import { BarChart3, Briefcase, House, Settings, Shield, Truck, type LucideIcon } from "lucide-react";
 
 /**
  * LA NAVIGATION DE L'ESPACE VENDEUR — colonne sur grand écran, onglets en bas
@@ -35,7 +35,7 @@ import { BarChart3, Briefcase, House, Shield, Truck, type LucideIcon } from "luc
  * écrite dans `CLAUDE.md` — `inventory_2 → package`, `palette → palette` —
  * datait du canevas condamné : le kit ne dessine ni paquet ni palette.
  */
-export type CleIcone = "tableau" | "commandes" | "envois" | "analyses" | "marque";
+export type CleIcone = "tableau" | "commandes" | "envois" | "analyses" | "marque" | "parametres";
 
 const ICONES: Record<CleIcone, LucideIcon> = {
   // `house` : l icône du tableau de bord dans le `NAV` du kit.
@@ -44,6 +44,7 @@ const ICONES: Record<CleIcone, LucideIcon> = {
   envois: Truck,
   analyses: BarChart3,
   marque: Shield,
+  parametres: Settings,
 };
 
 export interface EntreeNavigation {
@@ -55,6 +56,12 @@ export interface EntreeNavigation {
    * à lui seul, et la barre débordait.
    */
   readonly libelleCourt?: string;
+  /**
+   * `false` pour rester HORS de la barre d'onglets du téléphone. Six onglets ne
+   * tiennent pas dans 390 px ; les paramètres s'ouvrent au téléphone depuis
+   * l'en-tête du tableau de bord, un geste qu'on ne fait pas vingt fois par jour.
+   */
+  readonly auTelephone?: boolean;
   readonly icone: CleIcone;
   /**
    * Le compte affiché en pastille à droite de l entrée.
@@ -135,7 +142,7 @@ export function NavigationVendeur({
         className="fixed inset-x-0 bottom-0 z-40 border-t border-ds-filet bg-ds-surface-carte px-5 pt-2 pb-[18px] md:hidden"
       >
         <ul className="flex justify-between">
-          {entrees.map((entree) => {
+          {entrees.filter((entree) => entree.auTelephone !== false).map((entree) => {
             const active = estActive(chemin, entree.href);
             const Composant = active ? LienEcran : Link;
             return (

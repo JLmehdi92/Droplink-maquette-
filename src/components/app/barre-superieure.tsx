@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { ChevronDown } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
+import { LienParametres } from "@/components/app/lien-parametres";
 import { ClocheAlertes } from "./cloche-alertes";
 import { RechercheGlobale } from "./recherche-globale";
 
@@ -83,6 +84,7 @@ export async function BarreSuperieure({
         </summary>
         <div className="absolute end-0 top-full z-30 mt-1.5 w-64 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1.5 shadow-ds-lg">
           <p className="truncate px-3 py-2 text-[12px] text-ds-texte-sourdine">{email}</p>
+          <LienParametres langue={langue} variante="menu" />
           <BoutonDeconnexion langue={langue} variante="menu" />
         </div>
       </details>

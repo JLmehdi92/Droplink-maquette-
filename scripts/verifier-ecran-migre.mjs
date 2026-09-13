@@ -452,6 +452,55 @@ const { error: eQc2 } = await service
   .eq("id", commandes[1].id);
 if (eQc2) throw new Error("jeu de mesure : qc non pose — " + eQc2.message);
 
+/*
+ * ⚠️ LA DATE DE MISE A JOUR DES COLIS EST FIXEE — ET SUR CELLE DU KIT.
+ *
+ * L en-tete des envois affiche « Derniere mise a jour » du colis le plus
+ * recent. Laissee a l instant du passage, elle changeait la largeur de son bloc
+ * CHAQUE MINUTE (« 21:33 » n a pas la largeur de « 11:11 ») et CHAQUE MOIS
+ * (« septembre » contre « mai ») : le bouton « Actualiser » glissait de zero a
+ * treize pixels, sa declaration mourait un passage sur deux, et en octobre la
+ * date entiere serait sortie de l appariement.
+ *
+ * ELLE SE POSE ICI, EN FIN DE JEU, ET PAS A L INSERTION : le declencheur
+ * `tracked_parcels_updated_at` la reecrit a chaque point de passage insere.
+ * Une transaction le suspend le temps d une ecriture et le retablit — si
+ * quoi que ce soit echoue, le `rollback` le rend actif, jamais a moitie.
+ * Quatre dates DISTINCTES, parce que la liste est triee sur cette colonne :
+ * des dates egales laissaient l ordre a l identifiant, tire au hasard.
+ */
+{
+  const urlBase = process.env["SUPABASE_DB_URL"] ?? "";
+  if (urlBase === "" || (refProd !== undefined && urlBase.includes(refProd))) {
+    throw new Error("jeu de mesure : SUPABASE_DB_URL absente ou visant la production");
+  }
+  const { default: pg } = await import("pg");
+  const connexion = new pg.Client({ connectionString: urlBase });
+  await connexion.connect();
+  try {
+    await connexion.query("begin");
+    await connexion.query("alter table public.tracked_parcels disable trigger tracked_parcels_updated_at");
+    const { rowCount } = await connexion.query(
+      `update public.tracked_parcels p
+          set updated_at = v.date
+         from (values ('DLKMESURE0001FR', timestamptz '2025-09-08 14:32:00+02'),
+                      ('DLKMESURE0002CN', timestamptz '2025-09-08 14:31:00+02'),
+                      ('DLKMESURE0004FR', timestamptz '2025-09-08 14:30:00+02'),
+                      ('DLKMESURE0003FR', timestamptz '2025-09-08 14:29:00+02')) as v(numero, date)
+        where p.shop_id = $1 and p.tracking_number = v.numero`,
+      [shop.id],
+    );
+    await connexion.query("alter table public.tracked_parcels enable trigger tracked_parcels_updated_at");
+    if (rowCount !== 4) throw new Error(`jeu de mesure : ${rowCount} colis dates sur 4`);
+    await connexion.query("commit");
+  } catch (erreur) {
+    await connexion.query("rollback");
+    throw erreur;
+  } finally {
+    await connexion.end();
+  }
+}
+
 console.error(
   `[jeu] ${commandes.length} commandes, ${colis.length} colis dont un silencieux, 3 points de passage, ` +
     `${medias.length} medias dont une couverture, 4 evenements, 8 ouvertures de lien.`,
