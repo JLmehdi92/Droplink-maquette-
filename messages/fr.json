@@ -874,7 +874,9 @@
       "preparation": "Préparation",
       "expedie": "Expédié",
       "en_transit": "En transit",
-      "livre": "Livré"
+      "livre": "Livré",
+      "enCours": "En cours",
+      "enAttente": "En attente"
     },
     "galerie": {
       "titre": "Photos et vidéos",
@@ -887,11 +889,9 @@
       "position": "{n} sur {total}",
       "videTitre": "Pas encore de photos",
       "videTexte": "Elles apparaîtront ici dès que le vendeur les aura ajoutées.",
-      "compte": "{n, plural, one {# élément} other {# éléments}}",
       "balayez": "Balayez pour changer de photo"
     },
     "details": {
-      "titre": "Détails",
       "reference": "Référence",
       "destinataire": "Destinataire"
     },
@@ -909,8 +909,6 @@
       "annuler": "Annuler"
     },
     "suivi": {
-      "titre": "Suivi du colis",
-      "numero": "Numéro",
       "aucunMouvement": "Pas encore d’information du transporteur",
       "dernierMouvement": "Dernier mouvement il y a {n} jours",
       "aujourdHui": "Mouvement aujourd’hui",
@@ -918,20 +916,12 @@
       "silence": "Le colis est enregistré et suivi. Ce délai n’est pas rare au passage en douane — nous continuons d’interroger le transporteur chaque jour.",
       "arrete": "Le transporteur ne donne plus d’information sur ce numéro. Contactez le vendeur si vous n’avez rien reçu.",
       "silenceTitre": "Aucun mouvement depuis {n} jours",
-      "anciennete": "il y a {n} jours",
       "attenteTitre": "En attente du transporteur",
       "attenteTexte": "Le colis a été confié au transporteur. Son premier scan n’est pas encore arrivé — c’est fréquent les premiers jours. Le suivi détaillé s’affichera ici automatiquement."
     },
-    "pourClient": "pour {nom}",
-    "etat": {
-      "arriveeEstimee": "Arrivée estimée",
-      "titre": "Expédition",
-      "statut": "Statut"
-    },
     "reseaux": {
-      "titre": "Retrouvez {nom}",
-      "note": "Les liens s’ouvrent dans un nouvel onglet.",
-      "site": "Site web"
+      "site": "Site web",
+      "titre": "Retrouvez {nom}"
     },
     "lienInvalideTitre": "Ce lien n'est plus valable",
     "lienInvalideTexte": "Demandez un nouveau lien à la personne qui vous a envoyé celui-ci.",
@@ -939,7 +929,38 @@
       "titre": "Cette page n'a pas pu s'afficher",
       "texte": "Une erreur est survenue de notre côté. Réessayez dans un instant : votre lien, lui, reste valable.",
       "reessayer": "Réessayer"
-    }
+    },
+    "commandeDe": "Une commande de",
+    "commande": {
+      "sousTitre": "Suivi mis à jour automatiquement.",
+      "dateEstimee": "Date estimée de livraison"
+    },
+    "bandeau": {
+      "preparation": "Votre commande est en préparation",
+      "expedie": "Votre colis a été expédié",
+      "en_transit": "Votre colis est en transit",
+      "livre": "Votre colis a été livré",
+      "preparationTexte": "Le vendeur prépare votre commande."
+    },
+    "livraison": {
+      "titre": "Informations de livraison",
+      "transporteur": "Transporteur",
+      "numero": "Numéro de suivi",
+      "dateEstimee": "Date estimée"
+    },
+    "historique": {
+      "titre": "Historique du suivi"
+    },
+    "contact": {
+      "titre": "Une question ?",
+      "texte": "Pour toute question concernant votre commande, contactez directement la boutique.",
+      "bouton": "Contacter la boutique"
+    },
+    "pied": {
+      "conditions": "Conditions d'utilisation",
+      "confidentialite": "Politique de confidentialité"
+    },
+    "pourClient": "pour {nom}"
   },
   "admin": {
     "navigation": "Administration",

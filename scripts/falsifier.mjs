@@ -782,12 +782,14 @@ const SQL = {
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
-                     boutique_site text, boutique_description text)
+                     boutique_site text, boutique_description text,
+                     reference_courte text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language, s.watermark_enabled,
-             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description
+             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description,
+             '#' || upper(right(replace(o.id::text, '-', ''), 6))
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -795,20 +797,20 @@ const SQL = {
       $$;
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
-    // ⚠️ LA 147, PAS LA 133. La 147 redefinit `lire_commande_publique` pour y
-    // ajouter la description de la boutique : reparer depuis la 133 aurait
-    // remis en place une fonction a DIX-NEUF colonnes, et la page client
+    // ⚠️ LA 153, PAS LA 147 NI LA 133. La 153 redefinit `lire_commande_publique`
+    // pour y ajouter la reference courte : reparer depuis la 147 aurait
+    // remis en place une fonction a VINGT colonnes, et la page client
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      fichier: "147_la_description_de_la_boutique.sql",
+      fichier: "153_la_page_client_ne_connaissait_pas_sa_reference.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      // ⚠️ PLUS DE BORNE HAUTE : dans la 147, la fonction et ses DROITS vont
+      // ⚠️ PLUS DE BORNE HAUTE : dans la 153, la fonction et ses DROITS vont
       // jusqu a la fin du fichier. La borne existait pour que la decoupe
       // couvre le `revoke all` et le `grant execute to anon` — les droits ne
       // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
@@ -833,12 +835,14 @@ const SQL = {
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
-                     boutique_site text, boutique_description text)
+                     boutique_site text, boutique_description text,
+                     reference_courte text)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, 'fr'::text, (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
-             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description
+             s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description,
+             '#' || upper(right(replace(o.id::text, '-', ''), 6))
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -846,20 +850,20 @@ const SQL = {
       $$;
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
-    // ⚠️ LA 147, PAS LA 133. La 147 redefinit `lire_commande_publique` pour y
-    // ajouter la description de la boutique : reparer depuis la 133 aurait
-    // remis en place une fonction a DIX-NEUF colonnes, et la page client
+    // ⚠️ LA 153, PAS LA 147 NI LA 133. La 153 redefinit `lire_commande_publique`
+    // pour y ajouter la reference courte : reparer depuis la 147 aurait
+    // remis en place une fonction a VINGT colonnes, et la page client
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      fichier: "147_la_description_de_la_boutique.sql",
+      fichier: "153_la_page_client_ne_connaissait_pas_sa_reference.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      // ⚠️ PLUS DE BORNE HAUTE : dans la 147, la fonction et ses DROITS vont
+      // ⚠️ PLUS DE BORNE HAUTE : dans la 153, la fonction et ses DROITS vont
       // jusqu a la fin du fichier. La borne existait pour que la decoupe
       // couvre le `revoke all` et le `grant execute to anon` — les droits ne
       // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
@@ -1121,13 +1125,15 @@ const SQL = {
                      boutique_nom text, boutique_logo text, boutique_couleur text,
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
-                     boutique_site text, boutique_description text)
+                     boutique_site text, boutique_description text,
+                     reference_courte text)
       language sql stable security definer set search_path = '' as $$
         select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
                o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
                o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language,
                (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
-               s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description
+               s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description,
+             '#' || upper(right(replace(o.id::text, '-', ''), 6))
         from public.orders o
         join public.shops s on s.id = o.shop_id
         join public.profiles p on p.id = s.owner_id
@@ -1135,20 +1141,20 @@ const SQL = {
       $$;
       revoke all on function public.lire_commande_publique(text) from public;
       grant execute on function public.lire_commande_publique(text) to anon;`,
-    // ⚠️ LA 147, PAS LA 133. La 147 redefinit `lire_commande_publique` pour y
-    // ajouter la description de la boutique : reparer depuis la 133 aurait
-    // remis en place une fonction a DIX-NEUF colonnes, et la page client
+    // ⚠️ LA 153, PAS LA 147 NI LA 133. La 153 redefinit `lire_commande_publique`
+    // pour y ajouter la reference courte : reparer depuis la 147 aurait
+    // remis en place une fonction a VINGT colonnes, et la page client
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      fichier: "147_la_description_de_la_boutique.sql",
+      fichier: "153_la_page_client_ne_connaissait_pas_sa_reference.sql",
       depuis: "drop function if exists public.lire_commande_publique",
       // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
       // s'arrêtait au `comment on`, donc la réparation recréait la fonction
       // SANS son `revoke all from public` ni son `grant execute to anon` : le
       // produit repartait avec une lecture publique exécutable par PUBLIC et
       // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      // ⚠️ PLUS DE BORNE HAUTE : dans la 147, la fonction et ses DROITS vont
+      // ⚠️ PLUS DE BORNE HAUTE : dans la 153, la fonction et ses DROITS vont
       // jusqu a la fin du fichier. La borne existait pour que la decoupe
       // couvre le `revoke all` et le `grant execute to anon` — les droits ne
       // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.

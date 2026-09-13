@@ -21,7 +21,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *     distribuées à qui lit la source, pour une seule qui sera regardée.
  *
  * LA PELLICULE OBÉIT À LA MÊME RÈGLE. Elle rend une vignette par média — donc
- * plus que la grille, qui s'arrête à sept — mais elle ne vit QUE pendant que le
+ * plus que la grille, qui s'arrête à dix — mais elle ne vit QUE pendant que le
  * visionneur est ouvert, et ses vignettes sont en `loading="lazy"` : celles qui
  * sont hors du champ ne sont pas demandées. Le coût est payé par qui regarde,
  * pas par qui ouvre le lien.
@@ -35,17 +35,13 @@ export interface EntreeVisionneur {
   readonly type: "photo" | "video";
   readonly urlVignette: string | null;
   /**
-   * LA DÉRIVÉE 900 PX, pour la seule image qui est rendue en grand.
+   * LA DÉRIVÉE 900 PX — le REPLI d'une tuile dont la vignette manque.
    *
-   * ⚠️ La couverture était servie par la VIGNETTE : 200 × 200 étirés en
-   * 899 × 562, soit un agrandissement de 4,49× au bureau et 5,85× sur un
-   * téléphone en DPR 3. Le plus gros élément de la page — celui que le client
-   * vient voir — était flou, à l'endroit exact où le produit prétend montrer
-   * un contrôle qualité.
-   *
-   * Nulle pour tout média déposé avant qu'elle existe, et pour les vidéos,
-   * dont la vignette est une capture. La couverture retombe alors sur la
-   * vignette : l'écran reste celui d'avant, il ne casse pas.
+   * Elle servait la pièce en grand de la planche du canevas, et le kit
+   * `client_link` n'en dessine plus : sa grille est uniforme, et chaque tuile
+   * prend la vignette. La dérivée ne sert donc plus qu'à ne pas laisser une case
+   * vide quand la vignette n'existe pas — une image trop lourde bat une tuile
+   * vide.
    */
   readonly urlCouverture?: string | null;
   readonly largeur: number | null;
@@ -53,30 +49,45 @@ export interface EntreeVisionneur {
 }
 
 /**
- * Combien de tuiles suivent la pièce en grand, par largeur d'écran.
+ * Combien de tuiles la grille rend, par largeur d'écran.
  *
- * ⚠️ LE TÉLÉPHONE EN PORTAIT CINQ, ET LA PLANCHE EN DESSINE SIX. Cinq tuiles
- * dans une grille de trois colonnes, c'est une rangée pleine et une rangée à
- * moitié vide — exactement ce qui se lit comme un chargement inachevé. Six
- * remplit deux rangées. Le bureau en montre sept sur quatre colonnes, et la
- * planche `PageClientDesktop` laisse délibérément la huitième case libre.
+ * ⚠️ LA PIÈCE EN GRAND A DISPARU AVEC LE KIT `client_link`, ET LE NOMBRE DE
+ * TUILES AVEC ELLE. La planche du canevas posait la couverture à 900 px puis
+ * sept tuiles ; le kit dessine une grille UNIFORME de carrés — cinq colonnes au
+ * bureau, deux au téléphone. La couverture choisie par le vendeur reste la
+ * PREMIÈRE tuile : l'appelant la place en tête.
+ *
+ * DIX AU BUREAU, SIX AU TÉLÉPHONE : deux rangées pleines de cinq, trois rangées
+ * pleines de deux. Une rangée à moitié vide se lit comme un chargement
+ * inachevé. Au-delà, la dernière tuile porte « +N » et ouvre le plein écran,
+ * dont la pellicule montre tout.
+ *
+ * ⚠️ LES TUILES AU-DELÀ DE LA BORNE NE SONT PAS RENDUES, pas masquées : une
+ * vignette masquée par CSS est tout de même téléchargée. Seules les tuiles 7 à
+ * 10 existent au téléphone en `hidden`, et elles sont en `loading="lazy"` —
+ * Chrome ne demande pas une image différée qui n'a pas de boîte.
  */
 const TUILES_TELEPHONE = 6;
-const TUILES_BUREAU = 7;
+const TUILES_BUREAU = 10;
 
 /** Au-delà de ce déplacement horizontal, un glissement du doigt change de média. */
 const SEUIL_BALAYAGE_PX = 40;
 
-/** La pastille de lecture d'une vidéo, posée sur sa vignette. */
-function PastilleLecture({ taille = 22 }: { readonly taille?: number }) {
+/**
+ * La pastille de lecture d'une vidéo, posée sur sa vignette — celle du kit :
+ * un voile sombre sur la tuile, un disque blanc de 38 px, un triangle à l'encre.
+ */
+function PastilleLecture() {
   return (
     <span
-      className="pointer-events-none absolute inset-0 flex items-center justify-center text-ds-texte-corps"
+      className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[rgba(11,11,24,.22)]"
       aria-hidden="true"
     >
-      <svg width={taille} height={taille} viewBox="0 0 24 24" fill="currentColor">
-        <path d="M8 5v14l11-7z" />
-      </svg>
+      <span className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-white/[.92] text-ds-texte-fort">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </span>
     </span>
   );
 }
@@ -122,43 +133,15 @@ export function apercuDe(
     readonly urlVignette: string | null;
     readonly urlCouverture?: string | null;
   },
-  /*
-   * ⚠️ CE PARAMÈTRE N'EXISTAIT PAS, ET C'EST CE QUI FAISAIT LE DÉFAUT.
-   *
-   * Cette fonction sert DEUX surfaces qui ne veulent pas la même image : la
-   * grande image d'en-tête, large de 600 px, et les tuiles de la grille,
-   * larges de 197 px. Elle rendait la COUVERTURE aux deux.
-   *
-   * MESURÉ AU NAVIGATEUR LE 03/09/2026, page client réelle à 7 médias :
-   * chaque tuile de 197 px téléchargeait un `.couverture.webp` de 900 px
-   * pesant **77 à 89 Ko**, là où le brief fixe la vignette à **12 Ko de
-   * cible et 20 Ko de PLAFOND DUR** — quatre à sept fois le plafond, par
-   * tuile. À vingt médias la page dépasserait 1,9 Mo pour un budget de 1 Mo,
-   * sur la surface précisément décrite comme « ouverte en 4G depuis un DM,
-   * sur un mobile d'entrée de gamme ».
-   *
-   * ⚠️ ET LES VIGNETTES EXISTAIENT. La charge d'hydratation portait
-   * **14 URL `.vignette.webp` et 14 `.couverture.webp`, zéro vignette
-   * nulle** : le produit payait la génération au dépôt et la signature de
-   * lecture des 200 px, puis téléchargeait les 900 px à la place.
-   *
-   * ⚠️ SA GARDE VERROUILLAIT LE DÉFAUT — L-025 dans sa forme exacte.
-   * `tests/unit/page-client-couleurs.test.ts` EXIGEAIT que la couverture
-   * gagne dès que les deux existent. C'est juste pour l'en-tête, et c'est
-   * cela qu'on venait de corriger — la couverture était servie par une
-   * vignette étirée. La garde a donc hérité du champ de vision de LA
-   * CORRECTION et rendu la grille « correcte par test ».
-   *
-   * Le repli reste croisé dans les deux sens : mieux vaut une image trop
-   * lourde qu'une tuile vide, et c'est le cas d'une vidéo dont l'extraction
-   * de vignette a échoué — un échec délibérément non bloquant.
-   */
-  surface: "grille" | "large",
 ): { readonly url: string } | { readonly repli: "photo" | "video" } {
-  const url =
-    surface === "grille"
-      ? (media.urlVignette ?? media.urlCouverture)
-      : (media.urlCouverture ?? media.urlVignette);
+  /*
+   * ⚠️ LA VIGNETTE D'ABORD, ET C'EST UN DÉFAUT PAYÉ. Mesuré au navigateur le
+   * 03/09/2026 : chaque tuile de 197 px téléchargeait la dérivée 900 px, 77 à
+   * 89 Ko, contre un PLAFOND DUR de 20 Ko par vignette. La fonction servait
+   * alors aussi la pièce en grand, qui voulait l'inverse ; le kit l'a retirée,
+   * et le paramètre de surface avec elle.
+   */
+  const url = media.urlVignette ?? media.urlCouverture;
   return url !== null && url !== undefined ? { url } : { repli: media.type };
 }
 
@@ -213,9 +196,7 @@ export function Visionneur({
   const [mediaCharge, setMediaCharge] = useState<string | null>(null);
 
   const courant = index === null ? undefined : medias[index];
-  const premier = medias[0];
-  const tuiles = medias.slice(1, TUILES_BUREAU + 1);
-  const apercuPremier = premier === undefined ? { repli: "photo" as const } : apercuDe(premier, "large");
+  const tuiles = medias.slice(0, TUILES_BUREAU);
 
   /*
    * ⚠️ LA REMISE À ZÉRO SE FAIT PENDANT LE RENDU, PLUS DANS L'EFFET.
@@ -421,119 +402,66 @@ export function Visionneur({
   return (
     <>
       {/*
-        LA GALERIE DU CANEVAS : une pièce en grand, puis les autres en tuiles.
+        LA GALERIE DU KIT : une grille uniforme de carrés, au rayon de carte,
+        chacun encadré d'un filet.
 
-        Ce n'est pas un choix d'esthétique. La première photo est celle que le
-        vendeur a désignée comme couverture ; c'est elle que le client veut
-        voir, et une grille uniforme la noie parmi les autres.
+        CINQ COLONNES AU BUREAU, TROIS ENTRE 768 ET 1 023 PX, DEUX AU
+        TÉLÉPHONE — les paliers du kit, ramenés aux familles de Tailwind. Deux
+        colonnes au téléphone est aussi une règle du brief : sur une colonne
+        pleine largeur, une vignette de 200 px serait agrandie de 80 % et floue.
 
-        LE NOMBRE DE TUILES EST BORNÉ, et les tuiles au-delà de la borne ne
-        sont PAS RENDUES du tout — pas masquées. Une vignette masquée par CSS
-        est tout de même téléchargée, et c'est la façon la plus courante de
-        croire qu'on a différé un chargement sans l'avoir fait. À vingt médias,
-        rendre toute la grille ferait treize requêtes que personne ne regarde.
-
-        PLEINE LARGEUR ET SANS RAYON AU TÉLÉPHONE, encadrée sur grand écran :
-        c'est ce que les deux planches dessinent. Sur 390 px, une marge de
-        chaque côté coûterait un dixième de la surface de chaque photo.
+        LA PREMIÈRE TUILE EST L'ÉLÉMENT LCP de la page, et elle n'est pas
+        différée. Les autres le sont.
       */}
-      {premier !== undefined ? (
-        <div>
-          <button
-            type="button"
-            onClick={() => ouvrirA(0)}
-            className="relative block aspect-[4/3] w-full overflow-hidden bg-ds-surface-creux lg:aspect-[16/10] lg:rounded-ds-sm"
-            aria-label={libelles.ouvrir + " 1"}
-          >
-            {"url" in apercuPremier ? (
-              /* eslint-disable-next-line @next/next/no-img-element -- URL
-                 signée à expiration : l'optimiseur la mettrait en cache
-                 au-delà de sa validité et servirait des images mortes. */
-              <img
-                src={apercuPremier.url}
-                alt=""
-                // Les dimensions déclarées SUIVENT la source réellement
-                // servie. Annoncer 200 × 200 pour une image de 900 px ferait
-                // réserver la mauvaise place et produirait le décalage que le
-                // budget de cette page interdit (< 0,1).
-                width={premier.urlCouverture != null ? 900 : 200}
-                height={premier.urlCouverture != null ? 563 : 200}
-                // LA COUVERTURE EST L'ÉLÉMENT LCP de la page. La différer la
-                // ferait attendre le premier passage de mise en page, ce qui
-                // est exactement ce qu'on cherche à éviter ici.
-                fetchPriority="high"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <ApercuIndisponible video={apercuPremier.repli === "video"} />
-            )}
-            {premier.type === "video" && "url" in apercuPremier ? (
-              <PastilleLecture taille={34} />
-            ) : null}
-            {filigrane !== null ? (
-              <span className="pointer-events-none absolute right-3 bottom-3 select-none text-white drop-shadow">
-                {filigrane}
-              </span>
-            ) : null}
-          </button>
+      {tuiles.length > 0 ? (
+        <ul className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3.5 lg:grid-cols-5">
+          {tuiles.map((media, rang) => {
+            const resteTelephone = medias.length - TUILES_TELEPHONE;
+            const resteBureau = medias.length - TUILES_BUREAU;
+            const apercu = apercuDe(media);
 
-          {tuiles.length > 0 ? (
-            <ul className="mt-[5px] grid grid-cols-3 gap-[5px] lg:mt-2 lg:grid-cols-4 lg:gap-2">
-              {tuiles.map((media, decalage) => {
-                const rang = decalage + 1;
-                const resteTelephone = medias.length - TUILES_TELEPHONE - 1;
-                const resteBureau = medias.length - TUILES_BUREAU - 1;
-                const apercu = apercuDe(media, "grille");
+            return (
+              <li key={media.id} className={rang >= TUILES_TELEPHONE ? "hidden lg:block" : undefined}>
+                <button
+                  type="button"
+                  onClick={() => ouvrirA(rang)}
+                  className="relative block aspect-square w-full overflow-hidden rounded-ds-card border border-ds-filet bg-ds-surface-creux"
+                  aria-label={libelles.ouvrir + " " + (rang + 1)}
+                >
+                  {"url" in apercu ? (
+                    /* eslint-disable-next-line @next/next/no-img-element -- URL
+                       signée à expiration : l'optimiseur la mettrait en cache
+                       au-delà de sa validité et servirait des images mortes. */
+                    <img
+                      src={apercu.url}
+                      alt=""
+                      width={200}
+                      height={200}
+                      loading={rang === 0 ? undefined : "lazy"}
+                      fetchPriority={rang === 0 ? "high" : undefined}
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <ApercuIndisponible video={apercu.repli === "video"} />
+                  )}
+                  {media.type === "video" && "url" in apercu ? <PastilleLecture /> : null}
 
-                return (
-                  <li
-                    key={media.id}
-                    className={rang > TUILES_TELEPHONE ? "hidden lg:block" : undefined}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => ouvrirA(rang)}
-                      className="relative block aspect-square w-full overflow-hidden bg-ds-surface-creux lg:rounded"
-                      aria-label={libelles.ouvrir + " " + (rang + 1)}
-                    >
-                      {"url" in apercu ? (
-                        /* eslint-disable-next-line @next/next/no-img-element --
-                           même raison : URL signée à expiration, et une
-                           vignette de 200 px n'a rien à optimiser. */
-                        <img
-                          src={apercu.url}
-                          alt=""
-                          width={200}
-                          height={200}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <ApercuIndisponible video={apercu.repli === "video"} />
-                      )}
-                      {media.type === "video" && "url" in apercu ? (
-                        <PastilleLecture />
-                      ) : null}
-
-                      {rang === TUILES_TELEPHONE && resteTelephone > 0 ? (
-                        <span className="absolute inset-0 flex items-center justify-center bg-ds-surface-creux/90 text-[15px] font-extrabold text-ds-texte-corps lg:hidden">
-                          {"+" + resteTelephone}
-                        </span>
-                      ) : null}
-                      {rang === TUILES_BUREAU && resteBureau > 0 ? (
-                        <span className="absolute inset-0 hidden items-center justify-center bg-ds-surface-creux/90 text-[16px] font-extrabold text-ds-texte-corps lg:flex">
-                          {"+" + resteBureau}
-                        </span>
-                      ) : null}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
-        </div>
+                  {rang === TUILES_TELEPHONE - 1 && resteTelephone > 0 ? (
+                    <span className="absolute inset-0 flex items-center justify-center bg-ds-surface-creux/90 text-[15px] font-extrabold text-ds-texte-corps lg:hidden">
+                      {"+" + resteTelephone}
+                    </span>
+                  ) : null}
+                  {rang === TUILES_BUREAU - 1 && resteBureau > 0 ? (
+                    <span className="absolute inset-0 hidden items-center justify-center bg-ds-surface-creux/90 text-[16px] font-extrabold text-ds-texte-corps lg:flex">
+                      {"+" + resteBureau}
+                    </span>
+                  ) : null}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       ) : null}
 
       {courant !== undefined ? (

@@ -104,6 +104,20 @@ describe("Résolution de l'accent — conformité obtenue automatiquement", () =
     ).toBeGreaterThanOrEqual(RATIO_INTERFACE);
   });
 
+  /**
+   * LE BANDEAU D'ÉTAT ÉCRIT SUR UNE TEINTE, PAS SUR LE FOND.
+   *
+   * `texte` est garanti à 4,5:1 contre le fond de page — et une teinte à 10 %
+   * est plus sombre que ce fond. Sans une mesure contre la teinte elle-même, le
+   * titre du bandeau passerait sous le seuil sur les accents ajustés au plus
+   * juste, et le test du dessus resterait vert.
+   */
+  test.each(COULEURS_EXTREMES)("%s : le titre du bandeau se lit sur sa teinte", (couleur) => {
+    const r = resoudreAccent(couleur, "#ffffff");
+    const ratio = ratioContraste(analyserHex(r.surTeinte) as never, analyserHex(r.teinte) as never);
+    expect(ratio, `${r.surTeinte} sur ${r.teinte}`).toBeGreaterThanOrEqual(RATIO_TEXTE);
+  });
+
   test("une valeur invalide retombe sur le défaut sans lever", () => {
     // La page publique d'un vendeur ne doit jamais cesser de s'afficher parce
     // qu'une couleur est mal formée.

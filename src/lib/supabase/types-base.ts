@@ -1021,6 +1021,7 @@ export type Database = {
           modifiee_le: string
           numero_suivi: string
           reference: string
+          reference_courte: string
           statut: Database["public"]["Enums"]["order_status"]
           statut_qc: Database["public"]["Enums"]["qc_status"]
           transporteur: string

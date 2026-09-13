@@ -12,6 +12,7 @@ import {
 } from "../aide/utilisateurs";
 import { lireCommandePublique, signerMediaPlein } from "@/lib/page-publique/lecture";
 import { revoquerLien, type ClientCycle } from "@/lib/commandes/cycle";
+import { referenceCourte } from "@/lib/commandes/reference";
 
 /**
  * LA PAGE PUBLIQUE — la surface que Wassim a désignée comme prioritaire.
@@ -127,6 +128,21 @@ describe("Ce que le jeton donne", () => {
     expect(page).not.toBeNull();
     expect(page?.client).toBe("Yanis");
     expect(page?.medias.length).toBeGreaterThan(0);
+  });
+
+  /**
+   * LA RÉFÉRENCE DU CLIENT EST CELLE DU VENDEUR, AU CARACTÈRE PRÈS.
+   *
+   * Elle est calculée DEUX FOIS : en SQL pour la page publique (migration 153),
+   * qui n'a pas le droit de lire l'identifiant, et en TypeScript pour l'espace
+   * vendeur. Deux formules divergent au premier remaniement de l'une — et le
+   * client écrirait alors à son vendeur une référence que celui-ci ne retrouve
+   * nulle part. On compare donc les deux sur une VRAIE commande.
+   */
+  test("la référence courte est celle que le vendeur lit", async () => {
+    const page = await lireCommandePublique(jeton);
+    expect(page?.referenceCourte, "la lecture publique ne rend pas de référence").not.toBeNull();
+    expect(page?.referenceCourte).toBe(referenceCourte(commande));
   });
 
   /**

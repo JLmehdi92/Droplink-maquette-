@@ -874,7 +874,9 @@
       "preparation": "备货中",
       "expedie": "已发出",
       "en_transit": "运输中",
-      "livre": "已送达"
+      "livre": "已送达",
+      "enCours": "进行中",
+      "enAttente": "待处理"
     },
     "galerie": {
       "titre": "照片和视频",
@@ -887,11 +889,9 @@
       "position": "第 {n} 张，共 {total} 张",
       "videTitre": "还没有照片",
       "videTexte": "卖家上传后，照片会显示在这里。",
-      "compte": "{n, plural, other {# 项}}",
       "balayez": "左右滑动切换照片"
     },
     "details": {
-      "titre": "详情",
       "reference": "商品编号",
       "destinataire": "收件人"
     },
@@ -909,8 +909,6 @@
       "annuler": "取消"
     },
     "suivi": {
-      "titre": "包裹物流",
-      "numero": "运单号",
       "aucunMouvement": "承运商尚未提供物流信息",
       "dernierMouvement": "最近一次更新在 {n} 天前",
       "aujourdHui": "今天有物流更新",
@@ -918,20 +916,12 @@
       "silence": "包裹已登记并在跟踪中。经过海关时出现这样的间隔并不少见——我们每天都会向承运商查询。",
       "arrete": "承运商不再提供该运单号的信息。如果您尚未收到包裹，请联系卖家。",
       "silenceTitre": "已有 {n} 天没有更新",
-      "anciennete": "{n} 天前",
       "attenteTitre": "等待承运商揽收",
       "attenteTexte": "包裹已交给承运商，首次扫描信息还没有到——最初几天这很常见。详细物流会自动显示在这里。"
     },
-    "pourClient": "致 {nom}",
-    "etat": {
-      "arriveeEstimee": "预计送达",
-      "titre": "配送",
-      "statut": "状态"
-    },
     "reseaux": {
-      "titre": "关注 {nom}",
-      "note": "链接将在新标签页中打开。",
-      "site": "官网"
+      "site": "官网",
+      "titre": "关注 {nom}"
     },
     "lienInvalideTitre": "此链接已失效",
     "lienInvalideTexte": "请向发给您链接的人索取一个新链接。",
@@ -939,7 +929,38 @@
       "titre": "此页面无法显示",
       "texte": "我们这边出现了错误。请稍后重试：您的链接仍然有效。",
       "reessayer": "重试"
-    }
+    },
+    "commandeDe": "来自以下店铺的订单",
+    "commande": {
+      "sousTitre": "物流信息自动更新。",
+      "dateEstimee": "预计送达日期"
+    },
+    "bandeau": {
+      "preparation": "您的订单正在备货",
+      "expedie": "您的包裹已发出",
+      "en_transit": "您的包裹正在运输中",
+      "livre": "您的包裹已送达",
+      "preparationTexte": "卖家正在为您备货。"
+    },
+    "livraison": {
+      "titre": "配送信息",
+      "transporteur": "承运商",
+      "numero": "运单号",
+      "dateEstimee": "预计日期"
+    },
+    "historique": {
+      "titre": "物流记录"
+    },
+    "contact": {
+      "titre": "有疑问？",
+      "texte": "如对订单有任何疑问，请直接联系店铺。",
+      "bouton": "联系店铺"
+    },
+    "pied": {
+      "conditions": "使用条款",
+      "confidentialite": "隐私政策"
+    },
+    "pourClient": "致 {nom}"
   },
   "admin": {
     "navigation": "后台管理",

@@ -3087,10 +3087,10 @@ try {
          * MESURÉ AU NAVIGATEUR le 03/09/2026 : 77 à 89 Ko par tuile, contre un
          * PLAFOND DUR de 20 Ko. Ce contrôle-ci lit ce que le HTML DEMANDE.
          *
-         * ⚠️ LES DEUX CONTRE-TESTS VIENNENT EN PREMIER. « Aucune couverture
-         * dans les tuiles » est trivialement vrai d'une page sans tuile, et
-         * d'une page dont aucune dérivée n'existe. Il faut donc établir que
-         * les deux dérivées sont bien référencées avant de dire laquelle va où.
+         * ⚠️ LE CONTRE-TEST VIENT EN PREMIER. « Aucune couverture dans les
+         * tuiles » est trivialement vrai d'une page sans tuile. Il faut donc
+         * établir qu'une vignette est bien demandée avant de dire que la
+         * dérivée 900 px ne l'est pas.
          */
         {
           /*
@@ -3115,26 +3115,23 @@ try {
               vignettes > 0,
               `CONTRE-TEST : une balise img demande bien une vignette 200 px (vu ${vignettes})`,
             ],
-            [
-              couvertures > 0,
-              `CONTRE-TEST : une balise img demande bien la derivee 900 px (vu ${couvertures})`,
-            ],
             /*
-             * LA COUVERTURE EST RENDUE UNE FOIS, ET UNE SEULE : la grande image
-             * d'en-tete. Toute occurrence supplementaire est une tuile qui
-             * telecharge 900 px pour en afficher 197 — c'est exactement la
-             * forme qu'avait le defaut, et la seule qui se voie sans navigateur.
+             * AUCUNE BALISE NE DEMANDE LA DERIVEE 900 PX, et c est une regle
+             * qui a change de forme sans changer de raison. La planche du
+             * canevas posait UNE piece en grand, seule autorisee a la demander ;
+             * le kit `client_link` dessine une grille UNIFORME de carres, donc
+             * plus aucune image n a de raison de peser 900 px. Toute demande
+             * est une tuile de 197 px qui telecharge 77 a 89 Ko — la forme
+             * exacte du defaut du 03/09, et la seule qui se voie sans
+             * navigateur.
+             *
+             * Le contre-test qui l accompagne est celui des vignettes, juste
+             * au-dessus : sans tuile servie, « zero couverture » serait vrai
+             * d une page vide.
              */
             [
-              couvertures <= 1,
-              `la derivee 900 px n est demandee QUE par l en-tete` +
-                (couvertures > 1
-                  ? ` — ${couvertures} demandes, donc ${couvertures - 1} tuile(s) servie(s) en 900 px`
-                  : ""),
-            ],
-            [
-              vignettes >= couvertures,
-              `les tuiles prennent la vignette, pas la couverture (vignettes ${vignettes}, couvertures ${couvertures})`,
+              couvertures === 0,
+              `aucune tuile ne demande la derivee 900 px (vu ${couvertures})`,
             ],
             /*
              * ⚠️ UNE PHOTO SANS DERIVEE DOIT QUAND MEME S AFFICHER.
@@ -4163,20 +4160,19 @@ try {
             /*
              * LA CARTE D ETAT NE PEUT PAS RESTER MUETTE.
              *
-             * ⚠️ SANS ARRIVEE CALCULABLE, son surtitre ET sa grande ligne
-             * etaient tous deux conditionnes a l estimation : la carte se
-             * reduisait a une ligne sourdine sur l aplat de la couleur du
-             * vendeur — le PREMIER objet de la page au telephone. Le surtitre
-             * « Statut » n existe que dans ce cas ; sa presence prouve que la
-             * branche est prise, et « Arrivee estimee » prouve qu on n a rien
-             * invente pour la remplir.
+             * ⚠️ SANS ARRIVEE CALCULABLE, la carte du canevas se reduisait a une
+             * ligne sourdine — le PREMIER objet de la page au telephone. Depuis
+             * le kit `client_link`, c est le BANDEAU qui dit l etat en une
+             * phrase, et il ne depend d aucune estimation : sa presence prouve
+             * que la carte parle, et l absence de « Date estimee de livraison »
+             * prouve qu on n a rien invente pour la remplir.
              */
             [
-              avantScan.includes(">Statut<"),
-              "sans arrivee calculable, la carte d etat porte le surtitre « Statut »",
+              ["Votre commande est en préparation", "Votre colis a été expédié", "Votre colis est en transit", "Votre colis a été livré", "Aucun mouvement depuis"].some((b) => avantScan.includes(b)),
+              "sans arrivee calculable, la carte d etat porte son bandeau d etat",
             ],
             [
-              !avantScan.includes("Arrivée estimée"),
+              !avantScan.includes("Date estimée de livraison"),
               "et AUCUNE arrivee n est annoncee — on ne fabrique pas de date",
             ],
           );
@@ -4422,12 +4418,12 @@ try {
           ).text();
           controles.push(
             [
-              avecEta.includes("Arrivée estimée"),
+              avecEta.includes("Date estimée de livraison"),
               "CONTRE-TEST : quand le transporteur annonce une arrivee, la carte la porte",
             ],
             [
-              !avecEta.includes(">Statut<"),
-              "et le surtitre « Statut » cede la place — il ne recouvre jamais une vraie date",
+              avecEta.includes(">Date estimée<"),
+              "et la carte de livraison la reprend sur sa ligne — une seule verite, deux endroits",
             ],
           );
         }

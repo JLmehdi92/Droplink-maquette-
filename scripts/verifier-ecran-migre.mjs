@@ -95,7 +95,21 @@ const { data: shop } = await service.from("shops").select("id").eq("owner_id", p
    elle, ni le compteur ni la deuxieme ligne de l en-tete ne sont exerces. */
 await service
   .from("shops")
-  .update({ name: "Atelier de verification", description: "Vetements · Sneakers · Accessoires" })
+  .update({
+    name: "Atelier de verification",
+    description: "Vetements · Sneakers · Accessoires",
+    /* ⚠️ LES TROIS RESEAUX SONT POSES, SINON LA PAGE CLIENT MESURE LEUR ABSENCE.
+       L en-tete de boutique et la carte « Une question ? » ne rendent rien
+       sans lien configure : le kit les dessine, et la sonde ne pouvait alors
+       ni rougir sur leurs puces ni verifier leurs cibles tactiles. */
+    instagram_url: "https://instagram.com/atelier.verification",
+    tiktok_url: "https://www.tiktok.com/@atelier.verification",
+    whatsapp_url: "https://wa.me/33612345678",
+    /* ⚠️ LA PAGE CLIENT NE SE MESURE PAS EN ANGLAIS PAR SON URL : elle vit hors
+       de `[locale]` et prend la langue de la BOUTIQUE. `LANGUE_BOUTIQUE=en`
+       est donc le seul moyen de la verifier dans une autre langue. */
+    default_language: process.env["LANGUE_BOUTIQUE"] ?? "fr",
+  })
   .eq("id", shop.id);
 /*
  * ⚠️ QUATRE COMMANDES, UNE PAR STATUT, ET PAS UNE SEULE.

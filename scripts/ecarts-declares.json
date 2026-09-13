@@ -1688,6 +1688,13 @@
         ],
         "motif": "contrainte",
         "raison": "LES DEUX AUTRES ETATS DU BOUTON D ENREGISTREMENT. Un bouton qui ne dit pas qu il travaille se fait cliquer deux fois, et un echec muet laisse croire que c est enregistre — ici un seul geste rhabille TOUTES les pages du vendeur, y compris les liens deja envoyes."
+      },
+      {
+        "textes": [
+          "Retrouvez Atelier de verification"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE CONFIGURE DESORMAIS LES TROIS RESEAUX de sa boutique, pour que la page client mesure son en-tete de boutique et sa carte « Une question ? ». L apercu de cet ecran rend alors la ligne de reseaux que le vendeur verra sous le nom de sa boutique ; le kit dessine un apercu sans reseaux configures."
       }
     ]
   },
@@ -3326,6 +3333,277 @@
         ],
         "motif": "structure",
         "raison": "LE TELEPHONE MONTRE LA PAGE CLIENT, pas une image de synthese : c est le produit qu on vend, et une capture inventee serait la seule chose de cette page qu on ne pourrait pas tenir. Les trois pastilles autour de lui sont les `FloatingChip` du kit avec notre contenu — voir la declaration symetrique dans les manquants."
+      }
+    ]
+  },
+  "p-jeton": {
+    "valeurs": [
+      {
+        "textes": [
+          "Une commande de",
+          "Date estimée de livraison",
+          "Numéro de suivi",
+          "Date estimée"
+        ],
+        "motif": "donnee",
+        "raison": "LARGEUR ET PLACE, PAS DESSIN. Un libelle pose en colonne prend la largeur de sa valeur la plus longue : « Atelier de verification » est plus long que « LaPlanque », la fourchette « 14 septembre — 15 septembre » plus longue que « 12 septembre 2025 », et « DLKMESURE0001FR » que « CJ123456789FR ». Le jeu de mesure n a pas de logo, donc le bloc d identite commence 118 px plus a gauche que chez le kit, ou le disque de 96 px le precede. Taille, graisse, interligne et couleur sont ceux du kit."
+      },
+      {
+        "textes": [
+          "8 sept. 2025 14:32  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "LA DATE DE PREPARATION EST OMISE QUAND ELLE CONTREDIT L EXPEDITION. Le jeu cree la commande AUJOURD HUI et date le premier mouvement du colis de trois jours avant : la frise afficherait « Preparation 13 sept. » avant « Expedie 10 sept. ». La creation de la page n est pas la preparation de la commande — c est le cas de tout import —, et elle ne s affiche que tant qu elle ne la contredit pas."
+      },
+      {
+        "textes": [
+          "En transit"
+        ],
+        "motif": "donnee",
+        "raison": "LE MEME MOT A DEUX PLACES DIFFERENTES DE LA FRISE. Le kit montre une commande en livraison : « En transit » y est une etape FRANCHIE, a l encre, et le titre d un passage de l historique. Le jeu de mesure est EN transit : c est l etape COURANTE, donc accentuee, et nos passages portent la phrase du transporteur, pas ce libelle."
+      },
+      {
+        "textes": [
+          "En cours",
+          "Contacter la boutique"
+        ],
+        "motif": "donnee",
+        "raison": "L ACCENT DU VENDEUR. Le kit est dessine pour #5B4BF5 ; la boutique du jeu porte l accent par defaut stocke en base, #7c5cf5, et chaque couleur passe par `resoudreAccent()` — la teinte de la pastille est recalculee a 10 % de cet accent. La place du bouton suit la carte de livraison, plus haute de 6 px (voir la declaration des lignes de livraison)."
+      },
+      {
+        "textes": [
+          "Photos et vidéos"
+        ],
+        "motif": "contrainte",
+        "raison": "LE BOUTON « VOIR TOUT » N EST PAS PORTE, et c est lui qui haussait l en-tete de carte de 36 px — le titre y est centre, 8 px plus bas. Chaque tuile ouvre deja le plein ecran, dont la pellicule montre tout ; et le bouton du kit fait 36 px de haut, sous la cible tactile de 44 que la regle 5 impose au telephone."
+      },
+      {
+        "textes": [
+          "Historique du suivi"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CARTE DE VALIDATION EST INSEREE AVANT L HISTORIQUE. L arbitrage QC vient juste apres la galerie qu il juge ; le design system le declare hors de son perimetre, donc il n a pas de place dans le kit, et tout ce qui le suit dans la colonne descend de sa hauteur."
+      },
+      {
+        "textes": [
+          "8 septembre 2025 à 14:32 [1/2]",
+          "8 septembre 2025 à 18:33 [2/2]",
+          "10 septembre 2025 à 09:15  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en invente cinq, et le premier porte une description de transporteur assez longue pour passer sur deux lignes. La date prend la hauteur de sa rangee, comme au kit, et la rangee est plus haute."
+      },
+      {
+        "textes": [
+          "Une question ?",
+          "Pour toute question concernant votre com",
+          "Instagram",
+          "TikTok",
+          "WhatsApp"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, 5 PX PLUS BAS. La carte de livraison du kit commence par le transporteur, dont la pastille fait 38 px ; le jeu n a pas de code transporteur sur la commande, et ses quatre lignes portent toutes une tuile de 44 — la carte grandit de 6 px et celle du contact descend d autant."
+      },
+      {
+        "textes": [
+          "PROPULSÉ PAR DROPLINK",
+          "Conditions d'utilisation",
+          "Politique de confidentialité"
+        ],
+        "motif": "contrainte",
+        "raison": "LA MENTION DROPLINK RESTE SECONDAIRE — decision 25. Le kit la peint en surtitre violet de 11 px dans une carte promotionnelle ; nous la gardons au pied, en sourdine de 13, jamais confondable avec l expediteur. Sans cette carte ni celle des notifications, la colonne de droite est plus courte et le pied remonte."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Français"
+        ],
+        "motif": "contrainte",
+        "raison": "LE SELECTEUR DE LANGUE N EST PAS PORTE. La page vit hors du segment `[locale]` et parle la langue que le VENDEUR a choisie pour sa boutique : un client a qui on envoie un lien ne la choisit pas, et une URL localisee creerait deux adresses pour un jeton cense etre unique. Le logo DropLink qui l accompagne n est pas porte non plus (decision 25) ; son espace de 82 px, lui, est garde."
+      },
+      {
+        "textes": [
+          "Qualité 1:1",
+          "Produits premium",
+          "Suivi en temps réel",
+          "Informations automatiques",
+          "Service client réactif",
+          "Une question ? Contactez-nous"
+        ],
+        "motif": "contrainte",
+        "raison": "LES TROIS GAGES DE L EN-TETE. « Qualite 1:1 » est interdit par le principe II — c est du vocabulaire de replique. Les deux autres sont des PROMESSES du vendeur, « suivi en temps reel » et « service client reactif », que la base n enregistre nulle part : l interface n affirme jamais ce que la base n a pas (principe XII)."
+      },
+      {
+        "textes": [
+          "LaPlanque"
+        ],
+        "motif": "contrainte",
+        "raison": "LE NOM ECRIT DANS UN DISQUE NOIR QUAND LE LOGO MANQUE. Le nom est deja ecrit en grand juste a cote ; le repeter dans un faux logo serait un texte de remplacement, ce que la decision 26 refuse sur cette page. Sans logo, le disque est omis."
+      },
+      {
+        "textes": [
+          "Vêtements · Sneakers · Accessoires",
+          "#DLK7842",
+          "12 septembre 2025",
+          "CJ123456789FR"
+        ],
+        "motif": "donnee",
+        "raison": "LES VALEURS DU JEU DE MESURE. La description du jeu est ecrite sans accent, la reference est derivee de l identifiant de la commande (migration 153, meme formule que l espace vendeur), la date estimee est une fourchette relative au jour de la mesure, et le numero de suivi est celui du jeu. Voir les valeurs symetriques dans « en trop »."
+      },
+      {
+        "textes": [
+          "Suivi de votre commande en temps réel."
+        ],
+        "motif": "contrainte",
+        "raison": "« EN TEMPS REEL » N EST PAS VRAI. Le suivi est interroge a une cadence de plusieurs heures, et le transporteur ne rapporte qu a chaque scan : le sous-titre dit « Suivi mis a jour automatiquement », ce que le produit fait reellement (principe XII)."
+      },
+      {
+        "textes": [
+          "Commandée",
+          "En livraison",
+          "Livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "LA FRISE A QUATRE ETAPES QUI SONT LES NOTRES — decision 4 : preparation, expedie, en transit, livre. « En livraison » est une granularite que le brief range dans le detail du suivi, jamais dans la frise."
+      },
+      {
+        "textes": [
+          "Votre colis est en livraison",
+          "Votre colis est en cours de livraison. I"
+        ],
+        "motif": "donnee",
+        "raison": "L ETAT DE LA COMMANDE DU JEU. Le kit montre un colis en livraison ; le jeu de mesure est en transit, et le bandeau dit « Votre colis est en transit », suivi de l anciennete du dernier mouvement — le seul element de la page qui change chaque jour quand le colis ne bouge pas (decision 8)."
+      },
+      {
+        "textes": [
+          "( 5 )"
+        ],
+        "motif": "structure",
+        "raison": "LE MEME COMPTEUR, ECRIT EN UN SEUL NOEUD. Le kit rend la parenthese, le nombre et la parenthese en trois noeuds de texte, que la sonde joint par des espaces ; nous l ecrivons « (5) » d un bloc. Taille 18, graisse 500 et sourdine sont les siennes."
+      },
+      {
+        "textes": [
+          "Voir tout"
+        ],
+        "motif": "contrainte",
+        "raison": "Chaque tuile ouvre deja le plein ecran, dont la pellicule montre tous les medias ; et le bouton du kit fait 36 px de haut, sous la cible tactile de 44 px que la regle 5 impose au telephone. Voir la declaration de place du titre de la galerie."
+      },
+      {
+        "textes": [
+          "Votre colis est en cours de livraison ve",
+          "Arrivé dans votre région",
+          "Votre colis est arrivé dans le centre de",
+          "Votre colis est en cours d'acheminement ",
+          "Colis expédié",
+          "Votre colis a été remis au transporteur.",
+          "Commande enregistrée",
+          "Les informations du colis ont été enregi"
+        ],
+        "motif": "donnee",
+        "raison": "LES PASSAGES DU TRANSPORTEUR. La base porte, pour chaque passage, une description et un lieu — pas un titre court et une phrase d explication. La description devient le titre et le lieu la ligne de detail : reecrire la phrase du transporteur en un titre demanderait de l INTERPRETER, et une interpretation fausse sur un colis bloque est exactement ce qui fait ecrire « c est ou mon colis »."
+      },
+      {
+        "textes": [
+          "Transporteur",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE NE POSE PAS DE CODE TRANSPORTEUR SUR LA COMMANDE. La ligne existe : elle nomme le transporteur des que `orders.carrier_code` porte un code que le catalogue officiel de 17TRACK connait (`lib/tracking/transporteurs.ts`), et c est l interrogation du colis qui l ecrit. Le jeu insere ses colis a la main, sans elle."
+      },
+      {
+        "textes": [
+          "Pays de livraison",
+          "France"
+        ],
+        "motif": "donnee",
+        "raison": "LE DESTINATAIRE N A PAS D ADRESSE CHEZ NOUS — c est un pseudo en texte libre. Le pays d un transporteur n est pas celui ou arrive le colis, et le lieu du dernier passage n est pas une destination : la ligne n existe pas plutot que d afficher un pays devine (decision 26)."
+      },
+      {
+        "textes": [
+          "Notifications automatiques",
+          "Vous serez informé de chaque mise à jour"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CARTE AFFIRME AU CLIENT QU IL SERA PREVENU, ET RIEN NE L Y ABONNE. La decision 3 exclut tout formulaire de cette page — un champ email serait le premier pas vers un compte destinataire —, donc aucune notification ne peut lui parvenir."
+      },
+      {
+        "textes": [
+          "Des liens de suivi simples et puissants.",
+          "Créez un lien de suivi par commande, en ",
+          "Découvrir DropLink",
+          "© 2025 DropLink. Tous droits réservés.",
+          "Aide"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PAGE APPARTIENT AU VENDEUR — decision 25. La mention DropLink doit rester SECONDAIRE et jamais confondable avec l expediteur : une carte promotionnelle avec son appel « Decouvrir DropLink » et un droit d auteur au nom de DropLink en pied se liraient comme le proprietaire de la page. Le lien « Aide » mene a la documentation des vendeurs, que le client n a aucune raison d ouvrir."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "Atelier de verification",
+          "Vetements · Sneakers · Accessoires",
+          "DLKMESURE0001FR",
+          "Votre colis est en transit",
+          "Mouvement hier",
+          "Colis arrive au centre de tri internatio",
+          "Roissy, France",
+          "Colis remis au transporteur",
+          "Guangzhou, Chine"
+        ],
+        "motif": "donnee",
+        "raison": "LES VALEURS DU JEU DE MESURE : sa boutique, son numero de suivi, l etat en transit de sa commande et ses deux passages. Voir les valeurs symetriques dans les manquants."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F#]{6}$",
+          "^[0-9#]{1,2} [^ ]+ — [0-9#]{1,2} [^ ]+$"
+        ],
+        "motif": "donnee",
+        "raison": "LA REFERENCE ET LA FOURCHETTE D ARRIVEE CHANGENT A CHAQUE PASSAGE : la premiere derive de l identifiant d une commande creee par la sonde, la seconde est posee relativement au jour de la mesure. Un motif ancre, jamais une valeur litterale qui mourrait au passage suivant."
+      },
+      {
+        "textes": [
+          "Suivi mis à jour automatiquement."
+        ],
+        "motif": "contrainte",
+        "raison": "Le sous-titre vrai qui remplace « en temps reel » — voir la declaration symetrique."
+      },
+      {
+        "textes": [
+          "Préparation",
+          "Expédié",
+          "Livré"
+        ],
+        "motif": "contrainte",
+        "raison": "Les etapes de la decision 4 — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "textes": [
+          "(5)"
+        ],
+        "motif": "structure",
+        "raison": "Le compteur de la galerie ecrit en un seul noeud — voir la declaration symetrique."
+      },
+      {
+        "textes": [
+          "Votre validation",
+          "Cette commande est validée.",
+          "Changer d’avis"
+        ],
+        "motif": "contrainte",
+        "raison": "L ARBITRAGE QC, que le kit ne dessine pas : c est l une des trois features du produit, et le design system le declare hors de son perimetre. Il prend la carte et le titre de carte du kit, sans rien inventer d autre."
+      },
+      {
+        "textes": [
+          "Destinataire",
+          "Client de verification",
+          "Référence",
+          "REF-V"
+        ],
+        "motif": "contrainte",
+        "raison": "DEUX INFORMATIONS QUE LE PRODUIT PORTAIT ET QUE LE KIT N A PAS : le pseudo du destinataire et la reference du produit. Elles etaient rendues dans un bloc « Details » que le kit ne dessine pas ; elles rejoignent la carte de livraison, au dessin exact de ses lignes, plutot que de disparaitre."
       }
     ]
   }

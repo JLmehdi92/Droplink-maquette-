@@ -874,7 +874,9 @@
       "preparation": "Preparation",
       "expedie": "Shipped",
       "en_transit": "In transit",
-      "livre": "Delivered"
+      "livre": "Delivered",
+      "enCours": "Ongoing",
+      "enAttente": "Pending"
     },
     "galerie": {
       "titre": "Photos and videos",
@@ -887,11 +889,9 @@
       "position": "{n} of {total}",
       "videTitre": "No photos yet",
       "videTexte": "They will appear here as soon as the seller adds them.",
-      "compte": "{n, plural, one {# item} other {# items}}",
       "balayez": "Swipe to change photo"
     },
     "details": {
-      "titre": "Details",
       "reference": "Reference",
       "destinataire": "Recipient"
     },
@@ -909,8 +909,6 @@
       "annuler": "Cancel"
     },
     "suivi": {
-      "titre": "Parcel tracking",
-      "numero": "Number",
       "aucunMouvement": "No carrier information yet",
       "dernierMouvement": "Last movement {n} days ago",
       "aujourdHui": "Movement today",
@@ -918,20 +916,12 @@
       "silence": "The parcel is registered and tracked. Such a delay is not unusual at customs — we keep querying the carrier every day.",
       "arrete": "The carrier no longer reports on this number. Contact the seller if nothing has arrived.",
       "silenceTitre": "No movement for {n} days",
-      "anciennete": "{n} days ago",
       "attenteTitre": "Waiting for the carrier",
       "attenteTexte": "The parcel has been handed to the carrier. Its first scan has not arrived yet — this is common in the first few days. Detailed tracking will appear here automatically."
     },
-    "pourClient": "for {nom}",
-    "etat": {
-      "arriveeEstimee": "Estimated arrival",
-      "titre": "Shipping",
-      "statut": "Status"
-    },
     "reseaux": {
-      "titre": "Find {nom}",
-      "note": "Links open in a new tab.",
-      "site": "Website"
+      "site": "Website",
+      "titre": "Find {nom}"
     },
     "lienInvalideTitre": "This link is no longer valid",
     "lienInvalideTexte": "Ask the person who sent it to you for a new link.",
@@ -939,7 +929,38 @@
       "titre": "This page could not be displayed",
       "texte": "Something went wrong on our side. Try again in a moment — your link is still valid.",
       "reessayer": "Try again"
-    }
+    },
+    "commandeDe": "An order from",
+    "commande": {
+      "sousTitre": "Tracking updated automatically.",
+      "dateEstimee": "Estimated delivery date"
+    },
+    "bandeau": {
+      "preparation": "Your order is being prepared",
+      "expedie": "Your parcel has been shipped",
+      "en_transit": "Your parcel is in transit",
+      "livre": "Your parcel has been delivered",
+      "preparationTexte": "The seller is preparing your order."
+    },
+    "livraison": {
+      "titre": "Delivery details",
+      "transporteur": "Carrier",
+      "numero": "Tracking number",
+      "dateEstimee": "Estimated date"
+    },
+    "historique": {
+      "titre": "Tracking history"
+    },
+    "contact": {
+      "titre": "A question?",
+      "texte": "For anything about your order, contact the shop directly.",
+      "bouton": "Contact the shop"
+    },
+    "pied": {
+      "conditions": "Terms of use",
+      "confidentialite": "Privacy policy"
+    },
+    "pourClient": "for {nom}"
   },
   "admin": {
     "navigation": "Administration",

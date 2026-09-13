@@ -84,6 +84,19 @@ export interface CommandePublique {
   readonly statut: "preparation" | "expedie" | "en_transit" | "livre";
   readonly qc: "en_attente" | "approuve" | "refuse";
   readonly numeroSuivi: string | null;
+  /**
+   * « #A1B2C3 » — la référence que le vendeur lit dans sa liste, calculée EN
+   * BASE par la même formule que `referenceCourte()` (migration 153).
+   * L'identifiant de la commande, lui, ne sort toujours pas.
+   *
+   * ⚠️ `null` TANT QUE LA 153 N'EST PAS APPLIQUÉE : une production migrée après
+   * le déploiement rend la ligne sans cette colonne, et la carte omet alors son
+   * titre plutôt que d'écrire « undefined » au client.
+   */
+  readonly referenceCourte: string | null;
+  /** Le code numérique du transporteur, tel que le fournisseur de suivi le nomme. */
+  readonly codeTransporteur: number | null;
+  readonly creeeLe: string;
   readonly modifieeLe: string;
   readonly boutique: Boutique;
   readonly medias: readonly MediaPublic[];
@@ -215,6 +228,12 @@ async function lireCommandePubliqueSansMemo(
     statut: ligne.statut,
     qc: ligne.statut_qc,
     numeroSuivi: ligne.numero_suivi,
+    referenceCourte: ligne.reference_courte ?? null,
+    codeTransporteur:
+      ligne.transporteur !== null && /^[0-9]{1,9}$/.test(ligne.transporteur)
+        ? Number(ligne.transporteur)
+        : null,
+    creeeLe: ligne.creee_le,
     modifieeLe: ligne.modifiee_le,
     boutique: {
       nom: ligne.boutique_nom,

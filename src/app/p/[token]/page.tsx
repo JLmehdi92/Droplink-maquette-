@@ -3,10 +3,13 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
 import { BaliseVue } from "@/components/publique/balise-vue";
-import { EtatExpedition } from "@/components/publique/etat-expedition";
+import { CARTE, TitreCarte } from "@/components/publique/carte-client";
+import { CarteCommande } from "@/components/publique/carte-commande";
+import { CarteContact } from "@/components/publique/carte-contact";
+import { CarteLivraison, type LigneLivraison } from "@/components/publique/carte-livraison";
+import { EnTeteBoutique } from "@/components/publique/en-tete-boutique";
+import { HistoriqueSuivi } from "@/components/publique/historique-suivi";
 import { estimationVisible } from "@/lib/page-publique/estimation";
-import { ReseauxVendeur } from "@/components/publique/reseaux-vendeur";
-import { Suivi } from "@/components/publique/suivi";
 import { Visionneur } from "@/components/publique/visionneur";
 import { lireCommandePublique, lireSuiviPublic } from "@/lib/page-publique/lecture";
 import { resoudreAccent } from "@/lib/design/contraste";
@@ -16,7 +19,7 @@ import { adresseAppelant, empreinte } from "@/lib/limitation/empreinte";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { decrireSilence } from "@/lib/tracking/silence";
-import { substituer } from "@/lib/format/gabarit";
+import { lireTransporteur } from "@/lib/tracking/transporteurs";
 
 /**
  * LA PAGE QUE VOIT LE CLIENT.
@@ -24,42 +27,47 @@ import { substituer } from "@/lib/format/gabarit";
  * Elle est ouverte UNE FOIS, au téléphone, en 4G, depuis un message privé. Tout
  * ce qui suit découle de cette phrase.
  *
- * L'ORDRE EST CELUI DES QUESTIONS QU'ON SE POSE, dans l'ordre où on se les
- * pose : quand est-ce que ça arrive (la carte d'état), à quoi ça ressemble (la
- * galerie), est-ce que c'est bien ça (la validation), et seulement ensuite le
- * détail du transport. Le canevas met la galerie AVANT les détails
- * d'expédition sur téléphone ; sur grand écran, les deux tiennent côte à côte.
+ * ⚠️ PORTÉE SUR LE KIT `client_link` LE 13/09/2026, ET CE N'ÉTAIT PAS UNE PASSE DE
+ * DÉTAIL. Le canevas peignait un BANDEAU à la couleur du vendeur et rangeait
+ * tout en deux colonnes de sections titrées en majuscules ; le kit compose une
+ * page de CARTES : l'identité de la boutique, « Votre commande » avec sa
+ * référence et une frise datée, la galerie, l'historique du suivi, puis à
+ * droite les informations de livraison et le contact.
  *
- * DEUX PLANCHES, DEUX RÉPARTITIONS DE LA MÊME INFORMATION. `PageClient` met la
- * date d'arrivée dans une carte à la couleur du vendeur, en tête ;
- * `PageClientDesktop` la monte dans l'en-tête, à droite du titre, et rend à sa
- * place une carte « Expédition » qui porte le nom de l'étape. Ce n'est pas la
- * même mise en page avec des tailles différentes — c'est la même information
- * distribuée autrement, et le composant d'état porte les deux variantes.
+ * L'ORDRE DE LA SOURCE EST CELUI DU TÉLÉPHONE, et c'est lui qui compte pour la
+ * grande majorité des visiteurs : où en est la commande, à quoi elle ressemble
+ * (la galerie), est-ce que c'est bien ça (la validation, juste après ce qu'elle
+ * juge), et seulement ensuite le détail du transport. Sur grand écran, la
+ * colonne de droite reçoit la livraison et le contact.
  *
- * LA BASCULE EST À `lg`, PAS À `md`. Mesurée : à 768 px, la colonne de droite
- * de la planche ne fait plus que 246 px, et les quatre libellés de la frise —
- * « Préparation » en tête — n'y tiennent plus sur une ligne. La leçon des deux
- * écrans précédents est que les défauts graves vivent ENTRE les deux largeurs
- * dessinées, pas sur elles.
+ * LA COULEUR DU VENDEUR VIT DANS CE QUI PORTE UNE INFORMATION — la frise, le
+ * bandeau d'état, le bouton de contact —, jamais en dur : `resoudreAccent()`
+ * décide de chaque couleur, sinon un accent jaune rendrait un titre illisible.
+ * Et le dégradé de marque DropLink n'apparaît nulle part ici : c'est sa page,
+ * pas la nôtre.
  *
- * L'EN-TÊTE PORTE LA COULEUR DU VENDEUR EN APLAT PLEIN. C'est sa page, pas la
- * nôtre : le dégradé de marque DropLink n'apparaît nulle part ici. Et aucune
- * couleur d'écriture n'est posée en dur sur cet aplat — `resoudreAccent()`
- * décide, sinon un accent jaune rendrait un titre blanc illisible.
- *
- * AUCUN GLASSMORPHISM, AUCUN `backdrop-blur`. Sur un aplat uni, un blanc à 70 %
- * flouté rend exactement la même couleur qu'un blanc opaque : le flou n'a rien
- * à flouter, et c'est ce qui coûte le plus cher sur un appareil d'entrée de
+ * AUCUN GLASSMORPHISM, AUCUN `backdrop-blur`. Le flou n'a rien à flouter sur un
+ * fond uni, et c'est ce qui coûte le plus cher sur un appareil d'entrée de
  * gamme.
  *
  * LA LANGUE EST CELLE DU VENDEUR, lue en base. Aucun provider de traduction
- * n'est expédié au navigateur : les Server Components résolvent, et le
- * visionneur reçoit ses libellés en propriétés.
+ * n'est expédié au navigateur : les Server Components résolvent, et les îlots
+ * reçoivent leurs libellés en propriétés.
  *
  * UNE INFORMATION ABSENTE EST OMISE. Pas de texte de remplacement, pas de
- * valeur inventée, pas de bloc vide : sur cette page, « nous n'avons pas encore
- * cette information » se dit en n'affichant rien.
+ * valeur inventée, pas de carte vide : sur cette page, « nous n'avons pas
+ * encore cette information » se dit en n'affichant rien.
+ *
+ * CE QUE LE KIT DESSINE ET QUE LA PAGE NE PORTE PAS, et pourquoi :
+ *  - le logo DropLink en tête et le sélecteur de langue : la page appartient
+ *    au vendeur, et sa langue est celle qu'il a choisie ;
+ *  - la carte « Notifications automatiques » : elle affirme au client qu'il
+ *    sera prévenu, et rien ne l'y abonne — la décision 3 exclut tout
+ *    formulaire de cette page ;
+ *  - la carte promotionnelle « Découvrir DropLink » : la décision 25 exige une
+ *    mention SECONDAIRE, jamais confondable avec l'expéditeur. Elle reste au
+ *    pied, discrète ;
+ *  - le lien « Aide », qui ne mène à rien que le client puisse utiliser.
  */
 
 /**
@@ -110,40 +118,20 @@ export async function generateMetadata({
 }
 
 /**
- * Le conteneur du canevas : 1 240 px de large, 18 px de marge au téléphone,
- * 56 px sur grand écran.
+ * LE CONTENEUR DU KIT : 1 180 px, gouttière 24.
  *
- * ⚠️ LES DEUX PLANCHES SE CONTREDISENT SUR CE POINT, et il fallait trancher.
- * `PageClientDesktop` pose les 56 px À L'EXTÉRIEUR du conteneur pour l'en-tête
- * et À L'INTÉRIEUR pour le corps : mesuré dans Chrome à 1 440 px, le titre
- * commence à x = 100 et la galerie à x = 156. Cinquante-six pixels de décalage
- * entre le titre et ce qu'il titre, sur la planche elle-même. Une seule des
- * deux lectures peut survivre ; c'est celle du CORPS qui est retenue — c'est
- * elle qui donne le « conteneur 1240 » annoncé, et c'est le corps qui porte le
- * contenu.
- */
-/**
- * LE CONTENEUR DE LA PAGE CLIENT.
+ * Mesuré sur la référence servie : `max-width: 1180px`, padding `0 24px 40px`,
+ * et la grille rend 704 + 18 + 410 = 1 132, soit exactement 1 180 moins ses
+ * deux gouttières. Les trois nombres se vérifient l'un l'autre.
  *
- * ⚠️ 600 px JUSQU'À `lg`, PAS PLEINE LARGEUR. Entre 768 et 1 023 px la page ne
- * peut pas passer à deux colonnes — mesuré, la colonne de droite y ferait
- * 246 px et « Préparation » n'y tiendrait pas. Elle restait donc en une colonne
- * qui s'étirait jusqu'au bord : mesuré à 900 px, la photo de couverture rendait
- * **885 x 885**, soit un écran et demi de photo avant la moindre autre
- * information. La planche `PageClient` porte désormais ce plafond.
+ * ⚠️ AUCUNE GOUTTIÈRE SOUS `lg` : les cartes y deviennent des sections pleine
+ * largeur qui portent leur propre remplissage (`carte-client.tsx`).
  *
- * La bande de couleur du vendeur reste PLEINE LARGEUR : elle est posée sur le
- * `<header>`, pas ici. C'est sa marque, pas un bloc de contenu.
+ * ⚠️ ET 600 px JUSQU'À `lg`, PAS PLEINE LARGEUR. Entre 768 et 1 023 px la page
+ * reste en une colonne ; sans plafond, elle s'étirait jusqu'au bord et la
+ * frise étalait ses quatre étapes sur 900 px.
  */
-/*
- * ⚠️ MIGRÉ SUR LE DESIGN SYSTEM LE 11/09/2026 — 1180 et non 1240, gouttière 24
- * et non 56. Mesuré sur la référence servie : `max-width: 1180px`, padding
- * `0 24px 40px`, et la grille interne rend 704 + 18 + 410 = 1132, soit
- * exactement 1180 moins ses deux gouttières. Les trois nombres se vérifient
- * l'un l'autre ; recopier 1240 aurait laissé 60 px de vide qu'aucune mesure
- * n'aurait signalés.
- */
-const CONTENEUR = "mx-auto w-full max-w-[600px] px-[18px] lg:max-w-[1180px] lg:px-6";
+const CONTENEUR = "mx-auto w-full max-w-[600px] lg:max-w-[1180px] lg:px-6";
 
 export default async function PagePublique({
   params,
@@ -186,11 +174,10 @@ export default async function PagePublique({
    * LE STATUT AFFICHÉ VIENT DU COLIS DÈS QU'IL EN EXISTE UN.
    *
    * « Le vendeur prime avant la remise au transporteur, le transporteur après » :
-   * chacun est seul à savoir ce qu'il affirme. Tant qu'aucun colis n'est
-   * enregistré, c'est le vendeur qui décrit la réalité ; une fois le numéro
-   * suivi, c'est le transporteur. Prendre le maximum des deux plutôt que l'un ou
-   * l'autre garantit en plus que l'étape ne recule jamais à l'écran, même si le
-   * vendeur remet sa commande « en préparation » par mégarde.
+   * chacun est seul à savoir ce qu'il affirme. Prendre le maximum des deux
+   * plutôt que l'un ou l'autre garantit en plus que l'étape ne recule jamais à
+   * l'écran, même si le vendeur remet sa commande « en préparation » par
+   * mégarde.
    */
   const ETAPES = ["preparation", "expedie", "en_transit", "livre"] as const;
   const statutAffiche =
@@ -202,14 +189,6 @@ export default async function PagePublique({
   // à chercher « une couleur qui marche ». Un rouge saturé reste lisible.
   const accent = resoudreAccent(commande.boutique.couleur);
 
-  /*
-   * L'ÉTAT DU COLIS EST RÉSOLU ICI, ET NON DANS LE COMPOSANT D'ÉTAT.
-   *
-   * Il est rendu DEUX FOIS — une variante par largeur — et la date d'arrivée
-   * remonte en plus dans l'en-tête du bureau. Trois endroits pour une seule
-   * vérité : la calculer là où elle s'affiche la ferait diverger le jour où
-   * l'une des trois oublierait la règle du silence.
-   */
   const dernier =
     suivi === null || suivi.dernierMouvement === null ? null : new Date(suivi.dernierMouvement);
   // L ETAPE AFFICHEE, pas le statut brut de la commande : c est celle que le
@@ -219,37 +198,16 @@ export default async function PagePublique({
   const jour = (instant: Date): string => format.dateTime(instant, { day: "numeric", month: "long" });
 
   /*
-   * LA FOURCHETTE D'ARRIVÉE. Les deux bornes existent en base ; quand elles
-   * tombent le même jour, on n'écrit pas « 2 — 2 septembre ». Et quand le
-   * transporteur n'a rien annoncé, tout le bloc disparaît : une fourchette
-   * inventée serait indiscernable d'une vraie, et c'est celle qu'on croirait.
+   * LA FOURCHETTE D'ARRIVÉE. Quand ses deux bornes tombent le même jour, on
+   * n'écrit pas « 2 — 2 septembre ». Quand le transporteur n'a rien annoncé,
+   * elle disparaît : une fourchette inventée serait indiscernable d'une vraie.
    *
-   * ELLE DISPARAÎT AUSSI QUAND LE COLIS SE TAIT depuis plus de dix jours. Une
-   * date d'arrivée qu'on sait dépassée est pire qu'une absence de date.
-   *
-   * ⚠️ ET CETTE PHRASE-LÀ N'ÉTAIT PAS APPLIQUÉE, elle n'était qu'écrite. Deux
-   * cas mesurés le 02/09/2026 sur la page servie :
-   *
-   *   colis en transit, ETA du 24 au 27 août, mouvement il y a 2 jours
-   *     → « Arrivée estimée 24 août — 27 août », SIX JOURS DANS LE PASSÉ
-   *   colis LIVRÉ hier, ETA du 6 au 9 septembre
-   *     → « Arrivée estimée 6 — 9 septembre », à côté d'une frise « Livré »
-   *
-   * La règle du silence ne rattrapait ni l'un ni l'autre : elle attend DIX
-   * jours sans mouvement, et un colis qui bouge tous les trois jours mais qui
-   * est en retard garde sa date morte indéfiniment. Or c'est exactement le
-   * colis en retard qui produit le message « c'est où mon colis » que la
-   * deuxième feature du produit existe pour tuer.
-   *
-   * LA BORNE HAUTE EST CELLE QUI COMPTE : tant qu'elle n'est pas passée, la
-   * fourchette reste vraie même si son début l'est. Et une fois le colis
-   * LIVRÉ, l'estimation n'a plus d'objet — ce n'est plus une prévision, c'est
-   * un fait, et il est déjà écrit dans la frise.
-   *
-   * ⚠️ LA COMPARAISON SE FAIT AU JOUR, PAS À LA SECONDE. Le transporteur annonce
-   * une DATE, pas un horaire : traiter « aujourd'hui » comme dépassé ferait
-   * disparaître l'estimation le matin même du jour annoncé, c'est-à-dire au
-   * moment où elle intéresse le plus.
+   * ⚠️ ELLE DISPARAÎT AUSSI QUAND ELLE EST DÉPASSÉE, QUAND LE COLIS EST LIVRÉ ET
+   * QUAND IL SE TAIT depuis plus de dix jours. Mesuré le 02/09/2026 : la page
+   * annonçait « 24 août — 27 août » six jours après, et « 6 — 9 septembre » à
+   * côté d'une frise « Livré ». Une date qu'on sait fausse est pire qu'une
+   * absence de date — la règle vit dans `estimationVisible`, qui la compare AU
+   * JOUR : le transporteur annonce une date, pas un horaire.
    */
   const du = suivi?.estimationDu == null ? null : new Date(suivi.estimationDu);
   const au = suivi?.estimationAu == null ? null : new Date(suivi.estimationAu);
@@ -282,71 +240,115 @@ export default async function PagePublique({
           ? t("suivi.hier")
           : t.raw("suivi.dernierMouvement").replace("{n}", String(silence.jours));
 
-  /** La forme courte, à droite du nom de l'étape sur grand écran. */
-  const ancienneteCourte =
-    silence.etat === "aucun-mouvement"
-      ? t("suivi.aucunMouvement")
-      : silence.jours === 0
-        ? t("suivi.aujourdHui")
-        : silence.jours === 1
-          ? t("suivi.hier")
-          : t.raw("suivi.anciennete").replace("{n}", String(silence.jours));
-
-  const libellesEtat = {
-    titre: t("etat.titre"),
-    arriveeEstimee: t("etat.arriveeEstimee"),
-    statut: t("etat.statut"),
-    silenceTitre: t.raw("suivi.silenceTitre"),
-    silenceTexte: t("suivi.silence"),
-    etapes: {
-      preparation: t("frise.preparation"),
-      expedie: t("frise.expedie"),
-      en_transit: t("frise.en_transit"),
-      livre: t("frise.livre"),
-    },
+  const titresBandeau = {
+    preparation: t("bandeau.preparation"),
+    expedie: t("bandeau.expedie"),
+    en_transit: t("bandeau.en_transit"),
+    livre: t("bandeau.livre"),
   } as const;
 
-  // EN-TÊTE OMIS quand il n'y a NI nom NI logo. Pas de barre vide, pas de
-  // libellé de remplacement : un vendeur qui n'a rien configuré obtient une page
-  // qui commence par le contenu, et c'est le cas le plus fréquent en début de
-  // vie d'un compte — pas un repli dégradé.
+  /*
+   * LE BANDEAU DIT L'ÉTAT EN UNE PHRASE. Sa seconde ligne est l'ANCIENNETÉ du
+   * dernier mouvement — le seul élément de la page qui change tous les jours
+   * quand le colis ne bouge pas (décision 8). En préparation sans colis, il n'y
+   * a pas de mouvement à dater : la ligne dit ce que le vendeur a déclaré, rien
+   * de plus.
+   */
+  const bandeau =
+    silence.etat === "silencieux"
+      ? {
+          titre: t.raw("suivi.silenceTitre").replace("{n}", String(silence.jours)),
+          texte: t("suivi.silence"),
+          silencieux: true,
+        }
+      : {
+          titre: titresBandeau[statutAffiche],
+          texte:
+            statutAffiche === "preparation" && suivi === null
+              ? t("bandeau.preparationTexte")
+              : anciennete,
+          silencieux: false,
+        };
+
+  const dateEtHeure = (instant: string | null) =>
+    instant === null
+      ? null
+      : {
+          jour: format.dateTime(new Date(instant), { day: "numeric", month: "short", year: "numeric" }),
+          heure: format.dateTime(new Date(instant), { hour: "2-digit", minute: "2-digit" }),
+        };
+
+  /*
+   * ⚠️ UNE DATE PAR ÉTAPE, SEULEMENT QUAND LA BASE LA CONNAÎT. La création de la
+   * commande date la préparation ; le premier mouvement du transporteur date
+   * l'expédition ; le dernier date la livraison. « En transit » n'a pas de date
+   * propre, et n'en reçoit pas.
+   *
+   * ⚠️ LA DATE DE PRÉPARATION DISPARAÎT QUAND ELLE SUIT L'EXPÉDITION. Un vendeur
+   * peut créer la page d'une commande déjà partie — c'est même le cas de tout
+   * import — et la frise affichait alors « Préparation 13 sept. » avant
+   * « Expédié 10 sept. ». La création de la page n'est pas la préparation de
+   * la commande ; elle n'en tient lieu que tant qu'elle ne la contredit pas.
+   */
+  const premierMouvement = suivi?.premierMouvement ?? null;
+  const preparationContredite =
+    premierMouvement !== null &&
+    new Date(commande.creeeLe).getTime() > new Date(premierMouvement).getTime();
+  const dates = {
+    preparation: preparationContredite ? null : dateEtHeure(commande.creeeLe),
+    expedie: dateEtHeure(premierMouvement),
+    en_transit: null,
+    livre: statutAffiche === "livre" ? dateEtHeure(suivi?.dernierMouvement ?? null) : null,
+  } as const;
+
+  // EN-TÊTE OMIS quand il n'y a NI nom NI logo — décision 24. Pas de carte vide,
+  // pas de libellé de remplacement : un vendeur qui n'a rien configuré obtient
+  // une page qui commence par sa commande.
   const aUnEnTete = commande.boutique.nom !== null || commande.boutique.logo !== null;
 
-  const surTitre =
-    "text-[11.5px] leading-[16px] font-bold tracking-[0.09em] uppercase text-ds-texte-sourdine";
-
   /*
-   * SECTION AU TÉLÉPHONE, CARTE SUR GRAND ÉCRAN — et c'est la largeur qui
-   * décide, pas le contenu. À 390 px, une carte n'encadre rien : elle ajoute
-   * deux traits et retire seize pixels à ce qu'il y a dedans. Un filet en tête
-   * de section sépare aussi bien pour rien.
+   * LES LIGNES DE LIVRAISON, dans l'ordre du kit, puis les deux que le produit
+   * portait déjà. Le transporteur n'est nommé que si le catalogue officiel le
+   * connaît : un code brut n'apprend rien au client.
    */
-  /*
-   * ⚠️ LE PLEIN-CADRE DU TÉLÉPHONE EST CONSERVÉ, ET C'EST UNE CONSIGNE EXPLICITE
-   * de Wassim : « au téléphone, encadrer coûte 16 px de chaque côté sur une
-   * largeur de 390 — un dixième de la ligne, pris à ce qu'il y a dedans ». La
-   * référence dessine des cartes à toutes les largeurs ; le produit garde sa
-   * section pleine largeur sous `lg`, et migre le dessin du BUREAU.
-   *
-   * Valeurs mesurées sur la référence servie : rayon 20 (`--radius-card-lg`,
-   * pas `--radius-card` qui vaut 16), filet 1px `#ECECF5`, ombre
-   * `rgba(28,22,78,.06) 0 4px 16px`, padding 24 — et non 24/26, qui n'est celui
-   * que de la carte d'en-tête.
-   */
-  const section =
-    "border-t border-ds-filet px-[18px] py-[26px] " +
-    "lg:rounded-ds-card-lg lg:border lg:border-ds-filet lg:bg-ds-surface-carte " +
-    "lg:p-6 lg:shadow-ds-card";
+  const transporteur = lireTransporteur(commande.codeTransporteur);
+  const numeroCommande = commande.numeroSuivi?.trim() ?? "";
+  const numero = suivi?.numero ?? (numeroCommande === "" ? null : numeroCommande);
+  const lignesLivraison: LigneLivraison[] = [];
+  if (transporteur !== null)
+    lignesLivraison.push({
+      cle: "transporteur",
+      libelle: t("livraison.transporteur"),
+      valeur: transporteur.nom,
+    });
+  if (numero !== null)
+    lignesLivraison.push({ cle: "numero", libelle: t("livraison.numero"), valeur: numero });
+  if (estimation !== null)
+    lignesLivraison.push({
+      cle: "estimation",
+      libelle: t("livraison.dateEstimee"),
+      valeur: estimation,
+    });
+  if (commande.client !== null)
+    lignesLivraison.push({
+      cle: "destinataire",
+      libelle: t("details.destinataire"),
+      valeur: commande.client,
+    });
+  if (commande.reference !== null)
+    lignesLivraison.push({
+      cle: "reference",
+      libelle: t("details.reference"),
+      valeur: commande.reference,
+    });
 
   // LE RENDU EST COMPTÉ CÔTÉ SERVEUR, la VUE côté client, et les deux ne se
-  // confondent pas : `rendus ≥ vues réelles ≥ vues enregistrées`. Sans la borne
-  // haute, une perte de balises ressemblerait à une absence d'audience.
+  // confondent pas : `rendus ≥ vues réelles ≥ vues enregistrées`.
   //
   // NI LE JETON NI L'IDENTIFIANT DE LA COMMANDE NE PARTENT VERS L'ANALYTICS. Le
   // jeton ne transporte pas une donnée mais une CAPACITÉ, définitivement,
   // puisqu'il est immuable à vie : l'expédier chez un tiers reviendrait à lui
-  // donner la page. Le décompte par commande vit dans notre base, où il est
-  // déjà.
+  // donner la page.
   const visiteur = await adresseAppelant();
   emettreApres(EVENEMENTS.PAGE_PUBLIQUE_RENDUE, {
     sujet: visiteur === null ? "visiteur:sans-adresse" : `visiteur:${empreinte(visiteur)}`,
@@ -355,21 +357,14 @@ export default async function PagePublique({
   /*
    * LA COUVERTURE CHOISIE PAR LE VENDEUR PASSE EN TÊTE.
    *
-   * ⚠️ DÉFAUT TROUVÉ EN PILOTANT LE PRODUIT LE 27/08/2026, en vérifiant tout
-   * autre chose. « Définir comme couverture » écrivait bien `cover_media_id` en
-   * base, l'éditeur affichait le badge « Couverture » sur la bonne photo — et la
-   * page du client montrait la PREMIÈRE photo par position, quoi qu'il arrive.
-   * Le réglage était enregistré, affiché, et sans effet.
-   *
-   * C'est le pire genre de défaut de ce produit : le vendeur croit avoir choisi
-   * ce que son client verra en grand, personne ne le contredit, et l'écart ne se
-   * découvre que chez le destinataire — s'il se découvre.
+   * ⚠️ DÉFAUT TROUVÉ EN PILOTANT LE PRODUIT LE 27/08/2026. « Définir comme
+   * couverture » écrivait bien `cover_media_id` en base — et la page du client
+   * montrait la PREMIÈRE photo par position, quoi qu'il arrive. Le réglage était
+   * enregistré, affiché, et sans effet.
    *
    * ON RÉORDONNE ICI plutôt que dans le visionneur : celui-ci se sert de la
    * POSITION dans le tableau pour son index de plein écran, pour ses tuiles et
-   * pour son compteur « 3 / 12 ». Lui faire choisir une tête différente du reste
-   * l'obligerait à distinguer deux ordres, et c'est exactement le genre de
-   * question qu'on finit par trancher de travers.
+   * pour son compteur « 3 / 12 ».
    */
   const mediasAvecCouvertureEnTete =
     commande.couverture === null
@@ -379,179 +374,80 @@ export default async function PagePublique({
           ...commande.medias.filter((m) => m.id !== commande.couverture),
         ];
 
-  const etatExpedition = (variante: "accent" | "carte") => (
-    <EtatExpedition
-      variante={variante}
-      statut={statutAffiche}
-      silence={silence}
-      estimation={estimation}
-      anciennete={anciennete}
-      ancienneteCourte={ancienneteCourte}
-      libelles={libellesEtat}
-      accent={accent}
-    />
-  );
-
   return (
     <div
       lang={langue}
       /*
-       * ⚠️ LE FOND LAVANDE N'APPARAÎT QU'À PARTIR DE `md`, et c'est un motif à
-       * conserver, pas un oubli : au téléphone la page est déjà pleine largeur,
-       * un fond teinté n'y encadrerait rien et ferait payer un dégradé à
-       * l'appareil le plus lent du parc.
+       * ⚠️ LE FOND TEINTÉ N'APPARAÎT QU'À PARTIR DE `md`, et c'est un motif à
+       * conserver : au téléphone la page est pleine largeur, un fond teinté n'y
+       * encadrerait rien et ferait payer un dégradé à l'appareil le plus lent.
        */
-      className="flex min-h-dvh flex-col bg-ds-surface-carte md:bg-[image:var(--degrade-ds-page-client)]"
+      /*
+       * ⚠️ `leading-[normal]` ET NON L'INTERLIGNE DU PRODUIT. Le kit ne pose
+       * aucun interligne sur ses libellés : ils rendent l'interligne NORMAL de
+       * la police, et la page héritait de 1,5 — chaque libellé de 12 à 15 px
+       * mesurait 3 à 6 px de trop. Ce qui porte un interligne à soi le déclare.
+       */
+      className="flex min-h-dvh flex-col bg-ds-surface-carte leading-[normal] md:bg-[image:var(--degrade-ds-page-client)]"
     >
-      {/*
-        L'EN-TÊTE À LA COULEUR DU VENDEUR. Il porte aussi le titre et le nom du
-        destinataire : sans lui, le bandeau serait une bande de couleur qui
-        n'apprend rien, et la page commencerait deux fois.
-      */}
-      {aUnEnTete ? (
-        <header
-          style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
-          className="pt-5 pb-[26px] lg:pt-[26px] lg:pb-[34px]"
-        >
-          <div className={CONTENEUR}>
-            <div className="mb-5 flex items-center gap-2.5 lg:mb-[26px] lg:gap-3">
-              {commande.boutique.logo !== null ? (
-                /* eslint-disable-next-line @next/next/no-img-element -- le logo
-                   est servi par une URL signée à expiration ; l'optimiseur la
-                   mettrait en cache au-delà de sa validité. */
-                <img
-                  src={commande.boutique.logo}
-                  alt=""
-                  width={34}
-                  height={34}
-                  className="h-[34px] w-[34px] rounded-full object-contain lg:h-[38px] lg:w-[38px]"
-                />
-              ) : null}
-              {commande.boutique.nom !== null ? (
-                <span className="flex min-w-0 flex-col">
-                  <span className="text-[16px] leading-5 font-bold tracking-[-0.01em] lg:text-[18px] lg:leading-[23px]">
-                    {commande.boutique.nom}
-                  </span>
-                  {/*
-                    LA DESCRIPTION DE LA BOUTIQUE — la deuxième ligne de
-                    l'en-tête du kit : « Vêtements · Sneakers · Accessoires ».
+      {/* 82 PX AU-DESSUS DE LA PREMIÈRE CARTE : la hauteur de la barre du kit
+          — logo DropLink et sélecteur de langue —, que la page ne porte pas.
+          L'espace reste, pour que la carte de boutique tombe là où le kit la
+          pose. */}
+      <main id="contenu" className={CONTENEUR + " flex-grow lg:pt-[82px]"}>
+        {aUnEnTete ? (
+          <EnTeteBoutique
+            boutique={commande.boutique}
+            commandeDe={t("commandeDe")}
+            libelleSite={t("reseaux.site")}
+          />
+        ) : null}
 
-                    ⚠️ ELLE EST OMISE QUAND ELLE N'EST PAS CONFIGURÉE, jamais
-                    remplacée par un texte d'attente : décision 26, et c'est la
-                    page que voit le CLIENT — celle où une information inventée
-                    coûte le plus cher. La condition « pas de nom, pas de
-                    description » est résolue EN BASE, pas ici : une règle
-                    applicative s'oublie dans un nouveau chemin de lecture.
-                  */}
-                  {commande.boutique.description === null ? null : (
-                    <span
-                      className="text-[12px] leading-[16px] lg:text-[13px] lg:leading-[17px]"
-                      style={{ color: accent.surRemplissageDoux }}
-                    >
-                      {commande.boutique.description}
-                    </span>
-                  )}
-                </span>
-              ) : null}
-            </div>
-            <EnTeteTitre
-              titre={t("titre")}
-              client={commande.client}
-              reference={commande.reference}
-              pourClient={t.raw("pourClient")}
-              doux={accent.surRemplissageDoux}
-              arriveeEstimee={t("etat.arriveeEstimee")}
+        {/*
+          DEUX COLONNES, CHACUNE UNE PILE — et non une grille à rangées. Une
+          grille distribue la hauteur d'un élément entre les rangées qu'il
+          enjambe : mesuré sur le canevas, un trou de 279 px s'ouvrait ainsi
+          entre deux cartes. Deux piles indépendantes n'ont rien à distribuer.
+        */}
+        <div className="lg:mt-[18px] lg:grid lg:grid-cols-[minmax(0,1.72fr)_minmax(0,1fr)] lg:items-start lg:gap-[18px]">
+          <div className="flex flex-col lg:gap-[18px]">
+            <CarteCommande
+              reference={commande.referenceCourte}
+              statut={statutAffiche}
               estimation={estimation}
-              statut={libellesEtat.etapes[statutAffiche]}
-              surFaible={accent.surRemplissageFaible}
+              dates={dates}
+              bandeau={bandeau}
+              accent={accent}
+              libelles={{
+                titre: t("titre"),
+                sousTitre: t("commande.sousTitre"),
+                dateEstimee: t("commande.dateEstimee"),
+                etapes: {
+                  preparation: t("frise.preparation"),
+                  expedie: t("frise.expedie"),
+                  en_transit: t("frise.en_transit"),
+                  livre: t("frise.livre"),
+                },
+                enCours: t("frise.enCours"),
+                enAttente: t("frise.enAttente"),
+              }}
             />
-          </div>
-        </header>
-      ) : (
-        <div className="pt-[30px] lg:pt-8">
-          <div className={CONTENEUR}>
-            <EnTeteTitre
-              titre={t("titre")}
-              client={commande.client}
-              reference={commande.reference}
-              pourClient={t.raw("pourClient")}
-              doux="var(--color-ds-texte-corps)"
-              arriveeEstimee={t("etat.arriveeEstimee")}
-              estimation={estimation}
-              statut={libellesEtat.etapes[statutAffiche]}
-              /* SANS EN-TÊTE, LE FOND EST BLANC — pas l'aplat d'accent. Y poser
-                 `surRemplissageFaible` rendrait la pastille INVISIBLE une fois
-                 sur deux : cette valeur vaut un blanc translucide dès que
-                 l'accent est sombre. Le filet neutre est ce que dessine
-                 `PageClientSansEntete`, dont toutes les surfaces sont blanches. */
-              surFaible="var(--color-ds-filet)"
-            />
-          </div>
-        </div>
-      )}
 
-      {/*
-        UNE SEULE GRILLE, TROIS BLOCS, PLACEMENT EXPLICITE.
-
-        L'ordre de la SOURCE est celui du téléphone — état, galerie, détail —
-        parce que c'est lui qui compte pour la grande majorité des visiteurs et
-        pour qui lit la page sans feuille de style.
-
-        ⚠️ LA CARTE D'ÉTAT EXISTE EN DEUX EXEMPLAIRES, ET C'EST CE QUI PERMET
-        D'AVOIR UNE GRILLE À UNE SEULE RANGÉE. Le premier jet en faisait trois
-        blocs sur deux rangées, la galerie couvrant les deux : mesuré à
-        1 440 px, un trou de 279 px s'ouvrait entre la carte « Expédition » et
-        la carte « Suivi ». Une grille distribue la hauteur d'un élément qui
-        enjambe plusieurs rangées ENTRE ces rangées ; la première n'était donc
-        plus à la hauteur de son contenu, et la seconde commençait au milieu de
-        la galerie. Deux colonnes, une rangée, aucun calcul de hauteur.
-      */}
-      <main
-        id="contenu"
-        className={
-          // ⚠️ 1,717 ET NON 1,55 : la référence rend 704 et 410, soit un rapport
-          // de 1,7171. L'écart paraît minime et ne l'est pas — à 1180 de large
-          // il déplace la colonne de droite de 30 px, assez pour que la galerie
-          // change de nombre de colonnes.
-          "mx-auto w-full max-w-[600px] flex-grow lg:grid lg:max-w-[1180px] " +
-          "lg:grid-cols-[1.717fr_1fr] lg:items-start lg:gap-[18px] lg:px-6 lg:pt-[34px]"
-        }
-      >
-        {/* LA CARTE À LA COULEUR DU VENDEUR — téléphone uniquement. */}
-        <div className={"px-[18px] lg:hidden " + (aUnEnTete ? "pt-4" : "pt-5")}>
-          {etatExpedition("accent")}
-        </div>
-
-        <div>
-          {/* PLEINE LARGEUR AU TÉLÉPHONE. Les vignettes sortent des marges :
-              c'est ce que le client vient voir, et une marge de chaque côté lui
-              coûte un dixième de la surface de chaque photo. */}
-          <div className="pt-6 lg:pt-0">
-            <div className="mb-[13px] flex items-baseline justify-between gap-4 px-[18px] lg:mb-3.5 lg:px-0">
-              <p className={surTitre}>{t("galerie.titre")}</p>
-              {commande.medias.length > 0 ? (
-                <>
-                  {/* Le nombre nu au téléphone, nommé sur grand écran : la
-                      place n'est pas la même, et « 7 éléments » sur 390 px
-                      pousse le titre de la section. */}
-                  <span className="text-[12px] text-ds-texte-corps lg:hidden">
-                    {format.number(commande.medias.length)}
+            <section className={CARTE}>
+              <TitreCarte>
+                {t("galerie.titre")}
+                {commande.medias.length > 0 ? (
+                  <span className="font-medium text-ds-texte-sourdine">
+                    {" (" + format.number(commande.medias.length) + ")"}
                   </span>
-                  <span className="hidden text-[13px] text-ds-texte-corps lg:inline">
-                    {t("galerie.compte", { n: commande.medias.length })}
-                  </span>
-                </>
-              ) : null}
-            </div>
+                ) : null}
+              </TitreCarte>
 
-            {commande.medias.length === 0 ? (
-              /* LA GALERIE VIDE SE DIT. Ni cadres gris ni « bientôt
-                 disponible » : on nomme ce qui est, et on dit ce qui va se
-                 passer. L'icône n'ajoute pas d'information — elle donne au bloc
-                 la forme d'un état voulu plutôt que celle d'un chargement qui
-                 n'a pas abouti. */
-              <div className="px-[18px] lg:px-0">
-                <div className="rounded-ds-sm border border-dashed border-ds-filet-appuye px-5 py-8 text-center">
+              {commande.medias.length === 0 ? (
+                /* LA GALERIE VIDE SE DIT. Ni cadres gris ni « bientôt
+                   disponible » : on nomme ce qui est, et on dit ce qui va se
+                   passer. */
+                <div className="rounded-ds-card border border-dashed border-ds-filet-appuye px-5 py-8 text-center">
                   <svg
                     width="26"
                     height="26"
@@ -575,303 +471,162 @@ export default async function PagePublique({
                     {t("galerie.videTexte")}
                   </p>
                 </div>
-              </div>
-            ) : (
-              <Visionneur
-                jeton={commande.jeton}
-                medias={mediasAvecCouvertureEnTete.map((m) => ({
-                  id: m.id,
-                  type: m.type,
-                  urlVignette: m.urlVignette,
-                  urlCouverture: m.urlCouverture,
-                  largeur: m.largeur,
-                  hauteur: m.hauteur,
-                }))}
-                // Le texte du filigrane est le NOM DE LA BOUTIQUE. La base a
-                // déjà décidé si un filigrane est possible : elle éteint le
-                // drapeau quand il n'y a pas de nom, ce qui rend ce `??`
-                // inatteignable — il est là parce que le typage l'exige, pas
-                // comme un repli.
-                filigrane={commande.boutique.filigrane ? (commande.boutique.nom ?? null) : null}
-                libelles={{
-                  ouvrir: t("galerie.ouvrir"),
-                  fermer: t("galerie.fermer"),
-                  precedent: t("galerie.precedent"),
-                  suivant: t("galerie.suivant"),
-                  chargement: t("galerie.chargement"),
-                  indisponible: t("galerie.indisponible"),
-                  position: t("galerie.position"),
-                  balayez: t("galerie.balayez"),
-                }}
-              />
-            )}
-          </div>
-        </div>
+              ) : (
+                <Visionneur
+                  jeton={commande.jeton}
+                  medias={mediasAvecCouvertureEnTete.map((m) => ({
+                    id: m.id,
+                    type: m.type,
+                    urlVignette: m.urlVignette,
+                    urlCouverture: m.urlCouverture,
+                    largeur: m.largeur,
+                    hauteur: m.hauteur,
+                  }))}
+                  // Le texte du filigrane est le NOM DE LA BOUTIQUE. La base a
+                  // déjà décidé si un filigrane est possible : elle éteint le
+                  // drapeau quand il n'y a pas de nom, ce qui rend ce `??`
+                  // inatteignable — il est là parce que le typage l'exige.
+                  filigrane={commande.boutique.filigrane ? (commande.boutique.nom ?? null) : null}
+                  libelles={{
+                    ouvrir: t("galerie.ouvrir"),
+                    fermer: t("galerie.fermer"),
+                    precedent: t("galerie.precedent"),
+                    suivant: t("galerie.suivant"),
+                    chargement: t("galerie.chargement"),
+                    indisponible: t("galerie.indisponible"),
+                    position: t("galerie.position"),
+                    balayez: t("galerie.balayez"),
+                  }}
+                />
+              )}
+            </section>
 
-        <div className="lg:flex lg:flex-col lg:gap-4">
-          {/*
-            L'ARBITRAGE QC vient JUSTE APRÈS CE QU'IL JUGE : on ne demande pas à
-            quelqu'un de se prononcer sur des photos avant de les lui avoir
-            montrées.
+            {/*
+              L'ARBITRAGE QC vient JUSTE APRÈS CE QU'IL JUGE : on ne demande pas
+              à quelqu'un de se prononcer sur des photos avant de les lui avoir
+              montrées. Le design system le déclare hors de son périmètre ; il
+              prend donc la carte du kit, sans rien inventer d'autre.
 
-            OMIS QUAND IL N'Y A AUCUNE PHOTO. Demander « ces photos
-            correspondent-elles ? » devant une galerie vide n'appelle aucune
-            réponse sensée, et une décision prise là-dessus serait écrite au
-            journal comme les autres.
+              OMIS QUAND IL N'Y A AUCUNE PHOTO : « ces photos correspondent-elles
+              ? » devant une galerie vide n'appelle aucune réponse sensée.
+            */}
+            {commande.medias.length > 0 ? (
+              <section className={CARTE}>
+                <TitreCarte>{t("qc.titre")}</TitreCarte>
+                <ArbitrageQc
+                  jeton={commande.jeton}
+                  etatInitial={commande.qc}
+                  remplissage={accent.remplissage}
+                  surRemplissage={accent.surRemplissage}
+                  libelles={{
+                    texte: t("qc.texte"),
+                    approuver: t("qc.approuver"),
+                    refuser: t("qc.refuser"),
+                    commentaire: t("qc.commentaire"),
+                    envoi: t("qc.envoi"),
+                    annuler: t("qc.annuler"),
+                    /* LES LIBELLÉS NE DISENT PAS « VOUS ». Le vendeur peut
+                       reporter dans son éditeur une réponse reçue par message
+                       privé, et la page affichait alors « Vous avez validé
+                       cette commande » à un client qui n'avait rien validé. */
+                    approuve: t("qc.approuve"),
+                    refuse: t("qc.refuse"),
+                    modifier: t("qc.modifier"),
+                    echec: t("qc.echec"),
+                  }}
+                />
+              </section>
+            ) : null}
 
-            ⚠️ IL EST DANS LA COLONNE DE DROITE, REMIS EN DERNIER PAR
-            `lg:order-last`. Sous la galerie, la colonne gauche mesurait 980 px
-            et la droite 572 : 403 px de blanc à droite, et une page 195 px plus
-            haute pour rien — mesuré au navigateur sur les DEUX planches bureau,
-            donc y compris celle qui a des passages. Ici les deux colonnes se
-            terminent à 4 px près.
-
-            L'ORDRE DE LA SOURCE RESTE CELUI DU TÉLÉPHONE — validation juste
-            après la galerie qu'elle juge, avant le détail du transport — parce
-            que c'est lui que lisent la grande majorité des visiteurs et tout
-            lecteur d'écran. `order` ne déplace que le rendu visuel, et cette
-            carte porte les SEULS éléments focalisables de la colonne : le
-            parcours au clavier est donc identique dans les deux largeurs.
-          */}
-          {commande.medias.length > 0 ? (
-            <div className="px-[18px] py-[26px] lg:order-last lg:rounded-ds-card-lg lg:border lg:border-ds-filet lg:bg-ds-surface-carte lg:p-6 lg:shadow-ds-card">
-              <p className={surTitre + " mb-[13px] lg:mb-3.5"}>{t("qc.titre")}</p>
-              <ArbitrageQc
-                jeton={commande.jeton}
-                etatInitial={commande.qc}
-                remplissage={accent.remplissage}
-                surRemplissage={accent.surRemplissage}
-                libelles={{
-                  texte: t("qc.texte"),
-                  approuver: t("qc.approuver"),
-                  refuser: t("qc.refuser"),
-                  commentaire: t("qc.commentaire"),
-                  envoi: t("qc.envoi"),
-                  annuler: t("qc.annuler"),
-                  /* LES LIBELLÉS NE DISENT PLUS « VOUS ». Le vendeur peut
-                     reporter dans son éditeur une réponse reçue par message
-                     privé — c'est une fonction voulue — et la page affichait
-                     alors « Vous avez validé cette commande » à un client qui
-                     n'avait rien validé. Une phrase qui parle du lecteur et
-                     qui est fausse est pire qu'une phrase neutre, et c'est
-                     celle-là qu'on invoquerait en cas de litige. */
-                  approuve: t("qc.approuve"),
-                  refuse: t("qc.refuse"),
-                  modifier: t("qc.modifier"),
-                  echec: t("qc.echec"),
-                }}
-              />
-            </div>
-          ) : null}
-          {/* LA CARTE « EXPÉDITION » — grand écran uniquement. Elle est ici, en
-              tête de la colonne de droite, et non dans un bloc à part : c'est
-              ce qui garde la grille à une seule rangée. */}
-          <div className="hidden lg:block">{etatExpedition("carte")}</div>
-
-          {/* OMIS tant qu'aucun colis n'est enregistré : une carte vide
-              affirmerait qu'il y a quelque chose à y lire. */}
-          {suivi !== null ? (
-            <section className={section}>
-              <p className={surTitre + " mb-[13px] lg:mb-3.5"}>{t("suivi.titre")}</p>
-              <Suivi
+            {/* OMIS tant qu'aucun colis n'est enregistré : une carte vide
+                affirmerait qu'il y a quelque chose à y lire. */}
+            {suivi !== null ? (
+              <HistoriqueSuivi
                 suivi={suivi}
-                accent={accent.interface}
+                accent={accent}
                 formaterDate={(instant) =>
                   format.dateTime(instant, {
                     day: "numeric",
-                    month: "short",
+                    month: "long",
+                    year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
                   })
                 }
                 libelles={{
-                  numero: t("suivi.numero"),
+                  titre: t("historique.titre"),
                   arrete: t("suivi.arrete"),
                   attenteTitre: t("suivi.attenteTitre"),
                   attenteTexte: t("suivi.attenteTexte"),
                 }}
               />
-            </section>
-          ) : null}
+            ) : null}
+          </div>
 
-          {/* Bloc OMIS quand ni référence ni destinataire : une carte vide
-              affirmerait qu'il y a quelque chose à y lire. */}
-          {commande.reference !== null || commande.client !== null ? (
-            <section className={section}>
-              <p className={surTitre + " mb-[13px] lg:mb-3.5"}>{t("details.titre")}</p>
-              <dl className="flex flex-col gap-[13px]">
-                {commande.reference !== null ? (
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-[14px] text-ds-texte-corps">
-                      {t("details.reference")}
-                    </dt>
-                    <dd className="text-right text-[14px] font-bold text-ds-texte-fort">
-                      {commande.reference}
-                    </dd>
-                  </div>
-                ) : null}
-                {commande.client !== null ? (
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-[14px] text-ds-texte-corps">
-                      {t("details.destinataire")}
-                    </dt>
-                    <dd className="text-right text-[14px] font-bold text-ds-texte-fort">
-                      {commande.client}
-                    </dd>
-                  </div>
-                ) : null}
-              </dl>
-            </section>
-          ) : null}
+          <div className="flex flex-col lg:gap-[18px]">
+            <CarteLivraison titre={t("livraison.titre")} lignes={lignesLivraison} accent={accent} />
+            <CarteContact
+              boutique={commande.boutique}
+              libelleSite={t("reseaux.site")}
+              accent={accent}
+              libelles={{
+                titre: t("contact.titre"),
+                texte: t("contact.texte"),
+                bouton: t("contact.bouton"),
+              }}
+            />
+          </div>
         </div>
       </main>
 
-      {/* LES RÉSEAUX DU VENDEUR, s'il en a configuré. Le titre porte son nom —
-          et SANS nom, il n'y a pas de titre du tout. Un texte de remplacement
-          est ce que la décision 26 interdit, et ce que la planche
-          `PageClientSansEntete` refuse explicitement. */}
-      <ReseauxVendeur
-        boutique={commande.boutique}
-        note={t("reseaux.note")}
-        libelleSite={t("reseaux.site")}
-        titre={
-          commande.boutique.nom === null
-            ? null
-            : substituer(t.raw("reseaux.titre"), "{nom}", commande.boutique.nom)
-        }
-      />
+      <footer className={CONTENEUR}>
+        <div className="flex flex-col items-start gap-2.5 border-t border-ds-filet px-[18px] pt-[26px] pb-8 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-5 lg:border-t-0 lg:px-0 lg:pb-10">
+          {/*
+            ⚠️ CHAQUE LIEN DU PIED EST UNE CIBLE TACTILE, ET LA MARGE NÉGATIVE EN
+            EST LA MOITIÉ INDISSOCIABLE. `min-h-11` porte la cible à 44 px
+            (règle 5) ; `-my-3.5` vaut (44 − 16) / 2 et rend au flux sa hauteur
+            exacte, sans quoi le pied grandirait de 28 px. Au bureau, où il n'y a
+            pas de pouce, le lien reprend la hauteur de son texte, comme au kit.
+            La classe est écrite
+            sur chaque lien et non dans une constante : c'est là que
+            `cibles-tactiles.test.ts` la lit.
 
-      <footer className="border-t border-ds-filet px-[18px] pt-[22px] pb-[26px] text-center lg:px-14 lg:py-[26px]">
-        {/*
-          « Powered by DropLink », avec ses trois garde-fous : secondaire
-          visuellement, jamais confondable avec l'expéditeur, et ouverture HORS
-          de la page — le client est venu voir sa commande, pas nous.
+            « Propulsé par DropLink », avec ses trois garde-fous : secondaire
+            visuellement, jamais confondable avec l'expéditeur, et ouverture HORS
+            de la page — le client est venu voir sa commande, pas nous.
 
-          ⚠️ `min-h-11` EST LE PLANCHER TACTILE DU BRIEF §8 (44 points), ET LA
-          MARGE NÉGATIVE EN EST LA MOITIÉ INDISSOCIABLE. Mesuré au navigateur le
-          09/09/2026 à 390 px : ce lien rendait 16 px de haut. `-my-3.5` vaut
-          (44 − 16) / 2 et rend au flux sa hauteur exacte — sans elle le pied
-          grandirait de 28 px. Vérifié : hauteur du pied inchangée, texte déplacé
-          de 0,0 px.
-
-          ⚠️ C'EST LA SURFACE LA PLUS VUE DU PRODUIT, et c'est celle qu'on
-          oublie : elle a son propre pied, distinct de la landing et de la coque
-          publique, donc aucune correction faite ailleurs ne l'atteint. Elle est
-          restée hors du premier relevé pour cette seule raison.
-        */}
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="-my-3.5 inline-flex min-h-11 items-center text-[12px] text-ds-texte-corps hover:underline"
-        >
-          {t("propulsePar")}
-        </a>
+            ⚠️ LE KIT ÉCRIT « © DropLink. Tous droits réservés. » À CETTE PLACE,
+            et la page ne le fait pas : sur la page d'un vendeur, un droit
+            d'auteur au nom de DropLink se lit comme le propriétaire de la page
+            — exactement la confusion que la décision 25 interdit.
+          */}
+          <a href="/" target="_blank" rel="noopener noreferrer" className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0">
+            {t("propulsePar")}
+          </a>
+          <span className="flex flex-wrap gap-x-[18px] lg:gap-x-6">
+            <a
+              href={`/${langue}/conditions`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0"
+            >
+              {t("pied.conditions")}
+            </a>
+            <a
+              href={`/${langue}/confidentialite`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0"
+            >
+              {t("pied.confidentialite")}
+            </a>
+          </span>
+        </div>
       </footer>
 
       {/* Monté APRÈS le premier rendu — c'est toute la différence entre une page
           chargée et une page vue. Il ne rend rien. */}
       <BaliseVue jeton={commande.jeton} />
-    </div>
-  );
-}
-
-/**
- * Le titre, le destinataire et — sur grand écran seulement — la date d'arrivée.
- *
- * Ils sont extraits parce qu'ils existent en DEUX exemplaires — sur l'aplat
- * d'accent quand la boutique est configurée, sur fond blanc sinon — et que
- * deux copies d'un même bloc divergent toujours par le libellé qu'on oublie de
- * corriger dans la seconde.
- *
- * LA RÉFÉRENCE PRODUIT NE PARAÎT QUE SUR GRAND ÉCRAN, à la suite du
- * destinataire : c'est ce que dessine `PageClientDesktop`, et sur 390 px cette
- * ligne passerait sur deux lignes pour une information qui est déjà dans la
- * carte « Détails ».
- */
-function EnTeteTitre({
-  titre,
-  client,
-  reference,
-  pourClient,
-  doux,
-  arriveeEstimee,
-  estimation,
-  statut,
-  surFaible,
-}: {
-  readonly titre: string;
-  readonly client: string | null;
-  readonly reference: string | null;
-  readonly pourClient: string;
-  readonly doux: string;
-  readonly arriveeEstimee: string;
-  readonly estimation: string | null;
-  /** Le nom de l'étape, montré à la place de l'arrivée quand elle est inconnue. */
-  readonly statut: string;
-  /** Le fond de la pastille, déjà accordé à l'accent par `resoudreAccent()`. */
-  readonly surFaible: string;
-}) {
-  const pour = client === null ? null : substituer(pourClient, "{nom}", client);
-
-  return (
-    <div className="lg:flex lg:items-end lg:justify-between lg:gap-10">
-      <div className="min-w-0">
-        <h1 className="text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] lg:text-[44px] lg:leading-[50px] lg:tracking-[-0.035em]">
-          {titre}
-        </h1>
-        {pour !== null || reference !== null ? (
-          <p
-            className="mt-1.5 text-[15px] leading-[22px] lg:mt-2 lg:text-[17px] lg:leading-[26px]"
-            style={{ color: doux }}
-          >
-            {pour}
-            {reference !== null ? (
-              <span className="hidden lg:inline">{pour === null ? reference : " · " + reference}</span>
-            ) : null}
-          </p>
-        ) : null}
-      </div>
-
-      {/* La date d'arrivée MONTE ICI sur grand écran, parce que la carte
-          d'expédition de droite porte l'étape à sa place. Au téléphone elle
-          reste dans la carte à la couleur du vendeur, en tête de page. */}
-      {estimation !== null ? (
-        <div className="hidden shrink-0 text-right lg:block">
-          <p className="mb-1 text-[13px]" style={{ color: doux }}>
-            {arriveeEstimee}
-          </p>
-          <p className="text-[24px] leading-[30px] font-extrabold tracking-[-0.025em]">
-            {estimation}
-          </p>
-        </div>
-      ) : (
-        /*
-          PAS D'ARRIVÉE CALCULABLE : LA PASTILLE DE STATUT PREND SA PLACE —
-          planche `PageClientAttenteDesktop`.
-
-          ⚠️ CE COIN RESTAIT VIDE, et c'est le coin haut droit du premier écran.
-          Le bandeau perdait son seul contre-poids : un titre à gauche, rien à
-          droite, sur toute la largeur d'un écran de bureau.
-
-          ON N'INVENTE PAS DE DATE POUR AUTANT. Le statut, LUI, est connu — le
-          vendeur l'a posé — et c'est tout ce que la pastille affirme. Ses
-          couleurs viennent de `resoudreAccent()` : aucun blanc en dur, sinon un
-          accent clair rendrait cette pastille illisible.
-        */
-        <div className="hidden shrink-0 pb-1 lg:block">
-          <span
-            className="inline-flex items-center gap-2 rounded-full px-4 py-[9px] text-[14px] font-bold"
-            style={{ backgroundColor: surFaible }}
-          >
-            <span
-              className="h-[7px] w-[7px] rounded-full"
-              style={{ backgroundColor: "currentColor" }}
-            />
-            {statut}
-          </span>
-        </div>
-      )}
     </div>
   );
 }

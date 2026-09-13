@@ -58,6 +58,19 @@ export interface AccentResolu {
    */
   readonly surRemplissageDoux: string;
   readonly surRemplissageFaible: string;
+  /**
+   * LA TEINTE DOUCE DU KIT — le fond du bandeau d'état de la page client, et
+   * l'écriture accentuée qui va dessus.
+   *
+   * Le kit la pose à 10 % de l'accent sur blanc (`--surface-tint`) et y écrit
+   * en `--accent-ink`. ⚠️ ÉCRIRE `texte` SUR CETTE TEINTE NE SUFFIT PAS : `texte`
+   * vise 4,5:1 contre le FOND DE PAGE, et une teinte est plus sombre que le
+   * fond — sur un accent déjà ajusté au plus juste, le titre du bandeau
+   * passerait sous le seuil sans que rien ne le signale. `surTeinte` est donc
+   * RE-mesurée contre la teinte elle-même.
+   */
+  readonly teinte: string;
+  readonly surTeinte: string;
   /** Vrai si la couleur choisie a dû être ajustée pour atteindre les cibles. */
   readonly ajuste: boolean;
 }
@@ -292,6 +305,14 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
 
   const ecritureBlanche = surRemplissage === BLANC;
 
+  // 10 % d'accent, 90 % de fond : la proportion de `--surface-tint` dans le kit.
+  const teinte = quantifier({
+    r: fond.r + (elementInterface.r - fond.r) * 0.1,
+    g: fond.g + (elementInterface.g - fond.g) * 0.1,
+    b: fond.b + (elementInterface.b - fond.b) * 0.1,
+  });
+  const surTeinte = ajusterPourRatio(texte, teinte, RATIO_TEXTE);
+
   return {
     brut: versHex(base),
     texte: versHex(texte),
@@ -300,6 +321,8 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
     surRemplissage: versHex(surRemplissage),
     surRemplissageDoux: ecritureBlanche ? "rgba(255,255,255,0.82)" : "rgba(17,17,23,0.72)",
     surRemplissageFaible: ecritureBlanche ? "rgba(255,255,255,0.32)" : "rgba(17,17,23,0.22)",
+    teinte: versHex(teinte),
+    surTeinte: versHex(surTeinte),
     ajuste: choisi === null || versHex(texte) !== versHex(base),
   };
 }
