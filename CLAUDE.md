@@ -612,8 +612,9 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**TREIZE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, les cinq
-que le kit admin dessine, la page client, la connexion et l'inscription :
+**SEIZE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, les cinq
+que le kit admin dessine, la page client et son lien mort, la connexion,
+l'inscription et les deux pages légales :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -630,6 +631,9 @@ que le kit admin dessine, la page client, la connexion et l'inscription :
 | `/p/[token]` | `ClientPage`, kit **client_link** à 1440 | 39 (0) | 23 (0) | **0** |
 | `/connexion` | `LoginScreen`, kit **auth** à 1425 | 13 (0) | 1 (0) | **0** |
 | `/inscription` | `CLIC_KIT="Créer un compte"` | 46 (0) | 2 (0) | **0** |
+| `/conditions` | `legal/conditions.html` à 1280 | 80 (0) | 25 (0) | **0** |
+| `/confidentialite` | `legal/confidentialite.html` à 1280 | 116 (0) | 18 (0) | **0** |
+| lien mort `/p/<inconnu>` | `client_link/not-found.html` à 1440 | 2 (0) | 2 (0) | **0** |
 
 > ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
 > QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
@@ -774,12 +778,33 @@ piste implicite est `auto`, qui prend la largeur MINIMALE de son contenu : la
 carte d'accès débordait de 8 px à 390, parce qu'un champ mot de passe réclamait
 330 px. `grid-cols-[minmax(0,1fr)]` sous le palier.
 
-**▶️ PROCHAIN ÉCRAN : les pages légales** (`/conditions`, `/confidentialite`)
-contre le kit `legal`, puis les deux pages de lien mort
-(`client_link/link-expired.html`, `not-found.html`).
+**LES PAGES LÉGALES ET LE LIEN MORT SORTENT EN CODE 0.**
 
-Et deux écrans sont à CRÉER, pas à migrer : le tableau de bord
-(`DashboardHome.jsx`) et les paramètres vendeur (`SettingsView.jsx`).
+⚠️ **LE KIT `legal` A ÉTÉ PORTÉ POUR SA COQUE, PAS POUR SON TEXTE.** Ses
+conditions sont un gabarit : abonnement Pro à 19,90 € prélevé chaque mois,
+prestataire de paiement, Apple, double authentification, pays et e-mail de
+l'acheteur. La contrainte n° 1 interdit la moitié, le reste décrit un autre
+produit. Le texte juridique reste celui du produit — lacunes affichées dans la
+pastille « à compléter » du kit — et le brief exige toujours sa validation par
+un avocat avant toute ouverture publique.
+
+⚠️ **LE LIEN MORT N'A QU'UNE PAGE, ET LA PLANCHE « LIEN EXPIRÉ » N'EST PAS
+PORTÉE.** Le jeton n'expire jamais, et jeton inconnu, révoqué ou compte
+suspendu doivent rendre la même réponse. Le titre du kit (« Cette commande est
+introuvable ») est faux de deux des trois cas.
+
+⚠️ **UNE GARDE QUI CHERCHE `#RRGGBB` SUIVI D'UNE FRONTIÈRE DE MOT NE VOIT PAS
+LES DÉGRADÉS ARBITRAIRES DE TAILWIND.** Dans `#F2F0FD_0%`, le `_` est un
+caractère de mot : `couleurs-en-dur` laissait passer toute couleur écrite dans
+un `bg-[linear-gradient(…)]`. Le motif exige désormais seulement qu'aucun
+septième chiffre hexadécimal ne suive.
+
+**▶️ PROCHAIN ÉCRAN : le tableau de bord** (`DashboardHome.jsx`), à CRÉER — il
+repose sur des lectures que `/analyses` possède déjà. Les paramètres vendeur
+(`SettingsView.jsx`) dessinent presque uniquement des capacités que le produit
+n'a pas (nom, téléphone, photo, fuseau, préférences de notification, 2FA,
+sessions, suppression de compte et de données, abonnement, intégrations) :
+chacune est une décision produit avant d'être un écran.
 
 ### Comment on vérifie un écran migré
 
