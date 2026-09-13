@@ -355,12 +355,17 @@ de la page client.
 écran de paramètres vendeur, `/docs`. Ce sont des routes à créer, donc des
 décisions produit — pas de la migration.
 
-> ⚠️ **L'ADMIN : SIX ÉCRANS EN CODE, DIX DESSINÉS.** Les six existants
-> (`/admin`, `boutiques`, `comptes`, `comptes/[id]`, `journal`, `parametres`,
-> `surveillance`) se migrent. Des quatre autres, **trois sont de la phase 2 et ne
-> doivent PAS être implémentés** (voir ci-dessous) ; seul « Statistiques » est un
-> écran de phase 1 à arbitrer, sachant que `surveillance` en couvre déjà une
-> partie.
+> ⚠️ **L'ADMIN : SEPT ÉCRANS EN CODE, DIX DESSINÉS — ET CE BLOC EN COMPTAIT MAL
+> CINQ.** Il disait « six existants » en en listant sept, et « quatre autres »
+> quand la barre latérale du kit (`ADMIN_NAV`) en porte cinq. Relevé le
+> 14/09/2026 : cinq écrans du kit sont portés (vue d'ensemble, utilisateurs,
+> boutiques, logs, paramètres) ; `comptes/[id]` et `surveillance` n'ont pas de
+> planche. Les cinq restants : **Abonnements et Paiements** sont de la
+> facturation, interdite par la contrainte n° 1 ; **Support** suppose un système
+> de tickets que la base n'a pas ; **Commandes** (toutes boutiques) et
+> **Statistiques** seraient des routes à créer, lisant les données de tiers donc
+> auditées — **décision de Wassim**, `surveillance` couvrant déjà une partie des
+> secondes.
 
 > ⚠️ **LE DESIGN SYSTEM CONTIENT DES ÉCRANS DE FACTURATION, ET LA CONTRAINTE N°1
 > LES INTERDIT.** Admin → Paiements (390 paiements, 12 358 €), Admin →
@@ -612,9 +617,9 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**DIX-NEUF ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+**VINGT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
 tableau de bord, les paramètres et la vérification en deux étapes créés, les cinq que le kit admin dessine, la page client et son
-lien mort, la connexion, l'inscription et les deux pages légales :
+lien mort, la connexion, l'inscription, les deux pages légales et la documentation :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -637,6 +642,16 @@ lien mort, la connexion, l'inscription et les deux pages légales :
 | `/tableau-de-bord` (CRÉÉ) | `CLIC_KIT="Tableau de bord"` à 1690 | 48 (0) | 52 (0) | **0** |
 | `/parametres` (CRÉÉ) | `CLIC_KIT="Paramètres"` à 1690 | 46 (0) | 18 (0) | **0** |
 | `/verification` (CRÉÉ) | `auth/index.html#verification` à **1440**, `DEUX_ETAPES=1` | 0 (0) | 0 (0) | **0** |
+| `/docs` | `docs/index.html` à **1280** | 81 (0) | 42 (0) | **0** |
+
+> ⚠️ **`/docs` AVAIT ÉTÉ « PORTÉ » LE 12/09 SANS AVOIR JAMAIS ÉTÉ SOUSTRAIT.** Au
+> premier relevé : **108 écarts de valeur** — titres à 26 contre 28, marges de 38
+> contre 48, paragraphes à 15 contre 15,5, cercles cochés au lieu de coches, ni
+> en-tête collant ni sommaire qui suit la lecture. Un écran absent du tableau
+> ci-dessus n'est pas conforme, quel que soit le commit qui l'affirme. Le TEXTE,
+> lui, reste celui du produit : 61 fonctions que le kit documente n'existent pas
+> (connexion Apple, lien qui expire, brouillon, cloche, intégrations, passage au
+> Pro), et une documentation fausse se lit comme une promesse.
 
 > ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
 > QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
