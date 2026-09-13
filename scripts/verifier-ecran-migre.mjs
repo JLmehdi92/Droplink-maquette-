@@ -83,6 +83,18 @@ const { data: cree, error: eCree } = await service.auth.admin.createUser({
 });
 if (eCree) throw new Error(eCree.message);
 
+/*
+ * ⚠️ LE COMPTE DE MESURE EST SUPPRIMÉ DANS UN `finally`, ET IL NE L'ÉTAIT PAS.
+ * La suppression vivait à la dernière ligne : tout passage interrompu — police
+ * de repli, écran qui rend 404, mesure qui lève — laissait derrière lui un
+ * compte ADMINISTRATEUR, sa boutique, ses quatre commandes et leurs médias.
+ * Mesuré le 14/09/2026 : la liste admin des commandes, première à lister TOUTE
+ * la plateforme, montrait une trentaine de comptes « ecran-… » accumulés, et
+ * chacun déplaçait les chiffres des écrans suivants. Personne ne les voyait,
+ * parce qu'aucun écran ne listait ce que la sonde laissait.
+ */
+try {
+
 const { data: profil } = await service
   .from("profiles")
   .select("id")
@@ -975,6 +987,8 @@ for (const modele of routes) {
 }
 nav.close();
 
-await service.auth.admin.deleteUser(cree.user.id);
-console.error("[purge] compte supprime.");
 console.log(JSON.stringify(rapport, null, 1));
+} finally {
+  await service.auth.admin.deleteUser(cree.user.id);
+  console.error("[purge] compte supprime.");
+}

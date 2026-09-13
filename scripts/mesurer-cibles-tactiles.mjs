@@ -38,6 +38,9 @@ const { data: cree, error: eCree } = await service.auth.admin.createUser({
 });
 if (eCree) throw new Error(eCree.message);
 const userId = cree.user.id;
+// Supprimé dans un `finally` : un passage interrompu laissait son compte en base
+// (voir verifier-ecran-migre.mjs, 14/09/2026).
+try {
 const { data: profil } = await service.from("profiles").select("id").eq("user_id", userId).single();
 const { data: shop } = await service.from("shops").select("id").eq("owner_id", profil.id).single();
 await service.from("shops").update({ name: "Atelier de mesure" }).eq("id", shop.id);
@@ -244,5 +247,7 @@ for (const chemin of ecransDemandes.length > 0 ? ecransDemandes : ECRANS_AUTHENT
 }
 nav.close();
 console.log(JSON.stringify(rapport, null, 1));
-await service.auth.admin.deleteUser(userId);
-console.error("[purge] compte supprime.");
+} finally {
+  await service.auth.admin.deleteUser(userId);
+  console.error("[purge] compte supprime.");
+}
