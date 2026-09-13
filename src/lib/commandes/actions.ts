@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { LANGUE_DEFAUT } from "@/i18n/config";
+import { LANGUE_DEFAUT, estLangueSupportee } from "@/i18n/config";
 import { SchemaLangue } from "@/i18n/schema";
 
 /**
@@ -167,9 +167,10 @@ export async function dupliquer(
   const resultat = await dupliquerCommande(supabase, profil.profilId, profil.shopId, orderId);
 
   if (resultat.statut === "ok") {
-    // Ensemble FERMÉ : tout ce qui n est pas exactement « en » vaut « fr ».
-    // Une langue venue du navigateur ne peut donc porter aucun chemin.
-    redirect("/" + (langue === "en" ? "en" : "fr") + "/commandes/" + resultat.nouvelleCommande);
+    // Ensemble FERMÉ : une langue venue du navigateur ne peut porter aucun
+    // chemin. ⚠️ Il s'écrivait `=== "en" ? "en" : "fr"`, antérieur au chinois :
+    // dupliquer une commande depuis `/zh-CN` renvoyait l'éditeur en français.
+    redirect("/" + (typeof langue === "string" && estLangueSupportee(langue) ? langue : LANGUE_DEFAUT) + "/commandes/" + resultat.nouvelleCommande);
   }
 
   return resultat;

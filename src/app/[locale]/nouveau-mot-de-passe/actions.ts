@@ -9,6 +9,7 @@ import { sessionParEmail } from "@/lib/auth/recuperation";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { estLangueSupportee } from "@/i18n/config";
 
 /**
  * CHOISIR UN NOUVEAU MOT DE PASSE.
@@ -57,7 +58,9 @@ export async function changerMotDePasse(
   if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "indisponible" };
 
   const langueBrute = donnees.get("locale");
-  const langue = langueBrute === "en" ? "en" : "fr";
+  // ⚠️ `=== "en" ? "en" : "fr"` jusqu'au 13/09/2026, antérieur au chinois : un
+  // vendeur qui choisissait son mot de passe sur `/zh-CN` repartait en français.
+  const langue = typeof langueBrute === "string" && estLangueSupportee(langueBrute) ? langueBrute : "fr";
 
   const profil = await lireProfilVendeur();
 
