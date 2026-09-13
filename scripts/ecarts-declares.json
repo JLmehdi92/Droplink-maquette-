@@ -2252,5 +2252,286 @@
         "raison": "Les boutiques et les types du jeu de mesure. « Pas encore nommee » n est pas un repli invente : `shops.name` est NULLABLE SANS DEFAUT, la ligne naissant a l inscription, et un vendeur qui n a rien configure est le cas le plus frequent au debut de vie d un compte. Le dire en italique vaut mieux que d inventer un nom."
       }
     ]
+  },
+  "fr-admin-boutiques": {
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble",
+          "Boutiques [3/3]"
+        ],
+        "motif": "structure",
+        "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere. Taille, graisse et couleur ne figurent pas dans l ecart : elles sont identiques."
+      },
+      {
+        "textes": [
+          "Commandes  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "La seconde occurrence du kit est son entree de navigation « Commandes », une route que le depot n a pas. Une entree qui mene a un 404 est pire qu une entree absente."
+      },
+      {
+        "textes": [
+          "Boutiques  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "Le kit ecrit « Boutiques » quatre fois : l entree de navigation, le titre, et DEUX unites d anneau — il en pose deux a droite, dont un « Repartition par plan » que rien ne peut remplir. Nous n en avons qu un."
+      },
+      {
+        "textes": [
+          "boutiques [1/3]"
+        ],
+        "motif": "structure",
+        "raison": "L UNITE AU CENTRE DE L ANNEAU, et deux anneaux du kit contre un chez nous : la sonde apparie donc le NOTRE avec le PREMIER des siens, celui du panneau de plan. Les deux ecrans portent la meme taille d anneau (165, donc unite a 12) ; l ecart de police releve ici vient de l appariement, pas du dessin — le second anneau du kit, celui des statuts, porte exactement nos valeurs."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "structure",
+        "raison": "Position et largeur. Le kit ecrit le role dans sa barre superieure, en haut a droite ; nous l ecrivons dans le bloc d identite au BAS de la colonne, ou il tient toute la largeur de celle-ci."
+      },
+      {
+        "motifs": [
+          "^(Boutique|Propriétaire|Création|Statut|Commandes)$"
+        ],
+        "motif": "structure",
+        "raison": "EN-TETES DE COLONNE, ET LA LARGEUR D UNE CELLULE DE TABLEAU N EST PAS CELLE DE SON TEXTE. Le kit pose ses entetes dans une grille CSS dont chaque piste est fixee par la declaration ; nos colonnes sont des `th` qui se dimensionnent sur le contenu de la colonne entiere. Taille 12,5, graisse 600, couleur et retrait de 12 px sous la ligne sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Boutiques [2/3]",
+          "Gérez et suivez toutes les boutiques uti",
+          "Boutiques totales",
+          "Commandes créées",
+          "Réinitialiser",
+          "Liste des boutiques",
+          "124 boutiques au total",
+          "Statut des boutiques",
+          "69 %",
+          "31 %"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE. Nos sections ne sont ni les memes ni dans le meme ordre : l encart de trace precede les tuiles, elles sont QUATRE et non six — les deux tuiles de plan sont declarees plus bas, ainsi qu une septieme sur les liens clients — la barre superieure du kit n existe pas, et la colonne de droite porte UN panneau au lieu de trois. Le panneau de liste est donc plus large et tout ce qui le suit est decale. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Statistiques",
+          "Support"
+        ],
+        "motif": "contrainte",
+        "raison": "Deux ecrans du kit admin que le depot n a pas, donc deux entrees de navigation qui meneraient a un 404 — pire qu une entree absente."
+      },
+      {
+        "textes": [
+          "Abonnements",
+          "Paiements",
+          "Plan",
+          "Pro",
+          "Gratuit",
+          "Répartition des boutiques par plan",
+          "Plan Pro",
+          "Plan Gratuit",
+          "Passage au plan Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CONTRAINTE N°1 INTERDIT TOUT CODE DE FACTURATION en phase 1, et il n existe AUCUNE COLONNE DE PLAN. Les plans sont MONTRES sur la tarification, jamais APPLIQUES : il n y a rien a lire, rien a compter, rien a filtrer. Deux tuiles, une colonne et un anneau entier du kit reposent sur cette donnee inexistante."
+      },
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Logs système",
+          "Paramètres",
+          "Boutiques actives",
+          "Boutiques inactives",
+          "Actives",
+          "Inactives",
+          "Actif",
+          "Inactif",
+          "Actions",
+          "Voir"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DU PRODUIT GAGNE, ET IL EST LE MEME PARTOUT — voir la meme declaration sur la liste des comptes. Un ecart merite sa propre phrase : « active » et « inactive » ne decrivent pas une boutique chez nous. Une boutique NAIT a l inscription et n a pas d etat propre ; c est le COMPTE qui est actif ou suspendu. Ce qui distingue reellement deux boutiques, c est qu un vendeur soit alle jusqu a se donner un NOM — la mesure d activation, celle sur laquelle on decidera. L ecran dit donc « configurees » et « sans nom »."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "1 sept. 2025 – 8 sept. 2025",
+          "admin@droplink.fr"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE DU KIT N EST PAS PORTEE, comme sur les deux autres ecrans de liste. « Ctrl K » annonce une recherche transverse qui n existe pas ; le selecteur de dates ne commanderait rien, la pagination etant PAR CURSEUR. La carte decorative garde sa geometrie en bas de colonne et porte notre contenu : la seule phrase qui merite d etre relue a cet endroit est celle qui dit que tout est trace."
+      },
+      {
+        "textes": [
+          "Ajouter une boutique"
+        ],
+        "motif": "contrainte",
+        "raison": "UNE BOUTIQUE NE SE CREE PAS, ELLE NAIT AVEC SON COMPTE. `shops.owner_id` est UNIQUE : il y a exactement une boutique par compte, creee a l inscription. Un bouton d ajout n aurait rien a creer, et la decision 9 ferme de toute facon la surface d administration a la creation de comptes."
+      },
+      {
+        "textes": [
+          "Exporter"
+        ],
+        "motif": "contrainte",
+        "raison": "L EXPORT CSV DU PRODUIT EST CELUI DU VENDEUR, sur SES commandes, lu SOUS RLS AVEC SA SESSION. Un export d administration sortirait un fichier de donnees tierces hors de l application, et il faudrait d abord trancher ce qu il contient et ce que son audit consigne. Ce n est pas un bouton, c est une decision produit."
+      },
+      {
+        "textes": [
+          "+12%",
+          "vs période précédente",
+          "90% du total",
+          "-20%",
+          "Nouvelles boutiques"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUN COMPTEUR DU PRODUIT NE PORTE SON HISTORIQUE : `compteurs_admin` rend des totaux instantanes, il n existe aucune valeur de periode precedente, donc aucun ecart a afficher. Un badge calcule sur rien a la FORME d une mesure. « Nouvelles boutiques » serait de surcroit le MEME nombre que « nouveaux inscrits » de l ecran des comptes — une boutique naissant a l inscription — donc une tuile qui n apprend rien de plus."
+      },
+      {
+        "textes": [
+          "Liens clients actifs",
+          "1 248",
+          "sur ces boutiques"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUNE FONCTION NE REND UN AGREGAT DE `link_views` SUR TOUTE LA PLATEFORME. Les ouvertures de lien sont comptees PAR VENDEUR, sous sa RLS, pour son ecran d analyses ; les additionner cote administration demanderait une fonction de plus, et surtout de trancher ce que « lien actif » veut dire — une commande consultee ce mois ? jamais expiree ? La tuile attend cette decision, pas du code."
+      },
+      {
+        "textes": [
+          "Envois",
+          "Dernière activité"
+        ],
+        "motif": "donnee",
+        "raison": "DEUX COLONNES QUE LA BASE NE PEUT PAS REMPLIR TELLES QUELLES. « Envois » compte chez le kit des expeditions sans rapport avec notre facture ; la colonne qui compte ici est « Colis », le SEUL poste que le fournisseur de suivi nous facture, et elle est lue sur la meme source que l alerte du panneau. « Derniere activite » n existe nulle part : rien n horodate la derniere visite d un vendeur, et l instrumenter serait une decision produit."
+      },
+      {
+        "textes": [
+          "StreetWear FR",
+          "Yanis B.",
+          "LuxShop",
+          "Inès K.",
+          "Paris Sneakers",
+          "Samir A.",
+          "ModeAddict",
+          "Léa M.",
+          "TechStore",
+          "Thomas R.",
+          "UrbanPlace",
+          "Julie P.",
+          "TrendZone",
+          "Mehdi S.",
+          "ShopElite",
+          "Camille D.",
+          "KicksLab",
+          "Lucas F.",
+          "NextGen",
+          "Sara L.",
+          "Il y a 12 min",
+          "Il y a 2 h",
+          "Il y a 1 jour",
+          "Il y a 2 jours",
+          "02/09/2025"
+        ],
+        "motif": "donnee",
+        "raison": "La population de demonstration du kit : noms de boutiques, noms de personnes, dates et anciennetes. Le jeu de mesure porte vingt boutiques jetables, dont cinq n ont jamais ete nommees."
+      },
+      {
+        "textes": [
+          "Affichage de 1 à 10 sur 124 boutiques",
+          "Afficher"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PAGINATION EST PAR CURSEUR, JAMAIS PAR DECALAGE. A la page 40 d un jeu de 9 600, un `offset` lit 2 000 lignes pour en rendre 50 : le cout croit avec le numero de page. Un curseur ne sait pas dire « 1 a 10 sur 124 » — le savoir exigerait un comptage complet a chaque page, c est-a-dire exactement ce qu il evite. L ecran rend donc un lien « Voir la suite »."
+      },
+      {
+        "textes": [
+          "Activité récente",
+          "Voir tout",
+          "Nouvelle boutique créée",
+          "TrendZone par Mehdi S.",
+          "Boutique désactivée",
+          "TechStore par Thomas R.",
+          "LuxShop par Inès K.",
+          "Boutique activée",
+          "NextGen par Sara L.",
+          "Nom de boutique modifié",
+          "ModeAddict par Léa M."
+        ],
+        "motif": "contrainte",
+        "raison": "LE FLUX D ACTIVITE NOMME DES VENDEURS TIERS A CHAQUE OUVERTURE DE L ECRAN. Le brief l interdit en l etat : tout acces admin a des donnees tierces ecrit un audit, consultations comprises — donc une entree par CHARGEMENT, qui noierait les consultations deliberees que le journal existe pour retrouver. Le journal d audit est a un onglet, et il ne lit que NOS propres gestes."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend",
+          "Cette consultation est écrite au journal"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et son encart de trace, qui occupe la geometrie de la carte decorative du kit. L encart est un RAPPEL PERMANENT : chaque consultation de donnees d un vendeur ecrit une ligne au journal, LECTURES COMPRISES, et celui qui regarde doit le savoir AVANT de regarder."
+      },
+      {
+        "motifs": [
+          "^(sonde|ecran|vitrine|zone)-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "Les vingt comptes jetables du jeu de mesure, dont les adresses changent a chaque passage. Un motif ancre plutot qu une liste d adresses, qui serait morte au passage suivant."
+      },
+      {
+        "textes": [
+          "une par compte, créée à l'inscription",
+          "Boutiques configurées",
+          "75 % du total",
+          "ce mois-ci",
+          "Stockage des médias",
+          "4,1 Mo",
+          "relu côté serveur au dépôt",
+          "Configurées",
+          "Sans nom",
+          "Colis",
+          "Médias",
+          "Stockage",
+          "Active",
+          "Boutique non configurée"
+        ],
+        "motif": "contrainte",
+        "raison": "NOS TUILES, NOS COLONNES ET NOTRE VOCABULAIRE — voir la declaration symetrique dans les manquants. Trois d entre elles n ont pas d equivalent chez le kit et portent chacune une decision : « Colis » rend le SEUL poste que le fournisseur de suivi nous facture ; « Medias » et « Stockage » rendent ce que chaque compte OCCUPE, mesure cote serveur au depot et jamais cru depuis le client ; et « Boutique non configuree » n est pas un repli invente — `shops.name` est NULLABLE SANS DEFAUT, et un vendeur qui n a rien configure est le cas le plus frequent au debut de vie d un compte."
+      },
+      {
+        "textes": [
+          "Toutes",
+          "Fournisseurs",
+          "Revendeurs",
+          "Non configurées"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS DU SELECTEUR DE TYPE, REPLIEES. Le kit rend les siennes dans un `select` natif, dont la sonde lit les `option` ; les notres sont des liens dans un `details` ferme, que la sonde releve aussi. L oeil n en voit qu une de chaque cote. Leurs libelles different parce que les filtres different : le kit filtre par plan, par boutique et par date — trois dimensions que le produit n a pas — la ou nous filtrons par TYPE DE COMPTE, qui est la segmentation d usage du brief."
+      },
+      {
+        "textes": [
+          "Atelier Nord",
+          "Atelier de verification",
+          "Atelier de mesure",
+          "600 Ko",
+          "0 o",
+          "12 sept. 2026"
+        ],
+        "motif": "donnee",
+        "raison": "Les boutiques, volumes et dates du jeu de mesure."
+      }
+    ]
   }
 }

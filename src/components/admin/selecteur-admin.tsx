@@ -14,10 +14,15 @@ import { ChevronDown } from "lucide-react";
  * partage et se recharge telle quelle, et les écrans les plus lourds du produit
  * n'embarquent pas un îlot client pour trois valeurs.
  *
- * ⚠️ ET LE MENU EST REPLIÉ PAR DÉFAUT, exactement comme la liste d'un `<select>`.
- * Déplié, il rendrait tous ses libellés là où la référence n'en montre qu'un — et
- * ce n'est pas qu'une affaire de mesure : un contrôle qui affiche en permanence
- * tous ses états n'est plus un contrôle, c'est une barre d'onglets.
+ * ⚠️ ET LE MENU EST REPLIÉ PAR DÉFAUT, exactement comme la liste d'un `<select>` :
+ * un contrôle qui affiche en permanence tous ses états n'est plus un contrôle,
+ * c'est une barre d'onglets.
+ *
+ * ⚠️ CE QUI EST REPLIÉ RESTE DANS LE DOCUMENT, ET LA SONDE LE VOIT. Un premier
+ * commentaire prétendait ici que le menu fermé ne rendait qu'un libellé ; la
+ * mesure dit l'inverse — les options d'un `<details>` fermé sont relevées comme
+ * celles d'un `<option>`. L'œil ne les voit pas, la comparaison si, et leurs
+ * libellés sont donc déclarés là où ils diffèrent de ceux du kit.
  */
 export function SelecteurAdmin({
   etiquette,

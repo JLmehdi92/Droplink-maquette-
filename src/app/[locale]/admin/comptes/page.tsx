@@ -495,6 +495,7 @@ export default async function AdminComptes({
               <h2 className={PANNEAU_TITRE}>{t("comptes.repartition")}</h2>
             </header>
             <Anneau
+              variante="liste"
               total={compteurs.comptes}
               unite={t("comptes.unite")}
               part={(pourcent) => t("comptes.part", { part: pourcent })}

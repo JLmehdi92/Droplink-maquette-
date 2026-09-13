@@ -18,10 +18,20 @@ import { getFormatter } from "next-intl/server";
  * annoncé, il ferait entendre deux fois les mêmes chiffres.
  */
 
-const COTE = 190;
-const RAYON = COTE * 0.37;
-const EPAISSEUR = COTE * 0.155;
-const CIRCONFERENCE = 2 * Math.PI * RAYON;
+/*
+ * ⚠️ DEUX TAILLES, ET C'EST LE KIT QUI EN A DEUX. 190 sur la vue d'ensemble,
+ * 165 sur les écrans de liste — où l'anneau partage sa colonne avec deux autres
+ * panneaux. Tout en découle : le total vaut `round(cote * 0,16)` et l'unité
+ * `round(cote * 0,072)`, donc 30/14 d'un côté et 26/12 de l'autre. Transposer
+ * l'une à l'autre fait un anneau conforme à la mauvaise référence.
+ *
+ * ⚠️ ET LA LÉGENDE N'EST PAS LA MÊME NON PLUS. Sur la vue d'ensemble, la valeur
+ * occupe 46 px et la part 40 ; sur les écrans de liste, la valeur se dimensionne
+ * sur son contenu, la part occupe 38, et le libellé TRONQUE — sa colonne y a
+ * 150 px de base, contre 37 dans le panneau étroit de la vue d'ensemble, où
+ * tronquer rendrait « A » et « S. ».
+ */
+const COTES = { panneau: 190, liste: 165 } as const;
 
 export interface PartAnneau {
   readonly cle: string;
@@ -36,6 +46,7 @@ export async function Anneau({
   total,
   unite,
   part,
+  variante = "panneau",
 }: {
   readonly parts: readonly PartAnneau[];
   readonly total: number;
@@ -43,8 +54,16 @@ export async function Anneau({
   readonly unite: string;
   /** Le gabarit d'une part, « {part} % » — la langue décide de l'espace. */
   readonly part: (pourcent: number) => string;
+  /** `panneau` sur la vue d'ensemble, `liste` sur les écrans de liste. */
+  readonly variante?: keyof typeof COTES;
 }) {
   const format = await getFormatter();
+
+  const COTE = COTES[variante];
+  const RAYON = COTE * 0.37;
+  const EPAISSEUR = COTE * 0.155;
+  const CIRCONFERENCE = 2 * Math.PI * RAYON;
+  const liste = variante === "liste";
 
   /* Les segments sont calculés AVANT le rendu : un cumul tenu pendant le `map`
      serait une écriture après rendu, et React n'en garantit pas l'ordre. */
@@ -77,14 +96,30 @@ export async function Anneau({
           </g>
         </svg>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[30px] leading-[1.15] font-extrabold tracking-[-0.045em] text-ds-texte-titre">
+          <span
+            className={
+              "leading-[1.15] font-extrabold tracking-[-0.045em] text-ds-texte-titre " +
+              (liste ? "text-[26px]" : "text-[30px]")
+            }
+          >
             {format.number(total)}
           </span>
-          <span className="text-[14px] leading-[1.2] text-ds-texte-sourdine">{unite}</span>
+          <span
+            className={
+              "leading-[1.2] text-ds-texte-sourdine " + (liste ? "text-[12px]" : "text-[14px]")
+            }
+          >
+            {unite}
+          </span>
         </div>
       </div>
 
-      <ul className="flex min-w-0 flex-1 flex-col justify-center gap-3.5 self-stretch">
+      <ul
+        className={
+          "flex min-w-0 flex-col justify-center gap-3.5 self-stretch " +
+          (liste ? "flex-[1_1_150px]" : "flex-1")
+        }
+      >
         {parts.map((p) => (
           <li key={p.cle} className="flex items-center gap-[11px]">
             {/* La pastille DOUBLE le libellé qui suit : c'est un repère de
@@ -94,17 +129,33 @@ export async function Anneau({
               className="h-2.5 w-2.5 flex-none rounded-ds-pill"
               style={{ background: p.trait }}
             />
-            {/* ⚠️ `whitespace-nowrap` SANS `truncate`, ET C'EST CE QUE FAIT LE
-                KIT. La colonne du libellé vaut 37 px dans son propre panneau :
-                tronquée, elle rendrait « A » et « S. » — mesuré ici même. Le
-                texte déborde donc sa boîte, ce qu'aucun conteneur ne masque. */}
-            <span className="min-w-0 flex-1 text-[14px] leading-[normal] whitespace-nowrap text-ds-texte-titre">
+            {/* ⚠️ LE LIBELLÉ NE TRONQUE PAS DANS LE PANNEAU ÉTROIT, et le kit non
+                plus : sa colonne y vaut 37 px, donc `truncate` rendrait « A » et
+                « S. » — mesuré. Le texte déborde sa boîte, ce qu'aucun conteneur
+                ne masque. Sur les écrans de liste, où la colonne a 150 px de
+                base, le kit tronque et nous aussi. */}
+            <span
+              className={
+                "min-w-0 flex-1 text-[14px] leading-[normal] whitespace-nowrap text-ds-texte-titre " +
+                (liste ? "overflow-hidden text-ellipsis" : "")
+              }
+            >
               {p.libelle}
             </span>
-            <span className="w-[46px] text-right text-[14px] leading-[normal] font-bold text-ds-texte-titre">
+            <span
+              className={
+                "text-right text-[14px] leading-[normal] font-bold whitespace-nowrap text-ds-texte-titre " +
+                (liste ? "" : "w-[46px]")
+              }
+            >
               {format.number(p.valeur)}
             </span>
-            <span className="w-10 text-right text-[13px] leading-[normal] text-ds-texte-sourdine">
+            <span
+              className={
+                "text-right text-[13px] leading-[normal] text-ds-texte-sourdine " +
+                (liste ? "w-[38px]" : "w-10")
+              }
+            >
               {part(total === 0 ? 0 : Math.round((p.valeur / total) * 100))}
             </span>
           </li>
