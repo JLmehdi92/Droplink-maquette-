@@ -8,7 +8,7 @@ import { attendrePlancher } from "@/lib/auth/plancher";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
 import { verifierMotDePasseActuel } from "@/lib/auth/reauthentification";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
-import { verifierQuotaAuth } from "@/lib/limitation/quota";
+import { verifierQuotaAuth, verifierQuotaMotDePasse } from "@/lib/limitation/quota";
 import { origineDuSite } from "@/lib/site";
 import { creerClientServeur } from "@/lib/supabase/server";
 
@@ -33,6 +33,13 @@ import { creerClientServeur } from "@/lib/supabase/server";
 export type EtatParametres =
   | { statut: "inactif" }
   | { statut: "enregistre" }
+  /**
+   * L'activation a commencé : le facteur est ENRÔLÉ, pas vérifié. Le QR code et
+   * la clé repassent par l'état parce qu'il faut les montrer une fois — c'est le
+   * secret du vendeur lui-même, rendu à sa propre session, et il ne protège
+   * encore rien tant qu'un premier code ne l'a pas prouvé.
+   */
+  | { statut: "enrole"; facteur: string; qr: string; cle: string }
   | {
       statut: "erreur";
       motif:
@@ -45,6 +52,8 @@ export type EtatParametres =
         | "mdp_contient_email"
         | "mdp_identique"
         | "adresse_identique"
+        | "code"
+        | "deja_active"
         | "indisponible";
     };
 
@@ -347,4 +356,193 @@ export async function changerLangueInterface(donnees: unknown): Promise<void> {
   }
 
   redirect(`/${analyse.data.langue}/parametres`);
+}
+
+/**
+ * ACTIVER LA DOUBLE AUTHENTIFICATION — premier temps : enrôler.
+ *
+ * ⚠️ LE MOT DE PASSE ACTUEL EST EXIGÉ, ET C'EST ICI QU'IL COMPTE LE PLUS. Sans
+ * lui, quelqu'un qui tient une session volée enrôlerait SON téléphone : dès le
+ * premier code, la base refuserait toute requête aux sessions du propriétaire
+ * (migration 156), et le vendeur serait dehors de son propre compte, sans
+ * recours. La protection deviendrait l'arme.
+ *
+ * Un enrôlement abandonné laisse un facteur NON VÉRIFIÉ : il est retiré avant
+ * d'en créer un autre, sans quoi le nom du facteur, unique par compte,
+ * refuserait la seconde tentative.
+ */
+const Actuel = z.object({ actuel: MotDePasseActuel });
+
+export async function commencerActivation(
+  _precedent: EtatParametres,
+  donnees: unknown,
+): Promise<EtatParametres> {
+  const debut = Date.now();
+  const profil = await vendeurActif();
+  if (profil === null) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "session" };
+  }
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "invalide" };
+
+  const analyse = Actuel.safeParse({ actuel: donnees.get("actuel") });
+  if (!analyse.success) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "mot_de_passe_actuel" };
+  }
+  const verification = await verifierMotDePasseActuel(profil.email, analyse.data.actuel);
+  if (verification !== "ok") {
+    await attendrePlancher(debut);
+    return {
+      statut: "erreur",
+      motif: verification === "trop_de_tentatives" ? "trop_de_tentatives" : "mot_de_passe_actuel",
+    };
+  }
+
+  const supabase = await creerClientServeur();
+  const { data: lu, error: erreurLecture } = await supabase.auth.getUser();
+  if (erreurLecture !== null || lu.user === null) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "session" };
+  }
+  const totp = (lu.user.factors ?? []).filter((f) => f.factor_type === "totp");
+  if (totp.some((f) => f.status === "verified")) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "deja_active" };
+  }
+  for (const abandonne of totp) {
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: abandonne.id });
+    if (error !== null) console.error("[parametres] facteur abandonné non retiré — " + error.message);
+  }
+
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: "DropLink" });
+  await attendrePlancher(debut);
+  if (error !== null) {
+    console.error("[parametres] enrôlement refusé — " + error.message);
+    return { statut: "erreur", motif: "indisponible" };
+  }
+  return { statut: "enrole", facteur: data.id, qr: data.totp.qr_code, cle: data.totp.secret };
+}
+
+/**
+ * ACTIVER — second temps : le premier code prouve que l'application est réglée.
+ *
+ * Tant qu'il n'est pas saisi juste, rien ne s'applique : un vendeur qui a mal
+ * scanné n'est pas enfermé dehors. Le facteur visé doit appartenir à CE compte
+ * et être encore non vérifié — lu chez le serveur d'authentification, jamais cru
+ * sur l'identifiant du formulaire. Le quota est celui du mot de passe : un code
+ * à six chiffres se devine sans lui.
+ */
+const Confirmation = z.object({
+  facteur: z.string().uuid(),
+  code: z
+    .string()
+    .transform((v) => v.replace(/\s+/g, ""))
+    .pipe(z.string().regex(/^\d{6}$/)),
+});
+
+export async function confirmerActivation(
+  _precedent: EtatParametres,
+  donnees: unknown,
+): Promise<EtatParametres> {
+  const debut = Date.now();
+  const profil = await vendeurActif();
+  if (profil === null) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "session" };
+  }
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "invalide" };
+
+  const analyse = Confirmation.safeParse({ facteur: donnees.get("facteur"), code: donnees.get("code") });
+  if (!analyse.success) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "code" };
+  }
+
+  const supabase = await creerClientServeur();
+  const { data: lu, error: erreurLecture } = await supabase.auth.getUser();
+  const facteur = (lu.user?.factors ?? []).find(
+    (f) => f.id === analyse.data.facteur && f.factor_type === "totp" && f.status === "unverified",
+  );
+  if (erreurLecture !== null || facteur === undefined) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "invalide" };
+  }
+
+  const quota = await verifierQuotaMotDePasse(profil.email);
+  if (!quota.autorise) {
+    await attendrePlancher(debut);
+    return {
+      statut: "erreur",
+      motif: quota.motif === "indisponible" ? "indisponible" : "trop_de_tentatives",
+    };
+  }
+
+  const { error } = await supabase.auth.mfa.challengeAndVerify({
+    factorId: facteur.id,
+    code: analyse.data.code,
+  });
+  await attendrePlancher(debut);
+  if (error !== null) {
+    return { statut: "erreur", motif: error.status === 429 ? "trop_de_tentatives" : "code" };
+  }
+
+  // Cette session vient de passer en `aal2`. Les AUTRES appareils du compte
+  // demanderont le code à leur prochaine requête : c'est l'effet voulu.
+  revalidatePath("/[locale]/parametres", "page");
+  return { statut: "enregistre" };
+}
+
+/**
+ * DÉSACTIVER LA DOUBLE AUTHENTIFICATION.
+ *
+ * Supabase exige déjà une session `aal2` pour retirer un facteur vérifié
+ * (mesuré), et la garde d'identité en exige autant : une session qui n'a pas
+ * saisi son code n'arrive pas jusqu'ici. Le mot de passe actuel est exigé EN
+ * PLUS — c'est le geste qui retire la protection, et un poste resté ouvert ne
+ * doit pas suffire.
+ */
+export async function desactiverDeuxEtapes(
+  _precedent: EtatParametres,
+  donnees: unknown,
+): Promise<EtatParametres> {
+  const debut = Date.now();
+  const profil = await vendeurActif();
+  if (profil === null) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "session" };
+  }
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "invalide" };
+
+  const analyse = Actuel.safeParse({ actuel: donnees.get("actuel") });
+  if (!analyse.success) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "mot_de_passe_actuel" };
+  }
+  const verification = await verifierMotDePasseActuel(profil.email, analyse.data.actuel);
+  if (verification !== "ok") {
+    await attendrePlancher(debut);
+    return {
+      statut: "erreur",
+      motif: verification === "trop_de_tentatives" ? "trop_de_tentatives" : "mot_de_passe_actuel",
+    };
+  }
+
+  const supabase = await creerClientServeur();
+  const { data: lu } = await supabase.auth.getUser();
+  const verifies = (lu.user?.factors ?? []).filter(
+    (f) => f.factor_type === "totp" && f.status === "verified",
+  );
+  for (const f of verifies) {
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: f.id });
+    if (error !== null) {
+      await attendrePlancher(debut);
+      console.error("[parametres] facteur non retiré — " + error.message);
+      return { statut: "erreur", motif: "indisponible" };
+    }
+  }
+
+  await attendrePlancher(debut);
+  revalidatePath("/[locale]/parametres", "page");
+  return { statut: "enregistre" };
 }

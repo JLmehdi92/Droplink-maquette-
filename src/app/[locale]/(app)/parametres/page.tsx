@@ -101,7 +101,15 @@ export default async function Parametres({
     creerClientServeur(),
   ]);
   const adresseSuivie = (await searchParams)["adresse"] === "suivie";
-  const lues = await lireMesSessions(supabase);
+  const [lues, facteurs] = await Promise.all([
+    lireMesSessions(supabase),
+    supabase.rpc("lister_mes_facteurs"),
+  ]);
+  if (facteurs.error !== null) console.error("[parametres] facteurs illisibles — " + facteurs.error.message);
+  // UNE LECTURE ÉCHOUÉE SE LIT « NON ACTIVÉE » : l'écran propose alors d'activer,
+  // et l'action d'enrôlement relit l'état chez le serveur d'authentification
+  // avant de rien faire — elle refuse si un facteur vérifié existe déjà.
+  const deuxEtapesActive = (facteurs.data ?? []).length > 0;
 
   const sessions: readonly SessionAffichee[] | null =
     lues === null
@@ -190,7 +198,7 @@ export default async function Parametres({
               </form>
             </CarteReglage>
 
-            <CarteSecurite sessions={sessions} />
+            <CarteSecurite sessions={sessions} deuxEtapesActive={deuxEtapesActive} />
           </div>
         </TraductionsClient>
 

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { lireProfilAvec } from "@/lib/comptes/profil";
-import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
+import { lireEtatDuCompteAvec } from "@/lib/comptes/profil";
+import { cheminDeRefus, cheminDeVerification, suivreApresSession } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { verifierQuotaAuthAdresse } from "@/lib/limitation/quota";
 import { redirigerVers } from "@/lib/http/rediriger";
@@ -142,7 +142,11 @@ export async function GET(
      * donc pas protégé par un jeton qu'il faudrait vérifier, mais par le fait
      * que seul le possesseur de la boîte a pu arriver jusqu'ici.
      */
-    const profil = await lireProfilAvec(supabase);
+    const etat = await lireEtatDuCompteAvec(supabase);
+    if (etat.etat === "verification") {
+      return redirigerVers(cheminDeVerification(langue, "mot-de-passe"));
+    }
+    const profil = etat.etat === "profil" ? etat.profil : null;
     if (profil === null) {
       return redirigerVers(cheminDeRefus(langue, "profil"));
     }

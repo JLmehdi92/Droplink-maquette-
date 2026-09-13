@@ -110,7 +110,7 @@ export function ChampAcces({
    */
   readonly valeur?: string;
   readonly surChangement?: (valeur: string) => void;
-  readonly modeSaisie?: "email" | "text";
+  readonly modeSaisie?: "email" | "text" | "numeric";
   readonly invalide?: boolean;
 }) {
   const [devoile, setDevoile] = useState(false);

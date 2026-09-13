@@ -2,10 +2,13 @@
 
 import { useActionState, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Lock, Monitor, MonitorSmartphone, Smartphone, UserRound } from "lucide-react";
+import { Lock, Monitor, MonitorSmartphone, Shield, Smartphone, UserRound } from "lucide-react";
 import {
   changerAdresseCompte,
   changerMotDePasseCompte,
+  commencerActivation,
+  confirmerActivation,
+  desactiverDeuxEtapes,
   enregistrerNom,
   fermerAutresSessions,
   type EtatParametres,
@@ -45,7 +48,7 @@ type Message = { readonly texte: string; readonly erreur: boolean };
 
 function useMessage(etat: EtatParametres, succes: string): Message | null {
   const t = useTranslations("parametres.erreurs");
-  if (etat.statut === "inactif") return null;
+  if (etat.statut === "inactif" || etat.statut === "enrole") return null;
   if (etat.statut === "enregistre") return { texte: succes, erreur: false };
   const cle = {
     session: "session",
@@ -57,6 +60,8 @@ function useMessage(etat: EtatParametres, succes: string): Message | null {
     mdp_contient_email: "mdpContientEmail",
     mdp_identique: "mdpIdentique",
     adresse_identique: "adresseIdentique",
+    code: "code",
+    deja_active: "dejaActive",
     indisponible: "indisponible",
   }[etat.motif];
   return { texte: t(cle), erreur: true };
@@ -356,14 +361,176 @@ function FormulaireSessions() {
   );
 }
 
-export function CarteSecurite({ sessions }: { readonly sessions: readonly SessionAffichee[] | null }) {
+
+/** La clé en groupes de quatre : on la recopie à la main, et 32 caractères d'un bloc se lisent mal. */
+function cleLisible(cle: string): string {
+  return (cle.match(/.{1,4}/g) ?? [cle]).join(" ");
+}
+
+function ActivationDeuxEtapes() {
+  const t = useTranslations("parametres");
+  const [etatDebut, commencer, enPreparation] = useActionState(commencerActivation, INITIAL);
+  const [etatFin, confirmer, enConfirmation] = useActionState(confirmerActivation, INITIAL);
+  const idCode = useId();
+  const messageDebut = useMessage(etatDebut, "");
+  const messageFin = useMessage(etatFin, t("securite.deuxEtapes.activeeOk"));
+
+  if (etatDebut.statut !== "enrole") {
+    return (
+      <form action={commencer} className="flex flex-col gap-4">
+        <p className={CLASSE_AIDE}>{t("securite.deuxEtapes.motDePasseAide")}</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <ChampMotDePasse libelle={t("compte.actuel")} nom="actuel" />
+        </div>
+        <div>
+          <Soumettre
+            libelle={t("securite.deuxEtapes.continuer")}
+            enCours={t("securite.deuxEtapes.continuation")}
+            pendant={enPreparation}
+          />
+        </div>
+        <Annonce message={messageDebut} />
+      </form>
+    );
+  }
+
+  return (
+    <form action={confirmer} className="flex flex-col gap-4">
+      <input type="hidden" name="facteur" value={etatDebut.facteur} />
+      <p className={CLASSE_AIDE}>{t("securite.deuxEtapes.scanner")}</p>
+      <div className="flex flex-wrap items-center gap-[18px]">
+        {/* LE QR CODE EST UN SVG RENDU PAR SUPABASE, en `data:`. Dans un `<img>`,
+            un SVG n'exécute rien ; et `next/image` n'a rien à optimiser dans une
+            image vectorielle servie depuis la page elle-même. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={etatDebut.qr}
+          alt={t("securite.deuxEtapes.qrAlt")}
+          width={164}
+          height={164}
+          className="h-[164px] w-[164px] shrink-0 rounded-ds-control border border-ds-filet bg-ds-surface-carte p-2"
+        />
+        <div className="flex min-w-0 flex-[1_1_220px] flex-col gap-2">
+          <span className={CLASSE_LIBELLE}>{t("securite.deuxEtapes.cle")}</span>
+          <span className="flex min-h-12 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-3.5 py-2 font-mono text-[13.5px] tracking-[0.06em] break-all text-ds-texte-fort select-all">
+            {cleLisible(etatDebut.cle)}
+          </span>
+          <span className={CLASSE_AIDE}>{t("securite.deuxEtapes.cleAide")}</span>
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className={CLASSE_CHAMP_ETIQUETE}>
+          <label htmlFor={idCode} className={CLASSE_LIBELLE}>
+            {t("securite.deuxEtapes.code")}
+          </label>
+          <span className={CLASSE_CHAMP}>
+            <input
+              id={idCode}
+              name="code"
+              required
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={7}
+              placeholder="123456"
+              className={CLASSE_ENTREE}
+            />
+          </span>
+        </div>
+      </div>
+      <div>
+        <Soumettre
+          libelle={t("securite.deuxEtapes.confirmer")}
+          enCours={t("securite.deuxEtapes.confirmation")}
+          pendant={enConfirmation}
+        />
+      </div>
+      <Annonce message={messageFin} />
+    </form>
+  );
+}
+
+function DesactivationDeuxEtapes() {
+  const t = useTranslations("parametres");
+  const [etat, action, pendant] = useActionState(desactiverDeuxEtapes, INITIAL);
+  const message = useMessage(etat, t("securite.deuxEtapes.desactiveeOk"));
+
+  return (
+    <form action={action} className="flex flex-col gap-4">
+      <p className={CLASSE_AIDE}>{t("securite.deuxEtapes.desactiverAide")}</p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ChampMotDePasse libelle={t("compte.actuel")} nom="actuel" />
+      </div>
+      <div>
+        <Soumettre
+          libelle={t("securite.deuxEtapes.desactiverBouton")}
+          enCours={t("securite.deuxEtapes.desactivation")}
+          pendant={pendant}
+        />
+      </div>
+      <Annonce message={message} />
+    </form>
+  );
+}
+
+export function CarteSecurite({
+  sessions,
+  deuxEtapesActive,
+}: {
+  readonly sessions: readonly SessionAffichee[] | null;
+  readonly deuxEtapesActive: boolean;
+}) {
   const t = useTranslations("parametres.securite");
   const [ouvert, setOuvert] = useState(false);
+  /*
+   * LE PANNEAU GARDE LE MODE DANS LEQUEL IL A ÉTÉ OUVERT. Après un code juste,
+   * l'action relit la page : `deuxEtapesActive` passe à vrai, et un panneau
+   * piloté par cette propriété basculait aussitôt sur le formulaire de
+   * DÉSACTIVATION — démontant le message de succès avant qu'il soit lu. Mesuré
+   * le 13/09/2026 en pilotant l'activation : badge « Activée », aucun message.
+   */
+  const [mode, setMode] = useState<"activer" | "desactiver" | null>(null);
+  const termine = (mode === "activer" && deuxEtapesActive) || (mode === "desactiver" && !deuxEtapesActive);
   const idPanneau = useId();
+  const idDeuxEtapes = useId();
 
   return (
     <CarteReglage icone={Lock} titre={t("titre")} sousTitre={t("aide")}>
-      <LigneAction premiere icone={MonitorSmartphone} titre={t("sessions")} sousTitre={t("sessionsAide")}>
+      {/* PAS D'INTERRUPTEUR, À LA DIFFÉRENCE DU KIT. Une bascule promet un effet
+          immédiat ; activer exige ici le mot de passe, un QR code et un premier
+          code juste. Un interrupteur qui se remettrait tout seul à « éteint »
+          mentirait sur l'état du compte (principe XII). */}
+      <LigneAction premiere icone={Shield} titre={t("deuxEtapes.titre")} sousTitre={t("deuxEtapes.aide")}>
+        {deuxEtapesActive ? (
+          <span className="inline-flex rounded-ds-pill bg-ds-succes-fond px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold text-ds-succes lg:text-[11px]">
+            {t("deuxEtapes.activee")}
+          </span>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => setMode((m) => (m !== null ? null : deuxEtapesActive ? "desactiver" : "activer"))}
+          aria-expanded={mode !== null}
+          aria-controls={idDeuxEtapes}
+          className={CLASSE_BOUTON}
+        >
+          {mode !== null
+            ? termine
+              ? t("deuxEtapes.fermer")
+              : t("deuxEtapes.annuler")
+            : deuxEtapesActive
+              ? t("deuxEtapes.desactiver")
+              : t("deuxEtapes.activer")}
+        </button>
+      </LigneAction>
+
+      <div id={idDeuxEtapes} hidden={mode === null}>
+        {mode !== null ? (
+          <div className="mb-1.5 rounded-ds-card border border-ds-filet bg-ds-surface-creux p-4">
+            {mode === "desactiver" ? <DesactivationDeuxEtapes /> : <ActivationDeuxEtapes />}
+          </div>
+        ) : null}
+      </div>
+
+      <LigneAction icone={MonitorSmartphone} titre={t("sessions")} sousTitre={t("sessionsAide")}>
         <button
           type="button"
           onClick={() => setOuvert((v) => !v)}

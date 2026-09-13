@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import { FormulaireNouveauMotDePasse } from "@/components/formulaire-nouveau-mot-de-passe";
 import { TraductionsClient } from "@/components/traductions-client";
 import { PanneauAcces } from "@/components/panneau-acces";
-import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { lireEtatDuCompte } from "@/lib/comptes/profil";
 import { sessionParEmail } from "@/lib/auth/recuperation";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { cheminDeRefus } from "@/lib/comptes/apres-session";
+import { cheminDeRefus, cheminDeVerification } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { routing } from "@/i18n/routing";
 
@@ -55,7 +55,12 @@ export default async function NouveauMotDePasse({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const profil = await lireProfilVendeur();
+  const etat = await lireEtatDuCompte();
+  // UN COMPTE À DOUBLE AUTHENTIFICATION SAISIT D'ABORD SON CODE : Supabase refuse
+  // de changer le mot de passe depuis une session `aal1` (mesuré), et la base en
+  // refuse toute lecture (migration 156). L'écran de vérification ramène ici.
+  if (etat.etat === "verification") redirect(cheminDeVerification(langue, "mot-de-passe"));
+  const profil = etat.etat === "profil" ? etat.profil : null;
   if (profil === null) {
     // Arrivée sans session : un lien périmé, déjà consommé, ou une visite
     // directe. Les trois se réparent en redemandant un lien, et l'écran de

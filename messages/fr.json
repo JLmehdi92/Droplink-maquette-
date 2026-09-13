@@ -1696,7 +1696,31 @@
       "activeLe": "Dernière activité : {date}",
       "appareilInconnu": "Appareil non reconnu",
       "lectureImpossible": "Impossible de lire vos sessions pour le moment. Réessayez.",
-      "fermerAide": "Déconnectez tous vos autres appareils. Celui-ci reste connecté."
+      "fermerAide": "Déconnectez tous vos autres appareils. Celui-ci reste connecté.",
+      "deuxEtapes": {
+        "titre": "Authentification à deux facteurs (2FA)",
+        "aide": "Sécurisez votre compte avec un code de vérification.",
+        "activer": "Activer",
+        "annuler": "Annuler",
+        "activee": "Activée",
+        "desactiver": "Désactiver",
+        "motDePasseAide": "Confirmez votre mot de passe pour commencer. Il vous faudra une application d'authentification sur votre téléphone.",
+        "continuer": "Continuer",
+        "continuation": "Préparation…",
+        "scanner": "Scannez ce code avec votre application d'authentification, puis saisissez le code qu'elle affiche.",
+        "qrAlt": "Code QR à scanner avec votre application d'authentification",
+        "cle": "Clé de secours",
+        "cleAide": "Notez-la en lieu sûr : c'est la seule façon de retrouver l'accès si vous perdez votre appareil.",
+        "code": "Code à 6 chiffres",
+        "confirmer": "Confirmer l'activation",
+        "confirmation": "Vérification…",
+        "activeeOk": "Double authentification activée. Vos autres appareils demanderont le code à leur prochaine utilisation.",
+        "desactiverAide": "Votre compte ne demandera plus de code à la connexion. Confirmez avec votre mot de passe.",
+        "desactiverBouton": "Désactiver la double authentification",
+        "desactivation": "Désactivation…",
+        "desactiveeOk": "Double authentification désactivée.",
+        "fermer": "Fermer"
+      }
     },
     "abonnement": {
       "titre": "Abonnement",
@@ -1726,6 +1750,23 @@
       "mdpContientEmail": "Le mot de passe ne doit pas contenir votre adresse e-mail.",
       "mdpIdentique": "Le nouveau mot de passe doit être différent de l'actuel.",
       "adresseIdentique": "C'est déjà l'adresse de votre compte.",
+      "indisponible": "Le service est momentanément indisponible. Réessayez.",
+      "code": "Code incorrect ou expiré. Saisissez le code affiché maintenant.",
+      "dejaActive": "La double authentification est déjà activée sur ce compte."
+    }
+  },
+  "verification": {
+    "titre": "Vérification en deux étapes",
+    "sousTitre": "Saisissez le code à 6 chiffres de votre application d'authentification.",
+    "libelle": "Code de vérification",
+    "bouton": "Vérifier",
+    "enCours": "Vérification…",
+    "perdu": "Appareil perdu ? Ajoutez la clé de secours notée à l'activation dans une nouvelle application d'authentification.",
+    "pasVous": "Ce n'est pas votre compte ?",
+    "erreurs": {
+      "code": "Code incorrect ou expiré. Saisissez le code affiché maintenant.",
+      "invalide": "Saisissez les 6 chiffres affichés par votre application.",
+      "trop": "Trop de tentatives. Réessayez dans quelques minutes.",
       "indisponible": "Le service est momentanément indisponible. Réessayez."
     }
   }

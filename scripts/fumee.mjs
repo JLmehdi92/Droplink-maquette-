@@ -411,6 +411,14 @@ const cas = [
     final: "/fr/connexion?erreur=session",
     libelle: "parametres SANS session renvoyes vers la connexion",
   },
+  // LA VERIFICATION EN DEUX ETAPES, creee le 13/09/2026 : sans session il n y a
+  // aucun code a saisir, et l ecran ne doit pas s afficher a qui n a rien ouvert.
+  {
+    chemin: "/fr/verification",
+    statut: 200,
+    final: "/fr/connexion?erreur=session",
+    libelle: "verification SANS session renvoyee vers la connexion",
+  },
   {
     chemin: "/fr/marque",
     statut: 200,

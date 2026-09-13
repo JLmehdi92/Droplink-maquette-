@@ -387,6 +387,23 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "le moteur refusera toute écriture qu'on y ajouterait.",
     ],
     [
+      "exiger_aal_du_compte",
+      "Le crochet `db_pre_request` de PostgREST (migration 156), exécuté AVANT " +
+        "CHAQUE requête, avec le rôle de la requête : `anon` et `authenticated` " +
+        "doivent pouvoir l'appeler, sans quoi le produit entier cesserait de " +
+        "répondre. Il ne rend RIEN et n'écrit rien : il refuse, en 42501, toute " +
+        "requête d'un compte à facteur vérifié dont le jeton n'est pas `aal2`. " +
+        "C'est lui qui fait tenir la double authentification sur les fonctions " +
+        "`security definer`, que la RLS ne voit pas.",
+    ],
+    [
+      "lister_mes_facteurs",
+      "« La double authentification est-elle active ? » pour l'écran Paramètres. " +
+        "`authenticated` n'a aucun droit sur `auth.mfa_factors` (mesuré) : elle " +
+        "rend les facteurs TOTP VÉRIFIÉS de `auth.uid()`, identifiant et date, " +
+        "jamais leur secret. Aucun argument ne désigne un compte. Refusée à `anon`.",
+    ],
+    [
       "lister_mes_sessions",
       "« Voir les sessions » de l'écran Paramètres (migration 155). `auth.sessions` " +
         "est hors du schéma exposé, et doit le rester : la fonction rend les " +

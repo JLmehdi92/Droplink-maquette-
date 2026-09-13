@@ -506,6 +506,41 @@ console.error(
     `${medias.length} medias dont une couverture, 4 evenements, 8 ouvertures de lien.`,
 );
 
+/*
+ * `DEUX_ETAPES=1` : LE COMPTE DE MESURE ACTIVE LA DOUBLE AUTHENTIFICATION, et la
+ * session servie au navigateur est une session NEUVE, donc `aal1`. C'est le seul
+ * moyen de rendre l'écran `/verification` — il renvoie ailleurs toute session
+ * qui n'a rien à vérifier. Le facteur est enrôlé et vérifié sur un client à
+ * part, avec un code calculé selon la RFC 6238 : un vrai facteur, pas un décor.
+ */
+if (process.env["DEUX_ETAPES"] === "1") {
+  const { createHmac } = await import("node:crypto");
+  const codeTotp = (secret) => {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    let bits = "";
+    for (const c of secret.replace(/=+$/, "")) bits += alphabet.indexOf(c).toString(2).padStart(5, "0");
+    const octets = [];
+    for (let i = 0; i + 8 <= bits.length; i += 8) octets.push(parseInt(bits.slice(i, i + 8), 2));
+    const compteur = Buffer.alloc(8);
+    compteur.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30000)));
+    const h = createHmac("sha1", Buffer.from(octets)).update(compteur).digest();
+    const o = h[19] & 15;
+    return String((h.readUInt32BE(o) & 0x7fffffff) % 1000000).padStart(6, "0");
+  };
+  const enroleur = createClient(urlSupabase, process.env["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"], {
+    auth: { persistSession: false },
+  });
+  await enroleur.auth.signInWithPassword({ email: courriel, password: MOT_DE_PASSE });
+  const { data: facteur, error: eEnrole } = await enroleur.auth.mfa.enroll({ factorType: "totp", friendlyName: "mesure" });
+  if (eEnrole) throw new Error("jeu de mesure : enrôlement impossible — " + eEnrole.message);
+  const { error: eVerif } = await enroleur.auth.mfa.challengeAndVerify({
+    factorId: facteur.id,
+    code: codeTotp(facteur.totp.secret),
+  });
+  if (eVerif) throw new Error("jeu de mesure : facteur non vérifié — " + eVerif.message);
+  console.error("[jeu] double authentification activée : la session servie sera aal1.");
+}
+
 const { data: sess } = await publiable.auth.signInWithPassword({
   email: courriel,
   password: MOT_DE_PASSE,

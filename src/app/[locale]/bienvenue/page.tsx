@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { FormulaireOnboarding } from "@/components/formulaire-onboarding";
 import { libellesApercu } from "@/lib/boutique/libelles-apercu";
 import { TraductionsClient } from "@/components/traductions-client";
-import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
+import { lireEtatDuCompte, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
 
 export async function generateMetadata({
@@ -33,7 +33,9 @@ export default async function Bienvenue({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const profil = await lireProfilVendeur();
+  const etat = await lireEtatDuCompte();
+  if (etat.etat === "verification") redirect(`/${langue}/verification`);
+  const profil = etat.etat === "profil" ? etat.profil : null;
   // Le layout a déjà écarté l'absence de session. On revérifie ici sans s'en
   // remettre à lui : une page qui suppose qu'un parent l'a protégée devient
   // fausse le jour où elle est déplacée.

@@ -4654,6 +4654,15 @@
         ],
         "motif": "contrainte",
         "raison": "Position verticale seule : la page est plus courte, pour les raisons ecrites sur « Securite » et « Support »."
+      },
+      {
+        "textes": [
+          "Authentification à deux facteurs (2FA)",
+          "Sécurisez votre compte avec un code de v",
+          "Activer"
+        ],
+        "motif": "contrainte",
+        "raison": "LA LIGNE DE DOUBLE AUTHENTIFICATION, SANS INTERRUPTEUR. Le kit pose une bascule a gauche du bouton ; une bascule promet un effet immediat, et activer exige ici le mot de passe actuel, un QR code et un premier code juste — un interrupteur qui se remettrait seul a « eteint » mentirait sur l etat du compte (principe XII). Le libelle gagne donc les 52 px de la bascule et de son ecart. Position verticale : meme cause que « Securite », la carte « Preferences » plus courte."
       }
     ],
     "manquants": [
@@ -4688,15 +4697,6 @@
         ],
         "motif": "contrainte",
         "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
-      },
-      {
-        "textes": [
-          "Authentification à deux facteurs (2FA)",
-          "Sécurisez votre compte avec un code de v",
-          "Activer"
-        ],
-        "motif": "donnee",
-        "raison": "LA DOUBLE AUTHENTIFICATION. La base ne porte encore aucun facteur : l enrolement TOTP, le defi a la connexion et les policies qui exigent le niveau aal2 sont la phase suivante de cet ecran. Une bascule posee avant eux activerait une protection qui ne protege rien."
       },
       {
         "textes": [
@@ -4811,6 +4811,36 @@
         ],
         "motif": "contrainte",
         "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
+      }
+    ]
+  },
+  "fr-verification": {
+    "valeurs": [
+      {
+        "textes": [
+          "Un seul lien de suivi pour toute la",
+          "commande",
+          ": vos clients arrêtent de vous demander ",
+          "Un lien de suivi par commande",
+          "Rapide et simple",
+          "Créez vos commandes en quelques clics.",
+          "Tout au même endroit",
+          "Photos, suivi, statut, client… tout est ",
+          "Conçu pour les vendeurs",
+          "Une expérience pensée par et pour les e-",
+          "Vérification en deux étapes",
+          "Saisissez le code à 6 chiffres de votre ",
+          "Code de vérification",
+          "Vérifier",
+          "Appareil perdu ? Ajoutez la clé de secou",
+          "Ce n'est pas votre compte ?",
+          "Se déconnecter",
+          "Vos données sont sécurisées et confident",
+          "· © 2025 DropLink. Tous droits réservés.",
+          "Documentation"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, ET UN MEME DECALAGE PARTOUT (+36 a +37 px sur les deux colonnes, -10 px au pied) — donc une seule cause. Le pied du kit porte l accent manuscrit « Plus de ventes, plus de temps. », une IMAGE de 123 px de haut : le produit ne la rend pas, pas plus que sur la connexion et l inscription — une image de texte francais ne suit pas les trois langues, et « plus de ventes » est une promesse que le produit ne fait pas. La grille qui centre les deux colonnes en devient plus haute, et la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, d ou les 10 px du pied. Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, relevee le 13/09/2026 apres avoir ete ecrite dans le kit."
       }
     ]
   }

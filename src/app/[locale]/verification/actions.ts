@@ -1,0 +1,105 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { SchemaLangue } from "@/i18n/schema";
+import { attendrePlancher } from "@/lib/auth/plancher";
+import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
+import { verifierQuotaMotDePasse } from "@/lib/limitation/quota";
+import { creerClientServeur } from "@/lib/supabase/server";
+
+/**
+ * LE SECOND TEMPS DE LA CONNEXION : le code à 6 chiffres.
+ *
+ * ⚠️ L'IDENTITÉ VIENT DU SERVEUR D'AUTHENTIFICATION, PAS DU PROFIL. À cet instant
+ * la session est `aal1` et la base refuse toute lecture (migration 156) :
+ * `lireProfilVendeur` rendrait `null`. `getUser()` valide le jeton auprès de
+ * Supabase et rend les facteurs à jour ; le facteur visé en vient, jamais du
+ * formulaire, sans quoi on pourrait viser le facteur d'un autre compte.
+ *
+ * ⚠️ LE QUOTA EST CELUI DU MOT DE PASSE, consommé AVANT la vérification. Un code
+ * à 6 chiffres n'a qu'un million de valeurs, dont trois valides à la fois :
+ * sans compteur, il se devine. Le même budget que la connexion — et non un
+ * second — parce qu'alterner les deux essais ne doit pas doubler le nombre de
+ * tentatives offertes à celui qui connaît déjà le mot de passe.
+ *
+ * Et le plancher de temps couvre tout, succès compris : un code juste ne doit
+ * pas répondre plus vite ou plus lentement qu'un code faux.
+ */
+
+export type ResultatVerification =
+  | { statut: "inactif" }
+  | { statut: "erreur"; motif: "code" | "invalide" | "trop" | "indisponible" };
+
+const Saisie = z.object({
+  code: z
+    .string()
+    .transform((v) => v.replace(/\s+/g, ""))
+    .pipe(z.string().regex(/^\d{6}$/)),
+  locale: SchemaLangue,
+  suite: z.enum(["mot-de-passe"]).optional(),
+});
+
+export async function verifierCode(
+  _precedent: ResultatVerification,
+  donnees: unknown,
+): Promise<ResultatVerification> {
+  const debut = Date.now();
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "invalide" };
+
+  const suiteBrute = donnees.get("suite");
+  const analyse = Saisie.safeParse({
+    code: donnees.get("code"),
+    locale: donnees.get("locale"),
+    suite: typeof suiteBrute === "string" && suiteBrute !== "" ? suiteBrute : undefined,
+  });
+  if (!analyse.success) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "invalide" };
+  }
+  const { code, locale, suite } = analyse.data;
+
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.auth.getUser();
+  if (error !== null || data.user === null) {
+    await attendrePlancher(debut);
+    redirect(`/${locale}/connexion?erreur=session`);
+  }
+
+  const facteur = (data.user.factors ?? []).find(
+    (f) => f.factor_type === "totp" && f.status === "verified",
+  );
+  if (facteur === undefined) {
+    // Rien à vérifier : le compte n'a pas (ou plus) de facteur. La suite
+    // ordinaire décide, comme après toute connexion.
+    const destination = await suivreApresSession(locale, supabase);
+    await attendrePlancher(debut);
+    redirect(destination.ok ? destination.chemin : cheminDeRefus(locale, destination.motif));
+  }
+
+  const quota = await verifierQuotaMotDePasse(data.user.email ?? data.user.id);
+  if (!quota.autorise) {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: quota.motif === "indisponible" ? "indisponible" : "trop" };
+  }
+
+  const { error: erreurCode } = await supabase.auth.mfa.challengeAndVerify({
+    factorId: facteur.id,
+    code,
+  });
+  if (erreurCode !== null) {
+    await attendrePlancher(debut);
+    // La limite du serveur d'authentification ne dépend pas du code essayé : la
+    // nommer ne renseigne personne. Tout le reste est « code incorrect ».
+    return { statut: "erreur", motif: erreurCode.status === 429 ? "trop" : "code" };
+  }
+
+  if (suite === "mot-de-passe") {
+    await attendrePlancher(debut);
+    redirect(`/${locale}/nouveau-mot-de-passe`);
+  }
+
+  const destination = await suivreApresSession(locale, supabase);
+  await attendrePlancher(debut);
+  redirect(destination.ok ? destination.chemin : cheminDeRefus(locale, destination.motif));
+}

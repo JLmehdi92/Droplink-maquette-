@@ -62,6 +62,15 @@ const SANS_IDENTITE_ADMISES: ReadonlyMap<string, string> = new Map([
       "chemins ne double pas le budget d'envoi vers une même boîte.",
   ],
   [
+    "verifierCode",
+    "Le second temps de la connexion à double authentification. La session est " +
+      "`aal1` et la base refuse alors toute lecture (migration 156) : exiger le " +
+      "profil serait exiger ce que le code doit débloquer. L'identité vient de " +
+      "`getUser()`, validé par le serveur d'authentification, et le facteur visé " +
+      "en vient aussi. Sa protection est le quota du mot de passe, consommé AVANT " +
+      "la vérification : un code à six chiffres se devine sans lui.",
+  ],
+  [
     "partirVersGoogle",
     "Même porte, autre fournisseur. Le quota est celui des envois et non un " +
       "troisième : des compteurs distincts offriraient un budget multiplié à " +

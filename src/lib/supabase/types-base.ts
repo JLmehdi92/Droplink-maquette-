@@ -967,6 +967,7 @@ export type Database = {
           source: string
         }[]
       }
+      exiger_aal_du_compte: { Args: never; Returns: undefined }
       fenetre_courante: {
         Args: { p_fenetre_secondes: number }
         Returns: string
@@ -1160,6 +1161,13 @@ export type Database = {
           id: string
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["account_status"]
+        }[]
+      }
+      lister_mes_facteurs: {
+        Args: never
+        Returns: {
+          cree_le: string
+          id: string
         }[]
       }
       lister_mes_sessions: {

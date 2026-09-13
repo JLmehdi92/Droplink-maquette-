@@ -2,8 +2,8 @@ import "server-only";
 import { redirect } from "next/navigation";
 import type { creerClientServeur } from "@/lib/supabase/server";
 import {
-  lireProfilAvec,
-  lireProfilVendeur,
+  lireEtatDuCompte,
+  lireEtatDuCompteAvec,
   onboardingAFaire,
   SessionIndisponible,
   type ProfilVendeur,
@@ -92,7 +92,15 @@ export async function suivreApresSession(
   langue: Langue,
   supabase: Awaited<ReturnType<typeof creerClientServeur>>,
 ): Promise<Destination> {
-  const profil = await lireProfilAvec(supabase);
+  const etat = await lireEtatDuCompteAvec(supabase);
+
+  // LA VÉRIFICATION EN DEUX ÉTAPES PASSE AVANT TOUT LE RESTE : tant que le code
+  // n'est pas saisi, la base refuse de lire le profil (migration 156), donc rien
+  // de ce qui suit ne peut être décidé.
+  if (etat.etat === "verification") {
+    return { ok: true, chemin: cheminDeVerification(langue) };
+  }
+  const profil = etat.etat === "profil" ? etat.profil : null;
 
   if (profil === null) {
     // La session existe mais le profil est introuvable : le déclencheur de
@@ -177,6 +185,11 @@ export async function suivreApresSession(
  * redirigeait avec son motif, et rien ne l'affichait, parce que l'inventaire des
  * motifs affichables vivait ailleurs que leur émission.
  */
+/** L'écran du code à 6 chiffres. `suite` ne prend que des valeurs connues. */
+export function cheminDeVerification(langue: Langue, suite?: "mot-de-passe"): string {
+  return `/${langue}/verification` + (suite === undefined ? "" : `?suite=${suite}`);
+}
+
 export function cheminDeRefus(
   langue: Langue,
   motif: "profil" | "suspendu" | "fermees" | "service",
@@ -230,7 +243,9 @@ export function cheminDeRefus(
 export async function exigerVendeur(langue: Langue): Promise<ProfilVendeur> {
   let profil: ProfilVendeur | null;
   try {
-    profil = await lireProfilVendeur();
+    const etat = await lireEtatDuCompte();
+    if (etat.etat === "verification") redirect(cheminDeVerification(langue));
+    profil = etat.etat === "profil" ? etat.profil : null;
   } catch (erreur) {
     /*
      * ⚠️ LE SERVEUR D'AUTHENTIFICATION N'A PAS RÉPONDU — CE N'EST PAS UNE

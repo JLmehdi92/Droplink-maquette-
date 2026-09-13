@@ -95,8 +95,13 @@ export type ProfilVendeur = {
  * Le motif est déjà employé pour `lireCommandePublique` et `exigerAdmin` ; il
  * manquait ici, où il paie le plus.
  */
+export const lireEtatDuCompte = cache(async (): Promise<EtatDuCompte> => {
+  return lireEtatDuCompteAvec(await creerClientServeur());
+});
+
 export const lireProfilVendeur = cache(async (): Promise<ProfilVendeur | null> => {
-  return lireProfilAvec(await creerClientServeur());
+  const etat = await lireEtatDuCompte();
+  return etat.etat === "profil" ? etat.profil : null;
 });
 
 /**
@@ -121,6 +126,35 @@ export const lireProfilVendeur = cache(async (): Promise<ProfilVendeur | null> =
 export async function lireProfilAvec(
   supabase: Awaited<ReturnType<typeof creerClientServeur>>,
 ): Promise<ProfilVendeur | null> {
+  const etat = await lireEtatDuCompteAvec(supabase);
+  return etat.etat === "profil" ? etat.profil : null;
+}
+
+/**
+ * CE QUE LA SESSION PERMET : le profil, rien, ou d'abord la VÉRIFICATION EN DEUX
+ * ÉTAPES.
+ *
+ * ⚠️ POURQUOI UN TROISIÈME ÉTAT, ET POURQUOI LES AUTRES APPELANTS NE LE VOIENT
+ * PAS. Un compte qui a activé la double authentification présente, après son
+ * mot de passe, une session `aal1` ; la base refuse alors TOUTE requête
+ * (migration 156), donc la lecture du profil échoue. Rendue telle quelle, cette
+ * panne se lirait « profil introuvable » et renverrait vers la connexion en
+ * boucle. Les deux gardes qui ORIENTENT — celle des pages et la suite de la
+ * connexion — lisent donc cet état et envoient vers `/verification`. Tous les
+ * autres appelants reçoivent `null` par `lireProfilAvec` : un refus, fermé.
+ *
+ * Les facteurs viennent de `getUser()`, c'est-à-dire du serveur
+ * d'authentification, et non de l'objet utilisateur rangé dans le cookie, qu'un
+ * client pourrait réécrire. Le niveau vient du jeton que ce même appel a validé.
+ */
+export type EtatDuCompte =
+  | { readonly etat: "profil"; readonly profil: ProfilVendeur }
+  | { readonly etat: "aucun" }
+  | { readonly etat: "verification" };
+
+export async function lireEtatDuCompteAvec(
+  supabase: Awaited<ReturnType<typeof creerClientServeur>>,
+): Promise<EtatDuCompte> {
   /*
    * ⚠️ LA SESSION EST VALIDÉE PAR LE SERVEUR D'AUTHENTIFICATION, PAS SEULEMENT
    * PAR LA RLS. DÉFAUT RÉEL, MESURÉ LE 01/09/2026 EN ÉPROUVANT LA DÉCONNEXION.
@@ -194,18 +228,24 @@ export async function lireProfilAvec(
     if (session.error !== null && estPanneDeTransport(session.error.message)) {
       throw new SessionIndisponible(session.error.message);
     }
-    return null;
+    return { etat: "aucun" };
+  }
+
+  const facteurVerifie = (session.data.user.factors ?? []).some((f) => f.status === "verified");
+  if (facteurVerifie) {
+    const { data: niveau, error: erreurNiveau } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (erreurNiveau !== null || niveau.currentLevel !== "aal2") return { etat: "verification" };
   }
 
   const { data, error } = profil;
 
-  if (error !== null || data === null) return null;
+  if (error !== null || data === null) return { etat: "aucun" };
 
   // `shops` arrive sous forme d'objet ou de tableau selon la façon dont
   // PostgREST résout la relation. On traite les deux plutôt que de parier.
   const brutShop = data.shops as unknown;
   const shop = Array.isArray(brutShop) ? brutShop[0] : brutShop;
-  if (shop === undefined || shop === null) return null;
+  if (shop === undefined || shop === null) return { etat: "aucun" };
 
   const s = shop as {
     id: string;
@@ -221,7 +261,7 @@ export async function lireProfilAvec(
     site_url: string | null;
   };
 
-  return {
+  const lu: ProfilVendeur = {
     profilId: data.id,
     email: data.email,
     nomAffiche: data.nom_affiche,
@@ -265,6 +305,7 @@ export async function lireProfilAvec(
       site: s.site_url,
     },
   };
+  return { etat: "profil", profil: lu };
 }
 
 /**
