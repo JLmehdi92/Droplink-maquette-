@@ -859,6 +859,13 @@ export type Database = {
           total: number
         }[]
       }
+      compter_commandes_par_jour_admin: {
+        Args: { p_depuis: string; p_jusqu_a: string }
+        Returns: {
+          jour: string
+          total: number
+        }[]
+      }
       compter_commandes_par_semaine: {
         Args: { p_fin: string; p_semaines: number }
         Returns: {
@@ -897,6 +904,8 @@ export type Database = {
       compteurs_admin: {
         Args: never
         Returns: {
+          boutiques: number
+          boutiques_nommees: number
           colis_abandonnes_ce_mois: number
           colis_pris_en_charge_ce_mois: number
           commandes_creees_ce_mois: number
@@ -1189,6 +1198,16 @@ export type Database = {
       reordonner_medias: {
         Args: { p_ids: string[]; p_order_id: string }
         Returns: number
+      }
+      repartir_commandes_admin: {
+        Args: never
+        Returns: {
+          en_transit: number
+          expedie: number
+          livre: number
+          preparation: number
+          total: number
+        }[]
       }
       repartir_transporteurs: {
         Args: { p_depuis: string }

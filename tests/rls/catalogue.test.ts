@@ -460,6 +460,27 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "ne croît pas avec l'âge du produit.",
     ],
     [
+      "repartir_commandes_admin",
+      "Répartition des commandes de la plateforme par statut, pour l'anneau du " +
+        "panneau. Elle NE RÉUTILISE PAS `compter_commandes_par_etat`, qui est " +
+        "`security invoker` : appelée par un administrateur, celle-là rendrait SES " +
+        "commandes — c'est-à-dire zéro — sur un panneau qui prétend décrire tout " +
+        "le produit. Elle ne rend QUE DES NOMBRES : aucun pseudo, aucune " +
+        "référence, aucune boutique, donc aucune donnée tierce lue, donc aucun " +
+        "audit à écrire. C'est ce qui l'autorise à vivre sur l'écran d'accueil là " +
+        "où un TABLEAU de commandes y écrirait une entrée de journal à chaque " +
+        "ouverture.",
+    ],
+    [
+      "compter_commandes_par_jour_admin",
+      "Commandes créées par jour sur toute la plateforme, pour la courbe du " +
+        "panneau. Même raisonnement que `repartir_commandes_admin` : garde interne " +
+        "`est_admin()`, et rien d'autre que des dates et des comptes. Les jours " +
+        "VIDES sont rendus — une courbe qui saute les jours sans commande rend ses " +
+        "points équidistants alors que le temps ne l'est pas, et une semaine morte " +
+        "s'y lirait comme une semaine pleine.",
+    ],
+    [
       "est_admin",
       "LA SEULE AUTORITÉ sur la question « cet appelant est-il administrateur ». " +
         "Ouverte à `authenticated` parce que chaque garde l'appelle. Elle lit le " +

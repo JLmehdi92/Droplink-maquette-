@@ -589,7 +589,7 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**QUATRE ÉCRANS SORTENT EN CODE 0**, tous remesurés contre un kit qui rend enfin
+**CINQ ÉCRANS SORTENT EN CODE 0**, tous remesurés contre un kit qui rend enfin
 sa vraie police (neuvième piège) :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
@@ -598,6 +598,7 @@ sa vraie police (neuvième piège) :
 | `/envois` | `CLIC_KIT="Suivi d'envois"` | 48 (0) | 46 (0) | **0** |
 | **l'éditeur** `/commandes/[id]` | `CLIC_KIT="#DLK7842"` | 26 (0) | 48 (0) | **0** |
 | `/analyses` | `CLIC_KIT="Analyses"` | 32 (0) | 41 (0) | **0** |
+| `/marque` | `CLIC_KIT="Ma marque"` | 26 (0) | 41 (0) | **0** |
 
 ⚠️ **LE PRODUIT NE SE MESURE PAS TOUJOURS À LA MÊME LARGEUR QUE LE KIT.** Les
 deux relevés doivent porter la même largeur UTILE — 1675 —, et c'est la barre de
@@ -634,9 +635,9 @@ allowed ». Cinq panneaux du kit exigeaient donc une fonction SQL. Voir
 `pnpm db:migrate:tests` plus haut : le code est écrit et appliqué à la base de
 tests ; **la production attend `pnpm db:migrate`, AVANT le déploiement.**
 
-**▶️ PROCHAIN ÉCRAN : `/marque`**, contre `BrandView` du kit vendeur.
+**▶️ PROCHAINS ÉCRANS : les SIX de l'administration.**
 
-Puis, dans cet ordre : les SIX écrans admin · la landing · `/p/[token]` ·
+Puis, dans cet ordre : la landing · la landing · `/p/[token]` ·
 l'authentification · les pages légales. Tous ont déjà eu une
 passe de jetons et de règle 5 ; **aucun n'a eu la soustraction.** Et deux écrans
 sont à CRÉER, pas à migrer : le tableau de bord (`DashboardHome.jsx`) et les

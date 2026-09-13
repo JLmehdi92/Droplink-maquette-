@@ -1083,7 +1083,7 @@
       }
     },
     "panneau": {
-      "titre": "Dashboard",
+      "titre": "Overview",
       "aucuneAlerte": "No alerts. Nothing is over the thresholds, and background tasks are beating normally.",
       "alertesIndisponibles": "Alerts unreadable right now — this is NOT “no alerts”. Try again in a moment.",
       "compteursIndisponibles": "Counters unreadable right now. The dashes do not mean zero.",
@@ -1097,14 +1097,13 @@
       "stockageIndisponible": "Unavailable",
       "stockageAide": "Sum of the sizes re-read server-side at upload, across all accounts.",
       "stockageValeur": "{valeur} {unite}",
-      "sousTitre": "Platform status. Viewing these alerts is recorded with your email address and the time.",
+      "sousTitre": "A global overview of activity on DropLink.",
       "decision": "Needs a decision",
       "volumes": "Volumes",
       "examiner": "Review",
       "facture": "BILLED",
       "ceMoisCi": "this month",
       "commandes": "Orders created",
-      "commandesCourt": "Orders",
       "comptesDont": "of which {sansType} with no type · {suspendus} suspended, outside this total",
       "dernieresActions": "Latest administration actions",
       "dernieresActionsIndisponibles": "Preview unavailable right now. The full log is still readable.",
@@ -1112,7 +1111,25 @@
       "alerteDetail": {
         "colis_au_dessus_du_seuil": "{sujet} · Every parcel registered is billed to us.",
         "veilleur_en_retard": "Alert threshold: {seuil} minutes. Job concerned: {sujet}."
-      }
+      },
+      "boutiques": "Shops",
+      "boutiquesDont": "of which {nommees} have a shop name",
+      "statuts": "Order status",
+      "statutsAide": "Orders broken down by status",
+      "statutsIndisponible": "Breakdown unavailable.",
+      "statutPart": "{part}%",
+      "aucuneCommande": "No order created on the platform yet.",
+      "statut": {
+        "preparation": "Preparing",
+        "expedie": "Shipped",
+        "enTransit": "In transit",
+        "livre": "Delivered"
+      },
+      "commandesAide": "Order volume over the last {jours} days",
+      "statutsUnite": "orders",
+      "courbeIndisponible": "Chart unavailable.",
+      "courbe": "Orders",
+      "periode": "Last {jours} days"
     },
     "parametres": {
       "titre": "System settings",

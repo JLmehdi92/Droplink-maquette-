@@ -1083,7 +1083,7 @@
       }
     },
     "panneau": {
-      "titre": "Panneau",
+      "titre": "Vue d'ensemble",
       "aucuneAlerte": "Aucune alerte. Rien ne dépasse les seuils, et les tâches de fond battent normalement.",
       "alertesIndisponibles": "Alertes illisibles pour l’instant — ce n’est PAS « aucune alerte ». Réessayer dans un instant.",
       "compteursIndisponibles": "Compteurs illisibles pour l’instant. Les tirets ne valent pas zéro.",
@@ -1097,14 +1097,13 @@
       "stockageIndisponible": "Indisponible",
       "stockageAide": "Somme des tailles relues côté serveur au dépôt, tous comptes confondus.",
       "stockageValeur": "{valeur} {unite}",
-      "sousTitre": "État de la plateforme. La consultation des alertes est enregistrée avec votre email et l'heure.",
+      "sousTitre": "Voici un aperçu global de l'activité sur DropLink.",
       "decision": "Ce qui demande une décision",
       "volumes": "Volumes",
       "examiner": "Examiner",
       "facture": "FACTURÉ",
       "ceMoisCi": "ce mois-ci",
       "commandes": "Commandes créées",
-      "commandesCourt": "Commandes",
       "comptesDont": "dont {sansType} sans type · {suspendus} suspendus, hors de ce total",
       "dernieresActions": "Dernières actions d'administration",
       "dernieresActionsIndisponibles": "Aperçu indisponible pour l’instant. Le journal complet reste consultable.",
@@ -1112,7 +1111,25 @@
       "alerteDetail": {
         "colis_au_dessus_du_seuil": "{sujet} · Chaque colis pris en charge nous est facturé.",
         "veilleur_en_retard": "Seuil d'alerte : {seuil} minutes. Tâche concernée : {sujet}."
-      }
+      },
+      "boutiques": "Boutiques",
+      "boutiquesDont": "dont {nommees} avec un nom de boutique",
+      "statuts": "Statut des commandes",
+      "statutsAide": "Répartition des commandes par statut",
+      "statutsIndisponible": "Répartition indisponible.",
+      "statutPart": "{part} %",
+      "aucuneCommande": "Aucune commande créée sur la plateforme.",
+      "statut": {
+        "preparation": "En préparation",
+        "expedie": "Expédiées",
+        "enTransit": "En transit",
+        "livre": "Livrées"
+      },
+      "commandesAide": "Évolution du nombre de commandes sur les {jours} derniers jours",
+      "statutsUnite": "commandes",
+      "courbeIndisponible": "Courbe indisponible.",
+      "courbe": "Commandes",
+      "periode": "{jours} derniers jours"
     },
     "parametres": {
       "titre": "Paramètres système",

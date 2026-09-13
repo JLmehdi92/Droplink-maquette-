@@ -57,6 +57,17 @@ export interface CompteursAdmin {
   readonly colisPrisEnChargeCeMois: number;
   readonly colisAbandonnesCeMois: number;
   readonly commandesCreeesCeMois: number;
+  /**
+   * Les boutiques, et celles qui portent un NOM.
+   *
+   * ⚠️ DEUX CHIFFRES, PAS UN. Une boutique naît à l'inscription : il y en a
+   * donc exactement autant que de comptes, et le seul total afficherait
+   * « 20 boutiques » pour vingt comptes dont dix-huit n'ont jamais rien
+   * configuré. Celui qui informe est le second — combien de vendeurs sont
+   * allés jusqu'à se donner une identité.
+   */
+  readonly boutiques: number;
+  readonly boutiquesNommees: number;
 }
 
 /**
@@ -131,6 +142,108 @@ export interface Panneau {
 
 export type ClientAdmin = SupabaseClient<Database>;
 
+/** La répartition des commandes de la plateforme, par statut. */
+export interface RepartitionAdmin {
+  readonly total: number;
+  readonly preparation: number;
+  readonly expedie: number;
+  readonly enTransit: number;
+  readonly livre: number;
+}
+
+/**
+ * La répartition des commandes par statut, sur TOUTE la plateforme.
+ *
+ * ⚠️ ELLE NE PASSE PAS PAR `compter_commandes_par_etat`, ET C'EST LE POINT.
+ * Celle-là est `security invoker` : elle compte les commandes DE L'APPELANT, ce
+ * qui est exactement ce qu'il faut pour l'écran du vendeur et exactement ce
+ * qu'il ne faut pas pour celui de la plateforme. L'appeler ici rendrait les
+ * commandes de l'administrateur — c'est-à-dire zéro — sur un panneau qui prétend
+ * décrire tout le produit. Un chiffre faux et parfaitement crédible.
+ *
+ * ⚠️ ELLE NE REND QUE DES NOMBRES, donc elle n'écrit aucun audit. Compter n'est
+ * pas consulter : aucun pseudo de client, aucune référence, aucune boutique n'en
+ * sort. C'est ce qui la distingue du tableau « Dernières commandes » du kit, que
+ * le brief obligerait à auditer À CHAQUE OUVERTURE du panneau — et qui noierait
+ * les consultations délibérées que le journal existe pour retrouver.
+ *
+ * `null` sur une panne de TRANSPORT, comme les quatre autres lectures : la
+ * section se nomme indisponible, l'écran se rend.
+ */
+export async function lireRepartition(
+  supabase: ClientAdmin,
+): Promise<RepartitionAdmin | null> {
+  const reponse = await supabase.rpc("repartir_commandes_admin");
+  if (lectureIllisible(reponse, "de la répartition")) return null;
+  if (reponse.error !== null) {
+    throw new Error("lecture de la répartition impossible : " + reponse.error.message);
+  }
+  const r = (reponse.data ?? [])[0];
+  if (r === undefined) return null;
+  return {
+    total: Number(r.total),
+    preparation: Number(r.preparation),
+    expedie: Number(r.expedie),
+    enTransit: Number(r.en_transit),
+    livre: Number(r.livre),
+  };
+}
+
+/** Un jour de la courbe des commandes de la plateforme. */
+export interface JourDeCommandes {
+  /** `AAAA-MM-JJ`, tel que la base le rend. */
+  readonly jour: string;
+  readonly total: number;
+}
+
+/**
+ * Les commandes créées jour par jour, sur toute la plateforme.
+ *
+ * ⚠️ LA FENÊTRE VIENT DE L'APPELANT, ET ELLE EST CALCULÉE ICI PLUTÔT QU'EN BASE, et ce n'est pas un détail de
+ * confort : une fonction qui poserait elle-même ses bornes empêcherait de les
+ * déplacer sans migration, et surtout elle rendrait le jeu de mesure
+ * irreproductible — la sonde ne pourrait plus figer la période qu'elle décrit.
+ *
+ * ⚠️ LA COURBE S'ARRÊTE AUJOURD'HUI, BORNE COMPRISE. C'est le piège de borne
+ * haute du dashboard, rencontré sur les filtres de période : « jusqu'à
+ * aujourd'hui » vaut minuit, donc une borne exclusive effacerait toute la
+ * journée en cours — précisément celle qu'on regarde.
+ *
+ * `null` sur une panne de TRANSPORT, comme les autres lectures du panneau : la
+ * section se nomme indisponible, l'écran se rend.
+ */
+export async function lireCommandesParJour(
+  supabase: ClientAdmin,
+  maintenant: Date,
+  jours: number,
+): Promise<readonly JourDeCommandes[] | null> {
+  const jusqua = new Date(maintenant);
+  const depuis = new Date(maintenant);
+  depuis.setUTCDate(depuis.getUTCDate() - (jours - 1));
+
+  const reponse = await supabase.rpc("compter_commandes_par_jour_admin", {
+    p_depuis: enJour(depuis),
+    p_jusqu_a: enJour(jusqua),
+  });
+  if (lectureIllisible(reponse, "de la courbe des commandes")) return null;
+  if (reponse.error !== null) {
+    throw new Error("lecture de la courbe impossible : " + reponse.error.message);
+  }
+  return (reponse.data ?? []).map((j) => ({ jour: j.jour, total: Number(j.total) }));
+}
+
+/**
+ * `Date` → `AAAA-MM-JJ`, en UTC.
+ *
+ * ⚠️ PAS `toLocaleDateString`, ET PAS UN FUSEAU LOCAL. Le serveur peut tourner
+ * n'importe où — Railway a servi ce produit depuis US West pendant trois jours —
+ * et une borne décalée d'un fuseau ferait commencer la fenêtre la veille pour la
+ * moitié des lecteurs, sans qu'aucun chiffre paraisse faux.
+ */
+function enJour(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
 /**
  * Les seuls compteurs de comptes, sans le reste du panneau.
  *
@@ -154,6 +267,8 @@ export async function lireCompteurs(supabase: ClientAdmin): Promise<CompteursAdm
     colisPrisEnChargeCeMois: Number(c.colis_pris_en_charge_ce_mois),
     colisAbandonnesCeMois: Number(c.colis_abandonnes_ce_mois),
     commandesCreeesCeMois: Number(c.commandes_creees_ce_mois),
+    boutiques: Number(c.boutiques),
+    boutiquesNommees: Number(c.boutiques_nommees),
   };
 }
 
@@ -254,6 +369,8 @@ export async function lirePanneau(
             colisPrisEnChargeCeMois: Number(c.colis_pris_en_charge_ce_mois),
             colisAbandonnesCeMois: Number(c.colis_abandonnes_ce_mois),
             commandesCreeesCeMois: Number(c.commandes_creees_ce_mois),
+            boutiques: Number(c.boutiques),
+            boutiquesNommees: Number(c.boutiques_nommees),
           },
     taches: lignesTaches,
     // ⚠️ `false` QUAND LA LECTURE N'A PAS ABOUTI. « Aucune tâche déployée »

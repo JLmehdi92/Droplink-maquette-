@@ -483,7 +483,30 @@ const catalogue = JSON.parse(readFileSync(join(process.cwd(), "messages", "fr.js
  * charge — la sentinelle des notes internes, le jeton — doivent continuer de
  * lire le HTML ENTIER : c est la que la fuite se produirait.
  */
-const rendu = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, "");
+/*
+ * LE HTML SERVI N EST PAS LE TEXTE RENDU, ET UNE APOSTROPHE SUFFIT A LE PROUVER.
+ *
+ * Defaut mesure le 13/09/2026 : le titre du panneau d administration est passe
+ * de « Panneau » a « Vue d ensemble », et la sonde qui verifie que la page porte
+ * son titre est devenue ROUGE alors que la page le portait. React echappe
+ * l apostrophe en `&#x27;` ; `includes` cherchait donc une chaine que le HTML ne
+ * peut pas contenir.
+ *
+ * Le sens de l erreur importe : elle etait FAUSSEMENT ROUGE, donc visible. Le
+ * meme motif dans une assertion NEGATIVE — « ce libelle ne fuit pas » — aurait
+ * ete faussement VERT, et rien ne l aurait dit. Les entites sont donc decodees
+ * une fois pour toutes, ici, plutot que contournees au cas par cas.
+ */
+const sansEntites = (html) =>
+  html
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&quot;|&#34;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+
+const rendu = (html) => sansEntites(html.replace(/<script[\s\S]*?<\/script>/gi, ""));
 
 
 const espaces = Object.keys(catalogue);
@@ -2398,7 +2421,7 @@ try {
             `retrograde, LE MEME COOKIE ne rouvre plus le panneau (statut ${retrograde.status})`,
           ],
           [
-            !corpsRetrograde.includes(titreAdmin),
+            !rendu(corpsRetrograde).includes(titreAdmin),
             "et le corps du refus ne laisse pas fuir le titre de la surface",
           ],
           /*

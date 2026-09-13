@@ -1690,5 +1690,269 @@
         "raison": "LES DEUX AUTRES ETATS DU BOUTON D ENREGISTREMENT. Un bouton qui ne dit pas qu il travaille se fait cliquer deux fois, et un echec muet laisse croire que c est enregistre — ici un seul geste rhabille TOUTES les pages du vendeur, y compris les liens deja envoyes."
       }
     ]
+  },
+  "fr-admin": {
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble [1/2]",
+          "Boutiques [1/2]"
+        ],
+        "motif": "structure",
+        "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere, pas d un libelle. Taille, graisse et couleur — les seules proprietes du texte lui-meme — ne figurent pas dans l ecart : elles sont identiques."
+      },
+      {
+        "textes": [
+          "En transit  <nombre d'occurrences>",
+          "En préparation  <nombre d'occurrences>",
+          "50 %  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "TROIS OCCURRENCES DE MOINS, UNE SEULE CAUSE. Le kit rend CINQ parts d anneau — il ajoute « Probleme » et « Annulees » — et repete deux de ses libelles dans les pastilles du tableau « Dernieres commandes ». La decision 4 arrete la frise a QUATRE etapes, et ce tableau est refuse (declare plus bas). Inventer deux etats pour remplir un anneau leur donnerait une existence que la base ne leur accorde pas."
+      },
+      {
+        "textes": [
+          "10 août  <nombre d'occurrences>",
+          "3 sept.  <nombre d'occurrences>",
+          "Il y a 12 min  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE N A NI LES MEMES DATES NI LE MEME NOMBRE DE LIGNES. La fenetre du kit est figee au 8 septembre 2025 et la notre se termine AUJOURD HUI ; ses quinze reperes d axe ne tombent donc pas sur les memes jours que nos huit, et son flux d activite porte cinq lignes la ou notre apercu de journal en porte quatre."
+      },
+      {
+        "motifs": [
+          "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.)$"
+        ],
+        "motif": "donnee",
+        "raison": "LES REPERES D AXE DE LA COURBE — position, et la largeur du dernier. Le kit trace une fenetre figee au 8 septembre 2025 ; la notre finit aujourd hui, donc aucun repere ne tombe au meme endroit et le dernier libelle n a pas la meme longueur. Un motif ancre plutot que des dates ecrites : une declaration litterale sur des dates glissantes serait morte le lendemain."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "structure",
+        "raison": "Position et largeur. Le kit ecrit le role dans sa barre superieure, en haut a droite ; nous l ecrivons dans le bloc d identite au BAS de la colonne, ou il tient toute la largeur de celle-ci. La barre superieure n est pas portee — voir sa declaration dans les manquants."
+      },
+      {
+        "textes": [
+          "Commandes  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "La troisieme occurrence du kit est son entree de navigation « Commandes », une route que le depot n a pas. Une entree qui mene a un 404 est pire qu une entree absente."
+      },
+      {
+        "textes": [
+          "Vue d'ensemble [2/2]",
+          "commandes",
+          "Commandes [2/2]",
+          "Boutiques [2/2]",
+          "Voici un aperçu global de l'activité sur",
+          "Évolution du nombre de commandes sur les",
+          "Statut des commandes",
+          "Répartition des commandes par statut",
+          "Livrées",
+          "En transit",
+          "En préparation",
+          "3 %",
+          "5 %",
+          "12 %",
+          "30 %",
+          "Il y a 28 min",
+          "Il y a 12 min"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE, ET UNE SEULE CAUSE POUR TOUTES CES LIGNES — sauf « Boutiques », dont la boite de libelle perd huit pixels pour la meme raison. Nos sections ne sont ni les memes ni dans le meme ordre : les ALERTES viennent AVANT les compteurs (le brief l exige — un panneau qui les enterre oblige a chercher ce qui devrait sauter aux yeux), la barre superieure du kit n existe pas, nous posons CINQ tuiles de volumes la ou il en pose quatre, et le tableau « Dernieres commandes » est refuse. Tout ce qui suit est donc decale. Taille, graisse, interlettrage, interligne et couleur sont ceux du kit."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Statistiques",
+          "Support"
+        ],
+        "motif": "contrainte",
+        "raison": "Deux ecrans du kit admin que le depot n a pas, donc deux entrees de navigation qui meneraient a un 404 — pire qu une entree absente. « Statistiques » est de phase 1 ; l ecran Surveillance en couvre deja une partie, et le reste (courbes d usage, taux de liens consultes, temps moyen de livraison) n a aucune fonction en base cote plateforme."
+      },
+      {
+        "textes": [
+          "Abonnements",
+          "Paiements",
+          "Revenus abonnements",
+          "12 358 €",
+          "Paiement reçu",
+          "49,00 € par LuxShop"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CONTRAINTE N°1 INTERDIT TOUT CODE DE FACTURATION en phase 1 : ni ecran, ni table, ni compteur, ni ligne d activite. Les planches sont conservees pour la phase 2 ; aucune ligne ne les suit. La barre laterale continue d annoncer la gratuite de la phase de validation."
+      },
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Logs système",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DU PRODUIT GAGNE, ET IL EST LE MEME PARTOUT. La route est /admin/comptes, les compteurs s appellent comptes, comptes_actifs, comptes_suspendus, et le brief nomme « journal d audit » ce que le kit appelle « logs systeme » — il demande meme explicitement de refaire ce titre. Reprendre les mots du kit creerait deux vocabulaires pour les memes objets. « Parametres » seul perdrait ce que « Parametres systeme » dit : ce ne sont pas les preferences de celui qui regarde, ce sont les seuils de la plateforme. Et l eyebrow de la colonne est ecrit en entier, « ADMINISTRATION », parce qu il porte a lui seul la distinction entre cette surface et l espace vendeur."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "1 sept. 2025 – 8 sept. 2025"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE DU KIT N EST PAS PORTEE, ET CHAQUE MORCEAU A SA RAISON. « Ctrl K » annonce une recherche transverse qui n existe pas — une promesse creuse sur l ecran dont tout le role est de porter des faits verifiables. Le selecteur de dates ne commanderait rien : les compteurs sont bornes au mois courant de usage_counters, et la seule fenetre reglable de l ecran a son propre controle, sur le panneau qu elle concerne. La carte decorative « DropLink Admin / Tout sous controle » garde sa GEOMETRIE en bas de colonne et porte notre contenu : a cet endroit precis, la seule phrase qui merite d etre relue est celle qui dit que tout est trace."
+      },
+      {
+        "textes": [
+          "Commandes totales",
+          "1 248",
+          "+12%",
+          "vs période précédente"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUN COMPTEUR DU PRODUIT NE PORTE SON HISTORIQUE. usage_counters tient le mois COURANT : il n existe ni total depuis toujours, ni valeur du mois precedent, donc ni « +12 % » ni « vs periode precedente ». Un badge calcule sur rien serait le pire des deux mondes — il a la FORME d une mesure. Notre tuile dit donc ce qu elle compte : « Commandes creees », « ce mois-ci »."
+      },
+      {
+        "textes": [
+          "admin@droplink.fr",
+          "mehdi.pro@gmail.com",
+          "Nouvel utilisateur inscrit"
+        ],
+        "motif": "donnee",
+        "raison": "Les identites de demonstration du kit. Le produit rend l adresse du compte connecte, et son apercu de journal ne montre que des ACTIONS D ADMINISTRATION — une inscription de vendeur n en est pas une."
+      },
+      {
+        "textes": [
+          "Problème",
+          "Annulées",
+          "Problème de livraison signalé"
+        ],
+        "motif": "contrainte",
+        "raison": "DEUX ETATS QUI N EXISTENT PAS. La decision 4 arrete la frise a quatre etapes — preparation, expedie, en transit, livre — et la granularite vit dans le DETAIL du suivi, pas dans la frise. Il n y a donc ni statut « probleme » ni statut « annulee » a compter, et aucun signalement de livraison a lister."
+      },
+      {
+        "textes": [
+          "Dernières commandes",
+          "Voir toutes",
+          "Client",
+          "Boutique",
+          "Statut",
+          "Transporteur",
+          "Date",
+          "#DLK7838",
+          "Yanis B.",
+          "StreetWear FR",
+          "La Poste",
+          "08/09/2025 16:42",
+          "Inès K.",
+          "LuxShop",
+          "Livrée",
+          "Chronopost",
+          "Samir A.",
+          "Paris Sneakers",
+          "Léa M.",
+          "ModeAddict",
+          "DHL",
+          "Thomas R.",
+          "TechStore"
+        ],
+        "motif": "contrainte",
+        "raison": "LE TABLEAU « DERNIERES COMMANDES » PORTERAIT LE PSEUDO DU CLIENT, LA BOUTIQUE ET LE TRANSPORTEUR DE COMMANDES APPARTENANT A D AUTRES VENDEURS. Le brief l interdit en l etat : tout acces admin a des donnees tierces ecrit un audit, consultations comprises. Un tableau pose sur l ecran d ACCUEIL ecrirait donc une entree A CHAQUE OUVERTURE du panneau — et noierait precisement les consultations deliberees que le journal existe pour retrouver. La decision « une consultation de liste produit UNE entree » protege contre ce bruit ; l ecran d accueil le produirait par construction. Ce que le panneau garde de ce tableau, il le garde en NOMBRES : la repartition par statut ne rend que des comptes, donc aucune donnee tierce, donc aucun audit."
+      },
+      {
+        "textes": [
+          "Activité récente",
+          "Voir tout",
+          "Nouvelle commande créée",
+          "#DLK7838 par Yanis B.",
+          "Il y a 1 h",
+          "Commande livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FLUX D ACTIVITE DE LA PLATEFORME, ET LA MEME RAISON QUE LE TABLEAU : il nomme des commandes et des vendeurs tiers a chaque ouverture du panneau. A cet emplacement, notre panneau montre les DERNIERES ACTIONS D ADMINISTRATION — le journal ne lit que NOS propres gestes, il n y a donc rien a auditer, et lire_journal_admin est declaree stable, donc le panneau ne peut pas se remplir de sa propre consultation."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et son encart de trace. L encart est un RAPPEL PERMANENT, pas une decoration — chaque consultation de donnees d un vendeur ecrit une ligne au journal, LECTURES COMPRISES, et celui qui regarde doit le savoir AVANT de regarder, pas le decouvrir dans le journal. Il occupe la geometrie de la carte decorative du kit."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte d administration cree par la sonde, differente a chaque passage. Un motif ancre plutot que la valeur relevee : une declaration litterale serait morte des la mesure suivante."
+      },
+      {
+        "textes": [
+          "Ce qui demande une décision",
+          "Aucune alerte. Rien ne dépasse les seuil"
+        ],
+        "motif": "contrainte",
+        "raison": "LES ALERTES AVANT LES COMPTEURS — le brief l exige, et le kit n a pas de section d alertes du tout. Un panneau qui les enterre sous des chiffres oblige a CHERCHER ce qui devrait sauter aux yeux, c est-a-dire au moment precis ou l on ne cherche pas. La section nomme aussi ce que les compteurs NE demandent pas."
+      },
+      {
+        "textes": [
+          "Volumes",
+          "Colis pris en charge",
+          "FACTURÉ",
+          "ce mois-ci",
+          "Comptes actifs",
+          "dont 0 sans type · 0 suspendus, hors de ",
+          "Commandes créées",
+          "dont 15 avec un nom de boutique",
+          "Stockage des médias",
+          "4,1 Mo",
+          "Somme des tailles relues côté serveur au"
+        ],
+        "motif": "contrainte",
+        "raison": "CINQ TUILES LA OU LE KIT EN POSE QUATRE, ET CHACUNE DIT SA FENETRE. Sa quatrieme est un revenu d abonnements que la contrainte n°1 interdit ; les notres comptent ce que la base sait compter. parcels_registered est EN TETE ET ENCADRE parce que c est le seul compteur du produit qui corresponde a une FACTURE — le noyer parmi les autres reviendrait a traiter notre seul cout variable comme une statistique de plus. Les lignes « dont… » portent les chiffres qui INFORMENT : une boutique naissant a l inscription, le total des boutiques vaut celui des comptes. Et le stockage se NOMME plutot que de s afficher a zero — cote administration une information absente se nomme, c est l inverse de la page publique."
+      },
+      {
+        "textes": [
+          "Expédiées"
+        ],
+        "motif": "contrainte",
+        "raison": "La quatrieme part de l anneau. La decision 4 pose « expedie » entre la preparation et le transit ; le kit ne le dessine pas, et l omettre ferait un anneau dont les parts ne font plus un tout."
+      },
+      {
+        "textes": [
+          "30 derniers jours"
+        ],
+        "motif": "structure",
+        "raison": "LE MEME CONTROLE, UN AUTRE BALISAGE. Le kit change de fenetre par un select natif, dont la sonde ne lit pas la valeur affichee ; la notre est un parametre d URL, donc un details replie portant le meme libelle et la meme geometrie (42 de haut, 180 de large, rayon sm, filet, ombre xs). Deux gains au passage : la vue se partage et se recharge telle quelle, et l ecran le plus lourd du produit n embarque pas un ilot client pour trois valeurs."
+      },
+      {
+        "textes": [
+          "Dernières actions d'administration",
+          "Tout le journal"
+        ],
+        "motif": "contrainte",
+        "raison": "Ce que notre panneau montre a la place du flux d activite du kit — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "textes": [
+          "Consultation de la liste des comptes",
+          "Modification d’un paramètre système",
+          "Création d’un paramètre système"
+        ],
+        "motif": "donnee",
+        "raison": "Les lignes du jeu de mesure : les gestes que la sonde a elle-meme poses en base. Le kit montre les siens."
+      }
+    ]
   }
 }

@@ -1083,7 +1083,7 @@
       }
     },
     "panneau": {
-      "titre": "总面板",
+      "titre": "总览",
       "aucuneAlerte": "没有告警。没有任何指标超出阈值，后台任务心跳正常。",
       "alertesIndisponibles": "告警暂时无法读取——这并不等于「没有告警」。请稍后重试。",
       "compteursIndisponibles": "计数暂时无法读取。横线不等于零。",
@@ -1097,14 +1097,13 @@
       "stockageIndisponible": "无法获取",
       "stockageAide": "全部账户在上传时由服务端重新读取的文件大小之和。",
       "stockageValeur": "{valeur} {unite}",
-      "sousTitre": "平台状态。查看告警会连同您的邮箱和时间一起记录。",
+      "sousTitre": "DropLink 平台活动的整体概览。",
       "decision": "需要决策的事项",
       "volumes": "用量",
       "examiner": "查看",
       "facture": "计费项",
       "ceMoisCi": "本月",
       "commandes": "新建订单",
-      "commandesCourt": "订单",
       "comptesDont": "其中 {sansType} 个未声明类型 · {suspendus} 个已停用，不计入此总数",
       "dernieresActions": "最近的管理操作",
       "dernieresActionsIndisponibles": "预览暂时无法读取。完整日志仍可查看。",
@@ -1112,7 +1111,25 @@
       "alerteDetail": {
         "colis_au_dessus_du_seuil": "{sujet} · 每登记一个包裹都会向我们计费。",
         "veilleur_en_retard": "告警阈值：{seuil} 分钟。涉及任务：{sujet}。"
-      }
+      },
+      "boutiques": "店铺",
+      "boutiquesDont": "其中 {nommees} 家已设置店名",
+      "statuts": "订单状态",
+      "statutsAide": "按状态划分的订单",
+      "statutsIndisponible": "无法获取分布。",
+      "statutPart": "{part}%",
+      "aucuneCommande": "平台上尚无订单。",
+      "statut": {
+        "preparation": "备货中",
+        "expedie": "已发货",
+        "enTransit": "运输中",
+        "livre": "已送达"
+      },
+      "commandesAide": "最近 {jours} 天的订单变化",
+      "statutsUnite": "个订单",
+      "courbeIndisponible": "曲线不可用。",
+      "courbe": "订单",
+      "periode": "最近 {jours} 天"
     },
     "parametres": {
       "titre": "系统参数",

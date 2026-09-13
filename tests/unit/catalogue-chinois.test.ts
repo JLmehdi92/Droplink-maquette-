@@ -66,6 +66,11 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
     "connexion.suggestionSuffixe",
     "Le point d'interrogation PLEINE LARGEUR de la typographie chinoise, seul.",
   ],
+  /* La part d'un statut dans l'anneau du panneau d'administration. Le chinois
+     écrit le pourcentage COLLé à son nombre, sans l'espace insécable du
+     français : la chaîne se réduit donc à la variable et au signe, et le
+     libellé du statut est écrit juste à côté, en idéogrammes. */
+  ["admin.panneau.statutPart", "La variable et le signe pour cent, collés comme en chinois."],
   ["marque.reseau.instagram", "Nom propre."],
   ["marque.reseau.tiktok", "Nom propre."],
   ["marque.reseau.whatsapp", "Nom propre."],

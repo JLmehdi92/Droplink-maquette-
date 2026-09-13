@@ -771,8 +771,29 @@ for (const modele of routes) {
        du navigateur survit d une cible a l autre, et une correction restait
        invisible : on remesurait indefiniment le meme ecart. */
     await envoyer("Network.setCacheDisabled", { cacheDisabled: true });
-    // L admin refuse toute requete sans adresse d appelant exploitable.
-    await envoyer("Network.setExtraHTTPHeaders", { headers: { "x-real-ip": "203.0.113.7" } });
+    /*
+     * L admin refuse toute requete sans adresse d appelant exploitable.
+     *
+     * ⚠️ ET L ADRESSE CHANGE A CHAQUE EXECUTION, DEPUIS LE 13/09/2026. Elle
+     * etait fixe — 203.0.113.7 — et le plafond de debit de l administration se
+     * compte EN BASE, par adresse, sur une fenetre glissante : toutes les
+     * mesures de la journee s additionnaient donc sur le meme compteur. Au
+     * bout d une dizaine de passages, `/fr/admin` rendait 404, la sonde
+     * mesurait cet ecran-la, et son rapport disait « aucun debordement, aucune
+     * cible trop petite » — c est le septieme piege, sous un autre visage.
+     *
+     * Il a ete attrape par la garde de POLICE et non par le controle de
+     * contenu : notre page de 404 se rend hors de la mise en page de langue,
+     * donc sans les faces d Inter. « Une sonde qui mesure un 404 certifie le
+     * 404 » — cette fois-ci elle a refuse de mesurer.
+     *
+     * Une adresse par execution n affaiblit rien : le plafond lui-meme est
+     * eprouve par les suites RLS, qui le prennent pour sujet. Ici il n est
+     * qu un obstacle a la mesure.
+     */
+    const adresseSonde =
+      "203.0.113." + (1 + Math.floor(Math.random() * 250)) + "";
+    await envoyer("Network.setExtraHTTPHeaders", { headers: { "x-real-ip": adresseSonde } });
     await envoyer("Emulation.setDeviceMetricsOverride", {
       width: largeur,
       height: largeur < 700 ? 844 : 1000,

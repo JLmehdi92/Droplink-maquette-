@@ -50,7 +50,7 @@ export function EnTeteAdmin({
   return (
     <div className="px-margin-mobile pt-4 pb-3.5 md:px-0 md:pt-[30px] md:pb-[26px] xl:flex xl:items-center xl:justify-between xl:gap-8">
       <div className="min-w-0">
-        <h1 className="text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] md:text-[40px]">
+        <h1 className="text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre max-[560px]:text-[24px] md:text-[36px] md:leading-[37.8px]">
           {titre}
         </h1>
         <p
