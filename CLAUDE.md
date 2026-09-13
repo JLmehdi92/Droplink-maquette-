@@ -612,9 +612,9 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**SEIZE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, les cinq
-que le kit admin dessine, la page client et son lien mort, la connexion,
-l'inscription et les deux pages légales :
+**DIX-SEPT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur et le
+tableau de bord créé, les cinq que le kit admin dessine, la page client et son
+lien mort, la connexion, l'inscription et les deux pages légales :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -634,6 +634,7 @@ l'inscription et les deux pages légales :
 | `/conditions` | `legal/conditions.html` à 1280 | 80 (0) | 25 (0) | **0** |
 | `/confidentialite` | `legal/confidentialite.html` à 1280 | 116 (0) | 18 (0) | **0** |
 | lien mort `/p/<inconnu>` | `client_link/not-found.html` à 1440 | 2 (0) | 2 (0) | **0** |
+| `/tableau-de-bord` (CRÉÉ) | `CLIC_KIT="Tableau de bord"` à 1690 | 48 (0) | 52 (0) | **0** |
 
 > ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
 > QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
@@ -799,12 +800,24 @@ caractère de mot : `couleurs-en-dur` laissait passer toute couleur écrite dans
 un `bg-[linear-gradient(…)]`. Le motif exige désormais seulement qu'aucun
 septième chiffre hexadécimal ne suive.
 
-**▶️ PROCHAIN ÉCRAN : le tableau de bord** (`DashboardHome.jsx`), à CRÉER — il
-repose sur des lectures que `/analyses` possède déjà. Les paramètres vendeur
-(`SettingsView.jsx`) dessinent presque uniquement des capacités que le produit
-n'a pas (nom, téléphone, photo, fuseau, préférences de notification, 2FA,
-sessions, suppression de compte et de données, abonnement, intégrations) :
-chacune est une décision produit avant d'être un écran.
+**LE TABLEAU DE BORD EST CRÉÉ**, et il ne calcule rien : chacun de ses
+panneaux est celui des Analyses, sous la même RLS, dans une taille « section »
+et un remplissage serré que le kit lui donne. Il n'est PAS la page d'arrivée —
+la connexion mène toujours aux commandes, l'écran où l'on passe sa journée.
+
+⚠️ **AJOUTER UNE ENTRÉE DE NAVIGATION ROUVRE LES CINQ ÉCRANS VENDEUR.** Leurs
+déclarations de décalage de la barre latérale citaient l'entrée « Tableau de
+bord » absente ; une fois créée, vingt d'entre elles ne désignaient plus rien.
+Le jour où « Paramètres » existera, il faudra refaire la même passe.
+
+**▶️ RESTE : les paramètres vendeur** (`SettingsView.jsx`). Le kit y dessine
+presque uniquement des capacités que le produit n'a pas — nom, téléphone,
+photo, fuseau, préférences de notification, 2FA, sessions, suppression de
+compte et de données, abonnement, intégrations. Ce qui existe déjà en base :
+l'adresse du compte, `profiles.locale`, `profiles.account_type`, la
+déconnexion. Changer d'adresse ou de mot de passe depuis une session ouvre une
+surface de sécurité (brief §9). **Le périmètre de cet écran est une décision de
+Wassim.**
 
 ### Comment on vérifie un écran migré
 
