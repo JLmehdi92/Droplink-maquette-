@@ -871,20 +871,43 @@ facteur. La clé de secours montrée à l'activation est le recours ; au-delà,
 seul un geste de service retire le facteur — décision de Wassim s'il faut
 l'outiller côté administration.
 
-**La production attend `pnpm db:migrate` pour 147 à 156, AVANT le
-déploiement.**
-
 **L'EXPORT DES DONNÉES EST EN PLACE** (`/api/compte/export`, JSON), **SANS LES
 NOTES INTERNES** : la décision 15 vaut pour tout fichier qui sort, pas seulement
 pour le CSV. Ni adresse du client final, ni jeton de désabonnement, ni
 empreintes de visiteurs. Contrôlé par sentinelles dans le fichier sérialisé,
 404 en `aal1`, plafond de débit partagé avec l'export CSV.
 
-**▶️ EN ATTENTE D'UNE DÉCISION DE WASSIM : la suppression du compte et des
-données.** Ce n'est pas un arbitrage de design : un hébergeur doit conserver
-les données d'identification de ses comptes (LCEN et son décret), la décision 9
-interdit la suppression de compte **par l'administration**, et la purge touche
-R2 et le suivi 17TRACK. Le kit la dessine ; elle reste déclarée absente.
+**LA SUPPRESSION DU COMPTE ET DES DONNÉES EST EN PLACE — décision de Wassim du
+13/09/2026, option A** : tout part, sauf l'adresse et les dates d'inscription
+et de suppression, gardées UN AN (`comptes_supprimes`) puis effacées par la
+veille. Migrations 157 et 158.
+
+⚠️ **UNE SEULE TRANSACTION, SANS CLÉ DE SERVICE.** La fonction SQL `supprimer_mon_compte` (migration 157)
+vérifie que le compte est ACTIF (un compte suspendu n'efface pas le contenu
+signalé), que la confirmation reprend son adresse, écrit la conservation, met
+les clés R2 en file et supprime `auth.users` — la cascade emporte le reste.
+Le propriétaire des fonctions peut supprimer cette ligne : mesuré, pas supposé.
+
+⚠️ **LE BUCKET NE S'ÉNUMÈRE PAS, DONC UNE CLÉ HORS FILE EST PERDUE POUR
+TOUJOURS.** `purges_r2` reçoit les clés DANS la transaction ; la purge est
+tentée aussitôt et rejouée par la veille jusqu'au succès. Une clé n'est purgée
+que si sa vignette et sa couverture ont répondu. ⚠️ Les seuls identifiants R2
+de la machine sont ceux de la PRODUCTION : la purge s'éprouve sans réseau
+(`tests/unit/purge-r2.test.ts`), et les médias témoins portent des clés à UUID
+aléatoire.
+
+⚠️ **UNE SUPPRESSION ÉTENDUE AU VOISIN EST LA PIRE PANNE CONCEVABLE, ET ELLE
+SERAIT SILENCIEUSE** : `tests/rls/suppression-du-compte.test.ts` compte les
+lignes du voisin par le rôle qui voit tout, et il a été falsifié sur ce cas.
+
+⚠️ **REACT 19 RÉINITIALISE UN FORMULAIRE APRÈS CHAQUE ENVOI.** En pilotant, un
+second envoi « ne partait pas » : le mot de passe s'était vidé, et le champ
+`required` bloquait l'envoi dans le navigateur, sans un message. Ce n'était pas
+le produit — mais une sonde qui rejoue un formulaire doit ressaisir TOUS ses
+champs.
+
+**La production attend `pnpm db:migrate` pour 147 à 158, AVANT le
+déploiement.**
 
 ### Comment on vérifie un écran migré
 
