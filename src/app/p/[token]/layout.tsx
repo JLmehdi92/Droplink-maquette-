@@ -1,10 +1,40 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { TraductionsClient } from "@/components/traductions-client";
 import { estLangueSupportee } from "@/i18n/config";
 import { lireCommandePublique } from "@/lib/page-publique/lecture";
 import { verifierQuotaPublique } from "@/lib/limitation/quota";
 import "../../globals.css";
+
+/*
+ * ⚠️ LA PAGE QUE LE CLIENT REÇOIT NE RENDAIT PAS DANS LA POLICE DU PRODUIT.
+ *
+ * Cette racine est DISTINCTE de celle de `[locale]`, et `next/font` n'injecte
+ * ses `@font-face` que dans la feuille de la racine qui l'IMPORTE. Celle-ci ne
+ * l'importait pas : mesuré le 13/09/2026 sur la page servie, la feuille de
+ * `/p/[token]` ne contenait AUCUN `@font-face`, et `document.fonts` n'y
+ * déclarait aucune face « Inter ». Les jetons pointent pourtant tous sur
+ * `"Inter", …` : le navigateur retombait donc sur la police SYSTÈME, c'est-à-
+ * dire Segoe UI sur Windows et San Francisco sur iOS.
+ *
+ * ⚠️ ET C'EST LA PAGE OÙ ÇA COÛTE LE PLUS CHER. Toutes les autres sont vues par
+ * le vendeur, qui sait à quoi ressemble son produit ; celle-ci est vue par SON
+ * CLIENT, une fois, et son rôle est de donner l'impression d'une vraie boutique.
+ * Le défaut ne cassait rien, ne levait rien, et n'aurait été visible qu'en
+ * comparant deux captures côte à côte.
+ *
+ * LE BUDGET LE PORTE : la page mesurait 176 Ko compressés sur 300 autorisés, et
+ * le sous-ensemble latin d'Inter en coûte une trentaine. L'axe optique est celui
+ * de l'espace vendeur — sans lui, toutes les tailles rendraient au dessin de 14
+ * et les mots sortiraient quelques pixels plus larges.
+ */
+const corps = Inter({
+  variable: "--font-corps",
+  subsets: ["latin"],
+  axes: ["opsz"],
+  display: "swap",
+});
 
 /**
  * RACINE DE MISE EN PAGE DISTINCTE pour la page publique.
@@ -150,7 +180,7 @@ export default async function LayoutPagePublique({
          * sur l'appareil pour lequel cette page est écrite.
          */
         style={{ backgroundColor: "var(--color-ds-surface-carte)" }}
-        className="min-h-dvh text-ds-texte-fort antialiased"
+        className={`${corps.variable} min-h-dvh text-ds-texte-fort antialiased`}
       >
         {/*
           LE SEUL PROVIDER CLIENT DE CETTE PAGE, ET IL NE PORTE QUE TROIS
