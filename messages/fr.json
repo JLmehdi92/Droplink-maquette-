@@ -926,7 +926,6 @@
       "titre": "Retrouvez {nom}"
     },
     "lienInvalideTitre": "Ce lien n'est plus valable",
-    "lienInvalideTexte": "Demandez un nouveau lien à la personne qui vous a envoyé celui-ci.",
     "erreur": {
       "titre": "Cette page n'a pas pu s'afficher",
       "texte": "Une erreur est survenue de notre côté. Réessayez dans un instant : votre lien, lui, reste valable.",
@@ -962,7 +961,12 @@
       "conditions": "Conditions d'utilisation",
       "confidentialite": "Politique de confidentialité"
     },
-    "pourClient": "pour {nom}"
+    "pourClient": "pour {nom}",
+    "lienInvalideSousTitre": "Ce lien de suivi ne mène plus à aucune commande.",
+    "lienInvalideAideTitre": "Vous pensez qu'il s'agit d'une erreur ?",
+    "lienInvalideAideTexte": "Contactez la boutique qui vous a envoyé le lien : elle peut vous en générer un nouveau en quelques secondes.",
+    "lienInvalideCommentCaMarche": "Comment fonctionne DropLink",
+    "lienInvalideAccueil": "Retour à l'accueil"
   },
   "admin": {
     "navigation": "Administration",

@@ -4187,5 +4187,45 @@
         "raison": "LE TEXTE DU PRODUIT : ses sections, ses paragraphes, et ses lacunes ecrites en toutes lettres dans la pastille « a completer » du kit. Voir la declaration symetrique du gabarit dans les manquants. Tailles, graisses, interlignes et couleurs sont ceux du kit."
       }
     ]
+  },
+  "p-lienmortdemesure0000000000": {
+    "valeurs": [
+      {
+        "textes": [
+          "Retour à l'accueil [2/2]"
+        ],
+        "motif": "contrainte",
+        "raison": "REGLE 3 : LE DEGRADE DE MARQUE N APPARAIT JAMAIS SOUS /p/[token]. Le kit peint cet appel au degrade ; il est ici un aplat a l accent du design system, meme hauteur, meme rayon, meme ombre. Sa place remonte de 18 px avec le sous-titre, plus court d une ligne."
+      },
+      {
+        "textes": [
+          "Vous pensez qu'il s'agit d'une erreur ?",
+          "Contactez la boutique qui vous a envoyé ",
+          "Comment fonctionne DropLink"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE. Le sous-titre du produit tient sur une ligne la ou celui du kit en prend deux : l encadre d aide remonte de 18 px, et le pied, pousse vers le bas d une page centree, de 10."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Cette commande est introuvable",
+          "Ce lien de suivi a été supprimé, ou la c"
+        ],
+        "motif": "contrainte",
+        "raison": "UNE SEULE PAGE POUR TROIS CAUSES, ET ELLE NE DIT QUE CE QUI EST VRAI DES TROIS. Jeton inconnu, jeton revoque, compte suspendu rendent la MEME reponse : les distinguer dirait a qui balaie des jetons lesquels ont existe, et une suspension ne se divulgue pas au client d un vendeur. Le kit ecrit « Cette commande est introuvable — ce lien a ete supprime, ou la commande n existe plus chez le vendeur » : c est faux d un lien revoque, dont la commande existe, et d un compte suspendu. « Ce lien n est plus valable » est vrai des trois. La planche « lien expire » n est pas portee pour la meme raison : le jeton n expire jamais."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "Ce lien n'est plus valable",
+          "Ce lien de suivi ne mène plus à aucune c"
+        ],
+        "motif": "contrainte",
+        "raison": "UNE SEULE PAGE POUR TROIS CAUSES, ET ELLE NE DIT QUE CE QUI EST VRAI DES TROIS. Jeton inconnu, jeton revoque, compte suspendu rendent la MEME reponse : les distinguer dirait a qui balaie des jetons lesquels ont existe, et une suspension ne se divulgue pas au client d un vendeur. Le kit ecrit « Cette commande est introuvable — ce lien a ete supprime, ou la commande n existe plus chez le vendeur » : c est faux d un lien revoque, dont la commande existe, et d un compte suspendu. « Ce lien n est plus valable » est vrai des trois. La planche « lien expire » n est pas portee pour la meme raison : le jeton n expire jamais."
+      }
+    ]
   }
 }

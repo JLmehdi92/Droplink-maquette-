@@ -926,7 +926,6 @@
       "titre": "Find {nom}"
     },
     "lienInvalideTitre": "This link is no longer valid",
-    "lienInvalideTexte": "Ask the person who sent it to you for a new link.",
     "erreur": {
       "titre": "This page could not be displayed",
       "texte": "Something went wrong on our side. Try again in a moment — your link is still valid.",
@@ -962,7 +961,12 @@
       "conditions": "Terms of use",
       "confidentialite": "Privacy policy"
     },
-    "pourClient": "for {nom}"
+    "pourClient": "for {nom}",
+    "lienInvalideSousTitre": "This tracking link no longer leads to an order.",
+    "lienInvalideAideTitre": "Think this is a mistake?",
+    "lienInvalideAideTexte": "Contact the shop that sent you the link: it can generate a new one in seconds.",
+    "lienInvalideCommentCaMarche": "How DropLink works",
+    "lienInvalideAccueil": "Back to home"
   },
   "admin": {
     "navigation": "Administration",

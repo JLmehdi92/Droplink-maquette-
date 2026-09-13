@@ -926,7 +926,6 @@
       "titre": "关注 {nom}"
     },
     "lienInvalideTitre": "此链接已失效",
-    "lienInvalideTexte": "请向发给您链接的人索取一个新链接。",
     "erreur": {
       "titre": "此页面无法显示",
       "texte": "我们这边出现了错误。请稍后重试：您的链接仍然有效。",
@@ -962,7 +961,12 @@
       "conditions": "使用条款",
       "confidentialite": "隐私政策"
     },
-    "pourClient": "致 {nom}"
+    "pourClient": "致 {nom}",
+    "lienInvalideSousTitre": "该物流链接已不再对应任何订单。",
+    "lienInvalideAideTitre": "认为这是个错误？",
+    "lienInvalideAideTexte": "请联系发送链接的店铺，几秒即可重新生成。",
+    "lienInvalideCommentCaMarche": "DropLink 如何运作",
+    "lienInvalideAccueil": "返回首页"
   },
   "admin": {
     "navigation": "后台管理",

@@ -127,6 +127,16 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#8a6212", "encre de la mention « à compléter » des pages légales — kit legal"],
   ["#f3dfb4", "filet de l'encadré d'avertissement des pages légales — kit legal"],
   /*
+   * LA PAGE DU LIEN MORT, portée sur `client_link/not-found` le 13/09/2026 : un
+   * cinquième lavande, et le kit le pose en dur sur cette seule page.
+   */
+  ["#f2f0fd", "fond de la page du lien mort — arrêt 0 %, kit client_link"],
+  ["#faf9fe", "fond de la page du lien mort — arrêt 42 %, et fond des pages légales — arrêt 0 %"],
+  ["#f6f2fc", "fond de la page du lien mort — arrêt 100 %"],
+  // Le dernier arrêt du fond des pages légales. Il n'était PAS déclaré et la
+  // garde n'a rien dit : c'est la couleur que la correction du motif a sortie.
+  ["#f8f3fd", "fond des pages légales — arrêt 100 %, kit legal"],
+  /*
    * ⚠️ LE FOND DE L'ESPACE VENDEUR, ET C'EST UN QUATRIÈME LAVANDE. Le design
    * system en pose un par surface, tous voisins et tous différents :
    *   accès          #F3F1FE → #FAF8FE → #F7F2FC
@@ -177,7 +187,17 @@ for (const fichier of sources(RACINE)) {
    * disparaît d'elle-même : elle ne servait qu'à contourner ce défaut.
    */
   const code = sansCommentaires(readFileSync(fichier, "utf8"));
-  for (const m of code.matchAll(/#[0-9a-fA-F]{6}\b/g)) {
+  /*
+   * ⚠️ AUCUNE FRONTIÈRE DE MOT APRÈS LA COULEUR, ET C'ÉTAIT UN ANGLE MORT. Le
+   * motif se terminait par la frontière de mot ; or dans une valeur arbitraire
+   * de Tailwind — `bg-[linear-gradient(135deg,#F2F0FD_0%,…)]` — la couleur est
+   * suivie d'un `_`, qui est un caractère de MOT. Toute couleur posée dans un
+   * dégradé arbitraire échappait donc au balayage : mesuré le 13/09/2026 en
+   * portant la page du lien mort, dont les trois arrêts, pourtant déclarés,
+   * ressortaient comme « exceptions inutiles ». Le motif exige désormais
+   * seulement qu'aucun septième chiffre hexadécimal ne suive.
+   */
+  for (const m of code.matchAll(/#[0-9a-fA-F]{6}(?![0-9a-fA-F])/g)) {
     const hex = m[0].toLowerCase();
     trouvees.set(hex, [...(trouvees.get(hex) ?? []), relatif]);
   }
