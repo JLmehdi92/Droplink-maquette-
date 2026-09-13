@@ -954,7 +954,24 @@
       "colisSurSeuil": "{valeur} / {seuil}",
       "colisSurSeuilLong": "{valeur} / {seuil} 个包裹",
       "commandesLong": "{n} 笔订单",
-      "decompte": "{total, plural, other {# 个账户}} · {suspendus, plural, other {# 个已停用}}"
+      "decompte": "{total, plural, other {# 个账户}} · {suspendus, plural, other {# 个已停用}}",
+      "tuileTotal": "账户总数",
+      "tuileNouveaux": "新注册",
+      "tuileActifs": "活跃账户",
+      "tuileSuspendus": "已停用账户",
+      "surJours": "近 {jours} 天",
+      "partDuTotal": "占总数 {part}%",
+      "liste": "账户列表",
+      "listeTotal": "共 {total} 个账户",
+      "filtreStatut": "按状态筛选",
+      "statutTous": "全部状态",
+      "reinitialiser": "重置",
+      "repartition": "账户状态",
+      "unite": "个账户",
+      "part": "{part}%",
+      "videFiltre": "没有符合此筛选的账户。",
+      "sousTitreListe": "管理并跟踪所有 DropLink 账户。",
+      "tuileTotalAide": "其中 {sansType} 个未声明类型"
     },
     "journal": {
       "titre": "审计日志",
@@ -1129,7 +1146,8 @@
       "statutsUnite": "个订单",
       "courbeIndisponible": "曲线不可用。",
       "courbe": "订单",
-      "periode": "最近 {jours} 天"
+      "periode": "最近 {jours} 天",
+      "periodeEtiquette": "曲线时间窗"
     },
     "parametres": {
       "titre": "系统参数",

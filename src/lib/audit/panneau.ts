@@ -189,6 +189,35 @@ export async function lireRepartition(
   };
 }
 
+/**
+ * Les comptes inscrits sur une fenêtre glissante.
+ *
+ * ⚠️ LA BORNE EST INCLUSIVE, ET C'EST LE PIÈGE DE BORNE PRIS PAR L'AUTRE BOUT.
+ * « depuis le 14 août » doit compter le 14 août : une borne exclusive effacerait
+ * le premier jour de la fenêtre, exactement comme « jusqu'à aujourd'hui »
+ * effacerait la journée en cours.
+ *
+ * `null` sur une panne de TRANSPORT : la tuile se nomme indisponible, l'écran se
+ * rend — la règle de l'administration, où une information absente est NOMMÉE.
+ */
+export async function lireInscriptionsRecentes(
+  supabase: ClientAdmin,
+  maintenant: Date,
+  jours: number,
+): Promise<number | null> {
+  const depuis = new Date(maintenant);
+  depuis.setUTCDate(depuis.getUTCDate() - (jours - 1));
+
+  const reponse = await supabase.rpc("compter_inscriptions_admin", {
+    p_depuis: depuis.toISOString().slice(0, 10),
+  });
+  if (lectureIllisible(reponse, "des inscriptions récentes")) return null;
+  if (reponse.error !== null) {
+    throw new Error("lecture des inscriptions impossible : " + reponse.error.message);
+  }
+  return Number(reponse.data);
+}
+
 /** Un jour de la courbe des commandes de la plateforme. */
 export interface JourDeCommandes {
   /** `AAAA-MM-JJ`, tel que la base le rend. */

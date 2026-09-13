@@ -886,6 +886,10 @@ export type Database = {
           total: number
         }[]
       }
+      compter_inscriptions_admin: {
+        Args: { p_depuis: string }
+        Returns: number
+      }
       compter_interrogation_vide: {
         Args: { p_numero: string }
         Returns: number
@@ -1140,6 +1144,7 @@ export type Database = {
           p_ip_hash: string
           p_limite: number
           p_recherche: string
+          p_statut: string
         }
         Returns: {
           account_type: Database["public"]["Enums"]["account_type"]

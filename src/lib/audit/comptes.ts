@@ -27,6 +27,16 @@ export const PAR_PAGE = 50;
 export const ParametresComptes = z.object({
   q: z.string().trim().max(120).catch(""),
   curseur: z.string().max(120).nullable().catch(null),
+  /*
+   * LE FILTRE DE STATUT, LISTE FERMÉE.
+   *
+   * ⚠️ `catch` PLUTÔT QUE `parse` QUI LÈVE, et c'est délibéré : la valeur
+   * vient d'une URL, donc d'une entrée externe, et un paramètre truqué ne doit
+   * pas transformer un écran d'administration en page d'erreur. La liste fermée
+   * tient lieu de schéma, ici comme dans la fonction en base — les deux, parce
+   * qu'une règle applicative s'oublie dans un nouveau chemin d'appel.
+   */
+  statut: z.enum(["tous", "active", "suspended"]).catch("tous"),
 });
 
 export type ParametresComptes = z.infer<typeof ParametresComptes>;
@@ -113,6 +123,8 @@ export async function listerComptes(
     // sans exiger un comptage complet de la table.
     p_limite: PAR_PAGE + 1,
     p_ip_hash: empreinteIp,
+    // « tous » VAUT ABSENCE, même convention que la chaîne vide de la recherche.
+    p_statut: parametres.statut === "tous" ? "" : parametres.statut,
   });
 
   if (error !== null || data === null) {

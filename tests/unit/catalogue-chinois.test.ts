@@ -71,6 +71,7 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      français : la chaîne se réduit donc à la variable et au signe, et le
      libellé du statut est écrit juste à côté, en idéogrammes. */
   ["admin.panneau.statutPart", "La variable et le signe pour cent, collés comme en chinois."],
+  ["admin.comptes.part", "Le même gabarit, sur l'anneau des comptes."],
   ["marque.reseau.instagram", "Nom propre."],
   ["marque.reseau.tiktok", "Nom propre."],
   ["marque.reseau.whatsapp", "Nom propre."],

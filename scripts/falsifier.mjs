@@ -1025,36 +1025,51 @@ const SQL = {
    */
   "audit-sans-trace": {
     casser: `create or replace function public.lister_comptes_admin(
-        p_recherche text, p_curseur_date text, p_curseur_id text, p_limite int, p_ip_hash text)
-      returns table (id uuid, email text, account_type public.account_type,
-                     role public.user_role, status public.account_status,
-                     created_at timestamptz, boutique_nom text, commandes bigint)
+        p_recherche text, p_curseur_date text, p_curseur_id text,
+        p_limite int, p_ip_hash text, p_statut text
+      )
+      returns table (
+        id uuid, email text, account_type public.account_type,
+        role public.user_role, status public.account_status,
+        created_at timestamptz, boutique_nom text,
+        commandes bigint, colis_ce_mois bigint
+      )
       language plpgsql volatile security definer set search_path = '' as $$
       declare
         v_limite int := least(greatest(coalesce(p_limite, 50), 1), 100);
         v_recherche text := nullif(btrim(coalesce(p_recherche, '')), '');
         v_date timestamptz := nullif(btrim(coalesce(p_curseur_date, '')), '')::timestamptz;
         v_id uuid := nullif(btrim(coalesce(p_curseur_id, '')), '')::uuid;
+        v_statut public.account_status := case
+          when p_statut = 'active' then 'active'::public.account_status
+          when p_statut = 'suspended' then 'suspended'::public.account_status
+          else null
+        end;
       begin
         if not public.est_admin() then
           raise exception 'introuvable' using errcode = 'DL031';
         end if;
         return query
         select p.id, p.email, p.account_type, p.role, p.status, p.created_at, s.name,
-               (select count(*) from public.orders o where o.shop_id = s.id)
-        from public.profiles p
-        left join public.shops s on s.owner_id = p.id
-        where (v_recherche is null or p.email ilike '%' || v_recherche || '%')
-          and (v_date is null or (p.created_at, p.id) < (v_date, v_id))
-        order by p.created_at desc, p.id desc
-        limit v_limite;
+               coalesce(s.commandes_reelles, 0)::bigint,
+               coalesce(u.parcels_registered, 0)::bigint
+          from public.profiles p
+          left join public.shops s on s.owner_id = p.id
+          left join public.usage_counters u
+                 on u.profile_id = p.id
+                and u.period_month = date_trunc('month', now())::date
+         where (v_recherche is null or p.email ilike '%' || v_recherche || '%')
+           and (v_statut is null or p.status = v_statut)
+           and (v_date is null or (p.created_at, p.id) < (v_date, v_id))
+         order by p.created_at desc, p.id desc
+         limit v_limite;
       end;
       $$;`,
     reparerDepuisMigration: {
-      fichier: "111_la_liste_des_comptes_dit_la_meme_chose_que_les_boutiques.sql",
+      fichier: "151_la_liste_des_comptes_ne_savait_pas_filtrer.sql",
       depuis: "create function public.lister_comptes_admin",
       jusqua: "comment on function public.lister_comptes_admin",
-      avant: "drop function if exists public.lister_comptes_admin(text, text, text, int, text);",
+      avant: "drop function if exists public.lister_comptes_admin(text, text, text, int, text, text);",
     },
   },
 
@@ -1589,7 +1604,7 @@ const SQL = {
   "deux-definitions-du-mot-commande": {
     casser: `create or replace function public.lister_comptes_admin(
         p_recherche text, p_curseur_date text, p_curseur_id text,
-        p_limite int, p_ip_hash text
+        p_limite int, p_ip_hash text, p_statut text
       )
       returns table (
         id uuid, email text, account_type public.account_type,
@@ -1603,6 +1618,11 @@ const SQL = {
         v_recherche text := nullif(btrim(coalesce(p_recherche, '')), '');
         v_date timestamptz := nullif(btrim(coalesce(p_curseur_date, '')), '')::timestamptz;
         v_id uuid := nullif(btrim(coalesce(p_curseur_id, '')), '')::uuid;
+        v_statut public.account_status := case
+          when p_statut = 'active' then 'active'::public.account_status
+          when p_statut = 'suspended' then 'suspended'::public.account_status
+          else null
+        end;
       begin
         if not public.est_admin() then
           raise exception 'introuvable' using errcode = 'DL031';
@@ -1610,7 +1630,8 @@ const SQL = {
         perform public.journaliser_admin(
           'comptes.liste', 'profiles', null, null, p_ip_hash,
           jsonb_build_object('recherche', v_recherche, 'limite', v_limite,
-                             'page_suivante', v_date is not null));
+                             'page_suivante', v_date is not null,
+                             'statut', v_statut));
         return query
         select p.id, p.email, p.account_type, p.role, p.status, p.created_at, s.name,
                (select count(*) from public.orders o where o.shop_id = s.id),
@@ -1621,16 +1642,17 @@ const SQL = {
                  on u.profile_id = p.id
                 and u.period_month = date_trunc('month', now())::date
          where (v_recherche is null or p.email ilike '%' || v_recherche || '%')
+           and (v_statut is null or p.status = v_statut)
            and (v_date is null or (p.created_at, p.id) < (v_date, v_id))
          order by p.created_at desc, p.id desc
          limit v_limite;
       end;
       $$;`,
     reparerDepuisMigration: {
-      fichier: "111_la_liste_des_comptes_dit_la_meme_chose_que_les_boutiques.sql",
+      fichier: "151_la_liste_des_comptes_ne_savait_pas_filtrer.sql",
       depuis: "create function public.lister_comptes_admin",
       jusqua: "comment on function public.lister_comptes_admin",
-      avant: "drop function if exists public.lister_comptes_admin(text, text, text, int, text);",
+      avant: "drop function if exists public.lister_comptes_admin(text, text, text, int, text, text);",
     },
   },
 

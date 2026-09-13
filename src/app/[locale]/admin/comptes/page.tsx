@@ -8,7 +8,11 @@ import { RechercheAdmin } from "@/components/admin/recherche-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
 import { listerComptes, ParametresComptes, type LigneCompte } from "@/lib/audit/comptes";
-import { lireCompteurs, lireSeuils } from "@/lib/audit/panneau";
+import { lireCompteurs, lireInscriptionsRecentes, lireSeuils } from "@/lib/audit/panneau";
+import { Anneau } from "@/components/admin/anneau";
+import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
+import { TuileVolume } from "@/components/admin/tuile-volume";
+import { UserCheck, UserPlus, UserX, Users } from "lucide-react";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -27,13 +31,33 @@ export async function generateMetadata({
   return { title: t("comptes.titre"), robots: { index: false, follow: false } };
 }
 
+/*
+ * GÉOMÉTRIES RELEVÉES SUR LE KIT SERVI — `AdminUsers`.
+ *
+ * En-tête de colonne : 12,5/600 en sourdine, 12 px de retrait sous la ligne, SANS
+ * majuscules ni interlettrage. Les majuscules étaient une habitude de l'ancien
+ * canevas ; le kit écrit ses entêtes en casse normale, et c'est ce qui les
+ * distingue d'un eyebrow de section.
+ *
+ * Pilule d'état : 11,5/700 à l'interlettrage -0,02em, remplissage 6/11,
+ * hauteur 26.
+ */
 const EN_TETE_COLONNE =
-  "pb-3 text-left text-[11.5px] leading-[13px] font-bold tracking-[0.05em] text-ds-texte-sourdine uppercase";
+  "pb-3 text-left text-[12.5px] leading-[normal] font-semibold text-ds-texte-sourdine";
 const CELLULE = "border-t border-ds-filet py-3.5 text-[14px] leading-[18px] font-normal";
 const PILULE =
-  "inline-flex items-center gap-[5px] rounded-ds-pill px-[9px] py-[3px] text-[11.5px] leading-[13px] font-semibold " +
-  "xl:gap-1.5 xl:px-2.5 xl:py-1 xl:text-[12px] xl:leading-[15px]";
+  "inline-flex items-center gap-[5px] rounded-ds-pill px-[9px] py-[3px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] " +
+  "xl:gap-1.5 xl:px-[11px] xl:py-1.5";
 const PILULE_NEUTRE = PILULE + " bg-ds-surface-creux text-ds-texte-corps";
+
+/* Le panneau du kit admin — les mêmes valeurs que sur la vue d'ensemble. */
+const PANNEAU =
+  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
+const PANNEAU_TITRE = "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
+const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps";
+
+/** La fenêtre de la tuile « nouveaux inscrits », celle de la courbe du panneau. */
+const JOURS_INSCRIPTIONS = 30;
 
 /**
  * GESTION DES COMPTES — surface d'administration.
@@ -83,18 +107,39 @@ export default async function AdminComptes({
   const parametres = ParametresComptes.parse({
     q: Array.isArray(brut["q"]) ? brut["q"][0] : brut["q"],
     curseur: (Array.isArray(brut["curseur"]) ? brut["curseur"][0] : brut["curseur"]) ?? null,
+    statut: Array.isArray(brut["statut"]) ? brut["statut"][0] : brut["statut"],
   });
 
   const supabase = await creerClientServeur();
-  const [page, seuils, compteurs] = await Promise.all([
+  const maintenant = new Date();
+  const [page, seuils, compteurs, nouveaux] = await Promise.all([
     listerComptes(supabase, parametres, await empreinteAdmin()),
     lireSeuils(supabase),
     lireCompteurs(supabase),
+    lireInscriptionsRecentes(supabase, maintenant, JOURS_INSCRIPTIONS),
   ]);
 
   const t = await getTranslations("admin");
   const format = await getFormatter();
   const base = `/${langue}/admin/comptes`;
+
+  /** La part d'une population dans le total, arrondie — jamais un total nul divisé. */
+  const part = (n: number): number =>
+    compteurs.comptes === 0 ? 0 : Math.round((n / compteurs.comptes) * 100);
+
+  /*
+   * LE LIEN D'UN FILTRE REPART DE LA PREMIÈRE PAGE, ET C'EST OBLIGATOIRE.
+   * Garder le curseur en changeant de filtre le ferait désigner une position
+   * dans une liste qui n'existe plus : on ouvrirait la page 3 d'un ensemble
+   * qu'on vient de réduire à deux lignes, et l'écran paraîtrait vide.
+   */
+  const lienFiltre = (statut: string): string => {
+    const p = new URLSearchParams();
+    if (parametres.q !== "") p.set("q", parametres.q);
+    if (statut !== "tous") p.set("statut", statut);
+    const q = p.toString();
+    return q === "" ? base : `${base}?${q}`;
+  };
 
   const suspendu = (l: LigneCompte): boolean => l.statut === "suspended";
   const auDessus = (l: LigneCompte): boolean => l.colisCeMois > seuils.colis;
@@ -104,6 +149,10 @@ export default async function AdminComptes({
       ? null
       : `${base}?${new URLSearchParams({
           ...(parametres.q === "" ? {} : { q: parametres.q }),
+          // LE FILTRE VOYAGE AVEC LE CURSEUR. Sans lui, la page 2 rendrait un
+          // autre ensemble que la page 1 et le curseur désignerait une position
+          // dans une liste qui n'est plus la même.
+          ...(parametres.statut === "tous" ? {} : { statut: parametres.statut }),
           curseur: page.curseurSuivant,
         }).toString()}`;
 
@@ -124,13 +173,11 @@ export default async function AdminComptes({
         (suspendu(l) ? "bg-ds-erreur text-ds-erreur" : "bg-ds-succes-fond text-ds-succes")
       }
     >
-      <span
-        aria-hidden="true"
-        className={
-          "h-[5px] w-[5px] rounded-ds-pill xl:h-1.5 xl:w-1.5 " +
-          (suspendu(l) ? "bg-ds-erreur" : "bg-ds-succes")
-        }
-      />
+      {/* ⚠️ LA PASTILLE DE COULEUR A DISPARU, ET LE KIT N'EN A JAMAIS POSÉ.
+          Elle doublait le mot qui suit — « Actif » dit déjà ce qu'elle disait —
+          et elle élargissait la pilule de douze pixels, mesurés contre la
+          référence. Ce qui reste de son intention est intact : la pilule se lit
+          sans lire, par sa couleur de fond. */}
       {t(`comptes.statuts.${l.statut}`)}
     </span>
   );
@@ -146,34 +193,151 @@ export default async function AdminComptes({
     <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin
         titre={t("comptes.titre")}
-        sousTitre={t("comptes.decompte", {
-          // LES NOMBRES PARTENT BRUTS : c'est ICU qui accorde, et il ne sait pas
-          // le faire sur une chaîne déjà formatée. « 1 comptes » se lisait sur la
-          // capture, et le français met 0 au singulier là où l'anglais met le
-          // pluriel — une règle par langue, dans le catalogue, jamais ici.
-          total: compteurs.comptes,
-          suspendus: compteurs.comptesSuspendus,
-        })}
+        // LE DÉCOMPTE A QUITTÉ LE SOUS-TITRE POUR LES TUILES, qui le disent
+        // mieux : quatre chiffres nommés valent une phrase qui en porte deux.
+        // Ce qui reste ici est ce que le kit écrit — à quoi sert l'écran.
+        sousTitre={t("comptes.sousTitreListe")}
         // L'encart violet répète l'avertissement trois centimètres plus bas. Au
         // téléphone, le redire dans le noir pousse le champ de recherche hors de
         // l'écran d'ouverture, qui est exactement ce qu'on vient y faire.
         sousTitreAuBureauSeulement
-      >
-        <RechercheAdmin
-          action={base}
-          valeur={parametres.q}
-          etiquette={t("comptes.recherche")}
-          exemple={t("comptes.recherchePlaceholder")}
-          chercher={t("comptes.chercher")}
-        />
-      </EnTeteAdmin>
+      />
 
       <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-[18px] md:px-0 md:py-0">
         <EncartTrace texte={t("comptes.trace")} />
 
+        {/* --- LES VOLUMES, en quatre tuiles ---
+
+            Le kit en pose SIX : deux d'entre elles comptent les plans Pro et
+            Gratuit, et aucune colonne de plan n'existe — la contrainte n°1
+            interdit d'en créer une. Les plans peuvent être AFFICHÉS sur la
+            tarification ; ils ne sont jamais APPLIQUÉS, donc il n'y a rien à
+            compter. Les quatre autres sont exactement les nôtres. */}
+        <div className="flex flex-col gap-2.5 xl:grid xl:grid-cols-4 xl:gap-[18px]">
+          <TuileVolume
+            icone={Users}
+            compacte
+            libelle={t("comptes.tuileTotal")}
+            valeur={format.number(compteurs.comptes)}
+            /* LE CHIFFRE QUI INFORME SOUS UN TOTAL : combien d'inscrits n'ont
+               jamais fini leur onboarding. `account_type` est nullable SANS
+               DÉFAUT pour que ce manque soit visible — un défaut aurait classé
+               tous les fournisseurs comme revendeurs et faussé la segmentation
+               d'usage, qui est le livrable réel de la phase de validation. Les
+               suspendus, eux, ont leur propre tuile. */
+            complement={t("comptes.tuileTotalAide", {
+              sansType: format.number(compteurs.comptesSansType),
+            })}
+          />
+          {/* « vs période précédente » du kit est remplacé par la FENÊTRE. Aucun
+              compteur du produit ne porte son historique ; un écart calculé sur
+              rien aurait la FORME d'une mesure. Dire sur quels jours on compte
+              est la seule chose vraie qu'on puisse écrire là. */}
+          <TuileVolume
+            icone={UserPlus}
+            compacte
+            teinte="info"
+            libelle={t("comptes.tuileNouveaux")}
+            valeurEnSourdine={nouveaux === null}
+            valeur={
+              nouveaux === null
+                ? t("panneau.stockageIndisponible")
+                : format.number(nouveaux)
+            }
+            complement={t("comptes.surJours", { jours: JOURS_INSCRIPTIONS })}
+          />
+          <TuileVolume
+            icone={UserCheck}
+            compacte
+            teinte="succes"
+            libelle={t("comptes.tuileActifs")}
+            valeur={format.number(compteurs.comptesActifs)}
+            complement={t("comptes.partDuTotal", { part: part(compteurs.comptesActifs) })}
+          />
+          <TuileVolume
+            icone={UserX}
+            compacte
+            teinte="alerte"
+            libelle={t("comptes.tuileSuspendus")}
+            valeur={format.number(compteurs.comptesSuspendus)}
+            complement={t("comptes.partDuTotal", { part: part(compteurs.comptesSuspendus) })}
+          />
+        </div>
+
+        {/* --- LA BARRE DE FILTRES ---
+
+            ⚠️ UN SEUL DES QUATRE FILTRES DU KIT EST PORTÉ, ET C'EST CELUI QUE LA
+            BASE SAIT APPLIQUER. Les plans n'existent pas ; la « boutique » n'est
+            pas une dimension distincte du compte, un compte en ayant exactement
+            une ; et une plage de dates ne se combine pas avec une pagination PAR
+            CURSEUR sans changer le contrat de la fonction. Le statut, lui, vit
+            dans `profiles` depuis la première migration — et c'est le filtre pour
+            lequel on ouvre cet écran.
+
+            LE CRITÈRE ENTRE DANS LA TRACE : la fonction en base l'écrit dans la
+            charge utile de l'entrée d'audit, sans quoi le journal ne pourrait
+            pas dire ce qui a réellement été consulté. */}
+        <div className="flex flex-wrap items-center gap-3 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3.5 shadow-ds-card">
+          <div className="min-w-[240px] flex-1 md:max-w-[320px]">
+            <RechercheAdmin
+              action={base}
+              valeur={parametres.q}
+              etiquette={t("comptes.recherche")}
+              exemple={t("comptes.recherchePlaceholder")}
+              chercher={t("comptes.chercher")}
+            />
+          </div>
+          <SelecteurAdmin
+            etiquette={t("comptes.filtreStatut")}
+            courant={parametres.statut}
+            options={[
+              { valeur: "tous", libelle: t("comptes.statutTous"), href: lienFiltre("tous") },
+              {
+                valeur: "active",
+                libelle: t("comptes.statuts.active"),
+                href: lienFiltre("active"),
+              },
+              {
+                valeur: "suspended",
+                libelle: t("comptes.statuts.suspended"),
+                href: lienFiltre("suspended"),
+              },
+            ]}
+          />
+          <Link
+            href={base}
+            className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
+          >
+            {t("comptes.reinitialiser")}
+          </Link>
+        </div>
+
+        {/* --- LA LISTE, ET L'ANNEAU DE STATUT À SA DROITE ---
+
+            Deux panneaux, comme la planche. Celui de droite ne rend QUE DES
+            NOMBRES : compter n'est pas consulter, donc il n'ajoute aucune entrée
+            au journal là où la liste, elle, en écrit une par consultation.
+
+            ⚠️ LE KIT EN POSE TROIS : un anneau « Répartition par plan », que rien
+            ne peut remplir, et un flux « Activité récente » qui nomme des
+            vendeurs tiers à chaque ouverture — donc une entrée d'audit par
+            chargement d'écran, qui noierait les consultations délibérées que le
+            journal existe pour retrouver. */}
+        <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] xl:items-start">
+          <section className={PANNEAU}>
+            <header className="mb-[18px]">
+              <h2 className={PANNEAU_TITRE}>{t("comptes.liste")}</h2>
+              <p className={PANNEAU_AIDE}>
+                {t("comptes.listeTotal", { total: compteurs.comptes })}
+              </p>
+            </header>
         {page.lignes.length === 0 ? (
           <p className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-6 text-center text-ds-texte-corps md:rounded-ds-card-lg">
-            {parametres.q === "" ? t("comptes.videCompte") : t("comptes.videRecherche")}
+            {parametres.q === "" && parametres.statut === "tous"
+              ? t("comptes.videCompte")
+              : parametres.q === ""
+                ? t("comptes.videFiltre")
+                : t("comptes.videRecherche")}
           </p>
         ) : (
           <>
@@ -183,7 +347,7 @@ export default async function AdminComptes({
                 colonne de navigation de 236 px : à 768 il resterait 472 px, soit
                 67 par colonne, et « 1 840 / 1 200 » en réclame 90 à lui seul. Le
                 même calcul a déjà fait basculer Envois, Analyses et le Panneau. */}
-            <div className="hidden rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card xl:block">
+            <div className="hidden xl:block">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
@@ -324,6 +488,33 @@ export default async function AdminComptes({
             {t("comptes.pageSuivante")}
           </LienEcran>
         )}
+          </section>
+
+          <section className={PANNEAU}>
+            <header className="mb-[18px]">
+              <h2 className={PANNEAU_TITRE}>{t("comptes.repartition")}</h2>
+            </header>
+            <Anneau
+              total={compteurs.comptes}
+              unite={t("comptes.unite")}
+              part={(pourcent) => t("comptes.part", { part: pourcent })}
+              parts={[
+                {
+                  cle: "actifs",
+                  libelle: t("comptes.statuts.active"),
+                  valeur: compteurs.comptesActifs,
+                  trait: "var(--color-ds-succes)",
+                },
+                {
+                  cle: "suspendus",
+                  libelle: t("comptes.statuts.suspended"),
+                  valeur: compteurs.comptesSuspendus,
+                  trait: "var(--color-ds-erreur)",
+                },
+              ]}
+            />
+          </section>
+        </div>
       </div>
     </main>
   );

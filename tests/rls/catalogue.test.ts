@@ -472,6 +472,14 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "ouverture.",
     ],
     [
+      "compter_inscriptions_admin",
+      "Comptes inscrits sur une fenêtre, pour la tuile « nouveaux inscrits » de la " +
+        "liste des comptes. Garde interne `est_admin()`, et rien d'autre qu'un " +
+        "NOMBRE en retour — aucune adresse, aucun identifiant, donc aucune donnée " +
+        "tierce lue et aucun audit à écrire. Sa borne est INCLUSIVE : « depuis le " +
+        "14 août » doit compter le 14 août.",
+    ],
+    [
       "compter_commandes_par_jour_admin",
       "Commandes créées par jour sur toute la plateforme, pour la courbe du " +
         "panneau. Même raisonnement que `repartir_commandes_admin` : garde interne " +

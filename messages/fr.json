@@ -954,7 +954,24 @@
       "colisSurSeuil": "{valeur} / {seuil}",
       "colisSurSeuilLong": "{valeur} / {seuil} colis",
       "commandesLong": "{n} commandes",
-      "decompte": "{total, plural, one {# compte} other {# comptes}} · {suspendus, plural, one {# suspendu} other {# suspendus}}"
+      "decompte": "{total, plural, one {# compte} other {# comptes}} · {suspendus, plural, one {# suspendu} other {# suspendus}}",
+      "tuileTotal": "Comptes totaux",
+      "tuileNouveaux": "Nouveaux inscrits",
+      "tuileActifs": "Comptes actifs",
+      "tuileSuspendus": "Comptes suspendus",
+      "surJours": "sur {jours} jours",
+      "partDuTotal": "{part} % du total",
+      "liste": "Liste des comptes",
+      "listeTotal": "{total, plural, one {# compte au total} other {# comptes au total}}",
+      "filtreStatut": "Filtrer par statut",
+      "statutTous": "Tous les statuts",
+      "reinitialiser": "Réinitialiser",
+      "repartition": "Statut des comptes",
+      "unite": "comptes",
+      "part": "{part} %",
+      "videFiltre": "Aucun compte ne correspond à ce filtre.",
+      "sousTitreListe": "Gérez et suivez tous les comptes de DropLink.",
+      "tuileTotalAide": "dont {sansType} sans type déclaré"
     },
     "journal": {
       "titre": "Journal d'audit",
@@ -1129,7 +1146,8 @@
       "statutsUnite": "commandes",
       "courbeIndisponible": "Courbe indisponible.",
       "courbe": "Commandes",
-      "periode": "{jours} derniers jours"
+      "periode": "{jours} derniers jours",
+      "periodeEtiquette": "Fenêtre de la courbe"
     },
     "parametres": {
       "titre": "Paramètres système",
