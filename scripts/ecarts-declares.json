@@ -4632,10 +4632,14 @@
           "Protégez votre compte et vos données.",
           "Sessions actives",
           "Gérez vos appareils connectés.",
-          "Voir les sessions"
+          "Voir les sessions",
+          "Données",
+          "Gérez vos données et exportez vos inform",
+          "Exporter mes données",
+          "Exporter"
         ],
         "motif": "contrainte",
-        "raison": "POSITION VERTICALE SEULE, et une seule cause pour ces lignes : la colonne de gauche est plus courte que celle du kit. La carte « Préférences » n a pas les quatre interrupteurs de notification — le produit n envoie AUCUNE notification au vendeur, et un interrupteur sans effet est un mensonge (principe XII) —, ni le fuseau horaire, qu aucun formatage n applique. La carte « Données » vient avec l export et la suppression, qui ne sont pas encore ecrits. Tailles, graisses, couleurs et largeurs sont celles du kit."
+        "raison": "POSITION VERTICALE SEULE, et une seule cause pour ces lignes : la colonne de gauche est plus courte que celle du kit. La carte « Preferences » n a pas les quatre interrupteurs de notification — le produit n envoie AUCUNE notification au vendeur, et un interrupteur sans effet est un mensonge (principe XII) —, ni le fuseau horaire, qu aucun formatage n applique ; la carte « Securite » n a pas la suppression du compte (voir les manquants). Tailles, graisses, couleurs et largeurs sont celles du kit."
       },
       {
         "textes": [
@@ -4703,16 +4707,11 @@
           "Supprimer le compte",
           "Supprimez définitivement votre compte et",
           "Supprimer",
-          "Données",
-          "Gérez vos données et exportez vos inform",
-          "Exporter mes données",
-          "Téléchargez toutes vos données (commande",
-          "Exporter",
           "Supprimer toutes les données",
           "Supprimez toutes vos données de manière "
         ],
         "motif": "donnee",
-        "raison": "LA SUPPRESSION DU COMPTE ET LA CARTE « DONNEES » — export, suppression de toutes les donnees. Ce sont des gestes IRREVERSIBLES et ils ne sont pas encore ecrits : confirmation recopiee, mot de passe actuel, purge des medias R2, trace. Un bouton « Supprimer » qui ne supprime pas, ou qui supprime sans ces garanties, serait pire que son absence."
+        "raison": "LA SUPPRESSION DU COMPTE ET DE TOUTES LES DONNEES. Des gestes IRREVERSIBLES, et leur perimetre n est pas un arbitrage de design : un hebergeur doit conserver les donnees d identification de ses comptes (LCEN et son decret d application), la decision 9 du brief interdit la suppression de compte par l administration, et la purge des medias R2 et du suivi 17TRACK engage des couts et des traces. C est une decision de Wassim ; un bouton « Supprimer » qui ne supprime pas, ou qui supprime sans ces garanties, serait pire que son absence."
       },
       {
         "textes": [
@@ -4753,6 +4752,13 @@
         ],
         "motif": "contrainte",
         "raison": "« NOUS CONTACTER ». La seule adresse du produit est celle des signalements d abus (`NEXT_PUBLIC_CONTACT_ABUS`), qui fonde le statut d hebergeur. En faire un canal d assistance melangerait les deux : un signalement noye dans les questions est un signalement en retard."
+      },
+      {
+        "textes": [
+          "Téléchargez toutes vos données (commande"
+        ],
+        "motif": "contrainte",
+        "raison": "« TOUTES VOS DONNEES » SERAIT FAUX : la decision 15 exclut les notes internes de tout export. Le produit ecrit ce que le fichier porte reellement — voir la declaration symetrique en trop."
       }
     ],
     "enTrop": [
@@ -4811,6 +4817,14 @@
         ],
         "motif": "contrainte",
         "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
+      },
+      {
+        "textes": [
+          "Commandes, colis, médias et vues, au for",
+          "Le fichier contient les liens publics de"
+        ],
+        "motif": "contrainte",
+        "raison": "L EXPORT DIT CE QU IL EMPORTE, ET CE QU IL N EMPORTE PAS. Le kit promet « toutes vos donnees » ; la decision 15 du brief exclut les notes internes de tout export — elles portent le prix d achat. La ligne le dit au lieu de le taire. Et le fichier porte les liens publics des commandes, qui transferent une capacite immuable : l avertissement est la meme discipline que celle de l export CSV."
       }
     ]
   },

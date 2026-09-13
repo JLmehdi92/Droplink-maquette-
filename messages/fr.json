@@ -1753,6 +1753,14 @@
       "indisponible": "Le service est momentanément indisponible. Réessayez.",
       "code": "Code incorrect ou expiré. Saisissez le code affiché maintenant.",
       "dejaActive": "La double authentification est déjà activée sur ce compte."
+    },
+    "donnees": {
+      "titre": "Données",
+      "aide": "Gérez vos données et exportez vos informations.",
+      "exporter": "Exporter mes données",
+      "exporterAide": "Commandes, colis, médias et vues, au format JSON. Sans vos notes internes.",
+      "bouton": "Exporter",
+      "avertissement": "Le fichier contient les liens publics de vos commandes : quiconque les obtient voit les pages de vos clients. Rangez-le comme tel."
     }
   },
   "verification": {

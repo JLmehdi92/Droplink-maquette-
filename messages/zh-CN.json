@@ -1753,6 +1753,14 @@
       "indisponible": "服务暂时不可用，请重试。",
       "code": "验证码错误或已过期，请输入当前显示的验证码。",
       "dejaActive": "此账号已启用双重验证。"
+    },
+    "donnees": {
+      "titre": "数据",
+      "aide": "管理数据并导出信息。",
+      "exporter": "导出我的数据",
+      "exporterAide": "订单、包裹、媒体与浏览记录，JSON 格式，不含内部备注。",
+      "bouton": "导出",
+      "avertissement": "文件包含订单的公开链接：任何获得链接的人都能看到您客户的页面，请妥善保管。"
     }
   },
   "verification": {

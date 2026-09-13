@@ -2,7 +2,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { ArrowUpRight, ChevronDown, CircleCheck, CircleHelp, Crown, LifeBuoy, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowUpRight,
+  ChevronDown,
+  CircleCheck,
+  CircleHelp,
+  Crown,
+  Database,
+  Download,
+  LifeBuoy,
+  SlidersHorizontal,
+} from "lucide-react";
 import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
 import { TraductionsClient } from "@/components/traductions-client";
 import { CarteReglage, LigneAction } from "@/components/parametres/carte-reglage";
@@ -77,8 +87,9 @@ function libelleAppareil({ navigateur, systeme }: AppareilDecrit): string | null
  *    signalements d'abus, et en faire un canal d'assistance mélangerait les
  *    deux — un signalement noyé dans les questions est un signalement en retard.
  *
- * LA DOUBLE AUTHENTIFICATION, L'EXPORT ET LA SUPPRESSION des données et du
- * compte viennent aux phases suivantes, chacune avec ses propres garanties.
+ * LA SUPPRESSION des données et du compte n'est pas ici : un geste irréversible,
+ * dont le périmètre légal (conservation des données d'identification par
+ * l'hébergeur) est une décision de Wassim, pas un arbitrage de design.
  */
 export default async function Parametres({
   params,
@@ -199,6 +210,18 @@ export default async function Parametres({
             </CarteReglage>
 
             <CarteSecurite sessions={sessions} deuxEtapesActive={deuxEtapesActive} />
+
+            <CarteReglage icone={Database} titre={t("donnees.titre")} sousTitre={t("donnees.aide")}>
+              <LigneAction premiere icone={Download} titre={t("donnees.exporter")} sousTitre={t("donnees.exporterAide")}>
+                {/* UN LIEN ET NON UN BOUTON : la route rend le fichier avec
+                    `Content-Disposition`, le navigateur le télécharge sans quitter
+                    l'écran, et rien n'a besoin de JavaScript. */}
+                <a href="/api/compte/export" download className={CLASSE_BOUTON}>
+                  {t("donnees.bouton")}
+                </a>
+              </LigneAction>
+              <p className="text-[12.5px] leading-[1.5] text-ds-texte-sourdine">{t("donnees.avertissement")}</p>
+            </CarteReglage>
           </div>
         </TraductionsClient>
 

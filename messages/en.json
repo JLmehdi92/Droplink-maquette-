@@ -1753,6 +1753,14 @@
       "indisponible": "The service is temporarily unavailable. Please try again.",
       "code": "Incorrect or expired code. Enter the code shown now.",
       "dejaActive": "Two-factor authentication is already enabled on this account."
+    },
+    "donnees": {
+      "titre": "Data",
+      "aide": "Manage your data and export your information.",
+      "exporter": "Export my data",
+      "exporterAide": "Orders, parcels, media and views, in JSON. Without your internal notes.",
+      "bouton": "Export",
+      "avertissement": "The file contains the public links of your orders: anyone who gets them sees your customers' pages. Store it accordingly."
     }
   },
   "verification": {

@@ -147,6 +147,18 @@ describe("Matcher du middleware", () => {
         "produit un fichier qui SORT de l'application.",
     ],
     [
+      "/api/compte/export",
+      "« Exporter mes données » de l'écran Paramètres, posé le 13/09/2026. Route " +
+        "handler pour `Content-Disposition`, comme les deux exports CSV. Elle porte " +
+        "SA garde : l'état du compte lu EN BASE, 404 — jamais 401 — sans session " +
+        "active ET pour une session `aal1` d'un compte à double authentification. " +
+        "Lecture sous RLS AVEC LA SESSION. Elle fait sortir les liens publics : " +
+        "elle partage donc le plafond de débit de l'export des commandes, et " +
+        "n'emporte ni notes internes (décision 15), ni adresse du client, ni " +
+        "jeton de désabonnement — contrôlé par sentinelles dans " +
+        "`tests/rls/export-donnees.test.ts`.",
+    ],
+    [
       "/api/envois/export",
       "Export CSV des COLIS du vendeur connecté, posé le 12/09/2026 avec la case " +
         "à cocher de l'écran Envois. Même raison d'être un route handler que " +
