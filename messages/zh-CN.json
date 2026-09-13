@@ -40,13 +40,21 @@
       "marqueTexte": "随时修改页面：客户的链接始终不变，页面始终用您的配色和店名。",
       "mediasTexteCourt": "不再需要共享文件夹，也不会遇到链接过期。",
       "suiviTexteCourt": "客户自己就能看到包裹到哪了。",
-      "marqueTexteCourt": "随时修改页面，链接始终不变。"
+      "marqueTexteCourt": "随时修改页面，链接始终不变。",
+      "commandesTitre": "订单管理",
+      "commandesTexte": "在一个地方创建、整理并追踪所有订单。",
+      "analysesTitre": "数据分析",
+      "analysesTexte": "已创建与已送达订单、链接打开数、平均送达时长。",
+      "sansCompteTitre": "无需安装，无需注册",
+      "sansCompteTexte": "客户打开链接即可查看全部内容。无需应用、无需账号、无需密码。"
     },
     "destinataireTitre": "您的客户什么都不用安装",
     "menu": {
-      "fonctionnement": "工作方式",
+      "fonctionnement": "功能",
       "clientVoit": "客户看到什么",
-      "tarif": "价格"
+      "tarif": "价格",
+      "etapes": "使用方式",
+      "docs": "使用文档"
     },
     "apercuTitre": "您的订单",
     "apercuBoutique": "北方工坊",
@@ -60,15 +68,16 @@
       "valideTitre": "订单已确认",
       "valideTexte": "由客户确认"
     },
-    "beneficesPilule": "帮您省掉什么",
+    "beneficesPilule": "功能",
     "beneficesTitre": "不用再一张一张地重发照片",
     "beneficesTexte": "三件您不必再手动做的事，也是客户不必再开口问的事。",
     "finalTitre": "您的下一笔订单，值得比共享文件夹更好的呈现",
-    "piedNavigation": "法律信息",
     "pied": {
       "conditions": "使用条款",
       "confidentialite": "隐私政策",
-      "signalement": "举报内容"
+      "signalement": "举报内容",
+      "docs": "使用文档",
+      "blog": "博客"
     },
     "heroSousTitreCourt": "上传照片，粘贴运单号，发出链接。无需网店：客户自己查看全部内容。",
     "finalTitreCourt": "您的下一笔订单值得更好的呈现",
@@ -76,8 +85,26 @@
     "piedCourt": {
       "conditions": "条款",
       "confidentialite": "隐私",
-      "signalement": "举报"
-    }
+      "signalement": "举报",
+      "docs": "使用文档",
+      "blog": "博客"
+    },
+    "perk1": "上线期间免费",
+    "perk2": "无需银行卡",
+    "perk3": "30 秒即可上手",
+    "etapesPilule": "如何使用？",
+    "etapesTitre": "三步生成客户物流链接",
+    "etapesTexte": "无需安装，无需配置承运商接口：一分钟内就能发出第一个链接。",
+    "etape1Titre": "创建订单",
+    "etape1Texte": "填写客户姓名，上传照片，输入运单号。",
+    "etape2Titre": "分享链接",
+    "etape2Texte": "系统为客户生成专属链接，而且永不变更。",
+    "etape3Titre": "客户实时查看",
+    "etape3Texte": "状态自动更新，您无需任何操作。",
+    "piedTagline": "一个链接，整笔订单。",
+    "piedProduit": "产品",
+    "piedSociete": "公司",
+    "piedDroits": "© {annee} DropLink. 保留所有权利。"
   },
   "legal": {
     "conditionsTitre": "使用条款",

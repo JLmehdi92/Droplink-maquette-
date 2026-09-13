@@ -54,6 +54,9 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   /* Les six questions de la documentation sont rendues par une boucle sur
      `[1..6]`, qui compose `faqQ${n}` et `faqR${n}`. Les écrire à plat aurait
      donné douze appels identiques à une ligne près. */
+  /* Les trois étapes de la landing sont rendues par une boucle sur `[1..3]`,
+     qui compose `etape${n}Titre` et `etape${n}Texte`. */
+  ["landing.etape", "composé depuis le rang de l étape — landing"],
   ["docs.faqQ", "composé depuis le rang de la question — documentation"],
   ["docs.faqR", "composé depuis le rang de la question — documentation"],
   ["envois.tri.", "composé depuis le tri choisi — tableau des envois"],

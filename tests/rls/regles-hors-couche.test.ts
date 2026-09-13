@@ -176,6 +176,14 @@ const TOLEREES: ReadonlyMap<string, string> = new Map([
   [".defilement-discret::-webkit-scrollbar", "le même, côté WebKit."],
   [".degrade-marque", "le dégradé de marque, une seule action principale par écran."],
   [
+    ".degrade-ds-marque-diagonal",
+    "le même dégradé à 120 degrés, pour la bannière d'appel de la landing. ⚠️ CE " +
+      "N'EST PAS UNE VARIANTE DÉCORATIVE : un dégradé horizontal sur une bande de " +
+      "1180 px de large et 200 de haut rend trois aplats verticaux, pas un " +
+      "dégradé. Le jeton existait depuis la migration du thème ; il n'avait aucune " +
+      "classe pour l'employer.",
+  ],
+  [
     ".degrade-ds-marque",
     "le dégradé du design system, pour les écrans migrés. ⚠️ Il ne pose AUCUNE " +
       "couleur de texte, contrairement à son aîné qui force `#ffffff` : sur un " +

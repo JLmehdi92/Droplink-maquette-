@@ -40,13 +40,21 @@
       "marqueTexte": "Edit the page whenever you like: your customer keeps the same link, in your colours and under your name.",
       "mediasTexteCourt": "No more shared folder, no more transfer that expires.",
       "suiviTexteCourt": "The customer sees where their parcel is, without asking.",
-      "marqueTexteCourt": "Edit the page whenever you want, the link stays the same."
+      "marqueTexteCourt": "Edit the page whenever you want, the link stays the same.",
+      "commandesTitre": "Order management",
+      "commandesTexte": "Create, organise and follow every order from one place.",
+      "analysesTitre": "Detailed analytics",
+      "analysesTexte": "Orders created and delivered, links opened, average delivery times.",
+      "sansCompteTitre": "Nothing to install, nothing to create",
+      "sansCompteTexte": "Your customer opens the link and sees everything. No app, no account, no password."
     },
     "destinataireTitre": "Your customers install nothing",
     "menu": {
-      "fonctionnement": "How it works",
+      "fonctionnement": "Features",
       "clientVoit": "What your customer sees",
-      "tarif": "Pricing"
+      "tarif": "Pricing",
+      "etapes": "How it works",
+      "docs": "Documentation"
     },
     "apercuTitre": "Your order",
     "apercuBoutique": "Atelier Nord",
@@ -60,15 +68,16 @@
       "valideTitre": "Order approved",
       "valideTexte": "by the customer"
     },
-    "beneficesPilule": "WHAT IT TAKES OFF YOUR PLATE",
+    "beneficesPilule": "Features",
     "beneficesTitre": "No more sending photos one by one",
     "beneficesTexte": "Three things you will not do by hand again, and your customer will not have to ask for.",
     "finalTitre": "Your next order deserves better than a shared folder",
-    "piedNavigation": "Legal links",
     "pied": {
       "conditions": "Terms",
       "confidentialite": "Privacy",
-      "signalement": "Report content"
+      "signalement": "Report content",
+      "docs": "Documentation",
+      "blog": "Blog"
     },
     "heroSousTitreCourt": "Drop the photos, paste the tracking, send the link. No online store needed.",
     "finalTitreCourt": "Your next order deserves better",
@@ -76,8 +85,26 @@
     "piedCourt": {
       "conditions": "Terms",
       "confidentialite": "Privacy",
-      "signalement": "Report"
-    }
+      "signalement": "Report",
+      "docs": "Documentation",
+      "blog": "Blog"
+    },
+    "perk1": "Free at launch",
+    "perk2": "No credit card",
+    "perk3": "Ready in 30 seconds",
+    "etapesPilule": "How does it work?",
+    "etapesTitre": "Create a customer tracking link in 3 steps",
+    "etapesTexte": "Nothing to install, no carrier integration to set up: your first link goes out in under a minute.",
+    "etape1Titre": "Create your order",
+    "etape1Texte": "Add the customer name, your photos and the tracking number.",
+    "etape2Titre": "Share the link",
+    "etape2Texte": "A unique link is generated for your customer, and it never changes again.",
+    "etape3Titre": "Your customer follows in real time",
+    "etape3Texte": "Tracking updates automatically, with nothing to do on your side.",
+    "piedTagline": "One link. The whole order.",
+    "piedProduit": "Product",
+    "piedSociete": "Company",
+    "piedDroits": "© {annee} DropLink. All rights reserved."
   },
   "legal": {
     "conditionsTitre": "Terms of use",

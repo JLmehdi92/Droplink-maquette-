@@ -40,13 +40,21 @@
       "marqueTexte": "Modifiez la page quand vous voulez : le client garde le même lien, à vos couleurs et à votre nom.",
       "mediasTexteCourt": "Plus de dossier partagé, plus de transfert qui expire.",
       "suiviTexteCourt": "Le client voit où en est son colis, sans vous le demander.",
-      "marqueTexteCourt": "Modifiez la page quand vous voulez, le lien reste le même."
+      "marqueTexteCourt": "Modifiez la page quand vous voulez, le lien reste le même.",
+      "commandesTitre": "Gestion de commandes",
+      "commandesTexte": "Créez, organisez et suivez toutes vos commandes depuis un seul endroit.",
+      "analysesTitre": "Analyses détaillées",
+      "analysesTexte": "Commandes créées, livrées, liens ouverts et délais moyens de livraison.",
+      "sansCompteTitre": "Rien à installer, rien à créer",
+      "sansCompteTexte": "Votre client ouvre le lien et voit tout. Pas d'application, pas de compte, pas de mot de passe."
     },
     "destinataireTitre": "Vos clients n'ont rien à installer",
     "menu": {
-      "fonctionnement": "Fonctionnement",
+      "fonctionnement": "Fonctionnalités",
       "clientVoit": "Ce que voit le client",
-      "tarif": "Tarif"
+      "tarif": "Tarifs",
+      "etapes": "Comment ça marche",
+      "docs": "Documentation"
     },
     "apercuTitre": "Votre commande",
     "apercuBoutique": "Atelier Nord",
@@ -60,15 +68,16 @@
       "valideTitre": "Commande validée",
       "valideTexte": "par le client"
     },
-    "beneficesPilule": "CE QUE ÇA VOUS ENLÈVE",
+    "beneficesPilule": "Fonctionnalités",
     "beneficesTitre": "Fini de renvoyer les photos une par une",
     "beneficesTexte": "Trois choses que vous ne referez plus à la main, et que votre client n’aura plus à demander.",
     "finalTitre": "Votre prochaine commande mérite mieux qu’un dossier partagé",
-    "piedNavigation": "Liens légaux",
     "pied": {
       "conditions": "Conditions",
       "confidentialite": "Confidentialité",
-      "signalement": "Signaler un contenu"
+      "signalement": "Signaler un contenu",
+      "docs": "Documentation",
+      "blog": "Blog"
     },
     "heroSousTitreCourt": "Déposez les photos, collez le suivi, envoyez le lien. Sans boutique en ligne : votre client consulte tout lui-même.",
     "finalTitreCourt": "Votre prochaine commande mérite mieux",
@@ -76,8 +85,26 @@
     "piedCourt": {
       "conditions": "Conditions",
       "confidentialite": "Confidentialité",
-      "signalement": "Signaler"
-    }
+      "signalement": "Signaler",
+      "docs": "Documentation",
+      "blog": "Blog"
+    },
+    "perk1": "Gratuit au lancement",
+    "perk2": "Sans carte bancaire",
+    "perk3": "Prêt en 30 secondes",
+    "etapesPilule": "Comment ça marche ?",
+    "etapesTitre": "Créer un lien de suivi client en 3 étapes",
+    "etapesTexte": "Aucune installation, aucune intégration transporteur à configurer : votre premier lien part en moins d'une minute.",
+    "etape1Titre": "Créez votre commande",
+    "etape1Texte": "Ajoutez le nom du client, ses photos et le numéro de suivi.",
+    "etape2Titre": "Partagez le lien",
+    "etape2Texte": "Un lien unique est généré pour votre client, et il ne change plus jamais.",
+    "etape3Titre": "Votre client suit en temps réel",
+    "etape3Texte": "Le suivi se met à jour automatiquement, sans que vous ayez à intervenir.",
+    "piedTagline": "Un seul lien. Toute la commande.",
+    "piedProduit": "Produit",
+    "piedSociete": "Société",
+    "piedDroits": "© {annee} DropLink. Tous droits réservés."
   },
   "legal": {
     "conditionsTitre": "Conditions d'utilisation",

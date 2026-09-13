@@ -98,8 +98,21 @@ export default async function Accueil({
    * ⚠️ 11,5 px ET NON 11. Le kit ecrit 11 ; le plancher de la regle 5 est 11,5
    * au telephone, et cette pilule y est rendue.
    */
+  /*
+   * L EYEBROW DE SECTION — valeurs relevees sur le kit marketing servi : 11/700
+   * a l interlettrage 0,12em, encre d accent sur la teinte, remplissage 6/14,
+   * rayon pilule, hauteur 26.
+   *
+   * ⚠️ 11,5 AU TELEPHONE, ET C EST LA REGLE 5 QUI GAGNE. Le kit ecrit 11 ;
+   * cet eyebrow est rendu au telephone, et 11 passe sous le plancher.
+   *
+   * ⚠️ ET LE TEXTE EST EN CASSE NORMALE DANS LE CATALOGUE, les majuscules
+   * venant du CSS. `textContent` ne suit pas `text-transform` : un libelle ecrit
+   * en capitales dans le catalogue ne se compare plus a celui du kit, et il se
+   * traduit mal — le chinois n a pas de casse.
+   */
   const pilule =
-    "inline-flex items-center gap-[7px] rounded-ds-pill bg-ds-surface-teinte px-3.5 py-1.5 text-[11.5px] leading-[15px] font-bold tracking-[0.12em] text-ds-accent-encre uppercase";
+    "inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3.5 py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[0.12em] text-ds-accent-encre uppercase lg:text-[11px]";
 
   /*
    * L'ACTION PRINCIPALE EST PLEINE LARGEUR AU TÉLÉPHONE. `LandingMobile` pose
@@ -107,13 +120,39 @@ export default async function Accueil({
    * que son texte laisse deux zones mortes de part et d'autre, à l'endroit
    * exact où le pouce arrive.
    */
+  /*
+   * ⚠️ LE DÉGRADÉ NE FIXAIT PAS SA COULEUR DE TEXTE, ET L APPEL PRINCIPAL
+   * HÉRITAIT DONC DE L ENCRE. Mesuré le 13/09/2026 contre le kit : la référence
+   * rend `rgb(255,255,255)`, le produit rendait `rgb(14,14,19)` — du noir sur un
+   * violet→corail, sur le bouton le plus important de la seule page que tout le
+   * monde voit. `.degrade-ds-marque` ne pose qu une image de fond ; les onze
+   * autres emplois du dégradé portent tous `text-ds-texte-sur-marque`, celui-ci
+   * était le seul à ne pas l avoir. `tests/unit/pilules-lisibles.test.ts` l exige
+   * désormais.
+   *
+   * LES AUTRES VALEURS SONT CELLES DU KIT : 600 de graisse, -0,02em, remplissage
+   * 0/28, écart 8, et l ombre de marque du design system plutôt qu une ombre
+   * écrite en dur sur l ancien violet.
+   *
+   * IL RESTE PLEINE LARGEUR AU TÉLÉPHONE : dans 350 px de carte, un bouton qui
+   * n occupe que son texte laisse deux zones mortes là où le pouce arrive.
+   */
   const actionPrincipale =
-    "degrade-ds-marque flex min-h-13 w-full items-center justify-center gap-[9px] rounded-full px-[30px] text-[15px] font-bold shadow-[0_10px_26px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-90 md:inline-flex md:h-13 md:w-auto md:min-h-0 md:shadow-[0_10px_26px_-10px_rgba(124,92,245,0.65)]";
+    "degrade-ds-marque flex min-h-13 w-full items-center justify-center gap-2 rounded-ds-pill border border-transparent px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover md:inline-flex md:h-13 md:w-auto md:min-h-0";
 
+  /* 14/600 en corps : la graisse du kit. Le produit rendait 500. */
   const lienMenu =
-    "text-[14px] leading-[18px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent";
+    "text-[14px] leading-[normal] font-semibold text-ds-texte-corps transition-colors hover:text-ds-accent";
 
-  const sections = ["fonctionnement", "clientVoit", "tarif"] as const;
+  /*
+   * CINQ ENTREES DE NAVIGATION, COMME LE KIT — quatre ancres et un lien.
+   *
+   * ⚠️ « DOCUMENTATION » MENE A UNE ROUTE QUI EXISTE, et c est la seule raison
+   * pour laquelle elle est la : `/docs` repond 200. La cinquieme entree du kit,
+   * « FAQ », ne menerait nulle part — une entree de navigation vers un 404, sur
+   * la seule page que tout le monde voit, est pire qu une entree absente.
+   */
+  const sections = ["fonctionnement", "etapes", "clientVoit", "tarif"] as const;
 
   /*
    * LE GRAPHE JSON-LD, RENDU CÔTÉ SERVEUR.
@@ -163,6 +202,9 @@ export default async function Accueil({
                 {t("menu." + clef)}
               </a>
             ))}
+            <Link href={`/${locale}/docs`} className={lienMenu}>
+              {t("menu.docs")}
+            </Link>
           </nav>
 
           {/*
@@ -184,13 +226,17 @@ export default async function Accueil({
           <div className="hidden items-center gap-2.5 md:flex">
             <Link
               href={`/${locale}/connexion`}
-              className="inline-flex h-11 items-center rounded-ds-pill border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-xs transition-colors hover:bg-ds-surface-teinte"
+              /* ⚠️ 36 AU BUREAU, 44 TANT QU ON PEUT Y TOUCHER. Le kit dessine
+                 36 ; `md:` commence à 768, où l on est encore au doigt. Le
+                 plancher tactile tient donc jusqu à `lg`, et la valeur du kit
+                 reprend au-delà. */
+              className="inline-flex h-11 items-center gap-2 rounded-ds-pill border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-sm transition-colors hover:bg-ds-surface-teinte lg:h-9"
             >
               {nav("seConnecter")}
             </Link>
             <Link
               href={`/${locale}/inscription`}
-              className="degrade-ds-marque inline-flex h-11 items-center gap-2 rounded-ds-pill px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+              className="degrade-ds-marque inline-flex h-11 items-center gap-2 rounded-ds-pill border border-transparent px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover lg:h-9"
             >
               {nav("creerCompte")}
               <Icone nom="arrow_forward" className="text-[13px]" />
@@ -221,6 +267,12 @@ export default async function Accueil({
                   {t("menu." + clef)}
                 </a>
               ))}
+              <Link
+                href={`/${locale}/docs`}
+                className="flex min-h-11 items-center rounded-md px-3 text-[14px] font-medium text-ds-texte-corps"
+              >
+                {t("menu.docs")}
+              </Link>
               <Link
                 href={`/${locale}/connexion`}
                 className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-[18px] text-[13px] font-semibold text-on-primary"
@@ -259,6 +311,29 @@ export default async function Accueil({
                 {t("ctaPrincipal")}
                 <Icone nom="arrow_forward" className="text-[15px]" />
               </Link>
+
+              {/* LES TROIS PROMESSES DU KIT, ET ELLES SONT TOUTES VRAIES :
+                  le produit est gratuit en phase de validation, il n a AUCUN
+                  code de paiement — donc aucune carte a demander — et
+                  l inscription n exige pas de confirmation d email, donc rien
+                  n attend entre le formulaire et la premiere commande.
+
+                  ⚠️ ELLES SONT DANS UNE LISTE, pas dans trois `span` alignes :
+                  ce sont trois affirmations distinctes, et un lecteur d ecran
+                  doit pouvoir les compter. */}
+              <ul className="mx-auto mt-5 flex max-w-[560px] flex-col items-center gap-2 md:mt-6 md:flex-row md:justify-center md:gap-7">
+                {(["perk1", "perk2", "perk3"] as const).map((clef) => (
+                  <li key={clef} className="flex items-center gap-2">
+                    <Icone
+                      nom="check_circle"
+                      className="shrink-0 text-[16px] text-ds-accent"
+                    />
+                    <span className="text-[14px] leading-[normal] font-medium text-ds-texte-corps">
+                      {t(clef)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </section>
 
@@ -463,15 +538,30 @@ export default async function Accueil({
               </p>
             </div>
 
+            {/*
+              SIX CARTES, COMME LE KIT — mais la sixieme n est pas la sienne.
+
+              ⚠️ « MULTI-PLATEFORMES : FONCTIONNE AVEC VINTED, EBAY, SHOPIFY,
+              TIKTOK SHOP, LEBONCOIN » EST FAUX. Le produit n a AUCUNE
+              integration avec l une de ces plateformes, et c est meme sa
+              raison d etre : il sert le vendeur qui n a PAS de boutique.
+              L annoncer serait la seule phrase de cette page qu on ne
+              pourrait pas tenir. Elle est remplacee par ce qui distingue
+              reellement le produit, et qui est verifiable : le destinataire
+              n a jamais de compte (decision 4).
+            */}
             <ul className="grid gap-3.5 text-left md:grid-cols-3 md:gap-5">
               {(
                 [
+                  ["commandes", "inventory_2", "bg-ds-surface-teinte text-ds-accent"],
                   ["medias", "download", "bg-ds-surface-teinte text-ds-accent"],
                   ["suivi", "schedule", "bg-ds-erreur-fond text-ds-erreur"],
                   // ⚠️ LE TROISIÈME EST VERT sur les deux planches. Le code le
                   // rendait GRIS, faute de famille verte dans l'ancien thème —
                   // elle existe désormais (`succes-pastel` / `succes`).
                   ["marque", "link", "bg-ds-succes-fond text-ds-succes"],
+                  ["analyses", "monitoring", "bg-ds-info-fond text-ds-info"],
+                  ["sansCompte", "lock", "bg-ds-alerte-fond text-ds-alerte"],
                 ] as const
               ).map(([clef, icone, teinte]) => (
                 <li
@@ -486,97 +576,216 @@ export default async function Accueil({
                   >
                     <Icone nom={icone} className="text-[20px] md:text-[21px]" />
                   </span>
-                  <h3 className="mt-4 mb-[7px] text-[17px] leading-[22px] font-bold tracking-[-0.015em] text-ds-texte-titre md:mt-[18px] md:mb-2 md:text-[18px] md:leading-[23px]">
+                  {/* 18/700 à l interligne 19,8 et à -0,02em : les valeurs du kit.
+                      Le produit rendait 23 d interligne et -0,015em. */}
+                  <h3 className="mt-4 mb-[7px] text-[17px] leading-[22px] font-bold tracking-[-0.02em] text-ds-texte-titre md:mt-[18px] md:mb-2 md:text-[18px] md:leading-[19.8px]">
                     {t("fonctionnalites." + clef + "Titre")}
                   </h3>
-                  <p className="text-[14px] leading-[22px] text-ds-texte-corps">
-                    <span className="md:hidden">{t("fonctionnalites." + clef + "TexteCourt")}</span>
-                    <span className="hidden md:inline">{t("fonctionnalites." + clef + "Texte")}</span>
+                  {/* LE TEXTE COURT N EXISTE QUE POUR LES TROIS PREMIERES
+                      CARTES, que la planche mobile raccourcissait ; les trois
+                      autres tiennent telles quelles. `t.has` evite d inventer
+                      une cle vide plutot que de dupliquer la phrase. */}
+                  <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
+                    {t.has("fonctionnalites." + clef + "TexteCourt") ? (
+                      <>
+                        <span className="md:hidden">
+                          {t("fonctionnalites." + clef + "TexteCourt")}
+                        </span>
+                        <span className="hidden md:inline">
+                          {t("fonctionnalites." + clef + "Texte")}
+                        </span>
+                      </>
+                    ) : (
+                      t("fonctionnalites." + clef + "Texte")
+                    )}
                   </p>
                 </li>
               ))}
             </ul>
           </section>
 
-          {/* ---- APPEL FINAL --------------------------------------------- */}
-          <section id="tarif" className="px-5 py-12 text-center md:px-10 md:py-[76px]">
-            <h2 className="mb-3 text-[28px] leading-[34px] font-extrabold tracking-[-0.03em] text-ds-texte-titre md:mb-3.5 md:text-[42px] md:leading-[48px]">
-              <span className="md:hidden">{t("finalTitreCourt")}</span>
-              <span className="hidden md:inline">{t("finalTitre")}</span>
-            </h2>
-            <p className="mb-6 text-[15px] leading-6 text-ds-texte-corps md:mb-[30px] md:text-[16px] md:leading-[26px]">
-              <span className="md:hidden">{t("gratuitPourLInstantCourt")}</span>
-              <span className="hidden md:inline">{t("gratuitPourLInstant")}</span>
-            </p>
-            <Link href={`/${locale}/inscription`} className={actionPrincipale}>
-              {t("ctaPrincipal")}
-              <Icone nom="arrow_forward" className="text-[15px]" />
-            </Link>
+          {/* ---- COMMENT ÇA MARCHE, EN TROIS ÉTAPES ----------------------
+           *
+           * LA SECTION QUE LE KIT POSE ET QUE LA LANDING N AVAIT PAS. Ses trois
+           * étapes sont vraies mot pour mot : il n y a rien à installer, aucune
+           * intégration transporteur à configurer, et le lien ne change plus
+           * jamais — c est l immuabilité du jeton, garantie par un déclencheur en
+           * base, pas par une promesse.
+           */}
+          <section id="etapes" className="px-5 py-12 md:px-10 md:py-[74px]">
+            <div className="text-center">
+              <span className={pilule}>{t("etapesPilule")}</span>
+              <h2 className="mx-auto mt-4 max-w-[720px] text-[30px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:mt-5 md:text-[44px]">
+                {t("etapesTitre")}
+              </h2>
+              <p className="mx-auto mt-[18px] mb-9 max-w-[620px] text-[16px] leading-[1.55] text-ds-texte-corps md:mb-11">
+                {t("etapesTexte")}
+              </p>
+            </div>
+
+            {/* ⚠️ UNE LISTE ORDONNÉE, ET PAS UNE GRILLE DE CARTES. Trois étapes
+                numérotées ont un ORDRE ; le rendre par des chiffres dessinés dans
+                des `div` le dirait à l œil et à personne d autre. */}
+            <ol className="grid gap-3.5 text-left md:grid-cols-3 md:gap-[18px]">
+              {([1, 2, 3] as const).map((n) => (
+                <li
+                  key={n}
+                  className="flex gap-3.5 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card md:p-6"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="flex h-9 w-9 flex-none items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-[14px] leading-[normal] font-extrabold text-ds-accent-encre"
+                  >
+                    {"0" + n}
+                  </span>
+                  <span className="flex min-w-0 flex-col gap-1.5">
+                    <h3 className="text-[18px] leading-[19.8px] font-bold tracking-[-0.045em] text-ds-texte-titre">
+                      {t(`etape${n}Titre`)}
+                    </h3>
+                    <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
+                      {t(`etape${n}Texte`)}
+                    </p>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* ---- APPEL FINAL : LA BANNIÈRE DU KIT -------------------------
+           *
+           * VALEURS RELEVÉES SUR LE KIT SERVI : bande au rayon `3xl`, dégradé
+           * DIAGONAL, remplissage 52/56, ombre `lg` ; titre 40/800 à -0,04em en
+           * blanc sur deux lignes, sous-titre 15/400 à 88 % de blanc, 14 px
+           * dessous, puis les actions à 26.
+           *
+           * ⚠️ L ACTION PRINCIPALE Y EST BLANCHE, PAS DÉGRADÉE, et c est la règle
+           * 3 : le dégradé est réservé à UNE seule action par écran. Il est déjà
+           * sur le bouton du héros ; le poser aussi ici en ferait deux, et sur un
+           * fond qui EST le dégradé il ne se verrait pas.
+           *
+           * ⚠️ ET LE SECOND BOUTON DU KIT N EST PAS PORTÉ. Il mène à un exemple de
+           * page client ; il n existe aucune page de démonstration, et en
+           * fabriquer une demanderait une commande réelle, donc un jeton réel
+           * dans une URL publique. La section qui montre ce que voit le client
+           * est plus haut, sur cette page.
+           */}
+          <section id="tarif" className="px-5 pb-12 md:px-10 md:pb-14">
+            <div className="degrade-ds-marque-diagonal relative overflow-hidden rounded-ds-3xl px-6 py-10 text-ds-texte-sur-marque shadow-ds-lg md:px-14 md:py-[52px]">
+              <div className="max-w-[520px]">
+                <h2 className="text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] md:text-[40px]">
+                  <span className="md:hidden">{t("finalTitreCourt")}</span>
+                  <span className="hidden md:inline">{t("finalTitre")}</span>
+                </h2>
+                {/* 88 % DE BLANC, ET NON UN GRIS : sur un dégradé, un gris de
+                    palette vire au sale d un bout à l autre de la bande. */}
+                <p className="mt-3.5 text-[15px] leading-[1.55] text-white/[.88]">
+                  <span className="md:hidden">{t("gratuitPourLInstantCourt")}</span>
+                  <span className="hidden md:inline">{t("gratuitPourLInstant")}</span>
+                </p>
+                <Link
+                  href={`/${locale}/inscription`}
+                  className="mt-[26px] flex min-h-13 w-full items-center justify-center gap-2 rounded-ds-pill border border-transparent bg-ds-surface-carte px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-md transition-shadow hover:shadow-ds-lg md:inline-flex md:h-13 md:w-auto md:min-h-0"
+                >
+                  {t("ctaPrincipal")}
+                  <Icone nom="arrow_forward" className="text-[15px]" />
+                </Link>
+              </div>
+            </div>
           </section>
         </main>
 
-        {/* ---- PIED ------------------------------------------------------ */}
-        <footer className="flex flex-col items-center gap-3.5 border-t border-ds-filet px-5 py-[22px] md:flex-row md:justify-between md:px-10 md:py-7">
-          <span className="text-[15px] leading-[19px] font-extrabold tracking-[-0.02em] text-ds-texte-titre">
-            DropLink
-          </span>
-          {/*
-            LE LIEN DE SIGNALEMENT DISPARAÎT QUAND LE CANAL N'EXISTE PAS, et ce
-            n'est pas un détail d'affichage : c'est la procédure de notification
-            et retrait qui fonde notre statut d'hébergeur (brief §12).
+        {/* ---- PIED ------------------------------------------------------
+         *
+         * TROIS COLONNES, COMME LE KIT — la marque, le produit, la société.
+         *
+         * ⚠️ SA QUATRIÈME, « RESTEZ INFORMÉ », N'EST PAS PORTÉE : elle pose un
+         * champ d'email qui n'irait nulle part. Il n'existe aucune liste de
+         * diffusion, et un formulaire qui avale une adresse sans rien en faire
+         * est pire qu'un formulaire absent.
+         *
+         * LE LIEN DE SIGNALEMENT DISPARAÎT QUAND LE CANAL N'EXISTE PAS, et ce
+         * n'est pas un détail d'affichage : c'est la procédure de notification
+         * et retrait qui fonde notre statut d'hébergeur (brief §12).
+         *
+         * ⚠️ DÉFAUT TROUVÉ EN PILOTANT LE PRODUIT LE 27/08/2026 : cette landing
+         * porte SON PROPRE pied, et la garde n'y avait pas été recopiée. Elle
+         * écrivait le lien SANS CONDITION, vers une page qui rend 404 tant
+         * qu'aucune adresse n'est configurée — sur la seule page que tout le
+         * monde voit. Ce qui se partage ici, c'est la RÈGLE, pas la mise en page.
+         */}
+        <footer className="border-t border-ds-filet px-5 py-9 md:px-10 md:py-11">
+          <div className="flex flex-col gap-8 md:flex-row md:justify-between md:gap-10">
+            <div className="max-w-[280px]">
+              <span className="text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre md:text-[18px]">
+                DropLink
+              </span>
+              <p className="mt-2 text-[13px] leading-[1.55] text-ds-texte-corps">
+                {t("piedTagline")}
+              </p>
+            </div>
 
-            ⚠️ DÉFAUT TROUVÉ EN PILOTANT LE PRODUIT LE 27/08/2026. Cette landing
-            porte SON PROPRE pied de page — celui du canevas, horizontal, qui
-            n'est pas celui de `PiedDePage` — et la garde n'y avait pas été
-            recopiée. Elle écrivait donc le lien SANS CONDITION, vers une page
-            qui rend 404 tant qu'aucune adresse n'est configurée. Le premier
-            clic d'un visiteur qui cherche à signaler un contenu tombait dans le
-            vide, sur la seule page que tout le monde voit.
+            <div className="flex flex-col gap-8 sm:flex-row sm:gap-16">
+              {(
+                [
+                  [
+                    "piedProduit",
+                    [
+                      ["fonctionnement", "#fonctionnement"],
+                      ["etapes", "#etapes"],
+                      ["tarif", "#tarif"],
+                      ["docs", `/${locale}/docs`],
+                    ],
+                  ],
+                  [
+                    "piedSociete",
+                    [
+                      ["blog", `/${locale}/blog`],
+                      ["conditions", `/${locale}/conditions`],
+                      ["confidentialite", `/${locale}/confidentialite`],
+                      ...(signalementDisponible()
+                        ? [["signalement", `/${locale}/signalement`]]
+                        : []),
+                    ],
+                  ],
+                ] as const
+              ).map(([titre, liens]) => (
+                <nav key={titre} aria-label={t(titre)}>
+                  <p className="mb-3.5 text-[13px] leading-[normal] font-extrabold text-ds-texte-titre">
+                    {t(titre)}
+                  </p>
+                  {/* ⚠️ `min-h-11` EST LE PLANCHER TACTILE (règle 5), et l'écart
+                      négatif en est la moitié indissociable : sans lui, chaque
+                      lien grandirait de 29 px et la colonne cesserait de
+                      décrire le rendu du kit. */}
+                  <ul className="flex flex-col gap-2.5">
+                    {liens.map(([clef, href]) => (
+                      <li key={clef}>
+                        {href.startsWith("#") ? (
+                          <a
+                            href={href}
+                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent"
+                          >
+                            {t("menu." + clef)}
+                          </a>
+                        ) : (
+                          <Link
+                            href={href}
+                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent"
+                          >
+                            {t.has("pied." + clef) ? t("pied." + clef) : t("menu." + clef)}
+                          </Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+            </div>
+          </div>
 
-            La garde est recopiée plutôt que le composant partagé importé : les
-            deux pieds n'ont pas le même dessin, et la planche fait foi. Ce qui
-            se partage ici, c'est la RÈGLE, pas la mise en page.
-          */}
-          <nav
-            aria-label={t("piedNavigation")}
-            className="flex flex-wrap justify-center gap-[18px] md:gap-[26px]"
-          >
-            {(
-              [
-                ["conditions", `/${locale}/conditions`],
-                ["confidentialite", `/${locale}/confidentialite`],
-                ...(signalementDisponible()
-                  ? ([["signalement", `/${locale}/signalement`]] as const)
-                  : []),
-              ] as const
-            ).map(([clef, href]) => (
-              /*
-                ⚠️ `min-h-11` EST LE PLANCHER TACTILE DU BRIEF §8 (44 points), ET
-                LA MARGE NÉGATIVE EN EST LA MOITIÉ INDISSOCIABLE. Mesuré au
-                navigateur le 09/09/2026 à 390 px : ces trois liens rendaient
-                15 px de haut. Leur largeur dépassait déjà 44 — seule la hauteur
-                manquait, d'où une correction purement verticale.
-
-                ⚠️ ET LES DEUX VALEURS DIFFÈRENT PARCE QUE LES INTERLIGNES
-                DIFFÈRENT : (44 − 15) / 2 = 14,5 au téléphone, où l'interligne
-                est de 15 px, mais (44 − 16) / 2 = 14 au bureau, où `md:leading-4`
-                le porte à 16. Recopier la même valeur des deux côtés ferait
-                bouger le pied d'un pixel sur l'une des deux tailles.
-
-                La marge rend au flux la hauteur exacte qu'il avait : sans elle
-                le pied grandirait de 29 px et la planche cesserait de décrire le
-                rendu. Vérifié : hauteur inchangée, texte déplacé de 0,0 px.
-              */
-              <Link
-                key={clef}
-                href={href}
-                className="-my-[14.5px] inline-flex min-h-11 items-center text-[12px] leading-[15px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent md:-my-3.5 md:md:text-[13px] md:leading-4 md:text-ds-texte-corps"
-              >
-                <span className="md:hidden">{t("piedCourt." + clef)}</span>
-                <span className="hidden md:inline">{t("pied." + clef)}</span>
-              </Link>
-            ))}
-          </nav>
+          <p className="mt-8 border-t border-ds-filet pt-6 text-[12px] leading-[normal] font-medium text-ds-texte-tenu md:mt-10">
+            {t("piedDroits", { annee: new Date().getUTCFullYear() })}
+          </p>
         </footer>
       </div>
     </div>

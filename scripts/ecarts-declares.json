@@ -3081,5 +3081,252 @@
         "raison": "CE QUI N EST PAS ICI EST DIT, plutot que laisse a deviner. Un ecran de parametres muet sur les secrets laisse chercher ou les regler — et la recherche finit par une cle collee quelque part. La cle de service ne quitte jamais le serveur : c est le principe VI, et cet encart est le seul endroit du produit ou il se lit."
       }
     ]
+  },
+  "fr": {
+    "valeurs": [
+      {
+        "textes": [
+          "Fonctionnalités",
+          "Comment ça marche",
+          "Comment ça marche ?",
+          "Tarifs",
+          "Documentation",
+          "Se connecter",
+          "Créer un compte",
+          "Créer ma première commande",
+          "Gratuit au lancement",
+          "Sans carte bancaire",
+          "Prêt en 30 secondes",
+          "Gestion de commandes",
+          "Créez, organisez et suivez toutes vos co",
+          "Analyses détaillées",
+          "Commandes créées, livrées, liens ouverts",
+          "Aucune installation, aucune intégration ",
+          "Créez votre commande",
+          "Ajoutez le nom du client, ses photos et ",
+          "Partagez le lien",
+          "Un lien unique est généré pour votre cli",
+          "Votre client suit en temps réel",
+          "Le suivi se met à jour automatiquement,",
+          "Produit",
+          "Société",
+          "© 2025 DropLink. Tous droits réservés."
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE POUR TOUTES CES LIGNES. La landing du kit compose SIX sections que nous n avons pas — une preuve sociale chiffree, une bande de logos de plateformes, une maquette de tableau de bord dans le heros, un bloc de temoignages, une colonne de newsletter — et chacune est declaree plus bas avec sa raison. Notre page est donc plus courte et plus large de colonne : ses cartes font 328 px la ou le kit en fait 274, et tout ce qui suit une section absente remonte. Tailles, graisses, interlettrages, interlignes et couleurs sont ceux du kit. Le second appel a l action, lui, est BLANC sur la banniere degradee et non degrade : la regle 3 reserve le degrade a UNE action par ecran, et il est deja sur celui du heros."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "+2 500 vendeurs nous font déjà confiance",
+          "Utilisé par des vendeurs sur",
+          "Vinted",
+          "ebay",
+          "amazon",
+          "shopify",
+          "Leboncoin",
+          "TikTok Shop",
+          "Témoignages",
+          "Ils ont arrêté les « où est mon",
+          "colis ? »",
+          "Vendeurs Vinted, e-commerçants et boutiq",
+          "Yanis",
+          "Vendeur Vinted",
+          "“ Franchement incroyable, ça change la v",
+          "Sarah",
+          "Boutique en ligne",
+          "“ Interface super propre et simple à uti",
+          "Mehdi",
+          "Revendeur",
+          "“ Ultra rapide à mettre en place, et ça ",
+          "Conçu pour les vendeurs, par des vendeur"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PREUVE SOCIALE EST INVENTEE, ET WASSIM A TRANCHE LE 27/08/2026 : ON NE LA FAIT PAS. Un chiffre de vendeurs sur une landing est un mensonge qui se mesure, et « 0 vendeur l utilise deja » serait pire que rien. Les trois temoignages sont des avis fabriques, avec nom, role et cinq etoiles — le produit est en phase de VALIDATION, il n a pas encore d utilisateurs a citer, et en inventer serait la seule chose de cette page qu on ne pourrait pas tenir. « Utilise par des vendeurs sur Vinted, eBay, Shopify… » ajoute une seconde faussete a la premiere : le produit n a AUCUNE integration avec ces plateformes, et c est sa raison d etre — il sert le vendeur qui n a PAS de boutique. « Concu par des vendeurs » n est pas vrai non plus. L espace se referme ; il ne se remplit pas."
+      },
+      {
+        "textes": [
+          "Multi-plateformes",
+          "Fonctionne avec Vinted, eBay, Shopify, T"
+        ],
+        "motif": "contrainte",
+        "raison": "LA SIXIEME FONCTIONNALITE DU KIT EST FAUSSE, et elle est remplacee plutot qu omise : « Rien a installer, rien a creer » dit ce qui distingue reellement le produit, et qui est verifiable — le destinataire n a JAMAIS de compte (decision 4). Les cinq autres sont reprises mot pour mot."
+      },
+      {
+        "textes": [
+          "FAQ",
+          "Questions fréquentes",
+          "À propos",
+          "Contact"
+        ],
+        "motif": "contrainte",
+        "raison": "QUATRE ENTREES VERS DES PAGES QUI N EXISTENT PAS. Une entree de navigation vers un 404, sur la seule page que tout le monde voit, est pire qu une entree absente — c est la meme regle que le lien de signalement, qui DISPARAIT quand son canal n est pas configure. « Documentation » est la, elle, parce que `/docs` repond 200."
+      },
+      {
+        "textes": [
+          "Restez informé"
+        ],
+        "motif": "contrainte",
+        "raison": "IL N EXISTE AUCUNE LISTE DE DIFFUSION. Un champ d email qui avale une adresse sans rien en faire est pire qu un champ absent, et en poser un demanderait d abord de decider ce qu on en fait — donc une table, un consentement et une desinscription."
+      },
+      {
+        "textes": [
+          "Français"
+        ],
+        "motif": "donnee",
+        "raison": "LE SELECTEUR DE LANGUE DU KIT N EST PAS PORTE. La langue vient de la negociation du navigateur et du prefixe d URL ; un selecteur devrait ecrire un choix quelque part — cookie ou profil — et ce choix entrerait en conflit avec la langue du VENDEUR, qui est celle de la page client. C est une decision produit, pas un controle."
+      },
+      {
+        "textes": [
+          "Un seul lien de suivi pour toute la",
+          "commande",
+          "DropLink crée une page de suivi client p",
+          "Le suivi de commande, sans un seul messa",
+          "relance",
+          "Photos, statut d'expédition, numéro de s",
+          "Créer un lien de suivi client en 3",
+          "étapes",
+          "Votre prochaine commande mérite mieux",
+          "Gratuit pendant le lancement. Aucune car",
+          "Un seul lien. Plus de ventes.",
+          "Conditions d'utilisation",
+          "Politique de confidentialité",
+          "Téléversement de photos",
+          "Ajoutez plusieurs photos et vidéos en un",
+          "Le suivi se met à jour tout seul et votr",
+          "Page client personnalisée",
+          "Un lien unique et une page à votre image"
+        ],
+        "motif": "structure",
+        "raison": "LES MEMES PHRASES, ECRITES AUTREMENT — un ecart de l outil, pas de l ecran. Le kit coupe ses titres en DEUX nœuds pour teinter le dernier mot d un degrade : « Un seul lien de suivi pour toute la » puis « commande ». La sonde lit donc deux textes la ou l œil en lit un, et aucun des deux ne peut correspondre a un titre entier. Le reste est du vocabulaire : nos titres et nos quatre libelles de fonctionnalite disent la meme chose dans les mots du produit, et nos deux liens legaux portent leur nom court — « Conditions », « Confidentialite » — parce qu ils vivent dans une colonne de pied, pas dans une phrase."
+      },
+      {
+        "textes": [
+          "Voir un exemple de page client",
+          "Voir un exemple"
+        ],
+        "motif": "donnee",
+        "raison": "IL N EXISTE AUCUNE PAGE DE DEMONSTRATION. En fabriquer une demanderait une commande REELLE, donc un `public_token` reel dans une URL publique — un jeton est IMMUABLE A VIE et transfere une CAPACITE, pas une donnee. La section « ce que voit le client » montre la meme chose, plus haut sur cette page, sans rien exposer."
+      },
+      {
+        "textes": [
+          "Téléversez vos photos",
+          "En un clic",
+          "Suivi automatique",
+          "Mise à jour en temps réel",
+          "Un lien unique",
+          "Pour votre client",
+          "Une expérience pro",
+          "À votre image"
+        ],
+        "motif": "structure",
+        "raison": "LES QUATRE PASTILLES FLOTTANTES EXISTENT, AVEC NOTRE CONTENU. Le kit les pose autour de la maquette de son heros et leur fait annoncer des capacites ; nous les posons autour du telephone de la section « ce que voit le client », et elles y disent ce que la page MONTRE — « 11 photos ajoutees », « Colis en transit », « Commande validee ». A cet endroit, decrire l ecran vaut mieux que le vanter."
+      },
+      {
+        "textes": [
+          "Tableau de bord",
+          "Commandes",
+          "Suivi d'envois",
+          "Analyses",
+          "Ma marque",
+          "Paramètres",
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade",
+          "NB",
+          "Mon compte",
+          "nassim@laplanque.fr",
+          "Rechercher une commande...",
+          "Ctrl",
+          "Nassim B.",
+          "Bonjour Nassim !",
+          "Voici un aperçu rapide de votre activité",
+          "7 derniers jours",
+          "Commandes créées",
+          "+12%",
+          "Livrées",
+          "En transit",
+          "Liens clients ouverts",
+          "6,2j",
+          "Temps moyen de livraison",
+          "-18%",
+          "Commandes récentes",
+          "Voir tout",
+          "N°",
+          "CLIENT",
+          "STATUT",
+          "DATE",
+          "#DLK7842",
+          "Yanis B.",
+          "Il y a 1h",
+          "Sofia M.",
+          "En livraison",
+          "Amine K.",
+          "Livrée",
+          "Luca R.",
+          "Commandée"
+        ],
+        "motif": "contrainte",
+        "raison": "LA MAQUETTE DE TABLEAU DE BORD DU HEROS N EST PAS PORTEE, et pour deux raisons qui se renforcent. La premiere : elle est faite de CHIFFRES INVENTES — 156 commandes, +12 %, 342 liens ouverts, 6,2 jours de delai moyen — sur la page qui doit etre la plus verifiable du produit. La seconde : elle dessine un ecran « Tableau de bord » et un ecran « Parametres » que le depot n a pas, et un encart « Passez au Pro » que la contrainte n°1 interdit. Ce que la landing montre a la place est le VRAI produit : la page client, dans un telephone, avec la page que le vendeur envoie."
+      },
+      {
+        "textes": [
+          "Ajouter des photos",
+          "Glissez-déposez vos fichiers ou cliquez ",
+          "https://droplink.fr/c/8F2k9",
+          "Commande créée",
+          "12/03 · 10:24",
+          "Livré"
+        ],
+        "motif": "donnee",
+        "raison": "LES TROIS MINIATURES DES CARTES D ETAPE. Le kit dessine dans chacune un morceau d interface : une zone de depot, un champ de lien copiable, une frise de suivi. Elles montrent des donnees fabriquees — un lien `droplink.fr/c/8F2k9` qui ne mene nulle part, une date de commande inventee. Les trois etapes, elles, sont portees mot pour mot ; c est leur illustration qui ne l est pas."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "Ce que voit le client",
+          "Photos et suivi en un seul lien",
+          "Déposez les photos, collez le suivi, env",
+          "Vos clients n'ont rien à installer",
+          "Fini de renvoyer les photos une par une",
+          "Trois choses que vous ne referez plus à ",
+          "Import des photos en un clic",
+          "Vos photos arrivent directement dans la ",
+          "Le suivi se met à jour seul",
+          "Vous collez le numéro une fois. Le clien",
+          "Le lien ne change jamais",
+          "Modifiez la page quand vous voulez : le ",
+          "Rien à installer, rien à créer",
+          "Votre client ouvre le lien et voit tout.",
+          "Créer un lien de suivi client en 3 étape",
+          "Votre prochaine commande mérite mieux qu",
+          "Gratuit pendant la phase de lancement. A",
+          "Un seul lien. Toute la commande.",
+          "Blog",
+          "Conditions",
+          "Confidentialité",
+          "Signaler un contenu"
+        ],
+        "motif": "structure",
+        "raison": "NOS TITRES EN UN SEUL NŒUD, ET NOTRE VOCABULAIRE — voir la declaration symetrique dans les manquants. Trois lignes portent une decision qui leur est propre : « Rien a installer, rien a creer » remplace la sixieme fonctionnalite du kit, qui annonce une integration que nous n avons pas ; « Signaler un contenu » est la procedure de notification et retrait qui fonde notre statut d hebergeur, et elle DISPARAIT quand son canal n est pas configure ; et « Blog » est une route qui existe, en francais seulement."
+      },
+      {
+        "textes": [
+          "Atelier Nord",
+          "Votre commande",
+          "11 photos ajoutées",
+          "Vues par le client",
+          "Colis en transit",
+          "Mis à jour tout seul",
+          "Commande validée",
+          "par le client"
+        ],
+        "motif": "structure",
+        "raison": "LE TELEPHONE MONTRE LA PAGE CLIENT, pas une image de synthese : c est le produit qu on vend, et une capture inventee serait la seule chose de cette page qu on ne pourrait pas tenir. Les trois pastilles autour de lui sont les `FloatingChip` du kit avec notre contenu — voir la declaration symetrique dans les manquants."
+      }
+    ]
   }
 }

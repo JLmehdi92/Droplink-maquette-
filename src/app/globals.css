@@ -600,6 +600,17 @@ body {
 }
 
 /*
+ * LA VARIANTE DIAGONALE, ET ELLE N'EST PAS DÉCORATIVE. Le kit marketing la pose
+ * sur sa bannière d'appel final — 120 degrés, contre 90 pour les boutons — parce
+ * qu'un dégradé horizontal sur une bande de 1180 px de large et 200 de haut rend
+ * trois aplats verticaux, pas un dégradé. Le jeton existait ; il n'avait aucune
+ * classe pour l'employer.
+ */
+.degrade-ds-marque-diagonal {
+  background-image: var(--degrade-ds-marque-diagonal);
+}
+
+/*
  * Champs de saisie. Fond légèrement en retrait de la carte, filet au repos,
  * accent et halo au focus.
  *
