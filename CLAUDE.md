@@ -874,11 +874,17 @@ l'outiller côté administration.
 **La production attend `pnpm db:migrate` pour 147 à 156, AVANT le
 déploiement.**
 
-**▶️ RESTE : l'export des données, puis la suppression** des données et du
-compte — gestes irréversibles, qui exigent confirmation recopiée, mot de passe
-actuel, purge R2 et trace. ⚠️ La décision 9 du brief interdit la suppression de
-compte **par l'administration** ; une suppression par le vendeur lui-même est
-une autre question.
+**L'EXPORT DES DONNÉES EST EN PLACE** (`/api/compte/export`, JSON), **SANS LES
+NOTES INTERNES** : la décision 15 vaut pour tout fichier qui sort, pas seulement
+pour le CSV. Ni adresse du client final, ni jeton de désabonnement, ni
+empreintes de visiteurs. Contrôlé par sentinelles dans le fichier sérialisé,
+404 en `aal1`, plafond de débit partagé avec l'export CSV.
+
+**▶️ EN ATTENTE D'UNE DÉCISION DE WASSIM : la suppression du compte et des
+données.** Ce n'est pas un arbitrage de design : un hébergeur doit conserver
+les données d'identification de ses comptes (LCEN et son décret), la décision 9
+interdit la suppression de compte **par l'administration**, et la purge touche
+R2 et le suivi 17TRACK. Le kit la dessine ; elle reste déclarée absente.
 
 ### Comment on vérifie un écran migré
 
