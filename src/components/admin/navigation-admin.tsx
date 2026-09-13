@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import {
   BookMarked,
+  ClipboardList,
   LayoutDashboard,
   Settings,
   Store,
@@ -34,7 +36,14 @@ import { LienEcran } from "@/components/lien-ecran";
  * frontière serveur → client. Le layout nomme, l'îlot résout.
  */
 
-export type CleIconeAdmin = "panneau" | "comptes" | "boutiques" | "journal" | "veille" | "reglages";
+export type CleIconeAdmin =
+  | "panneau"
+  | "commandes"
+  | "comptes"
+  | "boutiques"
+  | "journal"
+  | "veille"
+  | "reglages";
 
 /**
  * LES SIX ICÔNES, EN LUCIDE. L'ancien code employait les noms
@@ -44,6 +53,7 @@ export type CleIconeAdmin = "panneau" | "comptes" | "boutiques" | "journal" | "v
  */
 const ICONES: Record<CleIconeAdmin, LucideIcon> = {
   panneau: LayoutDashboard,
+  commandes: ClipboardList,
   comptes: Users,
   boutiques: Store,
   journal: BookMarked,
@@ -109,12 +119,33 @@ export function NavigationAdmin({
 }) {
   const chemin = usePathname();
   const racine = hrefRacine(entrees);
+  const barre = useRef<HTMLElement>(null);
+
+  /*
+   * L'ONGLET COURANT EST RAMENÉ DANS LA VUE. La barre défile (voir plus bas) :
+   * sans ce geste, ouvrir « Paramètres système » depuis la colonne du bureau
+   * puis passer au téléphone montrerait une barre dont l'onglet allumé est
+   * hors de l'écran — on ne saurait plus où l'on est.
+   */
+  useEffect(() => {
+    const courant = barre.current?.querySelector('[aria-current="page"]');
+    if (courant instanceof HTMLElement) courant.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [chemin]);
 
   if (variante === "onglets") {
     return (
+      /*
+       * ⚠️ LA BARRE DÉFILE, ET ELLE NE LE FAISAIT PAS. Six onglets de 60 px
+       * tenaient dans 390 ; le septième, « Commandes » (14/09/2026), a fait se
+       * CHEVAUCHER les libellés — « PanneauCommandesComptesBoutiques » — sans
+       * qu'aucune sonde le voie : rien ne déborde du document, les boîtes se
+       * rétrécissent et leurs textes se recouvrent. Chaque onglet garde donc la
+       * largeur de son libellé, et la barre glisse sous le pouce.
+       */
       <nav
+        ref={barre}
         aria-label={etiquette}
-        className="sticky bottom-0 z-20 flex justify-between border-t border-ds-filet bg-ds-surface-carte px-2 pt-2 pb-[18px] md:hidden"
+        className="defilement-discret sticky bottom-0 z-20 flex overflow-x-auto border-t border-ds-filet bg-ds-surface-carte px-2 pt-2 pb-[18px] md:hidden"
       >
         {entrees.map((entree) => {
           const courante = estCourante(chemin, entree.href, entree.href === racine);
@@ -127,7 +158,7 @@ export function NavigationAdmin({
               href={entree.href}
               aria-current={courante ? "page" : undefined}
               className={
-                "flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-1 rounded-ds-sm py-1 " +
+                "flex min-h-11 min-w-[60px] flex-auto shrink-0 flex-col items-center justify-center gap-1 rounded-ds-sm px-1.5 py-1 " +
                 (courante ? "text-ds-accent" : "text-ds-texte-sourdine")
               }
             >
@@ -139,7 +170,7 @@ export function NavigationAdmin({
                 la sonde ne pouvait pas mesurer — le plafond de débit de
                 l'administration lui servait des 404.
               */}
-              <span className={"text-[11.5px] leading-3 " + (courante ? "font-bold" : "font-semibold")}>
+              <span className={"text-[11.5px] leading-3 whitespace-nowrap " + (courante ? "font-bold" : "font-semibold")}>
                 {entree.court}
               </span>
             </Composant>

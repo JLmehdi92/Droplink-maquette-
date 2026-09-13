@@ -70,6 +70,12 @@ export default async function LayoutAdmin({
       icone: "panneau",
     },
     {
+      href: `/${langue}/admin/commandes`,
+      libelle: t("commandes.titre"),
+      court: t("onglets.commandes"),
+      icone: "commandes",
+    },
+    {
       href: `/${langue}/admin/comptes`,
       libelle: t("comptes.titre"),
       court: t("onglets.comptes"),

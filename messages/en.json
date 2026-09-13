@@ -1035,6 +1035,7 @@
       "titre": "Audit log",
       "actions": {
         "boutiques_liste": "Viewed the shop list",
+        "commandes_liste": "Viewed the order list",
         "compte_reactivation": "Reactivated an account",
         "compte_suspension": "Suspended an account",
         "comptes_detail": "Viewed an account record",
@@ -1453,12 +1454,63 @@
       "boutiques": "Shops",
       "journal": "Log",
       "surveillance": "Watch",
-      "parametres": "Settings"
+      "parametres": "Settings",
+      "commandes": "Orders"
     },
     "langues": {
       "fr": "French",
       "en": "English",
       "zh-CN": "Simplified Chinese"
+    },
+    "commandes": {
+      "titre": "Orders",
+      "sousTitreListe": "Manage and track every order created on DropLink.",
+      "trace": "This view is written to the audit log, along with its criteria. The list shows neither the customer, nor the product reference, nor the order link.",
+      "tuileTotal": "Total orders",
+      "tuileTotalAide": "with real content",
+      "tuileEnTransit": "In transit",
+      "tuileLivrees": "Delivered",
+      "tuilePreparation": "Preparing",
+      "tuileExpediees": "Shipped",
+      "tuileCeMois": "Created this month",
+      "tuileCeMoisAide": "since the 1st of the month",
+      "partDuTotal": "{part}% of total",
+      "recherche": "Search an order",
+      "recherchePlaceholder": "Reference, shop or email…",
+      "chercher": "Search",
+      "filtreStatut": "Filter by status",
+      "filtreJours": "Filter by date",
+      "statuts": {
+        "tous": "All statuses",
+        "preparation": "Preparing",
+        "expedie": "Shipped",
+        "en_transit": "In transit",
+        "livre": "Delivered"
+      },
+      "fenetres": {
+        "toutes": "All dates",
+        "7": "Last 7 days",
+        "30": "Last 30 days"
+      },
+      "reinitialiser": "Reset",
+      "liste": "Order list",
+      "listeTotal": "{total, plural, one {# order in total} other {# orders in total}}",
+      "colonnes": {
+        "reference": "#",
+        "compte": "Account",
+        "boutique": "Shop",
+        "statut": "Status",
+        "transporteur": "Carrier",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "voir": "View",
+      "voirLong": "View the account of {email}",
+      "nonConfiguree": "Shop not set up",
+      "videTout": "No order has been created yet.",
+      "videFiltre": "No order matches these filters.",
+      "pageSuivante": "Show more",
+      "repartition": "Status breakdown"
     }
   },
   "erreurs": {

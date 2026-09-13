@@ -1035,6 +1035,7 @@
       "titre": "审计日志",
       "actions": {
         "boutiques_liste": "查看店铺列表",
+        "commandes_liste": "查看订单列表",
         "compte_reactivation": "恢复一个账户",
         "compte_suspension": "停用一个账户",
         "comptes_detail": "查看账户详情",
@@ -1453,12 +1454,63 @@
       "boutiques": "店铺",
       "journal": "日志",
       "surveillance": "监控",
-      "parametres": "设置"
+      "parametres": "设置",
+      "commandes": "订单"
     },
     "langues": {
       "fr": "法语",
       "en": "英语",
       "zh-CN": "简体中文"
+    },
+    "commandes": {
+      "titre": "订单",
+      "sousTitreListe": "管理并追踪 DropLink 上创建的所有订单。",
+      "trace": "本次访问及其搜索条件都会写入审计日志。列表不显示客户、商品编号或订单链接。",
+      "tuileTotal": "订单总数",
+      "tuileTotalAide": "含实际内容",
+      "tuileEnTransit": "运输中",
+      "tuileLivrees": "已送达",
+      "tuilePreparation": "准备中",
+      "tuileExpediees": "已发货",
+      "tuileCeMois": "本月创建",
+      "tuileCeMoisAide": "自本月 1 日起",
+      "partDuTotal": "占总数 {part}%",
+      "recherche": "搜索订单",
+      "recherchePlaceholder": "订单编号、店铺或邮箱…",
+      "chercher": "搜索",
+      "filtreStatut": "按状态筛选",
+      "filtreJours": "按日期筛选",
+      "statuts": {
+        "tous": "全部状态",
+        "preparation": "准备中",
+        "expedie": "已发货",
+        "en_transit": "运输中",
+        "livre": "已送达"
+      },
+      "fenetres": {
+        "toutes": "全部日期",
+        "7": "近 7 天",
+        "30": "近 30 天"
+      },
+      "reinitialiser": "重置",
+      "liste": "订单列表",
+      "listeTotal": "共 {total} 个订单",
+      "colonnes": {
+        "reference": "#",
+        "compte": "账户",
+        "boutique": "店铺",
+        "statut": "状态",
+        "transporteur": "承运商",
+        "date": "日期",
+        "actions": "操作"
+      },
+      "voir": "查看",
+      "voirLong": "查看 {email} 的账户",
+      "nonConfiguree": "店铺尚未设置",
+      "videTout": "尚未创建任何订单。",
+      "videFiltre": "没有订单符合当前筛选条件。",
+      "pageSuivante": "查看更多",
+      "repartition": "状态分布"
     }
   },
   "erreurs": {

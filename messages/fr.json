@@ -1035,6 +1035,7 @@
       "titre": "Journal d'audit",
       "actions": {
         "boutiques_liste": "Consultation de la liste des boutiques",
+        "commandes_liste": "Consultation de la liste des commandes",
         "compte_reactivation": "Réactivation d’un compte",
         "compte_suspension": "Suspension d’un compte",
         "comptes_detail": "Consultation d’une fiche de compte",
@@ -1453,12 +1454,63 @@
       "boutiques": "Boutiques",
       "journal": "Journal",
       "surveillance": "Veille",
-      "parametres": "Réglages"
+      "parametres": "Réglages",
+      "commandes": "Commandes"
     },
     "langues": {
       "fr": "Français",
       "en": "Anglais",
       "zh-CN": "Chinois simplifié"
+    },
+    "commandes": {
+      "titre": "Commandes",
+      "sousTitreListe": "Gérez et suivez toutes les commandes créées sur DropLink.",
+      "trace": "Cette consultation est écrite au journal d'audit, avec ses critères. La liste ne montre ni le client, ni la référence produit, ni le lien de la commande.",
+      "tuileTotal": "Total commandes",
+      "tuileTotalAide": "avec du contenu réel",
+      "tuileEnTransit": "En transit",
+      "tuileLivrees": "Livrées",
+      "tuilePreparation": "En préparation",
+      "tuileExpediees": "Expédiées",
+      "tuileCeMois": "Créées ce mois-ci",
+      "tuileCeMoisAide": "depuis le 1er du mois",
+      "partDuTotal": "{part} % du total",
+      "recherche": "Rechercher une commande",
+      "recherchePlaceholder": "Référence, boutique ou adresse…",
+      "chercher": "Rechercher",
+      "filtreStatut": "Filtrer par statut",
+      "filtreJours": "Filtrer par date",
+      "statuts": {
+        "tous": "Tous les statuts",
+        "preparation": "En préparation",
+        "expedie": "Expédiée",
+        "en_transit": "En transit",
+        "livre": "Livrée"
+      },
+      "fenetres": {
+        "toutes": "Toutes les dates",
+        "7": "7 derniers jours",
+        "30": "30 derniers jours"
+      },
+      "reinitialiser": "Réinitialiser",
+      "liste": "Liste des commandes",
+      "listeTotal": "{total, plural, one {# commande au total} other {# commandes au total}}",
+      "colonnes": {
+        "reference": "#",
+        "compte": "Compte",
+        "boutique": "Boutique",
+        "statut": "Statut",
+        "transporteur": "Transporteur",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "voir": "Voir",
+      "voirLong": "Voir le compte de {email}",
+      "nonConfiguree": "Boutique non configurée",
+      "videTout": "Aucune commande n'a encore été créée.",
+      "videFiltre": "Aucune commande ne correspond à ces filtres.",
+      "pageSuivante": "Voir la suite",
+      "repartition": "Répartition des statuts"
     }
   },
   "erreurs": {

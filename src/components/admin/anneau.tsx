@@ -31,7 +31,7 @@ import { getFormatter } from "next-intl/server";
  * 150 px de base, contre 37 dans le panneau étroit de la vue d'ensemble, où
  * tronquer rendrait « A » et « S. ».
  */
-const COTES = { panneau: 190, liste: 165, compact: 124 } as const;
+const COTES = { panneau: 190, liste: 165, commandes: 170, compact: 124 } as const;
 
 /*
  * LES DEUX POLICES DU CENTRE SONT CALCULÉES, PAS ÉCRITES. Le kit les dérive de
@@ -86,6 +86,10 @@ export async function Anneau({
   /* La légende du kit a deux formes seulement : large sur la vue d'ensemble,
      `SplitLegend` partout ailleurs — quelle que soit la taille de l'anneau. */
   const liste = variante !== "panneau";
+  /* ⚠️ ET UNE TROISIÈME SUR L'ÉCRAN DES COMMANDES, relevée sur `AdminOrders` :
+     pastille 9, écart 10, libellé et valeur 13,5, part 12,5 sur 34 px, rangées
+     à 13 et 20 px entre l'anneau et sa légende. */
+  const commandes = variante === "commandes";
 
   /* Les segments sont calculés AVANT le rendu : un cumul tenu pendant le `map`
      serait une écriture après rendu, et React n'en garantit pas l'ordre. */
@@ -98,7 +102,7 @@ export async function Anneau({
   }, []);
 
   return (
-    <div className="flex flex-col items-center gap-6 sm:flex-row">
+    <div className={"flex flex-col items-center sm:flex-row " + (commandes ? "gap-5" : "gap-6")}>
       <div className="relative shrink-0" style={{ width: COTE, height: COTE }}>
         <svg width={COTE} height={COTE} viewBox={`0 0 ${COTE} ${COTE}`} aria-hidden="true">
           <g transform={`rotate(-90 ${COTE / 2} ${COTE / 2})`}>
@@ -135,17 +139,18 @@ export async function Anneau({
 
       <ul
         className={
-          "flex min-w-0 flex-col justify-center gap-3.5 self-stretch " +
+          "flex min-w-0 flex-col justify-center self-stretch " +
+          (commandes ? "gap-[13px] " : "gap-3.5 ") +
           (liste ? "flex-[1_1_150px]" : "flex-1")
         }
       >
         {parts.map((p) => (
-          <li key={p.cle} className="flex items-center gap-[11px]">
+          <li key={p.cle} className={"flex items-center " + (commandes ? "gap-2.5" : "gap-[11px]")}>
             {/* La pastille DOUBLE le libellé qui suit : c'est un repère de
                 balayage vers l'anneau, jamais le seul porteur de l'information. */}
             <span
               aria-hidden="true"
-              className="h-2.5 w-2.5 flex-none rounded-ds-pill"
+              className={"flex-none rounded-ds-pill " + (commandes ? "h-[9px] w-[9px]" : "h-2.5 w-2.5")}
               style={{ background: p.trait }}
             />
             {/* ⚠️ LE LIBELLÉ NE TRONQUE PAS DANS LE PANNEAU ÉTROIT, et le kit non
@@ -155,7 +160,8 @@ export async function Anneau({
                 base, le kit tronque et nous aussi. */}
             <span
               className={
-                "min-w-0 flex-1 text-[14px] leading-[normal] whitespace-nowrap text-ds-texte-titre " +
+                "min-w-0 flex-1 leading-[normal] whitespace-nowrap text-ds-texte-titre " +
+                (commandes ? "text-[13.5px] " : "text-[14px] ") +
                 (liste ? "overflow-hidden text-ellipsis" : "")
               }
             >
@@ -163,7 +169,8 @@ export async function Anneau({
             </span>
             <span
               className={
-                "text-right text-[14px] leading-[normal] font-bold whitespace-nowrap text-ds-texte-titre " +
+                "text-right leading-[normal] font-bold whitespace-nowrap text-ds-texte-titre " +
+                (commandes ? "text-[13.5px] " : "text-[14px] ") +
                 (liste ? "" : "w-[46px]")
               }
             >
@@ -171,8 +178,8 @@ export async function Anneau({
             </span>
             <span
               className={
-                "text-right text-[13px] leading-[normal] text-ds-texte-sourdine " +
-                (liste ? "w-[38px]" : "w-10")
+                "text-right leading-[normal] text-ds-texte-sourdine " +
+                (commandes ? "w-[34px] text-[12.5px]" : liste ? "w-[38px] text-[13px]" : "w-10 text-[13px]")
               }
             >
               {part(total === 0 ? 0 : Math.round((p.valeur / total) * 100))}

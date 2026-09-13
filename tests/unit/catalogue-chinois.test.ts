@@ -73,6 +73,7 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["admin.panneau.statutPart", "La variable et le signe pour cent, collés comme en chinois."],
   ["admin.comptes.part", "Le même gabarit, sur l'anneau des comptes."],
   ["admin.boutiques.part", "Le même gabarit, sur l'anneau des boutiques."],
+  ["admin.commandes.colonnes.reference", "Le dièse de la colonne des références, comme le kit l'écrit dans les trois langues."],
   ["admin.journal.part", "Le même gabarit, sur l'anneau du journal."],
   ["marque.reseau.instagram", "Nom propre."],
   ["marque.reseau.tiktok", "Nom propre."],

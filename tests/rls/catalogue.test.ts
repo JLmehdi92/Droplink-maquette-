@@ -461,6 +461,17 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "`public_token`, qui transfère une capacité et non une donnée.",
     ],
     [
+      "lister_commandes_admin",
+      "Commandes de toute la plateforme pour l'administration (migrations 159-160, " +
+        "décision de Wassim du 14/09/2026). UN HUMAIN Y LIT LES DONNÉES DE TIERS : " +
+        "UNE entrée d'audit par page, portant ses critères, dans la transaction de " +
+        "la lecture — `volatile` pour cette raison. Elle ne rend AUCUN contenu : ni " +
+        "pseudo ni adresse du client final, qui n'a jamais eu de compte chez nous, " +
+        "ni référence produit, ni note interne, ni `public_token` — contrôlé par " +
+        "valeur dans `tests/rls/commandes-admin.test.ts`. Un statut ou une fenêtre " +
+        "inconnus sont REFUSÉS (DL055) : ignorés, ils rendraient la liste entière.",
+    ],
+    [
       "stockage_total_admin",
       "Somme des octets occupés, tous comptes confondus. Elle lit les compteurs " +
         "par boutique et jamais `order_media` : le coût suit ainsi le nombre de " +

@@ -368,6 +368,10 @@ const DECLARES: Readonly<Record<string, Verdict>> = {
     change: false,
     raison: "liste admin des boutiques : lecture auditee, l'ecriture detectee est sa trace",
   },
+  "audit/commandes.ts": {
+    change: false,
+    raison: "liste admin des commandes : lecture auditee, l'ecriture detectee est sa trace",
+  },
   "audit/comptes.ts": {
     change: false,
     raison: "listes et journal admin : lectures auditees, l'ecriture detectee est leur trace",

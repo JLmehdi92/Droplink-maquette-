@@ -62,9 +62,31 @@ function actionsEcritesEnBase(): string[] {
       // Les actions du journal ont deux segments et sont insérées dans
       // `admin_audit_log` ; les autres chaînes pointées du SQL (noms de
       // schémas, chemins) ne s'écrivent jamais dans cette colonne.
-      if (valeur !== undefined && /^(compte|comptes|boutiques|parametre)\./.test(valeur)) {
+      if (valeur !== undefined && /^(compte|comptes|boutiques|commandes|panneau|parametre)\./.test(valeur)) {
         trouvees.add(valeur);
       }
+    }
+  }
+  return [...trouvees].sort();
+}
+
+/**
+ * Les actions passées à `journaliser_admin`, QUEL QUE SOIT LEUR PRÉFIXE.
+ *
+ * ⚠️ LA LISTE DE PRÉFIXES CI-DESSUS EST UNE SÉLECTION, et elle a laissé passer
+ * `commandes.liste` (migration 159) — et, depuis la migration 058,
+ * `panneau.alertes`, que personne n'avait vue manquer : une action d'un préfixe nouveau n'entrait
+ * dans aucune attente, et le test « dans les deux sens » restait vert sans l'avoir
+ * vue. Ce second relevé lit l'APPEL lui-même — le premier argument de la
+ * fonction qui écrit le journal — et exige que le premier le connaisse.
+ */
+function actionsJournalisees(): string[] {
+  const dossier = join(RACINE, "supabase", "migrations");
+  const trouvees = new Set<string>();
+  for (const fichier of readdirSync(dossier).filter((f) => f.endsWith(".sql"))) {
+    const sql = readFileSync(join(dossier, fichier), "utf8");
+    for (const m of sql.matchAll(/journaliser_admin\(\s*'([a-z_]+\.[a-z_]+)'/g)) {
+      if (m[1] !== undefined) trouvees.add(m[1]);
     }
   }
   return [...trouvees].sort();
@@ -77,6 +99,8 @@ const ATTENDU: Record<string, ReturnType<typeof natureDAction>> = {
   "comptes.liste": "consultation",
   "comptes.detail": "consultation",
   "boutiques.liste": "consultation",
+  "commandes.liste": "consultation",
+  "panneau.alertes": "consultation",
   "parametre.creation": "parametre",
   "parametre.modification": "parametre",
 };
@@ -88,6 +112,12 @@ describe("La nature d'une action de journal", () => {
     // Un ensemble vide passe tout. Si la lecture des migrations casse, ce
     // fichier doit le dire ici plutôt que de certifier le silence.
     expect(actions.length, "aucune action lue dans les migrations").toBeGreaterThanOrEqual(7);
+  });
+
+  test("aucune action journalisée n'échappe à l'inventaire, quel que soit son préfixe", () => {
+    const journalisees = actionsJournalisees();
+    expect(journalisees.length, "aucun appel à journaliser_admin lu").toBeGreaterThanOrEqual(4);
+    expect(journalisees.filter((a) => !actions.includes(a))).toEqual([]);
   });
 
   test("l'inventaire et les attentes coïncident DANS LES DEUX SENS", () => {

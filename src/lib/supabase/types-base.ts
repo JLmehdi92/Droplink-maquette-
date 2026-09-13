@@ -1188,6 +1188,29 @@ export type Database = {
           stockage_octets: number
         }[]
       }
+      lister_commandes_admin: {
+        Args: {
+          p_curseur_date: string
+          p_curseur_id: string
+          p_ip_hash: string
+          p_jours: string
+          p_limite: number
+          p_recherche: string
+          p_statut: string
+        }
+        Returns: {
+          accent_color: string
+          boutique_id: string
+          boutique_nom: string
+          created_at: string
+          id: string
+          proprietaire_email: string
+          proprietaire_id: string
+          reference_courte: string
+          statut: Database["public"]["Enums"]["order_status"]
+          transporteur: number
+        }[]
+      }
       lister_comptes_admin: {
         Args: {
           p_curseur_date: string

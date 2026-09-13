@@ -21,7 +21,14 @@ const PARTS = [
   { cle: "preparation", trait: "var(--color-ds-alerte)" },
 ] as const;
 
-export async function AnneauStatuts({ repartition }: { readonly repartition: RepartitionAdmin }) {
+export async function AnneauStatuts({
+  repartition,
+  variante = "panneau",
+}: {
+  readonly repartition: RepartitionAdmin;
+  /** « commandes » : l'écran de liste des commandes, où le kit le pose à 170. */
+  readonly variante?: "panneau" | "commandes";
+}) {
   const t = await getTranslations("admin.panneau");
 
   const valeurs = {
@@ -33,6 +40,7 @@ export async function AnneauStatuts({ repartition }: { readonly repartition: Rep
 
   return (
     <Anneau
+      variante={variante}
       total={repartition.total}
       unite={t("statutsUnite")}
       part={(pourcent) => t("statutPart", { part: pourcent })}
