@@ -22,6 +22,14 @@ import { fournisseurActif } from "@/lib/auth/fournisseurs";
  * ramenant ici, le séparateur ne peut plus exister sans son bouton, puisque
  * c'est la même fonction qui rend les deux ou rien du tout.
  *
+ * ⚠️ ET LE DÉFAUT EST REVENU QUAND MÊME, le 11/09/2026, par la porte que ce
+ * paragraphe laissait ouverte. La migration au design system a exporté un
+ * `SeparateurAcces` depuis la coque d'accès, et les DEUX pages l'ont posé à
+ * côté de ce bouton : deux « ou » empilés en production, où Google est actif,
+ * et un « ou continuer avec » suivi de RIEN dans tout environnement où il ne
+ * l'est pas. Mesuré le 13/09/2026 contre le kit `auth`. Le séparateur vit donc
+ * désormais ICI, non exporté : aucune page ne peut plus en poser un.
+ *
  * L'ACTION REVÉRIFIE CE MÊME DRAPEAU. Ne pas afficher un bouton n'empêche
  * personne d'appeler l'action : dans un module `"use server"`, chaque export est
  * un point d'entrée. L'absence d'affichage est une commodité, pas une garde.
@@ -31,43 +39,48 @@ import { fournisseurActif } from "@/lib/auth/fournisseurs";
  * l'échec est silencieux : derrière un pare-feu, le bouton s'afficherait sans
  * marque et paraîtrait cassé. Le glyphe est en SVG local.
  */
-export async function BoutonGoogle({ locale }: { locale: string }) {
+/** Le séparateur du kit : deux filets et un libellé 13 / 600 en sourdine. */
+function Separateur({ libelle }: { readonly libelle: string }) {
+  return (
+    <div aria-hidden="true" className="flex items-center gap-4">
+      <span className="h-px flex-1 bg-ds-filet" />
+      <span className="text-[13px] font-semibold text-ds-texte-sourdine">{libelle}</span>
+      <span className="h-px flex-1 bg-ds-filet" />
+    </div>
+  );
+}
+
+export async function BoutonGoogle({
+  locale,
+  separateur,
+}: {
+  locale: string;
+  /**
+   * OÙ EST LE « OU », ET CE QU'IL DIT — les deux pages du kit ne le posent pas
+   * au même endroit. La connexion met le formulaire d'abord, puis « ou
+   * continuer avec », puis Google ; l'inscription met Google d'abord, puis
+   * « ou », puis le formulaire.
+   */
+  separateur: { readonly position: "avant" | "apres"; readonly cle: "ou" | "ouAvec" };
+}) {
   if (!fournisseurActif("google")) return null;
 
   const t = await getTranslations({ locale, namespace: "connexion" });
+  const trait = <Separateur libelle={t(separateur.cle)} />;
 
   return (
     <>
-      {/* LE SÉPARATEUR EST ICI, ET PAS DANS LA PAGE. Il l'a été : la page en
-          rendait un et ce composant un second, les deux s'empilaient. Le
-          ramener ici ne corrige pas seulement le doublon — il rend le défaut
-          IMPOSSIBLE. Ce composant rend `null` quand Google n'est pas
-          configuré ; un séparateur écrit dans la page tiendrait alors à une
-          condition recopiée que le prochain chemin oubliera, et laisserait un
-          « ou » suivi de rien sur la première page que voit un utilisateur. */}
-      <div
-        aria-hidden="true"
-        className="my-[22px] flex items-center gap-3.5 md:my-[26px]"
-      >
-        <span className="h-px flex-grow bg-outline-variant" />
-        <span className="font-body-sm text-[12px] leading-[15px] text-sourdine">
-          {t("ou")}
-        </span>
-        <span className="h-px flex-grow bg-outline-variant" />
-      </div>
+      {separateur.position === "avant" ? trait : null}
 
       <form action={partirVersGoogle}>
         <input type="hidden" name="locale" value={locale} />
+        {/* LE BOUTON DU KIT : 52 px, rayon de carte, filet par défaut, 15 / 600,
+            glyphe de 18 à 10 px du libellé. */}
         <button
           type="submit"
-          className="flex h-13 w-full items-center justify-center gap-2.5 rounded-[13px] border border-filet-controle bg-surface-container-lowest font-headline-md text-[15px] leading-5 font-semibold text-on-surface transition-colors hover:bg-fond-neutre"
+          className="flex h-13 w-full items-center justify-center gap-2.5 rounded-ds-card border border-ds-filet-appuye bg-ds-surface-carte text-[15px] font-semibold text-ds-texte-fort transition-shadow hover:shadow-ds-sm"
         >
-          <svg
-            viewBox="0 0 18 18"
-            className="h-[19px] w-[19px]"
-            aria-hidden="true"
-            focusable="false"
-          >
+          <svg viewBox="0 0 18 18" className="h-[18px] w-[18px]" aria-hidden="true" focusable="false">
             <path
               fill="#4285F4"
               d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62Z"
@@ -88,6 +101,8 @@ export async function BoutonGoogle({ locale }: { locale: string }) {
           {t("avecGoogle")}
         </button>
       </form>
+
+      {separateur.position === "apres" ? trait : null}
     </>
   );
 }

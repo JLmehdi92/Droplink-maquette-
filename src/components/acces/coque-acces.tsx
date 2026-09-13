@@ -87,17 +87,6 @@ export function LogoMarque({
   );
 }
 
-/** Le filet séparateur, avec son libellé centré. */
-export function SeparateurAcces({ libelle }: { readonly libelle: string }) {
-  return (
-    <div className="flex items-center gap-4">
-      <span className="h-px flex-1 bg-ds-filet" />
-      <span className="text-[13px] font-semibold text-ds-texte-sourdine">{libelle}</span>
-      <span className="h-px flex-1 bg-ds-filet" />
-    </div>
-  );
-}
-
 /** La note de bas de carte : un fait, pas une promesse commerciale. */
 export async function NoteSecurite() {
   const t = await getTranslations("connexion");
@@ -153,10 +142,13 @@ export async function ArgumentAcces({
   ];
 
   return (
-    <div className={`flex flex-col ${inscription ? "gap-[34px]" : "gap-9"} max-w-[460px]`}>
+    /* LE PLAFOND DE 460 PX N'EST PAS LE MÊME AUX DEUX ÉCRANS. La connexion le
+       pose sur toute la colonne ; l'inscription ne le pose que sur son
+       accroche, et son titre court sur 621 px — mesuré au kit servi. */
+    <div className={`flex flex-col ${inscription ? "gap-[34px]" : "max-w-[460px] gap-9"}`}>
       <div>
         {inscription ? (
-          <span className="mb-5 inline-flex rounded-ds-pill border border-ds-filet bg-white/[0.78] px-4 py-2 text-[11px] font-bold tracking-[0.1em] text-ds-ink-600 uppercase">
+          <span className="mb-5 inline-flex rounded-ds-pill border border-ds-filet bg-[rgba(255,255,255,0.78)] px-4 py-2 text-[11px] font-bold tracking-[0.1em] text-ds-ink-600 uppercase">
             {ti("badge")}
           </span>
         ) : null}
@@ -186,11 +178,15 @@ export async function ArgumentAcces({
           }
         >
           {t("argumentTitreA")}
-          <span className="degrade-ds-marque bg-clip-text text-transparent">
+          {/* LE TEXTE GARDE SA COULEUR D'ENCRE ET PERD SON REMPLISSAGE, comme au
+              kit : `text-transparent` rendait le même dégradé, mais un texte
+              dont la couleur est transparente disparaît en entier le jour où
+              le navigateur ne découpe pas le fond. */}
+          <span className="degrade-ds-marque bg-clip-text text-ds-texte-titre [-webkit-text-fill-color:transparent]">
             {t("argumentTitreB")}
           </span>
         </p>
-        <p className="mt-[18px] text-[17px] leading-[1.5] text-ds-texte-corps">
+        <p className="mt-[18px] max-w-[460px] text-[17px] leading-[1.5] text-ds-texte-corps">
           {inscription ? (
             ti("accroche")
           ) : (

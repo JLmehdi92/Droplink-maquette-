@@ -9,7 +9,6 @@ import {
   FondAcces,
   LogoMarque,
   NoteSecurite,
-  SeparateurAcces,
 } from "@/components/acces/coque-acces";
 import { routing } from "@/i18n/routing";
 
@@ -94,10 +93,21 @@ export default async function Inscription({
        * le formulaire y est plus long que l'argument, donc un centrage
        * laisserait la colonne de gauche flotter au milieu du vide.
        */}
-      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 md:px-14 md:pt-10 md:pb-8">
+      {/* `leading-[normal]` : le kit ne pose aucun interligne sur ses libellés,
+          et la page héritait de 1,5 — 3 à 6 px de trop par libellé. */}
+      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
         <main
           id="contenu"
-          className="grid flex-1 items-start gap-[72px] py-4 lg:grid-cols-[minmax(0,1fr)_620px]"
+          // AUCUN REMPLISSAGE VERTICAL : au kit, les 40 px du haut sont ceux de la
+          // page, et la grille commence juste dessous. Les 16 px de trop
+          // descendaient les deux colonnes d'autant.
+          /* ⚠️ UNE COLONNE DÉCLARÉE SOUS `lg`, ET NON LA PISTE IMPLICITE. Sans
+             modèle, la grille crée une piste `auto` qui prend la largeur
+             MINIMALE de son contenu : le champ mot de passe en réclamait 330,
+             et la carte débordait l'écran de 8 px à 390 — mesuré le
+             13/09/2026, dans les trois langues. `minmax(0,1fr)` borne la piste
+             à la largeur disponible. */
+          className="grid flex-1 grid-cols-[minmax(0,1fr)] items-start gap-[72px] lg:grid-cols-[minmax(0,1fr)_620px]"
         >
           <div className="hidden flex-col gap-[34px] pt-1 lg:flex">
             <Link href={`/${locale}`} className="inline-flex min-h-11 items-center self-start">
@@ -119,10 +129,12 @@ export default async function Inscription({
 
             <div className="flex flex-col items-center gap-2.5">
               <LogoMarque hauteur={48} />
-              <h1 className="text-[26px] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[32px]">
+              <h1 className="text-[26px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[32px]">
                 {t("titreCarte")}
               </h1>
-              <p className="text-center text-[15px] text-ds-texte-corps">{t("sousTitreCarte")}</p>
+              <p className="text-center text-[15px] leading-[1.55] text-ds-texte-corps">
+                {t("sousTitreCarte")}
+              </p>
             </div>
 
             {/* ⚠️ GOOGLE EN PREMIER ICI, ET APRÈS LE FORMULAIRE SUR LA CONNEXION —
@@ -130,9 +142,7 @@ export default async function Inscription({
                 Google évite de choisir un mot de passe ; SE CONNECTER par Google
                 suppose de l'avoir déjà fait. Et le fournisseur en Chine, pour qui
                 Google est inaccessible, trouve le formulaire juste en dessous. */}
-            <BoutonGoogle locale={locale} />
-
-            <SeparateurAcces libelle={tc("ou")} />
+            <BoutonGoogle locale={locale} separateur={{ position: "apres", cle: "ou" }} />
 
             <TraductionsClient espaces={["inscription", "connexion"]}>
               <FormulaireInscription locale={locale} />
@@ -143,15 +153,20 @@ export default async function Inscription({
                 consentement bloquant est un changement de PRODUIT, pas de
                 design : c'est une étape de plus sur le seul écran qui doit être
                 court, et rien dans le brief ne la demande. La phrase reste. */}
-            <p className="text-center text-[12px] leading-[18px] text-ds-texte-tenu">
+            {/* AU DESSIN DE LA PHRASE DU KIT — 14 / 400 en corps, liens 600
+                soulignés —, SANS SA CASE : voir ci-dessus. */}
+            <p className="text-[14px] leading-[1.5] text-ds-texte-corps">
               {tc("cgvAvant")}{" "}
-              <Link href={`/${locale}/conditions`} className="text-ds-texte-lien hover:underline">
+              <Link
+                href={`/${locale}/conditions`}
+                className="font-semibold whitespace-nowrap text-ds-texte-lien underline hover:text-ds-texte-lien-survol"
+              >
                 {tc("cgvConditions")}
               </Link>{" "}
               {tc("cgvEt")}{" "}
               <Link
                 href={`/${locale}/confidentialite`}
-                className="text-ds-texte-lien hover:underline"
+                className="font-semibold whitespace-nowrap text-ds-texte-lien underline hover:text-ds-texte-lien-survol"
               >
                 {tc("cgvConfidentialite")}
               </Link>

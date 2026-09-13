@@ -189,6 +189,12 @@ describe("les cibles tactiles des pieds de page", () => {
  * DEUX SENS : un repère qui ne désigne plus rien, et un repère qui en désigne
  * soudain un de plus — un troisième lien glissé dans la même phrase serait
  * exempté en silence sans cette vérification.
+ *
+ * ⚠️ VIDE DEPUIS LE 13/09/2026, ET LE MÉCANISME RESTE. Le portage de la
+ * connexion sur le kit `auth` a retiré la phrase de consentement de son pied :
+ * le kit ne la pose qu'à l'inscription, où l'on accepte quelque chose, et elle
+ * n'y vit pas dans un `<footer>`. Son unique entrée ne désignait plus rien. Le
+ * prochain lien de prose glissé dans un pied s'inscrira ici, avec sa raison.
  */
 const EN_FLUX: ReadonlyArray<{
   readonly fichier: string;
@@ -196,15 +202,6 @@ const EN_FLUX: ReadonlyArray<{
   readonly nombre: number;
   readonly raison: string;
 }> = [
-  {
-    fichier: "src/app/[locale]/connexion/page.tsx",
-    repere: "text-ds-texte-lien hover:underline",
-    nombre: 2,
-    raison:
-      "« conditions d'utilisation » et « politique de confidentialité », au " +
-      "milieu de la phrase de consentement du pied. Mesurés 16 px de haut à " +
-      "390 px, tactile émulé — et c'est la hauteur voulue.",
-  },
 ];
 
 /** Les cibles d'un pied qui ne sont PAS exemptées comme liens de prose. */

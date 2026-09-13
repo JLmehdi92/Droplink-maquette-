@@ -198,7 +198,7 @@
   "connexion": {
     "titre": "Bon retour",
     "sousTitre": "Retrouvez vos commandes et vos liens de suivi client.",
-    "labelEmail": "Adresse email",
+    "labelEmail": "Adresse e-mail",
     "placeholderEmail": "vous@exemple.com",
     "erreurEmailInvalide": "Cette adresse ne semble pas valide.",
     "erreurTropDeTentatives": "Trop de demandes en peu de temps. Patientez une minute avant de réessayer.",

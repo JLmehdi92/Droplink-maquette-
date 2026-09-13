@@ -10,7 +10,6 @@ import {
   FondAcces,
   LogoMarque,
   NoteSecurite,
-  SeparateurAcces,
 } from "@/components/acces/coque-acces";
 import { routing } from "@/i18n/routing";
 
@@ -113,6 +112,7 @@ export default async function Connexion({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("connexion");
+  const tl = await getTranslations("landing");
 
   const parametres = await searchParams;
   const brut = parametres["erreur"];
@@ -127,7 +127,9 @@ export default async function Connexion({
        * LA PAGE, SUR LA GÉOMÉTRIE DE LA RÉFÉRENCE : padding 40/56/32 au bureau,
        * resserré au téléphone où encadrer coûterait un dixième de la largeur.
        */}
-      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 md:px-14 md:pt-10 md:pb-8">
+      {/* `leading-[normal]` : le kit ne pose aucun interligne sur ses libellés,
+          et la page héritait de 1,5 — 3 à 6 px de trop par libellé. */}
+      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
         <header className="flex flex-wrap items-center gap-3">
           {/*
             ⚠️ `min-h-11` MALGRÉ UNE IMAGE DÉJÀ HAUTE DE 44 PX, et ce n'est pas
@@ -159,22 +161,35 @@ export default async function Connexion({
 
         <main
           id="contenu"
-          className="grid flex-1 items-center gap-20 py-12 lg:grid-cols-[minmax(0,1fr)_520px]"
+          /* ⚠️ UNE COLONNE DÉCLARÉE SOUS `lg`, ET NON LA PISTE IMPLICITE. Sans
+             modèle, la grille crée une piste `auto` qui prend la largeur
+             MINIMALE de son contenu : le champ mot de passe en réclamait 330,
+             et la carte débordait l'écran de 8 px à 390 — mesuré le
+             13/09/2026, dans les trois langues. `minmax(0,1fr)` borne la piste
+             à la largeur disponible. */
+          className="grid flex-1 grid-cols-[minmax(0,1fr)] items-center gap-20 py-12 lg:grid-cols-[minmax(0,1fr)_520px]"
         >
           {/* MASQUÉ SOUS `lg`, ET C'EST LE POINT. Cette colonne ne porte aucune
               information dont la connexion dépende : sur un écran étroit elle
               disparaît entièrement, sans que rien ne manque. */}
-          <div className="hidden lg:block">
+          {/* CALÉE EN HAUT, PAS CENTRÉE. Au kit, cette colonne est la plus haute
+              de la grille et commence donc à son bord ; la nôtre, sans preuve
+              sociale ni rangée de places de marché, est plus courte, et le
+              centrage la faisait descendre de 140 px. */}
+          <div className="hidden self-start lg:block">
             <ArgumentAcces />
           </div>
 
           <div className="mx-auto flex w-full max-w-[520px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-12 md:py-11">
             <div className="flex flex-col items-center gap-[14px]">
               <LogoMarque hauteur={46} />
-              <h1 className="text-[28px] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
+              <h1 className="text-[28px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
                 {t("titre")}
               </h1>
-              <p className="text-center text-[15px] text-ds-texte-corps">{t("sousTitre")}</p>
+              {/* 1,55 : l'interligne que le kit donne à tout paragraphe. */}
+              <p className="text-center text-[15px] leading-[1.55] text-ds-texte-corps">
+                {t("sousTitre")}
+              </p>
             </div>
 
             {/* CE QUI A ÉCHOUÉ EST DIT. La route de retour redirige ici avec son
@@ -213,13 +228,11 @@ export default async function Connexion({
               <FormulaireConnexion locale={locale} />
             </TraductionsClient>
 
-            <SeparateurAcces libelle={t("ouAvec")} />
-
             {/* APRÈS le formulaire, et non avant : Google est inaccessible au
                 fournisseur en Chine. Le placer en tête ferait passer pour
                 secondaire le chemin qui, pour toute une part des utilisateurs,
                 est le seul qui existe. */}
-            <BoutonGoogle locale={locale} />
+            <BoutonGoogle locale={locale} separateur={{ position: "avant", cle: "ouAvec" }} />
 
             <p className="text-center text-[14px] text-ds-texte-corps">
               {t("pasDeCompteTitre")}{" "}
@@ -235,21 +248,25 @@ export default async function Connexion({
           </div>
         </main>
 
-        <footer>
-          <p className="text-center text-[12px] leading-[18px] text-ds-texte-tenu md:text-left">
-            {t("cgvAvant")}{" "}
-            <Link href={`/${locale}/conditions`} className="text-ds-texte-lien hover:underline">
-              {t("cgvConditions")}
-            </Link>{" "}
-            {t("cgvEt")}{" "}
+        {/*
+          LE PIED DU KIT : la documentation et le droit d'auteur, en 12 px.
+
+          ⚠️ LA PHRASE DE CONSENTEMENT N'EST PLUS ICI, et ce n'est pas un oubli.
+          Elle datait de la planche du canevas ; le kit `auth` ne la pose que là
+          où l'on ACCEPTE quelque chose, c'est-à-dire à l'inscription, qui la
+          garde. Se reconnecter à un compte n'accepte rien de nouveau.
+        */}
+        <footer className="flex items-end">
+          <span className="text-[12px] text-ds-texte-tenu">
             <Link
-              href={`/${locale}/confidentialite`}
-              className="text-ds-texte-lien hover:underline"
+              href={`/${locale}/docs`}
+              className="-my-3.5 inline-flex min-h-11 items-center font-semibold text-ds-texte-corps hover:underline lg:my-0 lg:min-h-0"
             >
-              {t("cgvConfidentialite")}
+              {tl("menu.docs")}
             </Link>
-            .
-          </p>
+            {"  ·  "}
+            {tl("piedDroits", { annee: new Date().getFullYear() })}
+          </span>
         </footer>
       </div>
     </>

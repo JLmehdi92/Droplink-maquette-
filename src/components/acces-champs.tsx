@@ -66,7 +66,7 @@ export const CLASSE_LIBELLE =
   "block font-headline-md text-[13px] leading-4 font-semibold text-on-surface";
 
 /** Le libellé d'un champ migré : 14 px, semi-gras, sur l'encre forte. */
-export const CLASSE_LIBELLE_DS = "text-[14px] leading-5 font-semibold text-ds-texte-fort";
+export const CLASSE_LIBELLE_DS = "text-[14px] leading-[normal] font-semibold text-ds-texte-fort";
 
 /**
  * Un champ d'accès complet : libellé, boîte, icône, et l'action de droite.
@@ -265,13 +265,17 @@ export function BoutonPrincipalDs({
       type="submit"
       disabled={pending}
       className={
-        `degrade-ds-marque flex w-full items-center justify-center gap-[10px] rounded-ds-card ` +
-        `text-[16px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow ` +
+        `degrade-ds-marque flex w-full items-center justify-center gap-2 rounded-ds-card ` +
+        `border border-transparent px-7 text-[16px] font-semibold tracking-[-0.02em] ` +
+        `text-ds-texte-sur-marque shadow-ds-brand transition-shadow ` +
         `hover:shadow-ds-brand-hover disabled:opacity-60 ${hauteur === 60 ? "h-[60px]" : "h-[58px]"}`
       }
     >
       {pending ? <Anneau /> : null}
-      <span>{pending ? libelleEnCours : libelle}</span>
+      {/* LE LIBELLÉ EST UN NŒUD DE TEXTE DU BOUTON, PAS UN `<span>` : c'est le
+          montage du kit, et la sonde mesurait sinon un mot de 102 px au lieu
+          du bouton de 424 qui le porte. */}
+      {pending ? libelleEnCours : libelle}
       {pending ? null : <ArrowRight aria-hidden="true" size={18} strokeWidth={1.8} />}
     </button>
   );

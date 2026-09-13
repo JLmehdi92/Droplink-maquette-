@@ -3606,5 +3606,200 @@
         "raison": "DEUX INFORMATIONS QUE LE PRODUIT PORTAIT ET QUE LE KIT N A PAS : le pseudo du destinataire et la reference du produit. Elles etaient rendues dans un bloc « Details » que le kit ne dessine pas ; elles rejoignent la carte de livraison, au dessin exact de ses lignes, plutot que de disparaitre."
       }
     ]
+  },
+  "fr-connexion": {
+    "valeurs": [
+      {
+        "textes": [
+          "Créer un compte [1/2]"
+        ],
+        "motif": "contrainte",
+        "raison": "REGLE 3 : UNE SEULE ACTION AU DEGRADE PAR ECRAN. Le kit peint le bouton d en-tete ET « Se connecter » au degrade de marque ; le produit garde le degrade a l action qu on vient faire ici, et pose l en-tete en contour — fond blanc, filet par defaut, encre."
+      },
+      {
+        "textes": [
+          "Pas encore de compte ? [1/2]",
+          "Pas encore de compte ? [2/2]",
+          "Créer un compte [2/2]",
+          "Bon retour",
+          "Retrouvez vos commandes et vos liens de ",
+          "Adresse e-mail",
+          "Mot de passe",
+          "Mot de passe oublié ?",
+          "Se connecter",
+          "ou continuer avec",
+          "Vos données sont sécurisées et confident",
+          "· © 2025 DropLink. Tous droits réservés.",
+          "Documentation"
+        ],
+        "motif": "contrainte",
+        "raison": "PLACE SEULE, ET UNE SEULE CAUSE. Au kit, la colonne de gauche est la plus haute de la grille — preuve sociale, temoignage, six noms de places de marche — et c est elle qui fixe la hauteur de la page : la carte est centree dans 805 px, et le pied tombe a 1 077. Ces trois blocs sont refuses (voir les manquants) ; la page est donc plus courte, le pied remonte, et la carte, centree dans ce qui reste, monte de 20 px. Le decalage de 11 px de « Pas encore de compte ? » en tete vient du bouton voisin, plus etroit en contour. Tailles, graisses, interlignes et couleurs sont ceux du kit."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "vendeurs nous font déjà confiance",
+          "+2 500",
+          "“DropLink m'a fait gagner un temps fou s",
+          "Vendeur sur Vinted",
+          "Yanis,"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PREUVE SOCIALE DU KIT EST INVENTEE. « +2 500 vendeurs nous font deja confiance », cinq etoiles et un temoignage signe « Yanis, vendeur sur Vinted » : le produit est en phase de validation, et aucun de ces chiffres n existe en base. L interface n affirme jamais ce que la base n a pas enregistre (principe XII) — et un faux temoignage sur la page d acces est exactement ce qu il ne faut pas pouvoir reprocher au produit."
+      },
+      {
+        "textes": [
+          "Vinted",
+          "ebay",
+          "amazon",
+          "shopify",
+          "Leboncoin",
+          "TikTok Shop"
+        ],
+        "motif": "contrainte",
+        "raison": "SIX PLACES DE MARCHE QUE LE PRODUIT N INTEGRE PAS. Posees sous l argument, elles se lisent comme des integrations ou des references clients ; il n y a ni l un ni l autre. Le CLAUDE.md range les places de marche parmi ce que le design system dessine et que le produit refuse."
+      },
+      {
+        "textes": [
+          "Google",
+          "Apple"
+        ],
+        "motif": "contrainte",
+        "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT. La decision 27 fixe email + mot de passe, et Google — configure en production, eprouve de bout en bout. Un bouton Apple menerait a une erreur de configuration, ce qui est pire que pas de bouton. Seul, Google prend toute la largeur, et son libelle porte le verbe « Continuer avec »."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "Continuer avec Google"
+        ],
+        "motif": "contrainte",
+        "raison": "Le bouton Google seul, pleine largeur — voir la declaration symetrique."
+      }
+    ]
+  },
+  "fr-inscription": {
+    "valeurs": [
+      {
+        "textes": [
+          "Continuer avec Google"
+        ],
+        "motif": "contrainte",
+        "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT. La decision 27 fixe email + mot de passe, et Google — configure en production, eprouve de bout en bout. Un bouton Apple menerait a une erreur de configuration, ce qui est pire que pas de bouton. Seul, Google prend toute la largeur, et son libelle porte le verbe « Continuer avec ». Le remplissage « 1px 6px » est celui que le navigateur donne a un bouton sans style ; le notre est a zero, et son contenu est centre de la meme facon."
+      },
+      {
+        "textes": [
+          "Adresse e-mail",
+          "Mot de passe",
+          "Créer mon compte",
+          "Vos données sont sécurisées et confident"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE : LE CHAMP « NOM COMPLET » N EXISTE PAS. Le produit ne stocke aucun nom de vendeur — `profiles` n a pas de colonne pour lui, et la boutique a son propre nom, saisi a l accueil. Tout ce qui le suit dans la carte remonte de sa hauteur, 101 px."
+      },
+      {
+        "textes": [
+          "Conditions d'utilisation",
+          "Politique de confidentialité"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CONSENTEMENT PAR LA CONTINUATION, SANS CASE BLOQUANTE. Le kit fait accepter les conditions par une case qui desactive le bouton ; passer a un consentement bloquant est un changement de PRODUIT — une etape de plus sur le seul ecran qui doit etre court, et rien dans le brief ne la demande. La phrase reprend le dessin du kit — 14 / 400, liens 600 soulignes — et, plus longue, passe sur deux lignes."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Tableau de bord",
+          "Commandes",
+          "Suivi d'envois",
+          "Analyses",
+          "Ma marque",
+          "Paramètres",
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade",
+          "NB",
+          "Mon compte",
+          "nassim@laplanque.fr",
+          "Rechercher une commande...",
+          "Ctrl",
+          "Nassim B.",
+          "Bonjour Nassim !",
+          "Voici un aperçu rapide de votre activité",
+          "7 derniers jours",
+          "Commandes créées",
+          "+12%",
+          "Livrées",
+          "En transit",
+          "Liens clients ouverts",
+          "6,2j",
+          "Temps moyen de livraison",
+          "-18%",
+          "Commandes récentes",
+          "Voir tout",
+          "N°",
+          "CLIENT",
+          "STATUT",
+          "DATE",
+          "#DLK7842",
+          "Yanis B.",
+          "Il y a 1h",
+          "Sofia M.",
+          "En livraison",
+          "Amine K.",
+          "Livrée",
+          "Luca R.",
+          "Commandée"
+        ],
+        "motif": "contrainte",
+        "raison": "LA FENETRE D APPLICATION DU KIT, REDUITE A 51 %. Elle montre un tableau de bord que le depot n a pas, des chiffres inventes (« +12 % », « 6,2 j »), et un encart « Passez au Pro » — la contrainte n° 1 interdit tout code de facturation en phase 1, affichage compris. La reproduire en vrai exigerait un ecran a creer, pas a migrer ; la reproduire en image figerait des donnees fausses sur la premiere page du produit."
+      },
+      {
+        "textes": [
+          "vendeurs nous font déjà confiance",
+          "+2 500"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PREUVE SOCIALE DU KIT EST INVENTEE. « +2 500 vendeurs nous font deja confiance », cinq etoiles et un temoignage signe « Yanis, vendeur sur Vinted » : le produit est en phase de validation, et aucun de ces chiffres n existe en base. L interface n affirme jamais ce que la base n a pas enregistre (principe XII) — et un faux temoignage sur la page d acces est exactement ce qu il ne faut pas pouvoir reprocher au produit."
+      },
+      {
+        "textes": [
+          "Continuer avec Apple"
+        ],
+        "motif": "contrainte",
+        "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT. La decision 27 fixe email + mot de passe, et Google — configure en production, eprouve de bout en bout. Un bouton Apple menerait a une erreur de configuration, ce qui est pire que pas de bouton. Seul, Google prend toute la largeur, et son libelle porte le verbe « Continuer avec »."
+      },
+      {
+        "textes": [
+          "Nom complet"
+        ],
+        "motif": "donnee",
+        "raison": "Aucune colonne ne porte le nom d un vendeur : le compte a une adresse, la boutique a un nom, saisi a l accueil. Un champ qu aucune ecriture ne conserve ferait croire au vendeur qu il a donne une information que le produit jette."
+      },
+      {
+        "textes": [
+          "J'accepte les et la de DropLink."
+        ],
+        "motif": "contrainte",
+        "raison": "La case de consentement bloquante — voir la declaration des deux liens."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "12 caractères minimum. Prenez plutôt une"
+        ],
+        "motif": "contrainte",
+        "raison": "LE PLANCHER DU MOT DE PASSE EST DE 12 CARACTERES, pas 8 — brief §9, impose des deux cotes, par Zod et par le reglage Supabase. Le kit ecrit « Minimum 8 caracteres » en texte d exemple ; le produit le dit sous le champ, ou il reste lisible pendant la saisie."
+      },
+      {
+        "textes": [
+          "En continuant, vous acceptez nos   et no"
+        ],
+        "motif": "contrainte",
+        "raison": "La phrase de consentement par la continuation — voir la declaration des deux liens."
+      }
+    ]
   }
 }
