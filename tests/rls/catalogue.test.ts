@@ -52,6 +52,25 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "comptes_supprimes",
+      "Conservation d'un an des comptes supprimés par leur titulaire (migration " +
+        "157) : adresse et dates, l'obligation de l'hébergeur. AUCUNE POLICY : " +
+        "écrite par `supprimer_mon_compte` dans la transaction même de la " +
+        "suppression, effacée par `purger_comptes_supprimes` au bout d'un an, " +
+        "réservée au rôle de service. Personne d'autre n'a à la lire — un vendeur " +
+        "y lirait les adresses des comptes partis —, et personne n'a à l'écrire : " +
+        "une ligne effacée à la main ferait manquer l'obligation.",
+    ],
+    [
+      "purges_r2",
+      "File des objets R2 à effacer après une suppression (migration 157). " +
+        "AUCUNE POLICY : une clé y entre dans la transaction qui supprime sa " +
+        "ligne, et n'en sort que par `purges_effectuees`, réservée au rôle de " +
+        "service, une fois l'objet réellement supprimé. Lire la file donnerait " +
+        "les clés des médias d'autres comptes ; y écrire ferait effacer les " +
+        "médias de n'importe qui à la prochaine veille.",
+    ],
+    [
       "alertes_envoyees",
       "Repos entre deux alertes du veilleur. AUCUNE POLICY : la table n'est " +
         "atteignable que par `reserver_alerte` et `liberer_alerte`, toutes deux " +
@@ -395,6 +414,23 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "requête d'un compte à facteur vérifié dont le jeton n'est pas `aal2`. " +
         "C'est lui qui fait tenir la double authentification sur les fonctions " +
         "`security definer`, que la RLS ne voit pas.",
+    ],
+    [
+      "supprimer_mon_compte",
+      "« Supprimer le compte » (migration 157, décision de Wassim du 13/09/2026). " +
+        "L'identité vient de `auth.uid()`, jamais d'un argument ; la fonction " +
+        "revérifie que le compte est ACTIF (un compte suspendu n'efface pas le " +
+        "contenu signalé) et que la confirmation reprend son adresse. Conservation " +
+        "d'un an, clés R2 en file et suppression en cascade dans UNE transaction. " +
+        "Le mot de passe actuel est vérifié par l'application avant l'appel, la " +
+        "double authentification par le crochet de la 156. Refusée à `anon`.",
+    ],
+    [
+      "supprimer_mes_donnees",
+      "« Supprimer toutes les données » (migration 157) : mêmes gardes que " +
+        "`supprimer_mon_compte`, et la suppression ne vise que la boutique de " +
+        "`auth.uid()` — éprouvé par une falsification qui l'étendait au voisin. " +
+        "Le compte, la boutique et le logo restent. Refusée à `anon`.",
     ],
     [
       "lister_mes_facteurs",

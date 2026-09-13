@@ -2,6 +2,7 @@ import "server-only";
 import type { Expediteur } from "@/lib/email/port";
 import { expediteurResend } from "@/lib/email/resend";
 import { creerClientSysteme } from "@/lib/supabase/system";
+import { purgerCles } from "@/lib/storage/purge";
 import { decider, type BattementVu } from "./decision";
 import { TACHE_VEILLE, TACHES_ATTENDUES } from "./taches";
 
@@ -202,6 +203,7 @@ export async function passerLaVeille(
   // est illisible, et l'on n'arrive alors jamais ici. Un passage qui n'a pas
   // veillé ne doit pas certifier l'avoir fait.
   const systeme = creerClientSysteme();
+  const purge = await purgerLaFile(systeme);
   await systeme.rpc("battre", {
     p_source: TACHE_VEILLE,
     p_detail: {
@@ -215,8 +217,51 @@ export async function passerLaVeille(
       // MUET. Sans cela, une veille non configurée et une veille sans rien à
       // signaler produisent exactement la même trace.
       non_configure: bilan.nonConfigure,
+      // LA PURGE DES COMPTES SUPPRIMÉS, dans le même battement : une file qui ne
+      // se vide jamais se lit ici, et nulle part ailleurs.
+      purge_objets: purge.purgees,
+      purge_echecs: purge.echecs,
+      purge_erreur: purge.erreur,
+      conservations_effacees: purge.conservationsEffacees,
     },
   });
 
   return bilan;
+}
+
+/**
+ * LA FILE DE PURGE R2 ET LA FIN DE LA CONSERVATION D'UN AN (migration 157).
+ *
+ * La suppression d'un compte met ses clés en file DANS sa transaction et tente
+ * la purge aussitôt ; la veille la REJOUE ici jusqu'au succès, tous les quarts
+ * d'heure. Une clé ne sort de la file qu'une fois tout ce qu'elle emporte
+ * réellement supprimé (`purgerCles`).
+ *
+ * ⚠️ UN ÉCHEC ICI N'EMPÊCHE PAS LE BATTEMENT. La veille surveille les tâches ;
+ * la faire tomber parce que R2 répond mal ferait croire que le VEILLEUR est en
+ * panne, et l'alerte désignerait le mauvais coupable. L'échec est écrit dans le
+ * battement, lisible depuis l'écran de surveillance.
+ */
+async function purgerLaFile(systeme: ReturnType<typeof creerClientSysteme>): Promise<{
+  purgees: number;
+  echecs: number;
+  erreur: string | null;
+  conservationsEffacees: number;
+}> {
+  try {
+    const { data: cles, error } = await systeme.rpc("cles_a_purger", { p_limite: 200 });
+    if (error !== null) throw new Error(error.message);
+    const { purgees, echecs } = await purgerCles(cles ?? []);
+    if (purgees.length > 0) {
+      const { error: eSortie } = await systeme.rpc("purges_effectuees", { p_cles: [...purgees] });
+      if (eSortie !== null) throw new Error(eSortie.message);
+    }
+    const { data: effacees, error: eConservation } = await systeme.rpc("purger_comptes_supprimes");
+    if (eConservation !== null) throw new Error(eConservation.message);
+    return { purgees: purgees.length, echecs, erreur: null, conservationsEffacees: effacees ?? 0 };
+  } catch (erreur) {
+    const message = erreur instanceof Error ? erreur.message : String(erreur);
+    console.error("[veille] purge : " + message);
+    return { purgees: 0, echecs: 0, erreur: message.slice(0, 200), conservationsEffacees: 0 };
+  }
 }

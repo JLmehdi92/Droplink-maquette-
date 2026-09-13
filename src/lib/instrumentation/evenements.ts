@@ -23,6 +23,15 @@ export const EVENEMENTS = {
    * si l'écran sert à autre chose qu'à cocher une case le premier jour.
    */
   MARQUE_ENREGISTREE: "marque_enregistree",
+  /**
+   * Le titulaire a supprimé son compte, ou vidé ses données (écran Paramètres).
+   * Ce sont les deux sorties VOLONTAIRES du produit : les confondre avec
+   * l'inactivité ferait lire un départ comme un oubli, et la rétention de la
+   * semaine 4 est une métrique de verdict. `objets` : les médias et le logo mis
+   * en purge — l'ampleur de ce qui part.
+   */
+  COMPTE_SUPPRIME: "compte_supprime",
+  DONNEES_SUPPRIMEES: "donnees_supprimees",
 
   // --- Commandes ---
   /**

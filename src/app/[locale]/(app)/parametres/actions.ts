@@ -11,6 +11,9 @@ import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { verifierQuotaAuth, verifierQuotaMotDePasse } from "@/lib/limitation/quota";
 import { origineDuSite } from "@/lib/site";
 import { creerClientServeur } from "@/lib/supabase/server";
+import { purgerCles } from "@/lib/storage/purge";
+import { emettreApres } from "@/lib/instrumentation/emettre";
+import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 
 /**
  * LES GESTES DE L'ÉCRAN « PARAMÈTRES ».
@@ -53,6 +56,7 @@ export type EtatParametres =
         | "mdp_identique"
         | "adresse_identique"
         | "code"
+        | "confirmation"
         | "deja_active"
         | "indisponible";
     };
@@ -544,5 +548,137 @@ export async function desactiverDeuxEtapes(
 
   await attendrePlancher(debut);
   revalidatePath("/[locale]/parametres", "page");
+  return { statut: "enregistre" };
+}
+
+/**
+ * SUPPRIMER LE COMPTE, OU SES DONNÉES — décision de Wassim du 13/09/2026, option A.
+ *
+ * ⚠️ TROIS PREUVES AVANT LE GESTE, ET AUCUNE NE SUFFIT SEULE :
+ *  - la session, `aal2` si la double authentification est active (la base refuse
+ *    sinon, migration 156) ;
+ *  - le mot de passe actuel — un poste resté ouvert ne doit pas suffire à
+ *    effacer un compte ;
+ *  - l'adresse du compte RECOPIÉE, que la fonction SQL revérifie : c'est le geste
+ *    qui force à lire quel compte on efface (même raison que la décision 12).
+ *
+ * La base fait le reste en UNE transaction (migration 157) : conservation d'un
+ * an, clés R2 en file, suppression en cascade. La purge des objets est tentée
+ * AUSSITÔT, bornée pour tenir dans la durée d'une action ; la veille rejoue la
+ * file jusqu'au succès. Un échec de R2 ne ressuscite donc rien et ne perd rien.
+ */
+const Suppression = z.object({
+  confirmation: z.string().max(254),
+  actuel: MotDePasseActuel,
+  locale: SchemaLangue,
+});
+
+/** Au-delà, la veille prend le relais : une action ne doit pas attendre des minutes. */
+const PURGE_IMMEDIATE_MAX = 100;
+
+async function preuvesDeSuppression(
+  donnees: unknown,
+): Promise<
+  | { ok: true; profil: NonNullable<Awaited<ReturnType<typeof vendeurActif>>>; confirmation: string; locale: string }
+  | { ok: false; etat: EtatParametres }
+> {
+  const profil = await vendeurActif();
+  if (profil === null) return { ok: false, etat: { statut: "erreur", motif: "session" } };
+  if (!(donnees instanceof FormData)) return { ok: false, etat: { statut: "erreur", motif: "invalide" } };
+
+  const analyse = Suppression.safeParse({
+    confirmation: donnees.get("confirmation"),
+    actuel: donnees.get("actuel"),
+    locale: donnees.get("locale"),
+  });
+  if (!analyse.success) return { ok: false, etat: { statut: "erreur", motif: "invalide" } };
+  const { confirmation, actuel, locale } = analyse.data;
+
+  if (confirmation.trim().toLowerCase() !== profil.email.toLowerCase()) {
+    return { ok: false, etat: { statut: "erreur", motif: "confirmation" } };
+  }
+
+  const verification = await verifierMotDePasseActuel(profil.email, actuel);
+  if (verification !== "ok") {
+    return {
+      ok: false,
+      etat: {
+        statut: "erreur",
+        motif: verification === "trop_de_tentatives" ? "trop_de_tentatives" : "mot_de_passe_actuel",
+      },
+    };
+  }
+  return { ok: true, profil, confirmation, locale };
+}
+
+async function purgerAussitot(cles: readonly string[]): Promise<void> {
+  try {
+    const { echecs } = await purgerCles(cles.slice(0, PURGE_IMMEDIATE_MAX));
+    if (echecs > 0) console.error(`[suppression] ${echecs} objet(s) laissé(s) à la veille`);
+  } catch (erreur) {
+    // La file en base est la garantie ; la purge immédiate n'est qu'un raccourci.
+    console.error("[suppression] purge immédiate impossible — " + (erreur instanceof Error ? erreur.message : String(erreur)));
+  }
+}
+
+export async function supprimerMonCompte(
+  _precedent: EtatParametres,
+  donnees: unknown,
+): Promise<EtatParametres> {
+  const debut = Date.now();
+  const preuves = await preuvesDeSuppression(donnees);
+  if (!preuves.ok) {
+    await attendrePlancher(debut);
+    return preuves.etat;
+  }
+
+  const supabase = await creerClientServeur();
+  const { data: cles, error } = await supabase.rpc("supprimer_mon_compte", {
+    p_confirmation: preuves.confirmation,
+  });
+  if (error !== null) {
+    await attendrePlancher(debut);
+    console.error("[suppression] compte non supprimé — " + error.message);
+    return { statut: "erreur", motif: error.code === "DL054" ? "confirmation" : "indisponible" };
+  }
+
+  emettreApres(EVENEMENTS.COMPTE_SUPPRIME, { sujet: preuves.profil.profilId }, { objets: (cles ?? []).length });
+  await purgerAussitot(cles ?? []);
+
+  // Le compte n'existe plus : la session côté serveur est déjà morte avec lui.
+  // `local` efface les cookies de CE navigateur sans rien demander au serveur.
+  const { error: erreurSortie } = await supabase.auth.signOut({ scope: "local" });
+  if (erreurSortie !== null) console.error("[suppression] cookies non effacés — " + erreurSortie.message);
+
+  await attendrePlancher(debut);
+  redirect(`/${preuves.locale}/connexion?info=compte-supprime`);
+}
+
+export async function supprimerMesDonnees(
+  _precedent: EtatParametres,
+  donnees: unknown,
+): Promise<EtatParametres> {
+  const debut = Date.now();
+  const preuves = await preuvesDeSuppression(donnees);
+  if (!preuves.ok) {
+    await attendrePlancher(debut);
+    return preuves.etat;
+  }
+
+  const supabase = await creerClientServeur();
+  const { data: cles, error } = await supabase.rpc("supprimer_mes_donnees", {
+    p_confirmation: preuves.confirmation,
+  });
+  if (error !== null) {
+    await attendrePlancher(debut);
+    console.error("[suppression] données non supprimées — " + error.message);
+    return { statut: "erreur", motif: error.code === "DL054" ? "confirmation" : "indisponible" };
+  }
+
+  emettreApres(EVENEMENTS.DONNEES_SUPPRIMEES, { sujet: preuves.profil.profilId }, { objets: (cles ?? []).length });
+  await purgerAussitot(cles ?? []);
+
+  await attendrePlancher(debut);
+  revalidatePath("/[locale]", "layout");
   return { statut: "enregistre" };
 }

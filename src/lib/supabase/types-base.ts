@@ -89,6 +89,33 @@ export type Database = {
         }
         Relationships: []
       }
+      comptes_supprimes: {
+        Row: {
+          conserver_jusqu_au: string
+          email: string
+          id: string
+          inscrit_le: string
+          supprime_le: string
+          user_id: string
+        }
+        Insert: {
+          conserver_jusqu_au?: string
+          email: string
+          id?: string
+          inscrit_le: string
+          supprime_le?: string
+          user_id: string
+        }
+        Update: {
+          conserver_jusqu_au?: string
+          email?: string
+          id?: string
+          inscrit_le?: string
+          supprime_le?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       link_views: {
         Row: {
           country: string | null
@@ -439,6 +466,24 @@ export type Database = {
           signup_event_at?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      purges_r2: {
+        Row: {
+          cle: string
+          demande_le: string
+          tentatives: number
+        }
+        Insert: {
+          cle: string
+          demande_le?: string
+          tentatives?: number
+        }
+        Update: {
+          cle?: string
+          demande_le?: string
+          tentatives?: number
         }
         Relationships: []
       }
@@ -831,6 +876,7 @@ export type Database = {
         Args: { p_cle: string; p_genre: string }
         Returns: boolean
       }
+      cles_a_purger: { Args: { p_limite: number }; Returns: string[] }
       colis_a_interroger: {
         Args: { p_limite: number }
         Returns: {
@@ -1194,9 +1240,14 @@ export type Database = {
         Args: { p_abandonne: boolean; p_parcel_id: string }
         Returns: undefined
       }
+      mettre_en_file_la_boutique: {
+        Args: { p_avec_logo: boolean; p_shop: string }
+        Returns: string[]
+      }
       mon_shop_id: { Args: never; Returns: string }
       notification_deja_vue: { Args: { p_cle: string }; Returns: boolean }
       prefixe_media_attendu: { Args: { p_order_id: string }; Returns: string }
+      purger_comptes_supprimes: { Args: never; Returns: number }
       purger_donnees_de_suivi: {
         Args: { p_lot?: number }
         Returns: {
@@ -1204,6 +1255,7 @@ export type Database = {
           notifications: number
         }[]
       }
+      purges_effectuees: { Args: { p_cles: string[] }; Returns: number }
       quota_depasse: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
@@ -1266,6 +1318,14 @@ export type Database = {
         }[]
       }
       stockage_total_admin: { Args: never; Returns: number }
+      supprimer_mes_donnees: {
+        Args: { p_confirmation: string }
+        Returns: string[]
+      }
+      supprimer_mon_compte: {
+        Args: { p_confirmation: string }
+        Returns: string[]
+      }
       suspendre_compte: {
         Args: { p_ip_hash: string; p_motif: string; p_profil: string }
         Returns: boolean

@@ -241,7 +241,8 @@
     "erreurIndisponible": "La connexion a échoué. Réessayez dans un instant.",
     "info": {
       "deconnecte": "Vous êtes déconnecté. À bientôt.",
-      "deconnexion-partielle": "Vous êtes déconnecté de cet appareil, mais nous n’avons pas pu le confirmer auprès du serveur. Sur un appareil partagé, reconnectez-vous et redemandez la déconnexion."
+      "deconnexion-partielle": "Vous êtes déconnecté de cet appareil, mais nous n’avons pas pu le confirmer auprès du serveur. Sur un appareil partagé, reconnectez-vous et redemandez la déconnexion.",
+      "compte-supprime": "Votre compte a été supprimé. Vos commandes, photos et liens clients ont été effacés."
     },
     "argumentTitreA": "Un seul lien de suivi pour toute la ",
     "argumentTitreB": "commande",
@@ -1752,7 +1753,8 @@
       "adresseIdentique": "C'est déjà l'adresse de votre compte.",
       "indisponible": "Le service est momentanément indisponible. Réessayez.",
       "code": "Code incorrect ou expiré. Saisissez le code affiché maintenant.",
-      "dejaActive": "La double authentification est déjà activée sur ce compte."
+      "dejaActive": "La double authentification est déjà activée sur ce compte.",
+      "confirmation": "L'adresse recopiée ne correspond pas à celle du compte."
     },
     "donnees": {
       "titre": "Données",
@@ -1761,6 +1763,30 @@
       "exporterAide": "Commandes, colis, médias et vues, au format JSON. Sans vos notes internes.",
       "bouton": "Exporter",
       "avertissement": "Le fichier contient les liens publics de vos commandes : quiconque les obtient voit les pages de vos clients. Rangez-le comme tel."
+    },
+    "suppression": {
+      "compte": {
+        "titre": "Supprimer le compte",
+        "aide": "Supprimez définitivement votre compte et toutes vos données.",
+        "bouton": "Supprimer",
+        "question": "Supprimer le compte ?",
+        "avertissement": "Cette action est définitive. Votre compte, vos commandes, vos envois et vos liens clients seront supprimés et ne pourront pas être restaurés.",
+        "conservation": "Seules votre adresse e-mail et les dates d'inscription et de suppression sont conservées un an, comme la loi l'impose à un hébergeur, puis effacées.",
+        "soumettre": "Supprimer le compte",
+        "enCours": "Suppression…"
+      },
+      "donnees": {
+        "titre": "Supprimer toutes les données",
+        "aide": "Supprimez toutes vos données de manière définitive.",
+        "bouton": "Supprimer",
+        "question": "Supprimer toutes les données ?",
+        "avertissement": "Toutes vos commandes, photos, vidéos et liens clients seront supprimés définitivement. Votre compte restera actif mais vide.",
+        "soumettre": "Tout supprimer",
+        "enCours": "Suppression…",
+        "ok": "Toutes vos données ont été supprimées."
+      },
+      "recopier": "Recopiez votre adresse e-mail pour confirmer : {adresse}",
+      "annuler": "Annuler"
     }
   },
   "verification": {

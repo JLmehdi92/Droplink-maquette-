@@ -4636,10 +4636,15 @@
           "Données",
           "Gérez vos données et exportez vos inform",
           "Exporter mes données",
-          "Exporter"
+          "Exporter",
+          "Supprimer le compte",
+          "Supprimez définitivement votre compte et",
+          "Supprimer",
+          "Supprimer toutes les données",
+          "Supprimez toutes vos données de manière "
         ],
         "motif": "contrainte",
-        "raison": "POSITION VERTICALE SEULE, et une seule cause pour ces lignes : la colonne de gauche est plus courte que celle du kit. La carte « Preferences » n a pas les quatre interrupteurs de notification — le produit n envoie AUCUNE notification au vendeur, et un interrupteur sans effet est un mensonge (principe XII) —, ni le fuseau horaire, qu aucun formatage n applique ; la carte « Securite » n a pas la suppression du compte (voir les manquants). Tailles, graisses, couleurs et largeurs sont celles du kit."
+        "raison": "POSITION VERTICALE SEULE, et une seule cause pour ces lignes : la colonne de gauche est plus courte que celle du kit. La carte « Preferences » n a pas les quatre interrupteurs de notification — le produit n envoie AUCUNE notification au vendeur, et un interrupteur sans effet est un mensonge (principe XII) —, ni le fuseau horaire, qu aucun formatage n applique. Tailles, graisses, couleurs et largeurs sont celles du kit, lignes « danger » comprises."
       },
       {
         "textes": [
@@ -4701,17 +4706,6 @@
         ],
         "motif": "contrainte",
         "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
-      },
-      {
-        "textes": [
-          "Supprimer le compte",
-          "Supprimez définitivement votre compte et",
-          "Supprimer",
-          "Supprimer toutes les données",
-          "Supprimez toutes vos données de manière "
-        ],
-        "motif": "donnee",
-        "raison": "LA SUPPRESSION DU COMPTE ET DE TOUTES LES DONNEES. Des gestes IRREVERSIBLES, et leur perimetre n est pas un arbitrage de design : un hebergeur doit conserver les donnees d identification de ses comptes (LCEN et son decret d application), la decision 9 du brief interdit la suppression de compte par l administration, et la purge des medias R2 et du suivi 17TRACK engage des couts et des traces. C est une decision de Wassim ; un bouton « Supprimer » qui ne supprime pas, ou qui supprime sans ces garanties, serait pire que son absence."
       },
       {
         "textes": [

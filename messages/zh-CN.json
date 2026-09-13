@@ -241,7 +241,8 @@
     "erreurIndisponible": "登录失败。请稍后重试。",
     "info": {
       "deconnecte": "您已退出登录。期待下次再见。",
-      "deconnexion-partielle": "此设备已退出登录，但我们无法向服务器确认。如果这是共用设备，请重新登录后再次退出。"
+      "deconnexion-partielle": "此设备已退出登录，但我们无法向服务器确认。如果这是共用设备，请重新登录后再次退出。",
+      "compte-supprime": "您的账号已注销。订单、照片与客户链接均已删除。"
     },
     "argumentTitreA": "一个物流链接，搞定整个",
     "argumentTitreB": "订单",
@@ -1752,7 +1753,8 @@
       "adresseIdentique": "这已经是您账户的邮箱。",
       "indisponible": "服务暂时不可用，请重试。",
       "code": "验证码错误或已过期，请输入当前显示的验证码。",
-      "dejaActive": "此账号已启用双重验证。"
+      "dejaActive": "此账号已启用双重验证。",
+      "confirmation": "输入的邮箱与账号邮箱不一致。"
     },
     "donnees": {
       "titre": "数据",
@@ -1761,6 +1763,30 @@
       "exporterAide": "订单、包裹、媒体与浏览记录，JSON 格式，不含内部备注。",
       "bouton": "导出",
       "avertissement": "文件包含订单的公开链接：任何获得链接的人都能看到您客户的页面，请妥善保管。"
+    },
+    "suppression": {
+      "compte": {
+        "titre": "注销账号",
+        "aide": "永久删除您的账号及全部数据。",
+        "bouton": "删除",
+        "question": "确认注销账号？",
+        "avertissement": "此操作不可撤销。您的账号、订单、发货记录与客户链接将被删除且无法恢复。",
+        "conservation": "仅保留您的电子邮箱及注册、注销日期一年（依法对托管服务商的要求），随后删除。",
+        "soumettre": "注销账号",
+        "enCours": "正在删除…"
+      },
+      "donnees": {
+        "titre": "删除全部数据",
+        "aide": "永久删除您的全部数据。",
+        "bouton": "删除",
+        "question": "确认删除全部数据？",
+        "avertissement": "您的全部订单、照片、视频与客户链接将被永久删除。账号仍然有效，但内容为空。",
+        "soumettre": "全部删除",
+        "enCours": "正在删除…",
+        "ok": "您的全部数据已删除。"
+      },
+      "recopier": "请输入您的电子邮箱以确认：{adresse}",
+      "annuler": "取消"
     }
   },
   "verification": {

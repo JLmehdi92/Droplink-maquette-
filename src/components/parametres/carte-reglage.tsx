@@ -48,12 +48,15 @@ export function LigneAction({
   titre,
   sousTitre,
   premiere = false,
+  danger = false,
   children,
 }: {
   readonly icone: LucideIcon;
   readonly titre: string;
   readonly sousTitre: string;
   readonly premiere?: boolean;
+  /** `ActionRow danger` : tuile et titre à la couleur d'erreur — un geste irréversible. */
+  readonly danger?: boolean;
   readonly children?: ReactNode;
 }) {
   return (
@@ -62,11 +65,20 @@ export function LigneAction({
         "flex flex-wrap items-center gap-3.5 py-3.5" + (premiere ? "" : " border-t border-ds-filet")
       }
     >
-      <span className="inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-ds-icon-tile bg-ds-surface-teinte text-ds-accent">
+      <span
+        className={
+          "inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-ds-icon-tile " +
+          (danger ? "bg-ds-erreur-fond text-ds-erreur" : "bg-ds-surface-teinte text-ds-accent")
+        }
+      >
         <Icone aria-hidden="true" size={17} strokeWidth={1.9} />
       </span>
       <span className="flex min-w-0 flex-[1_1_200px] flex-col gap-0.5">
-        <span className="text-[14px] leading-[normal] font-semibold text-ds-texte-fort">{titre}</span>
+        <span
+          className={"text-[14px] leading-[normal] font-semibold " + (danger ? "text-ds-erreur" : "text-ds-texte-fort")}
+        >
+          {titre}
+        </span>
         <span className="text-[12.5px] leading-[normal] text-ds-texte-sourdine">{sousTitre}</span>
       </span>
       <span className="flex items-center gap-3">{children}</span>

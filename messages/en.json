@@ -241,7 +241,8 @@
     "erreurIndisponible": "Log-in failed. Try again in a moment.",
     "info": {
       "deconnecte": "You are logged out. See you soon.",
-      "deconnexion-partielle": "You are logged out on this device, but we could not confirm it with the server. On a shared device, log in again and log out once more."
+      "deconnexion-partielle": "You are logged out on this device, but we could not confirm it with the server. On a shared device, log in again and log out once more.",
+      "compte-supprime": "Your account has been deleted. Your orders, photos and customer links have been erased."
     },
     "argumentTitreA": "One tracking link for the whole ",
     "argumentTitreB": "order",
@@ -1752,7 +1753,8 @@
       "adresseIdentique": "This is already your account's address.",
       "indisponible": "The service is temporarily unavailable. Please try again.",
       "code": "Incorrect or expired code. Enter the code shown now.",
-      "dejaActive": "Two-factor authentication is already enabled on this account."
+      "dejaActive": "Two-factor authentication is already enabled on this account.",
+      "confirmation": "The address you typed does not match the account's."
     },
     "donnees": {
       "titre": "Data",
@@ -1761,6 +1763,30 @@
       "exporterAide": "Orders, parcels, media and views, in JSON. Without your internal notes.",
       "bouton": "Export",
       "avertissement": "The file contains the public links of your orders: anyone who gets them sees your customers' pages. Store it accordingly."
+    },
+    "suppression": {
+      "compte": {
+        "titre": "Delete account",
+        "aide": "Permanently delete your account and all your data.",
+        "bouton": "Delete",
+        "question": "Delete the account?",
+        "avertissement": "This action is final. Your account, your orders, your shipments and your customer links will be deleted and cannot be restored.",
+        "conservation": "Only your email address and your sign-up and deletion dates are kept for one year, as the law requires of a host, then erased.",
+        "soumettre": "Delete the account",
+        "enCours": "Deleting…"
+      },
+      "donnees": {
+        "titre": "Delete all data",
+        "aide": "Permanently delete all your data.",
+        "bouton": "Delete",
+        "question": "Delete all data?",
+        "avertissement": "All your orders, photos, videos and customer links will be permanently deleted. Your account stays active but empty.",
+        "soumettre": "Delete everything",
+        "enCours": "Deleting…",
+        "ok": "All your data has been deleted."
+      },
+      "recopier": "Type your email address to confirm: {adresse}",
+      "annuler": "Cancel"
     }
   },
   "verification": {

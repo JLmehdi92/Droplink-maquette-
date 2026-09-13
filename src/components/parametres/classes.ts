@@ -34,5 +34,9 @@ export const CLASSE_LIBELLE = "text-[13px] leading-[normal] font-medium text-ds-
 export const CLASSE_BOUTON =
   "inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-[18px] text-[14px] leading-[normal] font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-teinte disabled:opacity-60 lg:min-h-0 lg:h-[42px]";
 
+/** `GhostButton danger` : filet et texte d'erreur, fond d'erreur au survol. */
+export const CLASSE_BOUTON_DANGER =
+  "inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-ds-control border border-ds-erreur bg-ds-surface-carte px-[18px] text-[14px] leading-[normal] font-semibold text-ds-erreur transition-colors hover:bg-ds-erreur-fond disabled:opacity-60 lg:min-h-0 lg:h-[42px]";
+
 /** Aide et messages sous un formulaire. */
 export const CLASSE_AIDE = "text-[12.5px] leading-[1.5] text-ds-texte-sourdine";

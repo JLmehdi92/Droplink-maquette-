@@ -2,7 +2,7 @@
 
 import { useActionState, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Lock, Monitor, MonitorSmartphone, Shield, Smartphone, UserRound } from "lucide-react";
+import { Lock, Monitor, MonitorSmartphone, Shield, Smartphone, Trash2, UserRound } from "lucide-react";
 import {
   changerAdresseCompte,
   changerMotDePasseCompte,
@@ -11,12 +11,15 @@ import {
   desactiverDeuxEtapes,
   enregistrerNom,
   fermerAutresSessions,
+  supprimerMesDonnees,
+  supprimerMonCompte,
   type EtatParametres,
 } from "@/app/[locale]/(app)/parametres/actions";
 import { CarteReglage, LigneAction } from "./carte-reglage";
 import {
   CLASSE_AIDE,
   CLASSE_BOUTON,
+  CLASSE_BOUTON_DANGER,
   CLASSE_CHAMP,
   CLASSE_CHAMP_ETIQUETE,
   CLASSE_ENTREE,
@@ -61,6 +64,7 @@ function useMessage(etat: EtatParametres, succes: string): Message | null {
     mdp_identique: "mdpIdentique",
     adresse_identique: "adresseIdentique",
     code: "code",
+    confirmation: "confirmation",
     deja_active: "dejaActive",
     indisponible: "indisponible",
   }[etat.motif];
@@ -472,12 +476,124 @@ function DesactivationDeuxEtapes() {
   );
 }
 
+/**
+ * LA CONFIRMATION D'UNE SUPPRESSION — `ConfirmDialog` du kit, sur place.
+ *
+ * ⚠️ LE COLLAGE EST BLOQUÉ DANS LE CHAMP DE RECOPIE, et c'est la règle de la
+ * décision 12 : la recopie n'existe pas pour refuser une faute de frappe, mais
+ * pour forcer à LIRE quel compte on efface. Coller l'adresse depuis la ligne
+ * au-dessus ferait passer le geste sans l'avoir lu. Le mot de passe, lui, reste
+ * collable : le bloquer n'apprendrait rien et gênerait les gestionnaires.
+ */
+function FormulaireSuppression({
+  variante,
+  adresse,
+  locale,
+}: {
+  readonly variante: "compte" | "donnees";
+  readonly adresse: string;
+  readonly locale: string;
+}) {
+  const t = useTranslations("parametres");
+  const [etat, action, pendant] = useActionState(
+    variante === "compte" ? supprimerMonCompte : supprimerMesDonnees,
+    INITIAL,
+  );
+  const idConfirmation = useId();
+  const message = useMessage(etat, t("suppression.donnees.ok"));
+
+  return (
+    <form action={action} className="flex flex-col gap-4">
+      <input type="hidden" name="locale" value={locale} />
+      <div className="flex flex-col gap-1.5">
+        <p className="text-[14.5px] leading-[normal] font-bold text-ds-erreur">
+          {t(`suppression.${variante}.question`)}
+        </p>
+        <p className="text-[13.5px] leading-[1.55] text-ds-texte-corps">{t(`suppression.${variante}.avertissement`)}</p>
+        {variante === "compte" ? <p className={CLASSE_AIDE}>{t("suppression.compte.conservation")}</p> : null}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className={CLASSE_CHAMP_ETIQUETE}>
+          <label htmlFor={idConfirmation} className={CLASSE_LIBELLE}>
+            {t("suppression.recopier", { adresse })}
+          </label>
+          <span className={CLASSE_CHAMP}>
+            <input
+              id={idConfirmation}
+              name="confirmation"
+              type="email"
+              required
+              maxLength={254}
+              autoComplete="off"
+              spellCheck={false}
+              onPaste={(e) => e.preventDefault()}
+              onDrop={(e) => e.preventDefault()}
+              className={CLASSE_ENTREE}
+            />
+          </span>
+        </div>
+        <ChampMotDePasse libelle={t("compte.actuel")} nom="actuel" />
+      </div>
+      <div>
+        <button type="submit" disabled={pendant} className={CLASSE_BOUTON_DANGER}>
+          {pendant ? t(`suppression.${variante}.enCours`) : t(`suppression.${variante}.soumettre`)}
+        </button>
+      </div>
+      <Annonce message={message} />
+    </form>
+  );
+}
+
+/** Une ligne « danger » et son panneau de confirmation. */
+export function LigneSuppression({
+  variante,
+  adresse,
+  locale,
+  premiere = false,
+}: {
+  readonly variante: "compte" | "donnees";
+  readonly adresse: string;
+  readonly locale: string;
+  readonly premiere?: boolean;
+}) {
+  const t = useTranslations("parametres.suppression");
+  const [ouvert, setOuvert] = useState(false);
+  const idPanneau = useId();
+
+  return (
+    <>
+      <LigneAction premiere={premiere} danger icone={Trash2} titre={t(`${variante}.titre`)} sousTitre={t(`${variante}.aide`)}>
+        <button
+          type="button"
+          onClick={() => setOuvert((v) => !v)}
+          aria-expanded={ouvert}
+          aria-controls={idPanneau}
+          className={ouvert ? CLASSE_BOUTON : CLASSE_BOUTON_DANGER}
+        >
+          {ouvert ? t("annuler") : t(`${variante}.bouton`)}
+        </button>
+      </LigneAction>
+      <div id={idPanneau} hidden={!ouvert}>
+        {ouvert ? (
+          <div className="mb-1.5 rounded-ds-card border border-ds-erreur bg-ds-erreur-fond p-4">
+            <FormulaireSuppression variante={variante} adresse={adresse} locale={locale} />
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
 export function CarteSecurite({
   sessions,
   deuxEtapesActive,
+  adresse,
+  locale,
 }: {
   readonly sessions: readonly SessionAffichee[] | null;
   readonly deuxEtapesActive: boolean;
+  readonly adresse: string;
+  readonly locale: string;
 }) {
   const t = useTranslations("parametres.securite");
   const [ouvert, setOuvert] = useState(false);
@@ -581,6 +697,8 @@ export function CarteSecurite({
           </div>
         ) : null}
       </div>
+
+      <LigneSuppression variante="compte" adresse={adresse} locale={locale} />
     </CarteReglage>
   );
 }

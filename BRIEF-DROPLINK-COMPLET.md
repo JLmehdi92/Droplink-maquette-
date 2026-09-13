@@ -617,6 +617,15 @@ alertes_envoyees    cle, envoye_at — (aucune policy) repos entre deux alertes 
 
 rate_limit          (aucune policy — atteignable uniquement par consommer_quota)
 
+comptes_supprimes   id, user_id, email, inscrit_le, supprime_le, conserver_jusqu_au
+                    — (aucune policy) comptes supprimés par leur titulaire :
+                    adresse et dates gardées UN AN (obligation de l'hébergeur),
+                    puis effacées par la veille. Décision de Wassim, 13/09/2026
+
+purges_r2           cle, demande_le, tentatives — (aucune policy) objets R2 à
+                    effacer après une suppression ; une clé n'en sort qu'une fois
+                    l'objet réellement supprimé
+
 tracking_notifications_vues
                     cle, vue_at — (aucune policy) empreintes des notifications
                     de suivi déjà traitées, pour qu'un rejeu ne compte qu'une fois

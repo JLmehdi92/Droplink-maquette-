@@ -26,6 +26,7 @@ import {
 import {
   CarteCompte,
   CarteSecurite,
+  LigneSuppression,
   type SessionAffichee,
 } from "@/components/parametres/formulaires-parametres";
 import { changerLangueInterface } from "./actions";
@@ -87,9 +88,9 @@ function libelleAppareil({ navigateur, systeme }: AppareilDecrit): string | null
  *    signalements d'abus, et en faire un canal d'assistance mélangerait les
  *    deux — un signalement noyé dans les questions est un signalement en retard.
  *
- * LA SUPPRESSION des données et du compte n'est pas ici : un geste irréversible,
- * dont le périmètre légal (conservation des données d'identification par
- * l'hébergeur) est une décision de Wassim, pas un arbitrage de design.
+ * LA SUPPRESSION du compte et des données suit la décision de Wassim du
+ * 13/09/2026 (option A) : tout part, sauf l'adresse et les dates, gardées un an.
+ * Voir la migration 157 et `actions.ts`.
  */
 export default async function Parametres({
   params,
@@ -209,7 +210,12 @@ export default async function Parametres({
               </form>
             </CarteReglage>
 
-            <CarteSecurite sessions={sessions} deuxEtapesActive={deuxEtapesActive} />
+            <CarteSecurite
+              sessions={sessions}
+              deuxEtapesActive={deuxEtapesActive}
+              adresse={profil.email}
+              locale={langue}
+            />
 
             <CarteReglage icone={Database} titre={t("donnees.titre")} sousTitre={t("donnees.aide")}>
               <LigneAction premiere icone={Download} titre={t("donnees.exporter")} sousTitre={t("donnees.exporterAide")}>
@@ -220,7 +226,8 @@ export default async function Parametres({
                   {t("donnees.bouton")}
                 </a>
               </LigneAction>
-              <p className="text-[12.5px] leading-[1.5] text-ds-texte-sourdine">{t("donnees.avertissement")}</p>
+              <LigneSuppression variante="donnees" adresse={profil.email} locale={langue} />
+              <p className="mt-1 text-[12.5px] leading-[1.5] text-ds-texte-sourdine">{t("donnees.avertissement")}</p>
             </CarteReglage>
           </div>
         </TraductionsClient>
