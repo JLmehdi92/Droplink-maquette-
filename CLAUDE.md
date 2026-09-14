@@ -351,21 +351,26 @@ d'improviser : `/bienvenue` (onboarding) · `/blog` et `/blog/[slug]` ·
 `/signalement` · `/mot-de-passe-oublie` · `/nouveau-mot-de-passe` · l'arbitrage QC
 de la page client.
 
-**Écrans dessinés que le dépôt n'a pas** : une page d'accueil de dashboard, un
-écran de paramètres vendeur, `/docs`. Ce sont des routes à créer, donc des
-décisions produit — pas de la migration.
+**Écrans dessinés que le dépôt n'avait pas, et qui sont créés** : le tableau de
+bord, les paramètres vendeur, `/docs`, et dans l'administration **Commandes** et
+**Statistiques** (décision de Wassim du 14/09/2026). Chacun a été une décision
+produit avant d'être une route.
 
-> ⚠️ **L'ADMIN : SEPT ÉCRANS EN CODE, DIX DESSINÉS — ET CE BLOC EN COMPTAIT MAL
-> CINQ.** Il disait « six existants » en en listant sept, et « quatre autres »
-> quand la barre latérale du kit (`ADMIN_NAV`) en porte cinq. Relevé le
-> 14/09/2026 : cinq écrans du kit sont portés (vue d'ensemble, utilisateurs,
-> boutiques, logs, paramètres) ; `comptes/[id]` et `surveillance` n'ont pas de
-> planche. Les cinq restants : **Abonnements et Paiements** sont de la
+> ⚠️ **L'ADMIN : NEUF ÉCRANS EN CODE, DIX DESSINÉS.** Sept écrans du kit sont
+> portés (vue d'ensemble, commandes, utilisateurs, boutiques, statistiques, logs,
+> paramètres) ; `comptes/[id]` et `surveillance` n'ont pas de planche. Restent
+> trois planches, et aucune ne se code : **Abonnements et Paiements** sont de la
 > facturation, interdite par la contrainte n° 1 ; **Support** suppose un système
-> de tickets que la base n'a pas ; **Commandes** (toutes boutiques) et
-> **Statistiques** seraient des routes à créer, lisant les données de tiers donc
-> auditées — **décision de Wassim**, `surveillance` couvrant déjà une partie des
-> secondes.
+> de tickets que la base n'a pas.
+>
+> ⚠️ **COMMANDES NE MONTRE AUCUN CONTENU.** Le kit dessine le pseudo et l'adresse
+> du client, et « Ouvrir la page client ». Le premier appartient à quelqu'un qui
+> n'a jamais eu de compte chez nous, le second transfère une capacité : la liste
+> rend référence courte, boutique, statut, transporteur et date, écrit UNE ligne
+> d'audit par page (migrations 159-160), et « Voir » mène à la fiche du compte.
+> **STATISTIQUES NE REND QUE DES NOMBRES** (migration 161), donc n'écrit rien au
+> journal ; la période précédente y est CALCULÉE sur les tables horodatées, et
+> l'anneau des abonnements du kit y devient celui des types de compte.
 
 > ⚠️ **LE DESIGN SYSTEM CONTIENT DES ÉCRANS DE FACTURATION, ET LA CONTRAINTE N°1
 > LES INTERDIT.** Admin → Paiements (390 paiements, 12 358 €), Admin →
@@ -617,8 +622,8 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**VINGT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
-tableau de bord, les paramètres et la vérification en deux étapes créés, les cinq que le kit admin dessine, la page client et son
+**VINGT-DEUX ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+tableau de bord, les paramètres et la vérification en deux étapes créés, les sept que le kit admin dessine et que la contrainte n° 1 autorise, la page client et son
 lien mort, la connexion, l'inscription, les deux pages légales et la documentation :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
@@ -628,11 +633,13 @@ lien mort, la connexion, l'inscription, les deux pages légales et la documentat
 | **l'éditeur** `/commandes/[id]` | `CLIC_KIT="#DLK7842"` | 26 (0) | 48 (0) | **0** |
 | `/analyses` | `CLIC_KIT="Analyses"` | 32 (0) | 41 (0) | **0** |
 | `/marque` | `CLIC_KIT="Ma marque"` | 26 (0) | 41 (0) | **0** |
-| `/admin` | `Overview`, kit **admin** | 55 (0) | 29 (0) | **0** |
-| `/admin/comptes` | `AdminUsers` | 99 (0) | 54 (0) | **0** |
-| `/admin/boutiques` | `AdminShops` | 78 (0) | 53 (0) | **0** |
-| `/admin/journal` | `AdminLogs` | 84 (0) | 51 (0) | **0** |
-| `/admin/parametres` | `AdminSettings` | 92 (0) | 49 (0) | **0** |
+| `/admin` | `Overview`, kit **admin** | 54 (0) | 28 (0) | **0** |
+| `/admin/commandes` (CRÉÉ) | `CLIC_KIT="Commandes"`, produit à **1545** | 75 (0) | 32 (0) | **0** |
+| `/admin/comptes` | `CLIC_KIT="Utilisateurs"`, produit à 1545 | 98 (0) | 31 (0) | **0** |
+| `/admin/boutiques` | `CLIC_KIT="Boutiques"`, produit à 1545 | 78 (0) | 30 (0) | **0** |
+| `/admin/statistiques` (CRÉÉ) | `CLIC_KIT="Statistiques"` | 62 (0) | 40 (0) | **0** |
+| `/admin/journal` | `CLIC_KIT="Logs système"` | 82 (0) | 51 (0) | **0** |
+| `/admin/parametres` | `CLIC_KIT="Paramètres"` | 90 (0) | 48 (0) | **0** |
 | `/p/[token]` | `ClientPage`, kit **client_link** à 1440 | 39 (0) | 23 (0) | **0** |
 | `/connexion` | `LoginScreen`, kit **auth** à 1425 | 13 (0) | 1 (0) | **0** |
 | `/inscription` | `CLIC_KIT="Créer un compte"` | 46 (0) | 2 (0) | **0** |
@@ -921,8 +928,35 @@ second envoi « ne partait pas » : le mot de passe s'était vidé, et le champ
 le produit — mais une sonde qui rejoue un formulaire doit ressaisir TOUS ses
 champs.
 
-**La production attend `pnpm db:migrate` pour 147 à 158, AVANT le
+**La production attend `pnpm db:migrate` pour 147 à 161, AVANT le
 déploiement.**
+
+⚠️ **LES SONDES DE MESURE LAISSAIENT LEURS COMPTES EN BASE.** La suppression
+vivait à leur dernière ligne : chaque passage interrompu laissait un compte —
+ADMINISTRATEUR pour `verifier-ecran-migre` —, sa boutique et ses commandes.
+Trente-trois se sont accumulés du 11 au 14/09, et personne ne les voyait tant
+qu'aucun écran ne listait toute la plateforme : c'est la liste admin des
+commandes qui les a montrés. Elle vit désormais dans un `finally`.
+
+⚠️ **ET LES DÉCLARATIONS DES ÉCRANS ADMIN TENAIENT À CES RÉSIDUS.** « dont 15
+avec un nom de boutique », « 4,1 Mo », « 20 comptes au total » : déclarés en
+toutes lettres, ils sont tous morts à la purge. Un écran d'administration lit
+TOUTE la base de tests — comptes, compteurs, dernières lignes du journal que les
+suites écrivent à chaque passage des portes. Ce qui y varie se déclare par
+MOTIF ; et le journal, lui, change encore d'un passage à l'autre : on le remesure
+juste avant de conclure, jamais sur un relevé de la veille.
+
+⚠️ **UN `<svg>` POSITIONNÉ EN ABSOLU NE S'ÉTIRE PAS ENTRE `left` ET `right`.**
+C'est un élément remplacé : il prend sa largeur intrinsèque. La courbe de la vue
+d'ensemble tenait donc dans ses cent premiers pixels depuis sa création, avec des
+mois écrits en français sur la page chinoise. Aucune porte ne pouvait le voir —
+la soustraction compare des textes, un tracé n'en a pas. **Regarder la capture
+n'est pas facultatif.**
+
+⚠️ **LE SEPTIÈME ONGLET A FAIT SE CHEVAUCHER LA BARRE DU TÉLÉPHONE** :
+« PanneauCommandesComptesBoutiques », sans aucun débordement du document, donc
+sans alerte de la sonde. La barre défile désormais, et l'onglet courant est
+ramené dans la vue.
 
 ### Comment on vérifie un écran migré
 
