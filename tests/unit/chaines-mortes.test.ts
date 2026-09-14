@@ -48,7 +48,6 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
    * même collision protégeait des clés RÉELLEMENT mortes. Les déclarer, c'est
    * échanger une couverture illusoire contre une couverture connue.
    */
-  ["onboarding.logoErreur.", "composé depuis le motif de refus d'un logo — onboarding"],
   ["marque.logoErreur.", "composé depuis le motif de refus d'un logo — réglages de marque"],
   ["envois.etat.", "composé depuis l'état du colis rendu par `compter_envois`"],
   /* Les six questions de la documentation sont rendues par une boucle sur

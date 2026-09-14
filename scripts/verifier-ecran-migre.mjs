@@ -100,7 +100,15 @@ const { data: profil } = await service
   .select("id")
   .eq("user_id", cree.user.id)
   .single();
-await service.from("profiles").update({ account_type: "reseller", role: "admin" }).eq("id", profil.id);
+/*
+ * `ONBOARDING=1` : LE TYPE DE COMPTE RESTE NUL. `/bienvenue` renvoie aux
+ * commandes tout compte qui l'a déjà déclaré : sans cette variable, la sonde
+ * mesurerait la liste des commandes en croyant mesurer l'onboarding.
+ */
+await service
+  .from("profiles")
+  .update({ account_type: process.env["ONBOARDING"] === "1" ? null : "reseller", role: "admin" })
+  .eq("id", profil.id);
 const { data: shop } = await service.from("shops").select("id").eq("owner_id", profil.id).single();
 /* ⚠️ LA DESCRIPTION EST POSEE, SINON LE CHAMP MESURE SON CAS VIDE. Elle
    apparait sur l ecran de marque ET dans l en-tete de la page client : sans

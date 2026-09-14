@@ -6,6 +6,7 @@ import { libellesApercu } from "@/lib/boutique/libelles-apercu";
 import { TraductionsClient } from "@/components/traductions-client";
 import { lireEtatDuCompte, onboardingAFaire } from "@/lib/comptes/profil";
 import { estLangueSupportee } from "@/i18n/config";
+import { FondAcces, LogoMarque } from "@/components/acces/coque-acces";
 
 export async function generateMetadata({
   params,
@@ -50,23 +51,30 @@ export default async function Bienvenue({
   // elle-même quand l'onboarding réussit.
   if (!onboardingAFaire(profil)) redirect(`/${langue}/commandes`);
 
+  const t = await getTranslations("onboarding");
+
   return (
-    <div className="min-h-dvh bg-canvas p-3 md:p-7">
+    <>
       {/*
-        ⚠️ LE CONTENEUR FAIT 1384, PAS 1000, et la carte-page porte les DEUX
-        colonnes de la planche : les réglages à gauche, l'aperçu en direct à
-        droite. Le formulaire les rend lui-même — l'aperçu dépend de ce qu'on
-        est en train de saisir, donc il ne peut pas vivre dans un composant
-        serveur qui ne verra jamais ces frappes.
+        ⚠️ LE CADRE LAVANDE ET LA CARTE-PAGE À RAYON 28 SONT PARTIS LE 14/09/2026 :
+        l'onboarding suit l'inscription d'une minute, et il portait l'ancien
+        canevas pendant que l'inscription portait le design system. Même fond et
+        même logo que la connexion (`OnboardingScreen` du kit `auth`).
       */}
-      <main
-        id="contenu"
-        className="mx-auto w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:rounded-page-publique"
-      >
-        <TraductionsClient espaces={["onboarding"]}>
-          <FormulaireOnboarding locale={langue} libelles={await libellesApercu(langue)} />
-        </TraductionsClient>
-      </main>
-    </div>
+      <FondAcces />
+      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
+        <header className="flex flex-wrap items-center gap-3">
+          <LogoMarque hauteur={44} className="md:h-13 md:w-auto" />
+          <div className="flex-1" />
+          <span className="text-[13px] font-semibold text-ds-texte-sourdine">{t("etape")}</span>
+        </header>
+
+        <main id="contenu" className="flex flex-1 flex-col justify-center pt-10 pb-6">
+          <TraductionsClient espaces={["onboarding"]}>
+            <FormulaireOnboarding locale={langue} libelles={await libellesApercu(langue)} />
+          </TraductionsClient>
+        </main>
+      </div>
+    </>
   );
 }

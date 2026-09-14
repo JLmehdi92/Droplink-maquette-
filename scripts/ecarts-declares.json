@@ -5709,5 +5709,33 @@
         "raison": "L adresse du compte jetable de la sonde, rappelee par l ecran : elle change a chaque passage."
       }
     ]
+  },
+  "fr-bienvenue": {
+    "valeurs": [
+      {
+        "textes": [
+          "Mettons votre nom sur la page",
+          "C’est ce que verra votre client. Vous po",
+          "Nom de votre boutique",
+          "Logo",
+          "Choisir une image",
+          "PNG ou JPG, 512 px minimum",
+          "Votre couleur",
+          "Le contraste est ajusté automatiquement ",
+          "Vous vendez plutôt…",
+          "À des revendeurs",
+          "Vous fournissez d’autres vendeurs",
+          "À vos clients",
+          "Vous vendez en direct, en message privé",
+          "Continuer",
+          "CE QUE VOTRE CLIENT VERRA",
+          "Votre boutique",
+          "Votre commande",
+          "Approuver"
+        ],
+        "motif": "structure",
+        "raison": "POSITION VERTICALE SEULE, ET LE MEME DECALAGE PARTOUT (-5 a -6 px sur les deux colonnes) : la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, et les deux colonnes sont CENTREES verticalement dans l espace qui reste sous l en-tete — 10 px de moins, 5 px plus haut. L en-tete, lui, est a la meme place au pixel (logo en 56,40, etape en 1305,58). Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, ecrite dans le kit le 14/09/2026 avant le produit."
+      }
+    ]
   }
 }

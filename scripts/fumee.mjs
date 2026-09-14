@@ -5406,16 +5406,12 @@ const EXCEPTIONS_VARIABLES = [
   // signalees. Une exception qui ne peut plus servir est une exception qui
   // masquera le jour ou la variable reviendra vraiment orpheline.
   //
-  // POSEE EN LIGNE par les apercus de marque et d onboarding — elle porte la
-  // couleur du vendeur, donc elle ne peut pas vivre dans une feuille statique —
-  // mais elle est LUE par une classe utilitaire (la bordure et le halo de la
-  // carte choisie), donc elle apparait bien dans le CSS servi.
-  //
-  // ⚠️ `--apercu-sur-remplissage` A QUITTE CETTE LISTE. Elle est desormais posee
-  // ET lue en ligne : elle ne traverse plus jamais la feuille de style, donc
-  // l attendre ici revenait a declarer une exception qui ne correspond plus a
-  // rien. C est la sonde qui l a dit, en echouant DANS L AUTRE SENS.
-  ["--apercu-remplissage", "posee en ligne, mais lue par une classe utilitaire"],
+  // ⚠️ `--apercu-remplissage` ET `--apercu-sur-remplissage` ONT QUITTE CETTE
+  // LISTE. La premiere etait posee en ligne par l onboarding et lue par une
+  // classe utilitaire (bordure et halo de la carte de type choisie) ; le
+  // portage de l onboarding sur le design system, le 14/09/2026, a retire ce
+  // halo a la couleur du vendeur — c est NOTRE ecran, il prend l anneau du
+  // design system. C est la sonde qui l a dit, en echouant DANS L AUTRE SENS.
 ];
 const tolerees = new Set(EXCEPTIONS_VARIABLES.map(([v]) => v));
 

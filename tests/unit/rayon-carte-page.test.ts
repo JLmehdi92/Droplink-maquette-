@@ -24,7 +24,15 @@ import { describe, expect, test } from "vitest";
  * c'est `pnpm fumee` qui l'interroge.
  */
 
-const RACINE = join(process.cwd(), "src", "app");
+/*
+ * ⚠️ LA SONDE NE BALAYAIT QUE `src/app`, ET LA DERNIÈRE CARTE-PAGE VIT DANS
+ * `src/components`. Relevé le 14/09/2026 en portant l'onboarding : la suite
+ * annonçait « il n'en reste qu'une » alors que `coque-publique.tsx` en pose une
+ * pour le blog et le signalement — un composant partagé, donc hors du dossier
+ * des routes. L-025 : la garde regardait là où les cartes-pages avaient été
+ * écrites la première fois, pas là où une carte-page peut vivre.
+ */
+const RACINE = join(process.cwd(), "src");
 
 /** Les deux classes, et la valeur que la planche leur assigne. */
 const RAYON_AUTHENTIFIE = "md:rounded-page";
@@ -65,7 +73,8 @@ function cartesPage(): CartePage[] {
         fichier: relatif,
         // Le segment fait foi : `(app)` et `admin` sont les deux surfaces
         // derrière session. Tout le reste est servi à qui n'a pas de compte.
-        authentifiee: relatif.startsWith("[locale]/(app)/") || relatif.startsWith("[locale]/admin/"),
+        authentifiee:
+          relatif.startsWith("app/[locale]/(app)/") || relatif.startsWith("app/[locale]/admin/"),
         classe: rayon[0],
       });
     }
@@ -91,8 +100,9 @@ describe("Le rayon de la carte-page", () => {
      * Il restait 6 cartes-pages le 11/09/2026, puis 5 ; l'administration a perdu
      * la sienne le 12/09, la LANDING dans la foulée, et il n'en reste QUE
      * TROIS ; le mot de passe oublié et le nouveau mot de passe sont passés au
-     * design system le 14/09, et il n'en reste QU'UNE, l'onboarding. Le
-     * plancher descend donc à 1.
+     * design system le 14/09, puis l'onboarding le même jour. Il en reste UNE,
+     * que la sonde ne voyait pas : la coque du blog et du signalement. Le
+     * plancher reste donc à 1.
      *
      * ⚠️ ET CES TROIS-LÀ NE DESCENDRONT PAS TOUTES SEULES : ce sont exactement
      * les écrans que le design system NE DESSINE PAS — `/bienvenue`,
@@ -138,7 +148,7 @@ describe("Le rayon de la carte-page", () => {
    * soient dessinés. Ce ne sont pas des oublis de migration.
    */
   const PUBLIQUES_RESTANTES: ReadonlyArray<readonly [string, string]> = [
-    ["[locale]/bienvenue/page.tsx", "L'onboarding — non dessiné par le design system."],
+    ["components/coque-publique.tsx", "La coque du blog et du signalement — pas encore portée."],
   ];
 
   test("les cartes-pages authentifiées restantes sont exactement celles déclarées", () => {

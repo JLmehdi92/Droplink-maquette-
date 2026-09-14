@@ -1,10 +1,9 @@
 "use client";
 
 import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
-
 import { useActionState, useMemo, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
+import { ImagePlus, MessageCircle, Store, Upload, Users, X } from "lucide-react";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import {
   confirmerDepotLogo,
@@ -13,71 +12,28 @@ import {
   type ResultatOnboarding,
 } from "@/app/[locale]/bienvenue/actions";
 import { ACCENT_DEFAUT, resoudreAccent } from "@/lib/design/contraste";
-import { Icone } from "@/components/icone";
+import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
 
 /**
- * L'ONBOARDING, porté sur `Onboarding` et `OnboardingMobile`.
+ * L'ONBOARDING — `OnboardingScreen` du kit `auth`, écrit le 14/09/2026 avant ce
+ * formulaire. Il portait encore l'ancien canevas : cadre lavande, carte-page à
+ * rayon 28, bouton noir, bandeau d'aperçu à la couleur du vendeur — une page
+ * client qui n'existe plus.
  *
- * ⚠️ CE COMMENTAIRE DÉCRIVAIT UN AUTRE ÉCRAN. Il annonçait une grille bento,
- * des cartes de verre, des pastilles de teintes suggérées et un aperçu en
- * pleine largeur — la maquette Stitch des réglages de marque, faute d'écran
- * d'onboarding dans le zip. Le canevas en dessine un : deux colonnes, les
- * réglages à gauche et l'aperçu du téléphone à droite, en direct.
+ * LE FORMULAIRE REND LES DEUX COLONNES : l'aperçu dépend de ce qu'on est en
+ * train de saisir, donc il ne peut pas vivre dans un composant serveur qui ne
+ * verra jamais ces frappes.
  *
- * LE COMPOSANT REND LES DEUX COLONNES, et pas seulement le formulaire. L'aperçu
- * dépend de ce qu'on est en train de saisir : il ne peut pas vivre dans un
- * composant serveur qui ne verra jamais ces frappes.
- *
- * DEUX CHAMPS QUE LA PLANCHE PARTAGE AVEC LE PRODUIT, et une raison pour
- * chacun :
- *
- * 1. LE TYPE DE COMPTE est la seule colonne sans valeur par défaut en base. Un
- *    défaut aurait classé tous les fournisseurs comme revendeurs et faussé
- *    irrémédiablement la segmentation d'usage, qui est le livrable réel de la
- *    phase de validation.
- * 2. LE NOM DE BOUTIQUE reste FACULTATIF : la page publique omet son en-tête
- *    quand il n'y a ni nom ni logo, et un vendeur peut envoyer un lien sans
- *    avoir rien configuré.
- *
- * L'APERÇU MONTRE LE CONTRASTE RÉSOLU, pas la couleur brute — sur un aplat
- * d'accent le texte prend `surRemplissage`, jamais `#ffffff` en dur. Le brief
- * exige que la conformité soit obtenue automatiquement, « sans que le vendeur
- * ait à chercher une couleur qui marche ».
- *
- * Le dépôt du logo va DIRECTEMENT du navigateur à R2 : les Server Actions ont
- * une limite de corps d'un mégaoctet, et le piège est vicieux parce qu'il PASSE
- * en développement sur de petites images de test.
+ * ⚠️ « PASSER POUR L'INSTANT » N'EXISTE PAS, ni dans le kit ni ici.
+ * `onboardingAFaire()` répond « oui » tant que `account_type` est nul — et cette
+ * colonne est NULLABLE SANS DÉFAUT exprès, pour que le manque soit visible. Passer
+ * reboucherait sur cette page ; l'honorer demanderait un état « a refusé de
+ * répondre », qui fausserait la segmentation que la colonne existe pour mesurer.
  */
 
 const INITIAL: ResultatOnboarding = { statut: "inactif" };
 
-/** Le libellé d'un champ, tel que les planches le posent : 13/600, 8 px de marge. */
-const LIBELLE = "mb-2 block font-headline-md text-[13px] leading-4 font-semibold text-on-surface";
-
-/** Le champ des planches : rayon 13, bordure et fond nommés, 15 px en Inter. */
-const CHAMP =
-  "w-full rounded-[13px] border border-filet-controle bg-surface-container-low px-[15px] font-body-md text-[15px] text-on-surface transition-colors focus:border-violet focus:outline-none focus:ring-2 focus:ring-violet/30";
-
-
-
-function BoutonValider({ libelle, enCours }: { libelle: string; enCours: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      // ⚠️ LE BOUTON EST NOIR, PAS À LA COULEUR DU VENDEUR. Il portait
-      // `--apercu-remplissage` : l'accent qu'on est en train de choisir se
-      // serait donc appliqué au bouton de NOTRE écran d'accueil, et il aurait
-      // changé de couleur pendant qu'on règle la sienne. La planche y pose la
-      // pilule noire du canevas — l'action neutre.
-      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 self-start rounded-[13px] bg-primary px-[26px] font-headline-md text-[15px] leading-5 font-bold text-on-primary transition-opacity hover:opacity-90 disabled:opacity-60 md:h-[50px] md:min-h-0 md:w-auto"
-    >
-      {pending ? enCours : libelle}
-      {pending ? null : <Icone nom="arrow_forward" className="text-[15px]" />}
-    </button>
-  );
-}
+const LIBELLE = "mb-2 block text-[14px] leading-[normal] font-semibold text-ds-texte-fort";
 
 type EtatLogo =
   | { phase: "vide" }
@@ -85,24 +41,20 @@ type EtatLogo =
   | { phase: "pose"; apercu: string; nom: string; octets: number }
   | { phase: "erreur"; motif: string };
 
+/*
+ * LES CLÉS SONT ÉCRITES EN TOUTES LETTRES : l'inventaire des chaînes mortes lit
+ * les appels du code, et une clé composée à l'exécution lui échappe.
+ */
+const TYPES = [
+  { valeur: "supplier", icone: Users, titre: "type.supplier.titre", detail: "type.supplier.detail" },
+  { valeur: "reseller", icone: MessageCircle, titre: "type.reseller.titre", detail: "type.reseller.detail" },
+] as const;
+
 export function FormulaireOnboarding({
   locale,
   libelles,
 }: {
   readonly locale: string;
-  /*
-   * ⚠️ LES PHRASES DE L'APERÇU ARRIVENT RÉSOLUES, comme dans l'éditeur et dans
-   * « Ma marque » — voir `lib/boutique/libelles-apercu`.
-   *
-   * ICI LA LANGUE COÏNCIDE AVEC CELLE DE L'URL, ET CE N'EST PAS UNE RAISON DE
-   * S'EN PASSER. `bienvenue/actions` écrit `shops.default_language` avec cette
-   * même locale : à cet instant précis, les deux sont égales par construction,
-   * donc le défaut des deux autres aperçus n'est pas observable ici. Ce qui
-   * l'est, c'est la DUPLICATION : ces phrases étaient recopiées dans
-   * `onboarding.*` alors que la page client les porte déjà. Une règle écrite
-   * trois fois n'est corrigée qu'aux endroits qu'on a sous les yeux — le
-   * projet l'a payé le 05/09/2026 sur la commande d'un vrai client.
-   */
   readonly libelles: LibellesApercu;
 }) {
   const t = useTranslations("onboarding");
@@ -116,26 +68,31 @@ export function FormulaireOnboarding({
 
   const accent = useMemo(() => resoudreAccent(couleur), [couleur]);
 
+  // ⚠️ `session` EST AUSSI UN MOTIF DE REFUS DU DÉPÔT, et la clé composée
+  // `logoErreur.${motif}` ne l'avait pas : une session expirée affichait
+  // l'identifiant de traduction brut à la place d'une phrase.
+  const erreurLogo = {
+    type: t("logoErreur.type"),
+    taille: t("logoErreur.taille"),
+    session: t("erreurSession"),
+  } as const;
+
   async function deposerLogo(fichier: File): Promise<void> {
     setLogo({ phase: "envoi", pourcent: 0 });
 
     const prepare = await preparerDepotLogo(fichier.type, fichier.size);
     if (prepare.statut === "erreur") {
-      setLogo({ phase: "erreur", motif: t(`logoErreur.${prepare.motif}`) });
+      setLogo({ phase: "erreur", motif: erreurLogo[prepare.motif] });
       return;
     }
 
-    // `XMLHttpRequest` et non `fetch` : c'est la seule API qui rapporte la
-    // progression d'un envoi. Sur une connexion lente — le cas du fournisseur en
-    // Chine — une barre qui n'avance pas se lit comme une panne.
+    // Dépôt DIRECT navigateur → stockage, par URL présignée : une Server Action
+    // plafonne son corps à 1 Mo, et un logo le dépasse vite.
     const envoi = await new Promise<boolean>((resoudre) => {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", prepare.url, true);
       for (const [nomEnTete, valeur] of Object.entries(prepare.enTetes)) {
-        // `content-length` est un en-tête interdit au script : le navigateur le
-        // calcule lui-même depuis le corps. On ne pose donc que ce qu'on a le
-        // droit de poser, et la valeur calculée doit coïncider avec celle qui a
-        // été signée.
+        // Le navigateur pose lui-même la longueur ; la forcer lève une erreur.
         if (nomEnTete.toLowerCase() === "content-length") continue;
         xhr.setRequestHeader(nomEnTete, valeur);
       }
@@ -154,9 +111,8 @@ export function FormulaireOnboarding({
       return;
     }
 
-    // On n'affirme le succès qu'APRÈS confirmation du serveur, qui relit la
-    // taille réelle. Annoncer avant serait un pari sur le serveur, et un pari
-    // perdu laisserait le vendeur croire son logo posé.
+    // La taille est RELUE côté serveur : le navigateur n'est jamais cru sur ce
+    // qu'il affirme avoir envoyé.
     const confirme = await confirmerDepotLogo(prepare.cle);
     if (confirme.statut === "erreur") {
       setLogo({ phase: "erreur", motif: t("logoErreur.confirmation") });
@@ -177,188 +133,174 @@ export function FormulaireOnboarding({
   return (
     <form
       action={action}
-      className="flex min-h-[calc(100dvh-24px)] flex-col md:min-h-[calc(100dvh-56px)] md:grid md:grid-cols-[1.05fr_0.95fr]"
-      style={
-        {
-          "--apercu-remplissage": accent.remplissage,
-          "--apercu-sur-remplissage": accent.surRemplissage,
-        } as React.CSSProperties
-      }
+      className="grid grid-cols-[minmax(0,1fr)] items-center gap-20 lg:grid-cols-[minmax(0,620px)_minmax(0,1fr)]"
     >
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="couleurAccent" value={couleur} />
 
       {/* ================= LES RÉGLAGES ================================== */}
-      <div className="flex flex-col px-5 pt-[22px] pb-5 md:px-16 md:py-10">
-        <div className="mb-[18px] flex items-center justify-between gap-4 md:mb-10">
-          <span className="font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:text-[18px] md:leading-[23px]">
-            DropLink
-          </span>
-          {/* ⚠️ « ÉTAPE 1 SUR 2 » EST VRAI, ET C'EST À VÉRIFIER AVANT DE
-              L'ÉCRIRE. La seconde étape est la première commande : c'est là que
-              mène « Continuer », et l'écran d'arrivée n'affiche rien d'autre
-              qu'une invitation à la créer. Un compteur d'étapes qui promet une
-              suite inexistante serait exactement ce que le principe XII
-              interdit — affirmer ce qui n'est pas. */}
-          <span className="font-body-sm text-[13px] leading-4 text-sourdine">{t("etape")}</span>
+      <div className="mx-auto flex w-full max-w-[620px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-12 md:py-10">
+        {/* ⚠️ « ÉTAPE 1 SUR 2 » EST VRAI : la seconde étape est la première
+            commande, et c'est là que mène « Continuer ». Un compteur d'étapes qui
+            promettrait une suite inexistante affirmerait ce qui n'est pas. */}
+        <div aria-hidden="true" className="grid grid-cols-2 gap-1.5">
+          <span className="h-1 rounded-ds-pill bg-ds-accent" />
+          <span className="h-1 rounded-ds-pill bg-ds-ink-200" />
         </div>
 
-        <div aria-hidden="true" className="mb-[26px] grid grid-cols-2 gap-1.5 md:mb-[34px]">
-          <span
-            className="h-1 rounded-full"
-            style={{ backgroundColor: "var(--apercu-remplissage)" }}
-          />
-          <span className="h-1 rounded-full bg-outline-variant" />
+        <div>
+          <h1 className="text-[28px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
+            {t("titre")}
+          </h1>
+          <p className="mt-2.5 text-[15px] leading-[1.55] text-ds-texte-corps">{t("sousTitre")}</p>
         </div>
-
-        <h1 className="mb-2 font-headline-xl text-[28px] leading-[33px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[34px] md:leading-10">
-          {t("titre")}
-        </h1>
-        <p className="mb-6 font-body-md text-[15px] leading-[23px] text-sourdine md:mb-8 md:leading-6">
-          {t("sousTitre")}
-        </p>
 
         {/* --- Le nom de la boutique ------------------------------------ */}
-        <label htmlFor="nom" className={LIBELLE}>
-          {t("nomTitre")}
-        </label>
-        <input
+        <ChampAcces
           id="nom"
-          name="nom"
-          type="text"
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
+          nom="nom"
+          libelle={t("nomTitre")}
+          icone={Store}
           placeholder={t("nomPlaceholder")}
-          aria-invalid={champsEnEchec.includes("nom") ? true : undefined}
-          className={CHAMP + " h-[50px]"}
+          requis={false}
+          valeur={nom}
+          surChangement={setNom}
+          invalide={champsEnEchec.includes("nom")}
         />
 
         {/* --- Le logo -------------------------------------------------- */}
-        <span className={LIBELLE + " mt-5 md:mt-[22px]"}>{t("logoTitre")}</span>
-        <div className="flex items-center gap-[13px] md:gap-3.5">
-          {logo.phase === "pose" ? (
-            // eslint-disable-next-line @next/next/no-img-element -- aperçu local (blob:)
-            <img
-              src={logo.apercu}
-              alt=""
-              className="h-14 w-14 shrink-0 rounded-[15px] border border-outline-variant bg-surface-container-lowest object-contain p-1.5"
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[15px] border border-dashed border-filet-pastille bg-fond-neutre"
-            >
-              <Icone nom="add" className="text-[20px] text-gris-inactif" />
-            </span>
-          )}
-          <div className="min-w-0">
-            <button
-              type="button"
-              onClick={() => champFichier.current?.click()}
-              className="min-h-11 rounded-[12px] border border-filet-controle bg-surface-container-lowest px-4 font-headline-md text-[14px] leading-[18px] font-semibold text-on-surface transition-colors hover:bg-fond-neutre md:min-h-0 md:h-10 md:rounded-[11px]"
-            >
-              {logo.phase === "envoi"
-                ? t("logoEnvoi", { pourcent: logo.pourcent })
-                : logo.phase === "pose"
-                  ? t("logoRemplacer")
-                  : t("logoChoisir")}
-            </button>
-            <p className="mt-[7px] hidden truncate font-body-sm text-[12px] leading-[15px] text-sourdine md:block">
-              {logo.phase === "pose" ? logo.nom : t("logoFormats")}
-            </p>
+        <div>
+          <span className={LIBELLE}>{t("logoTitre")}</span>
+          <div className="flex items-center gap-3.5">
+            {logo.phase === "pose" ? (
+              // eslint-disable-next-line @next/next/no-img-element -- aperçu local (blob:), hors optimiseur d'images
+              <img
+                src={logo.apercu}
+                alt=""
+                className="h-14 w-14 shrink-0 rounded-ds-card border border-ds-filet bg-ds-surface-carte object-contain p-1.5"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-ds-card border border-dashed border-ds-filet-appuye bg-ds-surface-creux text-ds-texte-sourdine"
+              >
+                <ImagePlus size={20} strokeWidth={1.8} />
+              </span>
+            )}
+            <div className="min-w-0">
+              <button
+                type="button"
+                onClick={() => champFichier.current?.click()}
+                className="inline-flex h-11 items-center gap-[9px] rounded-ds-card border border-ds-filet bg-ds-surface-carte px-4 text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs transition-colors hover:bg-ds-surface-creux"
+              >
+                <Upload aria-hidden="true" size={16} strokeWidth={1.9} className="text-ds-accent" />
+                {logo.phase === "envoi"
+                  ? t("logoEnvoi", { pourcent: logo.pourcent })
+                  : logo.phase === "pose"
+                    ? t("logoRemplacer")
+                    : t("logoChoisir")}
+              </button>
+              <p className="mt-1.5 truncate text-[12.5px] leading-[1.55] text-ds-texte-sourdine">
+                {logo.phase === "pose" ? logo.nom : t("logoFormats")}
+              </p>
+            </div>
+            {logo.phase === "pose" ? (
+              <button
+                type="button"
+                onClick={() => setLogo({ phase: "vide" })}
+                aria-label={t("logoRetirer")}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-sm text-ds-texte-sourdine transition-colors hover:text-ds-erreur"
+              >
+                <X aria-hidden="true" size={18} strokeWidth={1.9} />
+              </button>
+            ) : null}
           </div>
-          {logo.phase === "pose" ? (
-            <button
-              type="button"
-              onClick={() => setLogo({ phase: "vide" })}
-              className="shrink-0 text-sourdine transition-colors hover:text-alerte"
-            >
-              <Icone nom="close" titre={t("logoRetirer")} className="text-[20px]" />
-            </button>
+          {logo.phase === "erreur" ? (
+            <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+              {logo.motif}
+            </p>
           ) : null}
         </div>
-        {logo.phase === "erreur" ? (
-          <p role="alert" className="mt-2 font-body-sm text-[13px] text-error">
-            {logo.motif}
-          </p>
-        ) : null}
 
         {/* --- La couleur ----------------------------------------------- */}
-        <span className={LIBELLE + " mt-5 md:mt-[22px]"}>{t("couleurTitre")}</span>
-        <div className="mb-2 flex items-center gap-2.5 md:mb-0 md:flex-wrap">
-          <label
-            className="h-[46px] w-[46px] shrink-0 cursor-pointer rounded-[13px] border border-black/[0.06] md:h-11 md:w-11 md:rounded-[12px]"
-            style={{ backgroundColor: couleur }}
-          >
-            <span className="sr-only">{t("couleurTitre")}</span>
-            <input
-              type="color"
-              value={couleur}
-              onChange={(e) => setCouleur(e.target.value)}
-              className="sr-only"
-            />
+        <div>
+          <label htmlFor="couleurTexte" className={LIBELLE}>
+            {t("couleurTitre")}
           </label>
-          <input
-            id="couleurTexte"
-            type="text"
-            value={couleur}
-            onChange={(e) => setCouleur(e.target.value.trim())}
-            placeholder="#000000"
-            aria-label={t("couleurTitre")}
-            className={CHAMP + " h-[50px] font-mono text-[14px] md:h-11 md:w-[150px]"}
-          />
-          </div>
-        <p className="font-body-sm text-[12px] leading-[18px] text-sourdine md:mt-0 md:min-w-[180px] md:flex-grow">
-          {t("couleurAide")}
-        </p>
-        {/* ⚠️ « CETTE COULEUR A ÉTÉ AJUSTÉE » N'EST PAS RENDUE ICI, alors que
-            l'écran de marque la rend. Deux raisons : la phrase d'aide
-            ci-dessus, qui est celle de la planche, dit DÉJÀ que l'ajustement
-            est automatique et permanent ; et elle se déclenchait sur la couleur
-            PAR DÉFAUT — le violet de marque est à 4,46:1 sur blanc, donc
-            ajusté — donc dès l'ouverture de l'écran, avant que le vendeur ait
-            choisi quoi que ce soit. Un avertissement qui s'affiche sans qu'on
-            ait rien fait est un avertissement qu'on apprend à ignorer. Sur
-            l'écran de marque, où la couleur est DÉJÀ la sienne, la phrase garde
-            tout son sens. */}
+          <span className="flex h-14 items-center gap-3 rounded-ds-card border border-ds-filet-appuye bg-ds-surface-carte px-[18px] focus-within:border-ds-filet-focus focus-within:shadow-[var(--anneau-ds-focus)]">
+            {/* LA CIBLE FAIT 44 PX, LA PASTILLE 28 : les marges négatives rendent
+                à la ligne l'encombrement du kit, sans rétrécir ce qu'on touche. */}
+            <label className="-mx-2 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
+              <span
+                aria-hidden="true"
+                className="h-7 w-7 rounded-ds-xs shadow-[inset_0_0_0_1px_rgba(11,11,24,0.08)]"
+                style={{ backgroundColor: couleur }}
+              />
+              <span className="sr-only">{t("couleurTitre")}</span>
+              <input type="color" value={couleur} onChange={(e) => setCouleur(e.target.value)} className="sr-only" />
+            </label>
+            <input
+              id="couleurTexte"
+              type="text"
+              value={couleur}
+              onChange={(e) => setCouleur(e.target.value.trim())}
+              placeholder="#000000"
+              className="h-full min-w-0 flex-1 border-none bg-transparent font-mono text-[15px] text-ds-texte-fort uppercase outline-none"
+            />
+          </span>
+          {/* LA PHRASE DIT DÉJÀ QUE L'AJUSTEMENT EST AUTOMATIQUE : un
+              avertissement « couleur ajustée » s'afficherait ici avant que le
+              vendeur ait rien choisi, sur la couleur par défaut. */}
+          <p className="mt-2 text-[12.5px] leading-[1.5] text-ds-texte-sourdine">{t("couleurAide")}</p>
+        </div>
 
         {/* --- Le type de compte ---------------------------------------- */}
-        <fieldset className="mt-[22px] md:mt-[26px]">
-          {/* LA SEULE COLONNE SANS VALEUR PAR DÉFAUT EN BASE. Un défaut aurait
-              classé tous les fournisseurs comme revendeurs et faussé
-              irrémédiablement la segmentation d'usage, qui est le livrable réel
-              de la phase de validation. */}
+        <fieldset>
+          {/* LA SEULE COLONNE SANS VALEUR PAR DÉFAUT EN BASE : un défaut aurait
+              classé tous les fournisseurs comme revendeurs, et faussé la
+              segmentation d'usage qui est le livrable de la phase de validation. */}
           <legend className={LIBELLE}>{t("typeTitre")}</legend>
-          <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
-            {(["supplier", "reseller"] as const).map((valeur) => (
-              <label
-                key={valeur}
-                className={
-                  "cursor-pointer rounded-[15px] border bg-surface-container-lowest p-4 transition-colors " +
-                  (typeDeCompte === valeur
-                    ? "border-[var(--apercu-remplissage)] ring-[3px] ring-[color-mix(in_srgb,var(--apercu-remplissage)_14%,transparent)]"
-                    : "border-filet-controle hover:bg-fond-neutre")
-                }
-              >
-                <input
-                  type="radio"
-                  name="typeDeCompte"
-                  value={valeur}
-                  checked={typeDeCompte === valeur}
-                  onChange={() => setTypeDeCompte(valeur)}
-                  className="sr-only"
-                />
-                <span className="mb-[3px] block font-headline-md text-[15px] leading-[19px] font-bold text-on-surface md:mb-1">
-                  {t(`type.${valeur}.titre`)}
-                </span>
-                <span className="block font-body-sm text-[13px] leading-[19px] text-sourdine">
-                  {t(`type.${valeur}.detail`)}
-                </span>
-              </label>
-            ))}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {TYPES.map((type) => {
+              const choisi = typeDeCompte === type.valeur;
+              const Icone = type.icone;
+              return (
+                <label
+                  key={type.valeur}
+                  className={
+                    "flex cursor-pointer items-start gap-3 rounded-ds-card border p-4 transition-colors " +
+                    (choisi
+                      ? "border-ds-accent bg-ds-surface-teinte shadow-[var(--anneau-ds-focus)]"
+                      : "border-ds-filet bg-ds-surface-carte hover:bg-ds-surface-creux")
+                  }
+                >
+                  <input
+                    type="radio"
+                    name="typeDeCompte"
+                    value={type.valeur}
+                    checked={choisi}
+                    onChange={() => setTypeDeCompte(type.valeur)}
+                    className="sr-only"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className={
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-ds-sm text-ds-accent " +
+                      (choisi ? "bg-ds-surface-carte" : "bg-ds-surface-teinte")
+                    }
+                  >
+                    <Icone size={17} strokeWidth={1.9} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[14.5px] leading-[normal] font-bold text-ds-texte-fort">{t(type.titre)}</span>
+                    <span className="mt-0.5 block text-[13px] leading-[1.45] text-ds-texte-corps">{t(type.detail)}</span>
+                  </span>
+                </label>
+              );
+            })}
           </div>
           {champsEnEchec.includes("typeDeCompte") ? (
-            <p role="alert" className="mt-2 font-body-sm text-[13px] text-error">
+            <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
               {t("erreurType")}
             </p>
           ) : null}
@@ -376,111 +318,61 @@ export function FormulaireOnboarding({
         />
 
         {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
-          <p role="alert" className="mt-4 font-body-sm text-[13px] text-error">
-            {resultat.motif === "session" ? t("erreurSession") : t("erreurEcriture")}
-          </p>
+          <MessageErreurDs
+            id="erreur-onboarding"
+            texte={resultat.motif === "session" ? t("erreurSession") : t("erreurEcriture")}
+          />
         ) : null}
 
-        <div className="min-h-6 flex-grow md:min-h-[30px]" />
-
-        {/* ⚠️ « PASSER POUR L'INSTANT » N'EST PAS PORTÉ. La planche dessine le
-            lien ; le produit ne peut pas l'honorer. `onboardingAFaire()` répond
-            « oui » tant que `account_type` est nul — et cette colonne est
-            NULLABLE SANS DÉFAUT exprès, pour que le manque soit visible plutôt
-            que silencieux. Passer laisserait donc la garde renvoyer ici à la
-            requête suivante : un lien qui reboucle sur sa propre page. Le seul
-            moyen de l'honorer serait un état « a refusé de répondre », qui
-            fausserait la segmentation que cette colonne existe pour mesurer.
-            ⚠️ À POSER À WASSIM. */}
-        <BoutonValider libelle={t("valider")} enCours={t("validationEnCours")} />
+        <BoutonPrincipalDs libelle={t("valider")} libelleEnCours={t("validationEnCours")} />
       </div>
 
       {/* ================= L'APERÇU EN DIRECT ============================= */}
-      {/* MASQUÉ AU TÉLÉPHONE : `OnboardingMobile` ne le dessine pas, et il ne
-          porte aucune information dont le formulaire dépende. */}
-      <div className="hidden bg-fond-neutre p-10 md:flex md:flex-col md:items-center md:justify-center md:rounded-r-page-publique">
-        <p className="mb-6 font-body-sm text-[12px] leading-[15px] font-semibold tracking-[0.06em] text-sourdine">
+      {/* MASQUÉ SOUS `lg` : il ne porte aucune information dont le formulaire
+          dépende, et au téléphone il repousserait le bouton sous trois écrans. */}
+      <div className="hidden flex-col items-center gap-5 lg:flex">
+        <span className="text-[11px] leading-[normal] font-extrabold tracking-[0.12em] text-ds-texte-sourdine uppercase">
           {t("apercuTitre")}
-        </p>
-
-        <div className="h-[528px] w-[292px] rounded-[38px] bg-primary p-2 shadow-[0_40px_70px_-28px_rgba(14,14,19,0.42)]">
-          <div className="h-full w-full overflow-hidden rounded-[31px] bg-surface-container-lowest">
-            {/* L'EN-TÊTE PORTE LA COULEUR DU VENDEUR, jamais la nôtre : c'est
-                exactement ce que son client verra. Le texte prend
-                `surRemplissage` et non `#ffffff` en dur — un accent clair
-                rendrait le blanc illisible. */}
-            <div
-              className="px-4 pt-[26px] pb-5"
-              style={{ backgroundColor: "var(--apercu-remplissage)" }}
-            >
-              <div className="flex items-center gap-2">
-                {logo.phase === "pose" ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- aperçu local (blob:)
-                  <img src={logo.apercu} alt="" className="h-6 w-6 rounded-full object-cover" />
-                ) : (
-                  <span
-                    className="h-6 w-6 rounded-full"
-                    style={{
-                      backgroundColor:
-                        "color-mix(in srgb, var(--apercu-sur-remplissage) 30%, transparent)",
-                    }}
-                  />
-                )}
-                <span
-                  className="font-headline-md text-[12px] leading-[15px] font-bold"
-                  style={{ color: "var(--apercu-sur-remplissage)" }}
-                >
-                  {nom.trim() === "" ? t("sansNom") : nom}
-                </span>
-              </div>
-              <p
-                className="mt-2.5 mb-0.5 font-headline-md text-[19px] leading-6 font-extrabold tracking-[-0.02em]"
-                style={{ color: "var(--apercu-sur-remplissage)" }}
-              >
+        </span>
+        <div aria-hidden="true" className="w-[300px] rounded-[40px] bg-ds-ink-900 p-2 shadow-ds-window">
+          {/* LA PAGE CLIENT TELLE QU'ELLE EST : carte d'identité, carte de
+              commande et sa frise, galerie. Les couleurs sont celles que
+              `resoudreAccent` donnera réellement au client — jamais un blanc en
+              dur sur l'aplat, un accent clair le rendrait illisible. */}
+          <div className="flex min-h-[540px] flex-col gap-2.5 overflow-hidden rounded-[32px] bg-ds-surface-page p-3.5">
+            <div className="flex items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-3">
+              {logo.phase === "pose" ? (
+                // eslint-disable-next-line @next/next/no-img-element -- aperçu local (blob:)
+                <img src={logo.apercu} alt="" className="h-[34px] w-[34px] shrink-0 rounded-full object-cover" />
+              ) : (
+                <span className="h-[34px] w-[34px] shrink-0 rounded-full" style={{ backgroundColor: accent.remplissage }} />
+              )}
+              <span className="truncate text-[14px] font-bold text-ds-texte-fort">
+                {nom.trim() === "" ? t("sansNom") : nom}
+              </span>
+            </div>
+            <div className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-3.5">
+              <span className="block text-[16px] font-extrabold tracking-[-0.03em] text-ds-texte-fort">
                 {libelles.commande}
-              </p>
-              <p
-                className="font-body-sm text-[12px] leading-[15px]"
-                style={{
-                  color: "color-mix(in srgb, var(--apercu-sur-remplissage) 78%, transparent)",
-                }}
-              >
-                {libelles.pourGenerique}
-              </p>
-            </div>
-
-            <div className="p-3.5">
-              <div aria-hidden="true" className="mb-3.5 grid grid-cols-4 gap-1">
+              </span>
+              <div className="mt-3 grid grid-cols-4 gap-1">
                 {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="h-[5px] rounded-full"
-                    style={{ backgroundColor: "var(--apercu-remplissage)" }}
-                  />
+                  <span key={i} className="h-[5px] rounded-full" style={{ backgroundColor: accent.interface }} />
                 ))}
-                <span className="h-[5px] rounded-full bg-fond-barre" />
-              </div>
-              <div aria-hidden="true" className="mb-3.5 grid grid-cols-2 gap-1.5">
-                {["#e4e2ee", "#eee4e0", "#e0e4ee", "#eaeaef"].map((teinte) => (
-                  <span
-                    key={teinte}
-                    className="block aspect-square rounded-[10px]"
-                    style={{ backgroundColor: teinte }}
-                  />
-                ))}
-              </div>
-              <div
-                className="flex h-[42px] items-center justify-center rounded-[11px]"
-                style={{ backgroundColor: "var(--apercu-remplissage)" }}
-              >
-                <span
-                  className="font-headline-md text-[13px] leading-4 font-bold"
-                  style={{ color: "var(--apercu-sur-remplissage)" }}
-                >
-                  {libelles.approuver}
-                </span>
+                <span className="h-[5px] rounded-full bg-ds-ink-200" />
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {[0, 1, 2, 3].map((i) => (
+                <span key={i} className="aspect-square rounded-ds-sm bg-ds-surface-creux" />
+              ))}
+            </div>
+            <span
+              className="flex h-[42px] items-center justify-center rounded-ds-card text-[13px] font-bold"
+              style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
+            >
+              {libelles.approuver}
+            </span>
           </div>
         </div>
       </div>
