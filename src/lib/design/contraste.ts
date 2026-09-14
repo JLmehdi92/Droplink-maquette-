@@ -18,13 +18,23 @@ export const RATIO_INTERFACE = 3;
 
 /**
  * Valeur de repli, identique au défaut de `shops.accent_color` en base — voir
- * la migration 100. Le canevas déclare `#7c5cf5` comme défaut et `#0058be`
- * seulement parmi les OPTIONS : une couleur qu'un vendeur peut choisir, jamais
- * celle qu'il reçoit sans rien choisir. La distinction compte, parce que
- * `shops` est créée à l'inscription, donc avant l'onboarding : cette couleur
- * est celle que voient les clients d'un vendeur qui n'a rien configuré.
+ * la migration 163. Le design system déclare `primary: "#5B4BF5"` comme
+ * couleur du vendeur sur les planches Ma marque et page client. `shops` est
+ * créée à l'inscription, donc avant l'onboarding : cette couleur est celle que
+ * voient les clients d'un vendeur qui n'a rien configuré.
+ *
+ * ⚠️ ELLE VALAIT `#7c5cf5`, L'ANCIEN VIOLET DU CANEVAS, jusqu'au 14/09/2026 — trois
+ * jours après que le canevas a cessé d'être la référence.
  */
-export const ACCENT_DEFAUT = "#7c5cf5";
+export const ACCENT_DEFAUT = "#5B4BF5";
+
+/**
+ * Les couleurs que la colonne a données D'OFFICE au fil des migrations : 001
+ * (`#0058be`), 100 (`#7c5cf5`), 163 (`#5B4BF5`). Aucune ligne n'est réécrite
+ * quand le défaut change, donc un vendeur qui n'a jamais touché sa couleur peut
+ * porter n'importe laquelle des trois.
+ */
+export const ACCENTS_PAR_DEFAUT_HISTORIQUES = ["#0058be", "#7c5cf5", "#5b4bf5"] as const;
 
 export interface Rvb {
   readonly r: number;
@@ -71,6 +81,19 @@ export interface AccentResolu {
    */
   readonly teinte: string;
   readonly surTeinte: string;
+  /**
+   * LA TEINTE DES PASTILLES — `--accent-soft` du kit, 12 % de l'accent sur blanc,
+   * celle du `Badge` de ton « brand » (l'étape « En cours » de la frise).
+   *
+   * ⚠️ ELLE N'EST PAS `teinte`, ET LA PASTILLE PORTAIT `teinte`. Deux teintes
+   * voisines de deux points : 10 % pour les surfaces (`--surface-tint`), 12 %
+   * pour les pastilles. L'écart était masqué par la déclaration de l'ancien
+   * accent par défaut ; le jour où la boutique du jeu a reçu `#5B4BF5`, la
+   * soustraction l'a montré seul — rgb(239,237,254) contre (235,233,254).
+   * L'écriture est re-mesurée contre elle, comme `surTeinte`.
+   */
+  readonly doux: string;
+  readonly surDoux: string;
   /** Vrai si la couleur choisie a dû être ajustée pour atteindre les cibles. */
   readonly ajuste: boolean;
 }
@@ -313,6 +336,14 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
   });
   const surTeinte = ajusterPourRatio(texte, teinte, RATIO_TEXTE);
 
+  // 12 % d'accent : la proportion de `--accent-soft`, fond des pastilles du kit.
+  const doux = quantifier({
+    r: fond.r + (elementInterface.r - fond.r) * 0.12,
+    g: fond.g + (elementInterface.g - fond.g) * 0.12,
+    b: fond.b + (elementInterface.b - fond.b) * 0.12,
+  });
+  const surDoux = ajusterPourRatio(texte, doux, RATIO_TEXTE);
+
   return {
     brut: versHex(base),
     texte: versHex(texte),
@@ -323,6 +354,8 @@ export function resoudreAccent(accentBrut: string, fondPage: string = "#ffffff")
     surRemplissageFaible: ecritureBlanche ? "rgba(255,255,255,0.32)" : "rgba(17,17,23,0.22)",
     teinte: versHex(teinte),
     surTeinte: versHex(surTeinte),
+    doux: versHex(doux),
+    surDoux: versHex(surDoux),
     ajuste: choisi === null || versHex(texte) !== versHex(base),
   };
 }

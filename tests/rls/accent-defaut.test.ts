@@ -1,7 +1,7 @@
 import type { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { ouvrirConnexionCatalogue } from "../aide/base";
-import { ACCENT_DEFAUT } from "@/lib/design/contraste";
+import { ACCENT_DEFAUT, ACCENTS_PAR_DEFAUT_HISTORIQUES } from "@/lib/design/contraste";
 
 /**
  * LA COULEUR D'ACCENT PAR DÉFAUT EST LA MÊME EN BASE ET DANS LE CODE.
@@ -45,17 +45,25 @@ describe("L'accent par défaut", () => {
     // rendrait zéro ligne et le test serait vert en n'ayant rien comparé.
     expect(rows).toHaveLength(1);
 
-    // Postgres rend le défaut sous la forme `'#7c5cf5'::text`.
+    // Postgres rend le défaut sous la forme `'#5B4BF5'::text`.
     const brut = rows[0]?.defaut ?? "";
     const valeur = /'([^']*)'/.exec(brut)?.[1];
     expect(valeur, `défaut lu en base : ${brut}`).toBe(ACCENT_DEFAUT);
   });
 
-  test("et c'est bien celui du canevas", async () => {
+  test("et c'est bien celui du design system", async () => {
     // Le contrôle précédent tiendrait si les DEUX dérivaient ensemble. Celui-ci
-    // les ancre à la valeur relevée dans le canevas — `default:"#7c5cf5"` dans
-    // le script de la planche Marque.
-    expect(ACCENT_DEFAUT).toBe("#7c5cf5");
+    // les ancre à la valeur du design system — `primary: "#5B4BF5"` sur les
+    // planches Ma marque et page client. Il ancrait l'ancien canevas, et c'est
+    // pourquoi le produit a servi l'ancien violet trois jours après la bascule :
+    // un test qui fige une référence la fige aussi quand elle meurt.
+    expect(ACCENT_DEFAUT).toBe("#5B4BF5");
+  });
+
+  test("le défaut courant fait partie des défauts historiques", () => {
+    // Sans lui, la métrique « couleur personnalisée » compterait les boutiques
+    // nées avec le défaut du jour comme personnalisées.
+    expect(ACCENTS_PAR_DEFAUT_HISTORIQUES).toContain(ACCENT_DEFAUT.toLowerCase());
   });
 
   test("les boutiques existantes n'ont PAS été réécrites", async () => {

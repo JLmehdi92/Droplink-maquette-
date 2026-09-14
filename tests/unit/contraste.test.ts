@@ -118,11 +118,29 @@ describe("Résolution de l'accent — conformité obtenue automatiquement", () =
     expect(ratio, `${r.surTeinte} sur ${r.teinte}`).toBeGreaterThanOrEqual(RATIO_TEXTE);
   });
 
+  /**
+   * LA PASTILLE « EN COURS » ÉCRIT SUR LA TEINTE DOUCE, À 12 %, plus sombre
+   * encore que celle du bandeau : la même mesure, contre elle.
+   */
+  test.each(COULEURS_EXTREMES)("%s : la pastille se lit sur sa teinte douce", (couleur) => {
+    const r = resoudreAccent(couleur, "#ffffff");
+    const ratio = ratioContraste(analyserHex(r.surDoux) as never, analyserHex(r.doux) as never);
+    expect(ratio, `${r.surDoux} sur ${r.doux}`).toBeGreaterThanOrEqual(RATIO_TEXTE);
+  });
+
+  test("la teinte douce est plus soutenue que la teinte : 12 % contre 10 %", () => {
+    const r = resoudreAccent("#5B4BF5", "#ffffff");
+    expect(r.doux).toBe("#ebe9fe");
+    expect(r.teinte).toBe("#efedfe");
+  });
+
   test("une valeur invalide retombe sur le défaut sans lever", () => {
     // La page publique d'un vendeur ne doit jamais cesser de s'afficher parce
     // qu'une couleur est mal formée.
     const r = resoudreAccent("pas-une-couleur");
-    expect(r.brut).toBe(ACCENT_DEFAUT);
+    // `brut` est NORMALISÉ en minuscules ; le défaut s'écrit comme le design
+    // system l'écrit, en capitales, et c'est aussi ce que la base stocke.
+    expect(r.brut).toBe(ACCENT_DEFAUT.toLowerCase());
     expect(r.ajuste).toBe(true);
   });
 

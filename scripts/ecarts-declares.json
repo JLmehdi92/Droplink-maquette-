@@ -1552,13 +1552,12 @@
         "textes": [
           "Sans nom ni logo, la page de votre clien",
           "Une ligne sous votre nom, sur la page de",
-          "Sur la page de vos clients, le texte pos",
           "Ces liens s’ouvrent hors de la page de v",
           "Votre nom apparaît en discret sur chaque",
           "Vos clients voient toujours cette langue"
         ],
         "motif": "contrainte",
-        "raison": "LES AIDES SOUS LES CHAMPS, que le kit n ecrit pas. Chacune porte une decision du produit qui se voit autrement chez le client : l en-tete est OMIS sans nom ni logo (decision 24), la description suit le nom, la couleur stockee n est jamais reecrite (regle 1), les liens s ouvrent hors de la page, le filigrane decourage sans empecher, et la langue des pages client est celle du VENDEUR et non celle de l URL. Un reglage dont on ne dit pas l effet est un reglage qu on regle au hasard."
+        "raison": "LES AIDES SOUS LES CHAMPS, que le kit n ecrit pas. Chacune porte une decision du produit qui se voit autrement chez le client : l en-tete est OMIS sans nom ni logo (decision 24), la description suit le nom, les liens s ouvrent hors de la page, le filigrane decourage sans empecher, et la langue des pages client est celle du VENDEUR et non celle de l URL. Un reglage dont on ne dit pas l effet est un reglage qu on regle au hasard."
       },
       {
         "textes": [
@@ -3243,14 +3242,6 @@
       },
       {
         "textes": [
-          "En cours",
-          "Contacter la boutique"
-        ],
-        "motif": "donnee",
-        "raison": "L ACCENT DU VENDEUR. Le kit est dessine pour #5B4BF5 ; la boutique du jeu porte l accent par defaut stocke en base, #7c5cf5, et chaque couleur passe par `resoudreAccent()` — la teinte de la pastille est recalculee a 10 % de cet accent. La place du bouton suit la carte de livraison, plus haute de 6 px (voir la declaration des lignes de livraison)."
-      },
-      {
-        "textes": [
           "Photos et vidéos"
         ],
         "motif": "contrainte",
@@ -3267,10 +3258,11 @@
         "textes": [
           "8 septembre 2025 à 14:32 [1/2]",
           "8 septembre 2025 à 18:33 [2/2]",
-          "10 septembre 2025 à 09:15  <nombre d'occurrences>"
+          "10 septembre 2025 à 09:15  <nombre d'occurrences>",
+          "10 sept. 2025 09:15"
         ],
         "motif": "donnee",
-        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en invente cinq, et le premier porte une description de transporteur assez longue pour passer sur deux lignes. La date prend la hauteur de sa rangee, comme au kit, et la rangee est plus haute."
+        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en invente cinq, et le premier porte une description de transporteur assez longue pour passer sur deux lignes. La date prend la hauteur de sa rangee, comme au kit, et la rangee est plus haute. La date de la frise, elle, a la largeur de ses chiffres : le jeu la pose a l heure de la mesure, et « 14 sept. 2026 01:45 » n a pas la largeur de « 10 sept. 2025 09:15 »."
       },
       {
         "textes": [
@@ -3278,7 +3270,8 @@
           "Pour toute question concernant votre com",
           "Instagram",
           "TikTok",
-          "WhatsApp"
+          "WhatsApp",
+          "Contacter la boutique"
         ],
         "motif": "donnee",
         "raison": "PLACE SEULE, 5 PX PLUS BAS. La carte de livraison du kit commence par le transporteur, dont la pastille fait 38 px ; le jeu n a pas de code transporteur sur la commande, et ses quatre lignes portent toutes une tuile de 44 — la carte grandit de 6 px et celle du contact descend d autant."
@@ -3291,6 +3284,13 @@
         ],
         "motif": "contrainte",
         "raison": "LA MENTION DROPLINK RESTE SECONDAIRE — decision 25. Le kit la peint en surtitre violet de 11 px dans une carte promotionnelle ; nous la gardons au pied, en sourdine de 13, jamais confondable avec l expediteur. Sans cette carte ni celle des notifications, la colonne de droite est plus courte et le pied remonte."
+      },
+      {
+        "textes": [
+          "En cours"
+        ],
+        "motif": "structure",
+        "raison": "LA MEME TEINTE, DEUX NOTATIONS. Le kit peint la pastille en `color-mix(in srgb, accent 12%, #fff)`, que le navigateur rend en composantes FRACTIONNAIRES (235,3 / 233,4 / 253,8) ; nous la calculons au serveur (`resoudreAccent().doux`, 12 %) et l arrondissons (235 / 233 / 254). Moins d un niveau d ecart par canal. ⚠️ Cette ligne portait une autre raison jusqu au 14/09/2026 — « la boutique du jeu porte l accent par defaut #7c5cf5 » — et elle masquait un vrai defaut : la pastille etait a 10 % au lieu de 12 %. La migration 163 a rendu au jeu l accent du design system, et l ecart est reste seul."
       }
     ],
     "manquants": [

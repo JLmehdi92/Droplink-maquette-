@@ -15,7 +15,7 @@ import {
   type PreparationLogo,
 } from "@/lib/boutique/logo";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { ACCENT_DEFAUT } from "@/lib/design/contraste";
+import { ACCENTS_PAR_DEFAUT_HISTORIQUES } from "@/lib/design/contraste";
 
 /**
  * RÉGLAGES DE MARQUE — les actions.
@@ -96,9 +96,16 @@ export async function enregistrerMarque(
       // comparait encore à `#0058be`. Toute boutique née depuis déclarait donc
       // « couleur personnalisée » sans que le vendeur ait rien touché — et le
       // biais va du côté RASSURANT, celui qu'on ne remet jamais en question.
-      // La source unique est `ACCENT_DEFAUT`, ancrée au canevas par un test.
-      couleur_personnalisee:
-        analyse.data.couleurAccent.toLowerCase() !== ACCENT_DEFAUT.toLowerCase(),
+      //
+      // ⚠️ ET LE DÉFAUT A CHANGÉ TROIS FOIS (migrations 001, 100, 163) sans
+      // qu'aucune ligne soit réécrite. Comparer au seul défaut ACTUEL ferait de
+      // chaque boutique née avant la 163 une « couleur personnalisée » — le même
+      // biais rassurant. La comparaison porte donc sur les trois. Le prix, dit :
+      // un vendeur qui CHOISIRAIT exactement l'une d'elles serait compté comme
+      // n'ayant rien touché — un biais pessimiste, le seul qu'on accepte.
+      couleur_personnalisee: !(ACCENTS_PAR_DEFAUT_HISTORIQUES as readonly string[]).includes(
+        analyse.data.couleurAccent.toLowerCase(),
+      ),
       // COMBIEN de réseaux, jamais LESQUELS ni leurs adresses : le compte d'un
       // vendeur lui appartient, le fait qu'il en configure appartient au
       // produit — c'est ce dernier qui dit si l'écran sert à quelque chose.

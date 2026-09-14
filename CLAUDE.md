@@ -928,8 +928,42 @@ second envoi « ne partait pas » : le mot de passe s'était vidé, et le champ
 le produit — mais une sonde qui rejoue un formulaire doit ressaisir TOUS ses
 champs.
 
-**La production attend `pnpm db:migrate` pour 147 à 161, AVANT le
+**La production attend `pnpm db:migrate` pour 147 à 163, AVANT le
 déploiement.**
+
+⚠️ **LA COULEUR PAR DÉFAUT DES VENDEURS ÉTAIT RESTÉE CELLE DU CANEVAS MORT.**
+`shops.accent_color` valait `#7c5cf5` par défaut (migration 100) et
+`ACCENT_DEFAUT` aussi, trois jours après que le design system — `primary:
+"#5B4BF5"` sur Ma marque et sur la page client — l'a remplacé. Tout vendeur qui
+n'a rien configuré montrait l'ancien violet à ses clients. Aucune sonde ne
+pouvait le voir : le jeu de mesure prenait lui aussi le défaut de la colonne, et
+une déclaration « la boutique du jeu porte #7c5cf5 » excusait l'écart. **La 163
+change le défaut sans réécrire une ligne** (la valeur stockée fait foi) ; la
+métrique « couleur personnalisée » compare désormais aux trois défauts
+historiques. Et cette déclaration MASQUAIT un second défaut : la pastille « En
+cours » était à 10 % d'accent au lieu des 12 % de `--accent-soft`.
+`resoudreAccent` rend désormais `doux` et `surDoux`.
+
+⚠️ **ET DEUX GARDES ÉTAIENT ANCRÉES AU CANEVAS MORT.** `accent-defaut.test.ts`
+exigeait `#7c5cf5`, et `couleurs-en-dur.test.ts` acceptait l'ancien violet mais
+REFUSAIT l'accent du design system. Un test qui fige une référence la fige aussi
+quand elle meurt : le second lit désormais les jetons `--color-ds-*` de
+`globals.css`.
+
+⚠️ **LES ÉCRANS ADMIN QUI LISENT TOUTE LA PLATEFORME SONT DANS LE BANC, ET LE
+BANC A TROUVÉ UNE REQUÊTE QUI DEMANDAIT TRENTE-SIX PARCOURS.** Mesuré le
+14/09/2026 sur 219 200 commandes, seuils écrits avant : la liste admin des
+commandes emprunte son index partiel et lit moins d'une page ; les statistiques
+tiennent entre 5 et 474 ms — sauf `croissance_admin`, à 1 118 ms pour un seuil
+de 1 000. Il ne manquait pas d'index (L-017) : une sous-requête corrélée par
+mois ET par table relisait neuf fois les mêmes lignes. La 162 lit chaque table
+une fois.
+
+⚠️ **LE PROTOCOLE « DEUX SÉRIES CONCORDANTES » VIVAIT EN QUATRE COPIES, ET ELLES
+AVAIENT DIVERGÉ** : celle du banc des boutiques ne vérifiait aucune concordance.
+Il vit désormais dans `tests/aide/series.ts`, avec une troisième série qui
+DÉPARTAGE (jamais qui remplace) quand l'instance partagée fait prendre vingt
+millisecondes à une série — mesuré : « 8,6 ms puis 30,7 ms ».
 
 ⚠️ **LES SONDES DE MESURE LAISSAIENT LEURS COMPTES EN BASE.** La suppression
 vivait à leur dernière ligne : chaque passage interrompu laissait un compte —

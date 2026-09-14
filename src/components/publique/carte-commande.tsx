@@ -177,7 +177,7 @@ export function CarteCommande({
               {actuelle ? (
                 <span
                   className="mt-1.5 inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[11.5px] font-bold tracking-[-0.02em] lg:text-[11px]"
-                  style={{ backgroundColor: accent.teinte, color: accent.surTeinte }}
+                  style={{ backgroundColor: accent.doux, color: accent.surDoux }}
                 >
                   {libelles.enCours}
                 </span>

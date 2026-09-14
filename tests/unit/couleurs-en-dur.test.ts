@@ -160,6 +160,27 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
 ];
 const tolerees = new Map(EXCEPTIONS);
 
+/**
+ * LES COULEURS DU DESIGN SYSTEM, LUES DANS SES JETONS — pas recopiées.
+ *
+ * ⚠️ CE TEST NE CONNAISSAIT QUE LE CANEVAS, MORT LE 11/09/2026. Il acceptait
+ * donc l'ancien violet `#7c5cf5` et REFUSAIT l'accent du design system
+ * `#5B4BF5` : mesuré le 14/09/2026, en corrigeant l'accent par défaut des
+ * vendeurs, qui était resté l'ancien. Une garde ancrée à une référence la fige
+ * aussi quand elle meurt.
+ *
+ * Les valeurs sont lues dans `globals.css`, sur les jetons `--color-ds-*` et
+ * `--degrade-ds-*` : c'est la transcription versionnée du design system (son
+ * dossier est gitignoré), et une liste écrite ici divergerait au premier jeton
+ * ajouté.
+ */
+const DU_DESIGN_SYSTEM = new Set(
+  readFileSync(join(RACINE, "app", "globals.css"), "utf8")
+    .split(/\r?\n/)
+    .filter((ligne) => /--(color-ds|degrade-ds)-/.test(ligne))
+    .flatMap((ligne) => [...ligne.matchAll(/#[0-9a-fA-F]{6}(?![0-9a-fA-F])/g)].map((m) => m[0].toLowerCase())),
+);
+
 function sources(dossier: string): string[] {
   return readdirSync(dossier, { withFileTypes: true }).flatMap((e) => {
     const chemin = join(dossier, e.name);
@@ -209,9 +230,16 @@ describe("Les couleurs écrites en dur", () => {
     expect(trouvees.size).toBeGreaterThanOrEqual(15);
   });
 
+  test("CONTRE-TEST : les jetons du design system sont bien lus", () => {
+    // Un ensemble vide rendrait le design system muet, et le test retomberait
+    // en silence sur le seul canevas.
+    expect(DU_DESIGN_SYSTEM.size).toBeGreaterThanOrEqual(30);
+    expect(DU_DESIGN_SYSTEM.has("#5b4bf5")).toBe(true);
+  });
+
   test("chacune vient du canevas ou porte une raison", () => {
     const inconnues = [...trouvees.entries()]
-      .filter(([hex]) => !DU_CANEVAS.has(hex) && !tolerees.has(hex))
+      .filter(([hex]) => !DU_CANEVAS.has(hex) && !DU_DESIGN_SYSTEM.has(hex) && !tolerees.has(hex))
       .map(([hex, ou]) => `${hex} dans ${[...new Set(ou)].join(", ")}`);
     expect(inconnues).toEqual([]);
   });

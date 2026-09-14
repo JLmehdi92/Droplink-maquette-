@@ -306,11 +306,16 @@ export function FormulaireMarque({
      * votre site ». Il n'a pas de marque à lui, donc pas de teinte à emprunter :
      * il porte le violet DropLink, la seule couleur du système qui ne prétende
      * appartenir à personne d'autre.
+     *
+     * ⚠️ C'ÉTAIT L'ANCIEN VIOLET, `#7c5cf5` sur `#f1eefe` — celui du canevas mort
+     * le 11/09. Aucune sonde ne l'a vu : ce sont des propriétés d'un tracé SVG,
+     * et la pastille n'apparaît que si le vendeur a renseigné son site. Relevé le
+     * 14/09/2026 en cherchant les anciennes valeurs dans le code.
      */
     {
       clef: "site",
-      fond: "#f1eefe",
-      encre: "#7c5cf5",
+      fond: "#F1F0FE",
+      encre: "#5B4BF5",
       trace:
         "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.6 15.6 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.1 1.4 2.5 1.8 4h-3.6c.4-1.5 1-2.9 1.8-4zM4.3 14a8 8 0 0 1 0-4h3.3a17 17 0 0 0 0 4H4.3zm.8 2h2.9c.3 1.3.8 2.5 1.4 3.6A8 8 0 0 1 5.1 16zm2.9-8H5.1a8 8 0 0 1 4.3-3.6A15.6 15.6 0 0 0 8 8zM12 20c-.8-1.1-1.4-2.5-1.8-4h3.6c-.4 1.5-1 2.9-1.8 4zm2.2-6H9.8a15 15 0 0 1 0-4h4.4a15 15 0 0 1 0 4zm.4 5.6c.6-1.1 1.1-2.3 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zm1.8-5.6a17 17 0 0 0 0-4h3.3a8 8 0 0 1 0 4h-3.3z",
     },

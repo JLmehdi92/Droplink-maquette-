@@ -132,7 +132,7 @@ export default async function FicheCompte({
         <span
           aria-hidden="true"
           className="hidden h-12 w-12 shrink-0 rounded-ds-control md:block"
-          style={{ backgroundColor: fiche.accent ?? "#7c5cf5" }}
+          style={{ backgroundColor: fiche.accent ?? "var(--color-ds-accent)" }}
         />
 
         <div className="min-w-0 flex-grow">
@@ -371,7 +371,7 @@ export default async function FicheCompte({
                 <span
                   aria-hidden="true"
                   className="h-11 w-11 shrink-0 rounded-ds-control"
-                  style={{ backgroundColor: fiche.accent ?? "#7c5cf5" }}
+                  style={{ backgroundColor: fiche.accent ?? "var(--color-ds-accent)" }}
                 />
                 <div className="min-w-0">
                   <p className="truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort">
