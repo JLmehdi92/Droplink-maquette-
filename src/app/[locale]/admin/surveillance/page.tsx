@@ -67,9 +67,6 @@ const TEINTE_TACHE = {
     carte: "border-ds-filet bg-ds-surface-carte",
     point: "bg-ds-succes",
     titre: "text-ds-texte-fort",
-    // LA PLANCHE MET CE DÉTAIL EN INTER (classe `.mut`) sur les deux états
-    // neutres, et en Plus Jakarta Sans sur le seul état en retard — la ligne
-    // qui doit se lire comme une alerte porte la police des titres.
     detail: "leading-4 text-ds-texte-sourdine",
     pilule: "bg-ds-succes-fond text-ds-succes",
   },

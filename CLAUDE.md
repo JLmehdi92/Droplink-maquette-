@@ -627,9 +627,9 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**VINGT-HUIT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+**TRENTE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
 tableau de bord, les paramètres et la vérification en deux étapes créés, les sept que le kit admin dessine et que la contrainte n° 1 autorise, la page client et son
-lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot de passe et l'onboarding, les deux pages légales, le signalement, le blog et ses articles, et la documentation :
+lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot de passe et l'onboarding, les deux pages légales, le signalement, le blog et ses articles, la documentation, le 404 général et la commande introuvable :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -661,12 +661,18 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 | `/signalement` | `legal/signalement.html` à 1280 | 0 (0) | 0 (0) | **0** |
 | `/blog` | `blog/index.html` à 1280 | 0 (0) | 0 (0) | **0** |
 | `/blog/[slug]` | `blog/index.html#envoyer-photos-client-sans-lien-qui-expire` à 1280 | 0 (0) | 0 (0) | **0** |
+| 404 général `/fr/pas-une-route` | `erreurs/introuvable.html` à 1440, `ECRAN_ERREUR=1` | 0 (0) | 0 (0) | **0** |
+| commande introuvable `(app)/not-found` | `seller_app/index.html#introuvable` à 1690 | 4 (0) | 9 (0) | **0** |
 
 > ⚠️ **`/nouveau-mot-de-passe` NE S'OUVRE QU'À UNE SESSION DE RÉCUPÉRATION** — sa
 > méthode doit être `otp`. `RECUPERATION=1` fait ouvrir à la sonde un VRAI lien
 > de réinitialisation (généré par l'API d'administration de la base de tests,
 > puis vérifié comme le navigateur le ferait) ; sans lui, la page renvoie à la
-> connexion et la sonde mesurerait la connexion. **`ONBOARDING=1`** laisse de même
+> connexion et la sonde mesurerait la connexion. **`ECRAN_ERREUR=1`** lève la garde
+> qui refuse de mesurer une page d'erreur — seulement quand c'est elle qu'on
+> mesure. ⚠️ Les deux frontières d'erreur (`[locale]/error`, `(app)/error`)
+> partagent les composants de ces deux écrans mais ne se déclenchent pas sur
+> commande : elles ne sont PAS soustraites. **`ONBOARDING=1`** laisse de même
 > le type de compte NUL : `/bienvenue` renvoie aux commandes tout compte qui l'a
 > déclaré.
 

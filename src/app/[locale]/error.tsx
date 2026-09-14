@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { RotateCcw, TriangleAlert } from "lucide-react";
+import { CLASSE_ACTION_ERREUR, EcranErreurPublic } from "@/components/ecran-erreur-public";
 
 /**
  * LA FRONTIÈRE D'ERREUR DES SURFACES PUBLIQUES.
@@ -30,31 +32,17 @@ export default function ErreurPublique({
 }) {
   const t = useTranslations("erreurs");
 
+  /* PORTÉE SUR `ui_kits/erreurs/erreur.html` LE 14/09/2026 — elle rendait un
+     titre en Plus Jakarta Sans au-dessus d'un bouton noir. */
   return (
-    <main
-      id="contenu"
-      className="flex min-h-dvh items-center justify-center px-margin-mobile py-10 md:px-[30px]"
-    >
-      <div className="max-w-[520px] text-center">
-        <h1 className="font-headline-xl text-[24px] font-extrabold tracking-[-0.03em] text-on-surface">
-          {t("titre")}
-        </h1>
-        <p className="mt-3 font-body-md text-body-md text-on-surface-variant">{t("texte")}</p>
-
-        <button
-          type="button"
-          onClick={reset}
-          className="mt-6 min-h-[44px] rounded-md bg-primary px-5 font-label-md text-label-md text-surface-container-lowest"
-        >
-          {t("reessayer")}
-        </button>
-
-        {error.digest !== undefined && (
-          <p className="mt-6 font-body-sm text-body-sm text-sourdine">
-            {t("reference", { ref: error.digest })}
-          </p>
-        )}
-      </div>
-    </main>
+    <EcranErreurPublic icone={TriangleAlert} titre={t("titre")} texte={t("texte")}>
+      <button type="button" onClick={reset} className={CLASSE_ACTION_ERREUR}>
+        <RotateCcw aria-hidden="true" size={18} strokeWidth={1.9} />
+        {t("reessayer")}
+      </button>
+      {error.digest !== undefined && (
+        <p className="mt-6 text-[13px] text-ds-texte-sourdine">{t("reference", { ref: error.digest })}</p>
+      )}
+    </EcranErreurPublic>
   );
 }

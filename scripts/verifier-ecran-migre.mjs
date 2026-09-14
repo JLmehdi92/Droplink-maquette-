@@ -970,9 +970,15 @@ for (const modele of routes) {
        pour une page d erreur. Un ideogramme porte un mot : le plancher chinois
        est au tiers. */
     const plancher = chemin.startsWith("/zh") ? 40 : 120;
+    /* `ECRAN_ERREUR=1` : L ECRAN MESURE EST UNE PAGE D ERREUR, et c est voulu —
+       le 404 general et les frontieres d erreur, portes sur `ui_kits/erreurs`
+       le 14/09/2026. La garde ne se leve que sur demande explicite, et le
+       plancher de contenu, lui, reste : une page blanche n est pas un 404. */
+    const erreurAttendue = process.env["ECRAN_ERREUR"] === "1";
     const estErreur =
-      /^404|This page could not be found|n.existe pas|does not exist/i.test(vu.titre ?? "") ||
-      vu.corps_utile < plancher;
+      (!erreurAttendue &&
+        /^404|This page could not be found|n.existe pas|does not exist/i.test(vu.titre ?? "")) ||
+      vu.corps_utile < (erreurAttendue ? 40 : plancher);
     if (estErreur) {
       throw new Error(
         `ARRET : ${chemin} a ${largeur} px ne rend pas l ecran attendu — titre ` +

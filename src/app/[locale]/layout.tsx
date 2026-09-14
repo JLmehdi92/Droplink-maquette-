@@ -1,7 +1,7 @@
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
 import { origineConfiguree } from "@/lib/site";
@@ -14,12 +14,6 @@ import { TraductionsClient } from "@/components/traductions-client";
  * critique échouerait en silence derrière un pare-feu, et le texte partirait
  * dans une police de repli sans que rien ne le signale.
  */
-const titre = Plus_Jakarta_Sans({
-  variable: "--font-titre",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 const corps = Inter({
   variable: "--font-corps",
   subsets: ["latin"],
@@ -99,7 +93,7 @@ export default async function LayoutLangue({
 
   return (
     <html lang={locale}>
-      <body className={`${titre.variable} ${corps.variable} antialiased`}>
+      <body className={`${corps.variable} antialiased`}>
         {/*
          * AUCUN PROVIDER I18N ICI, DÉLIBÉRÉMENT.
          *

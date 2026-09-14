@@ -226,8 +226,8 @@
   /* ----- Familles : inchangées, servies par next/font, jamais un CDN -------
    *
    * ⚠️ AUCUNE DES DEUX POLICES NE COUVRE LES IDÉOGRAMMES. Mesuré le 06/09/2026
-   * sur le CSS produit par le build : aucune `unicode-range` de Plus Jakarta
-   * Sans ni d'Inter ne touche U+4E00–U+9FFF. En chinois, le navigateur
+   * sur le CSS produit par le build : aucune `unicode-range` d'Inter (ni de
+   * Plus Jakarta Sans, retirée le 14/09/2026) ne touche U+4E00–U+9FFF. En chinois, le navigateur
    * substitue donc — et il substitue ce qu'il veut, souvent une police à
    * empattements qui jure avec tout le reste.
    *
@@ -247,11 +247,6 @@
    * ------------------------------------------------------------------------ */
   --pile-cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
     "Noto Sans CJK SC", "WenQuanYi Micro Hei";
-  --font-headline-xl: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
-  --font-headline-lg: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
-  --font-headline-lg-mobile: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
-  --font-headline-md: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
-  --font-headline-md-mobile: "Plus Jakarta Sans", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
   --font-body-lg: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
   --font-body-md: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
   --font-body-sm: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
@@ -466,7 +461,7 @@
   --ease-ds-in-out: cubic-bezier(.65,0,.35,1);
 
   /* Familles : Inter est DÉJÀ chargée par `next/font` — aucun téléchargement de
-   * plus. Plus Jakarta Sans reste servie tant qu'un écran non migré s'en sert. */
+   * plus. Plus Jakarta Sans est retirée depuis le 14/09/2026. */
   --font-ds-display: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
   --font-ds-body: "Inter", var(--pile-cjk), ui-sans-serif, system-ui, sans-serif;
 }

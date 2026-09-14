@@ -5751,5 +5751,90 @@
         "raison": "LE PIED SEUL, ET 10 PX VERS LE HAUT : la page est moins haute que la fenetre, donc le pied se pose en bas de celle-ci — 1000 px pour la sonde du produit contre 1010 pour le kit. Tout ce qui est au-dessus du pied est a la meme place au pixel."
       }
     ]
+  },
+  "fr-commandes-00000000-0000-0000-0000-000000000000": {
+    "valeurs": [
+      {
+        "texte": "Commandes  <span>",
+        "motif": "donnee",
+        "raison": "Le libelle de la barre laterale est etire par le badge de volume a sa droite — « 124 » chez le kit, un chiffre du jeu de mesure ici. Meme declaration que sur /parametres."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "L entree de la barre laterale, comme le kit, PLUS une entree dans chacun des deux menus de compte que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade",
+          "© 2025 DropLink. Tous droits réservés."
+        ],
+        "motif": "structure",
+        "raison": "POSITION VERTICALE SEULE, ET 10 A 11 PX : l encart et le pied sont colles en BAS de la fenetre, qui fait 1000 px pour la sonde du produit contre 1010 pour le kit."
+      },
+      {
+        "texte": "Ctrl  <kbd>",
+        "motif": "structure",
+        "raison": "La touche du raccourci de recherche, meme ecart sur tous les ecrans vendeur : la barre de recherche du produit n a pas le meme texte d invite que celle du kit, et la touche suit sa fin."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
+      },
+      {
+        "textes": [
+          "Alertes",
+          "Le client n’a pas encore ouvert son lien",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les deux compteurs sont declares par MOTIF."
+      }
+    ]
+  },
+  "fr-pas-une-route": {
+    "valeurs": [
+      {
+        "textes": [
+          "Cette page n’existe pas",
+          "L’adresse que vous avez suivie ne mène à",
+          "Revenir à l’accueil"
+        ],
+        "motif": "structure",
+        "raison": "POSITION VERTICALE SEULE, 5 PX VERS LE HAUT, LE MEME PARTOUT : le contenu est centre verticalement dans la fenetre, qui fait 1000 px pour la sonde du produit contre 1010 pour le kit. Tailles, graisses, couleurs et largeurs sont celles de ui_kits/erreurs/introuvable.html."
+      }
+    ]
   }
 }
