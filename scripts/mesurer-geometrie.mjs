@@ -18,6 +18,13 @@ config({ path: ".env.local", quiet: true });
 
 const base = (process.argv[2] ?? "").replace(/\/$/, "");
 const urlSupabase = process.env["NEXT_PUBLIC_SUPABASE_URL"];
+/* LA BASE DE TESTS SEULEMENT : ce script crée un compte, des commandes et des
+   médias. `.env.test.local` est chargé d'abord, mais s'il manquait, la cible
+   retomberait sur `.env.local` — la PRODUCTION. On refuse plutôt que d'y écrire. */
+if (!urlSupabase || urlSupabase.includes("csndfatwtbzqmhgqseem")) {
+  console.error(`ARRET : la base visee est la PRODUCTION ou indeterminee (${urlSupabase ?? "aucune"}).`);
+  process.exit(1);
+}
 const service = createClient(urlSupabase, process.env["SUPABASE_SERVICE_ROLE_KEY"], {
   auth: { persistSession: false },
 });
