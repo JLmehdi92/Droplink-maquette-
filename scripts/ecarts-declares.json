@@ -3256,13 +3256,13 @@
       },
       {
         "textes": [
-          "8 septembre 2025 à 14:32 [1/2]",
-          "8 septembre 2025 à 18:33 [2/2]",
           "10 septembre 2025 à 09:15  <nombre d'occurrences>",
-          "10 sept. 2025 09:15"
+          "10 sept. 2025 09:15",
+          "9 septembre 2025 à 22:47 [1/2]",
+          "10 septembre 2025 à 09:15 [2/2]"
         ],
         "motif": "donnee",
-        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en invente cinq, et le premier porte une description de transporteur assez longue pour passer sur deux lignes. La date prend la hauteur de sa rangee, comme au kit, et la rangee est plus haute. La date de la frise, elle, a la largeur de ses chiffres : le jeu la pose a l heure de la mesure, et « 14 sept. 2026 01:45 » n a pas la largeur de « 10 sept. 2025 09:15 »."
+        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en invente cinq, et le premier porte une description de transporteur assez longue pour passer sur deux lignes. La date prend la hauteur de sa rangee, comme au kit, et la rangee est plus haute. La date de la frise, elle, a la largeur de ses chiffres : le jeu la pose a l heure de la mesure, et « 14 sept. 2026 01:45 » n a pas la largeur de « 10 sept. 2025 09:15 ». ⚠️ L APPARIEMENT DES DATES A CHANGE LE 14/09/2026 : la carte de validation ecrite dans le kit fait descendre son historique, et les rangs [1/2] et [2/2] s apparient desormais a d autres dates."
       },
       {
         "textes": [
@@ -3291,6 +3291,13 @@
         ],
         "motif": "structure",
         "raison": "LA MEME TEINTE, DEUX NOTATIONS. Le kit peint la pastille en `color-mix(in srgb, accent 12%, #fff)`, que le navigateur rend en composantes FRACTIONNAIRES (235,3 / 233,4 / 253,8) ; nous la calculons au serveur (`resoudreAccent().doux`, 12 %) et l arrondissons (235 / 233 / 254). Moins d un niveau d ecart par canal. ⚠️ Cette ligne portait une autre raison jusqu au 14/09/2026 — « la boutique du jeu porte l accent par defaut #7c5cf5 » — et elle masquait un vrai defaut : la pastille etait a 10 % au lieu de 12 %. La migration 163 a rendu au jeu l accent du design system, et l ecart est reste seul."
+      },
+      {
+        "textes": [
+          "Votre validation"
+        ],
+        "motif": "donnee",
+        "raison": "POSITION SEULE, 17 PX PLUS HAUT : la carte de validation suit la carte de commande et la galerie, dont les hauteurs dependent du jeu de mesure (voir leurs declarations). Carte, titre, taille et graisse sont ceux de la ValidationCard du kit, ecrite le 14/09/2026."
       }
     ],
     "manquants": [
@@ -3416,6 +3423,15 @@
         ],
         "motif": "contrainte",
         "raison": "LA PAGE APPARTIENT AU VENDEUR — decision 25. La mention DropLink doit rester SECONDAIRE et jamais confondable avec l expediteur : une carte promotionnelle avec son appel « Decouvrir DropLink » et un droit d auteur au nom de DropLink en pied se liraient comme le proprietaire de la page. Le lien « Aide » mene a la documentation des vendeurs, que le client n a aucune raison d ouvrir."
+      },
+      {
+        "textes": [
+          "Ces photos correspondent-elles à votre c",
+          "Approuver",
+          "Refuser"
+        ],
+        "motif": "donnee",
+        "raison": "L ETAT EN ATTENTE DE L ARBITRAGE, que dessine la ValidationCard du kit : la commande du jeu de mesure est deja approuvee, donc le produit rend l etat decide. Voir « en trop »."
       }
     ],
     "enTrop": [
@@ -3467,12 +3483,11 @@
       },
       {
         "textes": [
-          "Votre validation",
           "Cette commande est validée.",
           "Changer d’avis"
         ],
-        "motif": "contrainte",
-        "raison": "L ARBITRAGE QC, que le kit ne dessine pas : c est l une des trois features du produit, et le design system le declare hors de son perimetre. Il prend la carte et le titre de carte du kit, sans rien inventer d autre."
+        "motif": "donnee",
+        "raison": "L ETAT DECIDE DE L ARBITRAGE : la commande du jeu de mesure est deja approuvee (le jeu pose qc_status et l evenement qc_approuve, pour que l historique en porte la ligne), la ou le kit dessine l etat EN ATTENTE, celui que le client voit en premier. Voir la declaration symetrique dans les manquants."
       },
       {
         "textes": [

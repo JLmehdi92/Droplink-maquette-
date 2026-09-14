@@ -345,10 +345,10 @@ a pas.
 éditeur de commande · envois · analyses · marque · `/p/[token]` · conditions ·
 confidentialité · les deux pages d'erreur de lien (expiré, introuvable).
 
-**Écrans du dépôt que le design system ne dessine pas** — ils gardent leur
-habillage actuel jusqu'à ce qu'ils soient dessinés, et on le dit plutôt que
-d'improviser : l'arbitrage QC de la page client. **Tous les autres en sont sortis
-le 14/09/2026**, écrits d'abord dans le kit puis portés — ils portaient encore
+**Écrans du dépôt que le design system ne dessine pas : AUCUN depuis le
+14/09/2026.** Le dernier, l'arbitrage QC de la page client, est écrit dans
+`ui_kits/client_link` (`ValidationCard`, juste après la galerie, état en attente).
+Les autres en sont sortis le même jour, écrits d'abord dans le kit puis portés — ils portaient encore
 l'ancien canevas à un clic d'écrans migrés : `/mot-de-passe-oublie`,
 `/nouveau-mot-de-passe` et `/bienvenue` dans `ui_kits/auth` (`ForgotScreen`,
 `ResetScreen`, `OnboardingScreen`), `/signalement` dans `ui_kits/legal`
