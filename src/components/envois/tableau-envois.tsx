@@ -580,7 +580,7 @@ export async function TableauEnvois({
         rogne aussi en Y** : mesuré à 390 px, il s'ouvrait à y 242 pour 150 px de
         haut alors que sa bande s'arrête à 238. Cent pour cent hors du cadre,
         aucune erreur, aucune trace. La géométrie vit maintenant dans
-        `PANNEAU_OUTIL`, avec `Commandes` : feuille du bas au téléphone, panneau
+        `PANNEAU_OUTIL_DS`, avec `Commandes` : feuille du bas au téléphone, panneau
         ancré au bureau.
       */}
       <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>

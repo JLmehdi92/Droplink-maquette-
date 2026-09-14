@@ -19,26 +19,30 @@
  * contenu arrive — un décalage de mise en page est plus désagréable que
  * l'attente qu'il prétend masquer.
  *
+ * PORTÉ SUR LE DESIGN SYSTEM LE 14/09/2026 : la géométrie d'`EnTeteEcranDs` et
+ * des cartes du kit (filet, rayon 20, fond carte), des blocs sur le creux.
+ *
  * `animate-pulse` est décoratif et disparaît sous `prefers-reduced-motion` :
  * la règle est posée dans `globals.css`, et une animation ne porte jamais
  * d'information.
  */
 export default function Chargement() {
+  const bloc = "rounded-ds-sm bg-ds-surface-creux animate-pulse";
   return (
-    <div className="px-margin-mobile py-6 md:px-[30px] md:py-[26px]" aria-hidden="true">
-      <div className="h-8 w-56 rounded-md bg-outline-variant animate-pulse" />
-      <div className="mt-3 h-4 w-80 max-w-full rounded-md bg-outline-variant animate-pulse" />
+    <div className="px-margin-mobile pt-4 pb-6 md:px-8 md:pt-[30px] md:pb-[26px]" aria-hidden="true">
+      <div className={`h-9 w-56 md:h-10 ${bloc}`} />
+      <div className={`mt-2 h-4 w-80 max-w-full ${bloc}`} />
 
-      <div className="mt-gutter flex flex-col gap-3">
+      <div className="mt-[26px] flex flex-col gap-3">
         {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
           <div
             key={i}
-            className="flex items-center gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-4"
+            className="flex items-center gap-4 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card"
           >
-            <div className="h-12 w-12 shrink-0 rounded-md bg-outline-variant animate-pulse" />
+            <div className={`h-12 w-12 shrink-0 ${bloc}`} />
             <div className="flex-1">
-              <div className="h-4 w-40 max-w-full rounded bg-outline-variant animate-pulse" />
-              <div className="mt-2 h-3 w-64 max-w-full rounded bg-outline-variant animate-pulse" />
+              <div className={`h-4 w-40 max-w-full ${bloc}`} />
+              <div className={`mt-2 h-3 w-64 max-w-full ${bloc}`} />
             </div>
           </div>
         ))}
