@@ -1,5 +1,6 @@
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 import type { JourDeCommandes } from "@/lib/audit/panneau";
+import { echelle, jourCourt } from "@/components/admin/echelle";
 
 /**
  * LA COURBE DES COMMANDES DE LA PLATEFORME — `AdminArea` du kit admin.
@@ -22,29 +23,36 @@ import type { JourDeCommandes } from "@/lib/audit/panneau";
  * temps ne l'est pas : une semaine morte s'y lit comme une semaine pleine.
  */
 
-const HAUTEUR = 240;
 const MARGE_HAUT = 14;
 const MARGE_BAS = 30;
-const HAUTEUR_TRACE = HAUTEUR - MARGE_HAUT - MARGE_BAS;
 
 /** Au-delà, les dates se chevauchent. C'est le `labelEvery` du kit. */
 const REPERES = 7;
 
-export async function CourbeCommandes({ jours }: { readonly jours: readonly JourDeCommandes[] }) {
+export async function CourbeCommandes({
+  jours,
+  hauteur = 240,
+  reperes = REPERES,
+}: {
+  readonly jours: readonly JourDeCommandes[];
+  /** Combien de dates écrire au plus : sept sur la vue d'ensemble, cinq dans une carte d'un tiers. */
+  readonly reperes?: number;
+  /** 240 sur la vue d'ensemble ; 185 dans la carte des Statistiques, comme le kit. */
+  readonly hauteur?: number;
+}) {
   const t = await getTranslations("admin.panneau");
+  const format = await getFormatter();
+  const HAUTEUR_TRACE = hauteur - MARGE_HAUT - MARGE_BAS;
 
   if (jours.length < 2) {
     return <p className="text-[14px] text-ds-texte-corps">{t("aucuneCommande")}</p>;
   }
 
   /*
-   * LE PLAFOND EST ARRONDI À LA DIZAINE SUPÉRIEURE, jamais au maximum brut : des
-   * graduations à 0 / 4,75 / 9,5 se liraient comme une précision qu'on n'a pas.
-   * Le kit arrondit à 20 parce qu'il compte par centaines ; à notre volumétrie
-   * de démarrage, 20 écraserait toute la courbe sur la ligne du bas.
+   * LE PLAFOND EST UN PAS ROND, jamais le maximum brut : des graduations à 0 /
+   * 4,75 / 9,5 se liraient comme une précision qu'on n'a pas. Voir `echelle`.
    */
-  const maximum = Math.max(10, Math.ceil(Math.max(...jours.map((j) => j.total)) / 10) * 10);
-  const graduations = [4, 3, 2, 1, 0].map((k) => (maximum * k) / 4);
+  const { plafond: maximum, graduations } = echelle(Math.max(...jours.map((j) => j.total)), 4);
 
   const x = (i: number): number => (100 * i) / (jours.length - 1);
   const y = (v: number): number => HAUTEUR_TRACE - (HAUTEUR_TRACE * v) / maximum;
@@ -61,12 +69,12 @@ export async function CourbeCommandes({ jours }: { readonly jours: readonly Jour
   }
   const dernier = points[points.length - 1];
 
-  const pas = Math.max(1, Math.round(jours.length / REPERES));
+  const pas = Math.max(1, Math.round(jours.length / reperes));
 
   return (
     /* `aria-hidden` : le graphe est une IMAGE des chiffres. Un lecteur d'écran
        qui annoncerait trente points n'apprendrait rien de plus que le total. */
-    <div aria-hidden="true" className="relative" style={{ height: HAUTEUR }}>
+    <div aria-hidden="true" className="relative" style={{ height: hauteur }}>
       {graduations.map((g) => (
         <div key={g}>
           <span
@@ -82,9 +90,18 @@ export async function CourbeCommandes({ jours }: { readonly jours: readonly Jour
         </div>
       ))}
 
+      {/*
+        ⚠️ LA LARGEUR EST ÉCRITE, ET ELLE NE L'ÉTAIT PAS. Un `<svg>` est un
+        élément REMPLACÉ : positionné en absolu, `left` et `right` ne l'étirent
+        pas, il prend sa largeur intrinsèque — ici la hauteur multipliée par le
+        rapport du `viewBox`, soit une centaine de pixels. La courbe tenait donc
+        dans le premier sixième du panneau, son point final flottait seul à
+        droite, et aucune porte ne pouvait le voir : la soustraction compare des
+        textes, et un tracé n'en a pas. Constaté sur la capture du 14/09/2026.
+      */}
       <svg
-        className="absolute right-2 left-9 overflow-visible"
-        style={{ top: MARGE_HAUT, height: HAUTEUR_TRACE }}
+        className="absolute left-9 overflow-visible"
+        style={{ top: MARGE_HAUT, height: HAUTEUR_TRACE, width: "calc(100% - 2.75rem)" }}
         viewBox={`0 0 100 ${HAUTEUR_TRACE}`}
         preserveAspectRatio="none"
       >
@@ -136,7 +153,7 @@ export async function CourbeCommandes({ jours }: { readonly jours: readonly Jour
                 (rang === 0 || rang === tous.length - 1 || rang % 3 === 0 ? "" : "max-sm:hidden")
               }
             >
-              {etiquette(j.jour)}
+              {jourCourt(format, j.jour)}
             </span>
           ))}
       </div>
@@ -147,32 +164,4 @@ export async function CourbeCommandes({ jours }: { readonly jours: readonly Jour
 /** Deux décimales suffisent, et évitent un chemin SVG de dix kilo-octets. */
 function f(n: number | undefined): string {
   return (n ?? 0).toFixed(2);
-}
-
-/**
- * `AAAA-MM-JJ` → `13 sept.`, la forme du kit.
- *
- * ⚠️ DÉCOUPÉE, PAS FORMATÉE PAR UN FUSEAU. La base rend un JOUR déjà résolu ; le
- * passer dans un formateur de date le ferait relire comme un instant UTC et
- * reculer d'un jour pour la moitié des lecteurs.
- */
-const MOIS = [
-  "janv.",
-  "févr.",
-  "mars",
-  "avr.",
-  "mai",
-  "juin",
-  "juil.",
-  "août",
-  "sept.",
-  "oct.",
-  "nov.",
-  "déc.",
-];
-
-function etiquette(jour: string): string {
-  const [, mois, jourDuMois] = jour.split("-");
-  const nom = MOIS[Number(mois) - 1] ?? "";
-  return `${Number(jourDuMois)} ${nom}`;
 }
