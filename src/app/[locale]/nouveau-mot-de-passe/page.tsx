@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { FormulaireNouveauMotDePasse } from "@/components/formulaire-nouveau-mot-de-passe";
 import { TraductionsClient } from "@/components/traductions-client";
-import { PanneauAcces } from "@/components/panneau-acces";
+import { Info, KeyRound } from "lucide-react";
+import { CoqueAccesSimple } from "@/components/acces/coque-acces-simple";
 import { lireEtatDuCompte } from "@/lib/comptes/profil";
 import { sessionParEmail } from "@/lib/auth/recuperation";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -90,52 +91,29 @@ export default async function NouveauMotDePasse({
   const t = await getTranslations("motDePasse");
 
   return (
-    <div className="min-h-dvh bg-canvas p-3 md:p-7">
-      <main
-        id="contenu"
-        className="mx-auto grid min-h-[calc(100dvh-24px)] w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-page-publique lg:grid-cols-2"
-      >
-        <div className="flex flex-col px-[22px] pt-7 pb-[26px] md:px-[76px] md:py-10">
-          <span className="font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:text-[18px] md:leading-[23px]">
-            DropLink
-          </span>
+    <CoqueAccesSimple
+      langue={langue}
+      icone={KeyRound}
+      titre={t("nouveauTitre")}
+      /* L'ADRESSE CONCERNÉE EST RAPPELÉE, EN CLAIR ET NON MODIFIABLE. Quelqu'un
+         qui gère deux comptes doit voir lequel il change avant de taper — et
+         elle vient de la SESSION, jamais de l'URL. */
+      sousTitre={t.rich("nouveauSousTitre", {
+        email: profil.email,
+        adresse: (morceaux) => <span className="font-semibold text-ds-texte-fort">{morceaux}</span>,
+      })}
+    >
+      {/* CE QUE LE GESTE COÛTE EST DIT AVANT, pas découvert après : les autres
+          appareils devront se reconnecter. C'est précisément ce qu'on vient
+          chercher quand on soupçonne une intrusion. */}
+      <div className="flex items-start gap-3 rounded-ds-card bg-ds-surface-creux px-4 py-3.5">
+        <Info aria-hidden="true" size={17} strokeWidth={1.9} className="mt-px flex-none text-ds-texte-sourdine" />
+        <p className="text-[13px] leading-[1.55] text-ds-texte-corps">{t("avertissement")}</p>
+      </div>
 
-          <div className="flex max-w-[400px] flex-grow flex-col justify-center py-[30px]">
-            <h1 className="font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
-              {t("nouveauTitre")}
-            </h1>
-
-            {/* L'ADRESSE CONCERNÉE EST RAPPELÉE, EN CLAIR ET NON MODIFIABLE.
-                Quelqu'un qui gère deux comptes doit voir lequel il change avant
-                de taper — et elle vient de la SESSION, jamais de l'URL. */}
-            <p className="mt-2.5 font-body-md text-[15px] leading-6 text-sourdine">
-              {t.rich("nouveauSousTitre", {
-                email: profil.email,
-                adresse: (morceaux) => (
-                  <span className="font-semibold text-on-surface">{morceaux}</span>
-                ),
-              })}
-            </p>
-
-            {/* CE QUE LE GESTE COÛTE EST DIT AVANT, pas découvert après : les
-                autres appareils devront se reconnecter. C'est précisément ce
-                qu'on vient chercher quand on soupçonne une intrusion. */}
-            <div className="mt-[26px] rounded-[13px] border border-outline-variant bg-surface-container-low px-4 py-3.5">
-              <p className="font-body-sm text-[13px] leading-5 text-sourdine">
-                {t("avertissement")}
-              </p>
-            </div>
-
-            <div className="mt-[26px]">
-              <TraductionsClient espaces={["connexion", "inscription", "motDePasse"]}>
-                <FormulaireNouveauMotDePasse locale={langue} />
-              </TraductionsClient>
-            </div>
-          </div>
-        </div>
-
-        <PanneauAcces />
-      </main>
-    </div>
+      <TraductionsClient espaces={["connexion", "inscription", "motDePasse"]}>
+        <FormulaireNouveauMotDePasse locale={langue} />
+      </TraductionsClient>
+    </CoqueAccesSimple>
   );
 }

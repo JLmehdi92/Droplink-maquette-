@@ -2,20 +2,17 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { MailCheck, Mail } from "lucide-react";
 import {
   demanderReinitialisation,
   type ResultatReinitialisation,
 } from "@/app/[locale]/connexion/actions";
 import { suggererCorrection } from "@/lib/email/domaines";
-import {
-  BoutonPrincipal,
-  CLASSE_CHAMP,
-  CLASSE_LIBELLE,
-  MessageErreur,
-} from "@/components/acces-champs";
+import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
 
 /**
- * DEMANDER UN LIEN DE RÉINITIALISATION.
+ * DEMANDER UN LIEN DE RÉINITIALISATION — `ForgotScreen` du kit `auth`, écrit le
+ * 14/09/2026 avant ce formulaire, sur les champs de la connexion.
  *
  * ⚠️ L'ÉTAT DE SUCCÈS NE DIT PAS QU'UN EMAIL EST PARTI, il dit que S'IL Y A un
  * compte, un email est parti. La nuance est toute la protection : « nous vous
@@ -27,11 +24,10 @@ import {
  * plancher de 1 200 ms côté serveur s'en charge, parce qu'un envoi d'email prend
  * du temps et une adresse inconnue n'en prend aucun.
  *
- * ⚠️ ET IL N'Y A PAS DE BOUTON « RENVOYER ». Il existait pour le lien magique,
- * où l'on attendait le mail pour ENTRER ; ici on attend pour RÉPARER, c'est
- * beaucoup plus rare, et un bouton qui rejoue la demande épuiserait en trois
- * clics le compteur de six envois par heure — donc empêcherait la personne de
- * réessayer quand son mail arrive enfin en retard.
+ * ⚠️ ET IL N'Y A PAS DE BOUTON « RENVOYER ». Ici on attend pour RÉPARER, c'est
+ * rare, et un bouton qui rejoue la demande épuiserait en trois clics le compteur
+ * de six envois par heure — donc empêcherait la personne de réessayer quand son
+ * mail arrive enfin en retard.
  */
 
 const INITIAL: ResultatReinitialisation = { statut: "inactif" };
@@ -46,11 +42,12 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
 
   if (resultat.statut === "envoye") {
     return (
-      <div role="status" className="flex flex-col gap-3">
-        <h2 className="font-headline-md text-headline-md-mobile text-on-surface">
-          {tm("envoyeTitre")}
-        </h2>
-        <p className="font-body-md text-body-md text-on-surface-variant">{tm("envoyeTexte")}</p>
+      <div role="status" className="flex gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">
+        <MailCheck aria-hidden="true" size={18} strokeWidth={1.9} className="mt-px flex-none text-ds-accent" />
+        <div className="min-w-0">
+          <p className="text-[15px] leading-[normal] font-bold text-ds-texte-fort">{tm("envoyeTitre")}</p>
+          <p className="mt-1 text-[13.5px] leading-[1.55] text-ds-texte-corps">{tm("envoyeTexte")}</p>
+        </div>
       </div>
     );
   }
@@ -63,36 +60,31 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
       : null;
 
   return (
-    <form action={action} className="flex flex-col gap-4 md:gap-[18px]" noValidate>
+    <form action={action} className="flex flex-col gap-[22px]" noValidate>
       <input type="hidden" name="locale" value={locale} />
 
-      <div>
-        <label htmlFor="email-oubli" className={CLASSE_LIBELLE + " mb-2"}>
-          {t("labelEmail")}
-        </label>
-        <input
-          id="email-oubli"
-          name="email"
-          type="email"
-          autoComplete="username"
-          inputMode="email"
-          required
-          value={email}
-          onChange={(evenement) => setEmail(evenement.target.value)}
-          placeholder={t("placeholderEmail")}
-          aria-invalid={messageErreur !== null}
-          aria-describedby={messageErreur !== null ? "erreur-oubli" : undefined}
-          className={CLASSE_CHAMP}
-        />
-      </div>
+      <ChampAcces
+        id="email-oubli"
+        nom="email"
+        type="email"
+        libelle={t("labelEmail")}
+        icone={Mail}
+        placeholder={t("placeholderEmail")}
+        autoComplete="username"
+        modeSaisie="email"
+        valeur={email}
+        surChangement={setEmail}
+        invalide={messageErreur !== null}
+        {...(messageErreur !== null ? { decritPar: "erreur-oubli" } : {})}
+      />
 
       {suggestion !== null ? (
-        <p className="font-body-sm text-body-sm text-on-surface-variant" aria-live="polite">
+        <p className="-mt-3 text-[13px] leading-[1.5] text-ds-texte-corps" aria-live="polite">
           {t("suggestionPrefixe")}{" "}
           <button
             type="button"
             onClick={() => setEmail(suggestion.adresse)}
-            className="font-label-md text-label-md text-[var(--accent-texte)] underline"
+            className="font-semibold text-ds-texte-lien underline"
           >
             {suggestion.adresse}
           </button>
@@ -100,9 +92,9 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
         </p>
       ) : null}
 
-      {messageErreur !== null ? <MessageErreur id="erreur-oubli" texte={messageErreur} /> : null}
+      {messageErreur !== null ? <MessageErreurDs id="erreur-oubli" texte={messageErreur} /> : null}
 
-      <BoutonPrincipal libelle={tm("bouton")} libelleEnCours={tm("boutonEnCours")} />
+      <BoutonPrincipalDs libelle={tm("bouton")} libelleEnCours={tm("boutonEnCours")} />
     </form>
   );
 }

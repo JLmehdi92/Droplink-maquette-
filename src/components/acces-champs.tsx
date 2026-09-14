@@ -4,7 +4,6 @@ import { useFormStatus } from "react-dom";
 import { ArrowRight, Eye, EyeOff, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { Anneau } from "@/components/bouton-action";
-import { Icone as IconeMaterielle } from "@/components/icone";
 
 /**
  * LES BRIQUES COMMUNES AUX QUATRE ÉCRANS D'ACCÈS.
@@ -36,36 +35,15 @@ import { Icone as IconeMaterielle } from "@/components/icone";
  */
 
 /*
- * ═══════════════════════════════════════════════════════════════════════════
- * ⚠️ DEUX JEUX DE BRIQUES COHABITENT, ET C'EST DÉLIBÉRÉ.
- *
- * Ces briques servent QUATRE écrans : connexion, inscription, mot de passe
- * oublié, nouveau mot de passe. Le design system n'en dessine que DEUX — son
- * périmètre range explicitement `/mot-de-passe-oublie` et
- * `/nouveau-mot-de-passe` parmi « les écrans que le design system ne dessine
- * pas, qui gardent leur habillage actuel jusqu'à ce qu'ils soient dessinés ».
- *
- * Migrer les briques partagées aurait donc migré QUATRE écrans d'un coup, dont
- * deux pour lesquels il aurait fallu INVENTER une référence — l'inverse exact
- * de la règle « écran par écran, un écran migré est un écran vérifié ».
- *
- * Les anciennes briques restent donc intactes sous leurs noms, et les nouvelles
- * portent l'infixe `Ds`. La duplication est le prix de la migration ; elle meurt
- * quand les deux derniers écrans sont dessinés.
- * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ DEUX JEUX DE BRIQUES ONT COHABITÉ ICI DU 11 AU 14/09/2026. Le design system
+ * ne dessinait que la connexion et l'inscription ; le mot de passe oublié et le
+ * nouveau mot de passe gardaient les briques de l'ancien canevas — champ de
+ * 52 px au rayon 13, bouton à flèche Material. Les deux écrans ont été écrits
+ * dans le kit `auth` puis portés : l'ancien jeu est retiré, et l'infixe `Ds`
+ * reste pour ne pas renommer quatre formulaires dans le même geste.
  */
 
-/** Le champ des écrans NON migrés : 52 px, rayon 13, filet de contrôle. */
-export const CLASSE_CHAMP =
-  "h-13 w-full rounded-[13px] border border-filet-controle bg-surface-container-low px-4 " +
-  "font-body-md text-[15px] text-on-surface transition-colors focus:border-violet " +
-  "focus:outline-none focus:ring-2 focus:ring-violet/30";
-
-/** Le libellé des écrans NON migrés. */
-export const CLASSE_LIBELLE =
-  "block font-headline-md text-[13px] leading-4 font-semibold text-on-surface";
-
-/** Le libellé d'un champ migré : 14 px, semi-gras, sur l'encre forte. */
+/** Le libellé d'un champ d'accès : 14/600 sur l'encre forte, mesuré sur le kit. */
 export const CLASSE_LIBELLE_DS = "text-[14px] leading-[normal] font-semibold text-ds-texte-fort";
 
 /**
@@ -186,41 +164,6 @@ export function ChampAcces({
         ) : null}
       </span>
     </label>
-  );
-}
-
-/**
- * L'action principale des écrans NON migrés — mot de passe oublié, nouveau mot
- * de passe. Elle garde le dessin de l'ancien canevas : 52 px, rayon 13, flèche
- * Material. Elle disparaît le jour où ces deux écrans sont dessinés.
- */
-export function BoutonPrincipal({
-  libelle,
-  libelleEnCours,
-}: {
-  readonly libelle: string;
-  readonly libelleEnCours: string;
-}) {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="degrade-marque flex h-13 w-full items-center justify-center gap-[9px] rounded-[13px] font-headline-md text-[15px] leading-5 font-bold shadow-[0_10px_24px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-90 disabled:opacity-60"
-    >
-      {pending ? <Anneau /> : null}
-      <span>{pending ? libelleEnCours : libelle}</span>
-      {pending ? null : <IconeMaterielle nom="arrow_forward" className="text-[15px]" />}
-    </button>
-  );
-}
-
-/** Le message d'échec des écrans NON migrés. */
-export function MessageErreur({ id, texte }: { readonly id: string; readonly texte: string }) {
-  return (
-    <p id={id} role="alert" className="font-body-sm text-body-sm text-error">
-      {texte}
-    </p>
   );
 }
 

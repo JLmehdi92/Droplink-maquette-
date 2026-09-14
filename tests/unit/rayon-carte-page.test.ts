@@ -90,7 +90,9 @@ describe("Le rayon de la carte-page", () => {
      *
      * Il restait 6 cartes-pages le 11/09/2026, puis 5 ; l'administration a perdu
      * la sienne le 12/09, la LANDING dans la foulée, et il n'en reste QUE
-     * TROIS. Le plancher descend donc à 3.
+     * TROIS ; le mot de passe oublié et le nouveau mot de passe sont passés au
+     * design system le 14/09, et il n'en reste QU'UNE, l'onboarding. Le
+     * plancher descend donc à 1.
      *
      * ⚠️ ET CES TROIS-LÀ NE DESCENDRONT PAS TOUTES SEULES : ce sont exactement
      * les écrans que le design system NE DESSINE PAS — `/bienvenue`,
@@ -101,10 +103,10 @@ describe("Le rayon de la carte-page", () => {
      */
     expect(
       inventaire.length,
-      "moins de trois cartes-pages : soit la migration est plus avancée que ce " +
+      "aucune carte-page : soit la migration est plus avancée que ce " +
         "que cette suite déclare, soit le balayage est cassé. Les deux se " +
         "corrigent ICI, jamais en baissant le nombre.",
-    ).toBeGreaterThanOrEqual(3);
+    ).toBeGreaterThanOrEqual(1);
   });
 
   /**
@@ -129,21 +131,14 @@ describe("Le rayon de la carte-page", () => {
   const AUTHENTIFIEES_RESTANTES: ReadonlyArray<readonly [string, string]> = [];
 
   /**
-   * LES TROIS CARTES-PAGES PUBLIQUES QUI RESTENT, et la raison est la même pour
-   * les trois : `CLAUDE.md` range ces écrans parmi ceux que le design system NE
+   * LA DERNIÈRE CARTE-PAGE PUBLIQUE. Le mot de passe oublié et le nouveau mot de
+   * passe ont été écrits dans le kit `auth` puis portés le 14/09/2026 ; il ne
+   * reste que l'onboarding, pour la raison qui valait pour les trois : `CLAUDE.md` range ces écrans parmi ceux que le design system NE
    * DESSINE PAS, et dit qu'ils gardent leur habillage actuel jusqu'à ce qu'ils
    * soient dessinés. Ce ne sont pas des oublis de migration.
    */
   const PUBLIQUES_RESTANTES: ReadonlyArray<readonly [string, string]> = [
     ["[locale]/bienvenue/page.tsx", "L'onboarding — non dessiné par le design system."],
-    [
-      "[locale]/mot-de-passe-oublie/page.tsx",
-      "La demande de réinitialisation — non dessinée par le design system.",
-    ],
-    [
-      "[locale]/nouveau-mot-de-passe/page.tsx",
-      "La saisie du nouveau mot de passe — non dessinée par le design system.",
-    ],
   ];
 
   test("les cartes-pages authentifiées restantes sont exactement celles déclarées", () => {

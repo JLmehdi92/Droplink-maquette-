@@ -3,16 +3,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FormulaireMotDePasseOublie } from "@/components/formulaire-mot-de-passe-oublie";
 import { TraductionsClient } from "@/components/traductions-client";
-import { PanneauAcces } from "@/components/panneau-acces";
+import { Mail } from "lucide-react";
+import { CoqueAccesSimple } from "@/components/acces/coque-acces-simple";
+import { estLangueSupportee } from "@/i18n/config";
 import { routing } from "@/i18n/routing";
 
 /**
  * MOT DE PASSE OUBLIÉ.
  *
- * MÊME COMPOSITION QUE LA CONNEXION — carte-page à rayon 28 (surface PUBLIQUE),
- * colonne de formulaire à 400, volet illustré à droite au-delà de `lg`. Un écran
- * qu'on atteint depuis la connexion et qui y ramène ne doit pas dépayser, et la
- * planche le dessine ainsi.
+ * `ForgotScreen` du kit `auth`, écrit le 14/09/2026 avant cette page, sur la
+ * coque de la vérification. Un écran qu'on atteint depuis la connexion et qui y
+ * ramène ne doit pas dépayser : il en garde le fond, le logo, l'argument et la
+ * carte.
  *
  * ⚠️ AUCUN BOUTON GOOGLE. Ce n'est pas une porte d'entrée mais la réparation
  * d'un mot de passe : proposer Google ici enverrait vers une identité
@@ -43,51 +45,24 @@ export default async function MotDePasseOublie({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  const langue = estLangueSupportee(locale) ? locale : "fr";
+  setRequestLocale(langue);
   const t = await getTranslations("motDePasse");
 
   return (
-    <div className="min-h-dvh bg-canvas p-3 md:p-7">
-      <main
-        id="contenu"
-        className="mx-auto grid min-h-[calc(100dvh-24px)] w-full max-w-[1384px] overflow-hidden rounded-[24px] bg-surface-container-lowest md:min-h-[calc(100dvh-56px)] md:rounded-page-publique lg:grid-cols-2"
-      >
-        <div className="flex flex-col px-[22px] pt-7 pb-[26px] md:px-[76px] md:py-10">
-          <Link
-            href={`/${locale}`}
-            className="-my-[11px] inline-flex min-h-11 items-center font-headline-md text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-on-surface md:-my-[10.5px] md:text-[18px] md:leading-[23px]"
-          >
-            DropLink
-          </Link>
+    <CoqueAccesSimple langue={langue} icone={Mail} titre={t("oublieTitre")} sousTitre={t("oublieSousTitre")}>
+      <TraductionsClient espaces={["connexion", "motDePasse"]}>
+        <FormulaireMotDePasseOublie locale={langue} />
+      </TraductionsClient>
 
-          <div className="flex max-w-[400px] flex-grow flex-col justify-center py-[30px]">
-            <h1 className="font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.03em] text-on-surface md:text-[38px] md:leading-[44px]">
-              {t("oublieTitre")}
-            </h1>
-            <p className="mt-2.5 font-body-md text-[15px] leading-6 text-sourdine">
-              <span className="md:hidden">{t("oublieSousTitreCourt")}</span>
-              <span className="hidden md:inline">{t("oublieSousTitre")}</span>
-            </p>
-
-            <div className="mt-7 md:mt-[34px]">
-              <TraductionsClient espaces={["connexion", "motDePasse"]}>
-                <FormulaireMotDePasseOublie locale={locale} />
-              </TraductionsClient>
-            </div>
-
-            <p className="mt-[26px] text-center font-body-md text-[14px] leading-[22px] text-sourdine md:mt-[30px] md:text-left md:text-[13px] md:leading-[21px]">
-              <Link
-                href={`/${locale}/connexion`}
-                className="-my-[11px] inline-flex min-h-11 items-center font-semibold text-violet hover:underline"
-              >
-                {t("retourConnexion")}
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        <PanneauAcces />
-      </main>
-    </div>
+      <p className="text-center text-[14px] text-ds-texte-corps">
+        <Link
+          href={`/${langue}/connexion`}
+          className="-my-3 inline-flex min-h-11 items-center font-bold text-ds-texte-lien hover:underline lg:my-0 lg:min-h-0"
+        >
+          {t("retourConnexion")}
+        </Link>
+      </p>
+    </CoqueAccesSimple>
   );
 }

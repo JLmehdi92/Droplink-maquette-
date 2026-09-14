@@ -210,8 +210,6 @@
     "pasDeCompteTitre": "还没有账户？",
     "suggestionPrefixe": "您是否想输入",
     "suggestionSuffixe": "？",
-    "panneauTitre": "客户打开链接，就能看到全部内容。",
-    "panneauTexte": "客户无需注册账户，也不用安装任何应用。",
     "cgvAvant": "继续即表示您接受我们的",
     "cgvEt": "和",
     "cgvConditions": "使用条款",
@@ -231,8 +229,6 @@
       "fermees": "注册暂时关闭。已有账户不受影响。",
       "confirmez": "请查看您的邮箱：如果收到确认邮件，点击后即可完成账户创建。如果您本来就有账户，请在下方登录。"
     },
-    "apercuTitre": "您的订单",
-    "apercuBoutique": "北方工坊",
     "labelMotDePasse": "密码",
     "motDePasseOublie": "忘记密码？",
     "bouton": "登录",
@@ -1589,7 +1585,6 @@
   "motDePasse": {
     "oublieTitre": "忘记密码",
     "oublieSousTitre": "请输入您的邮箱地址。如果该账户存在，您会收到一封设置新密码的邮件。",
-    "oublieSousTitreCourt": "如果该邮箱已注册，您会收到一封邮件。",
     "bouton": "发送链接",
     "boutonEnCours": "正在发送…",
     "envoyeTitre": "请查看您的邮箱",

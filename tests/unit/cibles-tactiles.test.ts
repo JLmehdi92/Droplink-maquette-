@@ -305,16 +305,19 @@ const AUTONOMES: ReadonlyArray<{
       "et la cible disparaîtrait avec elle.",
   },
   {
-    fichier: "src/app/[locale]/mot-de-passe-oublie/page.tsx",
-    repere: "text-[17px] leading-[22px] font-extrabold",
-    raison: "Le logo d'en-tête de la réinitialisation.",
+    fichier: "src/components/acces/coque-acces-simple.tsx",
+    repere: 'className="inline-flex min-h-11 items-center"',
+    raison:
+      "Le logo d'en-tête du mot de passe oublié et du nouveau mot de passe : une " +
+      "IMAGE de 44 px au téléphone, et `min-h-11` reste posé si elle ne se charge pas.",
   },
   {
     fichier: "src/app/[locale]/mot-de-passe-oublie/page.tsx",
-    repere: "font-semibold text-violet hover:underline",
+    repere: "font-bold text-ds-texte-lien hover:underline lg:my-0 lg:min-h-0",
     raison:
       "« Revenir à la connexion » : SEUL dans son paragraphe, donc autonome et " +
-      "non un lien en flux de texte. Interligne hérité du <p>, 22 px.",
+      "non un lien en flux de texte. Porté sur le design system le 14/09/2026 ; " +
+      "le logo d'en-tête, lui, vit désormais dans la coque partagée.",
   },
   {
     fichier: "src/app/[locale]/blog/page.tsx",

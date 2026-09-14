@@ -553,10 +553,26 @@ if (process.env["DEUX_ETAPES"] === "1") {
   console.error("[jeu] double authentification activée : la session servie sera aal1.");
 }
 
-const { data: sess } = await publiable.auth.signInWithPassword({
-  email: courriel,
-  password: MOT_DE_PASSE,
-});
+/*
+ * `RECUPERATION=1` : LA SESSION SERVIE EST CELLE D'UN LIEN DE RÉINITIALISATION.
+ * `/nouveau-mot-de-passe` n'accepte qu'une session dont la méthode est `otp` —
+ * celle qu'ouvre le lien reçu par email —, et renvoie toute autre à la
+ * connexion : la sonde mesurerait la connexion en croyant mesurer l'écran. Le
+ * lien est RÉEL — généré par l'API d'administration de la base de tests, puis
+ * vérifié comme le navigateur le ferait —, jamais une session maquillée.
+ */
+async function ouvrirSession() {
+  if (process.env["RECUPERATION"] !== "1") {
+    return publiable.auth.signInWithPassword({ email: courriel, password: MOT_DE_PASSE });
+  }
+  const { data: lien, error: eLien } = await service.auth.admin.generateLink({ type: "recovery", email: courriel });
+  if (eLien) throw new Error("jeu de mesure : lien de récupération impossible — " + eLien.message);
+  const reponse = await publiable.auth.verifyOtp({ token_hash: lien.properties.hashed_token, type: "recovery" });
+  if (reponse.error) throw new Error("jeu de mesure : lien de récupération refusé — " + reponse.error.message);
+  console.error("[jeu] session ouverte par un lien de récupération (méthode otp).");
+  return reponse;
+}
+const { data: sess } = await ouvrirSession();
 
 /*
  * ⚠️ LE COOKIE DE SESSION N EST PAS `sb-access-token`. Supabase le nomme
@@ -940,9 +956,15 @@ for (const modele of routes) {
      * du contenu et un titre qui n est pas celui d une page d erreur.
      */
     const vu = result.value;
+    /* ⚠️ LE PLANCHER SE COMPTE EN SIGNES, ET LE CHINOIS EN PORTE TROIS FOIS MOINS.
+       Mesure le 14/09/2026 : /zh-CN/mot-de-passe-oublie rendait son ecran
+       complet en 100 caracteres, sous le plancher de 120 — la sonde le prenait
+       pour une page d erreur. Un ideogramme porte un mot : le plancher chinois
+       est au tiers. */
+    const plancher = chemin.startsWith("/zh") ? 40 : 120;
     const estErreur =
       /^404|This page could not be found|n.existe pas|does not exist/i.test(vu.titre ?? "") ||
-      vu.corps_utile < 120;
+      vu.corps_utile < plancher;
     if (estErreur) {
       throw new Error(
         `ARRET : ${chemin} a ${largeur} px ne rend pas l ecran attendu — titre ` +

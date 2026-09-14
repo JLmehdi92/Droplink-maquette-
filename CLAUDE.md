@@ -348,8 +348,11 @@ confidentialité · les deux pages d'erreur de lien (expiré, introuvable).
 **Écrans du dépôt que le design system ne dessine pas** — ils gardent leur
 habillage actuel jusqu'à ce qu'ils soient dessinés, et on le dit plutôt que
 d'improviser : `/bienvenue` (onboarding) · `/blog` et `/blog/[slug]` ·
-`/signalement` · `/mot-de-passe-oublie` · `/nouveau-mot-de-passe` · l'arbitrage QC
-de la page client.
+`/signalement` · l'arbitrage QC de la page client. **`/mot-de-passe-oublie` et
+`/nouveau-mot-de-passe` en sont sortis le 14/09/2026** : écrits dans le kit `auth`
+(`ForgotScreen`, `ResetScreen`, hash `#mot-de-passe-oublie` et
+`#nouveau-mot-de-passe`), puis portés — ils portaient encore l'ancien canevas à un
+clic d'une connexion migrée.
 
 **Écrans dessinés que le dépôt n'avait pas, et qui sont créés** : le tableau de
 bord, les paramètres vendeur, `/docs`, et dans l'administration **Commandes** et
@@ -622,9 +625,9 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**VINGT-DEUX ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+**VINGT-QUATRE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
 tableau de bord, les paramètres et la vérification en deux étapes créés, les sept que le kit admin dessine et que la contrainte n° 1 autorise, la page client et son
-lien mort, la connexion, l'inscription, les deux pages légales et la documentation :
+lien mort, la connexion, l'inscription, le mot de passe oublié et le nouveau mot de passe, les deux pages légales et la documentation :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -650,6 +653,14 @@ lien mort, la connexion, l'inscription, les deux pages légales et la documentat
 | `/parametres` (CRÉÉ) | `CLIC_KIT="Paramètres"` à 1690 | 46 (0) | 18 (0) | **0** |
 | `/verification` (CRÉÉ) | `auth/index.html#verification` à **1440**, `DEUX_ETAPES=1` | 0 (0) | 0 (0) | **0** |
 | `/docs` | `docs/index.html` à **1280** | 81 (0) | 42 (0) | **0** |
+| `/mot-de-passe-oublie` | `auth/index.html#mot-de-passe-oublie` à **1440** | 0 (0) | 0 (0) | **0** |
+| `/nouveau-mot-de-passe` | `auth/index.html#nouveau-mot-de-passe` à 1440, `RECUPERATION=1` | 1 (0) | 1 (0) | **0** |
+
+> ⚠️ **`/nouveau-mot-de-passe` NE S'OUVRE QU'À UNE SESSION DE RÉCUPÉRATION** — sa
+> méthode doit être `otp`. `RECUPERATION=1` fait ouvrir à la sonde un VRAI lien
+> de réinitialisation (généré par l'API d'administration de la base de tests,
+> puis vérifié comme le navigateur le ferait) ; sans lui, la page renvoie à la
+> connexion et la sonde mesurerait la connexion.
 
 > ⚠️ **`/docs` AVAIT ÉTÉ « PORTÉ » LE 12/09 SANS AVOIR JAMAIS ÉTÉ SOUSTRAIT.** Au
 > premier relevé : **108 écarts de valeur** — titres à 26 contre 28, marges de 38

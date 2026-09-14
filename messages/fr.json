@@ -210,8 +210,6 @@
     "pasDeCompteTitre": "Pas encore de compte ?",
     "suggestionPrefixe": "Vouliez-vous dire",
     "suggestionSuffixe": " ?",
-    "panneauTitre": "Votre client ouvre le lien et voit tout.",
-    "panneauTexte": "Aucun compte à créer de son côté, aucune application à installer.",
     "cgvAvant": "En continuant, vous acceptez nos",
     "cgvEt": "et notre",
     "cgvConditions": "conditions d'utilisation",
@@ -231,8 +229,6 @@
       "fermees": "Les inscriptions sont momentanément fermées. Les comptes existants ne sont pas affectés.",
       "confirmez": "Ouvrez votre boîte mail : si un lien de confirmation vous y attend, il termine la création de votre compte. Si vous aviez déjà un compte, connectez-vous ci-dessous."
     },
-    "apercuTitre": "Votre commande",
-    "apercuBoutique": "Atelier Nord",
     "labelMotDePasse": "Mot de passe",
     "motDePasseOublie": "Mot de passe oublié ?",
     "bouton": "Se connecter",
@@ -1589,7 +1585,6 @@
   "motDePasse": {
     "oublieTitre": "Mot de passe oublié",
     "oublieSousTitre": "Entrez votre adresse. Si un compte existe, vous recevez un lien pour en choisir un nouveau.",
-    "oublieSousTitreCourt": "Si un compte existe pour cette adresse, vous recevez un lien.",
     "bouton": "Envoyer le lien",
     "boutonEnCours": "Envoi…",
     "envoyeTitre": "Regardez votre boîte mail",

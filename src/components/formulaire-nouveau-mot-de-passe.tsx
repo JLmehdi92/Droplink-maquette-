@@ -2,19 +2,16 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import { Lock } from "lucide-react";
 import {
   changerMotDePasse,
   type ResultatChangement,
 } from "@/app/[locale]/nouveau-mot-de-passe/actions";
-import {
-  BoutonPrincipal,
-  CLASSE_CHAMP,
-  CLASSE_LIBELLE,
-  MessageErreur,
-} from "@/components/acces-champs";
+import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
 
 /**
- * SAISIR LE NOUVEAU MOT DE PASSE.
+ * SAISIR LE NOUVEAU MOT DE PASSE — `ResetScreen` du kit `auth`, écrit le
+ * 14/09/2026 avant ce formulaire.
  *
  * AUCUN CHAMP D'ADRESSE, et aucune adresse en entrée cachée non plus : elle est
  * lue DANS LA SESSION côté serveur. La faire voyager par le formulaire
@@ -22,11 +19,8 @@ import {
  * contenu qu'on applique — celui qui refuse un mot de passe contenant l'identité
  * qu'il protège.
  *
- * PAS DE SECOND CHAMP DE CONFIRMATION. Il servait à attraper les fautes de
- * frappe à l'époque où l'on ne pouvait pas relire ce qu'on tapait ; aujourd'hui
- * le gestionnaire de mots de passe remplit les deux à l'identique, et quelqu'un
- * qui se trompe quand même a le chemin de réparation juste derrière lui — il
- * vient précisément de l'emprunter.
+ * PAS DE SECOND CHAMP DE CONFIRMATION : le gestionnaire de mots de passe remplit
+ * les deux à l'identique, et le champ du kit se dévoile d'un geste.
  */
 
 const INITIAL: ResultatChangement = { statut: "inactif" };
@@ -51,37 +45,34 @@ export function FormulaireNouveauMotDePasse({ locale }: { readonly locale: strin
       : null;
 
   return (
-    <form action={action} className="flex flex-col gap-4 md:gap-[18px]" noValidate>
+    <form action={action} className="flex flex-col gap-[22px]" noValidate>
       <input type="hidden" name="locale" value={locale} />
 
       <div>
-        <label htmlFor="nouveau-mot-de-passe" className={CLASSE_LIBELLE + " mb-2"}>
-          {tm("labelNouveau")}
-        </label>
-        <input
+        <ChampAcces
           id="nouveau-mot-de-passe"
-          name="motDePasse"
+          nom="motDePasse"
           type="password"
+          libelle={tm("labelNouveau")}
+          icone={Lock}
           autoComplete="new-password"
-          required
-          autoFocus
-          aria-invalid={messageErreur !== null}
-          aria-describedby="aide-nouveau-mot-de-passe"
-          className={CLASSE_CHAMP}
+          invalide={messageErreur !== null}
+          decritPar={
+            messageErreur !== null
+              ? "aide-nouveau-mot-de-passe erreur-nouveau-mot-de-passe"
+              : "aide-nouveau-mot-de-passe"
+          }
         />
-        <p
-          id="aide-nouveau-mot-de-passe"
-          className="mt-2 font-body-sm text-[12px] leading-[18px] text-sourdine"
-        >
+        <p id="aide-nouveau-mot-de-passe" className="mt-2 text-[12.5px] leading-[1.5] text-ds-texte-sourdine">
           {ti("aideMotDePasse")}
         </p>
       </div>
 
       {messageErreur !== null ? (
-        <MessageErreur id="erreur-nouveau-mot-de-passe" texte={messageErreur} />
+        <MessageErreurDs id="erreur-nouveau-mot-de-passe" texte={messageErreur} />
       ) : null}
 
-      <BoutonPrincipal libelle={tm("boutonEnregistrer")} libelleEnCours={tm("boutonEnCours")} />
+      <BoutonPrincipalDs libelle={tm("boutonEnregistrer")} libelleEnCours={tm("boutonEnCours")} />
     </form>
   );
 }

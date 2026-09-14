@@ -5621,5 +5621,93 @@
         "raison": "LES VOLUMES ET LES DATES DU JEU DE MESURE : un compte, quatre commandes, trois colis (FedEx, 4PX), des mois de 2026. Des motifs ancres pour ce qui glisse avec la date du jour."
       }
     ]
+  },
+  "fr-mot-de-passe-oublie": {
+    "valeurs": [
+      {
+        "textes": [
+          "Un seul lien de suivi pour toute la",
+          "commande",
+          ": vos clients arrêtent de vous demander",
+          "Un lien de suivi par commande",
+          "Rapide et simple",
+          "Créez vos commandes en quelques clics.",
+          "Tout au même endroit",
+          "Photos, suivi, statut, client… tout est",
+          "Conçu pour les vendeurs",
+          "Une expérience pensée par et pour les e-",
+          "Mot de passe oublié",
+          "Entrez votre adresse. Si un compte exist",
+          "Adresse e-mail",
+          "Envoyer le lien",
+          "Vos données sont sécurisées et confident",
+          "· © 2025 DropLink. Tous droits réservés.",
+          "Documentation"
+        ],
+        "motif": "contrainte",
+        "raison": "MEME COQUE, MEME CAUSE QUE /verification (voir sa declaration) : POSITION VERTICALE SEULE, ET UN MEME DECALAGE PARTOUT (+36 a +37 px sur les deux colonnes, -10 px au pied) — donc une seule cause. Le pied du kit porte l accent manuscrit « Plus de ventes, plus de temps. », une IMAGE de 123 px de haut : le produit ne la rend pas, pas plus que sur la connexion et l inscription — une image de texte francais ne suit pas les trois langues, et « plus de ventes » est une promesse que le produit ne fait pas. La grille qui centre les deux colonnes en devient plus haute, et la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, d ou les 10 px du pied. Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, relevee le 13/09/2026 apres avoir ete ecrite dans le kit."
+      },
+      {
+        "textes": [
+          "Revenir à la connexion"
+        ],
+        "motif": "contrainte",
+        "raison": "« Revenir a la connexion » garde sa cible de 44 px au telephone (regle 5) et la rend au bureau, comme le lien de documentation du pied ; il suit donc le decalage vertical commun de la coque."
+      }
+    ],
+    "manquants": [],
+    "enTrop": []
+  },
+  "fr-nouveau-mot-de-passe": {
+    "valeurs": [
+      {
+        "textes": [
+          "Un seul lien de suivi pour toute la",
+          "commande",
+          ": vos clients arrêtent de vous demander",
+          "Un lien de suivi par commande",
+          "Rapide et simple",
+          "Créez vos commandes en quelques clics.",
+          "Tout au même endroit",
+          "Photos, suivi, statut, client… tout est",
+          "Conçu pour les vendeurs",
+          "Une expérience pensée par et pour les e-",
+          "Nouveau mot de passe",
+          "Ce lien ne servira qu’une fois, et vos a",
+          "12 caractères minimum. Prenez plutôt une",
+          "Enregistrer et me connecter",
+          "Vos données sont sécurisées et confident",
+          "· © 2025 DropLink. Tous droits réservés.",
+          "Documentation"
+        ],
+        "motif": "contrainte",
+        "raison": "MEME COQUE, MEME CAUSE QUE /verification (voir sa declaration) : POSITION VERTICALE SEULE, ET UN MEME DECALAGE PARTOUT (+36 a +37 px sur les deux colonnes, -10 px au pied) — donc une seule cause. Le pied du kit porte l accent manuscrit « Plus de ventes, plus de temps. », une IMAGE de 123 px de haut : le produit ne la rend pas, pas plus que sur la connexion et l inscription — une image de texte francais ne suit pas les trois langues, et « plus de ventes » est une promesse que le produit ne fait pas. La grille qui centre les deux colonnes en devient plus haute, et la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, d ou les 10 px du pied. Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, relevee le 13/09/2026 apres avoir ete ecrite dans le kit."
+      },
+      {
+        "textes": [
+          "Choisissez-en un nouveau pour ."
+        ],
+        "motif": "donnee",
+        "raison": "L ADRESSE DU COMPTE DE MESURE EST PLUS LONGUE QUE CELLE DU KIT : « ecran-xxxxxx@droplink-tests.invalid » contre « yanis.b@gmail.com ». La phrase passe sur deux lignes, s elargit a la carte, et tout ce qui la suit dans la carte descend d une ligne."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "yanis.b@gmail.com"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse de demonstration du kit ; le produit rappelle celle de la SESSION, jamais celle de l URL."
+      }
+    ],
+    "enTrop": [
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable de la sonde, rappelee par l ecran : elle change a chaque passage."
+      }
+    ]
   }
 }

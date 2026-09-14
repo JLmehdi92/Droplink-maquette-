@@ -210,8 +210,6 @@
     "pasDeCompteTitre": "No account yet?",
     "suggestionPrefixe": "Did you mean",
     "suggestionSuffixe": "?",
-    "panneauTitre": "Your customer opens the link and sees everything.",
-    "panneauTexte": "No account to create on their side, no app to install.",
     "cgvAvant": "By continuing, you accept our",
     "cgvEt": "and our",
     "cgvConditions": "terms of use",
@@ -231,8 +229,6 @@
       "fermees": "Sign-ups are closed for now. Existing accounts are unaffected.",
       "confirmez": "Open your inbox: if a confirmation link is waiting there, it completes your account. If you already had an account, log in below."
     },
-    "apercuTitre": "Your order",
-    "apercuBoutique": "Atelier Nord",
     "labelMotDePasse": "Password",
     "motDePasseOublie": "Forgot your password?",
     "bouton": "Log in",
@@ -1589,7 +1585,6 @@
   "motDePasse": {
     "oublieTitre": "Forgotten password",
     "oublieSousTitre": "Enter your address. If an account exists, you receive a link to choose a new one.",
-    "oublieSousTitreCourt": "If an account exists for this address, you receive a link.",
     "bouton": "Send the link",
     "boutonEnCours": "Sending…",
     "envoyeTitre": "Check your inbox",
