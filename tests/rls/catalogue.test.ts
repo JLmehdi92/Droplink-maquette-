@@ -472,6 +472,29 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "inconnus sont REFUSÉS (DL055) : ignorés, ils rendraient la liste entière.",
     ],
     [
+      "statistiques_admin",
+      "Indicateurs de l'écran Statistiques (migration 161) sur 7, 30 ou 90 jours et la période " +
+        "précédente. Garde est_admin, fenêtre inconnue REFUSÉE (DL056). Elle ne rend QUE des " +
+        "nombres — `tests/rls/statistiques-admin.test.ts` inventorie ses colonnes et rougit sur " +
+        "la première qui ne serait pas numérique — donc aucune donnée tierce n'est lue et aucun " +
+        "audit n'est écrit, comme `repartir_commandes_admin`. `stable`.",
+    ],
+    [
+      "statistiques_admin_par_jour",
+      "Séries jour par jour de l'écran Statistiques, jours vides compris, taux et délai NULS un " +
+        "jour sans mesure. Même garde, même fenêtre fermée, mêmes nombres seuls. `stable`.",
+    ],
+    [
+      "transporteurs_admin",
+      "Colis de la plateforme par CODE transporteur sur la fenêtre ; le nom se résout dans le " +
+        "dépôt. Même garde, même fenêtre fermée, aucune boutique ni aucun numéro de suivi rendus.",
+    ],
+    [
+      "croissance_admin",
+      "Volumes mensuels de la plateforme sur neuf mois, mois vides compris. Garde est_admin, " +
+        "aucun argument, nombres seuls. `stable`.",
+    ],
+    [
       "stockage_total_admin",
       "Somme des octets occupés, tous comptes confondus. Elle lit les compteurs " +
         "par boutique et jamais `order_media` : le coût suit ainsi le nombre de " +

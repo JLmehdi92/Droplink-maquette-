@@ -4474,6 +4474,7 @@ try {
   const cheminsAdmin = [
     "/fr/admin",
     "/fr/admin/commandes",
+    "/fr/admin/statistiques",
     "/fr/admin/comptes",
     "/fr/admin/journal",
     "/fr/admin/parametres",

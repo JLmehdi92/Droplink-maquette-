@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import {
+  BarChart3,
   BookMarked,
   ClipboardList,
   LayoutDashboard,
@@ -41,6 +42,7 @@ export type CleIconeAdmin =
   | "commandes"
   | "comptes"
   | "boutiques"
+  | "statistiques"
   | "journal"
   | "veille"
   | "reglages";
@@ -56,6 +58,7 @@ const ICONES: Record<CleIconeAdmin, LucideIcon> = {
   commandes: ClipboardList,
   comptes: Users,
   boutiques: Store,
+  statistiques: BarChart3,
   journal: BookMarked,
   veille: Activity,
   reglages: Settings,

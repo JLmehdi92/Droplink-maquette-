@@ -27,7 +27,7 @@ export async function AnneauStatuts({
 }: {
   readonly repartition: RepartitionAdmin;
   /** « commandes » : l'écran de liste des commandes, où le kit le pose à 170. */
-  readonly variante?: "panneau" | "commandes";
+  readonly variante?: "panneau" | "commandes" | "statistiques";
 }) {
   const t = await getTranslations("admin.panneau");
 

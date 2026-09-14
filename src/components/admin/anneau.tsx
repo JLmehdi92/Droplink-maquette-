@@ -31,7 +31,7 @@ import { getFormatter } from "next-intl/server";
  * 150 px de base, contre 37 dans le panneau étroit de la vue d'ensemble, où
  * tronquer rendrait « A » et « S. ».
  */
-const COTES = { panneau: 190, liste: 165, commandes: 170, compact: 124 } as const;
+const COTES = { panneau: 190, liste: 165, commandes: 170, compact: 124, statistiques: 122 } as const;
 
 /*
  * LES DEUX POLICES DU CENTRE SONT CALCULÉES, PAS ÉCRITES. Le kit les dérive de
@@ -102,7 +102,16 @@ export async function Anneau({
   }, []);
 
   return (
-    <div className={"flex flex-col items-center sm:flex-row " + (commandes ? "gap-5" : "gap-6")}>
+    <div
+      className={
+        variante === "statistiques"
+          ? /* L'ÉCRAN DES STATISTIQUES POSE L'ANNEAU ET SA LÉGENDE EN RANGÉE QUI
+               SE REPLIE (écart 18) : dans la carte étroite des statuts, la
+               légende passe sous l'anneau, comme au kit. */
+            "flex flex-wrap items-center gap-[18px]"
+          : "flex flex-col items-center sm:flex-row " + (commandes ? "gap-5" : "gap-6")
+      }
+    >
       <div className="relative shrink-0" style={{ width: COTE, height: COTE }}>
         <svg width={COTE} height={COTE} viewBox={`0 0 ${COTE} ${COTE}`} aria-hidden="true">
           <g transform={`rotate(-90 ${COTE / 2} ${COTE / 2})`}>
@@ -128,9 +137,16 @@ export async function Anneau({
           >
             {format.number(total)}
           </span>
+          {/* ⚠️ SUR L'ANNEAU DE 122 DES STATISTIQUES, LE PLANCHER EST AU TÉLÉPHONE
+              SEULEMENT. À 11,5 px, « commandes » touchait le bord intérieur de
+              l'anneau (trou de 71 px) ; le kit y écrit 9,5, et la règle 5 ne vise
+              que le téléphone — où l'anneau prend toute la largeur de sa carte. */}
           <span
-            className="leading-[1.2] text-ds-texte-sourdine"
-            style={{ fontSize: policeUnite(COTE) }}
+            className={
+              "leading-[1.2] text-ds-texte-sourdine " +
+              (variante === "statistiques" ? "text-[11.5px] lg:text-[9.5px]" : "")
+            }
+            style={variante === "statistiques" ? undefined : { fontSize: policeUnite(COTE) }}
           >
             {unite}
           </span>
@@ -179,7 +195,14 @@ export async function Anneau({
             <span
               className={
                 "text-right leading-[normal] text-ds-texte-sourdine " +
-                (commandes ? "w-[34px] text-[12.5px]" : liste ? "w-[38px] text-[13px]" : "w-10 text-[13px]")
+                (commandes
+                  ? "w-[34px] text-[12.5px]"
+                  : variante === "statistiques"
+                    ? /* « 100 % » ne tient pas dans 38 px : la part s'élargit plutôt que de passer à la ligne. */
+                      "min-w-[38px] text-[13px] whitespace-nowrap"
+                    : liste
+                      ? "w-[38px] text-[13px]"
+                      : "w-10 text-[13px]")
               }
             >
               {part(total === 0 ? 0 : Math.round((p.valeur / total) * 100))}

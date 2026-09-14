@@ -88,6 +88,12 @@ export default async function LayoutAdmin({
       icone: "boutiques",
     },
     {
+      href: `/${langue}/admin/statistiques`,
+      libelle: t("statistiques.titre"),
+      court: t("onglets.statistiques"),
+      icone: "statistiques",
+    },
+    {
       href: `/${langue}/admin/journal`,
       libelle: t("journal.titre"),
       court: t("onglets.journal"),

@@ -1617,7 +1617,8 @@
         "textes": [
           "Vue d'ensemble [1/2]",
           "Boutiques [1/2]",
-          "Commandes [1/3]"
+          "Commandes [1/3]",
+          "Statistiques  <span>"
         ],
         "motif": "structure",
         "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere, pas d un libelle. Taille, graisse et couleur — les seules proprietes du texte lui-meme — ne figurent pas dans l ecart : elles sont identiques."
@@ -1681,7 +1682,6 @@
     "manquants": [
       {
         "textes": [
-          "Statistiques",
           "Support"
         ],
         "motif": "contrainte",
@@ -1873,7 +1873,8 @@
         "textes": [
           "Vue d'ensemble",
           "Boutiques",
-          "Commandes"
+          "Commandes",
+          "Statistiques  <span>"
         ],
         "motif": "structure",
         "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13 et hauteur 44 sont ceux de l entree entiere. Taille, graisse et couleur — les seules proprietes du texte lui-meme — ne figurent pas dans l ecart."
@@ -1926,7 +1927,6 @@
     "manquants": [
       {
         "textes": [
-          "Statistiques",
           "Support"
         ],
         "motif": "contrainte",
@@ -2160,7 +2160,8 @@
       {
         "textes": [
           "Vue d'ensemble",
-          "Boutiques [3/3]"
+          "Boutiques [3/3]",
+          "Statistiques  <span>"
         ],
         "motif": "structure",
         "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere. Taille, graisse et couleur ne figurent pas dans l ecart : elles sont identiques."
@@ -2213,7 +2214,6 @@
     "manquants": [
       {
         "textes": [
-          "Statistiques",
           "Support"
         ],
         "motif": "contrainte",
@@ -2445,7 +2445,8 @@
         "textes": [
           "Vue d'ensemble",
           "Boutiques",
-          "Commandes"
+          "Commandes",
+          "Statistiques  <span>"
         ],
         "motif": "structure",
         "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13 et hauteur 44 sont ceux de l entree entiere. Le decompte de « Boutiques » differe pour la meme raison que partout : le kit ecrit ce mot dans une seconde unite d anneau, celle du panneau de plan, que rien ne peut remplir."
@@ -2493,7 +2494,6 @@
     "manquants": [
       {
         "textes": [
-          "Statistiques",
           "Support"
         ],
         "motif": "contrainte",
@@ -2700,10 +2700,12 @@
         "motifs": [
           "^\\d{1,3} % du total$",
           "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4} \\d{2}:\\d{2}$",
-          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$"
+          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$",
+          "^systeme$",
+          "^(Inscriptions ouvertes|Commandes par mois|Interrogation des transporteurs|Seuil d'alerte colis|Tâche en retard après)$"
         ],
         "motif": "donnee",
-        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
+        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve."
       }
     ]
   },
@@ -2713,7 +2715,8 @@
         "textes": [
           "Vue d'ensemble",
           "Boutiques",
-          "Commandes"
+          "Commandes",
+          "Statistiques  <span>"
         ],
         "motif": "structure",
         "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13 et hauteur 44 sont ceux de l entree entiere."
@@ -2729,7 +2732,6 @@
     "manquants": [
       {
         "textes": [
-          "Statistiques",
           "Support"
         ],
         "motif": "contrainte",
@@ -5084,7 +5086,8 @@
         "textes": [
           "Vue d'ensemble",
           "Commandes [2/3]",
-          "Boutiques"
+          "Boutiques",
+          "Statistiques  <span>"
         ],
         "motif": "structure",
         "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere. Taille, graisse et couleur ne figurent pas dans l ecart : elles sont identiques."
@@ -5165,13 +5168,12 @@
           "Utilisateurs",
           "Abonnements",
           "Paiements",
-          "Statistiques",
           "Support",
           "Logs système",
           "Paramètres"
         ],
         "motif": "contrainte",
-        "raison": "QUATRE ECRANS DU KIT QUE LE DEPOT N A PAS, DONC QUATRE ENTREES QUI MENERAIENT A UN 404 — pire qu une entree absente. Abonnements et Paiements sont de la facturation, que la contrainte n°1 interdit en phase 1 ; Support suppose un systeme de tickets que la base n a pas. Et le vocabulaire du produit gagne, le meme sur tous les ecrans d administration : « Comptes », « Journal d audit », « Parametres systeme »."
+        "raison": "TROIS ECRANS DU KIT QUE LE DEPOT N A PAS, DONC TROIS ENTREES QUI MENERAIENT A UN 404 — pire qu une entree absente. Abonnements et Paiements sont de la facturation, que la contrainte n°1 interdit en phase 1 ; Support suppose un systeme de tickets que la base n a pas. Et le vocabulaire du produit gagne, le meme sur tous les ecrans d administration : « Comptes », « Journal d audit », « Parametres systeme »."
       },
       {
         "textes": [
@@ -5361,6 +5363,262 @@
         ],
         "motif": "donnee",
         "raison": "Les volumes, la boutique et les transporteurs du jeu de mesure : quatre commandes, donc « 25 % du total » et « 4 commandes au total » la ou le kit en montre 1 248."
+      }
+    ]
+  },
+  "fr-admin-statistiques": {
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble",
+          "Commandes [1/4]",
+          "Boutiques  <span>",
+          "Statistiques [2/2]"
+        ],
+        "motif": "structure",
+        "raison": "LES ENTREES DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span a l interieur du lien ; chez nous le lien porte le texte. Rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere ; taille, graisse et couleur sont identiques."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "structure",
+        "raison": "Position et largeur. Le kit ecrit le role dans sa barre superieure ; nous l ecrivons dans le bloc d identite au bas de la colonne."
+      },
+      {
+        "textes": [
+          "Boutiques  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "Le kit ecrit « Boutiques » deux fois : l entree de navigation et la tuile « Sur 124 boutiques ». La tuile compte des comptes chez nous — voir les manquants."
+      },
+      {
+        "textes": [
+          "Taux de liens consultés"
+        ],
+        "motif": "structure",
+        "raison": "DEUX LIBELLES IDENTIQUES DANS UNE MEME CARTE, APPARIES A L ENVERS. « Taux de liens consultes » est le titre de la carte ET la legende de sa courbe, chez le kit comme chez nous ; la sonde apparie par proximite, et notre legende tombe plus pres de son titre. Titre 16/700 et legende 12,5/400 sont ceux du kit, chacun a sa place."
+      },
+      {
+        "textes": [
+          "Livrées",
+          "En transit",
+          "En préparation",
+          "juil. 2025"
+        ],
+        "motifs": [
+          "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.)$",
+          "^\\d{1,3} %$"
+        ],
+        "motif": "donnee",
+        "raison": "LES DATES D AXE ET LES PARTS DE LEGENDE SUIVENT LE JEU DE MESURE. La fenetre du kit finit le 8 septembre 2025, la notre aujourd hui : aucun repere ne tombe au meme jour, et leur nombre depend de la largeur du graphique. Les parts de legende (« 25 % », « 100 % ») sont celles de nos quatre commandes et de notre compte, et la largeur des libelles de legende s ajuste a la valeur qui les suit (« 1 » au lieu de « 624 »). Les mois de la croissance sont ceux de 2026."
+      },
+      {
+        "textes": [
+          "Commandes [2/4]",
+          "commandes [3/4]",
+          "Commandes [4/4]",
+          "Statistiques [1/2]",
+          "Analysez la croissance et l'utilisation",
+          "Commandes créées",
+          "Photos uploadées",
+          "Vue globale",
+          "Utilisation",
+          "Croissance",
+          "Évolution des commandes créées",
+          "Pages client consultées",
+          "Temps moyen de livraison",
+          "Temps moyen (jours)",
+          "Statut des commandes",
+          "Transporteurs les plus utilisés",
+          "Croissance globale"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE PAR RANGEE. La barre superieure du kit n existe pas : tout monte de 65 px. La troisieme rangee n a que DEUX cartes — l activite recente n est pas portee — donc les transporteurs et la croissance y sont plus larges, leurs titres tiennent sur une ligne, et la croissance commence plus a gauche. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Abonnements",
+          "Paiements",
+          "Support",
+          "Logs système",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DU PRODUIT ET TROIS ECRANS QUI N EXISTENT PAS. « Comptes », « Journal d audit » et « Parametres systeme », les memes mots sur tous les ecrans d administration ; Abonnements et Paiements sont de la facturation (contrainte n°1), Support suppose un systeme de tickets que la base n a pas."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "1 sept. 2025 – 8 sept. 2025",
+          "admin@droplink.fr"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE DU KIT N EST PAS PORTEE, comme sur les autres ecrans : « Ctrl K » annonce une recherche transverse qui n existe pas, et le selecteur de dates double celui de la rangee des vues, qui commande reellement les chiffres (7, 30 ou 90 jours)."
+      },
+      {
+        "textes": [
+          "Liens clients générés",
+          "Utilisateurs actifs",
+          "Nouvelles boutiques",
+          "sur 124 boutiques",
+          "Nouveaux abonnements",
+          "sur 386 abonnements",
+          "Évolution des utilisateurs",
+          "Nouveaux utilisateurs"
+        ],
+        "motif": "contrainte",
+        "raison": "TROIS TUILES DU KIT, TROIS DECISIONS. « Liens clients generes » vaut le nombre de commandes — une commande, un lien — et ne dirait rien de plus : la tuile compte les liens OUVERTS. « Nouvelles boutiques » sont nos nouveaux comptes, une boutique naissant avec son compte. « Nouveaux abonnements » est interdit (contrainte n°1) : la sixieme tuile compte les colis pris en charge, le seul poste facture du produit. « Utilisateurs » devient « Comptes » partout, cartes et legendes comprises."
+      },
+      {
+        "textes": [
+          "Répartition des abonnements",
+          "386 abonnements actifs",
+          "Plan Pro",
+          "Plan Gratuit"
+        ],
+        "motif": "contrainte",
+        "raison": "L ANNEAU DES ABONNEMENTS EST INTERDIT (contrainte n°1, aucune colonne de plan). Sa place porte les TYPES DE COMPTE — fournisseurs, revendeurs, sans type declare —, la segmentation d usage que le brief met au coeur de la validation."
+      },
+      {
+        "textes": [
+          "Problème",
+          "Annulées"
+        ],
+        "motif": "contrainte",
+        "raison": "DEUX ETATS QUI N EXISTENT PAS. La decision 4 arrete la frise a quatre etapes : ni « probleme » ni « annulee » dans l anneau des statuts."
+      },
+      {
+        "textes": [
+          "Activité récente",
+          "Voir tout",
+          "Nouvelle boutique créée",
+          "StreetWear FR par Yanis B.",
+          "Il y a 12 min",
+          "Nouvel abonnement Pro",
+          "Inès K. (LuxShop)",
+          "Pic d'activité commandes",
+          "72 commandes créées aujourd'hui",
+          "Il y a 1 h",
+          "Nouveau lien client généré",
+          "TechStore par Thomas R.",
+          "Utilisateur inscrit",
+          "Mehdi S."
+        ],
+        "motif": "contrainte",
+        "raison": "L ACTIVITE RECENTE N EST PAS PORTEE : elle nommerait des boutiques, des comptes et des abonnements a chaque ouverture de l ecran. Ces fonctions ne rendent que des nombres, et c est ce qui dispense l ecran d ecrire au journal ; un flux nominatif l y obligerait, et noierait les consultations deliberees. Avec lui partent le lien « Voir tout » des transporteurs, qui menerait a un ecran que le depot n a pas."
+      },
+      {
+        "textes": [
+          "1 248",
+          "+18%",
+          "vs période précédente",
+          "sur 386 comptes",
+          "1.5k",
+          "6,2 jours",
+          "-18%",
+          "1 248 commandes créées",
+          "Sur les 1 248 commandes suivies",
+          "LP",
+          "La Poste",
+          "( 424 )",
+          "CP",
+          "Chronopost",
+          "MR",
+          "Mondial Relay",
+          "DHL",
+          "CO",
+          "Colissimo",
+          "juin 2025",
+          "août 2025"
+        ],
+        "motif": "donnee",
+        "raison": "LA POPULATION DE DEMONSTRATION DU KIT : volumes, ecarts, transporteurs et mois de 2025. Le jeu de mesure porte une boutique, quatre commandes, trois colis et une fenetre qui finit aujourd hui. Les badges « +18 % » n apparaissent que si la periode precedente a une valeur — elle n en a pas dans ce jeu, et diviser par zero n est pas une croissance. « 6,2 jours » devient « 6 jours » : le jeu livre ses colis en jours ronds."
+      },
+      {
+        "textes": [
+          "Comparatif mensuel sur 3 mois"
+        ],
+        "motif": "contrainte",
+        "raison": "LE COMPARATIF DE CROISSANCE COMPARE TROIS MOIS A TROIS MOIS, et il le dit. Le kit ecrit « comparatif mensuel sur 3 mois » avec un selecteur de 3 ou 6 mois qui ne commande rien de reel ; le notre compare la somme des trois derniers mois a celle des trois precedents, sur les neuf mois que la base rend, sans selecteur."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire et son rappel permanent que chaque consultation de donnees d un vendeur est tracee."
+      },
+      {
+        "motifs": [
+          "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "Le compte jetable du jeu de mesure, dont l adresse change a chaque passage."
+      },
+      {
+        "textes": [
+          "rien sur la période précédente",
+          "Liens clients consultés",
+          "ouverts au moins une fois",
+          "Comptes actifs",
+          "Nouveaux comptes",
+          "Colis pris en charge",
+          "facturés par le suivi",
+          "Évolution des comptes",
+          "Types de compte",
+          "Fournisseurs",
+          "Revendeurs",
+          "Sans type déclaré",
+          "Expédiées",
+          "Trois derniers mois contre les trois pré",
+          "nouveau",
+          "Colis",
+          "Photos"
+        ],
+        "motif": "contrainte",
+        "raison": "NOS TUILES, NOS CARTES ET NOTRE VOCABULAIRE — voir les declarations symetriques des manquants : liens OUVERTS, comptes actifs et nouveaux, colis pris en charge « factures par le suivi », types de compte, et « Expediees », la quatrieme etape de la frise que le kit ne compte pas. « rien sur la periode precedente » remplace le badge quand il n y a pas de base : un ecart calcule sur zero aurait la forme d une mesure. Les quatre indicateurs de croissance sont des volumes qui existent — comptes, commandes, colis, photos — la ou le kit pose des abonnements."
+      },
+      {
+        "textes": [
+          "30 derniers jours"
+        ],
+        "motif": "structure",
+        "raison": "L OPTION REPLIEE DU SELECTEUR DE PERIODE. Le kit rend les siennes dans un `select` natif ; la notre est un lien dans un `details` ferme — la periode vit dans l URL. La sonde releve l option, l oeil ne voit qu une valeur de chaque cote."
+      },
+      {
+        "textes": [
+          "6 jours",
+          "FX",
+          "FedEx",
+          "4P",
+          "4PX"
+        ],
+        "motifs": [
+          "^sur \\d+ comptes?$",
+          "^\\d+ comptes?$",
+          "^\\d+ commandes? créées?$",
+          "^Sur (les )?\\d+ colis suivis?$",
+          "^\\(\\d+\\)$",
+          "^(janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4}$"
+        ],
+        "motif": "donnee",
+        "raison": "LES VOLUMES ET LES DATES DU JEU DE MESURE : un compte, quatre commandes, trois colis (FedEx, 4PX), des mois de 2026. Des motifs ancres pour ce qui glisse avec la date du jour."
       }
     ]
   }

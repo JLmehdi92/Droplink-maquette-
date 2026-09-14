@@ -972,6 +972,16 @@ export type Database = {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
       }
+      croissance_admin: {
+        Args: never
+        Returns: {
+          colis: number
+          commandes: number
+          comptes: number
+          mois: string
+          photos: number
+        }[]
+      }
       delai_moyen_livraison: {
         Args: { p_depuis: string }
         Returns: {
@@ -1340,6 +1350,41 @@ export type Database = {
           valeur: number
         }[]
       }
+      statistiques_admin: {
+        Args: { p_jours: number }
+        Returns: {
+          colis: number
+          colis_avant: number
+          commandes: number
+          commandes_avant: number
+          comptes: number
+          comptes_actifs: number
+          comptes_actifs_avant: number
+          delai_colis: number
+          delai_jours: number
+          delai_jours_avant: number
+          fournisseurs: number
+          liens_consultes: number
+          liens_consultes_avant: number
+          nouveaux_comptes: number
+          nouveaux_comptes_avant: number
+          photos: number
+          photos_avant: number
+          revendeurs: number
+        }[]
+      }
+      statistiques_admin_par_jour: {
+        Args: { p_jours: number }
+        Returns: {
+          commandes: number
+          comptes_actifs: number
+          delai_jours: number
+          jour: string
+          nouveaux_comptes: number
+          taux_consultes: number
+          vues: number
+        }[]
+      }
       stockage_total_admin: { Args: never; Returns: number }
       supprimer_mes_donnees: {
         Args: { p_confirmation: string }
@@ -1352,6 +1397,13 @@ export type Database = {
       suspendre_compte: {
         Args: { p_ip_hash: string; p_motif: string; p_profil: string }
         Returns: boolean
+      }
+      transporteurs_admin: {
+        Args: { p_jours: number }
+        Returns: {
+          carrier_code: number
+          nombre: number
+        }[]
       }
     }
     Enums: {
