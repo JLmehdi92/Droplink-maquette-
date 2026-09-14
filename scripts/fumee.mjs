@@ -67,7 +67,32 @@ const instantISO = (decalage) =>
 // chargement, la sonde qui cree une commande de test echouerait sur une
 // variable absente — et l echec ressemblerait a un defaut du produit.
 const { config: chargerEnv } = await import("dotenv");
+/*
+ * ⚠️ LANCEE SEULE, LA FUMEE VISAIT LA PRODUCTION — relevé le 14/09/2026.
+ * `pnpm gates` charge `.env.test.local` avant de la lancer, mais ce script ne
+ * chargeait que `.env.local` : `pnpm fumee` tapé à la main créait ses comptes,
+ * ses commandes et ses colis dans la base qui sert les clients. Le geste a été
+ * fait ce jour-là, pour éprouver une garde, et arrêté avant la première
+ * écriture — la ligne où naît le client Supabase n'avait pas été atteinte.
+ * C'était une protection qui tenait à une habitude (L-029).
+ *
+ * La base de TESTS d'abord, comme dans `portes.mjs` : `dotenv` ne remplace pas
+ * une variable déjà posée. Et le script REFUSE de démarrer si la cible résolue
+ * est la production, qu'il soit lancé seul ou par les portes.
+ */
+if (!existsSync(".env.test.local")) {
+  console.error("ECHEC `.env.test.local` est absent : la fumee viserait la PRODUCTION. Refus.");
+  process.exit(1);
+}
+chargerEnv({ path: ".env.test.local", quiet: true });
 chargerEnv({ path: ".env.local", quiet: true });
+if (
+  (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim() === "" ||
+  (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").includes("csndfatwtbzqmhgqseem")
+) {
+  console.error("ECHEC la fumee viserait la PRODUCTION ou une base indeterminee. Refus.");
+  process.exit(1);
+}
 
 const racine = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -5342,6 +5367,18 @@ controles.push([
 // et le signalement portaient les deux dernieres. Leurs jetons sont sortis de
 // globals.css dans le meme geste.
 controles.push(
+  /*
+   * --- INTER SEULE : PLUS JAKARTA SANS NE REVIENT PAS ---
+   *
+   * ⚠️ ELLE ETAIT ENCORE TELECHARGEE LE 14/09/2026, trois jours apres que le
+   * design system l a retiree : `[locale]/layout` et `global-not-found`
+   * l importaient pour cinq titres d ecrans d erreur. Aucune porte ne pouvait le
+   * voir — une police chargee pour rien ne casse rien, elle coute une requete
+   * et des octets sur chaque page. La feuille SERVIE en porte la trace : c est
+   * la qu on regarde, avec le contre-test d abord.
+   */
+  [/Inter/.test(css), "CONTRE-TEST : la famille Inter est bien declaree dans la feuille servie"],
+  [!/Jakarta/i.test(css), "Plus Jakarta Sans n est plus servie (Inter seule, design system)"],
 
   /*
    * --- LA TYPOGRAPHIE CHINOISE SURVIT AU BUILD ---
