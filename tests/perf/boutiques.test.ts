@@ -6,6 +6,7 @@ import {
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
+import { seriesConcordantes } from "../aide/series";
 
 /**
  * L'ÉCRAN DES BOUTIQUES — ce qui doit rester vrai À TOUT VOLUME.
@@ -90,30 +91,9 @@ async function mesurer(sql: string): Promise<Mesure> {
   return { ms: racine["Execution Time"], parRelation, opaque };
 }
 
-/** Rodage jeté, puis deux séries. Rend la PIRE — jamais la meilleure. */
+/** Rodage jeté, puis deux séries concordantes : voir `tests/aide/series.ts`. */
 async function mesurerSerieuse(sql: string): Promise<Mesure> {
-  /*
-   * ⚠️ DEUX RODAGES, ET NON UN. MESURÉ LE 31/08/2026.
-   *
-   * Un passage du banc a échoué sur sa PROPRE garde de discordance :
-   * « Séries discordantes : 18,5 ms puis 0,4 ms ». Le premier appel des deux
-   * séries payait encore un accès disque que le rodage unique n'avait pas
-   * absorbé — la seconde série, elle, rendait la vraie valeur.
-   *
-   * LA RÈGLE DU PROJET EST DE BORNER, PAS DE RELANCER JUSQU'AU VERT. On ne
-   * touche donc NI au seuil de discordance, NI aux assertions : le seul
-   * changement est un second rodage, jeté comme le premier. Ce qui est mesuré
-   * et ce qui est exigé restent identiques ; c'est la mise en condition qui
-   * était insuffisante.
-   *
-   * Si la discordance revient malgré cela, elle décrira autre chose qu'un cache
-   * froid — et il faudra le chercher là, pas ici.
-   */
-  await mesurer(sql);
-  await mesurer(sql); // second rodage, jeté lui aussi
-  const a = await mesurer(sql);
-  const b = await mesurer(sql);
-  return a.ms >= b.ms ? a : b;
+  return seriesConcordantes(() => mesurer(sql));
 }
 
 /**

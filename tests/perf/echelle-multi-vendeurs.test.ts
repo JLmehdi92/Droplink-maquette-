@@ -6,6 +6,7 @@ import {
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
+import { seriesConcordantes } from "../aide/series";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -124,37 +125,9 @@ async function mesurer(utilisateur: UtilisateurDeTest, sql: string): Promise<Mes
   }
 }
 
-/** Rodage JETÉ, puis deux séries CONCORDANTES, la pire retenue. */
+/** Rodage jeté, puis deux séries concordantes : voir `tests/aide/series.ts`. */
 async function mesurerSerieuse(utilisateur: UtilisateurDeTest, sql: string): Promise<Mesure> {
-  /*
-   * ⚠️ DEUX RODAGES, ET NON UN. MESURÉ LE 31/08/2026.
-   *
-   * Un passage du banc a échoué sur sa PROPRE garde de discordance :
-   * « Séries discordantes : 18,5 ms puis 0,4 ms ». Le premier appel des deux
-   * séries payait encore un accès disque que le rodage unique n'avait pas
-   * absorbé — la seconde série, elle, rendait la vraie valeur.
-   *
-   * LA RÈGLE DU PROJET EST DE BORNER, PAS DE RELANCER JUSQU'AU VERT. On ne
-   * touche donc NI au seuil de discordance, NI aux assertions : le seul
-   * changement est un second rodage, jeté comme le premier. Ce qui est mesuré
-   * et ce qui est exigé restent identiques ; c'est la mise en condition qui
-   * était insuffisante.
-   *
-   * Si la discordance revient malgré cela, elle décrira autre chose qu'un cache
-   * froid — et il faudra le chercher là, pas ici.
-   */
-  await mesurer(utilisateur, sql);
-  await mesurer(utilisateur, sql); // second rodage, jeté lui aussi
-  const a = await mesurer(utilisateur, sql);
-  const b = await mesurer(utilisateur, sql);
-  const ecart = Math.abs(a.ms - b.ms) / Math.max(a.ms, b.ms);
-  if (ecart > 0.6 && Math.max(a.ms, b.ms) > 10) {
-    throw new Error(
-      `Séries discordantes : ${a.ms.toFixed(1)} ms puis ${b.ms.toFixed(1)} ms ` +
-        `(${(ecart * 100).toFixed(0)} % d'écart). La mesure ne décrit rien de stable.`,
-    );
-  }
-  return a.ms >= b.ms ? a : b;
+  return seriesConcordantes(() => mesurer(utilisateur, sql));
 }
 
 /** Le semis d'un compte au plafond, étalé sur treize mois. */
@@ -617,6 +590,123 @@ describe("La recherche des boutiques est mesurée, et pas seulement la liste", (
         rows.map((r) => r.name),
         "« creme » ne trouve pas « Crème » : le repli d'accents ne replie rien",
       ).toContain("Crème Fraîche");
+    } finally {
+      await bd.query("rollback");
+    }
+  });
+});
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LES ÉCRANS ADMIN « COMMANDES » ET « STATISTIQUES » (migrations 159 à 161)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Ce sont les deux premiers écrans du produit qui lisent TOUTES les commandes
+ * de TOUS les vendeurs. Le banc à mille comptes est le seul terrain où leur
+ * coût se voit : 219 200 commandes.
+ *
+ * SEUILS ÉCRITS AVANT LA PREMIÈRE EXÉCUTION (14/09/2026) :
+ * - la LISTE doit coûter une page, pas une plateforme : 60 ms et moins de
+ *   mille lignes lues, comme une page vendeur, et par l'index partiel
+ *   `orders_plateforme_recentes_idx` — sans lui, trier la plateforme lirait la
+ *   table entière ;
+ * - les STATISTIQUES comptent la fenêtre entière par construction : 1 000 ms
+ *   par fonction, pour un écran qu'on ouvre quelques fois par jour.
+ *
+ * LES FONCTIONS SONT APPELÉES POUR DE VRAI, sous un rôle administrateur posé
+ * dans la transaction de mesure et annulé avec elle : garde, audit et corps
+ * compris. Leur plan, lui, est opaque (« Function Scan ») — il se lit sur la
+ * transcription du corps, dont le nombre de lignes est comparé à la fonction.
+ */
+const LISTE_ADMIN_MS = 60;
+const STATISTIQUES_MS = 1_000;
+
+async function mesurerEnAdmin(sql: string): Promise<Mesure & { lignes: number }> {
+  await bd.query("begin");
+  try {
+    await bd.query("update public.profiles set role = 'admin' where id = $1", [alice.profilId]);
+    await bd.query("set local role authenticated");
+    await bd.query(`set local request.jwt.claims = '{"sub":"${alice.userId}"}'`);
+    const debut = performance.now();
+    const { rowCount } = await bd.query(sql);
+    const ms = performance.now() - debut;
+    return { ms, plan: "", lignesLues: 0, lignes: rowCount ?? 0 };
+  } finally {
+    await bd.query("rollback");
+  }
+}
+
+describe("L'administration lit toute la plateforme sans la parcourir", () => {
+  test("la liste des commandes, première page : l'index partiel, pas la table", async () => {
+    const corps = `
+      select o.id, s.name, p.email, o.status, colis.carrier_code, o.created_at
+        from public.orders o
+        join public.shops s on s.id = o.shop_id
+        join public.profiles p on p.id = s.owner_id
+        left join lateral (
+          select tp.carrier_code from public.order_parcels op
+            join public.tracked_parcels tp on tp.id = op.parcel_id
+           where op.order_id = o.id order by tp.created_at desc, tp.id desc limit 1
+        ) colis on true
+       where o.first_content_at is not null
+       order by o.created_at desc, o.id desc
+       limit ${PAR_PAGE + 1}`;
+    // Le plan se lit en superutilisateur : la fonction est `security definer`,
+    // la RLS de l'appelant n'entre pas dans son corps.
+    const resultat = await bd.query<{ "QUERY PLAN": unknown[] }>(`explain (analyze, format json) ${corps}`);
+    const racine = (resultat.rows[0]?.["QUERY PLAN"] as Array<{ Plan: Record<string, unknown> }>)[0];
+    const plan = JSON.stringify(racine?.Plan);
+    let lignesOrders = 0;
+    const parcourir = (n: Record<string, unknown>): void => {
+      if (String(n["Relation Name"] ?? "") === "orders") {
+        lignesOrders += Number(n["Actual Rows"] ?? 0) * Number(n["Actual Loops"] ?? 1);
+      }
+      for (const e of (n["Plans"] as Record<string, unknown>[] | undefined) ?? []) parcourir(e);
+    };
+    if (racine !== undefined) parcourir(racine.Plan);
+    console.log(`  liste admin : ${lignesOrders} commandes lues`);
+    expect(plan, "le tri de la plateforme n'emprunte pas l'index partiel").toContain("orders_plateforme_recentes_idx");
+    expect(lignesOrders, "la première page lit plus qu'une page").toBeLessThan(LIGNES_LUES_MAX);
+
+    const m = await seriesConcordantes(() =>
+      mesurerEnAdmin("select * from public.lister_commandes_admin('', '', '', '', '', 51, '')"),
+    );
+    console.log(`  liste admin (fonction réelle, audit compris) : ${m.ms.toFixed(1)} ms, ${m.lignes} lignes`);
+    expect(m.lignes, "la fonction ne rend pas une page pleine : le jeu ne décrit rien").toBe(PAR_PAGE + 1);
+    expect(m.ms).toBeLessThan(LISTE_ADMIN_MS);
+  });
+
+  test("les quatre fonctions des statistiques, sur 30 et 90 jours", async () => {
+    for (const sql of [
+      "select * from public.statistiques_admin(30)",
+      "select * from public.statistiques_admin(90)",
+      "select * from public.statistiques_admin_par_jour(30)",
+      "select * from public.statistiques_admin_par_jour(90)",
+      "select * from public.transporteurs_admin(90)",
+      "select * from public.croissance_admin()",
+    ]) {
+      const m = await seriesConcordantes(() => mesurerEnAdmin(sql));
+      console.log(`  ${sql.replace("select * from public.", "")} : ${m.ms.toFixed(1)} ms`);
+      // LE JEU NE SÈME AUCUN COLIS SUIVI (voir l'en-tête : les ingestions réelles
+      // prendraient des heures) : les transporteurs n'ont rien à rendre, et
+      // leur mesure ne vaut que pour le temps. Les autres fonctions rendent
+      // toujours une ligne — une grille de jours ou de mois, des totaux.
+      if (!sql.includes("transporteurs_admin")) {
+        expect(m.lignes, `${sql} n'a rien rendu`).toBeGreaterThan(0);
+      }
+      expect(m.ms, `${sql} : ${m.ms.toFixed(1)} ms`).toBeLessThan(STATISTIQUES_MS);
+    }
+  });
+
+  test("CONTRE-TEST : les statistiques comptent bien le jeu semé", async () => {
+    // Un compteur à zéro passerait tous les seuils de temps.
+    await bd.query("begin");
+    try {
+      await bd.query("update public.profiles set role = 'admin' where id = $1", [alice.profilId]);
+      await bd.query("set local role authenticated");
+      await bd.query(`set local request.jwt.claims = '{"sub":"${alice.userId}"}'`);
+      const { rows } = await bd.query<{ commandes: string }>("select commandes from public.statistiques_admin(90)");
+      expect(Number(rows[0]?.commandes ?? 0)).toBeGreaterThanOrEqual(BOUTIQUES * COMMANDES_PAR_BOUTIQUE);
     } finally {
       await bd.query("rollback");
     }
