@@ -210,19 +210,11 @@
   --radius-full: 9999px;
 
   /*
-   * ----- Rayon de la CARTE-PAGE : deux valeurs, selon la surface ----------
-   * Relevé sur les 41 planches du canevas le 27/08/2026 : 15 disent 24, 6
-   * disent 28, et la coupure est nette — elle sépare le PUBLIC de
-   * l'AUTHENTIFIÉ. Le code rendait 28 partout parce qu'il suivait la prose de
-   * CLAUDE.md, qui annonçait une valeur unique ; la planche fait foi.
-   *
-   * Deux tokens nommés par leur RÔLE, et non par une taille abstraite : un
-   * `rounded-xl` partagé avait précisément produit ce défaut, en laissant
-   * croire qu'un seul rayon suffisait. Les cartes INTERNES gardent leur propre
-   * échelle et ne sont pas touchées ici.
+   * ⚠️ `--radius-page` ET `--radius-page-publique` ONT ÉTÉ RETIRÉS LE 14/09/2026.
+   * Ils portaient le rayon de la carte-page de l'ancien canevas — 24 derrière
+   * session, 28 en public. Le design system abolit la carte-page (« aucun
+   * cadre ») et le blog et le signalement portaient les deux dernières.
    */
-  --radius-page: 24px;
-  --radius-page-publique: 28px;
 
   /* ----- Espacements nommés ----------------------------------------------- */
   --spacing-base: 8px;

@@ -7,7 +7,6 @@
   "navigation": {
     "seConnecter": "Se connecter",
     "allerAuContenu": "Aller au contenu",
-    "retourAccueil": "Retour à l'accueil",
     "mesCommandes": "Commandes",
     "maMarque": "Ma marque",
     "espaceVendeur": "Espace vendeur",
@@ -114,7 +113,7 @@
     "confidentialiteTitre": "Politique de confidentialité",
     "confidentialiteChapeau": "ce que nous collectons, pourquoi, et pendant combien de temps.",
     "signalementTitre": "Signaler un contenu",
-    "signalementSurTitre": "NOTIFICATION ET RETRAIT",
+    "signalementSurTitre": "Notification et retrait",
     "misAJourLe": "Dernière mise à jour",
     "avertissementTitre": "Texte à faire rédiger et valider par un avocat avant toute ouverture publique.",
     "avertissementTexte": "Ce qui suit décrit la structure attendue, pas un texte juridique définitif.",

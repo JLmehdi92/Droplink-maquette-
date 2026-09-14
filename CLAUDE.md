@@ -347,12 +347,14 @@ confidentialité · les deux pages d'erreur de lien (expiré, introuvable).
 
 **Écrans du dépôt que le design system ne dessine pas** — ils gardent leur
 habillage actuel jusqu'à ce qu'ils soient dessinés, et on le dit plutôt que
-d'improviser : `/blog` et `/blog/[slug]` · `/signalement` · l'arbitrage QC de la
-page client. **`/mot-de-passe-oublie`, `/nouveau-mot-de-passe` et `/bienvenue` en
-sont sortis le 14/09/2026** : écrits dans le kit `auth` (`ForgotScreen`,
-`ResetScreen`, `OnboardingScreen`, hash `#mot-de-passe-oublie`,
-`#nouveau-mot-de-passe`, `#bienvenue`), puis portés — ils portaient encore
-l'ancien canevas à un clic d'une connexion migrée.
+d'improviser : l'arbitrage QC de la page client. **Tous les autres en sont sortis
+le 14/09/2026**, écrits d'abord dans le kit puis portés — ils portaient encore
+l'ancien canevas à un clic d'écrans migrés : `/mot-de-passe-oublie`,
+`/nouveau-mot-de-passe` et `/bienvenue` dans `ui_kits/auth` (`ForgotScreen`,
+`ResetScreen`, `OnboardingScreen`), `/signalement` dans `ui_kits/legal`
+(`signalement.html`, trois langues), `/blog` et `/blog/[slug]` dans le nouveau
+`ui_kits/blog` (français seul, `#<slug>` pour un article). ⚠️ **Le design system
+est gitignoré : ces planches ne voyagent pas avec le dépôt.**
 
 **Écrans dessinés que le dépôt n'avait pas, et qui sont créés** : le tableau de
 bord, les paramètres vendeur, `/docs`, et dans l'administration **Commandes** et
@@ -625,9 +627,9 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**VINGT-CINQ ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+**VINGT-HUIT ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
 tableau de bord, les paramètres et la vérification en deux étapes créés, les sept que le kit admin dessine et que la contrainte n° 1 autorise, la page client et son
-lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot de passe et l'onboarding, les deux pages légales et la documentation :
+lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot de passe et l'onboarding, les deux pages légales, le signalement, le blog et ses articles, et la documentation :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -656,6 +658,9 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 | `/mot-de-passe-oublie` | `auth/index.html#mot-de-passe-oublie` à **1440** | 0 (0) | 0 (0) | **0** |
 | `/nouveau-mot-de-passe` | `auth/index.html#nouveau-mot-de-passe` à 1440, `RECUPERATION=1` | 1 (0) | 1 (0) | **0** |
 | `/bienvenue` | `auth/index.html#bienvenue` à 1440, `ONBOARDING=1` | 0 (0) | 0 (0) | **0** |
+| `/signalement` | `legal/signalement.html` à 1280 | 0 (0) | 0 (0) | **0** |
+| `/blog` | `blog/index.html` à 1280 | 0 (0) | 0 (0) | **0** |
+| `/blog/[slug]` | `blog/index.html#envoyer-photos-client-sans-lien-qui-expire` à 1280 | 0 (0) | 0 (0) | **0** |
 
 > ⚠️ **`/nouveau-mot-de-passe` NE S'OUVRE QU'À UNE SESSION DE RÉCUPÉRATION** — sa
 > méthode doit être `otp`. `RECUPERATION=1` fait ouvrir à la sonde un VRAI lien
@@ -667,8 +672,11 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 
 > ⚠️ **LA GARDE DU RAYON DE CARTE-PAGE NE BALAYAIT QUE `src/app`.** Elle annonçait
 > « il n'en reste qu'une, l'onboarding » pendant que `components/coque-publique.tsx`
-> en posait une pour le blog et le signalement. Elle balaie `src` depuis le
-> 14/09/2026 ; ce sont les deux derniers écrans sur l'ancien canevas.
+> en posait une pour le blog et le signalement. Elle a balayé `src` le
+> 14/09/2026, puis a été SUPPRIMÉE le même jour avec les jetons `--radius-page`
+> et `--radius-page-publique` et leurs cinq contrôles de fumée, comme elle le
+> demandait elle-même : le blog et le signalement portaient les deux dernières
+> cartes-pages du dépôt.
 
 > ⚠️ **`/docs` AVAIT ÉTÉ « PORTÉ » LE 12/09 SANS AVOIR JAMAIS ÉTÉ SOUSTRAIT.** Au
 > premier relevé : **108 écarts de valeur** — titres à 26 contre 28, marges de 38

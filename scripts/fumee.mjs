@@ -5337,30 +5337,11 @@ controles.push([
   "un element visuellement masque n est pas une cible tactile de 44 px",
 ]);
 
-const valeur = (nom) => /:\s*(\d+)px/.exec(new RegExp(`--radius-${nom}\s*:\s*[^;]+;`).exec(css)?.[0] ?? "")?.[1];
-const rayonAuth = valeur("page");
-const rayonPublic = valeur("page-publique");
-
+// ⚠️ LES CINQ CONTROLES DU RAYON DE CARTE-PAGE (24 authentifie, 28 public) ONT
+// ETE RETIRES LE 14/09/2026 : le design system abolit la carte-page, et le blog
+// et le signalement portaient les deux dernieres. Leurs jetons sont sortis de
+// globals.css dans le meme geste.
 controles.push(
-  [rayonAuth === "24", `carte-page authentifiee servie a 24px (lu : ${rayonAuth ?? "AUCUNE VALEUR"})`],
-  [rayonPublic === "28", `carte-page publique servie a 28px (lu : ${rayonPublic ?? "AUCUNE VALEUR"})`],
-  // LES DEUX SENS : si quelqu un ramene une valeur unique, les deux tokens
-  // resteraient definis et les deux controles ci-dessus pourraient rester verts
-  // sur la mauvaise moitie. Ce qui distingue les surfaces, c est l ECART.
-  [
-    rayonAuth !== undefined && rayonAuth !== rayonPublic,
-    "les deux surfaces ne partagent PAS le meme rayon",
-  ],
-  // Et la classe doit exister ET referencer le token : une variable definie que
-  // personne n utilise laisse le coin carre tout aussi silencieusement.
-  [
-    /rounded-page\{border-radius:var\(--radius-page\)\}/.test(css),
-    "la classe du rayon authentifie existe et pointe sur son token",
-  ],
-  [
-    /rounded-page-publique\{border-radius:var\(--radius-page-publique\)\}/.test(css),
-    "la classe du rayon public existe et pointe sur son token",
-  ],
 
   /*
    * --- LA TYPOGRAPHIE CHINOISE SURVIT AU BUILD ---

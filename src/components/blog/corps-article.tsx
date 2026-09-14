@@ -11,13 +11,12 @@ import type { Bloc } from "@/lib/blog/types";
  *
  * ⚠️ AUCUN HTML BRUT NE TRAVERSE CE CHEMIN. Le texte des blocs est du texte,
  * rendu par React, donc échappé. Un article ne peut pas injecter de balise,
- * même par accident — ce qui vaut aussi le jour où un article sera écrit par
- * quelqu'un d'autre que celui qui a écrit ce composant.
+ * même par accident.
  *
- * Les valeurs viennent des planches `BlogArticle` et `BlogArticleMobile`,
- * mesurées dans un navigateur : corps 16/28 en téléphone et 17/30 en bureau —
- * un cran au-dessus des pages légales (15/25), parce qu'un article se lit en
- * entier et non en diagonale.
+ * Les valeurs sont celles de `blog/index.html#<slug>` du design system, écrit
+ * le 14/09/2026 : corps 17/1,75 au bureau — un cran au-dessus des pages légales
+ * (15,5/1,7), parce qu'un article se lit en entier et non en diagonale —,
+ * intertitres au 28/800 des pages légales, citation sur la teinte violette.
  */
 export function CorpsArticle({ blocs }: { blocs: readonly Bloc[] }) {
   return (
@@ -30,10 +29,7 @@ export function CorpsArticle({ blocs }: { blocs: readonly Bloc[] }) {
         switch (bloc.type) {
           case "chapeau":
             return (
-              <p
-                key={cle}
-                className="mb-1.5 font-body-lg text-[17px] leading-[29px] text-[#2c2d33] md:text-[19px] md:leading-8"
-              >
+              <p key={cle} className="mb-2 text-[17px] leading-[1.65] text-pretty text-ds-texte-fort md:text-[19px]">
                 {bloc.texte}
               </p>
             );
@@ -42,7 +38,7 @@ export function CorpsArticle({ blocs }: { blocs: readonly Bloc[] }) {
             return (
               <h2
                 key={cle}
-                className="mt-[34px] mb-3 font-headline-md text-[21px] leading-[27px] font-bold tracking-[-0.02em] text-on-surface md:mt-11 md:mb-3.5 md:text-[26px] md:leading-8"
+                className="mt-9 mb-3.5 text-[22px] leading-[1.15] font-extrabold tracking-[-0.035em] text-balance text-ds-texte-fort md:mt-11 md:text-[28px]"
               >
                 {bloc.texte}
               </h2>
@@ -50,10 +46,7 @@ export function CorpsArticle({ blocs }: { blocs: readonly Bloc[] }) {
 
           case "paragraphe":
             return (
-              <p
-                key={cle}
-                className="mb-4 font-body-lg text-[16px] leading-7 text-ardoise md:mb-[18px] md:text-[17px] md:leading-[30px]"
-              >
+              <p key={cle} className="mb-[18px] text-[16px] leading-[1.75] text-pretty text-ds-texte-corps md:text-[17px]">
                 {bloc.texte}
               </p>
             );
@@ -62,25 +55,23 @@ export function CorpsArticle({ blocs }: { blocs: readonly Bloc[] }) {
             return (
               <div
                 key={cle}
-                className="my-[22px] rounded-r-xl border-l-[3px] border-violet bg-[#fafafc] px-[18px] py-4 md:my-[26px] md:px-6 md:py-5"
+                className="my-[26px] rounded-r-ds-lg border-l-[3px] border-ds-accent bg-ds-surface-teinte px-[22px] py-[18px]"
               >
-                <p className="font-body-lg text-[16px] leading-7 text-[#2c2d33] md:text-[17px] md:leading-[30px]">
-                  {bloc.texte}
-                </p>
+                <p className="text-[16px] leading-[1.75] text-ds-texte-fort md:text-[17px]">{bloc.texte}</p>
               </div>
             );
 
           case "liste":
             return (
-              <ul key={cle} className="mb-4 md:mb-[18px]">
+              <ul key={cle} className="mb-[18px] flex flex-col gap-2.5">
                 {bloc.items.map((item, j) => (
                   <li
                     key={`${cle}-${j}`}
-                    className="mb-2.5 flex gap-3 font-body-lg text-[16px] leading-7 text-ardoise md:text-[17px] md:leading-[30px]"
+                    className="flex gap-3 text-[16px] leading-[1.75] text-ds-texte-corps md:text-[17px]"
                   >
                     {/* La puce est décorative : elle ne porte aucune
                         information que le texte ne porte pas déjà. */}
-                    <span aria-hidden="true" className="mt-[11px] size-1.5 shrink-0 rounded-full bg-violet" />
+                    <span aria-hidden="true" className="mt-3 size-1.5 shrink-0 rounded-ds-pill bg-ds-accent" />
                     <span>{item}</span>
                   </li>
                 ))}

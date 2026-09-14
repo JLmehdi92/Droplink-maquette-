@@ -7,7 +7,6 @@
   "navigation": {
     "seConnecter": "Log in",
     "allerAuContenu": "Skip to content",
-    "retourAccueil": "Back to home",
     "mesCommandes": "Orders",
     "maMarque": "My brand",
     "espaceVendeur": "Seller area",
@@ -114,7 +113,7 @@
     "confidentialiteTitre": "Privacy policy",
     "confidentialiteChapeau": "what we collect, why, and for how long.",
     "signalementTitre": "Report content",
-    "signalementSurTitre": "NOTICE AND TAKEDOWN",
+    "signalementSurTitre": "Notice and takedown",
     "misAJourLe": "Last updated",
     "avertissementTitre": "This text must be drafted and reviewed by a lawyer before any public launch.",
     "avertissementTexte": "What follows describes the intended structure, not a final legal text.",

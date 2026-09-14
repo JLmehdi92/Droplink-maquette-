@@ -2,44 +2,57 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Icone } from "./icone";
+import { ChevronDown, Flag, Link as IconeLien, Mail } from "lucide-react";
+import { BoutonPrincipalDs, CLASSE_LIBELLE_DS, ChampAcces } from "@/components/acces-champs";
 
 /**
- * LE FORMULAIRE DE SIGNALEMENT, porté sur ses deux planches.
+ * LE FORMULAIRE DE SIGNALEMENT — la carte de droite de `legal/signalement.html`,
+ * dans le vocabulaire des champs d'accès : boîtes de 56 au rayon 16, icône à
+ * gauche, bouton pleine largeur au DÉGRADÉ DE MARQUE, la seule action
+ * principale de l'écran.
  *
- * ⚠️ ÉCART ASSUMÉ, ET LA RAISON COMPTE. La planche montre un formulaire qui
- * s'envoie tout seul et promet un accusé de réception. Nous n'avons AUCUN point
- * de réception : pas de route, pas de table, pas d'envoi d'email — Resend n'est
- * même pas installé. Publier le même formulaire branché sur rien produirait la
- * pire défaillance possible pour cette page précise : un signalement que son
- * auteur croit déposé, que personne ne reçoit, et dont l'absence de réponse se
- * lira comme un refus. C'est aussi la capacité technique qui fonde notre statut
- * d'hébergeur.
+ * ⚠️ ÉCART ASSUMÉ, ET LA RAISON COMPTE. Un formulaire qui s'envoie tout seul et
+ * promet un accusé de réception supposerait un point de réception. Nous n'en
+ * avons AUCUN : pas de route, pas de table, pas d'envoi d'email. Publier ce
+ * formulaire branché sur rien produirait la pire défaillance possible pour cette
+ * page précise : un signalement que son auteur croit déposé, que personne ne
+ * reçoit, et dont l'absence de réponse se lira comme un refus. C'est aussi la
+ * capacité technique qui fonde notre statut d'hébergeur.
  *
  * Le bouton compose donc un message dans la messagerie du visiteur, avec tout le
  * contenu déjà rempli. Rien n'est affirmé qui ne se soit produit : le libellé dit
  * « préparer », la phrase sous le bouton dit que rien ne part tant qu'on ne
  * l'envoie pas soi-même, et l'adresse reste visible en clair pour qui n'a pas de
- * client de messagerie configuré. La promesse d'accusé de réception de la
- * planche est remplacée par cette phrase-là, pas supprimée en silence.
- *
- * LA GÉOMÉTRIE, ELLE, EST CELLE DE LA PLANCHE : carte #fafafc rayon 22 padding
- * 34 au bureau (20 et 22 au téléphone), champs de 50 px au rayon 13, libellés de
- * 13 px en gras, et le bouton pleine largeur au DÉGRADÉ DE MARQUE — c'est une
- * surface DropLink, la seule action principale de l'écran.
+ * client de messagerie configuré.
  */
+
+/*
+ * LES CLÉS SONT ÉCRITES EN TOUTES LETTRES : l'inventaire des chaînes mortes lit
+ * les appels du code, et une clé composée à l'exécution lui échappe.
+ */
+const CATEGORIES = [
+  ["droits", "signalement.cat_droits"],
+  ["illicite", "signalement.cat_illicite"],
+  ["donnees", "signalement.cat_donnees"],
+  ["autre", "signalement.cat_autre"],
+] as const;
+
+/** La boîte d'un champ d'accès, pour les deux contrôles que `ChampAcces` ne rend pas. */
+const BOITE =
+  "rounded-ds-card border border-ds-filet-appuye bg-ds-surface-carte transition-colors " +
+  "focus-within:border-ds-filet-focus focus-within:shadow-[var(--anneau-ds-focus)]";
+
 export function FormulaireSignalement({ adresse }: { readonly adresse: string }) {
   const t = useTranslations("legal");
 
   const [lien, setLien] = useState("");
-  const [categorie, setCategorie] = useState("droits");
+  const [categorie, setCategorie] = useState<(typeof CATEGORIES)[number][0]>("droits");
   const [description, setDescription] = useState("");
   const [email, setEmail] = useState("");
 
-  const CATEGORIES = ["droits", "illicite", "donnees", "autre"] as const;
-
   const composer = (): string => {
-    const libelleCategorie = t(`signalement.cat_${categorie}`);
+    const cle = CATEGORIES.find(([c]) => c === categorie)?.[1] ?? "signalement.cat_autre";
+    const libelleCategorie = t(cle);
 
     const corps = [
       `${t("signalement.lien")} : ${lien}`,
@@ -54,107 +67,91 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
     return `mailto:${adresse}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
   };
 
-  const libelle = "mb-2 block font-headline-md text-[13px] leading-4 font-bold text-ardoise";
-  const champ =
-    "w-full rounded-[13px] border border-filet-controle bg-[#fafafc] px-[15px] font-body-md text-[15px] text-on-surface placeholder:text-gris-inactif";
-  const hauteur = "h-[50px]";
-
   return (
     <form
-      className="self-start rounded-[20px] border border-outline-variant bg-[#fafafc] p-[22px] md:rounded-[22px] md:p-[34px]"
+      className="flex flex-col gap-5 rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-10 md:py-9"
       onSubmit={(evenement) => {
         evenement.preventDefault();
         window.location.href = composer();
       }}
     >
-      <label className={libelle} htmlFor="lien">
-        {t("signalement.lien")}
-      </label>
-      <input
+      <ChampAcces
         id="lien"
-        name="lien"
+        nom="lien"
         type="url"
-        required
-        value={lien}
-        onChange={(e) => setLien(e.target.value)}
+        libelle={t("signalement.lien")}
+        icone={IconeLien}
         placeholder={t("signalement.lienExemple")}
-        className={`${champ} ${hauteur}`}
+        valeur={lien}
+        surChangement={setLien}
       />
 
-      <div className="h-5" />
-
-      <label className={libelle} htmlFor="motif">
-        {t("signalement.categorie")}
+      <label htmlFor="motif" className="block">
+        <span className={`mb-2 block ${CLASSE_LIBELLE_DS}`}>{t("signalement.categorie")}</span>
+        <span className={`flex h-14 items-center gap-3 px-[18px] ${BOITE}`}>
+          <Flag aria-hidden="true" size={18} strokeWidth={1.8} className="shrink-0 text-ds-texte-sourdine" />
+          <select
+            id="motif"
+            name="motif"
+            value={categorie}
+            onChange={(e) => {
+              const choisie = CATEGORIES.find(([c]) => c === e.target.value);
+              if (choisie !== undefined) setCategorie(choisie[0]);
+            }}
+            className="h-full min-w-0 flex-1 cursor-pointer appearance-none border-none bg-transparent text-[15px] text-ds-texte-fort outline-none"
+          >
+            {CATEGORIES.map(([c, cle]) => (
+              <option key={c} value={c}>
+                {t(cle)}
+              </option>
+            ))}
+          </select>
+          <ChevronDown aria-hidden="true" size={18} strokeWidth={1.8} className="shrink-0 text-ds-texte-sourdine" />
+        </span>
       </label>
-      <select
-        id="motif"
-        name="motif"
-        value={categorie}
-        onChange={(e) => setCategorie(e.target.value)}
-        className={`${champ} ${hauteur} cursor-pointer`}
-      >
-        {CATEGORIES.map((c) => (
-          <option key={c} value={c}>
-            {t(`signalement.cat_${c}`)}
-          </option>
-        ))}
-      </select>
 
-      <div className="h-5" />
-
-      <label className={libelle} htmlFor="description">
-        {t("signalement.description")}
+      <label htmlFor="description" className="block">
+        <span className={`mb-2 block ${CLASSE_LIBELLE_DS}`}>{t("signalement.description")}</span>
+        <textarea
+          id="description"
+          name="description"
+          required
+          rows={4}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("signalement.descriptionExemple")}
+          className={`block h-[132px] w-full resize-none px-[18px] py-[15px] text-[15px] leading-[1.55] text-ds-texte-fort outline-none placeholder:text-ds-texte-tenu ${BOITE}`}
+        />
       </label>
-      <textarea
-        id="description"
-        name="description"
-        required
-        rows={4}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder={t("signalement.descriptionExemple")}
-        className={`${champ} h-28 resize-none py-[13px] leading-[23px] md:h-32`}
-      />
 
-      <div className="h-5" />
-
-      <label className={libelle} htmlFor="email">
-        {t("signalement.email")}
-      </label>
-      <input
+      <ChampAcces
         id="email"
-        name="email"
+        nom="email"
         type="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        libelle={t("signalement.email")}
+        icone={Mail}
         placeholder={t("signalement.emailExemple")}
-        className={`${champ} ${hauteur}`}
+        autoComplete="email"
+        valeur={email}
+        surChangement={setEmail}
       />
 
-      <div className="h-6" />
+      <div className="mt-1">
+        <BoutonPrincipalDs libelle={t("signalement.envoyer")} libelleEnCours={t("signalement.envoyer")} />
+      </div>
 
-      <button
-        type="submit"
-        className="inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 degrade-marque rounded-[13px] font-headline-md text-[15px] font-bold text-white shadow-[0_10px_24px_-10px_rgba(124,92,245,0.6)] transition-opacity hover:opacity-95"
-      >
-        {t("signalement.envoyer")}
-        <Icone nom="arrow_forward" className="text-[15px]" />
-      </button>
-
-      {/* CE QUE LE BOUTON FAIT VRAIMENT, dit sous le bouton. La planche promet
-          ici un accusé de réception ; nous n'en envoyons aucun, et annoncer un
-          accusé qui n'arrivera jamais est précisément ce qui ferait recommencer
-          un signalement — ou renoncer. */}
-      <p className="mt-3.5 text-center font-body-sm text-[12px] leading-[19px] text-sourdine">
-        {t("signalement.ouvreMessagerie")}
-      </p>
-      <p className="mt-1.5 text-center font-body-sm text-[12px] leading-[19px] text-sourdine">
-        {t("signalement.adresseDirecte")}{" "}
-        <a href={`mailto:${adresse}`} className="font-semibold text-violet">
-          {adresse}
-        </a>
-      </p>
+      {/* CE QUE LE BOUTON FAIT VRAIMENT, dit sous le bouton. Annoncer un accusé de
+          réception qui n'arrivera jamais est précisément ce qui ferait
+          recommencer un signalement — ou renoncer. */}
+      <div className="flex flex-col gap-1.5 text-center">
+        <p className="text-[12.5px] leading-[1.55] text-ds-texte-sourdine">{t("signalement.ouvreMessagerie")}</p>
+        <p className="text-[12.5px] leading-[1.55] text-ds-texte-sourdine">
+          {t("signalement.adresseDirecte")}{" "}
+          <a href={`mailto:${adresse}`} className="font-semibold text-ds-texte-lien hover:text-ds-accent-encre">
+            {adresse}
+          </a>
+        </p>
+      </div>
     </form>
   );
 }

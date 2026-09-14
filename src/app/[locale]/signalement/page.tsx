@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { Flag, Info } from "lucide-react";
 import { CoquePublique } from "@/components/coque-publique";
 import { FormulaireSignalement } from "@/components/formulaire-signalement";
 import { TraductionsClient } from "@/components/traductions-client";
-import { Icone } from "@/components/icone";
 import { adresseAbus } from "@/lib/contact";
 import { routing } from "@/i18n/routing";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
@@ -35,14 +34,16 @@ export async function generateMetadata({
 }
 
 /**
- * LA PAGE DE SIGNALEMENT, portée sur ses deux planches.
+ * LA PAGE DE SIGNALEMENT — `legal/signalement.html` du design system, écrite le
+ * 14/09/2026 avant ce fichier.
  *
- * Deux colonnes égales au bureau, écartées de 80 : à gauche le sur-titre, le
- * titre, l'intention et les TROIS ÉTAPES numérotées ; à droite le formulaire
- * dans sa carte grise. Au téléphone, tout s'empile dans le même ordre — la
- * planche mobile met l'avertissement APRÈS le formulaire, là où le bureau le met
- * avant : au téléphone, le remonter repousserait le formulaire sous la ligne de
- * flottaison.
+ * Au bureau, deux colonnes : à gauche la pastille, le titre, l'intention, les
+ * TROIS ÉTAPES et l'avertissement ; à droite le formulaire dans sa carte. Au
+ * téléphone tout s'empile, et l'avertissement passe APRÈS le formulaire : le
+ * remonter repousserait le formulaire sous la ligne de flottaison.
+ *
+ * Les étapes portent des pastilles TEINTÉES, pas le dégradé : il est réservé au
+ * bouton du formulaire, la seule action principale de l'écran.
  *
  * ELLE N'EXISTE PAS tant qu'aucune adresse de contact n'est configurée. Ce n'est
  * pas une dégradation, c'est le comportement voulu : publier une procédure de
@@ -74,76 +75,61 @@ export default async function Signalement({
   const avertissement = (
     <aside
       role="note"
-      className="flex gap-[11px] rounded-[14px] border border-outline-variant bg-[#fafafc] px-4 py-[15px] md:gap-3 md:px-[18px] md:py-4"
+      className="flex gap-[13px] rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte px-[18px] py-4"
     >
-      <Icone nom="error" className="mt-0.5 shrink-0 text-[17px] text-sourdine" />
-      <p className="font-body-sm text-[13px] leading-[21px] text-sourdine">
-        {t("signalement.avertissement")}
-      </p>
+      <Info aria-hidden="true" size={18} strokeWidth={2} className="mt-px shrink-0 text-ds-texte-sourdine" />
+      <p className="text-[14px] leading-[1.6] text-ds-texte-corps">{t("signalement.avertissement")}</p>
     </aside>
   );
 
   return (
-    <CoquePublique
-      locale={locale}
-      action={
-        <Link
-          href={`/${locale}/conditions`}
-          /* LA CIBLE MONTE A 44 px PAR UN REMPLISSAGE COMPENSE : ce lien vit
-             SEUL dans l en-tete, il n est pas en ligne dans une prose, donc
-             l exception de la regle 5 ne le couvre pas. Mesure a 390 : 69 x 16. */
-          className="-my-3.5 inline-flex min-h-11 items-center py-3.5 text-[13px] leading-4 font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort md:text-[14px]"
-        >
-          {t("piedConditions")}
-        </Link>
-      }
-    >
-      <div className="grid grid-cols-1 gap-8 px-5 pt-7 pb-8 md:grid-cols-2 md:gap-20 md:px-[88px] md:py-[52px]">
-        <div>
-          <p className="mb-2.5 text-[11.5px] leading-[15px] font-bold tracking-[0.09em] text-ds-texte-sourdine md:mb-3">
+    <CoquePublique locale={locale} pastille={t("pastille")} enteteSecondaire>
+      <main
+        id="contenu"
+        className="mx-auto grid w-full max-w-[1240px] flex-1 grid-cols-[minmax(0,1fr)] items-start gap-8 px-4 pt-6 pb-12 min-[980px]:grid-cols-[minmax(0,1fr)_minmax(0,520px)] min-[980px]:gap-16 min-[980px]:px-[34px] min-[980px]:pt-12 min-[980px]:pb-20"
+      >
+        <div className="min-w-0">
+          <span className="inline-flex items-center gap-2 rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-3.5 py-[7px] text-[12.5px] font-bold text-ds-accent-encre">
+            <Flag aria-hidden="true" size={14} strokeWidth={2} />
             {t("signalementSurTitre")}
-          </p>
-          <h1 className="mb-3 font-headline-xl text-[32px] leading-[37px] font-extrabold tracking-[-0.035em] text-on-surface md:mb-4 md:text-[42px] md:leading-[48px]">
+          </span>
+          <h1 className="mt-5 text-[27px] leading-[1.06] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort sm:text-[32px] md:text-[44px]">
             {t("signalementTitre")}
           </h1>
-          <p className="mb-7 font-body-md text-[15px] leading-[25px] text-sourdine md:mb-9 md:text-[16px] md:leading-[26px]">
+          <p className="mt-[18px] text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps">
             {t("signalement.intro")}
           </p>
 
           {/* LES TROIS ÉTAPES DISENT CE QUI SE PASSE APRÈS L'ENVOI. Sans elles,
               un signalement part dans le silence — et c'est ce silence qui fait
               recommencer, ou renoncer. */}
-          <ol className="flex flex-col gap-5 md:gap-[22px]">
+          <ol className="mt-[30px] flex flex-col gap-[18px]">
             {etapes.map((e, i) => (
-              <li key={e.titre} className="flex items-start gap-3 md:gap-3.5">
+              <li key={e.titre} className="flex gap-3.5">
                 <span
                   aria-hidden="true"
-                  className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-violet-fond font-headline-md text-[12px] font-extrabold text-violet md:h-7 md:w-7 md:text-[13px]"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte text-[13px] font-extrabold text-ds-accent-encre"
                 >
                   {i + 1}
                 </span>
-                <div className="min-w-0">
-                  <p className="font-headline-md text-[15px] leading-[19px] font-bold text-on-surface">
-                    {e.titre}
-                  </p>
-                  <p className="mt-1 font-body-sm text-[14px] leading-[22px] text-sourdine">
-                    {e.texte}
-                  </p>
+                <div className="min-w-0 pt-1">
+                  <p className="text-[15.5px] font-bold text-ds-texte-fort">{e.titre}</p>
+                  <p className="mt-[3px] text-[14.5px] leading-[1.6] text-ds-texte-corps">{e.texte}</p>
                 </div>
               </li>
             ))}
           </ol>
 
-          <div className="mt-[34px] hidden md:block">{avertissement}</div>
+          <div className="mt-[30px] hidden min-[980px]:block">{avertissement}</div>
         </div>
 
         <TraductionsClient espaces={["legal"]}>
           <div className="flex flex-col gap-[18px]">
             <FormulaireSignalement adresse={adresse} />
-            <div className="md:hidden">{avertissement}</div>
+            <div className="min-[980px]:hidden">{avertissement}</div>
           </div>
         </TraductionsClient>
-      </div>
+      </main>
     </CoquePublique>
   );
 }

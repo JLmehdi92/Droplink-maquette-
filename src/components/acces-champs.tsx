@@ -72,7 +72,7 @@ export function ChampAcces({
 }: {
   readonly id: string;
   readonly nom: string;
-  readonly type?: "text" | "email" | "password";
+  readonly type?: "text" | "email" | "password" | "url";
   readonly libelle: string;
   readonly icone: LucideIcon;
   readonly placeholder?: string;

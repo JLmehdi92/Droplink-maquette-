@@ -5737,5 +5737,19 @@
         "raison": "POSITION VERTICALE SEULE, ET LE MEME DECALAGE PARTOUT (-5 a -6 px sur les deux colonnes) : la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, et les deux colonnes sont CENTREES verticalement dans l espace qui reste sous l en-tete — 10 px de moins, 5 px plus haut. L en-tete, lui, est a la meme place au pixel (logo en 56,40, etape en 1305,58). Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, ecrite dans le kit le 14/09/2026 avant le produit."
       }
     ]
+  },
+  "fr-signalement": {
+    "valeurs": [
+      {
+        "textes": [
+          "Conditions",
+          "Confidentialité",
+          "Signaler un contenu [2/2]",
+          "© 2025 DropLink. Tous droits réservés."
+        ],
+        "motif": "structure",
+        "raison": "LE PIED SEUL, ET 10 PX VERS LE HAUT : la page est moins haute que la fenetre, donc le pied se pose en bas de celle-ci — 1000 px pour la sonde du produit contre 1010 pour le kit. Tout ce qui est au-dessus du pied est a la meme place au pixel."
+      }
+    ]
   }
 }

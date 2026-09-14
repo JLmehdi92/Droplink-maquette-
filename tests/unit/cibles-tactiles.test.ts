@@ -282,8 +282,10 @@ const AUTONOMES: ReadonlyArray<{
 }> = [
   {
     fichier: "src/components/coque-publique.tsx",
-    repere: "text-[17px] leading-[22px] font-extrabold",
-    raison: "Le logo d'en-tête : seul dans sa barre, il ramène à l'accueil. 22 px mesurés.",
+    repere: 'className="inline-flex min-h-11 items-center md:min-h-0"',
+    raison:
+      "Le logo d'en-tête du signalement et du blog, porté sur le design system le " +
+      "14/09/2026 : une IMAGE de 30 px, portée à 44 par son plancher au téléphone.",
   },
   {
     fichier: "src/app/[locale]/connexion/page.tsx",
@@ -320,19 +322,26 @@ const AUTONOMES: ReadonlyArray<{
       "le logo d'en-tête, lui, vit désormais dans la coque partagée.",
   },
   {
-    fichier: "src/app/[locale]/blog/page.tsx",
-    repere: "font-semibold text-ardoise transition-colors hover:text-on-surface",
-    raison: "« Découvrir DropLink », l'action d'en-tête de l'index du blog.",
+    fichier: "src/app/[locale]/blog/[slug]/page.tsx",
+    repere: "gap-2 text-[14px] font-semibold text-ds-texte-corps",
+    raison:
+      "« Le blog », le retour en tête de l'article. Les actions d'en-tête propres " +
+      "à chaque page (« Découvrir DropLink », « Le blog ») ont disparu le 14/09/2026 " +
+      "avec la coque de l'ancien canevas : l'en-tête est désormais partagé.",
+  },
+  {
+    fichier: "src/components/coque-publique.tsx",
+    repere: "text-[14.5px] font-medium text-ds-texte-corps",
+    raison:
+      "« Documentation » et « Accueil », l'en-tête partagé du signalement et du " +
+      "blog : 44 px au téléphone, la hauteur du texte au bureau, comme au kit.",
   },
   {
     fichier: "src/app/[locale]/blog/[slug]/page.tsx",
-    repere: "font-semibold text-ardoise transition-colors hover:text-on-surface",
-    raison: "« Le blog », l'action d'en-tête d'un article.",
-  },
-  {
-    fichier: "src/app/[locale]/blog/[slug]/page.tsx",
-    repere: "font-semibold text-sourdine transition-colors hover:text-violet",
-    raison: "« ← Le blog », le retour en tête du corps de l'article.",
+    repere: "degrade-ds-marque inline-flex h-[52px]",
+    raison:
+      "« Créer ma première commande », l'appel de fin d'article : 52 px dessinés, " +
+      "et le plancher posé quand même pour qu'une retouche de hauteur ne passe pas sous 44.",
   },
   {
     fichier: "src/components/page-legale.tsx",

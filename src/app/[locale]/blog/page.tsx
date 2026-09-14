@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { BookOpen } from "lucide-react";
 import { CoquePublique } from "@/components/coque-publique";
+import { MetaArticle } from "@/components/blog/meta-article";
 import { estLangueDuBlog, LANGUE_DU_BLOG, tousLesArticles } from "@/lib/blog/articles";
 import { alternatesUneSeuleLangue, openGraphDe } from "@/lib/seo/alternates";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
@@ -61,76 +63,45 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
   const articles = tousLesArticles();
 
   return (
-    <CoquePublique
-      locale={locale}
-      action={
-        <Link
-          href={`/${locale}`}
-          className="-my-3.5 inline-flex min-h-11 items-center font-headline-md text-[13px] leading-4 font-semibold text-ardoise transition-colors hover:text-on-surface md:text-[14px]"
-        >
-          Découvrir DropLink
-        </Link>
-      }
-    >
-      <div className="px-5 pt-[30px] pb-9 md:px-10 md:pt-14 md:pb-16">
-        <div className="max-w-[720px]">
-          <span className="inline-block rounded-full bg-[#f1eefe] px-[11px] py-[5px] font-headline-md text-[10px] font-bold tracking-[0.04em] text-violet md:text-[11px]">
-            LE BLOG
-          </span>
-          <h1 className="mt-3.5 mb-2.5 font-headline-xl text-[30px] leading-9 font-extrabold tracking-[-0.03em] text-on-surface md:mt-4 md:mb-3 md:text-[46px] md:leading-[52px]">
-            Vendre en direct, sans y passer ses soirées
-          </h1>
-          <p className="font-body-lg text-[15px] leading-[25px] text-ardoise md:text-[16px] md:leading-[27px]">
-            {DESCRIPTION}
-          </p>
-        </div>
+    <CoquePublique locale={locale} pastille="Blog" enteteSecondaire={false}>
+      {/* `blog/index.html` du design system, écrit le 14/09/2026 avant ce
+          fichier. « Créer un compte » garde le dégradé : l'index n'a pas
+          d'autre action. */}
+      <main
+        id="contenu"
+        className="mx-auto w-full max-w-[1240px] flex-1 px-4 pt-8 pb-12 md:px-[34px] md:pt-14 md:pb-[88px]"
+      >
+        <span className="inline-flex items-center gap-2 rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-3.5 py-[7px] text-[12.5px] font-bold text-ds-accent-encre">
+          <BookOpen aria-hidden="true" size={14} strokeWidth={2} />
+          Le blog
+        </span>
+        <h1 className="mt-5 max-w-[760px] text-[30px] leading-[1.06] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort sm:text-[36px] md:text-[44px]">
+          Vendre en direct, sans y passer ses soirées
+        </h1>
+        <p className="mt-[18px] max-w-[680px] text-[16px] leading-[1.65] text-pretty text-ds-texte-corps md:text-[17px]">
+          {DESCRIPTION}
+        </p>
 
         {/* UNE COLONNE EN TÉLÉPHONE, TROIS EN BUREAU. Deux cartes côte à côte
             dans 350 px couperaient chaque titre en cinq lignes ; au-delà de
             trois colonnes, les titres se coupent aussi. */}
-        <div className="mt-7 grid gap-3.5 md:mt-11 md:grid-cols-3 md:gap-5">
+        <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-3.5 md:mt-11 md:grid-cols-3 md:gap-5">
           {articles.map((a) => (
             <Link
               key={a.slug}
               href={`/${locale}/blog/${a.slug}`}
-              className="block rounded-2xl border border-filet-controle bg-surface-container-lowest p-[18px] transition-colors hover:border-[#d7d3f8] md:p-6"
+              className="flex flex-col gap-3 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card transition-shadow hover:shadow-ds-md"
             >
-              <span className="font-headline-md text-[11px] font-semibold text-sourdine md:text-[12px]">
-                <time dateTime={a.date}>{dateLisible(a.date)}</time> · {a.minutes} min
+              <span className="text-[11.5px] font-extrabold tracking-[0.12em] text-ds-accent-encre uppercase md:text-[11px]">
+                {a.etiquette}
               </span>
-              <h2 className="mt-2 mb-1.5 font-headline-md text-[18px] leading-6 font-bold tracking-[-0.02em] text-on-surface md:mt-2.5 md:mb-2 md:text-[20px] md:leading-[26px]">
-                {a.titre}
-              </h2>
-              <p className="font-body-lg text-[13px] leading-[21px] text-ardoise md:text-[14px] md:leading-[23px]">
-                {a.resume}
-              </p>
+              <h2 className="text-[20px] leading-[1.3] font-bold tracking-[-0.02em] text-balance text-ds-texte-fort">{a.titre}</h2>
+              <p className="flex-1 text-[14.5px] leading-[1.6] text-ds-texte-corps">{a.resume}</p>
+              <MetaArticle date={a.date} duree={`${a.minutes} min`} />
             </Link>
           ))}
         </div>
-      </div>
+      </main>
     </CoquePublique>
   );
-}
-
-/**
- * La date en toutes lettres.
- *
- * ⚠️ EN DUR PLUTÔT QU'AVEC `Intl.DateTimeFormat`. Le blog n'existe que dans une
- * langue : passer par une API de localisation ferait dépendre l'affichage du
- * fuseau et de la locale du serveur, pour un résultat qui doit être français
- * quoi qu'il arrive. Et `new Date("2026-09-08")` est interprété en UTC, ce qui
- * décale la date d'un jour dans les fuseaux négatifs — un article publié le 8
- * s'afficherait « 7 septembre » pour une partie des lecteurs.
- */
-const MOIS = [
-  "janvier", "février", "mars", "avril", "mai", "juin",
-  "juillet", "août", "septembre", "octobre", "novembre", "décembre",
-] as const;
-
-function dateLisible(iso: string): string {
-  const [annee, mois, jour] = iso.split("-");
-  const indice = Number(mois) - 1;
-  const nom = MOIS[indice];
-  if (annee === undefined || jour === undefined || nom === undefined) return iso;
-  return `${Number(jour)} ${nom} ${annee}`;
 }
