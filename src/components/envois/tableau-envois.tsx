@@ -474,7 +474,7 @@ export async function TableauEnvois({
             defaultValue={parametres.q ?? ""}
             placeholder={t("filtres.rechercher")}
             aria-label={t("filtres.rechercher")}
-            className="min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort outline-none placeholder:text-ds-texte-sourdine"
+            className="min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort outline-none placeholder:text-ds-texte-corps"
           />
         </label>
       </form>

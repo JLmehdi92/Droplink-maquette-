@@ -438,7 +438,7 @@ function FormulaireRecherche({
             blanc posé sur du blanc n'aurait plus de bord. 44 px au doigt.
           */
           "rounded-ds-card border border-ds-filet pr-3.5 pl-[40px] text-ds-texte-fort " +
-          "placeholder:text-ds-texte-tenu focus-visible:outline-none " +
+          "placeholder:text-ds-texte-corps focus-visible:outline-none " +
           "focus-visible:shadow-[var(--anneau-ds-focus)] " +
           (telephone
             ? "h-11 w-full bg-ds-surface-creux text-[15px]"

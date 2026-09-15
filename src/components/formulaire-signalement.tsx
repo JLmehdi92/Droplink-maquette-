@@ -120,7 +120,7 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t("signalement.descriptionExemple")}
-          className={`block h-[132px] w-full resize-none px-[18px] py-[15px] text-[15px] leading-[1.55] text-ds-texte-fort outline-none placeholder:text-ds-texte-tenu ${BOITE}`}
+          className={`block h-[132px] w-full resize-none px-[18px] py-[15px] text-[15px] leading-[1.55] text-ds-texte-fort outline-none placeholder:text-ds-texte-corps ${BOITE}`}
         />
       </label>
 

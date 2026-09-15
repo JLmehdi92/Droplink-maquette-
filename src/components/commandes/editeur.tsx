@@ -822,7 +822,7 @@ function CarteCommande({
   const base =
     "w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[14px] " +
     "font-medium text-ds-texte-fort transition-shadow outline-none placeholder:font-normal " +
-    "placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
+    "placeholder:text-ds-texte-corps focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
   const hauteur = "h-12";
   const enEchec = "border-ds-erreur focus:border-ds-erreur";
 

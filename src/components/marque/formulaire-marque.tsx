@@ -339,7 +339,7 @@ export function FormulaireMarque({
   const champBase =
     "w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[14px] " +
     "font-medium text-ds-texte-fort transition-shadow outline-none placeholder:font-normal " +
-    "placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
+    "placeholder:text-ds-texte-corps focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
   const champ = champBase + " h-12";
   const champReseau = champBase + " h-11 lg:h-[46px]";
   // Le kit écrit ses étiquettes de champ en 13/500 sur l'encre de corps, et ses
@@ -1100,7 +1100,7 @@ export function FormulaireMarque({
                      formulaire sous le plancher se rate au pouce — qu il soit
                      desactive aujourd hui n y change rien, il ne le sera pas
                      toujours. */
-                  className="min-h-11 min-w-0 flex-1 bg-transparent px-3.5 py-3 text-[14px] leading-[normal] font-semibold text-ds-texte-fort placeholder:font-normal placeholder:text-ds-texte-tenu lg:min-h-0"
+                  className="min-h-11 min-w-0 flex-1 bg-transparent px-3.5 py-3 text-[14px] leading-[normal] font-semibold text-ds-texte-fort placeholder:font-normal placeholder:text-ds-texte-corps lg:min-h-0"
                 />
               </span>
               <span className="flex items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">

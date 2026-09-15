@@ -143,7 +143,7 @@ export function ChampAcces({
           {...(valeur === undefined
             ? {}
             : { value: valeur, onChange: (e) => surChangement?.(e.target.value) })}
-          className="min-w-0 flex-1 border-none bg-transparent text-[15px] text-ds-texte-fort outline-none placeholder:text-ds-texte-tenu"
+          className="min-w-0 flex-1 border-none bg-transparent text-[15px] text-ds-texte-fort outline-none placeholder:text-ds-texte-corps"
         />
         {estMotDePasse ? (
           <button

@@ -155,7 +155,7 @@ export function ArbitrageQc({
             // défaut.
             maxLength={1000}
             rows={3}
-            className="w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte p-3 text-[14px] text-ds-texte-fort transition-shadow outline-none placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"
+            className="w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte p-3 text-[14px] text-ds-texte-fort transition-shadow outline-none placeholder:text-ds-texte-corps focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"
           />
         </label>
 

@@ -603,6 +603,18 @@ body {
  * garde ce qu'il déclare.
  */
 @layer base {
+  /*
+   * LE TEXTE INDICATIF D'UN CHAMP QUI NE DÉCLARE RIEN — `tokens/base.css` du
+   * design system, écrit le 15/09/2026. Onze champs le posaient en « estompé »
+   * (2,20:1 sur blanc) ; le gris de corps tient 4,91 sur la carte et 4,55 sur
+   * le creux. Dans `base` : un utilitaire `placeholder:` garde la main.
+   * `tests/unit/textes-indicatifs-lisibles.test.ts` mesure les deux.
+   */
+  ::placeholder {
+    color: var(--color-ds-texte-corps);
+    opacity: 1;
+  }
+
   @media (pointer: coarse) {
     button,
     a[role="button"],

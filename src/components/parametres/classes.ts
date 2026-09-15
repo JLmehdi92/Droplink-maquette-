@@ -16,7 +16,7 @@ export const CLASSE_CHAMP =
 
 /** Le texte saisi dans un `CTRL` : 14/500, encre forte. */
 export const CLASSE_SAISIE =
-  "min-w-0 flex-1 border-0 bg-transparent text-[14px] leading-[normal] font-medium text-ds-texte-fort outline-none placeholder:text-ds-texte-tenu";
+  "min-w-0 flex-1 border-0 bg-transparent text-[14px] leading-[normal] font-medium text-ds-texte-fort outline-none placeholder:text-ds-texte-corps";
 
 /**
  * Un `<input>` ou un `<select>` dans un `CTRL` : il REMPLIT la hauteur du cadre.

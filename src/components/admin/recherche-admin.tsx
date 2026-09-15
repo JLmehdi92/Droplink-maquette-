@@ -55,7 +55,7 @@ export function RechercheAdmin({
            avait deux : blanc translucide sur la bande sombre du téléphone,
            surface de carte au bureau. La bande n'est plus sombre, et deux
            peaux pour un seul champ sont deux valeurs à garder justes. */
-        className="h-11 w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte pr-[14px] pl-[38px] text-[15px] text-ds-texte-fort transition-shadow outline-none placeholder:text-ds-texte-tenu focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)] md:w-80 md:text-[14px]"
+        className="h-11 w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte pr-[14px] pl-[38px] text-[15px] text-ds-texte-fort transition-shadow outline-none placeholder:text-ds-texte-corps focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)] md:w-80 md:text-[14px]"
       />
 
       <button

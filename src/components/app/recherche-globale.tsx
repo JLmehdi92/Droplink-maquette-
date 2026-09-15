@@ -96,7 +96,7 @@ export function RechercheGlobale({
         defaultValue={valeurInitiale}
         placeholder={placeholder}
         aria-label={etiquette}
-        className="min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort placeholder:text-ds-texte-sourdine focus-visible:outline-none"
+        className="min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort placeholder:text-ds-texte-corps focus-visible:outline-none"
       />
       {/* Les deux touches du kit : 11 px en 600, creux, rayon 6, filet.
           `aria-hidden` parce qu'elles décrivent un geste, pas un contenu — un
