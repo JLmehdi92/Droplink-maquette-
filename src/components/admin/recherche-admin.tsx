@@ -1,4 +1,4 @@
-import { Icone } from "@/components/icone";
+import { Search } from "lucide-react";
 
 /**
  * LE CHAMP DE RECHERCHE DES ÉCRANS D'ADMINISTRATION.
@@ -38,9 +38,11 @@ export function RechercheAdmin({
         {etiquette}
       </label>
 
-      <Icone
-        nom="search"
-        className="pointer-events-none absolute top-[14px] left-[13px] text-[16px] text-ds-texte-tenu md:top-[13px]"
+      <Search
+        aria-hidden="true"
+        size={16}
+        strokeWidth={1.9}
+        className="pointer-events-none absolute top-[14px] left-[13px] text-ds-texte-tenu md:top-[13px]"
       />
 
       <input

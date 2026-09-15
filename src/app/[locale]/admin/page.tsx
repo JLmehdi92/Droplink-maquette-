@@ -12,7 +12,7 @@ import {
   UserX,
   Users,
 } from "lucide-react";
-import { Icone } from "@/components/icone";
+import { Clock, TriangleAlert } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { natureDAction } from "@/lib/admin/nature-d-action";
@@ -225,10 +225,11 @@ export default async function PanneauAdmin({
                           : "bg-ds-alerte-fond text-ds-alerte")
                       }
                     >
-                      <Icone
-                        nom={critique(a) ? "warning" : "schedule"}
-                        className="text-[16px] md:text-[17px]"
-                      />
+                      {critique(a) ? (
+                        <TriangleAlert aria-hidden="true" size={17} strokeWidth={1.9} />
+                      ) : (
+                        <Clock aria-hidden="true" size={17} strokeWidth={1.9} />
+                      )}
                     </span>
 
                     <div className="min-w-0">

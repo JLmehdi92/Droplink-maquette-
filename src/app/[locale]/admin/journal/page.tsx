@@ -1,7 +1,7 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
-import { Icone } from "@/components/icone";
+import { ShieldCheck } from "lucide-react";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { natureDAction } from "@/lib/admin/nature-d-action";
 import {
@@ -294,7 +294,7 @@ export default async function AdminJournal({
             garantie dans le sous-titre, faute de place. L'encart s'y affichait
             AUSSI, donc la phrase était dite deux fois à l'écran le plus étroit. */}
         <p className="hidden items-center gap-2.5 rounded-ds-control border border-ds-filet bg-ds-surface-carte px-3.5 py-3 md:flex">
-          <Icone nom="shield_lock" className="shrink-0 text-[16px] text-ds-texte-sourdine" />
+          <ShieldCheck aria-hidden="true" size={16} strokeWidth={1.9} className="shrink-0 text-ds-texte-sourdine" />
           <span className="text-[13px] leading-4 text-ds-texte-sourdine">
             {t("journal.garantie")}
           </span>

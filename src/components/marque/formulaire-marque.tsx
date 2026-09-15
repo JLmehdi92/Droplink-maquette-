@@ -5,7 +5,7 @@ import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
 import { normaliserLien } from "@/lib/boutique/normaliser-lien";
 import { useActionState, useMemo, useRef, useState } from "react";
 import { BoutonAction, type LibellesBoutonAction } from "@/components/bouton-action";
-import { Icone } from "@/components/icone";
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Eye, IdCard, Link as LinkIcon, Palette } from "lucide-react";
 import { Panneau } from "@/components/app/panneau";
@@ -1159,7 +1159,7 @@ export function FormulaireMarque({
                 role="status"
                 className="inline-flex items-center gap-[7px] self-center rounded-full bg-ds-succes-fond px-[13px] py-[7px] text-[13px] font-semibold text-ds-succes lg:self-auto"
               >
-                <Icone nom="done" className="h-[14px] w-[14px]" />
+                <Check aria-hidden="true" size={14} strokeWidth={2.2} />
                 {t("enregistre")}
               </p>
             ) : null}

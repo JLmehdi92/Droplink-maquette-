@@ -311,11 +311,12 @@ esthétiques, et le nouveau design ne les touche pas.
 l'interface**. Les logos de marques tierces (Google, Instagram, TikTok, WhatsApp,
 transporteurs) viennent de leurs SVG officiels — jamais reconstitués de mémoire.
 
-> ⚠️ **L'ANCIEN CODE EMPLOIE DES NOMS D'ICÔNES `material-symbols`**
-> (`inventory_2`, `local_shipping`, `monitoring`, `palette` dans
-> `(app)/layout.tsx`). Le design system est en Lucide. La correspondance se fait
-> à la migration de chaque écran, pas en bloc : `inventory_2 → package`,
-> `local_shipping → truck`, `monitoring → bar-chart-3`, `palette → palette`.
+> ⚠️ **LES TRACÉS `material-symbols` SONT SORTIS DU DÉPÔT LE 15/09/2026.** Le
+> composant `Icone` et ses 19 Ko de tracés vivaient encore dans sept fichiers —
+> la landing, quatre écrans d'administration, la recherche admin, la marque —
+> tous « conformes » : la soustraction compare des textes, jamais un tracé, donc
+> aucune mesure ne pouvait les voir. Ils sont remplacés par Lucide et le composant
+> est SUPPRIMÉ : une icône Material réintroduite ne compile plus.
 
 ### Réseaux sociaux du vendeur
 

@@ -8,7 +8,7 @@ import { RechercheAdmin } from "@/components/admin/recherche-admin";
 import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
 import { TuileVolume } from "@/components/admin/tuile-volume";
 import { AnneauStatuts } from "@/components/admin/anneau-statuts";
-import { Icone } from "@/components/icone";
+import { Store } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
@@ -190,7 +190,7 @@ export default async function AdminCommandes({
       {...(l.boutiqueNom === null ? {} : { style: { backgroundColor: l.accent } })}
     >
       {l.boutiqueNom === null ? (
-        <Icone nom="storefront" className="text-[14px] text-ds-texte-tenu" />
+        <Store aria-hidden="true" size={14} strokeWidth={1.9} className="text-ds-texte-tenu" />
       ) : null}
     </span>
   );

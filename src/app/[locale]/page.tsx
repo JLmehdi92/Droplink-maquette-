@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Icone } from "@/components/icone";
+import { ArrowRight, BarChart3, Check, Image as ImageIcon, Link2, Lock, Menu, Package, Truck } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { signalementDisponible } from "@/lib/contact";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
@@ -239,7 +239,7 @@ export default async function Accueil({
               className="degrade-ds-marque inline-flex h-11 items-center gap-2 rounded-ds-pill border border-transparent px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover lg:h-9"
             >
               {nav("creerCompte")}
-              <Icone nom="arrow_forward" className="text-[13px]" />
+              <ArrowRight aria-hidden="true" size={14} strokeWidth={1.9} />
             </Link>
           </div>
 
@@ -251,34 +251,40 @@ export default async function Accueil({
             — ce qui compte sur la page qu'on ouvre depuis un message privé.
           */}
           <details name="menu-landing" className="relative md:hidden">
-            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-ds-surface-creux text-ds-texte-titre [&::-webkit-details-marker]:hidden">
-              <Icone nom="menu" titre={nav("espaceVendeur")} className="text-[18px]" />
+            {/* LE BOUTON DU KIT (`ms-burger`) : carte, filet, rayon de carte — il
+                était un disque gris de l'ancien canevas. 44 px et non 40 : la
+                règle 5 l'emporte sur le dessin. */}
+            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte text-ds-texte-fort [&::-webkit-details-marker]:hidden">
+              <Menu aria-hidden="true" size={19} strokeWidth={1.9} />
+              <span className="sr-only">{nav("espaceVendeur")}</span>
             </summary>
             <nav
               aria-label={nav("espaceVendeur")}
-              className="absolute right-0 z-20 mt-2 flex w-60 flex-col gap-1 rounded-lg border border-ds-filet bg-ds-surface-carte p-2 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)]"
+              className="absolute right-0 z-20 mt-2 flex w-60 flex-col gap-1 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3 shadow-ds-card"
             >
               {sections.map((clef) => (
                 <a
                   key={clef}
                   href={"#" + clef}
-                  className="flex min-h-11 items-center rounded-md px-3 text-[14px] font-medium text-ds-texte-corps"
+                  className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps hover:bg-ds-surface-creux"
                 >
                   {t("menu." + clef)}
                 </a>
               ))}
               <Link
                 href={`/${locale}/docs`}
-                className="flex min-h-11 items-center rounded-md px-3 text-[14px] font-medium text-ds-texte-corps"
+                className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps hover:bg-ds-surface-creux"
               >
                 {t("menu.docs")}
               </Link>
               <Link
                 href={`/${locale}/connexion`}
-                className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-[18px] text-[13px] font-semibold text-on-primary"
+                /* ⚠️ `bg-primary text-on-primary` : la pilule NOIRE de l'ancien
+                   canevas, dans le seul menu que la mesure à 1280 ne déplie
+                   jamais. Le kit y pose une entrée comme les autres. */
+                className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps hover:bg-ds-surface-creux"
               >
                 {nav("seConnecter")}
-                <Icone nom="open_in_new" className="text-[13px]" />
               </Link>
             </nav>
           </details>
@@ -309,7 +315,7 @@ export default async function Accueil({
               </p>
               <Link href={`/${locale}/inscription`} className={actionPrincipale}>
                 {t("ctaPrincipal")}
-                <Icone nom="arrow_forward" className="text-[15px]" />
+                <ArrowRight aria-hidden="true" size={17} strokeWidth={1.9} />
               </Link>
 
               {/* LES TROIS PROMESSES DU KIT, ET ELLES SONT TOUTES VRAIES :
@@ -323,11 +329,15 @@ export default async function Accueil({
                   doit pouvoir les compter. */}
               <ul className="mx-auto mt-5 flex max-w-[560px] flex-col items-center gap-2 md:mt-6 md:flex-row md:justify-center md:gap-7">
                 {(["perk1", "perk2", "perk3"] as const).map((clef) => (
-                  <li key={clef} className="flex items-center gap-2">
-                    <Icone
-                      nom="check_circle"
-                      className="shrink-0 text-[16px] text-ds-accent"
-                    />
+                  <li key={clef} className="flex items-center gap-[9px]">
+                    {/* LA CASE COCHÉE DU KIT (`Checkbox checked`) : 18 px, rayon 6,
+                        aplat d'accent et coche blanche — pas un cercle Material. */}
+                    <span
+                      aria-hidden="true"
+                      className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-ds-xs bg-ds-accent text-ds-texte-sur-marque"
+                    >
+                      <Check size={12} strokeWidth={3} />
+                    </span>
                     <span className="text-[14px] leading-[normal] font-medium text-ds-texte-corps">
                       {t(clef)}
                     </span>
@@ -398,7 +408,7 @@ export default async function Accueil({
               montrer. Une capture qui ne correspond pas au produit est la seule
               chose de cette page qu'on ne pourrait pas tenir.
             */}
-            <div className="absolute top-0 left-1/2 h-[434px] w-[228px] -translate-x-1/2 rounded-[34px] bg-primary p-[7px] shadow-[0_30px_60px_-24px_rgba(14,14,19,0.5)] md:h-[578px] md:w-[330px] md:rounded-[42px] md:p-[9px] md:shadow-[0_40px_80px_-30px_rgba(14,14,19,0.45)]">
+            <div className="absolute top-0 left-1/2 h-[434px] w-[228px] -translate-x-1/2 rounded-[34px] bg-ds-ink-900 p-[7px] shadow-ds-window md:h-[578px] md:w-[330px] md:rounded-[42px] md:p-[9px] ">
               <div className="h-full w-full overflow-hidden rounded-[28px] bg-ds-surface-carte md:rounded-[34px]">
                 <div className="degrade-ds-marque h-[74px] px-3.5 pt-[22px] md:h-[92px] md:px-[18px] md:pt-[30px]">
                   <div className="flex items-center gap-[7px] md:gap-2">
@@ -447,9 +457,9 @@ export default async function Accueil({
               et 1 279 le téléphone est déjà à sa taille de bureau sans que la
               carte-page soit assez large pour les loger.
             */}
-            <div className="anim-flot absolute top-24 left-2.5 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-[0_16px_34px_-12px_rgba(14,14,19,0.26)] md:hidden">
+            <div className="anim-flot absolute top-24 left-2.5 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-ds-md md:hidden">
               <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ds-surface-teinte">
-                <Icone nom="image" className="text-[16px] text-ds-accent" />
+                <ImageIcon aria-hidden="true" size={16} strokeWidth={1.9} className="text-ds-accent" />
               </span>
               <span className="text-[12px] leading-[15px] font-bold text-ds-texte-titre">
                 {t("flottant.photosCourt")}
@@ -457,11 +467,11 @@ export default async function Accueil({
             </div>
 
             <div
-              className="anim-flot absolute top-[210px] right-2 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-[0_16px_34px_-12px_rgba(14,14,19,0.26)] md:hidden"
+              className="anim-flot absolute top-[210px] right-2 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-ds-md md:hidden"
               style={{ animationDelay: "1.6s" }}
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ds-erreur-fond">
-                <Icone nom="local_shipping" className="text-[16px] text-ds-erreur" />
+                <Truck aria-hidden="true" size={16} strokeWidth={1.9} className="text-ds-erreur" />
               </span>
               <span className="text-[12px] leading-[15px] font-bold text-ds-texte-titre">
                 {t("flottant.transitCourt")}
@@ -472,21 +482,21 @@ export default async function Accueil({
               [
                 {
                   clef: "photos",
-                  icone: "image",
+                  icone: ImageIcon,
                   peau: "bg-ds-surface-teinte text-ds-accent",
                   place: "top-[150px] left-[calc(50%-460px)] w-[264px]",
                   delai: "0s",
                 },
                 {
                   clef: "transit",
-                  icone: "local_shipping",
+                  icone: Truck,
                   peau: "bg-ds-erreur-fond text-ds-erreur",
                   place: "top-[262px] right-[calc(50%-484px)] w-[274px]",
                   delai: "1.6s",
                 },
                 {
                   clef: "valide",
-                  icone: "done",
+                  icone: Check,
                   peau: "bg-ds-succes-fond text-ds-succes",
                   place: "bottom-[34px] left-[calc(50%-424px)] w-[242px]",
                   delai: "3.2s",
@@ -496,7 +506,7 @@ export default async function Accueil({
               <div
                 key={carte.clef}
                 className={
-                  "anim-flot absolute hidden items-center gap-[11px] rounded-[14px] bg-ds-surface-carte px-3.5 py-3 shadow-[0_18px_40px_-14px_rgba(14,14,19,0.22)] xl:flex " +
+                  "anim-flot absolute hidden items-center gap-[11px] rounded-[14px] bg-ds-surface-carte px-3.5 py-3 shadow-ds-md xl:flex " +
                   carte.place
                 }
                 style={{ animationDelay: carte.delai }}
@@ -507,7 +517,7 @@ export default async function Accueil({
                     carte.peau
                   }
                 >
-                  <Icone nom={carte.icone} className="text-[19px]" />
+                  <carte.icone aria-hidden="true" size={19} strokeWidth={1.9} />
                 </span>
                 <span>
                   <span className="block text-[13px] leading-4 font-bold text-ds-texte-titre">
@@ -553,17 +563,17 @@ export default async function Accueil({
             <ul className="grid gap-3.5 text-left md:grid-cols-3 md:gap-5">
               {(
                 [
-                  ["commandes", "inventory_2", "bg-ds-surface-teinte text-ds-accent"],
-                  ["medias", "download", "bg-ds-surface-teinte text-ds-accent"],
-                  ["suivi", "schedule", "bg-ds-erreur-fond text-ds-erreur"],
+                  ["commandes", Package, "bg-ds-surface-teinte text-ds-accent"],
+                  ["medias", ImageIcon, "bg-ds-surface-teinte text-ds-accent"],
+                  ["suivi", Truck, "bg-ds-erreur-fond text-ds-erreur"],
                   // ⚠️ LE TROISIÈME EST VERT sur les deux planches. Le code le
                   // rendait GRIS, faute de famille verte dans l'ancien thème —
                   // elle existe désormais (`succes-pastel` / `succes`).
-                  ["marque", "link", "bg-ds-succes-fond text-ds-succes"],
-                  ["analyses", "monitoring", "bg-ds-info-fond text-ds-info"],
-                  ["sansCompte", "lock", "bg-ds-alerte-fond text-ds-alerte"],
+                  ["marque", Link2, "bg-ds-succes-fond text-ds-succes"],
+                  ["analyses", BarChart3, "bg-ds-info-fond text-ds-info"],
+                  ["sansCompte", Lock, "bg-ds-alerte-fond text-ds-alerte"],
                 ] as const
-              ).map(([clef, icone, teinte]) => (
+              ).map(([clef, IconeCarte, teinte]) => (
                 <li
                   key={clef}
                   className="rounded-lg border border-ds-filet bg-ds-surface-carte p-[22px] md:p-[26px]"
@@ -574,7 +584,7 @@ export default async function Accueil({
                       teinte
                     }
                   >
-                    <Icone nom={icone} className="text-[20px] md:text-[21px]" />
+                    <IconeCarte aria-hidden="true" size={20} strokeWidth={1.9} />
                   </span>
                   {/* 18/700 à l interligne 19,8 et à -0,02em : les valeurs du kit.
                       Le produit rendait 23 d interligne et -0,015em. */}
@@ -687,7 +697,7 @@ export default async function Accueil({
                   className="mt-[26px] flex min-h-13 w-full items-center justify-center gap-2 rounded-ds-pill border border-transparent bg-ds-surface-carte px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-md transition-shadow hover:shadow-ds-lg md:inline-flex md:h-13 md:w-auto md:min-h-0"
                 >
                   {t("ctaPrincipal")}
-                  <Icone nom="arrow_forward" className="text-[15px]" />
+                  <ArrowRight aria-hidden="true" size={17} strokeWidth={1.9} />
                 </Link>
               </div>
             </div>

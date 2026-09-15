@@ -1,7 +1,6 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
-import { Icone } from "@/components/icone";
 import { EncartTrace } from "@/components/admin/encart-trace";
 import { RechercheAdmin } from "@/components/admin/recherche-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
@@ -366,10 +365,7 @@ export default async function AdminBoutiques({
                                   : { style: { backgroundColor: b.accent } })}
                               >
                                 {b.nom === null ? (
-                                  <Icone
-                                    nom="storefront"
-                                    className="text-[15px] text-ds-texte-tenu"
-                                  />
+                                  <Store aria-hidden="true" size={15} strokeWidth={1.9} className="text-ds-texte-tenu" />
                                 ) : null}
                               </span>
                               {/* HUIT COLONNES DANS 755 PX : le nom se tronque a
@@ -458,7 +454,7 @@ export default async function AdminBoutiques({
                           {...(b.nom === null ? {} : { style: { backgroundColor: b.accent } })}
                         >
                           {b.nom === null ? (
-                            <Icone nom="storefront" className="text-[18px] text-ds-texte-tenu" />
+                            <Store aria-hidden="true" size={18} strokeWidth={1.9} className="text-ds-texte-tenu" />
                           ) : null}
                         </span>
                         <div className="min-w-0 flex-grow">
