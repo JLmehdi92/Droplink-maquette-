@@ -7,6 +7,7 @@ import {
   BarChart3,
   BookMarked,
   ClipboardList,
+  Ellipsis,
   LayoutDashboard,
   Settings,
   Store,
@@ -115,42 +116,43 @@ export function NavigationAdmin({
   entrees,
   etiquette,
   variante,
+  plus = "",
 }: {
   readonly entrees: readonly EntreeAdmin[];
   readonly etiquette: string;
   readonly variante: "colonne" | "onglets";
+  /** Libellé de l'onglet qui déplie les destinations au-delà de la quatrième. */
+  readonly plus?: string;
 }) {
   const chemin = usePathname();
   const racine = hrefRacine(entrees);
-  const barre = useRef<HTMLElement>(null);
+  const plusRef = useRef<HTMLDetailsElement>(null);
 
-  /*
-   * L'ONGLET COURANT EST RAMENÉ DANS LA VUE. La barre défile (voir plus bas) :
-   * sans ce geste, ouvrir « Paramètres système » depuis la colonne du bureau
-   * puis passer au téléphone montrerait une barre dont l'onglet allumé est
-   * hors de l'écran — on ne saurait plus où l'on est.
-   */
+  /* La feuille « Plus » se referme quand on change d'écran : un `<details>` resté
+     ouvert recouvrirait l'écran qu'on vient d'ouvrir. */
   useEffect(() => {
-    const courant = barre.current?.querySelector('[aria-current="page"]');
-    if (courant instanceof HTMLElement) courant.scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (plusRef.current !== null) plusRef.current.open = false;
   }, [chemin]);
 
   if (variante === "onglets") {
+    /*
+     * ⚠️ QUATRE ONGLETS ET « PLUS », DEPUIS LE 15/09/2026 — ET LA BARRE DÉFILAIT.
+     * Huit destinations ne tiennent pas dans 390 px : la barre glissait sous le
+     * pouce, et mesurée à 390 elle rendait « Panneau » et « Journal » coupés aux
+     * bords. Une destination cachée derrière un défilement horizontal ne se
+     * trouve pas. (Avant elle, sept onglets de 60 px avaient fait se CHEVAUCHER
+     * les libellés — « PanneauCommandesComptesBoutiques » — sans que rien ne
+     * déborde du document.) Planche `AdminShell`, `AdminTabBar`.
+     */
+    const principales = entrees.slice(0, 4);
+    const autres = entrees.slice(4);
+    const autreCourante = autres.some((e) => estCourante(chemin, e.href, e.href === racine));
     return (
-      /*
-       * ⚠️ LA BARRE DÉFILE, ET ELLE NE LE FAISAIT PAS. Six onglets de 60 px
-       * tenaient dans 390 ; le septième, « Commandes » (14/09/2026), a fait se
-       * CHEVAUCHER les libellés — « PanneauCommandesComptesBoutiques » — sans
-       * qu'aucune sonde le voie : rien ne déborde du document, les boîtes se
-       * rétrécissent et leurs textes se recouvrent. Chaque onglet garde donc la
-       * largeur de son libellé, et la barre glisse sous le pouce.
-       */
       <nav
-        ref={barre}
         aria-label={etiquette}
-        className="defilement-discret sticky bottom-0 z-20 flex overflow-x-auto border-t border-ds-filet bg-ds-surface-carte px-2 pt-2 pb-[18px] md:hidden"
+        className="sticky bottom-0 z-20 flex border-t border-ds-filet bg-ds-surface-carte px-2 pt-2 pb-[18px] md:hidden"
       >
-        {entrees.map((entree) => {
+        {principales.map((entree) => {
           const courante = estCourante(chemin, entree.href, entree.href === racine);
           const Icone = ICONES[entree.icone];
           // Voir `LienEcran` : l'entrée courante vise le chemin déjà occupé.
@@ -161,7 +163,7 @@ export function NavigationAdmin({
               href={entree.href}
               aria-current={courante ? "page" : undefined}
               className={
-                "flex min-h-11 min-w-[60px] flex-auto shrink-0 flex-col items-center justify-center gap-1 rounded-ds-sm px-1.5 py-1 " +
+                "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-ds-sm " +
                 (courante ? "text-ds-accent" : "text-ds-texte-sourdine")
               }
             >
@@ -173,12 +175,48 @@ export function NavigationAdmin({
                 la sonde ne pouvait pas mesurer — le plafond de débit de
                 l'administration lui servait des 404.
               */}
-              <span className={"text-[11.5px] leading-3 whitespace-nowrap " + (courante ? "font-bold" : "font-semibold")}>
+              <span className={"text-[11.5px] leading-[normal] whitespace-nowrap " + (courante ? "font-bold" : "font-semibold")}>
                 {entree.court}
               </span>
             </Composant>
           );
         })}
+        <details ref={plusRef} className="group relative flex min-w-0 flex-1">
+          <summary
+            aria-current={autreCourante ? "page" : undefined}
+            className={
+              "flex min-h-11 w-full cursor-pointer list-none flex-col items-center justify-center gap-1 rounded-ds-sm " +
+              (autreCourante ? "text-ds-accent" : "text-ds-texte-sourdine")
+            }
+          >
+            <Ellipsis aria-hidden="true" size={20} strokeWidth={autreCourante ? 2.1 : 1.8} />
+            <span className={"text-[11.5px] leading-[normal] whitespace-nowrap " + (autreCourante ? "font-bold" : "font-semibold")}>
+              {plus}
+            </span>
+          </summary>
+          {/* Une feuille posée au-dessus de la barre, pleine largeur moins 8 px. */}
+          <div className="fixed inset-x-2 bottom-[86px] z-30 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-1.5 shadow-ds-lg">
+            {autres.map((entree) => {
+              const courante = estCourante(chemin, entree.href, entree.href === racine);
+              const Icone = ICONES[entree.icone];
+              const Composant = courante ? LienEcran : Link;
+              return (
+                <Composant
+                  key={entree.href}
+                  href={entree.href}
+                  aria-current={courante ? "page" : undefined}
+                  className={
+                    "flex min-h-11 items-center gap-3 rounded-ds-sm px-3 text-[14px] font-semibold transition-colors " +
+                    (courante ? "bg-ds-surface-teinte text-ds-accent-encre" : "text-ds-texte-fort hover:bg-ds-surface-teinte")
+                  }
+                >
+                  <Icone aria-hidden="true" size={18} strokeWidth={1.9} />
+                  {entree.libelle}
+                </Composant>
+              );
+            })}
+          </div>
+        </details>
       </nav>
     );
   }

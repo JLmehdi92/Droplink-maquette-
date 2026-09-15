@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 import { LienParametres } from "@/components/app/lien-parametres";
+import { LogoMarque } from "@/components/acces/coque-acces";
 import { ClocheAlertes } from "./cloche-alertes";
 import { RechercheGlobale } from "./recherche-globale";
 
@@ -20,13 +21,17 @@ import { RechercheGlobale } from "./recherche-globale";
  *   séparateur   1 × 26, couleur de filet, 20 px de chaque côté
  *   pastille     52 de haut, rayon pilule, avatar 38, nom 14/600, chevron 16
  *
- * ⚠️ ELLE NE SE REND PAS AU TÉLÉPHONE, et ce n'est pas un abandon. Le kit y
- * pose une barre avec un menu hamburger parce que sa colonne latérale devient
- * un tiroir ; le produit a choisi une barre d'ONGLETS EN BAS, où les quatre
- * destinations sont visibles en permanence. Lui ajouter une bande en haut
- * prendrait 89 px de hauteur sur 844 — un dixième de l'écran — pour redire ce
- * que le bas montre déjà. La recherche reste donc dans l'en-tête au téléphone,
- * là où elle est atteignable au pouce.
+ * ⚠️ AU TÉLÉPHONE ELLE SE REND DEPUIS LE 15/09/2026, COMPACTE — et ce bloc
+ * disait le contraire. Il la refusait parce qu'elle « redirait ce que le bas
+ * montre déjà ». C'était vrai des DESTINATIONS, faux du COMPTE : sans elle, les
+ * paramètres ne s'ouvraient au téléphone que depuis le tableau de bord, la
+ * déconnexion que depuis les commandes, et la cloche d'alertes nulle part —
+ * Envois, Analyses et Ma marque n'offraient aucun accès au compte. Mesuré en
+ * passant les 37 écrans à 390 px contre le design system.
+ *
+ * Planche `AppShell` (TabBar, AccountMenu) : 62 px et non 89 — logo, cloche,
+ * avatar et son menu, la recherche restant dans l'en-tête de Commandes, au
+ * pouce. Les onglets du bas ne changent pas.
  */
 export async function BarreSuperieure({
   langue,
@@ -47,16 +52,21 @@ export async function BarreSuperieure({
   const tc = await getTranslations("commandes");
 
   return (
-    <header className="hidden h-[89px] shrink-0 items-center gap-5 px-8 md:flex">
+    <header className="flex h-[62px] shrink-0 items-center gap-2.5 border-b border-ds-filet px-[14px] md:h-[89px] md:gap-5 md:border-b-0 md:px-8">
+      <span className="flex items-center md:hidden">
+        <LogoMarque hauteur={28} />
+      </span>
       {/* `useSearchParams` fait sortir son porteur du rendu statique : la
           frontière le borne à ce seul champ plutôt qu à toute la coque. */}
-      <Suspense fallback={<span className="h-[46px] w-full max-w-[551px]" />}>
-        <RechercheGlobale
-          action={`/${langue}/commandes`}
-          placeholder={tc("rechercherExemple")}
-          etiquette={tc("rechercher")}
-        />
-      </Suspense>
+      <div className="hidden w-full max-w-[551px] md:block">
+        <Suspense fallback={<span className="block h-[46px] w-full" />}>
+          <RechercheGlobale
+            action={`/${langue}/commandes`}
+            placeholder={tc("rechercherExemple")}
+            etiquette={tc("rechercher")}
+          />
+        </Suspense>
+      </div>
 
       <span className="flex-1" />
 

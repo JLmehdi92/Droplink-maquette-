@@ -1636,8 +1636,7 @@
       {
         "textes": [
           "10 août  <nombre d'occurrences>",
-          "3 sept.  <nombre d'occurrences>",
-          "Il y a 12 min  <nombre d'occurrences>"
+          "3 sept.  <nombre d'occurrences>"
         ],
         "motif": "donnee",
         "raison": "LE JEU DE MESURE N A NI LES MEMES DATES NI LE MEME NOMBRE DE LIGNES. La fenetre du kit est figee au 8 septembre 2025 et la notre se termine AUJOURD HUI ; ses quinze reperes d axe ne tombent donc pas sur les memes jours que nos huit, et son flux d activite porte cinq lignes la ou notre apercu de journal en porte quatre."
@@ -1672,12 +1671,18 @@
           "3 %",
           "5 %",
           "12 %",
-          "30 %",
-          "Il y a 28 min",
-          "Il y a 12 min"
+          "30 %"
         ],
         "motif": "contrainte",
         "raison": "POSITION SEULE, ET UNE SEULE CAUSE POUR TOUTES CES LIGNES — sauf « Boutiques », dont la boite de libelle perd huit pixels pour la meme raison. Nos sections ne sont ni les memes ni dans le meme ordre : les ALERTES viennent AVANT les compteurs (le brief l exige — un panneau qui les enterre oblige a chercher ce qui devrait sauter aux yeux), la barre superieure du kit n existe pas, nous posons CINQ tuiles de volumes la ou il en pose quatre, et le tableau « Dernieres commandes » est refuse. Tout ce qui suit est donc decale. Taille, graisse, interlettrage, interligne et couleur sont ceux du kit."
+      },
+      {
+        "motifs": [
+          "^Il y a \\d+ (min|h|j)$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES ÂGES DES DERNIÈRES ACTIONS DU JOURNAL. Ils mesurent le temps écoulé depuis la dernière écriture des suites de tests dans la base de tests : « Il y a 12 min » juste après les portes, « Il y a 3 h » l'après-midi. Leurs largeurs, leurs places et leur nombre d'occurrences suivent. VOLATILE : selon l'heure de la mesure, aucun âge ne diffère parfois de ceux du kit."
       }
     ],
     "manquants": [
@@ -1783,11 +1788,18 @@
           "Voir tout",
           "Nouvelle commande créée",
           "#DLK7838 par Yanis B.",
-          "Il y a 1 h",
           "Commande livrée"
         ],
         "motif": "contrainte",
         "raison": "LE FLUX D ACTIVITE DE LA PLATEFORME, ET LA MEME RAISON QUE LE TABLEAU : il nomme des commandes et des vendeurs tiers a chaque ouverture du panneau. A cet emplacement, notre panneau montre les DERNIERES ACTIONS D ADMINISTRATION — le journal ne lit que NOS propres gestes, il n y a donc rien a auditer, et lire_journal_admin est declaree stable, donc le panneau ne peut pas se remplir de sa propre consultation."
+      },
+      {
+        "motifs": [
+          "^Il y a \\d+ (min|h|j)$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES ÂGES DU FLUX D ACTIVITÉ DU KIT (« Il y a 1 h », « Il y a 12 min »). Le flux lui-même est refusé (voir « Activité récente ») ; mais selon l heure de la mesure, le panneau du produit rend un âge de même forme et les deux s apparient. VOLATILE : manquant ou apparié selon l heure."
       }
     ],
     "enTrop": [
@@ -2703,12 +2715,19 @@
           "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4} \\d{2}:\\d{2}$",
           "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$",
           "^systeme$",
-          "^(Inscriptions ouvertes|Commandes par mois|Interrogation des transporteurs|Seuil d'alerte colis|Tâche en retard après)$",
+          "^(Inscriptions ouvertes|Commandes par mois|Interrogation des transporteurs|Seuil d'alerte colis|Tâche en retard après)$"
+        ],
+        "motif": "donnee",
+        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026)."
+      },
+      {
+        "motifs": [
           "^Compte visé :$",
           "^Motif :  .+"
         ],
         "motif": "donnee",
-        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026)."
+        "volatile": true,
+        "raison": "LES LIGNES DE SUSPENSION ET DE RÉACTIVATION. Elles n'apparaissent que si les suites RLS de suspension ont écrit parmi les cinquante dernières lignes du journal au dernier passage des portes — leur présence dépend de l'ordre des suites. VOLATILE, donc : couverte quand elle est là, pas exigée quand elle n'y est pas."
       }
     ]
   },

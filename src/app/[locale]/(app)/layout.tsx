@@ -239,7 +239,8 @@ export default async function LayoutApplication({
             compte il ferme.
 
             Au téléphone cette barre latérale n'existe pas — la déconnexion y
-            vit dans l'en-tête de Commandes, l'écran d'accueil du vendeur.
+            vit, avec les paramètres, dans le menu du compte de la barre du haut
+            (`BarreSuperieure`), commune à tous les écrans depuis le 15/09/2026.
           */}
           <details className="group relative mt-3">
             {/*

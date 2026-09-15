@@ -944,8 +944,16 @@ async function cliquerProduit(envoyer, chemin, largeur) {
           })()`
         : `(() => {
             // Par son texte OU par son nom accessible : une vignette de galerie n'a pas de texte.
-            const b = [...document.querySelectorAll('button')].find((e) =>
-              (e.textContent || '').trim() === ${JSON.stringify(etape)} || e.getAttribute('aria-label') === ${JSON.stringify(etape)});
+            // Et les \`summary\` : les menus du produit sont des \`<details>\` (compte, cloche, « Plus »).
+            // Seuls les éléments RENDUS comptent — la colonne du bureau, masquée au téléphone,
+            // porte les mêmes libellés.
+            // « ~texte » : le contrôle CONTIENT ce texte — un résumé de menu porte des initiales et un libellé masqué.
+            const cherche = ${JSON.stringify(etape.replace(/^~/, ""))};
+            const contient = ${JSON.stringify(etape.startsWith("~"))};
+            const b = [...document.querySelectorAll('button,summary')].filter((e) => e.getClientRects().length > 0).find((e) => {
+              const t = (e.textContent || '').trim();
+              return (contient ? t.includes(cherche) : t === cherche) || e.getAttribute('aria-label') === cherche;
+            });
             if (!b) return 'absent';
             b.click();
             return b.type === 'submit' ? 'soumis' : 'clique';

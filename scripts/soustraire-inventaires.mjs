@@ -347,9 +347,17 @@ const chercheur = (declarations) => {
   /* Les declarations qui n ont rien designe : l echec dans l autre sens. Sans
      lui, la liste grossirait jusqu a tout couvrir et « la soustraction est
      vide » voudrait dire « j ai tout declare ». */
+  /* ⚠️ `volatile: true` : LA SEULE EXCEPTION, ET ELLE EST BORNÉE. Les écrans
+     d'administration lisent le journal d'audit de la base de tests, que les
+     suites réécrivent à chaque passage des portes : selon l'ordre des suites,
+     une ligne « Motif : » ou un âge « Il y a 12 min » existe ou non. Une
+     déclaration de ces données mourait un passage sur deux, et l'écran sortait
+     rouge sans défaut (15/09/2026). Elle couvre ce qu'elle couvre, sans être
+     exigée quand la donnée manque ; toute autre déclaration reste exigée. */
   const mortes = () => {
     const restes = [];
     for (const d of declarations) {
+      if (d.volatile === true) continue;
       for (const cible of textesDe(d)) {
         if (!vus.has(cible)) restes.push({ texte: cible, motif: d.motif });
       }

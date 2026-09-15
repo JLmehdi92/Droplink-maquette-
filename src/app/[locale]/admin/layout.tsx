@@ -255,7 +255,7 @@ export default async function LayoutAdmin({
           {/* L'espace n'existe qu'au téléphone : il colle la barre d'onglets au
               bas de l'écran quand la page est courte. */}
           <div className="flex-grow md:hidden" />
-          <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="onglets" />
+          <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="onglets" plus={t("onglets.plus")} />
         </div>
       </div>
     </div>

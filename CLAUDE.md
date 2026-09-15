@@ -733,6 +733,27 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > d'attente du bouton d'action (« En cours… » et son anneau, invisibles) : sans
 > elle, 140 px contre 116.
 
+> ⚠️ **LE TÉLÉPHONE N'AVAIT JAMAIS ÉTÉ SOUSTRAIT, ET SES MISES EN PAGE VENAIENT
+> DE L'ANCIEN CANEVAS.** Consigne de Wassim du 15/09/2026 : « je veux la
+> meilleure version des écrans pour les mobiles ». La meilleure version n'est ni
+> la planche ni le produit : on garde les décisions téléphone écrites (page
+> client à plat, barre d'onglets en bas), on prend au kit ce qui est meilleur,
+> on L'ÉCRIT dans la planche, puis on porte et on soustrait à 390
+> (`ETAT=tel`). Premier lot, la NAVIGATION :
+> - **vendeur** — la barre du haut du kit au téléphone (logo, cloche, avatar et
+>   son menu Paramètres / Se déconnecter), les cinq onglets du produit en bas.
+>   Avant : les paramètres ne s'ouvraient que depuis le tableau de bord, la
+>   déconnexion que depuis les commandes, la cloche nulle part ;
+> - **administration** — quatre onglets et « Plus » (feuille des quatre
+>   autres). Avant : huit onglets dans une barre qui défilait, bords coupés.
+> Relevé téléphone des 37 écrans avant ce lot : 1 016 écarts de valeur, dont
+> 284 d'apparence — le reste du chantier, écran par écran.
+>
+> ⚠️ **`volatile: true`** dans `ecarts-declares.json` : la seule déclaration
+> qu'on n'exige pas de retrouver, réservée aux données que les suites réécrivent
+> selon leur ordre (âges du journal, lignes de suspension). Toute autre
+> déclaration morte fait toujours échouer la soustraction.
+
 > ⚠️ **LES ÉTATS AU CLIC SE MESURENT PAR SÉQUENCE.** `CLIC_KIT` et `CLIC_PRODUIT`
 > acceptent `« étape > étape »` ; côté produit, une étape `nom=valeur` remplit le
 > champ `name=nom` (`{motdepasse}` : celui du compte de mesure). **La planche de

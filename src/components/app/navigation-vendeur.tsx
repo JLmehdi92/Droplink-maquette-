@@ -166,7 +166,7 @@ export function NavigationVendeur({
                     1440 px où ils ne sont pas rendus, et ses cinq faux positifs
                     couvraient le vrai.
                   */}
-                  <span className="text-[11.5px] font-bold">{entree.libelleCourt ?? entree.libelle}</span>
+                  <span className="text-[11.5px] leading-[normal] font-bold">{entree.libelleCourt ?? entree.libelle}</span>
                 </Composant>
               </li>
             );

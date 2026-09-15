@@ -96,7 +96,10 @@ export async function ClocheAlertes({
         </span>
       </summary>
 
-      <div className="absolute end-0 top-full z-40 mt-2.5 w-[400px] overflow-hidden rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte shadow-ds-lg">
+      {/* Au téléphone, une feuille posée AU-DESSUS de la barre d'onglets : 400 px
+          ancrés à droite sortaient de l'écran par la gauche. Planche `AppShell`,
+          `.notif-panel` sous 760 px. */}
+      <div className="fixed inset-x-2 bottom-[94px] z-50 max-h-[72vh] overflow-y-auto rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte shadow-ds-lg md:absolute md:inset-x-auto md:end-0 md:top-full md:bottom-auto md:mt-2.5 md:max-h-none md:w-[400px] md:overflow-hidden">
         <header className="flex items-center gap-3 px-[18px] py-4">
           <h2 className="text-[16px] font-bold tracking-[-0.02em] text-ds-texte-titre">
             {t("titre")}

@@ -4,7 +4,6 @@ import { CircleCheck, Clock, EyeOff, Plus, Search, Truck } from "lucide-react";
 import { BoutonAction } from "@/components/bouton-action";
 import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
 import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
-import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 import { PucesFiltresActifs } from "@/components/commandes/puces-filtres-actifs";
 import { creerBrouillon } from "@/lib/commandes/actions";
 import { TableauCommandes } from "@/components/commandes/tableau-commandes";
@@ -172,18 +171,11 @@ export default async function Commandes({
       <EnTeteEcranDs
         titre={t("titre")}
         {...(sousTitre !== null ? { sousTitre } : {})}
-        /*
-          LA DÉCONNEXION DU TÉLÉPHONE EST ICI, ET NULLE PART AILLEURS.
-
-          Au bureau elle vit dans le bloc de compte de la barre latérale, qui
-          n'existe pas au téléphone : il n'y reste que la barre d'onglets, et ses
-          quatre destinations sont des ÉCRANS, pas des gestes. En ajouter un
-          cinquième annoncerait une page « compte » à visiter, qui n'existe pas.
-
-          Commandes est l'écran d'accueil du vendeur et la seule planche
-          téléphone à dessiner quelque chose à cet endroit.
-        */
-        actionMobile={<BoutonDeconnexion langue={langue} variante="rond" />}
+        /* ⚠️ LA DÉCONNEXION DU TÉLÉPHONE N'EST PLUS ICI depuis le 15/09/2026 : elle
+           vit, avec les paramètres, dans le menu du compte de la barre du haut,
+           commune à tous les écrans (`BarreSuperieure`). Elle n'existait
+           auparavant qu'ici, et les autres écrans n'offraient aucun accès au
+           compte. */
         actions={
           compteVide ? undefined : (
             <div className="hidden shrink-0 items-center gap-3 md:flex">
