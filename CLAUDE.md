@@ -667,6 +667,7 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 | commande introuvable `(app)/not-found` | `seller_app/index.html#introuvable` à 1690 | 4 (0) | 9 (0) | **0** |
 | `/admin/surveillance` | `admin/index.html#surveillance` à 1560 | 15 (0) | 9 (0) | **0** |
 | `/admin/comptes/[id]` | `admin/index.html#compte` à 1560, route `{profil}` | 23 (0) | 17 (0) | **0** |
+| ↳ suspension ouverte | `#compte-suspension` à 1560, `CLIC_PRODUIT="Suspendre ce compte" ETAT=suspension` | 23 (0) | 17 (0) | **0** |
 
 > ⚠️ **`/nouveau-mot-de-passe` NE S'OUVRE QU'À UNE SESSION DE RÉCUPÉRATION** — sa
 > méthode doit être `otp`. `RECUPERATION=1` fait ouvrir à la sonde un VRAI lien
@@ -705,8 +706,17 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > « 1 modifications de commande ». Les deux sont écrits dans le kit admin
 > (`#surveillance`, `#compte` — le tiroir annonçait lui-même « la fiche complète
 > quand elle sera maquettée ») puis soustraits. La sonde gagne `{profil}`,
-> l'identifiant du compte de mesure. ⚠️ Le formulaire OUVERT de suspension n'est
-> pas mesuré : la sonde relève l'état replié.
+> l'identifiant du compte de mesure. ⚠️ **Le formulaire OUVERT de suspension n'a
+> été mesuré que le 15/09/2026** — la sonde ne relevait que l'état replié, et le
+> kit ne dessinait que le bouton. Il est écrit dans le kit (`#compte-suspension`,
+> vocabulaire `Field` des paramètres, aide en gris de corps parce que la sourdine
+> rend 3,2:1) puis porté : le produit rendait des libellés 14/600 en encre, des
+> champs à rayon 16 et en 15 px, étrangers à l'administration. La sonde gagne
+> **`CLIC_PRODUIT="<texte du bouton>"`** (lève si le bouton manque) et
+> **`ETAT=<nom>`**, qui suffixe l'écran pour que l'état ouvert ait ses propres
+> déclarations. La planche dessine aussi la largeur RÉSERVÉE de l'état
+> d'attente du bouton d'action (« En cours… » et son anneau, invisibles) : sans
+> elle, 140 px contre 116.
 
 > ⚠️ **LE KIT ADMIN SE SERT À 1560, PAS À 1690.** C'est écrit dans l'en-tête de
 > sa page — `viewport="1560x1040"` — et la largeur UTILE est donc 1545. Mesurer

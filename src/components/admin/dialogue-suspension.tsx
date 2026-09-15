@@ -184,10 +184,13 @@ export function DialogueSuspension({
     </div>
   );
 
-  const libelle = "mb-2 block text-[14px] font-semibold text-ds-texte-fort";
-  const aide = "mt-1.5 text-[13px] leading-[1.55] text-ds-texte-corps";
+  /* Planche `#compte-suspension` du kit admin (15/09/2026), dans le vocabulaire
+     des paramètres : le libellé ENVELOPPE son champ, en colonne à 6 px. */
+  const groupe = "flex flex-col gap-1.5";
+  const libelle = "text-[12.5px] font-semibold text-ds-texte-sourdine";
+  const aide = "text-[12.5px] leading-[1.5] text-ds-texte-corps";
   const champ =
-    "w-full rounded-ds-card border border-ds-filet-appuye bg-ds-surface-carte text-[15px] text-ds-texte-fort outline-none focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
+    "w-full rounded-ds-sm border border-ds-filet bg-ds-surface-carte text-[13.5px] text-ds-texte-fort outline-none focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
 
   if (!ouvert) {
     return (
@@ -224,32 +227,26 @@ export function DialogueSuspension({
     >
       {entete}
       <div className="flex flex-col gap-4">
-        <div>
-          <label htmlFor="motif" className={libelle}>
-            {t("motif")}
-          </label>
+        <label className={groupe}>
+          <span className={libelle}>{t("motif")}</span>
           {/* LE MOTIF EST LA PIÈCE QU'ON DEMANDERAIT EN CAS DE LITIGE. Il
               s'affiche en clair sur la ligne du journal, pas replié derrière un
               détail que personne n'ouvre. */}
           <textarea
-            id="motif"
             name="motif"
             rows={3}
             value={motif}
             onChange={(e) => setMotif(e.target.value)}
-            className={champ + " resize-none px-3.5 py-3 leading-[1.55]"}
+            className={champ + " resize-none px-[13px] py-[11px] leading-[1.55]"}
           />
-          <p className={aide}>{t("motifAide", { n: motifMin })}</p>
-        </div>
+          <span className={aide}>{t("motifAide", { n: motifMin })}</span>
+        </label>
 
         {!suspendu ? (
-          <div>
-            <label htmlFor="confirmation" className={libelle}>
-              {t("recopier")}
-            </label>
-            <p className="mb-2 font-mono text-[13px] text-ds-texte-fort select-none">{email}</p>
+          <label className={groupe}>
+            <span className={libelle}>{t("recopier")}</span>
+            <span className="font-mono text-[13px] text-ds-texte-fort select-none">{email}</span>
             <input
-              id="confirmation"
               name="confirmation"
               type="text"
               autoComplete="off"
@@ -264,10 +261,10 @@ export function DialogueSuspension({
                 e.preventDefault();
                 setColle(true);
               }}
-              className={champ + " h-11 px-3.5 font-mono"}
+              className={champ + " h-11 px-[13px] font-mono"}
             />
-            <p className={aide}>{colle ? t("collageRefuse") : t("collageAide")}</p>
-          </div>
+            <span className={aide}>{colle ? t("collageRefuse") : t("collageAide")}</span>
+          </label>
         ) : null}
 
         {etat.statut === "erreur" ? (
@@ -282,7 +279,7 @@ export function DialogueSuspension({
           <button
             type="button"
             onClick={fermer}
-            className="h-11 px-4 text-[14px] font-semibold text-ds-texte-corps hover:text-ds-texte-fort"
+            className="h-11 px-4 text-[14px] font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort"
           >
             {t("annuler")}
           </button>

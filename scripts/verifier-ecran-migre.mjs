@@ -909,6 +909,31 @@ const VISIBLES = `(() => {
 
 const dossierInventaire = process.env["INVENTAIRE"] ?? null;
 
+/*
+ * `CLIC_PRODUIT="<texte exact d'un bouton>"` : L'ÉTAT QUI S'OUVRE AU CLIC, le
+ * pendant de `CLIC_KIT`. Ajouté le 15/09/2026 pour le formulaire de suspension
+ * de la fiche de compte, que la sonde ne relevait que replié — donc jamais
+ * mesuré. Un bouton introuvable LÈVE : mesurer l'état replié en croyant mesurer
+ * l'ouvert certifierait l'état replié.
+ */
+async function cliquerProduit(envoyer, chemin, largeur) {
+  const texte = process.env["CLIC_PRODUIT"];
+  if (texte === undefined || texte === "") return;
+  const { result } = await envoyer("Runtime.evaluate", {
+    expression: `(() => {
+      const b = [...document.querySelectorAll('button')].find((e) => (e.textContent || '').trim() === ${JSON.stringify(texte)});
+      if (!b) return false;
+      b.click();
+      return true;
+    })()`,
+    returnByValue: true,
+  });
+  if (result.value !== true) {
+    throw new Error(`ARRET : ${chemin} a ${largeur} px — aucun bouton « ${texte} » a cliquer`);
+  }
+  await new Promise((r) => setTimeout(r, 600));
+}
+
 const rapport = [];
 for (const modele of routes) {
   const chemin = modele
@@ -933,7 +958,14 @@ for (const modele of routes) {
    * Le gabarit, lui, ne varie pas : `/fr/commandes/{commande}` rend toujours
    * `fr-commandes-commande`.
    */
-  const nomEcran = modele.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+  /* `ETAT=<nom>` suffixe l'écran : un état ouvert par `CLIC_PRODUIT` a ses
+     propres déclarations. Sous le nom de l'état replié, elles mourraient à
+     chaque mesure ordinaire de l'écran — et celles du replié à chaque mesure
+     de l'ouvert. */
+  const etat = process.env["ETAT"];
+  const nomEcran =
+    modele.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "") +
+    (etat !== undefined && etat !== "" ? "-" + etat : "");
   for (const largeur of largeurs) {
     const { targetId } = await brut("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await brut("Target.attachToTarget", { targetId, flatten: true });
@@ -983,6 +1015,7 @@ for (const modele of routes) {
     await envoyer("Page.enable", {});
     await envoyer("Page.navigate", { url: base + chemin });
     await new Promise((r) => setTimeout(r, 3000));
+    await cliquerProduit(envoyer, chemin, largeur);
     const { result } = await envoyer("Runtime.evaluate", {
       expression: RELEVE,
       returnByValue: true,
@@ -1067,6 +1100,7 @@ for (const modele of routes) {
       });
       await envoyer("Page.reload", {});
       await new Promise((r) => setTimeout(r, 3000));
+      await cliquerProduit(envoyer, chemin, largeur);
       const { result: reduit } = await envoyer("Runtime.evaluate", {
         expression: `[matchMedia('(prefers-reduced-motion: reduce)').matches, ${VISIBLES}]`,
         returnByValue: true,
