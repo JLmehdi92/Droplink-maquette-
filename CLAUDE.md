@@ -233,6 +233,11 @@ succès #12A87A · erreur #EF4B57 · avertissement #E08A18 · info #4F46E5
                        ⚠️ CE SONT DES COULEURS D'APLAT : points, barres, fonds,
                        filets. En TEXTE ou en ICÔNE sur fond clair elles ne se
                        lisaient pas (3,61 · 3,04 · 2,69 sur blanc).
+GRIS SECONDAIRES       sourdine #8B90A8 (3,16:1 sur blanc) · estompé #A9AEC4 (2,20)
+                       ⚠️ SOUS 4,5:1 EN TEXTE, ET GARDÉS — décision de Wassim du
+                       15/09/2026. Les rendre lisibles les ramenait au gris de
+                       corps (#676D89, #646C91) : la hiérarchie à trois gris
+                       disparaissait. Ne pas rouvrir sans raison nouvelle.
 ENCRES D'ÉTAT          erreur #D81322 · succès #0D7C5A · avertissement #9D6111
                        (décision de Wassim, 15/09/2026 ; 4,5:1 sur blanc ET sur
                        le fond teinté ; `--status-*-ink` au kit,
