@@ -4806,6 +4806,245 @@
       }
     ]
   },
+  "fr-parametres-suppression": {
+    "_etat": "LA SUPPRESSION DU COMPTE OUVERTE (CLIC_PRODUIT=\"Supprimer\", ETAT=suppression), contre SettingsView apres « Parametres > Supprimer ». La planche dessinait une MODALE ; reecrite le 15/09/2026 en panneau en ligne, la forme de toutes les confirmations qui protegent le compte. Memes declarations que l ecran replie.",
+    "valeurs": [
+      {
+        "texte": "Commandes  <span>",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure."
+      },
+      {
+        "texte": "Paramètres  <nombre d'occurrences>",
+        "motif": "structure",
+        "raison": "Rendu quatre fois contre deux : l entree de la barre laterale et le titre de l ecran, comme le kit, PLUS une entree dans chacun des deux menus de compte — barre laterale et barre superieure — que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support »."
+      },
+      {
+        "textes": [
+          "Mot de passe  <span>",
+          "Modifier  <button>"
+        ],
+        "motif": "contrainte",
+        "raison": "LE TELEPHONE N EST PAS RENDU, donc le mot de passe prend sa place dans la grille — premiere colonne de la seconde rangee au lieu de la seconde. Aucune fonction du produit ne se sert d un numero : le collecter serait ce que la minimisation interdit. Le « Modifier » du mot de passe suit son champ."
+      },
+      {
+        "textes": [
+          "Modifier  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "« Modifier » rendu deux fois contre une : le kit rend l adresse e-mail EDITABLE en place, le produit la protege derriere le meme bouton que le mot de passe. Changer d adresse exige le mot de passe actuel et une confirmation par lien — une session ne suffit pas a changer ce qui protege le compte, un cookie vole en est une."
+      },
+      {
+        "textes": [
+          "Sécurité",
+          "Protégez votre compte et vos données.",
+          "Sessions actives",
+          "Gérez vos appareils connectés.",
+          "Voir les sessions",
+          "Données",
+          "Gérez vos données et exportez vos inform",
+          "Exporter mes données",
+          "Exporter",
+          "Supprimer le compte",
+          "Supprimez définitivement votre compte et",
+          "Supprimer",
+          "Supprimer toutes les données",
+          "Supprimez toutes vos données de manière ",
+          "Annuler  <button>",
+          "Supprimer le compte ?  <p>",
+          "Cette action est définitive. Votre compt",
+          "Seules votre adresse e-mail et les dates",
+          "Recopiez votre adresse e-mail pour confi",
+          "Mot de passe actuel  <span>"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, et une seule cause pour ces lignes : la colonne de gauche est plus courte que celle du kit. La carte « Preferences » n a pas les quatre interrupteurs de notification — le produit n envoie AUCUNE notification au vendeur, et un interrupteur sans effet est un mensonge (principe XII) —, ni le fuseau horaire, qu aucun formatage n applique. Tailles, graisses, couleurs et largeurs sont celles du kit, lignes « danger » comprises. Panneau de suppression ouvert : ses textes descendent avec la ligne qui l ouvre, du meme ecart."
+      },
+      {
+        "textes": [
+          "Support",
+          "Besoin d'aide ?",
+          "Centre d'aide",
+          "Consultez nos guides et tutoriels.",
+          "Ouvrir"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE : la colonne de droite n a ni la liste des fonctions « Pro » barrees ni le bouton « Passer au Pro » (contrainte n° 1, aucune facturation), ni la carte « Integrations » — Shopify, Google Sheets et Webhook n existent pas, et le kit les marque lui-meme « UI seule ». « Support » remonte d autant."
+      },
+      {
+        "textes": [
+          "© 2025 DropLink. Tous droits réservés."
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule : la page est plus courte, pour les raisons ecrites sur « Securite » et « Support »."
+      },
+      {
+        "textes": [
+          "Authentification à deux facteurs (2FA)",
+          "Sécurisez votre compte avec un code de v",
+          "Activer"
+        ],
+        "motif": "contrainte",
+        "raison": "LA LIGNE DE DOUBLE AUTHENTIFICATION, SANS INTERRUPTEUR. Le kit pose une bascule a gauche du bouton ; une bascule promet un effet immediat, et activer exige ici le mot de passe actuel, un QR code et un premier code juste — un interrupteur qui se remettrait seul a « eteint » mentirait sur l etat du compte (principe XII). Le libelle gagne donc les 52 px de la bascule et de son ecart. Position verticale : meme cause que « Securite », la carte « Preferences » plus courte."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      },
+      {
+        "textes": [
+          "Téléphone (optionnel)"
+        ],
+        "motif": "contrainte",
+        "raison": "LE TELEPHONE. Aucune fonction du produit ne s en sert — aucun envoi, aucun contact, aucune verification. Collecter une donnee personnelle qu aucune fonction n emploie est ce que la minimisation interdit, et la migration 154 ne pose donc pas de colonne."
+      },
+      {
+        "textes": [
+          "Fuseau horaire",
+          "Recevoir des notifications par e-mail",
+          "Soyez informé des nouvelles commandes et",
+          "Résumé quotidien",
+          "Recevez un résumé de votre activité chaq",
+          "Recevoir des notifications push",
+          "Notifications dans votre navigateur.",
+          "Offres et nouveautés",
+          "Soyez informé des nouvelles fonctionnali"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
+      },
+      {
+        "textes": [
+          "Gérez votre abonnement et accédez à plus",
+          "Découvrez DropLink et ses fonctionnalité",
+          "Suivi des commandes",
+          "Page client personnalisable",
+          "Jusqu'à 50 commandes/mois",
+          "Lien personnalisé",
+          "Statistiques avancées",
+          "Support prioritaire",
+          "Passer au Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
+      },
+      {
+        "textes": [
+          "Intégrations",
+          "Connectez vos outils préférés.",
+          "Shopify",
+          "UI seule",
+          "Importez vos commandes depuis Shopify.",
+          "Connecter",
+          "Google Sheets",
+          "Synchronisez vos données avec Google She",
+          "Webhook",
+          "Recevez des notifications en temps réel.",
+          "Configurer"
+        ],
+        "motif": "contrainte",
+        "raison": "LES INTEGRATIONS. Shopify, Google Sheets et Webhook n existent pas, et le kit les marque lui-meme « UI seule ». Un bouton « Connecter » qui ne connecte rien est une promesse non tenue."
+      },
+      {
+        "textes": [
+          "Nous contacter",
+          "Notre équipe est là pour vous aider."
+        ],
+        "motif": "contrainte",
+        "raison": "« NOUS CONTACTER ». La seule adresse du produit est celle des signalements d abus (`NEXT_PUBLIC_CONTACT_ABUS`), qui fonde le statut d hebergeur. En faire un canal d assistance melangerait les deux : un signalement noye dans les questions est un signalement en retard."
+      },
+      {
+        "textes": [
+          "Téléchargez toutes vos données (commande"
+        ],
+        "motif": "contrainte",
+        "raison": "« TOUTES VOS DONNEES » SERAIT FAUX : la decision 15 exclut les notes internes de tout export. Le produit ecrit ce que le fichier porte reellement — voir la declaration symetrique en trop."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification",
+          "Se déconnecter"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
+      },
+      {
+        "motifs": [
+          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
+      },
+      {
+        "textes": [
+          "Alertes",
+          "Le client n’a pas encore ouvert son lien",
+          "Plus de dix jours sans information du tr"
+        ],
+        "motifs": [
+          "^\\d+ commandes? jamais ouvertes$",
+          "^\\d+ colis sans mouvement$"
+        ],
+        "motif": "donnee",
+        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
+      },
+      {
+        "textes": [
+          "••••••••••"
+        ],
+        "motif": "structure",
+        "raison": "Le meme rendu par un autre balisage : le kit pose son mot de passe masque dans la VALEUR d un <input type=password>, que la sonde ne releve pas ; le produit ne met jamais un mot de passe, meme factice, dans un champ — il rend des points dans un texte masque aux lecteurs d ecran."
+      },
+      {
+        "textes": [
+          "Appliquer",
+          "La langue des pages que voient vos clien"
+        ],
+        "motif": "contrainte",
+        "raison": "« APPLIQUER » ET SON AIDE. Changer la langue recharge l ecran a une autre adresse : le faire au simple changement du menu naviguerait a chaque fleche du clavier, et un changement de contexte sur une simple saisie est ce que le critere WCAG 3.2.2 interdit. L aide dit ou se regle la langue que voient les CLIENTS — la confusion entre les deux langues a deja ete rapportee par Wassim le 06/09."
+      },
+      {
+        "textes": [
+          "Votre plan pendant la phase de validatio",
+          "Pendant la phase de validation, DropLink",
+          "Pages client à vos couleurs",
+          "Photos et vidéos de contrôle",
+          "Suivi automatique des colis",
+          "Analyses de votre activité"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
+      },
+      {
+        "textes": [
+          "Commandes, colis, médias et vues, au for",
+          "Le fichier contient les liens publics de"
+        ],
+        "motif": "contrainte",
+        "raison": "L EXPORT DIT CE QU IL EMPORTE, ET CE QU IL N EMPORTE PAS. Le kit promet « toutes vos donnees » ; la decision 15 du brief exclut les notes internes de tout export — elles portent le prix d achat. La ligne le dit au lieu de le taire. Et le fichier porte les liens publics des commandes, qui transferent une capacite immuable : l avertissement est la meme discipline que celle de l export CSV."
+      }
+    ]
+  },
   "fr-parametres-deux-etapes-qr": {
     "_etat": "L ACTIVATION EN DEUX ETAPES, SECONDE ETAPE (CLIC_PRODUIT=\"Activer > actuel={motdepasse} > Continuer\", ETAT=deux-etapes-qr) : un VRAI facteur est enrole sur le compte de mesure, supprime avec lui. Contre `SettingsView` apres « Parametres > Activer > Continuer ». Memes declarations que l ecran replie ; les textes du panneau rejoignent le groupe de position.",
     "valeurs": [

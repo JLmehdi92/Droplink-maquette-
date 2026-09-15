@@ -676,6 +676,7 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 | `/admin/comptes/[id]` | `admin/index.html#compte` à 1560, route `{profil}` | 23 (0) | 17 (0) | **0** |
 | ↳ suspension ouverte | `#compte-suspension` à 1560, `CLIC_PRODUIT="Suspendre ce compte" ETAT=suspension` | 23 (0) | 17 (0) | **0** |
 | `/parametres` ↳ deux étapes, mot de passe | `CLIC_KIT="Paramètres > Activer"`, `CLIC_PRODUIT="Activer" ETAT=deux-etapes` | 37 (0) | 20 (0) | **0** |
+| `/parametres` ↳ suppression du compte | `CLIC_KIT="Paramètres > Supprimer"`, `CLIC_PRODUIT="Supprimer" ETAT=suppression` (le panneau des données est le même composant) | 37 (0) | 20 (0) | **0** |
 | `/parametres` ↳ deux étapes, QR code | `CLIC_KIT="Paramètres > Activer > Continuer"`, `CLIC_PRODUIT="Activer > actuel={motdepasse} > Continuer" ETAT=deux-etapes-qr` | 38 (0) | 21 (0) | **0** |
 
 > ⚠️ **`/nouveau-mot-de-passe` NE S'OUVRE QU'À UNE SESSION DE RÉCUPÉRATION** — sa

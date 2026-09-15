@@ -106,16 +106,19 @@ function ChampMotDePasse({
   nom,
   nouveau = false,
   aide,
+  classeLibelle = CLASSE_LIBELLE,
 }: {
   readonly libelle: string;
   readonly nom: string;
   readonly nouveau?: boolean;
   readonly aide?: string;
+  /** Sur le fond rouge teinté d'une suppression, le gris de corps tombe à 4,30:1. */
+  readonly classeLibelle?: string;
 }) {
   const id = useId();
   return (
     <div className={CLASSE_CHAMP_ETIQUETE}>
-      <label htmlFor={id} className={CLASSE_LIBELLE}>
+      <label htmlFor={id} className={classeLibelle}>
         {libelle}
       </label>
       <span className={CLASSE_CHAMP}>
@@ -501,6 +504,11 @@ function FormulaireSuppression({
   );
   const idConfirmation = useId();
   const message = useMessage(etat, t("suppression.donnees.ok"));
+  /* ⚠️ SUR LE FOND ROUGE TEINTÉ, LE GRIS DE CORPS NE SE LIT PAS : mesuré le
+     15/09/2026, 4,30:1 pour l'avertissement et les libellés, 2,76:1 pour la note
+     de conservation en sourdine. L'encre ink-600 tient 7,12:1 — le remède des
+     alertes du panneau d'administration. Planche `SettingsView`, `DangerPanel`. */
+  const libelle = "text-[13px] leading-[normal] font-medium text-ds-ink-600";
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -509,12 +517,16 @@ function FormulaireSuppression({
         <p className="text-[14.5px] leading-[normal] font-bold text-ds-erreur-encre">
           {t(`suppression.${variante}.question`)}
         </p>
-        <p className="text-[13.5px] leading-[1.55] text-ds-texte-corps">{t(`suppression.${variante}.avertissement`)}</p>
-        {variante === "compte" ? <p className={CLASSE_AIDE}>{t("suppression.compte.conservation")}</p> : null}
+        <p className="text-[13.5px] leading-[1.55] text-ds-ink-600">{t(`suppression.${variante}.avertissement`)}</p>
+        {variante === "compte" ? (
+          <p className="text-[12.5px] leading-[1.5] text-ds-ink-600">{t("suppression.compte.conservation")}</p>
+        ) : null}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      {/* Alignés sur le bas : le libellé de recopie porte l'adresse et passe sur
+          deux lignes, et les deux champs se décalaient de 16 px. */}
+      <div className="grid items-end gap-4 sm:grid-cols-2">
         <div className={CLASSE_CHAMP_ETIQUETE}>
-          <label htmlFor={idConfirmation} className={CLASSE_LIBELLE}>
+          <label htmlFor={idConfirmation} className={libelle}>
             {t("suppression.recopier", { adresse })}
           </label>
           <span className={CLASSE_CHAMP}>
@@ -532,7 +544,7 @@ function FormulaireSuppression({
             />
           </span>
         </div>
-        <ChampMotDePasse libelle={t("compte.actuel")} nom="actuel" />
+        <ChampMotDePasse libelle={t("compte.actuel")} nom="actuel" classeLibelle={libelle} />
       </div>
       <div>
         <button type="submit" disabled={pendant} className={CLASSE_BOUTON_DANGER}>
