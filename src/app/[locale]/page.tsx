@@ -576,7 +576,7 @@ export default async function Accueil({
               ).map(([clef, IconeCarte, teinte]) => (
                 <li
                   key={clef}
-                  className="rounded-lg border border-ds-filet bg-ds-surface-carte p-[22px] md:p-[26px]"
+                  className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[22px] md:p-[26px]"
                 >
                   <span
                     className={

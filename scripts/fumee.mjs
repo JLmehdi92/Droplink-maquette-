@@ -5329,7 +5329,7 @@ const css = (
 // s apprete a verifier. On etablit qu on regarde une vraie feuille avant d y
 // chercher quoi que ce soit.
 controles.push([
-  feuilles.length > 0 && css.includes("--color-surface:"),
+  feuilles.length > 0 && css.includes("--color-ds-surface-page:"),
   `CONTRE-TEST : ${feuilles.length} feuille(s) servie(s), et elles portent bien le theme`,
 ]);
 

@@ -491,52 +491,31 @@
   --anneau-ds-focus: 0 0 0 3px rgba(91, 75, 245, 0.22);
 }
 
-
 :root {
   /*
    * Le dégradé de marque. Une seule action principale par écran, et
    * uniquement sur les surfaces DropLink. Il n'apparaît jamais sur
    * `/p/[token]` : cette page porte la couleur DU VENDEUR.
    */
-  --degrade-marque: linear-gradient(97deg, #7c5cf5 0%, #f2765e 100%);
-
   /*
-   * Accent du vendeur. Valeur de repli identique au défaut de
-   * `shops.accent_color` en base : il n'existe aucun état « couleur non
-   * configurée » à détecter. Écrasée au rendu par la palette résolue.
-   *
-   * ⚠️ ELLE NE L'ÉTAIT PLUS. Ce bloc portait `#0058be`, l'ancien défaut, alors
-   * que la migration 100 a fait passer celui de `shops.accent_color` à
-   * `#7c5cf5` — valeur que `contraste.ts` porte déjà sous `ACCENT_DEFAUT`. Le
-   * commentaire ci-dessus affirmait donc une identité qui avait cessé d'être
-   * vraie, et deux liens de l'écran de connexion rendaient un bleu
-   * n'appartenant à aucune palette du canevas.
+   * ⚠️ `--degrade-marque` (97deg, #7c5cf5 → #f2765e) ET LES CINQ `--accent-*` DE
+   * REPLI (#7c5cf5, le violet de l'ancien canevas) ONT ÉTÉ RETIRÉS LE 15/09/2026.
+   * Plus rien ne les lisait que les règles mortes `.champ*` et `.degrade-marque`,
+   * retirées avec eux ; l'accent du vendeur est résolu par `resoudreAccent` et
+   * posé en ligne là où il sert.
    */
-  --accent: #7c5cf5;
-  --accent-texte: #7c5cf5;
-  --accent-interface: #7c5cf5;
-  --accent-remplissage: #7c5cf5;
-  --accent-sur-remplissage: #ffffff;
-}
-
-body {
-  background: var(--color-surface);
-  color: var(--color-on-surface);
-  font-family: var(--font-body-md);
 }
 
 /*
- * LA CARTE DU CANEVAS : fond opaque, filet, rayon 16.
- *
- * Elle remplace l'ancienne carte de verre, qui portait un `backdrop-filter: blur(20px)`.
- * Le flou disparaît PARTOUT, pas seulement sur `/p/[token]` où le brief
- * l'interdisait : le canevas n'en emploie nulle part, et sur un aplat uni un
- * blanc à 70 % flouté rend exactement la même couleur qu'un blanc opaque —
- * le flou n'a rien à flouter, il ne fait que coûter cher au rendu.
+ * ⚠️ LE FOND DU PRODUIT ÉTAIT ENCORE CELUI DE L'ANCIEN CANEVAS le 15/09/2026 :
+ * #F7F7FB au lieu du fond de page du design system, #FBFBFE — visible partout
+ * où un écran ne peint pas son propre fond (rebond de défilement, bas de page
+ * court), et l'encre #0e0e13 au lieu de #0B0B18.
  */
-.carte {
-  background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+body {
+  background: var(--color-ds-surface-page);
+  color: var(--color-ds-texte-fort);
+  font-family: var(--font-ds-body);
 }
 
 /*
@@ -558,17 +537,6 @@ body {
 
 .defilement-discret::-webkit-scrollbar {
   display: none;
-}
-
-/*
- * L'action principale du canevas. `color: #ffffff` en dur est correct ICI et
- * seulement ici : le dégradé est NOTRE couleur, elle ne varie pas. Sur un
- * aplat d'accent VENDEUR, c'est `--accent-sur-remplissage` qui décide, jamais
- * un blanc en dur — un accent clair rendrait le blanc illisible.
- */
-.degrade-marque {
-  background-image: var(--degrade-marque);
-  color: #ffffff;
 }
 
 /*
@@ -598,85 +566,6 @@ body {
 }
 
 /*
- * Champs de saisie. Fond légèrement en retrait de la carte, filet au repos,
- * accent et halo au focus.
- *
- * La bordure existe DÈS LE REPOS. Sans elle, l'apparition d'une bordure au
- * focus décalerait le champ d'un pixel — un mouvement à chaque clic, dans un
- * formulaire à sauvegarde automatique où l'on passe de champ en champ.
- */
-.champ {
-  background-color: var(--color-surface-container);
-  border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius);
-}
-
-.champ:focus {
-  outline: none;
-  border-color: var(--accent-interface);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 22%, transparent);
-}
-
-/*
- * Champ posé DANS une carte : le fond de la carte étant déjà blanc, le champ
- * se distingue par son fond en retrait et redevient blanc au focus.
- */
-.champ-app {
-  /*
-   * ⚠️ FOND ET BORDURE RELEVÉS SUR LES PLANCHES, pas choisis. Sur les 18
-   * déclarations de `.champ` du canevas : 13 portent `#fafafc`, 14 portent
-   * `1px solid #e6e6ec`, et les 15 portent 15px de texte. Le code posait un
-   * fond plus gris et une bordure TRANSPARENTE — donc un champ sans contour,
-   * qui ne se distinguait de la carte que par sa nuance de gris.
-   */
-  background-color: var(--color-surface-container-low);
-  border: 1px solid var(--color-filet-controle);
-  font-size: 15px;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.champ-app:focus {
-  background-color: var(--color-surface-container-lowest);
-  border-color: var(--accent-interface);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 14%, transparent);
-  outline: none;
-}
-
-/* Alias historique de `.champ-app`, conservé le temps de reprendre l'éditeur. */
-.champ-editeur {
-  /*
-   * ⚠️ FOND ET BORDURE RELEVÉS SUR LES PLANCHES, pas choisis. Sur les 18
-   * déclarations de `.champ` du canevas : 13 portent `#fafafc`, 14 portent
-   * `1px solid #e6e6ec`, et les 15 portent 15px de texte. Le code posait un
-   * fond plus gris et une bordure TRANSPARENTE — donc un champ sans contour,
-   * qui ne se distinguait de la carte que par sa nuance de gris.
-   */
-  background-color: var(--color-surface-container-low);
-  border: 1px solid var(--color-filet-controle);
-  font-size: 15px;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-/*
- * QUINZE PIXELS AU DOIGT, QUATORZE À LA SOURIS, et c'est la planche qui le dit :
- * `EditeurMobile` écrit `font-size: 15px`, `Editeur` écrit 14. La bascule vit
- * ICI et non en classe utilitaire, parce que `.champ-editeur` n'est dans aucune
- * couche : elle l'emporterait sur un `lg:text-[14px]` écrit à côté, et le champ
- * resterait à 15 sans que rien ne le signale.
- */
-@media (min-width: 1024px) {
-  .champ-editeur {
-    font-size: 14px;
-  }
-}
-
-/*
  * UNE LISTE DÉROULANTE QUI RESSEMBLE AUX CHAMPS VOISINS, CHEVRON COMPRIS.
  *
  * ⚠️ `appearance: none` RETIRE LE CHEVRON DU NAVIGATEUR SANS LE REMPLACER. Sans
@@ -694,13 +583,6 @@ body {
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
-}
-
-.champ-editeur:focus {
-  border-color: var(--accent-interface);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-interface) 14%, transparent);
-  outline: none;
-  background-color: var(--color-surface-container-lowest);
 }
 
 /*
@@ -769,25 +651,6 @@ body {
     scroll-behavior: auto !important;
   }
 
-}
-
-/*
- * Carte « bento » de la page de signalement. Elle garde son rayon propre :
- * c'est la carte-page du canevas, rayon 28, et non la carte ordinaire.
- */
-.bento-item {
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.bento-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
 }
 
 /*

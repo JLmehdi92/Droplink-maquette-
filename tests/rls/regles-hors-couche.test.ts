@@ -171,10 +171,8 @@ const TOLEREES: ReadonlyMap<string, string> = new Map([
       "et c'est pour cette raison que la page client pose SON fond en style en " +
       "ligne plutôt qu'en classe.",
   ],
-  [".carte", "la carte du canevas : fond, filet, rayon. Aucun écran ne la surcharge."],
   [".defilement-discret", "masque la barre de défilement Windows sur les rangées de pilules."],
   [".defilement-discret::-webkit-scrollbar", "le même, côté WebKit."],
-  [".degrade-marque", "le dégradé de marque, une seule action principale par écran."],
   [
     ".degrade-ds-marque-diagonal",
     "le même dégradé à 120 degrés, pour la bannière d'appel de la landing. ⚠️ CE " +
@@ -186,21 +184,13 @@ const TOLEREES: ReadonlyMap<string, string> = new Map([
   [
     ".degrade-ds-marque",
     "le dégradé du design system, pour les écrans migrés. ⚠️ Il ne pose AUCUNE " +
-      "couleur de texte, contrairement à son aîné qui force `#ffffff` : sur un " +
+      "couleur de texte, contrairement à l'ancien `.degrade-marque` (retiré le 15/09/2026) qui forçait `#ffffff` : sur un " +
       "aplat d'accent le texte prend `surRemplissage`, jamais un blanc en dur. " +
       "Il vit hors couche comme elle, pour la même raison — une classe de " +
       "composant que rien ne surcharge.",
   ],
-  [".champ", "le champ de saisie du canevas."],
-  [".champ:focus", "son état de focus, piloté par l'accent du vendeur."],
-  [".champ-app", "le champ de l'espace vendeur."],
-  [".champ-app:focus", "le même, au focus."],
-  [".champ-editeur", "le champ de l'éditeur — sa taille responsive vit ICI, et pas en classe."],
-  [".champ-editeur:focus", "le même, au focus."],
   [".champ-liste", "la liste déroulante et son chevron, en CSS réel : une valeur " +
     "arbitraire Tailwind à guillemets ne produit AUCUNE règle, en silence."],
-  [".bento-item", "la tuile de la variante bento du tableau de bord."],
-  [".bento-item:hover", "la même, au survol."],
   [".anim-flot", "animation de la landing."],
   [".anim-derive", "animation de la landing."],
   [".anim-anneau", "animation de la landing."],

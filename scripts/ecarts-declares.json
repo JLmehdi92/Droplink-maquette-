@@ -484,9 +484,9 @@
         "raison": "Quatorze pixels de largeur : le libelle est etire par son compteur, passe de trois a quatre colis depuis que le jeu de mesure en pose un quatrieme, livre."
       },
       {
-        "texte": "7 sept. 2025 [2/2]  <span>",
+        "texte": "7 sept. 2025",
         "motif": "donnee",
-        "raison": "Seize pixels de hauteur. Le kit met la date ET l heure dans une cellule de deux lignes ; la notre n a qu une date sur cette ligne-la. L appariement au plus proche rapproche donc une cellule de deux lignes d une cellule d une seule — meme famille que « 8 sept. 2025 », declaree au-dessus."
+        "raison": "Seize pixels de hauteur. Le kit met la date ET l heure dans une cellule de deux lignes ; la notre n a qu une date sur cette ligne-la. L appariement au plus proche rapproche donc une cellule de deux lignes d une cellule d une seule — meme famille que « 8 sept. 2025 », declaree au-dessus. ⚠️ DÉCLARÉE SANS SON RANG DEPUIS LE 15/09/2026 : « [2/2] » est devenu « [2/3] » et « [3/3] » au changement de jour — les dates du jeu de mesure sont relatives, et le nombre de dates qui s apparient suit le calendrier."
       },
       {
         "texte": "Paramètres  <nombre d'occurrences>",
@@ -4451,9 +4451,9 @@
       },
       {
         "motif": "donnee",
-        "raison": "Les debuts de semaine de notre frise, au format « JJ/MM » — voir la declaration symetrique de « 1 sept. ».",
-        "textes": [
-          "22/06"
+        "raison": "Les debuts de semaine de notre frise, au format « JJ/MM » — voir la declaration symetrique de « 1 sept. ». ⚠️ PAR MOTIF DEPUIS LE 15/09/2026 : la déclaration littérale « 22/06 » est morte au changement de semaine, remplacée par « 29/06 » — le piège du jeu de mesure daté « maintenant ».",
+        "motifs": [
+          "^\\d{2}/\\d{2}$"
         ]
       },
       {
