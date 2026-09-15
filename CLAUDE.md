@@ -361,9 +361,10 @@ bord, les paramètres vendeur, `/docs`, et dans l'administration **Commandes** e
 **Statistiques** (décision de Wassim du 14/09/2026). Chacun a été une décision
 produit avant d'être une route.
 
-> ⚠️ **L'ADMIN : NEUF ÉCRANS EN CODE, DIX DESSINÉS.** Sept écrans du kit sont
+> ⚠️ **L'ADMIN : NEUF ÉCRANS EN CODE, TOUS DESSINÉS.** Sept écrans du kit sont
 > portés (vue d'ensemble, commandes, utilisateurs, boutiques, statistiques, logs,
-> paramètres) ; `comptes/[id]` et `surveillance` n'ont pas de planche. Restent
+> paramètres), et `surveillance` a reçu la sienne le 14/09/2026 (`#surveillance`) ;
+> et `comptes/[id]` la sienne (`#compte`). Restent
 > trois planches, et aucune ne se code : **Abonnements et Paiements** sont de la
 > facturation, interdite par la contrainte n° 1 ; **Support** suppose un système
 > de tickets que la base n'a pas.
@@ -627,9 +628,9 @@ disent dans le commit à chaque fois :**
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
-**TRENTE ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
+**TRENTE-DEUX ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
 tableau de bord, les paramètres et la vérification en deux étapes créés, les sept que le kit admin dessine et que la contrainte n° 1 autorise, la page client et son
-lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot de passe et l'onboarding, les deux pages légales, le signalement, le blog et ses articles, la documentation, le 404 général et la commande introuvable :
+lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot de passe et l'onboarding, les deux pages légales, le signalement, le blog et ses articles, la documentation, le 404 général, la commande introuvable, la surveillance et la fiche de compte de l'administration :
 
 | écran | relevé kit | manquants | en trop | écarts de valeur |
 |---|---|---|---|---|
@@ -663,6 +664,8 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 | `/blog/[slug]` | `blog/index.html#envoyer-photos-client-sans-lien-qui-expire` à 1280 | 0 (0) | 0 (0) | **0** |
 | 404 général `/fr/pas-une-route` | `erreurs/introuvable.html` à 1440, `ECRAN_ERREUR=1` | 0 (0) | 0 (0) | **0** |
 | commande introuvable `(app)/not-found` | `seller_app/index.html#introuvable` à 1690 | 4 (0) | 9 (0) | **0** |
+| `/admin/surveillance` | `admin/index.html#surveillance` à 1560 | 15 (0) | 9 (0) | **0** |
+| `/admin/comptes/[id]` | `admin/index.html#compte` à 1560, route `{profil}` | 23 (0) | 17 (0) | **0** |
 
 > ⚠️ **`/nouveau-mot-de-passe` NE S'OUVRE QU'À UNE SESSION DE RÉCUPÉRATION** — sa
 > méthode doit être `otp`. `RECUPERATION=1` fait ouvrir à la sonde un VRAI lien
@@ -693,14 +696,16 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > (connexion Apple, lien qui expire, brouillon, cloche, intégrations, passage au
 > Pro), et une documentation fausse se lit comme une promesse.
 
-> ⚠️ **DEUX ÉCRANS DE L'ADMINISTRATION N'ONT AUCUNE RÉFÉRENCE, ET C'EST LE KIT
-> QUI LE DIT.** `/admin/comptes/[id]` : le kit n'en dessine qu'un TIROIR, dont
-> le propre texte annonce « l'activité, les dernières commandes et les derniers
-> envois s'ajouteront ici quand la fiche complète sera maquettée » — et dont le
-> bouton mène à notre page. `/admin/surveillance` : le kit admin n'a pas
-> d'écran d'infrastructure du tout. Les deux gardent donc leur habillage, qui
-> est celui du design system, et ils sont vérifiés à 390 px dans les trois
-> langues. **Il n'y a rien à soustraire contre rien.**
+> ⚠️ **LES DEUX ÉCRANS D'ADMINISTRATION SANS RÉFÉRENCE EN ONT UNE DEPUIS LE
+> 14/09/2026, ET CE PARAGRAPHE DISAIT « IL N'Y A RIEN À SOUSTRAIRE CONTRE RIEN ».**
+> C'était vrai, et c'était l'excuse : `surveillance` portait encore `bg-corail`
+> et une pastille d'alerte de la couleur exacte de sa carte ; la fiche de compte,
+> un bouton de confirmation noir de l'ancien canevas, une icône Material, et
+> « 1 modifications de commande ». Les deux sont écrits dans le kit admin
+> (`#surveillance`, `#compte` — le tiroir annonçait lui-même « la fiche complète
+> quand elle sera maquettée ») puis soustraits. La sonde gagne `{profil}`,
+> l'identifiant du compte de mesure. ⚠️ Le formulaire OUVERT de suspension n'est
+> pas mesuré : la sonde relève l'état replié.
 
 > ⚠️ **LE KIT ADMIN SE SERT À 1560, PAS À 1690.** C'est écrit dans l'en-tête de
 > sa page — `viewport="1560x1040"` — et la largeur UTILE est donc 1545. Mesurer

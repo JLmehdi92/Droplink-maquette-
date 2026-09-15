@@ -48,46 +48,47 @@ const SURFACES_AFFICHEES: readonly Surface[] = [
   "admin",
 ] as const;
 
-const SUR_TITRE =
-  "text-[11.5px] leading-[13px] font-bold tracking-[0.08em] text-ds-texte-sourdine uppercase";
-const CARTE =
-  "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-6";
-const PILULE_ETAT =
-  "shrink-0 rounded-ds-pill px-3 py-[5px] text-[12px] leading-[15px] font-bold";
+/*
+ * ⚠️ LES VALEURS SONT CELLES DE LA PLANCHE `#surveillance` DU KIT ADMIN, écrite le
+ * 14/09/2026 : jusque-là l'écran n'avait aucune référence, et il portait encore
+ * deux jetons de l'ancien canevas (`bg-corail`, `bg-gris-illustration`).
+ */
+const SUR_TITRE = "mb-3 text-[11.5px] leading-[1.55] md:text-[11px] font-extrabold tracking-[0.12em] text-ds-texte-sourdine uppercase";
+const PANNEAU =
+  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
+const PANNEAU_TITRE = "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
+/** Le `Badge` du kit : 11 px gras, pilule, remplissage 5 × 11. */
+const BADGE =
+  "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[11.5px] font-bold md:text-[11px] tracking-[-0.02em] whitespace-nowrap";
 
 /**
  * L'HABILLAGE D'UNE TÂCHE, PAR ÉTAT. Trois états, trois teintes — et le vert
- * n'est PAS le défaut : une tâche jamais exécutée est grise, parce qu'elle n'est
- * ni saine ni en panne. La peindre en vert affirmerait qu'elle va bien, la
+ * n'est PAS le défaut : une tâche jamais exécutée est neutre, parce qu'elle
+ * n'est ni saine ni en panne. La peindre en vert affirmerait qu'elle va bien, la
  * peindre en ambre enverrait chercher une panne dans un mécanisme qui n'a jamais
  * tourné.
+ *
+ * ⚠️ LA PASTILLE D'UNE TÂCHE EN RETARD ÉTAIT INVISIBLE jusqu'au 14/09/2026 :
+ * peinte `bg-ds-alerte-fond` sur une carte `bg-ds-alerte-fond`, donc de la
+ * couleur exacte de son fond — sur le seul état que l'écran existe pour
+ * signaler. Le badge, de même fond, perdait sa forme : il passe sur la carte
+ * blanche, comme au kit.
  */
 const TEINTE_TACHE = {
   actif: {
     carte: "border-ds-filet bg-ds-surface-carte",
     point: "bg-ds-succes",
-    titre: "text-ds-texte-fort",
-    detail: "leading-4 text-ds-texte-sourdine",
-    pilule: "bg-ds-succes-fond text-ds-succes",
+    badge: "bg-ds-succes-fond text-ds-succes",
   },
   en_retard: {
-    carte: "border-ds-alerte bg-ds-alerte-fond",
-    // ⚠️ PAS `attention-icone` (#a97b1e) : la planche peint cette pastille en
-    // #d19a20, plus clair. L'ambre foncé est celui du TEXTE ; réemployer un
-    // token voisin parce qu'il est ambre est invisible à toute relecture.
-    point: "bg-ds-alerte-fond",
-    titre: "text-ds-alerte",
-    detail: "leading-4 text-ds-alerte",
-    pilule: "bg-ds-alerte-fond text-ds-alerte",
+    carte: "border-[#F3DFB4] bg-ds-alerte-fond",
+    point: "bg-ds-alerte",
+    badge: "bg-ds-surface-carte text-ds-alerte",
   },
   jamais_executee: {
     carte: "border-ds-filet bg-ds-surface-carte",
-    point: "bg-gris-illustration",
-    titre: "text-ds-texte-fort",
-    // 20 px, et déclaré comme tel dans la planche : c'est le seul détail qui
-    // tienne sur deux lignes, donc le seul où l'interlignage se voie.
-    detail: "leading-5 text-ds-texte-sourdine",
-    pilule: "bg-ds-surface-creux text-ds-texte-sourdine",
+    point: "bg-ds-ink-300",
+    badge: "bg-ds-surface-creux text-ds-texte-corps",
   },
 } as const;
 
@@ -157,16 +158,16 @@ export default async function SurveillanceAdmin({
     <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
       <EnTeteAdmin titre={t("surveillance.titre")} sousTitre={t("surveillance.sousTitre")} />
 
-      <div className="p-4 md:mt-[22px] md:p-0">
+      <div className="p-4 leading-[normal] md:-mt-1 md:p-0">
         {/* --- LES TÂCHES DE FOND, EN PREMIER --- */}
         <section aria-label={t("surveillance.taches")}>
-          <p className={SUR_TITRE + " mb-3"}>{t("surveillance.taches")}</p>
+          <p className={SUR_TITRE}>{t("surveillance.taches")}</p>
 
           {/* TROIS ÉTATS, PAS DEUX. Sur une lecture muette, la jointure ferait
               afficher « jamais exécutée » pour CHAQUE tâche attendue : une
               alerte inventée, sur l'écran fait pour les porter. */}
           {surveillance.surveillees === null ? (
-            <p className={CARTE + " text-ds-texte-corps"}>
+            <p className={PANNEAU + " text-ds-texte-corps"}>
               {t("surveillance.tachesIndisponibles")}
             </p>
           ) : (
@@ -181,29 +182,20 @@ export default async function SurveillanceAdmin({
                     teinte.carte
                   }
                 >
-                  {/* La pastille DOUBLE la pilule, elle ne la remplace pas : une
+                  {/* La pastille DOUBLE le badge, elle ne le remplace pas : une
                       couleur seule ne se lit pas de la même façon selon les yeux. */}
                   <span
                     aria-hidden="true"
                     className={"h-2.5 w-2.5 shrink-0 rounded-ds-pill " + teinte.point}
                   />
 
-                  <div className="min-w-0 flex-grow">
-                    <p
-                      className={
-                        "mb-0.5 text-[15px] leading-[19px] font-bold " +
-                        teinte.titre
-                      }
-                    >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] leading-[1.55] font-bold text-ds-texte-fort">
                       {t.has(`surveillance.tache.${tache.source}`)
                         ? t(`surveillance.tache.${tache.source}`)
                         : tache.source}
                     </p>
-                    <p
-                      className={
-                        "text-[13px] font-normal " + teinte.detail
-                      }
-                    >
+                    <p className="mt-0.5 text-[13px] leading-[1.55] text-ds-texte-corps">
                       {tache.etat === "jamais_executee"
                         ? t("surveillance.jamaisExecuteeAide")
                         : tache.etat === "en_retard"
@@ -215,7 +207,7 @@ export default async function SurveillanceAdmin({
                     </p>
                   </div>
 
-                  <span className={PILULE_ETAT + " " + teinte.pilule}>
+                  <span className={BADGE + " " + teinte.badge}>
                     {t(`surveillance.etat.${tache.etat}`)}
                   </span>
                 </li>
@@ -227,7 +219,7 @@ export default async function SurveillanceAdmin({
 
         {/* --- LA CONSOMMATION --- */}
         <section aria-label={t("surveillance.consommation")} className="mt-7">
-          <p className={SUR_TITRE + " mb-3"}>{t("surveillance.consommation")}</p>
+          <p className={SUR_TITRE}>{t("surveillance.consommation")}</p>
 
           {/* L'INDISPONIBILITÉ SE DIT. Des barres vides et des tirets se
               liraient « aucune consommation », ce qui est une affirmation — et
@@ -238,14 +230,14 @@ export default async function SurveillanceAdmin({
             </p>
           ) : null}
 
-          <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[1.5fr_1fr]">
+          <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
             {/* --- LA FRISE DES COLIS --- */}
-            <div className={CARTE}>
-              <div className="mb-5 flex items-baseline justify-between gap-4">
-                <h2 className="text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-ds-texte-fort">
+            <div className={PANNEAU}>
+              <div className="mb-[18px] flex flex-wrap items-start gap-3.5">
+                <h2 className={PANNEAU_TITRE + " min-w-0 flex-[1_1_180px]"}>
                   {t("surveillance.colisParJour")}
                 </h2>
-                <span className="shrink-0 text-[12px] leading-[15px] text-ds-texte-sourdine">
+                <span className="pt-[3px] text-[12px] text-ds-texte-sourdine">
                   {t("surveillance.seulPosteFacture")}
                 </span>
               </div>
@@ -271,21 +263,21 @@ export default async function SurveillanceAdmin({
                     // jour qui n'aurait pas été mesuré.
                     style={{ height: `${Math.max(2, Math.round((j.n / maxColis) * 100))}%` }}
                     className={
-                      "rounded-t-[4px] " + (rang === dernierJour ? "bg-corail" : "bg-ds-accent")
+                      "rounded-t-[4px] " + (rang === dernierJour ? "bg-ds-accent" : "bg-ds-violet-200")
                     }
                   />
                 ))}
               </div>
               )}
 
-              <p className="mt-3 text-[12px] leading-[15px] text-ds-texte-sourdine">
+              <p className="mt-3 text-[12px] leading-[1.55] text-ds-texte-sourdine">
                 {t("surveillance.friseLegende", { n: JOURS_DE_FRISE })}
               </p>
             </div>
 
             {/* --- LA LIMITATION DE DÉBIT --- */}
-            <div className={CARTE}>
-              <h2 className="mb-5 text-[16px] leading-[21px] font-bold tracking-[-0.015em] text-ds-texte-fort">
+            <div className={PANNEAU}>
+              <h2 className={PANNEAU_TITRE + " mb-[18px]"}>
                 {t("surveillance.limitation")}
               </h2>
 
@@ -300,10 +292,10 @@ export default async function SurveillanceAdmin({
                   return (
                     <div key={surface}>
                       <div className="mb-[7px] flex flex-wrap justify-between gap-2">
-                        <span className="text-[13px] leading-4 font-semibold text-ds-texte-fort">
+                        <span className="text-[13px] font-semibold text-ds-texte-fort">
                           {t(`surveillance.surface.${surface}`)}
                         </span>
-                        <span className="text-[13px] leading-4 text-ds-texte-sourdine">
+                        <span className="text-[13px] text-ds-texte-sourdine">
                           {/* UN TIRET, JAMAIS UN ZÉRO : zéro affirmerait
                               qu'on a mesuré, sur l'écran fait pour dire si un
                               plafond est approché. */}
@@ -313,7 +305,7 @@ export default async function SurveillanceAdmin({
                           })}
                         </span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-ds-pill bg-ds-filet">
+                      <div className="h-2 overflow-hidden rounded-ds-pill bg-ds-ink-100">
                         <div
                           className="h-full rounded-ds-pill bg-ds-accent"
                           style={{
@@ -327,7 +319,7 @@ export default async function SurveillanceAdmin({
                           concerne pas ; l'administration REFUSE, ça ne pénalise
                           que nous. */}
                       {nouvelleRegle ? (
-                        <p className="mt-[7px] text-[11.5px] leading-[17px] text-ds-texte-sourdine">
+                        <p className="mt-[7px] text-[12px] leading-[1.5] text-ds-texte-sourdine">
                           {t(`surveillance.degradation.${DEGRADATION[surface]}`)}
                         </p>
                       ) : null}
@@ -341,17 +333,14 @@ export default async function SurveillanceAdmin({
 
         {/* --- CE QUI N'EST PAS MESURÉ, NOMMÉ --- */}
         <section aria-label={t("surveillance.nonMesure")} className="mt-7">
-          <p className={SUR_TITRE + " mb-3"}>{t("surveillance.nonMesure")}</p>
-          <div className={CARTE}>
-            <p className="text-[13px] leading-5 text-ds-texte-sourdine">
+          <p className={SUR_TITRE}>{t("surveillance.nonMesure")}</p>
+          <div className={PANNEAU}>
+            <p className="text-[13px] leading-[1.55] text-ds-texte-corps">
               {t("surveillance.nonMesureAide")}
             </p>
             <ul className="mt-3.5 flex flex-wrap gap-2">
               {surveillance.nonMesure.map((cle) => (
-                <li
-                  key={cle}
-                  className="rounded-ds-pill border border-ds-filet-appuye px-3 py-1 text-[12px] leading-[15px] font-semibold text-ds-texte-sourdine"
-                >
+                <li key={cle} className={BADGE + " bg-ds-surface-creux text-ds-texte-corps"}>
                   {t(`surveillance.absent.${cle}`)}
                 </li>
               ))}

@@ -112,11 +112,6 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["marque.lienPlaceholder", "Un exemple de segment d'URL : il doit ressembler à une adresse."],
   ["admin.comptes.colisSurSeuil", "Deux variables et une barre oblique."],
   ["admin.fiche.surPlafond", "Deux variables et une barre oblique."],
-  [
-    "admin.fiche.activiteLigne",
-    "Un pluriel ICU dont le libellé est injecté par `admin.fiche.evenement.*`, " +
-      "qui sont eux en chinois.",
-  ],
   ["admin.panneau.stockageValeur", "Une valeur et son unité, toutes deux injectées."],
   ["admin.boutiques.taille", "Une valeur et son unité, toutes deux injectées."],
   ["admin.unites.o", "Symbole d'unité de données, international."],

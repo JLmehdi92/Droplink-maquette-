@@ -1108,7 +1108,6 @@
       "activite": "该账户做了什么",
       "activiteAide": "这里只显示卖家操作的次数，不包括您的操作，也不包含任何订单内容。",
       "activiteVide": "该账户还没有任何操作。",
-      "activiteLigne": "{n, plural, other {# {quoi}}}",
       "filigrane": "水印",
       "active": "已开启",
       "inactive": "已关闭",
@@ -1116,16 +1115,16 @@
       "reseauxAucun": "没有",
       "interdits": "本页不允许做的事",
       "evenement": {
-        "commande_creee": "笔订单被创建",
-        "commande_modifiee": "次订单修改",
-        "commande_archivee": "笔订单被归档",
-        "commande_dupliquee": "笔订单被复制",
-        "media_ajoute": "个文件被添加",
-        "media_supprime": "个文件被删除",
-        "medias_reordonnes": "次文件排序调整",
-        "lien_revoque": "个链接被撤销",
-        "qc_approuve": "次客户确认",
-        "qc_refuse": "次客户反馈问题"
+        "commande_creee": "{n, plural, other {# 笔订单被创建}}",
+        "commande_modifiee": "{n, plural, other {# 次订单修改}}",
+        "commande_archivee": "{n, plural, other {# 笔订单被归档}}",
+        "commande_dupliquee": "{n, plural, other {# 笔订单被复制}}",
+        "media_ajoute": "{n, plural, other {# 个文件被添加}}",
+        "media_supprime": "{n, plural, other {# 个文件被删除}}",
+        "medias_reordonnes": "{n, plural, other {# 次文件排序调整}}",
+        "lien_revoque": "{n, plural, other {# 个链接被撤销}}",
+        "qc_approuve": "{n, plural, other {# 次客户确认}}",
+        "qc_refuse": "{n, plural, other {# 次客户反馈问题}}"
       },
       "interdit": {
         "suppression": {
@@ -1413,7 +1412,7 @@
       "consommation": "用量",
       "colisParJour": "每日登记包裹数",
       "seulPosteFacture": "唯一计费项",
-      "friseLegende": "最近 {n} 天 · 橙色柱是今天",
+      "friseLegende": "最近 {n} 天 · 最后一根柱子是今天",
       "friseAide": "最近 {n} 天每天登记的包裹数",
       "limitation": "访问频率限制",
       "surPlafond": "每分钟 {valeur} / {plafond}",

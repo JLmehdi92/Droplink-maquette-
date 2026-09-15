@@ -1108,7 +1108,6 @@
       "activite": "Ce que ce compte a fait",
       "activiteAide": "Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.",
       "activiteVide": "Ce compte n'a encore rien fait.",
-      "activiteLigne": "{n, plural, one {# {quoi}} other {# {quoi}}}",
       "filigrane": "Filigrane",
       "active": "Activé",
       "inactive": "Désactivé",
@@ -1116,16 +1115,16 @@
       "reseauxAucun": "Aucun",
       "interdits": "Ce que cette page ne permet pas",
       "evenement": {
-        "commande_creee": "commandes créées",
-        "commande_modifiee": "modifications de commande",
-        "commande_archivee": "commandes archivées",
-        "commande_dupliquee": "commandes dupliquées",
-        "media_ajoute": "médias ajoutés",
-        "media_supprime": "médias supprimés",
-        "medias_reordonnes": "réordonnancements de médias",
-        "lien_revoque": "liens révoqués",
-        "qc_approuve": "validations de client",
-        "qc_refuse": "refus de client"
+        "commande_creee": "{n, plural, one {# commande créée} other {# commandes créées}}",
+        "commande_modifiee": "{n, plural, one {# modification de commande} other {# modifications de commande}}",
+        "commande_archivee": "{n, plural, one {# commande archivée} other {# commandes archivées}}",
+        "commande_dupliquee": "{n, plural, one {# commande dupliquée} other {# commandes dupliquées}}",
+        "media_ajoute": "{n, plural, one {# média ajouté} other {# médias ajoutés}}",
+        "media_supprime": "{n, plural, one {# média supprimé} other {# médias supprimés}}",
+        "medias_reordonnes": "{n, plural, one {# réordonnancement de médias} other {# réordonnancements de médias}}",
+        "lien_revoque": "{n, plural, one {# lien révoqué} other {# liens révoqués}}",
+        "qc_approuve": "{n, plural, one {# validation de client} other {# validations de client}}",
+        "qc_refuse": "{n, plural, one {# refus de client} other {# refus de client}}"
       },
       "interdit": {
         "suppression": {
@@ -1413,7 +1412,7 @@
       "consommation": "Consommation",
       "colisParJour": "Colis pris en charge par jour",
       "seulPosteFacture": "le seul poste facturé",
-      "friseLegende": "{n} derniers jours · la barre orange est aujourd'hui",
+      "friseLegende": "{n} derniers jours · la dernière barre est aujourd'hui",
       "friseAide": "Colis pris en charge chaque jour sur les {n} derniers jours",
       "limitation": "Limitation de débit",
       "surPlafond": "{valeur} / {plafond} par minute",

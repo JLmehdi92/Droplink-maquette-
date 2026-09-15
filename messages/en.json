@@ -1108,7 +1108,6 @@
       "activite": "What this account has done",
       "activiteAide": "The vendor's events, not yours, and only their counts. No order content appears here.",
       "activiteVide": "This account has done nothing yet.",
-      "activiteLigne": "{n, plural, one {# {quoi}} other {# {quoi}}}",
       "filigrane": "Watermark",
       "active": "On",
       "inactive": "Off",
@@ -1116,16 +1115,16 @@
       "reseauxAucun": "None",
       "interdits": "What this page does not allow",
       "evenement": {
-        "commande_creee": "orders created",
-        "commande_modifiee": "order edits",
-        "commande_archivee": "orders archived",
-        "commande_dupliquee": "orders duplicated",
-        "media_ajoute": "media added",
-        "media_supprime": "media removed",
-        "medias_reordonnes": "media reorderings",
-        "lien_revoque": "links revoked",
-        "qc_approuve": "customer approvals",
-        "qc_refuse": "customer rejections"
+        "commande_creee": "{n, plural, one {# order created} other {# orders created}}",
+        "commande_modifiee": "{n, plural, one {# order edit} other {# order edits}}",
+        "commande_archivee": "{n, plural, one {# order archived} other {# orders archived}}",
+        "commande_dupliquee": "{n, plural, one {# order duplicated} other {# orders duplicated}}",
+        "media_ajoute": "{n, plural, one {# media file added} other {# media added}}",
+        "media_supprime": "{n, plural, one {# media file removed} other {# media removed}}",
+        "medias_reordonnes": "{n, plural, one {# media reordering} other {# media reorderings}}",
+        "lien_revoque": "{n, plural, one {# link revoked} other {# links revoked}}",
+        "qc_approuve": "{n, plural, one {# customer approval} other {# customer approvals}}",
+        "qc_refuse": "{n, plural, one {# customer rejection} other {# customer rejections}}"
       },
       "interdit": {
         "suppression": {
@@ -1413,7 +1412,7 @@
       "consommation": "Consumption",
       "colisParJour": "Parcels registered per day",
       "seulPosteFacture": "the only billed item",
-      "friseLegende": "Last {n} days · the orange bar is today",
+      "friseLegende": "Last {n} days · the last bar is today",
       "friseAide": "Parcels registered each day over the last {n} days",
       "limitation": "Rate limiting",
       "surPlafond": "{valeur} / {plafond} per minute",

@@ -1,4 +1,4 @@
-import { Icone } from "@/components/icone";
+import { Info } from "lucide-react";
 
 /**
  * L'ENCART « CETTE CONSULTATION EST TRACÉE ».
@@ -16,10 +16,9 @@ import { Icone } from "@/components/icone";
 export function EncartTrace({ texte }: { readonly texte: string }) {
   return (
     <p className="flex items-start gap-[9px] rounded-ds-control border border-ds-filet bg-ds-surface-teinte px-3.5 py-3 md:items-center md:gap-2.5">
-      <Icone
-        nom="error"
-        className="mt-px shrink-0 text-[15px] text-ds-accent-encre md:mt-0 md:text-[16px]"
-      />
+      {/* LUCIDE, COMME TOUT LE DESIGN SYSTEM : ce symbole était encore un tracé
+          Material Symbols le 14/09/2026. */}
+      <Info aria-hidden="true" size={16} strokeWidth={2} className="mt-px shrink-0 text-ds-accent-encre md:mt-0" />
       <span className="text-[12px] leading-[18px] font-normal text-ds-accent-encre md:text-[13px] md:leading-4">
         {texte}
       </span>

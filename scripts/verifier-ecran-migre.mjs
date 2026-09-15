@@ -878,7 +878,10 @@ const rapport = [];
 for (const modele of routes) {
   const chemin = modele
     .replaceAll("{commande}", idCommande)
-    .replaceAll("{jeton}", jetonPublic);
+    .replaceAll("{jeton}", jetonPublic)
+    // `{profil}` : la fiche admin du compte de mesure lui-même, le seul compte
+    // dont la sonde connaît l'identifiant sans aller le chercher.
+    .replaceAll("{profil}", profil.id);
   /*
    * ⚠️ LE NOM DE L INVENTAIRE VIENT DU GABARIT, PAS DE L URL SUBSTITUEE — ET
    * C EST UN DEFAUT PAYE LE 12/09 SUR L EDITEUR.
