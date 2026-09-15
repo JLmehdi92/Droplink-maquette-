@@ -759,6 +759,21 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > d'état sous la description. La bande d'action collée en bas de l'éditeur n'est
 > PAS un défaut : elle ne recouvre le texte que sur une capture pleine page.
 >
+> Troisième lot, **les seize petits écrans sortent en code 0 à 390** (`<écran>-tel`
+> dans `ecarts-declares.json`) : accès (connexion, inscription, vérification, mot
+> de passe oublié et nouveau, onboarding), lien mort, commande introuvable,
+> signalement, blog et article, conditions, confidentialité, documentation, 404.
+> Écrit dans les planches : en-têtes publics sur UNE ligne (Documentation et
+> Accueil sous 640 px), gouttière de 16, titres 27-30 au lieu de 44, liens de pied
+> à 44 px par marge négative, liens du pied groupés ; carte d'accès calée en haut,
+> logo de carte à 40, en-tête de 44 ; onboarding avec son « Étape 1 sur 2 » et
+> ses deux types de compte empilés (81 px de texte chacun côte à côte) ; commande
+> introuvable plein écran comme l'éditeur ; barre vendeur de 62 px. Porté dans le
+> produit : carte d'accès 24/20/30, titres 24, marges de 16.
+> ⚠️ **La soustraction ne compare pas l'alignement du texte** : un chapeau de
+> carte centré au produit et aligné à gauche au kit sortait à zéro écart. Seule
+> la capture l'a montré.
+>
 > ⚠️ **`volatile: true`** dans `ecarts-declares.json` : la seule déclaration
 > qu'on n'exige pas de retrouver, réservée aux données que les suites réécrivent
 > selon leur ordre (âges du journal, lignes de suspension). Toute autre

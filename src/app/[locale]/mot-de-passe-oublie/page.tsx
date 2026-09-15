@@ -58,7 +58,7 @@ export default async function MotDePasseOublie({
       <p className="text-center text-[14px] text-ds-texte-corps">
         <Link
           href={`/${langue}/connexion`}
-          className="-my-3 inline-flex min-h-11 items-center font-bold text-ds-texte-lien hover:underline lg:my-0 lg:min-h-0"
+          className="-my-3.5 inline-flex min-h-11 items-center font-bold text-ds-texte-lien hover:underline lg:my-0 lg:min-h-0"
         >
           {t("retourConnexion")}
         </Link>

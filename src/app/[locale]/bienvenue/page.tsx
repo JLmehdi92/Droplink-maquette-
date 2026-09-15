@@ -62,14 +62,14 @@ export default async function Bienvenue({
         même logo que la connexion (`OnboardingScreen` du kit `auth`).
       */}
       <FondAcces />
-      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
+      <div className="relative flex min-h-dvh flex-col px-4 pt-[22px] pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
         <header className="flex flex-wrap items-center gap-3">
           <LogoMarque hauteur={44} className="md:h-13 md:w-auto" />
           <div className="flex-1" />
           <span className="text-[13px] font-semibold text-ds-texte-sourdine">{t("etape")}</span>
         </header>
 
-        <main id="contenu" className="flex flex-1 flex-col justify-center pt-10 pb-6">
+        <main id="contenu" className="flex flex-1 flex-col justify-start pt-5 pb-6 md:justify-center md:pt-10">
           <TraductionsClient espaces={["onboarding"]}>
             <FormulaireOnboarding locale={langue} libelles={await libellesApercu(langue)} />
           </TraductionsClient>

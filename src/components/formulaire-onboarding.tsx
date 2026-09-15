@@ -139,7 +139,7 @@ export function FormulaireOnboarding({
       <input type="hidden" name="couleurAccent" value={couleur} />
 
       {/* ================= LES RÉGLAGES ================================== */}
-      <div className="mx-auto flex w-full max-w-[620px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-12 md:py-10">
+      <div className="mx-auto flex w-full max-w-[620px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte px-5 pt-6 pb-[30px] shadow-ds-lg md:px-12 md:py-10">
         {/* ⚠️ « ÉTAPE 1 SUR 2 » EST VRAI : la seconde étape est la première
             commande, et c'est là que mène « Continuer ». Un compteur d'étapes qui
             promettrait une suite inexistante affirmerait ce qui n'est pas. */}
@@ -149,7 +149,7 @@ export function FormulaireOnboarding({
         </div>
 
         <div>
-          <h1 className="text-[28px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
+          <h1 className="text-[24px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
             {t("titre")}
           </h1>
           <p className="mt-2.5 text-[15px] leading-[1.55] text-ds-texte-corps">{t("sousTitre")}</p>

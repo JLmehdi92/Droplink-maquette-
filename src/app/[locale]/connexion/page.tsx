@@ -129,7 +129,7 @@ export default async function Connexion({
        */}
       {/* `leading-[normal]` : le kit ne pose aucun interligne sur ses libellés,
           et la page héritait de 1,5 — 3 à 6 px de trop par libellé. */}
-      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
+      <div className="relative flex min-h-dvh flex-col px-4 pt-[22px] pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
         <header className="flex flex-wrap items-center gap-3">
           {/*
             ⚠️ `min-h-11` MALGRÉ UNE IMAGE DÉJÀ HAUTE DE 44 PX, et ce n'est pas
@@ -152,7 +152,7 @@ export default async function Connexion({
               faire ici. */}
           <Link
             href={`/${locale}/inscription`}
-            className="inline-flex h-13 items-center gap-2 rounded-ds-pill border border-ds-filet-appuye bg-ds-surface-carte px-5 text-[15px] font-semibold text-ds-texte-fort transition-shadow hover:shadow-ds-sm"
+            className="inline-flex h-11 items-center gap-2 rounded-ds-pill border border-ds-filet-appuye bg-ds-surface-carte px-4 text-[14px] font-semibold md:h-13 md:px-5 md:text-[15px] text-ds-texte-fort transition-shadow hover:shadow-ds-sm"
           >
             {t("lienCreerCompte")}
             <ArrowRight aria-hidden="true" size={18} strokeWidth={1.8} />
@@ -167,7 +167,7 @@ export default async function Connexion({
              et la carte débordait l'écran de 8 px à 390 — mesuré le
              13/09/2026, dans les trois langues. `minmax(0,1fr)` borne la piste
              à la largeur disponible. */
-          className="grid flex-1 grid-cols-[minmax(0,1fr)] items-center gap-20 py-12 lg:grid-cols-[minmax(0,1fr)_520px]"
+          className="grid flex-1 grid-cols-[minmax(0,1fr)] items-start gap-20 py-5 lg:grid-cols-[minmax(0,1fr)_520px] lg:items-center lg:py-12"
         >
           {/* MASQUÉ SOUS `lg`, ET C'EST LE POINT. Cette colonne ne porte aucune
               information dont la connexion dépende : sur un écran étroit elle
@@ -180,10 +180,10 @@ export default async function Connexion({
             <ArgumentAcces />
           </div>
 
-          <div className="mx-auto flex w-full max-w-[520px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-12 md:py-11">
+          <div className="mx-auto flex w-full max-w-[520px] flex-col gap-[22px] rounded-ds-3xl bg-ds-surface-carte px-5 pt-6 pb-[30px] shadow-ds-lg md:px-12 md:py-11">
             <div className="flex flex-col items-center gap-[14px]">
-              <LogoMarque hauteur={46} />
-              <h1 className="text-[28px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
+              <LogoMarque hauteur={46} className="h-10 w-auto md:h-[46px]" />
+              <h1 className="text-[24px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[34px]">
                 {t("titre")}
               </h1>
               {/* 1,55 : l'interligne que le kit donne à tout paragraphe. */}

@@ -95,7 +95,7 @@ export default async function Inscription({
        */}
       {/* `leading-[normal]` : le kit ne pose aucun interligne sur ses libellés,
           et la page héritait de 1,5 — 3 à 6 px de trop par libellé. */}
-      <div className="relative flex min-h-dvh flex-col px-5 pt-8 pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
+      <div className="relative flex min-h-dvh flex-col px-4 pt-[22px] pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
         <main
           id="contenu"
           // AUCUN REMPLISSAGE VERTICAL : au kit, les 40 px du haut sont ceux de la
@@ -116,7 +116,7 @@ export default async function Inscription({
             <ArgumentAcces variante="inscription" />
           </div>
 
-          <div className="mx-auto flex w-full max-w-[620px] flex-col gap-5 rounded-ds-3xl bg-ds-surface-carte p-6 shadow-ds-lg md:px-11 md:pt-[30px] md:pb-10">
+          <div className="mx-auto flex w-full max-w-[620px] flex-col gap-5 rounded-ds-3xl bg-ds-surface-carte px-5 pt-6 pb-[30px] shadow-ds-lg md:px-11 md:pt-[30px] md:pb-10">
             <p className="text-right text-[14px] text-ds-texte-corps">
               {t("dejaCompteTexte")}{" "}
               <Link
@@ -128,8 +128,8 @@ export default async function Inscription({
             </p>
 
             <div className="flex flex-col items-center gap-2.5">
-              <LogoMarque hauteur={48} />
-              <h1 className="text-[26px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[32px]">
+              <LogoMarque hauteur={48} className="h-10 w-auto md:h-12" />
+              <h1 className="text-[24px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-titre md:text-[32px]">
                 {t("titreCarte")}
               </h1>
               <p className="text-center text-[15px] leading-[1.55] text-ds-texte-corps">
