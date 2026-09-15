@@ -503,7 +503,7 @@ export function FormulaireMarque({
               que s'il y a un nom à écrire. « Retrouvez le vendeur » serait un
               texte de remplacement — ce que la décision 26 interdit. */}
           {reseauxConfigures.length > 0 ? (
-            <div className="border-t border-filet-section pt-3 text-center lg:pt-[13px]">
+            <div className="border-t border-ds-filet pt-3 text-center lg:pt-[13px]">
               {nom.trim() !== "" ? (
                 <p className="mb-[7px] text-[10px] text-ds-texte-corps lg:mb-2">
                   {substituerNom(phrasesClient.reseauxGabarit, nom)}

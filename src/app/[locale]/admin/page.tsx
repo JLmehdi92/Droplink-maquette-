@@ -208,8 +208,8 @@ export default async function PanneauAdmin({
                   className={
                     "flex flex-col gap-[13px] rounded-ds-card border p-4 md:flex-row md:items-start md:rounded-ds-card md:px-[18px] md:py-4 " +
                     (critique(a)
-                      ? "border-ds-erreur bg-ds-erreur-fond"
-                      : "border-ds-alerte bg-ds-alerte-fond")
+                      ? "border-ds-erreur/30 bg-ds-erreur-fond"
+                      : "border-[#F3DFB4] bg-ds-alerte-fond")
                   }
                 >
                   <div className="flex gap-[11px] md:flex-grow md:gap-[13px]">
@@ -220,9 +220,10 @@ export default async function PanneauAdmin({
                       aria-hidden="true"
                       className={
                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-ds-sm md:h-[34px] md:w-[34px] " +
-                        (critique(a)
-                          ? "bg-alerte-puce-fond text-ds-erreur"
-                          : "bg-ds-alerte-fond text-ds-alerte")
+                        /* ⚠️ LA PASTILLE D'ATTENTION ÉTAIT DE LA COULEUR DE SA
+                           CARTE (bg-ds-alerte-fond sur bg-ds-alerte-fond) : elle
+                           passe sur le blanc, comme le badge de la surveillance. */
+                        (critique(a) ? "bg-ds-surface-carte text-ds-erreur" : "bg-ds-surface-carte text-ds-alerte")
                       }
                     >
                       {critique(a) ? (
@@ -239,8 +240,13 @@ export default async function PanneauAdmin({
                           vérifier. */}
                       <p
                         className={
-                          "text-[14px] leading-5 font-bold md:text-[15px] md:leading-[19px] " +
-                          (critique(a) ? "text-alerte-titre" : "text-ds-alerte")
+                          /* ⚠️ L'ENCRE, PAS LA COULEUR DE L'ALERTE. Mesuré le
+                             15/09/2026 : le titre ambre rendait 2,44:1 sur son
+                             fond, le détail rouge 3,16:1 — illisibles, sur les
+                             deux seules lignes de l'écran faites pour être lues
+                             en premier. La couleur reste portée par la carte, la
+                             pastille et l'icône. */
+                          "text-[14px] leading-5 font-bold text-ds-texte-fort md:text-[15px] md:leading-[19px]"
                         }
                       >
                         {t(`panneau.alerte.${a.genre}`, {
@@ -250,8 +256,10 @@ export default async function PanneauAdmin({
                       </p>
                       <p
                         className={
-                          "mt-[3px] text-[13px] leading-[19px] font-normal md:leading-5 " +
-                          (critique(a) ? "text-ds-erreur" : "text-ds-alerte")
+                          /* ink-600 et non le gris de corps : #6B6F8C tombe à
+                             4,30:1 sur le fond rouge et 4,46:1 sur l'ambre ;
+                             #4A4E68 rend 7,1:1 et 7,4:1. */
+                          "mt-[3px] text-[13px] leading-[19px] font-normal text-ds-ink-600 md:leading-5"
                         }
                       >
                         {t(`panneau.alerteDetail.${a.genre}`, {
@@ -266,9 +274,8 @@ export default async function PanneauAdmin({
                     href={ouExaminer(a.genre, a.sujet)}
                     className={
                       "flex min-h-11 shrink-0 items-center justify-center rounded-ds-control border bg-ds-surface-carte px-[15px] text-[14px] leading-[18px] font-bold md:h-[38px] md:min-h-0 md:rounded-ds-sm md:text-[13px] md:leading-4 " +
-                      (critique(a)
-                        ? "border-alerte-bordure text-ds-erreur"
-                        : "border-attention-bordure text-ds-alerte")
+                      /* Le bouton est NEUTRE : l'ambre sur blanc rendait 2,69:1. */
+                      "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux"
                     }
                   >
                     {t("panneau.examiner")}

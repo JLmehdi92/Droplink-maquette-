@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Image as ImageIcon } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
@@ -448,22 +449,9 @@ export default async function PagePublique({
                    disponible » : on nomme ce qui est, et on dit ce qui va se
                    passer. */
                 <div className="rounded-ds-card border border-dashed border-ds-filet-appuye px-5 py-8 text-center">
-                  <svg
-                    width="26"
-                    height="26"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    className="mx-auto mb-3 text-gris-illustration"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="3" />
-                    <circle cx="8.5" cy="8.5" r="1.6" />
-                    <path d="m21 15-5-5L5 21" />
-                  </svg>
+                  {/* LUCIDE, pas un tracé recopié à la main (règle d'iconographie) ;
+                      rendu côté serveur, donc sans un octet de JavaScript. */}
+                  <ImageIcon aria-hidden="true" size={26} strokeWidth={1.8} className="mx-auto mb-3 text-ds-texte-tenu" />
                   <p className="text-[15px] font-semibold text-ds-texte-fort">
                     {t("galerie.videTitre")}
                   </p>

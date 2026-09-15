@@ -143,8 +143,8 @@ export default async function AdminJournal({
 
   /** Le filet de gauche de l'encart de motif, teinté comme la pilule. */
   const MOTIF = {
-    suspension: "border-alerte-puce bg-ds-erreur-fond",
-    reactivation: "border-ds-succes bg-succes-fond-doux",
+    suspension: "border-ds-erreur bg-ds-erreur-fond",
+    reactivation: "border-ds-succes bg-ds-succes-fond",
     parametre: "border-ds-accent bg-ds-surface-teinte",
     consultation: "border-ds-ink-200 bg-ds-surface-creux",
   } as const;
