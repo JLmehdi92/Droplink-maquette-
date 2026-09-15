@@ -422,6 +422,17 @@
   --color-ds-info-fond: #ECEBFE;
   --color-ds-alerte: #E08A18;
   --color-ds-alerte-fond: #FCF3E3;
+  /*
+   * ENCRES D’ÉTAT — décision de Wassim, 15/09/2026, écrites d’abord dans
+   * `tokens/colors.css`. Le -500 employé en TEXTE ou en ICÔNE sur fond clair ne
+   * se lisait pas : erreur 3,61:1, succès 3,04, alerte 2,69 sur blanc. Même
+   * teinte, luminosité abaissée jusqu’à 4,5:1 sur blanc ET sur le fond teinté.
+   * Le -500 reste la couleur des APLATS : points, barres, fonds, filets.
+   * `tests/unit/encres-etat-lisibles.test.ts` le mesure.
+   */
+  --color-ds-erreur-encre: #D81322;
+  --color-ds-succes-encre: #0D7C5A;
+  --color-ds-alerte-encre: #9D6111;
   --radius-ds-xs: 6px;
   --radius-ds-sm: 10px;
   --radius-ds-md: 12px;

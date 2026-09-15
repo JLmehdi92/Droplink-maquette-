@@ -204,7 +204,7 @@ export default async function Connexion({
             {motif === null ? null : (
               <p
                 role="alert"
-                className="rounded-ds-card border border-ds-erreur bg-ds-erreur-fond p-4 text-[14px] text-ds-erreur"
+                className="rounded-ds-card border border-ds-erreur bg-ds-erreur-fond p-4 text-[14px] text-ds-erreur-encre"
               >
                 {t(`motif.${motif}`)}
               </p>

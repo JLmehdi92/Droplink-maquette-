@@ -138,7 +138,7 @@ export function ReglageInterrupteur({ reglage }: { reglage: InterrupteurVu }) {
         {etat.statut === "ok" ? (
           <span className="mt-[6px] block text-ds-texte-fort">{t("fait")}</span>
         ) : etat.statut === "erreur" ? (
-          <span className="mt-[6px] block text-ds-erreur">{t(`erreur.${etat.motif}`)}</span>
+          <span className="mt-[6px] block text-ds-erreur-encre">{t(`erreur.${etat.motif}`)}</span>
         ) : null}
       </p>
     </div>

@@ -68,14 +68,14 @@ export function LigneAction({
       <span
         className={
           "inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-ds-icon-tile " +
-          (danger ? "bg-ds-erreur-fond text-ds-erreur" : "bg-ds-surface-teinte text-ds-accent")
+          (danger ? "bg-ds-erreur-fond text-ds-erreur-encre" : "bg-ds-surface-teinte text-ds-accent")
         }
       >
         <Icone aria-hidden="true" size={17} strokeWidth={1.9} />
       </span>
       <span className="flex min-w-0 flex-[1_1_200px] flex-col gap-0.5">
         <span
-          className={"text-[14px] leading-[normal] font-semibold " + (danger ? "text-ds-erreur" : "text-ds-texte-fort")}
+          className={"text-[14px] leading-[normal] font-semibold " + (danger ? "text-ds-erreur-encre" : "text-ds-texte-fort")}
         >
           {titre}
         </span>

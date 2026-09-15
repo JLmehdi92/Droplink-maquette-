@@ -105,7 +105,7 @@ function BoutonConfirmation({
       className={
         "flex h-11 items-center justify-center rounded-ds-card border bg-ds-surface-carte px-5 text-[14px] font-bold transition-colors disabled:opacity-50 " +
         (danger
-          ? "border-ds-erreur text-ds-erreur hover:bg-ds-erreur-fond"
+          ? "border-ds-erreur text-ds-erreur-encre hover:bg-ds-erreur-fond"
           : "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux")
       }
     />
@@ -203,7 +203,7 @@ export function DialogueSuspension({
             "flex h-11 w-full items-center justify-center rounded-ds-card border bg-ds-surface-carte px-[18px] text-[14px] font-bold transition-colors " +
             (suspendu
               ? "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux"
-              : "border-ds-erreur text-ds-erreur hover:bg-ds-erreur-fond")
+              : "border-ds-erreur text-ds-erreur-encre hover:bg-ds-erreur-fond")
           }
         >
           {suspendu ? t("rouvrir") : t("ouvrir")}
@@ -268,7 +268,7 @@ export function DialogueSuspension({
         ) : null}
 
         {etat.statut === "erreur" ? (
-          <p role="alert" className="text-[13px] text-ds-erreur">
+          <p role="alert" className="text-[13px] text-ds-erreur-encre">
             {t(`erreur.${etat.motif}`)}
           </p>
         ) : null}

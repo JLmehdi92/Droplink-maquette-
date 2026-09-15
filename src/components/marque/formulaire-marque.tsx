@@ -615,7 +615,7 @@ export function FormulaireMarque({
                   <button
                     type="button"
                     onClick={() => void retirer()}
-                    className="inline-flex h-12 shrink-0 items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-erreur shadow-ds-xs transition-colors hover:bg-ds-surface-teinte"
+                    className="inline-flex h-12 shrink-0 items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-erreur-encre shadow-ds-xs transition-colors hover:bg-ds-surface-teinte"
                   >
                     {t("logoRetirer")}
                   </button>
@@ -628,7 +628,7 @@ export function FormulaireMarque({
             <p className={"mt-2 " + aide + " text-[12px]"}>{t("depotFormats", { n: initial.plafondLogoKo })}</p>
 
             {logo.phase === "erreur" ? (
-              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur-encre">
                 {logo.motif}
               </p>
             ) : null}
@@ -650,7 +650,7 @@ export function FormulaireMarque({
             />
             <p className={"mt-1.5 " + aide + " text-[12px]"}>{t("nomAide")}</p>
             {champsEnEchec.includes("nom") ? (
-              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur-encre">
                 {t("erreurNom")}
               </p>
             ) : null}
@@ -690,7 +690,7 @@ export function FormulaireMarque({
             </span>
             <p className={"mt-1.5 " + aide + " text-[12px]"}>{t("descriptionAide")}</p>
             {champsEnEchec.includes("description") ? (
-              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur-encre">
                 {t("erreurDescription", { max: DESCRIPTION_MAX })}
               </p>
             ) : null}
@@ -714,7 +714,7 @@ export function FormulaireMarque({
               marche.
             */
             action={
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill bg-ds-succes-fond px-2.5 py-1 text-[12px] font-bold text-ds-succes">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill bg-ds-succes-fond px-2.5 py-1 text-[12px] font-bold text-ds-succes-encre">
                 <svg
                   width="11"
                   height="11"
@@ -769,7 +769,7 @@ export function FormulaireMarque({
             </div>
 
             {champsEnEchec.includes("couleurAccent") ? (
-              <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+              <p role="alert" className="mt-2 text-[13px] text-ds-erreur-encre">
                 {t("erreurCouleur")}
               </p>
             ) : null}
@@ -926,7 +926,7 @@ export function FormulaireMarque({
                       className={champReseau}
                     />
                     {champsEnEchec.includes(reseau.clef) ? (
-                      <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+                      <p role="alert" className="mt-2 text-[13px] text-ds-erreur-encre">
                         {t("reseauInvalide." + reseau.clef)}
                       </p>
                     ) : null}
@@ -1157,14 +1157,14 @@ export function FormulaireMarque({
             {resultat.statut === "enregistre" ? (
               <p
                 role="status"
-                className="inline-flex items-center gap-[7px] self-center rounded-full bg-ds-succes-fond px-[13px] py-[7px] text-[13px] font-semibold text-ds-succes lg:self-auto"
+                className="inline-flex items-center gap-[7px] self-center rounded-full bg-ds-succes-fond px-[13px] py-[7px] text-[13px] font-semibold text-ds-succes-encre lg:self-auto"
               >
                 <Check aria-hidden="true" size={14} strokeWidth={2.2} />
                 {t("enregistre")}
               </p>
             ) : null}
             {resultat.statut === "erreur" && resultat.motif !== "saisie" ? (
-              <p role="alert" className="text-[13px] text-ds-erreur">
+              <p role="alert" className="text-[13px] text-ds-erreur-encre">
                 {t(`erreur.${resultat.motif}`)}
               </p>
             ) : null}

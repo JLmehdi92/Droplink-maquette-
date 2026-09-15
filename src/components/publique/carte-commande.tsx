@@ -200,10 +200,10 @@ export function CarteCommande({
       */}
       {bandeau.silencieux ? (
         <div className="flex gap-3.5 rounded-ds-card border border-ds-alerte bg-ds-alerte-fond p-[18px]">
-          <Clock size={22} strokeWidth={1.9} className="shrink-0 text-ds-alerte" aria-hidden="true" />
+          <Clock size={22} strokeWidth={1.9} className="shrink-0 text-ds-alerte-encre" aria-hidden="true" />
           <span className="flex flex-col gap-1">
-            <span className="text-[15px] font-bold text-ds-alerte">{bandeau.titre}</span>
-            <span className="text-[13px] text-ds-alerte">{bandeau.texte}</span>
+            <span className="text-[15px] font-bold text-ds-alerte-encre">{bandeau.titre}</span>
+            <span className="text-[13px] text-ds-alerte-encre">{bandeau.texte}</span>
           </span>
         </div>
       ) : (

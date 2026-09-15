@@ -230,6 +230,13 @@ sourdine               #8B90A8     estompé           #A9AEC4
 filet                  #ECECF5     filet appuyé      #DEDEEA
 
 succès #12A87A · erreur #EF4B57 · avertissement #E08A18 · info #4F46E5
+                       ⚠️ CE SONT DES COULEURS D'APLAT : points, barres, fonds,
+                       filets. En TEXTE ou en ICÔNE sur fond clair elles ne se
+                       lisaient pas (3,61 · 3,04 · 2,69 sur blanc).
+ENCRES D'ÉTAT          erreur #D81322 · succès #0D7C5A · avertissement #9D6111
+                       (décision de Wassim, 15/09/2026 ; 4,5:1 sur blanc ET sur
+                       le fond teinté ; `--status-*-ink` au kit,
+                       `text-ds-*-encre` au produit)
 
 rayons    xs 6 · sm 10 · md 12 · lg 14 · xl 18 · 2xl 24 · 3xl 32 · pilule 9999
           carte 16 · carte-lg 20 · contrôle 12 · BOUTON 9999 · fenêtre 18
@@ -739,6 +746,26 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > retirant ses dimensions (0×0) ; passé le 15/09/2026 sur les 33 écrans et le
 > visionneur ouvert (`CLIC_PRODUIT="Agrandir la photo 1"`, qui trouve un bouton
 > par son nom accessible) : aucune image sans place.
+
+> ⚠️ **LES COULEURS D'ÉTAT SE LISAIENT À 2,69:1 EN TEXTE, PARTOUT.** Pastilles
+> de statut, boutons « Supprimer », messages d'erreur : le -500 servait d'aplat
+> ET de texte, dans le kit comme dans le produit. Décision de Wassim
+> (15/09/2026) : trois ENCRES, même teinte, luminosité abaissée. Kit : 144
+> avant-plans passés à `--status-*-ink` (bundle compris — les pages chargent
+> `_ds_bundle.js`, pas `components/`), 43 aplats gardés ; les ICÔNES sur fond
+> teinté suivent l'encre, parce que le -500 n'y tenait pas même 3:1 (ambre
+> 2,44). Produit : 119 utilitaires. `tests/unit/encres-etat-lisibles.test.ts`
+> résout et mesure chaque `text-ds-<état>`, falsifié deux fois. **Remesure
+> complète des 36 relevés, kit et produit : aucun écart de couleur**, et les
+> relevés comptent 470 textes à l'encre au kit, 335 au produit, zéro au -500
+> côté produit.
+>
+> ⚠️ **ET LA REMESURE A SORTI TROIS ROUGES QUI N'ÉTAIENT PAS DES COULEURS.** Les
+> analyses déclaraient la semaine « 22/06 » en toutes lettres — morte au
+> changement de semaine, passée en motif. Et la base de tests gardait, APRÈS
+> `pnpm gates`, un plafond de colis à 33 écrit par `parametres.test.ts` : la
+> remise à zéro des paramètres ne tournait qu'à l'entrée des suites. Elle tourne
+> désormais aussi au `teardown`.
 
 > ⚠️ **LE TEXTE INDICATIF DES CHAMPS SE LISAIT À 2,20:1.** Le design system ne lui
 > donnait aucune couleur — le kit rendait le gris par défaut de Chrome, 4,61:1 —

@@ -223,7 +223,7 @@ export async function PageLegale({
               aria-hidden="true"
               size={18}
               strokeWidth={2}
-              className="mt-px shrink-0 text-ds-alerte"
+              className="mt-px shrink-0 text-ds-alerte-encre"
             />
             <div className="min-w-0">
               <p className="mb-[3px] text-[14.5px] font-bold text-ds-texte-fort">{t("avertissementTitre")}</p>

@@ -184,7 +184,7 @@ export function ArbitrageQc({
         </div>
 
         {echec ? (
-          <p role="alert" className="text-[14px] text-ds-erreur">
+          <p role="alert" className="text-[14px] text-ds-erreur-encre">
             {libelles.echec}
           </p>
         ) : null}
@@ -225,7 +225,7 @@ export function ArbitrageQc({
       {/* L'échec est DIT. Un pari perdu qui ne se dit pas laisse le visiteur
           croire que sa décision est enregistrée. */}
       {echec ? (
-        <p role="alert" className="text-[14px] text-ds-erreur">
+        <p role="alert" className="text-[14px] text-ds-erreur-encre">
           {libelles.echec}
         </p>
       ) : null}

@@ -1267,9 +1267,11 @@
         "raison": "Le sous-titre et la fenetre de NOTRE frise — voir la declaration symetrique de « Nombre de commandes creees sur la periode selectionnee »."
       },
       {
-        "texte": "22/06",
+        "motifs": [
+          "^\\d{2}/\\d{2}$"
+        ],
         "motif": "donnee",
-        "raison": "Les debuts de semaine de notre frise, au format « JJ/MM » — voir la declaration symetrique de « 1 sept. »."
+        "raison": "Les debuts de semaine de notre frise, au format « JJ/MM » — voir la declaration symetrique de « 1 sept. ». ⚠️ PAR MOTIF DEPUIS LE 15/09/2026, comme sur le tableau de bord le même jour : la déclaration littérale « 22/06 » est morte au changement de semaine."
       },
       {
         "textes": [
@@ -3259,12 +3261,11 @@
       {
         "textes": [
           "10 septembre 2025 à 09:15  <nombre d'occurrences>",
-          "10 sept. 2025 09:15",
           "9 septembre 2025 à 22:47 [1/2]",
           "10 septembre 2025 à 09:15 [2/2]"
         ],
         "motif": "donnee",
-        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en invente cinq, et le premier porte une description de transporteur assez longue pour passer sur deux lignes. La date prend la hauteur de sa rangee, comme au kit, et la rangee est plus haute. La date de la frise, elle, a la largeur de ses chiffres : le jeu la pose a l heure de la mesure, et « 14 sept. 2026 01:45 » n a pas la largeur de « 10 sept. 2025 09:15 ». ⚠️ L APPARIEMENT DES DATES A CHANGE LE 14/09/2026 : la carte de validation ecrite dans le kit fait descendre son historique, et les rangs [1/2] et [2/2] s apparient desormais a d autres dates."
+        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en invente cinq, et le premier porte une description de transporteur assez longue pour passer sur deux lignes. La date prend la hauteur de sa rangee, comme au kit, et la rangee est plus haute. La date de la frise, elle, a la largeur de ses chiffres : le jeu la pose a l heure de la mesure, et « 14 sept. 2026 01:45 » n a pas la largeur de « 10 sept. 2025 09:15 ». ⚠️ L APPARIEMENT DES DATES A CHANGE LE 14/09/2026 : la carte de validation ecrite dans le kit fait descendre son historique, et les rangs [1/2] et [2/2] s apparient desormais a d autres dates. La date de la frise « 10 sept. 2025 09:15 » n est plus declaree : le jeu de mesure la pose au jour de la mesure, et depuis le 15/09/2026 elle a la forme de celle du kit et s apparie SANS AUCUN ECART."
       },
       {
         "textes": [

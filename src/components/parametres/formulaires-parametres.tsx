@@ -76,7 +76,7 @@ function Annonce({ message }: { readonly message: Message | null }) {
   return (
     <p
       role={message.erreur ? "alert" : "status"}
-      className={"text-[13px] leading-[1.5] " + (message.erreur ? "text-ds-erreur" : "text-ds-succes")}
+      className={"text-[13px] leading-[1.5] " + (message.erreur ? "text-ds-erreur-encre" : "text-ds-succes-encre")}
     >
       {message.texte}
     </p>
@@ -506,7 +506,7 @@ function FormulaireSuppression({
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="locale" value={locale} />
       <div className="flex flex-col gap-1.5">
-        <p className="text-[14.5px] leading-[normal] font-bold text-ds-erreur">
+        <p className="text-[14.5px] leading-[normal] font-bold text-ds-erreur-encre">
           {t(`suppression.${variante}.question`)}
         </p>
         <p className="text-[13.5px] leading-[1.55] text-ds-texte-corps">{t(`suppression.${variante}.avertissement`)}</p>
@@ -617,7 +617,7 @@ export function CarteSecurite({
           mentirait sur l'état du compte (principe XII). */}
       <LigneAction premiere icone={Shield} titre={t("deuxEtapes.titre")} sousTitre={t("deuxEtapes.aide")}>
         {deuxEtapesActive ? (
-          <span className="inline-flex rounded-ds-pill bg-ds-succes-fond px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold text-ds-succes lg:text-[11px]">
+          <span className="inline-flex rounded-ds-pill bg-ds-succes-fond px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold text-ds-succes-encre lg:text-[11px]">
             {t("deuxEtapes.activee")}
           </span>
         ) : null}
@@ -662,7 +662,7 @@ export function CarteSecurite({
         {ouvert ? (
           <div className="mt-1 flex flex-col gap-5 rounded-ds-card border border-ds-filet bg-ds-surface-creux p-4">
             {sessions === null ? (
-              <p role="alert" className="text-[13px] leading-[1.5] text-ds-erreur">
+              <p role="alert" className="text-[13px] leading-[1.5] text-ds-erreur-encre">
                 {t("lectureImpossible")}
               </p>
             ) : (

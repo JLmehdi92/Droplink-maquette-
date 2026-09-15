@@ -471,7 +471,7 @@ export default async function Accueil({
               style={{ animationDelay: "1.6s" }}
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ds-erreur-fond">
-                <Truck aria-hidden="true" size={16} strokeWidth={1.9} className="text-ds-erreur" />
+                <Truck aria-hidden="true" size={16} strokeWidth={1.9} className="text-ds-erreur-encre" />
               </span>
               <span className="text-[12px] leading-[15px] font-bold text-ds-texte-titre">
                 {t("flottant.transitCourt")}
@@ -490,14 +490,14 @@ export default async function Accueil({
                 {
                   clef: "transit",
                   icone: Truck,
-                  peau: "bg-ds-erreur-fond text-ds-erreur",
+                  peau: "bg-ds-erreur-fond text-ds-erreur-encre",
                   place: "top-[262px] right-[calc(50%-484px)] w-[274px]",
                   delai: "1.6s",
                 },
                 {
                   clef: "valide",
                   icone: Check,
-                  peau: "bg-ds-succes-fond text-ds-succes",
+                  peau: "bg-ds-succes-fond text-ds-succes-encre",
                   place: "bottom-[34px] left-[calc(50%-424px)] w-[242px]",
                   delai: "3.2s",
                 },
@@ -565,13 +565,13 @@ export default async function Accueil({
                 [
                   ["commandes", Package, "bg-ds-surface-teinte text-ds-accent"],
                   ["medias", ImageIcon, "bg-ds-surface-teinte text-ds-accent"],
-                  ["suivi", Truck, "bg-ds-erreur-fond text-ds-erreur"],
+                  ["suivi", Truck, "bg-ds-erreur-fond text-ds-erreur-encre"],
                   // ⚠️ LE TROISIÈME EST VERT sur les deux planches. Le code le
                   // rendait GRIS, faute de famille verte dans l'ancien thème —
                   // elle existe désormais (`succes-pastel` / `succes`).
-                  ["marque", Link2, "bg-ds-succes-fond text-ds-succes"],
+                  ["marque", Link2, "bg-ds-succes-fond text-ds-succes-encre"],
                   ["analyses", BarChart3, "bg-ds-info-fond text-ds-info"],
-                  ["sansCompte", Lock, "bg-ds-alerte-fond text-ds-alerte"],
+                  ["sansCompte", Lock, "bg-ds-alerte-fond text-ds-alerte-encre"],
                 ] as const
               ).map(([clef, IconeCarte, teinte]) => (
                 <li

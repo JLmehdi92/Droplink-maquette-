@@ -29,8 +29,8 @@ import type { ReactNode } from "react";
 const TEINTES = {
   marque: "bg-ds-surface-teinte text-ds-accent",
   info: "bg-ds-info-fond text-ds-info",
-  succes: "bg-ds-succes-fond text-ds-succes",
-  alerte: "bg-ds-alerte-fond text-ds-alerte",
+  succes: "bg-ds-succes-fond text-ds-succes-encre",
+  alerte: "bg-ds-alerte-fond text-ds-alerte-encre",
 } as const;
 
 export function TuileVolume({

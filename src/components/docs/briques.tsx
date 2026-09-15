@@ -66,7 +66,7 @@ export function Encart({
 }) {
   const peau =
     ton === "alerte"
-      ? { boite: "bg-ds-alerte-fond border-[#F3DFB4]", encre: "text-ds-alerte", Icone: TriangleAlert }
+      ? { boite: "bg-ds-alerte-fond border-[#F3DFB4]", encre: "text-ds-alerte-encre", Icone: TriangleAlert }
       : { boite: "bg-ds-surface-teinte border-ds-violet-200", encre: "text-ds-accent", Icone: Info };
   const { Icone } = peau;
   return (

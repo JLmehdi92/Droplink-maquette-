@@ -51,9 +51,9 @@ export function ActionsLigne({
         title={t("copierLien", { client: nomClient })}
       >
         {etat === "copie" ? (
-          <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes" />
+          <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes-encre" />
         ) : etat === "echec" ? (
-          <TriangleAlert aria-hidden="true" size={16} strokeWidth={2} className="text-ds-erreur" />
+          <TriangleAlert aria-hidden="true" size={16} strokeWidth={2} className="text-ds-erreur-encre" />
         ) : (
           <Copy aria-hidden="true" size={16} strokeWidth={1.8} />
         )}
@@ -72,7 +72,7 @@ export function ActionsLigne({
       </a>
 
       {etat === "echec" ? (
-        <span className="text-[12px] font-semibold text-ds-erreur">{t("copieEchouee")}</span>
+        <span className="text-[12px] font-semibold text-ds-erreur-encre">{t("copieEchouee")}</span>
       ) : null}
     </div>
   );

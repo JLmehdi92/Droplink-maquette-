@@ -111,7 +111,7 @@ const PEAU: Readonly<Record<Etat, { fond: string; encre: string; pastille: strin
   preparation: { fond: "bg-ds-surface-creux", encre: "text-ds-texte-corps", pastille: "bg-ds-texte-tenu" },
   expedie: { fond: "bg-ds-info-fond", encre: "text-ds-info", pastille: "bg-ds-info" },
   en_transit: { fond: "bg-ds-info-fond", encre: "text-ds-info", pastille: "bg-ds-info" },
-  livre: { fond: "bg-ds-succes-fond", encre: "text-ds-succes", pastille: "bg-ds-succes" },
+  livre: { fond: "bg-ds-succes-fond", encre: "text-ds-succes-encre", pastille: "bg-ds-succes" },
 };
 
 /* AMBRE, PAS ROUGE : un colis immobile n'est pas une erreur, c'est une attente
@@ -119,7 +119,7 @@ const PEAU: Readonly<Record<Etat, { fond: string; encre: string; pastille: strin
    l'écran Commandes. */
 const ALERTE = {
   fond: "bg-ds-alerte-fond",
-  encre: "text-ds-alerte",
+  encre: "text-ds-alerte-encre",
   pastille: "bg-ds-alerte",
 } as const;
 
@@ -516,8 +516,8 @@ export async function TableauEnvois({
               className={
                 "flex min-h-11 items-center rounded-ds-sm px-3 text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
                 (parametres.silencieux
-                  ? "bg-ds-alerte-fond font-bold text-ds-alerte"
-                  : "font-medium text-ds-alerte hover:bg-ds-alerte-fond")
+                  ? "bg-ds-alerte-fond font-bold text-ds-alerte-encre"
+                  : "font-medium text-ds-alerte-encre hover:bg-ds-alerte-fond")
               }
             >
               {t("filtres.silencieux")}
@@ -741,7 +741,7 @@ export async function TableauEnvois({
                          du kit. Un volume qui monte est une bonne nouvelle pour
                          un vendeur ; c'est le seul endroit de l'écran où la
                          couleur porte un jugement, et il est mérité. */
-                      classe: c.evolution >= 0 ? "text-ds-succes" : "text-ds-erreur",
+                      classe: c.evolution >= 0 ? "text-ds-succes-encre" : "text-ds-erreur-encre",
                     },
                   })}
             />
@@ -1078,7 +1078,7 @@ export async function TableauEnvois({
                             <span
                               className={
                                 "text-[12px] leading-[normal] " +
-                                (d.silencieux ? "font-bold text-ds-alerte" : "text-ds-texte-sourdine")
+                                (d.silencieux ? "font-bold text-ds-alerte-encre" : "text-ds-texte-sourdine")
                               }
                             >
                               {d.anciennete ?? ""}

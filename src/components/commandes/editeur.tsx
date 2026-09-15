@@ -387,14 +387,14 @@ export function Editeur({
           role="alert"
           className="fixed inset-x-0 bottom-0 z-20 border-t border-transparent bg-ds-erreur-fond px-4 py-3.5 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:max-w-[420px] lg:rounded-ds-card-lg lg:border lg:shadow-ds-lg"
         >
-          <p className="text-[14px] font-bold text-ds-erreur">
+          <p className="text-[14px] font-bold text-ds-erreur-encre">
             {t("echec", { champs: champsEnEchec.map((c) => t("nomChamp." + c)).join(", ") })}
           </p>
-          <p className="mt-1 text-[13px] leading-5 text-ds-erreur">{t("echecReste")}</p>
+          <p className="mt-1 text-[13px] leading-5 text-ds-erreur-encre">{t("echecReste")}</p>
           <button
             type="button"
             onClick={relancer}
-            className="mt-3 min-h-11 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[13px] font-semibold text-ds-erreur shadow-ds-xs transition-shadow hover:shadow-ds-md lg:h-10 lg:min-h-0"
+            className="mt-3 min-h-11 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[13px] font-semibold text-ds-erreur-encre shadow-ds-xs transition-shadow hover:shadow-ds-md lg:h-10 lg:min-h-0"
           >
             {t("reessayer")}
           </button>
@@ -536,7 +536,7 @@ function PanneauSuivi({
       {/* LE FOURNISSEUR A CESSÉ DE SUIVRE CE NUMÉRO, ET C'EST DIT. Un suivi qui
           s'arrête sans le dire se lit comme un suivi qui ne marche pas. */}
       {suivi.abandonne ? (
-        <p className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] font-medium text-ds-alerte">
+        <p className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] font-medium text-ds-alerte-encre">
           {t("suiviArrete")}
         </p>
       ) : null}
@@ -639,8 +639,8 @@ function TemoinSauvegarde({ etat }: { readonly etat: Etat }) {
     etat === "encours"
       ? { Icone: Clock, texte: t("enregistrement"), classe: "bg-ds-surface-creux text-ds-texte-corps" }
       : etat === "echec"
-        ? { Icone: TriangleAlert, texte: t("nonEnregistre"), classe: "bg-ds-erreur-fond text-ds-erreur" }
-        : { Icone: Check, texte: t("enregistre"), classe: "bg-ds-succes-fond text-ds-succes" };
+        ? { Icone: TriangleAlert, texte: t("nonEnregistre"), classe: "bg-ds-erreur-fond text-ds-erreur-encre" }
+        : { Icone: Check, texte: t("enregistre"), classe: "bg-ds-succes-fond text-ds-succes-encre" };
 
   return (
     <span
@@ -664,7 +664,7 @@ function TemoinSauvegarde({ etat }: { readonly etat: Etat }) {
 /** L'icône du bouton de copie — trois états, un seul endroit où ils sont écrits. */
 function IconeCopie({ etat }: { readonly etat: "repos" | "copie" | "echec" }) {
   if (etat === "copie")
-    return <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes" />;
+    return <Check aria-hidden="true" size={16} strokeWidth={2.2} className="text-ds-succes-encre" />;
   if (etat === "echec") return <TriangleAlert aria-hidden="true" size={16} strokeWidth={2} />;
   // À L'ACCENT, comme toutes les icônes de `DetailAction` : c'est ce qui
   // distingue ces boutons des boutons neutres du reste du produit, et la mesure
@@ -707,7 +707,7 @@ function BoutonCopier({ lien, compact = false }: { readonly lien: string; readon
         "flex items-center justify-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte " +
         "text-[14px] font-semibold shadow-ds-xs transition-colors hover:bg-ds-surface-teinte lg:h-12 " +
         (compact ? "min-h-12 w-[52px] shrink-0 lg:w-auto lg:px-[18px] " : "h-12 px-[18px] ") +
-        (etat === "echec" ? "text-ds-erreur" : "text-ds-texte-fort")
+        (etat === "echec" ? "text-ds-erreur-encre" : "text-ds-texte-fort")
       }
     >
       {/* L'icône est NOMMÉE quand elle est seule, muette quand un texte

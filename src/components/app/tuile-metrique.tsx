@@ -37,10 +37,10 @@ export type TeinteTuile = "marque" | "alerte" | "info" | "succes" | "erreur" | "
  */
 const TEINTES: Record<TeinteTuile, { readonly pastille: string; readonly encre: string }> = {
   marque: { pastille: "bg-ds-surface-teinte text-ds-accent", encre: "text-ds-accent" },
-  alerte: { pastille: "bg-ds-alerte-fond text-ds-alerte", encre: "text-ds-alerte" },
+  alerte: { pastille: "bg-ds-alerte-fond text-ds-alerte-encre", encre: "text-ds-alerte-encre" },
   info: { pastille: "bg-ds-info-fond text-ds-info", encre: "text-ds-info" },
-  succes: { pastille: "bg-ds-succes-fond text-ds-succes", encre: "text-ds-succes" },
-  erreur: { pastille: "bg-ds-erreur-fond text-ds-erreur", encre: "text-ds-erreur" },
+  succes: { pastille: "bg-ds-succes-fond text-ds-succes-encre", encre: "text-ds-succes-encre" },
+  erreur: { pastille: "bg-ds-erreur-fond text-ds-erreur-encre", encre: "text-ds-erreur-encre" },
   /*
    * LA TEINTE DE CE QUI NE S'EST PAS ENCORE PASSÉ.
    *

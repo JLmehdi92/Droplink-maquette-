@@ -75,8 +75,8 @@ const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps";
  * icône de 17 au trait 1,9.
  */
 const TUILE = {
-  suspension: { fond: "bg-ds-erreur-fond text-ds-erreur", icone: UserX },
-  reactivation: { fond: "bg-ds-succes-fond text-ds-succes", icone: UserCheck },
+  suspension: { fond: "bg-ds-erreur-fond text-ds-erreur-encre", icone: UserX },
+  reactivation: { fond: "bg-ds-succes-fond text-ds-succes-encre", icone: UserCheck },
   parametre: { fond: "bg-ds-surface-teinte text-ds-accent", icone: SlidersHorizontal },
   consultation: { fond: "bg-ds-info-fond text-ds-info", icone: Eye },
 } as const;
@@ -223,7 +223,7 @@ export default async function PanneauAdmin({
                         /* ⚠️ LA PASTILLE D'ATTENTION ÉTAIT DE LA COULEUR DE SA
                            CARTE (bg-ds-alerte-fond sur bg-ds-alerte-fond) : elle
                            passe sur le blanc, comme le badge de la surveillance. */
-                        (critique(a) ? "bg-ds-surface-carte text-ds-erreur" : "bg-ds-surface-carte text-ds-alerte")
+                        (critique(a) ? "bg-ds-surface-carte text-ds-erreur-encre" : "bg-ds-surface-carte text-ds-alerte-encre")
                       }
                     >
                       {critique(a) ? (

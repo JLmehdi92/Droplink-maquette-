@@ -57,7 +57,7 @@ export function HistoriqueSuivi({
       {/* Le fournisseur a cessé de suivre ce numéro. C'est DIT : un suivi qui
           s'arrête sans le dire se lit comme un suivi qui ne marche pas. */}
       {suivi.abandonne ? (
-        <p className="mb-[18px] rounded-ds-sm border border-ds-alerte bg-ds-alerte-fond p-3 text-[14px] text-ds-alerte">
+        <p className="mb-[18px] rounded-ds-sm border border-ds-alerte bg-ds-alerte-fond p-3 text-[14px] text-ds-alerte-encre">
           {libelles.arrete}
         </p>
       ) : null}

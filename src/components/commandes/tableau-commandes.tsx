@@ -187,7 +187,7 @@ export async function TableauCommandes({
               : // Le design system ne borde pas ses surfaces teintées : le fond
                 // ambré suffit à les détacher, et un filet de plus les ferait
                 // ressembler à un champ de saisie.
-                "border-transparent bg-ds-alerte-fond text-ds-alerte")
+                "border-transparent bg-ds-alerte-fond text-ds-alerte-encre")
           }
         >
           {lot.etat === "ok" ? t("lot.ok", { n: lot.nombre }) : t("lot." + lot.etat)}
@@ -541,7 +541,7 @@ export async function TableauCommandes({
                             </span>
                             {ligne.vues === 0 ? (
                               <span
-                                className="truncate text-[12px] font-bold text-ds-erreur"
+                                className="truncate text-[12px] font-bold text-ds-erreur-encre"
                                 title={t("jamaisOuvertAide", { client: nom })}
                               >
                                 {t("jamaisOuvert")}
@@ -769,7 +769,7 @@ export async function TableauCommandes({
                         <span className="flex items-center gap-2">
                           <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
                           {jamaisOuverte ? (
-                            <span className="text-[12px] leading-[15px] font-bold text-ds-erreur">
+                            <span className="text-[12px] leading-[15px] font-bold text-ds-erreur-encre">
                               {t("jamaisOuvert")}
                             </span>
                           ) : (

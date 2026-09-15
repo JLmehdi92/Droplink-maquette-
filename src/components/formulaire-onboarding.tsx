@@ -209,14 +209,14 @@ export function FormulaireOnboarding({
                 type="button"
                 onClick={() => setLogo({ phase: "vide" })}
                 aria-label={t("logoRetirer")}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-sm text-ds-texte-sourdine transition-colors hover:text-ds-erreur"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-sm text-ds-texte-sourdine transition-colors hover:text-ds-erreur-encre"
               >
                 <X aria-hidden="true" size={18} strokeWidth={1.9} />
               </button>
             ) : null}
           </div>
           {logo.phase === "erreur" ? (
-            <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+            <p role="alert" className="mt-2 text-[13px] text-ds-erreur-encre">
               {logo.motif}
             </p>
           ) : null}
@@ -300,7 +300,7 @@ export function FormulaireOnboarding({
             })}
           </div>
           {champsEnEchec.includes("typeDeCompte") ? (
-            <p role="alert" className="mt-2 text-[13px] text-ds-erreur">
+            <p role="alert" className="mt-2 text-[13px] text-ds-erreur-encre">
               {t("erreurType")}
             </p>
           ) : null}

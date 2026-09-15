@@ -64,7 +64,7 @@ export function CarteRevocation({
 
   return (
     <section className="rounded-ds-card-lg border border-transparent bg-ds-erreur-fond p-5 lg:p-6">
-      <h2 className="mb-1.5 text-[18px] font-bold tracking-[-0.025em] text-ds-erreur">
+      <h2 className="mb-1.5 text-[18px] font-bold tracking-[-0.025em] text-ds-erreur-encre">
         {t("revocation.titre")}
       </h2>
       <p className="mb-3 text-[13px] leading-5 text-ds-texte-corps lg:mb-3.5 lg:leading-[21px]">
@@ -84,7 +84,7 @@ export function CarteRevocation({
       </label>
 
       {echec !== null ? (
-        <p role="alert" className="mb-3 text-[13px] font-semibold text-ds-erreur">
+        <p role="alert" className="mb-3 text-[13px] font-semibold text-ds-erreur-encre">
           {echec}
         </p>
       ) : null}
@@ -114,7 +114,7 @@ export function CarteRevocation({
           reussi: t("revocation.confirmer"),
           echoue: t("revocation.confirmer"),
         }}
-        className="flex min-h-12 w-full items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-erreur shadow-ds-xs transition-shadow hover:shadow-ds-md disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-ds-xs lg:h-12 lg:min-h-0 lg:w-auto"
+        className="flex min-h-12 w-full items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-erreur-encre shadow-ds-xs transition-shadow hover:shadow-ds-md disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-ds-xs lg:h-12 lg:min-h-0 lg:w-auto"
       />
     </section>
   );

@@ -135,8 +135,8 @@ export default async function AdminJournal({
    * sert au filtre, et la base range tout `compte.%` sous « suspension ».
    */
   const TEINTE = {
-    suspension: "bg-ds-erreur-fond text-ds-erreur",
-    reactivation: "bg-ds-succes-fond text-ds-succes",
+    suspension: "bg-ds-erreur-fond text-ds-erreur-encre",
+    reactivation: "bg-ds-succes-fond text-ds-succes-encre",
     parametre: "bg-ds-surface-teinte text-ds-accent-encre",
     consultation: "bg-ds-surface-creux text-ds-texte-corps",
   } as const;

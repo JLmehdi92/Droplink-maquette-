@@ -170,7 +170,7 @@ export default async function AdminComptes({
       className={
         PILULE +
         " shrink-0 " +
-        (suspendu(l) ? "bg-ds-erreur-fond text-ds-erreur" : "bg-ds-succes-fond text-ds-succes")
+        (suspendu(l) ? "bg-ds-erreur-fond text-ds-erreur-encre" : "bg-ds-succes-fond text-ds-succes-encre")
       }
     >
       {/* ⚠️ LA PASTILLE DE COULEUR A DISPARU, ET LE KIT N'EN A JAMAIS POSÉ.
@@ -400,7 +400,7 @@ export default async function AdminComptes({
                           discute, et l'on finit par ne plus le lire. */}
                       <td
                         className={
-                          CELLULE + (auDessus(ligne) ? " font-bold text-ds-erreur" : " text-ds-texte-fort")
+                          CELLULE + (auDessus(ligne) ? " font-bold text-ds-erreur-encre" : " text-ds-texte-fort")
                         }
                       >
                         {auDessus(ligne)
@@ -455,7 +455,7 @@ export default async function AdminComptes({
                       <span className={PILULE_NEUTRE}>{t("comptes.roles.admin")}</span>
                     ) : null}
                     {auDessus(ligne) ? (
-                      <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur"}>
+                      <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>
                         {t("comptes.colisSurSeuilLong", {
                           valeur: format.number(ligne.colisCeMois),
                           seuil: format.number(seuils.colis),

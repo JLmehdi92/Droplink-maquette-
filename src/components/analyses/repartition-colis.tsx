@@ -61,7 +61,7 @@ export async function RepartitionColis({
                      correction. */
                   className={
                     "text-[14px] leading-[normal] font-medium " +
-                    (l.alerte ? "text-ds-alerte" : "text-ds-texte-fort")
+                    (l.alerte ? "text-ds-alerte-encre" : "text-ds-texte-fort")
                   }
                 >
                   {t(`colis.${l.cle}`)}

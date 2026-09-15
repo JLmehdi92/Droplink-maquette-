@@ -81,10 +81,10 @@ const LIBELLE_FENETRE = {
  * d'anneau se reconnaissent d'un coup d'œil.
  */
 const TEINTE_STATUT: Record<LigneCommandeAdmin["statut"], string> = {
-  preparation: "bg-ds-alerte-fond text-ds-alerte",
+  preparation: "bg-ds-alerte-fond text-ds-alerte-encre",
   expedie: "bg-ds-surface-teinte text-ds-accent-encre",
   en_transit: "bg-ds-info-fond text-ds-info",
-  livre: "bg-ds-succes-fond text-ds-succes",
+  livre: "bg-ds-succes-fond text-ds-succes-encre",
 };
 
 /**

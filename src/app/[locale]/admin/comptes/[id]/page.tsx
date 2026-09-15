@@ -152,7 +152,7 @@ export default async function FicheCompte({
             <span
               className={
                 "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[11.5px] font-bold tracking-[-0.02em] whitespace-nowrap md:text-[11px] " +
-                (suspendu ? "bg-ds-erreur-fond text-ds-erreur" : "bg-ds-succes-fond text-ds-succes")
+                (suspendu ? "bg-ds-erreur-fond text-ds-erreur-encre" : "bg-ds-succes-fond text-ds-succes-encre")
               }
             >
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-ds-pill bg-current" />
@@ -226,14 +226,14 @@ export default async function FicheCompte({
                   <div className="mb-[7px] flex flex-wrap justify-between gap-2">
                     <span
                       className={
-                        "text-[14px] font-semibold " + (colisAuDessus ? "text-ds-erreur" : "text-ds-texte-fort")
+                        "text-[14px] font-semibold " + (colisAuDessus ? "text-ds-erreur-encre" : "text-ds-texte-fort")
                       }
                     >
                       {t("fiche.plafondColis")}
                     </span>
                     <span
                       className={
-                        "text-[14px] " + (colisAuDessus ? "font-bold text-ds-erreur" : "text-ds-texte-sourdine")
+                        "text-[14px] " + (colisAuDessus ? "font-bold text-ds-erreur-encre" : "text-ds-texte-sourdine")
                       }
                     >
                       {t("fiche.surPlafond", {
@@ -246,7 +246,7 @@ export default async function FicheCompte({
                   {/* LE DÉPASSEMENT PORTE SON CHIFFRE : « dépassé de 640 » se
                       vérifie, « au-dessus du seuil » se discute. */}
                   {colisAuDessus ? (
-                    <p className="mt-[7px] text-[12px] leading-[1.5] text-ds-erreur">
+                    <p className="mt-[7px] text-[12px] leading-[1.5] text-ds-erreur-encre">
                       {t("fiche.depassementColis", {
                         ecart: format.number(fiche.colisCeMois - seuils.colis),
                       })}

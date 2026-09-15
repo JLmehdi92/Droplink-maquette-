@@ -76,9 +76,9 @@ export async function CompteursAnalyses({
         ecart === null
           ? "text-ds-texte-sourdine"
           : ecart > 0
-            ? "font-semibold text-ds-succes"
+            ? "font-semibold text-ds-succes-encre"
             : ecart < 0
-              ? "font-semibold text-ds-alerte"
+              ? "font-semibold text-ds-alerte-encre"
               : "text-ds-texte-sourdine",
       alerte: false,
     },

@@ -78,12 +78,12 @@ const TEINTE_TACHE = {
   actif: {
     carte: "border-ds-filet bg-ds-surface-carte",
     point: "bg-ds-succes",
-    badge: "bg-ds-succes-fond text-ds-succes",
+    badge: "bg-ds-succes-fond text-ds-succes-encre",
   },
   en_retard: {
     carte: "border-[#F3DFB4] bg-ds-alerte-fond",
     point: "bg-ds-alerte",
-    badge: "bg-ds-surface-carte text-ds-alerte",
+    badge: "bg-ds-surface-carte text-ds-alerte-encre",
   },
   jamais_executee: {
     carte: "border-ds-filet bg-ds-surface-carte",

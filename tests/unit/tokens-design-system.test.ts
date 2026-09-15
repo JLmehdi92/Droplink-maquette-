@@ -120,6 +120,13 @@ const TOKENS_DU_DESIGN_SYSTEM: ReadonlyArray<readonly [string, string]> = [
   ["--color-ds-info-fond", "#ECEBFE"],
   ["--color-ds-alerte", "#E08A18"],
   ["--color-ds-alerte-fond", "#FCF3E3"],
+  /* LES ENCRES D'ÉTAT — `--status-danger-ink`, `--status-success-ink`,
+     `--status-warning-ink` (`--red-700`, `--green-700`, `--amber-700`), écrites
+     dans `tokens/colors.css` le 15/09/2026 AVANT d'entrer ici, sur décision de
+     Wassim : le -500 en texte ne tenait pas 4,5:1. */
+  ["--color-ds-erreur-encre", "#D81322"],
+  ["--color-ds-succes-encre", "#0D7C5A"],
+  ["--color-ds-alerte-encre", "#9D6111"],
   ["--radius-ds-xs", "6px"],
   ["--radius-ds-sm", "10px"],
   ["--radius-ds-md", "12px"],

@@ -60,14 +60,14 @@ export async function ClocheAlertes({
       valeur: jamaisOuvertes,
       href: `/${langue}/commandes?tri=jamais-ouvert`,
       Icone: EyeOff,
-      peau: "bg-ds-erreur-fond text-ds-erreur",
+      peau: "bg-ds-erreur-fond text-ds-erreur-encre",
     },
     {
       clef: "silencieux" as const,
       valeur: colisSilencieux,
       href: `/${langue}/envois?silencieux=oui`,
       Icone: TriangleAlert,
-      peau: "bg-ds-alerte-fond text-ds-alerte",
+      peau: "bg-ds-alerte-fond text-ds-alerte-encre",
     },
   ].filter((f) => f.valeur !== null && f.valeur > 0);
 

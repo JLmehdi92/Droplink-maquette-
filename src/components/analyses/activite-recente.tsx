@@ -61,9 +61,9 @@ const ICONES: Record<TypeEvenement, LucideIcon> = {
  * attention », « le reste ».
  */
 const TEINTES: Partial<Record<TypeEvenement, string>> = {
-  qc_approuve: "bg-ds-succes-fond text-ds-succes",
-  qc_refuse: "bg-ds-erreur-fond text-ds-erreur",
-  lien_revoque: "bg-ds-alerte-fond text-ds-alerte",
+  qc_approuve: "bg-ds-succes-fond text-ds-succes-encre",
+  qc_refuse: "bg-ds-erreur-fond text-ds-erreur-encre",
+  lien_revoque: "bg-ds-alerte-fond text-ds-alerte-encre",
 };
 
 export async function ActiviteRecente({

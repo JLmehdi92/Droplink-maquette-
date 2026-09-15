@@ -232,7 +232,7 @@ export function BoutonPrincipalDs({
  */
 export function MessageErreurDs({ id, texte }: { readonly id: string; readonly texte: string }) {
   return (
-    <p id={id} role="alert" className="text-ds-body-sm text-ds-erreur">
+    <p id={id} role="alert" className="text-ds-body-sm text-ds-erreur-encre">
       {texte}
     </p>
   );

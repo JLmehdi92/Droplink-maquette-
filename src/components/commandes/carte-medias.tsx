@@ -522,7 +522,7 @@ export function CarteMedias({
       {echecAction !== null && (
         <p
           role="alert"
-          className="mb-3.5 rounded-ds-card border border-transparent bg-ds-erreur-fond px-4 py-3.5 text-[13px] leading-5 text-ds-erreur"
+          className="mb-3.5 rounded-ds-card border border-transparent bg-ds-erreur-fond px-4 py-3.5 text-[13px] leading-5 text-ds-erreur-encre"
         >
           {echecAction}
         </p>
@@ -625,11 +625,11 @@ export function CarteMedias({
                   </>
                 ) : (
                   <>
-                    <TriangleAlert aria-hidden="true" size={20} strokeWidth={1.9} className="text-ds-erreur" />
+                    <TriangleAlert aria-hidden="true" size={20} strokeWidth={1.9} className="text-ds-erreur-encre" />
                     {/* LE MOTIF ET LA TAILLE REELLE, TOUJOURS LES DEUX : sans la
                         taille, le vendeur ne sait pas de combien il s'est
                         trompe, donc ne sait pas quoi faire du fichier. */}
-                    <p className="text-center text-[11.5px] leading-4 text-ds-erreur">
+                    <p className="text-center text-[11.5px] leading-4 text-ds-erreur-encre">
                       {e.echec}
                     </p>
                     <button
@@ -637,7 +637,7 @@ export function CarteMedias({
                       onClick={() =>
                         setEnCours((liste) => liste.filter((x) => x.cleLocale !== e.cleLocale))
                       }
-                      className="text-[11.5px] font-semibold text-ds-erreur underline"
+                      className="text-[11.5px] font-semibold text-ds-erreur-encre underline"
                     >
                       {t("ecarter")}
                     </button>
@@ -678,7 +678,7 @@ export function CarteMedias({
       </DndContext>
 
       {complet ? (
-        <p className="mt-3.5 text-[13px] text-ds-alerte">{t("plein")}</p>
+        <p className="mt-3.5 text-[13px] text-ds-alerte-encre">{t("plein")}</p>
       ) : null}
 
       {/* L'AIDE AU DEPLACEMENT, et elle ne dit pas la meme chose selon l'engin :
@@ -824,7 +824,7 @@ function Case({
       <button
         type="button"
         onClick={onSupprimer}
-        className={coin + " top-[5px] right-[5px] text-ds-erreur lg:top-1.5 lg:right-1.5"}
+        className={coin + " top-[5px] right-[5px] text-ds-erreur-encre lg:top-1.5 lg:right-1.5"}
         title={t("supprimer")}
       >
         <X aria-hidden="true" size={14} strokeWidth={2.4} />

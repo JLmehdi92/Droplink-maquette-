@@ -151,7 +151,7 @@ export default async function AdminStatistiques({
         className={
           "inline-flex items-center rounded-ds-pill font-bold " +
           (taille === "tuile" ? "gap-0.5 px-[7px] py-0.5 text-[11.5px] lg:text-[11px] " : "gap-[3px] px-[9px] py-[3px] text-[12px] ") +
-          (hausse ? "bg-ds-succes-fond text-ds-succes" : "bg-ds-erreur-fond text-ds-erreur")
+          (hausse ? "bg-ds-succes-fond text-ds-succes-encre" : "bg-ds-erreur-fond text-ds-erreur-encre")
         }
       >
         <Fleche aria-hidden="true" size={taille === "tuile" ? 10 : 11} strokeWidth={3} />
@@ -401,8 +401,8 @@ export default async function AdminStatistiques({
                         (g.ecart === null
                           ? "text-ds-texte-sourdine"
                           : g.ecart >= 0
-                            ? "text-ds-succes"
-                            : "text-ds-erreur")
+                            ? "text-ds-succes-encre"
+                            : "text-ds-erreur-encre")
                       }
                     >
                       {g.ecart === null

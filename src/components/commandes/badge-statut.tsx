@@ -33,13 +33,13 @@ import type { LigneCommande } from "@/lib/commandes/liste";
 const TEINTES = {
   neutre: "bg-ds-surface-creux text-ds-texte-corps",
   info: "bg-ds-info-fond text-ds-info",
-  succes: "bg-ds-succes-fond text-ds-succes",
+  succes: "bg-ds-succes-fond text-ds-succes-encre",
   /*
    * AMBRE, PAS ROUGE. Un colis immobile n'est pas une erreur : c'est une
    * attente qu'il faut relancer. Le rouge du design system (`ds-erreur`) est
    * réservé à ce qui a ÉCHOUÉ.
    */
-  alerte: "bg-ds-alerte-fond text-ds-alerte",
+  alerte: "bg-ds-alerte-fond text-ds-alerte-encre",
 } as const;
 
 type Teinte = keyof typeof TEINTES;
