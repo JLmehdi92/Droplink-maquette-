@@ -899,12 +899,16 @@ const VISIBLES = `(() => {
   const textes = [...document.querySelectorAll('body *')]
     .filter((e) => e.children.length === 0 && (e.textContent || '').trim().length > 1 &&
                    !['SCRIPT','STYLE','TITLE'].includes(e.tagName) && e.getClientRects().length > 0)
-    .map((e) => ({ texte: (e.textContent || '').trim().slice(0, 40), visible: opaciteEffective(e) >= 0.5 }));
+    .map((e) => {
+      const r = e.getBoundingClientRect();
+      return { texte: (e.textContent || '').trim().slice(0, 40), visible: opaciteEffective(e) >= 0.5,
+               place: Math.round(r.left + scrollX) + ',' + Math.round(r.top + scrollY) };
+    });
   const infinies = document.getAnimations()
     .filter((a) => a.playState === 'running' && a.effect && a.effect.getComputedTiming().iterations === Infinity)
     .map((a) => (a.animationName || a.id || a.constructor.name) + ' sur ' +
                 ((a.effect.target && (a.effect.target.className?.baseVal ?? a.effect.target.className)) || '?').toString().slice(0, 40));
-  return { visibles: textes.filter((t) => t.visible).map((t) => t.texte), infinies };
+  return { visibles: textes.filter((t) => t.visible).map((t) => ({ texte: t.texte, place: t.place })), infinies };
 })()`;
 
 const dossierInventaire = process.env["INVENTAIRE"] ?? null;
@@ -916,22 +920,43 @@ const dossierInventaire = process.env["INVENTAIRE"] ?? null;
  * mesuré. Un bouton introuvable LÈVE : mesurer l'état replié en croyant mesurer
  * l'ouvert certifierait l'état replié.
  */
+/*
+ * Une SÉQUENCE séparée par « > » depuis le 15/09/2026 : l'activation en deux
+ * étapes ne montre son QR code qu'après le mot de passe. Une étape
+ * `nom=valeur` remplit le champ `name=nom` — `{motdepasse}` est celui du compte
+ * de mesure —, toute autre étape clique le bouton de ce texte exact. Après une
+ * soumission, l'attente couvre l'action serveur et son plancher de 1,2 s.
+ */
 async function cliquerProduit(envoyer, chemin, largeur) {
-  const texte = process.env["CLIC_PRODUIT"];
-  if (texte === undefined || texte === "") return;
-  const { result } = await envoyer("Runtime.evaluate", {
-    expression: `(() => {
-      const b = [...document.querySelectorAll('button')].find((e) => (e.textContent || '').trim() === ${JSON.stringify(texte)});
-      if (!b) return false;
-      b.click();
-      return true;
-    })()`,
-    returnByValue: true,
-  });
-  if (result.value !== true) {
-    throw new Error(`ARRET : ${chemin} a ${largeur} px — aucun bouton « ${texte} » a cliquer`);
+  const sequence = process.env["CLIC_PRODUIT"];
+  if (sequence === undefined || sequence === "") return;
+  for (const etape of sequence.split(" > ").map((e) => e.trim()).filter(Boolean)) {
+    const saisie = /^([\w-]+)=(.*)$/.exec(etape);
+    const { result } = await envoyer("Runtime.evaluate", {
+      expression: saisie
+        ? `(() => {
+            const c = document.querySelector('input[name=${JSON.stringify(saisie[1])}]');
+            if (!c) return 'absent';
+            const poser = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+            poser.call(c, ${JSON.stringify(saisie[2].replaceAll("{motdepasse}", MOT_DE_PASSE))});
+            c.dispatchEvent(new Event('input', { bubbles: true }));
+            return 'saisi';
+          })()`
+        : `(() => {
+            const b = [...document.querySelectorAll('button')].find((e) => (e.textContent || '').trim() === ${JSON.stringify(etape)});
+            if (!b) return 'absent';
+            b.click();
+            return b.type === 'submit' ? 'soumis' : 'clique';
+          })()`,
+      returnByValue: true,
+    });
+    if (result.value === "absent") {
+      throw new Error(
+        `ARRET : ${chemin} a ${largeur} px — ${saisie ? "aucun champ « " + saisie[1] + " »" : "aucun bouton « " + etape + " »"}`,
+      );
+    }
+    await new Promise((r) => setTimeout(r, result.value === "soumis" ? 5000 : 600));
   }
-  await new Promise((r) => setTimeout(r, 600));
 }
 
 const rapport = [];
@@ -1114,8 +1139,20 @@ for (const modele of routes) {
          compté comme un texte disparu — un faux positif qui apprend à ignorer
          le vrai. */
       const forme = (t) => t.replace(/\d+/g, "#");
-      const restants = new Set(vuReduit.visibles.map(forme));
-      const disparus = [...new Set(normal.value.visibles.map(forme))].filter((t) => !restants.has(t));
+      /* ⚠️ UN TEXTE REMPLACÉ À LA MÊME PLACE N'A PAS DISPARU. La clé de secours
+         de l'activation en deux étapes est tirée au hasard, et le rechargement
+         en tire une autre : lettres comprises, aucune normalisation ne les
+         rapproche. Un texte ne compte comme disparu que si AUCUN texte visible
+         n'occupe plus sa place. */
+      const restants = new Set(vuReduit.visibles.map((v) => forme(v.texte)));
+      const placesOccupees = new Set(vuReduit.visibles.map((v) => v.place));
+      const disparus = [
+        ...new Set(
+          normal.value.visibles
+            .filter((v) => !restants.has(forme(v.texte)) && !placesOccupees.has(v.place))
+            .map((v) => forme(v.texte)),
+        ),
+      ];
       const ligne = rapport[rapport.length - 1];
       ligne.mouvement_reduit = { disparus, animations_infinies: vuReduit.infinies };
       if (disparus.length > 0 || vuReduit.infinies.length > 0) {

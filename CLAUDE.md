@@ -668,6 +668,8 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 | `/admin/surveillance` | `admin/index.html#surveillance` à 1560 | 15 (0) | 9 (0) | **0** |
 | `/admin/comptes/[id]` | `admin/index.html#compte` à 1560, route `{profil}` | 23 (0) | 17 (0) | **0** |
 | ↳ suspension ouverte | `#compte-suspension` à 1560, `CLIC_PRODUIT="Suspendre ce compte" ETAT=suspension` | 23 (0) | 17 (0) | **0** |
+| `/parametres` ↳ deux étapes, mot de passe | `CLIC_KIT="Paramètres > Activer"`, `CLIC_PRODUIT="Activer" ETAT=deux-etapes` | 37 (0) | 20 (0) | **0** |
+| `/parametres` ↳ deux étapes, QR code | `CLIC_KIT="Paramètres > Activer > Continuer"`, `CLIC_PRODUIT="Activer > actuel={motdepasse} > Continuer" ETAT=deux-etapes-qr` | 38 (0) | 21 (0) | **0** |
 
 > ⚠️ **`/nouveau-mot-de-passe` NE S'OUVRE QU'À UNE SESSION DE RÉCUPÉRATION** — sa
 > méthode doit être `otp`. `RECUPERATION=1` fait ouvrir à la sonde un VRAI lien
@@ -717,6 +719,26 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > déclarations. La planche dessine aussi la largeur RÉSERVÉE de l'état
 > d'attente du bouton d'action (« En cours… » et son anneau, invisibles) : sans
 > elle, 140 px contre 116.
+
+> ⚠️ **LES ÉTATS AU CLIC SE MESURENT PAR SÉQUENCE.** `CLIC_KIT` et `CLIC_PRODUIT`
+> acceptent `« étape > étape »` ; côté produit, une étape `nom=valeur` remplit le
+> champ `name=nom` (`{motdepasse}` : celui du compte de mesure). **La planche de
+> l'activation en deux étapes contredisait une règle verrouillée** : elle
+> montrait le QR code et la clé de secours AVANT le mot de passe — un cookie volé
+> suffisait donc à lire la clé d'un facteur neuf. Le produit ne crée le facteur
+> qu'après le mot de passe ; la planche a été réécrite en deux étapes le
+> 15/09/2026, et la seconde se mesure avec un VRAI facteur enrôlé sur le compte
+> de mesure.
+
+> ⚠️ **LE TEXTE INDICATIF DES CHAMPS SE LISAIT À 2,20:1.** Le design system ne lui
+> donnait aucune couleur — le kit rendait le gris par défaut de Chrome, 4,61:1 —
+> et onze champs du produit le posaient en « estompé ». Écrit dans
+> `tokens/base.css` (`::placeholder` au gris de corps : 4,91 sur la carte, 4,55
+> sur le creux), porté en `@layer base` et sur les onze champs ;
+> `tests/unit/textes-indicatifs-lisibles.test.ts` RÉSOUT chaque couleur et mesure
+> son contraste, falsifié trois fois (un champ, la règle de base, une valeur
+> arbitraire). Aucune soustraction ne pouvait le voir : un texte indicatif n'est
+> pas un texte de la page.
 
 > ⚠️ **LE KIT ADMIN SE SERT À 1560, PAS À 1690.** C'est écrit dans l'en-tête de
 > sa page — `viewport="1560x1040"` — et la largeur UTILE est donc 1545. Mesurer

@@ -173,17 +173,21 @@ await envoyer("Page.navigate", { url });
 // lui faut plus qu un chargement de document.
 await new Promise((r) => setTimeout(r, 5000));
 
-if (clic !== "") {
+/* `CLIC_KIT="Paramètres > Activer"` : une SÉQUENCE, depuis le 15/09/2026. Un
+   état qui s'ouvre DANS un écran du kit — le panneau d'activation en deux
+   étapes des paramètres — demande d'abord de choisir l'écran, puis d'ouvrir
+   l'état. Chaque étape lève si son contrôle manque. */
+for (const etape of clic.split(" > ").map((e) => e.trim()).filter(Boolean)) {
   const { result: ouvert } = await envoyer("Runtime.evaluate", {
     expression:
       "(() => { const c = [...document.querySelectorAll('button,a')]" +
       ".find((e) => (e.textContent || '').trim().startsWith(" +
-      JSON.stringify(clic) +
+      JSON.stringify(etape) +
       ")); if (!c) return 'INTROUVABLE'; c.click(); return c.textContent.trim().slice(0, 30); })()",
     returnByValue: true,
   });
   if (ouvert.value === "INTROUVABLE") {
-    console.error(`ARRET : aucun controle ne commence par ${JSON.stringify(clic)}.`);
+    console.error(`ARRET : aucun controle ne commence par ${JSON.stringify(etape)}.`);
     process.exit(1);
   }
   console.error(`[kit] ouvert : ${ouvert.value}`);
