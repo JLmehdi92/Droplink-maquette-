@@ -872,6 +872,41 @@ const INVENTAIRE = `(() => {
   };
 })()`;
 
+/*
+ * ⚠️ `prefers-reduced-motion` : CET EN-TÊTE L'ANNONÇAIT DEPUIS LE 11/09/2026,
+ * ET LA SONDE NE L'ÉMULAIT PAS. Mesuré le 15/09 : aucun `setEmulatedMedia` dans
+ * le fichier. La quatrième étape de la vérification d'un écran — « rien ne
+ * disparaît, rien ne devient illisible » — n'avait donc jamais été exécutée par
+ * l'outil qui se présente comme la check-list exécutée (L-014).
+ *
+ * Ce qui se mesure : les textes RÉELLEMENT visibles — opacité effective, c'est-à-
+ * dire le produit des opacités des ancêtres, et `visibility` — relevés à l'état
+ * normal puis après un rechargement sous `reduce`. Un texte visible au repos et
+ * invisible sous mouvement réduit est un contenu que l'animation portait, ce que
+ * la règle 4 interdit. Et une animation INFINIE encore active sous `reduce` est
+ * une animation que le réglage n'a pas coupée.
+ */
+const VISIBLES = `(() => {
+  const opaciteEffective = (e) => {
+    let o = 1;
+    for (let n = e; n && n.nodeType === 1; n = n.parentElement) {
+      const c = getComputedStyle(n);
+      if (c.visibility === 'hidden' || c.display === 'none') return 0;
+      o *= parseFloat(c.opacity);
+    }
+    return o;
+  };
+  const textes = [...document.querySelectorAll('body *')]
+    .filter((e) => e.children.length === 0 && (e.textContent || '').trim().length > 1 &&
+                   !['SCRIPT','STYLE','TITLE'].includes(e.tagName) && e.getClientRects().length > 0)
+    .map((e) => ({ texte: (e.textContent || '').trim().slice(0, 40), visible: opaciteEffective(e) >= 0.5 }));
+  const infinies = document.getAnimations()
+    .filter((a) => a.playState === 'running' && a.effect && a.effect.getComputedTiming().iterations === Infinity)
+    .map((a) => (a.animationName || a.id || a.constructor.name) + ' sur ' +
+                ((a.effect.target && (a.effect.target.className?.baseVal ?? a.effect.target.className)) || '?').toString().slice(0, 40));
+  return { visibles: textes.filter((t) => t.visible).map((t) => t.texte), infinies };
+})()`;
+
 const dossierInventaire = process.env["INVENTAIRE"] ?? null;
 
 const rapport = [];
@@ -1020,6 +1055,44 @@ for (const modele of routes) {
       const nom = nomEcran + "-" + largeur + ".png";
       await writeFile(join(dossierCaptures, nom), Buffer.from(data, "base64"));
       console.error("[capture] " + nom);
+    }
+    /* Mouvement réduit : EN DERNIER, pour que l'inventaire et la capture restent
+       ceux de l'état normal — c'est lui qu'on compare au kit. Un RECHARGEMENT, et
+       non une bascule à chaud : une animation d'entrée ne se rejoue qu'au
+       chargement, et c'est elle qui risque de laisser un texte à opacité nulle. */
+    {
+      const { result: normal } = await envoyer("Runtime.evaluate", { expression: VISIBLES, returnByValue: true });
+      await envoyer("Emulation.setEmulatedMedia", {
+        features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+      });
+      await envoyer("Page.reload", {});
+      await new Promise((r) => setTimeout(r, 3000));
+      const { result: reduit } = await envoyer("Runtime.evaluate", {
+        expression: `[matchMedia('(prefers-reduced-motion: reduce)').matches, ${VISIBLES}]`,
+        returnByValue: true,
+      });
+      const [emule, vuReduit] = reduit.value;
+      // Une émulation qui n'a pas pris ferait mesurer deux fois l'état normal,
+      // et conclure « rien ne disparaît » : c'est vrai, et ça ne prouve rien.
+      if (emule !== true) throw new Error(`ARRET : ${chemin} a ${largeur} px — prefers-reduced-motion n a pas ete emule`);
+      /* Les chiffres en `#`, comme la soustraction : « il y a 20 s » devient
+         « il y a 23 s » entre les deux chargements, et le premier passage l'a
+         compté comme un texte disparu — un faux positif qui apprend à ignorer
+         le vrai. */
+      const forme = (t) => t.replace(/\d+/g, "#");
+      const restants = new Set(vuReduit.visibles.map(forme));
+      const disparus = [...new Set(normal.value.visibles.map(forme))].filter((t) => !restants.has(t));
+      const ligne = rapport[rapport.length - 1];
+      ligne.mouvement_reduit = { disparus, animations_infinies: vuReduit.infinies };
+      if (disparus.length > 0 || vuReduit.infinies.length > 0) {
+        process.exitCode = 1;
+        console.error(
+          `[mouvement-reduit] ${chemin} a ${largeur} px : ${disparus.length} texte(s) disparu(s), ` +
+            `${vuReduit.infinies.length} animation(s) infinie(s) encore active(s)`,
+        );
+      } else {
+        console.error(`[mouvement-reduit] ${chemin} a ${largeur} px : rien ne disparait, aucune animation infinie`);
+      }
     }
     await envoyer("Target.closeTarget", { targetId });
   }

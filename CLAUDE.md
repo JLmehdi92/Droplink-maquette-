@@ -1046,6 +1046,16 @@ Dans cet ordre, et on ne passe pas au suivant avant que les cinq passent :
    les longs ; c'est là que les colonnes de tableau cassent.
 4. **`prefers-reduced-motion`** activé : rien ne disparaît, rien ne devient
    illisible.
+   > ⚠️ **CETTE ÉTAPE N'AVAIT JAMAIS TOURNÉ, ET LA SONDE AFFIRMAIT LE CONTRAIRE.**
+   > L'en-tête de `verifier-ecran-migre.mjs` citait `prefers-reduced-motion`
+   > depuis le 11/09 ; mesuré le 15/09, aucun `setEmulatedMedia` dans le
+   > fichier. Elle recharge désormais chaque écran sous `reduce` émulé, compare
+   > les textes RÉELLEMENT visibles (opacité effective, `visibility`) à l'état
+   > normal, et relève les animations infinies encore actives — sortie en
+   > code 1 sur l'un ou l'autre. Falsifiée deux fois : les deux règles `reduce`
+   > neutralisées (10 boucles de la landing actives) et un titre en
+   > `opacity-0 motion-safe:opacity-100` (disparu). **Les 33 écrans, à la
+   > largeur du kit et à 390 px : 66 mesures, aucun défaut.**
 5. **Les six portes** — `pnpm gates`, et on relève le décompte, pas la couleur.
 
 > ⚠️ **NE JAMAIS VÉRIFIER UN ÉCRAN À LA LARGEUR DE SA FENÊTRE.** À 900 px, les
