@@ -152,7 +152,7 @@ export function ApercuClient({
                 key={etape}
                 className="h-[5px] rounded-full"
                 style={{
-                  backgroundColor: etape < 3 ? palette.remplissage : "var(--color-outline-variant)",
+                  backgroundColor: etape < 3 ? palette.remplissage : "var(--color-ds-ink-200)",
                 }}
               />
             ))}

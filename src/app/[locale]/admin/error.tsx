@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { RotateCcw, TriangleAlert } from "lucide-react";
+import { CarteEtatVide, CLASSE_BOUTON_SECONDAIRE } from "@/components/app/carte-etat-vide";
 
 /**
  * LA FRONTIÈRE D'ERREUR DE L'ESPACE D'ADMINISTRATION.
@@ -28,31 +30,21 @@ export default function Erreur({
 }) {
   const t = useTranslations("erreurs");
 
+  /* ⚠️ `text-admin` (#111117) : le texte du chrome SOMBRE de l'ancienne
+     administration, sur un bouton sans filet — le seul écran d'erreur resté à
+     l'ancien thème le 15/09/2026. Il prend la carte d'état vide du design
+     system, comme l'erreur de l'espace vendeur. */
   return (
-    <main
-      id="contenu"
-      className="flex flex-1 items-center justify-center px-margin-mobile py-10 md:px-8"
-    >
-      <div className="max-w-[520px] text-center">
-        <h1 className="text-[24px] font-extrabold tracking-[-0.03em] text-ds-texte-fort">
-          {t("titre")}
-        </h1>
-        <p className="mt-3 text-ds-texte-corps">{t("texte")}</p>
-
-        <button
-          type="button"
-          onClick={reset}
-          className="mt-6 min-h-[44px] rounded-ds-control bg-ds-surface-carte px-5 text-admin"
-        >
+    <main id="contenu" className="px-margin-mobile pt-4 pb-5 md:px-8 md:pt-[30px] md:pb-8">
+      <CarteEtatVide icone={TriangleAlert} titre={t("titre")} texte={t("texte")}>
+        <button type="button" onClick={reset} className={CLASSE_BOUTON_SECONDAIRE}>
+          <RotateCcw aria-hidden="true" size={17} strokeWidth={1.9} />
           {t("reessayer")}
         </button>
-
         {error.digest !== undefined && (
-          <p className="mt-6 text-ds-texte-sourdine">
-            {t("reference", { ref: error.digest })}
-          </p>
+          <p className="mt-5 text-[13px] text-ds-texte-sourdine">{t("reference", { ref: error.digest })}</p>
         )}
-      </div>
+      </CarteEtatVide>
     </main>
   );
 }

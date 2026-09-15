@@ -288,8 +288,8 @@ export function FormulaireMarque({
     },
     {
       clef: "tiktok",
-      fond: "var(--color-filet-section)",
-      encre: "var(--color-on-surface)",
+      fond: "var(--color-ds-surface-creux)",
+      encre: "var(--color-ds-texte-fort)",
       trace:
         "M14.7 3h2.5a5.3 5.3 0 0 0 4.3 4.3v2.5a7.7 7.7 0 0 1-4.3-1.4v5.9a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v2.6a3.3 3.3 0 1 0 2.5 3.2z",
     },
@@ -990,7 +990,7 @@ export function FormulaireMarque({
                   backgroundColor:
                     filigrane && filigranePossible
                       ? accent.remplissage
-                      : "var(--color-fond-barre)",
+                      : "var(--color-ds-ink-200)",
                 }}
               >
                 <input

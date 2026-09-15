@@ -168,7 +168,7 @@ export default async function LayoutApplication({
       */}
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-ds-sm focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-surface focus:shadow-md"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-ds-sm focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:text-[14px] focus:font-semibold focus:text-ds-texte-fort focus:shadow-ds-md"
       >
         {t("allerAuContenu")}
       </a>
