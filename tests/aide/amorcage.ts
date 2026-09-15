@@ -143,7 +143,19 @@ export async function setup(projet?: { readonly name?: string }): Promise<void> 
  * partir propre.
  */
 export async function teardown(): Promise<void> {
-  const { effacerLesBattements, effacerLesReservationsDAlerte } = await import("./purger-residus");
+  const { effacerLesBattements, effacerLesReservationsDAlerte, rendreLesParametresAuDefaut } = await import(
+    "./purger-residus"
+  );
   await effacerLesBattements();
   await effacerLesReservationsDAlerte();
+  /*
+   * ⚠️ LES PARAMÈTRES AUSSI, ET PAS SEULEMENT À L'ENTRÉE. Mesuré le 15/09/2026 :
+   * la remise à zéro ne tournait qu'au `setup`, et le dernier test de
+   * `parametres.test.ts` écrit un plafond de colis à 33. Après chaque
+   * `pnpm gates`, la base de tests portait donc ce seuil — et la fiche de compte
+   * mesurée juste après affichait « 0 sur 33 », un seuil que personne n'avait
+   * choisi, que la soustraction a pris pour un écart. Exactement le défaut que
+   * `rendreLesParametresAuDefaut` décrit, revenu par la sortie.
+   */
+  await rendreLesParametresAuDefaut();
 }
