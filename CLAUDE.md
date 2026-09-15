@@ -730,6 +730,16 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > 15/09/2026, et la seconde se mesure avec un VRAI facteur enrôlé sur le compte
 > de mesure.
 
+> **`IMAGES_EN_ATTENTE=1`** retient toutes les requêtes d'images : l'écran se
+> mesure dans l'état qu'un client voit en 4G, et la sonde sort en code 1 sur
+> toute image sans place réservée (boîte nulle dans un sens). Sans lui, le jeu
+> de mesure — dont les clés n'existent pas dans le bucket — ne montre que des
+> images EN ERREUR, que Chrome réduit à une bande de texte alternatif : la photo
+> du visionneur y ressemblait à un défaut qui n'en était pas un. Falsifié en
+> retirant ses dimensions (0×0) ; passé le 15/09/2026 sur les 33 écrans et le
+> visionneur ouvert (`CLIC_PRODUIT="Agrandir la photo 1"`, qui trouve un bouton
+> par son nom accessible) : aucune image sans place.
+
 > ⚠️ **LE TEXTE INDICATIF DES CHAMPS SE LISAIT À 2,20:1.** Le design system ne lui
 > donnait aucune couleur — le kit rendait le gris par défaut de Chrome, 4,61:1 —
 > et onze champs du produit le posaient en « estompé ». Écrit dans

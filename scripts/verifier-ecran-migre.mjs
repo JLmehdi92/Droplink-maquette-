@@ -943,7 +943,9 @@ async function cliquerProduit(envoyer, chemin, largeur) {
             return 'saisi';
           })()`
         : `(() => {
-            const b = [...document.querySelectorAll('button')].find((e) => (e.textContent || '').trim() === ${JSON.stringify(etape)});
+            // Par son texte OU par son nom accessible : une vignette de galerie n'a pas de texte.
+            const b = [...document.querySelectorAll('button')].find((e) =>
+              (e.textContent || '').trim() === ${JSON.stringify(etape)} || e.getAttribute('aria-label') === ${JSON.stringify(etape)});
             if (!b) return 'absent';
             b.click();
             return b.type === 'submit' ? 'soumis' : 'clique';
@@ -1000,6 +1002,15 @@ for (const modele of routes) {
        du navigateur survit d une cible a l autre, et une correction restait
        invisible : on remesurait indefiniment le meme ecart. */
     await envoyer("Network.setCacheDisabled", { cacheDisabled: true });
+    /* `IMAGES_EN_ATTENTE=1` : L'ÉCRAN TEL QU'IL SE REND PENDANT QUE SES IMAGES
+       ARRIVENT — l'état que voit un client en 4G, et le seul où une place non
+       réservée fait sauter la mise en page. Les requêtes d'images sont
+       retenues et ne reçoivent jamais de réponse. Sans cela, le jeu de mesure
+       (dont les clés n'existent pas dans le bucket) ne montre que des images EN
+       ERREUR, que le navigateur réduit à leur texte alternatif. */
+    if (process.env["IMAGES_EN_ATTENTE"] === "1") {
+      await envoyer("Fetch.enable", { patterns: [{ resourceType: "Image", requestStage: "Request" }] });
+    }
     /*
      * L admin refuse toute requete sans adresse d appelant exploitable.
      *
@@ -1094,6 +1105,26 @@ for (const modele of routes) {
       exigerPolices(v.value, `${chemin} a ${largeur} px`);
     }
     rapport.push({ chemin, largeur, ...vu });
+    if (process.env["IMAGES_EN_ATTENTE"] === "1") {
+      /* Toute image rendue, avec sa boîte : une image qui attend et dont la
+         boîte est NULLE dans un sens n'a pas de place réservée — falsifié, la
+         photo du visionneur sans ses dimensions rend 0×0.
+         ⚠️ LE PREMIER CRITÈRE ÉTAIT « MOINS DE 24 PX », et il a dénoncé le logo de
+         la coque publique sur huit pages : 66×22, place réservée à la taille
+         exacte de ses attributs. Un petit logo n'est pas une image plate. */
+      const { result: imgs } = await envoyer("Runtime.evaluate", {
+        expression: `[...document.images].filter((i) => i.getClientRects().length > 0).map((i) => {
+          const r = i.getBoundingClientRect();
+          return { alt: (i.alt || '').slice(0, 40), l: Math.round(r.width), h: Math.round(r.height), chargee: i.complete && i.naturalWidth > 0,
+                   attributs: (i.getAttribute('width') || '-') + 'x' + (i.getAttribute('height') || '-') };
+        })`,
+        returnByValue: true,
+      });
+      const plates = imgs.value.filter((i) => !i.chargee && (i.l === 0 || i.h === 0));
+      rapport[rapport.length - 1].images_en_attente = { total: imgs.value.length, plates };
+      if (plates.length > 0) process.exitCode = 1;
+      console.error(`[images] ${chemin} a ${largeur} px : ${imgs.value.length} images, ${plates.length} sans place reservee`);
+    }
     if (dossierInventaire !== null) {
       const { result: inv } = await envoyer("Runtime.evaluate", {
         expression: INVENTAIRE,
