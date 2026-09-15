@@ -774,6 +774,25 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > carte centré au produit et aligné à gauche au kit sortait à zéro écart. Seule
 > la capture l'a montré.
 >
+> ⚠️ **LES ÉCRANS VENDEUR ONT UNE PLANCHE TÉLÉPHONE À PART** —
+> `seller_app/Telephone.jsx` (dans le kit, pas dans `src`), choisie sous 768 px. À 390 px
+> la planche de bureau tassée rendait cinq tuiles empilées et un tableau de neuf
+> colonnes replié ; le produit avait déjà la composition du pouce (en-tête blanc
+> et recherche, compteurs deux par deux, cartes, action flottante). Au passage :
+> sur **/commandes**, « Filtres » et « Exporter » tombaient à 180 px HORS de
+> l'écran au bout des onglets qui défilent — ils ont désormais leur rangée, en
+> deux moitiés ; sur **/envois**, le tri seul sur sa rangée prend toute la
+> largeur (« Ce qui ne b… ») ; sur **Liens clients** (analyses et tableau de
+> bord), neuf dates dans 324 px faisaient déborder « 15/09 » de la carte, et
+> trente barres séparées de 10 px n'avaient plus qu'UN pixel de large — cinq
+> repères et 2 px d'écart au téléphone, rien ne change au bureau.
+> ⚠️ **`.dl-main > *` et `.dl-main div` portent `max-width:100%` au téléphone
+> dans la planche** : une bande en marges négatives s'y arrêtait à 358 px, sans
+> débordement ni alerte.
+> ⚠️ **Deux données du jeu de mesure changent d'ordre d'un passage à l'autre** —
+> quatre commandes et deux événements créés à la même seconde : leurs
+> déclarations de place sont `volatile`.
+>
 > ⚠️ **`volatile: true`** dans `ecarts-declares.json` : la seule déclaration
 > qu'on n'exige pas de retrouver, réservée aux données que les suites réécrivent
 > selon leur ordre (âges du journal, lignes de suspension). Toute autre

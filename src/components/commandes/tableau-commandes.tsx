@@ -229,8 +229,13 @@ export async function TableauCommandes({
           14 px manquants venaient du remplissage BAS de la colonne de droite,
           posé ci-dessous : sans lui, les onglets et tout le tableau
           remontaient de 8 px et aucune ligne ne tombait à la hauteur du kit. */}
-      <div className="defilement-discret flex items-center gap-4 overflow-x-auto px-margin-mobile md:px-5 md:pt-4 lg:relative lg:overflow-visible">
-        <PilulesFiltres base={base} parametres={parametres} compteurs={compteurs} />
+      {/* ⚠️ AU TÉLÉPHONE, LES ONGLETS DÉFILENT SEULS ET LES OUTILS ONT LEUR RANGÉE — 15/09/2026. Rangés au
+          bout des onglets dans le même conteneur à défilement, « Filtres » et « Exporter » tombaient à
+          180 px hors de l écran : rien ne disait qu ils existaient. Même composition que les envois. */}
+      <div className="flex flex-wrap items-center gap-y-3 pb-3.5 md:pt-4 lg:relative lg:flex-nowrap lg:gap-4 lg:px-5 lg:pb-0">
+        <div className="defilement-discret min-w-0 basis-full overflow-x-auto px-margin-mobile md:px-5 lg:shrink-0 lg:basis-auto lg:overflow-visible lg:px-0">
+          <PilulesFiltres base={base} parametres={parametres} compteurs={compteurs} />
+        </div>
 
         {vide ? null : (
           <>
@@ -243,7 +248,7 @@ export async function TableauCommandes({
             faisait 58 px au lieu de 72, les onglets remontaient de 8 px, et
             l'en-tête des colonnes avec eux : aucune ligne du tableau ne tombait
             à la hauteur du kit. L'écart entre les deux contrôles est de 10. */}
-        <div className="flex items-center gap-2.5 lg:pb-[14px]">
+        <div className="flex basis-full items-center gap-2.5 px-margin-mobile md:px-5 lg:basis-auto lg:px-0 lg:pb-[14px] [&>details]:min-w-0 [&>details]:flex-1 lg:[&>details]:flex-none [&>details>summary]:w-full lg:[&>details>summary]:w-fit">
         <PanneauFiltres base={base} parametres={parametres} />
 
         {/*
@@ -268,8 +273,8 @@ export async function TableauCommandes({
         */}
         <details className={DETAILS_OUTIL_DS + " lg:open:static"}>
           <summary className={PILULE_OUTIL_DS}>
-            <Download aria-hidden="true" size={16} strokeWidth={1.8} />
-            {t("lot.exporter")}
+            <Download aria-hidden="true" size={16} strokeWidth={1.8} className="shrink-0" />
+            <span className="min-w-0 flex-1 truncate text-left lg:flex-none">{t("lot.exporter")}</span>
             <ChevronDown aria-hidden="true" size={15} strokeWidth={1.8} className="text-ds-texte-tenu" />
           </summary>
 

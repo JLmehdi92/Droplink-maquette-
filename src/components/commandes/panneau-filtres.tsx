@@ -71,8 +71,8 @@ export async function PanneauFiltres({
   return (
     <details className={DETAILS_OUTIL_DS + " lg:open:static"}>
       <summary className={PILULE_OUTIL_DS}>
-        <SlidersHorizontal aria-hidden="true" size={16} strokeWidth={1.8} />
-        {t("filtres")}
+        <SlidersHorizontal aria-hidden="true" size={16} strokeWidth={1.8} className="shrink-0" />
+        <span className="min-w-0 flex-1 truncate text-left lg:flex-none">{t("filtres")}</span>
         <ChevronDown aria-hidden="true" size={15} strokeWidth={1.8} className="text-ds-texte-tenu" />
       </summary>
 

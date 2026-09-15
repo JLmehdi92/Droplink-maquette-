@@ -30,6 +30,12 @@ import type { OuverturesDuJour } from "@/lib/analyses/activite";
 
 /** Au-delà, les dates se chevauchent. Mesuré sur la largeur du panneau. */
 const LIBELLES_MAX = 8;
+/**
+ * ⚠️ AU TÉLÉPHONE, HUIT REPÈRES NE TIENNENT PAS — mesuré le 15/09/2026 : neuf dates de 30 px et
+ * leurs écarts dans 324 px, la dernière « 15/09 » débordait de la carte de 25 px, par-dessus son
+ * filet. Quatre intervalles, bornes comprises.
+ */
+const LIBELLES_MAX_TELEPHONE = 4;
 
 export async function LiensParJour({
   jours,
@@ -51,12 +57,12 @@ export async function LiensParJour({
   const maximum = jours.reduce((m, j) => Math.max(m, j.total), 0);
 
   /* Les repères de l'axe : au plus `LIBELLES_MAX`, répartis, bornes comprises. */
-  const pas = Math.max(1, Math.ceil(jours.length / LIBELLES_MAX));
-  const reperes = [
-    ...new Set(
-      jours.filter((_, i) => i % pas === 0 || i === jours.length - 1).map((j) => j.jour),
-    ),
-  ];
+  const repartir = (max: number) => {
+    const pas = Math.max(1, Math.ceil(jours.length / max));
+    return [...new Set(jours.filter((_, i) => i % pas === 0 || i === jours.length - 1).map((j) => j.jour))];
+  };
+  const reperes = repartir(LIBELLES_MAX);
+  const reperesTelephone = repartir(LIBELLES_MAX_TELEPHONE);
 
   return (
     <Panneau taille={taille} serre={taille === "section"} titre={t("liens.titre")} sousTitre={t("liens.aide")}>
@@ -71,7 +77,9 @@ export async function LiensParJour({
               au-dessus porte l'information, et un lecteur d'écran qui
               annoncerait quatre-vingt-dix barres n'apprendrait rien. */}
           <div aria-hidden="true">
-            <div className="flex h-[150px] items-end gap-2.5">
+            {/* ⚠️ 2 px D ÉCART AU TÉLÉPHONE, 10 AU BUREAU : trente barres séparées de 10 px dans 324 px n en
+                laissaient qu UN pixel chacune — un graphe de traits. */}
+            <div className="flex h-[150px] items-end gap-0.5 lg:gap-2.5">
               {jours.map((j) => (
                 <span
                   key={j.jour}
@@ -96,7 +104,14 @@ export async function LiensParJour({
               Le premier et le dernier sont toujours écrits — ce sont les bornes
               de la fenêtre, donc les deux qu'on lit.
             */}
-            <div className="mt-2.5 flex justify-between gap-2">
+            <div className="mt-2.5 flex justify-between gap-2 lg:hidden">
+              {reperesTelephone.map((r) => (
+                <span key={r} className="text-[11.5px] leading-[normal] whitespace-nowrap text-ds-texte-sourdine">
+                  {etiquette(r)}
+                </span>
+              ))}
+            </div>
+            <div className="mt-2.5 hidden justify-between gap-2 lg:flex">
               {reperes.map((r) => (
                 <span
                   key={r}

@@ -590,8 +590,11 @@ export async function TableauEnvois({
         aucune erreur, aucune trace. La géométrie vit maintenant dans
         `PANNEAU_OUTIL_DS`, avec `Commandes` : feuille du bas au téléphone, panneau
         ancré au bureau.
+
+        ⚠️ LE TRI PREND TOUTE LA LARGEUR QUAND IL EST SEUL SUR SA RANGÉE (15/09/2026) : en moitié,
+        « Ce qui ne bouge plus » se lisait « Ce qui ne b… », à côté d une moitié vide.
       */}
-      <details className={DETAILS_OUTIL_DS + MOITIE + " lg:open:relative"}>
+      <details className={DETAILS_OUTIL_DS + (transporteursVus.length === 0 ? MOITIE : " min-w-0 basis-full lg:basis-auto") + " lg:open:relative"}>
         <summary className={MENU_ENVOIS + " lg:min-w-[160px]"}>
           <ArrowUpDown aria-hidden="true" size={16} strokeWidth={1.8} className="shrink-0" />
           <span className="min-w-0 flex-1 truncate">{t(`tri.${parametres.tri}`)}</span>

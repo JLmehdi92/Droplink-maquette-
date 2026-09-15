@@ -505,7 +505,8 @@ export function FormulaireMarque({
           {reseauxConfigures.length > 0 ? (
             <div className="border-t border-ds-filet pt-3 text-center lg:pt-[13px]">
               {nom.trim() !== "" ? (
-                <p className="mb-[7px] text-[10px] text-ds-texte-corps lg:mb-2">
+                /* 11,5 px au téléphone (règle 5) : à 10, la sonde le relevait sous le plancher, en trois langues. */
+                <p className="mb-[7px] text-[11.5px] text-ds-texte-corps lg:mb-2 lg:text-[10px]">
                   {substituerNom(phrasesClient.reseauxGabarit, nom)}
                 </p>
               ) : null}
