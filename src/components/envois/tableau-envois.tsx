@@ -395,7 +395,7 @@ export async function TableauEnvois({
    * rien.
    */
   const MENU_ENVOIS =
-    "flex min-h-11 w-fit cursor-pointer list-none items-center gap-2.5 rounded-ds-card border " +
+    "flex min-h-11 w-full cursor-pointer list-none items-center gap-2.5 rounded-ds-card border lg:w-fit " +
     "border-ds-filet bg-ds-surface-carte px-[14px] text-[14px] font-medium whitespace-nowrap " +
     "text-ds-texte-fort shadow-ds-xs transition-colors hover:bg-ds-surface-teinte " +
     "lg:h-[46px] lg:min-h-0";
@@ -427,8 +427,16 @@ export async function TableauEnvois({
     ).values(),
   ].sort((a, b) => a.nom.localeCompare(b.nom));
 
+  /*
+   * ⚠️ AU TÉLÉPHONE LA BARRE NE DÉFILE PLUS, depuis le 15/09/2026. Elle glissait
+   * sous le pouce, le filtre suivant coupé au bord (« Tous les stat… ») : un
+   * filtre caché hors de l'écran ne se découvre pas. La recherche prend sa
+   * rangée, les menus viennent deux par deux, leurs libellés tronqués.
+   * Planche `ShippingView`, `.ship-filters` sous 760 px.
+   */
+  const MOITIE = " min-w-0 basis-[calc(50%-5px)] lg:basis-auto";
   const barreOutils = (
-    <div className="defilement-discret -mx-4 flex items-center gap-3.5 overflow-x-auto px-4 pb-0.5 lg:mx-0 lg:mb-4 lg:overflow-visible lg:px-0 lg:pb-0">
+    <div className="flex flex-wrap items-center gap-2.5 lg:mb-4 lg:flex-nowrap lg:gap-3.5">
       {/*
         LE CHAMP DE RECHERCHE, premier element de la barre du kit — 310 px de
         large, 46 de haut, une loupe de 17 a gauche.
@@ -463,7 +471,7 @@ export async function TableauEnvois({
         */}
         <label
           className={
-            "flex min-h-11 shrink-0 cursor-text items-center gap-[11px] rounded-ds-card border border-ds-filet " +
+            "flex min-h-11 shrink-0 basis-full cursor-text items-center gap-[11px] rounded-ds-card border border-ds-filet lg:basis-auto " +
             "bg-ds-surface-carte px-4 shadow-ds-xs lg:h-[46px] lg:min-h-0 lg:w-[310px]"
           }
         >
@@ -480,9 +488,9 @@ export async function TableauEnvois({
       </form>
 
       {/* ------------------------------------------------ LE STATUT */}
-      <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
+      <details className={DETAILS_OUTIL_DS + MOITIE + " lg:open:relative"}>
         <summary className={MENU_ENVOIS + " lg:min-w-[190px]"}>
-          <span className="flex-1">{libelleStatut}</span>
+          <span className="min-w-0 flex-1 truncate">{libelleStatut}</span>
           <ChevronDown aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
         </summary>
         <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
@@ -528,9 +536,9 @@ export async function TableauEnvois({
 
       {/* ------------------------------------------ LE TRANSPORTEUR */}
       {transporteursVus.length === 0 ? null : (
-        <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
+        <details className={DETAILS_OUTIL_DS + MOITIE + " lg:open:relative"}>
           <summary className={MENU_ENVOIS + " lg:min-w-[215px]"}>
-            <span className="flex-1">
+            <span className="min-w-0 flex-1 truncate">
               {parametres.transporteur === null
                 ? t("filtres.tousTransporteurs")
                 : (lireTransporteur(parametres.transporteur)?.nom ?? t("filtres.tousTransporteurs"))}
@@ -583,10 +591,10 @@ export async function TableauEnvois({
         `PANNEAU_OUTIL_DS`, avec `Commandes` : feuille du bas au téléphone, panneau
         ancré au bureau.
       */}
-      <details className={DETAILS_OUTIL_DS + " lg:open:relative"}>
+      <details className={DETAILS_OUTIL_DS + MOITIE + " lg:open:relative"}>
         <summary className={MENU_ENVOIS + " lg:min-w-[160px]"}>
-          <ArrowUpDown aria-hidden="true" size={16} strokeWidth={1.8} />
-          <span className="flex-1">{t(`tri.${parametres.tri}`)}</span>
+          <ArrowUpDown aria-hidden="true" size={16} strokeWidth={1.8} className="shrink-0" />
+          <span className="min-w-0 flex-1 truncate">{t(`tri.${parametres.tri}`)}</span>
           <ChevronDown aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
         </summary>
         <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>

@@ -15,6 +15,7 @@ import {
   TitreSection,
 } from "@/components/docs/briques";
 import { SommaireDocs } from "@/components/docs/sommaire-docs";
+import { SommaireRepliable } from "@/components/sommaire-repliable";
 import { LogoMarque } from "@/components/acces/coque-acces";
 import { BadgeStatut, iconeExpedition, teinteExpedition } from "@/components/commandes/badge-statut";
 
@@ -175,8 +176,15 @@ export default async function Documentation({
       <div className="mx-auto grid w-full max-w-[1240px] flex-1 grid-cols-[minmax(0,1fr)] items-start gap-7 px-4 pt-6 pb-12 min-[761px]:px-[34px] min-[761px]:pt-10 min-[761px]:pb-20 min-[981px]:grid-cols-[268px_minmax(0,1fr)] min-[981px]:gap-12">
         {/* AU-DESSUS DU CONTENU sous 980 px, filet dessous, comme au kit : on
             garde la carte de la page quand la colonne disparaît. */}
-        <aside className="border-b border-ds-filet pb-2.5 min-[981px]:sticky min-[981px]:top-24 min-[981px]:border-b-0 min-[981px]:pb-0">
-          <SommaireDocs etiquette={t("etiquette")} groupes={sommaire} />
+        <aside className="min-[981px]:sticky min-[981px]:top-24">
+          {/* ⚠️ AU TÉLÉPHONE, REPLIÉ (15/09/2026) : ses vingt entrées de 44 px
+              passaient avant la première ligne de la documentation. */}
+          <SommaireRepliable titre={legal("sommaireTitre")} masque="min-[981px]:hidden">
+            <SommaireDocs etiquette={t("etiquette")} groupes={sommaire} />
+          </SommaireRepliable>
+          <div className="hidden min-[981px]:block">
+            <SommaireDocs etiquette={t("etiquette")} groupes={sommaire} />
+          </div>
         </aside>
 
         <main id="contenu" className="min-w-0">

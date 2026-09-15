@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { AlertTriangle, ArrowRight, Building2, CalendarDays, FileText, Shield } from "lucide-react";
 import { LogoMarque } from "@/components/acces/coque-acces";
+import { SommaireRepliable } from "@/components/sommaire-repliable";
 import { signalementDisponible } from "@/lib/contact";
 
 export interface SectionLegale {
@@ -53,8 +54,8 @@ function Lacune({ children }: { readonly children: string }) {
  * LE SOMMAIRE EST UN VRAI SOMMAIRE, SANS ENTRÉE « ACTIVE ». Le kit suit le
  * défilement en JavaScript pour surligner la section courante ; un marquage
  * figé sur la première ment dès qu'on défile, et le suivi coûterait un îlot
- * client sur une page de texte. Au téléphone il passe au-dessus du document,
- * comme au kit, et chaque lien y fait 44 px.
+ * client sur une page de texte. Au téléphone il est REPLIÉ en tête du document
+ * (15/09/2026) : dépliées, ses dix entrées de 44 px passaient avant le texte.
  *
  * Ces pages restent indexables — contrairement aux pages de commande. Un
  * hébergeur dont les conditions ne sont pas consultables se prive du statut
@@ -107,6 +108,37 @@ export async function PageLegale({
     </div>
   ) : null;
 
+  const sommaire = (
+    <nav aria-label={t("sommaireTitre")} className="flex flex-col gap-[3px]">
+      <span className="px-3 pb-1.5 text-[11.5px] font-bold tracking-[0.08em] text-ds-texte-tenu uppercase">
+        {t("sommaireTitre")}
+      </span>
+      {sections.map((s, i) => (
+        <a
+          key={s.id}
+          href={`#${s.id}`}
+          className="flex min-h-11 items-center rounded-ds-sm px-3 py-2 text-[14px] font-medium text-ds-texte-corps transition-colors hover:bg-ds-surface-teinte hover:text-ds-accent-encre md:block md:min-h-0"
+        >
+          {`${i + 1}. ${s.titre}`}
+        </a>
+      ))}
+      <div className="mt-[18px] flex flex-col gap-2 border-t border-ds-filet px-3 pt-4">
+        <Link
+          href={`/${locale}/conditions`}
+          className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+        >
+          {t("conditionsTitre")}
+        </Link>
+        <Link
+          href={`/${locale}/confidentialite`}
+          className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+        >
+          {t("confidentialiteTitre")}
+        </Link>
+      </div>
+    </nav>
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-[linear-gradient(180deg,#FAF9FE_0%,#FBFAFE_60%,#F8F3FD_100%)] bg-fixed leading-[normal]">
       {/*
@@ -146,35 +178,13 @@ export async function PageLegale({
       </header>
 
       <main className="mx-auto grid w-full max-w-[1240px] flex-1 grid-cols-[minmax(0,1fr)] items-start gap-7 px-4 pt-6 pb-12 min-[980px]:grid-cols-[268px_minmax(0,1fr)] min-[980px]:gap-12 min-[980px]:px-[34px] min-[980px]:pt-10 min-[980px]:pb-20">
-        <aside className="border-b border-ds-filet pb-2.5 min-[980px]:sticky min-[980px]:top-24 min-[980px]:border-b-0 min-[980px]:pb-0">
-          <nav aria-label={t("sommaireTitre")} className="flex flex-col gap-[3px]">
-            <span className="px-3 pb-1.5 text-[11.5px] font-bold tracking-[0.08em] text-ds-texte-tenu uppercase">
-              {t("sommaireTitre")}
-            </span>
-            {sections.map((s, i) => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                className="flex min-h-11 items-center rounded-ds-sm px-3 py-2 text-[14px] font-medium text-ds-texte-corps transition-colors hover:bg-ds-surface-teinte hover:text-ds-accent-encre md:block md:min-h-0"
-              >
-                {`${i + 1}. ${s.titre}`}
-              </a>
-            ))}
-            <div className="mt-[18px] flex flex-col gap-2 border-t border-ds-filet px-3 pt-4">
-              <Link
-                href={`/${locale}/conditions`}
-                className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-              >
-                {t("conditionsTitre")}
-              </Link>
-              <Link
-                href={`/${locale}/confidentialite`}
-                className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
-              >
-                {t("confidentialiteTitre")}
-              </Link>
-            </div>
-          </nav>
+        <aside className="min-[980px]:sticky min-[980px]:top-24">
+          {/* Au téléphone replié — dix entrées de 44 px passaient avant le texte —,
+              dans la colonne au bureau. Voir `SommaireRepliable`. */}
+          <SommaireRepliable titre={t("sommaireTitre")} masque="min-[980px]:hidden">
+            {sommaire}
+          </SommaireRepliable>
+          <div className="hidden min-[980px]:block">{sommaire}</div>
 
           {/* L'ENCART DE SIGNALEMENT, que le kit n'a pas : la procédure de
               notification et retrait fonde notre statut d'hébergeur (brief

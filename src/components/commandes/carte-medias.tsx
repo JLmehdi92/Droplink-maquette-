@@ -588,7 +588,7 @@ export function CarteMedias({
               setSurvol(false);
               ajouter(e.dataTransfer.files);
             }}
-            className="grid grid-cols-3 gap-2 lg:grid-cols-6 lg:gap-[9px]"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 lg:gap-[9px]"
           >
             {medias.map((media, index) => (
               <Case

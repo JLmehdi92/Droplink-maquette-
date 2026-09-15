@@ -749,6 +749,16 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > Relevé téléphone des 37 écrans avant ce lot : 1 016 écarts de valeur, dont
 > 284 d'apparence — le reste du chantier, écran par écran.
 >
+> Second lot, les défauts vus à la revue des 33 écrans à 390 px, chacun écrit
+> dans sa planche puis porté : **Envois** — la barre de filtres ne défile plus
+> (recherche seule, menus deux par deux) ; **Paramètres** — « Enregistrer » sous
+> les champs qu'il enregistre, avatar à 64 px ; **Éditeur** — médias sur DEUX
+> colonnes (à trois, les coins tactiles de 44 px se chevauchaient sur 105 px) ;
+> **Documentation, conditions, confidentialité** — sommaire REPLIÉ
+> (`SommaireRepliable`), il passait avant le contenu ; **Surveillance** — badge
+> d'état sous la description. La bande d'action collée en bas de l'éditeur n'est
+> PAS un défaut : elle ne recouvre le texte que sur une capture pleine page.
+>
 > ⚠️ **`volatile: true`** dans `ecarts-declares.json` : la seule déclaration
 > qu'on n'exige pas de retrouver, réservée aux données que les suites réécrivent
 > selon leur ordre (âges du journal, lignes de suspension). Toute autre

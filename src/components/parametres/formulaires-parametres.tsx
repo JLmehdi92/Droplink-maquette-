@@ -271,7 +271,12 @@ export function CarteCompte({
       titre={t("titre")}
       sousTitre={t("aide")}
       action={
-        <Soumettre libelle={t("enregistrer")} enCours={t("enregistrement")} pendant={pendant} form={idFormulaire} />
+        /* Au téléphone le bouton descend sous les champs (voir plus bas) : l'en-tête
+           passait à la ligne et « Enregistrer » tombait seul avant les champs qu'il
+           enregistre. Planche `SettingsView`, `.set-save-bottom`. */
+        <div className="hidden md:block">
+          <Soumettre libelle={t("enregistrer")} enCours={t("enregistrement")} pendant={pendant} form={idFormulaire} />
+        </div>
       }
     >
       {/* LE FORMULAIRE DU NOM EST VIDE ET SES CHAMPS L'ATTEIGNENT PAR `form`. Le
@@ -282,7 +287,7 @@ export function CarteCompte({
       <div className="grid grid-cols-1 items-start gap-[22px] sm:grid-cols-[auto_minmax(0,1fr)]">
         <span
           aria-hidden="true"
-          className="flex h-24 w-24 shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent text-[30px] font-bold text-ds-texte-sur-marque"
+          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent text-[22px] font-bold text-ds-texte-sur-marque md:h-24 md:w-24 md:text-[30px]"
         >
           {initiales}
         </span>
@@ -322,6 +327,9 @@ export function CarteCompte({
             />
           </div>
           <Annonce message={message} />
+          <div className="md:hidden [&>button]:w-full">
+            <Soumettre libelle={t("enregistrer")} enCours={t("enregistrement")} pendant={pendant} form={idFormulaire} />
+          </div>
           {adresseSuivie ? (
             <p role="status" className="text-[13px] leading-[1.5] text-ds-texte-corps">
               {t("adresseSuivie")}

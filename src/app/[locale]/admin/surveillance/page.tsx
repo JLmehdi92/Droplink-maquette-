@@ -178,7 +178,7 @@ export default async function SurveillanceAdmin({
                 <li
                   key={tache.source}
                   className={
-                    "flex items-center gap-3.5 rounded-ds-card border px-4 py-4 md:px-[18px] " +
+                    "flex flex-wrap items-start gap-3.5 rounded-ds-card border px-4 py-4 md:flex-nowrap md:items-center md:px-[18px] " +
                     teinte.carte
                   }
                 >
@@ -186,10 +186,12 @@ export default async function SurveillanceAdmin({
                       couleur seule ne se lit pas de la même façon selon les yeux. */}
                   <span
                     aria-hidden="true"
-                    className={"h-2.5 w-2.5 shrink-0 rounded-ds-pill " + teinte.point}
+                    className={"mt-[7px] h-2.5 w-2.5 shrink-0 rounded-ds-pill md:mt-0 " + teinte.point}
                   />
 
-                  <div className="min-w-0 flex-1">
+                  {/* Au téléphone le badge passe SOUS la description, aligné sur elle : à droite,
+                      il écrasait le texte dans une colonne de cent pixels. */}
+                  <div className="min-w-0 flex-1 basis-[calc(100%-24px)] md:basis-auto">
                     <p className="text-[15px] leading-[1.55] font-bold text-ds-texte-fort">
                       {t.has(`surveillance.tache.${tache.source}`)
                         ? t(`surveillance.tache.${tache.source}`)
@@ -207,7 +209,7 @@ export default async function SurveillanceAdmin({
                     </p>
                   </div>
 
-                  <span className={BADGE + " " + teinte.badge}>
+                  <span className={BADGE + " ml-6 md:ml-0 " + teinte.badge}>
                     {t(`surveillance.etat.${tache.etat}`)}
                   </span>
                 </li>
