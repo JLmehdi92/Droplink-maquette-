@@ -1083,9 +1083,40 @@ for (const modele of routes) {
       await envoyer("Network.setCookie", { name: c.name, value: c.value, domain: hote, path: "/" });
     }
     await envoyer("Page.enable", {});
+    /*
+     * ⚠️ LA CSP N'AVAIT ÉTÉ VÉRIFIÉE AU NAVIGATEUR QU'UNE FOIS, LE 02/09/2026 —
+     * trois écrans, zéro violation. Depuis, tout le design a été refait : double
+     * authentification, écrans d'administration, blog, documentation. Une
+     * violation ne casse AUCUNE porte (la fumée n'exécute pas de JavaScript) :
+     * un script bloqué ou une image refusée n'existent qu'en production, où la
+     * CSP est servie, et seulement dans la console du navigateur.
+     *
+     * L'écouteur est posé AVANT la navigation, dans chaque nouveau document :
+     * il survit donc au rechargement en mouvement réduit.
+     */
+    await envoyer("Page.addScriptToEvaluateOnNewDocument", {
+      source: `window.__violationsCSP = [];
+        document.addEventListener('securitypolicyviolation', (e) => {
+          window.__violationsCSP.push({ directive: e.effectiveDirective, bloque: String(e.blockedURI).slice(0, 120),
+            source: (e.sourceFile || '').slice(-80) + ':' + e.lineNumber });
+        });`,
+    });
     await envoyer("Page.navigate", { url: base + chemin });
     await new Promise((r) => setTimeout(r, 3000));
     await cliquerProduit(envoyer, chemin, largeur);
+    /* UNE POLITIQUE ABSENTE NE PRODUIT AUCUNE VIOLATION : sans cet en-tête, « zéro
+       violation » serait vrai et ne prouverait rien. Le serveur de mesure est un
+       `next start`, donc NODE_ENV=production, donc la CSP doit être servie. */
+    {
+      const { result: entete } = await envoyer("Runtime.evaluate", {
+        expression: `fetch(location.href, { method: 'HEAD', credentials: 'include' }).then((r) => r.headers.get('content-security-policy') || '')`,
+        awaitPromise: true,
+        returnByValue: true,
+      });
+      if (!/default-src/.test(entete.value ?? "")) {
+        throw new Error(`ARRET : ${chemin} a ${largeur} px est servi SANS Content-Security-Policy — aucune violation ne pourrait etre relevee.`);
+      }
+    }
     const { result } = await envoyer("Runtime.evaluate", {
       expression: RELEVE,
       returnByValue: true,
@@ -1183,6 +1214,12 @@ for (const modele of routes) {
        ceux de l'état normal — c'est lui qu'on compare au kit. Un RECHARGEMENT, et
        non une bascule à chaud : une animation d'entrée ne se rejoue qu'au
        chargement, et c'est elle qui risque de laisser un texte à opacité nulle. */
+    const violationsCSP = [];
+    {
+      const { result: csp } = await envoyer("Runtime.evaluate", { expression: "window.__violationsCSP || null", returnByValue: true });
+      if (!Array.isArray(csp.value)) throw new Error(`ARRET : ${chemin} a ${largeur} px — l ecouteur CSP n est pas installe`);
+      violationsCSP.push(...csp.value);
+    }
     {
       const { result: normal } = await envoyer("Runtime.evaluate", { expression: VISIBLES, returnByValue: true });
       await envoyer("Emulation.setEmulatedMedia", {
@@ -1228,6 +1265,19 @@ for (const modele of routes) {
         );
       } else {
         console.error(`[mouvement-reduit] ${chemin} a ${largeur} px : rien ne disparait, aucune animation infinie`);
+      }
+    }
+    {
+      const { result: csp } = await envoyer("Runtime.evaluate", { expression: "window.__violationsCSP || []", returnByValue: true });
+      violationsCSP.push(...csp.value);
+      rapport[rapport.length - 1].violations_csp = violationsCSP;
+      if (violationsCSP.length > 0) {
+        process.exitCode = 1;
+        for (const v of violationsCSP) {
+          console.error(`[csp] ${chemin} a ${largeur} px : ${v.directive} bloque ${v.bloque} (${v.source})`);
+        }
+      } else {
+        console.error(`[csp] ${chemin} a ${largeur} px : politique servie, aucune violation`);
       }
     }
     await envoyer("Target.closeTarget", { targetId });

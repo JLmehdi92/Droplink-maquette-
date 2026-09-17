@@ -570,7 +570,7 @@ de Wassim. `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, e
 
 ### Comment on vérifie un écran migré
 
-Dans cet ordre, et on ne passe pas au suivant avant que les cinq passent :
+Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 
 1. **Bureau, À 1690 px** — comparer à la page de référence SERVIE, valeur par
    valeur, par la méthode ci-dessus. Pas une impression : deux inventaires et
@@ -593,7 +593,20 @@ Dans cet ordre, et on ne passe pas au suivant avant que les cinq passent :
    > neutralisées (10 boucles de la landing actives) et un titre en
    > `opacity-0 motion-safe:opacity-100` (disparu). **Les 33 écrans, à la
    > largeur du kit et à 390 px : 66 mesures, aucun défaut.**
-5. **Les six portes** — `pnpm gates`, et on relève le décompte, pas la couleur.
+5. **La CSP ne bloque rien** — la sonde relève chaque violation
+   (`securitypolicyviolation`, écouteur posé avant la navigation) et sort en
+   code 1.
+   > ⚠️ **ELLE N'AVAIT ÉTÉ VÉRIFIÉE AU NAVIGATEUR QU'UNE FOIS, LE 02/09/2026**,
+   > sur trois écrans — avant la refonte complète du design. Aucune porte ne
+   > peut voir une violation : la fumée n'exécute pas de JavaScript, et la CSP
+   > n'est servie qu'en `NODE_ENV=production`. La sonde **exige d'abord que
+   > l'en-tête soit servi** (une politique absente ne produit aucune violation).
+   > Falsifiée deux fois : `style-src` sans `'unsafe-inline'` (14 violations sur
+   > la connexion) et CSP désactivée (arrêt). **17/09/2026 : les 37 écrans et
+   > leurs états ouverts, au bureau et à 390 px — 75 passages, aucune violation.**
+   > Hors de sa portée : ce que les écrans mesurés n'exercent pas — un dépôt de
+   > média vers R2, un colis suivi.
+6. **Les six portes** — `pnpm gates`, et on relève le décompte, pas la couleur.
 
 > ⚠️ **NE JAMAIS VÉRIFIER UN ÉCRAN À LA LARGEUR DE SA FENÊTRE.** À 900 px, les
 > paliers 760 et 640 ne se déclenchent pas : cinq débordements s'y étaient cachés,
