@@ -606,6 +606,19 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
    > leurs états ouverts, au bureau et à 390 px — 75 passages, aucune violation.**
    > Hors de sa portée : ce que les écrans mesurés n'exercent pas — un dépôt de
    > média vers R2, un colis suivi.
+   >
+   > **Et la console ne ment pas non plus** : la même sonde relève les exceptions,
+   > les `console.error` et les requêtes en échec (≥ 400), sauf les images R2 du
+   > jeu (clés absentes du bucket) et le 404 VOULU du document mesuré. Elle
+   > exige d'avoir reçu des réponses réseau, sans quoi « aucune erreur » ne
+   > prouverait rien. Falsifiée : texte différent serveur/client et image
+   > inexistante sur la connexion → « React error #418 » et un 404 relevés.
+   > ⚠️ **PREMIER BALAYAGE, 17/09/2026 : UN VRAI DÉFAUT.** `/fr/verification`
+   > levait « Minified React error #418 » à chaque ouverture : un `<form>` (celui
+   > de `BoutonDeconnexion`) dans un `<p>`. Le navigateur ferme le paragraphe
+   > avant le formulaire, l'arbre ne correspond plus à celui de React, qui jette
+   > le HTML du serveur. **Un composant qui rend un `<form>` ne se pose jamais
+   > dans un `<p>`.**
 6. **Les six portes** — `pnpm gates`, et on relève le décompte, pas la couleur.
 
 > ⚠️ **NE JAMAIS VÉRIFIER UN ÉCRAN À LA LARGEUR DE SA FENÊTRE.** À 900 px, les

@@ -96,9 +96,16 @@ export default async function Verification({
 
             <p className="text-center text-[13px] leading-[1.55] text-ds-texte-corps">{t("perdu")}</p>
 
-            <p className="text-center text-[14px] text-ds-texte-corps">
+            {/* ⚠️ UN `div` ET PAS UN `p` : `BoutonDeconnexion` rend un `<form>`, et
+                un formulaire n'a pas le droit d'être dans un paragraphe. Le
+                navigateur fermait le `<p>` avant lui en analysant le HTML, l'arbre
+                ne correspondait plus à celui de React, et l'écran levait « Minified
+                React error #418 » à chaque ouverture — React jette alors le HTML du
+                serveur et reconstruit la page. Invisible à toutes les portes ;
+                trouvé le 17/09/2026 par la sonde, qui lit désormais la console. */}
+            <div className="text-center text-[14px] text-ds-texte-corps">
               {t("pasVous")} <BoutonDeconnexion langue={langue} variante="lien" />
-            </p>
+            </div>
 
             <NoteSecurite />
           </div>

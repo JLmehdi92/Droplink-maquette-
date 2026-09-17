@@ -650,8 +650,11 @@ const { webSocketDebuggerUrl } = await (await fetch("http://127.0.0.1:9223/json/
 const nav = new WebSocket(webSocketDebuggerUrl);
 let compteur = 0;
 const attentes = new Map();
+/* Les ÉVÉNEMENTS du navigateur, par session : console, exceptions, réseau. */
+const ecouteurs = new Map();
 nav.addEventListener("message", (m) => {
   const j = JSON.parse(m.data);
+  if (j.method !== undefined && j.sessionId !== undefined) ecouteurs.get(j.sessionId)?.(j.method, j.params);
   if (attentes.has(j.id)) {
     const { resoudre, rejeter } = attentes.get(j.id);
     attentes.delete(j.id);
@@ -1031,6 +1034,42 @@ for (const modele of routes) {
     const { targetId } = await brut("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await brut("Target.attachToTarget", { targetId, flatten: true });
     const envoyer = (m, p) => brut(m, p, sessionId);
+    /*
+     * ⚠️ UNE ERREUR QUI N'EXISTE QUE DANS LA CONSOLE N'EST VUE PAR RIEN. Une
+     * hydratation qui échoue, un îlot qui lève, une route qui répond 500 à un
+     * `fetch` : en production React réduit tout cela à « Minified React error
+     * #418 » dans la console, l'écran se rend quand même, et ni la soustraction
+     * ni les portes ne lisent la console.
+     *
+     * Exclues, et nommées : les IMAGES servies par R2. Les clés du jeu de mesure
+     * n'existent pas dans le bucket (voir `IMAGES_EN_ATTENTE`), donc leurs URL
+     * signées répondent en erreur par construction.
+     */
+    const erreursNavigateur = [];
+    // Un écouteur qui ne reçoit rien conclurait « aucune erreur » : on compte ce qu'il voit.
+    let reponsesVues = 0;
+    ecouteurs.set(sessionId, (methode, p) => {
+      if (methode === "Network.responseReceived") reponsesVues++;
+      if (methode === "Runtime.exceptionThrown") {
+        const d = p.exceptionDetails;
+        erreursNavigateur.push({ genre: "exception", texte: String(d.exception?.description ?? d.text).slice(0, 200) });
+      } else if (methode === "Runtime.consoleAPICalled" && (p.type === "error" || p.type === "assert")) {
+        erreursNavigateur.push({ genre: "console", texte: p.args.map((a) => a.value ?? a.description ?? "").join(" ").slice(0, 200) });
+      } else if (methode === "Network.responseReceived" && p.response.status >= 400) {
+        const imageR2 = p.type === "Image" && /r2\.cloudflarestorage\.com|\.r2\.dev/.test(p.response.url);
+        /* LE 404 DU DOCUMENT MESURÉ LUI-MÊME N'EST PAS UNE ERREUR DU NAVIGATEUR : c'est
+           la réponse voulue du lien mort et du 404 général, que la fumée vérifie déjà
+           (et la requête HEAD qui lit la CSP le reprend). Seul le 404 est écarté — un
+           500 sur le document reste signalé, et un 404 non voulu sur un écran normal
+           est arrêté plus haut par la garde « un écran qui n'est pas l'écran ». */
+        const quatreCentQuatreDuDocument =
+          p.response.status === 404 && p.response.url.split("#")[0] === base + chemin;
+        if (!imageR2 && !quatreCentQuatreDuDocument) {
+          erreursNavigateur.push({ genre: "reseau " + p.response.status, texte: `${p.type} ${p.response.url.slice(0, 160)}` });
+        }
+      }
+    });
+    await envoyer("Runtime.enable", {});
     await envoyer("Network.enable", {});
     /* ⚠️ SANS CECI, LA SONDE MESURE LES FEUILLES DU PASSAGE PRECEDENT. Le cache
        du navigateur survit d une cible a l autre, et une correction restait
@@ -1280,6 +1319,17 @@ for (const modele of routes) {
         console.error(`[csp] ${chemin} a ${largeur} px : politique servie, aucune violation`);
       }
     }
+    if (reponsesVues === 0) {
+      throw new Error(`ARRET : ${chemin} a ${largeur} px — aucune reponse reseau recue par l ecouteur : il n inspecte rien.`);
+    }
+    rapport[rapport.length - 1].erreurs_navigateur = erreursNavigateur;
+    if (erreursNavigateur.length > 0) {
+      process.exitCode = 1;
+      for (const e of erreursNavigateur) console.error(`[navigateur] ${chemin} a ${largeur} px : ${e.genre} — ${e.texte}`);
+    } else {
+      console.error(`[navigateur] ${chemin} a ${largeur} px : aucune erreur de console, d'exception ni de requete`);
+    }
+    ecouteurs.delete(sessionId);
     await envoyer("Target.closeTarget", { targetId });
   }
 }
