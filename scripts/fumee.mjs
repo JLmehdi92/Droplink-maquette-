@@ -816,11 +816,45 @@ const titreFr = JSON.parse(readFileSync(join(process.cwd(), "messages", "fr.json
 const titreEn = JSON.parse(readFileSync(join(process.cwd(), "messages", "en.json"), "utf8"))
   .landing.heroTitre;
 
+/**
+ * LE TITRE DU HERO, TEL QUE LE VISITEUR LE LIT — pas tel qu il est ecrit dans
+ * le HTML.
+ *
+ * ⚠️ CE CONTROLE CHERCHAIT LA PHRASE ENTIERE DANS LA SOURCE SERVIE, et il est
+ * devenu rouge le 17/09/2026 sans qu aucune cle cesse d etre resolue : le titre
+ * du kit peint UN de ses mots en degrade, donc le `h1` porte desormais du
+ * balisage AU MILIEU de sa phrase (`… toute la <span>commande</span>`), et
+ * React intercale en plus ses `<!-- -->` entre deux textes voisins. La phrase
+ * etait rendue, lisible, complete — et introuvable par `includes`.
+ *
+ * Ce que la sonde doit etablir n a pas change : que la cle est RESOLUE a
+ * l ecran, jamais qu elle est ecrite d un seul tenant. On lit donc le TEXTE du
+ * `h1`, balises et commentaires retires — c est ce que lisent un lecteur
+ * d ecran et un moteur de recherche.
+ *
+ * Elle rend `null` quand il n y a pas de `h1` : un ensemble vide passe tout, et
+ * une page sans titre doit rougir, pas disparaitre du controle.
+ */
+function texteDuTitre(html) {
+  const bloc = /<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(html);
+  if (bloc === null) return null;
+  return bloc[1]
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+const normaliser = (s) => s.replace(/\s+/g, " ").trim();
+const rendufr = texteDuTitre(fr);
+const renduEn = texteDuTitre(en);
+
 const controles = [
   [typeof titreFr === "string" && titreFr.length > 10, "titre francais lisible au catalogue"],
   [typeof titreEn === "string" && titreEn.length > 10, "titre anglais lisible au catalogue"],
-  [fr.includes(titreFr), "titre francais rendu"],
-  [en.includes(titreEn), "titre anglais rendu"],
+  [rendufr !== null, "la page francaise porte un h1"],
+  [renduEn !== null, "la page anglaise porte un h1"],
+  [rendufr !== null && rendufr === normaliser(titreFr), "titre francais rendu"],
+  [renduEn !== null && renduEn === normaliser(titreEn), "titre anglais rendu"],
   [!fr.includes("landing."), "aucune cle brute rendue en francais"],
   [!en.includes("landing."), "aucune cle brute rendue en anglais"],
   [fr.includes('lang="fr"'), "attribut lang correct en francais"],

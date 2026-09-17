@@ -4955,6 +4955,80 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE POUR TOUTES CES LIGNES. La landing du kit compose SIX sections que nous n avons pas — une preuve sociale chiffree, une bande de logos de plateformes, une maquette de tableau de bord dans le heros, un bloc de temoignages, une colonne de newsletter — et chacune est declaree plus bas avec sa raison. Notre page est donc plus courte et plus large de colonne : ses cartes font 328 px la ou le kit en fait 274, et tout ce qui suit une section absente remonte. Tailles, graisses, interlettrages, interlignes et couleurs sont ceux du kit. Le second appel a l action, lui, est BLANC sur la banniere degradee et non degrade : la regle 3 reserve le degrade a UNE action par ecran, et il est deja sur celui du heros."
+      },
+      {
+        "textes": [
+          "Un seul lien de suivi pour toute la",
+          "commande",
+          "DropLink crée une page de suivi client p",
+          "Le suivi de commande, sans un seul messa",
+          "relance",
+          "Photos, statut d'expédition, numéro de s",
+          "Votre prochaine commande mérite mieux"
+        ],
+        "motif": "contrainte",
+        "raison": "LES MOTS SONT CEUX DU KIT DEPUIS LE 17/09/2026 ; LEUR BOITE EST LA NOTRE. Au bureau, le titre occupe toute la largeur de notre carte-page (1185 contre 1180) et le chapeau la largeur que nous lui donnons. Au telephone, tailles et interlignes viennent des decisions du troisieme lot : titres de 27 a 30 au lieu de 44, gouttiere de 16 — le kit y garde ses valeurs de bureau, illisibles a 390. Le mot en degrade, lui, est peint des deux cotes : le kit met sa couleur a `transparent`, nous gardons l encre en repli et c est `-webkit-text-fill-color` qui l efface, pour qu il reste lisible la ou le degrade ne peint pas."
+      },
+      {
+        "textes": [
+          "Tableau de bord",
+          "Commandes",
+          "Suivi d'envois",
+          "Analyses",
+          "Ma marque",
+          "Paramètres",
+          "NB",
+          "Mon compte",
+          "nassim@laplanque.fr",
+          "Rechercher une commande...",
+          "Ctrl",
+          "Nassim B.",
+          "Bonjour Nassim !",
+          "Voici un aperçu rapide de votre activité",
+          "7 derniers jours",
+          "Commandes créées",
+          "+20%",
+          "+8%",
+          "+12%",
+          "+18%",
+          "Livrées",
+          "En transit",
+          "Liens clients ouverts",
+          "6,2j",
+          "Temps moyen de livraison",
+          "-18%",
+          "Commandes récentes",
+          "Voir tout",
+          "N°",
+          "CLIENT",
+          "STATUT",
+          "DATE",
+          "#DLK7842",
+          "#DLK7841",
+          "#DLK7840",
+          "#DLK7839",
+          "Yanis B.",
+          "Il y a 1h",
+          "Il y a 3h",
+          "Il y a 5h",
+          "Il y a 7h",
+          "Sofia M.",
+          "En livraison",
+          "Amine K.",
+          "Livrée",
+          "Luca R.",
+          "Commandée",
+          "Ajouter des photos",
+          "Glissez-déposez vos fichiers ou cliquez ",
+          "Commande créée",
+          "18/03 · 16:03",
+          "17/03 · 09:32",
+          "15/03 · 09:12",
+          "12/03 · 10:24",
+          "Livré"
+        ],
+        "motif": "structure",
+        "raison": "NOTRE MAQUETTE, NOTRE BALISAGE. Les composants du kit (`SidebarItem`, `MetricTile`, `Badge`, `TrackingTimeline`) sont du React de son design system, qu on ne peut pas importer : la maquette est refaite avec nos classes. Tailles, graisses, couleurs de role et echelle (0,68) sont celles du kit, mesurees une a une ; ce qui reste tient a la LARGEUR DES BOITES de nos conteneurs (un libelle qui remplit sa rangee, une pastille sans son ecart interne) et a l appariement par rang d un meme mot rendu a deux endroits — la tuile et la ligne de tableau."
       }
     ],
     "manquants": [
@@ -5020,15 +5094,8 @@
       },
       {
         "textes": [
-          "Un seul lien de suivi pour toute la",
-          "commande",
-          "DropLink crée une page de suivi client p",
-          "Le suivi de commande, sans un seul messa",
-          "relance",
-          "Photos, statut d'expédition, numéro de s",
           "Créer un lien de suivi client en 3",
           "étapes",
-          "Votre prochaine commande mérite mieux",
           "Gratuit pendant le lancement. Aucune car",
           "Un seul lien. Plus de ventes.",
           "Conditions d'utilisation",
@@ -5066,59 +5133,16 @@
       },
       {
         "textes": [
-          "Tableau de bord",
-          "Commandes",
-          "Suivi d'envois",
-          "Analyses",
-          "Ma marque",
-          "Paramètres",
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade",
-          "NB",
-          "Mon compte",
-          "nassim@laplanque.fr",
-          "Rechercher une commande...",
-          "Ctrl",
-          "Nassim B.",
-          "Bonjour Nassim !",
-          "Voici un aperçu rapide de votre activité",
-          "7 derniers jours",
-          "Commandes créées",
-          "+12%",
-          "Livrées",
-          "En transit",
-          "Liens clients ouverts",
-          "6,2j",
-          "Temps moyen de livraison",
-          "-18%",
-          "Commandes récentes",
-          "Voir tout",
-          "N°",
-          "CLIENT",
-          "STATUT",
-          "DATE",
-          "#DLK7842",
-          "Yanis B.",
-          "Il y a 1h",
-          "Sofia M.",
-          "En livraison",
-          "Amine K.",
-          "Livrée",
-          "Luca R.",
-          "Commandée"
+          "Upgrade"
         ],
         "motif": "contrainte",
         "raison": "LA MAQUETTE DE TABLEAU DE BORD DU HEROS N EST PAS PORTEE, et pour deux raisons qui se renforcent. La premiere : elle est faite de CHIFFRES INVENTES — 156 commandes, +12 %, 342 liens ouverts, 6,2 jours de delai moyen — sur la page qui doit etre la plus verifiable du produit. La seconde : elle dessine un ecran « Tableau de bord » et un ecran « Parametres » que le depot n a pas, et un encart « Passez au Pro » que la contrainte n°1 interdit. Ce que la landing montre a la place est le VRAI produit : la page client, dans un telephone, avec la page que le vendeur envoie."
       },
       {
         "textes": [
-          "Ajouter des photos",
-          "Glissez-déposez vos fichiers ou cliquez ",
-          "https://droplink.fr/c/8F2k9",
-          "Commande créée",
-          "12/03 · 10:24",
-          "Livré"
+          "https://droplink.fr/c/8F2k9"
         ],
         "motif": "donnee",
         "raison": "LES TROIS MINIATURES DES CARTES D ETAPE. Le kit dessine dans chacune un morceau d interface : une zone de depot, un champ de lien copiable, une frise de suivi. Elles montrent des donnees fabriquees — un lien `droplink.fr/c/8F2k9` qui ne mene nulle part, une date de commande inventee. Les trois etapes, elles, sont portees mot pour mot ; c est leur illustration qui ne l est pas."
@@ -5129,11 +5153,7 @@
         "textes": [
           "DropLink",
           "Ce que voit le client",
-          "Photos et suivi en un seul lien",
-          "Déposez les photos, collez le suivi, env",
           "Vos clients n'ont rien à installer",
-          "Fini de renvoyer les photos une par une",
-          "Trois choses que vous ne referez plus à ",
           "Import des photos en un clic",
           "Vos photos arrivent directement dans la ",
           "Le suivi se met à jour seul",
@@ -5143,7 +5163,6 @@
           "Rien à installer, rien à créer",
           "Votre client ouvre le lien et voit tout.",
           "Créer un lien de suivi client en 3 étape",
-          "Votre prochaine commande mérite mieux qu",
           "Gratuit pendant la phase de lancement. A",
           "Un seul lien. Toute la commande.",
           "Blog",
@@ -5167,6 +5186,13 @@
         ],
         "motif": "structure",
         "raison": "LE TELEPHONE MONTRE LA PAGE CLIENT, pas une image de synthese : c est le produit qu on vend, et une capture inventee serait la seule chose de cette page qu on ne pourrait pas tenir. Les trois pastilles autour de lui sont les `FloatingChip` du kit avec notre contenu — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "textes": [
+          "droplink.fr/c/exemple"
+        ],
+        "motif": "contrainte",
+        "raison": "LE LIEN DE L ILLUSTRATION EST UN EXEMPLE, ET IL LE DIT. Le kit ecrit « https://droplink.fr/c/8F2k9 », qui a l allure d un vrai jeton : un visiteur peut le recopier et tomber sur une page morte, et le jeton est immuable a vie — on n en fabrique pas pour decorer. « droplink.fr/c/exemple » montre la meme chose sans promettre une page."
       }
     ]
   },
@@ -5236,6 +5262,39 @@
         ],
         "motif": "structure",
         "raison": "LE MEME FILET, PORTE PAR UN AUTRE ELEMENT : au kit par la barre qui contient la ligne, au produit par la ligne elle-meme — 18 px au-dessus du texte des deux cotes, meme couleur, meme taille, meme abscisse."
+      },
+      {
+        "textes": [
+          "Photos, statut d'expédition, numéro de s",
+          "Ajouter des photos"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE : la maquette du heros ajoute 600 px avant le reste de la page, et la planche pose au-dessus de son titre une preuve sociale chiffree que Wassim a refusee le 27/08/2026. Toutes les abscisses coincident ; les ordonnees suivent, et chaque ligne descend d autant."
+      },
+      {
+        "textes": [
+          "Un seul lien de suivi pour toute la",
+          "commande",
+          "DropLink crée une page de suivi client p",
+          "Le suivi de commande, sans un seul messa",
+          "relance"
+        ],
+        "motif": "contrainte",
+        "raison": "LES MOTS SONT CEUX DU KIT DEPUIS LE 17/09/2026 ; LEUR BOITE EST LA NOTRE. Au bureau, le titre occupe toute la largeur de notre carte-page (1185 contre 1180) et le chapeau la largeur que nous lui donnons. Au telephone, tailles et interlignes viennent des decisions du troisieme lot : titres de 27 a 30 au lieu de 44, gouttiere de 16 — le kit y garde ses valeurs de bureau, illisibles a 390. Le mot en degrade, lui, est peint des deux cotes : le kit met sa couleur a `transparent`, nous gardons l encre en repli et c est `-webkit-text-fill-color` qui l efface, pour qu il reste lisible la ou le degrade ne peint pas."
+      },
+      {
+        "textes": [
+          "En livraison",
+          "Glissez-déposez vos fichiers ou cliquez ",
+          "Commande créée",
+          "12/03 · 10:24",
+          "15/03 · 09:12",
+          "17/03 · 09:32",
+          "18/03 · 16:03",
+          "Livré"
+        ],
+        "motif": "structure",
+        "raison": "NOTRE MAQUETTE, NOTRE BALISAGE. Les composants du kit (`SidebarItem`, `MetricTile`, `Badge`, `TrackingTimeline`) sont du React de son design system, qu on ne peut pas importer : la maquette est refaite avec nos classes. Tailles, graisses, couleurs de role et echelle (0,68) sont celles du kit, mesurees une a une ; ce qui reste tient a la LARGEUR DES BOITES de nos conteneurs (un libelle qui remplit sa rangee, une pastille sans son ecart interne) et a l appariement par rang d un meme mot rendu a deux endroits — la tuile et la ligne de tableau."
       }
     ],
     "manquants": [
@@ -5300,12 +5359,6 @@
       },
       {
         "textes": [
-          "Un seul lien de suivi pour toute la",
-          "commande",
-          "DropLink crée une page de suivi client p",
-          "Le suivi de commande, sans un seul messa",
-          "relance",
-          "Photos, statut d'expédition, numéro de s",
           "Créer un lien de suivi client en 3",
           "étapes",
           "Un seul lien. Plus de ventes.",
@@ -5348,7 +5401,6 @@
           "Liens clients ouverts",
           "6,2j",
           "Temps moyen de livraison",
-          "En livraison",
           "Livrée",
           "Commandée"
         ],
@@ -5357,12 +5409,7 @@
       },
       {
         "textes": [
-          "Ajouter des photos",
-          "Glissez-déposez vos fichiers ou cliquez ",
-          "https://droplink.fr/c/8F2k9",
-          "Commande créée",
-          "12/03 · 10:24",
-          "Livré"
+          "https://droplink.fr/c/8F2k9"
         ],
         "motif": "donnee",
         "raison": "LES TROIS MINIATURES DES CARTES D ETAPE. Le kit dessine dans chacune un morceau d interface : une zone de depot, un champ de lien copiable, une frise de suivi. Elles montrent des donnees fabriquees — un lien `droplink.fr/c/8F2k9` qui ne mene nulle part, une date de commande inventee. Les trois etapes, elles, sont portees mot pour mot ; c est leur illustration qui ne l est pas."
@@ -5373,10 +5420,7 @@
         "textes": [
           "DropLink",
           "Ce que voit le client",
-          "Photos et suivi en un seul lien",
-          "Déposez les photos, collez le suivi, env",
           "Vos clients n'ont rien à installer",
-          "Fini de renvoyer les photos une par une",
           "Import des photos en un clic",
           "Le suivi se met à jour seul",
           "Le lien ne change jamais",
@@ -5388,7 +5432,6 @@
           "Conditions",
           "Confidentialité",
           "Signaler un contenu",
-          "Trois choses que vous ne referez plus à ",
           "Vos photos arrivent directement dans la ",
           "Vous collez le numéro une fois. Le clien",
           "Modifiez la page quand vous voulez : le "
@@ -5412,6 +5455,13 @@
         ],
         "motif": "structure",
         "raison": "LE MENU DU TELEPHONE, RELEVE FERME, ET LE LIEN « TARIFS » DU PIED. « Se connecter » et « Tarifs » sont des entrees du menu repli, que la sonde releve ; le kit garde son menu dans un etat React non rendu. « Tarifs » mene aussi, dans le pied, a la banniere de gratuite de cette page — une ancre qui existe, la ou les colonnes du kit nomment des pages que le produit n a pas."
+      },
+      {
+        "textes": [
+          "droplink.fr/c/exemple"
+        ],
+        "motif": "contrainte",
+        "raison": "LE LIEN DE L ILLUSTRATION EST UN EXEMPLE, ET IL LE DIT. Le kit ecrit « https://droplink.fr/c/8F2k9 », qui a l allure d un vrai jeton : un visiteur peut le recopier et tomber sur une page morte, et le jeton est immuable a vie — on n en fabrique pas pour decorer. « droplink.fr/c/exemple » montre la meme chose sans promettre une page."
       }
     ]
   },

@@ -1,9 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, BarChart3, Check, Image as ImageIcon, Link2, Lock, Menu, Package, Truck } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { signalementDisponible } from "@/lib/contact";
+import { MaquetteApplication } from "@/components/landing/maquette-application";
+import { ChampDeLien, FriseDeSuivi, ZoneDeDepot } from "@/components/landing/illustrations-etapes";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { donneesStructurees } from "@/lib/seo/donnees-structurees";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
@@ -55,6 +58,32 @@ import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
  * deux fois, en haut et en bas, parce que la page est longue et que c'est la
  * même action.
  */
+
+/**
+ * LE DERNIER MOT DU TITRE EN DÉGRADÉ — le `GradientText` du kit, porté le
+ * 17/09/2026 (décision de Wassim : « les titres du kit »).
+ *
+ * ⚠️ `text-transparent` seul rend le mot INVISIBLE quand le dégradé ne peint pas
+ * (impression, `forced-colors`, image de fond bloquée) : la couleur de repli est
+ * l'encre du titre, et c'est `-webkit-text-fill-color` qui la rend transparente
+ * là où le dégradé s'affiche — le même geste que la coque d'accès.
+ *
+ * Le mot est cherché à la FIN : dans « Un seul lien de suivi pour toute la
+ * commande », c'est le dernier mot qui est peint, pas la première occurrence.
+ */
+function motEnDegrade(titre: string, mot: string): ReactNode {
+  const i = mot === "" ? -1 : titre.lastIndexOf(mot);
+  if (i < 0) return titre;
+  return (
+    <>
+      {titre.slice(0, i)}
+      <span className="degrade-ds-marque bg-clip-text text-ds-texte-titre [-webkit-text-fill-color:transparent]">
+        {mot}
+      </span>
+      {titre.slice(i + mot.length)}
+    </>
+  );
+}
 
 export function generateStaticParams(): Array<{ locale: string }> {
   return routing.locales.map((locale) => ({ locale }));
@@ -294,23 +323,17 @@ export default async function Accueil({
         <main id="contenu">
           {/* ---- HÉROS --------------------------------------------------- */}
           <section className="relative overflow-hidden px-4 pt-[22px] text-center md:px-10 md:pt-[46px]">
-            {/* Le mot en très grand derrière le titre. `aria-hidden` : il est
-                déjà lu dans la navigation, et un lecteur d'écran n'a rien à
-                faire d'un décor typographique. Absent de la planche mobile. */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-[78px] hidden text-center text-[216px] leading-none font-extrabold tracking-[-0.05em] text-ds-surface-creux select-none md:block"
-            >
-              DROPLINK
-            </span>
+            {/* ⚠️ LE FILIGRANE « DROPLINK » DERRIÈRE LE TITRE A ÉTÉ RETIRÉ le
+                17/09/2026 : la planche ne le porte pas, et depuis que la maquette
+                du héros est là, il transparaissait à travers elle. */}
 
             <div className="relative">
-              <h1 className="mx-auto max-w-[830px] text-[38px] leading-[1.02] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[64px] md:leading-[0.98]">
-                {t("heroTitre")}
+              <h1 className="mx-auto text-[38px] leading-[1.02] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[64px] md:leading-[0.98]">
+                {motEnDegrade(t("heroTitre"), t("motDegradeHero"))}
               </h1>
               {/* Deux textes, pas un texte coupé : la planche mobile RÉÉCRIT
                   la phrase plus court, elle ne la tronque pas. */}
-              <p className="mx-auto mt-4 mb-6 max-w-[540px] text-[15px] leading-[1.55] text-ds-texte-corps md:mt-5 md:mb-[30px] md:text-[17px] md:leading-[1.55]">
+              <p className="mx-auto mt-4 mb-6 max-w-[500px] text-[15px] leading-[1.55] text-ds-texte-corps md:mt-5 md:mb-[30px] md:text-[17px] md:leading-[1.55]">
                 <span className="md:hidden">{t("heroSousTitreCourt")}</span>
                 <span className="hidden md:inline">{t("heroSousTitre")}</span>
               </p>
@@ -345,6 +368,26 @@ export default async function Accueil({
                   </li>
                 ))}
               </ul>
+
+              {/* ---- LA MAQUETTE DU HÉROS ------------------------------------
+               *
+               * Le kit la pose sous les promesses, débordant du bas de la
+               * section : c'est la première chose qu'un visiteur voit du
+               * produit. Elle a 1180 px de large et se réduit par `scale` —
+               * jamais par une largeur fluide, sinon ses colonnes se replient
+               * et la maquette ne montre plus l'écran qu'elle décrit.
+               *
+               * ⚠️ `lg` ET AU-DESSUS SEULEMENT. Sous ce palier, c'est le
+               * téléphone de la section suivante qui montre le produit — le
+               * kit y réduit la fenêtre à 30 %, où elle n'est plus lisible.
+               */}
+              <div className="relative mt-10 hidden h-[600px] overflow-hidden lg:block">
+                {/* Les valeurs du kit : fenêtre de 1180 réduite à 0,68, posée à
+                    gauche du centre (-64 %), dans un bloc de 600. */}
+                <div className="absolute left-1/2 origin-top -translate-x-[64%] scale-[0.68]">
+                  <MaquetteApplication />
+                </div>
+              </div>
             </div>
           </section>
 
@@ -544,7 +587,7 @@ export default async function Accueil({
                 <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
               </span>
               <h2 className="mt-4 text-[30px] leading-[35px] font-extrabold tracking-[-0.03em] text-ds-texte-titre md:mt-5 md:text-[46px] md:leading-[52px]">
-                {t("beneficesTitre")}
+                {motEnDegrade(t("beneficesTitre"), t("motDegradeBenefices"))}
               </h2>
               {/* Le kit le montre aussi au téléphone. L'ancien canevas le retirait ;
                   c'est une décision d'une planche morte, pas du design system. */}
@@ -654,6 +697,9 @@ export default async function Accueil({
                     <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
                       {t(`etape${n}Texte`)}
                     </p>
+                    {/* L'ILLUSTRATION DE L'ÉTAPE — le kit en dessine une par carte, et
+                        elle dit en une image ce que la phrase annonce (17/09/2026). */}
+                    {n === 1 ? <ZoneDeDepot /> : n === 2 ? <ChampDeLien /> : <FriseDeSuivi />}
                   </span>
                 </li>
               ))}

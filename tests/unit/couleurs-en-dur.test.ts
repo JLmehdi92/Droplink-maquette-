@@ -157,6 +157,22 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
       "dit, la relecture ne l'avait pas vu.",
   ],
   ["#f8f4fd", "fond de l'espace vendeur — arrêt 100 %"],
+  /*
+   * ⚠️ LES TROIS PASTILLES DE LA FENÊTRE DE LA MAQUETTE DU HÉROS, portées avec
+   * elle le 17/09/2026 (`AppWindowMock` du kit `marketing_site`).
+   *
+   * Ce ne sont PAS des couleurs de thème, et c'est la raison de les garder hors
+   * de la palette : elles citent le chrome de fenêtre d'un système
+   * d'exploitation, comme un logo de marque tierce. Les jetonner les ferait
+   * suivre notre palette au prochain changement de design — et une pastille
+   * « fermer » verte ne se lirait plus comme une fenêtre.
+   *
+   * Elles ne peignent rien d'autre que ce dessin : `aria-hidden`, aucun texte
+   * par-dessus, donc aucun contraste à tenir.
+   */
+  ["#ff5f57", "pastille « fermer » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
+  ["#febc2e", "pastille « réduire » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
+  ["#28c840", "pastille « agrandir » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
 ];
 const tolerees = new Map(EXCEPTIONS);
 
