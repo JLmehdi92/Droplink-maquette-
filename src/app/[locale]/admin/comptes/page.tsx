@@ -213,7 +213,11 @@ export default async function AdminComptes({
             interdit d'en créer une. Les plans peuvent être AFFICHÉS sur la
             tarification ; ils ne sont jamais APPLIQUÉS, donc il n'y a rien à
             compter. Les quatre autres sont exactement les nôtres. */}
-        <div className="flex flex-col gap-2.5 xl:grid xl:grid-cols-4 xl:gap-[18px]">
+        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
+            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
+            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
+            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
+        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:gap-[18px]">
           <TuileVolume
             icone={Users}
             compacte

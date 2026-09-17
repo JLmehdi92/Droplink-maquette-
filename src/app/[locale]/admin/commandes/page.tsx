@@ -232,7 +232,11 @@ export default async function AdminCommandes({
             étape que le kit ne compte pas, et les commandes créées ce mois-ci,
             le compteur que la vue d'ensemble affiche déjà. Aucun badge
             « +12 % » : aucun compteur ne porte son historique. */}
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-6 xl:gap-3.5">
+        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
+            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
+            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
+            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
+        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-6 xl:gap-3.5">
           <TuileVolume
             icone={ShoppingCart}
             compacte

@@ -92,7 +92,10 @@ export function HistoriqueSuivi({
             return (
               <li
                 key={p.instant + p.description}
-                className="grid grid-cols-[22px_36px_minmax(0,1fr)] items-start gap-3 lg:grid-cols-[22px_40px_minmax(0,1fr)] lg:gap-3.5"
+                /* LA MÊME GRILLE À TOUTES LES LARGEURS, comme la planche : resserrée au
+                   téléphone (36 px, écart 12), elle décalait le texte de 8 px pour en
+                   gagner autant sur une ligne qui en a 264. */
+                className="grid grid-cols-[22px_40px_minmax(0,1fr)] items-start gap-3.5"
               >
                 <div className="flex flex-col items-center self-stretch">
                   <span

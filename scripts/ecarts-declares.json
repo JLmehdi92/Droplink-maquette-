@@ -2554,12 +2554,82 @@
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
+      },
+      {
+        "motifs": [
+          "^il\\sy\\sa\\s\\d+\\s(s|min|h|j)$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "L AGE DES DERNIERES ACTIONS D ADMINISTRATION. Il compte depuis la derniere ligne ecrite au journal par les suites, donc depuis le dernier passage des portes : « il y a 3 min » juste apres, « il y a 2 j » deux jours plus tard. Quand toutes les lignes ont le meme age, la soustraction en apparie autant que le kit en porte et laisse le reste en trop ; quand elles different, elles s apparient toutes. VOLATILE : couverte quand elle est la, pas exigee quand elle n y est pas (17/09/2026)."
       }
     ]
   },
   "fr-admin-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "Commandes [2/3]",
+          "commandes [3/3]",
+          "Évolution du nombre de commandes sur les",
+          "18 août [1/2]",
+          "10 août [2/2]",
+          "Statut des commandes",
+          "Répartition des commandes par statut",
+          "3 % [1/4]",
+          "5 % [2/4]",
+          "12 % [3/4]",
+          "30 % [4/4]"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "En transit  <nombre d'occurrences>",
+          "En préparation  <nombre d'occurrences>",
+          "50 %  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "TROIS OCCURRENCES DE MOINS, UNE SEULE CAUSE. Le kit rend CINQ parts d anneau — il ajoute « Probleme » et « Annulees » — et repete deux de ses libelles dans les pastilles du tableau « Dernieres commandes ». La decision 4 arrete la frise a QUATRE etapes, et ce tableau est refuse (declare plus bas). Inventer deux etats pour remplir un anneau leur donnerait une existence que la base ne leur accorde pas."
+      },
+      {
+        "textes": [
+          "10 août  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE N A NI LES MEMES DATES NI LE MEME NOMBRE DE LIGNES. La fenetre du kit est figee au 8 septembre 2025 et la notre se termine AUJOURD HUI ; ses quinze reperes d axe ne tombent donc pas sur les memes jours que nos huit, et son flux d activite porte cinq lignes la ou notre apercu de journal en porte quatre."
+      },
+      {
+        "motifs": [
+          "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.)$"
+        ],
+        "motif": "donnee",
+        "raison": "LES REPERES D AXE DE LA COURBE — position, et la largeur du dernier. Le kit trace une fenetre figee au 8 septembre 2025 ; la notre finit aujourd hui, donc aucun repere ne tombe au meme endroit et le dernier libelle n a pas la meme longueur. Un motif ancre plutot que des dates ecrites : une declaration litterale sur des dates glissantes serait morte le lendemain."
+      },
+      {
+        "textes": [
+          "Boutiques [2/2]",
+          "Évolution du nombre de commandes sur les",
+          "Statut des commandes",
+          "Répartition des commandes par statut",
+          "Livrées",
+          "En transit",
+          "En préparation"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE, ET UNE SEULE CAUSE POUR TOUTES CES LIGNES — sauf « Boutiques », dont la boite de libelle perd huit pixels pour la meme raison. Nos sections ne sont ni les memes ni dans le meme ordre : les ALERTES viennent AVANT les compteurs (le brief l exige — un panneau qui les enterre oblige a chercher ce qui devrait sauter aux yeux), la barre superieure du kit n existe pas, nous posons CINQ tuiles de volumes la ou il en pose quatre, et le tableau « Dernieres commandes » est refuse. Tout ce qui suit est donc decale. Taille, graisse, interlettrage, interligne et couleur sont ceux du kit."
+      },
+      {
+        "motifs": [
+          "^Il y a \\d+ (min|h|j)$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES ÂGES DES DERNIÈRES ACTIONS DU JOURNAL. Ils mesurent le temps écoulé depuis la dernière écriture des suites de tests dans la base de tests : « Il y a 12 min » juste après les portes, « Il y a 3 h » l'après-midi. Leurs largeurs, leurs places et leur nombre d'occurrences suivent. VOLATILE : selon l'heure de la mesure, aucun âge ne diffère parfois de ceux du kit."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -2659,8 +2729,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système"
@@ -2712,6 +2780,21 @@
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
+      },
+      {
+        "motifs": [
+          "^il\\sy\\sa\\s\\d+\\s(s|min|h|j)$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "L AGE DES DERNIERES ACTIONS D ADMINISTRATION. Il compte depuis la derniere ligne ecrite au journal par les suites, donc depuis le dernier passage des portes : « il y a 3 min » juste apres, « il y a 2 j » deux jours plus tard. Quand toutes les lignes ont le meme age, la soustraction en apparie autant que le kit en porte et laisse le reste en trop ; quand elles different, elles s apparient toutes. VOLATILE : couverte quand elle est la, pas exigee quand elle n y est pas (17/09/2026)."
       }
     ]
   },
@@ -3005,7 +3088,54 @@
   },
   "fr-admin-comptes-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "Nouveaux inscrits",
+          "Réinitialiser",
+          "32 % [1/2]"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Actif  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "Le jeu de mesure porte vingt comptes, tous actifs et tous administrateurs — la sonde se promeut pour atteindre la surface. La page du kit en montre dix, dont trois inactifs."
+      },
+      {
+        "textes": [
+          "Nouveaux inscrits"
+        ],
+        "motif": "contrainte",
+        "raison": "Largeur et hauteur du libelle : le kit pose SIX tuiles, nous QUATRE — ses deux tuiles de plan sont declarees plus bas. Dans une colonne plus etroite, son libelle se replie sur deux lignes ; le notre tient sur une. Taille, graisse, couleur et interligne sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Réinitialiser"
+        ],
+        "motif": "donnee",
+        "raison": "Position et largeur. Le bouton est pousse au bout d une barre de filtres qui porte UN selecteur au lieu de quatre — les trois autres sont declares plus bas. Hauteur 42, remplissage 0/18, rayon sm, filet, 13,5/600 en encre d accent : les valeurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "Actif",
+          "32 %",
+          "68 %"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE. Nos sections ne sont ni les memes ni dans le meme ordre : l encart de trace precede les tuiles, elles sont quatre et non six, et la colonne de droite porte UN panneau au lieu de trois — les deux autres sont declares plus bas. Tout ce qui suit est donc decale."
+      },
+      {
+        "textes": [
+          "Comptes"
+        ],
+        "motif": "structure",
+        "raison": "APPARIEMENT PAR RANG : « Comptes » est l onglet de la barre du bas, le titre de la liste et le libelle d une option de filtre. La soustraction les apparie dans l ordre du document."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -3147,8 +3277,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système"
@@ -3196,6 +3324,27 @@
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : son role apparait dans la liste et sur sa fiche. Le kit ecrit ceux de ses comptes de demonstration."
+      },
+      {
+        "textes": [
+          "4 commandes"
+        ],
+        "motif": "donnee",
+        "raison": "LE VOLUME DU COMPTE DE MESURE, face aux comptes de demonstration du kit."
       }
     ]
   },
@@ -3485,7 +3634,47 @@
   },
   "fr-admin-boutiques-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "boutiques [3/3]",
+          "Boutiques totales",
+          "Commandes créées",
+          "Réinitialiser",
+          "69 % [1/2]",
+          "Statut des boutiques"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Boutiques  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "Le kit ecrit « Boutiques » quatre fois : l entree de navigation, le titre, et DEUX unites d anneau — il en pose deux a droite, dont un « Repartition par plan » que rien ne peut remplir. Nous n en avons qu un."
+      },
+      {
+        "motifs": [
+          "^(Boutique|Propriétaire|Création|Statut|Commandes)$"
+        ],
+        "motif": "structure",
+        "raison": "EN-TETES DE COLONNE, ET LA LARGEUR D UNE CELLULE DE TABLEAU N EST PAS CELLE DE SON TEXTE. Le kit pose ses entetes dans une grille CSS dont chaque piste est fixee par la declaration ; nos colonnes sont des `th` qui se dimensionnent sur le contenu de la colonne entiere. Taille 12,5, graisse 600, couleur et retrait de 12 px sous la ligne sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Boutiques totales",
+          "Commandes créées",
+          "Réinitialiser",
+          "Liste des boutiques",
+          "Statut des boutiques",
+          "69 %",
+          "31 %"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE. Nos sections ne sont ni les memes ni dans le meme ordre : l encart de trace precede les tuiles, elles sont QUATRE et non six — les deux tuiles de plan sont declarees plus bas, ainsi qu une septieme sur les liens clients — la barre superieure du kit n existe pas, et la colonne de droite porte UN panneau au lieu de trois. Le panneau de liste est donc plus large et tout ce qui le suit est decale. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -3611,6 +3800,13 @@
       },
       {
         "textes": [
+          "Gérez et suivez toutes les boutiques uti"
+        ],
+        "motif": "contrainte",
+        "raison": "LE SOUS-TITRE DU KIT ; le notre dit ce que l ecran montre vraiment — les boutiques et leurs volumes, sans contenu de commande."
+      },
+      {
+        "textes": [
           "124 boutiques au total"
         ],
         "motif": "donnee",
@@ -3620,8 +3816,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système",
@@ -3635,8 +3829,7 @@
           "^(sonde|ecran|vitrine|zone)-[a-z0-9]+@droplink-tests\\.invalid$"
         ],
         "motif": "donnee",
-        "raison": "Les vingt comptes jetables du jeu de mesure, dont les adresses changent a chaque passage. Un motif ancre plutot qu une liste d adresses, qui serait morte au passage suivant.",
-        "textes": []
+        "raison": "Les vingt comptes jetables du jeu de mesure, dont les adresses changent a chaque passage. Un motif ancre plutot qu une liste d adresses, qui serait morte au passage suivant."
       },
       {
         "textes": [
@@ -3680,6 +3873,20 @@
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
+      },
+      {
+        "textes": [
+          "Revendeur"
+        ],
+        "motif": "donnee",
+        "raison": "LE TYPE DE COMPTE DE LA BOUTIQUE DU JEU DE MESURE."
       }
     ]
   },
@@ -3944,9 +4151,7 @@
         "motifs": [
           "^\\d{1,3} % du total$",
           "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4} \\d{2}:\\d{2}$",
-          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$",
-          "^systeme$",
-          "^(Inscriptions ouvertes|Commandes par mois|Interrogation des transporteurs|Seuil d'alerte colis|Tâche en retard après)$"
+          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$"
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026)."
@@ -3959,12 +4164,63 @@
         "motif": "donnee",
         "volatile": true,
         "raison": "LES LIGNES DE SUSPENSION ET DE RÉACTIVATION. Elles n'apparaissent que si les suites RLS de suspension ont écrit parmi les cinquante dernières lignes du journal au dernier passage des portes — leur présence dépend de l'ordre des suites. VOLATILE, donc : couverte quand elle est là, pas exigée quand elle n'y est pas."
+      },
+      {
+        "motifs": [
+          "^systeme$",
+          "^(Inscriptions ouvertes|Commandes par mois|Interrogation des transporteurs|Seuil d'alerte colis|Tâche en retard après)$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES MODIFICATIONS DE REGLAGE AU JOURNAL. Le journal nomme, sur une modification de parametre, le reglage et son auteur « systeme » — ils n apparaissent que si l une des cinquante dernieres lignes en porte une, c est-a-dire selon l ordre des suites au dernier passage des portes. VOLATILE, donc (17/09/2026)."
       }
     ]
   },
   "fr-admin-journal-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "Réinitialiser",
+          "4 % [1/3]",
+          "4 % [2/3]",
+          "7 % [3/3]"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Boutiques",
+          "Commandes"
+        ],
+        "motif": "structure",
+        "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13 et hauteur 44 sont ceux de l entree entiere. Le decompte de « Boutiques » differe pour la meme raison que partout : le kit ecrit ce mot dans une seconde unite d anneau, celle du panneau de plan, que rien ne peut remplir."
+      },
+      {
+        "textes": [
+          "10 926",
+          "10 926",
+          "12 842"
+        ],
+        "motif": "donnee",
+        "raison": "LES VOLUMES DU JEU DE MESURE, ET UN PLAFOND ASSUME. Le kit affiche 12 842 logs exactement ; notre journal est BORNE a 10 000 — compter au-dela couterait le parcours de toute la table a chaque ouverture, pour une precision dont personne ne decide. L ecran ecrit donc « plus de 10 000 », et le meme nombre revient dans la tuile, l anneau et le pied de liste. Les largeurs et les decomptes d occurrences suivent."
+      },
+      {
+        "textes": [
+          "Réinitialiser"
+        ],
+        "motif": "donnee",
+        "raison": "Position seule. Le bouton est pousse au bout d une barre de filtres qui porte DEUX selecteurs au lieu de quatre — le kit filtre par niveau, categorie, utilisateur et date, quatre dimensions declarees plus bas. Hauteur 42, remplissage 0/18, rayon sm, filet et 13,5/600 en encre d accent sont ceux du kit."
+      },
+      {
+        "textes": [
+          "85 %  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION, ET TROIS PARTS LA OU LE KIT EN A QUATRE. Son anneau range les logs par NIVEAU — succes, erreurs, avertissements, infos — ce qui decrit un journal technique. Le notre consigne des GESTES D ADMINISTRATION : ses parts sont les familles du filtre, et il n y en a que trois. Le reste de l ecart est du decalage : nos sections ne sont ni les memes ni dans le meme ordre."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -4083,8 +4339,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système"
@@ -4130,9 +4384,7 @@
       {
         "motifs": [
           "^\\d{1,3} % du total$",
-          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$",
-          "^systeme$",
-          "^(Inscriptions ouvertes|Commandes par mois|Interrogation des transporteurs|Seuil d'alerte colis|Tâche en retard après)$"
+          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$"
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026)."
@@ -4145,6 +4397,31 @@
         "motif": "donnee",
         "volatile": true,
         "raison": "LES LIGNES DE SUSPENSION ET DE RÉACTIVATION. Elles n'apparaissent que si les suites RLS de suspension ont écrit parmi les cinquante dernières lignes du journal au dernier passage des portes — leur présence dépend de l'ordre des suites. VOLATILE, donc : couverte quand elle est là, pas exigée quand elle n'y est pas."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
+      },
+      {
+        "textes": [
+          "Par",
+          "Paramètres"
+        ],
+        "motifs": [
+          "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}$"
+        ],
+        "motif": "donnee",
+        "raison": "LE PIED DU JOURNAL ET SES LIGNES : le volume reel de la base de tests et les horodatages ecrits par les suites au passage des portes. Le kit ecrit ses lignes de demonstration."
+      },
+      {
+        "motifs": [
+          "^Plus de [0-9][0-9\\s\\u202f\\u00a0]* entrées · ni modifiables ?$"
+        ],
+        "motif": "donnee",
+        "raison": "LE PIED DU JOURNAL : le volume reel de la base de tests, au-dela du plafond de comptage. Declare par MOTIF — le nombre change a chaque passage des portes, et son millier est separe par une espace insecable etroite."
       }
     ]
   },
@@ -4556,8 +4833,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système",
@@ -4615,6 +4890,13 @@
         ],
         "motif": "contrainte",
         "raison": "CE QUI N EST PAS ICI EST DIT, plutot que laisse a deviner. Un ecran de parametres muet sur les secrets laisse chercher ou les regler — et la recherche finit par une cle collee quelque part. La cle de service ne quitte jamais le serveur : c est le principe VI, et cet encart est le seul endroit du produit ou il se lit."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       }
     ]
   },
@@ -4867,7 +5149,72 @@
   },
   "fr-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "Créer ma première commande [1/2]",
+          "Gratuit au lancement",
+          "Sans carte bancaire",
+          "Prêt en 30 secondes",
+          "Fonctionnalités [1/2]",
+          "Gestion de commandes",
+          "Créez, organisez et suivez toutes vos co",
+          "Analyses détaillées",
+          "Commandes créées, livrées, liens ouverts",
+          "Comment ça marche ?",
+          "Aucune installation, aucune intégration ",
+          "Créez votre commande",
+          "Ajoutez le nom du client, ses photos et ",
+          "Partagez le lien",
+          "Un lien unique est généré pour votre cli",
+          "Votre client suit en temps réel",
+          "Le suivi se met à jour automatiquement, ",
+          "Produit",
+          "Société"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE, EN ORDONNEE : toutes les abscisses coincident (gouttiere 16, cartes et etapes aux valeurs du kit depuis le 17/09/2026). La landing du kit empile au telephone ce que la notre ne porte pas, et chaque ligne descend d autant : la preuve sociale chiffree et ses avatars, le second bouton « Voir un exemple », la maquette reduite du tableau de bord, la bande de logos de plateformes, la sixieme fonctionnalite, les temoignages, la lettre d information et le selecteur de langue du pied — tous declares dans les manquants, pour des raisons de contenu (chiffres inventes, integrations inexistantes, routes absentes)."
+      },
+      {
+        "textes": [
+          "Créer ma première commande [2/2]"
+        ],
+        "motif": "structure",
+        "raison": "LA MEME ACTION, PLEINE LARGEUR : filet, ombre, taille et place d abscisse sont ceux du kit depuis le 17/09/2026. Le kit pose a cote d elle un second bouton « Voir un exemple » (declare dans les manquants), qui la tient a la largeur de son texte, 294 ; seule, elle prend la largeur de la banniere, 302 — la regle du produit pour l action principale au telephone."
+      },
+      {
+        "textes": [
+          "En transit"
+        ],
+        "motif": "contrainte",
+        "raison": "DEUX OBJETS DIFFERENTS SOUS LE MEME MOT. Au kit, « En transit » est une pastille de 10 px dans la maquette de tableau de bord reduite a 30 % (non portee — declaration des manquants), trois fois ; au produit, c est le libelle de la pastille flottante du telephone, une fois."
+      },
+      {
+        "textes": [
+          "Fonctionnalités [2/2]",
+          "Fonctionnalités",
+          "Comment ça marche",
+          "Documentation"
+        ],
+        "motif": "structure",
+        "raison": "LE MENU DU TELEPHONE, RELEVE FERME. Ces mots sont a la fois une entree du menu repli (un `details` dont la sonde releve le contenu) et un lien du pied : une occurrence de plus qu au kit, dont le menu vit dans un etat React non rendu tant qu il est ferme, et l appariement par rang associe le lien du pied du kit a une autre ligne. Couleur, taille, hauteur et abscisse sont celles du kit."
+      },
+      {
+        "textes": [
+          "Votre prochaine commande mérite mieux",
+          "Gratuit pendant le lancement. Aucune car"
+        ],
+        "motif": "structure",
+        "raison": "LA MEME PHRASE, UNE AUTRE BOITE. Au produit, la sonde releve le `span` en ligne qui porte la version telephone du texte : sa boite est celle des lignes (297 × 61, 266 × 42), pas celle du bloc. Au kit, c est le bloc (302), et le titre y est coupe par un `<br>` force — trois lignes au lieu de deux. Taille, interligne et interlettrage identiques ; la couleur est le meme blanc a 88 %, ecrit `white/[.88]` au produit, que Chrome rend en oklab."
+      },
+      {
+        "textes": [
+          "© 2025 DropLink. Tous droits réservés."
+        ],
+        "motif": "structure",
+        "raison": "LE MEME FILET, PORTE PAR UN AUTRE ELEMENT : au kit par la barre qui contient la ligne, au produit par la ligne elle-meme — 18 px au-dessus du texte des deux cotes, meme couleur, meme taille, meme abscisse."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -5017,7 +5364,11 @@
           "Blog",
           "Conditions",
           "Confidentialité",
-          "Signaler un contenu"
+          "Signaler un contenu",
+          "Trois choses que vous ne referez plus à ",
+          "Vos photos arrivent directement dans la ",
+          "Vous collez le numéro une fois. Le clien",
+          "Modifiez la page quand vous voulez : le "
         ],
         "motif": "structure",
         "raison": "NOS TITRES EN UN SEUL NŒUD, ET NOTRE VOCABULAIRE — voir la declaration symetrique dans les manquants. Trois lignes portent une decision qui leur est propre : « Rien a installer, rien a creer » remplace la sixieme fonctionnalite du kit, qui annonce une integration que nous n avons pas ; « Signaler un contenu » est la procedure de notification et retrait qui fonde notre statut d hebergeur, et elle DISPARAIT quand son canal n est pas configure ; et « Blog » est une route qui existe, en francais seulement."
@@ -5025,10 +5376,19 @@
       {
         "textes": [
           "Atelier Nord",
-          "Votre commande"
+          "Votre commande",
+          "11 photos"
         ],
         "motif": "structure",
         "raison": "LE TELEPHONE MONTRE LA PAGE CLIENT, pas une image de synthese : c est le produit qu on vend, et une capture inventee serait la seule chose de cette page qu on ne pourrait pas tenir. Les trois pastilles autour de lui sont les `FloatingChip` du kit avec notre contenu — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "textes": [
+          "Tarifs",
+          "Se connecter"
+        ],
+        "motif": "structure",
+        "raison": "LE MENU DU TELEPHONE, RELEVE FERME, ET LE LIEN « TARIFS » DU PIED. « Se connecter » et « Tarifs » sont des entrees du menu repli, que la sonde releve ; le kit garde son menu dans un etat React non rendu. « Tarifs » mene aussi, dans le pied, a la banniere de gratuite de cette page — une ancre qui existe, la ou les colonnes du kit nomment des pages que le produit n a pas."
       }
     ]
   },
@@ -5320,7 +5680,88 @@
   },
   "p-jeton-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "Votre commande",
+          "10 sept. 2025 09:15",
+          "En attente",
+          "Photos et vidéos",
+          "Votre validation",
+          "Historique du suivi",
+          "10 septembre 2025 à 09:15 [1/2]",
+          "9 septembre 2025 à 22:47 [2/2]",
+          "Informations de livraison",
+          "Une question ?",
+          "Pour toute question concernant votre com",
+          "Contacter la boutique",
+          "Conditions d'utilisation",
+          "Politique de confidentialité"
+        ],
+        "motif": "contrainte",
+        "raison": "PLACE SEULE, EN ORDONNEE : les abscisses coincident toutes (gouttiere 18, depuis que la planche est ecrite a plat le 17/09/2026). Le decalage vertical s accumule de haut en bas par ce que la planche montre en plus et qui est declare dans les manquants : la barre DropLink et son selecteur de langue, les trois gages de l en-tete (principe II), le disque de 96 px du logo — 263 px avant « Votre commande » —, puis cinq passages de suivi contre deux, le transporteur et le pays de livraison, la carte des notifications (decision 3). Les deux passages du jeu s apparient par rang a l envers des cinq du kit, d ou [1/2] plus bas que [2/2]."
+      },
+      {
+        "textes": [
+          "Une commande de"
+        ],
+        "motif": "contrainte",
+        "raison": "L EN-TETE SANS LOGO. La boutique du jeu de mesure n a pas de logo, et la page n ecrit pas le nom dans un disque noir pour le remplacer (voir la declaration « LaPlanque » des manquants) : le texte commence donc a la gouttiere, 18, au lieu de 136 a droite du disque du kit."
+      },
+      {
+        "textes": [
+          "Date estimée de livraison",
+          "Numéro de suivi",
+          "Date estimée"
+        ],
+        "motif": "structure",
+        "raison": "LARGEUR DE BOITE, PAS DE DESSIN : meme taille, meme couleur, meme place. Le libelle est pose dans une colonne qui prend au produit toute la largeur restante (247, 148, 219) et au kit celle de sa valeur (158, 143, 140). Le texte rendu est identique."
+      },
+      {
+        "textes": [
+          "8 sept. 2025 14:32  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "LA DATE DE PREPARATION EST OMISE QUAND ELLE CONTREDIT L EXPEDITION — la meme regle qu au bureau : le jeu cree sa commande apres la date d expedition du colis, et la frise n ecrit pas une preparation posterieure a l envoi."
+      },
+      {
+        "textes": [
+          "En transit"
+        ],
+        "motif": "donnee",
+        "raison": "LE MEME MOT A DEUX PLACES DE LA FRISE. Le kit montre une commande en livraison, ou « En transit » est la deuxieme etape FRANCHIE (encre) ; le jeu de mesure est en transit, ou c est l etape COURANTE (accent, a 206). La planche ecrit aussi « En transit » dans son historique, d ou deux occurrences contre une."
+      },
+      {
+        "textes": [
+          "10 septembre 2025 à 09:15  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LES PASSAGES DU JEU DE MESURE : deux, la ou le kit en montre cinq."
+      },
+      {
+        "textes": [
+          "En cours"
+        ],
+        "motif": "structure",
+        "raison": "LA MEME TEINTE, DEUX NOTATIONS : le kit peint la pastille en `color-mix(in srgb, accent 12%, blanc)`, que Chrome rend `color(srgb 0,9228 0,9153 0,9953)` ; le produit la calcule (`resoudreAccent().doux`) et l ecrit rgb(235,233,254). 0,9228 x 255 = 235,3. Place et taille identiques."
+      },
+      {
+        "textes": [
+          "Instagram",
+          "TikTok",
+          "WhatsApp"
+        ],
+        "motif": "structure",
+        "raison": "LES PUCES PRENNENT LA LARGEUR DE LEUR NOM (115, 101, 118), la ou le kit les coupe en tiers egaux (111). La rangee du produit passe a la ligne plutot que de tronquer — « Instagr… » ne se reconnait pas. Meme hauteur, meme dessin, meme debut de rangee."
+      },
+      {
+        "textes": [
+          "PROPULSÉ PAR DROPLINK"
+        ],
+        "motif": "contrainte",
+        "raison": "LA MENTION DROPLINK RESTE SECONDAIRE — decision 25, comme au bureau. Le kit la peint en surtitre violet de 11,5/700 dans une carte teintee ; la page appartient au vendeur, la mention est une ligne de pied en sourdine, 13/400, dont le lien fait 44 px de haut (regle 5)."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -9884,7 +10325,72 @@
   },
   "fr-admin-commandes-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "commandes [3/3]",
+          "Total commandes",
+          "En préparation [1/4]",
+          "Réinitialiser",
+          "Répartition des statuts",
+          "50 % [1/4]",
+          "30 % [2/4]",
+          "12 % [3/4]",
+          "5 % [4/4]"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "En transit [4/4]",
+          "En préparation [4/4]"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS REPLIEES DU SELECTEUR DE STATUT, APPARIEES A DES PILULES DU KIT. Le kit ecrit « En transit », « En preparation » et « Livree » dans ses pilules de tableau ET dans son `select` ; la sonde releve nos options de `details` et, a nombre d occurrences egal, en apparie une avec une pilule du kit. Nos pilules, elles, portent exactement les valeurs du kit — 11,5/700, remplissage 6/11, rayon pilule, teinte du statut — et ne figurent pas dans l ecart."
+      },
+      {
+        "textes": [
+          "En transit [1/4]",
+          "En transit [2/4]",
+          "Livrées [1/2]",
+          "Livrées [2/2]",
+          "En préparation [1/4]",
+          "En préparation [2/4]"
+        ],
+        "motif": "donnee",
+        "raison": "LA LEGENDE DE L ANNEAU ET LES TUILES S AJUSTENT A LEURS NOMBRES. Le libelle de legende est la piste souple de sa rangee : a cote de « 1 » au lieu de « 624 », il occupe 18 px de plus. Et le libelle d une tuile a la largeur de sa colonne, que le badge « +8 % » du kit elargit — badge declare dans les manquants. Taille, graisse et couleur sont celles du kit."
+      },
+      {
+        "textes": [
+          "Livrée  <nombre d'occurrences>",
+          "Voir  <nombre d'occurrences>",
+          "50 %  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE A QUATRE COMMANDES, LE KIT DIX. Les nombres d occurrences des pilules, des dates, des boutons « Voir » et des parts d anneau suivent le nombre de lignes, et les parts elles-memes (« 25 % » contre « 50 % ») suivent leur repartition."
+      },
+      {
+        "textes": [
+          "Total commandes",
+          "En transit [3/4]",
+          "En préparation [3/4]",
+          "Réinitialiser",
+          "Liste des commandes",
+          "Voir",
+          "Répartition des statuts"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE PAR COLONNE DE CAUSES. L encart de trace precede les tuiles et la barre superieure du kit n existe pas : tout ce qui suit monte ou descend de quelques pixels. Dans le tableau, la case a cocher du kit n existe pas (aucune action groupee a porter), ni son menu « … » : les colonnes partent 48 px plus a gauche et « Voir » s aligne a droite. L en-tete du panneau de liste n a ni « Exporter » ni reglage de colonnes, donc son titre prend la largeur. Nos en-tetes sont des `th` qui portent le retrait de leur colonne, la ou le kit pose un span dans une grille. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Livrée"
+        ],
+        "motif": "structure",
+        "raison": "APPARIEMENT PAR RANG DES PASTILLES ET DES OPTIONS. Le meme mot est une pastille de statut sur une ligne, une option du filtre relevee fermee, et un libelle de tuile : la soustraction les apparie dans l ordre du document, et compare donc une pastille a une option. Chacune porte les valeurs de son modele."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -9975,7 +10481,10 @@
           "1 248 commandes au total"
         ],
         "motif": "donnee",
-        "raison": "La population de demonstration du kit : references, boutiques, transporteurs et volumes. Le jeu de mesure porte quatre commandes, une par statut, et leurs transporteurs sont ceux que le catalogue officiel de 17TRACK nomme pour leurs codes — « DHL Express », « FedEx », « 4PX »."
+        "raison": "La population de demonstration du kit : references, boutiques, transporteurs et volumes. Le jeu de mesure porte quatre commandes, une par statut, et leurs transporteurs sont ceux que le catalogue officiel de 17TRACK nomme pour leurs codes — « DHL Express », « FedEx », « 4PX ».",
+        "motifs": [
+          "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}$"
+        ]
       },
       {
         "textes": [
@@ -10002,17 +10511,23 @@
         ],
         "motif": "contrainte",
         "raison": "LE FLUX D ACTIVITE NOMME DES COMMANDES ET DES CLIENTS TIERS A CHAQUE OUVERTURE, et ses faits n existent pas tous : « Probleme de livraison signale » suppose un etat que la decision 4 refuse, et l ingestion du suivi n ecrit aucun evenement de commande. La liste, elle, est une consultation deliberee, tracee avec ses criteres."
+      },
+      {
+        "textes": [
+          "Gérez et suivez toutes les commandes cré"
+        ],
+        "motif": "contrainte",
+        "raison": "LE SOUS-TITRE DU KIT PROMET LE SUIVI DES COMMANDES ; l ecran ne montre AUCUN contenu de commande (ni pseudo, ni reference, ni lien) et le dit : le notre annonce ce qu il fait."
       }
     ],
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système",
-          "Cette consultation est écrite au journal"
+          "Cette consultation est écrite au journal",
+          "Statistiques"
         ],
         "motif": "contrainte",
         "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et ses deux rappels de trace — l encart permanent de la colonne, et celui de l ecran, qui dit AVANT de regarder que la consultation est ecrite au journal et ce que la liste ne montre pas."
@@ -10054,11 +10569,18 @@
       {
         "textes": [
           "25 % du total",
-          "4 commandes au total",
-          "Atelier de verification"
+          "Atelier de verification",
+          "4 commandes au total"
         ],
         "motif": "donnee",
         "raison": "Les volumes, la boutique et les transporteurs du jeu de mesure : quatre commandes, donc « 25 % du total » et « 4 commandes au total » la ou le kit en montre 1 248."
+      },
+      {
+        "motifs": [
+          "^(4PX|FedEx|DHL Express|La Poste|UPS|Colissimo|Chronopost)\\s·\\s\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}$"
+        ],
+        "motif": "donnee",
+        "raison": "LE DECOMPTE ET LES LIGNES DU JEU DE MESURE : transporteur et date de chaque commande, fabriques a chaque passage. Le kit ecrit ses huit lignes de demonstration."
       }
     ]
   },
@@ -10320,7 +10842,94 @@
   },
   "fr-admin-statistiques-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "Commandes créées",
+          "Photos uploadées",
+          "Vue globale",
+          "Utilisation",
+          "Croissance",
+          "Commandes [3/4]",
+          "Évolution des commandes créées",
+          "10 août [1/9]",
+          "16 août [2/9]",
+          "10 août [3/9]",
+          "18 août [4/9]",
+          "3 sept. [7/10]",
+          "8 sept. [10/10]",
+          "12 % [6/10]",
+          "5 % [7/10]",
+          "3 % [8/10]",
+          "Pages client consultées",
+          "Temps moyen de livraison",
+          "Temps moyen (jours)",
+          "Statut des commandes",
+          "Livrées",
+          "En transit",
+          "Croissance globale",
+          "juil. 2025"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Boutiques  <nombre d'occurrences>"
+        ],
+        "motif": "contrainte",
+        "raison": "Le kit ecrit « Boutiques » deux fois : l entree de navigation et la tuile « Sur 124 boutiques ». La tuile compte des comptes chez nous — voir les manquants."
+      },
+      {
+        "textes": [
+          "Taux de liens consultés"
+        ],
+        "motif": "structure",
+        "raison": "DEUX LIBELLES IDENTIQUES DANS UNE MEME CARTE, APPARIES A L ENVERS. « Taux de liens consultes » est le titre de la carte ET la legende de sa courbe, chez le kit comme chez nous ; la sonde apparie par proximite, et notre legende tombe plus pres de son titre. Titre 16/700 et legende 12,5/400 sont ceux du kit, chacun a sa place."
+      },
+      {
+        "textes": [
+          "Livrées",
+          "En transit",
+          "En préparation",
+          "juil. 2025"
+        ],
+        "motifs": [
+          "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.)$",
+          "^\\d{1,3} %$"
+        ],
+        "motif": "donnee",
+        "raison": "LES DATES D AXE ET LES PARTS DE LEGENDE SUIVENT LE JEU DE MESURE. La fenetre du kit finit le 8 septembre 2025, la notre aujourd hui : aucun repere ne tombe au meme jour, et leur nombre depend de la largeur du graphique. Les parts de legende (« 25 % », « 100 % ») sont celles de nos quatre commandes et de notre compte, et la largeur des libelles de legende s ajuste a la valeur qui les suit (« 1 » au lieu de « 624 »). Les mois de la croissance sont ceux de 2026."
+      },
+      {
+        "textes": [
+          "Commandes [4/4]",
+          "Commandes créées",
+          "Photos uploadées",
+          "Vue globale",
+          "Utilisation",
+          "Croissance",
+          "Évolution des commandes créées",
+          "Pages client consultées",
+          "Temps moyen de livraison",
+          "Temps moyen (jours)",
+          "Statut des commandes",
+          "Transporteurs les plus utilisés",
+          "Croissance globale"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE PAR RANGEE. La barre superieure du kit n existe pas : tout monte de 65 px. La troisieme rangee n a que DEUX cartes — l activite recente n est pas portee — donc les transporteurs et la croissance y sont plus larges, leurs titres tiennent sur une ligne, et la croissance commence plus a gauche. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Statistiques",
+          "Comptes",
+          "commandes"
+        ],
+        "motif": "donnee",
+        "raison": "LES CHIFFRES DU KIT CONTRE CEUX DU JEU. « sur 386 comptes » tient sur deux lignes au kit et sur une au produit (« sur 1 compte ») ; les libelles de centre d anneau derivent de son diametre, qui suit la place que les chiffres laissent. Et « Statistiques » comme « Comptes » sont a la fois un onglet, un titre et une option, apparies par rang."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -10394,7 +11003,6 @@
           "1 248",
           "+18%",
           "vs période précédente",
-          "sur 386 comptes",
           "1.5k",
           "6,2 jours",
           "-18%",
@@ -10411,7 +11019,8 @@
           "CO",
           "Colissimo",
           "juin 2025",
-          "août 2025"
+          "août 2025",
+          "sur 386 comptes"
         ],
         "motif": "donnee",
         "raison": "LA POPULATION DE DEMONSTRATION DU KIT : volumes, ecarts, transporteurs et mois de 2025. Le jeu de mesure porte une boutique, quatre commandes, trois colis et une fenetre qui finit aujourd hui. Les badges « +18 % » n apparaissent que si la periode precedente a une valeur — elle n en a pas dans ce jeu, et diviser par zero n est pas une croissance. « 6,2 jours » devient « 6 jours » : le jeu livre ses colis en jours ronds."
@@ -10422,13 +11031,18 @@
         ],
         "motif": "contrainte",
         "raison": "LE COMPARATIF DE CROISSANCE COMPARE TROIS MOIS A TROIS MOIS, et il le dit. Le kit ecrit « comparatif mensuel sur 3 mois » avec un selecteur de 3 ou 6 mois qui ne commande rien de reel ; le notre compare la somme des trois derniers mois a celle des trois precedents, sur les neuf mois que la base rend, sans selecteur."
+      },
+      {
+        "textes": [
+          "Analysez la croissance et l'utilisation "
+        ],
+        "motif": "contrainte",
+        "raison": "LE SOUS-TITRE DU KIT parle de croissance et d abonnements ; l ecran ne rend que des nombres, et son sous-titre le dit."
       }
     ],
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système"
@@ -10475,12 +11089,12 @@
           "4PX"
         ],
         "motifs": [
-          "^sur \\d+ comptes?$",
           "^\\d+ comptes?$",
           "^\\d+ commandes? créées?$",
           "^Sur (les )?\\d+ colis suivis?$",
           "^\\(\\d+\\)$",
-          "^(janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4}$"
+          "^(janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4}$",
+          "^sur \\d+ comptes?$"
         ],
         "motif": "donnee",
         "raison": "LES VOLUMES ET LES DATES DU JEU DE MESURE : un compte, quatre commandes, trois colis (FedEx, 4PX), des mois de 2026. Des motifs ancres pour ce qui glisse avec la date du jour."
@@ -10924,7 +11538,74 @@
   },
   "fr-admin-surveillance-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "Administration [2/2]",
+          "Tâches de fond",
+          "Consommation",
+          "Colis pris en charge par jour",
+          "le seul poste facturé",
+          "14 derniers jours · la dernière barre es",
+          "Limitation de débit",
+          "Pages publiques",
+          "Si le compteur tombe en panne, l'accès r",
+          "Jetons inconnus",
+          "Ici, une panne du compteur refuse l'accè",
+          "Non mesuré"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Interrogation des transporteurs",
+          "Veille mutuelle des tâches"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Tâches de fond",
+          "Interrogation des transporteurs",
+          "Veille mutuelle des tâches",
+          "Consommation",
+          "Colis pris en charge par jour",
+          "le seul poste facturé",
+          "14 derniers jours · la dernière barre es",
+          "Limitation de débit",
+          "Pages publiques",
+          "Si le compteur tombe en panne, l'accès r",
+          "Jetons inconnus",
+          "Ici, une panne du compteur refuse l'accè",
+          "Non mesuré",
+          "Aucun mécanisme ne relève ces grandeurs ",
+          "Disponibilité",
+          "Latence",
+          "Charge serveur",
+          "Erreurs serveur"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR SEULES, LE MEME ECART QUE SUR LES SEPT AUTRES ECRANS ADMIN : tout remonte de 79 px parce que la barre superieure du kit n est pas portee (sa recherche transverse n existe pas — voir « Ctrl K »), et la colonne de contenu porte 32 px de marge contre 30, d ou +2 en x et -4 en largeur. Planche ecrite dans le kit le 14/09/2026 pour cet ecran, qui n en avait aucune ; tailles, graisses, interlignes et couleurs sont les siens."
+      },
+      {
+        "textes": [
+          "Surveillance  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "Rendus deux fois : l entree de navigation du produit et le titre de l ecran, la surface « Administration » et la rubrique « ADMINISTRATION » de la colonne. Le kit n a d entree ni pour l une ni pour l autre."
+      },
+      {
+        "textes": [
+          "11 / 60 par minute",
+          "38 / 120 par minute",
+          "4 / 20 par minute"
+        ],
+        "motif": "donnee",
+        "raison": "LES COMPTEURS DE DEBIT DU JEU DE MESURE : leurs chiffres n ont pas la meme largeur que ceux du kit, et la pastille qui les porte suit."
+      }
+    ],
     "manquants": [
       {
         "textes": [
@@ -10940,7 +11621,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
           "Journal d'audit",
           "Paramètres système"
         ],
@@ -10954,6 +11634,13 @@
         ],
         "motif": "donnee",
         "raison": "L ETAT « JAMAIS EXECUTEE », celui des deux taches du jeu de mesure : la base de tests n a aucun planificateur, donc aucun battement. Il est rendu neutre, ni vert ni ambre, sur le vocabulaire du kit. Voir la declaration symetrique dans les manquants."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       }
     ]
   },
@@ -11127,12 +11814,106 @@
   },
   "fr-admin-comptes-profil-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "L'ouverture de cette fiche a été écrite ",
+          "Volumes",
+          "Colis",
+          "Commandes [2/2]",
+          "Médias",
+          "Stockage",
+          "Plafonds",
+          "Colis pris en charge",
+          "Commandes ce mois",
+          "Ce que ce compte a fait",
+          "Les événements du vendeur, pas les vôtre",
+          "12 sept. 2025 [1/3]",
+          "12 sept. 2025 [2/3]",
+          "Suspendre ce compte [1/2]",
+          "Ses pages publiques cesseront immédiatem",
+          "Identité",
+          "Email",
+          "Type",
+          "Revendeur",
+          "Rôle",
+          "Langue",
+          "Français",
+          "Boutique",
+          "Filigrane",
+          "Réseaux configurés",
+          "Supprimer le compte.",
+          "Se connecter à sa place.",
+          "Ouvrir ses commandes."
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Actif  <span>",
+          "L'ouverture de cette fiche a été écrite ",
+          "FACTURÉ  <span>",
+          "Commandes [2/2]",
+          "Les événements du vendeur, pas les vôtre",
+          "Ses pages publiques cesseront immédiatem",
+          "Ce que cette page ne permet pas  <h3>",
+          "Suspendre est réversible, supprimer ne l",
+          "Supprimer le compte.",
+          "La lecture tracée suffit au diagnostic.",
+          "Se connecter à sa place.",
+          "Leur contenu appartient à son client.",
+          "Ouvrir ses commandes."
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR SEULES. Tout remonte de 79 px parce que la barre superieure du kit n est pas portee, et la colonne de contenu porte 32 px de marge contre 30 — le meme ecart que sur tous les ecrans admin. Dans la colonne de droite s y ajoute la hauteur des valeurs du jeu de mesure (adresse plus longue, trois reseaux au lieu de deux), et le badge « Actif » suit la longueur du nom de boutique. Planche ecrite dans le kit le 14/09/2026 pour cet ecran, qui n en avait aucune ; tailles, graisses et couleurs sont les siennes."
+      },
+      {
+        "textes": [
+          "Suspendre ce compte [1/2]",
+          "Suspendre ce compte [2/2]"
+        ],
+        "motif": "structure",
+        "raison": "LE TITRE DU PANNEAU ET SON BOUTON PORTENT LE MEME TEXTE, et la sonde les apparie par proximite : decales de 79 px, ils se croisent. Titre 18/700 et bouton 14/700 a contour rouge sont ceux du kit, chacun a sa place."
+      },
+      {
+        "textes": [
+          "36 sur 1 200 [1/2]",
+          "42 sur 5 000 [2/2]",
+          "12 sept. 2025 [1/3]",
+          "12 sept. 2025 [2/3]",
+          "11 sept. 2025 [3/3]",
+          "12 sept. 2025  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LES VOLUMES ET LES DATES DU JEU DE MESURE. Les deux plafonds et les dates d activite ont la meme forme une fois les chiffres normalises : la sonde les apparie par proximite et les croise, et leurs largeurs suivent leurs chiffres. Le jeu porte trois types d evenement, le kit quatre."
+      },
+      {
+        "textes": [
+          "#5B4BF5  <span>"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CHASSE FIXE. Le kit declare « JetBrains Mono » en tete de sa pile ; le produit ne charge qu Inter (regle « Inter seule ») et rend donc la suite de la meme pile, ui-monospace. La largeur est celle du bloc, etire par le nom de boutique plus long du jeu de mesure."
+      },
+      {
+        "textes": [
+          "Comptes"
+        ],
+        "motif": "structure",
+        "raison": "APPARIEMENT PAR RANG : « Comptes » est l onglet actif de la barre du bas au produit (accent, gras) et le fil d Ariane au kit (gris). La soustraction les apparie dans l ordre du document."
+      }
+    ],
     "manquants": [
       {
         "textes": [
           "Atelier Nord",
           "yanis.b@gmail.com · Revendeur · inscrit ",
+          "1 312",
+          "2,4 Go",
+          "42 commandes créées",
+          "128 médias ajoutés",
+          "9 validations de client",
+          "3 liens révoqués",
           "yanis.b@gmail.com",
           "Vendeur",
           "Activé",
@@ -11145,8 +11926,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système"
@@ -11176,6 +11955,20 @@
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : son role apparait dans la liste et sur sa fiche. Le kit ecrit ceux de ses comptes de demonstration."
       }
     ]
   },
@@ -11357,12 +12150,108 @@
   },
   "fr-admin-comptes-profil-suspension-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
-    "valeurs": [],
+    "valeurs": [
+      {
+        "textes": [
+          "L'ouverture de cette fiche a été écrite ",
+          "Volumes",
+          "Colis",
+          "Commandes [2/2]",
+          "Médias",
+          "Stockage",
+          "Plafonds",
+          "Colis pris en charge",
+          "Commandes ce mois",
+          "Ce que ce compte a fait",
+          "Les événements du vendeur, pas les vôtre",
+          "12 sept. 2025 [1/3]",
+          "12 sept. 2025 [2/3]",
+          "Suspendre ce compte",
+          "Ses pages publiques cesseront immédiatem",
+          "Motif",
+          "Au moins 8 caractères. Il s'affiche en c",
+          "Recopiez l'adresse du compte pour confir",
+          "Le collage est désactivé : recopier l'ad",
+          "Annuler",
+          "Suspendre",
+          "En cours…",
+          "Identité",
+          "Email",
+          "Type",
+          "Revendeur",
+          "Rôle",
+          "Langue",
+          "Français",
+          "Boutique",
+          "Filigrane",
+          "Réseaux configurés",
+          "Supprimer le compte.",
+          "Se connecter à sa place.",
+          "Ouvrir ses commandes."
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Actif  <span>",
+          "L'ouverture de cette fiche a été écrite ",
+          "FACTURÉ  <span>",
+          "Commandes [2/2]",
+          "Les événements du vendeur, pas les vôtre",
+          "Ses pages publiques cesseront immédiatem",
+          "Ce que cette page ne permet pas  <h3>",
+          "Suspendre est réversible, supprimer ne l",
+          "Supprimer le compte.",
+          "La lecture tracée suffit au diagnostic.",
+          "Se connecter à sa place.",
+          "Leur contenu appartient à son client.",
+          "Ouvrir ses commandes.",
+          "Au moins 8 caractères. Il s'affiche en c",
+          "Recopiez l'adresse du compte pour confir",
+          "Le collage est désactivé : recopier l'ad"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR SEULES. Tout remonte de 79 px parce que la barre superieure du kit n est pas portee, et la colonne de contenu porte 32 px de marge contre 30 — le meme ecart que sur tous les ecrans admin. Dans la colonne de droite s y ajoute la hauteur des valeurs du jeu de mesure (adresse plus longue, trois reseaux au lieu de deux), et le badge « Actif » suit la longueur du nom de boutique. Planche ecrite dans le kit le 14/09/2026 pour cet ecran, qui n en avait aucune ; tailles, graisses et couleurs sont les siennes."
+      },
+      {
+        "textes": [
+          "36 sur 1 200 [1/2]",
+          "42 sur 5 000 [2/2]",
+          "12 sept. 2025 [1/3]",
+          "12 sept. 2025 [2/3]",
+          "11 sept. 2025 [3/3]",
+          "12 sept. 2025  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LES VOLUMES ET LES DATES DU JEU DE MESURE. Les deux plafonds et les dates d activite ont la meme forme une fois les chiffres normalises : la sonde les apparie par proximite et les croise, et leurs largeurs suivent leurs chiffres. Le jeu porte trois types d evenement, le kit quatre."
+      },
+      {
+        "textes": [
+          "#5B4BF5  <span>"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CHASSE FIXE. Le kit declare « JetBrains Mono » en tete de sa pile ; le produit ne charge qu Inter (regle « Inter seule ») et rend donc la suite de la meme pile, ui-monospace. La largeur est celle du bloc, etire par le nom de boutique plus long du jeu de mesure."
+      },
+      {
+        "textes": [
+          "Comptes"
+        ],
+        "motif": "structure",
+        "raison": "APPARIEMENT PAR RANG : « Comptes » est l onglet actif de la barre du bas au produit (accent, gras) et le fil d Ariane au kit (gris). La soustraction les apparie dans l ordre du document."
+      }
+    ],
     "manquants": [
       {
         "textes": [
           "Atelier Nord",
           "yanis.b@gmail.com · Revendeur · inscrit ",
+          "1 312",
+          "2,4 Go",
+          "42 commandes créées",
+          "128 médias ajoutés",
+          "9 validations de client",
+          "3 liens révoqués",
           "yanis.b@gmail.com",
           "Vendeur",
           "Activé",
@@ -11375,8 +12264,6 @@
     "enTrop": [
       {
         "textes": [
-          "DropLink",
-          "ADMINISTRATION",
           "Journal d'audit",
           "Surveillance",
           "Paramètres système"
@@ -11406,6 +12293,20 @@
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
+      },
+      {
+        "textes": [
+          "Statistiques"
+        ],
+        "motif": "structure",
+        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : son role apparait dans la liste et sur sa fiche. Le kit ecrit ceux de ses comptes de demonstration."
       }
     ]
   },

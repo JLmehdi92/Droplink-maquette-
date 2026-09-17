@@ -73,6 +73,32 @@ const publiable = createClient(urlSupabase, process.env["NEXT_PUBLIC_SUPABASE_PU
   auth: { persistSession: false },
 });
 
+/*
+ * ⚠️ LE `finally` NE SUFFIT PAS : UN PROCESSUS TUÉ N'Y PASSE PAS. Mesuré le
+ * 17/09/2026 : la base de tests ne portait plus qu'UN compte, un « ecran-… »
+ * laissé par un passage arrêté en cours de route la veille. Chaque mesure en
+ * ajoutait un second — 2 boutiques, 2 comptes, 8 commandes au lieu de 4 — et
+ * quatre écrans d'administration sont sortis rouges au bureau : « 1 boutique au
+ * total » s'appariait soudain à « 124 boutiques au total », l'accord du nom ne
+ * les séparant plus. Rien n'était cassé, sauf le jeu de mesure.
+ *
+ * Un passage purge donc, avant de créer le sien, les comptes de sonde de plus de
+ * trente minutes : aucune mesure ne dure autant, et un compte plus jeune peut
+ * appartenir à un passage qui tourne encore.
+ */
+const ABANDON_MS = 30 * 60 * 1000;
+{
+  const { data: liste, error: eListe } = await service.auth.admin.listUsers({ perPage: 1000 });
+  if (eListe) throw new Error(eListe.message);
+  for (const u of liste.users) {
+    if (!/^ecran-[a-z0-9]+@droplink-tests\.invalid$/.test(u.email ?? "")) continue;
+    if (Date.now() - Date.parse(u.created_at) < ABANDON_MS) continue;
+    const { error: eSuppr } = await service.auth.admin.deleteUser(u.id);
+    if (eSuppr) throw new Error(`compte de sonde abandonné ${u.email} : ${eSuppr.message}`);
+    console.error(`[sonde] compte abandonné purgé : ${u.email} (${u.created_at})`);
+  }
+}
+
 const MOT_DE_PASSE = "Chariot-Lilas-Tempete-91";
 const marque = Math.random().toString(36).slice(2, 8);
 const courriel = `ecran-${marque}@droplink-tests.invalid`;

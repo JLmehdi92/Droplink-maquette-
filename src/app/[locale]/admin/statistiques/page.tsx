@@ -454,7 +454,11 @@ export default async function AdminStatistiques({
             nouveaux comptes, une boutique naissant avec son compte. Ses
             « Nouveaux abonnements » sont interdits : la sixième tuile compte
             les colis pris en charge, le seul poste facturé du produit. */}
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-6 xl:gap-3.5">
+        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
+            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
+            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
+            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
+        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-6 xl:gap-3.5">
           <TuileVolume
             icone={ShoppingCart}
             compacte
@@ -516,11 +520,13 @@ export default async function AdminStatistiques({
         {/* --- LES VUES ET LA PÉRIODE ---
 
             Des LIENS, pas des boutons : la vue vit dans l'URL. Au téléphone la
-            rangée défile plutôt que de passer sur trois lignes. */}
+            rangée défile plutôt que de passer sur trois lignes — et elle prend
+            sa RANGÉE : partagée avec le sélecteur de période, il ne lui restait
+            que 159 px, et ses marges négatives passaient sous lui. */}
         <div className="flex flex-wrap items-center gap-3.5">
           <nav
             aria-label={t("statistiques.filtreVue")}
-            className="defilement-discret -mx-4 flex min-w-0 flex-1 gap-2.5 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+            className="defilement-discret -mx-4 flex min-w-0 basis-full gap-2.5 overflow-x-auto px-4 md:mx-0 md:flex-1 md:basis-auto md:flex-wrap md:overflow-visible md:px-0"
           >
             {VUES_STATISTIQUES.map((v) => {
               const courante = v === vue;

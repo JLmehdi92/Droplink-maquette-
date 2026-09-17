@@ -111,6 +111,7 @@ export default async function Accueil({
    * en capitales dans le catalogue ne se compare plus a celui du kit, et il se
    * traduit mal — le chinois n a pas de casse.
    */
+  /* Ses deux points décoratifs sont posés à chaque emploi : voir « Eyebrow » dans le design system. */
   const pilule =
     "inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3.5 py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[0.12em] text-ds-accent-encre uppercase lg:text-[11px]";
 
@@ -191,7 +192,7 @@ export default async function Accueil({
           une ligne de prose qui traverse un ecran large ne se lit pas. */}
       <div className="mx-auto w-full max-w-[1384px] overflow-hidden bg-ds-surface-page">
         {/* ---- NAVIGATION ------------------------------------------------ */}
-        <header className="flex items-center justify-between gap-6 px-5 py-[18px] md:px-10 md:py-[22px]">
+        <header className="flex items-center justify-between gap-6 px-4 py-[18px] md:px-10 md:py-[22px]">
           <span className="text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre md:text-[18px] md:leading-[23px]">
             DropLink
           </span>
@@ -292,7 +293,7 @@ export default async function Accueil({
 
         <main id="contenu">
           {/* ---- HÉROS --------------------------------------------------- */}
-          <section className="relative overflow-hidden px-5 pt-[22px] text-center md:px-10 md:pt-[46px]">
+          <section className="relative overflow-hidden px-4 pt-[22px] text-center md:px-10 md:pt-[46px]">
             {/* Le mot en très grand derrière le titre. `aria-hidden` : il est
                 déjà lu dans la navigation, et un lecteur d'écran n'a rien à
                 faire d'un décor typographique. Absent de la planche mobile. */}
@@ -327,7 +328,7 @@ export default async function Accueil({
                   ⚠️ ELLES SONT DANS UNE LISTE, pas dans trois `span` alignes :
                   ce sont trois affirmations distinctes, et un lecteur d ecran
                   doit pouvoir les compter. */}
-              <ul className="mx-auto mt-5 flex max-w-[560px] flex-col items-center gap-2 md:mt-6 md:flex-row md:justify-center md:gap-7">
+              <ul className="mx-auto mt-5 flex max-w-[560px] flex-col items-start gap-2.5 md:mt-6 md:flex-row md:items-center md:justify-center md:gap-7">
                 {(["perk1", "perk2", "perk3"] as const).map((clef) => (
                   <li key={clef} className="flex items-center gap-[9px]">
                     {/* LA CASE COCHÉE DU KIT (`Checkbox checked`) : 18 px, rayon 6,
@@ -365,7 +366,7 @@ export default async function Accueil({
            */}
           <h2
             id="titre-client-voit"
-            className="mx-auto mt-[34px] max-w-[760px] px-5 text-center text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:mt-10 md:px-0 md:text-[44px]"
+            className="mx-auto mt-[34px] max-w-[760px] px-4 text-center text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:mt-10 md:px-0 md:text-[44px]"
           >
             {t("destinataireTitre")}
           </h2>
@@ -534,16 +535,20 @@ export default async function Accueil({
           {/* ---- BÉNÉFICES ----------------------------------------------- */}
           <section
             id="fonctionnement"
-            className="bg-ds-surface-creux px-5 pt-11 pb-12 md:px-10 md:pt-[66px] md:pb-[74px]"
+            className="bg-ds-surface-creux px-4 pt-11 pb-12 md:px-10 md:pt-[66px] md:pb-[74px]"
           >
             <div className="text-center">
-              <span className={pilule}>{t("beneficesPilule")}</span>
-              <h2 className="mt-4 mb-7 text-[30px] leading-[35px] font-extrabold tracking-[-0.03em] text-ds-texte-titre md:mt-5 md:mb-0 md:text-[46px] md:leading-[52px]">
+              <span className={pilule}>
+                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
+                {t("beneficesPilule")}
+                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
+              </span>
+              <h2 className="mt-4 text-[30px] leading-[35px] font-extrabold tracking-[-0.03em] text-ds-texte-titre md:mt-5 md:text-[46px] md:leading-[52px]">
                 {t("beneficesTitre")}
               </h2>
-              {/* La planche mobile SUPPRIME ce paragraphe : trois cartes qui se
-                  suivent en colonne disent déjà ce qu'il annonçait. */}
-              <p className="mx-auto mt-4 mb-11 hidden max-w-[560px] text-[16px] leading-[26px] text-ds-texte-corps md:block">
+              {/* Le kit le montre aussi au téléphone. L'ancien canevas le retirait ;
+                  c'est une décision d'une planche morte, pas du design system. */}
+              <p className="mx-auto mt-4 mb-7 max-w-[560px] text-[16px] leading-[1.55] text-ds-texte-corps md:mb-11 md:leading-[26px]">
                 {t("beneficesTexte")}
               </p>
             </div>
@@ -576,39 +581,29 @@ export default async function Accueil({
               ).map(([clef, IconeCarte, teinte]) => (
                 <li
                   key={clef}
-                  className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[22px] md:p-[26px]"
+                  className="flex gap-4 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[22px] md:block md:p-[26px]"
                 >
+                  {/* AU TÉLÉPHONE, L'ICÔNE À GAUCHE DU TEXTE — la composition du kit.
+                      Empilées, les six cartes perdaient chacune la hauteur de leur
+                      tuile ; côte à côte, le texte garde 252 px et la liste se lit. */}
                   <span
                     className={
-                      "flex h-10 w-10 items-center justify-center rounded-[12px] md:h-[42px] md:w-[42px] " +
+                      "flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] md:h-[42px] md:w-[42px] " +
                       teinte
                     }
                   >
                     <IconeCarte aria-hidden="true" size={20} strokeWidth={1.9} />
                   </span>
-                  {/* 18/700 à l interligne 19,8 et à -0,02em : les valeurs du kit.
-                      Le produit rendait 23 d interligne et -0,015em. */}
-                  <h3 className="mt-4 mb-[7px] text-[17px] leading-[22px] font-bold tracking-[-0.02em] text-ds-texte-titre md:mt-[18px] md:mb-2 md:text-[18px] md:leading-[19.8px]">
-                    {t("fonctionnalites." + clef + "Titre")}
-                  </h3>
-                  {/* LE TEXTE COURT N EXISTE QUE POUR LES TROIS PREMIERES
-                      CARTES, que la planche mobile raccourcissait ; les trois
-                      autres tiennent telles quelles. `t.has` evite d inventer
-                      une cle vide plutot que de dupliquer la phrase. */}
-                  <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
-                    {t.has("fonctionnalites." + clef + "TexteCourt") ? (
-                      <>
-                        <span className="md:hidden">
-                          {t("fonctionnalites." + clef + "TexteCourt")}
-                        </span>
-                        <span className="hidden md:inline">
-                          {t("fonctionnalites." + clef + "Texte")}
-                        </span>
-                      </>
-                    ) : (
-                      t("fonctionnalites." + clef + "Texte")
-                    )}
-                  </p>
+                  <div className="min-w-0">
+                    {/* 18/700 à l'interligne 19,8 et à -0,02em : les valeurs du kit, aux deux
+                        largeurs. Le produit rendait 23 d'interligne et -0,015em. */}
+                    <h3 className="mb-1.5 text-[18px] leading-[19.8px] font-bold tracking-[-0.02em] text-ds-texte-titre md:mt-[18px] md:mb-2">
+                      {t("fonctionnalites." + clef + "Titre")}
+                    </h3>
+                    <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
+                      {t("fonctionnalites." + clef + "Texte")}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -622,9 +617,13 @@ export default async function Accueil({
            * jamais — c est l immuabilité du jeton, garantie par un déclencheur en
            * base, pas par une promesse.
            */}
-          <section id="etapes" className="px-5 py-12 md:px-10 md:py-[74px]">
+          <section id="etapes" className="px-4 py-12 md:px-10 md:py-[74px]">
             <div className="text-center">
-              <span className={pilule}>{t("etapesPilule")}</span>
+              <span className={pilule}>
+                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
+                {t("etapesPilule")}
+                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
+              </span>
               <h2 className="mx-auto mt-4 max-w-[720px] text-[30px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:mt-5 md:text-[44px]">
                 {t("etapesTitre")}
               </h2>
@@ -640,7 +639,7 @@ export default async function Accueil({
               {([1, 2, 3] as const).map((n) => (
                 <li
                   key={n}
-                  className="flex gap-3.5 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-5 shadow-ds-card md:p-6"
+                  className="flex gap-3.5 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card"
                 >
                   <span
                     aria-hidden="true"
@@ -679,10 +678,10 @@ export default async function Accueil({
            * dans une URL publique. La section qui montre ce que voit le client
            * est plus haut, sur cette page.
            */}
-          <section id="tarif" className="px-5 pb-12 md:px-10 md:pb-14">
-            <div className="degrade-ds-marque-diagonal relative overflow-hidden rounded-ds-3xl px-6 py-10 text-ds-texte-sur-marque shadow-ds-lg md:px-14 md:py-[52px]">
+          <section id="tarif" className="px-4 pb-12 md:px-10 md:pb-14">
+            <div className="degrade-ds-marque-diagonal relative overflow-hidden rounded-ds-3xl px-7 py-[34px] text-ds-texte-sur-marque shadow-ds-lg md:px-14 md:py-[52px]">
               <div className="max-w-[520px]">
-                <h2 className="text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] md:text-[40px]">
+                <h2 className="text-[27px] leading-[1.05] font-extrabold tracking-[-0.04em] md:text-[40px]">
                   <span className="md:hidden">{t("finalTitreCourt")}</span>
                   <span className="hidden md:inline">{t("finalTitre")}</span>
                 </h2>
@@ -694,7 +693,7 @@ export default async function Accueil({
                 </p>
                 <Link
                   href={`/${locale}/inscription`}
-                  className="mt-[26px] flex min-h-13 w-full items-center justify-center gap-2 rounded-ds-pill border border-transparent bg-ds-surface-carte px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-md transition-shadow hover:shadow-ds-lg md:inline-flex md:h-13 md:w-auto md:min-h-0"
+                  className="mt-[26px] flex min-h-13 w-full items-center justify-center gap-2 rounded-ds-pill border border-ds-filet bg-ds-surface-carte px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-sm transition-shadow hover:shadow-ds-md md:inline-flex md:h-13 md:w-auto md:min-h-0"
                 >
                   {t("ctaPrincipal")}
                   <ArrowRight aria-hidden="true" size={17} strokeWidth={1.9} />
@@ -723,7 +722,7 @@ export default async function Accueil({
          * qu'aucune adresse n'est configurée — sur la seule page que tout le
          * monde voit. Ce qui se partage ici, c'est la RÈGLE, pas la mise en page.
          */}
-        <footer className="border-t border-ds-filet px-5 py-9 md:px-10 md:py-11">
+        <footer className="border-t border-ds-filet px-4 py-9 md:px-10 md:py-11">
           <div className="flex flex-col gap-8 md:flex-row md:justify-between md:gap-10">
             <div className="max-w-[280px]">
               <span className="text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre md:text-[18px]">
@@ -773,14 +772,14 @@ export default async function Accueil({
                         {href.startsWith("#") ? (
                           <a
                             href={href}
-                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent"
+                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-sourdine transition-colors hover:text-ds-accent"
                           >
                             {t("menu." + clef)}
                           </a>
                         ) : (
                           <Link
                             href={href}
-                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-corps transition-colors hover:text-ds-accent"
+                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-sourdine transition-colors hover:text-ds-accent"
                           >
                             {t.has("pied." + clef) ? t("pied." + clef) : t("menu." + clef)}
                           </Link>
@@ -793,7 +792,7 @@ export default async function Accueil({
             </div>
           </div>
 
-          <p className="mt-8 border-t border-ds-filet pt-6 text-[12px] leading-[normal] font-medium text-ds-texte-tenu md:mt-10">
+          <p className="mt-8 border-t border-ds-filet pt-[18px] text-[12px] leading-[normal] font-medium text-ds-texte-tenu md:mt-10">
             {t("piedDroits", { annee: new Date().getUTCFullYear() })}
           </p>
         </footer>

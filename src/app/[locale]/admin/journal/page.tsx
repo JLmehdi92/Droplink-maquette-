@@ -193,7 +193,11 @@ export default async function AdminJournal({
             nôtre consigne des GESTES D'ADMINISTRATION : il n'a ni niveau, ni
             code de retour, ni latence. Ses familles sont donc les siennes, et
             elles sont exactement celles du filtre juste en dessous. */}
-        <div className="flex flex-col gap-2.5 xl:grid xl:grid-cols-4 xl:gap-[18px]">
+        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
+            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
+            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
+            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
+        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:gap-[18px]">
           <TuileVolume
             icone={ScrollText}
             compacte

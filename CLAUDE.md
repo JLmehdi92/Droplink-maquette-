@@ -797,6 +797,47 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > qu'on n'exige pas de retrouver, réservée aux données que les suites réécrivent
 > selon leur ordre (âges du journal, lignes de suspension). Toute autre
 > déclaration morte fait toujours échouer la soustraction.
+>
+> ⚠️ **QUATRIÈME LOT, L'ADMINISTRATION : SES DIX RELEVÉS SORTENT EN CODE 0 À
+> 390.** La planche admin n'avait pas de version téléphone du tout — sa barre du
+> haut, ses panneaux et ses tuiles étaient ceux du bureau, tassés. Écrit dans la
+> planche puis porté : une **bande de titre** (DropLink / ADMINISTRATION et la
+> déconnexion à 44 px) qui remplace la barre du haut sous 768 px, titre d'écran à
+> 24 et sous-titre à 14 (à 26 et 15 le titre passait sur deux lignes), panneaux à
+> 16 de remplissage, grilles `mon-grid` et `acc-grid` sur une colonne, compteurs
+> de fiche de compte deux par deux (à quatre, chaque libellé tenait dans 39 px),
+> et **plancher de 11,5 px sur les libellés d'axe des graphes**. Côté produit,
+> les grilles de tuiles compactes passent de une à **deux colonnes** : une tuile
+> par rangée repoussait la première ligne de liste à 550 px.
+> ⚠️ **LA PASTILLE DU DESIGN SYSTEM ÉCRIT EN `var(--text-micro)`, PAS EN
+> `font-size: 11px`** : la règle d'attribut qui remontait les 11 px ne pouvait
+> pas la voir. C'est `--text-micro` qu'on redéfinit à 11,5 dans `.adm-main`.
+> ⚠️ **ET UN DÉFAUT VU SEULEMENT À LA CAPTURE** : sur `/admin/statistiques`, la
+> rangée des vues (« Vue globale », « Utilisateurs »…) partageait sa ligne avec
+> le sélecteur de période — 159 px pour six onglets, et ses marges négatives
+> passaient SOUS le sélecteur. Aucun débordement du document, donc aucune alerte
+> de la sonde. Elle a sa rangée sous le palier.
+>
+> **CINQUIÈME LOT, LA PAGE CLIENT ET LA LANDING : CODE 0 À 390** (17/09/2026),
+> vérifiées en fr/en/zh et toujours à 0 au bureau.
+> - **Page client** — la planche est écrite **À PLAT** au téléphone (décision
+>   téléphone de Wassim) : sections séparées d'un filet, gouttière 18. Dans ses
+>   cartes, la frise ne tenait plus (« Commandée » et « En transit » se
+>   chevauchaient) et les liens du pied faisaient 40 px. Au produit, l'historique
+>   resserrait sa grille sous `lg` (texte 8 px à gauche) : même grille partout.
+> - **Landing** — pris au kit : cartes de fonctionnalités icône à gauche (elles
+>   perdaient la hauteur de leur tuile), gages en colonne alignée, étapes à 24,
+>   bannière 28 × 34, **les deux points de l'`Eyebrow`** que la pastille du
+>   produit n'avait pas, gouttière 16. Écrit dans le kit : liens du pied à 44 px
+>   (ils en faisaient 16), plancher 11,5 par `--type-eyebrow-size`. Retiré : les
+>   **textes courts et le paragraphe masqué de l'ancien canevas** — « la planche
+>   mobile SUPPRIME ce paragraphe » citait une planche morte.
+> - ⚠️ **UNE DÉCLARATION « POSITION ET LARGEUR » COUVRAIT UN ÉCART DE DESSIN.** Le
+>   bouton blanc de la bannière portait un filet transparent et l'ombre `md` là
+>   où le `Button secondary` du kit porte filet et ombre `sm` ; au bureau, sa
+>   déclaration ne parlait que de place. Une déclaration couvre un TEXTE, toutes
+>   propriétés confondues : relire ce qu'elle excuse quand l'écran change. Les
+>   liens du pied de la landing étaient de même au gris de corps, pas en sourdine.
 
 > ⚠️ **LES ÉTATS AU CLIC SE MESURENT PAR SÉQUENCE.** `CLIC_KIT` et `CLIC_PRODUIT`
 > acceptent `« étape > étape »` ; côté produit, une étape `nom=valeur` remplit le
@@ -1150,6 +1191,15 @@ ADMINISTRATEUR pour `verifier-ecran-migre` —, sa boutique et ses commandes.
 Trente-trois se sont accumulés du 11 au 14/09, et personne ne les voyait tant
 qu'aucun écran ne listait toute la plateforme : c'est la liste admin des
 commandes qui les a montrés. Elle vit désormais dans un `finally`.
+⚠️ **ET UN `finally` NE PROTÈGE PAS D'UN PROCESSUS TUÉ.** Le 17/09/2026, la base
+de tests ne portait plus qu'un compte : un « ecran-… » d'un passage arrêté la
+veille. Chaque mesure en ajoutait un second, et quatre écrans d'administration
+sont sortis rouges au bureau sans aucun défaut — « 1 boutique au total » ne
+s'appariait pas à « 124 boutiques au total » (l'accord du nom les sépare),
+« 2 boutiques au total » si. **Le singulier et le pluriel font basculer un
+écart d'une liste à l'autre.** La sonde purge désormais, avant de créer le sien,
+tout compte de sonde de plus de trente minutes. *Avant de déclarer un écart
+d'administration, compter les comptes de la base de tests.*
 
 ⚠️ **ET LES DÉCLARATIONS DES ÉCRANS ADMIN TENAIENT À CES RÉSIDUS.** « dont 15
 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total » : déclarés en
