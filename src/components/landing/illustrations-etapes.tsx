@@ -29,7 +29,7 @@ export async function ZoneDeDepot() {
         <Upload size={17} strokeWidth={1.9} />
       </span>
       <span className="text-[12px] leading-[normal] font-bold text-ds-accent-encre">{t("deposerTitre")}</span>
-      <span className="text-[11px] leading-[normal] font-medium text-ds-texte-sourdine">{t("deposerTexte")}</span>
+      <span className="text-[11.5px] leading-[normal] font-medium text-ds-texte-sourdine">{t("deposerTexte")}</span>
     </div>
   );
 }
@@ -92,7 +92,7 @@ export async function FriseDeSuivi() {
           >
             {t(e.cle)}
           </span>
-          <span className="text-[11px] leading-[normal] font-medium whitespace-nowrap text-ds-texte-tenu">{e.date}</span>
+          <span className="text-[11.5px] leading-[normal] font-medium whitespace-nowrap text-ds-texte-tenu">{e.date}</span>
         </li>
       ))}
     </ul>

@@ -1209,6 +1209,52 @@ for (const modele of routes) {
       exigerPolices(v.value, `${chemin} a ${largeur} px`);
     }
     rapport.push({ chemin, largeur, ...vu });
+    /*
+     * ⚠️ LE PLANCHER TÉLÉPHONE ÉTAIT UNE LIGNE DE RAPPORT, PAS UNE PORTE — et
+     * il est tombé le jour même où on l'a mis à l'épreuve.
+     *
+     * `CLAUDE.md` prescrit depuis le 11/09/2026 « aucun débordement, aucune
+     * cible sous 44 px, aucune police sous 11,5 px » au pas 2 de la
+     * vérification. Ces trois mesures étaient RELEVÉES et poussées dans le
+     * rapport — puis lues à l'œil, dans un JSON de trois cents lignes. Mesuré
+     * le 17/09/2026 en portant les illustrations de la landing : la sonde a
+     * listé CINQ textes à 11 px et elle est sortie en CODE 0. Une règle qu'on
+     * vérifie en relisant une liste n'est pas vérifiée : c'est L-018 dans sa
+     * forme exacte — constater qu'une déclaration existe ne prouve jamais que
+     * son absence bloque.
+     *
+     * ⚠️ LE SEUIL EST LA LARGEUR TÉLÉPHONE, PAS TOUTES LES LARGEURS, et c'est
+     * délibéré : la règle des 11,5 px est écrite « sur téléphone » (au bureau,
+     * une légende de 11 px est le corps du design system). Le débordement, lui,
+     * serait un défaut à toute largeur — il n'est gardé ici qu'à 390 parce que
+     * c'est là qu'il a été MESURÉ sur les 37 écrans. Étendre une garde à des
+     * largeurs qu'on n'a pas mesurées fabrique un mur de rouge, et un mur de
+     * rouge s'apprend à s'ignorer.
+     *
+     * Allumée après avoir mesuré : les 37 relevés à 390 px — 33 écrans et
+     * leurs 4 états ouverts au clic — sortent sans un seul défaut.
+     */
+    if (largeur <= 480) {
+      const defauts = [];
+      if (vu.debordement) {
+        defauts.push(`le document DÉBORDE : ${vu.largeur_doc} px rendus dans ${vu.largeur_vue}`);
+      }
+      for (const p of vu.polices_sous_11_5 ?? []) {
+        defauts.push(`police ${p.px} px (plancher 11,5) — « ${p.texte} »`);
+      }
+      for (const c of vu.cibles_sous_44 ?? []) {
+        defauts.push(`cible tactile de ${c.h} px (plancher 44) — « ${c.quoi} »`);
+      }
+      if (defauts.length > 0) {
+        process.exitCode = 1;
+        console.error(
+          `[plancher] ${chemin} a ${largeur} px : ${defauts.length} defaut(s)\n` +
+            defauts.map((d) => "    " + d).join("\n"),
+        );
+      } else {
+        console.error(`[plancher] ${chemin} a ${largeur} px : aucun debordement, aucune police sous 11,5, aucune cible sous 44`);
+      }
+    }
     if (process.env["IMAGES_EN_ATTENTE"] === "1") {
       /* Toute image rendue, avec sa boîte : une image qui attend et dont la
          boîte est NULLE dans un sens n'a pas de place réservée — falsifié, la
