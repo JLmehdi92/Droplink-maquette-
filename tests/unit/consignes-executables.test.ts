@@ -48,7 +48,9 @@ function commandesCitees(document: string): readonly string[] {
 }
 
 describe("Les consignes désignent des choses qui existent", () => {
-  const documents = ["CLAUDE.md", "BRIEF-DROPLINK-COMPLET.md"] as const;
+  // `consignes/historique-du-design.md` : le journal déplacé de `CLAUDE.md` le 17/09/2026 —
+  // ses commandes citées doivent exister, comme avant le déménagement.
+  const documents = ["CLAUDE.md", "BRIEF-DROPLINK-COMPLET.md", "consignes/historique-du-design.md"] as const;
 
   test("la sonde extrait réellement des commandes", () => {
     // `CLAUDE.md` est le document opératoire : c'est lui qui doit en citer. Le

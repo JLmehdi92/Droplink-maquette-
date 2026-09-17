@@ -167,6 +167,10 @@ describe("aucun document ne désigne une garde qui n'existe pas", () => {
    */
   const SOURCES_DE_PROSE = [
     join(process.cwd(), "CLAUDE.md"),
+    /* ⚠️ LE JOURNAL DÉPLACÉ DE `CLAUDE.md` LE 17/09/2026. Sans lui, 48 Ko de prose
+       qui citent des gardes auraient quitté le champ de ce contrôle en changeant
+       seulement de fichier (L-025). */
+    join(process.cwd(), "consignes", "historique-du-design.md"),
     join(process.cwd(), "src", "middleware.ts"),
   ];
 

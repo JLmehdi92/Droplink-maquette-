@@ -62,6 +62,11 @@ photos-qc-reelles/
 # une référence versionnée ici divergerait de la source au premier aller-retour.
 .claude/skills/droplink-design/
 
+# Les réglages PERSONNELS de Claude Code pour ce projet (autorisations locales,
+# chemins de la machine). Ils nomment des répertoires de ce poste : le dépôt est
+# PUBLIC, et ils n'y ont pas leur place.
+.claude/settings.local.json
+
 # Le port ephemere ecrit par `scripts/servir-contre-tests.mjs` a chaque lancement.
 port.txt
 
