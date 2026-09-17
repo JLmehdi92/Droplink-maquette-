@@ -1337,6 +1337,20 @@ nav.close();
 
 console.log(JSON.stringify(rapport, null, 1));
 } finally {
-  await service.auth.admin.deleteUser(cree.user.id);
-  console.error("[purge] compte supprime.");
+  /*
+   * `GARDER_JEU=1` : ON REGARDE LE PRODUIT À LA MAIN, donc le jeu doit survivre à
+   * la mesure. C'est la SEULE façon de naviguer sur un produit vivant sans servir
+   * la PRODUCTION en local — la base de tests, elle, est jetable.
+   *
+   * ⚠️ Le compte reste sous le motif `ecran-…@droplink-tests.invalid` : la
+   * prochaine sonde le purgera d'elle-même passé trente minutes. Ce n'est donc
+   * pas une fuite, c'est un sursis — et la mesure qui suivra retrouvera un jeu
+   * propre.
+   */
+  if (process.env["GARDER_JEU"] === "1") {
+    console.error(`[jeu] GARDE : ${courriel} / ${MOT_DE_PASSE} — purge par la prochaine sonde (30 min).`);
+  } else {
+    await service.auth.admin.deleteUser(cree.user.id);
+    console.error("[purge] compte supprime.");
+  }
 }
