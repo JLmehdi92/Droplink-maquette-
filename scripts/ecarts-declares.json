@@ -1012,15 +1012,14 @@
         "textes": [
           "FedEx",
           "Colis enregistre",
-          "Cliente en preparation · il y a 31 jours",
           "Pas encore d’information du transporteur",
-          "Client expedie · 2 septembre · 12 interr",
-          "Cliente livree · il y a 3 jours · 5 inte",
-          "Colis arrive au centre de tri internatio",
-          "Client de verification · Hier · 4 interr"
+          "Colis arrive au centre de tri internatio"
         ],
         "motif": "donnee",
-        "raison": "LES COLIS DU JEU DE MESURE : transporteurs, derniers evenements et destinataires, avec leurs dates relatives et leurs interrogations."
+        "raison": "LES COLIS DU JEU DE MESURE : transporteurs, derniers evenements et destinataires, avec leurs dates relatives et leurs interrogations. Les lignes de colis se declarent par MOTIF ancre sur les quatre destinataires du jeu : elles portent des dates relatives au jour du passage (« il y a 31 jours », « 2 septembre », « Hier »), et une declaration en toutes lettres mourait le lendemain (17/09/2026).",
+        "motifs": [
+          "^(Cliente en preparation|Client expedie|Cliente livree|Client de verification) · .+"
+        ]
       }
     ]
   },
@@ -1362,7 +1361,6 @@
     "valeurs": [
       {
         "textes": [
-          "Créée le 12 septembre 2025 à 14:32",
           "12 septembre 2025 à 14:32",
           "15 septembre 2025 à 09:15",
           "Date de création",
@@ -1402,6 +1400,14 @@
         "volatile": true,
         "motif": "donnee",
         "raison": "L ORDRE DE DEUX EVENEMENTS DE MEME SECONDE : le jeu cree la commande et son media dans la meme transaction, et leur ordre dans l historique change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Créée le 12 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA DATE DE CREATION DU JEU, ECRITE EN TOUTES LETTRES. Le jeu est cree le jour du passage : quand ce jour tombe en septembre, sa date s apparie a celle du kit (« Creee le 12 septembre 2025 a 14:32 », chiffres normalises) et les deux ont la meme largeur ; un autre mois, le nom du mois change sa longueur. VOLATILE, donc (17/09/2026)."
       }
     ],
     "manquants": [
@@ -1806,6 +1812,14 @@
         "volatile": true,
         "motif": "donnee",
         "raison": "L ORDRE DE DEUX EVENEMENTS DE MEME SECONDE. Le jeu de mesure cree la commande et son media dans la meme transaction : leur ordre dans l activite recente change d un passage a l autre. VOLATILE pour cette seule raison."
+      },
+      {
+        "motifs": [
+          "^\\d{2}/\\d{2}$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES REPERES DE DATE DE L AXE DES LIENS CLIENTS. Ce sont les derniers jours du passage (« 09/09 » au kit, la date du jour au produit) : la largeur de chaque repere suit ses chiffres — un « 1 » est plus etroit qu un « 0 » — et le dernier se cale a droite, donc sa place aussi. Meme taille, meme couleur, meme rangee. VOLATILE : les reperes qui different changent chaque jour (17/09/2026)."
       }
     ],
     "manquants": [
@@ -4422,6 +4436,15 @@
         ],
         "motif": "donnee",
         "raison": "LE PIED DU JOURNAL : le volume reel de la base de tests, au-dela du plafond de comptage. Declare par MOTIF — le nombre change a chaque passage des portes, et son millier est separe par une espace insecable etroite."
+      },
+      {
+        "motifs": [
+          "^systeme$",
+          "^(Inscriptions ouvertes|Commandes par mois|Interrogation des transporteurs|Seuil d'alerte colis|Tâche en retard après)$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES MODIFICATIONS DE REGLAGE AU JOURNAL. Le journal nomme, sur une modification de parametre, le reglage et son auteur « systeme » — ils n apparaissent que si l une des cinquante dernieres lignes en porte une, c est-a-dire selon l ordre des suites au dernier passage des portes. VOLATILE, donc (17/09/2026)."
       }
     ]
   },
@@ -7591,6 +7614,14 @@
         "volatile": true,
         "motif": "donnee",
         "raison": "L ORDRE DE DEUX EVENEMENTS DE MEME SECONDE. Le jeu de mesure cree la commande et son media dans la meme transaction : leur ordre dans l activite recente change d un passage a l autre. VOLATILE pour cette seule raison."
+      },
+      {
+        "motifs": [
+          "^\\d{2}/\\d{2}$"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES REPERES DE DATE DE L AXE DES LIENS CLIENTS. Ce sont les derniers jours du passage (« 09/09 » au kit, la date du jour au produit) : la largeur de chaque repere suit ses chiffres — un « 1 » est plus etroit qu un « 0 » — et le dernier se cale a droite, donc sa place aussi. Meme taille, meme couleur, meme rangee. VOLATILE : les reperes qui different changent chaque jour (17/09/2026)."
       }
     ],
     "manquants": [
