@@ -384,6 +384,21 @@ produit avant d'être une route.
 > facturation, interdite par la contrainte n° 1 ; **Support** suppose un système
 > de tickets que la base n'a pas.
 >
+> ⚠️ **ET SES PARAMÈTRES ONT SEPT SOUS-ONGLETS, DONT UN SEUL EST PORTÉ** — relevé
+> le 17/09/2026 en comparant `ADMIN_NAV`/`SETTINGS_NAV` du kit aux routes du
+> dépôt. Le nôtre est « Général », et il ne montre que ce que `parametres_admis`
+> autorise : plafonds par compte, suivi des colis, limitation de débit. Les six
+> autres ne se codent pas, et c'est une DÉCISION, pas un oubli :
+> **Abonnements** est de la facturation (contrainte n° 1) ; **Emails**,
+> **Intégrations** et **Apparence** (thème, couleurs, logo de la plateforme)
+> règlent ce qu'aucune colonne ne porte — c'est la même règle que les six
+> interrupteurs d'affichage de « Ma marque », *un réglage dessiné n'est pas une
+> autorisation* ; **Sécurité** (2FA obligatoire, durée de session, déconnexion
+> automatique) et **Système** (uptime, ressources, requêtes/minute) décrivent
+> l'un des réglages de compte qui vivent chez Supabase, l'autre ce que
+> `/admin/surveillance` montre déjà. **Aucun écran du dépôt n'attend donc d'être
+> implémenté.**
+>
 > ⚠️ **COMMANDES NE MONTRE AUCUN CONTENU.** Le kit dessine le pseudo et l'adresse
 > du client, et « Ouvrir la page client ». Le premier appartient à quelqu'un qui
 > n'a jamais eu de compte chez nous, le second transfère une capacité : la liste
