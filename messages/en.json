@@ -505,7 +505,7 @@
       "effacer": "Clear all"
     },
     "puce": {
-      "silence": "No movement · {n} d"
+      "silence": "No movement"
     },
     "interrogationsFaites": "{n, plural, one {# query} other {# queries}}",
     "aide": "A number you have just pasted is often not scanned yet. This is not an error: the carrier simply has not published anything.",
@@ -516,7 +516,8 @@
     "prochaine": {
       "livre": "Parcel delivered",
       "aujourdhui": "Delivery expected today",
-      "le": "Delivery expected {date}"
+      "le": "Delivery expected {date}",
+      "silence": "No movement for {n} days"
     },
     "actions": {
       "voirCommande": "View order {reference}",

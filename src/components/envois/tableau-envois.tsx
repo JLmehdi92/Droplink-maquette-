@@ -147,7 +147,14 @@ function Puce({
         // -0,24 px sur 12. Le même oubli avait été trouvé sur `/commandes`,
         // où la valeur écrite était -0,01em. C'est le genre de détail qu'on ne
         // voit jamais à l'œil et qui décale la largeur de chaque pastille.
-        "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-3 py-[7px] text-[12px] font-bold tracking-[-0.02em] " +
+        // ⚠️ `whitespace-nowrap`, ET IL MANQUAIT ICI. `BadgeStatut` le porte
+        // depuis longtemps, avec un commentaire qui cite littéralement le cas :
+        // « Sans mouvement · 14 j se replierait en deux lignes dans une
+        // pilule ». C'est cette pastille-ci qui rend ce texte, et elle ne l'avait
+        // jamais reçu : vu à la capture le 17/09/2026, replié sur TROIS lignes
+        // avec un « j » seul sur la dernière. Le correctif était resté dans le
+        // champ de vision de son premier cas — L-025.
+        "inline-flex shrink-0 items-center gap-1.5 rounded-ds-pill px-3 py-[7px] text-[12px] font-bold tracking-[-0.02em] whitespace-nowrap " +
         fond +
         " " +
         encre
@@ -269,8 +276,21 @@ export async function TableauEnvois({
             (ligne.commandes > Math.min(ligne.clients.length, 2)
               ? " +" + String(ligne.commandes - Math.min(ligne.clients.length, 2))
               : ""),
+      /*
+       * ⚠️ LA PASTILLE NE PORTE PLUS LE NOMBRE DE JOURS, ET C'EST UNE CORRECTION
+       * VUE À LA CAPTURE, PAS À LA MESURE. « Sans mouvement · 14 j » demande
+       * ~175 px ; sa colonne en offre 129. Le texte se repliait donc sur TROIS
+       * lignes avec un « j » seul sur la dernière, et lui interdire de se replier
+       * l'a fait DÉBORDER par-dessus la colonne voisine — pire que le défaut
+       * d'origine. Ni la soustraction (qui compare des textes) ni le contrôle de
+       * débordement (le document, lui, ne débordait pas) ne pouvaient le voir.
+       *
+       * Les jours ne sont pas perdus : ils passent dans « Prochaine étape », qui
+       * était VIDE pour ces lignes-là — c'est exactement ce que le kit fait de sa
+       * ligne en problème, où il écrit « Colis en attente (voir détails) ».
+       */
       puce: silencieux ? (
-        <Puce {...ALERTE}>{t("puce.silence", { n: silence.jours })}</Puce>
+        <Puce {...ALERTE}>{t("puce.silence")}</Puce>
       ) : (
         <Puce {...PEAU[ligne.etat]}>{t(`etat.${ligne.etat}`)}</Puce>
       ),
@@ -337,7 +357,15 @@ export async function TableauEnvois({
          * sinon.
          */
         if (ligne.etat === "livre") return t("prochaine.livre");
-        if (silencieux) return ligne.dernierPoint;
+        /*
+         * ⚠️ POUR UN COLIS SILENCIEUX, LA COLONNE DIT LE SILENCE, PAS LE DERNIER
+         * POINT. Elle rendait `dernierPoint` — souvent vide dans ce cas, et de
+         * toute façon vieux de deux semaines par définition. Le fait utile, le
+         * seul qui change tous les jours tant que le colis ne bouge pas, c'est
+         * la DURÉE du silence : c'est elle qui décide si le vendeur écrit au
+         * transporteur. Elle vivait dans la pastille, où elle ne tenait pas.
+         */
+        if (silencieux) return t("prochaine.silence", { n: silence.jours });
         const du = ligne.arriveeDu === null ? null : new Date(ligne.arriveeDu);
         const au = ligne.arriveeAu === null ? null : new Date(ligne.arriveeAu);
         const borne = au ?? du;
@@ -1202,13 +1230,24 @@ export async function TableauEnvois({
                     </span>
                     {d.puce}
                   </div>
+                  {/*
+                    ⚠️ LA MÊME PHRASE QUE LA COLONNE « PROCHAINE ÉTAPE » DU
+                    BUREAU, ET ELLE NE L'ÉTAIT PAS. La carte rendait
+                    `dernierPoint` pendant que le tableau rendait `prochaine` :
+                    deux phrases différentes pour la même ligne selon la largeur
+                    de l'écran. Vu à la capture le 17/09/2026 — un colis
+                    silencieux annonçait « Sans mouvement depuis 14 jours » au
+                    bureau et « Pas encore d'information du transporteur » au
+                    téléphone, ce qui est FAUX : le transporteur a parlé, il y a
+                    quatorze jours. Un même fait, un même calcul.
+                  */}
                   <p
                     className={
                       "mb-[3px] text-[14px] leading-5 " +
-                      (ligne.dernierPoint === null ? "text-ds-texte-sourdine" : "text-ds-texte-fort")
+                      (d.prochaine === null ? "text-ds-texte-sourdine" : "text-ds-texte-fort")
                     }
                   >
-                    {ligne.dernierPoint ?? t("mouvement.aucun")}
+                    {d.prochaine ?? t("mouvement.aucun")}
                   </p>
                   {/* LES TROIS FAITS SECONDAIRES SUR UNE SEULE LIGNE, séparés par
                       des points médians : c'est ce que fait la planche, et cela

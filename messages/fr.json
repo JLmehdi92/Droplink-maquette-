@@ -505,7 +505,7 @@
       "effacer": "Tout effacer"
     },
     "puce": {
-      "silence": "Sans mouvement · {n} j"
+      "silence": "Sans mouvement"
     },
     "interrogationsFaites": "{n, plural, one {# interrogation} other {# interrogations}}",
     "aide": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur : le transporteur n’a simplement rien publié.",
@@ -516,7 +516,8 @@
     "prochaine": {
       "livre": "Colis livré",
       "aujourdhui": "Livraison prévue aujourd’hui",
-      "le": "Livraison prévue le {date}"
+      "le": "Livraison prévue le {date}",
+      "silence": "Sans mouvement depuis {n} jours"
     },
     "actions": {
       "voirCommande": "Voir la commande {reference}",

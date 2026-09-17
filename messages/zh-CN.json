@@ -505,7 +505,7 @@
       "effacer": "全部清除"
     },
     "puce": {
-      "silence": "无更新 · {n} 天"
+      "silence": "无更新"
     },
     "interrogationsFaites": "{n, plural, other {已查询 # 次}}",
     "aide": "刚粘贴的运单号往往还没有被扫描。这不是故障：只是承运商还没有发布任何信息。",
@@ -516,7 +516,8 @@
     "prochaine": {
       "livre": "包裹已送达",
       "aujourdhui": "预计今日送达",
-      "le": "预计 {date} 送达"
+      "le": "预计 {date} 送达",
+      "silence": "已 {n} 天无更新"
     },
     "actions": {
       "voirCommande": "查看订单 {reference}",

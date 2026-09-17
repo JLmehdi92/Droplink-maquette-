@@ -654,6 +654,13 @@
         "texte": "Paramètres  <nombre d'occurrences>",
         "motif": "structure",
         "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
+      },
+      {
+        "textes": [
+          "Sans mouvement depuis 14 jours"
+        ],
+        "motif": "contrainte",
+        "raison": "LE KIT PEINT UN INCIDENT, NOUS N EN DECLARONS PAS. Sa ligne « problem » ecrit sa phrase en ROUGE, l encre d erreur : il affirme que le transporteur a signale un probleme. Il ne le fait pas — ce que nous savons, c est qu un colis ne bouge plus, et c est deja le raisonnement ecrit dans `tableau-envois.tsx` (« Problemes supposerait que le transporteur declare un incident »). La phrase est donc au gris de corps, comme les autres prochaines etapes ; l ambre de la pastille suffit a dire l alerte."
       }
     ],
     "manquants": [
@@ -723,7 +730,6 @@
           "Arrivée en France",
           "En cours d'acheminement",
           "Prise en charge par le transporteur",
-          "Colis en attente (voir détails)",
           "La Poste",
           "DHL",
           "DPD",
@@ -788,8 +794,7 @@
         "textes": [
           "DLKMESURE0002CN",
           "Cliente en preparation",
-          "Client de verification",
-          "Sans mouvement · 14 j"
+          "Client de verification"
         ],
         "motif": "donnee",
         "raison": "LES DEUX COLIS DU JEU DE MESURE, avec leurs numeros, leurs destinataires, leurs dates et leurs points de passage. Le kit en rend huit, inventes. LES REFERENCES ET LES DATES SONT DECLAREES PAR MOTIF, et pour deux raisons distinctes : la reference courte est DERIVEE de l identifiant de la commande, tire au hasard a chaque jeu, et les dates sont RELATIVES a l instant du passage — c est la lecon de la sonde de fumee qui avait une date de peremption. Les motifs sont ancres aux deux bouts : ils ne peuvent pas couvrir un libelle d interface.",
@@ -862,6 +867,13 @@
         "texte": "Cliente livree",
         "motif": "donnee",
         "raison": "LE DESTINATAIRE DE LA QUATRIEME COMMANDE DU JEU DE MESURE, rendu dans la colonne « Commande » depuis qu un quatrieme colis lui est rattache. Meme famille que les trois autres, declares juste au-dessus."
+      },
+      {
+        "motifs": [
+          "^Livraison prévue le .+$"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE A UN COLIS DONT LE TRANSPORTEUR ANNONCE UNE DATE, PAS LE KIT. La prevision sort de estimated_to d un vrai colis de la base de tests ; les huit lignes du kit sont ecrites a la main et aucune n en porte. ⚠️ DECLARE PAR MOTIF, PAS EN TOUTES LETTRES : la date est relative a aujourd hui, donc une declaration litterale mourrait le lendemain — et la soustraction, qui normalise les chiffres en #, ne la retrouverait de toute facon pas sous sa forme brute."
       }
     ]
   },
@@ -870,7 +882,6 @@
     "valeurs": [
       {
         "textes": [
-          "Sans mouvement · 14 j",
           "Un numéro tout juste collé n’est souvent",
           "Affichage de 1 à 8 sur 156 envois"
         ],
@@ -889,6 +900,23 @@
         ],
         "motif": "structure",
         "raison": "APPARIEMENT AVEC LES MENUS FERMES. Les trois menus du produit sont des <details> dont la sonde releve les options meme fermes — « En transit », « Expedie », « Pas encore scanne »… — et la soustraction les apparie aux pastilles des cartes du kit, qui portent les memes mots. Pastilles et options ont chacune les valeurs de leur modele."
+      },
+      {
+        "textes": [
+          "Sans mouvement depuis 14 jours"
+        ],
+        "motif": "contrainte",
+        "raison": "LE KIT PEINT UN INCIDENT, NOUS N EN DECLARONS PAS. Sa ligne « problem » ecrit sa phrase en ROUGE, l encre d erreur : il affirme que le transporteur a signale un probleme. Il ne le fait pas — ce que nous savons, c est qu un colis ne bouge plus, et c est deja le raisonnement ecrit dans `tableau-envois.tsx` (« Problemes supposerait que le transporteur declare un incident »). La phrase est donc au gris de corps, comme les autres prochaines etapes ; l ambre de la pastille suffit a dire l alerte."
+      },
+      {
+        "textes": [
+          "Colis livré",
+          "Colis livré",
+          "Sans mouvement",
+          "Sans mouvement"
+        ],
+        "motif": "structure",
+        "raison": "LE MEME TEXTE EST RENDU DEUX FOIS CHEZ NOUS, ET LA SOUSTRACTION APPARIE PAR LE TEXTE. « Sans mouvement » est a la fois la pastille de la ligne et une option du menu de filtre « Tous les statuts » — que la sonde releve OUVERT, puisque c est un `details`. Elle compare donc la pastille du kit a notre OPTION, qui n a evidemment ni fond, ni rayon de pilule, ni graisse 700. Meme cause pour « Colis livre », rendu par deux lignes du jeu de mesure la ou le kit n en a qu une. C est un ecart de l outil, pas de l ecran."
       }
     ],
     "manquants": [
@@ -918,8 +946,7 @@
           "Livraison prévue aujourd'hui",
           "Arrivée en France",
           "En cours d'acheminement",
-          "Prise en charge par le transporteur",
-          "Colis en attente (voir détails)"
+          "Prise en charge par le transporteur"
         ],
         "motif": "donnee",
         "raison": "LES VALEURS DE DEMONSTRATION DES DEUX COLONNES QUE NOUS RENDONS DESORMAIS. Le kit invente huit transporteurs et huit phrases d etape ; le jeu de mesure porte 4PX et FedEx, et la seule arrivee annoncee par le transporteur. Les colonnes existent des deux cotes — ce sont leurs CONTENUS qui different, et ils doivent differer : les notres viennent de la base."
@@ -928,7 +955,6 @@
         "textes": [
           "Lucas M. · 8 sept. 2025 · 7 interrogatio",
           "Yanis B. · 8 sept. 2025 · 3 interrogatio",
-          "Colis livré",
           "Sofiane A. · 7 sept. 2025 · 5 interrogat",
           "Inès K. · 8 sept. 2025 · 4 interrogation",
           "Thomas R. · 7 sept. 2025 · 1 interrogati",
@@ -986,13 +1012,6 @@
       },
       {
         "textes": [
-          "Sans mouvement"
-        ],
-        "motif": "donnee",
-        "raison": "LES OPTIONS DE NOTRE MENU DE STATUT, rendues dans le document parce qu un `<details>` porte ses entrees en clair — le `<select>` du kit garde les siennes dans des `<option>` que l inventaire ne releve pas. Et ce sont NOS etats : la frise est verrouillee a quatre par la decision 4 du brief, et « Sans mouvement » remplace le « Probleme » du kit, qui supposerait que le transporteur declare un incident."
-      },
-      {
-        "textes": [
           "DHL Express"
         ],
         "motifs": [
@@ -1010,16 +1029,20 @@
       },
       {
         "textes": [
-          "FedEx",
-          "Colis enregistre",
-          "Pas encore d’information du transporteur",
-          "Colis arrive au centre de tri internatio"
+          "FedEx"
         ],
         "motif": "donnee",
         "raison": "LES COLIS DU JEU DE MESURE : transporteurs, derniers evenements et destinataires, avec leurs dates relatives et leurs interrogations. Les lignes de colis se declarent par MOTIF ancre sur les quatre destinataires du jeu : elles portent des dates relatives au jour du passage (« il y a 31 jours », « 2 septembre », « Hier »), et une declaration en toutes lettres mourait le lendemain (17/09/2026).",
         "motifs": [
           "^(Cliente en preparation|Client expedie|Cliente livree|Client de verification) · .+"
         ]
+      },
+      {
+        "motifs": [
+          "^Livraison prévue le .+$"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE A UN COLIS DONT LE TRANSPORTEUR ANNONCE UNE DATE, PAS LE KIT. La prevision sort de estimated_to d un vrai colis de la base de tests ; les huit lignes du kit sont ecrites a la main et aucune n en porte. ⚠️ DECLARE PAR MOTIF, PAS EN TOUTES LETTRES : la date est relative a aujourd hui, donc une declaration litterale mourrait le lendemain — et la soustraction, qui normalise les chiffres en #, ne la retrouverait de toute facon pas sous sa forme brute."
       }
     ]
   },
