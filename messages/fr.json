@@ -153,12 +153,10 @@
   "legal": {
     "conditionsTitre": "Conditions d'utilisation",
     "confidentialiteTitre": "Politique de confidentialité",
-    "confidentialiteChapeau": "ce que nous collectons, pourquoi, et pendant combien de temps.",
+    "confidentialiteChapeau": "Ce que nous collectons, pourquoi, et pendant combien de temps.",
     "signalementTitre": "Signaler un contenu",
     "signalementSurTitre": "Notification et retrait",
     "misAJourLe": "Dernière mise à jour",
-    "avertissementTitre": "Texte à faire rédiger et valider par un avocat avant toute ouverture publique.",
-    "avertissementTexte": "Ce qui suit décrit la structure attendue, pas un texte juridique définitif.",
     "sommaireTitre": "Sommaire",
     "encartSignalerTitre": "Un contenu à signaler ?",
     "encartSignalerTexte": "Utilisez le formulaire dédié : nous traitons chaque signalement.",
@@ -182,15 +180,15 @@
       "retraitP2": "La suspension est réversible : la réactivation rétablit les pages sur les mêmes liens.",
       "disponibiliteTitre": "Disponibilité",
       "disponibiliteP1": "Le service est fourni en l'état, pendant sa phase de validation, à titre gratuit et sans engagement de disponibilité. Les informations de suivi proviennent des transporteurs : nous n'en garantissons ni l'exactitude ni la fraîcheur.",
-      "disponibiliteLacune": "CLAUSES DE LIMITATION DE RESPONSABILITÉ À FAIRE RÉDIGER",
       "donneesTitre": "Données personnelles",
       "donneesP1": "Le traitement des données est décrit dans la politique de confidentialité. Le nom du destinataire est un texte libre saisi par le vendeur ; il ne constitue ni un compte ni un identifiant.",
       "resiliationTitre": "Résiliation",
       "resiliationP1": "Le vendeur peut cesser d'utiliser le service à tout moment.",
-      "resiliationLacune": "MODALITÉS DE SUPPRESSION DES DONNÉES ET DURÉE DE CONSERVATION À FIXER",
       "droitTitre": "Droit applicable",
-      "droitLacune": "DROIT APPLICABLE ET JURIDICTION COMPÉTENTE À FIXER AVEC L'AVOCAT",
-      "retraitFormulaire": "Le signalement se fait au moyen du formulaire prévu à cet effet."
+      "retraitFormulaire": "Le signalement se fait au moyen du formulaire prévu à cet effet.",
+      "disponibiliteP2": "Le service peut être interrompu pour maintenance, faire l’objet d’évolutions, ou cesser. Nous ne sommes pas responsables des conséquences d’une indisponibilité, d’une perte de données due à un incident technique, ni d’une information de suivi erronée transmise par un transporteur.",
+      "resiliationP2": "La suppression du compte est immédiate et emporte celle des commandes, des médias et des suivis : les liens déjà envoyés cessent de fonctionner. Seules l’adresse e-mail et les dates d’inscription et de suppression sont conservées un an, au titre des obligations de l’hébergeur, puis effacées automatiquement.",
+      "droitP1": "Les présentes conditions sont soumises au droit français. À défaut de résolution amiable, les tribunaux français sont compétents."
     },
     "confidentialite": {
       "collecteTitre": "Ce que nous collectons",
@@ -201,10 +199,9 @@
       "indexationP1": "Les pages de commande portent une consigne de non-indexation, ne figurent dans aucune galerie et ne sont atteignables par aucune recherche interne. Aucun aperçu enrichi n'est produit pour les messageries : un aperçu montrerait le contenu à qui n'ouvre pas le lien.",
       "conservationTitre": "Combien de temps",
       "conservationP1": "Les contenus d'une commande sont conservés tant que le vendeur les conserve. Les réponses brutes des transporteurs sont purgées quatre-vingt-dix jours après le dernier mouvement du colis. Les traces d'administration sont conservées et survivent à la suppression du compte concerné.",
-      "conservationLacune": "DURÉE DE CONSERVATION APRÈS FERMETURE DE COMPTE À FIXER",
       "droitsTitre": "Vos droits",
       "droitsP1": "Accès, rectification, effacement, opposition. Écrivez-nous à l'adresse de contact indiquée sur la page de signalement.",
-      "droitsLacune": "RESPONSABLE DE TRAITEMENT ET COORDONNÉES À FIXER"
+      "conservationP2": "À la suppression du compte, seules l’adresse e-mail et les dates d’inscription et de suppression sont conservées un an, au titre des obligations de l’hébergeur, puis effacées automatiquement."
     },
     "signalement": {
       "intro": "Si une page hébergée chez nous porte atteinte à vos droits ou vous paraît illicite, décrivez-la ici. Chaque signalement est examiné par une personne.",
@@ -239,7 +236,7 @@
     "pastille": "Légal",
     "accueil": "Accueil",
     "editeur": "Éditeur :",
-    "editeurLacune": "raison sociale à compléter"
+    "editeurNom": "DropLink"
   },
   "connexion": {
     "titre": "Bon retour",

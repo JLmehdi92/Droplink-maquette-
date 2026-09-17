@@ -153,12 +153,10 @@
   "legal": {
     "conditionsTitre": "Terms of use",
     "confidentialiteTitre": "Privacy policy",
-    "confidentialiteChapeau": "what we collect, why, and for how long.",
+    "confidentialiteChapeau": "What we collect, why, and for how long.",
     "signalementTitre": "Report content",
     "signalementSurTitre": "Notice and takedown",
     "misAJourLe": "Last updated",
-    "avertissementTitre": "This text must be drafted and reviewed by a lawyer before any public launch.",
-    "avertissementTexte": "What follows describes the intended structure, not a final legal text.",
     "sommaireTitre": "Contents",
     "encartSignalerTitre": "Content to report?",
     "encartSignalerTexte": "Use the dedicated form: every report is reviewed.",
@@ -182,15 +180,15 @@
       "retraitP2": "Suspension is reversible: reactivation restores the pages on the same links.",
       "disponibiliteTitre": "Availability",
       "disponibiliteP1": "The service is provided as is, during its validation phase, free of charge and without any availability commitment. Tracking information comes from carriers: we guarantee neither its accuracy nor its freshness.",
-      "disponibiliteLacune": "LIABILITY LIMITATION CLAUSES TO BE DRAFTED",
       "donneesTitre": "Personal data",
       "donneesP1": "Data processing is described in the privacy policy. The recipient's name is free text entered by the seller; it constitutes neither an account nor an identifier.",
       "resiliationTitre": "Termination",
       "resiliationP1": "The seller may stop using the service at any time.",
-      "resiliationLacune": "DATA DELETION TERMS AND RETENTION PERIOD TO BE SET",
       "droitTitre": "Governing law",
-      "droitLacune": "GOVERNING LAW AND COMPETENT JURISDICTION TO BE SET WITH THE LAWYER",
-      "retraitFormulaire": "Reports are made using the form provided for that purpose."
+      "retraitFormulaire": "Reports are made using the form provided for that purpose.",
+      "disponibiliteP2": "The service may be interrupted for maintenance, change, or stop. We are not liable for the consequences of an outage, for data lost to a technical incident, or for incorrect tracking information reported by a carrier.",
+      "resiliationP2": "Deleting an account takes effect immediately and removes its orders, media and tracking: links already sent stop working. Only the email address and the sign-up and deletion dates are kept for one year, to meet hosting obligations, then erased automatically.",
+      "droitP1": "These terms are governed by French law. Failing an amicable settlement, the French courts have jurisdiction."
     },
     "confidentialite": {
       "collecteTitre": "What we collect",
@@ -201,10 +199,9 @@
       "indexationP1": "Order pages carry a no-index directive, appear in no gallery and are reachable through no internal search. No rich preview is produced for messaging apps: a preview would show the content to people who never open the link.",
       "conservationTitre": "For how long",
       "conservationP1": "An order's content is kept for as long as the seller keeps it. Raw carrier responses are purged ninety days after the parcel's last movement. Administration records are retained and survive the deletion of the account concerned.",
-      "conservationLacune": "RETENTION PERIOD AFTER ACCOUNT CLOSURE TO BE SET",
       "droitsTitre": "Your rights",
       "droitsP1": "Access, rectification, erasure, objection. Write to us at the contact address shown on the reporting page.",
-      "droitsLacune": "DATA CONTROLLER AND CONTACT DETAILS TO BE SET"
+      "conservationP2": "When an account is deleted, only the email address and the sign-up and deletion dates are kept for one year, to meet hosting obligations, then erased automatically."
     },
     "signalement": {
       "intro": "If a page we host infringes your rights or looks unlawful to you, describe it here. Every report is reviewed by a person.",
@@ -239,7 +236,7 @@
     "pastille": "Legal",
     "accueil": "Home",
     "editeur": "Publisher:",
-    "editeurLacune": "company name to be completed"
+    "editeurNom": "DropLink"
   },
   "connexion": {
     "titre": "Welcome back",

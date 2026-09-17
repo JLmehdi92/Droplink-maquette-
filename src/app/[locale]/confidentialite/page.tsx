@@ -56,14 +56,12 @@ export default async function Confidentialite({
     {
       id: "conservation",
       titre: t("confidentialite.conservationTitre"),
-      paragraphes: [t("confidentialite.conservationP1")],
-      lacune: t("confidentialite.conservationLacune"),
+      paragraphes: [t("confidentialite.conservationP1"), t("confidentialite.conservationP2")],
     },
     {
       id: "droits",
       titre: t("confidentialite.droitsTitre"),
       paragraphes: [t("confidentialite.droitsP1")],
-      lacune: t("confidentialite.droitsLacune"),
     },
   ];
 

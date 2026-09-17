@@ -157,8 +157,6 @@
     "signalementTitre": "举报内容",
     "signalementSurTitre": "通知与下架",
     "misAJourLe": "最近更新",
-    "avertissementTitre": "本文需由律师撰写并审核后方可正式对外公开。",
-    "avertissementTexte": "以下内容描述的是预期结构，并非最终的法律文本。",
     "sommaireTitre": "目录",
     "encartSignalerTitre": "有内容需要举报？",
     "encartSignalerTexte": "请使用专门的表单：我们会处理每一条举报。",
@@ -182,15 +180,15 @@
       "retraitP2": "停用是可以撤销的：恢复后，页面会在相同的链接上重新可用。",
       "disponibiliteTitre": "服务可用性",
       "disponibiliteP1": "本服务在验证阶段按现状免费提供，不作可用性承诺。物流信息来自承运商：我们不保证其准确性，也不保证其为最新。",
-      "disponibiliteLacune": "责任限制条款有待律师撰写",
       "donneesTitre": "个人信息",
       "donneesP1": "数据处理方式见隐私政策。收件人姓名是卖家自由填写的文本；它既不是账户，也不是身份标识。",
       "resiliationTitre": "终止使用",
       "resiliationP1": "卖家可以随时停止使用本服务。",
-      "resiliationLacune": "数据删除方式与保存期限有待确定",
       "droitTitre": "适用法律",
-      "droitLacune": "适用法律与管辖法院有待与律师确定",
-      "retraitFormulaire": "举报请通过专门的表单提交。"
+      "retraitFormulaire": "举报请通过专门的表单提交。",
+      "disponibiliteP2": "服务可能因维护而中断、发生变更或停止。对于服务中断的后果、技术事故导致的数据丢失，以及承运商提供的错误物流信息，我们不承担责任。",
+      "resiliationP2": "删除账号立即生效，并一并删除其订单、媒体文件和物流记录：已发出的链接将失效。仅邮箱地址与注册、删除日期会依托管方义务保留一年，此后自动清除。",
+      "droitP1": "本条款适用法国法律。协商不成的，由法国法院管辖。"
     },
     "confidentialite": {
       "collecteTitre": "我们收集什么",
@@ -201,10 +199,9 @@
       "indexationP1": "订单页面带有禁止收录的指令，不出现在任何图库中，也无法通过任何站内搜索找到。我们不为即时通讯软件生成富预览：预览会把内容展示给并未打开链接的人。",
       "conservationTitre": "保存多久",
       "conservationP1": "订单内容在卖家保留期间一直保存。承运商的原始返回数据在包裹最后一次更新后九十天清除。管理操作记录会长期保存，并在相关账户被删除后继续存在。",
-      "conservationLacune": "账户关闭后的保存期限有待确定",
       "droitsTitre": "您的权利",
       "droitsP1": "访问、更正、删除、反对。请写信至举报页面上标明的联系地址。",
-      "droitsLacune": "数据控制者及其联系方式有待确定"
+      "conservationP2": "账号删除后，仅邮箱地址与注册、删除日期会依托管方义务保留一年，此后自动清除。"
     },
     "signalement": {
       "intro": "如果我们托管的某个页面损害了您的权利，或您认为它违法，请在此描述。每一条举报都会由人工审查。",
@@ -239,7 +236,7 @@
     "pastille": "法律",
     "accueil": "首页",
     "editeur": "发布方：",
-    "editeurLacune": "公司名称待补充"
+    "editeurNom": "DropLink"
   },
   "connexion": {
     "titre": "欢迎回来",

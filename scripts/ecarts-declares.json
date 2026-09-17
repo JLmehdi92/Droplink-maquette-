@@ -6388,14 +6388,19 @@
           "Conditions d'utilisation [2/2]",
           "Conditions d'utilisation  <nombre d'occurrences>",
           "Politique de confidentialité",
-          "Éditeur :",
-          "raison sociale à compléter",
           "Conditions",
           "Confidentialité",
           "© 2025 DropLink. Tous droits réservés."
         ],
         "motif": "structure",
         "raison": "PLACE SEULE, ET LE NOMBRE DE SECTIONS EN EST LA CAUSE. Le gabarit du kit compte treize sections de conditions et dix de confidentialite, avec tableaux et encadres ; le texte du produit en compte huit et cinq. Le sommaire est plus court, les liens qui le suivent remontent, le document aussi, et le pied avec lui. « Editeur : » se decale de la longueur de la date voisine : « Derniere mise a jour : 29 aout 2026 » contre « En vigueur depuis le 11 septembre 2025 ». Les decomptes differents de « Conditions d utilisation » et « Politique de confidentialite » viennent de ce que le titre du produit reprend le nom de la page, la ou le gabarit l allonge en « Conditions generales d utilisation »."
+      },
+      {
+        "textes": [
+          "Les présentes conditions sont soumises a"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ],
     "manquants": [
@@ -6494,7 +6499,6 @@
           "Ces conditions peuvent être modifiées. T",
           "30 jours",
           "13. Droit applicable et litiges",
-          "Les présentes conditions sont soumises a",
           "ville du siège",
           "Pour toute question sur ces conditions :",
           "adresse e-mail de contact",
@@ -6502,24 +6506,102 @@
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU KIT EST UN GABARIT, ET IL DECRIT UN AUTRE PRODUIT. Il organise un abonnement Pro a 19,90 € preleve chaque mois, un prestataire de paiement, des factures conservees dix ans, l authentification Apple, la double authentification, une adresse e-mail et un pays d acheteur saisis par le vendeur, et des integrations. La contrainte n° 1 interdit tout ce qui touche a la facturation ; le reste decrit des capacites que le produit n a pas. Un document juridique qui affirme ce que le service ne fait pas engage son editeur sur du faux. La page garde donc SON texte — celui qui decrit le service reel, lacunes comprises —, et le kit ne lui donne que sa coque et sa typographie."
+      },
+      {
+        "textes": [
+          "Éditeur :",
+          "raison sociale à compléter"
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "1. Objet",
+          "2. Le service",
+          "3. Compte",
+          "4. Vos contenus",
+          "5. Usages interdits",
+          "6. Abonnement",
+          "9. Propriété intellectuelle",
+          "10. Responsabilité",
+          "12. Modification",
+          "Conditions générales d'utilisation",
+          "En vigueur depuis le",
+          "11 septembre 2025",
+          "Ces conditions encadrent l'utilisation d",
+          "Document à faire valider",
+          "Ce texte est une base rédigée à partir d",
+          "Les présentes conditions générales d'uti",
+          "l'éditeur",
+          "L'acheteur final qui consulte une page d",
+          "Le vendeur crée une commande, y ajoute d",
+          "DropLink est un service de suivi et de c",
+          "Ce que le service ne comprend pas",
+          "Aucune vente, aucun encaissement, aucun ",
+          "Aucun acheminement de colis : DropLink n",
+          "Aucune garantie sur les délais de livrai",
+          "Le détail des fonctionnalités est décrit",
+          "la documentation",
+          "La création d'un compte requiert une adr",
+          "Le vendeur garantit l'exactitude des inf",
+          "Les identifiants sont personnels et conf",
+          "L'authentification à deux facteurs est d",
+          "Le service est destiné à un usage profes",
+          "Les photos, vidéos et informations que l",
+          "Le vendeur garantit détenir les droits s",
+          "Publier des contenus illicites, contrefa",
+          "Utiliser le service pour tromper un ache",
+          "Saisir des numéros de suivi fictifs ou a",
+          "Tenter d'accéder aux commandes d'un autr",
+          "Contourner les limites du plan souscrit,",
+          "Sanction",
+          "En cas de manquement, l'accès au compte ",
+          "Gratuit",
+          "Pro",
+          "Prix",
+          "0 €",
+          "19,90 € par mois, toutes taxes comprises",
+          "Commandes",
+          "10 par mois",
+          "Illimitées",
+          "Stockage",
+          "1 Go",
+          "Engagement",
+          "Aucun",
+          "Aucun — mensuel, sans durée minimale",
+          "L'abonnement Pro est prélevé chaque mois",
+          "Le paiement est traité par un prestatair",
+          "En cas d'échec de paiement, le compte pe",
+          "Aucun remboursement au prorata n'est eff",
+          "Le service étant destiné aux professionn",
+          "À confirmer selon la cible réelle du ser",
+          "Le vendeur peut résilier son abonnement ",
+          "DropLink peut résilier un compte en cas ",
+          "DropLink s'efforce d'assurer un accès co",
+          "La mise à jour automatique des statuts d",
+          "La marque DropLink, son logo, son interf",
+          "DropLink répond de la fourniture du serv",
+          "DropLink ne répond ni de la réalité de l",
+          "Le vendeur reste seul responsable, à l'é",
+          "La responsabilité de DropLink est limité",
+          "Le traitement des données personnelles e",
+          "Lorsque le vendeur saisit les données de",
+          "12. Modification des conditions",
+          "Ces conditions peuvent être modifiées. T",
+          "30 jours",
+          "13. Droit applicable et litiges",
+          "ville du siège",
+          "Pour toute question sur ces conditions :",
+          "adresse e-mail de contact",
+          "le support",
+          "Contact"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ],
     "enTrop": [
-      {
-        "textes": [
-          "Dernière mise à jour : 29 août 2026"
-        ],
-        "motif": "contrainte",
-        "raison": "LA DATE DIT CE QU ELLE EST. « En vigueur depuis le » affirmerait qu un texte non valide s applique ; « Derniere mise a jour » dit un fait, date de la derniere redaction, dans toutes les langues."
-      },
-      {
-        "textes": [
-          "Texte à faire rédiger et valider par un ",
-          "Ce qui suit décrit la structure attendue"
-        ],
-        "motif": "contrainte",
-        "raison": "L AVERTISSEMENT EST CELUI DU PRODUIT, dans l encadre ambre du kit : « a faire rediger et valider par un avocat avant toute ouverture publique » — le brief l exige, et c est plus direct que la formule du gabarit."
-      },
       {
         "textes": [
           "Un contenu à signaler ?",
@@ -6545,14 +6627,52 @@
           "Le signalement se fait au moyen du formu",
           "La suspension est réversible : la réacti",
           "Le service est fourni en l'état, pendant",
-          "CLAUSES DE LIMITATION DE RESPONSABILITÉ ",
           "Le traitement des données est décrit dan",
-          "Le vendeur peut cesser d'utiliser le ser",
-          "MODALITÉS DE SUPPRESSION DES DONNÉES ET ",
-          "DROIT APPLICABLE ET JURIDICTION COMPÉTEN"
+          "Le vendeur peut cesser d'utiliser le ser"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU PRODUIT : ses sections, ses paragraphes, et ses lacunes ecrites en toutes lettres dans la pastille « a completer » du kit. Voir la declaration symetrique du gabarit dans les manquants. Tailles, graisses, interlignes et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Éditeur : DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "Dernière mise à jour : 18 septembre 2026"
+        ],
+        "motif": "donnee",
+        "raison": "LA DATE DE DERNIERE MISE A JOUR EST CELLE DE NOS TEXTES, PAS DE CEUX DU KIT. Elle est ecrite dans le composant et non dans les catalogues : c est un FAIT, et le meme fait vaut dans les trois langues. Elle change a chaque modification du contenu legal — une date figee sur un texte modifie affirme un etat qui n existe plus."
+      },
+      {
+        "textes": [
+          "1. Objet du service",
+          "2. Compte et accès",
+          "3. Contenus que vous publiez",
+          "4. Notification et retrait",
+          "Un contenu à signaler ?",
+          "Utilisez le formulaire dédié : nous trai",
+          "Signaler un contenu",
+          "DropLink met à disposition des vendeurs ",
+          "DropLink n'intervient à aucun moment dan",
+          "La création de commandes suppose un comp",
+          "Le lien d'une commande est immuable. Le ",
+          "Le vendeur reste seul responsable des co",
+          "DropLink agit en qualité d'hébergeur : l",
+          "Toute personne peut signaler un contenu ",
+          "Le signalement se fait au moyen du formu",
+          "La suspension est réversible : la réacti",
+          "Le service est fourni en l'état, pendant",
+          "Le service peut être interrompu pour mai",
+          "Le traitement des données est décrit dan",
+          "Le vendeur peut cesser d'utiliser le ser",
+          "La suppression du compte est immédiate e"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ]
   },
@@ -6570,14 +6690,19 @@
           "Conditions d'utilisation [2/2]",
           "Conditions d'utilisation",
           "Politique de confidentialité",
-          "Éditeur :",
-          "raison sociale à compléter",
           "Conditions",
           "Confidentialité",
           "© 2025 DropLink. Tous droits réservés."
         ],
         "motif": "structure",
         "raison": "PLACE SEULE, ET LE NOMBRE DE SECTIONS EN EST LA CAUSE. Le gabarit du kit compte treize sections de conditions et dix de confidentialite, avec tableaux et encadres ; le texte du produit en compte huit et cinq. Le sommaire est plus court, les liens qui le suivent remontent, le document aussi, et le pied avec lui. « Editeur : » se decale de la longueur de la date voisine : « Derniere mise a jour : 29 aout 2026 » contre « En vigueur depuis le 11 septembre 2025 ». Les decomptes differents de « Conditions d utilisation » et « Politique de confidentialite » viennent de ce que le titre du produit reprend le nom de la page, la ou le gabarit l allonge en « Conditions generales d utilisation ». Au telephone, le sommaire replie liste ces sections sous « Sommaire » : il compte autant d entrees que le texte a de sections, et ses liens se decalent avec lui."
+      },
+      {
+        "textes": [
+          "Les présentes conditions sont soumises a"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ],
     "manquants": [
@@ -6674,7 +6799,6 @@
           "Ces conditions peuvent être modifiées. T",
           "30 jours",
           "13. Droit applicable et litiges",
-          "Les présentes conditions sont soumises a",
           "ville du siège",
           "Pour toute question sur ces conditions :",
           "adresse e-mail de contact",
@@ -6682,24 +6806,100 @@
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU KIT EST UN GABARIT, ET IL DECRIT UN AUTRE PRODUIT. Il organise un abonnement Pro a 19,90 € preleve chaque mois, un prestataire de paiement, des factures conservees dix ans, l authentification Apple, la double authentification, une adresse e-mail et un pays d acheteur saisis par le vendeur, et des integrations. La contrainte n° 1 interdit tout ce qui touche a la facturation ; le reste decrit des capacites que le produit n a pas. Un document juridique qui affirme ce que le service ne fait pas engage son editeur sur du faux. La page garde donc SON texte — celui qui decrit le service reel, lacunes comprises —, et le kit ne lui donne que sa coque et sa typographie."
+      },
+      {
+        "textes": [
+          "Éditeur :",
+          "raison sociale à compléter"
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "1. Objet",
+          "2. Le service",
+          "3. Compte",
+          "4. Vos contenus",
+          "5. Usages interdits",
+          "6. Abonnement",
+          "9. Propriété intellectuelle",
+          "10. Responsabilité",
+          "12. Modification",
+          "Conditions générales d'utilisation",
+          "En vigueur depuis le",
+          "11 septembre 2025",
+          "Ces conditions encadrent l'utilisation d",
+          "Document à faire valider",
+          "Ce texte est une base rédigée à partir d",
+          "Les présentes conditions générales d'uti",
+          "l'éditeur",
+          "L'acheteur final qui consulte une page d",
+          "Le vendeur crée une commande, y ajoute d",
+          "DropLink est un service de suivi et de c",
+          "Ce que le service ne comprend pas",
+          "Aucune vente, aucun encaissement, aucun ",
+          "Aucun acheminement de colis : DropLink n",
+          "Aucune garantie sur les délais de livrai",
+          "Le détail des fonctionnalités est décrit",
+          "la documentation",
+          "La création d'un compte requiert une adr",
+          "Le vendeur garantit l'exactitude des inf",
+          "Les identifiants sont personnels et conf",
+          "L'authentification à deux facteurs est d",
+          "Le service est destiné à un usage profes",
+          "Les photos, vidéos et informations que l",
+          "Le vendeur garantit détenir les droits s",
+          "Publier des contenus illicites, contrefa",
+          "Utiliser le service pour tromper un ache",
+          "Saisir des numéros de suivi fictifs ou a",
+          "Tenter d'accéder aux commandes d'un autr",
+          "Contourner les limites du plan souscrit,",
+          "Sanction",
+          "En cas de manquement, l'accès au compte ",
+          "Prix",
+          "0 €",
+          "19,90 € par mois, toutes taxes comprises",
+          "Commandes",
+          "10 par mois",
+          "Illimitées",
+          "Stockage",
+          "1 Go",
+          "Engagement",
+          "Aucun",
+          "Aucun — mensuel, sans durée minimale",
+          "L'abonnement Pro est prélevé chaque mois",
+          "Le paiement est traité par un prestatair",
+          "En cas d'échec de paiement, le compte pe",
+          "Aucun remboursement au prorata n'est eff",
+          "Le service étant destiné aux professionn",
+          "À confirmer selon la cible réelle du ser",
+          "Le vendeur peut résilier son abonnement ",
+          "DropLink peut résilier un compte en cas ",
+          "DropLink s'efforce d'assurer un accès co",
+          "La mise à jour automatique des statuts d",
+          "La marque DropLink, son logo, son interf",
+          "DropLink répond de la fourniture du serv",
+          "DropLink ne répond ni de la réalité de l",
+          "Le vendeur reste seul responsable, à l'é",
+          "La responsabilité de DropLink est limité",
+          "Le traitement des données personnelles e",
+          "Lorsque le vendeur saisit les données de",
+          "12. Modification des conditions",
+          "Ces conditions peuvent être modifiées. T",
+          "30 jours",
+          "13. Droit applicable et litiges",
+          "ville du siège",
+          "Pour toute question sur ces conditions :",
+          "adresse e-mail de contact",
+          "le support",
+          "Contact"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ],
     "enTrop": [
-      {
-        "textes": [
-          "Dernière mise à jour : 29 août 2026"
-        ],
-        "motif": "contrainte",
-        "raison": "LA DATE DIT CE QU ELLE EST. « En vigueur depuis le » affirmerait qu un texte non valide s applique ; « Derniere mise a jour » dit un fait, date de la derniere redaction, dans toutes les langues."
-      },
-      {
-        "textes": [
-          "Texte à faire rédiger et valider par un ",
-          "Ce qui suit décrit la structure attendue"
-        ],
-        "motif": "contrainte",
-        "raison": "L AVERTISSEMENT EST CELUI DU PRODUIT, dans l encadre ambre du kit : « a faire rediger et valider par un avocat avant toute ouverture publique » — le brief l exige, et c est plus direct que la formule du gabarit."
-      },
       {
         "textes": [
           "Un contenu à signaler ?",
@@ -6725,14 +6925,52 @@
           "Le signalement se fait au moyen du formu",
           "La suspension est réversible : la réacti",
           "Le service est fourni en l'état, pendant",
-          "CLAUSES DE LIMITATION DE RESPONSABILITÉ ",
           "Le traitement des données est décrit dan",
-          "Le vendeur peut cesser d'utiliser le ser",
-          "MODALITÉS DE SUPPRESSION DES DONNÉES ET ",
-          "DROIT APPLICABLE ET JURIDICTION COMPÉTEN"
+          "Le vendeur peut cesser d'utiliser le ser"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU PRODUIT : ses sections, ses paragraphes, et ses lacunes ecrites en toutes lettres dans la pastille « a completer » du kit. Voir la declaration symetrique du gabarit dans les manquants. Tailles, graisses, interlignes et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Éditeur : DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "Dernière mise à jour : 18 septembre 2026"
+        ],
+        "motif": "donnee",
+        "raison": "LA DATE DE DERNIERE MISE A JOUR EST CELLE DE NOS TEXTES, PAS DE CEUX DU KIT. Elle est ecrite dans le composant et non dans les catalogues : c est un FAIT, et le meme fait vaut dans les trois langues. Elle change a chaque modification du contenu legal — une date figee sur un texte modifie affirme un etat qui n existe plus."
+      },
+      {
+        "textes": [
+          "1. Objet du service",
+          "2. Compte et accès",
+          "3. Contenus que vous publiez",
+          "4. Notification et retrait",
+          "DropLink met à disposition des vendeurs ",
+          "DropLink n'intervient à aucun moment dan",
+          "La création de commandes suppose un comp",
+          "Le lien d'une commande est immuable. Le ",
+          "Le vendeur reste seul responsable des co",
+          "DropLink agit en qualité d'hébergeur : l",
+          "Toute personne peut signaler un contenu ",
+          "Le signalement se fait au moyen du formu",
+          "La suspension est réversible : la réacti",
+          "Le service est fourni en l'état, pendant",
+          "Le service peut être interrompu pour mai",
+          "Le traitement des données est décrit dan",
+          "Le vendeur peut cesser d'utiliser le ser",
+          "La suppression du compte est immédiate e",
+          "Un contenu à signaler ?",
+          "Utilisez le formulaire dédié : nous trai",
+          "Signaler un contenu"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ]
   },
@@ -6744,8 +6982,6 @@
           "7. Vos droits [2/2]",
           "Conditions d'utilisation",
           "Politique de confidentialité [3/3]",
-          "Éditeur :",
-          "raison sociale à compléter",
           "Conditions",
           "Confidentialité",
           "© 2025 DropLink. Tous droits réservés."
@@ -6894,24 +7130,139 @@
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU KIT EST UN GABARIT, ET IL DECRIT UN AUTRE PRODUIT. Il organise un abonnement Pro a 19,90 € preleve chaque mois, un prestataire de paiement, des factures conservees dix ans, l authentification Apple, la double authentification, une adresse e-mail et un pays d acheteur saisis par le vendeur, et des integrations. La contrainte n° 1 interdit tout ce qui touche a la facturation ; le reste decrit des capacites que le produit n a pas. Un document juridique qui affirme ce que le service ne fait pas engage son editeur sur du faux. La page garde donc SON texte — celui qui decrit le service reel, lacunes comprises —, et le kit ne lui donne que sa coque et sa typographie."
+      },
+      {
+        "textes": [
+          "Éditeur :",
+          "raison sociale à compléter",
+          "raison sociale, forme juridique, SIREN, "
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "1. Responsable",
+          "2. Données collectées",
+          "3. Finalités et bases légales",
+          "4. Destinataires",
+          "5. Durées de conservation",
+          "6. Transferts hors UE",
+          "8. Cookies",
+          "9. Sécurité",
+          "10. Contact et réclamation",
+          "En vigueur depuis le",
+          "11 septembre 2025",
+          "DropLink traite deux catégories de donné",
+          "Document à faire valider",
+          "Ce texte est une base rédigée à partir d",
+          "1. Responsable du traitement",
+          "Le responsable du traitement des données",
+          "adresse e-mail dédiée aux demandes RGPD",
+          "Deux rôles distincts",
+          "Pour les données de compte du vendeur, D",
+          "responsable de traitement",
+          "sous-traitant",
+          "Données du vendeur",
+          "Donnée",
+          "Origine",
+          "Nom, adresse e-mail, téléphone (facultat",
+          "Saisis par le vendeur",
+          "Mot de passe (stocké sous forme de conde",
+          "Saisi par le vendeur",
+          "Identifiant Google ou Apple en cas de co",
+          "Fournisseur d'identité",
+          "Nom, description, logo, couleurs et rése",
+          "Plan souscrit, historique de facturation",
+          "Généré par le service",
+          "Adresse IP, navigateur, dates de connexi",
+          "Collectés automatiquement",
+          "Données de l'acheteur, saisies par le ve",
+          "Usage",
+          "Nom de l'acheteur",
+          "Identifier la commande",
+          "Pays de livraison",
+          "Afficher la destination et estimer le dé",
+          "Adresse e-mail (facultative)",
+          "Envoyer le lien de suivi et les mises à ",
+          "Numéro de suivi et transporteur",
+          "Interroger le transporteur",
+          "Photos et vidéos de la commande",
+          "Afficher la préparation sur la page de s",
+          "La page de suivi étant accessible par un",
+          "Données que DropLink ne collecte pas",
+          "Aucune coordonnée bancaire complète : le",
+          "Aucune adresse postale d'acheteur : Drop",
+          "Aucun prix, montant de commande ou donné",
+          "Finalité",
+          "Base légale",
+          "Créer et gérer le compte, fournir le ser",
+          "Exécution du contrat",
+          "Générer les liens de suivi et afficher l",
+          "Interroger les transporteurs pour mettre",
+          "Notifier le vendeur des événements de li",
+          "Facturer l'abonnement et tenir la compta",
+          "Obligation légale",
+          "Sécuriser le service, détecter les abus,",
+          "Intérêt légitime",
+          "Mesurer l'usage du produit sous forme ag",
+          "Envoyer des offres et nouveautés",
+          "Consentement, révocable à tout moment",
+          "4. Destinataires et sous-traitants",
+          "Les données ne sont ni vendues, ni louée",
+          "Destinataire",
+          "Rôle",
+          "hébergeur à préciser",
+          "Hébergement de l'application et des fich",
+          "prestataire d'e-mails",
+          "Envoi des e-mails transactionnels",
+          "prestataire de paiement",
+          "Encaissement des abonnements",
+          "Transporteurs (La Poste, Chronopost, DHL",
+          "Consultation du suivi à partir du numéro",
+          "Les intégrations facultatives que le ven",
+          "Durée",
+          "Compte vendeur",
+          "Toute la durée du compte, puis suppressi",
+          "Commandes, photos et vidéos",
+          "Jusqu'à leur suppression par le vendeur,",
+          "Lien de suivi accessible à l'acheteur",
+          "90 jours après la livraison",
+          "Journaux techniques et de sécurité",
+          "12 mois",
+          "Pièces comptables et factures",
+          "10 ans, obligation légale",
+          "6. Transferts hors Union européenne",
+          "Les données sont hébergées . Lorsqu'un s",
+          "zone d'hébergement à préciser",
+          ": accès, rectification, effacement, limi",
+          "Vous pouvez exercer vos droits à tout mo",
+          "Depuis l'application : les paramètres pe",
+          "Par e-mail : écrivez à l'adresse indiqué",
+          "Acheteurs : si vous souhaitez faire reti",
+          "DropLink utilise les cookies strictement",
+          "Aucun cookie publicitaire ni traceur tie",
+          "À compléter si un outil de mesure d'audi",
+          "Chiffrement des échanges en HTTPS sur l'",
+          "Mots de passe stockés sous forme de cond",
+          "Authentification à deux facteurs disponi",
+          "Masquage systématique des secrets dans l",
+          "Journalisation des accès et détection de",
+          "Sauvegardes quotidiennes de la base de d",
+          "En cas de violation de données susceptib",
+          "Pour toute question relative à vos donné",
+          "adresse e-mail dédiée",
+          "le support",
+          "Si la réponse apportée ne vous satisfait",
+          "Les conditions d'utilisation du service ",
+          "Conditions générales d'utilisation",
+          "Contact"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ],
     "enTrop": [
-      {
-        "textes": [
-          "Dernière mise à jour : 29 août 2026"
-        ],
-        "motif": "contrainte",
-        "raison": "LA DATE DIT CE QU ELLE EST. « En vigueur depuis le » affirmerait qu un texte non valide s applique ; « Derniere mise a jour » dit un fait, date de la derniere redaction, dans toutes les langues."
-      },
-      {
-        "textes": [
-          "Texte à faire rédiger et valider par un ",
-          "Ce qui suit décrit la structure attendue"
-        ],
-        "motif": "contrainte",
-        "raison": "L AVERTISSEMENT EST CELUI DU PRODUIT, dans l encadre ambre du kit : « a faire rediger et valider par un avocat avant toute ouverture publique » — le brief l exige, et c est plus direct que la formule du gabarit."
-      },
       {
         "textes": [
           "Un contenu à signaler ?",
@@ -6927,17 +7278,48 @@
           "2. Le destinataire n'a pas de compte",
           "3. Rien n'est indexé",
           "4. Combien de temps",
-          "ce que nous collectons, pourquoi, et pen",
           "Pour un vendeur : son adresse email, le ",
           "Consulter une page ne crée aucun compte,",
           "Les pages de commande portent une consig",
           "Les contenus d'une commande sont conserv",
-          "DURÉE DE CONSERVATION APRÈS FERMETURE DE",
-          "Accès, rectification, effacement, opposi",
-          "RESPONSABLE DE TRAITEMENT ET COORDONNÉES"
+          "Accès, rectification, effacement, opposi"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU PRODUIT : ses sections, ses paragraphes, et ses lacunes ecrites en toutes lettres dans la pastille « a completer » du kit. Voir la declaration symetrique du gabarit dans les manquants. Tailles, graisses, interlignes et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Éditeur : DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "Dernière mise à jour : 18 septembre 2026"
+        ],
+        "motif": "donnee",
+        "raison": "LA DATE DE DERNIERE MISE A JOUR EST CELLE DE NOS TEXTES, PAS DE CEUX DU KIT. Elle est ecrite dans le composant et non dans les catalogues : c est un FAIT, et le meme fait vaut dans les trois langues. Elle change a chaque modification du contenu legal — une date figee sur un texte modifie affirme un etat qui n existe plus."
+      },
+      {
+        "textes": [
+          "1. Ce que nous collectons",
+          "2. Le destinataire n'a pas de compte",
+          "3. Rien n'est indexé",
+          "4. Combien de temps",
+          "Un contenu à signaler ?",
+          "Utilisez le formulaire dédié : nous trai",
+          "Signaler un contenu",
+          "Ce que nous collectons, pourquoi, et pen",
+          "Pour un vendeur : son adresse email, le ",
+          "Consulter une page ne crée aucun compte,",
+          "Les pages de commande portent une consig",
+          "Les contenus d'une commande sont conserv",
+          "À la suppression du compte, seules l’adr",
+          "Accès, rectification, effacement, opposi"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ]
   },
@@ -7090,24 +7472,131 @@
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU KIT EST UN GABARIT, ET IL DECRIT UN AUTRE PRODUIT. Il organise un abonnement Pro a 19,90 € preleve chaque mois, un prestataire de paiement, des factures conservees dix ans, l authentification Apple, la double authentification, une adresse e-mail et un pays d acheteur saisis par le vendeur, et des integrations. La contrainte n° 1 interdit tout ce qui touche a la facturation ; le reste decrit des capacites que le produit n a pas. Un document juridique qui affirme ce que le service ne fait pas engage son editeur sur du faux. La page garde donc SON texte — celui qui decrit le service reel, lacunes comprises —, et le kit ne lui donne que sa coque et sa typographie."
+      },
+      {
+        "textes": [
+          "Éditeur :",
+          "raison sociale à compléter",
+          "raison sociale, forme juridique, SIREN, "
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "1. Responsable",
+          "2. Données collectées",
+          "3. Finalités et bases légales",
+          "4. Destinataires",
+          "5. Durées de conservation",
+          "6. Transferts hors UE",
+          "8. Cookies",
+          "9. Sécurité",
+          "10. Contact et réclamation",
+          "En vigueur depuis le",
+          "11 septembre 2025",
+          "DropLink traite deux catégories de donné",
+          "Document à faire valider",
+          "Ce texte est une base rédigée à partir d",
+          "1. Responsable du traitement",
+          "Le responsable du traitement des données",
+          "adresse e-mail dédiée aux demandes RGPD",
+          "Deux rôles distincts",
+          "Pour les données de compte du vendeur, D",
+          "responsable de traitement",
+          "sous-traitant",
+          "Données du vendeur",
+          "Nom, adresse e-mail, téléphone (facultat",
+          "Saisis par le vendeur",
+          "Mot de passe (stocké sous forme de conde",
+          "Saisi par le vendeur",
+          "Identifiant Google ou Apple en cas de co",
+          "Fournisseur d'identité",
+          "Nom, description, logo, couleurs et rése",
+          "Plan souscrit, historique de facturation",
+          "Généré par le service",
+          "Adresse IP, navigateur, dates de connexi",
+          "Collectés automatiquement",
+          "Données de l'acheteur, saisies par le ve",
+          "Nom de l'acheteur",
+          "Identifier la commande",
+          "Pays de livraison",
+          "Afficher la destination et estimer le dé",
+          "Adresse e-mail (facultative)",
+          "Envoyer le lien de suivi et les mises à ",
+          "Numéro de suivi et transporteur",
+          "Interroger le transporteur",
+          "Photos et vidéos de la commande",
+          "Afficher la préparation sur la page de s",
+          "La page de suivi étant accessible par un",
+          "Données que DropLink ne collecte pas",
+          "Aucune coordonnée bancaire complète : le",
+          "Aucune adresse postale d'acheteur : Drop",
+          "Aucun prix, montant de commande ou donné",
+          "Créer et gérer le compte, fournir le ser",
+          "Exécution du contrat",
+          "Générer les liens de suivi et afficher l",
+          "Interroger les transporteurs pour mettre",
+          "Notifier le vendeur des événements de li",
+          "Facturer l'abonnement et tenir la compta",
+          "Obligation légale",
+          "Sécuriser le service, détecter les abus,",
+          "Intérêt légitime",
+          "Mesurer l'usage du produit sous forme ag",
+          "Envoyer des offres et nouveautés",
+          "Consentement, révocable à tout moment",
+          "4. Destinataires et sous-traitants",
+          "Les données ne sont ni vendues, ni louée",
+          "hébergeur à préciser",
+          "Hébergement de l'application et des fich",
+          "prestataire d'e-mails",
+          "Envoi des e-mails transactionnels",
+          "prestataire de paiement",
+          "Encaissement des abonnements",
+          "Transporteurs (La Poste, Chronopost, DHL",
+          "Consultation du suivi à partir du numéro",
+          "Les intégrations facultatives que le ven",
+          "Compte vendeur",
+          "Toute la durée du compte, puis suppressi",
+          "Commandes, photos et vidéos",
+          "Jusqu'à leur suppression par le vendeur,",
+          "Lien de suivi accessible à l'acheteur",
+          "90 jours après la livraison",
+          "Journaux techniques et de sécurité",
+          "12 mois",
+          "Pièces comptables et factures",
+          "10 ans, obligation légale",
+          "6. Transferts hors Union européenne",
+          "Les données sont hébergées . Lorsqu'un s",
+          "zone d'hébergement à préciser",
+          ": accès, rectification, effacement, limi",
+          "Vous pouvez exercer vos droits à tout mo",
+          "Depuis l'application : les paramètres pe",
+          "Par e-mail : écrivez à l'adresse indiqué",
+          "Acheteurs : si vous souhaitez faire reti",
+          "DropLink utilise les cookies strictement",
+          "Aucun cookie publicitaire ni traceur tie",
+          "À compléter si un outil de mesure d'audi",
+          "Chiffrement des échanges en HTTPS sur l'",
+          "Mots de passe stockés sous forme de cond",
+          "Authentification à deux facteurs disponi",
+          "Masquage systématique des secrets dans l",
+          "Journalisation des accès et détection de",
+          "Sauvegardes quotidiennes de la base de d",
+          "En cas de violation de données susceptib",
+          "Pour toute question relative à vos donné",
+          "adresse e-mail dédiée",
+          "le support",
+          "Si la réponse apportée ne vous satisfait",
+          "Les conditions d'utilisation du service ",
+          "Conditions générales d'utilisation",
+          "Contact"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ],
     "enTrop": [
-      {
-        "textes": [
-          "Dernière mise à jour : 29 août 2026"
-        ],
-        "motif": "contrainte",
-        "raison": "LA DATE DIT CE QU ELLE EST. « En vigueur depuis le » affirmerait qu un texte non valide s applique ; « Derniere mise a jour » dit un fait, date de la derniere redaction, dans toutes les langues."
-      },
-      {
-        "textes": [
-          "Texte à faire rédiger et valider par un ",
-          "Ce qui suit décrit la structure attendue"
-        ],
-        "motif": "contrainte",
-        "raison": "L AVERTISSEMENT EST CELUI DU PRODUIT, dans l encadre ambre du kit : « a faire rediger et valider par un avocat avant toute ouverture publique » — le brief l exige, et c est plus direct que la formule du gabarit."
-      },
       {
         "textes": [
           "Un contenu à signaler ?",
@@ -7123,17 +7612,48 @@
           "2. Le destinataire n'a pas de compte",
           "3. Rien n'est indexé",
           "4. Combien de temps",
-          "ce que nous collectons, pourquoi, et pen",
           "Pour un vendeur : son adresse email, le ",
           "Consulter une page ne crée aucun compte,",
           "Les pages de commande portent une consig",
           "Les contenus d'une commande sont conserv",
-          "DURÉE DE CONSERVATION APRÈS FERMETURE DE",
-          "Accès, rectification, effacement, opposi",
-          "RESPONSABLE DE TRAITEMENT ET COORDONNÉES"
+          "Accès, rectification, effacement, opposi"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU PRODUIT : ses sections, ses paragraphes, et ses lacunes ecrites en toutes lettres dans la pastille « a completer » du kit. Voir la declaration symetrique du gabarit dans les manquants. Tailles, graisses, interlignes et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Éditeur : DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "L EDITEUR EST NOMME, LE KIT LE LAISSE A COMPLETER. Sa planche rend « Editeur : » puis une pastille « raison sociale a completer » ; nous ecrivons « Editeur : DropLink » d un seul tenant — decision de Wassim du 18/09/2026, prise en connaissance de ce que la LCEN demande de plus. Un seul element chez nous la ou le kit en rend deux."
+      },
+      {
+        "textes": [
+          "Dernière mise à jour : 18 septembre 2026"
+        ],
+        "motif": "donnee",
+        "raison": "LA DATE DE DERNIERE MISE A JOUR EST CELLE DE NOS TEXTES, PAS DE CEUX DU KIT. Elle est ecrite dans le composant et non dans les catalogues : c est un FAIT, et le meme fait vaut dans les trois langues. Elle change a chaque modification du contenu legal — une date figee sur un texte modifie affirme un etat qui n existe plus."
+      },
+      {
+        "textes": [
+          "1. Ce que nous collectons",
+          "2. Le destinataire n'a pas de compte",
+          "3. Rien n'est indexé",
+          "4. Combien de temps",
+          "Ce que nous collectons, pourquoi, et pen",
+          "Pour un vendeur : son adresse email, le ",
+          "Consulter une page ne crée aucun compte,",
+          "Les pages de commande portent une consig",
+          "Les contenus d'une commande sont conserv",
+          "À la suppression du compte, seules l’adr",
+          "Accès, rectification, effacement, opposi",
+          "Un contenu à signaler ?",
+          "Utilisez le formulaire dédié : nous trai",
+          "Signaler un contenu"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PASTILLES « A COMPLETER » ET LE BANDEAU « A VALIDER PAR UN AVOCAT » SONT RETIRES — decision de Wassim du 18/09/2026. Deux d entre elles designaient un fait que le CODE TIENT DEJA : la conservation d un an apres fermeture (`conserver_jusqu_au` vaut `now() + interval '1 year'`, migration 157) et la purge des reponses brutes a 90 jours du dernier mouvement (migration 075). Elles sont devenues de la PROSE, pas un trou — d ou des paragraphes que le kit n a pas. Le droit applicable, lui, etait une decision et non une lacune : droit francais, tribunaux francais."
       }
     ]
   },

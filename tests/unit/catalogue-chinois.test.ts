@@ -48,6 +48,11 @@ const IDEOGRAMME = /[一-鿿]/;
  */
 const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["legal.signalement.lienExemple", "Un début d'URL, montré tel quel."],
+  /* L'éditeur des pages légales. C'est un nom de marque, et le lexique le range
+     avec les transporteurs et les noms de personnes : il ne se traduit pas.
+     Posé le 18/09/2026, quand les pastilles « raison sociale à compléter » ont
+     été retirées — décision de Wassim. */
+  ["legal.editeurNom", "Le nom de la marque, identique dans les trois langues."],
   /* Deux gabarits de l'éditeur, composés d'une variable ou d'un signe seul.
      « à 09:15 » n'a pas d'équivalent chinois : l'heure s'écrit nue à côté de sa
      date, et ajouter un idéogramme pour satisfaire ce garde mettrait un mot

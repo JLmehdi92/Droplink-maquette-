@@ -97,8 +97,7 @@ export default async function Conditions({
     {
       id: "disponibilite",
       titre: t("conditions.disponibiliteTitre"),
-      paragraphes: [t("conditions.disponibiliteP1")],
-      lacune: t("conditions.disponibiliteLacune"),
+      paragraphes: [t("conditions.disponibiliteP1"), t("conditions.disponibiliteP2")],
     },
     {
       id: "donnees",
@@ -108,14 +107,12 @@ export default async function Conditions({
     {
       id: "resiliation",
       titre: t("conditions.resiliationTitre"),
-      paragraphes: [t("conditions.resiliationP1")],
-      lacune: t("conditions.resiliationLacune"),
+      paragraphes: [t("conditions.resiliationP1"), t("conditions.resiliationP2")],
     },
     {
       id: "droit",
       titre: t("conditions.droitTitre"),
-      paragraphes: [],
-      lacune: t("conditions.droitLacune"),
+      paragraphes: [t("conditions.droitP1")],
     },
   ];
 

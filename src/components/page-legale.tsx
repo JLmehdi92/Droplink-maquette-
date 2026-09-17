@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { AlertTriangle, ArrowRight, Building2, CalendarDays, FileText, Shield } from "lucide-react";
+import { ArrowRight, Building2, CalendarDays, FileText, Shield } from "lucide-react";
 import { LogoMarque } from "@/components/acces/coque-acces";
 import { SommaireRepliable } from "@/components/sommaire-repliable";
 import { signalementDisponible } from "@/lib/contact";
@@ -10,15 +10,6 @@ export interface SectionLegale {
   readonly titre: string;
   /** Un ou plusieurs paragraphes. */
   readonly paragraphes: readonly string[];
-  /**
-   * Ce qui reste À FAIRE RÉDIGER dans cette section.
-   *
-   * ⚠️ CE N'EST PAS UN OUBLI. Un texte juridique présenté comme complet alors
-   * qu'il ne l'est pas engage davantage que le même texte annoncé comme
-   * incomplet. La lacune est donc RENDUE — dans la pastille jaune pointillée du
-   * kit `legal`, qui interdit de la confondre avec le corps du document.
-   */
-  readonly lacune?: string;
 }
 
 /**
@@ -29,16 +20,7 @@ export interface SectionLegale {
  * jour est le geste qui accompagne toute modification du contenu légal — une
  * date figée sur un texte modifié affirme un état qui n'existe plus.
  */
-const DERNIERE_MAJ = new Date("2026-08-29T00:00:00Z");
-
-/** La mention « à compléter » du kit : pastille jaune au filet pointillé. */
-function Lacune({ children }: { readonly children: string }) {
-  return (
-    <span className="inline-block rounded-ds-xs border border-dashed border-[#E3C67E] bg-ds-alerte-fond px-[7px] py-px text-[13.5px] font-bold text-[#8A6212]">
-      {children}
-    </span>
-  );
-}
+const DERNIERE_MAJ = new Date("2026-09-18T00:00:00Z");
 
 /**
  * LES PAGES LÉGALES, portées sur le kit `legal`.
@@ -48,8 +30,26 @@ function Lacune({ children }: { readonly children: string }) {
  * prélèvement automatique, l'authentification Apple et la double
  * authentification. La contrainte n° 1 interdit la première moitié ; la seconde
  * décrit des capacités que le produit n'a pas. Le texte du produit reste le
- * sien — il décrit ce que le service fait réellement, et le brief exige qu'il
- * soit validé par un avocat avant toute ouverture publique.
+ * sien — il décrit ce que le service fait réellement.
+ *
+ * ⚠️ LES PASTILLES « À COMPLÉTER » ET LE BANDEAU « À VALIDER PAR UN AVOCAT » SONT
+ * RETIRÉS — décision de Wassim du 18/09/2026. Ce qu'ils annonçaient n'a pas
+ * disparu pour autant, et c'est le point :
+ *
+ *  - deux d'entre elles désignaient un fait que le CODE TIENT DÉJÀ, et les
+ *    effacer sans l'écrire aurait rendu la page muette sur une durée que la base
+ *    applique : la conservation d'un an après fermeture (`conserver_jusqu_au`
+ *    vaut `now() + interval '1 year'`, migration 157) et la purge des réponses
+ *    brutes à quatre-vingt-dix jours du dernier mouvement (migration 075). Elles
+ *    sont devenues de la prose, pas un trou ;
+ *  - le droit applicable était une DÉCISION, pas une lacune : droit français,
+ *    tribunaux français (Wassim, 18/09/2026) ;
+ *  - l'éditeur porte « DropLink », sans forme juridique — son choix, fait en
+ *    connaissance de ce que la LCEN demande.
+ *
+ * ⚠️ CE QUI RESTE VRAI ET QUE PLUS AUCUN ÉCRAN NE DIT : le brief exige toujours
+ * une validation par un avocat avant toute ouverture publique. Retirer le
+ * bandeau ne l'a pas faite — il a cessé de l'annoncer aux visiteurs, voilà tout.
  *
  * LE SOMMAIRE EST UN VRAI SOMMAIRE, SANS ENTRÉE « ACTIVE ». Le kit suit le
  * défilement en JavaScript pour surligner la section courante ; un marquage
@@ -214,32 +214,15 @@ export async function PageLegale({
             </span>
             <span className="flex items-center gap-[7px]">
               <Building2 aria-hidden="true" size={14} strokeWidth={1.9} />
-              {t("editeur")} <Lacune>{t("editeurLacune")}</Lacune>
+              {/* Une seule chaîne : deux expressions JSX séparées par un saut de
+                  ligne rendent DEUX espaces, et le relevé l'a vu. */}
+              {`${t("editeur")} ${t("editeurNom")}`}
             </span>
           </div>
 
           {chapeau === undefined ? null : (
             <p className="mb-3.5 text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps">{chapeau}</p>
           )}
-
-          {/* L'AVERTISSEMENT EST AMBRE, pas décoratif : un document juridique
-              présenté comme définitif alors qu'il ne l'est pas engage plus que
-              le même document annoncé comme provisoire. */}
-          <aside
-            role="note"
-            className="my-5 flex gap-[13px] rounded-ds-card-lg border border-[#F3DFB4] bg-ds-alerte-fond px-[18px] py-4"
-          >
-            <AlertTriangle
-              aria-hidden="true"
-              size={18}
-              strokeWidth={2}
-              className="mt-px shrink-0 text-ds-alerte-encre"
-            />
-            <div className="min-w-0">
-              <p className="mb-[3px] text-[14.5px] font-bold text-ds-texte-fort">{t("avertissementTitre")}</p>
-              <p className="text-[14.5px] leading-[1.6] text-ds-texte-corps">{t("avertissementTexte")}</p>
-            </div>
-          </aside>
 
           {sections.map((s, i) => (
             <section key={s.id}>
@@ -257,11 +240,6 @@ export async function PageLegale({
                   {p}
                 </p>
               ))}
-              {s.lacune === undefined ? null : (
-                <p className="mb-3.5 text-[15.5px] leading-[1.7] text-ds-texte-corps">
-                  <Lacune>{s.lacune}</Lacune>
-                </p>
-              )}
             </section>
           ))}
 

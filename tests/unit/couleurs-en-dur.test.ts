@@ -123,8 +123,14 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
    * d'avertissement. Elles ne servent qu'à dire qu'un texte juridique est
    * INCOMPLET, et c'est la seule raison de les garder hors de la palette.
    */
-  ["#e3c67e", "filet pointillé de la mention « à compléter » des pages légales — kit legal"],
-  ["#8a6212", "encre de la mention « à compléter » des pages légales — kit legal"],
+  /* ⚠️ TROIS EXCEPTIONS SONT PARTIES D'ICI LE 18/09/2026, ET C'EST CE TEST QUI
+     L'A EXIGÉ. Elles couvraient la pastille « à compléter » — filet pointillé et
+     encre ambre — et le filet de l'encadré « à faire valider par un avocat ».
+     Wassim a demandé le retrait de ces mentions ; le composant `Lacune` et
+     l'encadré ont disparu avec elles, et les trois couleurs ne peignaient donc
+     plus rien. C'est l'AUTRE SENS du test qui les a sorties, pas une relecture :
+     une exception qui ne désigne plus rien est une porte ouverte sur la valeur
+     du jour où quelqu'un la réécrira. */
   ["#f3dfb4", "filet de l'encadré d'avertissement des pages légales — kit legal"],
   /*
    * LA PAGE DU LIEN MORT, portée sur `client_link/not-found` le 13/09/2026 : un
