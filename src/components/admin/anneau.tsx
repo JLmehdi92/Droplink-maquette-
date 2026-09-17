@@ -195,14 +195,21 @@ export async function Anneau({
             <span
               className={
                 "text-right leading-[normal] text-ds-texte-sourdine " +
+                /* ⚠️ « 100 % » NE TIENT PAS DANS 38 px, ET LA PART S'ÉLARGIT
+                   PLUTÔT QUE DE PASSER À LA LIGNE.
+                   Cette correction n'existait que pour la variante
+                   « statistiques » : sur la LISTE des comptes, vu à la capture
+                   le 17/09/2026, « 100 % » se coupait en deux lignes — boîte de
+                   38 × 32 là où une ligne fait 16. Un correctif posé sur une
+                   seule variante hérite du champ de vision de son premier cas
+                   (L-025) ; les trois le portent désormais, et seule la largeur
+                   de départ les distingue. */
+                "whitespace-nowrap " +
                 (commandes
-                  ? "w-[34px] text-[12.5px]"
-                  : variante === "statistiques"
-                    ? /* « 100 % » ne tient pas dans 38 px : la part s'élargit plutôt que de passer à la ligne. */
-                      "min-w-[38px] text-[13px] whitespace-nowrap"
-                    : liste
-                      ? "w-[38px] text-[13px]"
-                      : "w-10 text-[13px]")
+                  ? "min-w-[34px] text-[12.5px]"
+                  : liste
+                    ? "min-w-[38px] text-[13px]"
+                    : "min-w-10 text-[13px]")
               }
             >
               {part(total === 0 ? 0 : Math.round((p.valeur / total) * 100))}
