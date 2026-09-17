@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { BarChart3, Package, ShieldCheck, Zap, type LucideIcon } from "lucide-react";
 import logoDropLink from "@/../public/marque/logo-droplink.png";
+import { MaquetteApplication } from "@/components/landing/maquette-application";
 
 /**
  * LES PIÈCES DE LA COQUE DES ÉCRANS D'ACCÈS — connexion et inscription.
@@ -213,6 +214,37 @@ export async function ArgumentAcces({
           </div>
         ))}
       </div>
+
+      {/*
+        LA MAQUETTE DE L'APPLICATION, SUR L'INSCRIPTION SEULEMENT — relevée au
+        kit servi le 17/09/2026, après l'avoir REGARDÉE à côté de la référence.
+        La soustraction sortait en code 0 et il manquait pourtant un bloc de
+        380 px de haut : la colonne s'arrêtait aux trois atouts.
+
+        ⚠️ CE N'EST PAS UNE SECONDE MAQUETTE, C'EST LA MÊME. Le kit rend sa
+        fenêtre de 1180 px réduite à 0,509 — mesuré, pas supposé : sa boîte
+        rend 601×298 pendant que son rayon calculé reste 18 et ses pastilles
+        5 px pour 10 naturels, ce qu'une transformation produit et qu'un second
+        composant plus petit ne produirait pas. On réemploie donc celle du
+        héros de la landing, et il n'y a qu'un dessin à maintenir.
+
+        ⚠️ LA CONNEXION N'EN PORTE PAS, et ce n'est pas un oubli : son kit met
+        à cet endroit un témoignage inventé, « +2 500 vendeurs » et une rangée
+        de places de marché — les trois blocs que le commentaire d'en-tête
+        écarte. L'inscription, elle, y met un dessin de NOTRE produit.
+
+        Elle déborde de sa colonne vers la droite, comme au kit (la fenêtre
+        commence 66 px après le bord et fait 601 de large pour un groupe de
+        621) : c'est la composition de la référence, pas un débordement de
+        page — la colonne entière disparaît sous `lg`.
+      */}
+      {inscription ? (
+        <div className="relative h-[298px]">
+          <div className="absolute top-0 left-[66px] origin-top-left scale-[0.509]">
+            <MaquetteApplication />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

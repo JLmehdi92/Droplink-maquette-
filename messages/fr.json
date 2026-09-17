@@ -64,7 +64,10 @@
       "navEnvois": "Suivi d'envois",
       "navAnalyses": "Analyses",
       "navMarque": "Ma marque",
-      "navParametres": "Paramètres"
+      "navParametres": "Paramètres",
+      "proTitre": "Passez au Pro",
+      "proTexte": "Plus de fonctionnalités, plus de possibilités.",
+      "proBouton": "Upgrade"
     },
     "metaTitre": "DropLink — une page par commande, à votre marque",
     "metaDescription": "Réunissez photos, vidéos et suivi du colis sur une page à vos couleurs. Vos clients consultent tout eux-mêmes, sans compte et sans application.",
@@ -1523,9 +1526,9 @@
         "livre": "Livrée"
       },
       "fenetres": {
-        "toutes": "Toutes les dates",
         "7": "7 derniers jours",
-        "30": "30 derniers jours"
+        "30": "30 derniers jours",
+        "toutes": "Toutes les dates"
       },
       "reinitialiser": "Réinitialiser",
       "liste": "Liste des commandes",

@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   BarChart3,
   Bell,
   Briefcase,
@@ -13,6 +14,7 @@ import {
   Settings,
   Shield,
   Truck,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -27,8 +29,6 @@ import { getTranslations } from "next-intl/server";
  * C'était la moitié de l'argument qui la tenait dehors, et elle était périmée.
  *
  * ⚠️ CE QU'ELLE NE PORTE PAS, ET POURQUOI :
- *  - l'encart « Passez au Pro » du kit : la contrainte n° 1 interdit tout code de
- *    facturation en phase 1, affichage compris ;
  *  - les drapeaux de pays, que le kit va chercher chez `flagcdn.com` : notre CSP
  *    n'autorise les images que depuis notre domaine et R2, donc ils seraient
  *    BLOQUÉS en production — la sonde le verrait, et le client verrait un trou ;
@@ -124,7 +124,35 @@ export async function MaquetteApplication() {
             </span>
           ))}
           <span className="flex-1" />
-          <span className="mt-2.5 flex items-center gap-[9px] rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[9px]">
+          {/*
+            ⚠️ CET ENCART A ÉTÉ OMIS PAR ERREUR, ET SON MOTIF ÉTAIT PÉRIMÉ.
+            L'en-tête de ce fichier disait « la contrainte n° 1 interdit tout
+            code de facturation, affichage compris » — c'était la bonne règle
+            jusqu'au 12/09/2026, quand Wassim a tranché (« jcompte mettre un
+            pricing genre un gratuit et un pro ») et que la VRAIE barre latérale
+            du produit a reçu le sien. Le dessin contredisait donc l'écran qu'il
+            dessine, et il le contredisait au nom d'une décision renversée.
+
+            Ce qui n'a pas changé : aucun code de paiement. Ici c'est un dessin
+            inerte ; dans l'espace vendeur, le bouton mène à `/docs#plans`.
+
+            Valeurs relevées au kit servi : carte de 200 × 118 au rayon 16, fond
+            `--degrade-ds-teinte` (le jeton EST le dégradé du kit, au stop près),
+            filet `violet-200`, remplissage 12 ; titre 12/700 à l'encre d'accent,
+            texte 10,5/400 en interligne 14,7, bouton de 35 au dégradé de marque.
+          */}
+          <span className="flex flex-col rounded-ds-card border border-ds-violet-200 bg-[image:var(--degrade-ds-teinte)] p-3">
+            <span className="flex items-center gap-[7px] text-[12px] leading-[normal] font-bold text-ds-accent-encre">
+              <Zap size={14} strokeWidth={2.2} />
+              {t("proTitre")}
+            </span>
+            <span className="text-[10.5px] leading-[14.7px] text-ds-texte-corps">{t("proTexte")}</span>
+            <span className="degrade-ds-marque mt-[11px] flex h-[35px] items-center justify-center gap-2 rounded-ds-pill text-[13px] font-semibold text-ds-texte-sur-marque">
+              {t("proBouton")}
+              <ArrowRight size={16} strokeWidth={2.2} />
+            </span>
+          </span>
+          <span className="mt-3.5 flex items-center gap-[9px] rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[9px]">
             <span className="flex h-7 w-7 items-center justify-center rounded-[999px] bg-ds-accent text-[10px] font-bold tracking-[-0.2px] text-ds-texte-sur-marque">
               NB
             </span>
@@ -176,7 +204,11 @@ export async function MaquetteApplication() {
                 <div className="text-[21px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-fort">
                   {t("salut")}
                 </div>
-                <p className="mt-1 text-[11.5px] text-ds-texte-corps">{t("salutSous")}</p>
+                {/* ⚠️ `leading-[1.55]`, PAS L'INTERLIGNE PAR DÉFAUT. Le kit rend
+                    17,8 px ici — l'interligne de corps du design system — et sans
+                    lui la ligne tombe à 14 : quatre pixels qui décalaient tout ce
+                    qui suit dans la colonne, jusqu'à dix en bas de la fenêtre. */}
+                <p className="mt-1 text-[11.5px] leading-[1.55] text-ds-texte-corps">{t("salutSous")}</p>
               </div>
               <span className="flex-1" />
               <span className="inline-flex h-8 items-center gap-2 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-3 text-[11px] font-medium whitespace-nowrap text-ds-texte-fort">
@@ -203,9 +235,13 @@ export async function MaquetteApplication() {
                       {valeur}
                     </span>
                     <span className="text-[13px] leading-[1.35] text-ds-texte-corps">{t(cle)}</span>
+                    {/* ⚠️ `mt-0.5` EN PLUS DE L'ÉCART DE LA COLONNE. Le kit laisse
+                        4 px entre le libellé et l'écart, et 2 seulement entre la
+                        valeur et le libellé : un écart uniforme rendait la tuile
+                        trois pixels trop courte. */}
                     <strong
                       className={
-                        "text-[12px] leading-[normal] font-bold " +
+                        "mt-0.5 text-[12px] leading-[normal] font-bold " +
                         (baisse === true ? "text-ds-erreur-encre" : "text-ds-succes-encre")
                       }
                     >

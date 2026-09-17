@@ -64,7 +64,10 @@
       "navEnvois": "物流追踪",
       "navAnalyses": "数据分析",
       "navMarque": "我的品牌",
-      "navParametres": "设置"
+      "navParametres": "设置",
+      "proTitre": "升级 Pro",
+      "proTexte": "更多功能，更多可能。",
+      "proBouton": "立即升级"
     },
     "metaTitre": "DropLink — 每笔订单一个页面，用您的品牌呈现",
     "metaDescription": "把照片、视频和物流信息集中到一个用您配色的页面上。客户自己查看，无需注册，也不用安装应用。",
@@ -1523,9 +1526,9 @@
         "livre": "已送达"
       },
       "fenetres": {
-        "toutes": "全部日期",
         "7": "近 7 天",
-        "30": "近 30 天"
+        "30": "近 30 天",
+        "toutes": "全部日期"
       },
       "reinitialiser": "重置",
       "liste": "订单列表",

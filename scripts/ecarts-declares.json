@@ -5025,7 +5025,10 @@
           "17/03 · 09:32",
           "15/03 · 09:12",
           "12/03 · 10:24",
-          "Livré"
+          "Livré",
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
         ],
         "motif": "structure",
         "raison": "NOTRE MAQUETTE, NOTRE BALISAGE. Les composants du kit (`SidebarItem`, `MetricTile`, `Badge`, `TrackingTimeline`) sont du React de son design system, qu on ne peut pas importer : la maquette est refaite avec nos classes. Tailles, graisses, couleurs de role et echelle (0,68) sont celles du kit, mesurees une a une ; ce qui reste tient a la LARGEUR DES BOITES de nos conteneurs (un libelle qui remplit sa rangee, une pastille sans son ecart interne) et a l appariement par rang d un meme mot rendu a deux endroits — la tuile et la ligne de tableau."
@@ -5130,15 +5133,6 @@
         ],
         "motif": "structure",
         "raison": "LES QUATRE PASTILLES FLOTTANTES EXISTENT, AVEC NOTRE CONTENU. Le kit les pose autour de la maquette de son heros et leur fait annoncer des capacites ; nous les posons autour du telephone de la section « ce que voit le client », et elles y disent ce que la page MONTRE — « 11 photos ajoutees », « Colis en transit », « Commande validee ». A cet endroit, decrire l ecran vaut mieux que le vanter."
-      },
-      {
-        "textes": [
-          "Passez au Pro",
-          "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
-        ],
-        "motif": "contrainte",
-        "raison": "LA MAQUETTE DE TABLEAU DE BORD DU HEROS N EST PAS PORTEE, et pour deux raisons qui se renforcent. La premiere : elle est faite de CHIFFRES INVENTES — 156 commandes, +12 %, 342 liens ouverts, 6,2 jours de delai moyen — sur la page qui doit etre la plus verifiable du produit. La seconde : elle dessine un ecran « Tableau de bord » et un ecran « Parametres » que le depot n a pas, et un encart « Passez au Pro » que la contrainte n°1 interdit. Ce que la landing montre a la place est le VRAI produit : la page client, dans un telephone, avec la page que le vendeur envoie."
       },
       {
         "textes": [
@@ -6176,9 +6170,7 @@
         ],
         "motif": "contrainte",
         "raison": "LE CONSENTEMENT PAR LA CONTINUATION, SANS CASE BLOQUANTE. Le kit fait accepter les conditions par une case qui desactive le bouton ; passer a un consentement bloquant est un changement de PRODUIT — une etape de plus sur le seul ecran qui doit etre court, et rien dans le brief ne la demande. La phrase reprend le dessin du kit — 14 / 400, liens 600 soulignes — et, plus longue, passe sur deux lignes."
-      }
-    ],
-    "manquants": [
+      },
       {
         "textes": [
           "Tableau de bord",
@@ -6187,9 +6179,6 @@
           "Analyses",
           "Ma marque",
           "Paramètres",
-          "Passez au Pro",
-          "Plus de fonctionnalités, plus de possibi",
-          "Upgrade",
           "NB",
           "Mon compte",
           "nassim@laplanque.fr",
@@ -6200,7 +6189,10 @@
           "Voici un aperçu rapide de votre activité",
           "7 derniers jours",
           "Commandes créées",
+          "+20%",
+          "+8%",
           "+12%",
+          "+18%",
           "Livrées",
           "En transit",
           "Liens clients ouverts",
@@ -6214,18 +6206,29 @@
           "STATUT",
           "DATE",
           "#DLK7842",
+          "#DLK7841",
+          "#DLK7840",
+          "#DLK7839",
           "Yanis B.",
           "Il y a 1h",
+          "Il y a 3h",
+          "Il y a 5h",
+          "Il y a 7h",
           "Sofia M.",
           "En livraison",
           "Amine K.",
           "Livrée",
           "Luca R.",
-          "Commandée"
+          "Commandée",
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
         ],
-        "motif": "contrainte",
-        "raison": "LA FENETRE D APPLICATION DU KIT, REDUITE A 51 %. Elle montre un tableau de bord que le depot n a pas, des chiffres inventes (« +12 % », « 6,2 j »), et un encart « Passez au Pro » — la contrainte n° 1 interdit tout code de facturation en phase 1, affichage compris. La reproduire en vrai exigerait un ecran a creer, pas a migrer ; la reproduire en image figerait des donnees fausses sur la premiere page du produit."
-      },
+        "motif": "structure",
+        "raison": "NOTRE MAQUETTE, NOTRE BALISAGE — LA MEME QUE CELLE DU HEROS DE LA LANDING. Le kit rend sa fenetre de 1180 px reduite a 0,509 ; ses composants (`SidebarItem`, `MetricTile`, `Badge`) sont du React de son propre design system, qu on ne peut pas importer, donc le dessin est refait avec nos classes. Tailles, graisses, couleurs de role et echelle sont celles du kit, mesurees une a une — et deux ecarts REELS ont ete fermes a cette occasion : l interligne du chapeau (1,55, sans quoi la ligne tombait de 17,8 a 14) et l ecart avant la ligne de variation d une tuile (4 px, pas 2). Ce qui reste tient a la LARGEUR DES BOITES de nos conteneurs (un libelle qui remplit sa rangee au lieu de s arreter a son texte) et a deux pixels de hauteur de fenetre — soit UN pixel reellement rendu a cette echelle, sous la precision de l echelle elle-meme, qui est inferee et vaut ±1 px sur 1180."
+      }
+    ],
+    "manquants": [
       {
         "textes": [
           "vendeurs nous font déjà confiance",
@@ -6270,6 +6273,13 @@
         ],
         "motif": "contrainte",
         "raison": "La phrase de consentement par la continuation — voir la declaration des deux liens."
+      },
+      {
+        "textes": [
+          "DropLink"
+        ],
+        "motif": "structure",
+        "raison": "LE NOM DE LA BOUTIQUE EST ECRIT, PAS DESSINE. Le kit pose son logo en IMAGE dans la barre laterale de la maquette ; nous ecrivons « DropLink » en texte. Un fichier de plus pour un dessin decoratif de 15 px, servi sur l ecran d entree, se paierait sur le budget de la page sans rien ajouter — et la maquette est `aria-hidden`, donc ce texte n est annonce a personne."
       }
     ]
   },

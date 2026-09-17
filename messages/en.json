@@ -64,7 +64,10 @@
       "navEnvois": "Shipment tracking",
       "navAnalyses": "Analytics",
       "navMarque": "My brand",
-      "navParametres": "Settings"
+      "navParametres": "Settings",
+      "proTitre": "Go Pro",
+      "proTexte": "More features, more possibilities.",
+      "proBouton": "Upgrade"
     },
     "metaTitre": "DropLink — one page per order, under your brand",
     "metaDescription": "Bring photos, videos and parcel tracking together on a page in your colours. Your customers see everything themselves, with no account and no app.",
@@ -1523,9 +1526,9 @@
         "livre": "Delivered"
       },
       "fenetres": {
-        "toutes": "All dates",
         "7": "Last 7 days",
-        "30": "Last 30 days"
+        "30": "Last 30 days",
+        "toutes": "All dates"
       },
       "reinitialiser": "Reset",
       "liste": "Order list",
