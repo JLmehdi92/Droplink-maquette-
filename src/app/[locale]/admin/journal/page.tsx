@@ -436,7 +436,16 @@ export default async function AdminJournal({
                         L'adresse, jamais un prénom : c'est elle qui identifie un
                         compte partout ailleurs, et deux administrateurs peuvent
                         partager un prénom. */}
-                    <p className="mt-[11px] text-[12px] leading-[15px] text-ds-texte-sourdine md:mt-2 xl:mt-0 xl:break-all">
+                    {/* ⚠️ `overflow-wrap: anywhere`, PAS `break-all`. Les deux
+                        empêchent le débordement, mais `break-all` coupe à
+                        n'importe quel caractère : vu à la capture le 17/09/2026,
+                        « droplink-tests.invalid » rendu « droplink-test » puis
+                        « s.invalid ». `anywhere` PRIVILÉGIE les coupures
+                        naturelles — le tiret, l'arobase — et ne casse un mot
+                        qu'en dernier recours. Sur le journal d'audit, qui est la
+                        pièce qu'on relit en cas de litige, une adresse doit se
+                        lire. */}
+                    <p className="mt-[11px] text-[12px] leading-[15px] text-ds-texte-sourdine md:mt-2 xl:mt-0 xl:[overflow-wrap:anywhere]">
                       <span className="xl:hidden">{t("journal.parQui")} </span>
                       {l.adminEmail}
                     </p>
