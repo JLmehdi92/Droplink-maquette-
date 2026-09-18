@@ -148,7 +148,15 @@
     "piedTagline": "One link. The whole order.",
     "piedProduit": "Product",
     "piedSociete": "Company",
-    "piedDroits": "© {annee} DropLink. All rights reserved."
+    "piedDroits": "© {annee} DropLink. All rights reserved.",
+    "pastilleDepotTitre": "Upload your photos",
+    "pastilleDepotTexte": "In one click",
+    "pastilleSuiviTitre": "Automatic tracking",
+    "pastilleSuiviTexte": "Updated without you",
+    "pastilleLienTitre": "One unique link",
+    "pastilleLienTexte": "For your customer",
+    "pastilleMarqueTitre": "A professional feel",
+    "pastilleMarqueTexte": "Branded as yours"
   },
   "legal": {
     "conditionsTitre": "Terms of use",

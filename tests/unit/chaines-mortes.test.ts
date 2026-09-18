@@ -56,6 +56,10 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   /* Les trois étapes de la landing sont rendues par une boucle sur `[1..3]`,
      qui compose `etape${n}Titre` et `etape${n}Texte`. */
   ["landing.etape", "composé depuis le rang de l étape — landing"],
+  /* Les quatre pastilles flottantes du héros, portées le 18/09/2026 : leur clé
+     est composée depuis le nom de la pastille (`pastille${cle}Titre`), comme
+     les cartes de la scène du téléphone juste en dessous. */
+  ["landing.pastille", "composé depuis le nom de la pastille flottante — landing"],
   ["docs.faqQ", "composé depuis le rang de la question — documentation"],
   ["docs.faqR", "composé depuis le rang de la question — documentation"],
   ["envois.tri.", "composé depuis le tri choisi — tableau des envois"],

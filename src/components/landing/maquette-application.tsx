@@ -17,7 +17,60 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import { LogoMarque } from "@/components/acces/coque-acces";
+/*
+ * ⚠️ IMPORTS STATIQUES, PAS DES CHEMINS EN CHAÎNE — et ça n'est pas un détail de
+ * style. Écrits `src="/marque/…"`, ces fichiers passent par `/_next/image`, qui
+ * va les rechercher sur leur URL publique ; le middleware de langue y répond
+ * **307** vers `/fr/marque/…`, et l'optimiseur rend « The requested resource
+ * isn't a valid image » — un 400, donc quatre vignettes et un téléphone CASSÉS.
+ * Importés, ils sont servis depuis `/_next/static/`, hors du filtre. C'est déjà
+ * la convention du dépôt (`logo-droplink.png` dans la coque d'accès) ; je ne
+ * l'avais pas suivie, et c'est la sonde réseau qui l'a dit.
+ */
+import maquetteClient from "@/../public/marque/maquette-page-client.webp";
+import apercuSneaker from "@/../public/marque/apercu-sneaker.jpg";
+import apercuCap from "@/../public/marque/apercu-cap.jpg";
+import apercuHoodie from "@/../public/marque/apercu-hoodie.jpg";
+import apercuJogger from "@/../public/marque/apercu-jogger.jpg";
+
+const APERCUS = {
+  sneaker: apercuSneaker,
+  cap: apercuCap,
+  hoodie: apercuHoodie,
+  jogger: apercuJogger,
+} as const;
+
+/**
+ * LE TÉLÉPHONE DU HÉROS — `PhoneMock` de la planche `marketing_site`.
+ *
+ * ⚠️ C'EST UNE IMAGE, PAS UN RENDU. La planche sert un rendu de 735 × 1488 de la
+ * page client (`mock-phone-client-page.png`) et le pose à 286 px de large. Le
+ * refaire en balisage vivant coûterait la page client entière en miniature, pour
+ * un dessin que personne ne lit.
+ *
+ * ⚠️ IL ÉTAIT ABSENT, ET C'EST CE QUE WASSIM A VU EN PREMIER : « le téléphone à
+ * côté du dashboard ». Le héros de la planche montre les DEUX surfaces côte à
+ * côte — ce que le vendeur voit, et ce que son client voit. La moitié droite
+ * manquait.
+ *
+ * ⚠️ 120 Ko EN WEBP, PAS 1,5 Mo EN PNG. La source de la planche pèse un mégaoctet
+ * et demi pour un dessin rendu à 286 px ; elle est redimensionnée à 572 (deux
+ * fois la taille d'affichage) et convertie, transparence comprise.
+ */
+export function TelephoneClient({ largeur = 286 }: { readonly largeur?: number }) {
+  return (
+    <Image
+      src={maquetteClient}
+      alt=""
+      aria-hidden="true"
+      className="block h-auto w-auto flex-none select-none [filter:drop-shadow(0_34px_70px_rgba(28,22,78,0.26))]"
+      style={{ width: largeur }}
+    />
+  );
+}
 
 /**
  * LA MAQUETTE D'APPLICATION DU HÉROS — `AppWindowMock` du kit `marketing_site`,
@@ -32,8 +85,15 @@ import { getTranslations } from "next-intl/server";
  *  - les drapeaux de pays, que le kit va chercher chez `flagcdn.com` : notre CSP
  *    n'autorise les images que depuis notre domaine et R2, donc ils seraient
  *    BLOQUÉS en production — la sonde le verrait, et le client verrait un trou ;
- *  - les photos des commandes : le kit sert quatre fichiers de son dossier
- *    d'assets, que le dépôt n'emporte pas. Un aplat tient leur place.
+ *
+ * ⚠️ LES PHOTOS DES COMMANDES ÉTAIENT DES APLATS GRIS, ET C'ÉTAIT FAUX DE DIRE
+ * QUE LE DÉPÔT NE LES EMPORTAIT PAS. Ce commentaire affirmait « le kit sert
+ * quatre fichiers de son dossier d'assets, que le dépôt n'emporte pas » —
+ * L-014 : personne n'avait vérifié. Le dépôt copie DÉJÀ des assets du kit dans
+ * `public/marque/` (le logo, les deux illustrations de colis) ; rien
+ * n'empêchait d'y copier les quatre vignettes. Elles y sont, ramenées de
+ * 526 Ko à 1 Ko chacune — la planche sert une photo pleine taille pour un
+ * dessin de 30 px.
  *
  * ⚠️ SES CHIFFRES SONT DES ILLUSTRATIONS, PAS DES MESURES. Ils décrivent l'écran,
  * pas notre activité : aucune promesse chiffrée n'est faite au visiteur, à la
@@ -70,11 +130,13 @@ const TUILES: ReadonlyArray<{
   { icone: Clock, valeur: "6,2j", cle: "kpiDelai", ecart: "-18%", baisse: true, teinte: "bg-ds-alerte-fond text-ds-alerte-encre" },
 ];
 
-const LIGNES: ReadonlyArray<readonly [string, string, string, string, string]> = [
-  ["#DLK7842", "Yanis B.", "statutTransit", "ilYA1", "bg-ds-info-fond text-ds-info"],
-  ["#DLK7841", "Sofia M.", "statutLivraison", "ilYA3", "bg-ds-alerte-fond text-ds-alerte-encre"],
-  ["#DLK7840", "Amine K.", "statutLivree", "ilYA5", "bg-ds-succes-fond text-ds-succes-encre"],
-  ["#DLK7839", "Luca R.", "statutCommandee", "ilYA7", "bg-ds-surface-teinte text-ds-accent-encre"],
+/* La vignette de chaque ligne est celle de la planche, redimensionnée au dépôt :
+   la planche sert des photos de 526 Ko pour une vignette de 30 px. */
+const LIGNES: ReadonlyArray<readonly [string, string, string, string, string, keyof typeof APERCUS]> = [
+  ["#DLK7842", "Yanis B.", "statutTransit", "ilYA1", "bg-ds-info-fond text-ds-info", "sneaker"],
+  ["#DLK7841", "Sofia M.", "statutLivraison", "ilYA3", "bg-ds-alerte-fond text-ds-alerte-encre", "cap"],
+  ["#DLK7840", "Amine K.", "statutLivree", "ilYA5", "bg-ds-succes-fond text-ds-succes-encre", "hoodie"],
+  ["#DLK7839", "Luca R.", "statutCommandee", "ilYA7", "bg-ds-surface-teinte text-ds-accent-encre", "jogger"],
 ];
 
 const COLONNES = "grid grid-cols-[34px_.8fr_1fr_.95fr_.7fr] items-center gap-2.5 px-4";
@@ -97,8 +159,11 @@ export async function MaquetteApplication() {
 
       <div className="grid min-h-[440px] grid-cols-[224px_1fr]">
         <div className="flex flex-col gap-[3px] px-3 pt-1.5 pb-3.5">
-          <span className="px-1.5 pb-4 text-[15px] leading-[21px] font-extrabold tracking-[-0.02em] text-ds-texte-titre">
-            DropLink
+          {/* ⚠️ LE LOGO, PAS LE MOT. La planche pose `<Logo height={21} />` ;
+              j'avais écrit « DropLink » en texte, ce qui donnait une barre
+              latérale sans marque — le premier détail que Wassim a vu. */}
+          <span className="block px-1.5 pb-4">
+            <LogoMarque hauteur={21} />
           </span>
           {NAV.map(([Icone, cle, compte], rang) => (
             <span
@@ -269,9 +334,19 @@ export async function MaquetteApplication() {
                 <span>{t("colStatut")}</span>
                 <span className="text-right">{t("colDate")}</span>
               </div>
-              {LIGNES.map(([reference, client, statut, quand, teinte]) => (
+              {LIGNES.map(([reference, client, statut, quand, teinte, apercu]) => (
                 <div key={reference} className={COLONNES + " border-t border-ds-filet py-[9px]"}>
-                  <span className="h-[30px] w-[30px] rounded-ds-sm border border-ds-filet bg-ds-surface-creux" />
+                  {/* ⚠️ LA PHOTO, PAS UN APLAT. La planche sert une vraie vignette
+                      de produit ; j'avais mis un carré gris, et quatre carrés gris
+                      dans un tableau ressemblent à une page qui n'a pas fini de
+                      charger. `alt` vide : la maquette entière est `aria-hidden`. */}
+                  <Image
+                    src={APERCUS[apercu]}
+                    alt=""
+                    width={30}
+                    height={30}
+                    className="h-[30px] w-[30px] rounded-ds-sm border border-ds-filet object-cover"
+                  />
                   <span className="text-[11.5px] font-bold whitespace-nowrap text-ds-texte-fort">{reference}</span>
                   <span className="truncate text-[11.5px] text-ds-texte-fort">{client}</span>
                   <span>

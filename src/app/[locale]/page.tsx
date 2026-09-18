@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, BarChart3, Check, Image as ImageIcon, Link2, Lock, Menu, Package, Truck } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { signalementDisponible } from "@/lib/contact";
-import { MaquetteApplication } from "@/components/landing/maquette-application";
+import { MaquetteApplication, TelephoneClient } from "@/components/landing/maquette-application";
 import { ChampDeLien, FriseDeSuivi, ZoneDeDepot } from "@/components/landing/illustrations-etapes";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { donneesStructurees } from "@/lib/seo/donnees-structurees";
@@ -327,6 +327,60 @@ export default async function Accueil({
                 17/09/2026 : la planche ne le porte pas, et depuis que la maquette
                 du héros est là, il transparaissait à travers elle. */}
 
+            {/*
+              LES QUATRE PASTILLES FLOTTANTES DU HÉROS — `FloatingChip` de la
+              planche, à ses positions exactes (0/170, -18/300 à gauche ; 0/170,
+              -12/300 à droite).
+
+              ⚠️ ELLES ÉTAIENT AILLEURS, ET C'ÉTAIT UNE DÉCLARATION, PAS UN
+              PORTAGE. Elles vivaient autour du téléphone de la section suivante,
+              avec un autre contenu, et une déclaration expliquait pourquoi —
+              sauf que la planche les met ICI, autour du titre. Wassim : « faut
+              que ce soit la même, pixel par pixel ».
+
+              ⚠️ UNE SEULE LÉGENDE CHANGE : la planche écrit « Mise à jour en
+              temps réel ». Le suivi est INTERROGÉ à intervalles, pas poussé en
+              temps réel — c'est déjà pour cette raison que « en temps réel » est
+              écarté de la page client. « Mise à jour sans vous » dit le même
+              bénéfice sans promettre ce que le produit ne tient pas.
+
+              Le flou d'arrière-plan est autorisé ici : la règle 2 ne l'interdit
+              que sur `/p/[token]`. Masquées sous `lg`, comme au kit.
+            */}
+            {/* ⚠️ AU-DESSUS DE 1180, PAS DE 1024. La feuille de la planche pose
+                `.ms-chips{display:none}` sous 1181 : c'est là qu'elles cessent
+                d'avoir la place de flotter sans recouvrir le titre. */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 mx-auto hidden h-0 max-w-[1185px] min-[1181px]:block">
+              {(
+                [
+                  { cle: "Depot", icone: ImageIcon, place: "left-0 top-[170px]" },
+                  { cle: "Suivi", icone: Truck, place: "-left-[18px] top-[300px]" },
+                  { cle: "Lien", icone: Link2, place: "right-0 top-[170px]" },
+                  { cle: "Marque", icone: Package, place: "-right-3 top-[300px]" },
+                ] as const
+              ).map(({ cle, icone: Icone, place }) => (
+                <span
+                  key={cle}
+                  className={
+                    "absolute inline-flex items-center gap-[11px] rounded-ds-card border border-[rgba(255,255,255,0.9)] bg-[rgba(255,255,255,0.86)] py-[11px] pr-4 pl-[11px] text-left shadow-ds-md backdrop-blur-[12px] " +
+                    place
+                  }
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
+                    <Icone aria-hidden="true" size={18} strokeWidth={1.9} />
+                  </span>
+                  <span className="flex flex-col gap-px">
+                    <span className="text-[13px] leading-[normal] font-bold text-ds-texte-fort">
+                      {t(`pastille${cle}Titre`)}
+                    </span>
+                    <span className="text-[11px] leading-[normal] font-medium text-ds-texte-sourdine">
+                      {t(`pastille${cle}Texte`)}
+                    </span>
+                  </span>
+                </span>
+              ))}
+            </div>
+
             <div className="relative">
               <h1 className="mx-auto text-[38px] leading-[1.02] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[64px] md:leading-[0.98]">
                 {motEnDegrade(t("heroTitre"), t("motDegradeHero"))}
@@ -381,11 +435,53 @@ export default async function Accueil({
                * téléphone de la section suivante qui montre le produit — le
                * kit y réduit la fenêtre à 30 %, où elle n'est plus lisible.
                */}
-              <div className="relative mt-10 hidden h-[600px] overflow-hidden lg:block">
-                {/* Les valeurs du kit : fenêtre de 1180 réduite à 0,68, posée à
-                    gauche du centre (-64 %), dans un bloc de 600. */}
-                <div className="absolute left-1/2 origin-top -translate-x-[64%] scale-[0.68]">
+              {/*
+                LES DEUX SURFACES CÔTE À CÔTE — c'est la composition de la
+                planche, et elle dit l'argument mieux que la phrase : à gauche ce
+                que le VENDEUR voit, à droite ce que son CLIENT voit.
+
+                ⚠️ LE TÉLÉPHONE MANQUAIT, ET C'EST LA MOITIÉ DU HÉROS. Le bloc ne
+                portait que la fenêtre d'application ; il paraissait centré alors
+                qu'il est décalé à gauche (-64 %) pour laisser la place au
+                téléphone. Un dessin posé à gauche sans rien à sa droite ne se lit
+                pas comme une composition, il se lit comme un oubli — et c'en
+                était un.
+
+                Valeurs de la planche : bloc de 600, fenêtre à 0,68 translatée de
+                -64 % depuis le centre, téléphone de 286 posé à `right: -30`,
+                `top: -10`. Il DÉBORDE de trente pixels à droite, exprès.
+              */}
+              {/*
+                ⚠️ LES QUATRE PALIERS SONT CEUX DE LA FEUILLE DE LA PLANCHE, et je
+                les avais tous manqués en masquant le bloc sous `lg`.
+
+                  > 1180   bloc de 600, fenêtre à 0,68 translatée de -64 %,
+                           téléphone en absolu à droite (`right: -30`, `top: -10`)
+                  ≤ 1180   ils S'EMPILENT : colonne centrée, écart 24, sans
+                           transformation ; la fenêtre garde sa taille et se fait
+                           ROGNER par `max-width: 100%` + `overflow: hidden`
+                  ≤ 760    fenêtre à 0,42, hauteur 260, rognée
+                  ≤ 560    fenêtre à 0,30, hauteur 190
+
+                Le kit ne cache donc JAMAIS la maquette : il la réduit. C'est ce
+                qui fait que sa landing dit la même chose au téléphone qu'au
+                bureau, et c'est exactement ce que le produit ne faisait pas.
+              */}
+              <div className="relative mt-8 flex flex-col items-center gap-6 min-[1181px]:mt-10 min-[1181px]:block min-[1181px]:h-[600px]">
+                {/* ⚠️ LES ÉCHELLES SE COMPOSENT DANS LA PLANCHE, ET J'EN AVAIS
+                    APPLIQUÉ UNE SEULE. `AppWindowMock` porte `scale(0.68)` EN
+                    LIGNE, toujours ; la feuille ajoute `scale(.42)` puis
+                    `scale(.30)` sur son ENVELOPPE sous 760 et 560. Le produit
+                    des deux fait 0,2856 et 0,204 — ma maquette était donc une
+                    fois et demie trop grande au téléphone. Mesuré : ses textes
+                    rendaient 5 px de haut contre 3 au kit, et la soustraction,
+                    qui ignore ce qui fait moins de 4 px, les comptait « en trop »
+                    d'un seul côté. */}
+                <div className="h-[190px] max-w-full origin-top scale-[0.204] overflow-hidden min-[561px]:h-[260px] min-[561px]:scale-[0.2856] min-[761px]:h-auto min-[761px]:scale-[0.68] min-[1181px]:absolute min-[1181px]:left-1/2 min-[1181px]:-translate-x-[64%]">
                   <MaquetteApplication />
+                </div>
+                <div className="min-[1181px]:absolute min-[1181px]:-top-2.5 min-[1181px]:-right-[30px]">
+                  <TelephoneClient largeur={286} />
                 </div>
               </div>
             </div>
@@ -744,6 +840,13 @@ export default async function Accueil({
                   {t("ctaPrincipal")}
                   <ArrowRight aria-hidden="true" size={17} strokeWidth={1.9} />
                 </Link>
+              </div>
+              {/* ⚠️ LE TÉLÉPHONE DE LA BANNIÈRE MANQUAIT AUSSI. La planche le pose
+                  à `right: 30, top: 10`, largeur 272, et le masque sous 900 —
+                  sous ce palier le texte occupe toute la bande. Sans lui, la
+                  moitié droite de la bande la plus voyante de la page est vide. */}
+              <div className="pointer-events-none absolute top-2.5 right-[30px] hidden min-[901px]:block">
+                <TelephoneClient largeur={272} />
               </div>
             </div>
           </section>

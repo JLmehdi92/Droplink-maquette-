@@ -148,7 +148,15 @@
     "piedTagline": "一个链接，整笔订单。",
     "piedProduit": "产品",
     "piedSociete": "公司",
-    "piedDroits": "© {annee} DropLink. 保留所有权利。"
+    "piedDroits": "© {annee} DropLink. 保留所有权利。",
+    "pastilleDepotTitre": "上传照片",
+    "pastilleDepotTexte": "一键完成",
+    "pastilleSuiviTitre": "自动追踪",
+    "pastilleSuiviTexte": "无需您操心",
+    "pastilleLienTitre": "专属链接",
+    "pastilleLienTexte": "发给您的客户",
+    "pastilleMarqueTitre": "专业体验",
+    "pastilleMarqueTexte": "使用您的品牌"
   },
   "legal": {
     "conditionsTitre": "使用条款",

@@ -724,7 +724,25 @@ const RELEVE = `(() => {
     largeur_doc: de.scrollWidth, largeur_vue: de.clientWidth,
     debordement: de.scrollWidth > de.clientWidth,
     h1: document.querySelectorAll('h1').length,
+    /*
+     * ⚠️ UN DESSIN DECORATIF N A PAS DE TEXTE A LIRE, ET LA GARDE LE CROYAIT.
+     *
+     * Mesure le 18/09/2026 : la maquette d application de la landing — une
+     * IMAGE de l espace vendeur, marquee aria-hidden, rendue a l echelle 0,30
+     * au telephone — a fait rendre DIX-HUIT defauts de plancher. Ses libelles
+     * sont ecrits 10 a 11 px et affiches a trois pixels : personne ne les lit,
+     * et c est le propos. Les agrandir casserait le dessin pour rendre lisible
+     * ce qui n a pas a l etre.
+     *
+     * L exclusion se fait PAR MESURE, jamais par exception nommee : on remonte
+     * la chaine des ancetres et on ecarte ce qui vit sous un aria-hidden vrai.
+     * Un texte cache aux lecteurs d ecran n est pas du contenu — s il l etait,
+     * le defaut serait l attribut, pas la taille. Meme geste que pour les
+     * cibles tactiles, ecartees par la hauteur de leur label et non par une
+     * liste de noms : onze faux positifs apprennent a ignorer le douzieme.
+     */
     polices_sous_11_5: feuilles
+      .filter((e) => e.closest('[aria-hidden=true]') === null)
       .map((e) => ({ texte: (e.textContent || '').trim().slice(0, 30), px: parseFloat(getComputedStyle(e).fontSize) }))
       .filter((x) => x.px < 11.5),
     /*

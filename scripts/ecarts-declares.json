@@ -5055,6 +5055,20 @@
         ],
         "motif": "structure",
         "raison": "NOTRE MAQUETTE, NOTRE BALISAGE. Les composants du kit (`SidebarItem`, `MetricTile`, `Badge`, `TrackingTimeline`) sont du React de son design system, qu on ne peut pas importer : la maquette est refaite avec nos classes. Tailles, graisses, couleurs de role et echelle (0,68) sont celles du kit, mesurees une a une ; ce qui reste tient a la LARGEUR DES BOITES de nos conteneurs (un libelle qui remplit sa rangee, une pastille sans son ecart interne) et a l appariement par rang d un meme mot rendu a deux endroits — la tuile et la ligne de tableau."
+      },
+      {
+        "textes": [
+          "Téléversez vos photos",
+          "En un clic",
+          "Suivi automatique",
+          "Suivi automatique",
+          "Un lien unique",
+          "Pour votre client",
+          "Une expérience pro",
+          "À votre image"
+        ],
+        "motif": "structure",
+        "raison": "LES QUATRE PASTILLES SONT PORTEES, A QUELQUES PIXELS PRES. Elles sont posees aux coordonnees de la planche (0/170, -18/300, 0/170, -12/300) ; ce qui reste est un decalage de UN A TROIS pixels en abscisse et de SEPT en ordonnee, qui vient de ce qui les precede : la planche pose au-dessus du titre une pastille de preuve sociale (« +2 500 vendeurs ») que la decision du 27/08/2026 ecarte, et un SECOND bouton (« Voir un exemple de page client ») qui supposerait une page de demonstration inexistante. Moins de contenu au-dessus, donc sept pixels plus haut. ⚠️ « Suivi automatique » est rendu DEUX fois par la planche — la pastille et l une de ses six cartes de fonctionnalite — et une seule fois chez nous, dont les cartes portent d autres titres."
       }
     ],
     "manquants": [
@@ -5145,14 +5159,7 @@
       },
       {
         "textes": [
-          "Téléversez vos photos",
-          "En un clic",
-          "Suivi automatique",
-          "Mise à jour en temps réel",
-          "Un lien unique",
-          "Pour votre client",
-          "Une expérience pro",
-          "À votre image"
+          "Mise à jour en temps réel"
         ],
         "motif": "structure",
         "raison": "LES QUATRE PASTILLES FLOTTANTES EXISTENT, AVEC NOTRE CONTENU. Le kit les pose autour de la maquette de son heros et leur fait annoncer des capacites ; nous les posons autour du telephone de la section « ce que voit le client », et elles y disent ce que la page MONTRE — « 11 photos ajoutees », « Colis en transit », « Commande validee ». A cet endroit, decrire l ecran vaut mieux que le vanter."
@@ -5210,6 +5217,40 @@
         ],
         "motif": "contrainte",
         "raison": "LE LIEN DE L ILLUSTRATION EST UN EXEMPLE, ET IL LE DIT. Le kit ecrit « https://droplink.fr/c/8F2k9 », qui a l allure d un vrai jeton : un visiteur peut le recopier et tomber sur une page morte, et le jeton est immuable a vie — on n en fabrique pas pour decorer. « droplink.fr/c/exemple » montre la meme chose sans promettre une page."
+      },
+      {
+        "textes": [
+          "DropLink",
+          "Ce que voit le client",
+          "Mise à jour sans vous",
+          "Vos clients n'ont rien à installer",
+          "Atelier Nord",
+          "Votre commande",
+          "11 photos ajoutées",
+          "Vues par le client",
+          "Colis en transit",
+          "Mis à jour tout seul",
+          "Commande validée",
+          "par le client",
+          "Import des photos en un clic",
+          "Vos photos arrivent directement dans la ",
+          "Le suivi se met à jour seul",
+          "Vous collez le numéro une fois. Le clien",
+          "Le lien ne change jamais",
+          "Modifiez la page quand vous voulez : le ",
+          "Rien à installer, rien à créer",
+          "Votre client ouvre le lien et voit tout.",
+          "Créer un lien de suivi client en 3 étape",
+          "droplink.fr/c/exemple",
+          "Gratuit pendant la phase de lancement. A",
+          "Un seul lien. Toute la commande.",
+          "Blog",
+          "Conditions",
+          "Confidentialité",
+          "Signaler un contenu"
+        ],
+        "motif": "structure",
+        "raison": "LA MAQUETTE EST DESORMAIS RENDUE AU TELEPHONE, COMME AU KIT, ET SES LIBELLES SE COMPTENT. La planche ne cache jamais son dessin : elle le reduit (0,68 en ligne, multiplie par 0,42 sous 760 et 0,30 sous 560). Ses textes rendent donc des boites de trois pixels de haut, et la soustraction ignore ce qui fait moins de quatre pixels — d ou des elements presents des deux cotes mais indexes d un seul. Ce qui reste tient a ce SEUIL, pas a l ecran : le meme dessin, a un pixel de hauteur pres."
       }
     ]
   },
@@ -5312,6 +5353,26 @@
         ],
         "motif": "structure",
         "raison": "NOTRE MAQUETTE, NOTRE BALISAGE. Les composants du kit (`SidebarItem`, `MetricTile`, `Badge`, `TrackingTimeline`) sont du React de son design system, qu on ne peut pas importer : la maquette est refaite avec nos classes. Tailles, graisses, couleurs de role et echelle (0,68) sont celles du kit, mesurees une a une ; ce qui reste tient a la LARGEUR DES BOITES de nos conteneurs (un libelle qui remplit sa rangee, une pastille sans son ecart interne) et a l appariement par rang d un meme mot rendu a deux endroits — la tuile et la ligne de tableau."
+      },
+      {
+        "textes": [
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade",
+          "NB",
+          "NB",
+          "Bonjour Nassim !",
+          "Voici un aperçu rapide de votre activité",
+          "7 derniers jours",
+          "Commandes créées",
+          "Livrées",
+          "Liens clients ouverts",
+          "6,2j",
+          "Temps moyen de livraison",
+          "Livrée",
+          "Commandée"
+        ],
+        "motif": "structure",
+        "raison": "LA MAQUETTE EST DESORMAIS RENDUE AU TELEPHONE, COMME AU KIT, ET SES LIBELLES SE COMPTENT. La planche ne cache jamais son dessin : elle le reduit (0,68 en ligne, multiplie par 0,42 sous 760 et 0,30 sous 560). Ses textes rendent donc des boites de trois pixels de haut, et la soustraction ignore ce qui fait moins de quatre pixels — d ou des elements presents des deux cotes mais indexes d un seul. Ce qui reste tient a ce SEUIL, pas a l ecran : le meme dessin, a un pixel de hauteur pres."
       }
     ],
     "manquants": [
@@ -5407,25 +5468,6 @@
       },
       {
         "textes": [
-          "Plus de fonctionnalités, plus de possibi",
-          "Upgrade",
-          "NB",
-          "Bonjour Nassim !",
-          "Voici un aperçu rapide de votre activité",
-          "7 derniers jours",
-          "Commandes créées",
-          "Livrées",
-          "Liens clients ouverts",
-          "6,2j",
-          "Temps moyen de livraison",
-          "Livrée",
-          "Commandée"
-        ],
-        "motif": "contrainte",
-        "raison": "LA MAQUETTE DE TABLEAU DE BORD DU HEROS N EST PAS PORTEE, et pour deux raisons qui se renforcent. La premiere : elle est faite de CHIFFRES INVENTES — 156 commandes, +12 %, 342 liens ouverts, 6,2 jours de delai moyen — sur la page qui doit etre la plus verifiable du produit. La seconde : elle dessine un ecran « Tableau de bord » et un ecran « Parametres » que le depot n a pas, et un encart « Passez au Pro » que la contrainte n°1 interdit. Ce que la landing montre a la place est le VRAI produit : la page client, dans un telephone, avec la page que le vendeur envoie."
-      },
-      {
-        "textes": [
           "https://droplink.fr/c/8F2k9"
         ],
         "motif": "donnee",
@@ -5479,6 +5521,44 @@
         ],
         "motif": "contrainte",
         "raison": "LE LIEN DE L ILLUSTRATION EST UN EXEMPLE, ET IL LE DIT. Le kit ecrit « https://droplink.fr/c/8F2k9 », qui a l allure d un vrai jeton : un visiteur peut le recopier et tomber sur une page morte, et le jeton est immuable a vie — on n en fabrique pas pour decorer. « droplink.fr/c/exemple » montre la meme chose sans promettre une page."
+      },
+      {
+        "textes": [
+          "DropLink",
+          "Ce que voit le client",
+          "Tarifs",
+          "Se connecter",
+          "Rechercher une commande...",
+          "Ctrl",
+          "Commandes récentes",
+          "Voir tout",
+          "#DLK7842",
+          "Yanis B.",
+          "Sofia M.",
+          "Amine K.",
+          "Luca R.",
+          "Vos clients n'ont rien à installer",
+          "Atelier Nord",
+          "Votre commande",
+          "11 photos",
+          "Import des photos en un clic",
+          "Vos photos arrivent directement dans la ",
+          "Le suivi se met à jour seul",
+          "Vous collez le numéro une fois. Le clien",
+          "Le lien ne change jamais",
+          "Modifiez la page quand vous voulez : le ",
+          "Rien à installer, rien à créer",
+          "Votre client ouvre le lien et voit tout.",
+          "Créer un lien de suivi client en 3 étape",
+          "droplink.fr/c/exemple",
+          "Un seul lien. Toute la commande.",
+          "Blog",
+          "Conditions",
+          "Confidentialité",
+          "Signaler un contenu"
+        ],
+        "motif": "structure",
+        "raison": "LA MAQUETTE EST DESORMAIS RENDUE AU TELEPHONE, COMME AU KIT, ET SES LIBELLES SE COMPTENT. La planche ne cache jamais son dessin : elle le reduit (0,68 en ligne, multiplie par 0,42 sous 760 et 0,30 sous 560). Ses textes rendent donc des boites de trois pixels de haut, et la soustraction ignore ce qui fait moins de quatre pixels — d ou des elements presents des deux cotes mais indexes d un seul. Ce qui reste tient a ce SEUIL, pas a l ecran : le meme dessin, a un pixel de hauteur pres."
       }
     ]
   },
