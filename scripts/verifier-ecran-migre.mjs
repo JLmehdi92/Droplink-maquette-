@@ -813,7 +813,10 @@ const RELEVE = `(() => {
     cibles_sous_44: interactifs
       .filter((e) => { const c = getComputedStyle(e);
         if (c.position === 'absolute' && parseFloat(c.width) <= 2) return false;
-        if (/(^|\s)sr-only(\s|$)/.test(e.className || '')) return false;
+        // ⚠️ DOUBLE BARRE : ce code vit dans une CHAINE GABARIT, ou une barre
+        // simple devant « s » se perd. L exclusion ne marchait donc que pour une
+        // classe seule (18/09/2026).
+        if (/(^|\\s)sr-only(\\s|$)/.test(e.className || '')) return false;
         const label = e.closest('label');
         if (label !== null && label.getBoundingClientRect().height >= 44) return false;
         if (e.tagName === 'A') {
@@ -825,6 +828,34 @@ const RELEVE = `(() => {
         return true; })
       .map((e) => ({ quoi: (e.textContent || e.getAttribute('aria-label') || e.id || e.tagName).trim().slice(0, 30), ...boite(e) }))
       .filter((c) => c.h > 0 && c.h < 44),
+    /*
+     * ⚠️ UNE CIBLE QU ON TOUCHE SANS LA VOIR. Ajoute le 18/09/2026 : le bouton
+     * « definir comme couverture » des medias etait a \`opacity-0\` et ne
+     * s affichait qu au SURVOL — qui n existe pas au doigt. Sur telephone, il
+     * restait touchable, invisible, dans le coin de chaque photo : un pouce
+     * changeait la couverture sans avoir vu de bouton. Aucune regle ne le
+     * voyait : sa boite faisait bien ses 28 px, son texte etait \`sr-only\`.
+     *
+     * Inventaire, pas selection : TOUT controle dont l opacite EFFECTIVE (le
+     * produit de celles de ses ancetres) est nulle, avec une vraie boite, hors
+     * \`sr-only\` et hors d un \`<details>\` ferme (son contenu garde ses boites
+     * sans etre peint, et n est pas touchable).
+     */
+    cibles_invisibles: interactifs
+      .filter((e) => { const r = e.getBoundingClientRect();
+        if (r.width <= 2 || r.height <= 2) return false;
+        if (/(^|\\s)sr-only(\\s|$)/.test(e.className || '')) return false;
+        if (e.type === 'hidden') return false;
+        const d = e.closest('details');
+        if (d !== null && !d.open && e.closest('summary') === null) return false;
+        let opacite = 1;
+        for (let n = e; n !== null && n.nodeType === 1; n = n.parentElement) {
+          const c = getComputedStyle(n);
+          if (c.display === 'none' || c.visibility === 'hidden') return false;
+          opacite *= parseFloat(c.opacity);
+        }
+        return opacite < 0.05; })
+      .map((e) => ({ quoi: (e.getAttribute('aria-label') || e.getAttribute('title') || e.textContent || e.tagName).trim().slice(0, 40), ...boite(e) })),
     barre_laterale: aside ? { ...boite(aside), filet: getComputedStyle(aside).borderRightColor } : null,
     principal: main ? { ...boite(main), colonnes: getComputedStyle(main).gridTemplateColumns, gap: getComputedStyle(main).gap, maxW: getComputedStyle(main).maxWidth } : null,
     rayons_de_carte: rayons,
@@ -1273,6 +1304,9 @@ for (const modele of routes) {
       }
       for (const c of vu.cibles_sous_44 ?? []) {
         defauts.push(`cible tactile de ${c.h} px (plancher 44) — « ${c.quoi} »`);
+      }
+      for (const c of vu.cibles_invisibles ?? []) {
+        defauts.push(`cible INVISIBLE (opacite nulle, touchable) — « ${c.quoi} » ${c.l}x${c.h}`);
       }
       if (defauts.length > 0) {
         process.exitCode = 1;

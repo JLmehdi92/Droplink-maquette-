@@ -21,12 +21,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  CircleCheck,
   CirclePlus,
   GripVertical,
   Image as ImageIcon,
   Info,
   Play,
+  Star,
   TriangleAlert,
   Upload,
   X,
@@ -796,16 +796,25 @@ function Case({
           {t("couverture")}
         </span>
       ) : (
+        /*
+          ⚠️ IL ÉTAIT INVISIBLE AU DOIGT, ET TOUCHABLE. `opacity-0` puis
+          `group-hover:opacity-100` : au téléphone il n'y a pas de survol, donc
+          le bouton restait transparent dans le coin de chaque photo — un
+          pouce changeait la couverture sans avoir vu de bouton, ou ne savait
+          pas qu'on pouvait la changer (audit du 18/09/2026, rebranchement
+          n° 8). Il ne se cache désormais qu'avec une SOURIS (`pointer-fine`),
+          et la planche téléphone le montre toujours, en étoile.
+        */
         <button
           type="button"
           onClick={onCouvrir}
           className={
             coin +
-            " bottom-[5px] left-[5px] text-ds-texte-corps opacity-0 transition-opacity group-hover/case:opacity-100 focus-visible:opacity-100 lg:bottom-1.5 lg:left-1.5"
+            " bottom-[5px] left-[5px] text-ds-texte-corps transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover/case:opacity-100 pointer-fine:focus-visible:opacity-100 lg:bottom-1.5 lg:left-1.5"
           }
           title={t("definirCouverture")}
         >
-          <CircleCheck aria-hidden="true" size={14} strokeWidth={2} />
+          <Star aria-hidden="true" size={14} strokeWidth={2} />
           <span className="sr-only">{t("definirCouverture")}</span>
         </button>
       )}
