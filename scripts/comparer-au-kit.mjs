@@ -202,7 +202,9 @@ await new Promise((r) => setTimeout(r, 5000));
 for (const etape of clic.split(" > ").map((e) => e.trim()).filter(Boolean)) {
   const { result: ouvert } = await envoyer("Runtime.evaluate", {
     expression:
-      "(() => { const c = [...document.querySelectorAll('button,a')]" +
+      // `summary` depuis le 18/09/2026 : les menus du kit sont des `<details>`,
+      // comme ceux du produit (« ••• » de la fiche, « Filtres » au téléphone).
+      "(() => { const c = [...document.querySelectorAll('button,a,summary')]" +
       ".find((e) => (e.textContent || '').trim().startsWith(" +
       JSON.stringify(etape) +
       ")); if (!c) return 'INTROUVABLE'; c.click(); return c.textContent.trim().slice(0, 30); })()",

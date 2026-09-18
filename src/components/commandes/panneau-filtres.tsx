@@ -132,10 +132,52 @@ export async function PanneauFiltres({
             caché : appliquer un statut ne doit pas défaire la période qu on vient
             de poser.
           */}
-          {parametres.du !== null ? <input type="hidden" name="du" value={parametres.du} /> : null}
-          {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
+          {/*
+            ⚠️ … SAUF SOUS 1024 PX, OÙ L'EN-TÊTE NE LA REND PAS. Le sélecteur de
+            période n'existe qu'à partir de `lg`, et la planche téléphone l'a
+            retiré de son en-tête sans lui donner d'autre place : au téléphone et
+            à la tablette, filtrer par date était devenu impossible (audit du
+            18/09/2026). Les deux champs vivent donc ICI, visibles sous `lg`.
 
-          <label className="flex min-h-11 items-center gap-2.5 text-[14px] text-ds-texte-fort lg:min-h-0 lg:leading-[18px]">
+            AU BUREAU ILS SONT MASQUÉS, PAS RETIRÉS : un champ masqué par CSS est
+            tout de même envoyé, et c'est exactement le rôle que tenaient les
+            deux champs cachés qu'ils remplacent — appliquer un statut ne défait
+            pas la période posée dans l'en-tête. Identifiants propres (`filtre-`)
+            : `du` et `au` sont déjà ceux du sélecteur de l'en-tête.
+          */}
+          <div className="grid grid-cols-2 gap-3 lg:hidden">
+            <div>
+              <label htmlFor="filtre-du" className="mb-1.5 block text-[12px] leading-[15px] font-semibold text-ds-texte-corps">
+                {t("periodeDu")}
+              </label>
+              <input
+                id="filtre-du"
+                name="du"
+                type="date"
+                defaultValue={parametres.du ?? ""}
+                max={parametres.au ?? undefined}
+                className={champ}
+              />
+            </div>
+            <div>
+              <label htmlFor="filtre-au" className="mb-1.5 block text-[12px] leading-[15px] font-semibold text-ds-texte-corps">
+                {t("periodeAu")}
+              </label>
+              <input
+                id="filtre-au"
+                name="au"
+                type="date"
+                defaultValue={parametres.au ?? ""}
+                min={parametres.du ?? undefined}
+                className={champ}
+              />
+            </div>
+          </div>
+
+          {/* ⚠️ `lg:pointer-fine:` ET NON `lg:` : le libellé porte la cible tactile de
+              la case (`globals.css`), et une tablette tactile en paysage passe
+              `lg` sans avoir de souris — `lg:min-h-0` lui retirait les 44 px. */}
+          <label className="flex min-h-11 items-center gap-2.5 text-[14px] text-ds-texte-fort lg:leading-[18px] lg:pointer-fine:min-h-0">
             <input
               type="checkbox"
               name="archivees"

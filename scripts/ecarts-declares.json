@@ -406,6 +406,119 @@
       }
     ]
   },
+  "fr-commandes-filtres-tel": {
+    "_etat": "LA FEUILLE « FILTRES » OUVERTE, 390 px (18/09/2026). Au telephone la periode ne vit que la : l en-tete ne porte pas le selecteur du bureau. Les declarations de contenu sont celles de l ecran au repos — memes donnees du jeu, meme liste sous la feuille.",
+    "valeurs": [
+      {
+        "textes": [
+          "Commandes",
+          "124 commandes, 12 créées cette semaine",
+          "Jamais ouvertes",
+          "Toutes",
+          "Bloquées"
+        ],
+        "motif": "donnee",
+        "raison": "LARGEURS SEULES, TIREES PAR LES CHIFFRES. Le sous-titre et les compteurs d onglet portent 124, 67 et 4 au kit, 4, 1 et 2 au produit : le bloc titre et chaque onglet s elargissent d autant, et ceux qui suivent se decalent de quelques pixels."
+      },
+      {
+        "textes": [
+          "En transit",
+          "Préparation",
+          "Jamais ouvert",
+          "Expédié",
+          "Livré",
+          "Affichage de 8 sur 124 commandes"
+        ],
+        "motifs": [
+          "^\\d+ photos? · \\d+ vues?$"
+        ],
+        "volatile": true,
+        "motif": "donnee",
+        "raison": "PLACE ET NOMBRE DE CARTES : huit commandes au kit, quatre au jeu de mesure, dans un autre ordre d etapes. Chaque carte a la meme taille et les memes valeurs ; ce sont leur rang et leur nombre qui changent. VOLATILE : les quatre commandes du jeu sont creees a la meme seconde, et leur ordre change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Nouvelle"
+        ],
+        "motif": "structure",
+        "raison": "L ACTION FLOTTANTE EST UN BOUTON D ATTENTE : le produit rend ses quatre libelles (repos, en cours, reussi, echoue), superposes et un seul visible, pour que la largeur ne saute pas pendant la creation. La planche n en dessine que le repos."
+      },
+      {
+        "texte": "Exporter  <span>",
+        "motif": "structure",
+        "raison": "CACHE PAR LA FEUILLE, et c est la seule cause. Ouverte, la feuille est en `position: fixed` : le `<details>` quitte le flux et « Exporter », seul dans sa rangee flex, en prend toute la largeur. La planche pose la rangee en grille a deux colonnes, qui garde la sienne. La rangee est SOUS la feuille (haut de la feuille a 128 px, rangee a 522) : aucun des deux rendus ne se voit, et les deux reviennent a 95 px a la fermeture — mesure au repos en code 0."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc de compte existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "Lucas M.",
+          "Sarah B.",
+          "Adam K.",
+          "Enzo D.",
+          "Lina T.",
+          "Mehdi R.",
+          "Chloé P.",
+          "Tom G."
+        ],
+        "motif": "donnee",
+        "raison": "LES HUIT COMMANDES DE DEMONSTRATION du kit, avec leurs references, leurs destinataires et leurs numeros de suivi. Le jeu de mesure en porte quatre, avec les siennes."
+      },
+      {
+        "textes": [
+          "il y a 2 h",
+          "hier",
+          "il y a 2 j",
+          "Sans mouvement"
+        ],
+        "motif": "donnee",
+        "raison": "LES CARTES DE DEMONSTRATION DU KIT AU TELEPHONE : leurs anciennetes, et l etat « sans mouvement » de la commande en probleme. Le jeu de mesure n a que quatre commandes creees a la seconde, aucune immobile depuis dix jours."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat.",
+        "motifs": []
+      },
+      {
+        "textes": [
+          "Cliente en preparation",
+          "Client expedie",
+          "Client de verification",
+          "Cliente livree"
+        ],
+        "motif": "donnee",
+        "raison": "LES QUATRE COMMANDES DU JEU DE MESURE, avec leurs destinataires, leurs references et leurs numeros. Le kit en rend huit, inventees.",
+        "motifs": []
+      },
+      {
+        "textes": [
+          "REF-P",
+          "REF-E",
+          "REF-L",
+          "REF-V"
+        ],
+        "motif": "donnee",
+        "raison": "LES QUATRE COMMANDES DU JEU DE MESURE : references produit, et, par MOTIF, leur anciennete (creees quelques secondes avant la mesure) et leur compte de photos et de vues.",
+        "motifs": [
+          "^il\\sy\\sa\\s\\d+\\s(s|min|h|j)$",
+          "^\\d+ photos? · \\d+ vues?$"
+        ]
+      }
+    ]
+  },
   "fr-envois": {
     "valeurs": [
       {

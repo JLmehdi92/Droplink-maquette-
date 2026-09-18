@@ -613,6 +613,40 @@ describe("les cibles tactiles des surfaces authentifiees", () => {
   });
 
   /**
+   * ⚠️ UNE CASE ENVELOPPÉE DE SON LIBELLÉ SE DESSINAIT EN CARRÉ DE 44 PX.
+   *
+   * Vu le 18/09/2026 en capture, la planche téléphone à côté : Chrome agrandit
+   * la case elle-même quand le plancher lui impose une hauteur. Toucher le
+   * libellé coche la case, donc c'est le LIBELLÉ qui porte les 44 px, et la
+   * case garde sa taille. Aucune soustraction ne pouvait le voir — une case
+   * n'a pas de texte — d'où ce contrôle, dans les deux moitiés : la case
+   * rendue à sa taille ET le plancher reporté sur le libellé. Une seule des
+   * deux ferait soit le carré, soit une cible sous 44.
+   */
+  test("une case enveloppée de son libellé garde sa taille, et le libellé prend les 44 px", () => {
+    const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8").replace(
+      /\/\*[\s\S]*?\*\//g,
+      " ",
+    );
+    const bloc = /@media \(pointer: coarse\)[\s\S]*?\n  \}/.exec(css)?.[0] ?? "";
+    expect(bloc.length, "le bloc `pointer: coarse` est introuvable : ce contrôle n'inspecte rien").toBeGreaterThan(200);
+
+    const regle = (selecteur: string): string =>
+      new RegExp(selecteur.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "[^{]*\\{([^}]*)\\}").exec(bloc)?.[1] ?? "";
+
+    for (const type of ["checkbox", "radio"]) {
+      expect(
+        regle(`label > input[type="${type}"]:not(.sr-only)`),
+        `La case « ${type} » enveloppée de son libellé n'est plus exemptée : elle se dessine en carré de 44 px.`,
+      ).toMatch(/min-height:\s*0/);
+      expect(
+        regle(`label:has(> input[type="${type}"]:not(.sr-only))`),
+        `Le libellé d'une case « ${type} » ne porte plus les 44 px : la cible tactile tombe à la hauteur du texte.`,
+      ).toMatch(/min-height:\s*44px/);
+    }
+  });
+
+  /**
    * ⚠️ LA SONDE QUI A PRODUIT CES CHIFFRES DOIT SURVIVRE, ET ELLE A FAILLI NE
    * PAS SURVIVRE.
    *

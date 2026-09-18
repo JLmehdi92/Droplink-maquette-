@@ -660,6 +660,31 @@ body {
       min-height: 0;
       min-width: 0;
     }
+
+    /*
+     * ⚠️ UNE CASE ENVELOPPÉE DE SON LIBELLÉ N'EST PAS LA CIBLE : C'EST LE
+     * LIBELLÉ. Vu le 18/09/2026 en capture, la planche téléphone à côté : la
+     * case « Voir les commandes archivées » et celle de la révocation se
+     * dessinaient en CARRÉS DE 44 PX, parce que Chrome agrandit la case
+     * elle-même quand on lui impose une hauteur. Aucune soustraction ne
+     * pouvait le voir : une case n'a pas de texte, et l'inventaire apparie par
+     * le texte.
+     *
+     * Toucher le libellé coche la case, donc le plancher de 44 passe au
+     * libellé, et la case retrouve la taille qu'elle déclare. Les cases SANS
+     * libellé englobant — la sélection des tableaux — gardent la règle
+     * ci-dessus : elles sont leur propre cible.
+     */
+    label > input[type="checkbox"]:not(.sr-only),
+    label > input[type="radio"]:not(.sr-only) {
+      min-height: 0;
+      min-width: 0;
+    }
+
+    label:has(> input[type="checkbox"]:not(.sr-only)),
+    label:has(> input[type="radio"]:not(.sr-only)) {
+      min-height: 44px;
+    }
   }
 }
 

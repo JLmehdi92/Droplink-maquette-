@@ -1742,6 +1742,48 @@ try {
         const formulairesGeste = [...htmlRemplie.matchAll(/<form\b[^>]*action="[^"]*\/commandes\/geste"[^>]*>([\s\S]*?)<\/form>/g)]
           .map((m) => m[1] ?? "")
           .filter((corps) => corps.includes(`value="${commandeFumee}"`));
+        /*
+         * ⚠️ LA PERIODE DOIT SE POSER SOUS 1024 PX.
+         *
+         * Le selecteur de periode ne se rend qu a partir de `lg`, dans l en-tete
+         * de l ecran, et la planche telephone l a retire de son en-tete sans lui
+         * donner d autre place : au telephone et a la tablette, le vendeur ne
+         * pouvait plus filtrer ses commandes par date (audit du 18/09/2026). Le
+         * panneau des filtres — celui qui porte la case des archives, servi a
+         * toutes les largeurs — doit donc porter de VRAIS champs de date.
+         */
+        const listeCommandes = await fetch(`${base}/fr/commandes`, { headers: entetes, redirect: "manual" });
+        const htmlListe = listeCommandes.status === 200 ? await listeCommandes.text() : "";
+        /*
+         * ⚠️ PAS DE « FORMULAIRE QUI CONTIENT » SUR DU HTML EN FLUX. La premiere
+         * version cherchait le <form> portant la case des archives, puis le champ
+         * dedans : verte deux fois seule, ROUGE dans les portes. Next sert la page
+         * EN FLUX — des morceaux arrivent plus loin dans la reponse et un script
+         * les remet en place — et dans le texte brut la case tombait HORS de toute
+         * balise <form>, selon le decoupage du moment. On cherche donc le champ du
+         * panneau par l identifiant qui n appartient qu a lui (`filtre-du`), et
+         * l on verifie son type et son nom sur la balise elle-meme.
+         */
+        const baliseDuChamp = (id) =>
+          (htmlListe.match(new RegExp(`<input\\b[^>]*\\bid="${id}"[^>]*>`)) ?? [])[0] ?? "";
+        const baliseDu = baliseDuChamp("filtre-du");
+        const baliseAu = baliseDuChamp("filtre-au");
+        controles.push(
+          [
+            /<input\b[^>]*type="checkbox"[^>]*name="archivees"/.test(htmlListe),
+            "CONTRE-TEST : le panneau des filtres de /commandes est bien servi (case des archives)" +
+              ` — statut ${listeCommandes.status}, ${htmlListe.length} o` +
+              (listeCommandes.status === 200 ? "" : `, vers ${listeCommandes.headers.get("location")}`),
+          ],
+          [
+            baliseDu.includes('type="date"') && baliseDu.includes('name="du"'),
+            "le panneau des filtres porte un vrai champ de date « du » (la periode se pose sous 1024 px)",
+          ],
+          [
+            baliseAu.includes('type="date"') && baliseAu.includes('name="au"'),
+            "le panneau des filtres porte un vrai champ de date « au »",
+          ],
+        );
         const gesteDe = (corps) => (corps.match(/name="geste"[^>]*value="([^"]+)"/) ?? [])[1];
         const gestesFiche = formulairesGeste.map(gesteDe);
         controles.push(
@@ -5482,8 +5524,14 @@ controles.push([
   plancherPose,
   "CONTRE-TEST : le plancher tactile de 44 px est bien dans la feuille servie",
 ]);
+// ⚠️ `.sr-only` EST UN ELEMENT DE LA LISTE DE SELECTEURS, PAS FORCEMENT LE
+// DERNIER. La premiere forme exigeait `.sr-only{`, collé à l accolade : le
+// 18/09/2026, une regle voisine aux memes declarations (la case enveloppee de
+// son libelle) a ete FUSIONNEE par le compilateur dans la meme liste, apres
+// `.sr-only` — exemption intacte, controle rouge. On cherche donc le selecteur
+// nu, borne des deux cotes, dans la liste d une regle qui pose `min-width:0`.
 controles.push([
-  plancherPose && /\.sr-only\{[^}]*min-width:0/.test(blocTactile),
+  plancherPose && /(?:^|[{},])\.sr-only(?=[,{])[^{]*\{[^}]*min-width:0/.test(blocTactile),
   "un element visuellement masque n est pas une cible tactile de 44 px",
 ]);
 
