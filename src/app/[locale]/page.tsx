@@ -560,6 +560,16 @@ export default async function Accueil({
               <a href="#etapes" className={lienPied}>{k("navHow")}</a>
               <Link href={`/${locale}/docs`} className={lienPied}>{k("navDocs")}</Link>
               <Link href={`/${locale}/docs#faq`} className={lienPied}>{k("footFaq")}</Link>
+              {/* ⚠️ LE SEUL CHEMIN VERS LE BLOG, ET IL AVAIT DISPARU. La réécriture
+                  de la landing sur sa planche (18/09/2026) avait emporté l'ancien
+                  pied, et plus aucune page ne menait au blog ; la fumée parcourt
+                  désormais le site et nomme les pages orphelines. En français
+                  seulement : /en/blog et /zh-CN/blog rendent 404, exprès. */}
+              {locale === "fr" ? (
+                <Link href="/fr/blog" className={lienPied}>
+                  {k("footBlog")}
+                </Link>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-[9px] max-[767.98px]:gap-0">

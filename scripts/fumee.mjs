@@ -4792,6 +4792,61 @@ function ageHsts(entetes) {
   ]);
 
   /*
+   * ⚠️ CHAQUE PAGE DU PLAN DE SITE DOIT SE REJOINDRE EN NAVIGUANT.
+   *
+   * Le 18/09/2026, la landing a ete reecrite sur sa planche, et le pied qui
+   * portait « Blog » a disparu avec l ancien. /blog repondait 200, figurait au
+   * plan de site, passait chaque controle de ce bloc — et plus AUCUNE page du
+   * site n y menait. Un lecteur ne pouvait l atteindre qu en tapant l adresse.
+   * Rien ne pouvait le voir : chaque controle regardait une page, aucun ne
+   * regardait les CHEMINS entre elles.
+   *
+   * On parcourt donc le site comme un visiteur : depuis la landing servie,
+   * dans chaque langue, en suivant les liens `<a>` qui restent dans la zone
+   * publique. Les balises `hreflang` ne comptent pas : ce sont des indications
+   * pour un moteur, pas un chemin qu un lecteur peut suivre.
+   */
+  const zonePublique = new Set(attendues);
+  for (const l of LANGUES_SERVIES) {
+    for (const c of ["/connexion", "/inscription", "/mot-de-passe-oublie"]) zonePublique.add(`/${l}${c}`);
+  }
+  // `visitees` evite de redemander une page ; `atteintes` ne retient que celles
+  // qui ont REPONDU 200. Une page bien liee mais en erreur ne doit pas passer
+  // pour atteinte : on prouve un chemin jusqu a une page qui s affiche, pas
+  // seulement l existence d un lien (relecture du 18/09/2026).
+  const visitees = new Set();
+  const atteintes = new Set();
+  const aVisiter = LANGUES_SERVIES.map((l) => `/${l}`);
+  while (aVisiter.length > 0) {
+    const chemin = aVisiter.shift();
+    if (chemin === undefined || visitees.has(chemin)) continue;
+    visitees.add(chemin);
+    const reponse = await fetch(`${base}${chemin}`, { redirect: "manual" });
+    if (reponse.status !== 200) continue;
+    atteintes.add(chemin);
+    const html = await reponse.text();
+    for (const m of html.matchAll(/<a\b[^>]*?\shref="([^"]+)"/g)) {
+      const cible = (m[1] ?? "").replace(/&amp;/g, "&").split("#")[0]?.split("?")[0] ?? "";
+      if (zonePublique.has(cible) && !visitees.has(cible)) aVisiter.push(cible);
+    }
+  }
+  const orphelines = attendues.filter((u) => !atteintes.has(u));
+  controles.push(
+    // CONTRE-TEST : un parcours qui ne sortirait pas de la landing (liens non
+    // releves, page en erreur) rendrait « aucune orpheline » sur une liste
+    // vide de pages visitees — il doit avoir reellement traverse le site.
+    [
+      atteintes.size >= attendues.length,
+      `CONTRE-TEST : le parcours depuis la landing a reellement traverse le site (${atteintes.size} pages visitees)`,
+    ],
+    [
+      orphelines.length === 0,
+      "chaque URL du plan de site se rejoint en naviguant depuis la landing" +
+        (orphelines.length === 0 ? "" : ` — ORPHELINES : ${orphelines.join(", ")}`),
+    ],
+  );
+
+  /*
    * ⚠️ LE CONTROLE QUI COMPTE LE PLUS DE TOUT CE BLOC.
    *
    * Chaque `public_token` donne acces A VIE aux photos d un client. Le publier
