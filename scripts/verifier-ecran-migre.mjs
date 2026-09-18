@@ -871,7 +871,18 @@ const INVENTAIRE = `(() => {
     );
     return utiles.join(", ").slice(0, 80);
   };
-  const rendu = (e) => e.getClientRects().length > 0;
+  /*
+   * ⚠️ UNE BOITE N EST PAS UN RENDU. Le contenu d un <details> FERME garde ses
+   * boites sous Chrome (il vit sous content-visibility: hidden) sans etre peint :
+   * la landing comptait « English », « 中文 » et les cinq liens du menu burger
+   * comme rendus, alors que la planche ne monte ses listes qu a l ouverture.
+   * checkVisibility() sans option n ecarte que display: none et
+   * content-visibility: hidden — rien de ce qui se voit (18/09/2026). Le
+   * plancher du telephone, plus haut, garde l ancien test : un menu ferme
+   * s ouvre, et ses cibles doivent tenir 44 px.
+   */
+  const rendu = (e) =>
+    e.getClientRects().length > 0 && (typeof e.checkVisibility !== "function" || e.checkVisibility());
   const lignes = [];
   for (const e of document.querySelectorAll("body *")) {
     if (!rendu(e)) continue;

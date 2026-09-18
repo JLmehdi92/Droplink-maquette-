@@ -391,6 +391,17 @@ lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot 
 > donc pas d'îlot client. L'œil ne voit qu'un libellé, la sonde relève TOUTES
 > les options : leurs libellés se déclarent là où ils diffèrent de ceux du kit.
 > Un commentaire du dépôt a affirmé le contraire pendant une heure.
+>
+> ⚠️ **CE N'EST PLUS VRAI DEPUIS LE 18/09/2026, ET C'ÉTAIT UN DÉFAUT DE LA
+> SONDE, PAS UNE CONVENTION.** Le contenu d'un `<details>` fermé garde ses
+> boîtes sous Chrome (`content-visibility: hidden`) sans être peint : la sonde
+> l'inventoriait donc comme rendu, et une option CACHÉE du produit pouvait
+> apparier un texte VISIBLE du kit. C'est ainsi que « Plus récentes », bouton
+> de la barre d'outils du kit, se trouvait « rendu » par le lien replié du
+> panneau Filtres de `/commandes` — déclaré `structure`, alors que le produit
+> ne l'affichait pas. L'inventaire écarte désormais ce qui n'est pas peint
+> (l'API du navigateur checkVisibility, sans argument) ; le plancher téléphone garde l'ancien test, un menu
+> fermé s'ouvre et ses cibles doivent tenir 44 px.
 
 ⚠️ **LE PRODUIT NE SE MESURE PAS TOUJOURS À LA MÊME LARGEUR QUE LE KIT.** Les
 deux relevés doivent porter la même largeur UTILE — 1675 —, et c'est la barre de

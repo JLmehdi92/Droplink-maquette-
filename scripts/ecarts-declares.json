@@ -74,11 +74,6 @@
         "raison": "LE MEME TEXTE EST RENDU TROIS FOIS CHEZ NOUS ET UNE SEULE FOIS DANS LE KIT, donc l appariement au plus proche tombe sur le mauvais element. Le produit rend le bouton principal en DEUX variantes — bureau et telephone, dont une seule est visible a la fois — plus son etat d attente « Creation… ». Le vrai bouton porte bien le degrade de marque, son rayon de 16 et l ombre marque ; c est le `<span>` du libelle, haut de 23 px, qui se fait apparier au bouton de 50 du kit."
       },
       {
-        "texte": "Plus récentes",
-        "motif": "structure",
-        "raison": "MEME CAUSE, ROLE INVERSE : « Plus recentes » est a la fois le DECLENCHEUR du menu de tri et l OPTION selectionnee a l interieur, que le produit rend dans le document. Le kit n a qu un menu ferme. L outil apparie l option violette (219x36, fond teinte) au declencheur blanc borde du kit (137x42) — deux elements qui ne jouent pas le meme role."
-      },
-      {
         "texte": "Passez au Pro",
         "motif": "contrainte",
         "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
@@ -97,11 +92,6 @@
         "texte": "Toutes  <button>",
         "motif": "donnee",
         "raison": "Quatre pixels de largeur. L onglet est etire par son compteur : « 124 » chez le kit, « 4 » dans le jeu de mesure. Meme cause que « Livrees », declaree juste au-dessus."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
@@ -213,26 +203,12 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat.",
         "motifs": [
           "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ]
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et applique ici la regle du panneau d administration : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
         ]
       },
       {
@@ -244,10 +220,7 @@
       },
       {
         "textes": [
-          "Toutes les périodes",
-          "Créées à partir du",
-          "Jusqu'au",
-          "Appliquer"
+          "Toutes les périodes"
         ],
         "motif": "donnee",
         "raison": "Le selecteur de periode OUVERT : le kit n en montre que la valeur fermee. ⚠️ Le libelle « Jusqu au » porte une decision : la borne haute d une periode vaut MINUIT, donc « jusqu a aujourd hui » exclurait toute la journee en cours si elle n etait pas corrigee."
@@ -270,20 +243,7 @@
       },
       {
         "textes": [
-          "Trier",
-          "Plus anciennes",
-          "Modifiées en dernier",
-          "Jamais ouvertes par le client",
-          "Bloquées en transit"
-        ],
-        "motif": "donnee",
-        "raison": "Le menu de tri OUVERT : le kit n en montre que la valeur selectionnee, « Plus recentes », que le produit affiche desormais a l identique. Les quatre autres options sont les notres ; deux d entre elles — « Jamais ouvertes par le client » et « Bloquees en transit » — repondent a la question que cet ecran existe pour poser."
-      },
-      {
-        "textes": [
-          "Exporter",
-          "Le fichier contient les liens publics de",
-          "Télécharger le CSV"
+          "Exporter"
         ],
         "motif": "donnee",
         "raison": "L EXPORT CSV, que le kit ne dessine pas. L avertissement n est pas decoratif : l export contient les LIENS PUBLICS des commandes, et un lien public transfere une capacite, definitivement. Les notes internes, qui portent le prix d achat, en sont exclues (decision 15)."
@@ -302,14 +262,6 @@
         ],
         "motif": "contrainte",
         "raison": "Les etapes de NOTRE frise, verrouillees par la decision 4 du brief — voir la declaration symetrique de « Commande » et « En livraison » dans les manquants."
-      },
-      {
-        "textes": [
-          "Dupliquer comme gabarit",
-          "Archiver"
-        ],
-        "motif": "structure",
-        "raison": "Les deux gestes du menu par ligne, rendus dans le document la ou le kit ne dessine que ses trois points. ⚠️ « Dupliquer comme GABARIT » porte la decision 14 : la duplication copie la reference produit et les notes internes, jamais les medias ni le NOM DU CLIENT — envoyer une page portant le pseudo d un autre est le defaut le plus visible que ce produit puisse produire."
       },
       {
         "textes": [
@@ -421,48 +373,11 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat.",
-        "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ]
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et applique ici la regle du panneau d administration : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
         "motifs": []
-      },
-      {
-        "textes": [
-          "Appliquer"
-        ],
-        "motif": "donnee",
-        "raison": "Le selecteur de periode OUVERT : le kit n en montre que la valeur fermee. ⚠️ Le libelle « Jusqu au » porte une decision : la borne haute d une periode vaut MINUIT, donc « jusqu a aujourd hui » exclurait toute la journee en cours si elle n etait pas corrigee."
-      },
-      {
-        "textes": [
-          "Trier",
-          "Plus anciennes",
-          "Modifiées en dernier",
-          "Jamais ouvertes par le client",
-          "Bloquées en transit"
-        ],
-        "motif": "donnee",
-        "raison": "Le menu de tri OUVERT : le kit n en montre que la valeur selectionnee, « Plus recentes », que le produit affiche desormais a l identique. Les quatre autres options sont les notres ; deux d entre elles — « Jamais ouvertes par le client » et « Bloquees en transit » — repondent a la question que cet ecran existe pour poser."
-      },
-      {
-        "textes": [
-          "Le fichier contient les liens publics de",
-          "Télécharger le CSV"
-        ],
-        "motif": "donnee",
-        "raison": "L EXPORT CSV, que le kit ne dessine pas. L avertissement n est pas decoratif : l export contient les LIENS PUBLICS des commandes, et un lien public transfere une capacite, definitivement. Les notes internes, qui portent le prix d achat, en sont exclues (decision 15)."
       },
       {
         "textes": [
@@ -474,23 +389,6 @@
         "motif": "donnee",
         "raison": "LES QUATRE COMMANDES DU JEU DE MESURE, avec leurs destinataires, leurs references et leurs numeros. Le kit en rend huit, inventees.",
         "motifs": []
-      },
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE MEME MENU DE COMPTE, PAR UN BALISAGE DIFFERENT. Le kit le dessine aussi — « Parametres », « Se deconnecter » — mais dans un etat React qui n est pas rendu tant qu il est ferme ; le produit en fait un <details>, sans JavaScript, et la sonde releve le contenu d un <details> ferme."
-      },
-      {
-        "textes": [
-          "Statut d’expédition",
-          "Statut des photos",
-          "Voir les commandes archivées",
-          "Plus récentes"
-        ],
-        "motif": "structure",
-        "raison": "LE PANNEAU DE FILTRES ET LE MENU DE TRI, FERMES. Au telephone la planche dessine les deux outils en boutons ; le produit en fait des <details> (feuille en bas d ecran une fois ouverts), dont la sonde releve le contenu meme ferme."
       },
       {
         "textes": [
@@ -549,21 +447,6 @@
         "texte": "En transit  <nombre d'occurrences>",
         "motif": "donnee",
         "raison": "Le kit rend huit envois, le jeu de mesure en rend deux. Le nombre d occurrences d un statut suit les donnees, pas le dessin."
-      },
-      {
-        "texte": "En transit [1/3]  <span>",
-        "motif": "donnee",
-        "raison": "Apparie a une PILULE DE FILTRE du produit, pas a une pastille de statut : le kit n a pas de pilules — il filtre par menus deroulants — donc le texte « En transit » n a pas le meme role des deux cotes. Voir la declaration de la barre de filtres."
-      },
-      {
-        "texte": "En transit [2/3]  <span>",
-        "motif": "donnee",
-        "raison": "Position seule, et elle suit le nombre de lignes : deux envois contre huit."
-      },
-      {
-        "texte": "En transit [3/3]  <span>",
-        "motif": "donnee",
-        "raison": "Apparie a l en-tete de colonne ou a une pilule selon le tour ; le kit rend quatre « En transit » et le produit trois. Les roles ne se correspondent pas un a un."
       },
       {
         "texte": "Livré  <span>",
@@ -651,16 +534,18 @@
         "raison": "Seize pixels de hauteur. Le kit met la date ET l heure dans une cellule de deux lignes ; la notre n a qu une date sur cette ligne-la. L appariement au plus proche rapproche donc une cellule de deux lignes d une cellule d une seule — meme famille que « 8 sept. 2025 », declaree au-dessus. ⚠️ DÉCLARÉE SANS SON RANG DEPUIS LE 15/09/2026 : « [2/2] » est devenu « [2/3] » et « [3/3] » au changement de jour — les dates du jeu de mesure sont relatives, et le nombre de dates qui s apparient suit le calendrier."
       },
       {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
-      },
-      {
         "textes": [
           "Sans mouvement depuis 14 jours"
         ],
         "motif": "contrainte",
         "raison": "LE KIT PEINT UN INCIDENT, NOUS N EN DECLARONS PAS. Sa ligne « problem » ecrit sa phrase en ROUGE, l encre d erreur : il affirme que le transporteur a signale un probleme. Il ne le fait pas — ce que nous savons, c est qu un colis ne bouge plus, et c est deja le raisonnement ecrit dans `tableau-envois.tsx` (« Problemes supposerait que le transporteur declare un incident »). La phrase est donc au gris de corps, comme les autres prochaines etapes ; l ambre de la pastille suffit a dire l alerte."
+      },
+      {
+        "textes": [
+          "En transit"
+        ],
+        "motif": "donnee",
+        "raison": "RANG ET NOMBRE, PAS APPARENCE. Les tuiles du produit suivent les etats qu il mesure — « Pas encore scanne » s intercale avant « En transit », deja declare — et le jeu de mesure n a qu UN colis en transit quand le kit en montre trois. La tuile et le badge ne tombent donc ni au meme rang ni au meme nombre ; leurs tailles, graisses et couleurs sont celles du kit. Jusqu au 18/09/2026, une option cachee du filtre de statut completait le compte par hasard."
       }
     ],
     "manquants": [
@@ -750,26 +635,12 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat. L ADRESSE EST DECLAREE PAR MOTIF : le jeu de mesure fabrique un compte jetable a chaque passage, dont la partie locale est tiree au hasard. Un texte litteral rendrait la soustraction rouge a la prochaine execution pour la seule raison que la base a rendu d autres octets.",
         "motifs": [
           "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ]
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas et que le produit rend au-dessus des compteurs. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et c est la regle du panneau d administration appliquee ici : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
         ]
       },
       {
@@ -783,9 +654,7 @@
       },
       {
         "textes": [
-          "Ce qui ne bouge plus",
-          "Mis à jour récemment",
-          "Mis à jour il y a longtemps"
+          "Ce qui ne bouge plus"
         ],
         "motif": "donnee",
         "raison": "Les trois tris du produit, face aux trois du kit (« Plus recent », « Plus ancien », « Par statut »). Meme contröle, meme place, a droite de la barre. Le tri par defaut differe et c est delibere : ce que le vendeur vient chercher ici, c est ce qui est bloque."
@@ -833,7 +702,6 @@
       },
       {
         "textes": [
-          "Expédié",
           "Sans mouvement"
         ],
         "motif": "donnee",
@@ -852,16 +720,6 @@
         ],
         "motif": "donnee",
         "raison": "LE TROISIEME COLIS DU JEU DE MESURE ET LE BADGE D EVOLUTION. Le colis date du MOIS DERNIER, et il existe pour une raison de verification : sans lui, le badge « ce mois-ci » ne s affiche jamais — la regle du produit le retire quand le mois precedent est vide — et rien ne distinguerait « la regle s applique » de « le calcul est casse ». Le badge et l anciennete sont declares PAR MOTIF : leur valeur depend du jour ou la mesure tourne."
-      },
-      {
-        "textes": [
-          "Ouvrir le site du transporteur"
-        ],
-        "motifs": [
-          "^Voir la commande #[0-9A-F]{6}$"
-        ],
-        "motif": "structure",
-        "raison": "LES DEUX GESTES DU MENU « ACTIONS », rendus dans le document parce qu un `<details>` porte ses entrees en clair. Le kit dessine trois points sans dire ce qu ils ouvrent — son menu est une demonstration, le notre mene quelque part : la commande rattachee, et le site officiel du transporteur. Les references sont declarees PAR MOTIF, elles sont derivees d identifiants tires au hasard a chaque jeu de mesure."
       },
       {
         "texte": "Cliente livree",
@@ -891,12 +749,7 @@
       {
         "textes": [
           "En transit",
-          "Tous les statuts",
-          "Tous les transporteurs",
-          "Ce qui ne bouge plus",
-          "Expédié",
-          "Livré",
-          "Pas encore scanné"
+          "Livré"
         ],
         "motif": "structure",
         "raison": "APPARIEMENT AVEC LES MENUS FERMES. Les trois menus du produit sont des <details> dont la sonde releve les options meme fermes — « En transit », « Expedie », « Pas encore scanne »… — et la soustraction les apparie aux pastilles des cartes du kit, qui portent les memes mots. Pastilles et options ont chacune les valeurs de leur modele."
@@ -964,35 +817,24 @@
         ],
         "motif": "donnee",
         "raison": "LES HUIT ENVOIS DE DEMONSTRATION DU KIT AU TELEPHONE : dernier evenement, destinataire, date et nombre d interrogations."
+      },
+      {
+        "textes": [
+          "Expédié",
+          "Pas encore scanné"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE N A AUCUN COLIS DANS CES DEUX ETATS : il en porte deux livres, un en transit et un sans mouvement (capture du 18/09/2026). Le kit les montre en badge sur ses cartes. Jusqu au 18/09/2026, les options cachees du filtre de statut « rendaient » ces libelles, et la sonde les comptait."
       }
     ],
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat. L ADRESSE EST DECLAREE PAR MOTIF : le jeu de mesure fabrique un compte jetable a chaque passage, dont la partie locale est tiree au hasard. Un texte litteral rendrait la soustraction rouge a la prochaine execution pour la seule raison que la base a rendu d autres octets.",
-        "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ]
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES, que le kit ne dessine pas et que le produit rend au-dessus des compteurs. Il porte deux faits mesures — des liens jamais ouverts, un colis silencieux — et c est la regle du panneau d administration appliquee ici : les alertes AVANT les compteurs, parce qu un ecran qui les enterre oblige a chercher ce qui devrait sauter aux yeux. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
         "motifs": []
-      },
-      {
-        "textes": [
-          "Mis à jour récemment",
-          "Mis à jour il y a longtemps"
-        ],
-        "motif": "donnee",
-        "raison": "Les trois tris du produit, face aux trois du kit (« Plus recent », « Plus ancien », « Par statut »). Meme contröle, meme place, a droite de la barre. Le tri par defaut differe et c est delibere : ce que le vendeur vient chercher ici, c est ce qui est bloque."
       },
       {
         "textes": [
@@ -1003,17 +845,7 @@
         "motifs": []
       },
       {
-        "textes": [
-          "4PX"
-        ],
-        "motifs": [],
-        "motif": "donnee",
-        "raison": "LE TRANSPORTEUR ET L ARRIVEE ANNONCEE DU JEU DE MESURE. Le kit rend huit envois chez La Poste, DHL, DPD… ; le jeu en rend deux, chez 4PX et FedEx, avec les monogrammes correspondants. « Livraison prevue le … » est declaree PAR MOTIF : la date est RELATIVE a l instant du passage, comme toutes les dates du jeu depuis qu une sonde de fumee a expire pour avoir ete ecrite en dur."
-      },
-      {
-        "textes": [
-          "DHL Express"
-        ],
+        "textes": [],
         "motifs": [
           "^DLKMESURE\\d+[A-Z]{2}$"
         ],
@@ -1021,16 +853,7 @@
         "raison": "LE TROISIEME COLIS DU JEU DE MESURE ET LE BADGE D EVOLUTION. Le colis date du MOIS DERNIER, et il existe pour une raison de verification : sans lui, le badge « ce mois-ci » ne s affiche jamais — la regle du produit le retire quand le mois precedent est vide — et rien ne distinguerait « la regle s applique » de « le calcul est casse ». Le badge et l anciennete sont declares PAR MOTIF : leur valeur depend du jour ou la mesure tourne."
       },
       {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE MEME MENU DE COMPTE, PAR UN BALISAGE DIFFERENT. Le kit le dessine aussi — « Parametres », « Se deconnecter » — mais dans un etat React qui n est pas rendu tant qu il est ferme ; le produit en fait un <details>, sans JavaScript, et la sonde releve le contenu d un <details> ferme."
-      },
-      {
-        "textes": [
-          "FedEx"
-        ],
+        "textes": [],
         "motif": "donnee",
         "raison": "LES COLIS DU JEU DE MESURE : transporteurs, derniers evenements et destinataires, avec leurs dates relatives et leurs interrogations. Les lignes de colis se declarent par MOTIF ancre sur les quatre destinataires du jeu : elles portent des dates relatives au jour du passage (« il y a 31 jours », « 2 septembre », « Hier »), et une declaration en toutes lettres mourait le lendemain (17/09/2026).",
         "motifs": [
@@ -1139,11 +962,6 @@
         "texte": "Numéro de suivi",
         "motif": "contrainte",
         "raison": "Rendu une fois par le kit — la ligne du panneau d informations —, trois fois chez nous : le kit le met en CHAMP sur un autre ecran (`CreateOrder`), nous l avons sur celui-ci. L appariement au plus proche tombe donc sur l etiquette du formulaire (13/500) et la compare a la ligne du kit (14/400)."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
@@ -1230,8 +1048,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
@@ -1242,19 +1059,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage. Ancree aux deux bouts, elle ne couvre rien d autre."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il porte deux faits mesures et appartient a la coque, pas a cet ecran — meme declaration que sur /commandes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ]
       },
       {
         "motifs": [
@@ -1461,26 +1265,10 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
-      },
-      {
-        "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ],
-        "motif": "donnee",
-        "raison": "L adresse du compte jetable, fabriquee a chaque passage. Ancree aux deux bouts, elle ne couvre rien d autre."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il porte deux faits mesures et appartient a la coque, pas a cet ecran — meme declaration que sur /commandes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": []
       },
       {
         "motifs": [
@@ -1510,13 +1298,6 @@
         ],
         "motif": "contrainte",
         "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
-      },
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE MEME MENU DE COMPTE, PAR UN BALISAGE DIFFERENT. Le kit le dessine aussi, dans un etat React qui n est pas rendu ferme ; le produit en fait un <details>, dont la sonde releve le contenu ferme."
       }
     ]
   },
@@ -1593,11 +1374,6 @@
         "texte": "En transit",
         "motif": "structure",
         "raison": "Largeur seule, et c est le balisage qui differe : la legende de l anneau du kit est une grille dont la premiere colonne s etire, notre liste de barres met le libelle a sa largeur naturelle et donne le reste a la piste. La taille, la graisse et la couleur sont desormais celles du kit."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
@@ -1696,8 +1472,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -1708,19 +1483,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. C est aussi la ou vit « jamais ouvertes », qui etait une tuile avant la reprise : une metrique qui appelle un geste appartient aux alertes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ]
       },
       {
         "texte": "+4 vs période précédente",
@@ -1884,26 +1646,10 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
-      },
-      {
-        "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ],
-        "motif": "donnee",
-        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. C est aussi la ou vit « jamais ouvertes », qui etait une tuile avant la reprise : une metrique qui appelle un geste appartient aux alertes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": []
       },
       {
         "textes": [
@@ -1938,13 +1684,6 @@
         ],
         "motif": "contrainte",
         "raison": "LE CLASSEMENT DES PLUS CONSULTEES, que le kit ne dessine pas. « Vues de lien par commande > 3 » est une metrique de VERDICT du brief (§11) : c est le signal que le destinataire revient, et le seul endroit du produit qui dise QUELLES commandes il revoit. Retirer une mesure de verdict parce qu un dessin ne la montre pas serait une regression, pas une mise en conformite."
-      },
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE MEME MENU DE COMPTE, PAR UN BALISAGE DIFFERENT. Le kit le dessine aussi — « Parametres », « Se deconnecter » — mais dans un etat React qui n est pas rendu tant qu il est ferme ; le produit en fait un <details>, sans JavaScript, et la sonde releve le contenu d un <details> ferme."
       },
       {
         "textes": [
@@ -2018,11 +1757,6 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION, ET UNE SEULE CAUSE POUR CES LIGNES. Nos sections portent des phrases d aide que le kit n ecrit pas — ce que devient une page sans nom ni logo, ou va la description, ce que font les liens des reseaux, pourquoi la couleur est ajustee. Chacune est une decision du produit rendue lisible, et elles allongent la colonne. Le bouton d enregistrement, lui, est rendu DEUX fois chez nous : une barre collee au telephone, une flottante au bureau — le kit n en dessine qu une, et aucune des deux planches ne dessine la notre."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
@@ -2105,8 +1839,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -2117,19 +1850,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les deux compteurs sont declares par MOTIF : ecrits en toutes lettres, ils mouraient au premier changement de jeu de mesure."
       },
       {
         "textes": [
@@ -2267,26 +1987,10 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
-      },
-      {
-        "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ],
-        "motif": "donnee",
-        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motifs": [],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les deux compteurs sont declares par MOTIF : ecrits en toutes lettres, ils mouraient au premier changement de jeu de mesure."
       },
       {
         "motifs": [
@@ -2309,13 +2013,6 @@
         ],
         "motif": "donnee",
         "raison": "LE JEU DE MESURE CONFIGURE DESORMAIS LES TROIS RESEAUX de sa boutique, pour que la page client mesure son en-tete de boutique et sa carte « Une question ? ». L apercu de cet ecran rend alors la ligne de reseaux que le vendeur verra sous le nom de sa boutique ; le kit dessine un apercu sans reseaux configures."
-      },
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE MEME MENU DE COMPTE, PAR UN BALISAGE DIFFERENT. Le kit le dessine aussi — « Parametres », « Se deconnecter » — mais dans un etat React qui n est pas rendu tant qu il est ferme ; le produit en fait un <details>, sans JavaScript, et la sonde releve le contenu d un <details> ferme."
       },
       {
         "textes": [
@@ -2610,8 +2307,6 @@
           "Commandes [2/3]",
           "commandes [3/3]",
           "Évolution du nombre de commandes sur les",
-          "18 août [1/2]",
-          "10 août [2/2]",
           "Statut des commandes",
           "Répartition des commandes par statut",
           "3 % [1/4]",
@@ -2766,15 +2461,6 @@
     "enTrop": [
       {
         "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système"
-        ],
-        "motif": "contrainte",
-        "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et son encart de trace. L encart est un RAPPEL PERMANENT, pas une decoration — chaque consultation de donnees d un vendeur ecrit une ligne au journal, LECTURES COMPRISES, et celui qui regarde doit le savoir AVANT de regarder, pas le decouvrir dans le journal. Il occupe la geometrie de la carte decorative du kit."
-      },
-      {
-        "textes": [
           "Ce qui demande une décision",
           "Aucune alerte. Rien ne dépasse les seuil"
         ],
@@ -2817,13 +2503,6 @@
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       },
       {
         "motifs": [
@@ -3313,15 +2992,6 @@
     ],
     "enTrop": [
       {
-        "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système"
-        ],
-        "motif": "contrainte",
-        "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et son encart de trace, qui occupe la geometrie de la carte decorative du kit. L encart est un RAPPEL PERMANENT : chaque consultation de donnees d un vendeur ecrit une ligne au journal, LECTURES COMPRISES, et celui qui regarde doit le savoir AVANT de regarder."
-      },
-      {
         "motifs": [
           "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
         ],
@@ -3361,13 +3031,6 @@
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       },
       {
         "textes": [
@@ -3642,10 +3305,7 @@
       },
       {
         "textes": [
-          "Toutes",
-          "Fournisseurs",
-          "Revendeurs",
-          "Non configurées"
+          "Toutes"
         ],
         "motif": "structure",
         "raison": "LES OPTIONS DU SELECTEUR DE TYPE, REPLIEES. Le kit rend les siennes dans un `select` natif, dont la sonde lit les `option` ; les notres sont des liens dans un `details` ferme, que la sonde releve aussi. L oeil n en voit qu une de chaque cote. Leurs libelles different parce que les filtres different : le kit filtre par plan, par boutique et par date — trois dimensions que le produit n a pas — la ou nous filtrons par TYPE DE COMPTE, qui est la segmentation d usage du brief."
@@ -3853,9 +3513,6 @@
     "enTrop": [
       {
         "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système",
           "Cette consultation est écrite au journal"
         ],
         "motif": "contrainte",
@@ -3887,10 +3544,7 @@
       },
       {
         "textes": [
-          "Toutes",
-          "Fournisseurs",
-          "Revendeurs",
-          "Non configurées"
+          "Toutes"
         ],
         "motif": "structure",
         "raison": "LES OPTIONS DU SELECTEUR DE TYPE, REPLIEES. Le kit rend les siennes dans un `select` natif, dont la sonde lit les `option` ; les notres sont des liens dans un `details` ferme, que la sonde releve aussi. L oeil n en voit qu une de chaque cote. Leurs libelles different parce que les filtres different : le kit filtre par plan, par boutique et par date — trois dimensions que le produit n a pas — la ou nous filtrons par TYPE DE COMPTE, qui est la segmentation d usage du brief."
@@ -3910,13 +3564,6 @@
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       },
       {
         "textes": [
@@ -4178,8 +3825,7 @@
           "Toutes",
           "Suspensions",
           "Consultations",
-          "Depuis le début",
-          "7 derniers jours"
+          "Depuis le début"
         ],
         "motif": "structure",
         "raison": "LES OPTIONS DES DEUX SELECTEURS, REPLIEES. Le kit rend les siennes dans des `select` natifs, dont la sonde lit les `option` ; les notres sont des liens dans des `details` fermes, que la sonde releve aussi. L oeil n en voit qu une de chaque cote. Leurs libelles different parce que les filtres different : le kit filtre par niveau, categorie, utilisateur et date — quatre dimensions declarees plus haut — la ou nous filtrons par FAMILLE D ACTION et par FENETRE."
@@ -4376,9 +4022,7 @@
     "enTrop": [
       {
         "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système"
+          "Journal d'audit"
         ],
         "motif": "contrainte",
         "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et son encart de trace, qui occupe la geometrie de la carte decorative du kit."
@@ -4412,8 +4056,7 @@
           "Toutes",
           "Suspensions",
           "Consultations",
-          "Depuis le début",
-          "7 derniers jours"
+          "Depuis le début"
         ],
         "motif": "structure",
         "raison": "LES OPTIONS DES DEUX SELECTEURS, REPLIEES. Le kit rend les siennes dans des `select` natifs, dont la sonde lit les `option` ; les notres sont des liens dans des `details` fermes, que la sonde releve aussi. L oeil n en voit qu une de chaque cote. Leurs libelles different parce que les filtres different : le kit filtre par niveau, categorie, utilisateur et date — quatre dimensions declarees plus haut — la ou nous filtrons par FAMILLE D ACTION et par FENETRE."
@@ -4434,13 +4077,6 @@
         "motif": "donnee",
         "volatile": true,
         "raison": "LES LIGNES DE SUSPENSION ET DE RÉACTIVATION. Elles n'apparaissent que si les suites RLS de suspension ont écrit parmi les cinquante dernières lignes du journal au dernier passage des portes — leur présence dépend de l'ordre des suites. VOLATILE, donc : couverte quand elle est là, pas exigée quand elle n'y est pas."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       },
       {
         "textes": [
@@ -4879,8 +4515,6 @@
     "enTrop": [
       {
         "textes": [
-          "Journal d'audit",
-          "Surveillance",
           "Paramètres système",
           "Chaque modification est écrite au journa"
         ],
@@ -4936,13 +4570,6 @@
         ],
         "motif": "contrainte",
         "raison": "CE QUI N EST PAS ICI EST DIT, plutot que laisse a deviner. Un ecran de parametres muet sur les secrets laisse chercher ou les regler — et la recherche finit par une cle collee quelque part. La cle de service ne quitte jamais le serveur : c est le principe VI, et cet encart est le seul endroit du produit ou il se lit."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       }
     ]
   },
@@ -6376,13 +6003,6 @@
         ],
         "motif": "contrainte",
         "raison": "La phrase de consentement par la continuation — voir la declaration des deux liens."
-      },
-      {
-        "textes": [
-          "DropLink"
-        ],
-        "motif": "structure",
-        "raison": "LE NOM DE LA BOUTIQUE EST ECRIT, PAS DESSINE. Le kit pose son logo en IMAGE dans la barre laterale de la maquette ; nous ecrivons « DropLink » en texte. Un fichier de plus pour un dessin decoratif de 15 px, servi sur l ecran d entree, se paierait sur le budget de la page sans rien ajouter — et la maquette est `aria-hidden`, donc ce texte n est annonce a personne."
       }
     ]
   },
@@ -6761,18 +6381,13 @@
     "valeurs": [
       {
         "textes": [
-          "7. Résiliation [2/2]",
-          "8. Disponibilité [1/2]",
-          "8. Disponibilité [2/2]",
-          "11. Données personnelles [1/2]",
-          "11. Données personnelles [2/2]",
-          "13. Droit applicable",
-          "Conditions d'utilisation [2/2]",
           "Conditions d'utilisation",
-          "Politique de confidentialité",
           "Conditions",
           "Confidentialité",
-          "© 2025 DropLink. Tous droits réservés."
+          "© 2025 DropLink. Tous droits réservés.",
+          "7. Résiliation",
+          "8. Disponibilité",
+          "11. Données personnelles"
         ],
         "motif": "structure",
         "raison": "PLACE SEULE, ET LE NOMBRE DE SECTIONS EN EST LA CAUSE. Le gabarit du kit compte treize sections de conditions et dix de confidentialite, avec tableaux et encadres ; le texte du produit en compte huit et cinq. Le sommaire est plus court, les liens qui le suivent remontent, le document aussi, et le pied avec lui. « Editeur : » se decale de la longueur de la date voisine : « Derniere mise a jour : 29 aout 2026 » contre « En vigueur depuis le 11 septembre 2025 ». Les decomptes differents de « Conditions d utilisation » et « Politique de confidentialite » viennent de ce que le titre du produit reprend le nom de la page, la ou le gabarit l allonge en « Conditions generales d utilisation ». Au telephone, le sommaire replie liste ces sections sous « Sommaire » : il compte autant d entrees que le texte a de sections, et ses liens se decalent avec lui."
@@ -6819,7 +6434,6 @@
           "6. Abonnement",
           "9. Propriété intellectuelle",
           "10. Responsabilité",
-          "12. Modification",
           "Conditions générales d'utilisation",
           "Ces conditions encadrent l'utilisation d",
           "Les présentes conditions générales d'uti",
@@ -6882,7 +6496,8 @@
           "ville du siège",
           "Pour toute question sur ces conditions :",
           "adresse e-mail de contact",
-          "le support"
+          "le support",
+          "politique de confidentialité"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU KIT EST UN GABARIT, ET IL DECRIT UN AUTRE PRODUIT. Il organise un abonnement Pro a 19,90 € preleve chaque mois, un prestataire de paiement, des factures conservees dix ans, l authentification Apple, la double authentification, une adresse e-mail et un pays d acheteur saisis par le vendeur, et des integrations. La contrainte n° 1 interdit tout ce qui touche a la facturation ; le reste decrit des capacites que le produit n a pas. Un document juridique qui affirme ce que le service ne fait pas engage son editeur sur du faux. La page garde donc SON texte — celui qui decrit le service reel, lacunes comprises —, et le kit ne lui donne que sa coque et sa typographie."
@@ -6905,7 +6520,6 @@
           "6. Abonnement",
           "9. Propriété intellectuelle",
           "10. Responsabilité",
-          "12. Modification",
           "Conditions générales d'utilisation",
           "En vigueur depuis le",
           "11 septembre 2025",
@@ -7006,7 +6620,8 @@
           "La suspension est réversible : la réacti",
           "Le service est fourni en l'état, pendant",
           "Le traitement des données est décrit dan",
-          "Le vendeur peut cesser d'utiliser le ser"
+          "Le vendeur peut cesser d'utiliser le ser",
+          "8. Droit applicable"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU PRODUIT : ses sections, ses paragraphes, et ses lacunes ecrites en toutes lettres dans la pastille « a completer » du kit. Voir la declaration symetrique du gabarit dans les manquants. Tailles, graisses, interlignes et couleurs sont ceux du kit."
@@ -7408,13 +7023,10 @@
     "valeurs": [
       {
         "textes": [
-          "7. Vos droits [1/2]",
-          "7. Vos droits [2/2]",
-          "Conditions d'utilisation",
-          "Politique de confidentialité [3/3]",
           "Conditions",
           "Confidentialité",
-          "© 2025 DropLink. Tous droits réservés."
+          "© 2025 DropLink. Tous droits réservés.",
+          "7. Vos droits"
         ],
         "motif": "structure",
         "raison": "PLACE SEULE, ET LE NOMBRE DE SECTIONS EN EST LA CAUSE. Le gabarit du kit compte treize sections de conditions et dix de confidentialite, avec tableaux et encadres ; le texte du produit en compte huit et cinq. Le sommaire est plus court, les liens qui le suivent remontent, le document aussi, et le pied avec lui. « Editeur : » se decale de la longueur de la date voisine : « Derniere mise a jour : 29 aout 2026 » contre « En vigueur depuis le 11 septembre 2025 ». Les decomptes differents de « Conditions d utilisation » et « Politique de confidentialite » viennent de ce que le titre du produit reprend le nom de la page, la ou le gabarit l allonge en « Conditions generales d utilisation ». Au telephone, le sommaire replie liste ces sections sous « Sommaire » : il compte autant d entrees que le texte a de sections, et ses liens se decalent avec lui."
@@ -7446,12 +7058,9 @@
       },
       {
         "textes": [
-          "1. Responsable",
           "2. Données collectées",
           "3. Finalités et bases légales",
-          "4. Destinataires",
           "5. Durées de conservation",
-          "6. Transferts hors UE",
           "8. Cookies",
           "9. Sécurité",
           "10. Contact et réclamation",
@@ -7564,12 +7173,9 @@
       },
       {
         "textes": [
-          "1. Responsable",
           "2. Données collectées",
           "3. Finalités et bases légales",
-          "4. Destinataires",
           "5. Durées de conservation",
-          "6. Transferts hors UE",
           "8. Cookies",
           "9. Sécurité",
           "10. Contact et réclamation",
@@ -7924,11 +7530,6 @@
         ],
         "motif": "structure",
         "raison": "LA SECONDE RANGEE A TROIS PANNEAUX, PAS QUATRE, puisque la carte « Passez au Pro » n est pas rendue : chaque panneau y est plus large que chez le kit, et ce qui y est pose en largeur de colonne s allonge. Tailles, graisses et couleurs sont celles du kit."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "« Paramètres » rendu trois fois : l entree de la barre laterale, que le kit dessine, et une entree dans CHACUN des deux menus de compte — celui de la barre laterale et celui de la barre superieure. Le kit n a aucun menu de compte ; la sonde mesure nos menus DEPLIES, parce que ce sont des <details>."
       }
     ],
     "manquants": [
@@ -8086,8 +7687,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -8098,19 +7698,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. C est aussi la ou vit « jamais ouvertes », qui etait une tuile avant la reprise : une metrique qui appelle un geste appartient aux alertes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ]
       },
       {
         "motif": "donnee",
@@ -8355,26 +7942,10 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
-      },
-      {
-        "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ],
-        "motif": "donnee",
-        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. C est aussi la ou vit « jamais ouvertes », qui etait une tuile avant la reprise : une metrique qui appelle un geste appartient aux alertes. ⚠️ LES DEUX COMPTEURS SONT DES MOTIFS DEPUIS LE 12/09 AU SOIR : ils etaient ecrits en toutes lettres — « 4 commandes jamais ouvertes » — et l enrichissement du jeu de mesure les a fait passer a 2. Une declaration litterale sur un chiffre que le jeu produit est une declaration qui mourra au premier changement de jeu, et l ecran sortirait rouge sans qu aucun defaut soit en cause.",
-        "motifs": []
       },
       {
         "textes": [
@@ -8426,13 +7997,6 @@
       },
       {
         "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE MEME MENU DE COMPTE, PAR UN BALISAGE DIFFERENT. Le kit le dessine aussi — « Parametres », « Se deconnecter » — mais dans un etat React qui n est pas rendu tant qu il est ferme ; le produit en fait un <details>, sans JavaScript, et la sonde releve le contenu d un <details> ferme."
-      },
-      {
-        "textes": [
           "2 ( 67 %)"
         ],
         "motif": "donnee",
@@ -8446,11 +8010,6 @@
         "texte": "Commandes  <span>",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "Rendu quatre fois contre deux : l entree de la barre laterale et le titre de l ecran, comme le kit, PLUS une entree dans chacun des deux menus de compte — barre laterale et barre superieure — que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
       },
       {
         "textes": [
@@ -8609,8 +8168,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -8621,19 +8179,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -8675,13 +8220,6 @@
   "fr-parametres-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
     "valeurs": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE TITRE DE L ECRAN ET L ENTREE DU MENU DE COMPTE : le kit dessine aussi l entree, dans un etat React non rendu tant que le menu est ferme ; le produit en fait un <details>, dont la sonde releve le contenu."
-      },
       {
         "textes": [
           "Modifier"
@@ -8808,8 +8346,7 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -8820,14 +8357,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motifs": [],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -8873,11 +8402,6 @@
         "texte": "Commandes  <span>",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "Rendu quatre fois contre deux : l entree de la barre laterale et le titre de l ecran, comme le kit, PLUS une entree dans chacun des deux menus de compte — barre laterale et barre superieure — que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
       },
       {
         "textes": [
@@ -9042,8 +8566,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -9054,19 +8577,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -9108,13 +8618,6 @@
   "fr-parametres-suppression-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
     "valeurs": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE TITRE DE L ECRAN ET L ENTREE DU MENU DE COMPTE : le kit dessine aussi l entree, dans un etat React non rendu tant que le menu est ferme ; le produit en fait un <details>, dont la sonde releve le contenu."
-      },
       {
         "textes": [
           "Modifier"
@@ -9252,8 +8755,7 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -9264,14 +8766,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motifs": [],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -9317,11 +8811,6 @@
         "texte": "Commandes  <span>",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "Rendu quatre fois contre deux : l entree de la barre laterale et le titre de l ecran, comme le kit, PLUS une entree dans chacun des deux menus de compte — barre laterale et barre superieure — que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
       },
       {
         "textes": [
@@ -9492,8 +8981,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -9504,19 +8992,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -9565,13 +9040,6 @@
   "fr-parametres-deux-etapes-qr-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
     "valeurs": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE TITRE DE L ECRAN ET L ENTREE DU MENU DE COMPTE : le kit dessine aussi l entree, dans un etat React non rendu tant que le menu est ferme ; le produit en fait un <details>, dont la sonde releve le contenu."
-      },
       {
         "textes": [
           "Modifier"
@@ -9710,8 +9178,7 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -9722,14 +9189,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motifs": [],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -9782,11 +9241,6 @@
         "texte": "Commandes  <span>",
         "motif": "donnee",
         "raison": "Quatorze pixels de largeur : le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure."
-      },
-      {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "Rendu quatre fois contre deux : l entree de la barre laterale et le titre de l ecran, comme le kit, PLUS une entree dans chacun des deux menus de compte — barre laterale et barre superieure — que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
       },
       {
         "textes": [
@@ -9948,8 +9402,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -9960,19 +9413,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -10014,13 +9454,6 @@
   "fr-parametres-deux-etapes-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
     "valeurs": [
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE TITRE DE L ECRAN ET L ENTREE DU MENU DE COMPTE : le kit dessine aussi l entree, dans un etat React non rendu tant que le menu est ferme ; le produit en fait un <details>, dont la sonde releve le contenu."
-      },
       {
         "textes": [
           "Modifier"
@@ -10150,8 +9583,7 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -10162,14 +9594,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motifs": [],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les compteurs sont des MOTIFS : ils dependent du jeu de mesure."
       },
       {
         "textes": [
@@ -10511,10 +9935,8 @@
     "valeurs": [
       {
         "textes": [
-          "Créer une commande [2/2]",
           "Créer une commande",
-          "Suivi d'envois [2/3]",
-          "Suivi d'envois [3/3]"
+          "Suivi d'envois"
         ],
         "motif": "structure",
         "raison": "APPARIEMENT PAR RANG, PAS UN ECART DE STYLE. Le produit ecrit « Creer une commande » et « Suivi d envois » une fois de plus que le kit, en gras dans sa prose ; la soustraction apparie les occurrences dans l ordre, et le titre de section du kit se retrouve compare au mot en gras du produit. Titres et mots en gras ont chacun les valeurs de leur modele."
@@ -10529,21 +9951,6 @@
       },
       {
         "textes": [
-          "Photos et vidéos [2/3]",
-          "Photos et vidéos [3/3]",
-          "Transporteur et suivi [2/2]",
-          "Statuts de commande [2/2]",
-          "Le lien client [2/2]",
-          "Analyses [3/4]",
-          "Analyses [4/4]",
-          "Notifications [2/2]",
-          "Paramètres [2/2]",
-          "Gratuit et Pro [2/2]",
-          "Aide",
-          "Questions fréquentes [1/2]",
-          "Questions fréquentes [2/2]",
-          "Contacter le support [1/2]",
-          "Contacter le support [2/2]",
           "7 min de lecture",
           "Générer une page de suivi unique, à votr",
           "Récupérer les informations du transporte",
@@ -10601,7 +10008,17 @@
           "Contact",
           "Conditions d'utilisation",
           "Politique de confidentialité",
-          "© 2025 DropLink. Tous droits réservés."
+          "© 2025 DropLink. Tous droits réservés.",
+          "Analyses",
+          "Photos et vidéos",
+          "Transporteur et suivi",
+          "Statuts de commande",
+          "Le lien client",
+          "Notifications",
+          "Paramètres",
+          "Gratuit et Pro",
+          "Questions fréquentes",
+          "Contacter le support"
         ],
         "motif": "contrainte",
         "raison": "PLACE ET RETOUR A LA LIGNE SEULS, ET LE TEXTE EN EST LA CAUSE. La documentation dit ce que le produit fait : 61 fonctions que le kit documente n existent pas (connexion Apple, lien qui expire, brouillon, cloche, integrations, passage au Pro), et une documentation fausse se lit comme une promesse. Les paragraphes n ont donc pas la meme longueur, les listes pas le meme nombre de lignes, et tout ce qui suit se decale d autant. Tailles, graisses, couleurs et marges sont celles du kit au telephone."
@@ -10772,21 +10189,8 @@
       },
       {
         "textes": [
-          "En transit [4/4]",
-          "En préparation [4/4]",
-          "Livrée [1/2]"
-        ],
-        "motif": "structure",
-        "raison": "LES OPTIONS REPLIEES DU SELECTEUR DE STATUT, APPARIEES A DES PILULES DU KIT. Le kit ecrit « En transit », « En preparation » et « Livree » dans ses pilules de tableau ET dans son `select` ; la sonde releve nos options de `details` et, a nombre d occurrences egal, en apparie une avec une pilule du kit. Nos pilules, elles, portent exactement les valeurs du kit — 11,5/700, remplissage 6/11, rayon pilule, teinte du statut — et ne figurent pas dans l ecart."
-      },
-      {
-        "textes": [
-          "En transit [1/4]",
-          "En transit [2/4]",
           "Livrées [1/2]",
-          "Livrées [2/2]",
-          "En préparation [1/4]",
-          "En préparation [2/4]"
+          "Livrées [2/2]"
         ],
         "motif": "donnee",
         "raison": "LA LEGENDE DE L ANNEAU ET LES TUILES S AJUSTENT A LEURS NOMBRES. Le libelle de legende est la piste souple de sa rangee : a cote de « 1 » au lieu de « 624 », il occupe 18 px de plus. Et le libelle d une tuile a la largeur de sa colonne, que le badge « +8 % » du kit elargit — badge declare dans les manquants. Taille, graisse et couleur sont celles du kit."
@@ -10807,8 +10211,6 @@
           "Commandes [3/3]",
           "Gérez et suivez toutes les commandes cré",
           "Total commandes",
-          "En transit [3/4]",
-          "En préparation [3/4]",
           "Réinitialiser",
           "Liste des commandes",
           "Boutique",
@@ -10821,7 +10223,6 @@
           "08/09/2025 16:42",
           "08/09/2025 12:03",
           "Voir",
-          "Livrée [2/2]",
           "Répartition des statuts",
           "50 %",
           "30 %",
@@ -10830,6 +10231,15 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE PAR COLONNE DE CAUSES. L encart de trace precede les tuiles et la barre superieure du kit n existe pas : tout ce qui suit monte ou descend de quelques pixels. Dans le tableau, la case a cocher du kit n existe pas (aucune action groupee a porter), ni son menu « … » : les colonnes partent 48 px plus a gauche et « Voir » s aligne a droite. L en-tete du panneau de liste n a ni « Exporter » ni reglage de colonnes, donc son titre prend la largeur. Nos en-tetes sont des `th` qui portent le retrait de leur colonne, la ou le kit pose un span dans une grille. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "En transit",
+          "En préparation",
+          "Livrée"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS REPLIEES DU SELECTEUR DE STATUT, APPARIEES A DES PILULES DU KIT. Le kit ecrit « En transit », « En preparation » et « Livree » dans ses pilules de tableau ET dans son `select` ; la sonde releve nos options de `details` et, a nombre d occurrences egal, en apparie une avec une pilule du kit. Nos pilules, elles, portent exactement les valeurs du kit — 11,5/700, remplissage 6/11, rayon pilule, teinte du statut — et ne figurent pas dans l ecart."
       }
     ],
     "manquants": [
@@ -11014,8 +10424,7 @@
         "textes": [
           "Tous les statuts",
           "Expédiée",
-          "Toutes les dates",
-          "7 derniers jours"
+          "Toutes les dates"
         ],
         "motif": "structure",
         "raison": "LES OPTIONS DES DEUX SELECTEURS, REPLIEES. Le kit rend les siennes dans un `select` natif ; les notres sont des liens dans un `details` ferme — le filtre vit dans l URL, donc la vue se partage, se recharge, et ses criteres entrent dans la trace. La sonde releve toutes les options, l oeil n en voit qu une de chaque cote."
@@ -11044,33 +10453,21 @@
         "textes": [
           "commandes [3/3]",
           "Total commandes",
-          "En préparation [1/4]",
           "Réinitialiser",
           "Répartition des statuts",
           "50 % [1/4]",
           "30 % [2/4]",
           "12 % [3/4]",
-          "5 % [4/4]"
+          "5 % [4/4]",
+          "En préparation"
         ],
         "motif": "donnee",
         "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
       },
       {
         "textes": [
-          "En transit [4/4]",
-          "En préparation [4/4]"
-        ],
-        "motif": "structure",
-        "raison": "LES OPTIONS REPLIEES DU SELECTEUR DE STATUT, APPARIEES A DES PILULES DU KIT. Le kit ecrit « En transit », « En preparation » et « Livree » dans ses pilules de tableau ET dans son `select` ; la sonde releve nos options de `details` et, a nombre d occurrences egal, en apparie une avec une pilule du kit. Nos pilules, elles, portent exactement les valeurs du kit — 11,5/700, remplissage 6/11, rayon pilule, teinte du statut — et ne figurent pas dans l ecart."
-      },
-      {
-        "textes": [
-          "En transit [1/4]",
-          "En transit [2/4]",
           "Livrées [1/2]",
-          "Livrées [2/2]",
-          "En préparation [1/4]",
-          "En préparation [2/4]"
+          "Livrées [2/2]"
         ],
         "motif": "donnee",
         "raison": "LA LEGENDE DE L ANNEAU ET LES TUILES S AJUSTENT A LEURS NOMBRES. Le libelle de legende est la piste souple de sa rangee : a cote de « 1 » au lieu de « 624 », il occupe 18 px de plus. Et le libelle d une tuile a la largeur de sa colonne, que le badge « +8 % » du kit elargit — badge declare dans les manquants. Taille, graisse et couleur sont celles du kit."
@@ -11087,8 +10484,6 @@
       {
         "textes": [
           "Total commandes",
-          "En transit [3/4]",
-          "En préparation [3/4]",
           "Réinitialiser",
           "Liste des commandes",
           "Voir",
@@ -11103,6 +10498,13 @@
         ],
         "motif": "structure",
         "raison": "APPARIEMENT PAR RANG DES PASTILLES ET DES OPTIONS. Le meme mot est une pastille de statut sur une ligne, une option du filtre relevee fermee, et un libelle de tuile : la soustraction les apparie dans l ordre du document, et compare donc une pastille a une option. Chacune porte les valeurs de son modele."
+      },
+      {
+        "textes": [
+          "En transit"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS REPLIEES DU SELECTEUR DE STATUT, APPARIEES A DES PILULES DU KIT. Le kit ecrit « En transit », « En preparation » et « Livree » dans ses pilules de tableau ET dans son `select` ; la sonde releve nos options de `details` et, a nombre d occurrences egal, en apparie une avec une pilule du kit. Nos pilules, elles, portent exactement les valeurs du kit — 11,5/700, remplissage 6/11, rayon pilule, teinte du statut — et ne figurent pas dans l ecart."
       }
     ],
     "manquants": [
@@ -11237,11 +10639,7 @@
     "enTrop": [
       {
         "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système",
-          "Cette consultation est écrite au journal",
-          "Statistiques"
+          "Cette consultation est écrite au journal"
         ],
         "motif": "contrainte",
         "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et ses deux rappels de trace — l encart permanent de la colonne, et celui de l ecran, qui dit AVANT de regarder que la consultation est ecrite au journal et ce que la liste ne montre pas."
@@ -11274,8 +10672,7 @@
         "textes": [
           "Tous les statuts",
           "Expédiée",
-          "Toutes les dates",
-          "7 derniers jours"
+          "Toutes les dates"
         ],
         "motif": "structure",
         "raison": "LES OPTIONS DES DEUX SELECTEURS, REPLIEES. Le kit rend les siennes dans un `select` natif ; les notres sont des liens dans un `details` ferme — le filtre vit dans l URL, donc la vue se partage, se recharge, et ses criteres entrent dans la trace. La sonde releve toutes les options, l oeil n en voit qu une de chaque cote."
@@ -11636,7 +11033,6 @@
       },
       {
         "textes": [
-          "Statistiques",
           "Comptes",
           "commandes"
         ],
@@ -11755,15 +11151,6 @@
       }
     ],
     "enTrop": [
-      {
-        "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système"
-        ],
-        "motif": "contrainte",
-        "raison": "LA COLONNE DU PRODUIT : son vocabulaire et son rappel permanent que chaque consultation de donnees d un vendeur est tracee."
-      },
       {
         "textes": [
           "rien sur la période précédente",
@@ -11993,11 +11380,6 @@
         "raison": "Le libelle de la barre laterale est etire par le badge de volume a sa droite — « 124 » chez le kit, un chiffre du jeu de mesure ici. Meme declaration que sur /parametres."
       },
       {
-        "texte": "Paramètres  <nombre d'occurrences>",
-        "motif": "structure",
-        "raison": "L entree de la barre laterale, comme le kit, PLUS une entree dans chacun des deux menus de compte que le kit n a pas. La sonde mesure ces menus deplies, parce que ce sont des <details>."
-      },
-      {
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
@@ -12029,8 +11411,7 @@
       {
         "textes": [
           "AD",
-          "Atelier de verification",
-          "Se déconnecter"
+          "Atelier de verification"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
@@ -12041,19 +11422,6 @@
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes",
-          "Le client n’a pas encore ouvert son lien",
-          "Plus de dix jours sans information du tr"
-        ],
-        "motifs": [
-          "^\\d+ commandes? jamais ouvertes$",
-          "^\\d+ colis sans mouvement$"
-        ],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les deux compteurs sont declares par MOTIF."
       }
     ]
   },
@@ -12072,33 +11440,10 @@
     "enTrop": [
       {
         "textes": [
-          "AD",
-          "Se déconnecter"
+          "AD"
         ],
         "motif": "donnee",
         "raison": "L identite du compte de mesure. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29)."
-      },
-      {
-        "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
-        ],
-        "motif": "donnee",
-        "raison": "L adresse du compte jetable, fabriquee a chaque passage."
-      },
-      {
-        "textes": [
-          "Alertes"
-        ],
-        "motifs": [],
-        "motif": "donnee",
-        "raison": "LE BLOC D ALERTES DE LA BARRE SUPERIEURE, que le kit ne dessine pas. Il appartient a la coque, pas a cet ecran. Les deux compteurs sont declares par MOTIF."
-      },
-      {
-        "textes": [
-          "Paramètres"
-        ],
-        "motif": "structure",
-        "raison": "LE MEME MENU DE COMPTE, PAR UN BALISAGE DIFFERENT. Le kit le dessine aussi — « Parametres », « Se deconnecter » — mais dans un etat React qui n est pas rendu tant qu il est ferme ; le produit en fait un <details>, sans JavaScript, et la sonde releve le contenu d un <details> ferme."
       }
     ]
   },
@@ -12305,13 +11650,6 @@
       },
       {
         "textes": [
-          "Surveillance  <nombre d'occurrences>"
-        ],
-        "motif": "structure",
-        "raison": "Rendus deux fois : l entree de navigation du produit et le titre de l ecran, la surface « Administration » et la rubrique « ADMINISTRATION » de la colonne. Le kit n a d entree ni pour l une ni pour l autre."
-      },
-      {
-        "textes": [
           "11 / 60 par minute",
           "38 / 120 par minute",
           "4 / 20 par minute"
@@ -12335,26 +11673,11 @@
     "enTrop": [
       {
         "textes": [
-          "Journal d'audit",
-          "Paramètres système"
-        ],
-        "motif": "contrainte",
-        "raison": "LA COLONNE DU PRODUIT : son vocabulaire et son rappel permanent que chaque consultation de donnees d un vendeur est tracee. « Surveillance » et « ADMINISTRATION » sont ici APPARIES au titre de l ecran et a la surface du meme nom : voir « nombre d occurrences »."
-      },
-      {
-        "textes": [
           "Aucun passage enregistré. La tâche n'a j",
           "Jamais exécutée"
         ],
         "motif": "donnee",
         "raison": "L ETAT « JAMAIS EXECUTEE », celui des deux taches du jeu de mesure : la base de tests n a aucun planificateur, donc aucun battement. Il est rendu neutre, ni vert ni ambre, sur le vocabulaire du kit. Voir la declaration symetrique dans les manquants."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       }
     ]
   },
@@ -12639,15 +11962,6 @@
     ],
     "enTrop": [
       {
-        "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système"
-        ],
-        "motif": "contrainte",
-        "raison": "LA COLONNE DU PRODUIT : son vocabulaire et son rappel permanent que chaque consultation de donnees d un vendeur est tracee. « Surveillance » et « ADMINISTRATION » sont ici APPARIES au titre de l ecran et a la surface du meme nom : voir « nombre d occurrences »."
-      },
-      {
         "motifs": [
           "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
         ],
@@ -12669,13 +11983,6 @@
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       },
       {
         "textes": [
@@ -12977,15 +12284,6 @@
     ],
     "enTrop": [
       {
-        "textes": [
-          "Journal d'audit",
-          "Surveillance",
-          "Paramètres système"
-        ],
-        "motif": "contrainte",
-        "raison": "LA COLONNE DU PRODUIT : son vocabulaire et son rappel permanent que chaque consultation de donnees d un vendeur est tracee. « Surveillance » et « ADMINISTRATION » sont ici APPARIES au titre de l ecran et a la surface du meme nom : voir « nombre d occurrences »."
-      },
-      {
         "motifs": [
           "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
         ],
@@ -13007,13 +12305,6 @@
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
-      },
-      {
-        "textes": [
-          "Statistiques"
-        ],
-        "motif": "structure",
-        "raison": "LA FEUILLE « PLUS » DE LA BARRE D ONGLETS, RELEVEE FERMEE. Les quatre destinations qui ne tiennent pas dans les quatre onglets y vivent ; le kit les garde dans un etat React, non rendu tant que la feuille est fermee, le produit dans un <details> dont la sonde releve le contenu. Meme navigation, deux balisages — et l ecran courant n y figure pas."
       },
       {
         "textes": [

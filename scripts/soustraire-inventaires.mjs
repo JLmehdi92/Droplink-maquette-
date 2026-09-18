@@ -318,7 +318,7 @@ const textesDe = (d) => (Array.isArray(d.textes) ? d.textes : d.texte === undefi
 const motifsDe = (d) => (Array.isArray(d.motifs) ? d.motifs.map((m) => new RegExp(m)) : []);
 
 /** Construit un chercheur sur une liste de declarations, et retient ce qui a servi. */
-const chercheur = (declarations) => {
+const chercheur = (declarations, section) => {
   const vus = new Set();
   const trouver = (texte) => {
     for (const d of declarations) {
@@ -359,10 +359,10 @@ const chercheur = (declarations) => {
     for (const d of declarations) {
       if (d.volatile === true) continue;
       for (const cible of textesDe(d)) {
-        if (!vus.has(cible)) restes.push({ texte: cible, motif: d.motif });
+        if (!vus.has(cible)) restes.push({ texte: cible, motif: d.motif, section });
       }
       for (const m of motifsDe(d)) {
-        if (!vus.has(m.source)) restes.push({ texte: `/${m.source}/`, motif: d.motif });
+        if (!vus.has(m.source)) restes.push({ texte: `/${m.source}/`, motif: d.motif, section });
       }
     }
     return restes;
@@ -370,9 +370,9 @@ const chercheur = (declarations) => {
   return { trouver, mortes };
 };
 
-const cValeurs = chercheur(listeDe("valeurs"));
-const cManquants = chercheur(listeDe("manquants"));
-const cEnTrop = chercheur(listeDe("enTrop"));
+const cValeurs = chercheur(listeDe("valeurs"), "valeurs");
+const cManquants = chercheur(listeDe("manquants"), "manquants");
+const cEnTrop = chercheur(listeDe("enTrop"), "enTrop");
 
 const restants = [];
 const ecartesDeclares = [];
@@ -413,7 +413,7 @@ bloc(
 if (declarationsMortes.length > 0) {
   bloc(
     "⑤ DECLARATIONS QUI NE DESIGNENT PLUS RIEN — A RETIRER",
-    declarationsMortes.map((d) => `  « ${d.texte} » — ${d.motif}`),
+    declarationsMortes.map((d) => `  « ${d.texte} » — ${d.motif} (${d.section})`),
   );
 }
 

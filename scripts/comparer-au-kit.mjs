@@ -75,7 +75,16 @@ const RELEVE = `(() => {
     );
     return utiles.join(", ").slice(0, 80);
   };
-  const rendu = (e) => e.getClientRects().length > 0;
+  /*
+   * ⚠️ UNE BOITE N EST PAS UN RENDU. Le contenu d un <details> FERME garde ses
+   * boites sous Chrome (il vit sous content-visibility: hidden) sans etre peint :
+   * la landing comptait « English », « 中文 » et les cinq liens du menu burger
+   * comme rendus, alors que la planche ne monte ses listes qu a l ouverture.
+   * checkVisibility() sans option n ecarte que display: none et
+   * content-visibility: hidden — rien de ce qui se voit (18/09/2026).
+   */
+  const rendu = (e) =>
+    e.getClientRects().length > 0 && (typeof e.checkVisibility !== "function" || e.checkVisibility());
   const lignes = [];
   for (const e of document.querySelectorAll("body *")) {
     if (!rendu(e)) continue;
@@ -153,7 +162,20 @@ await envoyer("Network.enable", {});
    apportee au design system restait invisible, et l on remesurait
    indefiniment le meme ecart. */
 await envoyer("Network.setCacheDisabled", { cacheDisabled: true });
-await envoyer("Network.setExtraHTTPHeaders", { headers: { "x-real-ip": "203.0.113.7" } });
+/* ⚠️ L'ADRESSE DE SONDE NE VAUT QUE POUR NOTRE SERVEUR, JAMAIS POUR LE KIT.
+   Elle existe pour le plafond de débit du produit. Posée sur la planche, elle
+   partait aussi vers `fonts.gstatic.com` : un en-tête personnalisé sur une
+   requête de police croisée impose un prévol CORS, que Google refuse — et
+   toute face que le kit y charge (l'italique d'Inter, JetBrains Mono)
+   passait en ERREUR. « Vinted », seul mot en italique de la landing, était
+   ainsi relevé à 30 px de haut dans la police de repli, contre 26 dans le
+   même Chrome sans l'en-tête (18/09/2026). Le kit est un dossier statique :
+   il n'a pas de plafond à contourner. */
+const cheminVise = new URL(url).pathname;
+const estLeKit = cheminVise.includes("/ui_kits/") || cheminVise.endsWith("/mobile.html");
+if (!estLeKit) {
+  await envoyer("Network.setExtraHTTPHeaders", { headers: { "x-real-ip": "203.0.113.7" } });
+}
 await envoyer("Emulation.setDeviceMetricsOverride", {
   width: largeur,
   height: largeur < 700 ? 844 : 1010,
