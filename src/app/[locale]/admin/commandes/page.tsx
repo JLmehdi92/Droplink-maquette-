@@ -338,7 +338,7 @@ export default async function AdminCommandes({
             ⚠️ LE PANNEAU « ACTIVITÉ RÉCENTE » DU KIT N'EST PAS PORTÉ : il nomme
             des commandes et des vendeurs tiers qu'on n'a pas demandé à voir, à
             chaque ouverture — la même raison que sur les boutiques. */}
-        <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] xl:items-start">
+        <div className="grid gap-2.5 md:gap-[18px] 2xl:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] 2xl:items-start">
           <section className={PANNEAU + " xl:px-0 xl:pb-0"}>
             <header className="mb-[18px] xl:px-[22px]">
               <h2 className={PANNEAU_TITRE}>{t("commandes.liste")}</h2>

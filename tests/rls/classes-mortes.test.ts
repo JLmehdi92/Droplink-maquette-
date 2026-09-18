@@ -52,7 +52,18 @@ function cssCompile(): string {
   // Tailwind échappe les caractères spéciaux dans les sélecteurs :
   // `md:px-4` devient `.md\:px-4`. On retire les échappements pour comparer aux
   // classes telles qu'elles sont écrites dans le balisage.
-  return feuilles.map((f) => readFileSync(f, "utf8")).join("\n").replaceAll("\\", "");
+  //
+  // ⚠️ UN CHIFFRE EN TÊTE S'ÉCHAPPE EN HEXADÉCIMAL, PAS PAR UNE BARRE. CSS
+  // interdit qu'un identifiant commence par un chiffre : `2xl:grid-cols-2`
+  // devient `.\32 xl\:grid-cols-2`. Retirer les barres seules laissait
+  // `.32 xl:…`, et le premier `2xl:` du dépôt (18/09/2026) sortait « mort »
+  // alors que sa règle était servie. L'échappement hexadécimal est donc
+  // décodé AVANT de retirer les barres restantes.
+  return feuilles
+    .map((f) => readFileSync(f, "utf8"))
+    .join("\n")
+    .replace(/\\([0-9a-fA-F]{1,6}) ?/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replaceAll("\\", "");
 }
 
 /**

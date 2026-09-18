@@ -327,7 +327,7 @@ export default async function AdminComptes({
             vendeurs tiers à chaque ouverture — donc une entrée d'audit par
             chargement d'écran, qui noierait les consultations délibérées que le
             journal existe pour retrouver. */}
-        <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] xl:items-start">
+        <div className="grid gap-2.5 md:gap-[18px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] 2xl:items-start">
           <section className={PANNEAU}>
             <header className="mb-[18px]">
               <h2 className={PANNEAU_TITRE}>{t("comptes.liste")}</h2>

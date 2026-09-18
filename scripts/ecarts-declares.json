@@ -1028,7 +1028,8 @@
       {
         "texte": "Créée le 8 septembre 2025 à 14:32",
         "motif": "donnee",
-        "raison": "Neuf pixels de largeur. Le kit ecrit « le 8 septembre 2025 », le jeu de mesure « le 12 septembre 2026 » : un chiffre de plus au jour."
+        "raison": "Neuf pixels de largeur. Le kit ecrit « le 8 septembre 2025 », le jeu de mesure « le 12 septembre 2026 » : un chiffre de plus au jour. VOLATILE (18/09/2026) : la date du jeu est celle du jour de la mesure, et selon ses chiffres la largeur tombe parfois juste — la declaration mourait alors sans que rien ait change.",
+        "volatile": true
       },
       {
         "textes": [
@@ -1075,6 +1076,14 @@
         "texte": "Numéro de suivi",
         "motif": "contrainte",
         "raison": "Rendu une fois par le kit — la ligne du panneau d informations —, trois fois chez nous : le kit le met en CHAMP sur un autre ecran (`CreateOrder`), nous l avons sur celui-ci. L appariement au plus proche tombe donc sur l etiquette du formulaire (13/500) et la compare a la ligne du kit (14/400)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
       }
     ],
     "manquants": [
@@ -1155,6 +1164,14 @@
         ],
         "motif": "donnee",
         "raison": "TROIS EVENEMENTS QUE LA BASE N ECRIT PAS. `order_events` porte dix types, tous emis par une mutation du VENDEUR ou du client ; l ingestion du suivi n en ecrit aucun, donc « statut mis a jour » n existe pas, et la generation du lien fait partie de la creation. « 3 articles ajoutes » est la charge utile d un evenement de demonstration."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
       }
     ],
     "enTrop": [
@@ -1350,6 +1367,16 @@
         "motif": "donnee",
         "volatile": true,
         "raison": "LA DATE DE CREATION DU JEU, ECRITE EN TOUTES LETTRES. Le jeu est cree le jour du passage : quand ce jour tombe en septembre, sa date s apparie a celle du kit (« Creee le 12 septembre 2025 a 14:32 », chiffres normalises) et les deux ont la meme largeur ; un autre mois, le nom du mois change sa longueur. VOLATILE, donc (17/09/2026)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025 [1/4]  <time>",
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40 [1/4]  <span>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
       }
     ],
     "manquants": [
@@ -1375,6 +1402,14 @@
         ],
         "motif": "donnee",
         "raison": "LA REFERENCE ET LE LIEN CLIENT DE LA COMMANDE DE DEMONSTRATION. Le produit rend ceux de la commande du jeu, derives d un identifiant et d un jeton tires au hasard."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
       }
     ],
     "enTrop": [
@@ -3217,6 +3252,19 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE. Nos sections ne sont ni les memes ni dans le meme ordre : l encart de trace precede les tuiles, elles sont QUATRE et non six — les deux tuiles de plan sont declarees plus bas, ainsi qu une septieme sur les liens clients — la barre superieure du kit n existe pas, et la colonne de droite porte UN panneau au lieu de trois. Le panneau de liste est donc plus large et tout ce qui le suit est decale. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Actions  <span>",
+          "Voir  <button>"
+        ],
+        "motif": "structure",
+        "raison": "LA COLONNE DES ACTIONS, REBRANCHEE LE 18/09/2026 (8e8cd8d l avait retiree avec le lien vers la fiche du compte). Meme libelle, meme bouton de 34 px que la planche ; leur place suit un tableau de NEUF colonnes contre dix au kit (ni case de selection ni « Plan », facturation interdite), et l en-tete porte la marge droite de la derniere colonne, comme sur la liste admin des commandes."
+      },
+      {
+        "texte": "Voir  <nombre d'occurrences>",
+        "motif": "donnee",
+        "raison": "Dix boutiques dans la planche, une dans le jeu de mesure : un « Voir » par boutique."
       }
     ],
     "manquants": [
@@ -3253,9 +3301,7 @@
           "Actives",
           "Inactives",
           "Actif",
-          "Inactif",
-          "Actions",
-          "Voir"
+          "Inactif"
         ],
         "motif": "contrainte",
         "raison": "LE VOCABULAIRE DU PRODUIT GAGNE, ET IL EST LE MEME PARTOUT — voir la meme declaration sur la liste des comptes. Un ecart merite sa propre phrase : « active » et « inactive » ne decrivent pas une boutique chez nous. Une boutique NAIT a l inscription et n a pas d etat propre ; c est le COMPTE qui est actif ou suspendu. Ce qui distingue reellement deux boutiques, c est qu un vendeur soit alle jusqu a se donner un NOM — la mesure d activation, celle sur laquelle on decidera. L ecran dit donc « configurees » et « sans nom »."
@@ -3485,6 +3531,16 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE. Nos sections ne sont ni les memes ni dans le meme ordre : l encart de trace precede les tuiles, elles sont QUATRE et non six — les deux tuiles de plan sont declarees plus bas, ainsi qu une septieme sur les liens clients — la barre superieure du kit n existe pas, et la colonne de droite porte UN panneau au lieu de trois. Le panneau de liste est donc plus large et tout ce qui le suit est decale. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      },
+      {
+        "texte": "Voir  <button>",
+        "motif": "contrainte",
+        "raison": "LE PLANCHER TACTILE DE LA REGLE 5. La planche pose « Voir » a 34 px dans sa rangee repliee ; au telephone le produit lui donne 44, comme a tous ses boutons, et la position suit la carte du produit. Rebranche le 18/09/2026 (8e8cd8d l avait retire)."
+      },
+      {
+        "texte": "Voir  <nombre d'occurrences>",
+        "motif": "donnee",
+        "raison": "Dix boutiques dans la planche, une dans le jeu de mesure : un « Voir » par boutique."
       }
     ],
     "manquants": [
@@ -3507,8 +3563,7 @@
           "Actives",
           "Inactives",
           "Actif",
-          "Inactif",
-          "Voir"
+          "Inactif"
         ],
         "motif": "contrainte",
         "raison": "LE VOCABULAIRE DU PRODUIT GAGNE, ET IL EST LE MEME PARTOUT — voir la meme declaration sur la liste des comptes. Un ecart merite sa propre phrase : « active » et « inactive » ne decrivent pas une boutique chez nous. Une boutique NAIT a l inscription et n a pas d etat propre ; c est le COMPTE qui est actif ou suspendu. Ce qui distingue reellement deux boutiques, c est qu un vendeur soit alle jusqu a se donner un NOM — la mesure d activation, celle sur laquelle on decidera. L ecran dit donc « configurees » et « sans nom »."

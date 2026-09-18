@@ -291,7 +291,16 @@ export default async function AdminBoutiques({
             donc une entrée d'audit par chargement d'écran, qui noierait les
             consultations délibérées que le journal existe pour retrouver. Le
             nôtre ne rend que des nombres. */}
-        <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] xl:items-start">
+        {/*
+          ⚠️ LE PANNEAU LATÉRAL NE SE RANGE À CÔTÉ QU'À `2xl` (1 536 px), plus à
+          `xl`. Vu en capture le 18/09/2026 à 1 280 px : à côté de ses 424 px, le
+          tableau n'avait plus la place de ses colonnes et le panneau les ROGNAIT
+          — Stockage, Création, Statut et « Voir » disparaissaient sans barre de
+          défilement. La planche se mesure à 1 560 : elle garde sa mise en page ;
+          en dessous, la liste prend toute la largeur. Même geste sur les comptes
+          et les commandes, dont les en-têtes se touchaient.
+        */}
+        <div className="grid gap-2.5 md:gap-[18px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] 2xl:items-start">
           <section className={PANNEAU}>
             <header className="mb-[18px]">
               <h2 className={PANNEAU_TITRE}>{t("boutiques.liste")}</h2>
@@ -346,6 +355,17 @@ export default async function AdminBoutiques({
                         </th>
                         <th scope="col" className={EN_TETE_COLONNE}>
                           {t("boutiques.colonnes.statut")}
+                        </th>
+                        {/*
+                          ⚠️ « VOIR » AVAIT DISPARU AU PORTAGE DE L'ÉCRAN (8e8cd8d,
+                          29/08) : la ligne menait à la fiche du compte, la grille
+                          de cartes n'y menait plus, et rien ne le signalait — le
+                          bouton du kit était rangé dans une déclaration de
+                          VOCABULAIRE dont la raison ne le couvrait pas. Même geste
+                          que la liste admin des commandes.
+                        */}
+                        <th scope="col" className={EN_TETE_COLONNE + " pr-[18px] last:pr-[18px]"}>
+                          {t("commandes.colonnes.actions")}
                         </th>
                       </tr>
                     </thead>
@@ -434,6 +454,15 @@ export default async function AdminBoutiques({
                                 {t("boutiques.activeEtat")}
                               </span>
                             )}
+                          </td>
+                          <td className={CELLULE + " pr-[18px] text-right last:pr-[18px]"}>
+                            <Link
+                              href={`/${locale}/admin/comptes/${b.proprietaireId}`}
+                              aria-label={t("commandes.voirLong", { email: b.email })}
+                              className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
+                            >
+                              {t("commandes.voir")}
+                            </Link>
                           </td>
                         </tr>
                       ))}
@@ -525,6 +554,16 @@ export default async function AdminBoutiques({
                             </p>
                           </div>
                         ))}
+                      </div>
+
+                      <div className="mt-3.5 flex justify-end">
+                        <Link
+                          href={`/${locale}/admin/comptes/${b.proprietaireId}`}
+                          aria-label={t("commandes.voirLong", { email: b.email })}
+                          className="inline-flex min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold text-ds-texte-fort"
+                        >
+                          {t("commandes.voir")}
+                        </Link>
                       </div>
                     </li>
                   ))}
