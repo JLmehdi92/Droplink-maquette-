@@ -170,7 +170,9 @@ export async function PanneauFiltres({
           d'un geste et se lit dans l'URL ; le passer par « Appliquer » ferait
           payer deux gestes pour un réglage qu'on change en parcourant la liste.
         */}
-        <div className="border-t border-ds-filet pt-4 lg:border-t-0 lg:border-s lg:border-ds-filet lg:pt-0 lg:ps-5">
+        {/* Masquée au bureau : le tri y a son propre bouton dans la barre d'outils,
+            comme dans la planche (`tableau-commandes.tsx`). */}
+        <div className="border-t border-ds-filet pt-4 lg:hidden">
           {/* 12 px, demi-gras, sourdine — comme les en-têtes de colonnes du kit.
               Les capitales de 11 px de l'ancien dessin passaient sous le
               plancher de 11,5 px de la règle 5. */}

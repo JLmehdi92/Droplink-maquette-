@@ -21,11 +21,12 @@ import { FriseSuivi } from "./frise-suivi";
 import { PilulesFiltres } from "./pilules-filtres";
 import { PanneauFiltres } from "./panneau-filtres";
 import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS, PILULE_OUTIL_DS } from "@/components/panneau-outil";
-import type {
-  DiagnosticListeVide,
-  LigneCommande,
-  PageCommandes,
-  ParametresListe,
+import {
+  TRIS,
+  type DiagnosticListeVide,
+  type LigneCommande,
+  type PageCommandes,
+  type ParametresListe,
 } from "@/lib/commandes/liste";
 import { decrireSilence } from "@/lib/tracking/silence";
 import { lienListe, listeFiltree } from "@/lib/commandes/url";
@@ -251,6 +252,7 @@ export async function TableauCommandes({
         <div className="flex basis-full items-center gap-2.5 px-margin-mobile md:px-5 lg:basis-auto lg:px-0 lg:pb-[14px] [&>details]:min-w-0 [&>details]:flex-1 lg:[&>details]:flex-none [&>details>summary]:w-full lg:[&>details>summary]:w-fit">
         <PanneauFiltres base={base} parametres={parametres} />
 
+
         {/*
           L'EXPORT CSV — HORS du formulaire de lot, et c'est structurel.
 
@@ -295,6 +297,51 @@ export async function TableauCommandes({
               {t("lot.exportTelecharger")}
             </a>
           </div>
+        </details>
+
+        {/*
+          LE TRI DE LA PLANCHE — « Plus récentes ▾ », DERNIER de la rangée, collé au bord
+          droit comme dans la planche (l'export, que la planche n'a pas, le précède).
+          Le libellé est porté par le `summary` lui-même, comme par le bouton du kit.
+          `OrdersView` pose un `ToolbarButton` sans icône qui nomme le tri actif.
+
+          ⚠️ IL VIVAIT SEULEMENT DANS LE PANNEAU DES FILTRES, ET LA SONDE NE LE
+          VOYAIT PAS. Jusqu'au 18/09/2026 elle inventoriait le contenu des
+          `<details>` FERMÉS : le lien « Plus récentes » replié dans le panneau
+          appariait le bouton VISIBLE du kit, et l'écart était déclaré
+          `structure` alors que le produit ne l'affichait pas.
+
+          AU BUREAU SEULEMENT : au téléphone, la planche `Telephone.jsx` n'a
+          pas ce bouton, et le tri reste dans la feuille des filtres — c'est
+          pourquoi la section « Trier » du panneau ne se masque qu'à partir de
+          `lg`. Un seul tri visible à chaque largeur.
+        */}
+        <details className={DETAILS_OUTIL_DS + " hidden lg:block lg:open:relative"}>
+          <summary className={PILULE_OUTIL_DS}>
+            {t("tri." + parametres.tri)}
+            <ChevronDown aria-hidden="true" size={15} strokeWidth={1.8} className="text-ds-texte-tenu" />
+          </summary>
+          <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[260px] lg:max-w-none lg:p-1.5"}>
+            {TRIS.map((tri) => {
+              const actif = parametres.tri === tri;
+              return (
+                <li key={tri}>
+                  <LienEcran
+                    href={lienListe(base, parametres, { tri })}
+                    aria-current={actif ? "true" : undefined}
+                    className={
+                      "flex min-h-9 items-center rounded-ds-sm px-3 text-[14px] transition-colors " +
+                      (actif
+                        ? "bg-ds-surface-teinte font-bold text-ds-accent-encre"
+                        : "font-medium text-ds-texte-corps hover:bg-ds-ink-50")
+                    }
+                  >
+                    {t("tri." + tri)}
+                  </LienEcran>
+                </li>
+              );
+            })}
+          </ul>
         </details>
         </div>
           </>
