@@ -19,7 +19,7 @@ import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { lireHistorique } from "@/lib/commandes/historique";
 import { lireSuiviDeCommande, datesDesEtapes } from "@/lib/commandes/suivi-commande";
-import { lireTransporteur } from "@/lib/tracking/transporteurs";
+import { lireTransporteur, transporteursProposes } from "@/lib/tracking/transporteurs";
 import type { Etape } from "@/lib/tracking/normalize";
 import { titreDeCommande } from "@/lib/commandes/titre";
 import { MenuGestesFiche } from "@/components/commandes/menu-gestes-fiche";
@@ -45,7 +45,7 @@ const lireCommandeEditee = cache(async (id: string) => {
       // ouverture porte sur un brouillon encore vide ou sur une commande déjà
       // remplie — la distinction que portait le second point d'émission qu'on
       // vient de retirer.
-      "id, public_token, customer_label, product_ref, tracking_number, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at, created_at, updated_at",
+      "id, public_token, customer_label, product_ref, tracking_number, carrier_code, internal_notes, status, qc_status, cover_media_id, archived_at, first_content_at, views_count, last_viewed_at, created_at, updated_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -332,9 +332,14 @@ export default async function EditeurCommande({
           versPageClient={versPageClient}
           statuts={STATUTS_EXPEDITION}
           qcs={STATUTS_QC}
+          /* La liste est résolue ICI, pour la même raison que le nom du
+             transporteur plus bas : le catalogue est `server-only`, l'îlot ne
+             reçoit que les vingt-neuf lignes qu'il affiche. */
+          transporteurs={transporteursProposes(data.carrier_code)}
           suivi={{
             numero: suivi?.numero ?? null,
             abandonne: suivi?.abandonne ?? false,
+            nonReconnu: suivi?.nonReconnu ?? false,
             quand: quandFormatees,
             notes: notesEtapes,
           }}
@@ -392,6 +397,9 @@ export default async function EditeurCommande({
             customer_label: data.customer_label ?? "",
             product_ref: data.product_ref ?? "",
             tracking_number: data.tracking_number ?? "",
+            // Un ancien texte libre (« DHL ») vaut détection automatique en base
+            // (migration 164) : la liste le montre donc comme tel.
+            carrier_code: /^[1-9][0-9]{0,8}$/.test(data.carrier_code ?? "") ? (data.carrier_code ?? "") : "",
             internal_notes: data.internal_notes ?? "",
             status: data.status,
             qc_status: data.qc_status,

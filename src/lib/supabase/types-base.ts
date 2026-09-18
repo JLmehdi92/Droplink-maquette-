@@ -867,6 +867,7 @@ export type Database = {
       attacher_colis: {
         Args: { p_numero: string; p_order_id: string; p_transporteur: string }
         Returns: {
+          a_inscrire: boolean
           cree: boolean
           parcel_id: string
         }[]

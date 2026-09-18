@@ -89,7 +89,7 @@ describe("Le jeton public survit à TOUTES les mutations de l'éditeur", () => {
       ["customer_label", "Yanis"],
       ["product_ref", "REF-9"],
       ["tracking_number", "LX123456789FR"],
-      ["carrier_code", "dhl"],
+      ["carrier_code", "100001"],
       ["internal_notes", "acheté 38 €"],
       ["status", "en_transit"],
       ["qc_status", "approuve"],
@@ -184,6 +184,23 @@ describe("Ce que l'éditeur accepte d'écrire", () => {
   test("un statut inventé est refusé", async () => {
     const resultat = await ecrire(alice, commande, "status", "perdu_en_mer");
     expect(resultat.statut).toBe("echec");
+  });
+
+  test("un transporteur en texte libre est refusé ; un code du fournisseur passe, le vide aussi", async () => {
+    // L'ancien champ acceptait « dhl », que la base ne sait pas lire (elle le
+    // traite désormais comme la détection automatique, migration 164). Le
+    // champ est une liste, mais une Server Action se rejoue avec n'importe
+    // quel corps : c'est la validation qui ferme la porte.
+    for (const libre of ["dhl", "12abc", "0", "1234567890"]) {
+      const refus = await ecrire(alice, commande, "carrier_code", libre);
+      expect(refus.statut, `« ${libre} » a été accepté`).toBe("echec");
+      if (refus.statut === "echec") expect(refus.motif).toBe("saisie");
+    }
+    // CONTRE-TESTS : un refus général passerait les quatre lignes ci-dessus.
+    expect((await ecrire(alice, commande, "carrier_code", "6051")).statut).toBe("ok");
+    expect((await lire(alice, commande, "carrier_code"))?.["carrier_code"]).toBe("6051");
+    expect((await ecrire(alice, commande, "carrier_code", "")).statut).toBe("ok");
+    expect((await lire(alice, commande, "carrier_code"))?.["carrier_code"]).toBeNull();
   });
 
   test("un champ de texte vidé redevient NULL, pas une chaîne vide", async () => {

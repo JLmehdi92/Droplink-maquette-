@@ -1213,10 +1213,12 @@
           "État des photos",
           "À renseigner si votre client vous répond",
           "Notes internes",
-          "Jamais visible par le client, et absent "
+          "Jamais visible par le client, et absent ",
+          "Transporteur",
+          "Reconnu d’après le numéro. Choisissez-le"
         ],
         "motif": "contrainte",
-        "raison": "LE FORMULAIRE, ET C EST LA MEME CAUSE QUE L ORDRE DES BLOCS. Le kit le met sur un ecran separe (`CreateOrder`) avec deux boutons d enregistrement que la decision 16 interdit ; le depot n a aucune route de creation — la Server Action cree la ligne et redirige ici. Les aides sous les champs portent des decisions verrouillees : le destinataire n a jamais de compte (principe IV), un numero fraichement colle n est pas introuvable (decision 7), les notes internes sont absentes de l export (decision 15)."
+        "raison": "LE FORMULAIRE, ET C EST LA MEME CAUSE QUE L ORDRE DES BLOCS. Le kit le met sur un ecran separe (`CreateOrder`) avec deux boutons d enregistrement que la decision 16 interdit ; le depot n a aucune route de creation — la Server Action cree la ligne et redirige ici. Les aides sous les champs portent des decisions verrouillees : le destinataire n a jamais de compte (principe IV), un numero fraichement colle n est pas introuvable (decision 7), les notes internes sont absentes de l export (decision 15). Le champ « Transporteur » (18/09/2026) est celui de `CreateOrder` : le kit le pose sur l ecran de creation, il revient ici, sous le numero de suivi."
       },
       {
         "textes": [

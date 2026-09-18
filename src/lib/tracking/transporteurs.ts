@@ -126,3 +126,54 @@ export function monogramme(nom: string): Monogramme {
      résultat différent selon la locale du navigateur. */
   return { fond: null, encre: null, court: nom.slice(0, 2).toUpperCase() };
 }
+
+/**
+ * LES TRANSPORTEURS QUE L'ÉDITEUR PROPOSE, et seulement ceux-là.
+ *
+ * ⚠️ PAS LES 3 502. Une liste déroulante de trois mille entrées ne se parcourt
+ * pas au pouce, et elle pèserait 157 Ko dans l'îlot client de l'éditeur. Le
+ * champ ne sert qu'au cas où le fournisseur NE RECONNAÎT PAS le numéro : c'est
+ * alors un transporteur courant de ceux qui vendent en direct — postes et
+ * express d'Europe, expéditeurs depuis la Chine — qu'il faut pouvoir nommer.
+ *
+ * Les CODES viennent du catalogue officiel du dépôt, relevés le 18/09/2026, et
+ * les NOMS sont lus dedans à l'exécution : rien n'est écrit de mémoire. Un code
+ * qui disparaîtrait du catalogue disparaît de la liste au lieu d'y afficher un
+ * nom inventé (`tests/unit/transporteurs-proposes.test.ts` exige qu'aucun ne
+ * manque).
+ */
+export const CODES_PROPOSES: readonly number[] = [
+  // France
+  6051, 100273, 100304, 100461, 100027, 100072, 101272, 100029,
+  // Europe et express
+  100001, 7041, 100002, 100003, 19181, 2061, 14041, 19251, 9071, 11031, 100331, 21051,
+  // Depuis la Chine
+  3011, 3013, 190271, 190008, 190094, 190012, 100012, 190072, 100295,
+];
+
+export interface TransporteurPropose {
+  /** Le code du fournisseur, en texte : c'est la valeur que porte `orders.carrier_code`. */
+  readonly code: string;
+  readonly nom: string;
+}
+
+/**
+ * La liste de l'éditeur, triée par nom — plus le transporteur ACTUEL de la
+ * commande s'il n'y figure pas, sans quoi la liste afficherait « détection
+ * automatique » pour une commande qui porte un transporteur, c'est-à-dire
+ * affirmerait ce que la base n'a pas (principe XII).
+ *
+ * Un code actuel NON NUMÉRIQUE (le texte libre de l'ancien champ) n'est pas
+ * ajouté : la base le traite comme « détection automatique » (migration 164),
+ * et c'est donc exactement ce que la liste doit montrer.
+ */
+export function transporteursProposes(actuel: string | null): readonly TransporteurPropose[] {
+  const codes = new Set(CODES_PROPOSES.map(String));
+  const code = (actuel ?? "").trim();
+  if (/^[1-9][0-9]{0,8}$/.test(code)) codes.add(code);
+
+  return [...codes]
+    .map((c) => ({ code: c, nom: lireTransporteur(Number(c))?.nom ?? (c === code ? c : null) }))
+    .filter((t): t is TransporteurPropose => t.nom !== null)
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+}

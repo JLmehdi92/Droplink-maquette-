@@ -51,7 +51,11 @@ const CHAMPS = {
   customer_label: z.string().trim().max(120),
   product_ref: z.string().trim().max(200),
   tracking_number: z.string().trim().max(64),
-  carrier_code: z.string().trim().max(32),
+  // UN CODE 17TRACK OU RIEN (« détection automatique »). Le champ est une liste
+  // du produit, mais une Server Action se rejoue avec n'importe quel corps : un
+  // texte libre y redeviendrait « DHL », que la base traite comme rien. Le
+  // plafond reste celui de la colonne (contrôle `bornes-de-saisie-concordantes`).
+  carrier_code: z.string().trim().max(32).regex(/^(?:[1-9][0-9]{0,8})?$/),
   internal_notes: z.string().trim().max(5000),
   status: z.enum(STATUTS_EXPEDITION),
   qc_status: z.enum(STATUTS_QC),

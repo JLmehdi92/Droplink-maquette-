@@ -47,19 +47,43 @@ async function attacher(
   orderId: string,
   numero: string,
   transporteur = "",
-): Promise<{ parcelId: string | null; cree: boolean; erreur: string | null }> {
+): Promise<{ parcelId: string | null; cree: boolean; aInscrire: boolean; erreur: string | null }> {
   const { data, error } = await u.client.rpc("attacher_colis", {
     p_order_id: orderId,
     p_numero: numero,
     p_transporteur: transporteur,
   });
-  if (error !== null) return { parcelId: null, cree: false, erreur: error.code ?? "erreur" };
+  if (error !== null) {
+    return { parcelId: null, cree: false, aInscrire: false, erreur: error.code ?? "erreur" };
+  }
   const ligne = Array.isArray(data) ? data[0] : null;
   return {
     parcelId: ligne?.parcel_id ?? null,
     cree: ligne?.cree === true,
+    aInscrire: ligne?.a_inscrire === true,
     erreur: null,
   };
+}
+
+/** Pose l'état qu'un refus du fournisseur laisse derrière lui : abandonné, jamais pris en charge. */
+async function refuserALaPriseEnCharge(parcelId: string): Promise<void> {
+  await interroger(
+    catalogue,
+    "update public.tracked_parcels set abandoned_at = now(), registered_at = null where id = $1",
+    [parcelId],
+  );
+}
+
+async function etatDuColis(
+  parcelId: string,
+): Promise<{ abandonne: boolean; transporteur: number | null }> {
+  const lignes = await interroger<{ abandonne: boolean; carrier_code: number | null }>(
+    catalogue,
+    "select abandoned_at is not null as abandonne, carrier_code from public.tracked_parcels where id = $1",
+    [parcelId],
+  );
+  expect(lignes.length, "colis introuvable : la sonde n'inspecte rien").toBe(1);
+  return { abandonne: lignes[0]?.abandonne === true, transporteur: lignes[0]?.carrier_code ?? null };
 }
 
 async function liens(orderId: string): Promise<string[]> {
@@ -207,5 +231,115 @@ describe("Ce que l'attache refuse", () => {
     );
     expect(lignes.length).toBe(1);
     expect(lignes[0]?.shop_id).toBe(alice.shopId);
+  });
+});
+
+/**
+ * PRÉCISER LE TRANSPORTEUR RELANCE UN SUIVI QUE SON ABSENCE AVAIT ARRÊTÉ.
+ *
+ * Quand le fournisseur ne reconnaît pas le transporteur d'un numéro, le colis
+ * est abandonné sur-le-champ, jamais pris en charge. Le seul geste utile du
+ * vendeur est alors de choisir le transporteur — et ce geste ne relançait
+ * rien (migration 164). Chaque contrôle ci-dessous ferme aussi une DÉPENSE :
+ * une relance à tort est une prise en charge payée pour rien.
+ */
+describe("Préciser le transporteur", () => {
+  const REFUSE = "LX-REFUSE-0001";
+  let commande: string;
+  let colis: string;
+
+  beforeAll(async () => {
+    commande = await creerCommande(alice);
+    const r = await attacher(alice, commande, REFUSE);
+    expect(r.cree).toBe(true);
+    expect(r.aInscrire, "un colis neuf doit partir en prise en charge").toBe(true);
+    colis = r.parcelId ?? "";
+    await refuserALaPriseEnCharge(colis);
+  }, 60_000);
+
+  test("un transporteur NOUVEAU relance un colis refusé à la prise en charge", async () => {
+    const r = await attacher(alice, commande, REFUSE, "100001");
+    expect(r.erreur).toBeNull();
+    expect(r.cree, "la ligne existait : rien n'est né").toBe(false);
+    expect(r.aInscrire, "le transporteur choisi ne relance pas la prise en charge").toBe(true);
+    expect(await etatDuColis(colis)).toEqual({ abandonne: false, transporteur: 100001 });
+  });
+
+  test("le MÊME transporteur rejoué ne relance rien", async () => {
+    // Le double clic, la sauvegarde qui repart : sans cette borne, chaque
+    // rejeu relancerait une prise en charge.
+    await refuserALaPriseEnCharge(colis);
+    const r = await attacher(alice, commande, REFUSE, "100001");
+    expect(r.aInscrire, "un rejeu a relancé la prise en charge").toBe(false);
+    expect((await etatDuColis(colis)).abandonne, "un rejeu a levé l'abandon").toBe(true);
+  });
+
+  test("un colis DÉJÀ pris en charge ne se relance jamais, même abandonné", async () => {
+    // Abandonné APRÈS une prise en charge réussie : le fournisseur le suivait,
+    // il s'est tu. Le relancer paierait une seconde fois le même colis.
+    await interroger(
+      catalogue,
+      "update public.tracked_parcels set registered_at = now(), abandoned_at = now() where id = $1",
+      [colis],
+    );
+    const r = await attacher(alice, commande, REFUSE, "100003");
+    expect(r.aInscrire, "un colis déjà payé a été relancé").toBe(false);
+    expect((await etatDuColis(colis)).abandonne).toBe(true);
+  });
+
+  test("un code non numérique vaut détection automatique, et l'attache aboutit", async () => {
+    // L'ancien champ était un texte libre (« Ex : DHL ») : `::integer` levait
+    // 22P02 à chaque enregistrement du numéro, et aucun colis n'était suivi.
+    const autre = await creerCommande(alice);
+    const r = await attacher(alice, autre, "LX-TEXTE-0001", "DHL");
+    expect(r.erreur, "un transporteur en texte libre fait échouer l'attache").toBeNull();
+    expect(r.cree).toBe(true);
+    expect((await etatDuColis(r.parcelId ?? "")).transporteur).toBeNull();
+  });
+
+  test("la relance est BORNÉE : alterner deux transporteurs ne rappelle pas le fournisseur sans fin", async () => {
+    // Revue de sécurité du 18/09/2026. Tant que le fournisseur refuse, une
+    // relance ne coûte rien — mais chacune est un appel réel, sur un compte
+    // partagé par tout le produit, et la fonction est appelable hors de
+    // l'application. `query_count` compte chaque refus : au-delà de cinq,
+    // plus de relance.
+    const numero = "LX-ALTERNE-0001";
+    const autre = await creerCommande(alice);
+    const r0 = await attacher(alice, autre, numero);
+    const id = r0.parcelId ?? "";
+    await interroger(
+      catalogue,
+      "update public.tracked_parcels set abandoned_at = now(), registered_at = null, query_count = 5 where id = $1",
+      [id],
+    );
+    const r = await attacher(alice, autre, numero, "100002");
+    expect(r.aInscrire, "une sixième tentative a relancé le fournisseur").toBe(false);
+    expect((await etatDuColis(id)).abandonne).toBe(true);
+
+    // CONTRE-TEST : sous la borne, la relance part toujours.
+    await interroger(catalogue, "update public.tracked_parcels set query_count = 4 where id = $1", [id]);
+    expect((await attacher(alice, autre, numero, "100003")).aInscrire).toBe(true);
+  });
+
+  test("un colis DÉJÀ pris en charge garde son transporteur, même si une commande groupée en choisit un autre", async () => {
+    // Revue de sécurité du 18/09/2026. Le colis est partagé par toutes les
+    // commandes du vendeur qui portent ce numéro ; le fournisseur le suit
+    // sous le transporteur de sa prise en charge. Réécrire ce code enverrait
+    // les interrogations suivantes au mauvais transporteur, et la page du
+    // client de l'AUTRE commande se viderait sans rien dire.
+    const numero = "LX-GROUPE-0001";
+    const premiere = await creerCommande(alice);
+    const seconde = await creerCommande(alice);
+    const r0 = await attacher(alice, premiere, numero, "6051");
+    const id = r0.parcelId ?? "";
+    await interroger(catalogue, "update public.tracked_parcels set registered_at = now() where id = $1", [id]);
+
+    await attacher(alice, seconde, numero, "100001");
+    expect((await etatDuColis(id)).transporteur, "le transporteur d'un colis suivi a été réécrit").toBe(6051);
+
+    // CONTRE-TEST : avant la prise en charge, le choix du vendeur s'applique.
+    const r1 = await attacher(alice, premiere, "LX-GROUPE-0002", "6051");
+    await attacher(alice, seconde, "LX-GROUPE-0002", "100001");
+    expect((await etatDuColis(r1.parcelId ?? "")).transporteur).toBe(100001);
   });
 });

@@ -44,6 +44,13 @@ export interface SuiviDeLaCommande {
   readonly codeTransporteur: number | null;
   readonly dernierMouvement: string | null;
   readonly abandonne: boolean;
+  /**
+   * Abandonné SANS avoir jamais été pris en charge : le fournisseur a refusé le
+   * numéro (transporteur indétectable). Ce n'est pas « le transporteur s'est
+   * tu » — c'est « précisez-le », et c'est le seul cas où le vendeur a un geste
+   * qui répare (migration 164).
+   */
+  readonly nonReconnu: boolean;
   readonly passages: readonly PassageCommande[];
 }
 
@@ -74,7 +81,7 @@ export async function lireSuiviDeCommande(
 ): Promise<SuiviDeLaCommande | null> {
   const { data: attaches } = await supabase
     .from("order_parcels")
-    .select("parcel_id, tracked_parcels(tracking_number, carrier_code, last_movement_at, abandoned_at)")
+    .select("parcel_id, tracked_parcels(tracking_number, carrier_code, last_movement_at, abandoned_at, registered_at)")
     .eq("order_id", orderId)
     .limit(1);
 
@@ -100,6 +107,7 @@ export async function lireSuiviDeCommande(
     codeTransporteur: colis.carrier_code,
     dernierMouvement: colis.last_movement_at,
     abandonne: colis.abandoned_at !== null,
+    nonReconnu: colis.abandoned_at !== null && colis.registered_at === null,
     passages: (points ?? []).map((p) => ({
       instant: p.occurred_at,
       lieu: p.location,

@@ -675,7 +675,7 @@ const SQL = {
   "attache-paie-toujours": {
     casser: `create or replace function public.attacher_colis(
         p_order_id uuid, p_numero text, p_transporteur text
-      ) returns table (parcel_id uuid, cree boolean)
+      ) returns table (parcel_id uuid, cree boolean, a_inscrire boolean)
       language plpgsql security definer set search_path = '' as $$
       declare v_shop uuid; v_numero text := btrim(coalesce(p_numero, ''));
               v_transporteur integer := nullif(btrim(coalesce(p_transporteur, '')), '')::integer;
@@ -693,7 +693,7 @@ const SQL = {
          where op.order_id = p_order_id and op.parcel_id = tp.id
            and (v_numero = '' or tp.tracking_number <> v_numero);
         if v_numero = '' then
-          return query select null::uuid, false;
+          return query select null::uuid, false, false;
           return;
         end if;
         insert into public.tracked_parcels as tp (shop_id, tracking_number, carrier_code)
@@ -703,10 +703,10 @@ const SQL = {
         returning tp.id into v_parcel;
         insert into public.order_parcels (order_id, parcel_id)
         values (p_order_id, v_parcel) on conflict do nothing;
-        return query select v_parcel, true;
+        return query select v_parcel, true, true;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "136_l_attache_a_un_colis_deja_suivi_n_heritait_de_rien.sql",
+      fichier: "165_la_relance_du_transporteur_est_bornee.sql",
       depuis: "create function public.attacher_colis",
       jusqua: "comment on function",
     },
@@ -722,7 +722,7 @@ const SQL = {
   "attache-sans-detacher": {
     casser: `create or replace function public.attacher_colis(
         p_order_id uuid, p_numero text, p_transporteur text
-      ) returns table (parcel_id uuid, cree boolean)
+      ) returns table (parcel_id uuid, cree boolean, a_inscrire boolean)
       language plpgsql security definer set search_path = '' as $$
       declare v_shop uuid; v_numero text := btrim(coalesce(p_numero, ''));
               v_transporteur integer := nullif(btrim(coalesce(p_transporteur, '')), '')::integer;
@@ -737,7 +737,7 @@ const SQL = {
           raise exception 'Commande introuvable.' using errcode = 'DL012';
         end if;
         if v_numero = '' then
-          return query select null::uuid, false;
+          return query select null::uuid, false, false;
           return;
         end if;
         insert into public.tracked_parcels as tp (shop_id, tracking_number, carrier_code)
@@ -747,10 +747,60 @@ const SQL = {
         returning tp.id, (tp.xmax = 0) into v_parcel, v_cree;
         insert into public.order_parcels (order_id, parcel_id)
         values (p_order_id, v_parcel) on conflict do nothing;
-        return query select v_parcel, v_cree;
+        return query select v_parcel, v_cree, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "136_l_attache_a_un_colis_deja_suivi_n_heritait_de_rien.sql",
+      fichier: "165_la_relance_du_transporteur_est_bornee.sql",
+      depuis: "create function public.attacher_colis",
+      jusqua: "comment on function",
+    },
+  },
+
+  /**
+   * LA RELANCE PAR LE TRANSPORTEUR, CASSEE (migration 164).
+   *
+   * Le fournisseur a refuse le numero, le vendeur choisit le transporteur — et
+   * rien ne repart : `a_inscrire` ne vaut plus que `cree`, l abandon reste
+   * pose. C est exactement le produit d avant le 18/09/2026 : le suivi reste
+   * arrete pour de bon, champ rempli ou non, et rien ne le dit.
+   */
+  "attache-ne-relance-pas": {
+    casser: `create or replace function public.attacher_colis(
+        p_order_id uuid, p_numero text, p_transporteur text
+      ) returns table (parcel_id uuid, cree boolean, a_inscrire boolean)
+      language plpgsql security definer set search_path = '' as $$
+      declare v_shop uuid; v_numero text := btrim(coalesce(p_numero, ''));
+              v_transporteur integer :=
+                case when btrim(coalesce(p_transporteur, '')) ~ '^[1-9][0-9]{0,8}$'
+                     then btrim(p_transporteur)::integer end;
+              v_parcel uuid; v_cree boolean := false;
+      begin
+        select public.mon_shop_id() into v_shop;
+        if v_shop is null then
+          raise exception 'Aucune boutique pour cet appelant.' using errcode = 'DL011';
+        end if;
+        perform 1 from public.orders o where o.id = p_order_id and o.shop_id = v_shop;
+        if not found then
+          raise exception 'Commande introuvable.' using errcode = 'DL012';
+        end if;
+        delete from public.order_parcels op using public.tracked_parcels tp
+         where op.order_id = p_order_id and op.parcel_id = tp.id
+           and (v_numero = '' or tp.tracking_number <> v_numero);
+        if v_numero = '' then
+          return query select null::uuid, false, false;
+          return;
+        end if;
+        insert into public.tracked_parcels as tp (shop_id, tracking_number, carrier_code)
+        values (v_shop, v_numero, v_transporteur)
+        on conflict (shop_id, tracking_number)
+          do update set carrier_code = coalesce(excluded.carrier_code, tp.carrier_code)
+        returning tp.id, (tp.xmax = 0) into v_parcel, v_cree;
+        insert into public.order_parcels (order_id, parcel_id)
+        values (p_order_id, v_parcel) on conflict do nothing;
+        return query select v_parcel, v_cree, v_cree;
+      end; $$;`,
+    reparerDepuisMigration: {
+      fichier: "165_la_relance_du_transporteur_est_bornee.sql",
       depuis: "create function public.attacher_colis",
       jusqua: "comment on function",
     },

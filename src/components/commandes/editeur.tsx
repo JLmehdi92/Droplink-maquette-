@@ -58,6 +58,8 @@ export interface ValeursCommande {
   readonly customer_label: string;
   readonly product_ref: string;
   readonly tracking_number: string;
+  /** Code 17TRACK du transporteur, ou "" pour la détection automatique. */
+  readonly carrier_code: string;
   readonly internal_notes: string;
   readonly status: string;
   readonly qc_status: string;
@@ -77,6 +79,7 @@ export function Editeur({
   initiales,
   statuts,
   qcs,
+  transporteurs,
   medias,
   suivi,
   dates,
@@ -97,6 +100,8 @@ export function Editeur({
   readonly versPageClient: string;
   readonly initiales: ValeursCommande;
   readonly statuts: readonly string[];
+  /** Les transporteurs proposés, résolus côté serveur (le catalogue est `server-only`). */
+  readonly transporteurs: readonly { readonly code: string; readonly nom: string }[];
   readonly qcs: readonly string[];
   readonly medias: {
     readonly initiaux: readonly MediaAffiche[];
@@ -116,6 +121,8 @@ export function Editeur({
   readonly suivi: {
     readonly numero: string | null;
     readonly abandonne: boolean;
+    /** Abandonné sans jamais avoir été pris en charge : le fournisseur n'a pas reconnu le numéro. */
+    readonly nonReconnu: boolean;
     /** Par étape, la date à laquelle un point de passage l'a datée. */
     readonly quand: Readonly<Partial<Record<Etape, string>>>;
     /** Par étape, ce que le transporteur a dit en la franchissant. */
@@ -310,6 +317,7 @@ export function Editeur({
                 valeurs={valeurs}
                 statuts={statuts}
                 qcs={qcs}
+                transporteurs={transporteurs}
                 champsEnEchec={champsEnEchec}
                 onChanger={changer}
               />
@@ -538,6 +546,7 @@ function PanneauSuivi({
   readonly suivi: {
     readonly numero: string | null;
     readonly abandonne: boolean;
+    readonly nonReconnu: boolean;
     readonly quand: Readonly<Partial<Record<Etape, string>>>;
     readonly notes: Readonly<Partial<Record<Etape, string>>>;
   };
@@ -552,9 +561,11 @@ function PanneauSuivi({
     <Panneau titre={t("suiviTitre")}>
       {/* LE FOURNISSEUR A CESSÉ DE SUIVRE CE NUMÉRO, ET C'EST DIT. Un suivi qui
           s'arrête sans le dire se lit comme un suivi qui ne marche pas. */}
+      {/* ET LA CAUSE EST NOMMÉE : « non reconnu » appelle un geste (préciser le
+          transporteur, qui relance le suivi) ; « arrêté » n'en appelle aucun. */}
       {suivi.abandonne ? (
         <p className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] font-medium text-ds-alerte-encre">
-          {t("suiviArrete")}
+          {suivi.nonReconnu ? t("suiviNonReconnu") : t("suiviArrete")}
         </p>
       ) : null}
 
@@ -807,12 +818,14 @@ function CarteCommande({
   valeurs,
   statuts,
   qcs,
+  transporteurs,
   champsEnEchec,
   onChanger,
 }: {
   readonly valeurs: ValeursCommande;
   readonly statuts: readonly string[];
   readonly qcs: readonly string[];
+  readonly transporteurs: readonly { readonly code: string; readonly nom: string }[];
   readonly champsEnEchec: readonly string[];
   readonly onChanger: (champ: keyof ValeursCommande, valeur: string, immediat: boolean) => void;
 }) {
@@ -918,6 +931,43 @@ function CarteCommande({
             className="mt-2 text-[13px] leading-[18px] text-ds-texte-sourdine"
           >
             {t("suiviAide")}
+          </p>
+        </div>
+
+        <div>
+          <label className={etiquette} htmlFor="carrier_code">
+            {t("transporteur")}
+          </label>
+          {/*
+            ⚠️ CE CHAMP AVAIT DISPARU À LA REFONTE DE L'ÉDITEUR (28/08), et
+            c'était le seul geste qui répare un numéro que le fournisseur ne
+            reconnaît pas : il abandonne alors le suivi sur-le-champ et attend
+            qu'on lui nomme le transporteur. La base relance la prise en charge
+            quand un transporteur NOUVEAU est choisi (migration 164).
+
+            UNE LISTE, PAS UN TEXTE LIBRE : la base attend un code du
+            fournisseur, et « DHL » tapé à la main ne désigne rien. Le choix part
+            immédiatement, comme le statut — c'est une décision, pas de la
+            saisie.
+          */}
+          <ChampListe>
+            <select
+              id="carrier_code"
+              className={classe("carrier_code") + " " + CLASSE_LISTE}
+              value={valeurs.carrier_code}
+              onChange={(e) => onChanger("carrier_code", e.target.value, true)}
+              aria-describedby="carrier_code-aide"
+            >
+              <option value="">{t("transporteurAuto")}</option>
+              {transporteurs.map((tr) => (
+                <option key={tr.code} value={tr.code}>
+                  {tr.nom}
+                </option>
+              ))}
+            </select>
+          </ChampListe>
+          <p id="carrier_code-aide" className="mt-1.5 text-[13px] text-ds-texte-sourdine">
+            {t("transporteurAide")}
           </p>
         </div>
 

@@ -8,8 +8,10 @@ import { prendreEnCharge } from "./prise-en-charge";
  *
  * DEUX TEMPS, ET C'EST TOUT L'INTÉRÊT :
  *
- *  1. LA BASE attache le colis et dit s'il vient d'être CRÉÉ. Ce booléen décide
- *     si l'on paie une prise en charge, et il est produit par un seul ordre SQL —
+ *  1. LA BASE attache le colis et dit s'il faut l'INSCRIRE (`a_inscrire` : créé
+ *     à l'instant, ou relancé par un transporteur précisé après un refus — voir
+ *     la migration 164). Ce booléen décide si l'on paie une prise en charge, et
+ *     il est produit par la fonction SQL, sous verrou —
  *     un « lire puis écrire » côté application ferait payer deux fois sur un
  *     double clic.
  *  2. L'APPEL AU FOURNISSEUR part APRÈS LA RÉPONSE, par `after()`. Le vendeur
@@ -28,7 +30,13 @@ import { prendreEnCharge } from "./prise-en-charge";
 type ClientAttache = Awaited<ReturnType<typeof creerClientServeur>>;
 
 export type ResultatAttache =
-  | { readonly statut: "attache"; readonly parcelId: string; readonly nouveau: boolean }
+  | {
+      readonly statut: "attache";
+      readonly parcelId: string;
+      readonly nouveau: boolean;
+      /** Une prise en charge part : colis neuf, ou colis refusé relancé par un transporteur précisé. */
+      readonly aInscrire: boolean;
+    }
   | { readonly statut: "detache" }
   | { readonly statut: "echec"; readonly motif: string };
 
@@ -68,12 +76,20 @@ export async function attacherColis(
 
   const parcelId = ligne.parcel_id;
   const nouveau = ligne.cree === true;
+  const aInscrire = ligne.a_inscrire === true;
 
-  if (nouveau) {
+  if (aInscrire) {
     // LE SEUL ENDROIT DU PRODUIT QUI DÉPENSE DE L'ARGENT. Il est franchi
-    // uniquement quand la BASE a dit que la ligne venait d'être créée.
-    const brut = transporteur === "" ? null : Number.parseInt(transporteur, 10);
-    const codeTransporteur = brut === null || Number.isNaN(brut) ? null : brut;
+    // uniquement quand la BASE l'a décidé : colis tout juste créé, OU colis
+    // refusé à la prise en charge dont le vendeur vient de préciser un AUTRE
+    // transporteur (migration 164 — sans cela, préciser ne relançait rien).
+    //
+    // ⚠️ LE CODE SE LIT PAR LA MÊME RÈGLE QUE LA BASE : un entier positif de
+    // neuf chiffres au plus, sinon détection automatique. `parseInt` seul
+    // lisait « 12abc » comme 12 — un transporteur que personne n'a choisi.
+    const codeTransporteur = /^[1-9][0-9]{0,8}$/.test(transporteur)
+      ? Number(transporteur)
+      : null;
 
     try {
       after(async () => {
@@ -95,5 +111,5 @@ export async function attacherColis(
     }
   }
 
-  return { statut: "attache", parcelId, nouveau };
+  return { statut: "attache", parcelId, nouveau, aInscrire };
 }

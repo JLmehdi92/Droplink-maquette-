@@ -1797,6 +1797,18 @@ try {
           ],
         );
 
+        // LE CHAMP « TRANSPORTEUR » A DISPARU UNE FOIS SANS QUE RIEN NE ROUGISSE
+        // (refonte de l editeur, 28/08 ; rebranche le 18/09/2026). C est pourtant
+        // le seul geste qui relance un suivi que le fournisseur a refuse. On le
+        // cherche dans le HTML SERVI : la liste, sa detection automatique (valeur
+        // vide) et un code du catalogue — La Poste (Colissimo), 6051.
+        const listeTransporteur =
+          (htmlRemplie.match(/<select\b[^>]*\bid="carrier_code"[^>]*>([\s\S]*?)<\/select>/) ?? [])[1] ?? "";
+        controles.push([
+          /<option value=""[\s>]/.test(listeTransporteur) && /<option value="6051"[\s>]/.test(listeTransporteur),
+          "la fiche d une commande porte la liste des transporteurs (detection automatique et codes du catalogue)",
+        ]);
+
         controles.push(
           [
             titreRemplie.includes("Client de fumee"),
