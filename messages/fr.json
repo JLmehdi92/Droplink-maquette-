@@ -877,7 +877,11 @@
     "tuileVuesAucune": "Jamais ouvert",
     "tuileVuesNombre": "{n, plural, one {# consultation} other {# consultations}}",
     "tuileSuivi": "Suivi",
-    "tuileVide": "–"
+    "tuileVide": "–",
+    "plusActions": "Plus d’actions",
+    "dupliquer": "Dupliquer comme gabarit",
+    "archiver": "Archiver",
+    "desarchiver": "Sortir des archives"
   },
   "medias": {
     "titre": "Photos et vidéos",

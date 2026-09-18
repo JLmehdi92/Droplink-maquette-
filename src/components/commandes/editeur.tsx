@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Check, ChevronDown, Clock, ExternalLink, Share2, TriangleAlert } from "lucide-react";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
 import { referenceCourte } from "@/lib/commandes/reference";
@@ -70,6 +71,7 @@ export function Editeur({
   id,
   langue,
   jeton,
+  menusGestes,
   origine,
   versPageClient,
   initiales,
@@ -85,6 +87,12 @@ export function Editeur({
   readonly id: string;
   readonly langue: string;
   readonly jeton: string;
+  /**
+   * Le menu « ••• » (dupliquer, archiver), rendu CÔTÉ SERVEUR par la page
+   * (`MenuGestesFiche`) : son module de route est `server-only`, et c'est
+   * l'import qui rend vérifiable le contrat des champs envoyés.
+   */
+  readonly menusGestes: { readonly bureau: ReactNode; readonly telephone: ReactNode };
   readonly origine: string;
   readonly versPageClient: string;
   readonly initiales: ValeursCommande;
@@ -264,6 +272,7 @@ export function Editeur({
           etat={etat}
           lienPublic={lienPublic}
           versPageClient={versPageClient}
+          menusGestes={menusGestes}
         />
 
         {/*
@@ -416,16 +425,20 @@ export function Editeur({
  * action principale par écran : c'est celle qui termine le travail, celle qu'on
  * fait avant d'envoyer le lien à son client.
  *
- * ⚠️ TROIS CHOSES DU KIT NE SONT PAS ICI, ET CHACUNE POUR UNE RAISON :
+ * ⚠️ LE BOUTON « ··· » Y EST, DEPUIS LE 18/09/2026, ET CE BLOC DISAIT L'INVERSE.
+ * Il l'écartait au motif que dupliquer et archiver « vivent sur la ligne de la
+ * liste » : or cette ligne n'existe qu'à partir de 1024 px, et au téléphone ces
+ * trois gestes (dupliquer, archiver, sortir des archives) n'avaient plus AUCUN
+ * chemin. Le menu n'est donc plus vide, et la fiche est la seule page d'une
+ * commande servie à toutes les largeurs.
+ *
+ * ⚠️ DEUX CHOSES DU KIT NE SONT PAS ICI, ET CHACUNE POUR UNE RAISON :
  *
  *  1. LA PILULE D'ÉTAT sous les actions (« En transit », chevron). Chez nous
  *     l'état est une liste déroulante du formulaire, 200 px plus bas. Deux
  *     contrôles pour la même valeur, sur un écran qui enregistre à la frappe,
  *     c'est deux endroits où lire un état qui peut momentanément différer.
- *  2. LE BOUTON « ··· ». Le kit y range dupliquer et archiver ; ces deux gestes
- *     vivent sur la LIGNE de la liste des commandes, pas ici. Un bouton de menu
- *     qui ouvre un menu vide est pire qu'un bouton absent.
- *  3. « MODIFIER LA COMMANDE ». Le kit sépare une vue de lecture d'un
+ *  2. « MODIFIER LA COMMANDE ». Le kit sépare une vue de lecture d'un
  *     formulaire (`CreateOrder.jsx`, avec son bouton « Enregistrer en
  *     brouillon »). La décision 16 interdit le bouton d'enregistrement : notre
  *     écran EST le formulaire, et son bouton « modifier » n'aurait mené qu'à
@@ -438,12 +451,14 @@ function EnTeteDetail({
   etat,
   lienPublic,
   versPageClient,
+  menusGestes,
 }: {
   readonly langue: string;
   readonly reference: string;
   readonly creeLe: string;
   readonly etat: Etat;
   readonly lienPublic: string;
+  readonly menusGestes: { readonly bureau: ReactNode; readonly telephone: ReactNode };
   readonly versPageClient: string;
 }) {
   const t = useTranslations("editeur");
@@ -478,6 +493,7 @@ function EnTeteDetail({
 
         <div className="hidden flex-wrap items-center gap-3 lg:flex">
           <TemoinSauvegarde etat={etat} />
+          {menusGestes.bureau}
           <BoutonCopier lien={lienPublic} />
           <a
             href={versPageClient}
@@ -492,8 +508,9 @@ function EnTeteDetail({
 
         {/* AU TÉLÉPHONE, LE TÉMOIN SEUL : les deux actions vivent dans la bande
             collée en bas, là où le pouce les atteint sans remonter. */}
-        <div className="lg:hidden">
+        <div className="flex items-center gap-3 lg:hidden">
           <TemoinSauvegarde etat={etat} />
+          {menusGestes.telephone}
         </div>
       </div>
     </header>

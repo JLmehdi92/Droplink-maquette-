@@ -22,6 +22,7 @@ import { lireSuiviDeCommande, datesDesEtapes } from "@/lib/commandes/suivi-comma
 import { lireTransporteur } from "@/lib/tracking/transporteurs";
 import type { Etape } from "@/lib/tracking/normalize";
 import { titreDeCommande } from "@/lib/commandes/titre";
+import { MenuGestesFiche } from "@/components/commandes/menu-gestes-fiche";
 import { HistoriqueCommande } from "@/components/commandes/historique-commande";
 
 /**
@@ -302,6 +303,28 @@ export default async function EditeurCommande({
           id={data.id}
           langue={langue}
           jeton={data.public_token}
+          // Le menu « ••• » de la fiche (dupliquer, archiver, sortir des
+          // archives), rendu ici côté serveur : voir `menu-gestes-fiche.tsx`.
+          menusGestes={{
+            bureau: (
+              <MenuGestesFiche
+                langue={langue}
+                id={data.id}
+                jeton={data.public_token}
+                archivee={data.archived_at !== null}
+                taille="bureau"
+              />
+            ),
+            telephone: (
+              <MenuGestesFiche
+                langue={langue}
+                id={data.id}
+                jeton={data.public_token}
+                archivee={data.archived_at !== null}
+                taille="telephone"
+              />
+            ),
+          }}
           // Sans origine connue, le lien public serait construit sur une valeur
           // devinée. On rend alors un chemin relatif : il ne se copie pas dans
           // une conversation, mais il n'envoie personne sur un domaine inventé.

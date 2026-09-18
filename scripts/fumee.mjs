@@ -1727,6 +1727,34 @@ try {
             `${remplie.status === 200 ? "" : ", vers " + remplie.headers.get("location")})`,
         ]);
 
+        /*
+         * ⚠️ ARCHIVER ET DUPLIQUER DOIVENT S ATTEINDRE DEPUIS LA FICHE.
+         *
+         * Ces deux gestes ne vivaient que sur la ligne du TABLEAU des commandes,
+         * rendu a partir de 1024 px seulement : au telephone, les cartes ne sont
+         * qu un lien, et la fiche avait perdu son menu « ••• ». Un vendeur sur
+         * son telephone ne pouvait ni archiver, ni desarchiver, ni dupliquer une
+         * commande (audit d atteignabilite du 18/09/2026). La fiche est la seule
+         * page d une commande servie a TOUTES les largeurs : c est elle qui doit
+         * porter les deux formulaires, vers la route des gestes, pour CETTE
+         * commande.
+         */
+        const formulairesGeste = [...htmlRemplie.matchAll(/<form\b[^>]*action="[^"]*\/commandes\/geste"[^>]*>([\s\S]*?)<\/form>/g)]
+          .map((m) => m[1] ?? "")
+          .filter((corps) => corps.includes(`value="${commandeFumee}"`));
+        const gesteDe = (corps) => (corps.match(/name="geste"[^>]*value="([^"]+)"/) ?? [])[1];
+        const gestesFiche = formulairesGeste.map(gesteDe);
+        controles.push(
+          [
+            gestesFiche.includes("archiver"),
+            `la fiche d une commande porte le geste « archiver » pour elle (gestes trouves : ${gestesFiche.join(", ") || "aucun"})`,
+          ],
+          [
+            gestesFiche.includes("dupliquer"),
+            `la fiche d une commande porte le geste « dupliquer » pour elle`,
+          ],
+        );
+
         controles.push(
           [
             titreRemplie.includes("Client de fumee"),

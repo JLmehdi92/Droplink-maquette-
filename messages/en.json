@@ -877,7 +877,11 @@
     "tuileVuesAucune": "Never opened",
     "tuileVuesNombre": "{n, plural, one {# view} other {# views}}",
     "tuileSuivi": "Tracking",
-    "tuileVide": "–"
+    "tuileVide": "–",
+    "plusActions": "More actions",
+    "dupliquer": "Duplicate as template",
+    "archiver": "Archive",
+    "desarchiver": "Restore from archive"
   },
   "medias": {
     "titre": "Photos and videos",

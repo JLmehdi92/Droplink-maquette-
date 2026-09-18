@@ -877,7 +877,11 @@
     "tuileVuesAucune": "尚未打开",
     "tuileVuesNombre": "{n, plural, other {# 次浏览}}",
     "tuileSuivi": "物流跟踪",
-    "tuileVide": "–"
+    "tuileVide": "–",
+    "plusActions": "更多操作",
+    "dupliquer": "复制为模板",
+    "archiver": "归档",
+    "desarchiver": "移出归档"
   },
   "medias": {
     "titre": "照片和视频",
