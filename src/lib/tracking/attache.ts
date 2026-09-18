@@ -76,7 +76,16 @@ export async function attacherColis(
 
   const parcelId = ligne.parcel_id;
   const nouveau = ligne.cree === true;
-  const aInscrire = ligne.a_inscrire === true;
+  /*
+   * ⚠️ LE REPLI SUR `cree` N'EST PAS UNE POLITESSE. Les migrations
+   * s'appliquent à la main, et un déploiement peut précéder
+   * `pnpm db:migrate` : la base rend alors l'ANCIENNE ligne, sans
+   * `a_inscrire`. Lu tel quel, ce champ absent vaudrait « faux », et plus
+   * AUCUN colis neuf ne serait pris en charge — sans une erreur nulle part,
+   * le suivi restant simplement vide. Absent, on retombe sur le verdict
+   * d'avant la migration 164 ; présent, c'est lui qui décide.
+   */
+  const aInscrire = "a_inscrire" in ligne ? ligne.a_inscrire === true : nouveau;
 
   if (aInscrire) {
     // LE SEUL ENDROIT DU PRODUIT QUI DÉPENSE DE L'ARGENT. Il est franchi
