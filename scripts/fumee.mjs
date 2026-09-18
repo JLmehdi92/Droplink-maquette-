@@ -4524,6 +4524,15 @@ try {
                 `CONTRE-TEST : l ecran Envois repond a la session (statut ${envois.status})`,
               ],
               /*
+               * LE SUIVI ARRETE N AVAIT PLUS AUCUNE ENTREE (portage du 28/08,
+               * rebranche le 18/09/2026) : la liste savait le filtrer, rien ne
+               * posait le filtre. On exige un LIEN servi qui le pose.
+               */
+              [
+                /href="[^"]*[?&](?:amp;)?abandonnes=oui/.test(htmlEnvois),
+                "l ecran Envois porte un lien qui filtre le suivi arrete (abandonnes=oui)",
+              ],
+              /*
                * LA SECONDE ECRITURE. Le colis a avance — c est deja verifie
                * plus haut — mais c est la COMMANDE qu on regarde ici : sans
                * cette ligne, le suivi vivrait dans `tracked_parcels` sans que

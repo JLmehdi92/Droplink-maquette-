@@ -442,7 +442,9 @@ export async function TableauEnvois({
    */
   const libelleStatut = parametres.silencieux
     ? t("filtres.silencieux")
-    : parametres.etat === null
+    : parametres.abandonnes === true
+      ? t("abandonne")
+      : parametres.etat === null
       ? t("filtres.tousStatuts")
       : t(`etat.${parametres.etat}`);
 
@@ -483,6 +485,9 @@ export async function TableauEnvois({
           <input type="hidden" name="etat" value={parametres.etat} />
         )}
         {!parametres.silencieux ? null : <input type="hidden" name="silencieux" value="oui" />}
+        {parametres.abandonnes === null ? null : (
+          <input type="hidden" name="abandonnes" value={parametres.abandonnes ? "oui" : "non"} />
+        )}
         {parametres.tri === "immobiles" ? null : (
           <input type="hidden" name="tri" value={parametres.tri} />
         )}
@@ -524,9 +529,15 @@ export async function TableauEnvois({
         <ul className={PANNEAU_OUTIL_DS + " flex flex-col gap-0.5 lg:w-[232px] lg:max-w-none lg:p-1.5"}>
           <li>
             <LienEcran
-              href={lien(base, parametres, { etat: null, silencieux: null })}
-              aria-current={parametres.etat === null && !parametres.silencieux ? "true" : undefined}
-              className={optionMenu(parametres.etat === null && !parametres.silencieux)}
+              href={lien(base, parametres, { etat: null, silencieux: null, abandonnes: null })}
+              aria-current={
+                parametres.etat === null && !parametres.silencieux && parametres.abandonnes === null
+                  ? "true"
+                  : undefined
+              }
+              className={optionMenu(
+                parametres.etat === null && !parametres.silencieux && parametres.abandonnes === null,
+              )}
             >
               {t("filtres.tousStatuts")}
             </LienEcran>
@@ -534,7 +545,7 @@ export async function TableauEnvois({
           {ETATS.map((etat: Etat) => (
             <li key={etat}>
               <LienEcran
-                href={lien(base, parametres, { etat, silencieux: null })}
+                href={lien(base, parametres, { etat, silencieux: null, abandonnes: null })}
                 aria-current={parametres.etat === etat ? "true" : undefined}
                 className={optionMenu(parametres.etat === etat)}
               >
@@ -547,7 +558,7 @@ export async function TableauEnvois({
               derniere entree du menu, peinte comme elle. */}
           <li>
             <LienEcran
-              href={lien(base, parametres, { silencieux: "oui", etat: null })}
+              href={lien(base, parametres, { silencieux: "oui", etat: null, abandonnes: null })}
               aria-current={parametres.silencieux ? "true" : undefined}
               className={
                 "flex min-h-11 items-center rounded-ds-sm px-3 text-[13px] transition-colors lg:min-h-0 lg:py-2 " +
@@ -557,6 +568,22 @@ export async function TableauEnvois({
               }
             >
               {t("filtres.silencieux")}
+            </LienEcran>
+          </li>
+          {/*
+            ⚠️ LE SUIVI ARRÊTÉ N'AVAIT PLUS D'ENTRÉE depuis le portage de l'écran
+            (28/08) : la liste savait le filtrer (`abandonnes=oui`), le compteur
+            le comptait, et aucun geste ne posait le filtre. Ce sont pourtant
+            les colis dont personne ne dira plus rien — un numéro non reconnu
+            se répare en précisant son transporteur dans la fiche.
+          */}
+          <li>
+            <LienEcran
+              href={lien(base, parametres, { abandonnes: "oui", etat: null, silencieux: null })}
+              aria-current={parametres.abandonnes === true ? "true" : undefined}
+              className={optionMenu(parametres.abandonnes === true)}
+            >
+              {t("abandonne")}
             </LienEcran>
           </li>
         </ul>
