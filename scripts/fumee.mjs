@@ -811,10 +811,18 @@ console.log("");
 //
 // Elle refuse une valeur trop courte : lire une chaine vide rendrait le
 // controle vrai sans rien prouver, `includes("")` etant toujours vrai.
-const titreFr = JSON.parse(readFileSync(join(process.cwd(), "messages", "fr.json"), "utf8"))
-  .landing.heroTitre;
-const titreEn = JSON.parse(readFileSync(join(process.cwd(), "messages", "en.json"), "utf8"))
-  .landing.heroTitre;
+//
+// ⚠️ IL EST COMPOSE DES TROIS CLES QUE LE `h1` REND, PAS LU DANS UNE QUATRIEME.
+// Depuis le 18/09/2026 le titre vient du catalogue de la planche (`landing.kit`) :
+// premiere ligne, seconde ligne, mot en degrade. Une cle `heroTitre` recopiee
+// a cote serait une chaine que rien n affiche — la garde des chaines mortes
+// l a d ailleurs signalee — et la sonde verifierait une copie, pas l ecran.
+const titreDuHeros = (langue) => {
+  const k = JSON.parse(readFileSync(join(process.cwd(), "messages", langue + ".json"), "utf8")).landing.kit;
+  return k.heroTitle1 + " " + k.heroTitle2 + k.heroTitleHl;
+};
+const titreFr = titreDuHeros("fr");
+const titreEn = titreDuHeros("en");
 
 /**
  * LE TITRE DU HERO, TEL QUE LE VISITEUR LE LIT — pas tel qu il est ecrit dans

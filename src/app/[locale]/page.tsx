@@ -1,89 +1,81 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BarChart3, Check, Image as ImageIcon, Link2, Lock, Menu, Package, Truck } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  Check,
+  Heart,
+  Image as ImageIcon,
+  Layers,
+  Link2,
+  Menu,
+  MessageCircle,
+  Package,
+  Plus,
+  Star,
+  Store,
+  Truck,
+  Upload,
+  type LucideIcon,
+} from "lucide-react";
 import { routing } from "@/i18n/routing";
-import { signalementDisponible } from "@/lib/contact";
+import { LogoMarque } from "@/components/acces/coque-acces";
 import { MaquetteApplication, TelephoneClient } from "@/components/landing/maquette-application";
 import { ChampDeLien, FriseDeSuivi, ZoneDeDepot } from "@/components/landing/illustrations-etapes";
+import { SelecteurLangue } from "@/components/landing/selecteur-langue";
+import { IconeInstagram, IconeTwitter, IconeYoutube } from "@/components/landing/icones-reseaux";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { donneesStructurees } from "@/lib/seo/donnees-structurees";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
+import avatar1 from "@/../public/marque/avatar-1.jpg";
+import avatar2 from "@/../public/marque/avatar-2.jpg";
+import avatar3 from "@/../public/marque/avatar-3.jpg";
+import avatar4 from "@/../public/marque/avatar-4.jpg";
+import avatar5 from "@/../public/marque/avatar-5.jpg";
 
 /**
- * LA LANDING, portée sur `Main` (bureau) et `LandingMobile` (téléphone).
+ * LA LANDING — `ui_kits/marketing_site/index.html`, SECTION PAR SECTION.
  *
- * UNE CARTE-PAGE BLANCHE POSÉE SUR LE FOND LAVANDE, et tout le reste dedans :
- * navigation, héros, scène du téléphone, bénéfices, appel final, pied.
+ * ⚠️ RÉÉCRITE LE 18/09/2026 SUR LA PLANCHE, ET POURQUOI. La version précédente
+ * s'en écartait sur quatorze points, et la plupart venaient d'avoir REDESSINÉ au
+ * lieu de COPIER : une section inventée (« Vos clients n'ont rien à installer »),
+ * un téléphone reconstruit à la main, les textes des six cartes réécrits, la
+ * navigation modifiée, un pied à deux colonnes. Wassim a fourni la liste ; elle
+ * vit dans le commit. La règle de cette page est donc la sienne : on ne
+ * redessine rien, on ne réécrit aucun texte, on n'ajoute aucune section.
  *
- * ⚠️ LA CARTE-PAGE N'A PAS LE MÊME RAYON SUR LES DEUX PLANCHES : 28 au bureau,
- * **24 au téléphone**, avec 12 px de lavande autour au lieu de 28. Le code
- * rendait la carte À BORD PERDU sur téléphone — aucune marge, aucun rayon —
- * donc la seule page publique qui ne ressemblait pas à une carte.
+ * LES HUIT SECTIONS DE LA PLANCHE, DANS CET ORDRE, ET RIEN D'AUTRE :
+ *   en-tête · héros · plateformes · fonctionnalités · étapes · témoignages ·
+ *   bannière · pied
  *
- * LE MOUVEMENT EST CONFINÉ À LA SCÈNE DU TÉLÉPHONE, à la demande explicite de
- * Wassim, et il est PUREMENT DÉCORATIF : halos, anneaux, points. Rien n'y porte
- * d'information, donc rien ne se perd quand `prefers-reduced-motion` le coupe —
- * c'est la condition pour avoir le droit de le couper.
+ * LES TEXTES VIENNENT DU CATALOGUE DE LA PLANCHE, clé pour clé (`landing.kit`),
+ * versés par programme depuis son `strings.js` dans les trois langues — aucune
+ * chaîne n'a été retraduite à la main.
  *
- * LE TÉLÉPHONE MONTRE LA PAGE CLIENT, pas une image de synthèse. C'est le
- * produit qu'on vend : une capture inventée serait la seule chose de cette page
- * qu'on ne pourrait pas tenir.
+ * LES PALIERS SONT CEUX DE SA FEUILLE — 1180, 900, 760, 640, 560 — et sont
+ * écrits en `max-[…]` / `min-[…]` à la valeur exacte : un palier Tailwind
+ * standard les aurait décalés de plusieurs dizaines de pixels.
  *
- * DEUX EMPLACEMENTS PORTENT UN CONTENU QUE NOUS N'AVONS PAS ENCORE, et ils le
- * DISENT plutôt que de l'inventer : le nombre de vendeurs et les logos clients.
- * Les planches les marquent `[NOMBRE]` et `[LOGOS À FOURNIR]`. Wassim a tranché
- * le 27/08/2026 : ON NE LES FAIT PAS. Un chiffre inventé sur une landing est un
- * mensonge qui se mesure, et « 0 vendeur l'utilise déjà » serait pire que rien.
- * Ils sont donc OMIS, et l'espace se referme.
+ * ⚠️ À UN PIXEL PRÈS, ET DANS LE BON SENS. La planche écrit `max-width: 900px`,
+ * donc 900 INCLUS ; `max-[900px]:` de Tailwind v4 compile en `width < 900px`,
+ * donc 900 EXCLU. Mesuré le 18/09/2026 à la largeur exacte de chaque palier :
+ * à 900 et à 640 le produit ne basculait pas — titre de 64 au lieu de 46,
+ * cartes sur trois colonnes au lieu de deux. Les bornes hautes s'écrivent
+ * donc `max-[901px]`, `max-[641px]`… et les basses `min-[901px]`.
  *
- * ⚠️ LE QUATRIÈME LIEN DE NAVIGATION, « AIDE », N'EST PAS PORTÉ. Les deux
- * planches le dessinent ; le produit n'a AUCUNE page d'aide, et les trois
- * autres liens sont des ancres vers des sections de cette page. Un lien de
- * navigation vers un 404, sur la seule page que tout le monde voit, est pire
- * qu'un lien manquant — c'est la même règle que le lien de signalement, qui
- * disparaît quand son canal n'existe pas. ⚠️ À POSER À WASSIM : veut-il une
- * page d'aide, et sur quel contenu ?
- *
- * ⚠️ DEUX VIOLETS PÂLES COHABITENT DANS LE CANEVAS, et c'est mesuré : les deux
- * planches de la landing posent `#efeaff` sur le fond des icônes, les seize
- * autres posent `#f1eefe` — 2 occurrences contre 25. L'écart entre les deux est
- * d'une unité perceptible ; le produit garde `violet-fond`, la valeur
- * systématique, plutôt que d'ajouter un quinzième ton de palette pour deux
- * emplois. ⚠️ À SIGNALER À WASSIM : c'est la planche qui fait foi, mais ici
- * elle se contredit elle-même.
- *
- * LE DÉGRADÉ EST SUR L'ACTION PRINCIPALE, et sur elle seule — elle apparaît
- * deux fois, en haut et en bas, parce que la page est longue et que c'est la
- * même action.
+ * ⚠️ CE QUI S'ÉCARTE DE LA PLANCHE, ET C'EST DIT ICI PLUTÔT QUE CACHÉ :
+ *  - « Voir un exemple de page client » mène à la section de la documentation
+ *    qui décrit cette page (`/docs#lien`). La planche vise une page de
+ *    démonstration que le dépôt n'a pas ; en faire une vraie demande de rendre
+ *    `/p/[token]` indépendante de sa lecture en base.
+ *  - « À propos » mène à la présentation de la documentation : la planche
+ *    l'écrit `href="#"`, un lien qui ne mène nulle part.
+ *  - « Restez informé » n'a pas de liste de diffusion derrière lui : le champ
+ *    envoie vers l'inscription, qui est la seule suite honnête.
+ *  - l'année du pied est l'année courante : la planche écrit « © 2025 ».
  */
-
-/**
- * LE DERNIER MOT DU TITRE EN DÉGRADÉ — le `GradientText` du kit, porté le
- * 17/09/2026 (décision de Wassim : « les titres du kit »).
- *
- * ⚠️ `text-transparent` seul rend le mot INVISIBLE quand le dégradé ne peint pas
- * (impression, `forced-colors`, image de fond bloquée) : la couleur de repli est
- * l'encre du titre, et c'est `-webkit-text-fill-color` qui la rend transparente
- * là où le dégradé s'affiche — le même geste que la coque d'accès.
- *
- * Le mot est cherché à la FIN : dans « Un seul lien de suivi pour toute la
- * commande », c'est le dernier mot qui est peint, pas la première occurrence.
- */
-function motEnDegrade(titre: string, mot: string): ReactNode {
-  const i = mot === "" ? -1 : titre.lastIndexOf(mot);
-  if (i < 0) return titre;
-  return (
-    <>
-      {titre.slice(0, i)}
-      <span className="degrade-ds-marque bg-clip-text text-ds-texte-titre [-webkit-text-fill-color:transparent]">
-        {mot}
-      </span>
-      {titre.slice(i + mot.length)}
-    </>
-  );
-}
 
 export function generateStaticParams(): Array<{ locale: string }> {
   return routing.locales.map((locale) => ({ locale }));
@@ -100,6 +92,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitre"),
     description: t("metaDescription"),
+    robots: { index: true, follow: true, "max-image-preview": "large" },
     alternates: alternatesDe(langue, ""),
     openGraph: openGraphDe(langue, "", {
       titre: t("metaTitre"),
@@ -107,6 +100,61 @@ export async function generateMetadata({
     }),
   };
 }
+
+/* ---------------------------------------------------------------------------
+ * LES BOUTONS DU DESIGN SYSTEM — `Button`, tailles `sm` (36 · 16 · 13) et `lg`
+ * (52 · 28 · 15), graisse 600, interlettrage -0,02em, rayon pilule.
+ * ⚠️ Le dégradé porte TOUJOURS `text-ds-texte-sur-marque` : sans lui l'appel
+ * principal héritait de l'encre — du noir sur violet (13/09/2026).
+ * ------------------------------------------------------------------------- */
+const BOUTON_LG =
+  "inline-flex h-13 items-center justify-center gap-2 rounded-ds-pill px-7 text-[15px] font-semibold tracking-[-0.02em] whitespace-nowrap transition-shadow";
+const BOUTON_SM =
+  "inline-flex h-9 items-center justify-center gap-2 rounded-ds-pill px-4 text-[13px] font-semibold tracking-[-0.02em] whitespace-nowrap transition-shadow";
+const PRIMAIRE =
+  "degrade-ds-marque border border-transparent text-ds-texte-sur-marque shadow-ds-brand hover:shadow-ds-brand-hover";
+const SECONDAIRE =
+  "border border-ds-filet bg-ds-surface-carte text-ds-texte-fort shadow-ds-sm hover:shadow-ds-md";
+
+/** `SectionHeading` : eyebrow, titre de 44 au mot final en dégradé, sous-titre. */
+function EnTeteSection({
+  surtitre,
+  titre,
+  motFort,
+  sousTitre,
+}: {
+  readonly surtitre: string;
+  readonly titre: string;
+  readonly motFort: string;
+  readonly sousTitre: string;
+}) {
+  return (
+    <div className="mx-auto flex max-w-[720px] flex-col items-center gap-[18px] text-center">
+      <span className="inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3.5 py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[0.12em] text-ds-accent-encre uppercase md:text-[11px]">
+        <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
+        {surtitre}
+        <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
+      </span>
+      <h2 className="text-[44px] leading-[1.05] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort [:lang(zh-CN)_&]:leading-[1.24]">
+        {titre}
+        {/* Vide en chinois pour le titre des étapes : la planche n'y met aucun mot
+            en dégradé, et une `span` vide n'a rien à peindre. */}
+        {motFort === "" ? null : (
+          <>
+            {" "}
+            <span className="degrade-ds-marque bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">
+              {motFort}
+            </span>
+          </>
+        )}
+      </h2>
+      <p className="text-[16px] leading-[1.55] text-pretty text-ds-texte-corps">{sousTitre}</p>
+    </div>
+  );
+}
+
+/** Une `Card` du design system : fond carte, filet, rayon 16, ombre de carte. */
+const CARTE = "rounded-ds-card border border-ds-filet bg-ds-surface-carte shadow-ds-card";
 
 export default async function Accueil({
   params,
@@ -117,833 +165,448 @@ export default async function Accueil({
   setRequestLocale(locale);
   const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
   const t = await getTranslations("landing");
-  const nav = await getTranslations("navigation");
+  const k = await getTranslations("landing.kit");
 
-  /*
-   * L EYEBROW DU KIT, MESURE SUR SA PAGE SERVIE : 11/700 a l interlettrage de
-   * 0,12em, en accent-encre sur la teinte lavande, rayon pilule, padding
-   * 6px 14px. Il etait ici en 10/600 sur une carte bordee, a 0,04em.
-   *
-   * ⚠️ 11,5 px ET NON 11. Le kit ecrit 11 ; le plancher de la regle 5 est 11,5
-   * au telephone, et cette pilule y est rendue.
-   */
-  /*
-   * L EYEBROW DE SECTION — valeurs relevees sur le kit marketing servi : 11/700
-   * a l interlettrage 0,12em, encre d accent sur la teinte, remplissage 6/14,
-   * rayon pilule, hauteur 26.
-   *
-   * ⚠️ 11,5 AU TELEPHONE, ET C EST LA REGLE 5 QUI GAGNE. Le kit ecrit 11 ;
-   * cet eyebrow est rendu au telephone, et 11 passe sous le plancher.
-   *
-   * ⚠️ ET LE TEXTE EST EN CASSE NORMALE DANS LE CATALOGUE, les majuscules
-   * venant du CSS. `textContent` ne suit pas `text-transform` : un libelle ecrit
-   * en capitales dans le catalogue ne se compare plus a celui du kit, et il se
-   * traduit mal — le chinois n a pas de casse.
-   */
-  /* Ses deux points décoratifs sont posés à chaque emploi : voir « Eyebrow » dans le design system. */
-  const pilule =
-    "inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3.5 py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[0.12em] text-ds-accent-encre uppercase lg:text-[11px]";
-
-  /*
-   * L'ACTION PRINCIPALE EST PLEINE LARGEUR AU TÉLÉPHONE. `LandingMobile` pose
-   * `width: 100%` sur le dégradé : dans 350 px de carte, un bouton qui n'occupe
-   * que son texte laisse deux zones mortes de part et d'autre, à l'endroit
-   * exact où le pouce arrive.
-   */
-  /*
-   * ⚠️ LE DÉGRADÉ NE FIXAIT PAS SA COULEUR DE TEXTE, ET L APPEL PRINCIPAL
-   * HÉRITAIT DONC DE L ENCRE. Mesuré le 13/09/2026 contre le kit : la référence
-   * rend `rgb(255,255,255)`, le produit rendait `rgb(14,14,19)` — du noir sur un
-   * violet→corail, sur le bouton le plus important de la seule page que tout le
-   * monde voit. `.degrade-ds-marque` ne pose qu une image de fond ; les onze
-   * autres emplois du dégradé portent tous `text-ds-texte-sur-marque`, celui-ci
-   * était le seul à ne pas l avoir. `tests/unit/pilules-lisibles.test.ts` l exige
-   * désormais.
-   *
-   * LES AUTRES VALEURS SONT CELLES DU KIT : 600 de graisse, -0,02em, remplissage
-   * 0/28, écart 8, et l ombre de marque du design system plutôt qu une ombre
-   * écrite en dur sur l ancien violet.
-   *
-   * IL RESTE PLEINE LARGEUR AU TÉLÉPHONE : dans 350 px de carte, un bouton qui
-   * n occupe que son texte laisse deux zones mortes là où le pouce arrive.
-   */
-  const actionPrincipale =
-    "degrade-ds-marque flex min-h-13 w-full items-center justify-center gap-2 rounded-ds-pill border border-transparent px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover md:inline-flex md:h-13 md:w-auto md:min-h-0";
-
-  /* 14/600 en corps : la graisse du kit. Le produit rendait 500. */
-  const lienMenu =
-    "text-[14px] leading-[normal] font-semibold text-ds-texte-corps transition-colors hover:text-ds-accent";
-
-  /*
-   * CINQ ENTREES DE NAVIGATION, COMME LE KIT — quatre ancres et un lien.
-   *
-   * ⚠️ « DOCUMENTATION » MENE A UNE ROUTE QUI EXISTE, et c est la seule raison
-   * pour laquelle elle est la : `/docs` repond 200. La cinquieme entree du kit,
-   * « FAQ », ne menerait nulle part — une entree de navigation vers un 404, sur
-   * la seule page que tout le monde voit, est pire qu une entree absente.
-   */
-  const sections = ["fonctionnement", "etapes", "clientVoit", "tarif"] as const;
-
-  /*
-   * LE GRAPHE JSON-LD, RENDU CÔTÉ SERVEUR.
-   *
-   * ⚠️ CÔTÉ SERVEUR N'EST PAS UN DÉTAIL D'IMPLÉMENTATION. Google traite les
-   * données structurées injectées par JavaScript avec un retard qui se compte
-   * en jours, et ne rend pas du tout le JS sur une page en statut non-200. Un
-   * graphe posé par un effet client existerait pour un navigateur et pour
-   * personne d'autre.
-   *
-   * ⚠️ ET `dangerouslySetInnerHTML` EST ICI LE SEUL CHEMIN CORRECT, alors que
-   * le reste du produit n'en contient aucun. React échapperait `<`, `>` et `&`
-   * en entités dans un nœud texte — le JSON-LD deviendrait illisible pour un
-   * analyseur. La valeur ne vient d'aucune entrée utilisateur : elle est
-   * construite ici à partir du catalogue et de la configuration. Le seul
-   * caractère à neutraliser est `<`, qui pourrait fermer la balise.
-   */
   const graphe = donneesStructurees(langue, {
     nom: "DropLink",
     description: t("metaDescription"),
   });
 
+  const inscription = `/${locale}/inscription`;
+  const connexion = `/${locale}/connexion`;
+  const exemple = `/${locale}/docs#lien`;
+
+  /* La navigation de la planche : cinq entrées, dans cet ordre. */
+  const NAV: ReadonlyArray<readonly [string, string]> = [
+    [k("navFeatures"), "#fonctionnalites"],
+    [k("navHow"), "#etapes"],
+    [k("navPricing"), `/${locale}/docs#plans`],
+    [k("navDocs"), `/${locale}/docs`],
+    [k("navFaq"), `/${locale}/docs#faq`],
+  ];
+
+  const PASTILLES: ReadonlyArray<readonly [LucideIcon, string, string, string]> = [
+    [Upload, k("chip1"), k("chip1c"), "left-0 top-[170px]"],
+    [Truck, k("chip2"), k("chip2c"), "-left-[18px] top-[300px]"],
+    [Link2, k("chip3"), k("chip3c"), "right-0 top-[170px]"],
+    [Store, k("chip4"), k("chip4c"), "-right-3 top-[300px]"],
+  ];
+
+  const FONCTIONNALITES: ReadonlyArray<readonly [LucideIcon, string, string]> = [
+    [Package, k("f1"), k("f1b")],
+    [ImageIcon, k("f2"), k("f2b")],
+    [Truck, k("f3"), k("f3b")],
+    [Link2, k("f4"), k("f4b")],
+    [BarChart3, k("f5"), k("f5b")],
+    [Layers, k("f6"), k("f6b")],
+  ];
+
+  const TEMOIGNAGES = [
+    { nom: "Yanis", role: k("q1role"), citation: k("q1"), avatar: avatar2 },
+    { nom: "Sarah", role: k("q2role"), citation: k("q2"), avatar: avatar3 },
+    { nom: "Mehdi", role: k("q3role"), citation: k("q3"), avatar: avatar4 },
+  ] as const;
+
+  /* La planche écrit « © 2025 » en dur ; l'année est celle du rendu. */
+  const droits = k("footRights").replace(/\b20\d\d\b/, String(new Date().getFullYear()));
+
+  /* Liens du pied : la planche fait 44 px au téléphone par marge négative. */
+  const lienPied =
+    "text-[13px] leading-[normal] font-medium text-ds-texte-sourdine hover:text-ds-texte-fort max-[767.98px]:-my-[5px] max-[767.98px]:inline-flex max-[767.98px]:min-h-11 max-[767.98px]:items-center max-[767.98px]:self-start";
+
   return (
-    <div className="bg-ds-surface-page">
+    <div className="min-h-screen bg-[image:var(--degrade-ds-page)] bg-fixed">
       {graphe === null ? null : (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(graphe).replace(/</g, "\u003c"),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(graphe).replace(/</g, "\\u003c") }}
         />
       )}
-      {/* ⚠️ PLUS DE CARTE-PAGE. Le design system supprime le cadre exterieur —
-          « carte blanche sur `#c5cbfb` → aucun cadre ». La largeur bornee reste :
-          le kit compose sa landing sur 1347 px de contenu a 1690 de fenetre, et
-          une ligne de prose qui traverse un ecran large ne se lit pas. */}
-      <div className="mx-auto w-full max-w-[1384px] overflow-hidden bg-ds-surface-page">
-        {/* ---- NAVIGATION ------------------------------------------------ */}
-        <header className="flex items-center justify-between gap-6 px-4 py-[18px] md:px-10 md:py-[22px]">
-          <span className="text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre md:text-[18px] md:leading-[23px]">
-            DropLink
-          </span>
 
-          <nav aria-label={nav("espaceVendeur")} className="hidden gap-[30px] md:flex">
-            {sections.map((clef) => (
-              <a key={clef} href={"#" + clef} className={lienMenu}>
-                {t("menu." + clef)}
-              </a>
-            ))}
-            <Link href={`/${locale}/docs`} className={lienMenu}>
-              {t("menu.docs")}
+      {/* `#root` de la planche : 1280 de large, gouttière 32 · 20 sous 900 · 16 sous 640. */}
+      <div className="mx-auto w-full max-w-[1280px] px-4 min-[641px]:px-5 min-[901px]:px-8">
+        {/* ==== 1 · EN-TÊTE ============================================== */}
+        <header className="relative mx-auto w-full max-w-[1180px] py-[18px]">
+          <div className="flex items-center justify-between gap-4">
+            <Link href={`/${locale}`} aria-label="DropLink" className="flex min-h-11 flex-none items-center md:min-h-0">
+              <LogoMarque hauteur={38} />
             </Link>
-          </nav>
-
-          {/*
-            DEUX BOUTONS, ET C EST LE KIT QUI LES COMPTE. Il pose « Se
-            connecter » en pilule BLANCHE bordee et « Créer un compte » en
-            pilule DEGRADEE, toutes deux a 36 px de haut, `padding 0 16px`,
-            13/600 en -0,02em. Il n y en avait qu un, en pilule NOIRE — le
-            chrome de l ancien canevas, dont `CLAUDE.md` dit qu il est mort.
-
-            ⚠️ ILS PASSENT A 44 px AU TELEPHONE. Le kit dessine 36 ; ces deux
-            liens y sont rendus, et 36 se rate au pouce. C est la regle 5, et
-            elle prime sur la valeur du kit partout ou les deux se contredisent.
-
-            « CRÉER UN COMPTE » MENE A UNE ROUTE QUI EXISTE — `/inscription`.
-            C est la difference avec « Tarifs » et « Documentation », que le kit
-            dessine aussi et qui ne menent nulle part chez nous : une entree de
-            navigation vers un 404 est pire qu une entree absente.
-          */}
-          <div className="hidden items-center gap-2.5 md:flex">
-            <Link
-              href={`/${locale}/connexion`}
-              /* ⚠️ 36 AU BUREAU, 44 TANT QU ON PEUT Y TOUCHER. Le kit dessine
-                 36 ; `md:` commence à 768, où l on est encore au doigt. Le
-                 plancher tactile tient donc jusqu à `lg`, et la valeur du kit
-                 reprend au-delà. */
-              className="inline-flex h-11 items-center gap-2 rounded-ds-pill border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-sm transition-colors hover:bg-ds-surface-teinte lg:h-9"
-            >
-              {nav("seConnecter")}
-            </Link>
-            <Link
-              href={`/${locale}/inscription`}
-              className="degrade-ds-marque inline-flex h-11 items-center gap-2 rounded-ds-pill border border-transparent px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover lg:h-9"
-            >
-              {nav("creerCompte")}
-              <ArrowRight aria-hidden="true" size={14} strokeWidth={1.9} />
-            </Link>
-          </div>
-
-          {/*
-            LE MENU DU TÉLÉPHONE, en `<details>` et sans une ligne de
-            JavaScript. `LandingMobile` dessine un bouton de 44 px ; un bouton
-            qui n'ouvre rien serait un dessin, pas une navigation. Échap le
-            referme, le clavier l'atteint, et il fonctionne avant l'hydratation
-            — ce qui compte sur la page qu'on ouvre depuis un message privé.
-          */}
-          <details name="menu-landing" className="relative md:hidden">
-            {/* LE BOUTON DU KIT (`ms-burger`) : carte, filet, rayon de carte — il
-                était un disque gris de l'ancien canevas. 44 px et non 40 : la
-                règle 5 l'emporte sur le dessin. */}
-            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte text-ds-texte-fort [&::-webkit-details-marker]:hidden">
-              <Menu aria-hidden="true" size={19} strokeWidth={1.9} />
-              <span className="sr-only">{nav("espaceVendeur")}</span>
-            </summary>
-            <nav
-              aria-label={nav("espaceVendeur")}
-              className="absolute right-0 z-20 mt-2 flex w-60 flex-col gap-1 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3 shadow-ds-card"
-            >
-              {sections.map((clef) => (
+            <nav aria-label={k("menu")} className="hidden gap-7 min-[1181px]:flex">
+              {NAV.map(([libelle, cible]) => (
                 <a
-                  key={clef}
-                  href={"#" + clef}
-                  className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps hover:bg-ds-surface-creux"
+                  key={cible}
+                  href={cible}
+                  className="text-[14px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-corps hover:text-ds-texte-fort"
                 >
-                  {t("menu." + clef)}
+                  {libelle}
                 </a>
               ))}
-              <Link
-                href={`/${locale}/docs`}
-                className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps hover:bg-ds-surface-creux"
-              >
-                {t("menu.docs")}
-              </Link>
-              <Link
-                href={`/${locale}/connexion`}
-                /* ⚠️ `bg-primary text-on-primary` : la pilule NOIRE de l'ancien
-                   canevas, dans le seul menu que la mesure à 1280 ne déplie
-                   jamais. Le kit y pose une entrée comme les autres. */
-                className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps hover:bg-ds-surface-creux"
-              >
-                {nav("seConnecter")}
-              </Link>
             </nav>
-          </details>
+            <div className="flex items-center gap-2.5">
+              <SelecteurLangue locale={locale} compact />
+              <span className="hidden items-center gap-2.5 min-[641px]:flex">
+                <Link href={connexion} className={BOUTON_SM + " " + SECONDAIRE}>
+                  {k("login")}
+                </Link>
+                <Link href={inscription} className={BOUTON_SM + " " + PRIMAIRE}>
+                  {k("signup")}
+                  <ArrowRight aria-hidden="true" size={15} strokeWidth={2} />
+                </Link>
+              </span>
+              {/* LE BURGER N'APPARAÎT QUE SOUS 640 : entre 640 et 1180 la
+                  navigation disparaît sans lui, comme dans la planche. */}
+              <details className="group min-[641px]:hidden">
+                <summary
+                  aria-label={k("menu")}
+                  className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte text-ds-texte-fort [&::-webkit-details-marker]:hidden"
+                >
+                  <Menu aria-hidden="true" size={19} />
+                </summary>
+                <div className="absolute inset-x-0 top-full z-40 mt-3.5 flex flex-col gap-1 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3 shadow-ds-card">
+                  {NAV.map(([libelle, cible]) => (
+                    <a
+                      key={cible}
+                      href={cible}
+                      className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps"
+                    >
+                      {libelle}
+                    </a>
+                  ))}
+                  <Link
+                    href={connexion}
+                    className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps"
+                  >
+                    {k("login")}
+                  </Link>
+                  <Link href={inscription} className={"mt-1 w-full " + BOUTON_LG.replace("h-13", "h-11") + " " + PRIMAIRE}>
+                    {k("signup")}
+                    <ArrowRight aria-hidden="true" size={16} strokeWidth={2} />
+                  </Link>
+                </div>
+              </details>
+            </div>
+          </div>
         </header>
 
         <main id="contenu">
-          {/* ---- HÉROS --------------------------------------------------- */}
-          <section className="relative overflow-hidden px-4 pt-[22px] text-center md:px-10 md:pt-[46px]">
-            {/* ⚠️ LE FILIGRANE « DROPLINK » DERRIÈRE LE TITRE A ÉTÉ RETIRÉ le
-                17/09/2026 : la planche ne le porte pas, et depuis que la maquette
-                du héros est là, il transparaissait à travers elle. */}
-
-            {/*
-              LES QUATRE PASTILLES FLOTTANTES DU HÉROS — `FloatingChip` de la
-              planche, à ses positions exactes (0/170, -18/300 à gauche ; 0/170,
-              -12/300 à droite).
-
-              ⚠️ ELLES ÉTAIENT AILLEURS, ET C'ÉTAIT UNE DÉCLARATION, PAS UN
-              PORTAGE. Elles vivaient autour du téléphone de la section suivante,
-              avec un autre contenu, et une déclaration expliquait pourquoi —
-              sauf que la planche les met ICI, autour du titre. Wassim : « faut
-              que ce soit la même, pixel par pixel ».
-
-              ⚠️ UNE SEULE LÉGENDE CHANGE : la planche écrit « Mise à jour en
-              temps réel ». Le suivi est INTERROGÉ à intervalles, pas poussé en
-              temps réel — c'est déjà pour cette raison que « en temps réel » est
-              écarté de la page client. « Mise à jour sans vous » dit le même
-              bénéfice sans promettre ce que le produit ne tient pas.
-
-              Le flou d'arrière-plan est autorisé ici : la règle 2 ne l'interdit
-              que sur `/p/[token]`. Masquées sous `lg`, comme au kit.
-            */}
-            {/* ⚠️ AU-DESSUS DE 1180, PAS DE 1024. La feuille de la planche pose
-                `.ms-chips{display:none}` sous 1181 : c'est là qu'elles cessent
-                d'avoir la place de flotter sans recouvrir le titre. */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 mx-auto hidden h-0 max-w-[1185px] min-[1181px]:block">
-              {(
-                [
-                  { cle: "Depot", icone: ImageIcon, place: "left-0 top-[170px]" },
-                  { cle: "Suivi", icone: Truck, place: "-left-[18px] top-[300px]" },
-                  { cle: "Lien", icone: Link2, place: "right-0 top-[170px]" },
-                  { cle: "Marque", icone: Package, place: "-right-3 top-[300px]" },
-                ] as const
-              ).map(({ cle, icone: Icone, place }) => (
-                <span
-                  key={cle}
-                  className={
-                    "absolute inline-flex items-center gap-[11px] rounded-ds-card border border-[rgba(255,255,255,0.9)] bg-[rgba(255,255,255,0.86)] py-[11px] pr-4 pl-[11px] text-left shadow-ds-md backdrop-blur-[12px] " +
-                    place
-                  }
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
-                    <Icone aria-hidden="true" size={18} strokeWidth={1.9} />
-                  </span>
-                  <span className="flex flex-col gap-px">
-                    <span className="text-[13px] leading-[normal] font-bold text-ds-texte-fort">
-                      {t(`pastille${cle}Titre`)}
-                    </span>
-                    <span className="text-[11px] leading-[normal] font-medium text-ds-texte-sourdine">
-                      {t(`pastille${cle}Texte`)}
-                    </span>
-                  </span>
-                </span>
-              ))}
-            </div>
-
-            <div className="relative">
-              <h1 className="mx-auto text-[38px] leading-[1.02] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[64px] md:leading-[0.98]">
-                {motEnDegrade(t("heroTitre"), t("motDegradeHero"))}
-              </h1>
-              {/* Deux textes, pas un texte coupé : la planche mobile RÉÉCRIT
-                  la phrase plus court, elle ne la tronque pas. */}
-              <p className="mx-auto mt-4 mb-6 max-w-[500px] text-[15px] leading-[1.55] text-ds-texte-corps md:mt-5 md:mb-[30px] md:text-[17px] md:leading-[1.55]">
-                <span className="md:hidden">{t("heroSousTitreCourt")}</span>
-                <span className="hidden md:inline">{t("heroSousTitre")}</span>
-              </p>
-              <Link href={`/${locale}/inscription`} className={actionPrincipale}>
-                {t("ctaPrincipal")}
-                <ArrowRight aria-hidden="true" size={17} strokeWidth={1.9} />
-              </Link>
-
-              {/* LES TROIS PROMESSES DU KIT, ET ELLES SONT TOUTES VRAIES :
-                  le produit est gratuit en phase de validation, il n a AUCUN
-                  code de paiement — donc aucune carte a demander — et
-                  l inscription n exige pas de confirmation d email, donc rien
-                  n attend entre le formulaire et la premiere commande.
-
-                  ⚠️ ELLES SONT DANS UNE LISTE, pas dans trois `span` alignes :
-                  ce sont trois affirmations distinctes, et un lecteur d ecran
-                  doit pouvoir les compter. */}
-              <ul className="mx-auto mt-5 flex max-w-[560px] flex-col items-start gap-2.5 md:mt-6 md:flex-row md:items-center md:justify-center md:gap-7">
-                {(["perk1", "perk2", "perk3"] as const).map((clef) => (
-                  <li key={clef} className="flex items-center gap-[9px]">
-                    {/* LA CASE COCHÉE DU KIT (`Checkbox checked`) : 18 px, rayon 6,
-                        aplat d'accent et coche blanche — pas un cercle Material. */}
-                    <span
-                      aria-hidden="true"
-                      className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-ds-xs bg-ds-accent text-ds-texte-sur-marque"
-                    >
-                      <Check size={12} strokeWidth={3} />
-                    </span>
-                    <span className="text-[14px] leading-[normal] font-medium text-ds-texte-corps">
-                      {t(clef)}
-                    </span>
-                  </li>
+          {/* ==== 2 · HÉROS =============================================== */}
+          <section className="relative mx-auto w-full max-w-[1180px] pt-[34px] text-center max-[641px]:text-left">
+            {/* Le badge de confiance : « + », cinq avatars qui se chevauchent
+                (30 % de leur côté), le texte en 12/700. */}
+            <div className="inline-flex max-w-full items-center gap-3 rounded-ds-pill bg-[rgba(255,255,255,0.8)] py-[7px] pr-4 pl-2.5 shadow-ds-sm max-[641px]:mb-1 backdrop-blur-[14px] backdrop-saturate-[1.4]">
+              <Plus aria-hidden="true" size={14} className="flex-none text-ds-accent" />
+              <span className="inline-flex flex-none items-center">
+                {[avatar1, avatar2, avatar3, avatar4, avatar5].map((a, i) => (
+                  <Image
+                    key={i}
+                    src={a}
+                    alt=""
+                    width={26}
+                    height={26}
+                    className={"h-[26px] w-[26px] rounded-full object-cover ring-2 ring-ds-surface-carte" + (i === 0 ? "" : " -ml-[7.8px]")}
+                  />
                 ))}
-              </ul>
-
-              {/* ---- LA MAQUETTE DU HÉROS ------------------------------------
-               *
-               * Le kit la pose sous les promesses, débordant du bas de la
-               * section : c'est la première chose qu'un visiteur voit du
-               * produit. Elle a 1180 px de large et se réduit par `scale` —
-               * jamais par une largeur fluide, sinon ses colonnes se replient
-               * et la maquette ne montre plus l'écran qu'elle décrit.
-               *
-               * ⚠️ `lg` ET AU-DESSUS SEULEMENT. Sous ce palier, c'est le
-               * téléphone de la section suivante qui montre le produit — le
-               * kit y réduit la fenêtre à 30 %, où elle n'est plus lisible.
-               */}
-              {/*
-                LES DEUX SURFACES CÔTE À CÔTE — c'est la composition de la
-                planche, et elle dit l'argument mieux que la phrase : à gauche ce
-                que le VENDEUR voit, à droite ce que son CLIENT voit.
-
-                ⚠️ LE TÉLÉPHONE MANQUAIT, ET C'EST LA MOITIÉ DU HÉROS. Le bloc ne
-                portait que la fenêtre d'application ; il paraissait centré alors
-                qu'il est décalé à gauche (-64 %) pour laisser la place au
-                téléphone. Un dessin posé à gauche sans rien à sa droite ne se lit
-                pas comme une composition, il se lit comme un oubli — et c'en
-                était un.
-
-                Valeurs de la planche : bloc de 600, fenêtre à 0,68 translatée de
-                -64 % depuis le centre, téléphone de 286 posé à `right: -30`,
-                `top: -10`. Il DÉBORDE de trente pixels à droite, exprès.
-              */}
-              {/*
-                ⚠️ LES QUATRE PALIERS SONT CEUX DE LA FEUILLE DE LA PLANCHE, et je
-                les avais tous manqués en masquant le bloc sous `lg`.
-
-                  > 1180   bloc de 600, fenêtre à 0,68 translatée de -64 %,
-                           téléphone en absolu à droite (`right: -30`, `top: -10`)
-                  ≤ 1180   ils S'EMPILENT : colonne centrée, écart 24, sans
-                           transformation ; la fenêtre garde sa taille et se fait
-                           ROGNER par `max-width: 100%` + `overflow: hidden`
-                  ≤ 760    fenêtre à 0,42, hauteur 260, rognée
-                  ≤ 560    fenêtre à 0,30, hauteur 190
-
-                Le kit ne cache donc JAMAIS la maquette : il la réduit. C'est ce
-                qui fait que sa landing dit la même chose au téléphone qu'au
-                bureau, et c'est exactement ce que le produit ne faisait pas.
-              */}
-              <div className="relative mt-8 flex flex-col items-center gap-6 min-[1181px]:mt-10 min-[1181px]:block min-[1181px]:h-[600px]">
-                {/* ⚠️ LES ÉCHELLES SE COMPOSENT DANS LA PLANCHE, ET J'EN AVAIS
-                    APPLIQUÉ UNE SEULE. `AppWindowMock` porte `scale(0.68)` EN
-                    LIGNE, toujours ; la feuille ajoute `scale(.42)` puis
-                    `scale(.30)` sur son ENVELOPPE sous 760 et 560. Le produit
-                    des deux fait 0,2856 et 0,204 — ma maquette était donc une
-                    fois et demie trop grande au téléphone. Mesuré : ses textes
-                    rendaient 5 px de haut contre 3 au kit, et la soustraction,
-                    qui ignore ce qui fait moins de 4 px, les comptait « en trop »
-                    d'un seul côté. */}
-                <div className="h-[190px] max-w-full origin-top scale-[0.204] overflow-hidden min-[561px]:h-[260px] min-[561px]:scale-[0.2856] min-[761px]:h-auto min-[761px]:scale-[0.68] min-[1181px]:absolute min-[1181px]:left-1/2 min-[1181px]:-translate-x-[64%]">
-                  <MaquetteApplication />
-                </div>
-                <div className="min-[1181px]:absolute min-[1181px]:-top-2.5 min-[1181px]:-right-[30px]">
-                  <TelephoneClient largeur={286} />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* ---- CE QUE VOIT LE CLIENT : LE TITRE, PUIS LA SCÈNE ---------
-           *
-           * ⚠️ CE TITRE N'EXISTAIT QUE COMME `aria-label`, ET C'ÉTAIT UN TROU.
-           * La section occupe 500 px, elle est citée dans le menu de
-           * navigation — et elle n'annonçait son sujet à personne d'autre
-           * qu'un lecteur d'écran. Ni un visiteur pressé ni un moteur ne
-           * pouvaient savoir ce qu'ils regardaient.
-           *
-           * Les deux planches le portent depuis le 08/09/2026 : le canevas
-           * d'abord, l'implémentation ensuite — jamais l'inverse.
-           *
-           * ⚠️ `aria-labelledby` REMPLACE `aria-label`, IL NE S'Y AJOUTE PAS.
-           * Garder les deux ferait exister deux sources pour le même nom, qui
-           * divergeraient au premier ajustement de l'une — et c'est celle
-           * qu'on ne voit pas qui gagnerait.
-           */}
-          <h2
-            id="titre-client-voit"
-            className="mx-auto mt-[34px] max-w-[760px] px-4 text-center text-[26px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:mt-10 md:px-0 md:text-[44px]"
-          >
-            {t("destinataireTitre")}
-          </h2>
-          <section
-            id="clientVoit"
-            aria-labelledby="titre-client-voit"
-            className="relative mt-[18px] h-[386px] overflow-hidden md:mt-[22px] md:h-[500px]"
-          >
-            {/* DÉCOR. Purement décoratif, entièrement `aria-hidden`. */}
-            <div aria-hidden="true">
-              <div className="anim-halo absolute top-10 left-1/2 -ml-[310px] hidden h-[480px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(124,92,245,0.16)_0%,rgba(255,255,255,0)_66%)] md:block" />
-              <div className="anim-anneau absolute top-[84px] left-[168px] hidden h-[132px] w-[132px] rounded-full border-[1.5px] border-[#ddd5fb] xl:block" />
-              <div
-                className="anim-anneau absolute top-[288px] right-[152px] hidden h-24 w-24 rounded-full border-[1.5px] border-[#fbd9d0] xl:block"
-                style={{ animationDelay: "2.4s" }}
-              />
-              <div className="anim-derive absolute top-[336px] left-[330px] hidden h-7 w-7 rounded-[9px] bg-[rgba(124,92,245,0.18)] xl:block" />
-              <div
-                className="anim-derive absolute top-[74px] right-[336px] hidden h-5 w-5 rounded-[7px] bg-[rgba(242,118,94,0.24)] xl:block"
-                style={{ animationDelay: "4s" }}
-              />
-              <div
-                className="anim-derive absolute top-[402px] left-[232px] hidden h-3 w-3 rounded-full bg-[rgba(242,118,94,0.4)] xl:block"
-                style={{ animationDelay: "7s" }}
-              />
-              <div
-                className="anim-derive absolute top-[154px] right-[218px] hidden h-3.5 w-3.5 rounded-full bg-[rgba(124,92,245,0.3)] xl:block"
-                style={{ animationDelay: "9.5s" }}
-              />
-            </div>
-
-            {/*
-              LE TÉLÉPHONE. Aperçu de la page client : en-tête au dégradé, la
-              FRISE d'expédition, puis la grille de photos.
-
-              ⚠️ L'ORDRE ÉTAIT INVERSÉ. Le code posait quatre carrés de couleur
-              PUIS la frise ; les deux planches posent la FRISE en premier et les
-              photos en 2×2 en dessous. Ce n'est pas un détail de dessin : c'est
-              l'ordre de la vraie page client, et cette vignette est censée la
-              montrer. Une capture qui ne correspond pas au produit est la seule
-              chose de cette page qu'on ne pourrait pas tenir.
-            */}
-            <div className="absolute top-0 left-1/2 h-[434px] w-[228px] -translate-x-1/2 rounded-[34px] bg-ds-ink-900 p-[7px] shadow-ds-window md:h-[578px] md:w-[330px] md:rounded-[42px] md:p-[9px] ">
-              <div className="h-full w-full overflow-hidden rounded-[28px] bg-ds-surface-carte md:rounded-[34px]">
-                <div className="degrade-ds-marque h-[74px] px-3.5 pt-[22px] md:h-[92px] md:px-[18px] md:pt-[30px]">
-                  <div className="flex items-center gap-[7px] md:gap-2">
-                    <span className="h-[19px] w-[19px] rounded-full bg-white/30 md:h-6 md:w-6" />
-                    <span className="text-[11.5px] leading-[15px] font-bold text-white md:text-[13px] md:leading-4">
-                      {t("apercuBoutique")}
-                    </span>
-                  </div>
-                  <p className="mt-[7px] text-[16px] leading-[21px] font-extrabold tracking-[-0.02em] text-white md:mt-[9px] md:text-[19px] md:leading-6">
-                    {t("apercuTitre")}
-                  </p>
-                </div>
-
-                <div className="p-[11px] md:px-3.5 md:pt-3.5">
-                  <div className="mb-2.5 grid grid-cols-4 gap-[3px] md:mb-3 md:gap-1">
-                    <span className="h-1 rounded-full bg-ds-accent" />
-                    <span className="h-1 rounded-full bg-ds-accent" />
-                    <span className="h-1 rounded-full bg-ds-accent" />
-                    <span className="h-1 rounded-full bg-ds-surface-creux" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-[5px] md:gap-1.5">
-                    {["#e4e2ee", "#eee4e0", "#e0e4ee", "#eaeaef"].map((teinte) => (
-                      <span
-                        key={teinte}
-                        className="block aspect-square rounded-[9px] md:rounded-[10px]"
-                        style={{ backgroundColor: teinte }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/*
-              LES CARTES FLOTTANTES.
-
-              ⚠️ ELLES SONT ANCRÉES AU CENTRE, PAS AUX BORDS. Les planches les
-              posent en `left: 232px` d'un conteneur de 1 384 : recopier cette
-              valeur les fait dériver vers le téléphone dès que la fenêtre
-              rétrécit, et à 1 024 la seconde le RECOUVRE. Ancrées au centre,
-              leur distance à l'appareil qu'elles commentent ne dépend plus de la
-              largeur — et à 1 384 elles retombent exactement sur la planche.
-
-              TROIS AU BUREAU LARGE, DEUX AU TÉLÉPHONE, aucune entre les deux :
-              la planche mobile n'en garde que deux, plus courtes, et entre 768
-              et 1 279 le téléphone est déjà à sa taille de bureau sans que la
-              carte-page soit assez large pour les loger.
-            */}
-            <div className="anim-flot absolute top-24 left-2.5 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-ds-md md:hidden">
-              <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ds-surface-teinte">
-                <ImageIcon aria-hidden="true" size={16} strokeWidth={1.9} className="text-ds-accent" />
               </span>
-              <span className="text-[12px] leading-[15px] font-bold text-ds-texte-titre">
-                {t("flottant.photosCourt")}
+              <span className="text-[12px] leading-[normal] font-bold text-ds-texte-corps max-[767.98px]:text-[11.5px]">
+                {k("trust")}
               </span>
             </div>
 
-            <div
-              className="anim-flot absolute top-[210px] right-2 flex items-center gap-[9px] rounded-[13px] bg-ds-surface-carte px-3 py-2.5 shadow-ds-md md:hidden"
-              style={{ animationDelay: "1.6s" }}
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ds-erreur-fond">
-                <Truck aria-hidden="true" size={16} strokeWidth={1.9} className="text-ds-erreur-encre" />
+            {/* Deux lignes par un `<br>`, comme la planche ; l'espace avant lui
+                garde la phrase lisible d'un seul tenant pour un lecteur d'écran
+                et un moteur (il disparaît en fin de ligne). */}
+            <h1 className="mt-[26px] text-[64px] leading-[0.98] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort max-[901px]:text-[46px] max-[641px]:text-[34px] max-[641px]:leading-[1.06] [:lang(zh-CN)_&]:leading-[1.24]">
+              {k("heroTitle1")}{" "}
+              <br />
+              {k("heroTitle2")}
+              <span className="degrade-ds-marque bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">
+                {k("heroTitleHl")}
               </span>
-              <span className="text-[12px] leading-[15px] font-bold text-ds-texte-titre">
-                {t("flottant.transitCourt")}
-              </span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-[500px] text-[17px] leading-[1.55] text-pretty text-ds-texte-corps max-[641px]:text-[15.5px]">
+              {k("heroLead")}
+            </p>
+
+            <div className="mt-7 flex flex-wrap justify-center gap-3.5 max-[641px]:flex-col max-[641px]:items-stretch">
+              <Link href={inscription} className={BOUTON_LG + " " + PRIMAIRE}>
+                {k("ctaPrimary")}
+                <ArrowRight aria-hidden="true" size={17} strokeWidth={2} />
+              </Link>
+              <Link href={exemple} className={BOUTON_LG + " " + SECONDAIRE}>
+                {k("ctaSecondary")}
+              </Link>
             </div>
 
-            {(
-              [
-                {
-                  clef: "photos",
-                  icone: ImageIcon,
-                  peau: "bg-ds-surface-teinte text-ds-accent",
-                  place: "top-[150px] left-[calc(50%-460px)] w-[264px]",
-                  delai: "0s",
-                },
-                {
-                  clef: "transit",
-                  icone: Truck,
-                  peau: "bg-ds-erreur-fond text-ds-erreur-encre",
-                  place: "top-[262px] right-[calc(50%-484px)] w-[274px]",
-                  delai: "1.6s",
-                },
-                {
-                  clef: "valide",
-                  icone: Check,
-                  peau: "bg-ds-succes-fond text-ds-succes-encre",
-                  place: "bottom-[34px] left-[calc(50%-424px)] w-[242px]",
-                  delai: "3.2s",
-                },
-              ] as const
-            ).map((carte) => (
-              <div
-                key={carte.clef}
-                className={
-                  "anim-flot absolute hidden items-center gap-[11px] rounded-[14px] bg-ds-surface-carte px-3.5 py-3 shadow-ds-md xl:flex " +
-                  carte.place
-                }
-                style={{ animationDelay: carte.delai }}
-              >
-                <span
-                  className={
-                    "flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[11px] " +
-                    carte.peau
-                  }
-                >
-                  <carte.icone aria-hidden="true" size={19} strokeWidth={1.9} />
-                </span>
-                <span>
-                  <span className="block text-[13px] leading-4 font-bold text-ds-texte-titre">
-                    {t("flottant." + carte.clef + "Titre")}
+            <ul className="mt-[22px] flex flex-wrap justify-center gap-7 max-[641px]:flex-col max-[641px]:items-start max-[641px]:gap-2.5">
+              {[k("perk1"), k("perk2"), k("perk3")].map((garantie) => (
+                <li key={garantie} className="inline-flex items-center gap-[9px]">
+                  <span className="inline-flex h-[18px] w-[18px] flex-none items-center justify-center rounded-ds-xs border border-ds-accent bg-ds-accent text-ds-texte-sur-marque">
+                    <Check aria-hidden="true" size={12} strokeWidth={3} />
                   </span>
-                  <span className="mt-px block text-[11.5px] leading-[15px] text-ds-texte-corps">
-                    {t("flottant." + carte.clef + "Texte")}
-                  </span>
-                </span>
-              </div>
-            ))}
-          </section>
-
-          {/* ---- BÉNÉFICES ----------------------------------------------- */}
-          <section
-            id="fonctionnement"
-            className="bg-ds-surface-creux px-4 pt-11 pb-12 md:px-10 md:pt-[66px] md:pb-[74px]"
-          >
-            <div className="text-center">
-              <span className={pilule}>
-                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
-                {t("beneficesPilule")}
-                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
-              </span>
-              <h2 className="mt-4 text-[30px] leading-[35px] font-extrabold tracking-[-0.03em] text-ds-texte-titre md:mt-5 md:text-[46px] md:leading-[52px]">
-                {motEnDegrade(t("beneficesTitre"), t("motDegradeBenefices"))}
-              </h2>
-              {/* Le kit le montre aussi au téléphone. L'ancien canevas le retirait ;
-                  c'est une décision d'une planche morte, pas du design system. */}
-              <p className="mx-auto mt-4 mb-7 max-w-[560px] text-[16px] leading-[1.55] text-ds-texte-corps md:mb-11 md:leading-[26px]">
-                {t("beneficesTexte")}
-              </p>
-            </div>
-
-            {/*
-              SIX CARTES, COMME LE KIT — mais la sixieme n est pas la sienne.
-
-              ⚠️ « MULTI-PLATEFORMES : FONCTIONNE AVEC VINTED, EBAY, SHOPIFY,
-              TIKTOK SHOP, LEBONCOIN » EST FAUX. Le produit n a AUCUNE
-              integration avec l une de ces plateformes, et c est meme sa
-              raison d etre : il sert le vendeur qui n a PAS de boutique.
-              L annoncer serait la seule phrase de cette page qu on ne
-              pourrait pas tenir. Elle est remplacee par ce qui distingue
-              reellement le produit, et qui est verifiable : le destinataire
-              n a jamais de compte (decision 4).
-            */}
-            <ul className="grid gap-3.5 text-left md:grid-cols-3 md:gap-5">
-              {(
-                [
-                  ["commandes", Package, "bg-ds-surface-teinte text-ds-accent"],
-                  ["medias", ImageIcon, "bg-ds-surface-teinte text-ds-accent"],
-                  ["suivi", Truck, "bg-ds-erreur-fond text-ds-erreur-encre"],
-                  // ⚠️ LE TROISIÈME EST VERT sur les deux planches. Le code le
-                  // rendait GRIS, faute de famille verte dans l'ancien thème —
-                  // elle existe désormais (`succes-pastel` / `succes`).
-                  ["marque", Link2, "bg-ds-succes-fond text-ds-succes-encre"],
-                  ["analyses", BarChart3, "bg-ds-info-fond text-ds-info"],
-                  ["sansCompte", Lock, "bg-ds-alerte-fond text-ds-alerte-encre"],
-                ] as const
-              ).map(([clef, IconeCarte, teinte]) => (
-                <li
-                  key={clef}
-                  className="flex gap-4 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[22px] md:block md:p-[26px]"
-                >
-                  {/* AU TÉLÉPHONE, L'ICÔNE À GAUCHE DU TEXTE — la composition du kit.
-                      Empilées, les six cartes perdaient chacune la hauteur de leur
-                      tuile ; côte à côte, le texte garde 252 px et la liste se lit. */}
-                  <span
-                    className={
-                      "flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] md:h-[42px] md:w-[42px] " +
-                      teinte
-                    }
-                  >
-                    <IconeCarte aria-hidden="true" size={20} strokeWidth={1.9} />
-                  </span>
-                  <div className="min-w-0">
-                    {/* 18/700 à l'interligne 19,8 et à -0,02em : les valeurs du kit, aux deux
-                        largeurs. Le produit rendait 23 d'interligne et -0,015em. */}
-                    <h3 className="mb-1.5 text-[18px] leading-[19.8px] font-bold tracking-[-0.02em] text-ds-texte-titre md:mt-[18px] md:mb-2">
-                      {t("fonctionnalites." + clef + "Titre")}
-                    </h3>
-                    <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
-                      {t("fonctionnalites." + clef + "Texte")}
-                    </p>
-                  </div>
+                  <span className="text-[14px] leading-[normal] font-medium text-ds-texte-corps">{garantie}</span>
                 </li>
               ))}
             </ul>
-          </section>
 
-          {/* ---- COMMENT ÇA MARCHE, EN TROIS ÉTAPES ----------------------
-           *
-           * LA SECTION QUE LE KIT POSE ET QUE LA LANDING N AVAIT PAS. Ses trois
-           * étapes sont vraies mot pour mot : il n y a rien à installer, aucune
-           * intégration transporteur à configurer, et le lien ne change plus
-           * jamais — c est l immuabilité du jeton, garantie par un déclencheur en
-           * base, pas par une promesse.
-           */}
-          <section id="etapes" className="px-4 py-12 md:px-10 md:py-[74px]">
-            <div className="text-center">
-              <span className={pilule}>
-                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
-                {t("etapesPilule")}
-                <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
-              </span>
-              <h2 className="mx-auto mt-4 max-w-[720px] text-[30px] leading-[1.05] font-extrabold tracking-[-0.045em] text-ds-texte-titre md:mt-5 md:text-[44px]">
-                {t("etapesTitre")}
-              </h2>
-              <p className="mx-auto mt-[18px] mb-9 max-w-[620px] text-[16px] leading-[1.55] text-ds-texte-corps md:mb-11">
-                {t("etapesTexte")}
-              </p>
+            {/* Les quatre pastilles, absolues dans le conteneur de 1180, aux
+                coordonnées de la planche. Masquées sous 1181 : pas la place. */}
+            <div aria-hidden="true" className="hidden min-[1181px]:block">
+              {PASTILLES.map(([Icone, titre, legende, place]) => (
+                <span
+                  key={titre}
+                  className={
+                    "absolute inline-flex items-center gap-[11px] rounded-ds-card border border-[rgba(255,255,255,0.9)] bg-[rgba(255,255,255,0.86)] py-[11px] pr-4 pl-[11px] text-left shadow-ds-md backdrop-blur-[14px] backdrop-saturate-[1.4] " +
+                    place
+                  }
+                >
+                  <span className="inline-flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
+                    <Icone size={16} strokeWidth={1.9} />
+                  </span>
+                  <span className="flex flex-col gap-px">
+                    <span className="text-[13px] leading-[normal] font-bold text-ds-texte-fort">{titre}</span>
+                    <span className="text-[11.5px] leading-[normal] font-medium text-ds-texte-sourdine md:text-[11px]">{legende}</span>
+                  </span>
+                </span>
+              ))}
             </div>
 
-            {/* ⚠️ UNE LISTE ORDONNÉE, ET PAS UNE GRILLE DE CARTES. Trois étapes
-                numérotées ont un ORDRE ; le rendre par des chiffres dessinés dans
-                des `div` le dirait à l œil et à personne d autre. */}
-            <ol className="grid gap-3.5 text-left md:grid-cols-3 md:gap-[18px]">
-              {([1, 2, 3] as const).map((n) => (
-                <li
-                  key={n}
-                  className="flex gap-3.5 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="flex h-9 w-9 flex-none items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-[14px] leading-[normal] font-extrabold text-ds-accent-encre"
-                  >
-                    {"0" + n}
-                  </span>
-                  <span className="flex min-w-0 flex-col gap-1.5">
-                    <h3 className="text-[18px] leading-[19.8px] font-bold tracking-[-0.045em] text-ds-texte-titre">
-                      {t(`etape${n}Titre`)}
-                    </h3>
-                    <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
-                      {t(`etape${n}Texte`)}
-                    </p>
-                    {/* L'ILLUSTRATION DE L'ÉTAPE — le kit en dessine une par carte, et
-                        elle dit en une image ce que la phrase annonce (17/09/2026). */}
-                    {n === 1 ? <ZoneDeDepot /> : n === 2 ? <ChampDeLien /> : <FriseDeSuivi />}
-                  </span>
-                </li>
-              ))}
-            </ol>
+            {/* LES DEUX MAQUETTES. Au-dessus de 1180, bloc de 600 et téléphone en
+                absolu ; en dessous, ils s'empilent.
+
+                ⚠️ DEUX TRANSFORMATIONS EMBOÎTÉES, PAS UNE SEULE À 0,204. La planche
+                réduit la fenêtre à 0,68 sur elle-même, puis son ENVELOPPE à 0,42 et
+                0,30 sous 760 et 560 — enveloppe qui est aussi rognée à la largeur
+                de la colonne. Chacune tourne autour de son propre haut-centre : le
+                produit l'avait écrit en un seul facteur composé (0,2856 et 0,204),
+                même taille mais pas le même recadrage, et toute la maquette
+                s'affichait 39 px plus à gauche qu'au kit, à 390 px. */}
+            <div className="relative mt-8 flex flex-col items-center gap-2 min-[761px]:gap-6 min-[1181px]:mt-10 min-[1181px]:block min-[1181px]:h-[600px]">
+              <div className="h-[190px] max-w-full origin-top scale-[0.3] overflow-hidden min-[561px]:h-[260px] min-[561px]:scale-[0.42] min-[761px]:h-auto min-[761px]:scale-100 min-[1181px]:absolute min-[1181px]:left-1/2 min-[1181px]:-translate-x-[64%]">
+                <div className="w-[1180px] origin-top scale-[0.68]">
+                  <MaquetteApplication />
+                </div>
+              </div>
+              <div className="min-[1181px]:absolute min-[1181px]:-top-2.5 min-[1181px]:-right-[30px]">
+                <TelephoneClient largeur={286} />
+              </div>
+            </div>
           </section>
 
-          {/* ---- APPEL FINAL : LA BANNIÈRE DU KIT -------------------------
-           *
-           * VALEURS RELEVÉES SUR LE KIT SERVI : bande au rayon `3xl`, dégradé
-           * DIAGONAL, remplissage 52/56, ombre `lg` ; titre 40/800 à -0,04em en
-           * blanc sur deux lignes, sous-titre 15/400 à 88 % de blanc, 14 px
-           * dessous, puis les actions à 26.
-           *
-           * ⚠️ L ACTION PRINCIPALE Y EST BLANCHE, PAS DÉGRADÉE, et c est la règle
-           * 3 : le dégradé est réservé à UNE seule action par écran. Il est déjà
-           * sur le bouton du héros ; le poser aussi ici en ferait deux, et sur un
-           * fond qui EST le dégradé il ne se verrait pas.
-           *
-           * ⚠️ ET LE SECOND BOUTON DU KIT N EST PAS PORTÉ. Il mène à un exemple de
-           * page client ; il n existe aucune page de démonstration, et en
-           * fabriquer une demanderait une commande réelle, donc un jeton réel
-           * dans une URL publique. La section qui montre ce que voit le client
-           * est plus haut, sur cette page.
-           */}
-          <section id="tarif" className="px-4 pb-12 md:px-10 md:pb-14">
-            <div className="degrade-ds-marque-diagonal relative overflow-hidden rounded-ds-3xl px-7 py-[34px] text-ds-texte-sur-marque shadow-ds-lg md:px-14 md:py-[52px]">
-              <div className="max-w-[520px]">
-                <h2 className="text-[27px] leading-[1.05] font-extrabold tracking-[-0.04em] md:text-[40px]">
-                  <span className="md:hidden">{t("finalTitreCourt")}</span>
-                  <span className="hidden md:inline">{t("finalTitre")}</span>
-                </h2>
-                {/* 88 % DE BLANC, ET NON UN GRIS : sur un dégradé, un gris de
-                    palette vire au sale d un bout à l autre de la bande. */}
-                <p className="mt-3.5 text-[15px] leading-[1.55] text-white/[.88]">
-                  <span className="md:hidden">{t("gratuitPourLInstantCourt")}</span>
-                  <span className="hidden md:inline">{t("gratuitPourLInstant")}</span>
-                </p>
-                <Link
-                  href={`/${locale}/inscription`}
-                  className="mt-[26px] flex min-h-13 w-full items-center justify-center gap-2 rounded-ds-pill border border-ds-filet bg-ds-surface-carte px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-fort shadow-ds-sm transition-shadow hover:shadow-ds-md md:inline-flex md:h-13 md:w-auto md:min-h-0"
+          {/* ==== 3 · PLATEFORMES ========================================= */}
+          <div className="pt-9 pb-3.5 text-center">
+            <div className="text-[12px] leading-[normal] font-semibold text-ds-texte-sourdine">{k("usedOn")}</div>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-[54px] max-[901px]:gap-7">
+              <span className="text-[22px] font-semibold leading-[normal] tracking-[-0.02em] text-ds-ink-300 italic">Vinted</span>
+              <span className="text-[22px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">ebay</span>
+              <span className="text-[22px] font-semibold leading-[normal] tracking-[-0.02em] text-ds-ink-300">amazon</span>
+              <span className="text-[21px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">shopify</span>
+              <span className="text-[20px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">Leboncoin</span>
+              <span className="text-[20px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">TikTok Shop</span>
+            </div>
+          </div>
+
+          {/* ==== 4 · FONCTIONNALITÉS ===================================== */}
+          <section id="fonctionnalites" className="mx-auto w-full max-w-[1180px] scroll-mt-6 py-[72px]">
+            <EnTeteSection
+              surtitre={k("featEyebrow")}
+              titre={k("featTitle")}
+              motFort={k("featHl")}
+              sousTitre={k("featSub")}
+            />
+            <div className="mt-11 grid grid-cols-3 gap-5 max-[901px]:grid-cols-2 max-[641px]:grid-cols-1">
+              {FONCTIONNALITES.map(([Icone, titre, corps]) => (
+                <div
+                  key={titre}
+                  className={
+                    CARTE +
+                    " flex items-start gap-4 p-[22px] transition-[transform,box-shadow] duration-[240ms] hover:-translate-y-0.5 hover:shadow-ds-md"
+                  }
                 >
-                  {t("ctaPrincipal")}
-                  <ArrowRight aria-hidden="true" size={17} strokeWidth={1.9} />
-                </Link>
+                  <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-ds-md bg-ds-surface-teinte text-ds-accent">
+                    <Icone aria-hidden="true" size={20} strokeWidth={1.9} />
+                  </span>
+                  <div className="flex flex-col gap-1.5">
+                    <h3 className="text-[18px] leading-[1.1] font-bold tracking-[-0.02em] text-ds-texte-fort">{titre}</h3>
+                    <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">{corps}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ==== 5 · ÉTAPES ============================================== */}
+          <section id="etapes" className="mx-auto w-full max-w-[1180px] scroll-mt-6 pt-10 pb-[72px]">
+            <EnTeteSection
+              surtitre={k("howEyebrow")}
+              titre={k("howTitle")}
+              motFort={k("howHl")}
+              sousTitre={k("howSub")}
+            />
+            <div className="mt-11 grid grid-cols-3 items-start gap-5 max-[901px]:grid-cols-2 max-[641px]:grid-cols-1">
+              {(
+                [
+                  ["01", k("s1"), k("s1b"), <ZoneDeDepot key="depot" />],
+                  ["02", k("s2"), k("s2b"), <ChampDeLien key="lien" />],
+                  ["03", k("s3"), k("s3b"), <FriseDeSuivi key="frise" />],
+                ] as const
+              ).map(([numero, titre, corps, illustration]) => (
+                <div key={numero} className={CARTE + " flex flex-col gap-4 p-6"}>
+                  <div className="flex items-start gap-3.5">
+                    <span className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-[14px] font-extrabold text-ds-accent-encre">
+                      {numero}
+                    </span>
+                    <div className="flex flex-col gap-1.5">
+                      <h3 className="text-[18px] leading-[1.1] font-bold tracking-[-0.045em] text-ds-texte-fort">{titre}</h3>
+                      <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">{corps}</p>
+                    </div>
+                  </div>
+                  {illustration}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ==== 6 · TÉMOIGNAGES ========================================= */}
+          <section id="temoignages" className="mx-auto w-full max-w-[1180px] scroll-mt-6 pb-[72px]">
+            <EnTeteSection
+              surtitre={k("testiEyebrow")}
+              titre={k("testiTitle")}
+              motFort={k("testiHl")}
+              sousTitre={k("testiSub")}
+            />
+            <div className="mt-11 grid grid-cols-3 gap-5 max-[901px]:grid-cols-2 max-[641px]:grid-cols-1">
+              {TEMOIGNAGES.map((q) => (
+                <figure key={q.nom} className={CARTE + " flex flex-col gap-3 p-5"}>
+                  <figcaption className="flex items-center gap-[11px]">
+                    <Image src={q.avatar} alt="" width={34} height={34} className="h-[34px] w-[34px] rounded-full object-cover" />
+                    <span className="flex flex-col gap-px">
+                      <span className="text-[14px] leading-[normal] font-bold text-ds-texte-fort">{q.nom}</span>
+                      <span className="text-[13px] leading-[normal] font-medium text-ds-texte-sourdine">{q.role}</span>
+                    </span>
+                  </figcaption>
+                  <span aria-hidden="true" className="flex gap-0.5">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Star key={i} size={13} strokeWidth={0} className="fill-[#F5B843]" />
+                    ))}
+                  </span>
+                  <blockquote className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
+                    “{q.citation}”
+                  </blockquote>
+                </figure>
+              ))}
+            </div>
+          </section>
+
+          {/* ==== 7 · BANNIÈRE ============================================ */}
+          <section className="mx-auto w-full max-w-[1180px] pb-14">
+            <div className="degrade-ds-marque-diagonal relative overflow-hidden rounded-ds-3xl px-14 py-[52px] shadow-ds-lg max-[901px]:px-7 max-[901px]:py-[34px]">
+              <div className="relative z-10 max-w-[520px]">
+                <h2 className="text-[40px] leading-[1.05] font-extrabold tracking-[-0.04em] text-ds-texte-sur-marque max-[901px]:text-[32px] max-[641px]:text-[27px] [:lang(zh-CN)_&]:leading-[1.24]">
+                  {k("bannerTitle1")}
+                  <br />
+                  {k("bannerTitle2")}
+                </h2>
+                <p className="mt-3.5 text-[15px] leading-[1.55] text-[rgba(255,255,255,0.88)]">{k("bannerSub")}</p>
+                <div className="mt-[26px] flex flex-wrap gap-3">
+                  <Link href={inscription} className={BOUTON_LG + " " + SECONDAIRE}>
+                    {k("ctaPrimary")}
+                    <ArrowRight aria-hidden="true" size={17} strokeWidth={2} />
+                  </Link>
+                  <Link
+                    href={exemple}
+                    className={BOUTON_LG + " border border-[rgba(255,255,255,0.5)] text-ds-texte-sur-marque hover:bg-[rgba(255,255,255,0.12)]"}
+                  >
+                    {k("ctaSecondaryShort")}
+                  </Link>
+                </div>
               </div>
-              {/* ⚠️ LE TÉLÉPHONE DE LA BANNIÈRE MANQUAIT AUSSI. La planche le pose
-                  à `right: 30, top: 10`, largeur 272, et le masque sous 900 —
-                  sous ce palier le texte occupe toute la bande. Sans lui, la
-                  moitié droite de la bande la plus voyante de la page est vide. */}
-              <div className="pointer-events-none absolute top-2.5 right-[30px] hidden min-[901px]:block">
+              {/* Recadré par l'`overflow: hidden` de la bande ; masqué sous 900. */}
+              <div aria-hidden="true" className="pointer-events-none absolute top-2.5 right-[30px] hidden min-[901px]:block">
                 <TelephoneClient largeur={272} />
               </div>
             </div>
           </section>
         </main>
 
-        {/* ---- PIED ------------------------------------------------------
-         *
-         * TROIS COLONNES, COMME LE KIT — la marque, le produit, la société.
-         *
-         * ⚠️ SA QUATRIÈME, « RESTEZ INFORMÉ », N'EST PAS PORTÉE : elle pose un
-         * champ d'email qui n'irait nulle part. Il n'existe aucune liste de
-         * diffusion, et un formulaire qui avale une adresse sans rien en faire
-         * est pire qu'un formulaire absent.
-         *
-         * LE LIEN DE SIGNALEMENT DISPARAÎT QUAND LE CANAL N'EXISTE PAS, et ce
-         * n'est pas un détail d'affichage : c'est la procédure de notification
-         * et retrait qui fonde notre statut d'hébergeur (brief §12).
-         *
-         * ⚠️ DÉFAUT TROUVÉ EN PILOTANT LE PRODUIT LE 27/08/2026 : cette landing
-         * porte SON PROPRE pied, et la garde n'y avait pas été recopiée. Elle
-         * écrivait le lien SANS CONDITION, vers une page qui rend 404 tant
-         * qu'aucune adresse n'est configurée — sur la seule page que tout le
-         * monde voit. Ce qui se partage ici, c'est la RÈGLE, pas la mise en page.
-         */}
-        <footer className="border-t border-ds-filet px-4 py-9 md:px-10 md:py-11">
-          <div className="flex flex-col gap-8 md:flex-row md:justify-between md:gap-10">
-            <div className="max-w-[280px]">
-              <span className="text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre md:text-[18px]">
-                DropLink
+        {/* ==== 8 · PIED ===================================================== */}
+        <footer className="mx-auto w-full max-w-[1180px] pt-12 pb-7">
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_1.3fr] gap-8 max-[901px]:grid-cols-2 max-[901px]:gap-[26px] max-[641px]:grid-cols-1">
+            {/* Sous 768, la planche retire l'écart des colonnes du pied et pose 5 px
+                sous chacun de leurs `span` directs : le texte et le sélecteur de
+                langue ici, pas le logo, qui n'y est pas enveloppé. */}
+            <div className="flex flex-col gap-3 max-[767.98px]:gap-0">
+              <span className="self-start">
+                <LogoMarque hauteur={32} />
               </span>
-              <p className="mt-2 text-[13px] leading-[1.55] text-ds-texte-corps">
-                {t("piedTagline")}
-              </p>
+              <span className="text-[13px] leading-[normal] font-medium text-ds-texte-sourdine max-[767.98px]:mb-[5px]">
+                {k("footTag")}
+              </span>
+              <div aria-hidden="true" className="mt-1 flex gap-3.5 text-ds-texte-sourdine">
+                <IconeTwitter />
+                <IconeInstagram />
+                <IconeYoutube />
+                <MessageCircle size={16} />
+              </div>
+              <div className="self-start max-[767.98px]:mb-[5px]">
+                <SelecteurLangue locale={locale} versLeHaut />
+              </div>
             </div>
 
-            <div className="flex flex-col gap-8 sm:flex-row sm:gap-16">
-              {(
-                [
-                  [
-                    "piedProduit",
-                    [
-                      ["fonctionnement", "#fonctionnement"],
-                      ["etapes", "#etapes"],
-                      ["tarif", "#tarif"],
-                      ["docs", `/${locale}/docs`],
-                    ],
-                  ],
-                  [
-                    "piedSociete",
-                    [
-                      ["blog", `/${locale}/blog`],
-                      ["conditions", `/${locale}/conditions`],
-                      ["confidentialite", `/${locale}/confidentialite`],
-                      ...(signalementDisponible()
-                        ? [["signalement", `/${locale}/signalement`]]
-                        : []),
-                    ],
-                  ],
-                ] as const
-              ).map(([titre, liens]) => (
-                <nav key={titre} aria-label={t(titre)}>
-                  <p className="mb-3.5 text-[13px] leading-[normal] font-extrabold text-ds-texte-titre">
-                    {t(titre)}
-                  </p>
-                  {/* ⚠️ `min-h-11` EST LE PLANCHER TACTILE (règle 5), et l'écart
-                      négatif en est la moitié indissociable : sans lui, chaque
-                      lien grandirait de 29 px et la colonne cesserait de
-                      décrire le rendu du kit. */}
-                  <ul className="flex flex-col gap-2.5">
-                    {liens.map(([clef, href]) => (
-                      <li key={clef}>
-                        {href.startsWith("#") ? (
-                          <a
-                            href={href}
-                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-sourdine transition-colors hover:text-ds-accent"
-                          >
-                            {t("menu." + clef)}
-                          </a>
-                        ) : (
-                          <Link
-                            href={href}
-                            className="-my-[14.5px] inline-flex min-h-11 items-center text-[13px] leading-[15px] font-medium text-ds-texte-sourdine transition-colors hover:text-ds-accent"
-                          >
-                            {t.has("pied." + clef) ? t("pied." + clef) : t("menu." + clef)}
-                          </Link>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              ))}
+            <div className="flex flex-col gap-[9px] max-[767.98px]:gap-0">
+              <span className="mb-[3px] text-[13px] leading-[normal] font-extrabold text-ds-texte-fort max-[767.98px]:mb-[5px]">
+                {k("footProduct")}
+              </span>
+              <a href="#fonctionnalites" className={lienPied}>{k("navFeatures")}</a>
+              <a href="#etapes" className={lienPied}>{k("navHow")}</a>
+              <Link href={`/${locale}/docs`} className={lienPied}>{k("navDocs")}</Link>
+              <Link href={`/${locale}/docs#faq`} className={lienPied}>{k("footFaq")}</Link>
+            </div>
+
+            <div className="flex flex-col gap-[9px] max-[767.98px]:gap-0">
+              <span className="mb-[3px] text-[13px] leading-[normal] font-extrabold text-ds-texte-fort max-[767.98px]:mb-[5px]">
+                {k("footCompany")}
+              </span>
+              <Link href={`/${locale}/docs#presentation`} className={lienPied}>{k("footAbout")}</Link>
+              <Link href={`/${locale}/docs#support`} className={lienPied}>{k("footContact")}</Link>
+              <Link href={`/${locale}/conditions`} className={lienPied}>{k("footTerms")}</Link>
+              <Link href={`/${locale}/confidentialite`} className={lienPied}>{k("footPrivacy")}</Link>
+            </div>
+
+            <div className="flex flex-col gap-2.5 max-[767.98px]:gap-0">
+              <span className="text-[13px] leading-[normal] font-extrabold text-ds-texte-fort max-[767.98px]:mb-[5px]">
+                {k("footNews")}
+              </span>
+              <form
+                action={inscription}
+                className="flex items-center gap-2 rounded-ds-pill border border-ds-filet bg-ds-surface-carte py-1.5 pr-1.5 pl-4"
+              >
+                <input
+                  type="email"
+                  aria-label={k("footMail")}
+                  placeholder={k("footMail")}
+                  className="min-w-0 flex-1 border-none bg-transparent text-[13px] font-medium max-[767.98px]:min-h-11 text-ds-texte-fort outline-none placeholder:text-ds-texte-corps"
+                />
+                <button
+                  type="submit"
+                  aria-label={k("footNews")}
+                  className="degrade-ds-marque inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-ds-sm text-ds-texte-sur-marque max-[767.98px]:-my-[7px] max-[767.98px]:min-h-11 max-[767.98px]:w-11"
+                >
+                  <ArrowRight aria-hidden="true" size={14} />
+                </button>
+              </form>
             </div>
           </div>
 
-          <p className="mt-8 border-t border-ds-filet pt-[18px] text-[12px] leading-[normal] font-medium text-ds-texte-tenu md:mt-10">
-            {t("piedDroits", { annee: new Date().getUTCFullYear() })}
-          </p>
+          {/* 12 px d'écart à toutes les largeurs : la feuille de la planche demande
+              8 sous 640, mais son style en ligne (12) l'emporte, et c'est 12 qu'elle
+              rend. */}
+          <div className="mt-8 flex justify-between gap-3 border-t border-ds-filet pt-[18px] text-[12px] leading-[normal] font-medium text-ds-texte-tenu max-[641px]:flex-col">
+            <span>{droits}</span>
+            <span className="inline-flex items-center gap-1.5">
+              {k("footMade")}
+              <Heart aria-hidden="true" size={12} className="fill-ds-coral-500 text-ds-coral-500" />
+            </span>
+          </div>
         </footer>
       </div>
     </div>

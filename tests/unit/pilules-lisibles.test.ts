@@ -147,12 +147,6 @@ function pairesDe(chemin: string, source: string): Paire[] {
  * le texte lui-même : y poser une couleur la rendrait opaque.
  */
 const SUR_MARQUE_ADMISES: ReadonlyMap<string, string> = new Map([
-  [
-    "degrade-ds-marque h-[74px]",
-    "L’en-tête de la maquette de téléphone de la landing : le dégradé y est un " +
-      "APLAT décoratif, et les deux textes qu’il porte déclarent `text-white` sur " +
-      "leur propre nœud — le conteneur, lui, n’a aucun texte direct.",
-  ],
 ]);
 
 describe("Les surfaces peintes du dégradé de marque", () => {

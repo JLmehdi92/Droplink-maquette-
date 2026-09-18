@@ -35,6 +35,9 @@ import apercuSneaker from "@/../public/marque/apercu-sneaker.jpg";
 import apercuCap from "@/../public/marque/apercu-cap.jpg";
 import apercuHoodie from "@/../public/marque/apercu-hoodie.jpg";
 import apercuJogger from "@/../public/marque/apercu-jogger.jpg";
+import drapeauFr from "@/../public/marque/drapeaux/fr.png";
+import drapeauBe from "@/../public/marque/drapeaux/be.png";
+import drapeauIt from "@/../public/marque/drapeaux/it.png";
 
 const APERCUS = {
   sneaker: apercuSneaker,
@@ -42,6 +45,8 @@ const APERCUS = {
   hoodie: apercuHoodie,
   jogger: apercuJogger,
 } as const;
+
+const DRAPEAUX = { fr: drapeauFr, be: drapeauBe, it: drapeauIt } as const;
 
 /**
  * LE TÉLÉPHONE DU HÉROS — `PhoneMock` de la planche `marketing_site`.
@@ -81,10 +86,10 @@ export function TelephoneClient({ largeur = 286 }: { readonly largeur?: number }
  * existent — Tableau de bord et Paramètres — ont été créés depuis le 14/09/2026.
  * C'était la moitié de l'argument qui la tenait dehors, et elle était périmée.
  *
- * ⚠️ CE QU'ELLE NE PORTE PAS, ET POURQUOI :
- *  - les drapeaux de pays, que le kit va chercher chez `flagcdn.com` : notre CSP
- *    n'autorise les images que depuis notre domaine et R2, donc ils seraient
- *    BLOQUÉS en production — la sonde le verrait, et le client verrait un trou ;
+ * ⚠️ LES DRAPEAUX DE PAYS SONT SERVIS PAR LE DÉPÔT, PAS PAR `flagcdn.com`.
+ * Le kit va les chercher chez ce fournisseur ; notre CSP n'autorise les images
+ * que depuis notre domaine et R2, donc ils seraient BLOQUÉS en production. Les
+ * trois fichiers (100 octets chacun) ont été récupérés une fois et importés.
  *
  * ⚠️ LES PHOTOS DES COMMANDES ÉTAIENT DES APLATS GRIS, ET C'ÉTAIT FAUX DE DIRE
  * QUE LE DÉPÔT NE LES EMPORTAIT PAS. Ce commentaire affirmait « le kit sert
@@ -95,23 +100,21 @@ export function TelephoneClient({ largeur = 286 }: { readonly largeur?: number }
  * 526 Ko à 1 Ko chacune — la planche sert une photo pleine taille pour un
  * dessin de 30 px.
  *
- * ⚠️ SES CHIFFRES SONT DES ILLUSTRATIONS, PAS DES MESURES. Ils décrivent l'écran,
- * pas notre activité : aucune promesse chiffrée n'est faite au visiteur, à la
- * différence de la preuve sociale du kit (« +2 500 vendeurs »), écartée le
- * 27/08/2026 par Wassim et toujours écartée.
+ * ⚠️ SES CHIFFRES SONT DES ILLUSTRATIONS, PAS DES MESURES : ils décrivent
+ * l'écran, pas notre activité.
  *
  * ELLE EST DÉCORATIVE : `aria-hidden`, aucun lien, aucun bouton — un lecteur
  * d'écran n'a rien à faire d'une capture dessinée, et aucune de ses zones ne
- * mène nulle part. Elle ne se rend qu'à partir de `lg` : sous ce palier, c'est le
- * téléphone de la section « ce que voit le client » qui montre le produit.
+ * mène nulle part. Elle se rend à toutes les largeurs, réduite par la page
+ * (0,68 au bureau, 0,2856 puis 0,204 aux paliers de la planche).
  */
 const NAV: ReadonlyArray<readonly [LucideIcon, string, string | null]> = [
-  [Home, "navAccueil", null],
-  [Briefcase, "navCommandes", "124"],
-  [Truck, "navEnvois", null],
-  [BarChart3, "navAnalyses", null],
-  [Shield, "navMarque", null],
-  [Settings, "navParametres", null],
+  [Home, "appNavHome", null],
+  [Briefcase, "appNavOrders", "124"],
+  [Truck, "appNavShip", null],
+  [BarChart3, "appNavStats", null],
+  [Shield, "appNavBrand", null],
+  [Settings, "appNavSettings", null],
 ];
 
 /** Les cinq tuiles du kit : valeur, libellé, écart, et la teinte de sa pastille. */
@@ -123,26 +126,28 @@ const TUILES: ReadonlyArray<{
   readonly baisse?: boolean;
   readonly teinte: string;
 }> = [
-  { icone: Package, valeur: "156", cle: "kpiCreees", ecart: "+12%", teinte: "bg-ds-surface-teinte text-ds-accent" },
-  { icone: Check, valeur: "78", cle: "kpiLivrees", ecart: "+20%", teinte: "bg-ds-succes-fond text-ds-succes-encre" },
+  { icone: Package, valeur: "156", cle: "kpiCreated", ecart: "+12%", teinte: "bg-ds-surface-teinte text-ds-accent" },
+  { icone: Check, valeur: "78", cle: "kpiDelivered", ecart: "+20%", teinte: "bg-ds-succes-fond text-ds-succes-encre" },
   { icone: Truck, valeur: "42", cle: "kpiTransit", ecart: "+8%", teinte: "bg-ds-info-fond text-ds-info" },
-  { icone: Link2, valeur: "342", cle: "kpiLiens", ecart: "+18%", teinte: "bg-ds-surface-teinte text-ds-accent" },
-  { icone: Clock, valeur: "6,2j", cle: "kpiDelai", ecart: "-18%", baisse: true, teinte: "bg-ds-alerte-fond text-ds-alerte-encre" },
+  { icone: Link2, valeur: "342", cle: "kpiLinks", ecart: "+18%", teinte: "bg-ds-surface-teinte text-ds-accent" },
+  { icone: Clock, valeur: "6,2j", cle: "kpiDelay", ecart: "-18%", baisse: true, teinte: "bg-ds-alerte-fond text-ds-alerte-encre" },
 ];
 
 /* La vignette de chaque ligne est celle de la planche, redimensionnée au dépôt :
    la planche sert des photos de 526 Ko pour une vignette de 30 px. */
-const LIGNES: ReadonlyArray<readonly [string, string, string, string, string, keyof typeof APERCUS]> = [
-  ["#DLK7842", "Yanis B.", "statutTransit", "ilYA1", "bg-ds-info-fond text-ds-info", "sneaker"],
-  ["#DLK7841", "Sofia M.", "statutLivraison", "ilYA3", "bg-ds-alerte-fond text-ds-alerte-encre", "cap"],
-  ["#DLK7840", "Amine K.", "statutLivree", "ilYA5", "bg-ds-succes-fond text-ds-succes-encre", "hoodie"],
-  ["#DLK7839", "Luca R.", "statutCommandee", "ilYA7", "bg-ds-surface-teinte text-ds-accent-encre", "jogger"],
+const LIGNES: ReadonlyArray<
+  readonly [string, string, keyof typeof DRAPEAUX, string, string, string, keyof typeof APERCUS]
+> = [
+  ["#DLK7842", "Yanis B.", "fr", "stTransit", "ago1", "bg-ds-info-fond text-ds-info", "sneaker"],
+  ["#DLK7841", "Sofia M.", "fr", "stDelivering", "ago3", "bg-ds-alerte-fond text-ds-alerte-encre", "cap"],
+  ["#DLK7840", "Amine K.", "be", "stDelivered", "ago5", "bg-ds-succes-fond text-ds-succes-encre", "hoodie"],
+  ["#DLK7839", "Luca R.", "it", "stOrdered", "ago7", "bg-ds-violet-100 text-ds-accent-encre", "jogger"],
 ];
 
 const COLONNES = "grid grid-cols-[34px_.8fr_1fr_.95fr_.7fr] items-center gap-2.5 px-4";
 
 export async function MaquetteApplication() {
-  const t = await getTranslations("landing.maquette");
+  const t = await getTranslations("landing.kit");
 
   return (
     <div
@@ -181,11 +186,18 @@ export async function MaquetteApplication() {
               {/* `leading-[normal]` : le kit n'impose aucun interligne ici, et le défaut
                   de Tailwind (1,5) rendait une ligne de 18,75 px au lieu de 10. */}
               <span className="min-w-0 flex-1 truncate leading-[normal]">{t(cle)}</span>
-              {compte !== null ? (
-                <span className="rounded-ds-pill bg-ds-surface-creux px-1.5 text-[10.5px] font-bold text-ds-texte-sourdine">
-                  {compte}
-                </span>
-              ) : null}
+              {/* ⚠️ UNE PILULE SUR CHAQUE ENTRÉE, MÊME SANS COMPTEUR. Le kit passe
+                  `null` et `SidebarItem` teste `count !== undefined` : il rend donc
+                  une pilule VIDE, un trait de 18 × 4 à droite de chaque libellé
+                  (violet sur l'entrée active). C'est ce que la planche montre. */}
+              <span
+                className={
+                  "rounded-ds-pill px-[9px] py-0.5 text-[11.5px] leading-[normal] font-bold md:text-[11px] " +
+                  (rang === 0 ? "bg-ds-accent text-ds-texte-sur-marque" : "bg-ds-surface-creux text-ds-texte-sourdine")
+                }
+              >
+                {compte}
+              </span>
             </span>
           ))}
           <span className="flex-1" />
@@ -209,20 +221,20 @@ export async function MaquetteApplication() {
           <span className="flex flex-col rounded-ds-card border border-ds-violet-200 bg-[image:var(--degrade-ds-teinte)] p-3">
             <span className="flex items-center gap-[7px] text-[12px] leading-[normal] font-bold text-ds-accent-encre">
               <Zap size={14} strokeWidth={2.2} />
-              {t("proTitre")}
+              {t("appProTitle")}
             </span>
-            <span className="text-[10.5px] leading-[14.7px] text-ds-texte-corps">{t("proTexte")}</span>
-            <span className="degrade-ds-marque mt-[11px] flex h-[35px] items-center justify-center gap-2 rounded-ds-pill text-[13px] font-semibold text-ds-texte-sur-marque">
-              {t("proBouton")}
+            <span className="mt-[3px] text-[10.5px] leading-[14.7px] text-ds-texte-corps">{t("appProBody")}</span>
+            <span className="degrade-ds-marque mt-[9px] flex h-[35px] items-center justify-center gap-2 rounded-ds-pill border border-transparent px-4 text-[13px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand">
+              {t("appProCta")}
               <ArrowRight size={16} strokeWidth={2.2} />
             </span>
           </span>
-          <span className="mt-3.5 flex items-center gap-[9px] rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[9px]">
+          <span className="mt-2.5 flex items-center gap-[9px] rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[9px]">
             <span className="flex h-7 w-7 items-center justify-center rounded-[999px] bg-ds-accent text-[10px] font-bold tracking-[-0.2px] text-ds-texte-sur-marque">
               NB
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="text-[11.5px] leading-[normal] font-bold text-ds-texte-fort">{t("compte")}</span>
+              <span className="text-[11.5px] leading-[normal] font-bold text-ds-texte-fort">{t("appAccount")}</span>
               <span className="truncate text-[10px] leading-[normal] text-ds-texte-sourdine">nassim@laplanque.fr</span>
             </span>
             <ChevronDown size={13} className="text-ds-texte-tenu" />
@@ -233,12 +245,12 @@ export async function MaquetteApplication() {
           <div className="flex items-center gap-3.5 border-b border-ds-filet px-[18px] py-[11px]">
             <span className="flex h-[34px] max-w-[320px] flex-1 items-center gap-[9px] rounded-ds-card border border-ds-filet bg-ds-surface-carte px-3">
               <Search size={14} strokeWidth={1.8} className="text-ds-texte-sourdine" />
-              <span className="flex-1 text-[11.5px] text-ds-texte-tenu">{t("recherche")}</span>
+              <span className="flex-1 text-[11.5px] leading-[normal] text-ds-texte-tenu">{t("appSearch")}</span>
               <span className="flex gap-[3px]">
                 {["Ctrl", "K"].map((touche) => (
                   <span
                     key={touche}
-                    className="rounded-[5px] border border-ds-filet bg-ds-surface-page px-[5px] py-[2px] text-[9.5px] font-bold text-ds-texte-sourdine"
+                    className="rounded-[5px] border border-ds-filet bg-ds-surface-page px-[5px] py-[2px] text-[9.5px] leading-[normal] font-bold text-ds-texte-sourdine"
                   >
                     {touche}
                   </span>
@@ -267,18 +279,18 @@ export async function MaquetteApplication() {
             <div className="flex items-end gap-3.5">
               <div className="min-w-0">
                 <div className="text-[21px] leading-[1.1] font-extrabold tracking-[-0.04em] text-ds-texte-fort">
-                  {t("salut")}
+                  {t("appHello")}
                 </div>
                 {/* ⚠️ `leading-[1.55]`, PAS L'INTERLIGNE PAR DÉFAUT. Le kit rend
                     17,8 px ici — l'interligne de corps du design system — et sans
                     lui la ligne tombe à 14 : quatre pixels qui décalaient tout ce
                     qui suit dans la colonne, jusqu'à dix en bas de la fenêtre. */}
-                <p className="mt-1 text-[11.5px] leading-[1.55] text-ds-texte-corps">{t("salutSous")}</p>
+                <p className="mt-1 text-[11.5px] leading-[1.55] text-ds-texte-corps">{t("appHelloSub")}</p>
               </div>
               <span className="flex-1" />
-              <span className="inline-flex h-8 items-center gap-2 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-3 text-[11px] font-medium whitespace-nowrap text-ds-texte-fort">
+              <span className="inline-flex h-8 items-center gap-2 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-3 text-[11.5px] md:text-[11px] font-medium whitespace-nowrap text-ds-texte-fort">
                 <CalendarDays size={13} className="text-ds-accent" />
-                {t("periode")}
+                {t("appRange")}
               </span>
             </div>
 
@@ -304,24 +316,28 @@ export async function MaquetteApplication() {
                         4 px entre le libellé et l'écart, et 2 seulement entre la
                         valeur et le libellé : un écart uniforme rendait la tuile
                         trois pixels trop courte. */}
-                    <strong
-                      className={
-                        "mt-0.5 text-[12px] leading-[normal] font-bold " +
-                        (baisse === true ? "text-ds-erreur-encre" : "text-ds-succes-encre")
-                      }
-                    >
-                      {ecart}
-                    </strong>
+                    <span className="mt-0.5 text-[12px] leading-[normal] whitespace-nowrap">
+                      <strong
+                        className={"font-bold " + (baisse === true ? "text-ds-erreur-encre" : "text-ds-succes-encre")}
+                      >
+                        {ecart}
+                      </strong>
+                    </span>
                   </span>
                 </span>
               ))}
             </div>
 
-            <div className="overflow-hidden rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte shadow-ds-card">
+            <div className="overflow-hidden rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte leading-[normal] shadow-ds-card">
               <div className="flex items-center gap-3 px-4 pt-[13px] pb-[11px]">
-                <span className="text-[14px] font-bold tracking-[-0.02em] text-ds-texte-titre">{t("recentes")}</span>
+                {/* Au gris de corps : le kit ne donne pas de couleur à ce titre, qui hérite
+                    de la carte. */}
+                <span className="text-[14px] font-bold tracking-[-0.02em] text-ds-texte-corps">{t("recentOrders")}</span>
                 <span className="flex-1" />
-                <span className="text-[11.5px] font-semibold text-ds-accent">{t("voirTout")}</span>
+                <span className="inline-flex items-center gap-[5px] text-[11.5px] font-semibold text-ds-accent">
+                  {t("seeAll")}
+                  <ArrowRight size={12} />
+                </span>
               </div>
               <div
                 className={
@@ -329,12 +345,12 @@ export async function MaquetteApplication() {
                 }
               >
                 <span />
-                <span>{t("colNumero")}</span>
+                <span>{t("colNo")}</span>
                 <span>{t("colClient")}</span>
-                <span>{t("colStatut")}</span>
+                <span>{t("colStatus")}</span>
                 <span className="text-right">{t("colDate")}</span>
               </div>
-              {LIGNES.map(([reference, client, statut, quand, teinte, apercu]) => (
+              {LIGNES.map(([reference, client, pays, statut, quand, teinte, apercu]) => (
                 <div key={reference} className={COLONNES + " border-t border-ds-filet py-[9px]"}>
                   {/* ⚠️ LA PHOTO, PAS UN APLAT. La planche sert une vraie vignette
                       de produit ; j'avais mis un carré gris, et quatre carrés gris
@@ -348,9 +364,23 @@ export async function MaquetteApplication() {
                     className="h-[30px] w-[30px] rounded-ds-sm border border-ds-filet object-cover"
                   />
                   <span className="text-[11.5px] font-bold whitespace-nowrap text-ds-texte-fort">{reference}</span>
-                  <span className="truncate text-[11.5px] text-ds-texte-fort">{client}</span>
+                  <span className="flex min-w-0 items-center gap-[7px]">
+                    <Image
+                      src={DRAPEAUX[pays]}
+                      alt=""
+                      width={16}
+                      height={11}
+                      className="h-[11px] w-4 flex-none rounded-[2px] object-cover"
+                    />
+                    <span className="truncate text-[11.5px] text-ds-texte-fort">{client}</span>
+                  </span>
                   <span>
-                    <span className={"inline-flex rounded-ds-pill px-2 py-1 text-[10px] font-bold " + teinte}>
+                    <span
+                      className={
+                        "inline-flex items-center gap-1.5 rounded-ds-pill px-2 py-1 text-[10px] font-bold tracking-[-0.02em] whitespace-nowrap " +
+                        teinte
+                      }
+                    >
                       {t(statut)}
                     </span>
                   </span>

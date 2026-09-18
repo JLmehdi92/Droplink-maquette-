@@ -51,6 +51,20 @@ describe("Configuration des langues", () => {
   });
 });
 
+/**
+ * LES VALEURS VIDES VOULUES — chacune avec sa raison, et contrôlée dans l'AUTRE
+ * sens : une exception dont la valeur n'est plus vide est retirée de force,
+ * sans quoi la liste finirait par tout couvrir.
+ */
+const VIDES_VOULUS: ReadonlyMap<string, string> = new Map([
+  /* Le titre des étapes de la landing met son dernier mot en dégradé (« étapes »,
+     « steps »). La phrase chinoise de la planche, 三步生成客户物流链接, ouvre sur
+     « 三步 » et n'a pas de mot final à mettre en valeur : la planche laisse ce
+     mot VIDE, et le titre se lit entier. En inventer un serait réécrire sa
+     traduction (18/09/2026). */
+  ["zh-CN:landing.kit.howHl", "La planche ne met aucun mot en dégradé dans ce titre chinois."],
+]);
+
 describe("Parité des catalogues", () => {
   test("chaque langue déclarée possède son catalogue", () => {
     for (const langue of LANGUES) {
@@ -97,13 +111,22 @@ describe("Parité des catalogues", () => {
     const defauts: string[] = [];
     for (const langue of LANGUES) {
       for (const [cle, valeur] of aplatir(chargerCatalogue(langue))) {
-        if (valeur.trim() === "") defauts.push(`${langue}:${cle} est vide`);
+        if (valeur.trim() === "" && !VIDES_VOULUS.has(`${langue}:${cle}`)) defauts.push(`${langue}:${cle} est vide`);
         if (/^(TODO|TBD|À TRADUIRE|A TRADUIRE)/i.test(valeur.trim())) {
           defauts.push(`${langue}:${cle} est un marqueur, pas une traduction`);
         }
       }
     }
     expect(defauts, defauts.join(" | ")).toEqual([]);
+  });
+
+  test("chaque valeur vide voulue l'est encore", () => {
+    const perimees = [...VIDES_VOULUS.keys()].filter((id) => {
+      const [langue, ...reste] = id.split(":");
+      const valeur = aplatir(chargerCatalogue(langue ?? "")).get(reste.join(":"));
+      return valeur === undefined || valeur.trim() !== "";
+    });
+    expect(perimees, `Exceptions périmées : ${perimees.join(", ")}`).toEqual([]);
   });
 
   test("les catalogues portent bien des textes DIFFÉRENTS, deux à deux", () => {

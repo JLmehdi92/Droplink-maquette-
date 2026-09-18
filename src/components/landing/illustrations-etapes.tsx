@@ -1,4 +1,4 @@
-import { Check, Copy, Package, Truck, Upload } from "lucide-react";
+import { Check, Copy, Truck, Upload } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 /**
@@ -14,22 +14,22 @@ import { getTranslations } from "next-intl/server";
  * qui navigue au clavier ou au lecteur d'écran, des promesses que la page ne
  * tient pas — le principe XII appliqué à une image.
  *
- * ⚠️ LE LIEN EST UN EXEMPLE, ET IL LE DIT : `droplink.fr/c/exemple`. Le kit écrit
- * `8F2k9`, qui a l'air d'un vrai jeton ; un visiteur pourrait le recopier et
- * tomber sur une page morte. Un jeton, ici, ne prouverait rien de plus.
+ * LE LIEN EST CELUI DE LA PLANCHE, `https://droplink.fr/c/8F2k9` — décision de
+ * Wassim du 18/09/2026, qui a écarté l'« exemple » lisible : un jeton court et
+ * opaque est ce à quoi ressemble un vrai lien DropLink.
  */
 export async function ZoneDeDepot() {
-  const t = await getTranslations("landing.illustrations");
+  const t = await getTranslations("landing.kit");
   return (
     <div
       aria-hidden="true"
-      className="mt-4 flex flex-col items-center gap-2 rounded-ds-card border border-dashed border-ds-filet-appuye bg-ds-surface-teinte/60 px-4 py-6 text-center"
+      className="flex flex-col items-center gap-2 rounded-ds-card border border-dashed border-ds-violet-300 bg-ds-surface-teinte p-[26px] text-center"
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-ds-sm bg-ds-surface-carte text-ds-accent shadow-ds-xs">
-        <Upload size={17} strokeWidth={1.9} />
+      <span className="flex h-[34px] w-[34px] items-center justify-center rounded-ds-sm bg-ds-surface-carte text-ds-accent shadow-ds-sm">
+        <Upload size={16} strokeWidth={1.9} />
       </span>
-      <span className="text-[12px] leading-[normal] font-bold text-ds-accent-encre">{t("deposerTitre")}</span>
-      <span className="text-[11.5px] leading-[normal] font-medium text-ds-texte-sourdine">{t("deposerTexte")}</span>
+      <span className="text-[12px] leading-[normal] font-bold text-ds-accent-encre">{t("s1c")}</span>
+      <span className="text-[11.5px] leading-[normal] font-medium text-ds-texte-sourdine md:text-[11px]">{t("s1d")}</span>
     </div>
   );
 }
@@ -38,19 +38,29 @@ export function ChampDeLien() {
   return (
     <div
       aria-hidden="true"
-      className="mt-4 flex items-center gap-2 rounded-ds-card border border-ds-filet bg-ds-surface-carte py-2 pr-2 pl-3.5 shadow-ds-xs"
+      className="flex items-center gap-2.5 rounded-ds-pill border border-ds-filet bg-ds-surface-carte py-2.5 pr-2.5 pl-4 shadow-ds-xs"
     >
-      <span className="flex-1 truncate font-mono text-[12px] text-ds-texte-corps">droplink.fr/c/exemple</span>
-      <span className="flex h-7 w-7 items-center justify-center rounded-ds-sm bg-ds-surface-creux text-ds-texte-sourdine">
-        <Copy size={14} strokeWidth={1.9} />
+      <span className="min-w-0 flex-1 truncate font-mono text-[13px] leading-[normal] text-ds-texte-corps">https://droplink.fr/c/8F2k9</span>
+      <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-control border border-ds-filet bg-ds-surface-carte text-ds-texte-corps">
+        <Copy size={15} strokeWidth={2} />
       </span>
     </div>
   );
 }
 
-/** La frise du kit : quatre étapes, les deux premières franchies. */
+/**
+ * La frise de l'étape 3 — `TrackingTimeline compact` du design system, valeurs
+ * relevées dans son source : grille `22px 1fr auto` à l'écart 10, pastille de
+ * 14 px, trait vertical de 2 px (vert sous une étape franchie, filet appuyé
+ * sinon), libellé 13/700, heure 11/500 au gris estompé.
+ *
+ * ⚠️ ELLE PORTAIT UNE ICÔNE DE COLIS OU DE CAMION SUR CHAQUE LIGNE, ET PAS DE
+ * TRAIT. Le kit n'en dessine aucune : l'icône vit DANS la pastille (coche
+ * blanche, camion blanc pour l'étape courante), et c'est le trait qui fait une
+ * frise d'une liste. Vu capture contre capture le 18/09/2026.
+ */
 export async function FriseDeSuivi() {
-  const t = await getTranslations("landing.illustrations");
+  const t = await getTranslations("landing.kit");
   /* L'état est NOMMÉ, jamais déduit de la présence d'un drapeau : trois valeurs,
      et le typage refuse la quatrième. */
   const etapes: ReadonlyArray<{
@@ -58,43 +68,53 @@ export async function FriseDeSuivi() {
     readonly date: string;
     readonly etat: "faite" | "courante" | "a-venir";
   }> = [
-    { cle: "friseCreee", date: "12/03 · 10:24", etat: "faite" },
-    { cle: "friseTransit", date: "15/03 · 09:12", etat: "faite" },
-    { cle: "friseLivraison", date: "17/03 · 09:32", etat: "courante" },
-    { cle: "friseLivre", date: "18/03 · 16:03", etat: "a-venir" },
+    { cle: "tl1", date: "12/03 · 10:24", etat: "faite" },
+    { cle: "tl2", date: "15/03 · 09:12", etat: "faite" },
+    { cle: "tl3", date: "17/03 · 09:32", etat: "courante" },
+    { cle: "tl4", date: "18/03 · 16:03", etat: "a-venir" },
   ];
   return (
-    <ul aria-hidden="true" className="mt-4 flex flex-col gap-2.5">
-      {etapes.map((e) => (
-        <li key={e.cle} className="flex items-center gap-2.5">
-          <span
-            className={
-              "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full " +
-              (e.etat === "faite"
-                ? "bg-ds-succes text-ds-texte-sur-marque"
-                : e.etat === "courante"
-                  ? "border-2 border-ds-accent bg-ds-surface-carte"
-                  : "border-2 border-ds-filet-appuye bg-ds-surface-carte")
-            }
-          >
-            {e.etat === "faite" ? <Check size={11} strokeWidth={3.4} /> : null}
-          </span>
-          {e.cle === "friseTransit" ? (
-            <Truck size={13} className="shrink-0 text-ds-texte-sourdine" strokeWidth={1.9} />
-          ) : (
-            <Package size={13} className="shrink-0 text-ds-texte-sourdine" strokeWidth={1.9} />
-          )}
-          <span
-            className={
-              "flex-1 text-[13px] leading-[normal] font-bold " +
-              (e.etat === "courante" ? "text-ds-accent-encre" : "text-ds-texte-fort")
-            }
-          >
-            {t(e.cle)}
-          </span>
-          <span className="text-[11.5px] leading-[normal] font-medium whitespace-nowrap text-ds-texte-tenu">{e.date}</span>
-        </li>
-      ))}
+    <ul aria-hidden="true" className="flex flex-col">
+      {etapes.map((e, rang) => {
+        const derniere = rang === etapes.length - 1;
+        return (
+          <li key={e.cle} className="grid grid-cols-[22px_1fr_auto] items-start gap-2.5">
+            <span className="flex flex-col items-center self-stretch">
+              <span
+                className={
+                  "flex h-3.5 w-3.5 flex-none items-center justify-center rounded-full text-ds-texte-sur-marque " +
+                  (e.etat === "faite"
+                    ? "bg-ds-succes-encre"
+                    : e.etat === "courante"
+                      ? "bg-ds-info"
+                      : "border-2 border-ds-filet-appuye bg-ds-surface-carte")
+                }
+              >
+                {e.etat === "faite" ? <Check size={8} strokeWidth={3} /> : null}
+                {e.etat === "courante" ? <Truck size={8} strokeWidth={3} /> : null}
+              </span>
+              {derniere ? null : (
+                <span
+                  className={"min-h-4 w-0.5 flex-1 " + (e.etat === "faite" ? "bg-ds-succes" : "bg-ds-filet-appuye")}
+                />
+              )}
+            </span>
+            <span className={derniere ? "" : "pb-3"}>
+              <span
+                className={
+                  "block text-[13px] leading-[normal] font-bold " +
+                  (e.etat === "a-venir" ? "text-ds-texte-sourdine" : "text-ds-texte-fort")
+                }
+              >
+                {t(e.cle)}
+              </span>
+            </span>
+            <span className="pt-0.5 text-[11.5px] leading-[normal] font-medium whitespace-nowrap text-ds-texte-tenu md:text-[11px]">
+              {e.date}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

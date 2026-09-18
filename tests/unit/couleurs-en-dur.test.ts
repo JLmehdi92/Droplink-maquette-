@@ -176,6 +176,10 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
    * Elles ne peignent rien d'autre que ce dessin : `aria-hidden`, aucun texte
    * par-dessus, donc aucun contraste à tenir.
    */
+  /* Les étoiles des témoignages de la landing — `TestimonialCard` du kit les
+     peint en `#F5B843` en dur, et aucun jeton du design system ne le porte.
+     Portées le 18/09/2026 avec la section, sur la liste d'écarts de Wassim. */
+  ["#f5b843", "étoiles pleines des témoignages de la landing — TestimonialCard, kit marketing_site"],
   ["#ff5f57", "pastille « fermer » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
   ["#febc2e", "pastille « réduire » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
   ["#28c840", "pastille « agrandir » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],

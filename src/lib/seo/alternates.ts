@@ -113,10 +113,18 @@ const LOCALE_OPEN_GRAPH: Record<Langue, string> = {
  * messageries le mettent en cache sur leurs serveurs. Fuite silencieuse et
  * définitive. Deux gardes l'exigent, une sur le code et une sur le HTML servi.
  *
- * ⚠️ AUCUNE IMAGE, ET C'EST UNE OMISSION DÉLIBÉRÉE : `public/` ne contient que
- * les polices, il n'existe aucun fichier de logo. Déclarer une `og:image` qui
- * rend 404 produirait un aperçu CASSÉ là où son absence produit un aperçu
- * sobre — et le second vaut mieux que le premier.
+ * ⚠️ CE BLOC DISAIT « AUCUNE IMAGE, `public/` NE CONTIENT QUE LES POLICES », ET
+ * C'ÉTAIT DEVENU FAUX : `public/marque/` porte le logo et les illustrations du
+ * kit depuis la mi-septembre. L-014 — un document affirme un état que personne
+ * n'a vérifié. L'image de partage de la planche (`og-droplink.png`, 1200 × 630)
+ * est désormais servie.
+ *
+ * ⚠️ ELLE EST À LA RACINE DE `public/`, ET PAS DANS `marque/` — c'est la seule
+ * place qui marche. Le filtre du middleware n'exclut que les fichiers d'un seul
+ * segment (`/robots.txt`) : un chemin comme `/marque/og.jpg` reçoit la
+ * redirection de langue, 307 vers `/fr/marque/og.jpg`, et un robot de
+ * messagerie qui ne suit pas les redirections montrerait un aperçu CASSÉ.
+ * Mesuré sur le serveur de mesure le 18/09/2026.
  */
 export function openGraphDe(
   langue: Langue,
@@ -132,6 +140,7 @@ export function openGraphDe(
     title: textes.titre,
     description: textes.description,
     url: `${origine}/${langue}${chemin}`,
+    images: [{ url: `${origine}/og-droplink.jpg`, width: 1200, height: 630, alt: textes.titre }],
     locale: LOCALE_OPEN_GRAPH[langue],
     // Les autres langues, pour qu'un aperçu partagé sache qu'elles existent.
     alternateLocale: LANGUES.filter((l) => l !== langue).map((l) => LOCALE_OPEN_GRAPH[l]),

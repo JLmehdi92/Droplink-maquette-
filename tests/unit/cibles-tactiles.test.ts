@@ -98,14 +98,22 @@ function piedsDe(code: string): Array<{ readonly texte: string; readonly decalag
  * le contrôle croirait la classe absente.
  */
 function classesDe(balise: string, code: string): string {
-  const litteral = /className="([^"]*)"/.exec(balise);
-  if (litteral?.[1] !== undefined) return litteral[1];
-  const reference = /className=\{([A-Za-z_$][\w$]*)\}/.exec(balise);
-  if (reference?.[1] === undefined) return "";
+  /*
+   * ⚠️ LE PREMIER ATTRIBUT, QUELLE QUE SOIT SA FORME. La balise court jusqu'à
+   * la cible suivante : pour le dernier lien d'une colonne, elle emporte le
+   * `<div className="…">` de la colonne d'après. Chercher d'abord un littéral,
+   * PUIS une référence, rendait les classes de ce `div` à un lien écrit
+   * `className={lienPied}` — et le déclarait fautif (18/09/2026, pied de la
+   * landing). C'est l'attribut qui vient en PREMIER qui appartient à la cible.
+   */
+  const premier = /className=(?:"([^"]*)"|\{([A-Za-z_$][\w$]*)\})/.exec(balise);
+  if (premier?.[1] !== undefined) return premier[1];
+  const reference = premier?.[2];
+  if (reference === undefined) return "";
   // Recherche littérale plutôt qu'une expression construite : le nom peut
   // contenir un `$`, qui devrait alors être échappé — et une expression bâtie
   // par concaténation est précisément ce qui se casse en silence.
-  const marque = "const " + reference[1];
+  const marque = "const " + reference;
   const debut = code.indexOf(marque);
   if (debut === -1) return "";
   const suite = code.slice(debut + marque.length);

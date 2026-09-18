@@ -53,6 +53,16 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      Posé le 18/09/2026, quand les pastilles « raison sociale à compléter » ont
      été retirées — décision de Wassim. */
   ["legal.editeurNom", "Le nom de la marque, identique dans les trois langues."],
+  /* Le sélecteur de langue de la landing nomme chaque langue DANS ELLE-MÊME —
+     « Français », « English », « 中文 » —, comme la planche et comme tout
+     sélecteur de langue : un lecteur qui ne lit pas le chinois doit pouvoir y
+     retrouver la sienne. Ces deux-là sont donc les mêmes dans les trois
+     catalogues (18/09/2026). */
+  ["landing.kit.langues.fr", "Le nom du français en français : un sélecteur nomme chaque langue en elle-même."],
+  ["landing.kit.langues.en", "Le nom de l'anglais en anglais : un sélecteur nomme chaque langue en elle-même."],
+  /* Vide, et c'est la planche : sa phrase chinoise 三步生成客户物流链接 n'a pas de
+     mot final à mettre en dégradé. Même exception dans `i18n-parite`. */
+  ["landing.kit.howHl", "Vide : la planche ne met aucun mot en dégradé dans ce titre chinois."],
   /* Deux gabarits de l'éditeur, composés d'une variable ou d'un signe seul.
      « à 09:15 » n'a pas d'équivalent chinois : l'heure s'écrit nue à côté de sa
      date, et ajouter un idéogramme pour satisfaire ce garde mettrait un mot

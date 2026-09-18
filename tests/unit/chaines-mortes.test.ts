@@ -53,13 +53,6 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   /* Les six questions de la documentation sont rendues par une boucle sur
      `[1..6]`, qui compose `faqQ${n}` et `faqR${n}`. Les écrire à plat aurait
      donné douze appels identiques à une ligne près. */
-  /* Les trois étapes de la landing sont rendues par une boucle sur `[1..3]`,
-     qui compose `etape${n}Titre` et `etape${n}Texte`. */
-  ["landing.etape", "composé depuis le rang de l étape — landing"],
-  /* Les quatre pastilles flottantes du héros, portées le 18/09/2026 : leur clé
-     est composée depuis le nom de la pastille (`pastille${cle}Titre`), comme
-     les cartes de la scène du téléphone juste en dessous. */
-  ["landing.pastille", "composé depuis le nom de la pastille flottante — landing"],
   ["docs.faqQ", "composé depuis le rang de la question — documentation"],
   ["docs.faqR", "composé depuis le rang de la question — documentation"],
   ["envois.tri.", "composé depuis le tri choisi — tableau des envois"],
@@ -123,14 +116,6 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   ["admin.journal.actions.", "composé depuis l'action tracée"],
   ["admin.suspension.erreur.", "composé depuis le SQLSTATE traduit"],
   ["page-publique.frise.", "composé depuis le statut normalisé du colis"],
-  [
-    "landing.fonctionnalites.",
-    "composé depuis la liste des trois bénéfices — landing, section « ce que ça vous enlève »",
-  ],
-  [
-    "landing.flottant.",
-    "composé depuis la liste des trois cartes flottantes de la scène du téléphone — landing",
-  ],
   ["commandes.qc.", "composé depuis le statut QC"],
   ["medias.refus.", "composé depuis le motif de refus d'un média"],
   ["legal.signalement.cat_", "composé depuis la catégorie de signalement"],
