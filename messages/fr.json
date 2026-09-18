@@ -796,6 +796,7 @@
       "titre": "Historique de la commande",
       "aucun": "Rien ne s'est encore passé sur cette commande.",
       "aHeure": "à {heure}",
+      "commentaire": "« {texte} »",
       "types": {
         "commande_creee": "Commande créée",
         "commande_modifiee": "Commande modifiée",

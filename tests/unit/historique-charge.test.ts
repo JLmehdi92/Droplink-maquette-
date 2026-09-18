@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { resumerCharge, typeAffiche } from "@/lib/commandes/historique";
+import { commentaireDuClient, resumerCharge, typeAffiche } from "@/lib/commandes/historique";
 
 /**
  * LA CHARGE UTILE DU JOURNAL NE S'ÉCHAPPE PAS À L'ÉCRAN.
@@ -106,5 +106,45 @@ describe("Le sens du geste d'archivage", () => {
     ] as const) {
       expect(typeAffiche(t, { archivee: false })).toBe(t);
     }
+  });
+});
+
+/**
+ * LE COMMENTAIRE DU CLIENT, ENREGISTRÉ ET JAMAIS MONTRÉ JUSQU'AU 18/09/2026.
+ *
+ * Une clé admise est une porte : elle ne s'ouvre que pour les deux
+ * événements que le client écrit, et elle ne s'ouvre que sur du texte.
+ */
+describe("Le commentaire du client", () => {
+  test("rendu sous un arbitrage, approuvé comme refusé", () => {
+    expect(commentaireDuClient("qc_refuse", "client", { commentaire: "La couture est de travers" })).toBe(
+      "La couture est de travers",
+    );
+    expect(commentaireDuClient("qc_approuve", "client", { commentaire: "  Parfait  " })).toBe("Parfait");
+  });
+
+  test("ignoré sous tout AUTRE événement, même s'il porte ce nom", () => {
+    for (const t of ["commande_modifiee", "commande_creee", "media_ajoute", "lien_revoque"] as const) {
+      expect(commentaireDuClient(t, "client", { commentaire: "prix d'achat 12 €" })).toBeNull();
+    }
+  });
+
+  test("absent, vide, ou pas du texte : rien", () => {
+    expect(commentaireDuClient("qc_refuse", "client", {})).toBeNull();
+    expect(commentaireDuClient("qc_refuse", "client", { commentaire: "   " })).toBeNull();
+    expect(commentaireDuClient("qc_refuse", "client", { commentaire: 42 })).toBeNull();
+    expect(commentaireDuClient("qc_refuse", "client", null)).toBeNull();
+  });
+
+  test("un autre AUTEUR que le client ne s'affiche pas comme lui, même sous un arbitrage", () => {
+    // Revue de sécurité du 18/09/2026 : le type seul ne dit pas qui a écrit.
+    for (const acteur of ["vendeur", "systeme", null]) {
+      expect(commentaireDuClient("qc_refuse", acteur, { commentaire: "écrit par un autre" })).toBeNull();
+    }
+  });
+
+  test("il ne passe JAMAIS par le résumé, que l'écran traduit", () => {
+    // « status » écrit par un client ne doit pas devenir « expédition ».
+    expect(resumerCharge({ commentaire: "status" })).toBeNull();
   });
 });

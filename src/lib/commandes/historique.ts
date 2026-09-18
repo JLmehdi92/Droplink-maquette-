@@ -41,6 +41,18 @@ export interface LigneHistorique {
    * interne ou un jeton finit sur un écran. On n'extrait que ce qui est nommé.
    */
   readonly detail: string | null;
+  /**
+   * CE QUE LE CLIENT A ÉCRIT en approuvant ou en refusant les photos, ou `null`.
+   *
+   * ⚠️ IL ÉTAIT ENREGISTRÉ ET JAMAIS MONTRÉ (migration 135, audit du
+   * 18/09/2026) : la clé n'était pas admise, et l'historique la jetait.
+   *
+   * ⚠️ PAS DANS `detail`. L'écran TRADUIT le détail quand il a la forme d'un
+   * nom de colonne : un client qui écrirait « status » verrait son texte
+   * remplacé par « expédition ». Un texte tiers ne passe par aucune table de
+   * correspondance — il s'affiche tel qu'il a été écrit, échappé par React.
+   */
+  readonly commentaire: string | null;
 }
 
 /**
@@ -73,7 +85,44 @@ const Charge = z.object({
    * une lacune de vocabulaire.
    */
   archivee: z.boolean().optional(),
+  /**
+   * Le commentaire du CLIENT sur ses photos. La base le borne à 1 000
+   * caractères assainis (migration 135) ; la borne est reprise ici, pour
+   * qu'une charge écrite par une autre voie ne s'affiche pas sans limite.
+   */
+  commentaire: z.string().max(1000).optional(),
 });
+
+/** Les deux seuls événements dont le commentaire vient du client. */
+const ARBITRAGES: ReadonlySet<TypeEvenement> = new Set<TypeEvenement>(["qc_approuve", "qc_refuse"]);
+
+/**
+ * Rend le commentaire du client pour un arbitrage, ou `null`.
+ *
+ * PURE ET EXPORTÉE. Un `commentaire` rangé sous un AUTRE type d'événement
+ * n'est pas rendu : seul l'arbitrage l'écrit, et une clé admise ne doit pas
+ * devenir une porte pour tout ce qui se trouverait porter ce nom.
+ */
+export function commentaireDuClient(
+  type: TypeEvenement,
+  acteur: string | null,
+  brut: unknown,
+): string | null {
+  if (!ARBITRAGES.has(type)) return null;
+  /*
+   * ⚠️ L'AUTEUR SE LIT EN BASE, IL NE SE DÉDUIT PAS DU TYPE. Aujourd'hui seul
+   * `arbitrer_qc` écrit ces deux types, et toujours avec `actor = 'client'` —
+   * mais une protection qui tient à l'absence d'un second écrivain n'en est
+   * pas une (L-029). Le jour où un geste du vendeur ou de l'admin journalise
+   * sous `qc_refuse`, son texte ne s'affichera pas comme celui du client.
+   * Revue de sécurité du 18/09/2026.
+   */
+  if (acteur !== "client") return null;
+  const analyse = Charge.safeParse(brut);
+  if (!analyse.success) return null;
+  const texte = (analyse.data.commentaire ?? "").trim();
+  return texte === "" ? null : texte;
+}
 
 /**
  * Le type d'AFFICHAGE : celui de la base, sauf pour le geste qui en porte deux.
@@ -132,7 +181,7 @@ export async function lireHistorique(
 ): Promise<readonly LigneHistorique[]> {
   const { data, error } = await supabase
     .from("order_events")
-    .select("id, type, occurred_at, payload")
+    .select("id, type, occurred_at, payload, actor")
     .eq("order_id", commandeId)
     .order("occurred_at", { ascending: false })
     .limit(PLAFOND_HISTORIQUE);
@@ -159,5 +208,6 @@ export async function lireHistorique(
       type: typeAffiche(l.type as TypeEvenement, l.payload),
       quand: l.occurred_at,
       detail: resumerCharge(l.payload),
+      commentaire: commentaireDuClient(l.type as TypeEvenement, l.actor, l.payload),
     }));
 }

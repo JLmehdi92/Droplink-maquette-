@@ -796,6 +796,7 @@
       "titre": "订单记录",
       "aucun": "这笔订单还没有发生任何事。",
       "aHeure": "{heure}",
+      "commentaire": "“{texte}”",
       "types": {
         "commande_creee": "订单已创建",
         "commande_modifiee": "订单已修改",

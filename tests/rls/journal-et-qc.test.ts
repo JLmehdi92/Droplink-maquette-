@@ -10,6 +10,7 @@ import {
 } from "../aide/utilisateurs";
 import { TYPES_EVENEMENT, TYPES_VENDEUR } from "@/lib/commandes/journal";
 import { revoquerLien, type ClientCycle } from "@/lib/commandes/cycle";
+import { lireHistorique, type ClientHistorique } from "@/lib/commandes/historique";
 
 /**
  * LE JOURNAL ET L'ARBITRAGE QC — ce que cette suite établit.
@@ -204,6 +205,24 @@ describe("L'arbitrage QC par le porteur du jeton", () => {
     const apres = await evenements();
     expect(apres.length, "la seconde décision a écrasé la première").toBe(avant + 1);
     expect(apres.at(-1)?.type).toBe("qc_refuse");
+  });
+
+  test("le VENDEUR lit le commentaire de son client dans l'historique de la commande", async () => {
+    /*
+     * ⚠️ IL ÉTAIT ENREGISTRÉ ET JAMAIS MONTRÉ (migration 135, audit du
+     * 18/09/2026) : `resumerCharge` ne nommait pas la clé `commentaire`, et
+     * l'historique la jetait. Le client écrivait « la couture est de travers »
+     * pour rien. Lu ici par le vrai chemin — l'arbitrage anonyme par jeton,
+     * puis la lecture sous la session du vendeur.
+     */
+    const lignes = await lireHistorique(alice.client as unknown as ClientHistorique, commande);
+    const refus = lignes.find((l) => l.type === "qc_refuse");
+    expect(refus, "aucun refus dans l'historique : la sonde n'inspecte rien").toBeDefined();
+    expect(refus?.commentaire).toBe("Finalement la couture est de travers");
+    // Le commentaire n'emprunte PAS le détail, que l'écran traduit quand il
+    // ressemble à un nom de colonne : « status » écrit par un client
+    // s'afficherait « expédition ».
+    expect(refus?.detail).toBeNull();
   });
 
   test("le commentaire est retenu, et il est TRONQUÉ en base", async () => {

@@ -167,6 +167,21 @@ export async function HistoriqueCommande({
                       {lisible(ligne.detail)}
                     </span>
                   )}
+                  {/*
+                    LE COMMENTAIRE DU CLIENT, sous son arbitrage, entre
+                    guillemets : c'est SA phrase, pas la nôtre. Il ne passe pas
+                    par `lisible` — un texte tiers ne se traduit pas — et React
+                    l'échappe. `break-words` : un client colle parfois un lien.
+                  */}
+                  {/* `unicode-bidi: isolate` : si un caractère de direction
+                      survivait un jour à l'assainissement de la base (mesuré
+                      le 18/09/2026 : les dix-sept testés sont retirés), il ne
+                      déborderait pas sur le libellé voisin. */}
+                  {ligne.commentaire !== null && (
+                    <span className="text-[13px] leading-[normal] break-words text-ds-texte-corps [unicode-bidi:isolate]">
+                      {t("commentaire", { texte: ligne.commentaire })}
+                    </span>
+                  )}
                 </span>
               </li>
             );

@@ -796,6 +796,7 @@
       "titre": "Order history",
       "aucun": "Nothing has happened on this order yet.",
       "aHeure": "at {heure}",
+      "commentaire": "“{texte}”",
       "types": {
         "commande_creee": "Order created",
         "commande_modifiee": "Order updated",
