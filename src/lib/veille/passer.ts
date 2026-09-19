@@ -143,7 +143,15 @@ export async function veillerSur(
 
     // ÉCHEC : on rend la réservation, sinon l'alerte se tait pour toute la
     // durée du repos.
-    await systeme.rpc("liberer_alerte", { p_cle: alerte.cle });
+    const { error: erreurLiberation } = await systeme.rpc("liberer_alerte", { p_cle: alerte.cle });
+    if (erreurLiberation !== null) {
+      // L'INVERSE EXACT DE L'INTENTION (audit du 20/09/2026) : la réservation reste posée, et
+      // l'alerte se tait pour toute la durée du repos alors qu'elle n'est jamais partie.
+      console.error(
+        `[veille] alerte ${alerte.cle} non envoyée ET non rendue : elle se taira jusqu'à la fin du repos — ` +
+          erreurLiberation.message,
+      );
+    }
     echecs += 1;
 
     if (resultat.statut === "non_configure") {
@@ -204,7 +212,7 @@ export async function passerLaVeille(
   // veillé ne doit pas certifier l'avoir fait.
   const systeme = creerClientSysteme();
   const purge = await purgerLaFile(systeme);
-  await systeme.rpc("battre", {
+  const { error: erreurBattement } = await systeme.rpc("battre", {
     p_source: TACHE_VEILLE,
     p_detail: {
       observees: bilan.observees,
@@ -225,6 +233,10 @@ export async function passerLaVeille(
       conservations_effacees: purge.conservationsEffacees,
     },
   });
+  // UN BATTEMENT PERDU FAIT CROIRE À UNE TÂCHE MORTE (audit du 20/09/2026). On le dit ici.
+  if (erreurBattement !== null) {
+    console.error("[veille] battement non écrit — " + erreurBattement.message);
+  }
 
   return bilan;
 }

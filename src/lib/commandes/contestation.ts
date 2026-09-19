@@ -67,7 +67,15 @@ export async function lireEtatBlocage(supabase: Client, commandeId: string): Pro
     .select("id, admin_blocked_at, admin_block_reason")
     .eq("id", commandeId)
     .maybeSingle();
-  if (error !== null || commande === null) return null;
+  if (error !== null) {
+    // L'ÉCRAN SE TAIT, MAIS LE JOURNAL PARLE (audit du 20/09/2026). Rendre `null` évite
+    // d'affirmer un état non lu (contrainte 8) ; sans trace, une lecture en échec pendant des
+    // jours cacherait à un vendeur bloqué son bandeau ET le moyen de contester, et personne
+    // ne pourrait le savoir.
+    console.error("[commandes] état de blocage illisible : " + error.message);
+    return null;
+  }
+  if (commande === null) return null;
   if (commande.admin_blocked_at === null) return { bloque: false };
 
   const { data: lignes, error: erreurContestations } = await supabase
@@ -78,7 +86,10 @@ export async function lireEtatBlocage(supabase: Client, commandeId: string): Pro
     .order("created_at", { ascending: false });
   // Une lecture en échec ne doit pas faire croire qu'aucune contestation n'existe : le vendeur
   // en renverrait une, et la base la refuserait sans qu'il comprenne pourquoi (contrainte 8).
-  if (erreurContestations !== null) return null;
+  if (erreurContestations !== null) {
+    console.error("[commandes] contestations du blocage illisibles : " + erreurContestations.message);
+    return null;
+  }
 
   const contestations = await Promise.all(
     (lignes ?? []).map(async (l): Promise<ContestationVendeur> => ({

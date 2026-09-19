@@ -65,7 +65,14 @@ export async function contestationsEnAttenteParmi(
 ): Promise<{ readonly statut: "ok"; readonly ids: ReadonlySet<string> } | { readonly statut: "erreur" }> {
   if (commandes.length === 0) return { statut: "ok", ids: new Set() };
   const { data, error } = await supabase.rpc("contestations_en_attente_parmi", { p_commandes: [...commandes] });
-  if (error !== null || !Array.isArray(data)) return { statut: "erreur" };
+  if (error !== null || !Array.isArray(data)) {
+    // Sans trace, aucune ligne ne montrerait plus la pastille « Contestation » (audit du
+    // 20/09/2026) : un vendeur attendrait une réponse que personne ne saurait devoir donner.
+    console.error(
+      "[admin] contestations en attente illisibles : " + (error?.message ?? "réponse non tabulaire"),
+    );
+    return { statut: "erreur" };
+  }
   return { statut: "ok", ids: new Set(data.filter((v): v is string => typeof v === "string")) };
 }
 

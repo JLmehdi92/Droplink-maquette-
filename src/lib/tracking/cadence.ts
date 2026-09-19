@@ -255,7 +255,7 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
     );
   }
 
-  await systeme.rpc("battre", {
+  const { error: erreurBattement } = await systeme.rpc("battre", {
     p_source: TACHE_CADENCE,
     p_detail: {
       // ÉCRIT DANS LE BATTEMENT : sans lui, un passage coupé et un passage sans
@@ -274,6 +274,11 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
       purge_notifications: erreurPurge !== null ? null : (purgee?.notifications ?? 0),
     },
   });
+  // UN BATTEMENT PERDU FAIT CROIRE À UNE TÂCHE MORTE (audit du 20/09/2026) : le passage a
+  // travaillé, mais l'écran de surveillance et la veille ne le sauront pas. On le dit ici.
+  if (erreurBattement !== null) {
+    console.error("[suivi] cadence : battement non écrit — " + erreurBattement.message);
+  }
 
   return bilan;
 }

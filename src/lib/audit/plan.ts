@@ -74,6 +74,9 @@ export async function lirePlanCompte(
 ): Promise<{ statut: "ok"; plan: Plan } | { statut: "erreur" }> {
   const { data, error } = await supabase.rpc("lire_plan_compte", { p_profil: profilId });
   const plan = PLANS.find((p) => p === data);
-  if (error !== null || plan === undefined) return { statut: "erreur" };
+  if (error !== null || plan === undefined) {
+    console.error("[admin] plan du compte illisible : " + (error?.message ?? `valeur inattendue ${String(data)}`));
+    return { statut: "erreur" };
+  }
   return { statut: "ok", plan };
 }

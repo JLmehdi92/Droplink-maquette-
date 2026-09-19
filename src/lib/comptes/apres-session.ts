@@ -165,12 +165,24 @@ export async function suivreApresSession(
    * consommée avant une opération qui peut échouer perd l'événement
    * définitivement, sans réémission possible.
    */
-  const { data: reclamee } = await supabase.rpc("reclamer_evenement_inscription");
+  const { data: reclamee, error: erreurReclamation } = await supabase.rpc("reclamer_evenement_inscription");
+  if (erreurReclamation !== null) {
+    console.error("[instrumentation] marque d'inscription illisible : " + erreurReclamation.message);
+  }
 
   if (reclamee === true) {
     const parti = await emettre(EVENEMENTS.INSCRIPTION, { sujet: profil.profilId }, { langue });
     if (!parti) {
-      await supabase.rpc("liberer_evenement_inscription");
+      // LE SEUL FILET CONTRE LA PERTE DÉFINITIVE, et il n'était pas vérifié (audit du
+      // 20/09/2026) : si la marque n'est pas rendue, cette inscription ne sera JAMAIS comptée.
+      // On ne peut rien de plus ici — mais le journal doit le dire.
+      const { error: erreurLiberation } = await supabase.rpc("liberer_evenement_inscription");
+      if (erreurLiberation !== null) {
+        console.error(
+          "[instrumentation] inscription PERDUE : l'émission a échoué et la marque n'a pas pu être rendue — " +
+            erreurLiberation.message,
+        );
+      }
     }
   }
 

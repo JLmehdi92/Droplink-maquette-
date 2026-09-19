@@ -91,6 +91,11 @@ export async function liensBloquesParmi(
 ): Promise<{ statut: "ok"; bloques: ReadonlySet<string> } | { statut: "erreur" }> {
   if (commandes.length === 0) return { statut: "ok", bloques: new Set() };
   const { data, error } = await supabase.rpc("liens_bloques_parmi", { p_commandes: [...commandes] });
-  if (error !== null || !Array.isArray(data)) return { statut: "erreur" };
+  if (error !== null || !Array.isArray(data)) {
+    // Sans trace, chaque ligne perdrait sa pastille « lien bloqué » en silence (audit du
+    // 20/09/2026) : l'écran ne ment pas, mais la panne doit se lire quelque part.
+    console.error("[admin] liens bloqués illisibles : " + (error?.message ?? "réponse non tabulaire"));
+    return { statut: "erreur" };
+  }
   return { statut: "ok", bloques: new Set(data.map(String)) };
 }
