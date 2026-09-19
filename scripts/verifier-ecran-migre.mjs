@@ -723,6 +723,37 @@ const RELEVE = `(() => {
     corps_utile: document.body.innerText.trim().length,
     largeur_doc: de.scrollWidth, largeur_vue: de.clientWidth,
     debordement: de.scrollWidth > de.clientWidth,
+    /*
+     * QUI DÉBORDE, quand le document déborde (18/09/2026) : « il déborde de
+     * 298 px » ne dit pas où chercher. Les éléments les plus profonds dont le
+     * bord droit dépasse la fenêtre, hors de tout conteneur qui les contient
+     * (défilement ou coupe) — ceux-là seuls poussent le document.
+     */
+    depassent: de.scrollWidth <= de.clientWidth ? [] : [...document.querySelectorAll('body *')]
+      .filter((e) => { const r = e.getBoundingClientRect(); if (r.width === 0 || r.right <= de.clientWidth + 1) return false;
+        for (let n = e.parentElement; n !== null && n !== document.body; n = n.parentElement) {
+          const c = getComputedStyle(n); if (c.overflowX !== 'visible') return false; }
+        return ![...e.children].some((f) => f.getBoundingClientRect().right > de.clientWidth + 1); })
+      .slice(0, 6)
+      .map((e) => (e.tagName + '.' + (e.className || '').toString().split(' ').filter(Boolean).slice(0, 4).join('.')).slice(0, 90)
+        + ' droite=' + Math.round(e.getBoundingClientRect().right) + ' largeur=' + Math.round(e.getBoundingClientRect().width)),
+    /* SI LE FILTRE NE TROUVE PERSONNE (le coupable vit sous un conteneur
+       coupant, ou c'est une ombre, une transformation) : les éléments les plus
+       à droite, SANS filtre, pour qu'un débordement ne reste jamais anonyme. */
+    depassent_brut: de.scrollWidth <= de.clientWidth ? [] : [...document.querySelectorAll('body *')]
+      .map((e) => ({ e, r: e.getBoundingClientRect() }))
+      .filter((x) => x.r.width > 0 && x.r.right > de.clientWidth + 1)
+      .sort((a, b) => b.r.right - a.r.right)
+      .slice(0, 6)
+      .map(({ e, r }) => (e.tagName + '.' + (e.className || '').toString().split(' ').filter(Boolean).slice(0, 5).join('.')).slice(0, 100)
+        + ' droite=' + Math.round(r.right) + ' transform=' + getComputedStyle(e).transform.slice(0, 30))
+      .concat([...document.querySelectorAll('body *')]
+        .filter((e) => { const c = getComputedStyle(e); if (c.overflowX !== 'visible' || e.clientWidth === 0) return false;
+          const r = e.getBoundingClientRect(); return e.scrollWidth > e.clientWidth + 1 && r.left + e.scrollWidth > de.clientWidth + 1; })
+        .filter((e, i, l) => !l.some((f) => f !== e && e.contains(f)))
+        .slice(0, 4)
+        .map((e) => 'CONTENU QUI DEBORDE SA BOITE : ' + (e.tagName + '.' + (e.className || '').toString().split(' ').filter(Boolean).slice(0, 5).join('.')).slice(0, 100)
+          + ' « ' + (e.textContent || '').trim().slice(0, 30) + ' » boite=' + e.clientWidth + ' contenu=' + e.scrollWidth)),
     h1: document.querySelectorAll('h1').length,
     /*
      * ⚠️ UN DESSIN DECORATIF N A PAS DE TEXTE A LIRE, ET LA GARDE LE CROYAIT.
@@ -841,6 +872,127 @@ const RELEVE = `(() => {
      * \`sr-only\` et hors d un \`<details>\` ferme (son contenu garde ses boites
      * sans etre peint, et n est pas touchable).
      */
+    /*
+     * ⚠️ CE QU UN CONTENEUR COUPE SANS LE DIRE. Ajoute le 18/09/2026 : a
+     * 1 280 px, le tableau admin des boutiques perdait quatre colonnes — dont
+     * « Voir » — sous le \`overflow: hidden\` de son panneau, sans barre de
+     * defilement. Le document ne debordait pas ; aucune regle ne le voyait.
+     *
+     * Inventaire : tout texte ou controle visible qui DEPASSE de plus de 2 px
+     * un ancetre en \`overflow\` hidden ou clip, dans l axe coupe. Ecartes :
+     * la troncature VOULUE (ellipse, limite de lignes, sur l element ou entre
+     * lui et le conteneur), le decoratif (\`aria-hidden\`), le \`sr-only\`, et
+     * le contenu d un \`<details>\` ferme.
+     */
+    rognes: [...new Set([...feuilles, ...interactifs])]
+      .filter((e) => { const r = e.getBoundingClientRect();
+        if (r.width <= 2 || r.height <= 2) return false;
+        if (e.closest('[aria-hidden=true]') !== null) return false;
+        if ((e.className || '').toString().split(' ').includes('sr-only')) return false;
+        const d = e.closest('details');
+        if (d !== null && !d.open && e.closest('summary') === null) return false;
+        for (let n = e; n !== null && n.nodeType === 1; n = n.parentElement) {
+          const c = getComputedStyle(n);
+          if (c.display === 'none' || c.visibility === 'hidden' || parseFloat(c.opacity) === 0) return false;
+          if (c.textOverflow === 'ellipsis' || (c.webkitLineClamp && c.webkitLineClamp !== 'none')) return false;
+          if (n === e) continue;
+          const coupeX = c.overflowX === 'hidden' || c.overflowX === 'clip';
+          const coupeY = c.overflowY === 'hidden' || c.overflowY === 'clip';
+          if (!coupeX && !coupeY) continue;
+          const p = n.getBoundingClientRect();
+          if (coupeX && (r.right > p.right + 2 || r.left < p.left - 2)) { e.__rognePar = n; return true; }
+          if (coupeY && (r.bottom > p.bottom + 2 || r.top < p.top - 2)) { e.__rognePar = n; return true; }
+        }
+        return false; })
+      .map((e) => ({ quoi: (e.getAttribute('aria-label') || e.textContent || e.tagName).trim().slice(0, 40),
+        par: (e.__rognePar.tagName + '.' + (e.__rognePar.className || '').toString().split(' ').slice(0, 3).join('.')).slice(0, 70) })),
+    /*
+     * ⚠️ UN TEXTE QUI SORT DE SA CARTE. Ajoute le 18/09/2026 : a 1 024 px, les
+     * valeurs du panneau « Informations de la commande » depassaient la carte —
+     * ni le document ne debordait, ni un conteneur ne coupait : aucune regle ne
+     * le voyait, la capture si. Tout texte ou controle EN FLUX (ni absolu ni
+     * fixe : une pastille posee a cheval est voulue) qui depasse de plus de 2 px,
+     * a gauche ou a droite, le cadre VISIBLE d un ancetre (filet ou fond).
+     */
+    hors_cadre: [...new Set([...feuilles, ...interactifs])]
+      .filter((e) => {
+        /* L ETENDUE DU TEXTE, pas la boite : une valeur en \`min-w-0\` garde sa
+           boite dans la carte pendant que son texte en sort. */
+        const plage = document.createRange(); plage.selectNodeContents(e);
+        const rt = plage.getBoundingClientRect(), rb = e.getBoundingClientRect();
+        /* LE TEXTE SEUL quand il y en a : une cible agrandie par des marges
+           negatives (un lien de 44 px) depasse volontairement sa carte ; ce qui
+           se VOIT, c est le texte. La boite ne sert qu aux controles sans texte. */
+        /* Et sur une FEUILLE seulement : le texte d un lien qui contient un span
+           tronque a l ellipse compte aussi la partie que ce span cache. */
+        const feuille = e.children.length === 0;
+        const r = feuille && rt.width > 0 ? { left: rt.left, right: rt.right, width: rb.width, height: rb.height } : { left: rb.left, right: rb.right, width: rb.width, height: rb.height };
+        if (r.width <= 2 || r.height <= 2) return false;
+        if (e.closest('[aria-hidden=true]') !== null) return false;
+        if ((e.className || '').toString().split(' ').includes('sr-only')) return false;
+        const d = e.closest('details');
+        if (d !== null && !d.open && e.closest('summary') === null) return false;
+        for (let n = e; n !== null && n.nodeType === 1; n = n.parentElement) {
+          const c = getComputedStyle(n);
+          if (c.position === 'fixed') return false;
+          if (c.display === 'none' || c.visibility === 'hidden' || parseFloat(c.opacity) === 0) return false;
+        }
+        /* LE CADRE EST UNE CARTE : fond ou filet visible, rayon d au moins 12 px,
+           au moins 120 px de large. Une pastille posee a cheval sur un petit
+           bouton reste permise ; un libelle d axe qui sort de son panneau, non
+           (18/09/2026 : les dates de « Liens clients », en absolu, passaient
+           sous le panneau voisin a 1 024 px). */
+        const visible = (c, n) => { const a = (v) => { const m = v.match(/[0-9.]+/g); return !m || m.length < 4 ? 1 : parseFloat(m[3]); };
+          const fond = c.backgroundColor !== 'transparent' && a(c.backgroundColor) > 0.02;
+          const filet = parseFloat(c.borderLeftWidth) > 0 && c.borderLeftStyle !== 'none' && a(c.borderLeftColor) > 0.02;
+          return (fond || filet) && parseFloat(c.borderTopLeftRadius) >= 12 && n.getBoundingClientRect().width >= 120; };
+        for (let n = e; n !== null && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+          const c = getComputedStyle(n);
+          /* CE QU UN ANCETRE COUPE NE SE VOIT PAS : une ellipse, un defilement
+             ou une coupe bornent le texte visible a la boite de cet ancetre. */
+          if (c.overflowX !== 'visible') { const q = n.getBoundingClientRect(); r.right = Math.min(r.right, q.right); r.left = Math.max(r.left, q.left); }
+          if (n === e || !visible(c, n)) continue;
+          const p = n.getBoundingClientRect();
+          if (r.right > p.right + 2 || r.left < p.left - 2) { e.__cadre = n; return true; }
+        }
+        return false; })
+      .slice(0, 8)
+      .map((e) => ({ quoi: (e.getAttribute('aria-label') || e.textContent || e.tagName).trim().slice(0, 40),
+        cadre: (e.__cadre.tagName + '.' + (e.__cadre.className || '').toString().split(' ').filter(Boolean).slice(0, 3).join('.')).slice(0, 60) })),
+    /*
+     * ⚠️ DEUX TEXTES QUI SE RECOUVRENT. Ajoute le 18/09/2026 : a 1 280 px, les
+     * douze dates de l axe « Evolution des commandes » du tableau de bord se
+     * chevauchaient — « 29/0606/0713/07… », illisible. Aucune boite ne sortait
+     * de rien : il fallait comparer les TEXTES entre eux. Feuilles visibles,
+     * etendue du texte (Range), recouvrement de plus de 2 px dans les deux axes.
+     */
+    chevauchent: (() => {
+      /* Une barre FIXE ou COLLANTE recouvre le contenu qui defile dessous : c est
+         son role, pas un chevauchement. Ses textes sortent de la comparaison. */
+      const vis = (e) => { for (let n = e; n !== null && n.nodeType === 1; n = n.parentElement) { const c = getComputedStyle(n);
+        if (c.display === 'none' || c.visibility === 'hidden' || parseFloat(c.opacity) === 0) return false;
+        if (c.position === 'fixed' || c.position === 'sticky') return false; } return true; };
+      const textes = feuilles
+        .filter((e) => e.closest('[aria-hidden=true]') === null && !(e.className || '').toString().split(' ').includes('sr-only') && vis(e))
+        .filter((e) => { const d = e.closest('details'); return d === null || d.open || e.closest('summary') !== null; })
+        .map((e) => { const p = document.createRange(); p.selectNodeContents(e); const b = p.getBoundingClientRect();
+          /* CE QU UN ANCETRE COUPE NE SE VOIT PAS : une ellipse cache la fin du
+             texte, qui ne recouvre donc rien. */
+          const r = { left: b.left, right: b.right, top: b.top, bottom: b.bottom };
+          for (let n = e; n !== null && n !== document.body; n = n.parentElement) { const c = getComputedStyle(n);
+            if (c.overflowX !== 'visible') { const q = n.getBoundingClientRect(); r.left = Math.max(r.left, q.left); r.right = Math.min(r.right, q.right); }
+            if (c.overflowY !== 'visible') { const q = n.getBoundingClientRect(); r.top = Math.max(r.top, q.top); r.bottom = Math.min(r.bottom, q.bottom); } }
+          r.width = r.right - r.left; r.height = r.bottom - r.top; return { e, r }; })
+        .filter((x) => x.r.width > 2 && x.r.height > 2);
+      const paires = [];
+      for (let i = 0; i < textes.length && paires.length < 6; i++) for (let j = i + 1; j < textes.length && paires.length < 6; j++) {
+        const a = textes[i], b = textes[j];
+        if (a.e.contains(b.e) || b.e.contains(a.e)) continue;
+        const dx = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+        const dy = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+        if (dx > 2 && dy > 2) paires.push('« ' + (a.e.textContent || '').trim().slice(0, 20) + ' » sur « ' + (b.e.textContent || '').trim().slice(0, 20) + ' »');
+      }
+      return paires; })(),
     cibles_invisibles: interactifs
       .filter((e) => { const r = e.getBoundingClientRect();
         if (r.width <= 2 || r.height <= 2) return false;
@@ -1318,6 +1470,58 @@ for (const modele of routes) {
         console.error(`[plancher] ${chemin} a ${largeur} px : aucun debordement, aucune police sous 11,5, aucune cible sous 44`);
       }
     }
+    {
+      /* LE ROGNAGE, À TOUTE LARGEUR : un contenu coupé l'est aussi bien à
+         1 280 qu'à 390, et c'est entre les deux que le défaut des boutiques
+         vivait (18/09/2026). */
+      const rognes = vu.rognes ?? [];
+      if (rognes.length > 0) {
+        process.exitCode = 1;
+        console.error(
+          `[rognage] ${chemin} a ${largeur} px : ${rognes.length} element(s) coupe(s)\n` +
+            rognes.map((x) => `    « ${x.quoi} » coupe par ${x.par}`).join("\n"),
+        );
+      } else {
+        console.error(`[rognage] ${chemin} a ${largeur} px : rien n est coupe`);
+      }
+      /* LE DÉBORDEMENT ET LE PANNEAU HORS FENÊTRE, À TOUTE LARGEUR aussi. Ils
+         n'étaient rouges qu'au téléphone ; le balayage du 18/09/2026 a trouvé
+         /commandes et /envois qui défilaient de côté à 1 024 et 1 280, et le
+         menu du compte hors de l'écran à 768, sur les onze écrans vendeur. */
+      const cadre = vu.hors_cadre ?? [];
+      if (cadre.length > 0) {
+        process.exitCode = 1;
+        console.error(
+          `[cadre] ${chemin} a ${largeur} px : ${cadre.length} texte(s) sortent de leur carte\n` +
+            cadre.map((x) => `    « ${x.quoi} » sort de ${x.cadre}`).join("\n"),
+        );
+      } else {
+        console.error(`[cadre] ${chemin} a ${largeur} px : aucun texte ne sort de sa carte`);
+      }
+      const chev = vu.chevauchent ?? [];
+      if (chev.length > 0) {
+        process.exitCode = 1;
+        console.error(`[chevauchement] ${chemin} a ${largeur} px : ${chev.length} paire(s) de textes se recouvrent\n` + chev.map((x) => "    " + x).join("\n"));
+      } else {
+        console.error(`[chevauchement] ${chemin} a ${largeur} px : aucun texte n en recouvre un autre`);
+      }
+      const hors = (vu.panneaux ?? []).filter((x) => x.hors_fenetre);
+      if (vu.debordement || hors.length > 0) {
+        process.exitCode = 1;
+        console.error(
+          `[largeur] ${chemin} a ${largeur} px : ` +
+            (vu.debordement ? `le document DEBORDE (${vu.largeur_doc} pour ${vu.largeur_vue})` : "") +
+            (hors.length ? ` panneau(x) hors de la fenetre : ${hors.map((x) => x.quoi).join(", ")}` : "") +
+            ((vu.depassent ?? []).length
+              ? "\n" + vu.depassent.map((x) => "    " + x).join("\n")
+              : (vu.depassent_brut ?? []).length
+                ? "\n    (aucun coupable hors conteneur ; les plus a droite, sans filtre :)\n" + vu.depassent_brut.map((x) => "    " + x).join("\n")
+                : ""),
+        );
+      } else {
+        console.error(`[largeur] ${chemin} a ${largeur} px : rien ne deborde, aucun panneau hors de la fenetre`);
+      }
+    }
     if (process.env["IMAGES_EN_ATTENTE"] === "1") {
       /* Toute image rendue, avec sa boîte : une image qui attend et dont la
          boîte est NULLE dans un sens n'a pas de place réservée — falsifié, la
@@ -1376,33 +1580,46 @@ for (const modele of routes) {
       await envoyer("Page.reload", {});
       await new Promise((r) => setTimeout(r, 3000));
       await cliquerProduit(envoyer, chemin, largeur);
-      const { result: reduit } = await envoyer("Runtime.evaluate", {
-        expression: `[matchMedia('(prefers-reduced-motion: reduce)').matches, ${VISIBLES}]`,
-        returnByValue: true,
-      });
-      const [emule, vuReduit] = reduit.value;
-      // Une émulation qui n'a pas pris ferait mesurer deux fois l'état normal,
-      // et conclure « rien ne disparaît » : c'est vrai, et ça ne prouve rien.
-      if (emule !== true) throw new Error(`ARRET : ${chemin} a ${largeur} px — prefers-reduced-motion n a pas ete emule`);
       /* Les chiffres en `#`, comme la soustraction : « il y a 20 s » devient
          « il y a 23 s » entre les deux chargements, et le premier passage l'a
          compté comme un texte disparu — un faux positif qui apprend à ignorer
          le vrai. */
       const forme = (t) => t.replace(/\d+/g, "#");
-      /* ⚠️ UN TEXTE REMPLACÉ À LA MÊME PLACE N'A PAS DISPARU. La clé de secours
-         de l'activation en deux étapes est tirée au hasard, et le rechargement
-         en tire une autre : lettres comprises, aucune normalisation ne les
-         rapproche. Un texte ne compte comme disparu que si AUCUN texte visible
-         n'occupe plus sa place. */
-      const restants = new Set(vuReduit.visibles.map((v) => forme(v.texte)));
-      const placesOccupees = new Set(vuReduit.visibles.map((v) => v.place));
-      const disparus = [
-        ...new Set(
-          normal.value.visibles
-            .filter((v) => !restants.has(forme(v.texte)) && !placesOccupees.has(v.place))
-            .map((v) => forme(v.texte)),
-        ),
-      ];
+      /* ⚠️ UN TEXTE PAS ENCORE ARRIVÉ N'A PAS DISPARU. Rejouer un état au clic
+         relance ses actions serveur : le 19/09/2026, l'activation en deux étapes
+         est sortie avec « 2 textes disparus » à 768 px pendant un balayage qui
+         chargeait le serveur, puis en code 0 à trois passages suivants. On relit
+         donc jusqu'à dix secondes, et seul ce qui manque ENCORE est un défaut :
+         un texte laissé à opacité nulle par une animation ne revient jamais. */
+      let emule = false;
+      let vuReduit = { visibles: [], infinies: [] };
+      let disparus = [];
+      for (const fin = Date.now() + 10_000; ; ) {
+        const { result: reduit } = await envoyer("Runtime.evaluate", {
+          expression: `[matchMedia('(prefers-reduced-motion: reduce)').matches, ${VISIBLES}]`,
+          returnByValue: true,
+        });
+        [emule, vuReduit] = reduit.value;
+        // Une émulation qui n'a pas pris ferait mesurer deux fois l'état normal,
+        // et conclure « rien ne disparaît » : c'est vrai, et ça ne prouve rien.
+        if (emule !== true) throw new Error(`ARRET : ${chemin} a ${largeur} px — prefers-reduced-motion n a pas ete emule`);
+        /* ⚠️ UN TEXTE REMPLACÉ À LA MÊME PLACE N'A PAS DISPARU. La clé de secours
+           de l'activation en deux étapes est tirée au hasard, et le rechargement
+           en tire une autre : lettres comprises, aucune normalisation ne les
+           rapproche. Un texte ne compte comme disparu que si AUCUN texte visible
+           n'occupe plus sa place. */
+        const restants = new Set(vuReduit.visibles.map((v) => forme(v.texte)));
+        const placesOccupees = new Set(vuReduit.visibles.map((v) => v.place));
+        disparus = [
+          ...new Set(
+            normal.value.visibles
+              .filter((v) => !restants.has(forme(v.texte)) && !placesOccupees.has(v.place))
+              .map((v) => forme(v.texte)),
+          ),
+        ];
+        if (disparus.length === 0 || Date.now() > fin) break;
+        await new Promise((r) => setTimeout(r, 500));
+      }
       const ligne = rapport[rapport.length - 1];
       ligne.mouvement_reduit = { disparus, animations_infinies: vuReduit.infinies };
       if (disparus.length > 0 || vuReduit.infinies.length > 0) {
@@ -1411,6 +1628,7 @@ for (const modele of routes) {
           `[mouvement-reduit] ${chemin} a ${largeur} px : ${disparus.length} texte(s) disparu(s), ` +
             `${vuReduit.infinies.length} animation(s) infinie(s) encore active(s)`,
         );
+        for (const t of disparus) console.error(`    disparu : « ${t.slice(0, 60)} »`);
       } else {
         console.error(`[mouvement-reduit] ${chemin} a ${largeur} px : rien ne disparait, aucune animation infinie`);
       }
