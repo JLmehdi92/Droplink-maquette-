@@ -905,3 +905,22 @@ deux arrondis additionnés (3 px au téléphone, bandeau identique au pixel).
 - ⚠️ la planche admin « Commandes » au téléphone est elle-même CASSÉE (plage de dates à un mot
   par ligne, tableau écrasé) : le produit garde ses cartes, plus lisibles ;
 - ⚠️ les pages légales du kit sont un gabarit d'un autre produit — décision du 18/09, déclarée.
+
+### 20/09/2026 — Le motif du blocage, lu par le vendeur (migration 169)
+
+Décision de Wassim : « oui on montre la raison au vendeur ». **Planches d'abord** :
+`BlockedNotice` porte une ligne « Motif : … » sous sa phrase (texte 13,5 / encre forte, libellé
+en gras), dans ses quatre états et au téléphone ; `BlockLinkDialog` dit, au BLOCAGE seulement,
+« Le vendeur le lit dans sa commande, et il s'écrit au journal » (le déblocage garde l'aide du
+journal) ; dictionnaires `dict-app.js` (+2) et `dict-admin.js` (+2, dont l'aide du déblocage,
+qui n'était pas traduite).
+
+**Quatorze relevés en code 0** (les sept écrans-états du blocage, bureau et 390). La ligne du
+motif suit le décalage DÉJÀ déclaré du bandeau (32 px, le sélecteur de statut de l'en-tête de
+la planche) ; l'aide admin garde les 5 px de la fenêtre de mesure ; la tuile « Couverture » au
+téléphone devient VOLATILE (un arrondi de 3 px qui ne tombe pas à chaque passage). Captures
+côte à côte : le bandeau est identique.
+
+🔴 **Le serveur de mesure parlait à 17TRACK avec la clé de PRODUCTION** : 9 des 200 prises à vie
+perdues (numéros « LX…123FR » du parcours). Coupé au transport (`scripts/refus-tiers.mjs`,
+préchargé) et par des clés sentinelles — une clé VIDE ne suffit pas, Next recharge `.env.local`.

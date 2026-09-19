@@ -414,11 +414,12 @@ produit avant d'être une route.
 > n'a jamais eu de compte chez nous, le second transfère une capacité : la liste
 > rend référence courte, boutique, statut, transporteur et date, écrit UNE ligne
 > d'audit par page (migrations 159-160), et « Voir » mène à la fiche du compte.
-> ⚠️ **UNE SEULE EXCEPTION, ET C'EST LE VENDEUR QUI L'ENVOIE** (migration 168, décision de
+> ⚠️ **UNE SEULE EXCEPTION, ET C'EST LE VENDEUR QUI L'ENVOIE** (migrations 168 et 169, décision de
 > Wassim du 19/09/2026) : quand l'administration bloque un lien, le vendeur le voit dans ses
 > commandes et peut le CONTESTER — explication obligatoire, image facultative. L'administration
 > lit cette contestation, et chaque lecture est écrite au journal ; elle répond en débloquant
-> ou en refusant, et le vendeur lit la réponse. Le contenu de la commande reste invisible.
+> ou en refusant, et le vendeur lit la réponse — ainsi que le MOTIF du blocage (169), écrit pour
+> lui : l’aide du dialogue de blocage le dit à l’administrateur. Le contenu de la commande reste invisible.
 > **STATISTIQUES NE REND QUE DES NOMBRES** (migration 161), donc n'écrit rien au
 > journal ; la période précédente y est CALCULÉE sur les tables horodatées, et
 > l'anneau des abonnements du kit y devient celui des types de compte.
@@ -581,7 +582,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 168, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 169, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
