@@ -924,3 +924,35 @@ côte à côte : le bandeau est identique.
 🔴 **Le serveur de mesure parlait à 17TRACK avec la clé de PRODUCTION** : 9 des 200 prises à vie
 perdues (numéros « LX…123FR » du parcours). Coupé au transport (`scripts/refus-tiers.mjs`,
 préchargé) et par des clés sentinelles — une clé VIDE ne suffit pas, Next recharge `.env.local`.
+
+### 20/09/2026 — Les comptes en doublon (migrations 170 et 171)
+
+Décision de Wassim : « j'aime bien l'idée des doublons détectés dans l'admin […] faut que la
+feature soit vraiment parfaite, aucune erreur » — et « garde que ça » (ni plafond global, ni
+suivi réservé au Pro : le suivi automatique reste pour tous, gratuits compris).
+
+**Planches d'abord** : `ui_kits/admin/AdminDuplicates.jsx` (`#comptes-doublons` — une carte par
+identifiant partagé, colonne « En bref » et « Comment un doublon est reconnu »), panneau
+`DuplicatesPanel` dans la colonne de droite d'Utilisateurs (un NOMBRE, jamais un nom), 26
+entrées `dict-admin.js`. Deux défauts de ma propre planche au téléphone corrigés AVANT le
+portage : une adresse coupée (« lea.modeaddict@icl… » — l'adresse est justement ce qui
+distingue deux comptes) et un bouton de 34 px (plein largeur, 44 px).
+
+**Quatre relevés en code 0** : `admin-doublons` (bureau, 78 écarts de POSITION seule déclarés —
+la barre supérieure du kit, -2/-79 px, prouvé sur les ENSEMBLES de positions) et au téléphone ;
+`admin-comptes` au bureau et au téléphone, avec le panneau. Trois vrais écarts trouvés et
+corrigés à la mesure : l'action de l'en-tête centrée au lieu d'être alignée en haut
+(`EnTeteAdmin actionEnHaut`), 4 px sous l'en-tête, les remplissages téléphone des cartes et de
+la section des règles. Sonde : `DOUBLONS=1` (les sept comptes de la planche, adresses AFFICHÉES
+seulement, connexion `ecran-…`) et `DOUBLONS=nombres` (comptes neutres pour la liste — sinon
+les adresses de la planche s'appariaient aux utilisateurs de démonstration). Trois langues à
+390 px et en/zh à 1545 : rien ne déborde, CSP servie sans violation.
+
+⚠️ **Un écart CACHÉ PAR LES DONNÉES, trouvé en passant** : l'adresse d'une ligne de la liste des
+comptes est à 12 px chez le produit, 12,5 dans la planche — invisible tant que les deux jeux
+n'avaient aucune adresse commune. Hors du périmètre des doublons : à reprendre.
+
+**Revues ECC** (base, sécurité, code) : 0 critique en sécurité ; un faux positif réel
+(`stories/highlights/…` → `instagram:highlights`, corrigé par la 171 avec `www.m.`, le premier
+`?` et `parallel safe`) ; les étiquettes de cellule passent de `lg:hidden` à `lg:sr-only` pour
+le lecteur d'écran au bureau.

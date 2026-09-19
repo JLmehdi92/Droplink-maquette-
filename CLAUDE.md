@@ -423,6 +423,12 @@ produit avant d'être une route.
 > **STATISTIQUES NE REND QUE DES NOMBRES** (migration 161), donc n'écrit rien au
 > journal ; la période précédente y est CALCULÉE sur les tables horodatées, et
 > l'anneau des abonnements du kit y devient celui des types de compte.
+> **LES COMPTES EN DOUBLON** (migrations 170-171, décision de Wassim du 20/09/2026) : des
+> comptes DISTINCTS qui affichent le même Instagram, TikTok, WhatsApp ou site. L'écran dit un
+> fait, jamais « même personne », et n'agit sur rien. UNE fonction décide de l'égalité
+> (`identifiant_public`) : rien n'est deviné — aucun indicatif ajouté, un lien qui ne désigne pas
+> un compte ne rapproche personne. La liste nominative écrit `comptes.doublons` au journal ; le
+> panneau de la liste des comptes ne rend que des nombres.
 
 > ⚠️ **LE DESIGN SYSTEM CONTIENT DES ÉCRANS DE FACTURATION, ET LA CONTRAINTE N°1
 > LES INTERDIT.** Admin → Paiements (390 paiements, 12 358 €), Admin →
@@ -582,7 +588,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 169, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 171, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
