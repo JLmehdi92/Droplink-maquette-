@@ -49,6 +49,31 @@ async function enregistrerColis(u: UtilisateurDeTest, numero: string): Promise<s
   return id;
 }
 
+/**
+ * Un colis que la cadence peut prendre : porté par une commande, et dont le numéro tient
+ * depuis plus de trente secondes. Depuis la migration 172, la cadence ignore un colis jamais
+ * pris en charge qui ne remplit pas ces deux conditions — c'est un numéro en cours de saisie,
+ * ou un colis que plus rien ne porte, et le prendre en charge le PAIERAIT.
+ */
+async function enregistrerColisStable(u: UtilisateurDeTest, numero: string): Promise<string> {
+  const id = await enregistrerColis(u, numero);
+  const commande = await interroger<{ id: string }>(
+    catalogue,
+    "insert into public.orders (shop_id, customer_label) values ($1, 'client de la cadence') returning id",
+    [u.shopId],
+  );
+  await interroger(catalogue, "insert into public.order_parcels (order_id, parcel_id) values ($1, $2)", [
+    commande[0]?.id,
+    id,
+  ]);
+  await interroger(
+    catalogue,
+    "update public.tracked_parcels set created_at = now() - interval '5 minutes' where id = $1",
+    [id],
+  );
+  return id;
+}
+
 /** Ce que le compteur de coût du mois affiche pour un vendeur. */
 async function appelsFactures(u: UtilisateurDeTest): Promise<number> {
   const l = await interroger<{ n: string | number | null }>(
@@ -329,7 +354,7 @@ describe("Deux passages concurrents ne se servent pas deux fois", () => {
      * phrase juste, et c'est ce qu'on est en train de planifier.
      */
     const numero = numeroNeuf();
-    const id = await enregistrerColis(alice, numero);
+    const id = await enregistrerColisStable(alice, numero);
 
     const premier = await interroger<{ id: string }>(
       catalogue,
@@ -516,7 +541,7 @@ describe("La marque d'immobilité", () => {
 describe("Ce que la réservation rend doit rester décidable", () => {
   test("un colis jamais interrogé ressort avec une date NULLE, et se décide en « interroger »", async () => {
     const numero = numeroNeuf();
-    const id = await enregistrerColis(alice, numero);
+    const id = await enregistrerColisStable(alice, numero);
 
     const [ligne] = await interroger<{
       id: string;

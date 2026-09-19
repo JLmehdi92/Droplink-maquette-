@@ -29,6 +29,9 @@ import { prendreEnCharge } from "./prise-en-charge";
 
 type ClientAttache = Awaited<ReturnType<typeof creerClientServeur>>;
 
+/** Une seconde de plus que les trente de `colis_a_inscrire` (migration 172). */
+const ATTENTE_STABILITE_MS = 31_000;
+
 export type ResultatAttache =
   | {
       readonly statut: "attache";
@@ -102,6 +105,11 @@ export async function attacherColis(
 
     try {
       after(async () => {
+        // LE NUMÉRO DOIT TENIR TRENTE SECONDES AVANT DE SE PAYER (migration 172). Le champ
+        // s'enregistre pendant la frappe ; si le vendeur continue d'écrire, ce colis est
+        // détaché puis supprimé, et `colis_a_inscrire` répondra non. Un serveur qui redémarre
+        // pendant l'attente ne perd rien : la cadence reprend tout colis stable jamais inscrit.
+        await new Promise((fin) => setTimeout(fin, ATTENTE_STABILITE_MS));
         await prendreEnCharge(parcelId, numero, codeTransporteur);
       });
     } catch (erreur) {

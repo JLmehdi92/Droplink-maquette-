@@ -3,7 +3,12 @@ import { join } from "node:path";
 import type { Client } from "pg";
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "vitest";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
-import { clientService } from "../aide/utilisateurs";
+import {
+  clientService,
+  creerUtilisateur,
+  supprimerUtilisateur,
+  type UtilisateurDeTest,
+} from "../aide/utilisateurs";
 import { PARAMETRES } from "@/lib/audit/parametres";
 import { PURGE_JOURS } from "@/lib/audit/reglages-constates";
 import { prendreEnCharge } from "@/lib/tracking/prise-en-charge";
@@ -86,6 +91,40 @@ describe("Les deux lectures rendent ce que la base porte", () => {
 describe("L'interrupteur du suivi coupe la dépense, avant l'appel", () => {
   const COLIS = "00000000-0000-4000-8000-0000000000ff";
 
+  /*
+   * UN COLIS RÉEL POUR LE CONTRE-TEST (migration 172). Depuis que la prise en charge demande
+   * à la base si le numéro est STABLE — porté par une commande, créé depuis 30 secondes —
+   * un identifiant inventé est écarté AVANT l'adaptateur, comme il se doit : on ne paie
+   * jamais un colis que rien ne porte. Pour prouver que l'appel VA jusqu'à l'adaptateur
+   * quand l'interrupteur est ouvert, il faut donc un colis qui mérite d'y aller.
+   */
+  let vendeur: UtilisateurDeTest;
+  let colisStable = "";
+
+  beforeAll(async () => {
+    vendeur = await creerUtilisateur("interrupteur-suivi");
+    const commande = await interroger<{ id: string }>(
+      bd,
+      "insert into public.orders (shop_id, customer_label) values ($1, 'client interrupteur') returning id",
+      [vendeur.shopId],
+    );
+    const colis = await interroger<{ id: string }>(
+      bd,
+      `insert into public.tracked_parcels (shop_id, tracking_number, created_at)
+       values ($1, 'TESTINTERRUPTEUR02', now() - interval '5 minutes') returning id`,
+      [vendeur.shopId],
+    );
+    colisStable = colis[0]?.id ?? "";
+    await interroger(bd, "insert into public.order_parcels (order_id, parcel_id) values ($1, $2)", [
+      commande[0]?.id,
+      colisStable,
+    ]);
+  }, 120_000);
+
+  afterAll(async () => {
+    await supprimerUtilisateur(vendeur);
+  });
+
   test("coupé : le refus porte le motif de l'interrupteur", async () => {
     await poser("suivi_actif", 0);
     const r = await prendreEnCharge(COLIS, "TESTINTERRUPTEUR01", null);
@@ -130,7 +169,7 @@ describe("L'interrupteur du suivi coupe la dépense, avant l'appel", () => {
       MOTIF_CLE_ABSENTE,
     ];
     await poser("suivi_actif", 1);
-    const r = await prendreEnCharge(COLIS, "TESTINTERRUPTEUR02", null);
+    const r = await prendreEnCharge(colisStable, "TESTINTERRUPTEUR02", null);
     expect(r.statut).toBe("indisponible");
     expect(
       MOTIFS_DE_L_ADAPTATEUR,

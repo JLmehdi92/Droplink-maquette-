@@ -27,6 +27,8 @@ import { ingererEtat } from "./ingestion";
 
 export type ResultatPriseEnCharge =
   | { readonly statut: "pris-en-charge"; readonly avecEtat: boolean }
+  /** Pas encore payable : numéro en cours de saisie, détaché, déjà pris, abandonné (172). */
+  | { readonly statut: "ecarte"; readonly motif: string }
   | { readonly statut: "refuse"; readonly motif: string }
   | { readonly statut: "indisponible"; readonly motif: string };
 
@@ -64,6 +66,30 @@ export async function prendreEnCharge(
     );
   } else if (actif === false) {
     return { statut: "indisponible", motif: "interrupteur-coupe" };
+  }
+
+  /*
+   * LE NUMÉRO EST-IL STABLE ? (migration 172, audit du 20/09/2026). Le champ de suivi
+   * s'enregistre pendant la frappe : sans cette question, « LX12 » tapé puis complété
+   * partait chez le fournisseur et se payait. C'est la BASE qui répond — attaché à une
+   * commande, jamais pris en charge, non abandonné, créé depuis 30 secondes — et elle
+   * répond ici, sur les DEUX chemins qui paient : la sauvegarde et la cadence.
+   *
+   * ⚠️ UNE RÉPONSE ILLISIBLE NE PAIE PAS. À l'inverse de l'interrupteur ci-dessus, on ne
+   * laisse pas courir : ne rien envoyer ne perd rien (`registered_at` reste nulle, la
+   * cadence reposera la question), payer un numéro faux ne se rattrape pas.
+   */
+  const { data: stable, error: erreurStabilite } = await systeme.rpc("colis_a_inscrire", {
+    p_parcel_id: parcelId,
+  });
+  if (erreurStabilite !== null) {
+    console.error(
+      "[suivi] stabilité du numéro illisible, prise en charge reportée — " + erreurStabilite.message,
+    );
+    return { statut: "indisponible", motif: "stabilite-illisible" };
+  }
+  if (stable !== true) {
+    return { statut: "ecarte", motif: "numero-instable" };
   }
 
   const inscription = await dixSeptTrack

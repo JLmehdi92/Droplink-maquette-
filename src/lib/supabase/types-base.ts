@@ -958,6 +958,7 @@ export type Database = {
         Returns: boolean
       }
       cles_a_purger: { Args: { p_limite: number }; Returns: string[] }
+      colis_a_inscrire: { Args: { p_parcel_id: string }; Returns: boolean }
       colis_a_interroger: {
         Args: { p_limite: number }
         Returns: {

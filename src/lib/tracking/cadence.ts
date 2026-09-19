@@ -190,6 +190,9 @@ export async function passerLaCadence(maintenant: Date, limite = LOT): Promise<B
     // précisément le signal que l'appel initial n'a pas abouti.
     if (colis.registered_at === null) {
       const reprise = await prendreEnCharge(colis.id, colis.tracking_number, colis.carrier_code);
+      // ÉCARTÉ n'est ni une reprise ni une panne : la sélection et la prise en charge lisent
+      // la même règle (172), et le colis a changé entre les deux — il reviendra stable.
+      if (reprise.statut === "ecarte") continue;
       if (reprise.statut === "indisponible") bilan.indisponibles += 1;
       else bilan.repris += 1;
       continue;

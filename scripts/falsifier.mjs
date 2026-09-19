@@ -705,7 +705,7 @@ const SQL = {
         return query select v_parcel, true, true;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "165_la_relance_du_transporteur_est_bornee.sql",
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
       depuis: "create function public.attacher_colis",
       jusqua: "comment on function",
     },
@@ -749,7 +749,7 @@ const SQL = {
         return query select v_parcel, v_cree, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "165_la_relance_du_transporteur_est_bornee.sql",
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
       depuis: "create function public.attacher_colis",
       jusqua: "comment on function",
     },
@@ -799,12 +799,63 @@ const SQL = {
         return query select v_parcel, v_cree, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "165_la_relance_du_transporteur_est_bornee.sql",
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
       depuis: "create function public.attacher_colis",
       jusqua: "comment on function",
     },
   },
 
+
+  /*
+   * UN NUMÉRO SE PAIE QUAND IL EST STABLE (172, audit du 20/09/2026). Trois cibles : le ménage
+   * des saisies abandonnées, la stabilité au moment de payer, la cadence qui ne prend pas un
+   * orphelin.
+   */
+  /** Le colis d'une saisie abandonnée reste en base : il compte au plafond et s'affiche aux envois. */
+  "numero-partiel-conserve": {
+    casserDepuisMigration: {
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
+      depuis: "create function public.attacher_colis(",
+      jusqua: "comment on function",
+      remplacer: "    delete from public.tracked_parcels tp\n     where tp.id = any(v_detaches)",
+      par: "    perform 1 from public.tracked_parcels tp\n     where tp.id = any(v_detaches)",
+    },
+    reparerDepuisMigration: {
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
+      depuis: "create function public.attacher_colis(",
+      jusqua: "comment on function",
+    },
+  },
+
+  /** La stabilité ne compte plus : un numéro en cours de saisie se paie. */
+  "numero-instable-paye": {
+    casserDepuisMigration: {
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
+      depuis: "create function public.colis_a_inscrire(",
+      jusqua: "-- ── 3.",
+      remplacer: "       and tp.created_at <= now() - interval '30 seconds'\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
+      depuis: "create function public.colis_a_inscrire(",
+      jusqua: "-- ── 3.",
+    },
+  },
+
+  /** La cadence reprend un colis que plus aucune commande ne porte, et le paie. */
+  "cadence-prend-l-orphelin": {
+    casserDepuisMigration: {
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
+      depuis: "create function public.colis_a_interroger(",
+      remplacer: "and exists (select 1 from public.order_parcels op where op.parcel_id = c.id)",
+      par: "and true",
+    },
+    reparerDepuisMigration: {
+      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
+      depuis: "create function public.colis_a_interroger(",
+    },
+  },
 
   /**
    * Le suivi public rendu SANS le filtre de suspension.

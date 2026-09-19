@@ -224,6 +224,11 @@ describe("Ce que l'attache refuse", () => {
     // `security definer` a mis la RLS de côté : si le `shop_id` était pris
     // ailleurs que dans `mon_shop_id()`, le colis naîtrait chez quelqu'un
     // d'autre — et son propriétaire ne le verrait jamais.
+    //
+    // ON LE RECRÉE D'ABORD : le contrôle précédent a effacé le numéro, et depuis la
+    // migration 172 un colis jamais pris en charge que plus rien ne porte est supprimé —
+    // c'était une saisie abandonnée, il n'a plus de boutique à vérifier.
+    await attacher(alice, commandeA, AUTRE);
     const lignes = await interroger<{ shop_id: string }>(
       catalogue,
       "select shop_id from public.tracked_parcels where tracking_number = $1",
