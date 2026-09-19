@@ -119,6 +119,8 @@ if (eCree) throw new Error(eCree.message);
  * chacun déplaçait les chiffres des écrans suivants. Personne ne les voyait,
  * parce qu'aucun écran ne listait ce que la sonde laissait.
  */
+/* Les comptes que `DOUBLONS=1` ajoute : declares AVANT le try, pour que le finally les voie. */
+const comptesDoublons = [];
 try {
 
 const { data: profil } = await service
@@ -223,6 +225,71 @@ if (lienBloque !== undefined && lienBloque !== "" && idCommande !== "") {
           }
         : {}),
     });
+  }
+}
+
+/*
+ * `DOUBLONS=1` : LES SEPT COMPTES DE LA PLANCHE `#comptes-doublons` (170). Trois identifiants
+ * partages — un Instagram (trois comptes, dont un suspendu), un WhatsApp, un site — ecrits sous
+ * des formes DIFFERENTES d un compte a l autre (majuscules, www, parametre de partage, deux
+ * services WhatsApp) : la mesure exerce ainsi la normalisation, pas seulement l affichage.
+ *
+ * ⚠️ AUCUNE ADRESSE REELLE N EST CREEE. Chaque compte se connecte sous `ecran-…@droplink-tests.invalid`
+ * (donc purge par la regle des comptes abandonnes) ; seule l adresse AFFICHEE, `profiles.email`,
+ * prend le texte de la planche. Rien n est jamais envoye a ces adresses.
+ *
+ * La boutique de la sonde perd ses reseaux : son WhatsApp de demonstration est celui du groupe,
+ * et la rejoindre ferait un groupe de trois la ou la planche en dessine deux.
+ *
+ * `DOUBLONS=nombres` : les MEMES trois groupes, mais des comptes NEUTRES — adresse de sonde,
+ * boutique du jeu, actifs, inscrits du jour. C est ce que mesure la liste des comptes, dont le
+ * panneau ne rend que des NOMBRES (7 comptes, 3 identifiants) : les adresses de la planche des
+ * doublons y apparaitraient comme des lignes et s apparieraient aux utilisateurs de demonstration
+ * de la planche « Utilisateurs », qui en porte trois.
+ */
+const doublons = process.env["DOUBLONS"];
+if (doublons === "1" || doublons === "nombres") {
+  await service
+    .from("shops")
+    .update({ instagram_url: null, tiktok_url: null, whatsapp_url: null, site_url: null })
+    .eq("id", shop.id);
+  const PLANCHE = [
+    ["yanis.b@gmail.com", "StreetWear FR", "suspended", "2025-08-02T10:00:00Z", 84, { instagram_url: "https://instagram.com/maison.nova" }],
+    ["yanis.b2@gmail.com", "Streetwear France", "active", "2025-09-03T10:00:00Z", 19, { instagram_url: "https://www.instagram.com/Maison.Nova/" }],
+    ["ybk.store@outlook.fr", "SW France", "active", "2025-09-14T10:00:00Z", 6, { instagram_url: "https://instagram.com/maison.nova?igsh=cGxhbmNoZQ" }],
+    ["ines.k@hotmail.fr", "LuxShop", "active", "2025-08-28T10:00:00Z", 56, { whatsapp_url: "https://wa.me/33612345678" }],
+    ["ines.shop@gmail.com", null, "active", "2025-09-11T10:00:00Z", 2, { whatsapp_url: "https://api.whatsapp.com/send?phone=33612345678" }],
+    ["lea.m@gmail.com", "ModeAddict", "active", "2025-08-22T10:00:00Z", 47, { site_url: "https://laplanque-shop.com" }],
+    ["lea.modeaddict@icloud.com", "ModeAddict 2", "active", "2025-09-09T10:00:00Z", 11, { site_url: "https://www.laplanque-shop.com/" }],
+  ];
+  for (const [i, [affiche, nomBoutique, statut, inscrit, commandesReelles, reseau]] of PLANCHE.entries()) {
+    const { data: u, error: eU } = await service.auth.admin.createUser({
+      email: `ecran-${marque}d${i}@droplink-tests.invalid`,
+      password: MOT_DE_PASSE,
+      email_confirm: true,
+    });
+    if (eU) throw new Error(`compte de doublon ${i} : ${eU.message}`);
+    comptesDoublons.push(u.user.id);
+    const { data: p } = await service.from("profiles").select("id").eq("user_id", u.user.id).single();
+    const neutre = doublons === "nombres";
+    const { error: eP } = await service
+      .from("profiles")
+      .update(
+        neutre
+          ? { account_type: "reseller" }
+          : { email: affiche, status: statut, created_at: inscrit, account_type: "reseller" },
+      )
+      .eq("id", p.id);
+    if (eP) throw new Error(`profil de doublon ${i} : ${eP.message}`);
+    const { error: eS } = await service
+      .from("shops")
+      .update(
+        neutre
+          ? { name: "Atelier de verification", ...reseau }
+          : { name: nomBoutique, commandes_reelles: commandesReelles, ...reseau },
+      )
+      .eq("owner_id", p.id);
+    if (eS) throw new Error(`boutique de doublon ${i} : ${eS.message}`);
   }
 }
 
@@ -1737,6 +1804,7 @@ console.log(JSON.stringify(rapport, null, 1));
   if (process.env["GARDER_JEU"] === "1") {
     console.error(`[jeu] GARDE : ${courriel} / ${MOT_DE_PASSE} — purge par la prochaine sonde (30 min).`);
   } else {
+    for (const id of comptesDoublons) await service.auth.admin.deleteUser(id);
     await service.auth.admin.deleteUser(cree.user.id);
     console.error("[purge] compte supprime.");
   }

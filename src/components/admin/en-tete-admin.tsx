@@ -33,18 +33,26 @@ import type { ReactNode } from "react";
  * `children` est l'espace de l'action de l'écran — un champ de recherche. Au
  * bureau la planche le pose À DROITE du titre, au téléphone SOUS lui, dans le
  * noir : c'est là qu'on tape avant de lire quoi que ce soit.
+ *
+ * `actionEnHaut` : quand l'action est un BOUTON (« Retour aux comptes » des doublons), la
+ * planche l'aligne sur le HAUT du titre au bureau, 4 px sous son bord (`AdminHeader` du kit :
+ * `alignItems: flex-start`, `paddingTop: 4`), et le pose 24 px sous le sous-titre au téléphone
+ * (écart de 20 et ces mêmes 4). Centré, il descendait de 9 px. Un champ de recherche garde le
+ * centrage mesuré sur ses propres écrans.
  */
 export function EnTeteAdmin({
   titre,
   sousTitre,
   sousTitreMobile,
   sousTitreAuBureauSeulement = false,
+  actionEnHaut = false,
   children,
 }: {
   readonly titre: string;
   readonly sousTitre: string;
   readonly sousTitreMobile?: string;
   readonly sousTitreAuBureauSeulement?: boolean;
+  readonly actionEnHaut?: boolean;
   readonly children?: ReactNode;
 }) {
   return (
@@ -71,7 +79,9 @@ export function EnTeteAdmin({
       </div>
 
       {children === undefined ? null : (
-        <div className="mt-3.5 xl:mt-0 xl:shrink-0">{children}</div>
+        <div className={actionEnHaut ? "mt-6 xl:mt-0 xl:shrink-0 xl:self-start xl:pt-1" : "mt-3.5 xl:mt-0 xl:shrink-0"}>
+          {children}
+        </div>
       )}
     </div>
   );

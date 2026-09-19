@@ -52,7 +52,7 @@ const MOTIFS = { ...MOTIFS_RESEAUX, site: MOTIF_SITE } as const;
  * la couleur du vendeur qui dessine la marque d'un tiers.
  */
 
-const RESEAUX = [
+export const RESEAUX = [
   {
     clef: "instagram",
     libelle: "Instagram",

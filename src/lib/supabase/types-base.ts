@@ -1003,6 +1003,13 @@ export type Database = {
           total: number
         }[]
       }
+      compter_doublons_admin: {
+        Args: never
+        Returns: {
+          comptes: number
+          identifiants: number
+        }[]
+      }
       compter_envois: {
         Args: { p_silence_jours: number }
         Returns: {
@@ -1131,6 +1138,14 @@ export type Database = {
         Returns: string
       }
       generer_jeton_public: { Args: never; Returns: string }
+      identifiant_public: { Args: { p_lien: string }; Returns: string }
+      identifiants_des_comptes: {
+        Args: never
+        Returns: {
+          identifiant: string
+          profil_id: string
+        }[]
+      }
       imputer_appel_suivi: { Args: { p_numero: string }; Returns: undefined }
       journaliser: {
         Args: {
@@ -1358,6 +1373,19 @@ export type Database = {
           id: string
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["account_status"]
+        }[]
+      }
+      lister_doublons_admin: {
+        Args: { p_ip_hash: string }
+        Returns: {
+          boutique_nom: string
+          commandes: number
+          email: string
+          genre: string
+          inscrit_le: string
+          profil_id: string
+          statut: Database["public"]["Enums"]["account_status"]
+          valeur: string
         }[]
       }
       lister_mes_facteurs: {

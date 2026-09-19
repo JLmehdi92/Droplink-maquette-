@@ -1129,7 +1129,8 @@
         "comptes_liste": "Consultation de la liste des comptes",
         "panneau_alertes": "Consultation des alertes du panneau",
         "parametre_creation": "Création d’un paramètre système",
-        "parametre_modification": "Modification d’un paramètre système"
+        "parametre_modification": "Modification d’un paramètre système",
+        "comptes_doublons": "Consultation des comptes en doublon"
       },
       "vide": "Aucune entrée pour l'instant.",
       "surTotalAuDela": "{affichees} sur plus de {total, number} entrées",
@@ -1726,6 +1727,44 @@
         "deja": "Cette contestation a déjà reçu une réponse.",
         "ecriture": "La réponse n’a pas pu être enregistrée. Rien n’a changé."
       }
+    },
+    "doublons": {
+      "titre": "Comptes en doublon",
+      "sousTitre": "Des comptes distincts qui affichent le même Instagram, TikTok, WhatsApp ou site web.",
+      "retour": "Retour aux comptes",
+      "trace": "L'ouverture de cette liste a été écrite au journal d'audit, avec votre identité.",
+      "genres": {
+        "instagram": "Instagram",
+        "tiktok": "TikTok",
+        "whatsapp": "WhatsApp",
+        "site": "Site web"
+      },
+      "nombreComptes": "{n, plural, one {# compte} other {# comptes}}",
+      "colCompte": "Compte",
+      "colStatut": "Statut",
+      "colInscription": "Inscription",
+      "colCommandes": "Commandes",
+      "voir": "Voir la fiche",
+      "voirLong": "Voir la fiche de {email}",
+      "enBref": "En bref",
+      "identifiants": "Identifiants partagés",
+      "concernes": "Comptes concernés",
+      "suspendus": "Dont suspendus",
+      "reglesTitre": "Comment un doublon est reconnu",
+      "regles": {
+        "reseauxQ": "Instagram et TikTok.",
+        "reseauxR": "Le même nom de compte, quelle que soit l'écriture du lien : majuscules, www, paramètres de partage.",
+        "whatsappQ": "WhatsApp.",
+        "whatsappR": "Le même numéro, chiffre pour chiffre. Aucun indicatif n'est deviné.",
+        "siteQ": "Site web.",
+        "siteR": "Le même domaine et le même chemin. L'accueil d'une plateforme partagée, comme Linktree, ne désigne personne et n'est jamais comparé.",
+        "decisionQ": "Rien n'est automatique.",
+        "decisionR": "Un identifiant partagé n'est pas une preuve : deux associés peuvent en partager un. Aucun compte n'est suspendu par cette liste."
+      },
+      "vide": "Aucun identifiant n'est partagé entre deux comptes.",
+      "plafond": "Les 100 identifiants les plus partagés sont affichés, sur {total, number}.",
+      "panneauVoir": "Voir les doublons",
+      "panneauResume": "{comptes, plural, one {compte} other {comptes}}, sur {identifiants, plural, one {# identifiant partagé} other {# identifiants partagés}}"
     }
   },
   "erreurs": {

@@ -122,6 +122,8 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   ["medias.refus.", "composé depuis le motif de refus d'un média"],
   ["legal.signalement.cat_", "composé depuis la catégorie de signalement"],
   ["marque.erreur.", "composé depuis le champ en échec"],
+  ["admin.doublons.genres.", "composé depuis le genre de l'identifiant partagé (170) : instagram, tiktok, whatsapp, site"],
+  ["admin.doublons.regles.", "composé depuis la règle affichée (reseaux, whatsapp, site, decision) et sa moitié Q/R"],
 ]);
 
 /** Aplatit un catalogue en chemins de clés. */

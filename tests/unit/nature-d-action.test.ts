@@ -108,6 +108,8 @@ const ATTENDU: Record<string, ReturnType<typeof natureDAction>> = {
   "compte.contestation_refusee": "suspension",
   "comptes.liste": "consultation",
   "comptes.detail": "consultation",
+  // Les doublons (170) : une liste nominative LUE, jamais un geste sur les comptes.
+  "comptes.doublons": "consultation",
   "boutiques.liste": "consultation",
   "commandes.liste": "consultation",
   "panneau.alertes": "consultation",

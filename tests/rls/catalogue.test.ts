@@ -684,6 +684,22 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "transaction lecture seule, et l'audit ne pouvait pas s'y écrire.",
     ],
     [
+      "lister_doublons_admin",
+      "Les comptes en doublon (170) : des comptes DISTINCTS qui affichent le même " +
+        "Instagram, TikTok, WhatsApp ou site. `SECURITY DEFINER` parce qu'elle lit " +
+        "les boutiques de tous les vendeurs ; garde `est_admin()` en tête, puis UNE " +
+        "trace `comptes.doublons` AVANT la lecture. `VOLATILE`, pour la même raison " +
+        "que `lister_comptes_admin` : une fonction `stable` s'exécute en lecture " +
+        "seule, et la trace ne pourrait pas s'y écrire.",
+    ],
+    [
+      "compter_doublons_admin",
+      "Deux NOMBRES — identifiants partagés, comptes concernés — pour le panneau " +
+        "de la liste des comptes. `stable` et SANS trace : ils ne désignent " +
+        "personne, même règle que `compter_journal_admin`. Garde interne " +
+        "`est_admin()`, éprouvée par le falsificateur (doublons-comptes-sans-garde).",
+    ],
+    [
       "lire_compte_admin",
       "Détail d'un compte. Trace la consultation AVEC sa cible, et le fait même " +
         "quand le compte n'existe pas : ne consigner que les succès laisserait " +

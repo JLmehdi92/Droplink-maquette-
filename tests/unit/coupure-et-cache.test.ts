@@ -367,6 +367,12 @@ const DECLARES: Readonly<Record<string, Verdict>> = {
       "blocage d'UN lien par l'administration (166, 19/09/2026). Il coupe la page " +
       "publique d'une commande ; l'action ne connait meme pas le jeton a invalider.",
   },
+  "audit/doublons.ts": {
+    change: false,
+    raison:
+      "Les comptes en doublon (170) : la seule ecriture est la ligne de journal de la " +
+      "consultation. Rien n est modifie sur aucun compte, aucune page publique ne change.",
+  },
   "audit/contestation.ts": {
     change: false,
     raison:

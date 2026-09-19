@@ -1129,7 +1129,8 @@
         "comptes_liste": "Viewed the account list",
         "panneau_alertes": "Viewed the dashboard alerts",
         "parametre_creation": "Created a system setting",
-        "parametre_modification": "Changed a system setting"
+        "parametre_modification": "Changed a system setting",
+        "comptes_doublons": "Viewed duplicate accounts"
       },
       "vide": "No entries yet.",
       "surTotalAuDela": "{affichees} of more than {total, number} entries",
@@ -1726,6 +1727,44 @@
         "deja": "This dispute has already been answered.",
         "ecriture": "The reply could not be saved. Nothing has changed."
       }
+    },
+    "doublons": {
+      "titre": "Duplicate accounts",
+      "sousTitre": "Separate accounts that show the same Instagram, TikTok, WhatsApp or website.",
+      "retour": "Back to accounts",
+      "trace": "Opening this list was written to the audit log, with your identity.",
+      "genres": {
+        "instagram": "Instagram",
+        "tiktok": "TikTok",
+        "whatsapp": "WhatsApp",
+        "site": "Website"
+      },
+      "nombreComptes": "{n, plural, one {# account} other {# accounts}}",
+      "colCompte": "Account",
+      "colStatut": "Status",
+      "colInscription": "Signed up",
+      "colCommandes": "Orders",
+      "voir": "View profile",
+      "voirLong": "View the profile of {email}",
+      "enBref": "At a glance",
+      "identifiants": "Shared identifiers",
+      "concernes": "Accounts involved",
+      "suspendus": "Of which suspended",
+      "reglesTitre": "How a duplicate is recognised",
+      "regles": {
+        "reseauxQ": "Instagram and TikTok.",
+        "reseauxR": "The same account name, however the link is written: capital letters, www, sharing parameters.",
+        "whatsappQ": "WhatsApp.",
+        "whatsappR": "The same number, digit for digit. No country code is guessed.",
+        "siteQ": "Website.",
+        "siteR": "The same domain and the same path. The home page of a shared platform, such as Linktree, identifies no one and is never compared.",
+        "decisionQ": "Nothing is automatic.",
+        "decisionR": "A shared identifier is not proof: two partners may share one. No account is suspended by this list."
+      },
+      "vide": "No identifier is shared between two accounts.",
+      "plafond": "The 100 most shared identifiers are shown, out of {total, number}.",
+      "panneauVoir": "View duplicates",
+      "panneauResume": "{comptes, plural, one {account} other {accounts}}, across {identifiants, plural, one {# shared identifier} other {# shared identifiers}}"
     }
   },
   "erreurs": {

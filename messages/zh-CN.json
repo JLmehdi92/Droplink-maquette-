@@ -1129,7 +1129,8 @@
         "comptes_liste": "查看账户列表",
         "panneau_alertes": "查看面板告警",
         "parametre_creation": "创建系统参数",
-        "parametre_modification": "修改系统参数"
+        "parametre_modification": "修改系统参数",
+        "comptes_doublons": "查看重复账户"
       },
       "vide": "目前没有任何记录。",
       "surTotalAuDela": "显示 {affichees} 条，总数超过 {total, number} 条",
@@ -1726,6 +1727,44 @@
         "deja": "此申诉已得到回复。",
         "ecriture": "回复未能保存，未作任何更改。"
       }
+    },
+    "doublons": {
+      "titre": "重复账户",
+      "sousTitre": "显示相同 Instagram、TikTok、WhatsApp 或网站的不同账户。",
+      "retour": "返回账户",
+      "trace": "打开此列表已连同您的身份写入审计日志。",
+      "genres": {
+        "instagram": "Instagram",
+        "tiktok": "TikTok",
+        "whatsapp": "WhatsApp",
+        "site": "网站"
+      },
+      "nombreComptes": "{n} 个账户",
+      "colCompte": "账户",
+      "colStatut": "状态",
+      "colInscription": "注册时间",
+      "colCommandes": "订单",
+      "voir": "查看档案",
+      "voirLong": "查看 {email} 的档案",
+      "enBref": "概览",
+      "identifiants": "共享标识",
+      "concernes": "涉及账户",
+      "suspendus": "其中已停用",
+      "reglesTitre": "如何识别重复账户",
+      "regles": {
+        "reseauxQ": "Instagram 和 TikTok。",
+        "reseauxR": "相同的账户名，无论链接如何书写：大小写、www、分享参数。",
+        "whatsappQ": "WhatsApp。",
+        "whatsappR": "相同的号码，逐位一致。不会猜测国家区号。",
+        "siteQ": "网站。",
+        "siteR": "相同的域名和相同的路径。共享平台（如 Linktree）的首页不指向任何人，因此从不比较。",
+        "decisionQ": "没有任何操作是自动的。",
+        "decisionR": "共享标识并不是证据：两位合伙人可能共用一个。此列表不会停用任何账户。"
+      },
+      "vide": "没有任何标识在两个账户之间共享。",
+      "plafond": "显示共享最多的 100 个标识，共 {total, number} 个。",
+      "panneauVoir": "查看重复账户",
+      "panneauResume": "个账户，涉及 {identifiants} 个共享标识"
     }
   },
   "erreurs": {

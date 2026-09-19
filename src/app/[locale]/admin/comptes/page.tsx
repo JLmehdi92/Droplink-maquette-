@@ -12,7 +12,8 @@ import { lireCompteurs, lireInscriptionsRecentes, lireSeuils } from "@/lib/audit
 import { Anneau } from "@/components/admin/anneau";
 import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
 import { TuileVolume } from "@/components/admin/tuile-volume";
-import { UserCheck, UserPlus, UserX, Users } from "lucide-react";
+import { ArrowRight, UserCheck, UserPlus, UserX, Users } from "lucide-react";
+import { compterDoublons } from "@/lib/audit/doublons";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -111,11 +112,12 @@ export default async function AdminComptes({
 
   const supabase = await creerClientServeur();
   const maintenant = new Date();
-  const [page, seuils, compteurs, nouveaux] = await Promise.all([
+  const [page, seuils, compteurs, nouveaux, doublons] = await Promise.all([
     listerComptes(supabase, parametres, await empreinteAdmin()),
     lireSeuils(supabase),
     lireCompteurs(supabase),
     lireInscriptionsRecentes(supabase, maintenant, JOURS_INSCRIPTIONS),
+    compterDoublons(supabase),
   ]);
 
   const t = await getTranslations("admin");
@@ -493,31 +495,79 @@ export default async function AdminComptes({
         )}
           </section>
 
-          <section className={PANNEAU}>
-            <header className="mb-[18px]">
-              <h2 className={PANNEAU_TITRE}>{t("comptes.repartition")}</h2>
-            </header>
-            <Anneau
-              variante="liste"
-              total={compteurs.comptes}
-              unite={t("comptes.unite")}
-              part={(pourcent) => t("comptes.part", { part: pourcent })}
-              parts={[
-                {
-                  cle: "actifs",
-                  libelle: t("comptes.statuts.active"),
-                  valeur: compteurs.comptesActifs,
-                  trait: "var(--color-ds-succes)",
-                },
-                {
-                  cle: "suspendus",
-                  libelle: t("comptes.statuts.suspended"),
-                  valeur: compteurs.comptesSuspendus,
-                  trait: "var(--color-ds-erreur)",
-                },
-              ]}
-            />
-          </section>
+          {/* LA COLONNE DE DROITE, comme la planche : l'anneau, puis les doublons. */}
+          <div className="flex min-w-0 flex-col gap-2.5 md:gap-[18px]">
+            <section className={PANNEAU}>
+              <header className="mb-[18px]">
+                <h2 className={PANNEAU_TITRE}>{t("comptes.repartition")}</h2>
+              </header>
+              <Anneau
+                variante="liste"
+                total={compteurs.comptes}
+                unite={t("comptes.unite")}
+                part={(pourcent) => t("comptes.part", { part: pourcent })}
+                parts={[
+                  {
+                    cle: "actifs",
+                    libelle: t("comptes.statuts.active"),
+                    valeur: compteurs.comptesActifs,
+                    trait: "var(--color-ds-succes)",
+                  },
+                  {
+                    cle: "suspendus",
+                    libelle: t("comptes.statuts.suspended"),
+                    valeur: compteurs.comptesSuspendus,
+                    trait: "var(--color-ds-erreur)",
+                  },
+                ]}
+              />
+            </section>
+
+            {/* --- LES DOUBLONS (migration 170, décision de Wassim du 20/09/2026) ---
+
+                UN NOMBRE ICI, les adresses sur leur écran : compter n'est pas consulter, donc ce
+                panneau n'écrit rien au journal ; l'écran des doublons, qui nomme des comptes, en
+                écrit une ligne à chaque ouverture. Le lien n'existe que s'il y a quelque chose à
+                voir. */}
+            <section className={PANNEAU}>
+              <header className="mb-[18px] flex flex-wrap items-start gap-3.5">
+                <div className="min-w-0 flex-[1_1_180px]">
+                  <h2 className={PANNEAU_TITRE}>{t("doublons.titre")}</h2>
+                  <p className={PANNEAU_AIDE}>{t("doublons.sousTitre")}</p>
+                </div>
+                {doublons.identifiants === 0 ? null : (
+                  <Link
+                    prefetch={false}
+                    href={`${base}/doublons`}
+                    className="inline-flex min-h-11 items-center gap-1.5 text-[13px] leading-[normal] font-semibold text-ds-accent hover:text-ds-accent-encre lg:min-h-0"
+                  >
+                    {t("doublons.panneauVoir")}
+                    <ArrowRight aria-hidden="true" size={14} strokeWidth={2} />
+                  </Link>
+                )}
+              </header>
+              {doublons.identifiants === 0 ? (
+                <p className="text-[14px] leading-[normal] text-ds-texte-sourdine">{t("doublons.vide")}</p>
+              ) : (
+                <div className="flex items-center gap-3.5">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-card bg-ds-alerte-fond text-ds-alerte-encre">
+                    <Users aria-hidden="true" size={20} strokeWidth={1.9} />
+                  </span>
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="text-[23px] leading-[1.1] font-extrabold tracking-[-0.045em] text-ds-texte-fort">
+                      {format.number(doublons.comptes)}
+                    </span>
+                    <span className="text-[13px] leading-[normal] text-ds-texte-corps">
+                      {t("doublons.panneauResume", {
+                        comptes: doublons.comptes,
+                        identifiants: doublons.identifiants,
+                      })}
+                    </span>
+                  </span>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </div>
     </main>

@@ -3155,6 +3155,95 @@ $$;
     reparer: "revoke update (admin_block_reason) on public.orders from authenticated;",
   },
 
+  /*
+   * LES DOUBLONS (170) — « aucune erreur », dans les deux sens. Deux cibles pour le faux
+   * NÉGATIF (la casse, le compte qui se compte lui-même), une pour le faux POSITIF (un
+   * indicatif deviné), une pour la trace, une pour la garde.
+   */
+  // La fonction vit désormais dans la 171 (revue du 20/09/2026) : réparer depuis la 170
+  // rétablirait le faux positif des temps forts.
+  /** La casse n'est plus neutralisée : « Maison.Nova » et « maison.nova » cessent d'être le même compte. */
+  "doublon-sensible-a-la-casse": {
+    casserDepuisMigration: {
+      fichier: "171_la_revue_des_doublons.sql",
+      depuis: "create or replace function public.identifiant_public(",
+      jusqua: "-- ── 2.",
+      remplacer: "v          text := lower(btrim(coalesce(p_lien, '')));",
+      par: "v          text := btrim(coalesce(p_lien, ''));",
+    },
+    reparerDepuisMigration: {
+      fichier: "171_la_revue_des_doublons.sql",
+      depuis: "create or replace function public.identifiant_public(",
+      jusqua: "-- ── 2.",
+    },
+  },
+
+  /** Un indicatif français est DEVINÉ devant un « 0 » : deux vendeurs de pays différents se rapprocheraient. */
+  "doublon-indicatif-devine": {
+    casserDepuisMigration: {
+      fichier: "171_la_revue_des_doublons.sql",
+      depuis: "create or replace function public.identifiant_public(",
+      jusqua: "-- ── 2.",
+      remplacer: "v_chiffres := regexp_replace(v_chiffres, '^00', '');",
+      par: "v_chiffres := regexp_replace(regexp_replace(v_chiffres, '^00', ''), '^0', '33');",
+    },
+    reparerDepuisMigration: {
+      fichier: "171_la_revue_des_doublons.sql",
+      depuis: "create or replace function public.identifiant_public(",
+      jusqua: "-- ── 2.",
+    },
+  },
+
+  /** Plus de DISTINCT : un compte qui affiche son Instagram deux fois devient son propre doublon. */
+  "doublon-de-soi-meme": {
+    casserDepuisMigration: {
+      fichier: "170_les_comptes_en_doublon.sql",
+      depuis: "create function public.identifiants_des_comptes(",
+      jusqua: "-- ── 3.",
+      remplacer: "select distinct s.owner_id",
+      par: "select s.owner_id",
+    },
+    reparerDepuisMigration: {
+      fichier: "170_les_comptes_en_doublon.sql",
+      depuis: "create function public.identifiants_des_comptes(",
+      jusqua: "-- ── 3.",
+    },
+  },
+
+  /** La liste nominative ne laisse plus de trace. */
+  "doublons-sans-trace": {
+    casserDepuisMigration: {
+      fichier: "170_les_comptes_en_doublon.sql",
+      depuis: "create function public.lister_doublons_admin(",
+      remplacer: "  perform public.journaliser_admin(\n    'comptes.doublons', 'profiles', null, null, p_ip_hash,\n    jsonb_build_object('limite', 100)\n  );\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "170_les_comptes_en_doublon.sql",
+      depuis: "create function public.lister_doublons_admin(",
+    },
+  },
+
+  /*
+   * Le comptage perd sa garde. C'est celui-là qu'on casse et pas la liste : la liste appelle
+   * `journaliser_admin`, qui refuse lui-même un non-administrateur — la garde de la liste est
+   * doublée, celle du comptage ne l'est pas.
+   */
+  "doublons-comptes-sans-garde": {
+    casserDepuisMigration: {
+      fichier: "170_les_comptes_en_doublon.sql",
+      depuis: "create function public.compter_doublons_admin(",
+      jusqua: "-- ── 4.",
+      remplacer: "  if not public.est_admin() then\n    raise exception 'introuvable' using errcode = 'DL031';\n  end if;\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "170_les_comptes_en_doublon.sql",
+      depuis: "create function public.compter_doublons_admin(",
+      jusqua: "-- ── 4.",
+    },
+  },
+
 };
 
 /**

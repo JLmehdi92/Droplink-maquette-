@@ -2755,6 +2755,16 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION SEULE. Nos sections ne sont ni les memes ni dans le meme ordre : l encart de trace precede les tuiles, elles sont quatre et non six, et la colonne de droite porte UN panneau au lieu de trois — les deux autres sont declares plus bas. Tout ce qui suit est donc decale."
+      },
+      {
+        "textes": [
+          "Comptes en doublon  <h3>",
+          "Des comptes distincts qui affichent le m  <p>",
+          "Voir les doublons  <button>",
+          "comptes, sur 3 identifiants partagés  <span>"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE (et, au telephone, la hauteur du lien). Le panneau « Comptes en doublon » (170, 20/09/2026) suit l anneau de statut dans la colonne de droite, comme sur la planche — mais la planche pose AVANT lui l anneau « Repartition par plan », que la contrainte n°1 interdit (declare dans les manquants) : il remonte donc de la hauteur de ce panneau. Au telephone, « Voir les doublons » porte 44 px de haut contre 16 : la cible tactile minimale (regle 5) gagne sur la planche, comme pour « Voir tout » du tableau de bord."
       }
     ],
     "manquants": [
@@ -3036,6 +3046,16 @@
         ],
         "motif": "structure",
         "raison": "APPARIEMENT PAR RANG : « Comptes » est l onglet de la barre du bas, le titre de la liste et le libelle d une option de filtre. La soustraction les apparie dans l ordre du document."
+      },
+      {
+        "textes": [
+          "Comptes en doublon  <h3>",
+          "Des comptes distincts qui affichent le m  <p>",
+          "Voir les doublons  <button>",
+          "comptes, sur 3 identifiants partagés  <span>"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE (et, au telephone, la hauteur du lien). Le panneau « Comptes en doublon » (170, 20/09/2026) suit l anneau de statut dans la colonne de droite, comme sur la planche — mais la planche pose AVANT lui l anneau « Repartition par plan », que la contrainte n°1 interdit (declare dans les manquants) : il remonte donc de la hauteur de ce panneau. Au telephone, « Voir les doublons » porte 44 px de haut contre 16 : la cible tactile minimale (regle 5) gagne sur la planche, comme pour « Voir tout » du tableau de bord."
       }
     ],
     "manquants": [
@@ -3226,11 +3246,11 @@
         "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : son role apparait dans la liste et sur sa fiche. Le kit ecrit ceux de ses comptes de demonstration."
       },
       {
-        "textes": [
-          "4 commandes"
-        ],
         "motif": "donnee",
-        "raison": "LE VOLUME DU COMPTE DE MESURE, face aux comptes de demonstration du kit."
+        "raison": "LE VOLUME DU COMPTE DE MESURE, face aux comptes de demonstration du kit. MOTIF depuis le 20/09/2026 : la carte en tete de liste est celle du compte le plus recent, et la mesure de la liste pose sept comptes neutres (DOUBLONS=nombres) sans commande — « 0 commandes » ou « 4 commandes » selon le compte en tete.",
+        "motifs": [
+          "^\\d+ commandes?$"
+        ]
       }
     ]
   },
@@ -16016,6 +16036,176 @@
         "textes": [],
         "motif": "donnee",
         "raison": "La reference courte de la commande du jeu de mesure dans le titre du dialogue, derivee d un identifiant tire au hasard : un motif ancre, jamais une valeur litterale."
+      }
+    ]
+  },
+  "fr-admin-comptes-doublons": {
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble",
+          "Commandes [1/4]",
+          "Boutiques  <span>",
+          "Statistiques  <span>"
+        ],
+        "motif": "structure",
+        "raison": "LES ENTREES DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span a l interieur du lien ; chez nous le lien porte le texte. Rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere ; taille, graisse et couleur sont identiques."
+      },
+      {
+        "textes": [
+          "Administrateur  <span>"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : « Administrateur » est la valeur de sa rangee « Role », et le kit ecrit le role du compte connecte dans sa barre superieure. L appariement tombe sur la rangee, d ou la taille et la graisse d une valeur."
+      },
+      {
+        "textes": [
+          "Commandes [2/4]  <span>",
+          "Commandes [3/4]  <span>",
+          "Commandes [4/4]  <span>",
+          "Comptes en doublon  <h1>",
+          "Des comptes distincts qui affichent le m  <p>",
+          "Retour aux comptes  <button>",
+          "L'ouverture de cette liste a été écrite   <span>",
+          "Instagram  <span>",
+          "@maison.nova  <span>",
+          "3 comptes [1/3]  <span>",
+          "2 comptes [2/3]  <span>",
+          "2 comptes [3/3]  <span>",
+          "Compte [1/3]  <span>",
+          "Compte [2/3]  <span>",
+          "Compte [3/3]  <span>",
+          "Statut [1/3]  <span>",
+          "Statut [2/3]  <span>",
+          "Statut [3/3]  <span>",
+          "Inscription [1/3]  <span>",
+          "Inscription [2/3]  <span>",
+          "Inscription [3/3]  <span>",
+          "yanis.b@gmail.com  <span>",
+          "StreetWear FR  <span>",
+          "Suspendu  <span>",
+          "2 août 2025 [1/3]  <span>",
+          "28 août 2025 [2/3]  <span>",
+          "22 août 2025 [3/3]  <span>",
+          "Voir la fiche [1/7]  <button>",
+          "Voir la fiche [2/7]  <button>",
+          "Voir la fiche [3/7]  <button>",
+          "Voir la fiche [4/7]  <button>",
+          "Voir la fiche [5/7]  <button>",
+          "Voir la fiche [6/7]  <button>",
+          "Voir la fiche [7/7]  <button>",
+          "yanis.b2@gmail.com  <span>",
+          "Streetwear France  <span>",
+          "Actif [1/6]  <span>",
+          "Actif [2/6]  <span>",
+          "Actif [3/6]  <span>",
+          "Actif [4/6]  <span>",
+          "Actif [5/6]  <span>",
+          "Actif [6/6]  <span>",
+          "3 sept. 2025 [1/4]  <span>",
+          "11 sept. 2025 [2/4]  <span>",
+          "9 sept. 2025 [3/4]  <span>",
+          "14 sept. 2025 [4/4]  <span>",
+          "ybk.store@outlook.fr  <span>",
+          "SW France  <span>",
+          "WhatsApp  <span>",
+          "+33612345678  <span>",
+          "ines.k@hotmail.fr  <span>",
+          "LuxShop  <span>",
+          "ines.shop@gmail.com  <span>",
+          "Pas encore nommée  <span>",
+          "Site web  <span>",
+          "laplanque-shop.com  <span>",
+          "lea.m@gmail.com  <span>",
+          "ModeAddict  <span>",
+          "lea.modeaddict@icloud.com  <span>",
+          "ModeAddict 2  <span>",
+          "En bref  <h3>",
+          "Identifiants partagés  <span>",
+          "Comptes concernés  <span>",
+          "Dont suspendus  <span>",
+          "Comment un doublon est reconnu  <h3>",
+          "Le même nom de compte, quelle que soit l  <li>",
+          "Instagram et TikTok.  <b>",
+          "Le même numéro, chiffre pour chiffre. Au  <li>",
+          "WhatsApp.  <b>",
+          "Le même domaine et le même chemin. L'acc  <li>",
+          "Site web.  <b>",
+          "Un identifiant partagé n'est pas une pre  <li>",
+          "Rien n'est automatique.  <b>"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR SEULES. Tout remonte de 75 px (79 pour le titre) parce que la barre superieure du kit n est pas portee, comme sur tous les ecrans d administration, et la colonne de contenu porte 32 px de marge contre 30 : 2 px a droite, 4 px de moins en largeur. Planche ecrite dans le kit le 20/09/2026 pour cet ecran ; tailles, graisses, couleurs, rayons et remplissages sont les siens. Les « Voir la fiche », « Actif » et les dates de septembre s apparient dans un ordre different des deux cotes (textes identiques une fois les chiffres normalises) : verifie le 20/09/2026, l ENSEMBLE de leurs positions est exactement celui du kit decale de (-2, -79)."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Abonnements",
+          "Paiements",
+          "Support",
+          "Logs système",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DU PRODUIT ET TROIS ECRANS QUI N EXISTENT PAS. « Comptes », « Journal d audit » et « Parametres systeme », les memes mots sur tous les ecrans d administration ; Abonnements et Paiements sont de la facturation (contrainte n°1), Support suppose un systeme de tickets que la base n a pas."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "admin@droplink.fr"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE ET LA CARTE DECORATIVE DU KIT NE SONT PAS PORTEES, comme sur les autres ecrans d administration : « Ctrl K » annonce une recherche transverse qui n existe pas, et la carte occupe la place de notre rappel de trace."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire et son rappel permanent que chaque consultation de donnees d un vendeur est tracee. « Surveillance » et « ADMINISTRATION » sont ici APPARIES au titre de l ecran et a la surface du meme nom : voir « nombre d occurrences »."
+      },
+      {
+        "motifs": [
+          "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "Le compte jetable du jeu de mesure, dont l adresse change a chaque passage."
+      }
+    ]
+  },
+  "fr-admin-comptes-doublons-tel": {
+    "enTrop": [
+      {
+        "textes": [
+          "Compte",
+          "Statut",
+          "Inscription"
+        ],
+        "motif": "structure",
+        "raison": "LES ETIQUETTES DES CELLULES AU TELEPHONE. Le kit les pose en pseudo-element (::before de data-label), que la sonde n inventorie pas ; le produit les rend en vraies balises, pour qu elles se lisent aussi au lecteur d ecran. Meme place, meme graisse, meme couleur — a 11,5 px au lieu de 11 : le plancher de lecture au telephone (regle 5) passe avant la planche."
+      }
+    ],
+    "valeurs": [
+      {
+        "textes": [
+          "Commandes  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LA MEME ETIQUETTE, COMPTEE AUTREMENT : « Commandes » est l onglet de la barre du bas des deux cotes, plus l etiquette de chaque ligne chez le produit (sept comptes), qui chez le kit est un pseudo-element non inventorie."
       }
     ]
   }

@@ -109,6 +109,10 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
       "forme utile au persona visé.",
   ],
   ["marque.reseauExemple.site", "Exemple d'adresse de site."],
+  ["admin.doublons.genres.instagram", "Nom propre."],
+  ["admin.doublons.genres.tiktok", "Nom propre."],
+  ["admin.doublons.genres.whatsapp", "Nom propre."],
+  ["admin.doublons.regles.whatsappQ", "Nom propre, suivi du point chinois « 。 »."],
   [
     "commandes.plusMedias",
     "Un signe plus et un nombre : la pastille « +N » de la colonne des " +
