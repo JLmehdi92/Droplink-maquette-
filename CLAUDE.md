@@ -313,6 +313,13 @@ esthétiques, et le nouveau design ne les touche pas.
 3. **Le dégradé est réservé à UNE SEULE action principale par écran**, et
    uniquement sur les surfaces DropLink. Il **n'apparaît jamais** sur
    `/p/[token]` : cette page porte la couleur DU VENDEUR, pas la nôtre.
+   ⚠️ **LA CARTE « Propulsé par DropLink » N'Y FAIT PAS EXCEPTION** (décision de
+   Wassim du 19/09/2026 : elle est sur la page client d'un compte GRATUIT, un
+   compte **Pro** la retire depuis « Ma marque », migration 167). Elle a d'abord
+   été peinte au dégradé DropLink : c'était faux. La planche `client_link`
+   rhabille ses variables aux couleurs du VENDEUR (`brandVars`), carte comprise ;
+   seul le symbole est le nôtre. Le plan se pose à la main dans l'administration,
+   après un paiement reçu HORS du produit : la contrainte n° 1 tient.
 4. **Toute animation respecte `prefers-reduced-motion`** et ne porte jamais
    d'information.
 5. **Cible tactile 44 px minimum, police 11,5 px minimum sur téléphone** —
@@ -351,8 +358,11 @@ a pas.
 > **Ce qui reste vrai et qui motivait l'avertissement :** un champ dessiné n'est
 > pas une autorisation. Les **options d'affichage** du kit — six interrupteurs
 > « Afficher le logo », « Afficher la description », « Afficher les photos »… —
-> n'ont aucune colonne, et `shops` ne porte que `watermark_enabled`. Elles ne
-> s'implémentent pas au motif qu'elles sont dessinées.
+> n'ont aucune colonne, et `shops` ne porte que `watermark_enabled` — plus,
+> depuis la migration 167, `hide_droplink_brand`, qui est une DÉCISION de Wassim
+> (réservée au plan Pro, refusée en base sinon), pas un interrupteur du kit porté
+> parce qu'il était dessiné. Les six autres ne s'implémentent pas au motif
+> qu'elles sont dessinées.
 
 ### Périmètre — ce que le design system couvre, et ce qu'il ne couvre pas
 
@@ -561,8 +571,9 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 166, AVANT le déploiement** — décision
-de Wassim. `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
+**La production attend `pnpm db:migrate` pour 147 à 167, AVANT le déploiement** — décision
+de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
+celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
 **Les consignes que ce journal porte et qui ne se perdent pas avec lui :**
 

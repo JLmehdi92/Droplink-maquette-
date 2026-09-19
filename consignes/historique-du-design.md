@@ -836,3 +836,40 @@ volume n'est attaché — ce qui est notre cas, les médias vivant chez R2.
 
 ---
 
+
+#### ▶️ LE PLAN D'UN COMPTE ET LA CARTE « PROPULSÉ PAR DROPLINK » (19/09/2026)
+
+Décision de Wassim (point 4) : en gratuit, la page client porte la carte promotionnelle du kit
+(`PoweredCard`) ; un compte **Pro** la retire par un interrupteur de « Ma marque » ; le plan se
+pose à la main dans l'administration, après un paiement reçu hors du produit (migration 167).
+
+**Planches d'abord** : `seller_app/BrandView.jsx` et `Telephone.jsx` (section « 6. Marque
+DropLink (Pro) », état gratuit verrouillé ; l'état Pro — interrupteur pleine ligne, sans carte —
+écrit en commentaire), `admin/AdminAccount.jsx` (`AccPlan` sous la suspension, état ouvert
+`#compte-plan`, état Pro en commentaire), dictionnaire `dict-app.js` (+6 entrées en/zh).
+
+**Relevés** : `marque`, `compte`, `compte-suspension`, `compte-plan` (NOUVEAU, `CLIC_PRODUIT="Passer
+en Pro"`, `ETAT=plan`) et `client`, au bureau en code 0. Défauts trouvés en mesurant :
+
+- 🔴 **LA CARTE ÉTAIT PEINTE AUX COULEURS DROPLINK, ET LA PLANCHE AUX COULEURS DU VENDEUR.**
+  `ClientPage.jsx` rhabille `--gradient-brand`, `--gradient-tint`, `--violet-200` et
+  `--accent-ink` par `brandVars` : le bouton du kit est `primaire → secondaire` du VENDEUR. La
+  règle 3 tient donc sans exception ; la carte suit l'accent (`resoudreAccent`), le bouton est un
+  aplat (une seule couleur au produit), seul le symbole est à nous. CLAUDE.md corrigé.
+- 🔴 **LA SOUSTRACTION NE COMPARAIT PAS L'IMAGE DE FOND** — donc AUCUN dégradé, sur aucun écran,
+  depuis l'origine. La sonde la relevait ; `PROPRIETES` s'arrêtait à `fond`. Ajoutée. Balayage
+  des 74 inventaires : 14 écarts, 9 portés par un parent immédiat (mesuré), 4 déjà déclarés par
+  la règle 3, et le seul vrai : la carte ci-dessus. Falsifié : la déclaration levée, l'ancien
+  dégradé de la carte ressort en « image de fond ».
+- ⚠️ **LA MENTION ÉTAIT ÉCRITE DEUX FOIS** en gratuit : dans la carte ET dans le lien « Propulsé
+  par DropLink » du pied (hérité de la décision 25). Le lien du pied est retiré ; les deux liens
+  légaux gardent la droite, comme au kit.
+- ⚠️ **LE BOUTON « PASSER EN PRO » TOMBAIT 11 PX TROP HAUT** : la rangée `AccRow` du kit porte
+  11 px en bas. Et 127 px de décalage de la carte client, mesurés : c'est la carte
+  « Notifications automatiques » du kit (refusée), 132 px moins les 5 de la carte de contact.
+- ⚠️ **CE QUE COÛTE UN DÉPLOIEMENT AVANT LA 167 — corrigé après le commit `cb63602`**, dont le
+  message dit à tort « la page client rend 500 ». Vérifié dans le code : la page client lit
+  `marque_masquee === true` et resterait servie. C'est la lecture du profil vendeur
+  (`profil.ts`) qui demande `profiles.plan` et `shops.hide_droplink_brand` : PostgREST la
+  refuse, et CHAQUE page vendeur traite le compte comme déconnecté. Donc `pnpm db:migrate`
+  (147 → 167) AVANT le déploiement, sans exception.
