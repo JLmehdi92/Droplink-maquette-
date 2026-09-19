@@ -141,7 +141,29 @@ export default async function EditeurCommande({
 
   if (error !== null || data === null) notFound();
 
-  const origine = await origineDuSite();
+  /*
+   * LES LECTURES INDÉPENDANTES PARTENT ENSEMBLE (audit du 20/09/2026). Elles ne dépendent que
+   * de la commande déjà lue, et elles s'enchaînaient une à une : chaque aller-retour vers la
+   * base attendait le précédent, sur l'écran où un vendeur passe sa journée. La garde et la
+   * lecture de la commande restent AVANT : elles décident si la page existe.
+   */
+  const [origine, resultatMedias, historique, suivi, blocage] = await Promise.all([
+    origineDuSite(),
+    supabase
+      .from("order_media")
+      .select("id, type, cle, cle_vignette, duree_s")
+      .eq("order_id", id)
+      .order("position", { ascending: true }),
+    // Lu SOUS LA SESSION du vendeur : la policy de `order_events` remonte à
+    // `orders → shops → profiles`, et c'est elle qui garantit qu'on ne lit que
+    // ses propres commandes. Contourner la RLS ici en ferait la seule surface du
+    // produit où l'historique d'un tiers serait atteignable.
+    lireHistorique(supabase, id),
+    lireSuiviDeCommande(supabase, id),
+    // LE LIEN BLOQUÉ (168) : lu sous RLS avec la session du vendeur. Une lecture en échec rend
+    // `null`, et l'écran ne dit rien plutôt que d'affirmer un état qu'il n'a pas lu.
+    lireEtatBlocage(supabase, data.id),
+  ]);
 
   /*
    * Les médias, avec des URL de lecture SIGNÉES ET À EXPIRATION.
@@ -159,17 +181,7 @@ export default async function EditeurCommande({
    * client entièrement vide. La clé pleine est donc lue AUSSI — elle ne sert
    * qu'au repli, et elle ne coûte rien tant qu'aucune dérivée ne manque.
    */
-  const { data: lignesMedias } = await supabase
-    .from("order_media")
-    .select("id, type, cle, cle_vignette, duree_s")
-    .eq("order_id", id)
-    .order("position", { ascending: true });
-
-  // Lu SOUS LA SESSION du vendeur : la policy de `order_events` remonte à
-  // `orders → shops → profiles`, et c'est elle qui garantit qu'on ne lit que
-  // ses propres commandes. Contourner la RLS ici en ferait la seule surface du
-  // produit où l'historique d'un tiers serait atteignable.
-  const historique = await lireHistorique(supabase, id);
+  const lignesMedias = resultatMedias.data;
 
   /*
    * ⚠️ MÊME REPLI QUE LA PAGE CLIENT, ET POUR LA MÊME RAISON. Une photo sans
@@ -207,7 +219,6 @@ export default async function EditeurCommande({
    * Une commande sur deux n'a pas de colis attaché, et la lecture rend alors
    * `null` : la frise se rend quand même, sur le seul `orders.status`.
    */
-  const suivi = await lireSuiviDeCommande(supabase, id);
   const quandEtapes = suivi === null ? {} : datesDesEtapes(suivi.passages);
 
   const format = await getFormatter();
@@ -293,9 +304,6 @@ export default async function EditeurCommande({
    */
   const versPageClient = "/" + langue + "/commandes/" + data.id + "/page-client";
 
-  // LE LIEN BLOQUÉ (168) : lu sous RLS avec la session du vendeur. Une lecture en échec rend
-  // `null`, et l'écran ne dit rien plutôt que d'affirmer un état qu'il n'a pas lu.
-  const blocage = await lireEtatBlocage(supabase, data.id);
   const jourLong = (iso: string): string => format.dateTime(new Date(iso), { dateStyle: "long" });
 
   return (
