@@ -9,6 +9,7 @@ import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
 import { TuileVolume } from "@/components/admin/tuile-volume";
 import { AnneauStatuts } from "@/components/admin/anneau-statuts";
 import { BlocageLien } from "@/components/admin/blocage-lien";
+import { ContestationLien } from "@/components/admin/contestation-lien";
 import { TraductionsClient } from "@/components/traductions-client";
 import { Store } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
@@ -23,6 +24,7 @@ import {
 } from "@/lib/audit/commandes";
 import { lireCompteurs, lireRepartition } from "@/lib/audit/panneau";
 import { liensBloquesParmi } from "@/lib/audit/blocage-lien";
+import { contestationsEnAttenteParmi } from "@/lib/audit/contestation";
 import { MOTIF_MIN } from "@/lib/audit/suspension";
 import { lireTransporteur, monogramme } from "@/lib/tracking/transporteurs";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -151,6 +153,15 @@ export default async function AdminCommandes({
   );
   const bloque = (l: LigneCommandeAdmin): boolean | null =>
     blocages.statut === "ok" ? blocages.bloques.has(l.id) : null;
+  /* LES CONTESTATIONS EN ATTENTE (168), lues comme les blocages : des identifiants seulement,
+     sans rien écrire au journal — la lecture tracée part à l'ouverture du dialogue. En échec,
+     la ligne garde le geste de déblocage : il reste juste, la contestation se lira plus tard. */
+  const contestations = await contestationsEnAttenteParmi(
+    supabase,
+    page.lignes.map((l) => l.id),
+  );
+  const conteste = (l: LigneCommandeAdmin): boolean =>
+    contestations.statut === "ok" && contestations.ids.has(l.id);
 
   const t = await getTranslations("admin");
   const format = await getFormatter();
@@ -223,10 +234,16 @@ export default async function AdminCommandes({
       {bloque(l) === true ? (
         <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>{t("commandes.lienBloque")}</span>
       ) : null}
+      {bloque(l) === true && conteste(l) ? (
+        <span className={PILULE + " bg-ds-alerte-fond text-ds-alerte-encre"}>{t("contestation.pastille")}</span>
+      ) : null}
     </span>
   );
   const geste = (l: LigneCommandeAdmin, carte: boolean) => {
     const etat = bloque(l);
+    if (etat === true && conteste(l)) {
+      return <ContestationLien commandeId={l.id} reference={l.reference} motifMin={MOTIF_MIN} carte={carte} />;
+    }
     return etat === null ? null : (
       <BlocageLien commandeId={l.id} reference={l.reference} bloque={etat} motifMin={MOTIF_MIN} carte={carte} />
     );
@@ -384,7 +401,7 @@ export default async function AdminCommandes({
                 {filtre ? t("commandes.videFiltre") : t("commandes.videTout")}
               </p>
             ) : (
-              <TraductionsClient espaces={["admin.blocage"]}>
+              <TraductionsClient espaces={["admin.blocage", "admin.contestation"]}>
                 {/* --- LE TABLEAU, au bureau --- */}
                 <div className="hidden xl:block">
                   <table className="w-full table-fixed border-collapse">

@@ -2473,6 +2473,15 @@
         "motif": "donnee",
         "volatile": true,
         "raison": "L AGE DES DERNIERES ACTIONS D ADMINISTRATION. Il compte depuis la derniere ligne ecrite au journal par les suites, donc depuis le dernier passage des portes : « il y a 3 min » juste apres, « il y a 2 j » deux jours plus tard. Quand toutes les lignes ont le meme age, la soustraction en apparie autant que le kit en porte et laisse le reste en trop ; quand elles different, elles s apparient toutes. VOLATILE : couverte quand elle est la, pas exigee quand elle n y est pas (17/09/2026)."
+      },
+      {
+        "motifs": [
+          "^(Blocage du lien d’une commande|Déblocage du lien d’une commande|Lecture d’une contestation|Refus d’une contestation|Changement de plan d’un compte)$"
+        ],
+        "textes": [],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DERNIERES ACTIONS D ADMINISTRATION ECRITES PAR LES SUITES : la vue d ensemble liste les plus recentes du journal de la base de tests, et selon l ordre des suites RLS ce sont des blocages, des contestations ou des changements de plan. Volatile : presentes ou non selon le dernier passage des portes."
       }
     ]
   },
@@ -4030,10 +4039,10 @@
         "motifs": [
           "^\\d{1,3} % du total$",
           "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4} \\d{2}:\\d{2}$",
-          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$"
+          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte|Blocage du lien d’une commande|Déblocage du lien d’une commande|Lecture d’une contestation|Refus d’une contestation|Changement de plan d’un compte)$"
         ],
         "motif": "donnee",
-        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026)."
+        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026). Depuis le 19/09/2026, les blocages de lien, les contestations et les changements de plan des suites s y ajoutent, au meme titre."
       },
       {
         "motifs": [
@@ -4260,10 +4269,10 @@
       {
         "motifs": [
           "^\\d{1,3} % du total$",
-          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte)$"
+          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte|Blocage du lien d’une commande|Déblocage du lien d’une commande|Lecture d’une contestation|Refus d’une contestation|Changement de plan d’un compte)$"
         ],
         "motif": "donnee",
-        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026)."
+        "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026). Depuis le 19/09/2026, les blocages de lien, les contestations et les changements de plan des suites s y ajoutent, au meme titre."
       },
       {
         "motifs": [
@@ -12881,6 +12890,3121 @@
         ],
         "motif": "structure",
         "raison": "LE BOUTON D ACTION EMPILE SES LIBELLES DANS UNE SEULE CELLULE (BoutonAction, comme la suspension de la fiche compte) : « En cours… » y est rendu invisible pour RESERVER sa largeur, sans quoi le bouton s elargirait au clic. La planche dessine la meme reserve (AccSuspension) mais sur un autre bouton."
+      }
+    ]
+  },
+  "fr-commandes-bloquee": {
+    "_etat": "LA LISTE AVEC UNE COMMANDE AU LIEN BLOQUE (LIEN_BLOQUE=1), contre `#commandes-bloquee` (19/09/2026). Memes declarations que la liste ; la pastille « Lien bloque » sous le statut est celle de la planche.",
+    "valeurs": [
+      {
+        "texte": "Commandes [1/2]  <h1>",
+        "motif": "structure",
+        "raison": "Le titre du kit s etire sur toute la largeur de son conteneur, le notre se limite a son texte. Aucun fond, aucun filet : les deux boites rendent le meme dessin."
+      },
+      {
+        "texte": "Commandes [2/2]  <span>",
+        "motif": "donnee",
+        "raison": "Le libelle est etire par le badge de volume a sa droite : « 124 » chez le kit, « 4 » dans le jeu de mesure. Quatorze pixels d ecart, tous dans le badge."
+      },
+      {
+        "texte": "En transit",
+        "motif": "donnee",
+        "raison": "Le kit rend huit commandes, le jeu de mesure quatre. Les graisses et les couleurs des libelles de frise disent QUELLE etape est atteinte : elles suivent les donnees, pas le dessin. Et le vocabulaire des quatre etapes est verrouille par la decision 4 du brief — preparation, expedie, en transit, livre — la ou le kit ecrit commande, en transit, en livraison, livree."
+      },
+      {
+        "texte": "Livrées",
+        "motif": "contrainte",
+        "raison": "Le kit pose cinq onglets — Toutes, En attente, En transit, Livrees, Problemes. Le produit en pose quatre, dont « Jamais ouvertes » et « Bloquees » qui n existent pas chez lui, et pas de « Problemes » : la base ne porte que quatre etats d expedition."
+      },
+      {
+        "texte": "Livré",
+        "motif": "donnee",
+        "raison": "Meme cause que « En transit » : huit lignes chez le kit contre quatre, et l appariement rapproche alors une pastille de statut d un libelle de frise."
+      },
+      {
+        "texte": "Filtres  <button>",
+        "motif": "structure",
+        "raison": "Trois pixels. Le bouton du kit se COMPRIME dans sa rangee, plus chargee que la notre — son `flex` vaut `0 1 auto`. Mesure directe de son bouton a sa largeur naturelle : 120,19 px, exactement la notre."
+      },
+      {
+        "texte": "8 sept. 2025",
+        "motif": "structure",
+        "raison": "Le kit met la date et l heure dans UN span de 34 px dont le texte direct est la date ; nous mettons deux spans de 17 dans une colonne. Meme rendu, deux balisages."
+      },
+      {
+        "texte": "14:32",
+        "motif": "donnee",
+        "raison": "Huit lignes chez le kit, quatre dans le jeu de mesure."
+      },
+      {
+        "texte": "7 sept. 2025",
+        "motif": "structure",
+        "raison": "Meme cause que « 8 sept. 2025 » : le kit met la date et l heure dans UN span de 34 px, nous en mettons deux de 17."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu : huit lignes de tableau chez le kit contre quatre dans le jeu de mesure, soit 130 px de page en moins."
+      },
+      {
+        "texte": "Créer une commande",
+        "motif": "structure",
+        "raison": "LE MEME TEXTE EST RENDU TROIS FOIS CHEZ NOUS ET UNE SEULE FOIS DANS LE KIT, donc l appariement au plus proche tombe sur le mauvais element. Le produit rend le bouton principal en DEUX variantes — bureau et telephone, dont une seule est visible a la fois — plus son etat d attente « Creation… ». Le vrai bouton porte bien le degrade de marque, son rayon de 16 et l ombre marque ; c est le `<span>` du libelle, haut de 23 px, qui se fait apparier au bouton de 50 du kit."
+      },
+      {
+        "texte": "Passez au Pro",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Plus de fonctionnalités, plus de possibi",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Upgrade",
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+      },
+      {
+        "texte": "Toutes  <button>",
+        "motif": "donnee",
+        "raison": "Quatre pixels de largeur. L onglet est etire par son compteur : « 124 » chez le kit, « 4 » dans le jeu de mesure. Meme cause que « Livrees », declaree juste au-dessus."
+      },
+      {
+        "textes": [
+          "Lien bloqué  <span>",
+          "18:45 [3/4]  <span>",
+          "16:03 [4/4]  <span>",
+          "12:17 [4/4]  <span>"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "L ORDRE DES QUATRE COMMANDES DU JEU EST TIRE AU SORT, et c est mesure : la sonde les insere d un seul coup, au MEME instant, et la liste les trie par date de creation — l egalite se departage sur un identifiant aleatoire. La ligne bloquee tombe donc a la 3e ou a la 4e place selon le passage (constate : 607 puis 698 px). La ligne a deux pastilles est plus haute de 13 px, et les dates de la planche qui la suivent descendent d autant. Volatile parce que la place depend du tirage, pas de l ecran."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc de compte existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "Suivez toutes vos commandes et leur stat"
+        ],
+        "motif": "donnee",
+        "raison": "Le sous-titre du kit est une phrase fixe ; le notre porte un DECOMPTE — « 4 commandes, 4 creees cette semaine ». Les deux occupent la meme place, a la meme taille. Contrairement a `/envois`, ou le total a une tuile ou demenager, cet ecran n en a pas : le chiffre n aurait nulle part ou aller."
+      },
+      {
+        "textes": [
+          "1 sept. 2025 - 8 sept. 2025"
+        ],
+        "motif": "donnee",
+        "raison": "Le selecteur de periode du kit affiche une plage figee ; le notre affiche l etat reel du filtre, « Toutes les periodes » par defaut. Meme contröle, meme place — et la valeur du kit serait un mensonge chez nous, puisque aucune periode n est filtree au chargement."
+      },
+      {
+        "textes": [
+          "Total des commandes",
+          "En attente",
+          "Problèmes"
+        ],
+        "motif": "donnee",
+        "raison": "Les libelles des tuiles du kit, face aux notres. « En attente » et « Problemes » supposent des etats que la base ne porte pas : nos quatre compteurs disent « En preparation », « En transit », « Jamais ouvertes » et « Livrees » — quatre faits verifiables. « Jamais ouvertes » n a pas d equivalent chez le kit et c est la metrique de verdict du produit."
+      },
+      {
+        "textes": [
+          "+12%",
+          "-20%"
+        ],
+        "motif": "donnee",
+        "raison": "Des variations inventees pour la demonstration. Le produit ne mesure aucune evolution d une periode a l autre sur cet ecran : ni serie temporelle, ni periode de reference, ni requete qui les produise. Les rendre exigerait de les inventer, ce que le principe XII interdit."
+      },
+      {
+        "textes": [
+          "•••"
+        ],
+        "motif": "structure",
+        "raison": "Le menu par ligne. Il EXISTE chez nous, mais son declencheur porte un libelle accessible et ses deux gestes sont rendus dans le document — « Dupliquer comme gabarit » et « Archiver » apparaissent dans la liste des elements en trop, ce qui le prouve. Le kit dessine trois points typographiques la ou nous posons une icone."
+      },
+      {
+        "textes": [
+          "La Poste",
+          "UPS",
+          "EMS",
+          "Colissimo"
+        ],
+        "motif": "donnee",
+        "raison": "LES NOMS DE TRANSPORTEUR. `carrier_code` est l identifiant NUMERIQUE du fournisseur de suivi, pas un nom, et aucun catalogue ne le traduit. Rendu tel quel il afficherait « 100003 » ; avec un repli, « Transporteur inconnu » sur chaque ligne. Les deux valent moins que rien."
+      },
+      {
+        "textes": [
+          "Commandé",
+          "En livraison"
+        ],
+        "motif": "contrainte",
+        "raison": "Le vocabulaire des etapes de la frise est VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et la granularite fine vit dans le detail du suivi. Le kit ecrit « Commande » et « En livraison », deux etapes que notre frise ne connait pas."
+      },
+      {
+        "textes": [
+          "Livrée",
+          "Problème"
+        ],
+        "motif": "donnee",
+        "raison": "Statuts de lignes du kit. « Livree » existe chez nous au singulier feminin dans une autre casse de phrase ; « Probleme » supposerait que le transporteur declare un incident, ce qu il ne fait pas — nous savons seulement qu un colis ne bouge plus, et nous le disons ainsi."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "Lucas M.",
+          "+ 2",
+          "CJ123456789FR",
+          "Sarah B.",
+          "Adam K.",
+          "129F8V6X1234567890",
+          "Enzo D.",
+          "EV123456789CN",
+          "Lina T.",
+          "FR9876543210",
+          "Mehdi R.",
+          "Chloé P.",
+          "Tom G.",
+          "LV123456789CN"
+        ],
+        "motif": "donnee",
+        "raison": "LES HUIT COMMANDES DE DEMONSTRATION du kit, avec leurs references, leurs destinataires et leurs numeros de suivi. Le jeu de mesure en porte quatre, avec les siennes."
+      },
+      {
+        "textes": [
+          "Affichage de 1 à 8 sur 124 commandes",
+          "Afficher"
+        ],
+        "motif": "donnee",
+        "raison": "Le pied de pagination avec les chiffres du kit. Le produit rend desormais la meme phrase — « Affichage de 4 sur 4 commandes » — mais SANS les numeros de page : sa pagination est par CURSEUR, et un curseur ne sait pas sauter a la page 17. Poser les numeros exigerait de revenir au decalage, donc de degrader precisement celui qui a le plus de donnees."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat.",
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
+        ]
+      },
+      {
+        "textes": [
+          "4 commandes, 4 créées cette semaine"
+        ],
+        "motif": "donnee",
+        "raison": "Notre sous-titre, face a la phrase fixe du kit — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "textes": [
+          "Toutes les périodes"
+        ],
+        "motif": "donnee",
+        "raison": "Le selecteur de periode OUVERT : le kit n en montre que la valeur fermee. ⚠️ Le libelle « Jusqu au » porte une decision : la borne haute d une periode vaut MINUIT, donc « jusqu a aujourd hui » exclurait toute la journee en cours si elle n etait pas corrigee."
+      },
+      {
+        "textes": [
+          "Création…"
+        ],
+        "motif": "donnee",
+        "raison": "L etat d attente du bouton principal, que le kit ne dessine pas. Il existe parce qu un bouton qui ne dit pas qu il travaille se fait cliquer deux fois, et une commande en double est visible par le client."
+      },
+      {
+        "textes": [
+          "En préparation",
+          "Jamais ouvertes",
+          "Bloquées"
+        ],
+        "motif": "donnee",
+        "raison": "Les libelles de NOS pilules de filtre, face aux tuiles du kit — voir la declaration symetrique dans les manquants. « Jamais ouvertes » est la metrique de verdict du produit : le kit n a rien de tel."
+      },
+      {
+        "textes": [
+          "Exporter"
+        ],
+        "motif": "donnee",
+        "raison": "L EXPORT CSV, que le kit ne dessine pas. L avertissement n est pas decoratif : l export contient les LIENS PUBLICS des commandes, et un lien public transfere une capacite, definitivement. Les notes internes, qui portent le prix d achat, en sont exclues (decision 15)."
+      },
+      {
+        "textes": [
+          "Jamais ouvert"
+        ],
+        "motif": "donnee",
+        "raison": "La pastille « jamais ouvert » d une ligne : le kit ne compte pas les ouvertures de lien, le produit en fait une metrique de verdict."
+      },
+      {
+        "textes": [
+          "Préparation",
+          "Expédié"
+        ],
+        "motif": "contrainte",
+        "raison": "Les etapes de NOTRE frise, verrouillees par la decision 4 du brief — voir la declaration symetrique de « Commande » et « En livraison » dans les manquants."
+      },
+      {
+        "textes": [
+          "Cliente en preparation",
+          "Client expedie",
+          "Client de verification",
+          "Cliente livree"
+        ],
+        "motif": "donnee",
+        "raison": "LES QUATRE COMMANDES DU JEU DE MESURE, avec leurs destinataires, leurs references et leurs numeros. Le kit en rend huit, inventees.",
+        "motifs": [
+          "^#[0-9A-F]{6}$",
+          "^DLKMESURE\\d+[A-Z]{2}$"
+        ]
+      },
+      {
+        "textes": [
+          "Affichage de 4 sur 4 commandes"
+        ],
+        "motif": "donnee",
+        "raison": "Le compteur de page, avec les chiffres du jeu de mesure. Meme phrase que le kit, qui porte « 1 a 8 sur 124 »."
+      },
+      {
+        "texte": "+3",
+        "motif": "structure",
+        "raison": "LA PASTILLE DE SURPLUS DE VIGNETTES, ET C EST UN ARTEFACT DE SONDE, PAS UN ECART VISUEL. Le kit ecrit `+{order.extra}` en JSX, ce qui produit DEUX noeuds de texte — « + » puis « 2 » — que le releve joint par une espace : il relit donc « + 2 ». Nous interpolons une seule chaine, « +3 ». Les deux pastilles ont la meme boite, la meme graisse et le meme fond ; seule la decoupe du balisage differe. Voir la declaration symetrique de « + 2 » dans les manquants.\n⚠️ ELLE N APPARAISSAIT PAS AVANT LE 12/09 AU SOIR : le jeu de mesure ne creait AUCUN media, donc aucune commande n avait de surplus a montrer. L enrichir a fait surgir un element que l ecran rendait depuis toujours sans qu aucune mesure ne le voie."
+      },
+      {
+        "motifs": [
+          "^\\d+ vues?$"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTEUR DE VUES D UNE LIGNE. Il n apparaissait pas avant le 12/09 au soir : aucune commande du jeu de mesure n avait jamais ete ouverte, donc la colonne ne rendait que la pastille « Jamais ouvert ». Ajouter des ouvertures au jeu a fait surgir un element que l ecran rendait depuis toujours sans qu aucune mesure ne le voie. Le kit, lui, ne compte pas les ouvertures."
+      }
+    ]
+  },
+  "fr-commandes-commande-bloquee": {
+    "_etat": "LE DETAIL D UNE COMMANDE AU LIEN BLOQUE, etat « bloquee » (LIEN_BLOQUE), contre `#commande-bloquee…` (19/09/2026). Memes declarations que le detail ; le bandeau est celui de la planche.",
+    "valeurs": [
+      {
+        "texte": "Commandes",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur et la position. Le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree « Tableau de bord » absente."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu, et notre page est plus haute : elle porte le formulaire d edition que le kit met sur un ecran separe."
+      },
+      {
+        "textes": [
+          "Retour aux commandes",
+          "Partager",
+          "Suivi de la commande",
+          "Informations de la commande",
+          "Référence",
+          "Date de création",
+          "Dernière mise à jour",
+          "Méthode d'expédition",
+          "Lien client",
+          "Aperçu de la page client",
+          "Photos et vidéos",
+          "Ajouter des fichiers",
+          "Ajouter",
+          "Historique de la commande",
+          "Commande créée",
+          "Commande modifiée"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE, ET UNE SEULE CAUSE POUR TOUTES CES LIGNES. Le kit separe une vue de LECTURE (`OrderDetail`) d un FORMULAIRE (`CreateOrder`, avec son bouton « Enregistrer en brouillon ») ; la decision 16 interdit le bouton d enregistrement, notre ecran EST le formulaire, et il n existe aucune route de creation — la Server Action cree la ligne et redirige ici. Le panneau « La commande » occupe donc 690 px avant les panneaux du kit, et chacun d eux descend d autant. La disposition suit `CreateOrder` pour le couple formulaire + apercu, et `OrderDetail` pour les panneaux."
+      },
+      {
+        "texte": "Créée le 8 septembre 2025 à 14:32",
+        "motif": "donnee",
+        "raison": "Neuf pixels de largeur. Le kit ecrit « le 8 septembre 2025 », le jeu de mesure « le 12 septembre 2026 » : un chiffre de plus au jour. VOLATILE (18/09/2026) : la date du jeu est celle du jour de la mesure, et selon ses chiffres la largeur tombe parfois juste — la declaration mourait alors sans que rien ait change.",
+        "volatile": true
+      },
+      {
+        "textes": [
+          "10 septembre 2025 à 09:15",
+          "8 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "raison": "Trois a neuf pixels de largeur sur les dates des lignes cle-valeur, et la position, heritee du decalage des panneaux. La largeur a une cause simple : les dates du jeu de mesure portent un chiffre de plus que celles du kit — « 12 septembre 2026 » contre « 8 septembre 2025 »."
+      },
+      {
+        "textes": [
+          "Client",
+          "Suivi"
+        ],
+        "motif": "donnee",
+        "raison": "LARGEUR DES DEUX LIBELLES DE TUILE, et c est la VALEUR qui la fixe. La colonne de texte d une tuile se dimensionne sur son enfant le plus large : « Lucas M. » chez le kit, « Client de verification » dans le jeu de mesure. Le libelle, lui, s etire a la colonne. La position vient de la rangee de tuiles, posee juste sous un en-tete plus court que celui du kit."
+      },
+      {
+        "textes": [
+          "8 sept. 2025",
+          "10 sept. 2025",
+          "à 14:32",
+          "à 09:15"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE, SUR LES QUATRE LIGNES DU JOURNAL. Meme cause que les panneaux : le kit met l historique dans la colonne etroite de la DERNIERE rangee, a cote des photos ; chez nous il occupe la troisieme colonne de la rangee du milieu, parce que la derniere rangee porte la carte de revocation que le kit ne dessine pas. La colonne de date, ses 92 px et ses deux lignes sont conformes."
+      },
+      {
+        "texte": "Voir la page client",
+        "motif": "contrainte",
+        "raison": "LE DEGRADE. Le kit le pose sur « Modifier la commande » ; la decision 16 interdit ce bouton — nos champs sont deja editables, il n aurait mene qu a lui-meme. La regle 3 du design system reserve le degrade a UNE seule action principale par ecran : c est donc celle-ci, la seule qui termine le travail. Un ecran de detail sans aucune action principale serait le seul du produit."
+      },
+      {
+        "texte": "En transit",
+        "motif": "contrainte",
+        "raison": "Rendu deux fois par le kit — dans la frise ET dans une pilule d etat sous les actions —, une seule fois chez nous. L etat est une liste deroulante du formulaire, 200 px plus bas : deux controles pour la meme valeur, sur un ecran qui enregistre a la frappe, c est deux endroits ou lire un etat qui peut momentanement differer."
+      },
+      {
+        "texte": "En attente",
+        "motif": "donnee",
+        "raison": "Rendu deux fois par le kit, une fois chez nous : sa commande de demonstration a DEUX etapes non franchies, celle du jeu de mesure une seule. Le badge lui-meme est conforme."
+      },
+      {
+        "texte": "Numéro de suivi",
+        "motif": "contrainte",
+        "raison": "Rendu une fois par le kit — la ligne du panneau d informations —, trois fois chez nous : le kit le met en CHAMP sur un autre ecran (`CreateOrder`), nous l avons sur celui-ci. L appariement au plus proche tombe donc sur l etiquette du formulaire (13/500) et la compare a la ligne du kit (14/400)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      },
+      {
+        "textes": [
+          "Lien bloqué par DropLink  <h2>",
+          "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Contester le blocage  <button>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "texte": "#DLK7842",
+        "motif": "donnee",
+        "raison": "La reference du kit. La notre est DERIVEE de l identifiant plutot que stockee : un numero sequentiel exigerait une colonne, un compteur par boutique et une reprise de l existant, pour une reference qu on copie plus qu on ne recite."
+      },
+      {
+        "texte": "Modifier la commande",
+        "motif": "contrainte",
+        "raison": "La decision 16 interdit le bouton d enregistrement, et la sauvegarde est automatique : nos champs sont editables en place. Un bouton « modifier » n aurait mene qu a l ecran ou l on se trouve deja."
+      },
+      {
+        "textes": [
+          "Lucas M.",
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "Pays de livraison",
+          "France"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUNE COLONNE DE PAYS N EXISTE, et ce n est pas un oubli : le destinataire est un texte libre sans compte ni adresse (principe III). Il n y a donc aucune adresse d ou tirer un pays, et « France » ecrit d avance serait une valeur que la base n a pas enregistree."
+      },
+      {
+        "textes": [
+          "Nombre d'articles",
+          "3 articles"
+        ],
+        "motif": "donnee",
+        "raison": "Une commande DropLink porte une REFERENCE produit en texte libre et des medias, jamais des lignes de commande. Presenter le nombre de photos comme un nombre d articles dirait autre chose que ce qui est enregistre."
+      },
+      {
+        "textes": [
+          "Commandé",
+          "En livraison",
+          "Livré"
+        ],
+        "motif": "contrainte",
+        "raison": "Le vocabulaire des quatre etapes est VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et notre frise les rend sous leur forme feminine, accordee a « commande »."
+      },
+      {
+        "textes": [
+          "La commande a été passée auprès du fourn",
+          "Le colis est en transit vers la France.",
+          "Le colis est en cours de livraison.",
+          "Le colis sera marqué comme livré."
+        ],
+        "motif": "contrainte",
+        "raison": "LE KIT MET DE LA PROSE SOUS CHAQUE ETAPE, Y COMPRIS SOUS CELLES QU AUCUN COLIS N A FRANCHIES. Reprise telle quelle, elle affirmerait a chaque commande un fait que la base n a pas enregistre — principe XII. Notre note est celle du point de passage qui a date l etape, et elle est OMISE tant qu il n y en a pas."
+      },
+      {
+        "texte": "https://droplink.fr/c/LucasM",
+        "motif": "donnee",
+        "raison": "Le lien public de la commande de demonstration. Le notre porte l origine reelle du serveur mesure et un jeton tire au hasard."
+      },
+      {
+        "textes": [
+          "Statut mis à jour : En transit",
+          "Lien client généré",
+          "3 articles ajoutés"
+        ],
+        "motif": "donnee",
+        "raison": "TROIS EVENEMENTS QUE LA BASE N ECRIT PAS. `order_events` porte dix types, tous emis par une mutation du VENDEUR ou du client ; l ingestion du suivi n en ecrit aucun, donc « statut mis a jour » n existe pas, et la generation du lien fait partie de la creation. « 3 articles ajoutes » est la charge utile d un evenement de demonstration."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage. Ancree aux deux bouts, elle ne couvre rien d autre."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "texte": "Enregistré",
+        "motif": "contrainte",
+        "raison": "LE TEMOIN DE SAUVEGARDE, exige par la decision 17 : la sauvegarde est automatique, donc l ecran doit dire a trois etats ce que la base a garde. Le kit n en dessine pas parce que son ecran de detail n edite rien."
+      },
+      {
+        "textes": [
+          "Client de verification",
+          "REF-V",
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "textes": [
+          "Référence produit",
+          "Vues du lien"
+        ],
+        "motif": "donnee",
+        "raison": "LES DEUX TUILES QUI REMPLACENT CELLES QUE LA BASE NE PORTE PAS. Voir les declarations symetriques de « Pays de livraison » et « Nombre d articles ». Elles portent de VRAIES colonnes — `product_ref`, et le compteur de consultations, qui est une metrique de verdict du produit (decision 22)."
+      },
+      {
+        "textes": [
+          "La commande",
+          "Nom ou pseudo du client",
+          "Texte libre. Votre client n’a pas de com",
+          "Un numéro tout juste collé n’est souvent",
+          "Statut",
+          "État des photos",
+          "À renseigner si votre client vous répond",
+          "Notes internes",
+          "Jamais visible par le client, et absent ",
+          "Transporteur",
+          "Reconnu d’après le numéro. Choisissez-le"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FORMULAIRE, ET C EST LA MEME CAUSE QUE L ORDRE DES BLOCS. Le kit le met sur un ecran separe (`CreateOrder`) avec deux boutons d enregistrement que la decision 16 interdit ; le depot n a aucune route de creation — la Server Action cree la ligne et redirige ici. Les aides sous les champs portent des decisions verrouillees : le destinataire n a jamais de compte (principe IV), un numero fraichement colle n est pas introuvable (decision 7), les notes internes sont absentes de l export (decision 15). Le champ « Transporteur » (18/09/2026) est celui de `CreateOrder` : le kit le pose sur l ecran de creation, il revient ici, sous le numero de suivi."
+      },
+      {
+        "textes": [
+          "Votre commande",
+          "pour Client de verification",
+          "Approuver"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CONTENU DE L APERCU, que le kit rend par une iframe vers sa vraie page client. La notre est une MAQUETTE a l echelle : reutiliser les vrais composants ferait entrer tout le poids de la page cliente dans l editeur, et une iframe vers `/p/<jeton>` compterait une vue sur sa propre commande (decision 22)."
+      },
+      {
+        "textes": [
+          "En préparation",
+          "Expédiée",
+          "Livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "Les etapes de NOTRE frise, verrouillees par la decision 4 — voir la declaration symetrique de « Commande », « En livraison » et « Livre »."
+      },
+      {
+        "textes": [
+          "Colis remis au transporteur — Guangzhou,",
+          "Colis arrive au centre de tri internatio"
+        ],
+        "motif": "donnee",
+        "raison": "Les points de passage du jeu de mesure. Le kit ecrit sa propre prose sous chaque etape — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Contrôle approuvé par le client",
+          "Média ajouté"
+        ],
+        "motif": "donnee",
+        "raison": "Deux de nos dix types d evenements, face a ceux du kit. Le troisieme — « Commande modifiee » — porte desormais le libelle du kit."
+      },
+      {
+        "textes": [
+          "5 sur 20",
+          "· 1 vidéo sur 3"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PLAFONDS DE MEDIAS, dans l en-tete du panneau. Le kit n en dessine pas parce qu il n en a pas : 20 medias et 3 videos par commande sont une contrainte de cout du produit, et un vendeur qui les decouvre au refus du vingt-et-unieme fichier a deja perdu son temps."
+      },
+      {
+        "textes": [
+          "Couverture",
+          "0:42",
+          "Glissez une vignette par sa poignée pour"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COUVERTURE, LA DUREE ET L AIDE AU DEPLACEMENT. Le kit dessine une grille de vignettes inertes ; la notre est reordonnable au glisser et au clavier (decisions 18 et 19), et la couverture est la premiere image que voit le client. Une poignee sans aide ne se decouvre pas."
+      },
+      {
+        "textes": [
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d",
+          "Révoquer et régénérer",
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      },
+      {
+        "motifs": [
+          "^\\d+ consultations?$"
+        ],
+        "motif": "donnee",
+        "raison": "LA VALEUR DE LA TUILE « VUES DU LIEN », dans son etat NON VIDE. Elle rendait « Jamais ouvert » tant que le jeu de mesure ne posait aucune ouverture : la tuile existait, mais un seul de ses deux etats etait exerce. Voir la declaration de « Vues du lien »."
+      }
+    ]
+  },
+  "fr-commandes-commande-contestation": {
+    "_etat": "LE DETAIL D UNE COMMANDE AU LIEN BLOQUE, etat « contestation » (LIEN_BLOQUE), contre `#commande-bloquee…` (19/09/2026). Memes declarations que le detail ; le bandeau est celui de la planche.",
+    "valeurs": [
+      {
+        "texte": "Commandes",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur et la position. Le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree « Tableau de bord » absente."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu, et notre page est plus haute : elle porte le formulaire d edition que le kit met sur un ecran separe."
+      },
+      {
+        "textes": [
+          "Retour aux commandes",
+          "Partager",
+          "Suivi de la commande",
+          "Informations de la commande",
+          "Référence",
+          "Date de création",
+          "Dernière mise à jour",
+          "Méthode d'expédition",
+          "Lien client",
+          "Aperçu de la page client",
+          "Photos et vidéos",
+          "Ajouter des fichiers",
+          "Ajouter",
+          "Historique de la commande",
+          "Commande créée",
+          "Commande modifiée"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE, ET UNE SEULE CAUSE POUR TOUTES CES LIGNES. Le kit separe une vue de LECTURE (`OrderDetail`) d un FORMULAIRE (`CreateOrder`, avec son bouton « Enregistrer en brouillon ») ; la decision 16 interdit le bouton d enregistrement, notre ecran EST le formulaire, et il n existe aucune route de creation — la Server Action cree la ligne et redirige ici. Le panneau « La commande » occupe donc 690 px avant les panneaux du kit, et chacun d eux descend d autant. La disposition suit `CreateOrder` pour le couple formulaire + apercu, et `OrderDetail` pour les panneaux."
+      },
+      {
+        "texte": "Créée le 8 septembre 2025 à 14:32",
+        "motif": "donnee",
+        "raison": "Neuf pixels de largeur. Le kit ecrit « le 8 septembre 2025 », le jeu de mesure « le 12 septembre 2026 » : un chiffre de plus au jour. VOLATILE (18/09/2026) : la date du jeu est celle du jour de la mesure, et selon ses chiffres la largeur tombe parfois juste — la declaration mourait alors sans que rien ait change.",
+        "volatile": true
+      },
+      {
+        "textes": [
+          "10 septembre 2025 à 09:15",
+          "8 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "raison": "Trois a neuf pixels de largeur sur les dates des lignes cle-valeur, et la position, heritee du decalage des panneaux. La largeur a une cause simple : les dates du jeu de mesure portent un chiffre de plus que celles du kit — « 12 septembre 2026 » contre « 8 septembre 2025 »."
+      },
+      {
+        "textes": [
+          "Client",
+          "Suivi"
+        ],
+        "motif": "donnee",
+        "raison": "LARGEUR DES DEUX LIBELLES DE TUILE, et c est la VALEUR qui la fixe. La colonne de texte d une tuile se dimensionne sur son enfant le plus large : « Lucas M. » chez le kit, « Client de verification » dans le jeu de mesure. Le libelle, lui, s etire a la colonne. La position vient de la rangee de tuiles, posee juste sous un en-tete plus court que celui du kit."
+      },
+      {
+        "textes": [
+          "8 sept. 2025",
+          "10 sept. 2025",
+          "à 14:32",
+          "à 09:15"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE, SUR LES QUATRE LIGNES DU JOURNAL. Meme cause que les panneaux : le kit met l historique dans la colonne etroite de la DERNIERE rangee, a cote des photos ; chez nous il occupe la troisieme colonne de la rangee du milieu, parce que la derniere rangee porte la carte de revocation que le kit ne dessine pas. La colonne de date, ses 92 px et ses deux lignes sont conformes."
+      },
+      {
+        "texte": "Voir la page client",
+        "motif": "contrainte",
+        "raison": "LE DEGRADE. Le kit le pose sur « Modifier la commande » ; la decision 16 interdit ce bouton — nos champs sont deja editables, il n aurait mene qu a lui-meme. La regle 3 du design system reserve le degrade a UNE seule action principale par ecran : c est donc celle-ci, la seule qui termine le travail. Un ecran de detail sans aucune action principale serait le seul du produit."
+      },
+      {
+        "texte": "En transit",
+        "motif": "contrainte",
+        "raison": "Rendu deux fois par le kit — dans la frise ET dans une pilule d etat sous les actions —, une seule fois chez nous. L etat est une liste deroulante du formulaire, 200 px plus bas : deux controles pour la meme valeur, sur un ecran qui enregistre a la frappe, c est deux endroits ou lire un etat qui peut momentanement differer."
+      },
+      {
+        "texte": "En attente",
+        "motif": "donnee",
+        "raison": "Rendu deux fois par le kit, une fois chez nous : sa commande de demonstration a DEUX etapes non franchies, celle du jeu de mesure une seule. Le badge lui-meme est conforme."
+      },
+      {
+        "texte": "Numéro de suivi",
+        "motif": "contrainte",
+        "raison": "Rendu une fois par le kit — la ligne du panneau d informations —, trois fois chez nous : le kit le met en CHAMP sur un autre ecran (`CreateOrder`), nous l avons sur celui-ci. L appariement au plus proche tombe donc sur l etiquette du formulaire (13/500) et la compare a la ligne du kit (14/400)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      },
+      {
+        "textes": [
+          "Envoyer la contestation  <button>",
+          "Envoyer la contestation  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES QUATRE LIBELLES DANS UNE SEULE CELLULE (repos, attente, reussite, echec) : trois disent le meme mot, et la sonde apparie le texte au `span` du libelle courant, dont la boite n est pas celle du bouton. Le bouton lui-meme porte les valeurs de la planche, relevees : hauteur 44, rayon, fond, filet, ombre et remplissage identiques."
+      },
+      {
+        "textes": [
+          "Lien bloqué par DropLink  <h2>",
+          "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Votre explication  <span>",
+          "Au moins 20 caractères. L’équipe DropLin  <span>",
+          "Une image (facultative)  <span>",
+          "Joindre une image  <button>",
+          "JPEG, PNG ou WebP · 5 Mo au plus.  <span>",
+          "Annuler  <button>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "texte": "#DLK7842",
+        "motif": "donnee",
+        "raison": "La reference du kit. La notre est DERIVEE de l identifiant plutot que stockee : un numero sequentiel exigerait une colonne, un compteur par boutique et une reprise de l existant, pour une reference qu on copie plus qu on ne recite."
+      },
+      {
+        "texte": "Modifier la commande",
+        "motif": "contrainte",
+        "raison": "La decision 16 interdit le bouton d enregistrement, et la sauvegarde est automatique : nos champs sont editables en place. Un bouton « modifier » n aurait mene qu a l ecran ou l on se trouve deja."
+      },
+      {
+        "textes": [
+          "Lucas M.",
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "Pays de livraison",
+          "France"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUNE COLONNE DE PAYS N EXISTE, et ce n est pas un oubli : le destinataire est un texte libre sans compte ni adresse (principe III). Il n y a donc aucune adresse d ou tirer un pays, et « France » ecrit d avance serait une valeur que la base n a pas enregistree."
+      },
+      {
+        "textes": [
+          "Nombre d'articles",
+          "3 articles"
+        ],
+        "motif": "donnee",
+        "raison": "Une commande DropLink porte une REFERENCE produit en texte libre et des medias, jamais des lignes de commande. Presenter le nombre de photos comme un nombre d articles dirait autre chose que ce qui est enregistre."
+      },
+      {
+        "textes": [
+          "Commandé",
+          "En livraison",
+          "Livré"
+        ],
+        "motif": "contrainte",
+        "raison": "Le vocabulaire des quatre etapes est VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et notre frise les rend sous leur forme feminine, accordee a « commande »."
+      },
+      {
+        "textes": [
+          "La commande a été passée auprès du fourn",
+          "Le colis est en transit vers la France.",
+          "Le colis est en cours de livraison.",
+          "Le colis sera marqué comme livré."
+        ],
+        "motif": "contrainte",
+        "raison": "LE KIT MET DE LA PROSE SOUS CHAQUE ETAPE, Y COMPRIS SOUS CELLES QU AUCUN COLIS N A FRANCHIES. Reprise telle quelle, elle affirmerait a chaque commande un fait que la base n a pas enregistre — principe XII. Notre note est celle du point de passage qui a date l etape, et elle est OMISE tant qu il n y en a pas."
+      },
+      {
+        "texte": "https://droplink.fr/c/LucasM",
+        "motif": "donnee",
+        "raison": "Le lien public de la commande de demonstration. Le notre porte l origine reelle du serveur mesure et un jeton tire au hasard."
+      },
+      {
+        "textes": [
+          "Statut mis à jour : En transit",
+          "Lien client généré",
+          "3 articles ajoutés"
+        ],
+        "motif": "donnee",
+        "raison": "TROIS EVENEMENTS QUE LA BASE N ECRIT PAS. `order_events` porte dix types, tous emis par une mutation du VENDEUR ou du client ; l ingestion du suivi n en ecrit aucun, donc « statut mis a jour » n existe pas, et la generation du lien fait partie de la creation. « 3 articles ajoutes » est la charge utile d un evenement de demonstration."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage. Ancree aux deux bouts, elle ne couvre rien d autre."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "texte": "Enregistré",
+        "motif": "contrainte",
+        "raison": "LE TEMOIN DE SAUVEGARDE, exige par la decision 17 : la sauvegarde est automatique, donc l ecran doit dire a trois etats ce que la base a garde. Le kit n en dessine pas parce que son ecran de detail n edite rien."
+      },
+      {
+        "textes": [
+          "Client de verification",
+          "REF-V",
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "textes": [
+          "Référence produit",
+          "Vues du lien"
+        ],
+        "motif": "donnee",
+        "raison": "LES DEUX TUILES QUI REMPLACENT CELLES QUE LA BASE NE PORTE PAS. Voir les declarations symetriques de « Pays de livraison » et « Nombre d articles ». Elles portent de VRAIES colonnes — `product_ref`, et le compteur de consultations, qui est une metrique de verdict du produit (decision 22)."
+      },
+      {
+        "textes": [
+          "La commande",
+          "Nom ou pseudo du client",
+          "Texte libre. Votre client n’a pas de com",
+          "Un numéro tout juste collé n’est souvent",
+          "Statut",
+          "État des photos",
+          "À renseigner si votre client vous répond",
+          "Notes internes",
+          "Jamais visible par le client, et absent ",
+          "Transporteur",
+          "Reconnu d’après le numéro. Choisissez-le"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FORMULAIRE, ET C EST LA MEME CAUSE QUE L ORDRE DES BLOCS. Le kit le met sur un ecran separe (`CreateOrder`) avec deux boutons d enregistrement que la decision 16 interdit ; le depot n a aucune route de creation — la Server Action cree la ligne et redirige ici. Les aides sous les champs portent des decisions verrouillees : le destinataire n a jamais de compte (principe IV), un numero fraichement colle n est pas introuvable (decision 7), les notes internes sont absentes de l export (decision 15). Le champ « Transporteur » (18/09/2026) est celui de `CreateOrder` : le kit le pose sur l ecran de creation, il revient ici, sous le numero de suivi."
+      },
+      {
+        "textes": [
+          "Votre commande",
+          "pour Client de verification",
+          "Approuver"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CONTENU DE L APERCU, que le kit rend par une iframe vers sa vraie page client. La notre est une MAQUETTE a l echelle : reutiliser les vrais composants ferait entrer tout le poids de la page cliente dans l editeur, et une iframe vers `/p/<jeton>` compterait une vue sur sa propre commande (decision 22)."
+      },
+      {
+        "textes": [
+          "En préparation",
+          "Expédiée",
+          "Livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "Les etapes de NOTRE frise, verrouillees par la decision 4 — voir la declaration symetrique de « Commande », « En livraison » et « Livre »."
+      },
+      {
+        "textes": [
+          "Colis remis au transporteur — Guangzhou,",
+          "Colis arrive au centre de tri internatio"
+        ],
+        "motif": "donnee",
+        "raison": "Les points de passage du jeu de mesure. Le kit ecrit sa propre prose sous chaque etape — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Contrôle approuvé par le client",
+          "Média ajouté"
+        ],
+        "motif": "donnee",
+        "raison": "Deux de nos dix types d evenements, face a ceux du kit. Le troisieme — « Commande modifiee » — porte desormais le libelle du kit."
+      },
+      {
+        "textes": [
+          "5 sur 20",
+          "· 1 vidéo sur 3"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PLAFONDS DE MEDIAS, dans l en-tete du panneau. Le kit n en dessine pas parce qu il n en a pas : 20 medias et 3 videos par commande sont une contrainte de cout du produit, et un vendeur qui les decouvre au refus du vingt-et-unieme fichier a deja perdu son temps."
+      },
+      {
+        "textes": [
+          "Couverture",
+          "0:42",
+          "Glissez une vignette par sa poignée pour"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COUVERTURE, LA DUREE ET L AIDE AU DEPLACEMENT. Le kit dessine une grille de vignettes inertes ; la notre est reordonnable au glisser et au clavier (decisions 18 et 19), et la couverture est la premiere image que voit le client. Une poignee sans aide ne se decouvre pas."
+      },
+      {
+        "textes": [
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d",
+          "Révoquer et régénérer",
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      },
+      {
+        "motifs": [
+          "^\\d+ consultations?$"
+        ],
+        "motif": "donnee",
+        "raison": "LA VALEUR DE LA TUILE « VUES DU LIEN », dans son etat NON VIDE. Elle rendait « Jamais ouvert » tant que le jeu de mesure ne posait aucune ouverture : la tuile existait, mais un seul de ses deux etats etait exerce. Voir la declaration de « Vues du lien »."
+      },
+      {
+        "textes": [
+          "Envoi…"
+        ],
+        "motif": "structure",
+        "raison": "Le libelle d attente du meme bouton, invisible au repos : il reserve la largeur pour qu elle ne saute pas pendant l envoi. La planche ne dessine que le repos."
+      }
+    ]
+  },
+  "fr-commandes-commande-attente": {
+    "_etat": "LE DETAIL D UNE COMMANDE AU LIEN BLOQUE, etat « attente » (LIEN_BLOQUE), contre `#commande-bloquee…` (19/09/2026). Memes declarations que le detail ; le bandeau est celui de la planche.",
+    "valeurs": [
+      {
+        "texte": "Commandes",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur et la position. Le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree « Tableau de bord » absente."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu, et notre page est plus haute : elle porte le formulaire d edition que le kit met sur un ecran separe."
+      },
+      {
+        "textes": [
+          "Retour aux commandes",
+          "Partager",
+          "Suivi de la commande",
+          "Informations de la commande",
+          "Référence",
+          "Date de création",
+          "Dernière mise à jour",
+          "Méthode d'expédition",
+          "Lien client",
+          "Aperçu de la page client",
+          "Photos et vidéos",
+          "Ajouter des fichiers",
+          "Ajouter",
+          "Historique de la commande",
+          "Commande créée",
+          "Commande modifiée"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE, ET UNE SEULE CAUSE POUR TOUTES CES LIGNES. Le kit separe une vue de LECTURE (`OrderDetail`) d un FORMULAIRE (`CreateOrder`, avec son bouton « Enregistrer en brouillon ») ; la decision 16 interdit le bouton d enregistrement, notre ecran EST le formulaire, et il n existe aucune route de creation — la Server Action cree la ligne et redirige ici. Le panneau « La commande » occupe donc 690 px avant les panneaux du kit, et chacun d eux descend d autant. La disposition suit `CreateOrder` pour le couple formulaire + apercu, et `OrderDetail` pour les panneaux."
+      },
+      {
+        "texte": "Créée le 8 septembre 2025 à 14:32",
+        "motif": "donnee",
+        "raison": "Neuf pixels de largeur. Le kit ecrit « le 8 septembre 2025 », le jeu de mesure « le 12 septembre 2026 » : un chiffre de plus au jour. VOLATILE (18/09/2026) : la date du jeu est celle du jour de la mesure, et selon ses chiffres la largeur tombe parfois juste — la declaration mourait alors sans que rien ait change.",
+        "volatile": true
+      },
+      {
+        "textes": [
+          "10 septembre 2025 à 09:15",
+          "8 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "raison": "Trois a neuf pixels de largeur sur les dates des lignes cle-valeur, et la position, heritee du decalage des panneaux. La largeur a une cause simple : les dates du jeu de mesure portent un chiffre de plus que celles du kit — « 12 septembre 2026 » contre « 8 septembre 2025 »."
+      },
+      {
+        "textes": [
+          "Client",
+          "Suivi"
+        ],
+        "motif": "donnee",
+        "raison": "LARGEUR DES DEUX LIBELLES DE TUILE, et c est la VALEUR qui la fixe. La colonne de texte d une tuile se dimensionne sur son enfant le plus large : « Lucas M. » chez le kit, « Client de verification » dans le jeu de mesure. Le libelle, lui, s etire a la colonne. La position vient de la rangee de tuiles, posee juste sous un en-tete plus court que celui du kit."
+      },
+      {
+        "textes": [
+          "8 sept. 2025",
+          "10 sept. 2025",
+          "à 14:32",
+          "à 09:15"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE, SUR LES QUATRE LIGNES DU JOURNAL. Meme cause que les panneaux : le kit met l historique dans la colonne etroite de la DERNIERE rangee, a cote des photos ; chez nous il occupe la troisieme colonne de la rangee du milieu, parce que la derniere rangee porte la carte de revocation que le kit ne dessine pas. La colonne de date, ses 92 px et ses deux lignes sont conformes."
+      },
+      {
+        "texte": "Voir la page client",
+        "motif": "contrainte",
+        "raison": "LE DEGRADE. Le kit le pose sur « Modifier la commande » ; la decision 16 interdit ce bouton — nos champs sont deja editables, il n aurait mene qu a lui-meme. La regle 3 du design system reserve le degrade a UNE seule action principale par ecran : c est donc celle-ci, la seule qui termine le travail. Un ecran de detail sans aucune action principale serait le seul du produit."
+      },
+      {
+        "texte": "En transit",
+        "motif": "contrainte",
+        "raison": "Rendu deux fois par le kit — dans la frise ET dans une pilule d etat sous les actions —, une seule fois chez nous. L etat est une liste deroulante du formulaire, 200 px plus bas : deux controles pour la meme valeur, sur un ecran qui enregistre a la frappe, c est deux endroits ou lire un etat qui peut momentanement differer."
+      },
+      {
+        "texte": "En attente",
+        "motif": "donnee",
+        "raison": "Rendu deux fois par le kit, une fois chez nous : sa commande de demonstration a DEUX etapes non franchies, celle du jeu de mesure une seule. Le badge lui-meme est conforme."
+      },
+      {
+        "texte": "Numéro de suivi",
+        "motif": "contrainte",
+        "raison": "Rendu une fois par le kit — la ligne du panneau d informations —, trois fois chez nous : le kit le met en CHAMP sur un autre ecran (`CreateOrder`), nous l avons sur celui-ci. L appariement au plus proche tombe donc sur l etiquette du formulaire (13/500) et la compare a la ligne du kit (14/400)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      },
+      {
+        "textes": [
+          "Lien bloqué par DropLink  <h2>",
+          "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Contestation envoyée le 19 septembre 202  <span>",
+          "En attente de réponse  <span>",
+          "Ce produit est le mien : voici la factur  <p>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "texte": "#DLK7842",
+        "motif": "donnee",
+        "raison": "La reference du kit. La notre est DERIVEE de l identifiant plutot que stockee : un numero sequentiel exigerait une colonne, un compteur par boutique et une reprise de l existant, pour une reference qu on copie plus qu on ne recite."
+      },
+      {
+        "texte": "Modifier la commande",
+        "motif": "contrainte",
+        "raison": "La decision 16 interdit le bouton d enregistrement, et la sauvegarde est automatique : nos champs sont editables en place. Un bouton « modifier » n aurait mene qu a l ecran ou l on se trouve deja."
+      },
+      {
+        "textes": [
+          "Lucas M.",
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "Pays de livraison",
+          "France"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUNE COLONNE DE PAYS N EXISTE, et ce n est pas un oubli : le destinataire est un texte libre sans compte ni adresse (principe III). Il n y a donc aucune adresse d ou tirer un pays, et « France » ecrit d avance serait une valeur que la base n a pas enregistree."
+      },
+      {
+        "textes": [
+          "Nombre d'articles",
+          "3 articles"
+        ],
+        "motif": "donnee",
+        "raison": "Une commande DropLink porte une REFERENCE produit en texte libre et des medias, jamais des lignes de commande. Presenter le nombre de photos comme un nombre d articles dirait autre chose que ce qui est enregistre."
+      },
+      {
+        "textes": [
+          "Commandé",
+          "En livraison",
+          "Livré"
+        ],
+        "motif": "contrainte",
+        "raison": "Le vocabulaire des quatre etapes est VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et notre frise les rend sous leur forme feminine, accordee a « commande »."
+      },
+      {
+        "textes": [
+          "La commande a été passée auprès du fourn",
+          "Le colis est en transit vers la France.",
+          "Le colis est en cours de livraison.",
+          "Le colis sera marqué comme livré."
+        ],
+        "motif": "contrainte",
+        "raison": "LE KIT MET DE LA PROSE SOUS CHAQUE ETAPE, Y COMPRIS SOUS CELLES QU AUCUN COLIS N A FRANCHIES. Reprise telle quelle, elle affirmerait a chaque commande un fait que la base n a pas enregistre — principe XII. Notre note est celle du point de passage qui a date l etape, et elle est OMISE tant qu il n y en a pas."
+      },
+      {
+        "texte": "https://droplink.fr/c/LucasM",
+        "motif": "donnee",
+        "raison": "Le lien public de la commande de demonstration. Le notre porte l origine reelle du serveur mesure et un jeton tire au hasard."
+      },
+      {
+        "textes": [
+          "Statut mis à jour : En transit",
+          "Lien client généré",
+          "3 articles ajoutés"
+        ],
+        "motif": "donnee",
+        "raison": "TROIS EVENEMENTS QUE LA BASE N ECRIT PAS. `order_events` porte dix types, tous emis par une mutation du VENDEUR ou du client ; l ingestion du suivi n en ecrit aucun, donc « statut mis a jour » n existe pas, et la generation du lien fait partie de la creation. « 3 articles ajoutes » est la charge utile d un evenement de demonstration."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage. Ancree aux deux bouts, elle ne couvre rien d autre."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "texte": "Enregistré",
+        "motif": "contrainte",
+        "raison": "LE TEMOIN DE SAUVEGARDE, exige par la decision 17 : la sauvegarde est automatique, donc l ecran doit dire a trois etats ce que la base a garde. Le kit n en dessine pas parce que son ecran de detail n edite rien."
+      },
+      {
+        "textes": [
+          "Client de verification",
+          "REF-V",
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "textes": [
+          "Référence produit",
+          "Vues du lien"
+        ],
+        "motif": "donnee",
+        "raison": "LES DEUX TUILES QUI REMPLACENT CELLES QUE LA BASE NE PORTE PAS. Voir les declarations symetriques de « Pays de livraison » et « Nombre d articles ». Elles portent de VRAIES colonnes — `product_ref`, et le compteur de consultations, qui est une metrique de verdict du produit (decision 22)."
+      },
+      {
+        "textes": [
+          "La commande",
+          "Nom ou pseudo du client",
+          "Texte libre. Votre client n’a pas de com",
+          "Un numéro tout juste collé n’est souvent",
+          "Statut",
+          "État des photos",
+          "À renseigner si votre client vous répond",
+          "Notes internes",
+          "Jamais visible par le client, et absent ",
+          "Transporteur",
+          "Reconnu d’après le numéro. Choisissez-le"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FORMULAIRE, ET C EST LA MEME CAUSE QUE L ORDRE DES BLOCS. Le kit le met sur un ecran separe (`CreateOrder`) avec deux boutons d enregistrement que la decision 16 interdit ; le depot n a aucune route de creation — la Server Action cree la ligne et redirige ici. Les aides sous les champs portent des decisions verrouillees : le destinataire n a jamais de compte (principe IV), un numero fraichement colle n est pas introuvable (decision 7), les notes internes sont absentes de l export (decision 15). Le champ « Transporteur » (18/09/2026) est celui de `CreateOrder` : le kit le pose sur l ecran de creation, il revient ici, sous le numero de suivi."
+      },
+      {
+        "textes": [
+          "Votre commande",
+          "pour Client de verification",
+          "Approuver"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CONTENU DE L APERCU, que le kit rend par une iframe vers sa vraie page client. La notre est une MAQUETTE a l echelle : reutiliser les vrais composants ferait entrer tout le poids de la page cliente dans l editeur, et une iframe vers `/p/<jeton>` compterait une vue sur sa propre commande (decision 22)."
+      },
+      {
+        "textes": [
+          "En préparation",
+          "Expédiée",
+          "Livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "Les etapes de NOTRE frise, verrouillees par la decision 4 — voir la declaration symetrique de « Commande », « En livraison » et « Livre »."
+      },
+      {
+        "textes": [
+          "Colis remis au transporteur — Guangzhou,",
+          "Colis arrive au centre de tri internatio"
+        ],
+        "motif": "donnee",
+        "raison": "Les points de passage du jeu de mesure. Le kit ecrit sa propre prose sous chaque etape — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Contrôle approuvé par le client",
+          "Média ajouté"
+        ],
+        "motif": "donnee",
+        "raison": "Deux de nos dix types d evenements, face a ceux du kit. Le troisieme — « Commande modifiee » — porte desormais le libelle du kit."
+      },
+      {
+        "textes": [
+          "5 sur 20",
+          "· 1 vidéo sur 3"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PLAFONDS DE MEDIAS, dans l en-tete du panneau. Le kit n en dessine pas parce qu il n en a pas : 20 medias et 3 videos par commande sont une contrainte de cout du produit, et un vendeur qui les decouvre au refus du vingt-et-unieme fichier a deja perdu son temps."
+      },
+      {
+        "textes": [
+          "Couverture",
+          "0:42",
+          "Glissez une vignette par sa poignée pour"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COUVERTURE, LA DUREE ET L AIDE AU DEPLACEMENT. Le kit dessine une grille de vignettes inertes ; la notre est reordonnable au glisser et au clavier (decisions 18 et 19), et la couverture est la premiere image que voit le client. Une poignee sans aide ne se decouvre pas."
+      },
+      {
+        "textes": [
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d",
+          "Révoquer et régénérer",
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      },
+      {
+        "motifs": [
+          "^\\d+ consultations?$"
+        ],
+        "motif": "donnee",
+        "raison": "LA VALEUR DE LA TUILE « VUES DU LIEN », dans son etat NON VIDE. Elle rendait « Jamais ouvert » tant que le jeu de mesure ne posait aucune ouverture : la tuile existait, mais un seul de ses deux etats etait exerce. Voir la declaration de « Vues du lien »."
+      }
+    ]
+  },
+  "fr-commandes-commande-refusee": {
+    "_etat": "LE DETAIL D UNE COMMANDE AU LIEN BLOQUE, etat « refusee » (LIEN_BLOQUE), contre `#commande-bloquee…` (19/09/2026). Memes declarations que le detail ; le bandeau est celui de la planche.",
+    "valeurs": [
+      {
+        "texte": "Commandes",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur et la position. Le libelle est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure — et la colonne est decalee par l entree « Tableau de bord » absente."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Upgrade"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+      },
+      {
+        "texte": "© 2025 DropLink. Tous droits réservés.",
+        "motif": "donnee",
+        "raison": "Position seule. Le pied vient APRES le contenu, et notre page est plus haute : elle porte le formulaire d edition que le kit met sur un ecran separe."
+      },
+      {
+        "textes": [
+          "Retour aux commandes",
+          "Partager",
+          "Suivi de la commande",
+          "Informations de la commande",
+          "Référence",
+          "Date de création",
+          "Dernière mise à jour",
+          "Méthode d'expédition",
+          "Lien client",
+          "Aperçu de la page client",
+          "Photos et vidéos",
+          "Ajouter des fichiers",
+          "Ajouter",
+          "Historique de la commande",
+          "Commande créée",
+          "Commande modifiée"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE, ET UNE SEULE CAUSE POUR TOUTES CES LIGNES. Le kit separe une vue de LECTURE (`OrderDetail`) d un FORMULAIRE (`CreateOrder`, avec son bouton « Enregistrer en brouillon ») ; la decision 16 interdit le bouton d enregistrement, notre ecran EST le formulaire, et il n existe aucune route de creation — la Server Action cree la ligne et redirige ici. Le panneau « La commande » occupe donc 690 px avant les panneaux du kit, et chacun d eux descend d autant. La disposition suit `CreateOrder` pour le couple formulaire + apercu, et `OrderDetail` pour les panneaux."
+      },
+      {
+        "texte": "Créée le 8 septembre 2025 à 14:32",
+        "motif": "donnee",
+        "raison": "Neuf pixels de largeur. Le kit ecrit « le 8 septembre 2025 », le jeu de mesure « le 12 septembre 2026 » : un chiffre de plus au jour. VOLATILE (18/09/2026) : la date du jeu est celle du jour de la mesure, et selon ses chiffres la largeur tombe parfois juste — la declaration mourait alors sans que rien ait change.",
+        "volatile": true
+      },
+      {
+        "textes": [
+          "10 septembre 2025 à 09:15",
+          "8 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "raison": "Trois a neuf pixels de largeur sur les dates des lignes cle-valeur, et la position, heritee du decalage des panneaux. La largeur a une cause simple : les dates du jeu de mesure portent un chiffre de plus que celles du kit — « 12 septembre 2026 » contre « 8 septembre 2025 »."
+      },
+      {
+        "textes": [
+          "Client",
+          "Suivi"
+        ],
+        "motif": "donnee",
+        "raison": "LARGEUR DES DEUX LIBELLES DE TUILE, et c est la VALEUR qui la fixe. La colonne de texte d une tuile se dimensionne sur son enfant le plus large : « Lucas M. » chez le kit, « Client de verification » dans le jeu de mesure. Le libelle, lui, s etire a la colonne. La position vient de la rangee de tuiles, posee juste sous un en-tete plus court que celui du kit."
+      },
+      {
+        "textes": [
+          "8 sept. 2025",
+          "10 sept. 2025",
+          "à 14:32",
+          "à 09:15"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION SEULE, SUR LES QUATRE LIGNES DU JOURNAL. Meme cause que les panneaux : le kit met l historique dans la colonne etroite de la DERNIERE rangee, a cote des photos ; chez nous il occupe la troisieme colonne de la rangee du milieu, parce que la derniere rangee porte la carte de revocation que le kit ne dessine pas. La colonne de date, ses 92 px et ses deux lignes sont conformes."
+      },
+      {
+        "texte": "Voir la page client",
+        "motif": "contrainte",
+        "raison": "LE DEGRADE. Le kit le pose sur « Modifier la commande » ; la decision 16 interdit ce bouton — nos champs sont deja editables, il n aurait mene qu a lui-meme. La regle 3 du design system reserve le degrade a UNE seule action principale par ecran : c est donc celle-ci, la seule qui termine le travail. Un ecran de detail sans aucune action principale serait le seul du produit."
+      },
+      {
+        "texte": "En transit",
+        "motif": "contrainte",
+        "raison": "Rendu deux fois par le kit — dans la frise ET dans une pilule d etat sous les actions —, une seule fois chez nous. L etat est une liste deroulante du formulaire, 200 px plus bas : deux controles pour la meme valeur, sur un ecran qui enregistre a la frappe, c est deux endroits ou lire un etat qui peut momentanement differer."
+      },
+      {
+        "texte": "En attente",
+        "motif": "donnee",
+        "raison": "Rendu deux fois par le kit, une fois chez nous : sa commande de demonstration a DEUX etapes non franchies, celle du jeu de mesure une seule. Le badge lui-meme est conforme."
+      },
+      {
+        "texte": "Numéro de suivi",
+        "motif": "contrainte",
+        "raison": "Rendu une fois par le kit — la ligne du panneau d informations —, trois fois chez nous : le kit le met en CHAMP sur un autre ecran (`CreateOrder`), nous l avons sur celui-ci. L appariement au plus proche tombe donc sur l etiquette du formulaire (13/500) et la compare a la ligne du kit (14/400)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      },
+      {
+        "textes": [
+          "Lien bloqué par DropLink  <h2>",
+          "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Contestation refusée le 20 septembre 202  <span>",
+          "Refusée  <span>",
+          "Réponse de DropLink  <span>",
+          "La facture jointe ne correspond pas au p  <p>",
+          "Encore 2 contestations possibles pour ce  <span>",
+          "Contester à nouveau  <button>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "texte": "#DLK7842",
+        "motif": "donnee",
+        "raison": "La reference du kit. La notre est DERIVEE de l identifiant plutot que stockee : un numero sequentiel exigerait une colonne, un compteur par boutique et une reprise de l existant, pour une reference qu on copie plus qu on ne recite."
+      },
+      {
+        "texte": "Modifier la commande",
+        "motif": "contrainte",
+        "raison": "La decision 16 interdit le bouton d enregistrement, et la sauvegarde est automatique : nos champs sont editables en place. Un bouton « modifier » n aurait mene qu a l ecran ou l on se trouve deja."
+      },
+      {
+        "textes": [
+          "Lucas M.",
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "Pays de livraison",
+          "France"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUNE COLONNE DE PAYS N EXISTE, et ce n est pas un oubli : le destinataire est un texte libre sans compte ni adresse (principe III). Il n y a donc aucune adresse d ou tirer un pays, et « France » ecrit d avance serait une valeur que la base n a pas enregistree."
+      },
+      {
+        "textes": [
+          "Nombre d'articles",
+          "3 articles"
+        ],
+        "motif": "donnee",
+        "raison": "Une commande DropLink porte une REFERENCE produit en texte libre et des medias, jamais des lignes de commande. Presenter le nombre de photos comme un nombre d articles dirait autre chose que ce qui est enregistre."
+      },
+      {
+        "textes": [
+          "Commandé",
+          "En livraison",
+          "Livré"
+        ],
+        "motif": "contrainte",
+        "raison": "Le vocabulaire des quatre etapes est VERROUILLE par la decision 4 du brief — preparation, expedie, en transit, livre — et notre frise les rend sous leur forme feminine, accordee a « commande »."
+      },
+      {
+        "textes": [
+          "La commande a été passée auprès du fourn",
+          "Le colis est en transit vers la France.",
+          "Le colis est en cours de livraison.",
+          "Le colis sera marqué comme livré."
+        ],
+        "motif": "contrainte",
+        "raison": "LE KIT MET DE LA PROSE SOUS CHAQUE ETAPE, Y COMPRIS SOUS CELLES QU AUCUN COLIS N A FRANCHIES. Reprise telle quelle, elle affirmerait a chaque commande un fait que la base n a pas enregistre — principe XII. Notre note est celle du point de passage qui a date l etape, et elle est OMISE tant qu il n y en a pas."
+      },
+      {
+        "texte": "https://droplink.fr/c/LucasM",
+        "motif": "donnee",
+        "raison": "Le lien public de la commande de demonstration. Le notre porte l origine reelle du serveur mesure et un jeton tire au hasard."
+      },
+      {
+        "textes": [
+          "Statut mis à jour : En transit",
+          "Lien client généré",
+          "3 articles ajoutés"
+        ],
+        "motif": "donnee",
+        "raison": "TROIS EVENEMENTS QUE LA BASE N ECRIT PAS. `order_events` porte dix types, tous emis par une mutation du VENDEUR ou du client ; l ingestion du suivi n en ecrit aucun, donc « statut mis a jour » n existe pas, et la generation du lien fait partie de la creation. « 3 articles ajoutes » est la charge utile d un evenement de demonstration."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
+        ],
+        "motif": "donnee",
+        "raison": "L adresse du compte jetable, fabriquee a chaque passage. Ancree aux deux bouts, elle ne couvre rien d autre."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "texte": "Enregistré",
+        "motif": "contrainte",
+        "raison": "LE TEMOIN DE SAUVEGARDE, exige par la decision 17 : la sauvegarde est automatique, donc l ecran doit dire a trois etats ce que la base a garde. Le kit n en dessine pas parce que son ecran de detail n edite rien."
+      },
+      {
+        "textes": [
+          "Client de verification",
+          "REF-V",
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "textes": [
+          "Référence produit",
+          "Vues du lien"
+        ],
+        "motif": "donnee",
+        "raison": "LES DEUX TUILES QUI REMPLACENT CELLES QUE LA BASE NE PORTE PAS. Voir les declarations symetriques de « Pays de livraison » et « Nombre d articles ». Elles portent de VRAIES colonnes — `product_ref`, et le compteur de consultations, qui est une metrique de verdict du produit (decision 22)."
+      },
+      {
+        "textes": [
+          "La commande",
+          "Nom ou pseudo du client",
+          "Texte libre. Votre client n’a pas de com",
+          "Un numéro tout juste collé n’est souvent",
+          "Statut",
+          "État des photos",
+          "À renseigner si votre client vous répond",
+          "Notes internes",
+          "Jamais visible par le client, et absent ",
+          "Transporteur",
+          "Reconnu d’après le numéro. Choisissez-le"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FORMULAIRE, ET C EST LA MEME CAUSE QUE L ORDRE DES BLOCS. Le kit le met sur un ecran separe (`CreateOrder`) avec deux boutons d enregistrement que la decision 16 interdit ; le depot n a aucune route de creation — la Server Action cree la ligne et redirige ici. Les aides sous les champs portent des decisions verrouillees : le destinataire n a jamais de compte (principe IV), un numero fraichement colle n est pas introuvable (decision 7), les notes internes sont absentes de l export (decision 15). Le champ « Transporteur » (18/09/2026) est celui de `CreateOrder` : le kit le pose sur l ecran de creation, il revient ici, sous le numero de suivi."
+      },
+      {
+        "textes": [
+          "Votre commande",
+          "pour Client de verification",
+          "Approuver"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CONTENU DE L APERCU, que le kit rend par une iframe vers sa vraie page client. La notre est une MAQUETTE a l echelle : reutiliser les vrais composants ferait entrer tout le poids de la page cliente dans l editeur, et une iframe vers `/p/<jeton>` compterait une vue sur sa propre commande (decision 22)."
+      },
+      {
+        "textes": [
+          "En préparation",
+          "Expédiée",
+          "Livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "Les etapes de NOTRE frise, verrouillees par la decision 4 — voir la declaration symetrique de « Commande », « En livraison » et « Livre »."
+      },
+      {
+        "textes": [
+          "Colis remis au transporteur — Guangzhou,",
+          "Colis arrive au centre de tri internatio"
+        ],
+        "motif": "donnee",
+        "raison": "Les points de passage du jeu de mesure. Le kit ecrit sa propre prose sous chaque etape — voir la declaration symetrique dans les manquants."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Contrôle approuvé par le client",
+          "Média ajouté"
+        ],
+        "motif": "donnee",
+        "raison": "Deux de nos dix types d evenements, face a ceux du kit. Le troisieme — « Commande modifiee » — porte desormais le libelle du kit."
+      },
+      {
+        "textes": [
+          "5 sur 20",
+          "· 1 vidéo sur 3"
+        ],
+        "motif": "contrainte",
+        "raison": "LES PLAFONDS DE MEDIAS, dans l en-tete du panneau. Le kit n en dessine pas parce qu il n en a pas : 20 medias et 3 videos par commande sont une contrainte de cout du produit, et un vendeur qui les decouvre au refus du vingt-et-unieme fichier a deja perdu son temps."
+      },
+      {
+        "textes": [
+          "Couverture",
+          "0:42",
+          "Glissez une vignette par sa poignée pour"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COUVERTURE, LA DUREE ET L AIDE AU DEPLACEMENT. Le kit dessine une grille de vignettes inertes ; la notre est reordonnable au glisser et au clavier (decisions 18 et 19), et la couverture est la premiere image que voit le client. Une poignee sans aide ne se decouvre pas."
+      },
+      {
+        "textes": [
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d",
+          "Révoquer et régénérer",
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      },
+      {
+        "motifs": [
+          "^\\d+ consultations?$"
+        ],
+        "motif": "donnee",
+        "raison": "LA VALEUR DE LA TUILE « VUES DU LIEN », dans son etat NON VIDE. Elle rendait « Jamais ouvert » tant que le jeu de mesure ne posait aucune ouverture : la tuile existait, mais un seul de ses deux etats etait exerce. Voir la declaration de « Vues du lien »."
+      }
+    ]
+  },
+  "fr-admin-commandes-contestation": {
+    "_etat": "LA CONTESTATION OUVERTE PAR L ADMINISTRATION (LIEN_BLOQUE=attente, clic « Voir la contestation »), contre `#commandes-contestation` (19/09/2026). Memes declarations que le dialogue de blocage ouvert.",
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble",
+          "Commandes [2/3]",
+          "Boutiques",
+          "Statistiques  <span>"
+        ],
+        "motif": "structure",
+        "raison": "L ENTREE DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span A L INTERIEUR du lien ; chez nous le lien EST l element qui porte le texte. La sonde compare donc un mot au CONTENANT du mot : rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere. Taille, graisse et couleur ne figurent pas dans l ecart : elles sont identiques."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "structure",
+        "raison": "Position et largeur. Le kit ecrit le role dans sa barre superieure, en haut a droite ; nous l ecrivons dans le bloc d identite au BAS de la colonne, ou il tient toute la largeur de celle-ci."
+      },
+      {
+        "textes": [
+          "Livrées [1/2]",
+          "Livrées [2/2]"
+        ],
+        "motif": "donnee",
+        "raison": "LA LEGENDE DE L ANNEAU ET LES TUILES S AJUSTENT A LEURS NOMBRES. Le libelle de legende est la piste souple de sa rangee : a cote de « 1 » au lieu de « 624 », il occupe 18 px de plus. Et le libelle d une tuile a la largeur de sa colonne, que le badge « +8 % » du kit elargit — badge declare dans les manquants. Taille, graisse et couleur sont celles du kit."
+      },
+      {
+        "textes": [
+          "Livrée  <nombre d'occurrences>",
+          "08/09/2025 16:42  <nombre d'occurrences>",
+          "Voir  <nombre d'occurrences>",
+          "50 %  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE A QUATRE COMMANDES, LE KIT DIX. Les nombres d occurrences des pilules, des dates, des boutons « Voir » et des parts d anneau suivent le nombre de lignes, et les parts elles-memes (« 25 % » contre « 50 % ») suivent leur repartition."
+      },
+      {
+        "textes": [
+          "commandes [1/3]",
+          "Commandes [3/3]",
+          "Gérez et suivez toutes les commandes cré",
+          "Total commandes",
+          "Réinitialiser",
+          "Liste des commandes",
+          "Boutique",
+          "Statut",
+          "Transporteur",
+          "Date",
+          "Actions",
+          "08/09/2025 15:21",
+          "08/09/2025 14:18",
+          "08/09/2025 16:42",
+          "08/09/2025 12:03",
+          "Voir",
+          "Répartition des statuts",
+          "50 %",
+          "30 %",
+          "12 %",
+          "5 %"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE PAR COLONNE DE CAUSES. L encart de trace precede les tuiles et la barre superieure du kit n existe pas : tout ce qui suit monte ou descend de quelques pixels. Dans le tableau, la case a cocher du kit n existe pas (aucune action groupee a porter), ni son menu « … » : les colonnes partent 48 px plus a gauche et « Voir » s aligne a droite. L en-tete du panneau de liste n a ni « Exporter » ni reglage de colonnes, donc son titre prend la largeur. Nos en-tetes sont des `th` qui portent le retrait de leur colonne, la ou le kit pose un span dans une grille. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "En transit",
+          "En préparation",
+          "Livrée"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS REPLIEES DU SELECTEUR DE STATUT, APPARIEES A DES PILULES DU KIT. Le kit ecrit « En transit », « En preparation » et « Livree » dans ses pilules de tableau ET dans son `select` ; la sonde releve nos options de `details` et, a nombre d occurrences egal, en apparie une avec une pilule du kit. Nos pilules, elles, portent exactement les valeurs du kit — 11,5/700, remplissage 6/11, rayon pilule, teinte du statut — et ne figurent pas dans l ecart."
+      },
+      {
+        "textes": [
+          "Lien bloqué  <span>",
+          "Contestation  <span>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE BLOQUEE N EST PAS LA MEME : la planche bloque sa cinquieme commande de demonstration, la sonde bloque REELLEMENT la premiere du jeu avant d ouvrir le dialogue sur la suivante. Seule la place suit sa ligne."
+      },
+      {
+        "textes": [
+          "Annuler  <button>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 5 PX PLUS HAUT, ET C EST LA FENETRE DE MESURE. Le dialogue est CENTRE dans la fenetre, des deux cotes, et il fait la meme hauteur (358). Or la sonde du kit mesure dans 1 010 px de haut (l en-tete viewport des planches), celle du produit dans 1 000 : (1 010 - 358) / 2 = 326 contre (1 000 - 358) / 2 = 321. Le titre subit le meme decalage (350 contre 345) ; il n est pas liste ici parce que sa reference differe et qu il est declare a part."
+      },
+      {
+        "textes": [
+          "Refuser la contestation  <button>",
+          "Refuser la contestation  <nombre d'occurrences>",
+          "Débloquer le lien  <button>",
+          "Débloquer le lien  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES QUATRE LIBELLES DANS UNE SEULE CELLULE (repos, attente, reussite, echec) : trois disent le meme mot, et la sonde apparie le texte au `span` du libelle courant, dont la boite n est pas celle du bouton. Le bouton lui-meme porte les valeurs de la planche, relevees : hauteur 44, rayon, fond, filet, ombre et remplissage identiques."
+      },
+      {
+        "textes": [
+          "Envoyée par le vendeur le 19 septembre 2",
+          "Ce produit est le mien : voici la factur",
+          "Votre réponse  <span>",
+          "Au moins 8 caractères. Le vendeur la lit"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE NE JOINT PAS D IMAGE. La planche montre la vignette de 96 px que le vendeur a jointe ; le jeu ne peut pas en deposer : les seuls identifiants R2 de la machine sont ceux de la PRODUCTION, et la mesure ne l ecrit pas. Sans elle, l explication prend toute la largeur (442 px contre 332), le cadre raccourcit, et le dialogue — centre — descend de 22 px (dont les 5 px connus de la fenetre de 1 010 du kit contre 1 000). Le chemin de l image est eprouve ailleurs : cle, forme et purge par tests/rls/contestation.test.ts."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Abonnements",
+          "Paiements",
+          "Support",
+          "Logs système",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "TROIS ECRANS DU KIT QUE LE DEPOT N A PAS, DONC TROIS ENTREES QUI MENERAIENT A UN 404 — pire qu une entree absente. Abonnements et Paiements sont de la facturation, que la contrainte n°1 interdit en phase 1 ; Support suppose un systeme de tickets que la base n a pas. Et le vocabulaire du produit gagne, le meme sur tous les ecrans d administration : « Comptes », « Journal d audit », « Parametres systeme »."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "1 sept. 2025 – 8 sept. 2025",
+          "admin@droplink.fr"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE DU KIT N EST PAS PORTEE, comme sur les autres ecrans de liste : « Ctrl K » annonce une recherche transverse qui n existe pas, et le selecteur de dates est remplace par le filtre de fenetre de la barre de filtres, qui commande reellement la liste. La carte decorative garde sa geometrie en bas de colonne et porte le rappel que tout est trace."
+      },
+      {
+        "textes": [
+          "Nouvelle commande"
+        ],
+        "motif": "contrainte",
+        "raison": "UN ADMINISTRATEUR NE CREE PAS DE COMMANDE POUR UN VENDEUR. Contrainte 3 : chacun est proprietaire de ses commandes et de ses destinataires. Une commande creee depuis l administration n aurait pas de proprietaire legitime."
+      },
+      {
+        "textes": [
+          "+12%",
+          "vs période précédente",
+          "30% du total",
+          "-10%"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUN COMPTEUR NE PORTE SON HISTORIQUE : `repartir_commandes_admin` rend des totaux instantanes, il n existe aucune valeur de periode precedente, donc aucun « +12 % ». Un badge calcule sur rien a la FORME d une mesure. La part du total est rendue, a la typographie francaise (« 50 % »)."
+      },
+      {
+        "textes": [
+          "Problèmes",
+          "Annulées",
+          "Problème",
+          "Annulée"
+        ],
+        "motif": "contrainte",
+        "raison": "DEUX ETATS QUI N EXISTENT PAS. La decision 4 arrete la frise a quatre etapes — preparation, expedie, en transit, livre — et la granularite vit dans le DETAIL du suivi. Il n y a ni « probleme » ni « annulee » a compter, a filtrer ou a signaler ; leurs deux tuiles portent « Expediees », la quatrieme etape que le kit ne compte pas, et les commandes creees ce mois-ci."
+      },
+      {
+        "textes": [
+          "Exporter"
+        ],
+        "motif": "contrainte",
+        "raison": "PAS D EXPORT DE LA PLATEFORME. L export CSV du produit est celui du vendeur, sur SES commandes, sous RLS avec sa session ; un export d administration sortirait de l application le fichier le plus precieux que ce produit puisse laisser partir. Ce n est pas un bouton, c est une decision produit."
+      },
+      {
+        "textes": [
+          "Client",
+          "Yanis B.",
+          "yanis.b@gmail.com",
+          "Inès K.",
+          "ines.k@hotmail.fr",
+          "Samir A.",
+          "samir.a@outlook.fr",
+          "Léa M.",
+          "lea.m@gmail.com",
+          "Thomas R.",
+          "thomas.r@outlook.fr",
+          "Julie P.",
+          "julie.p@gmail.com",
+          "Mehdi S.",
+          "mehdi.s@icloud.com",
+          "Camille D.",
+          "camille.d@gmail.com",
+          "Lucas F.",
+          "lucas.f@outlook.fr",
+          "Sara L.",
+          "sara.l@gmail.com"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CLIENT FINAL N APPARAIT PAS, ET C EST LA DECISION DE CET ECRAN (migration 159). Son pseudo et son adresse appartiennent a quelqu un qui n a jamais eu de compte chez nous et n a rien accepte ; la supervision decide avec la boutique, le statut, le transporteur et la date. La colonne porte le COMPTE du vendeur, et « Voir » mene a sa fiche, elle-meme auditee. `tests/rls/commandes-admin.test.ts` le controle par valeur."
+      },
+      {
+        "textes": [
+          "#DLK7838",
+          "StreetWear FR",
+          "LP",
+          "La Poste",
+          "LuxShop",
+          "CP",
+          "Chronopost",
+          "Paris Sneakers",
+          "ModeAddict",
+          "DHL",
+          "TechStore",
+          "UrbanPlace",
+          "MR",
+          "Mondial Relay",
+          "CO",
+          "Colissimo",
+          "1 248",
+          "1 248 commandes au total"
+        ],
+        "motif": "donnee",
+        "raison": "La population de demonstration du kit : references, boutiques, transporteurs et volumes. Le jeu de mesure porte quatre commandes, une par statut, et leurs transporteurs sont ceux que le catalogue officiel de 17TRACK nomme pour leurs codes — « DHL Express », « FedEx », « 4PX »."
+      },
+      {
+        "textes": [
+          "Affichage de 1 à 10 sur 1 248 commandes",
+          "Afficher"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PAGINATION EST PAR CURSEUR, JAMAIS PAR DECALAGE. A la page 40 d un jeu de 9 600, un `offset` lit 2 000 lignes pour en rendre 50 : le cout croit avec le numero de page. Un curseur ne sait pas dire « 1 a 10 sur 1 248 » sans un comptage complet a chaque page. L ecran rend donc un lien « Voir la suite »."
+      },
+      {
+        "textes": [
+          "Activité récente",
+          "Voir tout",
+          "Nouvelle commande créée",
+          "#DLK7838 par Yanis B.",
+          "Il y a 12 min",
+          "Statut mis à jour",
+          "#DLK7837 → Livrée",
+          "Nouveau suivi ajouté",
+          "#DLK7836 · La Poste",
+          "Il y a 1 h",
+          "Problème de livraison signalé",
+          "Commande livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FLUX D ACTIVITE NOMME DES COMMANDES ET DES CLIENTS TIERS A CHAQUE OUVERTURE, et ses faits n existent pas tous : « Probleme de livraison signale » suppose un etat que la decision 4 refuse, et l ingestion du suivi n ecrit aucun evenement de commande. La liste, elle, est une consultation deliberee, tracee avec ses criteres."
+      },
+      {
+        "textes": [
+          "Contestation du blocage de #DLK7834"
+        ],
+        "motif": "donnee",
+        "raison": "La reference de la commande de demonstration dans le titre du dialogue — pendant du motif ci-dessous cote produit."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend",
+          "Cette consultation est écrite au journal"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et ses deux rappels de trace — l encart permanent de la colonne, et celui de l ecran, qui dit AVANT de regarder que la consultation est ecrite au journal et ce que la liste ne montre pas."
+      },
+      {
+        "motifs": [
+          "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "Le compte jetable du jeu de mesure, dont l adresse change a chaque passage. Un motif ancre plutot qu une adresse, qui serait morte au passage suivant."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "LES REFERENCES COURTES DU JEU DE MESURE, derivees d identifiants tires au hasard — six caracteres hexadecimaux, la formule de `referenceCourte()`. Elles changent a chaque passage : un motif ancre, jamais une liste."
+      },
+      {
+        "textes": [
+          "avec du contenu réel",
+          "Expédiées",
+          "Créées ce mois-ci",
+          "depuis le 1er du mois",
+          "Compte"
+        ],
+        "motif": "contrainte",
+        "raison": "NOS TUILES ET NOTRE COLONNE — voir les declarations symetriques des manquants. « Expediees » est la quatrieme etape de la frise, que le kit ne compte pas ; « Creees ce mois-ci » est le compteur de la vue d ensemble, a la meme source ; « avec du contenu reel » dit ce que le total compte, les brouillons abandonnes n etant pas des commandes. « Compte » remplace « Client » : c est le vendeur, pas son client."
+      },
+      {
+        "textes": [
+          "Tous les statuts",
+          "Expédiée",
+          "Toutes les dates"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS DES DEUX SELECTEURS, REPLIEES. Le kit rend les siennes dans un `select` natif ; les notres sont des liens dans un `details` ferme — le filtre vit dans l URL, donc la vue se partage, se recharge, et ses criteres entrent dans la trace. La sonde releve toutes les options, l oeil n en voit qu une de chaque cote."
+      },
+      {
+        "textes": [
+          "25 % du total",
+          "4 commandes au total",
+          "Atelier de verification",
+          "FX",
+          "FedEx",
+          "4P",
+          "4PX",
+          "DH",
+          "DHL Express"
+        ],
+        "motif": "donnee",
+        "raison": "Les volumes, la boutique et les transporteurs du jeu de mesure : quatre commandes, donc « 25 % du total » et « 4 commandes au total » la ou le kit en montre 1 248."
+      },
+      {
+        "textes": [
+          "En cours…"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES LIBELLES DANS UNE SEULE CELLULE (BoutonAction, comme la suspension de la fiche compte) : « En cours… » y est rendu invisible pour RESERVER sa largeur, sans quoi le bouton s elargirait au clic. La planche dessine la meme reserve (AccSuspension) mais sur un autre bouton."
+      },
+      {
+        "motifs": [
+          "^Contestation du blocage de #[0-9A-F]{6}$"
+        ],
+        "textes": [],
+        "motif": "donnee",
+        "raison": "La reference courte de la commande du jeu de mesure dans le titre du dialogue, derivee d un identifiant tire au hasard : un motif ancre, jamais une valeur litterale."
+      }
+    ]
+  },
+  "fr-commandes-bloquee-tel": {
+    "_etat": "LA LISTE A 390 PX AVEC UNE COMMANDE AU LIEN BLOQUE (LIEN_BLOQUE=1), contre `#commandes-bloquee` servie a 390. Memes declarations que la liste au telephone.",
+    "valeurs": [
+      {
+        "textes": [
+          "Commandes",
+          "124 commandes, 12 créées cette semaine",
+          "Jamais ouvertes",
+          "Toutes",
+          "Bloquées"
+        ],
+        "motif": "donnee",
+        "raison": "LARGEURS SEULES, TIREES PAR LES CHIFFRES. Le sous-titre et les compteurs d onglet portent 124, 67 et 4 au kit, 4, 1 et 2 au produit : le bloc titre et chaque onglet s elargissent d autant, et ceux qui suivent se decalent de quelques pixels."
+      },
+      {
+        "textes": [
+          "En transit",
+          "Préparation",
+          "Jamais ouvert",
+          "Expédié",
+          "Livré",
+          "Affichage de 8 sur 124 commandes"
+        ],
+        "motifs": [
+          "^\\d+ photos? · \\d+ vues?$"
+        ],
+        "volatile": true,
+        "motif": "donnee",
+        "raison": "PLACE ET NOMBRE DE CARTES : huit commandes au kit, quatre au jeu de mesure, dans un autre ordre d etapes. Chaque carte a la meme taille et les memes valeurs ; ce sont leur rang et leur nombre qui changent. VOLATILE : les quatre commandes du jeu sont creees a la meme seconde, et leur ordre change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Nouvelle"
+        ],
+        "motif": "structure",
+        "raison": "L ACTION FLOTTANTE EST UN BOUTON D ATTENTE : le produit rend ses quatre libelles (repos, en cours, reussi, echoue), superposes et un seul visible, pour que la largeur ne saute pas pendant la creation. La planche n en dessine que le repos."
+      },
+      {
+        "textes": [
+          "Lien bloqué  <span>"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE : la pastille est sur la ligne de la commande bloquee, et les cartes du jeu n ont ni la hauteur ni l ordre de celles de la planche — voir les declarations de la liste au telephone."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc de compte existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "Lucas M.",
+          "Sarah B.",
+          "Adam K.",
+          "Enzo D.",
+          "Lina T.",
+          "Mehdi R.",
+          "Chloé P.",
+          "Tom G."
+        ],
+        "motif": "donnee",
+        "raison": "LES HUIT COMMANDES DE DEMONSTRATION du kit, avec leurs references, leurs destinataires et leurs numeros de suivi. Le jeu de mesure en porte quatre, avec les siennes."
+      },
+      {
+        "textes": [
+          "il y a 2 h",
+          "hier",
+          "il y a 2 j",
+          "Sans mouvement"
+        ],
+        "motif": "donnee",
+        "raison": "LES CARTES DE DEMONSTRATION DU KIT AU TELEPHONE : leurs anciennetes, et l etat « sans mouvement » de la commande en probleme. Le jeu de mesure n a que quatre commandes creees a la seconde, aucune immobile depuis dix jours."
+      },
+      {
+        "textes": [
+          "5 photos · 4 vues"
+        ],
+        "motif": "donnee",
+        "raison": "LA COMMANDE BLOQUEE DU JEU EST CELLE QUI PORTE 5 PHOTOS ET 4 VUES. Au telephone, la pastille « Lien bloque » prend la place de la ligne d appoint (planche) : c est donc CETTE ligne-la qui disparait chez nous, quand la planche bloque une commande a « 1 photos · 7 vues »."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat.",
+        "motifs": []
+      },
+      {
+        "textes": [
+          "Cliente en preparation",
+          "Client expedie",
+          "Client de verification",
+          "Cliente livree"
+        ],
+        "motif": "donnee",
+        "raison": "LES QUATRE COMMANDES DU JEU DE MESURE, avec leurs destinataires, leurs references et leurs numeros. Le kit en rend huit, inventees.",
+        "motifs": []
+      },
+      {
+        "textes": [
+          "REF-P",
+          "REF-E",
+          "REF-L",
+          "REF-V"
+        ],
+        "motif": "donnee",
+        "raison": "LES QUATRE COMMANDES DU JEU DE MESURE : references produit, et, par MOTIF, leur anciennete (creees quelques secondes avant la mesure) et leur compte de photos et de vues.",
+        "motifs": [
+          "^il\\sy\\sa\\s\\d+\\s(s|min|h|j)$",
+          "^\\d+ photos? · \\d+ vues?$"
+        ]
+      }
+    ]
+  },
+  "fr-commandes-commande-bloquee-tel": {
+    "_etat": "LE DETAIL A 390 PX, lien bloque, etat « bloquee », contre `#commande-bloquee…` servie a 390. Memes declarations que le detail au telephone.",
+    "valeurs": [
+      {
+        "textes": [
+          "12 septembre 2025 à 14:32",
+          "15 septembre 2025 à 09:15",
+          "Date de création",
+          "Dernière mise à jour",
+          "Lien client",
+          "numéro de suivi",
+          "Historique de la commande",
+          "Contrôle approuvé par le client",
+          "Commande modifiée",
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d"
+        ],
+        "motif": "donnee",
+        "raison": "LA LONGUEUR DES DATES DU JEU DE MESURE. Sa date de creation, ecrite en toutes lettres avec l annee et l heure, depasse les 183 px que la rangee laisse a la valeur et passe sur deux lignes ; celle du kit y tient. La rangee grandit de 17 px, et tout ce qui suit — historique, revocation — descend d autant, a quelques pixels pres selon la date du jour. Valeurs, tailles et couleurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "Méthode d'expédition",
+          "Numéro de suivi"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DEUX LIBELLES QUI SUIVENT LA DATE DU JOUR. La date de creation du jeu est celle de la mesure, ecrite en toutes lettres : selon la largeur de ses chiffres elle tient sur une ligne ou passe sur deux, et ces deux rangees descendent ou non de 17 px. Constate le 19/09/2026 : la meme mesure, deux jours differents, deux positions. Volatile parce que sa presence depend du calendrier, pas de l ecran — la declaration voisine reste exigee."
+      },
+      {
+        "textes": [
+          "10 sept. 2025",
+          "9 sept. 2025",
+          "8 sept. 2025",
+          "à 09:15",
+          "à 11:02",
+          "à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DATES DE L HISTORIQUE, MEME CAUSE QUE CI-DESSUS : la rangee de la date de creation grandit et tout l historique descend. VOLATILE (19/09/2026) : le jeu est date du jour du passage, et ce jour decide si ses dates ont la largeur de celles du kit — le 19/09, les quatre tombent a deux chiffres et ne s ecartent plus ; la declaration mourait alors qu elle couvre toujours le meme decalage."
+      },
+      {
+        "textes": [
+          "Révoquer et régénérer"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ATTENTE DE LA REVOCATION : le produit rend ses trois libelles (repos, en cours, echec), superposes et un seul visible. Sa place suit la longueur des dates, declaree ci-dessus."
+      },
+      {
+        "textes": [
+          "Commande créée",
+          "Média ajouté"
+        ],
+        "volatile": true,
+        "motif": "donnee",
+        "raison": "L ORDRE DE DEUX EVENEMENTS DE MEME SECONDE : le jeu cree la commande et son media dans la meme transaction, et leur ordre dans l historique change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Créée le 12 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA DATE DE CREATION DU JEU, ECRITE EN TOUTES LETTRES. Le jeu est cree le jour du passage : quand ce jour tombe en septembre, sa date s apparie a celle du kit (« Creee le 12 septembre 2025 a 14:32 », chiffres normalises) et les deux ont la meme largeur ; un autre mois, le nom du mois change sa longueur. VOLATILE, donc (17/09/2026)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025 [1/4]  <time>",
+          "11 sept. 2025 [2/4]  <time>",
+          "11 sept. 2025 [3/4]  <time>",
+          "11 sept. 2025 [4/4]  <time>",
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40 [1/4]  <span>",
+          "à 18:40 [2/4]  <span>",
+          "à 18:40 [3/4]  <span>",
+          "à 18:40 [4/4]  <span>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique. VOLATILE, et les quatre rangs : le jeu est date du jour du passage, et c est ce jour qui decide a quelle ligne s apparie la date de la planche — [1/4] le 18/09, [4/4] le 19/09 (toutes les dates a deux chiffres). Seule la ligne commentee est couverte : sa hauteur (68 contre 34) et le decalage qu elle entraine."
+      },
+      {
+        "textes": [
+          "Couverture  <span>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "https://droplink.fr/p/LucasM7Qk2"
+        ],
+        "motif": "donnee",
+        "raison": "LA REFERENCE ET LE LIEN CLIENT DE LA COMMANDE DE DEMONSTRATION. Le produit rend ceux de la commande du jeu, derives d un identifiant et d un jeton tires au hasard."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "textes": [
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      }
+    ]
+  },
+  "fr-commandes-commande-contestation-tel": {
+    "_etat": "LE DETAIL A 390 PX, lien bloque, etat « contestation », contre `#commande-bloquee…` servie a 390. Memes declarations que le detail au telephone.",
+    "valeurs": [
+      {
+        "textes": [
+          "12 septembre 2025 à 14:32",
+          "15 septembre 2025 à 09:15",
+          "Date de création",
+          "Dernière mise à jour",
+          "Lien client",
+          "numéro de suivi",
+          "Historique de la commande",
+          "Contrôle approuvé par le client",
+          "Commande modifiée",
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d"
+        ],
+        "motif": "donnee",
+        "raison": "LA LONGUEUR DES DATES DU JEU DE MESURE. Sa date de creation, ecrite en toutes lettres avec l annee et l heure, depasse les 183 px que la rangee laisse a la valeur et passe sur deux lignes ; celle du kit y tient. La rangee grandit de 17 px, et tout ce qui suit — historique, revocation — descend d autant, a quelques pixels pres selon la date du jour. Valeurs, tailles et couleurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "Méthode d'expédition",
+          "Numéro de suivi"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DEUX LIBELLES QUI SUIVENT LA DATE DU JOUR. La date de creation du jeu est celle de la mesure, ecrite en toutes lettres : selon la largeur de ses chiffres elle tient sur une ligne ou passe sur deux, et ces deux rangees descendent ou non de 17 px. Constate le 19/09/2026 : la meme mesure, deux jours differents, deux positions. Volatile parce que sa presence depend du calendrier, pas de l ecran — la declaration voisine reste exigee."
+      },
+      {
+        "textes": [
+          "10 sept. 2025",
+          "9 sept. 2025",
+          "8 sept. 2025",
+          "à 09:15",
+          "à 11:02",
+          "à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DATES DE L HISTORIQUE, MEME CAUSE QUE CI-DESSUS : la rangee de la date de creation grandit et tout l historique descend. VOLATILE (19/09/2026) : le jeu est date du jour du passage, et ce jour decide si ses dates ont la largeur de celles du kit — le 19/09, les quatre tombent a deux chiffres et ne s ecartent plus ; la declaration mourait alors qu elle couvre toujours le meme decalage."
+      },
+      {
+        "textes": [
+          "Révoquer et régénérer"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ATTENTE DE LA REVOCATION : le produit rend ses trois libelles (repos, en cours, echec), superposes et un seul visible. Sa place suit la longueur des dates, declaree ci-dessus."
+      },
+      {
+        "textes": [
+          "Commande créée",
+          "Média ajouté"
+        ],
+        "volatile": true,
+        "motif": "donnee",
+        "raison": "L ORDRE DE DEUX EVENEMENTS DE MEME SECONDE : le jeu cree la commande et son media dans la meme transaction, et leur ordre dans l historique change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Créée le 12 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA DATE DE CREATION DU JEU, ECRITE EN TOUTES LETTRES. Le jeu est cree le jour du passage : quand ce jour tombe en septembre, sa date s apparie a celle du kit (« Creee le 12 septembre 2025 a 14:32 », chiffres normalises) et les deux ont la meme largeur ; un autre mois, le nom du mois change sa longueur. VOLATILE, donc (17/09/2026)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025 [1/4]  <time>",
+          "11 sept. 2025 [2/4]  <time>",
+          "11 sept. 2025 [3/4]  <time>",
+          "11 sept. 2025 [4/4]  <time>",
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40 [1/4]  <span>",
+          "à 18:40 [2/4]  <span>",
+          "à 18:40 [3/4]  <span>",
+          "à 18:40 [4/4]  <span>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique. VOLATILE, et les quatre rangs : le jeu est date du jour du passage, et c est ce jour qui decide a quelle ligne s apparie la date de la planche — [1/4] le 18/09, [4/4] le 19/09 (toutes les dates a deux chiffres). Seule la ligne commentee est couverte : sa hauteur (68 contre 34) et le decalage qu elle entraine."
+      },
+      {
+        "textes": [
+          "Envoyer la contestation  <button>",
+          "Envoyer la contestation  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES QUATRE LIBELLES DANS UNE SEULE CELLULE (repos, attente, reussite, echec) : trois disent le meme mot, et la sonde apparie le texte au `span` du libelle courant, dont la boite n est pas celle du bouton. Le bouton lui-meme porte les valeurs de la planche, relevees : hauteur 44, rayon, fond, filet, ombre et remplissage identiques."
+      },
+      {
+        "textes": [
+          "Couverture  <span>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "https://droplink.fr/p/LucasM7Qk2"
+        ],
+        "motif": "donnee",
+        "raison": "LA REFERENCE ET LE LIEN CLIENT DE LA COMMANDE DE DEMONSTRATION. Le produit rend ceux de la commande du jeu, derives d un identifiant et d un jeton tires au hasard."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "textes": [
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      },
+      {
+        "textes": [
+          "Envoi…"
+        ],
+        "motif": "structure",
+        "raison": "Le libelle d attente du meme bouton, invisible au repos : il reserve la largeur pour qu elle ne saute pas pendant l envoi. La planche ne dessine que le repos."
+      }
+    ]
+  },
+  "fr-commandes-commande-attente-tel": {
+    "_etat": "LE DETAIL A 390 PX, lien bloque, etat « attente », contre `#commande-bloquee…` servie a 390. Memes declarations que le detail au telephone.",
+    "valeurs": [
+      {
+        "textes": [
+          "12 septembre 2025 à 14:32",
+          "15 septembre 2025 à 09:15",
+          "Date de création",
+          "Dernière mise à jour",
+          "Lien client",
+          "numéro de suivi",
+          "Historique de la commande",
+          "Contrôle approuvé par le client",
+          "Commande modifiée",
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d"
+        ],
+        "motif": "donnee",
+        "raison": "LA LONGUEUR DES DATES DU JEU DE MESURE. Sa date de creation, ecrite en toutes lettres avec l annee et l heure, depasse les 183 px que la rangee laisse a la valeur et passe sur deux lignes ; celle du kit y tient. La rangee grandit de 17 px, et tout ce qui suit — historique, revocation — descend d autant, a quelques pixels pres selon la date du jour. Valeurs, tailles et couleurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "Méthode d'expédition",
+          "Numéro de suivi"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DEUX LIBELLES QUI SUIVENT LA DATE DU JOUR. La date de creation du jeu est celle de la mesure, ecrite en toutes lettres : selon la largeur de ses chiffres elle tient sur une ligne ou passe sur deux, et ces deux rangees descendent ou non de 17 px. Constate le 19/09/2026 : la meme mesure, deux jours differents, deux positions. Volatile parce que sa presence depend du calendrier, pas de l ecran — la declaration voisine reste exigee."
+      },
+      {
+        "textes": [
+          "10 sept. 2025",
+          "9 sept. 2025",
+          "8 sept. 2025",
+          "à 09:15",
+          "à 11:02",
+          "à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DATES DE L HISTORIQUE, MEME CAUSE QUE CI-DESSUS : la rangee de la date de creation grandit et tout l historique descend. VOLATILE (19/09/2026) : le jeu est date du jour du passage, et ce jour decide si ses dates ont la largeur de celles du kit — le 19/09, les quatre tombent a deux chiffres et ne s ecartent plus ; la declaration mourait alors qu elle couvre toujours le meme decalage."
+      },
+      {
+        "textes": [
+          "Révoquer et régénérer"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ATTENTE DE LA REVOCATION : le produit rend ses trois libelles (repos, en cours, echec), superposes et un seul visible. Sa place suit la longueur des dates, declaree ci-dessus."
+      },
+      {
+        "textes": [
+          "Commande créée",
+          "Média ajouté"
+        ],
+        "volatile": true,
+        "motif": "donnee",
+        "raison": "L ORDRE DE DEUX EVENEMENTS DE MEME SECONDE : le jeu cree la commande et son media dans la meme transaction, et leur ordre dans l historique change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Créée le 12 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA DATE DE CREATION DU JEU, ECRITE EN TOUTES LETTRES. Le jeu est cree le jour du passage : quand ce jour tombe en septembre, sa date s apparie a celle du kit (« Creee le 12 septembre 2025 a 14:32 », chiffres normalises) et les deux ont la meme largeur ; un autre mois, le nom du mois change sa longueur. VOLATILE, donc (17/09/2026)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025 [1/4]  <time>",
+          "11 sept. 2025 [2/4]  <time>",
+          "11 sept. 2025 [3/4]  <time>",
+          "11 sept. 2025 [4/4]  <time>",
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40 [1/4]  <span>",
+          "à 18:40 [2/4]  <span>",
+          "à 18:40 [3/4]  <span>",
+          "à 18:40 [4/4]  <span>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique. VOLATILE, et les quatre rangs : le jeu est date du jour du passage, et c est ce jour qui decide a quelle ligne s apparie la date de la planche — [1/4] le 18/09, [4/4] le 19/09 (toutes les dates a deux chiffres). Seule la ligne commentee est couverte : sa hauteur (68 contre 34) et le decalage qu elle entraine."
+      },
+      {
+        "textes": [
+          "Couverture  <span>"
+        ],
+        "motif": "structure",
+        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "https://droplink.fr/p/LucasM7Qk2"
+        ],
+        "motif": "donnee",
+        "raison": "LA REFERENCE ET LE LIEN CLIENT DE LA COMMANDE DE DEMONSTRATION. Le produit rend ceux de la commande du jeu, derives d un identifiant et d un jeton tires au hasard."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "textes": [
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      }
+    ]
+  },
+  "fr-commandes-commande-refusee-tel": {
+    "_etat": "LE DETAIL A 390 PX, lien bloque, etat « refusee », contre `#commande-bloquee…` servie a 390. Memes declarations que le detail au telephone.",
+    "valeurs": [
+      {
+        "textes": [
+          "12 septembre 2025 à 14:32",
+          "15 septembre 2025 à 09:15",
+          "Date de création",
+          "Dernière mise à jour",
+          "Lien client",
+          "numéro de suivi",
+          "Historique de la commande",
+          "Contrôle approuvé par le client",
+          "Commande modifiée",
+          "Révoquer le lien",
+          "L’ancien lien cessera définitivement de ",
+          "Je comprends que l’ancien lien cessera d"
+        ],
+        "motif": "donnee",
+        "raison": "LA LONGUEUR DES DATES DU JEU DE MESURE. Sa date de creation, ecrite en toutes lettres avec l annee et l heure, depasse les 183 px que la rangee laisse a la valeur et passe sur deux lignes ; celle du kit y tient. La rangee grandit de 17 px, et tout ce qui suit — historique, revocation — descend d autant, a quelques pixels pres selon la date du jour. Valeurs, tailles et couleurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "Méthode d'expédition",
+          "Numéro de suivi"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DEUX LIBELLES QUI SUIVENT LA DATE DU JOUR. La date de creation du jeu est celle de la mesure, ecrite en toutes lettres : selon la largeur de ses chiffres elle tient sur une ligne ou passe sur deux, et ces deux rangees descendent ou non de 17 px. Constate le 19/09/2026 : la meme mesure, deux jours differents, deux positions. Volatile parce que sa presence depend du calendrier, pas de l ecran — la declaration voisine reste exigee."
+      },
+      {
+        "textes": [
+          "10 sept. 2025",
+          "9 sept. 2025",
+          "8 sept. 2025",
+          "à 09:15",
+          "à 11:02",
+          "à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DATES DE L HISTORIQUE, MEME CAUSE QUE CI-DESSUS : la rangee de la date de creation grandit et tout l historique descend. VOLATILE (19/09/2026) : le jeu est date du jour du passage, et ce jour decide si ses dates ont la largeur de celles du kit — le 19/09, les quatre tombent a deux chiffres et ne s ecartent plus ; la declaration mourait alors qu elle couvre toujours le meme decalage."
+      },
+      {
+        "textes": [
+          "Révoquer et régénérer"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ATTENTE DE LA REVOCATION : le produit rend ses trois libelles (repos, en cours, echec), superposes et un seul visible. Sa place suit la longueur des dates, declaree ci-dessus."
+      },
+      {
+        "textes": [
+          "Commande créée",
+          "Média ajouté"
+        ],
+        "volatile": true,
+        "motif": "donnee",
+        "raison": "L ORDRE DE DEUX EVENEMENTS DE MEME SECONDE : le jeu cree la commande et son media dans la meme transaction, et leur ordre dans l historique change d un passage a l autre."
+      },
+      {
+        "textes": [
+          "Créée le 12 septembre 2025 à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA DATE DE CREATION DU JEU, ECRITE EN TOUTES LETTRES. Le jeu est cree le jour du passage : quand ce jour tombe en septembre, sa date s apparie a celle du kit (« Creee le 12 septembre 2025 a 14:32 », chiffres normalises) et les deux ont la meme largeur ; un autre mois, le nom du mois change sa longueur. VOLATILE, donc (17/09/2026)."
+      },
+      {
+        "textes": [
+          "11 sept. 2025 [1/4]  <time>",
+          "11 sept. 2025 [2/4]  <time>",
+          "11 sept. 2025 [3/4]  <time>",
+          "11 sept. 2025 [4/4]  <time>",
+          "11 sept. 2025  <nombre d'occurrences>",
+          "à 18:40 [1/4]  <span>",
+          "à 18:40 [2/4]  <span>",
+          "à 18:40 [3/4]  <span>",
+          "à 18:40 [4/4]  <span>",
+          "à 18:40  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique. VOLATILE, et les quatre rangs : le jeu est date du jour du passage, et c est ce jour qui decide a quelle ligne s apparie la date de la planche — [1/4] le 18/09, [4/4] le 19/09 (toutes les dates a deux chiffres). Seule la ligne commentee est couverte : sa hauteur (68 contre 34) et le decalage qu elle entraine."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte. Le bloc existe et se trouve au meme endroit."
+      },
+      {
+        "textes": [
+          "CJ123456789FR",
+          "La Poste"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs de la commande de demonstration du kit. Les tuiles qui les portent EXISTENT desormais et rendent celles du jeu de mesure — « Client de verification », « DLKMESURE0001FR », « FedEx »."
+      },
+      {
+        "textes": [
+          "#DLK7842",
+          "https://droplink.fr/p/LucasM7Qk2"
+        ],
+        "motif": "donnee",
+        "raison": "LA REFERENCE ET LE LIEN CLIENT DE LA COMMANDE DE DEMONSTRATION. Le produit rend ceux de la commande du jeu, derives d un identifiant et d un jeton tires au hasard."
+      },
+      {
+        "textes": [
+          "Contrôle refusé par le client",
+          "« La couture de la manche est de travers"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29), pas un confort."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "Notre reference courte, DERIVEE de l identifiant de la commande, donc differente a chaque passage. Voir la declaration symetrique de « #DLK7842 »."
+      },
+      {
+        "textes": [
+          "DLKMESURE0001FR",
+          "FedEx"
+        ],
+        "motif": "donnee",
+        "raison": "Les valeurs du jeu de mesure dans les quatre tuiles de resume, face a celles du kit. ⚠️ « Jamais ouvert » A QUITTE CETTE LISTE le 12/09 au soir : le jeu de mesure pose desormais des ouvertures de lien, donc la tuile rend son etat NON VIDE. Les deux etats existent ; c est le jeu qui n en exercait qu un."
+      },
+      {
+        "motifs": [
+          "^http://localhost:\\d+/p/[A-Za-z0-9_-]+$"
+        ],
+        "motif": "donnee",
+        "raison": "Le lien public reel, sur l origine du serveur de mesure et un jeton tire au hasard a la creation. Voir la declaration symetrique de « https://droplink.fr/c/LucasM »."
+      },
+      {
+        "textes": [
+          "Révocation…"
+        ],
+        "motif": "contrainte",
+        "raison": "LA REVOCATION DU LIEN, exigee par le principe V et volontairement inconfortable : le jeton est immuable A VIE, et seule cette action explicite le change. Deux gestes separes, une case a cocher qui nomme la consequence, aucun raccourci. Le kit ne dessine rien de tel."
+      }
+    ]
+  },
+  "fr-admin-commandes-contestation-tel": {
+    "_etat": "LA CONTESTATION OUVERTE A 390 PX, contre `#commandes-contestation` servie a 390. Memes declarations que le dialogue de blocage au telephone.",
+    "valeurs": [
+      {
+        "textes": [
+          "commandes [3/3]",
+          "Total commandes",
+          "Réinitialiser",
+          "Répartition des statuts",
+          "50 % [1/4]",
+          "30 % [2/4]",
+          "12 % [3/4]",
+          "5 % [4/4]",
+          "En préparation"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Livrées [1/2]",
+          "Livrées [2/2]"
+        ],
+        "motif": "donnee",
+        "raison": "LA LEGENDE DE L ANNEAU ET LES TUILES S AJUSTENT A LEURS NOMBRES. Le libelle de legende est la piste souple de sa rangee : a cote de « 1 » au lieu de « 624 », il occupe 18 px de plus. Et le libelle d une tuile a la largeur de sa colonne, que le badge « +8 % » du kit elargit — badge declare dans les manquants. Taille, graisse et couleur sont celles du kit."
+      },
+      {
+        "textes": [
+          "Livrée  <nombre d'occurrences>",
+          "Voir  <nombre d'occurrences>",
+          "50 %  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE A QUATRE COMMANDES, LE KIT DIX. Les nombres d occurrences des pilules, des dates, des boutons « Voir » et des parts d anneau suivent le nombre de lignes, et les parts elles-memes (« 25 % » contre « 50 % ») suivent leur repartition."
+      },
+      {
+        "textes": [
+          "Total commandes",
+          "Réinitialiser",
+          "Liste des commandes",
+          "Voir",
+          "Répartition des statuts"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR, UNE SEULE CAUSE PAR COLONNE DE CAUSES. L encart de trace precede les tuiles et la barre superieure du kit n existe pas : tout ce qui suit monte ou descend de quelques pixels. Dans le tableau, la case a cocher du kit n existe pas (aucune action groupee a porter), ni son menu « … » : les colonnes partent 48 px plus a gauche et « Voir » s aligne a droite. L en-tete du panneau de liste n a ni « Exporter » ni reglage de colonnes, donc son titre prend la largeur. Nos en-tetes sont des `th` qui portent le retrait de leur colonne, la ou le kit pose un span dans une grille. Tailles, graisses, interlettrages et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "Livrée"
+        ],
+        "motif": "structure",
+        "raison": "APPARIEMENT PAR RANG DES PASTILLES ET DES OPTIONS. Le meme mot est une pastille de statut sur une ligne, une option du filtre relevee fermee, et un libelle de tuile : la soustraction les apparie dans l ordre du document, et compare donc une pastille a une option. Chacune porte les valeurs de son modele."
+      },
+      {
+        "textes": [
+          "En transit"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS REPLIEES DU SELECTEUR DE STATUT, APPARIEES A DES PILULES DU KIT. Le kit ecrit « En transit », « En preparation » et « Livree » dans ses pilules de tableau ET dans son `select` ; la sonde releve nos options de `details` et, a nombre d occurrences egal, en apparie une avec une pilule du kit. Nos pilules, elles, portent exactement les valeurs du kit — 11,5/700, remplissage 6/11, rayon pilule, teinte du statut — et ne figurent pas dans l ecart."
+      },
+      {
+        "textes": [
+          "Lien bloqué  <span>",
+          "Contestation  <span>"
+        ],
+        "motif": "donnee",
+        "raison": "LA LIGNE BLOQUEE N EST PAS LA MEME : la planche bloque sa cinquieme commande de demonstration, la sonde bloque REELLEMENT la premiere du jeu avant d ouvrir le dialogue sur la suivante. Seule la place suit sa ligne."
+      },
+      {
+        "textes": [
+          "Refuser la contestation  <button>",
+          "Refuser la contestation  <nombre d'occurrences>",
+          "Débloquer le lien  <button>",
+          "Débloquer le lien  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES QUATRE LIBELLES DANS UNE SEULE CELLULE (repos, attente, reussite, echec) : trois disent le meme mot, et la sonde apparie le texte au `span` du libelle courant, dont la boite n est pas celle du bouton. Le bouton lui-meme porte les valeurs de la planche, relevees : hauteur 44, rayon, fond, filet, ombre et remplissage identiques."
+      },
+      {
+        "textes": [
+          "Envoyée par le vendeur le 19 septembre 2",
+          "Ce produit est le mien : voici la factur",
+          "Votre réponse  <span>",
+          "Au moins 8 caractères. Le vendeur la lit",
+          "Annuler  <button>"
+        ],
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE NE JOINT PAS D IMAGE. La planche montre la vignette de 96 px que le vendeur a jointe ; le jeu ne peut pas en deposer : les seuls identifiants R2 de la machine sont ceux de la PRODUCTION, et la mesure ne l ecrit pas. Sans elle, l explication prend toute la largeur (442 px contre 332), le cadre raccourcit, et le dialogue — centre — descend de 22 px (dont les 5 px connus de la fenetre de 1 010 du kit contre 1 000). Le chemin de l image est eprouve ailleurs : cle, forme et purge par tests/rls/contestation.test.ts."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "1 sept. 2025 – 8 sept. 2025"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE DU KIT N EST PAS PORTEE, comme sur les autres ecrans de liste : « Ctrl K » annonce une recherche transverse qui n existe pas, et le selecteur de dates est remplace par le filtre de fenetre de la barre de filtres, qui commande reellement la liste. La carte decorative garde sa geometrie en bas de colonne et porte le rappel que tout est trace."
+      },
+      {
+        "textes": [
+          "Nouvelle commande"
+        ],
+        "motif": "contrainte",
+        "raison": "UN ADMINISTRATEUR NE CREE PAS DE COMMANDE POUR UN VENDEUR. Contrainte 3 : chacun est proprietaire de ses commandes et de ses destinataires. Une commande creee depuis l administration n aurait pas de proprietaire legitime."
+      },
+      {
+        "textes": [
+          "+12%",
+          "vs période précédente",
+          "30% du total",
+          "-10%"
+        ],
+        "motif": "donnee",
+        "raison": "AUCUN COMPTEUR NE PORTE SON HISTORIQUE : `repartir_commandes_admin` rend des totaux instantanes, il n existe aucune valeur de periode precedente, donc aucun « +12 % ». Un badge calcule sur rien a la FORME d une mesure. La part du total est rendue, a la typographie francaise (« 50 % »)."
+      },
+      {
+        "textes": [
+          "Problèmes",
+          "Annulées",
+          "Problème",
+          "Annulée"
+        ],
+        "motif": "contrainte",
+        "raison": "DEUX ETATS QUI N EXISTENT PAS. La decision 4 arrete la frise a quatre etapes — preparation, expedie, en transit, livre — et la granularite vit dans le DETAIL du suivi. Il n y a ni « probleme » ni « annulee » a compter, a filtrer ou a signaler ; leurs deux tuiles portent « Expediees », la quatrieme etape que le kit ne compte pas, et les commandes creees ce mois-ci."
+      },
+      {
+        "textes": [
+          "Exporter"
+        ],
+        "motif": "contrainte",
+        "raison": "PAS D EXPORT DE LA PLATEFORME. L export CSV du produit est celui du vendeur, sur SES commandes, sous RLS avec sa session ; un export d administration sortirait de l application le fichier le plus precieux que ce produit puisse laisser partir. Ce n est pas un bouton, c est une decision produit."
+      },
+      {
+        "textes": [
+          "Yanis B.",
+          "yanis.b@gmail.com",
+          "Inès K.",
+          "ines.k@hotmail.fr",
+          "Samir A.",
+          "samir.a@outlook.fr",
+          "Léa M.",
+          "lea.m@gmail.com",
+          "Thomas R.",
+          "thomas.r@outlook.fr",
+          "Julie P.",
+          "julie.p@gmail.com",
+          "Mehdi S.",
+          "mehdi.s@icloud.com",
+          "Camille D.",
+          "camille.d@gmail.com",
+          "Lucas F.",
+          "lucas.f@outlook.fr",
+          "Sara L.",
+          "sara.l@gmail.com"
+        ],
+        "motif": "contrainte",
+        "raison": "LE CLIENT FINAL N APPARAIT PAS, ET C EST LA DECISION DE CET ECRAN (migration 159). Son pseudo et son adresse appartiennent a quelqu un qui n a jamais eu de compte chez nous et n a rien accepte ; la supervision decide avec la boutique, le statut, le transporteur et la date. La colonne porte le COMPTE du vendeur, et « Voir » mene a sa fiche, elle-meme auditee. `tests/rls/commandes-admin.test.ts` le controle par valeur."
+      },
+      {
+        "textes": [
+          "#DLK7838",
+          "StreetWear FR",
+          "LP",
+          "La Poste",
+          "LuxShop",
+          "CP",
+          "Chronopost",
+          "Paris Sneakers",
+          "ModeAddict",
+          "DHL",
+          "TechStore",
+          "UrbanPlace",
+          "MR",
+          "Mondial Relay",
+          "CO",
+          "Colissimo",
+          "1 248",
+          "1 248 commandes au total"
+        ],
+        "motif": "donnee",
+        "raison": "La population de demonstration du kit : references, boutiques, transporteurs et volumes. Le jeu de mesure porte quatre commandes, une par statut, et leurs transporteurs sont ceux que le catalogue officiel de 17TRACK nomme pour leurs codes — « DHL Express », « FedEx », « 4PX ».",
+        "motifs": [
+          "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}$"
+        ]
+      },
+      {
+        "textes": [
+          "Affichage de 1 à 10 sur 1 248 commandes",
+          "Afficher"
+        ],
+        "motif": "contrainte",
+        "raison": "LA PAGINATION EST PAR CURSEUR, JAMAIS PAR DECALAGE. A la page 40 d un jeu de 9 600, un `offset` lit 2 000 lignes pour en rendre 50 : le cout croit avec le numero de page. Un curseur ne sait pas dire « 1 a 10 sur 1 248 » sans un comptage complet a chaque page. L ecran rend donc un lien « Voir la suite »."
+      },
+      {
+        "textes": [
+          "Activité récente",
+          "Voir tout",
+          "Nouvelle commande créée",
+          "#DLK7838 par Yanis B.",
+          "Il y a 12 min",
+          "Statut mis à jour",
+          "#DLK7837 → Livrée",
+          "Nouveau suivi ajouté",
+          "#DLK7836 · La Poste",
+          "Il y a 1 h",
+          "Problème de livraison signalé",
+          "Commande livrée"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FLUX D ACTIVITE NOMME DES COMMANDES ET DES CLIENTS TIERS A CHAQUE OUVERTURE, et ses faits n existent pas tous : « Probleme de livraison signale » suppose un etat que la decision 4 refuse, et l ingestion du suivi n ecrit aucun evenement de commande. La liste, elle, est une consultation deliberee, tracee avec ses criteres."
+      },
+      {
+        "textes": [
+          "Gérez et suivez toutes les commandes cré"
+        ],
+        "motif": "contrainte",
+        "raison": "LE SOUS-TITRE DU KIT PROMET LE SUIVI DES COMMANDES ; l ecran ne montre AUCUN contenu de commande (ni pseudo, ni reference, ni lien) et le dit : le notre annonce ce qu il fait."
+      },
+      {
+        "textes": [
+          "Contestation du blocage de #DLK7834"
+        ],
+        "motif": "donnee",
+        "raison": "La reference de la commande de demonstration dans le titre du dialogue — pendant du motif ci-dessous cote produit."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "Cette consultation est écrite au journal"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire (voir la declaration symetrique dans les manquants) et ses deux rappels de trace — l encart permanent de la colonne, et celui de l ecran, qui dit AVANT de regarder que la consultation est ecrite au journal et ce que la liste ne montre pas."
+      },
+      {
+        "motifs": [
+          "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "Le compte jetable du jeu de mesure, dont l adresse change a chaque passage. Un motif ancre plutot qu une adresse, qui serait morte au passage suivant."
+      },
+      {
+        "motifs": [
+          "^#[0-9A-F]{6}$"
+        ],
+        "motif": "donnee",
+        "raison": "LES REFERENCES COURTES DU JEU DE MESURE, derivees d identifiants tires au hasard — six caracteres hexadecimaux, la formule de `referenceCourte()`. Elles changent a chaque passage : un motif ancre, jamais une liste."
+      },
+      {
+        "textes": [
+          "avec du contenu réel",
+          "Expédiées",
+          "Créées ce mois-ci",
+          "depuis le 1er du mois"
+        ],
+        "motif": "contrainte",
+        "raison": "NOS TUILES ET NOTRE COLONNE — voir les declarations symetriques des manquants. « Expediees » est la quatrieme etape de la frise, que le kit ne compte pas ; « Creees ce mois-ci » est le compteur de la vue d ensemble, a la meme source ; « avec du contenu reel » dit ce que le total compte, les brouillons abandonnes n etant pas des commandes. « Compte » remplace « Client » : c est le vendeur, pas son client."
+      },
+      {
+        "textes": [
+          "Tous les statuts",
+          "Expédiée",
+          "Toutes les dates"
+        ],
+        "motif": "structure",
+        "raison": "LES OPTIONS DES DEUX SELECTEURS, REPLIEES. Le kit rend les siennes dans un `select` natif ; les notres sont des liens dans un `details` ferme — le filtre vit dans l URL, donc la vue se partage, se recharge, et ses criteres entrent dans la trace. La sonde releve toutes les options, l oeil n en voit qu une de chaque cote."
+      },
+      {
+        "textes": [
+          "25 % du total",
+          "Atelier de verification",
+          "4 commandes au total"
+        ],
+        "motif": "donnee",
+        "raison": "Les volumes, la boutique et les transporteurs du jeu de mesure : quatre commandes, donc « 25 % du total » et « 4 commandes au total » la ou le kit en montre 1 248."
+      },
+      {
+        "motifs": [
+          "^(4PX|FedEx|DHL Express|La Poste|UPS|Colissimo|Chronopost)\\s·\\s\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}$"
+        ],
+        "motif": "donnee",
+        "raison": "LE DECOMPTE ET LES LIGNES DU JEU DE MESURE : transporteur et date de chaque commande, fabriques a chaque passage. Le kit ecrit ses huit lignes de demonstration."
+      },
+      {
+        "textes": [
+          "En cours…"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES LIBELLES DANS UNE SEULE CELLULE (BoutonAction, comme la suspension de la fiche compte) : « En cours… » y est rendu invisible pour RESERVER sa largeur, sans quoi le bouton s elargirait au clic. La planche dessine la meme reserve (AccSuspension) mais sur un autre bouton."
+      },
+      {
+        "motifs": [
+          "^Contestation du blocage de #[0-9A-F]{6}$"
+        ],
+        "textes": [],
+        "motif": "donnee",
+        "raison": "La reference courte de la commande du jeu de mesure dans le titre du dialogue, derivee d un identifiant tire au hasard : un motif ancre, jamais une valeur litterale."
       }
     ]
   }

@@ -116,6 +116,70 @@ export type Database = {
         }
         Relationships: []
       }
+      link_contests: {
+        Row: {
+          admin_response: string | null
+          blocked_at: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          image_key: string | null
+          message: string
+          order_id: string
+          shop_id: string
+          status: Database["public"]["Enums"]["contest_status"]
+        }
+        Insert: {
+          admin_response?: string | null
+          blocked_at: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          image_key?: string | null
+          message: string
+          order_id: string
+          shop_id: string
+          status?: Database["public"]["Enums"]["contest_status"]
+        }
+        Update: {
+          admin_response?: string | null
+          blocked_at?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          image_key?: string | null
+          message?: string
+          order_id?: string
+          shop_id?: string
+          status?: Database["public"]["Enums"]["contest_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_contests_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_contests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_contests_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       link_views: {
         Row: {
           country: string | null
@@ -986,6 +1050,14 @@ export type Database = {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
       }
+      contestations_en_attente_parmi: {
+        Args: { p_commandes: string[] }
+        Returns: string[]
+      }
+      contester_blocage: {
+        Args: { p_commande: string; p_image_key: string; p_message: string }
+        Returns: string
+      }
       croissance_admin: {
         Args: never
         Returns: {
@@ -1140,6 +1212,16 @@ export type Database = {
           status: Database["public"]["Enums"]["account_status"]
           stockage_octets: number
           watermark_enabled: boolean
+        }[]
+      }
+      lire_contestation_admin: {
+        Args: { p_commande: string; p_ip_hash: string }
+        Returns: {
+          created_at: string
+          id: string
+          image_key: string
+          message: string
+          rang: number
         }[]
       }
       lire_inscriptions_ouvertes: { Args: never; Returns: boolean }
@@ -1339,6 +1421,10 @@ export type Database = {
         Args: { p_parcel_id: string; p_quand: string }
         Returns: boolean
       }
+      refuser_contestation: {
+        Args: { p_contestation: string; p_ip_hash: string; p_reponse: string }
+        Returns: boolean
+      }
       regenerer_jeton_public: { Args: { p_order_id: string }; Returns: string }
       reordonner_medias: {
         Args: { p_ids: string[]; p_order_id: string }
@@ -1443,6 +1529,7 @@ export type Database = {
       account_plan: "gratuit" | "pro"
       account_status: "active" | "suspended"
       account_type: "supplier" | "reseller"
+      contest_status: "en_attente" | "refusee" | "acceptee"
       media_source: "upload" | "agent_import"
       media_type: "photo" | "video"
       order_status: "preparation" | "expedie" | "en_transit" | "livre"
@@ -1579,6 +1666,7 @@ export const Constants = {
       account_plan: ["gratuit", "pro"],
       account_status: ["active", "suspended"],
       account_type: ["supplier", "reseller"],
+      contest_status: ["en_attente", "refusee", "acceptee"],
       media_source: ["upload", "agent_import"],
       media_type: ["photo", "video"],
       order_status: ["preparation", "expedie", "en_transit", "livre"],

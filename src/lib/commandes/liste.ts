@@ -170,6 +170,8 @@ export interface LigneCommande {
   readonly creeeLe: string;
   readonly modifieeLe: string;
   readonly archiveeLe: string | null;
+  /** Le lien bloqué par l'administration depuis cette date (168), `null` sinon. */
+  readonly lienBloqueLe: string | null;
   /**
    * Vues DÉDUPLIQUÉES : un visiteur, un jour. Lue sur la commande et non agrégée
    * depuis `link_views` — mesuré, l'agrégat lisait vingt fois plus de lignes.
@@ -262,7 +264,7 @@ export interface PageCommandes {
  * sur un type d'erreur — le typage cesse alors de vérifier quoi que ce soit.
  */
 export const COLONNES =
-  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at, media_count, cover_media_id";
+  "id, public_token, customer_label, product_ref, tracking_number, status, qc_status, views_count, last_viewed_at, created_at, updated_at, archived_at, parcel_last_movement_at, media_count, cover_media_id, admin_blocked_at";
 
 /**
  * La valeur de tri d'une ligne, pour le curseur.
@@ -669,6 +671,7 @@ export async function lireCommandes(
     creeeLe: l.created_at,
     modifieeLe: l.updated_at,
     archiveeLe: l.archived_at,
+    lienBloqueLe: l.admin_blocked_at,
     vues: l.views_count,
     derniereVueLe: l.last_viewed_at,
     colisBougeLe: l.parcel_last_movement_at,

@@ -367,6 +367,18 @@ const DECLARES: Readonly<Record<string, Verdict>> = {
       "blocage d'UN lien par l'administration (166, 19/09/2026). Il coupe la page " +
       "publique d'une commande ; l'action ne connait meme pas le jeton a invalider.",
   },
+  "audit/contestation.ts": {
+    change: false,
+    raison:
+      "La contestation (168) : lire est trace, refuser garde le lien COUPE. Rien de ce que " +
+      "le client voit ne change — sa page reste « Ce lien n est plus valable ».",
+  },
+  "commandes/contestation.ts": {
+    change: false,
+    raison:
+      "Le vendeur conteste un blocage (168) : une ligne de dossier, lue par l administration. " +
+      "La page publique reste coupee tant que l administration ne debloque pas.",
+  },
   "audit/plan.ts": {
     change: true,
     couvreur: null,

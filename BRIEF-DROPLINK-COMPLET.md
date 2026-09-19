@@ -629,6 +629,14 @@ purges_r2           cle, demande_le, tentatives — (aucune policy) objets R2 à
 tracking_notifications_vues
                     cle, vue_at — (aucune policy) empreintes des notifications
                     de suivi déjà traitées, pour qu'un rejeu ne compte qu'une fois
+
+link_contests       id, order_id, shop_id, blocked_at, message, image_key, status,
+                    created_at, decided_at, decided_by, admin_response — la
+                    CONTESTATION d'un lien bloqué par l'administration (168,
+                    décision de Wassim du 19/09/2026). Le vendeur la LIT sous RLS
+                    (sans `decided_by`, droit de colonne) et l'écrit par fonction :
+                    une en attente, trois par blocage, image facultative sous
+                    SA commande. L'administration la lit — tracé — et répond
 ```
 
 ### Colonnes structurantes, et leurs conséquences produit

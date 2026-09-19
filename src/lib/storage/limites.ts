@@ -43,6 +43,8 @@ export type Limites = {
   readonly photoOctets: number;
   readonly videoOctets: number;
   readonly logoOctets: number;
+  /** L'image FACULTATIVE d'une contestation de blocage (168). */
+  readonly contestationOctets: number;
   readonly mediasParCommande: number;
   readonly videosParCommande: number;
   readonly dureeVideoMaxS: number;
@@ -78,6 +80,8 @@ export function limites(): Limites {
      * configuration franchit toutes les validations de présence (L-026).
      */
     logoOctets: entierDepuisEnv("DEPOT_LOGO_MAX_KO", 20) * 1024,
+    // 5 Mo : une capture d'écran de téléphone en PNG tient sous ce plafond, une photo aussi.
+    contestationOctets: entierDepuisEnv("DEPOT_CONTESTATION_MAX_MO", 5) * MO,
     mediasParCommande: entierDepuisEnv("DEPOT_MEDIAS_PAR_COMMANDE", 20),
     videosParCommande: entierDepuisEnv("DEPOT_VIDEOS_PAR_COMMANDE", 3),
     dureeVideoMaxS: entierDepuisEnv("DEPOT_VIDEO_DUREE_MAX_S", 60),

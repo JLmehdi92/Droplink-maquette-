@@ -9,6 +9,12 @@ import {
   debloquerLienCommande,
   type ResultatBlocage,
 } from "@/lib/audit/blocage-lien";
+import {
+  lireContestationAdmin,
+  refuserContestation,
+  type ResultatLecture,
+  type ResultatRefus,
+} from "@/lib/audit/contestation";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
@@ -59,4 +65,29 @@ export async function bloquerLien(_precedent: EtatBlocage, donnees: FormData): P
 
 export async function debloquerLien(_precedent: EtatBlocage, donnees: FormData): Promise<EtatBlocage> {
   return basculer(debloquerLienCommande, donnees);
+}
+
+/**
+ * LA CONTESTATION D'UN LIEN BLOQUÉ (168). Lire est TRACÉ par la base, à chaque ouverture :
+ * l'action n'est appelée qu'au geste de l'administrateur (« Voir la contestation »), jamais au
+ * rendu de la liste — sans quoi chaque affichage de la page écrirait une consultation.
+ */
+export async function lireContestation(entree: unknown): Promise<ResultatLecture> {
+  await exigerAdmin();
+  const analyse = z.string().uuid().safeParse(entree);
+  if (!analyse.success) return { statut: "erreur", motif: "introuvable" };
+  return lireContestationAdmin(await creerClientServeur(), analyse.data, await empreinteAdmin());
+}
+
+export type EtatRefus = { statut: "inactif" } | ResultatRefus;
+
+export async function refuserUneContestation(_precedent: EtatRefus, donnees: FormData): Promise<EtatRefus> {
+  await exigerAdmin();
+  const resultat = await refuserContestation(
+    await creerClientServeur(),
+    { contestationId: String(donnees.get("contestationId") ?? ""), reponse: String(donnees.get("reponse") ?? "") },
+    await empreinteAdmin(),
+  );
+  if (resultat.statut === "ok") revalidatePath("/[locale]/admin/commandes", "page");
+  return resultat;
 }

@@ -794,7 +794,8 @@
     "periodeToutes": "全部时间",
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "自 {du} 起",
-    "periodeJusquaCourt": "至 {au}"
+    "periodeJusquaCourt": "至 {au}",
+    "lienBloque": "链接已停用"
   },
   "editeur": {
     "historique": {
@@ -1120,6 +1121,8 @@
         "compte_blocage_lien": "停用一个订单链接",
         "compte_deblocage_lien": "恢复一个订单链接",
         "compte_plan": "更改一个账户的套餐",
+        "contestations_detail": "查看一项申诉",
+        "compte_contestation_refusee": "驳回一项申诉",
         "compte_reactivation": "恢复一个账户",
         "compte_suspension": "停用一个账户",
         "comptes_detail": "查看账户详情",
@@ -1701,6 +1704,27 @@
         "introuvable": "找不到该订单。",
         "ecriture": "没有任何改动。请重试。"
       }
+    },
+    "contestation": {
+      "pastille": "申诉",
+      "voir": "查看 {ref} 的申诉",
+      "titre": "{ref} 停用申诉",
+      "aide": "卖家于 {date} 提交 · 三次中的第 {rang} 次。本次查看已写入审计日志。",
+      "image": "打开卖家附上的图片",
+      "reponse": "您的回复",
+      "reponseAide": "至少 {n} 个字符。卖家会看到这条回复，它也会写入日志。",
+      "refuser": "驳回申诉",
+      "debloquer": "恢复链接",
+      "annuler": "取消",
+      "enCours": "处理中…",
+      "lecture": "正在读取…",
+      "erreur": {
+        "introuvable": "此申诉已不再等待回复。请刷新列表。",
+        "lecture": "无法读取该申诉。",
+        "saisie": "回复太短。",
+        "deja": "此申诉已得到回复。",
+        "ecriture": "回复未能保存，未作任何更改。"
+      }
     }
   },
   "erreurs": {
@@ -2072,6 +2096,42 @@
       "invalide": "请输入应用显示的 6 位数字。",
       "trop": "尝试次数过多，请几分钟后再试。",
       "indisponible": "服务暂时不可用，请重试。"
+    }
+  },
+  "blocageVendeur": {
+    "titre": "链接已被 DropLink 停用",
+    "texte": "自 {date} 起，您的客户看到的是“此链接已失效”，而不是他的订单。如果这是误判，请提出申诉：说明原因，附上图片会更有帮助。",
+    "contester": "对停用提出申诉",
+    "explication": "您的说明",
+    "explicationAide": "至少 {n} 个字符。DropLink 团队会连同您附上的图片一起阅读。",
+    "image": "图片（可选）",
+    "joindre": "附上图片",
+    "changer": "更换图片",
+    "retirer": "移除图片",
+    "imageAide": "JPEG、PNG 或 WebP · 最大 {n} MB。",
+    "annuler": "取消",
+    "envoyer": "提交申诉",
+    "enCours": "正在提交…",
+    "envoyee": "申诉已于 {date} 提交",
+    "enAttente": "等待回复",
+    "refusee": "申诉已于 {date} 被驳回",
+    "refuseeBadge": "已驳回",
+    "reponse": "DropLink 的回复",
+    "restantes": "此次停用还可以再申诉 {n} 次。",
+    "aucuneRestante": "此次停用的三次申诉机会已用完。",
+    "recontester": "再次申诉",
+    "erreur": {
+      "saisie": "说明至少需要 20 个字符。",
+      "image": "无法附上图片。请重试，或不附图片直接提交。",
+      "type": "不支持此图片格式：请使用 JPEG、PNG 或 WebP。",
+      "taille": "该图片超出允许的大小。",
+      "cadence": "短时间内上传过多。请一分钟后重试。",
+      "deja": "已有一项申诉在等待回复。",
+      "plafond": "此次停用的三次申诉机会已用完。",
+      "non-bloque": "此链接已不再停用。请刷新页面。",
+      "introuvable": "找不到该订单。请刷新页面。",
+      "session": "您的会话已过期。请重新登录。",
+      "ecriture": "申诉未能保存，未提交任何内容。"
     }
   }
 }

@@ -196,6 +196,34 @@ const idCommande = commandes?.[0]?.id ?? "";
 const jetonPublic = commandes?.[0]?.public_token ?? "";
 
 /*
+ * `LIEN_BLOQUE` : LA PREMIERE COMMANDE A SON LIEN BLOQUE PAR L ADMINISTRATION (168), pour les
+ * planches `#commandes-bloquee` et `#commande-bloquee…`. `1` : bloque seul. `attente` : une
+ * contestation attend. `refusee` : une contestation refusee, avec la reponse de DropLink. Les
+ * textes sont ceux de la planche, mot pour mot, sans quoi la soustraction mesurerait le jeu.
+ * Ecrit par le client de SERVICE : la mesure prepare un etat, elle n eprouve pas un droit.
+ */
+const lienBloque = process.env["LIEN_BLOQUE"];
+if (lienBloque !== undefined && lienBloque !== "" && idCommande !== "") {
+  const bloqueLe = new Date(Date.now() - 7 * 86400000).toISOString();
+  await service.from("orders").update({ admin_blocked_at: bloqueLe }).eq("id", idCommande);
+  if (lienBloque === "attente" || lienBloque === "refusee") {
+    await service.from("link_contests").insert({
+      order_id: idCommande,
+      shop_id: shop.id,
+      blocked_at: bloqueLe,
+      message: "Ce produit est le mien : voici la facture d’achat auprès de mon fournisseur, datée du 2 septembre.",
+      ...(lienBloque === "refusee"
+        ? {
+            status: "refusee",
+            decided_at: new Date(Date.now() - 86400000).toISOString(),
+            admin_response: "La facture jointe ne correspond pas au produit signalé.",
+          }
+        : {}),
+    });
+  }
+}
+
+/*
  * ⚠️ DEUX COLIS, DONT UN SILENCIEUX, PARCE QU UN ECRAN VIDE NE MESURE RIEN.
  *
  * Sans eux, `/envois` rendait son etat vide : la sonde y voyait une carte et une

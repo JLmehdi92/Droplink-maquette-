@@ -62,7 +62,7 @@ function actionsEcritesEnBase(): string[] {
       // Les actions du journal ont deux segments et sont insérées dans
       // `admin_audit_log` ; les autres chaînes pointées du SQL (noms de
       // schémas, chemins) ne s'écrivent jamais dans cette colonne.
-      if (valeur !== undefined && /^(compte|comptes|boutiques|commandes|panneau|parametre)\./.test(valeur)) {
+      if (valeur !== undefined && /^(compte|comptes|boutiques|commandes|contestations|panneau|parametre)\./.test(valeur)) {
         trouvees.add(valeur);
       }
     }
@@ -102,6 +102,10 @@ const ATTENDU: Record<string, ReturnType<typeof natureDAction>> = {
   "compte.deblocage_lien": "reactivation",
   // Le plan (167) : un réglage du compte, jamais une sanction.
   "compte.plan": "parametre",
+  // La contestation (168) : la LIRE est une consultation ; la REFUSER garde le lien coupé, un
+  // geste de modération rangé avec les suspensions.
+  "contestations.detail": "consultation",
+  "compte.contestation_refusee": "suspension",
   "comptes.liste": "consultation",
   "comptes.detail": "consultation",
   "boutiques.liste": "consultation",

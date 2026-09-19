@@ -794,7 +794,8 @@
     "periodeToutes": "All dates",
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "From {du}",
-    "periodeJusquaCourt": "Until {au}"
+    "periodeJusquaCourt": "Until {au}",
+    "lienBloque": "Link blocked"
   },
   "editeur": {
     "historique": {
@@ -1120,6 +1121,8 @@
         "compte_blocage_lien": "Blocked an order link",
         "compte_deblocage_lien": "Unblocked an order link",
         "compte_plan": "Changed an account’s plan",
+        "contestations_detail": "Read a dispute",
+        "compte_contestation_refusee": "Rejected a dispute",
         "compte_reactivation": "Reactivated an account",
         "compte_suspension": "Suspended an account",
         "comptes_detail": "Viewed an account record",
@@ -1701,6 +1704,27 @@
         "introuvable": "Order not found.",
         "ecriture": "Nothing was changed. Please retry."
       }
+    },
+    "contestation": {
+      "pastille": "Dispute",
+      "voir": "View the dispute for {ref}",
+      "titre": "Dispute of the block on {ref}",
+      "aide": "Sent by the seller on {date} · {rang, selectordinal, one {first} two {second} few {third} other {#th}} of three. This reading is written to the audit log.",
+      "image": "Open the image attached by the seller",
+      "reponse": "Your reply",
+      "reponseAide": "At least {n} characters. The seller reads it, and it is written to the log.",
+      "refuser": "Reject the dispute",
+      "debloquer": "Unblock the link",
+      "annuler": "Cancel",
+      "enCours": "Working…",
+      "lecture": "Loading…",
+      "erreur": {
+        "introuvable": "This dispute is no longer awaiting a reply. Reload the list.",
+        "lecture": "The dispute could not be read.",
+        "saisie": "The reply is too short.",
+        "deja": "This dispute has already been answered.",
+        "ecriture": "The reply could not be saved. Nothing has changed."
+      }
     }
   },
   "erreurs": {
@@ -2072,6 +2096,42 @@
       "invalide": "Enter the 6 digits shown by your app.",
       "trop": "Too many attempts. Try again in a few minutes.",
       "indisponible": "The service is temporarily unavailable. Please try again."
+    }
+  },
+  "blocageVendeur": {
+    "titre": "Link blocked by DropLink",
+    "texte": "Since {date}, your customer sees “This link is no longer valid” instead of their order. If this is a mistake, dispute the block: explain why — an image can help.",
+    "contester": "Dispute the block",
+    "explication": "Your explanation",
+    "explicationAide": "At least {n} characters. The DropLink team reads it along with the image you attach.",
+    "image": "An image (optional)",
+    "joindre": "Attach an image",
+    "changer": "Change image",
+    "retirer": "Remove image",
+    "imageAide": "JPEG, PNG or WebP · {n} MB at most.",
+    "annuler": "Cancel",
+    "envoyer": "Send the dispute",
+    "enCours": "Sending…",
+    "envoyee": "Dispute sent on {date}",
+    "enAttente": "Awaiting reply",
+    "refusee": "Dispute rejected on {date}",
+    "refuseeBadge": "Rejected",
+    "reponse": "DropLink’s reply",
+    "restantes": "{n, plural, one {# more dispute} other {# more disputes}} possible for this block.",
+    "aucuneRestante": "All three disputes for this block have been used.",
+    "recontester": "Dispute again",
+    "erreur": {
+      "saisie": "The explanation must be at least 20 characters long.",
+      "image": "The image could not be attached. Try again, or send without an image.",
+      "type": "This image format is not accepted: JPEG, PNG or WebP.",
+      "taille": "This image exceeds the allowed size.",
+      "cadence": "Too many uploads in a short time. Try again in a minute.",
+      "deja": "A dispute is already awaiting a reply.",
+      "plafond": "All three disputes for this block have been used.",
+      "non-bloque": "This link is no longer blocked. Reload the page.",
+      "introuvable": "This order cannot be found. Reload the page.",
+      "session": "Your session has expired. Sign in again.",
+      "ecriture": "The dispute could not be saved. Nothing was sent."
     }
   }
 }

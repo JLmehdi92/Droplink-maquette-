@@ -1,3 +1,6 @@
+import { BandeauBlocage } from "@/components/commandes/bandeau-blocage";
+import { EXPLICATION_MIN, lireEtatBlocage } from "@/lib/commandes/contestation";
+import { limites } from "@/lib/storage/limites";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
@@ -290,6 +293,11 @@ export default async function EditeurCommande({
    */
   const versPageClient = "/" + langue + "/commandes/" + data.id + "/page-client";
 
+  // LE LIEN BLOQUÉ (168) : lu sous RLS avec la session du vendeur. Une lecture en échec rend
+  // `null`, et l'écran ne dit rien plutôt que d'affirmer un état qu'il n'a pas lu.
+  const blocage = await lireEtatBlocage(supabase, data.id);
+  const jourLong = (iso: string): string => format.dateTime(new Date(iso), { dateStyle: "long" });
+
   return (
     /*
       LA MARGE NÉGATIVE ANNULE LA PLACE RÉSERVÉE AUX ONGLETS. Le layout de
@@ -298,13 +306,33 @@ export default async function EditeurCommande({
       la place. Sans cette annulation, 86 px de gris flottaient sous la bande.
     */
     <main id="contenu" className="-mb-[86px] flex min-h-dvh flex-col md:mb-0">
-      <TraductionsClient espaces={["editeur", "medias", "actions"]}>
+      <TraductionsClient espaces={["editeur", "medias", "actions", "blocageVendeur"]}>
         <Editeur
           id={data.id}
           langue={langue}
           jeton={data.public_token}
           // Le menu « ••• » de la fiche (dupliquer, archiver, sortir des
           // archives), rendu ici côté serveur : voir `menu-gestes-fiche.tsx`.
+          bandeau={
+            blocage === null || !blocage.bloque ? null : (
+              <BandeauBlocage
+                commandeId={data.id}
+                depuis={jourLong(blocage.depuis)}
+                contestations={blocage.contestations.map((c) => ({
+                  id: c.id,
+                  statut: c.statut,
+                  message: c.message,
+                  creeeLe: jourLong(c.creeeLe),
+                  decideeLe: c.decideeLe === null ? null : jourLong(c.decideeLe),
+                  reponse: c.reponse,
+                }))}
+                peutContester={blocage.peutContester}
+                restantes={blocage.restantes}
+                explicationMin={EXPLICATION_MIN}
+                imageMaxMo={Math.round(limites().contestationOctets / (1024 * 1024))}
+              />
+            )
+          }
           menusGestes={{
             bureau: (
               <MenuGestesFiche

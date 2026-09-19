@@ -398,6 +398,29 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "rend que des identifiants, donc rien qui ne soit déjà à l'écran.",
     ],
     [
+      "contester_blocage",
+      "LA CONTESTATION D'UN LIEN BLOQUÉ (168, décision de Wassim du 19/09/2026). `SECURITY " +
+        "DEFINER` parce que `link_contests` n'est accordée en écriture à PERSONNE — la fonction " +
+        "retrouve la boutique de l'appelant (compte ACTIF), exige que la commande soit la sienne et " +
+        "bloquée, borne l'explication, refuse une image rangée sous une autre commande, et tient « une " +
+        "en attente, trois par blocage ».",
+    ],
+    [
+      "contestations_en_attente_parmi",
+      "Pour la liste d'administration, comme liens_bloques_parmi : parmi des identifiants qu'elle " +
+        "a DÉJÀ, lesquels ont une contestation en attente. Rôle admin vérifié en base, 200 au plus.",
+    ],
+    [
+      "lire_contestation_admin",
+      "L'administration lit ce que le vendeur lui envoie ; rôle admin vérifié en base, et la " +
+        "lecture est écrite au journal AVANT d'être rendue (contrainte 6).",
+    ],
+    [
+      "refuser_contestation",
+      "Refus tracé AVANT la mutation, réponse obligatoire que le vendeur lit ; le lien reste bloqué. " +
+        "Rôle admin actif vérifié en base.",
+    ],
+    [
       "definir_plan_compte",
       "LE PLAN D'UN COMPTE (167, décision de Wassim du 19/09/2026) : aucun paiement ne " +
         "passe par le produit, l'administration pose le plan à la main. `SECURITY DEFINER` " +

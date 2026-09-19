@@ -794,7 +794,8 @@
     "periodeToutes": "Toutes les périodes",
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "À partir du {du}",
-    "periodeJusquaCourt": "Jusqu’au {au}"
+    "periodeJusquaCourt": "Jusqu’au {au}",
+    "lienBloque": "Lien bloqué"
   },
   "editeur": {
     "historique": {
@@ -1120,6 +1121,8 @@
         "compte_blocage_lien": "Blocage du lien d’une commande",
         "compte_deblocage_lien": "Déblocage du lien d’une commande",
         "compte_plan": "Changement de plan d’un compte",
+        "contestations_detail": "Lecture d’une contestation",
+        "compte_contestation_refusee": "Refus d’une contestation",
         "compte_reactivation": "Réactivation d’un compte",
         "compte_suspension": "Suspension d’un compte",
         "comptes_detail": "Consultation d’une fiche de compte",
@@ -1701,6 +1704,27 @@
         "introuvable": "Commande introuvable.",
         "ecriture": "Rien n'a été modifié. Réessayez."
       }
+    },
+    "contestation": {
+      "pastille": "Contestation",
+      "voir": "Voir la contestation de {ref}",
+      "titre": "Contestation du blocage de {ref}",
+      "aide": "Envoyée par le vendeur le {date} · {rang, selectordinal, one {première} other {#e}} sur trois. Cette lecture est écrite au journal d’audit.",
+      "image": "Ouvrir l’image jointe par le vendeur",
+      "reponse": "Votre réponse",
+      "reponseAide": "Au moins {n} caractères. Le vendeur la lit, et elle s’écrit au journal.",
+      "refuser": "Refuser la contestation",
+      "debloquer": "Débloquer le lien",
+      "annuler": "Annuler",
+      "enCours": "En cours…",
+      "lecture": "Lecture…",
+      "erreur": {
+        "introuvable": "Cette contestation n’attend plus de réponse. Rechargez la liste.",
+        "lecture": "La contestation n’a pas pu être lue.",
+        "saisie": "La réponse est trop courte.",
+        "deja": "Cette contestation a déjà reçu une réponse.",
+        "ecriture": "La réponse n’a pas pu être enregistrée. Rien n’a changé."
+      }
     }
   },
   "erreurs": {
@@ -2072,6 +2096,42 @@
       "invalide": "Saisissez les 6 chiffres affichés par votre application.",
       "trop": "Trop de tentatives. Réessayez dans quelques minutes.",
       "indisponible": "Le service est momentanément indisponible. Réessayez."
+    }
+  },
+  "blocageVendeur": {
+    "titre": "Lien bloqué par DropLink",
+    "texte": "Depuis le {date}, votre client voit « Ce lien n’est plus valable » à la place de sa commande. Si c’est une erreur, contestez le blocage : expliquez pourquoi, une image peut aider.",
+    "contester": "Contester le blocage",
+    "explication": "Votre explication",
+    "explicationAide": "Au moins {n} caractères. L’équipe DropLink la lit avec l’image que vous joignez.",
+    "image": "Une image (facultative)",
+    "joindre": "Joindre une image",
+    "changer": "Changer d’image",
+    "retirer": "Retirer l’image",
+    "imageAide": "JPEG, PNG ou WebP · {n} Mo au plus.",
+    "annuler": "Annuler",
+    "envoyer": "Envoyer la contestation",
+    "enCours": "Envoi…",
+    "envoyee": "Contestation envoyée le {date}",
+    "enAttente": "En attente de réponse",
+    "refusee": "Contestation refusée le {date}",
+    "refuseeBadge": "Refusée",
+    "reponse": "Réponse de DropLink",
+    "restantes": "Encore {n, plural, one {# contestation possible} other {# contestations possibles}} pour ce blocage.",
+    "aucuneRestante": "Les trois contestations de ce blocage ont été utilisées.",
+    "recontester": "Contester à nouveau",
+    "erreur": {
+      "saisie": "L’explication doit compter au moins 20 caractères.",
+      "image": "L’image n’a pas pu être jointe. Réessayez, ou envoyez sans image.",
+      "type": "Ce format d’image n’est pas accepté : JPEG, PNG ou WebP.",
+      "taille": "Cette image dépasse la taille permise.",
+      "cadence": "Trop d’envois en peu de temps. Réessayez dans une minute.",
+      "deja": "Une contestation attend déjà une réponse.",
+      "plafond": "Les trois contestations de ce blocage ont été utilisées.",
+      "non-bloque": "Ce lien n’est plus bloqué. Rechargez la page.",
+      "introuvable": "Cette commande est introuvable. Rechargez la page.",
+      "session": "Votre session a expiré. Reconnectez-vous.",
+      "ecriture": "La contestation n’a pas pu être enregistrée. Rien n’a été envoyé."
     }
   }
 }

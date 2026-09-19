@@ -40,6 +40,8 @@ const TEINTES = {
    * réservé à ce qui a ÉCHOUÉ.
    */
   alerte: "bg-ds-alerte-fond text-ds-alerte-encre",
+  /* Le lien bloqué par l'administration (168) : ce qui a ÉCHOUÉ côté client, donc le rouge. */
+  erreur: "bg-ds-erreur-fond text-ds-erreur-encre",
 } as const;
 
 type Teinte = keyof typeof TEINTES;

@@ -3063,6 +3063,61 @@ $$;
     reparer: "revoke update (admin_blocked_at) on public.orders from authenticated;",
   },
 
+  /**
+   * LA CONTESTATION (168) : l'image doit vivre sous la commande contestée. Sans ce contrôle,
+   * un vendeur désignerait l'objet d'un AUTRE vendeur, que l'administrateur ouvrirait en le
+   * croyant joint à cette contestation. Le test l'éprouve par l'appel direct (DL065).
+   */
+  "contestation-image-d-un-autre": {
+    casserDepuisMigration: {
+      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      depuis: "create function public.contester_blocage(",
+      jusqua: "comment on function public.contester_blocage",
+      remplacer: "and p_image_key not like",
+      par: "and false and p_image_key not like",
+    },
+    reparerDepuisMigration: {
+      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      depuis: "create function public.contester_blocage(",
+      jusqua: "comment on function public.contester_blocage",
+    },
+  },
+
+  /** Une lecture de contestation par l'administration qui ne laisserait AUCUNE trace. */
+  "contestation-lue-sans-trace": {
+    casserDepuisMigration: {
+      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      depuis: "create function public.lire_contestation_admin(",
+      jusqua: "comment on function public.lire_contestation_admin",
+      // La lecture se trace sous un AUTRE nom : l'action cherchée disparaît du journal, et
+      // la fonction répond quand même — exactement la défaillance silencieuse à attraper.
+      remplacer: "'contestations.detail', 'link_contests'",
+      par: "'falsifie.sans_trace', 'link_contests'",
+    },
+    reparerDepuisMigration: {
+      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      depuis: "create function public.lire_contestation_admin(",
+      jusqua: "comment on function public.lire_contestation_admin",
+    },
+  },
+
+  /**
+   * Débloquer sans clore le dossier : le vendeur lirait « en attente » sur un lien rétabli, et
+   * ne pourrait plus contester le blocage SUIVANT (une seule en attente par commande).
+   */
+  "deblocage-laisse-le-dossier-ouvert": {
+    casserDepuisMigration: {
+      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      depuis: "create or replace function public.debloquer_lien_commande(",
+      remplacer: "set status = 'acceptee'",
+      par: "set status = 'en_attente'",
+    },
+    reparerDepuisMigration: {
+      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      depuis: "create or replace function public.debloquer_lien_commande(",
+    },
+  },
+
 };
 
 /**

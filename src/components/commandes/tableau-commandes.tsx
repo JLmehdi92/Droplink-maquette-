@@ -10,6 +10,7 @@ import {
   Copy,
   Download,
   ExternalLink,
+  Link2Off,
   MoreHorizontal,
   Plus,
   Search,
@@ -673,8 +674,16 @@ export async function TableauCommandes({
                           )}
                         </td>
 
+                        {/* LE LIEN BLOQUÉ SOUS LE STATUT (19/09/2026) : un état du LIEN, qui
+                            s'ajoute au statut du colis sans le remplacer — planche
+                            `#commandes-bloquee`. */}
                         <td className={cellule}>
-                          <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
+                          <span className="flex flex-col items-start gap-1.5">
+                            <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
+                            {ligne.lienBloqueLe === null ? null : (
+                              <BadgeStatut libelle={t("lienBloque")} teinte="erreur" Icone={Link2Off} />
+                            )}
+                          </span>
                         </td>
 
                         {/* ⚠️ LA FRISE ET LES VIGNETTES NE S'AFFICHENT QU'À `2xl`.
@@ -836,7 +845,11 @@ export async function TableauCommandes({
 
                         <span className="flex items-center gap-2">
                           <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
-                          {jamaisOuverte ? (
+                          {/* Au téléphone, le lien bloqué prend la place de la ligne d'appoint :
+                              c'est ce que le vendeur doit voir d'abord. */}
+                          {ligne.lienBloqueLe !== null ? (
+                            <BadgeStatut libelle={t("lienBloque")} teinte="erreur" Icone={Link2Off} />
+                          ) : jamaisOuverte ? (
                             <span className="text-[12px] leading-[15px] font-bold text-ds-erreur-encre">
                               {t("jamaisOuvert")}
                             </span>

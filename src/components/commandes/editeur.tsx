@@ -74,6 +74,7 @@ export function Editeur({
   langue,
   jeton,
   menusGestes,
+  bandeau,
   origine,
   versPageClient,
   initiales,
@@ -96,6 +97,8 @@ export function Editeur({
    * l'import qui rend vérifiable le contrat des champs envoyés.
    */
   readonly menusGestes: { readonly bureau: ReactNode; readonly telephone: ReactNode };
+  /** Le lien bloqué par l'administration (168), rendu par le serveur ; `null` sinon. */
+  readonly bandeau?: ReactNode;
   readonly origine: string;
   readonly versPageClient: string;
   readonly initiales: ValeursCommande;
@@ -281,6 +284,10 @@ export function Editeur({
           versPageClient={versPageClient}
           menusGestes={menusGestes}
         />
+
+        {/* Le lien bloqué d'abord : c'est ce qui a changé pour le client (planche
+            `#commande-bloquee`, entre l'en-tête et le résumé). */}
+        {bandeau ?? null}
 
         {/*
           LA RANGÉE DE RÉSUMÉ DU KIT, et elle manquait entièrement. Elle vient

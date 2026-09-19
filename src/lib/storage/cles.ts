@@ -24,7 +24,7 @@
  */
 
 /** Ce à quoi sert un objet. Détermine les types acceptés. */
-export type UsageObjet = "media" | "logo";
+export type UsageObjet = "media" | "logo" | "contestation";
 
 /**
  * Types acceptés, et l'extension que le SERVEUR leur attribue.
@@ -43,6 +43,16 @@ const EXTENSIONS: Readonly<Record<UsageObjet, Readonly<Record<string, string>>>>
     "video/mp4": "mp4",
     "video/webm": "webm",
     "video/quicktime": "mov",
+  },
+  /*
+   * L'IMAGE D'UNE CONTESTATION (168) : une capture, une facture, une photo — ce que le
+   * vendeur joint pour dire pourquoi son lien ne devait pas être bloqué. Trois formats
+   * d'image que tout navigateur produit, sans SVG pour la même raison que le logo.
+   */
+  contestation: {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
   },
   logo: {
     "image/jpeg": "jpg",
@@ -169,10 +179,28 @@ export function cleLogo(params: { shopId: string; logoId: string; typeMime: stri
   return `logos/${shop}/${logo}.${extension}`;
 }
 
+/**
+ * Clé de l'image d'une contestation : `contestations/{shop}/{commande}/{image}.{ext}`.
+ * La boutique et la commande en tête, comme les médias : la purge d'un compte la trouve sous
+ * son préfixe, et la base refuse une contestation dont l'image vit sous une autre commande.
+ */
+export function cleContestation(params: {
+  shopId: string;
+  orderId: string;
+  imageId: string;
+  typeMime: string;
+}): string {
+  const shop = exigerUuid(params.shopId, "shopId");
+  const commande = exigerUuid(params.orderId, "orderId");
+  const image = exigerUuid(params.imageId, "imageId");
+  const extension = extensionPour("contestation", params.typeMime);
+  return `contestations/${shop}/${commande}/${image}.${extension}`;
+}
+
 /** Préfixe couvrant TOUT ce qui appartient à une boutique. */
 export function prefixesBoutique(shopId: string): readonly string[] {
   const shop = exigerUuid(shopId, "shopId");
-  return [`medias/${shop}/`, `logos/${shop}/`];
+  return [`medias/${shop}/`, `logos/${shop}/`, `contestations/${shop}/`];
 }
 
 export class CleNonCanonique extends Error {
@@ -180,7 +208,8 @@ export class CleNonCanonique extends Error {
     super(
       `La clé « ${cle} » ne correspond à aucune forme produite par ce module. ` +
         "Seules les formes `medias/{uuid}/{uuid}/{uuid}.{ext}`, " +
-        "`medias/{uuid}/{uuid}/{uuid}.vignette.webp` et `logos/{uuid}/{uuid}.{ext}` " +
+        "`medias/{uuid}/{uuid}/{uuid}.vignette.webp`, `logos/{uuid}/{uuid}.{ext}` et " +
+        "`contestations/{uuid}/{uuid}/{uuid}.{ext}` " +
         "sont admises.",
     );
     this.name = "CleNonCanonique";
@@ -212,6 +241,9 @@ const FORMES_ADMISES = new RegExp(
     `medias/${UUID_NU}/${UUID_NU}/${UUID_NU}\\.(?:couverture\\.webp|vignette\\.webp|${extensionsPossibles()})` +
     "|" +
     `logos/${UUID_NU}/${UUID_NU}\\.(?:${extensionsPossibles()})` +
+    "|" +
+    // Les SEULES extensions de sa propre table : une contestation ne porte jamais de vidéo.
+    `contestations/${UUID_NU}/${UUID_NU}/${UUID_NU}\\.(?:${Object.values(EXTENSIONS.contestation).join("|")})` +
     ")$",
   // PAS DE DRAPEAU INSENSIBLE À LA CASSE. Une clé R2 est sensible à la casse :
   // `LOGOS/x` et `logos/x` sont DEUX objets. Les tolérer confondrait un espace
