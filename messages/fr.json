@@ -219,7 +219,7 @@
     },
     "confidentialite": {
       "collecteTitre": "Ce que nous collectons",
-      "collecteP1": "Pour un vendeur : son adresse email, le nom et les réglages de sa boutique, et les contenus qu'il dépose. Pour un destinataire : rien qui l'identifie. Une consultation de page enregistre une empreinte salée de l'adresse IP et du navigateur, jamais les valeurs elles-mêmes.",
+      "collecteP1": "Pour un vendeur : son adresse email, le nom et les réglages de sa boutique, et les contenus qu'il dépose. S'il se connecte avec Google : l'identifiant et l'adresse email de son compte Google ; Google transmet aussi son nom et sa photo de profil, que DropLink n'affiche ni n'utilise. Pour un destinataire : rien qui l'identifie. Une consultation de page enregistre une empreinte salée de l'adresse IP et du navigateur, jamais les valeurs elles-mêmes.",
       "pasDeCompteTitre": "Le destinataire n'a pas de compte",
       "pasDeCompteP1": "Consulter une page ne crée aucun compte, ne demande aucune adresse et n'installe aucun traceur publicitaire. Le nom affiché sur la page est un texte libre saisi par le vendeur : il ne désigne aucun utilisateur de notre service.",
       "indexationTitre": "Rien n'est indexé",
@@ -1713,7 +1713,7 @@
     "faitPasTexte": "DropLink n'est pas une marketplace et ne gère pas votre catalogue. Vous ne trouverez ni produits, ni quantités, ni prix, ni panier, ni chiffre d'affaires : ces données appartiennent à votre boutique, pas à votre suivi.",
     "demarrer": "Créer son compte",
     "etape1": "Ouvrez un compte",
-    "etape1Texte": "Par e-mail et mot de passe, depuis la page d'inscription. Aucune carte bancaire n'est demandée.",
+    "etape1Texte": "Par e-mail ou avec Google depuis la <lien>page d'inscription</lien>. Aucune carte bancaire n'est demandée.",
     "etape2": "Nommez votre boutique",
     "etape2Texte": "Le nom et le logo apparaissent en haut de chaque page client.",
     "etape3": "Créez votre première commande",

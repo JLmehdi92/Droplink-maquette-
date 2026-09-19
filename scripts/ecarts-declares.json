@@ -4421,19 +4421,6 @@
       },
       {
         "textes": [
-          "Zone dangereuse",
-          "Actions irréversibles sur la plateforme.",
-          "Vider les logs",
-          "Supprime définitivement tous les logs sy",
-          "Réinitialiser la plateforme",
-          "Cette action supprimera toutes les donné",
-          "Réinitialiser"
-        ],
-        "motif": "contrainte",
-        "raison": "LA « ZONE DANGEREUSE » EST EXACTEMENT CE QUE LE BRIEF INTERDIT. Le journal d audit est APPEND-ONLY : ni modifiable, ni effacable, y compris par un administrateur — c est ce qui lui donne sa valeur de piece en cas de litige, et un bouton « vider les logs » detruirait la seule chose que cet ecran garantit. La decision 9 ferme de meme toute suppression : suspendre est REVERSIBLE, et la lecture tracee suffit au diagnostic. Un bouton « reinitialiser la plateforme » n existera jamais."
-      },
-      {
-        "textes": [
           "Statut des services",
           "État actuel des services DropLink.",
           "Application web",
@@ -4639,19 +4626,6 @@
         ],
         "motif": "donnee",
         "raison": "LES NOTIFICATIONS D ADMINISTRATION N EXISTENT PAS ENCORE, et l ecran le DIT plutot que de les dessiner : son interrupteur « Notifications par email » porte « Non deployees : rien n est envoye ». Le seul envoi reel du produit est l alerte du veilleur mutuel, qui part par email sans reglage — une alerte qu on peut eteindre depuis l ecran qu elle surveille n est plus une alerte. Le bouton « Enregistrer » suit : chaque reglage s ecrit ici INDIVIDUELLEMENT, parce que la trace est posee par un declencheur qui consigne l ancienne et la nouvelle valeur — un enregistrement groupe rendrait UNE ligne de journal pour quatre changements."
-      },
-      {
-        "textes": [
-          "Zone dangereuse",
-          "Actions irréversibles sur la plateforme.",
-          "Vider les logs",
-          "Supprime définitivement tous les logs sy",
-          "Réinitialiser la plateforme",
-          "Cette action supprimera toutes les donné",
-          "Réinitialiser"
-        ],
-        "motif": "contrainte",
-        "raison": "LA « ZONE DANGEREUSE » EST EXACTEMENT CE QUE LE BRIEF INTERDIT. Le journal d audit est APPEND-ONLY : ni modifiable, ni effacable, y compris par un administrateur — c est ce qui lui donne sa valeur de piece en cas de litige, et un bouton « vider les logs » detruirait la seule chose que cet ecran garantit. La decision 9 ferme de meme toute suppression : suspendre est REVERSIBLE, et la lecture tracee suffit au diagnostic. Un bouton « reinitialiser la plateforme » n existera jamais."
       },
       {
         "textes": [
@@ -5409,8 +5383,7 @@
       },
       {
         "textes": [
-          "Google",
-          "Apple"
+          "Google"
         ],
         "motif": "contrainte",
         "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT. La decision 27 fixe email + mot de passe, et Google — configure en production, eprouve de bout en bout. Un bouton Apple menerait a une erreur de configuration, ce qui est pire que pas de bouton. Seul, Google prend toute la largeur, et son libelle porte le verbe « Continuer avec »."
@@ -5431,18 +5404,7 @@
     "valeurs": [
       {
         "textes": [
-          "Créer un compte [1/2]"
-        ],
-        "motif": "contrainte",
-        "raison": "REGLE 3 : UNE SEULE ACTION AU DEGRADE PAR ECRAN. Le kit peint le bouton d en-tete ET « Se connecter » au degrade de marque ; le produit garde le degrade a l action qu on vient faire ici, et pose l en-tete en contour — fond blanc, filet par defaut, encre."
-      },
-      {
-        "textes": [
-          "Pas encore de compte ?",
-          "Créer un compte [2/2]",
-          "Vos données sont sécurisées et confident",
-          "· © 2025 DropLink. Tous droits réservés.",
-          "Documentation"
+          "Créer un compte [2/2]"
         ],
         "motif": "contrainte",
         "raison": "PLACE SEULE, ET UNE SEULE CAUSE : APPLE. Au telephone, le kit empile « Google » et « Apple » sous le formulaire ; le produit n a que Google (decision 27, voir les manquants). Tout ce qui suit remonte de la hauteur d un bouton et de son ecart (60 px), et le pied, que la page du kit poussait sous la fenetre, revient en bas de l ecran (38 px)."
@@ -5451,8 +5413,7 @@
     "manquants": [
       {
         "textes": [
-          "Google",
-          "Apple"
+          "Google"
         ],
         "motif": "contrainte",
         "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT. La decision 27 fixe email + mot de passe, et Google — configure en production, eprouve de bout en bout. Un bouton Apple menerait a une erreur de configuration, ce qui est pire que pas de bouton. Seul, Google prend toute la largeur, et son libelle porte le verbe « Continuer avec »."
@@ -5563,13 +5524,6 @@
       },
       {
         "textes": [
-          "Continuer avec Apple"
-        ],
-        "motif": "contrainte",
-        "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT. La decision 27 fixe email + mot de passe, et Google — configure en production, eprouve de bout en bout. Un bouton Apple menerait a une erreur de configuration, ce qui est pire que pas de bouton. Seul, Google prend toute la largeur, et son libelle porte le verbe « Continuer avec »."
-      },
-      {
-        "textes": [
           "Nom complet"
         ],
         "motif": "donnee",
@@ -5605,13 +5559,6 @@
     "valeurs": [
       {
         "textes": [
-          "ou"
-        ],
-        "motif": "contrainte",
-        "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT (decision 27). Au telephone, le kit empile « Google » et « Apple » ; seul Google existe ici, et « ou » remonte de la hauteur du bouton Apple et de son ecart (56 px)."
-      },
-      {
-        "textes": [
           "Adresse e-mail",
           "Mot de passe",
           "Créer mon compte",
@@ -5630,13 +5577,6 @@
       }
     ],
     "manquants": [
-      {
-        "textes": [
-          "Continuer avec Apple"
-        ],
-        "motif": "contrainte",
-        "raison": "APPLE N EST PAS UN MOYEN D ACCES DU PRODUIT. La decision 27 fixe email + mot de passe, et Google — configure en production, eprouve de bout en bout. Un bouton Apple menerait a une erreur de configuration, ce qui est pire que pas de bouton. Seul, Google prend toute la largeur, et son libelle porte le verbe « Continuer avec »."
-      },
       {
         "textes": [
           "Nom complet"
@@ -6330,7 +6270,7 @@
           "Saisis par le vendeur",
           "Mot de passe (stocké sous forme de conde",
           "Saisi par le vendeur",
-          "Identifiant Google ou Apple en cas de co",
+          "Identifiant Google en cas de connexion d",
           "Fournisseur d'identité",
           "Nom, description, logo, couleurs et rése",
           "Plan souscrit, historique de facturation",
@@ -6459,7 +6399,7 @@
           "Saisis par le vendeur",
           "Mot de passe (stocké sous forme de conde",
           "Saisi par le vendeur",
-          "Identifiant Google ou Apple en cas de co",
+          "Identifiant Google en cas de connexion d",
           "Fournisseur d'identité",
           "Nom, description, logo, couleurs et rése",
           "Plan souscrit, historique de facturation",
@@ -6672,7 +6612,7 @@
           "Saisis par le vendeur",
           "Mot de passe (stocké sous forme de conde",
           "Saisi par le vendeur",
-          "Identifiant Google ou Apple en cas de co",
+          "Identifiant Google en cas de connexion d",
           "Fournisseur d'identité",
           "Nom, description, logo, couleurs et rése",
           "Plan souscrit, historique de facturation",
@@ -6790,7 +6730,7 @@
           "Saisis par le vendeur",
           "Mot de passe (stocké sous forme de conde",
           "Saisi par le vendeur",
-          "Identifiant Google ou Apple en cas de co",
+          "Identifiant Google en cas de connexion d",
           "Fournisseur d'identité",
           "Nom, description, logo, couleurs et rése",
           "Plan souscrit, historique de facturation",
@@ -9278,8 +9218,6 @@
           "Configurer sa marque [2/2]  <h2>",
           "Créer une commande [2/2]  <h2>",
           "Créer une commande  <nombre d'occurrences>",
-          "Photos et vidéos [2/3]  <b>",
-          "Photos et vidéos [3/3]  <h2>",
           "Transporteur et suivi [2/2]  <h2>",
           "Statuts de commande [2/2]  <h2>",
           "Le lien client [2/2]  <h2>",
@@ -9372,7 +9310,11 @@
           "Contact  <a>",
           "Conditions d'utilisation  <a>",
           "Politique de confidentialité  <a>",
-          "© 2025 DropLink. Tous droits réservés.  <span>"
+          "© 2025 DropLink. Tous droits réservés.  <span>",
+          "Photos et vidéos [2/3]  <h2>",
+          "Photos et vidéos [3/3]  <b>",
+          "Par e-mail ou avec Google depuis la . Au  <span>",
+          "page d'inscription  <a>"
         ],
         "motif": "contrainte",
         "raison": "POSITION ET APPARIEMENT, UNE SEULE CAUSE : le contenu. La structure est celle du kit — en-tete collant, grille 268 + 48, sommaire, briques mesurees au pixel — et le TEXTE est celui du produit, arbitrage de Wassim du 12/09/2026 : chaque section ou le kit decrit une fonction absente est plus courte ou plus longue, et tout ce qui suit se deplace. Les memes mots servent a plusieurs endroits (« Photos et videos » est un titre de section ET une etape), et l appariement au plus proche les croise quand l ordre des sections change de hauteur. Tailles, graisses, interlignes et couleurs sont ceux du kit."
@@ -9383,7 +9325,6 @@
         "textes": [
           "Intégrations",
           "un exemple de page client",
-          "Par e-mail, avec Google ou avec Apple de",
           "Couleur principale et secondaire",
           "Appliquées aux accents de la page. Valeu",
           "Options d'affichage",
@@ -9448,7 +9389,6 @@
       },
       {
         "textes": [
-          "page d'inscription",
           "Le bouton est disponible depuis le et de",
           "Nouvelle commande",
           "tableau de bord",
@@ -9476,7 +9416,6 @@
     "enTrop": [
       {
         "textes": [
-          "Par e-mail et mot de passe, depuis la pa",
           "Couleur d'accent",
           "Appliquée aux accents de la page. Valeur",
           "Filigrane",
@@ -9623,7 +9562,6 @@
         "textes": [
           "Intégrations",
           "un exemple de page client",
-          "Par e-mail, avec Google ou avec Apple de",
           "Couleur principale et secondaire",
           "Appliquées aux accents de la page. Valeu",
           "Options d'affichage",
@@ -9686,7 +9624,6 @@
       },
       {
         "textes": [
-          "page d'inscription",
           "Le bouton est disponible depuis le et de",
           "Nouvelle commande",
           "tableau de bord",
@@ -9714,7 +9651,6 @@
     "enTrop": [
       {
         "textes": [
-          "Par e-mail et mot de passe, depuis la pa",
           "Couleur d'accent",
           "Appliquée aux accents de la page. Valeur",
           "Filigrane",

@@ -219,7 +219,7 @@
     },
     "confidentialite": {
       "collecteTitre": "What we collect",
-      "collecteP1": "For a seller: their email address, the name and settings of their shop, and the content they upload. For a recipient: nothing that identifies them. Viewing a page records a salted fingerprint of the IP address and browser, never the values themselves.",
+      "collecteP1": "For a seller: their email address, the name and settings of their shop, and the content they upload. If they sign in with Google: the identifier and email address of their Google account; Google also sends their name and profile picture, which DropLink neither displays nor uses. For a recipient: nothing that identifies them. Viewing a page records a salted fingerprint of the IP address and browser, never the values themselves.",
       "pasDeCompteTitre": "The recipient has no account",
       "pasDeCompteP1": "Viewing a page creates no account, asks for no address and installs no advertising tracker. The name shown on the page is free text entered by the seller: it designates no user of our service.",
       "indexationTitre": "Nothing is indexed",
@@ -1713,7 +1713,7 @@
     "faitPasTexte": "DropLink is not a marketplace and does not manage your catalogue. You will find no products, quantities, prices, cart or revenue: that data belongs to your shop, not to your tracking.",
     "demarrer": "Creating your account",
     "etape1": "Open an account",
-    "etape1Texte": "With an email address and a password, from the sign-up page. No bank card is required.",
+    "etape1Texte": "By email or with Google, from the <lien>sign-up page</lien>. No bank card is required.",
     "etape2": "Name your shop",
     "etape2Texte": "The name and logo appear at the top of every customer page.",
     "etape3": "Create your first order",

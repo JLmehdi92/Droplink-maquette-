@@ -235,7 +235,7 @@ export default async function Documentation({
             <TitreSection id="demarrer">{t("demarrer")}</TitreSection>
             <Etapes
               items={[
-                { titre: t("etape1"), texte: t("etape1Texte") },
+                { titre: t("etape1"), texte: t.rich("etape1Texte", { lien: ancre(`/${langue}/inscription`) }) },
                 { titre: t("etape2"), texte: t("etape2Texte") },
                 { titre: t("etape3"), texte: t("etape3Texte") },
               ]}
