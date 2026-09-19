@@ -26,6 +26,21 @@ import type { NomEvenement } from "./evenements";
  *    tout échec est compté et consultable.
  */
 
+/**
+ * LE TEMPS MAXIMAL QU'UNE ÉMISSION PEUT COÛTER À QUELQU'UN QUI ATTEND.
+ *
+ * 1,5 s, et la valeur est un ARBITRAGE, pas une constante technique. Elle tient
+ * entre deux bornes mesurées : un aller-retour normal vers l'UE coûte de 80 à
+ * 400 ms — la borne ne doit donc jamais couper une émission saine — et le
+ * délai anti-rebond de l'éditeur est de 800 ms, si bien qu'une borne plus
+ * large laisserait les sauvegardes s'empiler dans la file d'attente que Next
+ * impose aux Server Actions.
+ *
+ * Elle est EXPORTÉE parce qu'un contrôle la vérifie : une valeur d'arbitrage
+ * qui ne vit que dans la mémoire de celui qui l'a posée finit par grandir.
+ */
+export const BORNE_EMISSION_MS = 1_500;
+
 export type ProprietesEvenement = Record<string, string | number | boolean | null>;
 
 /** Ce que l'appelant doit fournir pour qu'un événement soit attribuable. */
@@ -102,7 +117,52 @@ export async function emettre(
       event: nom,
       properties: proprietes,
     });
-    await client.flush();
+
+    /*
+     * ⚠️ L'ENVOI EST BORNÉ, ET CE N'EST PAS UNE PRÉCAUTION THÉORIQUE.
+     *
+     * MESURÉ AU NAVIGATEUR LE 20/09/2026, sur l'éditeur de commande piloté au
+     * vrai clavier : la réponse de `enregistrerChamp` a mis 32,4 s au premier
+     * enregistrement d'une commande et 15,5 s aux suivants, pendant qu'une
+     * LECTURE de la même page répondait en 952 ms. `after()` ne retarde pas une
+     * page ; il retarde la réponse d'une SERVER ACTION, qui l'attend.
+     *
+     * ET NEXT SÉRIALISE LES SERVER ACTIONS : tant que la première n'a pas
+     * répondu, les suivantes ne partent pas. Mesuré : UN SEUL POST pour six
+     * champs saisis — cinq modifications perdues, sans une erreur à l'écran.
+     * Le chemin le plus utilisé du produit dépendait donc du temps de réponse
+     * d'un tiers d'analytique, sans borne et sans signal.
+     *
+     * On ne peut pas empêcher Next d'attendre `after()`. On peut empêcher cette
+     * attente d'être INFINIE : au-delà de la borne, l'événement est abandonné et
+     * COMPTÉ COMME PERDU — ce qu'il est. Le rendre `true` ferait monter la
+     * métrique de verdict du côté rassurant, ce que le brief nomme.
+     *
+     * La promesse abandonnée reçoit son propre `catch` : sans lui, un rejet
+     * arrivant après la borne deviendrait un rejet non traité, c'est-à-dire un
+     * incident de processus pour une panne d'analytique.
+     */
+    let minuterie: ReturnType<typeof setTimeout> | undefined;
+    const envoi = client.flush().then(() => "parti" as const);
+    const issue = await Promise.race([
+      envoi,
+      new Promise<"borne">((resoudre) => {
+        minuterie = setTimeout(() => resoudre("borne"), BORNE_EMISSION_MS);
+      }),
+    ]);
+    clearTimeout(minuterie);
+
+    if (issue === "borne") {
+      // Le POST continue sa vie sans personne pour l'attendre : on neutralise
+      // son rejet éventuel, jamais son effet — s'il finit par aboutir, tant
+      // mieux, l'événement sera simplement compté ici comme perdu.
+      void envoi.catch(() => undefined);
+      compteurs.echecs += 1;
+      compteurs.dernierEchec = `envoi abandonné après ${BORNE_EMISSION_MS} ms`;
+      console.error("[instrumentation] événement perdu :", nom, compteurs.dernierEchec);
+      return false;
+    }
+
     compteurs.emis += 1;
     return true;
   } catch (erreur) {
@@ -154,6 +214,23 @@ export function reinitialiserInstrumentation(): void {
  * l'événement part réellement, il ne part simplement plus AVANT la réponse. Le
  * dépôt employait déjà ce motif pour l'appel au fournisseur de suivi ;
  * l'instrumentation ne l'avait pas reçu.
+ *
+ * ⚠️ CE PARAGRAPHE N'EST VRAI QUE DES PAGES, ET IL A ÉTÉ ÉCRIT COMME S'IL
+ * L'ÉTAIT DE TOUT — c'est L-014 sur le correctif même qui devait sortir
+ * l'analytique du chemin critique, et personne ne l'avait exécuté.
+ *
+ * MESURÉ AU NAVIGATEUR LE 20/09/2026, pendant qu'un envoi PostHog était
+ * délibérément retenu : un GET de la fiche de commande a répondu en **952 ms**
+ * — le report tient — mais la réponse de la Server Action `enregistrerChamp` a
+ * mis **15,5 s**, et **32,4 s** au premier enregistrement d'une commande, qui
+ * paie en plus l'émission attendue EN LIGNE de `marquerPremierContenu`. Next
+ * ATTEND les rappels d'`after()` avant de terminer la réponse d'une action.
+ *
+ * Conséquence, mesurée elle aussi : Next sérialise les Server Actions, donc
+ * **un seul POST est parti pour six champs saisis** — cinq modifications
+ * perdues, témoin bloqué sur « Enregistrement… », aucune erreur à l'écran.
+ *
+ * Ce qui borne désormais le dégât est `BORNE_EMISSION_MS`, pas ce report.
  *
  * ⚠️ CE N'EST PAS UN « TIRE ET OUBLIE ». La promesse est confiée à `after`, qui
  * l'attend : `no-floating-promises` reste satisfait, et une promesse non

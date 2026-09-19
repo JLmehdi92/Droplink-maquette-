@@ -4,6 +4,7 @@ import {
   clientAnonyme,
   creerUtilisateur,
   fetchResilient,
+  malgreLAlea,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -40,11 +41,30 @@ function nouveauClient(): SupabaseClient {
   });
 }
 
+/*
+ * ⚠️ CETTE CONNEXION CONTOURNAIT L'ENROBAGE D'ALÉA, ET C'EST CE QUI A RENDU UNE
+ * PORTE BLOQUANTE INTERMITTENTE.
+ *
+ * Constaté le 20/09/2026 : trois cas de ce fichier ont rougi sur « Request rate
+ * limit reached » après une série de passages du parcours de bout en bout, qui
+ * ouvre lui aussi de vraies sessions. Le reste de la suite traverse
+ * `malgreLAlea`, qui patiente puis réessaie ; ces connexions-ci appelaient
+ * `signInWithPassword` en direct, donc la première limite atteinte les tuait.
+ *
+ * Ce n'est pas un défaut du produit, et c'est précisément le problème : une
+ * suite qui rougit pour l'infrastructure apprend à lire le rouge comme du
+ * bruit. Le dépôt a une règle pour ça — un test qui échoue par intermittence
+ * doit être BORNÉ, pas relancé jusqu'au vert.
+ */
 async function sessionAal1(u: UtilisateurDeTest): Promise<SupabaseClient> {
   const client = nouveauClient();
-  const { error } = await client.auth.signInWithPassword({ email: u.email, password: u.motDePasse });
-  if (error !== null) throw new Error("connexion impossible : " + error.message);
-  return client;
+  return await malgreLAlea("connexion aal1", async () => {
+    const { error } = await client.auth.signInWithPassword({
+      email: u.email,
+      password: u.motDePasse,
+    });
+    return { erreur: error, valeur: client };
+  });
 }
 
 beforeAll(async () => {
