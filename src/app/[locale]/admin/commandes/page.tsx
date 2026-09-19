@@ -236,7 +236,10 @@ export default async function AdminCommandes({
             avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
             sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
             complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
-        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-6 xl:gap-3.5">
+        {/* ⚠️ SIX TUILES PAR RANGÉE À PARTIR DE `2xl` : à 1 280 px, six tuiles
+            laissaient 56 px au texte, et « Total commandes » SORTAIT de sa tuile
+            (balayage du 18/09/2026). Trois entre les deux. */}
+        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-3 xl:gap-3.5 2xl:grid-cols-6">
           <TuileVolume
             icone={ShoppingCart}
             compacte

@@ -144,7 +144,12 @@ export async function CourbeCommandes({
       */}
       <div className="absolute right-2 bottom-0 left-9 flex justify-between gap-2">
         {jours
-          .filter((_, i) => i % pas === 0 || i === jours.length - 1)
+          /* ⚠️ UN REPÈRE RÉGULIER TROP PRÈS DU DERNIER JOUR EST OMIS, comme sur la
+             planche : sur 30 jours au pas de 4, elle écrit 0, 4… 24 puis le 29e,
+             jamais le 28e. Nous écrivions les deux : neuf dates au lieu de huit,
+             les deux dernières collées, et à 768 px la rangée sortait de sa
+             carte de 69 px (balayage du 19/09/2026). */
+          .filter((_, i) => i === jours.length - 1 || (i % pas === 0 && jours.length - 1 - i >= pas))
           .map((j, rang, tous) => (
             <span
               key={j.jour}

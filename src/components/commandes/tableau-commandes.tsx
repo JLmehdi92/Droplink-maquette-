@@ -233,14 +233,19 @@ export async function TableauCommandes({
       {/* ⚠️ AU TÉLÉPHONE, LES ONGLETS DÉFILENT SEULS ET LES OUTILS ONT LEUR RANGÉE — 15/09/2026. Rangés au
           bout des onglets dans le même conteneur à défilement, « Filtres » et « Exporter » tombaient à
           180 px hors de l écran : rien ne disait qu ils existaient. Même composition que les envois. */}
-      <div className="flex flex-wrap items-center gap-y-3 pb-3.5 md:pt-4 lg:relative lg:flex-nowrap lg:gap-4 lg:px-5 lg:pb-0">
-        <div className="defilement-discret min-w-0 basis-full overflow-x-auto px-margin-mobile md:px-5 lg:shrink-0 lg:basis-auto lg:overflow-visible lg:px-0">
+      {/* ⚠️ UNE SEULE RANGÉE À PARTIR DE `2xl`, PLUS DE `lg`. Onglets, filtres,
+          export et tri demandent ~950 px ; entre 1 024 et 1 535 px la rangée ne
+          les avait pas, et le document défilait de côté — 298 px à 1 024, 42 à
+          1 280 (balayage du 18/09/2026). En dessous, les outils passent sous les
+          onglets, alignés à droite ; la planche, mesurée à 1 675, ne change pas. */}
+      <div className="flex flex-wrap items-center gap-y-3 pb-3.5 md:pt-4 lg:relative 2xl:flex-nowrap 2xl:gap-4 2xl:px-5 2xl:pb-0">
+        <div className="defilement-discret min-w-0 basis-full overflow-x-auto px-margin-mobile md:px-5 2xl:shrink-0 2xl:basis-auto 2xl:overflow-visible 2xl:px-0">
           <PilulesFiltres base={base} parametres={parametres} compteurs={compteurs} />
         </div>
 
         {vide ? null : (
           <>
-        <span className="hidden flex-grow lg:block" />
+        <span className="hidden flex-grow 2xl:block" />
 
         {/* ⚠️ LES CONTRÔLES DE DROITE SONT GROUPÉS, ET LE GROUPE PORTE 14 px SOUS
             LUI. C'est ce que le kit mesure : sa colonne de droite rend 56 px de
@@ -249,7 +254,7 @@ export async function TableauCommandes({
             faisait 58 px au lieu de 72, les onglets remontaient de 8 px, et
             l'en-tête des colonnes avec eux : aucune ligne du tableau ne tombait
             à la hauteur du kit. L'écart entre les deux contrôles est de 10. */}
-        <div className="flex basis-full items-center gap-2.5 px-margin-mobile md:px-5 lg:basis-auto lg:px-0 lg:pb-[14px] [&>details]:min-w-0 [&>details]:flex-1 lg:[&>details]:flex-none [&>details>summary]:w-full lg:[&>details>summary]:w-fit">
+        <div className="flex basis-full items-center gap-2.5 px-margin-mobile md:px-5 lg:justify-end 2xl:basis-auto 2xl:px-0 2xl:pb-[14px] [&>details]:min-w-0 [&>details]:flex-1 lg:[&>details]:flex-none [&>details>summary]:w-full lg:[&>details>summary]:w-fit">
         <PanneauFiltres base={base} parametres={parametres} />
 
 
@@ -471,10 +476,10 @@ export async function TableauCommandes({
                   <col className="w-[14.424%]" />
                   <col className="w-[8.922%]" />
                   <col className="w-[10.260%]" />
-                  <col className="w-[10.781%]" />
+                  <col className="hidden w-[10.781%] 2xl:table-column" />
                   <col className="w-[13.532%]" />
                   <col className="w-[11.227%]" />
-                  <col className="w-[20.892%]" />
+                  <col className="hidden w-[20.892%] 2xl:table-column" />
                   <col className="w-[4.609%]" />
                 </colgroup>
                 <thead>
@@ -484,7 +489,11 @@ export async function TableauCommandes({
                     </th>
                     {["commande", "date", "client", "produits", "numeroSuivi", "statutCourt", "suivi"].map(
                       (clef) => (
-                        <th key={clef} scope="col" className={enTete}>
+                        <th
+                          key={clef}
+                          scope="col"
+                          className={enTete + (clef === "produits" || clef === "suivi" ? " hidden 2xl:table-cell" : "")}
+                        >
                           {/* ⚠️ LE LIBELLÉ DANS UN `<span>`, COMME LE KIT. Sa rangée
                               d en-tête est une GRILLE : chaque libellé y est un span
                               sans remplissage, et l écart de 14 vient du `gap`. Un
@@ -622,7 +631,7 @@ export async function TableauCommandes({
                         {/* PRODUITS : deux vignettes de 38 puis « +N ». Le
                             compte restant vient de `media_count`, porté par la
                             commande — il n est pas déduit des vignettes lues. */}
-                        <td className={cellule}>
+                        <td className={cellule + " hidden 2xl:table-cell"}>
                           <span className="flex items-center gap-[7px]">
                             {ligne.vignettes.map((url, rang) => (
                               <Vignette key={url} url={url} taille={38} rayon={10} alt={nom + " " + String(rang + 1)} />
@@ -668,7 +677,14 @@ export async function TableauCommandes({
                           <PuceExpedition ligne={ligne} maintenant={maintenant} libelles={t} />
                         </td>
 
-                        <td className={cellule}>
+                        {/* ⚠️ LA FRISE ET LES VIGNETTES NE S'AFFICHENT QU'À `2xl`.
+                            Les neuf colonnes gardent les proportions de la planche
+                            (1 675 px) : à 1 024 et 1 280, leurs textes SE
+                            CHEVAUCHAIENT — étapes de la frise, date sur client,
+                            « +3 » sur le numéro (balayage du 18/09/2026). Plus
+                            étroit, le statut reste, les deux colonnes décoratives
+                            s'effacent. */}
+                        <td className={cellule + " hidden 2xl:table-cell"}>
                           <FriseSuivi
                             statut={ligne.statut}
                             libelles={{

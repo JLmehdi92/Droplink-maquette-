@@ -208,7 +208,7 @@
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat.",
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ]
       },
       {
@@ -753,7 +753,7 @@
         "motif": "donnee",
         "raison": "L identite du compte de mesure, la ou le kit affiche la sienne. « Se deconnecter » est en plus : la deconnexion est une PROPRIETE DE SECURITE (decision 29) — sans elle, le suivant qui ouvre un navigateur partage herite de l editeur, de l export CSV et des notes internes, qui portent le prix d achat. L ADRESSE EST DECLAREE PAR MOTIF : le jeu de mesure fabrique un compte jetable a chaque passage, dont la partie locale est tiree au hasard. Un texte litteral rendrait la soustraction rouge a la prochaine execution pour la seule raison que la base a rendu d autres octets.",
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ]
       },
       {
@@ -1185,7 +1185,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage. Ancree aux deux bouts, elle ne couvre rien d autre."
@@ -1329,12 +1329,6 @@
           "Numéro de suivi",
           "numéro de suivi",
           "Historique de la commande",
-          "10 sept. 2025",
-          "9 sept. 2025",
-          "8 sept. 2025",
-          "à 09:15",
-          "à 11:02",
-          "à 14:32",
           "Contrôle approuvé par le client",
           "Commande modifiée",
           "Révoquer le lien",
@@ -1343,6 +1337,19 @@
         ],
         "motif": "donnee",
         "raison": "LA LONGUEUR DES DATES DU JEU DE MESURE. Sa date de creation, ecrite en toutes lettres avec l annee et l heure, depasse les 183 px que la rangee laisse a la valeur et passe sur deux lignes ; celle du kit y tient. La rangee grandit de 17 px, et tout ce qui suit — historique, revocation — descend d autant, a quelques pixels pres selon la date du jour. Valeurs, tailles et couleurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "10 sept. 2025",
+          "9 sept. 2025",
+          "8 sept. 2025",
+          "à 09:15",
+          "à 11:02",
+          "à 14:32"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DATES DE L HISTORIQUE, MEME CAUSE QUE CI-DESSUS : la rangee de la date de creation grandit et tout l historique descend. VOLATILE (19/09/2026) : le jeu est date du jour du passage, et ce jour decide si ses dates ont la largeur de celles du kit — le 19/09, les quatre tombent a deux chiffres et ne s ecartent plus ; la declaration mourait alors qu elle couvre toujours le meme decalage."
       },
       {
         "textes": [
@@ -1371,12 +1378,19 @@
       {
         "textes": [
           "11 sept. 2025 [1/4]  <time>",
+          "11 sept. 2025 [2/4]  <time>",
+          "11 sept. 2025 [3/4]  <time>",
+          "11 sept. 2025 [4/4]  <time>",
           "11 sept. 2025  <nombre d'occurrences>",
           "à 18:40 [1/4]  <span>",
+          "à 18:40 [2/4]  <span>",
+          "à 18:40 [3/4]  <span>",
+          "à 18:40 [4/4]  <span>",
           "à 18:40  <nombre d'occurrences>"
         ],
         "motif": "donnee",
-        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique."
+        "volatile": true,
+        "raison": "LA LIGNE D ARBITRAGE COMMENTEE DE LA PLANCHE (18/09/2026) : « Controle refuse par le client » et la phrase du client, entre guillemets. Le produit la rend a l identique quand l evenement existe (tests/rls/journal-et-qc, arbitrage anonyme puis lecture du vendeur) ; le jeu de mesure n a pas d arbitrage commente. Ses quatre evenements face aux cinq de la planche decalent aussi l appariement des dates de l historique. VOLATILE, et les quatre rangs : le jeu est date du jour du passage, et c est ce jour qui decide a quelle ligne s apparie la date de la planche — [1/4] le 18/09, [4/4] le 19/09 (toutes les dates a deux chiffres). Seule la ligne commentee est couverte : sa hauteur (68 contre 34) et le decalage qu elle entraine."
       }
     ],
     "manquants": [
@@ -1629,7 +1643,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -1996,7 +2010,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -2380,7 +2394,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte d administration cree par la sonde, differente a chaque passage. Un motif ancre plutot que la valeur relevee : une declaration litterale serait morte des la mesure suivante."
@@ -2904,7 +2918,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte d administration cree par la sonde, differente a chaque passage. Un motif ancre plutot que la valeur relevee : une declaration litterale serait morte des la mesure suivante.",
@@ -3143,7 +3157,7 @@
     "enTrop": [
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte d administration cree par la sonde, differente a chaque passage. Un motif ancre plutot que la valeur relevee : une declaration litterale serait morte des la mesure suivante.",
@@ -3457,12 +3471,11 @@
           "Configurées",
           "Sans nom",
           "Colis",
-          "Médias",
           "Stockage",
           "Active"
         ],
         "motif": "contrainte",
-        "raison": "NOS TUILES, NOS COLONNES ET NOTRE VOCABULAIRE — voir la declaration symetrique dans les manquants. Trois d entre elles n ont pas d equivalent chez le kit et portent chacune une decision : « Colis » rend le SEUL poste que le fournisseur de suivi nous facture ; « Medias » et « Stockage » rendent ce que chaque compte OCCUPE, mesure cote serveur au depot et jamais cru depuis le client ; et « Boutique non configuree » n est pas un repli invente — `shops.name` est NULLABLE SANS DEFAUT, et un vendeur qui n a rien configure est le cas le plus frequent au debut de vie d un compte."
+        "raison": "NOS TUILES, NOS COLONNES ET NOTRE VOCABULAIRE — voir la declaration symetrique dans les manquants. Trois d entre elles n ont pas d equivalent chez le kit et portent chacune une decision : « Colis » rend le SEUL poste que le fournisseur de suivi nous facture ; « Stockage » rend ce que chaque compte OCCUPE, mesure cote serveur au depot et jamais cru depuis le client ; et « Boutique non configuree » n est pas un repli invente — `shops.name` est NULLABLE SANS DEFAUT, et un vendeur qui n a rien configure est le cas le plus frequent au debut de vie d un compte. « Medias » n est plus ici : a 1 545, la largeur de la planche, la colonne est masquee (elle ne s affiche qu a 1 700) pour que les neuf autres tiennent a cote du panneau, comme au kit (19/09/2026)."
       },
       {
         "textes": [
@@ -3963,10 +3976,10 @@
       },
       {
         "motifs": [
-          "^(ecran|fumee|test-[a-z-]+)[-0-9]*[a-z0-9@.-]*$"
+          "^(ecran|fumee|parcours|test-[a-z-]+)[-0-9]*[a-z0-9@.-]*$"
         ],
         "motif": "donnee",
-        "raison": "Les adresses des comptes jetables qui ont ecrit les dernieres lignes du journal : sondes, fumee, et les suites de tests, dont le libelle precede l horodatage. Elles changent a chaque passage et sont tronquees a quarante caracteres par le releve."
+        "raison": "Les adresses des comptes jetables qui ont ecrit les dernieres lignes du journal : sondes, fumee, et les suites de tests, dont le libelle precede l horodatage. Elles changent a chaque passage et sont tronquees a quarante caracteres par le releve. Le PARCOURS de bout en bout (18/09/2026) cree lui aussi ses comptes, parcours-…@droplink-tests.invalid, et le journal est en ajout seul : ses lignes restent en tete tant que d autres ne les poussent pas."
       },
       {
         "textes": [
@@ -4199,10 +4212,10 @@
       },
       {
         "motifs": [
-          "^(ecran|fumee|test-[a-z-]+)[-0-9]*[a-z0-9@.-]*$"
+          "^(ecran|fumee|parcours|test-[a-z-]+)[-0-9]*[a-z0-9@.-]*$"
         ],
         "motif": "donnee",
-        "raison": "Les adresses des comptes jetables qui ont ecrit les dernieres lignes du journal : sondes, fumee, et les suites de tests, dont le libelle precede l horodatage. Elles changent a chaque passage et sont tronquees a quarante caracteres par le releve."
+        "raison": "Les adresses des comptes jetables qui ont ecrit les dernieres lignes du journal : sondes, fumee, et les suites de tests, dont le libelle precede l horodatage. Elles changent a chaque passage et sont tronquees a quarante caracteres par le releve. Le PARCOURS de bout en bout (18/09/2026) cree lui aussi ses comptes, parcours-…@droplink-tests.invalid, et le journal est en ajout seul : ses lignes restent en tete tant que d autres ne les poussent pas."
       },
       {
         "textes": [
@@ -4479,7 +4492,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte d administration cree par la sonde, differente a chaque passage. Un motif ancre plutot que la valeur relevee."
@@ -7275,7 +7288,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -7756,7 +7769,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -7934,7 +7947,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -8154,7 +8167,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -8343,7 +8356,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -8569,7 +8582,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -8766,7 +8779,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -8990,7 +9003,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -9171,7 +9184,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -10870,7 +10883,7 @@
     "enTrop": [
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable de la sonde, rappelee par l ecran : elle change a chaque passage."
@@ -10892,7 +10905,7 @@
     "enTrop": [
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable de la sonde, rappelee par l ecran : elle change a chaque passage."
@@ -10999,7 +11012,7 @@
       },
       {
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid$"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
         ],
         "motif": "donnee",
         "raison": "L adresse du compte jetable, fabriquee a chaque passage."
@@ -11423,7 +11436,7 @@
           "Instagram, TikTok, WhatsApp"
         ],
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid · Re"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests\\.invalid · Re"
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
@@ -11560,7 +11573,7 @@
           "Instagram, TikTok, WhatsApp"
         ],
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid · Re"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests\\.invalid · Re"
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
@@ -11743,7 +11756,7 @@
           "Instagram, TikTok, WhatsApp"
         ],
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid · Re"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests\\.invalid · Re"
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
@@ -11882,7 +11895,7 @@
           "Instagram, TikTok, WhatsApp"
         ],
         "motifs": [
-          "^ecran-[a-z0-9]+@droplink-tests\\.invalid · Re"
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests\\.invalid · Re"
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."

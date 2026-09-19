@@ -588,7 +588,11 @@ export function CarteMedias({
               setSurvol(false);
               ajouter(e.dataTransfer.files);
             }}
-            className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 lg:gap-[9px]"
+            /* ⚠️ SIX COLONNES À PARTIR DE `2xl` SEULEMENT. Posées dès `lg`, elles
+               donnaient des vignettes de 51 px à 1 024 et de 75 à 1 280 dans la
+               colonne de la fiche : la pastille « Couverture » y était COUPÉE
+               (balayage du 18/09/2026). La planche, mesurée à 1 690, garde ses six. */
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:gap-[9px] xl:grid-cols-4 2xl:grid-cols-6"
           >
             {medias.map((media, index) => (
               <Case

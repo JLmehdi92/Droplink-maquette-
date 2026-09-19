@@ -126,7 +126,14 @@ export async function HistoriqueCommande({
         // croire à un échec de chargement.
         <p className="text-[13px] text-ds-texte-sourdine">{t("aucun")}</p>
       ) : (
-        <ol>
+        /*
+          ⚠️ UNE REQUÊTE DE CONTENEUR, PAS D'ÉCRAN. À 1 024 px, ce panneau est si
+          étroit que la colonne de date (92 px, icône en plus) ne laissait que
+          11 px au titre : « Commande modifiée » débordait de la carte et élargissait
+          la page (balayage du 18/09/2026). Sous 280 px de liste, la date passe
+          sous le titre ; au-dessus — téléphone et bureau des planches — rien ne change.
+        */
+        <ol className="@container">
           {lignes.map((ligne, index) => {
             const Icone = ICONES[ligne.type];
             return (
@@ -138,24 +145,25 @@ export async function HistoriqueCommande({
               <li
                 key={ligne.id}
                 className={
-                  "flex gap-3.5 py-[13px]" + (index === 0 ? "" : " border-t border-ds-filet")
+                  "grid grid-cols-[34px_minmax(0,1fr)] gap-x-3.5 gap-y-1 py-[13px] @[280px]:flex @[280px]:gap-3.5" +
+                  (index === 0 ? "" : " border-t border-ds-filet")
                 }
               >
                 {/* `IconTile` taille `sm` : 34 au rayon `sm`, fond teinte,
                     icone 16 a l accent au trait 1,9. */}
-                <span className="inline-flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
+                <span className="row-span-2 inline-flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
                   <Icone aria-hidden="true" size={16} strokeWidth={1.9} />
                 </span>
                 {/* LA COLONNE DE DATE FAIT 92 px ET NE SE COMPRIME PAS : c est
                     ce qui aligne les titres des quatre lignes entre eux. */}
                 <time
                   dateTime={ligne.quand}
-                  className="flex w-[92px] flex-none flex-col text-[12px] leading-[normal] text-ds-texte-sourdine"
+                  className="col-start-2 row-start-2 flex flex-none flex-col text-[12px] leading-[normal] text-ds-texte-sourdine @[280px]:w-[92px]"
                 >
                   {jour(ligne.quand)}
                   <span>{t("aHeure", { heure: heure(ligne.quand) })}</span>
                 </time>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="col-start-2 row-start-1 flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="text-[14px] leading-[normal] font-bold text-ds-texte-fort">
                     {t(`types.${ligne.type}`)}
                   </span>

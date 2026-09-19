@@ -109,7 +109,13 @@ export async function Anneau({
                SE REPLIE (écart 18) : dans la carte étroite des statuts, la
                légende passe sous l'anneau, comme au kit. */
             "flex flex-wrap items-center gap-[18px]"
-          : "flex flex-col items-center sm:flex-row " + (commandes ? "gap-5" : "gap-6")
+          : "flex flex-col items-center sm:flex-row " +
+            /* ⚠️ SUR LA VUE D'ENSEMBLE, LA LÉGENDE PASSE SOUS L'ANNEAU sous
+               230 px. À la largeur du kit elle en a 239 (mesuré à 1 545) et
+               reste à côté ; à 1 280, « En préparation » recouvrait sa part
+               (balayage du 18/09/2026). */
+            (liste ? "" : "sm:flex-wrap sm:justify-center ") +
+            (commandes ? "gap-5" : "gap-6")
       }
     >
       <div className="relative shrink-0" style={{ width: COTE, height: COTE }}>
@@ -157,7 +163,7 @@ export async function Anneau({
         className={
           "flex min-w-0 flex-col justify-center self-stretch " +
           (commandes ? "gap-[13px] " : "gap-3.5 ") +
-          (liste ? "flex-[1_1_150px]" : "flex-1")
+          (liste ? "flex-[1_1_150px]" : "flex-1 sm:flex-[1_1_230px]")
         }
       >
         {parts.map((p) => (

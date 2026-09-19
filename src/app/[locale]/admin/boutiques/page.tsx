@@ -296,9 +296,18 @@ export default async function AdminBoutiques({
           `xl`. Vu en capture le 18/09/2026 à 1 280 px : à côté de ses 424 px, le
           tableau n'avait plus la place de ses colonnes et le panneau les ROGNAIT
           — Stockage, Création, Statut et « Voir » disparaissaient sans barre de
-          défilement. La planche se mesure à 1 560 : elle garde sa mise en page ;
-          en dessous, la liste prend toute la largeur. Même geste sur les comptes
-          et les commandes, dont les en-têtes se touchaient.
+          défilement. Même geste sur les comptes et les commandes, dont les
+          en-têtes se touchaient.
+
+          ⚠️ ET LA COLONNE « MÉDIAS » NE S'AFFICHE QU'À 1 700 px. À 1 545 (la
+          largeur de la planche), la colonne « Actions » ajoutée le 18/09 dépassait
+          la carte et « Voir » passait SOUS le panneau des statuts : neuf colonnes
+          de vraies données ne tiennent pas à côté de 424 px. Repousser le panneau
+          sous la liste jusqu'à 1 700 px (essayé le 18/09) réparait le débordement
+          mais n'était plus la planche. La planche n'a pas de colonne Médias, et le
+          Stockage voisin en porte déjà le coût : c'est elle qui cède, le seuil des
+          colis restant visible. La soustraction ne l'avait pas vu — sa place
+          avait été déclarée « structure » —, la règle `[cadre]` de la sonde, si.
         */}
         <div className="grid gap-2.5 md:gap-[18px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] 2xl:items-start">
           <section className={PANNEAU}>
@@ -344,7 +353,7 @@ export default async function AdminBoutiques({
                         <th scope="col" className={EN_TETE_COLONNE}>
                           {t("boutiques.colonnes.colis")}
                         </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
+                        <th scope="col" className={EN_TETE_COLONNE + " hidden min-[1700px]:table-cell"}>
                           {t("boutiques.colonnes.medias")}
                         </th>
                         <th scope="col" className={EN_TETE_COLONNE}>
@@ -437,7 +446,7 @@ export default async function AdminBoutiques({
                                 })
                               : format.number(b.colisCeMois)}
                           </td>
-                          <td className={CELLULE + " text-ds-texte-fort"}>
+                          <td className={CELLULE + " hidden text-ds-texte-fort min-[1700px]:table-cell"}>
                             {format.number(b.medias)}
                           </td>
                           <td className={CELLULE + " text-ds-texte-fort"}>{taille(b.octets)}</td>

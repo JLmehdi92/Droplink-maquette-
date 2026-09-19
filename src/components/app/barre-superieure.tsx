@@ -58,7 +58,7 @@ export async function BarreSuperieure({
       </span>
       {/* `useSearchParams` fait sortir son porteur du rendu statique : la
           frontière le borne à ce seul champ plutôt qu à toute la coque. */}
-      <div className="hidden w-full max-w-[551px] md:block">
+      <div className="hidden w-full max-w-[551px] min-w-0 md:block">
         <Suspense fallback={<span className="block h-[46px] w-full" />}>
           <RechercheGlobale
             action={`/${langue}/commandes`}

@@ -96,7 +96,11 @@ export function RechercheGlobale({
         defaultValue={valeurInitiale}
         placeholder={placeholder}
         aria-label={etiquette}
-        className="min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort placeholder:text-ds-texte-corps focus-visible:outline-none"
+        /* ⚠️ `w-0` : un champ garde sa largeur INTRINSÈQUE (≈ 200 px) dans le
+           calcul du minimum, même en `min-w-0 flex-1`. À 768 px, à côté de la
+           barre latérale, l'en-tête débordait donc de 17 px et le menu du
+           compte sortait de l'écran (balayage du 18/09/2026). */
+        className="w-0 min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort placeholder:text-ds-texte-corps focus-visible:outline-none"
       />
       {/* Les deux touches du kit : 11 px en 600, creux, rayon 6, filet.
           `aria-hidden` parce qu'elles décrivent un geste, pas un contenu — un

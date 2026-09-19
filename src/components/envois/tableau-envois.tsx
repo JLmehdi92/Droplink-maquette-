@@ -220,8 +220,12 @@ export async function TableauEnvois({
    * rendait `py-[15px]` et un écart de 16 au lieu de 14 — sur huit colonnes,
    * seize pixels de dérive cumulée jusqu'au bord droit.
    */
+  // ⚠️ LES EN-TÊTES NE RESTENT SUR UNE LIGNE QU'À `2xl`. Les colonnes sont en
+  // pourcentage de la planche (1 675 px) : à 1 280 et 1 440, « Dernière mise à
+  // jour » débordait de ses ~83 px et recouvrait « Prochaine étape » (balayage
+  // du 18/09/2026). Plus étroit, le libellé passe à la ligne dans sa colonne.
   const enTete =
-    "pt-4 pb-4 pr-[14px] text-left text-[12px] font-semibold whitespace-nowrap text-ds-texte-sourdine";
+    "pt-4 pb-4 pr-[14px] text-left align-bottom text-[12px] font-semibold text-ds-texte-sourdine 2xl:whitespace-nowrap";
   const cellule = "border-t border-ds-filet py-[14px] pr-[14px] text-[14px]";
   const bordGauche = " pl-5";
   const bordDroit = " pr-5";
@@ -463,10 +467,15 @@ export async function TableauEnvois({
    * filtre caché hors de l'écran ne se découvre pas. La recherche prend sa
    * rangée, les menus viennent deux par deux, leurs libellés tronqués.
    * Planche `ShippingView`, `.ship-filters` sous 760 px.
+   *
+   * ⚠️ ET ELLE NE TIENT SUR UNE LIGNE QU'À PARTIR DE `2xl`. En `lg`, la
+   * recherche et quatre menus débordaient la colonne : le document défilait de
+   * côté, 281 px à 1 024 et 25 à 1 280 (balayage du 18/09/2026). Entre les
+   * deux, la barre se replie ; la planche, mesurée à 1 675, ne change pas.
    */
   const MOITIE = " min-w-0 basis-[calc(50%-5px)] lg:basis-auto";
   const barreOutils = (
-    <div className="flex flex-wrap items-center gap-2.5 lg:mb-4 lg:flex-nowrap lg:gap-3.5">
+    <div className="flex flex-wrap items-center gap-2.5 lg:mb-4 lg:gap-3.5 2xl:flex-nowrap">
       {/*
         LE CHAMP DE RECHERCHE, premier element de la barre du kit — 310 px de
         large, 46 de haut, une loupe de 17 a gauche.

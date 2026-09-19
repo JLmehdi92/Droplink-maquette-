@@ -204,8 +204,13 @@ export default async function Analyses({
         </div>
 
         {/* LA DERNIÈRE RANGÉE DU KIT : trois colonnes égales — les ouvertures
-            de liens, les transporteurs, l'activité récente. */}
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-3 lg:items-start lg:gap-4">
+            de liens, les transporteurs, l'activité récente.
+
+            ⚠️ TROIS COLONNES À PARTIR DE `xl` SEULEMENT. Posées dès `lg`, elles
+            faisaient 224 px à 1 024 : les parts des transporteurs et les dates
+            de l'axe des ouvertures SORTAIENT DE LEUR CARTE (balayage du
+            18/09/2026). Entre les deux, deux colonnes, l'activité dessous. */}
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 xl:grid-cols-3 lg:[&>*:last-child]:col-span-2 xl:[&>*:last-child]:col-span-1">
           {ouvertures === null || activite === null ? (
             <p className={INDISPONIBLE}>{t("indisponible")}</p>
           ) : (

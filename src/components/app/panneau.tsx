@@ -209,12 +209,20 @@ export function LigneInfo({
     </>
   );
 
+  /*
+   * ⚠️ LA LIGNE SE REPLIE QUAND LA PLACE MANQUE. À 1 024 px, le panneau de la
+   * fiche fait ~200 px : « Méthode d'expédition », qui ne rétrécit pas, laissait
+   * 30 px à la valeur, et « septembre », « FedEx », le numéro de suivi SORTAIENT
+   * DE LA CARTE (balayage du 18/09/2026). La valeur passe alors sous son
+   * libellé, alignée à droite, et un numéro sans espace peut se couper. Aux
+   * largeurs des planches, la place suffit : rien ne se replie.
+   */
   return (
-    <div className="flex items-center gap-4 border-b border-ds-filet py-[13px] last:border-b-0">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-ds-filet py-[13px] last:border-b-0">
       <span className="shrink-0 text-[14px] leading-[normal] text-ds-texte-corps">{libelle}</span>
       <span className="flex-1" />
       {href === undefined ? (
-        <span className="min-w-0 text-right text-[14px] leading-[normal] font-semibold text-ds-texte-fort">
+        <span className="max-w-full min-w-0 text-right text-[14px] leading-[normal] font-semibold text-ds-texte-fort [overflow-wrap:anywhere]">
           {valeur}
         </span>
       ) : (
@@ -228,7 +236,7 @@ export function LigneInfo({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="-my-[13px] inline-flex min-h-11 min-w-0 items-center gap-[7px] py-[13px] text-[14px] leading-[normal] font-semibold text-ds-texte-lien hover:underline lg:min-h-0"
+          className="-my-[13px] inline-flex min-h-11 max-w-full min-w-0 items-center gap-[7px] py-[13px] text-[14px] leading-[normal] font-semibold text-ds-texte-lien hover:underline lg:min-h-0"
         >
           {texte}
         </a>

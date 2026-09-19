@@ -154,8 +154,14 @@ export default async function TableauDeBord({
           <CompteursAnalyses activite={activite} delai={delai} />
         )}
 
-        {/* LA PREMIÈRE RANGÉE DU KIT : 1,35fr / 1fr / 0,82fr, alignée en haut. */}
-        <div className="flex flex-col gap-3 lg:gap-[18px] xl:grid xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,0.82fr)] xl:items-start">
+        {/* LA PREMIÈRE RANGÉE DU KIT : 1,35fr / 1fr / 0,82fr, alignée en haut.
+
+            ⚠️ EN GRILLE À PARTIR DE `2xl` SEULEMENT, comme la seconde rangée.
+            Posées dès `xl`, les trois colonnes laissaient ~286 px aux dernières
+            commandes (« il y a 1 s » SORTAIT de la carte) et ~270 au graphique,
+            dont les douze dates SE CHEVAUCHAIENT à 1 280 px (balayage du
+            18/09/2026). En dessous, les panneaux s'empilent pleine largeur. */}
+        <div className="flex flex-col gap-3 lg:gap-[18px] 2xl:grid 2xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,0.82fr)] 2xl:items-start">
           <div className="flex min-w-0 flex-col gap-3 lg:gap-[18px]">
             <CarteLancement langue={langue} />
             {semaines === null ? (
@@ -186,7 +192,7 @@ export default async function TableauDeBord({
 
         {/* LA SECONDE RANGÉE : trois panneaux — la carte « Passez au Pro » du
             kit, quatrième, n'est pas rendue. */}
-        <div className="flex flex-col gap-3 lg:gap-[18px] xl:grid xl:grid-cols-3 xl:items-start">
+        <div className="flex flex-col gap-3 lg:gap-[18px] 2xl:grid 2xl:grid-cols-3 2xl:items-start">
           {ouvertures === null || activite === null ? (
             <p className={INDISPONIBLE}>{ta("indisponible")}</p>
           ) : (
