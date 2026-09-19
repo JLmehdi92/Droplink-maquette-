@@ -161,7 +161,15 @@ qui garantit qu'elles visent toutes la même base.**
 
 ## Stack
 
-Next.js 15 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAccess`) · Tailwind v4 · shadcn/ui · dnd-kit · **Supabase** (Postgres + Auth + RLS) · **Cloudflare R2** (médias, bucket privé) · Resend + React Email · PostHog (EU) · Sentry · next-intl (FR + EN) · Zod · 17TRACK (suivi).
+Next.js 16 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAccess`) · Tailwind v4 · shadcn/ui · dnd-kit · **Supabase** (Postgres + Auth + RLS) · **Cloudflare R2** (médias, bucket privé) · Resend · PostHog (EU) · Sentry · next-intl (FR, EN, zh-CN) · Zod · 17TRACK (suivi).
+
+> ⚠️ **TROIS MENTIONS DE CETTE LIGNE ÉTAIENT FAUSSES, mesurées le 20/09/2026 dans
+> `package.json`** : le dépôt est en **Next 16.3.4**, pas 15 ; il n'y a **AUCUN paquet Resend ni React
+> Email** — `lib/email/resend.ts` appelle l'API HTTP à la main, et il ne sert qu'aux ALERTES DE
+> VEILLE, vers l'exploitant ; les e-mails de compte (inscription, réinitialisation, changement
+> d'adresse) partent du SMTP configuré dans Supabase Auth. **Aucun e-mail ne part vers le client
+> final** : `orders.notify_email` et `unsubscribe_token` existent en base et ne sont lus par
+> aucun chemin, et il n'existe pas de route de désinscription.
 
 **Absent volontairement :** toute librairie de paiement, Three.js, WebGL, tout transcodeur vidéo.
 
@@ -725,7 +733,12 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 - **Contrôle par VALEUR, pas par nom.** Une valeur voyage sous n'importe quel nom : un champ sensible republié sous `meta`, `debug`, `commentaire` ou `diagnostic` survit à un contrôle textuel. Injecter des sentinelles uniques et les chercher dans les réponses **et dans le HTML rendu**, charges d'hydratation comprises. **Le `public_token` est la sentinelle prioritaire** : les autres exposent une donnée, celle-là transfère une **capacité**, définitivement.
 - **Bucket R2 privé sans exception.** URL signées à expiration. **Clé d'objet générée par le SERVEUR** — une clé fournie par le client permettrait d'écraser le média d'un autre vendeur. **Taille relue côté serveur**, jamais crue depuis le client : c'est la base du modèle de coût.
 - **Rate limiting à deux seuils, EN BASE** (pas en mémoire : les instances se multiplient précisément sous la charge à limiter). Compteurs **distincts** entre page publique et admin. **En cas de panne du compteur : la page publique AUTORISE** (refuser pénaliserait les clients d'un vendeur pour un incident qui ne les concerne pas), **l'admin REFUSE** (ça ne pénalise que nous).
-- **SVG assainis avant stockage.**
+- **SVG REFUSÉ, jamais « assaini ».** Ce fichier a longtemps écrit « SVG assainis avant
+  stockage » : cet assainissement n'a JAMAIS existé, et ce qui refusait réellement le format
+  était l'absence d'un troisième appelant (L-029). Le format est sorti de la table des types
+  acceptés — dépôt de média, logo et image de contestation comprises. Le relever est plus
+  strict que la règle d'origine, et c'est voulu : héberger du script déguisé en image pour
+  gagner un format vectoriel ne vaut pas l'échange (audit du 20/09/2026).
 
 ---
 

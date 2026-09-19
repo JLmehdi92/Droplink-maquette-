@@ -24,8 +24,12 @@ import "../../globals.css";
  * Le défaut ne cassait rien, ne levait rien, et n'aurait été visible qu'en
  * comparant deux captures côte à côte.
  *
- * LE BUDGET LE PORTE : la page mesurait 176 Ko compressés sur 300 autorisés, et
- * le sous-ensemble latin d'Inter en coûte une trentaine. L'axe optique est celui
+ * LE BUDGET LE PORTE, MAIS DE MOINS LOIN QUE CETTE PHRASE NE LE DISAIT. Elle
+ * annonçait « une trentaine de Ko » pour le sous-ensemble latin d'Inter ; mesuré
+ * le 20/09/2026 sur le fichier réellement servi (`.next/static/media/*.woff2`,
+ * déjà compressé) : 73 Ko. Le total transféré hors médias est de 268 Ko sur 300
+ * autorisés — JS 174, CSS 21, police 73 — soit 32 Ko de marge, pas 124.
+ * L'axe optique est celui
  * de l'espace vendeur — sans lui, toutes les tailles rendraient au dessin de 14
  * et les mots sortiraient quelques pixels plus larges.
  */
