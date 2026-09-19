@@ -325,7 +325,7 @@ export default async function AdminCommandes({
               href: lien({ jours }),
             }))}
           />
-          <Link
+          <Link prefetch={false}
             href={base}
             className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
           >
@@ -444,7 +444,7 @@ export default async function AdminCommandes({
                               </span>
                             </td>
                             <td className={CELLULE + " pr-[18px] text-right last:pr-[18px]"}>
-                              <Link
+                              <Link prefetch={false}
                                 href={`/${langue}/admin/comptes/${l.proprietaireId}`}
                                 aria-label={t("commandes.voirLong", { email: l.proprietaireEmail })}
                                 className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
@@ -487,7 +487,7 @@ export default async function AdminCommandes({
                           <span className="min-w-0 truncate text-[12.5px] text-ds-texte-sourdine">
                             {c === null ? date(l) : `${c.nom} · ${date(l)}`}
                           </span>
-                          <Link
+                          <Link prefetch={false}
                             href={`/${langue}/admin/comptes/${l.proprietaireId}`}
                             aria-label={t("commandes.voirLong", { email: l.proprietaireEmail })}
                             className="inline-flex min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold text-ds-texte-fort"
@@ -503,7 +503,7 @@ export default async function AdminCommandes({
             )}
 
             {lienSuivant === null ? null : (
-              <LienEcran
+              <LienEcran prefetch={false}
                 href={lienSuivant}
                 className="mx-auto my-4 inline-flex min-h-11 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-6 text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
               >

@@ -308,7 +308,7 @@ export default async function AdminComptes({
               },
             ]}
           />
-          <Link
+          <Link prefetch={false}
             href={base}
             className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
           >
@@ -418,7 +418,7 @@ export default async function AdminComptes({
                         {format.dateTime(new Date(ligne.creeLe), { dateStyle: "medium" })}
                       </td>
                       <td className={CELLULE + " text-right"}>
-                        <Link
+                        <Link prefetch={false}
                           href={`${base}/${ligne.id}`}
                           className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet-appuye bg-ds-surface-carte px-[13px] text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
                         >
@@ -472,7 +472,7 @@ export default async function AdminComptes({
                     )}
                   </div>
 
-                  <Link
+                  <Link prefetch={false}
                     href={`${base}/${ligne.id}`}
                     className="flex min-h-11 w-full items-center justify-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
                   >
@@ -485,7 +485,7 @@ export default async function AdminComptes({
         )}
 
         {lienSuivant === null ? null : (
-          <LienEcran
+          <LienEcran prefetch={false}
             href={lienSuivant}
             className="mx-auto inline-flex min-h-11 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-6 text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
           >

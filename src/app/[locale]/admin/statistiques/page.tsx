@@ -531,7 +531,7 @@ export default async function AdminStatistiques({
             {VUES_STATISTIQUES.map((v) => {
               const courante = v === vue;
               return (
-                <Link
+                <Link prefetch={false}
                   key={v}
                   href={lien({ vue: v })}
                   aria-current={courante ? "page" : undefined}

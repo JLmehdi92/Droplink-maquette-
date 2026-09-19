@@ -283,7 +283,7 @@ export default async function AdminJournal({
               href: lien(parametres.famille, j),
             }))}
           />
-          <Link
+          <Link prefetch={false}
             href={base}
             className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
           >
@@ -468,7 +468,7 @@ export default async function AdminJournal({
                     ? t("journal.surTotalAuDela", { affichees: page.lignes.length, total })
                     : t("journal.surTotal", { affichees: page.lignes.length, total })}
                 </p>
-                <LienEcran
+                <LienEcran prefetch={false}
                   href={lienSuivant}
                   className="inline-flex min-h-12 items-center justify-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-[18px] text-[14px] leading-[18px] font-semibold text-ds-texte-fort md:h-10 md:min-h-0"
                 >

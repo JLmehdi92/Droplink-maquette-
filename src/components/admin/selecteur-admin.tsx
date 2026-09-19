@@ -54,7 +54,7 @@ export function SelecteurAdmin({
       >
         {options.map((o) => (
           <li key={o.valeur}>
-            <Link
+            <Link prefetch={false}
               href={o.href}
               className={
                 "flex min-h-11 items-center px-3.5 text-[13.5px] leading-[normal] whitespace-nowrap hover:bg-ds-surface-creux " +

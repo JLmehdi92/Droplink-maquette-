@@ -127,7 +127,7 @@ export default async function FicheCompte({
           administrateur arrive souvent ici depuis une recherche, et
           `history.back()` lui rendrait une page qu'il n'a pas demandée. */}
       <div className="flex items-start gap-3 px-margin-mobile pt-4 pb-3.5 md:items-center md:gap-4 md:px-0 md:pt-[30px] md:pb-[22px]">
-        <Link
+        <Link prefetch={false}
           href={`/${langue}/admin/comptes`}
           aria-label={t("fiche.retour")}
           className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte text-ds-texte-fort shadow-ds-xs transition-colors before:absolute before:-inset-[3px] before:content-[''] hover:bg-ds-surface-teinte"

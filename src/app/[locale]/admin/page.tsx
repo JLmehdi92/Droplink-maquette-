@@ -270,7 +270,7 @@ export default async function PanneauAdmin({
                     </div>
                   </div>
 
-                  <Link
+                  <Link prefetch={false}
                     href={ouExaminer(a.genre, a.sujet)}
                     className={
                       "flex min-h-11 shrink-0 items-center justify-center rounded-ds-control border bg-ds-surface-carte px-[15px] text-[14px] leading-[18px] font-bold md:h-[38px] md:min-h-0 md:rounded-ds-sm md:text-[13px] md:leading-4 " +
@@ -463,7 +463,7 @@ export default async function PanneauAdmin({
           <div className={PANNEAU}>
             <div className="mb-[18px] flex items-start justify-between gap-3.5">
               <h2 className={PANNEAU_TITRE}>{t("panneau.dernieresActions")}</h2>
-              <Link
+              <Link prefetch={false}
                 href={`/${langue}/admin/journal`}
                 className="shrink-0 text-[13px] leading-4 font-semibold text-ds-accent hover:text-ds-accent-survol"
               >

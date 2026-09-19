@@ -275,7 +275,7 @@ export default async function AdminBoutiques({
               href: lienFiltre(type),
             }))}
           />
-          <Link
+          <Link prefetch={false}
             href={base}
             className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
           >
@@ -456,7 +456,7 @@ export default async function AdminBoutiques({
                             )}
                           </td>
                           <td className={CELLULE + " pr-[18px] text-right last:pr-[18px]"}>
-                            <Link
+                            <Link prefetch={false}
                               href={`/${locale}/admin/comptes/${b.proprietaireId}`}
                               aria-label={t("commandes.voirLong", { email: b.email })}
                               className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
@@ -557,7 +557,7 @@ export default async function AdminBoutiques({
                       </div>
 
                       <div className="mt-3.5 flex justify-end">
-                        <Link
+                        <Link prefetch={false}
                           href={`/${locale}/admin/comptes/${b.proprietaireId}`}
                           aria-label={t("commandes.voirLong", { email: b.email })}
                           className="inline-flex min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold text-ds-texte-fort"
@@ -572,7 +572,7 @@ export default async function AdminBoutiques({
             )}
 
             {lienSuivant === null ? null : (
-              <LienEcran
+              <LienEcran prefetch={false}
                 href={lienSuivant}
                 className="mx-auto mt-4 inline-flex min-h-11 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-6 text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
               >

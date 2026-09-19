@@ -158,7 +158,7 @@ export function NavigationAdmin({
           // Voir `LienEcran` : l'entrée courante vise le chemin déjà occupé.
           const Composant = courante ? LienEcran : Link;
           return (
-            <Composant
+            <Composant prefetch={false}
               key={entree.href}
               href={entree.href}
               aria-current={courante ? "page" : undefined}
@@ -201,7 +201,7 @@ export function NavigationAdmin({
               const Icone = ICONES[entree.icone];
               const Composant = courante ? LienEcran : Link;
               return (
-                <Composant
+                <Composant prefetch={false}
                   key={entree.href}
                   href={entree.href}
                   aria-current={courante ? "page" : undefined}
@@ -236,7 +236,7 @@ export function NavigationAdmin({
           const Composant = courante ? LienEcran : Link;
           return (
             <li key={entree.href}>
-              <Composant
+              <Composant prefetch={false}
                 href={entree.href}
                 aria-current={courante ? "page" : undefined}
                 className={
