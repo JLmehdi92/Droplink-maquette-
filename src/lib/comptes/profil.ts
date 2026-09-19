@@ -49,6 +49,14 @@ export type ProfilVendeur = {
   readonly couleurAccent: string;
   readonly filigrane: boolean;
   /**
+   * Le plan du COMPTE (migration 167), posé par l'administration seule : aucune colonne de
+   * `profiles` ne s'écrit par le vendeur. Il ne décide ici que d'une chose, l'interrupteur
+   * « Marque DropLink » de « Ma marque » — et la base le redit par son déclencheur (DL059).
+   */
+  readonly planPro: boolean;
+  /** Le vendeur Pro a retiré la carte « Propulsé par DropLink » de ses pages client. */
+  readonly marqueMasquee: boolean;
+  /**
    * Langue des pages que voient les CLIENTS, distincte de `langue` qui habille
    * l'interface du vendeur. Un fournisseur peut travailler en anglais et livrer
    * en France ; confondre les deux ne se voit jamais côté vendeur.
@@ -189,7 +197,7 @@ export async function lireEtatDuCompteAvec(
     supabase
       .from("profiles")
       .select(
-        "id, email, nom_affiche, account_type, status, locale, shops(id, name, description, logo_url, accent_color, watermark_enabled, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
+        "id, email, nom_affiche, account_type, status, locale, plan, shops(id, name, description, logo_url, accent_color, watermark_enabled, hide_droplink_brand, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
       )
       .maybeSingle(),
   ]);
@@ -254,6 +262,7 @@ export async function lireEtatDuCompteAvec(
     logo_url: string | null;
     accent_color: string;
     watermark_enabled: boolean;
+    hide_droplink_brand: boolean;
     default_language: string;
     instagram_url: string | null;
     tiktok_url: string | null;
@@ -274,6 +283,8 @@ export async function lireEtatDuCompteAvec(
     logoUrl: s.logo_url,
     couleurAccent: s.accent_color,
     filigrane: s.watermark_enabled,
+    planPro: data.plan === "pro",
+    marqueMasquee: s.hide_droplink_brand,
     /*
      * ⚠️ CETTE LIGNE DISAIT `=== "en" ? "en" : "fr"`, ET SA JUSTIFICATION S'EST
      * RETOURNÉE CONTRE ELLE.

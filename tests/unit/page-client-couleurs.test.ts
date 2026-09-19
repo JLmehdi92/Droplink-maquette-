@@ -174,6 +174,7 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     couleur: "#0058be",
     langue: "fr",
     filigrane: false,
+    marqueMasquee: false,
     instagram: null,
     tiktok: null,
     whatsapp: null,

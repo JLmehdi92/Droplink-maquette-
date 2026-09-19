@@ -7,7 +7,7 @@ import { useActionState, useMemo, useRef, useState } from "react";
 import { BoutonAction, type LibellesBoutonAction } from "@/components/bouton-action";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Eye, IdCard, Link as LinkIcon, Palette } from "lucide-react";
+import { BadgeCheck, Eye, IdCard, Link as LinkIcon, Palette } from "lucide-react";
 import { Panneau } from "@/components/app/panneau";
 import { LANGUES, estLangueSupportee, type Langue } from "@/i18n/config";
 import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
@@ -128,6 +128,9 @@ export function FormulaireMarque({
     readonly couleur: string;
     readonly languePublique: Langue;
     readonly filigrane: boolean;
+    /** Le compte est Pro : seul cas où l'interrupteur de la section 6 s'ouvre. */
+    readonly planPro: boolean;
+    readonly marqueMasquee: boolean;
     readonly logoUrl: string | null;
     readonly reseaux: {
       readonly instagram: string | null;
@@ -162,6 +165,7 @@ export function FormulaireMarque({
    */
   const phrasesClient = libelles[langue];
   const [filigrane, setFiligrane] = useState(initial.filigrane);
+  const [masquerMarque, setMasquerMarque] = useState(initial.marqueMasquee);
   const [logo, setLogo] = useState<EtatLogo>(
     initial.logoUrl === null ? { phase: "aucun" } : { phase: "existant", url: initial.logoUrl },
   );
@@ -1117,6 +1121,95 @@ export function FormulaireMarque({
                   </span>
                 </span>
               </span>
+            </div>
+          </Panneau>
+
+          {/*
+            6. LA MARQUE DROPLINK — décision de Wassim du 19/09/2026 : un compte gratuit porte la
+            carte « Propulsé par DropLink » sur ses pages client, un compte Pro peut la retirer ici.
+
+            ⚠️ L'INTERRUPTEUR N'EST QU'UNE COMMODITÉ, LA RÈGLE EST EN BASE. Désactivé en gratuit, il
+            n'envoie rien, et l'action écrit donc « faux » — la seule valeur que le déclencheur de la
+            migration 167 admet pour ce compte. Une requête forgée qui écrirait « vrai » y serait
+            refusée (DL059), quel que soit ce qu'affiche cet écran.
+
+            La planche dessine l'état GRATUIT (verrouillé, carte « Pro » à droite). En Pro, la carte
+            n'a plus rien à expliquer : elle disparaît et l'interrupteur prend toute la ligne.
+          */}
+          <Panneau
+            titre={
+              <>
+                {t("marqueTitre")}{" "}
+                <span className="font-medium text-ds-texte-sourdine">{t("lienPro")}</span>
+              </>
+            }
+            sousTitre={t("marqueAide")}
+            taille="section"
+            icone={BadgeCheck}
+          >
+            <div
+              className={
+                "flex flex-col gap-3.5 lg:items-center lg:gap-4 " +
+                (initial.planPro ? "" : "lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]")
+              }
+            >
+              <div className={"flex items-center gap-4 " + (initial.planPro ? "lg:w-full" : "opacity-55")}>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="text-[15px] leading-[1.5] font-semibold text-ds-texte-fort lg:text-[14px] lg:leading-[normal]">
+                    {t("marqueOption")}
+                  </span>
+                  <span className="mt-0.5 text-[13px] leading-5 text-ds-texte-corps lg:text-[12.5px] lg:leading-[1.5]">
+                    {t("marqueOptionAide")}
+                  </span>
+                </span>
+                {/* Même interrupteur peint que le filigrane, case `sr-only` derrière : c'est elle
+                    qui porte le nom du champ, l'état et le focus clavier. */}
+                <label
+                  className={
+                    "relative inline-flex h-[27px] w-[46px] shrink-0 items-center rounded-full px-[3px] transition-colors lg:h-[23px] lg:w-10 " +
+                    "before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 before:content-[''] " +
+                    (initial.planPro ? "cursor-pointer" : "cursor-not-allowed")
+                  }
+                  style={{
+                    backgroundColor:
+                      masquerMarque && initial.planPro ? accent.remplissage : "var(--color-ds-ink-200)",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    name="masquerMarque"
+                    checked={masquerMarque && initial.planPro}
+                    disabled={!initial.planPro}
+                    onChange={(e) => setMasquerMarque(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className="h-[21px] w-[21px] rounded-full transition-transform peer-checked:translate-x-[19px] lg:h-[17px] lg:w-[17px] lg:shadow-ds-xs lg:peer-checked:translate-x-[17px]"
+                    style={{
+                      backgroundColor:
+                        masquerMarque && initial.planPro
+                          ? accent.surRemplissage
+                          : "var(--color-ds-surface-carte)",
+                    }}
+                  />
+                  <span className="sr-only">{t("marqueOption")}</span>
+                </label>
+              </div>
+              {initial.planPro ? null : (
+                <span className="flex items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">
+                  <span className="inline-flex flex-none items-center rounded-ds-pill bg-ds-accent px-2.5 py-1 text-[11.5px] leading-[normal] font-bold text-ds-texte-sur-marque lg:text-[11px]">
+                    {t("lienProBadge")}
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-[14px] leading-[normal] font-bold text-ds-accent-encre">
+                      {t("lienProTitre")}
+                    </span>
+                    <span className="text-[12px] leading-[normal] text-ds-texte-corps">
+                      {t("marqueProAide")}
+                    </span>
+                  </span>
+                </span>
+              )}
             </div>
           </Panneau>
 

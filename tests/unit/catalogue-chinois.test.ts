@@ -127,6 +127,7 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      accepte. */
   ["marque.lienPro", "Le nom du plan, entre parenthèses pleine largeur."],
   ["marque.lienProBadge", "Le nom du plan, seul."],
+  ["admin.plan.plans.pro", "Le nom du plan, seul, comme le badge de « Ma marque »."],
   ["marque.lienPlaceholder", "Un exemple de segment d'URL : il doit ressembler à une adresse."],
   ["admin.comptes.colisSurSeuil", "Deux variables et une barre oblique."],
   ["admin.fiche.surPlafond", "Deux variables et une barre oblique."],

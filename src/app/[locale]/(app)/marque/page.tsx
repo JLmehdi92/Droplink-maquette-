@@ -92,6 +92,8 @@ export default async function Marque({
               couleur: profil.couleurAccent,
               languePublique: profil.languePublique,
               filigrane: profil.filigrane,
+              planPro: profil.planPro,
+              marqueMasquee: profil.marqueMasquee,
               logoUrl,
               reseaux: profil.reseaux,
             }}

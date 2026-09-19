@@ -61,6 +61,9 @@ export async function enregistrerMarque(
     // vaut « faux ». Lire `=== "on"` traiterait l'absence comme une erreur de
     // saisie et refuserait tout enregistrement qui désactive le filigrane.
     filigrane: donnees.get("filigrane") !== null,
+    // Même règle : absente, la case vaut « faux ». Un compte gratuit ne l'envoie jamais
+    // (elle est désactivée), et « faux » est précisément la seule valeur que la base lui admet.
+    masquerMarque: donnees.get("masquerMarque") !== null,
     instagram: donnees.get("instagram") ?? undefined,
     tiktok: donnees.get("tiktok") ?? undefined,
     whatsapp: donnees.get("whatsapp") ?? undefined,

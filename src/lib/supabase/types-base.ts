@@ -441,6 +441,7 @@ export type Database = {
           id: string
           locale: string
           nom_affiche: string | null
+          plan: Database["public"]["Enums"]["account_plan"]
           role: Database["public"]["Enums"]["user_role"]
           signup_event_at: string | null
           status: Database["public"]["Enums"]["account_status"]
@@ -453,6 +454,7 @@ export type Database = {
           id?: string
           locale?: string
           nom_affiche?: string | null
+          plan?: Database["public"]["Enums"]["account_plan"]
           role?: Database["public"]["Enums"]["user_role"]
           signup_event_at?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -465,6 +467,7 @@ export type Database = {
           id?: string
           locale?: string
           nom_affiche?: string | null
+          plan?: Database["public"]["Enums"]["account_plan"]
           role?: Database["public"]["Enums"]["user_role"]
           signup_event_at?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -536,6 +539,7 @@ export type Database = {
           created_at: string
           default_language: string
           description: string | null
+          hide_droplink_brand: boolean
           id: string
           instagram_url: string | null
           logo_url: string | null
@@ -556,6 +560,7 @@ export type Database = {
           created_at?: string
           default_language?: string
           description?: string | null
+          hide_droplink_brand?: boolean
           id?: string
           instagram_url?: string | null
           logo_url?: string | null
@@ -576,6 +581,7 @@ export type Database = {
           created_at?: string
           default_language?: string
           description?: string | null
+          hide_droplink_brand?: boolean
           id?: string
           instagram_url?: string | null
           logo_url?: string | null
@@ -994,6 +1000,15 @@ export type Database = {
         Args: { p_commande: string; p_ip_hash: string; p_motif: string }
         Returns: boolean
       }
+      definir_plan_compte: {
+        Args: {
+          p_ip_hash: string
+          p_motif: string
+          p_plan: string
+          p_profil: string
+        }
+        Returns: boolean
+      }
       delai_moyen_livraison: {
         Args: { p_depuis: string }
         Returns: {
@@ -1094,6 +1109,7 @@ export type Database = {
           couverture: string
           creee_le: string
           jeton: string
+          marque_masquee: boolean
           modifiee_le: string
           numero_suivi: string
           reference: string
@@ -1176,6 +1192,7 @@ export type Database = {
         }[]
       }
       lire_plafond_commandes: { Args: never; Returns: number }
+      lire_plan_compte: { Args: { p_profil: string }; Returns: string }
       lire_retard_veilleur_minutes: { Args: never; Returns: number }
       lire_suivi_actif: { Args: never; Returns: boolean }
       lire_suivi_public: {
@@ -1423,6 +1440,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_plan: "gratuit" | "pro"
       account_status: "active" | "suspended"
       account_type: "supplier" | "reseller"
       media_source: "upload" | "agent_import"
@@ -1558,6 +1576,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_plan: ["gratuit", "pro"],
       account_status: ["active", "suspended"],
       account_type: ["supplier", "reseller"],
       media_source: ["upload", "agent_import"],

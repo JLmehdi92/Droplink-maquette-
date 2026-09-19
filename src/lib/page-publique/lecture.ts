@@ -49,6 +49,12 @@ export interface Boutique {
    */
   readonly filigrane: boolean;
   /**
+   * Vrai quand la marque DropLink doit disparaître de la page : un compte PRO qui l'a demandé
+   * (décision de Wassim, 19/09/2026, migration 167). Résolu EN BASE, comme le filigrane : un
+   * compte repassé en gratuit la retrouve à la requête suivante.
+   */
+  readonly marqueMasquee: boolean;
+  /**
    * Les réseaux du vendeur, chacun `null` quand il n'est pas configuré.
    *
    * TROIS CHAMPS ET PAS UN TABLEAU : le rendu n'est pas le même d'un réseau à
@@ -242,6 +248,7 @@ async function lireCommandePubliqueSansMemo(
       couleur: ligne.boutique_couleur,
       langue: ligne.boutique_langue,
       filigrane: ligne.boutique_filigrane,
+      marqueMasquee: ligne.marque_masquee === true,
       instagram: ligne.boutique_instagram,
       tiktok: ligne.boutique_tiktok,
       whatsapp: ligne.boutique_whatsapp,

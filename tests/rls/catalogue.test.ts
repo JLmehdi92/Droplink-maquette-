@@ -398,6 +398,20 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "rend que des identifiants, donc rien qui ne soit déjà à l'écran.",
     ],
     [
+      "definir_plan_compte",
+      "LE PLAN D'UN COMPTE (167, décision de Wassim du 19/09/2026) : aucun paiement ne " +
+        "passe par le produit, l'administration pose le plan à la main. `SECURITY DEFINER` " +
+        "parce que `profiles.plan` n'est accordé en écriture à PERSONNE — un vendeur se " +
+        "passerait Pro. Rôle admin actif vérifié EN BASE, motif exigé, ligne verrouillée, " +
+        "audit écrit AVANT la mutation ; repasser en gratuit fait retomber l'interrupteur " +
+        "de marque.",
+    ],
+    [
+      "lire_plan_compte",
+      "Le plan d'un compte pour sa fiche d'administration. Rôle admin vérifié en base ; " +
+        "ne rend qu'un mot, `gratuit` ou `pro`.",
+    ],
+    [
       "ecrire_parametre",
       "Écriture d'un paramètre système. Vérifie le rôle elle-même : une fonction " +
         "qui accepterait n'importe quel appelant laisserait un vendeur modifier " +
@@ -875,6 +889,11 @@ describe("Sonde C — privilèges de colonne", () => {
     // décision 26, et c'est la fonction de lecture publique qui la fait
     // respecter, pas le rendu.
     "shops.description",
+    // L'interrupteur « Marque DropLink » (migration 167). ⚠️ LE DROIT DE COLONNE NE SUFFIT
+    // PAS, ET C'EST VOULU : il est ouvert à tout vendeur, et c'est le déclencheur
+    // `shops_marque_droplink_reservee_au_pro` qui refuse de le LEVER sans plan Pro (DL059).
+    // Le plan lui-même, `profiles.plan`, n'est accordé en écriture à personne.
+    "shops.hide_droplink_brand",
     // `orders` — sont volontairement ABSENTES : `public_token` et
     // `unsubscribe_token` (immuables, et deux pouvoirs distincts), `shop_id`
     // (aucun transfert entre comptes), `created_at`, `updated_at` (tenue par

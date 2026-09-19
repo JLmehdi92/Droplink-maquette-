@@ -832,13 +832,14 @@ const SQL = {
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
                      boutique_site text, boutique_description text,
-                     reference_courte text)
+                     reference_courte text, marque_masquee boolean)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language, s.watermark_enabled,
              s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description,
-             '#' || upper(right(replace(o.id::text, '-', ''), 6))
+             '#' || upper(right(replace(o.id::text, '-', ''), 6)),
+             (p.plan = 'pro' and s.hide_droplink_brand)
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -852,12 +853,12 @@ const SQL = {
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
-      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      // La DERNIÈRE version (167, 19/09/2026) : réparer depuis la 166 retirerait la colonne
+      // `marque_masquee`, et la carte DropLink reviendrait chez un vendeur Pro qui l'a retirée.
+      // La 167 la recrée en fin de fichier ; la recopie va jusqu'au bout, droits compris.
       avant: "drop function if exists public.lire_commande_publique(text);",
-      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
-      depuis: "create or replace function public.lire_commande_publique(",
-      jusqua: "-- lire_medias_publics — recopiée",
+      fichier: "167_le_plan_du_compte_et_la_marque_droplink.sql",
+      depuis: "create function public.lire_commande_publique(",
     },
   },
 
@@ -880,13 +881,14 @@ const SQL = {
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
                      boutique_site text, boutique_description text,
-                     reference_courte text)
+                     reference_courte text, marque_masquee boolean)
       language sql stable security definer set search_path = '' as $$
       select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
              o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
              o.updated_at, s.name, s.logo_url, s.accent_color, 'fr'::text, (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
              s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description,
-             '#' || upper(right(replace(o.id::text, '-', ''), 6))
+             '#' || upper(right(replace(o.id::text, '-', ''), 6)),
+             (p.plan = 'pro' and s.hide_droplink_brand)
       from public.orders o
       join public.shops s on s.id = o.shop_id
       join public.profiles p on p.id = s.owner_id
@@ -900,12 +902,12 @@ const SQL = {
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
-      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      // La DERNIÈRE version (167, 19/09/2026) : réparer depuis la 166 retirerait la colonne
+      // `marque_masquee`, et la carte DropLink reviendrait chez un vendeur Pro qui l'a retirée.
+      // La 167 la recrée en fin de fichier ; la recopie va jusqu'au bout, droits compris.
       avant: "drop function if exists public.lire_commande_publique(text);",
-      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
-      depuis: "create or replace function public.lire_commande_publique(",
-      jusqua: "-- lire_medias_publics — recopiée",
+      fichier: "167_le_plan_du_compte_et_la_marque_droplink.sql",
+      depuis: "create function public.lire_commande_publique(",
     },
   },
 
@@ -1165,14 +1167,15 @@ const SQL = {
                      boutique_langue text, boutique_filigrane boolean,
                      boutique_instagram text, boutique_tiktok text, boutique_whatsapp text,
                      boutique_site text, boutique_description text,
-                     reference_courte text)
+                     reference_courte text, marque_masquee boolean)
       language sql stable security definer set search_path = '' as $$
         select o.public_token, o.customer_label, o.product_ref, o.status, o.qc_status,
                o.tracking_number, o.carrier_code, o.cover_media_id, o.created_at,
                o.updated_at, s.name, s.logo_url, s.accent_color, s.default_language,
                (s.watermark_enabled and s.name is not null and btrim(s.name) <> ''),
                s.instagram_url, s.tiktok_url, s.whatsapp_url, s.site_url, s.description,
-             '#' || upper(right(replace(o.id::text, '-', ''), 6))
+             '#' || upper(right(replace(o.id::text, '-', ''), 6)),
+             (p.plan = 'pro' and s.hide_droplink_brand)
         from public.orders o
         join public.shops s on s.id = o.shop_id
         join public.profiles p on p.id = s.owner_id
@@ -1186,12 +1189,12 @@ const SQL = {
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
-      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      // La DERNIÈRE version (167, 19/09/2026) : réparer depuis la 166 retirerait la colonne
+      // `marque_masquee`, et la carte DropLink reviendrait chez un vendeur Pro qui l'a retirée.
+      // La 167 la recrée en fin de fichier ; la recopie va jusqu'au bout, droits compris.
       avant: "drop function if exists public.lire_commande_publique(text);",
-      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
-      depuis: "create or replace function public.lire_commande_publique(",
-      jusqua: "-- lire_medias_publics — recopiée",
+      fichier: "167_le_plan_du_compte_et_la_marque_droplink.sql",
+      depuis: "create function public.lire_commande_publique(",
     },
   },
 
@@ -3006,6 +3009,48 @@ $$;
       depuis: "create or replace function public.arbitrer_qc(",
       jusqua: "-- enregistrer_vue — recopiée",
     },
+  },
+
+  /**
+   * LE PLAN ET LA MARQUE (167) — le cas motivant : un compte GRATUIT qui masque la marque
+   * DropLink en écrivant directement dans `shops`. Sans le déclencheur, le droit de colonne
+   * suffit à le faire, et la page perd la seule publicité du produit sans que rien ne lève.
+   */
+  "marque-masquable-en-gratuit": {
+    casser: "drop trigger if exists shops_marque_droplink_reservee_au_pro on public.shops;",
+    reparer:
+      "create trigger shops_marque_droplink_reservee_au_pro before insert or update of " +
+      "hide_droplink_brand on public.shops for each row execute function " +
+      "public.marque_droplink_reservee_au_pro();",
+  },
+
+  /**
+   * HORS DU CAS MOTIVANT : repassé en gratuit, l'interrupteur ne retombe plus. La page reste
+   * juste (la lecture exige aussi le plan Pro), mais « Ma marque » affiche levé un réglage que
+   * le compte ne peut plus tenir — l'écran affirme ce que la base n'applique pas.
+   */
+  "interrupteur-reste-leve-en-gratuit": {
+    casserDepuisMigration: {
+      fichier: "167_le_plan_du_compte_et_la_marque_droplink.sql",
+      depuis: "create function public.definir_plan_compte(",
+      jusqua: "comment on function public.definir_plan_compte",
+      remplacer: "    update public.shops set hide_droplink_brand = false where owner_id = p_profil;\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "167_le_plan_du_compte_et_la_marque_droplink.sql",
+      depuis: "create function public.definir_plan_compte(",
+      jusqua: "comment on function public.definir_plan_compte",
+    },
+  },
+
+  /**
+   * L-029 ENCORE : personne n'a le droit d'écrire `profiles.plan`. Qu'une migration future
+   * l'ajoute aux colonnes accordées au vendeur, et il se passe Pro lui-même, sans payer.
+   */
+  "vendeur-se-passe-pro": {
+    casser: "grant update (plan) on public.profiles to authenticated;",
+    reparer: "revoke update (plan) on public.profiles from authenticated;",
   },
 
   /**

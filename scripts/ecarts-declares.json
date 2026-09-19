@@ -1900,7 +1900,8 @@
           "Ajoutez vos réseaux sociaux pour qu'ils ",
           "Choisissez les éléments à afficher sur v",
           "Personnalisez votre lien pour un rendu p",
-          "Voici un aperçu de ce que verront vos cl"
+          "Voici un aperçu de ce que verront vos cl",
+          "Retirez la carte « Propulsé par DropLink"
         ],
         "motif": "structure",
         "raison": "LARGEUR DES SOUS-TITRES DE SECTION. Le kit laisse le sien occuper toute la largeur de l en-tete ; le notre partage cette ligne avec une action — le badge de contraste, la mention « facultatif », « en direct » — et se replie donc une ligne plus tot. L interligne est desormais celui du kit (1,55)."
@@ -1917,7 +1918,10 @@
           "Pro",
           "Fonctionnalité Pro",
           "Avec un lien personnalisé à votre marque",
-          "Enregistrer les modifications"
+          "Enregistrer les modifications",
+          "Masquer la marque DropLink",
+          "Vos clients ne voient plus que votre bou",
+          "Réservé au plan Pro."
         ],
         "motif": "contrainte",
         "raison": "POSITION, ET UNE SEULE CAUSE POUR CES LIGNES. Nos sections portent des phrases d aide que le kit n ecrit pas — ce que devient une page sans nom ni logo, ou va la description, ce que font les liens des reseaux, pourquoi la couleur est ajustee. Chacune est une decision du produit rendue lisible, et elles allongent la colonne. Le bouton d enregistrement, lui, est rendu DEUX fois chez nous : une barre collee au telephone, une flottante au bureau — le kit n en dessine qu une, et aucune des deux planches ne dessine la notre."
@@ -1945,7 +1949,8 @@
           "2 . Personnalisation",
           "3 . Réseaux sociaux",
           "4 . Options d'affichage",
-          "5 . Lien personnalisé"
+          "5 . Lien personnalisé",
+          "6 . Marque DropLink"
         ],
         "motif": "structure",
         "raison": "ARTEFACT DE SONDE, PAS ECART VISUEL. Le kit ecrit `{step}. {title}` en JSX, ce qui produit DEUX noeuds de texte — « 1 » puis « . Identite de la marque » — que le releve joint par une espace : il relit donc « 1 . ». Nous ecrivons une seule chaine. Meme taille, meme graisse, meme interlettrage, meme boite — voir les declarations symetriques dans les elements en trop."
@@ -2021,7 +2026,8 @@
           "2. Personnalisation",
           "3. Réseaux sociaux",
           "4. Options d'affichage",
-          "5. Lien personnalisé"
+          "5. Lien personnalisé",
+          "6. Marque DropLink"
         ],
         "motif": "structure",
         "raison": "LES MEMES CINQ TITRES, EN UNE SEULE CHAINE. Voir la declaration symetrique dans les manquants : c est le releve qui joint les deux noeuds de texte du kit par une espace, pas l ecran qui differe."
@@ -4822,10 +4828,19 @@
         "textes": [
           "PROPULSÉ PAR DROPLINK",
           "Conditions d'utilisation",
-          "Politique de confidentialité"
+          "Politique de confidentialité",
+          "Des liens de suivi simples et puissants.",
+          "Créez un lien de suivi par commande, en "
         ],
         "motif": "contrainte",
-        "raison": "LA MENTION DROPLINK RESTE SECONDAIRE — decision 25. Le kit la peint en surtitre violet de 11 px dans une carte promotionnelle ; nous la gardons au pied, en sourdine de 13, jamais confondable avec l expediteur. Sans cette carte ni celle des notifications, la colonne de droite est plus courte et le pied remonte."
+        "raison": "PLACE SEULE, 127 PX PLUS HAUT, MESURE : la carte « Notifications automatiques » du kit (y 919 a 1051) n est pas portee — voir sa declaration dans les manquants —, et la carte « Propulse par DropLink », portee depuis le 19/09/2026 sur decision de Wassim (en gratuit), remonte de ses 132 px moins les 5 px dont la carte de contact descend. Le pied suit. Fond teinte, filet violet, surtitre, titre, texte, bouton au degrade et symbole sont ceux de PoweredCard."
+      },
+      {
+        "textes": [
+          "Découvrir DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "UN APLAT A LA COULEUR DU VENDEUR, LA OU LE KIT PEINT SON DEGRADE PRIMAIRE → SECONDAIRE. La planche client rhabille `--gradient-brand` aux deux couleurs du vendeur (`brandVars`) ; le produit n en a qu UNE — la couleur secondaire est refusee, voir sa declaration dans « Ma marque » et la regle 1 —, et un degrade d une seule couleur est un aplat. Texte en `surRemplissage`, ombre, rayon, hauteur et remplissage sont ceux du Button primaire du kit. Sa place remonte de 127 px avec la carte (voir la declaration voisine)."
       },
       {
         "textes": [
@@ -4957,14 +4972,11 @@
       },
       {
         "textes": [
-          "Des liens de suivi simples et puissants.",
-          "Créez un lien de suivi par commande, en ",
-          "Découvrir DropLink",
           "© 2025 DropLink. Tous droits réservés.",
           "Aide"
         ],
         "motif": "contrainte",
-        "raison": "LA PAGE APPARTIENT AU VENDEUR — decision 25. La mention DropLink doit rester SECONDAIRE et jamais confondable avec l expediteur : une carte promotionnelle avec son appel « Decouvrir DropLink » et un droit d auteur au nom de DropLink en pied se liraient comme le proprietaire de la page. Le lien « Aide » mene a la documentation des vendeurs, que le client n a aucune raison d ouvrir."
+        "raison": "LE PIED DU KIT, PAS SA CARTE. La carte « Propulse par DropLink » est portee depuis le 19/09/2026 (decision de Wassim : en gratuit elle reste, un compte Pro la retire). Reste refuse le pied du kit : un droit d auteur « © DropLink » sur la page d un vendeur se lit comme le proprietaire de la page, et « Aide » menerait le client d un vendeur vers la documentation des VENDEURS."
       },
       {
         "textes": [
@@ -5061,10 +5073,20 @@
           "Pour toute question concernant votre com",
           "Contacter la boutique",
           "Conditions d'utilisation",
-          "Politique de confidentialité"
+          "Politique de confidentialité",
+          "PROPULSÉ PAR DROPLINK",
+          "Des liens de suivi simples et puissants.",
+          "Créez un lien de suivi par commande, en "
         ],
         "motif": "contrainte",
         "raison": "PLACE SEULE, EN ORDONNEE : les abscisses coincident toutes (gouttiere 18, depuis que la planche est ecrite a plat le 17/09/2026). Le decalage vertical s accumule de haut en bas par ce que la planche montre en plus et qui est declare dans les manquants : la barre DropLink et son selecteur de langue, les trois gages de l en-tete (principe II), le disque de 96 px du logo — 263 px avant « Votre commande » —, puis cinq passages de suivi contre deux, le transporteur et le pays de livraison, la carte des notifications (decision 3). Les deux passages du jeu s apparient par rang a l envers des cinq du kit, d ou [1/2] plus bas que [2/2]."
+      },
+      {
+        "textes": [
+          "Découvrir DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "UN APLAT A LA COULEUR DU VENDEUR, LA OU LE KIT PEINT SON DEGRADE PRIMAIRE → SECONDAIRE, comme au bureau : le produit n a qu une couleur (regle 1), et un degrade d une seule couleur est un aplat. Sa place suit le decalage vertical declare juste au-dessus."
       },
       {
         "textes": [
@@ -5118,13 +5140,6 @@
         ],
         "motif": "structure",
         "raison": "LES PUCES PRENNENT LA LARGEUR DE LEUR NOM (115, 101, 118), la ou le kit les coupe en tiers egaux (111). La rangee du produit passe a la ligne plutot que de tronquer — « Instagr… » ne se reconnait pas. Meme hauteur, meme dessin, meme debut de rangee."
-      },
-      {
-        "textes": [
-          "PROPULSÉ PAR DROPLINK"
-        ],
-        "motif": "contrainte",
-        "raison": "LA MENTION DROPLINK RESTE SECONDAIRE — decision 25, comme au bureau. Le kit la peint en surtitre violet de 11,5/700 dans une carte teintee ; la page appartient au vendeur, la mention est une ligne de pied en sourdine, 13/400, dont le lien fait 44 px de haut (regle 5)."
       }
     ],
     "manquants": [
@@ -5242,14 +5257,11 @@
       },
       {
         "textes": [
-          "Des liens de suivi simples et puissants.",
-          "Créez un lien de suivi par commande, en ",
-          "Découvrir DropLink",
           "© 2025 DropLink. Tous droits réservés.",
           "Aide"
         ],
         "motif": "contrainte",
-        "raison": "LA PAGE APPARTIENT AU VENDEUR — decision 25. La mention DropLink doit rester SECONDAIRE et jamais confondable avec l expediteur : une carte promotionnelle avec son appel « Decouvrir DropLink » et un droit d auteur au nom de DropLink en pied se liraient comme le proprietaire de la page. Le lien « Aide » mene a la documentation des vendeurs, que le client n a aucune raison d ouvrir."
+        "raison": "LE PIED DU KIT, PAS SA CARTE. La carte « Propulse par DropLink » est portee depuis le 19/09/2026 (decision de Wassim : en gratuit elle reste, un compte Pro la retire). Reste refuse le pied du kit : un droit d auteur « © DropLink » sur la page d un vendeur se lit comme le proprietaire de la page, et « Aide » menerait le client d un vendeur vers la documentation des VENDEURS."
       },
       {
         "textes": [
@@ -11277,7 +11289,12 @@
           "La lecture tracée suffit au diagnostic.",
           "Se connecter à sa place.",
           "Leur contenu appartient à son client.",
-          "Ouvrir ses commandes."
+          "Ouvrir ses commandes.",
+          "Plan  <h3>",
+          "Aucun paiement ne passe par DropLink : u",
+          "Plan actuel  <span>",
+          "Gratuit  <span>",
+          "Passer en Pro  <button>"
         ],
         "motif": "contrainte",
         "raison": "POSITION ET LARGEUR SEULES. Tout remonte de 79 px parce que la barre superieure du kit n est pas portee, et la colonne de contenu porte 32 px de marge contre 30 — le meme ecart que sur tous les ecrans admin. Dans la colonne de droite s y ajoute la hauteur des valeurs du jeu de mesure (adresse plus longue, trois reseaux au lieu de deux), et le badge « Actif » suit la longueur du nom de boutique. Planche ecrite dans le kit le 14/09/2026 pour cet ecran, qui n en avait aucune ; tailles, graisses et couleurs sont les siennes."
@@ -11425,7 +11442,12 @@
           "Réseaux configurés",
           "Supprimer le compte.",
           "Se connecter à sa place.",
-          "Ouvrir ses commandes."
+          "Ouvrir ses commandes.",
+          "Plan  <h3>",
+          "Aucun paiement ne passe par DropLink : u",
+          "Plan actuel  <span>",
+          "Gratuit  <span>",
+          "Passer en Pro  <button>"
         ],
         "motif": "donnee",
         "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
@@ -11598,7 +11620,12 @@
           "Le collage est désactivé : recopier l'ad",
           "Annuler  <button>",
           "En cours…  <span>",
-          "Suspendre  <span>"
+          "Suspendre  <span>",
+          "Plan  <h3>",
+          "Aucun paiement ne passe par DropLink : u",
+          "Plan actuel  <span>",
+          "Gratuit  <span>",
+          "Passer en Pro  <button>"
         ],
         "motif": "contrainte",
         "raison": "POSITION ET LARGEUR SEULES. Tout remonte de 79 px parce que la barre superieure du kit n est pas portee, et la colonne de contenu porte 32 px de marge contre 30 — le meme ecart que sur tous les ecrans admin. Dans la colonne de droite s y ajoute la hauteur des valeurs du jeu de mesure (adresse plus longue, trois reseaux au lieu de deux), et le badge « Actif » suit la longueur du nom de boutique. Planche ecrite dans le kit le 14/09/2026 pour cet ecran, qui n en avait aucune ; tailles, graisses et couleurs sont les siennes."
@@ -11713,6 +11740,197 @@
       }
     ]
   },
+  "fr-admin-comptes-profil-plan": {
+    "_etat": "LE PANNEAU DU PLAN OUVERT (CLIC_PRODUIT=\"Passer en Pro\", ETAT=plan), contre la planche `#compte-plan` ecrite le 19/09/2026 (decision de Wassim : c est lui qui passe un compte en Pro, apres un paiement recu HORS du produit). Memes declarations que la fiche repliee, dont il partage toute la page ; les textes du formulaire rejoignent le groupe de position — meme decalage vers le haut, tailles, graisses, couleurs, rayons et filets de la planche.",
+    "valeurs": [
+      {
+        "textes": [
+          "Vue d'ensemble",
+          "Commandes [1/2]",
+          "Boutiques  <span>",
+          "Statistiques  <span>"
+        ],
+        "motif": "structure",
+        "raison": "LES ENTREES DE NAVIGATION, ET UN ECART DE L OUTIL. Le kit met son libelle dans un span a l interieur du lien ; chez nous le lien porte le texte. Rayon 16, remplissage 0/14, ecart 13, hauteur 44 et l ombre du degrade sont ceux de l entree entiere ; taille, graisse et couleur sont identiques."
+      },
+      {
+        "textes": [
+          "Administrateur  <span>",
+          "Administrateur  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : « Administrateur » est la valeur de sa rangee « Role », et le kit ecrit le role du compte connecte dans sa barre superieure. L appariement tombe sur la rangee, d ou la taille et la graisse d une valeur."
+      },
+      {
+        "textes": [
+          "Actif  <span>",
+          "L'ouverture de cette fiche a été écrite ",
+          "Volumes  <h3>",
+          "Colis  <span>",
+          "FACTURÉ  <span>",
+          "Commandes [2/2]",
+          "Médias  <span>",
+          "Stockage  <span>",
+          "Plafonds  <h3>",
+          "Colis pris en charge  <span>",
+          "Commandes ce mois  <span>",
+          "Ce que ce compte a fait  <h3>",
+          "Les événements du vendeur, pas les vôtre",
+          "Ses pages publiques cesseront immédiatem",
+          "Identité  <h3>",
+          "Email  <span>",
+          "Type  <span>",
+          "Revendeur  <span>",
+          "Rôle  <span>",
+          "Langue  <span>",
+          "Français  <span>",
+          "Boutique  <h3>",
+          "Filigrane  <span>",
+          "Réseaux configurés  <span>",
+          "Ce que cette page ne permet pas  <h3>",
+          "Suspendre est réversible, supprimer ne l",
+          "Supprimer le compte.",
+          "La lecture tracée suffit au diagnostic.",
+          "Se connecter à sa place.",
+          "Leur contenu appartient à son client.",
+          "Ouvrir ses commandes.",
+          "Plan  <h3>",
+          "Aucun paiement ne passe par DropLink : u",
+          "Plan actuel  <span>",
+          "Gratuit  <span>",
+          "Passer en Pro  <button>",
+          "Motif  <span>",
+          "Annuler  <button>",
+          "Au moins 8 caractères. Par exemple : « p"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR SEULES. Tout remonte de 79 px parce que la barre superieure du kit n est pas portee, et la colonne de contenu porte 32 px de marge contre 30 — le meme ecart que sur tous les ecrans admin. Dans la colonne de droite s y ajoute la hauteur des valeurs du jeu de mesure (adresse plus longue, trois reseaux au lieu de deux), et le badge « Actif » suit la longueur du nom de boutique. Planche ecrite dans le kit le 14/09/2026 pour cet ecran, qui n en avait aucune ; tailles, graisses et couleurs sont les siennes."
+      },
+      {
+        "textes": [
+          "Suspendre ce compte [1/2]",
+          "Suspendre ce compte [2/2]"
+        ],
+        "motif": "structure",
+        "raison": "LE TITRE DU PANNEAU ET SON BOUTON PORTENT LE MEME TEXTE, et la sonde les apparie par proximite : decales de 79 px, ils se croisent. Titre 18/700 et bouton 14/700 a contour rouge sont ceux du kit, chacun a sa place."
+      },
+      {
+        "textes": [
+          "36 sur 1 200 [1/2]",
+          "42 sur 5 000 [2/2]",
+          "12 sept. 2025 [1/3]",
+          "12 sept. 2025 [2/3]",
+          "11 sept. 2025 [3/3]",
+          "12 sept. 2025  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LES VOLUMES ET LES DATES DU JEU DE MESURE. Les deux plafonds et les dates d activite ont la meme forme une fois les chiffres normalises : la sonde les apparie par proximite et les croise, et leurs largeurs suivent leurs chiffres. Le jeu porte trois types d evenement, le kit quatre."
+      },
+      {
+        "textes": [
+          "#5B4BF5  <span>"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CHASSE FIXE. Le kit declare « JetBrains Mono » en tete de sa pile ; le produit ne charge qu Inter (regle « Inter seule ») et rend donc la suite de la meme pile, ui-monospace. La largeur est celle du bloc, etire par le nom de boutique plus long du jeu de mesure."
+      },
+      {
+        "textes": [
+          "Passer en Pro  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES QUATRE LIBELLES DANS UNE SEULE CELLULE, comme celui de la suspension : le repos, la reussite et l echec disent tous « Passer en Pro » (un passage reussi recharge la fiche, un echec s ecrit dans le message qui nomme le motif). Seul le libelle courant est visible ; les autres sont `invisible` et ne servent qu a reserver la largeur."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "ADMIN",
+          "Utilisateurs",
+          "Abonnements",
+          "Paiements",
+          "Support",
+          "Logs système",
+          "Paramètres"
+        ],
+        "motif": "contrainte",
+        "raison": "LE VOCABULAIRE DU PRODUIT ET TROIS ECRANS QUI N EXISTENT PAS. « Comptes », « Journal d audit » et « Parametres systeme », les memes mots sur tous les ecrans d administration ; Abonnements et Paiements sont de la facturation (contrainte n°1), Support suppose un systeme de tickets que la base n a pas."
+      },
+      {
+        "textes": [
+          "DropLink Admin",
+          "Tout sous contrôle.",
+          "Ctrl K",
+          "admin@droplink.fr"
+        ],
+        "motif": "contrainte",
+        "raison": "LA BARRE SUPERIEURE ET LA CARTE DECORATIVE DU KIT NE SONT PAS PORTEES, comme sur les autres ecrans d administration : « Ctrl K » annonce une recherche transverse qui n existe pas, et la carte occupe la place de notre rappel de trace."
+      },
+      {
+        "textes": [
+          "Atelier Nord",
+          "yanis.b@gmail.com · Revendeur · inscrit ",
+          "1 312",
+          "2,4 Go",
+          "42 commandes créées",
+          "128 médias ajoutés",
+          "9 validations de client",
+          "3 liens révoqués",
+          "yanis.b@gmail.com",
+          "Vendeur",
+          "Activé",
+          "Instagram, WhatsApp"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE DEMONSTRATION DU KIT : nom, adresse, volumes, activite, role, filigrane et reseaux. Le produit rend ceux du compte de mesure — voir « en trop »."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "DropLink",
+          "ADMINISTRATION",
+          "Comptes",
+          "Journal d'audit",
+          "Surveillance",
+          "Paramètres système",
+          "Tout est tracé",
+          "Chaque consultation de données d’un vend"
+        ],
+        "motif": "contrainte",
+        "raison": "LA COLONNE DU PRODUIT : son vocabulaire et son rappel permanent que chaque consultation de donnees d un vendeur est tracee. « Surveillance » et « ADMINISTRATION » sont ici APPARIES au titre de l ecran et a la surface du meme nom : voir « nombre d occurrences »."
+      },
+      {
+        "motifs": [
+          "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "Le compte jetable du jeu de mesure, dont l adresse change a chaque passage."
+      },
+      {
+        "textes": [
+          "Atelier de verification",
+          "600 Ko",
+          "1 modification de commande",
+          "1 commande créée",
+          "1 média ajouté",
+          "Désactivé",
+          "Instagram, TikTok, WhatsApp"
+        ],
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests\\.invalid · Re"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
+      },
+      {
+        "textes": [
+          "En cours…"
+        ],
+        "motif": "structure",
+        "raison": "Le libelle d attente du meme bouton, invisible au repos : il reserve la largeur du bouton pour qu elle ne saute pas pendant la requete. La planche ne dessine que le repos."
+      }
+    ]
+  },
   "fr-admin-comptes-profil-suspension-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
     "valeurs": [
@@ -11752,7 +11970,12 @@
           "Réseaux configurés",
           "Supprimer le compte.",
           "Se connecter à sa place.",
-          "Ouvrir ses commandes."
+          "Ouvrir ses commandes.",
+          "Plan  <h3>",
+          "Aucun paiement ne passe par DropLink : u",
+          "Plan actuel  <span>",
+          "Gratuit  <span>",
+          "Passer en Pro  <button>"
         ],
         "motif": "donnee",
         "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
@@ -11856,6 +12079,172 @@
         ],
         "motif": "donnee",
         "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : son role apparait dans la liste et sur sa fiche. Le kit ecrit ceux de ses comptes de demonstration."
+      }
+    ]
+  },
+  "fr-admin-comptes-profil-plan-tel": {
+    "_etat": "LE PANNEAU DU PLAN OUVERT AU TELEPHONE (CLIC_PRODUIT=\"Passer en Pro\", ETAT=plan-tel), contre la planche `#compte-plan` servie a 390 px. Memes declarations que la fiche repliee ; les textes du formulaire rejoignent le groupe de position.",
+    "valeurs": [
+      {
+        "textes": [
+          "L'ouverture de cette fiche a été écrite ",
+          "Volumes",
+          "Colis",
+          "Commandes [2/2]",
+          "Médias",
+          "Stockage",
+          "Plafonds",
+          "Colis pris en charge",
+          "Commandes ce mois",
+          "Ce que ce compte a fait",
+          "Les événements du vendeur, pas les vôtre",
+          "12 sept. 2025 [1/3]",
+          "12 sept. 2025 [2/3]",
+          "Suspendre ce compte [1/2]",
+          "Ses pages publiques cesseront immédiatem",
+          "Identité",
+          "Email",
+          "Type",
+          "Revendeur",
+          "Rôle",
+          "Langue",
+          "Français",
+          "Boutique",
+          "Filigrane",
+          "Réseaux configurés",
+          "Supprimer le compte.",
+          "Se connecter à sa place.",
+          "Ouvrir ses commandes.",
+          "Plan  <h3>",
+          "Aucun paiement ne passe par DropLink : u",
+          "Plan actuel  <span>",
+          "Gratuit  <span>",
+          "Passer en Pro  <button>",
+          "Motif  <span>",
+          "Au moins 8 caractères. Par exemple : « p",
+          "Annuler  <button>"
+        ],
+        "motif": "donnee",
+        "raison": "PLACE SEULE, ET LE JEU DE MESURE EN EST LA CAUSE. Le kit ecrit les chiffres et les listes d une plateforme de demonstration — 1 248 commandes, 386 comptes, 124 boutiques, des courbes sur quatorze jours pleins ; la base de tests en porte une poignee, et ses panneaux vides ou courts remontent tout ce qui suit. Tailles, graisses, rembourrages et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Actif  <span>",
+          "L'ouverture de cette fiche a été écrite ",
+          "FACTURÉ  <span>",
+          "Commandes [2/2]",
+          "Les événements du vendeur, pas les vôtre",
+          "Ses pages publiques cesseront immédiatem",
+          "Ce que cette page ne permet pas  <h3>",
+          "Suspendre est réversible, supprimer ne l",
+          "Supprimer le compte.",
+          "La lecture tracée suffit au diagnostic.",
+          "Se connecter à sa place.",
+          "Leur contenu appartient à son client.",
+          "Ouvrir ses commandes."
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION ET LARGEUR SEULES. Tout remonte de 79 px parce que la barre superieure du kit n est pas portee, et la colonne de contenu porte 32 px de marge contre 30 — le meme ecart que sur tous les ecrans admin. Dans la colonne de droite s y ajoute la hauteur des valeurs du jeu de mesure (adresse plus longue, trois reseaux au lieu de deux), et le badge « Actif » suit la longueur du nom de boutique. Planche ecrite dans le kit le 14/09/2026 pour cet ecran, qui n en avait aucune ; tailles, graisses et couleurs sont les siennes."
+      },
+      {
+        "textes": [
+          "Suspendre ce compte [1/2]",
+          "Suspendre ce compte [2/2]"
+        ],
+        "motif": "structure",
+        "raison": "LE TITRE DU PANNEAU ET SON BOUTON PORTENT LE MEME TEXTE, et la sonde les apparie par proximite : decales de 79 px, ils se croisent. Titre 18/700 et bouton 14/700 a contour rouge sont ceux du kit, chacun a sa place."
+      },
+      {
+        "textes": [
+          "36 sur 1 200 [1/2]",
+          "42 sur 5 000 [2/2]",
+          "12 sept. 2025 [1/3]",
+          "12 sept. 2025 [2/3]",
+          "11 sept. 2025 [3/3]",
+          "12 sept. 2025  <nombre d'occurrences>"
+        ],
+        "motif": "donnee",
+        "raison": "LES VOLUMES ET LES DATES DU JEU DE MESURE. Les deux plafonds et les dates d activite ont la meme forme une fois les chiffres normalises : la sonde les apparie par proximite et les croise, et leurs largeurs suivent leurs chiffres. Le jeu porte trois types d evenement, le kit quatre."
+      },
+      {
+        "textes": [
+          "#5B4BF5  <span>"
+        ],
+        "motif": "contrainte",
+        "raison": "LA CHASSE FIXE. Le kit declare « JetBrains Mono » en tete de sa pile ; le produit ne charge qu Inter (regle « Inter seule ») et rend donc la suite de la meme pile, ui-monospace. La largeur est celle du bloc, etire par le nom de boutique plus long du jeu de mesure."
+      },
+      {
+        "textes": [
+          "Comptes"
+        ],
+        "motif": "structure",
+        "raison": "APPARIEMENT PAR RANG : « Comptes » est l onglet actif de la barre du bas au produit (accent, gras) et le fil d Ariane au kit (gris). La soustraction les apparie dans l ordre du document."
+      },
+      {
+        "textes": [
+          "Passer en Pro  <nombre d'occurrences>"
+        ],
+        "motif": "structure",
+        "raison": "LE BOUTON D ACTION EMPILE SES QUATRE LIBELLES DANS UNE SEULE CELLULE, comme celui de la suspension : le repos, la reussite et l echec disent tous « Passer en Pro » (un passage reussi recharge la fiche, un echec s ecrit dans le message qui nomme le motif). Seul le libelle courant est visible ; les autres sont `invisible` et ne servent qu a reserver la largeur."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "Atelier Nord",
+          "yanis.b@gmail.com · Revendeur · inscrit ",
+          "1 312",
+          "2,4 Go",
+          "42 commandes créées",
+          "128 médias ajoutés",
+          "9 validations de client",
+          "3 liens révoqués",
+          "yanis.b@gmail.com",
+          "Vendeur",
+          "Activé",
+          "Instagram, WhatsApp"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE DEMONSTRATION DU KIT : nom, adresse, volumes, activite, role, filigrane et reseaux. Le produit rend ceux du compte de mesure — voir « en trop »."
+      }
+    ],
+    "enTrop": [
+      {
+        "motifs": [
+          "^(sonde|ecran)-[a-z0-9]+@droplink-tests\\.invalid$"
+        ],
+        "motif": "donnee",
+        "raison": "Le compte jetable du jeu de mesure, dont l adresse change a chaque passage."
+      },
+      {
+        "textes": [
+          "Atelier de verification",
+          "600 Ko",
+          "1 modification de commande",
+          "1 commande créée",
+          "1 média ajouté",
+          "Désactivé",
+          "Instagram, TikTok, WhatsApp"
+        ],
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests\\.invalid · Re"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE : sa boutique, son adresse jetable dans le resume, ses volumes et son activite du jour — au singulier, ce qui a fait voir le 14/09/2026 que la fiche ecrivait « 1 modifications de commande »."
+      },
+      {
+        "textes": [
+          "Administrateur"
+        ],
+        "motif": "donnee",
+        "raison": "LE COMPTE DE MESURE EST ADMINISTRATEUR : son role apparait dans la liste et sur sa fiche. Le kit ecrit ceux de ses comptes de demonstration."
+      },
+      {
+        "textes": [
+          "En cours…"
+        ],
+        "motif": "structure",
+        "raison": "Le libelle d attente du meme bouton, invisible au repos : il reserve la largeur du bouton pour qu elle ne saute pas pendant la requete. La planche ne dessine que le repos."
       }
     ]
   },

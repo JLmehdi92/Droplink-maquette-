@@ -36,6 +36,11 @@ export function natureDAction(action: string): NatureDAction {
   // coupe, et tombe dans la règle `compte.` qui suit. En base, les deux se rangent dans
   // la famille « suspension » (like 'compte.%'), ce que `familleDAction` reproduit.
   if (action === "compte.deblocage_lien") return "reactivation";
+  // Le changement de plan (167) ne coupe ni ne rétablit rien : c'est un RÉGLAGE du compte,
+  // posé après un paiement reçu. Le peindre en rouge par la règle `compte.` ferait lire une
+  // sanction dans la ligne qui dit « ce vendeur a payé ». Sa famille reste « suspension »,
+  // comme tout `compte.%` en base.
+  if (action === "compte.plan") return "parametre";
   if (action.startsWith("compte.")) return "suspension";
   if (action.startsWith("parametre.")) return "parametre";
   return "consultation";

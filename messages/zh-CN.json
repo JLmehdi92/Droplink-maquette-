@@ -471,6 +471,11 @@
     "lienProBadge": "Pro",
     "lienProTitre": "Pro 功能",
     "lienProAide": "使用您品牌的自定义链接。",
+    "marqueTitre": "6. DropLink 品牌标识",
+    "marqueAide": "从客户页面移除“由 DropLink 提供支持”卡片。",
+    "marqueOption": "隐藏 DropLink 品牌标识",
+    "marqueOptionAide": "客户只会看到您的店铺。",
+    "marqueProAide": "仅限 Pro 套餐。",
     "lienPlaceholder": "your-shop"
   },
   "envois": {
@@ -946,7 +951,6 @@
   },
   "page-publique": {
     "titre": "您的订单",
-    "propulsePar": "由 DropLink 提供支持",
     "frise": {
       "preparation": "备货中",
       "expedie": "已发出",
@@ -1041,7 +1045,13 @@
     "lienInvalideAideTitre": "认为这是个错误？",
     "lienInvalideAideTexte": "请联系发送链接的店铺，几秒即可重新生成。",
     "lienInvalideCommentCaMarche": "DropLink 如何运作",
-    "lienInvalideAccueil": "返回首页"
+    "lienInvalideAccueil": "返回首页",
+    "carteDropLink": {
+      "surtitre": "由 DROPLINK 提供支持",
+      "titre": "简单而强大的物流链接。",
+      "texte": "为每笔订单创建物流链接，一分钟内完成。",
+      "bouton": "了解 DropLink"
+    }
   },
   "admin": {
     "navigation": "后台管理",
@@ -1109,6 +1119,7 @@
         "commandes_liste": "查看订单列表",
         "compte_blocage_lien": "停用一个订单链接",
         "compte_deblocage_lien": "恢复一个订单链接",
+        "compte_plan": "更改一个账户的套餐",
         "compte_reactivation": "恢复一个账户",
         "compte_suspension": "停用一个账户",
         "comptes_detail": "查看账户详情",
@@ -1244,6 +1255,29 @@
         "refuse": "该账户无法被停用。",
         "introuvable": "找不到该账户。",
         "ecriture": "没有任何改动。请重试。"
+      }
+    },
+    "plan": {
+      "titre": "套餐",
+      "aide": "DropLink 不经手任何付款：收到付款后，请在此将账号切换为 Pro。Pro 卖家可以从客户页面移除 DropLink 品牌标识。",
+      "planActuel": "当前套餐",
+      "plans": {
+        "gratuit": "免费",
+        "pro": "Pro"
+      },
+      "illisible": "暂时无法读取",
+      "passerPro": "切换为 Pro",
+      "passerGratuit": "切回免费",
+      "motif": "原因",
+      "motifAide": "至少 {n} 个字符。例如：“9 月 19 日已通过银行转账收到付款”。原因会完整显示在日志中。",
+      "annuler": "取消",
+      "enCours": "处理中…",
+      "fait": "已完成。",
+      "erreur": {
+        "saisie": "原因太短。",
+        "deja": "该账号已是此套餐。请重新加载页面。",
+        "introuvable": "找不到该账号。",
+        "ecriture": "无法保存套餐，未作任何更改。"
       }
     },
     "panneau": {

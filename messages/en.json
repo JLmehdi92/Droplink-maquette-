@@ -471,6 +471,11 @@
     "lienProBadge": "Pro",
     "lienProTitre": "Pro feature",
     "lienProAide": "With a link customised to your brand.",
+    "marqueTitre": "6. DropLink branding",
+    "marqueAide": "Remove the “Powered by DropLink” card from your customer pages.",
+    "marqueOption": "Hide DropLink branding",
+    "marqueOptionAide": "Your customers only see your shop.",
+    "marqueProAide": "Available on the Pro plan.",
     "lienPlaceholder": "your-shop"
   },
   "envois": {
@@ -946,7 +951,6 @@
   },
   "page-publique": {
     "titre": "Your order",
-    "propulsePar": "Powered by DropLink",
     "frise": {
       "preparation": "Preparation",
       "expedie": "Shipped",
@@ -1041,7 +1045,13 @@
     "lienInvalideAideTitre": "Think this is a mistake?",
     "lienInvalideAideTexte": "Contact the shop that sent you the link: it can generate a new one in seconds.",
     "lienInvalideCommentCaMarche": "How DropLink works",
-    "lienInvalideAccueil": "Back to home"
+    "lienInvalideAccueil": "Back to home",
+    "carteDropLink": {
+      "surtitre": "POWERED BY DROPLINK",
+      "titre": "Tracking links, simple and powerful.",
+      "texte": "Create one tracking link per order, in under a minute.",
+      "bouton": "Discover DropLink"
+    }
   },
   "admin": {
     "navigation": "Administration",
@@ -1109,6 +1119,7 @@
         "commandes_liste": "Viewed the order list",
         "compte_blocage_lien": "Blocked an order link",
         "compte_deblocage_lien": "Unblocked an order link",
+        "compte_plan": "Changed an account’s plan",
         "compte_reactivation": "Reactivated an account",
         "compte_suspension": "Suspended an account",
         "comptes_detail": "Viewed an account record",
@@ -1244,6 +1255,29 @@
         "refuse": "This account cannot be suspended.",
         "introuvable": "Account not found.",
         "ecriture": "Nothing was changed. Please retry."
+      }
+    },
+    "plan": {
+      "titre": "Plan",
+      "aide": "No payment goes through DropLink: once you have received the payment, switch the account to Pro here. A Pro seller can remove DropLink branding from their customer pages.",
+      "planActuel": "Current plan",
+      "plans": {
+        "gratuit": "Free",
+        "pro": "Pro"
+      },
+      "illisible": "Unreadable for now",
+      "passerPro": "Switch to Pro",
+      "passerGratuit": "Switch back to Free",
+      "motif": "Reason",
+      "motifAide": "At least {n} characters. For example: “payment received on 19/09 by bank transfer”. It is shown in full in the log.",
+      "annuler": "Cancel",
+      "enCours": "Working…",
+      "fait": "Done.",
+      "erreur": {
+        "saisie": "The reason is too short.",
+        "deja": "This account is already on this plan. Reload the page.",
+        "introuvable": "This account cannot be found.",
+        "ecriture": "The plan could not be saved. Nothing has changed."
       }
     },
     "panneau": {

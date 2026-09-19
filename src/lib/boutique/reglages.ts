@@ -123,6 +123,15 @@ export const ReglagesMarque = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, "couleur hexadécimale à six chiffres attendue"),
   languePublique: SchemaLangue,
   filigrane: z.boolean(),
+  /**
+   * Retirer la carte « Propulsé par DropLink » de la page client. Réservé au plan Pro, mais
+   * ce schéma ne le sait pas et n'a pas à le savoir : c'est le déclencheur de la migration 167
+   * qui refuse (DL059). Une garde ici se contournerait par un appel direct à PostgREST.
+   *
+   * FACULTATIF, et l'absence veut dire « ne pas toucher » : l'onboarding appelle la même
+   * écriture sans connaître cet interrupteur, et il ne doit pas le rabaisser en passant.
+   */
+  masquerMarque: z.boolean().optional(),
   instagram: lienNormalise("instagram", MOTIFS_RESEAUX.instagram),
   tiktok: lienNormalise("tiktok", MOTIFS_RESEAUX.tiktok),
   whatsapp: lienNormalise("whatsapp", MOTIFS_RESEAUX.whatsapp),
@@ -160,6 +169,7 @@ export async function appliquerReglagesMarque(
       accent_color: reglages.couleurAccent.toLowerCase(),
       default_language: reglages.languePublique,
       watermark_enabled: reglages.filigrane,
+      ...(reglages.masquerMarque === undefined ? {} : { hide_droplink_brand: reglages.masquerMarque }),
       // Même règle que le nom : la chaîne vide vaut ABSENCE. C'est `null` qui
       // fait omettre le bloc des réseaux sur la page publique ; une chaîne vide
       // produirait un lien qui ne mène nulle part.

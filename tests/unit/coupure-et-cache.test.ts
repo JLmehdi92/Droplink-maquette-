@@ -367,11 +367,20 @@ const DECLARES: Readonly<Record<string, Verdict>> = {
       "blocage d'UN lien par l'administration (166, 19/09/2026). Il coupe la page " +
       "publique d'une commande ; l'action ne connait meme pas le jeton a invalider.",
   },
+  "audit/plan.ts": {
+    change: true,
+    couvreur: null,
+    raison:
+      "DETTE NOMMEE. Le plan du compte (167, 19/09/2026) : repasse en gratuit, la " +
+      "carte DropLink revient sur CHAQUE page publique du vendeur (l'interrupteur " +
+      "retombe en base), et l'action ne connait aucun jeton a invalider.",
+  },
   "boutique/reglages.ts": {
     change: true,
     couvreur: null,
     raison:
-      "DETTE NOMMEE. Nom, couleur, langue publique, filigrane et reseaux : " +
+      "DETTE NOMMEE. Nom, couleur, langue publique, filigrane, reseaux et carte " +
+      "DropLink (167) : " +
       "l'en-tete de CHAQUE page publique de ce vendeur, pas d'une seule.",
   },
   "boutique/logo.ts": {

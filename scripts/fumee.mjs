@@ -5624,6 +5624,17 @@ const EXCEPTIONS_VARIABLES = [
   // portage de l onboarding sur le design system, le 14/09/2026, a retire ce
   // halo a la couleur du vendeur — c est NOTRE ecran, il prend l anneau du
   // design system. C est la sonde qui l a dit, en echouant DANS L AUTRE SENS.
+  [
+    "--fond-carte-propulsee",
+    "posee EN LIGNE par la carte « Propulse par DropLink » (carte-propulsee.tsx), a la couleur " +
+      "du VENDEUR calculee au serveur, et lue par `lg:bg-(image:…)` : la teinte n existe qu au " +
+      "bureau (la planche aplatit ses cartes au telephone), et un palier ne s ecrit qu en classe.",
+  ],
+  [
+    "--filet-carte-propulsee",
+    "meme carte, meme raison : le filet a 26 % de la couleur du vendeur, lu par `lg:border-(…)`. " +
+      "Les deux noms vivent dans le MEME fichier que leur lecture.",
+  ],
 ];
 const tolerees = new Set(EXCEPTIONS_VARIABLES.map(([v]) => v));
 

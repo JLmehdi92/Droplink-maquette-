@@ -4,12 +4,14 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import type { Metadata } from "next";
 import { DialogueSuspension } from "@/components/admin/dialogue-suspension";
 import { EncartTrace } from "@/components/admin/encart-trace";
+import { PlanCompte } from "@/components/admin/plan-compte";
 import { ArrowLeft } from "lucide-react";
 import { TraductionsClient } from "@/components/traductions-client";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
 import { lireCompte } from "@/lib/audit/comptes";
 import { lireSeuils } from "@/lib/audit/panneau";
+import { lirePlanCompte } from "@/lib/audit/plan";
 import { MOTIF_MIN } from "@/lib/audit/suspension";
 import { mettreOctetsALEchelle } from "@/lib/format/octets";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -83,9 +85,10 @@ export default async function FicheCompte({
   await exigerAdmin();
 
   const supabase = await creerClientServeur();
-  const [fiche, seuils] = await Promise.all([
+  const [fiche, seuils, plan] = await Promise.all([
     lireCompte(supabase, id, await empreinteAdmin()),
     lireSeuils(supabase),
+    lirePlanCompte(supabase, id),
   ]);
 
   // Un identifiant absent rend 404, comme une adresse inexistante. La
@@ -318,6 +321,18 @@ export default async function FicheCompte({
                   profilId={fiche.id}
                   email={fiche.email}
                   suspendu={suspendu}
+                  motifMin={MOTIF_MIN}
+                />
+              </TraductionsClient>
+            </section>
+
+            {/* LE PLAN, juste sous la suspension comme sur la planche : ce sont les deux seuls
+                gestes de la fiche, et tous deux exigent un motif. */}
+            <section className={PANNEAU} aria-label={t("plan.titre")}>
+              <TraductionsClient espaces={["admin.plan"]}>
+                <PlanCompte
+                  profilId={fiche.id}
+                  plan={plan.statut === "ok" ? plan.plan : null}
                   motifMin={MOTIF_MIN}
                 />
               </TraductionsClient>

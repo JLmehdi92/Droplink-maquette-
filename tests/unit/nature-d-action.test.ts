@@ -100,6 +100,8 @@ const ATTENDU: Record<string, ReturnType<typeof natureDAction>> = {
   // pas une consultation, sinon un filtre « suspensions » le cacherait.
   "compte.blocage_lien": "suspension",
   "compte.deblocage_lien": "reactivation",
+  // Le plan (167) : un réglage du compte, jamais une sanction.
+  "compte.plan": "parametre",
   "comptes.liste": "consultation",
   "comptes.detail": "consultation",
   "boutiques.liste": "consultation",

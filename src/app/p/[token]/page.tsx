@@ -8,6 +8,7 @@ import { CARTE, TitreCarte } from "@/components/publique/carte-client";
 import { CarteCommande } from "@/components/publique/carte-commande";
 import { CarteContact } from "@/components/publique/carte-contact";
 import { CarteLivraison, type LigneLivraison } from "@/components/publique/carte-livraison";
+import { CartePropulsee } from "@/components/publique/carte-propulsee";
 import { EnTeteBoutique } from "@/components/publique/en-tete-boutique";
 import { HistoriqueSuivi } from "@/components/publique/historique-suivi";
 import { estimationVisible } from "@/lib/page-publique/estimation";
@@ -563,6 +564,20 @@ export default async function PagePublique({
                 bouton: t("contact.bouton"),
               }}
             />
+            {/* LA CARTE « PROPULSÉ PAR DROPLINK » (planche `PoweredCard`), en gratuit seulement —
+                un compte Pro qui l'a demandé la retire (décision de Wassim, 19/09/2026). */}
+            {commande.boutique.marqueMasquee ? null : (
+              <CartePropulsee
+                langue={langue}
+                accent={accent}
+                libelles={{
+                  surtitre: t("carteDropLink.surtitre"),
+                  titre: t("carteDropLink.titre"),
+                  texte: t("carteDropLink.texte"),
+                  bouton: t("carteDropLink.bouton"),
+                }}
+              />
+            )}
           </div>
         </div>
       </main>
@@ -579,19 +594,19 @@ export default async function PagePublique({
             sur chaque lien et non dans une constante : c'est là que
             `cibles-tactiles.test.ts` la lit.
 
-            « Propulsé par DropLink », avec ses trois garde-fous : secondaire
-            visuellement, jamais confondable avec l'expéditeur, et ouverture HORS
-            de la page — le client est venu voir sa commande, pas nous.
+            ⚠️ LE PIED NE DIT PLUS « Propulsé par DropLink » (19/09/2026). Il le disait
+            en sourdine, pour tous les comptes, quand la décision 25 interdisait la
+            carte promotionnelle du kit. Wassim a tranché autrement : la CARTE le dit,
+            en gratuit, et un compte Pro la retire. Garder aussi le lien du pied
+            faisait écrire la même mention deux fois sur la page d'un vendeur gratuit,
+            et la laissait sur celle d'un vendeur Pro qui a payé pour la retirer.
 
             ⚠️ LE KIT ÉCRIT « © DropLink. Tous droits réservés. » À CETTE PLACE,
             et la page ne le fait pas : sur la page d'un vendeur, un droit
-            d'auteur au nom de DropLink se lit comme le propriétaire de la page
-            — exactement la confusion que la décision 25 interdit.
+            d'auteur au nom de DropLink se lit comme le propriétaire de la page.
+            Les deux liens gardent donc la droite du pied, comme au kit.
           */}
-          <a href="/" target="_blank" rel="noopener noreferrer" className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0">
-            {t("propulsePar")}
-          </a>
-          <span className="flex flex-wrap gap-x-[18px] lg:gap-x-6">
+          <span className="flex flex-wrap gap-x-[18px] lg:ml-auto lg:gap-x-6">
             <a
               href={`/${langue}/conditions`}
               target="_blank"

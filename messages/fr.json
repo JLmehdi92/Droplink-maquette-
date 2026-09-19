@@ -471,6 +471,11 @@
     "lienProBadge": "Pro",
     "lienProTitre": "Fonctionnalité Pro",
     "lienProAide": "Avec un lien personnalisé à votre marque.",
+    "marqueTitre": "6. Marque DropLink",
+    "marqueAide": "Retirez la carte « Propulsé par DropLink » de vos pages client.",
+    "marqueOption": "Masquer la marque DropLink",
+    "marqueOptionAide": "Vos clients ne voient plus que votre boutique.",
+    "marqueProAide": "Réservé au plan Pro.",
     "lienPlaceholder": "votre-boutique"
   },
   "envois": {
@@ -946,7 +951,6 @@
   },
   "page-publique": {
     "titre": "Votre commande",
-    "propulsePar": "Propulsé par DropLink",
     "frise": {
       "preparation": "Préparation",
       "expedie": "Expédié",
@@ -1041,7 +1045,13 @@
     "lienInvalideAideTitre": "Vous pensez qu'il s'agit d'une erreur ?",
     "lienInvalideAideTexte": "Contactez la boutique qui vous a envoyé le lien : elle peut vous en générer un nouveau en quelques secondes.",
     "lienInvalideCommentCaMarche": "Comment fonctionne DropLink",
-    "lienInvalideAccueil": "Retour à l'accueil"
+    "lienInvalideAccueil": "Retour à l'accueil",
+    "carteDropLink": {
+      "surtitre": "PROPULSÉ PAR DROPLINK",
+      "titre": "Des liens de suivi simples et puissants.",
+      "texte": "Créez un lien de suivi par commande, en moins d'une minute.",
+      "bouton": "Découvrir DropLink"
+    }
   },
   "admin": {
     "navigation": "Administration",
@@ -1109,6 +1119,7 @@
         "commandes_liste": "Consultation de la liste des commandes",
         "compte_blocage_lien": "Blocage du lien d’une commande",
         "compte_deblocage_lien": "Déblocage du lien d’une commande",
+        "compte_plan": "Changement de plan d’un compte",
         "compte_reactivation": "Réactivation d’un compte",
         "compte_suspension": "Suspension d’un compte",
         "comptes_detail": "Consultation d’une fiche de compte",
@@ -1244,6 +1255,29 @@
         "refuse": "Ce compte ne peut pas être suspendu.",
         "introuvable": "Compte introuvable.",
         "ecriture": "Rien n'a été modifié. Réessayez."
+      }
+    },
+    "plan": {
+      "titre": "Plan",
+      "aide": "Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.",
+      "planActuel": "Plan actuel",
+      "plans": {
+        "gratuit": "Gratuit",
+        "pro": "Pro"
+      },
+      "illisible": "Illisible pour l'instant",
+      "passerPro": "Passer en Pro",
+      "passerGratuit": "Repasser en gratuit",
+      "motif": "Motif",
+      "motifAide": "Au moins {n} caractères. Par exemple : « paiement reçu le 19/09 par virement ». Il s'affiche en clair dans le journal.",
+      "annuler": "Annuler",
+      "enCours": "En cours…",
+      "fait": "Effectué.",
+      "erreur": {
+        "saisie": "Le motif est trop court.",
+        "deja": "Ce compte est déjà dans ce plan. Rechargez la fiche.",
+        "introuvable": "Ce compte est introuvable.",
+        "ecriture": "Le plan n'a pas pu être enregistré. Rien n'a changé."
       }
     },
     "panneau": {

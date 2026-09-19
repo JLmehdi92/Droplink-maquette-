@@ -10,6 +10,7 @@ import {
   suspendreCompte,
   type ResultatSuspension,
 } from "@/lib/audit/suspension";
+import { DemandePlan, definirPlanCompte, type ResultatPlan } from "@/lib/audit/plan";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
@@ -118,5 +119,34 @@ export async function reactiver(
     revalidatePath("/[locale]/admin/comptes/[id]", "page");
   }
 
+  return resultat;
+}
+
+/**
+ * LE PLAN DU COMPTE — décision de Wassim du 19/09/2026 : « c'est à moi de mettre les gens pro
+ * quand ils ont payé ». Aucun paiement ne passe par le produit ; l'administration pose le plan,
+ * motif à l'appui, et la fonction en base trace le geste avant de l'appliquer.
+ *
+ * Même garde que les deux actions ci-dessus, et pour la même raison : une Server Action est un
+ * point d'entrée à part entière. Le plan VISÉ est transporté (et non déduit du plan actuel) :
+ * deux onglets ouverts sur la même fiche ne doivent pas s'annuler l'un l'autre — le second
+ * reçoit « déjà dans ce plan » au lieu de basculer le compte en sens inverse.
+ */
+export type EtatPlan = { statut: "inactif" } | ResultatPlan;
+
+export async function definirPlan(_precedent: EtatPlan, donnees: FormData): Promise<EtatPlan> {
+  await exigerAdmin();
+
+  const analyse = DemandePlan.safeParse({
+    profilId: donnees.get("profilId"),
+    plan: donnees.get("plan"),
+    motif: donnees.get("motif") ?? "",
+  });
+  if (!analyse.success) return { statut: "erreur", motif: "saisie" };
+
+  const supabase = await creerClientServeur();
+  const resultat = await definirPlanCompte(supabase, analyse.data, await empreinteAdmin());
+
+  if (resultat.statut === "ok") revalidatePath("/[locale]/admin/comptes/[id]", "page");
   return resultat;
 }
