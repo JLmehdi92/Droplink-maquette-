@@ -96,6 +96,10 @@ function actionsJournalisees(): string[] {
 const ATTENDU: Record<string, ReturnType<typeof natureDAction>> = {
   "compte.suspension": "suspension",
   "compte.reactivation": "reactivation",
+  // Le blocage d'UN lien (166) : un geste de modération, rangé avec les suspensions —
+  // pas une consultation, sinon un filtre « suspensions » le cacherait.
+  "compte.blocage_lien": "suspension",
+  "compte.deblocage_lien": "reactivation",
   "comptes.liste": "consultation",
   "comptes.detail": "consultation",
   "boutiques.liste": "consultation",

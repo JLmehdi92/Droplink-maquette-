@@ -8,6 +8,8 @@ import { RechercheAdmin } from "@/components/admin/recherche-admin";
 import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
 import { TuileVolume } from "@/components/admin/tuile-volume";
 import { AnneauStatuts } from "@/components/admin/anneau-statuts";
+import { BlocageLien } from "@/components/admin/blocage-lien";
+import { TraductionsClient } from "@/components/traductions-client";
 import { Store } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
 import { exigerAdmin } from "@/lib/audit/garde";
@@ -20,6 +22,8 @@ import {
   type LigneCommandeAdmin,
 } from "@/lib/audit/commandes";
 import { lireCompteurs, lireRepartition } from "@/lib/audit/panneau";
+import { liensBloquesParmi } from "@/lib/audit/blocage-lien";
+import { MOTIF_MIN } from "@/lib/audit/suspension";
 import { lireTransporteur, monogramme } from "@/lib/tracking/transporteurs";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
@@ -138,6 +142,15 @@ export default async function AdminCommandes({
     lireCompteurs(supabase),
     lireRepartition(supabase),
   ]);
+  /* LES LIENS BLOQUÉS DE CETTE PAGE (décision de Wassim, 19/09/2026). Si la lecture
+     échoue, l écran n affiche NI pastille NI bouton : montrer « bloquer » sur un lien
+     peut-être déjà bloqué affirmerait un état que la base n a pas rendu (contrainte 8). */
+  const blocages = await liensBloquesParmi(
+    supabase,
+    page.lignes.map((l) => l.id),
+  );
+  const bloque = (l: LigneCommandeAdmin): boolean | null =>
+    blocages.statut === "ok" ? blocages.bloques.has(l.id) : null;
 
   const t = await getTranslations("admin");
   const format = await getFormatter();
@@ -202,9 +215,22 @@ export default async function AdminCommandes({
       <span className={classes + " text-ds-texte-corps"}>{l.boutiqueNom}</span>
     );
 
+  /* LE LIEN BLOQUÉ S AJOUTE AU STATUT, il ne le remplace pas : c est un état du LIEN,
+     la commande garde le sien. */
   const pilule = (l: LigneCommandeAdmin) => (
-    <span className={PILULE + " " + TEINTE_STATUT[l.statut]}>{t(LIBELLE_STATUT[l.statut])}</span>
+    <span className="inline-flex flex-wrap items-center gap-1.5">
+      <span className={PILULE + " " + TEINTE_STATUT[l.statut]}>{t(LIBELLE_STATUT[l.statut])}</span>
+      {bloque(l) === true ? (
+        <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>{t("commandes.lienBloque")}</span>
+      ) : null}
+    </span>
   );
+  const geste = (l: LigneCommandeAdmin, carte: boolean) => {
+    const etat = bloque(l);
+    return etat === null ? null : (
+      <BlocageLien commandeId={l.id} reference={l.reference} bloque={etat} motifMin={MOTIF_MIN} carte={carte} />
+    );
+  };
 
   const date = (l: LigneCommandeAdmin): string =>
     format.dateTime(new Date(l.creeLe), { dateStyle: "short", timeStyle: "short" });
@@ -358,7 +384,7 @@ export default async function AdminCommandes({
                 {filtre ? t("commandes.videFiltre") : t("commandes.videTout")}
               </p>
             ) : (
-              <>
+              <TraductionsClient espaces={["admin.blocage"]}>
                 {/* --- LE TABLEAU, au bureau --- */}
                 <div className="hidden xl:block">
                   <table className="w-full table-fixed border-collapse">
@@ -369,7 +395,7 @@ export default async function AdminCommandes({
                       <col className="w-[118px]" />
                       <col />
                       <col className="w-[128px]" />
-                      <col className="w-[74px]" />
+                      <col className="w-[116px]" />
                     </colgroup>
                     <thead>
                       <tr>
@@ -447,6 +473,7 @@ export default async function AdminCommandes({
                               </span>
                             </td>
                             <td className={CELLULE + " pr-[18px] text-right last:pr-[18px]"}>
+                              <span className="inline-flex items-center gap-2">
                               <Link prefetch={false}
                                 href={`/${langue}/admin/comptes/${l.proprietaireId}`}
                                 aria-label={t("commandes.voirLong", { email: l.proprietaireEmail })}
@@ -454,6 +481,8 @@ export default async function AdminCommandes({
                               >
                                 {t("commandes.voir")}
                               </Link>
+                              {geste(l, false)}
+                              </span>
                             </td>
                           </tr>
                         );
@@ -497,12 +526,13 @@ export default async function AdminCommandes({
                           >
                             {t("commandes.voir")}
                           </Link>
+                          {geste(l, true)}
                         </div>
                       </li>
                     );
                   })}
                 </ul>
-              </>
+              </TraductionsClient>
             )}
 
             {lienSuivant === null ? null : (

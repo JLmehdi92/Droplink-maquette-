@@ -99,6 +99,12 @@ const SURFACE_PUBLIQUE = TOUS.filter(
 /** L'action qui suspend un compte. */
 const ACTION_SUSPENSION = TOUS.find((f) => f.posix.endsWith("/admin/comptes/[id]/actions.ts"));
 
+/**
+ * L'action qui bloque le lien d'UNE commande (19/09/2026). Même chaîne, même mode de
+ * défaillance : bloquée en base, la page resterait servie depuis un cache.
+ */
+const ACTION_BLOCAGE = TOUS.find((f) => f.posix.endsWith("/admin/commandes/actions.ts"));
+
 describe("le seuil est gardé : pas de cache public sans invalidation à la suspension", () => {
   // UN ENSEMBLE VIDE PASSE TOUT. Si ces chemins étaient renommés, la suite
   // deviendrait verte en ne surveillant plus rien — exactement l'état qu'elle
@@ -109,6 +115,7 @@ describe("le seuil est gardé : pas de cache public sans invalidation à la susp
       "aucun fichier de la surface publique trouvé : la sonde vise à côté",
     ).toBeGreaterThan(3);
     expect(ACTION_SUSPENSION, "l'action de suspension est introuvable").toBeDefined();
+    expect(ACTION_BLOCAGE, "l'action de blocage de lien est introuvable").toBeDefined();
   });
 
   test("aucun cache de données sur la lecture publique sans invalidation câblée", () => {
@@ -118,14 +125,14 @@ describe("le seuil est gardé : pas de cache public sans invalidation à la susp
 
     if (enCache.length === 0) return; // Rien à garder tant que rien n'est en cache.
 
-    const action = ACTION_SUSPENSION as (typeof TOUS)[number];
-    const invalide = /revalidateTag\s*\(/.test(action.source);
+    const actions = [ACTION_SUSPENSION, ACTION_BLOCAGE] as (typeof TOUS)[number][];
+    const invalide = actions.every((action) => /revalidateTag\s*\(/.test(action.source));
 
     expect(
       invalide,
       "Un cache de données a été posé sur la lecture publique " +
         `(${enCache.map((f) => f.posix.split("/").pop()).join(", ")}), ` +
-        "mais la suspension d'un compte n'invalide toujours rien. La coupure " +
+        "mais la suspension d'un compte ou le blocage d'un lien n'invalide toujours rien. La coupure " +
         "cesserait de couper SANS ÉCHOUER : la suspension s'enregistrerait, " +
         "l'audit la consignerait, l'écran afficherait « suspendu », et la page " +
         "publique continuerait d'être servie depuis le cache.",
@@ -351,6 +358,14 @@ const DECLARES: Readonly<Record<string, Verdict>> = {
       "DETTE NOMMEE, gardee a part par le bloc ci-dessus : c'est la COUPURE de " +
       "suspension, la capacite qui fonde notre statut d'hebergeur. Le module " +
       "qui la FAIT, pas la Server Action qui la declenche.",
+  },
+  "audit/blocage-lien.ts": {
+    change: true,
+    couvreur: null,
+    raison:
+      "DETTE NOMMEE, gardee a part par le bloc ci-dessus comme la suspension : le " +
+      "blocage d'UN lien par l'administration (166, 19/09/2026). Il coupe la page " +
+      "publique d'une commande ; l'action ne connait meme pas le jeton a invalider.",
   },
   "boutique/reglages.ts": {
     change: true,

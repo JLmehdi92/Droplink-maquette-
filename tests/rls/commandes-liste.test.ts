@@ -185,6 +185,12 @@ describe("Ce que la liste rend", () => {
       ["notify_email", "donnée de contact, inutile à la liste"],
       ["shop_id", "posé par la RLS, jamais lu ni réécrit par l'écran"],
       [
+        "admin_blocked_at",
+        "le blocage d'un lien par l'administration (166) : lu par l'administration seule. " +
+          "Le montrer au vendeur est une décision produit que Wassim n'a pas encore prise " +
+          "(19/09/2026) ; tant qu'elle ne l'est pas, la liste n'en dit rien",
+      ],
+      [
         "carrier_code",
         "un identifiant NUMÉRIQUE de fournisseur de suivi, stocké en texte et relu " +
           "par `parseInt` avant l'appel à 17TRACK — pas un nom de transporteur. " +

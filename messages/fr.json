@@ -1107,6 +1107,8 @@
       "actions": {
         "boutiques_liste": "Consultation de la liste des boutiques",
         "commandes_liste": "Consultation de la liste des commandes",
+        "compte_blocage_lien": "Blocage du lien d’une commande",
+        "compte_deblocage_lien": "Déblocage du lien d’une commande",
         "compte_reactivation": "Réactivation d’un compte",
         "compte_suspension": "Suspension d’un compte",
         "comptes_detail": "Consultation d’une fiche de compte",
@@ -1582,7 +1584,8 @@
       "videTout": "Aucune commande n'a encore été créée.",
       "videFiltre": "Aucune commande ne correspond à ces filtres.",
       "pageSuivante": "Voir la suite",
-      "repartition": "Répartition des statuts"
+      "repartition": "Répartition des statuts",
+      "lienBloque": "Lien bloqué"
     },
     "statistiques": {
       "titre": "Statistiques",
@@ -1646,6 +1649,24 @@
       "croissanceSansBase": "nouveau",
       "ecartHausse": "+{ecart} %",
       "ecartBaisse": "−{ecart} %"
+    },
+    "blocage": {
+      "bloquer": "Bloquer le lien",
+      "debloquer": "Débloquer le lien",
+      "bloquerLong": "Bloquer le lien de {reference}",
+      "debloquerLong": "Débloquer le lien de {reference}",
+      "aideBlocage": "Son client verra « Ce lien n'est plus valable ». Le lien n'est pas détruit : le débloquer le rétablit à l'identique. Vous ne voyez pas le contenu de la commande.",
+      "aideDeblocage": "La page revient sur le même lien, celui que le client a déjà reçu.",
+      "motif": "Motif",
+      "motifAide": "Au moins {n} caractères. Il s'affiche en clair dans le journal, et c'est ce qu'on relira si la décision est contestée.",
+      "annuler": "Annuler",
+      "enCours": "En cours…",
+      "erreur": {
+        "saisie": "Le motif est trop court.",
+        "deja": "Ce lien est déjà dans cet état. Rechargez la page.",
+        "introuvable": "Commande introuvable.",
+        "ecriture": "Rien n'a été modifié. Réessayez."
+      }
     }
   },
   "erreurs": {

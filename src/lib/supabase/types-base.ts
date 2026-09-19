@@ -277,6 +277,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_blocked_at: string | null
           archived_at: string | null
           carrier_code: string | null
           cover_media_id: string | null
@@ -303,6 +304,7 @@ export type Database = {
           views_count: number
         }
         Insert: {
+          admin_blocked_at?: string | null
           archived_at?: string | null
           carrier_code?: string | null
           cover_media_id?: string | null
@@ -329,6 +331,7 @@ export type Database = {
           views_count?: number
         }
         Update: {
+          admin_blocked_at?: string | null
           archived_at?: string | null
           carrier_code?: string | null
           cover_media_id?: string | null
@@ -873,6 +876,10 @@ export type Database = {
         }[]
       }
       battre: { Args: { p_detail: Json; p_source: string }; Returns: undefined }
+      bloquer_lien_commande: {
+        Args: { p_commande: string; p_ip_hash: string; p_motif: string }
+        Returns: boolean
+      }
       cle_media_canonique: {
         Args: { p_cle: string; p_genre: string }
         Returns: boolean
@@ -983,6 +990,10 @@ export type Database = {
           photos: number
         }[]
       }
+      debloquer_lien_commande: {
+        Args: { p_commande: string; p_ip_hash: string; p_motif: string }
+        Returns: boolean
+      }
       delai_moyen_livraison: {
         Args: { p_depuis: string }
         Returns: {
@@ -1062,6 +1073,10 @@ export type Database = {
       }
       liberer_evenement_inscription: { Args: never; Returns: boolean }
       liberer_notification_vue: { Args: { p_cle: string }; Returns: undefined }
+      liens_bloques_parmi: {
+        Args: { p_commandes: string[] }
+        Returns: string[]
+      }
       lire_commande_publique: {
         Args: { p_jeton: string }
         Returns: {

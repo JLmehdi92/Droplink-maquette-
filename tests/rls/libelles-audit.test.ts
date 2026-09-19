@@ -64,7 +64,10 @@ afterAll(async () => {
 async function actionsDuProduit(): Promise<string[]> {
   const lignes = await interroger<{ action: string }>(
     bd,
-    `select distinct (regexp_matches(p.prosrc, $motif$'([a-z]+\\.[a-z]+)'$motif$, 'g'))[1] as action
+    // `[a-z_]` et non `[a-z]` : `compte.blocage_lien` (166) porte un souligné, et la
+    // recherche d'origine le rendait INVISIBLE — un libellé ajouté pour lui passait
+    // pour orphelin, et une action sans libellé serait passée inaperçue.
+    `select distinct (regexp_matches(p.prosrc, $motif$'([a-z_]+\\.[a-z_]+)'$motif$, 'g'))[1] as action
        from pg_proc p
        join pg_namespace n on n.oid = p.pronamespace
       where n.nspname = 'public'

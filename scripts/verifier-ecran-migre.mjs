@@ -1172,13 +1172,36 @@ async function cliquerProduit(envoyer, chemin, largeur) {
   const sequence = process.env["CLIC_PRODUIT"];
   if (sequence === undefined || sequence === "") return;
   for (const etape of sequence.split(" > ").map((e) => e.trim()).filter(Boolean)) {
+    /* `(recharge)` : l'étape précédente RECHARGE la page une fois la base confirmée (le
+       blocage d'un lien, la suspension). Lire pendant le rechargement lève « Inspected
+       target navigated » — constaté le 19/09 à 390 px, passé par chance à 1545. On
+       laisse partir la navigation, puis on attend un document complet. */
+    if (etape === "(recharge)") {
+      await new Promise((r) => setTimeout(r, 2500));
+      for (const fin = Date.now() + 15_000; Date.now() < fin; ) {
+        try {
+          const { result: pret } = await envoyer("Runtime.evaluate", {
+            expression: "document.readyState",
+            returnByValue: true,
+          });
+          if (pret.value === "complete") break;
+        } catch {
+          // La page est encore en train de changer sous nous : on réessaie.
+        }
+        await new Promise((r) => setTimeout(r, 300));
+      }
+      await new Promise((r) => setTimeout(r, 1500));
+      continue;
+    }
     const saisie = /^([\w-]+)=(.*)$/.exec(etape);
     const { result } = await envoyer("Runtime.evaluate", {
       expression: saisie
         ? `(() => {
-            const c = document.querySelector('input[name=${JSON.stringify(saisie[1])}]');
+            // Un textarea aussi — le motif d'un blocage de lien —, avec SON accesseur : celui
+            // de HTMLInputElement lève sur un textarea.
+            const c = [...document.querySelectorAll('input[name=${JSON.stringify(saisie[1])}], textarea[name=${JSON.stringify(saisie[1])}]')].find((e) => e.getClientRects().length > 0);
             if (!c) return 'absent';
-            const poser = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+            const poser = Object.getOwnPropertyDescriptor(c instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype, 'value').set;
             poser.call(c, ${JSON.stringify(saisie[2].replaceAll("{motdepasse}", MOT_DE_PASSE))});
             c.dispatchEvent(new Event('input', { bubbles: true }));
             return 'saisi';
@@ -1189,11 +1212,14 @@ async function cliquerProduit(envoyer, chemin, largeur) {
             // Seuls les éléments RENDUS comptent — la colonne du bureau, masquée au téléphone,
             // porte les mêmes libellés.
             // « ~texte » : le contrôle CONTIENT ce texte — un résumé de menu porte des initiales et un libellé masqué.
+            // Et un bouton-icône n'a QUE son aria-label, qui porte souvent une donnée du jeu
+            // (« Bloquer le lien de #3F2A1C ») : « ~ » s'applique donc à lui aussi.
             const cherche = ${JSON.stringify(etape.replace(/^~/, ""))};
             const contient = ${JSON.stringify(etape.startsWith("~"))};
             const b = [...document.querySelectorAll('button,summary')].filter((e) => e.getClientRects().length > 0).find((e) => {
               const t = (e.textContent || '').trim();
-              return (contient ? t.includes(cherche) : t === cherche) || e.getAttribute('aria-label') === cherche;
+              const a = e.getAttribute('aria-label') || '';
+              return contient ? t.includes(cherche) || a.includes(cherche) : t === cherche || a === cherche;
             });
             if (!b) return 'absent';
             b.click();

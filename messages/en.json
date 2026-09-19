@@ -1107,6 +1107,8 @@
       "actions": {
         "boutiques_liste": "Viewed the shop list",
         "commandes_liste": "Viewed the order list",
+        "compte_blocage_lien": "Blocked an order link",
+        "compte_deblocage_lien": "Unblocked an order link",
         "compte_reactivation": "Reactivated an account",
         "compte_suspension": "Suspended an account",
         "comptes_detail": "Viewed an account record",
@@ -1582,7 +1584,8 @@
       "videTout": "No order has been created yet.",
       "videFiltre": "No order matches these filters.",
       "pageSuivante": "Show more",
-      "repartition": "Status breakdown"
+      "repartition": "Status breakdown",
+      "lienBloque": "Link blocked"
     },
     "statistiques": {
       "titre": "Statistics",
@@ -1646,6 +1649,24 @@
       "croissanceSansBase": "new",
       "ecartHausse": "+{ecart}%",
       "ecartBaisse": "−{ecart}%"
+    },
+    "blocage": {
+      "bloquer": "Block the link",
+      "debloquer": "Unblock the link",
+      "bloquerLong": "Block the link of {reference}",
+      "debloquerLong": "Unblock the link of {reference}",
+      "aideBlocage": "Their customer will see “This link is no longer valid”. The link is not destroyed: unblocking restores it as it was. You do not see the order's content.",
+      "aideDeblocage": "The page comes back on the same link, the one the customer already received.",
+      "motif": "Reason",
+      "motifAide": "At least {n} characters. It appears in plain text in the audit log, and it is what will be read back if the decision is challenged.",
+      "annuler": "Cancel",
+      "enCours": "Working…",
+      "erreur": {
+        "saisie": "The reason is too short.",
+        "deja": "This link is already in that state. Reload the page.",
+        "introuvable": "Order not found.",
+        "ecriture": "Nothing was changed. Please retry."
+      }
     }
   },
   "erreurs": {

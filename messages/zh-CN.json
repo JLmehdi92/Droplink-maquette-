@@ -1107,6 +1107,8 @@
       "actions": {
         "boutiques_liste": "查看店铺列表",
         "commandes_liste": "查看订单列表",
+        "compte_blocage_lien": "停用一个订单链接",
+        "compte_deblocage_lien": "恢复一个订单链接",
         "compte_reactivation": "恢复一个账户",
         "compte_suspension": "停用一个账户",
         "comptes_detail": "查看账户详情",
@@ -1582,7 +1584,8 @@
       "videTout": "尚未创建任何订单。",
       "videFiltre": "没有订单符合当前筛选条件。",
       "pageSuivante": "查看更多",
-      "repartition": "状态分布"
+      "repartition": "状态分布",
+      "lienBloque": "链接已停用"
     },
     "statistiques": {
       "titre": "统计",
@@ -1646,6 +1649,24 @@
       "croissanceSansBase": "新增",
       "ecartHausse": "+{ecart}%",
       "ecartBaisse": "−{ecart}%"
+    },
+    "blocage": {
+      "bloquer": "停用链接",
+      "debloquer": "恢复链接",
+      "bloquerLong": "停用链接：{reference}",
+      "debloquerLong": "恢复链接：{reference}",
+      "aideBlocage": "其客户将看到“此链接已失效”。链接不会被销毁：恢复后与原来完全相同。您看不到订单内容。",
+      "aideDeblocage": "页面恢复为同一个链接，即客户已收到的那个。",
+      "motif": "原因",
+      "motifAide": "至少 {n} 个字符。它会明文显示在日志中，也是决定被质疑时我们会重读的内容。",
+      "annuler": "取消",
+      "enCours": "处理中…",
+      "erreur": {
+        "saisie": "原因太短了。",
+        "deja": "该链接已处于此状态。请刷新页面。",
+        "introuvable": "找不到该订单。",
+        "ecriture": "没有任何改动。请重试。"
+      }
     }
   },
   "erreurs": {

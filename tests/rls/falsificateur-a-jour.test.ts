@@ -99,6 +99,8 @@ interface Reparation {
   readonly fichier: string;
   readonly depuis: string;
   readonly jusqua: string | null;
+  /** Le SQL joué AVANT la découpe — un `drop` peut y vivre plutôt que dans l'ancre. */
+  readonly avant: string | null;
 }
 
 /**
@@ -136,6 +138,7 @@ function reparations(): readonly Reparation[] {
       fichier,
       depuis,
       jusqua: /jusqua:\s*"([^"]+)"/.exec(brut)?.[1] ?? null,
+      avant: /avant:\s*"([^"]+)"/.exec(brut)?.[1] ?? null,
     });
   }
   return trouvees;
@@ -262,7 +265,12 @@ describe("Le falsificateur répare vers le produit d'aujourd'hui", () => {
 
     for (const r of reparations()) {
       const { fichier, depuis, jusqua } = r;
-      if (!depuis.startsWith("drop function")) continue;
+      // ⚠️ LE `drop` PEUT VIVRE DANS `avant`, et depuis le 19/09/2026 c'est le cas des
+      // réparations de `lire_commande_publique` et `lire_medias_publics`, redirigées vers
+      // la 166 (qui les recrée par `create or replace`). Ne regarder que l'ancre les
+      // aurait sorties du contrôle — et vidé l'ensemble inspecté, ce qui l'a fait rougir.
+      const rejoueUnDrop = depuis.startsWith("drop function") || (r.avant?.startsWith("drop function") ?? false);
+      if (!rejoueUnDrop) continue;
       inspectees += 1;
 
       const contenu = readFileSync(join(MIGRATIONS, fichier), "utf8");

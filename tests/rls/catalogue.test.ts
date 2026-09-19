@@ -379,6 +379,25 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "façon de rendre la suspension réversible pour ses clients aussi.",
     ],
     [
+      "bloquer_lien_commande",
+      "LE BLOCAGE D'UN SEUL LIEN (166, décision de Wassim du 19/09/2026). `SECURITY " +
+        "DEFINER` parce que `orders.admin_blocked_at` n'est accordé en écriture à " +
+        "PERSONNE — sans quoi un vendeur se débloquerait lui-même. La fonction vérifie " +
+        "le rôle admin actif EN BASE, exige un motif, verrouille la ligne, écrit l'audit " +
+        "AVANT la mutation, et ne touche jamais le `public_token`.",
+    ],
+    [
+      "debloquer_lien_commande",
+      "Le déblocage, tracé comme le blocage : la page revient sur le MÊME lien, celui " +
+        "que le client a déjà reçu.",
+    ],
+    [
+      "liens_bloques_parmi",
+      "Pour la liste d'administration : parmi des identifiants qu'elle a DÉJÀ, lesquels " +
+        "portent un blocage. Rôle admin vérifié en base, 200 identifiants au plus ; ne " +
+        "rend que des identifiants, donc rien qui ne soit déjà à l'écran.",
+    ],
+    [
       "ecrire_parametre",
       "Écriture d'un paramètre système. Vérifie le rôle elle-même : une fonction " +
         "qui accepterait n'importe quel appelant laisserait un vendeur modifier " +

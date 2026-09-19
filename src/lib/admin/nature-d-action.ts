@@ -32,6 +32,10 @@ export type FamilleDAction = "suspension" | "parametre" | "consultation";
  */
 export function natureDAction(action: string): NatureDAction {
   if (action.startsWith("compte.reactivation")) return "reactivation";
+  // Le déblocage d'un lien (166) RÉTABLIT, comme une réactivation ; le blocage, lui,
+  // coupe, et tombe dans la règle `compte.` qui suit. En base, les deux se rangent dans
+  // la famille « suspension » (like 'compte.%'), ce que `familleDAction` reproduit.
+  if (action === "compte.deblocage_lien") return "reactivation";
   if (action.startsWith("compte.")) return "suspension";
   if (action.startsWith("parametre.")) return "parametre";
   return "consultation";

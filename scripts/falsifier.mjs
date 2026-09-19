@@ -294,9 +294,10 @@ const SQL = {
         return v_insere is not null;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "076_une_vue_exige_une_empreinte_reelle.sql",
-      depuis: "create or replace function public.enregistrer_vue",
-      jusqua: "comment on function",
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.enregistrer_vue(",
     },
   },
 
@@ -337,8 +338,10 @@ const SQL = {
         return v_insere is not null;
       end; $$;`,
     reparerDepuisMigration: {
-      // Les doublons crees pendant la falsification empechent de reposer la
-      // contrainte : ils sont retires d abord. Ne garder que la premiere ligne
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      // Les doublons créés pendant la falsification empêchent de reposer la
+      // contrainte : ils sont retirés d'abord. Ne garder que la première ligne
       // de chaque groupe restaure exactement ce que la contrainte aurait tenu.
       avant:
         "delete from public.link_views a using public.link_views b " +
@@ -347,9 +350,8 @@ const SQL = {
         "alter table public.link_views add constraint " +
         "link_views_order_id_ip_hash_user_agent_hash_viewed_on_key " +
         "unique (order_id, ip_hash, user_agent_hash, viewed_on);",
-      fichier: "076_une_vue_exige_une_empreinte_reelle.sql",
-      depuis: "create or replace function public.enregistrer_vue",
-      jusqua: "comment on function",
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.enregistrer_vue(",
     },
   },
 
@@ -419,14 +421,11 @@ const SQL = {
     // l attribution du QC dans son etat FAUX — une revision du client
     // reattribuee au vendeur — pendant que le script annonce avoir repare.
     reparerDepuisMigration: {
-      fichier: "135_le_commentaire_du_client_perdait_sa_decision.sql",
-      // ⚠️ `create function`, PAS `create or replace`. La 135 DROPE la fonction
-      // d abord puis la recree : l ancre citait une forme qui n a jamais existe
-      // dans ce fichier, et la reparation aurait echoue en disant « introuvable ».
-      // Le defaut etait INVISIBLE a la sonde `falsificateur-a-jour` jusqu au
-      // 13/09 : son motif exigeait `fichier:` juste apres l accolade, et un
-      // commentaire pose au-dessus faisait sauter ce bloc en entier.
-      depuis: "create function public.arbitrer_qc",
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.arbitrer_qc(",
+      jusqua: "-- enregistrer_vue — recopiée",
     },
   },
 
@@ -853,17 +852,12 @@ const SQL = {
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      fichier: "153_la_page_client_ne_connaissait_pas_sa_reference.sql",
-      depuis: "drop function if exists public.lire_commande_publique",
-      // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
-      // s'arrêtait au `comment on`, donc la réparation recréait la fonction
-      // SANS son `revoke all from public` ni son `grant execute to anon` : le
-      // produit repartait avec une lecture publique exécutable par PUBLIC et
-      // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      // ⚠️ PLUS DE BORNE HAUTE : dans la 153, la fonction et ses DROITS vont
-      // jusqu a la fin du fichier. La borne existait pour que la decoupe
-      // couvre le `revoke all` et le `grant execute to anon` — les droits ne
-      // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      avant: "drop function if exists public.lire_commande_publique(text);",
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_commande_publique(",
+      jusqua: "-- lire_medias_publics — recopiée",
     },
   },
 
@@ -906,17 +900,12 @@ const SQL = {
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      fichier: "153_la_page_client_ne_connaissait_pas_sa_reference.sql",
-      depuis: "drop function if exists public.lire_commande_publique",
-      // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
-      // s'arrêtait au `comment on`, donc la réparation recréait la fonction
-      // SANS son `revoke all from public` ni son `grant execute to anon` : le
-      // produit repartait avec une lecture publique exécutable par PUBLIC et
-      // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      // ⚠️ PLUS DE BORNE HAUTE : dans la 153, la fonction et ses DROITS vont
-      // jusqu a la fin du fichier. La borne existait pour que la decoupe
-      // couvre le `revoke all` et le `grant execute to anon` — les droits ne
-      // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      avant: "drop function if exists public.lire_commande_publique(text);",
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_commande_publique(",
+      jusqua: "-- lire_medias_publics — recopiée",
     },
   },
 
@@ -1197,17 +1186,12 @@ const SQL = {
     // aurait cesse de repondre — une reparation qui casse est pire que la
     // falsification.
     reparerDepuisMigration: {
-      fichier: "153_la_page_client_ne_connaissait_pas_sa_reference.sql",
-      depuis: "drop function if exists public.lire_commande_publique",
-      // LA BORNE DOIT COUVRIR LES DROITS, pas seulement le corps. Elle
-      // s'arrêtait au `comment on`, donc la réparation recréait la fonction
-      // SANS son `revoke all from public` ni son `grant execute to anon` : le
-      // produit repartait avec une lecture publique exécutable par PUBLIC et
-      // non accordée nommément à `anon`. Les droits ne survivent PAS au `drop`.
-      // ⚠️ PLUS DE BORNE HAUTE : dans la 153, la fonction et ses DROITS vont
-      // jusqu a la fin du fichier. La borne existait pour que la decoupe
-      // couvre le `revoke all` et le `grant execute to anon` — les droits ne
-      // survivent PAS au `drop` —, et la fin de fichier les couvre aussi.
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      avant: "drop function if exists public.lire_commande_publique(text);",
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_commande_publique(",
+      jusqua: "-- lire_medias_publics — recopiée",
     },
   },
 
@@ -1249,13 +1233,12 @@ const SQL = {
       revoke execute on function public.lire_medias_publics(text) from public;
       grant execute on function public.lire_medias_publics(text) to anon, authenticated;`,
     reparerDepuisMigration: {
-      fichier: "097_la_couverture_a_sa_propre_derivee.sql",
-      depuis: "drop function public.lire_medias_publics",
-      // AUCUNE BORNE, DELIBEREMENT : le `grant execute` est la DERNIERE ligne
-      // du fichier. Une borne posee avant lui recreerait la fonction sans ses
-      // droits, et la page publique cesserait de rendre ses photos — l erreur
-      // porterait alors sur la fonction, jamais sur la reparation qui l a
-      // amputee.
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      avant: "drop function if exists public.lire_medias_publics(text);",
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_medias_publics(",
+      jusqua: "-- lire_suivi_public — recopiée",
     },
   },
 
@@ -1414,9 +1397,11 @@ const SQL = {
         limit 1
       $$;`,
     reparerDepuisMigration: {
-      fichier: "034_suivi_public.sql",
-      depuis: "create function public.lire_suivi_public",
-      jusqua: "comment on function",
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_suivi_public(",
+      jusqua: "-- lire_passages_publics — recopiée",
     },
   },
 
@@ -1447,9 +1432,11 @@ const SQL = {
         limit 1
       $$;`,
     reparerDepuisMigration: {
-      fichier: "034_suivi_public.sql",
-      depuis: "create function public.lire_suivi_public",
-      jusqua: "comment on function",
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_suivi_public(",
+      jusqua: "-- lire_passages_publics — recopiée",
     },
   },
 
@@ -2373,8 +2360,10 @@ $$;
       return v_insere is not null;
     end; $fals$;`,
     reparerDepuisMigration: {
-      fichier: "076_une_vue_exige_une_empreinte_reelle.sql",
-      depuis: "create or replace function public.enregistrer_vue",
+      // La DERNIÈRE version (166, 19/09/2026) : réparer depuis une version antérieure
+      // retirerait le filtre de blocage d'un lien. La recopie porte ses droits.
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.enregistrer_vue(",
     },
   },
 
@@ -2957,6 +2946,76 @@ $$;
       depuis: "create or replace function public.creer_profil_et_shop",
       jusqua: "comment on function",
     },
+  },
+
+  /**
+   * LE BLOCAGE D'UN LIEN (166) — HORS DU CAS MOTIVANT, qui est la page elle-même.
+   *
+   * La lecture publique filtre bien, mais `enregistrer_vue` oublie le blocage : la
+   * page est coupée et continue de COMPTER des vues. Rien ne lève, l'écran dit
+   * « bloqué », et les statistiques du vendeur mentent sur un lien mort.
+   */
+  "vue-comptee-sur-lien-bloque": {
+    casserDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.enregistrer_vue(",
+      remplacer: "\n    and o.admin_blocked_at is null",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.enregistrer_vue(",
+    },
+  },
+
+  /**
+   * Le même oubli sur `lire_medias_publics`, qui sert aussi la photo pleine du
+   * visionneur : la page est coupée, et ses images passent une à une. Relevé par la
+   * revue de sécurité du 19/09 — le test ne déposait alors aucune photo, donc ne
+   * pouvait pas rougir.
+   */
+  "medias-sur-lien-bloque": {
+    casserDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_medias_publics(",
+      jusqua: "-- lire_suivi_public — recopiée",
+      remplacer: "\n    and o.admin_blocked_at is null",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_medias_publics(",
+      jusqua: "-- lire_suivi_public — recopiée",
+    },
+  },
+
+  /**
+   * Le même oubli sur `arbitrer_qc` : un lien coupé reste un lien qui ÉCRIT dans la
+   * commande — le client valide ou refuse les photos d'une page qu'il ne voit plus.
+   */
+  "arbitrage-sur-lien-bloque": {
+    casserDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.arbitrer_qc(",
+      jusqua: "-- enregistrer_vue — recopiée",
+      remplacer: "\n    and o.admin_blocked_at is null",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.arbitrer_qc(",
+      jusqua: "-- enregistrer_vue — recopiée",
+    },
+  },
+
+  /**
+   * UNE PROTECTION QUI TIENT À UNE ABSENCE (L-029) : personne n'a le droit d'écrire
+   * `admin_blocked_at`. Qu'une migration future l'ajoute à la liste des colonnes
+   * accordées au vendeur, et il se débloque lui-même par PostgREST.
+   */
+  "vendeur-se-debloque": {
+    casser: "grant update (admin_blocked_at) on public.orders to authenticated;",
+    reparer: "revoke update (admin_blocked_at) on public.orders from authenticated;",
   },
 
 };
