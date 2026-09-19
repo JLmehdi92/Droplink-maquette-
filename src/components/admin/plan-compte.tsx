@@ -118,6 +118,8 @@ export function PlanCompte({
             <textarea
               name="motif"
               rows={3}
+              // LE FOCUS SUIT L'OUVERTURE (audit du 20/09/2026) : le bouton disparaît avec le clic.
+              autoFocus
               value={motif}
               onChange={(e) => setMotif(e.target.value)}
               className="w-full resize-none rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[13px] py-[11px] text-[13.5px] leading-[1.55] text-ds-texte-fort outline-none focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"

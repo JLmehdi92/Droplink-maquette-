@@ -133,6 +133,9 @@ export function BandeauBlocage({
         <textarea
           name="message"
           rows={4}
+          // LE FOCUS SUIT L'OUVERTURE (audit du 20/09/2026) : « Contester le blocage » disparaît
+          // avec le clic, et le focus retombait sur la page.
+          autoFocus
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           className="w-full resize-none rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[13px] py-[11px] text-[13.5px] leading-[1.55] text-ds-texte-fort outline-none focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"

@@ -242,6 +242,10 @@ export function DialogueSuspension({
           <textarea
             name="motif"
             rows={3}
+            // LE FOCUS SUIT L'OUVERTURE (audit du 20/09/2026) : le bouton qui ouvre ce panneau
+            // disparaît avec le clic, et le focus retombait sur la page — un lecteur d'écran
+            // perdait le fil. Le panneau n'existe qu'après un geste explicite : pas de vol.
+            autoFocus
             value={motif}
             onChange={(e) => setMotif(e.target.value)}
             className={champ + " resize-none px-[13px] py-[11px] leading-[1.55]"}
