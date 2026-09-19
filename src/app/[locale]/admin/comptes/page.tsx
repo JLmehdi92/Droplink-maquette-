@@ -389,7 +389,7 @@ export default async function AdminComptes({
                             <span className={PILULE_NEUTRE}>{t("comptes.roles.admin")}</span>
                           ) : null}
                         </span>
-                        <span className="mt-0.5 block text-[12px] leading-[15px] text-ds-texte-sourdine">
+                        <span className="mt-0.5 block text-[12.5px] leading-[15px] text-ds-texte-sourdine">
                           {ligne.email}
                         </span>
                       </td>
@@ -447,7 +447,7 @@ export default async function AdminComptes({
                   <div className="mb-2.5 flex items-center justify-between gap-2.5">
                     <div className="min-w-0">
                       {nom(ligne, "block truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort")}
-                      <span className="mt-px block truncate text-[12px] leading-[15px] text-ds-texte-sourdine">
+                      <span className="mt-px block truncate text-[12.5px] leading-[15px] text-ds-texte-sourdine">
                         {ligne.email}
                       </span>
                     </div>

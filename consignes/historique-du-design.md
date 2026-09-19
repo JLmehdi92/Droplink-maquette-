@@ -950,7 +950,7 @@ les adresses de la planche s'appariaient aux utilisateurs de démonstration). Tr
 
 ⚠️ **Un écart CACHÉ PAR LES DONNÉES, trouvé en passant** : l'adresse d'une ligne de la liste des
 comptes est à 12 px chez le produit, 12,5 dans la planche — invisible tant que les deux jeux
-n'avaient aucune adresse commune. Hors du périmètre des doublons : à reprendre.
+n'avaient aucune adresse commune. Corrigé dans la foulée (12,5 px, bureau et téléphone), vérifié par une mesure ponctuelle aux adresses de la planche.
 
 **Revues ECC** (base, sécurité, code) : 0 critique en sécurité ; un faux positif réel
 (`stories/highlights/…` → `instagram:highlights`, corrigé par la 171 avec `www.m.`, le premier
