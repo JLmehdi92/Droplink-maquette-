@@ -780,6 +780,29 @@ par une décision verrouillée, 43 qui attendent une décision de Wassim, 19 fai
 arbitrage. La liste écran par écran est dans `consignes/inventaire-du-kit.md`, indexée dans context-mode
 (source `inventaire-kit`).
 
+#### ▶️ LES DÉCISIONS DE WASSIM SUR LE KIT, ET LE BLOCAGE D'UN LIEN (19/09/2026)
+
+**Retirés du design system** (décision de Wassim : « tu peux enlever pour la sécurité »,
+« enlève apple et github ») : les boutons et mentions Apple, la rangée GitHub et la carte
+« Politique de mot de passe » de l'onglet Sécurité admin, la carte « Configuration SMTP », la
+carte « Zone dangereuse ». Sauvegarde avant retrait dans `out/kit-sauvegarde-19-09/`. La
+remesure des six écrans touchés (12 relevés en code 0) a trouvé un défaut **du produit** : ni
+la confidentialité ni la documentation ne mentionnaient Google (commit `451d1e8`).
+
+**Blocage d'un lien par l'administration** (commit `229365d`, migration 166) : planche
+`admin/AdminOrders.jsx` d'abord — le « ⋯ » inerte devient le bouton de blocage, une pastille
+« Lien bloqué » s'ajoute au statut, `BlockLinkDialog` avec motif (état `#commandes-blocage`).
+Relevés `admin-commandes` et `admin-commandes-blocage`, bureau et 390 px, en code 0 ; la sonde
+bloque RÉELLEMENT une ligne avant de relever. Pièges payés :
+
+- ⚠️ **UN DIALOGUE CENTRÉ SE DÉCALE DE 5 PX** : la sonde du kit mesure dans une fenêtre de
+  1 010 px de haut (l'en-tête `viewport` des planches), celle du produit dans 1 000. Déclaré
+  `structure`, avec le calcul.
+- ⚠️ **UN COMPOSANT CLIENT D'ADMINISTRATION REÇOIT SES TEXTES PAR `TraductionsClient`** : sans
+  `espaces={["admin.blocage"]}`, la console relevait `MISSING_MESSAGE` à chaque ligne.
+- ⚠️ **LA PASTILLE COMPACTE DES CARTES ADMIN** (3/9 sous `xl`) diffère de la planche téléphone
+  (6/11) pour TOUTES les pastilles des listes admin — écart préexistant, déclaré et signalé.
+
 ### ⚠️ LA RÉGION DU SERVICE RAILWAY EST UNE PROPRIÉTÉ DE PERFORMANCE
 
 Mesuré le 07/09/2026, sur le produit servi. Le service tournait en **US West**
