@@ -221,6 +221,37 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
         "protection a changé sans que la déclaration le dise.",
     ).toEqual([]);
   });
+
+  /*
+   * ⚠️ UNE TABLE NÉE HORS DES MIGRATIONS NAÎT GRANDE OUVERTE (audit du 20/09/2026).
+   *
+   * Les privilèges par défaut ne sont fermés que pour les objets créés par `postgres` : le
+   * rôle `supabase_admin`, celui sous lequel l'éditeur de tables du tableau de bord Supabase
+   * travaille, porte encore `anon=arwdDxtm` et `authenticated=arwdDxtm` dans `pg_default_acl`.
+   * Une table créée d'un clic hériterait donc de SELECT/INSERT/UPDATE/DELETE pour les deux
+   * rôles, sans RLS, et aucun fichier de migration ne le dirait.
+   *
+   * On ne peut pas le corriger d'ici : `alter default privileges for role supabase_admin`
+   * exige d'être membre de ce rôle, et `postgres` ne l'est pas (vérifié). Ce qu'on peut faire,
+   * c'est REFUSER le résultat : toute table de `public` doit appartenir à `postgres`, donc
+   * venir d'une migration. Une table créée au tableau de bord rougit ici.
+   */
+  test("toutes les tables de public sont nées d'une migration (propriétaire `postgres`)", async () => {
+    const tables = await interroger<{ table_name: string; proprietaire: string }>(
+      bd,
+      `select c.relname as table_name, c.relowner::regrole::text as proprietaire
+         from pg_class c
+         join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'public' and c.relkind = 'r'
+        order by c.relname`,
+    );
+    expect(tables.length, "aucune table lue : la sonde ne regarde rien").toBeGreaterThan(10);
+    const etrangeres = tables.filter((t) => t.proprietaire !== "postgres");
+    expect(
+      etrangeres.map((t) => `${t.table_name} (${t.proprietaire})`),
+      "table(s) créées hors des migrations : leurs droits par défaut ouvrent anon et authenticated",
+    ).toEqual([]);
+  });
 });
 
 describe("Sonde B — droits d'exécution dans public", () => {

@@ -3028,6 +3028,38 @@ $$;
    * revue de sécurité du 19/09 — le test ne déposait alors aucune photo, donc ne
    * pouvait pas rougir.
    */
+  /** Le suivi d'un lien coupé continue d'être servi : le client suit son colis sur une page morte. */
+  "suivi-sur-lien-bloque": {
+    casserDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_suivi_public(",
+      jusqua: "-- lire_passages_publics — recopiée",
+      remplacer: "\n    and o.admin_blocked_at is null",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_suivi_public(",
+      jusqua: "-- lire_passages_publics — recopiée",
+    },
+  },
+
+  /** Et les points de passage avec lui : la frise du colis reste lisible sur un lien coupé. */
+  "passages-sur-lien-bloque": {
+    casserDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_passages_publics(",
+      jusqua: "-- arbitrer_qc — recopiée",
+      remplacer: "\n    and o.admin_blocked_at is null",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",
+      depuis: "create or replace function public.lire_passages_publics(",
+      jusqua: "-- arbitrer_qc — recopiée",
+    },
+  },
+
   "medias-sur-lien-bloque": {
     casserDepuisMigration: {
       fichier: "166_l_administration_bloque_un_lien_sans_le_voir.sql",

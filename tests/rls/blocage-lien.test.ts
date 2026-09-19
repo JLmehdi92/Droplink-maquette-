@@ -58,7 +58,43 @@ beforeAll(async () => {
      values ($1, 'photo', $2, 1000, 0)`,
     [commandeId, `${prefixe[0]?.p ?? ""}aaaaaaaa-0000-4000-8000-000000000001.jpg`],
   );
+
+  /*
+   * UN COLIS AVEC UN PASSAGE (audit du 20/09/2026). `lire_suivi_public` et
+   * `lire_passages_publics` portent le même filtre que les quatre autres fonctions par jeton,
+   * mais rien ne l'exerçait : sans colis attaché, elles rendent vide qu'un lien soit bloqué ou
+   * non — et « vide » aurait certifié un filtre absent.
+   */
+  const colis = await interroger<{ id: string }>(
+    catalogue,
+    `insert into public.tracked_parcels (shop_id, tracking_number, registered_at, normalized_status)
+     values ($1, 'BLOCAGE-SUIVI-0001', now(), 'en_transit') returning id`,
+    [vendeur.shopId],
+  );
+  await interroger(catalogue, "insert into public.order_parcels (order_id, parcel_id) values ($1, $2)", [
+    commandeId,
+    colis[0]?.id,
+  ]);
+  await interroger(
+    catalogue,
+    `insert into public.parcel_checkpoints (parcel_id, occurred_at, location, description, stage)
+     values ($1, now() - interval '1 day', 'Roissy', 'Départ du centre de tri', 'en_transit')`,
+    [colis[0]?.id],
+  );
 }, 120_000);
+
+/** Ce que la page publique sert du suivi : la ligne du colis, et ses passages. */
+async function suiviServi(): Promise<{ colis: number; passages: number }> {
+  const anon = clientAnonyme();
+  const suivi = await anon.rpc("lire_suivi_public", { p_jeton: jeton });
+  const passages = await anon.rpc("lire_passages_publics", { p_jeton: jeton });
+  if (suivi.error !== null) throw new Error(`lire_suivi_public : ${suivi.error.message}`);
+  if (passages.error !== null) throw new Error(`lire_passages_publics : ${passages.error.message}`);
+  return {
+    colis: Array.isArray(suivi.data) ? suivi.data.length : 0,
+    passages: Array.isArray(passages.data) ? passages.data.length : 0,
+  };
+}
 
 /** Combien de médias la page publique sert, vue d'un anonyme. */
 async function mediasServis(): Promise<number> {
@@ -88,6 +124,9 @@ describe("Le blocage coupe vraiment", () => {
     expect(avant, "la page ne répondait pas AVANT le blocage").not.toBeNull();
     expect(avant?.client).toBe("Client du blocage");
     expect(await mediasServis(), "la photo n'était pas servie AVANT le blocage").toBe(1);
+    const avantSuivi = await suiviServi();
+    expect(avantSuivi.colis, "le suivi n'était pas servi AVANT le blocage").toBe(1);
+    expect(avantSuivi.passages, "les passages n'étaient pas servis AVANT le blocage").toBe(1);
   });
 
   test("après blocage, la page cesse d'être servie", async () => {
@@ -100,6 +139,12 @@ describe("Le blocage coupe vraiment", () => {
     // lire_medias_publics sert aussi la photo pleine du visionneur (signerMediaPlein) :
     // sans le filtre, le lien bloqué laisserait passer les images une à une.
     expect(await mediasServis(), "une photo d'un lien bloqué est encore servie").toBe(0);
+  });
+
+  test("et son suivi aussi : ni le colis, ni ses passages", async () => {
+    const pendant = await suiviServi();
+    expect(pendant.colis, "le suivi d'un lien bloqué est encore servi").toBe(0);
+    expect(pendant.passages, "les passages d'un lien bloqué sont encore servis").toBe(0);
   });
 
   test("un client ne peut plus arbitrer les photos d'une commande bloquée", async () => {
@@ -151,6 +196,9 @@ describe("Le blocage coupe vraiment", () => {
     expect(apres, "le déblocage n'a pas rétabli la page").not.toBeNull();
     expect(apres?.jeton, "le jeton a changé : le lien envoyé au client est mort").toBe(jeton);
     expect(await mediasServis(), "la photo n'est pas revenue").toBe(1);
+    const apresSuivi = await suiviServi();
+    expect(apresSuivi.colis, "le suivi n'est pas revenu").toBe(1);
+    expect(apresSuivi.passages, "les passages ne sont pas revenus").toBe(1);
     expect(await liensBloquesParmi(admin.client, [commandeId])).toEqual({ statut: "ok", bloques: new Set() });
   });
 
