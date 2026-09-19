@@ -14,6 +14,8 @@
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { config } from "dotenv";
 
 config({ path: ".env.test.local", quiet: true });
@@ -37,9 +39,34 @@ writeFileSync(process.argv[2] ?? "port.txt", String(port));
 console.log("base visee : " + cible);
 console.log("port ephemere : " + port);
 
+/*
+ * ⚠️ LES TIERS PAYANTS SONT DÉBRANCHÉS, ET ILS NE L'ÉTAIENT PAS — 9 PRISES EN CHARGE PERDUES.
+ *
+ * `.env.local`, chargé en second, apporte les clés de PRODUCTION de tout ce que `.env.test.local`
+ * ne redéfinit pas : 17TRACK et Resend compris. Seul PostHog était coupé. Relevé le 20/09/2026 par
+ * Wassim sur le tableau de bord 17TRACK : 191 / 200, et des numéros « LX…123FR » — ceux que le
+ * parcours navigateur (`parcours.mjs`) saisit dans l'éditeur. Chaque passage prenait donc en charge
+ * un numéro INVENTÉ chez le fournisseur, sur les 200 prises À VIE du compte gratuit.
+ *
+ * Même règle que `tests/aide/charger-env.ts` (`TIERS_DEBRANCHES`) : ce serveur mesure des écrans,
+ * il n'a pas à parler au transporteur ni à envoyer d'e-mail. DEUX barrières :
+ *   1. LE TRANSPORT REFUSE les hôtes payants (`refus-tiers.mjs`, préchargé dans le serveur) —
+ *      c'est la protection ; elle tient même si une vraie clé revient par un autre chemin ;
+ *   2. les clés sont remplacées par des valeurs SENTINELLES, non vides. ⚠️ VIDE NE SUFFIT PAS,
+ *      mesuré : Next recharge lui-même `.env.local` au démarrage et traite une chaîne vide comme
+ *      « non posée » — la route de notification répondait encore 401 (clé présente), pas 503.
+ */
+const precharge = pathToFileURL(join(process.cwd(), "scripts", "refus-tiers.mjs")).href;
 const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   shell: true,
-  env: { ...process.env, BORD_DE_CONFIANCE: "railway", NEXT_PUBLIC_POSTHOG_KEY: "" },
+  env: {
+    ...process.env,
+    BORD_DE_CONFIANCE: "railway",
+    NEXT_PUBLIC_POSTHOG_KEY: "",
+    TRACKING_API_KEY: "debranche-serveur-de-mesure",
+    RESEND_API_KEY: "debranche-serveur-de-mesure",
+    NODE_OPTIONS: [process.env.NODE_OPTIONS ?? "", `--import=${precharge}`].join(" ").trim(),
+  },
   stdio: "inherit",
 });
 serveur.on("exit", (c) => process.exit(c ?? 0));
