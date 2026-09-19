@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { LANGUES } from "@/i18n/config";
+import catalogueTransporteurs from "@/lib/tracking/transporteurs.json";
+import { lireTransporteur } from "@/lib/tracking/transporteurs";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -290,5 +292,58 @@ describe("Le vocabulaire des chaînes visibles", () => {
         `clés présentes en ${langue} et absentes en ${CATALOGUES[0]}`,
       ).toEqual([]);
     }
+  });
+});
+
+/**
+ * LES NOMS DE TRANSPORTEURS SONT AUSSI DU TEXTE AFFICHÉ — audit du 20/09/2026.
+ *
+ * Le contrôle ci-dessus lisait les catalogues de traduction, et seulement eux. Or le nom
+ * d'un transporteur s'affiche dans les envois, les analyses, le tableau de bord, l'export
+ * CSV et l'administration, et il vient d'une liste recopiée du fournisseur de suivi : 3 502
+ * entrées, dont une PLATEFORME D'ACHAT (code 190837), qu'aucun contrôle ne voyait. La
+ * contrainte n° 2 ne distingue pas un mot écrit par nous d'un mot recopié : il est affiché.
+ *
+ * INVENTAIRE, pas sélection : chaque code du catalogue passe par `lireTransporteur`, la
+ * seule porte par laquelle un nom arrive à l'écran.
+ */
+describe("Les noms de transporteurs affichés respectent la contrainte n° 2", () => {
+  const codes = Object.keys(catalogueTransporteurs as Record<string, unknown>);
+
+  test("CONTRE-TEST : l'inventaire porte les 3 502 entrées, et il en rend des noms", () => {
+    expect(codes.length).toBeGreaterThan(3000);
+    const nommes = codes.filter((c) => lireTransporteur(Number(c)) !== null);
+    expect(nommes.length).toBeGreaterThan(3000);
+  });
+
+  /*
+   * TROIS FAMILLES SEULEMENT, ET C'EST UNE DÉCISION. Un nom de transporteur est un NOM PROPRE,
+   * affiché tel quel (CLAUDE.md : marques et transporteurs ne se traduisent pas). « DHL
+   * Freight », « CEVA Logistics », « SAP EXPRESS » ou « Jordan Post » (la poste jordanienne)
+   * sont de vrais transporteurs : le vocabulaire de fret, les marques et les noms de logiciels
+   * de la liste visent NOTRE rédaction, pas le nom d'une entreprise de livraison. Ce qu'un nom
+   * propre ne doit jamais être ici, c'est une plateforme d'achat du vertical ou son jargon.
+   */
+  const FAMILLES_INTERDITES_POUR_UN_NOM = /^(nom de plateforme d'achat|plateforme du vertical|jargon du vertical reps)/;
+
+  test("aucun nom rendu n'est une plateforme d'achat ni le jargon du vertical", () => {
+    const trouves: string[] = [];
+    for (const code of codes) {
+      const t = lireTransporteur(Number(code));
+      if (t === null) continue;
+      for (const mot of mots(t.nom)) {
+        if (AUTORISES_MALGRE_TOUT.has(mot)) continue;
+        const motif = INTERDITS.get(mot);
+        if (motif !== undefined && FAMILLES_INTERDITES_POUR_UN_NOM.test(motif)) {
+          trouves.push(`${code} → « ${t.nom} » (${motif})`);
+        }
+      }
+      for (const [terme, motif] of INTERDITS_SANS_MOTS) {
+        if (FAMILLES_INTERDITES_POUR_UN_NOM.test(motif) && t.nom.includes(terme)) {
+          trouves.push(`${code} → « ${t.nom} » (${motif})`);
+        }
+      }
+    }
+    expect(trouves, "un nom de transporteur affichable nomme une plateforme d'achat").toEqual([]);
   });
 });

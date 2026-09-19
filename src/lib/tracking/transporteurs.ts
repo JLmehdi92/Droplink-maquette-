@@ -39,6 +39,18 @@ import catalogue from "./transporteurs.json";
  */
 const TABLE = catalogue as Record<string, readonly string[]>;
 
+/*
+ * ⚠️ LES PLATEFORMES D'ACHAT DE LA LISTE NE SONT PAS DES TRANSPORTEURS À NOMMER (audit du
+ * 20/09/2026). La liste du fournisseur de suivi range une plateforme d'achat du vertical parmi
+ * ses 3 502 « transporteurs » (code 190837). Si le fournisseur détectait ce code, son nom
+ * s'afficherait dans les envois, les analyses, le tableau de bord, l'export CSV et
+ * l'administration — la contrainte n° 2 interdit tout nom d'agent dans l'interface. Le code
+ * est traité comme INCONNU : la cellule reste vide, comme pour tout code que la liste ignore.
+ * `tests/unit/vocabulaire.test.ts` inventorie chaque nom rendu : une liste régénérée qui en
+ * ajouterait un autre rougirait là.
+ */
+const PLATEFORMES_D_ACHAT: ReadonlySet<string> = new Set(["190837"]);
+
 export interface Transporteur {
   readonly nom: string;
   /** Code pays ISO du transporteur, quand la source le donne. */
@@ -70,6 +82,7 @@ export interface Transporteur {
  */
 export function lireTransporteur(code: number | null): Transporteur | null {
   if (code === null) return null;
+  if (PLATEFORMES_D_ACHAT.has(String(code))) return null;
   const e = TABLE[String(code)];
   if (e === undefined) return null;
   const nom = e[0];
