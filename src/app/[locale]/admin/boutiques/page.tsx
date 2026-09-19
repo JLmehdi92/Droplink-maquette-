@@ -44,7 +44,7 @@ export async function generateMetadata({
  * remplissage 22, titre 18/700 à -0,025em, sous-titre 13/400 à 3 px.
  */
 const PILULE =
-  "inline-flex items-center gap-1.5 rounded-ds-pill px-[9px] py-[3px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] xl:px-[11px] xl:py-1.5";
+  "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[-0.02em]";
 const PILULE_NEUTRE = PILULE + " bg-ds-surface-creux text-ds-texte-corps";
 /* L'ECART DE 12 PX DU KIT ENTRE SES COLONNES. Sans lui, les entetes numeriques
    se touchent : « CommandesColisMedias » — mesure a l'appui. */

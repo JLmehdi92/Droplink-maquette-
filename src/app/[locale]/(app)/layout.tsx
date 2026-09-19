@@ -150,12 +150,13 @@ export default async function LayoutApplication({
    * s'étale de bord à bord force à balayer l'écran des yeux pour relier une
    * ligne à son action.
    *
-   * LE FOND LAVANDE N'EXISTE QU'À PARTIR DE `md`. Au téléphone, encadrer coûte
-   * seize pixels de chaque côté sur une largeur de 390 — c'est-à-dire un
-   * dixième de la ligne, pris à ce qu'il y a dedans.
+   * AUCUN CADRE AU TÉLÉPHONE : encadrer coûterait seize pixels de chaque côté sur
+   * une largeur de 390 — un dixième de la ligne, pris à ce qu'il y a dedans. Le FOND,
+   * lui, est celui de la planche à toutes les largeurs : cette racine reste
+   * transparente, sans quoi elle recouvrirait `FondApplication` (posé en `-z-10`).
    */
   return (
-    <div className="min-h-dvh bg-ds-surface-carte md:bg-transparent">
+    <div className="min-h-dvh">
       <FondApplication />
       {/*
         ⚠️ CE LIEN MANQUAIT ICI, ALORS QU'IL EXISTE DANS L'ADMIN.

@@ -145,7 +145,15 @@ export default async function LayoutAdmin({
    * inaccessible n'est pas un écart de dessin, c'est une fonction perdue.
    */
   return (
-    <div data-surface="administration" className="min-h-dvh bg-ds-surface-page">
+    /* LE FOND DE LA COQUE ADMIN, relevé sur `AdminShell.jsx` : un dégradé posé sur la racine
+       (il défile avec la page, sans halos — ce n'est pas celui de l'espace vendeur, fixe et
+       halé). Absent du produit à toutes les largeurs jusqu'au 19/09/2026, et invisible à la
+       soustraction pour la même raison qu'au vendeur : un décor ne porte aucun texte. */
+    <div
+      data-surface="administration"
+      className="min-h-dvh bg-ds-surface-page"
+      style={{ backgroundImage: "linear-gradient(135deg,#F7F5FE 0%,#FBFAFE 46%,#F8F4FD 100%)" }}
+    >
       {/* PREMIER ÉLÉMENT FOCUSABLE DE LA PAGE. Au bureau, la colonne pose six
           liens avant le contenu ; les traverser à chaque écran au clavier est
           le genre de coût qu'on ne mesure jamais parce qu'on ne le paie pas

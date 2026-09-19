@@ -46,8 +46,7 @@ const EN_TETE_COLONNE =
   "pb-3 text-left text-[12.5px] leading-[normal] font-semibold text-ds-texte-sourdine";
 const CELLULE = "border-t border-ds-filet py-3.5 text-[14px] leading-[18px] font-normal";
 const PILULE =
-  "inline-flex items-center gap-[5px] rounded-ds-pill px-[9px] py-[3px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] " +
-  "xl:gap-1.5 xl:px-[11px] xl:py-1.5";
+  "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[-0.02em]";
 const PILULE_NEUTRE = PILULE + " bg-ds-surface-creux text-ds-texte-corps";
 
 /* Le panneau du kit admin — les mêmes valeurs que sur la vue d'ensemble. */

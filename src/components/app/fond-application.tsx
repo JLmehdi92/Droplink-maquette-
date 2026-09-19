@@ -13,12 +13,19 @@
  * toute la journée.
  *
  * Valeurs relevées sur `AppShell.jsx` du kit `seller_app`, pas estimées.
+ *
+ * ⚠️ IL ÉTAIT MASQUÉ AU TÉLÉPHONE (`hidden md:block`), ET LA PLANCHE LE MONTRE. Relevé le
+ * 19/09/2026 sur les neuf écrans vendeur à 390 px : la planche garde ce fond derrière ses
+ * cartes, le produit rendait un blanc uni. Aucune soustraction ne pouvait le voir — elle
+ * apparie des TEXTES, et un décor n'en porte pas ; c'est la capture côte à côte qui l'a montré.
+ * La raison écrite dans la mise en page (« encadrer coûte seize pixels au téléphone ») vise le
+ * CADRE, que le design system a supprimé partout ; elle ne disait rien du fond.
  */
 export function FondApplication() {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 -z-10 hidden overflow-hidden md:block"
+      className="fixed inset-0 -z-10 overflow-hidden"
       style={{ background: "linear-gradient(135deg,#F7F5FE 0%,#FBFAFE 45%,#F8F4FD 100%)" }}
     >
       <div

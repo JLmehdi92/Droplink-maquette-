@@ -47,7 +47,7 @@ export async function generateMetadata({
  * `comptes`, relevées sur la page servie.
  */
 const PILULE =
-  "inline-flex items-center gap-1.5 rounded-ds-pill px-[9px] py-[3px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] whitespace-nowrap xl:px-[11px] xl:py-1.5";
+  "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] whitespace-nowrap";
 const EN_TETE_COLONNE =
   "pb-3 pr-3 text-left text-[12.5px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-sourdine last:pr-0 last:text-right";
 /* SANS TAILLE NI GRAISSE : chaque colonne pose les siennes. Une taille commune
