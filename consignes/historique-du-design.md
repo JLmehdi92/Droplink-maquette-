@@ -873,3 +873,35 @@ en Pro"`, `ETAT=plan`) et `client`, au bureau en code 0. Défauts trouvés en me
   (`profil.ts`) qui demande `profiles.plan` et `shops.hide_droplink_brand` : PostgREST la
   refuse, et CHAQUE page vendeur traite le compte comme déconnecté. Donc `pnpm db:migrate`
   (147 → 167) AVANT le déploiement, sans exception.
+
+#### ▶️ LE LIEN BLOQUÉ VU DU VENDEUR, SA CONTESTATION, ET LE TÉLÉPHONE PARFAIT (19-20/09/2026)
+
+Décisions de Wassim : « oui il doit le savoir », le vendeur CONTESTE (explication, image
+facultative), et « je veux que les pages soient parfaites en version téléphone ».
+
+**Planches d'abord** : `seller_app/OrderDetail.jsx` (`BlockedNotice`, quatre états par
+l'adresse : `#commande-bloquee`, `-formulaire`, `-attente`, `-refusee`, partagé avec le
+téléphone), `OrdersView.jsx` et `Telephone.jsx` (`#commandes-bloquee`, pastille « Lien bloqué »
+sous le statut ; au téléphone elle remplace la ligne d'appoint), `admin/AdminOrders.jsx`
+(`#commandes-contestation` : pastille « Contestation », `ContestDialog` — explication, image,
+réponse, refuser OU débloquer, les deux issues à largeur égale et empilées au téléphone),
+dictionnaires `dict-app.js` (+19) et `dict-admin.js` (+7). Le bandeau prend le rouge des ÉTATS,
+jamais le dégradé.
+
+**Douze relevés neufs, tous en code 0** (bureau et 390) : `commandes-bloquee`, `detail-bloquee`,
+`detail-contestation`, `detail-attente`, `detail-refusee`, `admin-commandes-contestation`. La
+sonde prépare l'état par `LIEN_BLOQUE=1|attente|refusee` (client de service, textes de la
+planche mot pour mot). Écarts déclarés avec leur cause MESURÉE : l'en-tête du kit (32 px), le
+bouton d'action à quatre libellés, l'absence d'image dans le jeu (R2 de production seulement),
+deux arrondis additionnés (3 px au téléphone, bandeau identique au pixel).
+
+**Le téléphone, capture contre capture — ce que la soustraction ne voyait pas** :
+- 🔴 **le fond de l'espace vendeur manquait sur NEUF écrans à 390 px** (`FondApplication` en
+  `hidden md:block`, racine blanche au téléphone) et **celui de l'admin manquait PARTOUT**
+  (jamais porté). Corrigés ; la soustraction compare désormais les DÉCORS (⑥), et les deux
+  sondes inventorient `<body>` (le kit y peint le fond des pages publiques) ;
+- 🔴 **les pastilles des listes admin passaient en 3/9 sous `xl`**, la planche dessine 6/11
+  partout : alignées (comptes, boutiques, commandes) ;
+- ⚠️ la planche admin « Commandes » au téléphone est elle-même CASSÉE (plage de dates à un mot
+  par ligne, tableau écrasé) : le produit garde ses cartes, plus lisibles ;
+- ⚠️ les pages légales du kit sont un gabarit d'un autre produit — décision du 18/09, déclarée.

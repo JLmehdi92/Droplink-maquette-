@@ -414,6 +414,11 @@ produit avant d'être une route.
 > n'a jamais eu de compte chez nous, le second transfère une capacité : la liste
 > rend référence courte, boutique, statut, transporteur et date, écrit UNE ligne
 > d'audit par page (migrations 159-160), et « Voir » mène à la fiche du compte.
+> ⚠️ **UNE SEULE EXCEPTION, ET C'EST LE VENDEUR QUI L'ENVOIE** (migration 168, décision de
+> Wassim du 19/09/2026) : quand l'administration bloque un lien, le vendeur le voit dans ses
+> commandes et peut le CONTESTER — explication obligatoire, image facultative. L'administration
+> lit cette contestation, et chaque lecture est écrite au journal ; elle répond en débloquant
+> ou en refusant, et le vendeur lit la réponse. Le contenu de la commande reste invisible.
 > **STATISTIQUES NE REND QUE DES NOMBRES** (migration 161), donc n'écrit rien au
 > journal ; la période précédente y est CALCULÉE sur les tables horodatées, et
 > l'anneau des abonnements du kit y devient celui des types de compte.
@@ -523,7 +528,12 @@ affirmation fausse, et elle coûte plus cher que l'absence d'affirmation.*
 `soustraire-inventaires.mjs` rend trois listes — ce que le kit rend et que le
 produit ne rend pas, ce que le produit rend en plus, et pour chaque texte commun
 les propriétés qui diffèrent (taille, graisse, interligne, interlettrage,
-couleur, fond, rayon, filet, ombre, remplissage, écart, boîte). **Il apparie par
+couleur, fond, IMAGE DE FOND, rayon, filet, ombre, remplissage, écart, boîte) — et
+une quatrième liste, les DÉCORS : les dégradés d'au moins 300 × 150 sans texte (fonds
+de page, halos, cartes teintées), comparés en ensembles. ⚠️ **Jusqu'au 19/09/2026 ni
+l'image de fond ni les décors n'étaient comparés** : le fond de l'espace vendeur manquait
+sur neuf écrans au téléphone, celui de l'admin partout, et tout sortait en code 0. Les deux
+sondes inventorient aussi `<body>`, où le kit peint le fond de ses pages publiques. **Il apparie par
 le TEXTE, jamais par la position** — apparier par position reviendrait à
 supposer la réponse, puisque la position est justement ce qu'on mesure — et il
 **normalise les chiffres en `#`**, sinon chaque date et chaque compteur des deux
@@ -571,7 +581,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 167, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 168, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
