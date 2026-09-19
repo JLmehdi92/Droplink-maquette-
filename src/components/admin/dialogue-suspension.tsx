@@ -198,7 +198,12 @@ export function DialogueSuspension({
         {entete}
         <button
           type="button"
-          onClick={() => setOuvert(true)}
+          onClick={() => {
+            // L'état repart de zéro à l'OUVERTURE : une erreur arrivée après une
+            // fermeture ne doit pas accueillir la tentative suivante (revue du 19/09/2026).
+            setEtat(INITIAL);
+            setOuvert(true);
+          }}
           className={
             "flex h-11 w-full items-center justify-center rounded-ds-card border bg-ds-surface-carte px-[18px] text-[14px] font-bold transition-colors " +
             (suspendu
@@ -221,8 +226,10 @@ export function DialogueSuspension({
     <div
       ref={zone}
       onKeyDown={(e) => {
-        // Échap ferme. La sortie doit toujours être plus facile que l'action.
-        if (e.key === "Escape") fermer();
+        // Échap ferme. La sortie doit toujours être plus facile que l'action — sauf
+        // pendant la requête : une Server Action ne s'annule pas, et fermer ferait
+        // croire à une annulation avant de recharger sur une suspension bien faite.
+        if (e.key === "Escape" && !travaille) fermer();
       }}
     >
       {entete}
@@ -274,12 +281,13 @@ export function DialogueSuspension({
         ) : null}
 
         <div className="flex flex-wrap items-center justify-end gap-3">
-          {/* ANNULER EST UN BOUTON ORDINAIRE, jamais désactivé : la sortie ne
-              doit dépendre d'aucune condition. */}
+          {/* ANNULER N'EST DÉSACTIVÉ QUE PENDANT LA REQUÊTE : il n'annulerait alors
+              rien, et le proposer serait mentir (contrainte 8, revue du 19/09/2026). */}
           <button
             type="button"
+            disabled={travaille}
             onClick={fermer}
-            className="h-11 px-4 text-[14px] font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort"
+            className="h-11 px-4 text-[14px] font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort disabled:opacity-50"
           >
             {t("annuler")}
           </button>
