@@ -158,6 +158,15 @@ const PROPRIETES = [
   ["ombre", "ombre"],
   ["marge", "remplissage"],
   ["ecart", "ecart"],
+  /*
+   * ⚠️ L'IMAGE DE FOND ÉTAIT RELEVÉE ET JAMAIS COMPARÉE (19/09/2026). La sonde l'inventorie depuis
+   * le début — c'est là que vivent TOUS les dégradés —, mais cette liste s'arrêtait à `fond`, qui
+   * ne porte que la couleur unie. Aucun dégradé n'avait donc jamais été confronté au kit : la
+   * carte « Propulsé par DropLink » est sortie en code 0 au dégradé DropLink, là où la planche
+   * peint la couleur du VENDEUR. Relevé sur les 74 inventaires : 14 écarts, dont 13 déjà déclarés
+   * ou portés par un parent immédiat, et UN vrai — celui-là.
+   */
+  ["image", "image de fond"],
 ];
 
 const manquants = [];

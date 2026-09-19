@@ -1640,12 +1640,18 @@ describe("Sonde I — qui peut poser un drapeau de session", () => {
   ]);
 
   test("l'inventaire des fonctions qui touchent un drapeau est fermé", async () => {
+    // ⚠️ DEUX ANTISLASHS, ET CE N'EST PAS UNE COQUETTERIE. Ce motif s'écrivait `'droplink\.'`
+    // dans ce gabarit JavaScript, qui MANGE l'antislash : Postgres recevait `droplink.`, où le
+    // point est un joker. La sonde attrapait donc aussi `hide_droplink_brand` (migration 167),
+    // et aurait tout aussi bien attrapé n'importe quel `droplink_…` sans qu'aucun drapeau ne
+    // soit posé. Mesuré le 19/09/2026 : le motif strict rend exactement les huit fonctions
+    // déclarées ci-dessus, le motif mangé en rendait onze.
     const trouvees = await interroger<{ nom: string }>(
       bd,
       `select p.proname as nom
          from pg_proc p
          join pg_namespace n on n.oid = p.pronamespace
-        where n.nspname = 'public' and p.prosrc ~ 'droplink\.'
+        where n.nspname = 'public' and p.prosrc ~ 'droplink\\.'
         order by 1`,
     );
 
