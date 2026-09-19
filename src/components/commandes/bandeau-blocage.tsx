@@ -56,6 +56,7 @@ const AIDE = "text-[12.5px] leading-[1.5] text-ds-texte-corps";
 export function BandeauBlocage({
   commandeId,
   depuis,
+  motif,
   contestations,
   peutContester,
   restantes,
@@ -64,6 +65,8 @@ export function BandeauBlocage({
 }: {
   readonly commandeId: string;
   readonly depuis: string;
+  /** Écrit par l'administration POUR le vendeur (169) ; null sur un blocage antérieur sans motif relu. */
+  readonly motif: string | null;
   readonly contestations: readonly ContestationAffichee[];
   readonly peutContester: boolean;
   readonly restantes: number;
@@ -215,6 +218,11 @@ export function BandeauBlocage({
           <div className="min-w-0 flex-1">
             <h2 className="text-[16px] leading-[1.3] font-bold tracking-[-0.02em] text-ds-texte-fort">{t("titre")}</h2>
             <p className="mt-1 text-[13.5px] leading-[1.55] text-ds-texte-corps">{t("texte", { date: depuis })}</p>
+            {motif === null ? null : (
+              <p className="mt-2 text-[13.5px] leading-[1.55] break-words text-ds-texte-fort">
+                <span className="font-bold">{t("motif")}</span> {motif}
+              </p>
+            )}
           </div>
         </div>
         {derniere === undefined && !ouvert ? (

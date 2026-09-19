@@ -1703,7 +1703,8 @@
         "deja": "This link is already in that state. Reload the page.",
         "introuvable": "Order not found.",
         "ecriture": "Nothing was changed. Please retry."
-      }
+      },
+      "motifAideBlocage": "At least {n} characters. The seller reads it on their order, and it is written to the log."
     },
     "contestation": {
       "pastille": "Dispute",
@@ -2132,6 +2133,7 @@
       "introuvable": "This order cannot be found. Reload the page.",
       "session": "Your session has expired. Sign in again.",
       "ecriture": "The dispute could not be saved. Nothing was sent."
-    }
+    },
+    "motif": "Reason:"
   }
 }

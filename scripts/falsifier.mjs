@@ -3107,15 +3107,52 @@ $$;
    */
   "deblocage-laisse-le-dossier-ouvert": {
     casserDepuisMigration: {
-      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      fichier: "169_le_vendeur_lit_le_motif_du_blocage.sql",
       depuis: "create or replace function public.debloquer_lien_commande(",
       remplacer: "set status = 'acceptee'",
       par: "set status = 'en_attente'",
     },
     reparerDepuisMigration: {
-      fichier: "168_le_vendeur_conteste_un_lien_bloque.sql",
+      // La DERNIÈRE version (169) : réparer depuis la 168 laisserait le motif sur un lien débloqué.
+      fichier: "169_le_vendeur_lit_le_motif_du_blocage.sql",
       depuis: "create or replace function public.debloquer_lien_commande(",
     },
+  },
+
+  /** Le blocage n'écrit plus son motif sur la commande : le vendeur conteste sans savoir pourquoi. */
+  "motif-invisible-au-vendeur": {
+    casserDepuisMigration: {
+      fichier: "169_le_vendeur_lit_le_motif_du_blocage.sql",
+      depuis: "create or replace function public.bloquer_lien_commande(",
+      jusqua: "-- ── 3.",
+      remplacer: ", admin_block_reason = left(v_motif, 1000)",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "169_le_vendeur_lit_le_motif_du_blocage.sql",
+      depuis: "create or replace function public.bloquer_lien_commande(",
+      jusqua: "-- ── 3.",
+    },
+  },
+
+  /** Le motif survit au déblocage : le vendeur lirait une raison sur un lien rétabli. */
+  "motif-survit-au-deblocage": {
+    casserDepuisMigration: {
+      fichier: "169_le_vendeur_lit_le_motif_du_blocage.sql",
+      depuis: "create or replace function public.debloquer_lien_commande(",
+      remplacer: ", admin_block_reason = null",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "169_le_vendeur_lit_le_motif_du_blocage.sql",
+      depuis: "create or replace function public.debloquer_lien_commande(",
+    },
+  },
+
+  /** Une protection qui tient à une absence (L-029) : le droit d'écrire le motif. */
+  "vendeur-reecrit-le-motif": {
+    casser: "grant update (admin_block_reason) on public.orders to authenticated;",
+    reparer: "revoke update (admin_block_reason) on public.orders from authenticated;",
   },
 
 };

@@ -341,6 +341,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_block_reason: string | null
           admin_blocked_at: string | null
           archived_at: string | null
           carrier_code: string | null
@@ -368,6 +369,7 @@ export type Database = {
           views_count: number
         }
         Insert: {
+          admin_block_reason?: string | null
           admin_blocked_at?: string | null
           archived_at?: string | null
           carrier_code?: string | null
@@ -395,6 +397,7 @@ export type Database = {
           views_count?: number
         }
         Update: {
+          admin_block_reason?: string | null
           admin_blocked_at?: string | null
           archived_at?: string | null
           carrier_code?: string | null

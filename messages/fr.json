@@ -1703,7 +1703,8 @@
         "deja": "Ce lien est déjà dans cet état. Rechargez la page.",
         "introuvable": "Commande introuvable.",
         "ecriture": "Rien n'a été modifié. Réessayez."
-      }
+      },
+      "motifAideBlocage": "Au moins {n} caractères. Le vendeur le lit dans sa commande, et il s'écrit au journal."
     },
     "contestation": {
       "pastille": "Contestation",
@@ -2132,6 +2133,7 @@
       "introuvable": "Cette commande est introuvable. Rechargez la page.",
       "session": "Votre session a expiré. Reconnectez-vous.",
       "ecriture": "La contestation n’a pas pu être enregistrée. Rien n’a été envoyé."
-    }
+    },
+    "motif": "Motif :"
   }
 }

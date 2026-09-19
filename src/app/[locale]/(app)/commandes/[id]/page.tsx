@@ -318,6 +318,7 @@ export default async function EditeurCommande({
               <BandeauBlocage
                 commandeId={data.id}
                 depuis={jourLong(blocage.depuis)}
+                motif={blocage.motif}
                 contestations={blocage.contestations.map((c) => ({
                   id: c.id,
                   statut: c.statut,

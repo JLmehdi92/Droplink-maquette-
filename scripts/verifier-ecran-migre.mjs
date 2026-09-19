@@ -205,7 +205,10 @@ const jetonPublic = commandes?.[0]?.public_token ?? "";
 const lienBloque = process.env["LIEN_BLOQUE"];
 if (lienBloque !== undefined && lienBloque !== "" && idCommande !== "") {
   const bloqueLe = new Date(Date.now() - 7 * 86400000).toISOString();
-  await service.from("orders").update({ admin_blocked_at: bloqueLe }).eq("id", idCommande);
+  await service
+    .from("orders")
+    .update({ admin_blocked_at: bloqueLe, admin_block_reason: "Signalement d’un ayant droit concernant les photos de cette commande." })
+    .eq("id", idCommande);
   if (lienBloque === "attente" || lienBloque === "refusee") {
     await service.from("link_contests").insert({
       order_id: idCommande,

@@ -109,7 +109,22 @@ describe("Le vendeur voit le blocage et le conteste", () => {
     if (etat?.bloque) {
       expect(etat.peutContester).toBe(true);
       expect(etat.restantes).toBe(3);
+      // « Oui on montre la raison au vendeur » (Wassim, 20/09/2026, migration 169).
+      expect(etat.motif, "le vendeur ne lit pas pourquoi son lien est bloqué").toBe(MOTIF);
     }
+  });
+
+  test("le vendeur ne réécrit pas le motif du blocage", async () => {
+    await vendeur.client
+      .from("orders")
+      .update({ admin_block_reason: "Ce n est pas vrai" } as never)
+      .eq("id", commandeId);
+    const l = await interroger<{ r: string | null }>(
+      catalogue,
+      "select admin_block_reason as r from public.orders where id = $1",
+      [commandeId],
+    );
+    expect(l[0]?.r, "un vendeur a réécrit le motif de son propre blocage").toBe(MOTIF);
   });
 
   test("une explication trop courte est refusée, EN BASE comme au module", async () => {
@@ -261,6 +276,12 @@ describe("Débloquer clôt le dossier, sur le même lien", () => {
       r: "Contestation fondée",
     });
     expect(await lireEtatBlocage(vendeur.client, commandeId)).toEqual({ bloque: false });
+    const l = await interroger<{ r: string | null }>(
+      catalogue,
+      "select admin_block_reason as r from public.orders where id = $1",
+      [commandeId],
+    );
+    expect(l[0]?.r, "le motif a survécu au déblocage").toBeNull();
   });
 
   test("le jeton du client n'a jamais bougé", async () => {

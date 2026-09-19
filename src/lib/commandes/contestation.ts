@@ -43,6 +43,11 @@ export type EtatBlocage =
   | {
       readonly bloque: true;
       readonly depuis: string;
+      /**
+       * Pourquoi l'administration a bloqué (169) — « oui on montre la raison au vendeur ».
+       * `null` seulement pour un blocage antérieur à la 169 dont le journal n'a pas gardé de motif.
+       */
+      readonly motif: string | null;
       /** Les contestations DE CE BLOCAGE, la plus récente d'abord. */
       readonly contestations: readonly ContestationVendeur[];
       /** Une nouvelle contestation est-elle possible (aucune en attente, moins de trois) ? */
@@ -59,7 +64,7 @@ export const PLAFOND_PAR_BLOCAGE = 3;
 export async function lireEtatBlocage(supabase: Client, commandeId: string): Promise<EtatBlocage | null> {
   const { data: commande, error } = await supabase
     .from("orders")
-    .select("id, admin_blocked_at")
+    .select("id, admin_blocked_at, admin_block_reason")
     .eq("id", commandeId)
     .maybeSingle();
   if (error !== null || commande === null) return null;
@@ -92,6 +97,7 @@ export async function lireEtatBlocage(supabase: Client, commandeId: string): Pro
   return {
     bloque: true,
     depuis: commande.admin_blocked_at,
+    motif: commande.admin_block_reason,
     contestations,
     peutContester: !enAttente && restantes > 0,
     restantes,

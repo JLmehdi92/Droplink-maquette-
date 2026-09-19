@@ -202,6 +202,13 @@ describe("Ce que la liste rend", () => {
           "compteurs. Une colonne de plus sur cet écran serait du bruit.",
       ],
       ["recherche", "colonne générée, filtrée en base : la rendre serait la dupliquer"],
+      [
+        "admin_block_reason",
+        "le motif d'un blocage (169) se lit dans la commande, sous le bandeau qui " +
+          "l'explique ; la liste n'en montre que l'existence, par la pastille « Lien " +
+          "bloqué » que porte `admin_blocked_at`. Mille caractères par ligne pour une " +
+          "pastille qui n'en affiche aucun.",
+      ],
     ]);
 
     const colonnes = await interroger<{ column_name: string }>(

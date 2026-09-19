@@ -12375,7 +12375,7 @@
         "textes": [
           "Son client verra « Ce lien n'est plus va  <p>",
           "Motif  <span>",
-          "Au moins 8 caractères. Il s'affiche en c  <span>",
+          "Au moins 8 caractères. Le vendeur le lit  <span>",
           "Annuler  <button>"
         ],
         "motif": "structure",
@@ -13295,10 +13295,12 @@
         "textes": [
           "Lien bloqué par DropLink  <h2>",
           "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Motif :  <span>",
+          "Signalement d’un ayant droit concernant   <p>",
           "Contester le blocage  <button>"
         ],
         "motif": "structure",
-        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). La ligne du MOTIF (169), posee sous la phrase, suit le meme decalage. Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
       }
     ],
     "manquants": [
@@ -13646,6 +13648,8 @@
         "textes": [
           "Lien bloqué par DropLink  <h2>",
           "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Motif :  <span>",
+          "Signalement d’un ayant droit concernant   <p>",
           "Votre explication  <span>",
           "Au moins 20 caractères. L’équipe DropLin  <span>",
           "Une image (facultative)  <span>",
@@ -13654,7 +13658,7 @@
           "Annuler  <button>"
         ],
         "motif": "structure",
-        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). La ligne du MOTIF (169), posee sous la phrase, suit le meme decalage. Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
       }
     ],
     "manquants": [
@@ -14001,12 +14005,14 @@
         "textes": [
           "Lien bloqué par DropLink  <h2>",
           "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Motif :  <span>",
+          "Signalement d’un ayant droit concernant   <p>",
           "Contestation envoyée le 19 septembre 202  <span>",
           "En attente de réponse  <span>",
           "Ce produit est le mien : voici la factur  <p>"
         ],
         "motif": "structure",
-        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). La ligne du MOTIF (169), posee sous la phrase, suit le meme decalage. Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
       }
     ],
     "manquants": [
@@ -14346,6 +14352,8 @@
         "textes": [
           "Lien bloqué par DropLink  <h2>",
           "Depuis le 12 septembre 2025, votre clien  <p>",
+          "Motif :  <span>",
+          "Signalement d’un ayant droit concernant   <p>",
           "Contestation refusée le 20 septembre 202  <span>",
           "Refusée  <span>",
           "Réponse de DropLink  <span>",
@@ -14354,7 +14362,7 @@
           "Contester à nouveau  <button>"
         ],
         "motif": "structure",
-        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
+        "raison": "PLACE SEULE, 32 PX PLUS HAUT, ET UNE SEULE CAUSE MESUREE : l en-tete de la planche porte, sous ses actions, une seconde rangee — le selecteur de statut « En transit », 42 px — que le produit rend dans son formulaire (declaration du detail). Le bandeau, pose juste sous l en-tete comme sur la planche, remonte d autant ; la tuile « Client » qui le suit remonte des memes 32 px (310 → 278 sans bandeau, 435 → 403 avec). La ligne du MOTIF (169), posee sous la phrase, suit le meme decalage. Tailles, graisses, couleurs, rayons et filets du bandeau sont ceux de la planche."
       }
     ],
     "manquants": [
@@ -15133,7 +15141,8 @@
           "Couverture  <span>"
         ],
         "motif": "structure",
-        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large."
+        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large. VOLATILE (20/09/2026) : c est un ARRONDI, et il ne tombe pas a chaque passage — la remesure de l etat « en attente » ne l a pas vu, sans que rien ait change sous la tuile.",
+        "volatile": true
       }
     ],
     "manquants": [
@@ -15305,7 +15314,8 @@
           "Couverture  <span>"
         ],
         "motif": "structure",
-        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large."
+        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large. VOLATILE (20/09/2026) : c est un ARRONDI, et il ne tombe pas a chaque passage — la remesure de l etat « en attente » ne l a pas vu, sans que rien ait change sous la tuile.",
+        "volatile": true
       }
     ],
     "manquants": [
@@ -15476,7 +15486,8 @@
           "Couverture  <span>"
         ],
         "motif": "structure",
-        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large."
+        "raison": "PLACE SEULE, 3 PX, ET CE SONT DEUX ARRONDIS ADDITIONNES, MESURES : 2 px existent deja sur le detail sans bandeau (439 contre 441, sous le seuil de la sonde, donc jamais signales), et 1 px vient du bouton du bandeau (420 contre 419), arrondi de la boite du texte qui le precede. Le bandeau lui-meme est identique au pixel : section 259/221, titre 276/21, texte 301/105, bouton 44 de haut et 324 de large. VOLATILE (20/09/2026) : c est un ARRONDI, et il ne tombe pas a chaque passage — la remesure de l etat « en attente » ne l a pas vu, sans que rien ait change sous la tuile.",
+        "volatile": true
       }
     ],
     "manquants": [
