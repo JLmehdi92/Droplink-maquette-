@@ -596,7 +596,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 171, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 173, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
@@ -754,6 +754,28 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 - Pagination **par curseur**, jamais par décalage (à la page 40 d'un jeu de 9 600, un `offset` lit 2 000 lignes pour en rendre 50 : le coût croît avec le numéro de page).
 - Index sur `(shop_id, created_at)`, `(shop_id, status)`, **et sur le tri par défaut** (facile à oublier, invisible à faible volumétrie).
 - Recherche **insensible aux accents** — index d'EXPRESSION avec `unaccent`. « creme » doit trouver « Crème », c'est le cas majoritaire.
+
+### ⚠️ `after` (de `next/server`) NE DIFFÈRE RIEN DANS UNE SERVER ACTION — ET NEXT LES SÉRIALISE
+
+**Mesuré au navigateur le 20/09/2026, et ça coûtait cinq modifications sur six.**
+Le report par `after` tient pour une PAGE : un GET de la fiche de commande a
+répondu en **952 ms** pendant qu'un envoi d'analytique était retenu. Il ne tient
+PAS pour une **Server Action** : la même action répondait en **15,5 s**, et en
+**32,4 s** au premier enregistrement d'une commande, qui paie en plus l'émission
+attendue en ligne par `marquerPremierContenu`. Next termine la réponse d'une
+action seulement **une fois ses rappels `after` honorés**.
+
+**Et Next SÉRIALISE les Server Actions** : tant que la première n'a pas répondu,
+les suivantes ne partent pas. Mesuré : **UN SEUL POST pour six champs saisis**,
+témoin bloqué sur « Enregistrement… », aucune erreur — et tout ce qui attendait
+est perdu si le vendeur quitte l'écran.
+
+**Conséquence de règle : sur le chemin d'une mutation, tout appel à un tiers doit
+être BORNÉ.** `emettre()` l'est à `BORNE_EMISSION_MS` (1,5 s) ; au-delà l'événement
+est abandonné et **compté comme perdu**, jamais déclaré parti — deux appelants
+rendent une marque à usage unique sur ce retour. ⚠️ Le commentaire d'`emettreApres`
+affirmait le contraire depuis le 26/08 : vrai d'une page, faux d'une action, jamais
+exécuté. C'est **L-014 sur le correctif lui-même**.
 
 ### ⚠️ LA RÉGION DU SERVICE RAILWAY EST UNE PROPRIÉTÉ DE PERFORMANCE
 
