@@ -123,6 +123,11 @@
 
 #### ▶️ OÙ ON EN EST, ET LE PROCHAIN ÉCRAN
 
+> **REMESURÉ LE 19/09/2026 : 37 RELEVÉS AU BUREAU ET 37 À 390 px EN CODE 0, ET 148 RELEVÉS
+> AUX LARGEURS INTERMÉDIAIRES (768, 1 024, 1 280, 1 440) SANS DÉFAUT.** Le tableau ci-dessous
+> garde ses décomptes d'origine ; le détail de la nuit du 18 au 19/09 est en fin de fichier,
+> § « Les largeurs entre les planches ».
+
 **TRENTE-DEUX ÉCRANS SORTENT EN CODE 0** — les cinq de l'espace vendeur, le
 tableau de bord, les paramètres et la vérification en deux étapes créés, les sept que le kit admin dessine et que la contrainte n° 1 autorise, la page client et son
 lien mort, la connexion, l'inscription, le mot de passe oublié, le nouveau mot de passe et l'onboarding, les deux pages légales, le signalement, le blog et ses articles, la documentation, le 404 général, la commande introuvable, la surveillance et la fiche de compte de l'administration :
@@ -713,6 +718,67 @@ n'est pas facultatif.**
 « PanneauCommandesComptesBoutiques », sans aucun débordement du document, donc
 sans alerte de la sonde. La barre défile désormais, et l'onglet courant est
 ramené dans la vue.
+
+#### ▶️ LES LARGEURS ENTRE LES PLANCHES (nuit du 18 au 19/09/2026)
+
+Consigne de Wassim : « vérifie tout les écran et chaque features deja existante ». Les 37
+relevés étaient en code 0 à la largeur du kit et à 390 px ; **entre les deux, rien n'était
+mesuré.** Quatre règles nouvelles dans `scripts/verifier-ecran-migre.mjs` (commit `d9cbbc9`),
+toutes en code 1 : `[rognage]` (contenu coupé par un ancêtre en overflow caché), `[largeur]`
+(document qui déborde, avec ses coupables, et menu ouvert hors de la fenêtre), `[cadre]`
+(étendue réelle du texte, par `Range`, qui sort d'une carte visible) et `[chevauchement]`
+(deux textes qui se recouvrent ; les textes sous un ancêtre fixe ou collant en sont exclus,
+une barre du bas recouvre ce qui défile sous elle par construction).
+
+**Défauts trouvés et corrigés** (commit `4a102cc`) :
+
+| écran | largeur | défaut | correction |
+|---|---|---|---|
+| en-tête vendeur | 768 | le champ de recherche gardait sa largeur d'input : +17 px, menu du compte hors écran | `w-0 min-w-0 flex-1` |
+| `/commandes`, `/envois` | 1 024 / 1 280 | rangée d'outils sur une ligne dès `lg` : +298/+281 px, puis +42/+25 | une ligne seulement à `2xl` |
+| `/commandes` | 1 024 / 1 280 | frise, date et vignettes se recouvraient | colonnes Produits et Suivi à `2xl` seulement |
+| `/envois` | 1 280 / 1 440 | « Dernière mise à jour » (en-tête `nowrap`) sur « Prochaine étape » | en-têtes à la ligne sous `2xl` |
+| fiche de commande | 1 024 | grille de médias à 6 colonnes (pastille « Couverture » coupée) ; historique dont le titre n'avait plus que 11 px ; valeurs du panneau Informations HORS de la carte | 6 colonnes à `2xl` ; requête de conteneur `@[280px]` ; `LigneInfo` en `flex-wrap` |
+| `/admin` | 1 280 | la légende de l'anneau recouvrait sa part | légende sous l'anneau sous 230 px (239 mesurés à 1 545 : la planche reste en rangée) |
+| `/admin`, courbe | 768 | neuf dates au lieu des huit de la planche, sorties de la carte de 69 px | la règle de la planche : un repère régulier n'est écrit que s'il reste un pas complet avant le dernier jour |
+| `/admin/boutiques` | 1 545 | la colonne Actions (`ee7f945`) dépassait la carte, « Voir » passait sous le panneau — caché par une déclaration « structure » | panneau à côté dès `2xl`, comme la planche ; la colonne Médias (absente de la planche, son coût est dans Stockage) ne s'affiche qu'à 1 700 |
+
+**Et hors écran** (commit `f7d3f2c`) : les liens de l'administration préchargeaient leur
+cible, et chaque préchargement comptait contre le plafond de 30 requêtes par minute — une
+404 au quatrième écran ouvert en vingt secondes. `prefetch={false}` sur les 22 liens, gardé
+par `tests/unit/admin-sans-prechargement.test.ts`.
+
+**Mouvement réduit** : un texte n'est « disparu » que s'il manque encore après dix secondes de
+relecture. L'activation en deux étapes à 768 px était sortie avec deux textes disparus
+pendant un balayage qui chargeait le serveur, puis en code 0 trois fois : l'état rejoué au
+clic relance une action serveur. Falsifié : un titre en `opacity-0 motion-safe:opacity-100`
+rougit toujours.
+
+**Les pièges de la nuit**, tous payés :
+
+- ⚠️ **ARRÊTER UN SERVEUR DE MESURE PAR MOTIF** : la ligne de commande réelle est
+  `next" start`, avec un guillemet entre les deux mots. Un motif `next start` ne tuait rien,
+  et huit serveurs orphelins se sont accumulés jusqu'à faire tomber les mesures. Motif :
+  `next\W+start`.
+- ⚠️ **FERMER LES FENÊTRES NOIRES, C'EST COUPER LES SERVEURS** : les écrans sortent alors en
+  « servi SANS Content-Security-Policy », les uns après les autres.
+- ⚠️ **UNE CHAÎNE TUÉE LAISSE UN COMPTE DE SONDE** (quatre commandes) : pendant trente minutes,
+  les écrans d'administration comptent double (« 8 commandes au total »). On attend la purge
+  et on remesure ; **on ne déclare rien.**
+- ⚠️ **LE JEU DE MESURE EST DATÉ DU JOUR DU PASSAGE** : le 19/09, toutes ses dates tombent à
+  deux chiffres, l'appariement aux dates du kit change de rang, et des déclarations meurent.
+  Celles qui en dépendent sont `volatile`, avec les quatre rangs.
+
+**Parcours de bout en bout** (vrais clics, effets vérifiés EN BASE de tests) : 26 étapes sur
+26 — connexion, commande, transporteur, dupliquer, archiver, révoquer, recherche et export,
+page client et arbitrage, envois, marque, paramètres, deux étapes, sessions, export et
+suppression des données et du compte, suspension et réactivation par l'administration.
+Portes : 862 unitaires, 799 RLS, 0 sauté, fumée 349.
+
+**Les nouveautés du kit que le produit n'a pas** : 83, inventoriées le 19/09 — 21 interdites
+par une décision verrouillée, 43 qui attendent une décision de Wassim, 19 faisables sans
+arbitrage. La liste écran par écran est dans `consignes/inventaire-du-kit.md`, indexée dans context-mode
+(source `inventaire-kit`).
 
 ### ⚠️ LA RÉGION DU SERVICE RAILWAY EST UNE PROPRIÉTÉ DE PERFORMANCE
 
