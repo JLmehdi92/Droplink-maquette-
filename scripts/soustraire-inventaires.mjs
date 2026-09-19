@@ -394,7 +394,39 @@ for (const e of ecarts) {
 const manquantsNonDeclares = manquants.filter((m) => cManquants.trouver(m.exemple.txt) === null);
 const enTropNonDeclares = enTrop.filter((m) => cEnTrop.trouver(m.exemple.txt) === null);
 
-const declarationsMortes = [...cValeurs.mortes(), ...cManquants.mortes(), ...cEnTrop.mortes()];
+/*
+ * ⑥ LES DÉCORS — CE QUE L'APPARIEMENT PAR TEXTE NE PEUT PAS VOIR (19/09/2026).
+ *
+ * Tout ce qui précède apparie des TEXTES. Un fond de page, un halo, une bande dégradée n'en
+ * portent aucun : ils n'étaient comparés à rien. Relevé à la capture côte à côte, pas à la
+ * soustraction : le fond dégradé de l'espace vendeur manquait sur NEUF écrans au téléphone, et
+ * celui de l'administration à TOUTES les largeurs — tous sortaient en code 0.
+ *
+ * Un décor est ici un élément SANS texte propre, d'au moins 300 de large et 150 de haut (un
+ * bouton en fait 44 à 52 ; une carte teintée raccourcie par son contenu, 259 : le seuil de 300 × 300
+ * l'avait prise pour absente), qui porte un dégradé.
+ * On compare les ENSEMBLES de dégradés des deux côtés (la position d'un décor fixe dépend de la
+ * hauteur de page, pas du dessin). Un écart se déclare dans `decors` par le DÉBUT de sa valeur.
+ */
+const DECOR = (e) => !e.txt && e.l >= 300 && e.h >= 150 && /gradient/.test(e.image ?? "");
+const decorsDe = (lignes) => new Set(lignes.filter(DECOR).map((e) => e.image));
+const dKit = decorsDe(kit);
+const dProduit = decorsDe(produit);
+const decorsDeclares = listeDe("decors");
+const decorsServis = new Set();
+const decorDeclare = (image) => {
+  const d = decorsDeclares.find((x) => (x.images ?? []).some((p) => image.startsWith(p)));
+  if (d) for (const p of d.images) if (image.startsWith(p)) decorsServis.add(p);
+  return d ?? null;
+};
+const decorsManquants = [...dKit].filter((i) => !dProduit.has(i));
+const decorsEnTrop = [...dProduit].filter((i) => !dKit.has(i));
+const decorsNonDeclares = [...decorsManquants.map((i) => ["manquant", i]), ...decorsEnTrop.map((i) => ["en trop", i])].filter(
+  ([, i]) => decorDeclare(i) === null,
+);
+const decorsMorts = decorsDeclares.flatMap((d) => (d.images ?? []).filter((p) => !decorsServis.has(p)).map((p) => ({ texte: "decor " + p, motif: d.motif, section: "decors" })));
+
+const declarationsMortes = [...cValeurs.mortes(), ...cManquants.mortes(), ...cEnTrop.mortes(), ...decorsMorts];
 
 const bloc = (titre, lignes) => {
   console.log(`\n${titre} (${lignes.length})`);
@@ -419,6 +451,13 @@ bloc(
   ecartesDeclares.map((e) => `  [${e.motif}] « ${e.texte} »`),
 );
 
+if (decorsManquants.length + decorsEnTrop.length > 0) {
+  bloc(
+    "⑥ DECORS (fonds degrades sans texte, 300 x 150 au moins)",
+    [...decorsManquants.map((i) => `  kit seul    ${i.slice(0, 120)}`), ...decorsEnTrop.map((i) => `  produit seul ${i.slice(0, 120)}`)],
+  );
+}
+
 if (declarationsMortes.length > 0) {
   bloc(
     "⑤ DECLARATIONS QUI NE DESIGNENT PLUS RIEN — A RETIRER",
@@ -430,7 +469,8 @@ console.log(
   `\n[soustraction] ${nomEcran} : kit ${kit.length} elements, produit ${produit.length} ; ` +
     `${manquants.length} manquants (${manquantsNonDeclares.length} NON DECLARES), ` +
     `${enTrop.length} en trop (${enTropNonDeclares.length} NON DECLARES), ` +
-    `${restants.length} ecarts de valeur NON DECLARES (${ecartesDeclares.length} declares).`,
+    `${restants.length} ecarts de valeur NON DECLARES (${ecartesDeclares.length} declares), ` +
+    `${decorsNonDeclares.length} decors NON DECLARES (kit ${dKit.size}, produit ${dProduit.size}).`,
 );
 
 /*
@@ -455,6 +495,7 @@ if (
   restants.length > 0 ||
   manquantsNonDeclares.length > 0 ||
   enTropNonDeclares.length > 0 ||
+  decorsNonDeclares.length > 0 ||
   declarationsMortes.length > 0
 ) {
   process.exit(1);

@@ -1324,9 +1324,7 @@
           "15 septembre 2025 à 09:15",
           "Date de création",
           "Dernière mise à jour",
-          "Méthode d'expédition",
           "Lien client",
-          "Numéro de suivi",
           "numéro de suivi",
           "Historique de la commande",
           "Contrôle approuvé par le client",
@@ -1337,6 +1335,15 @@
         ],
         "motif": "donnee",
         "raison": "LA LONGUEUR DES DATES DU JEU DE MESURE. Sa date de creation, ecrite en toutes lettres avec l annee et l heure, depasse les 183 px que la rangee laisse a la valeur et passe sur deux lignes ; celle du kit y tient. La rangee grandit de 17 px, et tout ce qui suit — historique, revocation — descend d autant, a quelques pixels pres selon la date du jour. Valeurs, tailles et couleurs sont celles du kit."
+      },
+      {
+        "textes": [
+          "Méthode d'expédition",
+          "Numéro de suivi"
+        ],
+        "motif": "donnee",
+        "volatile": true,
+        "raison": "LES DEUX LIBELLES QUI SUIVENT LA DATE DU JOUR. La date de creation du jeu est celle de la mesure, ecrite en toutes lettres : selon la largeur de ses chiffres elle tient sur une ligne ou passe sur deux, et ces deux rangees descendent ou non de 17 px. Constate le 19/09/2026 : la meme mesure, deux jours differents, deux positions. Volatile parce que sa presence depend du calendrier, pas de l ecran — la declaration voisine reste exigee."
       },
       {
         "textes": [
@@ -5052,6 +5059,15 @@
         ],
         "motif": "contrainte",
         "raison": "DEUX INFORMATIONS QUE LE PRODUIT PORTAIT ET QUE LE KIT N A PAS : le pseudo du destinataire et la reference du produit. Elles etaient rendues dans un bloc « Details » que le kit ne dessine pas ; elles rejoignent la carte de livraison, au dessin exact de ses lignes, plutot que de disparaitre."
+      }
+    ],
+    "decors": [
+      {
+        "images": [
+          "linear-gradient(135deg, color(srgb 0.942118 0.936471 0.996471) 0%"
+        ],
+        "motif": "contrainte",
+        "raison": "LE FOND DE LA CARTE « PROPULSE PAR DROPLINK » : la planche le degrade de la couleur PRIMAIRE du vendeur (9 %) a sa couleur SECONDAIRE (7 %) ; le produit n a qu une couleur (regle 1), et le second arret prend donc la primaire a 7 %. Meme reduction que le bouton de la carte, declare dans les valeurs."
       }
     ]
   },

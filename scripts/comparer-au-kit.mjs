@@ -86,7 +86,10 @@ const RELEVE = `(() => {
   const rendu = (e) =>
     e.getClientRects().length > 0 && (typeof e.checkVisibility !== "function" || e.checkVisibility());
   const lignes = [];
-  for (const e of document.querySelectorAll("body *")) {
+  /* ⚠️ LE CORPS LUI-MÊME EST INVENTORIÉ (19/09/2026). Le kit peint le fond des pages publiques
+     sur « body » (légal, blog, …) ; « body * » ne le voyait pas, et le produit, qui le peint sur un
+     « div », ressortait « en trop ». Un décor ne se compare que s'il est relevé des DEUX côtés. */
+  for (const e of [document.body, ...document.querySelectorAll("body *")]) {
     if (!rendu(e)) continue;
     if (["SCRIPT", "STYLE", "SVG", "PATH", "CIRCLE", "LINE", "RECT", "POLYLINE"].includes(e.tagName)) continue;
     const r = e.getBoundingClientRect();
