@@ -3523,6 +3523,40 @@ const DEPOT = {
     par: 'const EN_TETES_SIGNATURE = ["sign"] as const;',
   },
 
+  /*
+   * LE WEBHOOK D'ABONNEMENT CROIT TOUT LE MONDE. C'est le cas motivant : sans
+   * signature, un POST suffit à s'offrir le plan payant, et la garde ne protège
+   * pas une donnée — elle protège le revenu.
+   */
+  "abonnement-sans-signature": {
+    fichier: "src/lib/paiement/lemon-squeezy.ts",
+    remplacer:
+      "  if (attendue.length !== presentee.length) return false;\n  return timingSafeEqual(attendue, presentee);",
+    par: "  void attendue;\n  void presentee;\n  return true;",
+  },
+
+  /*
+   * HORS du cas motivant : la signature tient, mais la RÉSILIATION coupe à
+   * l'instant du clic. Un vendeur qui résilie le 2 du mois a payé jusqu'au 30 —
+   * le couper lui vole ce qu'il a réglé, et c'est le genre de défaut dont on
+   * n'entend parler qu'une fois, en public.
+   */
+  "resiliation-coupe-immediatement": {
+    casserDepuisMigration: {
+      fichier: "179_le_plan_pour_statut_epingle_son_chemin.sql",
+      depuis: "create function public.plan_pour_statut(",
+      jusqua: "comment on function public.plan_pour_statut",
+      remplacer:
+        "    when p_statut = 'cancelled' and p_ends_at is not null and p_ends_at > now()\n      then 'pro'::public.account_plan\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "179_le_plan_pour_statut_epingle_son_chemin.sql",
+      depuis: "create function public.plan_pour_statut(",
+      jusqua: "comment on function public.plan_pour_statut",
+    },
+  },
+
   "notification-non-signee": {
     fichier: "src/app/api/suivi/notification/route.ts",
     remplacer: "    authentique = dixSeptTrack.verifierNotification(corps, signature);",

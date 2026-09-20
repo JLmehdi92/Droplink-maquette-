@@ -78,6 +78,21 @@ const DECISION_DU_BRIEF: Readonly<Record<string, "autorise" | "refuse">> = {
   // Un point d'ingestion machine sans plafond nous fait calculer des signatures
   // à l'infini.
   "suivi-notification": "refuse",
+  /*
+   * LE WEBHOOK D'ABONNEMENT. `refuse`, et la raison n'est PAS la même que pour
+   * les autres surfaces qui refusent.
+   *
+   * Ailleurs, refuser coûte une nouvelle tentative à quelqu'un qui est devant
+   * son écran. Ici, personne n'attend : le fournisseur REJOUE tout ce qui n'est
+   * pas 2xx. Un refus pendant une panne du compteur n'est donc pas une perte,
+   * c'est un report — et un 429 est précisément le code qui le lui dit.
+   *
+   * Autoriser pendant la panne ouvrirait au contraire, sans aucun plafond, la
+   * seule surface du produit capable de POSER UN PLAN PAYANT — et elle
+   * s'ouvrirait le jour où la base va mal, c'est-à-dire le jour où on est le
+   * moins capable de s'en apercevoir.
+   */
+  "paiement-webhook": "refuse",
   // Le seul chemin qui signe des URL d'ÉCRITURE vers le stockage. Un refus
   // injustifié coûte au vendeur de redéposer un fichier qu'il a toujours.
   depot: "refuse",

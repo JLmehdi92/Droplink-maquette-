@@ -117,6 +117,16 @@ describe("Matcher du middleware", () => {
    */
   const HORS_MIDDLEWARE = new Map<string, string>([
     [
+      "/api/paiement/lemon-squeezy",
+      "Le webhook d'abonnement. `/api` est exclu du matcher, et cette route " +
+        "est la seule du produit qui POSE UN PLAN PAYANT : sans garde, un POST " +
+        "suffirait à s'offrir l'abonnement. Elle porte la sienne — une " +
+        "signature HMAC-SHA256 vérifiée sur le CORPS BRUT, à temps constant, " +
+        "avant toute analyse, et un refus si le secret n'est pas configuré. " +
+        "Le middleware ne pourrait de toute façon rien y ajouter : l'appelant " +
+        "est un fournisseur, pas une session.",
+    ],
+    [
       "/api/suivi/cadence",
       "Déclencheur de la tâche de fond du suivi. `/api` est exclu du matcher, et " +
         "ce que cette route déclenche COÛTE DE L'ARGENT : chaque passage " +

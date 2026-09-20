@@ -52,6 +52,19 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "payment_events",
+      "Le journal des webhooks de paiement (migration 177) : la charge BRUTE " +
+        "envoyée par le fournisseur, donc les adresses e-mail des vendeurs et " +
+        "ses identifiants internes. AUCUNE POLICY, et c'est la décision : la " +
+        "table n'est écrite que par le webhook — un chemin SANS HUMAIN, sous " +
+        "le rôle de service — et lue que pour répondre à « j'ai payé et je " +
+        "n'ai rien ». Un vendeur qui la lirait verrait les paiements des " +
+        "autres ; une policy « son propre paiement » donnerait un droit que " +
+        "personne ne demande et ouvrirait la table à la première erreur de " +
+        "condition. RLS activée ET forcée : sans policy, elle refuse tout le " +
+        "monde, ce qui est exactement l'intention.",
+    ],
+    [
       "comptes_supprimes",
       "Conservation d'un an des comptes supprimés par leur titulaire (migration " +
         "157) : adresse et dates, l'obligation de l'hébergeur. AUCUNE POLICY : " +
@@ -1120,6 +1133,11 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
       "parcel_checkpoints",
       "profiles",
       "shops",
+      // Son PROPRE abonnement, et celui de personne d'autre (migrations 177
+      // et 178). AUCUN droit d'écriture : un abonnement n'est pas une
+      // déclaration de l'utilisateur mais un fait du fournisseur — pouvoir
+      // l'écrire reviendrait exactement à pouvoir se payer soi-même.
+      "subscriptions",
       // Les colis suivis. Lecture seule, pour la même raison.
       "tracked_parcels",
     ]);

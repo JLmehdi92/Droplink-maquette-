@@ -1,0 +1,32 @@
+-- ╔══════════════════════════════════════════════════════════════════════════╗
+-- ║ LE VENDEUR LIT SON ABONNEMENT — correctif de la 177                      ║
+-- ╚══════════════════════════════════════════════════════════════════════════╝
+--
+-- ⚠️ DÉFAUT RÉEL DE LA MIGRATION 177, TROUVÉ PAR SON PROPRE TEST.
+--
+-- La 177 pose une policy « un vendeur lit son propre abonnement » et REVOQUE
+-- ce qu'il ne doit pas faire. Elle n'ACCORDE rien — et c'est là l'erreur : ce
+-- dépôt applique `alter default privileges` pour que tout nouvel objet naisse
+-- FERMÉ. `authenticated` n'avait donc aucun droit de table sur
+-- `public.subscriptions`, et mes `revoke` étaient des non-opérations sur des
+-- droits qui n'existaient pas.
+--
+-- ⚠️ CE QUE ÇA RAPPELLE, ET QUI VAUT PLUS QUE LE CORRECTIF : **une policy n'est
+-- pas un droit.** Les deux se cumulent — le droit de TABLE ouvre la porte, la
+-- policy choisit les lignes. Une policy seule décrit un accès que personne ne
+-- peut exercer ; un droit seul ouvre toutes les lignes. Le contrôle du
+-- catalogue vérifie le second, jamais le premier : seul un test qui LIT
+-- réellement, avec une vraie session, pouvait voir ce trou-là.
+--
+-- La 177 n'est pas rouverte : elle est appliquée.
+
+-- SELECT SEULEMENT. Ni `insert`, ni `update`, ni `delete` : un abonnement n'est
+-- pas une déclaration de l'utilisateur, c'est un fait du fournisseur. Pouvoir
+-- l'écrire reviendrait exactement à pouvoir se payer soi-même.
+grant select on public.subscriptions to authenticated;
+
+-- ⚠️ `anon` N'EST PAS SERVI, ET `payment_events` RESTE ENTIÈREMENT FERMÉE.
+-- La première porte l'état commercial d'un vendeur ; la seconde porte la charge
+-- BRUTE des webhooks — donc des adresses e-mail et les identifiants du
+-- fournisseur. Rien de tout cela n'a de raison d'être atteignable sans session,
+-- et la page client ne lit aucune des deux.

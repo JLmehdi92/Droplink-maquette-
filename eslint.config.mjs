@@ -210,6 +210,22 @@ const eslintConfig = [
       // seuil de retard — aucune donnée de vendeur, donc rien à auditer. Elle
       // tourne appelée par un planificateur, jamais par quelqu'un.
       "src/lib/veille/**/*.ts",
+      /*
+       * LE WEBHOOK D'ABONNEMENT (20/09/2026, accord explicite de Wassim).
+       *
+       * Même raison que le suivi : c'est le FOURNISSEUR qui appelle, pas un
+       * humain. Il n'y a donc aucune consultation à auditer, et lui donner
+       * `admin.ts` noierait le journal d'audit — qui ne sert qu'à répondre
+       * « QUI a lu les données de qui » — sous des lignes que personne n'a
+       * provoquées.
+       *
+       * ⚠️ ET IL NE PEUT PAS EMPLOYER `server.ts` : il n'y a PAS DE SESSION.
+       * Le vendeur n'est pas devant son écran quand son paiement aboutit —
+       * c'est précisément l'automatisme demandé. Ce n'est donc pas un
+       * assouplissement de la règle : c'est une surface de plus qui remplit
+       * déjà sa condition.
+       */
+      "src/app/api/paiement/**/*.ts",
     ],
     rules: { "no-restricted-imports": ["error", { patterns: sauf("systeme") }] },
   },

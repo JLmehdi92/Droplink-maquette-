@@ -574,6 +574,37 @@ tracked_parcels     id, shop_id, tracking_number, carrier_code, normalized_statu
 
 order_parcels       order_id, parcel_id
 
+subscriptions       id, profile_id, provider, provider_subscription_id, status,
+                    renews_at, ends_at, created_at, updated_at
+                    UNIQUE (provider, provider_subscription_id)
+                    ⚠️ AJOUTÉE LE 20/09/2026, ET ELLE LÈVE LA CONTRAINTE N° 1
+                    (« pas de table subscriptions ») — décision explicite de
+                    Wassim : « quand le mec a payé via stripe ou lemon squeezy,
+                    il a son abonnement automatiquement sur le saas ».
+                    AUCUNE DONNÉE DE PAIEMENT : ni carte, ni montant, ni moyen
+                    de paiement. Lemon Squeezy est MERCHANT OF RECORD — il
+                    encaisse, facture, collecte et reverse la TVA. Ce qui est
+                    stocké est l'ÉTAT d'un abonnement tel qu'un tiers nous le
+                    raconte. `status` est gardé BRUT : chez ce fournisseur
+                    `cancelled` ne veut PAS dire « coupé », l'abonnement court
+                    jusqu'à `ends_at`, et le traduire ici perdrait la seule
+                    distinction qui coûte de l'argent à qui la rate.
+                    `profiles.plan` reste la VÉRITÉ D'ACCÈS ; cette table est ce
+                    qui la justifie.
+
+payment_events      id, provider, event_name, signature, payload, profile_id,
+                    issue, received_at
+                    UNIQUE (provider, signature)
+                    Le journal des webhooks reçus, avec ce qu'on en a fait
+                    (`applique`, `sans_destinataire`, `ignore`, `echec`).
+                    La SIGNATURE sert de clé d'idempotence : le fournisseur
+                    n'envoie aucun identifiant d'événement, et un renvoi porte
+                    le même corps donc la même signature.
+                    ⚠️ RLS ACTIVÉE ET FORCÉE, SANS AUCUNE POLICY — donc fermée à
+                    tout le monde sauf au rôle de service. Elle porte la charge
+                    brute du fournisseur, c'est-à-dire des adresses e-mail de
+                    vendeurs.
+
 parcel_checkpoints  id, parcel_id, occurred_at, location, description, stage,
                     created_at
                     ⚠️ IL N'Y A PAS DE COLONNE `raw` ICI, ET IL N'Y EN A JAMAIS

@@ -171,7 +171,7 @@ Next.js 16 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 > final** : `orders.notify_email` et `unsubscribe_token` existent en base et ne sont lus par
 > aucun chemin, et il n'existe pas de route de désinscription.
 
-**Absent volontairement :** toute librairie de paiement, Three.js, WebGL, tout transcodeur vidéo.
+**Absent volontairement :** Three.js, WebGL, tout transcodeur vidéo. ⚠️ « Toute librairie de paiement » figurait ici et n'y est plus (20/09/2026) : il n'y a toujours AUCUN SDK de paiement — le webhook Lemon Squeezy tient en un HMAC et un `fetch` —, mais l'interdiction de principe est levée.
 
 ---
 
@@ -596,7 +596,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 176, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 179, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
@@ -707,7 +707,53 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 
 ## Contraintes produit à ne jamais violer
 
-1. **Aucun traitement de paiement.** Ni les commandes (définitif), ni un abonnement (phase 1). Pas de Stripe, pas de table `subscriptions`. Les maquettes de facturation existent et sont conservées pour la phase 2, mais **aucun code**.
+1. **Aucun traitement de paiement SUR LES COMMANDES** — définitif. DropLink ne
+   sera jamais un intermédiaire entre un vendeur et son client : c'est ce qui le
+   distingue d'une marketplace, et ce qui lui évite d'être responsable de la
+   transaction.
+
+   > ⚠️ **LA SECONDE MOITIÉ DE CETTE CONTRAINTE EST TOMBÉE LE 20/09/2026.**
+   > Elle disait aussi « ni un abonnement, pas de Stripe, pas de table
+   > `subscriptions` ». **Wassim l'a levée explicitement** : « je veux que quand
+   > le mec a prix son abonnement et que il a payé via stripe ou lemon squeezy
+   > et bah il a son abonnement automatiquement sur le saas ! ».
+   >
+   > **Le fournisseur est Lemon Squeezy**, et le choix n'est pas technique :
+   > c'est un **MERCHANT OF RECORD**. Il encaisse, facture, collecte et reverse
+   > la TVA européenne. Avec Stripe, le vendeur du service serait Wassim — donc
+   > immatriculation TVA OSS et déclarations trimestrielles à sa charge. Le
+   > surcoût mesuré est d'environ **1 € par client et par mois** sur un
+   > abonnement à 20 €.
+   >
+   > **CE QUI RESTE VRAI ET NE BOUGE PAS : aucune carte ne passe par nous.** Le
+   > produit ne voit aucun numéro, ne stocke aucun moyen de paiement, n'a aucun
+   > montant en base. Ce que `subscriptions` porte est l'**ÉTAT** d'un abonnement
+   > tel qu'un tiers nous le raconte (migrations 177-179).
+   >
+   > ⚠️ **`status` EST GARDÉ BRUT, ET C'EST LA RÈGLE QUI COÛTE LE PLUS CHER SI
+   > ON LA RATE** : chez ce fournisseur, `cancelled` ne veut PAS dire « coupé ».
+   > L'abonnement court jusqu'à `ends_at`. Un vendeur qui résilie le 2 du mois a
+   > payé jusqu'au 30 ; le couper au clic lui vole ce qu'il a réglé.
+   > `past_due` reste Pro aussi — le prélèvement a échoué, le fournisseur
+   > réessaie. La traduction vit dans `plan_pour_statut`, à UN SEUL endroit.
+   >
+   > **Le webhook est la seule surface qui POSE UN PLAN PAYANT.** `/api/*` est
+   > hors du middleware : sa seule garde est une signature HMAC-SHA256 vérifiée
+   > sur le **corps brut**, à temps constant, **avant toute analyse**. Sans elle,
+   > un POST suffirait à s'offrir l'abonnement.
+   >
+   > **Les maquettes de facturation de l'admin restent non codées** : elles
+   > montrent des paiements et des montants que le produit n'a toujours pas, et
+   > n'aura pas — c'est le fournisseur qui les détient.
+
+   > ⚠️ **UN QUOTA PAR PLAN N'EST PAS UN PAIEMENT NON PLUS.**
+   > Un compte **gratuit** est borné à **15 commandes À VIE** (migrations
+   > 175-176), un compte **pro** retrouve le plafond **mensuel**. Le « à vie »
+   > est le cœur de la décision — un plafond mensuel se contourne en attendant,
+   > celui-ci se contourne en recréant un compte, ce qui laisse une trace que
+   > l'administration voit (170-171). Les deux nombres se règlent à l'écran :
+   > « 300 commandes pour l'abo à 20 € » s'obtient en écrivant 300 dans
+   > `plafond_commandes_mensuel`, sans une ligne de code.
 
    > ⚠️ **UN QUOTA PAR PLAN N'EST PAS UN PAIEMENT, et la frontière est nette.**
    > Décision de Wassim du 20/09/2026 : un compte **gratuit** est borné à **15

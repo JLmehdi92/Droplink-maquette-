@@ -54,6 +54,15 @@ export type Surface =
   | "publique-ecriture"
   /** Les notifications de suivi poussées par le fournisseur. */
   | "suivi-notification"
+  /**
+   * LE WEBHOOK D'ABONNEMENT, par adresse.
+   *
+   * DISTINCT du suivi, et ce n'est pas de la symétrie : partager le compteur
+   * laisserait un flot de fausses notifications de transporteur épuiser le
+   * budget des PAIEMENTS. Un vendeur qui vient de payer perdrait son plan à
+   * cause d'un bruit qui ne le concerne pas.
+   */
+  | "paiement-webhook"
   /** La demande d'une URL de dépôt de média, par VENDEUR. */
   | "depot"
   /**
@@ -112,6 +121,7 @@ export const DEGRADATION: Readonly<Record<Surface, "autorise" | "refuse">> = {
   "publique-inconnu": "autorise",
   "publique-ecriture": "refuse",
   "suivi-notification": "refuse",
+  "paiement-webhook": "refuse",
   depot: "refuse",
   "export-csv": "refuse",
   admin: "refuse",
@@ -319,6 +329,25 @@ export function seuil(surface: Surface): { plafond: number; fenetreSecondes: num
        */
       return {
         plafond: entierEnv("QUOTA_DEPOT_PAR_MINUTE", 60),
+        fenetreSecondes: 60,
+      };
+    case "paiement-webhook":
+      /*
+       * PLUS SERRÉ QUE LE SUIVI, parce que le trafic légitime n'a rien à voir.
+       *
+       * Le fournisseur de suivi pousse par paquets — trois cents colis scannés
+       * dans la même minute quand un vol atterrit. Les abonnements, eux, sont
+       * des événements RARES : une poignée par jour au mieux, et un vendeur ne
+       * s'abonne pas deux fois. Reprendre les six cents du suivi laisserait un
+       * plafond qui ne peut pas se déclencher, c'est-à-dire un garde qu'on
+       * croit avoir.
+       *
+       * Soixante par minute reste très au-dessus de toute rafale réelle — un
+       * rejeu en masse après une panne de notre côté — et très en dessous de ce
+       * qu'il faudrait pour nous faire calculer des signatures à l'infini.
+       */
+      return {
+        plafond: entierEnv("QUOTA_PAIEMENT_PAR_MINUTE", 60),
         fenetreSecondes: 60,
       };
     case "suivi-notification":
@@ -593,6 +622,29 @@ export async function verifierQuotaNotificationSuivi(): Promise<Verdict> {
   // personne de service, alors que les laisser passer offrirait un contournement
   // à qui sait masquer son adresse.
   return consommer(ip === null ? "sans-adresse" : empreinte(ip), "suivi-notification");
+}
+
+/**
+ * Le quota du WEBHOOK DE PAIEMENT.
+ *
+ * ⚠️ COMPTEUR DISTINCT DE CELUI DU SUIVI, et ce n'est pas de la symétrie
+ * décorative : les partager laisserait un flot de fausses notifications de
+ * transporteur épuiser le budget du webhook d'ABONNEMENT. Un vendeur qui vient
+ * de payer se retrouverait sans son plan à cause d'un bruit qui n'a rien à voir
+ * avec lui — et le fournisseur, voyant des 429, finirait par cesser de réessayer.
+ *
+ * Comme pour le suivi, les appels sans adresse exploitable sont comptés sous une
+ * clé commune : cette surface n'a qu'un appelant légitime, donc regrouper les
+ * anonymes ne prive personne, alors que les laisser passer offrirait un
+ * contournement à qui sait masquer son adresse.
+ *
+ * ET ELLE REFUSE EN CAS DE PANNE DU COMPTEUR, comme toute surface qui n'est pas
+ * la page client : un refus ici ne pénalise pas le client d'un vendeur, et le
+ * fournisseur REJOUE — un 429 n'est pas une perte, c'est un report.
+ */
+export async function verifierQuotaPaiement(): Promise<Verdict> {
+  const ip = await adresseAppelant();
+  return consommer(ip === null ? "sans-adresse" : empreinte(ip), "paiement-webhook");
 }
 
 /**

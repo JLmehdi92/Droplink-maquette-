@@ -170,6 +170,23 @@ const HOTES_INTERDITS = [
    * emails à chaque exécution, et consommerait un quota d'envoi.
    */
   "api.resend.com",
+  /*
+   * LE SALON D'EXPLOITATION. Ajouté le 20/09/2026, le jour même où l'alerte de
+   * budget de suivi est née — pas après le premier passage bruyant.
+   *
+   * Ce qu'un appel coûte ici n'est pas de l'argent, c'est de l'ATTENTION : une
+   * suite qui posterait à chaque exécution noierait le salon, et une alerte
+   * qu'on apprend à survoler est une alerte qui ne sert plus. C'est la même
+   * famille que l'analytics — on ne bloque pas parce que c'est cher, on bloque
+   * parce que ça POLLUE le signal.
+   *
+   * Aujourd'hui aucune suite ne peut l'atteindre : l'annonce ne part qu'après
+   * une prise en charge réellement payée, et le fournisseur de suivi est déjà
+   * refusé plus haut. C'est exactement pourquoi ce blocage est posé MAINTENANT
+   * — une protection qui dépend d'une autre protection n'en est pas une (L-029).
+   */
+  "discord.com",
+  "discordapp.com",
 ];
 
 /** Vrai si l'hôte est interdit, sous-domaines compris. */

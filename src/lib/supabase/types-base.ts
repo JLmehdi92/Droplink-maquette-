@@ -89,6 +89,75 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_events: {
+        Row: {
+          event_name: string
+          id: string
+          issue: string
+          payload: Json
+          profile_id: string | null
+          provider: string
+          received_at: string
+          signature: string
+        }
+        Insert: {
+          event_name: string
+          id?: string
+          issue: string
+          payload: Json
+          profile_id?: string | null
+          provider: string
+          received_at?: string
+          signature: string
+        }
+        Update: {
+          event_name?: string
+          id?: string
+          issue?: string
+          payload?: Json
+          profile_id?: string | null
+          provider?: string
+          received_at?: string
+          signature?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          profile_id: string
+          provider: string
+          provider_subscription_id: string
+          renews_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          profile_id: string
+          provider: string
+          provider_subscription_id: string
+          renews_at?: string | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          profile_id?: string
+          provider?: string
+          provider_subscription_id?: string
+          renews_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comptes_supprimes: {
         Row: {
           conserver_jusqu_au: string
@@ -1112,6 +1181,21 @@ export type Database = {
           p_ua_hash: string
         }
         Returns: boolean
+      }
+      appliquer_abonnement: {
+        Args: {
+          p_ends_at: string | null
+          p_profil: string
+          p_provider: string
+          p_renews_at: string | null
+          p_statut: string
+          p_subscription_id: string
+        }
+        Returns: Database["public"]["Enums"]["account_plan"]
+      }
+      plan_pour_statut: {
+        Args: { p_ends_at: string | null; p_statut: string }
+        Returns: Database["public"]["Enums"]["account_plan"]
       }
       est_admin: { Args: never; Returns: boolean }
       etat_budget_suivi: {
