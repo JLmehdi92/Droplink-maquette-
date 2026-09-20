@@ -122,6 +122,71 @@ describe("Le quota d'un compte gratuit", () => {
     await service.from("profiles").update({ plan: "gratuit" }).eq("id", vendeur.profilId);
   });
 
+  test("le quota de COLIS d'un compte gratuit suit son quota de commandes", async () => {
+    /*
+     * ⚠️ TROU RÉEL, OUVERT PAR LA MIGRATION 176 — c'est-à-dire par moi, le même
+     * jour, et mesuré ensuite sur la base de tests.
+     *
+     * Le plafond de colis (migration 125) vaut « deux fois le plafond MENSUEL
+     * de commandes », soit 6 000. Or depuis la 176, un compte gratuit n'est plus
+     * régi par ce plafond mensuel : il a 15 commandes À VIE. Les deux se sont
+     * désolidarisés sans que rien ne le dise.
+     *
+     * Résultat mesuré : **60 colis créés sans un seul refus** par un compte à
+     * 15 commandes à vie — et c'est la sonde qui s'est arrêtée, pas le produit.
+     *
+     * CE QUE ÇA COÛTE, ET POURQUOI C'EST LE PIRE ENDROIT POUR UN TROU : la prise
+     * en charge est le SEUL geste payant du produit, et le palier du fournisseur
+     * est COMMUN à tous les comptes. Un vendeur gratuit qui change le numéro de
+     * suivi de ses 15 commandes toutes les trente secondes épuise le budget de
+     * tout le monde en quelques minutes. Le quota de commandes ne l'arrête pas :
+     * il compte les commandes, pas les colis.
+     *
+     * Le facteur 2 est repris de la 125 et garde sa raison : il laisse UNE
+     * correction de numéro de suivi sur CHAQUE commande.
+     */
+    const pieton = await creerUtilisateur("quota-colis");
+    try {
+      const plafondAttendu = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT * 2;
+
+      // On en crée un de moins que le plafond : tous doivent PASSER. Sans ce
+      // contre-test, un plafond qui refuserait tout serait vert ici.
+      const sousLePlafond = Array.from({ length: plafondAttendu - 1 }, (_, i) => ({
+        shop_id: pieton.shopId,
+        tracking_number: "SOUS-LE-PLAFOND-" + i,
+        carrier_code: 6051,
+      }));
+      const { error: erreurSous } = await service.from("tracked_parcels").insert(sousLePlafond);
+      expect(erreurSous, `refus prématuré : ${erreurSous?.message ?? ""}`).toBeNull();
+
+      // Celui-ci atteint le plafond : il doit PASSER aussi.
+      const { error: erreurPile } = await service.from("tracked_parcels").insert({
+        shop_id: pieton.shopId,
+        tracking_number: "PILE-AU-PLAFOND",
+        carrier_code: 6051,
+      });
+      expect(erreurPile, `refus au dernier colis autorisé : ${erreurPile?.message ?? ""}`).toBeNull();
+
+      // Celui d'après est REFUSÉ.
+      const { error: erreurTrop } = await service.from("tracked_parcels").insert({
+        shop_id: pieton.shopId,
+        tracking_number: "AU-DELA-DU-PLAFOND",
+        carrier_code: 6051,
+      });
+      expect(
+        erreurTrop,
+        "un compte gratuit a pu créer plus de colis que son quota ne l'autorise — " +
+          "c'est le budget de suivi de TOUS les comptes qui est ouvert",
+      ).not.toBeNull();
+      expect(erreurTrop?.message).toContain(String(plafondAttendu));
+    } finally {
+      // Le décor est rendu même si une assertion échoue : un compte de sonde
+      // résiduel déplace les compteurs de toutes les suites suivantes.
+      await service.from("tracked_parcels").delete().eq("shop_id", pieton.shopId);
+      await supprimerUtilisateur(pieton);
+    }
+  });
+
   test("et le quota redevient opposable dès que le compte repasse gratuit", async () => {
     // Le plan n'est pas un aiguillage qu'on franchit une fois : il est relu à
     // chaque insertion. Sans ce cas, un compte rétrogradé garderait le bénéfice
