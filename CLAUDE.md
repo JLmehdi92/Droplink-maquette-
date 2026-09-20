@@ -596,7 +596,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 173, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 176, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
@@ -708,6 +708,19 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 ## Contraintes produit à ne jamais violer
 
 1. **Aucun traitement de paiement.** Ni les commandes (définitif), ni un abonnement (phase 1). Pas de Stripe, pas de table `subscriptions`. Les maquettes de facturation existent et sont conservées pour la phase 2, mais **aucun code**.
+
+   > ⚠️ **UN QUOTA PAR PLAN N'EST PAS UN PAIEMENT, et la frontière est nette.**
+   > Décision de Wassim du 20/09/2026 : un compte **gratuit** est borné à **15
+   > commandes À VIE** (migrations 175-176), un compte **pro** retrouve le
+   > plafond **mensuel**. Le « à vie » est le cœur de la décision — un plafond
+   > mensuel se contourne en attendant, celui-ci se contourne en recréant un
+   > compte, ce qui laisse une trace que l'administration voit (170-171).
+   >
+   > Ce qui reste interdit est **d'encaisser** : le plan est un ÉTAT DU COMPTE,
+   > posé **à la main dans l'administration** après un paiement reçu HORS du
+   > produit. Les deux nombres se règlent à l'écran — « 300 commandes pour l'abo
+   > à 20 € » s'obtient en écrivant 300 dans `plafond_commandes_mensuel`, sans
+   > une ligne de code.
 
 2. **Positionnement générique et neutre.** Zéro « rep », « replica », « batch », « W2C », zéro marque de luxe, zéro nom d'agent chinois dans l'UI, la copy, les CGU ou les métadonnées. *Exception bornée : les noms d'agents sont autorisés dans les identifiants de parsers et la config technique interne, jamais dans une chaîne traduite, la landing, un message d'erreur ou les métadonnées.*
 
