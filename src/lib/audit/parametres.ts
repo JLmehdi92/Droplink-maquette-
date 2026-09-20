@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import {
+  BUDGET_SUIVI_DEJA_CONSOMME_DEFAUT,
   BUDGET_SUIVI_TOTAL_DEFAUT,
   PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT,
   PLAFOND_COMMANDES_MENSUEL_DEFAUT,
@@ -135,6 +136,15 @@ export const PARAMETRES: readonly DefinitionParametre[] = [
     min: 1,
     // Au-delà, le plafond ne borne plus rien.
     max: 100_000,
+  },
+  {
+    cle: "budget_suivi_deja_consomme",
+    nature: "nombre",
+    // 0 : notre base ne peut pas connaitre ce chiffre. Le tableau de bord du
+    // fournisseur fait autorite, et ce reglage sert a s'y raccorder.
+    defaut: BUDGET_SUIVI_DEJA_CONSOMME_DEFAUT,
+    min: 0,
+    max: 1_000_000,
   },
   {
     cle: "budget_suivi_total",

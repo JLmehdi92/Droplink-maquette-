@@ -182,6 +182,71 @@ describe("L'application d'un abonnement", () => {
   });
 });
 
+describe("Le budget de suivi se réconcilie avec le fournisseur", () => {
+  /*
+   * ⚠️ DÉFAUT RÉEL, TROUVÉ EN MESURANT LA PRODUCTION LE 20/09/2026 : notre base
+   * comptait 2 prises en charge consommées, le fournisseur en annonçait 9.
+   * L'alerte aurait donc annoncé « 198 restantes » quand il en restait 191 —
+   * fausse DANS LE SENS RASSURANT, ce que ce dépôt interdit partout ailleurs.
+   *
+   * Sept unités avaient été payées avant le 06/09, par des suites qui visaient
+   * encore la production, et leurs lignes effacées. L'argent, lui, était parti :
+   * le fournisseur décompte à la prise en charge, pas au stockage de la ligne.
+   *
+   * CE QUE CE FICHIER ÉPROUVE : que le décalage est réellement ADDITIONNÉ. Un
+   * réglage écrivable que rien ne lit produirait une ligne, une trace et un
+   * affichage parfaitement crédibles — et ne changerait aucune alerte.
+   */
+  async function poser(cle: string, valeur: number | null): Promise<void> {
+    if (valeur === null) {
+      await service.from("system_settings").delete().eq("key", cle);
+      return;
+    }
+    await service.from("system_settings").upsert({ key: cle, value: valeur as never });
+  }
+
+  async function budget() {
+    const { data } = await service.rpc("etat_budget_suivi");
+    return Array.isArray(data) ? data[0] : null;
+  }
+
+  afterAll(async () => {
+    // Le décor est rendu : une clé laissée derrière ferait échouer la suite
+    // suivante pour une raison qui n'est pas la sienne.
+    await poser("budget_suivi_deja_consomme", null);
+    await poser("budget_suivi_total", null);
+  });
+
+  test("sans décalage, « utilisées » ne compte que nos lignes", async () => {
+    await poser("budget_suivi_deja_consomme", null);
+    const avant = await budget();
+    expect(avant, "la sonde ne lit rien").not.toBeNull();
+    expect(Number(avant?.total)).toBe(200);
+  });
+
+  test("le décalage S'AJOUTE aux dépenses et RETIRE d'autant le reste", async () => {
+    const avant = await budget();
+    await poser("budget_suivi_deja_consomme", 7);
+    const apres = await budget();
+
+    expect(Number(apres?.utilisees) - Number(avant?.utilisees)).toBe(7);
+    expect(Number(apres?.restantes)).toBe(Number(avant?.restantes) - 7);
+  });
+
+  test("le TOTAL ne bouge pas — il dit ce que le palier donne, pas ce qu'il reste", async () => {
+    // Écrire 193 dans le total donnerait le bon reste aujourd'hui et mentirait
+    // sur le palier réel, que plus personne ne pourrait retrouver.
+    await poser("budget_suivi_deja_consomme", 7);
+    expect(Number((await budget())?.total)).toBe(200);
+  });
+
+  test("le reste ne descend JAMAIS sous zéro", async () => {
+    // Un négatif se lirait comme un crédit dans un message d'alerte.
+    await poser("budget_suivi_deja_consomme", 100_000);
+    expect(Number((await budget())?.restantes)).toBe(0);
+  });
+});
+
 describe("Qui peut toucher aux abonnements", () => {
   test("`anon` ne peut PAS appliquer un abonnement", async () => {
     /*

@@ -1376,6 +1376,10 @@
           "titre": "Free orders (lifetime)",
           "aide": "Total over the life of a free account"
         },
+        "budget_suivi_deja_consomme": {
+          "titre": "Already spent elsewhere",
+          "aide": "Paid to the provider, missing from our rows"
+        },
         "budget_suivi_total": {
           "titre": "Tracking budget (lifetime)",
           "aide": "Total pickups the provider plan allows"

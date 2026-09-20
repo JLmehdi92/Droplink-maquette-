@@ -135,6 +135,13 @@ const CARTES: readonly {
        * corriger le jour où le palier change.
        */
       { genre: "reglage", cle: "budget_suivi_total" },
+      /*
+       * LE DECALAGE, juste sous le budget, et jamais ailleurs : les deux ne se
+       * lisent QUE l'un a cote de l'autre. Seul, « deja consomme » n'a aucun
+       * sens ; a cote du total, il dit pourquoi notre compte et celui du
+       * fournisseur ne coincident pas.
+       */
+      { genre: "reglage", cle: "budget_suivi_deja_consomme" },
       { genre: "constate", id: "silence_jours" },
       { genre: "constate", id: "abandon_jours" },
       { genre: "constate", id: "purge_jours" },

@@ -1376,6 +1376,10 @@
           "titre": "免费订单（终身）",
           "aide": "免费账户终身可创建的总数"
         },
+        "budget_suivi_deja_consomme": {
+          "titre": "已在别处消耗",
+          "aide": "已付给服务商但我们没有记录"
+        },
         "budget_suivi_total": {
           "titre": "追踪额度（终身）",
           "aide": "服务商套餐允许的登记总数"

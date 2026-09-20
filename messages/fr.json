@@ -1376,6 +1376,10 @@
           "titre": "Commandes gratuites (à vie)",
           "aide": "Total sur la vie d'un compte gratuit"
         },
+        "budget_suivi_deja_consomme": {
+          "titre": "Déjà consommé ailleurs",
+          "aide": "Payé au fournisseur, absent de nos lignes"
+        },
         "budget_suivi_total": {
           "titre": "Budget de suivi (à vie)",
           "aide": "Prises en charge que le palier autorise en tout"

@@ -56,6 +56,21 @@ export const PLAFOND_COMMANDES_MENSUEL_DEFAUT = 3_000;
 export const BUDGET_SUIVI_TOTAL_DEFAUT = 200;
 
 /**
+ * Les prises en charge PAYÉES au fournisseur dont la ligne n'existe plus chez
+ * nous.
+ *
+ * ⚠️ 0 PAR DÉFAUT, ET CE N'EST PAS UNE VALEUR NEUTRE : c'est l'aveu que notre
+ * base ne peut PAS connaître ce chiffre. Elle compte ce qu'elle a GARDÉ, le
+ * fournisseur facture ce qu'il a PRIS EN CHARGE. Mesuré le 20/09/2026 : la
+ * production comptait 2 unités consommées, le fournisseur en annonçait 9. Les
+ * sept manquantes ont été brûlées avant le 06/09 par des suites qui visaient
+ * encore la production, et leurs lignes effacées — l'argent, lui, était parti.
+ *
+ * La valeur se relit sur le tableau de bord du fournisseur, qui fait autorité.
+ */
+export const BUDGET_SUIVI_DEJA_CONSOMME_DEFAUT = 0;
+
+/**
  * Le nombre total de commandes qu'un compte GRATUIT peut créer sur sa vie.
  *
  * 15, décision de Wassim du 20/09/2026, et le « à vie » est le coeur de la
