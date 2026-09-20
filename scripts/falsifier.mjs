@@ -888,6 +888,27 @@ const SQL = {
     },
   },
 
+  /*
+   * LE BUDGET IGNORE LE DECALAGE. C'est le defaut trouve en production le
+   * 20/09 : notre base comptait 2 unites consommees, le fournisseur 9. Sans
+   * l'addition, l'alerte annonce plus de credits qu'il n'en reste — fausse
+   * dans le sens rassurant, donc invisible jusqu'a la panne.
+   */
+  "budget-ignore-le-decalage": {
+    casserDepuisMigration: {
+      fichier: "180_le_budget_de_suivi_se_reconcilie.sql",
+      depuis: "create or replace function public.etat_budget_suivi()",
+      jusqua: "comment on function public.etat_budget_suivi",
+      remplacer: "  v_utilisees := v_comptees + v_hors_traces;",
+      par: "  v_utilisees := v_comptees;",
+    },
+    reparerDepuisMigration: {
+      fichier: "180_le_budget_de_suivi_se_reconcilie.sql",
+      depuis: "create or replace function public.etat_budget_suivi()",
+      jusqua: "comment on function public.etat_budget_suivi",
+    },
+  },
+
   "numero-instable-paye": {
     casserDepuisMigration: {
       fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
