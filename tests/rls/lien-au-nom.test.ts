@@ -1,3 +1,5 @@
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import {
   clientAnonyme,
@@ -319,5 +321,81 @@ describe("La contrainte de forme ne ferme pas la table au vendeur", () => {
         "s'évalue avec SES droits, et `slug_valide` ne lui est plus accordée. " +
         (error?.message ?? ""),
     ).toBeNull();
+  });
+});
+
+describe("Les mots réservés couvrent les routes RÉELLES", () => {
+  /*
+   * ⚠️ CETTE SUITE EXISTE PARCE QUE LA LISTE DE LA MIGRATION 182 A ÉTÉ ÉCRITE
+   * À LA MAIN, ET QU'UNE LISTE ÉCRITE À LA MAIN SE DÉSYNCHRONISE.
+   *
+   * Elle en oubliait DEUX dès le premier jour — `deconnexion` et `auth` — et
+   * personne ne l'aurait vu : rien ne casse, rien ne lève. Un vendeur aurait
+   * simplement pu prendre `deconnexion` comme nom de lien, et envoyer à ses
+   * clients des adresses commençant par le mot que le produit emploie pour
+   * fermer une session.
+   *
+   * La sonde INVENTORIE les seconds segments réels de `src/app/[locale]/` au
+   * lieu de vérifier ceux auxquels son auteur a pensé. Le jour où quelqu'un
+   * ajoute un écran, cette suite rougit tant que son mot n'est pas réservé —
+   * c'est-à-dire au moment où il faut le décider, pas six mois après.
+   */
+  const RACINE_LOCALE = join(process.cwd(), "src", "app", "[locale]");
+
+  function segmentsDeLocale(): string[] {
+    const vus = new Set<string>();
+    const parcourir = (dossier: string, sousGroupe: boolean): void => {
+      for (const entree of readdirSync(dossier)) {
+        const chemin = join(dossier, entree);
+        if (!statSync(chemin).isDirectory()) continue;
+        // Un groupe entre parenthèses n'ajoute rien à l'URL : ses enfants sont
+        // eux-mêmes des seconds segments.
+        if (entree.startsWith("(")) {
+          parcourir(chemin, true);
+          continue;
+        }
+        if (!entree.startsWith("[")) vus.add(entree);
+        void sousGroupe;
+      }
+    };
+    parcourir(RACINE_LOCALE, false);
+    return [...vus].sort();
+  }
+
+  test("la sonde inventorie réellement des segments", async () => {
+    // UN ENSEMBLE VIDE PASSE TOUT : sans segment à éprouver, le contrôle
+    // suivant serait vert en ne regardant rien.
+    const segments = segmentsDeLocale();
+    expect(segments.length, "aucun segment lu : la sonde vise à côté").toBeGreaterThan(10);
+    expect(segments, "la surface d'administration est introuvable").toContain("admin");
+  });
+
+  test("CHAQUE second segment de `[locale]` est un nom de lien réservé", async () => {
+    const segments = segmentsDeLocale();
+    const oublies: string[] = [];
+
+    for (const segment of segments) {
+      const { data, error } = await service.rpc("slug_est_reserve", { p_slug: segment });
+      expect(error, error?.message ?? "").toBeNull();
+      if (data !== true) oublies.push(segment);
+    }
+
+    expect(
+      oublies,
+      "Ces écrans du produit peuvent être pris comme nom de lien par un vendeur : " +
+        oublies.join(", ") +
+        ". Un client recevrait alors une adresse dont le premier segment se lit " +
+        "comme une page officielle de DropLink. Les ajouter dans une NOUVELLE " +
+        "migration — jamais en rouvrant la 182, qui est appliquée.",
+    ).toEqual([]);
+  });
+
+  test("CONTRE-TEST : un mot ordinaire n'est PAS réservé", async () => {
+    // Sans lui, une fonction qui répondrait `true` à tout passerait le contrôle
+    // ci-dessus à 100 % en interdisant l'intégralité des noms de lien.
+    const { data } = await service.rpc("slug_est_reserve", { p_slug: "atelier-nord" });
+    expect(data, "`slug_est_reserve` répond vrai à tout : elle n'interdit plus, elle bloque").toBe(
+      false,
+    );
   });
 });

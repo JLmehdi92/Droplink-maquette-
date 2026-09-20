@@ -23,6 +23,7 @@ import { BadgeStatut, iconeExpedition, teinteExpedition } from "@/components/com
 const MISE_A_JOUR = new Date("2026-09-14T00:00:00Z");
 import { LienEcran } from "@/components/lien-ecran";
 import { estLangueSupportee, LANGUES } from "@/i18n/config";
+import { PRIX_PRO_EUR } from "@/lib/paiement/plan";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 
 export function generateStaticParams() {
@@ -368,7 +369,19 @@ export default async function Documentation({
               route : c'est un engagement, et celui-ci était déjà public.
             */}
             <Tableau
-              entetes={["", t("planGratuit"), t("planPro")]}
+              /* ⚠️ LE PRIX VIENT DE `lib/paiement/plan.ts`, ET IL ETAIT ECRIT EN
+                 DUR DANS LES TROIS CATALOGUES. Trois copies d'un meme nombre
+                 divergent au premier changement : on corrige `fr.json`, on
+                 oublie `zh-CN.json`, et un vendeur chinois lit un montant
+                 different de celui qu'on lui facture. Un fait, un point
+                 d'emission. */
+              entetes={[
+                "",
+                t("planGratuit"),
+                t("planPro", {
+                  prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR" }),
+                }),
+              ]}
               lignes={[
                 [t("plCommandes"), t("plCommandesG"), t("plCommandesP")],
                 [t("plPage"), t("plPageG"), t("plPageP")],

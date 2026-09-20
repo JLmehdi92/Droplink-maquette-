@@ -1219,6 +1219,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["account_plan"]
       }
       definir_slug_boutique: { Args: { p_slug: string }; Returns: string }
+      lire_plafond_gratuit_a_vie: { Args: never; Returns: number }
       slug_est_reserve: { Args: { p_slug: string }; Returns: boolean }
       slug_valide: { Args: { p_slug: string }; Returns: boolean }
       verifier_slug_commande: {

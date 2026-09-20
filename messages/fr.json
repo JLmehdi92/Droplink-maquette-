@@ -19,7 +19,7 @@
     "pro": {
       "titre": "Passez au Pro",
       "texte": "Plus de fonctionnalités, plus de possibilités.",
-      "bouton": "Upgrade"
+      "bouton": "Passer au Pro"
     },
     "tableauDeBord": "Tableau de bord",
     "tableauDeBordCourt": "Accueil",
@@ -152,7 +152,7 @@
       "appNavSettings": "Paramètres",
       "appProTitle": "Passez au Pro",
       "appProBody": "Plus de fonctionnalités, plus de possibilités.",
-      "appProCta": "Upgrade",
+      "appProCta": "Passer au Pro",
       "appAccount": "Mon compte",
       "appRange": "7 derniers jours",
       "kpiCreated": "Commandes créées",
@@ -1913,7 +1913,7 @@
     "plans": "Gratuit et Pro",
     "plansTexte": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer 15 commandes au total — c'est un quota à vie, il ne se recharge pas chaque mois. Le Pro le porte à 300 commandes par mois et retire la mention DropLink de la page que voit votre client.",
     "planGratuit": "Gratuit",
-    "planPro": "Pro — 20 €/mois",
+    "planPro": "Pro — {prix}/mois",
     "plCommandes": "Commandes",
     "plCommandesG": "15 au total",
     "plCommandesP": "300 par mois",
@@ -2183,5 +2183,53 @@
       "ecriture": "La contestation n’a pas pu être enregistrée. Rien n’a été envoyé."
     },
     "motif": "Motif :"
+  },
+  "passerPro": {
+    "titre": "Passer au Pro",
+    "sousTitre": "Ce que le plan Pro change, et ce qu'il ne change pas.",
+    "eyebrow": "Plan Pro",
+    "accroche": "Vos liens, à votre nom",
+    "intro": "Quatre choses changent, et ce sont les seules. Tout le reste — les photos, les vidéos, le suivi automatique, vos couleurs — est déjà inclus dans le plan gratuit.",
+    "gratuit": "Gratuit",
+    "pro": "Pro",
+    "parMois": "{prix} / mois",
+    "passer": "Passer au Pro",
+    "dejaPro": "Votre plan Pro est actif",
+    "pasEncoreOuvert": "L'abonnement n'est pas encore ouvert. Écrivez-nous pour activer votre compte.",
+    "facture": "Le paiement est traité par Lemon Squeezy, qui émet la facture. Résiliable à tout moment : votre plan reste actif jusqu'à la fin de la période déjà payée.",
+    "features": {
+      "lien": {
+        "titre": "Le lien à votre nom",
+        "texte": "droplink.fr/votre-boutique/… au lieu de droplink.fr/p/…. Vos anciens liens continuent de répondre, même si vous renommez votre boutique."
+      },
+      "marque": {
+        "titre": "Votre page, sans la nôtre",
+        "texte": "La carte « Propulsé par DropLink » disparaît de vos pages client."
+      },
+      "commandes": {
+        "titre": "Un plafond qui se recharge",
+        "texte": "Un compte gratuit est borné à un total de commandes à vie. En Pro, le plafond redevient mensuel."
+      },
+      "colis": {
+        "titre": "Le suivi qui suit",
+        "texte": "Même règle pour les colis suivis : un total à vie en gratuit, un plafond mensuel en Pro."
+      }
+    },
+    "tableau": {
+      "commandes": "Commandes",
+      "colis": "Colis suivis",
+      "adresse": "Adresse de la page client",
+      "carte": "Carte « Propulsé par DropLink »",
+      "medias": "Photos, vidéos et suivi automatique",
+      "couleurs": "Page brandée à vos couleurs",
+      "aVie": "{n} au total, à vie",
+      "parMois": "{n} par mois",
+      "mensuel": "Plafond mensuel",
+      "adresseGratuit": "droplink.fr/p/…",
+      "adressePro": "droplink.fr/votre-boutique/…",
+      "carteGratuit": "Affichée",
+      "cartePro": "Retirée",
+      "inclus": "Inclus"
+    }
   }
 }

@@ -209,15 +209,27 @@ export default async function LayoutApplication({
             Wassim a tranché ce jour-là — « jcompte mettre un pricing genre un
             gratuit et un pro » — et l encart reprend donc le dessin du kit.
 
-            ⚠️ CE QUI N A PAS CHANGÉ : AUCUN CODE DE PAIEMENT. Le bouton mène à
-            la section « Gratuit et Pro » de la documentation, exactement comme
-            la navigation de la landing du design system envoie « Tarifs » sur
-            `/docs#plans`. Il n y a ni Stripe, ni table d abonnement, ni plafond
-            appliqué : les limites affichées là-bas ne sont vérifiées nulle part,
-            et la page le dit en toutes lettres. *Un bouton qui ne mène nulle
-            part serait pire qu une case vide* — celui-ci mène à une page qui
-            existe.
+            ⚠️ CE BLOC DISAIT « AUCUN CODE DE PAIEMENT », ET CE N EST PLUS VRAI
+            DEPUIS LE 20/09/2026 : Wassim a levé la contrainte n°1 pour
+            l abonnement — « quand le mec a payé via stripe ou lemon squeezy, il
+            a son abonnement automatiquement sur le saas ». Les plafonds sont
+            appliqués EN BASE (migrations 175-176 et 181), le plan est posé par
+            le webhook (177-181), et le bouton mène désormais à l écran
+            « Passer au Pro » plutôt qu à une section de documentation.
+
+            ⚠️ TROIS DÉFAUTS CORRIGÉS ICI, TOUS VUS SUR UNE CAPTURE ET AUCUN PAR
+            UNE MESURE — les nombres disaient que rien ne débordait :
+
+            1. LE BOUTON DISAIT « Upgrade » EN FRANÇAIS. Le catalogue `fr.json`
+               portait le mot anglais, recopié du kit ; le chinois, lui, était
+               traduit. L incohérence venait de la planche, corrigée d abord.
+            2. IL MENAIT À `/docs#plans`, une section de documentation, alors
+               qu il existe un écran qui répond exactement à la question.
+            3. ⚠️ ET LA CARTE S AFFICHAIT À UN COMPTE QUI PAIE DÉJÀ. Proposer
+               « Passez au Pro » à un abonné Pro n est pas qu une maladresse :
+               c est l interface qui affirme un état que la base contredit.
           */}
+          {profil.planPro ? null : (
           <div className="flex flex-col gap-1.5 rounded-ds-card-lg border border-ds-violet-200 bg-ds-surface-teinte p-[18px]">
             <span className="flex items-center gap-[9px] text-[15px] leading-[normal] font-bold text-ds-accent-encre">
               <Zap aria-hidden="true" size={17} strokeWidth={2.2} />
@@ -225,13 +237,14 @@ export default async function LayoutApplication({
             </span>
             <span className="text-[13px] leading-[1.45] text-ds-texte-corps">{t("pro.texte")}</span>
             <LienEcran
-              href={`/${langue}/docs#plans`}
+              href={`/${langue}/passer-pro`}
               className="degrade-ds-marque mt-2 flex h-[42px] items-center justify-center gap-2 rounded-ds-pill border border-transparent px-[22px] text-[14px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
             >
               {t("pro.bouton")}
               <ArrowRight aria-hidden="true" size={16} strokeWidth={2.2} />
             </LienEcran>
           </div>
+          )}
 
           {/*
             LE BLOC DE COMPTE PORTE LA DÉCONNEXION, et c'est le seul endroit

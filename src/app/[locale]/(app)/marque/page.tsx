@@ -95,6 +95,10 @@ export default async function Marque({
               planPro: profil.planPro,
               marqueMasquee: profil.marqueMasquee,
               nomDeLien: profil.nomDeLien ?? "",
+              // La langue VALIDEE, jamais le parametre brut : `estLangueSupportee`
+              // replie sur « fr » ce que le middleware n'aurait pas filtre, et un
+              // lien bati sur la valeur brute menerait a une page inexistante.
+              lienPasserPro: `/${langue}/passer-pro`,
               logoUrl,
               reseaux: profil.reseaux,
             }}

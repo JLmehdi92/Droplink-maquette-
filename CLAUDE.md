@@ -787,7 +787,32 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 ## Règles de sécurité
 
 - **RLS activée sur toutes les tables dès la première migration**, jamais en rattrapage. Supabase accorde SELECT/INSERT/UPDATE/DELETE à `anon` par défaut : **une table créée sans RLS est grande ouverte, et le fichier de migration ne le dira pas.**
-- **Postgres accorde `EXECUTE` à `PUBLIC` par défaut.** Révoquer explicitement, + `alter default privileges` pour que l'objet suivant naisse fermé. Un droit d'exécution **ne s'écrit pas dans le corps d'une fonction** — aucun contrôle textuel ne peut le voir, il faut **interroger le catalogue**.
+- **Postgres accorde `EXECUTE` à `PUBLIC` par défaut. Révoquer explicitement, sur CHAQUE fonction, sans exception.** Un droit d'exécution **ne s'écrit pas dans le corps d'une fonction** — aucun contrôle textuel ne peut le voir, il faut **interroger le catalogue**.
+
+  > ⚠️ **CETTE LIGNE DISAIT « + `alter default privileges` POUR QUE L'OBJET
+  > SUIVANT NAISSE FERMÉ ». C'EST FAUX SUR CETTE BASE, mesuré le 20/09/2026.**
+  >
+  > Trois sondages en transaction ANNULÉE sur la base de tests, après qu'une
+  > migration a livré deux fonctions ouvertes à `PUBLIC` :
+  >
+  > | | ACL de la fonction créée |
+  > |---|---|
+  > | sans rien toucher | `{=X/postgres, postgres=X/postgres, service_role=X/postgres}` |
+  > | après avoir RE-exécuté la ligne de la migration 001 | identique |
+  > | avec `for role postgres` | identique |
+  >
+  > `pg_default_acl` porte pourtant l'entrée attendue pour
+  > (`postgres`, `public`, fonctions), PUBLIC absent — et les **six**
+  > déclencheurs d'événement de la base ont été lus : aucun n'accorde quoi que
+  > ce soit sur `public`. **Le mécanisme n'est pas établi, et on ne l'invente
+  > pas.** Le comportement, lui, l'est trois fois.
+  >
+  > **Conséquence pratique, et c'est tout ce qui compte :** une fonction
+  > nouvelle naît **OUVERTE**. Le seul geste qui ferme est le `revoke` écrit à
+  > la main, et le seul filet quand on l'oublie est
+  > `tests/rls/catalogue-droits.test.ts`, qui interroge le catalogue. Croire au
+  > réglage par défaut, c'est L-029 — une protection dont personne n'a vu
+  > l'effet.
 - Ce qui empêche un vendeur de se promouvoir admin doit être un **privilège de COLONNE**, pas une policy (une policy sur `profiles` qui lit `profiles` = récursion infinie).
 - **Contrôle par VALEUR, pas par nom.** Une valeur voyage sous n'importe quel nom : un champ sensible republié sous `meta`, `debug`, `commentaire` ou `diagnostic` survit à un contrôle textuel. Injecter des sentinelles uniques et les chercher dans les réponses **et dans le HTML rendu**, charges d'hydratation comprises. **Le `public_token` est la sentinelle prioritaire** : les autres exposent une donnée, celle-là transfère une **capacité**, définitivement.
 - **Bucket R2 privé sans exception.** URL signées à expiration. **Clé d'objet générée par le SERVEUR** — une clé fournie par le client permettrait d'écraser le média d'un autre vendeur. **Taille relue côté serveur**, jamais crue depuis le client : c'est la base du modèle de coût.

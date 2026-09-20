@@ -139,6 +139,16 @@ export function FormulaireMarque({
      * ferait croire qu'il l'a perdu.
      */
     readonly nomDeLien: string;
+    /**
+     * L'adresse de l'ecran « Passer au Pro », resolue COTE SERVEUR.
+     *
+     * ⚠️ ELLE N'EST PAS FABRIQUEE ICI. Ce composant connait la langue des
+     * PAGES CLIENT (celle que le vendeur choisit pour ses clients), qui
+     * n'est pas celle de son interface : construire le lien avec elle
+     * enverrait un vendeur francais sur l'ecran en chinois parce qu'il a
+     * regle ses pages client en chinois.
+     */
+    readonly lienPasserPro: string;
     readonly logoUrl: string | null;
     readonly reseaux: {
       readonly instagram: string | null;
@@ -1157,7 +1167,14 @@ export function FormulaireMarque({
                 </p>
               ) : null}
               {initial.planPro ? null : (
-              <span className="flex items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">
+              <a
+                href={initial.lienPasserPro}
+                /* ⚠️ LA CARTE EST LE « PANNEAU » DEMANDE PAR WASSIM (« un pop up
+                   ou alors une page » → les deux). Sans lien, l'ecran
+                   « Passer au Pro » existerait sans qu'on puisse y arriver
+                   depuis l'endroit meme ou le vendeur bute sur le verrou. */
+                className="flex min-h-11 items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5 transition-transform hover:-translate-y-[2px] active:scale-[.98]"
+              >
                 <span className="inline-flex flex-none items-center rounded-ds-pill bg-ds-accent px-2.5 py-1 text-[11.5px] leading-[normal] font-bold text-ds-texte-sur-marque lg:text-[11px]">
                   {t("lienProBadge")}
                 </span>
@@ -1169,7 +1186,7 @@ export function FormulaireMarque({
                     {t("lienProAide")}
                   </span>
                 </span>
-              </span>
+              </a>
               )}
             </div>
           </Panneau>
@@ -1246,7 +1263,11 @@ export function FormulaireMarque({
                 </label>
               </div>
               {initial.planPro ? null : (
-                <span className="flex items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">
+                <a
+                  href={initial.lienPasserPro}
+                  /* Meme panneau qu'a la section 5, au second verrou. */
+                  className="flex min-h-11 items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5 transition-transform hover:-translate-y-[2px] active:scale-[.98]"
+                >
                   <span className="inline-flex flex-none items-center rounded-ds-pill bg-ds-accent px-2.5 py-1 text-[11.5px] leading-[normal] font-bold text-ds-texte-sur-marque lg:text-[11px]">
                     {t("lienProBadge")}
                   </span>
@@ -1258,7 +1279,7 @@ export function FormulaireMarque({
                       {t("marqueProAide")}
                     </span>
                   </span>
-                </span>
+                </a>
               )}
             </div>
           </Panneau>

@@ -19,7 +19,7 @@
     "pro": {
       "titre": "升级专业版",
       "texte": "更多功能，更多可能。",
-      "bouton": "立即升级"
+      "bouton": "升级至 Pro"
     },
     "tableauDeBord": "仪表盘",
     "tableauDeBordCourt": "首页",
@@ -1913,7 +1913,7 @@
     "plans": "免费版与 Pro",
     "plansTexte": "DropLink 提供免费版和专业版。免费版共可创建 15 笔订单——这是终身额度，不会每月重置。专业版将其提高到每月 300 笔，并移除客户页面上的 DropLink 标识。",
     "planGratuit": "免费版",
-    "planPro": "专业版 — 每月 20 €",
+    "planPro": "专业版 — 每月 {prix}",
     "plCommandes": "订单",
     "plCommandesG": "共 15 笔",
     "plCommandesP": "每月 300 笔",
@@ -2183,5 +2183,53 @@
       "ecriture": "申诉未能保存，未提交任何内容。"
     },
     "motif": "原因："
+  },
+  "passerPro": {
+    "titre": "升级至 Pro",
+    "sousTitre": "Pro 套餐会改变什么，又不会改变什么。",
+    "eyebrow": "Pro 套餐",
+    "accroche": "以你的名义生成链接",
+    "intro": "只有四项会改变。其余的一切——照片、视频、自动物流跟踪、你的品牌色——免费套餐已经包含。",
+    "gratuit": "免费",
+    "pro": "Pro",
+    "parMois": "{prix} / 月",
+    "passer": "升级至 Pro",
+    "dejaPro": "你的 Pro 套餐已生效",
+    "pasEncoreOuvert": "订阅尚未开放。请联系我们为你的账户开通。",
+    "facture": "付款由 Lemon Squeezy 处理并开具发票。可随时取消：已付费周期内套餐继续有效。",
+    "features": {
+      "lien": {
+        "titre": "以你的名义生成链接",
+        "texte": "使用 droplink.fr/你的店铺/… 而非 droplink.fr/p/…。即使你更改店铺名称，已发出的旧链接仍然有效。"
+      },
+      "marque": {
+        "titre": "只展示你的品牌",
+        "texte": "客户页面上的「由 DropLink 提供支持」卡片将不再显示。"
+      },
+      "commandes": {
+        "titre": "按月重置的上限",
+        "texte": "免费账户受终身订单总量限制。升级 Pro 后，上限恢复为按月计算。"
+      },
+      "colis": {
+        "titre": "跟上节奏的物流跟踪",
+        "texte": "已跟踪包裹同理：免费套餐为终身总量，Pro 套餐为每月上限。"
+      }
+    },
+    "tableau": {
+      "commandes": "订单",
+      "colis": "已跟踪包裹",
+      "adresse": "客户页面地址",
+      "carte": "「由 DropLink 提供支持」卡片",
+      "medias": "照片、视频与自动物流跟踪",
+      "couleurs": "品牌配色页面",
+      "aVie": "共 {n} 个，终身",
+      "parMois": "每月 {n} 个",
+      "mensuel": "每月上限",
+      "adresseGratuit": "droplink.fr/p/…",
+      "adressePro": "droplink.fr/你的店铺/…",
+      "carteGratuit": "显示",
+      "cartePro": "移除",
+      "inclus": "包含"
+    }
   }
 }

@@ -146,6 +146,15 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["admin.unites.Mo", "Symbole d'unité de données, international."],
   ["admin.unites.Go", "Symbole d'unité de données, international."],
   ["admin.unites.To", "Symbole d'unité de données, international."],
+  /* L'écran « Passer au Pro ». Deux valeurs seulement, et pour les deux
+     raisons déjà admises ailleurs dans ce fichier : le NOM DU PLAN ne se
+     traduit pas (comme `marque.lienProBadge`), et une ADRESSE doit
+     ressembler à une adresse — un vendeur chinois recopie la même URL que
+     les autres, en lettres latines, parce que c'est ce qu'un navigateur
+     accepte. `tableau.adressePro` n'est PAS ici : elle porte « 你的店铺 »,
+     le nom de boutique à remplacer, et c'est bien lui qu'il faut lire. */
+  ["passerPro.pro", "Le nom du plan, seul, comme le badge de « Ma marque »."],
+  ["passerPro.tableau.adresseGratuit", "Une adresse : elle doit ressembler à une adresse."],
 ]);
 
 function catalogue(): ReadonlyMap<string, string> {

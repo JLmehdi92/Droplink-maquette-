@@ -19,7 +19,7 @@
     "pro": {
       "titre": "Go Pro",
       "texte": "More features, more possibilities.",
-      "bouton": "Upgrade"
+      "bouton": "Upgrade to Pro"
     },
     "tableauDeBord": "Dashboard",
     "tableauDeBordCourt": "Home",
@@ -152,7 +152,7 @@
       "appNavSettings": "Settings",
       "appProTitle": "Go Pro",
       "appProBody": "More features, more possibilities.",
-      "appProCta": "Upgrade",
+      "appProCta": "Upgrade to Pro",
       "appAccount": "My account",
       "appRange": "Last 7 days",
       "kpiCreated": "Orders created",
@@ -1913,7 +1913,7 @@
     "plans": "Free and Pro",
     "plansTexte": "DropLink has a free plan and a Pro plan. The free plan allows 15 orders in total — a lifetime quota, it does not reset each month. Pro raises it to 300 orders per month and removes the DropLink mention from the page your customer sees.",
     "planGratuit": "Free",
-    "planPro": "Pro — €20/month",
+    "planPro": "Pro — {prix}/month",
     "plCommandes": "Orders",
     "plCommandesG": "15 in total",
     "plCommandesP": "300 per month",
@@ -2183,5 +2183,53 @@
       "ecriture": "The dispute could not be saved. Nothing was sent."
     },
     "motif": "Reason:"
+  },
+  "passerPro": {
+    "titre": "Upgrade to Pro",
+    "sousTitre": "What the Pro plan changes — and what it doesn't.",
+    "eyebrow": "Pro plan",
+    "accroche": "Your links, under your name",
+    "intro": "Four things change, and they are the only ones. Everything else — photos, videos, automatic tracking, your colours — is already in the free plan.",
+    "gratuit": "Free",
+    "pro": "Pro",
+    "parMois": "{prix} / month",
+    "passer": "Upgrade to Pro",
+    "dejaPro": "Your Pro plan is active",
+    "pasEncoreOuvert": "Subscriptions aren't open yet. Get in touch and we'll activate your account.",
+    "facture": "Payment is handled by Lemon Squeezy, who issues the invoice. Cancel any time: your plan stays active until the end of the period you already paid for.",
+    "features": {
+      "lien": {
+        "titre": "The link under your name",
+        "texte": "droplink.fr/your-shop/… instead of droplink.fr/p/…. Links you already sent keep working, even if you rename your shop."
+      },
+      "marque": {
+        "titre": "Your page, not ours",
+        "texte": "The “Powered by DropLink” card disappears from your customer pages."
+      },
+      "commandes": {
+        "titre": "A cap that resets",
+        "texte": "A free account is capped on a lifetime total of orders. On Pro, the cap becomes monthly again."
+      },
+      "colis": {
+        "titre": "Tracking that keeps up",
+        "texte": "Same rule for tracked parcels: a lifetime total on free, a monthly cap on Pro."
+      }
+    },
+    "tableau": {
+      "commandes": "Orders",
+      "colis": "Tracked parcels",
+      "adresse": "Customer page address",
+      "carte": "“Powered by DropLink” card",
+      "medias": "Photos, videos and automatic tracking",
+      "couleurs": "Page branded in your colours",
+      "aVie": "{n} in total, for life",
+      "parMois": "{n} per month",
+      "mensuel": "Monthly cap",
+      "adresseGratuit": "droplink.fr/p/…",
+      "adressePro": "droplink.fr/your-shop/…",
+      "carteGratuit": "Shown",
+      "cartePro": "Removed",
+      "inclus": "Included"
+    }
   }
 }
