@@ -116,6 +116,17 @@ const CARTES: readonly {
     icone: Truck,
     rangees: [
       { genre: "reglage", cle: "seuil_colis_par_compte" },
+      /*
+       * LE BUDGET DE SUIVI — ÉCART ASSUMÉ, comme le retard du veilleur juste
+       * plus bas : la planche ne le dessine pas.
+       *
+       * Il est ici parce que c'est le SEUL budget du produit qui ne se recharge
+       * pas — 200 prises en charge à vie, pour tous les comptes réunis — et
+       * qu'aucun plafond par compte ne peut le voir. Le laisser sans écran
+       * ferait d'un nombre décisif une valeur qu'il faut une migration pour
+       * corriger le jour où le palier change.
+       */
+      { genre: "reglage", cle: "budget_suivi_total" },
       { genre: "constate", id: "silence_jours" },
       { genre: "constate", id: "abandon_jours" },
       { genre: "constate", id: "purge_jours" },

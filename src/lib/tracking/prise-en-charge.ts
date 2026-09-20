@@ -1,5 +1,6 @@
 import "server-only";
 import { creerClientSysteme } from "@/lib/supabase/system";
+import { annoncerBudgetDeSuivi } from "@/lib/alerte/budget-suivi";
 import { emettre } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { dixSeptTrack } from "./provider/dix-sept-track";
@@ -183,6 +184,22 @@ export async function prendreEnCharge(
     { sujet: "suivi:" + numero.slice(0, 4) },
     { transporteur: transporteur ?? -1 },
   );
+
+  /*
+   * L'ANNONCE DE LA DÉPENSE — décision de Wassim, 20/09/2026, « à chaque quota
+   * utilisé sur notre compte 17track ».
+   *
+   * ELLE EST ICI ET NULLE PART AILLEURS, parce que c'est ici et nulle part
+   * ailleurs que l'argent part. La poser plus haut — à l'attache, à la
+   * sauvegarde du numéro — annoncerait des dépenses qui n'ont pas eu lieu :
+   * un numéro instable est détaché avant d'être payé (172), et un colis déjà
+   * suivi ne se repaie pas.
+   *
+   * Elle ne lève jamais et ne conditionne rien : l'unité est DÉJÀ dépensée.
+   * Faire échouer la prise en charge parce qu'une notification n'est pas partie
+   * reviendrait à payer puis à perdre ce qu'on a payé.
+   */
+  await annoncerBudgetDeSuivi(systeme, numero);
 
   // L'INTERROGATION IMMÉDIATE. Elle est séparée de la prise en charge parce que
   // celle-ci ne rend pas l'état du colis : elle l'enregistre. Sans ce second

@@ -1372,6 +1372,10 @@
           "titre": "Commandes par mois",
           "aide": "Au-delà, la création est refusée"
         },
+        "budget_suivi_total": {
+          "titre": "Budget de suivi (à vie)",
+          "aide": "Prises en charge que le palier autorise en tout"
+        },
         "seuil_colis_par_compte": {
           "titre": "Seuil d'alerte colis",
           "aide": "Signale un compte au-delà de ce nombre"

@@ -755,27 +755,38 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 - Index sur `(shop_id, created_at)`, `(shop_id, status)`, **et sur le tri par défaut** (facile à oublier, invisible à faible volumétrie).
 - Recherche **insensible aux accents** — index d'EXPRESSION avec `unaccent`. « creme » doit trouver « Crème », c'est le cas majoritaire.
 
-### ⚠️ `after` (de `next/server`) NE DIFFÈRE RIEN DANS UNE SERVER ACTION — ET NEXT LES SÉRIALISE
+### ⚠️ UN APPEL EN LIGNE À UN TIERS + LA FILE DES SERVER ACTIONS = DES MODIFICATIONS PERDUES
 
 **Mesuré au navigateur le 20/09/2026, et ça coûtait cinq modifications sur six.**
-Le report par `after` tient pour une PAGE : un GET de la fiche de commande a
-répondu en **952 ms** pendant qu'un envoi d'analytique était retenu. Il ne tient
-PAS pour une **Server Action** : la même action répondait en **15,5 s**, et en
-**32,4 s** au premier enregistrement d'une commande, qui paie en plus l'émission
-attendue en ligne par `marquerPremierContenu`. Next termine la réponse d'une
-action seulement **une fois ses rappels `after` honorés**.
+Six champs saisis dans l'éditeur, deux secondes entre chacun : **UN SEUL POST est
+parti**, un seul champ est arrivé en base. Témoin bloqué sur « Enregistrement… »,
+aucune erreur, rien en console — et tout ce qui attendait est perdu si le vendeur
+quitte l'écran.
 
-**Et Next SÉRIALISE les Server Actions** : tant que la première n'a pas répondu,
-les suivantes ne partent pas. Mesuré : **UN SEUL POST pour six champs saisis**,
-témoin bloqué sur « Enregistrement… », aucune erreur — et tout ce qui attendait
-est perdu si le vendeur quitte l'écran.
+**Deux causes qui se multiplient :**
 
-**Conséquence de règle : sur le chemin d'une mutation, tout appel à un tiers doit
-être BORNÉ.** `emettre()` l'est à `BORNE_EMISSION_MS` (1,5 s) ; au-delà l'événement
-est abandonné et **compté comme perdu**, jamais déclaré parti — deux appelants
-rendent une marque à usage unique sur ce retour. ⚠️ Le commentaire d'`emettreApres`
-affirmait le contraire depuis le 26/08 : vrai d'une page, faux d'une action, jamais
-exécuté. C'est **L-014 sur le correctif lui-même**.
+1. **`marquerPremierContenu` attendait PostHog EN LIGNE**, et `emettre()` n'avait
+   aucune borne : 15,5 s par sauvegarde quand le tiers ne répond pas. Pire, la
+   marque à usage unique est RENDUE quand l'envoi échoue — donc la sauvegarde
+   suivante la re-réclame et re-paie l'appel. Chaque champ, à chaque fois.
+2. **Next SÉRIALISE les Server Actions** : tant que la première n'a pas répondu,
+   les suivantes ne partent même pas. Une seule action lente les bloque toutes,
+   en silence.
+
+**Règle : sur le chemin d'une mutation, tout appel à un tiers est BORNÉ.**
+`emettre()` l'est à `BORNE_EMISSION_MS` (1,5 s) ; au-delà l'événement est
+abandonné et **compté comme perdu**, jamais déclaré parti — deux appelants rendent
+une marque à usage unique sur ce retour. Effet mesuré : 32,4 s → 1,65 s, et 6 POST
+pour 6 champs.
+
+> ⚠️ **ET CE BLOC A D'ABORD ACCUSÉ `after`, À TORT.** Il affirmait que Next
+> attend les rappels d'`after` avant de terminer la réponse d'une action. **Faux,
+> mesuré :** une sauvegarde de numéro de suivi, dont l'attache pose un `after`
+> qui DORT 31 secondes, répond en **1,72 s** — colis bien attaché, donc le rappel
+> bien posé. Le report par `after` fait ce qu'il promet, pour une page comme pour
+> une action. C'était une explication plausible, cohérente avec les durées, et
+> jamais exécutée : **L-014 commis en corrigeant L-014.** La mesure qui l'a
+> démentie a été faite en cherchant un défaut voisin, pas en relisant.
 
 ### ⚠️ LA RÉGION DU SERVICE RAILWAY EST UNE PROPRIÉTÉ DE PERFORMANCE
 

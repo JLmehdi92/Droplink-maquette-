@@ -1114,6 +1114,14 @@ export type Database = {
         Returns: boolean
       }
       est_admin: { Args: never; Returns: boolean }
+      etat_budget_suivi: {
+        Args: never
+        Returns: {
+          restantes: number
+          total: number
+          utilisees: number
+        }[]
+      }
       etat_veille: {
         Args: { p_retard_minutes: number; p_sources: string[] }
         Returns: {

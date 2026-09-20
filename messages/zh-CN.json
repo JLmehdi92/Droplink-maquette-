@@ -1372,6 +1372,10 @@
           "titre": "每月订单数",
           "aide": "超出后将拒绝创建"
         },
+        "budget_suivi_total": {
+          "titre": "追踪额度（终身）",
+          "aide": "服务商套餐允许的登记总数"
+        },
         "seuil_colis_par_compte": {
           "titre": "包裹告警阈值",
           "aide": "超过此数量的账户会被标记"

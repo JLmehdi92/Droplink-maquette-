@@ -41,6 +41,20 @@ export const RETARD_VEILLEUR_MINUTES_DEFAUT = 90;
  */
 export const PLAFOND_COMMANDES_MENSUEL_DEFAUT = 3_000;
 
+/**
+ * Le nombre TOTAL de prises en charge que le palier du fournisseur de suivi
+ * autorise — sur la vie du compte, pas par mois.
+ *
+ * ⚠️ C'EST LE SEUL BUDGET DU PRODUIT QUI NE SE RECHARGE PAS, et le seul qu'aucun
+ * plafond par compte ne protège : `plafond_commandes_mensuel` et le plafond de
+ * colis bornent UN vendeur, quand celui-ci est une SOMME sur tous. Dix comptes
+ * parfaitement dans les clous l'épuisent sans qu'aucun garde ne s'oppose à rien.
+ *
+ * 200 parce que c'est ce que le palier donne. Il en restait 191 le 20/09/2026 —
+ * et c'est ce chiffre qui a motivé l'alerte Discord à chaque unité dépensée.
+ */
+export const BUDGET_SUIVI_TOTAL_DEFAUT = 200;
+
 export interface Alerte {
   readonly genre: string;
   readonly gravite: "critique" | "attention";

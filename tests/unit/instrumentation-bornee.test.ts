@@ -11,26 +11,28 @@ import { EVENEMENTS } from "@/lib/instrumentation/evenements";
  * l'un après l'autre, deux secondes entre chacun. UN SEUL est arrivé en base.
  * La cause n'était pas l'éditeur — elle tient en deux faits mesurés :
  *
- *  1. La réponse de la Server Action `enregistrerChamp` a mis **32,4 s** au
- *     premier enregistrement d'une commande, **15,5 s** aux suivants. Une
- *     simple LECTURE de la même page répondait en 952 ms au même moment.
- *     `after()` ne retarde donc pas une page — il retarde bel et bien la
- *     réponse d'une SERVER ACTION, qui l'attend avant de se terminer.
+ *  1. `marquerPremierContenu` attend `emettre()` EN LIGNE — il a besoin du
+ *     retour pour savoir s'il doit rendre sa marque à usage unique. Sans borne,
+ *     un tiers qui ne répond pas coûtait **15,5 s par sauvegarde**, pendant
+ *     qu'une LECTURE de la même page répondait en **952 ms**. Et comme la
+ *     marque est RENDUE quand l'envoi échoue, la sauvegarde suivante la
+ *     re-réclame et re-paie : chaque champ, à chaque fois.
  *  2. Next.js SÉRIALISE les Server Actions. Tant que la première n'a pas
  *     répondu, les suivantes ne partent même pas : mesuré, **un seul POST pour
  *     six saisies**. Le vendeur ne voit aucune erreur, le témoin reste sur
  *     « Enregistrement… », et s'il quitte l'écran ses cinq autres champs sont
  *     perdus sans que rien ne l'ait dit.
  *
- * Le commentaire d'`emettreApres` affirmait le contraire — « l'événement part
- * réellement, il ne part simplement plus AVANT la réponse ». C'est L-014 sur le
- * correctif même qui devait sortir l'analytique du chemin critique : la phrase
- * est vraie d'une page, fausse d'une action, et personne ne l'avait exécutée.
+ * ⚠️ J'AI D'ABORD ACCUSÉ `after()`, ET C'ÉTAIT FAUX. L'explication « Next attend
+ * ses rappels avant de terminer la réponse d'une action » collait à toutes les
+ * durées observées. Elle a été démentie par une mesure faite ensuite : une
+ * sauvegarde de numéro de suivi, dont l'attache pose un `after()` qui DORT 31
+ * secondes, répond en **1,72 s**, colis bien attaché. Une explication cohérente
+ * n'est pas une explication exécutée — L-014, commis en corrigeant L-014.
  *
- * ON NE PEUT PAS EMPÊCHER `after()` D'ÊTRE ATTENDU — c'est Next qui le décide.
- * Ce qu'on peut borner, c'est la DURÉE : une panne de PostHog coûte désormais
- * au plus `BORNE_EMISSION_MS`, au lieu d'une attente non bornée. L'événement
- * est alors compté comme perdu, ce qu'il est — et le compteur existait déjà.
+ * CE QU'ON BORNE EST DONC LA DURÉE DE L'APPEL, en ligne comme différé : une
+ * panne du tiers coûte au plus `BORNE_EMISSION_MS`. L'événement est alors
+ * compté comme perdu, ce qu'il est — et le compteur existait déjà.
  *
  * ⚠️ CE CONTRÔLE ÉCHOUE DANS LES DEUX SENS : une émission qui dépasse sa borne,
  * et une borne qui refuserait une émission NORMALE (contre-test positif). Sans

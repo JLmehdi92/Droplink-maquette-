@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import {
+  BUDGET_SUIVI_TOTAL_DEFAUT,
   PLAFOND_COMMANDES_MENSUEL_DEFAUT,
   RETARD_VEILLEUR_MINUTES_DEFAUT,
   SEUIL_COLIS_DEFAUT,
@@ -122,6 +123,22 @@ export const PARAMETRES: readonly DefinitionParametre[] = [
     defaut: 1,
     min: 0,
     max: 1,
+  },
+  {
+    cle: "budget_suivi_total",
+    nature: "nombre",
+    // 200, parce que c'est ce que le palier du fournisseur donne — À VIE, pour
+    // tout le produit, pas par mois et pas par compte. Le défaut vit ici ET
+    // dans `etat_budget_suivi`, comme pour le plafond de commandes : une clé
+    // absente signifie « personne n'a décidé », et l'insérer en base ferait
+    // croire à un choix là où il n'y a qu'un héritage.
+    defaut: BUDGET_SUIVI_TOTAL_DEFAUT,
+    // 0 est une valeur LÉGITIME : un palier épuisé est un état réel, et le
+    // réglage doit pouvoir le dire plutôt que de mentir avec un 1.
+    min: 0,
+    // Au-delà, la notion de budget ne borne plus rien et l'alerte ne pourrait
+    // plus se déclencher.
+    max: 1_000_000,
   },
 ] as const;
 

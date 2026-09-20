@@ -124,8 +124,12 @@ export async function emettre(
      * MESURÉ AU NAVIGATEUR LE 20/09/2026, sur l'éditeur de commande piloté au
      * vrai clavier : la réponse de `enregistrerChamp` a mis 32,4 s au premier
      * enregistrement d'une commande et 15,5 s aux suivants, pendant qu'une
-     * LECTURE de la même page répondait en 952 ms. `after()` ne retarde pas une
-     * page ; il retarde la réponse d'une SERVER ACTION, qui l'attend.
+     * LECTURE de la même page répondait en 952 ms.
+     *
+     * L'APPELANT COUPABLE EST `marquerPremierContenu`, qui attend CETTE
+     * fonction EN LIGNE pour savoir s'il doit rendre sa marque à usage unique.
+     * Et comme il la REND quand l'envoi échoue, la sauvegarde suivante la
+     * re-réclame et re-paie l'appel : chaque champ, à chaque fois.
      *
      * ET NEXT SÉRIALISE LES SERVER ACTIONS : tant que la première n'a pas
      * répondu, les suivantes ne partent pas. Mesuré : UN SEUL POST pour six
@@ -215,22 +219,23 @@ export function reinitialiserInstrumentation(): void {
  * dépôt employait déjà ce motif pour l'appel au fournisseur de suivi ;
  * l'instrumentation ne l'avait pas reçu.
  *
- * ⚠️ CE PARAGRAPHE N'EST VRAI QUE DES PAGES, ET IL A ÉTÉ ÉCRIT COMME S'IL
- * L'ÉTAIT DE TOUT — c'est L-014 sur le correctif même qui devait sortir
- * l'analytique du chemin critique, et personne ne l'avait exécuté.
+ * ⚠️ CE PARAGRAPHE DIT VRAI, ET IL A ÉTÉ MIS EN DOUTE À TORT LE 20/09/2026.
  *
- * MESURÉ AU NAVIGATEUR LE 20/09/2026, pendant qu'un envoi PostHog était
- * délibérément retenu : un GET de la fiche de commande a répondu en **952 ms**
- * — le report tient — mais la réponse de la Server Action `enregistrerChamp` a
- * mis **15,5 s**, et **32,4 s** au premier enregistrement d'une commande, qui
- * paie en plus l'émission attendue EN LIGNE de `marquerPremierContenu`. Next
- * ATTEND les rappels d'`after()` avant de terminer la réponse d'une action.
+ * Ce jour-là, six champs saisis dans l'éditeur n'en ont enregistré qu'un, et
+ * j'ai d'abord accusé ce report : « `after()` ne différerait rien dans une
+ * Server Action ». **Faux, mesuré ensuite** — une sauvegarde de numéro de suivi,
+ * dont l'attache pose un `after()` qui DORT 31 secondes, répond en **1,72 s**,
+ * colis bien attaché. Le report fait ce qu'il promet.
  *
- * Conséquence, mesurée elle aussi : Next sérialise les Server Actions, donc
- * **un seul POST est parti pour six champs saisis** — cinq modifications
- * perdues, témoin bloqué sur « Enregistrement… », aucune erreur à l'écran.
+ * LE VRAI COUPABLE ÉTAIT L'APPEL EN LIGNE : `marquerPremierContenu` attend
+ * `emettre()` pour savoir s'il doit rendre sa marque, et il la rend quand
+ * l'envoi échoue — si bien que la sauvegarde suivante la re-réclame et re-paie.
+ * 15,5 s par champ, tant que le tiers ne répondait pas, pendant qu'un GET de la
+ * même page répondait en 952 ms. Next sérialisant les Server Actions, **un seul
+ * POST est parti pour six champs** — cinq modifications perdues en silence.
  *
- * Ce qui borne désormais le dégât est `BORNE_EMISSION_MS`, pas ce report.
+ * Ce qui borne désormais le dégât est `BORNE_EMISSION_MS`, et il borne l'appel
+ * EN LIGNE comme celui qui passe par ici.
  *
  * ⚠️ CE N'EST PAS UN « TIRE ET OUBLIE ». La promesse est confiée à `after`, qui
  * l'attend : `no-floating-promises` reste satisfait, et une promesse non

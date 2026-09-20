@@ -75,6 +75,31 @@ function motifsDeLecture(cle: string): readonly RegExp[] {
   ];
 }
 
+/**
+ * TROISIÈME FORME : LE RÉGLAGE EST LU EN BASE, par une fonction ou un
+ * déclencheur qui interroge `system_settings`.
+ *
+ * Elle a été ajoutée le 20/09/2026 pour `budget_suivi_total`, lu par
+ * `etat_budget_suivi()` et par personne en TypeScript. Sans elle, la garde
+ * aurait exigé un lecteur côté produit là où le bon endroit est la base — et
+ * l'auteur suivant aurait posé un lecteur inutile pour faire taire un test.
+ *
+ * ⚠️ LE MOTIF NE PEUT PAS ÊTRE « LA CLÉ APPARAÎT DANS UNE MIGRATION ». Chaque
+ * clé est CITÉE par le `insert into parametres_admis` qui la déclare : compter
+ * cette occurrence ferait que toute clé se prouverait elle-même, et la garde
+ * passerait à 100 % sans plus rien vérifier — l'ensemble vide qui passe tout,
+ * déguisé. On exige donc la forme d'une LECTURE : `key = '<clé>'`, qui est ce
+ * qu'écrit une fonction qui va chercher la valeur.
+ */
+function litEnBase(cle: string): readonly string[] {
+  const dossier = join(RACINE, "supabase", "migrations");
+  const motif = new RegExp(`key\\s*=\\s*'${cle}'`);
+  return readdirSync(dossier)
+    .filter((f) => f.endsWith(".sql"))
+    .filter((f) => motif.test(readFileSync(join(dossier, f), "utf8").replace(/^\s*--.*$/gm, " ")))
+    .map((f) => "supabase/migrations/" + f);
+}
+
 describe("Chaque réglage modifiable est réellement consommé", () => {
   const code = codeConsommateur();
 
@@ -95,9 +120,12 @@ describe("Chaque réglage modifiable est réellement consommé", () => {
 
   test.each(PARAMETRES.map((p) => p.cle))("« %s » est lu ailleurs que dans son formulaire", (cle) => {
     const motifs = motifsDeLecture(cle);
-    const lecteurs = [...code.entries()]
-      .filter(([, contenu]) => motifs.some((m) => m.test(contenu)))
-      .map(([fichier]) => fichier);
+    const lecteurs = [
+      ...[...code.entries()]
+        .filter(([, contenu]) => motifs.some((m) => m.test(contenu)))
+        .map(([fichier]) => fichier),
+      ...litEnBase(cle),
+    ];
 
     expect(
       lecteurs,
