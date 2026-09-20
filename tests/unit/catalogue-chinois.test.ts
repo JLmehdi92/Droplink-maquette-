@@ -77,8 +77,12 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      international, et les unités de stockage s'écrivent en lettres latines en
      chinois comme ailleurs. */
   ["docs.regLogo", "« Logo » s'écrit ainsi en chinois."],
-  ["docs.plStockageG", "Une unité de stockage : « 1 GB »."],
-  ["docs.plStockageP", "Une unité de stockage : « 50 GB »."],
+  // ⚠️ `docs.plStockageG` et `docs.plStockageP` étaient déclarées ici. Les clés
+  // ont été SUPPRIMÉES le 20/09/2026 : le tableau tarifaire promettait « 1 Go »
+  // et « 50 Go » alors qu'AUCUN plafond de stockage n'existe dans le produit —
+  // l'écran d'administration le déclare lui-même absent. Les exceptions sont
+  // retirées avec elles : une exception périmée couvre le retour du défaut
+  // qu'elle décrivait, et c'est cette garde qui l'a signalé.
   ["connexion.placeholderEmail", "Un exemple d'adresse : il doit ressembler à une adresse."],
   [
     "connexion.suggestionSuffixe",

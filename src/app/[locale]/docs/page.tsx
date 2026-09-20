@@ -350,13 +350,28 @@ export default async function Documentation({
 
             <TitreSection id="plans">{t("plans")}</TitreSection>
             <Paragraphe>{t("plansTexte")}</Paragraphe>
+            {/*
+              ⚠️ CE TABLEAU AVAIT QUATRE LIGNES, ET TROIS ÉTAIENT FAUSSES — servies
+              en production. Vérifiées une à une le 20/09/2026 :
+
+                « 1 Go / 50 Go »        → AUCUN plafond de stockage n'existe. L'écran
+                                          d'administration le déclare lui-même absent.
+                « lien à votre nom »    → `shops.slug` existe en base, AUCUNE route ne
+                                          la sert : l'adresse promise ne répond pas.
+                « Support prioritaire » → aucun système de tickets.
+
+              Et la quatrième mentait des deux côtés depuis les migrations 175-176
+              (« 10 par mois » / « Illimitées »).
+
+              Les deux lignes qui restent sont les deux seules que le produit
+              applique réellement. Un tableau tarifaire n'est pas une feuille de
+              route : c'est un engagement, et celui-ci était déjà public.
+            */}
             <Tableau
               entetes={["", t("planGratuit"), t("planPro")]}
               lignes={[
                 [t("plCommandes"), t("plCommandesG"), t("plCommandesP")],
-                [t("plStockage"), t("plStockageG"), t("plStockageP")],
                 [t("plPage"), t("plPageG"), t("plPageP")],
-                [t("plSupport"), t("plSupportG"), t("plSupportP")],
               ]}
             />
 
