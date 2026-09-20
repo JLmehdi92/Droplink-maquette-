@@ -6,6 +6,55 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 20/09/2026 — DEUX ÉCRANS TOUCHÉS, ET TROIS DÉFAUTS QUE SEULE UNE CAPTURE A VUS
+
+**Écrans :** `/[locale]/passer-pro` (NOUVEAU, planche `seller_app/PassProView.jsx`
+écrite d'abord) · `/marque` (sections 5 et 6 vivantes en Pro) · la barre latérale
+de tout l'espace vendeur.
+
+**Mesure :** `verifier-ecran-migre.mjs` sur `/fr/passer-pro`, `/fr|en|zh-CN/marque`,
+à **1690 et 390 px** — **60 contrôles, code 0**. CSP servie sans violation, aucune
+erreur de console, rien ne disparaît sous `prefers-reduced-motion`.
+
+#### Ce que la MESURE a trouvé, à 390 px seulement
+
+- une police à **11 px** — le plancher du téléphone est **11,5** (règle 5). Le kit
+  descend à 11 px et c'est réservé au bureau : `text-[11.5px] lg:text-[11px]` ;
+- `droplink.fr/votre-boutique/…` **sortait de sa carte**. Trois colonnes ne
+  tiennent pas sur un téléphone : chaque ligne du tableau y devient un BLOC, et
+  ses deux valeurs portent leur nom — sans en-tête de colonne, « Affichée » tout
+  seul ne dit pas de quel plan il parle.
+
+#### ⚠️ CE QUE LES NOMBRES NE POUVAIENT PAS VOIR, ET QU'UNE CAPTURE A MONTRÉ
+
+Les trois relevés sortaient déjà en code 0. Rien ne débordait, rien n'était
+tronqué. La capture, elle, montrait :
+
+1. un bouton **« Upgrade »** dans la barre latérale d'un écran **français**. Le
+   mot venait de la planche (`AppShell.jsx`), recopié dans `fr.json` ; le
+   chinois, lui, était traduit. **Corrigé dans le kit D'ABORD**, produit ensuite ;
+2. ce bouton menait à `/docs#plans` alors qu'un écran répond à la question ;
+3. ⚠️ **la carte « Passez au Pro » s'affichait à un compte qui PAIE DÉJÀ.**
+   Ce n'est pas une maladresse de copie : c'est l'interface qui affirme un état
+   que la base contredit (principe VIII).
+
+*C'est la règle du 12/09 dans sa formulation exacte : « regarder les deux
+captures côte à côte — les nombres établissent qu'un écran ne déborde pas, ils
+ne disent rien de ce qui MANQUE autour ». Ici ce n'était pas un manque mais un
+mot faux et une carte de trop, et aucune soustraction ne pouvait les voir.*
+
+#### La planche se contredisait, et il a fallu trancher
+
+`BrandView.jsx` dessinait la section 5 (« Lien personnalisé ») avec un champ
+**ACTIF** et sa coche de validation, pendant que la section 6 (« Marque
+DropLink ») juste en dessous dessinait un interrupteur **VERROUILLÉ** — pour le
+même compte, sur le même écran. Les deux sont réservées au Pro : elles ne
+peuvent pas être dans deux états à la fois. Un drapeau `PLAN_PRO` (défaut
+`false`) porte désormais les deux états, et `false` est le bon défaut — le reste
+de l'écran décrit un compte gratuit.
+
+---
+
 #### ⚠️ LES NEUF PIÈGES, TOUS PAYÉS UNE FOIS
 
 1. **LE KIT EST DESSINÉ À 1690 px, PAS 1440.** C'est écrit dans l'en-tête de
