@@ -3,6 +3,7 @@ import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -84,6 +85,15 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("inv-alice");
   bob = await creerUtilisateur("inv-bob");
+
+  /*
+   * ⚠️ LES DEUX COMPTES SONT `pro`, parce que ce fichier crée plus de quinze
+   * commandes. Depuis la migration 176, un compte GRATUIT est borné à quinze
+   * À VIE : sans cela, ces invariants rougiraient sur `DL067` en croyant
+   * mesurer l'attribution d'un arbitrage qualité. Le quota a sa propre suite.
+   */
+  await passerEnPro(alice);
+  await passerEnPro(bob);
 }, 120_000);
 
 afterAll(async () => {

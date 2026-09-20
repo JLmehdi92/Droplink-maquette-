@@ -246,6 +246,32 @@ export async function creerUtilisateur(etiquette: string): Promise<UtilisateurDe
   return { email, motDePasse, userId, profilId, shopId, client };
 }
 
+/**
+ * Passe un compte de test au plan `pro`.
+ *
+ * ⚠️ À N'EMPLOYER QUE QUAND LA SUITE A BESOIN DE PLUS DE COMMANDES QUE LE QUOTA
+ * GRATUIT, et à dire dans un commentaire pourquoi.
+ *
+ * Depuis la migration 176, un compte GRATUIT est borné à 15 commandes À VIE
+ * (décision de Wassim du 20/09/2026). Une suite qui en crée davantage sans le
+ * vouloir rougit sur `DL067` — ce qui est le bon comportement du produit, et un
+ * mauvais diagnostic pour la suite : elle croirait mesurer sa propre règle.
+ *
+ * Le marquer `pro` est plus VRAI que commode : une suite qui a besoin de vingt
+ * commandes modélise un vendeur qui travaille, donc un vendeur qui paie. Et
+ * rien n'est encaissé ici non plus — le plan est un état du compte, posé à la
+ * main dans l'administration (contrainte n° 1).
+ */
+export async function passerEnPro(u: UtilisateurDeTest): Promise<void> {
+  const { error } = await clientService()
+    .from("profiles")
+    .update({ plan: "pro" })
+    .eq("id", u.profilId);
+  if (error !== null) {
+    throw new Error("passage en pro impossible pour " + u.email + " : " + error.message);
+  }
+}
+
 export async function supprimerUtilisateur(u: UtilisateurDeTest): Promise<void> {
   /*
    * ⚠️ LA FERMETURE DE SESSION NE DOIT PAS BLOQUER LA SUPPRESSION.

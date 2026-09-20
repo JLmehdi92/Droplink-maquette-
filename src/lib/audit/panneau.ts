@@ -55,6 +55,21 @@ export const PLAFOND_COMMANDES_MENSUEL_DEFAUT = 3_000;
  */
 export const BUDGET_SUIVI_TOTAL_DEFAUT = 200;
 
+/**
+ * Le nombre total de commandes qu'un compte GRATUIT peut créer sur sa vie.
+ *
+ * 15, décision de Wassim du 20/09/2026, et le « à vie » est le coeur de la
+ * décision : un plafond mensuel se contourne en attendant, un plafond à vie se
+ * contourne en recréant un compte — ce qui laisse une trace que l'administration
+ * voit (les comptes en doublon). Le premier contournement est gratuit et
+ * invisible, le second coûte un effort et se repère.
+ *
+ * ⚠️ Un compte `pro` n'est PAS concerné : il retrouve le plafond MENSUEL, parce
+ * qu'un abonnement se renouvelle. Et aucun paiement ne passe par le produit —
+ * le plan est un état du compte, posé à la main dans l'administration.
+ */
+export const PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT = 15;
+
 export interface Alerte {
   readonly genre: string;
   readonly gravite: "critique" | "attention";

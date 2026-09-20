@@ -104,6 +104,14 @@ const CARTES: readonly {
     colonne: "gauche",
     icone: Gauge,
     rangees: [
+      /*
+       * LES DEUX QUOTAS, ET ILS NE MESURENT PAS LA MÊME CHOSE. Le premier
+       * s'applique aux comptes GRATUITS et compte toute leur vie ; le second
+       * aux comptes PRO et compte le mois. Les montrer côte à côte est
+       * délibéré : c'est la seule façon de voir qu'un vendeur n'est jamais
+       * soumis aux deux, et lequel des deux on est en train de changer.
+       */
+      { genre: "reglage", cle: "plafond_commandes_gratuit_a_vie" },
       { genre: "reglage", cle: "plafond_commandes_mensuel" },
       { genre: "absent", id: "stockage_par_compte" },
       { genre: "constate", id: "medias_par_commande" },

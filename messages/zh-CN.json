@@ -1372,6 +1372,10 @@
           "titre": "每月订单数",
           "aide": "超出后将拒绝创建"
         },
+        "plafond_commandes_gratuit_a_vie": {
+          "titre": "免费订单（终身）",
+          "aide": "免费账户终身可创建的总数"
+        },
         "budget_suivi_total": {
           "titre": "追踪额度（终身）",
           "aide": "服务商套餐允许的登记总数"

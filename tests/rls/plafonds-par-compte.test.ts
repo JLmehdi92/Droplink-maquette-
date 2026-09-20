@@ -66,6 +66,21 @@ async function abaisserPlafondCommandes(valeur: number): Promise<void> {
 beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("plafond-alice");
+
+  /*
+   * ⚠️ ALICE EST PASSÉE EN `pro`, ET CE N'EST PAS UN CONTOURNEMENT.
+   *
+   * Depuis la migration 176, le plafond MENSUEL est celui des comptes payants :
+   * un compte gratuit relève d'un quota À VIE (15), qui est une autre règle,
+   * avec un autre code d'erreur. Laisser Alice gratuite ferait mesurer à ce
+   * fichier la règle qu'il ne décrit pas — il rougirait sur `DL067` en croyant
+   * parler du plafond mensuel, ou pire, il passerait pour la mauvaise raison.
+   *
+   * Le quota à vie a sa propre suite, `quota-gratuit.test.ts`.
+   */
+  await interroger(catalogue, "update public.profiles set plan = 'pro' where id = $1", [
+    alice.profilId,
+  ]);
 }, 120_000);
 
 afterAll(async () => {

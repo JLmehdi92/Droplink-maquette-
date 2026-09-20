@@ -280,6 +280,16 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "lire, et une contrainte ne s'évalue qu'à l'écriture.",
     ],
     [
+      "lire_plafond_gratuit_a_vie",
+      "Le quota À VIE d'un compte gratuit (15 par défaut), lu par le même " +
+        "déclencheur `verifier_plafond_commandes` et pour la même raison que " +
+        "`lire_plafond_commandes` : il s'exécute avec le rôle du VENDEUR, qui " +
+        "n'a aucun droit sur `system_settings`. Le défaut a existé UNE JOURNÉE, " +
+        "entre les migrations 175 et 176, et il empêchait toute création de " +
+        "commande (42501). N'expose qu'un nombre de configuration, le même pour " +
+        "tout le monde. `anon` n'y a pas droit : il ne crée aucune commande.",
+    ],
+    [
       "lire_plafond_commandes",
       "Le plafond mensuel de commandes, lu par le déclencheur `verifier_plafond_" +
         "commandes` — qui s'exécute avec le rôle du VENDEUR qui insère. Sans ce " +

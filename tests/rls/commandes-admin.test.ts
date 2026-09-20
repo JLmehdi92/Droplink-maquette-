@@ -3,6 +3,7 @@ import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -78,6 +79,14 @@ beforeAll(async () => {
   admin = await creerUtilisateur("commandes-admin");
   vendeur = await creerUtilisateur("commandes-vendeur");
   voisin = await creerUtilisateur("commandes-voisin");
+
+  /*
+   * ⚠️ `pro`, parce que la pagination par curseur ne se mesure qu'au-delà
+   * d'une page — donc bien au-delà des quinze commandes À VIE d'un compte
+   * gratuit (migration 176). Le quota a sa propre suite.
+   */
+  await passerEnPro(vendeur);
+  await passerEnPro(voisin);
 
   await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [
     admin.profilId,

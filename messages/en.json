@@ -1372,6 +1372,10 @@
           "titre": "Orders per month",
           "aide": "Beyond this, creation is refused"
         },
+        "plafond_commandes_gratuit_a_vie": {
+          "titre": "Free orders (lifetime)",
+          "aide": "Total over the life of a free account"
+        },
         "budget_suivi_total": {
           "titre": "Tracking budget (lifetime)",
           "aide": "Total pickups the provider plan allows"

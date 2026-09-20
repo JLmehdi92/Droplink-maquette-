@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import {
   BUDGET_SUIVI_TOTAL_DEFAUT,
+  PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT,
   PLAFOND_COMMANDES_MENSUEL_DEFAUT,
   RETARD_VEILLEUR_MINUTES_DEFAUT,
   SEUIL_COLIS_DEFAUT,
@@ -123,6 +124,17 @@ export const PARAMETRES: readonly DefinitionParametre[] = [
     defaut: 1,
     min: 0,
     max: 1,
+  },
+  {
+    cle: "plafond_commandes_gratuit_a_vie",
+    nature: "nombre",
+    defaut: PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT,
+    // 1 et non 0 : à zéro, un compte gratuit ne pourrait rien créer, donc
+    // l'inscription ouvrirait sur un produit inutilisable — et personne ne paie
+    // pour un produit qu'il n'a pas pu essayer.
+    min: 1,
+    // Au-delà, le plafond ne borne plus rien.
+    max: 100_000,
   },
   {
     cle: "budget_suivi_total",

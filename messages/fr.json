@@ -1372,6 +1372,10 @@
           "titre": "Commandes par mois",
           "aide": "Au-delà, la création est refusée"
         },
+        "plafond_commandes_gratuit_a_vie": {
+          "titre": "Commandes gratuites (à vie)",
+          "aide": "Total sur la vie d'un compte gratuit"
+        },
         "budget_suivi_total": {
           "titre": "Budget de suivi (à vie)",
           "aide": "Prises en charge que le palier autorise en tout"

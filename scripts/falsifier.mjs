@@ -828,6 +828,44 @@ const SQL = {
   },
 
   /** La stabilité ne compte plus : un numéro en cours de saisie se paie. */
+  /*
+   * LE QUOTA GRATUIT N'EST PLUS À VIE — il redevient mensuel, comme avant la
+   * décision du 20/09/2026. Un vendeur qui a épuisé ses quinze commandes
+   * recommence le 1er du mois, et le quota ne sert plus à rien : c'est
+   * exactement ce que « à vie » existe pour empêcher.
+   */
+  "quota-gratuit-mensuel": {
+    casserDepuisMigration: {
+      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      remplacer: "    from public.orders\n    where shop_id = new.shop_id;\n",
+      par: "    from public.orders\n    where shop_id = new.shop_id\n      and created_at >= date_trunc('month', now());\n",
+    },
+    reparerDepuisMigration: {
+      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+    },
+  },
+
+  /*
+   * LE PLAN NE DÉBLOQUE PLUS RIEN : le quota à vie s'applique à TOUT LE MONDE,
+   * comptes payants compris. Le produit refuserait alors la seizième commande
+   * d'un vendeur qui vient de payer — la pire défaillance possible pour un
+   * mécanisme dont l'unique raison d'être est de faire payer.
+   */
+  "plan-ne-debloque-rien": {
+    casserDepuisMigration: {
+      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      remplacer: "  if v_plan = 'gratuit' then\n",
+      par: "  if true then\n",
+    },
+    reparerDepuisMigration: {
+      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+    },
+  },
+
   "numero-instable-paye": {
     casserDepuisMigration: {
       fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
@@ -2631,18 +2669,24 @@ $$;
    * plafond qui MENT sur sa valeur ne se voit qu au moment ou un fournisseur se
    * fait refuser une commande qu on croyait avoir autorisee.
    */
+  /*
+   * ⚠️ CETTE CIBLE VISAIT LA 096 JUSQU'AU 20/09/2026, et la méta-garde a eu
+   * raison de la refuser : les migrations 175-176 redéfinissent
+   * `verifier_plafond_commandes` pour faire dépendre le quota du PLAN. Réparer
+   * depuis la 096 aurait ramené le produit en arrière — le plafond serait
+   * redevenu mensuel pour tout le monde, silencieusement, et le falsificateur
+   * aurait laissé derrière lui le défaut qu'il prétendait avoir réparé.
+   */
   "plafond-commandes-en-dur": {
     casserDepuisMigration: {
-      fichier: "096_le_plafond_se_lit_sans_etre_admin.sql",
+      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
-      jusqua: "comment on function",
       remplacer: "  v_plafond := public.lire_plafond_commandes();",
       par: "  v_plafond := 3000;",
     },
     reparerDepuisMigration: {
-      fichier: "096_le_plafond_se_lit_sans_etre_admin.sql",
+      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
-      jusqua: "comment on function",
     },
   },
 
