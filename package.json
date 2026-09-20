@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node scripts/suite.mjs unit",
     "test:rls": "node scripts/suite.mjs rls",
-    "test:perf": "vitest run --project perf",
+    "test:perf": "node scripts/suite.mjs perf",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:types": "node scripts/db-types.mjs",
     "gates": "node scripts/portes.mjs",

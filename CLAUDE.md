@@ -30,7 +30,7 @@ pnpm lint             # eslint
 pnpm typecheck        # tsc --noEmit — zéro erreur tolérée
 pnpm test             # projet unit — REFUSE un test sauté, todo, ou une suite vide
 pnpm test:rls         # suites BLOQUANTES d'isolation — jamais désactivables
-pnpm test:perf        # mesures (~10 min) — PAS une porte de commit, voir ci-dessous
+pnpm test:perf        # mesures (~15 min) — PAS une porte, mais gardée : voir ci-dessous
 pnpm db:migrate       # applique les migrations — ⚠️ EN PRODUCTION
 pnpm db:migrate:tests # les applique à la base de TESTS (refuse toute autre cible)
 pnpm db:types         # régénère les types Supabase — depuis la PRODUCTION
@@ -53,6 +53,24 @@ pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 > `public.<fonction>(…)` du banc résout encore, **nom ET arité**. Le reste — les
 > temps, les plans, les lignes lues — reste dans `test:perf`, **à relancer à
 > chaque reprise de séance**, pas seulement en fin de phase.
+>
+> ⚠️ **ET ÇA S'EST REPRODUIT LE 20/09/2026, PAR UNE AUTRE PORTE.** Les migrations
+> 175-176 et 181 bornent un compte **gratuit** à 15 commandes et 30 colis **À
+> VIE**. Le banc en sème des milliers pour savoir si l'écran tient : ses quatre
+> fichiers ont cessé de se charger, et vitest a rendu **« 6 passed | 48
+> skipped »**. Six sur cinquante-quatre, présenté comme un succès partiel.
+>
+> Ce n'était pas l'arité cette fois, c'étaient les **FIXTURES refusées par une
+> règle métier neuve** — et aucune garde ne pouvait le voir, parce que
+> `test:perf` court-circuitait `scripts/suite.mjs`.
+>
+> **`pnpm test:perf` PASSE DÉSORMAIS PAR LE MÊME GARDE que `test` et
+> `test:rls`** : saut refusé, todo refusé, suite vide refusée, et un plancher de
+> 45 mesures qui rougit quand un fichier entier disparaît. La correction du banc
+> lui-même n'est pas un contournement : **les comptes du banc sont Pro**, parce
+> qu'un vendeur à 9 600 commandes l'est par construction. Le plafond MENSUEL du
+> plan Pro, lui, continue de s'appliquer — c'est pour lui que le semis étale ses
+> lignes sur treize mois.
 
 > ⚠️ **UN TEST SAUTÉ N'EST PAS UN TEST QUI PASSE.** Une exécution a rendu
 > `589 passed | 22 skipped` là où les 611 passent — aucun échec, statut 0, porte

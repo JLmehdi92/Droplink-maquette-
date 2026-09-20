@@ -4,8 +4,7 @@ import { ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
   supprimerUtilisateur,
-  type UtilisateurDeTest,
-} from "../aide/utilisateurs";
+  type UtilisateurDeTest, passerEnPro } from "../aide/utilisateurs";
 import { seriesConcordantes } from "../aide/series";
 
 /**
@@ -165,6 +164,23 @@ beforeAll(async () => {
   alice = await creerUtilisateur("echelle-alice");
   voisin = await creerUtilisateur("echelle-voisin");
 
+  /*
+   * ⚠️ LES COMPTES DU BANC SONT PRO, ET CE N'EST PAS UN CONTOURNEMENT.
+   *
+   * Depuis les migrations 175-176 et 181 (20/09/2026), un compte GRATUIT est
+   * borné à 15 commandes À VIE et 30 colis À VIE. Le banc en sème des milliers
+   * pour savoir si l'écran tient : le semis echouait donc a la seizieme ligne,
+   * et les 48 mesures partaient en SAUT — un test saute n'est pas un test qui
+   * passe, et `test:perf` n'etant pas une porte, personne ne l'aurait vu.
+   *
+   * Le rendre Pro n'excuse pas le plafond, il decrit le bon compte : un vendeur
+   * a 9 600 commandes EST Pro, par construction. Le plafond MENSUEL du plan Pro
+   * (3 000) reste applique, et c'est pour lui que le semis etale ses lignes sur
+   * treize mois.
+   */
+  await passerEnPro(alice);
+  await passerEnPro(voisin);
+
   await semerAuPlafond(alice, "alice");
   await semerAuPlafond(voisin, "voisin");
 
@@ -188,6 +204,23 @@ beforeAll(async () => {
      from generate_series(1, $2) as i`,
     [PREFIXE, BOUTIQUES],
   );
+
+  /*
+   * ⚠️ LES MILLE BOUTIQUES SONT PRO, PAR LE MÊME RAISONNEMENT QUE LES DEUX
+   * COMPTES NOMMÉS — et il faut le geste EN PLUS ici, parce que celles-ci
+   * naissent du déclencheur d'inscription, donc en `gratuit`.
+   *
+   * Depuis les migrations 175-176, un compte gratuit est borné à 15 commandes À
+   * VIE : le semis suivant échouait à la seizième ligne de la première
+   * boutique, et les seize mesures de ce fichier partaient en SAUT.
+   *
+   * ⚠️ ET IL SE FAIT EN SQL DIRECT, PAS PAR `passerEnPro`. `profiles.plan`
+   * n'est accordée en écriture à personne — c'est un privilège de COLONNE, et
+   * c'est ce qui empêche un vendeur de se passer Pro. Le propriétaire de la
+   * table le garde ; mille appels REST, eux, prendraient des minutes pour un
+   * jeu qu'on monte à chaque exécution.
+   */
+  await bd.query(`update public.profiles set plan = 'pro' where email like $1 || '%'`, [PREFIXE]);
 
   /*
    * PAR LOTS, et ce n'est pas une élégance : mesuré, les deux cent mille lignes

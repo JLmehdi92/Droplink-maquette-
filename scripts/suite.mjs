@@ -17,11 +17,20 @@
 // Vitest ne sait pas echouer sur un test saute — il n existe aucun drapeau pour
 // ca. On lui demande donc son rapport en JSON, et on tranche nous-memes.
 //
-// ⚠️ CE SCRIPT NE COUVRE QUE LES SUITES DES PORTES (`unit` et `rls`). Le projet
-// `r2` porte un `describe.runIf` deliberé — il ne peut pas tourner sans
-// identifiants Cloudflare, et exiger zero saut la-bas rendrait la commande
-// impossible a lancer pour qui n a pas de compte tiers. Une regle qui ne
-// s applique pas partout doit dire OU elle s applique, et pourquoi.
+// ⚠️ CE SCRIPT COUVRE `unit`, `rls` ET — depuis le 20/09/2026 — `perf`.
+//
+// `perf` N EST PAS UNE PORTE, et c est precisement pourquoi il en a besoin.
+// Ce jour-la, les migrations 175-176 et 181 ont borne un compte GRATUIT a 15
+// commandes A VIE. Le banc en seme des milliers pour savoir si l ecran tient :
+// ses quatre fichiers ont cesse de se charger, et vitest a rendu
+// « 6 passed | 48 skipped ». Six sur cinquante-quatre, presente comme un succes
+// partiel. Personne ne l aurait vu — le banc ne tourne pas a chaque commit, et
+// c est deja comme ca qu il etait reste rouge plusieurs jours en aout.
+//
+// Le projet `r2` reste EXCLU : son `describe.runIf` est deliberé — il ne peut
+// pas tourner sans identifiants Cloudflare, et exiger zero saut la-bas rendrait
+// la commande impossible a lancer pour qui n a pas de compte tiers. Une regle
+// qui ne s applique pas partout doit dire OU elle s applique, et pourquoi.
 
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync, rmSync } from "node:fs";
@@ -32,8 +41,8 @@ import { tmpdir } from "node:os";
 const racine = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const projet = process.argv[2];
-if (projet !== "unit" && projet !== "rls") {
-  console.error("usage : node scripts/suite.mjs <unit|rls>");
+if (projet !== "unit" && projet !== "rls" && projet !== "perf") {
+  console.error("usage : node scripts/suite.mjs <unit|rls|perf>");
   process.exit(1);
 }
 
@@ -105,7 +114,10 @@ if (total === 0) griefs.push("la suite n a trouve AUCUN test : elle ne prouve ri
  * message dit quoi faire, et l abaisser est un geste DELIBERE, inscrit dans un
  * commit. Un plancher qu on met a jour sans y penser ne borne rien.
  */
-const PLANCHERS = { unit: 400, rls: 600 };
+// `perf` est a 54 depuis le 17/09/2026. Le plancher est volontairement proche :
+// ce banc ne grossit pas comme les autres suites, et sa facon de disparaitre est
+// justement qu un fichier entier cesse de se charger — douze mesures d un coup.
+const PLANCHERS = { unit: 400, rls: 600, perf: 45 };
 const plancher = PLANCHERS[projet];
 if (plancher !== undefined && total < plancher) {
   griefs.push(

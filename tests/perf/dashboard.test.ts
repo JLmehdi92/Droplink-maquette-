@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { ouvrirConnexionCatalogue } from "../aide/base";
-import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
+import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest, passerEnPro} from "../aide/utilisateurs";
 import { seriesConcordantes } from "../aide/series";
 
 /**
@@ -158,6 +158,23 @@ beforeAll(async () => {
   bd = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("perf-alice");
   voisin = await creerUtilisateur("perf-voisin");
+
+  /*
+   * ⚠️ LES COMPTES DU BANC SONT PRO, ET CE N'EST PAS UN CONTOURNEMENT.
+   *
+   * Depuis les migrations 175-176 et 181 (20/09/2026), un compte GRATUIT est
+   * borné à 15 commandes À VIE et 30 colis À VIE. Le banc en sème des milliers
+   * pour savoir si l'écran tient : le semis echouait donc a la seizieme ligne,
+   * et les 48 mesures partaient en SAUT — un test saute n'est pas un test qui
+   * passe, et `test:perf` n'etant pas une porte, personne ne l'aurait vu.
+   *
+   * Le rendre Pro n'excuse pas le plafond, il decrit le bon compte : un vendeur
+   * a 9 600 commandes EST Pro, par construction. Le plafond MENSUEL du plan Pro
+   * (3 000) reste applique, et c'est pour lui que le semis etale ses lignes sur
+   * treize mois.
+   */
+  await passerEnPro(alice);
+  await passerEnPro(voisin);
 
   await semer(alice, "alice");
   // LE COMPTE VOISIN, de même volumétrie. Sans lui, la mesure décrirait une base
