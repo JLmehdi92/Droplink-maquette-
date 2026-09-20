@@ -557,6 +557,35 @@ profiles            id, user_id, email, account_type (supplier|reseller),
 shops               id, owner_id (UNIQUE), name, slug, logo_url, accent_color,
                     default_language, watermark_enabled
 
+shop_slugs          id, shop_id, slug (UNIQUE), created_at
+                    ⚠️ AJOUTÉE LE 20/09/2026 (migration 182) — le LIEN AU NOM DU
+                    VENDEUR, fonctionnalité Pro : `droplink.fr/atelier-nord/xK9…`
+                    au lieu de `droplink.fr/p/xK9…`.
+                    ELLE GARDE TOUS LES NOMS QU'UNE BOUTIQUE A PORTÉS, y compris
+                    ceux qu'elle a abandonnés. `shops.slug` porte le nom COURANT
+                    — c'est lui qu'on AFFICHE — et cette table sert à RÉSOUDRE.
+                    Confondre les deux ferait soit afficher un ancien nom, soit
+                    casser un ancien lien.
+                    ⚠️ UN NOM ABANDONNÉ RESTE RÉSERVÉ À VIE, et c'est le prix
+                    assumé de la promesse. Un lien brandé part dans le message
+                    privé d'un CLIENT — quelqu'un qui n'a pas de compte, n'a rien
+                    demandé, et ne sera jamais prévenu : ce qui est parti doit
+                    continuer de répondre. C'est la règle du `public_token`
+                    immuable, vue depuis l'autre bout. Laisser un concurrent
+                    reprendre « atelier-nord » ferait atterrir les anciens
+                    clients chez lui.
+                    ⚠️ ET LE SERVICE NE DÉPEND PAS DU PLAN. Le plan garde la
+                    CRÉATION du nom (DL059), jamais sa RÉSOLUTION : un vendeur
+                    qui repasse en gratuit voit ses liens déjà envoyés continuer
+                    de répondre. L'inverse punirait les clients d'un tiers pour
+                    une résiliation qu'ils ignorent.
+                    RLS activée ET forcée. Une seule policy, en LECTURE, pour le
+                    vendeur propriétaire : aucune écriture directe, tout passe
+                    par `definir_slug_boutique` qui vérifie le plan. Un vendeur
+                    qui pourrait insérer ici se donnerait la fonctionnalité — et
+                    surtout pourrait RÉSERVER le nom d'un concurrent,
+                    définitivement.
+
 orders              id, shop_id, public_token (unique, nanoid 16+, IMMUABLE),
                     customer_label, product_ref, internal_notes, status,
                     tracking_number, carrier_code, qc_status, cover_media_id,

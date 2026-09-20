@@ -1,4 +1,5 @@
 import "server-only";
+import { lienPageClient } from "@/lib/liens/page-client";
 import { lireCommandes, ParametresListe, type ClientLecture } from "./liste";
 
 /**
@@ -105,6 +106,16 @@ export interface ResultatExport {
 export async function exporterCommandes(
   parametres: ParametresListe,
   origine: string,
+  /**
+   * Le nom de lien de la boutique, `null` si aucun n'a ete pose.
+   *
+   * ⚠️ IL COMPTE PLUS ICI QU'AILLEURS. Un export CSV SORT du produit : ses
+   * lignes finissent dans un tableur, puis dans des messages envoyes aux
+   * clients. Une adresse `/p/<jeton>` exportee par un vendeur qui a pose son
+   * nom ne serait pas fausse — elle repond — mais elle annulerait, commande
+   * par commande, ce pour quoi il a paye.
+   */
+  nomDeLien: string | null,
   client?: ClientLecture,
 ): Promise<ResultatExport> {
   const lignes: string[] = [ENTETES.join(",")];
@@ -135,7 +146,7 @@ export async function exporterCommandes(
           cellule(l.archiveeLe),
           cellule(l.vues),
           cellule(l.derniereVueLe),
-          cellule(origine + "/p/" + l.jetonPublic),
+          cellule(lienPageClient(origine, l.jetonPublic, nomDeLien)),
         ].join(","),
       );
       total += 1;

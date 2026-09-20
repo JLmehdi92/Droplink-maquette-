@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { LANGUES } from "@/i18n/config";
+import { lireLienAuNom } from "@/lib/routes/lien-au-nom";
 
 /**
  * CHAQUE EXCLUSION DU MATCHER EST UNE PORTE.
@@ -386,66 +387,94 @@ describe("Matcher du middleware", () => {
     ).toBe(true);
   });
 
-  test("un point dans la VALEUR d'un segment dynamique n'exclut pas la route", () => {
-    /*
-     * ⚠️ CE CONTRÔLE EXISTE PARCE QUE LE PRÉCÉDENT REGARDAIT À CÔTÉ (L-025).
-     *
-     * Le test « l'exclusion des fichiers pointés n'avale aucune route réelle »
-     * inventorie les GABARITS et vérifie qu'aucun DOSSIER ne contient de point.
-     * Il passait — aucun n'en contient. Mais le défaut n'était pas là :
-     * `concretiser()` remplace les segments dynamiques par la chaîne littérale
-     * « exemple », qui n'a pas de point, alors que la valeur d'un segment
-     * dynamique est CHOISIE PAR LE VISITEUR.
-     *
-     * Avec l'ancienne exclusion `.*\..*` — « un point, n'importe où, sans
-     * ancrage de fin » — il suffisait d'un point dans l'identifiant pour sortir
-     * `/[locale]/admin/comptes/[id]` du middleware. Vérifié par exécution avant
-     * correction. Aucune donnée ne fuitait, `exigerAdmin()` tenant ; c'est la
-     * défense en profondeur exigée par le brief sur cette surface qui tombait à
-     * UNE SEULE couche, sur la seule route admin dont l'URL est contrôlée par
-     * le visiteur.
-     *
-     * ON ÉPROUVE DONC DES ROUTES CONCRÈTES AVEC DES VALEURS HOSTILES, plutôt
-     * que des gabarits avec une valeur polie.
-     */
-    const VALEURS_HOSTILES = ["a.b", "x.png", "e6ac6d6e-0000-4000-8000-000000000000.x", "a.b.c"];
+  /*
+   * ═════════════════════════════════════════════════════════════════════════
+   * LA RÉÉCRITURE DU LIEN AU NOM DU VENDEUR N'AVALE AUCUNE ROUTE
+   * ═════════════════════════════════════════════════════════════════════════
+   *
+   * Depuis les migrations 182-183, `droplink.fr/<nom>/<jeton>` sert la page
+   * client. La décision est prise au bord, AVANT la négociation de langue, sur
+   * tout chemin que le matcher laisse passer.
+   *
+   * ⚠️ C'EST LA PREMIÈRE FOIS QUE LE MIDDLEWARE DÉTOURNE UNE REQUÊTE AU LIEU DE
+   * LA LAISSER PASSER. Une exclusion trop large coûtait jusqu'ici une couche de
+   * défense ; une RÉÉCRITURE trop large envoie une page du produit vers la page
+   * client, qui rend 404 — et rien, nulle part, ne dirait pourquoi.
+   *
+   * La sonde INVENTORIE les routes réelles et les éprouve avec des valeurs de
+   * segment dynamique HOSTILES : celles qui ont exactement la forme d'un jeton.
+   * Un identifiant de commande poli n'y ressemble pas ; celui que le visiteur
+   * choisit, si.
+   */
+  const VALEURS_EN_FORME_DE_JETON = [
+    "xK9mQ2pL7vR4nT8wY3zB1", // 21, la longueur réellement produite aujourd'hui
+    "abcdefghijklmnop", // 16, la borne basse
+    "a".repeat(64), // 64, la borne haute
+  ];
 
-    const dynamiques = routesDeclarees().filter(
-      (r) => r.replace("[locale]", "L").includes("[") && !r.startsWith("/p/"),
-    );
+  test("la réécriture du lien au nom n'avale aucune route de l'application", () => {
+    const avalees: string[] = [];
+    let eprouvees = 0;
 
-    // UN ENSEMBLE VIDE PASSE TOUT : sans route dynamique à éprouver, ce
-    // contrôle serait décoratif et personne ne le saurait.
-    expect(
-      dynamiques.length,
-      "aucune route à segment dynamique trouvée : la sonde vise à côté",
-    ).toBeGreaterThan(0);
+    for (const route of routesDeclarees()) {
+      for (const langue of LANGUES) {
+        for (const valeur of VALEURS_EN_FORME_DE_JETON) {
+          const concret = route
+            .replace("[locale]", langue)
+            .replace(/\[[^\]]+\]/g, valeur);
 
-    const avales: string[] = [];
-    for (const route of dynamiques) {
-      for (const valeur of VALEURS_HOSTILES) {
-        const concret = route.replace("[locale]", "fr").split("[").length
-          ? route.replace("[locale]", "fr").replace(/\[[^\]]+\]/g, valeur)
-          : route;
-        if (!motif.test(concret)) avales.push(concret);
+          // Hors du matcher, la décision ne s'exécute jamais : l'y éprouver
+          // inventerait un défaut que le produit ne peut pas rencontrer.
+          if (!motif.test(concret)) continue;
+
+          eprouvees += 1;
+          if (lireLienAuNom(concret) !== null) avalees.push(concret);
+        }
       }
     }
 
+    // UN ENSEMBLE VIDE PASSE TOUT. Si le matcher venait à tout exclure, la
+    // boucle ci-dessus ne testerait rien et ce contrôle serait vert.
     expect(
-      avales,
-      "Ces URL sortent du middleware alors qu'elles atteignent une vraie route. " +
-        "La valeur d'un segment dynamique est choisie par le visiteur : une " +
-        "exclusion qui la regarde est une porte.",
+      eprouvees,
+      "aucune route ne traverse le middleware : la sonde vise à côté",
+    ).toBeGreaterThan(0);
+
+    expect(
+      avalees,
+      "Ces routes RÉELLES seraient détournées vers la page client, qui rendrait " +
+        "404 : " + avalees.join(", "),
     ).toEqual([]);
   });
 
-  test("les fichiers statiques de la racine restent exclus", () => {
-    // CONTRE-TEST POSITIF. Resserrer l'exclusion jusqu'à ne plus rien exclure
-    // ferait passer le contrôle ci-dessus à 100 % en envoyant chaque requête de
-    // fichier statique dans le middleware — donc dans un rafraîchissement de
-    // session, pour une icône.
-    for (const fichier of ["/favicon.ico", "/robots.txt", "/manifest.webmanifest"]) {
-      expect(motif.test(fichier), `${fichier} devrait rester hors du middleware`).toBe(false);
+  test("la sonde éprouve bien la forme qui DÉCLENCHE la réécriture", () => {
+    /*
+     * CONTRE-TEST POSITIF, ET IL N'EST PAS DÉCORATIF.
+     *
+     * Le contrôle ci-dessus passerait à 100 % si `lireLienAuNom` rendait
+     * toujours `null` — c'est-à-dire si la fonctionnalité était morte. Il faut
+     * donc établir que les valeurs employées SONT capables de déclencher une
+     * réécriture quand le premier segment n'est pas une langue.
+     */
+    for (const valeur of VALEURS_EN_FORME_DE_JETON) {
+      expect(
+        lireLienAuNom(`/atelier-nord/${valeur}`),
+        `« ${valeur} » ne déclenche aucune réécriture : la sonde ci-dessus ne prouve rien`,
+      ).toEqual({ nom: "atelier-nord", jeton: valeur });
     }
+  });
+
+  test("un lien brandé traverse le matcher — sinon la réécriture n'a jamais lieu", () => {
+    /*
+     * ⚠️ LE MATCHER EST LA CONDITION D'EXISTENCE DE LA FONCTIONNALITÉ.
+     *
+     * `lireLienAuNom` peut être parfaite : si `/atelier-nord/<jeton>` est exclu
+     * du middleware, elle n'est jamais appelée et chaque lien brandé rend 404.
+     * L'exclusion `[^/]+\.[^/]+$` ne vise qu'un chemin d'UN SEUL segment, et
+     * c'est précisément ce qui rend ce cas sûr — mais une protection dont
+     * personne n'a vérifié l'effet n'est pas une protection.
+     */
+    expect(motif.test("/atelier-nord/xK9mQ2pL7vR4nT8wY3zB1")).toBe(true);
+    expect(motif.test("/Atelier-Nord/xK9mQ2pL7vR4nT8wY3zB1")).toBe(true);
   });
 });

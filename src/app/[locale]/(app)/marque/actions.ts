@@ -4,7 +4,12 @@ import { revalidatePath } from "next/cache";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
-import { appliquerReglagesMarque, ReglagesMarque } from "@/lib/boutique/reglages";
+import {
+  appliquerReglagesMarque,
+  definirNomDeLien,
+  NomDeLien,
+  ReglagesMarque,
+} from "@/lib/boutique/reglages";
 import {
   CleDeposee,
   confirmerDepotDeLogo,
@@ -41,7 +46,20 @@ import { ACCENTS_PAR_DEFAUT_HISTORIQUES } from "@/lib/design/contraste";
 export type ResultatMarque =
   | { statut: "inactif" }
   | { statut: "enregistre" }
-  | { statut: "erreur"; motif: "saisie" | "session" | "ecriture"; champs?: readonly string[] };
+  | {
+      statut: "erreur";
+      motif: "saisie" | "session" | "ecriture";
+      champs?: readonly string[];
+      /**
+       * Pourquoi le NOM DE LIEN a été refusé, quand c'est lui qui l'a été.
+       *
+       * ⚠️ « Quelque chose ne va pas » oblige le vendeur à deviner, et ici il
+       * ne peut pas : « atelier-nord » et « atelier--nord » se ressemblent, et
+       * « déjà pris » ne se corrige pas de la même façon que « forme
+       * invalide ». C'est la même raison qui a fait nommer les champs en échec.
+       */
+      detail?: "nom-invalide" | "nom-pris" | "nom-pro";
+    };
 
 export async function enregistrerMarque(
   _precedent: ResultatMarque,
@@ -78,6 +96,42 @@ export async function enregistrerMarque(
   }
 
   const supabase = await creerClientServeur();
+
+  /*
+   * ⚠️ LE NOM DE LIEN S'ÉCRIT EN PREMIER, ET L'ORDRE EST UNE DÉCISION.
+   *
+   * C'est la seule écriture de cet écran qui peut échouer pour une raison que
+   * le vendeur ne contrôle pas : le nom qu'il veut peut appartenir à quelqu'un
+   * d'autre. La poser en dernier laisserait cinq réglages appliqués et un
+   * message d'erreur à l'écran — le vendeur ne saurait plus ce qui a été
+   * enregistré, ce que le principe XII interdit exactement.
+   *
+   * ⚠️ LE CHAMP EST ABSENT POUR UN COMPTE GRATUIT, et son absence ne vaut pas
+   * erreur. Le formulaire ne lui donne pas de `name` : rien ne part, et rien ne
+   * serait accepté si quelque chose partait — la base refuse en DL059. Un champ
+   * désactivé à l'écran mais soumis quand même est la façon la plus courante de
+   * croire qu'on a fermé une porte.
+   */
+  const nomBrut = donnees.get("nomDeLien");
+  if (nomBrut !== null) {
+    const analyseNom = NomDeLien.safeParse(nomBrut);
+    if (!analyseNom.success) {
+      return { statut: "erreur", motif: "saisie", champs: ["nomDeLien"], detail: "nom-invalide" };
+    }
+
+    const issue = await definirNomDeLien(supabase, analyseNom.data, profil.nomDeLien);
+    if (issue === "invalide") {
+      return { statut: "erreur", motif: "saisie", champs: ["nomDeLien"], detail: "nom-invalide" };
+    }
+    if (issue === "deja-pris") {
+      return { statut: "erreur", motif: "saisie", champs: ["nomDeLien"], detail: "nom-pris" };
+    }
+    if (issue === "reserve-pro") {
+      return { statut: "erreur", motif: "saisie", champs: ["nomDeLien"], detail: "nom-pro" };
+    }
+    if (issue === "echec") return { statut: "erreur", motif: "ecriture" };
+  }
+
   const ecrit = await appliquerReglagesMarque(supabase, profil.shopId, analyse.data);
   if (!ecrit) return { statut: "erreur", motif: "ecriture" };
 

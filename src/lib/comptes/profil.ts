@@ -57,6 +57,16 @@ export type ProfilVendeur = {
   /** Le vendeur Pro a retiré la carte « Propulsé par DropLink » de ses pages client. */
   readonly marqueMasquee: boolean;
   /**
+   * Le nom de lien de la boutique — `droplink.fr/<nom>/<jeton>` au lieu de
+   * `/p/<jeton>` (migrations 182-184). `null` tant qu'aucun n'a été posé.
+   *
+   * ⚠️ IL EST LU SANS REGARDER LE PLAN, ET C'EST VOULU. Le plan commande la
+   * CRÉATION du nom, jamais son SERVICE : un vendeur repassé en gratuit garde
+   * un nom qui résout, et lui réafficher `/p/<jeton>` lui ferait envoyer une
+   * seconde adresse pour une commande dont ses clients ont déjà la première.
+   */
+  readonly nomDeLien: string | null;
+  /**
    * Langue des pages que voient les CLIENTS, distincte de `langue` qui habille
    * l'interface du vendeur. Un fournisseur peut travailler en anglais et livrer
    * en France ; confondre les deux ne se voit jamais côté vendeur.
@@ -197,7 +207,7 @@ export async function lireEtatDuCompteAvec(
     supabase
       .from("profiles")
       .select(
-        "id, email, nom_affiche, account_type, status, locale, plan, shops(id, name, description, logo_url, accent_color, watermark_enabled, hide_droplink_brand, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
+        "id, email, nom_affiche, account_type, status, locale, plan, shops(id, name, slug, description, logo_url, accent_color, watermark_enabled, hide_droplink_brand, default_language, instagram_url, tiktok_url, whatsapp_url, site_url)",
       )
       .maybeSingle(),
   ]);
@@ -258,6 +268,7 @@ export async function lireEtatDuCompteAvec(
   const s = shop as {
     id: string;
     name: string | null;
+    slug: string | null;
     description: string | null;
     logo_url: string | null;
     accent_color: string;
@@ -285,6 +296,7 @@ export async function lireEtatDuCompteAvec(
     filigrane: s.watermark_enabled,
     planPro: data.plan === "pro",
     marqueMasquee: s.hide_droplink_brand,
+    nomDeLien: s.slug,
     /*
      * ⚠️ CETTE LIGNE DISAIT `=== "en" ? "en" : "fr"`, ET SA JUSTIFICATION S'EST
      * RETOURNÉE CONTRE ELLE.

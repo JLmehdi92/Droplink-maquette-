@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
+import { cheminPageClient } from "@/lib/liens/page-client";
+import { lireProfilVendeur } from "@/lib/comptes/profil";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -75,5 +77,20 @@ export default async function VersLaPageClient({
 
   if (error !== null || data === null) notFound();
 
-  redirect("/p/" + data.public_token);
+  /*
+   * ⚠️ ON ENVOIE LE VENDEUR SUR SON LIEN BRANDÉ, PAS SUR `/p/`. Ce bouton
+   * existe pour qu'il voie CE QUE VOIT SON CLIENT : l'envoyer sur une autre
+   * adresse que celle qu'il a partagée lui ferait vérifier une page qui n'est
+   * pas tout à fait celle qui circule — et c'est précisément sur cette page-là
+   * que le nom du vendeur est la seule chose visible dans la barre d'adresse.
+   *
+   * ⚠️ `lireProfilVendeur()` NE COÛTE RIEN ICI : `exigerVendeur()` vient de
+   * l'appeler, et elle est mémoïsée par requête.
+   *
+   * LE CHEMIN RESTE RELATIF. Une redirection construite sur l'adresse d'arrivée
+   * porterait celle du conteneur derrière un proxy — mesuré en production le
+   * 08/09/2026, `localhost:8080`.
+   */
+  const profil = await lireProfilVendeur();
+  redirect(cheminPageClient(data.public_token, profil?.nomDeLien ?? null));
 }

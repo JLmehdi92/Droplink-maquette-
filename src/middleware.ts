@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { viseAdmin } from "@/lib/routes/vise-admin";
+import { lireLienAuNom, PARAM_NOM } from "@/lib/routes/lien-au-nom";
 import { OPTIONS_COOKIES } from "@/lib/auth/cookies";
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
@@ -116,6 +117,46 @@ const gestionLangue = createMiddleware(routing);
  */
 
 export default async function middleware(requete: NextRequest): Promise<NextResponse> {
+  /*
+   * ⚠️ LE LIEN AU NOM DU VENDEUR PASSE AVANT TOUT LE RESTE, ET L'ORDRE EST LA
+   * MOITIÉ DE LA CORRECTION.
+   *
+   * `gestionLangue` ne connaît que trois préfixes. Présenté à
+   * `/atelier-nord/xK9…`, il n'y voit pas une langue et REDIRIGE vers
+   * `/fr/atelier-nord/xK9…` — une adresse qui n'existe pas. Décider après lui
+   * reviendrait à décider après que la réponse est partie.
+   *
+   * ⚠️ ET C'EST UNE RÉÉCRITURE, JAMAIS UNE REDIRECTION. Une redirection
+   * remplacerait dans la barre d'adresse le nom du vendeur par `/p/…` : le
+   * client verrait DropLink au lieu de la boutique dont il attend le colis,
+   * c'est-à-dire exactement l'inverse de ce que la fonctionnalité promet. La
+   * réécriture sert la même page sous l'URL demandée, sans un octet de plus.
+   *
+   * ⚠️ ET IL N'Y A AUCUNE REDIRECTION, PAS MÊME POUR LA CASSE. Le premier jet
+   * renvoyait `/Atelier-Nord/…` en 308 vers `/atelier-nord/…`. MESURÉ AU
+   * NAVIGATEUR : 500, `TypeError: Invalid URL — input: '/atelier-nord/xK9…'`.
+   * Next 16 EXIGE une `Location` absolue dans un middleware, et la seule base
+   * absolue disponible ici est `requete.url` — c'est-à-dire l'adresse par
+   * laquelle le conteneur a été joint, `localhost:8080` chez Railway. C'est
+   * exactement le défaut du 08/09/2026, que
+   * `tests/unit/redirections-relatives.test.ts` interdit depuis.
+   *
+   * `lireLienAuNom` abaisse donc le NOM et sert la page directement. Le jeton,
+   * lui, garde sa casse : il est en base 62.
+   *
+   * ⚠️ LE NOM EST IMPOSÉ PAR `set`, PAS AJOUTÉ. Une requête entrante portant
+   * déjà `?nom=…` verrait sa valeur ÉCRASÉE par celle de l'URL. Sans ça,
+   * `/atelier-nord/xK9…?nom=atelier-nord` laisserait choisir au visiteur le nom
+   * que la page va vérifier, ce qui reviendrait à ne rien vérifier.
+   */
+  const lienAuNom = lireLienAuNom(requete.nextUrl.pathname);
+  if (lienAuNom !== null) {
+    const cible = requete.nextUrl.clone();
+    cible.pathname = `/p/${lienAuNom.jeton}`;
+    cible.searchParams.set(PARAM_NOM, lienAuNom.nom);
+    return NextResponse.rewrite(cible);
+  }
+
   const reponse = gestionLangue(requete);
 
   /*

@@ -892,6 +892,50 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "vérifie la PROPRIÉTÉ dans son corps — sans quoi elle contournerait la " +
         "RLS et permettrait de couper l'accès aux clients d'un autre vendeur.",
     ],
+    [
+      "definir_slug_boutique",
+      "Pose le nom de lien de la boutique de l'appelant — `droplink.fr/<nom>/<jeton>` " +
+        "au lieu de `/p/<jeton>` (migrations 182-184). `security definer` parce que " +
+        "`shops.slug` n'est accordée en écriture à PERSONNE : c'est ce qui garde son " +
+        "sens à la falsification `slug-ouvert`, qui ouvre précisément ce droit pour " +
+        "éprouver la garde. L'identité vient de `auth.uid()`, jamais d'un argument, et " +
+        "elle RÉSERVE AU PLAN PRO (DL059). Refusée à `anon`, qui n'a pas de boutique.",
+    ],
+    [
+      "verifier_slug_commande",
+      "« Ce nom de lien est-il celui de la boutique de cette commande ? » Accordée à " +
+        "`anon` parce que la page client n'a pas de session. ⚠️ ELLE N'AUTORISE RIEN : " +
+        "elle COMPARE deux choses que l'appelant apporte déjà, et le `public_token` " +
+        "reste le seul secret — un nom faux ne fait que rendre 404 à celui qui l'a " +
+        "écrit. Sans elle, `droplink.fr/<nom-du-concurrent>/<mon-jeton>` afficherait ma " +
+        "commande sous l'identité d'autrui, sur une page par ailleurs authentique. Elle " +
+        "ne révèle rien de plus que ce que la page montre déjà, et aucun argument n'y " +
+        "désigne une boutique : on ne peut donc pas énumérer les noms des autres.",
+    ],
+    [
+      "slug_valide",
+      "La FORME d'un nom de lien — 3 à 40 caractères, minuscules, tirets internes. " +
+        "Appelée depuis la contrainte `CHECK` `shops_slug_forme`, et une contrainte " +
+        "s'évalue avec les droits de CELUI QUI ÉCRIT : sans ce `grant`, un vendeur " +
+        "ayant posé un nom ne pourrait plus enregistrer aucun réglage de marque, et le " +
+        "refus se présenterait comme une erreur de permission plutôt que comme une " +
+        "violation de contrainte. Même montage que `cle_media_canonique`, même raison. " +
+        "Elle ne lit AUCUNE donnée — elle compare une chaîne à une expression " +
+        "rationnelle. `anon` n'y a pas droit : il ne fait que lire, et une contrainte " +
+        "ne s'évalue qu'à l'écriture.",
+    ],
+    [
+      "slug_est_reserve",
+      "Les 35 mots qu'un vendeur ne peut pas prendre, en trois familles : les segments " +
+        "racine servis, les seconds segments de `[locale]`, et les mots qui " +
+        "laisseraient croire à une surface officielle de DropLink auprès du client d'un " +
+        "vendeur. Mêmes droits que `slug_valide`, qui l'APPELLE : celle-ci n'étant pas " +
+        "`security definer`, les droits de l'appelant s'appliquent à l'appel imbriqué, " +
+        "donc lui refuser l'accès casserait la contrainte. ⚠️ ELLE ÉTAIT EXÉCUTABLE PAR " +
+        "`PUBLIC` jusqu'à la migration 184 — la 182 avait révoqué les deux fonctions qui " +
+        "agissent et oublié les deux aides. Ce qui fuitait est la liste elle-même : pas " +
+        "une donnée de vendeur, mais une carte de la surface du produit.",
+    ],
   ]);
 
   test("aucune fonction de public n'est exécutable par anon, authenticated ou PUBLIC", async () => {
@@ -1132,6 +1176,17 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
       // pas eu lieu : aucun droit d'écriture n'accompagne celui-ci.
       "parcel_checkpoints",
       "profiles",
+      // Tous les noms de lien que sa boutique a portés, y compris les anciens
+      // (migration 182). Lisible par son vendeur pour qu'il retrouve un lien
+      // déjà envoyé. AUCUN droit d'écriture : poser un nom passe par
+      // `definir_slug_boutique`, qui vérifie le plan — un vendeur qui pourrait
+      // insérer ici se donnerait la fonctionnalité Pro, et pourrait surtout
+      // RÉSERVER le nom d'un concurrent, définitivement.
+      //
+      // ⚠️ IL PRÉCÈDE `shops` DANS CETTE LISTE, et ce n'est pas une coquetterie :
+      // la sonde compare à l'ordre RENDU PAR LA BASE, où le souligné trie avant
+      // le « s ». Le placer « logiquement » après faisait rougir la sonde.
+      "shop_slugs",
       "shops",
       // Son PROPRE abonnement, et celui de personne d'autre (migrations 177
       // et 178). AUCUN droit d'écriture : un abonnement n'est pas une

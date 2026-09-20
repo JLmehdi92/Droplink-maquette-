@@ -55,6 +55,16 @@ import { NextResponse } from "next/server";
  * @param chemin Chemin ABSOLU sur notre domaine, commençant par `/`. Jamais une
  *   URL complète : ce serait rouvrir la porte à une redirection ouverte.
  * @param statut 303 après un POST (le navigateur repasse en GET), 307 sinon.
+ *
+ * ⚠️ RÉSERVÉ AUX ROUTE HANDLERS, ET CE N'EST PAS UN DÉTAIL DE RANGEMENT.
+ * MESURÉ AU NAVIGATEUR LE 20/09/2026 : la même réponse rendue depuis un
+ * MIDDLEWARE produit un 500 — `TypeError: Invalid URL`, `input:
+ * '/atelier-nord/xK9…'`. Next 16 exige une `Location` ABSOLUE au bord, là où un
+ * route handler accepte la référence relative de la RFC 9110 §10.2.2.
+ *
+ * Un middleware qui doit changer de chemin RÉÉCRIT (`NextResponse.rewrite`) au
+ * lieu de rediriger : il n'a alors aucune URL absolue à fabriquer, donc aucune
+ * occasion de fabriquer celle du conteneur.
  */
 export function redirigerVers(chemin: string, statut: 303 | 307 = 307): NextResponse {
   /*

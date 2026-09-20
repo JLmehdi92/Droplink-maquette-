@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Check, ChevronDown, Clock, ExternalLink, Share2, TriangleAlert } from "lucide-react";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
+import { lienPageClient } from "@/lib/liens/page-client";
 import { referenceCourte } from "@/lib/commandes/reference";
 import { ETAPES, type Etape } from "@/lib/tracking/normalize";
 import { Panneau, LienRetour, LigneInfo } from "@/components/app/panneau";
@@ -76,6 +77,7 @@ export function Editeur({
   menusGestes,
   bandeau,
   origine,
+  nomDeLien,
   versPageClient,
   initiales,
   statuts,
@@ -100,6 +102,8 @@ export function Editeur({
   /** Le lien bloqué par l'administration (168), rendu par le serveur ; `null` sinon. */
   readonly bandeau?: ReactNode;
   readonly origine: string;
+  /** Le nom de lien de la boutique, `null` si aucun n'a ete pose. */
+  readonly nomDeLien: string | null;
   readonly versPageClient: string;
   readonly initiales: ValeursCommande;
   readonly statuts: readonly string[];
@@ -270,7 +274,10 @@ export function Editeur({
     }
   }, [champsEnEchec, envoyer, valeurs]);
 
-  const lienPublic = origine === "" ? "/p/" + jetonCourant : origine + "/p/" + jetonCourant;
+  // UN SEUL POINT D'EMISSION pour l'adresse de la page client : cinq ecrans
+  // la fabriquaient a la main, et depuis les migrations 182-184 il y en a DEUX
+  // formes. Voir `lib/liens/page-client.ts`.
+  const lienPublic = lienPageClient(origine, jetonCourant, nomDeLien);
 
   return (
     <>

@@ -350,3 +350,52 @@ export async function lireSuiviPublic(jetonBrut: string): Promise<SuiviPublic | 
     })),
   };
 }
+
+/**
+ * « CE NOM DE LIEN EST-IL BIEN CELUI DE LA BOUTIQUE DE CETTE COMMANDE ? »
+ *
+ * Appelée UNIQUEMENT quand la page a été demandée sous un nom de vendeur
+ * (`droplink.fr/atelier-nord/xK9…`). Un lien `/p/xK9…` ne passe jamais par ici :
+ * il n'affirme rien qu'il faille vérifier.
+ *
+ * ⚠️ SANS ELLE, N'IMPORTE QUI SERT SA PAGE SOUS LE NOM D'UN AUTRE. Il suffirait
+ * de `droplink.fr/<nom-du-concurrent>/<mon-jeton>` pour afficher SA commande
+ * sous l'identité d'autrui — une usurpation qui ne coûte rien, ne laisse aucune
+ * trace, et ne se voit pas : la page est par ailleurs authentique.
+ *
+ * ⚠️ ELLE N'AUTORISE RIEN, ET C'EST CE QUI LA REND SÛRE À ACCORDER À `anon`. Le
+ * `public_token` reste le seul secret ; cette fonction ne fait que comparer deux
+ * choses que l'appelant apporte déjà. Elle ne peut que RESTREINDRE.
+ *
+ * ⚠️ ELLE ÉCHOUE FERMÉ, ET LA RAISON N'EST PAS CELLE QU'ON CROIT. La règle du
+ * produit veut que la page publique AUTORISE quand un compteur tombe en panne —
+ * refuser punirait les clients d'un vendeur pour un incident qui ne les regarde
+ * pas. Elle ne s'applique pas ici, pour une raison mesurable : une base
+ * indisponible fait déjà échouer `lireCommandePublique`, donc la page rend 404
+ * avant d'arriver jusqu'ici. Le seul échec que cette fonction peut réellement
+ * rencontrer est que la FONCTION SQL n'existe pas — c'est-à-dire un code déployé
+ * avant sa migration. Dans ce cas précis, aucun vendeur n'a pu poser de nom non
+ * plus, donc aucun lien brandé n'existe : échouer fermé ne casse rien, et
+ * échouer ouvert servirait n'importe quel nom à n'importe quel jeton pendant
+ * toute la fenêtre de déploiement.
+ */
+export async function nomDeLienCorrespond(jetonBrut: string, nom: string): Promise<boolean> {
+  const analyse = JetonPublic.safeParse(jetonBrut);
+  if (!analyse.success) return false;
+
+  const supabase = creerClientAnonyme();
+  const { data, error } = await supabase.rpc("verifier_slug_commande", {
+    p_jeton: analyse.data,
+    p_slug: nom,
+  });
+
+  // Un échec se DIT. Rendre `false` en silence ferait d'une panne de migration
+  // un « lien introuvable » indiscernable d'un vrai, et personne ne chercherait
+  // du bon côté.
+  if (error !== null) {
+    console.error("[lien-au-nom] vérification impossible :", error.message);
+    return false;
+  }
+
+  return data === true;
+}

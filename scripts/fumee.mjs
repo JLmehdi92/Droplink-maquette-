@@ -4660,6 +4660,140 @@ try {
     ]);
   }
 
+  // ── LE LIEN AU NOM DU VENDEUR ────────────────────────────────────────────
+  //
+  // ⚠️ MESURE SUR LE SERVEUR REEL, PAS SUR UNE FONCTION. La decision de
+  // routage est eprouvee par `tests/unit/lien-au-nom.test.ts` ; ce qu aucune
+  // suite ne peut voir, c est ce que Next fait REELLEMENT d une reecriture au
+  // bord — et c est precisement la ou une fonctionnalite de routage se casse.
+  //
+  // Quatre proprietes, et elles tirent en sens opposes : un lien parti doit
+  // toujours repondre, un nom ne doit jamais se preter.
+  if (jetonFumee && shopFumee) {
+    const NOM_A = "atelier-de-fumee";
+    const NOM_B = "atelier-de-fumee-renomme";
+    const NOM_TIERS = "boutique-de-fumee-tierce";
+
+    // ⚠️ UNE MAJUSCULE EST SERVIE, PAS REDIRIGEE — et ce controle est pose ICI
+    // parce que le premier jet redirigeait et rendait 500.
+    //
+    // MESURE AU NAVIGATEUR LE 20/09/2026 :
+    //   TypeError: Invalid URL — input: '/atelier-de-fumee/xK9…'
+    // Next 16 EXIGE une `Location` absolue dans un middleware, et la seule base
+    // absolue disponible au bord est l adresse par laquelle le conteneur a ete
+    // joint : `localhost:8080` chez Railway. C est le defaut du 08/09/2026.
+    //
+    // Le nom est donc abaisse en memoire et la page servie directement. Ce
+    // controle tourne AVANT qu aucun nom soit pose en base : il doit donc rendre
+    // 404 — ce qui prouve que la reecriture a eu lieu ET que la verification
+    // mord, la ou un 500 ou un 308 signalerait l un des deux defauts.
+    const casse = await fetch(`${base}/Atelier-De-Fumee/${jetonFumee}`, {
+      redirect: "manual",
+      headers: visiteur(41),
+    });
+    controles.push([
+      casse.status === 404,
+      `une majuscule dans le nom est SERVIE, jamais redirigee ni 500 (statut ${casse.status})`,
+    ]);
+
+    // CONTRE-TEST, ET IL VIENT EN PREMIER. Sans nom pose en base, le lien
+    // brande doit rendre 404 : si cette page repondait 200 avant meme qu un
+    // nom existe, tout ce qui suit ne prouverait rien.
+    const avantNom = await fetch(`${base}/${NOM_A}/${jetonFumee}`, { headers: visiteur(42) });
+    controles.push([
+      avantNom.status === 404,
+      `un nom que personne ne porte rend 404 (statut ${avantNom.status})`,
+    ]);
+
+    // Et le lien NU repond, lui, avant comme apres : c est la promesse de base.
+    const nu = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(43) });
+    controles.push([nu.status === 200, `le lien nu /p/ repond (statut ${nu.status})`]);
+
+    // Le vendeur pose son nom. On passe par le service-role : la garde du plan
+    // Pro est eprouvee dans `tests/rls/lien-au-nom.test.ts`, ce qu on mesure
+    // ici est le ROUTAGE.
+    await service.from("shop_slugs").insert({ shop_id: shopFumee, slug: NOM_A });
+    await service.from("shops").update({ slug: NOM_A }).eq("id", shopFumee);
+
+    const casseApres = await fetch(`${base}/Atelier-De-Fumee/${jetonFumee}`, {
+      redirect: "manual",
+      headers: visiteur(48),
+    });
+    controles.push([
+      casseApres.status === 200,
+      `et une fois le nom pose, la meme URL en MAJUSCULES sert la page (statut ${casseApres.status})`,
+    ]);
+
+    const avecNom = await fetch(`${base}/${NOM_A}/${jetonFumee}`, { headers: visiteur(44) });
+    const htmlNom = await avecNom.text();
+    controles.push([
+      avecNom.status === 200,
+      `la page repond sous le nom du vendeur (statut ${avecNom.status})`,
+    ]);
+    // MEME PAGE, pas une variante. Un 200 ne prouve rien a lui seul : une
+    // coquille vide en rend un aussi. On cherche donc une donnee que SEULE la
+    // page client rend — le pseudo du destinataire, ecrit dans la carte de
+    // livraison.
+    controles.push([
+      htmlNom.includes("Client de fumee"),
+      "la page brandee rend le CONTENU de la commande, pas une coquille a 200",
+    ]);
+    controles.push([
+      !htmlNom.includes(NOTE_SENTINELLE),
+      "et elle ne laisse pas fuiter les notes internes au passage",
+    ]);
+
+    // ⚠️ LA PROPRIETE QUI COUTE LE PLUS CHER SI ELLE TOMBE : le vendeur se
+    // renomme, et le lien DEJA ENVOYE dans un message prive continue de
+    // repondre. Le client qui l a recu n a pas de compte, n a rien demande, et
+    // ne sera jamais prevenu.
+    await service.from("shop_slugs").insert({ shop_id: shopFumee, slug: NOM_B });
+    await service.from("shops").update({ slug: NOM_B }).eq("id", shopFumee);
+
+    const ancien = await fetch(`${base}/${NOM_A}/${jetonFumee}`, { headers: visiteur(45) });
+    controles.push([
+      ancien.status === 200,
+      `un ancien nom repond encore apres renommage (statut ${ancien.status})`,
+    ]);
+    const nouveau = await fetch(`${base}/${NOM_B}/${jetonFumee}`, { headers: visiteur(46) });
+    controles.push([
+      nouveau.status === 200,
+      `et le nouveau nom repond aussi (statut ${nouveau.status})`,
+    ]);
+
+    // ⚠️ L USURPATION. Un nom qui appartient a une AUTRE boutique ne doit pas
+    // servir cette commande : sans ce refus, il suffirait de
+    // `droplink.fr/<nom-du-concurrent>/<mon-jeton>` pour afficher sa propre
+    // page sous l identite d autrui — et la page serait par ailleurs
+    // authentique, donc rien ne le trahirait.
+    const { data: autreShop } = await service
+      .from("shops")
+      .select("id")
+      .neq("id", shopFumee)
+      .limit(1)
+      .maybeSingle();
+
+    if (autreShop?.id) {
+      await service.from("shop_slugs").insert({ shop_id: autreShop.id, slug: NOM_TIERS });
+      const usurpe = await fetch(`${base}/${NOM_TIERS}/${jetonFumee}`, { headers: visiteur(47) });
+      controles.push([
+        usurpe.status === 404,
+        `le nom d une AUTRE boutique ne sert pas cette commande (statut ${usurpe.status})`,
+      ]);
+      await service.from("shop_slugs").delete().eq("slug", NOM_TIERS);
+    } else {
+      // Un ensemble vide passe tout : le dire plutot que de compter un
+      // controle qui n a rien eprouve.
+      controles.push([false, "aucune seconde boutique : l usurpation n a pas pu etre eprouvee"]);
+    }
+
+    // Remise en etat. La base de tests est purgee entre les passages, mais un
+    // nom de lien est reserve A VIE : le laisser rendrait le passage suivant
+    // dependant du precedent.
+    await service.from("shops").update({ slug: null }).eq("id", shopFumee);
+    await service.from("shop_slugs").delete().eq("shop_id", shopFumee);
+  }
+
   // CONTRE-TEST : la sonde saurait-elle voir une page qui REPOND ? Sans lui,
   // « tout rend 404 » pourrait etre vrai parce que le serveur est mort.
   const temoin = await fetch(`${base}/fr/connexion`, { redirect: "manual" });

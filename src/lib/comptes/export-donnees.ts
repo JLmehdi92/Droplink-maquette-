@@ -1,4 +1,5 @@
 import "server-only";
+import { lienPageClient } from "@/lib/liens/page-client";
 import type { ClientLecture } from "@/lib/commandes/liste";
 import { referenceCourte } from "@/lib/commandes/reference";
 
@@ -75,7 +76,12 @@ export type ExportDonnees = {
   readonly colis: readonly unknown[];
 };
 
-export async function exporterDonnees(supabase: ClientLecture, origine: string): Promise<ExportDonnees> {
+export async function exporterDonnees(
+  supabase: ClientLecture,
+  origine: string,
+  /** Le nom de lien de la boutique, `null` si aucun n'a ete pose. */
+  nomDeLien: string | null,
+): Promise<ExportDonnees> {
   const [compte, boutique] = await Promise.all([
     supabase.from("profiles").select("email, nom_affiche, account_type, locale, created_at").single(),
     supabase
@@ -175,7 +181,7 @@ export async function exporterDonnees(supabase: ClientLecture, origine: string):
     boutique: boutique.data,
     commandes: commandes.map(({ id, public_token, ...c }) => ({
       reference: referenceCourte(id),
-      lien_public: `${origine}/p/${public_token}`,
+      lien_public: lienPageClient(origine, public_token, nomDeLien),
       ...c,
       colis: colisPar.get(id) ?? [],
       medias: mediasPar.get(id) ?? [],

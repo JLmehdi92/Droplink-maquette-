@@ -476,7 +476,10 @@
     "marqueOption": "Hide DropLink branding",
     "marqueOptionAide": "Your customers only see your shop.",
     "marqueProAide": "Available on the Pro plan.",
-    "lienPlaceholder": "your-shop"
+    "lienPlaceholder": "your-shop",
+    "erreurLien": "That name won't work: 3 to 40 characters, lowercase letters, digits and hyphens — no hyphen at the start, at the end, or two in a row.",
+    "erreurLienPris": "That name is already taken. Pick another one.",
+    "erreurLienPro": "The custom link is a Pro feature."
   },
   "envois": {
     "titre": "Shipments",

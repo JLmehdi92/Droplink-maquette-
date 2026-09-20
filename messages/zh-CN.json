@@ -476,7 +476,10 @@
     "marqueOption": "隐藏 DropLink 品牌标识",
     "marqueOptionAide": "客户只会看到您的店铺。",
     "marqueProAide": "仅限 Pro 套餐。",
-    "lienPlaceholder": "your-shop"
+    "lienPlaceholder": "your-shop",
+    "erreurLien": "该名称不可用：3 至 40 个字符，仅限小写字母、数字和连字符，且不能以连字符开头或结尾，也不能连续使用两个连字符。",
+    "erreurLienPris": "该名称已被占用，请换一个。",
+    "erreurLienPro": "自定义链接为 Pro 套餐专属功能。"
   },
   "envois": {
     "titre": "物流追踪",

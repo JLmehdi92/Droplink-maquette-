@@ -131,6 +131,14 @@ export function FormulaireMarque({
     /** Le compte est Pro : seul cas où l'interrupteur de la section 6 s'ouvre. */
     readonly planPro: boolean;
     readonly marqueMasquee: boolean;
+    /**
+     * Le nom de lien deja pose, chaine vide s'il n'y en a pas.
+     *
+     * ⚠️ IL EST RENDU MEME EN GRATUIT. Un compte retrograde garde son nom,
+     * qui continue de servir ses liens deja envoyes : le lui cacher lui
+     * ferait croire qu'il l'a perdu.
+     */
+    readonly nomDeLien: string;
     readonly logoUrl: string | null;
     readonly reseaux: {
       readonly instagram: string | null;
@@ -166,6 +174,7 @@ export function FormulaireMarque({
   const phrasesClient = libelles[langue];
   const [filigrane, setFiligrane] = useState(initial.filigrane);
   const [masquerMarque, setMasquerMarque] = useState(initial.marqueMasquee);
+  const [nomDeLien, setNomDeLien] = useState(initial.nomDeLien);
   const [logo, setLogo] = useState<EtatLogo>(
     initial.logoUrl === null ? { phase: "aucun" } : { phase: "existant", url: initial.logoUrl },
   );
@@ -1060,19 +1069,28 @@ export function FormulaireMarque({
           </Panneau>
 
           {/*
-            5. LE LIEN PERSONNALISÉ — AFFICHÉ, JAMAIS APPLIQUÉ.
+            5. LE LIEN PERSONNALISÉ — VIVANT DEPUIS LE 20/09/2026, EN PRO.
 
-            ⚠️ C'EST LA DÉCISION DE WASSIM DU 12/09 : les plans se MONTRENT,
-            aucun plafond ne s'applique, et il n'existe toujours aucune ligne de
-            code de facturation — la contrainte n°1 tient. Le kit dessine cette
-            section verrouillée, avec son champ inerte et sa carte « Pro » ; on
-            la rend telle quelle.
+            ⚠️ CE BLOC A LONGTEMPS DIT « AFFICHÉ, JAMAIS APPLIQUÉ », et c'était
+            vrai : `shops.slug` existait depuis les débuts sans contrainte de
+            forme, sans droit d'écriture et sans aucune route qui la serve. Les
+            migrations 182-184 en ont fait une fonctionnalité — décision de
+            Wassim : « le lien a ton nom c'est une features pro ».
 
-            ⚠️ ET LE CHAMP EST RÉELLEMENT INERTE, pas seulement grisé : il est
-            `disabled` et ne porte AUCUN `name`, donc rien ne part au serveur et
-            rien ne serait accepté s'il partait. Un champ désactivé à l'écran mais
-            soumis quand même est la façon la plus courante de croire qu'on a
-            fermé une porte.
+            ⚠️ EN GRATUIT, LE CHAMP RESTE RÉELLEMENT INERTE, pas seulement grisé :
+            il est `disabled` et ne porte AUCUN `name`, donc rien ne part au
+            serveur — et rien ne serait accepté s'il partait, puisque
+            `definir_slug_boutique` refuse un compte gratuit (DL059). Un champ
+            désactivé à l'écran mais soumis quand même est la façon la plus
+            courante de croire qu'on a fermé une porte.
+
+            ⚠️ ET LA CARTE « Pro » DISPARAÎT EN PRO, où le champ prend toute la
+            largeur : elle n'a plus rien à vendre. C'est le même geste qu'à la
+            section 6, et la planche le porte (`PLAN_PRO` de `BrandView.jsx`).
+
+            ⚠️ AUCUN PLAFOND, AUCUN PRIX NE S'AFFICHE ICI. La contrainte n° 1
+            tient : le plan est un ÉTAT DU COMPTE, posé à la main dans
+            l'administration ou par le webhook, jamais encaissé depuis cet écran.
 
             ⚠️ ELLE NE PROMET RIEN DE DATÉ. Le kit n'écrit aucune échéance, et
             nous n'en inventons pas : une fonctionnalité annoncée pour une date
@@ -1089,25 +1107,56 @@ export function FormulaireMarque({
             taille="section"
             icone={LinkIcon}
           >
-            <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
+            <div
+              className={
+                "flex flex-col gap-3.5 lg:items-center lg:gap-4 " +
+                (initial.planPro
+                  ? "lg:block"
+                  : "lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]")
+              }
+            >
               <span className="flex min-w-0 items-stretch overflow-hidden rounded-ds-control border border-ds-filet bg-ds-surface-carte">
                 <span className="flex flex-none items-center bg-ds-surface-creux px-3.5 text-[14px] leading-[normal] text-ds-texte-sourdine">
                   {origineLisible}
                 </span>
                 <input
                   type="text"
-                  disabled
-                  defaultValue=""
+                  {...(initial.planPro
+                    ? {
+                        name: "nomDeLien",
+                        value: nomDeLien,
+                        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                          setNomDeLien(e.target.value),
+                        maxLength: 40,
+                        /* La saisie est GUIDÉE, jamais corrigée en silence : on
+                           laisse passer ce qui s'écrit et c'est la base qui
+                           tranche (`slug_valide`). Corriger à la frappe ferait
+                           disparaître des caractères sous les doigts du vendeur
+                           sans lui dire pourquoi. */
+                        autoComplete: "off",
+                        spellCheck: false,
+                      }
+                    : { disabled: true, defaultValue: "" })}
                   placeholder={t("lienPlaceholder")}
                   aria-label={t("lienTitre")}
                   /* 44 px AU TELEPHONE : la sonde compte ce champ comme une
                      cible parce qu il porte un nom accessible, et un champ de
-                     formulaire sous le plancher se rate au pouce — qu il soit
-                     desactive aujourd hui n y change rien, il ne le sera pas
-                     toujours. */
+                     formulaire sous le plancher se rate au pouce. */
                   className="min-h-11 min-w-0 flex-1 bg-transparent px-3.5 py-3 text-[14px] leading-[normal] font-semibold text-ds-texte-fort placeholder:font-normal placeholder:text-ds-texte-corps lg:min-h-0"
                 />
               </span>
+              {initial.planPro && champsEnEchec.includes("nomDeLien") ? (
+                <p role="alert" className="text-[13px] text-ds-erreur-encre lg:mt-2">
+                  {t(
+                    resultat.statut === "erreur" && resultat.detail === "nom-pris"
+                      ? "erreurLienPris"
+                      : resultat.statut === "erreur" && resultat.detail === "nom-pro"
+                        ? "erreurLienPro"
+                        : "erreurLien",
+                  )}
+                </p>
+              ) : null}
+              {initial.planPro ? null : (
               <span className="flex items-center gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">
                 <span className="inline-flex flex-none items-center rounded-ds-pill bg-ds-accent px-2.5 py-1 text-[11.5px] leading-[normal] font-bold text-ds-texte-sur-marque lg:text-[11px]">
                   {t("lienProBadge")}
@@ -1121,6 +1170,7 @@ export function FormulaireMarque({
                   </span>
                 </span>
               </span>
+              )}
             </div>
           </Panneau>
 

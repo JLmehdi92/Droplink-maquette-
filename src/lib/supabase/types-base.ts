@@ -89,6 +89,27 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_slugs: {
+        Row: {
+          created_at: string
+          id: string
+          shop_id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          shop_id: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          shop_id?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       payment_events: {
         Row: {
           event_name: string
@@ -1196,6 +1217,13 @@ export type Database = {
       plan_pour_statut: {
         Args: { p_ends_at: string | null; p_statut: string }
         Returns: Database["public"]["Enums"]["account_plan"]
+      }
+      definir_slug_boutique: { Args: { p_slug: string }; Returns: string }
+      slug_est_reserve: { Args: { p_slug: string }; Returns: boolean }
+      slug_valide: { Args: { p_slug: string }; Returns: boolean }
+      verifier_slug_commande: {
+        Args: { p_jeton: string; p_slug: string }
+        Returns: boolean
       }
       est_admin: { Args: never; Returns: boolean }
       etat_budget_suivi: {

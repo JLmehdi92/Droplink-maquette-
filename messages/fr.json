@@ -476,7 +476,10 @@
     "marqueOption": "Masquer la marque DropLink",
     "marqueOptionAide": "Vos clients ne voient plus que votre boutique.",
     "marqueProAide": "Réservé au plan Pro.",
-    "lienPlaceholder": "votre-boutique"
+    "lienPlaceholder": "votre-boutique",
+    "erreurLien": "Ce nom ne convient pas : 3 à 40 caractères, en minuscules, chiffres et tirets — sans tiret au début, à la fin, ni deux à la suite.",
+    "erreurLienPris": "Ce nom est déjà pris. Choisissez-en un autre.",
+    "erreurLienPro": "Le lien personnalisé est réservé au plan Pro."
   },
   "envois": {
     "titre": "Suivi d'envois",

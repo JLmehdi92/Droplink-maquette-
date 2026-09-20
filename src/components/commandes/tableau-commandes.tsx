@@ -34,6 +34,7 @@ import { lienListe, listeFiltree } from "@/lib/commandes/url";
 import type { EtatLot } from "@/lib/commandes/lot";
 import { creerBrouillon } from "@/lib/commandes/actions";
 import { cheminGesteDeListe } from "@/lib/commandes/geste-liste";
+import { lienPageClient } from "@/lib/liens/page-client";
 
 /**
  * La liste des commandes, portée sur les planches `Commandes`, `CommandesMobile`,
@@ -59,6 +60,7 @@ export async function TableauCommandes({
   base,
   langue,
   origine,
+  nomDeLien,
   parametres,
   page,
   lot,
@@ -68,6 +70,8 @@ export async function TableauCommandes({
   readonly base: string;
   readonly langue: string;
   readonly origine: string;
+  /** Le nom de lien de la boutique, `null` si aucun n'a ete pose. */
+  readonly nomDeLien: string | null;
   readonly parametres: ParametresListe;
   readonly page: PageCommandes;
   /**
@@ -740,7 +744,7 @@ export async function TableauCommandes({
                                 */}
                                 <TraductionsClient espaces={["commandes"]}>
                                   <ActionsLigne
-                                    lien={origine + "/p/" + ligne.jetonPublic}
+                                    lien={lienPageClient(origine, ligne.jetonPublic, nomDeLien)}
                                     nomClient={nom}
                                   />
                                 </TraductionsClient>

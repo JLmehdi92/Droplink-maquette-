@@ -13,7 +13,12 @@ import { EnTeteBoutique } from "@/components/publique/en-tete-boutique";
 import { HistoriqueSuivi } from "@/components/publique/historique-suivi";
 import { estimationVisible } from "@/lib/page-publique/estimation";
 import { Visionneur } from "@/components/publique/visionneur";
-import { lireCommandePublique, lireSuiviPublic } from "@/lib/page-publique/lecture";
+import {
+  lireCommandePublique,
+  lireSuiviPublic,
+  nomDeLienCorrespond,
+} from "@/lib/page-publique/lecture";
+import { PARAM_NOM } from "@/lib/routes/lien-au-nom";
 import { resoudreAccent } from "@/lib/design/contraste";
 import { estLangueSupportee } from "@/i18n/config";
 import { signalerJetonInconnu, verifierQuotaPublique } from "@/lib/limitation/quota";
@@ -137,10 +142,25 @@ const CONTENEUR = "mx-auto w-full max-w-[600px] lg:max-w-[1180px] lg:px-6";
 
 export default async function PagePublique({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { token } = await params;
+
+  /*
+   * LE NOM SOUS LEQUEL LA PAGE A ÉTÉ DEMANDÉE — posé par le middleware quand
+   * l'URL était `droplink.fr/<nom>/<jeton>`, absent sur un `/p/<jeton>` nu.
+   *
+   * ⚠️ UNE VALEUR MULTIPLE (`?nom=a&nom=b`) EST TRAITÉE COMME UNE ABSENCE, et
+   * jamais comme un refus. Le middleware POSE ce paramètre par `set`, donc il
+   * est toujours unique sur le chemin brandé : une valeur multiple ne peut
+   * venir que d'un `/p/<jeton>?…` écrit à la main, par quelqu'un qui détient
+   * déjà le jeton. Lui rendre 404 ne protégerait personne de rien.
+   */
+  const brut = (await searchParams)[PARAM_NOM];
+  const nomDemande = typeof brut === "string" ? brut : null;
 
   // LA LIMITATION DE DÉBIT VIENT AVANT LA LECTURE : c'est la lecture qu'elle
   // protège. Un refus emprunte le MÊME chemin de sortie que tout le reste —
@@ -159,9 +179,27 @@ export default async function PagePublique({
     notFound();
   }
 
-  // Lu APRÈS la commande : une commande sur deux n'a pas encore de numéro, et
-  // `null` est alors la réponse normale — pas une erreur.
-  const suivi = await lireSuiviPublic(token);
+  /*
+   * Lu APRÈS la commande : une commande sur deux n'a pas encore de numéro, et
+   * `null` est alors la réponse normale — pas une erreur.
+   *
+   * ⚠️ LA VÉRIFICATION DU NOM PART AVEC LUI, ET NON APRÈS. Les deux lectures
+   * sont indépendantes ; les enchaîner ajouterait un aller-retour complet à la
+   * page qui doit s'afficher en moins de deux secondes en 4G, et le ferait
+   * payer aux seuls liens brandés — c'est-à-dire précisément ceux d'un vendeur
+   * qui a payé pour eux.
+   *
+   * ⚠️ ET LE REFUS EMPRUNTE LE MÊME `notFound()` QUE TOUT LE RESTE. Jeton
+   * inconnu, jeton révoqué, compte suspendu, nom qui n'appartient pas à cette
+   * boutique : un seul chemin de sortie. Quatre chemins distincts finiraient par
+   * diverger — en contenu, en code de réponse ou en délai — et chacun de ces
+   * écarts est un oracle.
+   */
+  const [suivi, nomLegitime] = await Promise.all([
+    lireSuiviPublic(token),
+    nomDemande === null ? Promise.resolve(true) : nomDeLienCorrespond(token, nomDemande),
+  ]);
+  if (!nomLegitime) notFound();
 
   const langue = estLangueSupportee(commande.boutique.langue) ? commande.boutique.langue : "fr";
   const t = await getTranslations({ locale: langue, namespace: "page-publique" });

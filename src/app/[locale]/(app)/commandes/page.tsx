@@ -12,6 +12,7 @@ import { analyserParametres, compterParEtat, lireCommandes } from "@/lib/command
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
+import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { EtatLot, NombreLot } from "@/lib/commandes/lot";
 
 export async function generateMetadata({
@@ -91,10 +92,18 @@ export default async function Commandes({
   };
   const t = await getTranslations("commandes");
 
-  const [page, origine, compteurs] = await Promise.all([
+  /*
+   * ⚠️ `lireProfilVendeur()` NE COÛTE AUCUN ALLER-RETOUR DE PLUS ICI. Elle est
+   * mémoïsée par requête (`cache()` de React) et la mise en page de l'espace
+   * vendeur l'a déjà appelée pour décider si la page existe : ce second appel
+   * lit le même résultat. Sans cette mémoïsation, l'écran le plus utilisé du
+   * produit paierait une lecture de profil pour afficher un nom de lien.
+   */
+  const [page, origine, compteurs, profil] = await Promise.all([
     lireCommandes(parametres),
     origineDuSite(),
     compterParEtat(),
+    lireProfilVendeur(),
   ]);
 
   const base = "/" + langue + "/commandes";
@@ -323,6 +332,7 @@ export default async function Commandes({
           // devinée. On rend alors un chemin relatif : il ne se copie pas dans
           // une conversation, mais il n'envoie personne sur un domaine inventé.
           origine={origine ?? ""}
+          nomDeLien={profil?.nomDeLien ?? null}
           parametres={parametres}
           page={page}
           lot={lot}

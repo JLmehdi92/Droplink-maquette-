@@ -366,6 +366,7 @@ export default async function EditeurCommande({
           // devinée. On rend alors un chemin relatif : il ne se copie pas dans
           // une conversation, mais il n'envoie personne sur un domaine inventé.
           origine={origine ?? ""}
+          nomDeLien={profil.nomDeLien}
           versPageClient={versPageClient}
           statuts={STATUTS_EXPEDITION}
           qcs={STATUTS_QC}

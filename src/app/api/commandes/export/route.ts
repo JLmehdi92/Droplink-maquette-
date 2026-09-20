@@ -96,7 +96,7 @@ export async function GET(requete: NextRequest): Promise<NextResponse> {
     curseur: null,
   });
 
-  const resultat = await exporterCommandes(parametres, origine);
+  const resultat = await exporterCommandes(parametres, origine, profil.nomDeLien);
 
   emettreApres(
     EVENEMENTS.EXPORT_CSV,

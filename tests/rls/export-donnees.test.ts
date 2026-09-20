@@ -63,7 +63,7 @@ afterAll(async () => {
 
 describe("Le fichier d'export", () => {
   test("porte la commande du vendeur, son client et son lien", async () => {
-    const fichier = await exporterDonnees(vendeur.client as unknown as ClientLecture, ORIGINE);
+    const fichier = await exporterDonnees(vendeur.client as unknown as ClientLecture, ORIGINE, null);
     expect(fichier.commandes).toHaveLength(1);
     const texte = JSON.stringify(fichier);
     expect(texte).toContain("Client exporté");
@@ -74,7 +74,7 @@ describe("Le fichier d'export", () => {
   }, 60_000);
 
   test("ne laisse sortir AUCUNE des valeurs exclues, sous aucun nom", async () => {
-    const texte = JSON.stringify(await exporterDonnees(vendeur.client as unknown as ClientLecture, ORIGINE));
+    const texte = JSON.stringify(await exporterDonnees(vendeur.client as unknown as ClientLecture, ORIGINE, null));
     expect(jetonDesabonnement.length, "le jeton de désabonnement témoin doit exister").toBeGreaterThan(10);
     for (const [nom, valeur] of [
       ["note interne (décision 15)", SENTINELLE_NOTE],
@@ -86,12 +86,12 @@ describe("Le fichier d'export", () => {
   }, 60_000);
 
   test("ne porte RIEN du voisin", async () => {
-    const texte = JSON.stringify(await exporterDonnees(vendeur.client as unknown as ClientLecture, ORIGINE));
+    const texte = JSON.stringify(await exporterDonnees(vendeur.client as unknown as ClientLecture, ORIGINE, null));
     expect(texte).not.toContain(SENTINELLE_CLIENT_VOISIN);
     expect(texte).not.toContain(voisin.email);
 
     // Contre-test : la sentinelle du voisin existe bel et bien, dans SON export.
-    const sien = JSON.stringify(await exporterDonnees(voisin.client as unknown as ClientLecture, ORIGINE));
+    const sien = JSON.stringify(await exporterDonnees(voisin.client as unknown as ClientLecture, ORIGINE, null));
     expect(sien).toContain(SENTINELLE_CLIENT_VOISIN);
   }, 60_000);
 });

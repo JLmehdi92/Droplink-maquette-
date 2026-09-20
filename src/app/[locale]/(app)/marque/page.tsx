@@ -94,6 +94,7 @@ export default async function Marque({
               filigrane: profil.filigrane,
               planPro: profil.planPro,
               marqueMasquee: profil.marqueMasquee,
+              nomDeLien: profil.nomDeLien ?? "",
               logoUrl,
               reseaux: profil.reseaux,
             }}

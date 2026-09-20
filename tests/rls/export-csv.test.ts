@@ -82,13 +82,36 @@ describe("Ce que l'export contient", () => {
   test("il contient les commandes du vendeur, et son lien public", async () => {
     // La sonde doit d'abord prouver qu'elle inspecte quelque chose : un export
     // vide passerait tous les contrôles d'absence qui suivent.
-    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", alice.client);
+    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", null, alice.client);
     expect(r.lignes, "l'export est vide : les contrôles d'absence ne prouveraient rien").toBe(1);
     expect(r.csv, "le lien public n'est pas dans l'export").toContain("https://exemple.test/p/");
   });
 
+  test("⚠️ QUAND LA BOUTIQUE A UN NOM DE LIEN, C'EST LUI QUI SORT", async () => {
+    /*
+     * L'EXPORT EST LE PIRE ENDROIT OÙ SE TROMPER D'ADRESSE, parce qu'il SORT du
+     * produit. Ses lignes finissent dans un tableur, puis, une par une, dans
+     * des messages envoyés à des clients. Une adresse `/p/<jeton>` exportée par
+     * un vendeur qui a posé son nom n'est pas FAUSSE — elle répond — et c'est
+     * bien le problème : rien ne casse, rien ne lève, et ce pour quoi il a payé
+     * est annulé commande par commande, sans un seul signal.
+     *
+     * ⚠️ LE CONTRÔLE D'ABSENCE VIENT APRÈS CELUI DE PRÉSENCE. « Aucun `/p/` »
+     * est trivialement vrai d'un export vide.
+     */
+    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", "atelier-nord", alice.client);
+    expect(r.lignes, "l'export est vide : le contrôle d'absence ne prouverait rien").toBe(1);
+    expect(r.csv, "le nom du vendeur n'est pas dans l'export").toContain(
+      "https://exemple.test/atelier-nord/",
+    );
+    expect(
+      r.csv.includes("https://exemple.test/p/"),
+      "l'export donne encore l'adresse générique à un vendeur qui a posé son nom",
+    ).toBe(false);
+  });
+
   test("les notes internes n'y sont NULLE PART, cherchées PAR VALEUR", async () => {
-    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", alice.client);
+    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", null, alice.client);
     expect(
       r.csv.includes(SENTINELLE_NOTES),
       "le prix d'achat est sorti de l'application dans un fichier",
@@ -96,7 +119,7 @@ describe("Ce que l'export contient", () => {
   });
 
   test("l'export d'un vendeur ne porte AUCUNE trace d'un autre", async () => {
-    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", alice.client);
+    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", null, alice.client);
     expect(
       r.csv.includes(SENTINELLE_CLIENT_BOB),
       "l'export d'Alice contient une commande de Bob : la RLS n'a pas filtré",
@@ -104,7 +127,7 @@ describe("Ce que l'export contient", () => {
 
     // Le contre-test : Bob voit bien la sienne. Sans lui, un export qui rendrait
     // toujours vide passerait le contrôle précédent.
-    const rBob = await exporterCommandes(PARAMETRES, "https://exemple.test", bob.client);
+    const rBob = await exporterCommandes(PARAMETRES, "https://exemple.test", null, bob.client);
     expect(rBob.csv, "Bob ne voit pas sa propre commande").toContain(SENTINELLE_CLIENT_BOB);
   });
 });
@@ -122,7 +145,7 @@ describe("Aucune cellule n'est une formule", () => {
      * la cellule bien formée et la formule s'évalue quand même. C'est pour cette
      * raison qu'un export « correctement échappé » ne suffit pas.
      */
-    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", alice.client);
+    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", null, alice.client);
 
     // La sonde vérifie d'abord que la valeur dangereuse est bien là : si elle
     // avait disparu pour une autre raison, l'absence de formule ne dirait rien.
@@ -144,7 +167,7 @@ describe("Aucune cellule n'est une formule", () => {
     // Une correction qui préfixerait TOUTES les cellules passerait le contrôle
     // précédent, et rendrait chaque valeur du fichier illisible. La référence
     // porte exprès une virgule, des guillemets et un accent.
-    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", alice.client);
+    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", null, alice.client);
     expect(r.csv, "une valeur ordinaire a été altérée").toContain(
       '"Crème n°1, ""spéciale"""',
     );
@@ -154,7 +177,7 @@ describe("Aucune cellule n'est une formule", () => {
     // Sans marque d'ordre des octets, Excel sous Windows lit le fichier en ANSI
     // et « Crème » devient « CrÃ¨me ». Le vendeur conclurait que l'export
     // corrompt ses données — et il aurait raison de le conclure.
-    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", alice.client);
+    const r = await exporterCommandes(PARAMETRES, "https://exemple.test", null, alice.client);
     expect(r.csv.codePointAt(0), "la marque d'ordre des octets manque").toBe(0xfeff);
     expect(r.csv.endsWith("\r\n"), "le fichier ne finit pas par une fin de ligne").toBe(true);
   });

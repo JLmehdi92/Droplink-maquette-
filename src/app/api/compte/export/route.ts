@@ -40,7 +40,7 @@ export async function GET(): Promise<NextResponse> {
 
   let contenu: string;
   try {
-    contenu = JSON.stringify(await exporterDonnees(await creerClientServeur(), origine), null, 2);
+    contenu = JSON.stringify(await exporterDonnees(await creerClientServeur(), origine, etat.profil.nomDeLien), null, 2);
   } catch (erreur) {
     // Un fichier à moitié rempli se lirait comme complet : on ne rend rien.
     console.error("[export] " + (erreur instanceof Error ? erreur.message : String(erreur)));

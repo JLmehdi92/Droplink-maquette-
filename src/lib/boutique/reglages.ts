@@ -182,3 +182,79 @@ export async function appliquerReglagesMarque(
 
   return error === null;
 }
+
+/**
+ * LE NOM DE LIEN — `droplink.fr/<nom>/<jeton>` au lieu de `/p/<jeton>`.
+ *
+ * ⚠️ AUCUNE VALIDATION DE FORME ICI, ET C'EST DÉLIBÉRÉ. La forme est décidée
+ * par `public.slug_valide()` (migrations 182-184), qui est aussi ce qui fait
+ * tenir la contrainte `CHECK` de la table : la recopier en Zod créerait une
+ * SECONDE source de vérité, qui divergerait au premier ajustement — et c'est
+ * l'application qui gagnerait à l'écran pendant que la base refuserait, ou
+ * l'inverse. On borne seulement la LONGUEUR, pour ne pas expédier dix kilo-
+ * octets à la base, et on laisse la base trancher.
+ *
+ * La borne est volontairement plus large que les 40 caractères admis : refuser
+ * ici à 40 rendrait le message « nom trop long » au lieu de « nom invalide »,
+ * donc deux messages pour une seule règle.
+ */
+export const NomDeLien = z.string().trim().max(200);
+
+/**
+ * Ce que la base a répondu. Énumération FERMÉE : un cas ajouté en base sans
+ * être traité ici fait rougir le compilateur là où il faut décider quoi dire au
+ * vendeur, plutôt que de retomber en silence sur « une erreur est survenue ».
+ */
+export type ResultatNomDeLien =
+  | "pose"
+  /** Déjà le sien : réenregistrer le même formulaire est un geste ordinaire. */
+  | "inchange"
+  /** DL059 — réservé au plan Pro. */
+  | "reserve-pro"
+  /** DL071 — la forme ne convient pas. */
+  | "invalide"
+  /** DL072 — porté par une AUTRE boutique, y compris dans son passé. */
+  | "deja-pris"
+  | "echec";
+
+/**
+ * Pose le nom de lien de la boutique de l'appelant.
+ *
+ * ⚠️ TOUT PASSE PAR LA FONCTION, JAMAIS PAR UN `update`. `authenticated` n'a
+ * aucun droit d'écriture sur `shops.slug` : c'est ce qui garde son sens à la
+ * falsification `slug-ouvert`, qui ouvre précisément ce droit pour éprouver la
+ * garde. Une vérification de plan écrite ICI se contournerait par un appel
+ * direct à PostgREST.
+ *
+ * ⚠️ UN NOM VIDE NE VIDE RIEN, IL NE FAIT RIEN. Un nom abandonné reste réservé
+ * à vie — c'est ce qui fait qu'un lien déjà envoyé continue de répondre — donc
+ * « effacer » ne libérerait rien et ne ferait que retirer au vendeur l'adresse
+ * qu'il a déjà partagée. Le champ vide signifie « ne pas toucher ».
+ */
+export async function definirNomDeLien(
+  supabase: SupabaseClient<Database>,
+  nom: string,
+  nomActuel: string | null,
+): Promise<ResultatNomDeLien> {
+  const voulu = nom.trim().toLowerCase();
+  if (voulu === "") return "inchange";
+  if (voulu === (nomActuel ?? "")) return "inchange";
+
+  const { error } = await supabase.rpc("definir_slug_boutique", { p_slug: voulu });
+  if (error === null) return "pose";
+
+  // Le code vient de `raise … using errcode`, et PostgREST le fait remonter tel
+  // quel. On ne lit JAMAIS le message : il est en français dans la migration,
+  // il n'est pas traduit, et le montrer au vendeur ferait fuiter du vocabulaire
+  // interne dans une interface qui parle trois langues.
+  switch (error.code) {
+    case "DL059":
+      return "reserve-pro";
+    case "DL071":
+      return "invalide";
+    case "DL072":
+      return "deja-pris";
+    default:
+      return "echec";
+  }
+}
