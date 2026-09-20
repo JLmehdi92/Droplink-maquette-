@@ -909,6 +909,27 @@ const SQL = {
     },
   },
 
+  /*
+   * LE PLAFOND DE COLIS REDEVIENT AVEUGLE AU PLAN. C'est le trou mesure le
+   * 20/09 : un compte gratuit limite a 15 commandes A VIE retrouve 6 000
+   * colis par mois, soit de quoi bruler le budget de TOUS les comptes en
+   * quelques minutes en changeant ses numeros de suivi.
+   */
+  "colis-gratuit-au-plafond-mensuel": {
+    casserDepuisMigration: {
+      fichier: "181_le_plafond_de_colis_suit_le_plan.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+      remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie() * 2;",
+      par: "    v_plafond := public.lire_plafond_commandes() * 2;",
+    },
+    reparerDepuisMigration: {
+      fichier: "181_le_plafond_de_colis_suit_le_plan.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+    },
+  },
+
   "numero-instable-paye": {
     casserDepuisMigration: {
       fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
