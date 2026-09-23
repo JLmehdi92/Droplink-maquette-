@@ -17,8 +17,14 @@
   que si `EMAIL_CLIENTS_DE` est posée.
 - **Planche légale** `legal/Confidentialite.jsx` : l'e-mail de l'acheteur n'est plus saisi par
   le vendeur. Produit : trois paragraphes corrigés en fr/en/zh.
-- ⚠️ **LA SOUSTRACTION N'A PAS ÉTÉ LANCÉE** sur ces deux écrans : aucune conformité au pixel
-  n'est affirmée. À mesurer avant de les dire conformes.
+- ✅ **MESURÉS LE MÊME SOIR (`1b2540f`)** : page de notification en 4 états × 3 langues et carte
+  client, au bureau et à 390 px, **code 0**. Défauts trouvés : texte hors du `<span>` de la
+  planche, bouton sans le tracking du `Button` ; planche chinoise fautive (police CJK en tête).
+- 🔴 **DÉFAUT DE L'OUTIL** : `verifier-ecran-migre.mjs` émulait 1000 px de haut, le kit 1010 —
+  toute page centrée ressortait décalée de 5/10 px, et **7 écrans le déclaraient**. La sonde
+  mesure à 1010 : 48 déclarations retirées, bienvenue/signalement/404 en code 0 sans aucune.
+- Le serveur de mesure pose une clé `re_…` et `EMAIL_CLIENTS_DE` factices (Resend refusé au
+  transport) : sans cela la carte, dessinée par la planche, n'était jamais rendue.
 
 ### ▶️ 20/09/2026 — DEUX ÉCRANS TOUCHÉS, ET TROIS DÉFAUTS QUE SEULE UNE CAPTURE A VUS
 
