@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
+import { fetchBorne } from "@/lib/reseau/fetch-borne";
 import { OPTIONS_COOKIES } from "@/lib/auth/cookies";
 import { cookies, headers } from "next/headers";
 import type { Database } from "./types-base";
@@ -31,7 +32,12 @@ export async function creerClientServeur() {
      * L'en-tête vient du navigateur du vendeur et ne décrit que lui ; il n'ouvre
      * rien et ne prouve rien. Borné à 400 caractères comme sa lecture.
      */
-    ...(agent === "" ? {} : { global: { headers: { "user-agent": agent } } }),
+    // Aucun appel n'attend sans fin : voir `lib/reseau/fetch-borne`. Le mandataire
+    // du navigateur n'est transmis que s'il existe.
+    global: {
+      fetch: fetchBorne(),
+      ...(agent === "" ? {} : { headers: { "user-agent": agent } }),
+    },
     // Les jetons de session ne doivent JAMAIS être lisibles en JavaScript :
     // la bibliothèque les pose `httpOnly:false` par défaut.
     cookieOptions: OPTIONS_COOKIES,

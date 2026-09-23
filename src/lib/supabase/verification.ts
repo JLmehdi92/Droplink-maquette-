@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
+import { fetchBorne } from "@/lib/reseau/fetch-borne";
 import type { Database } from "./types-base";
 import { clePubliable, urlSupabase } from "./config";
 
@@ -32,5 +33,7 @@ export function creerClientVerification() {
       autoRefreshToken: false,
       detectSessionInUrl: false,
     },
+    // Aucun appel n'attend sans fin : voir `lib/reseau/fetch-borne`.
+    global: { fetch: fetchBorne() },
   });
 }

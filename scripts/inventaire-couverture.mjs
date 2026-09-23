@@ -61,11 +61,6 @@ const EXCEPTIONS = new Map([
     "Redirections `next/navigation` après ouverture de session. Atteinte par la fumée " +
       "sur les douze routes vendeur et d'accès qui l'appellent.",
   ],
-  [
-    "src/lib/supabase/server.ts",
-    "Le client serveur lit `cookies()` de `next/headers`. Trente-deux appelants, " +
-      "atteint par la fumée sur chaque écran authentifié.",
-  ],
 
   // ── Atteints de bout en bout par la fumée, sur une route qu'elle inspecte ──
 

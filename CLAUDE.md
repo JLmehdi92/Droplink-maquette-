@@ -917,6 +917,18 @@ pour 6 champs.
 > jamais exécutée : **L-014 commis en corrigeant L-014.** La mesure qui l'a
 > démentie a été faite en cherchant un défaut voisin, pas en relisant.
 
+### ⚠️ AUCUN APPEL À SUPABASE N'ATTEND SANS FIN (23/09/2026)
+
+Mesuré le 04/09 : `/fr/analyses` a rendu 500 après 10,7 s, le serveur d'authentification
+ne répondant pas — et rien ne bornait l'attente. Les quatre clients passent désormais par
+`fetchBorne()` (`lib/reseau/fetch-borne.ts`, **10 s**) : au-delà, l'appel est abandonné et
+suit les chemins de panne existants (`SessionIndisponible`, lecture illisible).
+
+⚠️ **L'abandon s'appelle `AbortError`, et c'est mesuré** : `postgrest-js` 2.112 réessaie
+seul une lecture en échec réseau (après 1, 2 puis 4 s) sauf si l'erreur porte ce nom.
+Nommée `TimeoutError`, une lecture muette attendait ≈ 47 s — la borne quadruplait
+l'attente qu'elle devait couper. `tests/unit/appels-supabase-bornes.test.ts` l'exige.
+
 ### ⚠️ LA RÉGION DU SERVICE RAILWAY EST UNE PROPRIÉTÉ DE PERFORMANCE
 
 **Tout service créé pour ce produit doit être en `EU West`** (`Settings → Regions`) : la base

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
+import { fetchBorne } from "@/lib/reseau/fetch-borne";
 import type { Database } from "./types-base";
 import { cleServiceRole, urlSupabase } from "./config";
 
@@ -20,5 +21,7 @@ import { cleServiceRole, urlSupabase } from "./config";
 export function creerClientSysteme() {
   return createClient<Database>(urlSupabase(), cleServiceRole(), {
     auth: { persistSession: false, autoRefreshToken: false },
+    // Aucun appel n'attend sans fin : voir `lib/reseau/fetch-borne`.
+    global: { fetch: fetchBorne() },
   });
 }
