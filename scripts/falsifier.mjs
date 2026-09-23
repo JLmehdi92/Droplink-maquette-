@@ -836,14 +836,16 @@ const SQL = {
    */
   "quota-gratuit-mensuel": {
     casserDepuisMigration: {
-      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "    from public.orders\n    where shop_id = new.shop_id;\n",
       par: "    from public.orders\n    where shop_id = new.shop_id\n      and created_at >= date_trunc('month', now());\n",
     },
     reparerDepuisMigration: {
-      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
     },
   },
 
@@ -855,14 +857,16 @@ const SQL = {
    */
   "plan-ne-debloque-rien": {
     casserDepuisMigration: {
-      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  if v_plan = 'gratuit' then\n",
       par: "  if true then\n",
     },
     reparerDepuisMigration: {
-      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
     },
   },
 
@@ -917,16 +921,91 @@ const SQL = {
    */
   "colis-gratuit-au-plafond-mensuel": {
     casserDepuisMigration: {
-      fichier: "181_le_plafond_de_colis_suit_le_plan.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie() * 2;",
       par: "    v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "181_le_plafond_de_colis_suit_le_plan.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
+    },
+  },
+
+  /*
+   * LA COURSE SUR LE QUOTA (192) : sans le verrou consultatif, deux insertions
+   * simultanées comptent le même total et passent toutes les deux. Le quota à
+   * vie d'un compte gratuit devient « autant que de requêtes parallèles ».
+   */
+  "quota-sans-verrou": {
+    casserDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+      remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-commandes:' || new.shop_id::text, 0));\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+    },
+  },
+
+  /*
+   * HORS du cas motivant : la même course, sur les COLIS. Chaque ligne de trop
+   * y est une prise en charge PAYANTE, sur un palier commun à tous les comptes.
+   */
+  "colis-sans-verrou": {
+    casserDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+      remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-colis:' || new.shop_id::text, 0));\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+    },
+  },
+
+  /*
+   * UN VENDEUR SUSPENDU ÉCRIT DE NOUVEAU À SES CLIENTS (192) : sa page rend 404,
+   * et le client reçoit quand même « votre colis est en transit ».
+   */
+  "notifications-vendeur-suspendu": {
+    casserDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.notifications_a_envoyer(",
+      jusqua: "-- ── 3. Poser son nom de lien",
+      remplacer: "    and p.status = 'active'\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.notifications_a_envoyer(",
+      jusqua: "-- ── 3. Poser son nom de lien",
+    },
+  },
+
+  /*
+   * LA COURSE SUR LE NOM DE LIEN SE TAIT DE NOUVEAU (192) : le second vendeur
+   * reçoit une erreur d'unicité générique, que l'écran lit comme une panne.
+   */
+  "slug-course-muette": {
+    casserDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.definir_slug_boutique(",
+      remplacer: "  if not found then\n",
+      par: "  if false then\n",
+    },
+    reparerDepuisMigration: {
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      depuis: "create or replace function public.definir_slug_boutique(",
     },
   },
 
@@ -2745,14 +2824,16 @@ $$;
    */
   "plafond-commandes-en-dur": {
     casserDepuisMigration: {
-      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  v_plafond := public.lire_plafond_commandes();",
       par: "  v_plafond := 3000;",
     },
     reparerDepuisMigration: {
-      fichier: "176_le_quota_gratuit_se_lit_sans_droits.sql",
+      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
     },
   },
 

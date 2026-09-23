@@ -640,7 +640,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 191, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 192, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
@@ -652,9 +652,12 @@ celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne s
   partent de la tâche `cadence-suivi` existante — aucune tâche Railway de plus.
 - ⚠️ **LA 186 REND LA DOUBLE AUTHENTIFICATION OBLIGATOIRE POUR L'ADMINISTRATION, EN BASE**
   (décision de Wassim, 23/09/2026) : les fonctions SQL `est_admin` et `journaliser_admin` refusent une
-  session à un seul facteur. **Avant de la déployer, activer la 2FA sur le compte admin**
-  (Paramètres → sécurité) ; sinon `/admin` renvoie aux paramètres jusqu'à l'activation.
-  L'espace vendeur, lui, reste ouvert à un seul facteur — c'est là qu'on l'active.
+  session à un seul facteur. ⚠️ **« L'ACTIVER AVANT DE DÉPLOYER » ÉTAIT IMPOSSIBLE** (corrigé le
+  23/09/2026) : le module 2FA lui-même (156) n'est pas encore en production. L'ordre juste :
+  migrations → déploiement → ouvrir `/admin`, qui renvoie aux **Paramètres** → activer la 2FA
+  (QR code dans l'application d'authentification de l'administrateur — personne ne peut le
+  faire à sa place : le secret doit finir dans SON téléphone). Aucun blocage : l'espace vendeur
+  reste ouvert à un seul facteur, c'est là qu'on l'active.
 - ⚠️ **après `pnpm db:migrate`, vérifier À LA MAIN que le rôle `authenticator` porte
   `pgrst.db_pre_request`** (migration 156, la double authentification tenue en base) :
   `pnpm verif:prod` ne compare pas les réglages de rôle ;
