@@ -97,3 +97,36 @@ export function lireConfigEmail(): ConfigEmail | { readonly manquant: readonly s
 export function envoiConfigure(): boolean {
   return !("manquant" in lireConfigEmail());
 }
+
+/**
+ * L'ENVOI AU CLIENT FINAL a sa propre adresse d'expédition (23/09/2026).
+ *
+ * Les alertes de veille partent vers l'exploitant ; les e-mails de suivi partent
+ * vers les clients des vendeurs. Les confondre mettrait les deux sous la même
+ * réputation d'envoi : un pic de désinscriptions côté clients ferait classer en
+ * indésirable l'alerte qui dit que le produit est en panne.
+ *
+ * ABSENTE ⇒ LA FONCTION N'EXISTE PAS À L'ÉCRAN. La page client ne propose pas
+ * « me prévenir par e-mail » quand rien ne peut partir : une promesse qu'aucun
+ * e-mail ne tiendrait est pire qu'une absence (contrainte n° 8).
+ */
+export interface ConfigEmailClient {
+  readonly cle: string;
+  readonly expediteur: string;
+}
+
+export function lireConfigEmailClient(): ConfigEmailClient | { readonly manquant: readonly string[] } {
+  const manquant: string[] = [];
+  const brutCle = process.env["RESEND_API_KEY"]?.trim() ?? "";
+  const cle = brutCle !== "" && brutCle.startsWith("re_") && brutCle.length >= 20 ? brutCle : null;
+  if (cle === null) manquant.push("RESEND_API_KEY");
+  const expediteur = adresseUtilisable(process.env["EMAIL_CLIENTS_DE"]);
+  if (expediteur === null) manquant.push("EMAIL_CLIENTS_DE");
+  if (cle === null || expediteur === null) return { manquant };
+  return { cle, expediteur };
+}
+
+/** Vrai quand un e-mail au client final peut réellement partir. */
+export function envoiClientConfigure(): boolean {
+  return !("manquant" in lireConfigEmailClient());
+}

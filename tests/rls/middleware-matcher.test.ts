@@ -128,6 +128,22 @@ describe("Matcher du middleware", () => {
         "est un fournisseur, pas une session.",
     ],
     [
+      "/api/notification/confirmer",
+      "Le bouton « Confirmer » de la page ouverte depuis un e-mail de suivi " +
+        "(migration 188). Le client n'a JAMAIS de session : le middleware n'aurait " +
+        "rien à rafraîchir. Sa garde est le jeton lui-même — 32 octets aléatoires, " +
+        "dont la base ne garde que l'empreinte SHA-256, à usage unique, expiré en " +
+        "24 heures — plus le quota d'écriture publique.",
+    ],
+    [
+      "/api/notification/desinscription",
+      "La désinscription en un clic des e-mails de suivi (RFC 8058) : la " +
+        "messagerie du client poste ICI sans ouvrir de page, donc sans session ni " +
+        "cookie. Sa garde est `unsubscribe_token`, immuable et distinct du jeton " +
+        "public — il ne donne aucun accès à la commande —, plus le quota " +
+        "d'écriture publique.",
+    ],
+    [
       "/api/suivi/cadence",
       "Déclencheur de la tâche de fond du suivi. `/api` est exclu du matcher, et " +
         "ce que cette route déclenche COÛTE DE L'ARGENT : chaque passage " +

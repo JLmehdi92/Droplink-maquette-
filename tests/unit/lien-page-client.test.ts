@@ -62,6 +62,11 @@ const ADMIS: ReadonlyMap<string, string> = new Map([
       "pas l'adresse de la page. Le jeton y est encodé par `encodeURIComponent`.",
   ],
   [
+    "components/publique/carte-notifications.tsx",
+    "Appel de la carte de suivi par e-mail vers `/p/<jeton>/notification` — une " +
+      "SOUS-ROUTE d'API, pas l'adresse de la page. Le jeton y est encodé par `encodeURIComponent`.",
+  ],
+  [
     "components/publique/balise-vue.tsx",
     "Appel vers `/p/<jeton>/vue`, la sous-route qui compte une vue réelle.",
   ],

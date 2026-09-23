@@ -187,9 +187,14 @@ structurellement du marché gris.**
    interdit.
 2. **Le vendeur prime avant la remise au transporteur, le transporteur après.** Chacun
    est seul à savoir ce qu'il affirme. **Le statut ne recule jamais.**
-3. **La page publique reste sans formulaire.** L'abonnement du destinataire reste en
-   v1 : un champ email serait le premier pas vers l'inverse de « le destinataire n'a
-   jamais de compte ».
+3. ~~**La page publique reste sans formulaire.**~~ **LEVÉE PAR WASSIM LE 23/09/2026.**
+   Le client final peut demander à être prévenu par e-mail depuis sa page : UN champ
+   (son adresse), jamais de compte ni de mot de passe — le destinataire n'a toujours
+   aucun compte. Garde-fous : double consentement (rien ne part avant qu'il confirme
+   depuis sa boîte, par un BOUTON, jamais à l'ouverture du lien), trois e-mails au plus
+   (expédié, en transit, livré), désinscription en un clic, l'adresse n'est plus
+   écrivable par le vendeur (migrations 188-189). La carte n'apparaît que si l'envoi
+   est configuré (`EMAIL_CLIENTS_DE`).
 4. **La frise reste à quatre étapes** (préparation, expédié, en transit, livré). La
    granularité vit dans le **détail** du suivi, pas dans la frise.
 5. **Purge des réponses brutes 90 jours après le DERNIER MOUVEMENT**, pas après la
@@ -634,6 +639,21 @@ payment_events      id, provider, event_name, signature, payload, profile_id,
                     tout le monde sauf au rôle de service. Elle porte la charge
                     brute du fournisseur, c'est-à-dire des adresses e-mail de
                     vendeurs.
+
+notification_requests  id, order_id, email, token_hash, expires_at, created_at
+                    Les demandes de suivi par e-mail EN ATTENTE de confirmation
+                    (migrations 188-189, 23/09/2026). `token_hash` est le SHA-256
+                    du jeton envoyé par e-mail : le jeton en clair n'est jamais
+                    stocké. Expire en 24 heures ; trois demandes par heure et par
+                    commande au plus. ⚠️ RLS ACTIVÉE ET FORCÉE, SANS POLICY :
+                    atteinte seulement par les fonctions réservées au service.
+
+notifications_sent  order_id, etape, sent_at — PRIMARY KEY (order_id, etape)
+                    Les étapes déjà annoncées au client. La clé primaire EST le
+                    verrou d'idempotence : une étape est RÉSERVÉE avant l'envoi et
+                    RENDUE s'il échoue. L'adresse confirmée vit dans
+                    `orders.notify_email`, que le vendeur ne peut plus écrire.
+                    ⚠️ RLS ACTIVÉE ET FORCÉE, SANS POLICY.
 
 parcel_checkpoints  id, parcel_id, occurred_at, location, description, stage,
                     created_at

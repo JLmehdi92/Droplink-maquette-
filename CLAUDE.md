@@ -640,12 +640,16 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 187, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 191, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
 **Les consignes que ce journal porte et qui ne se perdent pas avec lui :**
 
+- ⚠️ **LES E-MAILS DE SUIVI DU CLIENT FINAL (188-189) N'EXISTENT À L'ÉCRAN QUE SI
+  `EMAIL_CLIENTS_DE` EST POSÉE** (adresse d'expédition dédiée, domaine vérifié chez Resend) :
+  sans elle, la carte « Suivi par e-mail » n'apparaît pas et rien ne part. Les e-mails d'étape
+  partent de la tâche `cadence-suivi` existante — aucune tâche Railway de plus.
 - ⚠️ **LA 186 REND LA DOUBLE AUTHENTIFICATION OBLIGATOIRE POUR L'ADMINISTRATION, EN BASE**
   (décision de Wassim, 23/09/2026) : les fonctions SQL `est_admin` et `journaliser_admin` refusent une
   session à un seul facteur. **Avant de la déployer, activer la 2FA sur le compte admin**

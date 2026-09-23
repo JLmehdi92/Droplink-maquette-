@@ -9,6 +9,8 @@ import { CarteCommande } from "@/components/publique/carte-commande";
 import { CarteContact } from "@/components/publique/carte-contact";
 import { CarteLivraison, type LigneLivraison } from "@/components/publique/carte-livraison";
 import { CartePropulsee } from "@/components/publique/carte-propulsee";
+import { CarteNotifications } from "@/components/publique/carte-notifications";
+import { envoiClientConfigure } from "@/lib/email/config";
 import { EnTeteBoutique } from "@/components/publique/en-tete-boutique";
 import { HistoriqueSuivi } from "@/components/publique/historique-suivi";
 import { estimationVisible } from "@/lib/page-publique/estimation";
@@ -68,9 +70,10 @@ import { lireTransporteur } from "@/lib/tracking/transporteurs";
  * CE QUE LE KIT DESSINE ET QUE LA PAGE NE PORTE PAS, et pourquoi :
  *  - le logo DropLink en tête et le sélecteur de langue : la page appartient
  *    au vendeur, et sa langue est celle qu'il a choisie ;
- *  - la carte « Notifications automatiques » : elle affirme au client qu'il
- *    sera prévenu, et rien ne l'y abonne — la décision 3 exclut tout
- *    formulaire de cette page ;
+ *  - (JUSQU'AU 23/09/2026) la carte « Notifications automatiques » : elle
+ *    affirmait au client qu'il serait prévenu, et rien ne l'y abonnait. Wassim
+ *    a LEVÉ la décision 3 ce jour-là : la carte porte désormais le champ et le
+ *    bouton (`CarteNotifications`), et n'apparaît que si l'envoi est configuré ;
  *  - la carte promotionnelle « Découvrir DropLink » : la décision 25 exige une
  *    mention SECONDAIRE, jamais confondable avec l'expéditeur. Elle reste au
  *    pied, discrète ;
@@ -203,6 +206,7 @@ export default async function PagePublique({
 
   const langue = estLangueSupportee(commande.boutique.langue) ? commande.boutique.langue : "fr";
   const t = await getTranslations({ locale: langue, namespace: "page-publique" });
+  const tn = await getTranslations({ locale: langue, namespace: "notifications.carte" });
   const format = await getFormatter({ locale: langue });
 
   // L'INSTANT EST PRIS UNE SEULE FOIS, ici, et descendu en propriété. Un
@@ -602,6 +606,25 @@ export default async function PagePublique({
                 bouton: t("contact.bouton"),
               }}
             />
+            {/* LE SUIVI PAR E-MAIL (planche `NotificationsCard`). ABSENT quand aucun
+                e-mail ne peut partir : une promesse qu'aucun envoi ne tiendrait est
+                pire qu'une carte absente (contrainte n° 8). */}
+            {envoiClientConfigure() ? (
+              <CarteNotifications
+                jeton={token}
+                accent={accent}
+                libelles={{
+                  titre: tn("titre"),
+                  texte: tn("texte"),
+                  champ: tn("champ"),
+                  bouton: tn("bouton"),
+                  envoye: tn("envoye"),
+                  invalide: tn("invalide"),
+                  trop: tn("trop"),
+                  erreur: tn("erreur"),
+                }}
+              />
+            ) : null}
             {/* LA CARTE « PROPULSÉ PAR DROPLINK » (planche `PoweredCard`), en gratuit seulement —
                 un compte Pro qui l'a demandé la retire (décision de Wassim, 19/09/2026). */}
             {commande.boutique.marqueMasquee ? null : (

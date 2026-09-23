@@ -1148,6 +1148,12 @@ export type Database = {
           comptes_suspendus: number
         }[]
       }
+      confirmer_notification: {
+        Args: { p_token_hash: string }
+        Returns: {
+          langue: string
+        }[]
+      }
       consommer_quota: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
         Returns: boolean
@@ -1190,6 +1196,19 @@ export type Database = {
           jours: number
         }[]
       }
+      demander_notification: {
+        Args: { p_email: string; p_jeton_public: string; p_token_hash: string }
+        Returns: {
+          langue: string
+          nom_boutique: string
+        }[]
+      }
+      desabonner_notification: {
+        Args: { p_jeton: string }
+        Returns: {
+          langue: string
+        }[]
+      }
       ecrire_parametre: {
         Args: { p_cle: string; p_valeur: Json }
         Returns: boolean
@@ -1215,12 +1234,39 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["account_plan"]
       }
+      notifications_a_envoyer: {
+        Args: { p_limite: number }
+        Returns: {
+          email: string
+          etape: Database["public"]["Enums"]["order_status"]
+          jeton_desinscription: string
+          jeton_public: string
+          langue: string
+          nom_boutique: string
+          nom_de_lien: string | null
+          order_id: string
+        }[]
+      }
       plan_pour_statut: {
         Args: { p_ends_at: string | null; p_statut: string }
         Returns: Database["public"]["Enums"]["account_plan"]
       }
       definir_slug_boutique: { Args: { p_slug: string }; Returns: string }
       lire_plafond_gratuit_a_vie: { Args: never; Returns: number }
+      rendre_notification: {
+        Args: {
+          p_etape: Database["public"]["Enums"]["order_status"]
+          p_order: string
+        }
+        Returns: undefined
+      }
+      reserver_notification: {
+        Args: {
+          p_etape: Database["public"]["Enums"]["order_status"]
+          p_order: string
+        }
+        Returns: boolean
+      }
       slug_est_reserve: { Args: { p_slug: string }; Returns: boolean }
       slug_valide: { Args: { p_slug: string }; Returns: boolean }
       verifier_slug_commande: {

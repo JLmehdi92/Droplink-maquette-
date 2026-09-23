@@ -68,6 +68,14 @@ const PREFIXES_DYNAMIQUES: ReadonlyMap<string, string> = new Map([
   ["admin.unites.", "composé depuis l'unité rendue par `mettreOctetsALEchelle`"],
   ["admin.surveillance.etat.", "composé depuis l'état du veilleur"],
   ["admin.surveillance.tache.", "composé depuis `scheduler_heartbeat.source`"],
+  [
+    "notifications.etape.sujet.",
+    "composé depuis l'étape de la commande (`expedie`, `en_transit`, `livre`) — e-mails de suivi du client",
+  ],
+  [
+    "notifications.etape.phrase.",
+    "composé depuis la même étape, pour la phrase du corps de l'e-mail",
+  ],
   ["admin.surveillance.degradation.", "composé depuis la décision de `surPanne`"],
   [
     "admin.panneau.alerte.",

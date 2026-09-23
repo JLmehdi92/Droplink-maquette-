@@ -52,6 +52,22 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "notification_requests",
+      "Les demandes de suivi par e-mail en attente de confirmation (migrations " +
+        "188-189) : l'adresse d'un client final et l'EMPREINTE du jeton envoyé. " +
+        "AUCUNE POLICY : atteinte seulement par `demander_notification` et " +
+        "`confirmer_notification`, réservées au rôle de service. Un vendeur y " +
+        "lirait les adresses des clients des autres ; personne n'a à la lire.",
+    ],
+    [
+      "notifications_sent",
+      "Les étapes déjà annoncées par e-mail (migrations 188-189) : sa clé " +
+        "primaire EST le verrou d'idempotence de l'envoi. AUCUNE POLICY : écrite " +
+        "et rendue par `reserver_notification` / `rendre_notification`, réservées " +
+        "au rôle de service. Un vendeur qui pourrait y écrire ferait taire les " +
+        "e-mails de son propre client, ou les faire repartir.",
+    ],
+    [
       "payment_events",
       "Le journal des webhooks de paiement (migration 177) : la charge BRUTE " +
         "envoyée par le fournisseur, donc les adresses e-mail des vendeurs et " +
@@ -1045,7 +1061,9 @@ describe("Sonde C — privilèges de colonne", () => {
     // (aucun transfert entre comptes), `created_at`, `updated_at` (tenue par
     // déclencheur) et `first_content_at` (c'est une MESURE, pas une donnée du
     // vendeur : la lui laisser écrire reviendrait à lui laisser écrire notre
-    // métrique de verdict).
+    // métrique de verdict). ET `notify_email` depuis la migration 188 : l'adresse
+    // du client n'entre que par SA confirmation — un vendeur qui pouvait l'écrire
+    // pour n'importe qui faisait de DropLink un relais de spam.
     "orders.customer_label",
     "orders.product_ref",
     "orders.internal_notes",
@@ -1054,7 +1072,6 @@ describe("Sonde C — privilèges de colonne", () => {
     "orders.tracking_number",
     "orders.carrier_code",
     "orders.cover_media_id",
-    "orders.notify_email",
     "orders.archived_at",
     // `order_media` — sont volontairement ABSENTES : `taille_octets` (elle fonde
     // le MODÈLE DE COÛT et n'est écrite qu'une fois, avec la valeur RELUE chez

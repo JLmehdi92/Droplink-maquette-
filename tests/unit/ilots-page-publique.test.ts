@@ -43,6 +43,14 @@ const DECLARES: ReadonlyArray<{ readonly fichier: string; readonly raison: strin
       "40 à 90 Ko, soit la moitié de la marge du budget à elle seule.",
   },
   {
+    fichier: "src/components/publique/carte-notifications.tsx",
+    raison:
+      "Le suivi par e-mail (décision de Wassim du 23/09/2026, qui lève la décision 3). " +
+      "Un champ et un bouton, sans bibliothèque : l'état « un e-mail vous attend » " +
+      "ne s'affiche qu'après la réponse du serveur, ce qu'un formulaire sans JavaScript " +
+      "ne saurait dire sans recharger toute la page au budget le plus serré.",
+  },
+  {
     fichier: "src/components/publique/balise-vue.tsx",
     raison:
       "Le comptage de consultation, émis APRÈS le rendu — compter au rendu " +

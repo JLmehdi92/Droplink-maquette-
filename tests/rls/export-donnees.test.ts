@@ -36,11 +36,19 @@ beforeAll(async () => {
       customer_label: "Client exporté",
       product_ref: "REF-EXPORT",
       internal_notes: SENTINELLE_NOTE,
-      notify_email: SENTINELLE_EMAIL,
     })
     .select("id")
     .single();
   if (error !== null) throw new Error("commande : " + error.message);
+
+  // L'ADRESSE DU CLIENT n'est plus écrivable par le vendeur (migration 188) :
+  // elle n'entre que par la confirmation du client. Elle est posée ici par le
+  // service, comme la confirmation la pose.
+  const { error: eAdresse } = await clientService()
+    .from("orders")
+    .update({ notify_email: SENTINELLE_EMAIL })
+    .eq("id", data.id);
+  if (eAdresse !== null) throw new Error("adresse du client : " + eAdresse.message);
 
   const { data: jetons } = await clientService()
     .from("orders")

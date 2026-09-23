@@ -219,13 +219,13 @@
     },
     "confidentialite": {
       "collecteTitre": "What we collect",
-      "collecteP1": "For a seller: their email address, the name and settings of their shop, and the content they upload. If they sign in with Google: the identifier and email address of their Google account; Google also sends their name and profile picture, which DropLink neither displays nor uses. For a recipient: nothing that identifies them. Viewing a page records a salted fingerprint of the IP address and browser, never the values themselves.",
+      "collecteP1": "For a seller: their email address, the name and settings of their shop, and the content they upload. If they sign in with Google: the identifier and email address of their Google account; Google also sends their name and profile picture, which DropLink neither displays nor uses. For a recipient: nothing that identifies them, unless they themselves ask to be notified by email — their address is then used only for the tracking emails of that order. Viewing a page records a salted fingerprint of the IP address and browser, never the values themselves.",
       "pasDeCompteTitre": "The recipient has no account",
-      "pasDeCompteP1": "Viewing a page creates no account, asks for no address and installs no advertising tracker. The name shown on the page is free text entered by the seller: it designates no user of our service.",
+      "pasDeCompteP1": "Viewing a page creates no account, requires no address and installs no advertising tracker. The name shown on the page is free text entered by the seller: it designates no user of our service.",
       "indexationTitre": "Nothing is indexed",
       "indexationP1": "Order pages carry a no-index directive, appear in no gallery and are reachable through no internal search. No rich preview is produced for messaging apps: a preview would show the content to people who never open the link.",
       "conservationTitre": "For how long",
-      "conservationP1": "An order's content is kept for as long as the seller keeps it. Raw carrier responses are purged ninety days after the parcel's last movement. Administration records are retained and survive the deletion of the account concerned.",
+      "conservationP1": "An order's content is kept for as long as the seller keeps it. Raw carrier responses are purged ninety days after the parcel's last movement. A tracking email address is used only after its owner confirms it, for three emails at most (shipped, in transit, delivered), and every email offers one-click unsubscribe; an unconfirmed request is erased after twenty-four hours. Administration records are retained and survive the deletion of the account concerned.",
       "droitsTitre": "Your rights",
       "droitsP1": "Access, rectification, erasure, objection. Write to us at the contact address shown on the reporting page.",
       "conservationP2": "When an account is deleted, only the email address and the sign-up and deletion dates are kept for one year, to meet hosting obligations, then erased automatically."
@@ -2232,6 +2232,65 @@
       "carteGratuit": "Shown",
       "cartePro": "Removed",
       "inclus": "Included"
+    }
+  },
+  "notifications": {
+    "carte": {
+      "titre": "Email updates",
+      "texte": "Get an email when your order ships, while it's in transit and when it's delivered. Three emails at most, nothing else.",
+      "champ": "Your email address",
+      "bouton": "Notify me",
+      "envoye": "Almost done: open the email we just sent to confirm.",
+      "invalide": "This email address is not valid.",
+      "trop": "Too many requests for this order. Please try again in an hour.",
+      "erreur": "Your request could not be saved. Please try again in a moment."
+    },
+    "boutiqueSansNom": "your seller",
+    "confirmation": {
+      "sujet": "Confirm updates for your order — {boutique}",
+      "corps": "Hello,\n\nYou asked to be notified by email about your order from {boutique}.\n\nTo confirm, open this link and press “Confirm”:\n{lien}\n\nThe link is valid for 24 hours. If you did not make this request, ignore this email: nothing will be sent to you.\n\n—\nDropLink, for {boutique}"
+    },
+    "etape": {
+      "sujet": {
+        "expedie": "Your order has shipped — {boutique}",
+        "en_transit": "Your order is on its way — {boutique}",
+        "livre": "Your order has been delivered — {boutique}"
+      },
+      "phrase": {
+        "expedie": "Good news: your order has shipped.",
+        "en_transit": "Your order is on its way: the carrier has it.",
+        "livre": "Your order is marked as delivered."
+      },
+      "corps": "Hello,\n\n{phrase}\n\nFollow your order, photos and parcel tracking:\n{lien}\n\n—\nYou are receiving this email because you asked to be notified about this order. To stop receiving them:\n{desinscription}\n\nDropLink, for {boutique}"
+    },
+    "page": {
+      "titre": "Email updates",
+      "confirmer": {
+        "titre": "Confirm email updates",
+        "texte": "Press the button to get an email when this order ships, while it's in transit and when it's delivered.",
+        "bouton": "Confirm"
+      },
+      "confirmee": {
+        "titre": "You're all set",
+        "texte": "You'll get an email at the next steps of your order. Every email has a link to unsubscribe."
+      },
+      "desinscrire": {
+        "titre": "Stop email updates",
+        "texte": "You will no longer receive tracking emails for this order.",
+        "bouton": "Unsubscribe"
+      },
+      "desinscrite": {
+        "titre": "Done",
+        "texte": "You will no longer receive emails for this order."
+      },
+      "invalide": {
+        "titre": "This link is no longer valid",
+        "texte": "It may have expired or already been used. You can ask again from your order page."
+      },
+      "indisponible": {
+        "titre": "Service temporarily unavailable",
+        "texte": "Your link is still valid: please try again in a few minutes."
+      }
     }
   }
 }

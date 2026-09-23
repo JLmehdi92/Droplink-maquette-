@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { secretDeTacheValide } from "@/lib/taches/secret";
 import { passerLaCadence } from "@/lib/tracking/cadence";
+import { envoyerNotificationsEnAttente } from "@/lib/page-publique/notifications";
+import { origineConfiguree } from "@/lib/site";
 
 /**
  * LE DÉCLENCHEUR DE LA TÂCHE DE FOND.
@@ -32,7 +34,8 @@ export async function POST(requete: Request): Promise<NextResponse> {
     // décrire un instant, pas une durée : sinon deux colis à égalité seraient
     // traités selon des règles imperceptiblement différentes.
     const bilan = await passerLaCadence(new Date());
-    return NextResponse.json(bilan, { headers: { "cache-control": "no-store" } });
+    const notifications = await envoyerLesNotifications();
+    return NextResponse.json({ ...bilan, notifications }, { headers: { "cache-control": "no-store" } });
   } catch (erreur) {
     // L'ÉCHEC EST UN 500, PAS UN 200 SILENCIEUX. C'est ce code que le
     // planificateur voit, et c'est la seule chose qui distingue un passage qui a
@@ -42,6 +45,28 @@ export async function POST(requete: Request): Promise<NextResponse> {
       "[suivi] cadence en échec : " + (erreur instanceof Error ? erreur.message : String(erreur)),
     );
     return NextResponse.json({ erreur: "cadence" }, { status: 500 });
+  }
+}
+
+/**
+ * LES E-MAILS DE SUIVI DU CLIENT, APRÈS LES COLIS (23/09/2026).
+ *
+ * Ils partent de cette tâche parce qu'elle tourne DÉJÀ toutes les quinze minutes :
+ * une tâche de plus à planifier sur Railway serait une étape de déploiement de
+ * plus à oublier. Ils viennent APRÈS la cadence, qui vient de faire avancer les
+ * étapes — et leur échec ne fait JAMAIS échouer la cadence : un e-mail en retard
+ * repart au passage suivant, un colis non interrogé coûte une interrogation.
+ */
+async function envoyerLesNotifications(): Promise<{ envoyes: number; echoues: number } | null> {
+  const origine = origineConfiguree();
+  if (origine === null) return null;
+  try {
+    return await envoyerNotificationsEnAttente(origine);
+  } catch (erreur) {
+    console.error(
+      "[notifications] envoi en échec : " + (erreur instanceof Error ? erreur.message : String(erreur)),
+    );
+    return null;
   }
 }
 

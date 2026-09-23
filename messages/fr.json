@@ -219,13 +219,13 @@
     },
     "confidentialite": {
       "collecteTitre": "Ce que nous collectons",
-      "collecteP1": "Pour un vendeur : son adresse email, le nom et les réglages de sa boutique, et les contenus qu'il dépose. S'il se connecte avec Google : l'identifiant et l'adresse email de son compte Google ; Google transmet aussi son nom et sa photo de profil, que DropLink n'affiche ni n'utilise. Pour un destinataire : rien qui l'identifie. Une consultation de page enregistre une empreinte salée de l'adresse IP et du navigateur, jamais les valeurs elles-mêmes.",
+      "collecteP1": "Pour un vendeur : son adresse email, le nom et les réglages de sa boutique, et les contenus qu'il dépose. S'il se connecte avec Google : l'identifiant et l'adresse email de son compte Google ; Google transmet aussi son nom et sa photo de profil, que DropLink n'affiche ni n'utilise. Pour un destinataire : rien qui l'identifie, sauf s'il demande lui-même à être prévenu par e-mail — son adresse sert alors uniquement aux e-mails de suivi de cette commande. Une consultation de page enregistre une empreinte salée de l'adresse IP et du navigateur, jamais les valeurs elles-mêmes.",
       "pasDeCompteTitre": "Le destinataire n'a pas de compte",
-      "pasDeCompteP1": "Consulter une page ne crée aucun compte, ne demande aucune adresse et n'installe aucun traceur publicitaire. Le nom affiché sur la page est un texte libre saisi par le vendeur : il ne désigne aucun utilisateur de notre service.",
+      "pasDeCompteP1": "Consulter une page ne crée aucun compte, n'exige aucune adresse et n'installe aucun traceur publicitaire. Le nom affiché sur la page est un texte libre saisi par le vendeur : il ne désigne aucun utilisateur de notre service.",
       "indexationTitre": "Rien n'est indexé",
       "indexationP1": "Les pages de commande portent une consigne de non-indexation, ne figurent dans aucune galerie et ne sont atteignables par aucune recherche interne. Aucun aperçu enrichi n'est produit pour les messageries : un aperçu montrerait le contenu à qui n'ouvre pas le lien.",
       "conservationTitre": "Combien de temps",
-      "conservationP1": "Les contenus d'une commande sont conservés tant que le vendeur les conserve. Les réponses brutes des transporteurs sont purgées quatre-vingt-dix jours après le dernier mouvement du colis. Les traces d'administration sont conservées et survivent à la suppression du compte concerné.",
+      "conservationP1": "Les contenus d'une commande sont conservés tant que le vendeur les conserve. Les réponses brutes des transporteurs sont purgées quatre-vingt-dix jours après le dernier mouvement du colis. Une adresse de suivi par e-mail n'est utilisée qu'après confirmation par son titulaire, pour trois e-mails au plus (expédition, transit, livraison), et chaque e-mail permet de s'en désinscrire en un clic ; une demande non confirmée est effacée après vingt-quatre heures. Les traces d'administration sont conservées et survivent à la suppression du compte concerné.",
       "droitsTitre": "Vos droits",
       "droitsP1": "Accès, rectification, effacement, opposition. Écrivez-nous à l'adresse de contact indiquée sur la page de signalement.",
       "conservationP2": "À la suppression du compte, seules l’adresse e-mail et les dates d’inscription et de suppression sont conservées un an, au titre des obligations de l’hébergeur, puis effacées automatiquement."
@@ -2232,6 +2232,65 @@
       "carteGratuit": "Affichée",
       "cartePro": "Retirée",
       "inclus": "Inclus"
+    }
+  },
+  "notifications": {
+    "carte": {
+      "titre": "Suivi par e-mail",
+      "texte": "Recevez un e-mail à l'expédition, pendant le transit et à la livraison. Trois e-mails au plus, rien d'autre.",
+      "champ": "Votre adresse e-mail",
+      "bouton": "Me prévenir",
+      "envoye": "Presque fini : ouvrez l'e-mail que nous venons d'envoyer pour confirmer.",
+      "invalide": "Cette adresse e-mail n'est pas valide.",
+      "trop": "Trop de demandes pour cette commande. Réessayez dans une heure.",
+      "erreur": "La demande n'a pas pu être enregistrée. Réessayez dans un instant."
+    },
+    "boutiqueSansNom": "votre vendeur",
+    "confirmation": {
+      "sujet": "Confirmez le suivi de votre commande — {boutique}",
+      "corps": "Bonjour,\n\nVous avez demandé à être prévenu par e-mail de l'avancement de votre commande chez {boutique}.\n\nPour confirmer, ouvrez ce lien puis appuyez sur « Confirmer » :\n{lien}\n\nLe lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : rien ne vous sera envoyé.\n\n—\nDropLink, pour {boutique}"
+    },
+    "etape": {
+      "sujet": {
+        "expedie": "Votre commande a été expédiée — {boutique}",
+        "en_transit": "Votre commande est en route — {boutique}",
+        "livre": "Votre commande est livrée — {boutique}"
+      },
+      "phrase": {
+        "expedie": "Bonne nouvelle : votre commande a été expédiée.",
+        "en_transit": "Votre commande est en route : le transporteur l'a prise en charge.",
+        "livre": "Votre commande est indiquée comme livrée."
+      },
+      "corps": "Bonjour,\n\n{phrase}\n\nSuivez votre commande, photos et suivi du colis :\n{lien}\n\n—\nVous recevez cet e-mail parce que vous avez demandé à être prévenu pour cette commande. Pour ne plus en recevoir :\n{desinscription}\n\nDropLink, pour {boutique}"
+    },
+    "page": {
+      "titre": "Suivi par e-mail",
+      "confirmer": {
+        "titre": "Confirmer le suivi par e-mail",
+        "texte": "Appuyez sur le bouton pour recevoir un e-mail à l'expédition, pendant le transit et à la livraison de cette commande.",
+        "bouton": "Confirmer"
+      },
+      "confirmee": {
+        "titre": "C'est confirmé",
+        "texte": "Vous recevrez un e-mail aux prochaines étapes de votre commande. Chaque e-mail contient un lien pour vous désinscrire."
+      },
+      "desinscrire": {
+        "titre": "Ne plus recevoir d'e-mails",
+        "texte": "Vous ne recevrez plus d'e-mails de suivi pour cette commande.",
+        "bouton": "Me désinscrire"
+      },
+      "desinscrite": {
+        "titre": "C'est fait",
+        "texte": "Vous ne recevrez plus d'e-mails pour cette commande."
+      },
+      "invalide": {
+        "titre": "Ce lien n'est plus valable",
+        "texte": "Il a peut-être expiré ou déjà servi. Vous pouvez refaire la demande depuis la page de votre commande."
+      },
+      "indisponible": {
+        "titre": "Service momentanément indisponible",
+        "texte": "Votre lien reste valable : réessayez dans quelques minutes."
+      }
     }
   }
 }

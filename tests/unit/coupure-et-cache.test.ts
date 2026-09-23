@@ -445,6 +445,12 @@ const DECLARES: Readonly<Record<string, Verdict>> = {
     change: false,
     raison: "quatre rpc de LECTURE (lire_*) — la forme trompe, rien n'est ecrit",
   },
+  "page-publique/notifications.ts": {
+    change: false,
+    raison:
+      "demandes de suivi par e-mail, adresses et etapes annoncees (migration 188) : " +
+      "rien de ce qu'elle ecrit n'est rendu par la page du client",
+  },
   "page-publique/vue.ts": {
     change: false,
     raison: "compte une consultation ; invisible du client, et deliberement apres le rendu",

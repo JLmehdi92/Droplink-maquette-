@@ -3135,6 +3135,83 @@ try {
     // archiverait aussi les corps FORGES, et ils resteraient en base.
     await service.from("payment_events").delete().like("payload->data->>id", "fumee-%");
 
+    /*
+     * LES E-MAILS DE SUIVI DU CLIENT (migration 188, 23/09/2026).
+     *
+     * ⚠️ RIEN NE PEUT PARTIR ICI, ET C EST VOULU : ce serveur tourne avec
+     * `RESEND_API_KEY` vide, et la seule cle de la machine est celle de la
+     * PRODUCTION. On eprouve donc ce qui ne depend d aucun envoi — les refus, la
+     * page, et l ABSENCE de promesse quand l envoi n est pas configure.
+     */
+    const catalogueNotif = JSON.parse(readFileSync(join(racine, "messages", "fr.json"), "utf8")).notifications;
+    const JETON_EMAIL_FACTICE = "A".repeat(43);
+
+    const adresseInvalide = await fetch(`${base}/p/${jetonFumee ?? "x"}/notification`, {
+      method: "POST",
+      headers: { "content-type": "application/json", ...visiteur(92) },
+      body: JSON.stringify({ email: "pas-une-adresse" }),
+    });
+    const jetonMalForme = await fetch(`${base}/p/court/notification`, {
+      method: "POST",
+      headers: { "content-type": "application/json", ...visiteur(92) },
+      body: JSON.stringify({ email: "client@exemple.test" }),
+    });
+    const pageSansJeton = await fetch(`${base}/fr/notification`);
+    const htmlSansJeton = await pageSansJeton.text();
+    const pageAConfirmer = await fetch(`${base}/fr/notification?action=confirmer&j=${JETON_EMAIL_FACTICE}`);
+    const htmlAConfirmer = await pageAConfirmer.text();
+    const confirmationFausse = await fetch(`${base}/api/notification/confirmer`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", ...visiteur(93) },
+      body: `j=${JETON_EMAIL_FACTICE}&langue=fr`,
+      redirect: "manual",
+    });
+    const unClicFaux = await fetch(`${base}/api/notification/desinscription?j=${"B".repeat(32)}`, {
+      method: "POST",
+      headers: visiteur(93),
+      body: "List-Unsubscribe=One-Click",
+    });
+    const desinscriptionPage = await fetch(`${base}/api/notification/desinscription`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", ...visiteur(93) },
+      body: `j=${"B".repeat(32)}&langue=en&retour=page`,
+      redirect: "manual",
+    });
+    // LA PAGE DOIT ETRE SERVIE (200) : sur une commande deja nettoyee, « la carte
+    // est absente » serait vrai par vacuite, et le controle ne prouverait rien.
+    const reponseClient = jetonFumee ? await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(94) }) : null;
+    const pageClient = reponseClient?.status === 200 ? await reponseClient.text() : "";
+
+    controles.push(
+      [adresseInvalide.status === 400, `une adresse invalide est refusee (statut ${adresseInvalide.status})`],
+      [jetonMalForme.status === 404, `un jeton mal forme rend 404 (statut ${jetonMalForme.status})`],
+      [
+        pageSansJeton.status === 200 && rendu(htmlSansJeton).includes(catalogueNotif.page.invalide.titre),
+        `la page de notification sans jeton dit « lien invalide » (statut ${pageSansJeton.status})`,
+      ],
+      [/noindex/.test(htmlSansJeton), "la page de notification n est pas indexee"],
+      [
+        rendu(htmlAConfirmer).includes(catalogueNotif.page.confirmer.titre) &&
+          htmlAConfirmer.includes('action="/api/notification/confirmer"'),
+        "OUVRIR le lien montre le bouton de confirmation — sans rien confirmer",
+      ],
+      [
+        confirmationFausse.status === 303 &&
+          (confirmationFausse.headers.get("location") ?? "").endsWith("/fr/notification?etat=invalide"),
+        `une confirmation au jeton inconnu mene a « invalide » (statut ${confirmationFausse.status})`,
+      ],
+      [unClicFaux.status === 404, `la desinscription en un clic d un jeton inconnu rend 404 (statut ${unClicFaux.status})`],
+      [
+        desinscriptionPage.status === 303 &&
+          (desinscriptionPage.headers.get("location") ?? "").endsWith("/en/notification?etat=invalide"),
+        `la desinscription depuis la page revient dans SA langue (statut ${desinscriptionPage.status})`,
+      ],
+      [
+        pageClient !== "" && !rendu(pageClient).includes(catalogueNotif.carte.titre),
+        "sans envoi configure, la page client ne promet AUCUN e-mail",
+      ],
+    );
+
   }
 
   {

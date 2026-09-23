@@ -278,7 +278,6 @@ describe("Ce que le vendeur peut écrire", () => {
       "cover_media_id",
       "customer_label",
       "internal_notes",
-      "notify_email",
       "product_ref",
       "qc_status",
       "status",
