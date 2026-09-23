@@ -15,7 +15,7 @@ import "server-only";
  * session persistante que NI la suspension du compte NI la révocation d'un lien
  * ne coupent avant l'expiration du jeton de rafraîchissement.
  *
- * CE QUE ÇA NE COÛTE RIEN DE FERMER : `creerClientNavigateur` n'est appelé nulle
+ * CE QUE ÇA NE COÛTE RIEN DE FERMER : `creerClientNavigateur` (supprimé le 23/09/2026) n'était appelé nulle
  * part dans le produit. Aucun accès Supabase ne part du navigateur, donc rien
  * n'a jamais eu besoin de lire ces cookies en JavaScript. La protection était
  * disponible gratuitement et n'avait simplement pas été demandée.

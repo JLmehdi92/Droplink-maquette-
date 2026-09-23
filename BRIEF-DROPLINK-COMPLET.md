@@ -477,11 +477,12 @@ base**, audit **atomique** avec la lecture qu'il trace.
 
 | Fichier | Rôle |
 |---|---|
-| `lib/supabase/client.ts` | Navigateur, clé publiable |
+| ~~`lib/supabase/client.ts`~~ | ⚠️ **SUPPRIMÉ le 23/09/2026** : `creerClientNavigateur` n'avait aucun appelant. Aucun accès Supabase ne part du navigateur — c'est ce qui permet aux cookies de session d'être `httpOnly` (`lib/auth/cookies.ts`) ; un client navigateur recréé devrait défaire cette protection |
 | `lib/supabase/server.ts` | Serveur **avec session**, RLS active. **Client par défaut** |
 | ~~`lib/supabase/admin.ts`~~ | ⚠️ **SUPPRIMÉ le 23/09/2026** : `creerClientAdmin` n'avait plus AUCUN appelant — l'audit passe par la session de l'administrateur (fonctions `security definer` et lectures sous RLS). La cloison ESLint reste, en fil-piège |
 | `lib/supabase/anon.ts` | Serveur **SANS session** — pour la page publique |
 | `lib/supabase/system.ts` | Service-role pour les chemins **sans utilisateur** (webhooks, tâches, envois) |
+| `lib/supabase/verification.ts` | **Sans cookies**, pour une seule question : « ce mot de passe est-il celui de ce compte ? », avant un geste sensible. Réservé à `lib/auth/` ; la session ouverte est refermée aussitôt (ajouté au tableau le 23/09/2026 — il y manquait) |
 
 **Pourquoi `anon.ts` existe** : `server.ts` lit les cookies, donc le rendu de la page
 publique dépendrait de la présence d'un cookie — **un vendeur connecté verrait sa page

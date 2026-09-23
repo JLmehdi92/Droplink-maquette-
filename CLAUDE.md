@@ -733,15 +733,16 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 
 **4. `/api/*` — machine.** Exclue du middleware, donc **chaque route porte sa propre garde**.
 
-**Quatre clients Supabase, physiquement séparés** (cinq jusqu'au 23/09/2026). Importer le mauvais doit casser le build plutôt que de fuiter silencieusement :
+**Quatre clients Supabase, physiquement séparés** (six jusqu'au 23/09/2026). Importer le mauvais doit casser le build plutôt que de fuiter silencieusement :
 
 | Fichier | Rôle |
 |---|---|
-| `lib/supabase/client.ts` | Navigateur, clé publiable |
+| ~~`lib/supabase/client.ts`~~ | ⚠️ **SUPPRIMÉ le 23/09/2026** : `creerClientNavigateur` n'avait aucun appelant. Aucun accès Supabase ne part du navigateur — c'est ce qui permet aux cookies de session d'être `httpOnly` (`lib/auth/cookies.ts`) ; un client navigateur recréé devrait défaire cette protection |
 | `lib/supabase/server.ts` | Serveur **avec session**, RLS active. **Défaut** |
 | ~~`lib/supabase/admin.ts`~~ | ⚠️ **SUPPRIMÉ le 23/09/2026** : `creerClientAdmin` n'avait plus AUCUN appelant — l'audit passe par la session de l'administrateur (fonctions `security definer` et lectures sous RLS). La cloison ESLint reste, en fil-piège |
 | `lib/supabase/anon.ts` | Serveur **SANS session** — page publique uniquement |
 | `lib/supabase/system.ts` | Service-role pour les chemins **sans humain** (webhooks, tâches) |
+| `lib/supabase/verification.ts` | **Sans cookies**, pour une seule question : « ce mot de passe est-il celui de ce compte ? », avant un geste sensible. Réservé à `lib/auth/` ; la session ouverte est refermée aussitôt (ajouté au tableau le 23/09/2026 — il y manquait) |
 
 `anon.ts` existe parce que `server.ts` lit les cookies : sinon le rendu de la page publique dépendrait de la présence d'un cookie, et **un vendeur connecté verrait sa page autrement que son client**, sans que personne s'en aperçoive avant que ça compte.
 

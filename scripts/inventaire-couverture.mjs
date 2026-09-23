@@ -57,87 +57,20 @@ const EXCEPTIONS = new Map([
   //    bout en bout par la fumée — relevé le 23/09/2026 en croisant les
   //    appelants de `src/app` avec les chemins que `scripts/fumee.mjs` demande.
   [
-    "src/lib/audit/garde.ts",
-    "`exigerAdmin()` : `notFound()` et `cache()` de React. Éprouvée de bout en bout " +
-      "par la fumée sur les routes d'administration (« rend 404 sans session »).",
-  ],
-  [
     "src/lib/comptes/apres-session.ts",
     "Redirections `next/navigation` après ouverture de session. Atteinte par la fumée " +
       "sur les douze routes vendeur et d'accès qui l'appellent.",
-  ],
-  [
-    "src/lib/comptes/profil.ts",
-    "`lireProfilVendeur()` lit les cookies de session. Atteinte par la fumée sur " +
-      "quinze routes, dont les deux exports CSV.",
   ],
   [
     "src/lib/supabase/server.ts",
     "Le client serveur lit `cookies()` de `next/headers`. Trente-deux appelants, " +
       "atteint par la fumée sur chaque écran authentifié.",
   ],
-  [
-    "src/lib/commandes/actions.ts",
-    "Module `use server` : chaque export est une Server Action, qui n'existe que dans " +
-      "une requête. Atteint par la fumée sur /fr/commandes.",
-  ],
-  [
-    "src/lib/commandes/actions-contestation.ts",
-    "Module `use server` appelé par `bandeau-blocage.tsx`. Le travail vit dans " +
-      "`lib/commandes/contestation.ts`, éprouvé en RLS.",
-  ],
-  [
-    "src/lib/commandes/actions-medias.ts",
-    "Module `use server` appelé par `carte-medias.tsx`. Le travail vit dans " +
-      "`lib/commandes/medias.ts`, éprouvé en RLS.",
-  ],
 
   // ── Atteints de bout en bout par la fumée, sur une route qu'elle inspecte ──
-  [
-    "src/lib/tracking/ingestion.ts",
-    "Appelée par le webhook `/api/suivi/notification`, que la fumée éprouve : " +
-      "signature, rejeu du même corps ignoré, étape du colis qui avance.",
-  ],
-  [
-    "src/lib/envois/export-csv.ts",
-    "Appelée par `/api/envois/export`, que la fumée télécharge et inspecte " +
-      "(aucun lien public dans le fichier).",
-  ],
-  [
-    "src/lib/blog/articles.ts",
-    "Le registre des articles, servi par /fr/blog et /fr/blog/[slug] — que la fumée " +
-      "demande (200 en français, 404 dans les autres langues).",
-  ],
-  [
-    "src/lib/seo/donnees-structurees.ts",
-    "Le JSON-LD des articles, que la fumée lit sur le HTML servi.",
-  ],
-  [
-    "src/lib/analyses/recente.ts",
-    "Servie par /fr/analyses et /fr/tableau-de-bord, que la fumée et les sondes " +
-      "de conformité rendent.",
-  ],
-  [
-    "src/lib/boutique/libelles-apercu.ts",
-    "Les libellés de l'aperçu, rendus par /fr/marque, /fr/bienvenue et l'éditeur — " +
-      "mesurés par les sondes de conformité.",
-  ],
-  [
-    "src/lib/auth/recuperation.ts",
-    "Appelée par /fr/nouveau-mot-de-passe, que la fumée demande.",
-  ],
-  [
-    "src/lib/audit/empreinte-admin.ts",
-    "Sept lignes, appelées par sept routes d'administration que la fumée demande.",
-  ],
 
 
   // ── ⚠️ DU CODE MORT — constaté le 23/09/2026 par cet inventaire ────────────
-  [
-    "src/lib/supabase/client.ts",
-    "Code mort DÉCLARÉ : `creerClientNavigateur` n'est appelé nulle part, et " +
-      "`lib/auth/cookies.ts` le dit. Gardé : la cloison ESLint le cite.",
-  ],
 ]);
 
 // ── 1. Les deux rapports, frais ─────────────────────────────────────────────
