@@ -21,8 +21,7 @@ import {
   lirePlusConsultees,
   lireSemaines,
   lireTransporteurs,
-  PERIODES,
-} from "@/lib/analyses/activite";
+  PERIODES, etatPanneauQc } from "@/lib/analyses/activite";
 import { lireActiviteRecente } from "@/lib/analyses/recente";
 import { compterEnvois } from "@/lib/envois/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -125,8 +124,9 @@ export default async function Analyses({
   const INDISPONIBLE =
     "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 text-[14px] text-ds-texte-corps shadow-ds-card lg:p-6";
 
-  const qcTotal =
-    activite === null ? 0 : activite.qcApprouve + activite.qcRefuse + activite.qcEnAttente;
+  // UNE LECTURE EN ÉCHEC N'EST PAS « AUCUNE COMMANDE » (23/09/2026) : voir `etatPanneauQc`.
+  const panneauQc = etatPanneauQc(activite);
+  const qcTotal = panneauQc.etat === "parts" ? panneauQc.total : 0;
 
   /*
    * LE BOUTON DE PÉRIODE ACTIF EST À L'ACCENT, ET IL ÉTAIT NOIR.
@@ -235,7 +235,9 @@ export default async function Analyses({
         )}
 
         <Panneau titre={t("qc.titre")} sousTitre={t("qc.aide")}>
-          {qcTotal === 0 ? (
+          {panneauQc.etat === "indisponible" ? (
+            <p className="text-[14px] text-ds-texte-corps">{t("indisponible")}</p>
+          ) : panneauQc.etat === "vide" ? (
             <p className="text-[14px] text-ds-texte-corps">{t("qc.vide")}</p>
           ) : (
             <ul className="flex flex-col gap-[15px] lg:gap-4">

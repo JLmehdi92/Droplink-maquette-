@@ -48,6 +48,27 @@ export const ParametresAnalyses = z.object({
 
 export type ParametresAnalyses = z.infer<typeof ParametresAnalyses>;
 
+/**
+ * CE QUE LE PANNEAU QC DES ANALYSES PEUT AFFIRMER (23/09/2026).
+ *
+ * Défaut trouvé par la chasse aux échecs silencieux : une lecture en échec
+ * (`null`) donnait un total de 0, et le panneau affichait « Aucune commande sur
+ * cette période » — une absence que la base n'avait pas confirmée (contrainte
+ * n° 8). Le reste de l'écran disait déjà « section illisible » ; celui-ci aussi.
+ */
+export type EtatPanneauQc =
+  | { readonly etat: "indisponible" }
+  | { readonly etat: "vide" }
+  | { readonly etat: "parts"; readonly total: number };
+
+export function etatPanneauQc(
+  activite: Pick<Activite, "qcApprouve" | "qcRefuse" | "qcEnAttente"> | null,
+): EtatPanneauQc {
+  if (activite === null) return { etat: "indisponible" };
+  const total = activite.qcApprouve + activite.qcRefuse + activite.qcEnAttente;
+  return total === 0 ? { etat: "vide" } : { etat: "parts", total };
+}
+
 export interface Activite {
   readonly commandesCreees: number;
   readonly commandesOuvertes: number;

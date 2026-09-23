@@ -316,6 +316,11 @@ export default async function EditeurCommande({
     <main id="contenu" className="-mb-[86px] flex min-h-dvh flex-col md:mb-0">
       <TraductionsClient espaces={["editeur", "medias", "actions", "blocageVendeur"]}>
         <Editeur
+          // UNE CLÉ PAR COMMANDE (revue ECC du 23/09/2026) : l'éditeur et sa carte
+          // de médias initialisent leur état depuis les propriétés au PREMIER
+          // montage. Sans clé, une navigation d'une fiche à une autre qui garderait
+          // l'arbre monté afficherait les médias et le lien de la précédente.
+          key={data.id}
           id={data.id}
           langue={langue}
           jeton={data.public_token}
