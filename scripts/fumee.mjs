@@ -23,7 +23,7 @@
 //
 // Il exige un `.next` a jour, donc il vient APRES `pnpm build` dans la chaine.
 import { spawn, execSync } from "node:child_process";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 import { createServer } from "node:net";
 import { gzipSync } from "node:zlib";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -111,9 +111,39 @@ function portLibre() {
   });
 }
 
+const SECRET_WEBHOOK_FUMEE = "secret-webhook-fumee-" + randomUUID();
+
 const port = await portLibre();
 const base = `http://127.0.0.1:${port}`;
 console.log(`port ephemere : ${port}\n`);
+
+/*
+ * CHAQUE REQUETE VERS LE SERVEUR EST NOTEE, avec son statut — pour l inventaire
+ * des routes en fin de sonde (23/09/2026). Installe AVANT le transport
+ * resilient, qui capture le `fetch` courant : il enrobe donc celui-ci.
+ */
+const requetesServies = [];
+{
+  const precedent = globalThis.fetch.bind(globalThis);
+  globalThis.fetch = (entree, options) => {
+    const url =
+      typeof entree === "string" ? entree : entree instanceof URL ? entree.href : entree.url;
+    const promesse = precedent(entree, options);
+    if (url.startsWith(base)) {
+      const chemin = new URL(url).pathname;
+      const methode = (
+        options?.method ?? (typeof entree === "object" && "method" in entree ? entree.method : "GET")
+      ).toUpperCase();
+      void promesse.then(
+        (r) => requetesServies.push({ chemin, methode, statut: r.status }),
+        // Une connexion refusee n est pas une reponse : c est la boucle
+        // d attente du demarrage, qui essaie avant que le serveur ecoute.
+        () => undefined,
+      );
+    }
+    return promesse;
+  };
+}
 
 // Le plafond public est abaisse POUR CE SERVEUR : mesurer le seuil reel de 120
 // exigerait 121 requetes, et on ne verifierait de toute facon qu un nombre. Ce
@@ -230,6 +260,11 @@ const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   env: {
     ...process.env,
     QUOTA_PUBLIQUE_PAR_MINUTE: String(PLAFOND_PUBLIC),
+    // UN SECRET DE WEBHOOK PROPRE A LA FUMEE. Sans lui, la route de paiement
+    // repond 503 « non configure » a tout, et la verification de signature — la
+    // seule garde de la seule surface qui pose un plan payant — ne serait
+    // jamais atteinte ici.
+    LEMON_SQUEEZY_WEBHOOK_SECRET: SECRET_WEBHOOK_FUMEE,
     // LE MODE DE CONFIANCE EST CELUI DE LA CIBLE DE DEPLOIEMENT, PAS UN MODE DE
     // COMMODITE. Le defaut est `cloudflare` — seul `cf-connecting-ip` est cru —
     // et il n y a pas de Cloudflare devant ce serveur : sans reglage, aucune
@@ -1599,6 +1634,33 @@ try {
           const entetesExport = { cookie: cookieVendeur, ...visiteur(44) };
 
           /*
+           * L EXPORT DES DONNEES DU COMPTE — le droit d acces du vendeur. Aucune
+           * requete de cette sonde ne l atteignait avant le 23/09/2026 (trouve par
+           * l inventaire des routes). Mesure AVANT la rafale ci-dessous, qui
+           * epuise le plafond partage des exports.
+           */
+          const exportCompte = await fetch(`${base}/api/compte/export`, { headers: entetesExport });
+          const texteCompte = exportCompte.ok ? await exportCompte.text() : "";
+          let compteLisible = false;
+          try {
+            compteLisible = typeof JSON.parse(texteCompte) === "object";
+          } catch {
+            compteLisible = false;
+          }
+          controles.push(
+            [exportCompte.status === 200, `l export du compte sert le vendeur (statut ${exportCompte.status})`],
+            [compteLisible, "l export du compte est un JSON lisible"],
+            [
+              (exportCompte.headers.get("content-disposition") ?? "").startsWith("attachment"),
+              "l export du compte est propose en telechargement",
+            ],
+            [
+              (exportCompte.headers.get("cache-control") ?? "").includes("no-store"),
+              "l export du compte n est garde par aucun cache",
+            ],
+          );
+
+          /*
            * ⚠️ LE COMPTEUR EST REMIS A ZERO AVANT LA MESURE, ET C EST NECESSAIRE.
            *
            * Sa fenetre est d UNE HEURE, et le compte de fumee peut survivre a un
@@ -2906,6 +2968,81 @@ try {
       envoisSansSession.status === 404,
       `l export des colis refuse sans session (statut ${envoisSansSession.status}, attendu 404)`,
     ]);
+
+    // L export des DONNEES DU COMPTE : tout ce que le vendeur a confie, liens
+    // publics compris. Sans session, rien — et le meme 404 que les autres.
+    const compteSansSession = await fetch(`${base}/api/compte/export`, { redirect: "manual" });
+    const compteEnPost = await fetch(`${base}/api/compte/export`, { method: "POST" });
+    controles.push(
+      [
+        compteSansSession.status === 404 && (await compteSansSession.text()) === "",
+        `l export du compte refuse sans session, corps vide (statut ${compteSansSession.status})`,
+      ],
+      [compteEnPost.status === 405, `l export du compte refuse le POST (statut ${compteEnPost.status})`],
+    );
+
+    /*
+     * LE WEBHOOK DE PAIEMENT — la SEULE surface qui pose un plan payant. Hors du
+     * middleware, sa seule garde est la signature HMAC du corps brut. Aucune
+     * requete de cette sonde ne l atteignait avant le 23/09/2026.
+     *
+     * Le refus ne prouve rien seul : un contre-test SIGNE doit passer. On signe
+     * un evenement que la route IGNORE (`order_created`) : il est archive, rien
+     * n est applique a aucun compte, et l archive est retiree ensuite.
+     */
+    const urlPaiement = `${base}/api/paiement/lemon-squeezy`;
+    const idEvenementFumee = "fumee-" + randomUUID();
+    const evenementIgnore = JSON.stringify({
+      meta: { event_name: "order_created" },
+      data: { id: idEvenementFumee, attributes: { status: "active" } },
+    });
+    const signer = (corps, secret) => createHmac("sha256", secret).update(corps, "utf8").digest("hex");
+    const posterPaiement = (corps, signature) =>
+      fetch(urlPaiement, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(signature === null ? {} : { "x-signature": signature }),
+          ...visiteur(91),
+        },
+        body: corps,
+      });
+
+    const sansSignature = await posterPaiement(evenementIgnore, null);
+    const mauvaiseSignature = await posterPaiement(evenementIgnore, signer(evenementIgnore, "pas-le-bon-secret"));
+    const signatureDUnAutreCorps = await posterPaiement(
+      evenementIgnore.replace("order_created", "subscription_created"),
+      signer(evenementIgnore, SECRET_WEBHOOK_FUMEE),
+    );
+    const corpsVide = await posterPaiement("", signer("", SECRET_WEBHOOK_FUMEE));
+    const signe = await posterPaiement(evenementIgnore, signer(evenementIgnore, SECRET_WEBHOOK_FUMEE));
+    const reponseSignee = signe.ok ? await signe.json() : null;
+    const rejeu = await posterPaiement(evenementIgnore, signer(evenementIgnore, SECRET_WEBHOOK_FUMEE));
+    const reponseRejeu = rejeu.ok ? await rejeu.json() : null;
+
+    controles.push(
+      [sansSignature.status === 401, `le webhook refuse un corps sans signature (statut ${sansSignature.status})`],
+      [
+        mauvaiseSignature.status === 401,
+        `le webhook refuse une signature d un autre secret (statut ${mauvaiseSignature.status})`,
+      ],
+      [
+        signatureDUnAutreCorps.status === 401,
+        `le webhook refuse une signature VALIDE posee sur un corps modifie (statut ${signatureDUnAutreCorps.status})`,
+      ],
+      [corpsVide.status === 400, `le webhook refuse un corps vide (statut ${corpsVide.status})`],
+      [
+        signe.status === 200 && reponseSignee?.statut === "ignore",
+        `CONTRE-TEST : un evenement correctement signe est accepte (statut ${signe.status}, ${reponseSignee?.statut})`,
+      ],
+      [
+        rejeu.status === 200 && reponseRejeu?.statut === "deja_traite",
+        `un rejeu du meme evenement n est traite qu une fois (${reponseRejeu?.statut})`,
+      ],
+    );
+    // PAR L IDENTIFIANT DE L EVENEMENT, pas par la signature : une route cassee
+    // archiverait aussi les corps FORGES, et ils resteraient en base.
+    await service.from("payment_events").delete().like("payload->data->>id", "fumee-%");
 
   }
 
@@ -4629,15 +4766,22 @@ try {
    * porterait le mot « admin » ou un libelle reconnaissable serait un aveu
    * malgre le bon code de reponse.
    */
+  /*
+   * ⚠️ CETTE LISTE ETAIT ECRITE A LA MAIN, ET ELLE AVAIT OUBLIE DEUX ECRANS.
+   * L inventaire des routes (23/09/2026) a montre que `/admin/comptes/doublons`
+   * et `/admin/comptes/[id]` n etaient jamais demandes : le 404 de l admin —
+   * une suite qui ne doit jamais etre desactivable — ne les couvrait pas. Les
+   * ecrans sont desormais LUS SUR LE DISQUE, les segments dynamiques eprouves
+   * avec un identifiant et une valeur a point, comme pour l espace vendeur.
+   */
   const cheminsAdmin = [
     "/fr/admin",
-    "/fr/admin/commandes",
-    "/fr/admin/statistiques",
-    "/fr/admin/comptes",
-    "/fr/admin/journal",
-    "/fr/admin/parametres",
-    "/fr/admin/boutiques",
-    "/fr/admin/surveillance",
+    ...routesDeLEspaceVendeur(join(process.cwd(), "src", "app", "[locale]", "admin")).flatMap(
+      (route) =>
+        route.includes("[")
+          ? VALEURS_DYNAMIQUES.map((v) => "/fr/admin" + route.replace(/\[[^\]]+\]/g, v))
+          : ["/fr/admin" + route],
+    ),
     // Casse et absence de prefixe de langue : ne reconnaitre que `/fr/admin`
     // laisserait ces formes franchir le filtre. Elles ne menent nulle part
     // aujourd hui, mais une protection qui tient a ce qu une redirection ait
@@ -6245,6 +6389,102 @@ console.log(`\npoids HTML /fr : ${poids.toFixed(1)} Ko`);
  * Les trois etages disent desormais leur motif quand ils cedent, sans quoi le
  * plancher signale qu il manque quelque chose sans jamais dire quoi.
  */
+/*
+ * ═════════════════════════════════════════════════════════════════════════════
+ * AUCUNE ROUTE DU PRODUIT SANS UNE REQUETE DE CETTE SONDE
+ * ═════════════════════════════════════════════════════════════════════════════
+ *
+ * Pose le 23/09/2026, en miroir de la septieme porte. `couverture` exige que
+ * chaque fichier de `src/lib/` soit traverse par un test ; elle ne voit pas
+ * `src/app/`, qui tourne dans le processus du serveur. Rien n exigeait donc
+ * qu une page ou une route AJOUTEE soit seulement appelee une fois avant d etre
+ * livree.
+ *
+ * L INVENTAIRE PART DU DISQUE — chaque `page.tsx` et `route.ts` — et se compare
+ * aux requetes REELLEMENT PARTIES vers ce serveur, notees par l enrobage de
+ * `fetch` pose en tete de fichier. Pas au texte de cette sonde : un chemin cite
+ * dans un commentaire ou dans un `if` jamais pris n est pas une requete (L-020).
+ *
+ * ⚠️ CE QUE CA PROUVE, ET PAS PLUS : que chaque route a RECU une requete et
+ * qu aucune n a repondu 500. Pas que chacune fait tout ce qu elle doit — ca,
+ * ce sont les controles de cette sonde, des suites et des sondes navigateur.
+ * C est le plancher : une route qu aucun controle n a meme atteinte.
+ */
+function routesDuDisque(dossier, relatif = "") {
+  const trouvees = [];
+  for (const entree of readdirSync(dossier)) {
+    const chemin = join(dossier, entree);
+    if (statSync(chemin).isDirectory()) {
+      trouvees.push(...routesDuDisque(chemin, relatif + "/" + entree));
+    } else if (entree === "page.tsx" || entree === "route.ts") {
+      trouvees.push(relatif + "/" + entree);
+    }
+  }
+  return trouvees;
+}
+
+function motifDeRoute(fichier) {
+  const segments = fichier
+    .split("/")
+    .slice(1, -1)
+    .filter((s) => !s.startsWith("("))
+    .map((s) =>
+      s === "[locale]"
+        ? "(?:fr|en|zh-CN)"
+        : s.startsWith("[...")
+          ? ".+"
+          : s.startsWith("[")
+            ? "[^/]+"
+            : s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+    );
+  return new RegExp("^/" + segments.join("/") + "/?$");
+}
+
+// Chaque exception porte sa raison. Aucune pour l instant : si une route ne peut
+// pas etre appelee ici, on l ecrit, on ne la laisse pas passer en silence.
+const ROUTES_NON_APPELEES = new Map([]);
+
+const routesProduit = routesDuDisque(join(process.cwd(), "src", "app"));
+let routesAtteintes = 0;
+for (const fichier of routesProduit) {
+  const motif = motifDeRoute(fichier);
+  const recues = requetesServies.filter((r) => motif.test(r.chemin));
+  const excuse = ROUTES_NON_APPELEES.get(fichier);
+  if (recues.length === 0 && excuse === undefined) {
+    echecs += 1;
+    console.log(`ECHEC ${fichier} : aucune requete de la fumee ne l a atteinte`);
+    continue;
+  }
+  if (recues.length > 0 && excuse !== undefined) {
+    echecs += 1;
+    console.log(`ECHEC ${fichier} est declaree non appelee, et elle l a ete : retirer l exception`);
+  }
+  const en500 = recues.filter((r) => r.statut >= 500);
+  if (en500.length > 0) {
+    echecs += 1;
+    console.log(`ECHEC ${fichier} a repondu ${en500.map((r) => r.statut).join(", ")} (${en500[0]?.chemin})`);
+  }
+  if (recues.length > 0) routesAtteintes += 1;
+}
+for (const fichier of ROUTES_NON_APPELEES.keys()) {
+  if (!routesProduit.includes(fichier)) {
+    echecs += 1;
+    console.log(`ECHEC exception perimee : ${fichier} n existe plus`);
+  }
+}
+// Un ensemble vide passe tout : sans routes lues ni requetes notees, le
+// controle serait vert par vacuite.
+if (routesProduit.length < 30 || requetesServies.length < 100) {
+  echecs += 1;
+  console.log(
+    `ECHEC l inventaire ne voit que ${routesProduit.length} routes et ${requetesServies.length} requetes : il n inspecte pas ce qu il pretend`,
+  );
+}
+console.log(
+  `routes du produit : ${routesAtteintes}/${routesProduit.length} atteintes par ${requetesServies.length} requetes, ` +
+    `${ROUTES_NON_APPELEES.size} exception(s) declaree(s)`,
+);
+
 const PLANCHER_CONTROLES = 140;
 console.log(`controles empiles : ${controles.length}`);
 if (controles.length < PLANCHER_CONTROLES) {

@@ -185,6 +185,17 @@ pnpm typecheck · pnpm lint · pnpm build · pnpm test · pnpm test:rls · pnpm 
 > n'importe ne peut pas s'y cacher. `src/app/` et `src/components/` n'y sont pas —
 > la fumée et les sondes navigateur les exercent dans un autre processus, que la
 > couverture ne voit pas.
+>
+> **Leur plancher est donc dans la fumée** (même jour) : elle note chaque requête
+> RÉELLEMENT partie vers le serveur, et exige que chaque `page.tsx` et `route.ts`
+> du DISQUE en ait reçu une, sans réponse 5xx. Premier passage : **42/46**. Deux
+> écrans d'administration (`comptes/doublons`, `comptes/[id]`) manquaient à la
+> liste du 404 admin, écrite à la main — elle est désormais lue sur le disque — et
+> ni l'export des données du compte ni le webhook de paiement n'étaient jamais
+> appelés. Le webhook est éprouvé depuis avec un secret propre à la fumée : sans
+> signature, mauvaise signature, signature valide sur un corps modifié, contre-test
+> signé accepté, rejeu traité une fois. Ce plancher dit qu'une route a été
+> atteinte, pas qu'elle fait tout ce qu'elle doit.
 **Ne pas les enchaîner à la main : `scripts/portes.mjs` les lance, et c'est lui
 qui garantit qu'elles visent toutes la même base.**
 

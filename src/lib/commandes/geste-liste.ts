@@ -207,7 +207,15 @@ async function archiverUnLot(donnees: FormData, profilId: string): Promise<strin
   const archiver = donnees.get("archiver") === "1";
   const retour = destination(donnees, "/fr/commandes");
 
-  if (!ids.success || ids.data.length === 0) {
+  // ⚠️ UNE SÉLECTION REFUSÉE N'EST PAS UNE SÉLECTION VIDE. Au-delà du plafond, ou
+  // avec un identifiant altéré, ce chemin répondait `lot=vide` : l'écran disait
+  // « Aucune commande sélectionnée » à un vendeur qui venait d'en cocher. Le
+  // message vrai est celui de l'échec — rien n'a été modifié.
+  if (!ids.success) {
+    invaliderRetour(retour);
+    return retour + separateur(retour) + "lot=ecriture";
+  }
+  if (ids.data.length === 0) {
     invaliderRetour(retour);
     return retour + separateur(retour) + "lot=vide";
   }

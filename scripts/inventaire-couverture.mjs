@@ -77,10 +77,6 @@ const EXCEPTIONS = new Map([
       "atteint par la fumée sur chaque écran authentifié.",
   ],
   [
-    "src/lib/commandes/cache.ts",
-    "`revalidateTag` de `next/cache` n'existe que dans le rendu de Next.",
-  ],
-  [
     "src/lib/commandes/actions.ts",
     "Module `use server` : chaque export est une Server Action, qui n'existe que dans " +
       "une requête. Atteint par la fumée sur /fr/commandes.",
@@ -135,13 +131,6 @@ const EXCEPTIONS = new Map([
     "Sept lignes, appelées par sept routes d'administration que la fumée demande.",
   ],
 
-  // ── ⚠️ UNE LACUNE RÉELLE, DITE COMME TELLE ─────────────────────────────────
-  [
-    "src/lib/commandes/geste-liste.ts",
-    "⚠️ LACUNE RÉELLE : la fumée n'éprouve que les REFUS de /fr/commandes/geste " +
-      "(POST seul, sans session → connexion). L'archivage par lot lui-même n'est " +
-      "tenu que par la fonction SQL, en RLS. Premier fichier à couvrir.",
-  ],
 
   // ── ⚠️ DU CODE MORT — constaté le 23/09/2026 par cet inventaire ────────────
   [
