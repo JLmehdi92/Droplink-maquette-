@@ -6,6 +6,20 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 23/09/2026 — UN ÉCRAN NOUVEAU, UNE CARTE NOUVELLE : LES E-MAILS DU CLIENT FINAL
+
+- **Nouvelle planche** `ui_kits/client_link/notification.html` (?etat=… · ?lang=…) — même
+  gabarit que « lien introuvable » ; route `/[locale]/notification` (`noindex`). Six états :
+  confirmer et desinscrire portent un BOUTON (jamais d'action à l'ouverture du lien).
+- **Carte modifiée** `NotificationsCard` de `client_link/ClientPage.jsx` : elle promettait
+  « chaque mise à jour » sans moyen de s'inscrire ; elle porte le champ et le bouton `solid`
+  (couleur du vendeur). Produit : `components/publique/carte-notifications.tsx`, n'apparaît
+  que si `EMAIL_CLIENTS_DE` est posée.
+- **Planche légale** `legal/Confidentialite.jsx` : l'e-mail de l'acheteur n'est plus saisi par
+  le vendeur. Produit : trois paragraphes corrigés en fr/en/zh.
+- ⚠️ **LA SOUSTRACTION N'A PAS ÉTÉ LANCÉE** sur ces deux écrans : aucune conformité au pixel
+  n'est affirmée. À mesurer avant de les dire conformes.
+
 ### ▶️ 20/09/2026 — DEUX ÉCRANS TOUCHÉS, ET TROIS DÉFAUTS QUE SEULE UNE CAPTURE A VUS
 
 **Écrans :** `/[locale]/passer-pro` (NOUVEAU, planche `seller_app/PassProView.jsx`
