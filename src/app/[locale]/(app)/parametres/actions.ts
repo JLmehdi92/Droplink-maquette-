@@ -6,6 +6,7 @@ import { z } from "zod";
 import { SchemaLangue } from "@/i18n/schema";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
+import { verifierFuite } from "@/lib/auth/fuites";
 import { verifierMotDePasseActuel } from "@/lib/auth/reauthentification";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { verifierQuotaAuth, verifierQuotaMotDePasse } from "@/lib/limitation/quota";
@@ -53,6 +54,7 @@ export type EtatParametres =
         | "mdp_trop_court"
         | "mdp_trop_long"
         | "mdp_contient_email"
+        | "mdp_fuite"
         | "mdp_identique"
         | "adresse_identique"
         | "code"
@@ -170,6 +172,10 @@ export async function changerMotDePasseCompte(
   if (analyse.data.nouveau === actuel) {
     await attendrePlancher(debut);
     return { statut: "erreur", motif: "mdp_identique" };
+  }
+  if ((await verifierFuite(analyse.data.nouveau)) === "fuite") {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "mdp_fuite" };
   }
 
   const supabase = await creerClientServeur();

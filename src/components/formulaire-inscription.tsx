@@ -62,9 +62,11 @@ export function FormulaireInscription({ locale }: { readonly locale: string }) {
               ? ti("erreurMdpTropLong")
               : resultat.motif === "mdp_contient_email"
                 ? ti("erreurMdpContientEmail")
-                : resultat.motif === "deja_inscrit"
-                  ? ti("erreurDejaInscrit")
-                  : t("erreurIndisponible")
+                : resultat.motif === "mdp_fuite"
+                  ? ti("erreurMdpFuite")
+                  : resultat.motif === "deja_inscrit"
+                    ? ti("erreurDejaInscrit")
+                    : t("erreurIndisponible")
       : null;
 
   /*
@@ -79,7 +81,10 @@ export function FormulaireInscription({ locale }: { readonly locale: string }) {
   const motif = resultat.statut === "erreur" ? resultat.motif : null;
   const emailEnCause = motif === "email_invalide" || motif === "deja_inscrit";
   const motDePasseEnCause =
-    motif === "mdp_trop_court" || motif === "mdp_trop_long" || motif === "mdp_contient_email";
+    motif === "mdp_trop_court" ||
+    motif === "mdp_trop_long" ||
+    motif === "mdp_contient_email" ||
+    motif === "mdp_fuite";
 
   return (
     <form action={action} className="flex flex-col gap-5" noValidate>

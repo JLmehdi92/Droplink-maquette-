@@ -61,6 +61,7 @@ function useMessage(etat: EtatParametres, succes: string): Message | null {
     mdp_trop_court: "mdpTropCourt",
     mdp_trop_long: "mdpTropLong",
     mdp_contient_email: "mdpContientEmail",
+    mdp_fuite: "mdpFuite",
     mdp_identique: "mdpIdentique",
     adresse_identique: "adresseIdentique",
     code: "code",

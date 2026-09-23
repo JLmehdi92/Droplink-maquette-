@@ -6,6 +6,7 @@ import { SchemaLangue } from "@/i18n/schema";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { fournisseurActif } from "@/lib/auth/fournisseurs";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
+import { verifierFuite } from "@/lib/auth/fuites";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import {
   verifierQuotaAuth,
@@ -108,6 +109,7 @@ export type ResultatInscription =
         | "mdp_trop_court"
         | "mdp_trop_long"
         | "mdp_contient_email"
+        | "mdp_fuite"
         | "deja_inscrit"
         | "trop_de_tentatives"
         | "indisponible";
@@ -262,6 +264,13 @@ export async function sInscrire(
   if (!quota.autorise) {
     await attendrePlancher(debut);
     return { statut: "erreur", motif: "trop_de_tentatives" };
+  }
+
+  // APRÈS le quota : sans lui, ce formulaire servirait de relais gratuit vers
+  // le service des fuites à qui voudrait l'interroger en masse.
+  if ((await verifierFuite(motDePasse)) === "fuite") {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "mdp_fuite" };
   }
 
   const origine = await origineDuSite();

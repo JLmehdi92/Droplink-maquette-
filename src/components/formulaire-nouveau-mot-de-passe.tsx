@@ -39,9 +39,11 @@ export function FormulaireNouveauMotDePasse({ locale }: { readonly locale: strin
           ? ti("erreurMdpTropLong")
           : resultat.motif === "contient_email"
             ? ti("erreurMdpContientEmail")
-            : resultat.motif === "session"
-              ? tm("erreurSession")
-              : t("erreurIndisponible")
+            : resultat.motif === "fuite"
+              ? ti("erreurMdpFuite")
+              : resultat.motif === "session"
+                ? tm("erreurSession")
+                : t("erreurIndisponible")
       : null;
 
   return (

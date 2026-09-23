@@ -1042,8 +1042,13 @@ voir — c'est L-028 appliqué à l'authentification.
 - **Longueur minimale 12 caractères**, imposée **des deux côtés** : par Zod chez
   nous, et par le réglage du projet Supabase. Les deux sont nécessaires — Zod ne
   voit pas `updateUser`, et le réglage Supabase ne voit pas nos messages.
-- **Refus des mots de passe des fuites connues** (option Supabase adossée à
-  HaveIBeenPwned). Sans elle, le bourrage d'identifiants est gratuit.
+- **Refus des mots de passe des fuites connues** — FAIT le 23/09/2026 (décision de
+  Wassim), **dans le code et gratuitement** plutôt que par l'option Supabase payante :
+  `lib/auth/fuites.ts` interroge Have I Been Pwned par k-anonymat (5 caractères de
+  l'empreinte SHA-1 partent, jamais le mot de passe), sur les TROIS chemins qui
+  choisissent un mot de passe — inscription, réinitialisation, paramètres. Service en
+  panne → mot de passe accepté et journalisé : un tiers ne ferme pas les inscriptions.
+  Sans elle, le bourrage d'identifiants est gratuit.
 - **Aucun message ne distingue un email inconnu d'un mot de passe faux**, et le
   **délai non plus** : le hachage ne s'exécute que si le compte existe, donc
   sans plancher le chronomètre répond à la place du message. Même discipline

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { SchemaLangue } from "@/i18n/schema";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
+import { verifierFuite } from "@/lib/auth/fuites";
 import { sessionParEmail } from "@/lib/auth/recuperation";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
@@ -46,7 +47,7 @@ export type ResultatChangement =
   | { statut: "inactif" }
   | {
       statut: "erreur";
-      motif: "trop_court" | "trop_long" | "contient_email" | "session" | "indisponible";
+      motif: "trop_court" | "trop_long" | "contient_email" | "fuite" | "session" | "indisponible";
     };
 
 export async function changerMotDePasse(
@@ -110,6 +111,10 @@ export async function changerMotDePasse(
   const refus = refusDuMotDePasse(analyse.data.motDePasse, profil.email);
   if (refus.includes("contient_email")) {
     return { statut: "erreur", motif: "contient_email" };
+  }
+  if ((await verifierFuite(analyse.data.motDePasse)) === "fuite") {
+    await attendrePlancher(debut);
+    return { statut: "erreur", motif: "fuite" };
   }
 
   const { error } = await supabase.auth.updateUser({ password: analyse.data.motDePasse });
