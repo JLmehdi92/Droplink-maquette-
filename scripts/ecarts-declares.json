@@ -4855,10 +4855,13 @@
           "Instagram",
           "TikTok",
           "WhatsApp",
-          "Contacter la boutique"
+          "Contacter la boutique",
+          "Suivi par e-mail",
+          "Recevez un e-mail à l'expédition, pendan",
+          "Me prévenir"
         ],
         "motif": "donnee",
-        "raison": "PLACE SEULE, 5 PX PLUS BAS. La carte de livraison du kit commence par le transporteur, dont la pastille fait 38 px ; le jeu n a pas de code transporteur sur la commande, et ses quatre lignes portent toutes une tuile de 44 — la carte grandit de 6 px et celle du contact descend d autant."
+        "raison": "PLACE SEULE, 5 PX PLUS BAS. La carte de livraison du kit commence par le transporteur, dont la pastille fait 38 px ; le jeu n a pas de code transporteur sur la commande, et ses quatre lignes portent toutes une tuile de 44 — la carte grandit de 6 px et celle du contact descend d autant. La carte « Suivi par e-mail » (23/09/2026), juste dessous, descend des mêmes 5 px."
       },
       {
         "textes": [
@@ -4868,8 +4871,8 @@
           "Des liens de suivi simples et puissants.",
           "Créez un lien de suivi par commande, en "
         ],
-        "motif": "contrainte",
-        "raison": "PLACE SEULE, 127 PX PLUS HAUT, MESURE : la carte « Notifications automatiques » du kit (y 919 a 1051) n est pas portee — voir sa declaration dans les manquants —, et la carte « Propulse par DropLink », portee depuis le 19/09/2026 sur decision de Wassim (en gratuit), remonte de ses 132 px moins les 5 px dont la carte de contact descend. Le pied suit. Fond teinte, filet violet, surtitre, titre, texte, bouton au degrade et symbole sont ceux de PoweredCard."
+        "motif": "donnee",
+        "raison": "PLACE SEULE, DEUX CAUSES MESUREES LE 23/09/2026. (1) La carte « Propulse par DropLink », portee depuis le 19/09/2026 sur decision de Wassim (en gratuit), DESCEND DE 4 PX avec toute la colonne de droite : la carte de livraison du jeu est plus haute que celle du kit (voir la carte de contact, 5 px). Elle etait jusque-la 127 px plus haut, parce que la carte « Notifications » du kit n etait pas portee ; elle l est depuis le 23/09 (« Suivi par e-mail »), et cet ecart a disparu. (2) Le pied REMONTE DE 113 PX : sa place suit la colonne de GAUCHE, la plus longue, qui s arrete a 1328 px dans le jeu de mesure contre 1441 au kit (galerie et historique du jeu plus courts). Fond teinte, filet violet, surtitre, titre, texte, bouton et symbole sont ceux de PoweredCard."
       },
       {
         "textes": [
@@ -5000,14 +5003,6 @@
       },
       {
         "textes": [
-          "Notifications automatiques",
-          "Vous serez informé de chaque mise à jour"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE AFFIRME AU CLIENT QU IL SERA PREVENU, ET RIEN NE L Y ABONNE. La decision 3 exclut tout formulaire de cette page — un champ email serait le premier pas vers un compte destinataire —, donc aucune notification ne peut lui parvenir."
-      },
-      {
-        "textes": [
           "© 2025 DropLink. Tous droits réservés.",
           "Aide"
         ],
@@ -5121,10 +5116,13 @@
           "Politique de confidentialité",
           "PROPULSÉ PAR DROPLINK",
           "Des liens de suivi simples et puissants.",
-          "Créez un lien de suivi par commande, en "
+          "Créez un lien de suivi par commande, en ",
+          "Suivi par e-mail",
+          "Recevez un e-mail à l'expédition, pendan",
+          "Me prévenir"
         ],
         "motif": "contrainte",
-        "raison": "PLACE SEULE, EN ORDONNEE : les abscisses coincident toutes (gouttiere 18, depuis que la planche est ecrite a plat le 17/09/2026). Le decalage vertical s accumule de haut en bas par ce que la planche montre en plus et qui est declare dans les manquants : la barre DropLink et son selecteur de langue, les trois gages de l en-tete (principe II), le disque de 96 px du logo — 263 px avant « Votre commande » —, puis cinq passages de suivi contre deux, le transporteur et le pays de livraison, la carte des notifications (decision 3). Les deux passages du jeu s apparient par rang a l envers des cinq du kit, d ou [1/2] plus bas que [2/2]."
+        "raison": "PLACE SEULE, EN ORDONNEE : les abscisses coincident toutes (gouttiere 18, depuis que la planche est ecrite a plat le 17/09/2026). Le decalage vertical s accumule de haut en bas par ce que la planche montre en plus et qui est declare dans les manquants : la barre DropLink et son selecteur de langue, les trois gages de l en-tete (principe II), le disque de 96 px du logo — 263 px avant « Votre commande » —, puis cinq passages de suivi contre deux, le transporteur et le pays de livraison, la carte des notifications (decision 3). Les deux passages du jeu s apparient par rang a l envers des cinq du kit, d ou [1/2] plus bas que [2/2]. La carte « Suivi par e-mail » (23/09/2026), sous la carte de contact, suit le même décalage cumulé."
       },
       {
         "textes": [
@@ -5291,14 +5289,6 @@
         ],
         "motif": "donnee",
         "raison": "LE DESTINATAIRE N A PAS D ADRESSE CHEZ NOUS — c est un pseudo en texte libre. Le pays d un transporteur n est pas celui ou arrive le colis, et le lieu du dernier passage n est pas une destination : la ligne n existe pas plutot que d afficher un pays devine (decision 26)."
-      },
-      {
-        "textes": [
-          "Notifications automatiques",
-          "Vous serez informé de chaque mise à jour"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE AFFIRME AU CLIENT QU IL SERA PREVENU, ET RIEN NE L Y ABONNE. La decision 3 exclut tout formulaire de cette page — un champ email serait le premier pas vers un compte destinataire —, donc aucune notification ne peut lui parvenir."
       },
       {
         "textes": [
@@ -6340,8 +6330,6 @@
           "Identifier la commande",
           "Pays de livraison",
           "Afficher la destination et estimer le dé",
-          "Adresse e-mail (facultative)",
-          "Envoyer le lien de suivi et les mises à ",
           "Numéro de suivi et transporteur",
           "Interroger le transporteur",
           "Photos et vidéos de la commande",
@@ -6412,7 +6400,10 @@
           "le support",
           "Si la réponse apportée ne vous satisfait",
           "Les conditions d'utilisation du service ",
-          "Conditions générales d'utilisation"
+          "Conditions générales d'utilisation",
+          "Donnée que l'acheteur donne lui-même",
+          "Adresse e-mail (facultative), confirmée ",
+          "Trois e-mails de suivi au plus — expédit"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU KIT EST UN GABARIT, ET IL DECRIT UN AUTRE PRODUIT. Il organise un abonnement Pro a 19,90 € preleve chaque mois, un prestataire de paiement, des factures conservees dix ans, l authentification Apple, la double authentification, une adresse e-mail et un pays d acheteur saisis par le vendeur, et des integrations. La contrainte n° 1 interdit tout ce qui touche a la facturation ; le reste decrit des capacites que le produit n a pas. Un document juridique qui affirme ce que le service ne fait pas engage son editeur sur du faux. La page garde donc SON texte — celui qui decrit le service reel, lacunes comprises —, et le kit ne lui donne que sa coque et sa typographie."
@@ -6469,8 +6460,6 @@
           "Identifier la commande",
           "Pays de livraison",
           "Afficher la destination et estimer le dé",
-          "Adresse e-mail (facultative)",
-          "Envoyer le lien de suivi et les mises à ",
           "Numéro de suivi et transporteur",
           "Interroger le transporteur",
           "Photos et vidéos de la commande",
@@ -6681,8 +6670,6 @@
           "Identifier la commande",
           "Pays de livraison",
           "Afficher la destination et estimer le dé",
-          "Adresse e-mail (facultative)",
-          "Envoyer le lien de suivi et les mises à ",
           "Numéro de suivi et transporteur",
           "Interroger le transporteur",
           "Photos et vidéos de la commande",
@@ -6748,7 +6735,10 @@
           "le support",
           "Si la réponse apportée ne vous satisfait",
           "Les conditions d'utilisation du service ",
-          "Conditions générales d'utilisation"
+          "Conditions générales d'utilisation",
+          "Donnée que l'acheteur donne lui-même",
+          "Adresse e-mail (facultative), confirmée ",
+          "Trois e-mails de suivi au plus — expédit"
         ],
         "motif": "contrainte",
         "raison": "LE TEXTE DU KIT EST UN GABARIT, ET IL DECRIT UN AUTRE PRODUIT. Il organise un abonnement Pro a 19,90 € preleve chaque mois, un prestataire de paiement, des factures conservees dix ans, l authentification Apple, la double authentification, une adresse e-mail et un pays d acheteur saisis par le vendeur, et des integrations. La contrainte n° 1 interdit tout ce qui touche a la facturation ; le reste decrit des capacites que le produit n a pas. Un document juridique qui affirme ce que le service ne fait pas engage son editeur sur du faux. La page garde donc SON texte — celui qui decrit le service reel, lacunes comprises —, et le kit ne lui donne que sa coque et sa typographie."
@@ -6799,8 +6789,6 @@
           "Identifier la commande",
           "Pays de livraison",
           "Afficher la destination et estimer le dé",
-          "Adresse e-mail (facultative)",
-          "Envoyer le lien de suivi et les mises à ",
           "Numéro de suivi et transporteur",
           "Interroger le transporteur",
           "Photos et vidéos de la commande",
@@ -6946,8 +6934,7 @@
       {
         "textes": [
           "Vous pensez qu'il s'agit d'une erreur ?",
-          "Contactez la boutique qui vous a envoyé ",
-          "Comment fonctionne DropLink"
+          "Contactez la boutique qui vous a envoyé "
         ],
         "motif": "structure",
         "raison": "PLACE SEULE. Le sous-titre du produit tient sur une ligne la ou celui du kit en prend deux : l encadre d aide remonte de 18 px, et le pied, pousse vers le bas d une page centree, de 10."
@@ -9244,9 +9231,7 @@
           "Appareil perdu ? Ajoutez la clé de secou",
           "Ce n'est pas votre compte ?",
           "Se déconnecter",
-          "Vos données sont sécurisées et confident",
-          "· © 2025 DropLink. Tous droits réservés.",
-          "Documentation"
+          "Vos données sont sécurisées et confident"
         ],
         "motif": "contrainte",
         "raison": "POSITION VERTICALE SEULE, ET UN MEME DECALAGE PARTOUT (+36 a +37 px sur les deux colonnes, -10 px au pied) — donc une seule cause. Le pied du kit porte l accent manuscrit « Plus de ventes, plus de temps. », une IMAGE de 123 px de haut : le produit ne la rend pas, pas plus que sur la connexion et l inscription — une image de texte francais ne suit pas les trois langues, et « plus de ventes » est une promesse que le produit ne fait pas. La grille qui centre les deux colonnes en devient plus haute, et la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, d ou les 10 px du pied. Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, relevee le 13/09/2026 apres avoir ete ecrite dans le kit."
@@ -10821,9 +10806,7 @@
           "Entrez votre adresse. Si un compte exist",
           "Adresse e-mail",
           "Envoyer le lien",
-          "Vos données sont sécurisées et confident",
-          "· © 2025 DropLink. Tous droits réservés.",
-          "Documentation"
+          "Vos données sont sécurisées et confident"
         ],
         "motif": "contrainte",
         "raison": "MEME COQUE, MEME CAUSE QUE /verification (voir sa declaration) : POSITION VERTICALE SEULE, ET UN MEME DECALAGE PARTOUT (+36 a +37 px sur les deux colonnes, -10 px au pied) — donc une seule cause. Le pied du kit porte l accent manuscrit « Plus de ventes, plus de temps. », une IMAGE de 123 px de haut : le produit ne la rend pas, pas plus que sur la connexion et l inscription — une image de texte francais ne suit pas les trois langues, et « plus de ventes » est une promesse que le produit ne fait pas. La grille qui centre les deux colonnes en devient plus haute, et la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, d ou les 10 px du pied. Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, relevee le 13/09/2026 apres avoir ete ecrite dans le kit."
@@ -10863,9 +10846,7 @@
           "Ce lien ne servira qu’une fois, et vos a",
           "12 caractères minimum. Prenez plutôt une",
           "Enregistrer et me connecter",
-          "Vos données sont sécurisées et confident",
-          "· © 2025 DropLink. Tous droits réservés.",
-          "Documentation"
+          "Vos données sont sécurisées et confident"
         ],
         "motif": "contrainte",
         "raison": "MEME COQUE, MEME CAUSE QUE /verification (voir sa declaration) : POSITION VERTICALE SEULE, ET UN MEME DECALAGE PARTOUT (+36 a +37 px sur les deux colonnes, -10 px au pied) — donc une seule cause. Le pied du kit porte l accent manuscrit « Plus de ventes, plus de temps. », une IMAGE de 123 px de haut : le produit ne la rend pas, pas plus que sur la connexion et l inscription — une image de texte francais ne suit pas les trois langues, et « plus de ventes » est une promesse que le produit ne fait pas. La grille qui centre les deux colonnes en devient plus haute, et la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, d ou les 10 px du pied. Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, relevee le 13/09/2026 apres avoir ete ecrite dans le kit."
@@ -10920,32 +10901,7 @@
     ]
   },
   "fr-bienvenue": {
-    "valeurs": [
-      {
-        "textes": [
-          "Mettons votre nom sur la page",
-          "C’est ce que verra votre client. Vous po",
-          "Nom de votre boutique",
-          "Logo",
-          "Choisir une image",
-          "PNG ou JPG, 512 px minimum",
-          "Votre couleur",
-          "Le contraste est ajusté automatiquement ",
-          "Vous vendez plutôt…",
-          "À des revendeurs",
-          "Vous fournissez d’autres vendeurs",
-          "À vos clients",
-          "Vous vendez en direct, en message privé",
-          "Continuer",
-          "CE QUE VOTRE CLIENT VERRA",
-          "Votre boutique",
-          "Votre commande",
-          "Approuver"
-        ],
-        "motif": "structure",
-        "raison": "POSITION VERTICALE SEULE, ET LE MEME DECALAGE PARTOUT (-5 a -6 px sur les deux colonnes) : la sonde du produit rend a 1000 px de haut contre 1010 pour le kit, et les deux colonnes sont CENTREES verticalement dans l espace qui reste sous l en-tete — 10 px de moins, 5 px plus haut. L en-tete, lui, est a la meme place au pixel (logo en 56,40, etape en 1305,58). Largeurs, tailles, graisses, interlignes et couleurs sont ceux de la planche, ecrite dans le kit le 14/09/2026 avant le produit."
-      }
-    ]
+    "valeurs": []
   },
   "fr-bienvenue-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
@@ -10954,18 +10910,7 @@
     "enTrop": []
   },
   "fr-signalement": {
-    "valeurs": [
-      {
-        "textes": [
-          "Conditions",
-          "Confidentialité",
-          "Signaler un contenu [2/2]",
-          "© 2025 DropLink. Tous droits réservés."
-        ],
-        "motif": "structure",
-        "raison": "LE PIED SEUL, ET 10 PX VERS LE HAUT : la page est moins haute que la fenetre, donc le pied se pose en bas de celle-ci — 1000 px pour la sonde du produit contre 1010 pour le kit. Tout ce qui est au-dessus du pied est a la meme place au pixel."
-      }
-    ]
+    "valeurs": []
   },
   "fr-signalement-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",
@@ -10979,16 +10924,6 @@
         "texte": "Commandes  <span>",
         "motif": "donnee",
         "raison": "Le libelle de la barre laterale est etire par le badge de volume a sa droite — « 124 » chez le kit, un chiffre du jeu de mesure ici. Meme declaration que sur /parametres."
-      },
-      {
-        "textes": [
-          "Passez au Pro",
-          "Plus de fonctionnalités, plus de possibi",
-          "Upgrade",
-          "© 2025 DropLink. Tous droits réservés."
-        ],
-        "motif": "structure",
-        "raison": "POSITION VERTICALE SEULE, ET 10 A 11 PX : l encart et le pied sont colles en BAS de la fenetre, qui fait 1000 px pour la sonde du produit contre 1010 pour le kit."
       },
       {
         "texte": "Ctrl  <kbd>",
@@ -11049,17 +10984,7 @@
     ]
   },
   "fr-pas-une-route": {
-    "valeurs": [
-      {
-        "textes": [
-          "Cette page n’existe pas",
-          "L’adresse que vous avez suivie ne mène à",
-          "Revenir à l’accueil"
-        ],
-        "motif": "structure",
-        "raison": "POSITION VERTICALE SEULE, 5 PX VERS LE HAUT, LE MEME PARTOUT : le contenu est centre verticalement dans la fenetre, qui fait 1000 px pour la sonde du produit contre 1010 pour le kit. Tailles, graisses, couleurs et largeurs sont celles de ui_kits/erreurs/introuvable.html."
-      }
-    ]
+    "valeurs": []
   },
   "fr-pas-une-route-tel": {
     "_etat": "LE TÉLÉPHONE, 390 px, contre la planche servie à la même largeur (15/09/2026, « la meilleure version des écrans pour les mobiles »). Manquants et en trop hérités du bureau — des raisons de contenu, qui ne dépendent pas de la largeur ; les écarts de valeur sont déclarés ici un par un, jamais hérités.",

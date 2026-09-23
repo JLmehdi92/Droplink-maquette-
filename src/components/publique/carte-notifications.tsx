@@ -117,7 +117,7 @@ export function CarteNotifications({
           <button
             type="submit"
             disabled={etat === "envoi"}
-            className="h-11 cursor-pointer rounded-ds-card border border-transparent px-[22px] text-[14px] font-semibold shadow-ds-sm transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
+            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-ds-card border border-transparent px-[22px] text-[14px] font-semibold tracking-[-0.02em] shadow-ds-sm transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
             style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
           >
             {libelles.bouton}

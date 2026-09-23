@@ -72,7 +72,9 @@ export default async function PageNotification({
           className="inline-flex h-12 items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs transition-shadow hover:shadow-ds-sm sm:h-[46px]"
         >
           <House aria-hidden="true" size={18} strokeWidth={1.9} className="text-ds-accent" />
-          {tp("lienInvalideAccueil")}
+          {/* LE TEXTE DANS UN <span>, COMME LA PLANCHE : la sonde apparie par le
+              texte, et comparerait sinon un span nu à un lien stylé. */}
+          <span>{tp("lienInvalideAccueil")}</span>
         </Link>
       </header>
 
@@ -99,7 +101,7 @@ export default async function PageNotification({
               type="submit"
               className="mt-8 inline-flex h-14 cursor-pointer items-center gap-2.5 rounded-ds-card bg-ds-accent px-8 text-[16px] font-bold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
             >
-              {t(`${actionEnCours}.bouton`)}
+              <span>{t(`${actionEnCours}.bouton`)}</span>
               <ArrowRight aria-hidden="true" size={18} strokeWidth={1.9} />
             </button>
           </form>

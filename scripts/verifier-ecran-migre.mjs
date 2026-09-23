@@ -1456,7 +1456,15 @@ for (const modele of routes) {
     await envoyer("Network.setExtraHTTPHeaders", { headers: { "x-real-ip": adresseSonde } });
     await envoyer("Emulation.setDeviceMetricsOverride", {
       width: largeur,
-      height: largeur < 700 ? 844 : 1000,
+      /*
+       * ⚠️ 1010 ET NON PLUS 1000 — LA HAUTEUR DE `comparer-au-kit.mjs` (23/09/2026).
+       * Les deux sondes n'émulaient pas la même fenêtre : 1000 px ici, 1010 côté
+       * kit. Sur toute page centrée verticalement, le contenu remontait de 5 px
+       * et le pied de 10 px — un écart de l'OUTIL, que sept écrans déclaraient
+       * un par un en « structure ». Une mesure ne se compare qu'à conditions
+       * égales ; la cause est corrigée ici, et les sept excuses retirées.
+       */
+      height: largeur < 700 ? 844 : 1010,
       deviceScaleFactor: largeur < 700 ? 3 : 1,
       mobile: largeur < 700,
     });

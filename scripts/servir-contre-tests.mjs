@@ -64,7 +64,16 @@ const serveur = spawn("pnpm", ["start", "--port", String(port)], {
     BORD_DE_CONFIANCE: "railway",
     NEXT_PUBLIC_POSTHOG_KEY: "",
     TRACKING_API_KEY: "debranche-serveur-de-mesure",
-    RESEND_API_KEY: "debranche-serveur-de-mesure",
+    /*
+     * ⚠️ AU FORMAT D'UNE CLÉ (`re_…`) DEPUIS LE 23/09/2026, ET C'EST SANS RISQUE.
+     * La planche de la page client dessine la carte « Suivi par e-mail », qui
+     * n'apparaît que si l'envoi est configuré : avec une sentinelle hors format,
+     * on mesurait une page à laquelle il manquait une carte. Rien ne peut partir
+     * pour autant — `refus-tiers.mjs`, préchargé ci-dessous, refuse Resend au
+     * TRANSPORT, quelle que soit la clé.
+     */
+    RESEND_API_KEY: "re_debranche_serveur_de_mesure",
+    EMAIL_CLIENTS_DE: "DropLink <suivi@mesure.invalid>",
     NODE_OPTIONS: [process.env.NODE_OPTIONS ?? "", `--import=${precharge}`].join(" ").trim(),
   },
   stdio: "inherit",
