@@ -50,6 +50,37 @@ if (projet !== "unit" && projet !== "rls" && projet !== "perf") {
 // de mesure qui traine finit par etre commite, puis lu comme une source.
 const rapport = join(tmpdir(), `droplink-suite-${projet}-${process.pid}.json`);
 
+/*
+ * ⚠️ LA COUVERTURE DE `src/lib/`, ÉCRITE À CHAQUE PASSAGE DE `unit` ET DE `rls`.
+ *
+ * Posée le 23/09/2026. `@vitest/coverage-v8` était installé depuis des semaines
+ * et n'avait JAMAIS tourné : aucune configuration, aucun script. Mesuré ce
+ * jour-là en l'allumant enfin : 28 fichiers de `src/lib/` qu'AUCUN des 1 931
+ * tests ne traversait — dont le secret des tâches planifiées, la garde anti-CSRF
+ * et la cadence qui décide des appels payants au fournisseur de suivi.
+ *
+ * Le rapport part dans un dossier temporaire PAR PROJET, VIDÉ AVANT chaque
+ * passage : `scripts/inventaire-couverture.mjs` fusionne ensuite les deux et
+ * refuse un fichier de `lib/` que rien ne traverse. Un rapport resté d'une
+ * exécution précédente décrirait un code qui n'existe plus (L-032) — d'où le
+ * vidage, et d'où le refus de l'inventaire quand un rapport manque.
+ *
+ * `perf` n'en écrit pas : il sème des milliers de lignes pour MESURER, pas pour
+ * exercer, et sa couverture n'ajouterait rien à celle des deux autres.
+ */
+const dossierCouverture = join(tmpdir(), "droplink-couverture", projet);
+const couverture =
+  projet === "perf"
+    ? []
+    : [
+        "--coverage.enabled",
+        "--coverage.provider=v8",
+        "--coverage.reporter=json",
+        "--coverage.include=src/lib/**",
+        `--coverage.reportsDirectory=${dossierCouverture}`,
+      ];
+if (couverture.length > 0) rmSync(dossierCouverture, { recursive: true, force: true });
+
 const code = await new Promise((resoudre) => {
   const enfant = spawn(
     "pnpm",
@@ -62,6 +93,7 @@ const code = await new Promise((resoudre) => {
       "--reporter=default",
       "--reporter=json",
       `--outputFile=${rapport}`,
+      ...couverture,
     ],
     { cwd: racine, shell: true, stdio: "inherit" },
   );

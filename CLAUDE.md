@@ -30,7 +30,9 @@ pnpm lint             # eslint
 pnpm typecheck        # tsc --noEmit — zéro erreur tolérée
 pnpm test             # projet unit — REFUSE un test sauté, todo, ou une suite vide
 pnpm test:rls         # suites BLOQUANTES d'isolation — jamais désactivables
+pnpm test:watch       # les tests unitaires relancés à chaque enregistrement
 pnpm test:perf        # mesures (~15 min) — PAS une porte, mais gardée : voir ci-dessous
+pnpm couverture       # 7e porte : aucun fichier de src/lib/ sans un test qui le traverse
 pnpm db:migrate       # applique les migrations — ⚠️ EN PRODUCTION
 pnpm db:migrate:tests # les applique à la base de TESTS (refuse toute autre cible)
 pnpm db:types         # régénère les types Supabase — depuis la PRODUCTION
@@ -165,11 +167,24 @@ Après toute modif de schéma : `pnpm db:migrate && pnpm db:types`, sinon les ty
 > les gardes s'exécutent ne prouve rien — on casse une base, on en regarde une
 > autre.*
 
-**Portes de qualité avant chaque commit** — les six, dans cet ordre, sous un
+**Portes de qualité avant chaque commit** — les sept, dans cet ordre, sous un
 seul environnement :
 ```
-pnpm typecheck · pnpm lint · pnpm build · pnpm test · pnpm test:rls · pnpm fumee
+pnpm typecheck · pnpm lint · pnpm build · pnpm test · pnpm test:rls · pnpm couverture · pnpm fumee
 ```
+
+> ⚠️ **LA SEPTIÈME, `couverture`, EST NÉE LE 23/09/2026 — ET ELLE FAIT ROUGIR UNE
+> FEATURE AJOUTÉE SANS TEST.** `@vitest/coverage-v8` était installé et n'avait
+> jamais tourné. Allumé, il a montré **28 fichiers de `src/lib/` qu'aucun des
+> 1 931 tests ne traversait** — dont le secret des tâches planifiées, la garde
+> anti-CSRF, la cadence qui décide des appels PAYANTS, et l'adresse du site qui
+> fabrique les liens de réinitialisation. `test` et `test:rls` écrivent désormais
+> leur couverture ; `scripts/inventaire-couverture.mjs` exige que CHAQUE fichier
+> de `src/lib/` soit traversé par au moins un test, ou déclaré avec sa raison, et
+> échoue dans les deux sens. **L'inventaire part du disque** : un fichier que rien
+> n'importe ne peut pas s'y cacher. `src/app/` et `src/components/` n'y sont pas —
+> la fumée et les sondes navigateur les exercent dans un autre processus, que la
+> couverture ne voit pas.
 **Ne pas les enchaîner à la main : `scripts/portes.mjs` les lance, et c'est lui
 qui garantit qu'elles visent toutes la même base.**
 

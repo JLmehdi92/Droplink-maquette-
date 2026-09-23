@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * LES SIX PORTES, TOUTES SUR LA MEME BASE.
+ * LES SEPT PORTES, TOUTES SUR LA MEME BASE.
  *
  * ═══════════════════════════════════════════════════════════════════════════
  * POURQUOI UN SCRIPT PLUTOT QU UNE CHAINE DE `&&`
@@ -65,9 +65,18 @@ if (cible === "" || cible.includes(REF_PRODUCTION)) {
 }
 
 const ref = cible.replace(/^https?:\/\//, "").split(".")[0];
-console.log(`[portes] base visee : ${ref} — les six portes partagent cet environnement.`);
+console.log(`[portes] base visee : ${ref} — les sept portes partagent cet environnement.`);
 
-const PORTES = ["typecheck", "lint", "build", "test", "test:rls", "fumee"];
+/*
+ * ⚠️ LA SEPTIÈME PORTE, `couverture`, VIENT APRÈS `test:rls` ET PAS AVANT.
+ *
+ * Posée le 23/09/2026. Elle ne relance rien : elle LIT les deux rapports de
+ * couverture que `test` et `test:rls` viennent d'écrire (vidés avant chacun) et
+ * refuse tout fichier de `src/lib/` qu'aucun test ne traverse — une feature
+ * ajoutée sans test rougit donc le jour même. Placée avant, elle lirait les
+ * rapports d'une exécution précédente, c'est-à-dire un code qui n'existe plus.
+ */
+const PORTES = ["typecheck", "lint", "build", "test", "test:rls", "couverture", "fumee"];
 
 for (const porte of PORTES) {
   console.log(`\n[portes] ── ${porte} ─────────────────────────────────────────`);
@@ -86,4 +95,4 @@ for (const porte of PORTES) {
   }
 }
 
-console.log("\n[portes] les six portes sont passees.");
+console.log("\n[portes] les sept portes sont passees.");
