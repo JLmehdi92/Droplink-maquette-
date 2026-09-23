@@ -722,19 +722,19 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 
 **4. `/api/*` — machine.** Exclue du middleware, donc **chaque route porte sa propre garde**.
 
-**Cinq clients Supabase, physiquement séparés.** Importer le mauvais doit casser le build plutôt que de fuiter silencieusement :
+**Quatre clients Supabase, physiquement séparés** (cinq jusqu'au 23/09/2026). Importer le mauvais doit casser le build plutôt que de fuiter silencieusement :
 
 | Fichier | Rôle |
 |---|---|
 | `lib/supabase/client.ts` | Navigateur, clé publiable |
 | `lib/supabase/server.ts` | Serveur **avec session**, RLS active. **Défaut** |
-| `lib/supabase/admin.ts` | Service-role, `server-only`. **Jamais hors `lib/audit/`** |
+| ~~`lib/supabase/admin.ts`~~ | ⚠️ **SUPPRIMÉ le 23/09/2026** : `creerClientAdmin` n'avait plus AUCUN appelant — l'audit passe par la session de l'administrateur (fonctions `security definer` et lectures sous RLS). La cloison ESLint reste, en fil-piège |
 | `lib/supabase/anon.ts` | Serveur **SANS session** — page publique uniquement |
 | `lib/supabase/system.ts` | Service-role pour les chemins **sans humain** (webhooks, tâches) |
 
 `anon.ts` existe parce que `server.ts` lit les cookies : sinon le rendu de la page publique dépendrait de la présence d'un cookie, et **un vendeur connecté verrait sa page autrement que son client**, sans que personne s'en aperçoive avant que ça compte.
 
-`system.ts` est distinct de `admin.ts` parce que le client admin impose un audit — un **humain** y lit les données d'un tiers. **Un webhook n'est personne** ; l'auditer noierait les vraies consultations humaines.
+`system.ts` est le SEUL client service-role depuis le 23/09/2026, et il est réservé aux chemins **sans humain** (webhooks, tâches). Quand un **humain** de l'administration lit les données d'un tiers, ce n'est jamais par lui : c'est sous SA session — 41 appels de fonctions `security definer` qui vérifient le rôle en base, et 6 lectures de tables sous RLS (compté le 23/09/2026 dans `lib/audit/`). Aucune ne passe par la clé service-role. **Un webhook n'est personne** ; l'auditer noierait les vraies consultations humaines.
 
 ---
 

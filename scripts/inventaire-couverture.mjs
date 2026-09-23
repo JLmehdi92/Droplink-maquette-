@@ -145,16 +145,9 @@ const EXCEPTIONS = new Map([
 
   // ── ⚠️ DU CODE MORT — constaté le 23/09/2026 par cet inventaire ────────────
   [
-    "src/lib/supabase/admin.ts",
-    "⚠️ CODE MORT : `creerClientAdmin` n'est appelé NULLE PART, alors que CLAUDE.md " +
-      "le décrit comme le client de `lib/audit/`. Gardé parce que la cloison ESLint et " +
-      "`cloisons-supabase-jamais-eteintes.test.ts` s'appuient dessus : le retirer est " +
-      "une décision d'architecture, à prendre par Wassim.",
-  ],
-  [
     "src/lib/supabase/client.ts",
     "Code mort DÉCLARÉ : `creerClientNavigateur` n'est appelé nulle part, et " +
-      "`lib/auth/cookies.ts` le dit. Gardé pour la même raison que `admin.ts`.",
+      "`lib/auth/cookies.ts` le dit. Gardé : la cloison ESLint le cite.",
   ],
 ]);
 

@@ -479,7 +479,7 @@ base**, audit **atomique** avec la lecture qu'il trace.
 |---|---|
 | `lib/supabase/client.ts` | Navigateur, clé publiable |
 | `lib/supabase/server.ts` | Serveur **avec session**, RLS active. **Client par défaut** |
-| `lib/supabase/admin.ts` | Service-role, `server-only`. **Jamais hors `lib/audit/`** |
+| ~~`lib/supabase/admin.ts`~~ | ⚠️ **SUPPRIMÉ le 23/09/2026** : `creerClientAdmin` n'avait plus AUCUN appelant — l'audit passe par la session de l'administrateur (fonctions `security definer` et lectures sous RLS). La cloison ESLint reste, en fil-piège |
 | `lib/supabase/anon.ts` | Serveur **SANS session** — pour la page publique |
 | `lib/supabase/system.ts` | Service-role pour les chemins **sans utilisateur** (webhooks, tâches, envois) |
 
@@ -487,7 +487,7 @@ base**, audit **atomique** avec la lecture qu'il trace.
 publique dépendrait de la présence d'un cookie — **un vendeur connecté verrait sa page
 autrement que son client, sans que personne s'en aperçoive avant que ça compte**.
 
-**Pourquoi `system.ts` est distinct de `admin.ts`** : le client admin impose un audit,
+**Pourquoi `system.ts` était distinct de `admin.ts`** (supprimé le 23/09/2026, sans appelant) : le client admin imposait un audit,
 parce qu'un **humain** y lit les données d'un tiers. **Un webhook n'est personne** ;
 l'auditer noierait les vraies consultations humaines.
 

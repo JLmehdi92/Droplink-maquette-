@@ -70,6 +70,13 @@ const MESSAGE_VERIFICATION =
 
 const CLOISONS = [
   {
+    /*
+     * ⚠️ LE FICHIER `supabase/admin.ts` A ÉTÉ SUPPRIMÉ LE 23/09/2026, ET CETTE
+     * CLOISON EST GARDÉE EXPRÈS. `creerClientAdmin` n'avait plus un seul appelant
+     * — l'inventaire de couverture l'a trouvé mort. La cloison devient un
+     * fil-piège : un client service-role recréé sous ce nom ne pourrait pas être
+     * importé hors de `lib/audit/` sans que le lint refuse.
+     */
     nom: "admin",
     group: ["**/supabase/admin", "@/lib/supabase/admin", "./admin"],
     message: MESSAGE_ADMIN,
