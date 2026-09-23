@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
@@ -92,7 +93,7 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   admin = await creerUtilisateur("statistiques-admin");
   vendeur = await creerUtilisateur("statistiques-vendeur");
-  await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [admin.profilId]);
+  await promouvoirAdmin(catalogue, admin);
 
   avant = await lireIndicateurs(admin.client, "30");
   commandesDuJourAvant = (await lireSeries(admin.client, "30")).find((j) => j.jour === auJourdHui())?.commandes ?? 0;

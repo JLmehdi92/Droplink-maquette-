@@ -658,19 +658,7 @@ console.error(
  * part, avec un code calculé selon la RFC 6238 : un vrai facteur, pas un décor.
  */
 if (process.env["DEUX_ETAPES"] === "1") {
-  const { createHmac } = await import("node:crypto");
-  const codeTotp = (secret) => {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-    let bits = "";
-    for (const c of secret.replace(/=+$/, "")) bits += alphabet.indexOf(c).toString(2).padStart(5, "0");
-    const octets = [];
-    for (let i = 0; i + 8 <= bits.length; i += 8) octets.push(parseInt(bits.slice(i, i + 8), 2));
-    const compteur = Buffer.alloc(8);
-    compteur.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30000)));
-    const h = createHmac("sha1", Buffer.from(octets)).update(compteur).digest();
-    const o = h[19] & 15;
-    return String((h.readUInt32BE(o) & 0x7fffffff) % 1000000).padStart(6, "0");
-  };
+  const { codeTotp } = await import("./totp.mjs");
   const enroleur = createClient(urlSupabase, process.env["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"], {
     auth: { persistSession: false },
   });
@@ -694,6 +682,26 @@ if (process.env["DEUX_ETAPES"] === "1") {
  * vérifié comme le navigateur le ferait —, jamais une session maquillée.
  */
 async function ouvrirSession() {
+  /*
+   * ⚠️ L'ADMINISTRATION EXIGE UNE SESSION EN DOUBLE FACTEUR (migration 186).
+   * Mesurer un écran `/admin` avec une session à un seul facteur mesurerait la
+   * REDIRECTION vers les paramètres, pas l'écran. Pour ces routes, un vrai
+   * facteur est enrôlé et vérifié, et c'est la session élevée qui est servie.
+   */
+  if (routes.some((r) => r.includes("/admin")) && process.env["DEUX_ETAPES"] !== "1") {
+    const { codeTotp } = await import("./totp.mjs");
+    const ouverte = await publiable.auth.signInWithPassword({ email: courriel, password: MOT_DE_PASSE });
+    if (ouverte.error) return ouverte;
+    const { data: facteur, error: eEnrole } = await publiable.auth.mfa.enroll({ factorType: "totp", friendlyName: "mesure-admin" });
+    if (eEnrole) throw new Error("jeu de mesure : enrôlement admin impossible — " + eEnrole.message);
+    const { error: eVerif } = await publiable.auth.mfa.challengeAndVerify({
+      factorId: facteur.id,
+      code: codeTotp(facteur.totp.secret),
+    });
+    if (eVerif) throw new Error("jeu de mesure : facteur admin non vérifié — " + eVerif.message);
+    console.error("[jeu] session d'administration en double facteur (aal2).");
+    return publiable.auth.getSession();
+  }
   if (process.env["RECUPERATION"] !== "1") {
     return publiable.auth.signInWithPassword({ email: courriel, password: MOT_DE_PASSE });
   }

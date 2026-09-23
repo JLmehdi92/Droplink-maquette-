@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import { promouvoirAdmin } from "../aide/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
@@ -22,15 +23,19 @@ import {
  */
 
 class Introuvable extends Error {}
+class Redirection extends Error {}
 
 let session: SupabaseClient | null = null;
-let profil: { profilId: string; email: string } | null = null;
+let profil: { profilId: string; email: string; langue: string } | null = null;
 let quotaAutorise = true;
 let panne = false;
 
 vi.mock("next/navigation", () => ({
   notFound: () => {
     throw new Introuvable("404");
+  },
+  redirect: (vers: string) => {
+    throw new Redirection(vers);
   },
 }));
 vi.mock("@/lib/limitation/quota", () => ({
@@ -49,24 +54,29 @@ const { exigerAdmin } = await import("@/lib/audit/garde");
 
 let vendeur: UtilisateurDeTest;
 let admin: UtilisateurDeTest;
+let adminSansFacteur: UtilisateurDeTest;
 let catalogue: Client;
 
 function comme(u: UtilisateurDeTest): void {
   session = u.client;
-  profil = { profilId: u.profilId, email: u.email };
+  profil = { profilId: u.profilId, email: u.email, langue: "en" };
 }
 
 beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   vendeur = await creerUtilisateur("garde-vendeur");
   admin = await creerUtilisateur("garde-admin");
-  await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [admin.profilId]);
+  adminSansFacteur = await creerUtilisateur("garde-admin-sans-facteur");
+  await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [
+    adminSansFacteur.profilId,
+  ]);
+  await promouvoirAdmin(catalogue, admin);
 }, 90_000);
 
 afterAll(async () => {
-  await interroger(catalogue, "update public.profiles set role = 'user' where id = $1", [admin.profilId]);
   await supprimerUtilisateur(vendeur);
   await supprimerUtilisateur(admin);
+  await supprimerUtilisateur(adminSansFacteur);
   await catalogue.end();
 }, 60_000);
 
@@ -86,6 +96,15 @@ describe("La garde de l'administration", () => {
     // profil aussi : seul le rôle, lu en base, fait la différence.
     comme(vendeur);
     await expect(exigerAdmin()).rejects.toBeInstanceOf(Introuvable);
+  });
+
+  test("⚠️ UN ADMINISTRATEUR SANS DOUBLE AUTHENTIFICATION EST ENVOYÉ L'ACTIVER, dans SA langue", async () => {
+    // Migration 186 : la base lui refuse l'administration. Un 404 muet le
+    // laisserait sans comprendre ; il est envoyé à ses paramètres.
+    comme(adminSansFacteur);
+    const refus = await exigerAdmin().catch((e: unknown) => e);
+    expect(refus).toBeInstanceOf(Redirection);
+    expect((refus as Error).message).toBe("/en/parametres");
   });
 
   test("sans profil, 404", async () => {

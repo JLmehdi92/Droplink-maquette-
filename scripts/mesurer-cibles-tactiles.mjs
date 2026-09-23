@@ -56,10 +56,24 @@ await service
   .update({ account_type: "supplier", role: "admin" })
   .eq("id", profil.id);
 
-const { data: sess } = await publiable.auth.signInWithPassword({
+await publiable.auth.signInWithPassword({
   email: courriel,
   password: MOT_DE_PASSE,
 });
+/*
+ * ⚠️ L'ADMINISTRATION EXIGE UNE SESSION EN DOUBLE FACTEUR (migration 186) : sans
+ * elle, chaque écran `/admin` mesuré serait la redirection vers les paramètres.
+ * Un vrai facteur est enrôlé et vérifié ; la session élevée sert tous les écrans.
+ */
+const { codeTotp } = await import("./totp.mjs");
+const { data: facteur, error: eEnrole } = await publiable.auth.mfa.enroll({ factorType: "totp", friendlyName: "cibles" });
+if (eEnrole) throw new Error("enrôlement du facteur de mesure impossible — " + eEnrole.message);
+const { error: eVerif } = await publiable.auth.mfa.challengeAndVerify({
+  factorId: facteur.id,
+  code: codeTotp(facteur.totp.secret),
+});
+if (eVerif) throw new Error("facteur de mesure non vérifié — " + eVerif.message);
+const { data: sess } = await publiable.auth.getSession();
 const ref = new URL(urlSupabase).hostname.split(".")[0];
 const s = sess.session;
 const mince = {

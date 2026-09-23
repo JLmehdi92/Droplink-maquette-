@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
@@ -32,7 +33,7 @@ beforeAll(async () => {
   vendeur = await creerUtilisateur("etat-vendeur");
   voisin = await creerUtilisateur("etat-voisin");
   admin = await creerUtilisateur("etat-admin");
-  await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [admin.profilId]);
+  await promouvoirAdmin(catalogue, admin);
 }, 90_000);
 
 afterAll(async () => {

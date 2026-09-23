@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin, revendicationsReelles } from "../aide/admin";
 import type { Client } from "pg";
 import { ouvrirConnexionCatalogue } from "../aide/base";
 import {
@@ -122,7 +123,7 @@ beforeAll(async () => {
 
   // Alice est administratrice : la fonction vérifie le rôle EN BASE, et on
   // l'appelle donc sous une vraie identité plutôt qu'en la contournant.
-  await bd.query("update public.profiles set role = 'admin' where id = $1", [alice.profilId]);
+  await promouvoirAdmin(bd, alice);
 
   // Un peu de contenu chez les deux : sans lui, toutes les tables seraient vides
   // et « aucune lecture de `orders` » serait vrai sans rien prouver. Un ensemble
@@ -189,7 +190,7 @@ describe("La mesure décrit bien le jeu qu'elle prétend décrire", () => {
     let fonction;
     try {
       await bd.query("set local role authenticated");
-      await bd.query(`set local request.jwt.claims = '{"sub":"${alice.userId}"}'`);
+      await bd.query("select set_config('request.jwt.claims', $1, true)", [await revendicationsReelles(alice)]);
       // ⚠️ SIX ARGUMENTS, PAS CINQ. La migration 113 a ajouté le filtre par type
       // et DROPPÉ l'ancienne signature ; cet appel est resté à cinq arguments,
       // donc il ne résolvait plus aucune fonction et cette mesure était ROUGE

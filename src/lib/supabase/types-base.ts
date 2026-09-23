@@ -976,6 +976,7 @@ export type Database = {
         Args: { p_motif: string; p_parcel_id: string }
         Returns: undefined
       }
+      admin_sans_double_facteur: { Args: never; Returns: boolean }
       alertes_admin: {
         Args: { p_retard_minutes: number; p_seuil_colis: number }
         Returns: {
@@ -1622,6 +1623,7 @@ export type Database = {
           valeur: number
         }[]
       }
+      session_double_facteur: { Args: never; Returns: boolean }
       statistiques_admin: {
         Args: { p_jours: number }
         Returns: {

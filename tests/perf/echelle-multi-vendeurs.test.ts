@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin, revendicationsReelles } from "../aide/admin";
 import type { Client } from "pg";
 import { ouvrirConnexionCatalogue } from "../aide/base";
 import {
@@ -657,9 +658,9 @@ const STATISTIQUES_MS = 1_000;
 async function mesurerEnAdmin(sql: string): Promise<Mesure & { lignes: number }> {
   await bd.query("begin");
   try {
-    await bd.query("update public.profiles set role = 'admin' where id = $1", [alice.profilId]);
+    await promouvoirAdmin(bd, alice);
     await bd.query("set local role authenticated");
-    await bd.query(`set local request.jwt.claims = '{"sub":"${alice.userId}"}'`);
+    await bd.query("select set_config('request.jwt.claims', $1, true)", [await revendicationsReelles(alice)]);
     const debut = performance.now();
     const { rowCount } = await bd.query(sql);
     const ms = performance.now() - debut;
@@ -735,9 +736,9 @@ describe("L'administration lit toute la plateforme sans la parcourir", () => {
     // Un compteur à zéro passerait tous les seuils de temps.
     await bd.query("begin");
     try {
-      await bd.query("update public.profiles set role = 'admin' where id = $1", [alice.profilId]);
+      await promouvoirAdmin(bd, alice);
       await bd.query("set local role authenticated");
-      await bd.query(`set local request.jwt.claims = '{"sub":"${alice.userId}"}'`);
+      await bd.query("select set_config('request.jwt.claims', $1, true)", [await revendicationsReelles(alice)]);
       const { rows } = await bd.query<{ commandes: string }>("select commandes from public.statistiques_admin(90)");
       expect(Number(rows[0]?.commandes ?? 0)).toBeGreaterThanOrEqual(BOUTIQUES * COMMANDES_PAR_BOUTIQUE);
     } finally {

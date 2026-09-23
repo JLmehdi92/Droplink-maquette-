@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
@@ -37,7 +38,7 @@ async function identifiant(lien: string | null): Promise<string | null> {
 beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   admin = await creerUtilisateur("doub-admin");
-  await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [admin.profilId]);
+  await promouvoirAdmin(catalogue, admin);
   for (const cle of ["a", "b", "c", "d", "e", "f"]) {
     vendeurs[cle] = await creerUtilisateur(`doub-${cle}`);
   }

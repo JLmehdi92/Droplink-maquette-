@@ -1206,8 +1206,10 @@ const SQL = {
         )
       $$;`,
     reparerDepuisMigration: {
-      fichier: "038_socle_admin.sql",
-      depuis: "create function public.est_admin",
+      // 186 et non plus 038 : réparer depuis la 038 effacerait l'exigence de
+      // double authentification, sans qu'aucune garde ne le voie.
+      fichier: "186_l_administration_exige_la_double_authentification.sql",
+      depuis: "create or replace function public.est_admin",
       jusqua: "comment on function public.est_admin",
     },
   },

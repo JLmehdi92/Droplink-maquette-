@@ -1095,6 +1095,7 @@ controles.push(
  * pour que les deux le lisent — une regle ecrite a deux endroits est une regle
  * qu un seul des deux appliquera.
  */
+const { codeTotp } = await import("./totp.mjs");
 const { installerTransportResilient } = await import("./transport.mjs");
 installerTransportResilient();
 
@@ -1488,13 +1489,54 @@ try {
           echecs += 1;
         }
         if (!verif?.session) return null;
+        return cookieDeSession(verif.session);
+      }
 
+      /*
+       * UNE SESSION D ADMINISTRATION EN DOUBLE FACTEUR (migration 186).
+       *
+       * Le vrai chemin : mot de passe, puis un facteur TOTP enrole et verifie
+       * avec un vrai code. Le facteur est RETIRE par l appelant apres usage —
+       * un compte qui en garde un voit ses sessions a un seul facteur envoyees
+       * a la verification, et le reste de la sonde serait mesure a cote.
+       */
+      async function ouvrirSessionAdminDoubleFacteur() {
+        const publiable = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+          { auth: { persistSession: false } },
+        );
+        const { error: erreurMdp } = await publiable.auth.signInWithPassword({
+          email: courriel,
+          password: motDePasseFumee,
+        });
+        if (erreurMdp !== null) return null;
+        const { data: enrole, error: erreurEnrole } = await publiable.auth.mfa.enroll({
+          factorType: "totp",
+          friendlyName: "fumee-" + Date.now(),
+        });
+        if (erreurEnrole !== null) {
+          console.error(`ECHEC enrolement du facteur de fumee : ${erreurEnrole.message}`);
+          return null;
+        }
+        const { error: erreurVerif } = await publiable.auth.mfa.challengeAndVerify({
+          factorId: enrole.id,
+          code: codeTotp(enrole.totp.secret),
+        });
+        const { data: lue } = await publiable.auth.getSession();
+        if (erreurVerif !== null || !lue.session) {
+          console.error(`ECHEC verification du facteur de fumee : ${erreurVerif?.message}`);
+          return { cookie: null, facteur: enrole.id, client: publiable };
+        }
+        return { cookie: cookieDeSession(lue.session), facteur: enrole.id, client: publiable };
+      }
+
+      function cookieDeSession(s) {
         const ref = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname.split(".")[0];
         // Reduite au strict necessaire : au-dela d environ 3180 octets
         // `@supabase/ssr` decoupe le cookie en `.0`, `.1`, … et une sonde qui
         // ne decoupe pas enverrait un cookie tronque, donc pas de session —
         // et le controle se croirait rouge pour la mauvaise raison.
-        const s = verif.session;
         const mince = {
           access_token: s.access_token,
           refresh_token: s.refresh_token,
@@ -1520,7 +1562,7 @@ try {
               .join("; ");
       }
 
-      const cookieVendeur = await ouvrirSessionVendeur();
+      let cookieVendeur = await ouvrirSessionVendeur();
 
       controles.push([
         cookieVendeur !== null,
@@ -2554,7 +2596,33 @@ try {
        * repondrait encore 200 — et c est exactement ce qu on veut interdire.
        */
       if (cookieVendeur && profilFumee) {
-        const entetesAdmin = { cookie: cookieVendeur, ...visiteur(42) };
+        /*
+         * ⚠️ L ADMINISTRATION EXIGE LA DOUBLE AUTHENTIFICATION (migration 186).
+         *
+         * Mesure sur le serveur reel, avant tout : un administrateur dont la
+         * session n a qu UN facteur n obtient pas le panneau — il est envoye a
+         * ses parametres pour activer la 2FA, au lieu d un 404 muet.
+         */
+        await service.from("profiles").update({ role: "admin" }).eq("id", profilFumee);
+        const simpleFacteur = await fetch(`${base}/fr/admin`, {
+          headers: { cookie: cookieVendeur, ...visiteur(42) },
+          redirect: "manual",
+        });
+        await service.from("profiles").update({ role: "user" }).eq("id", profilFumee);
+        const versSimple = simpleFacteur.headers.get("location") ?? "";
+        controles.push([
+          simpleFacteur.status >= 300 &&
+            simpleFacteur.status < 400 &&
+            new URL(versSimple, base).pathname === "/fr/parametres",
+          `un administrateur a UN facteur est envoye activer la 2FA (statut ${simpleFacteur.status} vers ${versSimple})`,
+        ]);
+
+        const sessionAdmin = await ouvrirSessionAdminDoubleFacteur();
+        controles.push([
+          typeof sessionAdmin?.cookie === "string",
+          "une session d administration en double facteur a pu etre ouverte",
+        ]);
+        const entetesAdmin = { cookie: sessionAdmin?.cookie ?? cookieVendeur, ...visiteur(42) };
         const catalogueAdmin = JSON.parse(
           readFileSync(join(racine, "messages", "fr.json"), "utf8"),
         );
@@ -2728,6 +2796,29 @@ try {
             `le refus (${corpsRetrograde.length} o) pese comme une route admin inventee (${corpsInvente.length} o)`,
           ],
         );
+
+        // Le facteur est retire : sinon chaque session a un seul facteur de ce
+        // compte serait envoyee a la verification, et la suite de la sonde
+        // mesurerait autre chose que ce qu elle croit.
+        if (sessionAdmin?.client && sessionAdmin.facteur) {
+          const { error: erreurRetrait } = await sessionAdmin.client.auth.mfa.unenroll({
+            factorId: sessionAdmin.facteur,
+          });
+          controles.push([
+            erreurRetrait === null,
+            `le facteur de fumee est retire apres usage (${erreurRetrait?.message ?? "ok"})`,
+          ]);
+        }
+
+        /*
+         * ⚠️ LA SESSION VENDEUR EST ROUVERTE, ET C EST UNE PROPRIETE DE SUPABASE.
+         * Mesure le 23/09/2026 : a la PREMIERE verification d un facteur, le
+         * serveur d authentification revoque toutes les autres sessions a un seul
+         * facteur du compte — c est ce qui empeche un voleur de cookie de garder
+         * sa session apres que la victime a active la 2FA. Le cookie ouvert plus
+         * haut est donc mort, et les blocs suivants mesureraient une deconnexion.
+         */
+        cookieVendeur = await ouvrirSessionVendeur();
       }
 
       /*

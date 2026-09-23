@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
@@ -30,7 +31,7 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   admin = await creerUtilisateur("plan-admin");
   vendeur = await creerUtilisateur("plan-vendeur");
-  await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [admin.profilId]);
+  await promouvoirAdmin(catalogue, admin);
   const { data } = await vendeur.client
     .from("orders")
     .insert({ shop_id: vendeur.shopId, customer_label: "Client du plan" })

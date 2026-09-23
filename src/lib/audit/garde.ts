@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { verifierQuotaAdmin } from "@/lib/limitation/quota";
@@ -93,7 +93,20 @@ async function exigerAdminSansMemo(): Promise<Administrateur> {
   // peut pas établir que l'appelant est administrateur, il ne l'est pas. Le
   // réflexe inverse — « en cas de doute, laisser passer pour ne pas casser » —
   // est exactement ce qui ouvre une surface le jour d'un incident de base.
-  if (error !== null || data !== true) notFound();
+  if (error !== null || data !== true) {
+    /*
+     * UN ADMINISTRATEUR SANS DOUBLE AUTHENTIFICATION EST ENVOYÉ L'ACTIVER.
+     *
+     * Depuis la migration 186, la base refuse l'administration à une session à
+     * un seul facteur. Lui rendre le même 404 qu'à un inconnu le laisserait
+     * devant une page vide, sans savoir pourquoi son accès a disparu. La base ne
+     * répond `true` ici QU'À un administrateur actif en session à un seul
+     * facteur : un vendeur reçoit toujours le 404, et n'apprend rien.
+     */
+    const { data: sansFacteur } = await supabase.rpc("admin_sans_double_facteur");
+    if (sansFacteur === true) redirect("/" + profil.langue + "/parametres");
+    notFound();
+  }
 
   return { profilId: profil.profilId, email: profil.email };
 }

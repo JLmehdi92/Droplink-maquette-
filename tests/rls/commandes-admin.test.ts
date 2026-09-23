@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
@@ -88,9 +89,7 @@ beforeAll(async () => {
   await passerEnPro(vendeur);
   await passerEnPro(voisin);
 
-  await interroger(catalogue, "update public.profiles set role = 'admin' where id = $1", [
-    admin.profilId,
-  ]);
+  await promouvoirAdmin(catalogue, admin);
   await interroger(catalogue, "update public.shops set name = $2 where id = $1", [
     vendeur.shopId,
     "Crème Brûlée Studio",

@@ -707,6 +707,15 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "s'y lirait comme une semaine pleine.",
     ],
     [
+      "admin_sans_double_facteur",
+      "Appelée par la garde de l'administration SOUS LA SESSION de l'utilisateur, " +
+        "pour envoyer un administrateur à un seul facteur activer la 2FA plutôt " +
+        "que de lui rendre un 404 muet (migration 186). Elle ne rend `true` qu'à " +
+        "un administrateur actif en session aal1 : un vendeur reçoit `false`, " +
+        "exactement comme un administrateur en règle — elle n'apprend à personne " +
+        "d'autre que l'administration existe. `anon` n'y a pas droit.",
+    ],
+    [
       "est_admin",
       "LA SEULE AUTORITÉ sur la question « cet appelant est-il administrateur ». " +
         "Ouverte à `authenticated` parce que chaque garde l'appelle. Elle lit le " +

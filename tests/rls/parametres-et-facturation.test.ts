@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { ouvrirConnexionCatalogue } from "../aide/base";
 import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
@@ -48,10 +49,22 @@ async function sousSession<T>(
   sql: string,
   valeurs: readonly unknown[] = [],
 ): Promise<{ ok: true; lignes: T[] } | { ok: false; code: string; message: string }> {
+  /*
+   * LES REVENDICATIONS DU VRAI JETON DE L'UTILISATEUR, pas un `sub` recopié.
+   * Depuis la migration 186, la base lit aussi le niveau de la session (`aal`) :
+   * un jeton simulé réduit à `sub` ferait passer chaque administrateur pour une
+   * session à un seul facteur — et inventer `aal2` ici validerait un niveau que
+   * personne n'a présenté.
+   */
+  const { data: lue } = await utilisateur.client.auth.getSession();
+  const jeton = lue.session?.access_token ?? "";
+  const charge = jeton.split(".")[1] ?? "";
+  const revendications: unknown =
+    charge === "" ? { sub: utilisateur.userId } : JSON.parse(Buffer.from(charge, "base64url").toString("utf8"));
   await bd.query("begin");
   try {
     await bd.query("set local role authenticated");
-    await bd.query(`set local request.jwt.claims = '{"sub":"${utilisateur.userId}"}'`);
+    await bd.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify(revendications)]);
     const { rows } = await bd.query(sql, [...valeurs]);
     await bd.query("commit");
     return { ok: true, lignes: rows as T[] };
@@ -68,7 +81,7 @@ beforeAll(async () => {
   vendeur = await creerUtilisateur("param-vendeur");
   // La promotion passe par le propriétaire de la base : c'est justement ce
   // qu'un vendeur ne peut pas faire, et une autre suite l'établit.
-  await bd.query("update public.profiles set role = 'admin' where id = $1", [admin.profilId]);
+  await promouvoirAdmin(bd, admin);
 }, 120_000);
 
 afterAll(async () => {
