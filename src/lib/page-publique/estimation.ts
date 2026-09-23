@@ -60,16 +60,20 @@ export function estimationVisible(entree: {
    * annonce une DATE, pas un horaire : traiter « aujourd'hui » comme dépassé
    * ferait disparaître l'estimation le matin même du jour annoncé,
    * c'est-à-dire au moment précis où elle intéresse le plus.
+   *
+   * ⚠️ ET LE JOUR SE LIT EN UTC, comme la page l'affiche. En heure LOCALE, il
+   * dépendait du fuseau du serveur : à New York, une ETA « 2 septembre »
+   * (minuit UTC) tombait le 1er au soir et disparaissait le jour annoncé.
    */
   const borne = entree.au ?? entree.du;
-  const finDuJour = new Date(
-    borne.getFullYear(),
-    borne.getMonth(),
-    borne.getDate(),
+  const finDuJour = Date.UTC(
+    borne.getUTCFullYear(),
+    borne.getUTCMonth(),
+    borne.getUTCDate(),
     23,
     59,
     59,
     999,
   );
-  return finDuJour.getTime() >= entree.maintenant.getTime();
+  return finDuJour >= entree.maintenant.getTime();
 }

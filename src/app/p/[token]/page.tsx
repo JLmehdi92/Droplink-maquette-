@@ -239,7 +239,10 @@ export default async function PagePublique({
   // client voit sur la frise, et le silence doit s accorder avec elle.
   const silence = decrireSilence(dernier, maintenant, statutAffiche);
 
-  const jour = (instant: Date): string => format.dateTime(instant, { day: "numeric", month: "long" });
+  // En UTC, comme `estimationVisible` : le jour affiché et le jour qui décide
+  // de la péremption ne peuvent pas dépendre du fuseau du serveur.
+  const jour = (instant: Date): string =>
+    format.dateTime(instant, { day: "numeric", month: "long", timeZone: "UTC" });
 
   /*
    * LA FOURCHETTE D'ARRIVÉE. Quand ses deux bornes tombent le même jour, on

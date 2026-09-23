@@ -23,8 +23,9 @@ import { estimationVisible } from "@/lib/page-publique/estimation";
  * une interrogation qui cesse d'annoncer une date laisse l'ancienne en base.
  */
 describe("Quand la page client montre une arrivée estimée", () => {
-  const LE_2_SEPT = new Date(2026, 8, 2, 14, 0, 0);
-  const jour = (j: number, mois = 8): Date => new Date(2026, mois, j);
+  // En UTC, comme la base : `timestamptz` relu par `new Date(chaîne ISO)`.
+  const LE_2_SEPT = new Date(Date.UTC(2026, 8, 2, 14, 0, 0));
+  const jour = (j: number, mois = 8): Date => new Date(Date.UTC(2026, mois, j));
 
   const cas = (
     o: Partial<Parameters<typeof estimationVisible>[0]>,
@@ -89,6 +90,36 @@ describe("Quand la page client montre une arrivée estimée", () => {
      */
     for (const etape of ["preparation", "expedie", "en_transit"] as const) {
       expect(estimationVisible(cas({ etape, du: jour(6, 8), au: jour(9, 8) })), etape).toBe(true);
+    }
+  });
+
+  /*
+   * ⚠️ LE JOUR NE DÉPEND PAS DU FUSEAU DU SERVEUR — trouvé par la revue ECC,
+   * 23/09/2026. La fin du jour se calculait en heure LOCALE : sur un serveur
+   * à New York, une ETA « 2 septembre » (minuit UTC) tombait le 1er au soir,
+   * et l'estimation disparaissait le jour même où elle intéresse le plus.
+   * Railway tourne en UTC, donc le défaut dormait — jusqu'au jour où la région
+   * ou l'image change. La page affiche la date en UTC ; la décision aussi.
+   */
+  test("⚠️ le jour de la borne se lit en UTC, quel que soit le fuseau du serveur", () => {
+    const avant = process.env.TZ;
+    try {
+      for (const fuseau of ["America/New_York", "Asia/Shanghai", "UTC"]) {
+        process.env.TZ = fuseau;
+        const eta = new Date("2026-09-02T00:00:00Z");
+        expect(
+          estimationVisible(cas({ du: eta, au: eta, maintenant: new Date("2026-09-02T20:00:00Z") })),
+          fuseau,
+        ).toBe(true);
+        // CONTRE-TEST : le lendemain en UTC, elle est bien périmée.
+        expect(
+          estimationVisible(cas({ du: eta, au: eta, maintenant: new Date("2026-09-03T00:30:00Z") })),
+          fuseau,
+        ).toBe(false);
+      }
+    } finally {
+      if (avant === undefined) delete process.env.TZ;
+      else process.env.TZ = avant;
     }
   });
 });
