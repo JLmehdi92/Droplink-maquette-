@@ -317,7 +317,10 @@ export default async function FicheCompte({
                 panneau non. */}
             <section className={PANNEAU} aria-label={suspendu ? t("suspension.rouvrir") : t("suspension.ouvrir")}>
               <TraductionsClient espaces={["admin.suspension"]}>
+                {/* `key` : le motif tapé pour un compte ne doit pas survivre à une
+                    navigation vers un autre (même correctif que l'éditeur, cb9e45b). */}
                 <DialogueSuspension
+                  key={fiche.id}
                   profilId={fiche.id}
                   email={fiche.email}
                   suspendu={suspendu}
@@ -331,6 +334,7 @@ export default async function FicheCompte({
             <section className={PANNEAU} aria-label={t("plan.titre")}>
               <TraductionsClient espaces={["admin.plan"]}>
                 <PlanCompte
+                  key={fiche.id}
                   profilId={fiche.id}
                   plan={plan.statut === "ok" ? plan.plan : null}
                   motifMin={MOTIF_MIN}

@@ -75,3 +75,9 @@ port.txt
 # `port.txt` la veille. Un fichier jetable ecrit a la racine finit dans un
 # commit ; le motif le rattrape desormais avant git.
 out-*.mjs
+
+# Videos de reference (TikTok, captures d ecran) deposees a la racine le temps
+# d une seance. Le depot est PUBLIC : une video non suivie est publiee par le
+# premier `git add .` venu (audit du 24/09/2026).
+*.mp4
+*.mov

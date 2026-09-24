@@ -20,8 +20,18 @@ export async function promouvoirAdmin(catalogue: Client, u: UtilisateurDeTest): 
   await eleverEnDoubleFacteur(u);
 }
 
-/** Enrôle un facteur TOTP réel et élève la session du client en `aal2`. */
+/**
+ * Enrôle un facteur TOTP réel et élève la session du client en `aal2`.
+ *
+ * ⚠️ IDEMPOTENTE, ET ELLE NE L'ÉTAIT PAS (audit du 24/09/2026). Le banc de
+ * performance promeut son administrateur à CHAQUE mesure : chaque appel enrôlait
+ * un facteur de plus, et Supabase refuse au-delà de dix (« Maximum number of
+ * verified factors reached ») — deux mesures d'administration tombaient, non pas
+ * lentes, mais en erreur. Une session déjà `aal2` n'a rien à prouver de plus.
+ */
 export async function eleverEnDoubleFacteur(u: UtilisateurDeTest): Promise<void> {
+  const { data: niveau } = await u.client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (niveau?.currentLevel === "aal2") return;
   const { data: enrole, error: eEnrole } = await u.client.auth.mfa.enroll({
     factorType: "totp",
     friendlyName: "admin-" + u.profilId.slice(0, 8) + "-" + String(Date.now()),
