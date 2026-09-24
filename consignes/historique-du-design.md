@@ -6,6 +6,40 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 24/09/2026 — LA REMESURE COMPLÈTE AVANT MISE EN LIGNE, ET CE QU'ELLE A TROUVÉ
+
+Première remesure des 74 relevés depuis le 19/09. **Ce qui était en code 0 le 19 ne l'était
+plus**, et aucune porte ne pouvait le voir :
+
+- 🔴 **LE BOUTON « Passer au Pro » DE LA BARRE LATÉRALE (20/09) N'AVAIT JAMAIS ÉTÉ REMESURÉ** :
+  les déclarations couvraient encore « Passez au Pro / Upgrade ». Même motif (position verticale
+  seule, la colonne suit la page), libellé ajouté ; 15 écrans vendeur rendus au code 0.
+- 🔴 **L'ÉCRAN « PASSER AU PRO » N'AVAIT JAMAIS ÉTÉ SOUSTRAIT** — la planche n'offrait aucun
+  chemin pour l'ouvrir (bouton sans `onClick`). Planche corrigée (bouton + adresse `#pro`, en-tête
+  de page standard), écran ajouté à la table. Défauts du produit : colonne 32 px trop à gauche
+  (marge hors de la boîte de 1180 au lieu de dedans), pastille de prix blanche sur violet au lieu
+  du `Badge brand`, lignes de tableau à 53 px au lieu de 46 (valeurs en ligne héritant de
+  l'interligne 24 px), bouton en gras sans flèche, quota non cité. Le serveur de mesure pose
+  désormais une adresse de paiement factice : on mesure l'état configuré.
+- 🔴 **LA CARTE « ABONNEMENT » DES PARAMÈTRES MENTAIT** : « gratuit et sans limite » depuis le
+  quota à vie (175-176), et « Plan actuel : Gratuit » en dur, y compris pour un compte Pro. La
+  planche inventait trois lignes sur six (« Statistiques avancées »…) : corrigée d'abord.
+- 🔴 **LE TABLEAU DE BORD N'AVAIT PAS SA CARTE « PASSEZ AU PRO »** (écartée « faute d'offre »
+  avant le 20/09) : `CartePro`, bureau seulement (la planche téléphone n'en a pas), jamais pour un
+  compte Pro. Rangée à quatre colonnes ; le `Panneau` serré reprend l'en-tête du `DashPanel`
+  (160 px + 14, sans espaceur) — « Voir tout » tombait sous le titre ; « Voir tout » ajouté aux
+  transporteurs ; pourcentages à 12,5 px au tableau de bord (13 aux analyses).
+- `/docs` : prix « 20,00 € » → « 20 € » (trois sites) ; le paragraphe « Gratuit et Pro » écrit
+  dans la planche.
+- ⚠️ **160 DÉCLARATIONS MORTES RETIRÉES** (listées par l'outil, section ⑤, et retirées une à une),
+  plus 2 encore vivantes dont la RAISON était devenue fausse (« la seconde rangée a trois
+  panneaux ») — retirées pour voir ce qu'elles couvraient : trois vrais écarts. Les mortes : les
+  anciennes promesses de la planche (« 1 Go / 50 Go », « Pro — 19,90 € », « Support
+  prioritaire »…), corrigées le 20/09 sans que les déclarations suivent.
+- ⚠️ **PIÈGE DE MESURE** : plusieurs captures ont photographié l'écran de CHARGEMENT (base de tests
+  lente) ; un relevé à 137 éléments n'est pas un écran cassé, c'est un écran pas encore rendu.
+  Et l'admin se mesure par lots de cinq, avec une minute de pause (plafond de débit).
+
 ### ▶️ 23/09/2026 — UN ÉCRAN NOUVEAU, UNE CARTE NOUVELLE : LES E-MAILS DU CLIENT FINAL
 
 - **Nouvelle planche** `ui_kits/client_link/notification.html` (?etat=… · ?lang=…) — même

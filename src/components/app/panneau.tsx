@@ -76,13 +76,18 @@ export function Panneau({
         (className === undefined ? "" : " " + className)
       }
     >
-      <header className={"mb-4 flex flex-wrap items-start gap-4 " + (serre ? "" : "lg:mb-5")}>
+      {/* SERRÉ (sections du tableau de bord), AU BUREAU : le `DashPanel` du kit réserve
+          160 px au titre et 14 d'écart, sans espaceur — avec les 210 + 16 + 16 du panneau
+          large, une colonne à quatre renvoyait « Voir tout » sous le titre. Au téléphone,
+          la planche `TableauPhone` garde l'en-tête large : c'est lui qui s'applique sous
+          `lg` (remesure du 24/09, la version non responsive l'avait cassé). */}
+      <header className={"mb-4 flex flex-wrap items-start " + (serre ? "gap-4 lg:gap-3.5" : "gap-4 lg:mb-5")}>
         {Icone === undefined ? null : (
           <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-ds-accent">
             <Icone aria-hidden="true" size={20} strokeWidth={1.9} />
           </span>
         )}
-        <div className="min-w-0 flex-[1_1_210px]">
+        <div className={"min-w-0 " + (serre ? "flex-[1_1_210px] lg:flex-[1_1_160px]" : "flex-[1_1_210px]")}>
           {/*
             ⚠️ L'INTERLIGNE FAIT PARTIE DE LA MESURE, ET IL MANQUAIT. La taille
             et l'interlettrage avaient bien été relevés sur le kit servi ; pas
@@ -109,7 +114,7 @@ export function Panneau({
             <p className="mt-1 text-[13px] leading-[1.55] text-ds-texte-corps">{sousTitre}</p>
           )}
         </div>
-        <span className="flex-1" />
+        <span className={serre ? "flex-1 lg:hidden" : "flex-1"} />
         {action}
       </header>
       <div className="min-w-0 flex-1">{children}</div>

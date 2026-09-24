@@ -74,6 +74,13 @@ const serveur = spawn("pnpm", ["start", "--port", String(port)], {
      */
     RESEND_API_KEY: "re_debranche_serveur_de_mesure",
     EMAIL_CLIENTS_DE: "DropLink <suivi@mesure.invalid>",
+    /*
+     * LE BOUTON DE PAIEMENT DE « PASSER AU PRO » n'est rendu que si l'adresse est posée —
+     * la planche le dessine. Sans elle on mesurait « l'abonnement n'est pas encore
+     * ouvert », un état que la production n'aura pas (24/09/2026). L'adresse est
+     * factice et ne sera jamais suivie : une page mesurée ne clique pas.
+     */
+    LEMON_SQUEEZY_CHECKOUT_URL: "https://mesure.lemonsqueezy.com/buy/mesure",
     NODE_OPTIONS: [process.env.NODE_OPTIONS ?? "", `--import=${precharge}`].join(" ").trim(),
   },
   stdio: "inherit",

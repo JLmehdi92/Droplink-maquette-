@@ -1991,6 +1991,14 @@
       "marque": "自定义客户页面",
       "envois": "查看物流",
       "analyses": "查看数据分析"
+    },
+    "pro": {
+      "titre": "升级专业版",
+      "lien": "以你的名义生成链接",
+      "marque": "不显示「由 DropLink 提供支持」卡片",
+      "plafond": "按月重置的上限，而非终身额度",
+      "colis": "按月计算的包裹跟踪",
+      "bouton": "查看套餐"
     }
   },
   "parametres": {
@@ -2069,14 +2077,20 @@
     },
     "abonnement": {
       "titre": "订阅",
-      "aide": "验证阶段期间的套餐。",
+      "aide": "管理订阅并解锁更多功能。",
       "planActuel": "当前套餐",
       "gratuit": "免费版",
-      "gratuitAide": "验证阶段期间，DropLink 免费且不限量。",
-      "inclus1": "品牌定制的客户页面",
-      "inclus2": "质检照片与视频",
-      "inclus3": "自动包裹追踪",
-      "inclus4": "业务数据分析"
+      "gratuitAide": "了解 DropLink 的核心功能。",
+      "pro": "Pro",
+      "proAide": "你的 Pro 订阅已生效。",
+      "inclusPhotos": "照片、视频和自动物流跟踪",
+      "inclusCouleurs": "使用你品牌配色的客户页面",
+      "inclusTotal": "共 {n} 笔订单",
+      "proLien": "以你的名义生成链接",
+      "proMarque": "不显示「由 DropLink 提供支持」卡片",
+      "proPlafond": "按月重置的上限，而非终身额度",
+      "bouton": "升级至 Pro",
+      "nonInclus": "不包含："
     },
     "support": {
       "titre": "客服支持",
@@ -2210,7 +2224,8 @@
       },
       "commandes": {
         "titre": "按月重置的上限",
-        "texte": "免费账户受终身订单总量限制。升级 Pro 后，上限恢复为按月计算。"
+        "texte": "免费账户受终身订单总量限制。升级 Pro 后，上限恢复为按月计算。",
+        "texteNombre": "免费账户终身最多可创建 {n} 笔订单。升级 Pro 后，上限恢复为按月计算。"
       },
       "colis": {
         "titre": "跟上节奏的物流跟踪",
@@ -2227,8 +2242,8 @@
       "aVie": "共 {n} 个，终身",
       "parMois": "每月 {n} 个",
       "mensuel": "每月上限",
-      "adresseGratuit": "droplink.fr/p/…",
-      "adressePro": "droplink.fr/你的店铺/…",
+      "adresseGratuit": "droplink.fr/p/xK9…",
+      "adressePro": "droplink.fr/你的店铺/xK9…",
       "carteGratuit": "显示",
       "cartePro": "移除",
       "inclus": "包含"

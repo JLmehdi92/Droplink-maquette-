@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import {
+  ArrowRight,
   ArrowUpRight,
   ChevronDown,
   CircleCheck,
   CircleHelp,
+  CircleX,
   Crown,
   Database,
   Download,
@@ -14,6 +16,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
+import { LienEcran } from "@/components/lien-ecran";
 import { TraductionsClient } from "@/components/traductions-client";
 import { CarteReglage, LigneAction } from "@/components/parametres/carte-reglage";
 import {
@@ -81,9 +84,7 @@ function libelleAppareil({ navigateur, systeme }: AppareilDecrit): string | null
  *    produit ne fait pas (principe XII) ;
  *  - les quatre bascules de notification : le produit n'envoie aucune
  *    notification au vendeur. Des interrupteurs sans effet sont des mensonges ;
- *  - « Passer au Pro », les fonctions « Pro » barrées et les intégrations
- *    Shopify, Google Sheets, Webhook : la contrainte n° 1 interdit toute
- *    facturation, et aucune intégration n'existe ;
+ *  - les intégrations Shopify, Google Sheets, Webhook : aucune n'existe ;
  *  - « Nous contacter » : la seule adresse du produit est celle des
  *    signalements d'abus, et en faire un canal d'assistance mélangerait les
  *    deux — un signalement noyé dans les questions est un signalement en retard.
@@ -113,10 +114,15 @@ export default async function Parametres({
     creerClientServeur(),
   ]);
   const adresseSuivie = (await searchParams)["adresse"] === "suivie";
-  const [lues, facteurs] = await Promise.all([
+  const [lues, facteurs, quota] = await Promise.all([
     lireMesSessions(supabase),
     supabase.rpc("lister_mes_facteurs"),
+    supabase.rpc("lire_plafond_gratuit_a_vie"),
   ]);
+  // Le quota à vie d'un compte gratuit (175-176), lu en base : il se règle dans
+  // l'administration. Illisible, la ligne disparaît plutôt que d'afficher un
+  // nombre de secours — indiscernable d'un vrai.
+  const quotaAVie = typeof quota.data === "number" ? quota.data : null;
   if (facteurs.error !== null) console.error("[parametres] facteurs illisibles — " + facteurs.error.message);
   // UNE LECTURE ÉCHOUÉE SE LIT « NON ACTIVÉE » : l'écran propose alors d'activer,
   // et l'action d'enrôlement relit l'état chez le serveur d'authentification
@@ -234,32 +240,80 @@ export default async function Parametres({
 
         <div className="flex min-w-0 flex-col gap-[18px]">
           <CarteReglage icone={Crown} titre={t("abonnement.titre")} sousTitre={t("abonnement.aide")}>
-            {/* AFFICHAGE SEUL, et c'est la contrainte n° 1 : aucun bouton vers une
-                offre payante, aucune fonction « Pro » barrée — le produit est
-                gratuit et sans limite pendant la validation, et la carte le dit. */}
+            {/*
+              ⚠️ CETTE CARTE MENTAIT DEPUIS LE 20/09/2026 — audit avant mise en ligne, 24/09.
+              Elle affirmait « DropLink est gratuit et sans limite » alors qu'un compte
+              gratuit est borné à quinze commandes À VIE (175-176), et elle disait « Plan
+              actuel : Gratuit » en dur, y compris à un compte qui PAIE le Pro. Deux
+              affirmations que la base contredit (contrainte n° 8).
+
+              Au dessin de la planche `SettingsView` (« Abonnement »), dont la liste
+              inventait elle aussi trois lignes sur six — corrigée d'abord dans le kit :
+              en gratuit, ce qui est inclus coché et les vraies fonctions Pro barrées, puis
+              « Passer au Pro » ; en Pro, tout coché et AUCUN bouton.
+            */}
             <div className="rounded-ds-card border border-ds-violet-200 bg-[image:var(--degrade-ds-teinte)] p-[22px]">
               <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-violet-100 px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] text-ds-accent-encre lg:text-[11px]">
                 {t("abonnement.planActuel")}
               </span>
               <p className="mt-2.5 mb-1 text-[30px] leading-[normal] font-extrabold tracking-[-0.045em] text-ds-texte-fort">
-                {t("abonnement.gratuit")}
+                {profil.planPro ? t("abonnement.pro") : t("abonnement.gratuit")}
               </p>
-              <p className="text-[13px] leading-[normal] text-ds-texte-corps">{t("abonnement.gratuitAide")}</p>
-              <ul className="mt-5 flex flex-col gap-[11px]">
-                {(["inclus1", "inclus2", "inclus3", "inclus4"] as const).map((cle) => (
-                  <li key={cle} className="flex items-center gap-[11px]">
-                    <CircleCheck
-                      aria-hidden="true"
-                      size={17}
-                      strokeWidth={1.8}
-                      className="shrink-0 fill-ds-accent text-ds-white"
-                    />
-                    <span className="text-[14px] leading-[normal] font-medium text-ds-texte-fort">
-                      {t(`abonnement.${cle}`)}
+              <p className="text-[13px] leading-[normal] text-ds-texte-corps">
+                {profil.planPro ? t("abonnement.proAide") : t("abonnement.gratuitAide")}
+              </p>
+              <ul className={"flex flex-col gap-[11px] " + (profil.planPro ? "mt-5" : "mt-5 mb-[22px]")}>
+                {(
+                  [
+                    { cle: "photos", texte: t("abonnement.inclusPhotos"), inclus: true },
+                    { cle: "couleurs", texte: t("abonnement.inclusCouleurs"), inclus: true },
+                    ...(profil.planPro || quotaAVie === null
+                      ? []
+                      : [{ cle: "total", texte: t("abonnement.inclusTotal", { n: quotaAVie }), inclus: true }]),
+                    { cle: "lien", texte: t("abonnement.proLien"), inclus: profil.planPro },
+                    { cle: "marque", texte: t("abonnement.proMarque"), inclus: profil.planPro },
+                    { cle: "plafond", texte: t("abonnement.proPlafond"), inclus: profil.planPro },
+                  ] as const
+                ).map((ligne) => (
+                  <li key={ligne.cle} className="flex items-center gap-[11px]">
+                    {ligne.inclus ? (
+                      <CircleCheck
+                        aria-hidden="true"
+                        size={17}
+                        strokeWidth={1.8}
+                        className="shrink-0 fill-ds-accent text-ds-white"
+                      />
+                    ) : (
+                      <CircleX
+                        aria-hidden="true"
+                        size={17}
+                        strokeWidth={1.8}
+                        className="shrink-0 fill-ds-ink-300 text-ds-white"
+                      />
+                    )}
+                    <span
+                      className={
+                        "text-[14px] leading-[normal] " +
+                        (ligne.inclus ? "font-medium text-ds-texte-fort" : "text-ds-texte-tenu")
+                      }
+                    >
+                      {/* Une ligne barrée se DIT absente au lecteur d'écran : le
+                          pictogramme seul porterait l'information (règle de la couleur). */}
+                      {ligne.inclus ? null : <span className="sr-only">{t("abonnement.nonInclus")} </span>}
+                      {ligne.texte}
                     </span>
                   </li>
                 ))}
               </ul>
+              {profil.planPro ? null : (
+                <LienEcran
+                  href={`/${langue}/passer-pro`}
+                  className="degrade-ds-marque flex h-[52px] w-full items-center justify-center gap-2 rounded-ds-card border border-transparent px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+                >
+                  {t("abonnement.bouton")}
+                  <ArrowRight aria-hidden="true" size={18} strokeWidth={2.2} />
+                </LienEcran>
+              )}
             </div>
           </CarteReglage>
 

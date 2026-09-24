@@ -1,6 +1,6 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { BadgeCheck, Crown, Link as LinkIcon, Package, Truck } from "lucide-react";
+import { ArrowRight, BadgeCheck, Crown, Link as LinkIcon, Package, Truck } from "lucide-react";
 import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
@@ -146,9 +146,12 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
       <EnTeteEcranDs titre={t("titre")} sousTitre={t("sousTitre")} />
 
       <main id="contenu" className="px-margin-mobile py-5 md:px-8 md:pt-0 md:pb-8">
-        <div className="mx-auto w-full max-w-[1180px]">
+        {/* 32 px DANS la boîte de 1180, comme la planche (`padding: 0 32px`, maxWidth 1180) :
+            sans eux la colonne commençait 32 px plus à gauche (remesure du 24/09/2026). Et 8 px
+            en bas : la planche en pose 40, la page 32. */}
+        <div className="mx-auto w-full max-w-[1180px] md:px-8 md:pb-2">
           <header className="max-w-[720px] pt-1 pb-6">
-            <span className="mb-3.5 inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3 py-1.5 text-[11px] leading-[normal] font-extrabold tracking-[0.12em] text-ds-accent-encre uppercase">
+            <span className="mb-3.5 inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3 py-[5px] text-[11px] leading-[normal] font-extrabold tracking-[0.12em] text-ds-accent-encre uppercase">
               <Crown aria-hidden="true" size={13} strokeWidth={2.2} />
               {t("eyebrow")}
             </span>
@@ -172,7 +175,11 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
                     {t(`features.${cle}.titre`)}
                   </span>
                   <span className="mt-[5px] block text-[13.5px] leading-[1.55] text-ds-texte-corps">
-                    {t(`features.${cle}.texte`)}
+                    {/* Le quota à vie est DIT, comme la planche (« borné à 15 commandes À
+                        VIE »), dès qu'il est lu ; illisible, la phrase ne cite aucun nombre. */}
+                    {cle === "commandes" && aVie !== null
+                      ? t("features.commandes.texteNombre", { n: nombre(aVie) })
+                      : t(`features.${cle}.texte`)}
                   </span>
                 </span>
               </section>
@@ -190,9 +197,9 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
               <span className="text-[13px] leading-[normal] font-bold text-ds-accent-encre">
                 {t("pro")}
               </span>
-              <span className="inline-flex items-center rounded-ds-pill bg-ds-accent px-2.5 py-1 text-[11.5px] leading-[normal] font-bold text-ds-texte-sur-marque">
+              <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-violet-100 px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] text-ds-accent-encre">
                 {t("parMois", {
-                  prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR" }),
+                  prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
                 })}
               </span>
             </div>
@@ -208,9 +215,9 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
                 </span>
                 {/* 11,5 px est le PLANCHER du téléphone (règle 5) ; le kit
                     descend à 11 px, et c'est réservé au bureau. */}
-                <span className="inline-flex items-center rounded-ds-pill bg-ds-accent px-2.5 py-1 text-[11.5px] leading-[normal] font-bold text-ds-texte-sur-marque lg:text-[11px]">
+                <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-violet-100 px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] text-ds-accent-encre lg:text-[11px]">
                   {t("parMois", {
-                    prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR" }),
+                    prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
                   })}
                 </span>
               </span>
@@ -228,12 +235,15 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
                   {t(`tableau.${ligne.cle}`)}
                 </span>
                 {/* Au téléphone les deux valeurs portent leur nom : sans en-tête
-                    de colonne, « Affichée » tout seul ne dit pas de quel plan. */}
+                    de colonne, « Affichée » tout seul ne dit pas de quel plan.
+                    Au bureau la valeur est un BLOC, comme la cellule du kit : en ligne,
+                    elle héritait de l'interligne de 24 px de la page — 53 px par
+                    rangée au lieu de 46 (remesure du 24/09/2026). */}
                 <span className="mt-1.5 flex min-w-0 items-baseline justify-between gap-3 md:mt-0 md:block">
                   <span className="flex-none text-[12.5px] leading-[normal] text-ds-texte-sourdine md:hidden">
                     {t("gratuit")}
                   </span>
-                  <span className="min-w-0 text-right text-[14px] leading-[normal] break-words text-ds-texte-corps md:text-left">
+                  <span className="min-w-0 text-right text-[14px] leading-[normal] break-words text-ds-texte-corps md:block md:text-left">
                     {ligne.gratuit}
                   </span>
                 </span>
@@ -241,7 +251,7 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
                   <span className="flex-none text-[12.5px] leading-[normal] text-ds-texte-sourdine md:hidden">
                     {t("pro")}
                   </span>
-                  <span className="min-w-0 text-right text-[14px] leading-[normal] font-semibold break-words text-ds-accent-encre md:text-left">
+                  <span className="min-w-0 text-right text-[14px] leading-[normal] font-semibold break-words text-ds-accent-encre md:block md:text-left">
                     {ligne.pro}
                   </span>
                 </span>
@@ -278,9 +288,11 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
                    */
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-ds-pill bg-[image:var(--degrade-ds-marque)] px-6 text-[14px] leading-[normal] font-bold text-ds-texte-sur-marque shadow-ds-brand transition-transform active:scale-[.98]"
+                  className="inline-flex h-11 items-center gap-2 rounded-ds-pill border border-transparent bg-[image:var(--degrade-ds-marque)] px-[22px] text-[14px] leading-[normal] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-transform active:scale-[.98]"
                 >
+                  {/* Le `Button primary` du kit : flèche à droite, demi-gras, 22 px. */}
                   {t("passer")}
+                  <ArrowRight aria-hidden="true" size={16} strokeWidth={2.2} />
                 </a>
               )}
             </div>

@@ -154,6 +154,7 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      accepte. `tableau.adressePro` n'est PAS ici : elle porte « 你的店铺 »,
      le nom de boutique à remplacer, et c'est bien lui qu'il faut lire. */
   ["passerPro.pro", "Le nom du plan, seul, comme le badge de « Ma marque »."],
+  ["parametres.abonnement.pro", "Le même nom de plan, dans la carte « Abonnement » des paramètres (24/09/2026)."],
   ["passerPro.tableau.adresseGratuit", "Une adresse : elle doit ressembler à une adresse."],
 ]);
 

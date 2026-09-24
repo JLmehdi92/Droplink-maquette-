@@ -74,17 +74,15 @@
         "raison": "LE MEME TEXTE EST RENDU TROIS FOIS CHEZ NOUS ET UNE SEULE FOIS DANS LE KIT, donc l appariement au plus proche tombe sur le mauvais element. Le produit rend le bouton principal en DEUX variantes — bureau et telephone, dont une seule est visible a la fois — plus son etat d attente « Creation… ». Le vrai bouton porte bien le degrade de marque, son rayon de 16 et l ombre marque ; c est le `<span>` du libelle, haut de 23 px, qui se fait apparier au bouton de 50 du kit."
       },
       {
-        "texte": "Passez au Pro",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque ». ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026).",
+        "textes": [
+          "Passez au Pro",
+          "Passer au Pro"
+        ]
       },
       {
         "texte": "Plus de fonctionnalités, plus de possibi",
-        "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
-      },
-      {
-        "texte": "Upgrade",
         "motif": "contrainte",
         "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
@@ -607,17 +605,15 @@
         "raison": "Rendu deux fois chez nous, une seule chez le kit : « Livre » est a la fois une OPTION du menu de statut — que le `<details>` porte en clair, la ou le `<select>` du kit garde les siennes dans des `<option>` invisibles a l inventaire — et la pastille du colis livre du jeu de mesure."
       },
       {
-        "texte": "Passez au Pro",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque ». ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026).",
+        "textes": [
+          "Passez au Pro",
+          "Passer au Pro"
+        ]
       },
       {
         "texte": "Plus de fonctionnalités, plus de possibi",
-        "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
-      },
-      {
-        "texte": "Upgrade",
         "motif": "contrainte",
         "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
@@ -993,10 +989,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "texte": "© 2025 DropLink. Tous droits réservés.",
@@ -1483,10 +1479,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "texte": "© 2025 DropLink. Tous droits réservés.",
@@ -1876,10 +1872,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "texte": "© 2025 DropLink. Tous droits réservés.",
@@ -4059,7 +4055,7 @@
         "motifs": [
           "^\\d{1,3} % du total$",
           "^\\d{1,2} (janv\\.|févr\\.|mars|avr\\.|mai|juin|juil\\.|août|sept\\.|oct\\.|nov\\.|déc\\.) \\d{4} \\d{2}:\\d{2}$",
-          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte|Blocage du lien d’une commande|Déblocage du lien d’une commande|Lecture d’une contestation|Refus d’une contestation|Changement de plan d’un compte)$"
+          "^(Consultation des comptes en doublon|Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte|Blocage du lien d’une commande|Déblocage du lien d’une commande|Lecture d’une contestation|Refus d’une contestation|Changement de plan d’un compte)$"
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026). Depuis le 19/09/2026, les blocages de lien, les contestations et les changements de plan des suites s y ajoutent, au meme titre."
@@ -4289,7 +4285,7 @@
       {
         "motifs": [
           "^\\d{1,3} % du total$",
-          "^(Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte|Blocage du lien d’une commande|Déblocage du lien d’une commande|Lecture d’une contestation|Refus d’une contestation|Changement de plan d’un compte)$"
+          "^(Consultation des comptes en doublon|Consultation de la liste des (comptes|boutiques|commandes)|Consultation d’une fiche de compte|Consultation des alertes du panneau|Modification d’un paramètre système|Création d’un paramètre système|Suspension d’un compte|Réactivation d’un compte|Blocage du lien d’une commande|Déblocage du lien d’une commande|Lecture d’une contestation|Refus d’une contestation|Changement de plan d’un compte)$"
         ],
         "motif": "donnee",
         "raison": "CE QUI VARIE PAR CONSTRUCTION, ET RIEN D AUTRE. Ces ecrans lisent TOUTE la base de tests : comptes existants, compteurs de la plateforme, dernieres lignes du journal d audit. Les suites en ecrivent a chaque passage des portes, et le journal est append-only. Mesure le 14/09/2026 : les declarations litterales de ces valeurs (« dont 15 avec un nom de boutique », « 4,1 Mo », « 20 comptes au total », les actions du journal) ne tenaient que parce que la base portait vingt-six comptes de sonde jamais supprimes — la purge les a toutes tuees. Des motifs ancres, donc : un nombre, une taille, une date du jour, une action de journal. Le journal nomme aussi, sur une modification de reglage, le reglage et son auteur « systeme » : ils n apparaissent que si l une des cinquante dernieres lignes en porte une, et c est le cas au moment de ce releve. ⚠️ LES LIGNES DE SUSPENSION ET DE RÉACTIVATION (« Compte visé : », « Motif : … ») apparaissent quand les suites RLS de suspension ont écrit les dernières lignes du journal : leur présence dépend de l ordre des suites au dernier passage des portes, d où un motif et non un texte (15/09/2026). Depuis le 19/09/2026, les blocages de lien, les contestations et les changements de plan des suites s y ajoutent, au meme titre."
@@ -4563,10 +4559,16 @@
           "Interrogation des transporteurs",
           "Couper arrête la facturation à la prise ",
           "Notifications par email",
-          "Non déployées : rien n'est envoyé"
+          "Non déployées : rien n'est envoyé",
+          "Commandes gratuites (à vie)",
+          "Total sur la vie d'un compte gratuit",
+          "Budget de suivi (à vie)",
+          "Prises en charge que le palier autorise ",
+          "Déjà consommé ailleurs",
+          "Payé au fournisseur, absent de nos ligne"
         ],
         "motif": "contrainte",
-        "raison": "CE QUE LE PRODUIT REGLE REELLEMENT, et le kit n en dessine rien. Ses sept onglets reglent une application generique — nom, logo, fuseau, plans, sauvegardes ; les quatre cartes d ici reglent LES SEULS SEUILS QUI EXISTENT, et `parametres_admis` en est l inventaire ferme, bornes comprises. Chaque sous-titre dit ce que la carte GARANTIT plutot que ce qu elle contient — « verifies en base, pas seulement dans l interface », « effet immediat sur toute la plateforme » — et chaque aide dit la consequence du chiffre, pas sa definition : « couper arrete la facturation a la prise en charge » est la seule phrase qui compte au-dessus de cet interrupteur. Les valeurs grisees sont des CONSTATS, non des champs : elles vivent dans le code et se changent au deploiement, et l ecran le dit plutot que de faire croire l inverse."
+        "raison": "CE QUE LE PRODUIT REGLE REELLEMENT, et le kit n en dessine rien. Ses sept onglets reglent une application generique — nom, logo, fuseau, plans, sauvegardes ; les quatre cartes d ici reglent LES SEULS SEUILS QUI EXISTENT, et `parametres_admis` en est l inventaire ferme, bornes comprises. Chaque sous-titre dit ce que la carte GARANTIT plutot que ce qu elle contient — « verifies en base, pas seulement dans l interface », « effet immediat sur toute la plateforme » — et chaque aide dit la consequence du chiffre, pas sa definition : « couper arrete la facturation a la prise en charge » est la seule phrase qui compte au-dessus de cet interrupteur. Les valeurs grisees sont des CONSTATS, non des champs : elles vivent dans le code et se changent au deploiement, et l ecran le dit plutot que de faire croire l inverse. ⚠️ Et les trois reglages du 20/09/2026 — quota gratuit A VIE (175-176), budget de suivi total et deja consomme (174, 180) : memes raisons, ce sont des cles de `parametres_admis`."
       },
       {
         "textes": [
@@ -4757,10 +4759,16 @@
           "Interrogation des transporteurs",
           "Couper arrête la facturation à la prise ",
           "Notifications par email",
-          "Non déployées : rien n'est envoyé"
+          "Non déployées : rien n'est envoyé",
+          "Commandes gratuites (à vie)",
+          "Total sur la vie d'un compte gratuit",
+          "Budget de suivi (à vie)",
+          "Prises en charge que le palier autorise ",
+          "Déjà consommé ailleurs",
+          "Payé au fournisseur, absent de nos ligne"
         ],
         "motif": "contrainte",
-        "raison": "CE QUE LE PRODUIT REGLE REELLEMENT, et le kit n en dessine rien. Ses sept onglets reglent une application generique — nom, logo, fuseau, plans, sauvegardes ; les quatre cartes d ici reglent LES SEULS SEUILS QUI EXISTENT, et `parametres_admis` en est l inventaire ferme, bornes comprises. Chaque sous-titre dit ce que la carte GARANTIT plutot que ce qu elle contient — « verifies en base, pas seulement dans l interface », « effet immediat sur toute la plateforme » — et chaque aide dit la consequence du chiffre, pas sa definition : « couper arrete la facturation a la prise en charge » est la seule phrase qui compte au-dessus de cet interrupteur. Les valeurs grisees sont des CONSTATS, non des champs : elles vivent dans le code et se changent au deploiement, et l ecran le dit plutot que de faire croire l inverse."
+        "raison": "CE QUE LE PRODUIT REGLE REELLEMENT, et le kit n en dessine rien. Ses sept onglets reglent une application generique — nom, logo, fuseau, plans, sauvegardes ; les quatre cartes d ici reglent LES SEULS SEUILS QUI EXISTENT, et `parametres_admis` en est l inventaire ferme, bornes comprises. Chaque sous-titre dit ce que la carte GARANTIT plutot que ce qu elle contient — « verifies en base, pas seulement dans l interface », « effet immediat sur toute la plateforme » — et chaque aide dit la consequence du chiffre, pas sa definition : « couper arrete la facturation a la prise en charge » est la seule phrase qui compte au-dessus de cet interrupteur. Les valeurs grisees sont des CONSTATS, non des champs : elles vivent dans le code et se changent au deploiement, et l ecran le dit plutot que de faire croire l inverse. ⚠️ Et les trois reglages du 20/09/2026 — quota gratuit A VIE (175-176), budget de suivi total et deja consomme (174, 180) : memes raisons, ce sont des cles de `parametres_admis`."
       },
       {
         "textes": [
@@ -5554,7 +5562,7 @@
           "Commandée",
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "structure",
         "raison": "NOTRE MAQUETTE, NOTRE BALISAGE — LA MEME QUE CELLE DU HEROS DE LA LANDING. Le kit rend sa fenetre de 1180 px reduite a 0,509 ; ses composants (`SidebarItem`, `MetricTile`, `Badge`) sont du React de son propre design system, qu on ne peut pas importer, donc le dessin est refait avec nos classes. Tailles, graisses, couleurs de role et echelle sont celles du kit, mesurees une a une — et deux ecarts REELS ont ete fermes a cette occasion : l interligne du chapeau (1,55, sans quoi la ligne tombait de 17,8 a 14) et l ecart avant la ligne de variation d une tuile (4 px, pas 2). Ce qui reste tient a la LARGEUR DES BOITES de nos conteneurs (un libelle qui remplit sa rangee au lieu de s arreter a son texte) et a deux pixels de hauteur de fenetre — soit UN pixel reellement rendu a cette echelle, sous la precision de l echelle elle-meme, qui est inferee et vaut ±1 px sur 1180."
@@ -7016,10 +7024,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "motif": "donnee",
@@ -7078,36 +7086,37 @@
       },
       {
         "textes": [
-          "Dernières commandes",
-          "Actions rapides"
+          "Le lien à votre nom",
+          "Sans la carte DropLink",
+          "Plafond mensuel, pas à vie",
+          "Colis suivis au mois",
+          "Découvrir les offres"
         ],
-        "motif": "structure",
-        "raison": "LE TITRE DE PANNEAU PREND LA LARGEUR DE SON TEXTE, ET LE KIT CELLE DE SON BLOC. Meme taille, graisse et interlettrage — 17 / 700 / -0,025em."
+        "motif": "donnee",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. Toute la seconde rangee commence 24 px plus bas que chez le kit (titres des panneaux a y 1039 contre 1015) : la premiere rangee du jeu de mesure est plus haute. Les quatre colonnes sont aux abscisses du kit (319 / 637 / 1002 / 1366) et la carte Pro garde ses ecarts internes. (24/09/2026)"
       },
       {
         "textes": [
-          "Voir tout [2/2]",
-          "Voir tout  <nombre d'occurrences>"
-        ],
-        "motif": "structure",
-        "raison": "LA SECONDE RANGEE A TROIS PANNEAUX, PAS QUATRE, puisque la carte « Passez au Pro » n est pas rendue : chaque panneau y est plus large que chez le kit, et ce qui y est pose en largeur de colonne s allonge. Tailles, graisses et couleurs sont celles du kit. « Voir tout » figure deux fois et non trois : « Derniers envois » est ici le panneau des transporteurs des Analyses, sans lien."
-      },
-      {
-        "textes": [
-          "42 ( 27 %) [1/2]",
-          "28 ( 18 %) [2/2]",
-          "18 ( 12 %)  <nombre d'occurrences>",
+          "Voir tout [2/3]",
+          "Voir tout [3/3]",
+          "Répartition de vos envois par transporte",
+          "Activité récente",
           "Commande [1/4]",
           "Commande [2/4]",
           "Commande [3/4]",
-          "Commande [4/4]",
+          "Commande [4/4]"
+        ],
+        "motif": "donnee",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. La seconde rangee commence 24 px plus bas que chez le kit (premiere rangee plus haute dans le jeu de mesure) ; le sous-titre des transporteurs descend de 20 px de plus parce que le titre du produit, « Transporteurs les plus utilises » (panneau des analyses repris, declare), tient sur deux lignes la ou « Derniers envois » en tient une. (24/09/2026)"
+      },
+      {
+        "textes": [
+          "18 ( 12 %)  <nombre d'occurrences>",
           "Commande  <nombre d'occurrences>",
-          "Répartition de vos envois par transporte",
-          "Activité récente",
           "Commande créée"
         ],
-        "motif": "structure",
-        "raison": "LA SECONDE RANGEE A TROIS PANNEAUX, PAS QUATRE, puisque la carte « Passez au Pro » n est pas rendue : chaque panneau y est plus large que chez le kit, et ce qui y est pose en largeur de colonne s allonge. Tailles, graisses et couleurs sont celles du kit."
+        "motif": "donnee",
+        "raison": "LE JEU DE MESURE, PAS L ECRAN. Le kit montre six transporteurs et cinq faits d activite ; le jeu de mesure en porte deux et quatre. Le rang d appariement de « Commande creee » en decoule (la soustraction apparie par rang), d ou sa place et sa largeur. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -7248,17 +7257,6 @@
         ],
         "motif": "contrainte",
         "raison": "IL N EXISTE PAS D ECRAN DE GESTION DES LIENS : un lien vit dans sa commande. Le raccourci mene, comme au kit, a l ecran de marque, et le dit — « Personnaliser ma page client »."
-      },
-      {
-        "textes": [
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Plus de fonctionnalités",
-          "Découvrir les offres"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE « PASSEZ AU PRO » N EST PAS RENDUE : aucune offre n existe, la contrainte n° 1 interdit tout code de facturation, et son « Decouvrir les offres » menerait a un 404. L encart de la barre laterale, deja present sur tous les ecrans, garde son libelle."
       }
     ],
     "enTrop": [
@@ -7593,10 +7591,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support »."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support ». ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "textes": [
@@ -7696,21 +7694,6 @@
       },
       {
         "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
-      },
-      {
-        "textes": [
           "Intégrations",
           "Connectez vos outils préférés.",
           "Shopify",
@@ -7775,18 +7758,6 @@
       },
       {
         "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
-      },
-      {
-        "textes": [
           "Commandes, colis, médias et vues, au for",
           "Le fichier contient les liens publics de"
         ],
@@ -7841,6 +7812,21 @@
         ],
         "motif": "contrainte",
         "raison": "PLACE SEULE, ET LE CONTENU DU COMPTE EN EST LA CAUSE. Le kit dessine un champ « Telephone », un fuseau horaire, quatre interrupteurs de notification et un interrupteur a cote de « Activer » ; le produit n a ni numero de telephone, ni notifications par courriel ou push, ni fuseau (voir les manquants), et sa langue s applique par un bouton. Chaque carte est donc plus courte, et tout ce qui suit remonte. Tailles, rembourrages, rayons et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Gérez votre abonnement et accédez à plus",
+          "Découvrez DropLink et ses fonctionnalité",
+          "Photos, vidéos et suivi automatique",
+          "Page client à vos couleurs",
+          "15 commandes au total",
+          "Le lien à votre nom",
+          "Sans la carte DropLink",
+          "Plafond mensuel, pas à vie",
+          "Passer au Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. La carte « Abonnement » suit les cartes posees au-dessus d elle, plus courtes au produit : le telephone, le fuseau horaire et les bascules de notification du kit n existent pas (declares plus haut). Ecarts entre ses lignes identiques au kit. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -7872,21 +7858,6 @@
         ],
         "motif": "contrainte",
         "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
-      },
-      {
-        "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
       },
       {
         "textes": [
@@ -7953,18 +7924,6 @@
       },
       {
         "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
-      },
-      {
-        "textes": [
           "Commandes, colis, médias et vues, au for",
           "Le fichier contient les liens publics de"
         ],
@@ -7985,10 +7944,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support »."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support ». ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "textes": [
@@ -8094,21 +8053,6 @@
       },
       {
         "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
-      },
-      {
-        "textes": [
           "Intégrations",
           "Connectez vos outils préférés.",
           "Shopify",
@@ -8170,18 +8114,6 @@
         ],
         "motif": "contrainte",
         "raison": "« APPLIQUER » ET SON AIDE. Changer la langue recharge l ecran a une autre adresse : le faire au simple changement du menu naviguerait a chaque fleche du clavier, et un changement de contexte sur une simple saisie est ce que le critere WCAG 3.2.2 interdit. L aide dit ou se regle la langue que voient les CLIENTS — la confusion entre les deux langues a deja ete rapportee par Wassim le 06/09."
-      },
-      {
-        "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
       },
       {
         "textes": [
@@ -8250,6 +8182,21 @@
         ],
         "motif": "contrainte",
         "raison": "PLACE SEULE, ET LE CONTENU DU COMPTE EN EST LA CAUSE. Le kit dessine un champ « Telephone », un fuseau horaire, quatre interrupteurs de notification et un interrupteur a cote de « Activer » ; le produit n a ni numero de telephone, ni notifications par courriel ou push, ni fuseau (voir les manquants), et sa langue s applique par un bouton. Chaque carte est donc plus courte, et tout ce qui suit remonte. Tailles, rembourrages, rayons et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Gérez votre abonnement et accédez à plus",
+          "Découvrez DropLink et ses fonctionnalité",
+          "Photos, vidéos et suivi automatique",
+          "Page client à vos couleurs",
+          "15 commandes au total",
+          "Le lien à votre nom",
+          "Sans la carte DropLink",
+          "Plafond mensuel, pas à vie",
+          "Passer au Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. La carte « Abonnement » suit les cartes posees au-dessus d elle, plus courtes au produit : le telephone, le fuseau horaire et les bascules de notification du kit n existent pas (declares plus haut). Ecarts entre ses lignes identiques au kit. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -8281,21 +8228,6 @@
         ],
         "motif": "contrainte",
         "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
-      },
-      {
-        "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
       },
       {
         "textes": [
@@ -8362,18 +8294,6 @@
       },
       {
         "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
-      },
-      {
-        "textes": [
           "Commandes, colis, médias et vues, au for",
           "Le fichier contient les liens publics de"
         ],
@@ -8394,10 +8314,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support »."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support ». ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "textes": [
@@ -8502,21 +8422,6 @@
       },
       {
         "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
-      },
-      {
-        "textes": [
           "Intégrations",
           "Connectez vos outils préférés.",
           "Shopify",
@@ -8588,18 +8493,6 @@
       },
       {
         "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
-      },
-      {
-        "textes": [
           "Commandes, colis, médias et vues, au for",
           "Le fichier contient les liens publics de"
         ],
@@ -8666,6 +8559,21 @@
         ],
         "motif": "contrainte",
         "raison": "PLACE SEULE, ET LE CONTENU DU COMPTE EN EST LA CAUSE. Le kit dessine un champ « Telephone », un fuseau horaire, quatre interrupteurs de notification et un interrupteur a cote de « Activer » ; le produit n a ni numero de telephone, ni notifications par courriel ou push, ni fuseau (voir les manquants), et sa langue s applique par un bouton. Chaque carte est donc plus courte, et tout ce qui suit remonte. Tailles, rembourrages, rayons et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Gérez votre abonnement et accédez à plus",
+          "Découvrez DropLink et ses fonctionnalité",
+          "Photos, vidéos et suivi automatique",
+          "Page client à vos couleurs",
+          "15 commandes au total",
+          "Le lien à votre nom",
+          "Sans la carte DropLink",
+          "Plafond mensuel, pas à vie",
+          "Passer au Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. La carte « Abonnement » suit les cartes posees au-dessus d elle, plus courtes au produit : le telephone, le fuseau horaire et les bascules de notification du kit n existent pas (declares plus haut). Ecarts entre ses lignes identiques au kit. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -8697,21 +8605,6 @@
         ],
         "motif": "contrainte",
         "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
-      },
-      {
-        "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
       },
       {
         "textes": [
@@ -8785,18 +8678,6 @@
       },
       {
         "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
-      },
-      {
-        "textes": [
           "Commandes, colis, médias et vues, au for",
           "Le fichier contient les liens publics de"
         ],
@@ -8824,10 +8705,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support »."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et la page est plus courte que celle du kit — voir « Securite » et « Support ». ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "textes": [
@@ -8930,21 +8811,6 @@
       },
       {
         "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
-      },
-      {
-        "textes": [
           "Intégrations",
           "Connectez vos outils préférés.",
           "Shopify",
@@ -9009,18 +8875,6 @@
       },
       {
         "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
-      },
-      {
-        "textes": [
           "Commandes, colis, médias et vues, au for",
           "Le fichier contient les liens publics de"
         ],
@@ -9078,6 +8932,21 @@
         ],
         "motif": "contrainte",
         "raison": "PLACE SEULE, ET LE CONTENU DU COMPTE EN EST LA CAUSE. Le kit dessine un champ « Telephone », un fuseau horaire, quatre interrupteurs de notification et un interrupteur a cote de « Activer » ; le produit n a ni numero de telephone, ni notifications par courriel ou push, ni fuseau (voir les manquants), et sa langue s applique par un bouton. Chaque carte est donc plus courte, et tout ce qui suit remonte. Tailles, rembourrages, rayons et couleurs sont ceux de la planche au telephone."
+      },
+      {
+        "textes": [
+          "Gérez votre abonnement et accédez à plus",
+          "Découvrez DropLink et ses fonctionnalité",
+          "Photos, vidéos et suivi automatique",
+          "Page client à vos couleurs",
+          "15 commandes au total",
+          "Le lien à votre nom",
+          "Sans la carte DropLink",
+          "Plafond mensuel, pas à vie",
+          "Passer au Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. La carte « Abonnement » suit les cartes posees au-dessus d elle, plus courtes au produit : le telephone, le fuseau horaire et les bascules de notification du kit n existent pas (declares plus haut). Ecarts entre ses lignes identiques au kit. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -9109,21 +8978,6 @@
         ],
         "motif": "contrainte",
         "raison": "LE FUSEAU HORAIRE ET LES QUATRE INTERRUPTEURS DE NOTIFICATION. Aucun formatage de date n applique un fuseau declare, et le produit n envoie aucune notification au vendeur — ni e-mail, ni push, ni resume, ni offres. Enregistrer une preference que rien n applique serait affirmer ce que le produit ne fait pas (principe XII)."
-      },
-      {
-        "textes": [
-          "Gérez votre abonnement et accédez à plus",
-          "Découvrez DropLink et ses fonctionnalité",
-          "Suivi des commandes",
-          "Page client personnalisable",
-          "Jusqu'à 50 commandes/mois",
-          "Lien personnalisé",
-          "Statistiques avancées",
-          "Support prioritaire",
-          "Passer au Pro"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DU KIT VEND UNE OFFRE PAYANTE : un plan gratuit borne a « 50 commandes/mois », trois fonctions « Pro » barrees et « Passer au Pro ». La contrainte n° 1 interdit toute facturation, et le produit est gratuit et SANS limite pendant la validation — la carte le dit, et elle liste ce qui est reellement inclus."
       },
       {
         "textes": [
@@ -9187,18 +9041,6 @@
         ],
         "motif": "contrainte",
         "raison": "« APPLIQUER » ET SON AIDE. Changer la langue recharge l ecran a une autre adresse : le faire au simple changement du menu naviguerait a chaque fleche du clavier, et un changement de contexte sur une simple saisie est ce que le critere WCAG 3.2.2 interdit. L aide dit ou se regle la langue que voient les CLIENTS — la confusion entre les deux langues a deja ete rapportee par Wassim le 06/09."
-      },
-      {
-        "textes": [
-          "Votre plan pendant la phase de validatio",
-          "Pendant la phase de validation, DropLink",
-          "Pages client à vos couleurs",
-          "Photos et vidéos de contrôle",
-          "Suivi automatique des colis",
-          "Analyses de votre activité"
-        ],
-        "motif": "contrainte",
-        "raison": "LA CARTE D ABONNEMENT DIT CE QUI EST VRAI : gratuit et sans limite pendant la validation, et les quatre fonctions reellement incluses. Voir la declaration symetrique de « Jusqu a 50 commandes/mois »."
       },
       {
         "textes": [
@@ -9324,18 +9166,7 @@
           "Sécurité : authentification à deux facte  <span>",
           "Données : export de vos données, suppres  <span>",
           "Gratuit  <span>",
-          "Pro — 19,90 €/mois  <span>",
           "Commandes  <span>",
-          "10 par mois  <span>",
-          "Illimitées  <span>",
-          "Stockage des médias  <span>",
-          "1 Go [1/2]  <span>",
-          "50 Go [2/2]  <span>",
-          "Standard  <span>",
-          "Personnalisée, lien à votre nom  <span>",
-          "Support  <span>",
-          "Centre d'aide  <span>",
-          "Support prioritaire  <span>",
           "Mon client doit-il créer un compte ?  <div>",
           "Non. Il ouvre le lien et voit sa command  <div>",
           "Dois-je mettre le statut à jour moi-même  <div>",
@@ -9360,6 +9191,18 @@
         ],
         "motif": "contrainte",
         "raison": "POSITION ET APPARIEMENT, UNE SEULE CAUSE : le contenu. La structure est celle du kit — en-tete collant, grille 268 + 48, sommaire, briques mesurees au pixel — et le TEXTE est celui du produit, arbitrage de Wassim du 12/09/2026 : chaque section ou le kit decrit une fonction absente est plus courte ou plus longue, et tout ce qui suit se deplace. Les memes mots servent a plusieurs endroits (« Photos et videos » est un titre de section ET une etape), et l appariement au plus proche les croise quand l ordre des sections change de hauteur. Tailles, graisses, interlignes et couleurs sont ceux du kit."
+      },
+      {
+        "textes": [
+          "DropLink a un plan gratuit et un plan Pr",
+          "Pro — 20 €/mois",
+          "15 au total",
+          "300 par mois",
+          "Avec la mention DropLink",
+          "Sans la mention DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. La section « Gratuit et Pro » vient apres les sections que le produit ne rend pas (facturation, integrations, fuseau : declarees plus haut) ; elle remonte d autant. Son contenu et ses valeurs sont ceux du kit. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -9414,9 +9257,6 @@
           "Préférences : langue, fuseau horaire, no",
           "Abonnement : plan en cours et passage au",
           "Support : centre d'aide et contact.",
-          "Suivi",
-          "Suivi de commandes",
-          "Suivi avancé",
           "DropLink se connecte aux outils que vous",
           "Shopify — synchronisez vos commandes.",
           "Google Sheets — exportez vos commandes e",
@@ -9495,7 +9335,6 @@
           "Préférences : langue de l'interface. La ",
           "Abonnement : plan en cours. Pendant la p",
           "Support : centre d'aide.",
-          "DropLink est gratuit pendant la phase de",
           "Oui. Créez-la, partagez le lien, et ajou",
           "Aussi longtemps que vous le souhaitez. U",
           "Que voit mon client si j'ai révoqué le l"
@@ -9557,16 +9396,6 @@
           "Sécurité : authentification à deux facte",
           "Données : export de vos données, suppres",
           "Commandes",
-          "10 par mois",
-          "Illimitées",
-          "Stockage des médias",
-          "1 Go [1/2]",
-          "50 Go [2/2]",
-          "Standard",
-          "Personnalisée, lien à votre nom",
-          "Support",
-          "Centre d'aide",
-          "Support prioritaire",
           "Mon client doit-il créer un compte ?",
           "Non. Il ouvre le lien et voit sa command",
           "Dois-je mettre le statut à jour moi-même",
@@ -9597,6 +9426,17 @@
         ],
         "motif": "contrainte",
         "raison": "PLACE ET RETOUR A LA LIGNE SEULS, ET LE TEXTE EN EST LA CAUSE. La documentation dit ce que le produit fait : 61 fonctions que le kit documente n existent pas (connexion Apple, lien qui expire, brouillon, cloche, integrations, passage au Pro), et une documentation fausse se lit comme une promesse. Les paragraphes n ont donc pas la meme longueur, les listes pas le meme nombre de lignes, et tout ce qui suit se decale d autant. Tailles, graisses, couleurs et marges sont celles du kit au telephone."
+      },
+      {
+        "textes": [
+          "DropLink a un plan gratuit et un plan Pr",
+          "15 au total",
+          "300 par mois",
+          "Avec la mention DropLink",
+          "Sans la mention DropLink"
+        ],
+        "motif": "contrainte",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse. La section « Gratuit et Pro » vient apres les sections que le produit ne rend pas (facturation, integrations, fuseau : declarees plus haut) ; elle remonte d autant. Son contenu et ses valeurs sont ceux du kit. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -9649,9 +9489,6 @@
           "Préférences : langue, fuseau horaire, no",
           "Abonnement : plan en cours et passage au",
           "Support : centre d'aide et contact.",
-          "Suivi",
-          "Suivi de commandes",
-          "Suivi avancé",
           "DropLink se connecte aux outils que vous",
           "Shopify — synchronisez vos commandes.",
           "Google Sheets — exportez vos commandes e",
@@ -9730,7 +9567,6 @@
           "Préférences : langue de l'interface. La ",
           "Abonnement : plan en cours. Pendant la p",
           "Support : centre d'aide.",
-          "DropLink est gratuit pendant la phase de",
           "Oui. Créez-la, partagez le lien, et ajou",
           "Aussi longtemps que vous le souhaitez. U",
           "Que voit mon client si j'ai révoqué le l"
@@ -10549,10 +10385,6 @@
           "Croissance",
           "Commandes [3/4]",
           "Évolution des commandes créées",
-          "10 août [1/9]",
-          "16 août [2/9]",
-          "10 août [3/9]",
-          "18 août [4/9]",
           "3 sept. [7/10]",
           "8 sept. [10/10]",
           "12 % [6/10]",
@@ -11997,6 +11829,14 @@
         ],
         "motif": "structure",
         "raison": "APPARIEMENT PAR RANG : « Comptes » est l onglet actif de la barre du bas au produit (accent, gras) et le fil d Ariane au kit (gris). La soustraction les apparie dans l ordre du document."
+      },
+      {
+        "textes": [
+          "DropLink",
+          "Administration"
+        ],
+        "motif": "structure",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse — UN ECART DE LA MESURE, PAS DE L ECRAN. Le produit ouvre le panneau par un CLIC (CLIC_PRODUIT), et le champ du motif prend le focus : la page defile, la bande du haut sort de la fenetre. Le kit ouvre le meme etat par son ADRESSE (#compte-...), sans defilement. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -12156,6 +11996,14 @@
         ],
         "motif": "structure",
         "raison": "LE BOUTON D ACTION EMPILE SES QUATRE LIBELLES DANS UNE SEULE CELLULE, comme celui de la suspension : le repos, la reussite et l echec disent tous « Passer en Pro » (un passage reussi recharge la fiche, un echec s ecrit dans le message qui nomme le motif). Seul le libelle courant est visible ; les autres sont `invisible` et ne servent qu a reserver la largeur."
+      },
+      {
+        "textes": [
+          "DropLink",
+          "Administration"
+        ],
+        "motif": "structure",
+        "raison": "POSITION VERTICALE SEULE, meme abscisse — UN ECART DE LA MESURE, PAS DE L ECRAN. Le produit ouvre le panneau par un CLIC (CLIC_PRODUIT), et le champ du motif prend le focus : la page defile, la bande du haut sort de la fenetre. Le kit ouvre le meme etat par son ADRESSE (#compte-...), sans defilement. (24/09/2026)"
       }
     ],
     "manquants": [
@@ -12315,16 +12163,6 @@
         ],
         "motif": "donnee",
         "raison": "LA LIGNE BLOQUEE N EST PAS LA MEME : la planche bloque sa cinquieme commande de demonstration, la sonde bloque REELLEMENT la premiere du jeu avant d ouvrir le dialogue sur la suivante. Seule la place suit sa ligne."
-      },
-      {
-        "textes": [
-          "Son client verra « Ce lien n'est plus va  <p>",
-          "Motif  <span>",
-          "Au moins 8 caractères. Le vendeur le lit  <span>",
-          "Annuler  <button>"
-        ],
-        "motif": "structure",
-        "raison": "PLACE SEULE, 5 PX PLUS HAUT, ET C EST LA FENETRE DE MESURE. Le dialogue est CENTRE dans la fenetre, des deux cotes, et il fait la meme hauteur (358). Or la sonde du kit mesure dans 1 010 px de haut (l en-tete viewport des planches), celle du produit dans 1 000 : (1 010 - 358) / 2 = 326 contre (1 000 - 358) / 2 = 321. Le titre subit le meme decalage (350 contre 345) ; il n est pas liste ici parce que sa reference differe et qu il est declare a part."
       }
     ],
     "manquants": [
@@ -12897,17 +12735,15 @@
         "raison": "LE MEME TEXTE EST RENDU TROIS FOIS CHEZ NOUS ET UNE SEULE FOIS DANS LE KIT, donc l appariement au plus proche tombe sur le mauvais element. Le produit rend le bouton principal en DEUX variantes — bureau et telephone, dont une seule est visible a la fois — plus son etat d attente « Creation… ». Le vrai bouton porte bien le degrade de marque, son rayon de 16 et l ombre marque ; c est le `<span>` du libelle, haut de 23 px, qui se fait apparier au bouton de 50 du kit."
       },
       {
-        "texte": "Passez au Pro",
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
+        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque ». ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026).",
+        "textes": [
+          "Passez au Pro",
+          "Passer au Pro"
+        ]
       },
       {
         "texte": "Plus de fonctionnalités, plus de possibi",
-        "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
-      },
-      {
-        "texte": "Upgrade",
         "motif": "contrainte",
         "raison": "Position verticale seule. L encart est en BAS de la colonne de navigation, et notre colonne est plus courte de 114 px : le kit y place une entree de plus — « Parametres », dont la route n existe pas encore ; « Tableau de bord » existe depuis le 13/09/2026. Meme cause que le decalage deja declare pour « Analyses » et « Ma marque »."
       },
@@ -13144,10 +12980,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "texte": "© 2025 DropLink. Tous droits réservés.",
@@ -13489,10 +13325,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "texte": "© 2025 DropLink. Tous droits réservés.",
@@ -13854,10 +13690,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "texte": "© 2025 DropLink. Tous droits réservés.",
@@ -14201,10 +14037,10 @@
         "textes": [
           "Passez au Pro",
           "Plus de fonctionnalités, plus de possibi",
-          "Upgrade"
+          "Passer au Pro"
         ],
         "motif": "contrainte",
-        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees."
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, et notre colonne est plus courte de deux entrees. ⚠️ LE BOUTON DIT « Passer au Pro » DEPUIS LE 20/09/2026 (planche et produit), et cette declaration ne suivait pas : l ecart de hauteur est le meme, la colonne suit la longueur de la page, donc le jeu de donnees (remesure du 24/09/2026)."
       },
       {
         "texte": "© 2025 DropLink. Tous droits réservés.",
@@ -16131,6 +15967,69 @@
         ],
         "motif": "structure",
         "raison": "LA MEME ETIQUETTE, COMPTEE AUTREMENT : « Commandes » est l onglet de la barre du bas des deux cotes, plus l etiquette de chaque ligne chez le produit (sept comptes), qui chez le kit est un pseudo-element non inventorie."
+      }
+    ]
+  },
+  "fr-passer-pro": {
+    "valeurs": [
+      {
+        "texte": "Commandes",
+        "motif": "donnee",
+        "raison": "Quatorze pixels de largeur : le libelle de la navigation est etire par le badge de volume a sa droite — « 124 » chez le kit, « 4 » dans le jeu de mesure."
+      },
+      {
+        "textes": [
+          "Passez au Pro",
+          "Plus de fonctionnalités, plus de possibi",
+          "Passer au Pro"
+        ],
+        "motif": "contrainte",
+        "raison": "Position verticale seule. L encart est colle en BAS de la colonne de navigation, qui suit la hauteur de la page. Premier releve de cet ecran contre sa planche : 24/09/2026 (il n avait jamais ete soustrait, la planche n offrait aucun chemin pour l ouvrir)."
+      }
+    ],
+    "manquants": [
+      {
+        "textes": [
+          "NB",
+          "Nassim B.",
+          "nassim@laplanque.fr",
+          "Mon compte"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD",
+          "Atelier de verification"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure, la ou le kit affiche la sienne.",
+        "motifs": [
+          "^(ecran|parcours-admin|parcours-victime|parcours)-[a-z0-9]+@droplink-tests[.a-z]*$"
+        ]
+      }
+    ]
+  },
+  "fr-passer-pro-tel": {
+    "manquants": [
+      {
+        "textes": [
+          "NB"
+        ],
+        "motif": "donnee",
+        "raison": "L identite de demonstration du kit ; le produit rend celle du compte connecte."
+      }
+    ],
+    "enTrop": [
+      {
+        "textes": [
+          "AD"
+        ],
+        "motif": "donnee",
+        "raison": "L identite du compte de mesure."
       }
     ]
   }

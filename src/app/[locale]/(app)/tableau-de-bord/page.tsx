@@ -11,6 +11,7 @@ import { LiensParJour } from "@/components/analyses/liens-par-jour";
 import { PartsTransporteurs } from "@/components/analyses/parts-transporteurs";
 import { ActionsRapides } from "@/components/tableau/actions-rapides";
 import { CarteLancement } from "@/components/tableau/carte-lancement";
+import { CartePro } from "@/components/tableau/carte-pro";
 import {
   DERNIERES_COMMANDES,
   DernieresCommandes,
@@ -67,8 +68,6 @@ export async function generateMetadata({
  *    celui de sa boutique — c'est lui qui est salué, ou personne ;
  *  - les pourcentages d'évolution « +12 % ce mois-ci » : les compteurs sont
  *    ceux des analyses, qui ne portent qu'un seul écart vérifié ;
- *  - la carte « Passez au Pro » et son « Découvrir les offres » : aucune offre
- *    n'existe (contrainte n° 1), et le bouton mènerait à un 404 ;
  *  - les drapeaux de pays des dernières commandes : aucun pays n'est stocké.
  */
 export default async function TableauDeBord({
@@ -190,9 +189,18 @@ export default async function TableauDeBord({
           </div>
         </div>
 
-        {/* LA SECONDE RANGÉE : trois panneaux — la carte « Passez au Pro » du
-            kit, quatrième, n'est pas rendue. */}
-        <div className="flex flex-col gap-3 lg:gap-[18px] 2xl:grid 2xl:grid-cols-3 2xl:items-start">
+        {/* LA SECONDE RANGÉE : quatre panneaux au dessin du kit — la carte « Passez
+            au Pro », quatrième, n'est rendue qu'à un compte gratuit (audit du
+            24/09/2026 : elle manquait depuis que l'offre existe). Pour un compte
+            Pro, les trois autres se partagent la rangée. */}
+        <div
+          className={
+            "flex flex-col gap-3 lg:gap-[18px] 2xl:grid 2xl:items-start " +
+            (profil.planPro
+              ? "2xl:grid-cols-3"
+              : "2xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.95fr)]")
+          }
+        >
           {ouvertures === null || activite === null ? (
             <p className={INDISPONIBLE}>{ta("indisponible")}</p>
           ) : (
@@ -201,13 +209,14 @@ export default async function TableauDeBord({
           {transporteurs === null ? (
             <p className={INDISPONIBLE}>{ta("indisponible")}</p>
           ) : (
-            <PartsTransporteurs parts={transporteurs} taille="section" />
+            <PartsTransporteurs parts={transporteurs} taille="section" voirTout={`/${langue}/envois`} />
           )}
           {recente === null ? (
             <p className={INDISPONIBLE}>{ta("indisponible")}</p>
           ) : (
             <ActiviteRecente faits={recente} langue={langue} variante="tableau" />
           )}
+          {profil.planPro ? null : <CartePro langue={langue} />}
         </div>
       </main>
     </>

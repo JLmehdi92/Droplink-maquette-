@@ -1991,6 +1991,14 @@
       "marque": "Customise my customer page",
       "envois": "View my shipments",
       "analyses": "Open analytics"
+    },
+    "pro": {
+      "titre": "Go Pro",
+      "lien": "The link under your name",
+      "marque": "Without the “Powered by DropLink” card",
+      "plafond": "Monthly cap, not lifetime",
+      "colis": "Parcels tracked per month",
+      "bouton": "See the plans"
     }
   },
   "parametres": {
@@ -2069,14 +2077,20 @@
     },
     "abonnement": {
       "titre": "Subscription",
-      "aide": "Your plan during the validation phase.",
+      "aide": "Manage your subscription and unlock more features.",
       "planActuel": "Current plan",
       "gratuit": "Free",
-      "gratuitAide": "During the validation phase, DropLink is free and unlimited.",
-      "inclus1": "Customer pages in your colours",
-      "inclus2": "Inspection photos and videos",
-      "inclus3": "Automatic parcel tracking",
-      "inclus4": "Analytics on your activity"
+      "gratuitAide": "Discover DropLink and its core features.",
+      "pro": "Pro",
+      "proAide": "Your Pro subscription is active.",
+      "inclusPhotos": "Photos, videos and automatic tracking",
+      "inclusCouleurs": "Customer page in your colours",
+      "inclusTotal": "{n, plural, one {# order in total} other {# orders in total}}",
+      "proLien": "The link under your name",
+      "proMarque": "Without the “Powered by DropLink” card",
+      "proPlafond": "Monthly cap, not lifetime",
+      "bouton": "Upgrade to Pro",
+      "nonInclus": "Not included:"
     },
     "support": {
       "titre": "Support",
@@ -2210,7 +2224,8 @@
       },
       "commandes": {
         "titre": "A cap that resets",
-        "texte": "A free account is capped on a lifetime total of orders. On Pro, the cap becomes monthly again."
+        "texte": "A free account is capped on a lifetime total of orders. On Pro, the cap becomes monthly again.",
+        "texteNombre": "A free account is capped at {n} orders FOR LIFE. On Pro, the cap becomes monthly again."
       },
       "colis": {
         "titre": "Tracking that keeps up",
@@ -2227,8 +2242,8 @@
       "aVie": "{n} in total, for life",
       "parMois": "{n} per month",
       "mensuel": "Monthly cap",
-      "adresseGratuit": "droplink.fr/p/…",
-      "adressePro": "droplink.fr/your-shop/…",
+      "adresseGratuit": "droplink.fr/p/xK9…",
+      "adressePro": "droplink.fr/your-shop/xK9…",
       "carteGratuit": "Shown",
       "cartePro": "Removed",
       "inclus": "Included"

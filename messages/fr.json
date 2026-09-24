@@ -1991,6 +1991,14 @@
       "marque": "Personnaliser ma page client",
       "envois": "Voir mes envois",
       "analyses": "Accéder aux analyses"
+    },
+    "pro": {
+      "titre": "Passez au Pro",
+      "lien": "Le lien à votre nom",
+      "marque": "Sans la carte DropLink",
+      "plafond": "Plafond mensuel, pas à vie",
+      "colis": "Colis suivis au mois",
+      "bouton": "Découvrir les offres"
     }
   },
   "parametres": {
@@ -2069,14 +2077,20 @@
     },
     "abonnement": {
       "titre": "Abonnement",
-      "aide": "Votre plan pendant la phase de validation.",
+      "aide": "Gérez votre abonnement et accédez à plus de fonctionnalités.",
       "planActuel": "Plan actuel",
       "gratuit": "Gratuit",
-      "gratuitAide": "Pendant la phase de validation, DropLink est gratuit et sans limite.",
-      "inclus1": "Pages client à vos couleurs",
-      "inclus2": "Photos et vidéos de contrôle",
-      "inclus3": "Suivi automatique des colis",
-      "inclus4": "Analyses de votre activité"
+      "gratuitAide": "Découvrez DropLink et ses fonctionnalités principales.",
+      "pro": "Pro",
+      "proAide": "Votre abonnement Pro est actif.",
+      "inclusPhotos": "Photos, vidéos et suivi automatique",
+      "inclusCouleurs": "Page client à vos couleurs",
+      "inclusTotal": "{n, plural, one {# commande au total} other {# commandes au total}}",
+      "proLien": "Le lien à votre nom",
+      "proMarque": "Sans la carte DropLink",
+      "proPlafond": "Plafond mensuel, pas à vie",
+      "bouton": "Passer au Pro",
+      "nonInclus": "Non inclus :"
     },
     "support": {
       "titre": "Support",
@@ -2210,7 +2224,8 @@
       },
       "commandes": {
         "titre": "Un plafond qui se recharge",
-        "texte": "Un compte gratuit est borné à un total de commandes à vie. En Pro, le plafond redevient mensuel."
+        "texte": "Un compte gratuit est borné à un total de commandes à vie. En Pro, le plafond redevient mensuel.",
+        "texteNombre": "Un compte gratuit est borné à {n} commandes À VIE. En Pro, le plafond redevient mensuel."
       },
       "colis": {
         "titre": "Le suivi qui suit",
@@ -2227,8 +2242,8 @@
       "aVie": "{n} au total, à vie",
       "parMois": "{n} par mois",
       "mensuel": "Plafond mensuel",
-      "adresseGratuit": "droplink.fr/p/…",
-      "adressePro": "droplink.fr/votre-boutique/…",
+      "adresseGratuit": "droplink.fr/p/xK9…",
+      "adressePro": "droplink.fr/votre-boutique/xK9…",
       "carteGratuit": "Affichée",
       "cartePro": "Retirée",
       "inclus": "Inclus"

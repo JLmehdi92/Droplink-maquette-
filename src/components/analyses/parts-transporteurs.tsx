@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from "next-intl/server";
-import { MoreHorizontal } from "lucide-react";
+import { LienEcran } from "@/components/lien-ecran";
+import { ArrowRight, MoreHorizontal } from "lucide-react";
 import { Panneau } from "@/components/app/panneau";
 import { lireTransporteur, monogramme } from "@/lib/tracking/transporteurs";
 import type { PartTransporteur } from "@/lib/analyses/activite";
@@ -28,8 +29,14 @@ const LIGNES = 5;
 export async function PartsTransporteurs({
   parts,
   taille = "panneau",
+  voirTout,
 }: {
   readonly parts: readonly PartTransporteur[];
+  /**
+   * Le « Voir tout » d'en-tête du tableau de bord, vers les envois — le kit le pose
+   * sur ce panneau (`DashPanel` « Derniers envois »). Absent des analyses.
+   */
+  readonly voirTout?: string;
   /**
    * `section` sur le tableau de bord : le kit y dessine ses panneaux avec un
    * titre de 17 px (`DashPanel`), là où les analyses en posent 19.
@@ -63,7 +70,26 @@ export async function PartsTransporteurs({
   const maximum = lignes.reduce((m, l) => Math.max(m, l.nombre), 0);
 
   return (
-    <Panneau taille={taille} serre={taille === "section"} titre={t("transporteurs.titre")} sousTitre={t("transporteurs.aide")}>
+    <Panneau
+      taille={taille}
+      serre={taille === "section"}
+      titre={t("transporteurs.titre")}
+      sousTitre={t("transporteurs.aide")}
+      action={
+        voirTout === undefined ? undefined : (
+          <LienEcran
+            href={voirTout}
+            // Bureau seulement : la planche `TableauPhone` n'a pas ce lien.
+            className="hidden min-h-11 items-center gap-1.5 text-[13px] leading-[normal] font-semibold text-ds-accent hover:text-ds-accent-encre lg:inline-flex lg:min-h-0"
+          >
+            {t("activite.voirTout")}
+            {/* L'icône du kit (`SeeAll` : flèche de 14), pas le caractère « → » — une
+                glyphe de police n'a pas sa largeur (1 px d'écart mesuré le 24/09). */}
+            <ArrowRight aria-hidden="true" size={14} strokeWidth={2} />
+          </LienEcran>
+        )
+      }
+    >
       {total === 0 ? (
         <p className="text-[14px] text-ds-texte-corps">{t("transporteurs.aucun")}</p>
       ) : (
@@ -110,7 +136,16 @@ export async function PartsTransporteurs({
                     style={{ width: `${(l.nombre / maximum) * 100}%` }}
                   />
                 </span>
-                <span className="w-[66px] text-right text-[13px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-corps">
+                {/* Le tableau de bord (`section`) pose 12,5 px sur 62 de large, les Analyses
+                    13 sur 66 : deux planches, deux valeurs. Elles étaient confondues tant
+                    que la carte Pro manquait et élargissait la rangée (remesure du 24/09).
+                    Au téléphone, `TableauPhone` garde 13 sur 66. */}
+                <span
+                  className={
+                    "text-right leading-[normal] font-semibold whitespace-nowrap text-ds-texte-corps " +
+                    (taille === "section" ? "w-[66px] text-[13px] lg:w-[62px] lg:text-[12.5px]" : "w-[66px] text-[13px]")
+                  }
+                >
                   {format.number(l.nombre)} ({Math.round((l.nombre / total) * 100)} %)
                 </span>
               </li>

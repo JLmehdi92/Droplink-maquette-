@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import {
   Archive,
+  ArrowRight,
   ArrowUpDown,
   CircleCheck,
   CircleX,
@@ -104,7 +105,9 @@ export async function ActiviteRecente({
             className="inline-flex min-h-11 items-center gap-1.5 text-[13px] leading-[normal] font-semibold text-ds-accent hover:text-ds-accent-encre lg:min-h-0"
           >
             {t("activite.voirTout")}
-            <span aria-hidden="true">→</span>
+            {/* L'icône du kit (`SeeAll` : flèche de 14), pas le caractère « → » — une
+                glyphe de police n'a pas sa largeur (1 px d'écart mesuré le 24/09). */}
+            <ArrowRight aria-hidden="true" size={14} strokeWidth={2} />
           </LienEcran>
         ) : (
           <LienEcran

@@ -379,7 +379,7 @@ export default async function Documentation({
                 "",
                 t("planGratuit"),
                 t("planPro", {
-                  prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR" }),
+                  prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
                 }),
               ]}
               lignes={[
