@@ -143,14 +143,21 @@ async function lireCommandePubliqueSansMemo(
   const jeton = analyse.data;
   const supabase = creerClientAnonyme();
 
-  const { data, error } = await supabase.rpc("lire_commande_publique", { p_jeton: jeton });
+  /*
+   * LES DEUX LECTURES PARTENT ENSEMBLE (audit ECC du 24/09/2026). Elles ne
+   * dépendent que du jeton : les enchaîner coûtait un aller-retour complet vers
+   * la base, sur une page vue une fois, en 4G, dont le budget LCP est de 2 s.
+   * Pour un jeton inconnu, la seconde rend un ensemble vide — rien de plus.
+   */
+  const [{ data, error }, { data: medias }] = await Promise.all([
+    supabase.rpc("lire_commande_publique", { p_jeton: jeton }),
+    supabase.rpc("lire_medias_publics", { p_jeton: jeton }),
+  ]);
 
   if (error !== null || data === null || data.length === 0) return null;
 
   const ligne = data[0];
   if (ligne === undefined) return null;
-
-  const { data: medias } = await supabase.rpc("lire_medias_publics", { p_jeton: jeton });
 
   /*
    * ⚠️ UNE PHOTO SANS DÉRIVÉE ÉTAIT INVISIBLE. DÉFAUT TROUVÉ CHEZ UN VRAI

@@ -147,19 +147,17 @@ export default async function AdminCommandes({
   /* LES LIENS BLOQUÉS DE CETTE PAGE (décision de Wassim, 19/09/2026). Si la lecture
      échoue, l écran n affiche NI pastille NI bouton : montrer « bloquer » sur un lien
      peut-être déjà bloqué affirmerait un état que la base n a pas rendu (contrainte 8). */
-  const blocages = await liensBloquesParmi(
-    supabase,
-    page.lignes.map((l) => l.id),
-  );
+  // Les deux lectures sont indépendantes : elles partent ensemble (audit du 24/09/2026).
+  const identifiants = page.lignes.map((l) => l.id);
+  const [blocages, contestations] = await Promise.all([
+    liensBloquesParmi(supabase, identifiants),
+    contestationsEnAttenteParmi(supabase, identifiants),
+  ]);
   const bloque = (l: LigneCommandeAdmin): boolean | null =>
     blocages.statut === "ok" ? blocages.bloques.has(l.id) : null;
   /* LES CONTESTATIONS EN ATTENTE (168), lues comme les blocages : des identifiants seulement,
      sans rien écrire au journal — la lecture tracée part à l'ouverture du dialogue. En échec,
      la ligne garde le geste de déblocage : il reste juste, la contestation se lira plus tard. */
-  const contestations = await contestationsEnAttenteParmi(
-    supabase,
-    page.lignes.map((l) => l.id),
-  );
   const conteste = (l: LigneCommandeAdmin): boolean =>
     contestations.statut === "ok" && contestations.ids.has(l.id);
 
