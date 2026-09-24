@@ -3,6 +3,7 @@ import { referenceCourte } from "@/lib/commandes/reference";
 import { LienEcran } from "@/components/lien-ecran";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { BoutonAction } from "@/components/bouton-action";
+import { BoutonSoumissionUnique } from "@/components/bouton-soumission-unique";
 import {
   Archive,
   ArchiveRestore,
@@ -748,14 +749,15 @@ export async function TableauCommandes({
                                     nomClient={nom}
                                   />
                                 </TraductionsClient>
-                                <button
-                                  type="submit"
+                                {/* Une seule soumission : un double-clic créait DEUX copies,
+                                    chacune décomptée du quota du compte (audit du 24/09/2026). */}
+                                <BoutonSoumissionUnique
                                   form={"dup-" + ligne.id}
                                   className="flex min-h-11 items-center gap-2.5 rounded-ds-sm px-3 text-left text-[13px] font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-teinte"
                                 >
                                   <Copy aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
                                   {t("dupliquer")}
-                                </button>
+                                </BoutonSoumissionUnique>
                                 <button
                                   type="submit"
                                   form={"arch-" + ligne.id}

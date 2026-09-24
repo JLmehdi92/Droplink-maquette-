@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Archive, ArchiveRestore, Copy, MoreHorizontal } from "lucide-react";
 import { cheminGesteDeListe } from "@/lib/commandes/geste-liste";
 import { DETAILS_OUTIL_DS, PANNEAU_OUTIL_DS } from "@/components/panneau-outil";
+import { BoutonSoumissionUnique } from "@/components/bouton-soumission-unique";
 
 /**
  * LE MENU « ••• » DE LA FICHE — dupliquer, archiver ou sortir des archives.
@@ -70,10 +71,11 @@ export async function MenuGestesFiche({
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="langue" value={langue} />
           <input type="hidden" name="retour" value={retour} />
-          <button type="submit" className={entree}>
+          {/* Une seule soumission : un double-clic créait DEUX copies (audit du 24/09/2026). */}
+          <BoutonSoumissionUnique className={entree}>
             <Copy aria-hidden="true" size={16} strokeWidth={1.8} className="text-ds-texte-tenu" />
             {t("dupliquer")}
-          </button>
+          </BoutonSoumissionUnique>
         </form>
         {/* Le jeton ne sert qu'à invalider la page publique après le geste ;
             l'autorisation vient de la session et de la RLS sur `orders`. */}
