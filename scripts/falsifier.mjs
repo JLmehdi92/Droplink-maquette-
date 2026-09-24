@@ -878,16 +878,16 @@ const SQL = {
    */
   "resiliation-coupe-immediatement": {
     casserDepuisMigration: {
-      fichier: "179_le_plan_pour_statut_epingle_son_chemin.sql",
-      depuis: "create function public.plan_pour_statut(",
+      fichier: "193_un_prelevement_echoue_repasse_en_gratuit.sql",
+      depuis: "create or replace function public.plan_pour_statut(",
       jusqua: "comment on function public.plan_pour_statut",
       remplacer:
         "    when p_statut = 'cancelled' and p_ends_at is not null and p_ends_at > now()\n      then 'pro'::public.account_plan\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "179_le_plan_pour_statut_epingle_son_chemin.sql",
-      depuis: "create function public.plan_pour_statut(",
+      fichier: "193_un_prelevement_echoue_repasse_en_gratuit.sql",
+      depuis: "create or replace function public.plan_pour_statut(",
       jusqua: "comment on function public.plan_pour_statut",
     },
   },
@@ -898,6 +898,26 @@ const SQL = {
    * l'addition, l'alerte annonce plus de credits qu'il n'en reste — fausse
    * dans le sens rassurant, donc invisible jusqu'a la panne.
    */
+  /*
+   * UN IMPAYÉ GARDE LE PRO (193) : le prélèvement échoue, et le compte reste
+   * Pro indéfiniment tant que le fournisseur réessaie. Décision de Wassim du
+   * 24/09/2026 : ce qui n'est pas payé repasse en gratuit.
+   */
+  "impaye-reste-pro": {
+    casserDepuisMigration: {
+      fichier: "193_un_prelevement_echoue_repasse_en_gratuit.sql",
+      depuis: "create or replace function public.plan_pour_statut(",
+      jusqua: "comment on function public.plan_pour_statut",
+      remplacer: "    when p_statut in ('on_trial', 'active') then",
+      par: "    when p_statut in ('on_trial', 'active', 'past_due') then",
+    },
+    reparerDepuisMigration: {
+      fichier: "193_un_prelevement_echoue_repasse_en_gratuit.sql",
+      depuis: "create or replace function public.plan_pour_statut(",
+      jusqua: "comment on function public.plan_pour_statut",
+    },
+  },
+
   "budget-ignore-le-decalage": {
     casserDepuisMigration: {
       fichier: "180_le_budget_de_suivi_se_reconcilie.sql",

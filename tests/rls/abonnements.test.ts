@@ -59,9 +59,11 @@ describe("La traduction d'un statut en plan", () => {
   const cas: readonly [string, string | null, string][] = [
     ["active", null, "pro"],
     ["on_trial", null, "pro"],
-    // Le prélèvement a échoué, le fournisseur va réessayer. Couper au premier
-    // échec punirait une carte expirée comme une résiliation.
-    ["past_due", null, "pro"],
+    // ⚠️ DÉCISION DE WASSIM, 24/09/2026 : « même si le client est débité et que
+    // ça paye pas bah le compte retourne en gratuit ». Un prélèvement échoué
+    // coupe le Pro dès l'échec ; le fournisseur réessaie, et un paiement
+    // réussi (`active`) le rend aussitôt (migration 193).
+    ["past_due", null, "gratuit"],
     ["expired", null, "gratuit"],
     ["unpaid", null, "gratuit"],
     ["paused", null, "gratuit"],

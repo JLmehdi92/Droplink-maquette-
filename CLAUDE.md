@@ -640,7 +640,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 192, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 193, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
@@ -791,8 +791,11 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
    > ON LA RATE** : chez ce fournisseur, `cancelled` ne veut PAS dire « coupé ».
    > L'abonnement court jusqu'à `ends_at`. Un vendeur qui résilie le 2 du mois a
    > payé jusqu'au 30 ; le couper au clic lui vole ce qu'il a réglé.
-   > `past_due` reste Pro aussi — le prélèvement a échoué, le fournisseur
-   > réessaie. La traduction vit dans `plan_pour_statut`, à UN SEUL endroit.
+   > ⚠️ **`past_due` REPASSE EN GRATUIT** (décision de Wassim du 24/09/2026,
+   > migration 193 — la 179 le gardait Pro) : un prélèvement échoué coupe le Pro,
+   > un paiement réussi (`active`) le rend par le même webhook. Un `cancelled`
+   > SANS `ends_at` est gratuit aussi (confirmé le même jour). La traduction vit
+   > dans `plan_pour_statut`, à UN SEUL endroit.
    >
    > **Le webhook est la seule surface qui POSE UN PLAN PAYANT.** `/api/*` est
    > hors du middleware : sa seule garde est une signature HMAC-SHA256 vérifiée
