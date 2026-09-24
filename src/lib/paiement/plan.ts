@@ -82,3 +82,27 @@ export function urlPaiementPro(): string | null {
 
   return url.toString();
 }
+
+/**
+ * L'adresse de paiement POUR CE COMPTE : celle de `urlPaiementPro`, qui y porte
+ * l'identifiant du compte et pré-remplit son e-mail.
+ *
+ * ⚠️ SANS ELLE, UN PAIEMENT POUVAIT ARRIVER SANS PLAN (audit ECC, 24/09/2026).
+ * Le webhook rattache par `meta.custom_data.profil_id`, et à défaut par l'e-mail
+ * du PAYEUR. Le bouton envoyait l'adresse brute : un vendeur qui payait avec une
+ * autre adresse que celle de son compte était débité sans recevoir le Pro.
+ * Lemon Squeezy renvoie dans `custom_data` ce que le lien porte en
+ * `checkout[custom][…]`.
+ *
+ * L'identifiant n'autorise RIEN : le webhook n'est cru que signé, et un lien
+ * modifié pour porter l'identifiant d'un autre compte ne ferait que lui OFFRIR
+ * l'abonnement payé.
+ */
+export function urlPaiementPourCompte(compte: { readonly profilId: string; readonly email: string }): string | null {
+  const base = urlPaiementPro();
+  if (base === null) return null;
+  const url = new URL(base);
+  url.searchParams.set("checkout[custom][profil_id]", compte.profilId);
+  if (compte.email !== "") url.searchParams.set("checkout[email]", compte.email);
+  return url.toString();
+}

@@ -115,6 +115,36 @@ describe("L'adresse de paiement du plan Pro", () => {
     expect(erreurs, "une adresse valide ne journalise rien").toEqual([]);
   });
 
+  test("⚠️ LE LIEN DU BOUTON PORTE L'IDENTIFIANT DU COMPTE (audit ECC, 24/09/2026)", async () => {
+    /*
+     * Le webhook rattache un paiement par `meta.custom_data.profil_id` — la voie
+     * sûre — et, à défaut, par l'e-mail du PAYEUR. Le bouton envoyait l'adresse
+     * brute : un vendeur qui payait avec une autre adresse que celle de son compte
+     * était débité SANS recevoir le Pro. Lemon Squeezy renvoie dans
+     * `custom_data` ce que le lien porte en `checkout[custom][…]`.
+     */
+    process.env[CLE] = "https://droplink.lemonsqueezy.com/buy/abc-123?media=0";
+    vi.resetModules();
+    const { urlPaiementPourCompte } = await import("@/lib/paiement/plan");
+    const brut = urlPaiementPourCompte({
+      profilId: "11111111-2222-4333-8444-555555555555",
+      email: "vendeur+pro@exemple.test",
+    });
+    expect(brut).not.toBeNull();
+    const url = new URL(brut ?? "");
+    expect(url.hostname).toBe("droplink.lemonsqueezy.com");
+    expect(url.searchParams.get("checkout[custom][profil_id]")).toBe("11111111-2222-4333-8444-555555555555");
+    expect(url.searchParams.get("checkout[email]")).toBe("vendeur+pro@exemple.test");
+    expect(url.searchParams.get("media"), "les paramètres déjà posés sont gardés").toBe("0");
+  });
+
+  test("CONTRE-TEST : sans adresse configurée, pas de lien — même avec un compte", async () => {
+    delete process.env[CLE];
+    vi.resetModules();
+    const { urlPaiementPourCompte } = await import("@/lib/paiement/plan");
+    expect(urlPaiementPourCompte({ profilId: "11111111-2222-4333-8444-555555555555", email: "a@b.test" })).toBeNull();
+  });
+
   test("le prix a UN SEUL point d'émission, et c'est un nombre", async () => {
     vi.resetModules();
     const { PRIX_PRO_EUR } = await import("@/lib/paiement/plan");

@@ -6,7 +6,7 @@ import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
-import { PRIX_PRO_EUR, urlPaiementPro } from "@/lib/paiement/plan";
+import { PRIX_PRO_EUR, urlPaiementPourCompte } from "@/lib/paiement/plan";
 
 /**
  * « PASSER AU PRO ».
@@ -94,7 +94,9 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
   const aVie = typeof plafondGratuit.data === "number" ? plafondGratuit.data : null;
 
   const nombre = (n: number): string => format.number(n);
-  const paiement = urlPaiementPro();
+  // L'identifiant du compte voyage DANS le lien : sans lui, un paiement fait
+  // avec une autre adresse que celle du compte n'aurait pas de destinataire.
+  const paiement = profil === null ? null : urlPaiementPourCompte(profil);
   const dejaPro = profil?.planPro === true;
 
   const FEATURES = [
