@@ -3,7 +3,7 @@
 import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
 
 import { normaliserLien } from "@/lib/boutique/normaliser-lien";
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { BoutonAction, type LibellesBoutonAction } from "@/components/bouton-action";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -188,6 +188,14 @@ export function FormulaireMarque({
   const [logo, setLogo] = useState<EtatLogo>(
     initial.logoUrl === null ? { phase: "aucun" } : { phase: "existant", url: initial.logoUrl },
   );
+  // L'aperçu local est une URL `blob:` : elle retient le fichier en mémoire tant
+  // qu'on ne la libère pas. Libérée quand l'aperçu change ou que l'écran se
+  // démonte (audit ECC du 24/09/2026 — elle ne l'était jamais).
+  const apercuLocal = logo.phase === "pose" ? logo.apercu : null;
+  useEffect(() => {
+    if (apercuLocal === null) return;
+    return () => URL.revokeObjectURL(apercuLocal);
+  }, [apercuLocal]);
   /*
    * LES RÉSEAUX SONT CONTRÔLÉS, et ils ne l'étaient pas.
    *

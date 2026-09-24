@@ -1,7 +1,7 @@
 "use client";
 
 import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ImagePlus, MessageCircle, Store, Upload, Users, X } from "lucide-react";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
@@ -64,6 +64,14 @@ export function FormulaireOnboarding({
   const [nom, setNom] = useState("");
   const [couleur, setCouleur] = useState(ACCENT_DEFAUT);
   const [logo, setLogo] = useState<EtatLogo>({ phase: "vide" });
+  // L'aperçu local est une URL `blob:` : elle retient le fichier en mémoire tant
+  // qu'on ne la libère pas. Libérée quand l'aperçu change ou que l'écran se
+  // démonte (audit ECC du 24/09/2026 — elle ne l'était jamais).
+  const apercuLocal = logo.phase === "pose" ? logo.apercu : null;
+  useEffect(() => {
+    if (apercuLocal === null) return;
+    return () => URL.revokeObjectURL(apercuLocal);
+  }, [apercuLocal]);
   const champFichier = useRef<HTMLInputElement>(null);
 
   const accent = useMemo(() => resoudreAccent(couleur), [couleur]);

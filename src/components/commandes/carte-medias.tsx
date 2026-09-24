@@ -175,6 +175,20 @@ export function CarteMedias({
    * pas le compte.
    */
   const suiviCouverture = useRef(creerSuiviDeCouverture(initiaux.length));
+  /*
+   * LES APERÇUS LOCAUX (`blob:`) RETIENNENT LEUR FICHIER EN MÉMOIRE tant qu'on
+   * ne les libère pas — et ils ne l'étaient jamais (audit ECC du 24/09/2026) :
+   * vingt médias par commande, plusieurs commandes par session, jusqu'au
+   * rechargement de l'onglet. Libérés au retrait du média, et au démontage.
+   */
+  const apercusLocaux = useRef(new Set<string>());
+  useEffect(() => {
+    const ensemble = apercusLocaux.current;
+    return () => {
+      for (const url of ensemble) URL.revokeObjectURL(url);
+      ensemble.clear();
+    };
+  }, []);
 
   /**
    * Ce que la dernière action a échoué à faire, en clair.
@@ -345,6 +359,7 @@ export function CarteMedias({
         rendu.vignette === null
           ? null
           : URL.createObjectURL(rendu.vignette.blob);
+      if (apercu !== null) apercusLocaux.current.add(apercu);
       setMedias((liste) => [
         ...liste,
         {
@@ -403,7 +418,11 @@ export function CarteMedias({
       }
       setEchecAction(null);
       suiviCouverture.current.retirer();
-      setMedias((liste) => liste.filter((m) => m.id !== id));
+      setMedias((liste) => {
+        const retire = liste.find((m) => m.id === id)?.urlVignette ?? null;
+        if (retire !== null && apercusLocaux.current.delete(retire)) URL.revokeObjectURL(retire);
+        return liste.filter((m) => m.id !== id);
+      });
     },
     [orderId, t],
   );
@@ -633,7 +652,10 @@ export function CarteMedias({
                     {/* LE MOTIF ET LA TAILLE REELLE, TOUJOURS LES DEUX : sans la
                         taille, le vendeur ne sait pas de combien il s'est
                         trompe, donc ne sait pas quoi faire du fichier. */}
-                    <p className="text-center text-[11.5px] leading-4 text-ds-erreur-encre">
+                    {/* `role="alert"` : pendant un dépôt en lot, le vendeur est ailleurs
+                        dans la page — un échec qui ne s'annonce pas ne s'entend pas
+                        (WCAG 4.1.3, audit du 24/09/2026). */}
+                    <p role="alert" className="text-center text-[11.5px] leading-4 text-ds-erreur-encre">
                       {e.echec}
                     </p>
                     <button

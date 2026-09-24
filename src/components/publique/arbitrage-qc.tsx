@@ -114,7 +114,10 @@ export function ArbitrageQc({
   if (decide) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-[15px] leading-[23px] text-ds-texte-fort lg:text-[16px] lg:leading-6">
+        {/* `role="status"` : l'échec s'annonçait, la réussite non — un client qui
+            n'y voit pas n'avait aucune confirmation que sa décision était
+            enregistrée (WCAG 4.1.3, audit du 24/09/2026). */}
+        <p role="status" className="text-[15px] leading-[23px] text-ds-texte-fort lg:text-[16px] lg:leading-6">
           {etat === "approuve" ? libelles.approuve : libelles.refuse}
         </p>
         <button
