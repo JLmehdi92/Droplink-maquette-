@@ -59,6 +59,8 @@ console.log("port ephemere : " + port);
 const precharge = pathToFileURL(join(process.cwd(), "scripts", "refus-tiers.mjs")).href;
 const serveur = spawn("pnpm", ["start", "--port", String(port)], {
   shell: true,
+  // Sans lui, Windows ouvre une console par serveur lancé en arrière-plan (24/09/2026).
+  windowsHide: true,
   env: {
     ...process.env,
     BORD_DE_CONFIANCE: "railway",
