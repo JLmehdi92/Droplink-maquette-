@@ -171,6 +171,16 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
 
   async headers() {
+    // On retire Referrer-Policy ET la CSP de base pour les redéclarer : `no-referrer`
+    // (l'URL porte le jeton), et la même CSP complète — qui inclut déjà
+    // `frame-ancestors 'none'`, sans doublon d'en-tête.
+    const enTetesPagePublique = [
+      ...enTetesCommuns.filter(
+        (h) => h.key !== "Referrer-Policy" && h.key !== "Content-Security-Policy",
+      ),
+      { key: "Referrer-Policy", value: "no-referrer" },
+      ...(CSP_ACTIVE ? [{ key: "Content-Security-Policy", value: politiqueCSP() }] : []),
+    ];
     return [
       {
         source: "/:path*",
@@ -194,16 +204,20 @@ const nextConfig: NextConfig = {
          * même chose, mais aux navigateurs de générations différentes.
          */
         source: "/p/:path*",
-        headers: [
-          // On retire Referrer-Policy ET la CSP de base pour les redéclarer :
-          // `no-referrer` (l'URL porte le jeton), et la même CSP complète —
-          // qui inclut déjà `frame-ancestors 'none'`, sans doublon d'en-tête.
-          ...enTetesCommuns.filter(
-            (h) => h.key !== "Referrer-Policy" && h.key !== "Content-Security-Policy",
-          ),
-          { key: "Referrer-Policy", value: "no-referrer" },
-          ...(CSP_ACTIVE ? [{ key: "Content-Security-Policy", value: politiqueCSP() }] : []),
-        ],
+        headers: enTetesPagePublique,
+      },
+      {
+        /*
+         * ⚠️ LE LIEN AU NOM EST LA MÊME PAGE, ET IL N'AVAIT PAS SES EN-TÊTES (fumée du
+         * 24/09/2026 : servi en `strict-origin-when-cross-origin`). Ces règles
+         * s'appliquent au chemin de la REQUÊTE, avant la réécriture du middleware vers
+         * `/p/<jeton>` : `/<nom>/<jeton>` ne correspondait qu'à la règle générale. Le
+         * motif reprend les deux formes de `lib/routes/lien-au-nom.ts` (nom de 3 à 40,
+         * jeton de 16 à 64 alphanumériques). Posée après la règle générale, elle
+         * l'emporte sur les clés communes.
+         */
+        source: "/:nom([a-zA-Z0-9][a-zA-Z0-9-]{1,38}[a-zA-Z0-9])/:jeton([0-9A-Za-z]{16,64})",
+        headers: enTetesPagePublique,
       },
     ];
   },

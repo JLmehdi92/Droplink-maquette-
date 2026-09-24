@@ -5054,6 +5054,21 @@ try {
       !htmlNom.includes(NOTE_SENTINELLE),
       "et elle ne laisse pas fuiter les notes internes au passage",
     ]);
+    // ⚠️ LES EN-TETES DE LA PAGE CLIENT SUIVENT-ILS LA REECRITURE ? (audit ECC,
+    // 24/09/2026) `next.config` les pose sur `/p/:path*`, c est-a-dire sur le
+    // chemin de la REQUETE — et la requete, ici, est `/<nom>/<jeton>`. L URL
+    // porte le jeton : sans `no-referrer`, un clic sortant emporterait le
+    // chemin complet vers une destination de meme origine, et la CSP de la
+    // page client ne serait pas celle servie.
+    controles.push([
+      avecNom.headers.get("referrer-policy") === "no-referrer",
+      `aucun referent sous le nom du vendeur non plus (servi : ${avecNom.headers.get("referrer-policy") ?? "absent"})`,
+    ]);
+    controles.push([
+      (avecNom.headers.get("content-security-policy") ?? "") !== "" &&
+        avecNom.headers.get("content-security-policy") === nu.headers.get("content-security-policy"),
+      "la page sous le nom du vendeur porte la MEME CSP que /p/",
+    ]);
 
     // ⚠️ LA PROPRIETE QUI COUTE LE PLUS CHER SI ELLE TOMBE : le vendeur se
     // renomme, et le lien DEJA ENVOYE dans un message prive continue de
