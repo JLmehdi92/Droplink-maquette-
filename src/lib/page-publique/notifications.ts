@@ -73,7 +73,10 @@ export async function demanderNotification(
     p_email: adresse.data,
     p_token_hash: empreinteDuJeton(confirmation),
   });
-  if (error !== null) return { statut: error.code === "DL074" ? "trop" : "indisponible" };
+  // DL074 : trois demandes par commande sur 24 h ; DL075 : la boutique entière (194).
+  if (error !== null) {
+    return { statut: error.code === "DL074" || error.code === "DL075" ? "trop" : "indisponible" };
+  }
   const ligne = data[0];
   if (ligne === undefined) return { statut: "introuvable" };
 
@@ -194,11 +197,30 @@ export async function envoyerNotificationsEnAttente(origine: string, limite = 50
       continue;
     }
     echoues += 1;
-    await systeme.rpc("rendre_notification", { p_order: ligne.order_id, p_etape: ligne.etape });
+    /*
+     * ⚠️ LA RESTITUTION SE VÉRIFIE (audit ECC, 24/09/2026). Réservée et jamais
+     * rendue, une étape n'est plus jamais proposée par `notifications_a_envoyer` :
+     * le client ne reçoit pas cet e-mail, et rien d'autre ne le dirait.
+     */
+    const { error: nonRendue } = await systeme.rpc("rendre_notification", {
+      p_order: ligne.order_id,
+      p_etape: ligne.etape,
+    });
+    if (nonRendue !== null) {
+      console.error(
+        `[notifications] réservation NON RENDUE — commande ${ligne.order_id}, étape ${ligne.etape} : ` +
+          `cet e-mail ne repartira pas seul (${nonRendue.message})`,
+      );
+    }
     console.error("[notifications] e-mail d'étape non parti — " + (envoi.statut === "refuse" ? envoi.motif : envoi.statut));
-    // Un refus du fournisseur (quota du jour, clé révoquée) ne s'arrangera pas
-    // au destinataire suivant : on s'arrête, tout ce qui reste repartira.
-    break;
+    /*
+     * Un refus du FOURNISSEUR (quota du jour, clé révoquée, panne) ne s'arrangera
+     * pas au destinataire suivant : on s'arrête, tout ce qui reste repartira.
+     * Un refus propre à CE message (adresse rejetée) ne dit rien des autres — et
+     * s'arrêter là bloquerait toute la file, puisqu'il revient en tête à chaque
+     * passage.
+     */
+    if (envoi.statut !== "refuse" || envoi.portee === "fournisseur") break;
   }
   return { envoyes, echoues };
 }

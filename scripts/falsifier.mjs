@@ -903,6 +903,38 @@ const SQL = {
    * Pro indéfiniment tant que le fournisseur réessaie. Décision de Wassim du
    * 24/09/2026 : ce qui n'est pas payé repasse en gratuit.
    */
+  /*
+   * LE RELAIS DE SPAM ROUVERT (194) : sans la borne par BOUTIQUE, quinze liens
+   * d'un compte gratuit envoient chacun leurs confirmations vers des adresses
+   * au choix de l'attaquant, depuis notre domaine d'envoi.
+   */
+  "spam-par-boutique": {
+    casserDepuisMigration: {
+      fichier: "194_les_demandes_d_e_mail_se_comptent_par_jour_et_par_boutique.sql",
+      depuis: "create or replace function public.demander_notification(",
+      remplacer: "  if v_recentes >= 60 then",
+      par: "  if false then",
+    },
+    reparerDepuisMigration: {
+      fichier: "194_les_demandes_d_e_mail_se_comptent_par_jour_et_par_boutique.sql",
+      depuis: "create or replace function public.demander_notification(",
+    },
+  },
+
+  /* HORS du cas motivant : la borne par commande recompte à l'HEURE (188). */
+  "demandes-par-heure": {
+    casserDepuisMigration: {
+      fichier: "194_les_demandes_d_e_mail_se_comptent_par_jour_et_par_boutique.sql",
+      depuis: "create or replace function public.demander_notification(",
+      remplacer: "  where r.order_id = v_order and r.created_at > now() - interval '24 hours';",
+      par: "  where r.order_id = v_order and r.created_at > now() - interval '1 hour';",
+    },
+    reparerDepuisMigration: {
+      fichier: "194_les_demandes_d_e_mail_se_comptent_par_jour_et_par_boutique.sql",
+      depuis: "create or replace function public.demander_notification(",
+    },
+  },
+
   "impaye-reste-pro": {
     casserDepuisMigration: {
       fichier: "193_un_prelevement_echoue_repasse_en_gratuit.sql",

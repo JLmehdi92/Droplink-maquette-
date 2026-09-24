@@ -27,11 +27,14 @@ vi.mock("@/lib/supabase/system", () => ({
 
 type Envoye = { a: string; sujet: string; texte: string; desinscription?: string };
 const envoyes: Envoye[] = [];
-let resultatEnvoi: { statut: "envoye" } | { statut: "refuse"; motif: string } = { statut: "envoye" };
+type Resultat = { statut: "envoye" } | { statut: "refuse"; motif: string; portee: "message" | "fournisseur" };
+let resultatEnvoi: Resultat = { statut: "envoye" };
+/** Si posée, chaque envoi consomme la tête de cette file (un résultat par destinataire). */
+let fileEnvoi: Resultat[] = [];
 vi.mock("@/lib/email/client-final", () => ({
   envoyerAuClient: async (m: Envoye) => {
     envoyes.push(m);
-    return resultatEnvoi;
+    return fileEnvoi.shift() ?? resultatEnvoi;
   },
 }));
 
@@ -64,6 +67,7 @@ beforeEach(() => {
   appels.length = 0;
   envoyes.length = 0;
   resultatEnvoi = { statut: "envoye" };
+  fileEnvoi = [];
   reponses = { demander_notification: { data: [{ langue: "en", nom_boutique: "Atelier Nord" }], error: null } };
   process.env["RESEND_API_KEY"] = "re_cle_de_test_assez_longue";
   process.env["EMAIL_CLIENTS_DE"] = "DropLink <suivi@droplink.fr>";
@@ -123,6 +127,11 @@ describe("La demande du client", () => {
     expect(await demanderNotification(JETON_PUBLIC, { email: "a@exemple.test" }, ORIGINE)).toEqual({ statut: "trop" });
   });
 
+  test("le plafond de la BOUTIQUE (DL075, migration 194) se dit « trop » aussi, jamais « indisponible »", async () => {
+    reponses["demander_notification"] = { data: null, error: { code: "DL075", message: "trop" } };
+    expect(await demanderNotification(JETON_PUBLIC, { email: "a@exemple.test" }, ORIGINE)).toEqual({ statut: "trop" });
+  });
+
   test("⚠️ SANS CONFIGURATION D'ENVOI, RIEN N'EST DEMANDÉ À LA BASE", async () => {
     delete process.env["EMAIL_CLIENTS_DE"];
     expect(await demanderNotification(JETON_PUBLIC, { email: "a@exemple.test" }, ORIGINE)).toEqual({ statut: "indisponible" });
@@ -130,7 +139,7 @@ describe("La demande du client", () => {
   });
 
   test("un e-mail qui ne part pas se dit « indisponible », jamais « envoyé »", async () => {
-    resultatEnvoi = { statut: "refuse", motif: "HTTP 500" };
+    resultatEnvoi = { statut: "refuse", motif: "HTTP 500", portee: "fournisseur" };
     expect(await demanderNotification(JETON_PUBLIC, { email: "a@exemple.test" }, ORIGINE)).toEqual({ statut: "indisponible" });
   });
 });
@@ -203,11 +212,42 @@ describe("L'envoi des étapes", () => {
   test("⚠️ UN ENVOI ÉCHOUÉ REND LA RÉSERVATION, et le lot s'arrête", async () => {
     reponses["notifications_a_envoyer"] = { data: [LIGNE, { ...LIGNE, order_id: "00000000-0000-4000-8000-000000000002" }], error: null };
     reponses["reserver_notification"] = { data: true, error: null };
-    resultatEnvoi = { statut: "refuse", motif: "HTTP 429" };
+    resultatEnvoi = { statut: "refuse", motif: "HTTP 429", portee: "fournisseur" };
     expect(await envoyerNotificationsEnAttente(ORIGINE)).toEqual({ envoyes: 0, echoues: 1 });
     const rendue = appels.find((a) => a.nom === "rendre_notification")?.args;
     expect(rendue).toEqual({ p_order: LIGNE.order_id, p_etape: "livre" });
     expect(envoyes, "le lot a continué après un refus du fournisseur").toHaveLength(1);
+  });
+
+  test("⚠️ UN REFUS PROPRE À UN DESTINATAIRE N'ARRÊTE PAS LE LOT (audit ECC, 24/09/2026)", async () => {
+    /*
+     * Le `break` supposait tout refus « fournisseur » (quota, clé). Un refus qui ne
+     * vise QUE ce message (HTTP 422 : adresse rejetée) revient pourtant en tête
+     * de liste à chaque passage — et bloquait TOUTE la file, pour toujours.
+     */
+    const autre = { ...LIGNE, order_id: "00000000-0000-4000-8000-000000000002" };
+    reponses["notifications_a_envoyer"] = { data: [LIGNE, autre], error: null };
+    reponses["reserver_notification"] = { data: true, error: null };
+    fileEnvoi = [{ statut: "refuse", motif: "HTTP 422", portee: "message" }, { statut: "envoye" }];
+    expect(await envoyerNotificationsEnAttente(ORIGINE)).toEqual({ envoyes: 1, echoues: 1 });
+    expect(envoyes).toHaveLength(2);
+    // Et la réservation du refusé est bien rendue : il repartira.
+    expect(appels.filter((a) => a.nom === "rendre_notification").map((a) => a.args)).toEqual([
+      { p_order: LIGNE.order_id, p_etape: "livre" },
+    ]);
+  });
+
+  test("⚠️ UNE RÉSERVATION QUI NE SE REND PAS EST DITE — l'étape ne repartirait jamais", async () => {
+    reponses["notifications_a_envoyer"] = { data: [LIGNE], error: null };
+    reponses["reserver_notification"] = { data: true, error: null };
+    reponses["rendre_notification"] = { data: null, error: { message: "coupure" } };
+    resultatEnvoi = { statut: "refuse", motif: "HTTP 500", portee: "fournisseur" };
+    const erreurs: string[] = [];
+    vi.mocked(console.error).mockImplementation((...a: unknown[]) => {
+      erreurs.push(a.map(String).join(" "));
+    });
+    await envoyerNotificationsEnAttente(ORIGINE);
+    expect(erreurs.some((e) => e.includes(LIGNE.order_id) && e.includes("coupure"))).toBe(true);
   });
 
   test("⚠️ SANS CONFIGURATION, RIEN N'EST RÉSERVÉ — donc rien n'est perdu", async () => {

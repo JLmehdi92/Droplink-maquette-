@@ -195,6 +195,69 @@ describe("La demande, la confirmation, la désinscription", () => {
     expect(resultats).toEqual([null, null, null, "DL074"]);
   });
 
+  /*
+   * ⚠️ UN RELAIS DE SPAM — audit ECC du 24/09/2026. Trois demandes par HEURE et
+   * par commande laissaient 72 e-mails de confirmation par jour et par lien, vers
+   * des adresses au choix de qui détient le lien — et le NOM DE BOUTIQUE, choisi
+   * par le vendeur, est dans l'e-mail. Un compte gratuit a quinze liens : ~1 000
+   * e-mails par jour depuis NOTRE domaine d'envoi. La migration 194 compte sur
+   * 24 h, et borne aussi la boutique entière.
+   */
+  test("⚠️ LES TROIS DEMANDES D'UNE COMMANDE SE COMPTENT SUR 24 H, PAS SUR UNE HEURE", async () => {
+    const fraiche = await creerCommande("notif 24h");
+    for (let i = 0; i < 3; i += 1) {
+      await interroger(
+        catalogue,
+        "insert into public.notification_requests (order_id, email, token_hash, created_at) values ($1, 'v@exemple.test', $2, now() - interval '5 hours')",
+        [fraiche.id, nouveauJeton().hash],
+      );
+    }
+    const { error } = await service.rpc("demander_notification", {
+      p_jeton_public: fraiche.public_token,
+      p_email: "q@exemple.test",
+      p_token_hash: nouveauJeton().hash,
+    });
+    expect(error?.code).toBe("DL074");
+  });
+
+  test("CONTRE-TEST : des demandes de plus de 24 h ne comptent plus", async () => {
+    const fraiche = await creerCommande("notif 25h");
+    for (let i = 0; i < 3; i += 1) {
+      await interroger(
+        catalogue,
+        "insert into public.notification_requests (order_id, email, token_hash, created_at) values ($1, 'v@exemple.test', $2, now() - interval '25 hours')",
+        [fraiche.id, nouveauJeton().hash],
+      );
+    }
+    const { error } = await service.rpc("demander_notification", {
+      p_jeton_public: fraiche.public_token,
+      p_email: "q@exemple.test",
+      p_token_hash: nouveauJeton().hash,
+    });
+    expect(error).toBeNull();
+  });
+
+  test("⚠️ LA BOUTIQUE ENTIÈRE EST BORNÉE : multiplier les commandes ne multiplie pas le spam", async () => {
+    // Soixante demandes récentes sur une commande de la boutique : une commande
+    // NEUVE, jamais sollicitée, doit être refusée quand même.
+    const seme = await creerCommande("notif boutique");
+    await interroger(
+      catalogue,
+      `insert into public.notification_requests (order_id, email, token_hash, created_at)
+       select $1, 'v@exemple.test', encode(extensions.gen_random_bytes(32), 'hex'), now() - interval '2 hours'
+       from generate_series(1, 60)`,
+      [seme.id],
+    );
+    const neuve = await creerCommande("notif boutique neuve");
+    const { error } = await service.rpc("demander_notification", {
+      p_jeton_public: neuve.public_token,
+      p_email: "q@exemple.test",
+      p_token_hash: nouveauJeton().hash,
+    });
+    await interroger(catalogue, "delete from public.notification_requests where order_id = $1", [seme.id]);
+    expect(error?.code).toBe("DL075");
+  });
+
   test("la désinscription efface l'adresse, et la commande n'écrit plus à personne", async () => {
     const { data } = await service.rpc("desabonner_notification", { p_jeton: commande.unsubscribe_token });
     expect((data as unknown[]).length).toBe(1);

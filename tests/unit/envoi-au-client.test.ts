@@ -59,6 +59,26 @@ describe("L'envoi au client", () => {
 
   test("un refus du fournisseur ne recopie pas sa réponse — elle peut citer l'adresse du client", async () => {
     const r = await envoyerAuClient({ a: "secret@exemple.test", sujet: "s", texte: "t" }, fournisseur(422));
-    expect(r).toEqual({ statut: "refuse", motif: "HTTP 422" });
+    expect(r).toEqual({ statut: "refuse", motif: "HTTP 422", portee: "message" });
+  });
+
+  test("⚠️ LA PORTÉE D'UN REFUS : ce message seul, ou le fournisseur entier", async () => {
+    // 400 / 422 : CE message est rejeté (adresse, contenu) — le lot peut continuer.
+    for (const code of [400, 422]) {
+      const r = await envoyerAuClient({ a: "x@exemple.test", sujet: "s", texte: "t" }, fournisseur(code));
+      expect(r, String(code)).toMatchObject({ statut: "refuse", portee: "message" });
+    }
+    // Clé, domaine, quota, panne : le destinataire suivant échouerait pareil.
+    for (const code of [401, 403, 429, 500, 503]) {
+      const r = await envoyerAuClient({ a: "x@exemple.test", sujet: "s", texte: "t" }, fournisseur(code));
+      expect(r, String(code)).toMatchObject({ statut: "refuse", portee: "fournisseur" });
+    }
+    const coupe: typeof fetch = async () => {
+      throw new TypeError("fetch failed");
+    };
+    expect(await envoyerAuClient({ a: "x@exemple.test", sujet: "s", texte: "t" }, coupe)).toMatchObject({
+      statut: "refuse",
+      portee: "fournisseur",
+    });
   });
 });

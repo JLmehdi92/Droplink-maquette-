@@ -31,7 +31,16 @@ export interface MessageClient {
 export type EnvoiClient =
   | { readonly statut: "envoye" }
   | { readonly statut: "non_configure" }
-  | { readonly statut: "refuse"; readonly motif: string };
+  | {
+      readonly statut: "refuse";
+      readonly motif: string;
+      /**
+       * `message` : CE message est rejeté (HTTP 400/422 — adresse, contenu) ; le
+       * destinataire suivant peut partir. `fournisseur` : clé, domaine, quota,
+       * panne ou réseau — le suivant échouerait pareil.
+       */
+      readonly portee: "message" | "fournisseur";
+    };
 
 export async function envoyerAuClient(message: MessageClient, sous?: typeof fetch): Promise<EnvoiClient> {
   const config = lireConfigEmailClient();
@@ -60,10 +69,11 @@ export async function envoyerAuClient(message: MessageClient, sous?: typeof fetc
     if (!reponse.ok) {
       // Le corps de la réponse n'est PAS journalisé : il peut citer l'adresse du
       // client, qui n'a rien à faire dans nos journaux.
-      return { statut: "refuse", motif: "HTTP " + String(reponse.status) };
+      const portee = reponse.status === 400 || reponse.status === 422 ? "message" : "fournisseur";
+      return { statut: "refuse", motif: "HTTP " + String(reponse.status), portee };
     }
     return { statut: "envoye" };
   } catch (erreur) {
-    return { statut: "refuse", motif: erreur instanceof Error ? erreur.name : "inconnu" };
+    return { statut: "refuse", motif: erreur instanceof Error ? erreur.name : "inconnu", portee: "fournisseur" };
   }
 }
