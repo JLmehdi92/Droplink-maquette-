@@ -181,7 +181,10 @@ pnpm typecheck · pnpm lint · pnpm build · pnpm test · pnpm test:rls · pnpm 
 > fabrique les liens de réinitialisation. `test` et `test:rls` écrivent désormais
 > leur couverture ; `scripts/inventaire-couverture.mjs` exige que CHAQUE fichier
 > de `src/lib/` soit traversé par au moins un test, ou déclaré avec sa raison, et
-> échoue dans les deux sens. **L'inventaire part du disque** : un fichier que rien
+> échoue dans les deux sens. ⚠️ **« Traversé » veut dire qu'une de ses FONCTIONS a
+> été APPELÉE** (depuis le 24/09/2026) : une instruction exécutée ne suffisait pas,
+> le code de niveau module tourne au simple import, et trois fichiers passaient la
+> porte sans un seul test. **L'inventaire part du disque** : un fichier que rien
 > n'importe ne peut pas s'y cacher. `src/app/` et `src/components/` n'y sont pas —
 > la fumée et les sondes navigateur les exercent dans un autre processus, que la
 > couverture ne voit pas.
@@ -640,7 +643,7 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 147 à 193, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 147 à 194, AVANT le déploiement** — décision
 de Wassim. ⚠️ La 167 passe en Pro les comptes `admin` existants (le seul en production est
 celui de Wassim, à sa demande). `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 

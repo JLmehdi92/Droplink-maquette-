@@ -92,7 +92,18 @@ function relatif(cle) {
   return i === -1 ? null : normal.slice(i + 1);
 }
 
-/** Un fichier est traversé si UNE instruction au moins a été exécutée, dans l'un OU l'autre rapport. */
+/**
+ * Un fichier est traversé si UNE DE SES FONCTIONS au moins a été APPELÉE, dans
+ * l'un OU l'autre rapport — ou, s'il n'en déclare aucune, si une instruction a
+ * été exécutée.
+ *
+ * ⚠️ « UNE INSTRUCTION » NE SUFFISAIT PAS (audit ECC, 24/09/2026). Le code de
+ * NIVEAU MODULE — imports, constantes — s'exécute au simple chargement : un
+ * fichier importé en passant par un autre, dont aucune fonction n'était jamais
+ * appelée, sortait « traversé ». Trois fichiers passaient ainsi la porte sans
+ * un seul test : les alertes du budget de suivi, l'envoi des alertes de veille,
+ * et les réglages constatés de l'administration.
+ */
 const traverse = new Map();
 /**
  * Les fichiers SANS AUCUNE INSTRUCTION exécutable — des types, des interfaces.
@@ -106,7 +117,8 @@ for (const rapport of Object.values(rapports)) {
     if (rel === null) continue;
     const instructions = Object.values(donnees.s ?? {});
     if (instructions.length === 0) sansCode.add(rel);
-    const touche = instructions.some((n) => n > 0);
+    const fonctions = Object.values(donnees.f ?? {});
+    const touche = fonctions.length > 0 ? fonctions.some((n) => n > 0) : instructions.some((n) => n > 0);
     traverse.set(rel, (traverse.get(rel) ?? false) || touche);
   }
 }
