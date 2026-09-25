@@ -1615,6 +1615,33 @@ try {
         }
 
         // ══════════════════════════════════════════════════════════════════════════
+        // DROPLINK.FR MÈNE UN VENDEUR CONNECTÉ À SON TABLEAU DE BORD (26/09/2026)
+        // ══════════════════════════════════════════════════════════════════════════
+        //
+        // Wassim : « quand je mets droplink.fr faut que ça me redirige sur le
+        // tableau de bord ». Le middleware RÉÉCRIT l'accueil vers `/…/auth/entree`, qui
+        // redirige en RELATIF — jamais une Location fabriquée depuis l'URL du
+        // conteneur. Le `Location` servi est donc vérifié ici sans hôte, et la
+        // route est aussi appelée directement pour que le plancher des routes la
+        // voie. CONTRE-TEST : sans session, l'accueil reste la landing (200).
+        for (const chemin of ["/fr", "/en", "/fr/auth/entree"]) {
+          const r = await fetch(`${base}${chemin}`, { redirect: "manual", headers: entetes });
+          const vers = r.headers.get("location") ?? "";
+          const langue = chemin.startsWith("/en") ? "en" : "fr";
+          controles.push([
+            r.status === 307 && vers === `/${langue}/tableau-de-bord`,
+            `${chemin} mène une session vendeur à son tableau de bord, en relatif (statut ${r.status}, vers « ${vers} »)`,
+          ]);
+        }
+        {
+          const r = await fetch(`${base}/fr`, { redirect: "manual", headers: visiteur(43) });
+          controles.push([
+            r.status === 200,
+            `CONTRE-TEST : sans session, /fr reste la landing (statut ${r.status})`,
+          ]);
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
         // ET LE GESTE FAIT-IL CE QU IL DIT ? — LE CONTRE-TEST POSITIF QUI MANQUAIT
         // ══════════════════════════════════════════════════════════════════════════
         //

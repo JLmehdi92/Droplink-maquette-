@@ -227,6 +227,33 @@ export default async function middleware(requete: NextRequest): Promise<NextResp
   // et `lib/audit/garde.ts`, qui portent les vraies gardes.
   const { data } = await supabase.auth.getSession();
 
+  /*
+   * DROPLINK.FR MÈNE UN VENDEUR CONNECTÉ À SON TABLEAU DE BORD (26/09/2026).
+   *
+   * Seulement l'accueil EXACT d'une langue (`/fr`, `/en`, `/zh-CN`) et
+   * seulement avec un cookie de session : sans lui, rien ne change — la
+   * landing reste statique, et un moteur de recherche la voit comme avant.
+   *
+   * ⚠️ UNE RÉÉCRITURE, PAS UNE REDIRECTION : Next 16 exige une `Location`
+   * absolue au bord, et la seule base disponible ici est l'adresse du
+   * conteneur (le défaut `localhost:8080`). La route `/…/auth/entree` répond, elle,
+   * une redirection RELATIVE. Les cookies éventuellement rafraîchis par
+   * `getSession()` ont été posés sur `reponse` : ils sont reportés, sinon la
+   * session renouvelée serait perdue sur ce chemin précis.
+   */
+  const accueil = /^\/([^/]+)\/?$/.exec(requete.nextUrl.pathname)?.[1];
+  if (
+    data.session !== null &&
+    accueil !== undefined &&
+    (routing.locales as readonly string[]).includes(accueil)
+  ) {
+    const cible = requete.nextUrl.clone();
+    cible.pathname = `/${accueil}/auth/entree`;
+    const reecrite = NextResponse.rewrite(cible);
+    for (const cookie of reponse.cookies.getAll()) reecrite.cookies.set(cookie);
+    return reecrite;
+  }
+
   const viseLAdmin = viseAdmin(requete.nextUrl.pathname);
 
   /*
