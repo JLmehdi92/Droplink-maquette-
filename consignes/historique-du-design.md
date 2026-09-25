@@ -6,6 +6,22 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 26/09/2026 — UN ÉCRAN NOUVEAU : LA PAGE TARIFS PUBLIQUE
+
+Décision de Wassim : « tu créer la page et tu mets l'offre ». Le lien « Tarifs » de la landing
+menait à une section de la documentation, et Lemon Squeezy exige un plan tarifaire détaillé
+avant d'ouvrir les paiements. **Planche écrite d'abord** : `ui_kits/legal/tarifs.html` (+ `-en`,
+`-zh`), `Tarifs.jsx`, et `i18n/dict-tarifs.js`, qui complète le dictionnaire légal.
+
+- **Le contenu est celui de « Passer au Pro »** — catalogue `passerPro` réutilisé (features,
+  tableau, mention Lemon Squeezy) : la page qui vend et l'écran qui encaisse ne peuvent pas
+  diverger. Prix : `PRIX_PRO_EUR`. Plafonds : lus en base, ouverts à `anon` par la 196.
+- **Trois défauts de MA planche, trouvés par la soustraction** : la feuille des pages légales
+  stylise TOUT `<header>` au téléphone (le titre de page est devenu un `<div>`, des deux côtés) ;
+  les cellules du tableau, en ligne, prenaient l'interligne de la page (49 px par rangée au lieu
+  de 46) ; le libellé de ligne au téléphone, idem.
+- Mesuré : **code 0 à 1280 et à 390, avec ZÉRO déclaration** ; 8 largeurs × 3 langues propres.
+
 ### ▶️ 26/09/2026 — LE HÉROS DE LA LANDING AU TÉLÉPHONE : UN TIMBRE-POSTE ET UN RECTANGLE
 
 Vu par Wassim sur son iPhone, le site en ligne : sous « Prêt en 30 secondes », le tableau de

@@ -773,6 +773,30 @@ if (routesVendeur.length < 5 || routesEprouvees < routesVendeur.length) {
  * constatee du lien « conditions » sur chaque page, une page rendue sans pied
  * de page — ou pas rendue du tout — passerait ce controle en ne prouvant rien.
  */
+/*
+ * LA PAGE TARIFS (26/09/2026) LIT SES PLAFONDS EN BASE, EN VISITEUR.
+ *
+ * Le marqueur n'est pas un titre : c'est la phrase du quota à vie, qui n'est
+ * rendue QUE si le plafond a été lu. Sans le droit accordé à `anon` par la
+ * migration 196, la page répondrait 200 avec sa phrase de repli — et un
+ * contrôle de statut resterait vert sur une page qui ne dit plus son offre.
+ */
+console.log("");
+console.log("— La page tarifs —");
+for (const [chemin, marqueur] of [
+  ["/fr/tarifs", "commandes au total, à vie"],
+  ["/en/tarifs", "orders in total, for life"],
+  ["/zh-CN/tarifs", "终身共"],
+]) {
+  const r = await fetch(`${base}${chemin}`, { redirect: "manual" });
+  const html = r.status === 200 ? await r.text() : "";
+  const lu = html.includes(marqueur);
+  if (r.status !== 200 || !lu) echecs += 1;
+  console.log(
+    `${r.status === 200 && lu ? "OK   " : "ECHEC"} ${chemin} rend ${r.status} et dit le plafond lu en base (« ${marqueur} » ${lu ? "present" : "ABSENT"})`,
+  );
+}
+
 console.log("");
 console.log("— Le recours de signalement —");
 
@@ -5338,7 +5362,8 @@ function ageHsts(entetes) {
 // rendu. Les deux sont necessaires et aucune ne remplace l autre — une
 // regression de configuration ne touche pas une ligne de code source.
 {
-  const CHEMINS_INDEXABLES = ["", "/conditions", "/confidentialite", "/signalement", "/docs"];
+  // `/tarifs` ajouté le 26/09/2026, en même temps qu'au plan de site et à `tests/unit/seo.test.ts`.
+  const CHEMINS_INDEXABLES = ["", "/tarifs", "/conditions", "/confidentialite", "/signalement", "/docs"];
   const LANGUES_SERVIES = ["fr", "en", "zh-CN"];
 
   const robots = await fetch(`${base}/robots.txt`);

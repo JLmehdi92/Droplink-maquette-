@@ -73,7 +73,15 @@ const RACINE_APP = join(process.cwd(), "src", "app");
  * blog, donc la seule qui puisse répondre à « comment fonctionne DropLink »
  * dans un moteur. L'indexer est l'intention, pas un effet de bord.
  */
-const CHEMINS_ATTENDUS = ["", "/conditions", "/confidentialite", "/signalement", "/docs"] as const;
+/*
+ * ⚠️ `/tarifs` A ÉTÉ AJOUTÉ EN CONSCIENCE LE 26/09/2026 (décision de Wassim : « tu
+ * créer la page et tu mets l'offre »). Relecture : page PUBLIQUE de vente, sans
+ * donnée de compte, sans jeton, sans nom de client — deux plans, un prix et deux
+ * plafonds globaux lus en base. Elle a sa canonique et ses trois hreflang, comme
+ * `/docs`. L'indexer est l'intention : c'est la page qui répond à « combien coûte
+ * DropLink », et Lemon Squeezy la demande avant d'ouvrir les paiements.
+ */
+const CHEMINS_ATTENDUS = ["", "/tarifs", "/conditions", "/confidentialite", "/signalement", "/docs"] as const;
 
 /** Les chemins réellement déclarés dans `src/app/sitemap.ts`, lus dans le fichier. */
 function cheminsDuSitemap(): string[] {

@@ -2307,5 +2307,27 @@
         "texte": "Votre lien reste valable : réessayez dans quelques minutes."
       }
     }
+  },
+  "tarifs": {
+    "metaTitre": "Tarifs — DropLink",
+    "metaDescription": "Commencez gratuitement, sans carte bancaire. Le plan Pro à {prix} par mois, sans engagement : votre lien à votre nom, une page sans mention DropLink et un plafond qui se recharge chaque mois.",
+    "pastille": "Tarifs",
+    "eyebrow": "Tarifs",
+    "titre": "Gratuit pour commencer, Pro quand vous grandissez",
+    "intro": "Photos, vidéos, suivi automatique et page à vos couleurs : tout ce qui fait DropLink est déjà dans le plan gratuit. Le Pro ajoute quatre choses, et seulement quatre.",
+    "gratuitSous": "Sans carte bancaire",
+    "gratuitQuota": "{n} commandes au total, à vie",
+    "gratuitQuotaSansNombre": "Un total de commandes à vie",
+    "proSous": "Par mois, sans engagement",
+    "proQuota": "{n} commandes par mois",
+    "proQuotaSansNombre": "Un plafond qui se recharge chaque mois",
+    "toutLeGratuit": "Tout le plan gratuit",
+    "ctaGratuit": "Créer un compte gratuit",
+    "ctaPro": "Commencer avec Pro",
+    "noteCompte": "Le Pro s'active depuis votre espace, une fois le compte créé.",
+    "dejaInscrit": "Déjà un compte ?",
+    "comparer": "Comparer les deux plans",
+    "question": "Une question sur les plans ?",
+    "voirDocs": "Tout est expliqué dans la documentation"
   }
 }

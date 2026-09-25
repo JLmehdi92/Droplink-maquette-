@@ -2307,5 +2307,27 @@
         "texte": "您的链接仍然有效，请几分钟后再试。"
       }
     }
+  },
+  "tarifs": {
+    "metaTitre": "价格 — DropLink",
+    "metaDescription": "免费开始，无需银行卡。Pro 套餐每月 {prix}，无需长期绑定：以你的名义生成链接、客户页面不显示 DropLink 标识、上限每月重置。",
+    "pastille": "价格",
+    "eyebrow": "价格",
+    "titre": "免费起步，业务增长后升级 Pro",
+    "intro": "照片、视频、自动物流跟踪和品牌配色页面：DropLink 的核心功能，免费套餐已经全部包含。Pro 只增加四项。",
+    "gratuitSous": "无需银行卡",
+    "gratuitQuota": "终身共 {n} 笔订单",
+    "gratuitQuotaSansNombre": "终身订单总量",
+    "proSous": "按月付费，无需长期绑定",
+    "proQuota": "每月 {n} 笔订单",
+    "proQuotaSansNombre": "每月重置的上限",
+    "toutLeGratuit": "包含免费套餐的全部功能",
+    "ctaGratuit": "免费注册账号",
+    "ctaPro": "从 Pro 开始",
+    "noteCompte": "创建账号后，可在你的账户中开通 Pro。",
+    "dejaInscrit": "已有账号？",
+    "comparer": "对比两种套餐",
+    "question": "对套餐有疑问？",
+    "voirDocs": "使用文档中有详细说明"
   }
 }

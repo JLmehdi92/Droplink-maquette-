@@ -2307,5 +2307,27 @@
         "texte": "Your link is still valid: please try again in a few minutes."
       }
     }
+  },
+  "tarifs": {
+    "metaTitre": "Pricing — DropLink",
+    "metaDescription": "Start free, no credit card needed. The Pro plan is {prix} a month, no commitment: links under your name, a page without the DropLink mention and a cap that resets every month.",
+    "pastille": "Pricing",
+    "eyebrow": "Pricing",
+    "titre": "Free to start, Pro when you grow",
+    "intro": "Photos, videos, automatic tracking and a page in your colours: everything DropLink does is already in the free plan. Pro adds four things, and only four.",
+    "gratuitSous": "No credit card needed",
+    "gratuitQuota": "{n} orders in total, for life",
+    "gratuitQuotaSansNombre": "A lifetime total of orders",
+    "proSous": "Per month, no commitment",
+    "proQuota": "{n} orders per month",
+    "proQuotaSansNombre": "A cap that resets every month",
+    "toutLeGratuit": "Everything in the free plan",
+    "ctaGratuit": "Create a free account",
+    "ctaPro": "Start with Pro",
+    "noteCompte": "Pro is activated from your account, once it is created.",
+    "dejaInscrit": "Already have an account?",
+    "comparer": "Compare the two plans",
+    "question": "A question about the plans?",
+    "voirDocs": "Everything is explained in the documentation"
   }
 }

@@ -180,7 +180,7 @@ export default async function Accueil({
   const NAV: ReadonlyArray<readonly [string, string]> = [
     [k("navFeatures"), "#fonctionnalites"],
     [k("navHow"), "#etapes"],
-    [k("navPricing"), `/${locale}/docs#plans`],
+    [k("navPricing"), `/${locale}/tarifs`],
     [k("navDocs"), `/${locale}/docs`],
     [k("navFaq"), `/${locale}/docs#faq`],
   ];
