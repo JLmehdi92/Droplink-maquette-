@@ -373,16 +373,17 @@ export default async function Accueil({
             {/* LES DEUX MAQUETTES. Au-dessus de 1180, bloc de 600 et téléphone en
                 absolu ; en dessous, ils s'empilent.
 
-                ⚠️ DEUX TRANSFORMATIONS EMBOÎTÉES, PAS UNE SEULE À 0,204. La planche
-                réduit la fenêtre à 0,68 sur elle-même, puis son ENVELOPPE à 0,42 et
-                0,30 sous 760 et 560 — enveloppe qui est aussi rognée à la largeur
-                de la colonne. Chacune tourne autour de son propre haut-centre : le
-                produit l'avait écrit en un seul facteur composé (0,2856 et 0,204),
-                même taille mais pas le même recadrage, et toute la maquette
-                s'affichait 39 px plus à gauche qu'au kit, à 390 px. */}
+                ⚠️ SOUS 1181, LA FENÊTRE SE RÉDUIT PAR `zoom`, PAS PAR UNE
+                TRANSFORMATION (26/09/2026). Une transformation laisse la place
+                d'une fenêtre de 1180 px : la colonne la rognait AVANT la réduction,
+                et à 390 px il ne restait que le bord gauche du tableau de bord, en
+                timbre-poste de 50 px — Wassim l'a vu sur son iPhone ; la planche
+                avait le même défaut, corrigé d'abord chez elle. `zoom` réduit aussi
+                la place occupée : la fenêtre entière tient dans la colonne, sans
+                hauteur fixe ni rognage. Au-dessus de 1180, rien ne change. */}
             <div className="relative mt-8 flex flex-col items-center gap-2 min-[761px]:gap-6 min-[1181px]:mt-10 min-[1181px]:block min-[1181px]:h-[600px]">
-              <div className="h-[190px] max-w-full origin-top scale-[0.3] overflow-hidden min-[561px]:h-[260px] min-[561px]:scale-[0.42] min-[761px]:h-auto min-[761px]:scale-100 min-[1181px]:absolute min-[1181px]:left-1/2 min-[1181px]:-translate-x-[64%]">
-                <div className="w-[1180px] origin-top scale-[0.68]">
+              <div className="[zoom:0.275] min-[561px]:[zoom:0.44] min-[761px]:[zoom:0.6] min-[1181px]:absolute min-[1181px]:left-1/2 min-[1181px]:max-w-full min-[1181px]:-translate-x-[64%] min-[1181px]:overflow-hidden min-[1181px]:[zoom:1]">
+                <div className="w-[1180px] min-[1181px]:origin-top min-[1181px]:scale-[0.68]">
                   <MaquetteApplication />
                 </div>
               </div>

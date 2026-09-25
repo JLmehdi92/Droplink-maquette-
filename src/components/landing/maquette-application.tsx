@@ -64,6 +64,11 @@ const DRAPEAUX = { fr: drapeauFr, be: drapeauBe, it: drapeauIt } as const;
  * ⚠️ 120 Ko EN WEBP, PAS 1,5 Mo EN PNG. La source de la planche pèse un mégaoctet
  * et demi pour un dessin rendu à 286 px ; elle est redimensionnée à 572 (deux
  * fois la taille d'affichage) et convertie, transparence comprise.
+ *
+ * ⚠️ PAS D'OMBRE SOUS 761 PX (26/09/2026). Safari iOS rendait l'ombre floutée de
+ * 70 px de cette grande image transparente en rectangle clair derrière le
+ * téléphone — vu par Wassim sur son iPhone, invisible dans Chrome. La planche
+ * l'a retirée au même palier.
  */
 export function TelephoneClient({ largeur = 286 }: { readonly largeur?: number }) {
   return (
@@ -71,7 +76,7 @@ export function TelephoneClient({ largeur = 286 }: { readonly largeur?: number }
       src={maquetteClient}
       alt=""
       aria-hidden="true"
-      className="block h-auto w-auto flex-none select-none [filter:drop-shadow(0_34px_70px_rgba(28,22,78,0.26))]"
+      className="block h-auto w-auto flex-none select-none min-[761px]:[filter:drop-shadow(0_34px_70px_rgba(28,22,78,0.26))]"
       style={{ width: largeur }}
     />
   );

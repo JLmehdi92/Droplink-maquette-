@@ -6,6 +6,29 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 26/09/2026 — LE HÉROS DE LA LANDING AU TÉLÉPHONE : UN TIMBRE-POSTE ET UN RECTANGLE
+
+Vu par Wassim sur son iPhone, le site en ligne : sous « Prêt en 30 secondes », le tableau de
+bord n'était plus qu'un **timbre-poste de 50 px**, et le téléphone reposait sur un **rectangle
+clair**. Les 74 relevés étaient pourtant en code 0 — **la planche avait le même défaut**, donc
+la soustraction ne pouvait rien voir : elle compare le produit à la planche, pas à ce qui est
+juste.
+
+- **La cause du timbre-poste.** La fenêtre de 1180 px était réduite par une TRANSFORMATION, qui
+  laisse sa place intacte ; la colonne rognait cette place, PUIS on réduisait le reste. À 390 px,
+  il ne restait que le bord gauche du tableau de bord ; entre 761 et 1180 px, sa partie droite
+  était coupée aussi. Remplacé, **dans la planche d'abord** (les trois langues), puis au produit,
+  par `zoom` (0,275 · 0,44 · 0,6 aux paliers 560 · 760 · 1180) : `zoom` réduit aussi la place
+  occupée, la fenêtre entière tient dans la colonne, sans hauteur fixe ni rognage. Au-dessus de
+  1180, rien ne bouge.
+- **Le rectangle.** L'image du téléphone est bien transparente (vérifié pixel par pixel). C'est
+  l'ombre floutée de 70 px, que Safari iOS rend en bloc clair sur une grande image transparente —
+  invisible dans Chrome, donc dans toutes nos sondes. Retirée sous 761 px, planche comprise.
+  **À confirmer sur un vrai iPhone** : aucune de nos mesures ne tourne sous WebKit.
+
+Mesuré : landing en code 0 au bureau (1280) et au téléphone (390) ; sonde à 14 largeurs (360 à
+1181) × 3 langues = 42 passages sans défaut ; captures regardées à 390, 640 et 900.
+
 ### ▶️ 24/09/2026 — LA REMESURE COMPLÈTE AVANT MISE EN LIGNE, ET CE QU'ELLE A TROUVÉ
 
 Première remesure des 74 relevés depuis le 19/09. **Ce qui était en code 0 le 19 ne l'était
