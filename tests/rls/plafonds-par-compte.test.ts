@@ -180,10 +180,12 @@ describe("Le nombre de commandes par mois est borné", () => {
  * monde. La fonction étant accordée à `authenticated`, elle est de surcroît
  * appelable directement en PostgREST, hors de toute limitation de débit.
  *
- * Le plafond vaut DEUX FOIS celui des commandes (migration 125) : un colis
- * correspond à une commande, et le facteur 2 laisse une correction de numéro sur
- * chacune. On abaisse donc le réglage des commandes pour éprouver la borne, plutôt
- * que d'insérer six mille lignes — ce qui mesurerait la vitesse d'insertion.
+ * ⚠️ EN PRO, LE PLAFOND DE COLIS VAUT LE PLAFOND DE COMMANDES — une fois, plus
+ * deux (décision de Wassim, 26/09/2026 : « 300 commandes par mois et 300 colis à
+ * suivre »). La 125 lui donnait deux fois, pour laisser une correction de numéro
+ * sur chaque commande ; la 197 retire ce facteur pour le Pro. On abaisse donc le
+ * réglage des commandes pour éprouver la borne, plutôt que d'insérer trois cents
+ * lignes — ce qui mesurerait la vitesse d'insertion.
  */
 describe("Le nombre de colis pris en charge est borné", () => {
   async function creerColis(u: UtilisateurDeTest, numero: string): Promise<string | null> {
@@ -194,8 +196,8 @@ describe("Le nombre de colis pris en charge est borné", () => {
   }
 
   test("au-delà du plafond, la base refuse la prise en charge", async () => {
-    // Plafond de commandes à 1 ⇒ plafond de colis à 2.
-    await abaisserPlafondCommandes(1);
+    // Plafond de commandes à 2 ⇒ plafond de colis à 2 (et non plus 4).
+    await abaisserPlafondCommandes(2);
 
     // LA SONDE PROUVE D'ABORD QU'ELLE INSPECTE QUELQUE CHOSE : si les deux
     // premiers étaient refusés, le troisième refus ne dirait rien.

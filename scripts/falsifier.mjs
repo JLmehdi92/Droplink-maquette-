@@ -973,14 +973,14 @@ const SQL = {
    */
   "colis-gratuit-au-plafond-mensuel": {
     casserDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie() * 2;",
       par: "    v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -1012,14 +1012,35 @@ const SQL = {
    */
   "colis-sans-verrou": {
     casserDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-colis:' || new.shop_id::text, 0));\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+    },
+  },
+
+  /*
+   * LE PRO RETROUVE SON DOUBLE (197). Décision de Wassim, 26/09/2026 : « 300
+   * commandes par mois et 300 colis à suivre ». Remettre le facteur 2 rendrait
+   * 600 colis à un compte qui en a payé 300 — et chacun est une prise en charge
+   * payante sur un palier commun. `plafonds-par-compte` doit rougir.
+   */
+  "colis-pro-au-double": {
+    casserDepuisMigration: {
+      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+      remplacer: "  v_plafond := public.lire_plafond_commandes();",
+      par: "  v_plafond := public.lire_plafond_commandes() * 2;",
+    },
+    reparerDepuisMigration: {
+      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },

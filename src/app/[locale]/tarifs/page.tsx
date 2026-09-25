@@ -116,7 +116,8 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
           {
             cle: "colis",
             gratuit: p("tableau.aVie", { n: nombre(aVie * 2) }),
-            pro: parMois === null ? p("tableau.mensuel") : p("tableau.parMois", { n: nombre(parMois * 2) }),
+            // Une fois le plafond de commandes, plus deux (197) : 300 commandes, 300 colis.
+            pro: parMois === null ? p("tableau.mensuel") : p("tableau.parMois", { n: nombre(parMois) }),
           },
         ]),
     { cle: "adresse", gratuit: p("tableau.adresseGratuit"), pro: p("tableau.adressePro") },

@@ -132,7 +132,8 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
             pro:
               parMois === null
                 ? t("tableau.mensuel")
-                : t("tableau.parMois", { n: nombre(parMois * 2) }),
+                : // Une fois le plafond de commandes, plus deux (197) : 300 commandes, 300 colis.
+                  t("tableau.parMois", { n: nombre(parMois) }),
           },
         ]),
     { cle: "adresse", gratuit: t("tableau.adresseGratuit"), pro: t("tableau.adressePro") },
