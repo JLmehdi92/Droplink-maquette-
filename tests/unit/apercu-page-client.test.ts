@@ -52,11 +52,24 @@ function fichiers(dossier: string): string[] {
 
 const normaliser = (chemin: string): string => chemin.split(sep).join("/");
 
-/** Les îlots de la page publique qui ÉCRIVENT : fichiers clients dont le code envoie un POST. */
+/**
+ * CE QUI COMPTE COMME ÉCRIRE. Pas seulement `method: "POST"` écrit en toutes lettres : la
+ * revue ECC du 26/09/2026 a relevé qu'un geste passant par une Server Action importée, un
+ * autre verbe ou `sendBeacon` aurait échappé à l'inventaire — un faux vert, L-020. Reste
+ * hors de portée une écriture cachée derrière un utilitaire au nom neutre : c'est la limite
+ * d'un contrôle qui lit du code, et la fumée comme le navigateur la complètent.
+ */
+const ECRIT = [
+  /method:\s*["'](?:POST|PUT|PATCH|DELETE)["']/i,
+  /sendBeacon\s*\(/,
+  /from\s+["'][^"']*actions[^"']*["']/,
+];
+
+/** Les îlots de la page publique qui ÉCRIVENT. */
 function ilotsQuiEcrivent(): Array<{ readonly fichier: string; readonly composants: string[] }> {
   return fichiers(join("src", "components", "publique"))
     .map((fichier) => ({ fichier, code: codeSeul(fichier) }))
-    .filter(({ code }) => /^\s*["']use client["']/.test(code) && /method:\s*["']POST["']/.test(code))
+    .filter(({ code }) => /^\s*["']use client["']/.test(code) && ECRIT.some((m) => m.test(code)))
     .map(({ fichier, code }) => ({
       fichier: normaliser(relative(RACINE, join(RACINE, fichier))),
       composants: [...code.matchAll(/export function (\w+)/g)].map((m) => m[1] as string),
@@ -129,6 +142,30 @@ describe("L'aperçu de l'éditeur ne peut rien écrire au nom du client", () => 
       .filter((f) => /emettre\w*\(\s*EVENEMENTS\.PAGE_PUBLIQUE_RENDUE/.test(codeSeul(f)))
       .map(normaliser);
     expect(emetteurs).toEqual([normaliser(VRAIE_PAGE)]);
+  });
+
+  test("le motif d'écriture reconnaît les formes qu'il doit attraper", () => {
+    // CONTRE-TEST : un motif cassé ne reconnaîtrait plus rien, et l'inventaire serait
+    // réduit aux îlots qui écrivent `method: "POST"` en toutes lettres.
+    for (const forme of [
+      'fetch(u, { method: "POST" })',
+      "fetch(u, { method: 'put' })",
+      "navigator.sendBeacon(u, corps)",
+      'import { approuver } from "@/lib/commandes/actions-client";',
+    ]) {
+      expect(ECRIT.some((m) => m.test(forme)), forme).toBe(true);
+    }
+    expect(ECRIT.some((m) => m.test('fetch("/p/x/media/y")')), "une lecture n'écrit pas").toBe(false);
+  });
+
+  test("le lien mort ouvre l'accueil dans l'onglet ENTIER, jamais dans le cadre de l'aperçu", () => {
+    // L'aperçu d'un lien bloqué encadre cet écran ; l'accueil refuse d'être encadré. Chaque
+    // lien vers l'accueil doit donc porter `target="_top"` (ou un nouvel onglet).
+    const code = codeSeul(join("src", "app", "p", "[token]", "not-found.tsx"));
+    const liens = [...code.matchAll(/<(?:Link|a)\b[^>]*>/g)].map((m) => m[0]);
+    expect(liens.length, "aucun lien lu dans l'écran du lien mort").toBeGreaterThanOrEqual(2);
+    const pieges = liens.filter((l) => !/target="(?:_top|_blank)"/.test(l));
+    expect(pieges, "liens qui s'ouvriraient dans le cadre de l'aperçu").toEqual([]);
   });
 
   test("l'aperçu est freiné comme la vraie page : quota AVANT la lecture, jeton inconnu compté", () => {

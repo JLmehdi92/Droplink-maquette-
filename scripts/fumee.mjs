@@ -3719,6 +3719,10 @@ if (jetonFumee) {
     inconnu.status === 404 && corpsInconnu.includes("Ce lien n"),
     `un jeton inconnu rend le lien mort en 404 sur l aperçu aussi (statut ${inconnu.status})`,
   ]);
+} else {
+  // UN ENSEMBLE VIDE PASSE TOUT : sans commande de fumée, ce bloc sautait en silence, et
+  // le seul contrôle servi du cadrage de l aperçu disparaissait avec lui (revue ECC, 26/09).
+  controles.push([false, "la commande de fumee manque : l aperçu de l editeur n a pas ete verifie"]);
 }
 
   if (jetonFumee) {

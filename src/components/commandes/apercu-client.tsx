@@ -42,6 +42,14 @@ import { cheminApercuPageClient } from "@/lib/liens/page-client";
 
 type Mode = "mobile" | "desktop";
 
+/** Un document chargé dans un cadre : l'adresse demandée, et la version qu'elle montrait. */
+interface Chargement {
+  readonly version: number;
+  readonly source: string;
+}
+
+const cle = (charge: Chargement): string => charge.source + ":" + String(charge.version);
+
 /** La hauteur visible, identique dans les deux modes : basculer ne fait pas sauter la colonne. */
 const HAUTEUR = 616;
 /** Le téléphone de `BrandPreview` : 300 px, 8 de bord noir. */
@@ -118,24 +126,36 @@ export function ApercuClient({
    * Recharger le cadre visible le ferait blanchir à chaque champ enregistré, et le
    * remonterait en haut de page pendant que le vendeur regarde sa galerie.
    */
-  const [affichee, setAffichee] = useState(version);
-  const [enChargement, setEnChargement] = useState<number | null>(null);
+  /*
+   * ⚠️ CHAQUE CADRE RETIENT L'ADRESSE AVEC LAQUELLE IL A ÉTÉ CHARGÉ, ET PAS SEULEMENT SA
+   * VERSION (revue ECC du 26/09/2026). La clé du cadre affiché lisait le jeton COURANT :
+   * révoquer le lien changeait donc la clé du cadre DÉJÀ chargé, React le remontait à
+   * vide, et l'aperçu blanchissait — sur l'action la plus sensible de l'écran, en
+   * contournant le double tampon. Un nouveau jeton est désormais un rechargement comme
+   * un autre : il se charge dessous, et l'ancien reste affiché jusqu'au relais.
+   */
+  const source = cheminApercuPageClient(jeton);
+  const [affichee, setAffichee] = useState<Chargement>({ version, source });
+  const [enChargement, setEnChargement] = useState<Chargement | null>(null);
 
   useEffect(() => {
-    if (version === affichee) return;
-    const minuterie = window.setTimeout(() => setEnChargement(version), DELAI_RECHARGE_MS);
+    if (version === affichee.version && source === affichee.source) return;
+    const minuterie = window.setTimeout(
+      () => setEnChargement({ version, source }),
+      DELAI_RECHARGE_MS,
+    );
     return () => window.clearTimeout(minuterie);
-  }, [version, affichee]);
+  }, [version, source, affichee]);
 
-  const surChargement = (numero: number, cadre: HTMLIFrameElement): void => {
-    if (numero !== enChargement) return;
+  const surChargement = (charge: Chargement, cadre: HTMLIFrameElement): void => {
+    if (enChargement === null || cle(charge) !== cle(enChargement)) return;
     // L'ANCIEN CADRE EST L'AUTRE `iframe` DU MÊME CONTENEUR : il n'y en a jamais que deux,
     // et seulement le temps de ce chargement.
     const ancien = Array.from(cadre.parentElement?.querySelectorAll("iframe") ?? []).find(
       (autre) => autre !== cadre,
     );
     cadre.contentWindow?.scrollTo(0, defilementDe(ancien));
-    setAffichee(numero);
+    setAffichee(charge);
     setEnChargement(null);
   };
 
@@ -149,23 +169,27 @@ export function ApercuClient({
   // Plus large que son propre filet : en deçà, l'échelle du desktop serait nulle ou négative.
   const zoneAffichee = largeurZone !== null && largeurZone > 2 * FILET;
 
-  const source = cheminApercuPageClient(jeton);
-  const numeros = enChargement === null ? [affichee] : [affichee, enChargement];
+  const charges = enChargement === null ? [affichee] : [affichee, enChargement];
 
   const lesCadres = !zoneAffichee
     ? null
-    : numeros.map((numero) => (
+    : charges.map((charge) => (
         <iframe
-          /* LE MODE ET LE JETON FONT PARTIE DE LA CLÉ : changer l'un ou l'autre charge un
-             document neuf, sans rien à préserver — ni la largeur ni la page ne sont les
-             mêmes. */
-          key={mode + ":" + jeton + ":" + String(numero)}
-          src={source}
+          /* LE MODE FAIT PARTIE DE LA CLÉ : en changer charge un document neuf, sans rien à
+             préserver — la largeur de la page n'est plus la même. L'ADRESSE ET LA VERSION
+             sont celles du chargement, jamais le jeton courant (voir plus haut). */
+          key={mode + ":" + cle(charge)}
+          src={charge.source}
           title={mode === "mobile" ? t("apercuCadreMobile") : t("apercuCadreDesktop")}
-          onLoad={(evenement) => surChargement(numero, evenement.currentTarget)}
+          /* HORS DE LA TABULATION, comme les aperçus de `BrandPreview` (revue ECC du
+             26/09/2026). Sans lui, Tab entrait dans la page encadrée et en traversait tous
+             les liens avant de revenir à l'éditeur. La souris y garde la main — défiler,
+             ouvrir une photo — et la vraie page reste à un lien, juste au-dessus. */
+          tabIndex={-1}
+          onLoad={(evenement) => surChargement(charge, evenement.currentTarget)}
           className={
             "absolute top-0 left-0 block border-0 bg-ds-surface-carte " +
-            (numero === enChargement ? "invisible" : "")
+            (enChargement !== null && cle(charge) === cle(enChargement) ? "invisible" : "")
           }
           style={{
             width: largeurPage,

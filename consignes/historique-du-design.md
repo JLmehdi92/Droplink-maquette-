@@ -34,6 +34,13 @@ dans les deux modes, et on fait DÉFILER la page (pas de fondu).
   rien ne déborde, CSP et console propres. Navigateur piloté, 15/15 : clic et clavier sans effet
   sur l'arbitrage, champ e-mail non remplissable, aucun POST `/vue`, défilement, rechargement
   500 → 500 ; contre-tests sur la vraie page (la vue part, le clic ouvre l'arbitrage).
+- **Vérification demandée par Wassim (même jour), quatre revues ECC** : 🔴 deux vrais défauts du
+  premier commit. RÉVOQUER le lien blanchissait l'aperçu (la clé du cadre lisait le jeton
+  COURANT ; mesuré 7 instants blancs sur 12 échantillons) → chaque cadre retient sa propre
+  adresse, 0 sur 20. Tab entrait dans la page encadrée → `tabIndex={-1}`, comme les cadres de
+  `BrandPreview` (planche mise à jour). Tests d'exécution ajoutés (happy-dom : le cadre, et
+  `CarteMedias` qui ne signale qu'après le oui de la base), tous falsifiés. Remesurés au pixel
+  après le découpage : la VRAIE page client et le lien mort, à 1440 et 390, en code 0.
 
 ### ▶️ 26/09/2026 — L'HISTORIQUE DU SUIVI SE REPLIE SUR LA PAGE CLIENT
 
