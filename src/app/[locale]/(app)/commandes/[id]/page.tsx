@@ -16,8 +16,6 @@ import { creerClientServeur } from "@/lib/supabase/server";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
-import { libellesApercu } from "@/lib/boutique/libelles-apercu";
-import { resoudreAccent } from "@/lib/design/contraste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
 import { lireHistorique } from "@/lib/commandes/historique";
@@ -263,20 +261,12 @@ export default async function EditeurCommande({
   const plafonds = plafondsAffichables();
 
   /*
-   * LA PALETTE DE L'APERÇU EST RÉSOLUE ICI, côté serveur, par la MÊME fonction
-   * que la page publique. Un aperçu qui calculerait ses couleurs autrement
-   * finirait par montrer autre chose que ce que le client verra — et c'est
-   * exactement l'unique chose que cet aperçu promet de ne pas faire.
-   *
-   * `accent_color` est NON NULLE avec un défaut en base : il n'existe aucun état
-   * « couleur non configurée » à détecter.
+   * ⚠️ L'APERÇU NE REÇOIT PLUS NI PALETTE, NI LOGO, NI LIBELLÉS (26/09/2026). Ils
+   * étaient résolus ici pour une maquette qui redessinait la page client ; l'aperçu
+   * CHARGE désormais la page elle-même (`/p/<jeton>/apercu`), qui résout tout cela
+   * par son propre chemin. Deux résolutions de la même couleur, c'était deux
+   * occasions de montrer au vendeur autre chose que ce que son client verra.
    */
-  // `profil` NE PEUT PLUS ÊTRE NUL ici : `exigerVendeur` a déjà redirigé. Les
-  // trois branches de repli qui vivaient là étaient précisément ce qui laissait
-  // la page se rendre quand il l'était.
-  const accent = resoudreAccent(profil.couleurAccent);
-  const logoUrl =
-    profil.logoUrl === null ? null : await signerLecture(profil.logoUrl).catch(() => null);
 
   {
     // `order_editor_opened` mesure l'OUVERTURE, `order_created` mesure le
@@ -408,25 +398,6 @@ export default async function EditeurCommande({
             plafondMedias: plafonds.medias,
             plafondVideos: plafonds.videos,
             typesAcceptes: plafonds.typesAcceptes,
-          }}
-          boutique={{
-            nom: profil?.nomBoutique ?? null,
-            logoUrl,
-            /*
-             * ⚠️ `profil.languePublique`, PAS `langue`. La première est le
-             * réglage de la boutique, celle que verront ses clients ; la
-             * seconde est le segment de l'URL vendeur. Les confondre est
-             * exactement le défaut mesuré le 06/09/2026 — un aperçu titré
-             * « ce que voit le client » qui montrait autre chose que ce que le
-             * client verra.
-             */
-            libellesApercu: await libellesApercu(profil.languePublique),
-            palette: {
-              remplissage: accent.remplissage,
-              surRemplissage: accent.surRemplissage,
-              surRemplissageDoux: accent.surRemplissageDoux,
-              surRemplissageFaible: accent.surRemplissageFaible,
-            },
           }}
           /*
             L'HISTORIQUE EST UN COMPOSANT SERVEUR passé en propriété. Le rendre

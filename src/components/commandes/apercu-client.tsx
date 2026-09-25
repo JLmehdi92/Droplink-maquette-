@@ -1,194 +1,259 @@
 "use client";
 
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Monitor, Smartphone, type LucideIcon } from "lucide-react";
 import { Panneau } from "@/components/app/panneau";
-import { substituerNom, type LibellesApercu } from "@/lib/boutique/phrases-apercu";
-import type { MediaAffiche } from "./carte-medias";
+import { cheminApercuPageClient } from "@/lib/liens/page-client";
 
 /**
- * « CE QUE VOIT LE CLIENT » — l'aperçu en direct de la page publique.
+ * « APERÇU DE LA PAGE CLIENT » — LA VRAIE PAGE, EN MOBILE OU EN DESKTOP.
  *
- * IL MANQUAIT, et il est exigé deux fois : par la planche `Editeur`, qui lui
- * donne toute la colonne de droite, et par le brief §7 — « aperçu en direct de
- * ce que voit le client, côte à côte ».
+ * ⚠️ CE FUT UNE MAQUETTE JUSQU'AU 26/09/2026, ET WASSIM L'A VU EN UNE PHRASE :
+ * « pourquoi l'aperçu n'est pas comme la vraie page client, c'est moche ». Elle
+ * redessinait la page à l'échelle — trois vignettes, quatre barres, un bouton — au
+ * motif que réutiliser les vrais composants ferait entrer le poids de la page dans
+ * l'éditeur. C'était juste pour les COMPOSANTS, et faux pour la PAGE : un cadre ne
+ * coûte rien à l'éditeur, puisque la page s'y charge dans son propre document. Et la
+ * maquette ne pouvait que diverger — elle ne connaissait ni l'en-tête de boutique, ni
+ * l'historique, ni la carte « Propulsé par DropLink ».
  *
- * POURQUOI IL COMPTE PLUS QU'IL N'EN A L'AIR. Le produit vend une chose : la
- * crédibilité d'un lien envoyé en message privé. Le vendeur ne peut pas la
- * juger depuis un formulaire — il faut qu'il voie sa couleur, son nom et ses
- * photos assemblés. Sans cet aperçu, la seule façon de vérifier est d'ouvrir la
- * page publique dans un onglet, donc de compter une vue sur sa propre commande.
+ * La planche `OrderDetail` le dessinait déjà ainsi : « Live miniature of the REAL
+ * client page, not a mock-up of it ». La bascule vient de `BrandPreview` (« Ma
+ * marque ») : mêmes deux boutons, même téléphone de 300 px.
  *
- * CE N'EST PAS LA PAGE PUBLIQUE EN MINIATURE, et il ne faut pas qu'il le
- * devienne. Réutiliser les vrais composants ferait entrer tout le poids de la
- * page cliente dans l'éditeur, et ferait dépendre l'aperçu d'un rendu qui n'a
- * pas les mêmes contraintes. C'est une MAQUETTE, à l'échelle, avec les mêmes
- * couleurs résolues — ce que la planche dessine, exactement.
+ * CE QUI EST CHARGÉ : `/p/<jeton>/apercu` — `PageClient`, le composant de la page
+ * publique, sans balise de vue et avec ses deux gestes d'écriture inertes. Voir
+ * `app/p/[token]/apercu/page.tsx`.
  *
- * AUCUNE COULEUR D'ÉCRITURE N'EST POSÉE EN DUR SUR L'APLAT D'ACCENT. Un accent
- * clair — un jaune vif, un blanc cassé — rendrait un texte blanc illisible.
- * `resoudreAccent()` a déjà tranché côté serveur, ici on applique.
+ * ⚠️ LA LARGEUR DU CADRE EST CELLE DE L'APPAREIL, JAMAIS CELLE DE LA COLONNE. La page
+ * client choisit sa mise en page sur la largeur de SA fenêtre : cadrée à 520 px, elle
+ * rendrait sa version tablette, qui n'est ni l'une ni l'autre. Le cadre est donc servi
+ * à 390 ou 1 180 px — la largeur de référence du téléphone, et le conteneur du kit —,
+ * puis RÉDUIT à l'affichage par `transform`, qui ne change pas la fenêtre de la page.
+ *
+ * ⚠️ PAS DE `sandbox`, ET C'EST UNE DÉCISION. La page cadrée est la nôtre, sur notre
+ * origine : elle a besoin de ses scripts et de son origine pour hydrater ses îlots,
+ * et `allow-scripts` + `allow-same-origin` réunis ne forment plus une frontière — le
+ * document pourrait retirer son propre bac à sable. Poser l'attribut aurait affiché
+ * une protection qui n'en est pas une (L-029). Ce qui protège le client est ailleurs,
+ * et vérifiable : ses deux gestes d'écriture sont inertes dans l'aperçu.
  */
-export interface PaletteApercu {
-  readonly remplissage: string;
-  readonly surRemplissage: string;
-  readonly surRemplissageDoux: string;
-  readonly surRemplissageFaible: string;
-}
+
+type Mode = "mobile" | "desktop";
+
+/** La hauteur visible, identique dans les deux modes : basculer ne fait pas sauter la colonne. */
+const HAUTEUR = 616;
+/** Le téléphone de `BrandPreview` : 300 px, 8 de bord noir. */
+const TELEPHONE = 300;
+const BORD = 8;
+/** 1 px de filet autour du cadre desktop, de chaque côté. */
+const FILET = 1;
+const LARGEUR_PAGE: Readonly<Record<Mode, number>> = { mobile: 390, desktop: 1180 };
+
+/**
+ * UN ENREGISTREMENT EN APPELLE SOUVENT UN AUTRE — un champ, puis le suivant. Recharger
+ * à chaque réponse ferait tourner deux documents pour rien ; on attend que la saisie se
+ * pose.
+ */
+const DELAI_RECHARGE_MS = 350;
+
+const MODES: ReadonlyArray<{ readonly mode: Mode; readonly icone: LucideIcon }> = [
+  { mode: "desktop", icone: Monitor },
+  { mode: "mobile", icone: Smartphone },
+];
 
 export function ApercuClient({
-  nomBoutique,
-  logoUrl,
-  palette,
-  client,
-  medias,
+  jeton,
   versPageClient,
-  libelles,
+  version,
 }: {
-  readonly nomBoutique: string | null;
-  readonly logoUrl: string | null;
-  readonly palette: PaletteApercu;
-  readonly client: string;
-  readonly medias: readonly MediaAffiche[];
-  /** Vers la vraie page, pour l action d en-tete du kit. */
+  /** Le jeton COURANT : il change quand le vendeur révoque, et l'aperçu doit suivre. */
+  readonly jeton: string;
+  /** Vers la vraie page, pour l'action d'en-tête du kit. */
   readonly versPageClient: string;
-  /*
-   * ⚠️ LES PHRASES DE LA MAQUETTE ARRIVENT RÉSOLUES, DANS LA LANGUE DE LA
-   * BOUTIQUE — pas dans celle de l'URL. `useTranslations` reste juste au-dessus
-   * pour le CADRE, qui parle au VENDEUR ; ce qui est montré COMME étant la page
-   * du client doit être dans la langue du client, sinon cet encart affirme le
-   * contraire de ce que le lien produira. Mesuré le 06/09/2026 : sur `/en`, il
-   * annonçait « What your customer sees » puis « Your order » pour une boutique
-   * en français.
+  /**
+   * Avance à chaque écriture CONFIRMÉE par la base — champ ou média. L'aperçu se
+   * recharge alors : il montre ce que la base porte, pas ce qu'on vient de taper
+   * (contrainte n° 8 — l'interface n'affirme pas ce qui n'est pas enregistré).
    */
-  readonly libelles: LibellesApercu;
+  readonly version: number;
 }) {
   const t = useTranslations("editeur");
 
-  const nom = client.trim();
-  const vignettes = medias.slice(0, 3);
+  /*
+   * MOBILE PAR DÉFAUT : c'est ce que le client ouvre, au téléphone, depuis un message
+   * privé. Le desktop est à un clic.
+   */
+  const [mode, setMode] = useState<Mode>("mobile");
+
+  /*
+   * LA LARGEUR DE LA ZONE, MESURÉE AVANT LE PREMIER AFFICHAGE CÔTÉ NAVIGATEUR. Le
+   * serveur ne la connaît pas : il rend le téléphone à sa largeur de planche, VIDE, et
+   * le cadre ne naît qu'une fois la zone mesurée avec une largeur.
+   *
+   * ⚠️ C'EST AUSSI CE QUI EMPÊCHE LE TÉLÉPHONE DE LE CHARGER. L'éditeur cache ce panneau
+   * sous `lg` (`hidden lg:block`), et le premier montage posait `loading="lazy"` en
+   * croyant que ça suffisait. Mesuré au navigateur à 390 px le 26/09/2026 : DEUX
+   * demandes de l'aperçu par ouverture de fiche — Chrome ne diffère PAS un cadre caché,
+   * il le charge d'emblée. Une zone non affichée mesure 0 : pas de cadre, pas de rendu
+   * serveur payé pour une page que personne ne regarde. L'observateur le fait naître si
+   * la fenêtre s'élargit.
+   */
+  const zone = useRef<HTMLDivElement>(null);
+  const [largeurZone, setLargeurZone] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const element = zone.current;
+    if (element === null) return;
+    const mesurer = (): void => setLargeurZone(element.clientWidth);
+    mesurer();
+    const observateur = new ResizeObserver(mesurer);
+    observateur.observe(element);
+    return () => observateur.disconnect();
+  }, []);
+
+  /*
+   * DEUX CADRES LE TEMPS D'UN RECHARGEMENT. Le nouveau se charge SOUS l'ancien,
+   * invisible ; il ne le remplace qu'une fois chargé, à la même hauteur de défilement.
+   * Recharger le cadre visible le ferait blanchir à chaque champ enregistré, et le
+   * remonterait en haut de page pendant que le vendeur regarde sa galerie.
+   */
+  const [affichee, setAffichee] = useState(version);
+  const [enChargement, setEnChargement] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (version === affichee) return;
+    const minuterie = window.setTimeout(() => setEnChargement(version), DELAI_RECHARGE_MS);
+    return () => window.clearTimeout(minuterie);
+  }, [version, affichee]);
+
+  const surChargement = (numero: number, cadre: HTMLIFrameElement): void => {
+    if (numero !== enChargement) return;
+    // L'ANCIEN CADRE EST L'AUTRE `iframe` DU MÊME CONTENEUR : il n'y en a jamais que deux,
+    // et seulement le temps de ce chargement.
+    const ancien = Array.from(cadre.parentElement?.querySelectorAll("iframe") ?? []).find(
+      (autre) => autre !== cadre,
+    );
+    cadre.contentWindow?.scrollTo(0, defilementDe(ancien));
+    setAffichee(numero);
+    setEnChargement(null);
+  };
+
+  const largeurPage = LARGEUR_PAGE[mode];
+  const cadreMobile = Math.min(TELEPHONE, largeurZone ?? TELEPHONE);
+  const echelle =
+    mode === "mobile"
+      ? (cadreMobile - 2 * BORD) / largeurPage
+      : ((largeurZone ?? 0) - 2 * FILET) / largeurPage;
+  const hauteurVisible = mode === "mobile" ? HAUTEUR - 2 * BORD : HAUTEUR - 2 * FILET;
+  // Plus large que son propre filet : en deçà, l'échelle du desktop serait nulle ou négative.
+  const zoneAffichee = largeurZone !== null && largeurZone > 2 * FILET;
+
+  const source = cheminApercuPageClient(jeton);
+  const numeros = enChargement === null ? [affichee] : [affichee, enChargement];
+
+  const lesCadres = !zoneAffichee
+    ? null
+    : numeros.map((numero) => (
+        <iframe
+          /* LE MODE ET LE JETON FONT PARTIE DE LA CLÉ : changer l'un ou l'autre charge un
+             document neuf, sans rien à préserver — ni la largeur ni la page ne sont les
+             mêmes. */
+          key={mode + ":" + jeton + ":" + String(numero)}
+          src={source}
+          title={mode === "mobile" ? t("apercuCadreMobile") : t("apercuCadreDesktop")}
+          onLoad={(evenement) => surChargement(numero, evenement.currentTarget)}
+          className={
+            "absolute top-0 left-0 block border-0 bg-ds-surface-carte " +
+            (numero === enChargement ? "invisible" : "")
+          }
+          style={{
+            width: largeurPage,
+            height: Math.ceil(hauteurVisible / echelle),
+            transform: `scale(${echelle})`,
+            transformOrigin: "top left",
+          }}
+        />
+      ));
 
   return (
     <Panneau
       titre={t("apercuTitre")}
-      /*
-        ⚠️ L ACTION D EN-TETE ETAIT LE MOT « en direct », LE KIT Y MET UNE
-        ICONE DE LIEN. Et « en direct » n apprenait rien qui ne se voie : la
-        maquette se met a jour a la frappe, sous les yeux de celui qui tape.
-        L icone, elle, ouvre la VRAIE page — le seul geste que cet encart ne
-        peut pas rendre, puisqu il est une image de la page et non la page.
-      */
       action={
-        <a
-          href={versPageClient}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="-m-3 inline-flex min-h-11 min-w-11 items-center justify-center p-3 text-ds-accent transition-colors hover:text-ds-accent-survol lg:min-h-0 lg:min-w-0"
-        >
-          <ExternalLink aria-hidden="true" size={18} strokeWidth={1.9} />
-          <span className="sr-only">{t("voirPage")}</span>
-        </a>
+        <div role="group" aria-label={t("apercuFormat")} className="flex items-center gap-2">
+          {MODES.map(({ mode: valeur, icone: Icone }) => {
+            const actif = mode === valeur;
+            return (
+              <button
+                key={valeur}
+                type="button"
+                aria-pressed={actif}
+                onClick={() => setMode(valeur)}
+                className={
+                  "inline-flex h-10 items-center gap-2 rounded-ds-sm border px-3.5 text-[13px] leading-[normal] transition-colors duration-160 ease-ds-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-accent " +
+                  (actif
+                    ? "border-transparent bg-ds-accent font-bold text-ds-texte-sur-marque"
+                    : "border-ds-filet bg-ds-surface-carte font-medium text-ds-texte-corps hover:text-ds-texte-fort")
+                }
+              >
+                <Icone aria-hidden="true" size={16} strokeWidth={1.9} />
+                {valeur === "mobile" ? t("apercuMobile") : t("apercuDesktop")}
+              </button>
+            );
+          })}
+          <a
+            href={versPageClient}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-ds-sm border border-ds-filet text-ds-accent transition-colors duration-160 ease-ds-standard hover:text-ds-accent-survol focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-accent"
+          >
+            <ExternalLink aria-hidden="true" size={16} strokeWidth={1.9} />
+            <span className="sr-only">{t("voirPage")}</span>
+          </a>
+        </div>
       }
     >
-
-      {/* `aria-hidden` : c'est une IMAGE de la page, pas la page. Un lecteur
-          d'écran qui la parcourrait annoncerait deux fois le nom du client et un
-          bouton « Approuver » sur lequel il n'y a rien à approuver ici. */}
-      <div
-        aria-hidden="true"
-        className="overflow-hidden rounded-ds-card border border-ds-filet"
-      >
-        <div
-          className="px-3.5 py-4"
-          style={{ backgroundColor: palette.remplissage, color: palette.surRemplissage }}
-        >
-          <div className="flex items-center gap-[7px]">
-            {logoUrl !== null ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={logoUrl}
-                alt=""
-                width={20}
-                height={20}
-                className="h-5 w-5 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <span
-                className="h-5 w-5 shrink-0 rounded-full"
-                style={{ backgroundColor: palette.surRemplissageFaible }}
-              />
-            )}
-            {/*
-              L'EN-TÊTE EST OMIS QUAND NI NOM NI LOGO — décision 24. On ne rend
-              pas de barre vide ni de libellé de remplacement : ici le nom
-              disparaît, et il ne reste que la pastille.
-            */}
-            {nomBoutique !== null ? (
-              <span className="truncate text-[11px] font-bold">{nomBoutique}</span>
-            ) : null}
+      <div ref={zone} className="w-full">
+        {mode === "mobile" ? (
+          <div className="flex justify-center">
+            <div
+              className="rounded-[40px] bg-ds-ink-900 shadow-ds-window"
+              style={{ width: cadreMobile, padding: BORD }}
+            >
+              <div
+                className="relative overflow-hidden rounded-[33px] bg-ds-surface-carte"
+                style={{ height: hauteurVisible }}
+              >
+                {lesCadres}
+              </div>
+            </div>
           </div>
-
-          {/* Inter, comme la vraie page client depuis sa migration : l'aperçu doit
-              porter la MÊME police que ce qu'il annonce montrer. */}
-          <p className="mt-2 mb-px text-[17px] font-extrabold tracking-[-0.03em]">
-            {libelles.commande}
-          </p>
-
-          {/* UNE INFORMATION ABSENTE EST OMISE, jamais remplacée par un texte
-              inventé : sans nom de client, la ligne « pour … » disparaît. */}
-          {nom !== "" ? (
-            <p className="truncate text-[11px]" style={{ color: palette.surRemplissageDoux }}>
-              {substituerNom(libelles.pourGabarit, nom)}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="p-3">
-          {/* LA FRISE À QUATRE ÉTAPES, réduite à ses barres : c'est sa forme, et
-              c'est tout ce qu'on peut en montrer à cette échelle. */}
-          <div className="mb-3 grid grid-cols-4 gap-1">
-            {[0, 1, 2, 3].map((etape) => (
-              <span
-                key={etape}
-                className="h-[5px] rounded-full"
-                style={{
-                  backgroundColor: etape < 3 ? palette.remplissage : "var(--color-ds-ink-200)",
-                }}
-              />
-            ))}
-          </div>
-
-          {/* TROIS VIGNETTES, ET DES CASES VIDES QUAND IL Y EN A MOINS. La
-              grille garde sa hauteur : un aperçu qui se replie à chaque dépôt
-              ferait sauter la colonne entière pendant qu'on travaille. */}
-          <div className="mb-3 grid grid-cols-3 gap-1">
-            {[0, 1, 2].map((rang) => {
-              const media = vignettes[rang];
-              return media?.urlVignette != null ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={media.id}
-                  src={media.urlVignette}
-                  alt=""
-                  className="aspect-square w-full rounded-ds-xs object-cover"
-                />
-              ) : (
-                <span
-                  key={"vide-" + rang}
-                  className="aspect-square w-full rounded-ds-xs bg-ds-surface-creux"
-                />
-              );
-            })}
-          </div>
-
+        ) : (
           <div
-            className="flex h-9 items-center justify-center rounded-[9px]"
-            style={{ backgroundColor: palette.remplissage, color: palette.surRemplissage }}
+            className="relative overflow-hidden rounded-ds-card border border-ds-filet bg-ds-surface-page"
+            style={{ height: HAUTEUR }}
           >
-            <span className="text-[12px] font-bold">{libelles.approuver}</span>
+            {lesCadres}
           </div>
-        </div>
+        )}
       </div>
     </Panneau>
   );
+}
+
+/**
+ * La hauteur de défilement d'un cadre, pour que le suivant reprenne au même endroit.
+ *
+ * ⚠️ LA LECTURE PEUT LEVER, et 0 est alors la bonne réponse. Le cadre est sur notre
+ * origine ; il n'en sortirait que si un lien s'y ouvrait au lieu d'un nouvel onglet,
+ * et le navigateur refuse alors de dire où en est une page étrangère. Repartir du haut
+ * est exactement ce qu'un cadre neuf ferait de toute façon.
+ */
+function defilementDe(cadre: HTMLIFrameElement | undefined): number {
+  if (cadre === undefined) return 0;
+  try {
+    return cadre.contentWindow?.scrollY ?? 0;
+  } catch {
+    return 0;
+  }
 }

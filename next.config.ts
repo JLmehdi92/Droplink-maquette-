@@ -77,7 +77,7 @@ const HSTS = { key: "Strict-Transport-Security", value: "max-age=63072000; inclu
  * ⚠️ PRODUCTION SEULEMENT, comme HSTS. En développement, `upgrade`/`connect`
  * stricts gêneraient le rechargement à chaud et les assets servis en clair.
  */
-function politiqueCSP(): string {
+function politiqueCSP(ancetres: "'none'" | "'self'" = "'none'"): string {
   const r2 = "https://*.r2.cloudflarestorage.com";
   let supabase = "";
   try {
@@ -98,7 +98,7 @@ function politiqueCSP(): string {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    `frame-ancestors ${ancetres}`,
   ].join("; ");
 }
 
@@ -218,6 +218,31 @@ const nextConfig: NextConfig = {
          */
         source: "/:nom([a-zA-Z0-9][a-zA-Z0-9-]{1,38}[a-zA-Z0-9])/:jeton([0-9A-Za-z]{16,64})",
         headers: enTetesPagePublique,
+      },
+      {
+        /*
+         * L'APERÇU DE L'ÉDITEUR — la seule page client qui se laisse encadrer, et par
+         * DropLink seulement (26/09/2026). Posée APRÈS `/p/:path*`, elle l'emporte sur
+         * ses deux clés de cadrage ; `no-referrer` reste, l'URL porte toujours le jeton.
+         *
+         * ⚠️ POURQUOI CE N'EST PAS LA FAILLE QUE LA RÈGLE DU DESSUS FERME. Le détournement
+         * de clic exige une page qui ENGAGE : l'aperçu rend l'arbitrage et l'inscription
+         * aux e-mails inertes (`inert`, `components/publique/page-client.tsx`), et
+         * `'self'` n'admet que nos propres pages comme cadre — aucune n'héberge de HTML
+         * écrit par un tiers. Un site étranger ne peut toujours rien encadrer.
+         *
+         * ⚠️ LE MOTIF EXIGE LE SEGMENT EXACT : un jeton, puis `apercu`, rien d'autre. Un
+         * motif à segments multiples aurait ouvert au cadrage n'importe quel chemin
+         * finissant par ce mot sous `/p/`.
+         */
+        source: "/p/:token([0-9A-Za-z]{16,64})/apercu",
+        headers: [
+          ...enTetesPagePublique.filter(
+            (h) => h.key !== "X-Frame-Options" && h.key !== "Content-Security-Policy",
+          ),
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          ...(CSP_ACTIVE ? [{ key: "Content-Security-Policy", value: politiqueCSP("'self'") }] : []),
+        ],
       },
     ];
   },

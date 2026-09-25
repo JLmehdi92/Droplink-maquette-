@@ -6,6 +6,35 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 26/09/2026 — L'APERÇU DE LA FICHE COMMANDE DEVIENT LA VRAIE PAGE, EN MOBILE ET EN DESKTOP
+
+Wassim : « pourquoi l'aperçu de la page client n'est pas comme la vraie page client finale,
+c'est moche », puis « tu mets une version pc et mobile ». L'aperçu était une MAQUETTE (trois
+vignettes, quatre barres, un bouton) ; la planche `OrderDetail` le dessinait pourtant déjà comme
+« la vraie page, pas une imitation ».
+
+**Planche d'abord** : `seller_app/OrderDetail.jsx` gagne `PreviewModeSwitch` et
+`ClientPagePreviewDevice` — le vocabulaire de `BrandPreview` (« Ma marque ») : boutons
+Desktop/Mobile de 40 px, téléphone de 300 px à 8 px de bord, MOBILE par défaut, 616 px de haut
+dans les deux modes, et on fait DÉFILER la page (pas de fondu).
+
+- **Produit** : le corps de `/p/[token]` sort dans `components/publique/page-client.tsx`
+  (découpage mécanique), rendu par la vraie page ET par `/p/<jeton>/apercu`. L'aperçu : aucune
+  vue ni rendu compté, arbitrage QC et e-mails `inert` (dessinés à l'identique, non cliquables),
+  même quota et même lien mort. Cadrable par DropLink seulement (`SAMEORIGIN`,
+  `frame-ancestors 'self'`) ; la vraie page reste `DENY`. Le cadre est servi à 390 ou 1180 px et
+  RÉDUIT par `transform` — la page choisit sa mise en page sur SA fenêtre.
+- Rechargement après chaque écriture CONFIRMÉE (champ, ou les cinq confirmations de
+  `CarteMedias`, qui passait par un effet déclenché aussi sur les paris optimistes), en double
+  tampon : le nouveau cadre se charge dessous et reprend la hauteur de défilement.
+- **Mesuré** : fiche à 1690 en mobile ET en desktop (`CLIC_PRODUIT="Desktop"`, clé
+  `fr-commandes-commande-desktop`) en code 0 ; trois déclarations de la maquette retirées des
+  cinq états de la fiche, la bascule ajoutée au décalage de position déjà déclaré. en/zh à 1690,
+  1024 (téléphone réduit à 240 px) et 390 (aperçu masqué, cadre paresseux jamais demandé) :
+  rien ne déborde, CSP et console propres. Navigateur piloté, 15/15 : clic et clavier sans effet
+  sur l'arbitrage, champ e-mail non remplissable, aucun POST `/vue`, défilement, rechargement
+  500 → 500 ; contre-tests sur la vraie page (la vue part, le clic ouvre l'arbitrage).
+
 ### ▶️ 26/09/2026 — L'HISTORIQUE DU SUIVI SE REPLIE SUR LA PAGE CLIENT
 
 Wassim : « c'est moche que l'on voie toute la liste de l'historique du suivi débordée comme

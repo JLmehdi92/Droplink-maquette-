@@ -45,10 +45,19 @@ function code(chemin: string): string {
  * existe, et c'est la bonne.
  */
 const APERCUS = [
-  "components/commandes/apercu-client.tsx",
   "components/marque/formulaire-marque.tsx",
   "components/formulaire-onboarding.tsx",
 ] as const;
+
+/**
+ * ⚠️ L'APERÇU DE LA FICHE COMMANDE A QUITTÉ CETTE LISTE LE 26/09/2026, ET CE N'EST PAS UNE
+ * EXCEPTION : il ne dessine plus rien. Il ENCADRE la page client elle-même
+ * (`/p/<jeton>/apercu`, `PageClient`), qui prend la langue de la boutique par le même
+ * chemin que la page envoyée au client — la fumée compare leurs deux textes, mot pour
+ * mot. Il n'a donc plus de phrases à emprunter : ce qu'on garde ici, c'est qu'il n'en
+ * refabrique aucune, et qu'il charge bien la page.
+ */
+const APERCU_ENCADRE = "components/commandes/apercu-client.tsx";
 
 /** Les phrases que le client verra, et qui ne doivent donc jamais venir de `t`. */
 const CONTENU = [
@@ -63,7 +72,7 @@ const CONTENU = [
 const CADRE = ["apercuTitre", "apercuDirect"] as const;
 
 describe("Les aperçus rendent la langue du CLIENT, pas celle de l'URL", () => {
-  test("la sonde lit réellement les trois fichiers", () => {
+  test("la sonde lit réellement les deux fichiers", () => {
     // UN ENSEMBLE VIDE PASSE TOUT. Un chemin devenu faux — un fichier renommé,
     // un composant déplacé — rendrait tous les contrôles ci-dessous verts et
     // muets, sur un produit redevenu faux.
@@ -99,7 +108,7 @@ describe("Les aperçus rendent la langue du CLIENT, pas celle de l'URL", () => {
       const src = code(chemin);
       return !CADRE.some((cle) => src.includes(`t("${cle}"`));
     });
-    // `apercu-client.tsx` et `formulaire-marque.tsx` portent le cadre ;
+    // `formulaire-marque.tsx` porte le cadre ;
     // l'onboarding a son propre titre (`apercuTitre`) et compte donc aussi.
     expect(
       sansCadre,
@@ -136,6 +145,18 @@ describe("Les aperçus rendent la langue du CLIENT, pas celle de l'URL", () => {
       "ces aperçus ne reçoivent plus leurs phrases de `lib/boutique/libelles-apercu` — " +
         orphelins.join(", "),
     ).toEqual([]);
+  });
+
+  test("l'aperçu de la fiche encadre la vraie page et ne refabrique aucune phrase du client", () => {
+    const src = code(APERCU_ENCADRE);
+    expect(src.length, `${APERCU_ENCADRE} vide ou illisible`).toBeGreaterThan(500);
+    // Il charge la page, par le point d'émission unique de son adresse.
+    expect(src).toContain("cheminApercuPageClient(");
+    expect(src).toMatch(/<iframe\b/);
+    // Et il ne dessine aucune des phrases du client, par aucune voie.
+    const refabriquees = CONTENU.filter((cle) => src.includes(cle));
+    expect(refabriquees, "l'aperçu encadré refabrique des phrases du client").toEqual([]);
+    expect(src).not.toContain("boutique/phrases-apercu");
   });
 });
 

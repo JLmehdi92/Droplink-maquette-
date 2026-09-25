@@ -14,7 +14,8 @@ import { join, relative, sep } from "node:path";
  * ⚠️ IL Y A TROIS PIEDS DE PAGE DISTINCTS, ET C'EST LE PIÈGE QUI A FAILLI ME
  * FAIRE N'EN CORRIGER QU'UN. `app/[locale]/page.tsx` (la landing),
  * `components/coque-publique.tsx` (conditions, confidentialité, signalement,
- * blog, connexion, inscription…) et `app/p/[token]/page.tsx` (la page client).
+ * blog, connexion, inscription…) et `components/publique/page-client.tsx` (la page
+ * client, sortie de `app/p/[token]/page.tsx` le 26/09/2026 pour servir aussi l'aperçu).
  * Ils ne partagent pas leur dessin — c'est délibéré, la planche fait foi pour
  * chacun — donc rien dans le code ne relie une correction aux deux autres.
  * D'où un contrôle qui BALAIE `src/` au lieu de viser des fichiers nommés :

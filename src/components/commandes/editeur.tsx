@@ -12,9 +12,8 @@ import { Panneau, LienRetour, LigneInfo } from "@/components/app/panneau";
 import { FriseDetail } from "./frise-detail";
 import { CarteMedias, type MediaAffiche } from "./carte-medias";
 import { CarteRevocation } from "./carte-revocation";
-import { ApercuClient, type PaletteApercu } from "./apercu-client";
+import { ApercuClient } from "./apercu-client";
 import { TuilesResume } from "./tuiles-resume";
-import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 
 /**
  * L'éditeur d'une commande — sauvegarde automatique, sans bouton « enregistrer ».
@@ -87,7 +86,6 @@ export function Editeur({
   suivi,
   dates,
   resume,
-  boutique,
   historique,
 }: {
   readonly id: string;
@@ -152,18 +150,6 @@ export function Editeur({
     readonly vues: number;
     readonly derniereVueLe: string | null;
   };
-  readonly boutique: {
-    readonly nom: string | null;
-    readonly logoUrl: string | null;
-    readonly palette: PaletteApercu;
-    /*
-     * Les phrases de l'aperçu, résolues dans la LANGUE DES PAGES CLIENT de
-     * cette boutique — voir `lib/boutique/libelles-apercu`. Elles vivent sous
-     * `boutique` et non à côté parce qu'elles en dépendent : c'est son réglage
-     * de langue qui les a produites, pas celui de l'URL.
-     */
-    readonly libellesApercu: LibellesApercu;
-  };
   /** Rendu par le SERVEUR : ses libellés ne voyagent pas dans l'hydratation. */
   readonly historique: React.ReactNode;
 }) {
@@ -188,11 +174,19 @@ export function Editeur({
   // nouveau. Une copie prise au rendu du serveur pointerait vers le lien qu'on
   // vient de tuer — précisément au moment où l'on veut envoyer le nouveau.
   const [jetonCourant, setJetonCourant] = useState(jeton);
-  const [mediasCourants, setMediasCourants] = useState<readonly MediaAffiche[]>(medias.initiaux);
+  /*
+   * LE NUMÉRO DE VERSION DE L'APERÇU : il avance à chaque écriture que la base a
+   * CONFIRMÉE — un champ, un média —, et l'aperçu se recharge sur lui. Jamais sur
+   * la frappe : l'aperçu montre la page que le client recevrait maintenant, donc ce
+   * que la base porte, pas ce que le champ affiche avant la réponse du serveur.
+   */
+  const [versionApercu, setVersionApercu] = useState(0);
+  const apercuPerime = useCallback((): void => setVersionApercu((v) => v + 1), []);
 
   const appliquer = useCallback(
     (champ: keyof ValeursCommande, valeur: string, resultat: ResultatEnregistrement): void => {
       if (resultat.statut === "ok") {
+        apercuPerime();
         confirmees.current = { ...confirmees.current, [champ]: valeur };
         setChampsEnEchec((precedents) => {
           const restants = precedents.filter((c) => c !== champ);
@@ -225,7 +219,7 @@ export function Editeur({
         precedents.includes(champ) ? precedents : [...precedents, champ],
       );
     },
-    [],
+    [apercuPerime],
   );
 
   const envoyer = useCallback(
@@ -345,13 +339,9 @@ export function Editeur({
             */}
             <div className="hidden lg:block">
               <ApercuClient
-                nomBoutique={boutique.nom}
-                logoUrl={boutique.logoUrl}
-                palette={boutique.palette}
-                client={valeurs.customer_label}
-                medias={mediasCourants}
+                jeton={jetonCourant}
                 versPageClient={versPageClient}
-                libelles={boutique.libellesApercu}
+                version={versionApercu}
               />
             </div>
           </div>
@@ -383,7 +373,7 @@ export function Editeur({
                 plafondMedias={medias.plafondMedias}
                 plafondVideos={medias.plafondVideos}
                 typesAcceptes={medias.typesAcceptes}
-                onMedias={setMediasCourants}
+                onEnregistre={apercuPerime}
               />
             </div>
 

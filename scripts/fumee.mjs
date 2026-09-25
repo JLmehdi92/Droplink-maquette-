@@ -1907,6 +1907,20 @@ try {
           `la session ouvre bien l editeur (statut ${remplie.status}` +
             `${remplie.status === 200 ? "" : ", vers " + remplie.headers.get("location")})`,
         ]);
+        // L APERÇU DE LA FICHE EST LA VRAIE PAGE (26/09/2026), ET SON CADRE N EST PAS DANS LE
+        // HTML SERVI : il ne naît qu au navigateur, dans une zone affichée. Servi d emblée,
+        // il était chargé au TÉLÉPHONE aussi — Chrome ne diffère pas un cadre caché, mesuré :
+        // deux demandes par ouverture de fiche à 390 px, pour un panneau que personne ne voit.
+        controles.push(
+          [
+            htmlRemplie.includes("Aperçu de la page client"),
+            "CONTRE-TEST : le panneau de l aperçu est bien servi dans l editeur",
+          ],
+          [
+            !htmlRemplie.includes("/apercu\"") && !/<iframe\b/.test(htmlRemplie),
+            "le cadre de l aperçu n est pas dans le HTML servi (aucun chargement au telephone)",
+          ],
+        );
 
         /*
          * ⚠️ ARCHIVER ET DUPLIQUER DOIVENT S ATTEINDRE DEPUIS LA FICHE.
@@ -3623,6 +3637,89 @@ try {
     ]);
 
   }
+
+// ⚠️ POSÉ ICI, AVANT L ARBITRAGE ET LA PURGE : plus bas, la commande de fumée est validée puis
+// supprimée — l aperçu rendrait 404 et « Approuver » aurait disparu (constaté aux portes du 26/09).
+/*
+ * ── L APERÇU DE L ÉDITEUR EST LA VRAIE PAGE, CADRABLE PAR NOUS SEULS, ET INERTE ──
+ *
+ * 26/09/2026. L aperçu de la fiche commande charge `/p/<jeton>/apercu` dans un
+ * cadre, en mobile et en desktop. Quatre choses doivent être vraies A LA FOIS, et
+ * chacune se lit sur ce que le serveur SERT :
+ *  - il se laisse encadrer par DropLink et par DropLink seulement — et la vraie
+ *    page, elle, ne se laisse toujours encadrer par personne ;
+ *  - il montre la MÊME page : même texte, à la balise près ;
+ *  - les deux gestes qui écrivent au nom du client y sont `inert` — et nulle part
+ *    ailleurs : la vraie page n en porte aucun ;
+ *  - un jeton inconnu y rend le même lien mort, en 404.
+ */
+if (jetonFumee) {
+  const apercu = await fetch(`${base}/p/${jetonFumee}/apercu`, { headers: visiteur(95) });
+  const htmlApercu = await apercu.text();
+  const vraie = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(96) });
+  const htmlVraie = await vraie.text();
+  const cspApercu = apercu.headers.get("content-security-policy") ?? "";
+  const cspVraie = vraie.headers.get("content-security-policy") ?? "";
+
+  /** Le texte VISIBLE d un document : ni scripts, ni styles, ni balises. */
+  const texteVisible = (html) =>
+    html
+      .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+      .replace(/<template\b[\s\S]*?<\/template>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  // Le premier `inert` du document, puis la place de la carte qu il doit couvrir.
+  const debutInerte = htmlApercu.indexOf(' inert=""');
+  const placeApprouver = htmlApercu.indexOf(">Approuver<");
+
+  controles.push(
+    // CONTRE-TEST, EN PREMIER : sans lui, un aperçu vide passerait toutes les suivantes.
+    [
+      apercu.status === 200 && htmlApercu.includes("Client de fumee"),
+      `l aperçu rend la commande de fumee (statut ${apercu.status})`,
+    ],
+    [
+      apercu.headers.get("x-frame-options") === "SAMEORIGIN",
+      `l aperçu se laisse encadrer par DropLink (X-Frame-Options « ${apercu.headers.get("x-frame-options")} »)`,
+    ],
+    [
+      cspApercu.includes("frame-ancestors 'self'") && !cspApercu.includes("frame-ancestors 'none'"),
+      `l aperçu n admet que DropLink comme cadre (CSP « ${/frame-ancestors[^;]*/.exec(cspApercu)?.[0] ?? "absente"} »)`,
+    ],
+    [
+      apercu.headers.get("referrer-policy") === "no-referrer",
+      "l aperçu garde `no-referrer` : son URL porte le jeton",
+    ],
+    [/<meta name="robots" content="noindex/.test(htmlApercu), "l aperçu est noindex"],
+    // LA VRAIE PAGE NE BOUGE PAS : le cadrage reste refusé à tous, nous compris.
+    [
+      vraie.headers.get("x-frame-options") === "DENY" && cspVraie.includes("frame-ancestors 'none'"),
+      `la vraie page reste non cadrable (X-Frame-Options « ${vraie.headers.get("x-frame-options")} »)`,
+    ],
+    [
+      texteVisible(htmlApercu) === texteVisible(htmlVraie),
+      "l aperçu montre exactement le texte de la vraie page",
+    ],
+    [
+      debutInerte >= 0 && placeApprouver > debutInerte,
+      `« Approuver » est rendu, et sous une enveloppe inerte (inert à ${debutInerte}, bouton à ${placeApprouver})`,
+    ],
+    [
+      !htmlVraie.includes(' inert=""') && htmlVraie.includes(">Approuver<"),
+      "la vraie page rend « Approuver » sans aucune enveloppe inerte",
+    ],
+  );
+
+  const inconnu = await fetch(`${base}/p/AAAAAAAAAAAAAAAAAAAAAAAA/apercu`, { headers: visiteur(97) });
+  const corpsInconnu = await inconnu.text();
+  controles.push([
+    inconnu.status === 404 && corpsInconnu.includes("Ce lien n"),
+    `un jeton inconnu rend le lien mort en 404 sur l aperçu aussi (statut ${inconnu.status})`,
+  ]);
+}
 
   if (jetonFumee) {
         const reponse = await fetch(`${base}/p/${jetonFumee}`, { headers: visiteur(11) });

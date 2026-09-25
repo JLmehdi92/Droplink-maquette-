@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { describe, expect, test } from "vitest";
-import { cheminPageClient, lienPageClient } from "@/lib/liens/page-client";
+import { cheminApercuPageClient, cheminPageClient, lienPageClient } from "@/lib/liens/page-client";
 
 /**
  * L'ADRESSE DE LA PAGE CLIENT N'A QU'UN SEUL POINT D'ÉMISSION.
@@ -203,5 +203,15 @@ describe("Ce que le point d'émission rend", () => {
     // origine de secours donnerait une adresse qui a la FORME d'un lien sans en
     // être un — et personne ne verrait la différence avant qu'un client clique.
     expect(lienPageClient("", JETON, "atelier-nord")).toBe(`/atelier-nord/${JETON}`);
+  });
+
+  test("l'aperçu de l'éditeur vit sous `/p/`, le seul chemin cadrable par DropLink", () => {
+    expect(cheminApercuPageClient(JETON)).toBe(`/p/${JETON}/apercu`);
+  });
+
+  test("un jeton qui porterait un `/` ne sort pas de son segment", () => {
+    const chemin = cheminApercuPageClient("../../fr/admin");
+    expect(chemin).toBe("/p/..%2F..%2Ffr%2Fadmin/apercu");
+    expect(chemin.split("/")).toHaveLength(4);
   });
 });

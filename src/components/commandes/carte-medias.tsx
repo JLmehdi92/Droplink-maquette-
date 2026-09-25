@@ -84,7 +84,7 @@ export function CarteMedias({
   plafondMedias,
   plafondVideos,
   typesAcceptes,
-  onMedias,
+  onEnregistre,
 }: {
   readonly orderId: string;
   readonly initiaux: readonly MediaAffiche[];
@@ -92,14 +92,22 @@ export function CarteMedias({
   readonly plafondVideos: number;
   readonly typesAcceptes: readonly string[];
   /**
-   * Appelé à chaque changement de la liste.
+   * Appelé après chaque écriture que la base a CONFIRMÉE : dépôt, couverture,
+   * suppression, nouvel ordre.
    *
-   * L'APERÇU « CE QUE VOIT LE CLIENT » EST EN DIRECT, et il doit l'être sur les
-   * photos autant que sur les champs. Sans ce rappel, il montrerait les médias
-   * du chargement de la page — donc mentirait dès le premier dépôt, à l'endroit
-   * exact où il promet de dire la vérité.
+   * L'APERÇU DE LA PAGE CLIENT EST LA VRAIE PAGE, rechargée sur ce signal. Il
+   * doit l'être sur les photos autant que sur les champs, sans quoi il montrerait
+   * les médias du chargement de l'écran.
+   *
+   * ⚠️ CE RAPPEL PARTAIT D'UN EFFET SUR LA LISTE, ET IL NE LE PEUT PLUS (26/09/2026).
+   * Le réordonnancement est OPTIMISTE : la liste change avant que la base ait
+   * répondu. Tant que l'aperçu était une maquette dessinée depuis cette liste,
+   * c'était juste ; il relit désormais la base, et un rechargement parti sur le
+   * pari relirait l'ANCIEN ordre — puis plus rien ne le rechargerait. Le signal
+   * part donc des cinq endroits où la base a dit oui, et d'aucun retour en arrière :
+   * après un échec, la base porte ce que l'aperçu montre déjà.
    */
-  readonly onMedias?: (medias: readonly MediaAffiche[]) => void;
+  readonly onEnregistre?: () => void;
 }) {
   const t = useTranslations("medias");
 
@@ -137,19 +145,6 @@ export function CarteMedias({
 
   const [medias, setMedias] = useState<readonly MediaAffiche[]>(initiaux);
   const [enCours, setEnCours] = useState<readonly EnCours[]>([]);
-
-  /*
-   * LE RAPPEL PART D'UN EFFET, PAS DE CHAQUE `setMedias`.
-   *
-   * Il y a six endroits où la liste change — dépôt, couverture, suppression,
-   * réordonnancement, et deux retours en arrière après échec. En appeler un
-   * septième à la main dans chacun garantit qu'on en oubliera un, et l'oubli ne
-   * casserait rien : l'aperçu afficherait simplement l'avant-dernier état, ce
-   * que personne ne remarque avant que ça compte.
-   */
-  useEffect(() => {
-    onMedias?.(medias);
-  }, [medias, onMedias]);
 
   /**
    * Le nombre de médias CONFIRMÉS, tenu à jour à la main.
@@ -373,6 +368,7 @@ export function CarteMedias({
         },
       ]);
       setEnCours((liste) => liste.filter((e) => e.cleLocale !== cleLocale));
+      onEnregistre?.();
 
       if (premier) {
         // La première photo devient la couverture — mais l'écran ne le dit
@@ -387,12 +383,13 @@ export function CarteMedias({
               estCouverture: m.id === confirmation.mediaId,
             })),
           );
+          onEnregistre?.();
         } else {
           setEchecAction(t("echecCouverture"));
         }
       }
     },
-    [orderId, libelleRefus, majEnCours, t],
+    [orderId, libelleRefus, majEnCours, onEnregistre, t],
   );
 
   const ajouter = useCallback(
@@ -423,8 +420,9 @@ export function CarteMedias({
         if (retire !== null && apercusLocaux.current.delete(retire)) URL.revokeObjectURL(retire);
         return liste.filter((m) => m.id !== id);
       });
+      onEnregistre?.();
     },
-    [orderId, t],
+    [orderId, onEnregistre, t],
   );
 
   const couvrir = useCallback(
@@ -438,8 +436,9 @@ export function CarteMedias({
       setMedias((liste) =>
         liste.map((m) => ({ ...m, estCouverture: m.id === id })),
       );
+      onEnregistre?.();
     },
-    [orderId, t],
+    [orderId, onEnregistre, t],
   );
 
   const deplacer = useCallback(
@@ -470,8 +469,9 @@ export function CarteMedias({
         return;
       }
       setEchecAction(null);
+      onEnregistre?.();
     },
-    [medias, orderId, t],
+    [medias, onEnregistre, orderId, t],
   );
 
   const total = medias.length + enCours.length;

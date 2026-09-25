@@ -1429,7 +1429,16 @@ for (const modele of routes) {
            est arrêté plus haut par la garde « un écran qui n'est pas l'écran ». */
         const quatreCentQuatreDuDocument =
           p.response.status === 404 && p.response.url.split("#")[0] === base + chemin;
-        if (!imageR2 && !quatreCentQuatreDuDocument) {
+        /* L'APERÇU D'UN LIEN BLOQUÉ REND LE LIEN MORT, et c'est voulu (26/09/2026) : la fiche
+           encadre la vraie page client, et le client d'un lien bloqué reçoit exactement ce 404.
+           Écarté SEULEMENT quand le jeu bloque le lien (`LIEN_BLOQUE`) : sur une fiche
+           ordinaire, un aperçu en 404 reste une erreur. */
+        const quatreCentQuatreDeLApercuBloque =
+          p.response.status === 404 &&
+          lienBloque !== undefined &&
+          p.type === "Document" &&
+          /\/p\/[0-9A-Za-z]{16,64}\/apercu$/.test(new URL(p.response.url).pathname);
+        if (!imageR2 && !quatreCentQuatreDuDocument && !quatreCentQuatreDeLApercuBloque) {
           erreursNavigateur.push({ genre: "reseau " + p.response.status, texte: `${p.type} ${p.response.url.slice(0, 160)}` });
         }
       }

@@ -743,6 +743,7 @@ Dans cet ordre, et on ne passe pas au suivant avant que les six passent :
 **1. `/[locale]/(app)/*` — authentifié, RLS.** Client serveur **avec** session, jamais service-role. Le dashboard est l'écran le plus utilisé : un fournisseur à 200 commandes/semaine y passe sa journée.
 
 **2. `/p/[token]` — jamais authentifié.** Hors du segment `[locale]` (la langue est celle du vendeur, pas de l'URL). Racine de mise en page distincte — c'est le budget, pas l'organisation. Lecture par jeton via **fonctions `security definer`** — `lire_commande_publique`, `lire_medias_publics`, `lire_suivi_public`, `lire_passages_publics`. ⚠️ **Le dépôt ne contient AUCUNE VUE, et c'est délibéré** : une vue SE PARCOURT, une fonction EXIGE le jeton. `noindex`.
+Son corps vit dans `components/publique/page-client.tsx` (26/09/2026), rendu aussi par **`/p/<jeton>/apercu`** — l'aperçu que la fiche commande encadre en mobile et en desktop : même page et même quota, mais **aucune vue comptée**, arbitrage et e-mails **`inert`**, et c'est la SEULE page client cadrable (par DropLink seulement, `next.config.ts`). ⚠️ Un nouvel îlot qui écrit (`POST`) doit être enveloppé d'`Inerte` : `tests/unit/apercu-page-client.test.ts` l'inventorie et rougit sinon.
 
 **3. `/[locale]/admin/*` — rôle vérifié EN BASE, à chaque requête.** Segment RÉEL, jamais un groupe entre parenthèses : un groupe n'ajoute rien à l'URL, les écrans tomberaient hors du filtre du middleware.
 

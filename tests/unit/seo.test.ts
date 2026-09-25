@@ -218,7 +218,7 @@ describe("Le SEO : chaque page est soit déclarée, soit fermée", () => {
      * Une passe SEO est précisément le moment où quelqu'un ajoute un Open Graph
      * « pour bien faire ». Ce contrôle existe pour que ce jour-là soit rouge.
      */
-    for (const fichier of ["p/[token]/page.tsx", "p/[token]/layout.tsx"]) {
+    for (const fichier of ["p/[token]/page.tsx", "p/[token]/apercu/page.tsx", "p/[token]/layout.tsx"]) {
       const code = codeSansCommentaires(join(RACINE_APP, fichier));
       expect(code.length, `${fichier} : le dépouilleur a vidé le fichier`).toBeGreaterThan(200);
       /*

@@ -42,8 +42,13 @@ export default async function LienInvalide() {
       <header className="flex items-center px-4 py-[18px] sm:px-[34px] sm:py-[26px]">
         <Image src={logoDropLink} alt="DropLink" height={34} width={Math.round((34 * 2172) / 724)} />
         <span className="flex-1" />
+        {/* `_top` ET NON LE CADRE COURANT (26/09/2026). Pour le client, c'est la même
+            chose : cette page EST la fenêtre. Dans l'aperçu de l'éditeur, qui encadre la
+            page d'un lien bloqué, l'accueil s'ouvrirait DANS le cadre — et l'accueil
+            refuse d'être encadré : le vendeur aurait vu une page d'erreur du navigateur. */}
         <Link
           href="/fr"
+          target="_top"
           className="inline-flex h-12 items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs transition-shadow hover:shadow-ds-sm sm:h-[46px]"
         >
           <House aria-hidden="true" size={18} strokeWidth={1.9} className="text-ds-accent" />
@@ -69,6 +74,7 @@ export default async function LienInvalide() {
         </p>
         <Link
           href="/fr"
+          target="_top"
           className="mt-8 inline-flex h-14 items-center gap-2.5 rounded-ds-card bg-ds-accent px-8 text-[16px] font-bold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
         >
           {t("lienInvalideAccueil")}

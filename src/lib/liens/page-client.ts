@@ -53,3 +53,19 @@ export function cheminPageClient(jeton: string, nomDeLien: string | null): strin
 export function lienPageClient(origine: string, jeton: string, nomDeLien: string | null): string {
   return origine + cheminPageClient(jeton, nomDeLien);
 }
+
+/**
+ * L'ADRESSE DE L'APERÇU QUE L'ÉDITEUR ENCADRE (26/09/2026) — la même page, sans vue
+ * comptée ni geste d'écriture (`app/p/[token]/apercu/page.tsx`).
+ *
+ * ⚠️ TOUJOURS SOUS `/p/`, JAMAIS AU NOM DU VENDEUR. Ce n'est pas une adresse qu'on envoie :
+ * personne ne la voit, et c'est sous `/p/<jeton>/apercu` seulement que `next.config.ts`
+ * autorise le cadrage par DropLink. Le nom ne changerait rien à la page — il n'y est vérifié
+ * que pour refuser un nom étranger.
+ *
+ * Le jeton est ENCODÉ : un jeton ne contient que des alphanumériques, mais une valeur qui
+ * porterait un `/` ne doit pas pouvoir sortir de son segment.
+ */
+export function cheminApercuPageClient(jeton: string): string {
+  return `/p/${encodeURIComponent(jeton)}/apercu`;
+}
