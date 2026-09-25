@@ -592,6 +592,8 @@ export default async function PagePublique({
                   arrete: t("suivi.arrete"),
                   attenteTitre: t("suivi.attenteTitre"),
                   attenteTexte: t("suivi.attenteTexte"),
+                  voirTout: t("historique.voirTout", { n: suivi.passages.length }),
+                  reduire: t("historique.reduire"),
                 }}
               />
             ) : null}

@@ -37,6 +37,14 @@ import { join, relative, sep } from "node:path";
 /** Les îlots déclarés, chacun avec la raison qui l'autorise. */
 const DECLARES: ReadonlyArray<{ readonly fichier: string; readonly raison: string }> = [
   {
+    fichier: "src/components/publique/repli-historique.tsx",
+    raison:
+      "Le repli de l'historique du suivi (demande de Wassim du 26/09/2026 : trente " +
+      "étapes débordaient). Un bouton et un booléen, sans bibliothèque : les étapes " +
+      "repliées sont rendues par le serveur et cachées dès le premier rendu. " +
+      "`<details>` aurait coincé « Réduire » au milieu de la liste ouverte.",
+  },
+  {
     fichier: "src/components/publique/visionneur.tsx",
     raison:
       "Le plein écran. Écrit à la main : une bibliothèque de carrousel coûterait " +

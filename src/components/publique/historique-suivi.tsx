@@ -2,6 +2,8 @@ import { Check, Clock, MapPin, Truck } from "lucide-react";
 import { CARTE, TitreCarte } from "@/components/publique/carte-client";
 import type { SuiviPublic } from "@/lib/page-publique/lecture";
 import type { AccentResolu } from "@/lib/design/contraste";
+import { replierHistorique } from "@/lib/page-publique/repli-historique";
+import { RepliHistorique } from "@/components/publique/repli-historique";
 
 /**
  * « HISTORIQUE DU SUIVI » — les passages du transporteur, datés.
@@ -37,6 +39,9 @@ export interface LibellesHistorique {
   readonly arrete: string;
   readonly attenteTitre: string;
   readonly attenteTexte: string;
+  /** « Voir tout l'historique (N) », le nombre déjà posé par la page. */
+  readonly voirTout: string;
+  readonly reduire: string;
 }
 
 export function HistoriqueSuivi({
@@ -50,6 +55,70 @@ export function HistoriqueSuivi({
   readonly accent: AccentResolu;
   readonly formaterDate: (instant: Date) => string;
 }) {
+  const { visibles, reste } = replierHistorique(suivi.passages);
+
+  const ligne = (p: (typeof suivi.passages)[number], rang: number, dernier: boolean) => {
+    const recent = rang === 0;
+    const Icone = recent ? Truck : MapPin;
+    return (
+      <li
+        key={p.instant + p.description}
+        /* LA MÊME GRILLE À TOUTES LES LARGEURS, comme la planche : resserrée au
+           téléphone (36 px, écart 12), elle décalait le texte de 8 px pour en
+           gagner autant sur une ligne qui en a 264. */
+        className="grid grid-cols-[22px_40px_minmax(0,1fr)] items-start gap-3.5"
+      >
+        <div className="flex flex-col items-center self-stretch">
+          <span
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+            style={
+              recent
+                ? { backgroundColor: accent.remplissage, color: accent.surRemplissage }
+                : { backgroundColor: "var(--color-ds-filet-appuye)" }
+            }
+          >
+            {recent ? <Check size={11} strokeWidth={3.4} aria-hidden="true" /> : null}
+          </span>
+          {!dernier ? (
+            <span className="min-h-[26px] w-0.5 flex-1 bg-ds-filet-appuye" />
+          ) : null}
+        </div>
+        <span
+          className="flex h-9 w-9 items-center justify-center rounded-ds-icon-tile"
+          style={
+            recent
+              ? { backgroundColor: accent.teinte, color: accent.interface }
+              : {
+                  backgroundColor: "var(--color-ds-surface-creux)",
+                  color: "var(--color-ds-texte-sourdine)",
+                }
+          }
+          aria-hidden="true"
+        >
+          <Icone size={17} strokeWidth={1.8} />
+        </span>
+        <div
+          className={
+            "grid grid-cols-[minmax(0,1fr)] gap-1 min-[1080px]:grid-cols-[190px_minmax(0,1fr)] min-[1080px]:gap-[18px] " +
+            (dernier ? "" : "pb-[22px]")
+          }
+        >
+          <span className="pt-px text-[13px] text-ds-texte-sourdine">
+            {formaterDate(new Date(p.instant))}
+          </span>
+          <span className="flex min-w-0 flex-col gap-[3px]">
+            <span className="text-[15px] font-bold break-words text-ds-texte-fort">
+              {p.description}
+            </span>
+            {p.lieu !== null ? (
+              <span className="text-[13px] text-ds-texte-corps">{p.lieu}</span>
+            ) : null}
+          </span>
+        </div>
+      </li>
+    );
+  };
+
   return (
     <section className={CARTE}>
       <TitreCarte>{libelles.titre}</TitreCarte>
@@ -82,72 +151,24 @@ export function HistoriqueSuivi({
         </div>
       ) : null}
 
-      {suivi.passages.length > 0 ? (
+      {/*
+        L'HISTORIQUE LONG SE REPLIE (26/09/2026, demande de Wassim : « c'est moche
+        que l'on voie toute la liste débordée comme ça »). Au-delà de six étapes, les
+        cinq plus récentes, puis « Voir tout » — la règle vit dans
+        `replierHistorique`. La cinquième garde son trait quand il y a une suite : il
+        descend vers le bouton et dit qu'il y a plus.
+      */}
+      {visibles.length > 0 ? (
         <ol className="flex flex-col">
-          {suivi.passages.map((p, rang) => {
-            const recent = rang === 0;
-            const dernier = rang === suivi.passages.length - 1;
-            const Icone = recent ? Truck : MapPin;
-
-            return (
-              <li
-                key={p.instant + p.description}
-                /* LA MÊME GRILLE À TOUTES LES LARGEURS, comme la planche : resserrée au
-                   téléphone (36 px, écart 12), elle décalait le texte de 8 px pour en
-                   gagner autant sur une ligne qui en a 264. */
-                className="grid grid-cols-[22px_40px_minmax(0,1fr)] items-start gap-3.5"
-              >
-                <div className="flex flex-col items-center self-stretch">
-                  <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                    style={
-                      recent
-                        ? { backgroundColor: accent.remplissage, color: accent.surRemplissage }
-                        : { backgroundColor: "var(--color-ds-filet-appuye)" }
-                    }
-                  >
-                    {recent ? <Check size={11} strokeWidth={3.4} aria-hidden="true" /> : null}
-                  </span>
-                  {!dernier ? (
-                    <span className="min-h-[26px] w-0.5 flex-1 bg-ds-filet-appuye" />
-                  ) : null}
-                </div>
-                <span
-                  className="flex h-9 w-9 items-center justify-center rounded-ds-icon-tile"
-                  style={
-                    recent
-                      ? { backgroundColor: accent.teinte, color: accent.interface }
-                      : {
-                          backgroundColor: "var(--color-ds-surface-creux)",
-                          color: "var(--color-ds-texte-sourdine)",
-                        }
-                  }
-                  aria-hidden="true"
-                >
-                  <Icone size={17} strokeWidth={1.8} />
-                </span>
-                <div
-                  className={
-                    "grid grid-cols-[minmax(0,1fr)] gap-1 min-[1080px]:grid-cols-[190px_minmax(0,1fr)] min-[1080px]:gap-[18px] " +
-                    (dernier ? "" : "pb-[22px]")
-                  }
-                >
-                  <span className="pt-px text-[13px] text-ds-texte-sourdine">
-                    {formaterDate(new Date(p.instant))}
-                  </span>
-                  <span className="flex min-w-0 flex-col gap-[3px]">
-                    <span className="text-[15px] font-bold break-words text-ds-texte-fort">
-                      {p.description}
-                    </span>
-                    {p.lieu !== null ? (
-                      <span className="text-[13px] text-ds-texte-corps">{p.lieu}</span>
-                    ) : null}
-                  </span>
-                </div>
-              </li>
-            );
-          })}
+          {visibles.map((p, rang) => ligne(p, rang, reste.length === 0 && rang === visibles.length - 1))}
         </ol>
+      ) : null}
+      {reste.length > 0 ? (
+        <RepliHistorique voirTout={libelles.voirTout} reduire={libelles.reduire} couleur={accent.texte}>
+          <ol className="flex flex-col">
+            {reste.map((p, i) => ligne(p, visibles.length + i, i === reste.length - 1))}
+          </ol>
+        </RepliHistorique>
       ) : null}
     </section>
   );

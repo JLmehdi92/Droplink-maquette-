@@ -1034,7 +1034,9 @@
       "dateEstimee": "Estimated date"
     },
     "historique": {
-      "titre": "Tracking history"
+      "titre": "Tracking history",
+      "voirTout": "See the full history ({n})",
+      "reduire": "Show less"
     },
     "contact": {
       "titre": "A question?",

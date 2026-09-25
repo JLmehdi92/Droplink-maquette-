@@ -469,6 +469,24 @@ const { error: ePoints } = await service.from("parcel_checkpoints").insert([
   },
 ]);
 if (ePoints) throw new Error("jeu de mesure : points de passage non crees — " + ePoints.message);
+/*
+ * L ETAT « HISTORIQUE LONG » (26/09/2026) : neuf points sur le premier colis, pour
+ * que la page client REPLIE son historique (au-dela de six etapes, cinq visibles puis
+ * « Voir tout »). Les phrases et les lieux sont ceux de la planche
+ * (`client_link/index.html#historique-long`) : la soustraction apparie par le texte.
+ */
+if (process.env.HISTORIQUE_LONG === "1") {
+  const { error: eLong } = await service.from("parcel_checkpoints").insert([
+    { parcel_id: colis[0].id, occurred_at: jours(0.1), location: "Paris, France", description: "Colis livré", stage: "livre" },
+    { parcel_id: colis[0].id, occurred_at: jours(0.3), location: "Paris, France", description: "Colis en cours de livraison", stage: "en_transit" },
+    { parcel_id: colis[0].id, occurred_at: jours(0.5), location: "Paris, France", description: "Colis arrivé au site de distribution", stage: "en_transit" },
+    { parcel_id: colis[0].id, occurred_at: jours(0.7), location: "Roissy, France", description: "Colis en cours d'acheminement", stage: "en_transit" },
+    { parcel_id: colis[0].id, occurred_at: jours(1.5), location: "Liège, Belgique", description: "Colis dédouané", stage: "en_transit" },
+    { parcel_id: colis[0].id, occurred_at: jours(2), location: "Liège, Belgique", description: "Arrivé à l'aéroport de destination", stage: "en_transit" },
+    { parcel_id: colis[0].id, occurred_at: jours(2.5), location: "Hong Kong", description: "Remis à la compagnie aérienne", stage: "expedie" },
+  ]);
+  if (eLong) throw new Error("jeu de mesure : historique long non cree — " + eLong.message);
+}
 
 /*
  * ⚠️ DES MEDIAS ET DES EVENEMENTS, SINON L EDITEUR MESURE SES DEUX PANNEAUX

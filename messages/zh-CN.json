@@ -1034,7 +1034,9 @@
       "dateEstimee": "预计日期"
     },
     "historique": {
-      "titre": "物流记录"
+      "titre": "物流记录",
+      "voirTout": "查看全部记录（{n}）",
+      "reduire": "收起"
     },
     "contact": {
       "titre": "有疑问？",

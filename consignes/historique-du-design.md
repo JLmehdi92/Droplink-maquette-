@@ -6,6 +6,24 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 26/09/2026 — L'HISTORIQUE DU SUIVI SE REPLIE SUR LA PAGE CLIENT
+
+Wassim : « c'est moche que l'on voie toute la liste de l'historique du suivi débordée comme
+ça » — un colis venu de Chine en compte une trentaine. **Planche d'abord** : état
+`client_link/index.html#historique-long` (neuf étapes, cinq visibles, « Voir tout
+l'historique (9) » ; « Réduire » une fois ouvert, toujours EN BAS de la liste).
+
+- La règle (au-delà de 6 étapes, les 5 plus récentes) vit dans `replierHistorique`, testée
+  seule. Le bouton est un îlot client de quelques lignes (déclaré dans
+  `ilots-page-publique`), les étapes repliées sont rendues par le serveur et cachées dès le
+  premier rendu (aucun décalage). `<details>` a été écarté : son `<summary>` aurait coincé
+  « Réduire » entre la cinquième et la sixième étape.
+- La sonde sait semer l'état (`HISTORIQUE_LONG=1`, neuf points de passage). Mesuré à 1440 et
+  390 : la carte correspond à la planche (mêmes textes, tailles, couleurs, abscisses ; seul un
+  décalage vertical uniforme hérité des cartes du dessus) ; déplié par la sonde, les neuf
+  étapes et « Réduire » sont présents ; aucun défaut de plancher, CSP ni console.
+- ⏸️ La TRADUCTION de l'historique est mise de côté par Wassim (recherche dans la mémoire).
+
 ### ▶️ 26/09/2026 — UN ÉCRAN NOUVEAU : LA PAGE TARIFS PUBLIQUE
 
 Décision de Wassim : « tu créer la page et tu mets l'offre ». Le lien « Tarifs » de la landing
