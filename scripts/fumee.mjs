@@ -1589,6 +1589,32 @@ try {
         const entetes = { cookie: cookieVendeur, ...visiteur(41) };
 
         // ══════════════════════════════════════════════════════════════════════════
+        // UNE SESSION VALIDE NE REPASSE PAS PAR LE FORMULAIRE (26/09/2026)
+        // ══════════════════════════════════════════════════════════════════════════
+        //
+        // Wassim, connecté, rouvrait droplink.fr, cliquait « Se connecter »… et
+        // retapait son mot de passe : la page de connexion affichait le formulaire
+        // à une session parfaitement valide (400 jours de cookie). L'espace vendeur
+        // lui aurait répondu ; c'est la porte d'entrée qui l'ignorait. Même chose
+        // pour « Créer un compte ». Le CONTRE-TEST est juste après : sans cookie,
+        // la connexion rend toujours son formulaire (`/fr/connexion` en 200).
+        for (const chemin of ["/fr/connexion", "/fr/inscription"]) {
+          const r = await fetch(`${base}${chemin}`, { redirect: "manual", headers: entetes });
+          const vers = r.headers.get("location") ?? "";
+          controles.push([
+            r.status >= 300 && r.status < 400 && /\/fr\/commandes$/.test(new URL(vers, base).pathname),
+            `${chemin} renvoie une session vendeur valide vers son espace (statut ${r.status}, vers « ${vers} »)`,
+          ]);
+        }
+        {
+          const r = await fetch(`${base}/fr/connexion`, { redirect: "manual", headers: visiteur(42) });
+          controles.push([
+            r.status === 200,
+            `CONTRE-TEST : sans session, /fr/connexion rend toujours son formulaire (statut ${r.status})`,
+          ]);
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
         // ET LE GESTE FAIT-IL CE QU IL DIT ? — LE CONTRE-TEST POSITIF QUI MANQUAIT
         // ══════════════════════════════════════════════════════════════════════════
         //

@@ -1473,7 +1473,19 @@ for (const modele of routes) {
       await envoyer("Emulation.setEmitTouchEventsForMouse", { enabled: true, configuration: "mobile" });
     }
     const hote = new URL(base).hostname;
-    for (const c of cookies) {
+    /*
+     * ⚠️ LA CONNEXION ET L'INSCRIPTION SE MESURENT SANS SESSION (26/09/2026).
+     * Depuis `entreeDejaOuverte`, une session valide y est renvoyée vers
+     * l'espace vendeur : avec le cookie de la sonde, on mesurait la liste des
+     * commandes sous le nom de la connexion (367 éléments des deux côtés, 49
+     * « en trop »). Personne de connecté ne voit plus ces écrans ; les mesurer
+     * connecté mesurerait un écran que personne ne voit.
+     */
+    const sansSession = /^\/[a-z]{2}(?:-[A-Z]{2})?\/(?:connexion|inscription)(?:[?#]|$)/.test(chemin);
+    // Vidés, pas seulement non posés : une route mesurée avant dans le même
+    // navigateur y aurait laissé les siens.
+    if (sansSession) await envoyer("Network.clearBrowserCookies", {});
+    for (const c of sansSession ? [] : cookies) {
       await envoyer("Network.setCookie", { name: c.name, value: c.value, domain: hote, path: "/" });
     }
     await envoyer("Page.enable", {});

@@ -12,6 +12,9 @@ import {
   NoteSecurite,
 } from "@/components/acces/coque-acces";
 import { routing } from "@/i18n/routing";
+import { redirect } from "next/navigation";
+import { estLangueSupportee } from "@/i18n/config";
+import { entreeDejaOuverte } from "@/lib/comptes/apres-session";
 
 /**
  * CONNEXION — deux volets dans la carte-page du canevas.
@@ -111,6 +114,11 @@ export default async function Connexion({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  // Une session déjà ouverte ne repasse pas par le formulaire : voir `entreeDejaOuverte`.
+  const dejaOuverte = await entreeDejaOuverte(estLangueSupportee(locale) ? locale : "fr");
+  if (dejaOuverte !== null) redirect(dejaOuverte);
+
   const t = await getTranslations("connexion");
   const tl = await getTranslations("landing");
 

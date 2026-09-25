@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { FondApplication } from "@/components/app/fond-application";
 import { LogoMarque } from "@/components/acces/coque-acces";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -183,9 +184,12 @@ export default async function LayoutApplication({
         <aside className="hidden border-r border-ds-filet bg-ds-surface-carte px-[18px] pt-[26px] pb-5 md:flex md:w-[264px] md:shrink-0 md:flex-col md:gap-1.5">
           {/* Logo de 38 px avec un retrait de 8 et 24 px sous lui — mesure sur
               la reference, ou il remplace le mot « DropLink » ecrit en dur. */}
-          <span className="px-2 pb-6">
+          {/* Le logo MÈNE AU TABLEAU DE BORD, jamais à la landing : dans son
+              espace, le vendeur veut revenir chez lui, pas relire la
+              présentation d'un produit qu'il emploie (Wassim, 26/09/2026). */}
+          <Link href={`/${langue}/tableau-de-bord`} className="self-start px-2 pb-6">
             <LogoMarque hauteur={38} />
-          </span>
+          </Link>
 
           <NavigationVendeur entrees={entrees} variante="cote" etiquette={t("espaceVendeur")} />
 

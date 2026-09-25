@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
@@ -53,9 +54,11 @@ export async function BarreSuperieure({
 
   return (
     <header className="flex h-[62px] shrink-0 items-center gap-2.5 border-b border-ds-filet px-[14px] md:h-[89px] md:gap-5 md:border-b-0 md:px-8">
-      <span className="flex items-center md:hidden">
+      {/* Le logo mène au tableau de bord (voir le layout de l'espace vendeur) ;
+          `min-h-11` : 44 px de cible au téléphone, le logo n'en fait que 28. */}
+      <Link href={`/${langue}/tableau-de-bord`} className="flex min-h-11 items-center md:hidden">
         <LogoMarque hauteur={28} />
-      </span>
+      </Link>
       {/* `useSearchParams` fait sortir son porteur du rendu statique : la
           frontière le borne à ce seul champ plutôt qu à toute la coque. */}
       <div className="hidden w-full max-w-[551px] min-w-0 md:block">

@@ -288,3 +288,40 @@ export async function exigerVendeur(langue: Langue): Promise<ProfilVendeur> {
 
   return profil;
 }
+
+/**
+ * OÙ ENVOYER QUELQU'UN QUI ARRIVE SUR LA CONNEXION OU L'INSCRIPTION AVEC UNE
+ * SESSION DÉJÀ OUVERTE — ou `null` s'il doit voir le formulaire.
+ *
+ * DÉFAUT VU PAR WASSIM LE 26/09/2026 : connecté, il rouvrait droplink.fr,
+ * cliquait « Se connecter »… et retapait son mot de passe. Sa session était
+ * valide (400 jours de cookie) ; c'est la porte d'entrée qui l'ignorait et
+ * rendait le formulaire à tout le monde.
+ *
+ * ⚠️ PAS `suivreApresSession` : elle ÉMET (l'inscription est le dénominateur du
+ * taux d'activation), et une simple visite de la page de connexion ne doit rien
+ * compter. Celle-ci lit le même état et n'émet rien.
+ *
+ * ⚠️ ELLE NE PEUT PAS BOUCLER AVEC L'ESPACE VENDEUR, parce qu'elle lui est
+ * exactement symétrique : le layout de `(app)` ne renvoie vers la connexion que
+ * sans profil ou pour un compte suspendu — deux cas où celle-ci rend `null`, donc
+ * le formulaire. La vérification en deux étapes part vers `/verification`, comme
+ * partout ailleurs. Un onboarding inachevé part vers les commandes, où le layout
+ * le redirige lui-même vers `/bienvenue`.
+ *
+ * UNE PANNE DU SERVEUR D'AUTHENTIFICATION REND LE FORMULAIRE : la page qui permet
+ * d'entrer ne doit jamais tomber parce qu'on n'a pas pu savoir si l'on était
+ * déjà entré.
+ */
+export async function entreeDejaOuverte(langue: Langue): Promise<string | null> {
+  try {
+    const etat = await lireEtatDuCompte();
+    if (etat.etat === "verification") return cheminDeVerification(langue);
+    if (etat.etat !== "profil" || etat.profil.statut === "suspended") return null;
+    return `/${langue}/commandes`;
+  } catch (erreur) {
+    if (!(erreur instanceof SessionIndisponible)) throw erreur;
+    console.error("[entree] " + erreur.message);
+    return null;
+  }
+}
