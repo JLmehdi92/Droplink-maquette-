@@ -1090,6 +1090,22 @@ const SQL = {
     },
   },
 
+  /*
+   * LE QUOTA COMPTE DE NOUVEAU LES TENTATIVES (202) : le déclencheur repasse en
+   * BEFORE INSERT, et chaque `on conflict do update` d'`attacher_colis` — un
+   * transporteur précisé, un numéro ressaisi — consomme un colis qui n'existe pas.
+   */
+  "colis-compte-les-tentatives": {
+    casser: `drop trigger if exists tracked_parcels_plafond on public.tracked_parcels;
+create trigger tracked_parcels_plafond
+  before insert on public.tracked_parcels
+  for each row execute function public.verifier_plafond_colis();`,
+    reparerDepuisMigration: {
+      fichier: "202_le_quota_compte_des_colis_pas_des_tentatives.sql",
+      depuis: "drop trigger if exists tracked_parcels_plafond on public.tracked_parcels;",
+    },
+  },
+
   "colis-sans-verrou": {
     casserDepuisMigration: {
       fichier: "201_le_gratuit_suit_quinze_colis.sql",

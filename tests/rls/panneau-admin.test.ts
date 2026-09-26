@@ -533,7 +533,7 @@ describe("Le plafond de commandes affiché suit le réglage", () => {
 
     const fiche = await lireCompte(admin.client, pro.profilId, "ip-test");
     expect(
-      fiche?.quotaCommandes.plafond,
+      fiche?.quotaCommandes?.plafond,
       "l'écran afficherait un plafond que la base n'applique pas",
     ).toBe(512);
 
@@ -576,7 +576,7 @@ describe("Le plafond de commandes affiché suit le réglage", () => {
     );
 
     const fiche = await lireCompte(admin.client, pro.profilId, "ip-test");
-    expect(fiche?.quotaCommandes.plafond).toBe(PLAFOND_COMMANDES_MENSUEL_DEFAUT);
+    expect(fiche?.quotaCommandes?.plafond).toBe(PLAFOND_COMMANDES_MENSUEL_DEFAUT);
 
     if (avant?.value != null) {
       await interroger(

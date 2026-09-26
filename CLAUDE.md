@@ -643,15 +643,17 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 198, 199, 200 et 201, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 198 à 202, AVANT le déploiement** — décision
 de Wassim (147 à 197 y sont depuis le 25/09/2026). La 198 rend le quota À VIE impossible à
 recharger par « Supprimer mes données » ; la 199 laisse la fiche commande dire qu'un suivi est
 bloqué par le quota de colis ; la 200 fait repartir de zéro le vendeur qui passe Pro (ses
 commandes gratuites ne mangent plus ses 300 du mois) et donne à la fiche admin la règle du plan.
 La 201 ramène le plafond de colis d'un compte gratuit à 15 à vie (au lieu de 30) : chaque colis
 suivi coûte une prise en charge, et le gratuit n'a plus de marge de correction.
-⚠️ Sans la 200, le code déployé lit dans `lire_compte_admin` des colonnes qu'elle ne rend pas
-encore : la jauge de la fiche d'un compte serait fausse (non mesuré — lu dans le code).
+La 202 fait compter le quota de colis en AFTER INSERT : en BEFORE, chaque `on conflict do update`
+d'`attacher_colis` (un transporteur précisé) consommait un colis qui n'existait pas — mesuré : 1 colis
+réel, 3 consommés. Sans la 200, la jauge de la fiche admin est OMISE (le lecteur rend `null` plutôt
+qu'un « NaN », testé).
 `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
 **Les consignes que ce journal porte et qui ne se perdent pas avec lui :**

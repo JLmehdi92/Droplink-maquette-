@@ -243,3 +243,73 @@ describe("Le suivi bloqué par le quota de colis se dit", () => {
     expect(error).not.toBeNull();
   });
 });
+
+/**
+ * LE QUOTA COMPTE DES COLIS, PAS DES TENTATIVES — migration 202.
+ *
+ * ⚠️ DÉFAUT TROUVÉ PAR LA RELECTURE ECC DU 27/09/2026, dans la 198. Le compteur de
+ * colis était un déclencheur BEFORE INSERT ; or `attacher_colis` écrit par
+ * `insert … on conflict do update`, à CHAQUE sauvegarde du numéro ou du transporteur.
+ * Postgres exécute un BEFORE INSERT pour chaque ligne proposée, même quand elle
+ * finit en mise à jour. Mesuré : UN colis réel, TROIS consommés après deux
+ * changements de transporteur — et, à 15/15, préciser le transporteur d'un colis
+ * EXISTANT était refusé, alors que c'est le seul geste qui relance un numéro non
+ * reconnu. Numéros FACTICES : aucune prise en charge ne part d'ici (`after()`).
+ */
+describe("Le quota compte des colis, pas des tentatives", () => {
+  const colisConsommes = async (u: UtilisateurDeTest) =>
+    ((await service.from("quotas_consommes").select("colis").eq("shop_id", u.shopId)).data ?? []).reduce(
+      (a, l) => a + l.colis,
+      0,
+    );
+  const nouvelleCommande = async (u: UtilisateurDeTest) => {
+    const { data, error } = await u.client.from("orders").insert({ shop_id: u.shopId }).select("id").single();
+    expect(error).toBeNull();
+    return (data as { id: string }).id;
+  };
+  const ecrire = (u: UtilisateurDeTest, id: string, champ: string, valeur: string) =>
+    appliquerChamp(u.client as unknown as ClientEcriture, u.profilId, id, champ, valeur);
+
+  test("préciser le transporteur d'un colis déjà suivi ne consomme rien", async () => {
+    const u = await nouveau("tentatives");
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMOTENTATIVE01")).statut).toBe("ok");
+    expect(await ecrire(u, id, "carrier_code", "100003")).toEqual(expect.objectContaining({ statut: "ok" }));
+    expect(await ecrire(u, id, "carrier_code", "100001")).toEqual(expect.objectContaining({ statut: "ok" }));
+    const { count } = await service.from("tracked_parcels").select("id", { count: "exact", head: true }).eq("shop_id", u.shopId);
+    expect(count, "un seul colis existe").toBe(1);
+    expect(await colisConsommes(u), "le quota compte les tentatives, pas les colis").toBe(1);
+  });
+
+  test("À 15/15, le transporteur d'un colis EXISTANT se précise encore — un NOUVEAU numéro est refusé", async () => {
+    const u = await nouveau("tentatives-plein");
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMOPLEIN-A")).statut).toBe("ok");
+    const autres = Array.from({ length: PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT - 1 }, (_, i) => ({
+      shop_id: u.shopId,
+      tracking_number: `DEMOREMPLI${i}`,
+      carrier_code: 6051,
+    }));
+    expect((await service.from("tracked_parcels").insert(autres)).error).toBeNull();
+    expect(await colisConsommes(u)).toBe(PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT);
+
+    const precise = await ecrire(u, id, "carrier_code", "100003");
+    expect(precise, "le suivi d'un colis existant serait dit bloqué").toEqual({ statut: "ok", modifieeLe: expect.any(String) });
+    const { data: colis } = await service
+      .from("tracked_parcels")
+      .select("carrier_code")
+      .eq("shop_id", u.shopId)
+      .eq("tracking_number", "DEMOPLEIN-A")
+      .single();
+    expect(colis?.carrier_code, "le transporteur précisé n'est pas arrivé sur le colis").toBe(100003);
+    expect(await colisConsommes(u)).toBe(PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT);
+
+    // CONTRE-TEST : un numéro NEUF reste refusé — le quota tient toujours.
+    const id2 = await nouvelleCommande(u).catch(() => null);
+    if (id2 !== null) {
+      const neuf = await ecrire(u, id2, "tracking_number", "DEMOPLEIN-NEUF");
+      expect(neuf).toEqual(expect.objectContaining({ statut: "ok", suiviBloque: "gratuit" }));
+    }
+    expect((await service.from("tracked_parcels").insert({ shop_id: u.shopId, tracking_number: "DEMOPLEIN-SERVICE" })).error?.code).toBe("DL070");
+  });
+});

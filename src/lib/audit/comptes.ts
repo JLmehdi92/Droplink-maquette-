@@ -193,7 +193,7 @@ export interface FicheCompte {
    * « commandes ce mois / plafond mensuel », qui disait « 0 sur 300 » d'un gratuit
    * bloqué à vie.
    */
-  readonly quotaCommandes: { readonly utilise: number; readonly plafond: number };
+  readonly quotaCommandes: { readonly utilise: number; readonly plafond: number } | null;
   readonly medias: number;
   readonly stockageOctets: number;
   readonly activite: readonly ActiviteCompte[];
@@ -238,7 +238,18 @@ export async function lireCompte(
     commandes: Number(l.commandes),
     colisCeMois: Number(l.colis_ce_mois),
     plan: l.plan,
-    quotaCommandes: { utilise: Number(l.quota_commandes), plafond: Number(l.quota_commandes_plafond) },
+    // ⚠️ `null` PLUTÔT QU'UN « NaN SUR NaN » (relecture ECC du 27/09/2026). Tant que la
+    // migration 200 n'est pas appliquée, la fonction répond SANS ces colonnes, et
+    // `Number(undefined)` afficherait une jauge fausse sans lever d'erreur. On
+    // n'affiche rien plutôt qu'un chiffre que la base n'a pas rendu.
+    quotaCommandes:
+      (l.plan === "gratuit" || l.plan === "pro") &&
+      Number.isFinite(Number(l.quota_commandes)) &&
+      Number.isFinite(Number(l.quota_commandes_plafond)) &&
+      l.quota_commandes !== null &&
+      l.quota_commandes_plafond !== null
+        ? { utilise: Number(l.quota_commandes), plafond: Number(l.quota_commandes_plafond) }
+        : null,
     medias: Number(l.medias),
     stockageOctets: Number(l.stockage_octets),
     // La base rend `[]` plutot que `null` : l'appelant n'a pas a distinguer

@@ -234,7 +234,16 @@ export async function appliquerChamp(
   let suiviBloque: QuotaAtteint | null = null;
   if (nom === "tracking_number" || nom === "carrier_code") {
     const attache = await attacherColis(supabase, analyse.data.id);
-    if (attache.statut === "echec") suiviBloque = quotaColisDepuisCode(attache.motif);
+    if (attache.statut === "echec") {
+      suiviBloque = quotaColisDepuisCode(attache.motif);
+      // UNE ATTACHE QUI ÉCHOUE POUR UNE AUTRE RAISON NE PASSE PLUS EN SILENCE
+      // (relecture ECC du 27/09/2026) : le numéro reste enregistré, mais aucun suivi
+      // ne démarre, et rien ne le disait nulle part — ni à l'écran, ni au journal.
+      // Le motif est un code, jamais le numéro : il se lit sans exposer de donnée.
+      if (suiviBloque === null) {
+        console.error("[commandes] attache du colis impossible, suivi non démarré — motif " + attache.motif);
+      }
+    }
   }
 
   await marquerPremierContenu(supabase, analyse.data.id, profilId);
