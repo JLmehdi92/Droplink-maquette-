@@ -6,6 +6,7 @@ import type { creerClientServeur } from "@/lib/supabase/server";
 import { STATUTS_EXPEDITION, STATUTS_QC } from "./liste";
 import { journaliserApres } from "./journal";
 import { attacherColis } from "@/lib/tracking/attache";
+import { quotaColisDepuisCode, type QuotaAtteint } from "./quota-atteint";
 
 /**
  * LE CŒUR DES ÉCRITURES DE COMMANDE, hors d'un module `"use server"`.
@@ -64,7 +65,16 @@ const CHAMPS = {
 type NomChamp = keyof typeof CHAMPS;
 
 export type ResultatEnregistrement =
-  | { readonly statut: "ok"; readonly modifieeLe: string }
+  | {
+      readonly statut: "ok";
+      readonly modifieeLe: string;
+      /**
+       * LE NUMÉRO EST ENREGISTRÉ, MAIS LE SUIVI N'A PAS DÉMARRÉ : la base a refusé
+       * d'attacher le colis au quota de colis. Absent partout ailleurs — un « ok » sans
+       * ce champ n'affirme rien sur le suivi.
+       */
+      readonly suiviBloque?: QuotaAtteint;
+    }
   | {
       readonly statut: "echec";
       readonly motif: "session" | "saisie" | "ecriture" | "introuvable";
@@ -214,8 +224,17 @@ export async function appliquerChamp(
   // LE NUMÉRO DE SUIVI DÉCLENCHE L'ATTACHE D'UN COLIS. Elle vient APRÈS
   // l'écriture réussie : attacher un colis à une commande dont la sauvegarde a
   // échoué créerait un suivi que personne n'a demandé — et qui se paierait.
+  //
+  // ⚠️ SON REFUS ÉTAIT IGNORÉ JUSQU'AU 26/09/2026. Au quota de colis, la base refuse
+  // l'attache (`DL070`, `DL051`) : le numéro restait enregistré, l'écran disait
+  // « enregistré », et aucun suivi ne démarrait jamais — sans un mot. Le refus de
+  // quota remonte désormais à l'éditeur, qui le dit dans le panneau de suivi. Les
+  // autres échecs d'attache gardent leur ancien sort : la sauvegarde du CHAMP a
+  // réussi, et la dire échouée ferait revenir l'écran sur un numéro que la base porte.
+  let suiviBloque: QuotaAtteint | null = null;
   if (nom === "tracking_number" || nom === "carrier_code") {
-    await attacherColis(supabase, analyse.data.id);
+    const attache = await attacherColis(supabase, analyse.data.id);
+    if (attache.statut === "echec") suiviBloque = quotaColisDepuisCode(attache.motif);
   }
 
   await marquerPremierContenu(supabase, analyse.data.id, profilId);
@@ -229,7 +248,9 @@ export async function appliquerChamp(
   // surface de fuite.
   journaliserApres(supabase, analyse.data.id, "commande_modifiee", { champ: nom });
 
-  return { statut: "ok", modifieeLe: data.updated_at };
+  return suiviBloque === null
+    ? { statut: "ok", modifieeLe: data.updated_at }
+    : { statut: "ok", modifieeLe: data.updated_at, suiviBloque };
 }
 
 /**

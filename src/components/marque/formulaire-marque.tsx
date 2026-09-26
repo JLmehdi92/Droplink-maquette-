@@ -609,11 +609,16 @@ export function FormulaireMarque({
             <div className="grid gap-x-4 gap-y-[18px] lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)] lg:gap-y-5">
               <div className="min-w-0">
             <span className={etiquette}>{t("logoTitre")}</span>
+            {/* HORS DU CLAVIER ET DES LECTEURS D'ÉCRAN (26/09/2026) : le bouton ci-dessous est
+                le contrôle, ce champ n'en est que le moteur. Atteignable, il faisait un arrêt
+                de tabulation sans nom juste avant lui. */}
             <input
               ref={champFichier}
               type="file"
               accept={ACCEPT_LOGO}
               className="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
               onChange={(e) => {
                 const fichier = e.target.files?.[0];
                 if (fichier !== undefined) void deposerLogo(fichier);

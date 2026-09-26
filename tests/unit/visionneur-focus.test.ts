@@ -42,6 +42,7 @@ const MEDIAS: readonly EntreeVisionneur[] = [
 
 const LIBELLES = {
   ouvrir: "Ouvrir",
+  ouvrirVideo: "Lire la vidéo",
   fermer: "Fermer",
   precedent: "Précédent",
   suivant: "Suivant",

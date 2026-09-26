@@ -14,6 +14,9 @@ import { estLangueSupportee } from "@/i18n/config";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { EtatLot, NombreLot } from "@/lib/commandes/lot";
+import { EtatQuota, type QuotaAtteint } from "@/lib/commandes/quota-atteint";
+import { BandeauQuota } from "@/components/commandes/bandeau-quota";
+import { creerClientServeur } from "@/lib/supabase/server";
 
 export async function generateMetadata({
   params,
@@ -91,6 +94,12 @@ export default async function Commandes({
     nombre: NombreLot.parse(requete["n"]),
   };
   const t = await getTranslations("commandes");
+
+  // LE QUOTA ATTEINT (26/09/2026), validé comme le lot. Le plafond n'est lu que s'il
+  // y a un refus à expliquer : l'écran le plus ouvert du produit ne paie pas cette
+  // lecture le reste du temps.
+  const quota = EtatQuota.parse(requete["quota"]);
+  const plafondQuota = quota === null ? null : await lirePlafondDuQuota(quota);
 
   /*
    * ⚠️ `lireProfilVendeur()` NE COÛTE AUCUN ALLER-RETOUR DE PLUS ICI. Elle est
@@ -247,6 +256,21 @@ export default async function Commandes({
         id="contenu"
         className="flex flex-grow flex-col gap-3.5 py-3.5 md:gap-[22px] md:px-8 md:pt-0 md:pb-[26px]"
       >
+        {/* LE QUOTA ATTEINT, avant tout le reste : c'est ce qui vient d'arriver au vendeur
+            (planche `OrdersView`, `#quota-atteint`, `#quota-mensuel`). */}
+        {quota !== null ? (
+          <BandeauQuota
+            quota={quota}
+            titre={t(quota === "gratuit" ? "quota.gratuitTitre" : "quota.mensuelTitre")}
+            texte={
+              plafondQuota === null
+                ? t(quota === "gratuit" ? "quota.gratuitTexteSansNombre" : "quota.mensuelTexteSansNombre")
+                : t(quota === "gratuit" ? "quota.gratuitTexte" : "quota.mensuelTexte", { n: plafondQuota })
+            }
+            passerPro={t("quota.passerPro")}
+            versPasserPro={`/${langue}/passer-pro`}
+          />
+        ) : null}
         {/*
           LES QUATRE COMPTEURS. Omis en bloc si la lecture échoue : rendre des
           zéros affirmerait qu'on a compté et trouvé rien, ce qui est faux — et
@@ -463,6 +487,23 @@ function FormulaireRecherche({
  * l'anneau prend sa place à largeur constante. Les deux ensemble élargiraient le
  * bouton au clic, et sur l'action flottante du téléphone cela vaut douze pixels.
  */
+/**
+ * Le plafond que le vendeur vient d'atteindre, lu en base : c'est le réglage de
+ * l'administration qui fait foi, jamais un nombre écrit ici. Illisible, le bandeau
+ * dit la même chose sans nombre plutôt que d'en inventer un.
+ */
+async function lirePlafondDuQuota(quota: QuotaAtteint): Promise<number | null> {
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.rpc(
+    quota === "gratuit" ? "lire_plafond_gratuit_a_vie" : "lire_plafond_commandes",
+  );
+  if (error !== null || typeof data !== "number") {
+    console.error("[commandes] plafond du quota illisible : " + (error?.message ?? "réponse vide"));
+    return null;
+  }
+  return data;
+}
+
 function LibelleNouvelle({ libelle }: { readonly libelle: string }) {
   return (
     <>

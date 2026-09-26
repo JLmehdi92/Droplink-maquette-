@@ -6,6 +6,30 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 26/09/2026 — L'AUDIT « TOUT CLIQUER » ET SES CORRECTIFS : QUOTAS DITS, QUOTA QUI NE SE REND PLUS
+
+Wassim : « check toute les features… clique sur tous les boutons… réfléchis comme un humain »,
+puis « corrige-moi tout ça avec ecc sans aucune erreur et tu re-check derrière ». Navigateur
+piloté sur la base de tests, comptes semés, aucun numéro de suivi réel.
+
+- **Deux écrans nouveaux, écrits d'abord dans le kit** : le bandeau du quota atteint sur la liste
+  (`OrdersView`, `#quota-atteint`, `#quota-mensuel`, et au téléphone dans `Telephone.jsx`) et
+  l'avis « suivi bloqué » dans le panneau de suivi de la fiche (`OrderDetail`, `#suivi-bloque`,
+  `#suivi-bloque-mensuel`, bureau et téléphone). Relevés ajoutés au lanceur :
+  `commandes-quota` (`/fr/commandes?quota=gratuit`, `ETAT=quota`) et `detail-suivi-bloque`
+  (`SUIVI_BLOQUE=1`, nouvel état de la sonde : colis détaché, consommation de colis épuisée).
+  Les quatre relevés (1690 et 390) en code 0 ; déclarations reprises de l'écran de base, plus ce
+  qui est propre à l'état (pas de colis → « Aucun transporteur », ni points de passage).
+- 🔴 **Une capture a vu ce que la soustraction ne pouvait pas voir** : au téléphone, « Passer au
+  Pro » se coupait en « Passer au » / « Pro ». Rendu insécable, kit ET produit.
+- ⚠️ **La planche téléphone agrandit TOUT lien du contenu** (`.dl-main a{min-height:34px}`), un
+  lien de prose compris. La règle 5 dit l'inverse : écart déclaré `contrainte`, le produit gagne.
+- ⚠️ **Un premier passage téléphone a mesuré la liste SANS le bandeau** (212 éléments au lieu de
+  222). Non reproduit en deux passages groupés, ni au navigateur à 390 : cause NON établie.
+- `/docs` lit ses deux plafonds en base (plus de « 300 » en dur) : déclaré par MOTIF, puisque le
+  nombre suit le réglage. Remesuré à 1280 et 390 en code 0.
+- Trois langues × 1690/390 au navigateur : avis, bandeau, lien d'une ligne, aucun débordement.
+
 ### ▶️ 26/09/2026 — L'APERÇU DE LA FICHE COMMANDE DEVIENT LA VRAIE PAGE, EN MOBILE ET EN DESKTOP
 
 Wassim : « pourquoi l'aperçu de la page client n'est pas comme la vraie page client finale,

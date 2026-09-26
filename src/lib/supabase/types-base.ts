@@ -650,6 +650,35 @@ export type Database = {
         }
         Relationships: []
       }
+      quotas_consommes: {
+        Row: {
+          colis: number
+          commandes: number
+          mois: string
+          shop_id: string
+        }
+        Insert: {
+          colis?: number
+          commandes?: number
+          mois: string
+          shop_id: string
+        }
+        Update: {
+          colis?: number
+          commandes?: number
+          mois?: string
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotas_consommes_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limit: {
         Row: {
           cle: string
@@ -1592,6 +1621,7 @@ export type Database = {
         Args: { p_avec_logo: boolean; p_shop: string }
         Returns: string[]
       }
+      mon_quota_colis_atteint: { Args: never; Returns: string }
       mon_shop_id: { Args: never; Returns: string }
       notification_deja_vue: { Args: { p_cle: string }; Returns: boolean }
       prefixe_media_attendu: { Args: { p_order_id: string }; Returns: string }

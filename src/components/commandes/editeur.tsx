@@ -2,10 +2,12 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { Check, ChevronDown, Clock, ExternalLink, Share2, TriangleAlert } from "lucide-react";
 import { enregistrerChamp, type ResultatEnregistrement } from "@/lib/commandes/actions";
 import { lienPageClient } from "@/lib/liens/page-client";
+import type { QuotaAtteint } from "@/lib/commandes/quota-atteint";
 import { referenceCourte } from "@/lib/commandes/reference";
 import { ETAPES, type Etape } from "@/lib/tracking/normalize";
 import { Panneau, LienRetour, LigneInfo } from "@/components/app/panneau";
@@ -128,6 +130,11 @@ export function Editeur({
     readonly abandonne: boolean;
     /** Abandonné sans jamais avoir été pris en charge : le fournisseur n'a pas reconnu le numéro. */
     readonly nonReconnu: boolean;
+    /**
+     * Un numéro saisi, aucun colis attaché, et la base dit que le quota de colis est
+     * atteint (199) : le suivi n'a pas démarré. `null` partout ailleurs.
+     */
+    readonly bloque: QuotaAtteint | null;
     /** Par étape, la date à laquelle un point de passage l'a datée. */
     readonly quand: Readonly<Partial<Record<Etape, string>>>;
     /** Par étape, ce que le transporteur a dit en la franchissant. */
@@ -175,6 +182,13 @@ export function Editeur({
   // vient de tuer — précisément au moment où l'on veut envoyer le nouveau.
   const [jetonCourant, setJetonCourant] = useState(jeton);
   /*
+   * LE SUIVI BLOQUÉ PAR LE QUOTA DE COLIS. Lu par le serveur au chargement (199), puis
+   * tenu à jour par chaque sauvegarde du numéro ou du transporteur : une attache refusée
+   * le pose, une attache réussie — ou un numéro effacé — le retire. Une sauvegarde d'un
+   * AUTRE champ n'en dit rien et n'y touche pas.
+   */
+  const [suiviBloque, setSuiviBloque] = useState<QuotaAtteint | null>(suivi.bloque);
+  /*
    * LE NUMÉRO DE VERSION DE L'APERÇU : il avance à chaque écriture que la base a
    * CONFIRMÉE — un champ, un média —, et l'aperçu se recharge sur lui. Jamais sur
    * la frappe : l'aperçu montre la page que le client recevrait maintenant, donc ce
@@ -187,6 +201,9 @@ export function Editeur({
     (champ: keyof ValeursCommande, valeur: string, resultat: ResultatEnregistrement): void => {
       if (resultat.statut === "ok") {
         apercuPerime();
+        if (champ === "tracking_number" || champ === "carrier_code") {
+          setSuiviBloque(resultat.suiviBloque ?? null);
+        }
         confirmees.current = { ...confirmees.current, [champ]: valeur };
         setChampsEnEchec((precedents) => {
           const restants = precedents.filter((c) => c !== champ);
@@ -348,7 +365,12 @@ export function Editeur({
 
           <div className="contents lg:grid lg:grid-cols-3 lg:items-start lg:gap-[18px]">
             <div className="order-3 lg:order-none">
-              <PanneauSuivi suivi={suivi} statut={valeurs.status} />
+              <PanneauSuivi
+                suivi={suivi}
+                bloque={suiviBloque}
+                versPasserPro={"/" + langue + "/passer-pro"}
+                statut={valeurs.status}
+              />
             </div>
 
             <div className="order-4 lg:order-none">
@@ -545,8 +567,12 @@ function EnTeteDetail({
  */
 function PanneauSuivi({
   suivi,
+  bloque,
+  versPasserPro,
   statut,
 }: {
+  readonly bloque: QuotaAtteint | null;
+  readonly versPasserPro: string;
   readonly suivi: {
     readonly numero: string | null;
     readonly abandonne: boolean;
@@ -570,6 +596,29 @@ function PanneauSuivi({
       {suivi.abandonne ? (
         <p className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] font-medium text-ds-alerte-encre">
           {suivi.nonReconnu ? t("suiviNonReconnu") : t("suiviArrete")}
+        </p>
+      ) : null}
+
+      {/* LE SUIVI N'A PAS DÉMARRÉ, ET LA CAUSE EST NOMMÉE (planche `OrderDetail`,
+          `#suivi-bloque`). Sans cet avis, la frise disait « en attente » pour toujours
+          à un vendeur dont le numéro ne serait jamais suivi. En gratuit, le quota est à
+          vie : le seul geste est le Pro. En Pro, il se recharge le 1er. */}
+      {bloque !== null ? (
+        <p
+          role="status"
+          className="mb-4 rounded-ds-sm bg-ds-alerte-fond p-3 text-[13px] leading-[1.5] font-medium text-ds-alerte-encre"
+        >
+          {bloque === "gratuit" ? (
+            <>
+              {t("suiviBloqueGratuit")}{" "}
+              {/* INSÉCABLE : coupé en « Passer au » / « Pro », le geste se lisait en deux morceaux. */}
+              <Link href={versPasserPro} className="font-bold whitespace-nowrap text-ds-alerte-encre underline">
+                {t("suiviBloquePasserPro")}
+              </Link>
+            </>
+          ) : (
+            t("suiviBloqueMensuel")
+          )}
         </p>
       ) : null}
 

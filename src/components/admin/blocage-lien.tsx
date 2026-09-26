@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Ban, Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { BoutonAction } from "@/components/bouton-action";
@@ -38,6 +38,9 @@ export function BlocageLien({
   /** Sur la carte du téléphone, la cible fait 44 px ; dans le tableau, 34 comme « Voir ». */
   readonly carte?: boolean;
 }) {
+  // UNIQUE PAR INSTANCE (26/09/2026) : la ligne est rendue deux fois — tableau du bureau et
+  // carte du téléphone —, et `blocage-<commande>` donnait deux titres au même identifiant.
+  const idTitre = useId();
   const t = useTranslations("admin.blocage");
   const dialogue = useRef<HTMLDialogElement>(null);
   const [motif, setMotif] = useState("");
@@ -107,13 +110,13 @@ export function BlocageLien({
         onCancel={(e) => {
           if (travaille) e.preventDefault();
         }}
-        aria-labelledby={`blocage-${commandeId}`}
+        aria-labelledby={idTitre}
         className="m-auto w-[480px] max-w-[calc(100%-32px)] rounded-ds-card-lg bg-ds-surface-carte p-6 text-left shadow-ds-window backdrop:bg-[rgba(11,11,24,.34)]"
       >
         <div className="flex flex-col gap-4">
           <div>
             <h2
-              id={`blocage-${commandeId}`}
+              id={idTitre}
               className="text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre"
             >
               {t(bloque ? "debloquerLong" : "bloquerLong", { reference })}

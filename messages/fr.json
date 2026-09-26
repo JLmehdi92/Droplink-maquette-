@@ -799,7 +799,16 @@
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "À partir du {du}",
     "periodeJusquaCourt": "Jusqu’au {au}",
-    "lienBloque": "Lien bloqué"
+    "lienBloque": "Lien bloqué",
+    "quota": {
+      "gratuitTitre": "Quota du compte gratuit atteint",
+      "gratuitTexte": "Vous avez créé vos {n} commandes : ce quota est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
+      "gratuitTexteSansNombre": "Vous avez atteint le quota de votre compte gratuit : il est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
+      "mensuelTitre": "Plafond du mois atteint",
+      "mensuelTexte": "Vous avez créé vos {n} commandes de ce mois-ci. Le plafond se recharge le 1er du mois.",
+      "mensuelTexteSansNombre": "Vous avez atteint votre plafond de commandes pour ce mois-ci. Il se recharge le 1er du mois.",
+      "passerPro": "Passer au Pro"
+    }
   },
   "editeur": {
     "historique": {
@@ -883,6 +892,9 @@
     "transporteurAuto": "Détection automatique",
     "transporteurAide": "Reconnu d’après le numéro. Choisissez-le seulement s’il ne l’est pas.",
     "suiviNonReconnu": "Le transporteur de ce numéro n’a pas été reconnu. Choisissez-le dans « Transporteur » pour relancer le suivi.",
+    "suiviBloqueGratuit": "Numéro enregistré, mais le suivi automatique n’a pas démarré : vos colis suivis gratuits sont tous utilisés, et ce quota est à vie.",
+    "suiviBloqueMensuel": "Numéro enregistré, mais le suivi automatique n’a pas démarré : le plafond de colis suivis de ce mois est atteint. Il se recharge le 1er ; ressaisissez alors le numéro.",
+    "suiviBloquePasserPro": "Passer au Pro",
     "infosTitre": "Informations de la commande",
     "infosReference": "Référence",
     "infosCreee": "Date de création",
@@ -972,6 +984,7 @@
     "galerie": {
       "titre": "Photos et vidéos",
       "ouvrir": "Agrandir la photo",
+      "ouvrirVideo": "Lire la vidéo",
       "fermer": "Fermer",
       "precedent": "Précédent",
       "suivant": "Suivant",
@@ -1919,12 +1932,13 @@
     "notificationsTexte": "Quand vous renseignez l'e-mail de votre client, il reçoit un message à la livraison du colis. Vous gardez la main : l'e-mail reste facultatif, et il ne crée jamais de compte.",
     "parametres": "Paramètres",
     "plans": "Gratuit et Pro",
-    "plansTexte": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer 15 commandes au total — c'est un quota à vie, il ne se recharge pas chaque mois. Le Pro le porte à 300 commandes par mois et retire la mention DropLink de la page que voit votre client.",
+    "plansTexte": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer {gratuit} commandes au total — c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le porte à {pro} commandes par mois et retire la mention DropLink de la page que voit votre client.",
+    "plansTexteSansNombre": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer un nombre limité de commandes au total — c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le remplace par un plafond mensuel et retire la mention DropLink de la page que voit votre client.",
     "planGratuit": "Gratuit",
     "planPro": "Pro — {prix}/mois",
     "plCommandes": "Commandes",
-    "plCommandesG": "15 au total",
-    "plCommandesP": "300 par mois",
+    "plCommandesG": "{n} au total",
+    "plCommandesP": "{n} par mois",
     "plPage": "Page client",
     "plPageG": "Avec la mention DropLink",
     "plPageP": "Sans la mention DropLink",

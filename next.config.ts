@@ -93,6 +93,16 @@ function politiqueCSP(ancetres: "'none'" | "'self'" = "'none'"): string {
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${r2}`,
+    /*
+     * ⚠️ `media-src` MANQUAIT, ET LES VIDÉOS NE SE LISAIENT PAS EN PRODUCTION (trouvé en
+     * cliquant tout le SaaS, 26/09/2026). Sans lui, le navigateur retombe sur
+     * `default-src 'self'` : la vidéo de contrôle qualité, servie par R2, était bloquée
+     * dans le visionneur du CLIENT ; et `apercuDepuisVideo` ne pouvait pas lire le fichier
+     * déposé (`blob:`) — les vidéos partaient sans vignette ni DURÉE, donc sans que la
+     * limite de 60 s puisse s'appliquer. La CSP n'étant servie qu'en production, aucun
+     * écran mesuré ne le montrait : aucun n'ouvrait une vidéo.
+     */
+    `media-src 'self' blob: ${r2}`,
     "font-src 'self'",
     `connect-src 'self' ${supabase} ${r2}`.replace(/\s+/g, " ").trim(),
     "object-src 'none'",

@@ -52,6 +52,17 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "quotas_consommes",
+      "La consommation des quotas de commandes et de colis, par boutique et par " +
+        "mois (migration 198). AUCUNE POLICY, et c'est le cœur du remède : les " +
+        "quotas comptaient les lignes EXISTANTES, et « Supprimer mes données » les " +
+        "rechargeait — un compte gratuit à 15/15 en recréait 15, mesuré. Écrite et " +
+        "lue par les seuls déclencheurs `verifier_plafond_commandes` et " +
+        "`verifier_plafond_colis`, en `security definer`. Un vendeur qui pourrait y " +
+        "écrire remettrait son quota à zéro ; un vendeur qui pourrait la lire " +
+        "lirait la consommation des autres.",
+    ],
+    [
       "notification_requests",
       "Les demandes de suivi par e-mail en attente de confirmation (migrations " +
         "188-189) : l'adresse d'un client final et l'EMPREINTE du jeton envoyé. " +
@@ -354,6 +365,15 @@ describe("Sonde B — droits d'exécution dans public", () => {
         "sans ce droit toute lecture de commande échouerait. Elle est évaluée " +
         "une fois par requête au lieu d'une jointure par ligne, ce qui est la " +
         "raison même de son existence.",
+    ],
+    [
+      "mon_quota_colis_atteint",
+      "Dit à un vendeur si SON quota de colis est atteint ('gratuit', 'mensuel' ou " +
+        "NULL), pour que l'éditeur explique un numéro dont le suivi n'a pas démarré " +
+        "(199). Sans argument, comme `mon_shop_id` qu'elle appelle : aucune autre " +
+        "boutique ne peut être interrogée. `security definer` parce que la " +
+        "consommation (`quotas_consommes`) est fermée au vendeur — elle ne rend " +
+        "qu'un verdict, jamais un compte. `anon` n'y a pas droit : il n'a pas de boutique.",
     ],
     [
       "compter_commandes_par_etat",

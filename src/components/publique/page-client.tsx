@@ -413,6 +413,7 @@ export async function PageClient({
                   filigrane={commande.boutique.filigrane ? (commande.boutique.nom ?? null) : null}
                   libelles={{
                     ouvrir: t("galerie.ouvrir"),
+                    ouvrirVideo: t("galerie.ouvrirVideo"),
                     fermer: t("galerie.fermer"),
                     precedent: t("galerie.precedent"),
                     suivant: t("galerie.suivant"),

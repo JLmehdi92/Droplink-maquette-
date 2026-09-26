@@ -431,6 +431,25 @@ const { error: eLien } = await service.from("order_parcels").insert(
   colis.map((c, i) => ({ order_id: commandes[i % commandes.length].id, parcel_id: c.id })),
 );
 if (eLien) throw new Error("jeu de mesure : colis non rattaches — " + eLien.message);
+
+/*
+ * `SUIVI_BLOQUE=1` : LE SUIVI DE LA PREMIERE COMMANDE N A PAS DEMARRE, QUOTA DE COLIS EPUISE
+ * (planche `OrderDetail`, `#suivi-bloque`, 199). La commande garde son numero, perd son colis,
+ * et la consommation de colis du compte GRATUIT est portee au-dela de son quota a vie — c est
+ * exactement l etat que laisse une attache refusee (`DL070`). Ecrit par le client de SERVICE :
+ * la mesure prepare un etat, elle n eprouve pas un droit. Aucun colis n est cree, donc aucune
+ * prise en charge ne peut partir.
+ */
+if (process.env["SUIVI_BLOQUE"] === "1" && idCommande !== "") {
+  const { error: eDetache } = await service.from("order_parcels").delete().eq("order_id", idCommande);
+  if (eDetache) throw new Error("jeu de mesure : colis non detache — " + eDetache.message);
+  const mois = new Date();
+  const premierDuMois = new Date(Date.UTC(mois.getUTCFullYear(), mois.getUTCMonth(), 1)).toISOString().slice(0, 10);
+  const { error: eQuota } = await service
+    .from("quotas_consommes")
+    .upsert({ shop_id: shop.id, mois: premierDuMois, colis: 999 }, { onConflict: "shop_id,mois" });
+  if (eQuota) throw new Error("jeu de mesure : quota de colis non epuise — " + eQuota.message);
+}
 /*
  * ⚠️ DES POINTS DE PASSAGE, SINON LA FRISE DE L EDITEUR MESURE SON CAS VIDE.
  *

@@ -836,14 +836,74 @@ const SQL = {
    */
   "quota-gratuit-mensuel": {
     casserDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
-      remplacer: "    from public.orders\n    where shop_id = new.shop_id;\n",
-      par: "    from public.orders\n    where shop_id = new.shop_id\n      and created_at >= date_trunc('month', now());\n",
+      remplacer: "    from public.quotas_consommes q\n    where q.shop_id = new.shop_id;\n",
+      par: "    from public.quotas_consommes q\n    where q.shop_id = new.shop_id\n      and q.mois = date_trunc('month', now())::date;\n",
     },
     reparerDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+    },
+  },
+
+  /*
+   * LA SUPPRESSION REND LE QUOTA (198) : le décompte redevient celui des lignes
+   * EXISTANTES. « Supprimer mes données » recharge alors les quinze commandes À VIE
+   * d'un compte gratuit — le défaut mesuré le 26/09/2026. `quota-survit-a-la-suppression`
+   * doit rougir.
+   */
+  "quota-rendu-par-la-suppression": {
+    casserDepuisMigration: {
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+      remplacer: "    select coalesce(sum(q.commandes), 0) into v_compte\n    from public.quotas_consommes q\n    where q.shop_id = new.shop_id;\n",
+      par: "    select count(*) into v_compte\n    from public.orders\n    where shop_id = new.shop_id;\n",
+    },
+    reparerDepuisMigration: {
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+    },
+  },
+
+  /*
+   * HORS du cas motivant : la même régression sur les COLIS, dont chacun est une prise
+   * en charge PAYANTE sur un palier commun. Supprimer ses données y rendrait trente colis.
+   */
+  "colis-rendus-par-la-suppression": {
+    casserDepuisMigration: {
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+      remplacer: "    select coalesce(sum(q.colis), 0) into v_compte\n    from public.quotas_consommes q\n    where q.shop_id = new.shop_id;\n",
+      par: "    select count(*) into v_compte\n    from public.tracked_parcels\n    where shop_id = new.shop_id;\n",
+    },
+    reparerDepuisMigration: {
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+    },
+  },
+
+  /*
+   * LE DÉCLENCHEUR PRIVILÉGIÉ DEVIENT UN ORACLE (198) : sans la garde « sa propre
+   * boutique », un vendeur qui vise la boutique d'un autre reçoit le refus du QUOTA de
+   * l'autre — avec ses deux nombres — au lieu du refus de la RLS.
+   */
+  "quota-oracle-inter-boutiques": {
+    casserDepuisMigration: {
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+      remplacer: "  if (select auth.uid()) is not null and new.shop_id is distinct from public.mon_shop_id() then\n    return new;\n  end if;\n",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -857,14 +917,14 @@ const SQL = {
    */
   "plan-ne-debloque-rien": {
     casserDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  if v_plan = 'gratuit' then\n",
       par: "  if true then\n",
     },
     reparerDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -973,14 +1033,14 @@ const SQL = {
    */
   "colis-gratuit-au-plafond-mensuel": {
     casserDepuisMigration: {
-      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie() * 2;",
       par: "    v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -993,14 +1053,14 @@ const SQL = {
    */
   "quota-sans-verrou": {
     casserDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-commandes:' || new.shop_id::text, 0));\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -1012,14 +1072,14 @@ const SQL = {
    */
   "colis-sans-verrou": {
     casserDepuisMigration: {
-      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-colis:' || new.shop_id::text, 0));\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -1033,14 +1093,14 @@ const SQL = {
    */
   "colis-pro-au-double": {
     casserDepuisMigration: {
-      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "  v_plafond := public.lire_plafond_commandes();",
       par: "  v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "197_en_pro_le_plafond_de_colis_vaut_celui_des_commandes.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -2894,17 +2954,38 @@ $$;
    * depuis la 096 aurait ramené le produit en arrière — le plafond serait
    * redevenu mensuel pour tout le monde, silencieusement, et le falsificateur
    * aurait laissé derrière lui le défaut qu'il prétendait avoir réparé.
+   * Même motif le 26/09/2026 : la 198 la redéfinit sur la consommation.
    */
+  /*
+   * LE SUIVI BLOQUÉ SE TAIT DE NOUVEAU (199) : au rechargement de la fiche, la base
+   * répond « rien à signaler » à un vendeur gratuit dont le quota de colis est
+   * épuisé, et la frise redit « en attente » à un numéro qui ne sera jamais suivi.
+   */
+  "suivi-bloque-muet": {
+    casserDepuisMigration: {
+      fichier: "199_le_vendeur_sait_que_son_suivi_est_bloque.sql",
+      depuis: "create function public.mon_quota_colis_atteint()",
+      jusqua: "comment on function public.mon_quota_colis_atteint",
+      remplacer: "then 'gratuit' end;",
+      par: "then null end;",
+    },
+    reparerDepuisMigration: {
+      fichier: "199_le_vendeur_sait_que_son_suivi_est_bloque.sql",
+      depuis: "create function public.mon_quota_colis_atteint()",
+      jusqua: "comment on function public.mon_quota_colis_atteint",
+    },
+  },
+
   "plafond-commandes-en-dur": {
     casserDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  v_plafond := public.lire_plafond_commandes();",
       par: "  v_plafond := 3000;",
     },
     reparerDepuisMigration: {
-      fichier: "192_les_quotas_se_verrouillent_et_un_vendeur_suspendu_se_tait.sql",
+      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },

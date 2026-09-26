@@ -6075,6 +6075,9 @@ controles.push(
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      // LES VIDÉOS (26/09/2026) : sans `media-src`, R2 et `blob:` retombaient sur
+      // `default-src 'self'` — le client ne pouvait pas lire la vidéo de sa commande.
+      "media-src 'self' blob: https://*.r2.cloudflarestorage.com",
     ];
     return [enTetesLanding, enTetesPublique].flatMap((entetes, i) => {
       const surface = i === 0 ? "landing" : "page publique";

@@ -799,7 +799,16 @@
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "From {du}",
     "periodeJusquaCourt": "Until {au}",
-    "lienBloque": "Link blocked"
+    "lienBloque": "Link blocked",
+    "quota": {
+      "gratuitTitre": "Free plan limit reached",
+      "gratuitTexte": "You have created your {n} orders: this limit is for life and never resets. Upgrade to Pro to keep creating orders.",
+      "gratuitTexteSansNombre": "You have reached your free plan limit: it is for life and never resets. Upgrade to Pro to keep creating orders.",
+      "mensuelTitre": "Monthly limit reached",
+      "mensuelTexte": "You have created your {n} orders for this month. The limit resets on the 1st of the month.",
+      "mensuelTexteSansNombre": "You have reached your order limit for this month. It resets on the 1st of the month.",
+      "passerPro": "Upgrade to Pro"
+    }
   },
   "editeur": {
     "historique": {
@@ -883,6 +892,9 @@
     "transporteurAuto": "Automatic detection",
     "transporteurAide": "Detected from the number. Only choose it if it isn’t.",
     "suiviNonReconnu": "The carrier for this number wasn’t recognized. Choose it under “Carrier” to restart tracking.",
+    "suiviBloqueGratuit": "Number saved, but automatic tracking has not started: all your free tracked parcels are used, and this limit is for life.",
+    "suiviBloqueMensuel": "Number saved, but automatic tracking has not started: this month’s tracked parcel limit is reached. It resets on the 1st; enter the number again then.",
+    "suiviBloquePasserPro": "Upgrade to Pro",
     "infosTitre": "Order details",
     "infosReference": "Reference",
     "infosCreee": "Created",
@@ -972,6 +984,7 @@
     "galerie": {
       "titre": "Photos and videos",
       "ouvrir": "Enlarge photo",
+      "ouvrirVideo": "Play video",
       "fermer": "Close",
       "precedent": "Previous",
       "suivant": "Next",
@@ -1919,12 +1932,13 @@
     "notificationsTexte": "When you fill in your customer's email, they get a message when the parcel is delivered. You stay in control: the email is optional, and it never creates an account.",
     "parametres": "Settings",
     "plans": "Free and Pro",
-    "plansTexte": "DropLink has a free plan and a Pro plan. The free plan allows 15 orders in total — a lifetime quota, it does not reset each month. Pro raises it to 300 orders per month and removes the DropLink mention from the page your customer sees.",
+    "plansTexte": "DropLink has a free plan and a Pro plan. The free plan allows {gratuit} orders in total — a lifetime quota, it does not reset each month. Pro raises it to {pro} orders per month and removes the DropLink mention from the page your customer sees.",
+    "plansTexteSansNombre": "DropLink has a free plan and a Pro plan. The free plan allows a limited number of orders in total — a lifetime quota, it does not reset each month. Pro replaces it with a monthly limit and removes the DropLink mention from the page your customer sees.",
     "planGratuit": "Free",
     "planPro": "Pro — {prix}/month",
     "plCommandes": "Orders",
-    "plCommandesG": "15 in total",
-    "plCommandesP": "300 per month",
+    "plCommandesG": "{n} in total",
+    "plCommandesP": "{n} per month",
     "plPage": "Customer page",
     "plPageG": "With the DropLink mention",
     "plPageP": "Without the DropLink mention",

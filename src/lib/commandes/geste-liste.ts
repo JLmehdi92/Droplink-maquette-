@@ -9,6 +9,7 @@ import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { invaliderCommandePublique } from "./cache";
 import { archiverCommande, dupliquerCommande } from "./cycle";
+import { cheminQuotaAtteint } from "./quota-atteint";
 
 /**
  * LES TROIS GESTES DE LA LISTE — archiver, dupliquer, archiver une SÉLECTION.
@@ -184,6 +185,11 @@ async function dupliquerUne(donnees: FormData, profilId: string, shopId: string)
   // La copie est un GABARIT vide : on ouvre son éditeur, parce que personne ne
   // duplique pour laisser la copie en l'état. Sur échec on revient à la liste
   // plutôt que d'inventer une destination.
+  // LE QUOTA SE DIT (26/09/2026) : ce chemin revenait à la liste sans un mot, et le
+  // vendeur concluait que « Dupliquer » ne marchait pas.
+  if (resultat.statut === "echec" && resultat.motif === "quota") {
+    return cheminQuotaAtteint(langue, resultat.quota);
+  }
   if (resultat.statut !== "ok") {
     invaliderRetour(retour);
     return retour;

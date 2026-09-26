@@ -180,6 +180,8 @@ export function Visionneur({
   readonly filigrane: string | null;
   readonly libelles: {
     readonly ouvrir: string;
+    /** « Lire la vidéo » : une tuile vidéo annoncée « Agrandir la photo » mentait (26/09/2026). */
+    readonly ouvrirVideo: string;
     readonly fermer: string;
     readonly precedent: string;
     readonly suivant: string;
@@ -426,7 +428,7 @@ export function Visionneur({
                   type="button"
                   onClick={() => ouvrirA(rang)}
                   className="relative block aspect-square w-full overflow-hidden rounded-ds-card border border-ds-filet bg-ds-surface-creux"
-                  aria-label={libelles.ouvrir + " " + (rang + 1)}
+                  aria-label={(media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)}
                 >
                   {"url" in apercu ? (
                     /* eslint-disable-next-line @next/next/no-img-element -- URL
@@ -640,7 +642,7 @@ export function Visionneur({
                   <button
                     type="button"
                     onClick={() => ouvrirA(rang)}
-                    aria-label={libelles.ouvrir + " " + (rang + 1)}
+                    aria-label={(media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)}
                     aria-current={rang === index ? "true" : undefined}
                     ref={
                       rang === index

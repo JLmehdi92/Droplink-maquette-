@@ -20,6 +20,7 @@ import { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
 import { appliquerChamp, type ResultatEnregistrement } from "./ecriture";
 import { invaliderCommandePublique } from "./cache";
+import { cheminQuotaAtteint, quotaDepuisErreur } from "./quota-atteint";
 import {
   archiverCommande,
   dupliquerCommande,
@@ -74,6 +75,14 @@ export async function creerBrouillon(donnees: FormData): Promise<void> {
   const brouillon = { shop_id: profil.shopId } as unknown as InsertCommande;
 
   const { data, error } = await supabase.from("orders").insert(brouillon).select("id").single();
+
+  /*
+   * LE QUOTA ATTEINT N'EST PAS UNE PANNE (26/09/2026). Il levait l'erreur ci-dessous :
+   * le vendeur gratuit à sa seizième commande recevait une page d'erreur, au lieu de
+   * l'explication — et de l'offre qui la lève. Il revient à la liste, qui le dit.
+   */
+  const quota = quotaDepuisErreur(error);
+  if (quota !== null) redirect(cheminQuotaAtteint(langue, quota));
 
   if (error !== null || data === null) {
     // Pas de `catch` muet : sans cette sortie, le vendeur serait renvoyé sur une

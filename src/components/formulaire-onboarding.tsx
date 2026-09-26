@@ -314,11 +314,15 @@ export function FormulaireOnboarding({
           ) : null}
         </fieldset>
 
+        {/* Hors du clavier et des lecteurs d'écran : le bouton de dépôt est le contrôle,
+            ce champ n'en est que le moteur (même correctif que « Ma marque », 26/09/2026). */}
         <input
           ref={champFichier}
           type="file"
           accept={ACCEPT_LOGO}
           className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
           onChange={(e) => {
             const fichier = e.target.files?.[0];
             if (fichier !== undefined) void deposerLogo(fichier);

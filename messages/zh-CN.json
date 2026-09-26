@@ -799,7 +799,16 @@
     "periodeEntreCourt": "{du} – {au}",
     "periodeDepuisCourt": "自 {du} 起",
     "periodeJusquaCourt": "至 {au}",
-    "lienBloque": "链接已停用"
+    "lienBloque": "链接已停用",
+    "quota": {
+      "gratuitTitre": "免费版额度已用完",
+      "gratuitTexte": "您已创建 {n} 个订单：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
+      "gratuitTexteSansNombre": "您已用完免费版额度：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
+      "mensuelTitre": "本月上限已达到",
+      "mensuelTexte": "您本月已创建 {n} 个订单。上限将于每月 1 日重置。",
+      "mensuelTexteSansNombre": "您本月的订单已达上限。上限将于每月 1 日重置。",
+      "passerPro": "升级至 Pro"
+    }
   },
   "editeur": {
     "historique": {
@@ -883,6 +892,9 @@
     "transporteurAuto": "自动识别",
     "transporteurAide": "根据运单号自动识别。仅在无法识别时手动选择。",
     "suiviNonReconnu": "未能识别该单号的承运商。请在“承运商”中选择，以重新开始跟踪。",
+    "suiviBloqueGratuit": "单号已保存，但自动追踪未启动：您的免费追踪包裹已全部用完，此额度为终身额度。",
+    "suiviBloqueMensuel": "单号已保存，但自动追踪未启动：本月追踪包裹上限已达到。上限将于每月 1 日重置，届时请重新输入单号。",
+    "suiviBloquePasserPro": "升级至 Pro",
     "infosTitre": "订单详情",
     "infosReference": "编号",
     "infosCreee": "创建时间",
@@ -972,6 +984,7 @@
     "galerie": {
       "titre": "照片和视频",
       "ouvrir": "查看大图",
+      "ouvrirVideo": "播放视频",
       "fermer": "关闭",
       "precedent": "上一张",
       "suivant": "下一张",
@@ -1919,12 +1932,13 @@
     "notificationsTexte": "如果您填写了客户邮箱，包裹送达时客户会收到邮件。主动权在您：邮箱始终是可选的，且不会创建账号。",
     "parametres": "设置",
     "plans": "免费版与 Pro",
-    "plansTexte": "DropLink 提供免费版和专业版。免费版共可创建 15 笔订单——这是终身额度，不会每月重置。专业版将其提高到每月 300 笔，并移除客户页面上的 DropLink 标识。",
+    "plansTexte": "DropLink 提供免费版和专业版。免费版共可创建 {gratuit} 笔订单——这是终身额度，不会每月重置。专业版将其提高到每月 {pro} 笔，并移除客户页面上的 DropLink 标识。",
+    "plansTexteSansNombre": "DropLink 提供免费版和专业版。免费版可创建的订单总数有限——这是终身额度，不会每月重置。专业版改为每月上限，并移除客户页面上的 DropLink 标识。",
     "planGratuit": "免费版",
     "planPro": "专业版 — 每月 {prix}",
     "plCommandes": "订单",
-    "plCommandesG": "共 15 笔",
-    "plCommandesP": "每月 300 笔",
+    "plCommandesG": "共 {n} 笔",
+    "plCommandesP": "每月 {n} 笔",
     "plPage": "客户页面",
     "plPageG": "带 DropLink 标识",
     "plPageP": "不带 DropLink 标识",

@@ -25,6 +25,7 @@ import type { Etape } from "@/lib/tracking/normalize";
 import { titreDeCommande } from "@/lib/commandes/titre";
 import { MenuGestesFiche } from "@/components/commandes/menu-gestes-fiche";
 import { HistoriqueCommande } from "@/components/commandes/historique-commande";
+import { EtatQuota } from "@/lib/commandes/quota-atteint";
 
 /**
  * LA COMMANDE, LUE UNE SEULE FOIS PAR REQUETE.
@@ -219,6 +220,23 @@ export default async function EditeurCommande({
    */
   const quandEtapes = suivi === null ? {} : datesDesEtapes(suivi.passages);
 
+  /*
+   * UN NUMÉRO SANS COLIS : LE SUIVI N'A PAS DÉMARRÉ, ET L'ÉCRAN DOIT DIRE POURQUOI.
+   *
+   * ⚠️ TROUVÉ LE 26/09/2026. Au quota de colis, la base refuse l'attache ; le numéro
+   * reste enregistré, et la frise disait « en attente » pour toujours. La sauvegarde
+   * rapporte désormais le refus — mais au rechargement, seule la base sait si le quota
+   * est atteint (199). On ne le lui demande que dans ce cas précis : un numéro saisi,
+   * aucun colis attaché. Une lecture en échec rend `null`, et l'écran ne dit rien
+   * plutôt que d'affirmer une cause qu'il n'a pas lue.
+   */
+  let suiviBloque: ReturnType<typeof EtatQuota.parse> = null;
+  if (suivi === null && (data.tracking_number ?? "").trim() !== "") {
+    const { data: quota, error: erreurQuota } = await supabase.rpc("mon_quota_colis_atteint");
+    if (erreurQuota !== null) console.error("[editeur] quota de colis illisible", erreurQuota.code);
+    else suiviBloque = EtatQuota.parse(quota);
+  }
+
   const format = await getFormatter();
   const instant = (iso: string): string =>
     format.dateTime(new Date(iso), {
@@ -373,6 +391,7 @@ export default async function EditeurCommande({
             numero: suivi?.numero ?? null,
             abandonne: suivi?.abandonne ?? false,
             nonReconnu: suivi?.nonReconnu ?? false,
+            bloque: suiviBloque,
             quand: quandFormatees,
             notes: notesEtapes,
           }}

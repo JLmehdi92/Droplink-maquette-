@@ -5,6 +5,7 @@ import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import type { creerClientServeur } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types-base";
 import { journaliserApres } from "./journal";
+import { quotaDepuisErreur, type QuotaAtteint } from "./quota-atteint";
 
 /**
  * LE CYCLE DE VIE D'UNE COMMANDE : révoquer le lien, dupliquer, archiver.
@@ -72,7 +73,9 @@ export async function revoquerLien(
 
 export type Duplication =
   | { readonly statut: "ok"; readonly nouvelleCommande: string }
-  | { readonly statut: "echec"; readonly motif: "saisie" | "introuvable" | "ecriture" };
+  | { readonly statut: "echec"; readonly motif: "saisie" | "introuvable" | "ecriture" }
+  /** Refus de la base au quota du compte : dit au vendeur, jamais confondu avec une panne. */
+  | { readonly statut: "echec"; readonly motif: "quota"; readonly quota: QuotaAtteint };
 
 /**
  * Duplique une commande — comme GABARIT, pas comme copie.
@@ -122,6 +125,10 @@ export async function dupliquerCommande(
 
   const { data, error } = await supabase.from("orders").insert(gabarit).select("id").maybeSingle();
 
+  // ⚠️ LE QUOTA N'EST PAS UNE PANNE D'ÉCRITURE (26/09/2026) : confondus, le vendeur à
+  // son quota cliquait « Dupliquer » et revenait à la liste sans un mot.
+  const quota = quotaDepuisErreur(error);
+  if (quota !== null) return { statut: "echec", motif: "quota", quota };
   if (error !== null || data === null) return { statut: "echec", motif: "ecriture" };
 
   emettreApres(

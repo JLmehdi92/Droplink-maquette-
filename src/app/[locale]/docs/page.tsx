@@ -24,7 +24,17 @@ const MISE_A_JOUR = new Date("2026-09-14T00:00:00Z");
 import { LienEcran } from "@/components/lien-ecran";
 import { estLangueSupportee, LANGUES } from "@/i18n/config";
 import { PRIX_PRO_EUR } from "@/lib/paiement/plan";
+import { creerClientServeur } from "@/lib/supabase/server";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
+
+/*
+ * ⚠️ LES PLAFONDS SONT LUS EN BASE, COMME SUR `/tarifs` (26/09/2026). La page les écrivait
+ * en dur — « 15 au total », « 300 par mois » — pendant que Tarifs et « Passer au Pro » les
+ * lisaient : le premier réglage dans l'administration faisait se contredire deux pages
+ * publiques. Trouvé en relisant le SaaS écran par écran. RENDUE À LA REQUÊTE pour la même
+ * raison que Tarifs : figée au build, elle montrerait les plafonds du jour du déploiement.
+ */
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return LANGUES.map((locale) => ({ locale }));
@@ -90,12 +100,24 @@ export default async function Documentation({
   const { locale } = await params;
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
-  const [t, nav, legal, format] = await Promise.all([
+  const supabase = await creerClientServeur();
+  const [t, nav, legal, format, plafondPro, plafondGratuit] = await Promise.all([
     getTranslations("docs"),
     getTranslations("navigation"),
     getTranslations("legal"),
     getFormatter(),
+    supabase.rpc("lire_plafond_commandes"),
+    supabase.rpc("lire_plafond_gratuit_a_vie"),
   ]);
+  // Une lecture qui échoue retire ses nombres de la page — elle ne le fait pas en silence.
+  for (const [nom, lu] of [
+    ["mensuel", plafondPro],
+    ["a vie", plafondGratuit],
+  ] as const) {
+    if (lu.error !== null) console.error(`[docs] plafond ${nom} illisible — ${lu.error.message}`);
+  }
+  const parMois = typeof plafondPro.data === "number" ? format.number(plafondPro.data) : null;
+  const aVie = typeof plafondGratuit.data === "number" ? format.number(plafondGratuit.data) : null;
 
   const sommaire: readonly (readonly [string, readonly (readonly [string, string])[]])[] = [
     [t("grCommencer"), [["presentation", t("presentation")], ["demarrer", t("demarrer")], ["marque", t("marque")]]],
@@ -350,7 +372,11 @@ export default async function Documentation({
             <Liste items={[t("param1"), t("param2"), t("param3"), t("param4"), t("param5"), t("param6")]} />
 
             <TitreSection id="plans">{t("plans")}</TitreSection>
-            <Paragraphe>{t("plansTexte")}</Paragraphe>
+            <Paragraphe>
+              {aVie !== null && parMois !== null
+                ? t("plansTexte", { gratuit: aVie, pro: parMois })
+                : t("plansTexteSansNombre")}
+            </Paragraphe>
             {/*
               ⚠️ CE TABLEAU AVAIT QUATRE LIGNES, ET TROIS ÉTAIENT FAUSSES — servies
               en production. Vérifiées une à une le 20/09/2026 :
@@ -382,8 +408,12 @@ export default async function Documentation({
                   prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
                 }),
               ]}
+              /* Un plafond illisible fait disparaître la ligne plutôt que d'afficher un
+                 nombre de secours — la règle de `/tarifs`. */
               lignes={[
-                [t("plCommandes"), t("plCommandesG"), t("plCommandesP")],
+                ...(aVie !== null && parMois !== null
+                  ? [[t("plCommandes"), t("plCommandesG", { n: aVie }), t("plCommandesP", { n: parMois })]]
+                  : []),
                 [t("plPage"), t("plPageG"), t("plPageP")],
               ]}
             />
