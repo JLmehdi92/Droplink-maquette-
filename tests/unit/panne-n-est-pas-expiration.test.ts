@@ -303,3 +303,81 @@ describe("La règle de dégradation n'a qu'un seul exemplaire", () => {
     }
   });
 });
+
+/**
+ * PERSONNE NE LIT LA SESSION SANS DIRE LA PANNE — inventaire de `src/app`
+ * (27/09/2026).
+ *
+ * ⚠️ DÉFAUT RÉEL, RÉVÉLÉ PAR UNE VRAIE PANNE DE SUPABASE PENDANT LA FUMÉE. Les
+ * contrôles ci-dessus regardent `apres-session.ts`, là où la correction du 02/09
+ * a été faite. Le layout de `(app)` lisait la session EN DIRECT, en parallèle de
+ * la page : pendant la panne, la garde de la page redirigeait vers « service »,
+ * et le 500 du layout gagnait — `/en/analyses` a rendu 500. L-025 à la lettre :
+ * une garde écrite après coup hérite du champ de vision de la correction.
+ * `/bienvenue` et `/nouveau-mot-de-passe` avaient le même trou, et les trois
+ * routes d'export répondaient 404 (« rien ici ») au lieu de 503.
+ *
+ * LA RÈGLE : un fichier de `src/app` qui appelle `lireEtatDuCompte(` ou
+ * `lireProfilVendeur(` doit —
+ *   - route (`route.ts`) : rattraper `SessionIndisponible` lui-même ;
+ *   - page ou layout : passer D'ABORD par `exigerVendeur(` ou
+ *     `lireEtatOuDireLaPanne(`, qui disent la panne. La relecture mémoïsée qui
+ *     suit ne peut plus lever : la première a réussi, ou elle a redirigé.
+ */
+const LECTURES_DIRECTES = ["lireEtatDuCompte(", "lireProfilVendeur("] as const;
+const LECTEURS_QUI_DISENT_LA_PANNE = ["exigerVendeur(", "lireEtatOuDireLaPanne("] as const;
+
+/** Rend la raison d'une violation, ou `null`. Pure : le contre-test l'éprouve seule. */
+function lectureSansPanneDite(chemin: string, code: string): string | null {
+  const indices = LECTURES_DIRECTES.map((m) => code.indexOf(m)).filter((i) => i >= 0);
+  if (indices.length === 0) return null;
+  if (chemin.endsWith("route.ts")) {
+    return code.includes("instanceof SessionIndisponible")
+      ? null
+      : "route qui lit la session sans rattraper SessionIndisponible (404/500 au lieu de 503)";
+  }
+  const premiereLecture = Math.min(...indices);
+  const gardes = LECTEURS_QUI_DISENT_LA_PANNE.map((m) => code.indexOf(m)).filter((i) => i >= 0);
+  if (gardes.length === 0 || Math.min(...gardes) > premiereLecture) {
+    return "lit la session AVANT exigerVendeur/lireEtatOuDireLaPanne : une panne d'auth y devient un 500";
+  }
+  return null;
+}
+
+describe("Personne ne lit la session sans dire la panne (inventaire de src/app)", () => {
+  const racine = join(process.cwd(), "src", "app");
+  const fichiers = (readdirSync(racine, { recursive: true }) as string[])
+    .filter((f) => /(^|[\\/])(page\.tsx|layout\.tsx|route\.ts)$/.test(f))
+    .map((f) => ({ chemin: f.split("\\").join("/"), code: codeSansCommentaires("src", "app", f) }));
+  const lecteurs = fichiers.filter((f) =>
+    [...LECTURES_DIRECTES, ...LECTEURS_QUI_DISENT_LA_PANNE].some((m) => f.code.includes(m)),
+  );
+
+  test("l'inventaire voit réellement des lecteurs de session", () => {
+    // UN ENSEMBLE VIDE PASSE TOUT : un parcours cassé rendrait la règle muette.
+    expect(fichiers.length).toBeGreaterThan(40);
+    expect(lecteurs.length).toBeGreaterThan(10);
+  });
+
+  test("CONTRE-TEST : la règle rougit sur une lecture directe non gardée", () => {
+    expect(lectureSansPanneDite("x/layout.tsx", "const etat = await lireEtatDuCompte();")).not.toBeNull();
+    expect(
+      lectureSansPanneDite("x/page.tsx", "const p = await lireProfilVendeur(); await exigerVendeur(l);"),
+      "une garde posée APRÈS la lecture ne protège rien",
+    ).not.toBeNull();
+    expect(lectureSansPanneDite("x/route.ts", "const p = await lireProfilVendeur().catch(() => null);")).not.toBeNull();
+    // …et laisse passer les formes sûres.
+    expect(lectureSansPanneDite("x/page.tsx", "await exigerVendeur(l); const p = await lireProfilVendeur();")).toBeNull();
+    expect(
+      lectureSansPanneDite("x/route.ts", "try { p = await lireProfilVendeur(); } catch (e) { if (e instanceof SessionIndisponible) {} }"),
+    ).toBeNull();
+  });
+
+  test("chaque page, layout et route qui lit la session dit la panne", () => {
+    const fautifs = fichiers
+      .map((f) => ({ chemin: f.chemin, raison: lectureSansPanneDite(f.chemin, f.code) }))
+      .filter((f) => f.raison !== null)
+      .map((f) => `${f.chemin} : ${f.raison}`);
+    expect(fautifs).toEqual([]);
+  });
+});

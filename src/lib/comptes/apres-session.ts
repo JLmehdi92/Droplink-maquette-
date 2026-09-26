@@ -6,6 +6,7 @@ import {
   lireEtatDuCompteAvec,
   onboardingAFaire,
   SessionIndisponible,
+  type EtatDuCompte,
   type ProfilVendeur,
 } from "@/lib/comptes/profil";
 /*
@@ -210,6 +211,31 @@ export function cheminDeRefus(
 }
 
 /**
+ * LIRE L'ÉTAT DU COMPTE EN DISANT LA PANNE — pour tout composant serveur qui ne
+ * passe pas par `exigerVendeur`.
+ *
+ * ⚠️ DÉFAUT RÉEL, RÉVÉLÉ PAR UNE VRAIE PANNE PENDANT LA FUMÉE DU 27/09/2026.
+ * Supabase a cessé de répondre (appels coupés à la borne de 10 s) : la page
+ * `/en/analyses` a rendu 500 avec un `SessionIndisponible` NON RATTRAPÉ. La
+ * garde de la page, elle, redirigeait bien vers « service indisponible » — mais
+ * le layout de `(app)` lit la session EN PARALLÈLE, sans rattraper l'erreur, et
+ * son 500 gagnait. Le correctif du 02/09 (dire la panne plutôt que « session
+ * expirée ») était donc neutralisé sur TOUT l'espace vendeur ; `/bienvenue` et
+ * `/nouveau-mot-de-passe` avaient le même trou.
+ *
+ * L'accès reste refusé — on redirige, rien ne s'ouvre. Seule la phrase est vraie.
+ */
+export async function lireEtatOuDireLaPanne(langue: Langue): Promise<EtatDuCompte> {
+  try {
+    return await lireEtatDuCompte();
+  } catch (erreur) {
+    if (!(erreur instanceof SessionIndisponible)) throw erreur;
+    console.error("[garde] " + erreur.message);
+    redirect(cheminDeRefus(langue, "service"));
+  }
+}
+
+/**
  * LA GARDE DE CHAQUE PAGE DE L'ESPACE VENDEUR.
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -253,31 +279,20 @@ export function cheminDeRefus(
  * qui empêche le défaut de revenir par la porte de la page suivante.
  */
 export async function exigerVendeur(langue: Langue): Promise<ProfilVendeur> {
-  let profil: ProfilVendeur | null;
-  try {
-    const etat = await lireEtatDuCompte();
-    if (etat.etat === "verification") redirect(cheminDeVerification(langue));
-    profil = etat.etat === "profil" ? etat.profil : null;
-  } catch (erreur) {
-    /*
-     * ⚠️ LE SERVEUR D'AUTHENTIFICATION N'A PAS RÉPONDU — CE N'EST PAS UNE
-     * SESSION REFUSÉE, ET ON NE LE DIT PLUS COMME SI C'EN ÉTAIT UNE.
-     *
-     * Mesuré le 02/09/2026 : sur 200 requêtes authentifiées portant un cookie
-     * valide, deux ont été éjectées, à 11,1 s et 11,4 s — soit juste au-delà du
-     * délai de connexion de dix secondes — et l'écran affirmait « Votre session
-     * a expiré ». C'est le principe XII à l'envers : l'interface affirme un état
-     * que la base n'a jamais enregistré. Le même chemin servant la sauvegarde
-     * automatique de l'éditeur, la phrase tombait pendant que le vendeur tape,
-     * c'est-à-dire quand il a du texte non enregistré.
-     *
-     * L'ACCÈS RESTE REFUSÉ : on redirige, la garde ne s'ouvre pas. Seule la
-     * PHRASE change, et elle devient vraie.
-     */
-    if (!(erreur instanceof SessionIndisponible)) throw erreur;
-    console.error("[garde] " + erreur.message);
-    redirect(cheminDeRefus(langue, "service"));
-  }
+  /*
+   * ⚠️ LE SERVEUR D'AUTHENTIFICATION N'A PAS RÉPONDU — CE N'EST PAS UNE
+   * SESSION REFUSÉE, ET ON NE LE DIT PLUS COMME SI C'EN ÉTAIT UNE.
+   *
+   * Mesuré le 02/09/2026 : sur 200 requêtes authentifiées portant un cookie
+   * valide, deux ont été éjectées, à 11,1 s et 11,4 s — soit juste au-delà du
+   * délai de connexion de dix secondes — et l'écran affirmait « Votre session
+   * a expiré ». C'est le principe XII à l'envers : l'interface affirme un état
+   * que la base n'a jamais enregistré. `lireEtatOuDireLaPanne` redirige vers
+   * « service indisponible » : l'accès reste refusé, seule la phrase devient vraie.
+   */
+  const etat = await lireEtatOuDireLaPanne(langue);
+  if (etat.etat === "verification") redirect(cheminDeVerification(langue));
+  const profil: ProfilVendeur | null = etat.etat === "profil" ? etat.profil : null;
 
   if (profil === null) {
     redirect(cheminDeRefus(langue, "profil"));

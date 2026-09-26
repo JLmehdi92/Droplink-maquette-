@@ -3,7 +3,8 @@ import Link from "next/link";
 import { FondApplication } from "@/components/app/fond-application";
 import { LogoMarque } from "@/components/acces/coque-acces";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { lireEtatDuCompte, onboardingAFaire } from "@/lib/comptes/profil";
+import { onboardingAFaire } from "@/lib/comptes/profil";
+import { lireEtatOuDireLaPanne } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
 import { ArrowRight, ChevronDown, Zap } from "lucide-react";
@@ -45,7 +46,7 @@ export default async function LayoutApplication({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const etat = await lireEtatDuCompte();
+  const etat = await lireEtatOuDireLaPanne(langue);
   // LA VÉRIFICATION EN DEUX ÉTAPES AVANT « SESSION EXPIRÉE ». Le layout rend en
   // parallèle de la page et sa redirection gagne : sans cette ligne, une session
   // `aal1` était envoyée vers la connexion — mesuré en pilotant, une impasse où

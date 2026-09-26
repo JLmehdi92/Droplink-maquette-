@@ -5,10 +5,9 @@ import { FormulaireNouveauMotDePasse } from "@/components/formulaire-nouveau-mot
 import { TraductionsClient } from "@/components/traductions-client";
 import { Info, KeyRound } from "lucide-react";
 import { CoqueAccesSimple } from "@/components/acces/coque-acces-simple";
-import { lireEtatDuCompte } from "@/lib/comptes/profil";
 import { sessionParEmail } from "@/lib/auth/recuperation";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { cheminDeRefus, cheminDeVerification } from "@/lib/comptes/apres-session";
+import { cheminDeRefus, cheminDeVerification, lireEtatOuDireLaPanne } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { routing } from "@/i18n/routing";
 
@@ -56,7 +55,7 @@ export default async function NouveauMotDePasse({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const etat = await lireEtatDuCompte();
+  const etat = await lireEtatOuDireLaPanne(langue);
   // UN COMPTE À DOUBLE AUTHENTIFICATION SAISIT D'ABORD SON CODE : Supabase refuse
   // de changer le mot de passe depuis une session `aal1` (mesuré), et la base en
   // refuse toute lecture (migration 156). L'écran de vérification ramène ici.

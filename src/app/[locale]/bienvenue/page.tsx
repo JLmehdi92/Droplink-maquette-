@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import { FormulaireOnboarding } from "@/components/formulaire-onboarding";
 import { libellesApercu } from "@/lib/boutique/libelles-apercu";
 import { TraductionsClient } from "@/components/traductions-client";
-import { lireEtatDuCompte, onboardingAFaire } from "@/lib/comptes/profil";
+import { onboardingAFaire } from "@/lib/comptes/profil";
+import { lireEtatOuDireLaPanne } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { FondAcces, LogoMarque } from "@/components/acces/coque-acces";
 
@@ -34,7 +35,7 @@ export default async function Bienvenue({
   const langue = estLangueSupportee(locale) ? locale : "fr";
   setRequestLocale(langue);
 
-  const etat = await lireEtatDuCompte();
+  const etat = await lireEtatOuDireLaPanne(langue);
   if (etat.etat === "verification") redirect(`/${langue}/verification`);
   const profil = etat.etat === "profil" ? etat.profil : null;
   // Le layout a déjà écarté l'absence de session. On revérifie ici sans s'en

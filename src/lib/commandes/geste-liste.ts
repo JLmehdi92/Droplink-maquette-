@@ -164,7 +164,18 @@ async function archiverUne(donnees: FormData, profilId: string): Promise<string>
   const supabase = await creerClientServeur();
   const resultat = await archiverCommande(supabase, profilId, id.data, archiver);
 
-  if (resultat.statut === "ok" && jeton.success && jeton.data !== "") {
+  // ⚠️ L'ÉCHEC EST DIT, comme pour le lot. Sans ça, une écriture refusée (RLS, la
+  // commande n'appartient plus à l'appelant…) rendait la même URL sans message :
+  // le bouton reste sur « Archiver », indiscernable d'un clic sans effet
+  // (contrainte n° 8). On réutilise le canal `lot`, dont les messages sont neutres
+  // en nombre — « introuvable » invite à recharger, le reste dit la panne.
+  if (resultat.statut !== "ok") {
+    invaliderRetour(retour);
+    const motif = resultat.motif === "introuvable" ? "partiel" : "ecriture";
+    return retour + separateur(retour) + "lot=" + motif;
+  }
+
+  if (jeton.success && jeton.data !== "") {
     invaliderCommandePublique(jeton.data);
   }
 

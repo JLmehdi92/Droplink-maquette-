@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { lireEtatDuCompte } from "@/lib/comptes/profil";
+import { lireEtatDuCompte, SessionIndisponible } from "@/lib/comptes/profil";
 import { exporterDonnees } from "@/lib/comptes/export-donnees";
 import { origineDuSite } from "@/lib/site";
 import { verifierQuotaExport } from "@/lib/limitation/quota";
@@ -25,7 +25,16 @@ import { creerClientServeur } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export async function GET(): Promise<NextResponse> {
-  const etat = await lireEtatDuCompte().catch(() => null);
+  let etat;
+  try {
+    etat = await lireEtatDuCompte();
+  } catch (e) {
+    // Une panne transitoire du serveur d'auth n'est PAS « pas de session » : la
+    // confondre rendait 404 (« l'export n'existe pas ») à un vendeur actif. On
+    // dit 503 — réessayez — et on ne l'avale plus en silence.
+    if (e instanceof SessionIndisponible) return new NextResponse(null, { status: 503 });
+    throw e;
+  }
   if (etat === null || etat.etat !== "profil" || etat.profil.statut !== "active") {
     return new NextResponse(null, { status: 404 });
   }

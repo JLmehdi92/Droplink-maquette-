@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { lireProfilVendeur, SessionIndisponible } from "@/lib/comptes/profil";
 import { exporterEnvois } from "@/lib/envois/export-csv";
 
 /**
@@ -25,7 +25,15 @@ import { exporterEnvois } from "@/lib/envois/export-csv";
 export const dynamic = "force-dynamic";
 
 export async function GET(requete: NextRequest): Promise<NextResponse> {
-  const profil = await lireProfilVendeur().catch(() => null);
+  let profil;
+  try {
+    profil = await lireProfilVendeur();
+  } catch (e) {
+    // Panne transitoire du serveur d'auth ≠ « pas de session » : 503 (réessayez),
+    // jamais 404 muet à un vendeur actif.
+    if (e instanceof SessionIndisponible) return new NextResponse(null, { status: 503 });
+    throw e;
+  }
 
   /*
    * 404 ET NON 401, comme l'export des commandes : une route qui répond 401

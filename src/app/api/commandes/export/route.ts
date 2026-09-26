@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { lireProfilVendeur } from "@/lib/comptes/profil";
+import { lireProfilVendeur, SessionIndisponible } from "@/lib/comptes/profil";
 import { exporterCommandes } from "@/lib/commandes/export-csv";
 import { ParametresListe } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
@@ -28,7 +28,15 @@ import { verifierQuotaExport } from "@/lib/limitation/quota";
 export const dynamic = "force-dynamic";
 
 export async function GET(requete: NextRequest): Promise<NextResponse> {
-  const profil = await lireProfilVendeur().catch(() => null);
+  let profil;
+  try {
+    profil = await lireProfilVendeur();
+  } catch (e) {
+    // Panne transitoire du serveur d'auth ≠ « pas de session » : 503 (réessayez),
+    // jamais 404 muet à un vendeur actif.
+    if (e instanceof SessionIndisponible) return new NextResponse(null, { status: 503 });
+    throw e;
+  }
 
   /*
    * 404 ET NON 401. La règle de l'admin s'applique ici pour une raison
