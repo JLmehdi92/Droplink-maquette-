@@ -310,3 +310,126 @@ describe("Qui peut toucher aux abonnements", () => {
     expect(error !== null || (data ?? []).length === 0).toBe(true);
   });
 });
+
+/**
+ * LE LIEN DE PAIEMENT SIGNÉ ET L'ABONNEMENT QUI NE CHANGE PAS DE COMPTE — 204.
+ *
+ * Audit ECC du 27/09/2026 : le webhook rattachait un paiement par l'e-mail saisi
+ * chez le fournisseur, que personne ne prouve posséder. Le lien porte désormais
+ * l'identifiant de PROFIL et sa signature HMAC ; la base signe pour l'appelant
+ * seul et juge la signature pour le webhook seul.
+ */
+describe("Le lien de paiement signé (204)", () => {
+  const juge = (profil: string, signature: string) =>
+    service.rpc("verifier_lien_paiement", { p_profil: profil, p_signature: signature });
+
+  test("un vendeur obtient une signature, `anon` aucune", async () => {
+    const { data, error } = await vendeur.client.rpc("signer_lien_paiement");
+    expect(error, error?.message ?? "").toBeNull();
+    expect(data).toMatch(/^[0-9a-f]{64}$/);
+    const anonyme = await clientAnonyme().rpc("signer_lien_paiement");
+    expect(anonyme.error, "anon a obtenu une signature de lien").not.toBeNull();
+  });
+
+  test("CONTRE-TEST : la signature du vendeur vaut pour SON identifiant de PROFIL", async () => {
+    /*
+     * ⚠️ LA PAIRE RÉELLE : le lien porte `profiles.id`, pas l'identifiant
+     * d'authentification. La première écriture de la 204 signait `auth.uid()` —
+     * ce test aurait rendu `false`, et chaque vrai paiement aurait été refusé.
+     */
+    const { data: signature } = await vendeur.client.rpc("signer_lien_paiement");
+    const { data, error } = await juge(vendeur.profilId, signature as string);
+    expect(error, error?.message ?? "").toBeNull();
+    expect(data, "la signature d'un vendeur ne vaut pas pour son propre profil").toBe(true);
+  });
+
+  test("la signature d'un compte ne vaut RIEN pour un autre, ni retouchée", async () => {
+    const { data: sigVendeur } = await vendeur.client.rpc("signer_lien_paiement");
+    const { data: sigVoisin } = await voisin.client.rpc("signer_lien_paiement");
+    const s = sigVendeur as string;
+    expect(s).not.toBe(sigVoisin);
+
+    // Le lien retouché pour viser le compte d'un autre.
+    expect((await juge(voisin.profilId, s)).data, "une signature a ouvert le compte d'un autre").toBe(false);
+    // Un seul caractère changé.
+    const altere = s.slice(0, -1) + (s.endsWith("0") ? "1" : "0");
+    expect((await juge(vendeur.profilId, altere)).data).toBe(false);
+    // Tronquée, ou pas de l'hexadécimal : un refus, jamais une erreur que le
+    // fournisseur rejouerait sans fin.
+    expect((await juge(vendeur.profilId, s.slice(2))).data).toBe(false);
+    const pasHexa = await juge(vendeur.profilId, "z".repeat(64));
+    expect(pasHexa.error, pasHexa.error?.message ?? "").toBeNull();
+    expect(pasHexa.data).toBe(false);
+  });
+
+  test("un vendeur ne peut PAS interroger le juge des signatures", async () => {
+    const { data: signature } = await vendeur.client.rpc("signer_lien_paiement");
+    const { error } = await vendeur.client.rpc("verifier_lien_paiement", {
+      p_profil: vendeur.profilId,
+      p_signature: signature as string,
+    });
+    expect(error, "un vendeur a pu appeler le juge des signatures").not.toBeNull();
+  });
+});
+
+describe("Un abonnement ne change pas de compte (204)", () => {
+  test("⚠️ le désigner pour un AUTRE compte lève DL076, et rien n'est écrasé", async () => {
+    const abonnement = "sonde-reattache-" + vendeur.profilId.slice(0, 8);
+    const premier = await appliquer(vendeur.profilId, "active", null, abonnement);
+    expect(premier.error, premier.error?.message ?? "").toBeNull();
+    const planVoisinAvant = await planDe(voisin.profilId);
+
+    const detourne = await appliquer(voisin.profilId, "active", null, abonnement);
+    expect(detourne.error?.code, "un abonnement a changé de compte").toBe("DL076");
+    expect(await planDe(voisin.profilId), "le compte visé a reçu le plan").toBe(planVoisinAvant);
+
+    const { data: ligne } = await service
+      .from("subscriptions")
+      .select("profile_id")
+      .eq("provider", "lemon_squeezy")
+      .eq("provider_subscription_id", abonnement)
+      .single();
+    expect(ligne?.profile_id, "l'abonnement a été ré-attaché").toBe(vendeur.profilId);
+
+    // CONTRE-TEST : son propre compte peut toujours le rejouer.
+    const rejeu = await appliquer(vendeur.profilId, "active", null, abonnement);
+    expect(rejeu.error, rejeu.error?.message ?? "").toBeNull();
+  });
+});
+
+describe("Le plan est celui de L'ENSEMBLE des abonnements du compte (204)", () => {
+  test("la fin d'un AUTRE abonnement ne retire pas le Pro à qui paie encore", async () => {
+    /*
+     * Revue sécurité ECC du 27/09/2026 : le plan était écrit d'après le SEUL
+     * événement reçu. Un second abonnement résilié — ou un abonnement ouvert par un
+     * tiers avec une signature de lien qui aurait fuité, puis résilié — faisait
+     * tomber le Pro d'un vendeur dont le vrai abonnement court toujours.
+     */
+    // POINT DE DÉPART CONNU, quel que soit l'ordre des tests : un cas plus haut
+    // donne au voisin son propre abonnement actif (`sonde-voisin`) — et le calcul
+    // sur l'ensemble le garderait Pro, à raison. On clôt tout ce qu'il a.
+    const { data: existants } = await service
+      .from("subscriptions")
+      .select("provider_subscription_id")
+      .eq("profile_id", voisin.profilId);
+    for (const e of existants ?? []) {
+      await appliquer(voisin.profilId, "expired", null, e.provider_subscription_id);
+    }
+    expect(await planDe(voisin.profilId), "le voisin ne part pas gratuit").toBe("gratuit");
+
+    const actif = "sonde-actif-" + voisin.profilId.slice(0, 8);
+    const autre = "sonde-autre-" + voisin.profilId.slice(0, 8);
+    expect((await appliquer(voisin.profilId, "active", null, actif)).error).toBeNull();
+    expect(await planDe(voisin.profilId)).toBe("pro");
+
+    expect((await appliquer(voisin.profilId, "active", null, autre)).error).toBeNull();
+    expect((await appliquer(voisin.profilId, "expired", null, autre)).error).toBeNull();
+    expect(await planDe(voisin.profilId), "la fin d'un AUTRE abonnement a retiré le Pro").toBe("pro");
+
+    // CONTRE-TEST : quand le dernier abonnement qui le justifiait expire, il repasse gratuit.
+    const fin = await appliquer(voisin.profilId, "expired", null, actif);
+    expect(fin.error, fin.error?.message ?? "").toBeNull();
+    expect(fin.data).toBe("gratuit");
+    expect(await planDe(voisin.profilId)).toBe("gratuit");
+  });
+});

@@ -142,23 +142,47 @@ export async function POST(requete: Request): Promise<NextResponse> {
     .select("id")
     .maybeSingle();
 
+  let idArchive: string | null = archive?.id ?? null;
+
   if (erreurArchive !== null) {
-    // 23505 = violation d'unicité : c'est un REJEU, donc un succès du point de
-    // vue du fournisseur. Tout autre code est une vraie panne, et il doit
-    // rejouer plutôt que de considérer l'événement remis.
-    if (erreurArchive.code === "23505") {
+    // Tout autre code que 23505 est une vraie panne : le fournisseur doit rejouer.
+    if (erreurArchive.code !== "23505") {
+      console.error("[paiement] archivage impossible : " + erreurArchive.message);
+      return NextResponse.json({ statut: "indisponible" }, { status: 503 });
+    }
+    /*
+     * 23505 = violation d'unicité : c'est un REJEU. ⚠️ IL N'EST « DÉJÀ TRAITÉ »
+     * QUE SI LE PREMIER PASSAGE A ABOUTI (audit ECC du 27/09/2026). Ce chemin
+     * répondait `deja_traite` à TOUT rejeu — y compris celui d'un passage qui
+     * avait rendu 503 pour être rejoué : l'archive existait déjà, le rejeu était
+     * avalé, et le plan n'était jamais posé. Le commentaire « un rejeu peut le
+     * réussir » affirmait un comportement qui n'existait pas (L-014).
+     *
+     * Un premier passage resté `recu` (interrompu) ou `echec` (panne) se REPREND ;
+     * l'application est idempotente — rejouer le même événement rend le même état.
+     */
+    const { data: premier, error: erreurPremier } = await systeme
+      .from("payment_events")
+      .select("id, issue")
+      .eq("provider", FOURNISSEUR)
+      .eq("signature", signature ?? "")
+      .maybeSingle();
+    if (erreurPremier !== null || premier === null) {
+      console.error("[paiement] rejeu illisible : " + (erreurPremier?.message ?? "archive introuvable"));
+      return NextResponse.json({ statut: "indisponible" }, { status: 503 });
+    }
+    if (premier.issue !== "recu" && premier.issue !== "echec") {
       return NextResponse.json({ statut: "deja_traite" }, { status: 200 });
     }
-    console.error("[paiement] archivage impossible : " + erreurArchive.message);
-    return NextResponse.json({ statut: "indisponible" }, { status: 503 });
+    idArchive = premier.id;
   }
 
   const marquer = async (issue: string, profilId: string | null): Promise<void> => {
-    if (archive === null) return;
+    if (idArchive === null) return;
     const { error } = await systeme
       .from("payment_events")
       .update({ issue, profile_id: profilId })
-      .eq("id", archive.id);
+      .eq("id", idArchive);
     // Jamais de `catch` muet : l'archive est le seul témoin de ce chemin.
     if (error !== null) {
       console.error("[paiement] issue non consignée (" + issue + ") : " + error.message);
@@ -171,39 +195,73 @@ export async function POST(requete: Request): Promise<NextResponse> {
   }
 
   // ── À qui ? ───────────────────────────────────────────────────────────────
-  const destinataire = destinataireDe(evenement);
-  let profilId: string | null = null;
+  /*
+   * ⚠️ DEUX VOIES, ET PLUS AUCUNE PAR E-MAIL (migration 204, audit ECC du
+   * 27/09/2026). Le filet par l'adresse saisie chez le fournisseur permettait à
+   * qui connaissait l'e-mail d'un vendeur de poser ou de RETIRER son plan.
+   *
+   *   1. L'identifiant SIGNÉ que porte le lien de paiement : la base juge la
+   *      signature. C'est la seule voie qui RATTACHE un abonnement à un compte.
+   *   2. À défaut, le compte auquel CET abonnement est déjà rattaché — par la
+   *      voie 1, à sa création. Un événement ultérieur ne le déplace pas.
+   *
+   * Une panne de lecture ici rend 503 APRÈS avoir marqué `echec` : le rejeu du
+   * fournisseur reprend l'archive (voir plus haut) au lieu d'être avalé.
+   */
+  const panne = async (quoi: string, message: string): Promise<NextResponse> => {
+    await marquer("echec", null);
+    console.error("[paiement] " + quoi + " : " + message);
+    return NextResponse.json({ statut: "indisponible" }, { status: 503 });
+  };
 
-  if (destinataire.par === "profil") {
-    const { data } = await systeme
-      .from("profiles")
-      .select("id")
-      .eq("id", destinataire.profilId)
-      .maybeSingle();
-    profilId = data?.id ?? null;
-  } else if (destinataire.par === "courriel") {
-    const { data } = await systeme
-      .from("profiles")
-      .select("id")
-      .eq("email", destinataire.courriel)
-      .maybeSingle();
-    profilId = data?.id ?? null;
+  const candidat = destinataireDe(evenement);
+  let profilId: string | null = null;
+  let signatureRefusee = false;
+
+  if (candidat.par === "profil") {
+    const { data: valide, error: erreurVerification } = await systeme.rpc("verifier_lien_paiement", {
+      p_profil: candidat.profilId,
+      p_signature: candidat.signature,
+    });
+    if (erreurVerification !== null) return await panne("vérification du lien impossible", erreurVerification.message);
+    if (valide === true) {
+      const { data, error } = await systeme.from("profiles").select("id").eq("id", candidat.profilId).maybeSingle();
+      if (error !== null) return await panne("lecture du compte impossible", error.message);
+      profilId = data?.id ?? null;
+    } else {
+      signatureRefusee = true;
+    }
   }
 
   if (profilId === null) {
-    await marquer("sans_destinataire", null);
+    const { data, error } = await systeme
+      .from("subscriptions")
+      .select("profile_id")
+      .eq("provider", FOURNISSEUR)
+      .eq("provider_subscription_id", evenement.data.id)
+      .maybeSingle();
+    if (error !== null) return await panne("lecture de l'abonnement impossible", error.message);
+    profilId = data?.profile_id ?? null;
+  }
+
+  if (profilId === null) {
+    await marquer(signatureRefusee ? "signature_invalide" : "sans_destinataire", null);
     await alerter(
-      "Paiement reçu SANS destinataire",
+      signatureRefusee ? "Paiement reçu avec une signature de lien FAUSSE" : "Paiement reçu SANS destinataire",
       "Un abonnement `" +
         nom +
         "` est arrivé et **aucun compte ne lui correspond**.\n" +
+        (signatureRefusee
+          ? "Il porte un identifiant de compte dont la signature est FAUSSE : lien modifié à la main, " +
+            "ou tentative de viser le compte d'un autre. Rien n'a été appliqué.\n"
+          : "") +
         "Abonnement " +
         evenement.data.id +
         " — statut " +
         evenement.data.attributes.status +
         ".\n" +
         "Il est encaissé chez le fournisseur et SANS EFFET ici. À rattacher à la main " +
-        "(table `payment_events`, issue `sans_destinataire`).",
+        "(table `payment_events`).",
     );
     // 200 : rejouer ne fera pas apparaître le compte manquant.
     return NextResponse.json({ statut: "sans_destinataire" }, { status: 200 });
@@ -219,9 +277,24 @@ export async function POST(requete: Request): Promise<NextResponse> {
   });
 
   if (erreurApplication !== null) {
+    // DL076 : l'abonnement est déjà rattaché à un AUTRE compte (204). Rien n'est
+    // écrasé ; c'est une anomalie à regarder, et la rejouer ne la résoudra pas.
+    if (erreurApplication.code === "DL076") {
+      await marquer("conflit", profilId);
+      await alerter(
+        "Abonnement désigné pour un AUTRE compte",
+        "L'abonnement " +
+          evenement.data.id +
+          " (`" +
+          nom +
+          "`) est rattaché à un compte, et cet événement en désigne un autre. " +
+          "Rien n'a été modifié (table `payment_events`, issue `conflit`).",
+      );
+      return NextResponse.json({ statut: "conflit" }, { status: 200 });
+    }
     await marquer("echec", profilId);
     console.error("[paiement] application impossible : " + erreurApplication.message);
-    // 503 : celui-là, un rejeu peut le réussir.
+    // 503 : le rejeu reprend l'archive `echec` (voir l'archivage) et réessaie.
     return NextResponse.json({ statut: "indisponible" }, { status: 503 });
   }
 

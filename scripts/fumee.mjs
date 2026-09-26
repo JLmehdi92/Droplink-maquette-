@@ -3222,6 +3222,91 @@ try {
         `un rejeu du meme evenement n est traite qu une fois (${reponseRejeu?.statut})`,
       ],
     );
+
+    /*
+     * LE RATTACHEMENT PAR E-MAIL EST FERME, LE LIEN SIGNE OUVRE (migration 204).
+     *
+     * Audit ECC du 27/09/2026 : sans identifiant, le webhook rattachait par l e-mail
+     * saisi chez le fournisseur, que personne ne prouve posseder. Qui connaissait
+     * celui d un vendeur pouvait poser ou RETIRER son plan. On le rejoue ici contre
+     * le vrai serveur : un evenement CORRECTEMENT signe par le fournisseur, portant
+     * l e-mail du compte de fumee — sans signature de lien, puis avec une signature
+     * fausse — ne doit RIEN poser. Le contre-test signe un VRAI lien sous la session
+     * du vendeur : lui DOIT poser le plan, sinon les deux refus ne prouveraient rien.
+     *
+     * Un visiteur a lui (94) : le plafond de debit du webhook est par adresse, et
+     * ces requetes ne doivent pas manger celui des controles ci-dessus.
+     */
+    const posterAbonnement = (corps) =>
+      fetch(urlPaiement, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-signature": signer(corps, SECRET_WEBHOOK_FUMEE),
+          ...visiteur(94),
+        },
+        body: corps,
+      });
+    const abonnementDeFumee = (id, custom) =>
+      JSON.stringify({
+        meta: { event_name: "subscription_created", custom_data: custom },
+        data: {
+          id: "fumee-" + id,
+          attributes: { status: "active", user_email: courriel, renews_at: null, ends_at: null },
+        },
+      });
+    const planDeFumee = async () =>
+      (await service.from("profiles").select("plan").eq("id", profilFumee).maybeSingle()).data?.plan ?? null;
+
+    const planAvantLien = await planDeFumee();
+    const parEmail = await posterAbonnement(abonnementDeFumee(randomUUID(), {}));
+    const corpsParEmail = parEmail.ok ? await parEmail.json() : null;
+    const planApresEmail = await planDeFumee();
+
+    const lienFaux = await posterAbonnement(
+      abonnementDeFumee(randomUUID(), { profil_id: profilFumee, signature: "ab".repeat(32) }),
+    );
+    const corpsLienFaux = lienFaux.ok ? await lienFaux.json() : null;
+    const planApresLienFaux = await planDeFumee();
+
+    const sessionLien = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+      { auth: { persistSession: false } },
+    );
+    await sessionLien.auth.signInWithPassword({ email: courriel, password: motDePasseFumee });
+    const { data: vraieSignature } = await sessionLien.rpc("signer_lien_paiement");
+    await sessionLien.auth.signOut();
+    const idLienJuste = randomUUID();
+    const lienJuste = await posterAbonnement(
+      abonnementDeFumee(idLienJuste, { profil_id: profilFumee, signature: vraieSignature ?? "" }),
+    );
+    const corpsLienJuste = lienJuste.ok ? await lienJuste.json() : null;
+    const planApresLienJuste = await planDeFumee();
+
+    // Le compte de fumee retrouve son etat : l abonnement retire, le plan rendu.
+    await service.from("subscriptions").delete().eq("provider_subscription_id", "fumee-" + idLienJuste);
+    await service.from("profiles").update({ plan: "gratuit" }).eq("id", profilFumee);
+
+    controles.push(
+      [planAvantLien === "gratuit", `le compte de fumee part GRATUIT (${planAvantLien})`],
+      [
+        parEmail.status === 200 && corpsParEmail?.statut === "sans_destinataire" && planApresEmail === "gratuit",
+        `un paiement portant SEULEMENT l e-mail d un vendeur ne pose plus son plan (${parEmail.status}, ${corpsParEmail?.statut}, plan ${planApresEmail})`,
+      ],
+      [
+        lienFaux.status === 200 && corpsLienFaux?.statut === "sans_destinataire" && planApresLienFaux === "gratuit",
+        `un lien a la signature FAUSSE ne pose pas de plan (${lienFaux.status}, ${corpsLienFaux?.statut}, plan ${planApresLienFaux})`,
+      ],
+      [
+        typeof vraieSignature === "string" &&
+          lienJuste.status === 200 &&
+          corpsLienJuste?.statut === "applique" &&
+          planApresLienJuste === "pro",
+        `CONTRE-TEST : un lien CORRECTEMENT signe pose le plan (${lienJuste.status}, ${corpsLienJuste?.statut}, plan ${planApresLienJuste})`,
+      ],
+    );
+
     // PAR L IDENTIFIANT DE L EVENEMENT, pas par la signature : une route cassee
     // archiverait aussi les corps FORGES, et ils resteraient en base.
     await service.from("payment_events").delete().like("payload->data->>id", "fumee-%");

@@ -583,3 +583,91 @@ describe("Le falsificateur CASSE aussi le produit d'aujourd'hui", () => {
     ).toEqual([]);
   });
 });
+
+/**
+ * CHAQUE FALSIFICATION SQL MORD ENCORE SUR LE CODE D'AUJOURD'HUI (27/09/2026).
+ *
+ * ⚠️ DÉFAUT RÉEL. Les contrôles ci-dessus vérifient que l'ANCRE (`depuis`) et la
+ * BORNE (`jusqua`) d'une cible existent encore, et que les cibles du second
+ * registre ont leur motif une fois — jamais que le texte À CASSER (`remplacer`)
+ * d'une cible SQL figure encore dans sa fenêtre. Le 27/09, la comparaison HMAC de
+ * la 203 est passée à temps constant : `appareil-signature-non-verifiee` cherchait
+ * l'ancienne ligne, les sept portes sont restées vertes, et la falsification aurait
+ * refusé de tourner le jour où quelqu'un l'aurait lancée. L-018 : l'ancre existait,
+ * la falsification ne mordait plus.
+ *
+ * Les fins de ligne sont normalisées comme le fait le falsificateur : douze
+ * migrations sont en CRLF dans l'arbre de travail Windows.
+ */
+function cassures(): readonly {
+  cible: string;
+  fichier: string;
+  depuis: string;
+  jusqua: string | null;
+  remplacer: string;
+}[] {
+  const source = readFileSync(FALSIFICATEUR, "utf8").replace(/\r\n/g, "\n");
+  const finSql = source.indexOf("const DEPOT = {");
+  const registre = finSql === -1 ? source : source.slice(0, finSql);
+  const cles = [...registre.matchAll(/^ {2}"([a-z0-9-]+)":\s*\{$/gm)];
+  const trouvees: { cible: string; fichier: string; depuis: string; jusqua: string | null; remplacer: string }[] =
+    [];
+
+  for (const [i, cle] of cles.entries()) {
+    const bloc = registre.slice(cle.index, cles[i + 1]?.index ?? registre.length);
+    const brut = /casserDepuisMigration:\s*\{([\s\S]*?)\n {4}\},/.exec(bloc)?.[1];
+    if (brut === undefined) continue;
+    const fichier = /fichier:\s*"([^"]+)"/.exec(brut)?.[1];
+    const depuis = /depuis:\s*"([^"]+)"/.exec(brut)?.[1];
+    // Le motif peut tenir sur une ligne, sur la suivante, ou être CONCATÉNÉ :
+    // on recolle tous les littéraux entre `remplacer:` et `par:`.
+    const segment = /remplacer:([\s\S]*?)\n\s*par:/.exec(brut)?.[1];
+    if (fichier === undefined || depuis === undefined || segment === undefined) continue;
+    const remplacer = [...segment.matchAll(/"((?:[^"\\]|\\.)*)"/g)]
+      .map((m) =>
+        (m[1] ?? "").replace(/\\(.)/g, (_, c: string) =>
+          c === "n" ? "\n" : c === "t" ? "\t" : c === "r" ? "\r" : c,
+        ),
+      )
+      .join("");
+    trouvees.push({
+      cible: cle[1] as string,
+      fichier,
+      depuis,
+      jusqua: /jusqua:\s*"([^"]+)"/.exec(brut)?.[1] ?? null,
+      remplacer,
+    });
+  }
+  return trouvees;
+}
+
+describe("Chaque falsification SQL mord encore sur le code d'aujourd'hui", () => {
+  const toutes = cassures();
+
+  test("les falsifications sont réellement relues", () => {
+    // UN ENSEMBLE VIDE PASSE TOUT : une lecture qui cesserait de coller à la forme
+    // du script rendrait ce contrôle vert et muet.
+    expect(toutes.length).toBeGreaterThan(40);
+    expect(
+      toutes.filter((c) => c.remplacer === "").map((c) => c.cible),
+      "des motifs vides ont été lus",
+    ).toEqual([]);
+  });
+
+  test("chaque motif à casser figure UNE fois dans sa fenêtre", () => {
+    const defauts: string[] = [];
+    for (const c of toutes) {
+      const contenu = readFileSync(join(MIGRATIONS, c.fichier), "utf8").replace(/\r\n/g, "\n");
+      const debut = contenu.indexOf(c.depuis);
+      if (debut === -1) {
+        defauts.push(`${c.cible} : ancre « ${c.depuis} » introuvable dans ${c.fichier}`);
+        continue;
+      }
+      const fin = c.jusqua === null ? -1 : contenu.indexOf(c.jusqua, debut);
+      const fenetre = contenu.slice(debut, fin === -1 ? undefined : fin);
+      const n = fenetre.split(c.remplacer).length - 1;
+      if (n !== 1) defauts.push(`${c.cible} : son motif apparaît ${n} fois dans sa fenêtre de ${c.fichier}`);
+    }
+    expect(defauts, defauts.join(" | ")).toEqual([]);
+  });
+});

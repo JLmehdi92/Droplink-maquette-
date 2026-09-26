@@ -1360,6 +1360,7 @@ export type Database = {
       }
       slug_est_reserve: { Args: { p_slug: string }; Returns: boolean }
       slug_valide: { Args: { p_slug: string }; Returns: boolean }
+      verifier_lien_paiement: { Args: { p_profil: string; p_signature: string }; Returns: boolean }
       verifier_slug_commande: {
         Args: { p_jeton: string; p_slug: string }
         Returns: boolean
@@ -1371,7 +1372,8 @@ export type Database = {
         Returns: boolean
       }
       revoquer_appareil_fiable: { Args: { p_id: string }; Returns: undefined }
-      revoquer_tous_les_appareils_fiables: { Args: Record<string, never>; Returns: undefined }
+      revoquer_tous_les_appareils_fiables: { Args: never; Returns: undefined }
+      signer_lien_paiement: { Args: never; Returns: string }
       etat_budget_suivi: {
         Args: never
         Returns: {

@@ -643,18 +643,14 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 198 à 202, AVANT le déploiement** — décision
-de Wassim (147 à 197 y sont depuis le 25/09/2026). La 198 rend le quota À VIE impossible à
-recharger par « Supprimer mes données » ; la 199 laisse la fiche commande dire qu'un suivi est
-bloqué par le quota de colis ; la 200 fait repartir de zéro le vendeur qui passe Pro (ses
-commandes gratuites ne mangent plus ses 300 du mois) et donne à la fiche admin la règle du plan.
-La 201 ramène le plafond de colis d'un compte gratuit à 15 à vie (au lieu de 30) : chaque colis
-suivi coûte une prise en charge, et le gratuit n'a plus de marge de correction.
-La 202 fait compter le quota de colis en AFTER INSERT : en BEFORE, chaque `on conflict do update`
-d'`attacher_colis` (un transporteur précisé) consommait un colis qui n'existait pas — mesuré : 1 colis
-réel, 3 consommés. Sans la 200, la jauge de la fiche admin est OMISE (le lecteur rend `null` plutôt
-qu'un « NaN », testé).
-`pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
+**La production attend `pnpm db:migrate` pour la 204, AVANT le déploiement** — décision de
+Wassim. **198 à 203 y sont depuis le 27/09/2026** (lancé par Wassim, `verif:prod` 29/29) : le
+quota à vie qui ne se recharge pas (198), le suivi bloqué dit (199), le Pro qui repart de zéro
+(200), 15 colis à vie en gratuit (201), le quota de colis compté en AFTER INSERT (202), l'appareil
+fiable (203). **La 204 signe le lien de paiement** et retire le rattachement par e-mail (voir la
+contrainte n° 1) : sans elle en production, l'écran « Passer au Pro » appelle une fonction absente
+et n'affiche AUCUN bouton de paiement (le lien n'est jamais proposé non signé).
+`pnpm verif:prod` rend rouge tant que la 204 n'est pas appliquée, et c'est attendu.
 
 **Les consignes que ce journal porte et qui ne se perdent pas avec lui :**
 
@@ -814,6 +810,21 @@ Son corps vit dans `components/publique/page-client.tsx` (26/09/2026), rendu aus
    > hors du middleware : sa seule garde est une signature HMAC-SHA256 vérifiée
    > sur le **corps brut**, à temps constant, **avant toute analyse**. Sans elle,
    > un POST suffirait à s'offrir l'abonnement.
+   >
+   > ⚠️ **CETTE SIGNATURE PROUVE LA PROVENANCE, PAS LE PAYEUR — et c'était une
+   > faille CRITIQUE** (audit ECC du 27/09/2026, migration 204, solution A choisie
+   > par Wassim). Sans identifiant, le webhook rattachait le paiement par
+   > l'**e-mail saisi chez le fournisseur**, que personne ne prouve posséder : qui
+   > connaissait l'adresse d'un vendeur pouvait, par un abonnement qu'il contrôle
+   > puis résilie, poser ou RETIRER son plan — jusqu'à rétrograder un vrai client
+   > Pro. **Le filet e-mail est supprimé.** Le lien de paiement porte `profil_id`
+   > (l'identifiant de PROFIL, pas celui d'authentification) ET sa signature HMAC
+   > (secret en base, `signer_lien_paiement` pour l'appelant seul,
+   > `verifier_lien_paiement` pour le webhook seul) ; un événement sans preuve
+   > valide garde le compte auquel son abonnement a été rattaché à la création, et
+   > `appliquer_abonnement` refuse de ré-attacher un abonnement à un autre compte
+   > (`DL076`). Un rejeu n'est « déjà traité » que si le premier passage a
+   > ABOUTI — un 503 est donc réellement rejoué.
    >
    > **Les maquettes de facturation de l'admin restent non codées** : elles
    > montrent des paiements et des montants que le produit n'a toujours pas, et

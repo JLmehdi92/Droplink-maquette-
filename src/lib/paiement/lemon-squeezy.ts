@@ -103,6 +103,11 @@ const Evenement = z.object({
         // lien le plus sûr : il ne dépend ni de l'adresse e-mail que le vendeur
         // a saisie chez le fournisseur, ni de son orthographe.
         profil_id: z.string().uuid().optional(),
+        // Sa signature HMAC (204). Lue en chaîne bornée, SANS contrôle de forme :
+        // une signature trafiquée ne doit pas faire refuser tout l'événement
+        // (le fournisseur le renverrait sans fin) — la base la juge, et un faux
+        // retombe simplement sur l'abonnement déjà rattaché.
+        signature: z.string().max(256).optional(),
       })
       .partial()
       .optional(),
@@ -154,34 +159,31 @@ export function lireEvenement(corpsBrut: string): LectureEvenement {
 }
 
 export type Destinataire =
-  | { readonly par: "profil"; readonly profilId: string }
-  | { readonly par: "courriel"; readonly courriel: string }
+  | { readonly par: "profil"; readonly profilId: string; readonly signature: string }
   | { readonly par: "rien" };
 
 /**
- * À QUI CET ABONNEMENT APPARTIENT-IL ?
+ * À QUI CET ABONNEMENT APPARTIENT-IL ? — le CANDIDAT porté par l'événement.
  *
- * DEUX VOIES, ET L'ORDRE COMPTE. L'identifiant de profil qu'on a nous-mêmes
- * glissé dans le paiement est la voie sûre. L'adresse e-mail est le FILET :
- * elle rattrape le vendeur qui a payé depuis un lien générique, et c'est
- * exactement le cas qui, sans filet, produit un paiement encaissé sans plan
- * posé — le pire résultat possible.
+ * ⚠️ PLUS DE FILET PAR E-MAIL (migration 204, audit ECC du 27/09/2026). Ce
+ * module rattachait, à défaut d'identifiant, par l'adresse saisie dans le
+ * formulaire du fournisseur. Or personne ne prouve posséder cette adresse : qui
+ * connaissait l'e-mail d'un vendeur pouvait, par un abonnement qu'il contrôle
+ * puis résilie, poser ou RETIRER le plan de ce vendeur — y compris d'un vrai
+ * client Pro. Un paiement sans destinataire se signale et se rattache à la main
+ * (`sans_destinataire`) : c'est moins grave qu'un plan posé sur le mauvais compte,
+ * que personne ne découvrirait.
  *
- * ⚠️ ET SI LES DEUX ÉCHOUENT, ON N'INVENTE PAS. Pas de « premier compte qui
- * ressemble », pas de création de compte : l'appelant signale, et un humain
- * tranche. Poser un plan sur le mauvais compte est plus grave que de ne pas le
- * poser, parce que personne ne le découvrirait.
+ * Le candidat n'est qu'un identifiant ACCOMPAGNÉ de sa signature. Ce n'est pas
+ * encore une preuve : la route la fait juger par la base
+ * (`verifier_lien_paiement`), et un événement sans preuve valide garde le compte
+ * auquel son abonnement a été rattaché à la création.
  */
 export function destinataireDe(evenement: EvenementAbonnement): Destinataire {
   const profilId = evenement.meta.custom_data?.profil_id;
-  if (typeof profilId === "string" && profilId !== "") {
-    return { par: "profil", profilId };
+  const signature = evenement.meta.custom_data?.signature;
+  if (typeof profilId === "string" && profilId !== "" && typeof signature === "string" && signature !== "") {
+    return { par: "profil", profilId, signature };
   }
-
-  const courriel = evenement.data.attributes.user_email;
-  if (typeof courriel === "string" && courriel !== "") {
-    return { par: "courriel", courriel: courriel.trim().toLowerCase() };
-  }
-
   return { par: "rien" };
 }

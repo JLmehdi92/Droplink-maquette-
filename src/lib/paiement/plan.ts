@@ -88,21 +88,32 @@ export function urlPaiementPro(): string | null {
  * l'identifiant du compte et pré-remplit son e-mail.
  *
  * ⚠️ SANS ELLE, UN PAIEMENT POUVAIT ARRIVER SANS PLAN (audit ECC, 24/09/2026).
- * Le webhook rattache par `meta.custom_data.profil_id`, et à défaut par l'e-mail
- * du PAYEUR. Le bouton envoyait l'adresse brute : un vendeur qui payait avec une
- * autre adresse que celle de son compte était débité sans recevoir le Pro.
- * Lemon Squeezy renvoie dans `custom_data` ce que le lien porte en
- * `checkout[custom][…]`.
+ * Le bouton envoyait l'adresse brute : un vendeur qui payait avec une autre
+ * adresse que celle de son compte était débité sans recevoir le Pro. Lemon
+ * Squeezy renvoie dans `custom_data` ce que le lien porte en `checkout[custom][…]`.
  *
- * L'identifiant n'autorise RIEN : le webhook n'est cru que signé, et un lien
- * modifié pour porter l'identifiant d'un autre compte ne ferait que lui OFFRIR
- * l'abonnement payé.
+ * ⚠️ L'IDENTIFIANT EST SIGNÉ (migration 204, audit ECC du 27/09/2026). Ce
+ * commentaire disait « l'identifiant n'autorise RIEN, un lien modifié ne ferait
+ * qu'OFFRIR l'abonnement ». C'était faux : le webhook rattachait aussi par
+ * l'e-mail saisi chez le fournisseur, que personne ne prouve posséder, et
+ * pouvait ainsi retirer le Pro d'un vrai client. Désormais le webhook ne croit
+ * que `profil_id` accompagné de sa `signature` (HMAC, secret en base, obtenue par
+ * le vendeur connecté pour SON compte seulement) — et plus jamais l'e-mail.
+ *
+ * SANS SIGNATURE, PAS DE LIEN : un lien non signé serait encaissé et resterait
+ * sans effet. Mieux vaut un bouton absent qu'un paiement perdu.
  */
-export function urlPaiementPourCompte(compte: { readonly profilId: string; readonly email: string }): string | null {
+export function urlPaiementPourCompte(compte: {
+  readonly profilId: string;
+  readonly email: string;
+  readonly signature: string | null;
+}): string | null {
   const base = urlPaiementPro();
   if (base === null) return null;
+  if (compte.signature === null || !/^[0-9a-f]{64}$/.test(compte.signature)) return null;
   const url = new URL(base);
   url.searchParams.set("checkout[custom][profil_id]", compte.profilId);
+  url.searchParams.set("checkout[custom][signature]", compte.signature);
   if (compte.email !== "") url.searchParams.set("checkout[email]", compte.email);
   return url.toString();
 }

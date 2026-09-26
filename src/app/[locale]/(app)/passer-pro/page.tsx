@@ -78,11 +78,16 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
    * autres, et `lireProfilVendeur()` est mémoïsée — `exigerVendeur()` vient de
    * l'appeler, donc elle ne coûte rien de plus ici.
    */
-  const [profil, plafondPro, plafondGratuit] = await Promise.all([
+  const [profil, plafondPro, plafondGratuit, signatureLien] = await Promise.all([
     lireProfilVendeur(),
     supabase.rpc("lire_plafond_commandes"),
     supabase.rpc("lire_plafond_gratuit_a_vie"),
+    // La signature de l'identifiant du compte (204), obtenue SOUS SA SESSION :
+    // la base ne signe que l'appelant. Illisible → pas de lien (voir plan.ts).
+    supabase.rpc("signer_lien_paiement"),
   ]);
+  if (signatureLien.error !== null)
+    console.error("[passer-pro] lien de paiement non signé — " + signatureLien.error.message);
 
   /*
    * ⚠️ UN PLAFOND QU'ON N'A PAS PU LIRE NE S'INVENTE PAS. Les deux lignes
@@ -94,9 +99,17 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
   const aVie = typeof plafondGratuit.data === "number" ? plafondGratuit.data : null;
 
   const nombre = (n: number): string => format.number(n);
-  // L'identifiant du compte voyage DANS le lien : sans lui, un paiement fait
-  // avec une autre adresse que celle du compte n'aurait pas de destinataire.
-  const paiement = profil === null ? null : urlPaiementPourCompte(profil);
+  // L'identifiant du compte voyage DANS le lien, SIGNÉ : sans lui, un paiement
+  // fait avec une autre adresse que celle du compte n'aurait pas de destinataire,
+  // et sans signature le webhook ne le croirait pas.
+  const paiement =
+    profil === null
+      ? null
+      : urlPaiementPourCompte({
+          profilId: profil.profilId,
+          email: profil.email,
+          signature: typeof signatureLien.data === "string" ? signatureLien.data : null,
+        });
   const dejaPro = profil?.planPro === true;
 
   const FEATURES = [

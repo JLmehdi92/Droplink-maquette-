@@ -710,6 +710,10 @@ sessions_fiables    session_id, appareil_id, user_id, expire_le — (aucune poli
 config_appareils_fiables
                     secret — (aucune policy) le secret HMAC des preuves d'appareil
                     fiable (203), aléatoire par environnement, jamais dans le dépôt
+config_lien_paiement
+                    secret — (aucune policy) le secret HMAC des liens de paiement
+                    (204) : le lien porte profil_id + signature, le webhook ne
+                    rattache plus jamais par e-mail
 
 quotas_consommes    shop_id, mois, commandes, colis, commandes_pro, colis_pro —
                     (aucune policy) ce que chaque boutique a CONSOMMÉ de ses

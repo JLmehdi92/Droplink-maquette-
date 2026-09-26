@@ -1472,7 +1472,11 @@ create trigger tracked_parcels_plafond
       fichier: "203_l_appareil_fiable.sql",
       depuis: "create function public.confirmer_appareil_fiable",
       jusqua: "comment on function public.confirmer_appareil_fiable",
-      remplacer: "  if p_signature is null or length(p_signature) <> length(v_attendue) or p_signature <> v_attendue then\n    return false;\n  end if;",
+      // ⚠️ Ce motif visait l'ancienne comparaison `p_signature <> v_attendue`,
+      // remplacée par une comparaison à temps constant le 27/09/2026 : la cible
+      // ne mordait plus, et aucune porte ne le voyait (falsificateur-a-jour ne
+      // relisait pas les motifs des cibles SQL — c'est corrigé).
+      remplacer: "  if v_diff <> 0 then\n    return false;\n  end if;",
       par: "  if false then\n    return false;\n  end if;",
     },
     reparerDepuisMigration: {
@@ -1543,6 +1547,74 @@ create trigger tracked_parcels_plafond
       fichier: "203_l_appareil_fiable.sql",
       depuis: "create or replace function public.exiger_aal_du_compte",
       jusqua: "revoke all on function public.exiger_aal_du_compte",
+    },
+  },
+
+  /*
+   * LE JUGE DES LIENS DE PAIEMENT ACCEPTE TOUT (204) : une signature quelconque
+   * vaut pour n importe quel compte. C est la faille d avant la 204 sous une autre
+   * forme — poser ou retirer le plan de qui on veut.
+   */
+  "lien-paiement-juge-complaisant": {
+    casserDepuisMigration: {
+      fichier: "204_le_lien_de_paiement_est_signe.sql",
+      depuis: "create function public.verifier_lien_paiement",
+      jusqua: "comment on function public.verifier_lien_paiement",
+      remplacer: "  return v_diff = 0;",
+      par: "  return true;",
+    },
+    reparerDepuisMigration: {
+      fichier: "204_le_lien_de_paiement_est_signe.sql",
+      depuis: "create function public.verifier_lien_paiement",
+      jusqua: "comment on function public.verifier_lien_paiement",
+    },
+  },
+
+  /*
+   * UN ABONNEMENT CHANGE DE COMPTE EN SILENCE (204) : le controle du proprietaire
+   * retire, un evenement qui designe un autre compte lui pose le plan.
+   * Sans borne : `appliquer_abonnement` est le dernier bloc de la 204.
+   */
+  "abonnement-reattachable": {
+    casserDepuisMigration: {
+      fichier: "204_le_lien_de_paiement_est_signe.sql",
+      depuis: "create or replace function public.appliquer_abonnement",
+      remplacer:
+        "  if v_proprietaire is not null and v_proprietaire <> p_profil then\n" +
+        "    raise exception 'abonnement rattache a un autre compte' using errcode = 'DL076';\n" +
+        "  end if;",
+      par: "",
+    },
+    reparerDepuisMigration: {
+      fichier: "204_le_lien_de_paiement_est_signe.sql",
+      depuis: "create or replace function public.appliquer_abonnement",
+    },
+  },
+
+  /*
+   * LE PLAN REDEVIENT CELUI DU DERNIER EVENEMENT (204) : la fin d un AUTRE
+   * abonnement — second abonnement, ou abonnement ouvert par un tiers avec une
+   * signature de lien qui aurait fuite — retire le Pro a qui paie encore.
+   */
+  "plan-du-dernier-evenement": {
+    casserDepuisMigration: {
+      fichier: "204_le_lien_de_paiement_est_signe.sql",
+      depuis: "create or replace function public.appliquer_abonnement",
+      remplacer:
+        "  v_plan := case\n" +
+        "    when exists (\n" +
+        "      select 1\n" +
+        "        from public.subscriptions s\n" +
+        "       where s.profile_id = p_profil\n" +
+        "         and public.plan_pour_statut(s.status, s.ends_at) = 'pro'\n" +
+        "    ) then 'pro'::public.account_plan\n" +
+        "    else 'gratuit'::public.account_plan\n" +
+        "  end;",
+      par: "  v_plan := public.plan_pour_statut(p_statut, p_ends_at);",
+    },
+    reparerDepuisMigration: {
+      fichier: "204_le_lien_de_paiement_est_signe.sql",
+      depuis: "create or replace function public.appliquer_abonnement",
     },
   },
 
@@ -4068,7 +4140,10 @@ let sql = SQL[cible][action];
 if (sql === undefined && action === "casser" && SQL[cible].casserDepuisMigration) {
   const { fichier, depuis, jusqua, remplacer, par } = SQL[cible].casserDepuisMigration;
   const chemin = join(process.cwd(), "supabase", "migrations", fichier);
-  const contenu = readFileSync(chemin, "utf8");
+  // CRLF -> LF. Douze migrations sont en CRLF dans l arbre de travail Windows (le
+  // depot, lui, est en LF) : un motif ecrit sur plusieurs lignes y etait
+  // « introuvable » et la falsification refusait de tourner. Mesure le 27/09/2026.
+  const contenu = readFileSync(chemin, "utf8").replace(/\r\n/g, "\n");
   const index = contenu.indexOf(depuis);
   if (index === -1) {
     console.error(
@@ -4125,7 +4200,8 @@ if (sql === undefined && action === "reparer" && SQL[cible].reparerDepuisMigrati
   // le fichier ne remet en etat que la fonction : le reste se repare ici, avant.
   if (avant) await client.query(avant);
   const chemin = join(process.cwd(), "supabase", "migrations", fichier);
-  const contenu = readFileSync(chemin, "utf8");
+  // Meme normalisation qu a la casse : la reparation rejoue le meme texte.
+  const contenu = readFileSync(chemin, "utf8").replace(/\r\n/g, "\n");
   const index = contenu.indexOf(depuis);
   const fin = jusqua ? contenu.indexOf(jusqua, index) : -1;
   if (index === -1) {

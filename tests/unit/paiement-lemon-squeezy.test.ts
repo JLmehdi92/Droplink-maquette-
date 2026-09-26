@@ -35,7 +35,7 @@ const charge = (surcharge: Record<string, unknown> = {}): string =>
   JSON.stringify({
     meta: {
       event_name: "subscription_created",
-      custom_data: { profil_id: "3f7c2b1e-5a4d-4c8e-9b1a-2d3e4f5a6b7c" },
+      custom_data: { profil_id: "3f7c2b1e-5a4d-4c8e-9b1a-2d3e4f5a6b7c", signature: "ab".repeat(32) },
     },
     data: {
       id: "987654",
@@ -145,22 +145,35 @@ describe("Le destinataire d'un abonnement", () => {
     return l.evenement;
   };
 
-  test("l'identifiant de profil PRIME sur l'adresse e-mail", () => {
-    // Le profil vient de NOUS, l'adresse vient de ce que le vendeur a tapé chez
-    // le fournisseur. Quand les deux sont là, on croit le nôtre.
+  test("un identifiant ACCOMPAGNÉ de sa signature est le candidat", () => {
+    // Le profil et sa signature viennent de NOUS (le lien signé, 204). La route
+    // fait juger la signature par la base avant de croire quoi que ce soit.
     const d = destinataireDe(lire(charge()));
     expect(d.par).toBe("profil");
+    if (d.par !== "profil") return;
+    expect(d.profilId).toBe("3f7c2b1e-5a4d-4c8e-9b1a-2d3e4f5a6b7c");
+    expect(d.signature).toBe("ab".repeat(32));
   });
 
-  test("sans identifiant, l'adresse e-mail sert de FILET", () => {
+  test("⚠️ l'adresse e-mail ne rattache PLUS RIEN (204)", () => {
+    /*
+     * Ce test disait l'inverse : « sans identifiant, l'adresse e-mail sert de
+     * FILET ». C'était la faille de l'audit ECC du 27/09/2026 — l'adresse saisie
+     * chez le fournisseur n'est prouvée par personne, et qui connaissait celle
+     * d'un vendeur pouvait poser ou retirer son plan. Une adresse seule, même
+     * celle d'un vrai compte, ne désigne plus personne.
+     */
     const sansProfil = JSON.parse(charge()) as { meta: { custom_data?: unknown } };
     sansProfil.meta.custom_data = {};
-    const d = destinataireDe(lire(JSON.stringify(sansProfil)));
-    expect(d.par).toBe("courriel");
-    if (d.par !== "courriel") return;
-    // Normalisée : une adresse saisie « Vendeur@Exemple.invalid » doit retrouver
-    // le même compte qu'en minuscules.
-    expect(d.courriel).toBe("vendeur@exemple.invalid");
+    expect(destinataireDe(lire(JSON.stringify(sansProfil))).par).toBe("rien");
+  });
+
+  test("un identifiant SANS signature n'est pas un candidat", () => {
+    // Le lien d'avant la 204, ou un lien retouché à la main pour retirer la
+    // signature : l'identifiant nu ne vaut rien.
+    const nu = JSON.parse(charge()) as { meta: { custom_data?: unknown } };
+    nu.meta.custom_data = { profil_id: "3f7c2b1e-5a4d-4c8e-9b1a-2d3e4f5a6b7c" };
+    expect(destinataireDe(lire(JSON.stringify(nu))).par).toBe("rien");
   });
 
   test("sans rien, on N'INVENTE PAS de destinataire", () => {

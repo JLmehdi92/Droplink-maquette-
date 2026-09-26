@@ -59,6 +59,14 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
         "Un vendeur qui pourrait le lire forgerait des appareils fiables à volonté.",
     ],
     [
+      "config_lien_paiement",
+      "Le secret HMAC des liens de paiement (migration 204), aléatoire par environnement, " +
+        "jamais dans le dépôt. AUCUNE POLICY et aucun droit : lu par les seules fonctions " +
+        "`security definer` qui signent (pour l'appelant) et vérifient (pour le webhook). " +
+        "Qui pourrait le lire signerait le lien de n'importe quel compte, et poserait ou " +
+        "retirerait son plan.",
+    ],
+    [
       "sessions_fiables",
       "Les sessions rattachées à un appareil fiable (migration 203), interrogées par " +
         "la garde `exiger_aal_du_compte` pour laisser passer une session `aal1` fiable. " +
@@ -349,6 +357,13 @@ describe("Sonde B — droits d'exécution dans public", () => {
       "Révoque TOUS les appareils fiables de l'appelant (migration 203), appelée à la " +
         "rotation du second facteur et au changement de mot de passe. Ouverte à " +
         "`authenticated` : elle n'agit que sur l'appelant, et ne RETIRE que de la confiance.",
+    ],
+    [
+      "signer_lien_paiement",
+      "Signe l'identifiant de PROFIL de l'appelant pour son lien de paiement (migration " +
+        "204). Ouverte à `authenticated` — l'écran « Passer au Pro » l'appelle sous la " +
+        "session du vendeur. Sans argument : on ne peut obtenir que la signature de SON " +
+        "compte. Le juge (`verifier_lien_paiement`), lui, reste au seul `service_role`.",
     ],
     [
       "cle_media_canonique",
