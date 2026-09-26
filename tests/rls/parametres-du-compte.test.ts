@@ -48,6 +48,35 @@ async function sessionsDe(userId: string): Promise<number> {
   return Number(ligne?.n ?? "NaN");
 }
 
+/**
+ * Le verdict de `verifierMotDePasseActuel`, BORNÉ — pas relancé jusqu'au vert.
+ *
+ * ⚠️ INTERMITTENCE MESURÉE (27/09/2026, trois passages de portes sur six). Sous une
+ * suite saturée, Supabase refuse en quelques millisecondes la connexion de
+ * vérification (429, par adresse IP : toute la suite partage la machine), et le
+ * produit le dit — à juste titre — `trop_de_tentatives`. Ce n'est pas le
+ * comportement éprouvé ici (`ok` / `refuse`), et la reprise du harnais ne le
+ * couvre pas : c'est la fonction du PRODUIT qui appelle Supabase.
+ *
+ * On patiente sur CE SEUL verdict, au rythme du harnais (15 s puis 45 s) ; tout
+ * autre verdict est rendu tel quel, et un quota qui ne se libère pas laisse le
+ * test ROUGE. Le budget par adresse (60/h) couvre largement les reprises. Le test
+ * qui éprouve NOTRE quota n'emploie pas cette aide : il attend `trop_de_tentatives`.
+ */
+async function verdict(email: string, motDePasse: string): Promise<string> {
+  let v = await verifierMotDePasseActuel(email, motDePasse);
+  for (const attente of [15_000, 45_000]) {
+    if (v !== "trop_de_tentatives") return v;
+    console.warn(
+      `[harnais] vérification de mot de passe refusée pour quota (${email}) : ` +
+        `nouvelle tentative dans ${attente / 1000} s. Ce n'est PAS le comportement éprouvé.`,
+    );
+    await new Promise((fin) => setTimeout(fin, attente));
+    v = await verifierMotDePasseActuel(email, motDePasse);
+  }
+  return v;
+}
+
 beforeAll(async () => {
   // HORS REQUÊTE, AUCUNE ADRESSE IP N'EST LISIBLE. Le mode `aucun` le dit
   // explicitement plutôt que de laisser `headers()` lever : il reste le compteur
@@ -71,23 +100,23 @@ afterAll(async () => {
 describe("Vérifier le mot de passe actuel", () => {
   test("le bon mot de passe est accepté, un faux est refusé", async () => {
     // Contre-test positif D'ABORD : un refus systématique passerait la suite.
-    expect(await verifierMotDePasseActuel(vendeur.email, vendeur.motDePasse)).toBe("ok");
-    expect(await verifierMotDePasseActuel(vendeur.email, vendeur.motDePasse + "x")).toBe("refuse");
-    expect(await verifierMotDePasseActuel(vendeur.email, "")).toBe("refuse");
-  }, 60_000);
+    expect(await verdict(vendeur.email, vendeur.motDePasse)).toBe("ok");
+    expect(await verdict(vendeur.email, vendeur.motDePasse + "x")).toBe("refuse");
+    expect(await verdict(vendeur.email, "")).toBe("refuse");
+  }, 240_000);
 
   test("le mot de passe d'un AUTRE compte ne vaut rien pour celui-ci", async () => {
     // L'adresse vient de la base côté action ; ce test borne la fonction
     // elle-même : un mot de passe valide ailleurs n'ouvre pas ce compte.
-    expect(await verifierMotDePasseActuel(vendeur.email, voisin.motDePasse)).toBe("refuse");
-  }, 60_000);
+    expect(await verdict(vendeur.email, voisin.motDePasse)).toBe("refuse");
+  }, 120_000);
 
   test("aucune session ne survit à la vérification, et celle du vendeur reste vivante", async () => {
     const avant = await sessionsDe(vendeur.userId);
     expect(avant, "Le vendeur de test doit avoir sa propre session.").toBeGreaterThan(0);
 
-    expect(await verifierMotDePasseActuel(vendeur.email, vendeur.motDePasse)).toBe("ok");
-    expect(await verifierMotDePasseActuel(vendeur.email, vendeur.motDePasse)).toBe("ok");
+    expect(await verdict(vendeur.email, vendeur.motDePasse)).toBe("ok");
+    expect(await verdict(vendeur.email, vendeur.motDePasse)).toBe("ok");
 
     expect(
       await sessionsDe(vendeur.userId),
@@ -99,7 +128,7 @@ describe("Vérifier le mot de passe actuel", () => {
     const { data, error } = await vendeur.client.auth.getUser();
     expect(error).toBeNull();
     expect(data.user?.id).toBe(vendeur.userId);
-  }, 60_000);
+  }, 180_000);
 
   test("un budget épuisé refuse MÊME le bon mot de passe", async () => {
     const cible = await creerUtilisateur("parametres-quota");
