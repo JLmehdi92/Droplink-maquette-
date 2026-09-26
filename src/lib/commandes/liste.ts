@@ -572,6 +572,11 @@ export async function lireCommandes(
   // (L-032). Le défaut reste le client à session : aucun appel de l'application
   // ne passe d'argument, et le client service-role n'a pas ce type.
   client?: ClientLecture,
+  // Les vignettes coûtent une lecture de `order_media` et jusqu'à 2 signatures R2
+  // par commande. L'export CSV ne les affiche pas : à son plafond (5 000 lignes,
+  // ~100 pages) il lisait ~15 000 lignes et signait ~5 000 URL pour rien. Il
+  // passe `false` ; l'écran, qui les montre, garde le défaut `true`.
+  avecVignettes = true,
 ): Promise<PageCommandes> {
   const supabase = client ?? (await creerClientServeur());
   const { colonne, croissant } = ordre(parametres.tri);
@@ -658,7 +663,7 @@ export async function lireCommandes(
   const trop = data.length > PAR_PAGE;
   const visibles = trop ? data.slice(0, PAR_PAGE) : data;
 
-  const vignettes = await lireVignettes(supabase, visibles);
+  const vignettes = avecVignettes ? await lireVignettes(supabase, visibles) : new Map<string, string[]>();
 
   const lignes: LigneCommande[] = visibles.map((l) => ({
     id: l.id,

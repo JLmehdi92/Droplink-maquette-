@@ -127,7 +127,9 @@ export async function exporterCommandes(
   // coût avec le numéro de page : à la page quarante d'un jeu de neuf mille, il
   // lirait deux mille lignes pour en rendre cinquante.
   for (;;) {
-    const page = await lireCommandes({ ...parametres, curseur }, client);
+    // `false` : le CSV n'affiche aucune vignette. Sans ça, chaque page lisait
+    // `order_media` et signait des URL R2 jetées aussitôt (défaut de perf mesuré).
+    const page = await lireCommandes({ ...parametres, curseur }, client, false);
 
     for (const l of page.lignes) {
       if (total >= PLAFOND_LIGNES) {
