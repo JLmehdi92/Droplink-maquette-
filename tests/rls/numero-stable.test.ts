@@ -4,6 +4,7 @@ import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   clientAnonyme,
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -80,6 +81,11 @@ async function vieillir(parcelId: string): Promise<void> {
 beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   vendeur = await creerUtilisateur("numero-stable");
+  // ⚠️ VENDEURS PRO DEPUIS LA 201 (27/09/2026) : un compte gratuit ne suit plus que
+  // 15 colis à vie, et ces épreuves du SUIVI en créent davantage. Un vendeur qui
+  // suit autant de colis est un vendeur qui paye — ce n'est pas un contournement,
+  // les refus de quota ont leurs propres suites (quota-gratuit, quota-*).
+  await passerEnPro(vendeur);
   commandeA = await creerCommande();
   commandeB = await creerCommande();
 }, 120_000);

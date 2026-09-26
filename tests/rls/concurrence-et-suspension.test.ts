@@ -137,7 +137,8 @@ describe("⚠️ Deux insertions simultanées ne dépassent pas un quota", () =>
 
   test("le DERNIER colis gratuit ne se prend pas deux fois", async () => {
     const v = await compte("course-colis");
-    const plafond = (await nombre("select public.lire_plafond_gratuit_a_vie() as n", [])) * 2;
+    // UNE FOIS le quota de commandes depuis la 201 (le facteur 2 est retiré).
+    const plafond = await nombre("select public.lire_plafond_gratuit_a_vie() as n", []);
     await interroger(
       catalogue,
       "insert into public.tracked_parcels (shop_id, tracking_number) select $1, 'COURSE' || g from generate_series(1, $2::int) g",

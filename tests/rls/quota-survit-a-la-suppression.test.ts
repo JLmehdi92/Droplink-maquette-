@@ -102,9 +102,9 @@ describe("Le quota consommé ne se rend pas", () => {
     expect((await consommation(u)).commandes).toBe(PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT);
   });
 
-  test("GRATUIT, colis (hors du cas motivant) : les trente prises en charge ne reviennent pas", async () => {
+  test("GRATUIT, colis (hors du cas motivant) : les quinze prises en charge ne reviennent pas", async () => {
     const u = await nouveau("colis-survit");
-    const plafond = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT * 2;
+    const plafond = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT;
     const colis = (n: number, prefixe: string) =>
       Array.from({ length: n }, (_, i) => ({ shop_id: u.shopId, tracking_number: `${prefixe}-${i}`, carrier_code: 6051 }));
 
@@ -201,7 +201,7 @@ describe("Le suivi bloqué par le quota de colis se dit", () => {
 
   test("GRATUIT : la sauvegarde du numéro dit que le suivi n'a pas démarré, et la base le redit", async () => {
     const u = await nouveau("suivi-bloque");
-    const plafond = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT * 2;
+    const plafond = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT;
     const colis = Array.from({ length: plafond }, (_, i) => ({ shop_id: u.shopId, tracking_number: `DEMOPLEIN${i}`, carrier_code: 6051 }));
     expect((await service.from("tracked_parcels").insert(colis)).error).toBeNull();
 

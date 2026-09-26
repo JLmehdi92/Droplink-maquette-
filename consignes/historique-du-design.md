@@ -6,6 +6,20 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 27/09/2026 — 15 COLIS SUIVIS EN GRATUIT, PLUS 30 (migration 201)
+
+Wassim : « ça me coûte cher de perdre 30 suivis sur mon quota 17TRACK, pas de deuxième chance ».
+Le facteur 2 (une correction de numéro par commande) est retiré : gratuit = 15 commandes et
+15 colis à vie. Planches `legal/Tarifs.jsx` et `seller_app/PassProView.jsx` corrigées d'abord
+(« 15 au total, à vie », entrée ajoutée au dictionnaire `dict-app` qui ne l'avait pas), puis
+les deux pages. **Mesuré** : Tarifs (nouveau relevé du lanceur, `legal/tarifs.html`, 1280) et
+Passer au Pro, au bureau et à 390, code 0.
+
+🔧 **La sonde mesurait parfois le squelette de chargement** : `/fr/passer-pro` est sorti avec 28
+textes « manquants », et sa capture montrait les cartes grises de `loading.tsx`. Elle attend
+désormais que les blocs `animate-pulse` disparaissent (20 s au plus, puis ARRET) ; les deux
+chemins sont éprouvés (189 éléments mesurés ; ARRET au bout de 20 s, seuil forcé).
+
 ### ▶️ 27/09/2026 — LA FICHE ADMIN DIT LE QUOTA DU PLAN, ET LE PRO REPART DE ZÉRO (migration 200)
 
 Wassim : « le compte gratuit a 15/15, et s'il paye ça débloque 300 commandes par mois ; pareil

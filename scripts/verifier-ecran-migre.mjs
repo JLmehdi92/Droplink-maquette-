@@ -1314,6 +1314,35 @@ const dossierInventaire = process.env["INVENTAIRE"] ?? null;
  * de mesure —, toute autre étape clique le bouton de ce texte exact. Après une
  * soumission, l'attente couvre l'action serveur et son plancher de 1,2 s.
  */
+/*
+ * ⚠️ LE SQUELETTE DE CHARGEMENT N'EST PAS L'ÉCRAN (27/09/2026).
+ *
+ * Après la navigation, la sonde attendait TROIS SECONDES FIXES puis mesurait ce
+ * qu'elle trouvait. Quand la base de tests répond lentement, ce qu'elle trouve est
+ * le `loading.tsx` de l'espace vendeur : huit cartes grises et aucun texte. Le
+ * 27/09, `/fr/passer-pro` est sorti avec 28 textes « manquants » — tout l'écran —
+ * et la capture montrait le squelette ; remesuré aussitôt, code 0. Une mesure qui
+ * dépend de la vitesse de la base mesure la base.
+ *
+ * On attend donc que le squelette soit PARTI (ses blocs portent `animate-pulse`,
+ * cinq au moins), vingt secondes au plus. Au-delà, on s'arrête en le disant :
+ * mesurer un squelette rendrait un rapport cohérent et faux.
+ */
+async function attendreFinDuSquelette(envoyer, chemin, largeur) {
+  const debut = Date.now();
+  for (;;) {
+    const { result } = await envoyer("Runtime.evaluate", {
+      expression: "document.querySelectorAll('.animate-pulse').length",
+      returnByValue: true,
+    });
+    if (Number(result.value ?? 0) < 5) return;
+    if (Date.now() - debut > 20_000) {
+      throw new Error(`ARRET : ${chemin} a ${largeur} px est reste sur son squelette de chargement pendant 20 s — on ne mesure pas un ecran qui n est pas arrive.`);
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+}
+
 async function cliquerProduit(envoyer, chemin, largeur) {
   const sequence = process.env["CLIC_PRODUIT"];
   if (sequence === undefined || sequence === "") return;
@@ -1555,6 +1584,7 @@ for (const modele of routes) {
     });
     await envoyer("Page.navigate", { url: base + chemin });
     await new Promise((r) => setTimeout(r, 3000));
+    await attendreFinDuSquelette(envoyer, chemin, largeur);
     await cliquerProduit(envoyer, chemin, largeur);
     /* UNE POLITIQUE ABSENTE NE PRODUIT AUCUNE VIOLATION : sans cet en-tête, « zéro
        violation » serait vrai et ne prouverait rien. Le serveur de mesure est un
@@ -1780,6 +1810,7 @@ for (const modele of routes) {
       });
       await envoyer("Page.reload", {});
       await new Promise((r) => setTimeout(r, 3000));
+      await attendreFinDuSquelette(envoyer, chemin, largeur);
       await cliquerProduit(envoyer, chemin, largeur);
       /* Les chiffres en `#`, comme la soustraction : « il y a 20 s » devient
          « il y a 23 s » entre les deux chargements, et le premier passage l'a

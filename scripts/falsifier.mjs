@@ -876,14 +876,14 @@ const SQL = {
    */
   "colis-rendus-par-la-suppression": {
     casserDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "    select coalesce(sum(q.colis), 0) into v_compte\n    from public.quotas_consommes q\n    where q.shop_id = new.shop_id;\n",
       par: "    select count(*) into v_compte\n    from public.tracked_parcels\n    where shop_id = new.shop_id;\n",
     },
     reparerDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -1033,14 +1033,14 @@ const SQL = {
    */
   "colis-gratuit-au-plafond-mensuel": {
     casserDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
-      remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie() * 2;",
+      remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie();",
       par: "    v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -1070,16 +1070,36 @@ const SQL = {
    * HORS du cas motivant : la même course, sur les COLIS. Chaque ligne de trop
    * y est une prise en charge PAYANTE, sur un palier commun à tous les comptes.
    */
+  /*
+   * LE GRATUIT RETROUVE SA SECONDE CHANCE (201) : trente colis suivis pour quinze
+   * commandes. Chaque colis de trop est une prise en charge payante, sur le palier
+   * commun à tous les comptes — Wassim l'a refusé le 27/09/2026.
+   */
+  "colis-gratuit-au-double": {
+    casserDepuisMigration: {
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+      remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie();",
+      par: "    v_plafond := public.lire_plafond_gratuit_a_vie() * 2;",
+    },
+    reparerDepuisMigration: {
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
+      depuis: "create or replace function public.verifier_plafond_colis()",
+      jusqua: "comment on function public.verifier_plafond_colis",
+    },
+  },
+
   "colis-sans-verrou": {
     casserDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-colis:' || new.shop_id::text, 0));\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -1093,14 +1113,14 @@ const SQL = {
    */
   "colis-pro-au-double": {
     casserDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "  v_plafond := public.lire_plafond_commandes();",
       par: "  v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -2927,14 +2947,14 @@ $$;
    */
   "suivi-bloque-muet": {
     casserDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.mon_quota_colis_atteint()",
       jusqua: "comment on function public.mon_quota_colis_atteint",
       remplacer: "then 'gratuit' end;",
       par: "then null end;",
     },
     reparerDepuisMigration: {
-      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      fichier: "201_le_gratuit_suit_quinze_colis.sql",
       depuis: "create or replace function public.mon_quota_colis_atteint()",
       jusqua: "comment on function public.mon_quota_colis_atteint",
     },

@@ -226,7 +226,7 @@ beforeAll(async () => {
    * ⚠️ LES COMPTES DU BANC SONT PRO, ET CE N'EST PAS UN CONTOURNEMENT.
    *
    * Depuis les migrations 175-176 et 181 (20/09/2026), un compte GRATUIT est
-   * borné à 15 commandes À VIE et 30 colis À VIE. Le banc en sème des milliers
+   * borné à 15 commandes À VIE et 15 colis À VIE (30 jusqu à la 201). Le banc en sème des milliers
    * pour savoir si l'écran tient : le semis echouait donc a la seizieme ligne,
    * et les 48 mesures partaient en SAUT — un test saute n'est pas un test qui
    * passe, et `test:perf` n'etant pas une porte, personne ne l'aurait vu.

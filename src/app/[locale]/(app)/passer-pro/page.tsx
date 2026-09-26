@@ -128,7 +128,9 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
           },
           {
             cle: "colis",
-            gratuit: t("tableau.aVie", { n: nombre(aVie * 2) }),
+            // UNE FOIS le quota de commandes (201) : 15 commandes, 15 colis, sans marge
+            // de correction payée par le budget de suivi commun.
+            gratuit: t("tableau.aVie", { n: nombre(aVie) }),
             pro:
               parMois === null
                 ? t("tableau.mensuel")

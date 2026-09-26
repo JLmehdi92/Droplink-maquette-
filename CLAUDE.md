@@ -58,7 +58,7 @@ pnpm check:r2         # dépôt R2 de bout en bout — exige les variables R2_*
 >
 > ⚠️ **ET ÇA S'EST REPRODUIT LE 20/09/2026, PAR UNE AUTRE PORTE.** Les migrations
 > 175-176 et 181 bornent un compte **gratuit** à 15 commandes et 30 colis **À
-> VIE**. Le banc en sème des milliers pour savoir si l'écran tient : ses quatre
+> VIE** (15 colis depuis la 201, décision de Wassim du 27/09/2026). Le banc en sème des milliers pour savoir si l'écran tient : ses quatre
 > fichiers ont cessé de se charger, et vitest a rendu **« 6 passed | 48
 > skipped »**. Six sur cinquante-quatre, présenté comme un succès partiel.
 >
@@ -643,11 +643,13 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 198, 199 et 200, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 198, 199, 200 et 201, AVANT le déploiement** — décision
 de Wassim (147 à 197 y sont depuis le 25/09/2026). La 198 rend le quota À VIE impossible à
 recharger par « Supprimer mes données » ; la 199 laisse la fiche commande dire qu'un suivi est
 bloqué par le quota de colis ; la 200 fait repartir de zéro le vendeur qui passe Pro (ses
 commandes gratuites ne mangent plus ses 300 du mois) et donne à la fiche admin la règle du plan.
+La 201 ramène le plafond de colis d'un compte gratuit à 15 à vie (au lieu de 30) : chaque colis
+suivi coûte une prise en charge, et le gratuit n'a plus de marge de correction.
 ⚠️ Sans la 200, le code déployé lit dans `lire_compte_admin` des colonnes qu'elle ne rend pas
 encore : la jauge de la fiche d'un compte serait fausse (non mesuré — lu dans le code).
 `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.

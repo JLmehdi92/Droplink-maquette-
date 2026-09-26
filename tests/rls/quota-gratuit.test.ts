@@ -142,12 +142,15 @@ describe("Le quota d'un compte gratuit", () => {
      * tout le monde en quelques minutes. Le quota de commandes ne l'arrête pas :
      * il compte les commandes, pas les colis.
      *
-     * Le facteur 2 est repris de la 125 et garde sa raison : il laisse UNE
-     * correction de numéro de suivi sur CHAQUE commande.
+     * Le facteur 2 de la 125 laissait UNE correction de numéro par commande.
+     * ⚠️ RETIRÉ LE 27/09/2026 (migration 201, décision de Wassim) : chaque
+     * colis suivi coûte une prise en charge sur un palier commun, et le produit
+     * ne peut pas offrir de seconde chance à un compte gratuit. 15 commandes,
+     * 15 colis — une correction de numéro consomme l'un des quinze.
      */
     const pieton = await creerUtilisateur("quota-colis");
     try {
-      const plafondAttendu = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT * 2;
+      const plafondAttendu = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT;
 
       // On en crée un de moins que le plafond : tous doivent PASSER. Sans ce
       // contre-test, un plafond qui refuserait tout serait vert ici.

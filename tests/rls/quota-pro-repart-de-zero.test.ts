@@ -144,9 +144,9 @@ describe("Le Pro repart de zéro, le gratuit compte tout", () => {
     expect(await creerCommandes(u, 1), "la seconde bascule a rendu un plafond neuf").toBe("DL035");
   });
 
-  test("COLIS (hors du cas motivant) : les 30 colis gratuits ne mangent pas le plafond Pro", async () => {
+  test("COLIS (hors du cas motivant) : les 15 colis gratuits ne mangent pas le plafond Pro", async () => {
     const u = await nouveau("colis-gratuit-puis-pro");
-    expect(await attacherColis(u, QUINZE * 2, "GRATUIT")).toBeNull();
+    expect(await attacherColis(u, QUINZE, "GRATUIT")).toBeNull();
     expect(await attacherColis(u, 1, "TROP")).toBe("DL070");
     expect((await u.client.rpc("mon_quota_colis_atteint")).data).toBe("gratuit");
 
