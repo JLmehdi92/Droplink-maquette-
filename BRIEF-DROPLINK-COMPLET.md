@@ -698,12 +698,15 @@ alertes_envoyees    cle, envoye_at — (aucune policy) repos entre deux alertes 
 
 rate_limit          (aucune policy — atteignable uniquement par consommer_quota)
 
-quotas_consommes    shop_id, mois, commandes, colis — (aucune policy) ce que chaque
-                    boutique a CONSOMMÉ de ses quotas, par mois, écrit par les
-                    seuls déclencheurs de quota. Ne redescend JAMAIS : « Supprimer
-                    mes données » rechargeait le quota à vie quand il comptait les
-                    lignes existantes (198). Un vendeur n'en lit qu'un verdict,
-                    par mon_quota_colis_atteint (199)
+quotas_consommes    shop_id, mois, commandes, colis, commandes_pro, colis_pro —
+                    (aucune policy) ce que chaque boutique a CONSOMMÉ de ses
+                    quotas, par mois, écrit par les seuls déclencheurs de quota.
+                    Ne redescend JAMAIS : « Supprimer mes données » rechargeait le
+                    quota à vie quand il comptait les lignes existantes (198). Un
+                    vendeur n'en lit qu'un verdict, par mon_quota_colis_atteint
+                    (199). `*_pro` = la part créée EN PRO (200) : le gratuit compte
+                    tout, à vie ; le Pro ne compte que sa part du mois — un
+                    vendeur qui paye repart de zéro, une fois par mois civil
 
 comptes_supprimes   id, user_id, email, inscrit_le, supprime_le, conserver_jusqu_au
                     — (aucune policy) comptes supprimés par leur titulaire :

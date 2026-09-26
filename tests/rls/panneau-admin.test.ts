@@ -2,7 +2,8 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { promouvoirAdmin } from "../aide/admin";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
-import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
+import { creerUtilisateur, passerEnPro, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
+import { lireCompte } from "@/lib/audit/comptes";
 import {
   lirePanneau,
   lireSeuils,
@@ -498,8 +499,26 @@ describe("Les compteurs de comptes décrivent la population qu'ils annoncent", (
  * un plafond que le produit n'applique plus — et c'est le pire état possible
  * pour un tableau de bord, PARCE QU'IL RASSURE. »
  */
+/*
+ * ⚠️ DEPUIS LA 200 (27/09/2026), LE PLAFOND AFFICHÉ VIENT DE `lire_compte_admin`,
+ * à la règle du plan du compte, et non plus de `lireSeuils` : la jauge d'un compte
+ * gratuit est son quota À VIE, celle d'un Pro son plafond du mois. La règle gardée
+ * ici ne change pas — le chiffre affiché est celui que la base applique — mais elle
+ * s'éprouve désormais sur la fiche d'un compte PRO, là où ce plafond s'affiche.
+ */
 describe("Le plafond de commandes affiché suit le réglage", () => {
-  test("`lireSeuils` rend la valeur ÉCRITE en base, pas la constante", async () => {
+  let pro: UtilisateurDeTest;
+
+  beforeAll(async () => {
+    pro = await creerUtilisateur("plafond-affiche");
+    await passerEnPro(pro);
+  }, 60_000);
+
+  afterAll(async () => {
+    await supprimerUtilisateur(pro);
+  });
+
+  test("la fiche d'un Pro rend la valeur ÉCRITE en base, pas la constante", async () => {
     const [avant] = await interroger<{ value: number | null }>(
       catalogue,
       "select value from public.system_settings where key = 'plafond_commandes_mensuel'",
@@ -512,9 +531,9 @@ describe("Le plafond de commandes affiché suit le réglage", () => {
          on conflict (key) do update set value = excluded.value`,
     );
 
-    const seuils = await lireSeuils(admin.client);
+    const fiche = await lireCompte(admin.client, pro.profilId, "ip-test");
     expect(
-      seuils.plafondCommandes,
+      fiche?.quotaCommandes.plafond,
       "l'écran afficherait un plafond que la base n'applique pas",
     ).toBe(512);
 
@@ -556,8 +575,8 @@ describe("Le plafond de commandes affiché suit le réglage", () => {
       "delete from public.system_settings where key = 'plafond_commandes_mensuel'",
     );
 
-    const seuils = await lireSeuils(admin.client);
-    expect(seuils.plafondCommandes).toBe(PLAFOND_COMMANDES_MENSUEL_DEFAUT);
+    const fiche = await lireCompte(admin.client, pro.profilId, "ip-test");
+    expect(fiche?.quotaCommandes.plafond).toBe(PLAFOND_COMMANDES_MENSUEL_DEFAUT);
 
     if (avant?.value != null) {
       await interroger(

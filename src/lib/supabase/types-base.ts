@@ -653,19 +653,25 @@ export type Database = {
       quotas_consommes: {
         Row: {
           colis: number
+          colis_pro: number
           commandes: number
+          commandes_pro: number
           mois: string
           shop_id: string
         }
         Insert: {
           colis?: number
+          colis_pro?: number
           commandes?: number
+          commandes_pro?: number
           mois: string
           shop_id: string
         }
         Update: {
           colis?: number
+          colis_pro?: number
           commandes?: number
+          commandes_pro?: number
           mois?: string
           shop_id?: string
         }
@@ -1416,13 +1422,15 @@ export type Database = {
           boutique_nom: string
           colis_ce_mois: number
           commandes: number
-          commandes_ce_mois: number
           created_at: string
           email: string
           evenements: Json
           id: string
           locale: string
           medias: number
+          plan: Database["public"]["Enums"]["account_plan"]
+          quota_commandes: number
+          quota_commandes_plafond: number
           reseaux: string[]
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["account_status"]

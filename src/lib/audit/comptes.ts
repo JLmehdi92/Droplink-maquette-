@@ -185,8 +185,15 @@ export interface FicheCompte {
   readonly reseaux: readonly string[];
   /** Commandes AYANT DU CONTENU RÉEL — même définition que les deux listes. */
   readonly commandes: number;
-  readonly commandesCeMois: number;
   readonly colisCeMois: number;
+  readonly plan: "gratuit" | "pro";
+  /**
+   * LE QUOTA DE COMMANDES À LA RÈGLE DU PLAN (200), lu là où il bloque : à vie et
+   * tout compris en gratuit, ce mois-ci et en Pro seulement en Pro. Il remplace
+   * « commandes ce mois / plafond mensuel », qui disait « 0 sur 300 » d'un gratuit
+   * bloqué à vie.
+   */
+  readonly quotaCommandes: { readonly utilise: number; readonly plafond: number };
   readonly medias: number;
   readonly stockageOctets: number;
   readonly activite: readonly ActiviteCompte[];
@@ -229,8 +236,9 @@ export async function lireCompte(
     filigrane: l.watermark_enabled === true,
     reseaux: l.reseaux ?? [],
     commandes: Number(l.commandes),
-    commandesCeMois: Number(l.commandes_ce_mois),
     colisCeMois: Number(l.colis_ce_mois),
+    plan: l.plan,
+    quotaCommandes: { utilise: Number(l.quota_commandes), plafond: Number(l.quota_commandes_plafond) },
     medias: Number(l.medias),
     stockageOctets: Number(l.stockage_octets),
     // La base rend `[]` plutot que `null` : l'appelant n'a pas a distinguer

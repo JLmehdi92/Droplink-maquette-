@@ -463,8 +463,11 @@ export async function lirePanneau(
 /** Lit les seuils configurés, ou rend les défauts. */
 export async function lireSeuils(
   supabase: ClientAdmin,
-): Promise<{ colis: number; retardMinutes: number; plafondCommandes: number }> {
-  const [colis, retard, plafond] = await Promise.all([
+): Promise<{ colis: number; retardMinutes: number }> {
+  // Le plafond de commandes n'est plus lu ici (200) : la fiche d'un compte reçoit
+  // son quota À LA RÈGLE DE SON PLAN de `lire_compte_admin`, et aucun autre écran
+  // ne l'affichait.
+  const [colis, retard] = await Promise.all([
     supabase.rpc("lire_parametre_entier", {
       p_cle: "seuil_colis_par_compte",
       p_defaut: SEUIL_COLIS_DEFAUT,
@@ -472,10 +475,6 @@ export async function lireSeuils(
     supabase.rpc("lire_parametre_entier", {
       p_cle: "retard_veilleur_minutes",
       p_defaut: RETARD_VEILLEUR_MINUTES_DEFAUT,
-    }),
-    supabase.rpc("lire_parametre_entier", {
-      p_cle: "plafond_commandes_mensuel",
-      p_defaut: PLAFOND_COMMANDES_MENSUEL_DEFAUT,
     }),
   ]);
 
@@ -488,9 +487,5 @@ export async function lireSeuils(
       retard.error === null && retard.data !== null
         ? Number(retard.data)
         : RETARD_VEILLEUR_MINUTES_DEFAUT,
-    plafondCommandes:
-      plafond.error === null && plafond.data !== null
-        ? Number(plafond.data)
-        : PLAFOND_COMMANDES_MENSUEL_DEFAUT,
   };
 }

@@ -643,10 +643,14 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour 198 et 199, AVANT le déploiement** — décision
+**La production attend `pnpm db:migrate` pour 198, 199 et 200, AVANT le déploiement** — décision
 de Wassim (147 à 197 y sont depuis le 25/09/2026). La 198 rend le quota À VIE impossible à
 recharger par « Supprimer mes données » ; la 199 laisse la fiche commande dire qu'un suivi est
-bloqué par le quota de colis. `pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
+bloqué par le quota de colis ; la 200 fait repartir de zéro le vendeur qui passe Pro (ses
+commandes gratuites ne mangent plus ses 300 du mois) et donne à la fiche admin la règle du plan.
+⚠️ Sans la 200, le code déployé lit dans `lire_compte_admin` des colonnes qu'elle ne rend pas
+encore : la jauge de la fiche d'un compte serait fausse (non mesuré — lu dans le code).
+`pnpm verif:prod` rend rouge tant qu'elles ne sont pas appliquées, et c'est attendu.
 
 **Les consignes que ce journal porte et qui ne se perdent pas avec lui :**
 

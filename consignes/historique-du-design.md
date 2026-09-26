@@ -6,6 +6,23 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 27/09/2026 — LA FICHE ADMIN DIT LE QUOTA DU PLAN, ET LE PRO REPART DE ZÉRO (migration 200)
+
+Wassim : « le compte gratuit a 15/15, et s'il paye ça débloque 300 commandes par mois ; pareil
+pour quelqu'un qui n'a jamais rien utilisé : s'il paye le Pro, il a 300/300 ».
+
+- 🔴 **La planche elle-même portait l'incohérence** : `AdminAccount` dessine un compte GRATUIT et
+  lui donnait la jauge « Commandes ce mois : 42 sur 5 000 », une règle qui ne s'applique pas à
+  lui. Planche corrigée d'abord : « Commandes à vie : 12 sur 15 » (dict en/zh ajouté), et la
+  variante Pro écrite en commentaire, comme la carte du plan (« Commandes ce mois (Pro) »).
+- **Produit** : la jauge lit `lire_compte_admin` (200), qui rend le plan, la consommation selon
+  la règle du plan (`quotas_consommes`, là où elle bloque) et le plafond qui s'y applique.
+  L'ancienne lisait `usage_counters` (un troisième compteur) contre `lireSeuils().plafondCommandes`,
+  désormais retiré — une lecture en base de moins sur cinq écrans admin.
+- **Mesuré** : `compte`, `compte-suspension`, `compte-plan` à 1560 et 390 en code 0 ; les
+  déclarations des jauges suivent leur nouveau texte (18 remplacements, même raison). Captures
+  regardées : « Commandes à vie : 4 sur 15 » pour le compte de mesure, jauge au quart.
+
 ### ▶️ 26/09/2026 — L'AUDIT « TOUT CLIQUER » ET SES CORRECTIFS : QUOTAS DITS, QUOTA QUI NE SE REND PLUS
 
 Wassim : « check toute les features… clique sur tous les boutons… réfléchis comme un humain »,

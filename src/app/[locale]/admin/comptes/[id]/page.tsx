@@ -257,19 +257,23 @@ export default async function FicheCompte({
                   ) : null}
                 </div>
 
+                {/* LE QUOTA À LA RÈGLE DU PLAN (200, planche `#compte`), lu là où il BLOQUE.
+                    À vie et tout compris en gratuit ; ce mois-ci et en Pro seulement en Pro.
+                    La jauge disait « commandes ce mois / plafond mensuel » pour tous : un
+                    gratuit bloqué à vie y lisait « 0 sur 300 ». */}
                 <div>
                   <div className="mb-[7px] flex flex-wrap justify-between gap-2">
                     <span className="text-[14px] font-semibold text-ds-texte-fort">
-                      {t("fiche.plafondCommandes")}
+                      {t(fiche.plan === "gratuit" ? "fiche.quotaAVie" : "fiche.quotaMoisPro")}
                     </span>
                     <span className="text-[14px] text-ds-texte-sourdine">
                       {t("fiche.surPlafond", {
-                        valeur: format.number(fiche.commandesCeMois),
-                        plafond: format.number(seuils.plafondCommandes),
+                        valeur: format.number(fiche.quotaCommandes.utilise),
+                        plafond: format.number(fiche.quotaCommandes.plafond),
                       })}
                     </span>
                   </div>
-                  {barre(fiche.commandesCeMois / seuils.plafondCommandes, false)}
+                  {barre(fiche.quotaCommandes.utilise / Math.max(fiche.quotaCommandes.plafond, 1), false)}
                 </div>
               </div>
             </section>

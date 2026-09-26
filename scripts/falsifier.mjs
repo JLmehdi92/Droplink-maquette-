@@ -836,14 +836,14 @@ const SQL = {
    */
   "quota-gratuit-mensuel": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "    from public.quotas_consommes q\n    where q.shop_id = new.shop_id;\n",
       par: "    from public.quotas_consommes q\n    where q.shop_id = new.shop_id\n      and q.mois = date_trunc('month', now())::date;\n",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -857,14 +857,14 @@ const SQL = {
    */
   "quota-rendu-par-la-suppression": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "    select coalesce(sum(q.commandes), 0) into v_compte\n    from public.quotas_consommes q\n    where q.shop_id = new.shop_id;\n",
       par: "    select count(*) into v_compte\n    from public.orders\n    where shop_id = new.shop_id;\n",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -876,14 +876,14 @@ const SQL = {
    */
   "colis-rendus-par-la-suppression": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "    select coalesce(sum(q.colis), 0) into v_compte\n    from public.quotas_consommes q\n    where q.shop_id = new.shop_id;\n",
       par: "    select count(*) into v_compte\n    from public.tracked_parcels\n    where shop_id = new.shop_id;\n",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -896,14 +896,14 @@ const SQL = {
    */
   "quota-oracle-inter-boutiques": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  if (select auth.uid()) is not null and new.shop_id is distinct from public.mon_shop_id() then\n    return new;\n  end if;\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -917,14 +917,14 @@ const SQL = {
    */
   "plan-ne-debloque-rien": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  if v_plan = 'gratuit' then\n",
       par: "  if true then\n",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -1033,14 +1033,14 @@ const SQL = {
    */
   "colis-gratuit-au-plafond-mensuel": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "    v_plafond := public.lire_plafond_gratuit_a_vie() * 2;",
       par: "    v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -1053,14 +1053,14 @@ const SQL = {
    */
   "quota-sans-verrou": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-commandes:' || new.shop_id::text, 0));\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
@@ -1072,14 +1072,14 @@ const SQL = {
    */
   "colis-sans-verrou": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "  perform pg_advisory_xact_lock(hashtextextended('plafond-colis:' || new.shop_id::text, 0));\n",
       par: "",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -1093,14 +1093,14 @@ const SQL = {
    */
   "colis-pro-au-double": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
       remplacer: "  v_plafond := public.lire_plafond_commandes();",
       par: "  v_plafond := public.lire_plafond_commandes() * 2;",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_colis()",
       jusqua: "comment on function public.verifier_plafond_colis",
     },
@@ -2079,96 +2079,60 @@ const SQL = {
    * controle par VALEUR sur la reponse BRUTE de la base le voit.
    */
   "frise-republie-la-charge-utile": {
-    casser: `drop function if exists public.lire_compte_admin(uuid, text);
-create or replace function public.lire_compte_admin(p_profil uuid, p_ip_hash text)
-  returns table (
-    id uuid,
-    email text,
-    account_type public.account_type,
-    role public.user_role,
-    status public.account_status,
-    locale text,
-    created_at timestamptz,
-    boutique_id uuid,
-    boutique_nom text,
-    accent_color text,
-    watermark_enabled boolean,
-    reseaux text[],
-    commandes bigint,
-    commandes_ce_mois bigint,
-    colis_ce_mois bigint,
-    medias bigint,
-    stockage_octets bigint,
-    evenements jsonb
-  )
-  language plpgsql
-  volatile
-  security definer
-  set search_path = ''
-as $$
-begin
-  if not public.est_admin() then
-    raise exception 'introuvable' using errcode = 'DL031';
-  end if;
-
-  -- ON TRACE MÊME QUAND LE COMPTE N'EXISTE PAS. Ne tracer que les succès
-  -- laisserait l'énumération d'identifiants totalement invisible.
-  perform public.journaliser_admin(
-    'comptes.detail', 'profiles', p_profil::text, p_profil, p_ip_hash, '{}'::jsonb
-  );
-
-  return query
-  select
-    p.id, p.email, p.account_type, p.role, p.status, p.locale, p.created_at,
-    s.id, s.name, s.accent_color, s.watermark_enabled,
-    -- LES RÉSEAUX CONFIGURÉS, PAR LEUR NOM, jamais par leur adresse : savoir
-    -- qu'un vendeur a mis un Instagram suffit à décrire son compte, l'ouvrir ne
-    -- regarde personne ici.
-    array_remove(array[
-      case when nullif(btrim(coalesce(s.instagram_url, '')), '') is null then null else 'instagram' end,
-      case when nullif(btrim(coalesce(s.tiktok_url, '')), '') is null then null else 'tiktok' end,
-      case when nullif(btrim(coalesce(s.whatsapp_url, '')), '') is null then null else 'whatsapp' end
-    ], null),
-    -- MÊME DÉFINITION QUE LES DEUX AUTRES ÉCRANS, enfin.
-    coalesce(s.commandes_reelles, 0)::bigint,
-    coalesce(u.orders_created, 0)::bigint,
-    coalesce(u.parcels_registered, 0)::bigint,
-    coalesce(s.medias_count, 0)::bigint,
-    coalesce(s.stockage_octets, 0)::bigint,
-    -- LA FRISE : agrégats seulement, six lignes au plus, du plus récent au plus
-    -- ancien. \`coalesce\` sur un tableau vide plutôt que \`null\` — l'appelant ne
-    -- doit pas avoir à distinguer « aucun événement » de « rien lu ».
-    coalesce((
-      select jsonb_agg(x order by x.jour desc)
-        from (
-          select e.type as type,
-                 date_trunc('day', e.occurred_at)::date as jour,
-                 count(*) as n,
-                 (array_agg(e.payload))[1] as meta
-            from public.order_events e
-            join public.orders o on o.id = e.order_id
-           where o.shop_id = s.id
-             and e.actor = 'vendeur'
-           group by e.type, date_trunc('day', e.occurred_at)::date
-           order by 2 desc
-           limit 6
-        ) as x
-    ), '[]'::jsonb)
-  from public.profiles p
-  left join public.shops s on s.owner_id = p.id
-  left join public.usage_counters u
-         on u.profile_id = p.id
-        and u.period_month = date_trunc('month', now())::date
-  where p.id = p_profil;
-end;
-$$;
-
-`,
-    reparerDepuisMigration: {
-      fichier: "112_la_fiche_de_compte_dit_ce_que_la_planche_montre.sql",
+    // ⚠️ CETTE CIBLE PORTAIT SA PROPRE COPIE DE LA FONCTION (112) jusqu'au
+    // 27/09/2026 : la 200 a changé la signature, et la copie aurait recréé
+    // l'ANCIENNE à côté de la nouvelle. Elle se découpe désormais dans la
+    // migration, comme les autres — une copie est une seconde source qui diverge.
+    casserDepuisMigration: {
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create function public.lire_compte_admin",
-      jusqua: "-- L'INDEX QUE LA FRISE DEMANDE",
-      avant: "drop function if exists public.lire_compte_admin(uuid, text);",
+      jusqua: "revoke all on function public.lire_compte_admin",
+      remplacer: "                 count(*) as n\n",
+      par: "                 count(*) as n,\n                 (array_agg(e.payload))[1] as meta\n",
+    },
+    reparerDepuisMigration: {
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      depuis: "create function public.lire_compte_admin",
+      jusqua: "comment on function public.lire_compte_admin",
+    },
+  },
+
+  /*
+   * LE PRO PAYE 300 ET EN REÇOIT MOINS (200) : son plafond du mois recompte les
+   * commandes créées quand il était gratuit. Un gratuit à 15/15 qui paye le 20
+   * n'aurait que 285 commandes ce mois-là.
+   */
+  "pro-compte-le-gratuit": {
+    casserDepuisMigration: {
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+      remplacer: "  select coalesce(sum(q.commandes_pro), 0) into v_compte",
+      par: "  select coalesce(sum(q.commandes), 0) into v_compte",
+    },
+    reparerDepuisMigration: {
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      depuis: "create or replace function public.verifier_plafond_commandes()",
+      jusqua: "comment on function public.verifier_plafond_commandes",
+    },
+  },
+
+  /*
+   * LA FICHE D'ADMINISTRATION RECOMPTE LE GRATUIT AU MOIS (200) : un compte
+   * bloqué à vie par ses 15 commandes du mois dernier y lit « 0 sur 15 ».
+   */
+  "fiche-gratuit-au-mois": {
+    casserDepuisMigration: {
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      depuis: "create function public.lire_compte_admin",
+      jusqua: "revoke all on function public.lire_compte_admin",
+      remplacer: "(select coalesce(sum(q.commandes), 0) from public.quotas_consommes q where q.shop_id = s.id)",
+      par: "(select coalesce(sum(q.commandes), 0) from public.quotas_consommes q where q.shop_id = s.id and q.mois = date_trunc('month', now())::date)",
+    },
+    reparerDepuisMigration: {
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      depuis: "create function public.lire_compte_admin",
+      jusqua: "comment on function public.lire_compte_admin",
     },
   },
 
@@ -2963,29 +2927,29 @@ $$;
    */
   "suivi-bloque-muet": {
     casserDepuisMigration: {
-      fichier: "199_le_vendeur_sait_que_son_suivi_est_bloque.sql",
-      depuis: "create function public.mon_quota_colis_atteint()",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      depuis: "create or replace function public.mon_quota_colis_atteint()",
       jusqua: "comment on function public.mon_quota_colis_atteint",
       remplacer: "then 'gratuit' end;",
       par: "then null end;",
     },
     reparerDepuisMigration: {
-      fichier: "199_le_vendeur_sait_que_son_suivi_est_bloque.sql",
-      depuis: "create function public.mon_quota_colis_atteint()",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
+      depuis: "create or replace function public.mon_quota_colis_atteint()",
       jusqua: "comment on function public.mon_quota_colis_atteint",
     },
   },
 
   "plafond-commandes-en-dur": {
     casserDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
       remplacer: "  v_plafond := public.lire_plafond_commandes();",
       par: "  v_plafond := 3000;",
     },
     reparerDepuisMigration: {
-      fichier: "198_le_quota_consomme_ne_se_rend_pas.sql",
+      fichier: "200_le_pro_repart_de_zero_le_gratuit_compte_tout.sql",
       depuis: "create or replace function public.verifier_plafond_commandes()",
       jusqua: "comment on function public.verifier_plafond_commandes",
     },
