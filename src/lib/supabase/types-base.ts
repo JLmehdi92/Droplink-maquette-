@@ -1,5 +1,6 @@
 // GÉNÉRÉ PAR `pnpm db:types` — NE PAS MODIFIER À LA MAIN.
-// Source de vérité : le schéma réellement appliqué en base.
+// Source de vérité : le schéma réellement appliqué en base. Les arguments
+// qui acceptent null sont DÉCLARÉS dans scripts/db-types.mjs.
 
 export type Json =
   | string
@@ -17,62 +18,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      appareils_fiables: {
-        Row: {
-          id: string
-          user_id: string
-          agent: string
-          cree_le: string
-          expire_le: string
-          revoque_le: string | null
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          agent?: string
-          cree_le?: string
-          expire_le: string
-          revoque_le?: string | null
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          agent?: string
-          cree_le?: string
-          expire_le?: string
-          revoque_le?: string | null
-        }
-        Relationships: []
-      }
-      sessions_fiables: {
-        Row: {
-          session_id: string
-          appareil_id: string
-          user_id: string
-          expire_le: string
-        }
-        Insert: {
-          session_id: string
-          appareil_id: string
-          user_id: string
-          expire_le: string
-        }
-        Update: {
-          session_id?: string
-          appareil_id?: string
-          user_id?: string
-          expire_le?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sessions_fiables_appareil_id_fkey"
-            columns: ["appareil_id"]
-            isOneToOne: false
-            referencedRelation: "appareils_fiables"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       admin_audit_log: {
         Row: {
           action: string
@@ -145,93 +90,30 @@ export type Database = {
         }
         Relationships: []
       }
-      shop_slugs: {
+      appareils_fiables: {
         Row: {
-          created_at: string
+          agent: string
+          cree_le: string
+          expire_le: string
           id: string
-          shop_id: string
-          slug: string
+          revoque_le: string | null
+          user_id: string
         }
         Insert: {
-          created_at?: string
+          agent?: string
+          cree_le?: string
+          expire_le: string
           id?: string
-          shop_id: string
-          slug: string
+          revoque_le?: string | null
+          user_id: string
         }
         Update: {
-          created_at?: string
+          agent?: string
+          cree_le?: string
+          expire_le?: string
           id?: string
-          shop_id?: string
-          slug?: string
-        }
-        Relationships: []
-      }
-      payment_events: {
-        Row: {
-          event_name: string
-          id: string
-          issue: string
-          payload: Json
-          profile_id: string | null
-          provider: string
-          received_at: string
-          signature: string
-        }
-        Insert: {
-          event_name: string
-          id?: string
-          issue: string
-          payload: Json
-          profile_id?: string | null
-          provider: string
-          received_at?: string
-          signature: string
-        }
-        Update: {
-          event_name?: string
-          id?: string
-          issue?: string
-          payload?: Json
-          profile_id?: string | null
-          provider?: string
-          received_at?: string
-          signature?: string
-        }
-        Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          created_at: string
-          ends_at: string | null
-          id: string
-          profile_id: string
-          provider: string
-          provider_subscription_id: string
-          renews_at: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          ends_at?: string | null
-          id?: string
-          profile_id: string
-          provider: string
-          provider_subscription_id: string
-          renews_at?: string | null
-          status: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          ends_at?: string | null
-          id?: string
-          profile_id?: string
-          provider?: string
-          provider_subscription_id?: string
-          renews_at?: string | null
-          status?: string
-          updated_at?: string
+          revoque_le?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -259,6 +141,36 @@ export type Database = {
           inscrit_le?: string
           supprime_le?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      config_appareils_fiables: {
+        Row: {
+          secret: string
+          unique_row: boolean
+        }
+        Insert: {
+          secret: string
+          unique_row?: boolean
+        }
+        Update: {
+          secret?: string
+          unique_row?: boolean
+        }
+        Relationships: []
+      }
+      config_lien_paiement: {
+        Row: {
+          secret: string
+          unique_row: boolean
+        }
+        Insert: {
+          secret: string
+          unique_row?: boolean
+        }
+        Update: {
+          secret?: string
+          unique_row?: boolean
         }
         Relationships: []
       }
@@ -357,6 +269,67 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "link_views_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_requests: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          order_id: string
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          order_id: string
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          order_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications_sent: {
+        Row: {
+          etape: Database["public"]["Enums"]["order_status"]
+          order_id: string
+          sent_at: string
+        }
+        Insert: {
+          etape: Database["public"]["Enums"]["order_status"]
+          order_id: string
+          sent_at?: string
+        }
+        Update: {
+          etape?: Database["public"]["Enums"]["order_status"]
+          order_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_sent_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -646,6 +619,47 @@ export type Database = {
           },
         ]
       }
+      payment_events: {
+        Row: {
+          event_name: string
+          id: string
+          issue: string
+          payload: Json
+          profile_id: string | null
+          provider: string
+          received_at: string
+          signature: string
+        }
+        Insert: {
+          event_name: string
+          id?: string
+          issue: string
+          payload: Json
+          profile_id?: string | null
+          provider: string
+          received_at?: string
+          signature: string
+        }
+        Update: {
+          event_name?: string
+          id?: string
+          issue?: string
+          payload?: Json
+          profile_id?: string | null
+          provider?: string
+          received_at?: string
+          signature?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
@@ -780,6 +794,64 @@ export type Database = {
         }
         Relationships: []
       }
+      sessions_fiables: {
+        Row: {
+          appareil_id: string
+          expire_le: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          appareil_id: string
+          expire_le: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          appareil_id?: string
+          expire_le?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_fiables_appareil_id_fkey"
+            columns: ["appareil_id"]
+            isOneToOne: false
+            referencedRelation: "appareils_fiables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_slugs: {
+        Row: {
+          created_at: string
+          id: string
+          shop_id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          shop_id: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          shop_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_slugs_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           accent_color: string
@@ -849,6 +921,50 @@ export type Database = {
             foreignKeyName: "shops_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          profile_id: string
+          provider: string
+          provider_subscription_id: string
+          renews_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          profile_id: string
+          provider: string
+          provider_subscription_id: string
+          renews_at?: string | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          profile_id?: string
+          provider?: string
+          provider_subscription_id?: string
+          renews_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1093,6 +1209,17 @@ export type Database = {
           vues_totales: number
         }[]
       }
+      appliquer_abonnement: {
+        Args: {
+          p_ends_at: string | null
+          p_profil: string
+          p_provider: string
+          p_renews_at: string | null
+          p_statut: string
+          p_subscription_id: string
+        }
+        Returns: Database["public"]["Enums"]["account_plan"]
+      }
       appliquer_etat_colis: {
         Args: {
           p_brut: Json
@@ -1239,6 +1366,10 @@ export type Database = {
           comptes_suspendus: number
         }[]
       }
+      confirmer_appareil_fiable: {
+        Args: { p_charge: string; p_signature: string }
+        Returns: boolean
+      }
       confirmer_notification: {
         Args: { p_token_hash: string }
         Returns: {
@@ -1280,6 +1411,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      definir_slug_boutique: { Args: { p_slug: string }; Returns: string }
       delai_moyen_livraison: {
         Args: { p_depuis: string }
         Returns: {
@@ -1304,6 +1436,7 @@ export type Database = {
         Args: { p_cle: string; p_valeur: Json }
         Returns: boolean
       }
+      emettre_preuve_appareil: { Args: { p_agent: string }; Returns: Json }
       enregistrer_vue: {
         Args: {
           p_ip_hash: string
@@ -1314,66 +1447,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      appliquer_abonnement: {
-        Args: {
-          p_ends_at: string | null
-          p_profil: string
-          p_provider: string
-          p_renews_at: string | null
-          p_statut: string
-          p_subscription_id: string
-        }
-        Returns: Database["public"]["Enums"]["account_plan"]
-      }
-      notifications_a_envoyer: {
-        Args: { p_limite: number }
-        Returns: {
-          email: string
-          etape: Database["public"]["Enums"]["order_status"]
-          jeton_desinscription: string
-          jeton_public: string
-          langue: string
-          nom_boutique: string
-          nom_de_lien: string | null
-          order_id: string
-        }[]
-      }
-      plan_pour_statut: {
-        Args: { p_ends_at: string | null; p_statut: string }
-        Returns: Database["public"]["Enums"]["account_plan"]
-      }
-      definir_slug_boutique: { Args: { p_slug: string }; Returns: string }
-      lire_plafond_gratuit_a_vie: { Args: never; Returns: number }
-      rendre_notification: {
-        Args: {
-          p_etape: Database["public"]["Enums"]["order_status"]
-          p_order: string
-        }
-        Returns: undefined
-      }
-      reserver_notification: {
-        Args: {
-          p_etape: Database["public"]["Enums"]["order_status"]
-          p_order: string
-        }
-        Returns: boolean
-      }
-      slug_est_reserve: { Args: { p_slug: string }; Returns: boolean }
-      slug_valide: { Args: { p_slug: string }; Returns: boolean }
-      verifier_lien_paiement: { Args: { p_profil: string; p_signature: string }; Returns: boolean }
-      verifier_slug_commande: {
-        Args: { p_jeton: string; p_slug: string }
-        Returns: boolean
-      }
       est_admin: { Args: never; Returns: boolean }
-      emettre_preuve_appareil: { Args: { p_agent: string }; Returns: Json }
-      confirmer_appareil_fiable: {
-        Args: { p_charge: string; p_signature: string }
-        Returns: boolean
-      }
-      revoquer_appareil_fiable: { Args: { p_id: string }; Returns: undefined }
-      revoquer_tous_les_appareils_fiables: { Args: never; Returns: undefined }
-      signer_lien_paiement: { Args: never; Returns: string }
       etat_budget_suivi: {
         Args: never
         Returns: {
@@ -1563,6 +1637,7 @@ export type Database = {
         }[]
       }
       lire_plafond_commandes: { Args: never; Returns: number }
+      lire_plafond_gratuit_a_vie: { Args: never; Returns: number }
       lire_plan_compte: { Args: { p_profil: string }; Returns: string }
       lire_retard_veilleur_minutes: { Args: never; Returns: number }
       lire_suivi_actif: { Args: never; Returns: boolean }
@@ -1697,6 +1772,23 @@ export type Database = {
       mon_quota_colis_atteint: { Args: never; Returns: string }
       mon_shop_id: { Args: never; Returns: string }
       notification_deja_vue: { Args: { p_cle: string }; Returns: boolean }
+      notifications_a_envoyer: {
+        Args: { p_limite: number }
+        Returns: {
+          email: string
+          etape: Database["public"]["Enums"]["order_status"]
+          jeton_desinscription: string
+          jeton_public: string
+          langue: string
+          nom_boutique: string
+          nom_de_lien: string
+          order_id: string
+        }[]
+      }
+      plan_pour_statut: {
+        Args: { p_ends_at: string; p_statut: string }
+        Returns: Database["public"]["Enums"]["account_plan"]
+      }
       prefixe_media_attendu: { Args: { p_order_id: string }; Returns: string }
       purger_comptes_supprimes: { Args: never; Returns: number }
       purger_donnees_de_suivi: {
@@ -1729,6 +1821,13 @@ export type Database = {
         Returns: boolean
       }
       regenerer_jeton_public: { Args: { p_order_id: string }; Returns: string }
+      rendre_notification: {
+        Args: {
+          p_etape: Database["public"]["Enums"]["order_status"]
+          p_order: string
+        }
+        Returns: undefined
+      }
       reordonner_medias: {
         Args: { p_ids: string[]; p_order_id: string }
         Returns: number
@@ -1763,6 +1862,15 @@ export type Database = {
         Args: { p_cle: string; p_repos_minutes: number }
         Returns: boolean
       }
+      reserver_notification: {
+        Args: {
+          p_etape: Database["public"]["Enums"]["order_status"]
+          p_order: string
+        }
+        Returns: boolean
+      }
+      revoquer_appareil_fiable: { Args: { p_id: string }; Returns: undefined }
+      revoquer_tous_les_appareils_fiables: { Args: never; Returns: undefined }
       sans_accents: { Args: { p_texte: string }; Returns: string }
       sante_infrastructure: {
         Args: never
@@ -1773,6 +1881,9 @@ export type Database = {
         }[]
       }
       session_double_facteur: { Args: never; Returns: boolean }
+      signer_lien_paiement: { Args: never; Returns: string }
+      slug_est_reserve: { Args: { p_slug: string }; Returns: boolean }
+      slug_valide: { Args: { p_slug: string }; Returns: boolean }
       statistiques_admin: {
         Args: { p_jours: number }
         Returns: {
@@ -1827,6 +1938,14 @@ export type Database = {
           carrier_code: number
           nombre: number
         }[]
+      }
+      verifier_lien_paiement: {
+        Args: { p_profil: string; p_signature: string }
+        Returns: boolean
+      }
+      verifier_slug_commande: {
+        Args: { p_jeton: string; p_slug: string }
+        Returns: boolean
       }
     }
     Enums: {
