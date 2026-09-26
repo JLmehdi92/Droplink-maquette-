@@ -52,6 +52,22 @@ describe("Sonde A — RLS sur toutes les tables de public", () => {
    */
   const TABLES_SANS_POLICY_ADMISES = new Map<string, string>([
     [
+      "config_appareils_fiables",
+      "Le secret HMAC des preuves d'appareil fiable (migration 203), aléatoire par " +
+        "environnement, jamais dans le dépôt. AUCUNE POLICY et aucun droit : lu par " +
+        "les seules fonctions `security definer` qui signent et vérifient les preuves. " +
+        "Un vendeur qui pourrait le lire forgerait des appareils fiables à volonté.",
+    ],
+    [
+      "sessions_fiables",
+      "Les sessions rattachées à un appareil fiable (migration 203), interrogées par " +
+        "la garde `exiger_aal_du_compte` pour laisser passer une session `aal1` fiable. " +
+        "AUCUNE POLICY : écrite par `confirmer_appareil_fiable`/`revoquer_appareil_fiable` " +
+        "en `security definer`, lue par la garde definer. Un vendeur qui pourrait y " +
+        "écrire déclarerait sa propre session fiable sans preuve, c'est-à-dire sauterait " +
+        "la 2FA.",
+    ],
+    [
       "quotas_consommes",
       "La consommation des quotas de commandes et de colis, par boutique et par " +
         "mois (migration 198). AUCUNE POLICY, et c'est le cœur du remède : les " +
@@ -308,6 +324,32 @@ describe("Sonde B — droits d'exécution dans public", () => {
    * passer finit désactivé.
    */
   const FONCTIONS_OUVERTES_ADMISES = new Map<string, string>([
+    [
+      "emettre_preuve_appareil",
+      "Crée un appareil fiable et rend une preuve signée (migration 203). Ouverte à " +
+        "`authenticated` mais refuse à `aal1` : un appareil ne devient fiable qu'après " +
+        "un vrai second facteur. Le secret de signature reste en base. `anon` n'y a " +
+        "pas droit : il n'a pas de session à rendre fiable.",
+    ],
+    [
+      "confirmer_appareil_fiable",
+      "Vérifie une preuve d'appareil fiable et inscrit la session courante (migration " +
+        "203). Ouverte à `authenticated` ET exemptée de la garde `aal` par son chemin, " +
+        "parce qu'elle doit s'exécuter à `aal1` — mais sûre : elle vérifie le HMAC en " +
+        "base et lie la preuve à l'appelant. Un appel sans cookie valide échoue.",
+    ],
+    [
+      "revoquer_appareil_fiable",
+      "Révoque un appareil fiable de l'appelant et coupe ses sessions (migration 203). " +
+        "Ouverte à `authenticated` : elle n'agit que sur les appareils de l'appelant, et " +
+        "révoquer ne fait que RETIRER de la confiance — jamais en accorder.",
+    ],
+    [
+      "revoquer_tous_les_appareils_fiables",
+      "Révoque TOUS les appareils fiables de l'appelant (migration 203), appelée à la " +
+        "rotation du second facteur et au changement de mot de passe. Ouverte à " +
+        "`authenticated` : elle n'agit que sur l'appelant, et ne RETIRE que de la confiance.",
+    ],
     [
       "cle_media_canonique",
       "La forme canonique d'une clé d'objet, appelée depuis DEUX CONTRAINTES " +
@@ -1201,6 +1243,11 @@ describe("Sonde D — anon n'a aucun droit de table", () => {
     // qui apparaît ici doit obliger quelqu'un à confirmer qu'elle est bien
     // censée être lisible par un vendeur authentifié.
     expect(droitsAuth.map((d) => d.table_name)).toEqual([
+      // Les appareils fiables du vendeur (migration 203), lisibles par lui seul pour
+      // les afficher et les révoquer dans « Paramètres ». AUCUN droit d'écriture : la
+      // création et la révocation passent par des fonctions `security definer`. Il
+      // trie en tête, la base ordonnant le souligné et « a » avant « l ».
+      "appareils_fiables",
       // Lisible par le vendeur, et par lui seul : c'est son compteur de vues et
       // son indicateur « jamais ouvert ». AUCUN droit d'écriture ne
       // l'accompagne — un vendeur qui pourrait s'ajouter des vues se

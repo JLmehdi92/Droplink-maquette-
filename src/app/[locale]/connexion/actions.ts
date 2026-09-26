@@ -8,6 +8,7 @@ import { fournisseurActif } from "@/lib/auth/fournisseurs";
 import { MotDePasse, refusDuMotDePasse } from "@/lib/auth/mot-de-passe";
 import { verifierFuite } from "@/lib/auth/fuites";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
+import { confirmerAppareilSiPresent } from "@/lib/auth/appareil-fiable";
 import {
   verifierQuotaAuth,
   verifierQuotaAuthAdresse,
@@ -184,6 +185,12 @@ export async function seConnecter(
       motif: error.status === 429 ? "trop_de_tentatives" : "identifiants",
     };
   }
+
+  // ⚠️ APPAREIL FIABLE (203) : si un cookie de preuve valide est présent, la
+  // session est marquée fiable AVANT de décider de la suite — `suivreApresSession`
+  // verra alors la lecture du profil aboutir et évitera l'écran du code, pour
+  // l'espace vendeur. Best-effort : sans cookie valide, on va au code comme avant.
+  await confirmerAppareilSiPresent(supabase);
 
   const suite = await suivreApresSession(locale, supabase);
 

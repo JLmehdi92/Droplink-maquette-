@@ -2072,6 +2072,16 @@
       "appareilInconnu": "未识别的设备",
       "lectureImpossible": "暂时无法读取您的会话，请重试。",
       "fermerAide": "退出您的其他所有设备，本设备保持登录。",
+      "appareilsFiables": {
+        "titre": "受信任的设备",
+        "aide": "无需再次输入验证码的设备。",
+        "voir": "查看设备",
+        "masquer": "隐藏设备",
+        "actifJusqu": "信任至 {date}",
+        "aucun": "暂无受信任的设备。",
+        "revoquer": "移除",
+        "revocation": "移除中…"
+      },
       "deuxEtapes": {
         "titre": "双重验证（2FA）",
         "aide": "使用验证码保护账号。",
@@ -2172,6 +2182,7 @@
   },
   "verification": {
     "titre": "两步验证",
+    "souvenirAppareil": "在此设备上记住 30 天",
     "sousTitre": "请输入身份验证应用中的 6 位数验证码。",
     "libelle": "验证码",
     "bouton": "验证",

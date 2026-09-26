@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { KeyRound } from "lucide-react";
+import { Check, KeyRound } from "lucide-react";
 import { verifierCode, type ResultatVerification } from "@/app/[locale]/verification/actions";
 import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
 
@@ -52,6 +52,20 @@ export function FormulaireVerification({
         {...(message !== null ? { decritPar: "erreur-verification" } : {})}
       />
       {message !== null ? <MessageErreurDs id="erreur-verification" texte={message} /> : null}
+      {/* « Se souvenir de cet appareil » (203) : jamais dans le flux de
+          réinitialisation (`suite`), où la session ne devient pas durable. */}
+      {suite === null ? (
+        <label className="flex min-h-[44px] cursor-pointer items-center gap-[9px] lg:min-h-0">
+          <input type="checkbox" name="souvenir" value="on" defaultChecked className="peer sr-only" />
+          <span
+            aria-hidden="true"
+            className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-ds-xs border border-ds-filet-appuye bg-ds-surface-carte transition-colors peer-checked:border-ds-accent peer-checked:bg-ds-accent peer-checked:text-ds-texte-sur-marque peer-focus-visible:border-ds-accent"
+          >
+            <Check className="opacity-0 peer-checked:opacity-100" size={12} strokeWidth={3} aria-hidden="true" />
+          </span>
+          <span className="text-[14px] leading-[1.5] text-ds-texte-corps">{t("souvenirAppareil")}</span>
+        </label>
+      ) : null}
       <BoutonPrincipalDs libelle={t("bouton")} libelleEnCours={t("enCours")} />
     </form>
   );

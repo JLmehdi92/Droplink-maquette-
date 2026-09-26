@@ -30,12 +30,13 @@ import {
   CarteCompte,
   CarteSecurite,
   LigneSuppression,
+  type AppareilFiableAffiche,
   type SessionAffichee,
 } from "@/components/parametres/formulaires-parametres";
 import { changerLangueInterface } from "./actions";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
-import { lireMesSessions, type AppareilDecrit } from "@/lib/comptes/sessions";
+import { decrireAppareil, lireMesSessions, type AppareilDecrit } from "@/lib/comptes/sessions";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { LANGUES, estLangueSupportee } from "@/i18n/config";
 
@@ -114,10 +115,18 @@ export default async function Parametres({
     creerClientServeur(),
   ]);
   const adresseSuivie = (await searchParams)["adresse"] === "suivie";
-  const [lues, facteurs, quota] = await Promise.all([
+  const [lues, facteurs, quota, appareils] = await Promise.all([
     lireMesSessions(supabase),
     supabase.rpc("lister_mes_facteurs"),
     supabase.rpc("lire_plafond_gratuit_a_vie"),
+    // Les appareils fiables ENCORE actifs (203), sous RLS : le vendeur ne lit que
+    // les siens. Révoqués ou expirés, ils ne s'affichent pas.
+    supabase
+      .from("appareils_fiables")
+      .select("id, agent, expire_le")
+      .is("revoque_le", null)
+      .gt("expire_le", new Date().toISOString())
+      .order("cree_le", { ascending: false }),
   ]);
   // Le quota à vie d'un compte gratuit (175-176), lu en base : il se règle dans
   // l'administration. Illisible, la ligne disparaît plutôt que d'afficher un
@@ -141,6 +150,23 @@ export default async function Parametres({
           activeLe: format.dateTime(new Date(s.activeLe), { dateStyle: "medium", timeStyle: "short" }),
           cetAppareil: s.cetAppareil,
         }));
+
+  if (appareils.error !== null)
+    console.error("[parametres] appareils fiables illisibles — " + appareils.error.message);
+  // Illisibles → `null`, la liste dit « lecture impossible » plutôt que « aucun » :
+  // un appareil fiable caché par une panne est un mensonge de sécurité.
+  const appareilsFiables: readonly AppareilFiableAffiche[] | null =
+    appareils.error !== null
+      ? null
+      : (appareils.data ?? []).map((a) => {
+          const decrit = decrireAppareil(a.agent);
+          return {
+            id: a.id,
+            libelle: libelleAppareil(decrit),
+            mobile: decrit.systeme === "ios" || decrit.systeme === "android",
+            actifJusqu: format.dateTime(new Date(a.expire_le), { dateStyle: "medium" }),
+          };
+        });
 
   const initiales = (profil.nomAffiche ?? profil.nomBoutique ?? profil.email)
     .split(/\s+/)
@@ -218,6 +244,7 @@ export default async function Parametres({
 
             <CarteSecurite
               sessions={sessions}
+              appareilsFiables={appareilsFiables}
               deuxEtapesActive={deuxEtapesActive}
               adresse={profil.email}
               locale={langue}

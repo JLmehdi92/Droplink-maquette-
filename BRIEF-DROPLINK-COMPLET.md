@@ -698,6 +698,19 @@ alertes_envoyees    cle, envoye_at — (aucune policy) repos entre deux alertes 
 
 rate_limit          (aucune policy — atteignable uniquement par consommer_quota)
 
+appareils_fiables   id, user_id, agent, cree_le, expire_le, revoque_le — les
+                    appareils qu'un vendeur a marqués « fiables » 30 jours (203) :
+                    la 2FA y est sautée pour l'ESPACE VENDEUR, jamais pour
+                    l'administration. Le vendeur les lit (Paramètres) et les
+                    révoque
+sessions_fiables    session_id, appareil_id, user_id, expire_le — (aucune policy)
+                    les sessions rattachées à un appareil fiable, interrogées par
+                    la garde `exiger_aal_du_compte` pour laisser passer une session
+                    aal1 fiable. Écrite/lue par les seules fonctions definer
+config_appareils_fiables
+                    secret — (aucune policy) le secret HMAC des preuves d'appareil
+                    fiable (203), aléatoire par environnement, jamais dans le dépôt
+
 quotas_consommes    shop_id, mois, commandes, colis, commandes_pro, colis_pro —
                     (aucune policy) ce que chaque boutique a CONSOMMÉ de ses
                     quotas, par mois, écrit par les seuls déclencheurs de quota.

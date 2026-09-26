@@ -2072,6 +2072,16 @@
       "appareilInconnu": "Unrecognised device",
       "lectureImpossible": "Your sessions can't be read right now. Please try again.",
       "fermerAide": "Sign out all your other devices. This one stays signed in.",
+      "appareilsFiables": {
+        "titre": "Trusted devices",
+        "aide": "Devices that skip your code.",
+        "voir": "View devices",
+        "masquer": "Hide devices",
+        "actifJusqu": "Trusted until {date}",
+        "aucun": "No trusted devices yet.",
+        "revoquer": "Revoke",
+        "revocation": "Revoking…"
+      },
       "deuxEtapes": {
         "titre": "Two-factor authentication (2FA)",
         "aide": "Secure your account with a verification code.",
@@ -2172,6 +2182,7 @@
   },
   "verification": {
     "titre": "Two-step verification",
+    "souvenirAppareil": "Remember this device for 30 days",
     "sousTitre": "Enter the 6-digit code from your authenticator app.",
     "libelle": "Verification code",
     "bouton": "Verify",

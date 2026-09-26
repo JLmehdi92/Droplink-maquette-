@@ -6,6 +6,7 @@ import { SchemaLangue } from "@/i18n/schema";
 import { attendrePlancher } from "@/lib/auth/plancher";
 import { cheminDeRefus, suivreApresSession } from "@/lib/comptes/apres-session";
 import { verifierQuotaMotDePasse } from "@/lib/limitation/quota";
+import { poserPreuveAppareil } from "@/lib/auth/appareil-fiable";
 import { creerClientServeur } from "@/lib/supabase/server";
 
 /**
@@ -38,6 +39,9 @@ const Saisie = z.object({
     .pipe(z.string().regex(/^\d{6}$/)),
   locale: SchemaLangue,
   suite: z.enum(["mot-de-passe"]).optional(),
+  // La case « se souvenir de cet appareil » (203) : présente seulement à la
+  // connexion ordinaire, absente du flux de réinitialisation.
+  souvenir: z.enum(["on"]).optional(),
 });
 
 export async function verifierCode(
@@ -48,16 +52,18 @@ export async function verifierCode(
   if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "invalide" };
 
   const suiteBrute = donnees.get("suite");
+  const souvenirBrut = donnees.get("souvenir");
   const analyse = Saisie.safeParse({
     code: donnees.get("code"),
     locale: donnees.get("locale"),
     suite: typeof suiteBrute === "string" && suiteBrute !== "" ? suiteBrute : undefined,
+    souvenir: typeof souvenirBrut === "string" && souvenirBrut !== "" ? souvenirBrut : undefined,
   });
   if (!analyse.success) {
     await attendrePlancher(debut);
     return { statut: "erreur", motif: "invalide" };
   }
-  const { code, locale, suite } = analyse.data;
+  const { code, locale, suite, souvenir } = analyse.data;
 
   const supabase = await creerClientServeur();
   const { data, error } = await supabase.auth.getUser();
@@ -92,6 +98,16 @@ export async function verifierCode(
     // La limite du serveur d'authentification ne dépend pas du code essayé : la
     // nommer ne renseigne personne. Tout le reste est « code incorrect ».
     return { statut: "erreur", motif: erreurCode.status === 429 ? "trop" : "code" };
+  }
+
+  // ⚠️ « SE SOUVENIR DE CET APPAREIL » (203) : la session est maintenant aal2,
+  // seul moment où la base accepte d'émettre une preuve. Best-effort : si elle
+  // échoue, la connexion réussit quand même, l'appareil n'est simplement pas
+  // retenu. JAMAIS dans le flux de réinitialisation : l'UI n'y montre pas la
+  // case, mais l'action l'exclut aussi — un document qui affirme un état doit
+  // l'exécuter, pas s'en remettre à l'UI (L-014).
+  if (souvenir === "on" && suite !== "mot-de-passe") {
+    await poserPreuveAppareil(supabase);
   }
 
   if (suite === "mot-de-passe") {

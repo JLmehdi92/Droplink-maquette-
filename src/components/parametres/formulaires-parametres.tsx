@@ -2,7 +2,7 @@
 
 import { useActionState, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Lock, Monitor, MonitorSmartphone, Shield, Smartphone, Trash2, UserRound } from "lucide-react";
+import { Laptop, Lock, Monitor, MonitorSmartphone, Shield, Smartphone, Trash2, UserRound } from "lucide-react";
 import {
   changerAdresseCompte,
   changerMotDePasseCompte,
@@ -11,6 +11,7 @@ import {
   desactiverDeuxEtapes,
   enregistrerNom,
   fermerAutresSessions,
+  revoquerAppareilFiable,
   supprimerMesDonnees,
   supprimerMonCompte,
   type EtatParametres,
@@ -358,6 +359,36 @@ export type SessionAffichee = {
   readonly cetAppareil: boolean;
 };
 
+export type AppareilFiableAffiche = {
+  readonly id: string;
+  readonly libelle: string | null;
+  readonly mobile: boolean;
+  readonly actifJusqu: string;
+};
+
+/**
+ * RÉVOQUER UN APPAREIL FIABLE (203) — un bouton, pas de mot de passe : révoquer
+ * ne fait que retirer une confiance (voir l'action). La liste est relue par le
+ * serveur, donc l'appareil disparaît de lui-même au succès.
+ */
+function BoutonRevocationAppareil({ id, libelle }: { readonly id: string; readonly libelle: string | null }) {
+  const t = useTranslations("parametres.securite");
+  const [etat, action, pendant] = useActionState(revoquerAppareilFiable, INITIAL);
+  // Un échec de révocation DOIT se voir : sans message, le bouton redevient
+  // cliquable et l'appareil reste, sans que rien ne le dise (contrainte n° 8).
+  const message = useMessage(etat, "");
+  const nom = libelle ?? t("appareilInconnu");
+  return (
+    <form action={action} className="flex flex-col items-end gap-1.5">
+      <input type="hidden" name="id" value={id} />
+      <button type="submit" disabled={pendant} aria-label={`${t("appareilsFiables.revoquer")} — ${nom}`} className={CLASSE_BOUTON_DANGER}>
+        {pendant ? t("appareilsFiables.revocation") : t("appareilsFiables.revoquer")}
+      </button>
+      <Annonce message={message} />
+    </form>
+  );
+}
+
 function FormulaireSessions() {
   const t = useTranslations("parametres");
   const [etat, action, pendant] = useActionState(fermerAutresSessions, INITIAL);
@@ -607,17 +638,21 @@ export function LigneSuppression({
 
 export function CarteSecurite({
   sessions,
+  appareilsFiables,
   deuxEtapesActive,
   adresse,
   locale,
 }: {
   readonly sessions: readonly SessionAffichee[] | null;
+  readonly appareilsFiables: readonly AppareilFiableAffiche[] | null;
   readonly deuxEtapesActive: boolean;
   readonly adresse: string;
   readonly locale: string;
 }) {
   const t = useTranslations("parametres.securite");
   const [ouvert, setOuvert] = useState(false);
+  const [fiablesOuvert, setFiablesOuvert] = useState(false);
+  const idFiables = useId();
   /*
    * LE PANNEAU GARDE LE MODE DANS LEQUEL IL A ÉTÉ OUVERT. Après un code juste,
    * l'action relit la page : `deuxEtapesActive` passe à vrai, et un panneau
@@ -718,6 +753,69 @@ export function CarteSecurite({
           </div>
         ) : null}
       </div>
+
+      {/* LES APPAREILS FIABLES (203) N'EXISTENT QU'AVEC LA 2FA : un appareil ne
+          devient fiable qu'après un vrai second facteur. Sans 2FA, la ligne
+          n'aurait rien à montrer et laisserait croire à une option absente. */}
+      {deuxEtapesActive ? (
+        <>
+          <LigneAction icone={Laptop} titre={t("appareilsFiables.titre")} sousTitre={t("appareilsFiables.aide")}>
+            <button
+              type="button"
+              onClick={() => setFiablesOuvert((v) => !v)}
+              aria-expanded={fiablesOuvert}
+              aria-controls={idFiables}
+              className={CLASSE_BOUTON}
+            >
+              {fiablesOuvert ? t("appareilsFiables.masquer") : t("appareilsFiables.voir")}
+            </button>
+          </LigneAction>
+
+          <div id={idFiables} hidden={!fiablesOuvert}>
+            {fiablesOuvert ? (
+              <div className="mt-1 flex flex-col gap-1 rounded-ds-card border border-ds-filet bg-ds-surface-creux p-4">
+                {appareilsFiables === null ? (
+                  <p role="alert" className="text-[13px] leading-[1.5] text-ds-erreur-encre">
+                    {t("lectureImpossible")}
+                  </p>
+                ) : appareilsFiables.length === 0 ? (
+                  <p className="text-[13px] leading-[1.5] text-ds-texte-sourdine">{t("appareilsFiables.aucun")}</p>
+                ) : (
+                  <ul className="flex flex-col">
+                    {appareilsFiables.map((a, i) => {
+                      const Icone = a.mobile ? Smartphone : Monitor;
+                      return (
+                        <li
+                          key={a.id}
+                          className={
+                            "flex flex-wrap items-center gap-3 py-3" + (i === 0 ? "" : " border-t border-ds-filet")
+                          }
+                        >
+                          <Icone
+                            aria-hidden="true"
+                            size={17}
+                            strokeWidth={1.9}
+                            className="shrink-0 text-ds-texte-sourdine"
+                          />
+                          <span className="flex min-w-0 flex-[1_1_180px] flex-col gap-0.5">
+                            <span className="text-[14px] leading-[normal] font-semibold text-ds-texte-fort">
+                              {a.libelle ?? t("appareilInconnu")}
+                            </span>
+                            <span className="text-[12.5px] leading-[normal] text-ds-texte-sourdine">
+                              {t("appareilsFiables.actifJusqu", { date: a.actifJusqu })}
+                            </span>
+                          </span>
+                          <BoutonRevocationAppareil id={a.id} libelle={a.libelle} />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </>
+      ) : null}
 
       <LigneSuppression variante="compte" adresse={adresse} locale={locale} />
     </CarteReglage>

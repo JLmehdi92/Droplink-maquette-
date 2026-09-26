@@ -2072,6 +2072,16 @@
       "appareilInconnu": "Appareil non reconnu",
       "lectureImpossible": "Impossible de lire vos sessions pour le moment. Réessayez.",
       "fermerAide": "Déconnectez tous vos autres appareils. Celui-ci reste connecté.",
+      "appareilsFiables": {
+        "titre": "Appareils fiables",
+        "aide": "Les appareils qui ne redemandent pas votre code.",
+        "voir": "Voir les appareils",
+        "masquer": "Masquer les appareils",
+        "actifJusqu": "Fiable jusqu’au {date}",
+        "aucun": "Aucun appareil fiable pour le moment.",
+        "revoquer": "Révoquer",
+        "revocation": "Révocation…"
+      },
       "deuxEtapes": {
         "titre": "Authentification à deux facteurs (2FA)",
         "aide": "Sécurisez votre compte avec un code de vérification.",
@@ -2172,6 +2182,7 @@
   },
   "verification": {
     "titre": "Vérification en deux étapes",
+    "souvenirAppareil": "Se souvenir de cet appareil pendant 30 jours",
     "sousTitre": "Saisissez le code à 6 chiffres de votre application d'authentification.",
     "libelle": "Code de vérification",
     "bouton": "Vérifier",

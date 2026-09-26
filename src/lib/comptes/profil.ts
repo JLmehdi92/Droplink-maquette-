@@ -252,7 +252,20 @@ export async function lireEtatDuCompteAvec(
   const facteurVerifie = (session.data.user.factors ?? []).some((f) => f.status === "verified");
   if (facteurVerifie) {
     const { data: niveau, error: erreurNiveau } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (erreurNiveau !== null || niveau.currentLevel !== "aal2") return { etat: "verification" };
+    const estAal2 = erreurNiveau === null && niveau.currentLevel === "aal2";
+    /*
+     * ⚠️ UN APPAREIL FIABLE (203) DÉBLOQUE L'ESPACE VENDEUR SANS aal2. La session
+     * reste `aal1`, mais la garde 156 laisse alors la lecture du profil ABOUTIR
+     * plutôt que de la refuser. On ne réclame donc le code que lorsque la garde a
+     * REFUSÉ cette lecture (`42501`) ; une session fiable continue comme
+     * d'ordinaire, avec le profil déjà lu ci-dessus.
+     *
+     * L'ADMINISTRATION N'EST PAS CONCERNÉE : `est_admin()` exige `aal2` (186),
+     * qu'un appareil fiable ne satisfait pas — la 186 reste entière.
+     */
+    if (!estAal2 && profil.error?.code === "42501") {
+      return { etat: "verification" };
+    }
   }
 
   const { data, error } = profil;

@@ -1462,6 +1462,90 @@ create trigger tracked_parcels_plafond
     },
   },
 
+  /*
+   * L APPAREIL FIABLE ACCEPTE N IMPORTE QUELLE SIGNATURE (203) : la verification
+   * HMAC retiree, un cookie forge suffit a rendre fiable une session, donc a
+   * sauter la 2FA. C est le coeur de la preuve.
+   */
+  "appareil-signature-non-verifiee": {
+    casserDepuisMigration: {
+      fichier: "203_l_appareil_fiable.sql",
+      depuis: "create function public.confirmer_appareil_fiable",
+      jusqua: "comment on function public.confirmer_appareil_fiable",
+      remplacer: "  if p_signature is null or length(p_signature) <> length(v_attendue) or p_signature <> v_attendue then\n    return false;\n  end if;",
+      par: "  if false then\n    return false;\n  end if;",
+    },
+    reparerDepuisMigration: {
+      fichier: "203_l_appareil_fiable.sql",
+      depuis: "create function public.confirmer_appareil_fiable",
+      jusqua: "comment on function public.confirmer_appareil_fiable",
+    },
+  },
+
+  /*
+   * LA PREUVE N EST PLUS LIEE A SON PORTEUR (203) : un cookie fiable vole pour le
+   * compte X rendrait fiable la session du compte Y. La liaison est double (le
+   * controle `v_user` ET la propriete de l appareil) : on casse les DEUX, sinon
+   * l un rattrape l autre et la falsification ne rougit pas.
+   */
+  "appareil-preuve-non-liee": {
+    casserDepuisMigration: {
+      fichier: "203_l_appareil_fiable.sql",
+      depuis: "create function public.confirmer_appareil_fiable",
+      jusqua: "comment on function public.confirmer_appareil_fiable",
+      remplacer:
+        "  if v_user <> (select auth.uid()) or v_exp <= now() then\n" +
+        "    return false;\n" +
+        "  end if;\n\n" +
+        "  -- L'appareil doit toujours exister, ne pas être révoqué ni expiré.\n" +
+        "  if not exists (\n" +
+        "    select 1 from public.appareils_fiables a\n" +
+        "     where a.id = v_appareil_id\n" +
+        "       and a.user_id = (select auth.uid())\n" +
+        "       and a.revoque_le is null\n" +
+        "       and a.expire_le > now()\n" +
+        "  ) then\n" +
+        "    return false;\n" +
+        "  end if;",
+      par:
+        "  if v_exp <= now() then\n" +
+        "    return false;\n" +
+        "  end if;\n\n" +
+        "  if not exists (\n" +
+        "    select 1 from public.appareils_fiables a\n" +
+        "     where a.id = v_appareil_id\n" +
+        "       and a.revoque_le is null\n" +
+        "       and a.expire_le > now()\n" +
+        "  ) then\n" +
+        "    return false;\n" +
+        "  end if;",
+    },
+    reparerDepuisMigration: {
+      fichier: "203_l_appareil_fiable.sql",
+      depuis: "create function public.confirmer_appareil_fiable",
+      jusqua: "comment on function public.confirmer_appareil_fiable",
+    },
+  },
+
+  /*
+   * UNE SESSION FIABLE EXPIREE PASSE ENCORE (203) : la garde ignore l expiration,
+   * et un appareil fiable le reste pour toujours.
+   */
+  "appareil-sans-expiration": {
+    casserDepuisMigration: {
+      fichier: "203_l_appareil_fiable.sql",
+      depuis: "create or replace function public.exiger_aal_du_compte",
+      jusqua: "revoke all on function public.exiger_aal_du_compte",
+      remplacer: "       where sf.session_id = (auth.jwt() ->> 'session_id')\n         and sf.expire_le > now()",
+      par: "       where sf.session_id = (auth.jwt() ->> 'session_id')",
+    },
+    reparerDepuisMigration: {
+      fichier: "203_l_appareil_fiable.sql",
+      depuis: "create or replace function public.exiger_aal_du_compte",
+      jusqua: "revoke all on function public.exiger_aal_du_compte",
+    },
+  },
+
   /**
    * LA LECTURE ADMIN NE LAISSE PLUS DE TRACE.
    *

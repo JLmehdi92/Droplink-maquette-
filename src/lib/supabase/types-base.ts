@@ -17,6 +17,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      appareils_fiables: {
+        Row: {
+          id: string
+          user_id: string
+          agent: string
+          cree_le: string
+          expire_le: string
+          revoque_le: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          agent?: string
+          cree_le?: string
+          expire_le: string
+          revoque_le?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          agent?: string
+          cree_le?: string
+          expire_le?: string
+          revoque_le?: string | null
+        }
+        Relationships: []
+      }
+      sessions_fiables: {
+        Row: {
+          session_id: string
+          appareil_id: string
+          user_id: string
+          expire_le: string
+        }
+        Insert: {
+          session_id: string
+          appareil_id: string
+          user_id: string
+          expire_le: string
+        }
+        Update: {
+          session_id?: string
+          appareil_id?: string
+          user_id?: string
+          expire_le?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_fiables_appareil_id_fkey"
+            columns: ["appareil_id"]
+            isOneToOne: false
+            referencedRelation: "appareils_fiables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -1309,6 +1365,13 @@ export type Database = {
         Returns: boolean
       }
       est_admin: { Args: never; Returns: boolean }
+      emettre_preuve_appareil: { Args: { p_agent: string }; Returns: Json }
+      confirmer_appareil_fiable: {
+        Args: { p_charge: string; p_signature: string }
+        Returns: boolean
+      }
+      revoquer_appareil_fiable: { Args: { p_id: string }; Returns: undefined }
+      revoquer_tous_les_appareils_fiables: { Args: Record<string, never>; Returns: undefined }
       etat_budget_suivi: {
         Args: never
         Returns: {

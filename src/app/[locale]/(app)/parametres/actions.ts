@@ -193,6 +193,13 @@ export async function changerMotDePasseCompte(
     console.error("[parametres] autres sessions non fermées — " + erreurAutres.message);
   }
 
+  // ⚠️ CHANGER LE MOT DE PASSE RÉVOQUE LES APPAREILS FIABLES (203). Fermer les
+  // autres SESSIONS ne suffit pas : un appareil fiable rouvre l'espace vendeur
+  // avec le seul mot de passe, et un cookie/preuve volé survivrait au changement.
+  const { error: erreurAppareils } = await supabase.rpc("revoquer_tous_les_appareils_fiables");
+  if (erreurAppareils !== null)
+    console.error("[parametres] appareils fiables non révoqués au changement de mot de passe — " + erreurAppareils.message);
+
   revalidatePath("/[locale]/parametres", "page");
   await attendrePlancher(debut);
   return { statut: "enregistre" };
@@ -334,6 +341,41 @@ export async function fermerAutresSessions(
   }
   // La liste « Voir les sessions » est rendue par le serveur : sans relecture,
   // elle montrerait encore les appareils qu'on vient de déconnecter.
+  revalidatePath("/[locale]/parametres", "page");
+  return { statut: "enregistre" };
+}
+
+/**
+ * RÉVOQUER UN APPAREIL FIABLE (203).
+ *
+ * ⚠️ SANS MOT DE PASSE, ET C'EST DÉLIBÉRÉ. Révoquer ne fait que RETIRER une
+ * confiance : l'accès de cet appareil retombe aussitôt sous la 2FA. La direction
+ * dangereuse — ACCORDER la confiance — exige déjà un vrai second facteur
+ * (`emettre_preuve_appareil` refuse à aal1). Exiger le mot de passe pour la
+ * direction sûre freinerait un geste de sécurité, à un clic chez les gros SaaS.
+ * La fonction en base ne révoque que les appareils de l'appelant.
+ */
+const IdAppareil = z.object({ id: z.string().uuid() });
+
+export async function revoquerAppareilFiable(
+  _precedent: EtatParametres,
+  donnees: unknown,
+): Promise<EtatParametres> {
+  const profil = await vendeurActif();
+  if (profil === null) return { statut: "erreur", motif: "session" };
+  if (!(donnees instanceof FormData)) return { statut: "erreur", motif: "invalide" };
+
+  const analyse = IdAppareil.safeParse({ id: donnees.get("id") });
+  if (!analyse.success) return { statut: "erreur", motif: "invalide" };
+
+  const supabase = await creerClientServeur();
+  const { error } = await supabase.rpc("revoquer_appareil_fiable", { p_id: analyse.data.id });
+  if (error !== null) {
+    console.error("[parametres] appareil fiable non révoqué — " + error.message);
+    return { statut: "erreur", motif: "indisponible" };
+  }
+  // La liste des appareils fiables est rendue par le serveur : sans relecture,
+  // elle montrerait encore celui qu'on vient de révoquer.
   revalidatePath("/[locale]/parametres", "page");
   return { statut: "enregistre" };
 }
@@ -551,6 +593,15 @@ export async function desactiverDeuxEtapes(
       return { statut: "erreur", motif: "indisponible" };
     }
   }
+
+  // ⚠️ ROTATION DU SECOND FACTEUR = RÉVOCATION DES APPAREILS FIABLES (203). Sans
+  // cela, un appareil marqué fiable sous l'ANCIEN facteur rouvrirait l'espace
+  // vendeur 30 jours malgré le nouveau — la remédiation d'un vol de facteur
+  // serait sans effet. On révoque tout ; une panne ici ne bloque pas la
+  // désactivation, mais on la journalise.
+  const { error: erreurAppareils } = await supabase.rpc("revoquer_tous_les_appareils_fiables");
+  if (erreurAppareils !== null)
+    console.error("[parametres] appareils fiables non révoqués à la désactivation 2FA — " + erreurAppareils.message);
 
   await attendrePlancher(debut);
   revalidatePath("/[locale]/parametres", "page");
