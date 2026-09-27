@@ -3,7 +3,9 @@
 DropLink — une page privée par commande, pour ceux qui vendent en direct sans boutique (DM Snap, Insta, WhatsApp).
 Le vendeur upload ses photos/vidéos QC, colle le tracking, envoie **un seul lien brandé à ses couleurs**. Son client consulte tout lui-même, sans compte.
 
-**Statut : phase de validation. Produit gratuit. Aucun code de paiement.**
+**Statut : phase de validation, en ligne sur droplink.fr. Plan gratuit (15 commandes et 15 colis
+suivis à vie) et plan Pro à 20 €/mois (300/300 par mois), encaissé par Lemon Squeezy — encore en
+mode test au 27/09/2026. Aucun paiement ne passe jamais SUR les commandes (contrainte n° 1).**
 
 📖 **Contexte produit complet : `BRIEF-DROPLINK-COMPLET.md`** — à consulter avant toute décision produit ou d'architecture. Il n'est PAS chargé d'office (83 Ko) : on l'interroge dans context-mode (`ctx_search`, source `brief`), et on le lit en entier quand la décision l'exige. Si la recherche ne rend rien, le réindexer d'abord (`ctx_index`). Il contient les 26 décisions verrouillées avec leurs raisons, le modèle de données, les budgets chiffrés et les 32 leçons.
 
@@ -643,14 +645,18 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production attend `pnpm db:migrate` pour la 204, AVANT le déploiement** — décision de
-Wassim. **198 à 203 y sont depuis le 27/09/2026** (lancé par Wassim, `verif:prod` 29/29) : le
-quota à vie qui ne se recharge pas (198), le suivi bloqué dit (199), le Pro qui repart de zéro
-(200), 15 colis à vie en gratuit (201), le quota de colis compté en AFTER INSERT (202), l'appareil
-fiable (203). **La 204 signe le lien de paiement** et retire le rattachement par e-mail (voir la
-contrainte n° 1) : sans elle en production, l'écran « Passer au Pro » appelle une fonction absente
-et n'affiche AUCUN bouton de paiement (le lien n'est jamais proposé non signé).
-`pnpm verif:prod` rend rouge tant que la 204 n'est pas appliquée, et c'est attendu.
+**La production est à jour jusqu'à la 204 incluse, depuis le 27/09/2026** — migrations lancées
+à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29, puis
+code poussé. Aucune migration n'attend. Les dernières : le quota à vie qui ne se recharge pas
+(198), le suivi bloqué dit (199), le Pro qui repart de zéro (200), 15 colis à vie en gratuit
+(201), le quota de colis compté en AFTER INSERT (202), l'appareil fiable (203), et **le lien de
+paiement signé (204)**, qui retire le rattachement par e-mail (voir la contrainte n° 1).
+**La chaîne de paiement est prouvée EN PRODUCTION** (27/09, Lemon Squeezy en mode test, carte
+de test) : lien signé → webhook → `verifier_lien_paiement` → compte gratuit passé Pro tout seul.
+Passer en live ne demande aucun code : le mode live chez Lemon Squeezy et ses variables dans
+Railway. **La règle reste : la prochaine migration s'applique en production AVANT de pousser le
+code qui l'appelle**, sinon l'écran qui l'appelle rend 500 (ou, pour la 204, « Passer au Pro »
+n'affiche aucun bouton : le lien n'est jamais proposé non signé).
 
 **Les consignes que ce journal porte et qui ne se perdent pas avec lui :**
 
@@ -1123,6 +1129,11 @@ Liste complète des 32 leçons dans `BRIEF-DROPLINK-COMPLET.md` §13.
 ---
 
 ## Travailler avec Wassim
+
+> ⚠️ **LA PERSONNE AU CLAVIER EST SOUVENT MEHDI SEDDIKI, SON FRÈRE** (précisé le 27/09/2026) :
+> ne pas l'appeler Wassim. Les « décisions de Wassim » de ce fichier restent des décisions du
+> projet ; ce qui suit vaut pour les deux. **Toujours en français**, même quand le livrable est
+> en anglais, et **montrer l'avant/après avant tout changement visible du site public**.
 
 - **Il veut les CHIFFRES, pas la recommandation.** Présenter les données, dire ce qu'elles impliquent, **et le laisser trancher**.
 - **Poser une question binaire avec ses conséquences chiffrées**, pas un menu d'options.
