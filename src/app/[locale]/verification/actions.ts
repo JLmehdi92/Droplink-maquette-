@@ -38,7 +38,8 @@ const Saisie = z.object({
     .transform((v) => v.replace(/\s+/g, ""))
     .pipe(z.string().regex(/^\d{6}$/)),
   locale: SchemaLangue,
-  suite: z.enum(["mot-de-passe"]).optional(),
+  // `admin` : retour à l'administration une fois la session passée à deux facteurs.
+  suite: z.enum(["mot-de-passe", "admin"]).optional(),
   // La case « se souvenir de cet appareil » (203) : présente seulement à la
   // connexion ordinaire, absente du flux de réinitialisation.
   souvenir: z.enum(["on"]).optional(),
@@ -113,6 +114,12 @@ export async function verifierCode(
   if (suite === "mot-de-passe") {
     await attendrePlancher(debut);
     redirect(`/${locale}/nouveau-mot-de-passe`);
+  }
+  if (suite === "admin") {
+    // La session est maintenant `aal2` : c'est `exigerAdmin`, à l'arrivée, qui
+    // relit le rôle en base — cette redirection n'accorde rien.
+    await attendrePlancher(debut);
+    redirect(`/${locale}/admin`);
   }
 
   const destination = await suivreApresSession(locale, supabase);

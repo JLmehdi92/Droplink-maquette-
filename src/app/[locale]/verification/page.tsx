@@ -51,9 +51,18 @@ export default async function Verification({
 
   const aUnFacteur = (data.user.factors ?? []).some((f) => f.status === "verified");
   const { data: niveau } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  const suite = (await searchParams)["suite"] === "mot-de-passe" ? "mot-de-passe" : null;
+  const suiteBrute = (await searchParams)["suite"];
+  // `admin` (30/09/2026) : un administrateur connecté par un appareil fiable n'a
+  // qu'un facteur ; l'administration l'envoie ici taper son code, puis l'y ramène.
+  const suite = suiteBrute === "mot-de-passe" || suiteBrute === "admin" ? suiteBrute : null;
   if (!aUnFacteur || niveau?.currentLevel === "aal2") {
-    redirect(suite === "mot-de-passe" ? `/${langue}/nouveau-mot-de-passe` : `/${langue}/commandes`);
+    redirect(
+      suite === "mot-de-passe"
+        ? `/${langue}/nouveau-mot-de-passe`
+        : suite === "admin"
+          ? `/${langue}/admin`
+          : `/${langue}/commandes`,
+    );
   }
 
   const [t, tl] = await Promise.all([getTranslations("verification"), getTranslations("landing")]);

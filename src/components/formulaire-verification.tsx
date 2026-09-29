@@ -20,7 +20,7 @@ export function FormulaireVerification({
   suite,
 }: {
   readonly locale: string;
-  readonly suite: "mot-de-passe" | null;
+  readonly suite: "mot-de-passe" | "admin" | null;
 }) {
   const t = useTranslations("verification");
   const [resultat, action] = useActionState(verifierCode, INITIAL);

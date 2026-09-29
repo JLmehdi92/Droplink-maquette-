@@ -104,10 +104,30 @@ async function exigerAdminSansMemo(): Promise<Administrateur> {
      * facteur : un vendeur reçoit toujours le 404, et n'apprend rien.
      */
     const { data: sansFacteur } = await supabase.rpc("admin_sans_double_facteur");
-    if (sansFacteur === true) redirect("/" + profil.langue + "/parametres");
+    if (sansFacteur === true) {
+      const { data: session } = await supabase.auth.getUser();
+      const facteurVerifie = (session.user?.factors ?? []).some((f) => f.status === "verified");
+      redirect(cheminAdminSansDoubleFacteur(profil.langue, facteurVerifie));
+    }
     notFound();
   }
 
   return { profilId: profil.profilId, email: profil.email };
+}
+
+/**
+ * OÙ ENVOYER UN ADMINISTRATEUR DONT LA SESSION N'A QU'UN FACTEUR.
+ *
+ * ⚠️ DÉFAUT VU PAR MEHDI LE 30/09/2026 : il était renvoyé aux Paramètres, où sa
+ * double authentification s'affichait « Activée » — une impasse. Sa session était
+ * à un seul facteur parce qu'il s'était connecté depuis un APPAREIL FIABLE (203),
+ * qui dispense de code l'espace vendeur mais JAMAIS l'administration (186).
+ *
+ *  - un facteur déjà vérifié : il suffit de taper le code → `/verification`,
+ *    qui ramène ensuite à `/admin` ;
+ *  - aucun facteur : il faut l'activer → les Paramètres, comme avant.
+ */
+export function cheminAdminSansDoubleFacteur(langue: string, facteurVerifie: boolean): string {
+  return facteurVerifie ? `/${langue}/verification?suite=admin` : `/${langue}/parametres`;
 }
 
