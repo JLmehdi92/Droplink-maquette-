@@ -69,6 +69,7 @@ function useMessage(etat: EtatParametres, succes: string): Message | null {
     confirmation: "confirmation",
     deja_active: "dejaActive",
     indisponible: "indisponible",
+    abonnement_en_cours: "abonnementEnCours",
   }[etat.motif];
   return { texte: t(cle), erreur: true };
 }
@@ -592,6 +593,19 @@ function FormulaireSuppression({
         </button>
       </div>
       <Annonce message={message} />
+      {/* LE SEUL ENDROIT OÙ RÉSILIER. Le produit n'a pas de clé d'API chez le
+          fournisseur : il ne peut qu'indiquer son portail, où le vendeur se
+          connecte avec son e-mail (206). */}
+      {etat.statut === "erreur" && etat.motif === "abonnement_en_cours" && etat.portail !== null ? (
+        <a
+          href={etat.portail}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center self-start text-[13.5px] font-semibold text-ds-erreur-encre underline underline-offset-2"
+        >
+          {t("suppression.compte.portail")}
+        </a>
+      ) : null}
     </form>
   );
 }

@@ -13,6 +13,7 @@ import { verifierQuotaAuth, verifierQuotaMotDePasse } from "@/lib/limitation/quo
 import { origineDuSite } from "@/lib/site";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { purgerCles } from "@/lib/storage/purge";
+import { urlPortailClient } from "@/lib/paiement/plan";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 
@@ -61,7 +62,14 @@ export type EtatParametres =
         | "confirmation"
         | "deja_active"
         | "indisponible";
-    };
+    }
+  /**
+   * LA SUPPRESSION REFUSÉE PARCE QU'UN ABONNEMENT PRÉLÈVE ENCORE (DL077, 206).
+   * Le portail client du fournisseur voyage avec le refus : c'est là, et
+   * seulement là, que le vendeur peut résilier. `null` s'il n'est pas connu —
+   * on ne fabrique pas de lien.
+   */
+  | { statut: "erreur"; motif: "abonnement_en_cours"; portail: string | null };
 
 const MotDePasseActuel = z.string().min(1).max(1024);
 
@@ -696,6 +704,11 @@ export async function supprimerMonCompte(
   if (error !== null) {
     await attendrePlancher(debut);
     console.error("[suppression] compte non supprimé — " + error.message);
+    // DL077 (206) : un abonnement prélève encore. Supprimer le compte ne l'aurait
+    // résilié que chez nous ; Lemon Squeezy aurait continué de prélever.
+    if (error.code === "DL077") {
+      return { statut: "erreur", motif: "abonnement_en_cours", portail: urlPortailClient() };
+    }
     return { statut: "erreur", motif: error.code === "DL054" ? "confirmation" : "indisponible" };
   }
 

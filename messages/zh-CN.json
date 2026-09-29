@@ -2145,7 +2145,8 @@
       "indisponible": "服务暂时不可用，请重试。",
       "code": "验证码错误或已过期，请输入当前显示的验证码。",
       "dejaActive": "此账号已启用双重验证。",
-      "confirmation": "输入的邮箱与账号邮箱不一致。"
+      "confirmation": "输入的邮箱与账号邮箱不一致。",
+      "abonnementEnCours": "您的专业版订阅仍然有效：在这里删除账户不会停止 Lemon Squeezy 的扣款。请先在 Lemon Squeezy 客户中心取消订阅，然后再回来删除账户。"
     },
     "donnees": {
       "titre": "数据",
@@ -2164,7 +2165,8 @@
         "avertissement": "此操作不可撤销。您的账号、订单、发货记录与客户链接将被删除且无法恢复。",
         "conservation": "仅保留您的电子邮箱及注册、注销日期一年（依法对托管服务商的要求），随后删除。",
         "soumettre": "注销账号",
-        "enCours": "正在删除…"
+        "enCours": "正在删除…",
+        "portail": "在 Lemon Squeezy 取消我的订阅"
       },
       "donnees": {
         "titre": "删除全部数据",

@@ -2145,7 +2145,8 @@
       "indisponible": "Le service est momentanément indisponible. Réessayez.",
       "code": "Code incorrect ou expiré. Saisissez le code affiché maintenant.",
       "dejaActive": "La double authentification est déjà activée sur ce compte.",
-      "confirmation": "L'adresse recopiée ne correspond pas à celle du compte."
+      "confirmation": "L'adresse recopiée ne correspond pas à celle du compte.",
+      "abonnementEnCours": "Votre abonnement Pro est encore actif : supprimer votre compte ici ne l'arrêterait pas chez Lemon Squeezy, qui continuerait de vous prélever. Résiliez-le d'abord depuis votre espace client Lemon Squeezy, puis revenez supprimer votre compte."
     },
     "donnees": {
       "titre": "Données",
@@ -2164,7 +2165,8 @@
         "avertissement": "Cette action est définitive. Votre compte, vos commandes, vos envois et vos liens clients seront supprimés et ne pourront pas être restaurés.",
         "conservation": "Seules votre adresse e-mail et les dates d'inscription et de suppression sont conservées un an, comme la loi l'impose à un hébergeur, puis effacées.",
         "soumettre": "Supprimer le compte",
-        "enCours": "Suppression…"
+        "enCours": "Suppression…",
+        "portail": "Résilier mon abonnement chez Lemon Squeezy"
       },
       "donnees": {
         "titre": "Supprimer toutes les données",

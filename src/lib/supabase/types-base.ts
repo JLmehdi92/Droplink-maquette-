@@ -1798,6 +1798,7 @@ export type Database = {
           notifications: number
         }[]
       }
+      purger_donnees_expirees: { Args: never; Returns: Json }
       purges_effectuees: { Args: { p_cles: string[] }; Returns: number }
       quota_depasse: {
         Args: { p_cle: string; p_fenetre_secondes: number; p_plafond: number }
@@ -1869,6 +1870,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      resume_evenement_paiement: { Args: { p_charge: Json }; Returns: Json }
       revoquer_appareil_fiable: { Args: { p_id: string }; Returns: undefined }
       revoquer_tous_les_appareils_fiables: { Args: never; Returns: undefined }
       sans_accents: { Args: { p_texte: string }; Returns: string }

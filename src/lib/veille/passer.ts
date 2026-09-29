@@ -3,6 +3,7 @@ import type { Expediteur } from "@/lib/email/port";
 import { expediteurResend } from "@/lib/email/resend";
 import { creerClientSysteme } from "@/lib/supabase/system";
 import { purgerCles } from "@/lib/storage/purge";
+import type { Json } from "@/lib/supabase/types-base";
 import { decider, type BattementVu } from "./decision";
 import { TACHE_VEILLE, TACHES_ATTENDUES } from "./taches";
 
@@ -212,6 +213,7 @@ export async function passerLaVeille(
   // veillé ne doit pas certifier l'avoir fait.
   const systeme = creerClientSysteme();
   const purge = await purgerLaFile(systeme);
+  const durees = await purgerLesDurees(systeme);
   const { error: erreurBattement } = await systeme.rpc("battre", {
     p_source: TACHE_VEILLE,
     p_detail: {
@@ -231,6 +233,10 @@ export async function passerLaVeille(
       purge_echecs: purge.echecs,
       purge_erreur: purge.erreur,
       conservations_effacees: purge.conservationsEffacees,
+      // LES DURÉES DE CONSERVATION (206) : ce que la politique de confidentialité
+      // promet d'effacer, compté ici pour qu'une purge muette se voie.
+      durees_effacees: durees.effacees,
+      durees_erreur: durees.erreur,
     },
   });
   // UN BATTEMENT PERDU FAIT CROIRE À UNE TÂCHE MORTE (audit du 20/09/2026). On le dit ici.
@@ -276,4 +282,25 @@ async function purgerLaFile(systeme: ReturnType<typeof creerClientSysteme>): Pro
     console.error("[veille] purge : " + message);
     return { purgees: 0, echecs: 0, erreur: message.slice(0, 200), conservationsEffacees: 0 };
   }
+}
+
+/**
+ * CE QUE LA POLITIQUE DE CONFIDENTIALITÉ PROMET D'EFFACER (migration 206) :
+ * demandes d'e-mail non confirmées (24 h), vues (13 mois), archives de paiement
+ * (3 ans).
+ *
+ * ⚠️ SÉPARÉE DE LA PURGE R2, ET C'EST VOULU : un stockage qui répond mal ne doit
+ * pas suspendre un effacement que la loi exige. Chacune échoue seule, et le dit
+ * dans le battement.
+ */
+async function purgerLesDurees(systeme: ReturnType<typeof creerClientSysteme>): Promise<{
+  effacees: Json;
+  erreur: string | null;
+}> {
+  const { data, error } = await systeme.rpc("purger_donnees_expirees");
+  if (error !== null) {
+    console.error("[veille] durées de conservation : " + error.message);
+    return { effacees: null, erreur: error.message.slice(0, 200) };
+  }
+  return { effacees: data, erreur: null };
 }

@@ -2145,7 +2145,8 @@
       "indisponible": "The service is temporarily unavailable. Please try again.",
       "code": "Incorrect or expired code. Enter the code shown now.",
       "dejaActive": "Two-factor authentication is already enabled on this account.",
-      "confirmation": "The address you typed does not match the account's."
+      "confirmation": "The address you typed does not match the account's.",
+      "abonnementEnCours": "Your Pro subscription is still active: deleting your account here would not stop it at Lemon Squeezy, which would keep charging you. Cancel it first from your Lemon Squeezy customer portal, then come back to delete your account."
     },
     "donnees": {
       "titre": "Data",
@@ -2164,7 +2165,8 @@
         "avertissement": "This action is final. Your account, your orders, your shipments and your customer links will be deleted and cannot be restored.",
         "conservation": "Only your email address and your sign-up and deletion dates are kept for one year, as the law requires of a host, then erased.",
         "soumettre": "Delete the account",
-        "enCours": "Deleting…"
+        "enCours": "Deleting…",
+        "portail": "Cancel my subscription on Lemon Squeezy"
       },
       "donnees": {
         "titre": "Delete all data",

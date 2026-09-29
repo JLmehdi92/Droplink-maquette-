@@ -84,6 +84,28 @@ export function urlPaiementPro(): string | null {
 }
 
 /**
+ * LE PORTAIL CLIENT DU FOURNISSEUR — là où un vendeur RÉSILIE son abonnement.
+ *
+ * Le produit n'a pas de clé d'API Lemon Squeezy : il ne peut pas résilier à la
+ * place du vendeur. Il lui indique donc où le faire. L'adresse du portail est
+ * celle de la BOUTIQUE (`https://<boutique>.lemonsqueezy.com/billing`, doc
+ * « Customer Portal », adresse non signée : le client s'y connecte par e-mail),
+ * et on la DÉDUIT du lien de paiement déjà configuré plutôt que d'ajouter une
+ * variable de plus qui pourrait diverger.
+ *
+ * `null` quand le lien de paiement n'est pas configuré, ou quand il ne désigne
+ * pas une boutique (l'hôte générique `store.lemonsqueezy.com`) : on ne fabrique
+ * pas une adresse qu'on ne sait pas être la bonne.
+ */
+export function urlPortailClient(): string | null {
+  const paiement = urlPaiementPro();
+  if (paiement === null) return null;
+  const hote = new URL(paiement).hostname.toLowerCase();
+  if (!hote.endsWith(".lemonsqueezy.com") || hote === "store.lemonsqueezy.com") return null;
+  return `https://${hote}/billing`;
+}
+
+/**
  * L'adresse de paiement POUR CE COMPTE : celle de `urlPaiementPro`, qui y porte
  * l'identifiant du compte et pré-remplit son e-mail.
  *
