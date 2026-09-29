@@ -201,6 +201,18 @@ describe("Supprimer un compte ne peut pas laisser un prélèvement courir", () =
     expect(data, "le compte a disparu malgré le refus").not.toBeNull();
   }, 60_000);
 
+  test("un abonnement EN PAUSE bloque aussi : une pause peut reprendre seule, et le prélèvement avec (207)", async () => {
+    // Doc Lemon Squeezy, « Pausing a subscription » : `resumes_at` REPREND
+    // l'abonnement automatiquement. On ne stocke pas cette date : toute pause
+    // est donc traitée comme un prélèvement possible.
+    const u = await creerUtilisateur("rgpd-pro-pause");
+    aSupprimer.push(u);
+    await abonner(u, "paused", null);
+
+    const { error } = await u.client.rpc("supprimer_mon_compte", { p_confirmation: u.email });
+    expect(error?.code, "un compte en pause a été supprimé alors que la pause peut reprendre").toBe("DL077");
+  }, 60_000);
+
   test("CONTRE-TEST : un abonnement résilié (plus de prélèvement) n'empêche pas la suppression", async () => {
     const u = await creerUtilisateur("rgpd-pro-resilie");
     aSupprimer.push(u);
