@@ -36,6 +36,21 @@ export { NOM_MAX, DESCRIPTION_MAX } from "./bornes";
 import { NOM_MAX, DESCRIPTION_MAX } from "./bornes";
 
 /**
+ * LA LANGUE DES PAGES CLIENT D'UN COMPTE NEUF : L'ANGLAIS, quelle que soit la
+ * langue dans laquelle le vendeur s'est inscrit (décision de Mehdi, 29/09/2026).
+ *
+ * Un fournisseur inscrit en chinois vend à des acheteurs qui ne le lisent pas :
+ * recopier la langue de son interface dans celle de ses pages servait du chinois
+ * à ses clients. L'anglais est la langue que ses acheteurs lisent le plus
+ * probablement, et « Ma marque » la change en un geste.
+ *
+ * C'est aussi la valeur par défaut de `shops.default_language` en base
+ * (migration 205), qui couvre la boutique d'un compte n'ayant pas encore terminé
+ * l'accueil. Les deux doivent rester égales.
+ */
+export const LANGUE_PAGE_CLIENT_PAR_DEFAUT = "en" satisfies z.infer<typeof SchemaLangue>;
+
+/**
  * LES TROIS RÉSEAUX, ET LEUR DOMAINE ATTENDU.
  *
  * UN LIEN LIBRE SERAIT UNE REDIRECTION OUVERTE offerte à qui contrôle un compte

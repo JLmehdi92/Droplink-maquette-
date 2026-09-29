@@ -348,3 +348,42 @@ describe("La contrainte de base décide comme le motif applicatif", () => {
     30_000,
   );
 });
+
+describe("Un compte neuf sert sa page client en anglais (décision de Mehdi, 29/09/2026)", () => {
+  // Un compte NEUF, créé par le vrai déclencheur d'inscription : la boutique
+  // naît de la valeur par défaut de la colonne, sans que personne ne l'écrive.
+  // C'est l'état de tout compte qui n'a pas encore terminé l'accueil.
+  let carole: UtilisateurDeTest;
+  let jetonCarole: string;
+
+  beforeAll(async () => {
+    carole = await creerUtilisateur("marque-carole");
+    const { data } = await carole.client
+      .from("orders")
+      .insert({ shop_id: carole.shopId, customer_label: "Lina" })
+      .select("public_token")
+      .single();
+    jetonCarole = (data as { public_token: string }).public_token;
+  }, 90_000);
+
+  afterAll(async () => {
+    await supprimerUtilisateur(carole);
+  });
+
+  test("sans aucun réglage, la page client est en anglais", async () => {
+    const publique = await lireCommandePublique(jetonCarole);
+    expect(publique, "la page publique ne rend rien").not.toBeNull();
+    expect(publique?.boutique.langue).toBe("en");
+  });
+
+  test("CONTRE-TEST : le choix fait dans « Ma marque » reste respecté", async () => {
+    const ok = await appliquerReglagesMarque(carole.client, carole.shopId, {
+      couleurAccent: "#5B4BF5",
+      languePublique: "zh-CN",
+      filigrane: false,
+    });
+    expect(ok, "l'écriture des réglages a échoué").toBe(true);
+    const publique = await lireCommandePublique(jetonCarole);
+    expect(publique?.boutique.langue).toBe("zh-CN");
+  });
+});

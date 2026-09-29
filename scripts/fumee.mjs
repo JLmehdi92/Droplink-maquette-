@@ -1281,7 +1281,7 @@ try {
 
     const { data: shop, error: erreurShop } = await service
       .from("shops")
-      .select("id")
+      .select("id, default_language")
       .eq("owner_id", profilFumee)
       .maybeSingle();
 
@@ -1294,6 +1294,33 @@ try {
     }
 
     if (shop?.id) {
+      /*
+       * UNE BOUTIQUE NEUVE NAIT EN ANGLAIS (migration 205, decision de Mehdi du
+       * 29/09/2026) : sa page client part en anglais quelle que soit la langue
+       * d'inscription. On le constate ICI, sur la boutique que le vrai
+       * declencheur d'inscription vient de creer, avant tout reglage.
+       *
+       * PUIS LA FUMEE POSE LE FRANCAIS ELLE-MEME. Ses controles de page client
+       * cherchent des libelles francais (« Votre commande », « Approuver ») :
+       * ils comptaient sur l'ancien defaut `fr`, et ont rougi le jour ou le
+       * defaut a change — un controle qui depend d'un defaut mesure le defaut,
+       * pas ce qu'il croit mesurer. La langue mesuree est desormais DECLAREE.
+       */
+      const naissance = shop.default_language;
+      if (naissance === "en") {
+        console.log("OK    une boutique neuve sert sa page client en anglais (205)");
+      } else {
+        echecs += 1;
+        console.log(`ECHEC une boutique neuve nait en « ${naissance} », attendu « en » (migration 205)`);
+      }
+      const { error: erreurLangue } = await service
+        .from("shops")
+        .update({ default_language: "fr" })
+        .eq("id", shop.id);
+      if (erreurLangue) {
+        echecs += 1;
+        console.log(`ECHEC la fumee n'a pas pu poser le francais sur sa boutique : ${erreurLangue.message}`);
+      }
       const { data: commande } = await service
         .from("orders")
         .insert({

@@ -7,7 +7,7 @@ import { EVENEMENTS } from "@/lib/instrumentation/evenements";
 import { emettreApres } from "@/lib/instrumentation/emettre";
 import { lireProfilVendeur, onboardingAFaire } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
-import { appliquerReglagesMarque } from "@/lib/boutique/reglages";
+import { appliquerReglagesMarque, LANGUE_PAGE_CLIENT_PAR_DEFAUT } from "@/lib/boutique/reglages";
 import {
   CleDeposee,
   confirmerDepotDeLogo,
@@ -122,25 +122,23 @@ export async function terminerOnboarding(
 
   const nom = analyse.data.nomBoutique;
 
-  // LE CHOIX UNIQUE DE L'ONBOARDING INITIALISE LES DEUX LANGUES.
+  // LA LANGUE DE L'INTERFACE N'EST PAS CELLE DES PAGES CLIENT.
   //
-  // `profiles.locale` habille l'interface du vendeur, `shops.default_language`
-  // habille les pages que voient ses clients. Ce sont deux réglages distincts,
-  // et les réglages de marque permettent de les dissocier — un fournisseur peut
-  // travailler en anglais et livrer en France. Mais à l'inscription, personne
-  // n'a encore de raison de les distinguer : offrir deux menus ici ferait payer
-  // à tout le monde un cas qui concerne une minorité.
+  // `profiles.locale` habille l'interface du vendeur (écrite plus haut, avec SA
+  // langue), `shops.default_language` habille les pages que voient ses clients.
+  // Cette ligne recopiait longtemps la première dans la seconde : un fournisseur
+  // inscrit en chinois servait alors ses pages en chinois à des acheteurs qui
+  // ne le lisent pas (constaté le 29/09/2026 sur une vraie commande). Décision
+  // de Mehdi : la page client part en ANGLAIS, quelle que soit la langue
+  // d'inscription, et « Ma marque » la change.
   //
-  // Sans cette ligne, `default_language` restait à son défaut `fr` pour TOUS les
-  // comptes, y compris ceux qui avaient tout choisi en anglais. Le défaut ne se
-  // voyait pas côté vendeur : il ne se voyait que chez son client. Ce qui
-  // l'empêche de revenir n'est pas cette relecture mais le TYPAGE — la langue
-  // publique est obligatoire dans `ReglagesMarque`, donc l'omettre ne compile
-  // pas.
+  // La langue publique reste OBLIGATOIRE dans `ReglagesMarque` : l'omettre ne
+  // compile pas, et c'est ce qui empêche la base de retomber sur son défaut
+  // sans qu'on l'ait décidé.
   const ecrit = await appliquerReglagesMarque(supabase, profil.shopId, {
     ...(nom === undefined ? {} : { nom }),
     couleurAccent: analyse.data.couleurAccent,
-    languePublique: analyse.data.locale,
+    languePublique: LANGUE_PAGE_CLIENT_PAR_DEFAUT,
     // Le filigrane est un réglage de marque, pas une décision d'inscription :
     // il se règle plus tard, avec un aperçu sous les yeux.
     filigrane: false,
