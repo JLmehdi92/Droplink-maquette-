@@ -6,6 +6,26 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 30/09/2026 — L'ADMINISTRATION : L'IMPASSE DU CODE, PUIS UN AUDIT DE SÉCURITÉ À CINQ RELECTEURS
+
+- 🔴 **Mehdi bloqué hors de `/admin`** : connecté par un appareil fiable (203), sa session n'avait
+  qu'un facteur, et la garde l'envoyait aux Paramètres « activer » une 2FA déjà active. Elle
+  l'envoie maintenant taper son code (`/verification?suite=admin`), puis le ramène à `/admin`
+  (`cheminAdminSansDoubleFacteur`). Choix de Mehdi : un code une fois par connexion, PAS
+  l'appareil fiable pour l'administration.
+- **Audit ECC de l'administration** (contrôle d'accès, fonctions SQL, authentification et 2FA,
+  traçabilité, actions) : **aucune faille confirmée**. Un angle mort de TEST : seule
+  `suspendre_compte` était éprouvée à un seul facteur, alors que les écritures d'administration
+  n'exigent la 2FA que parce qu'elles appellent `journaliser_admin` avant d'écrire — une
+  discipline (L-029). `tests/rls/admin-exige-double-facteur.test.ts` inventorie désormais le
+  catalogue : 7 fonctions d'écriture, chacune doit appeler sa garde AVANT sa première écriture.
+  Le premier filtre manquait `ecrire_parametre` (garde par `est_admin` seule) — élargi.
+  Falsifié deux fois sur la base de tests (écriture avant le journal ; insertion avant
+  `est_admin`) : rouge, fonction nommée, puis retirée.
+- CLAUDE.md affirmait que les paramètres d'administration réglaient la « limitation de débit » :
+  faux, corrigé (elle vit dans `QUOTA_ADMIN_PAR_MINUTE`, hors de l'écran).
+- Portes : 1220 unit, 1083 RLS, couverture 120/123, fumée 54/54 routes.
+
 ### ▶️ 29/09/2026 — LES TROIS PAGES LÉGALES : UN SEUL TEXTE, ÉCRIT DANS LE KIT (migration 208)
 
 Mehdi : « vasy fait tout avec ecc brozer, mais vraiment fait tout sans rien oublier !!! ».

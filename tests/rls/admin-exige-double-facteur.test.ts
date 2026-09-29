@@ -103,6 +103,54 @@ describe("L'administration sans double authentification", () => {
   });
 });
 
+/*
+ * ⚠️ L'ORDRE DE L'EXIGENCE, PAR INVENTAIRE — audit ECC du 30/09/2026.
+ *
+ * Les fonctions qui vérifient le rôle EN LIGNE (`role = 'admin'`) n'exigent la
+ * double authentification que parce qu'elles appellent `journaliser_admin` AVANT
+ * d'écrire. C'est une discipline, pas une structure (L-029) : une future fonction
+ * qui écrirait d'abord, ou oublierait le journal, ouvrirait un geste d'administration
+ * à un mot de passe seul — et le test ci-dessus, qui n'essaie que la suspension,
+ * ne le verrait pas.
+ *
+ * On INVENTORIE donc le catalogue : toute fonction `security definer` qui mentionne
+ * le rôle admin et écrit ailleurs que dans le journal doit appeler une garde de
+ * double facteur AVANT sa première écriture. Lu sur le CODE, commentaires retirés
+ * (L-031) — sinon un commentaire qui décrit la garde la satisferait.
+ */
+describe("Toute écriture d'administration exige la double authentification AVANT d'écrire", () => {
+  const GARDES = /\b(est_admin|journaliser_admin|session_double_facteur)\s*\(/i;
+  const ECRITURE = /\b(insert\s+into\s+(?!public\.admin_audit_log\b)[\w.]+|update\s+(?!public\.admin_audit_log\b)[\w.]+\s+(?:\w+\s+)?set|delete\s+from\s+(?!public\.admin_audit_log\b)[\w.]+)/i;
+  const sansCommentaires = (src: string): string => src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
+
+  test("chaque fonction d'écriture d'administration appelle sa garde avant sa première écriture", async () => {
+    const fonctions = await interroger<{ nom: string; src: string }>(
+      catalogue,
+      `select p.proname as nom, p.prosrc as src
+         from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public' and p.prosecdef
+          and has_function_privilege('authenticated', p.oid, 'execute')`,
+    );
+    const inspectees: string[] = [];
+    const fautives: string[] = [];
+    for (const f of fonctions) {
+      const code = sansCommentaires(f.src);
+      // Le rôle vérifié EN LIGNE, ou par l'une des gardes (`ecrire_parametre` ne
+      // passe que par `est_admin`) : filtrer sur le seul texte du rôle l'oubliait.
+      if (!/role\s*=\s*'admin'/i.test(code) && !GARDES.test(code)) continue;
+      const ecriture = ECRITURE.exec(code);
+      if (ecriture === null) continue;
+      inspectees.push(f.nom);
+      const garde = GARDES.exec(code);
+      if (garde === null || garde.index > ecriture.index) fautives.push(`${f.nom} (écrit « ${ecriture[0]} » avant toute garde)`);
+    }
+    // UN ENSEMBLE VIDE PASSE TOUT : les sept écritures connues doivent être inspectées
+    // (suspendre, réactiver, plan, bloquer, débloquer, refuser une contestation, paramètre).
+    expect(inspectees.length, `fonctions inspectées : ${inspectees.join(", ")}`).toBeGreaterThanOrEqual(7);
+    expect(fautives, "écriture d'administration possible à un seul facteur").toEqual([]);
+  });
+});
+
 describe("Ce que l'écran peut dire à l'administrateur", () => {
   test("un administrateur à un seul facteur est reconnu comme tel — pour être envoyé activer la 2FA", async () => {
     expect((await simple.client.rpc("admin_sans_double_facteur")).data).toBe(true);

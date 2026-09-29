@@ -465,7 +465,11 @@ produit avant d'être une route.
 > ⚠️ **ET SES PARAMÈTRES ONT SEPT SOUS-ONGLETS, DONT UN SEUL EST PORTÉ** — relevé
 > le 17/09/2026 en comparant `ADMIN_NAV`/`SETTINGS_NAV` du kit aux routes du
 > dépôt. Le nôtre est « Général », et il ne montre que ce que `parametres_admis`
-> autorise : plafonds par compte, suivi des colis, limitation de débit. Les six
+> autorise : plafonds de commandes (mensuel et gratuit à vie), seuil de colis par compte,
+> suivi des colis actif ou non, inscriptions ouvertes, retard du veilleur, et le budget
+> 17TRACK recopié pour l'affichage. ⚠️ **« limitation de débit » figurait ici et c'était
+> FAUX** (audit ECC du 30/09/2026) : aucun réglage ne la pilote depuis l'écran — elle vit
+> dans `QUOTA_ADMIN_PAR_MINUTE` et le code, hors de portée d'un administrateur. Les six
 > autres ne se codent pas, et c'est une DÉCISION, pas un oubli :
 > **Abonnements** est de la facturation (contrainte n° 1) ; **Emails**,
 > **Intégrations** et **Apparence** (thème, couleurs, logo de la plateforme)
