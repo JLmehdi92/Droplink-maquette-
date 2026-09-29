@@ -174,16 +174,15 @@
       "ago3": "3h ago",
       "ago5": "5h ago",
       "ago7": "7h ago",
-      "footBlog": "Blog"
+      "footBlog": "Blog",
+      "footLegal": "Legal notice"
     }
   },
   "legal": {
     "conditionsTitre": "Terms of use",
     "confidentialiteTitre": "Privacy policy",
-    "confidentialiteChapeau": "What we collect, why, and for how long.",
     "signalementTitre": "Report content",
     "signalementSurTitre": "Notice and takedown",
-    "misAJourLe": "Last updated",
     "sommaireTitre": "Contents",
     "encartSignalerTitre": "Content to report?",
     "encartSignalerTexte": "Use the dedicated form: every report is reviewed.",
@@ -192,44 +191,6 @@
     "piedConditions": "Terms",
     "piedConfidentialite": "Privacy",
     "piedSignaler": "Report content",
-    "conditions": {
-      "objetTitre": "Purpose of the service",
-      "objetP1": "DropLink gives sellers a space in which to create, for each of their orders, a private page reachable through an unguessable link. That page gathers the photos and videos uploaded by the seller together with the parcel's shipping status.",
-      "objetP2": "DropLink never takes part in the transaction between a seller and their customer: no payment is processed, collected or facilitated by the service.",
-      "compteTitre": "Account and access",
-      "compteP1": "Creating orders requires an account. Viewing a page as the recipient of a link requires none: the recipient is neither registered, nor identified, nor solicited.",
-      "compteP2": "An order's link is immutable. The seller may revoke it at any time, which makes it permanently inoperative and generates a new one.",
-      "contenusTitre": "Content you publish",
-      "contenusP1": "The seller remains solely responsible for the content they upload and warrants holding the necessary rights. Infringing or unlawful content, and content harming third-party rights, are prohibited.",
-      "contenusP2": "DropLink acts as a host: the service exercises no prior control over uploaded content, and does not select it.",
-      "retraitTitre": "Notice and takedown",
-      "retraitP1": "Anyone may report content they consider unlawful. Every report is reviewed, and the account concerned may be suspended as a precaution — its pages then immediately stop being served.",
-      "retraitP2": "Suspension is reversible: reactivation restores the pages on the same links.",
-      "disponibiliteTitre": "Availability",
-      "disponibiliteP1": "The service is provided as is, during its validation phase, free of charge and without any availability commitment. Tracking information comes from carriers: we guarantee neither its accuracy nor its freshness.",
-      "donneesTitre": "Personal data",
-      "donneesP1": "Data processing is described in the privacy policy. The recipient's name is free text entered by the seller; it constitutes neither an account nor an identifier.",
-      "resiliationTitre": "Termination",
-      "resiliationP1": "The seller may stop using the service at any time.",
-      "droitTitre": "Governing law",
-      "retraitFormulaire": "Reports are made using the form provided for that purpose.",
-      "disponibiliteP2": "The service may be interrupted for maintenance, change, or stop. We are not liable for the consequences of an outage, for data lost to a technical incident, or for incorrect tracking information reported by a carrier.",
-      "resiliationP2": "Deleting an account takes effect immediately and removes its orders, media and tracking: links already sent stop working. Only the email address and the sign-up and deletion dates are kept for one year, to meet hosting obligations, then erased automatically.",
-      "droitP1": "These terms are governed by French law. Failing an amicable settlement, the French courts have jurisdiction."
-    },
-    "confidentialite": {
-      "collecteTitre": "What we collect",
-      "collecteP1": "For a seller: their email address, the name and settings of their shop, and the content they upload. If they sign in with Google: the identifier and email address of their Google account; Google also sends their name and profile picture, which DropLink neither displays nor uses. For a recipient: nothing that identifies them, unless they themselves ask to be notified by email — their address is then used only for the tracking emails of that order. Viewing a page records a salted fingerprint of the IP address and browser, never the values themselves.",
-      "pasDeCompteTitre": "The recipient has no account",
-      "pasDeCompteP1": "Viewing a page creates no account, requires no address and installs no advertising tracker. The name shown on the page is free text entered by the seller: it designates no user of our service.",
-      "indexationTitre": "Nothing is indexed",
-      "indexationP1": "Order pages carry a no-index directive, appear in no gallery and are reachable through no internal search. No rich preview is produced for messaging apps: a preview would show the content to people who never open the link.",
-      "conservationTitre": "For how long",
-      "conservationP1": "An order's content is kept for as long as the seller keeps it. Raw carrier responses are purged ninety days after the parcel's last movement. A tracking email address is used only after its owner confirms it, for three emails at most (shipped, in transit, delivered), and every email offers one-click unsubscribe; an unconfirmed request is erased after twenty-four hours. Administration records are retained and survive the deletion of the account concerned.",
-      "droitsTitre": "Your rights",
-      "droitsP1": "Access, rectification, erasure, objection. Write to us at the contact address shown on the reporting page.",
-      "conservationP2": "When an account is deleted, only the email address and the sign-up and deletion dates are kept for one year, to meet hosting obligations, then erased automatically."
-    },
     "signalement": {
       "intro": "If a page we host infringes your rights or looks unlawful to you, describe it here. Every report is reviewed by a person.",
       "etape1Titre": "You send us the link",
@@ -255,15 +216,757 @@
       "adresseDirecte": "Or write directly to"
     },
     "conditionsMetaTitre": "Terms of use — DropLink",
-    "conditionsMetaDescription": "DropLink's terms of use: what the service does, what it does not host, and the rules every seller accepts when creating an account.",
+    "conditionsMetaDescription": "DropLink's terms of use: the service, the seller account, content, the Free and Pro plans, termination and liability.",
     "confidentialiteMetaTitre": "Privacy policy — DropLink",
-    "confidentialiteMetaDescription": "What data DropLink keeps, for how long, and why the person who receives a link never has an account or a password with us.",
+    "confidentialiteMetaDescription": "What data DropLink processes, why, for how long, with which providers, and your rights — for sellers and their customers alike.",
     "signalementMetaTitre": "Report content — DropLink",
     "signalementMetaDescription": "Report content hosted on DropLink. Describe the link and the reason: every report is read, and a page can be taken down without delay.",
     "pastille": "Legal",
     "accueil": "Home",
-    "editeur": "Publisher:",
-    "editeurNom": "DropLink"
+    "editeurNom": "Mahfoud SEDDIKI",
+    "mentionsTitre": "Legal notice",
+    "piedMentions": "Legal notice",
+    "mentionsMetaTitre": "Legal notice — DropLink",
+    "mentionsMetaDescription": "DropLink's legal notice: publisher, publication director, hosting providers and contact.",
+    "misAJourDate": "Last updated: {date}",
+    "editeurLigne": "Publisher: {nom}",
+    "pages": {
+      "conditions": {
+        "titre": "Terms and conditions of use",
+        "pastille": "Terms of use",
+        "chapeau": "These terms govern the use of DropLink, an online service that lets a seller create one tracking page per order. By creating an account, you accept them.",
+        "sections": [
+          {
+            "id": "objet",
+            "titre": "Purpose",
+            "blocs": [
+              {
+                "p": "These terms govern access to and use of the DropLink service, available at droplink.fr. They form a contract between Mahfoud SEDDIKI, sole trader, publisher of the service (see the legal notice), and any person who creates an account, referred to below as “the seller”."
+              },
+              {
+                "p": "The seller's customer who views an order page has no account and is not a party to this contract. Their business relationship is with the seller, not with DropLink."
+              }
+            ]
+          },
+          {
+            "id": "service",
+            "titre": "The service",
+            "blocs": [
+              {
+                "p": "DropLink is a tracking and communication service, not a marketplace. The seller creates an order and adds photos or videos and a tracking number; DropLink generates a private page, reachable through a link that cannot be guessed, and queries the carrier to keep the status up to date."
+              },
+              {
+                "h3": "What the service does not include"
+              },
+              {
+                "ul": [
+                  "No sale and no payment between the seller and their customer: DropLink knows neither the seller's prices nor their margins.",
+                  "No parcel delivery: DropLink is neither a carrier nor a shipping intermediary.",
+                  "No guarantee on delivery times, which depend on the carrier chosen by the seller."
+                ]
+              },
+              {
+                "p": "An order's link never changes. The seller can revoke it at any time, which disables it permanently and generates a new one."
+              }
+            ]
+          },
+          {
+            "id": "compte",
+            "titre": "Account",
+            "blocs": [
+              {
+                "ul": [
+                  "Creating an account requires a valid email address, or signing in with Google.",
+                  "The seller guarantees that the information provided is accurate and keeps it up to date.",
+                  "Credentials are personal and confidential. The seller is responsible for all activity carried out from their account.",
+                  "Two-factor authentication is available in the settings and recommended.",
+                  "The service is open to professional sellers and private individuals alike, provided they are of legal age."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "contenus",
+            "titre": "Your content",
+            "blocs": [
+              {
+                "p": "The photos, videos and information the seller uploads remain their property. The seller grants DropLink the licence strictly necessary to provide the service: storing these files and displaying them on the order page reachable through the link. This licence ends when the content or the account is deleted."
+              },
+              {
+                "p": "The seller guarantees that they hold the rights to the published content, and undertakes not to include sensitive data or identifying details that are not needed to track the order. DropLink acts as a host: it does not review uploaded content in advance."
+              }
+            ]
+          },
+          {
+            "id": "interdits",
+            "titre": "Prohibited uses",
+            "blocs": [
+              {
+                "ul": [
+                  "Publishing unlawful, infringing, violent, hateful or sexual content.",
+                  "Using the service to mislead a customer about the nature, origin or existence of a shipment.",
+                  "Entering fake tracking numbers or numbers belonging to third-party shipments.",
+                  "Trying to access another account's orders, or to enumerate order links.",
+                  "Circumventing the limits of the plan, automating requests in bulk or degrading the service."
+                ]
+              },
+              {
+                "encart": {
+                  "ton": "alerte",
+                  "titre": "Sanction",
+                  "texte": "In the event of a breach, access to the account may be suspended immediately, without prejudice to any legal action. Suspension is reversible: reactivation restores the pages on the same links."
+                }
+              }
+            ]
+          },
+          {
+            "id": "signalement",
+            "titre": "Reporting and removal",
+            "blocs": [
+              {
+                "p": "Anyone can report content they consider unlawful by writing to contact@droplink.fr. Every report is reviewed by a person, and the account concerned may be suspended as a precaution: its pages then immediately stop being served."
+              },
+              {
+                "p": "Content can also be reported from the report page, linked at the bottom of every page of the site.",
+                "si": "signalement"
+              },
+              {
+                "p": "The seller is told the reason for a block and can contest it from their account."
+              }
+            ]
+          },
+          {
+            "id": "abonnement",
+            "titre": "Subscription",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Plan",
+                    "Free",
+                    "Pro"
+                  ],
+                  "lignes": [
+                    [
+                      "Price",
+                      "Free",
+                      "{prixPro} per month, all taxes included"
+                    ],
+                    [
+                      "Orders",
+                      "15 in total, for the whole life of the account",
+                      "300 per month"
+                    ],
+                    [
+                      "Automatically tracked parcels",
+                      "15 in total, for the whole life of the account",
+                      "300 per month"
+                    ],
+                    [
+                      "Commitment",
+                      "None",
+                      "None: monthly, no minimum term"
+                    ]
+                  ]
+                }
+              },
+              {
+                "ul": [
+                  "The Pro subscription is collected by Lemon Squeezy, reseller and issuer of the invoice, under its own terms of purchase. DropLink neither sees nor stores any card data.",
+                  "It renews every month until cancelled.",
+                  "A failed payment returns the account to the free plan; a successful payment restores the Pro plan.",
+                  "No refund is made for a period that has started."
+                ]
+              },
+              {
+                "p": "If you are a consumer, you have the right of withdrawal provided by law; it is exercised with Lemon Squeezy, reseller of the subscription, under its terms of purchase."
+              }
+            ]
+          },
+          {
+            "id": "resiliation",
+            "titre": "Termination",
+            "blocs": [
+              {
+                "p": "The seller can cancel their Pro subscription at any time from their Lemon Squeezy customer portal: the Pro plan stays active until the end of the period already paid."
+              },
+              {
+                "p": "The seller can delete their account at any time from the settings, once any subscription has been cancelled: DropLink refuses deletion while a charge can still occur. Deletion is immediate and removes orders, media and tracking; links already sent stop working. Only the email address and the sign-up and deletion dates are kept for one year, under the host's obligations, then erased automatically."
+              },
+              {
+                "p": "DropLink may terminate an account in the event of a breach of these terms, or with reasonable notice if the service is discontinued."
+              }
+            ]
+          },
+          {
+            "id": "disponibilite",
+            "titre": "Availability",
+            "blocs": [
+              {
+                "p": "DropLink strives to keep the service continuously available, without guaranteeing that it will never be interrupted. The service may be interrupted for maintenance, change or be discontinued."
+              },
+              {
+                "p": "Automatic status updates depend on the information sent by carriers. Data that is unavailable, late or wrong on the carrier's side cannot be attributed to DropLink."
+              }
+            ]
+          },
+          {
+            "id": "propriete",
+            "titre": "Intellectual property",
+            "blocs": [
+              {
+                "p": "The DropLink brand, its logo, interface, texts and code are the property of Mahfoud SEDDIKI. No reproduction, extraction or reuse is permitted without written consent. The seller keeps full ownership of their brand, logo and content."
+              }
+            ]
+          },
+          {
+            "id": "responsabilite",
+            "titre": "Liability",
+            "blocs": [
+              {
+                "ul": [
+                  "DropLink is responsible for providing the service: hosting content, generating links, showing the statuses sent by carriers.",
+                  "DropLink is not responsible for the reality of the sale, the conformity of the products, delivery times, or disputes between a seller and their customer.",
+                  "The seller alone is responsible, towards their customers, for the information they publish on their order pages.",
+                  "Subject to the mandatory provisions protecting consumers, DropLink's liability is limited to direct and foreseeable damage, up to the amounts paid over the last twelve months."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "donnees",
+            "titre": "Personal data",
+            "blocs": [
+              {
+                "p": "The processing of personal data is described in the privacy policy, which sets out the data collected, its purposes, its retention periods and the rights of the people concerned."
+              },
+              {
+                "h3": "Data of the seller's customers (Article 28 GDPR)"
+              },
+              {
+                "p": "For the information the seller enters or uploads about their customers — name, photos, tracking number —, the seller is the controller and DropLink acts as processor, on the seller's instructions only: providing order pages and parcel tracking. As such, DropLink:"
+              },
+              {
+                "ul": [
+                  "uses this data only to provide the service;",
+                  "protects it with appropriate security measures and imposes the same obligations on its own providers;",
+                  "uses the providers listed in the privacy policy;",
+                  "helps the seller answer requests from their customers;",
+                  "deletes the data when the orders or the account are deleted;",
+                  "informs the seller of any data breach that concerns them."
+                ]
+              },
+              {
+                "p": "It is up to the seller to inform their customers of this processing."
+              }
+            ]
+          },
+          {
+            "id": "modification",
+            "titre": "Changes to the terms",
+            "blocs": [
+              {
+                "p": "These terms may change. Any substantial change is notified by email or in the application at least thirty days before it takes effect. Continuing to use the service after that date constitutes acceptance. The version in force is dated at the top of the page."
+              }
+            ]
+          },
+          {
+            "id": "droit",
+            "titre": "Governing law and disputes",
+            "blocs": [
+              {
+                "p": "These terms are governed by French law. In the event of a dispute, the parties first seek an amicable solution. Failing that, a dispute with a professional seller falls within the jurisdiction of the courts of Nanterre; a consumer keeps the benefit of the jurisdiction rules and protective provisions provided by law."
+              },
+              {
+                "p": "For any question about these terms: contact@droplink.fr."
+              }
+            ]
+          }
+        ]
+      },
+      "confidentialite": {
+        "titre": "Privacy policy",
+        "pastille": "Privacy policy",
+        "chapeau": "DropLink processes two kinds of data: data about the seller who has an account, and data about that seller's customers, who view an order page without ever having an account. This page explains which data, why, for how long, and the rights you have.",
+        "sections": [
+          {
+            "id": "responsable",
+            "titre": "Data controller",
+            "blocs": [
+              {
+                "p": "The controller of the processing described here is Mahfoud SEDDIKI, sole trader (entrepreneur individuel), 2 square de l'Avre, 92100 Boulogne-Billancourt, France (SIREN 990 848 004). For any question or request about your data: contact@droplink.fr."
+              },
+              {
+                "encart": {
+                  "ton": "info",
+                  "titre": "Two separate roles",
+                  "texte": "For the seller's account data, DropLink is the controller. For the data of the seller's customers (the name entered, the photos of an order), DropLink acts as the seller's processor: the seller decides what to enter and how it is used."
+                }
+              }
+            ]
+          },
+          {
+            "id": "donnees",
+            "titre": "Data collected",
+            "blocs": [
+              {
+                "h3": "Seller data"
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Data",
+                    "Source"
+                  ],
+                  "lignes": [
+                    [
+                      "Email address and password (stored as a hash, never in plain text)",
+                      "Entered by the seller"
+                    ],
+                    [
+                      "Identifier and address of the Google account when signing in with Google; Google also sends the name and photo, kept by our sign-in provider but neither displayed nor used",
+                      "Google"
+                    ],
+                    [
+                      "Display name, name, description, logo, colour and social links of the shop",
+                      "Entered by the seller"
+                    ],
+                    [
+                      "Orders, photos, videos, tracking numbers and internal notes",
+                      "Entered by the seller"
+                    ],
+                    [
+                      "Plan, status and dates of the Pro subscription",
+                      "Sent by Lemon Squeezy"
+                    ],
+                    [
+                      "Active sessions, trusted devices, a hashed fingerprint of the IP address to limit abuse",
+                      "Collected automatically"
+                    ]
+                  ]
+                }
+              },
+              {
+                "h3": "Data of the seller's customers"
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Data",
+                    "Purpose"
+                  ],
+                  "lignes": [
+                    [
+                      "Name or nickname, entered by the seller",
+                      "Identify the order on its page"
+                    ],
+                    [
+                      "Tracking number and carrier, entered by the seller",
+                      "Show the parcel's journey"
+                    ],
+                    [
+                      "Photos and videos of the order, uploaded by the seller",
+                      "Show the order before it ships"
+                    ],
+                    [
+                      "Approval or rejection of the photos, and any comment, given by the customer",
+                      "Passed on to the seller"
+                    ],
+                    [
+                      "Email address, given and confirmed by the customer themselves (optional)",
+                      "Three tracking emails at most — shipped, in transit, delivered — with one-click unsubscribe"
+                    ],
+                    [
+                      "Hashed fingerprint of the IP address and browser, and country, on each visit",
+                      "Count views and limit abuse, without ever keeping the IP address itself"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "An order page can be viewed by anyone who has its link. That is why these pages are not indexed by search engines, appear in no search results and produce no preview in messaging apps."
+              },
+              {
+                "h3": "What DropLink does not collect"
+              },
+              {
+                "ul": [
+                  "No card data: the subscription is collected by Lemon Squeezy, which sends us neither the card number nor its last digits.",
+                  "No postal address: DropLink ships nothing.",
+                  "No price, order amount or seller revenue.",
+                  "No advertising cookie and no third-party tracker."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "finalites",
+            "titre": "Purposes and legal bases",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Purpose",
+                    "Legal basis"
+                  ],
+                  "lignes": [
+                    [
+                      "Create and manage the account, provide order pages and parcel tracking",
+                      "Performance of the contract"
+                    ],
+                    [
+                      "Manage the Pro subscription",
+                      "Performance of the contract"
+                    ],
+                    [
+                      "Keep the email address and dates after an account is deleted",
+                      "Legal obligation of the host"
+                    ],
+                    [
+                      "Handle reports of content",
+                      "Legal obligation of the host"
+                    ],
+                    [
+                      "Secure the service: limit abuse, check that a password has not leaked, recognise trusted devices, log administration access",
+                      "Legitimate interest: protecting the service and its users"
+                    ],
+                    [
+                      "Count the views of an order page for the seller",
+                      "Legitimate interest: informing the seller"
+                    ],
+                    [
+                      "Measure use of the service in pseudonymous form",
+                      "Legitimate interest: improving the product"
+                    ],
+                    [
+                      "Spot duplicate accounts showing the same social links",
+                      "Legitimate interest: enforcing the limits of the free plan"
+                    ],
+                    [
+                      "Send tracking emails to the seller's customer",
+                      "Consent, confirmed by email and withdrawable at any time"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "DropLink sends no marketing offers and makes no automated decision producing legal effects concerning you."
+              }
+            ]
+          },
+          {
+            "id": "destinataires",
+            "titre": "Recipients and processors",
+            "blocs": [
+              {
+                "p": "Data is never sold, rented or shared for advertising. It is passed only to the providers the service needs:"
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Provider",
+                    "Role",
+                    "Location"
+                  ],
+                  "lignes": [
+                    [
+                      "Supabase",
+                      "Database and account sign-in",
+                      "European Union (Paris)"
+                    ],
+                    [
+                      "Railway",
+                      "Application hosting",
+                      "Servers in the European Union; company based in the United States"
+                    ],
+                    [
+                      "Cloudflare",
+                      "Storage of photos and videos, network, receipt of contact emails",
+                      "Company based in the United States"
+                    ],
+                    [
+                      "Resend",
+                      "Sending emails",
+                      "Sent from the European Union; company based in the United States"
+                    ],
+                    [
+                      "PostHog",
+                      "Pseudonymous usage measurement",
+                      "European Union"
+                    ],
+                    [
+                      "Sentry",
+                      "Technical error reports, with no personal data",
+                      "Company based in the United States"
+                    ],
+                    [
+                      "17TRACK",
+                      "Parcel tracking: receives only the tracking number and the carrier",
+                      "Outside the European Union"
+                    ],
+                    [
+                      "Google",
+                      "Sign in with Google, if the seller chooses it",
+                      "European Union and United States"
+                    ],
+                    [
+                      "Lemon Squeezy",
+                      "Collection of the Pro subscription, as a reseller responsible for its own processing",
+                      "Company based in the United States"
+                    ]
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "durees",
+            "titre": "Retention periods",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Data",
+                    "Period"
+                  ],
+                  "lignes": [
+                    [
+                      "Seller account",
+                      "For as long as the account exists"
+                    ],
+                    [
+                      "Email address and sign-up and deletion dates, after the account is deleted",
+                      "One year, then automatic erasure"
+                    ],
+                    [
+                      "Orders, photos and videos",
+                      "Until the seller deletes them, or with the account"
+                    ],
+                    [
+                      "Raw carrier responses",
+                      "Ninety days after the parcel's last movement"
+                    ],
+                    [
+                      "Unconfirmed tracking email request",
+                      "Twenty-four hours"
+                    ],
+                    [
+                      "Confirmed tracking email address",
+                      "Until unsubscribe, or deletion of the order"
+                    ],
+                    [
+                      "Order page views (fingerprints, country)",
+                      "Thirteen months"
+                    ],
+                    [
+                      "Archives of subscription events, without name, email or card",
+                      "Three years"
+                    ],
+                    [
+                      "Log of administration access",
+                      "Kept for the security of the service and the defence of our rights; it cannot be modified and survives the deletion of the account concerned"
+                    ]
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "transferts",
+            "titre": "Transfers outside the European Union",
+            "blocs": [
+              {
+                "p": "When data is processed by a provider established outside the European Union, the transfer is covered by the European Commission's standard contractual clauses or, for providers that have joined it, by the EU–US Data Privacy Framework. 17TRACK receives no personal names: only the tracking number and the carrier."
+              }
+            ]
+          },
+          {
+            "id": "cookies",
+            "titre": "Cookies",
+            "blocs": [
+              {
+                "p": "DropLink uses only cookies strictly necessary for it to work, which require no consent. A visitor who is not signed in receives none."
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Cookie",
+                    "Role",
+                    "Duration"
+                  ],
+                  "lignes": [
+                    [
+                      "Session cookies",
+                      "Keep you signed in",
+                      "Until sign-out, at most four hundred days"
+                    ],
+                    [
+                      "NEXT_LOCALE",
+                      "Remember the chosen language",
+                      "For the browser session"
+                    ],
+                    [
+                      "dl_appareil",
+                      "Recognise a trusted device for two-factor authentication",
+                      "Thirty days"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "No advertising cookie, no audience measurement cookie and no third-party tracker is set."
+              }
+            ]
+          },
+          {
+            "id": "droits",
+            "titre": "Your rights",
+            "blocs": [
+              {
+                "p": "You have the right of access, rectification, erasure, restriction, portability and objection, the right to withdraw your consent at any time, and the right to set instructions for what happens to your data after your death."
+              },
+              {
+                "ul": [
+                  "Sellers: the settings let you edit your information, download your data and delete your account.",
+                  "A seller's customers: every tracking email contains an unsubscribe link. For information a seller has entered about you, contact the seller first; you can also write to us and we will pass it on.",
+                  "By email: contact@droplink.fr. You will receive a reply within one month."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "securite",
+            "titre": "Security",
+            "blocs": [
+              {
+                "ul": [
+                  "Encrypted HTTPS connections across the whole service.",
+                  "Passwords stored as hashes, never in plain text, and checked against known leaks without ever being sent.",
+                  "Each seller's data is isolated in the database: an account can read only its own orders.",
+                  "Photos and videos stored in a private space, served through signed links with limited lifetime.",
+                  "Two-factor authentication available to sellers and mandatory for administration, where every view of an account is logged."
+                ]
+              },
+              {
+                "p": "In the event of a data breach likely to put the people concerned at risk, the CNIL is notified within seventy-two hours and the people concerned are informed."
+              }
+            ]
+          },
+          {
+            "id": "contact",
+            "titre": "Contact and complaints",
+            "blocs": [
+              {
+                "p": "For any question about your data: contact@droplink.fr, or by post to Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt, France."
+              },
+              {
+                "p": "If you are not satisfied with the reply, you can lodge a complaint with the French data protection authority (CNIL), 3 place de Fontenoy, 75007 Paris, France, or at cnil.fr."
+              }
+            ]
+          }
+        ]
+      },
+      "mentions": {
+        "titre": "Legal notice",
+        "pastille": "Legal notice",
+        "chapeau": "Who publishes DropLink, how to reach us, and who hosts the service.",
+        "sections": [
+          {
+            "id": "editeur",
+            "titre": "Publisher",
+            "blocs": [
+              {
+                "p": "DropLink is published by Mahfoud SEDDIKI, sole trader (entrepreneur individuel, EI), 2 square de l'Avre, 92100 Boulogne-Billancourt, France."
+              },
+              {
+                "ul": [
+                  "SIREN: 990 848 004 — SIRET: 990 848 004 00018",
+                  "Registered with the French National Business Register (RNE)",
+                  "VAT not applicable, article 293 B of the French General Tax Code",
+                  "Phone: +33 7 66 96 57 96",
+                  "Email: contact@droplink.fr"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "publication",
+            "titre": "Publication director",
+            "blocs": [
+              {
+                "p": "Mahfoud SEDDIKI."
+              }
+            ]
+          },
+          {
+            "id": "hebergement",
+            "titre": "Hosting",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Provider",
+                    "Role",
+                    "Address"
+                  ],
+                  "lignes": [
+                    [
+                      "Railway Corporation",
+                      "Application hosting, on servers located in the European Union",
+                      "548 Market St PMB 68956, San Francisco, CA 94104, United States"
+                    ],
+                    [
+                      "Supabase Pte. Ltd.",
+                      "Database, located in Paris",
+                      "65 Chulia Street #38-02/03, OCBC Centre, Singapore 049513"
+                    ],
+                    [
+                      "Cloudflare, Inc.",
+                      "Storage of photos and videos",
+                      "101 Townsend St, San Francisco, CA 94107, United States"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "These providers can be reached through the contact forms on their respective websites."
+              }
+            ]
+          },
+          {
+            "id": "propriete",
+            "titre": "Intellectual property",
+            "blocs": [
+              {
+                "p": "The DropLink brand, its logo, interface, texts and code are the property of Mahfoud SEDDIKI. Any reproduction without written permission is prohibited. Content uploaded by sellers remains their property."
+              }
+            ]
+          },
+          {
+            "id": "signaler",
+            "titre": "Reporting content",
+            "blocs": [
+              {
+                "p": "To report unlawful content hosted on DropLink, write to contact@droplink.fr. Every report is reviewed by a person."
+              },
+              {
+                "p": "You can also use the report page, linked at the bottom of every page of the site.",
+                "si": "signalement"
+              }
+            ]
+          },
+          {
+            "id": "donnees",
+            "titre": "Personal data",
+            "blocs": [
+              {
+                "p": "The processing of personal data is described in the privacy policy, and the use of the service in the terms and conditions of use."
+              }
+            ]
+          }
+        ]
+      }
+    }
   },
   "connexion": {
     "titre": "Welcome back",
@@ -1063,7 +1766,8 @@
     },
     "pied": {
       "conditions": "Terms of use",
-      "confidentialite": "Privacy policy"
+      "confidentialite": "Privacy policy",
+      "mentions": "Legal notice"
     },
     "pourClient": "for {nom}",
     "lienInvalideSousTitre": "This tracking link no longer leads to an order.",
@@ -1930,7 +2634,7 @@
     "analyses": "Analytics",
     "analysesTexte": "Analytics measure your use of DropLink and the effectiveness of your tracking. No revenue data appears: DropLink does not know your prices.",
     "notifications": "Notifications",
-    "notificationsTexte": "When you fill in your customer's email, they get a message when the parcel is delivered. You stay in control: the email is optional, and it never creates an account.",
+    "notificationsTexte": "Your customer can ask, from their order page, to be notified by email. They confirm their address, then receive at most three messages — shipped, in transit, delivered —, each with an unsubscribe link. They never create an account.",
     "parametres": "Settings",
     "plans": "Free and Pro",
     "plansTexte": "DropLink has a free plan and a Pro plan. The free plan allows {gratuit} orders in total — a lifetime quota, it does not reset each month. Pro raises it to {pro} orders per month and removes the DropLink mention from the page your customer sees.",
@@ -1957,7 +2661,7 @@
     "faqQ6": "What does my customer see if I revoked the link?",
     "faqR6": "A DropLink page explaining the link is no longer valid and inviting them to contact you. It reveals nothing about your shop.",
     "support": "Contacting support",
-    "supportTexte": "A question this page does not answer? Write to us from the report page: every message reaches the product team.",
+    "supportTexte": "A question not answered here? Write to us at contact@droplink.fr: every message reaches the product team.",
     "ctaTitre": "Ready to create your first link?",
     "ctaTexte": "Free account, no credit card, ready in under a minute.",
     "ctaBouton": "Create my account",

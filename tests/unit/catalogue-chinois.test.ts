@@ -158,6 +158,46 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["passerPro.tableau.adresseGratuit", "Une adresse : elle doit ressembler à une adresse."],
 ]);
 
+/*
+ * LES PAGES LÉGALES (29/09/2026) portent deux familles de valeurs sans
+ * idéogramme, et aucune n'est une traduction manquante.
+ *
+ * 1. LA STRUCTURE du document, recopiée du kit : l'ancre de section (`id`), le
+ *    ton d'un encart (`ton`), la condition d'affichage d'un bloc (`si`). Ce sont
+ *    des identifiants, jamais rendus comme texte — `PageLegale` les valide.
+ * 2. DES NOMS PROPRES, déclarés PAR VALEUR et non par chemin : les prestataires,
+ *    les sociétés hébergeuses, leurs adresses postales, les noms de cookies. Un
+ *    chemin d'index de tableau changerait au premier bloc ajouté ; la valeur,
+ *    elle, dit exactement ce qui est admis. Toute AUTRE valeur latine sous
+ *    `legal.pages` reste refusée.
+ */
+const STRUCTURE_LEGALE = /^legal\.pages\..+\.(id|ton|si)$/;
+const NOMS_PROPRES_LEGAUX: ReadonlyMap<string, string> = new Map([
+  ["Supabase", "Prestataire, nom propre."],
+  ["Railway", "Prestataire, nom propre."],
+  ["Cloudflare", "Prestataire, nom propre."],
+  ["Resend", "Prestataire, nom propre."],
+  ["PostHog", "Prestataire, nom propre."],
+  ["Sentry", "Prestataire, nom propre."],
+  ["17TRACK", "Prestataire, nom propre."],
+  ["Google", "Prestataire, nom propre."],
+  ["Lemon Squeezy", "Prestataire, nom propre."],
+  ["NEXT_LOCALE", "Nom technique d'un cookie : c'est lui qu'on lit dans le navigateur."],
+  ["dl_appareil", "Nom technique d'un cookie : c'est lui qu'on lit dans le navigateur."],
+  ["Railway Corporation", "Raison sociale de l'hébergeur, telle qu'immatriculée."],
+  ["Supabase Pte. Ltd.", "Raison sociale de l'hébergeur, telle qu'immatriculée."],
+  ["Cloudflare, Inc.", "Raison sociale de l'hébergeur, telle qu'immatriculée."],
+  ["548 Market St PMB 68956, San Francisco, CA 94104, United States", "Adresse postale : elle s'écrit dans la langue du pays."],
+  ["65 Chulia Street #38-02/03, OCBC Centre, Singapore 049513", "Adresse postale : elle s'écrit dans la langue du pays."],
+  ["101 Townsend St, San Francisco, CA 94107, United States", "Adresse postale : elle s'écrit dans la langue du pays."],
+]);
+
+function admiseSansIdeogramme(cle: string, valeur: string): boolean {
+  if (SANS_IDEOGRAMME.has(cle)) return true;
+  if (!cle.startsWith("legal.pages.")) return false;
+  return STRUCTURE_LEGALE.test(cle) || NOMS_PROPRES_LEGAUX.has(valeur);
+}
+
 function catalogue(): ReadonlyMap<string, string> {
   const brut = readFileSync(join(process.cwd(), "messages", "zh-CN.json"), "utf8");
   const plat = new Map<string, string>();
@@ -183,7 +223,7 @@ describe("Le catalogue chinois est écrit en chinois", () => {
 
   test("chaque chaîne porte des idéogrammes, aux exceptions déclarées près", () => {
     const fautives = [...ZH.entries()]
-      .filter(([cle, valeur]) => !IDEOGRAMME.test(valeur) && !SANS_IDEOGRAMME.has(cle))
+      .filter(([cle, valeur]) => !IDEOGRAMME.test(valeur) && !admiseSansIdeogramme(cle, valeur))
       .map(([cle, valeur]) => `${cle} = ${JSON.stringify(valeur)}`);
 
     expect(
@@ -209,6 +249,19 @@ describe("Le catalogue chinois est écrit en chinois", () => {
       `Exceptions devenues inutiles : ${inutiles.join(", ")}. Les retirer — une ` +
         "exception périmée couvre le retour du défaut qu'elle décrivait.",
     ).toEqual([]);
+  });
+
+  test("chaque nom propre déclaré des pages légales y figure encore", () => {
+    const presents = new Set(
+      [...ZH.entries()].filter(([cle]) => cle.startsWith("legal.pages.")).map(([, valeur]) => valeur),
+    );
+    // La sonde lit réellement les pages légales : sans elles, tout nom serait « absent ».
+    expect(presents.size, "aucune page légale dans le catalogue chinois").toBeGreaterThan(100);
+    const perimes = [...NOMS_PROPRES_LEGAUX.keys()].filter((nom) => !presents.has(nom));
+    expect(perimes, `Noms propres déclarés et absents des pages légales : ${perimes.join(", ")}`).toEqual([]);
+    // Et la structure admise n'est pas une porte ouverte : une clé de texte n'y entre pas.
+    expect(STRUCTURE_LEGALE.test("legal.pages.mentions.sections.0.titre")).toBe(false);
+    expect(STRUCTURE_LEGALE.test("legal.pages.mentions.sections.0.id")).toBe(true);
   });
 
   test("CONTRE-TEST : la sonde sait reconnaître un idéogramme", () => {

@@ -81,7 +81,7 @@ const RACINE_APP = join(process.cwd(), "src", "app");
  * `/docs`. L'indexer est l'intention : c'est la page qui répond à « combien coûte
  * DropLink », et Lemon Squeezy la demande avant d'ouvrir les paiements.
  */
-const CHEMINS_ATTENDUS = ["", "/tarifs", "/conditions", "/confidentialite", "/signalement", "/docs"] as const;
+const CHEMINS_ATTENDUS = ["", "/tarifs", "/conditions", "/confidentialite", "/mentions-legales", "/signalement", "/docs"] as const;
 
 /** Les chemins réellement déclarés dans `src/app/sitemap.ts`, lus dans le fichier. */
 function cheminsDuSitemap(): string[] {

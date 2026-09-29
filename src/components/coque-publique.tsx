@@ -98,6 +98,9 @@ export async function CoquePublique({
           <Link href={`/${locale}/confidentialite`} className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0">
             {l("piedConfidentialite")}
           </Link>
+          <Link href={`/${locale}/mentions-legales`} className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0">
+            {l("piedMentions")}
+          </Link>
           {signalable ? (
             <Link href={`/${locale}/signalement`} className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0">
               {l("piedSignaler")}

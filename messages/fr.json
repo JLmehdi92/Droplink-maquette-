@@ -174,16 +174,15 @@
       "ago3": "Il y a 3h",
       "ago5": "Il y a 5h",
       "ago7": "Il y a 7h",
-      "footBlog": "Blog"
+      "footBlog": "Blog",
+      "footLegal": "Mentions légales"
     }
   },
   "legal": {
     "conditionsTitre": "Conditions d'utilisation",
     "confidentialiteTitre": "Politique de confidentialité",
-    "confidentialiteChapeau": "Ce que nous collectons, pourquoi, et pendant combien de temps.",
     "signalementTitre": "Signaler un contenu",
     "signalementSurTitre": "Notification et retrait",
-    "misAJourLe": "Dernière mise à jour",
     "sommaireTitre": "Sommaire",
     "encartSignalerTitre": "Un contenu à signaler ?",
     "encartSignalerTexte": "Utilisez le formulaire dédié : nous traitons chaque signalement.",
@@ -192,44 +191,6 @@
     "piedConditions": "Conditions",
     "piedConfidentialite": "Confidentialité",
     "piedSignaler": "Signaler un contenu",
-    "conditions": {
-      "objetTitre": "Objet du service",
-      "objetP1": "DropLink met à disposition des vendeurs un espace leur permettant de créer, pour chacune de leurs commandes, une page privée accessible par un lien non devinable. Cette page rassemble les photos et vidéos déposées par le vendeur ainsi que l'état d'acheminement du colis.",
-      "objetP2": "DropLink n'intervient à aucun moment dans la transaction entre le vendeur et son client : aucun paiement n'est traité, encaissé ni facilité par le service.",
-      "compteTitre": "Compte et accès",
-      "compteP1": "La création de commandes suppose un compte. La consultation d'une page par le destinataire du lien n'en suppose aucun : le destinataire n'est ni inscrit, ni identifié, ni sollicité.",
-      "compteP2": "Le lien d'une commande est immuable. Le vendeur peut à tout moment le révoquer, ce qui le rend définitivement inopérant et en génère un nouveau.",
-      "contenusTitre": "Contenus que vous publiez",
-      "contenusP1": "Le vendeur reste seul responsable des contenus qu'il dépose et garantit disposer des droits nécessaires. Sont notamment prohibés les contenus contrefaisants, illicites, ou portant atteinte aux droits de tiers.",
-      "contenusP2": "DropLink agit en qualité d'hébergeur : le service n'exerce aucun contrôle a priori sur les contenus déposés, et ne les sélectionne pas.",
-      "retraitTitre": "Notification et retrait",
-      "retraitP1": "Toute personne peut signaler un contenu qu'elle estime illicite. Chaque signalement fait l'objet d'un examen, et le compte concerné peut être suspendu à titre conservatoire — ses pages cessant alors immédiatement d'être servies.",
-      "retraitP2": "La suspension est réversible : la réactivation rétablit les pages sur les mêmes liens.",
-      "disponibiliteTitre": "Disponibilité",
-      "disponibiliteP1": "Le service est fourni en l'état, pendant sa phase de validation, à titre gratuit et sans engagement de disponibilité. Les informations de suivi proviennent des transporteurs : nous n'en garantissons ni l'exactitude ni la fraîcheur.",
-      "donneesTitre": "Données personnelles",
-      "donneesP1": "Le traitement des données est décrit dans la politique de confidentialité. Le nom du destinataire est un texte libre saisi par le vendeur ; il ne constitue ni un compte ni un identifiant.",
-      "resiliationTitre": "Résiliation",
-      "resiliationP1": "Le vendeur peut cesser d'utiliser le service à tout moment.",
-      "droitTitre": "Droit applicable",
-      "retraitFormulaire": "Le signalement se fait au moyen du formulaire prévu à cet effet.",
-      "disponibiliteP2": "Le service peut être interrompu pour maintenance, faire l’objet d’évolutions, ou cesser. Nous ne sommes pas responsables des conséquences d’une indisponibilité, d’une perte de données due à un incident technique, ni d’une information de suivi erronée transmise par un transporteur.",
-      "resiliationP2": "La suppression du compte est immédiate et emporte celle des commandes, des médias et des suivis : les liens déjà envoyés cessent de fonctionner. Seules l’adresse e-mail et les dates d’inscription et de suppression sont conservées un an, au titre des obligations de l’hébergeur, puis effacées automatiquement.",
-      "droitP1": "Les présentes conditions sont soumises au droit français. À défaut de résolution amiable, les tribunaux français sont compétents."
-    },
-    "confidentialite": {
-      "collecteTitre": "Ce que nous collectons",
-      "collecteP1": "Pour un vendeur : son adresse email, le nom et les réglages de sa boutique, et les contenus qu'il dépose. S'il se connecte avec Google : l'identifiant et l'adresse email de son compte Google ; Google transmet aussi son nom et sa photo de profil, que DropLink n'affiche ni n'utilise. Pour un destinataire : rien qui l'identifie, sauf s'il demande lui-même à être prévenu par e-mail — son adresse sert alors uniquement aux e-mails de suivi de cette commande. Une consultation de page enregistre une empreinte salée de l'adresse IP et du navigateur, jamais les valeurs elles-mêmes.",
-      "pasDeCompteTitre": "Le destinataire n'a pas de compte",
-      "pasDeCompteP1": "Consulter une page ne crée aucun compte, n'exige aucune adresse et n'installe aucun traceur publicitaire. Le nom affiché sur la page est un texte libre saisi par le vendeur : il ne désigne aucun utilisateur de notre service.",
-      "indexationTitre": "Rien n'est indexé",
-      "indexationP1": "Les pages de commande portent une consigne de non-indexation, ne figurent dans aucune galerie et ne sont atteignables par aucune recherche interne. Aucun aperçu enrichi n'est produit pour les messageries : un aperçu montrerait le contenu à qui n'ouvre pas le lien.",
-      "conservationTitre": "Combien de temps",
-      "conservationP1": "Les contenus d'une commande sont conservés tant que le vendeur les conserve. Les réponses brutes des transporteurs sont purgées quatre-vingt-dix jours après le dernier mouvement du colis. Une adresse de suivi par e-mail n'est utilisée qu'après confirmation par son titulaire, pour trois e-mails au plus (expédition, transit, livraison), et chaque e-mail permet de s'en désinscrire en un clic ; une demande non confirmée est effacée après vingt-quatre heures. Les traces d'administration sont conservées et survivent à la suppression du compte concerné.",
-      "droitsTitre": "Vos droits",
-      "droitsP1": "Accès, rectification, effacement, opposition. Écrivez-nous à l'adresse de contact indiquée sur la page de signalement.",
-      "conservationP2": "À la suppression du compte, seules l’adresse e-mail et les dates d’inscription et de suppression sont conservées un an, au titre des obligations de l’hébergeur, puis effacées automatiquement."
-    },
     "signalement": {
       "intro": "Si une page hébergée chez nous porte atteinte à vos droits ou vous paraît illicite, décrivez-la ici. Chaque signalement est examiné par une personne.",
       "etape1Titre": "Vous envoyez le lien concerné",
@@ -255,15 +216,757 @@
       "adresseDirecte": "Ou écrivez directement à"
     },
     "conditionsMetaTitre": "Conditions d'utilisation — DropLink",
-    "conditionsMetaDescription": "Les conditions d'utilisation de DropLink : ce que le service fait, ce qu'il n'héberge pas, et les règles que chaque vendeur accepte en créant un compte.",
+    "conditionsMetaDescription": "Les conditions d'utilisation de DropLink : le service, le compte vendeur, les contenus, l'abonnement Gratuit et Pro, la résiliation et la responsabilité.",
     "confidentialiteMetaTitre": "Politique de confidentialité — DropLink",
-    "confidentialiteMetaDescription": "Quelles données DropLink conserve, combien de temps, et pourquoi le destinataire d'un lien n'a jamais de compte ni de mot de passe chez nous.",
+    "confidentialiteMetaDescription": "Les données que DropLink traite, pourquoi, combien de temps, avec quels prestataires, et vos droits — vendeurs comme clients des vendeurs.",
     "signalementMetaTitre": "Signaler un contenu — DropLink",
     "signalementMetaDescription": "Signaler un contenu hébergé sur DropLink. Décrivez le lien concerné et le motif : chaque signalement est lu, et une page peut être coupée sans délai.",
     "pastille": "Légal",
     "accueil": "Accueil",
-    "editeur": "Éditeur :",
-    "editeurNom": "DropLink"
+    "editeurNom": "Mahfoud SEDDIKI",
+    "mentionsTitre": "Mentions légales",
+    "piedMentions": "Mentions légales",
+    "mentionsMetaTitre": "Mentions légales — DropLink",
+    "mentionsMetaDescription": "Les mentions légales de DropLink : éditeur, directeur de la publication, hébergeurs et contact.",
+    "misAJourDate": "Dernière mise à jour : {date}",
+    "editeurLigne": "Éditeur : {nom}",
+    "pages": {
+      "conditions": {
+        "titre": "Conditions générales d'utilisation",
+        "pastille": "Conditions d'utilisation",
+        "chapeau": "Ces conditions encadrent l'utilisation de DropLink, service en ligne qui permet à un vendeur de créer une page de suivi par commande. En créant un compte, vous les acceptez.",
+        "sections": [
+          {
+            "id": "objet",
+            "titre": "Objet",
+            "blocs": [
+              {
+                "p": "Les présentes conditions régissent l'accès au service DropLink, accessible à l'adresse droplink.fr, et son utilisation. Elles constituent un contrat entre Mahfoud SEDDIKI, entrepreneur individuel, éditeur du service (voir les mentions légales), et toute personne qui crée un compte, désignée ci-après « le vendeur »."
+              },
+              {
+                "p": "Le client du vendeur qui consulte une page de commande n'a pas de compte et n'est pas partie à ce contrat. Sa relation commerciale est établie avec le vendeur, pas avec DropLink."
+              }
+            ]
+          },
+          {
+            "id": "service",
+            "titre": "Le service",
+            "blocs": [
+              {
+                "p": "DropLink est un service de suivi et de communication, pas une place de marché. Le vendeur crée une commande, y ajoute des photos ou vidéos et un numéro de suivi ; DropLink génère une page privée, accessible par un lien non devinable, et interroge le transporteur pour mettre le statut à jour."
+              },
+              {
+                "h3": "Ce que le service ne comprend pas"
+              },
+              {
+                "ul": [
+                  "Aucune vente et aucun encaissement entre le vendeur et son client : DropLink ne connaît ni les prix ni les marges du vendeur.",
+                  "Aucun acheminement de colis : DropLink n'est ni transporteur, ni commissionnaire de transport.",
+                  "Aucune garantie sur les délais de livraison, qui relèvent du transporteur choisi par le vendeur."
+                ]
+              },
+              {
+                "p": "Le lien d'une commande ne change jamais. Le vendeur peut le révoquer à tout moment, ce qui le rend définitivement inopérant et en génère un nouveau."
+              }
+            ]
+          },
+          {
+            "id": "compte",
+            "titre": "Compte",
+            "blocs": [
+              {
+                "ul": [
+                  "La création d'un compte requiert une adresse e-mail valide, ou une connexion avec Google.",
+                  "Le vendeur garantit l'exactitude des informations fournies et les maintient à jour.",
+                  "Les identifiants sont personnels et confidentiels. Le vendeur est responsable de toute activité réalisée depuis son compte.",
+                  "La double authentification est disponible dans les paramètres et recommandée.",
+                  "Le service est ouvert aux vendeurs professionnels comme aux particuliers, à condition d'être majeur."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "contenus",
+            "titre": "Vos contenus",
+            "blocs": [
+              {
+                "p": "Les photos, vidéos et informations que le vendeur dépose restent sa propriété. Le vendeur concède à DropLink la licence strictement nécessaire à l'exécution du service : stocker ces fichiers et les afficher sur la page de commande accessible par le lien. Cette licence prend fin avec la suppression des contenus ou du compte."
+              },
+              {
+                "p": "Le vendeur garantit détenir les droits sur les contenus publiés, et s'engage à ne pas y faire figurer de données sensibles ni d'éléments identifiants qui ne seraient pas nécessaires au suivi de la commande. DropLink agit en qualité d'hébergeur : il n'exerce aucun contrôle préalable sur les contenus déposés."
+              }
+            ]
+          },
+          {
+            "id": "interdits",
+            "titre": "Usages interdits",
+            "blocs": [
+              {
+                "ul": [
+                  "Publier des contenus illicites, contrefaisants, violents, haineux ou à caractère sexuel.",
+                  "Utiliser le service pour tromper un client sur la nature, l'origine ou l'existence d'un envoi.",
+                  "Saisir des numéros de suivi fictifs ou appartenant à des envois tiers.",
+                  "Tenter d'accéder aux commandes d'un autre compte, ou d'énumérer les liens de commande.",
+                  "Contourner les limites du plan souscrit, automatiser des requêtes en masse ou dégrader le service."
+                ]
+              },
+              {
+                "encart": {
+                  "ton": "alerte",
+                  "titre": "Sanction",
+                  "texte": "En cas de manquement, l'accès au compte peut être suspendu immédiatement, sans préjudice des actions judiciaires possibles. La suspension est réversible : la réactivation rétablit les pages sur les mêmes liens."
+                }
+              }
+            ]
+          },
+          {
+            "id": "signalement",
+            "titre": "Signalement et retrait",
+            "blocs": [
+              {
+                "p": "Toute personne peut signaler un contenu qu'elle estime illicite en écrivant à contact@droplink.fr. Chaque signalement est examiné par une personne, et le compte concerné peut être suspendu à titre conservatoire : ses pages cessent alors immédiatement d'être servies."
+              },
+              {
+                "p": "Le signalement peut aussi se faire depuis la page de signalement, accessible en bas de chaque page du site.",
+                "si": "signalement"
+              },
+              {
+                "p": "Le vendeur est informé du motif d'un blocage et peut le contester depuis son espace."
+              }
+            ]
+          },
+          {
+            "id": "abonnement",
+            "titre": "Abonnement",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Offre",
+                    "Gratuit",
+                    "Pro"
+                  ],
+                  "lignes": [
+                    [
+                      "Prix",
+                      "Gratuit",
+                      "{prixPro} par mois, toutes taxes comprises"
+                    ],
+                    [
+                      "Commandes",
+                      "15 au total, pour toute la vie du compte",
+                      "300 par mois"
+                    ],
+                    [
+                      "Colis suivis automatiquement",
+                      "15 au total, pour toute la vie du compte",
+                      "300 par mois"
+                    ],
+                    [
+                      "Engagement",
+                      "Aucun",
+                      "Aucun : mensuel, sans durée minimale"
+                    ]
+                  ]
+                }
+              },
+              {
+                "ul": [
+                  "L'abonnement Pro est encaissé par Lemon Squeezy, revendeur et émetteur de la facture, selon ses propres conditions d'achat. DropLink ne voit et ne conserve aucune donnée de carte bancaire.",
+                  "Il se renouvelle chaque mois jusqu'à sa résiliation.",
+                  "Un paiement échoué ramène le compte au plan gratuit ; un paiement réussi rétablit le plan Pro.",
+                  "Aucun remboursement n'est effectué pour une période entamée."
+                ]
+              },
+              {
+                "p": "Si vous êtes un consommateur, vous bénéficiez du droit de rétractation prévu par la loi ; il s'exerce auprès de Lemon Squeezy, revendeur de l'abonnement, selon ses conditions d'achat."
+              }
+            ]
+          },
+          {
+            "id": "resiliation",
+            "titre": "Résiliation",
+            "blocs": [
+              {
+                "p": "Le vendeur peut résilier son abonnement Pro à tout moment depuis son espace client Lemon Squeezy : le plan Pro reste actif jusqu'à la fin de la période déjà payée."
+              },
+              {
+                "p": "Le vendeur peut supprimer son compte à tout moment depuis les paramètres, une fois son abonnement éventuel résilié : DropLink refuse la suppression tant qu'un prélèvement peut encore avoir lieu. La suppression est immédiate et emporte les commandes, les médias et les suivis ; les liens déjà envoyés cessent de fonctionner. Seules l'adresse e-mail et les dates d'inscription et de suppression sont conservées un an, au titre des obligations de l'hébergeur, puis effacées automatiquement."
+              },
+              {
+                "p": "DropLink peut résilier un compte en cas de manquement aux présentes conditions, ou avec un préavis raisonnable en cas d'arrêt du service."
+              }
+            ]
+          },
+          {
+            "id": "disponibilite",
+            "titre": "Disponibilité",
+            "blocs": [
+              {
+                "p": "DropLink s'efforce d'assurer un accès continu au service, sans garantie d'absence d'interruption. Le service peut être interrompu pour maintenance, évoluer ou cesser."
+              },
+              {
+                "p": "La mise à jour automatique des statuts dépend des informations transmises par les transporteurs. Une donnée indisponible, tardive ou erronée côté transporteur ne peut être imputée à DropLink."
+              }
+            ]
+          },
+          {
+            "id": "propriete",
+            "titre": "Propriété intellectuelle",
+            "blocs": [
+              {
+                "p": "La marque DropLink, son logo, son interface, ses textes et son code sont la propriété de Mahfoud SEDDIKI. Aucune reproduction, extraction ou réutilisation n'est autorisée sans accord écrit. Le vendeur conserve l'entière propriété de sa marque, de son logo et de ses contenus."
+              }
+            ]
+          },
+          {
+            "id": "responsabilite",
+            "titre": "Responsabilité",
+            "blocs": [
+              {
+                "ul": [
+                  "DropLink répond de la fourniture du service : hébergement des contenus, génération des liens, restitution des statuts transmis par les transporteurs.",
+                  "DropLink ne répond ni de la réalité de la vente, ni de la conformité des produits, ni des délais d'acheminement, ni des litiges entre un vendeur et son client.",
+                  "Le vendeur reste seul responsable, à l'égard de ses clients, des informations qu'il publie sur ses pages de commande.",
+                  "Sous réserve des dispositions impératives protégeant les consommateurs, la responsabilité de DropLink est limitée aux dommages directs et prévisibles, dans la limite des sommes versées au titre des douze derniers mois."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "donnees",
+            "titre": "Données personnelles",
+            "blocs": [
+              {
+                "p": "Le traitement des données personnelles est décrit dans la politique de confidentialité, qui précise les données collectées, leurs finalités, leurs durées de conservation et les droits des personnes concernées."
+              },
+              {
+                "h3": "Données des clients du vendeur (article 28 du RGPD)"
+              },
+              {
+                "p": "Pour les informations que le vendeur saisit ou dépose sur ses clients — nom, photos, numéro de suivi —, le vendeur est responsable du traitement et DropLink agit en sous-traitant, sur ses seules instructions : fournir les pages de commande et le suivi des colis. À ce titre, DropLink :"
+              },
+              {
+                "ul": [
+                  "n'utilise ces données que pour fournir le service ;",
+                  "les protège par des mesures de sécurité adaptées et impose les mêmes obligations à ses propres prestataires ;",
+                  "fait appel aux prestataires listés dans la politique de confidentialité ;",
+                  "aide le vendeur à répondre aux demandes de ses clients ;",
+                  "supprime les données à la suppression des commandes ou du compte ;",
+                  "informe le vendeur de toute violation de données qui le concerne."
+                ]
+              },
+              {
+                "p": "Il appartient au vendeur d'informer ses clients de ce traitement."
+              }
+            ]
+          },
+          {
+            "id": "modification",
+            "titre": "Modification des conditions",
+            "blocs": [
+              {
+                "p": "Ces conditions peuvent être modifiées. Toute évolution substantielle est notifiée par e-mail ou dans l'application au moins trente jours avant son entrée en vigueur. La poursuite de l'utilisation du service après cette date vaut acceptation. La version en vigueur est datée en tête de page."
+              }
+            ]
+          },
+          {
+            "id": "droit",
+            "titre": "Droit applicable et litiges",
+            "blocs": [
+              {
+                "p": "Les présentes conditions sont soumises au droit français. En cas de différend, les parties recherchent d'abord une solution amiable. À défaut, un litige avec un vendeur professionnel relève des tribunaux du ressort de Nanterre ; un consommateur conserve le bénéfice des règles de compétence et des dispositions protectrices prévues par la loi."
+              },
+              {
+                "p": "Pour toute question sur ces conditions : contact@droplink.fr."
+              }
+            ]
+          }
+        ]
+      },
+      "confidentialite": {
+        "titre": "Politique de confidentialité",
+        "pastille": "Politique de confidentialité",
+        "chapeau": "DropLink traite deux catégories de données : celles du vendeur qui possède un compte, et celles des clients de ce vendeur, qui consultent une page de commande sans jamais avoir de compte. Cette page décrit lesquelles, pourquoi, pendant combien de temps, et les droits dont vous disposez.",
+        "sections": [
+          {
+            "id": "responsable",
+            "titre": "Responsable du traitement",
+            "blocs": [
+              {
+                "p": "Le responsable des traitements décrits ici est Mahfoud SEDDIKI, entrepreneur individuel, 2 square de l'Avre, 92100 Boulogne-Billancourt, France (SIREN 990 848 004). Pour toute question ou demande sur vos données : contact@droplink.fr."
+              },
+              {
+                "encart": {
+                  "ton": "info",
+                  "titre": "Deux rôles distincts",
+                  "texte": "Pour les données de compte du vendeur, DropLink est responsable de traitement. Pour les données des clients du vendeur (le nom saisi, les photos d'une commande), DropLink agit comme sous-traitant du vendeur : c'est le vendeur qui décide de ce qu'il saisit et de son usage."
+                }
+              }
+            ]
+          },
+          {
+            "id": "donnees",
+            "titre": "Données collectées",
+            "blocs": [
+              {
+                "h3": "Données du vendeur"
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Donnée",
+                    "Origine"
+                  ],
+                  "lignes": [
+                    [
+                      "Adresse e-mail et mot de passe (stocké sous forme de condensat, jamais en clair)",
+                      "Saisis par le vendeur"
+                    ],
+                    [
+                      "Identifiant et adresse du compte Google en cas de connexion avec Google ; Google transmet aussi le nom et la photo, conservés par notre prestataire de connexion mais ni affichés ni utilisés",
+                      "Google"
+                    ],
+                    [
+                      "Nom affiché, nom, description, logo, couleur et réseaux sociaux de la boutique",
+                      "Saisis par le vendeur"
+                    ],
+                    [
+                      "Commandes, photos, vidéos, numéros de suivi et notes internes",
+                      "Saisis par le vendeur"
+                    ],
+                    [
+                      "Plan, état et dates de l'abonnement Pro",
+                      "Transmis par Lemon Squeezy"
+                    ],
+                    [
+                      "Sessions actives, appareils de confiance, empreinte chiffrée de l'adresse IP pour limiter les abus",
+                      "Collectés automatiquement"
+                    ]
+                  ]
+                }
+              },
+              {
+                "h3": "Données des clients du vendeur"
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Donnée",
+                    "Usage"
+                  ],
+                  "lignes": [
+                    [
+                      "Nom ou pseudo, saisi par le vendeur",
+                      "Identifier la commande sur sa page"
+                    ],
+                    [
+                      "Numéro de suivi et transporteur, saisis par le vendeur",
+                      "Afficher l'acheminement du colis"
+                    ],
+                    [
+                      "Photos et vidéos de la commande, déposées par le vendeur",
+                      "Montrer la commande avant son expédition"
+                    ],
+                    [
+                      "Validation ou refus des photos, et commentaire éventuel, donnés par le client",
+                      "Transmis au vendeur"
+                    ],
+                    [
+                      "Adresse e-mail, donnée et confirmée par le client lui-même (facultatif)",
+                      "Trois e-mails de suivi au plus — expédition, transit, livraison —, avec désinscription en un clic"
+                    ],
+                    [
+                      "Empreinte chiffrée de l'adresse IP et du navigateur, et pays, à chaque consultation",
+                      "Compter les vues et limiter les abus, sans jamais conserver l'adresse IP elle-même"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "Une page de commande est accessible à toute personne qui détient son lien. C'est pourquoi ces pages ne sont pas indexées par les moteurs de recherche, n'apparaissent dans aucune recherche et ne produisent pas d'aperçu dans les messageries."
+              },
+              {
+                "h3": "Ce que DropLink ne collecte pas"
+              },
+              {
+                "ul": [
+                  "Aucune donnée de carte bancaire : l'abonnement est encaissé par Lemon Squeezy, qui ne nous en transmet ni le numéro ni les derniers chiffres.",
+                  "Aucune adresse postale : DropLink n'expédie rien.",
+                  "Aucun prix, montant de commande ou chiffre d'affaires du vendeur.",
+                  "Aucun cookie publicitaire et aucun traceur tiers."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "finalites",
+            "titre": "Finalités et bases légales",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Finalité",
+                    "Base légale"
+                  ],
+                  "lignes": [
+                    [
+                      "Créer et gérer le compte, fournir les pages de commande et le suivi des colis",
+                      "Exécution du contrat"
+                    ],
+                    [
+                      "Gérer l'abonnement Pro",
+                      "Exécution du contrat"
+                    ],
+                    [
+                      "Conserver l'adresse e-mail et les dates après la suppression d'un compte",
+                      "Obligation légale de l'hébergeur"
+                    ],
+                    [
+                      "Traiter les signalements de contenus",
+                      "Obligation légale de l'hébergeur"
+                    ],
+                    [
+                      "Sécuriser le service : limiter les abus, vérifier qu'un mot de passe n'a pas fuité, reconnaître les appareils de confiance, journaliser les accès de l'administration",
+                      "Intérêt légitime : protéger le service et ses utilisateurs"
+                    ],
+                    [
+                      "Compter les vues d'une page de commande pour le vendeur",
+                      "Intérêt légitime : informer le vendeur"
+                    ],
+                    [
+                      "Mesurer l'usage du service sous forme pseudonyme",
+                      "Intérêt légitime : améliorer le produit"
+                    ],
+                    [
+                      "Repérer les comptes en double qui affichent les mêmes réseaux sociaux",
+                      "Intérêt légitime : faire respecter les limites du plan gratuit"
+                    ],
+                    [
+                      "Envoyer les e-mails de suivi au client du vendeur",
+                      "Consentement, confirmé par e-mail et retirable à tout moment"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "DropLink n'envoie aucune offre commerciale et ne prend aucune décision automatisée produisant des effets juridiques à votre égard."
+              }
+            ]
+          },
+          {
+            "id": "destinataires",
+            "titre": "Destinataires et sous-traitants",
+            "blocs": [
+              {
+                "p": "Les données ne sont ni vendues, ni louées, ni cédées à des fins publicitaires. Elles sont transmises uniquement aux prestataires nécessaires au service :"
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Prestataire",
+                    "Rôle",
+                    "Localisation"
+                  ],
+                  "lignes": [
+                    [
+                      "Supabase",
+                      "Base de données et connexion aux comptes",
+                      "Union européenne (Paris)"
+                    ],
+                    [
+                      "Railway",
+                      "Hébergement de l'application",
+                      "Serveurs dans l'Union européenne ; société établie aux États-Unis"
+                    ],
+                    [
+                      "Cloudflare",
+                      "Stockage des photos et vidéos, réseau, réception des e-mails de contact",
+                      "Société établie aux États-Unis"
+                    ],
+                    [
+                      "Resend",
+                      "Envoi des e-mails",
+                      "Envois depuis l'Union européenne ; société établie aux États-Unis"
+                    ],
+                    [
+                      "PostHog",
+                      "Mesure d'usage pseudonyme",
+                      "Union européenne"
+                    ],
+                    [
+                      "Sentry",
+                      "Rapports d'erreurs techniques, sans donnée personnelle",
+                      "Société établie aux États-Unis"
+                    ],
+                    [
+                      "17TRACK",
+                      "Suivi des colis : reçoit uniquement le numéro de suivi et le transporteur",
+                      "Hors Union européenne"
+                    ],
+                    [
+                      "Google",
+                      "Connexion avec Google, si le vendeur la choisit",
+                      "Union européenne et États-Unis"
+                    ],
+                    [
+                      "Lemon Squeezy",
+                      "Encaissement de l'abonnement Pro, en tant que revendeur responsable de ses propres traitements",
+                      "Société établie aux États-Unis"
+                    ]
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "durees",
+            "titre": "Durées de conservation",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Donnée",
+                    "Durée"
+                  ],
+                  "lignes": [
+                    [
+                      "Compte vendeur",
+                      "Toute la durée du compte"
+                    ],
+                    [
+                      "Adresse e-mail et dates d'inscription et de suppression, après la suppression du compte",
+                      "Un an, puis effacement automatique"
+                    ],
+                    [
+                      "Commandes, photos et vidéos",
+                      "Jusqu'à leur suppression par le vendeur, ou avec le compte"
+                    ],
+                    [
+                      "Réponses brutes des transporteurs",
+                      "Quatre-vingt-dix jours après le dernier mouvement du colis"
+                    ],
+                    [
+                      "Demande d'e-mail de suivi non confirmée",
+                      "Vingt-quatre heures"
+                    ],
+                    [
+                      "Adresse e-mail de suivi confirmée",
+                      "Jusqu'à la désinscription, ou la suppression de la commande"
+                    ],
+                    [
+                      "Vues des pages de commande (empreintes, pays)",
+                      "Treize mois"
+                    ],
+                    [
+                      "Archives des événements d'abonnement, sans nom, e-mail ni carte",
+                      "Trois ans"
+                    ],
+                    [
+                      "Journal des accès de l'administration",
+                      "Conservé pour la sécurité du service et la défense de nos droits ; il ne peut être modifié et survit à la suppression du compte concerné"
+                    ]
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "transferts",
+            "titre": "Transferts hors Union européenne",
+            "blocs": [
+              {
+                "p": "Lorsque des données sont traitées par un prestataire établi hors de l'Union européenne, le transfert est encadré par les clauses contractuelles types de la Commission européenne ou, pour les prestataires qui y adhèrent, par le cadre de protection des données UE–États-Unis. 17TRACK ne reçoit aucune donnée nominative : seulement le numéro de suivi et le transporteur."
+              }
+            ]
+          },
+          {
+            "id": "cookies",
+            "titre": "Cookies",
+            "blocs": [
+              {
+                "p": "DropLink n'utilise que des cookies strictement nécessaires à son fonctionnement, qui ne requièrent pas de consentement. Un visiteur non connecté n'en reçoit aucun."
+              },
+              {
+                "table": {
+                  "entetes": [
+                    "Cookie",
+                    "Rôle",
+                    "Durée"
+                  ],
+                  "lignes": [
+                    [
+                      "Cookies de session",
+                      "Vous garder connecté",
+                      "Jusqu'à la déconnexion, au plus quatre cents jours"
+                    ],
+                    [
+                      "NEXT_LOCALE",
+                      "Retenir la langue choisie",
+                      "Le temps de la session du navigateur"
+                    ],
+                    [
+                      "dl_appareil",
+                      "Reconnaître un appareil de confiance pour la double authentification",
+                      "Trente jours"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "Aucun cookie publicitaire, aucun cookie de mesure d'audience et aucun traceur tiers ne sont déposés."
+              }
+            ]
+          },
+          {
+            "id": "droits",
+            "titre": "Vos droits",
+            "blocs": [
+              {
+                "p": "Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, de portabilité et d'opposition, du droit de retirer votre consentement à tout moment, et du droit de définir des directives sur le sort de vos données après votre décès."
+              },
+              {
+                "ul": [
+                  "Vendeurs : les paramètres permettent de modifier vos informations, de télécharger vos données et de supprimer votre compte.",
+                  "Clients d'un vendeur : chaque e-mail de suivi contient un lien de désinscription. Pour les informations qu'un vendeur a saisies vous concernant, adressez-vous d'abord à lui ; vous pouvez aussi nous écrire et nous transmettrons.",
+                  "Par e-mail : contact@droplink.fr. Une réponse vous est apportée dans un délai d'un mois."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "securite",
+            "titre": "Sécurité",
+            "blocs": [
+              {
+                "ul": [
+                  "Échanges chiffrés en HTTPS sur l'ensemble du service.",
+                  "Mots de passe stockés sous forme de condensats, jamais en clair, et vérifiés contre les fuites connues sans jamais être transmis.",
+                  "Données de chaque vendeur cloisonnées en base : un compte ne peut lire que ses propres commandes.",
+                  "Photos et vidéos stockées dans un espace privé, servies par des liens signés à durée limitée.",
+                  "Double authentification disponible pour les vendeurs et obligatoire pour l'administration, dont chaque consultation d'un compte est journalisée."
+                ]
+              },
+              {
+                "p": "En cas de violation de données susceptible d'engendrer un risque pour les personnes concernées, la CNIL est notifiée dans les soixante-douze heures et les personnes concernées sont informées."
+              }
+            ]
+          },
+          {
+            "id": "contact",
+            "titre": "Contact et réclamation",
+            "blocs": [
+              {
+                "p": "Pour toute question relative à vos données : contact@droplink.fr, ou par courrier à Mahfoud SEDDIKI, 2 square de l'Avre, 92100 Boulogne-Billancourt."
+              },
+              {
+                "p": "Si la réponse apportée ne vous satisfait pas, vous pouvez introduire une réclamation auprès de la Commission nationale de l'informatique et des libertés (CNIL), 3 place de Fontenoy, 75007 Paris, ou sur cnil.fr."
+              }
+            ]
+          }
+        ]
+      },
+      "mentions": {
+        "titre": "Mentions légales",
+        "pastille": "Mentions légales",
+        "chapeau": "Qui édite DropLink, comment nous joindre, et qui héberge le service.",
+        "sections": [
+          {
+            "id": "editeur",
+            "titre": "Éditeur du site",
+            "blocs": [
+              {
+                "p": "DropLink est édité par Mahfoud SEDDIKI, entrepreneur individuel (EI), 2 square de l'Avre, 92100 Boulogne-Billancourt, France."
+              },
+              {
+                "ul": [
+                  "SIREN : 990 848 004 — SIRET : 990 848 004 00018",
+                  "Immatriculé au Registre national des entreprises",
+                  "TVA non applicable, article 293 B du Code général des impôts",
+                  "Téléphone : +33 7 66 96 57 96",
+                  "E-mail : contact@droplink.fr"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "publication",
+            "titre": "Directeur de la publication",
+            "blocs": [
+              {
+                "p": "Mahfoud SEDDIKI."
+              }
+            ]
+          },
+          {
+            "id": "hebergement",
+            "titre": "Hébergement",
+            "blocs": [
+              {
+                "table": {
+                  "entetes": [
+                    "Prestataire",
+                    "Rôle",
+                    "Adresse"
+                  ],
+                  "lignes": [
+                    [
+                      "Railway Corporation",
+                      "Hébergement de l'application, sur des serveurs situés dans l'Union européenne",
+                      "548 Market St PMB 68956, San Francisco, CA 94104, États-Unis"
+                    ],
+                    [
+                      "Supabase Pte. Ltd.",
+                      "Base de données, située à Paris",
+                      "65 Chulia Street #38-02/03, OCBC Centre, Singapour 049513"
+                    ],
+                    [
+                      "Cloudflare, Inc.",
+                      "Stockage des photos et vidéos",
+                      "101 Townsend St, San Francisco, CA 94107, États-Unis"
+                    ]
+                  ]
+                }
+              },
+              {
+                "p": "Ces prestataires sont joignables par les formulaires de contact de leurs sites respectifs."
+              }
+            ]
+          },
+          {
+            "id": "propriete",
+            "titre": "Propriété intellectuelle",
+            "blocs": [
+              {
+                "p": "La marque DropLink, son logo, son interface, ses textes et son code sont la propriété de Mahfoud SEDDIKI. Toute reproduction sans autorisation écrite est interdite. Les contenus déposés par les vendeurs restent leur propriété."
+              }
+            ]
+          },
+          {
+            "id": "signaler",
+            "titre": "Signaler un contenu",
+            "blocs": [
+              {
+                "p": "Pour signaler un contenu illicite hébergé sur DropLink, écrivez à contact@droplink.fr. Chaque signalement est examiné par une personne."
+              },
+              {
+                "p": "Vous pouvez aussi utiliser la page de signalement, accessible en bas de chaque page du site.",
+                "si": "signalement"
+              }
+            ]
+          },
+          {
+            "id": "donnees",
+            "titre": "Données personnelles",
+            "blocs": [
+              {
+                "p": "Le traitement des données personnelles est décrit dans la politique de confidentialité, et l'usage du service dans les conditions générales d'utilisation."
+              }
+            ]
+          }
+        ]
+      }
+    }
   },
   "connexion": {
     "titre": "Bon retour",
@@ -1063,7 +1766,8 @@
     },
     "pied": {
       "conditions": "Conditions d'utilisation",
-      "confidentialite": "Politique de confidentialité"
+      "confidentialite": "Politique de confidentialité",
+      "mentions": "Mentions légales"
     },
     "pourClient": "pour {nom}",
     "lienInvalideSousTitre": "Ce lien de suivi ne mène plus à aucune commande.",
@@ -1930,7 +2634,7 @@
     "analyses": "Analyses",
     "analysesTexte": "Les analyses mesurent l'usage de DropLink et l'efficacité de votre suivi. Aucune donnée de chiffre d'affaires n'y figure : DropLink ne connaît pas vos prix.",
     "notifications": "Notifications",
-    "notificationsTexte": "Quand vous renseignez l'e-mail de votre client, il reçoit un message à la livraison du colis. Vous gardez la main : l'e-mail reste facultatif, et il ne crée jamais de compte.",
+    "notificationsTexte": "Votre client peut demander lui-même, depuis sa page de commande, à être prévenu par e-mail. Il confirme son adresse, puis reçoit au plus trois messages — expédition, transit, livraison —, chacun avec un lien de désinscription. Il ne crée jamais de compte.",
     "parametres": "Paramètres",
     "plans": "Gratuit et Pro",
     "plansTexte": "DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer {gratuit} commandes au total — c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le porte à {pro} commandes par mois et retire la mention DropLink de la page que voit votre client.",
@@ -1957,7 +2661,7 @@
     "faqQ6": "Que voit mon client si j'ai révoqué le lien ?",
     "faqR6": "Une page DropLink lui expliquant que le lien n'est plus valable et l'invitant à vous contacter. Elle ne divulgue rien de votre boutique.",
     "support": "Contacter le support",
-    "supportTexte": "Une question qui n'a pas sa réponse ici ? Écrivez-nous depuis la page de signalement : chaque message arrive à l'équipe produit.",
+    "supportTexte": "Une question qui n'a pas sa réponse ici ? Écrivez-nous à contact@droplink.fr : chaque message arrive à l'équipe produit.",
     "ctaTitre": "Prêt à créer votre premier lien ?",
     "ctaTexte": "Compte gratuit, sans carte bancaire, prêt en moins d'une minute.",
     "ctaBouton": "Créer mon compte",

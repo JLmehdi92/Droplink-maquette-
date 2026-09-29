@@ -456,6 +456,9 @@ export default async function Documentation({
           <LienEcran href={`/${langue}/confidentialite`} className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0">
             {legal("confidentialiteTitre")}
           </LienEcran>
+          <LienEcran href={`/${langue}/mentions-legales`} className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0">
+            {legal("mentionsTitre")}
+          </LienEcran>
           <span className="text-[13px] text-ds-texte-sourdine">
             {nav("piedDePage", { annee: new Date().getFullYear() })}
           </span>

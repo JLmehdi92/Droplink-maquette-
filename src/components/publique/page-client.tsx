@@ -584,6 +584,14 @@ export async function PageClient({
             >
               {t("pied.confidentialite")}
             </a>
+            <a
+              href={`/${langue}/mentions-legales`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0"
+            >
+              {t("pied.mentions")}
+            </a>
           </span>
         </div>
       </footer>

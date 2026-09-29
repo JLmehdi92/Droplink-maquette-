@@ -42,7 +42,7 @@ import { origineConfiguree } from "@/lib/site";
  */
 
 /** Les chemins indexables DANS LES TROIS LANGUES, sans préfixe. Liste FERMÉE. */
-const CHEMINS_INDEXABLES = ["", "/tarifs", "/conditions", "/confidentialite", "/signalement", "/docs"] as const;
+const CHEMINS_INDEXABLES = ["", "/tarifs", "/conditions", "/confidentialite", "/mentions-legales", "/signalement", "/docs"] as const;
 
 /**
  * Les chemins qui n'existent QU'EN FRANÇAIS.

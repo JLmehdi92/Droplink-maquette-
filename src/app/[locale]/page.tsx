@@ -581,6 +581,7 @@ export default async function Accueil({
               <Link href={`/${locale}/docs#support`} className={lienPied}>{k("footContact")}</Link>
               <Link href={`/${locale}/conditions`} className={lienPied}>{k("footTerms")}</Link>
               <Link href={`/${locale}/confidentialite`} className={lienPied}>{k("footPrivacy")}</Link>
+              <Link href={`/${locale}/mentions-legales`} className={lienPied}>{k("footLegal")}</Link>
             </div>
 
             <div className="flex flex-col gap-2.5 max-[767.98px]:gap-0">

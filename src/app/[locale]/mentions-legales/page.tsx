@@ -18,27 +18,27 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "legal" });
   const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
   return {
-    title: t("conditionsMetaTitre"),
-    description: t("conditionsMetaDescription"),
-    alternates: alternatesDe(langue, "/conditions"),
-    openGraph: openGraphDe(langue, "/conditions", {
-      titre: t("conditionsMetaTitre"),
-      description: t("conditionsMetaDescription"),
+    title: t("mentionsMetaTitre"),
+    description: t("mentionsMetaDescription"),
+    alternates: alternatesDe(langue, "/mentions-legales"),
+    openGraph: openGraphDe(langue, "/mentions-legales", {
+      titre: t("mentionsMetaTitre"),
+      description: t("mentionsMetaDescription"),
     }),
   };
 }
 
 /**
- * LES CONDITIONS D'UTILISATION — quatorze sections, dans l'ordre de la planche.
- * Le texte vit dans `legal.pages.conditions`, recopié de
- * `ui_kits/legal/contenu-legal-*.js` (29/09/2026) : voir `PageLegale`.
+ * LES MENTIONS LÉGALES (29/09/2026) — ce que la LCEN exige d'un éditeur :
+ * identité, adresse, immatriculation, contact, directeur de la publication,
+ * hébergeurs. Six sections ; le texte vit dans `legal.pages.mentions`.
  */
-export default async function Conditions({
+export default async function MentionsLegales({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <PageLegale locale={locale} sorte="conditions" />;
+  return <PageLegale locale={locale} sorte="mentions" />;
 }

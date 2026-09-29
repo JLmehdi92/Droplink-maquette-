@@ -216,9 +216,10 @@ Next.js 16 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 > `package.json`** : le dépôt est en **Next 16.3.4**, pas 15 ; il n'y a **AUCUN paquet Resend ni React
 > Email** — `lib/email/resend.ts` appelle l'API HTTP à la main, et il ne sert qu'aux ALERTES DE
 > VEILLE, vers l'exploitant ; les e-mails de compte (inscription, réinitialisation, changement
-> d'adresse) partent du SMTP configuré dans Supabase Auth. **Aucun e-mail ne part vers le client
-> final** : `orders.notify_email` et `unsubscribe_token` existent en base et ne sont lus par
-> aucun chemin, et il n'existe pas de route de désinscription.
+> d'adresse) partent du SMTP configuré dans Supabase Auth. ⚠️ **La dernière phrase de ce bloc
+> est tombée avec les migrations 188-189** : le client final PEUT recevoir trois e-mails de suivi
+> (expédition, transit, livraison), à SA demande, adresse confirmée par lui, désinscription en un
+> clic — et seulement si `EMAIL_CLIENTS_DE` est posée (voir plus bas).
 
 **Absent volontairement :** Three.js, WebGL, tout transcodeur vidéo. ⚠️ « Toute librairie de paiement » figurait ici et n'y est plus (20/09/2026) : il n'y a toujours AUCUN SDK de paiement — le webhook Lemon Squeezy tient en un HMAC et un `fetch` —, mais l'interdiction de principe est levée.
 
@@ -425,7 +426,17 @@ a pas.
 
 **Couvert, à migrer** : landing · connexion · inscription · commandes · détail et
 éditeur de commande · envois · analyses · marque · `/p/[token]` · conditions ·
-confidentialité · les deux pages d'erreur de lien (expiré, introuvable).
+confidentialité · **mentions légales** · les deux pages d'erreur de lien (expiré, introuvable).
+
+> ⚠️ **LES TROIS PAGES LÉGALES ONT UN SEUL TEXTE, ÉCRIT DANS LE KIT (29/09/2026).** Il vit dans
+> `ui_kits/legal/contenu-legal-{fr,en,zh}.js` — rédigé depuis le fonctionnement RÉEL du produit
+> (audit RGPD du 29/09) et l'identité réelle de l'éditeur, **Mahfoud SEDDIKI, EI** — puis recopié
+> dans `messages/*.json` sous `legal.pages`, que `PageLegale` lit par `t.raw` et valide par Zod.
+> **Modifier un texte légal = modifier le kit, recopier, changer `DERNIERE_MAJ`.** Un bloc
+> `si: "signalement"` ne s'affiche que si la page de signalement existe. ⚠️ **Aucun médiateur de
+> la consommation n'est encore désigné** (obligatoire dès qu'un particulier peut payer le Pro) :
+> les conditions n'en citent aucun plutôt que d'en inventer un — c'est à Mehdi d'en choisir un.
+> Les textes restent à faire relire par un juriste avant l'ouverture publique.
 
 **Écrans du dépôt que le design system ne dessine pas : AUCUN depuis le
 14/09/2026.** Le dernier, l'arbitrage QC de la page client, est écrit dans
@@ -647,7 +658,11 @@ demandées — vit dans `consignes/historique-du-design.md` et dans context-mode
 
 **La production est à jour jusqu'à la 205 incluse, depuis le 29/09/2026** — migrations lancées
 à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29, puis
-code poussé. Aucune migration n'attend. Les dernières : le quota à vie qui ne se recharge pas
+code poussé. ⚠️ **TROIS MIGRATIONS ATTENDENT la production (29/09/2026)** : 206-207 (le RGPD
+efface ce qu'il promet, et refuse de supprimer un compte encore prélevable) et 208 (le mot
+`mentions-legales` réservé comme nom de lien) — `pnpm db:migrate` PUIS le push, sinon
+`mentions-legales` reste prenable comme nom de lien et la veille note une erreur de purge
+(`durees_erreur`) à chaque passage, faute de `purger_donnees_expirees`. Les dernières appliquées : le quota à vie qui ne se recharge pas
 (198), le suivi bloqué dit (199), le Pro qui repart de zéro (200), 15 colis à vie en gratuit
 (201), le quota de colis compté en AFTER INSERT (202), l'appareil fiable (203), **le lien de
 paiement signé (204)**, qui retire le rattachement par e-mail (voir la contrainte n° 1), et

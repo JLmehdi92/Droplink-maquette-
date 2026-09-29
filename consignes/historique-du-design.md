@@ -6,6 +6,37 @@
 > restées dans `CLAUDE.md`. Les deux gardes qui lisent la prose de `CLAUDE.md`
 > (`exports-vivants`, `consignes-executables`) lisent aussi ce fichier.
 
+### ▶️ 29/09/2026 — LES TROIS PAGES LÉGALES : UN SEUL TEXTE, ÉCRIT DANS LE KIT (migration 208)
+
+Mehdi : « vasy fait tout avec ecc brozer, mais vraiment fait tout sans rien oublier !!! ».
+Mentions légales (nouvelle route), politique de confidentialité et conditions réécrites depuis
+le fonctionnement RÉEL du produit (audit RGPD du jour) et l'identité réelle de l'éditeur
+(Mahfoud SEDDIKI, EI), dans les trois langues.
+
+- **Le kit d'abord, et le texte y vit** : `ui_kits/legal/contenu-legal-{fr,en,zh}.js`, rendu par
+  `LegalShell.jsx` (sections et blocs : paragraphe, sous-titre, liste, tableau, encart). Le
+  produit le recopie dans `legal.pages` et le lit par `t.raw`, validé par Zod (`documentLegal`).
+  Le gabarit d'avant (Pro à 19,90 €, pastilles « à compléter », « En vigueur depuis ») est parti.
+- **La planche prend les décisions du produit** : encart « Un contenu à signaler ? », sommaire
+  sans entrée active, pied Conditions · Confidentialité · Mentions légales · Signaler un contenu,
+  retrait des listes à 16 px sous 560 px (la règle du kit docs). Lien « Mentions légales » ajouté
+  à TOUS les pieds, kit puis produit (landing, docs, blog, signalement, tarifs, page client).
+- **Mesuré** : 20 relevés en code 0 — conditions, confidentialité, mentions, landing, docs,
+  signalement, tarifs, blog, page client, au bureau et à 390. **215 déclarations périmées
+  retirées** : sur les pages légales, kit et produit rendent désormais la même chose.
+- 🔴 **LA SONDE MESURAIT LE TABLEAU DE BORD SOUS LE NOM DE LA LANDING.** Depuis le 25/09,
+  `droplink.fr` montre le tableau de bord à un vendeur connecté ; `verifier-ecran-migre.mjs`
+  gardait sa session sur `/fr` et relevait 112 « manquants ». La racine d'une langue se mesure
+  désormais sans session, comme la connexion et l'inscription.
+- 🔴 **Les portes ont attrapé trois défauts du texte neuf** : le prix écrit en dur (il vient
+  maintenant de `PRIX_PRO_EUR` par le gabarit `{prixPro}`, formaté par la langue, au kit comme au
+  produit), « freight forwarder » (vocabulaire interdit), et la route `mentions-legales` non
+  réservée comme nom de lien — **migration 208**, qui refuse aussi de s'appliquer si une boutique
+  porte déjà l'un des mots réservés (une contrainte CHECK se réévalue à chaque mise à jour).
+- **Portes** : 1214 unit, 1079 RLS, couverture 120/123, fumée 54/54 routes (414 contrôles).
+- ⚠️ **Reste à décider par Mehdi** : le médiateur de la consommation (aucun n'est cité plutôt
+  qu'inventé), la relecture par un juriste, l'adresse `abus@droplink.fr` dans Cloudflare.
+
 ### ▶️ 27/09/2026 — 15 COLIS SUIVIS EN GRATUIT, PLUS 30 (migration 201)
 
 Wassim : « ça me coûte cher de perdre 30 suivis sur mon quota 17TRACK, pas de deuxième chance ».

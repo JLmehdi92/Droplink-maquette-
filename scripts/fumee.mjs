@@ -397,6 +397,7 @@ const cas = [
   { chemin: "/en/inscription", statut: 200, libelle: "inscription anglaise" },
   { chemin: "/fr/conditions", statut: 200, libelle: "conditions" },
   { chemin: "/fr/confidentialite", statut: 200, libelle: "confidentialite" },
+  { chemin: "/fr/mentions-legales", statut: 200, libelle: "mentions legales" },
   {
     /*
      * ⚠️ CE CAS ATTENDAIT 404 EN DUR, ET IL A ROUGI LE JOUR OU LE PRODUIT A EU
@@ -623,6 +624,7 @@ const ECRANS_SANS_SESSION = [
   "/en/inscription",
   "/fr/conditions",
   "/fr/confidentialite",
+  "/fr/mentions-legales",
 ];
 
 console.log("");
@@ -800,7 +802,7 @@ for (const [chemin, marqueur] of [
 console.log("");
 console.log("— Le recours de signalement —");
 
-const PAGES_A_PIED = ["/fr", "/en", "/zh-CN", "/fr/conditions", "/fr/confidentialite"];
+const PAGES_A_PIED = ["/fr", "/en", "/zh-CN", "/fr/conditions", "/fr/confidentialite", "/fr/mentions-legales"];
 
 const signalementServi = (await fetch(`${base}/fr/signalement`, { redirect: "manual" })).status;
 const canalOuvert = signalementServi === 200;
@@ -5576,7 +5578,7 @@ function ageHsts(entetes) {
 // regression de configuration ne touche pas une ligne de code source.
 {
   // `/tarifs` ajouté le 26/09/2026, en même temps qu'au plan de site et à `tests/unit/seo.test.ts`.
-  const CHEMINS_INDEXABLES = ["", "/tarifs", "/conditions", "/confidentialite", "/signalement", "/docs"];
+  const CHEMINS_INDEXABLES = ["", "/tarifs", "/conditions", "/confidentialite", "/mentions-legales", "/signalement", "/docs"];
   const LANGUES_SERVIES = ["fr", "en", "zh-CN"];
 
   const robots = await fetch(`${base}/robots.txt`);

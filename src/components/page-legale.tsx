@@ -1,15 +1,96 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { ArrowRight, Building2, CalendarDays, FileText, Shield } from "lucide-react";
+import { ArrowRight, Building2, CalendarDays, FileText, Scale, Shield } from "lucide-react";
+import { z } from "zod";
 import { LogoMarque } from "@/components/acces/coque-acces";
+import { Encart, Liste, Paragraphe, SousTitre, Tableau } from "@/components/docs/briques";
 import { SommaireRepliable } from "@/components/sommaire-repliable";
 import { signalementDisponible } from "@/lib/contact";
+import { PRIX_PRO_EUR } from "@/lib/paiement/plan";
 
-export interface SectionLegale {
-  readonly id: string;
-  readonly titre: string;
-  /** Un ou plusieurs paragraphes. */
-  readonly paragraphes: readonly string[];
+export type SorteLegale = "conditions" | "confidentialite" | "mentions";
+
+/*
+ * LE TEXTE DES TROIS PAGES VIT DANS `legal.pages`, RECOPIÉ DU KIT.
+ *
+ * Il est écrit d'abord dans `ui_kits/legal/contenu-legal-<langue>.js` (29/09/2026)
+ * puis recopié tel quel : la planche et le site rendent la même structure — les
+ * mêmes sections, les mêmes blocs — et c'est ce qui permet de les SOUSTRAIRE.
+ * Le texte se lit par `t.raw` (aucune interpolation ICU : un paragraphe qui
+ * contient une accolade ou une apostrophe ne doit rien déclencher), et il est
+ * VALIDÉ ici : un bloc mal formé dans un catalogue lève au rendu, au lieu de
+ * disparaître en silence d'un document qui engage.
+ */
+const Bloc = z.union([
+  z.object({ p: z.string(), si: z.literal("signalement").optional() }).strict(),
+  z.object({ h3: z.string() }).strict(),
+  z.object({ ul: z.array(z.string()).min(1) }).strict(),
+  z.object({ table: z.object({ entetes: z.array(z.string()).min(1), lignes: z.array(z.array(z.string())).min(1) }) }).strict(),
+  z.object({ encart: z.object({ ton: z.enum(["info", "alerte"]), titre: z.string(), texte: z.string() }) }).strict(),
+]);
+type Bloc = z.infer<typeof Bloc>;
+
+const DocumentLegal = z.object({
+  titre: z.string(),
+  pastille: z.string(),
+  chapeau: z.string(),
+  sections: z.array(z.object({ id: z.string(), titre: z.string(), blocs: z.array(Bloc).min(1) })).min(1),
+});
+
+/**
+ * Le document d'une sorte, lu et validé, blocs conditionnels résolus.
+ *
+ * `si: "signalement"` : le bloc cite la page de signalement, qui rend 404 tant
+ * qu'aucune adresse n'est configurée (`signalementDisponible`). Le citer alors
+ * serait promettre un canal qui ne mène nulle part — le défaut du 31/08/2026,
+ * quand les conditions parlaient d'un formulaire injoignable.
+ */
+export function documentLegal(
+  brut: unknown,
+  signalable: boolean,
+  valeurs: Readonly<Record<string, string>>,
+): z.infer<typeof DocumentLegal> {
+  const doc = DocumentLegal.parse(remplir(brut, valeurs));
+  return {
+    ...doc,
+    sections: doc.sections.map((s) => ({
+      ...s,
+      blocs: s.blocs.filter((b) => !("si" in b) || b.si === undefined || signalable),
+    })),
+  };
+}
+
+/**
+ * Remplit les gabarits `{nom}` du texte — le prix du Pro, qui n'existe qu'à UN
+ * endroit (`PRIX_PRO_EUR`) et ne s'écrit jamais en dur dans un catalogue.
+ * Un gabarit sans valeur LÈVE : « {prixPro} » affiché dans des conditions
+ * d'utilisation vaudrait une clause sans prix.
+ */
+function remplir(noeud: unknown, valeurs: Readonly<Record<string, string>>): unknown {
+  if (typeof noeud === "string") {
+    return noeud.replace(/\{(\w+)\}/g, (_, nom: string) => {
+      const valeur = valeurs[nom];
+      if (valeur === undefined) throw new Error(`gabarit sans valeur dans un texte légal : {${nom}}`);
+      return valeur;
+    });
+  }
+  if (Array.isArray(noeud)) return noeud.map((n) => remplir(n, valeurs));
+  if (noeud !== null && typeof noeud === "object") {
+    return Object.fromEntries(Object.entries(noeud).map(([k, v]) => [k, remplir(v, valeurs)]));
+  }
+  return noeud;
+}
+
+function BlocLegal({ bloc }: { readonly bloc: Bloc }) {
+  if ("p" in bloc) return <Paragraphe>{bloc.p}</Paragraphe>;
+  if ("h3" in bloc) return <SousTitre>{bloc.h3}</SousTitre>;
+  if ("ul" in bloc) return <Liste items={bloc.ul} />;
+  if ("table" in bloc) return <Tableau entetes={bloc.table.entetes} lignes={bloc.table.lignes} />;
+  return (
+    <Encart ton={bloc.encart.ton} titre={bloc.encart.titre}>
+      {bloc.encart.texte}
+    </Encart>
+  );
 }
 
 /**
@@ -20,36 +101,27 @@ export interface SectionLegale {
  * jour est le geste qui accompagne toute modification du contenu légal — une
  * date figée sur un texte modifié affirme un état qui n'existe plus.
  */
-const DERNIERE_MAJ = new Date("2026-09-18T00:00:00Z");
+const DERNIERE_MAJ = new Date("2026-09-29T00:00:00Z");
 
 /**
  * LES PAGES LÉGALES, portées sur le kit `legal`.
  *
- * ⚠️ ON PORTE LA COQUE ET LA TYPOGRAPHIE DU KIT, PAS SON TEXTE. Le kit rédige
- * ses conditions comme un gabarit : un plan Pro à 19,90 € par mois, un
- * prélèvement automatique, l'authentification Apple et la double
- * authentification. La contrainte n° 1 interdit la première moitié ; la seconde
- * décrit des capacités que le produit n'a pas. Le texte du produit reste le
- * sien — il décrit ce que le service fait réellement.
+ * ⚠️ LE KIT ET LE PRODUIT PORTENT DÉSORMAIS LE MÊME TEXTE (29/09/2026). Jusque-là
+ * on portait la coque du kit et pas son texte : le kit rédigeait un gabarit
+ * (Pro à 19,90 €, « 10 commandes par mois », pastilles « à compléter ») que le
+ * produit ne pouvait pas afficher. Le texte a été réécrit DANS LE KIT depuis le
+ * fonctionnement réel du service — audit RGPD du 29/09/2026 — avec l'identité
+ * réelle de l'éditeur (Mahfoud SEDDIKI, EI), puis recopié ici.
  *
- * ⚠️ LES PASTILLES « À COMPLÉTER » ET LE BANDEAU « À VALIDER PAR UN AVOCAT » SONT
- * RETIRÉS — décision de Wassim du 18/09/2026. Ce qu'ils annonçaient n'a pas
- * disparu pour autant, et c'est le point :
+ * CE QUE LE TEXTE AFFIRME, LA BASE LE TIENT, et chaque durée a sa source : un
+ * an après suppression (157), quatre-vingt-dix jours pour les réponses brutes
+ * des transporteurs (075), vingt-quatre heures pour une demande d'e-mail non
+ * confirmée, treize mois pour les vues, trois ans pour les archives de paiement
+ * (206), la suppression refusée tant qu'un prélèvement peut avoir lieu (206-207).
  *
- *  - deux d'entre elles désignaient un fait que le CODE TIENT DÉJÀ, et les
- *    effacer sans l'écrire aurait rendu la page muette sur une durée que la base
- *    applique : la conservation d'un an après fermeture (`conserver_jusqu_au`
- *    vaut `now() + interval '1 year'`, migration 157) et la purge des réponses
- *    brutes à quatre-vingt-dix jours du dernier mouvement (migration 075). Elles
- *    sont devenues de la prose, pas un trou ;
- *  - le droit applicable était une DÉCISION, pas une lacune : droit français,
- *    tribunaux français (Wassim, 18/09/2026) ;
- *  - l'éditeur porte « DropLink », sans forme juridique — son choix, fait en
- *    connaissance de ce que la LCEN demande.
- *
- * ⚠️ CE QUI RESTE VRAI ET QUE PLUS AUCUN ÉCRAN NE DIT : le brief exige toujours
- * une validation par un avocat avant toute ouverture publique. Retirer le
- * bandeau ne l'a pas faite — il a cessé de l'annoncer aux visiteurs, voilà tout.
+ * ⚠️ CE QUI RESTE VRAI : le brief exige une relecture par un juriste avant toute
+ * ouverture publique, et aucun médiateur de la consommation n'est encore
+ * désigné — les conditions n'en citent donc aucun plutôt que d'en inventer un.
  *
  * LE SOMMAIRE EST UN VRAI SOMMAIRE, SANS ENTRÉE « ACTIVE ». Le kit suit le
  * défilement en JavaScript pour surligner la section courante ; un marquage
@@ -64,16 +136,9 @@ const DERNIERE_MAJ = new Date("2026-09-18T00:00:00Z");
 export async function PageLegale({
   locale,
   sorte,
-  titre,
-  chapeau,
-  sections,
 }: {
   readonly locale: string;
-  /** Les conditions ou la politique de confidentialité : l'icône et la pastille en dépendent. */
-  readonly sorte: "conditions" | "confidentialite";
-  readonly titre: string;
-  readonly chapeau?: string;
-  readonly sections: readonly SectionLegale[];
+  readonly sorte: SorteLegale;
 }) {
   const t = await getTranslations("legal");
   const nav = await getTranslations("navigation");
@@ -86,6 +151,9 @@ export async function PageLegale({
     timeZone: "UTC",
   });
   const signalable = signalementDisponible();
+  const prixPro = format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const { titre, pastille, chapeau, sections } = documentLegal(t.raw(`pages.${sorte}`), signalable, { prixPro });
+  const IconePastille = sorte === "conditions" ? FileText : sorte === "confidentialite" ? Shield : Scale;
 
   /* LES LIENS D'EN-TÊTE ET DE PIED SONT DES CIBLES TACTILES : 44 px au
      téléphone, compensés par la marge négative, et la hauteur de leur texte au
@@ -134,6 +202,12 @@ export async function PageLegale({
           className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
         >
           {t("confidentialiteTitre")}
+        </Link>
+        <Link
+          href={`/${locale}/mentions-legales`}
+          className="-my-3.5 inline-flex min-h-11 items-center text-[13.5px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+        >
+          {t("mentionsTitre")}
         </Link>
       </div>
     </nav>
@@ -186,8 +260,8 @@ export async function PageLegale({
           </SommaireRepliable>
           <div className="hidden min-[980px]:block">{sommaire}</div>
 
-          {/* L'ENCART DE SIGNALEMENT, que le kit n'a pas : la procédure de
-              notification et retrait fonde notre statut d'hébergeur (brief
+          {/* L'ENCART DE SIGNALEMENT — écrit au kit le 29/09/2026 : la procédure
+              de notification et retrait fonde notre statut d'hébergeur (brief
               §12), et c'est ici, à côté des conditions, qu'on la cherche. */}
           {encartSignalement === null ? null : (
             <div className="mt-[22px] hidden min-[980px]:block">{encartSignalement}</div>
@@ -196,12 +270,8 @@ export async function PageLegale({
 
         <article id="contenu" className="max-w-[780px] min-w-0">
           <span className="inline-flex items-center gap-2 rounded-ds-pill border border-ds-violet-200 bg-ds-surface-teinte px-3.5 py-[7px] text-[12.5px] font-bold text-ds-accent-encre">
-            {sorte === "conditions" ? (
-              <FileText aria-hidden="true" size={14} strokeWidth={2} />
-            ) : (
-              <Shield aria-hidden="true" size={14} strokeWidth={2} />
-            )}
-            {sorte === "conditions" ? t("conditionsTitre") : t("confidentialiteTitre")}
+            <IconePastille aria-hidden="true" size={14} strokeWidth={2} />
+            {pastille}
           </span>
           <h1 className="mt-5 text-[27px] leading-[1.06] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort sm:text-[32px] md:text-[44px]">
             {titre}
@@ -210,19 +280,18 @@ export async function PageLegale({
           <div className="mt-[18px] mb-[22px] flex flex-wrap items-center gap-4 border-y border-ds-filet pt-3.5 pb-1 text-[12.5px] text-ds-texte-sourdine">
             <span className="flex items-center gap-[7px]">
               <CalendarDays aria-hidden="true" size={14} strokeWidth={1.9} />
-              {t("misAJourLe")} : {dateMaj}
+              {/* Une seule chaîne par ligne, ponctuation comprise : « : » prend
+                  une espace avant en français et aucune en anglais ni en
+                  chinois — la coller dans le code l'imposait aux trois. */}
+              {t("misAJourDate", { date: dateMaj })}
             </span>
             <span className="flex items-center gap-[7px]">
               <Building2 aria-hidden="true" size={14} strokeWidth={1.9} />
-              {/* Une seule chaîne : deux expressions JSX séparées par un saut de
-                  ligne rendent DEUX espaces, et le relevé l'a vu. */}
-              {`${t("editeur")} ${t("editeurNom")}`}
+              {t("editeurLigne", { nom: t("editeurNom") })}
             </span>
           </div>
 
-          {chapeau === undefined ? null : (
-            <p className="mb-3.5 text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps">{chapeau}</p>
-          )}
+          <Paragraphe>{chapeau}</Paragraphe>
 
           {sections.map((s, i) => (
             <section key={s.id}>
@@ -232,13 +301,8 @@ export async function PageLegale({
               >
                 {`${i + 1}. ${s.titre}`}
               </h2>
-              {s.paragraphes.map((p) => (
-                <p
-                  key={p.slice(0, 40)}
-                  className="mb-3.5 text-[15.5px] leading-[1.7] text-pretty text-ds-texte-corps"
-                >
-                  {p}
-                </p>
+              {s.blocs.map((b, j) => (
+                <BlocLegal key={j} bloc={b} />
               ))}
             </section>
           ))}
@@ -267,6 +331,12 @@ export async function PageLegale({
             className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
           >
             {t("piedConfidentialite")}
+          </Link>
+          <Link
+            href={`/${locale}/mentions-legales`}
+            className="-my-3.5 inline-flex min-h-11 items-center text-[13px] text-ds-texte-corps hover:text-ds-accent-encre md:my-0 md:min-h-0"
+          >
+            {t("piedMentions")}
           </Link>
           {signalable ? (
             <Link
