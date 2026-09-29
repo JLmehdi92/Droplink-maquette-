@@ -1555,8 +1555,15 @@ for (const modele of routes) {
      * commandes sous le nom de la connexion (367 éléments des deux côtés, 49
      * « en trop »). Personne de connecté ne voit plus ces écrans ; les mesurer
      * connecté mesurerait un écran que personne ne voit.
+     *
+     * ⚠️ LA LANDING AUSSI (29/09/2026). Depuis le 25/09, `droplink.fr` montre
+     * son tableau de bord à un vendeur connecté : la sonde, qui garde sa
+     * session, mesurait le tableau de bord sous le nom « fr » — 112 textes
+     * « manquants », attrapés en remesurant le pied de la landing après l'ajout
+     * des mentions légales. La racine d'une langue se mesure donc sans session,
+     * comme la voit le seul public qui la reçoit.
      */
-    const sansSession = /^\/[a-z]{2}(?:-[A-Z]{2})?\/(?:connexion|inscription)(?:[?#]|$)/.test(chemin);
+    const sansSession = /^\/[a-z]{2}(?:-[A-Z]{2})?(?:\/(?:connexion|inscription))?(?:[?#]|$)/.test(chemin);
     // Vidés, pas seulement non posés : une route mesurée avant dans le même
     // navigateur y aurait laissé les siens.
     if (sansSession) await envoyer("Network.clearBrowserCookies", {});
