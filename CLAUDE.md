@@ -656,14 +656,12 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production est à jour jusqu'à la 205 incluse, depuis le 29/09/2026** — migrations lancées
-à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29, puis
-code poussé. ⚠️ **QUATRE MIGRATIONS ATTENDENT la production (29/09/2026)** : 206-207 (le RGPD
-efface ce qu'il promet, et refuse de supprimer un compte encore prélevable), 208 (le mot
-`mentions-legales` réservé comme nom de lien) et 209 (les index de la purge) — `pnpm db:migrate`
-PUIS le push, sinon
-`mentions-legales` reste prenable comme nom de lien et la veille note une erreur de purge
-(`durees_erreur`) à chaque passage, faute de `purger_donnees_expirees`. Les dernières appliquées : le quota à vie qui ne se recharge pas
+**La production est à jour jusqu'à la 209 incluse, depuis le 30/09/2026** — migrations lancées
+à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29 (209
+migrations communes, dans l'ordre), puis code poussé. Aucune migration n'attend. Les dernières :
+le RGPD efface ce qu'il promet et refuse de supprimer un compte encore prélevable (206-207), le
+mot `mentions-legales` réservé comme nom de lien (208), les index de la purge (209) ; avant
+elles, le quota à vie qui ne se recharge pas
 (198), le suivi bloqué dit (199), le Pro qui repart de zéro (200), 15 colis à vie en gratuit
 (201), le quota de colis compté en AFTER INSERT (202), l'appareil fiable (203), **le lien de
 paiement signé (204)**, qui retire le rattachement par e-mail (voir la contrainte n° 1), et
