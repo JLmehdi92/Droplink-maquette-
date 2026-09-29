@@ -25,7 +25,17 @@ const Bloc = z.union([
   z.object({ p: z.string(), si: z.literal("signalement").optional() }).strict(),
   z.object({ h3: z.string() }).strict(),
   z.object({ ul: z.array(z.string()).min(1) }).strict(),
-  z.object({ table: z.object({ entetes: z.array(z.string()).min(1), lignes: z.array(z.array(z.string())).min(1) }) }).strict(),
+  z
+    .object({
+      table: z
+        .object({ entetes: z.array(z.string()).min(1), lignes: z.array(z.array(z.string())).min(1) })
+        // Une cellule de trop ou de moins décalerait toutes les colonnes d'un
+        // tableau de durées ou de prestataires : on LÈVE plutôt que de mal rendre.
+        .refine((t) => t.lignes.every((l) => l.length === t.entetes.length), {
+          message: "une ligne de tableau n'a pas autant de cellules que l'en-tête",
+        }),
+    })
+    .strict(),
   z.object({ encart: z.object({ ton: z.enum(["info", "alerte"]), titre: z.string(), texte: z.string() }) }).strict(),
 ]);
 type Bloc = z.infer<typeof Bloc>;

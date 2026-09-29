@@ -50,8 +50,9 @@ import {
  * ⚠️ LE CAS QUI COMPTE LE PLUS EST LE PAIEMENT QU'ON NE SAIT PAS RATTACHER.
  * Il est encaissé chez le fournisseur et sans effet chez nous : c'est le pire
  * résultat possible, et le seul que personne ne remarquerait. Il répond 200 —
- * rejouer ne créerait pas le compte manquant — mais il ALERTE, et il est archivé
- * avec sa charge pour qu'un humain puisse le rattacher à la main.
+ * rejouer ne créerait pas le compte manquant — mais il ALERTE, avec le numéro
+ * d'abonnement qui permet de retrouver le client dans le tableau de bord du
+ * fournisseur. L'archive, elle, n'en garde que les identifiants (206).
  */
 
 export const dynamic = "force-dynamic";
@@ -260,8 +261,9 @@ export async function POST(requete: Request): Promise<NextResponse> {
         " — statut " +
         evenement.data.attributes.status +
         ".\n" +
-        "Il est encaissé chez le fournisseur et SANS EFFET ici. À rattacher à la main " +
-        "(table `payment_events`).",
+        "Il est encaissé chez le fournisseur et SANS EFFET ici. À rattacher à la main : " +
+        "retrouver le client par ce numéro d'abonnement dans le tableau de bord Lemon Squeezy " +
+        "(l'archive `payment_events` ne garde ni nom ni e-mail depuis la migration 206).",
     );
     // 200 : rejouer ne fera pas apparaître le compte manquant.
     return NextResponse.json({ statut: "sans_destinataire" }, { status: 200 });

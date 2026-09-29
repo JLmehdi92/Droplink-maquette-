@@ -327,7 +327,7 @@
                 "p": "Anyone can report content they consider unlawful by writing to contact@droplink.fr. Every report is reviewed by a person, and the account concerned may be suspended as a precaution: its pages then immediately stop being served."
               },
               {
-                "p": "Content can also be reported from the report page, linked at the bottom of every page of the site.",
+                "p": "Content can also be reported from the report page, linked from the site's legal pages.",
                 "si": "signalement"
               },
               {
@@ -391,7 +391,7 @@
                 "p": "The seller can cancel their Pro subscription at any time from their Lemon Squeezy customer portal: the Pro plan stays active until the end of the period already paid."
               },
               {
-                "p": "The seller can delete their account at any time from the settings, once any subscription has been cancelled: DropLink refuses deletion while a charge can still occur. Deletion is immediate and removes orders, media and tracking; links already sent stop working. Only the email address and the sign-up and deletion dates are kept for one year, under the host's obligations, then erased automatically."
+                "p": "The seller can delete their account at any time from the settings, once any subscription has been cancelled: DropLink refuses deletion while a charge can still occur. Deletion is immediate and removes orders, media and tracking; links already sent stop working. Only the following remain, as the privacy policy describes: the email address and the sign-up and deletion dates, for one year under the host's obligations, then erased automatically; the archives of subscription events, without name, email or card, for three years; the log of administration access. A suspended account cannot be deleted from the settings: the request is then made to contact@droplink.fr."
               },
               {
                 "p": "DropLink may terminate an account in the event of a breach of these terms, or with reasonable notice if the service is discontinued."
@@ -541,6 +541,10 @@
                     ],
                     [
                       "Active sessions, trusted devices, a hashed fingerprint of the IP address to limit abuse",
+                      "Collected automatically"
+                    ],
+                    [
+                      "IP address and browser of each sign-in, logged by our sign-in provider",
                       "Collected automatically"
                     ]
                   ]
@@ -696,7 +700,7 @@
                     ],
                     [
                       "Sentry",
-                      "Technical error reports, with no personal data",
+                      "Technical error reports, without IP addresses or sign-in tokens",
                       "Company based in the United States"
                     ],
                     [
@@ -785,7 +789,7 @@
             "titre": "Cookies",
             "blocs": [
               {
-                "p": "DropLink uses only cookies strictly necessary for it to work, which require no consent. A visitor who is not signed in receives none."
+                "p": "DropLink uses only cookies strictly necessary for it to work, which require no consent. A visitor who is not signed in receives, at most, the language cookie."
               },
               {
                 "table": {
@@ -950,7 +954,7 @@
                 "p": "To report unlawful content hosted on DropLink, write to contact@droplink.fr. Every report is reviewed by a person."
               },
               {
-                "p": "You can also use the report page, linked at the bottom of every page of the site.",
+                "p": "You can also use the report page, linked from the site's legal pages.",
                 "si": "signalement"
               }
             ]
@@ -2870,7 +2874,8 @@
         "conservation": "Only your email address and your sign-up and deletion dates are kept for one year, as the law requires of a host, then erased.",
         "soumettre": "Delete the account",
         "enCours": "Deleting…",
-        "portail": "Cancel my subscription on Lemon Squeezy"
+        "portail": "Cancel my subscription on Lemon Squeezy",
+        "portailAbsent": "The link to your Lemon Squeezy customer portal is in every receipt email for your subscription. Otherwise, write to us at contact@droplink.fr."
       },
       "donnees": {
         "titre": "Delete all data",

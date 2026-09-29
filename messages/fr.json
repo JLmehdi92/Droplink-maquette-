@@ -327,7 +327,7 @@
                 "p": "Toute personne peut signaler un contenu qu'elle estime illicite en écrivant à contact@droplink.fr. Chaque signalement est examiné par une personne, et le compte concerné peut être suspendu à titre conservatoire : ses pages cessent alors immédiatement d'être servies."
               },
               {
-                "p": "Le signalement peut aussi se faire depuis la page de signalement, accessible en bas de chaque page du site.",
+                "p": "Le signalement peut aussi se faire depuis la page de signalement, accessible depuis les pages légales du site.",
                 "si": "signalement"
               },
               {
@@ -391,7 +391,7 @@
                 "p": "Le vendeur peut résilier son abonnement Pro à tout moment depuis son espace client Lemon Squeezy : le plan Pro reste actif jusqu'à la fin de la période déjà payée."
               },
               {
-                "p": "Le vendeur peut supprimer son compte à tout moment depuis les paramètres, une fois son abonnement éventuel résilié : DropLink refuse la suppression tant qu'un prélèvement peut encore avoir lieu. La suppression est immédiate et emporte les commandes, les médias et les suivis ; les liens déjà envoyés cessent de fonctionner. Seules l'adresse e-mail et les dates d'inscription et de suppression sont conservées un an, au titre des obligations de l'hébergeur, puis effacées automatiquement."
+                "p": "Le vendeur peut supprimer son compte à tout moment depuis les paramètres, une fois son abonnement éventuel résilié : DropLink refuse la suppression tant qu'un prélèvement peut encore avoir lieu. La suppression est immédiate et emporte les commandes, les médias et les suivis ; les liens déjà envoyés cessent de fonctionner. Restent seulement, comme le décrit la politique de confidentialité : l'adresse e-mail et les dates d'inscription et de suppression, un an au titre des obligations de l'hébergeur, puis effacées automatiquement ; les archives des événements d'abonnement, sans nom, e-mail ni carte, trois ans ; le journal des accès de l'administration. Un compte suspendu ne se supprime pas depuis les paramètres : la demande se fait alors à contact@droplink.fr."
               },
               {
                 "p": "DropLink peut résilier un compte en cas de manquement aux présentes conditions, ou avec un préavis raisonnable en cas d'arrêt du service."
@@ -540,7 +540,11 @@
                       "Transmis par Lemon Squeezy"
                     ],
                     [
-                      "Sessions actives, appareils de confiance, empreinte chiffrée de l'adresse IP pour limiter les abus",
+                      "Sessions actives, appareils de confiance, empreinte hachée de l'adresse IP pour limiter les abus",
+                      "Collectés automatiquement"
+                    ],
+                    [
+                      "Adresse IP et navigateur de chaque connexion, journalisés par notre prestataire de connexion",
                       "Collectés automatiquement"
                     ]
                   ]
@@ -577,7 +581,7 @@
                       "Trois e-mails de suivi au plus — expédition, transit, livraison —, avec désinscription en un clic"
                     ],
                     [
-                      "Empreinte chiffrée de l'adresse IP et du navigateur, et pays, à chaque consultation",
+                      "Empreinte hachée de l'adresse IP et du navigateur, et pays, à chaque consultation",
                       "Compter les vues et limiter les abus, sans jamais conserver l'adresse IP elle-même"
                     ]
                   ]
@@ -696,7 +700,7 @@
                     ],
                     [
                       "Sentry",
-                      "Rapports d'erreurs techniques, sans donnée personnelle",
+                      "Rapports d'erreurs techniques, sans adresse IP ni jeton de connexion",
                       "Société établie aux États-Unis"
                     ],
                     [
@@ -785,7 +789,7 @@
             "titre": "Cookies",
             "blocs": [
               {
-                "p": "DropLink n'utilise que des cookies strictement nécessaires à son fonctionnement, qui ne requièrent pas de consentement. Un visiteur non connecté n'en reçoit aucun."
+                "p": "DropLink n'utilise que des cookies strictement nécessaires à son fonctionnement, qui ne requièrent pas de consentement. Un visiteur non connecté ne reçoit, au plus, que le cookie de langue."
               },
               {
                 "table": {
@@ -950,7 +954,7 @@
                 "p": "Pour signaler un contenu illicite hébergé sur DropLink, écrivez à contact@droplink.fr. Chaque signalement est examiné par une personne."
               },
               {
-                "p": "Vous pouvez aussi utiliser la page de signalement, accessible en bas de chaque page du site.",
+                "p": "Vous pouvez aussi utiliser la page de signalement, accessible depuis les pages légales du site.",
                 "si": "signalement"
               }
             ]
@@ -2870,7 +2874,8 @@
         "conservation": "Seules votre adresse e-mail et les dates d'inscription et de suppression sont conservées un an, comme la loi l'impose à un hébergeur, puis effacées.",
         "soumettre": "Supprimer le compte",
         "enCours": "Suppression…",
-        "portail": "Résilier mon abonnement chez Lemon Squeezy"
+        "portail": "Résilier mon abonnement chez Lemon Squeezy",
+        "portailAbsent": "Le lien de votre espace client Lemon Squeezy figure dans chaque e-mail de reçu de votre abonnement. À défaut, écrivez-nous à contact@droplink.fr."
       },
       "donnees": {
         "titre": "Supprimer toutes les données",

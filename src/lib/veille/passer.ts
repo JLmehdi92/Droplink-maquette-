@@ -4,7 +4,7 @@ import { expediteurResend } from "@/lib/email/resend";
 import { creerClientSysteme } from "@/lib/supabase/system";
 import { purgerCles } from "@/lib/storage/purge";
 import type { Json } from "@/lib/supabase/types-base";
-import { decider, type BattementVu } from "./decision";
+import { decider, type Alerte, type BattementVu } from "./decision";
 import { TACHE_VEILLE, TACHES_ATTENDUES } from "./taches";
 
 /**
@@ -64,6 +64,121 @@ function reposMinutes(retardMinutes: number): number {
   return Math.max(60, retardMinutes);
 }
 
+/** Ce qu'il faut pour envoyer une alerte : sa clé de repos, son sujet, son texte. */
+type AlerteEnvoyable = Pick<Alerte, "cle" | "sujet" | "texte">;
+type IssueAlerte = "envoyee" | "repos" | "echec" | "non_configure";
+
+/**
+ * UNE alerte, dans l'ordre réserver → envoyer → libérer-si-échec (voir l'en-tête).
+ * Partagée par la veille des tâches et par les alertes de purge : deux chemins
+ * qui recopieraient cet ordre finiraient par ne plus le suivre tous les deux.
+ */
+async function envoyerAlerte(
+  systeme: ReturnType<typeof creerClientSysteme>,
+  expediteur: Expediteur,
+  alerte: AlerteEnvoyable,
+  repos: number,
+): Promise<IssueAlerte> {
+  const { data: obtenue, error: erreurReservation } = await systeme.rpc("reserver_alerte", {
+    p_cle: alerte.cle,
+    p_repos_minutes: repos,
+  });
+  if (erreurReservation !== null) {
+    // Ne PAS envoyer sans réservation : sans elle, chaque passage enverrait.
+    console.error("[veille] réservation impossible — " + erreurReservation.message);
+    return "echec";
+  }
+  if (obtenue !== true) return "repos";
+
+  // Pas de destinataire dans l'appel : il vient de la configuration. Voir
+  // `email/port.ts` — une alerte dont l'appelant choisit la destination est
+  // une alerte qu'on peut détourner.
+  const resultat = await expediteur.envoyer({ sujet: alerte.sujet, texte: alerte.texte });
+
+  if (resultat.statut === "envoye") {
+    console.warn(`[veille] alerte envoyée (${alerte.cle}) — message ${resultat.id}`);
+    return "envoyee";
+  }
+
+  // ÉCHEC : on rend la réservation, sinon l'alerte se tait pour toute la
+  // durée du repos.
+  const { error: erreurLiberation } = await systeme.rpc("liberer_alerte", { p_cle: alerte.cle });
+  if (erreurLiberation !== null) {
+    // L'INVERSE EXACT DE L'INTENTION (audit du 20/09/2026) : la réservation reste posée, et
+    // l'alerte se tait pour toute la durée du repos alors qu'elle n'est jamais partie.
+    console.error(
+      `[veille] alerte ${alerte.cle} non envoyée ET non rendue : elle se taira jusqu'à la fin du repos — ` +
+        erreurLiberation.message,
+    );
+  }
+
+  if (resultat.statut === "non_configure") {
+    /*
+     * BRUYANT, ET DÉLIBÉRÉMENT.
+     *
+     * C'est le seul endroit où l'on peut encore apprendre que le veilleur
+     * est muet. Un message discret ferait de ce produit exactement ce que
+     * L-022 décrit : un mécanisme dont on croit qu'il alerte. La liste de ce
+     * qui manque est nommée, parce que savoir QUE ce n'est pas configuré ne
+     * suffit pas à le configurer.
+     */
+    console.error(
+      `[veille] ALERTE NON ENVOYÉE, EXPÉDITEUR NON CONFIGURÉ — ${alerte.cle}. ` +
+        `Variables manquantes ou non substituées : ${resultat.manquant.join(", ")}. ` +
+        `Tant qu'elles manquent, AUCUNE alerte ne part : le veilleur constate et se tait.`,
+    );
+    return "non_configure";
+  }
+  console.error(`[veille] alerte refusée (${alerte.cle}) — ${resultat.motif}`);
+  return "echec";
+}
+
+/**
+ * LES PURGES QUI ÉCHOUENT SE DISENT PAR E-MAIL (audit ECC du 29/09/2026).
+ *
+ * Jusque-là leur échec n'allait que dans le détail du battement — que NI
+ * l'écran de surveillance NI la veille mutuelle ne lisent : le battement reste
+ * « à l'heure », puisqu'il est écrit. Une purge RGPD en panne (206 absente en
+ * production, par exemple) aurait donc manqué indéfiniment aux durées que la
+ * politique de confidentialité PROMET, sans un signal. C'est une obligation
+ * légale, pas une statistique.
+ *
+ * Fonction PURE : elle dit quoi alerter, `passerLaVeille` envoie.
+ */
+export function alertesDePurge(purge: {
+  readonly comptes: string | null;
+  readonly durees: string | null;
+}): AlerteEnvoyable[] {
+  const alertes: AlerteEnvoyable[] = [];
+  if (purge.comptes !== null) {
+    alertes.push({
+      cle: "veille:purge:comptes",
+      sujet: "[DropLink] Purge des comptes supprimés en échec",
+      texte:
+        "La purge des médias et de la conservation d'un an des comptes supprimés a échoué " +
+        `(migration 157). Elle sera rejouée au prochain passage.\n\nErreur : ${purge.comptes}`,
+    });
+  }
+  if (purge.durees !== null) {
+    alertes.push({
+      cle: "veille:purge:durees",
+      sujet: "[DropLink] Purge RGPD en échec — durées de conservation non tenues",
+      texte:
+        "La purge des durées promises par la politique de confidentialité a échoué : demandes " +
+        "d'e-mail non confirmées (24 h), vues (13 mois), archives de paiement (3 ans). Tant " +
+        "qu'elle échoue, ces données sont gardées au-delà de ce que la page annonce. Vérifier " +
+        `que la migration 206 est appliquée.\n\nErreur : ${purge.durees}`,
+    });
+  }
+  return alertes;
+}
+
+/**
+ * Six heures entre deux alertes de purge : la veille passe tous les quarts
+ * d'heure, et redire la même panne 24 fois par jour apprend surtout à l'ignorer.
+ */
+const REPOS_PURGE_MINUTES = 360;
+
 /**
  * Un passage de veille, mené par `veilleur`, qui regarde toutes les AUTRES
  * tâches attendues.
@@ -116,63 +231,12 @@ export async function veillerSur(
   let nonConfigure = false;
 
   for (const alerte of alertes) {
-    const { data: obtenue, error: erreurReservation } = await systeme.rpc("reserver_alerte", {
-      p_cle: alerte.cle,
-      p_repos_minutes: reposMinutes(retardMinutes),
-    });
-    if (erreurReservation !== null) {
-      // Ne PAS envoyer sans réservation : sans elle, chaque passage enverrait.
-      console.error("[veille] réservation impossible — " + erreurReservation.message);
+    const issue = await envoyerAlerte(systeme, expediteur, alerte, reposMinutes(retardMinutes));
+    if (issue === "envoyee") envoyees += 1;
+    else if (issue === "repos") enRepos += 1;
+    else {
       echecs += 1;
-      continue;
-    }
-    if (obtenue !== true) {
-      enRepos += 1;
-      continue;
-    }
-
-    // Pas de destinataire dans l'appel : il vient de la configuration. Voir
-    // `email/port.ts` — une alerte dont l'appelant choisit la destination est
-    // une alerte qu'on peut détourner.
-    const resultat = await expediteur.envoyer({ sujet: alerte.sujet, texte: alerte.texte });
-
-    if (resultat.statut === "envoye") {
-      envoyees += 1;
-      console.warn(`[veille] alerte envoyée (${alerte.cle}) — message ${resultat.id}`);
-      continue;
-    }
-
-    // ÉCHEC : on rend la réservation, sinon l'alerte se tait pour toute la
-    // durée du repos.
-    const { error: erreurLiberation } = await systeme.rpc("liberer_alerte", { p_cle: alerte.cle });
-    if (erreurLiberation !== null) {
-      // L'INVERSE EXACT DE L'INTENTION (audit du 20/09/2026) : la réservation reste posée, et
-      // l'alerte se tait pour toute la durée du repos alors qu'elle n'est jamais partie.
-      console.error(
-        `[veille] alerte ${alerte.cle} non envoyée ET non rendue : elle se taira jusqu'à la fin du repos — ` +
-          erreurLiberation.message,
-      );
-    }
-    echecs += 1;
-
-    if (resultat.statut === "non_configure") {
-      nonConfigure = true;
-      /*
-       * BRUYANT, ET DÉLIBÉRÉMENT.
-       *
-       * C'est le seul endroit où l'on peut encore apprendre que le veilleur
-       * est muet. Un message discret ferait de ce produit exactement ce que
-       * L-022 décrit : un mécanisme dont on croit qu'il alerte. La liste de ce
-       * qui manque est nommée, parce que savoir QUE ce n'est pas configuré ne
-       * suffit pas à le configurer.
-       */
-      console.error(
-        `[veille] ALERTE NON ENVOYÉE, EXPÉDITEUR NON CONFIGURÉ — ${alerte.cle}. ` +
-          `Variables manquantes ou non substituées : ${resultat.manquant.join(", ")}. ` +
-          `Tant qu'elles manquent, AUCUNE alerte ne part : le veilleur constate et se tait.`,
-      );
-    } else {
-      console.error(`[veille] alerte refusée (${alerte.cle}) — ${resultat.motif}`);
+      if (issue === "non_configure") nonConfigure = true;
     }
   }
 
@@ -214,6 +278,10 @@ export async function passerLaVeille(
   const systeme = creerClientSysteme();
   const purge = await purgerLaFile(systeme);
   const durees = await purgerLesDurees(systeme);
+  const issuesPurge: IssueAlerte[] = [];
+  for (const alerte of alertesDePurge({ comptes: purge.erreur, durees: durees.erreur })) {
+    issuesPurge.push(await envoyerAlerte(systeme, expediteur ?? expediteurResend(), alerte, REPOS_PURGE_MINUTES));
+  }
   const { error: erreurBattement } = await systeme.rpc("battre", {
     p_source: TACHE_VEILLE,
     p_detail: {
@@ -237,6 +305,8 @@ export async function passerLaVeille(
       // promet d'effacer, compté ici pour qu'une purge muette se voie.
       durees_effacees: durees.effacees,
       durees_erreur: durees.erreur,
+      // Ce que sont devenues les alertes de purge : « repos » ou « echec » se lisent ici.
+      purge_alertes: issuesPurge,
     },
   });
   // UN BATTEMENT PERDU FAIT CROIRE À UNE TÂCHE MORTE (audit du 20/09/2026). On le dit ici.

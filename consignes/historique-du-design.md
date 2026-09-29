@@ -36,6 +36,22 @@ le fonctionnement RÉEL du produit (audit RGPD du jour) et l'identité réelle d
 - **Portes** : 1214 unit, 1079 RLS, couverture 120/123, fumée 54/54 routes (414 contrôles).
 - ⚠️ **Reste à décider par Mehdi** : le médiateur de la consommation (aucun n'est cité plutôt
   qu'inventé), la relecture par un juriste, l'adresse `abus@droplink.fr` dans Cloudflare.
+- 🔴 **L'AUDIT ECC FINAL (5 relecteurs, lecture seule) a trouvé ce que les portes ne voyaient
+  pas.** Sur le TEXTE, 3 affirmations fausses et 3 imprécises, vérifiées une à une avant
+  correction : « un visiteur non connecté ne reçoit aucun cookie » (next-intl pose
+  `NEXT_LOCALE`, et la fumée l'exige), « la page de signalement en bas de chaque page » (elle
+  n'est liée que depuis les pages légales), « seuls l'e-mail et les dates sont conservés » (les
+  archives d'abonnement et le journal d'administration restent aussi ; un compte suspendu ne se
+  supprime pas depuis les paramètres), Sentry « sans donnée personnelle » (trop absolu),
+  « empreinte chiffrée » (c'est un hachage), et l'adresse IP des connexions que le prestataire
+  d'authentification journalise, que la politique taisait. Dans le CODE : une purge RGPD en échec
+  n'était écrite que dans le battement, que personne ne lit — elle part désormais par e-mail
+  (`alertesDePurge`, falsifié) ; la purge parcourait trois tables entières faute d'index —
+  **migration 209**, test vu rouge sur le catalogue avant ; un tableau décalé lève au rendu ; le
+  vendeur sans lien de portail reçoit où le trouver. Une remarque de sécurité s'est révélée
+  FAUSSE à la vérification (`slug_est_reserve` est bien révoquée depuis la 184) : écartée.
+- Remesuré après correction : les 6 relevés des pages légales en code 0. Portes : 1218 unit,
+  1082 RLS, couverture 120/123, fumée 54/54 routes.
 
 ### ▶️ 27/09/2026 — 15 COLIS SUIVIS EN GRATUIT, PLUS 30 (migration 201)
 

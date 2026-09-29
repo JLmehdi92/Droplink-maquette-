@@ -658,9 +658,10 @@ demandées — vit dans `consignes/historique-du-design.md` et dans context-mode
 
 **La production est à jour jusqu'à la 205 incluse, depuis le 29/09/2026** — migrations lancées
 à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29, puis
-code poussé. ⚠️ **TROIS MIGRATIONS ATTENDENT la production (29/09/2026)** : 206-207 (le RGPD
-efface ce qu'il promet, et refuse de supprimer un compte encore prélevable) et 208 (le mot
-`mentions-legales` réservé comme nom de lien) — `pnpm db:migrate` PUIS le push, sinon
+code poussé. ⚠️ **QUATRE MIGRATIONS ATTENDENT la production (29/09/2026)** : 206-207 (le RGPD
+efface ce qu'il promet, et refuse de supprimer un compte encore prélevable), 208 (le mot
+`mentions-legales` réservé comme nom de lien) et 209 (les index de la purge) — `pnpm db:migrate`
+PUIS le push, sinon
 `mentions-legales` reste prenable comme nom de lien et la veille note une erreur de purge
 (`durees_erreur`) à chaque passage, faute de `purger_donnees_expirees`. Les dernières appliquées : le quota à vie qui ne se recharge pas
 (198), le suivi bloqué dit (199), le Pro qui repart de zéro (200), 15 colis à vie en gratuit

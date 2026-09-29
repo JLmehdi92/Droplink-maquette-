@@ -52,6 +52,11 @@ describe("Les trois documents légaux se lisent dans les trois langues", () => {
     }
   }
 
+  test("un tableau dont une ligne n'a pas le compte de cellules est REFUSÉ", () => {
+    const decale = { titre: "T", pastille: "P", chapeau: "C", sections: [{ id: "a", titre: "A", blocs: [{ table: { entetes: ["x", "y"], lignes: [["1"]] } }] }] };
+    expect(() => documentLegal(decale, true, VALEURS)).toThrow(/cellules/);
+  });
+
   test("un bloc mal formé est REFUSÉ, pas ignoré", () => {
     const casse = { titre: "T", pastille: "P", chapeau: "C", sections: [{ id: "a", titre: "A", blocs: [{ paragraphe: "x" }] }] };
     expect(() => documentLegal(casse, true, VALEURS)).toThrow();

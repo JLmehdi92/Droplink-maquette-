@@ -596,15 +596,21 @@ function FormulaireSuppression({
       {/* LE SEUL ENDROIT OÙ RÉSILIER. Le produit n'a pas de clé d'API chez le
           fournisseur : il ne peut qu'indiquer son portail, où le vendeur se
           connecte avec son e-mail (206). */}
-      {etat.statut === "erreur" && etat.motif === "abonnement_en_cours" && etat.portail !== null ? (
-        <a
-          href={etat.portail}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center self-start text-[13.5px] font-semibold text-ds-erreur-encre underline underline-offset-2"
-        >
-          {t("suppression.compte.portail")}
-        </a>
+      {etat.statut === "erreur" && etat.motif === "abonnement_en_cours" ? (
+        etat.portail !== null ? (
+          <a
+            href={etat.portail}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center self-start text-[13.5px] font-semibold text-ds-erreur-encre underline underline-offset-2"
+          >
+            {t("suppression.compte.portail")}
+          </a>
+        ) : (
+          // SANS ADRESSE DE PORTAIL (audit ECC du 29/09/2026), le vendeur restait bloqué
+          // sans savoir où résilier : on lui dit où la trouver, et qui écrire à défaut.
+          <p className="text-[13.5px] text-ds-erreur-encre">{t("suppression.compte.portailAbsent")}</p>
+        )
       ) : null}
     </form>
   );

@@ -121,6 +121,32 @@ describe("Ce que la politique de confidentialité promet est réellement effacé
   });
 });
 
+describe("La purge ne parcourt pas des tables entières (audit ECC du 29/09/2026)", () => {
+  /*
+   * `purger_donnees_expirees` filtre trois colonnes, tous les quarts d'heure. Sans
+   * index qui COMMENCE par la colonne filtrée, chaque passage lit la table entière
+   * — et `link_views` est la plus grosse du produit : une ligne par ouverture de
+   * lien. Les index existants (`order_id` en tête) ne servent pas cette question.
+   */
+  test.each([
+    ["link_views", "viewed_at"],
+    ["notification_requests", "expires_at"],
+    ["payment_events", "received_at"],
+  ])("%s porte un index qui commence par %s", async (table, colonne) => {
+    const lignes = await interroger<{ n: number }>(
+      bd,
+      `select count(*)::int as n
+         from pg_index i
+         join pg_class t on t.oid = i.indrelid
+         join pg_namespace ns on ns.oid = t.relnamespace
+         join pg_attribute a on a.attrelid = t.oid and a.attnum = i.indkey[0]
+        where ns.nspname = 'public' and t.relname = $1 and a.attname = $2`,
+      [table, colonne],
+    );
+    expect(lignes[0]?.n, `aucun index ne commence par ${table}.${colonne} : la purge lit toute la table`).toBeGreaterThan(0);
+  });
+});
+
 describe("Les archives de paiement ne gardent aucune donnée personnelle du payeur", () => {
   // L'EFFET D'ABORD : une archive écrite avec la charge telle que le
   // fournisseur l'envoie. Sans ce test, l'inventaire ci-dessous passerait sur
