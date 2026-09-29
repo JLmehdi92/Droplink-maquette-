@@ -645,12 +645,21 @@ relevés, commandes exactes de mesure, défauts trouvés, décisions de Wassim, 
 demandées — vit dans `consignes/historique-du-design.md` et dans context-mode. **On le consulte avant de toucher
 à un écran**, pas après.
 
-**La production est à jour jusqu'à la 204 incluse, depuis le 27/09/2026** — migrations lancées
+**La production est à jour jusqu'à la 205 incluse, depuis le 29/09/2026** — migrations lancées
 à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29, puis
 code poussé. Aucune migration n'attend. Les dernières : le quota à vie qui ne se recharge pas
 (198), le suivi bloqué dit (199), le Pro qui repart de zéro (200), 15 colis à vie en gratuit
-(201), le quota de colis compté en AFTER INSERT (202), l'appareil fiable (203), et **le lien de
-paiement signé (204)**, qui retire le rattachement par e-mail (voir la contrainte n° 1).
+(201), le quota de colis compté en AFTER INSERT (202), l'appareil fiable (203), **le lien de
+paiement signé (204)**, qui retire le rattachement par e-mail (voir la contrainte n° 1), et
+**la page client en anglais par défaut (205)** : toutes les boutiques, anciennes et nouvelles,
+servent leurs pages client en anglais quelle que soit la langue d'inscription ; « Ma marque »
+garde le choix fr/en/zh-CN, et l'interface du vendeur garde SA langue.
+
+> ⚠️ **LE CLASSIFIEUR DU MODE AUTO REFUSE `pnpm db:migrate` EN PRODUCTION** (« Production
+> Deploy »), même avec l'accord de Mehdi, et interdit de s'ajouter soi-même la permission
+> (« Self-Modification »). Mehdi veut le pilote automatique complet : la migration de
+> production reste donc SA commande tant qu'il n'a pas changé le mode de permission — la lui
+> demander en UNE ligne, sans sermon. Le push, lui, se fait sur son ordre.
 **La chaîne de paiement est prouvée EN PRODUCTION** (27/09, Lemon Squeezy en mode test, carte
 de test) : lien signé → webhook → `verifier_lien_paiement` → compte gratuit passé Pro tout seul.
 Passer en live ne demande aucun code : le mode live chez Lemon Squeezy et ses variables dans
