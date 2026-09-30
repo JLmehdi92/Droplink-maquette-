@@ -89,7 +89,7 @@ afterAll(async () => {
 });
 
 describe("Le quota consommé ne se rend pas", () => {
-  test("GRATUIT, commandes : supprimer ses données ne rend pas les quinze commandes à vie", async () => {
+  test("GRATUIT, commandes : supprimer ses données ne rend pas les commandes à vie", async () => {
     const u = await nouveau("quota-survit");
     expect(await creerCommandes(u, PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT), "refus avant le quota").toBeNull();
     expect(await creerCommandes(u, 1)).toBe("DL067");
@@ -102,7 +102,7 @@ describe("Le quota consommé ne se rend pas", () => {
     expect((await consommation(u)).commandes).toBe(PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT);
   });
 
-  test("GRATUIT, colis (hors du cas motivant) : les quinze prises en charge ne reviennent pas", async () => {
+  test("GRATUIT, colis (hors du cas motivant) : les prises en charge consommées ne reviennent pas", async () => {
     const u = await nouveau("colis-survit");
     const plafond = PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT;
     const colis = (n: number, prefixe: string) =>
@@ -281,7 +281,7 @@ describe("Le quota compte des colis, pas des tentatives", () => {
     expect(await colisConsommes(u), "le quota compte les tentatives, pas les colis").toBe(1);
   });
 
-  test("À 15/15, le transporteur d'un colis EXISTANT se précise encore — un NOUVEAU numéro est refusé", async () => {
+  test("Quota plein, le transporteur d'un colis EXISTANT se précise encore — un NOUVEAU numéro est refusé", async () => {
     const u = await nouveau("tentatives-plein");
     const id = await nouvelleCommande(u);
     expect((await ecrire(u, id, "tracking_number", "DEMOPLEIN-A")).statut).toBe("ok");
@@ -311,5 +311,67 @@ describe("Le quota compte des colis, pas des tentatives", () => {
       expect(neuf).toEqual(expect.objectContaining({ statut: "ok", suiviBloque: "gratuit" }));
     }
     expect((await service.from("tracked_parcels").insert({ shop_id: u.shopId, tracking_number: "DEMOPLEIN-SERVICE" })).error?.code).toBe("DL070");
+  });
+
+  /*
+   * ⚠️ UNE SAISIE EN COURS NE CONSOMME PAS LE QUOTA (211, audit ECC du 30/09/2026).
+   * Le champ s'enregistre 800 ms après la dernière frappe : « DEMOBROUILLON », une
+   * pause, puis le numéro complet, et la 172 supprime le brouillon — mais la 198 ne
+   * rendait jamais ce qu'il avait consommé. Deux colis comptés pour un seul, et à
+   * 4 sur 5 le vendeur ne pouvait plus TERMINER son cinquième numéro. Un brouillon
+   * jamais pris en charge n'a rien coûté au fournisseur : sa place est rendue.
+   */
+  test("un numéro saisi en deux fois ne consomme qu'UN colis", async () => {
+    const u = await nouveau("brouillon");
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMOBROUILLON")).statut).toBe("ok");
+    expect((await ecrire(u, id, "tracking_number", "DEMOBROUILLON42")).statut).toBe("ok");
+    const { count } = await service.from("tracked_parcels").select("id", { count: "exact", head: true }).eq("shop_id", u.shopId);
+    expect(count, "le brouillon n'a pas été supprimé").toBe(1);
+    expect(await colisConsommes(u), "le brouillon a consommé une place du quota").toBe(1);
+  });
+
+  test("à une place du quota, le dernier numéro se TERMINE — sans « suivi bloqué »", async () => {
+    const u = await nouveau("brouillon-dernier");
+    const remplis = Array.from({ length: PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT - 1 }, (_, i) => ({
+      shop_id: u.shopId,
+      tracking_number: `DEMOAVANT${i}`,
+      carrier_code: 6051,
+    }));
+    expect((await service.from("tracked_parcels").insert(remplis)).error).toBeNull();
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMODERNIER")).statut).toBe("ok");
+    const fini = await ecrire(u, id, "tracking_number", "DEMODERNIER99");
+    expect(fini, "le brouillon a pris la dernière place").toEqual({ statut: "ok", modifieeLe: expect.any(String) });
+    expect(await colisConsommes(u)).toBe(PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT);
+  });
+
+  test("PRO (hors du cas motivant) : le brouillon rend aussi sa part du plafond MENSUEL", async () => {
+    // UN COLIS GRATUIT D'ABORD : sans lui, `colis_pro` vaut `colis` et la borne
+    // `least()` rendrait la part Pro à elle seule — falsifié, le test restait vert.
+    const u = await nouveau("brouillon-pro");
+    const gratuit = await nouvelleCommande(u);
+    expect((await ecrire(u, gratuit, "tracking_number", "DEMOAVANTPRO")).statut).toBe("ok");
+    await passerEnPro(u);
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMOPROBROUILLON")).statut).toBe("ok");
+    expect((await ecrire(u, id, "tracking_number", "DEMOPROBROUILLON7")).statut).toBe("ok");
+    const { data } = await service.from("quotas_consommes").select("colis, colis_pro").eq("shop_id", u.shopId);
+    const somme = (data ?? []).reduce((a, l) => ({ colis: a.colis + l.colis, pro: a.pro + l.colis_pro }), { colis: 0, pro: 0 });
+    expect(somme, "le plafond mensuel du Pro compte encore le brouillon").toEqual({ colis: 2, pro: 1 });
+  });
+
+  test("CONTRE-TEST : un colis PRIS EN CHARGE puis remplacé reste compté — il a été payé", async () => {
+    const u = await nouveau("paye-remplace");
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMOPAYE")).statut).toBe("ok");
+    const { error } = await service
+      .from("tracked_parcels")
+      .update({ registered_at: new Date().toISOString() })
+      .eq("shop_id", u.shopId)
+      .eq("tracking_number", "DEMOPAYE");
+    expect(error).toBeNull();
+    expect((await ecrire(u, id, "tracking_number", "DEMOPAYE-CORRIGE")).statut).toBe("ok");
+    expect(await colisConsommes(u), "une prise en charge payée a été rendue au quota").toBe(2);
   });
 });

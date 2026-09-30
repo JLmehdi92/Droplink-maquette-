@@ -705,8 +705,8 @@ const SQL = {
         return query select v_parcel, true, true;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
-      depuis: "create function public.attacher_colis",
+      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      depuis: "create or replace function public.attacher_colis",
       jusqua: "comment on function",
     },
   },
@@ -749,8 +749,8 @@ const SQL = {
         return query select v_parcel, v_cree, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
-      depuis: "create function public.attacher_colis",
+      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      depuis: "create or replace function public.attacher_colis",
       jusqua: "comment on function",
     },
   },
@@ -799,8 +799,8 @@ const SQL = {
         return query select v_parcel, v_cree, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
-      depuis: "create function public.attacher_colis",
+      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      depuis: "create or replace function public.attacher_colis",
       jusqua: "comment on function",
     },
   },
@@ -813,16 +813,34 @@ const SQL = {
    */
   /** Le colis d'une saisie abandonnée reste en base : il compte au plafond et s'affiche aux envois. */
   "numero-partiel-conserve": {
+    // Depuis la 211, la suppression vit dans une expression `with` qui rend aussi la
+    // place du brouillon : on casse sa condition plutôt que son verbe.
     casserDepuisMigration: {
-      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
-      depuis: "create function public.attacher_colis(",
+      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      depuis: "create or replace function public.attacher_colis(",
       jusqua: "comment on function",
-      remplacer: "    delete from public.tracked_parcels tp\n     where tp.id = any(v_detaches)",
-      par: "    perform 1 from public.tracked_parcels tp\n     where tp.id = any(v_detaches)",
+      remplacer: "       where tp.id = any(v_detaches)\n         and tp.registered_at is null",
+      par: "       where false and tp.id = any(v_detaches)\n         and tp.registered_at is null",
     },
     reparerDepuisMigration: {
-      fichier: "172_un_numero_se_paie_quand_il_est_stable.sql",
-      depuis: "create function public.attacher_colis(",
+      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      depuis: "create or replace function public.attacher_colis(",
+      jusqua: "comment on function",
+    },
+  },
+
+  /** 211 : le brouillon supprimé garde sa place consommée — à 4 sur 5, le dernier numéro ne se termine plus. */
+  "brouillon-consomme": {
+    casserDepuisMigration: {
+      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      depuis: "create or replace function public.attacher_colis(",
+      jusqua: "comment on function",
+      remplacer: "       set colis = greatest(q.colis - pm.n, 0),",
+      par: "       set colis = q.colis,",
+    },
+    reparerDepuisMigration: {
+      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      depuis: "create or replace function public.attacher_colis(",
       jusqua: "comment on function",
     },
   },

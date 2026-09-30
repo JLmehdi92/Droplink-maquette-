@@ -663,9 +663,11 @@ demandées — vit dans `consignes/historique-du-design.md` et dans context-mode
 
 **La production est à jour jusqu'à la 209 incluse, depuis le 30/09/2026** — migrations lancées
 à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29 (209
-migrations communes, dans l'ordre), puis code poussé. ⚠️ **LA 210 ATTEND la production**
-(30/09/2026 : le compte gratuit passe à 5 commandes et 5 colis à vie) — `pnpm db:migrate` PUIS le
-push, sinon les CGU annoncent 5 pendant que la base applique encore 15. Les dernières :
+migrations communes, dans l'ordre), puis code poussé. ⚠️ **LES 210 ET 211 ATTENDENT la production**
+(30/09/2026 : le compte gratuit passe à 5 commandes et 5 colis à vie ; un numéro de suivi saisi
+en plusieurs fois ne consomme plus qu'une place, le brouillon supprimé rend la sienne) —
+`pnpm db:migrate` PUIS le push, sinon les CGU annoncent 5 pendant que la base applique encore 15.
+Les dernières :
 le RGPD efface ce qu'il promet et refuse de supprimer un compte encore prélevable (206-207), le
 mot `mentions-legales` réservé comme nom de lien (208), les index de la purge (209) ; avant
 elles, le quota à vie qui ne se recharge pas
