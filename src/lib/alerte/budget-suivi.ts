@@ -73,26 +73,52 @@ type Solde = {
   readonly estimation: string | null;
 };
 
-let absenceDejaSignalee = false;
+/**
+ * ⚠️ UNE ABSENCE DE WEBHOOK SE RÉPÈTE, EN ERREUR, TOUTES LES HEURES (audit ECC du
+ * 30/09/2026). Une seule ligne d'avertissement par processus se noyait dans les
+ * journaux, et c'était le seul cas où RIEN ne préviendrait de l'épuisement du
+ * stock. Une fois par heure : assez pour être vu, trop peu pour noyer.
+ */
+const RAPPEL_ABSENCE_MS = 60 * 60 * 1000;
+let absenceSignaleeLe: number | null = null;
 
 export async function annoncerBudgetDeSuivi(
   systeme: SupabaseClient<Database>,
   numero: string,
   fournisseur: Pick<FournisseurSuivi, "lireQuota" | "nom"> = dixSeptTrack,
 ): Promise<void> {
-  const solde = await lireSolde(systeme, fournisseur);
-  if (solde === null) return;
+  // ⚠️ LA RÈGLE 1 TIENT PAR CONSTRUCTION, PAS PAR PRUDENCE (audit ECC du 30/09/2026).
+  // Un reste au-delà du palier faisait lever la jauge (`"░".repeat(-5)`) APRÈS
+  // l'unité payée : l'état du colis n'était jamais lu, et la boucle de la cadence
+  // s'interrompait pour tous les colis suivants. Tout ce qui suit est donc gardé.
+  try {
+    await annoncer(systeme, numero, fournisseur);
+  } catch (erreur) {
+    console.error("[budget] annonce du budget de suivi interrompue :", erreur);
+  }
+}
 
+async function annoncer(
+  systeme: SupabaseClient<Database>,
+  numero: string,
+  fournisseur: Pick<FournisseurSuivi, "lireQuota" | "nom">,
+): Promise<void> {
   // LE NOM VIENT DU PORT : ce fichier ne connaît pas le fournisseur (frontière
   // gardée par `suivi-frontiere`). Il ne sert qu'au salon de l'exploitant.
-  const issue = await publierCarteDiscord(carte(solde, numero, fournisseur.nom.toUpperCase()));
+  const source = fournisseur.nom.toUpperCase();
+
+  const solde = await lireSolde(systeme, fournisseur, source);
+  if (solde === null) return;
+
+  const issue = await publierCarteDiscord(carte(solde, numero, source));
 
   if (issue.statut === "envoye") return;
 
   if (issue.statut === "non_configure") {
-    if (absenceDejaSignalee) return;
-    absenceDejaSignalee = true;
-    console.warn(
+    const maintenant = Date.now();
+    if (absenceSignaleeLe !== null && maintenant - absenceSignaleeLe < RAPPEL_ABSENCE_MS) return;
+    absenceSignaleeLe = maintenant;
+    console.error(
       "[budget] " +
         issue.manquant.join(", ") +
         " n'est pas configuré : les alertes de budget de suivi sont PERDUES. " +
@@ -109,23 +135,45 @@ export async function annoncerBudgetDeSuivi(
   console.error("[budget] alerte de budget non remise : " + issue.motif);
 }
 
+/**
+ * Trois nombres qui ne s'additionnent pas ne « font pas foi » : afficher
+ * « Solde lu chez le fournisseur » au-dessus d'une contradiction serait le défaut
+ * d'origine, habillé d'une certitude.
+ */
+function coherent(q: { total: number; utilisees: number; restantes: number }): boolean {
+  return q.restantes <= q.total && q.utilisees + q.restantes === q.total;
+}
+
 /** Le fournisseur d'abord ; notre base seulement s'il ne répond pas. */
 async function lireSolde(
   systeme: SupabaseClient<Database>,
   fournisseur: Pick<FournisseurSuivi, "lireQuota">,
+  source: string,
 ): Promise<Solde | null> {
   // `try` ET NON `.catch()` : un double qui LÈVERAIT de façon synchrone passerait
   // avant le `.catch`, et la règle 1 — ne jamais lever — tomberait.
   let lu: QuotaPort;
   try {
     lu = await fournisseur.lireQuota();
-  } catch {
+  } catch (erreur) {
+    // La cause est gardée : « exception » seul confondrait un défaut de notre
+    // code avec une panne du fournisseur.
+    console.error("[budget] la lecture du solde chez " + source + " a levé :", erreur);
     lu = { statut: "indisponible", motif: "exception" };
+  }
+
+  if (lu.statut === "ok" && !coherent(lu)) {
+    lu = { statut: "indisponible", motif: "solde-incoherent" };
   }
 
   if (lu.statut === "ok") {
     return { total: lu.total, utilisees: lu.utilisees, restantes: lu.restantes, aujourdhui: lu.aujourdhui, estimation: null };
   }
+
+  // LE REPLI SE DIT AUSSI DANS LE JOURNAL, pas seulement dans Discord : une clé
+  // révoquée (`code-…`) serait sinon invisible côté serveur tant que le salon
+  // reçoit les cartes.
+  console.warn("[budget] solde illisible chez " + source + " (" + lu.motif + ") : repli sur l'estimation de la base.");
 
   const { data, error } = await systeme.rpc("etat_budget_suivi");
   const etat = error === null && Array.isArray(data) ? data[0] : undefined;
@@ -151,20 +199,27 @@ async function lireSolde(
 }
 
 function carte(solde: Solde, numero: string, source: string): CarteDiscord {
-  const part = solde.total > 0 ? solde.restantes / solde.total : 0;
-  const couleur = part >= SEUILS.large ? COULEURS.large : part >= SEUILS.moyen ? COULEURS.moyen : COULEURS.bas;
+  // BORNÉE À [0, 1] : une jauge ne déborde pas, quoi qu'on lui donne.
+  const part = solde.total > 0 ? Math.min(1, Math.max(0, solde.restantes / solde.total)) : 0;
+  const estimee = solde.estimation !== null;
+  // ⚠️ UNE ESTIMATION N'EST JAMAIS VERTE : notre base SOUS-ESTIME la dépense (197
+  // affichés quand il en restait 190). Le vert rassurait exactement à tort.
+  const couleur =
+    part >= SEUILS.large && !estimee ? COULEURS.large : part >= SEUILS.moyen ? COULEURS.moyen : COULEURS.bas;
   const pleines = Math.round(part * CASES_JAUGE);
   const jauge = "█".repeat(pleines) + "░".repeat(CASES_JAUGE - pleines) + "  " + String(Math.round(part * 100)) + " % restant";
+  const environ = estimee ? "~" : "";
 
   const champs: CarteDiscord["champs"][number][] = [
-    { nom: "Restantes", valeur: "**" + String(solde.restantes) + "**", enLigne: true },
-    { nom: "Utilisées", valeur: String(solde.utilisees), enLigne: true },
+    { nom: "Restantes", valeur: "**" + environ + String(solde.restantes) + "**", enLigne: true },
+    { nom: "Utilisées", valeur: environ + String(solde.utilisees), enLigne: true },
     { nom: "Palier", valeur: String(solde.total) + " à vie", enLigne: true },
   ];
   if (solde.aujourdhui !== null) {
     champs.push({ nom: "Aujourd'hui", valeur: String(solde.aujourdhui), enLigne: true });
   }
-  champs.push({ nom: "Jauge", valeur: "`" + jauge + "`" });
+  // L'AVERTISSEMENT AVANT LA JAUGE : une carte trop longue perd ses DERNIERS champs
+  // (`publierCarteDiscord`), et c'est la jauge qu'on peut perdre, pas lui.
   if (solde.estimation !== null) {
     champs.push({
       nom: "⚠️ Estimation",
@@ -178,12 +233,15 @@ function carte(solde: Solde, numero: string, source: string): CarteDiscord {
         " fait foi.",
     });
   }
+  champs.push({ nom: "Jauge", valeur: "`" + jauge + "`" });
 
   return {
     titre: "📦 Nouveau colis suivi — une prise en charge consommée",
     description:
       "Le colis `" +
-      numero.slice(0, EMPREINTE) +
+      // LETTRES ET CHIFFRES SEULEMENT : le numéro est un texte libre du vendeur, et
+      // un accent grave ou une étoile casseraient la mise en forme de la carte.
+      numero.replace(/[^A-Za-z0-9]/g, "").slice(0, EMPREINTE) +
       "…` est désormais suivi automatiquement. Ce palier est **à vie** : les unités ne se rechargent pas.",
     couleur,
     champs,
@@ -197,5 +255,5 @@ function carte(solde: Solde, numero: string, source: string): CarteDiscord {
 
 /** Remet le témoin d'avertissement à zéro. Réservé aux tests. */
 export function reinitialiserAnnonceBudget(): void {
-  absenceDejaSignalee = false;
+  absenceSignaleeLe = null;
 }

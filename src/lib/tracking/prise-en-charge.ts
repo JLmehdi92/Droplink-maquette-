@@ -185,22 +185,6 @@ export async function prendreEnCharge(
     { transporteur: transporteur ?? -1 },
   );
 
-  /*
-   * L'ANNONCE DE LA DÉPENSE — décision de Wassim, 20/09/2026, « à chaque quota
-   * utilisé sur notre compte 17track ».
-   *
-   * ELLE EST ICI ET NULLE PART AILLEURS, parce que c'est ici et nulle part
-   * ailleurs que l'argent part. La poser plus haut — à l'attache, à la
-   * sauvegarde du numéro — annoncerait des dépenses qui n'ont pas eu lieu :
-   * un numéro instable est détaché avant d'être payé (172), et un colis déjà
-   * suivi ne se repaie pas.
-   *
-   * Elle ne lève jamais et ne conditionne rien : l'unité est DÉJÀ dépensée.
-   * Faire échouer la prise en charge parce qu'une notification n'est pas partie
-   * reviendrait à payer puis à perdre ce qu'on a payé.
-   */
-  await annoncerBudgetDeSuivi(systeme, numero);
-
   // L'INTERROGATION IMMÉDIATE. Elle est séparée de la prise en charge parce que
   // celle-ci ne rend pas l'état du colis : elle l'enregistre. Sans ce second
   // appel, l'écran resterait vide jusqu'au premier passage de la tâche de fond.
@@ -209,6 +193,24 @@ export async function prendreEnCharge(
     .catch(() => ({ statut: "indisponible" as const, motif: "exception" }));
 
   const ingestion = await ingererEtat(numero, etat);
+
+  /*
+   * L'ANNONCE DE LA DÉPENSE — décision de Wassim, 20/09/2026, « à chaque quota
+   * utilisé sur notre compte 17track ».
+   *
+   * ELLE EST DANS CETTE FONCTION ET NULLE PART AILLEURS, parce que c'est ici que
+   * l'argent part. La poser plus haut — à l'attache, à la sauvegarde du numéro —
+   * annoncerait des dépenses qui n'ont pas eu lieu : un numéro instable est
+   * détaché avant d'être payé (172), et un colis déjà suivi ne se repaie pas.
+   *
+   * ⚠️ ET ELLE VIENT EN DERNIER (audit ECC du 30/09/2026). Elle lit le solde chez
+   * le fournisseur puis poste sur Discord — jusqu'à 22 secondes, bornées. Posée
+   * avant l'interrogation, elle retardait d'autant l'état du colis à l'écran du
+   * vendeur, et chaque colis d'une passe de la cadence, qui les traite en série.
+   *
+   * Elle ne lève jamais et ne conditionne rien : l'unité est DÉJÀ dépensée.
+   */
+  await annoncerBudgetDeSuivi(systeme, numero);
 
   return { statut: "pris-en-charge", avecEtat: ingestion.statut === "applique" };
 }

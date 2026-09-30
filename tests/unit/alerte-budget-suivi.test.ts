@@ -28,8 +28,11 @@ type Issue =
   | { statut: "refuse"; motif: string };
 const cartes: CarteDiscord[] = [];
 let issue: Issue = { statut: "envoye", id: "1" };
+/** Un envoi qui LÈVE, et non qui refuse — la règle 1 doit tenir quand même. */
+let envoiLeve = false;
 vi.mock("@/lib/alerte/discord", () => ({
   publierCarteDiscord: async (c: CarteDiscord) => {
+    if (envoiLeve) throw new Error("envoi en panne");
     cartes.push(c);
     return issue;
   },
@@ -152,19 +155,136 @@ describe("L'annonce du budget de suivi", () => {
     expect(champ(cartes[0], "Restantes")).toContain("190");
   });
 
-  test("⚠️ UNE CONFIGURATION ABSENTE SE DIT UNE FOIS, PAS À CHAQUE COLIS", async () => {
+  test("⚠️ UNE CONFIGURATION ABSENTE SE DIT EN ERREUR, UNE FOIS PAR HEURE — pas à chaque colis, pas une seule fois", async () => {
     issue = { statut: "non_configure", manquant: ["DISCORD_WEBHOOK_URL"] };
+    const debut = Date.now();
+    const horloge = vi.spyOn(Date, "now").mockReturnValue(debut);
     await annoncerBudgetDeSuivi(systeme(BASE), "LX1", fournisseur(LU));
     await annoncerBudgetDeSuivi(systeme(BASE), "LX2", fournisseur(LU));
-    expect(avertissements).toHaveLength(1);
-    expect(avertissements[0]).toContain("DISCORD_WEBHOOK_URL");
-    expect(avertissements[0]).toContain("190");
+    expect(erreurs).toHaveLength(1);
+    expect(erreurs[0]).toContain("DISCORD_WEBHOOK_URL");
+    expect(erreurs[0]).toContain("190");
+
+    // Une seule ligne par processus se noyait : une heure plus tard, elle revient.
+    horloge.mockReturnValue(debut + 61 * 60 * 1000);
+    await annoncerBudgetDeSuivi(systeme(BASE), "LX3", fournisseur(LU));
+    expect(erreurs).toHaveLength(2);
   });
 
   test("un refus de Discord est nommé — une alerte perdue en silence est le défaut visé", async () => {
     issue = { statut: "refuse", motif: "HTTP 404" };
     await annoncerBudgetDeSuivi(systeme(BASE), "LX1", fournisseur(LU));
     expect(erreurs.some((e) => e.includes("HTTP 404"))).toBe(true);
+  });
+
+  /*
+   * ⚠️ AUDIT ECC DU 30/09/2026. `"░".repeat(20 - pleines)` LEVAIT dès que le reste
+   * dépassait le palier (un bonus, un palier mal lu) : RangeError APRÈS l'unité
+   * payée, l'état du colis jamais lu, et la boucle de la cadence interrompue.
+   */
+  test("⚠️ UN RESTE AU-DELÀ DU PALIER NE FAIT PAS LEVER, et n'est pas présenté comme un fait", async () => {
+    await expect(
+      annoncerBudgetDeSuivi(
+        systeme(BASE),
+        "6A07",
+        fournisseur({ ...LU, total: 100, utilisees: 0, restantes: 125 }),
+      ),
+    ).resolves.toBeUndefined();
+    // Trois nombres qui ne s'additionnent pas ne « font pas foi » : on retombe sur
+    // l'estimation, et la carte dit pourquoi.
+    expect(texte(cartes[0]).toLowerCase()).toContain("estimation");
+    expect(texte(cartes[0])).toContain("incoherent");
+  });
+
+  test.each([
+    [{ utilisees: 210, total: 200, restantes: 0 }, "une base qui a dépensé plus que le palier"],
+    [{ utilisees: 5, total: 0, restantes: 0 }, "un palier réglé à zéro"],
+  ])("un repli dégénéré (%o, %s) ne lève pas et borne la jauge", async (etat) => {
+    await expect(
+      annoncerBudgetDeSuivi(systeme({ data: [etat], error: null }), "6A07", fournisseur(INJOIGNABLE)),
+    ).resolves.toBeUndefined();
+    const jauge = champ(cartes[0], "Jauge");
+    expect(jauge).toContain("0 %");
+    expect((jauge.match(/█/g) ?? []).length).toBe(0);
+  });
+
+  test.each([
+    [100, 0x12a87a, "exactement la moitié : encore vert"],
+    [99, 0xe08a18, "juste sous la moitié : orange"],
+    [40, 0xe08a18, "exactement le cinquième : encore orange"],
+    [39, 0xef4b57, "juste sous le cinquième : rouge"],
+  ])("aux seuils, %i restantes sur 200 → %s (%s)", async (restantes, couleur) => {
+    await annoncerBudgetDeSuivi(systeme(BASE), "6A07", fournisseur({ ...LU, restantes, utilisees: 200 - restantes }));
+    expect(cartes[0]?.couleur).toBe(couleur);
+  });
+
+  test("⚠️ UNE ESTIMATION N'EST JAMAIS VERTE, et son reste est précédé de « ~ »", async () => {
+    // Notre base SOUS-ESTIME la dépense : 197 affichés quand il en restait 190.
+    // Une carte verte et un « 197 » en gras rassuraient exactement à tort.
+    await annoncerBudgetDeSuivi(systeme(BASE), "6A07", fournisseur(INJOIGNABLE));
+    expect(cartes[0]?.couleur).not.toBe(0x12a87a);
+    expect(champ(cartes[0], "Restantes")).toContain("~");
+  });
+
+  test("le repli JOURNALISE la cause côté fournisseur — pas seulement dans Discord", async () => {
+    await annoncerBudgetDeSuivi(systeme(BASE), "6A07", fournisseur({ statut: "indisponible", motif: "code-401" }));
+    expect([...erreurs, ...avertissements].some((l) => l.includes("code-401"))).toBe(true);
+  });
+
+  test("une exception du fournisseur est journalisée AVEC sa cause", async () => {
+    await annoncerBudgetDeSuivi(systeme(BASE), "6A07", fournisseur(() => Promise.reject(new Error("boum précis"))));
+    expect(erreurs.some((l) => l.includes("boum précis"))).toBe(true);
+  });
+
+  test("un envoi qui LÈVE ne fait pas lever l'annonce — et la cause est journalisée", async () => {
+    envoiLeve = true;
+    try {
+      await expect(annoncerBudgetDeSuivi(systeme(BASE), "6A07", fournisseur(LU))).resolves.toBeUndefined();
+      expect(erreurs.some((l) => l.includes("envoi en panne"))).toBe(true);
+    } finally {
+      envoiLeve = false;
+    }
+  });
+
+  test("⚠️ LE PRÉFIXE DU NUMÉRO NE CASSE PAS LA CARTE : seuls lettres et chiffres passent", async () => {
+    await annoncerBudgetDeSuivi(systeme(BASE), "`**x\n@everyone", fournisseur(LU));
+    const description = cartes[0]?.description ?? "";
+    expect(description).not.toContain("**x");
+    expect(description).not.toContain("\n@");
+  });
+
+  test("« Estimation » est placée AVANT la jauge : c'est elle qu'une troncature doit garder", async () => {
+    await annoncerBudgetDeSuivi(systeme(BASE), "6A07", fournisseur(INJOIGNABLE));
+    const noms = cartes[0]?.champs.map((c) => c.nom) ?? [];
+    expect(noms.findIndex((n) => n.includes("Estimation"))).toBeLessThan(noms.indexOf("Jauge"));
+  });
+
+  test("SANS fournisseur explicite, le solde vient bien de getquota — les deux vrais morceaux branchés", async () => {
+    // Tous les autres tests passent un double : sans celui-ci, un défaut remplacé
+    // par un faux fournisseur resterait vert.
+    const ancienne = process.env["TRACKING_API_KEY"];
+    process.env["TRACKING_API_KEY"] = "cle-de-sonde";
+    const urls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      urls.push(String(url));
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ code: 0, data: { quota_total: 200, quota_used: 10, quota_remain: 190, today_used: 0 } }),
+      } as Response;
+    });
+    try {
+      await annoncerBudgetDeSuivi(systeme(BASE), "6A07");
+      expect(urls.some((u) => u.endsWith("/getquota"))).toBe(true);
+      expect(champ(cartes[0], "Restantes")).toContain("190");
+      expect(texte(cartes[0])).not.toContain("197");
+      // `today_used: 0` est un zéro DIT par le fournisseur : il s'affiche.
+      expect(champ(cartes[0], "Aujourd'hui")).toBe("0");
+    } finally {
+      vi.unstubAllGlobals();
+      if (ancienne === undefined) delete process.env["TRACKING_API_KEY"];
+      else process.env["TRACKING_API_KEY"] = ancienne;
+    }
   });
 
   test("un fournisseur qui lève de façon SYNCHRONE ne la fait pas lever non plus", async () => {
