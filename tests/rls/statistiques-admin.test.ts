@@ -4,6 +4,7 @@ import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -94,6 +95,10 @@ beforeAll(async () => {
   admin = await creerUtilisateur("statistiques-admin");
   vendeur = await creerUtilisateur("statistiques-vendeur");
   await promouvoirAdmin(catalogue, admin);
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; ce vendeur en reçoit 6 (dont une hors des deux fenêtres),
+  // et ce test mesure les statistiques de la plateforme, pas le quota.
+  await passerEnPro(vendeur);
 
   avant = await lireIndicateurs(admin.client, "30");
   commandesDuJourAvant = (await lireSeries(admin.client, "30")).find((j) => j.jour === auJourdHui())?.commandes ?? 0;

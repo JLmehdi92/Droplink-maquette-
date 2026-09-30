@@ -115,7 +115,7 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
           },
           {
             cle: "colis",
-            // UNE FOIS le quota de commandes (201) : 15 commandes, 15 colis, sans marge
+            // UNE FOIS le quota de commandes (201) : 5 commandes, 5 colis depuis la 210, sans marge
             // de correction payée par le budget de suivi commun.
             gratuit: p("tableau.aVie", { n: nombre(aVie) }),
             // Une fois le plafond de commandes, plus deux (197) : 300 commandes, 300 colis.

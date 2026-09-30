@@ -73,7 +73,10 @@ export const BUDGET_SUIVI_DEJA_CONSOMME_DEFAUT = 0;
 /**
  * Le nombre total de commandes qu'un compte GRATUIT peut créer sur sa vie.
  *
- * 15, décision de Wassim du 20/09/2026, et le « à vie » est le coeur de la
+ * 5 depuis le 30/09/2026 (décision de Mehdi : « 5 suivis et 5 commandes » — le
+ * stock 17TRACK commun, ~191 prises en charge à vie, se vidait en 13 inscrits à
+ * 15 colis ; migration 210). 15 avant, décision de Wassim du 20/09/2026, et le
+ * « à vie » est le coeur de la
  * décision : un plafond mensuel se contourne en attendant, un plafond à vie se
  * contourne en recréant un compte — ce qui laisse une trace que l'administration
  * voit (les comptes en doublon). Le premier contournement est gratuit et
@@ -83,7 +86,7 @@ export const BUDGET_SUIVI_DEJA_CONSOMME_DEFAUT = 0;
  * qu'un abonnement se renouvelle. Et aucun paiement ne passe par le produit —
  * le plan est un état du compte, posé à la main dans l'administration.
  */
-export const PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT = 15;
+export const PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT = 5;
 
 export interface Alerte {
   readonly genre: string;

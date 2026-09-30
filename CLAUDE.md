@@ -3,9 +3,10 @@
 DropLink — une page privée par commande, pour ceux qui vendent en direct sans boutique (DM Snap, Insta, WhatsApp).
 Le vendeur upload ses photos/vidéos QC, colle le tracking, envoie **un seul lien brandé à ses couleurs**. Son client consulte tout lui-même, sans compte.
 
-**Statut : phase de validation, en ligne sur droplink.fr. Plan gratuit (15 commandes et 15 colis
-suivis à vie) et plan Pro à 20 €/mois (300/300 par mois), encaissé par Lemon Squeezy — encore en
-mode test au 27/09/2026. Aucun paiement ne passe jamais SUR les commandes (contrainte n° 1).**
+**Statut : phase de validation, en ligne sur droplink.fr. Plan gratuit (5 commandes et 5 colis
+suivis à vie depuis la migration 210 — 15/15 avant, décision de Mehdi du 30/09/2026 pour ménager
+le stock 17TRACK commun) et plan Pro à 20 €/mois (300/300 par mois), encaissé par Lemon Squeezy,
+approuvé en mode live. Aucun paiement ne passe jamais SUR les commandes (contrainte n° 1).**
 
 📖 **Contexte produit complet : `BRIEF-DROPLINK-COMPLET.md`** — à consulter avant toute décision produit ou d'architecture. Il n'est PAS chargé d'office (83 Ko) : on l'interroge dans context-mode (`ctx_search`, source `brief`), et on le lit en entier quand la décision l'exige. Si la recherche ne rend rien, le réindexer d'abord (`ctx_index`). Il contient les 26 décisions verrouillées avec leurs raisons, le modèle de données, les budgets chiffrés et les 32 leçons.
 
@@ -662,7 +663,9 @@ demandées — vit dans `consignes/historique-du-design.md` et dans context-mode
 
 **La production est à jour jusqu'à la 209 incluse, depuis le 30/09/2026** — migrations lancées
 à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29 (209
-migrations communes, dans l'ordre), puis code poussé. Aucune migration n'attend. Les dernières :
+migrations communes, dans l'ordre), puis code poussé. ⚠️ **LA 210 ATTEND la production**
+(30/09/2026 : le compte gratuit passe à 5 commandes et 5 colis à vie) — `pnpm db:migrate` PUIS le
+push, sinon les CGU annoncent 5 pendant que la base applique encore 15. Les dernières :
 le RGPD efface ce qu'il promet et refuse de supprimer un compte encore prélevable (206-207), le
 mot `mentions-legales` réservé comme nom de lien (208), les index de la purge (209) ; avant
 elles, le quota à vie qui ne se recharge pas

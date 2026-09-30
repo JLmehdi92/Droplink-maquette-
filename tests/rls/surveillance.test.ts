@@ -4,6 +4,7 @@ import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -56,6 +57,10 @@ beforeAll(async () => {
   admin = await creerUtilisateur("surv-admin");
   vendeur = await creerUtilisateur("surv-vendeur");
   await promouvoirAdmin(catalogue, admin);
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; ce vendeur fait suivre 6 colis, et ce test mesure la
+  // surveillance (compteur d'interrogations, colis par jour), pas le quota.
+  await passerEnPro(vendeur);
 }, 120_000);
 
 afterAll(async () => {

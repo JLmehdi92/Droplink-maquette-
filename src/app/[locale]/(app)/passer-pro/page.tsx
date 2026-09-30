@@ -141,7 +141,7 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
           },
           {
             cle: "colis",
-            // UNE FOIS le quota de commandes (201) : 15 commandes, 15 colis, sans marge
+            // UNE FOIS le quota de commandes (201) : 5 commandes, 5 colis depuis la 210, sans marge
             // de correction payée par le budget de suivi commun.
             gratuit: t("tableau.aVie", { n: nombre(aVie) }),
             pro:
@@ -191,7 +191,7 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
                     {t(`features.${cle}.titre`)}
                   </span>
                   <span className="mt-[5px] block text-[13.5px] leading-[1.55] text-ds-texte-corps">
-                    {/* Le quota à vie est DIT, comme la planche (« borné à 15 commandes À
+                    {/* Le quota à vie est DIT, comme la planche (« borné à 5 commandes À
                         VIE »), dès qu'il est lu ; illisible, la phrase ne cite aucun nombre. */}
                     {cle === "commandes" && aVie !== null
                       ? t("features.commandes.texteNombre", { n: nombre(aVie) })

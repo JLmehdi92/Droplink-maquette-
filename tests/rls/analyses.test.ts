@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
-import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
+import { creerUtilisateur, passerEnPro, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
 import {
   debutPeriode,
   debutPeriodePrecedente,
@@ -102,6 +102,10 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("analyses-alice");
   bob = await creerUtilisateur("analyses-bob");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; ce test mesure les fenêtres d'analyse sur 6 commandes, pas
+  // le quota. (Bob en crée 5 : il reste gratuit.)
+  await passerEnPro(alice);
 
   /*
    * LE JEU D'ALICE COUVRE LES TROIS FENÊTRES ET LEURS TROIS PRÉCÉDENTES.

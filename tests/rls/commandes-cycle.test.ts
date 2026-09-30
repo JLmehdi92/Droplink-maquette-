@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -41,6 +42,10 @@ async function creerCommande(
 beforeAll(async () => {
   alice = await creerUtilisateur("cyc-alice");
   bob = await creerUtilisateur("cyc-bob");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; Alice en crée une dizaine (duplication comprise), et ce
+  // test mesure la révocation, la duplication et l'archivage, pas le quota.
+  await passerEnPro(alice);
 }, 90_000);
 
 afterAll(async () => {

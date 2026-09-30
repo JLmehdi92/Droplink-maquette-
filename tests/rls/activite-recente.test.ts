@@ -3,6 +3,7 @@ import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -39,6 +40,10 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("recente-alice");
   bob = await creerUtilisateur("recente-bob");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; ce test mesure la limite d'affichage (5) sur 7 commandes,
+  // pas le quota.
+  await passerEnPro(alice);
   commandesAlice = await creer(alice, 7);
   commandeBob = (await creer(bob, 1))[0] as string;
 

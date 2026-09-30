@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
-import { creerUtilisateur, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
+import { creerUtilisateur, passerEnPro, supprimerUtilisateur, type UtilisateurDeTest } from "../aide/utilisateurs";
 import {
   compterEnvois,
   decoderCurseur,
@@ -111,6 +111,10 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("envois-alice");
   bob = await creerUtilisateur("envois-bob");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; Alice en pose 9, et ce test mesure la liste des envois
+  // (isolation, tri, seuil de silence, pagination), pas le quota.
+  await passerEnPro(alice);
 
   // Trois colis chez Alice : un qui avance, un silencieux, un livré immobile.
   // Les écarts sont pris LOIN du seuil — un jour contre soixante — pour que la

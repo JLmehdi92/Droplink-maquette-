@@ -111,7 +111,7 @@ function BlocLegal({ bloc }: { readonly bloc: Bloc }) {
  * jour est le geste qui accompagne toute modification du contenu légal — une
  * date figée sur un texte modifié affirme un état qui n'existe plus.
  */
-const DERNIERE_MAJ = new Date("2026-09-29T00:00:00Z");
+const DERNIERE_MAJ = new Date("2026-09-30T00:00:00Z");
 
 /**
  * LES PAGES LÉGALES, portées sur le kit `legal`.

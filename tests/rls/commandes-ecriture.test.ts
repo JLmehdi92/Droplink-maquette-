@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -66,6 +67,10 @@ async function lire(u: UtilisateurDeTest, id: string, colonnes: string) {
 beforeAll(async () => {
   alice = await creerUtilisateur("ecr-alice");
   bob = await creerUtilisateur("ecr-bob");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; Alice en crée 7, et ce test mesure l'écriture champ par
+  // champ, pas le quota.
+  await passerEnPro(alice);
 
   const { data, error } = await alice.client
     .from("orders")

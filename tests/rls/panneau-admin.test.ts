@@ -42,7 +42,11 @@ beforeAll(async () => {
 
   await promouvoirAdmin(catalogue, admin);
 
-  // Le gros compte dépasse volontairement le seuil de test.
+  // Le gros compte dépasse volontairement le seuil de test. Il est PRO : depuis la
+  // 210, un compte gratuit ne peut faire suivre que 5 colis à vie, et la base
+  // refusait le semis entier (le fichier sortait « 23 skipped »). Un vendeur à
+  // neuf colis est Pro par construction — même règle que le banc de `test:perf`.
+  await passerEnPro(gros);
   await interroger(
     catalogue,
     `insert into public.tracked_parcels (shop_id, tracking_number, registered_at)

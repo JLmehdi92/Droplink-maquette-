@@ -6,6 +6,7 @@ import {
   clientAnonyme,
   clientService,
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -65,6 +66,11 @@ async function adresseDe(id: string): Promise<string | null> {
 beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   vendeur = await creerUtilisateur("notif-vendeur");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; ce vendeur en crée 8, et ce test mesure les demandes
+  // d'e-mail du client final (bornes par commande et par boutique, qui ne
+  // dépendent pas du plan), pas le quota.
+  await passerEnPro(vendeur);
   commande = await creerCommande("notif principale");
   archivee = await creerCommande("notif archivee");
   bloquee = await creerCommande("notif bloquee");

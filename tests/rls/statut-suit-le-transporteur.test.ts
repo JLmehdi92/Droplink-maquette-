@@ -3,6 +3,7 @@ import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -115,6 +116,10 @@ beforeAll(async () => {
   catalogue = await ouvrirConnexionCatalogue();
   alice = await creerUtilisateur("statut-alice");
   bob = await creerUtilisateur("statut-bob");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; Alice en crée une dizaine, chacune avec son colis, et ce
+  // test mesure la descente du statut depuis le transporteur, pas le quota.
+  await passerEnPro(alice);
 }, 120_000);
 
 afterAll(async () => {

@@ -6,6 +6,7 @@ import {
   clientAnonyme,
   clientService,
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -50,6 +51,10 @@ beforeAll(async () => {
   admin = await creerUtilisateur("admin-socle-admin");
   vendeur = await creerUtilisateur("admin-socle-vendeur");
   cible = await creerUtilisateur("admin-socle-cible");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; la cible en reçoit 7 au fil du fichier, et ce test mesure
+  // ce que l'administration lit et compte, pas le quota.
+  await passerEnPro(cible);
 
   // La promotion passe par le CATALOGUE, pas par l'application : `profiles.role`
   // n'est accordé en écriture à personne, et c'est exactement ce que le dernier

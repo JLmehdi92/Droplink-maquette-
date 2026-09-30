@@ -3,6 +3,7 @@ import type { Client } from "pg";
 import { interroger, ouvrirConnexionCatalogue } from "../aide/base";
 import {
   creerUtilisateur,
+  passerEnPro,
   supprimerUtilisateur,
   type UtilisateurDeTest,
 } from "../aide/utilisateurs";
@@ -49,6 +50,10 @@ beforeAll(async () => {
   bob = await creerUtilisateur("liste-bob");
   carla = await creerUtilisateur("liste-carla");
   dylan = await creerUtilisateur("liste-dylan");
+  // PRO : depuis la 210 un compte gratuit ne crée que 5 commandes et ne fait suivre
+  // que 5 colis à vie ; Alice en reçoit 7, et ce test mesure la liste (filtres,
+  // recherche, tri, pagination), pas le quota.
+  await passerEnPro(alice);
 
   // Alice : de quoi éprouver les filtres, la recherche et la pagination.
   const lignes = [
