@@ -20,8 +20,8 @@ import { PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT } from "@/lib/audit/panneau";
  * commandes avec une VRAIE session, jusqu'au refus.
  *
  * ⚠️ ET LE CONTRE-TEST EST LA MOITIÉ QUI COMPTE. Une suite où tout est refusé
- * passe à 100 % sans rien prouver : il faut donc voir les quinze premières
- * PASSER, puis la seizième être refusée, puis le même compte passé en `pro`
+ * passe à 100 % sans rien prouver : il faut donc voir le quota entier
+ * PASSER, puis la commande de trop être refusée, puis le même compte passé en `pro`
  * créer à nouveau. Sans ce dernier cas, un plafond qui refuserait TOUT le monde
  * — y compris les comptes payants — serait vert ici.
  */
@@ -58,20 +58,20 @@ describe("Le quota d'un compte gratuit", () => {
     expect(data?.plan).toBe("gratuit");
   });
 
-  test("les quinze premières commandes PASSENT, dont une d'un mois RÉVOLU", async () => {
+  test("le quota entier PASSE, dont une commande d'un mois RÉVOLU", async () => {
     /*
      * ⚠️ LA COMMANDE ANTIDATÉE EST CE QUI REND CE FICHIER DISCRIMINANT, et sans
      * elle il ne prouvait PAS la décision.
      *
-     * Première version : quinze commandes créées maintenant, la seizième
+     * Première version (quota à 15, avant la 210) : quinze commandes créées maintenant, la seizième
      * refusée. Falsifiée en remettant le décompte au MOIS (`quota-gratuit-mensuel`)
      * — et le test est resté VERT, parce que quinze commandes créées le même
      * jour sont quinze commandes de ce mois-ci. Il mesurait « il existe un
      * plafond », jamais « le plafond porte sur toute la vie ».
      *
      * Avec une commande vieille de deux mois, les deux lectures divergent : à
-     * vie le compte est à quinze, ce mois-ci il est à quatorze. Le refus de la
-     * seizième ne peut donc plus venir que du décompte à vie.
+     * vie le compte est au quota, ce mois-ci il en est à un de moins. Le refus de la
+     * commande de trop ne peut donc plus venir que du décompte à vie.
      */
     const { error: erreurAncienne } = await service.from("orders").insert({
       shop_id: vendeur.shopId,
@@ -89,7 +89,7 @@ describe("Le quota d'un compte gratuit", () => {
     expect(data).toHaveLength(PLAFOND_COMMANDES_GRATUIT_A_VIE_DEFAUT - 1);
   });
 
-  test("la seizième est REFUSÉE, et le refus nomme les deux nombres", async () => {
+  test("la commande de trop est REFUSÉE, et le refus nomme les deux nombres", async () => {
     const { error } = await creer(1, "Au-delà du quota");
 
     expect(error, "le quota à vie n'a pas refusé la commande de trop").not.toBeNull();
@@ -129,7 +129,7 @@ describe("Le quota d'un compte gratuit", () => {
      *
      * Le plafond de colis (migration 125) vaut « deux fois le plafond MENSUEL
      * de commandes », soit 6 000. Or depuis la 176, un compte gratuit n'est plus
-     * régi par ce plafond mensuel : il a 15 commandes À VIE. Les deux se sont
+     * régi par ce plafond mensuel : il a un quota de commandes À VIE (15 alors, 5 depuis la 210). Les deux se sont
      * désolidarisés sans que rien ne le dise.
      *
      * Résultat mesuré : **60 colis créés sans un seul refus** par un compte à
@@ -145,8 +145,8 @@ describe("Le quota d'un compte gratuit", () => {
      * Le facteur 2 de la 125 laissait UNE correction de numéro par commande.
      * ⚠️ RETIRÉ LE 27/09/2026 (migration 201, décision de Wassim) : chaque
      * colis suivi coûte une prise en charge sur un palier commun, et le produit
-     * ne peut pas offrir de seconde chance à un compte gratuit. 15 commandes,
-     * 15 colis — une correction de numéro consomme l'un des quinze.
+     * ne peut pas offrir de seconde chance à un compte gratuit. Autant de colis
+     * que de commandes (5 et 5 depuis la 210) — une correction de numéro en consomme un.
      */
     const pieton = await creerUtilisateur("quota-colis");
     try {

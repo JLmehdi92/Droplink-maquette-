@@ -12,8 +12,9 @@ import { expediteurDiscord } from "./discord";
  * ── POURQUOI À CHAQUE UNITÉ, ET NON À UN SEUIL ─────────────────────────────
  *
  * Un seuil ne se déclenche qu'une fois, et il se déclenche TARD. À 191 unités
- * restantes sur 200 À VIE, chaque prise en charge est un événement rare : dix
- * comptes de vendeurs à quinze commandes suffisent à tout consommer. Tant que
+ * restantes sur 200 À VIE, chaque prise en charge est un événement rare : à 5
+ * colis à vie par compte gratuit (210), trente-huit inscrits suffisent à tout
+ * consommer — et un seul compte Pro, en un mois. Tant que
  * le produit est en phase de validation, voir passer chaque unité vaut mieux
  * qu'une alerte unique — et c'est le choix de Wassim, qui a ajouté la suite :
  * quand le volume montera, on passera au seuil des 50 restantes.

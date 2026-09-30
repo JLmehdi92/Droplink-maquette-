@@ -252,7 +252,7 @@ export async function creerUtilisateur(etiquette: string): Promise<UtilisateurDe
  * ⚠️ À N'EMPLOYER QUE QUAND LA SUITE A BESOIN DE PLUS DE COMMANDES QUE LE QUOTA
  * GRATUIT, et à dire dans un commentaire pourquoi.
  *
- * Depuis la migration 176, un compte GRATUIT est borné à 15 commandes À VIE
+ * Depuis la migration 176, un compte GRATUIT est borné à un quota de commandes À VIE (15 alors, 5 depuis la 210)
  * (décision de Wassim du 20/09/2026). Une suite qui en crée davantage sans le
  * vouloir rougit sur `DL067` — ce qui est le bon comportement du produit, et un
  * mauvais diagnostic pour la suite : elle croirait mesurer sa propre règle.

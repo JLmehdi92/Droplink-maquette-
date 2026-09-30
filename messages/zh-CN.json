@@ -1509,7 +1509,7 @@
     "lienBloque": "链接已停用",
     "quota": {
       "gratuitTitre": "免费版额度已用完",
-      "gratuitTexte": "您已创建 {n} 个订单：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
+      "gratuitTexte": "免费账户共可创建 {n} 个订单：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
       "gratuitTexteSansNombre": "您已用完免费版额度：此额度为终身额度，不会重置。升级至 Pro 即可继续创建订单。",
       "mensuelTitre": "本月上限已达到",
       "mensuelTexte": "您本月已创建 {n} 个订单。上限将于每月 1 日重置。",

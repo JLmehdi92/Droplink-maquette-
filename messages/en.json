@@ -1509,7 +1509,7 @@
     "lienBloque": "Link blocked",
     "quota": {
       "gratuitTitre": "Free plan limit reached",
-      "gratuitTexte": "You have created your {n} orders: this limit is for life and never resets. Upgrade to Pro to keep creating orders.",
+      "gratuitTexte": "The free account includes {n} orders in total: this limit is for life and never resets. Upgrade to Pro to keep creating orders.",
       "gratuitTexteSansNombre": "You have reached your free plan limit: it is for life and never resets. Upgrade to Pro to keep creating orders.",
       "mensuelTitre": "Monthly limit reached",
       "mensuelTexte": "You have created your {n} orders for this month. The limit resets on the 1st of the month.",

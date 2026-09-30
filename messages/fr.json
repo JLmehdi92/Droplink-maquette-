@@ -1509,7 +1509,7 @@
     "lienBloque": "Lien bloqué",
     "quota": {
       "gratuitTitre": "Quota du compte gratuit atteint",
-      "gratuitTexte": "Vous avez créé vos {n} commandes : ce quota est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
+      "gratuitTexte": "Le compte gratuit comprend {n} commandes au total : ce quota est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
       "gratuitTexteSansNombre": "Vous avez atteint le quota de votre compte gratuit : il est à vie, il ne se recharge pas. Passez au Pro pour continuer à créer des commandes.",
       "mensuelTitre": "Plafond du mois atteint",
       "mensuelTexte": "Vous avez créé vos {n} commandes de ce mois-ci. Le plafond se recharge le 1er du mois.",
