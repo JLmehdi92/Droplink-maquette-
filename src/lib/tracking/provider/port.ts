@@ -73,6 +73,27 @@ export type ReponsePort =
 export const MOTIF_CLE_ABSENTE = "cle-absente";
 
 /**
+ * Le solde du palier, tel que le FOURNISSEUR le facture.
+ *
+ * ⚠️ C'EST LUI QUI FAIT FOI, PAS NOTRE BASE (30/09/2026). `etat_budget_suivi()`
+ * compte les colis que nous avons GARDÉS ; le fournisseur décompte ce qu'il a
+ * PRIS EN CHARGE. Une ligne effacée chez nous reste payée chez lui : l'alerte a
+ * annoncé 197 restantes quand il en restait 190.
+ *
+ * `aujourdhui` vaut `null` quand le fournisseur ne le donne pas — jamais un zéro
+ * qu'il n'a pas dit.
+ */
+export type QuotaPort =
+  | {
+      readonly statut: "ok";
+      readonly total: number;
+      readonly utilisees: number;
+      readonly restantes: number;
+      readonly aujourdhui: number | null;
+    }
+  | { readonly statut: "indisponible"; readonly motif: string };
+
+/**
  * L'adaptateur d'un fournisseur de suivi.
  *
  * `prendreEnCharge` est SÉPARÉE de `interroger` parce que les deux ne coûtent
@@ -107,6 +128,12 @@ export interface FournisseurSuivi {
 
   /** Demande l'état d'un numéro déjà pris en charge. */
   interroger(numero: string, transporteur: number | null): Promise<ReponsePort>;
+
+  /**
+   * Lit le solde du palier chez le fournisseur. Une lecture de COMPTE, sans
+   * numéro : elle ne prend rien en charge et ne se paie pas.
+   */
+  lireQuota(): Promise<QuotaPort>;
 
   /**
    * Vérifie qu'une notification vient bien du fournisseur.

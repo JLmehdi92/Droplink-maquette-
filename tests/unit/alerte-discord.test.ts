@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { expediteurDiscord } from "@/lib/alerte/discord";
+import { expediteurDiscord, publierCarteDiscord, type CarteDiscord } from "@/lib/alerte/discord";
 
 /**
  * L'ALERTE QUI PART SUR DISCORD, ET CE QU'ELLE DOIT REFUSER DE FAIRE.
@@ -161,5 +161,114 @@ describe("L'expéditeur Discord", () => {
     await expediteurDiscord().envoyer({ sujet: "s", texte: "t" });
 
     expect(appels[0]?.init.signal, "aucun signal d'abandon : l'appel est sans borne").toBeDefined();
+  });
+
+  test("⚠️ AUCUN MESSAGE NE PEUT MENTIONNER @everyone", async () => {
+    // Un texte venu d'un tiers — un nom de client chez le fournisseur de
+    // paiement, un numéro de colis — ne doit jamais pouvoir faire sonner le salon.
+    bouchonner(() => Promise.resolve(reponse(200, { id: "1" })));
+
+    await expediteurDiscord().envoyer({ sujet: "s", texte: "@everyone" });
+
+    expect(JSON.parse(String(appels[0]?.init.body)).allowed_mentions).toEqual({ parse: [] });
+  });
+});
+
+/**
+ * LA CARTE (30/09/2026) — demande de Mehdi : « un message simple comme ça
+ * jtrouve ça moche ». Discord rend un `embed` : un titre, une couleur, des champs
+ * en colonnes, un pied et une heure. Mêmes gardes que le message texte : l'URL
+ * validée pour sa substance, `?wait=true` et un identifiant exigé, l'envoi borné.
+ */
+describe("La carte Discord", () => {
+  const CARTE: CarteDiscord = {
+    titre: "Prise en charge 17TRACK",
+    description: "Colis `LX12…` pris en charge.",
+    couleur: 0x12a87a,
+    champs: [
+      { nom: "Restantes", valeur: "**190**", enLigne: true },
+      { nom: "Utilisées", valeur: "10", enLigne: true },
+    ],
+    pied: "Source : 17TRACK",
+    horodatage: new Date("2026-10-01T08:00:00Z"),
+  };
+
+  const embedEnvoye = (): Record<string, unknown> => {
+    const corps = JSON.parse(String(appels[0]?.init.body)) as { embeds: Record<string, unknown>[] };
+    return corps.embeds[0] ?? {};
+  };
+
+  test("CONTRE-TEST : la carte part en embed, et rend l'identifiant du message", async () => {
+    bouchonner(() => Promise.resolve(reponse(200, { id: "77" })));
+
+    const issue = await publierCarteDiscord(CARTE);
+
+    expect(issue).toEqual({ statut: "envoye", id: "77" });
+    expect(appels[0]?.url).toContain("wait=true");
+    expect(embedEnvoye()).toEqual({
+      title: "Prise en charge 17TRACK",
+      description: "Colis `LX12…` pris en charge.",
+      color: 0x12a87a,
+      fields: [
+        { name: "Restantes", value: "**190**", inline: true },
+        { name: "Utilisées", value: "10", inline: true },
+      ],
+      footer: { text: "Source : 17TRACK" },
+      timestamp: "2026-10-01T08:00:00.000Z",
+    });
+    expect(JSON.parse(String(appels[0]?.init.body)).allowed_mentions).toEqual({ parse: [] });
+    expect(appels[0]?.init.signal).toBeDefined();
+  });
+
+  test("sans variable ou avec une URL douteuse, rien ne part", async () => {
+    bouchonner(() => Promise.resolve(reponse(200, { id: "x" })));
+    delete process.env["DISCORD_WEBHOOK_URL"];
+    expect((await publierCarteDiscord(CARTE)).statut).toBe("non_configure");
+    process.env["DISCORD_WEBHOOK_URL"] = "https://discord.com.pirate.net/api/webhooks/1/x";
+    expect((await publierCarteDiscord(CARTE)).statut).toBe("non_configure");
+    expect(appels).toHaveLength(0);
+  });
+
+  test("un 204 sans identifiant est un refus, et le motif ne publie jamais l'URL", async () => {
+    bouchonner(() => Promise.resolve(reponse(204, "")));
+    expect((await publierCarteDiscord(CARTE)).statut).toBe("refuse");
+
+    bouchonner(() => Promise.resolve(reponse(400, { message: "Invalid Form Body" })));
+    const issue = await publierCarteDiscord(CARTE);
+    expect(issue.statut).toBe("refuse");
+    expect(JSON.stringify(issue)).not.toContain("jeton-de-sonde");
+  });
+
+  test("les limites de Discord sont TENUES plutôt que la carte refusée", async () => {
+    // Discord refuse l'embed ENTIER au-delà de ses limites (titre 256, texte
+    // 4 096, valeur de champ 1 024, 25 champs) : l'alerte la plus longue serait
+    // la seule perdue.
+    bouchonner(() => Promise.resolve(reponse(200, { id: "1" })));
+
+    await publierCarteDiscord({
+      ...CARTE,
+      titre: "t".repeat(400),
+      description: "d".repeat(5_000),
+      champs: Array.from({ length: 30 }, (_, i) => ({ nom: "n" + String(i), valeur: "v".repeat(2_000) })),
+    });
+
+    const e = embedEnvoye() as {
+      title: string;
+      description: string;
+      fields: { name: string; value: string }[];
+      footer: { text: string };
+    };
+    expect(e.title.length).toBeLessThanOrEqual(256);
+    expect(e.description.length).toBeLessThanOrEqual(4_096);
+    expect(e.fields.length).toBeLessThanOrEqual(25);
+    expect(Math.max(...e.fields.map((f) => f.value.length))).toBeLessThanOrEqual(1_024);
+    // …et la SOMME, que Discord borne à 6 000 caractères pour toute la carte.
+    const total =
+      e.title.length + e.description.length + e.footer.text.length +
+      e.fields.reduce((n, f) => n + f.name.length + f.value.length, 0);
+    expect(total).toBeLessThanOrEqual(6_000);
+    // CONTRE-TEST : on a tronqué, pas tout jeté — le titre et des champs restent.
+    expect(e.title.length).toBeGreaterThan(0);
+    expect(e.fields.length).toBeGreaterThan(0);
   });
 });

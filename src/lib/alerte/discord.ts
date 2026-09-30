@@ -97,59 +97,133 @@ export function lireWebhookDiscord(): { url: URL } | { manquant: readonly string
   return { url };
 }
 
+/**
+ * ⚠️ AUCUNE MENTION NE SONNE. Un texte venu d'un tiers — le nom d'un client chez
+ * le fournisseur de paiement, un numéro de colis — ne doit jamais pouvoir écrire
+ * `@everyone` et faire sonner tout le salon. Discord le garantit si on le lui dit.
+ */
+const SANS_MENTION = { parse: [] as string[] };
+
+/**
+ * L'UNIQUE ENVOI. Le message texte et la carte passent par lui : les gardes —
+ * URL validée, `?wait=true`, identifiant exigé, délai borné, jeton jamais recopié
+ * — ne peuvent donc pas exister sur l'un et manquer à l'autre.
+ */
+async function poster(corps: Record<string, unknown>): Promise<ResultatEnvoi> {
+  const config = lireWebhookDiscord();
+  if ("manquant" in config) {
+    // ON NE TENTE PAS « POUR VOIR ». Envoyer vers une URL douteuse, c'est
+    // livrer nos alertes d'exploitation à qui la détient.
+    return { statut: "non_configure", manquant: config.manquant };
+  }
+
+  const destination = new URL(config.url);
+  destination.searchParams.set("wait", "true");
+
+  let reponse: Response;
+  try {
+    reponse = await fetch(destination.toString(), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...corps, allowed_mentions: SANS_MENTION }),
+      signal: AbortSignal.timeout(DELAI_MS),
+    });
+  } catch (erreur) {
+    // Réseau, DNS, délai dépassé : Discord n'a pas été joint. Réessayable.
+    return {
+      statut: "refuse",
+      motif: "injoignable : " + (erreur instanceof Error ? erreur.message : String(erreur)),
+    };
+  }
+
+  if (!reponse.ok) {
+    const texte = await reponse.text().catch(() => "");
+    return {
+      statut: "refuse",
+      motif: `HTTP ${reponse.status} ${texte.slice(0, MOTIF_MAX)}`.trim(),
+    };
+  }
+
+  const donnees: unknown = await reponse.json().catch(() => null);
+  const id =
+    typeof donnees === "object" && donnees !== null && "id" in donnees
+      ? (donnees as { id: unknown }).id
+      : null;
+  if (typeof id !== "string" || id === "") {
+    // 204, corps vide, ou réponse inattendue : on préfère un refus visible
+    // à un succès qu'on ne peut retrouver dans aucun salon.
+    return { statut: "refuse", motif: "réponse acceptée mais sans identifiant de message" };
+  }
+
+  return { statut: "envoye", id };
+}
+
 export function expediteurDiscord(): Expediteur {
   return {
     async envoyer(message: Message): Promise<ResultatEnvoi> {
-      const config = lireWebhookDiscord();
-      if ("manquant" in config) {
-        // ON NE TENTE PAS « POUR VOIR ». Envoyer vers une URL douteuse, c'est
-        // livrer nos alertes d'exploitation à qui la détient.
-        return { statut: "non_configure", manquant: config.manquant };
-      }
-
       // Le sujet en gras, le corps dessous : un salon se lit en diagonale, et
       // c'est la première ligne qui décide si on ouvre.
-      const contenu = ("**" + message.sujet + "**\n" + message.texte).slice(0, CONTENU_MAX);
-
-      const destination = new URL(config.url);
-      destination.searchParams.set("wait", "true");
-
-      let reponse: Response;
-      try {
-        reponse = await fetch(destination.toString(), {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ content: contenu }),
-          signal: AbortSignal.timeout(DELAI_MS),
-        });
-      } catch (erreur) {
-        // Réseau, DNS, délai dépassé : Discord n'a pas été joint. Réessayable.
-        return {
-          statut: "refuse",
-          motif: "injoignable : " + (erreur instanceof Error ? erreur.message : String(erreur)),
-        };
-      }
-
-      if (!reponse.ok) {
-        const corps = await reponse.text().catch(() => "");
-        return {
-          statut: "refuse",
-          motif: `HTTP ${reponse.status} ${corps.slice(0, MOTIF_MAX)}`.trim(),
-        };
-      }
-
-      const donnees: unknown = await reponse.json().catch(() => null);
-      const id =
-        typeof donnees === "object" && donnees !== null && "id" in donnees
-          ? (donnees as { id: unknown }).id
-          : null;
-      if (typeof id !== "string" || id === "") {
-        // 204, corps vide, ou réponse inattendue : on préfère un refus visible
-        // à un succès qu'on ne peut retrouver dans aucun salon.
-        return { statut: "refuse", motif: "réponse acceptée mais sans identifiant de message" };
-      }
-
-      return { statut: "envoye", id };
+      return poster({ content: ("**" + message.sujet + "**\n" + message.texte).slice(0, CONTENU_MAX) });
     },
   };
+}
+
+/**
+ * UNE CARTE — l'« embed » de Discord (30/09/2026, Mehdi : « un message simple
+ * comme ça jtrouve ça moche »). Un titre, une couleur, des champs en colonnes,
+ * un pied et une heure : le solde se lit d'un coup d'œil au lieu d'une phrase.
+ */
+export interface CarteDiscord {
+  readonly titre: string;
+  readonly description: string;
+  /** 0xRRGGBB — la barre de couleur à gauche de la carte. */
+  readonly couleur: number;
+  readonly champs: readonly { readonly nom: string; readonly valeur: string; readonly enLigne?: boolean }[];
+  readonly pied: string;
+  readonly horodatage: Date;
+}
+
+/**
+ * Les limites de Discord. Au-delà, il refuse la carte ENTIÈRE : on tronque, sans
+ * quoi l'alerte la plus longue — donc souvent la plus grave — serait la seule perdue.
+ */
+const LIMITES = {
+  titre: 256,
+  description: 4_096,
+  champs: 25,
+  nom: 256,
+  valeur: 1_024,
+  pied: 2_048,
+  /** La somme de tous les textes de la carte. */
+  total: 6_000,
+};
+
+export function publierCarteDiscord(carte: CarteDiscord): Promise<ResultatEnvoi> {
+  const titre = carte.titre.slice(0, LIMITES.titre);
+  const pied = carte.pied.slice(0, LIMITES.pied);
+  const champs = carte.champs.slice(0, LIMITES.champs).map((c) => ({
+    name: c.nom.slice(0, LIMITES.nom),
+    value: c.valeur.slice(0, LIMITES.valeur),
+    inline: c.enLigne ?? false,
+  }));
+
+  // LE TOTAL AUSSI EST BORNÉ : les derniers champs tombent d'abord — le titre
+  // et les premiers nombres sont ce qu'on lit —, puis la description se raccourcit.
+  const taille = (): number =>
+    titre.length + pied.length + champs.reduce((n, c) => n + c.name.length + c.value.length, 0);
+  while (champs.length > 0 && taille() > LIMITES.total) champs.pop();
+  const description = carte.description.slice(0, Math.max(0, Math.min(LIMITES.description, LIMITES.total - taille())));
+
+  return poster({
+    embeds: [
+      {
+        title: titre,
+        description,
+        color: carte.couleur,
+        fields: champs,
+        footer: { text: pied },
+        timestamp: carte.horodatage.toISOString(),
+      },
+    ],
+  });
 }

@@ -2,7 +2,7 @@ import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { MOTIF_CLE_ABSENTE } from "./port";
-import type { EtatColisPort, FournisseurSuivi, ReponsePort } from "./port";
+import type { EtatColisPort, FournisseurSuivi, QuotaPort, ReponsePort } from "./port";
 
 /**
  * L'ADAPTATEUR 17TRACK — LE SEUL FICHIER DE L'APPLICATION QUI CONNAÎT UN
@@ -577,9 +577,77 @@ async function appeler(chemin: string, corps: unknown): Promise<ReponsePort> {
   }
 }
 
+/**
+ * Le solde du palier, tel que `getquota` le rend (API v2.4, relu le 30/09/2026).
+ *
+ * Des ENTIERS NON NÉGATIFS, et rien d'autre : un solde en texte, négatif ou
+ * absent n'est pas un solde. Il vaut mieux dire « illisible » qu'annoncer un
+ * nombre qu'on a deviné — c'est exactement l'erreur que cette lecture corrige.
+ */
+const Entier = z.number().int().nonnegative();
+/** Le code d'abord, seul : une clé révoquée arrive SANS nombres, et doit se nommer. */
+const CodeDeCompte = z.object({ code: z.number().nullish() }).passthrough();
+const SoldeQuota = z.object({
+  data: z
+    .object({
+      quota_total: Entier,
+      quota_used: Entier,
+      quota_remain: Entier,
+      today_used: Entier.nullish(),
+    })
+    .passthrough(),
+});
+
+async function lireQuota(): Promise<QuotaPort> {
+  const controleur = new AbortController();
+  const minuterie = setTimeout(() => controleur.abort(), DELAI_MS);
+  try {
+    const reponse = await fetch(BASE + "/getquota", {
+      method: "POST",
+      headers: { "content-type": "application/json", [EN_TETE_CLE]: cle() },
+      // Leur documentation exige un tableau VIDE : aucun numéro ne part, donc
+      // cette lecture ne peut rien prendre en charge — elle ne se paie pas.
+      body: "[]",
+      signal: controleur.signal,
+      cache: "no-store",
+    });
+    if (!reponse.ok) return { statut: "indisponible", motif: "http-" + String(reponse.status) };
+
+    // Un corps qui n'est pas du JSON — une page de maintenance — est ILLISIBLE, pas
+    // une panne réseau : lu sans lever, il ne tombe pas dans le `catch` du réseau.
+    const brut: unknown = await reponse.json().catch(() => null);
+
+    // Même règle que la prise en charge : un code de COMPTE non nul (clé
+    // révoquée, compte suspendu) n'est pas un solde, même accompagné de nombres.
+    // Il est lu AVANT les nombres : une clé révoquée n'en porte aucun, et le
+    // diagnostic « illisible » cacherait la vraie cause.
+    const code = CodeDeCompte.safeParse(brut);
+    if (!code.success) return { statut: "indisponible", motif: "reponse-illisible" };
+    const panne = refusDeCompte(code.data.code);
+    if (panne !== null && panne.statut === "indisponible") return panne;
+
+    const analyse = SoldeQuota.safeParse(brut);
+    if (!analyse.success) return { statut: "indisponible", motif: "reponse-illisible" };
+
+    const q = analyse.data.data;
+    return {
+      statut: "ok",
+      total: q.quota_total,
+      utilisees: q.quota_used,
+      restantes: q.quota_remain,
+      aujourdhui: q.today_used ?? null,
+    };
+  } catch (erreur) {
+    return { statut: "indisponible", motif: motifDeLErreur(erreur) };
+  } finally {
+    clearTimeout(minuterie);
+  }
+}
+
 export const dixSeptTrack: FournisseurSuivi = {
   nom: "17track",
   enTetesSignature: EN_TETES_SIGNATURE,
+  lireQuota,
 
   async prendreEnCharge(numero, transporteur) {
     const entree: Record<string, unknown> = { number: numero };
