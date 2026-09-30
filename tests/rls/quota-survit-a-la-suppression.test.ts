@@ -361,6 +361,104 @@ describe("Le quota compte des colis, pas des tentatives", () => {
     expect(somme, "le plafond mensuel du Pro compte encore le brouillon").toEqual({ colis: 2, pro: 1 });
   });
 
+  /*
+   * ⚠️ FAILLE CRITIQUE DE LA 211, TROUVÉE PAR L'AUDIT ECC DU 30/09/2026 (212).
+   * Entre l'appel PAYANT au fournisseur et `marquer_prise_en_charge`, un colis a
+   * `registered_at` nulle : la 211 le prenait pour un brouillon. Remplacer le
+   * numéro pendant cette fenêtre — ou après un paiement accepté dont la réponse
+   * s'est perdue — supprimait le colis ET rendait sa place : un compte gratuit
+   * pouvait faire payer des prises en charge sans fin, son compteur restant à 1.
+   *
+   * La place n'est plus rendue qu'à un colis de MOINS DE 20 SECONDES. Aucun
+   * paiement ne part avant 30 secondes de stabilité (`colis_a_inscrire`, 172) :
+   * un colis rendu n'a donc jamais pu être payé.
+   */
+  const colisDe = async (u: UtilisateurDeTest, numero: string): Promise<string> => {
+    const { data, error } = await service
+      .from("tracked_parcels")
+      .select("id")
+      .eq("shop_id", u.shopId)
+      .eq("tracking_number", numero)
+      .single();
+    expect(error).toBeNull();
+    return (data as { id: string }).id;
+  };
+  const vieillir = async (id: string, secondes: number) => {
+    const { error } = await service
+      .from("tracked_parcels")
+      .update({ created_at: new Date(Date.now() - secondes * 1000).toISOString() })
+      .eq("id", id);
+    expect(error).toBeNull();
+  };
+
+  test("⚠️ UN COLIS QUI A PU ÊTRE PAYÉ N'EST JAMAIS RENDU, même sans `registered_at`", async () => {
+    const u = await nouveau("paiement-en-vol");
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMOENVOL")).statut).toBe("ok");
+    // 31 s : il a passé le seuil de stabilité, l'appel payant a pu partir.
+    await vieillir(await colisDe(u, "DEMOENVOL"), 31);
+    expect((await ecrire(u, id, "tracking_number", "DEMOENVOL-B")).statut).toBe("ok");
+    expect(await colisConsommes(u), "une prise en charge en vol a été rendue au quota").toBe(2);
+  });
+
+  test("⚠️ LA FENÊTRE DE RESTITUTION RESTE SOUS LE SEUIL DE STABILITÉ", async () => {
+    // Les deux délais vivent dans deux fonctions : si l'un bouge sans l'autre, la
+    // faille rouvre. À 19 s, le colis n'est PAS payable ET il est rendu ; à 21 s,
+    // il n'est plus rendu.
+    const u = await nouveau("fenetre");
+    const a = await nouvelleCommande(u);
+    expect((await ecrire(u, a, "tracking_number", "DEMOFEN19")).statut).toBe("ok");
+    const id19 = await colisDe(u, "DEMOFEN19");
+    await vieillir(id19, 19);
+    const payable = await interroger<{ ok: boolean }>(catalogue, "select public.colis_a_inscrire($1) as ok", [id19]);
+    expect(payable[0]?.ok, "un colis encore rendable serait payable").toBe(false);
+    expect((await ecrire(u, a, "tracking_number", "DEMOFEN19-B")).statut).toBe("ok");
+    expect(await colisConsommes(u), "le brouillon de 19 s n'a pas été rendu").toBe(1);
+
+    const b = await nouvelleCommande(u);
+    expect((await ecrire(u, b, "tracking_number", "DEMOFEN21")).statut).toBe("ok");
+    await vieillir(await colisDe(u, "DEMOFEN21"), 21);
+    expect((await ecrire(u, b, "tracking_number", "DEMOFEN21-B")).statut).toBe("ok");
+    expect(await colisConsommes(u), "un colis de 21 s a été rendu").toBe(3);
+  });
+
+  test("trois saisies successives ne consomment qu'UN colis", async () => {
+    const u = await nouveau("trois-saisies");
+    const id = await nouvelleCommande(u);
+    for (const n of ["DEMOA", "DEMOAB", "DEMOABC"]) {
+      expect((await ecrire(u, id, "tracking_number", n)).statut).toBe("ok");
+    }
+    expect(await colisConsommes(u)).toBe(1);
+  });
+
+  test("EFFACER le numéro d'un brouillon rend sa place", async () => {
+    const u = await nouveau("numero-efface");
+    const id = await nouvelleCommande(u);
+    expect((await ecrire(u, id, "tracking_number", "DEMOVIDE")).statut).toBe("ok");
+    expect((await ecrire(u, id, "tracking_number", "")).statut).toBe("ok");
+    const { count } = await service.from("tracked_parcels").select("id", { count: "exact", head: true }).eq("shop_id", u.shopId);
+    expect(count).toBe(0);
+    expect(await colisConsommes(u)).toBe(0);
+  });
+
+  test("GROUPAGE : un colis encore porté par une AUTRE commande n'est ni supprimé ni rendu", async () => {
+    const u = await nouveau("groupage");
+    const a = await nouvelleCommande(u);
+    const b = await nouvelleCommande(u);
+    expect((await ecrire(u, a, "tracking_number", "DEMOGRP")).statut).toBe("ok");
+    expect((await ecrire(u, b, "tracking_number", "DEMOGRP")).statut).toBe("ok");
+    expect(await colisConsommes(u)).toBe(1);
+
+    expect((await ecrire(u, a, "tracking_number", "DEMOGRP2")).statut).toBe("ok");
+    const { count } = await service
+      .from("tracked_parcels")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", u.shopId)
+      .eq("tracking_number", "DEMOGRP");
+    expect(count, "le colis porté par B a été supprimé").toBe(1);
+    expect(await colisConsommes(u), "un colis encore porté a été rendu").toBe(2);
+  });
+
   test("CONTRE-TEST : un colis PRIS EN CHARGE puis remplacé reste compté — il a été payé", async () => {
     const u = await nouveau("paye-remplace");
     const id = await nouvelleCommande(u);

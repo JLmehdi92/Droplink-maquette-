@@ -705,7 +705,7 @@ const SQL = {
         return query select v_parcel, true, true;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
       depuis: "create or replace function public.attacher_colis",
       jusqua: "comment on function",
     },
@@ -749,7 +749,7 @@ const SQL = {
         return query select v_parcel, v_cree, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
       depuis: "create or replace function public.attacher_colis",
       jusqua: "comment on function",
     },
@@ -799,7 +799,7 @@ const SQL = {
         return query select v_parcel, v_cree, v_cree;
       end; $$;`,
     reparerDepuisMigration: {
-      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
       depuis: "create or replace function public.attacher_colis",
       jusqua: "comment on function",
     },
@@ -816,14 +816,30 @@ const SQL = {
     // Depuis la 211, la suppression vit dans une expression `with` qui rend aussi la
     // place du brouillon : on casse sa condition plutôt que son verbe.
     casserDepuisMigration: {
-      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
       depuis: "create or replace function public.attacher_colis(",
       jusqua: "comment on function",
       remplacer: "       where tp.id = any(v_detaches)\n         and tp.registered_at is null",
       par: "       where false and tp.id = any(v_detaches)\n         and tp.registered_at is null",
     },
     reparerDepuisMigration: {
-      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
+      depuis: "create or replace function public.attacher_colis(",
+      jusqua: "comment on function",
+    },
+  },
+
+  /** 212 : un colis ANCIEN — donc peut-être payé — rend sa place : le quota gratuit se contourne sans fin. */
+  "brouillon-ancien-rendu": {
+    casserDepuisMigration: {
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
+      depuis: "create or replace function public.attacher_colis(",
+      jusqua: "comment on function",
+      remplacer: "tp.created_at > now() - interval '20 seconds' as brouillon",
+      par: "true as brouillon",
+    },
+    reparerDepuisMigration: {
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
       depuis: "create or replace function public.attacher_colis(",
       jusqua: "comment on function",
     },
@@ -832,14 +848,14 @@ const SQL = {
   /** 211 : le brouillon supprimé garde sa place consommée — à 4 sur 5, le dernier numéro ne se termine plus. */
   "brouillon-consomme": {
     casserDepuisMigration: {
-      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
       depuis: "create or replace function public.attacher_colis(",
       jusqua: "comment on function",
       remplacer: "       set colis = greatest(q.colis - pm.n, 0),",
       par: "       set colis = q.colis,",
     },
     reparerDepuisMigration: {
-      fichier: "211_une_saisie_en_cours_ne_consomme_pas_le_quota.sql",
+      fichier: "212_seul_un_brouillon_recent_rend_sa_place.sql",
       depuis: "create or replace function public.attacher_colis(",
       jusqua: "comment on function",
     },

@@ -663,9 +663,11 @@ demandées — vit dans `consignes/historique-du-design.md` et dans context-mode
 
 **La production est à jour jusqu'à la 209 incluse, depuis le 30/09/2026** — migrations lancées
 à la main par Mehdi (frère de Wassim, qui pilote le projet avec lui), `verif:prod` 29/29 (209
-migrations communes, dans l'ordre), puis code poussé. ⚠️ **LES 210 ET 211 ATTENDENT la production**
+migrations communes, dans l'ordre), puis code poussé. ⚠️ **LES 210, 211 ET 212 ATTENDENT la production**
 (30/09/2026 : le compte gratuit passe à 5 commandes et 5 colis à vie ; un numéro de suivi saisi
-en plusieurs fois ne consomme plus qu'une place, le brouillon supprimé rend la sienne) —
+en plusieurs fois ne consomme plus qu'une place, le brouillon supprimé rend la sienne — mais
+SEULEMENT s'il a moins de 20 s (212) : la 211 seule rendait aussi un colis en cours de paiement,
+faille CRITIQUE trouvée par l'audit ECC. **Ne jamais appliquer la 211 sans la 212**) —
 `pnpm db:migrate` PUIS le push, sinon les CGU annoncent 5 pendant que la base applique encore 15.
 Les dernières :
 le RGPD efface ce qu'il promet et refuse de supprimer un compte encore prélevable (206-207), le
