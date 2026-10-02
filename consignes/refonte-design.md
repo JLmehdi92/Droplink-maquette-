@@ -353,32 +353,36 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   n'est pas confirmé, rien n'est poussé sur le vrai dépôt (le bac à sable du § 10, lui, ne déploie rien).
 - [ ] Trancher le flou de l'en-tête de la landing : le garder (autorisé par `CLAUDE.md`), ou le
   retirer pour la fluidité comme la maquette.
-- [ ] Créer le dépôt bac à sable (§ 10, étape 1).
+- [x] Créer le dépôt bac à sable (§ 10, étape 1) — `JLmehdi92/Droplink-maquette-`, 02/10/2026.
 
 ## 10. Le dépôt bac à sable — comment le travail circule
 
 ```
-JLmehdi92/droplink-refonte (privé)          JLmehdi92/droplink2
+JLmehdi92/Droplink-maquette- (privé)       JLmehdi92/droplink2
   ← Claude pousse ici, autant qu'il veut       ← Railway déploie depuis ici
   aucun service Railway ne le regarde          on n'y pousse qu'après validation
 ```
 
-1. **Créer le dépôt (Mehdi, une fois).** Sur github.com : New repository, nom
-   `droplink-refonte`, **Private**, **sans** README, sans .gitignore, sans licence (un dépôt
+1. **Créer le dépôt (Mehdi, une fois) — FAIT le 02/10/2026 :
+   `JLmehdi92/Droplink-maquette-`** (le tiret final fait partie du nom). Sur github.com :
+   New repository, **Private**, **sans** README, sans .gitignore, sans licence (un dépôt
    vide, sinon le premier push entre en conflit). Puis sur
    https://github.com/apps/claude/installations/select_target, donner à l'application Claude
    l'accès à ce dépôt, et **NE PAS le relier à Railway**.
-2. **Y pousser (Claude).** Dans la session : rattacher `JLmehdi92/droplink-refonte`, ajouter
-   le remote `refonte`, et `git push refonte claude/saas-motion-design-video-r3ani3`. Le
+2. **Y pousser (Claude).** Dans la session : rattacher `JLmehdi92/Droplink-maquette-`,
+   remote `maquette`, et `git push maquette claude/saas-motion-design-video-r3ani3` — la
+   branche suit `maquette`, pas `origin`. Le bac à sable porte aussi `master`, copie du vrai
+   `master` au `43ec195`, et l'historique COMPLET (580 commits) : c'est ce qui permet de
+   refusionner dans le vrai dépôt sans conflit d'ascendance. Le
    remote `origin` (le vrai dépôt) n'est jamais la cible d'un push pendant la refonte.
 3. **Travailler écran par écran** dans le bac à sable, un commit par écran, chaque commit
    consigné au § 8 avec ses mesures.
 4. **Revenir dans le vrai dépôt (Mehdi décide, Claude Code local exécute).** Sur le poste de
    Mehdi, qui a `.env.test.local` :
    ```
-   git remote add refonte https://github.com/JLmehdi92/droplink-refonte.git
-   git fetch refonte
-   git switch -c refonte refonte/claude/saas-motion-design-video-r3ani3
+   git remote add maquette https://github.com/JLmehdi92/Droplink-maquette-.git
+   git fetch maquette
+   git switch -c refonte maquette/claude/saas-motion-design-video-r3ani3
    git merge master            # récupérer ce qui a bougé sur le vrai dépôt entre-temps
    pnpm gates                  # relever le DÉCOMPTE, pas la couleur
    ```
