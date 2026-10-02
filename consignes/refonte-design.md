@@ -189,9 +189,13 @@ l'écran concerné ; une ligne sans réponse veut dire « ne pas porter, garder 
 | 1 à 13 | **« je prends tout »** : chaque décision suit la MAQUETTE. Pour la n° 1, le menu hamburger, avec la précision « un menu hamburger fluide avec une animation fluide » — le tiroir de la maquette a été refait en conséquence (§ 8, entrée du 02/10) | 02/10/2026 |
 
 ⚠️ **Ce que « la maquette » implique, à dire en portant chaque écran** : n° 3, prix et quotas
-LUS EN BASE (jamais écrits dans la page) ; n° 4, la ligne « Utilisé par des vendeurs sur
-Vinted, eBay… » reste, alors que c'est le même genre d'affirmation invérifiable que les
-témoignages retirés le 01/10 — reconfirmé auprès de Mehdi avant de la porter ; n° 13, le
+LUS EN BASE (jamais écrits dans la page) ; n° 4, **la ligne « Utilisé par des vendeurs sur
+Vinted, eBay… » (`usedOn`, `src/app/[locale]/page.tsx` l. 396-407) QUITTE la landing**
+— Mehdi, 02/10/2026 : « mets pas ça sur la landing page ». Elle n'est PAS dans la maquette
+(vérifié : aucune occurrence dans `design/maquette/src/`) ; elle vivait seulement dans la
+landing actuelle du produit, et une note précédente de ce journal l'attribuait à tort à la
+maquette. Même famille que les témoignages : une affirmation invérifiable. La phrase « Fonctionne avec Vinted, eBay, Shopify… » (`f6b`) part pour la même raison : la maquette ne l'a pas non plus. Le formulaire
+« Restez informé » et les icônes de réseaux du pied partent aussi, comme dans la maquette ; n° 13, le
 badge « Pro » demande une migration, donc une écriture en production par Mehdi AVANT le push.
 
 
