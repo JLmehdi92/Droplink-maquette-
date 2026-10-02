@@ -92,7 +92,9 @@ export function lireTransporteur(code: number | null): Transporteur | null {
   return {
     nom,
     pays: pays === undefined || pays === "" ? null : pays,
-    site: site === undefined || site === "" ? null : site,
+    // Seul un lien https est rendu : le catalogue vient d'un tiers, et un lien
+    // `javascript:` ou `http:` ouvert depuis l'espace vendeur ne doit jamais l'être.
+    site: site === undefined || !site.startsWith("https://") ? null : site,
   };
 }
 

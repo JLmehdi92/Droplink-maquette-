@@ -1116,7 +1116,7 @@
       "abandonnes": "Suivi arrêté",
       "livresCeMois": "Livrés ce mois",
       "preparation": "Pas encore scanné",
-      "ceMois": "ce mois-ci"
+      "evolution": "{valeur} ce mois-ci"
     },
     "filtres": {
       "silencieux": "Sans mouvement",
@@ -1165,7 +1165,6 @@
     },
     "interrogationsFaites": "{n, plural, one {# interrogation} other {# interrogations}}",
     "aide": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur : le transporteur n’a simplement rien publié.",
-    "aideCourte": "Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur.",
     "actualiser": "Actualiser",
     "derniereMaj": "Dernière mise à jour",
     "compteurPage": "Affichage de {de} à {a} sur {total, plural, one {# envoi} other {# envois}}",
@@ -1177,14 +1176,20 @@
     },
     "actions": {
       "voirCommande": "Voir la commande {reference}",
-      "siteTransporteur": "Ouvrir le site du transporteur"
+      "siteDe": "Ouvrir le site de {nom} (nouvel onglet)"
     },
     "lot": {
       "titre": "Sélection",
       "selectionner": "Sélectionner le colis {numero}",
-      "aide": "Colis sélectionnés",
-      "exporter": "Exporter la sélection"
-    }
+      "exporter": "Exporter la sélection",
+      "toutSelectionner": "Tout sélectionner",
+      "selectionUn": "# sélectionné",
+      "selectionPlusieurs": "# sélectionnés",
+      "toutDeselectionner": "Tout désélectionner"
+    },
+    "autresCommandes": "{n, plural, one {et # autre commande} other {et # autres commandes}}",
+    "trier": "Trier",
+    "finDeListe": "Fin de la liste."
   },
   "analyses": {
     "titre": "Analyses",
@@ -1213,7 +1218,6 @@
     "frise": {
       "titre": "Évolution des commandes",
       "fenetre": "{n} dernières semaines",
-      "barre": "Semaine du {semaine} : {n, plural, =0 {aucune commande} one {# commande} other {# commandes}}",
       "vide": "Aucune commande créée sur ces douze semaines.",
       "aide": "Nombre de commandes créées par semaine."
     },
@@ -1226,13 +1230,15 @@
       "silencieux": "Sans mouvement",
       "vide": "Aucun colis suivi pour le moment.",
       "aide": "Statut actuel de vos envois.",
-      "dontSilencieux": "{n, plural, one {Dont # colis sans mouvement depuis plus de 10 jours} other {Dont # colis sans mouvement depuis plus de 10 jours}}"
+      "dontSilencieux": "{n, plural, one {Dont # colis sans mouvement depuis plus de 10 jours} other {Dont # colis sans mouvement depuis plus de 10 jours}}",
+      "suivis": "{n, plural, one {colis suivi} other {colis suivis}}"
     },
     "consultees": {
       "titre": "Vos commandes les plus consultées",
       "aide": "Un client qui revient plusieurs fois sur sa page est un client rassuré.",
       "sansNom": "Sans destinataire",
-      "vide": "Aucun lien n’a encore été ouvert sur cette période."
+      "vide": "Aucun lien n’a encore été ouvert sur cette période.",
+      "vues": "{n, plural, one {vue} other {vues}}"
     },
     "qc": {
       "titre": "Réponses de vos clients",
@@ -1240,12 +1246,14 @@
       "approuve": "Approuvé",
       "refuse": "Refusé",
       "enAttente": "Sans réponse",
-      "vide": "Aucune commande sur cette période."
+      "vide": "Aucune commande sur cette période.",
+      "tauxTexte": "des réponses approuvent les photos",
+      "aucuneReponse": "aucune réponse pour l’instant"
     },
     "sousTitreEcran": "Suivez les performances de votre activité et l'efficacité de vos envois.",
     "livreesSur": "{n} sur {total} créées",
-    "reponsesSur": "{n} réponse{s} sur {total}",
-    "surColisLivres": "sur {n} colis livré{s}",
+    "reponsesSur": "{n, plural, one {# réponse} other {# réponses}} sur {total}",
+    "surColisLivres": "sur {n, plural, one {# colis livré} other {# colis livrés}}",
     "jours": "{n} jours",
     "evolution": {
       "titre": "Évolution des commandes",
@@ -1254,7 +1262,8 @@
     "liens": {
       "titre": "Liens clients",
       "aide": "Nombre d'ouvertures des liens de suivi.",
-      "aucun": "Aucun lien n'a été ouvert sur cette période."
+      "aucun": "Aucun lien n'a été ouvert sur cette période.",
+      "ouvertures": "{n, plural, one {# ouverture} other {# ouvertures}}"
     },
     "transporteurs": {
       "titre": "Transporteurs les plus utilisés",
@@ -1275,8 +1284,7 @@
       "propulse": "Propulsé par",
       "slogan": "Des liens de suivi simples et puissants."
     },
-    "vuesParCommande": "{n} vues par commande ouverte",
-    "ouverturesLe": "{n} ouverture(s) le {jour}"
+    "vuesParCommande": "{n} vues par commande ouverte"
   },
   "commandes": {
     "titre": "Commandes",
@@ -1371,7 +1379,10 @@
       "exporter": "Exporter",
       "exportAvertissement": "Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients.",
       "exportTelecharger": "Télécharger le CSV",
-      "enCours": "En cours…"
+      "enCours": "En cours…",
+      "selectionUn": "# sélectionnée",
+      "selectionPlusieurs": "# sélectionnées",
+      "toutDeselectionner": "Tout désélectionner"
     },
     "vues": {
       "toutes": "Toutes",
@@ -1390,8 +1401,6 @@
     "sansNom": "Sans nom",
     "sousTitreChiffre": "{total, plural, one {# commande} other {# commandes}}, {semaine, plural, one {# créée} other {# créées}} cette semaine",
     "sousTitreVide": "Votre espace est prêt",
-    "rechercherExempleCourt": "Client, référence, suivi…",
-    "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# vue} other {# vues}}",
     "surTotal": "Affichage de {n} sur {total, plural, one {# commande} other {# commandes}}",
     "chargerLaSuite": "Charger la suite",
     "plusDActions": "Plus d’actions pour {client}",
@@ -1433,7 +1442,18 @@
       "mensuelTexte": "Vous avez créé vos {n} commandes de ce mois-ci. Le plafond se recharge le 1er du mois.",
       "mensuelTexteSansNombre": "Vous avez atteint votre plafond de commandes pour ce mois-ci. Il se recharge le 1er du mois.",
       "passerPro": "Passer au Pro"
-    }
+    },
+    "vuesTitre": "Vues",
+    "toutSelectionner": "Tout sélectionner",
+    "aucunSuivi": "Aucun",
+    "frise": {
+      "dernierMouvement": "Dernier mouvement du colis : {date}",
+      "sansInfo": "Pas encore d’information du transporteur",
+      "sansNumero": "Pas encore de numéro de suivi",
+      "silence": "Sans mouvement depuis {jours, plural, one {# jour} other {# jours}}"
+    },
+    "resume": "Résumé",
+    "nbPhotos": "{n, plural, one {# photo} other {# photos}}"
   },
   "editeur": {
     "historique": {

@@ -50,12 +50,22 @@ export function GrapheTableau({
   semaines,
   ouvertures,
   textes,
+  fixe,
+  meta,
 }: {
   readonly semaines: readonly PointGraphe[] | null;
   readonly ouvertures: readonly PointGraphe[] | null;
   readonly textes: TextesGraphe;
+  /**
+   * Une seule vue, sans bascule : aux Analyses, la frise et les ouvertures ont
+   * chacune leur carte (maquette, `analyses.html`) ; la courbe y est compacte.
+   */
+  readonly fixe?: "semaines" | "liens";
+  /** La mention à droite du titre (« 12 dernières semaines », « 142 ouvertures »). */
+  readonly meta?: string;
 }) {
-  const [vue, setVue] = useState<"semaines" | "liens">("semaines");
+  const [vueChoisie, setVue] = useState<"semaines" | "liens">("semaines");
+  const vue = fixe ?? vueChoisie;
   const zone = useRef<HTMLDivElement>(null);
   const [taille, setTaille] = useState({ l: 0, h: 0 });
   const [vise, setVise] = useState<number | null>(null);
@@ -240,6 +250,8 @@ export function GrapheTableau({
     <section className="bloc bloc--graphe v4-carte" aria-labelledby={`t-graphe-${id}`}>
       <header className="bloc__tete">
         <h2 id={`t-graphe-${id}`}>{titre}</h2>
+        {meta === undefined ? null : <p className="bloc__meta">{meta}</p>}
+        {fixe !== undefined ? null : (
         <div className="bascule" role="group" aria-label={textes.bascule}>
           {(["semaines", "liens"] as const).map((v) => (
             <button
@@ -252,9 +264,10 @@ export function GrapheTableau({
             </button>
           ))}
         </div>
+        )}
       </header>
       <p className="bloc__aide">{aide}</p>
-      <div className={"graphe" + (vise !== null ? " est-vise" : "")} ref={zone}>
+      <div className={"graphe" + (fixe === "liens" ? " graphe--compact" : "") + (vise !== null ? " est-vise" : "")} ref={zone}>
         {dessin}
         {serie !== null && n > 0 ? (
           <div

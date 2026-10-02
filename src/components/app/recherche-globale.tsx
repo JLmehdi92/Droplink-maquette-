@@ -38,6 +38,16 @@ export function RechercheGlobale({
   );
 
   const valeurInitiale = chemin === action ? (parametres.get("q") ?? "") : "";
+  // Sur la liste elle-même, une recherche GARDE les critères en cours (archives,
+  // période, statut, tri) : sinon chercher un nom dans les archives ramènerait
+  // aux commandes actives, et le vendeur conclurait que la commande n'existe pas.
+  const gardes =
+    chemin === action
+      ? (["statut", "qc", "tri", "du", "au", "archivees"] as const).flatMap((cle) => {
+          const v = parametres.get(cle);
+          return v === null || v === "" ? [] : [[cle, v] as const];
+        })
+      : [];
 
   useEffect(() => {
     const surTouche = (e: KeyboardEvent): void => {
@@ -52,6 +62,9 @@ export function RechercheGlobale({
 
   return (
     <form className="recherche" role="search" method="get" action={action}>
+      {gardes.map(([cle, v]) => (
+        <input key={cle} type="hidden" name={cle} value={v} />
+      ))}
       <Search aria-hidden="true" className="ic" />
       <input
         ref={champ}

@@ -1,13 +1,14 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { CircleCheck, Clock, EyeOff, Plus, Search, Truck } from "lucide-react";
-import { BoutonAction } from "@/components/bouton-action";
-import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
-import { TuileMetrique, type TeinteTuile } from "@/components/app/tuile-metrique";
-import { PucesFiltresActifs } from "@/components/commandes/puces-filtres-actifs";
-import { creerBrouillon } from "@/lib/commandes/actions";
-import { TableauCommandes } from "@/components/commandes/tableau-commandes";
-import { SelecteurPeriode } from "@/components/commandes/selecteur-periode";
+import { ChevronRight } from "lucide-react";
+import { ValeurRoulee } from "@/components/app/couche-v4";
+import {
+  BarreListe,
+  ListeCommandes,
+  OutilExport,
+  OutilPeriode,
+  PucesFiltres,
+} from "@/components/commandes/liste-commandes";
 import { analyserParametres, compterParEtat, lireCommandes } from "@/lib/commandes/liste";
 import { origineDuSite } from "@/lib/site";
 import { estLangueSupportee } from "@/i18n/config";
@@ -180,285 +181,98 @@ export default async function Commandes({
             semaine: compteurs.creeesCetteSemaine,
           });
 
+  /* LA REFONTE (02/10/2026) suit `commandes.html` : fil d'Ariane, titre,
+     période et export dans l'en-tête, quatre compteurs en une bande, vues
+     soulignées avec filtres et tri, puces des critères, puis la liste. La
+     recherche est celle de la barre supérieure, à toutes les largeurs : elle
+     mène ici avec `?q=`. « Créer une commande » est dans la barre du haut
+     (décision n° 5) : aucun second bouton ici. */
+  const nom = profil?.nomAffiche ?? profil?.nomBoutique ?? null;
+  const outils = !compteVide && page.lignes.length > 0;
+
   return (
-    <>
-      {/*
-        L'EN-TÊTE EST CELUI DE TOUS LES ÉCRANS DE L'ESPACE VENDEUR. Cette page
-        recopiait le sien, et la copie avait déjà divergé sur trois valeurs.
-      */}
-      <EnTeteEcranDs
-        titre={t("titre")}
-        {...(sousTitre !== null ? { sousTitre } : {})}
-        /* ⚠️ LA DÉCONNEXION DU TÉLÉPHONE N'EST PLUS ICI depuis le 15/09/2026 : elle
-           vit, avec les paramètres, dans le menu du compte de la barre du haut,
-           commune à tous les écrans (`BarreSuperieure`). Elle n'existait
-           auparavant qu'ici, et les autres écrans n'offraient aucun accès au
-           compte. */
-        actions={
-          compteVide ? undefined : (
-            <div className="hidden shrink-0 items-center gap-3 md:flex">
-              {/* Le kit pose la période à gauche de l action principale, à 12 px
-                  d elle. Elle ne se rend qu à partir de `lg` : sous 1 024 px,
-                  257 px de bouton plus 224 de bouton principal ne tiennent pas
-                  à côté du titre — c est la même mesure qui avait déjà fait
-                  descendre la recherche. */}
-              <span className="hidden lg:block">
-                <SelecteurPeriode base={base} parametres={parametres} />
-              </span>
-              {/*
-                ⚠️ LA RECHERCHE A QUITTÉ CET EN-TÊTE POUR LA BARRE SUPÉRIEURE.
-                Le kit n en dessine qu une par écran, et elle est en haut ; deux
-                champs qui cherchent la même chose à 200 px l un de l autre
-                posent une question à chaque écran. Elle reste ici AU TÉLÉPHONE,
-                où la barre supérieure ne se rend pas — voir `dessous`.
-              */}
-              {/* CRÉER EST UNE MUTATION, donc une Server Action et non un lien
-                  vers une page qui écrirait au rendu. Un lien serait suivi par
-                  le préchargement du navigateur, par un aspirateur, par une
-                  visite accidentelle — et chacun créerait un brouillon.
+    <main id="contenu" className="tableau commandes-ecran">
+      <div className="tableau__tete">
+        <div>
+          <p className="v4-fil">
+            {nom === null ? null : (
+              <>
+                <span>{nom}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
+            )}
+            <b>{t("titre")}</b>
+          </p>
+          <h1>{t("titre")}</h1>
+          {sousTitre === null ? null : <p>{sousTitre}</p>}
+        </div>
+        {compteVide ? null : (
+          <div className="outils-tete">
+            <OutilPeriode base={base} parametres={parametres} />
+            {outils ? <OutilExport parametres={parametres} /> : null}
+          </div>
+        )}
+      </div>
 
-                  LE DÉGRADÉ EST ICI, ET NULLE PART AILLEURS SUR L'ÉCRAN : une
-                  seule action principale par page. */}
-              <form action={creerBrouillon}>
-                <input type="hidden" name="langue" value={langue} />
-                <BoutonAction
-                  libelles={{
-                    repos: <LibelleNouvelle libelle={t("nouvelle")} />,
-                    enCours: t("nouvelleEnCours"),
-                    reussi: <LibelleNouvelle libelle={t("nouvelle")} />,
-                    echoue: <LibelleNouvelle libelle={t("nouvelle")} />,
-                  }}
-                  gapLibelle="gap-2"
-                  /* `Button variant="primary" size="lg"` du kit, avec les deux
-                     surcharges que `OrdersView` lui pose : 50 px de haut et le
-                     rayon de CARTE au lieu de la pilule. Le dégradé reste
-                     l'action principale UNIQUE de l'écran. */
-                  className="flex h-[50px] items-center gap-2 rounded-ds-card bg-ds-accent px-7 text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-xs transition-colors hover:bg-ds-accent-survol"
-                />
-              </form>
-            </div>
-          )
-        }
-        dessous={
-          /* La recherche passe SOUS le titre au téléphone : à 390 px elle ne
-             tient pas à côté du bouton, et c'est elle qu'on utilise le plus.
-             Elle y reste jusqu'à 1024 px, faute de place. Le bouton, lui,
-             devient l'action flottante du bas d'écran sous 768 px. */
-          compteVide ? undefined : (
-            <div className="mt-3.5 lg:hidden">
-              <FormulaireRecherche base={base} parametres={parametres} libelles={t} telephone />
-            </div>
-          )
-        }
-      />
-
-      <main
-        id="contenu"
-        className="flex flex-grow flex-col gap-3.5 py-3.5 md:gap-[22px] md:px-8 md:pt-0 md:pb-[26px]"
-      >
-        {/* LE QUOTA ATTEINT, avant tout le reste : c'est ce qui vient d'arriver au vendeur
-            (planche `OrdersView`, `#quota-atteint`, `#quota-mensuel`). */}
-        {quota !== null ? (
-          <BandeauQuota
-            quota={quota}
-            titre={t(quota === "gratuit" ? "quota.gratuitTitre" : "quota.mensuelTitre")}
-            texte={
-              plafondQuota === null
-                ? t(quota === "gratuit" ? "quota.gratuitTexteSansNombre" : "quota.mensuelTexteSansNombre")
-                : t(quota === "gratuit" ? "quota.gratuitTexte" : "quota.mensuelTexte", { n: plafondQuota })
-            }
-            passerPro={t("quota.passerPro")}
-            versPasserPro={`/${langue}/passer-pro`}
-          />
-        ) : null}
-        {/*
-          LES QUATRE COMPTEURS. Omis en bloc si la lecture échoue : rendre des
-          zéros affirmerait qu'on a compté et trouvé rien, ce qui est faux — et
-          c'est le genre de nombre crédible qui fait décider de travers.
-
-          « JAMAIS OUVERTES » EST MIS EN AVANT parce que c'est le seul des quatre
-          qui appelle une action : une commande que le client n'a pas regardée est
-          un lien qu'il n'a peut-être jamais reçu.
-        */}
-        {/*
-          ⚠️ LE NOMBRE DE COLONNES SUIT LA LARGEUR DU CONTENU, PAS CELLE DE LA
-          FENÊTRE, ET C'EST POURQUOI LE PALIER EST À 1 424.
-
-          Le kit exprime ses paliers en requêtes de CONTENEUR : sa rangée passe à
-          deux colonnes quand la zone de contenu descend sous 1 100 px. Chez
-          nous la barre latérale vaut 264 px fixes dès `md`, et la zone de
-          contenu porte 30 px de marge de chaque côté : la zone tombe donc sous
-          1 100 px quand la FENÊTRE passe sous 1 424. Traduire le palier plutôt
-          que de le recopier est le seul moyen d'obtenir le même dessin — un
-          `2xl:` (1 536) laisserait deux colonnes sur toute la plage 1 424–1 535,
-          là où le kit en montre quatre.
-
-          ⚠️ DEUX COLONNES AU TÉLÉPHONE, ALORS QUE LE KIT N'EN MET QU'UNE, ET
-          C'EST UNE DIVERGENCE MESURÉE. En une colonne, les quatre tuiles
-          occupent 760 px de haut : sur un écran de 844, la première commande
-          n'est visible qu'après avoir fait défiler tout l'écran — sur la vue la
-          plus ouverte du produit, celle qu'un fournisseur consulte vingt fois
-          par jour. Le kit peut se le permettre parce que SES tuiles portent un
-          badge d'évolution en haut à droite, qui leur impose une largeur que
-          les nôtres n'ont pas : on l'a retiré, faute de donnée à y mettre. À
-          deux colonnes il reste 171 px par tuile, dont 107 pour le texte après
-          la pastille de 48 et son écart — mesuré, le plus long des quatre
-          libellés y tient sur deux lignes sans être tronqué, dans les trois
-          langues.
-
-          ⚠️ ET LES DEUX PALIERS SONT ÉCRITS DANS LA MÊME FAMILLE, `min-[…]`,
-          PARCE QU'EN MÉLANGER DEUX A DONNÉ UN ÉCRAN FAUX. Écrit
-          `md:grid-cols-2 min-[1424px]:grid-cols-4`, la rangée rendait DEUX
-          colonnes à 1 440 px. Mesuré dans la feuille servie : Tailwind émet le
-          bloc `min-width:1424px` à l'octet 71 505 et un bloc `min-width:48rem`
-          à l'octet 71 763 — la règle du palier le plus LARGE arrive donc en
-          PREMIER, et celle du palier le plus étroit l'écrase. Rien ne le
-          signale : les deux classes existent, sont servies, et les gardes qui
-          les surveillent restent vertes ; seul le rendu le dit. Deux paliers de
-          la même famille se trient entre eux par leur valeur.
-        */}
-        {compteursVisibles && compteurs !== null ? (
-          <ul className="grid grid-cols-2 gap-3 px-margin-mobile min-[768px]:gap-4 min-[768px]:px-0 min-[1424px]:grid-cols-4">
-            {(
-              [
-                ["preparation", compteurs.preparation, Clock, "alerte", false],
-                ["enTransit", compteurs.enTransit, Truck, "info", false],
-                ["jamaisOuvertes", compteurs.jamaisOuvertes, EyeOff, "erreur", true],
-                ["livrees", compteurs.livrees, CircleCheck, "succes", false],
-              ] as const
-            ).map(([clef, valeur, IconeTuile, teinte, alerte]) => (
-              <li key={clef}>
-                <TuileMetrique
-                  Icone={IconeTuile}
-                  valeur={valeur}
-                  libelle={t("compteurs." + clef)}
-                  teinte={teinte satisfies TeinteTuile}
-                  valeurEnAlerte={alerte && valeur > 0}
-                />
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        {compteVide ? null : <PucesFiltresActifs base={base} parametres={parametres} />}
-
-        {/* ⚠️ LE PANNEAU DE FILTRES N'EST PLUS ICI. Il était une carte à part,
-            posée entre les puces et le tableau ; il est devenu un contrôle de la
-            barre d'outils, DANS la carte du tableau, comme la planche
-            `CommandesOutils` le dessine. Il suit donc désormais la barre
-            d'outils, qui ne se rend pas au-dessus d'une liste vide : sur un
-            résultat vide, la sortie se fait par les puces de critères, chacune
-            retirable seule, et par « tout effacer ». */}
-        <TableauCommandes
-          base={base}
-          langue={langue}
-          // Sans origine connue, le lien public serait construit sur une valeur
-          // devinée. On rend alors un chemin relatif : il ne se copie pas dans
-          // une conversation, mais il n'envoie personne sur un domaine inventé.
-          origine={origine ?? ""}
-          nomDeLien={profil?.nomDeLien ?? null}
-          parametres={parametres}
-          page={page}
-          lot={lot}
-          total={compteurs?.total ?? null}
-          compteurs={compteurs}
+      {/* LE QUOTA ATTEINT, avant tout le reste : c'est ce qui vient d'arriver. */}
+      {quota !== null ? (
+        <BandeauQuota
+          quota={quota}
+          titre={t(quota === "gratuit" ? "quota.gratuitTitre" : "quota.mensuelTitre")}
+          texte={
+            plafondQuota === null
+              ? t(quota === "gratuit" ? "quota.gratuitTexteSansNombre" : "quota.mensuelTexteSansNombre")
+              : t(quota === "gratuit" ? "quota.gratuitTexte" : "quota.mensuelTexte", { n: plafondQuota })
+          }
+          passerPro={t("quota.passerPro")}
+          versPasserPro={`/${langue}/passer-pro`}
         />
-      </main>
+      ) : null}
 
-      {/*
-        L'ACTION FLOTTANTE DU TÉLÉPHONE A ÉTÉ RETIRÉE PAR LA REFONTE (02/10/2026) :
-        « Créer une commande » est dans la barre du haut, à toutes les largeurs
-        (décision n° 5), et la barre d'onglets sur laquelle elle se calait n'existe
-        plus. Elle aurait fait un second dégradé sur l'écran.
-      */}
-    </>
+      {/* LES QUATRE COMPTEURS, omis en bloc si la lecture échoue : des zéros
+          affirmeraient qu'on a compté et trouvé rien. « Jamais ouvertes » est mis
+          en avant : c'est le seul qui appelle une action. */}
+      {compteursVisibles && compteurs !== null ? (
+        <section className="compteurs compteurs--4 v4-carte" aria-label={t("resume")}>
+          {(
+            [
+              ["preparation", compteurs.preparation],
+              ["enTransit", compteurs.enTransit],
+              ["jamaisOuvertes", compteurs.jamaisOuvertes],
+              ["livrees", compteurs.livrees],
+            ] as const
+          ).map(([clef, valeur]) => (
+            <div key={clef} className="compteur-app" data-alerte={(clef === "jamaisOuvertes" && valeur > 0) || undefined}>
+              <p className="compteur-app__titre">{t(`compteurs.${clef}`)}</p>
+              <p className="compteur-app__valeur">
+                <ValeurRoulee texte={String(valeur)} />
+              </p>
+            </div>
+          ))}
+        </section>
+      ) : null}
+
+      {compteVide ? null : (
+        <>
+          <BarreListe base={base} parametres={parametres} outils={outils} />
+          <PucesFiltres base={base} parametres={parametres} />
+        </>
+      )}
+
+      <ListeCommandes
+        base={base}
+        langue={langue}
+        origine={origine ?? ""}
+        nomDeLien={profil?.nomDeLien ?? null}
+        parametres={parametres}
+        page={page}
+        lot={lot}
+        total={compteurs?.total ?? null}
+      />
+    </main>
   );
 }
 
-/**
- * Le champ de recherche.
- *
- * LES AUTRES RÉGLAGES VOYAGENT AVEC LUI, en champs cachés : chercher ne doit pas
- * défaire le filtre qu'on vient de poser. Ils étaient recopiés deux fois — une
- * pour le bureau, une pour le téléphone — et deux copies d'une même liste
- * divergent au premier paramètre ajouté, sans que rien ne le signale : le
- * vendeur perdrait alors son filtre en cherchant, mais seulement sur un des deux
- * écrans.
- */
-function FormulaireRecherche({
-  base,
-  parametres,
-  libelles,
-  telephone = false,
-}: {
-  readonly base: string;
-  readonly parametres: Awaited<ReturnType<typeof analyserParametres>>;
-  readonly libelles: (clef: string) => string;
-  readonly telephone?: boolean;
-}) {
-  return (
-    <form method="get" action={base} className="relative">
-      {parametres.statut !== null ? (
-        <input type="hidden" name="statut" value={parametres.statut} />
-      ) : null}
-      {parametres.qc !== null ? <input type="hidden" name="qc" value={parametres.qc} /> : null}
-      {parametres.tri !== "recentes" ? (
-        <input type="hidden" name="tri" value={parametres.tri} />
-      ) : null}
-      {parametres.du !== null ? <input type="hidden" name="du" value={parametres.du} /> : null}
-      {parametres.au !== null ? <input type="hidden" name="au" value={parametres.au} /> : null}
-      {parametres.archivees ? <input type="hidden" name="archivees" value="1" /> : null}
-
-      <Search
-        aria-hidden="true"
-        size={17}
-        strokeWidth={1.8}
-        className="pointer-events-none absolute top-1/2 left-[14px] -translate-y-1/2 text-ds-texte-tenu"
-      />
-      <input
-        type="search"
-        name="q"
-        defaultValue={parametres.q}
-        placeholder={libelles(telephone ? "rechercherExempleCourt" : "rechercherExemple")}
-        aria-label={libelles("rechercher")}
-        className={
-          /*
-            LE CHAMP DE RECHERCHE DU KIT — `dl-topsearch` : 42 px de haut, rayon
-            de carte, filet `--border-subtle`, fond carte.
-
-            AU TÉLÉPHONE IL RESTE SUR LE CREUX, et c'est la même raison qu'avant
-            la migration : il vit alors DANS la barre blanche de l'en-tête, et un
-            blanc posé sur du blanc n'aurait plus de bord. 44 px au doigt.
-          */
-          "rounded-ds-card border border-ds-filet pr-3.5 pl-[40px] text-ds-texte-fort " +
-          "placeholder:text-ds-texte-corps focus-visible:outline-none " +
-          "focus-visible:shadow-[var(--anneau-ds-focus)] " +
-          (telephone
-            ? "h-11 w-full bg-ds-surface-creux text-[15px]"
-            : "h-[42px] w-[290px] bg-ds-surface-carte text-[14px]")
-        }
-      />
-    </form>
-  );
-}
-
-/**
- * Le libellé du bouton « nouvelle commande » — l'icône et le mot.
- *
- * IL EXISTE PARCE QU'IL ÉTAIT ÉCRIT HUIT FOIS : `BoutonAction` prend quatre
- * libellés, et l'écran porte deux boutons. Huit copies d'un même fragment
- * divergent à la première retouche, et c'est déjà arrivé sur cet écran — la
- * taille d'icône valait 15 au bureau, 16 au téléphone, sans raison.
- *
- * ⚠️ LE « + » RESTE PENDANT L'ATTENTE — NON, IL EST REMPLACÉ, et c'est mesuré :
- * l'anneau prend sa place à largeur constante. Les deux ensemble élargiraient le
- * bouton au clic, et sur l'action flottante du téléphone cela vaut douze pixels.
- */
-/**
- * Le plafond que le vendeur vient d'atteindre, lu en base : c'est le réglage de
- * l'administration qui fait foi, jamais un nombre écrit ici. Illisible, le bandeau
- * dit la même chose sans nombre plutôt que d'en inventer un.
- */
 async function lirePlafondDuQuota(quota: QuotaAtteint): Promise<number | null> {
   const supabase = await creerClientServeur();
   const { data, error } = await supabase.rpc(
@@ -469,13 +283,4 @@ async function lirePlafondDuQuota(quota: QuotaAtteint): Promise<number | null> {
     return null;
   }
   return data;
-}
-
-function LibelleNouvelle({ libelle }: { readonly libelle: string }) {
-  return (
-    <>
-      <Plus aria-hidden="true" size={17} strokeWidth={2} />
-      {libelle}
-    </>
-  );
 }

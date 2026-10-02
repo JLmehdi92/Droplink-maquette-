@@ -35,16 +35,18 @@ const ACTIONS: ReadonlyArray<{
       "validé le 09/09 après avoir refusé la version animée.",
   },
   {
-    fichier: "src/app/[locale]/(app)/commandes/page.tsx",
-    raison:
-      "Les deux boutons de création de l'écran le plus utilisé : celui de la " +
-      "barre d'outils et le bouton FLOTTANT du téléphone.",
-  },
-  {
-    fichier: "src/components/commandes/tableau-commandes.tsx",
+    // La refonte (02/10/2026) a déplacé la création dans la barre du haut
+    // (gardée par le dernier test de ce fichier) et la liste dans ce composant.
+    fichier: "src/components/commandes/liste-commandes.tsx",
     raison:
       "L'archivage groupé — action TOUT-OU-RIEN, donc la plus longue de " +
       "l'écran — et la création depuis le compte vide.",
+  },
+  {
+    fichier: "src/components/commandes/bandeau-blocage.tsx",
+    raison:
+      "L'envoi d'une contestation de blocage, avec son image : un envoi long, " +
+      "le seul recours du vendeur, qu'il ne doit pas croire perdu.",
   },
   {
     fichier: "src/components/commandes/carte-revocation.tsx",

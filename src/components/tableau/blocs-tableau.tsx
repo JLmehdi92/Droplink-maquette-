@@ -25,7 +25,7 @@ import { decrireSilence } from "@/lib/tracking/silence";
 import { lireTransporteur } from "@/lib/tracking/transporteurs";
 import type { LigneCommande } from "@/lib/commandes/liste";
 import type { CompteursEnvois } from "@/lib/envois/liste";
-import type { PartTransporteur } from "@/lib/analyses/activite";
+import { etatPanneauQc, type Activite, type CommandeConsultee, type PartTransporteur } from "@/lib/analyses/activite";
 import type { FaitRecent } from "@/lib/analyses/recente";
 import type { TypeEvenement } from "@/lib/commandes/journal";
 
@@ -184,7 +184,14 @@ export async function ActionsRapidesBloc({ langue }: { readonly langue: string }
 }
 
 /* ---------- répartition des statuts ---------- */
-export async function RepartitionBloc({ compteurs }: { readonly compteurs: CompteursEnvois }) {
+export async function RepartitionBloc({
+  compteurs,
+  variante = "tableau",
+}: {
+  readonly compteurs: CompteursEnvois;
+  /** Aux Analyses, le total s'écrit en grand au-dessus de la barre (maquette, `.total-colis`). */
+  readonly variante?: "tableau" | "analyses";
+}) {
   const t = await getTranslations("analyses");
   const tt = await getTranslations("tableau");
   const format = await getFormatter();
@@ -202,35 +209,168 @@ export async function RepartitionBloc({ compteurs }: { readonly compteurs: Compt
   const total = parts.reduce((s, p) => s + p.valeur, 0);
   return (
     <section className="bloc v4-carte" aria-labelledby="t-colis">
-      <TeteBloc id="t-colis" titre={t("colis.titre")} meta={tt("colisTotal", { n: compteurs.total })} />
+      <TeteBloc
+        id="t-colis"
+        titre={t("colis.titre")}
+        {...(variante === "tableau" ? { meta: tt("colisTotal", { n: compteurs.total }) } : {})}
+      />
       <p className="bloc__aide">{t("colis.aide")}</p>
+      {variante === "analyses" && total > 0 ? (
+        <p className="reponses__taux total-colis">
+          <b>
+            <ValeurRoulee texte={format.number(compteurs.total)} />
+          </b>
+          <span>{t("colis.suivis", { n: compteurs.total })}</span>
+        </p>
+      ) : null}
       {total === 0 ? (
         <p className="bloc__vide">{t("colis.vide")}</p>
       ) : (
-        <div className="envois">
-          <div className="empile" role="img" aria-label={parts.map((p) => `${p.libelle} : ${p.valeur}`).join(", ")}>
-            {parts
-              .filter((p) => p.valeur > 0)
-              .map((p) => (
-                <i key={p.cle} style={{ flexGrow: p.valeur, background: `var(--st-${p.cle})` }} />
-              ))}
-          </div>
-          <ul className="legende">
-            {parts.map((p) => (
-              <li key={p.cle}>
-                <i style={{ background: `var(--st-${p.cle})` }} />
-                <span>{p.libelle}</span>
-                <b>{format.number(p.valeur)}</b>
-                <small>{format.number(p.valeur / total, { style: "percent" })}</small>
-              </li>
-            ))}
-          </ul>
+        <div className={variante === "analyses" ? "envois envois--colis" : "envois"}>
+          <BarreEtLegende parts={parts} total={total} />
           {compteurs.silencieux > 0 ? (
             <p className="legende__silence">
               <i style={{ background: "var(--st-silence)" }} />
               {t("colis.dontSilencieux", { n: compteurs.silencieux })}
             </p>
           ) : null}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** La barre empilée et sa légende (maquette, `barreEtLegende`) : chaque part
+    porte son libellé, sa valeur et sa proportion — jamais la couleur seule. */
+async function BarreEtLegende({
+  parts,
+  total,
+}: {
+  readonly parts: ReadonlyArray<{ readonly cle: string; readonly libelle: string; readonly valeur: number }>;
+  readonly total: number;
+}) {
+  const format = await getFormatter();
+  return (
+    <>
+      <div className="empile" role="img" aria-label={parts.map((p) => `${p.libelle} : ${p.valeur}`).join(", ")}>
+        {parts
+          .filter((p) => p.valeur > 0)
+          .map((p) => (
+            <i key={p.cle} style={{ flexGrow: p.valeur, background: `var(--st-${p.cle})` }} />
+          ))}
+      </div>
+      <ul className="legende">
+        {parts.map((p) => (
+          <li key={p.cle}>
+            <i style={{ background: `var(--st-${p.cle})` }} />
+            <span>{p.libelle}</span>
+            <b>{format.number(p.valeur)}</b>
+            <small>{format.number(p.valeur / total, { style: "percent" })}</small>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+/* ---------- les commandes les plus consultées (Analyses) ---------- */
+export async function ConsulteesBloc({
+  commandes,
+  langue,
+}: {
+  readonly commandes: readonly CommandeConsultee[];
+  readonly langue: string;
+}) {
+  const t = await getTranslations("analyses");
+  const format = await getFormatter();
+  const max = Math.max(1, ...commandes.map((c) => c.vues));
+  return (
+    <section className="bloc v4-carte" aria-labelledby="t-consultees">
+      <TeteBloc id="t-consultees" titre={t("consultees.titre")} />
+      <p className="bloc__aide">{t("consultees.aide")}</p>
+      {commandes.length === 0 ? (
+        <p className="bloc__vide">{t("consultees.vide")}</p>
+      ) : (
+        <ol className="consultees">
+          {commandes.map((c, i) => (
+            <li key={c.id}>
+              <LienEcran className="consultee" href={`/${langue}/commandes/${c.id}`}>
+                <span className="consultee__rang">{i + 1}</span>
+                {c.vignette === null ? (
+                  <span className="vignette-vide" style={{ width: 40, height: 40 }} aria-hidden="true">
+                    <Images className="ic" />
+                  </span>
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element --
+                     URL signée à expiration : `next/image` la resservirait après. */
+                  <img src={c.vignette} alt="" width={40} height={40} loading="lazy" decoding="async" />
+                )}
+                <span className="consultee__qui">
+                  <b>{c.client?.trim() ? c.client : t("consultees.sansNom")}</b>
+                  <small>{referenceCourte(c.id)}</small>
+                </span>
+                <span className="consultee__vues">
+                  <b>{format.number(c.vues)}</b>
+                  <small>{t("consultees.vues", { n: c.vues })}</small>
+                </span>
+                <i className="consultee__barre" style={{ "--p": c.vues / max } as React.CSSProperties} aria-hidden="true" />
+              </LienEcran>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  );
+}
+
+/* ---------- les réponses des clients (Analyses) ----------
+   Le taux porte sur ce qui a été RÉPONDU (approuvé + refusé), jamais sur tout :
+   une commande sans réponse n'est pas un refus. Le gris sépare le vert du rouge. */
+export async function ReponsesBloc({ activite }: { readonly activite: Activite | null }) {
+  const t = await getTranslations("analyses");
+  const format = await getFormatter();
+  // L'état du panneau vient de la règle testée (`etatPanneauQc`), jamais d'un recalcul ici.
+  const etat = etatPanneauQc(activite);
+  const total = etat.etat === "parts" ? etat.total : 0;
+  const repondu = activite === null ? 0 : activite.qcApprouve + activite.qcRefuse;
+  return (
+    <section className="bloc v4-carte" aria-labelledby="t-qc">
+      <TeteBloc id="t-qc" titre={t("qc.titre")} />
+      <p className="bloc__aide">{t("qc.aide")}</p>
+      {etat.etat === "indisponible" || activite === null ? (
+        <p className="bloc__vide">{t("indisponible")}</p>
+      ) : etat.etat === "vide" ? (
+        <p className="bloc__vide">{t("qc.vide")}</p>
+      ) : (
+        <div className="reponses">
+          <p className="reponses__taux">
+            {/* Aucune réponse encore : « — », jamais « 0 % », qui dirait un refus. */}
+            <b>
+              {repondu === 0 ? (
+                <>
+                  <span aria-hidden="true">—</span>
+                  <span className="visuellement-cache">{t("qc.aucuneReponse")}</span>
+                </>
+              ) : (
+                // Arrondi vers le bas : 199 sur 200 ne s'affiche jamais « 100 % ».
+                format.number(Math.floor((activite.qcApprouve / repondu) * 100) / 100, { style: "percent" })
+              )}
+            </b>
+            <span>
+              {t("qc.tauxTexte")}
+              <small>{t("reponsesSur", { n: repondu, total })}</small>
+            </span>
+          </p>
+          <div data-parts="">
+            <BarreEtLegende
+              parts={[
+                { cle: "livre", libelle: t("qc.approuve"), valeur: activite.qcApprouve },
+                { cle: "attente", libelle: t("qc.enAttente"), valeur: activite.qcEnAttente },
+                { cle: "refus", libelle: t("qc.refuse"), valeur: activite.qcRefuse },
+              ]}
+              total={total}
+            />
+          </div>
         </div>
       )}
     </section>
@@ -244,7 +384,8 @@ export async function TransporteursBloc({
   voirTout,
 }: {
   readonly parts: readonly PartTransporteur[];
-  readonly voirTout: string;
+  /** Le lien vers les envois (tableau de bord) ; les Analyses n'en portent pas. */
+  readonly voirTout?: string;
 }) {
   const t = await getTranslations("analyses");
   const format = await getFormatter();
@@ -259,7 +400,11 @@ export async function TransporteursBloc({
   const maximum = lignes.reduce((m, l) => Math.max(m, l.nombre), 0);
   return (
     <section className="bloc v4-carte" aria-labelledby="t-transp">
-      <TeteBloc id="t-transp" titre={t("transporteurs.titre")} lien={{ href: voirTout, libelle: t("activite.voirTout") }} />
+      <TeteBloc
+        id="t-transp"
+        titre={t("transporteurs.titre")}
+        {...(voirTout === undefined ? {} : { lien: { href: voirTout, libelle: t("activite.voirTout") } })}
+      />
       <p className="bloc__aide">{t("transporteurs.aide")}</p>
       {total === 0 ? (
         <p className="bloc__vide">{t("transporteurs.aucun")}</p>

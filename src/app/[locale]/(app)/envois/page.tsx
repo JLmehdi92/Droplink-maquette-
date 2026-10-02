@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
+import { ChevronRight } from "lucide-react";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { TableauEnvois } from "@/components/envois/tableau-envois";
@@ -100,48 +100,40 @@ export default async function Envois({
     throw new Error("comptage des envois momentanément illisible");
   }
 
+  /* LA REFONTE (02/10/2026) suit `envois.html` : fil d'Ariane, titre, et la
+     fraîcheur des données avec « Actualiser » à droite. */
+  const nom = profil.nomAffiche ?? profil.nomBoutique;
   return (
-    <>
-      {/*
-        LE SOUS-TITRE EST CELUI DU KIT, ET LE DÉCOMPTE A DÉMÉNAGÉ DANS LA TUILE.
-
-        Il a longtemps porté « n colis suivis, tous transporteurs confondus » —
-        un nombre, donc, là où la référence explique à quoi sert l'écran. Le kit
-        met le total dans sa première tuile, « Tous les envois », et c'est mieux
-        placé : un chiffre isolé sous un titre ne dit pas ce qu'on peut faire de
-        la page, et il disparaissait de toute façon au téléphone.
-      */}
-      <EnTeteEcranDs
-        titre={t("titre")}
-        sousTitre={t("sousTitre")}
-        actions={
-          <EnTeteEnvois
-            libelleActualiser={t("actualiser")}
-            libelleFraicheur={t("derniereMaj")}
-            fraicheur={
-              fraicheur === null
-                ? null
-                : format.dateTime(fraicheur, {
-                    dateStyle: "long",
-                    timeStyle: "short",
-                  })
-            }
-          />
-        }
-      />
-
-      <main id="contenu" className="px-margin-mobile pt-3.5 pb-5 md:px-8 md:pt-0 md:pb-[26px]">
+    <main id="contenu" className="tableau envois-ecran">
+      <div className="tableau__tete">
         <div>
-        <TableauEnvois
-          base={`/${langue}/envois`}
-          parametres={parametres}
-          page={page}
-          compteurs={compteurs}
-          evolution={evolution}
-          maintenant={maintenant}
+          <p className="v4-fil">
+            {nom === null ? null : (
+              <>
+                <span>{nom}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
+            )}
+            <b>{t("titre")}</b>
+          </p>
+          <h1>{t("titre")}</h1>
+          <p>{t("sousTitre")}</p>
+        </div>
+        <EnTeteEnvois
+          libelleActualiser={t("actualiser")}
+          libelleFraicheur={t("derniereMaj")}
+          fraicheur={fraicheur === null ? null : format.dateTime(fraicheur, { dateStyle: "long", timeStyle: "short" })}
         />
       </div>
-      </main>
-    </>
+      <TableauEnvois
+        base={`/${langue}/envois`}
+        langue={langue}
+        parametres={parametres}
+        page={page}
+        compteurs={compteurs}
+        evolution={evolution}
+        maintenant={maintenant}
+      />
+    </main>
   );
 }

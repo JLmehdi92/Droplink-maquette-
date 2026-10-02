@@ -78,6 +78,8 @@ export function LienEcran({
    * qui lit ce fichier pour savoir ce qu'on peut lui donner.
    */
   readonly "data-vue-active"?: "true" | undefined;
+  /** Une tuile de compteur qui appelle un geste (maquette, `[data-alerte]`). */
+  readonly "data-alerte"?: string | undefined;
   /** Le jeton de la page client, lu par l'aperçu au survol (`ApercuSurvol`). */
   readonly "data-jeton"?: string;
   /**

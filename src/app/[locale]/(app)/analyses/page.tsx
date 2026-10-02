@@ -1,18 +1,21 @@
-import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
-import { Panneau } from "@/components/app/panneau";
 import { redirect } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { ChevronRight } from "lucide-react";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
-import { CompteursAnalyses } from "@/components/analyses/compteurs-analyses";
-import { FriseSemaines } from "@/components/analyses/frise-semaines";
-import { PlusConsultees } from "@/components/analyses/plus-consultees";
-import { RepartitionColis } from "@/components/analyses/repartition-colis";
-import { ActiviteRecente } from "@/components/analyses/activite-recente";
 import { BandeauAnalyses } from "@/components/analyses/bandeau-analyses";
-import { LiensParJour } from "@/components/analyses/liens-par-jour";
-import { PartsTransporteurs } from "@/components/analyses/parts-transporteurs";
+import { CompteursApp } from "@/components/tableau/compteurs-app";
+import { GrapheTableau, type PointGraphe, type TextesGraphe } from "@/components/tableau/graphe-tableau";
+import { SelecteurPeriode } from "@/components/tableau/selecteur-periode";
+import {
+  ActiviteBloc,
+  BlocIndisponible,
+  ConsulteesBloc,
+  RepartitionBloc,
+  ReponsesBloc,
+  TransporteursBloc,
+} from "@/components/tableau/blocs-tableau";
 import {
   analyserParametres,
   lireActivite,
@@ -21,12 +24,13 @@ import {
   lirePlusConsultees,
   lireSemaines,
   lireTransporteurs,
-  PERIODES, etatPanneauQc } from "@/lib/analyses/activite";
+  PERIODES,
+  SEMAINES_FRISE,
+} from "@/lib/analyses/activite";
 import { lireActiviteRecente } from "@/lib/analyses/recente";
 import { compterEnvois } from "@/lib/envois/liste";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
-import { LienEcran } from "@/components/lien-ecran";
 
 export async function generateMetadata({
   params,
@@ -109,174 +113,104 @@ export default async function Analyses({
     ]);
 
   const t = await getTranslations("analyses");
+  const tt = await getTranslations("tableau");
   const format = await getFormatter();
   const base = `/${langue}/analyses`;
+  const nom = profil.nomAffiche ?? profil.nomBoutique;
 
-  /**
-   * ⚠️ CHAQUE SECTION SE REND OU SE NOMME, JAMAIS N'INVENTE.
-   *
-   * Les quatre lectures sont indépendantes ; une seule qui bronche emportait
-   * tout l'écran. Défaut vu en vrai : `/fr/analyses` en 500 après 10,7 s le
-   * 03/09. Et le zéro n'est pas une porte de sortie non plus — le module le
-   * disait déjà : *afficher des zéros ferait croire à un vendeur actif qu'il
-   * n'a rien fait.*
-   */
-  const INDISPONIBLE =
-    "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 text-[14px] text-ds-texte-corps shadow-ds-card lg:p-6";
-
-  // UNE LECTURE EN ÉCHEC N'EST PAS « AUCUNE COMMANDE » (23/09/2026) : voir `etatPanneauQc`.
-  const panneauQc = etatPanneauQc(activite);
-  const qcTotal = panneauQc.etat === "parts" ? panneauQc.total : 0;
-
-  /*
-   * LE BOUTON DE PÉRIODE ACTIF EST À L'ACCENT, ET IL ÉTAIT NOIR.
-   *
-   * ⚠️ CE NOIR ÉTAIT L'ANCIEN CANEVAS, `#111117`, celui dont `CLAUDE.md` dit que
-   * le chrome sombre est mort. Il a survécu à la migration des quatre autres
-   * écrans parce que rien ne le cherchait : il était écrit en tokens
-   * (`bg-primary` / `text-on-primary`), donc aucune garde de couleur en dur ne
-   * pouvait le voir, et il restait le seul aplat noir de tout le produit.
-   *
-   * Le kit rend ces onglets à 38 px de haut, rayon 10, `padding 0 15`, en 13/700
-   * blanc sur accent quand ils sont actifs, 13/500 corps sur carte bordée sinon.
-   *
-   * ⚠️ LA HAUTEUR MONTE À 44 AU TÉLÉPHONE. Ce sont des liens, pas des boutons —
-   * la règle de cible tactile de la feuille de base ne les couvre pas, et les
-   * 38 px du kit se ratent au pouce.
-   */
-  const pilule = (actif: boolean): string =>
-    "inline-flex h-11 items-center rounded-ds-sm border px-[15px] text-[13px] leading-4 transition-colors lg:h-[38px] " +
-    (actif
-      ? "border-transparent bg-ds-accent font-bold text-ds-texte-sur-marque"
-      : "border-ds-filet bg-ds-surface-carte font-medium text-ds-texte-corps shadow-ds-xs hover:bg-ds-surface-teinte");
+  /* LA REFONTE (02/10/2026) suit `analyses.html` : les mêmes lectures et les
+     mêmes composants que le tableau de bord (un même panneau ne rend jamais deux
+     nombres différents d'un écran à l'autre ; « liens ouverts » compte les vues
+     des commandes CRÉÉES dans la période, la courbe compte les ouvertures DU
+     JOUR — deux questions, deux libellés), la frise et les ouvertures chacune
+     dans sa carte, puis les commandes les plus consultées, les réponses des
+     clients et le bandeau. Chaque panneau se rend ou se dit illisible, jamais
+     zéro. */
+  const courtJour = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", timeZone: "UTC" });
+  const pointsSemaines: readonly PointGraphe[] | null =
+    semaines?.map((s) => ({
+      valeur: s.total,
+      court: courtJour(s.debut),
+      long: tt("graphe.semaineDuDate", { date: format.dateTime(s.debut, { day: "numeric", month: "long", timeZone: "UTC" }) }),
+    })) ?? null;
+  const pointsOuvertures: readonly PointGraphe[] | null =
+    ouvertures?.map((o) => {
+      const d = new Date(`${o.jour}T12:00:00Z`);
+      return { valeur: o.total, court: courtJour(d), long: format.dateTime(d, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }) };
+    }) ?? null;
+  const n = semaines?.length ?? SEMAINES_FRISE;
+  const totalOuvertures = ouvertures?.reduce((somme, o) => somme + o.total, 0) ?? null;
+  const textes: TextesGraphe = {
+    bascule: tt("graphe.bascule"),
+    commandes: tt("graphe.commandes"),
+    liens: tt("graphe.liens"),
+    titreSemaines: t("frise.titre"),
+    aideSemaines: t("frise.aide"),
+    titreLiens: t("liens.titre"),
+    aideLiens: t("liens.aide"),
+    voirValeurs: tt("graphe.voirValeurs"),
+    semaineDu: tt("graphe.semaineDu"),
+    creees: tt("graphe.creees"),
+    jour: tt("graphe.jour"),
+    ouvertures: tt("graphe.ouvertures"),
+    cetteSemaine: tt("graphe.cetteSemaine"),
+    zoneSemaines: tt("graphe.zoneSemaines", { n }),
+    zoneLiens: tt("graphe.zoneLiens", { n: totalOuvertures ?? 0 }),
+    videSemaines: semaines === null ? t("indisponible") : t("frise.vide"),
+    videLiens: ouvertures === null ? t("indisponible") : t("liens.aucun"),
+  };
 
   return (
-    <>
-      <EnTeteEcranDs
-        titre={t("titre")}
-        sousTitre={t("sousTitreEcran")}
-        actions={
-          <nav
-            aria-label={t("periode.titre")}
-            /* −2 px pour retrouver les 14 px de la planche quand la barre passe
-               à la ligne au téléphone : l'écart de rangée de l'en-tête est de
-               16. Au bureau la barre ne passe pas à la ligne, donc rien. */
-            className="flex flex-wrap gap-2"
-          >
-            {PERIODES.map((p) => (
-              <LienEcran
-                key={p}
-                href={p === "30j" ? base : `${base}?periode=${p}`}
-                aria-current={periode === p ? "true" : undefined}
-                className={pilule(periode === p)}
-              >
-                {t(`periode.${p}`)}
-              </LienEcran>
-            ))}
-          </nav>
-        }
-      />
-
-      <main
-        id="contenu"
-        className="flex flex-col gap-3 px-margin-mobile pt-3.5 pb-6 lg:gap-[18px] lg:px-8 lg:pt-0 lg:pb-8"
-      >
-        {activite === null ? (
-          <p className={INDISPONIBLE}>{t("indisponible")}</p>
-        ) : (
-          <CompteursAnalyses activite={activite} delai={delai} />
-        )}
-
-        {/* 1,6fr / 1fr sur la planche. La frise garde la place : c'est elle
-            qu'on lit en premier, et quatre barres de progression n'ont pas
-            besoin de plus de largeur qu'un libellé et un chiffre. */}
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[1.6fr_minmax(0,1fr)] lg:gap-4">
-          {semaines === null ? (
-            <p className={INDISPONIBLE}>{t("indisponible")}</p>
-          ) : (
-            <FriseSemaines semaines={semaines} />
-          )}
-          {colis === null ? (
-            <p className={INDISPONIBLE}>{t("indisponible")}</p>
-          ) : (
-            <RepartitionColis compteurs={colis} />
-          )}
+    <main id="contenu" className="tableau analyses-ecran">
+      <div className="tableau__tete">
+        <div>
+          <p className="v4-fil">
+            {nom === null ? null : (
+              <>
+                <span>{nom}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
+            )}
+            <b>{t("titre")}</b>
+          </p>
+          <h1>{t("titre")}</h1>
+          <p>{t("sousTitreEcran")}</p>
         </div>
+        <SelecteurPeriode
+          etiquette={t("periode.titre")}
+          actif={periode}
+          periodes={PERIODES.map((p) => ({ cle: p, libelle: t(`periode.${p}`), href: p === "30j" ? base : `${base}?periode=${p}` }))}
+        />
+      </div>
 
-        {/* LA DERNIÈRE RANGÉE DU KIT : trois colonnes égales — les ouvertures
-            de liens, les transporteurs, l'activité récente.
+      {activite === null ? <p className="bloc bloc__vide">{t("indisponible")}</p> : <CompteursApp activite={activite} delai={delai} />}
 
-            ⚠️ TROIS COLONNES À PARTIR DE `xl` SEULEMENT. Posées dès `lg`, elles
-            faisaient 224 px à 1 024 : les parts des transporteurs et les dates
-            de l'axe des ouvertures SORTAIENT DE LEUR CARTE (balayage du
-            18/09/2026). Entre les deux, deux colonnes, l'activité dessous. */}
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 xl:grid-cols-3 lg:[&>*:last-child]:col-span-2 xl:[&>*:last-child]:col-span-1">
-          {ouvertures === null || activite === null ? (
-            <p className={INDISPONIBLE}>{t("indisponible")}</p>
-          ) : (
-            <LiensParJour jours={ouvertures} total={activite.vuesTotales} />
-          )}
-          {transporteurs === null ? (
-            <p className={INDISPONIBLE}>{t("indisponible")}</p>
-          ) : (
-            <PartsTransporteurs parts={transporteurs} />
-          )}
-          {recente === null ? (
-            <p className={INDISPONIBLE}>{t("indisponible")}</p>
-          ) : (
-            <ActiviteRecente faits={recente} langue={langue} />
-          )}
-        </div>
+      <div className="analyses__rangee analyses__rangee--16">
+        <GrapheTableau semaines={pointsSemaines} ouvertures={null} textes={textes} fixe="semaines" meta={t("frise.fenetre", { n })} />
+        {colis === null ? <BlocIndisponible titre={t("colis.titre")} /> : <RepartitionBloc compteurs={colis} variante="analyses" />}
+      </div>
 
-        {consultees === null ? (
-          <p className={INDISPONIBLE}>{t("indisponible")}</p>
+      <div className="analyses__rangee analyses__rangee--3">
+        <GrapheTableau
+          semaines={null}
+          ouvertures={pointsOuvertures}
+          textes={textes}
+          fixe="liens"
+          {...(totalOuvertures === null ? {} : { meta: t("liens.ouvertures", { n: totalOuvertures }) })}
+        />
+        {transporteurs === null ? (
+          <BlocIndisponible titre={t("transporteurs.titre")} />
         ) : (
-          <PlusConsultees commandes={consultees} />
+          <TransporteursBloc parts={transporteurs} />
         )}
+        {recente === null ? <BlocIndisponible titre={t("activite.titre")} /> : <ActiviteBloc faits={recente} langue={langue} />}
+      </div>
 
-        <Panneau titre={t("qc.titre")} sousTitre={t("qc.aide")}>
-          {panneauQc.etat === "indisponible" ? (
-            <p className="text-[14px] text-ds-texte-corps">{t("indisponible")}</p>
-          ) : panneauQc.etat === "vide" ? (
-            <p className="text-[14px] text-ds-texte-corps">{t("qc.vide")}</p>
-          ) : (
-            <ul className="flex flex-col gap-[15px] lg:gap-4">
-              {(
-                [
-                  { cle: "approuve", valeur: activite?.qcApprouve ?? 0, barre: "bg-ds-succes" },
-                  { cle: "refuse", valeur: activite?.qcRefuse ?? 0, barre: "bg-ds-erreur" },
-                  { cle: "enAttente", valeur: activite?.qcEnAttente ?? 0, barre: "bg-ds-ink-200" },
-                ] as const
-              ).map((part) => (
-                <li key={part.cle}>
-                  <div className="mb-1.5 flex items-baseline justify-between gap-3 lg:mb-[7px]">
-                    <span className="text-[13px] leading-4 font-semibold text-ds-texte-fort">
-                      {t(`qc.${part.cle}`)}
-                    </span>
-                    <span className="text-[13px] leading-4 font-semibold text-ds-texte-sourdine">
-                      {format.number(part.valeur)}
-                    </span>
-                  </div>
-                  {/* La piste est décorative : le chiffre au-dessus porte
-                      l'information, elle n'a rien à annoncer de plus. */}
-                  <div
-                    aria-hidden="true"
-                    className="h-2 overflow-hidden rounded-ds-pill bg-ds-surface-creux"
-                  >
-                    <span
-                      className={"block h-full rounded-ds-pill " + part.barre}
-                      style={{ width: `${(part.valeur / qcTotal) * 100}%` }}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panneau>
+      {consultees === null ? <BlocIndisponible titre={t("consultees.titre")} /> : <ConsulteesBloc commandes={consultees} langue={langue} />}
 
-        {/* LE BANDEAU DE PIED DU KIT, en dernier comme chez lui. */}
-        <BandeauAnalyses />
-      </main>
-    </>
+      <ReponsesBloc activite={activite} />
+
+      <BandeauAnalyses />
+    </main>
   );
 }

@@ -58,13 +58,13 @@ export async function CompteursApp({
     {
       cle: "tauxValidation",
       valeur: validation === null ? "—" : format.number(validation / 100, { style: "percent" }),
-      dessous: t("reponsesSur", { n: reponses, s: reponses > 1 ? "s" : "", total: activite.commandesCreees }),
+      dessous: t("reponsesSur", { n: reponses, total: activite.commandesCreees }),
     },
     {
       cle: "delaiLivraison",
       valeur: delai?.jours == null ? "—" : t("jours", { n: format.number(delai.jours) }),
       // Une lecture en panne se dit illisible : « sur 0 colis livré » serait un zéro inventé.
-      dessous: delai === null ? t("indisponibleCourt") : t("surColisLivres", { n: delai.colis, s: delai.colis > 1 ? "s" : "" }),
+      dessous: delai === null ? t("indisponibleCourt") : t("surColisLivres", { n: delai.colis }),
     },
   ];
 

@@ -474,6 +474,63 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .lot__fermer .ic { width: 16px; height: 16px; }
 @media (hover: hover) and (pointer: fine) { .lot__fermer:hover { background: color-mix(in srgb, var(--fond) 12%, transparent); color: var(--fond); } }
 
+/* ---------- Commandes : la maquette portée sur les balises du produit ----------
+   Les déroulants sont des `<details>` (ils s'ouvrent sans JavaScript), les vues
+   et le tri sont des LIENS (l'état est dans l'URL) : mêmes dessins, autres balises. */
+.deroulant > summary { list-style: none; cursor: pointer; }
+.deroulant > summary::-webkit-details-marker { display: none; }
+.deroulant[open] > .bouton-outil { border-color: color-mix(in srgb, var(--encre) 26%, transparent); background: var(--survol-ligne); }
+.deroulant[open] > .action-ligne { background: color-mix(in srgb, var(--encre) 7%, transparent); color: var(--encre); }
+.vues-liste a { flex: none; display: inline-flex; align-items: center; height: 38px; font-size: 13.5px; font-weight: 500; color: var(--corps); transition: color 120ms var(--ease); }
+.vues-liste a[aria-current="page"] { color: var(--encre); }
+@media (hover: hover) and (pointer: fine) { .vues-liste a:hover { color: var(--encre); } }
+.pop--menu a { display: flex; align-items: center; gap: 9px; min-height: 36px; padding: 0 10px; border-radius: 8px; font-size: 13.5px; }
+.pop--menu a[aria-current="true"] { font-weight: 600; }
+.pop--menu a[aria-current="true"]::after { content: ""; margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+@media (hover: hover) and (pointer: fine) { .pop--menu a:hover, .pop--menu button:hover { background: var(--survol-ligne); } }
+.pop--ligne { z-index: 60; }
+/* Placé par script à l'ouverture (position fixe) : invisible tant qu'il ne l'est pas,
+   sinon il apparaîtrait une image en haut à gauche de l'écran. */
+.deroulant:not([data-place]) > .pop--ligne { visibility: hidden; }
+.col-actions { position: relative; }
+.action-ligne__echec { position: absolute; right: 0; bottom: calc(100% + 4px); z-index: 5; padding: 5px 9px; border-radius: 8px; background: var(--encre); color: var(--fond); font-size: 12px; white-space: nowrap; }
+.col-statut { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.badge[data-ton="refus"] { color: var(--erreur-encre); background: color-mix(in srgb, var(--st-refus) 10%, transparent); }
+.vignette-vide { display: grid; place-items: center; flex: none; border-radius: 9px; background: var(--creux); box-shadow: inset 0 0 0 1px var(--filet); color: var(--sourdine); }
+.vignette-vide .ic { width: 15px; height: 15px; }
+.col-produits .vide { color: var(--sourdine); }
+.rangee:has(input[name="selection"]:checked) { background: color-mix(in srgb, var(--accent) 5%, var(--feuille)); }
+.action-ligne.est-echec { color: var(--erreur-encre); }
+/* La barre de lot existe dès qu'une case est cochée, par le CSS : sans JavaScript
+   elle s'affiche aussi (le compte, lui, vient de l'îlot). */
+.liste__lot .lot { display: none; opacity: 1; transform: none; animation: lot-entre 240ms var(--ease-sortie); }
+.liste__lot:has(input[name="selection"]:checked) .lot { display: flex; }
+@keyframes lot-entre { from { opacity: 0; transform: translateY(16px); } }
+.liste__suite { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--filet-appuye); background: var(--feuille); font-weight: 500; color: var(--encre); }
+.message-lot { padding: 10px 14px; border-radius: 10px; font-size: 13px; background: var(--creux); color: var(--encre); }
+.message-lot[data-ton="refus"] { background: color-mix(in srgb, var(--st-silence) 14%, transparent); color: var(--avert-encre); }
+/* Le compte vide : la maquette ne le dessine pas, il prend la grammaire de ses états */
+.compte-vide { display: grid; justify-items: center; gap: 10px; max-width: 620px; width: 100%; margin: 12px auto 0; padding: 40px 28px; text-align: center; }
+.compte-vide__tuile { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; background: var(--teinte); color: var(--accent-texte); }
+.compte-vide__tuile .ic { width: 26px; height: 26px; }
+.compte-vide h2 { font-size: 24px; font-weight: 800; letter-spacing: -.035em; }
+.compte-vide > p { max-width: 460px; font-size: 14.5px; color: var(--corps); }
+.compte-vide__etapes { display: grid; gap: 14px; margin: 14px 0 10px; text-align: left; }
+.compte-vide__etapes li { display: flex; gap: 12px; }
+.compte-vide__etapes li > span:first-child { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 99px; background: var(--teinte); color: var(--accent-texte); font-size: 13px; font-weight: 800; }
+.compte-vide__etapes b { display: block; font-size: 14.5px; }
+.compte-vide__etapes small { display: block; font-size: 13.5px; color: var(--corps); }
+.compte-vide__marque { margin-top: 8px; font-size: 13px; color: var(--corps); }
+@media (max-width: 760px) {
+  /* Le second filtre des envois est à droite de l'écran : son menu s'ouvre vers la gauche. */
+  .barre-envois__filtres .deroulant:nth-child(2) .pop { left: auto; right: 0; transform-origin: 100% 0; }
+  .pop--menu { max-width: calc(100vw - 32px); }
+}
+@media (pointer: coarse) {
+  .vues-liste a, .pop--menu a, .liste__suite { min-height: 44px; }
+  .vues-liste a { min-width: 44px; justify-content: center; }
+}
+
 /* la page publique d'une commande */
 .page-publique { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; }
 .page-publique__fond { position: absolute; inset: 0; background: rgba(11, 11, 24, .42); opacity: 0; transition: opacity 200ms var(--ease-sortie); }
@@ -485,6 +542,8 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 
 @media (prefers-reduced-motion: reduce) {
   .pop, .lot, .rangee, .page-publique__cadre { animation: none; transition-property: opacity; }
+  .liste__lot .lot { animation: none; }
+  .vues-liste__trait { transition: none; }
 }
 
 @media (min-width: 1500px) {
@@ -576,7 +635,7 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .fraicheur p { display: grid; text-align: right; font-size: 12.5px; line-height: 1.35; color: var(--sourdine); }
 .fraicheur time { color: var(--corps); font-variant-numeric: tabular-nums; }
 [data-actualiser] .ic { transition: transform 160ms var(--ease-sortie); }
-[data-actualiser].est-en-cours .ic { animation: tourne-actualiser 700ms linear infinite; }
+.fraicheur .bouton-outil.est-en-cours .ic { animation: tourne-actualiser 700ms linear infinite; }
 @keyframes tourne-actualiser { to { transform: rotate(360deg); } }
 
 .compteurs--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -584,10 +643,10 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .compteur-app--bouton { text-align: left; transition: background-color 120ms var(--ease); }
 .compteur-app--bouton:first-child { border-radius: 11px 0 0 11px; }
 .compteur-app--bouton:last-child { border-radius: 0 11px 11px 0; }
-.compteur-app--bouton[aria-pressed="true"] { background: var(--feuille); box-shadow: inset 0 -2px 0 var(--accent); }
-.compteur-app--bouton[aria-pressed="true"] .compteur-app__titre { color: var(--encre); }
+.compteur-app--bouton:is([aria-pressed="true"], [aria-current="true"]) { background: var(--feuille); box-shadow: inset 0 -2px 0 var(--accent); }
+.compteur-app--bouton:is([aria-pressed="true"], [aria-current="true"]) .compteur-app__titre { color: var(--encre); }
 .compteur-app--bouton:focus-visible { border-radius: 0; box-shadow: inset var(--focus); }
-@media (hover: hover) and (pointer: fine) { .compteur-app--bouton:not([aria-pressed="true"]):hover { background: var(--survol-ligne); } }
+@media (hover: hover) and (pointer: fine) { .compteur-app--bouton:not([aria-pressed="true"], [aria-current="true"]):hover { background: var(--survol-ligne); } }
 .compteur-app[data-alerte] .compteur-app__titre { color: var(--avert-encre); }
 .compteurs--5 .compteur-app[data-alerte] .compteur-app__valeur { color: var(--avert-encre); }
 
@@ -610,10 +669,11 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .col-ref a { font-size: 13px; font-weight: 500; color: var(--corps); font-variant-numeric: tabular-nums; }
 @media (hover: hover) and (pointer: fine) { .col-ref a:hover { color: var(--accent-texte); text-decoration: underline; text-underline-offset: 3px; } }
 .col-client-envoi { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.col-transp { font-size: 13px; color: var(--corps); white-space: nowrap; }
+.col-transp { font-size: 13px; color: var(--corps); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .col-maj { display: grid; font-size: 13px; line-height: 1.35; cursor: default; }
 .col-maj small { font-size: 12.5px; color: var(--sourdine); font-variant-numeric: tabular-nums; }
 .col-maj .vide { font-size: 12.5px; color: var(--sourdine); }
+.col-maj__interro { display: none; }
 .col-prochaine { font-size: 13px; line-height: 1.4; color: var(--corps); }
 .col-prochaine[data-ton="livre"] { color: var(--succes-encre); font-weight: 500; }
 .col-prochaine[data-ton="silence"] { color: var(--avert-encre); font-weight: 500; }
@@ -649,7 +709,8 @@ a.action-ligne { color: var(--corps); }
   .rangee--envoi .col-transp { grid-area: transp; display: block !important; }
   .rangee--envoi .col-statut { grid-area: statut; justify-self: end; }
   .rangee--envoi .col-progression { grid-area: progression; }
-  .rangee--envoi .col-maj { grid-area: maj; display: flex; gap: 6px; align-items: baseline; }
+  .rangee--envoi .col-maj { grid-area: maj; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+  .rangee--envoi .col-maj__interro { display: inline; order: 3; }
   .rangee--envoi .col-prochaine { grid-area: prochaine; }
   .rangee--envoi .col-prochaine:empty { display: none; }
   .rangee--envoi .col-actions { grid-area: actions; }
@@ -740,7 +801,7 @@ a.action-ligne { color: var(--corps); }
   .bandeau-analyses__marque { text-align: left; }
 }
 .total-colis { display: flex; align-items: baseline; gap: 8px; padding: 20px 16px 0; }
-.total-colis span { font-size: 13px; }
+.total-colis > span { font-size: 13px; }
 .analyses-ecran .envois--colis { flex: 1; align-content: end; padding-bottom: 20px; }
 .reponses__taux > span small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--sourdine); font-variant-numeric: tabular-nums; }
 

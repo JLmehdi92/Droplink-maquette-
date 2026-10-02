@@ -1116,7 +1116,7 @@
       "abandonnes": "Tracking stopped",
       "livresCeMois": "Delivered this month",
       "preparation": "Not scanned yet",
-      "ceMois": "this month"
+      "evolution": "{valeur} this month"
     },
     "filtres": {
       "silencieux": "No movement",
@@ -1165,7 +1165,6 @@
     },
     "interrogationsFaites": "{n, plural, one {# query} other {# queries}}",
     "aide": "A number you have just pasted is often not scanned yet. This is not an error: the carrier simply has not published anything.",
-    "aideCourte": "A number you have just pasted is often not scanned yet. This is not an error.",
     "actualiser": "Refresh",
     "derniereMaj": "Last updated",
     "compteurPage": "Showing {de} to {a} of {total, plural, one {# shipment} other {# shipments}}",
@@ -1177,14 +1176,20 @@
     },
     "actions": {
       "voirCommande": "View order {reference}",
-      "siteTransporteur": "Open the carrier's website"
+      "siteDe": "Open the {nom} website (new tab)"
     },
     "lot": {
       "titre": "Selection",
       "selectionner": "Select parcel {numero}",
-      "aide": "Selected parcels",
-      "exporter": "Export the selection"
-    }
+      "exporter": "Export the selection",
+      "toutSelectionner": "Select all",
+      "selectionUn": "# selected",
+      "selectionPlusieurs": "# selected",
+      "toutDeselectionner": "Clear selection"
+    },
+    "autresCommandes": "{n, plural, one {and # more order} other {and # more orders}}",
+    "trier": "Sort",
+    "finDeListe": "End of the list."
   },
   "analyses": {
     "titre": "Analytics",
@@ -1212,8 +1217,7 @@
     "leClientRevient": "the customer comes back",
     "frise": {
       "titre": "Order trend",
-      "fenetre": "last {n} weeks",
-      "barre": "Week of {semaine}: {n, plural, =0 {no order} one {# order} other {# orders}}",
+      "fenetre": "Last {n} weeks",
       "vide": "No order created over these twelve weeks.",
       "aide": "Orders created each week."
     },
@@ -1226,13 +1230,15 @@
       "silencieux": "No movement",
       "vide": "No tracked parcel yet.",
       "aide": "Current status of your shipments.",
-      "dontSilencieux": "{n, plural, one {Including # parcel with no movement for over 10 days} other {Including # parcels with no movement for over 10 days}}"
+      "dontSilencieux": "{n, plural, one {Including # parcel with no movement for over 10 days} other {Including # parcels with no movement for over 10 days}}",
+      "suivis": "{n, plural, one {parcel tracked} other {parcels tracked}}"
     },
     "consultees": {
       "titre": "Your most viewed orders",
       "aide": "A customer who comes back to their page several times is a reassured customer.",
       "sansNom": "No recipient",
-      "vide": "No link has been opened over this period yet."
+      "vide": "No link has been opened over this period yet.",
+      "vues": "{n, plural, one {view} other {views}}"
     },
     "qc": {
       "titre": "What your customers replied",
@@ -1240,12 +1246,14 @@
       "approuve": "Approved",
       "refuse": "Declined",
       "enAttente": "No reply",
-      "vide": "No order over this period."
+      "vide": "No order over this period.",
+      "tauxTexte": "of responses approve the photos",
+      "aucuneReponse": "no replies yet"
     },
     "sousTitreEcran": "Track your performance and the effectiveness of your shipments.",
     "livreesSur": "{n} of {total} created",
-    "reponsesSur": "{n} repl{s} of {total}",
-    "surColisLivres": "across {n} delivered parcel{s}",
+    "reponsesSur": "{n, plural, one {# reply} other {# replies}} of {total}",
+    "surColisLivres": "across {n, plural, one {# delivered parcel} other {# delivered parcels}}",
     "jours": "{n} days",
     "evolution": {
       "titre": "Order trend",
@@ -1254,7 +1262,8 @@
     "liens": {
       "titre": "Customer links",
       "aide": "Number of tracking-link opens.",
-      "aucun": "No link was opened over this period."
+      "aucun": "No link was opened over this period.",
+      "ouvertures": "{n, plural, one {# open} other {# opens}}"
     },
     "transporteurs": {
       "titre": "Most used carriers",
@@ -1275,8 +1284,7 @@
       "propulse": "Powered by",
       "slogan": "Tracking links, simple and powerful."
     },
-    "vuesParCommande": "{n} views per opened order",
-    "ouverturesLe": "{n} open(s) on {jour}"
+    "vuesParCommande": "{n} views per opened order"
   },
   "commandes": {
     "titre": "Orders",
@@ -1371,7 +1379,10 @@
       "exporter": "Export",
       "exportAvertissement": "The file contains your orders’ public links: anyone who opens it can open your customers’ pages.",
       "exportTelecharger": "Download the CSV",
-      "enCours": "Working…"
+      "enCours": "Working…",
+      "selectionUn": "# selected",
+      "selectionPlusieurs": "# selected",
+      "toutDeselectionner": "Clear selection"
     },
     "vues": {
       "toutes": "All",
@@ -1390,8 +1401,6 @@
     "sansNom": "Unnamed",
     "sousTitreChiffre": "{total, plural, one {# order} other {# orders}}, {semaine, plural, one {# created} other {# created}} this week",
     "sousTitreVide": "Your space is ready",
-    "rechercherExempleCourt": "Customer, reference, tracking…",
-    "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# view} other {# views}}",
     "surTotal": "Showing {n} of {total, plural, one {# order} other {# orders}}",
     "chargerLaSuite": "Load more",
     "plusDActions": "More actions for {client}",
@@ -1433,7 +1442,18 @@
       "mensuelTexte": "You have created your {n} orders for this month. The limit resets on the 1st of the month.",
       "mensuelTexteSansNombre": "You have reached your order limit for this month. It resets on the 1st of the month.",
       "passerPro": "Upgrade to Pro"
-    }
+    },
+    "vuesTitre": "Views",
+    "toutSelectionner": "Select all",
+    "aucunSuivi": "None",
+    "frise": {
+      "dernierMouvement": "Last parcel movement: {date}",
+      "sansInfo": "No carrier information yet",
+      "sansNumero": "No tracking number yet",
+      "silence": "No movement for {jours, plural, one {# day} other {# days}}"
+    },
+    "resume": "Summary",
+    "nbPhotos": "{n, plural, one {# photo} other {# photos}}"
   },
   "editeur": {
     "historique": {

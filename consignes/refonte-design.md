@@ -629,6 +629,81 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
   **Au poste de Mehdi** : `fumee` (le tableau de bord sert un autre HTML), `couverture`.
 
+### ▶️ 02/10/2026 — étapes 4b et 4c : Commandes et Suivi d'envois (session cloud)
+
+- **Portée de `commandes.html` et `envois.html`** : fil d'Ariane, titre, outils d'en-tête
+  (période et export ; fraîcheur et « Actualiser »), compteurs en une bande (quatre ; cinq tuiles qui
+  filtrent pour les envois), vues soulignées / filtres / tri, puces des critères, table à rangées en
+  grille avec frise (Commandes) ou mini-frise (Envois), et, au téléphone, les mêmes rangées en cartes.
+  Composants : `liste-commandes.tsx` (remplace `tableau-commandes.tsx`), `tableau-envois.tsx` réécrit,
+  îlots `vues-liste`, `selection-lot` (« tout sélectionner » et compte de la barre), `copier-lien-ligne`.
+- **La maquette filtre dans le navigateur, le produit non — le produit gagne.** Vues, filtres, tri,
+  période, recherche et pagination restent des LIENS et des formulaires `GET` lus par le serveur
+  (curseur, recherche sans accents) : l'écran reprend le dessin, pas le moteur. Archiver (une ligne ou
+  un lot) et dupliquer restent des POST natifs (marchent sans JavaScript), avec exactement les champs
+  qu'attend la route ; la sélection des envois EXPORTE (GET). La barre de lot s'affiche par le CSS
+  (`:has(:checked)`) ; son compte vient de l'îlot.
+- **Ce que la maquette fait et que le produit ne refait pas** : « Ouvrir la page » ouvre la VRAIE page
+  client dans un onglet (pas une imitation en fenêtre) ; la frise ne s'anime pas au chargement (elle
+  clignoterait à chaque « Charger la suite ») ; aucune « interroger maintenant » sur un colis (palier de
+  prises en charge à vie) ; un transporteur inconnu n'affiche rien. Les vues ne portent plus leur
+  compteur (la maquette n'en a pas ; les quatre compteurs sont juste au-dessus).
+- **Gardé du produit** : bandeau de quota, messages de lot (validés), deux états vides (compte vide
+  avec ses trois étapes et le renvoi vers « Ma marque », filtre sans résultat avec « tout archivé » et
+  la phrase sur les accents), compteurs masqués dans les archives et en panne de lecture, dénominateur
+  « n sur total » seulement sur la liste entière (ni filtre, ni archive, ni page suivante — la relecture
+  a vu « 50 sur 184 » en page 2), « Suivi arrêté », références multiples, évolution « ce mois-ci ».
+  La recherche de la barre du haut GARDE les critères en cours quand on est sur la liste (sans quoi
+  chercher dans les archives ramenait aux commandes actives).
+- **Menus** : `<details>` (s'ouvrent sans JavaScript) fermés par `DetailsFermable` ; le menu d'une
+  ligne est posé en position FIXE (la liste rogne ce qui déborde : le menu de la dernière ligne était
+  coupé), invisible tant qu'il n'est pas placé, refermé au défilement (sauf l'inertie des 300 premières
+  ms) et au redimensionnement.
+- **Piège payé** : la classe `table` de la maquette déclenche l'utilitaire Tailwind `display: table`
+  (couche `utilities`, qui gagne sur toute règle de composant) : la table perdait 50 px. Renommée
+  `liste__table`. *Une classe de la maquette qui porte le nom d'un utilitaire Tailwind ne se reprend
+  jamais telle quelle.*
+- **Mesuré** (base de TESTS : cinq commandes, quatre colis semés en base et reliés à leurs commandes,
+  aucune prise en charge 17TRACK consommée — aucune tâche ni fonction ne contacte le fournisseur depuis
+  cette base) : 1440 et 390 px, fr/en/zh-CN, mouvement réduit, menus ouverts ; aucun débordement, aucune
+  erreur console, aucune violation CSP ; au téléphone, les cibles sous 44 px relevées sont le contenu
+  de `<details>` FERMÉS (ouverts, tout fait 44 px). Comportements au navigateur : sélection et lot,
+  « tout sélectionner », menu de ligne placé, copie, filtres, vues, tri, période, archivage puis retour.
+- **Relecture Commandes** : 0 CRITICAL/HIGH, 2 MEDIUM (recherche qui perdait les filtres, barre de lot
+  animée sous mouvement réduit), 7 LOW (menu qui clignotait en haut à gauche, échec de copie dit par
+  une icône seulement, date et « jamais ouvert » absents de la carte téléphone et muets au lecteur
+  d'écran, année perdue, rôles ARIA de rangée, clé mal nommée) : tous corrigés.
+- **Relecture Envois** : 0 CRITICAL, 1 HIGH (l'évolution « ce mois-ci » avait perdu son « % » :
+  « +12 » se serait lu douze colis de plus — rendu par une clé ICU et le format pourcentage, baisse
+  colorée), 3 MEDIUM (références multiples d'un colis groupé : deux liens et un menu vers chacune des
+  commandes ; compteur de pied faux sous un filtre ou en page deux ; interrogations invisibles au
+  doigt), 6 LOW (nom du lien du transporteur, `https:` vérifié dans le catalogue — il ne l'était pas,
+  année des dates, tri nommé, clé morte) : corrigés. Restent, hérités et dits : l'heure des mouvements
+  est formatée dans le fuseau du serveur (aucun `timeZone` n'est fixé dans `src/i18n`), la tuile
+  « Livrés ce mois » filtre tous les livrés, la ligne silencieuse n'a plus de fond d'alerte (badge et
+  mini-frise ambre la portent).
+
+### ▶️ 02/10/2026 — étape 4d : Analyses (session cloud)
+
+- **Portée de `analyses.html`** : mêmes compteurs et mêmes blocs que le tableau de bord (composants
+  partagés), la frise des semaines et les ouvertures chacune dans leur carte (variante `fixe` du
+  graphique, sans bascule, avec sa mention), la répartition avec son total en grand, les trois
+  commandes les plus consultées (elles mènent désormais à leur commande), les réponses des clients
+  (taux sur ce qui a été RÉPONDU, « — » sans réponse, jamais « 0 % »), et le bandeau final.
+  Sept anciens composants d'analyses et `tuile-metrique` supprimés.
+- **Piège payé** : la règle `.total-colis span` de la maquette attrapait les spans du rouleau des
+  compteurs (le « 4 » rendu à 13 px) ; restreinte à l'enfant direct. *Une règle descendante sur
+  `span` casse tout composant qui en contient.*
+- **Relecture** : 0 CRITICAL/HIGH, 2 MEDIUM (« 1 repl of 3 » : pluriels faits à la main, passés en
+  ICU dans les trois langues ; le bloc des réponses recalculait l'état au lieu d'appeler la règle
+  testée `etatPanneauQc`), 6 LOW (nom vide, taux arrondi à 100 % avec un refus — arrondi vers le bas,
+  « — » lu « tiret », commentaire qui promettait trop, majuscule anglaise) : corrigés.
+- **Mesuré** : 1440, 1024 et 390 px, fr/en/zh-CN, mouvement réduit ; aucun débordement, aucune erreur
+  console, aucune violation CSP.
+- **Portes (4b, 4c, 4d)** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme
+  Railway. **Au poste de Mehdi** : `fumee` (les trois écrans servent un autre HTML), `test:rls`,
+  `couverture`.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

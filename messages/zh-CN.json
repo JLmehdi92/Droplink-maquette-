@@ -1116,7 +1116,7 @@
       "abandonnes": "已停止跟踪",
       "livresCeMois": "本月已送达",
       "preparation": "尚未扫描",
-      "ceMois": "本月"
+      "evolution": "本月 {valeur}"
     },
     "filtres": {
       "silencieux": "无更新",
@@ -1165,7 +1165,6 @@
     },
     "interrogationsFaites": "{n, plural, other {已查询 # 次}}",
     "aide": "刚粘贴的运单号往往还没有被扫描。这不是故障：只是承运商还没有发布任何信息。",
-    "aideCourte": "刚粘贴的运单号往往还没有被扫描。这不是故障。",
     "actualiser": "刷新",
     "derniereMaj": "最后更新",
     "compteurPage": "显示第 {de}–{a} 条，共 {total} 条发货",
@@ -1177,14 +1176,20 @@
     },
     "actions": {
       "voirCommande": "查看订单 {reference}",
-      "siteTransporteur": "打开承运商网站"
+      "siteDe": "打开 {nom} 官网（新标签页）"
     },
     "lot": {
       "titre": "选择",
       "selectionner": "选择包裹 {numero}",
-      "aide": "已选包裹",
-      "exporter": "导出所选"
-    }
+      "exporter": "导出所选",
+      "toutSelectionner": "全选",
+      "selectionUn": "已选 # 个",
+      "selectionPlusieurs": "已选 # 个",
+      "toutDeselectionner": "取消全选"
+    },
+    "autresCommandes": "另有 {n} 个订单",
+    "trier": "排序",
+    "finDeListe": "已到列表末尾。"
   },
   "analyses": {
     "titre": "数据分析",
@@ -1213,7 +1218,6 @@
     "frise": {
       "titre": "订单趋势",
       "fenetre": "最近 {n} 周",
-      "barre": "{semaine} 那一周：{n, plural, =0 {没有订单} other {# 笔订单}}",
       "vide": "最近这十二周没有创建任何订单。",
       "aide": "每周创建的订单数量。"
     },
@@ -1226,13 +1230,15 @@
       "silencieux": "无更新",
       "vide": "目前没有跟踪中的包裹。",
       "aide": "当前发货状态。",
-      "dontSilencieux": "其中 {n} 个包裹超过 10 天没有动态"
+      "dontSilencieux": "其中 {n} 个包裹超过 10 天没有动态",
+      "suivis": "个跟踪中的包裹"
     },
     "consultees": {
       "titre": "浏览最多的订单",
       "aide": "反复回来看自己页面的客户，是一个放心的客户。",
       "sansNom": "未填写收件人",
-      "vide": "此时段内还没有链接被打开。"
+      "vide": "此时段内还没有链接被打开。",
+      "vues": "次查看"
     },
     "qc": {
       "titre": "客户的回复",
@@ -1240,7 +1246,9 @@
       "approuve": "已确认",
       "refuse": "有问题",
       "enAttente": "未回复",
-      "vide": "此时段内没有订单。"
+      "vide": "此时段内没有订单。",
+      "tauxTexte": "的回复确认了照片",
+      "aucuneReponse": "暂无回复"
     },
     "sousTitreEcran": "追踪业务表现与发货效率。",
     "livreesSur": "{total} 单中的 {n} 单",
@@ -1254,7 +1262,8 @@
     "liens": {
       "titre": "客户链接",
       "aide": "物流链接打开次数。",
-      "aucun": "本周期内没有链接被打开。"
+      "aucun": "本周期内没有链接被打开。",
+      "ouvertures": "{n} 次打开"
     },
     "transporteurs": {
       "titre": "最常用承运商",
@@ -1275,8 +1284,7 @@
       "propulse": "技术支持",
       "slogan": "简单而强大的物流链接。"
     },
-    "vuesParCommande": "每个已打开订单 {n} 次浏览",
-    "ouverturesLe": "{jour} 打开 {n} 次"
+    "vuesParCommande": "每个已打开订单 {n} 次浏览"
   },
   "commandes": {
     "titre": "订单",
@@ -1371,7 +1379,10 @@
       "exporter": "导出",
       "exportAvertissement": "该文件包含您订单的公开链接：拿到文件的人就能打开您客户的页面。",
       "exportTelecharger": "下载 CSV",
-      "enCours": "处理中…"
+      "enCours": "处理中…",
+      "selectionUn": "已选 # 单",
+      "selectionPlusieurs": "已选 # 单",
+      "toutDeselectionner": "取消全选"
     },
     "vues": {
       "toutes": "全部",
@@ -1390,8 +1401,6 @@
     "sansNom": "未填写",
     "sousTitreChiffre": "{total, plural, other {共 # 笔订单}}，{semaine, plural, other {本周新增 # 笔}}",
     "sousTitreVide": "您的工作台已准备好",
-    "rechercherExempleCourt": "客户、编号、运单号…",
-    "photosEtVues": "{photos, plural, other {# 张照片}} · {vues, plural, other {# 次浏览}}",
     "surTotal": "显示 {n} 条，共 {total} 条订单",
     "chargerLaSuite": "加载更多",
     "plusDActions": "{client} 的更多操作",
@@ -1433,7 +1442,18 @@
       "mensuelTexte": "您本月已创建 {n} 个订单。上限将于每月 1 日重置。",
       "mensuelTexteSansNombre": "您本月的订单已达上限。上限将于每月 1 日重置。",
       "passerPro": "升级至 Pro"
-    }
+    },
+    "vuesTitre": "视图",
+    "toutSelectionner": "全选",
+    "aucunSuivi": "无",
+    "frise": {
+      "dernierMouvement": "包裹最近动态：{date}",
+      "sansInfo": "暂无承运商信息",
+      "sansNumero": "暂无运单号",
+      "silence": "已 {jours} 天没有动态"
+    },
+    "resume": "概览",
+    "nbPhotos": "{n} 张照片"
   },
   "editeur": {
     "historique": {
