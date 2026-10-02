@@ -94,6 +94,21 @@ CE QUE LE CLOUD N'A PAS PU MESURER, À FAIRE EN PRIORITÉ :
 - la page de signalement exige NEXT_PUBLIC_CONTACT_ABUS au build (sinon 404) ;
 - l'administration au bureau ET dans le tiroir, ses quatre dialogues modaux (Échap et
   annulation bloqués pendant la requête, recopie d'adresse sans collage ni dépôt).
+- (fidélité du mouvement, 02/10/2026) côté administration : chaque dialogue SORT (160 ms)
+  puis la page se recharge et la bulle d'annonce dit le geste (« Lien bloqué… »,
+  « Contestation acceptée… », « Effectué. Compte suspendu… », « Effectué. Changement de
+  plan… ») ; un seuil enregistré dit « Enregistré. 300 → 400, écrit au journal. » et une
+  ligne `parametre.modification` est bien au journal ; un interrupteur dit « Activé / Désactivé,
+  effet immédiat, écrit au journal. » ; « La réponse est trop courte. » sur une contestation ;
+- le visionneur de la page client avec de VRAIES photos R2 (le cloud n'avait que des clés
+  absentes du bucket) : cadre carré blanc, pellicule, balayage au doigt, boucle ;
+- la carte « Suivi par e-mail » de /p (n'existe que si EMAIL_CLIENTS_DE est posée) : refus
+  d'une adresse sur place, « Presque fini » qui entre en fondu ;
+- les mini-frises d'Envois avec un vrai colis suivi ;
+- le BUDGET de /p : 288 Ko transférés hors médias mesurés au cloud (gzip) — 12 Ko de marge
+  seulement ; à remesurer en production (Brotli) avant tout ajout sur /p ;
+- « Précédent » entre connexion et inscription sur Safari (l'adresse ne suit qu'avec la
+  Navigation API : Safari 18.2 et plus).
 
 ÉTAPE 5 — LES CONTRAINTES QUI NE BOUGENT JAMAIS (vérifie dans le CODE, pas dans le journal)
 - /p/[token] : aucun backdrop-filter, aucun dégradé DropLink, la couleur est celle du
