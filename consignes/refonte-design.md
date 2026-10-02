@@ -1251,6 +1251,46 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
   provoquable sans toucher au code) — ses règles ne lisent plus que l'encre.
 - **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1270/1271 (alarme Railway).
 
+### ▶️ 02/10/2026 — fidélité du mouvement, lots 7 à 10 : deux tours d'audit final (session cloud)
+
+- **Méthode** : trois agents en lecture seule (accès, public et landing ; espace vendeur et
+  administration ; page client et états) comparent la maquette au produit, puis chaque point
+  est corrigé et MESURÉ au navigateur ; un second tour relit le tout, correctifs compris.
+- **1er tour — lot 7 (accès)** : erreur 2FA DANS le groupe des six cases ; suggestion
+  d'adresse à la sortie du champ seulement ; adresse transmise vers l'oubli ; au
+  « Précédent » entre connexion et inscription, l'adresse suit et le formulaire entre —
+  ⚠️ mesuré : à `popstate`, Next a DÉJÀ rendu la page d'arrivée ; c'est l'événement
+  `navigate` (Navigation API) qui est écouté ; bouton de notification « en cours » et un
+  seul POST au double clic ; chapô de confidentialité ; nom provisoire grisé à l'onboarding ;
+  404 globale avec sa classe `js`.
+- **1er tour — lot 8 (`/p`)** : ⚠️ **DÉFAUT GRAVE** — le visionneur « plein écran » tenait
+  dans 644 × 425 px au bureau, 348 × 201 au téléphone : rendu dans sa section, il héritait
+  du `transform` maintenu par l'entrée (`animation-fill-mode: both`), qui faisait de la
+  section le bloc conteneur des éléments `fixed`. Monté dans `<body>` par un portail
+  (1440 × 860 mesuré) ; test de focus adapté à l'endroit où il cherche, assertions
+  inchangées. Visionneur aux règles de la maquette (cadre carré blanc, pellicule, boucle,
+  balayage au pointeur 50 px ou 12 px à 0,11 px/ms, clic à côté) ; QC et carte e-mail dans
+  la cascade ; adresse jugée sur place ; lien d'évitement ; `theme-color` du vendeur.
+- **1er tour — lot 9 (vendeur, admin)** : bordure lumineuse sur toutes les cartes (`:where()`,
+  spécificité nulle ; défaut trouvé : l'aperçu de Ma marque en `static` débordait d'1 px) ;
+  les **bulles d'annonce** de la maquette (`annonce.tsx`, toujours APRÈS la base ; à travers
+  le rechargement pour l'administration) ; pied des paramètres (la réponse remplace l'aide,
+  l'aide revient à la frappe) ; trait des vues posé puis glissant au seul changement ;
+  onglet de la fiche qui suit le nom ; réglage numérique de l'administration.
+- **2e tour — lot 10** : plus aucun écart visible. Corrigés, dont des effets de bord du
+  1er tour : focus volé dans le bloc Adresse ; suggestion qui poussait un lien sous le
+  pointeur ; focus rendu à la tuile sur Safari ; sens de transition d'après l'ordre des
+  écrans pour tout lien et au « Précédent » (mesuré) ; focus au contenu de l'écran neuf,
+  même après le remplacement du squelette (mesuré) ; barre de lot qui sort en fondu ;
+  confirmations repliées après succès ; bulles de l'archivage et des interrupteurs.
+  Vérifié sans défaut : un jeton valide sous un mauvais nom rend la même 404 neutre (aucun
+  `theme-color`, même titre) — pas d'oracle.
+- **Mesures** : fumée sans débordement, violation CSP ni erreur sur les surfaces vendeur,
+  accès, public et `/p`, à 1440 et 390 px, normal et réduit ; `/p` 288,7 Ko transférés hors
+  médias ; CPU ×4, feuille d'historique pire image 33-50 ms (maquette 33).
+- **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1270/1271 (alarme
+  Railway, jamais désactivée).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

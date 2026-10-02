@@ -1,5 +1,36 @@
 # Audit de fidélité de la refonte (03/10/2026)
 
+> ## ▶️ ÉTAT AU 02/10/2026, APRÈS LES LOTS 1 À 10 (session cloud)
+>
+> **Tout ce que ce document listait comme MANQUANT est porté** (§ 1 et § 2), et les trois
+> points du § 3 sont tranchés par Mehdi : écrans d'état de `/p` NEUTRES (encre, aucun
+> violet — mesuré), barre de progression des articles PORTÉE, badge de plan gardé sur la
+> fiche d'UN compte et absent de la liste.
+>
+> **Deux tours d'audit final** (trois agents en lecture seule chacun) ont suivi :
+> - 1er tour : 8 écarts visibles et 29 subtils → corrigés (lots 7 à 9), dont un DÉFAUT GRAVE
+>   trouvé en mesurant un « à vérifier » : le visionneur « plein écran » de `/p` tenait dans
+>   644 × 425 px (il héritait du `transform` de l'entrée de sa section) ;
+> - 2e tour : **aucun écart visible**, des défauts subtils dont plusieurs introduits par le
+>   1er tour (focus volé dans le bloc Adresse, suggestion qui poussait un lien sous le
+>   pointeur…) → corrigés (lot 10).
+>
+> **Écarts GARDÉS, volontairement :** thème sombre ; facturation ; témoignages ; titre
+> d'onglet neutre sur `/p` et aucun « · DropLink » ailleurs ; « Mouvement aujourd'hui »
+> (fuseau) ; pas de lien d'évitement sur le lien mort (cadre de l'aperçu) ; envoi
+> automatique au 6e chiffre de la 2FA (quota) ; « Se souvenir de cet appareil » coché ;
+> phrase légale à l'inscription seule ; « Mot de passe oublié » sur sa propre page (pas de
+> panneau) et son film qui se refond au retour ; aucune sortie animée au « Précédent » du
+> navigateur (l'entrée, elle, prend le bon sens) ; ligne ciblée `#REF` liée à l'alerte
+> « contestation » encore à trancher ; « Réessayer » sans état en cours.
+>
+> **Non mesuré dans le conteneur** (à faire au poste, `verification-finale-locale.md`) :
+> l'administration au navigateur (aucun compte administrateur utilisable), les vraies
+> photos R2, la carte « Suivi par e-mail », les mini-frises avec un vrai colis, Safari.
+>
+> Le détail de chaque lot, avec ses mesures, est au § 8 de `refonte-design.md`. Ce qui suit
+> est l'audit du 03/10, conservé tel quel.
+
 État audité : `34bd810` sur le bac à sable. Trois agents `ecc:code-explorer` ont comparé, en
 lecture seule, la maquette (`design/maquette/src/`) au produit (`src/`), zone par zone. Ils
 n'ont rien mesuré au navigateur : tout vient du code et des CSS. Contrôles relancés à part :
