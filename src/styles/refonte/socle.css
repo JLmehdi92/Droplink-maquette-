@@ -470,6 +470,8 @@ code { font: 500 .92em/1 ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .qc__sceau .ic { width: 24px; height: 24px; stroke-width: 2.6; }
 .qc__changer { min-height: 44px; padding: 0 12px; color: var(--corps); font-weight: 600; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
 .qc.est-refuse .qc__sceau { background: color-mix(in srgb, var(--color-ds-alerte) 16%, transparent); color: var(--color-ds-alerte-encre); }
+.qc__sceau [data-sceau="refus"], .qc.est-refuse .qc__sceau [data-sceau="ok"] { display: none; }
+.qc.est-refuse .qc__sceau [data-sceau="refus"] { display: block; }
 .qc__question, .qc__reponse { transition: opacity 280ms var(--ease-sortie), transform 280ms var(--ease-sortie), filter 280ms var(--ease-sortie); }
 .qc__question.sort, .qc__reponse.sort { opacity: 0; transform: translateY(-6px); filter: blur(2px); }
 .qc__reponse.entre { animation: entre 360ms var(--ease-sortie) both; }

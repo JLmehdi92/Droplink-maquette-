@@ -110,7 +110,13 @@ export function ReglageInterrupteur({ reglage }: { reglage: InterrupteurVu }) {
         <i aria-hidden="true" />
       </label>
       <p className="adm-reglage__retour" role="status" aria-live="polite">
-        {etat.statut === "ok" ? t("fait") : etat.statut === "erreur" ? t(`erreur.${etat.motif}`) : null}
+        {/* L'état DIT est celui que la base a relu, et la trace vient du déclencheur
+            `tracer_parametre`, dans la même transaction que l'écriture. */}
+        {etat.statut === "ok"
+          ? t(etat.apres.valeur !== 0 ? "faitActive" : "faitDesactive")
+          : etat.statut === "erreur"
+            ? t(`erreur.${etat.motif}`)
+            : null}
       </p>
     </div>
   );

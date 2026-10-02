@@ -2067,7 +2067,10 @@
         "bornes": "Value outside the allowed range.",
         "refuse": "You do not have the rights to change this setting.",
         "panne": "Could not save. The setting has not changed."
-      }
+      },
+      "faitDetail": "Saved. {avant} → {apres}, written to the audit log.",
+      "faitActive": "Enabled, effective immediately, written to the audit log.",
+      "faitDesactive": "Disabled, effective immediately, written to the audit log."
     },
     "boutiques": {
       "titre": "Shops",

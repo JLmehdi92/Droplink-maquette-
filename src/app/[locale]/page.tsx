@@ -12,6 +12,7 @@ import {
   ClockAlert,
   EyeOff,
   Link as IconeLien,
+  MessageCircle,
   Package,
   Palette,
   Plus,
@@ -646,6 +647,10 @@ export default async function Accueil({ params }: { params: Promise<{ locale: st
                   <div className="qc__reponse" hidden data-qc-reponse>
                     <span className="qc__sceau" data-qc-sceau>
                       <Check aria-hidden="true" className="ic" data-sceau="ok" />
+                      {/* LE SCEAU CHANGE AVEC LA RÉPONSE (maquette, `main.js`) : une coche pour
+                          l'accord, une bulle pour un refus — les deux sont rendues ici, et
+                          `.est-refuse` choisit, sans que le script réécrive une icône. */}
+                      <MessageCircle aria-hidden="true" className="ic" data-sceau="refus" />
                     </span>
                     <b data-qc-texte>{pp("qc.approuve")}</b>
                     <button type="button" className="qc__changer" data-qc-changer>

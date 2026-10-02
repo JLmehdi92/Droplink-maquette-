@@ -2067,7 +2067,10 @@
         "bornes": "Valeur hors des limites autorisées.",
         "refuse": "Vous n'avez pas les droits pour modifier ce réglage.",
         "panne": "Enregistrement impossible. Le réglage n'a pas changé."
-      }
+      },
+      "faitDetail": "Enregistré. {avant} → {apres}, écrit au journal.",
+      "faitActive": "Activé, effet immédiat, écrit au journal.",
+      "faitDesactive": "Désactivé, effet immédiat, écrit au journal."
     },
     "boutiques": {
       "titre": "Boutiques",

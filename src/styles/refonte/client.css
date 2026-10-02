@@ -256,11 +256,25 @@
 .cv-photo__repli { color: var(--color-ds-texte-sourdine); }
 dialog.cv-feuille { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; }
 dialog.cv-feuille::backdrop { background: rgba(11, 11, 24, .42); }
-dialog.cv-feuille[open] .cv-feuille__panneau { animation: cv-monte 300ms cubic-bezier(.23, 1, .32, 1); }
-@keyframes cv-monte { from { transform: translateY(24px); opacity: 0; } }
-@keyframes cv-glisse { from { transform: translateX(24px); opacity: 0; } }
+/* MISE EN PAGE D'AVANCE, comme la maquette (sa feuille est une `<div>` déjà rendue) : un
+   `<dialog>` fermé est en `display:none`, et son premier `showModal()` payait tout le style
+   et la mise en page du contenu dans l'image du geste — 83 ms d'une traite à CPU ×4,
+   mesuré le 02/10/2026. Masqué par `visibility`, il ne se voit pas, ne se clique pas, ne
+   prend pas le focus et sort de l'arbre d'accessibilité : seul le coût est payé d'avance. */
+dialog.cv-feuille:not([open]) { display: block; visibility: hidden; pointer-events: none; }
+/* l'entrée de la maquette (`client.js`) : le panneau monte de tout son hauteur en 420 ms à la
+   courbe des tiroirs, le voile se fond en 320 ms ; la sortie (`.sort`) est plus rapide */
+dialog.cv-feuille[open] .cv-feuille__panneau { animation: cv-monte 420ms cubic-bezier(.32, .72, 0, 1); }
+dialog.cv-feuille[open]::backdrop { animation: cv-voile 320ms ease-out; }
+dialog.cv-feuille.sort::backdrop { animation: cv-voile-sort 220ms ease-out forwards; }
+@keyframes cv-monte { from { transform: translateY(100%); } }
+@keyframes cv-glisse { from { transform: translateX(calc(100% + 24px)); } }
+@keyframes cv-voile { from { opacity: 0; } }
+@keyframes cv-voile-sort { to { opacity: 0; } }
 @media (min-width: 1024px) { dialog.cv-feuille[open] .cv-feuille__panneau { animation-name: cv-glisse; } }
-@media (prefers-reduced-motion: reduce) { dialog.cv-feuille[open] .cv-feuille__panneau { animation: none; } }
+@media (prefers-reduced-motion: reduce) { dialog.cv-feuille[open] .cv-feuille__panneau, dialog.cv-feuille[open]::backdrop, dialog.cv-feuille.sort::backdrop { animation: none; } }
+/* le fond ne défile pas sous la feuille ni sous le visionneur */
+.cl-bloque, .cl-bloque body { overflow: hidden; }
 /* AU TÉLÉPHONE, LES LIBELLÉS DU TRAJET EN QUATRE COLONNES ÉGALES, chacune centrée sous son
    arrêt (la ligne rentre de 12,5 % de chaque côté) : posés en absolu comme au bureau,
    « Preparation » et « Shipped » se chevauchaient en anglais à 390 px. */
@@ -284,8 +298,6 @@ dialog.cv-feuille[open] .cv-feuille__panneau { animation: cv-monte 300ms cubic-b
 @media (min-width: 1024px) { .cv-principal > .cv-section:first-child { padding-top: 70px; } .cv-cote > .cv-propulse:first-child { margin-top: 70px; } }
 .cv-dernier__lien em { color: var(--cl-sur-teinte); }
 .cv-propulse { background: #FFFFFF; }
-.cv-compte { display: inline; }
-.cv-feuille__poignee { cursor: default; touch-action: auto; }
 .cv-lien-fort { min-height: 44px; }
 @media (pointer: coarse) { .cv-pied a { min-height: 44px; } }
 /* À L'IMPRESSION, le navigateur retire les fonds : l'écriture du vendeur, souvent blanche,
@@ -309,10 +321,14 @@ dialog.cv-feuille[open] .cv-feuille__panneau { animation: cv-monte 300ms cubic-b
 .etat-p {
   --fond: var(--color-ds-surface-page); --surface: var(--color-ds-surface-carte); --feuille: var(--color-ds-surface-carte);
   --creux: var(--color-ds-surface-creux); --filet: var(--color-ds-filet); --encre: var(--color-ds-texte-fort);
-  --corps: var(--color-ds-texte-corps); --sourdine: var(--color-ds-texte-sourdine); --accent: var(--color-ds-accent);
-  --accent-survol: var(--color-ds-accent-survol); --accent-texte: var(--color-ds-accent-encre); --sur-accent: var(--color-ds-texte-sur-marque);
+  /* NEUTRE (décision de Mehdi, 02/10/2026) : la maquette peint ces deux écrans au violet
+     DropLink, mais la règle 3 interdit toute couleur DropLink sous /p — l'« accent » est
+     donc l'ENCRE, et les ombres restent teintées comme le reste du design system, sans
+     jamais le violet de marque. */
+  --corps: var(--color-ds-texte-corps); --sourdine: var(--color-ds-texte-sourdine); --accent: var(--color-ds-texte-fort);
+  --accent-survol: var(--color-ds-texte-fort); --accent-texte: var(--color-ds-texte-fort); --sur-accent: var(--color-ds-surface-carte);
   --succes-encre: var(--color-ds-succes-encre); --alerte-encre: var(--color-ds-alerte-encre);
-  --ombre-xs: var(--shadow-ds-xs); --ombre-marque: var(--shadow-ds-brand);
+  --ombre-xs: var(--shadow-ds-xs); --ombre-marque: 0 10px 26px rgba(28, 22, 78, .16);
   --ease: cubic-bezier(.4, 0, .2, 1); --ease-sortie: cubic-bezier(.16, 1, .3, 1);
   min-height: 100dvh; color: var(--encre);
 }
@@ -327,7 +343,7 @@ dialog.cv-feuille[open] .cv-feuille__panneau { animation: cv-monte 300ms cubic-b
 .etat-p .notifp__visuel i { position: absolute; inset: 0; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); }
 .etat-p .notifp__visuel i:nth-of-type(2) { inset: 16px; border-color: color-mix(in srgb, var(--accent) 28%, transparent); }
 .etat-p .notifp__visuel i:nth-of-type(3) { inset: -16px; border-color: color-mix(in srgb, var(--accent) 12%, transparent); }
-.etat-p .notifp__icone { position: relative; z-index: 1; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 22px; background: var(--surface); color: var(--accent-texte); box-shadow: 0 1px 2px rgba(28, 22, 78, .06), 0 18px 40px rgba(91, 75, 245, .18); }
+.etat-p .notifp__icone { position: relative; z-index: 1; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 22px; background: var(--surface); color: var(--accent-texte); box-shadow: 0 1px 2px rgba(28, 22, 78, .06), 0 18px 40px rgba(28, 22, 78, .10); }
 .etat-p .notifp__icone .ic { width: 30px; height: 30px; }
 .etat-p .notifp__carte[data-etat="invalide"] .notifp__icone { color: var(--alerte-encre, var(--color-ds-alerte-encre)); }
 @media (prefers-reduced-motion: no-preference) { .etat-p .notifp__visuel i { animation: notif-onde 3.2s cubic-bezier(.23, 1, .32, 1) infinite; } .etat-p .notifp__visuel i:nth-of-type(2) { animation-delay: .4s; } .etat-p .notifp__visuel i:nth-of-type(3) { animation-delay: .8s; } }
@@ -338,6 +354,9 @@ dialog.cv-feuille[open] .cv-feuille__panneau { animation: cv-monte 300ms cubic-b
 .etat-p .notifp__bouton .ic { width: 18px; height: 18px; transition: transform 200ms var(--ease-sortie); }
 .etat-p .notifp__bouton:active { transform: scale(.97); }
 @media (hover: hover) and (pointer: fine) { .etat-p .notifp__bouton:hover { filter: brightness(1.06); } .etat-p .notifp__bouton:hover .ic { transform: translateX(3px); } }
+.etat-p .notif-accueil { display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 18px; border-radius: 14px; border: 1px solid var(--filet); background: var(--surface); color: var(--encre); font-size: 14px; font-weight: 600; text-decoration: none; box-shadow: var(--ombre-xs); }
+.etat-p .notif-accueil .ic { width: 17px; height: 17px; color: var(--accent-texte); }
+@media (max-width: 640px) { .etat-p .notif-accueil { padding: 0 14px; } }
 .etat-p .notif-pied { display: grid; justify-items: center; gap: 4px; padding: 0 20px 30px; }
 .etat-p .logo--petit { font-size: 15px; min-height: 32px; }
 .etat-p .logo--petit img { height: 20px; }

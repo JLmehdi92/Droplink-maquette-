@@ -2067,7 +2067,10 @@
         "bornes": "数值超出允许范围。",
         "refuse": "您没有修改该设置的权限。",
         "panne": "保存失败。设置未发生变化。"
-      }
+      },
+      "faitDetail": "已保存。{avant} → {apres}，已写入审计日志。",
+      "faitActive": "已启用，立即生效，已写入审计日志。",
+      "faitDesactive": "已停用，立即生效，已写入审计日志。"
     },
     "boutiques": {
       "titre": "店铺",

@@ -371,7 +371,14 @@ export async function PageClient({
             <section className="cv-section cv-entree" aria-labelledby="cv-photos">
               <div className="cv-section__tete">
                 <h2 id="cv-photos">{t("galerie.titre")}</h2>
-                {commande.medias.length > 0 ? <span className="cv-compte">{format.number(commande.medias.length)}</span> : null}
+                {/* « 1 / 4 » : la photo en vue sur le carrousel du téléphone (le visionneur
+                    met le premier nombre à jour au défilement) ; masqué au bureau, où tout
+                    est visible. Décoratif : la galerie se lit par ses boutons. */}
+                {commande.medias.length > 0 ? (
+                  <span className="cv-compte" aria-hidden="true">
+                    <b data-carrousel-position="">1</b> / {format.number(commande.medias.length)}
+                  </span>
+                ) : null}
               </div>
               {commande.medias.length === 0 ? (
                 /* LA GALERIE VIDE SE DIT : on nomme ce qui est, et ce qui va se passer. */
@@ -495,9 +502,21 @@ export async function PageClient({
 
       <FeuilleSuivi lignes={lignesSuivi} libelles={libellesSuivi} />
       {children}
+      {/*
+        L'ARRIVÉE (maquette, `client.js`), jouée pendant la lecture du HTML, avant la
+        première image : chaque bloc reçoit son rang (le CSS décale ses entrées de 45 ms,
+        au plus huit), et le camion rejoint sa place le long du rail (1 100 ms après
+        300 ms, en transformation : rien ne se recalcule). Un script en ligne de quelques
+        octets, sans îlot : la page a 300 Ko pour tout faire, et un îlot hydraté
+        arriverait après les entrées qu'il doit ordonner.
+      */}
+      <script dangerouslySetInnerHTML={{ __html: SCRIPT_ARRIVEE }} />
     </div>
   );
 }
+
+const SCRIPT_ARRIVEE =
+  '(function(){var l=document.querySelectorAll(".cv-entree");for(var i=0;i<l.length;i++)l[i].style.setProperty("--i",String(Math.min(i,8)));if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var c=document.querySelector(".cv-camion");if(!c||!c.animate||!c.parentElement)return;var x=parseFloat(getComputedStyle(c).getPropertyValue("--x"))/100;if(!(x>0))return;c.animate([{transform:"translateX("+(-c.parentElement.getBoundingClientRect().width*x)+"px)"},{transform:"none"}],{duration:1100,delay:300,easing:"cubic-bezier(.23,1,.32,1)",fill:"backwards"})})()';
 
 /**
  * L'APERÇU NE PEUT RIEN ÉCRIRE AU NOM DU CLIENT : dans `/p/<jeton>/apercu`, les îlots qui

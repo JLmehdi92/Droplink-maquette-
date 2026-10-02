@@ -118,7 +118,6 @@ export default async function AdminComptes({
     return q === "" ? base : `${base}?${q}`;
   };
 
-  const suspendu = (l: LigneCompte): boolean => l.statut === "suspended";
   const auDessus = (l: LigneCompte): boolean => l.colisCeMois > seuils.colis;
 
   const lienSuivant =

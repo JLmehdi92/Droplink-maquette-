@@ -1192,6 +1192,51 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
   on n'engage pas de prise en charge 17TRACK). À voir au poste de Mehdi.
 - **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1270/1271 (alarme Railway).
 
+### ▶️ 02/10/2026 — fidélité du mouvement, lots 5 et 6 : page client, états, landing, administration (session cloud)
+
+- **Page client `/p`** : la cascade d'entrée reçoit enfin son `--i` (0 à 8, plafonné comme la
+  maquette) et le camion glisse depuis la gauche de son trajet (1 100 ms après 300 ms, WAAPI,
+  `fill: backwards`), le tout par un script en ligne de 0,6 Ko qui ne tourne pas sous mouvement
+  réduit ; pastille numérotée sur chaque photo ; compteur « 1 / N » du carrousel du téléphone,
+  qui suit la photo en vue (masqué au bureau, comme la maquette ; le produit montrait le total seul,
+  aussi au bureau).
+- **Feuille d'historique** (`<dialog>` natif, gardé) : entrée 420 ms à la courbe des tiroirs, SORTIE
+  de 240 ms (voile 220 ms) quel que soit le geste — croix, voile, Échap ; au téléphone la poignée se
+  TIRE : fermée au-delà de 110 px ou de 0,11 px/ms, résistance (racine) au-dessus, retour en 260 ms
+  sinon ; défilement du fond bloqué (`cl-bloque`). Mesuré : entrée 629 → 0 px en ≈ 450 ms, sortie
+  0 → 627 px en 240 ms, glisser 60 px → reste ouverte, 200 px → fermée. **Défauts trouvés en
+  mesurant** : `setPointerCapture` levait sur un pointeur déjà relâché (protégé) ; sous mouvement
+  réduit, un glisser laissait son `transform` en ligne et la feuille se serait rouverte décalée de
+  200 px (remis à zéro à chaque fermeture). **Fluidité** : le premier `showModal()` payait le style
+  et la mise en page de tout le contenu dans l'image du geste (83 ms d'une traite à CPU ×4) — la
+  feuille fermée est désormais mise en page d'avance sous `visibility: hidden` (ni visible, ni
+  cliquable, ni focalisable, hors de l'arbre d'accessibilité — vérifié) : pire image 33-50 ms, comme
+  la maquette (33).
+- **Visionneur** : entrée 200 ms (0,97 → 1), glissement de 24 px entre photos (200 ms, sens du
+  geste), sortie par une COPIE inerte qui s'efface (140 ms) pendant que le vrai dialogue se ferme
+  aussitôt — le focus revient à la vignette sans attendre (test `visionneur-focus` inchangé).
+  CPU ×4 : pire image 33-67 ms (maquette 17) ; les 67 ms tombent sur le premier rendu React de la
+  scène, à opacité 0 : rien de visible n'est sauté. Assumé.
+- **Validation QC** : l'étape qui arrive entre (200 ms, 4 px), jamais au premier rendu ; le focus suit.
+- **Budget** : 140 Ko hors médias au téléphone, 94 Ko au bureau (< 300 Ko).
+- **Lien invalide et erreur de `/p` NEUTRES** (décision de Mehdi) : l'« accent » de `.etat-p` est
+  l'encre, plus aucun `rgba(91,75,245,…)` ni `--shadow-ds-brand` dessous — mesuré : aucun style
+  calculé violet ou en dégradé sur la page. Ajoutés comme la maquette : « Retour à l'accueil » dans
+  l'en-tête ; « Comment fonctionne DropLink » mène à `/fr/docs` (et non plus à `/fr`).
+- **Landing** : le sceau de la démonstration QC devient une bulle sur un refus et redevient une coche
+  sur un accord — les deux icônes sont rendues par le serveur, `.est-refuse` choisit.
+- **Administration** : un seuil enregistré dit « Enregistré. 300 → 400, écrit au journal. », un
+  interrupteur « Activé, effet immédiat, écrit au journal. » (comme la maquette). Les DEUX valeurs
+  sont relues en base (l'« avant » juste avant l'écriture, sans bloquer l'écriture si cette lecture
+  échoue) et « écrit au journal » est vrai : le déclencheur `tracer_parametre` (migration 044) écrit
+  `admin_audit_log` dans la même transaction. Le badge de plan reste sur la fiche d'UN compte ; la
+  liste des comptes reste sans badge Pro (décisions de Mehdi). Avertissement de lint `suspendu`
+  (variable morte depuis l'étape 8) retiré.
+- ⚠️ **Non vérifié au navigateur ici** : les messages de réglage de l'administration (aucun compte
+  administrateur utilisable dans ce conteneur) ; l'écran d'erreur de `/p` (aucune panne de rendu
+  provoquable sans toucher au code) — ses règles ne lisent plus que l'encre.
+- **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1270/1271 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

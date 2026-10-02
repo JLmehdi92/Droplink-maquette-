@@ -113,7 +113,15 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
         </button>
       </div>
       <p className="adm-reglage__retour" role="status" aria-live="polite">
-        {etat.statut === "ok" ? t("fait") : etat.statut === "erreur" ? t(`erreur.${etat.motif}`) : null}
+        {/* « 300 → 400 » comme la maquette : les deux valeurs sont relues en base, et la
+            trace est écrite par le déclencheur `tracer_parametre`, dans la même transaction. */}
+        {etat.statut === "ok"
+          ? etat.avant === null
+            ? t("fait")
+            : t("faitDetail", { avant: etat.avant, apres: etat.apres.valeur })
+          : etat.statut === "erreur"
+            ? t(`erreur.${etat.motif}`)
+            : null}
       </p>
     </form>
   );

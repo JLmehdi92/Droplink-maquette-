@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, MessageCircle, PackageOpen } from "lucide-react";
+import { ArrowRight, House, MessageCircle, PackageOpen } from "lucide-react";
 import symbole from "@/../public/marque/logo-symbole.png";
 
 /**
@@ -28,7 +28,8 @@ import symbole from "@/../public/marque/logo-symbole.png";
  * AUCUNE COULEUR DE VENDEUR ICI, et c'est une propriété de sécurité : on ne sait
  * pas de quelle boutique il s'agit, et si on le savait, l'afficher serait déjà
  * une fuite. La page est donc à DropLink — mais sous `/p/[token]`, et la règle 3
- * y interdit le dégradé de marque : l'appel au retour est un aplat.
+ * y interdit le dégradé de marque ET la couleur DropLink : l'appel au retour est un
+ * aplat d'ENCRE (décision de Mehdi, 02/10/2026 ; la maquette le peint en violet).
  *
  * LA LANGUE EST LE FRANÇAIS, pour la même raison que le `lang` du layout : il
  * n'y a pas de vendeur, donc pas de langue de vendeur, et la langue par défaut
@@ -54,6 +55,10 @@ export default async function LienInvalide() {
               l'accueil refuse d'être encadré. */}
           <Link className="logo" href="/fr" target="_top" aria-label="DropLink">
             {logo(28)}
+          </Link>
+          <Link className="notif-accueil" href="/fr" target="_top">
+            <House aria-hidden="true" className="ic" />
+            {t("lienInvalideAccueil")}
           </Link>
         </header>
         <main id="contenu" className="notifp">
@@ -86,7 +91,9 @@ export default async function LienInvalide() {
             seule page du parcours client qui soit entièrement la nôtre. */}
         <footer className="notif-pied">
           <span className="logo logo--petit">{logo(20)}</span>
-          <a className="notif-pied__lien" href="/fr" target="_blank" rel="noopener noreferrer">
+          {/* LA DOCUMENTATION, comme la maquette (`docs.html`) : la question posée est
+              « comment ça marche », et l'accueil n'y répond qu'en vendant. */}
+          <a className="notif-pied__lien" href="/fr/docs" target="_blank" rel="noopener noreferrer">
             {t("lienInvalideCommentCaMarche")}
           </a>
         </footer>

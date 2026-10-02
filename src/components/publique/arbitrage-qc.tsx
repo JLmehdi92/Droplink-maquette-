@@ -106,10 +106,22 @@ export function ArbitrageQc({
   const statut = useRef<HTMLParagraphElement>(null);
   const question = useRef<HTMLHeadingElement>(null);
   const interagi = useRef(false);
+  const zone = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!interagi.current) {
       interagi.current = true;
       return;
+    }
+    // L'étape qui arrive entre (maquette, `client.js` : `apparaitre`, 200 ms, 4 px).
+    const etape = zone.current?.firstElementChild;
+    if (etape instanceof HTMLElement && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      etape.animate(
+        [
+          { opacity: 0, transform: "translateY(4px)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 200, easing: "cubic-bezier(.23,1,.32,1)" },
+      );
     }
     if (decide) statut.current?.focus();
     else if (!motif) question.current?.focus();
@@ -124,7 +136,7 @@ export function ArbitrageQc({
   ) : null;
 
   return (
-    <section className="cv-qc" aria-labelledby="cv-qc-titre" data-etat={decide ? etat : undefined}>
+    <section ref={zone} className="cv-qc" aria-labelledby="cv-qc-titre" data-etat={decide ? etat : undefined}>
       {decide ? (
         <div className="cv-qc__decide">
           <span className="cv-qc__marque" aria-hidden="true">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState , useLayoutEffect} from "react";
 
 /**
  * LE VISIONNEUR PLEIN ÉCRAN, ÉCRIT À LA MAIN.
@@ -274,7 +274,37 @@ export function Visionneur({
     setIndex(rang);
   }, []);
 
-  const fermer = useCallback(() => setIndex(null), []);
+  /*
+   * LE MOUVEMENT DE LA MAQUETTE (`client.js`) : le visionneur entre (200 ms, d'une
+   * échelle de 0,97), la photo suivante glisse de 24 px dans le sens du geste, et la
+   * SORTIE est plus rapide que l'entrée (140 ms).
+   *
+   * LA FERMETURE, ELLE, EST IMMÉDIATE : la couche quitte le document (une grande image
+   * cachée serait tout de même téléchargée), le fond redevient interactif et le focus
+   * revient à la vignette sans attendre. Ce qui s'efface est une COPIE inerte de la
+   * dernière image, posée par-dessus le temps du fondu — jamais un dialogue qui
+   * retiendrait encore le clavier. Sous mouvement réduit, rien ne bouge.
+   */
+  const mouvementReduit = (): boolean =>
+    typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fermer = useCallback(() => {
+    const boite = dialogue.current;
+    if (boite !== null && typeof boite.animate === "function" && !mouvementReduit()) {
+      const copie = boite.cloneNode(true) as HTMLElement;
+      copie.removeAttribute("role");
+      copie.removeAttribute("aria-modal");
+      copie.removeAttribute("aria-label");
+      copie.setAttribute("aria-hidden", "true");
+      copie.inert = true;
+      copie.style.pointerEvents = "none";
+      document.body.append(copie);
+      copie
+        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: "ease-out", fill: "forwards" })
+        .finished.finally(() => copie.remove())
+        .catch(() => copie.remove());
+    }
+    setIndex(null);
+  }, []);
 
   const aller = useCallback(
     (pas: number) => {
@@ -287,6 +317,52 @@ export function Visionneur({
     },
     [medias.length],
   );
+
+  const scene = useRef<HTMLDivElement | null>(null);
+  const indexPrecedent = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const avant = indexPrecedent.current;
+    indexPrecedent.current = index;
+    if (index === null || mouvementReduit()) return;
+    if (avant === null) {
+      if (typeof dialogue.current?.animate !== "function") return;
+      dialogue.current.animate(
+        [
+          { opacity: 0, transform: "scale(.97)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 200, easing: "cubic-bezier(.23,1,.32,1)" },
+      );
+    } else if (avant !== index) {
+      const sens = index > avant ? 1 : -1;
+      if (typeof scene.current?.animate !== "function") return;
+      scene.current.animate(
+        [
+          { opacity: 0, transform: `translateX(${sens * 24}px)` },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 200, easing: "cubic-bezier(.23,1,.32,1)" },
+      );
+    }
+  }, [index]);
+
+  /* LE COMPTEUR « 1 / N » SUIT LA PHOTO EN VUE dans le carrousel du téléphone (maquette,
+     `client.js`) : un écouteur passif, une écriture de texte, rien d'autre. */
+  const carrousel = useRef<HTMLUListElement | null>(null);
+  useEffect(() => {
+    const ul = carrousel.current;
+    const position = document.querySelector("[data-carrousel-position]");
+    if (ul === null || position === null) return;
+    const suivre = (): void => {
+      const premiere = ul.firstElementChild;
+      if (premiere === null) return;
+      const pas = premiere.getBoundingClientRect().width + 12;
+      const visibles = [...ul.children].filter((li) => li.getClientRects().length > 0).length;
+      position.textContent = String(Math.max(1, Math.min(visibles, Math.round(ul.scrollLeft / pas) + 1)));
+    };
+    ul.addEventListener("scroll", suivre, { passive: true });
+    return () => ul.removeEventListener("scroll", suivre);
+  }, []);
 
   useEffect(() => {
     if (index === null) return;
@@ -352,10 +428,12 @@ export function Visionneur({
     // a sauté quand on ferme.
     const avant = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.classList.add("cl-bloque");
 
     return () => {
       window.removeEventListener("keydown", surTouche);
       document.body.style.overflow = avant;
+      document.documentElement.classList.remove("cl-bloque");
       // Rendu à la vignette d'où l'on vient, si elle est toujours là. La
       // référence a été prise AU CLIC : la lire ici reviendrait à lire le
       // bouton « fermer » que `autoFocus` vient de saisir.
@@ -408,7 +486,7 @@ export function Visionneur({
         différée. Les autres le sont.
       */}
       {tuiles.length > 0 ? (
-        <ul className="cv-carrousel">
+        <ul className="cv-carrousel" ref={carrousel}>
           {tuiles.map((media, rang) => {
             const resteTelephone = medias.length - TUILES_TELEPHONE;
             const resteBureau = medias.length - TUILES_BUREAU;
@@ -439,6 +517,10 @@ export function Visionneur({
                     <ApercuIndisponible video={apercu.repli === "video"} />
                   )}
                   {media.type === "video" && "url" in apercu ? <PastilleLecture /> : null}
+                  {/* Le rang de la photo, en pastille (maquette, `.cv-photo__n`). */}
+                  <span className="cv-photo__n" aria-hidden="true">
+                    {rang + 1}
+                  </span>
                   {rang === TUILES_TELEPHONE - 1 && resteTelephone > 0 ? (
                     <span className="cv-photo__plus cv-photo__plus--telephone">{"+" + resteTelephone}</span>
                   ) : null}
@@ -516,6 +598,7 @@ export function Visionneur({
             pour les autres.
           */}
           <div
+            ref={scene}
             className="relative flex flex-1 items-center justify-center overflow-hidden px-2"
             onTouchStart={surDebutToucher}
             onTouchEnd={surFinToucher}

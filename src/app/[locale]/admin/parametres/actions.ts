@@ -55,7 +55,10 @@ export interface ValeurRelue {
 
 export type EtatParametre =
   | { statut: "inactif" }
-  | ({ statut: "ok"; cle: string } & { readonly apres: ValeurRelue })
+  // `avant` : la valeur relue en base JUSTE AVANT l'écriture (`null` si la relecture a
+  // échoué), pour dire « 300 → 400 » comme la maquette — jamais la valeur que l'écran
+  // croyait, qu'un autre administrateur a pu changer entre-temps.
+  | ({ statut: "ok"; cle: string; readonly avant: number | null } & { readonly apres: ValeurRelue })
   | Extract<ResultatEcriture, { statut: "erreur" }>;
 
 /*
@@ -101,6 +104,14 @@ export async function enregistrerParametre(
   if (!analyse.success) return { statut: "erreur", motif: "bornes" };
 
   const supabase = await creerClientServeur();
+  // Une lecture de plus, sur un écran d'administration : le prix d'un « avant → après »
+  // qui dit ce que la base portait, et non ce que l'écran supposait.
+  // Si elle échoue, l'écriture n'en dépend pas : le message dira « Enregistré. » sans la
+  // flèche, et la relecture qui suit l'écriture reste, elle, obligatoire.
+  const avant = await lireParametres(supabase).then(
+    (liste) => liste.find((p) => p.cle === analyse.data.cle)?.valeur ?? null,
+    () => null,
+  );
   const resultat = await ecrireParametre(supabase, analyse.data.cle, analyse.data.valeur);
 
   if (resultat.statut !== "ok") return resultat;
@@ -126,6 +137,7 @@ export async function enregistrerParametre(
   return {
     statut: "ok",
     cle: resultat.cle,
+    avant,
     apres: {
       valeur: relu.valeur,
       ecrit: relu.ecrit,
