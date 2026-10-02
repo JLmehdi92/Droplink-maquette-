@@ -388,10 +388,51 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
 - **À porter dans le produit** avec l'espace vendeur et l'administration : le produit a
   aujourd'hui une barre d'onglets en bas sur téléphone, elle est remplacée par ce tiroir.
 
+### ▶️ 02/10/2026 — premières portes dans le bac à sable (session Claude Code web)
+
+- **Environnement vérifié sans afficher une valeur** : les neuf variables attendues sont
+  présentes ; `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_DB_URL` et `SUPABASE_PROJECT_REF` ne
+  contiennent PAS la référence de production (`csndfatwtbzqmhgqseem`) et désignent le même
+  projet, `djvjaocvndqhqqgilrof`. `.env.test.local` est écrit (ignoré par git), avec des
+  valeurs R2 **factices** (les seules vraies sont celles de la production).
+- **`pnpm exec next typegen` puis `pnpm gates`**, décompte relevé porte par porte :
+
+  | Porte | Résultat |
+  |---|---|
+  | `typecheck` | 0 erreur |
+  | `lint` | 0 erreur, 1 avertissement préexistant (`tests/unit/suivi-quota-fournisseur.test.ts:80`) |
+  | `build` | compilé, 104 pages statiques générées |
+  | `test` | **1 261 / 1 262** — le seul échec est l'alarme Railway attendue (`tests/unit/deploiement.test.ts`, échéance du 01/12/2026), ni contournée ni désactivée |
+  | `test:rls` | **0 / 0 : n'a pas pu tourner** (ci-dessous) |
+  | `couverture` | non exécutée (elle lit le rapport de `test:rls`) |
+  | `fumee` | non exécutée (elle sert le produit contre la base de tests) |
+
+  `portes.mjs` s'arrête au premier rouge : les trois dernières portes ont été relancées par une
+  copie locale du script limitée à elles (même chargement de `.env.test.local`, même garde de
+  cible), non versionnée.
+- ⚠️ **CAUSE DU BLOCAGE : le réseau du conteneur refuse la base de tests.** Le proxy répond
+  `Host not in allowlist: djvjaocvndqhqqgilrof.supabase.co`, et
+  `db.djvjaocvndqhqqgilrof.supabase.co` ne se résout pas (`ENOTFOUND`). Les 35 « fetch
+  failed » de la porte `test` viennent de là : les tests unitaires qui touchent la base
+  passent par leurs chemins de panne, d'où leur vert. Ce n'est pas un défaut du produit, et
+  aucun code ne le corrige : c'est un réglage de l'environnement (§ 9).
+- **Conséquence : la refonte n'est pas commencée.** La consigne de la séance fait du portage
+  une suite conditionnelle aux portes, et chaque écran exige `pnpm gates` vert avant son
+  commit. Porter un écran sans `test:rls` ni `fumee`, c'est commiter par-dessus du rouge.
+  Seul ce journal est commité, vers le bac à sable uniquement.
+- La maquette se construit (`49 pages`) et se sert : le travail de lecture est prêt.
+
 ## 9. Ce qui attend Mehdi
 
-- [ ] Ajouter les variables de `.env.test.local` à l'environnement cloud, pour que
-  `pnpm gates` puisse tourner.
+- [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
+  l'environnement dans la barre de titre de la session, puis Modifier, « Network access ») :
+  autoriser `djvjaocvndqhqqgilrof.supabase.co` ET `db.djvjaocvndqhqqgilrof.supabase.co`
+  (Postgres direct, port 5432), ou passer à un niveau d'accès plus large. Sans cela,
+  `test:rls`, `couverture` et `fumee` ne peuvent pas tourner, et aucun écran ne se porte.
+  Si le port 5432 reste fermé même autorisé, une `SUPABASE_DB_URL` vers le pooler de
+  Supabase (port 6543) est l'autre voie.
+- [x] Ajouter les variables de `.env.test.local` à l'environnement cloud — présentes le
+  02/10/2026 (mais le réseau refuse encore l'hôte, voir la case du dessus).
 - [ ] Railway : recopier les réglages de `railway.json` dans l'onglet Settings, puis supprimer
   le fichier, avant le 01/12/2026.
 - [ ] Confirmer quelle branche Railway déploie (Railway, service, Settings, Source). Tant que ce
