@@ -11,6 +11,7 @@ import { signerLecture } from "@/lib/storage/r2";
 import { estLangueSupportee } from "@/i18n/config";
 import { origineDuSite } from "@/lib/site";
 import { limites } from "@/lib/storage/limites";
+import { creerClientServeur } from "@/lib/supabase/server";
 
 export async function generateMetadata({
   params,
@@ -65,6 +66,18 @@ export default async function Marque({
   const logoUrl =
     profil.logoUrl === null ? null : await signerLecture(profil.logoUrl).catch(() => null);
 
+  // « VOIR LA PAGE CLIENT » DE L'APERÇU (maquette) : l'aperçu réel de la commande la
+  // plus récente (`/p/<jeton>/apercu`, qui ne compte aucune vue), par le saut qui relit
+  // le jeton au clic — jamais un jeton recopié ici. Sous RLS ; sans commande, pas de lien.
+  const supabase = await creerClientServeur();
+  const { data: derniere } = await supabase
+    .from("orders")
+    .select("id")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const lienPageClient = derniere === null ? null : `/${langue}/commandes/${derniere.id}/page-client?apercu=1`;
+
   const nom = profil.nomAffiche ?? profil.nomBoutique;
   /* LA REFONTE (02/10/2026) suit `marque.html` : six réglages numérotés à
      gauche, l'aperçu de la page client à droite (mobile ou desktop). */
@@ -113,6 +126,7 @@ export default async function Marque({
               // replie sur « fr » ce que le middleware n'aurait pas filtre, et un
               // lien bati sur la valeur brute menerait a une page inexistante.
               lienPasserPro: `/${langue}/passer-pro`,
+              lienPageClient,
               logoUrl,
               reseaux: profil.reseaux,
             }}

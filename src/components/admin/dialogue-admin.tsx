@@ -18,6 +18,39 @@ import { X } from "lucide-react";
  * annulation, puis la page se rechargerait sur un geste bel et bien fait
  * (revue du 19/09/2026, contrainte 8).
  */
+/**
+ * FERMER EN SORTANT (maquette, `admin.js` : `fermer`) : la boîte descend et s'efface
+ * en 160 ms (`.sort`), PUIS le dialogue se ferme — `close()` seul la ferait
+ * disparaître d'un coup. Sous mouvement réduit, elle se ferme tout de suite. Un
+ * dialogue déjà en train de sortir n'est pas refermé deux fois.
+ */
+export function fermerDialogue(d: HTMLDialogElement | null | undefined): void {
+  if (!d || !d.open || d.classList.contains("sort")) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    d.close();
+    return;
+  }
+  d.classList.add("sort");
+  window.setTimeout(() => {
+    d.classList.remove("sort");
+    d.close();
+  }, 160);
+}
+
+/**
+ * LE REFUS D'UNE SAISIE DIT ET SECOUÉ (maquette, `admin.js` : le motif trop court
+ * affiche « Le motif est trop court. » et la boîte tremble 280 ms) plutôt qu'un bouton
+ * désactivé qui ne dit pas pourquoi. Le serveur garde le même plancher.
+ */
+export function secouerDialogue(d: HTMLDialogElement | null | undefined): void {
+  const corps = d?.querySelector<HTMLElement>(".adm-dialogue__corps");
+  if (!corps || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  corps.animate(
+    [{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(5px)" }, { transform: "translateX(0)" }],
+    { duration: 280 },
+  );
+}
+
 export function DialogueAdmin({
   refDialogue,
   idTitre,
@@ -54,13 +87,15 @@ export function DialogueAdmin({
       aria-describedby={aide === undefined ? undefined : `${idTitre}-aide`}
       onClose={onClose}
       onCancel={(e) => {
-        if (travaille) e.preventDefault();
+        // Échap : la sortie animée plutôt que la fermeture sèche du navigateur.
+        e.preventDefault();
+        if (!travaille) fermerDialogue(e.currentTarget);
       }}
       onPointerDown={(e) => {
         departDehors.current = e.target === e.currentTarget && dehors(e);
       }}
       onClick={(e) => {
-        if (departDehors.current && e.target === e.currentTarget && dehors(e) && !travaille) e.currentTarget.close();
+        if (departDehors.current && e.target === e.currentTarget && dehors(e) && !travaille) fermerDialogue(e.currentTarget);
         departDehors.current = false;
       }}
     >
@@ -72,7 +107,7 @@ export function DialogueAdmin({
             className="adm-dialogue__x"
             aria-label={fermer}
             disabled={travaille}
-            onClick={() => refDialogue.current?.close()}
+            onClick={() => fermerDialogue(refDialogue.current)}
           >
             <X aria-hidden="true" className="ic" />
           </button>

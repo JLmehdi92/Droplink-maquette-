@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normaliserLien, type CleLien } from "@/lib/boutique/normaliser-lien";
+import { lienAcceptable, normaliserLien, type CleLien } from "@/lib/boutique/normaliser-lien";
 import { MOTIFS_RESEAUX, MOTIF_SITE } from "@/lib/boutique/reglages";
 
 /**
@@ -115,5 +115,20 @@ describe("Le champ vide reste vide", () => {
   test.each(["instagram", "tiktok", "whatsapp", "site"] as const)("%s", (clef) => {
     expect(normaliserLien(clef, "")).toBe("");
     expect(normaliserLien(clef, "   ")).toBe("");
+  });
+});
+
+describe("La validation à la saisie de « Ma marque » (lienAcceptable)", () => {
+  test("elle accepte ce que le serveur accepte, normalisation comprise", () => {
+    expect(lienAcceptable("instagram", "")).toBe(true);
+    expect(lienAcceptable("instagram", "  ")).toBe(true);
+    expect(lienAcceptable("tiktok", "www.tiktok.com/@laplanque92")).toBe(true);
+    expect(lienAcceptable("site", "https://atelier-exemple.fr/boutique")).toBe(true);
+  });
+
+  test("elle refuse un domaine déguisé, comme le motif ancré du serveur", () => {
+    expect(lienAcceptable("instagram", "https://instagram.com.attaquant.example/x")).toBe(false);
+    expect(lienAcceptable("site", "https://instagram.com@attaquant.example/x")).toBe(false);
+    expect(lienAcceptable("site", "javascript:alert(1)")).toBe(false);
   });
 });

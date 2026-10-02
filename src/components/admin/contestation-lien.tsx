@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { MessageCircle } from "lucide-react";
-import { DialogueAdmin } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { useFormatter, useTranslations } from "next-intl";
 import { BoutonAction } from "@/components/bouton-action";
 import {
@@ -54,12 +54,14 @@ export function ContestationLien({
   const [reponse, setReponse] = useState("");
   const [resultat, setResultat] = useState<Resultat>(INITIAL);
   const [travaille, setTravaille] = useState<"refuser" | "debloquer" | null>(null);
+  const [refus, setRefus] = useState<string | null>(null);
+  const td = useTranslations("admin.dialogue");
 
-  const pret = reponse.trim().length >= motifMin && lecture.etat === "ok";
 
   async function ouvrir(): Promise<void> {
     setReponse("");
     setResultat(INITIAL);
+    setRefus(null);
     setLecture({ etat: "attente" });
     dialogue.current?.showModal();
     const r = await lireContestation(commandeId);
@@ -68,6 +70,11 @@ export function ContestationLien({
 
   async function repondre(geste: "refuser" | "debloquer"): Promise<void> {
     if (lecture.etat !== "ok") return;
+    if (reponse.trim().length < motifMin) {
+      setRefus(td("motifCourt"));
+      secouerDialogue(dialogue.current);
+      return;
+    }
     setTravaille(geste);
     const donnees = new FormData();
     let r: Resultat;
@@ -150,9 +157,18 @@ export function ContestationLien({
 
         <label className="adm-champ">
           <span>{t("reponse")}</span>
-          <textarea name="reponse" rows={3} autoFocus value={reponse} onChange={(e) => setReponse(e.target.value)} />
+          <textarea name="reponse" rows={3} autoFocus value={reponse} onChange={(e) => {
+              setReponse(e.target.value);
+              setRefus(null);
+            }}
+          />
           <small>{t("reponseAide", { n: motifMin })}</small>
         </label>
+        {refus === null ? null : (
+          <p role="alert" className="adm-dialogue__erreur">
+            {refus}
+          </p>
+        )}
 
         {resultat.statut === "erreur" ? (
           <p role="alert" className="adm-dialogue__erreur">
@@ -166,18 +182,18 @@ export function ContestationLien({
           <BoutonAction
             type="button"
             enAttente={travaille === "refuser"}
-            disabled={!pret || travaille !== null}
+            disabled={lecture.etat !== "ok" || travaille !== null}
             onClick={() => void repondre("refuser")}
             libelles={{ repos: t("refuser"), enCours: t("enCours"), reussi: t("refuser"), echoue: t("refuser") }}
             className="bouton-outil adm-refuser disabled:opacity-50"
           />
-          <button type="button" className="bouton-outil" disabled={travaille !== null} onClick={() => dialogue.current?.close()}>
+          <button type="button" className="bouton-outil" disabled={travaille !== null} onClick={() => fermerDialogue(dialogue.current)}>
             {t("annuler")}
           </button>
           <BoutonAction
             type="button"
             enAttente={travaille === "debloquer"}
-            disabled={!pret || travaille !== null}
+            disabled={lecture.etat !== "ok" || travaille !== null}
             onClick={() => void repondre("debloquer")}
             libelles={{ repos: t("debloquer"), enCours: t("enCours"), reussi: t("debloquer"), echoue: t("debloquer") }}
             className="adm-confirmer disabled:opacity-50"

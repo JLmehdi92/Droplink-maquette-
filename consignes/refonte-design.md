@@ -1130,6 +1130,68 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
 - **Portes ici** : `typecheck` 0, `lint` 0 erreur (2 avertissements, dont `suspendu` traité au lot 6),
   `build` vert, `test` 1268/1269 (alarme Railway seule).
 
+### ▶️ 02/10/2026 — fidélité du mouvement, lots 3 et 4 : sorties, analytique, espace vendeur (session cloud)
+
+- **Changer d'écran** (`TransitionsEcran`, `TemplateEcran`) : le contenu SORT (110 ms,
+  `cubic-bezier(.4,0,1,1)`, 6 px dans le sens du menu) avant que le routeur charge l'écran suivant,
+  qui est inséré INVISIBLE et n'entre que deux images plus tard (§ 6) — 240 ms sur 10 px. Le clic est
+  intercepté en capture avant le lien de Next ; exports `/api`, `target`, téléchargements, ancres et
+  clics modifiés restent des liens. **Défaut trouvé à la relecture** : un `template` ne se remonte pas
+  quand seul un segment plus profond change (liste → fiche) — l'écran restait invisible 6 s. Il est
+  désormais clé sur le chemin ; une sortie restée posée est levée à l'arrivée. Mesuré : sortie 0→132 ms,
+  entrée 149→448 ms ; CPU ×4 : pire image 67 ms (maquette 117-167).
+- **Filtrer une liste** (même écran, autre `?…`) : la table s'estompe à 0,35 en 90 ms pendant la
+  lecture serveur et revient en 160 ms (filet de 8 s ; « Charger la suite » exclu).
+- **Dialogues d'administration** : sortie `.sort` de 160 ms (Échap, voile, croix, Annuler), non
+  cliquables pendant la sortie ; « Le motif est trop court. » / « L'adresse recopiée ne correspond
+  pas » dits et secoués (280 ms) au lieu d'un bouton désactivé — même plancher que le serveur
+  (8 caractères après `trim`, vérifié à la relecture).
+- **Analytique** (`Changeant`, `GrapheTableau`) : au changement de période, chaque chiffre s'efface
+  flouté (110 ms) puis le nouveau entre (220 ms) ; le graphique se redessine en fondu (120 ms, flou
+  4 px) puis ses barres montent ou son trait se trace (900 ms) — à la bascule comme à la période.
+  Premier dessin animé au premier chargement réel seulement (`v4-entree`), comme `!arrivee`. Défauts
+  de relecture corrigés : double clic ou valeur revenue pendant le fondu laissaient le tracé effacé.
+  Rouleaux ajoutés : taux de validation (Analyses), tuiles d'administration, tuiles de la fiche.
+- **Commandes / Envois** : la frise se remplit en cascade (520 ms, +18 ms par ligne) et les
+  mini-frises entrent (320 ms, +16 ms) au premier chargement réel ; une ligne archivée se REPLIE
+  (`.est-partie`) avant que le POST natif parte (260 ms, `requestSubmit` avec le même bouton) —
+  **défaut de la maquette corrigé** : sa hauteur minimale de 62 px tenait la ligne ouverte. Un geste
+  de liste (rechargement) ne rejoue pas l'entrée ; « Précédent » rouvre les lignes repliées.
+  ⚠️ Cela renverse l'arbitrage « la frise ne s'anime pas au chargement » : elle ne s'anime qu'au
+  premier chargement réel, jamais à « Charger la suite ».
+- **⚠️ DÉFAUT DE COMPORTEMENT CORRIGÉ : l'historique de la fiche ne se relisait pas.** Il est relu
+  après chaque écriture confirmée (champ, média, révocation ; 700 ms de calme) par une action qui ne
+  lit QUE lui (`relireHistorique`, sous RLS) et rend le bloc formaté par le serveur ; la nouvelle ligne
+  entre (320 ms). Une première version passait par `router.refresh()` : la relecture a montré qu'il
+  comptait une ouverture d'éditeur de plus à chaque sauvegarde (événement dénominateur) et faisait la
+  queue avec les sauvegardes — abandonnée. Mesuré : 2 → 3 lignes après une modification.
+- **Fiche** : focus sur « Nom du client » pour une commande sans client (souris seulement, décidé à
+  l'ouverture), vignettes ajoutées qui entrent (420 ms, léger rebond), nouveau jeton qui réapparaît
+  flouté (360 ms) après la confirmation de la base.
+- **Ma marque** : validation à la saisie (couleur à chaque frappe, liens à la sortie puis à chaque
+  frappe une fois refusés) avec les règles EXACTES du serveur (`lienAcceptable` : normalisation,
+  200 caractères, motifs ancrés, déplacés de `reglages.ts` vers `normaliser-lien.ts` qui n'est pas
+  réservé au serveur ; test ajouté) ; à l'envoi refusé, focus au premier champ fautif et « Rien n'a été
+  enregistré. » ; badge « Contraste conforme » masqué tant que le code n'est pas une couleur ;
+  « Enregistré. » qui entre (220 ms) et s'efface à la première retouche. Le nom de lien n'est PAS
+  validé ici : sa forme appartient à `slug_valide()` seule (une copie divergerait). Lien « Voir la page
+  client » : l'APERÇU de la dernière commande (`/p/<jeton>/apercu`, aucune vue comptée), par le saut
+  qui relit le jeton au clic (`page-client?apercu=1`).
+- **Paramètres** : panneau d'onglet qui entre (180 ms) au changement d'onglet seulement ; « Enregistrer »
+  du nom désactivé tant que rien n'a changé (et sur la valeur ENVOYÉE, pas celle tapée pendant
+  l'aller-retour) ; « Changer le mot de passe » désactivé tant que les deux champs ne sont pas remplis ;
+  initiales qui suivent la frappe ; révélations animées (mot de passe de l'adresse, confirmations de
+  suppression, étapes 2FA, 200 ms) ; autres sessions qui s'en vont (180 ms) APRÈS la confirmation.
+- **Relectures** (trois agents) : corrigés — écran invisible liste → fiche (HIGH), graphe effacé au
+  double clic (HIGH), `router.refresh()` de la fiche (HIGH), focus volé après relecture, aperçu de Ma
+  marque qui comptait une vue, double POST et cache « Précédent » du repli, nom « Enregistré » sur une
+  saisie non envoyée, bouton du mot de passe actif sur des champs vidés, drapeau d'onglet jamais remis
+  à zéro, espaces de traduction `admin.dialogue` non expédiés (trouvé par `traductions-expediees`).
+- ⚠️ **Non vérifié au navigateur ici** : les dialogues d'administration (aucun compte administrateur
+  utilisable : la 2FA échoue par le proxy du conteneur) et les mini-frises d'Envois (aucun colis suivi :
+  on n'engage pas de prise en charge 17TRACK). À voir au poste de Mehdi.
+- **Portes ici** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1270/1271 (alarme Railway).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown, Link as LienIcone, RefreshCw } from "lucide-react";
 import { revoquerLienPublic } from "@/lib/commandes/actions";
@@ -82,7 +82,7 @@ export function CarteRevocation({
           <LienIcone aria-hidden="true" className="ic" />
           <span>
             {lisible.slice(0, coupure)}
-            <b>{lisible.slice(coupure)}</b>
+            <JetonQuiReapparait jeton={lisible.slice(coupure)} />
           </span>
           <BoutonCopierFiche lien={lienPublic} className="ed-url__copier" />
         </div>
@@ -126,4 +126,27 @@ export function CarteRevocation({
       </div>
     </section>
   );
+}
+
+/**
+ * LE NOUVEAU JETON RÉAPPARAÎT, FLOUTÉ (maquette, `commande.js` : 360 ms) : la seule
+ * partie de l'adresse qui change à la révocation se voit changer. Il n'est animé
+ * qu'APRÈS la confirmation de la base (c'est elle qui rend le nouveau jeton).
+ */
+function JetonQuiReapparait({ jeton }: { readonly jeton: string }) {
+  const b = useRef<HTMLElement>(null);
+  const precedent = useRef(jeton);
+  useEffect(() => {
+    if (precedent.current === jeton) return;
+    precedent.current = jeton;
+    if (b.current === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    b.current.animate(
+      [
+        { opacity: 0, filter: "blur(4px)" },
+        { opacity: 1, filter: "blur(0)" },
+      ],
+      { duration: 360, easing: "ease-out" },
+    );
+  }, [jeton]);
+  return <b ref={b}>{jeton}</b>;
 }

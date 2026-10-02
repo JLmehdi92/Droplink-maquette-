@@ -399,6 +399,10 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .liste { overflow: clip; margin-top: -4px; }
 .rangee { display: grid; grid-template-rows: 1fr; border-bottom: 1px solid var(--filet); transition: grid-template-rows 240ms var(--ease-sortie), opacity 180ms var(--ease-sortie), background-color 100ms var(--ease); }
 .rangee.est-partie { grid-template-rows: 0fr; opacity: 0; }
+/* la ligne se replie VRAIMENT : sans ceci, la hauteur minimale de 62 px du corps tenait la
+   rangée ouverte (mesuré : 63 px jusqu'au bout ; la maquette a le même défaut) */
+.rangee.est-partie .rangee__corps { min-height: 0; }
+.rangee.est-partie { border-bottom-color: transparent; }
 .rangee__corps, .rangee--tete { display: grid; grid-template-columns: 22px 108px 64px minmax(110px, 1fr) 124px 164px 296px 104px; gap: 10px; align-items: center; padding: 0 16px; min-height: 0; overflow: hidden; }
 .rangee__corps { min-height: 62px; }
 .rangee--tete { min-height: 36px; font-size: 12px; font-weight: 500; color: var(--sourdine); background: var(--sol-onglet); border-bottom: 1px solid var(--filet); overflow: visible; }
@@ -447,6 +451,12 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .frise[data-ton="livre"] { --c: var(--st-livre); }
 .frise__rail { position: absolute; top: 5px; left: 12.5%; right: 12.5%; height: 2px; border-radius: 2px; background: var(--filet-appuye); }
 .frise__plein { position: absolute; inset: 0 auto 0 0; width: calc(var(--k) / 3 * 100%); border-radius: inherit; background: var(--c); transform-origin: 0 50%; }
+/* la frise se remplit une fois, au premier chargement réel (maquette, `commandes.js`) ; ensuite
+   la liste se lit sans attendre — « Charger la suite » n'arrive jamais sous `v4-entree` */
+@media (prefers-reduced-motion: no-preference) {
+  .v4-entree .frise__plein { animation: frise-remplit 520ms cubic-bezier(.23, 1, .32, 1) backwards; animation-delay: calc(120ms + var(--i, 0) * 18ms); }
+}
+@keyframes frise-remplit { from { transform: scaleX(0); } }
 .frise__etape { position: relative; display: grid; justify-items: center; gap: 6px; min-width: 0; }
 .frise__etape i { width: 12px; height: 12px; border-radius: 50%; background: var(--feuille); box-shadow: inset 0 0 0 2px var(--filet-appuye); }
 .frise__etape small { max-width: 100%; font-size: 11.5px; line-height: 1.2; color: var(--sourdine); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -615,6 +625,9 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 :root { --vt-sens: 1; }
 :root[data-sens="haut"] { --vt-sens: -1; }
 .entree-ecran { animation: vt-entre 240ms cubic-bezier(.23, 1, .32, 1) backwards; }
+.changeant { display: inline-block; }
+/* arrivé par une navigation : inséré invisible, il entre deux images plus tard (TemplateEcran) */
+.entree-ecran[data-attente] { opacity: 0; animation: none; }
 /* pas de flou ici : flouter un instantané de toute la hauteur de l’écran coûtait jusqu’à 267 ms d’image figée */
 @keyframes vt-entre { from { opacity: 0; transform: translateY(calc(var(--vt-sens) * 10px)); } }
 
@@ -626,7 +639,8 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .a-venir .bouton-app { margin-top: 8px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .entree-ecran { animation: vt-fondu 160ms ease-out backwards; }
+  .entree-ecran { animation: vt-fondu 140ms ease-out backwards; }
+  .entree-ecran[data-attente] { animation: none; }
 }
 @keyframes vt-fondu { from { opacity: 0; } }
 
@@ -684,6 +698,11 @@ a.action-ligne { color: var(--corps); }
 
 /* la mini-frise : quatre points, sans libellés */
 .mini-frise { --c: var(--st-transit); position: relative; display: inline-flex; align-items: center; gap: 12px; }
+/* les mini-frises entrent une fois, au premier chargement réel (maquette, `envois.js`) */
+@media (prefers-reduced-motion: no-preference) {
+  .v4-entree .mini-frise { animation: mini-frise-entre 320ms cubic-bezier(.23, 1, .32, 1) backwards; animation-delay: calc(80ms + var(--i, 0) * 16ms); }
+}
+@keyframes mini-frise-entre { from { opacity: 0; transform: translateX(-4px); } }
 .mini-frise::before, .mini-frise::after { content: ""; position: absolute; left: 5px; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; }
 .mini-frise::before { right: 5px; background: var(--filet-appuye); }
 .mini-frise::after { width: calc(var(--k) * (100% - 10px) / 3); background: var(--c); }
@@ -2457,7 +2476,7 @@ a.notifp__bouton { text-decoration: none; }
 .adm-dialogue { width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; overflow-y: auto; padding: 0; border: 1px solid var(--filet); border-radius: 18px; background: var(--feuille); color: var(--encre); box-shadow: var(--ombre-lg); }
 .adm-dialogue::backdrop { background: rgba(11, 11, 24, .38); }
 .adm-dialogue[open] { animation: adm-dlg 240ms cubic-bezier(.23, 1, .32, 1); }
-.adm-dialogue.sort { animation: adm-dlg-sort 160ms cubic-bezier(.4, 0, 1, 1) forwards; }
+.adm-dialogue.sort { animation: adm-dlg-sort 160ms cubic-bezier(.4, 0, 1, 1) forwards; pointer-events: none; }
 @keyframes adm-dlg { from { opacity: 0; transform: translateY(10px) scale(.97); } }
 @keyframes adm-dlg-sort { to { opacity: 0; transform: translateY(6px) scale(.98); } }
 .adm-dialogue__corps { display: grid; gap: 14px; padding: 20px; }

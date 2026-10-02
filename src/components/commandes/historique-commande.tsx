@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { LigneHistorique } from "@/lib/commandes/historique";
+import { ListeHistorique } from "@/components/commandes/liste-historique";
 
 /**
  * UNE ICONE PAR TYPE D EVENEMENT — c est ce que le kit dessine, et il n en
@@ -116,11 +117,11 @@ export async function HistoriqueCommande({
         // une anomalie. Un bloc vide sans le dire laisserait croire à un échec.
         <p className="ed-histo__vide">{t("aucun")}</p>
       ) : (
-        <ol className="ed-histo">
+        <ListeHistorique>
           {lignes.map((ligne) => {
             const Icone = ICONES[ligne.type];
             return (
-              <li key={ligne.id}>
+              <li key={ligne.id} data-id={ligne.id}>
                 <i aria-hidden="true">
                   <Icone className="ic" />
                 </i>
@@ -145,7 +146,7 @@ export async function HistoriqueCommande({
               </li>
             );
           })}
-        </ol>
+        </ListeHistorique>
       )}
     </section>
   );

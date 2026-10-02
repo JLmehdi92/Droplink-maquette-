@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -10,6 +11,7 @@ import { LienEcran } from "@/components/lien-ecran";
 import { BarreSuperieure } from "@/components/app/barre-superieure";
 import { CoqueTiroir } from "@/components/app/coque-tiroir";
 import { CoucheV4, ScriptEntreeV4 } from "@/components/app/couche-v4";
+import { TransitionsEcran } from "@/components/app/transitions-ecran";
 import { DetailsFermable } from "@/components/app/details-fermable";
 import { LogoDropLink } from "@/components/logo-droplink";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
@@ -151,6 +153,10 @@ export default async function LayoutApplication({
     <div className="page-app v4">
       <ScriptEntreeV4 />
       <CoucheV4 />
+      {/* Sortie d'un écran, estompe d'une liste qu'on filtre (maquette, `coque.js`). */}
+      <Suspense fallback={null}>
+        <TransitionsEcran />
+      </Suspense>
       {/*
         Le lien d'évitement : sans lui, un vendeur au clavier retraverse les six
         destinations du menu à CHAQUE changement d'écran. Chaque écran déclare

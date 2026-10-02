@@ -151,3 +151,29 @@ export function normaliserLien(clef: CleLien, saisie: string): string {
 
   return brut;
 }
+
+/*
+ * LES MOTIFS DES LIENS, ICI ET NON DANS `reglages.ts` (03/10/2026) : ce module-là est
+ * réservé au serveur, et « Ma marque » valide désormais à la saisie (maquette,
+ * `marque.js`) avec EXACTEMENT les mêmes motifs, après la même normalisation. Une
+ * seule source : `reglages.ts` les réexporte. Leur commentaire d'origine y reste.
+ */
+export const MOTIFS_RESEAUX = {
+  instagram: /^https:\/\/(www\.)?instagram\.com\/[A-Za-z0-9._/?=&%-]{1,180}$/,
+  tiktok: /^https:\/\/(www\.)?tiktok\.com\/@[A-Za-z0-9._/?=&%-]{1,180}$/,
+  whatsapp: /^https:\/\/(wa\.me|api\.whatsapp\.com)\/[A-Za-z0-9._/?=&%+-]{1,180}$/,
+} as const;
+
+export const MOTIF_SITE =
+  /^https:\/\/[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+(\/[A-Za-z0-9._~:/?#=@!$&'()*+,;%-]{0,180})?$/;
+
+/**
+ * Le lien saisi, normalisé, est-il un lien que le serveur accepterait ? (vide = absence,
+ * accepté). La même règle que `ReglagesMarque` : normalisation, 200 caractères, motif.
+ */
+export function lienAcceptable(clef: CleLien, saisie: string): boolean {
+  const v = normaliserLien(clef, saisie.trim());
+  if (v === "") return true;
+  const motif = clef === "site" ? MOTIF_SITE : MOTIFS_RESEAUX[clef];
+  return v.length <= 200 && motif.test(v);
+}

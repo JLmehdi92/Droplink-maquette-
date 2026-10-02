@@ -3,7 +3,7 @@
 import { useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BoutonAction } from "@/components/bouton-action";
-import { DialogueAdmin } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { bloquerLien, debloquerLien, type EtatBlocage } from "@/app/[locale]/admin/commandes/actions";
 
 /**
@@ -46,12 +46,15 @@ export function BlocageLien({
   const [motif, setMotif] = useState("");
   const [etat, setEtat] = useState<EtatBlocage>(INITIAL);
   const [travaille, setTravaille] = useState(false);
+  const [refus, setRefus] = useState<string | null>(null);
+  const td = useTranslations("admin.dialogue");
 
   const pret = motif.trim().length >= motifMin;
 
   function reinitialiser(): void {
     setMotif("");
     setEtat(INITIAL);
+    setRefus(null);
   }
 
   /* L'ÉTAT SE REMET À ZÉRO À L'OUVERTURE AUSSI. Défaut relevé par la revue du
@@ -64,6 +67,11 @@ export function BlocageLien({
   }
 
   async function confirmer(): Promise<void> {
+    if (!pret) {
+      setRefus(td("motifCourt"));
+      secouerDialogue(dialogue.current);
+      return;
+    }
     setTravaille(true);
     const donnees = new FormData();
     donnees.set("commandeId", commandeId);
@@ -100,9 +108,18 @@ export function BlocageLien({
       >
         <label className="adm-champ">
           <span>{t("motif")}</span>
-          <textarea name="motif" rows={3} autoFocus value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <textarea name="motif" rows={3} autoFocus value={motif} onChange={(e) => {
+              setMotif(e.target.value);
+              setRefus(null);
+            }}
+          />
           <small>{t(bloque ? "motifAide" : "motifAideBlocage", { n: motifMin })}</small>
         </label>
+        {refus === null ? null : (
+          <p role="alert" className="adm-dialogue__erreur">
+            {refus}
+          </p>
+        )}
         {etat.statut === "erreur" ? (
           <p role="alert" className="adm-dialogue__erreur">
             {t(`erreur.${etat.motif}`)}
@@ -110,13 +127,12 @@ export function BlocageLien({
         ) : null}
         <footer>
           {/* Annuler ne dépend que d'une chose : qu'aucune requête ne soit partie. */}
-          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => dialogue.current?.close()}>
+          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => fermerDialogue(dialogue.current)}>
             {t("annuler")}
           </button>
           <BoutonAction
             type="button"
             enAttente={travaille}
-            disabled={!pret}
             onClick={() => void confirmer()}
             libelles={{
               repos: t(bloque ? "debloquer" : "bloquer"),

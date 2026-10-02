@@ -1061,7 +1061,9 @@
     "apercuBureau": "Desktop",
     "apercuMobile": "Mobile",
     "apercuImageMobile": "Aperçu mobile de la page client",
-    "apercuImageBureau": "Aperçu desktop de la page client"
+    "apercuImageBureau": "Aperçu desktop de la page client",
+    "voirPageClient": "Voir la page client",
+    "rienEnregistre": "Rien n’a été enregistré."
   },
   "envois": {
     "titre": "Suivi d'envois",
@@ -2391,7 +2393,11 @@
     },
     "accueil": "Administration DropLink",
     "pastille": "Admin",
-    "infoValeur": "{libelle} : {valeur}"
+    "infoValeur": "{libelle} : {valeur}",
+    "dialogue": {
+      "motifCourt": "Le motif est trop court.",
+      "recopieDifferente": "L’adresse recopiée ne correspond pas à ce compte."
+    }
   },
   "erreurs": {
     "titre": "Cet écran n'a pas pu s'afficher",

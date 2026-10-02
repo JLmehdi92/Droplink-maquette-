@@ -3,7 +3,7 @@ import { z } from "zod";
 import { SchemaLangue } from "@/i18n/schema";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types-base";
-import { normaliserLien, type CleLien } from "@/lib/boutique/normaliser-lien";
+import { MOTIFS_RESEAUX, MOTIF_SITE, normaliserLien, type CleLien } from "@/lib/boutique/normaliser-lien";
 
 /**
  * LES RÉGLAGES DE MARQUE — ce qui habille TOUTES les pages publiques d'un
@@ -67,11 +67,7 @@ export const LANGUE_PAGE_CLIENT_PAR_DEFAUT = "en" satisfies z.infer<typeof Schem
  * `https://instagram.com.attaquant.example/x` passerait — c'est la façon la
  * plus courante de croire qu'on a validé un domaine.
  */
-export const MOTIFS_RESEAUX = {
-  instagram: /^https:\/\/(www\.)?instagram\.com\/[A-Za-z0-9._/?=&%-]{1,180}$/,
-  tiktok: /^https:\/\/(www\.)?tiktok\.com\/@[A-Za-z0-9._/?=&%-]{1,180}$/,
-  whatsapp: /^https:\/\/(wa\.me|api\.whatsapp\.com)\/[A-Za-z0-9._/?=&%+-]{1,180}$/,
-} as const;
+export { MOTIFS_RESEAUX };
 
 /**
  * LE SITE DU VENDEUR — le seul lien dont l'hôte n'est pas contraint, parce que
@@ -85,8 +81,7 @@ export const MOTIFS_RESEAUX = {
  * remplacent pas le même défaut : celui-ci EXPLIQUE au vendeur, celle-là
  * EMPÊCHE quel que soit le chemin d'écriture.
  */
-export const MOTIF_SITE =
-  /^https:\/\/[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+(\/[A-Za-z0-9._~:/?#=@!$&'()*+,;%-]{0,180})?$/;
+export { MOTIF_SITE };
 
 /**
  * Un lien : vide vaut ABSENCE, et l'absence est `null` en base.

@@ -1061,7 +1061,9 @@
     "apercuBureau": "桌面端",
     "apercuMobile": "移动端",
     "apercuImageMobile": "客户页面的移动端预览",
-    "apercuImageBureau": "客户页面的桌面端预览"
+    "apercuImageBureau": "客户页面的桌面端预览",
+    "voirPageClient": "查看客户页面",
+    "rienEnregistre": "尚未保存任何内容。"
   },
   "envois": {
     "titre": "物流追踪",
@@ -2391,7 +2393,11 @@
     },
     "accueil": "DropLink 管理后台",
     "pastille": "管理",
-    "infoValeur": "{libelle}：{valeur}"
+    "infoValeur": "{libelle}：{valeur}",
+    "dialogue": {
+      "motifCourt": "理由太短。",
+      "recopieDifferente": "您输入的地址与该账户不符。"
+    }
   },
   "erreurs": {
     "titre": "此页面无法显示",

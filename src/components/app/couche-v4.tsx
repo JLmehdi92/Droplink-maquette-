@@ -43,7 +43,7 @@ export function ScriptEntreeV4() {
     <script
       dangerouslySetInnerHTML={{
         __html:
-          '(function(){if(window.__v4)return;window.__v4=1;if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var r=document.documentElement;r.classList.add("v4-entree");function fin(){setTimeout(function(){r.classList.remove("v4-entree")},1600)}if(r.classList.contains("pret")){fin();return}var o=new MutationObserver(function(){if(r.classList.contains("pret")){o.disconnect();fin()}});o.observe(r,{attributes:true,attributeFilter:["class"]});setTimeout(function(){o.disconnect();if(r.classList.contains("v4-entree"))fin()},2500)})()',
+          '(function(){if(window.__v4)return;window.__v4=1;if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;try{if(sessionStorage.getItem("dl-sans-entree")){sessionStorage.removeItem("dl-sans-entree");return}}catch(e){}var r=document.documentElement;r.classList.add("v4-entree");function fin(){setTimeout(function(){r.classList.remove("v4-entree")},1600)}if(r.classList.contains("pret")){fin();return}var o=new MutationObserver(function(){if(r.classList.contains("pret")){o.disconnect();fin()}});o.observe(r,{attributes:true,attributeFilter:["class"]});setTimeout(function(){o.disconnect();if(r.classList.contains("v4-entree"))fin()},2500)})()',
       }}
     />
   );

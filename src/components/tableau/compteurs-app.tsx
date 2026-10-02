@@ -1,4 +1,5 @@
 import { ValeurRoulee } from "@/components/app/couche-v4";
+import { Changeant } from "@/components/app/changeant";
 import { getFormatter, getTranslations } from "next-intl/server";
 import {
   ecartPeriodePrecedente,
@@ -32,7 +33,8 @@ export async function CompteursApp({
   const ton = ecart === null || ecart === 0 ? undefined : ecart > 0 ? "hausse" : "baisse";
   const signe = ecart === null ? "" : ecart > 0 ? "+" + format.number(ecart) : format.number(ecart);
 
-  const cartes: ReadonlyArray<{ cle: string; valeur: string; dessous: React.ReactNode }> = [
+  // `cleDessous` : ce que dit la ligne du dessous, pour savoir qu'elle a changé (maquette, `changer`).
+  const cartes: ReadonlyArray<{ cle: string; valeur: string; dessous: React.ReactNode; cleDessous: string }> = [
     {
       cle: "commandesCreees",
       valeur: format.number(activite.commandesCreees),
@@ -44,27 +46,32 @@ export async function CompteursApp({
             {t("ecartPrecedent", { n: signe })}
           </span>
         ),
+      cleDessous: ecart === null ? "-" : signe,
     },
     {
       cle: "commandesLivrees",
       valeur: format.number(activite.commandesLivrees),
       dessous: t("livreesSur", { n: activite.commandesLivrees, total: activite.commandesCreees }),
+      cleDessous: `${activite.commandesLivrees}/${activite.commandesCreees}`,
     },
     {
       cle: "liensOuverts",
       valeur: format.number(activite.vuesTotales),
       dessous: vues === null ? t("leClientRevient") : t("vuesParCommande", { n: format.number(vues) }),
+      cleDessous: String(vues),
     },
     {
       cle: "tauxValidation",
       valeur: validation === null ? "—" : format.number(validation / 100, { style: "percent" }),
       dessous: t("reponsesSur", { n: reponses, total: activite.commandesCreees }),
+      cleDessous: `${reponses}/${activite.commandesCreees}`,
     },
     {
       cle: "delaiLivraison",
       valeur: delai?.jours == null ? "—" : t("jours", { n: format.number(delai.jours) }),
       // Une lecture en panne se dit illisible : « sur 0 colis livré » serait un zéro inventé.
       dessous: delai === null ? t("indisponibleCourt") : t("surColisLivres", { n: delai.colis }),
+      cleDessous: delai === null ? "-" : String(delai.colis),
     },
   ];
 
@@ -74,9 +81,13 @@ export async function CompteursApp({
         <div key={c.cle} className="compteur-app">
           <p className="compteur-app__titre">{t(`carte.${c.cle}`)}</p>
           <p className="compteur-app__valeur">
-            <ValeurRoulee texte={c.valeur} />
+            <Changeant cle={c.valeur}>
+              <ValeurRoulee texte={c.valeur} />
+            </Changeant>
           </p>
-          <p className="compteur-app__dessous">{c.dessous}</p>
+          <p className="compteur-app__dessous">
+            <Changeant cle={c.cleDessous}>{c.dessous}</Changeant>
+          </p>
         </div>
       ))}
     </section>

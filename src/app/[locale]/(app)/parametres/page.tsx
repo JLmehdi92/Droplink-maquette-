@@ -26,6 +26,7 @@ import {
   BlocDeuxEtapes,
   BlocMotDePasse,
   BlocNom,
+  PanneauReglages,
   BlocSessions,
   BlocSuppression,
   type AppareilFiableAffiche,
@@ -232,10 +233,10 @@ export default async function Parametres({
 
         <div className="reglages">
           <TraductionsClient espaces={["parametres"]}>
-            <section className="reglages__panneau" aria-label={t(`onglets.${section}`)}>
+            <PanneauReglages key={section} etiquette={t(`onglets.${section}`)}>
               {section === "compte" ? (
                 <>
-                  <BlocNom nomActuel={profil.nomAffiche} initiales={initiales} />
+                  <BlocNom nomActuel={profil.nomAffiche} initiales={initiales} repli={profil.nomBoutique ?? profil.email} />
                   <BlocAdresse adresse={profil.email} locale={langue} adresseSuivie={adresseSuivie} />
                   <BlocMotDePasse />
                   <BlocSuppression variante="compte" adresse={profil.email} locale={langue} />
@@ -375,7 +376,7 @@ export default async function Parametres({
                   </footer>
                 </section>
               ) : null}
-            </section>
+            </PanneauReglages>
           </TraductionsClient>
         </div>
       </div>

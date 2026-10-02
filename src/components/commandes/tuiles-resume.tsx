@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ValeurRoulee } from "@/components/app/couche-v4";
 
 /**
  * LE RÉSUMÉ DE LA FICHE (maquette, `commande.html` : `.compteurs.fiche__resume`).
@@ -45,7 +46,8 @@ export function TuilesResume({
       </p>
     ) : (
       <p className="compteur-app__valeur" title={v}>
-        {v}
+        {/* Les chiffres roulent au premier chargement réel (maquette, `v4.js`). */}
+        <ValeurRoulee texte={v} />
       </p>
     );
 
@@ -69,7 +71,7 @@ export function TuilesResume({
       <div className="compteur-app" data-alerte={vues === 0 ? "" : undefined}>
         <p className="compteur-app__titre">{t("tuileVues")}</p>
         <p className="compteur-app__valeur">
-          {vues === 0 ? t("tuileVuesAucune") : t("tuileVuesNombre", { n: vues })}
+          <ValeurRoulee texte={vues === 0 ? t("tuileVuesAucune") : t("tuileVuesNombre", { n: vues })} />
         </p>
         {derniereVueLe === null ? null : (
           <p className="compteur-app__dessous">{t("tuileDerniereVue", { quand: derniereVueLe })}</p>

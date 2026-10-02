@@ -1,3 +1,4 @@
+import { Changeant } from "@/components/app/changeant";
 import { ValeurRoulee } from "@/components/app/couche-v4";
 import { getFormatter, getTranslations } from "next-intl/server";
 import {
@@ -28,6 +29,11 @@ import type { CompteursEnvois } from "@/lib/envois/liste";
 import { etatPanneauQc, type Activite, type CommandeConsultee, type PartTransporteur } from "@/lib/analyses/activite";
 import type { FaitRecent } from "@/lib/analyses/recente";
 import type { TypeEvenement } from "@/lib/commandes/journal";
+
+/** Le taux d'approbation, arrondi vers le bas : 199 sur 200 ne s'affiche jamais « 100 % ». */
+function tauxQc(approuve: number, repondu: number, format: Awaited<ReturnType<typeof getFormatter>>): string {
+  return format.number(Math.floor((approuve / repondu) * 100) / 100, { style: "percent" });
+}
 
 /*
  * LES BLOCS DU TABLEAU DE BORD DE LA REFONTE (maquette, `tableau.html`) : des
@@ -352,8 +358,11 @@ export async function ReponsesBloc({ activite }: { readonly activite: Activite |
                   <span className="visuellement-cache">{t("qc.aucuneReponse")}</span>
                 </>
               ) : (
-                // Arrondi vers le bas : 199 sur 200 ne s'affiche jamais « 100 % ».
-                format.number(Math.floor((activite.qcApprouve / repondu) * 100) / 100, { style: "percent" })
+                // Arrondi vers le bas : 199 sur 200 ne s'affiche jamais « 100 % ». Il roule
+                // au premier chargement et se fond au changement de période (maquette).
+                <Changeant cle={tauxQc(activite.qcApprouve, repondu, format)}>
+                  <ValeurRoulee texte={tauxQc(activite.qcApprouve, repondu, format)} />
+                </Changeant>
               )}
             </b>
             <span>

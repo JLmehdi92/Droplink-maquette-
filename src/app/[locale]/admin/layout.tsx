@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ChevronsUpDown, Search, Shield, ShieldCheck } from "lucide-react";
@@ -7,6 +8,7 @@ import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navig
 import { BoutonTiroir, CoqueTiroir } from "@/components/app/coque-tiroir";
 import { DetailsFermable } from "@/components/app/details-fermable";
 import { CoucheV4, ScriptEntreeV4 } from "@/components/app/couche-v4";
+import { TransitionsEcran } from "@/components/app/transitions-ecran";
 import { InfoBulles } from "@/components/admin/info-bulles";
 import { LogoDropLink } from "@/components/logo-droplink";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
@@ -109,6 +111,10 @@ export default async function LayoutAdmin({
     <div data-surface="administration" className="page-app v4 page-admin">
       <ScriptEntreeV4 />
       <CoucheV4 />
+      {/* Sortie d'un écran, estompe d'une liste qu'on filtre (maquette, `coque.js`). */}
+      <Suspense fallback={null}>
+        <TransitionsEcran />
+      </Suspense>
       <a href="#contenu" className="evitement">
         {t("allerAuContenu")}
       </a>

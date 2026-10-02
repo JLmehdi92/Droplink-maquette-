@@ -1,6 +1,6 @@
 "use client";
 
-import { DialogueAdmin } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { useId, useRef, useState } from "react";
 import { BoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
@@ -131,6 +131,8 @@ export function DialogueSuspension({
   const [motif, setMotif] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [colle, setColle] = useState(false);
+  const [refus, setRefus] = useState<string | null>(null);
+  const td = useTranslations("admin.dialogue");
 
   const motifSuffisant = motif.trim().length >= motifMin;
   // La comparaison ignore la casse et les espaces de bord : un email n'y est pas
@@ -142,9 +144,15 @@ export function DialogueSuspension({
     setMotif("");
     setConfirmation("");
     setColle(false);
+    setRefus(null);
   }
 
   async function confirmer(): Promise<void> {
+    if (!pret) {
+      setRefus(!motifSuffisant ? td("motifCourt") : td("recopieDifferente"));
+      secouerDialogue(dialogue.current);
+      return;
+    }
     setTravaille(true);
     const donnees = new FormData();
     donnees.set("profilId", profilId);
@@ -204,7 +212,12 @@ export function DialogueSuspension({
             en clair sur la ligne du journal. */}
         <label className="adm-champ">
           <span>{t("motif")}</span>
-          <textarea name="motif" rows={3} autoFocus value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <textarea name="motif" rows={3} autoFocus value={motif}
+            onChange={(e) => {
+              setMotif(e.target.value);
+              setRefus(null);
+            }}
+          />
           <small>{t("motifAide", { n: motifMin })}</small>
         </label>
 
@@ -218,7 +231,10 @@ export function DialogueSuspension({
               spellCheck={false}
               placeholder={email}
               value={confirmation}
-              onChange={(e) => setConfirmation(e.target.value)}
+              onChange={(e) => {
+                setConfirmation(e.target.value);
+                setRefus(null);
+              }}
               onDrop={(e) => {
                 // Déposer un texte glissé, c'est coller sans le dire.
                 e.preventDefault();
@@ -236,6 +252,11 @@ export function DialogueSuspension({
           </label>
         ) : null}
 
+        {refus === null ? null : (
+          <p role="alert" className="adm-dialogue__erreur">
+            {refus}
+          </p>
+        )}
         {etat.statut === "erreur" ? (
           <p role="alert" className="adm-dialogue__erreur">
             {t(`erreur.${etat.motif}`)}
@@ -245,14 +266,14 @@ export function DialogueSuspension({
         <footer>
           {/* ANNULER N'EST DÉSACTIVÉ QUE PENDANT LA REQUÊTE : il n'annulerait
               alors rien, et le proposer serait mentir. */}
-          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => dialogue.current?.close()}>
+          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => fermerDialogue(dialogue.current)}>
             {t("annuler")}
           </button>
           <BoutonConfirmation
             libelle={suspendu ? t("confirmerReactivation") : t("confirmerSuspension")}
             enCours={t("enCours")}
             danger={!suspendu}
-            desactive={!pret}
+            desactive={false}
             travaille={travaille}
             onConfirmer={() => void confirmer()}
           />

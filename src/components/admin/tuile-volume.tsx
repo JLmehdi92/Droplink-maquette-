@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ValeurRoulee } from "@/components/app/couche-v4";
 
 /**
  * LES TUILES CHIFFRÉES DE L'ADMINISTRATION — refonte du 02/10/2026 (maquette,
@@ -34,7 +35,10 @@ export function TuileVolume({
   return (
     <div className="compteur-app" data-ton={ton}>
       <p className="compteur-app__titre">{libelle}</p>
-      <p className={"compteur-app__valeur" + (valeurEnSourdine ? " adm-sourdine" : "")}>{valeur}</p>
+      <p className={"compteur-app__valeur" + (valeurEnSourdine ? " adm-sourdine" : "")}>
+        {/* Les chiffres roulent au premier chargement réel (maquette, `v4.js`). */}
+        <ValeurRoulee texte={valeur} />
+      </p>
       {complement === undefined ? null : <p className="compteur-app__dessous">{complement}</p>}
     </div>
   );

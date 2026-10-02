@@ -2,8 +2,8 @@
 
 import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
 
-import { normaliserLien } from "@/lib/boutique/normaliser-lien";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { lienAcceptable, normaliserLien } from "@/lib/boutique/normaliser-lien";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { BoutonAction } from "@/components/bouton-action";
 import { ArrowRight, Check, CircleAlert, CircleCheck, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -101,6 +101,8 @@ export function FormulaireMarque({
      * regle ses pages client en chinois.
      */
     readonly lienPasserPro: string;
+    /** « Voir la page client » de l'aperçu : la dernière commande, ou rien s'il n'y en a pas. */
+    readonly lienPageClient: string | null;
     readonly logoUrl: string | null;
     readonly reseaux: {
       readonly instagram: string | null;
@@ -112,6 +114,31 @@ export function FormulaireMarque({
 }) {
   const t = useTranslations("marque");
   const [resultat, action] = useActionState(enregistrerMarque, INITIAL);
+  /*
+   * LA VALIDATION À LA SAISIE (maquette, `marque.js`) : la couleur à chaque frappe (le
+   * badge « Contraste conforme » disparaît tant que le code n'en est pas un), les liens
+   * à la sortie du champ puis à chaque frappe une fois refusés, tout à l'envoi — le
+   * premier champ fautif reçoit le focus et rien ne part. Les règles sont celles du
+   * serveur (`ReglagesMarque`, `lienAcceptable`) ; le nom de lien n'en a aucune ici :
+   * sa forme est tranchée par la base seule (`slug_valide`), une copie divergerait.
+   */
+  const [refusLocaux, setRefusLocaux] = useState<Partial<Record<string, boolean>>>({});
+  const [envoiRefuse, setEnvoiRefuse] = useState(false);
+  // « Enregistré. » s'efface dès qu'on retouche un réglage (maquette) : il dirait sinon
+  // que ce qu'on est en train de changer l'est déjà.
+  const [resultatVu, setResultatVu] = useState<ResultatMarque | null>(null);
+  const statutOk = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (resultat.statut !== "enregistre" || statutOk.current === null) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    statutOk.current.animate(
+      [
+        { opacity: 0, transform: "translateY(4px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 220, easing: "cubic-bezier(.23,1,.32,1)" },
+    );
+  }, [resultat]);
 
   const [nom, setNom] = useState(initial.nom);
   /*
@@ -328,15 +355,43 @@ export function FormulaireMarque({
     libelle: r.clef === "site" ? phrasesClient.page.site : t(`reseau.${r.clef}`),
     trace: r.trace,
   }));
+  const couleurValide = /^#[0-9a-fA-F]{6}$/.test(couleur.trim());
   const erreur = (champ: string, message: string) =>
-    champsEnEchec.includes(champ) ? (
+    champsEnEchec.includes(champ) || refusLocaux[champ] === true ? (
       <p role="alert" className="champ-reglage__erreur">
         {message}
       </p>
     ) : null;
 
   return (
-    <form action={action} className="marque" data-apercu={format} noValidate>
+    <form
+      action={action}
+      className="marque"
+      data-apercu={format}
+      noValidate
+      onInput={() => {
+        setResultatVu(resultat);
+        setEnvoiRefuse(false);
+      }}
+      onSubmit={(e) => {
+        const refus: Record<string, boolean> = { couleurAccent: !couleurValide };
+        for (const r of RESEAUX) refus[r.clef] = !lienAcceptable(r.clef, reseaux[r.clef]);
+        setRefusLocaux(refus);
+        const premier = ["couleurAccent", ...RESEAUX.map((r) => r.clef)].find((c) => refus[c] === true);
+        if (premier === undefined) {
+          setEnvoiRefuse(false);
+          return;
+        }
+        e.preventDefault();
+        setEnvoiRefuse(true);
+        const champ = document.getElementById(premier === "couleurAccent" ? "couleurTexte" : premier);
+        champ?.focus({ preventScroll: true });
+        champ?.scrollIntoView({
+          block: "center",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        });
+      }}
+    >
       <input type="hidden" name="couleurAccent" value={couleur} />
       <input type="hidden" name="languePublique" value={langue} />
 
@@ -478,21 +533,29 @@ export function FormulaireMarque({
                   id="couleurTexte"
                   type="text"
                   value={couleur}
-                  onChange={(e) => setCouleur(e.target.value.trim())}
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    setCouleur(v);
+                    // « douce » : un code redevenu juste efface le refus, un code en cours de
+                    // frappe n'en affiche pas (maquette, `valider("couleur", true)`)
+                    if (/^#[0-9a-fA-F]{6}$/.test(v)) setRefusLocaux((r) => ({ ...r, couleurAccent: false }));
+                  }}
                   placeholder="#000000"
                   aria-label={t("couleurHex")}
                   spellCheck={false}
                   autoComplete="off"
                   maxLength={7}
-                  aria-invalid={champsEnEchec.includes("couleurAccent") || undefined}
+                  aria-invalid={champsEnEchec.includes("couleurAccent") || refusLocaux.couleurAccent === true || undefined}
                 />
                 {/* LE BADGE DIT CE QUE LA MACHINE A ÉTABLI : `resoudreAccent()` garantit
                     4,5:1 sur le texte et 3:1 sur l'interface pour n'importe quelle
                     valeur. Le vendeur n'a pas à chercher « une couleur qui marche ». */}
-                <span className="conforme">
-                  <CircleCheck aria-hidden="true" className="ic" />
-                  {t("contrasteConforme")}
-                </span>
+                {couleurValide ? (
+                  <span className="conforme">
+                    <CircleCheck aria-hidden="true" className="ic" />
+                    {t("contrasteConforme")}
+                  </span>
+                ) : null}
               </div>
               {erreur("couleurAccent", t("erreurCouleur"))}
             </div>
@@ -564,15 +627,22 @@ export function FormulaireMarque({
                     autoComplete="off"
                     maxLength={200}
                     value={reseaux[reseau.clef]}
-                    onChange={(e) => setReseaux((actuels) => ({ ...actuels, [reseau.clef]: e.target.value }))}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setReseaux((actuels) => ({ ...actuels, [reseau.clef]: v }));
+                      if (refusLocaux[reseau.clef] === true)
+                        setRefusLocaux((r) => ({ ...r, [reseau.clef]: !lienAcceptable(reseau.clef, v) }));
+                    }}
                     /* La normalisation SE VOIT, au moment où l'on quitte le champ :
                        l'écran ne garde pas un pseudo pendant que la base reçoit une
                        adresse. À chaque frappe, le curseur sauterait. */
-                    onBlur={(e) =>
-                      setReseaux((actuels) => ({ ...actuels, [reseau.clef]: normaliserLien(reseau.clef, e.target.value) }))
-                    }
+                    onBlur={(e) => {
+                      const v = e.target.value;
+                      setReseaux((actuels) => ({ ...actuels, [reseau.clef]: normaliserLien(reseau.clef, v) }));
+                      setRefusLocaux((r) => ({ ...r, [reseau.clef]: !lienAcceptable(reseau.clef, v) }));
+                    }}
                     placeholder={t(`reseauExemple.${reseau.clef}`)}
-                    aria-invalid={champsEnEchec.includes(reseau.clef) || undefined}
+                    aria-invalid={champsEnEchec.includes(reseau.clef) || refusLocaux[reseau.clef] === true || undefined}
                   />
                 </span>
                 {erreur(reseau.clef, t(`reseauInvalide.${reseau.clef}`))}
@@ -749,8 +819,14 @@ export function FormulaireMarque({
             défiler des couleurs intermédiaires chez ses clients. La réussite est
             dite en vert (demande de Wassim du 09/09/2026), `role="status"`. */}
         <div className="marque__enregistrer">
-          {resultat.statut === "enregistre" ? (
-            <p className="marque__statut" data-ton="ok" role="status">
+          {envoiRefuse ? (
+            <p className="marque__statut" data-ton="erreur" role="alert">
+              {t("rienEnregistre")}
+            </p>
+          ) : resultatVu === resultat ? (
+            <p className="marque__statut" role="status" />
+          ) : resultat.statut === "enregistre" ? (
+            <p className="marque__statut" data-ton="ok" role="status" ref={statutOk}>
               <Check aria-hidden="true" className="ic" />
               {t("enregistre")}
             </p>
@@ -790,7 +866,9 @@ export function FormulaireMarque({
           mobile: t("apercuMobile"),
           imageMobile: t("apercuImageMobile"),
           imageBureau: t("apercuImageBureau"),
+          voirPageClient: t("voirPageClient"),
         }}
+        lienPageClient={initial.lienPageClient}
         page={{
           textes: phrasesClient.page,
           pour: phrasesClient.pourGenerique,

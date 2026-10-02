@@ -281,7 +281,7 @@ export async function TableauEnvois({
         ) : (
           /* LA SÉLECTION EXPORTE : un `GET` qui ne modifie rien. */
           <form method="get" action="/api/envois/export" className="liste__lot">
-            <div className="liste__table" role="table" aria-label={t("titre")}>
+            <div className="liste__table" role="table" aria-label={t("titre")} data-table>
               <div className="rangee rangee--tete rangee--envoi" role="row">
                 <span role="columnheader">
                   <CaseTout libelle={t("lot.toutSelectionner")} />
@@ -298,7 +298,7 @@ export async function TableauEnvois({
                   <span className="visuellement-cache">{t("colonnes.actions")}</span>
                 </span>
               </div>
-              {page.lignes.map((ligne) => {
+              {page.lignes.map((ligne, rang) => {
                 const d = decrire(ligne);
                 const k = ETAPES.indexOf(ligne.etat);
                 const premiere = ligne.commandesLiees[0];
@@ -363,7 +363,7 @@ export async function TableauEnvois({
                         <span
                           className="mini-frise"
                           data-ton={ligne.etat === "livre" ? "livre" : d.silencieux ? "silence" : undefined}
-                          style={{ "--k": k } as React.CSSProperties}
+                          style={{ "--k": k, "--i": rang } as React.CSSProperties}
                         >
                           <span className="visuellement-cache">{d.silencieux ? t("puce.silence") : t(`etat.${ligne.etat}`)}</span>
                           {ETAPES.map((e, i) => (

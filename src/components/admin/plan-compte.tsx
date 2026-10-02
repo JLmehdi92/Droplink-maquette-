@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { DialogueAdmin } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { BoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
 import { definirPlan, type EtatPlan } from "@/app/[locale]/admin/comptes/[id]/actions";
@@ -41,6 +41,8 @@ export function PlanCompte({
   const [etat, setEtat] = useState<EtatPlan>(INITIAL);
   const [travaille, setTravaille] = useState(false);
   const [motif, setMotif] = useState("");
+  const [refus, setRefus] = useState<string | null>(null);
+  const td = useTranslations("admin.dialogue");
 
   // LE PLAN VISÉ VOYAGE, pas « l'inverse de l'actuel » : deux onglets ouverts ne
   // s'annulent pas, la base répond « déjà dans ce plan ».
@@ -49,6 +51,11 @@ export function PlanCompte({
   const geste = vise === "pro" ? t("passerPro") : t("passerGratuit");
 
   async function confirmer(): Promise<void> {
+    if (!pret) {
+      setRefus(td("motifCourt"));
+      secouerDialogue(dialogue.current);
+      return;
+    }
     setTravaille(true);
     const donnees = new FormData();
     donnees.set("profilId", profilId);
@@ -80,6 +87,7 @@ export function PlanCompte({
             onClick={() => {
               setEtat(INITIAL);
               setMotif("");
+              setRefus(null);
               dialogue.current?.showModal();
             }}
           >
@@ -104,22 +112,30 @@ export function PlanCompte({
       >
         <label className="adm-champ">
           <span>{t("motif")}</span>
-          <textarea name="motif" rows={3} autoFocus value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <textarea name="motif" rows={3} autoFocus value={motif} onChange={(e) => {
+              setMotif(e.target.value);
+              setRefus(null);
+            }}
+          />
           <small>{t("motifAide", { n: motifMin })}</small>
         </label>
+        {refus === null ? null : (
+          <p role="alert" className="adm-dialogue__erreur">
+            {refus}
+          </p>
+        )}
         {etat.statut === "erreur" ? (
           <p role="alert" className="adm-dialogue__erreur">
             {t(`erreur.${etat.motif}`)}
           </p>
         ) : null}
         <footer>
-          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => dialogue.current?.close()}>
+          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => fermerDialogue(dialogue.current)}>
             {t("annuler")}
           </button>
           <BoutonAction
             type="button"
             enAttente={travaille}
-            disabled={!pret}
             onClick={() => void confirmer()}
             libelles={{ repos: geste, enCours: t("enCours"), reussi: geste, echoue: geste }}
             className="adm-confirmer disabled:opacity-50"

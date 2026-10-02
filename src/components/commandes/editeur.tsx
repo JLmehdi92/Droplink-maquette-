@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { relireHistorique } from "@/app/[locale]/(app)/commandes/[id]/actions";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -194,6 +195,45 @@ export function Editeur({
   const [versionApercu, setVersionApercu] = useState(0);
   const apercuPerime = useCallback((): void => setVersionApercu((v) => v + 1), []);
 
+  /*
+   * ⚠️ L'HISTORIQUE NE SE RELISAIT PAS (audit de fidélité du 03/10/2026) : rendu par
+   * le serveur et jamais relu, il ne montrait aucune des modifications qu'on venait
+   * d'enregistrer, alors qu'il est la pièce qu'on relit en cas de litige. Il est
+   * désormais relu après chaque écriture CONFIRMÉE (la même horloge que l'aperçu : un
+   * champ, un média, la révocation), une fois par rafale (700 ms de calme), par une
+   * action qui ne lit QUE lui (`relireHistorique`) — jamais par `router.refresh()`, qui
+   * réexécutait toute la page et comptait une ouverture d'éditeur de plus à chaque fois.
+   * Jamais sur la frappe : l'historique dit ce que la base a écrit.
+   */
+  const [historiqueRelu, setHistoriqueRelu] = useState<ReactNode | null>(null);
+  useEffect(() => {
+    if (versionApercu === 0) return;
+    let abandonne = false;
+    const minuteur = window.setTimeout(() => {
+      relireHistorique(id)
+        .then((bloc) => {
+          if (!abandonne && bloc !== null) setHistoriqueRelu(bloc);
+        })
+        .catch((erreur: unknown) => {
+          // L'historique affiché reste celui d'avant : il est vrai, simplement en retard.
+          console.error("[editeur] relecture de l'historique impossible", erreur);
+        });
+    }, 700);
+    return () => {
+      abandonne = true;
+      window.clearTimeout(minuteur);
+    };
+  }, [versionApercu, id]);
+
+  // Une commande toute neuve (aucun client encore) : le curseur attend le nom du client
+  // (maquette, `commande.js`) — à la souris seulement, au téléphone le clavier couvrirait
+  // l'écran. Décidé à l'OUVERTURE de la fiche, une fois : jamais en cours de saisie.
+  const [nomInitial] = useState(initiales.customer_label);
+  useEffect(() => {
+    if (nomInitial.trim() !== "" || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    document.getElementById("customer_label")?.focus({ preventScroll: true });
+  }, [nomInitial]);
+
   const appliquer = useCallback(
     (champ: keyof ValeursCommande, valeur: string, resultat: ResultatEnregistrement): void => {
       if (resultat.statut === "ok") {
@@ -371,7 +411,10 @@ export function Editeur({
           orderId={id}
           jeton={jetonCourant}
           lienPublic={lienPublic}
-          onNouveauJeton={setJetonCourant}
+          onNouveauJeton={(nouveau) => {
+            setJetonCourant(nouveau);
+            apercuPerime();
+          }}
         />
         <PanneauSuivi
           suivi={suivi}
@@ -379,7 +422,7 @@ export function Editeur({
           versPasserPro={"/" + langue + "/passer-pro"}
           statut={valeurs.status}
         />
-        {historique}
+        {historiqueRelu ?? historique}
       </div>
 
       {/* LA BANDE D'ACTION DU TÉLÉPHONE, collée en bas : « voir la page client » est

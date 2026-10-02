@@ -49,10 +49,16 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
  */
 export default async function VersLaPageClient({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale, id } = await params;
+  // `?apercu=1` (« Voir la page client » de Ma marque) : l'APERÇU de la page, qui ne
+  // compte aucune vue — y envoyer le vendeur sur sa vraie page ferait passer « vue »
+  // une commande que son client n'a jamais ouverte (contrainte n° 8).
+  const apercu = (await searchParams)["apercu"] === "1";
   const langue = estLangueSupportee(locale) ? locale : "fr";
 
   /*
@@ -91,6 +97,7 @@ export default async function VersLaPageClient({
    * porterait celle du conteneur derrière un proxy — mesuré en production le
    * 08/09/2026, `localhost:8080`.
    */
+  if (apercu) redirect(`/p/${encodeURIComponent(data.public_token)}/apercu`);
   const profil = await lireProfilVendeur();
   redirect(cheminPageClient(data.public_token, profil?.nomDeLien ?? null));
 }

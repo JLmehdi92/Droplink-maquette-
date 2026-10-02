@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type ComponentProps } from "react";
-import { Monitor, Smartphone } from "lucide-react";
+import { ExternalLink, Monitor, Smartphone } from "lucide-react";
 import { ApercuPageClient } from "./apercu-page-client";
 
 /**
@@ -25,6 +25,7 @@ export function ApercuMarque({
   surFormat,
   libelles,
   page,
+  lienPageClient,
 }: {
   readonly format: "mobile" | "desktop";
   readonly surFormat: (f: "mobile" | "desktop") => void;
@@ -37,8 +38,11 @@ export function ApercuMarque({
     readonly mobile: string;
     readonly imageMobile: string;
     readonly imageBureau: string;
+    readonly voirPageClient: string;
   };
   readonly page: Omit<ComponentProps<typeof ApercuPageClient>, "bureau" | "zoom">;
+  /** La vraie page client de la dernière commande (maquette : « Voir la page client »). */
+  readonly lienPageClient: string | null;
 }) {
   const ecranMobile = useRef<HTMLDivElement>(null);
   const ecranBureau = useRef<HTMLDivElement>(null);
@@ -83,6 +87,18 @@ export function ApercuMarque({
           <Smartphone aria-hidden="true" className="ic" />
           {libelles.mobile}
         </button>
+        {lienPageClient === null ? null : (
+          <a
+            className="apercu-format__lien"
+            href={lienPageClient}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={libelles.voirPageClient}
+            title={libelles.voirPageClient}
+          >
+            <ExternalLink aria-hidden="true" className="ic" />
+          </a>
+        )}
       </div>
       <div className="apercu-zone">
         <div className="apercu-mobile" hidden={format !== "mobile"}>

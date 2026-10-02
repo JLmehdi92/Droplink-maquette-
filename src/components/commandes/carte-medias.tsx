@@ -133,6 +133,9 @@ export function CarteMedias({
   );
 
   const [medias, setMedias] = useState<readonly MediaAffiche[]>(initiaux);
+  // Les médias déjà là à l'ouverture de la fiche n'entrent pas : seuls ceux qu'on
+  // ajoute ensuite (maquette, `commande.js` : 420 ms, léger rebond).
+  const [presents] = useState<ReadonlySet<string>>(() => new Set(initiaux.map((m) => m.id)));
   const [enCours, setEnCours] = useState<readonly EnCours[]>([]);
 
   /**
@@ -569,6 +572,7 @@ export function CarteMedias({
                   key={media.id}
                   media={media}
                   index={index}
+                  nouvelle={!presents.has(media.id)}
                   onSupprimer={() => void supprimer(media.id)}
                   onCouvrir={() => void couvrir(media.id)}
                 />
@@ -652,11 +656,14 @@ function rang(medias: readonly MediaAffiche[], id: string | number): number {
 function Case({
   media,
   index,
+  nouvelle,
   onSupprimer,
   onCouvrir,
 }: {
   readonly media: MediaAffiche;
   readonly index: number;
+  /** Ajoutée depuis l'ouverture de la fiche : elle entre (maquette). */
+  readonly nouvelle: boolean;
   readonly onSupprimer: () => void;
   readonly onCouvrir: () => void;
 }) {
@@ -664,10 +671,27 @@ function Case({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: media.id,
   });
+  const caseLi = useRef<HTMLLIElement | null>(null);
+  const entree = useRef(nouvelle);
+  useEffect(() => {
+    const li = caseLi.current;
+    if (!entree.current || li === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    entree.current = false;
+    li.animate(
+      [
+        { opacity: 0, transform: "translateY(-10px) scale(.92)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 420, easing: "cubic-bezier(.2,.9,.25,1.15)", fill: "backwards" },
+    );
+  }, []);
 
   return (
     <li
-      ref={setNodeRef}
+      ref={(el) => {
+        setNodeRef(el);
+        caseLi.current = el;
+      }}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={
         "ed-vignette" + (media.estCouverture ? " est-couverture" : "") + (isDragging ? " est-saisie" : "")

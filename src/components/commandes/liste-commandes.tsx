@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
+import { RepliArchivage } from "@/components/commandes/repli-archivage";
 import { BoutonAction } from "@/components/bouton-action";
 import { BoutonSoumissionUnique } from "@/components/bouton-soumission-unique";
 import { DetailsFermable } from "@/components/app/details-fermable";
@@ -331,6 +332,7 @@ export async function ListeCommandes({
       ) : null}
 
       <section className="bloc liste" aria-label={t("titre")}>
+        <RepliArchivage />
         {page.lignes.length === 0 ? (
           <FiltreSansResultat diagnostic={page.diagnostic} base={base} parametres={parametres} total={total} />
         ) : (
@@ -344,7 +346,7 @@ export async function ListeCommandes({
             <form method="post" action={geste} className="liste__lot">
               <input type="hidden" name="geste" value="lot" />
               <input type="hidden" name="retour" value={retour} />
-              <div className="liste__table" role="table" aria-label={t("titre")}>
+              <div className="liste__table" role="table" aria-label={t("titre")} data-table>
                 <div className="rangee rangee--tete" role="row">
                   <span role="columnheader">
                     <CaseTout libelle={t("toutSelectionner")} />
@@ -362,9 +364,10 @@ export async function ListeCommandes({
                     <span className="visuellement-cache">{t("colonne.actions")}</span>
                   </span>
                 </div>
-                {page.lignes.map((ligne) => (
+                {page.lignes.map((ligne, rang) => (
                   <Ligne
                     key={ligne.id}
+                    rang={rang}
                     ligne={ligne}
                     base={base}
                     lien={lienPageClient(origine, ligne.jetonPublic, nomDeLien)}
@@ -454,6 +457,7 @@ export async function ListeCommandes({
 }
 
 function Ligne({
+  rang,
   ligne,
   base,
   lien,
@@ -464,6 +468,8 @@ function Ligne({
   derniereVue,
   dernierMouvement,
 }: {
+  /** Le rang de la ligne : la frise se remplit en cascade au premier chargement. */
+  readonly rang: number;
   readonly ligne: LigneCommande;
   readonly base: string;
   readonly lien: string;
@@ -561,7 +567,7 @@ function Ligne({
               {enSilence ? t("frise.silence", { jours: silence.jours }) : t(`statut.${ligne.statut}`)}. {info}.
             </span>
             <i className="frise__rail" aria-hidden="true">
-              <i className="frise__plein" />
+              <i className="frise__plein" style={{ "--i": rang } as React.CSSProperties} />
             </i>
             {ETAPES.map((e, i) => (
               <span

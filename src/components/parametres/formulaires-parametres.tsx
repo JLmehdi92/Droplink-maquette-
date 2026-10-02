@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Monitor, Smartphone } from "lucide-react";
 import {
@@ -102,24 +102,86 @@ function Tete({ titre, aide, id }: { readonly titre: string; readonly aide: stri
   );
 }
 
+/**
+ * CE QUI APPARAÎT SUR DEMANDE ENTRE (maquette, `parametres.js` : `devoiler`, 200 ms, 4 px
+ * vers le bas) : le mot de passe demandé quand l'adresse change, la confirmation d'une
+ * suppression, les étapes de la double authentification. Sous mouvement réduit, posé.
+ */
+function useDevoilement<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    if (ref.current === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    ref.current.animate(
+      [
+        { opacity: 0, transform: "translateY(-4px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 200, easing: "cubic-bezier(.23,1,.32,1)" },
+    );
+  }, []);
+  return ref;
+}
+
+function Devoile({ className, id, children }: { readonly className?: string; readonly id?: string; readonly children: ReactNode }) {
+  const ref = useDevoilement<HTMLDivElement>();
+  return (
+    <div ref={ref} className={className} id={id}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * LE PANNEAU D'UN ONGLET ENTRE quand on change d'onglet (maquette : 180 ms, 4 px), et
+ * seulement alors — pas à l'arrivée sur l'écran, qui a déjà son entrée. Les onglets
+ * sont des liens (`?section=`) : `TransitionsEcran` marque un changement sur place.
+ */
+export function PanneauReglages({ etiquette, children }: { readonly etiquette: string; readonly children: ReactNode }) {
+  const ref = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const surPlace = window.__changementSurPlace === true;
+    window.__changementSurPlace = false;
+    if (!surPlace || ref.current === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    ref.current.animate(
+      [
+        { opacity: 0, transform: "translateY(4px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 180, easing: "cubic-bezier(.23,1,.32,1)" },
+    );
+  }, []);
+  return (
+    <section ref={ref} className="reglages__panneau" aria-label={etiquette}>
+      {children}
+    </section>
+  );
+}
+
 function ChampMotDePasse({
   libelle,
   nom,
   nouveau = false,
   decritPar,
+  devoile = false,
+  surSaisie,
 }: {
   readonly libelle: string;
   readonly nom: string;
   readonly nouveau?: boolean;
   readonly decritPar?: string;
+  /** Apparu sur demande : il entre (maquette, `devoiler`). */
+  readonly devoile?: boolean;
+  readonly surSaisie?: (valeur: string) => void;
 }) {
   const id = useId();
+  const ref = useDevoilement<HTMLDivElement>();
   return (
-    <div className="champ-r">
+    <div className="champ-r" ref={devoile ? ref : undefined}>
       <label htmlFor={id}>{libelle}</label>
       <input
         id={id}
         name={nom}
+        onChange={surSaisie === undefined ? undefined : (e) => surSaisie(e.target.value)}
         type="password"
         required
         minLength={nouveau ? 12 : undefined}
@@ -133,28 +195,70 @@ function ChampMotDePasse({
 
 /* ---------- Compte ---------- */
 
-export function BlocNom({ nomActuel, initiales }: { readonly nomActuel: string | null; readonly initiales: string }) {
+/** Les initiales d'un nom, comme le serveur les calcule (`parametres/page.tsx`). */
+function initialesDe(texte: string): string {
+  return texte
+    .split(/\s+/)
+    .filter((m) => m !== "")
+    .slice(0, 2)
+    .map((m) => m[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+export function BlocNom({
+  nomActuel,
+  initiales,
+  repli,
+}: {
+  readonly nomActuel: string | null;
+  readonly initiales: string;
+  /** Ce qui nomme le compte quand le nom est vide (la boutique, sinon l'adresse). */
+  readonly repli: string;
+}) {
   const t = useTranslations("parametres.compte");
   const [etat, action, pendant] = useActionState(enregistrerNom, INITIAL);
   const id = useId();
+  // Le bouton n'agit qu'une fois le nom changé, et l'avatar suit la frappe (maquette).
+  const [saisie, setSaisie] = useState(nomActuel ?? "");
+  const [enregistre, setEnregistre] = useState(nomActuel ?? "");
+  // La valeur ENVOYÉE, pas celle du champ à la réponse : on peut taper pendant
+  // l'aller-retour, et ce qui est enregistré est ce qui est parti (contrainte n° 8).
+  const [envoye, setEnvoye] = useState(nomActuel ?? "");
+  const [vu, setVu] = useState(etat);
+  if (vu !== etat) {
+    setVu(etat);
+    if (etat.statut === "enregistre") setEnregistre(envoye);
+  }
+  const avatar = saisie.trim() === "" ? initialesDe(repli) : initialesDe(saisie.trim());
   return (
-    <form action={action} className="bloc-r" noValidate>
+    <form action={action} className="bloc-r" noValidate onSubmit={() => setEnvoye(saisie)}>
       <div className="bloc-r__corps">
         <Tete titre={t("nom")} aide={t("nomAide")} />
         <div className="nom-r">
           <span className="nom-r__avatar" aria-hidden="true">
-            {initiales}
+            {avatar || initiales}
           </span>
           <div className="champ-r champ-r--large">
             <label htmlFor={id} className="visuellement-cache">
               {t("nom")}
             </label>
-            <input id={id} name="nom" defaultValue={nomActuel ?? ""} maxLength={80} autoComplete="name" />
+            <input
+              id={id}
+              name="nom"
+              value={saisie}
+              onChange={(e) => setSaisie(e.target.value)}
+              maxLength={80}
+              autoComplete="name"
+            />
           </div>
         </div>
       </div>
       <Pied aide={t("nomMax")} message={useMessage(etat, t("enregistre"))}>
-        <button type="submit" className="bouton-app bouton-app--plein" disabled={pendant}>
+        <button
+          type="submit"
+          className="bouton-app bouton-app--plein"
+          disabled={pendant || saisie.trim() === enregistre.trim()}
+        >
           {pendant ? t("enregistrement") : t("enregistrer")}
         </button>
       </Pied>
@@ -198,7 +302,7 @@ export function BlocAdresse({
               onChange={(e) => setSaisie(e.target.value)}
             />
           </div>
-          {modifiee ? <ChampMotDePasse libelle={t("actuel")} nom="actuel" /> : null}
+          {modifiee ? <ChampMotDePasse libelle={t("actuel")} nom="actuel" devoile /> : null}
         </div>
         {adresseSuivie ? (
           <p role="status" className="aide-r">
@@ -219,18 +323,30 @@ export function BlocMotDePasse() {
   const t = useTranslations("parametres.compte");
   const [etat, action, pendant] = useActionState(changerMotDePasseCompte, INITIAL);
   const idAide = useId();
+  // Désactivé tant que les deux champs ne sont pas remplis (maquette).
+  const [actuel, setActuel] = useState("");
+  const [nouveau, setNouveau] = useState("");
+  // React vide les champs après une action réussie : l'état qui garde le bouton aussi.
+  const [vu, setVu] = useState(etat);
+  if (vu !== etat) {
+    setVu(etat);
+    if (etat.statut === "enregistre") {
+      setActuel("");
+      setNouveau("");
+    }
+  }
   return (
     <form action={action} className="bloc-r" noValidate>
       <div className="bloc-r__corps">
         <Tete titre={t("motDePasse")} aide={t("motDePasseAide")} />
         <div className="grille-r">
-          <ChampMotDePasse libelle={t("actuel")} nom="actuel" />
-          <ChampMotDePasse libelle={t("nouveau")} nom="nouveau" nouveau decritPar={idAide} />
+          <ChampMotDePasse libelle={t("actuel")} nom="actuel" surSaisie={setActuel} />
+          <ChampMotDePasse libelle={t("nouveau")} nom="nouveau" nouveau decritPar={idAide} surSaisie={setNouveau} />
         </div>
         <p className="aide-r aide-r--note">{t("sansMotDePasse")}</p>
       </div>
       <Pied aide={t("nouveauAide")} idAide={idAide} message={useMessage(etat, t("motDePasseChange"))}>
-        <button type="submit" className="bouton-app bouton-app--plein" disabled={pendant}>
+        <button type="submit" className="bouton-app bouton-app--plein" disabled={pendant || actuel === "" || nouveau === ""}>
           {pendant ? t("changement") : t("changerMotDePasse")}
         </button>
       </Pied>
@@ -269,7 +385,7 @@ export function BlocSuppression({
       <div className="bloc-r__corps">
         <Tete titre={t(`suppression.${variante}.titre`)} aide={t(`suppression.${variante}.avertissement`)} />
         {ouvert ? (
-          <div className="grille-r confirmation-r">
+          <Devoile className="grille-r confirmation-r">
             <div className="champ-r">
               <label htmlFor={id}>{t("suppression.recopier", { adresse })}</label>
               <input
@@ -285,7 +401,7 @@ export function BlocSuppression({
               />
             </div>
             <ChampMotDePasse libelle={t("compte.actuel")} nom="actuel" />
-          </div>
+          </Devoile>
         ) : null}
         {/* LE SEUL ENDROIT OÙ RÉSILIER : le produit n'a pas de clé d'API chez le
             fournisseur, il ne peut qu'indiquer son portail (206). */}
@@ -380,7 +496,7 @@ export function BlocDeuxEtapes({ active }: { readonly active: boolean | null }) 
         </div>
       </div>
       {mode === null ? null : (
-        <div id={idPanneau}>{mode === "desactiver" ? <DesactivationDeuxEtapes /> : <ActivationDeuxEtapes />}</div>
+        <Devoile id={idPanneau}>{mode === "desactiver" ? <DesactivationDeuxEtapes /> : <ActivationDeuxEtapes />}</Devoile>
       )}
     </section>
   );
@@ -414,7 +530,7 @@ function ActivationDeuxEtapes() {
   return (
     <form action={confirmer} noValidate>
       <input type="hidden" name="facteur" value={etatDebut.facteur} />
-      <div className="bloc-r__corps etape-r etape-r--bloc">
+      <Devoile className="bloc-r__corps etape-r etape-r--bloc">
         <p className="aide-r">{t("securite.deuxEtapes.scanner")}</p>
         <div className="qr-r">
           {/* LE QR CODE EST UN SVG RENDU PAR SUPABASE, en `data:` : dans un `<img>`,
@@ -433,7 +549,7 @@ function ActivationDeuxEtapes() {
           <label htmlFor={idCode}>{t("securite.deuxEtapes.code")}</label>
           <input id={idCode} name="code" required inputMode="numeric" autoComplete="one-time-code" maxLength={7} placeholder="123456" />
         </div>
-      </div>
+      </Devoile>
       <Pied aide="" message={messageFin}>
         <button type="submit" className="bouton-app bouton-app--plein" disabled={enConfirmation}>
           {enConfirmation ? t("securite.deuxEtapes.confirmation") : t("securite.deuxEtapes.confirmer")}
@@ -483,6 +599,45 @@ export function BlocSessions({ sessions }: { readonly sessions: readonly Session
   const t = useTranslations("parametres");
   const [etat, action, pendant] = useActionState(fermerAutresSessions, INITIAL);
   const [ouvert, setOuvert] = useState(false);
+  /*
+   * LES AUTRES APPAREILS S'EN VONT (maquette, `parametres.js` : 180 ms, 6 px vers la
+   * droite) — APRÈS la confirmation du serveur, jamais avant (contrainte n° 8). La
+   * liste n'est pas relue : seules les sessions fermées par CE geste disparaissent.
+   */
+  const liste = useRef<HTMLUListElement>(null);
+  const [fermees, setFermees] = useState(false);
+  useEffect(() => {
+    if (etat.statut !== "enregistre") return;
+    const partants = [...(liste.current?.querySelectorAll<HTMLElement>("li[data-autre]") ?? [])];
+    const fin = () => setFermees(true);
+    if (partants.length === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      queueMicrotask(fin);
+      return;
+    }
+    let annule = false;
+    void Promise.all(
+      partants.map(
+        (li) =>
+          li.animate(
+            [
+              { opacity: 1, transform: "none" },
+              { opacity: 0, transform: "translateX(6px)" },
+            ],
+            { duration: 180, easing: "cubic-bezier(.23,1,.32,1)", fill: "forwards" },
+          ).finished,
+      ),
+    ).then(
+      () => {
+        if (!annule) fin();
+      },
+      () => {
+        // Animation interrompue (écran quitté) : rien à faire disparaître.
+      },
+    );
+    return () => {
+      annule = true;
+    };
+  }, [etat]);
   return (
     <form action={action} className="bloc-r" noValidate>
       <div className="bloc-r__corps">
@@ -492,11 +647,11 @@ export function BlocSessions({ sessions }: { readonly sessions: readonly Session
             {t("securite.lectureImpossible")}
           </p>
         ) : (
-          <ul className="appareils-r">
-            {sessions.map((s) => {
+          <ul className="appareils-r" ref={liste}>
+            {sessions.filter((s) => !fermees || s.cetAppareil).map((s) => {
               const Icone = s.mobile ? Smartphone : Monitor;
               return (
-                <li key={s.id}>
+                <li key={s.id} data-autre={s.cetAppareil ? undefined : ""}>
                   <span className="appareils-r__ic">
                     <Icone aria-hidden="true" className="ic" />
                   </span>
@@ -511,9 +666,9 @@ export function BlocSessions({ sessions }: { readonly sessions: readonly Session
           </ul>
         )}
         {ouvert ? (
-          <div className="grille-r confirmation-r">
+          <Devoile className="grille-r confirmation-r">
             <ChampMotDePasse libelle={t("compte.actuel")} nom="actuel" />
-          </div>
+          </Devoile>
         ) : null}
       </div>
       <Pied aide={t("securite.fermerAide")} message={useMessage(etat, t("securite.ferme"))}>

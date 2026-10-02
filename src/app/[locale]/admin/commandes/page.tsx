@@ -259,7 +259,7 @@ export default async function AdminCommandes({
           {page.lignes.length === 0 ? (
             <p className="adm-vide">{filtre ? t("commandes.videFiltre") : t("commandes.videTout")}</p>
           ) : (
-            <TraductionsClient espaces={["admin.blocage", "admin.contestation"]}>
+            <TraductionsClient espaces={["admin.blocage", "admin.contestation", "admin.dialogue"]}>
               {/* AUCUN CONTENU : ni client, ni référence produit, ni lien. « Voir »
                   mène à la fiche du COMPTE, jamais à la commande. */}
               <div className="adm-defil">

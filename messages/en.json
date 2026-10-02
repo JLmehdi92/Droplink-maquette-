@@ -1061,7 +1061,9 @@
     "apercuBureau": "Desktop",
     "apercuMobile": "Mobile",
     "apercuImageMobile": "Mobile preview of the customer page",
-    "apercuImageBureau": "Desktop preview of the customer page"
+    "apercuImageBureau": "Desktop preview of the customer page",
+    "voirPageClient": "View the client page",
+    "rienEnregistre": "Nothing has been saved."
   },
   "envois": {
     "titre": "Shipments",
@@ -2391,7 +2393,11 @@
     },
     "accueil": "DropLink administration",
     "pastille": "Admin",
-    "infoValeur": "{libelle}: {valeur}"
+    "infoValeur": "{libelle}: {valeur}",
+    "dialogue": {
+      "motifCourt": "The reason is too short.",
+      "recopieDifferente": "The address you typed does not match this account."
+    }
   },
   "erreurs": {
     "titre": "This screen could not be displayed",

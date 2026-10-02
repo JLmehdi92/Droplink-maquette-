@@ -44,6 +44,29 @@ export interface TextesGraphe {
 }
 
 const EASE = "cubic-bezier(.23,1,.32,1)";
+
+/** Ce qui est dessiné : la vue et ses valeurs (une nouvelle période change la courbe). */
+function cleDessin(
+  vue: "semaines" | "liens",
+  semaines: readonly PointGraphe[] | null,
+  ouvertures: readonly PointGraphe[] | null,
+): string {
+  const serie = vue === "semaines" ? semaines : ouvertures;
+  return vue + ":" + (serie === null ? "-" : serie.map((p) => `${p.court}=${p.valeur}`).join(","));
+}
+
+/** L'entrée d'un dessin (maquette, `analytique.js`) : les barres montent, le trait se trace. */
+function animerDessin(z: HTMLElement, vue: "semaines" | "liens"): void {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (vue === "semaines") {
+    z.querySelectorAll(".graphe__barre").forEach((b, i) =>
+      b.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }], { duration: 520, delay: i * 35, easing: EASE, fill: "backwards" }),
+    );
+    return;
+  }
+  z.querySelector(".graphe__trait")?.animate([{ strokeDasharray: "1", strokeDashoffset: 1 }, { strokeDasharray: "1", strokeDashoffset: 0 }], { duration: 900, easing: EASE });
+  z.querySelector(".graphe__aire")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, delay: 300, easing: "ease-out", fill: "backwards" });
+}
 const GAUCHE = 30, BAS = 26, HAUT = 10;
 
 export function GrapheTableau({
@@ -70,7 +93,12 @@ export function GrapheTableau({
   const [taille, setTaille] = useState({ l: 0, h: 0 });
   const [vise, setVise] = useState<number | null>(null);
   const premier = useRef(true);
-  const traceePour = useRef<string | null>(null);
+  // LE DESSIN AFFICHÉ, qui peut retarder d'un fondu sur ce qui est demandé (maquette,
+  // `redessiner`) : à la bascule, ou quand une nouvelle période arrive, l'ancien tracé
+  // s'efface, flouté, en 120 ms, puis le nouveau se dessine (barres qui montent, trait
+  // qui se trace). Les boutons, eux, disent tout de suite la vue choisie.
+  const [dessine, setDessine] = useState({ vue, semaines, ouvertures });
+  const entreeDessin = useRef(false);
   const [auClavier, setAuClavier] = useState(false);
   const id = useId().replace(/:/g, "");
 
@@ -84,26 +112,67 @@ export function GrapheTableau({
     return () => obs.disconnect();
   }, []);
 
-  const serie = vue === "semaines" ? semaines : ouvertures;
+  const vueD = dessine.vue;
+  const serie = vueD === "semaines" ? dessine.semaines : dessine.ouvertures;
+  const cleVoulue = cleDessin(vue, semaines, ouvertures);
+  const cleDessinee = cleDessin(dessine.vue, dessine.semaines, dessine.ouvertures);
   const W = Math.max(280, taille.l), H = taille.h || 240;
 
-  // Les barres montent une fois au premier dessin, le trait se trace à chaque bascule.
+  // Le premier dessin s'anime au premier chargement réel seulement (`v4-entree`, comme
+  // `!dataset.arrivee` dans la maquette) : en revenant sur l'écran par le menu, il est posé.
   useEffect(() => {
     const z = zone.current;
-    if (!z || taille.l === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (vue !== "liens") traceePour.current = null;
-    if (vue === "semaines" && premier.current) {
-      premier.current = false;
-      z.querySelectorAll(".graphe__barre").forEach((b, i) =>
-        b.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }], { duration: 520, delay: i * 35, easing: EASE, fill: "backwards" }),
-      );
-    } else if (vue === "liens" && traceePour.current !== "liens") {
-      // Le trait se trace à la bascule, pas à chaque redimensionnement.
-      traceePour.current = "liens";
-      z.querySelector(".graphe__trait")?.animate([{ strokeDasharray: "1", strokeDashoffset: 1 }, { strokeDasharray: "1", strokeDashoffset: 0 }], { duration: 900, easing: EASE });
-      z.querySelector(".graphe__aire")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, delay: 300, easing: "ease-out", fill: "backwards" });
+    if (!z || taille.l === 0 || !premier.current) return;
+    premier.current = false;
+    if (!document.documentElement.classList.contains("v4-entree")) return;
+    animerDessin(z, vueD);
+  }, [vueD, taille.l]);
+
+  // Redessiner en fondu quand la vue ou la période change.
+  useEffect(() => {
+    if (cleVoulue === cleDessinee) {
+      // Revenu à ce qui est dessiné pendant le fondu (double clic) : le tracé ne reste
+      // pas effacé.
+      zone.current?.querySelector("svg")?.getAnimations().forEach((a) => a.cancel());
+      return;
     }
-  }, [vue, taille.l]);
+    const suivant = { vue, semaines, ouvertures };
+    const svg = zone.current?.querySelector("svg");
+    if (!svg || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      queueMicrotask(() => setDessine(suivant));
+      return;
+    }
+    let annule = false;
+    svg
+      .animate(
+        [
+          { opacity: 1, filter: "blur(0)" },
+          { opacity: 0, filter: "blur(4px)" },
+        ],
+        { duration: 120, easing: "ease-out", fill: "forwards" },
+      )
+      .finished.then(
+        () => {
+          if (annule) return;
+          entreeDessin.current = true;
+          setDessine(suivant);
+        },
+        () => {
+          // Fondu annulé (une autre demande arrive, ou l'écran part) : la suivante décide.
+        },
+      );
+    return () => {
+      annule = true;
+    };
+  }, [cleVoulue, cleDessinee, vue, semaines, ouvertures]);
+
+  useLayoutEffect(() => {
+    const z = zone.current;
+    if (!entreeDessin.current || !z) return;
+    entreeDessin.current = false;
+    z.querySelector("svg")?.getAnimations().forEach((a) => a.cancel());
+    animerDessin(z, dessine.vue);
+  }, [dessine]);
 
   const basculer = (v: "semaines" | "liens") => {
     if (v === vue) return;
@@ -129,7 +198,7 @@ export function GrapheTableau({
       </text>
     ));
     lignes = serie.map((p) => [p.court, p.valeur] as const);
-    if (vue === "semaines") {
+    if (vueD === "semaines") {
       const pas = (W - GAUCHE) / n, lb = Math.min(28, pas * 0.56);
       dessin = (
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} aria-hidden="true">
@@ -239,8 +308,8 @@ export function GrapheTableau({
     }
   }
 
-  const titre = vue === "semaines" ? textes.titreSemaines : textes.titreLiens;
-  const aide = vue === "semaines" ? textes.aideSemaines : textes.aideLiens;
+  const titre = vueD === "semaines" ? textes.titreSemaines : textes.titreLiens;
+  const aide = vueD === "semaines" ? textes.aideSemaines : textes.aideLiens;
   const vide = serie === null || n === 0 || serie.every((p) => p.valeur === 0);
   const largeurBulle = 190;
   const bx = Math.round(Math.min(taille.l - largeurBulle, Math.max(0, bulleXY[0] - largeurBulle / 2)));
@@ -274,7 +343,7 @@ export function GrapheTableau({
             className="graphe__zone"
             tabIndex={0}
             role="img"
-            aria-label={vue === "semaines" ? textes.zoneSemaines : textes.zoneLiens}
+            aria-label={vueD === "semaines" ? textes.zoneSemaines : textes.zoneLiens}
             style={{ left: `${(GAUCHE / W) * 100}%` }}
             onPointerMove={viser}
             onPointerLeave={() => setVise(null)}
@@ -297,13 +366,13 @@ export function GrapheTableau({
         {/* La bulle est décorative ; au clavier, le point lu est ANNONCÉ ici. */}
         <p className="visuellement-cache" aria-live="polite">
           {auClavier && vise !== null && serie?.[vise]
-            ? `${serie[vise].long} : ${serie[vise].valeur} ${vue === "semaines" ? textes.creees : textes.ouvertures}`
+            ? `${serie[vise].long} : ${serie[vise].valeur} ${vueD === "semaines" ? textes.creees : textes.ouvertures}`
             : ""}
         </p>
         <div className="bulle" style={{ transform: `translate(${bx}px, ${by}px)` }} aria-hidden="true">
           {bulle}
         </div>
-        {vide ? <p className="graphe__vide">{vue === "semaines" ? textes.videSemaines : textes.videLiens}</p> : null}
+        {vide ? <p className="graphe__vide">{vueD === "semaines" ? textes.videSemaines : textes.videLiens}</p> : null}
       </div>
       {lignes.length > 0 ? (
         <details className="table-vue">
@@ -312,8 +381,8 @@ export function GrapheTableau({
             <table>
               <thead>
                 <tr>
-                  <th scope="col">{vue === "semaines" ? textes.semaineDu : textes.jour}</th>
-                  <th scope="col">{vue === "semaines" ? textes.creees : textes.ouvertures}</th>
+                  <th scope="col">{vueD === "semaines" ? textes.semaineDu : textes.jour}</th>
+                  <th scope="col">{vueD === "semaines" ? textes.creees : textes.ouvertures}</th>
                 </tr>
               </thead>
               <tbody>

@@ -301,10 +301,10 @@ export default async function FicheCompte({
             {/* LES DEUX GESTES DE LA FICHE, tous deux avec motif, dans des
                 dialogues modaux. `key` : un motif tapé pour un compte ne survit
                 pas à une navigation vers un autre. */}
-            <TraductionsClient espaces={["admin.plan"]}>
+            <TraductionsClient espaces={["admin.plan", "admin.dialogue"]}>
               <PlanCompte key={fiche.id} profilId={fiche.id} plan={plan.statut === "ok" ? plan.plan : null} motifMin={MOTIF_MIN} />
             </TraductionsClient>
-            <TraductionsClient espaces={["admin.suspension"]}>
+            <TraductionsClient espaces={["admin.suspension", "admin.dialogue"]}>
               <DialogueSuspension key={fiche.id} profilId={fiche.id} email={fiche.email} suspendu={suspendu} motifMin={MOTIF_MIN} />
             </TraductionsClient>
             <section className="bloc adm-bloc" aria-labelledby="fiche-interdits">
