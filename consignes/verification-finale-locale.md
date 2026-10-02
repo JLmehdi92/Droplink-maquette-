@@ -54,9 +54,13 @@ main. Montre-moi la liste des conflits et ce que tu as gardé.
 - Vérifie que .env.test.local existe et vise la base de TESTS (jamais la référence de
   production nommée dans scripts/portes.mjs).
 - pnpm install, puis pnpm exec next typegen.
-- Applique UNIQUEMENT à la base de tests les migrations écrites par le cloud (journal § 9) :
-  `pnpm db:migrate:tests` puis `pnpm db:types:tests`. Vérifie que les types générés ne
-  diffèrent pas de ceux commités par le cloud ; s'ils diffèrent, les tiens font foi.
+- La refonte n'a écrit AUCUNE migration (vérifie-le : `git diff --stat origin/master...refonte
+  -- supabase/migrations` doit être vide). Si master en a de nouvelles, applique-les
+  UNIQUEMENT à la base de tests : `pnpm db:migrate:tests` puis `pnpm db:types:tests`.
+- La session cloud a créé sur la base de TESTS trois comptes de mesure :
+  refonte-demo@, refonte-onb@ et refonte-admin@droplink-test.invalid (ce dernier
+  administrateur, avec un facteur TOTP). Si un compteur des gardes d'administration s'en
+  trouve décalé, supprime-les de la base de tests (et d'elle seule) avant de conclure.
 
 ÉTAPE 3 — LES SEPT PORTES
 `pnpm gates`. Relève le DÉCOMPTE de chaque porte, pas la couleur. Jamais dans un tuyau.
@@ -79,6 +83,17 @@ Pour CHAQUE écran porté (liste au § 8 du journal), applique la méthode de CL
    geste du pouce, navigation depuis le tiroir).
 Utilise scripts/verifier-ecran-migre.mjs (serveur lancé avec AUTH_GOOGLE_ACTIF=1). Ne
 m'écris jamais « conforme » sans l'avoir mesuré.
+CE QUE LE CLOUD N'A PAS PU MESURER, À FAIRE EN PRIORITÉ :
+- la vérification à deux facteurs PAR LE FORMULAIRE (le cloud a vu « Challenge and verify IP
+  addresses mismatch », dû à sa sortie réseau) — avec ET sans JavaScript (six cases nommées
+  `code`, recollées par l'action) ;
+- le nouveau mot de passe (session de récupération) et son « Revenir à la connexion », qui
+  est désormais une déconnexion ;
+- les trois frontières d'erreur (espace vendeur, administration, site public, page client)
+  en provoquant une erreur de rendu, et les deux squelettes de chargement (réseau ralenti) ;
+- la page de signalement exige NEXT_PUBLIC_CONTACT_ABUS au build (sinon 404) ;
+- l'administration au bureau ET dans le tiroir, ses quatre dialogues modaux (Échap et
+  annulation bloqués pendant la requête, recopie d'adresse sans collage ni dépôt).
 
 ÉTAPE 5 — LES CONTRAINTES QUI NE BOUGENT JAMAIS (vérifie dans le CODE, pas dans le journal)
 - /p/[token] : aucun backdrop-filter, aucun dégradé DropLink, la couleur est celle du
@@ -98,6 +113,17 @@ ecc:typescript-reviewer, ecc:silent-failure-hunter, ecc:security-reviewer (authe
 admin, page client, paiement, webhook), ecc:database-reviewer (sur chaque migration),
 ecc:a11y-architect. Vérifie chaque constat CRITICAL ou HIGH avant d'y croire, corrige ce
 qui est réel, puis relance pnpm gates. Pour les constats écartés : un par un, avec la raison.
+
+ÉTAPE 6 BIS — LES POINTS LAISSÉS OUVERTS PAR LE CLOUD (journal § 8, bilan) : présente-les-
+moi, ne les tranche pas seul :
+- l'alerte « contestation en attente » de la vue d'ensemble admin (maquette) n'est pas
+  portée : il faudrait une fonction qui compte les contestations, donc une migration ;
+- le badge « Pro » de la liste des comptes admin (maquette) : il faudrait étendre
+  `lister_comptes_admin` (nouvelle arité, `drop` explicite) ;
+- la mention de facturation de Tarifs est au gris secondaire (3,16:1) ;
+- le menu « ••• » d'une commande poste l'ancien jeton après une révocation (défaut antérieur
+  à la refonte) ;
+- scripts/ecarts-declares.json est périmé : la référence est désormais la maquette.
 
 ÉTAPE 7 — LA PRODUCTION, SANS Y TOUCHER
 `pnpm verif:prod` (lecture seule). Liste les migrations que la production n'a pas encore.

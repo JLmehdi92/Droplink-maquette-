@@ -1029,6 +1029,46 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   erreur de rendu, ou avec un réseau ralenti pour les chargements).
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
 
+### ▶️ 02/10/2026 — corrections de la relecture de l'étape 9, et BILAN (session cloud)
+
+- **« Réessayer » appelle `retry`, plus `reset`** (Next 16.3) : `reset` re-rendait le flux déjà reçu,
+  donc une erreur venue du serveur revenait à chaque clic. L'état « en cours » simulé est retiré
+  (`retry` ne dit pas quand il a fini) — le commit précédent affirmait à tort le contraire.
+- Lien mort et erreur de /p : règles de `client.css` toutes préfixées `.etat-p` (rien ne peut toucher
+  la vraie page client), règles mortes retirées, petit logo du pied rendu à sa taille, fond en aplat
+  (le magenta du dégradé de marque n'apparaît plus sous /p), texte de bouton lu au jeton
+  (`--sur-accent`), bouton de l'erreur client neutre (encre) : aucune couleur DropLink.
+- Ancre de l'écran d'état par `useId`, variable `--i` morte retirée du squelette.
+
+#### BILAN DE LA SESSION CLOUD
+
+**Porté, du premier au dernier écran, en 15 commits poussés sur le bac à sable**
+(`claude/saas-motion-design-video-r3ani3`) : jetons et coque avec le tiroir (1), landing (2),
+connexion, inscription et leur film (3), les huit écrans de l'espace vendeur et la fiche commande (4),
+la page client et son aperçu (5), Tarifs, Documentation, blog, articles, pages légales et signalement
+(6), mot de passe oublié, nouveau mot de passe, vérification, bienvenue et notification (7), les dix
+écrans d'administration (8), et tous les écrans d'état (9). Chaque étape a été relue par un agent sur
+quatre angles, et ses retours corrigés dans le commit suivant.
+
+**Ce qui est vérifié ici** : `typecheck` et `lint` (0 erreur), `build`, `test` (1268/1269 — le seul
+rouge est l'alarme Railway, à ne pas désactiver) ; au navigateur, chaque écran mesurable au bureau et à
+390 px, en plusieurs langues, mouvement réduit, console et CSP. **Aucune migration écrite.**
+
+**Ce qui ne l'est pas, et doit l'être au poste de Mehdi** (`consignes/verification-finale-locale.md`) :
+`test:rls`, `couverture`, `fumee` et `test:perf` (Postgres injoignable d'ici) ; la vérification à
+deux facteurs par le formulaire (sortie réseau du conteneur) ; le nouveau mot de passe ; les
+frontières d'erreur et les chargements ; la revue ECC complète du diff.
+
+**Écarts assumés à la maquette** (le produit gagne) : aucun thème sombre ; aucun lien entre
+l'administration et l'espace vendeur ; quotas et prix lus en base ; pas de dégradé ni de couleur
+DropLink sur /p ; motif minimal à 8 caractères ; filtres appliqués en base (liens) au lieu de filtres
+côté navigateur ; la frise des colis à 14 jours ; aucune alerte « contestation » ni badge « Pro » dans
+la liste des comptes admin (il faudrait une migration — question ouverte au § 9).
+
+**Comptes de mesure créés sur la base de TESTS** : refonte-demo@, refonte-onb@ et refonte-admin@
+(`droplink-test.invalid`, ce dernier administrateur à deux facteurs). Le secret TOTP utilisé pour la
+mesure a été effacé du conteneur à la fin de la session.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
@@ -1054,6 +1094,13 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
 - [ ] Trancher le flou de l'en-tête de la landing : le garder (autorisé par `CLAUDE.md`), ou le
   retirer pour la fluidité comme la maquette.
 - [x] Créer le dépôt bac à sable (§ 10, étape 1) — `JLmehdi92/Droplink-maquette-`, 02/10/2026.
+- [ ] **Lancer la vérification finale sur ton poste** : `consignes/verification-finale-locale.md`
+  (portes complètes, écrans non mesurables d'ici, revue ECC). Rien ne part sur le vrai dépôt avant.
+- [ ] Trancher : l'alerte « contestation en attente » de la vue d'ensemble admin et le badge « Pro »
+  de la liste des comptes demandent chacun une migration — les porter, ou non ?
+- [ ] Trancher : la mention de facturation de Tarifs au gris secondaire (3,16:1).
+- [ ] Défaut antérieur à la refonte : le menu « ••• » d'une commande poste l'ancien jeton après une
+  révocation.
 
 ## 10. Le dépôt bac à sable — comment le travail circule
 

@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 /**
  * L'ÉCRAN D'ÉTAT DE L'ESPACE VENDEUR ET DE L'ADMINISTRATION — refonte du
@@ -18,12 +18,13 @@ export function CarteEtatVide({
   readonly texte: string;
   readonly children?: ReactNode;
 }) {
+  const id = useId();
   return (
-    <section className="etat" aria-labelledby="etat-titre">
+    <section className="etat" aria-labelledby={id}>
       <span className="etat__icone" aria-hidden="true">
         <Icone className="ic" />
       </span>
-      <h1 id="etat-titre">{titre}</h1>
+      <h1 id={id}>{titre}</h1>
       <p>{texte}</p>
       {children === undefined ? null : <div className="etat__actions">{children}</div>}
     </section>

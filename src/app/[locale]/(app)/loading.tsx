@@ -42,7 +42,7 @@ export default async function Chargement() {
         <i className="sq sq--ligne" />
         <div className="squelette__liste">
           {Array.from({ length: 8 }, (_, i) => (
-            <div key={i} className="squelette__rangee" style={{ "--i": String(i) } as React.CSSProperties}>
+            <div key={i} className="squelette__rangee">
               <i className="sq sq--tuile" />
               <div>
                 <i className="sq sq--l1" />

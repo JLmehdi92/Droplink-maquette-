@@ -12,16 +12,16 @@ import { BoutonReessayer } from "@/components/app/bouton-reessayer";
  */
 export default function Erreur({
   error,
-  reset,
+  retry,
 }: {
   readonly error: Error & { digest?: string };
-  readonly reset: () => void;
+  readonly retry: () => void;
 }) {
   const t = useTranslations("erreurs");
   return (
     <main id="contenu" className="tableau etat-ecran">
       <CarteEtatVide icone={TriangleAlert} titre={t("titre")} texte={t("texte")}>
-        <BoutonReessayer libelle={t("reessayer")} reset={reset} />
+        <BoutonReessayer libelle={t("reessayer")} retry={retry} />
         {error.digest === undefined ? null : <p className="etat__ref">{t("reference", { ref: error.digest })}</p>}
       </CarteEtatVide>
     </main>

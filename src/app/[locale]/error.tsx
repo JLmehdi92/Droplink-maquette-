@@ -1,7 +1,6 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useTransition } from "react";
 import { RotateCcw, TriangleAlert } from "lucide-react";
 import { CLASSE_ACTION_ERREUR, EcranErreurPublic } from "@/components/ecran-erreur-public";
 
@@ -26,14 +25,13 @@ import { CLASSE_ACTION_ERREUR, EcranErreurPublic } from "@/components/ecran-erre
  */
 export default function ErreurPublique({
   error,
-  reset,
+  retry,
 }: {
   readonly error: Error & { digest?: string };
-  readonly reset: () => void;
+  readonly retry: () => void;
 }) {
   const t = useTranslations("erreurs");
   const langue = useLocale();
-  const [enCours, demarrer] = useTransition();
 
   /* Refonte du 02/10/2026 : maquette `erreur.html`. */
   return (
@@ -43,8 +41,8 @@ export default function ErreurPublique({
       texte={t("texte")}
       accueil={{ href: `/${langue}`, libelle: t("accueilLogo") }}
     >
-      {/* L'attente est celle de la VRAIE relance (transition), jamais un délai fixe. */}
-      <button type="button" onClick={() => demarrer(reset)} aria-busy={enCours} disabled={enCours} className={CLASSE_ACTION_ERREUR}>
+      {/* `retry` relance le rendu SERVEUR ; `reset` ne re-rendait que le flux reçu. */}
+      <button type="button" onClick={retry} className={CLASSE_ACTION_ERREUR}>
         <RotateCcw aria-hidden="true" className="ic" />
         <span>{t("reessayer")}</span>
       </button>

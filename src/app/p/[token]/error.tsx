@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { CircleAlert } from "lucide-react";
 
@@ -29,12 +28,11 @@ import { CircleAlert } from "lucide-react";
  * instant on ne sait pas de quelle boutique il s'agit, et si on le savait,
  * l'afficher serait déjà une fuite.
  */
-export default function ErreurPagePublique({ reset }: { readonly reset: () => void }) {
+export default function ErreurPagePublique({ retry }: { readonly retry: () => void }) {
   const t = useTranslations("page-publique.erreur");
-  const [enCours, demarrer] = useTransition();
   // Refonte du 02/10/2026 (`erreur-client.html`). UN POINT D'ATTENTION, PAS UN
   // MAILLON ROMPU : le lien n'est pas en cause, et le visiteur ne doit pas croire
-  // qu'il faut en redemander un. Aucune marque DropLink.
+  // qu'il faut en redemander un. Aucune marque DropLink : le bouton est neutre (encre).
   return (
     <div className="etat-p page-erreur-client">
       <main id="contenu" className="errc">
@@ -43,7 +41,8 @@ export default function ErreurPagePublique({ reset }: { readonly reset: () => vo
         </span>
         <h1>{t("titre")}</h1>
         <p>{t("texte")}</p>
-        <button type="button" className="errc__bouton" aria-busy={enCours} disabled={enCours} onClick={() => demarrer(reset)}>
+        {/* `retry` relance le rendu serveur (Next 16.3) ; `reset` re-rendait l'erreur reçue. */}
+        <button type="button" className="errc__bouton" onClick={retry}>
           <span>{t("reessayer")}</span>
         </button>
       </main>
