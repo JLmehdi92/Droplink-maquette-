@@ -222,8 +222,16 @@ const EN_FLUX: ReadonlyArray<{
  * sa feuille, pas par une classe. L'exemption n'est valable que si la règle
  * existe ENCORE dans la feuille — sans elle, la cible retombe sous le plancher.
  */
-const FEUILLE_REFONTE = readFileSync(join(process.cwd(), "src", "styles", "refonte", "app.css"), "utf8");
+// Les feuilles de la refonte que les cibles des pieds peuvent invoquer : l'espace vendeur et la page client.
+const FEUILLE_REFONTE = ["app", "client"]
+  .map((f) => readFileSync(join(process.cwd(), "src", "styles", "refonte", f + ".css"), "utf8"))
+  .join("\n");
 const PORTEES_PAR_LA_FEUILLE: ReadonlyArray<{ readonly classe: string; readonly regle: string; readonly raison: string }> = [
+  {
+    classe: "cv-pied__lien",
+    regle: ".cv-pied a { display: inline-flex; align-items: center; min-height: 44px;",
+    raison: "Les trois liens du pied de la page client (v3) : 44 px au téléphone par `client.css` ; le bureau les rend à leur hauteur de texte.",
+  },
   {
     classe: "bouton-app",
     regle: ".recherche, .bouton-app, .alertes__bouton { height: 44px; }",

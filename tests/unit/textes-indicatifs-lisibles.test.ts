@@ -100,8 +100,9 @@ function releverRegles(): Array<{ ou: string; couleur: string | null }> {
   );
 }
 
-// Relevés le 02/10/2026 : les classes fondent à mesure que les écrans passent aux feuilles.
-const PLANCHER_CLASSES = 4;
+// Relevés le 02/10/2026 : les classes fondent à mesure que les écrans passent aux feuilles
+// (2 après la page client, dont le champ e-mail est passé à `.cv-notif input::placeholder`).
+const PLANCHER_CLASSES = 2;
 const PLANCHER_REGLES = 10;
 
 const CARTE = JETONS.get("ds-surface-carte") ?? "";

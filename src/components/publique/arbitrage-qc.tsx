@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, X } from "lucide-react";
 
 /**
  * L'ARBITRAGE QC, vu par celui qui consulte le lien.
@@ -24,24 +25,18 @@ export type EtatQc = "en_attente" | "approuve" | "refuse";
 export function ArbitrageQc({
   jeton,
   etatInitial,
-  remplissage,
-  surRemplissage,
   libelles,
 }: {
   readonly jeton: string;
   readonly etatInitial: EtatQc;
-  /**
-   * Le fond du bouton et l'écriture qui va dessus, RÉSOLUS EN AMONT.
-   *
-   * Deux propriétés et non une : c'est un bouton plein, donc l'accent y fait le
-   * FOND, et un blanc posé d'office sur un jaune vif se lit à 1,5:1. La
-   * conformité doit être obtenue automatiquement — le vendeur n'a pas à chercher
-   * « une couleur qui marche », et personne ne verra jamais la page qu'il aura
-   * rendue illisible sans le savoir.
+  /*
+   * LES COULEURS NE PASSENT PLUS EN PROPRIÉTÉS (refonte du 02/10/2026) : le bouton plein
+   * lit `--cl-remplissage` et `--cl-sur-remplissage`, posées sur la page par
+   * `resoudreAccent()`. Le contraste reste obtenu automatiquement — un blanc d'office
+   * sur un jaune vif se lirait à 1,5:1.
    */
-  readonly remplissage: string;
-  readonly surRemplissage: string;
   readonly libelles: {
+    readonly titre: string;
     readonly texte: string;
     readonly approuver: string;
     readonly refuser: string;
@@ -105,133 +100,90 @@ export function ArbitrageQc({
 
   const decide = etat !== "en_attente" && !rouvert;
 
-  const boutonPlein =
-    "min-h-[50px] rounded-ds-control px-6 text-[15px] font-bold disabled:opacity-50";
-  const boutonBorde =
-    "min-h-[50px] rounded-ds-control border border-ds-filet-appuye px-[22px] text-[15px] " +
-    "font-bold text-ds-texte-corps disabled:opacity-50 lg:px-[26px]";
+  /* L'échec est DIT. Un pari perdu qui ne se dit pas laisse le visiteur croire que sa
+     décision est enregistrée. */
+  const messageEchec = echec ? (
+    <p role="alert" className="cv-erreur">
+      {libelles.echec}
+    </p>
+  ) : null;
 
-  if (decide) {
-    return (
-      <div className="flex flex-col gap-3">
-        {/* `role="status"` : l'échec s'annonçait, la réussite non — un client qui
-            n'y voit pas n'avait aucune confirmation que sa décision était
-            enregistrée (WCAG 4.1.3, audit du 24/09/2026). */}
-        <p role="status" className="text-[15px] leading-[23px] text-ds-texte-fort lg:text-[16px] lg:leading-6">
-          {etat === "approuve" ? libelles.approuve : libelles.refuse}
-        </p>
-        <button
-          type="button"
-          onClick={() => setRouvert(true)}
-          className="min-h-11 self-start text-ds-texte-corps underline"
-        >
-          {libelles.modifier}
-        </button>
-      </div>
-    );
-  }
-
-  /*
-   * LE COMMENTAIRE N'APPARAÎT QU'APRÈS « REFUSER », et c'est la planche qui le
-   * décide : `PageClient` et `PageClientDesktop` ne montrent, au repos, QUE la
-   * question et les deux boutons.
-   *
-   * Ce n'est pas une amputation du champ. Personne n'écrit un commentaire avant
-   * d'avoir tranché, et un champ posé au-dessus des boutons demande d'abord de
-   * rédiger pour ensuite décider — l'ordre inverse de celui dans lequel on
-   * pense. C'est aussi le refus, pas l'accord, qui a besoin d'être expliqué :
-   * « c'est bon » se suffit, « il y a un problème » ne dit rien au vendeur.
-   */
-  if (motif) {
-    return (
-      <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-2">
-          <span className="text-ds-texte-fort">
-            {libelles.commentaire}
+  return (
+    <section className="cv-qc" aria-labelledby="cv-qc-titre" data-etat={decide ? etat : undefined}>
+      {decide ? (
+        <div className="cv-qc__decide">
+          <span className="cv-qc__marque" aria-hidden="true">
+            <Check className="ic" />
           </span>
+          {/* `role="status"` : un client qui n'y voit pas doit savoir que sa décision est
+              enregistrée (WCAG 4.1.3, audit du 24/09/2026). */}
+          <p role="status">{etat === "approuve" ? libelles.approuve : libelles.refuse}</p>
+          <button type="button" onClick={() => setRouvert(true)} className="cv-lien">
+            {libelles.modifier}
+          </button>
+        </div>
+      ) : motif ? (
+        /*
+         * LE COMMENTAIRE N'APPARAÎT QU'APRÈS « REFUSER » : personne n'écrit avant d'avoir
+         * tranché, et c'est le refus, pas l'accord, qui a besoin d'être expliqué.
+         */
+        <div className="cv-qc__motif">
+          <h2 id="cv-qc-titre">{libelles.titre}</h2>
+          <label htmlFor="cv-motif">{libelles.commentaire}</label>
           <textarea
+            id="cv-motif"
             value={commentaire}
             onChange={(e) => setCommentaire(e.target.value)}
             autoFocus
-            // Le même plafond qu'en base : refuser à la saisie explique,
-            // tronquer en base protège. Les deux ne remplacent pas le même
-            // défaut.
+            // Le même plafond qu'en base : refuser à la saisie explique, tronquer en
+            // base protège.
             maxLength={1000}
             rows={3}
-            className="w-full rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte p-3 text-[14px] text-ds-texte-fort transition-shadow outline-none placeholder:text-ds-texte-corps focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"
           />
-        </label>
-
-        <div className="flex flex-wrap gap-2.5">
-          <button
-            type="button"
-            disabled={envoi}
-            onClick={() => void decider("refuse")}
-            style={{ backgroundColor: remplissage, color: surRemplissage }}
-            className={boutonPlein + " flex-grow lg:flex-grow-0 lg:px-[34px]"}
-          >
-            {envoi ? libelles.envoi : libelles.refuser}
-          </button>
-          <button
-            type="button"
-            disabled={envoi}
-            onClick={() => {
-              setMotif(false);
-              setCommentaire("");
-              setEchec(false);
-            }}
-            className={boutonBorde}
-          >
-            {libelles.annuler}
-          </button>
+          <div className="cv-qc__actions">
+            <button
+              type="button"
+              disabled={envoi}
+              onClick={() => {
+                setMotif(false);
+                setCommentaire("");
+                setEchec(false);
+              }}
+              className="cv-bouton cv-bouton--clair"
+            >
+              {libelles.annuler}
+            </button>
+            <button type="button" disabled={envoi} onClick={() => void decider("refuse")} className="cv-bouton cv-bouton--plein">
+              {envoi ? libelles.envoi : libelles.refuser}
+            </button>
+          </div>
+          {messageEchec}
         </div>
-
-        {echec ? (
-          <p role="alert" className="text-[14px] text-ds-erreur-encre">
-            {libelles.echec}
-          </p>
-        ) : null}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="text-[15px] leading-[23px] text-ds-texte-fort lg:text-[16px] lg:leading-6">
-        {libelles.texte}
-      </p>
-
-      {/* Cibles de 50 points au doigt : cette page est ouverte au téléphone. */}
-      <div className="flex gap-2.5">
-        <button
-          type="button"
-          disabled={envoi}
-          onClick={() => void decider("approuve")}
-          style={{ backgroundColor: remplissage, color: surRemplissage }}
-          className={boutonPlein + " flex-grow lg:flex-grow-0 lg:px-[34px]"}
-        >
-          {envoi ? libelles.envoi : libelles.approuver}
-        </button>
-        <button
-          type="button"
-          disabled={envoi}
-          onClick={() => {
-            setEchec(false);
-            setMotif(true);
-          }}
-          className={boutonBorde}
-        >
-          {libelles.refuser}
-        </button>
-      </div>
-
-      {/* L'échec est DIT. Un pari perdu qui ne se dit pas laisse le visiteur
-          croire que sa décision est enregistrée. */}
-      {echec ? (
-        <p role="alert" className="text-[14px] text-ds-erreur-encre">
-          {libelles.echec}
-        </p>
-      ) : null}
-    </div>
+      ) : (
+        <div>
+          <h2 id="cv-qc-titre">{libelles.titre}</h2>
+          <p className="cv-qc__question">{libelles.texte}</p>
+          <div className="cv-qc__actions">
+            <button
+              type="button"
+              disabled={envoi}
+              onClick={() => {
+                setEchec(false);
+                setMotif(true);
+              }}
+              className="cv-bouton cv-bouton--clair"
+            >
+              <X aria-hidden="true" className="ic" />
+              {libelles.refuser}
+            </button>
+            <button type="button" disabled={envoi} onClick={() => void decider("approuve")} className="cv-bouton cv-bouton--plein">
+              <Check aria-hidden="true" className="ic" />
+              {envoi ? libelles.envoi : libelles.approuver}
+            </button>
+          </div>
+          {messageEchec}
+        </div>
+      )}
+    </section>
   );
 }

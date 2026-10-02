@@ -37,12 +37,12 @@ import { join, relative, sep } from "node:path";
 /** Les îlots déclarés, chacun avec la raison qui l'autorise. */
 const DECLARES: ReadonlyArray<{ readonly fichier: string; readonly raison: string }> = [
   {
-    fichier: "src/components/publique/repli-historique.tsx",
+    fichier: "src/components/publique/feuille-historique.tsx",
     raison:
-      "Le repli de l'historique du suivi (demande de Wassim du 26/09/2026 : trente " +
-      "étapes débordaient). Un bouton et un booléen, sans bibliothèque : les étapes " +
-      "repliées sont rendues par le serveur et cachées dès le premier rendu. " +
-      "`<details>` aurait coincé « Réduire » au milieu de la liste ouverte.",
+      "La feuille de l'historique du suivi (refonte v3 du 02/10/2026). Un `<dialog>` " +
+      "natif : piège du focus, Échap et fond inerte viennent du navigateur ; l'îlot ne " +
+      "fait qu'appeler `showModal()` et fermer au clic sur le voile. Son contenu est " +
+      "rendu par le serveur ; la croix ferme par `<form method=\"dialog\">`, sans script.",
   },
   {
     fichier: "src/components/publique/visionneur.tsx",

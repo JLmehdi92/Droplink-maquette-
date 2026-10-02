@@ -1,175 +1,182 @@
-import { Check, Clock, MapPin, Truck } from "lucide-react";
-import { CARTE, TitreCarte } from "@/components/publique/carte-client";
-import type { SuiviPublic } from "@/lib/page-publique/lecture";
-import type { AccentResolu } from "@/lib/design/contraste";
-import { replierHistorique } from "@/lib/page-publique/repli-historique";
-import { RepliHistorique } from "@/components/publique/repli-historique";
+import { ChevronRight, Clock, X } from "lucide-react";
+import { FeuilleHistorique } from "@/components/publique/feuille-historique";
 
-/**
- * « HISTORIQUE DU SUIVI » — les passages du transporteur, datés.
- *
- * Le dessin est celui du kit : une pastille reliée à la suivante par un trait,
- * une tuile d'icône, la date dans une colonne de 190 px, puis le titre du
- * passage et sa ligne de détail. La pastille et la tuile du passage le plus
- * récent portent l'accent : c'est ce qui distingue « où en est le colis » de
- * « par où il est passé », sans un mot de plus.
- *
- * ⚠️ LE TITRE EST LA PHRASE DU TRANSPORTEUR, PAS UN LIBELLÉ À NOUS. Le kit écrit
- * « Arrivé dans votre région » puis une phrase d'explication ; la base porte
- * une description et un lieu, rien d'autre. Réécrire la description en un
- * titre court demanderait d'INTERPRÉTER ce que dit le transporteur, et une
- * interprétation fausse sur un colis bloqué est exactement ce qui fait écrire
- * « c'est où mon colis ». La description devient donc le titre, et le lieu, la
- * ligne de détail — quand il existe.
- *
- * ⚠️ ET LES ICÔNES NE DEVINENT PAS L'ÉTAPE. Le kit en choisit une par passage —
- * avion, colis, camion. L'étape d'un passage est une chaîne du fournisseur de
- * suivi, sans correspondance fermée avec nos quatre étapes : le passage récent
- * prend le camion, les autres l'épingle de lieu, et aucun n'affirme un mode de
- * transport que personne n'a rapporté.
- *
- * LES DEUX ÉTATS QUE LE KIT NE DESSINE PAS restent portés, parce qu'ils sont
- * le cas de chaque commande à un moment de sa vie : le colis tout juste
- * confié au transporteur (aucun passage), et le numéro que le transporteur a
- * cessé de suivre.
- */
+/** Un passage du transporteur, déjà formaté par le serveur (la page n'expédie aucun formateur). */
+export interface LignePassage {
+  readonly cle: string;
+  /** Le jour, pour les intertitres de la feuille (« 29 septembre »). */
+  readonly jour: string;
+  /** L'heure seule (« 08:40 »). */
+  readonly heure: string;
+  /** Le jour et l'heure, pour l'aperçu du bureau et la carte du dernier mouvement. */
+  readonly quand: string;
+  readonly description: string;
+  readonly lieu: string | null;
+}
 
 export interface LibellesHistorique {
   readonly titre: string;
+  readonly voirTout: string;
+  readonly fermer: string;
   readonly arrete: string;
   readonly attenteTitre: string;
   readonly attenteTexte: string;
-  /** « Voir tout l'historique (N) », le nombre déjà posé par la page. */
-  readonly voirTout: string;
-  readonly reduire: string;
+  /** « Colissimo · 6A30… » : qui suit, et quel numéro. */
+  readonly sousTitreFeuille: string | null;
 }
 
-export function HistoriqueSuivi({
-  suivi,
+const ID_TITRE = "cv-historique-titre";
+
+/**
+ * LE SUIVI DU COLIS SUR LA PAGE CLIENT (maquette v3) : la carte du DERNIER mouvement,
+ * qui ouvre l'historique complet dans une feuille, et au bureau un aperçu des trois
+ * derniers.
+ *
+ * OMIS tant qu'aucun colis n'est enregistré (la page n'appelle pas ce composant) : une
+ * carte vide affirmerait qu'il y a quelque chose à y lire.
+ *
+ * LE TRANSPORTEUR A CESSÉ DE SUIVRE LE NUMÉRO : c'est DIT. Un suivi qui s'arrête sans le
+ * dire se lit comme un suivi qui ne marche pas.
+ *
+ * ZÉRO PASSAGE VEUT DIRE ZÉRO MOUVEMENT (`appliquer_etat_colis` le calcule sur les
+ * passages), et l'attente se dit CALME, jamais en ambre : la décision 7 nomme
+ * l'absence — « pas encore d'information du transporteur », jamais « introuvable ».
+ */
+export function SuiviClient({
+  lignes,
+  abandonne,
   libelles,
-  accent,
-  formaterDate,
 }: {
-  readonly suivi: SuiviPublic;
+  readonly lignes: readonly LignePassage[];
+  readonly abandonne: boolean;
   readonly libelles: LibellesHistorique;
-  readonly accent: AccentResolu;
-  readonly formaterDate: (instant: Date) => string;
 }) {
-  const { visibles, reste } = replierHistorique(suivi.passages);
-
-  const ligne = (p: (typeof suivi.passages)[number], rang: number, dernier: boolean) => {
-    const recent = rang === 0;
-    const Icone = recent ? Truck : MapPin;
-    return (
-      <li
-        key={p.instant + p.description}
-        /* LA MÊME GRILLE À TOUTES LES LARGEURS, comme la planche : resserrée au
-           téléphone (36 px, écart 12), elle décalait le texte de 8 px pour en
-           gagner autant sur une ligne qui en a 264. */
-        className="grid grid-cols-[22px_40px_minmax(0,1fr)] items-start gap-3.5"
-      >
-        <div className="flex flex-col items-center self-stretch">
-          <span
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-            style={
-              recent
-                ? { backgroundColor: accent.remplissage, color: accent.surRemplissage }
-                : { backgroundColor: "var(--color-ds-filet-appuye)" }
-            }
-          >
-            {recent ? <Check size={11} strokeWidth={3.4} aria-hidden="true" /> : null}
-          </span>
-          {!dernier ? (
-            <span className="min-h-[26px] w-0.5 flex-1 bg-ds-filet-appuye" />
-          ) : null}
-        </div>
-        <span
-          className="flex h-9 w-9 items-center justify-center rounded-ds-icon-tile"
-          style={
-            recent
-              ? { backgroundColor: accent.teinte, color: accent.interface }
-              : {
-                  backgroundColor: "var(--color-ds-surface-creux)",
-                  color: "var(--color-ds-texte-sourdine)",
-                }
-          }
-          aria-hidden="true"
-        >
-          <Icone size={17} strokeWidth={1.8} />
-        </span>
-        <div
-          className={
-            "grid grid-cols-[minmax(0,1fr)] gap-1 min-[1080px]:grid-cols-[190px_minmax(0,1fr)] min-[1080px]:gap-[18px] " +
-            (dernier ? "" : "pb-[22px]")
-          }
-        >
-          <span className="pt-px text-[13px] text-ds-texte-sourdine">
-            {formaterDate(new Date(p.instant))}
-          </span>
-          <span className="flex min-w-0 flex-col gap-[3px]">
-            <span className="text-[15px] font-bold break-words text-ds-texte-fort">
-              {p.description}
-            </span>
-            {p.lieu !== null ? (
-              <span className="text-[13px] text-ds-texte-corps">{p.lieu}</span>
-            ) : null}
-          </span>
-        </div>
-      </li>
-    );
-  };
-
+  const dernier = lignes[0];
   return (
-    <section className={CARTE}>
-      <TitreCarte>{libelles.titre}</TitreCarte>
+    <>
+      {abandonne ? <p className="cv-avis cv-entree">{libelles.arrete}</p> : null}
 
-      {/* Le fournisseur a cessé de suivre ce numéro. C'est DIT : un suivi qui
-          s'arrête sans le dire se lit comme un suivi qui ne marche pas. */}
-      {suivi.abandonne ? (
-        <p className="mb-[18px] rounded-ds-sm border border-ds-alerte bg-ds-alerte-fond p-3 text-[14px] text-ds-alerte-encre">
-          {libelles.arrete}
-        </p>
-      ) : null}
-
-      {/*
-        « EXPÉDIÉ, PAS ENCORE SCANNÉ ». ZÉRO PASSAGE VEUT DIRE ZÉRO MOUVEMENT, et
-        ce n'est pas une supposition : `appliquer_etat_colis` calcule le dernier
-        mouvement par `max(occurred_at)` sur les passages. CALME, JAMAIS AMBRE —
-        l'ambre est la couleur du silence ANORMAL, et la décision 7 nomme
-        l'absence : « pas encore d'information du transporteur », jamais
-        « numéro introuvable ».
-      */}
-      {suivi.passages.length === 0 && !suivi.abandonne ? (
-        <div className="flex items-start gap-3.5 rounded-ds-card bg-ds-surface-creux p-4">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ds-icon-tile bg-ds-surface-carte text-ds-texte-sourdine">
-            <Clock size={17} strokeWidth={1.8} aria-hidden="true" />
+      {dernier === undefined ? (
+        abandonne ? null : (
+          <section className="cv-carte cv-attente cv-entree" aria-labelledby="cv-attente">
+            <span className="cv-rond-teinte" aria-hidden="true">
+              <Clock className="ic" />
+            </span>
+            <div>
+              <b id="cv-attente">{libelles.attenteTitre}</b>
+              <p>{libelles.attenteTexte}</p>
+            </div>
+          </section>
+        )
+      ) : (
+        <button type="button" className="cv-carte cv-dernier cv-entree" aria-haspopup="dialog" data-ouvrir-historique="">
+          <span className="cv-direct" aria-hidden="true">
+            <i />
           </span>
-          <div>
-            <p className="mb-1 text-[15px] font-bold text-ds-texte-fort">{libelles.attenteTitre}</p>
-            <p className="text-[13px] leading-[1.55] text-ds-texte-corps">{libelles.attenteTexte}</p>
-          </div>
-        </div>
-      ) : null}
+          <span className="cv-dernier__texte">
+            <small>{dernier.quand}</small>
+            <b>{dernier.description}</b>
+            {dernier.lieu === null ? null : <span>{dernier.lieu}</span>}
+          </span>
+          <span className="cv-dernier__lien">
+            {libelles.titre} <em>{lignes.length}</em>
+            <ChevronRight aria-hidden="true" className="ic" />
+          </span>
+        </button>
+      )}
+    </>
+  );
+}
 
-      {/*
-        L'HISTORIQUE LONG SE REPLIE (26/09/2026, demande de Wassim : « c'est moche
-        que l'on voie toute la liste débordée comme ça »). Au-delà de six étapes, les
-        cinq plus récentes, puis « Voir tout » — la règle vit dans
-        `replierHistorique`. La cinquième garde son trait quand il y a une suite : il
-        descend vers le bouton et dit qu'il y a plus.
-      */}
-      {visibles.length > 0 ? (
-        <ol className="flex flex-col">
-          {visibles.map((p, rang) => ligne(p, rang, reste.length === 0 && rang === visibles.length - 1))}
-        </ol>
-      ) : null}
-      {reste.length > 0 ? (
-        <RepliHistorique voirTout={libelles.voirTout} reduire={libelles.reduire} couleur={accent.texte}>
-          <ol className="flex flex-col">
-            {reste.map((p, i) => ligne(p, visibles.length + i, i === reste.length - 1))}
-          </ol>
-        </RepliHistorique>
-      ) : null}
+/** Au bureau, les trois derniers mouvements se lisent sans ouvrir la feuille. */
+export function ApercuHistorique({
+  lignes,
+  libelles,
+}: {
+  readonly lignes: readonly LignePassage[];
+  readonly libelles: LibellesHistorique;
+}) {
+  if (lignes.length === 0) return null;
+  return (
+    <section className="cv-carte cv-apercu-fil cv-entree" aria-labelledby="cv-apercu-fil">
+      <div className="cv-section__tete">
+        <h2 id="cv-apercu-fil">{libelles.titre}</h2>
+        {lignes.length > 3 ? (
+          <button type="button" className="cv-lien-fort" aria-haspopup="dialog" data-ouvrir-historique="">
+            {libelles.voirTout}
+            <ChevronRight aria-hidden="true" className="ic" />
+          </button>
+        ) : null}
+      </div>
+      <ol className="cv-fil cv-fil--court">
+        {lignes.slice(0, 3).map((l, rang) => (
+          <li key={l.cle} className={rang === 0 ? "est-recent" : undefined}>
+            <i aria-hidden="true" />
+            <span>
+              <b>{l.description}</b>
+              {l.lieu === null ? null : <small>{l.lieu}</small>}
+            </span>
+            <time>{l.quand}</time>
+          </li>
+        ))}
+      </ol>
     </section>
+  );
+}
+
+/**
+ * LA FEUILLE : tout l'historique, groupé par jour, du plus récent au plus ancien. Elle
+ * se ferme par un `<form method="dialog">` — sans une ligne de JavaScript.
+ */
+export function FeuilleSuivi({
+  lignes,
+  libelles,
+}: {
+  readonly lignes: readonly LignePassage[];
+  readonly libelles: LibellesHistorique;
+}) {
+  if (lignes.length === 0) return null;
+  return (
+    <FeuilleHistorique titreId={ID_TITRE}>
+      <div className="cv-feuille__panneau">
+        <div className="cv-feuille__poignee" aria-hidden="true">
+          <i />
+        </div>
+        <div className="cv-feuille__tete">
+          <div>
+            <h2 id={ID_TITRE}>{libelles.titre}</h2>
+            {libelles.sousTitreFeuille === null ? null : <p>{libelles.sousTitreFeuille}</p>}
+          </div>
+          <form method="dialog">
+            <button type="submit" className="cv-rond" aria-label={libelles.fermer}>
+              <X aria-hidden="true" className="ic" />
+            </button>
+          </form>
+        </div>
+        <ol className="cv-fil">
+          {lignes.flatMap((l, rang) => {
+            const nouveauJour = rang === 0 || lignes[rang - 1]?.jour !== l.jour;
+            const ligne = (
+              <li key={l.cle} className={rang === 0 ? "est-recent" : undefined}>
+                <i aria-hidden="true" />
+                <span>
+                  <b>{l.description}</b>
+                  {l.lieu === null ? null : <small>{l.lieu}</small>}
+                </span>
+                <time>{l.heure}</time>
+              </li>
+            );
+            return nouveauJour
+              ? [
+                  <li key={"jour-" + l.cle} className="cv-fil__jour">
+                    {l.jour}
+                  </li>,
+                  ligne,
+                ]
+              : [ligne];
+          })}
+        </ol>
+      </div>
+    </FeuilleHistorique>
   );
 }

@@ -1697,8 +1697,7 @@
     },
     "historique": {
       "titre": "Historique du suivi",
-      "voirTout": "Voir tout l'historique ({n})",
-      "reduire": "Réduire"
+      "voirTout": "Voir tout l'historique ({n})"
     },
     "contact": {
       "titre": "Une question ?",

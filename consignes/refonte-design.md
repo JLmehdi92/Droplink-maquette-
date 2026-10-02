@@ -787,6 +787,41 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   l'ancien jeton (il ne sert qu'à invalider la page publique). `scripts/ecarts-declares.json` cite encore
   l'ancienne fiche (outil de l'ancien kit, déjà signalé).
 
+### ▶️ 02/10/2026 — étape 5 : la page client `/p/[token]` et son aperçu (session cloud)
+
+- **La version 3 de `client.html`** (décision n° 2 de Mehdi : la maquette) : un haut de page plein à
+  la couleur du VENDEUR (`--cl-*` résolues par `resoudreAccent()`, posées sur l'enveloppe), l'état du
+  colis en titre, la date estimée, le trajet en quatre arrêts ; puis la carte du dernier mouvement, qui
+  ouvre l'historique complet en FEUILLE, les photos en carrousel, la validation ; à droite la
+  livraison, le contact, le suivi par e-mail, « Propulsé par DropLink » (gratuit seulement). L'aperçu
+  de la fiche (`/p/<jeton>/apercu`) suit sans une ligne : c'est la même page.
+- **Les risques du § 5, tenus un par un** : aucun dégradé DropLink ni flou (le voile de la feuille est
+  un aplat) ; aucun `mix-blend-mode` sur une vraie photo (la maquette détoure des produits ; ici
+  `object-fit: cover`) ; le trajet ne nomme AUCUN lieu (arbitrage du § 5) — chaque arrêt porte sa
+  date, le dernier le destinataire ; les vignettes de 200 px restent nettes (2,5 tuiles au téléphone,
+  pas une, et pas d'image pleine dans le document). **Budget mesuré** (même commande, même machine,
+  avant/après) : 289 → 291 Ko hors médias (CSS +5, HTML −2, image −2, JS inchangé) — sous les 300, de
+  justesse comme avant. `client.css` est réduite à la seule v3 (39 → 22 Ko bruts).
+- **La feuille est un `<dialog>` natif** (`feuille-historique.tsx`, nouvel îlot déclaré) : piège du
+  focus, Échap, fond inerte et retour du focus viennent du navigateur ; la croix ferme par
+  `<form method="dialog">`, sans script ; un écouteur unique sert les deux boutons qui l'ouvrent.
+  Éprouvé au navigateur à 1440 et 390 : ouverture, Échap, croix, voile, focus rendu au bouton.
+- **Gardé du produit** : logo de la boutique, réseaux validés par `liensDuVendeur` (le seul filtre,
+  désormais testé directement), silence anormal et abandon dits, attente « pas encore
+  d'information » calme, couverture en tête et « +N », arbitrage QC sans retour optimiste, e-mails de
+  suivi seulement si `EMAIL_CLIENTS_DE` est posée, îlots qui écrivent sous `Inerte` dans l'aperçu.
+  Retirés : l'ancien repli « Voir tout » (la feuille le remplace, avec sa règle et son test), les
+  cartes de l'ancien kit (`carte-commande`, `en-tete-boutique`, `carte-client`) et `ReseauxVendeur`.
+- **Défaut trouvé en mesurant** : à 390 px en anglais, « Preparation » et « Shipped » se
+  chevauchaient (libellés posés en absolu) : au téléphone, quatre colonnes égales centrées sous des
+  arrêts recalés à 12,5 %. Et la feuille, hors de `.cv`, perdait la couleur du vendeur : les variables
+  sont montées sur l'enveloppe.
+- **Mesuré** : 1440 et 390 px, fr/en/zh-CN (langue de la boutique basculée sur la base de tests puis
+  rétablie), mouvement réduit, quatre commandes (préparation, transit avec six passages semés, livrée,
+  sans colis) ; aucun débordement, aucune erreur console, aucune violation CSP, aucune cible sous
+  44 px. Hors de portée : une commande AVEC photos (les clés R2 du jeu n'existent pas) — le carrousel
+  est vérifié par la feuille et `visionneur-focus`, pas à l'œil.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -1697,8 +1697,7 @@
     },
     "historique": {
       "titre": "Tracking history",
-      "voirTout": "See the full history ({n})",
-      "reduire": "Show less"
+      "voirTout": "See the full history ({n})"
     },
     "contact": {
       "titre": "A question?",

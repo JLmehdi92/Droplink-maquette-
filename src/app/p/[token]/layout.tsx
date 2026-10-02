@@ -6,6 +6,7 @@ import { estLangueSupportee } from "@/i18n/config";
 import { lireCommandePublique } from "@/lib/page-publique/lecture";
 import { verifierQuotaPublique } from "@/lib/limitation/quota";
 import "../../globals.css";
+import "@/styles/refonte/client.css";
 
 /*
  * ⚠️ LA PAGE QUE LE CLIENT REÇOIT NE RENDAIT PAS DANS LA POLICE DU PRODUIT.

@@ -1,16 +1,14 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { ArbitrageQc } from "@/components/publique/arbitrage-qc";
-import { CARTE, TitreCarte } from "@/components/publique/carte-client";
-import { CarteCommande } from "@/components/publique/carte-commande";
 import { CarteContact } from "@/components/publique/carte-contact";
 import { CarteLivraison, type LigneLivraison } from "@/components/publique/carte-livraison";
 import { CartePropulsee } from "@/components/publique/carte-propulsee";
 import { CarteNotifications } from "@/components/publique/carte-notifications";
 import { envoiClientConfigure } from "@/lib/email/config";
-import { EnTeteBoutique } from "@/components/publique/en-tete-boutique";
-import { HistoriqueSuivi } from "@/components/publique/historique-suivi";
+import { HerosClient } from "@/components/publique/heros-client";
+import { ApercuHistorique, FeuilleSuivi, SuiviClient, type LignePassage } from "@/components/publique/historique-suivi";
 import { estimationVisible } from "@/lib/page-publique/estimation";
 import { Visionneur } from "@/components/publique/visionneur";
 import type { CommandePublique, SuiviPublic } from "@/lib/page-publique/lecture";
@@ -25,12 +23,14 @@ import { lireTransporteur } from "@/lib/tracking/transporteurs";
  * Elle est ouverte UNE FOIS, au téléphone, en 4G, depuis un message privé. Tout
  * ce qui suit découle de cette phrase.
  *
- * ⚠️ PORTÉE SUR LE KIT `client_link` LE 13/09/2026, ET CE N'ÉTAIT PAS UNE PASSE DE
- * DÉTAIL. Le canevas peignait un BANDEAU à la couleur du vendeur et rangeait
- * tout en deux colonnes de sections titrées en majuscules ; le kit compose une
- * page de CARTES : l'identité de la boutique, « Votre commande » avec sa
- * référence et une frise datée, la galerie, l'historique du suivi, puis à
- * droite les informations de livraison et le contact.
+ * ⚠️ REFONTE DU 02/10/2026 : LA VERSION 3 DE LA MAQUETTE (`client.html`), décision n° 2
+ * de Mehdi. Un haut de page plein à la couleur du VENDEUR, l'état du colis en titre et
+ * son trajet dessiné ; puis le dernier mouvement (qui ouvre l'historique en feuille), les
+ * photos en carrousel, la validation ; à droite la livraison, le contact, le suivi par
+ * e-mail. Ses risques notés au § 5 sont tenus : aucun `mix-blend-mode` sur une vraie
+ * photo, aucun texte à opacité réduite sous 4,5:1 hors du haut de page (dont le texte
+ * reste à `surRemplissage`), aucun lieu interprété dans le trajet, et la feuille est un
+ * `<dialog>` natif plutôt qu'un script.
  *
  * L'ORDRE DE LA SOURCE EST CELUI DU TÉLÉPHONE, et c'est lui qui compte pour la
  * grande majorité des visiteurs : où en est la commande, à quoi elle ressemble
@@ -68,22 +68,6 @@ import { lireTransporteur } from "@/lib/tracking/transporteurs";
  *    pied, discrète ;
  *  - le lien « Aide », qui ne mène à rien que le client puisse utiliser.
  */
-
-/**
- * LE CONTENEUR DU KIT : 1 180 px, gouttière 24.
- *
- * Mesuré sur la référence servie : `max-width: 1180px`, padding `0 24px 40px`,
- * et la grille rend 704 + 18 + 410 = 1 132, soit exactement 1 180 moins ses
- * deux gouttières. Les trois nombres se vérifient l'un l'autre.
- *
- * ⚠️ AUCUNE GOUTTIÈRE SOUS `lg` : les cartes y deviennent des sections pleine
- * largeur qui portent leur propre remplissage (`carte-client.tsx`).
- *
- * ⚠️ ET 600 px JUSQU'À `lg`, PAS PLEINE LARGEUR. Entre 768 et 1 023 px la page
- * reste en une colonne ; sans plafond, elle s'étirait jusqu'au bord et la
- * frise étalait ses quatre étapes sur 900 px.
- */
-const CONTENEUR = "mx-auto w-full max-w-[600px] lg:max-w-[1180px] lg:px-6";
 
 export async function PageClient({
   token,
@@ -249,11 +233,13 @@ export async function PageClient({
     en_transit: null,
     livre: statutAffiche === "livre" ? dateEtHeure(suivi?.dernierMouvement ?? null) : null,
   } as const;
-
-  // EN-TÊTE OMIS quand il n'y a NI nom NI logo — décision 24. Pas de carte vide,
-  // pas de libellé de remplacement : un vendeur qui n'a rien configuré obtient
-  // une page qui commence par sa commande.
-  const aUnEnTete = commande.boutique.nom !== null || commande.boutique.logo !== null;
+  const jourCourt = (instant: string): string => format.dateTime(new Date(instant), { day: "numeric", month: "short" });
+  const datesTrajet = {
+    preparation: dates.preparation === null ? null : jourCourt(commande.creeeLe),
+    expedie: premierMouvement === null ? null : jourCourt(premierMouvement),
+    en_transit: null,
+    livre: dates.livre === null || suivi?.dernierMouvement == null ? null : jourCourt(suivi.dernierMouvement),
+  } as const;
 
   /*
    * LES LIGNES DE LIVRAISON, dans l'ordre du kit, puis les deux que le produit
@@ -311,89 +297,88 @@ export async function PageClient({
           ...commande.medias.filter((m) => m.id !== commande.couverture),
         ];
 
+  // Les passages du transporteur, formatés ICI : la page n'expédie aucun formateur.
+  const lignesSuivi: LignePassage[] = (suivi?.passages ?? []).map((p, rang) => ({
+    cle: String(rang) + p.instant,
+    jour: format.dateTime(new Date(p.instant), { day: "numeric", month: "long" }),
+    heure: format.dateTime(new Date(p.instant), { hour: "2-digit", minute: "2-digit" }),
+    quand: format.dateTime(new Date(p.instant), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
+    description: p.description,
+    lieu: p.lieu,
+  }));
+  const libellesSuivi = {
+    titre: t("historique.titre"),
+    voirTout: t("historique.voirTout", { n: lignesSuivi.length }),
+    fermer: t("galerie.fermer"),
+    arrete: t("suivi.arrete"),
+    attenteTitre: t("suivi.attenteTitre"),
+    attenteTexte: t("suivi.attenteTexte"),
+    sousTitreFeuille: numero === null ? null : (transporteur === null ? "" : transporteur.nom + " · ") + numero,
+  };
+
+  // LA COULEUR DU VENDEUR, résolue par `resoudreAccent()`, posée en variables que la
+  // feuille lit partout (`--cl-*`) : aucune couleur d'accent n'est écrite en dur.
+  const couleurs = {
+    "--cl-texte": accent.texte,
+    "--cl-interface": accent.interface,
+    "--cl-remplissage": accent.remplissage,
+    "--cl-sur-remplissage": accent.surRemplissage,
+    "--cl-teinte": accent.teinte,
+    "--cl-sur-teinte": accent.surTeinte,
+  } as CSSProperties;
+
   return (
-    <div
-      lang={langue}
-      /*
-       * ⚠️ LE FOND TEINTÉ N'APPARAÎT QU'À PARTIR DE `md`, et c'est un motif à
-       * conserver : au téléphone la page est pleine largeur, un fond teinté n'y
-       * encadrerait rien et ferait payer un dégradé à l'appareil le plus lent.
-       */
-      /*
-       * ⚠️ `leading-[normal]` ET NON L'INTERLIGNE DU PRODUIT. Le kit ne pose
-       * aucun interligne sur ses libellés : ils rendent l'interligne NORMAL de
-       * la police, et la page héritait de 1,5 — chaque libellé de 12 à 15 px
-       * mesurait 3 à 6 px de trop. Ce qui porte un interligne à soi le déclare.
-       */
-      className="flex min-h-dvh flex-col bg-ds-surface-carte leading-[normal] md:bg-[image:var(--degrade-ds-page-client)]"
-    >
-      {/* 82 PX AU-DESSUS DE LA PREMIÈRE CARTE : la hauteur de la barre du kit
-          — logo DropLink et sélecteur de langue —, que la page ne porte pas.
-          L'espace reste, pour que la carte de boutique tombe là où le kit la
-          pose. */}
-      <main id="contenu" className={CONTENEUR + " flex-grow lg:pt-[82px]"}>
-        {aUnEnTete ? (
-          <EnTeteBoutique
-            boutique={commande.boutique}
-            commandeDe={t("commandeDe")}
-            libelleSite={t("reseaux.site")}
-          />
-        ) : null}
+    // Les variables sont posées sur l'ENVELOPPE, pas sur `.cv` : la feuille d'historique
+    // (`<dialog>`) vit hors de `.cv`, et sans elles son point « récent » perdait la
+    // couleur du vendeur.
+    <div lang={langue} className="page-client page-client--v3" style={couleurs}>
+      <div className="cv">
+        <HerosClient
+          boutique={commande.boutique}
+          libelleSite={t("reseaux.site")}
+          reference={commande.referenceCourte}
+          client={commande.client}
+          statut={statutAffiche}
+          titre={bandeau.titre}
+          sousTitre={bandeau.texte}
+          estimation={estimation}
+          dates={datesTrajet}
+          libelles={{
+            commandeDe: t("commandeDe"),
+            votreCommande: t("titre"),
+            pourClient: commande.client === null ? null : t("pourClient", { nom: commande.client }),
+            dateEstimee: t("commande.dateEstimee"),
+            etapes: {
+              preparation: t("frise.preparation"),
+              expedie: t("frise.expedie"),
+              en_transit: t("frise.en_transit"),
+              livre: t("frise.livre"),
+            },
+            enCours: t("frise.enCours"),
+            enAttente: t("frise.enAttente"),
+          }}
+        />
 
         {/*
-          DEUX COLONNES, CHACUNE UNE PILE — et non une grille à rangées. Une
-          grille distribue la hauteur d'un élément entre les rangées qu'il
-          enjambe : mesuré sur le canevas, un trou de 279 px s'ouvrait ainsi
-          entre deux cartes. Deux piles indépendantes n'ont rien à distribuer.
+          L'ORDRE DE LA SOURCE EST CELUI DU TÉLÉPHONE : où en est le colis, à quoi
+          ressemble la commande (les photos AVANT la livraison — CLAUDE.md, performance),
+          est-ce bien ça (la validation, juste après ce qu'elle juge), puis le détail.
         */}
-        <div className="lg:mt-[18px] lg:grid lg:grid-cols-[minmax(0,1.72fr)_minmax(0,1fr)] lg:items-start lg:gap-[18px]">
-          <div className="flex flex-col lg:gap-[18px]">
-            <CarteCommande
-              reference={commande.referenceCourte}
-              statut={statutAffiche}
-              estimation={estimation}
-              dates={dates}
-              bandeau={bandeau}
-              accent={accent}
-              libelles={{
-                titre: t("titre"),
-                sousTitre: t("commande.sousTitre"),
-                dateEstimee: t("commande.dateEstimee"),
-                etapes: {
-                  preparation: t("frise.preparation"),
-                  expedie: t("frise.expedie"),
-                  en_transit: t("frise.en_transit"),
-                  livre: t("frise.livre"),
-                },
-                enCours: t("frise.enCours"),
-                enAttente: t("frise.enAttente"),
-              }}
-            />
+        <main id="contenu" className="cv-cadre cv-corps">
+          <div className="cv-principal">
+            {suivi === null ? null : <SuiviClient lignes={lignesSuivi} abandonne={suivi.abandonne} libelles={libellesSuivi} />}
 
-            <section className={CARTE}>
-              <TitreCarte>
-                {t("galerie.titre")}
-                {commande.medias.length > 0 ? (
-                  <span className="font-medium text-ds-texte-sourdine">
-                    {" (" + format.number(commande.medias.length) + ")"}
-                  </span>
-                ) : null}
-              </TitreCarte>
-
+            <section className="cv-section cv-entree" aria-labelledby="cv-photos">
+              <div className="cv-section__tete">
+                <h2 id="cv-photos">{t("galerie.titre")}</h2>
+                {commande.medias.length > 0 ? <span className="cv-compte">{format.number(commande.medias.length)}</span> : null}
+              </div>
               {commande.medias.length === 0 ? (
-                /* LA GALERIE VIDE SE DIT. Ni cadres gris ni « bientôt
-                   disponible » : on nomme ce qui est, et on dit ce qui va se
-                   passer. */
-                <div className="rounded-ds-card border border-dashed border-ds-filet-appuye px-5 py-8 text-center">
-                  {/* LUCIDE, pas un tracé recopié à la main (règle d'iconographie) ;
-                      rendu côté serveur, donc sans un octet de JavaScript. */}
-                  <ImageIcon aria-hidden="true" size={26} strokeWidth={1.8} className="mx-auto mb-3 text-ds-texte-tenu" />
-                  <p className="text-[15px] font-semibold text-ds-texte-fort">
-                    {t("galerie.videTitre")}
-                  </p>
-                  <p className="mt-1 text-[14px] leading-[21px] text-ds-texte-corps">
-                    {t("galerie.videTexte")}
-                  </p>
+                /* LA GALERIE VIDE SE DIT : on nomme ce qui est, et ce qui va se passer. */
+                <div className="cv-vide">
+                  <ImageIcon aria-hidden="true" className="ic" />
+                  <b>{t("galerie.videTitre")}</b>
+                  <p>{t("galerie.videTexte")}</p>
                 </div>
               ) : (
                 <Visionneur
@@ -406,10 +391,6 @@ export async function PageClient({
                     largeur: m.largeur,
                     hauteur: m.hauteur,
                   }))}
-                  // Le texte du filigrane est le NOM DE LA BOUTIQUE. La base a
-                  // déjà décidé si un filigrane est possible : elle éteint le
-                  // drapeau quand il n'y a pas de nom, ce qui rend ce `??`
-                  // inatteignable — il est là parce que le typage l'exige.
                   filigrane={commande.boutique.filigrane ? (commande.boutique.nom ?? null) : null}
                   libelles={{
                     ouvrir: t("galerie.ouvrir"),
@@ -426,92 +407,48 @@ export async function PageClient({
               )}
             </section>
 
-            {/*
-              L'ARBITRAGE QC vient JUSTE APRÈS CE QU'IL JUGE : on ne demande pas
-              à quelqu'un de se prononcer sur des photos avant de les lui avoir
-              montrées. Le design system le déclare hors de son périmètre ; il
-              prend donc la carte du kit, sans rien inventer d'autre.
-
-              OMIS QUAND IL N'Y A AUCUNE PHOTO : « ces photos correspondent-elles
-              ? » devant une galerie vide n'appelle aucune réponse sensée.
-            */}
+            {/* L'ARBITRAGE, OMIS SANS PHOTO : « ces photos correspondent-elles ? » devant
+                une galerie vide n'appelle aucune réponse sensée. */}
             {commande.medias.length > 0 ? (
-              <section className={CARTE}>
-                <TitreCarte>{t("qc.titre")}</TitreCarte>
-                <Inerte si={apercu}>
-                  <ArbitrageQc
-                    jeton={commande.jeton}
-                    etatInitial={commande.qc}
-                    remplissage={accent.remplissage}
-                    surRemplissage={accent.surRemplissage}
-                    libelles={{
-                      texte: t("qc.texte"),
-                      approuver: t("qc.approuver"),
-                      refuser: t("qc.refuser"),
-                      commentaire: t("qc.commentaire"),
-                      envoi: t("qc.envoi"),
-                      annuler: t("qc.annuler"),
-                      /* LES LIBELLÉS NE DISENT PAS « VOUS ». Le vendeur peut
-                         reporter dans son éditeur une réponse reçue par message
-                         privé, et la page affichait alors « Vous avez validé
-                         cette commande » à un client qui n'avait rien validé. */
-                      approuve: t("qc.approuve"),
-                      refuse: t("qc.refuse"),
-                      modifier: t("qc.modifier"),
-                      echec: t("qc.echec"),
-                    }}
-                  />
-                </Inerte>
-              </section>
+              <Inerte si={apercu}>
+                <ArbitrageQc
+                  jeton={commande.jeton}
+                  etatInitial={commande.qc}
+                  libelles={{
+                    titre: t("qc.titre"),
+                    texte: t("qc.texte"),
+                    approuver: t("qc.approuver"),
+                    refuser: t("qc.refuser"),
+                    commentaire: t("qc.commentaire"),
+                    envoi: t("qc.envoi"),
+                    annuler: t("qc.annuler"),
+                    /* LES LIBELLÉS NE DISENT PAS « VOUS » : le vendeur peut reporter une
+                       réponse reçue en message privé. */
+                    approuve: t("qc.approuve"),
+                    refuse: t("qc.refuse"),
+                    modifier: t("qc.modifier"),
+                    echec: t("qc.echec"),
+                  }}
+                />
+              </Inerte>
             ) : null}
 
-            {/* OMIS tant qu'aucun colis n'est enregistré : une carte vide
-                affirmerait qu'il y a quelque chose à y lire. */}
-            {suivi !== null ? (
-              <HistoriqueSuivi
-                suivi={suivi}
-                accent={accent}
-                formaterDate={(instant) =>
-                  format.dateTime(instant, {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                }
-                libelles={{
-                  titre: t("historique.titre"),
-                  arrete: t("suivi.arrete"),
-                  attenteTitre: t("suivi.attenteTitre"),
-                  attenteTexte: t("suivi.attenteTexte"),
-                  voirTout: t("historique.voirTout", { n: suivi.passages.length }),
-                  reduire: t("historique.reduire"),
-                }}
-              />
-            ) : null}
+            <ApercuHistorique lignes={lignesSuivi} libelles={libellesSuivi} />
           </div>
 
-          <div className="flex flex-col lg:gap-[18px]">
-            <CarteLivraison titre={t("livraison.titre")} lignes={lignesLivraison} accent={accent} />
+          <aside className="cv-cote">
+            <CarteLivraison titre={t("livraison.titre")} lignes={lignesLivraison} />
             <CarteContact
               boutique={commande.boutique}
               libelleSite={t("reseaux.site")}
-              accent={accent}
-              libelles={{
-                titre: t("contact.titre"),
-                texte: t("contact.texte"),
-                bouton: t("contact.bouton"),
-              }}
+              libelles={{ titre: t("contact.titre"), texte: t("contact.texte"), bouton: t("contact.bouton") }}
             />
-            {/* LE SUIVI PAR E-MAIL (planche `NotificationsCard`). ABSENT quand aucun
-                e-mail ne peut partir : une promesse qu'aucun envoi ne tiendrait est
-                pire qu'une carte absente (contrainte n° 8). */}
+            {/* LE SUIVI PAR E-MAIL, ABSENT quand aucun e-mail ne peut partir : une promesse
+                qu'aucun envoi ne tiendrait est pire qu'une carte absente (contrainte n° 8). */}
             {envoiClientConfigure() ? (
               <Inerte si={apercu}>
                 <CarteNotifications
                   jeton={token}
-                  accent={accent}
                   libelles={{
                     titre: tn("titre"),
                     texte: tn("texte"),
@@ -525,96 +462,48 @@ export async function PageClient({
                 />
               </Inerte>
             ) : null}
-            {/* LA CARTE « PROPULSÉ PAR DROPLINK » (planche `PoweredCard`), en gratuit seulement —
-                un compte Pro qui l'a demandé la retire (décision de Wassim, 19/09/2026). */}
+            {/* EN GRATUIT SEULEMENT : un compte Pro qui l'a demandé la retire. */}
             {commande.boutique.marqueMasquee ? null : (
               <CartePropulsee
                 langue={langue}
-                accent={accent}
                 libelles={{
                   surtitre: t("carteDropLink.surtitre"),
                   titre: t("carteDropLink.titre"),
-                  texte: t("carteDropLink.texte"),
                   bouton: t("carteDropLink.bouton"),
                 }}
               />
             )}
-          </div>
-        </div>
-      </main>
+          </aside>
+        </main>
 
-      <footer className={CONTENEUR}>
-        <div className="flex flex-col items-start gap-2.5 border-t border-ds-filet px-[18px] pt-[26px] pb-8 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-5 lg:border-t-0 lg:px-0 lg:pb-10">
-          {/*
-            ⚠️ CHAQUE LIEN DU PIED EST UNE CIBLE TACTILE, ET LA MARGE NÉGATIVE EN
-            EST LA MOITIÉ INDISSOCIABLE. `min-h-11` porte la cible à 44 px
-            (règle 5) ; `-my-3.5` vaut (44 − 16) / 2 et rend au flux sa hauteur
-            exacte, sans quoi le pied grandirait de 28 px. Au bureau, où il n'y a
-            pas de pouce, le lien reprend la hauteur de son texte, comme au kit.
-            La classe est écrite
-            sur chaque lien et non dans une constante : c'est là que
-            `cibles-tactiles.test.ts` la lit.
+        {/*
+          LE PIED NE PORTE NI « © DropLink » (sur la page d'un vendeur, il se lirait comme le
+          propriétaire de la page) ni « Propulsé par » (la carte le dit, en gratuit). Chaque
+          lien est une cible de 44 px au téléphone (`.cv-pied a`).
+        */}
+        <footer className="cv-cadre cv-pied">
+          <a href={`/${langue}/conditions`} target="_blank" rel="noopener noreferrer" className="cv-pied__lien">
+            {t("pied.conditions")}
+          </a>
+          <a href={`/${langue}/confidentialite`} target="_blank" rel="noopener noreferrer" className="cv-pied__lien">
+            {t("pied.confidentialite")}
+          </a>
+          <a href={`/${langue}/mentions-legales`} target="_blank" rel="noopener noreferrer" className="cv-pied__lien">
+            {t("pied.mentions")}
+          </a>
+        </footer>
+      </div>
 
-            ⚠️ LE PIED NE DIT PLUS « Propulsé par DropLink » (19/09/2026). Il le disait
-            en sourdine, pour tous les comptes, quand la décision 25 interdisait la
-            carte promotionnelle du kit. Wassim a tranché autrement : la CARTE le dit,
-            en gratuit, et un compte Pro la retire. Garder aussi le lien du pied
-            faisait écrire la même mention deux fois sur la page d'un vendeur gratuit,
-            et la laissait sur celle d'un vendeur Pro qui a payé pour la retirer.
-
-            ⚠️ LE KIT ÉCRIT « © DropLink. Tous droits réservés. » À CETTE PLACE,
-            et la page ne le fait pas : sur la page d'un vendeur, un droit
-            d'auteur au nom de DropLink se lit comme le propriétaire de la page.
-            Les deux liens gardent donc la droite du pied, comme au kit.
-          */}
-          <span className="flex flex-wrap gap-x-[18px] lg:ml-auto lg:gap-x-6">
-            <a
-              href={`/${langue}/conditions`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0"
-            >
-              {t("pied.conditions")}
-            </a>
-            <a
-              href={`/${langue}/confidentialite`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0"
-            >
-              {t("pied.confidentialite")}
-            </a>
-            <a
-              href={`/${langue}/mentions-legales`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="-my-3.5 inline-flex min-h-11 items-center whitespace-nowrap text-[13px] text-ds-texte-sourdine hover:underline lg:my-0 lg:min-h-0"
-            >
-              {t("pied.mentions")}
-            </a>
-          </span>
-        </div>
-      </footer>
-
+      <FeuilleSuivi lignes={lignesSuivi} libelles={libellesSuivi} />
       {children}
     </div>
   );
 }
 
 /**
- * CE QUE L'APERÇU NE DOIT PAS POUVOIR FAIRE : ÉCRIRE AU NOM DU CLIENT.
- *
- * « Approuver » depuis l'aperçu validerait la commande à la place de celui qui
- * doit la juger, et le vendeur le ferait en croyant seulement regarder. Les deux
- * cartes restent DESSINÉES à l'identique — c'est ce que le client verra —, mais
- * `inert` les retire du clic, du clavier et des lecteurs d'écran.
- *
- * ⚠️ `inert`, ET NON `disabled` : un bouton désactivé se grise, et l'aperçu
- * cesserait de montrer la page telle qu'elle est. ⚠️ ET `contents` : l'enveloppe
- * ne crée aucune boîte, la mise en page de la carte ne voit pas qu'elle existe.
- *
- * Sur la vraie page, rien n'est enveloppé : pas un nœud de plus dans le document
- * que le client télécharge en 4G.
+ * L'APERÇU NE PEUT RIEN ÉCRIRE AU NOM DU CLIENT : dans `/p/<jeton>/apercu`, les îlots qui
+ * écrivent sont rendus sous `inert`. `display: contents` : l'enveloppe ne pèse rien sur la
+ * mise en page.
  */
 function Inerte({ si, children }: { readonly si: boolean; readonly children: ReactNode }) {
   return si ? (

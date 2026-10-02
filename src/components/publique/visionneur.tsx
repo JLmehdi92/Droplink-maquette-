@@ -57,18 +57,18 @@ export interface EntreeVisionneur {
  * bureau, deux au téléphone. La couverture choisie par le vendeur reste la
  * PREMIÈRE tuile : l'appelant la place en tête.
  *
- * DIX AU BUREAU, SIX AU TÉLÉPHONE : deux rangées pleines de cinq, trois rangées
- * pleines de deux. Une rangée à moitié vide se lit comme un chargement
- * inachevé. Au-delà, la dernière tuile porte « +N » et ouvre le plein écran,
+ * HUIT AU BUREAU, SIX AU TÉLÉPHONE (refonte du 02/10/2026) : deux rangées pleines de
+ * quatre dans la grille de la maquette v3, six tuiles dans son carrousel. Une rangée à
+ * moitié vide se lit comme un chargement inachevé. Au-delà, la dernière tuile porte « +N » et ouvre le plein écran,
  * dont la pellicule montre tout.
  *
  * ⚠️ LES TUILES AU-DELÀ DE LA BORNE NE SONT PAS RENDUES, pas masquées : une
- * vignette masquée par CSS est tout de même téléchargée. Seules les tuiles 7 à
- * 10 existent au téléphone en `hidden`, et elles sont en `loading="lazy"` —
+ * vignette masquée par CSS est tout de même téléchargée. Seules les tuiles 7 et
+ * 8 existent au téléphone, masquées, et elles sont en `loading="lazy"` —
  * Chrome ne demande pas une image différée qui n'a pas de boîte.
  */
 const TUILES_TELEPHONE = 6;
-const TUILES_BUREAU = 10;
+const TUILES_BUREAU = 8;
 
 /** Au-delà de ce déplacement horizontal, un glissement du doigt change de média. */
 const SEUIL_BALAYAGE_PX = 40;
@@ -79,15 +79,10 @@ const SEUIL_BALAYAGE_PX = 40;
  */
 function PastilleLecture() {
   return (
-    <span
-      className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[rgba(11,11,24,.22)]"
-      aria-hidden="true"
-    >
-      <span className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-white/[.92] text-ds-texte-fort">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
-          <path d="M8 5v14l11-7z" />
-        </svg>
-      </span>
+    <span className="cv-photo__lecture" aria-hidden="true">
+      <svg className="ic" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z" />
+      </svg>
     </span>
   );
 }
@@ -147,10 +142,7 @@ export function apercuDe(
 
 function ApercuIndisponible({ video }: { readonly video: boolean }) {
   return (
-    <span
-      className="pointer-events-none absolute inset-0 flex items-center justify-center text-ds-texte-tenu"
-      aria-hidden="true"
-    >
+    <span className="cv-photo__repli" aria-hidden="true">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
         {video ? (
           <path d="M8 5v14l11-7z" />
@@ -416,18 +408,18 @@ export function Visionneur({
         différée. Les autres le sont.
       */}
       {tuiles.length > 0 ? (
-        <ul className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3.5 lg:grid-cols-5">
+        <ul className="cv-carrousel">
           {tuiles.map((media, rang) => {
             const resteTelephone = medias.length - TUILES_TELEPHONE;
             const resteBureau = medias.length - TUILES_BUREAU;
             const apercu = apercuDe(media);
 
             return (
-              <li key={media.id} className={rang >= TUILES_TELEPHONE ? "hidden lg:block" : undefined}>
+              <li key={media.id} className={rang >= TUILES_TELEPHONE ? "cv-carrousel__bureau" : undefined}>
                 <button
                   type="button"
                   onClick={() => ouvrirA(rang)}
-                  className="relative block aspect-square w-full overflow-hidden rounded-ds-card border border-ds-filet bg-ds-surface-creux"
+                  className="cv-photo"
                   aria-label={(media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)}
                 >
                   {"url" in apercu ? (
@@ -442,22 +434,16 @@ export function Visionneur({
                       loading={rang === 0 ? undefined : "lazy"}
                       fetchPriority={rang === 0 ? "high" : undefined}
                       decoding="async"
-                      className="h-full w-full object-cover"
                     />
                   ) : (
                     <ApercuIndisponible video={apercu.repli === "video"} />
                   )}
                   {media.type === "video" && "url" in apercu ? <PastilleLecture /> : null}
-
                   {rang === TUILES_TELEPHONE - 1 && resteTelephone > 0 ? (
-                    <span className="absolute inset-0 flex items-center justify-center bg-ds-surface-creux/90 text-[15px] font-extrabold text-ds-texte-corps lg:hidden">
-                      {"+" + resteTelephone}
-                    </span>
+                    <span className="cv-photo__plus cv-photo__plus--telephone">{"+" + resteTelephone}</span>
                   ) : null}
                   {rang === TUILES_BUREAU - 1 && resteBureau > 0 ? (
-                    <span className="absolute inset-0 hidden items-center justify-center bg-ds-surface-creux/90 text-[16px] font-extrabold text-ds-texte-corps lg:flex">
-                      {"+" + resteBureau}
-                    </span>
+                    <span className="cv-photo__plus cv-photo__plus--bureau">{"+" + resteBureau}</span>
                   ) : null}
                 </button>
               </li>

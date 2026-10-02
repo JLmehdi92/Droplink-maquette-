@@ -1,74 +1,57 @@
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { CARTE } from "@/components/publique/carte-client";
-import { ReseauxVendeur, liensDuVendeur } from "@/components/publique/reseaux-vendeur";
-import type { AccentResolu } from "@/lib/design/contraste";
+import { liensDuVendeur } from "@/components/publique/reseaux-vendeur";
 import type { Boutique } from "@/lib/page-publique/lecture";
 
-/**
- * « UNE QUESTION ? » — la carte de contact du kit `client_link`.
- *
- * ⚠️ OMISE QUAND LE VENDEUR N'A CONFIGURÉ AUCUN LIEN. Le kit l'affiche toujours ;
- * un bouton « Contacter la boutique » qui ne mène nulle part serait la pire
- * forme du texte de remplacement — une promesse d'interface que l'interface ne
- * tient pas. La page ne porte AUCUN formulaire (décision 3), donc sans lien il
- * n'y a tout simplement pas de moyen de contact à offrir.
- *
- * LE BOUTON MÈNE AU PREMIER MOYEN DE JOINDRE QUELQU'UN : WhatsApp, puis
- * Instagram, puis TikTok, puis le site. C'est l'ordre du plus direct au moins
- * direct — un message WhatsApp arrive à une personne, un site à une vitrine.
- *
- * ⚠️ IL EST À LA COULEUR DU VENDEUR, JAMAIS AU DÉGRADÉ DROPLINK — règle 3 : le
- * dégradé n'apparaît pas sur cette page. Aplat et écriture viennent de
- * `resoudreAccent()`, qui tient 4,5:1 quel que soit l'accent choisi.
- */
+/** WhatsApp d'abord : c'est la messagerie où l'on attend une réponse. Le site en dernier. */
 const ORDRE_CONTACT = ["whatsapp", "instagram", "tiktok", "site"] as const;
 
+/**
+ * « UNE QUESTION ? » (maquette v3, `.cv-contact`) : le bouton principal mène au premier
+ * réseau configuré, puis chaque messagerie est nommée. Le site n'est pas une messagerie :
+ * il ne figure pas parmi les puces nommées, et il n'est le bouton que faute d'autre chose.
+ *
+ * ABSENTE quand le vendeur n'a configuré aucun moyen de contact : « contactez la
+ * boutique » sans rien sur quoi cliquer serait une promesse creuse.
+ */
 export function CarteContact({
   boutique,
   libelles,
   libelleSite,
-  accent,
 }: {
   readonly boutique: Boutique;
   readonly libelles: { readonly titre: string; readonly texte: string; readonly bouton: string };
   readonly libelleSite: string;
-  readonly accent: AccentResolu;
 }) {
   const liens = liensDuVendeur(boutique, libelleSite);
-  const principal = ORDRE_CONTACT.map((clef) => liens.find((l) => l.clef === clef)).find(
-    (l) => l !== undefined,
-  );
-
+  const principal = ORDRE_CONTACT.map((clef) => liens.find((l) => l.clef === clef)).find((l) => l !== undefined);
   if (principal === undefined) return null;
+  const messageries = liens.filter((l) => l.clef !== "site");
 
   return (
-    <section className={CARTE}>
-      <div className="mb-[18px] flex gap-3.5">
-        <span
-          aria-hidden="true"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: accent.teinte, color: accent.interface }}
-        >
-          <MessageCircle size={20} strokeWidth={1.9} />
+    <section className="cv-carte cv-contact cv-entree" aria-labelledby="cv-contact">
+      <div className="cv-contact__tete">
+        <span className="cv-rond-teinte" aria-hidden="true">
+          <MessageCircle className="ic" />
         </span>
-        <span className="flex flex-col gap-[5px]">
-          <span className="text-[17px] font-bold text-ds-texte-fort">{libelles.titre}</span>
-          <span className="text-[13px] leading-[1.55] text-ds-texte-corps">{libelles.texte}</span>
-        </span>
+        <div>
+          <h2 className="cv-titre" id="cv-contact">
+            {libelles.titre}
+          </h2>
+          <p>{libelles.texte}</p>
+        </div>
       </div>
-      <a
-        href={principal.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex h-13 w-full items-center justify-center gap-2 rounded-ds-card border border-transparent px-7 text-[15px] font-semibold tracking-[-0.02em] shadow-ds-sm transition-opacity hover:opacity-90"
-        style={{ backgroundColor: accent.remplissage, color: accent.surRemplissage }}
-      >
+      <a href={principal.href} target="_blank" rel="noopener noreferrer" className="cv-bouton cv-bouton--plein cv-bouton--large">
         {libelles.bouton}
-        <ArrowRight size={18} strokeWidth={2} aria-hidden="true" />
+        <ArrowRight aria-hidden="true" className="ic" />
       </a>
-      <div className="mt-3.5 empty:hidden">
-        <ReseauxVendeur boutique={boutique} libelleSite={libelleSite} variante="libelle" />
-      </div>
+      {messageries.map((lien) => (
+        <a key={lien.clef} href={lien.href} target="_blank" rel="noopener noreferrer" className="cv-reseau-libelle">
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="cl-marque-reseau">
+            <path d={lien.trace} />
+          </svg>
+          {lien.libelle}
+        </a>
+      ))}
     </section>
   );
 }

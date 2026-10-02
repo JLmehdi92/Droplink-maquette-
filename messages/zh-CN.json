@@ -1697,8 +1697,7 @@
     },
     "historique": {
       "titre": "物流记录",
-      "voirTout": "查看全部记录（{n}）",
-      "reduire": "收起"
+      "voirTout": "查看全部记录（{n}）"
     },
     "contact": {
       "titre": "有疑问？",

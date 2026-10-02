@@ -3,7 +3,8 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { resoudreAccent } from "../../src/lib/design/contraste";
 import { apercuDe } from "@/components/publique/visionneur";
-import { ReseauxVendeur } from "../../src/components/publique/reseaux-vendeur";
+import { liensDuVendeur } from "../../src/components/publique/reseaux-vendeur";
+import { CarteContact } from "../../src/components/publique/carte-contact";
 import { sansCommentaires } from "../aide/source";
 
 /**
@@ -181,16 +182,16 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     site: null,
   };
 
-  test("un lien exécutable stocké en base n'est PAS rendu", () => {
-    const rendu = ReseauxVendeur({
-      boutique: { ...BOUTIQUE, instagram: "javascript:alert(1)" },
-      libelleSite: SITE,
-      variante: "libelle",
-    });
+  const LIBELLES_CONTACT = { titre: "t", texte: "x", bouton: "b" };
 
-    // Les trois liens invalides : le bloc entier disparaît, sans un mot au
-    // client — il n'y peut rien, et son vendeur ne lira jamais cette page.
-    expect(rendu).toBeNull();
+  test("un lien exécutable stocké en base n'est PAS rendu", () => {
+    // La refonte (02/10/2026) rend les réseaux à deux endroits (haut de page, contact) ;
+    // tous deux passent par `liensDuVendeur`, c'est donc LUI qui doit refuser.
+    expect(liensDuVendeur({ ...BOUTIQUE, instagram: "javascript:alert(1)" }, SITE)).toEqual([]);
+    // Sans lien valable, la carte de contact disparaît, sans un mot au client.
+    expect(
+      CarteContact({ boutique: { ...BOUTIQUE, instagram: "javascript:alert(1)" }, libelleSite: SITE, libelles: LIBELLES_CONTACT }),
+    ).toBeNull();
   });
 
   test.each([
@@ -199,19 +200,17 @@ describe("le rendu des réseaux ne fait pas confiance à ce qu'il lit", () => {
     ["http://instagram.com/x", "http en clair"],
     ["data:text/html,<script>", "charge inline"],
   ])("« %s » (%s) n'est pas rendu", (valeur) => {
-    expect(
-      ReseauxVendeur({ boutique: { ...BOUTIQUE, instagram: valeur }, libelleSite: SITE, variante: "icone" }),
-    ).toBeNull();
+    expect(liensDuVendeur({ ...BOUTIQUE, instagram: valeur }, SITE)).toEqual([]);
   });
 
   // CONTRE-TEST POSITIF. Une garde qui refuserait TOUT passerait ces cas à
   // 100 % en n'affichant jamais aucun réseau — c'est-à-dire en cassant la
   // fonctionnalité sans que rien ne le dise.
   test("un lien conforme EST rendu, et il porte noopener", () => {
-    const rendu = ReseauxVendeur({
+    const rendu = CarteContact({
       boutique: { ...BOUTIQUE, instagram: "https://instagram.com/atelier.nord" },
       libelleSite: SITE,
-      variante: "libelle",
+      libelles: LIBELLES_CONTACT,
     });
 
     expect(rendu).not.toBeNull();
