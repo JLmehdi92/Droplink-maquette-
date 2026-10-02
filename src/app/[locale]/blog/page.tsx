@@ -75,8 +75,12 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
             </span>
             Le blog
           </p>
-          <h1 className="pub-titre">Vendre en direct, sans y passer ses soirées</h1>
-          <p className="pub-chapo">{DESCRIPTION}</p>
+          <h1 className="pub-titre l4-titre">
+            <span className="l4-ligne" style={{ "--l": 0 } as React.CSSProperties}>Vendre en direct, sans y passer ses soirées</span>
+          </h1>
+          <p className="pub-chapo" data-entree>
+            {DESCRIPTION}
+          </p>
         </section>
         <section className="conteneur blog-grille" aria-label="Articles">
           {articles.map((a, rang) => (
@@ -84,6 +88,7 @@ export default async function Blog({ params }: { params: Promise<{ locale: strin
               key={a.slug}
               href={`/${locale}/blog/${a.slug}`}
               className={"blog-carte v4-carte" + (rang === 0 ? " blog-carte--une" : "")}
+              data-anime
             >
               <span className="blog-carte__etiquette">{a.etiquette}</span>
               <h2>{a.titre}</h2>

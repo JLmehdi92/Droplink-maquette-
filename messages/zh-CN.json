@@ -82,9 +82,13 @@
       "objet": "主题",
       "copier": "复制消息",
       "copie": "消息已复制",
-      "copieRefusee": "浏览器拒绝了复制",
       "ouvrir": "打开邮件应用",
-      "rienEnvoye": "在您亲自发送之前，不会发送任何内容。"
+      "rienEnvoye": "在您亲自发送之前，不会发送任何内容。",
+      "erreurLien": "请粘贴页面的完整地址，以 https:// 开头。",
+      "erreurDescription": "请说明问题所在。",
+      "erreurEmail": "这个邮箱地址似乎不正确。",
+      "copieSelection": "已选中，请复制",
+      "sujet": "举报内容：{categorie}"
     },
     "conditionsMetaTitre": "使用条款 — DropLink",
     "conditionsMetaDescription": "DropLink 的使用条款：服务内容、卖家账户、内容、免费版与专业版、终止与责任。",
@@ -882,7 +886,8 @@
     },
     "placeholderMotDePasse": "请输入密码",
     "afficherMotDePasse": "显示密码",
-    "masquerMotDePasse": "隐藏密码"
+    "masquerMotDePasse": "隐藏密码",
+    "erreurMdpVide": "请输入您的密码。"
   },
   "inscription": {
     "titre": "注册账号",

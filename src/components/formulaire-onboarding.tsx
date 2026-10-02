@@ -1,7 +1,8 @@
 "use client";
 
 import { ACCEPT_LOGO } from "@/lib/boutique/types-logo";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { secouer } from "@/components/acces/validation-locale";
 import { useTranslations } from "next-intl";
 import { CircleCheck, Images, MessageCircle, Upload, Users } from "lucide-react";
 import { ApercuPageClient } from "@/components/marque/apercu-page-client";
@@ -73,6 +74,13 @@ export function FormulaireOnboarding({
   const [resultat, action] = useActionState(terminerOnboarding, INITIAL);
 
   const [typeDeCompte, setTypeDeCompte] = useState<"supplier" | "reseller" | "">("");
+  // « Choisissez à qui vous vendez » dit avant l'envoi (maquette, `compte.js`) ; le
+  // serveur le refuse aussi, et son refus secoue le même groupe.
+  const [typeManquant, setTypeManquant] = useState(false);
+  const choixType = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (resultat.statut === "erreur" && resultat.motif === "saisie") secouer(choixType.current);
+  }, [resultat]);
   const [nom, setNom] = useState("");
   const [couleur, setCouleur] = useState(ACCENT_DEFAUT);
   const [logo, setLogo] = useState<EtatLogo>({ phase: "vide" });
@@ -153,7 +161,18 @@ export function FormulaireOnboarding({
      grammaire de la page client à droite (`ApercuPageClient`, celle de « Ma marque »), aux
      couleurs que `resoudreAccent()` donnera réellement au client. */
   return (
-    <form action={action} className="onb__grille" noValidate>
+    <form
+      action={action}
+      className="onb__grille"
+      noValidate
+      onSubmit={(e) => {
+        if (typeDeCompte !== "") return;
+        e.preventDefault();
+        setTypeManquant(true);
+        secouer(choixType.current);
+        choixType.current?.querySelector("input")?.focus();
+      }}
+    >
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="couleurAccent" value={couleur} />
 
@@ -290,7 +309,7 @@ export function FormulaireOnboarding({
             les fournisseurs comme revendeurs, et faussé la segmentation d'usage. */}
         <fieldset className="onb-champ onb-type">
           <legend className="onb-champ__titre">{t("typeTitre")}</legend>
-          <div className="onb-type__choix">
+          <div className="onb-type__choix" ref={choixType}>
             {TYPES.map((type) => {
               const Icone = type.icone;
               return (
@@ -300,7 +319,10 @@ export function FormulaireOnboarding({
                     name="typeDeCompte"
                     value={type.valeur}
                     checked={typeDeCompte === type.valeur}
-                    onChange={() => setTypeDeCompte(type.valeur)}
+                    onChange={() => {
+                      setTypeDeCompte(type.valeur);
+                      setTypeManquant(false);
+                    }}
                   />
                   <span className="onb-carte__icone" aria-hidden="true">
                     <Icone className="ic" />
@@ -312,7 +334,7 @@ export function FormulaireOnboarding({
               );
             })}
           </div>
-          {champsEnEchec.includes("typeDeCompte") ? (
+          {typeManquant || (champsEnEchec.includes("typeDeCompte") && typeDeCompte === "") ? (
             <p role="alert" className="champ-acces__erreur">
               {t("erreurType")}
             </p>

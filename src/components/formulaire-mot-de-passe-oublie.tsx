@@ -1,14 +1,15 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { MailCheck } from "lucide-react";
+import { Mail } from "lucide-react";
 import {
   demanderReinitialisation,
   type ResultatReinitialisation,
 } from "@/app/[locale]/connexion/actions";
 import { suggererCorrection } from "@/lib/email/domaines";
 import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
+import { emailValide, secouer, secouerInvalides, valeurEnvoyee } from "@/components/acces/validation-locale";
 
 /**
  * DEMANDER UN LIEN DE RÉINITIALISATION — `ForgotScreen` du kit `auth`, écrit le
@@ -37,18 +38,31 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
   const tm = useTranslations("motDePasse");
   const [resultat, action] = useActionState(demanderReinitialisation, INITIAL);
   const [email, setEmail] = useState("");
+  const [erreurEmail, setErreurEmail] = useState("");
+  const formulaire = useRef<HTMLFormElement>(null);
+  const envoye = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (resultat.statut === "erreur") secouerInvalides(formulaire.current);
+    // La confirmation remplace le formulaire : le focus la suit (maquette, `acces.js`),
+    // sans quoi il tomberait sur le document.
+    if (resultat.statut === "envoye") envoye.current?.focus();
+  }, [resultat]);
 
   const suggestion = useMemo(() => suggererCorrection(email), [email]);
 
   if (resultat.statut === "envoye") {
     return (
-      <div role="status" className="acces__note">
-        <MailCheck aria-hidden="true" className="ic" />
-        <p>
-          <b>{tm("envoyeTitre")}</b>
-          <br />
-          {tm("envoyeTexte")}
-        </p>
+      <div role="status" className="envoye">
+        <span className="envoye__icone" aria-hidden="true">
+          <Mail className="ic" />
+        </span>
+        {/* Le focus suit la confirmation (maquette, `acces.js`), sans quoi il tomberait
+            sur le document une fois le formulaire retiré. */}
+        <h2 ref={envoye} tabIndex={-1}>
+          {tm("envoyeTitre")}
+        </h2>
+        <p>{tm("envoyeTexte")}</p>
       </div>
     );
   }
@@ -61,7 +75,23 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
       : null;
 
   return (
-    <form action={action} className="formulaire" noValidate>
+    <form
+      ref={formulaire}
+      action={action}
+      className="formulaire v4-carte"
+      noValidate
+      onSubmit={(e) => {
+        if (emailValide(valeurEnvoyee(e.currentTarget, "email"))) {
+          setErreurEmail("");
+          return;
+        }
+        e.preventDefault();
+        setErreurEmail(t("erreurEmailInvalide"));
+        const champ = e.currentTarget.querySelector<HTMLInputElement>("#email-oubli");
+        secouer(champ?.closest(".champ-acces__boite"));
+        champ?.focus();
+      }}
+    >
       <input type="hidden" name="locale" value={locale} />
 
       <ChampAcces
@@ -73,7 +103,14 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
         autoComplete="username"
         modeSaisie="email"
         valeur={email}
-        surChangement={setEmail}
+        surChangement={(v) => {
+          setEmail(v);
+          if (erreurEmail !== "" && emailValide(v)) setErreurEmail("");
+        }}
+        surSortie={() => {
+          if (email !== "" && !emailValide(email)) setErreurEmail(t("erreurEmailInvalide"));
+        }}
+        erreurLocale={erreurEmail}
         invalide={messageErreur !== null}
         {...(messageErreur !== null ? { decritPar: "erreur-oubli" } : {})}
       >
@@ -81,7 +118,13 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
         {suggestion !== null ? (
           <p className="champ-acces__suggestion" aria-live="polite">
             {t("suggestionPrefixe")}{" "}
-            <button type="button" onClick={() => setEmail(suggestion.adresse)}>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail(suggestion.adresse);
+                setErreurEmail("");
+              }}
+            >
               {suggestion.adresse}
             </button>
             {t("suggestionSuffixe")}

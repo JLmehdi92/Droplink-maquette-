@@ -2,7 +2,8 @@
 
 import { useFormStatus } from "react-dom";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ecouterAppuisEnvoi, sortieVersEnvoi } from "@/components/acces/validation-locale";
 
 /**
  * LES CHAMPS DES PAGES D'ACCÈS ET DE COMPTE — au dessin de la refonte (maquette,
@@ -32,6 +33,8 @@ export function ChampAcces({
   modeSaisie,
   invalide = false,
   libellesOeil,
+  erreurLocale,
+  surSortie,
   children,
 }: {
   readonly id: string;
@@ -54,14 +57,28 @@ export function ChampAcces({
    * sans nom n'est pas un bouton.
    */
   readonly libellesOeil?: { readonly afficher: string; readonly masquer: string };
+  /**
+   * Le refus de la validation À LA SAISIE (maquette, `acces.js` : `[data-erreur]`),
+   * dit sous la boîte. Un confort : le serveur reste l'autorité, et son refus
+   * s'affiche à part (`MessageErreurDs`).
+   */
+  readonly erreurLocale?: string;
+  readonly surSortie?: () => void;
   /** Ce qui vit sous la boîte : jauge, aide, suggestion. */
   readonly children?: React.ReactNode;
 }) {
   const [devoile, setDevoile] = useState(false);
+  const ecouteSortie = surSortie !== undefined;
+  useEffect(() => {
+    if (ecouteSortie) ecouterAppuisEnvoi();
+  }, [ecouteSortie]);
   const estMotDePasse = type === "password";
+  const aErreurLocale = erreurLocale !== undefined && erreurLocale !== "";
+  const idErreur = `${id}-erreur`;
+  const decrit = [aErreurLocale ? idErreur : null, decritPar ?? null].filter(Boolean).join(" ") || undefined;
 
   return (
-    <div className={"champ-acces" + (invalide ? " est-invalide" : "")}>
+    <div className={"champ-acces" + (invalide || aErreurLocale ? " est-invalide" : "")}>
       <div className="champ-acces__ligne">
         <label htmlFor={id}>{libelle}</label>
         {action}
@@ -76,8 +93,11 @@ export function ChampAcces({
           autoCapitalize={type === "email" ? "off" : undefined}
           spellCheck={type === "email" || estMotDePasse ? false : undefined}
           required={requis}
-          aria-describedby={decritPar}
-          aria-invalid={invalide || undefined}
+          aria-describedby={decrit}
+          aria-invalid={invalide || aErreurLocale || undefined}
+          onBlur={(e) => {
+            if (!sortieVersEnvoi(e.relatedTarget)) surSortie?.();
+          }}
           inputMode={modeSaisie}
           {...(valeur === undefined
             ? {}
@@ -94,6 +114,14 @@ export function ChampAcces({
           </button>
         ) : null}
       </div>
+      {/* Il naît avec son texte, en `role="alert"` : une région `aria-live` masquée
+          (`display: none` hors refus) n'est pas dans l'arbre d'accessibilité au moment
+          où le texte arrive, et souvent pas annoncée. */}
+      {aErreurLocale ? (
+        <p className="champ-acces__erreur" id={idErreur} role="alert">
+          {erreurLocale}
+        </p>
+      ) : null}
       {children}
     </div>
   );
@@ -107,11 +135,15 @@ export function ChampAcces({
 export function BoutonPrincipalDs({
   libelle,
   libelleEnCours,
+  occupe = false,
 }: {
   readonly libelle: string;
   readonly libelleEnCours: string;
+  /** Reste « en cours » après la réponse, le temps que la page suivante arrive. */
+  readonly occupe?: boolean;
 }) {
-  const { pending } = useFormStatus();
+  const { pending: envoi } = useFormStatus();
+  const pending = envoi || occupe;
   return (
     <button
       type="submit"

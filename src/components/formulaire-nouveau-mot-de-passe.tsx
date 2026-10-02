@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   changerMotDePasse,
   type ResultatChangement,
 } from "@/app/[locale]/nouveau-mot-de-passe/actions";
 import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
+import { secouer, secouerInvalides, tropCourt, valeurEnvoyee } from "@/components/acces/validation-locale";
 
 /**
  * SAISIR LE NOUVEAU MOT DE PASSE — `ResetScreen` du kit `auth`, écrit le
@@ -37,6 +38,14 @@ export function FormulaireNouveauMotDePasse({
   const ti = useTranslations("inscription");
   const [resultat, action] = useActionState(changerMotDePasse, INITIAL);
   const [motDePasse, setMotDePasse] = useState("");
+  // Le refus de la saisie (maquette, `acces.js`) : la longueur seulement, la seule
+  // règle que le navigateur voit ici (l'adresse n'est pas dans la page).
+  const [erreurMdp, setErreurMdp] = useState("");
+  const formulaire = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (resultat.statut === "erreur") secouerInvalides(formulaire.current);
+  }, [resultat]);
 
   const messageErreur =
     resultat.statut === "erreur"
@@ -57,7 +66,23 @@ export function FormulaireNouveauMotDePasse({
   const assez = longueur >= longueurMinimale;
 
   return (
-    <form action={action} className="formulaire" noValidate>
+    <form
+      ref={formulaire}
+      action={action}
+      className="formulaire v4-carte"
+      noValidate
+      onSubmit={(e) => {
+        if (!tropCourt(valeurEnvoyee(e.currentTarget, "motDePasse"), longueurMinimale)) {
+          setErreurMdp("");
+          return;
+        }
+        e.preventDefault();
+        setErreurMdp(ti("erreurMdpTropCourt"));
+        const champ = e.currentTarget.querySelector<HTMLInputElement>("#nouveau-mot-de-passe");
+        secouer(champ?.closest(".champ-acces__boite"));
+        champ?.focus();
+      }}
+    >
       <input type="hidden" name="locale" value={locale} />
 
       {/* LA JAUGE DE LA MAQUETTE, comme à l'inscription : elle compte vers la seule règle
@@ -70,7 +95,11 @@ export function FormulaireNouveauMotDePasse({
         placeholder={ti("placeholderMotDePasse")}
         autoComplete="new-password"
         valeur={motDePasse}
-        surChangement={setMotDePasse}
+        surChangement={(v) => {
+          setMotDePasse(v);
+          if (erreurMdp !== "" && !tropCourt(v, longueurMinimale)) setErreurMdp("");
+        }}
+        erreurLocale={erreurMdp}
         libellesOeil={{ afficher: t("afficherMotDePasse"), masquer: t("masquerMotDePasse") }}
         invalide={messageErreur !== null}
         decritPar={

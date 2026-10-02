@@ -21,7 +21,7 @@ export const article: Article = {
     {
       type: "chapeau",
       texte:
-        "Cherchez « page de suivi personnalisée » : tous les résultats vous demandent l'adresse de votre boutique Shopify. Si vous vendez en message privé, aucun de ces outils ne vous concerne — et pourtant le besoin est le même.",
+        "Cherchez « page de suivi personnalisée » : tous les résultats vous demandent l'adresse de votre boutique Shopify. Si vous vendez en message privé, aucun de ces outils ne vous concerne, et pourtant le besoin est le même.",
     },
     { type: "titre", texte: "Pourquoi les outils existants ne servent à rien ici" },
     {
@@ -48,7 +48,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Pour votre client, un suivi qui n'avance plus veut dire un colis perdu. Il ne fait pas la différence entre « le transporteur n'a rien scanné » et « personne ne sait où il est ». C'est là que les messages arrivent, et c'est là qu'il faut une réponse — pas un tableau vide.",
+        "Pour votre client, un suivi qui n'avance plus veut dire un colis perdu. Il ne fait pas la différence entre « le transporteur n'a rien scanné » et « personne ne sait où il est ». C'est là que les messages arrivent, et c'est là qu'il faut une réponse, pas un tableau vide.",
     },
     { type: "titre", texte: "Ce qu'il faut, au minimum" },
     {

@@ -30,7 +30,15 @@ import { creerClientServeur } from "@/lib/supabase/server";
 
 export type ResultatVerification =
   | { statut: "inactif" }
-  | { statut: "erreur"; motif: "code" | "invalide" | "trop" | "indisponible" };
+  | { statut: "erreur"; motif: "code" | "invalide" | "trop" | "indisponible" }
+  /**
+   * Le code est ACCEPTÉ, et la suite est connue. Rendu seulement à un formulaire
+   * hydraté (`js=1`) : il pose les cases en vert (maquette, `compte.js`) PUIS
+   * navigue. Sans JavaScript, ou avant l'hydratation, l'action redirige comme
+   * avant — un formulaire qui recevrait ce résultat sans script resterait sur place.
+   * Le vert suit la réponse du serveur, il ne la précède jamais (contrainte 8).
+   */
+  | { statut: "valide"; chemin: string };
 
 const Saisie = z.object({
   code: z
@@ -43,6 +51,8 @@ const Saisie = z.object({
   // La case « se souvenir de cet appareil » (203) : présente seulement à la
   // connexion ordinaire, absente du flux de réinitialisation.
   souvenir: z.enum(["on"]).optional(),
+  // Posé par le formulaire une fois hydraté : il sait alors naviguer lui-même.
+  js: z.enum(["1"]).optional(),
 });
 
 export async function verifierCode(
@@ -54,6 +64,7 @@ export async function verifierCode(
 
   const suiteBrute = donnees.get("suite");
   const souvenirBrut = donnees.get("souvenir");
+  const jsBrut = donnees.get("js");
   const analyse = Saisie.safeParse({
     // LES SIX CASES PORTENT TOUTES `name="code"` : sans JavaScript, ou avant
     // l'hydratation, le navigateur envoie les six valeurs, recollées ici. Un
@@ -66,12 +77,13 @@ export async function verifierCode(
     locale: donnees.get("locale"),
     suite: typeof suiteBrute === "string" && suiteBrute !== "" ? suiteBrute : undefined,
     souvenir: typeof souvenirBrut === "string" && souvenirBrut !== "" ? souvenirBrut : undefined,
+    js: typeof jsBrut === "string" && jsBrut !== "" ? jsBrut : undefined,
   });
   if (!analyse.success) {
     await attendrePlancher(debut);
     return { statut: "erreur", motif: "invalide" };
   }
-  const { code, locale, suite, souvenir } = analyse.data;
+  const { code, locale, suite, souvenir, js } = analyse.data;
 
   const supabase = await creerClientServeur();
   const { data, error } = await supabase.auth.getUser();
@@ -118,18 +130,25 @@ export async function verifierCode(
     await poserPreuveAppareil(supabase);
   }
 
+  // Toutes les suites d'un code ACCEPTÉ passent par ici : un formulaire hydraté
+  // reçoit le chemin (cases vertes, puis navigation), les autres sont redirigés.
+  const aboutir = (chemin: string): ResultatVerification => {
+    if (js === "1") return { statut: "valide", chemin };
+    redirect(chemin);
+  };
+
   if (suite === "mot-de-passe") {
     await attendrePlancher(debut);
-    redirect(`/${locale}/nouveau-mot-de-passe`);
+    return aboutir(`/${locale}/nouveau-mot-de-passe`);
   }
   if (suite === "admin") {
     // La session est maintenant `aal2` : c'est `exigerAdmin`, à l'arrivée, qui
     // relit le rôle en base — cette redirection n'accorde rien.
     await attendrePlancher(debut);
-    redirect(`/${locale}/admin`);
+    return aboutir(`/${locale}/admin`);
   }
 
   const destination = await suivreApresSession(locale, supabase);
   await attendrePlancher(debut);
-  redirect(destination.ok ? destination.chemin : cheminDeRefus(locale, destination.motif));
+  return aboutir(destination.ok ? destination.chemin : cheminDeRefus(locale, destination.motif));
 }

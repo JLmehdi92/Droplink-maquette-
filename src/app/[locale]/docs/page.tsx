@@ -392,7 +392,7 @@ export default async function Documentation({
 
             {/* L'APPEL FINAL : une carte, et le dégradé sur son bouton — la seule action
                 principale de l'écran (règle 3). */}
-            <aside className="pub-cta v4-carte">
+            <aside className="pub-cta v4-carte" data-anime>
               <h2>{t("ctaTitre")}</h2>
               <p>{t("ctaTexte")}</p>
               <LienEcran href={`/${langue}/inscription`} className="bouton bouton--marque bouton--large min-h-11">

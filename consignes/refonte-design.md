@@ -172,7 +172,7 @@ leur raison :
 | Google | **Reste un formulaire POST** vers `partirVersGoogle`, affiché seulement si `AUTH_GOOGLE_ACTIF` | garde du fournisseur et quota |
 | « Se déconnecter » de la vérification | **`BoutonDeconnexion`** (POST), dans un `<div>` | un lien ne déconnecte pas ; un `<form>` dans un `<p>` casse l'hydratation (#418) |
 | Motif minimal des dialogues d'administration | **8 caractères**, la valeur du produit (`suspension.ts:20`), et non 10 comme la maquette | la donnée du produit gagne |
-| Sommaire des pages légales qui suit la lecture | **Non** : le sommaire reste sans JavaScript | refus documenté dans `page-legale.tsx:136-140` |
+| Sommaire des pages légales qui suit la lecture | **Oui depuis le 02/10/2026** (consigne de Mehdi : « exactement comme l'artefact ») : `AnimationsPubliques` le marque ; sans JavaScript il reste un sommaire, sans entrée active | `page-legale.tsx` |
 | Titres de page « X · DropLink » au lieu de « X — DropLink » | **Non** : on garde les titres des catalogues | changer trois catalogues et la fumée pour une ponctuation n'est pas la refonte |
 | Menu mobile des pages publiques | **`<details>` sans JavaScript**, habillé comme la maquette | même rendu, zéro JS |
 | Lieux par étape du trajet sur la page client (« Lyon · 29 sept. ») | **Non** | ce serait interpréter les passages du transporteur, ce que `historique-suivi.tsx:17-30` refuse |
@@ -1068,6 +1068,67 @@ la liste des comptes admin (il faudrait une migration — question ouverte au §
 **Comptes de mesure créés sur la base de TESTS** : refonte-demo@, refonte-onb@ et refonte-admin@
 (`droplink-test.invalid`, ce dernier administrateur à deux facteurs). Le secret TOTP utilisé pour la
 mesure a été effacé du conteneur à la fin de la session.
+
+### ▶️ 02/10/2026 — fidélité du mouvement, lots 1 et 2 : accès et pages publiques (session cloud)
+
+Consigne de Mehdi : « exactement comme l'artefact, avec vraiment toutes les animations […] et même
+les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/audit-fidelite-refonte.md`.
+
+- **La classe `js` devient GLOBALE** (`ScriptJs`, coque de langue) : chaque script de la maquette la
+  pose, le produit ne la posait que sur la landing — les règles `.js …` de l'administration (graphes),
+  des écrans d'état et des pages d'accès ne jouaient donc jamais. Elle porte `.attente` (animations
+  gelées) jusqu'à `.pret` (police chargée, deux images, plafond 900 ms — § 6), et un filet : sans
+  hydratation en 2,5 s, elle est retirée et tout s'affiche. La landing n'a plus son propre script et ne
+  retire plus `js` en partant. `/p` n'en a pas (sa maquette non plus). `v4-entree` est désormais retirée
+  1,6 s après `.pret`, sinon une entrée gelée était coupée net.
+- **Pages d'accès** : `CoucheV4` + `v4-entree` (titre, formulaire) et bordure lumineuse sur la carte du
+  formulaire (connexion, inscription, oubli, nouveau mot de passe, vérification, bienvenue) ; validation
+  à la saisie et à l'envoi comme `acces.js` (message sous le champ, `role="alert"`, secousse, focus sur
+  le premier champ fautif) — JAMAIS plus stricte que le serveur (longueur en unités UTF-16, partie
+  locale d'au moins 4 caractères, comme `lib/auth/mot-de-passe.ts`), et lue dans le `FormData` qui part ;
+  un refus du serveur secoue aussi les champs qu'il désigne. **Défaut de la maquette corrigé** : au
+  téléphone, sortir du champ en tapant « Envoyer » affichait l'erreur, le bouton descendait de 20 px et
+  le relâché tombait à côté (mesuré) ; une sortie vers le bouton d'envoi est laissée à l'envoi.
+- **Connexion ⇄ inscription sans recharger** (`BasculeAcces`) : sortie 170 ms, film figé sur sa
+  dernière image puis effacé en 520 ms, entrée 420 ms, film suivant construit 260 ms plus tard et
+  fondu, adresse recopiée, focus au titre, liens préchargés. **Second défaut de la maquette corrigé** :
+  à 800 ms elle retire `v4-entre`, ce qui rejoue l'entrée `monte` du chargement (le formulaire
+  disparaissait une seconde fois, mesuré image par image) ; le produit garde la classe. Filet : une page
+  qui n'est pas arrivée en 4 s est chargée comme un lien. Mesuré : mêmes durées que la maquette ; ici
+  l'attente réseau du serveur (~1 s, base distante depuis le conteneur) s'intercale.
+- **Vérification 2FA** : six cases secouées et vidées au refus, focus en première case (souris), message
+  effacé à la frappe, et **cases vertes 380 ms** : l'action renvoie `{statut:"valide", chemin}` à un
+  formulaire hydraté (`js=1`) — le vert SUIT l'acceptation du serveur — et redirige comme avant sans
+  JavaScript. Relu : chemin construit au serveur seulement, pas de redirection ouverte. ⚠️ Le succès
+  n'a pu être vu qu'une fois ici : Supabase refuse `challenge`/`verify` venus de deux IP différentes
+  (`mfa_ip_address_mismatch`), et le proxy du conteneur en change — à revoir au poste de Mehdi.
+- **Mot de passe oublié** : le bloc « Regardez votre boîte mail » de la maquette (`.envoye`, sceau,
+  focus sur son titre). **Bienvenue** : « Choisissez à qui vous vendez » avant l'envoi, secousse.
+  **Notification** : titre d'onglet par état, fondu 380 ms à l'arrivée d'un résultat.
+- **Pages publiques** (`AnimationsPubliques`, port de `public.js`) : titres `l4-ligne`, cascade
+  `data-entree`, `data-anime → est-vu` (seuil 0,2), croix du tableau des tarifs (`--tp-croix`,
+  `ResizeObserver`) et ses lignes à 180 + 45 ms × rang, **barre de progression des articles** (décision
+  de Mehdi), sommaire des pages légales qui suit la lecture (tiers haut de l'écran, comme celui de la
+  documentation désormais), bordure lumineuse. Signalement : validation en place, bloc « prêt » qui
+  entre en 320 ms et vient dans le champ de vision, copie au format de la maquette (« À : … / Objet : »),
+  « Message copié » qui revient à « Copier le message » après 2,2 s, sélection du message si la copie
+  est refusée. Blog : ordre et « à la une » de la maquette, titre « … » : … », et les tirets longs des
+  articles remplacés par la ponctuation de la maquette (texte identique, vérifié phrase par phrase).
+- **Mesuré au navigateur** (build de production, base de TESTS, compte de mesure neuf) : durées et
+  courbes identiques à la maquette servie (titre, chapô, lignes du tableau, progression, sommaire, bloc
+  prêt, copie) ; 1440 et 390 px tactile, fr/en/zh-CN, mouvement réduit : aucun débordement, aucun texte
+  masqué, aucune boucle, aucune erreur console, aucune violation CSP. **Processeur ×4** : tableau des
+  tarifs 60 images/s (maquette 59) ; bascule d'accès 50 images/s, pire image 150-180 ms (maquette 100 :
+  le rendu React de la page arrivante s'ajoute à la construction du film).
+- **Relectures** (deux agents, quatre angles) : 0 CRITICAL/HIGH. Corrigés : gel `.attente` perdu, puis
+  coupure de `v4-entree` ; validation plus stricte que le serveur ; régions `aria-live` masquées
+  (remplacées par `role="alert"` à l'insertion) ; validation sur l'état React plutôt que sur ce qui part ;
+  effet relancé à chaque rendu ; avertissement d'hydratation de `<html>` (`suppressHydrationWarning`) ;
+  commentaire du signalement ; corps du message non élagué ; volet du sommaire vide au rendu serveur ;
+  tableau des tarifs vide à l'impression. Laissé : la colonne reste vide pendant l'attente réseau d'une
+  bascule (comme la maquette pendant son `fetch`).
+- **Portes ici** : `typecheck` 0, `lint` 0 erreur (2 avertissements, dont `suspendu` traité au lot 6),
+  `build` vert, `test` 1268/1269 (alarme Railway seule).
 
 ## 9. Ce qui attend Mehdi
 

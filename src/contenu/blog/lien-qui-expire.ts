@@ -22,7 +22,7 @@ export const article: Article = {
     {
       type: "chapeau",
       texte:
-        "Sept jours en gratuit, vingt-huit en payant. Passé ce délai, le lien que vous avez envoyé à votre client ne mène plus nulle part — et c'est souvent le moment où il y revient.",
+        "Sept jours en gratuit, vingt-huit en payant. Passé ce délai, le lien que vous avez envoyé à votre client ne mène plus nulle part, et c'est souvent le moment où il y revient.",
     },
     { type: "titre", texte: "Pourquoi le lien meurt" },
     {
@@ -44,7 +44,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Le coût n'est pas le lien mort. Le coût, c'est le message qui suit — celui où votre client vous demande de tout renvoyer, et où vous devez retrouver les bonnes photos parmi celles de trente autres commandes, sur un téléphone qui a effacé les plus anciennes.",
+        "Le coût n'est pas le lien mort. Le coût, c'est le message qui suit, celui où votre client vous demande de tout renvoyer, et où vous devez retrouver les bonnes photos parmi celles de trente autres commandes, sur un téléphone qui a effacé les plus anciennes.",
     },
     {
       type: "citation",

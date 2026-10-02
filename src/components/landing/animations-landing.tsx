@@ -748,9 +748,8 @@ export function AnimationsLanding() {
     return () => {
       vivant = false;
       nettoyages.forEach((n) => n());
-      // La classe `js` ne survit pas à la landing : les autres écrans jouent leur
-      // entrée seulement au premier chargement réel, jamais en naviguant.
-      html.classList.remove("js", "pret", "attente");
+      // La classe `js` vit avec le document (`ScriptJs`) : toutes les surfaces la
+      // portent, comme dans la maquette où chaque script de page la pose.
       delete fenetre.__landing;
     };
   }, []);

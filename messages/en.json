@@ -82,9 +82,13 @@
       "objet": "Subject",
       "copier": "Copy the message",
       "copie": "Message copied",
-      "copieRefusee": "Copy blocked by the browser",
       "ouvrir": "Open your email app",
-      "rienEnvoye": "Nothing is sent until you send it yourself."
+      "rienEnvoye": "Nothing is sent until you send it yourself.",
+      "erreurLien": "Paste the full address of the page, starting with https://.",
+      "erreurDescription": "Say what the problem is.",
+      "erreurEmail": "That address does not look valid.",
+      "copieSelection": "Selected, copy it",
+      "sujet": "{titre}: {categorie}"
     },
     "conditionsMetaTitre": "Terms of use — DropLink",
     "conditionsMetaDescription": "DropLink's terms of use: the service, the seller account, content, the Free and Pro plans, termination and liability.",
@@ -882,7 +886,8 @@
     },
     "placeholderMotDePasse": "Your password",
     "afficherMotDePasse": "Show password",
-    "masquerMotDePasse": "Hide password"
+    "masquerMotDePasse": "Hide password",
+    "erreurMdpVide": "Enter your password."
   },
   "inscription": {
     "titre": "Create an account",

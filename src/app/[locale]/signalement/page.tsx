@@ -86,8 +86,12 @@ export default async function Signalement({
               </span>
               {t("signalementSurTitre")}
             </p>
-            <h1 className="pub-titre">{t("signalementTitre")}</h1>
-            <p className="pub-chapo">{t("signalement.intro")}</p>
+            <h1 className="pub-titre l4-titre">
+              <span className="l4-ligne" style={{ "--l": 0 } as React.CSSProperties}>{t("signalementTitre")}</span>
+            </h1>
+            <p className="pub-chapo" data-entree>
+              {t("signalement.intro")}
+            </p>
             <ol className="sig-etapes">
               {etapes.map((e, i) => (
                 <li key={e.titre}>

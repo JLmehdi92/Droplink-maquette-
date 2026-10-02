@@ -37,13 +37,13 @@ export const article: Article = {
     {
       type: "citation",
       texte:
-        "Vous ne décidez pas d'une fuite. Vous décidez d'un partage — et les deux sont parfois séparés de plusieurs mois.",
+        "Vous ne décidez pas d'une fuite. Vous décidez d'un partage, et les deux sont parfois séparés de plusieurs mois.",
     },
     { type: "titre", texte: "Le problème du mélange" },
     {
       type: "paragraphe",
       texte:
-        "À dix commandes par mois, un dossier par client reste tenable. À cent, l'arborescence devient le vrai travail : nommer, ranger, retrouver. Et une erreur de rangement ne se voit pas — elle se découvre quand un client vous dit qu'il voit des photos qui ne sont pas les siennes.",
+        "À dix commandes par mois, un dossier par client reste tenable. À cent, l'arborescence devient le vrai travail : nommer, ranger, retrouver. Et une erreur de rangement ne se voit pas, elle se découvre quand un client vous dit qu'il voit des photos qui ne sont pas les siennes.",
     },
     {
       type: "paragraphe",
@@ -54,7 +54,7 @@ export const article: Article = {
     {
       type: "liste",
       items: [
-        "Un lien qui ne montre qu'une commande — pas un dossier, pas une bibliothèque, pas un compte.",
+        "Un lien qui ne montre qu'une commande, pas un dossier, pas une bibliothèque, pas un compte.",
         "Une adresse impossible à deviner, et qui ne se déduit pas de la précédente.",
         "La possibilité de couper un lien précis sans toucher aux autres, le jour où c'est nécessaire.",
         "Aucun compte à créer côté client : quelqu'un qui doit s'inscrire pour voir ses photos ne les regardera pas.",
@@ -64,7 +64,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Demandez-vous ce qui se passe si votre client transfère le lien à quelqu'un d'autre — parce qu'il le fera, pour montrer son achat. Avec un dossier partagé, il transfère l'accès à tout ce que ce dossier contiendra un jour. Avec un lien par commande, il transfère exactement ce qu'il voulait montrer : sa commande.",
+        "Demandez-vous ce qui se passe si votre client transfère le lien à quelqu'un d'autre, parce qu'il le fera, pour montrer son achat. Avec un dossier partagé, il transfère l'accès à tout ce que ce dossier contiendra un jour. Avec un lien par commande, il transfère exactement ce qu'il voulait montrer : sa commande.",
     },
     {
       type: "paragraphe",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { EVENEMENT_FIGER_FILM, basculeRecente } from "@/components/acces/bascule-acces";
 import {
   Check,
   CircleCheck,
@@ -79,8 +80,38 @@ export function FilmAcces({
   useEffect(() => {
     const h = hote.current, m = modele.current, i = icones.current;
     if (!h || !m || !i) return;
-    const film = monterFilm(h, m, i, JSON.parse(cle) as TextesFilm, logo);
-    return () => film.arreter();
+    // Arrivé par la bascule connexion ⇄ inscription (maquette, `acces.js`) : le film
+    // se construit après l'entrée du formulaire (260 ms, pour ne pas lui voler ses
+    // images) et entre en fondu sur la dernière image de l'autre.
+    const entrant = basculeRecente() && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let film: ReturnType<typeof monterFilm> | null = null;
+    // La page qui part fige son film : un seul film calcule pendant le fondu.
+    const figer = () => film?.figer();
+    window.addEventListener(EVENEMENT_FIGER_FILM, figer);
+    if (!entrant) {
+      film = monterFilm(h, m, i, JSON.parse(cle) as TextesFilm, logo);
+      return () => {
+        window.removeEventListener(EVENEMENT_FIGER_FILM, figer);
+        film?.arreter();
+      };
+    }
+    h.classList.add("est-entrant");
+    let a = 0;
+    let b = 0;
+    const minuteur = window.setTimeout(() => {
+      film = monterFilm(h, m, i, JSON.parse(cle) as TextesFilm, logo);
+      a = requestAnimationFrame(() => {
+        b = requestAnimationFrame(() => h.classList.remove("est-entrant"));
+      });
+    }, 260);
+    return () => {
+      window.removeEventListener(EVENEMENT_FIGER_FILM, figer);
+      window.clearTimeout(minuteur);
+      cancelAnimationFrame(a);
+      cancelAnimationFrame(b);
+      h.classList.remove("est-entrant");
+      film?.arreter();
+    };
   }, [cle, logo]);
 
   return (
@@ -131,11 +162,17 @@ function monterFilm(hote: HTMLElement, modele: HTMLElement, sourceIcones: HTMLEl
   };
   place.addEventListener("change", lancer);
   lancer();
+  const figer = () => {
+    if (arrete) return;
+    arrete = true;
+    place.removeEventListener("change", lancer);
+    nettoyages.forEach((f) => f());
+  };
   return {
+    /** Arrête le film SUR SA DERNIÈRE IMAGE : la bascule le fond pendant qu'il part. */
+    figer,
     arreter: () => {
-      arrete = true;
-      place.removeEventListener("change", lancer);
-      nettoyages.forEach((f) => f());
+      figer();
       hote.replaceChildren();
       delete hote.dataset.lance;
     },

@@ -32,7 +32,9 @@ export function CoucheV4() {
 }
 
 /**
- * Le script qui pose `v4-entree` une fois par chargement de document. Exécuté
+ * Le script qui pose `v4-entree` une fois par chargement de document. Elle est retirée
+ * 1,6 s après `.pret` (et non après l'exécution du script) : jusqu'à `.pret`, `.attente`
+ * gèle les animations (`ScriptJs`), et une entrée gelée coupée trop tôt sauterait. Exécuté
  * par le navigateur pendant l'analyse du HTML ; une navigation cliente ne le
  * rejoue pas (React n'exécute pas un script inséré), ce qui est voulu.
  */
@@ -41,7 +43,7 @@ export function ScriptEntreeV4() {
     <script
       dangerouslySetInnerHTML={{
         __html:
-          '(function(){if(window.__v4)return;window.__v4=1;if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var r=document.documentElement;r.classList.add("v4-entree");setTimeout(function(){r.classList.remove("v4-entree")},1600)})()',
+          '(function(){if(window.__v4)return;window.__v4=1;if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var r=document.documentElement;r.classList.add("v4-entree");function fin(){setTimeout(function(){r.classList.remove("v4-entree")},1600)}if(r.classList.contains("pret")){fin();return}var o=new MutationObserver(function(){if(r.classList.contains("pret")){o.disconnect();fin()}});o.observe(r,{attributes:true,attributeFilter:["class"]});setTimeout(function(){o.disconnect();if(r.classList.contains("v4-entree"))fin()},2500)})()',
       }}
     />
   );

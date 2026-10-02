@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { adresseTransmise } from "@/components/acces/bascule-acces";
 import { seConnecter, type ResultatConnexion } from "@/app/[locale]/connexion/actions";
 import { suggererCorrection } from "@/lib/email/domaines";
 import {
@@ -10,6 +11,7 @@ import {
   ChampAcces,
   MessageErreurDs,
 } from "@/components/acces-champs";
+import { emailValide, secouer, secouerInvalides, valeurEnvoyee } from "@/components/acces/validation-locale";
 
 /**
  * SE CONNECTER — adresse et mot de passe.
@@ -38,7 +40,18 @@ const INITIAL: ResultatConnexion = { statut: "inactif" };
 export function FormulaireConnexion({ locale }: { readonly locale: string }) {
   const t = useTranslations("connexion");
   const [resultat, action] = useActionState(seConnecter, INITIAL);
-  const [email, setEmail] = useState("");
+  // L'adresse tapée sur l'autre page d'accès suit la bascule (maquette, `acces.js`).
+  const [email, setEmail] = useState(adresseTransmise);
+  const [motDePasse, setMotDePasse] = useState("");
+  // Les refus de la saisie (maquette, `acces.js`) : un confort, le serveur décide.
+  const [erreurEmail, setErreurEmail] = useState("");
+  const [erreurMdp, setErreurMdp] = useState("");
+  const formulaire = useRef<HTMLFormElement>(null);
+
+  // Un refus du SERVEUR secoue aussi les champs qu'il désigne : même geste, même sens.
+  useEffect(() => {
+    if (resultat.statut === "erreur") secouerInvalides(formulaire.current);
+  }, [resultat]);
 
   const suggestion = useMemo(() => suggererCorrection(email), [email]);
 
@@ -54,7 +67,29 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
       : null;
 
   return (
-    <form action={action} className="formulaire" noValidate>
+    <form
+      ref={formulaire}
+      action={action}
+      className="formulaire v4-carte"
+      noValidate
+      onSubmit={(e) => {
+        // Ce qui est refusé ici ne part pas : la secousse, le message sous le champ,
+        // et le focus sur le premier champ fautif (maquette, `acces.js`).
+        // On valide ce qui PART, pas l'état React (un remplissage automatique peut le taire).
+        const f = e.currentTarget;
+        const eEmail = emailValide(valeurEnvoyee(f, "email")) ? "" : t("erreurEmailInvalide");
+        const eMdp = valeurEnvoyee(f, "motDePasse") === "" ? t("erreurMdpVide") : "";
+        setErreurEmail(eEmail);
+        setErreurMdp(eMdp);
+        if (eEmail === "" && eMdp === "") return;
+        e.preventDefault();
+        const fautifs = [eEmail !== "" ? "email" : null, eMdp !== "" ? "motDePasse" : null].filter(
+          (x): x is string => x !== null,
+        );
+        fautifs.forEach((id) => secouer(f.querySelector(`#${id}`)?.closest(".champ-acces__boite")));
+        f.querySelector<HTMLInputElement>(`#${fautifs[0] ?? "email"}`)?.focus();
+      }}
+    >
       <input type="hidden" name="locale" value={locale} />
 
       <ChampAcces
@@ -66,7 +101,14 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
         autoComplete="username"
         modeSaisie="email"
         valeur={email}
-        surChangement={setEmail}
+        surChangement={(v) => {
+          setEmail(v);
+          if (erreurEmail !== "" && emailValide(v)) setErreurEmail("");
+        }}
+        surSortie={() => {
+          if (email !== "" && !emailValide(email)) setErreurEmail(t("erreurEmailInvalide"));
+        }}
+        erreurLocale={erreurEmail}
         invalide={messageErreur !== null}
         {...(messageErreur !== null ? { decritPar: "erreur-connexion" } : {})}
       >
@@ -75,7 +117,13 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
         {suggestion !== null ? (
           <p className="champ-acces__suggestion" aria-live="polite">
             {t("suggestionPrefixe")}{" "}
-            <button type="button" onClick={() => setEmail(suggestion.adresse)}>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail(suggestion.adresse);
+                setErreurEmail("");
+              }}
+            >
               {suggestion.adresse}
             </button>
             {t("suggestionSuffixe")}
@@ -96,6 +144,12 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
         libelle={t("labelMotDePasse")}
         placeholder={t("placeholderMotDePasse")}
         autoComplete="current-password"
+        valeur={motDePasse}
+        surChangement={(v) => {
+          setMotDePasse(v);
+          if (v !== "") setErreurMdp("");
+        }}
+        erreurLocale={erreurMdp}
         libellesOeil={{ afficher: t("afficherMotDePasse"), masquer: t("masquerMotDePasse") }}
         invalide={messageErreur !== null}
         {...(messageErreur !== null ? { decritPar: "erreur-connexion" } : {})}

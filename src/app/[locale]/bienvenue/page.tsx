@@ -9,6 +9,7 @@ import { lireEtatOuDireLaPanne } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { LANGUE_PAGE_CLIENT_PAR_DEFAUT } from "@/lib/boutique/reglages";
 import Link from "next/link";
+import { CoucheV4, ScriptEntreeV4 } from "@/components/app/couche-v4";
 import { LogoDropLink } from "@/components/logo-droplink";
 
 export async function generateMetadata({
@@ -64,6 +65,9 @@ export default async function Bienvenue({
   // lit l'état de ses champs.
   return (
     <div className="page-acces v4 onb-page">
+      {/* La couche « v4 » de la maquette (`bienvenue.html` charge `v4.js`). */}
+      <ScriptEntreeV4 />
+      <CoucheV4 />
       <a className="evitement" href="#contenu">
         {nav("allerAuContenu")}
       </a>

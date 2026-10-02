@@ -19,11 +19,13 @@ import { LANGUE_DEFAUT, type Langue } from "@/i18n/config";
  * dossier sans être inscrit ici n'est pas publié — et un test compare les deux
  * ensembles DANS LES DEUX SENS, pour que l'oubli se voie.
  */
+// L'ORDRE EST CELUI DE LA MAQUETTE (`blog.html`) : à date égale, le tri est stable, et
+// le premier de cette liste est l'article « à la une ».
 const ARTICLES: readonly Article[] = [
-  lienQuiExpire,
-  suivreUnColis,
   ouEstMonColis,
+  lienQuiExpire,
   photosControle,
+  suivreUnColis,
   vendreSansBoutique,
 ];
 

@@ -4,6 +4,8 @@ import { LogoDropLink } from "@/components/logo-droplink";
 import { PageClientDemo } from "@/components/landing/page-client-demo";
 import { FilmAcces, type TextesFilm } from "@/components/acces/film-acces";
 import { lirePlafondsPublics } from "@/lib/page-publique/plafonds";
+import { CoucheV4, ScriptEntreeV4 } from "@/components/app/couche-v4";
+import { BasculeAcces } from "@/components/acces/bascule-acces";
 import symbole from "@/../public/marque/logo-symbole.png";
 
 /**
@@ -92,6 +94,12 @@ export async function PageAcces({
 
   return (
     <div className="page-acces v4">
+      {/* La couche « v4 » (maquette, `v4.js`) : entrée du titre et du formulaire au
+          premier chargement réel, bordure lumineuse au pointeur ; et la bascule
+          connexion ⇄ inscription sans recharger (`acces.js`). */}
+      <ScriptEntreeV4 />
+      <CoucheV4 />
+      <BasculeAcces />
       <a className="evitement" href="#contenu">
         {nav("allerAuContenu")}
       </a>

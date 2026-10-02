@@ -156,12 +156,16 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
             </span>
             {t("eyebrow")}
           </p>
-          <h1 className="pub-titre">{t("titre")}</h1>
-          <p className="pub-chapo">{t("intro")}</p>
+          <h1 className="pub-titre l4-titre">
+            <span className="l4-ligne" style={{ "--l": 0 } as React.CSSProperties}>{t("titre")}</span>
+          </h1>
+          <p className="pub-chapo" data-entree>
+            {t("intro")}
+          </p>
         </section>
 
         <section className="conteneur tf-plans">
-          <article className="tf-plan v4-carte">
+          <article className="tf-plan v4-carte" data-anime>
             <header>
               <h2>{p("gratuit")}</h2>
               <p className="tf-prix">
@@ -175,7 +179,7 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
               <ArrowRight aria-hidden="true" className="ic" />
             </Link>
           </article>
-          <article className="tf-plan tf-plan--pro v4-carte">
+          <article className="tf-plan tf-plan--pro v4-carte" data-anime>
             <header>
               <h2>
                 <Crown aria-hidden="true" className="ic" />
@@ -207,7 +211,7 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
           <h2 id="tf-comparer" className="pub-h2">
             {t("comparer")}
           </h2>
-          <div className="tp tf-tp">
+          <div className="tp tf-tp" data-anime>
             <table className="tp__table">
               <caption className="sr">{t("comparer")}</caption>
               <colgroup>
@@ -234,8 +238,8 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
                 </tr>
               </thead>
               <tbody>
-                {LIGNES.map((ligne) => (
-                  <tr key={ligne.cle}>
+                {LIGNES.map((ligne, i) => (
+                  <tr key={ligne.cle} style={{ "--i": i } as React.CSSProperties}>
                     <th scope="row">{p(`tableau.${ligne.cle}`)}</th>
                     <td>{ligne.gratuit}</td>
                     <td>{ligne.pro}</td>

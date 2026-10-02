@@ -82,9 +82,13 @@
       "objet": "Objet",
       "copier": "Copier le message",
       "copie": "Message copié",
-      "copieRefusee": "Copie refusée par le navigateur",
       "ouvrir": "Ouvrir la messagerie",
-      "rienEnvoye": "Rien n’est envoyé tant que vous ne l’envoyez pas vous-même."
+      "rienEnvoye": "Rien n’est envoyé tant que vous ne l’envoyez pas vous-même.",
+      "erreurLien": "Collez l’adresse complète de la page, commençant par https://.",
+      "erreurDescription": "Précisez ce qui pose problème.",
+      "erreurEmail": "Cette adresse ne semble pas valide.",
+      "copieSelection": "Sélectionné, copiez-le",
+      "sujet": "{titre} : {categorie}"
     },
     "conditionsMetaTitre": "Conditions d'utilisation — DropLink",
     "conditionsMetaDescription": "Les conditions d'utilisation de DropLink : le service, le compte vendeur, les contenus, l'abonnement Gratuit et Pro, la résiliation et la responsabilité.",
@@ -882,7 +886,8 @@
     },
     "placeholderMotDePasse": "Votre mot de passe",
     "afficherMotDePasse": "Afficher le mot de passe",
-    "masquerMotDePasse": "Masquer le mot de passe"
+    "masquerMotDePasse": "Masquer le mot de passe",
+    "erreurMdpVide": "Saisissez votre mot de passe."
   },
   "inscription": {
     "titre": "Créer un compte",

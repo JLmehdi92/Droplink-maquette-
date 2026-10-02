@@ -9,6 +9,7 @@ import "../globals.css";
 import "@/styles/refonte/socle.css";
 import "@/styles/refonte/app.css";
 import { TraductionsClient } from "@/components/traductions-client";
+import { MarqueurHydratation, ScriptJs } from "@/components/script-js";
 
 /*
  * `next/font` télécharge les polices AU BUILD et les sert depuis notre domaine.
@@ -94,8 +95,10 @@ export default async function LayoutLangue({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} data-scroll-behavior="smooth">
+    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${corps.variable} antialiased`}>
+        <ScriptJs />
+        <MarqueurHydratation />
         {/*
          * AUCUN PROVIDER I18N ICI, DÉLIBÉRÉMENT.
          *

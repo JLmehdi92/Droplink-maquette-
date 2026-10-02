@@ -4,6 +4,8 @@ import { LogoDropLink } from "@/components/logo-droplink";
 import { EntetePublique } from "@/components/public/entete-publique";
 import { PiedPublic } from "@/components/public/pied-public";
 import { SelecteurLangue } from "@/components/landing/selecteur-langue";
+import { AnimationsPubliques } from "@/components/public/animations-publiques";
+import { CoucheV4 } from "@/components/app/couche-v4";
 
 export type PagePublique = "tarifs" | "docs" | "blog" | "legal" | "signalement";
 
@@ -49,6 +51,9 @@ export async function CoqueSite({
         selecteurLangue={<SelecteurLangue locale={locale} compact />}
         libellesMenu={{ ouvrir: nav("ouvrirMenu"), fermer: nav("fermerMenu") }}
       />
+      {/* Le mouvement de la maquette (`public.js`) et la bordure lumineuse au pointeur. */}
+      <AnimationsPubliques />
+      <CoucheV4 />
       {children}
       <PiedPublic locale={locale} />
     </div>

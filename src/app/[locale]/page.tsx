@@ -162,19 +162,8 @@ export default async function Accueil({ params }: { params: Promise<{ locale: st
           dangerouslySetInnerHTML={{ __html: JSON.stringify(graphe).replace(/</g, "\\u003c") }}
         />
       )}
-      {/*
-        Le mouvement de la landing est gardé par la classe `js` : posée AVANT le
-        premier rendu (sinon le contenu s'afficherait, disparaîtrait puis
-        reviendrait). Les entrées attendent que la police soit chargée, avec un
-        plafond de 900 ms (refonte-design.md § 6). Et si l'îlot qui fait vivre la
-        page ne démarre pas en 2,5 s, la classe est retirée : rien ne reste masqué.
-      */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            '(function(){var r=document.documentElement;r.classList.add("js","attente");var f=false;function p(){if(f)return;f=true;requestAnimationFrame(function(){requestAnimationFrame(function(){r.classList.remove("attente");r.classList.add("pret")})})}(document.fonts?document.fonts.ready:Promise.resolve()).then(p,p);setTimeout(p,900);setTimeout(function(){if(!window.__landing)r.classList.remove("js")},2500)})();',
-        }}
-      />
+      {/* Le mouvement de la landing est gardé par la classe `js`, posée avant le
+          premier rendu par `ScriptJs` (coque de langue), comme sur toutes les surfaces. */}
       <a className="evitement" href="#contenu">
         {nav("allerAuContenu")}
       </a>

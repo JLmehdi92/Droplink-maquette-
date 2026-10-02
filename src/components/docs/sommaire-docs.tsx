@@ -39,7 +39,8 @@ export function SommaireDocs({
       let courante = ancres.current[0];
       for (const id of ancres.current) {
         const titreSection = document.getElementById(id);
-        if (titreSection !== null && titreSection.getBoundingClientRect().top <= 120) courante = id;
+        // la dernière section dont le titre a passé le tiers haut de l'écran (maquette, `public.js`)
+        if (titreSection !== null && titreSection.getBoundingClientRect().top <= window.innerHeight * 0.3) courante = id;
       }
       setActive(courante);
     };

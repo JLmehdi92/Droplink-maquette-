@@ -22,13 +22,6 @@ import { LogoDropLink } from "@/components/logo-droplink";
  * confirme ou désinscrit. Il marche sans JavaScript.
  */
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
-  if (!estLangueSupportee(locale)) return { robots: { index: false, follow: false } };
-  const t = await getTranslations({ locale, namespace: "notifications.page" });
-  return { title: t("titre"), robots: { index: false, follow: false } };
-}
-
 const ACTIONS = ["confirmer", "desinscrire"] as const;
 const RESULTATS = ["confirmee", "desinscrite", "invalide", "indisponible"] as const;
 type Action = (typeof ACTIONS)[number];
@@ -49,6 +42,32 @@ function lire(valeur: string | string[] | undefined): string {
   return typeof valeur === "string" ? valeur : "";
 }
 
+/** L'état affiché, lu dans l'adresse (`?action=…&j=…` ou `?etat=…`). */
+function etatDe(requete: Record<string, string | string[] | undefined>): Etat {
+  const action = lire(requete["action"]);
+  const resultat = lire(requete["etat"]);
+  const jetonPlausible = /^[A-Za-z0-9_-]{16,64}$/.test(lire(requete["j"]));
+  return (RESULTATS as readonly string[]).includes(resultat)
+    ? (resultat as Etat)
+    : (ACTIONS as readonly string[]).includes(action) && jetonPlausible
+      ? (action as Action)
+      : "invalide";
+}
+
+/** Le titre de l'onglet dit l'état, comme la maquette (`compte.js` : `document.title`). */
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!estLangueSupportee(locale)) return { robots: { index: false, follow: false } };
+  const t = await getTranslations({ locale, namespace: "notifications.page" });
+  return { title: t(`${etatDe(await searchParams)}.titre`), robots: { index: false, follow: false } };
+}
+
 export default async function PageNotification({
   params,
   searchParams,
@@ -60,17 +79,12 @@ export default async function PageNotification({
   if (!estLangueSupportee(locale)) notFound();
   const requete = await searchParams;
 
-  const action = lire(requete["action"]);
+  const etat = etatDe(requete);
   const jeton = lire(requete["j"]);
-  const resultat = lire(requete["etat"]);
-  // Le jeton n'est ici que RECOPIÉ dans le formulaire : sa forme est vérifiée par
-  // la route qui le reçoit. Une valeur hors forme rend l'état « invalide ».
-  const jetonPlausible = /^[A-Za-z0-9_-]{16,64}$/.test(jeton);
-  const etat: Etat = (RESULTATS as readonly string[]).includes(resultat)
-    ? (resultat as Etat)
-    : (ACTIONS as readonly string[]).includes(action) && jetonPlausible
-      ? (action as Action)
-      : "invalide";
+  // Un RÉSULTAT (on revient de « Confirmer » ou « Me désinscrire ») entre en fondu,
+  // comme le changement d'état de la maquette (380 ms) ; une page ouverte depuis
+  // l'e-mail s'affiche posée.
+  const change = (RESULTATS as readonly string[]).includes(lire(requete["etat"]));
 
   const t = await getTranslations({ locale, namespace: "notifications.page" });
   const tp = await getTranslations({ locale, namespace: "page-publique" });
@@ -95,7 +109,7 @@ export default async function PageNotification({
           </Link>
         </header>
         <main id="contenu" className="notifp">
-          <section className="notifp__carte" data-etat={etat}>
+          <section className="notifp__carte" data-etat={etat} data-change={change ? "" : undefined}>
             <div className="notifp__visuel" aria-hidden="true">
               <span className="notifp__icone">
                 <Icone className="ic" />

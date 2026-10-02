@@ -2102,6 +2102,8 @@ a.action-ligne { color: var(--corps); }
 @media (prefers-reduced-motion: no-preference) { .notifp__visuel i { animation: notif-onde 3.2s cubic-bezier(.23, 1, .32, 1) infinite; } .notifp__visuel i:nth-of-type(2) { animation-delay: .4s; } .notifp__visuel i:nth-of-type(3) { animation-delay: .8s; } }
 @keyframes notif-onde { 0% { opacity: 0; transform: scale(.85); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.08); } }
 .notifp__carte h1 { font-size: clamp(30px, 4.6vw, 44px); line-height: 1.08; font-weight: 800; letter-spacing: -.045em; text-wrap: balance; outline: none; }
+@media (prefers-reduced-motion: no-preference) { .notifp__carte[data-change] { animation: notif-change 380ms cubic-bezier(.23, 1, .32, 1) backwards; } }
+@keyframes notif-change { from { opacity: 0; transform: translateY(8px) scale(.98); } }
 .notifp__texte { max-width: 46ch; font-size: clamp(16px, 1.6vw, 18px); line-height: 1.55; color: var(--corps); text-wrap: pretty; }
 .notifp__bouton { display: inline-flex; align-items: center; gap: 10px; height: 56px; margin-top: 18px; padding: 0 30px; border-radius: 16px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; box-shadow: var(--ombre-marque); transition: transform 140ms var(--ease-sortie), filter 140ms var(--ease), opacity 140ms var(--ease); }
 .notifp__bouton .ic { width: 18px; height: 18px; transition: transform 200ms var(--ease-sortie); }
@@ -2720,4 +2722,9 @@ img.compte__avatar { object-fit: cover; }
   .js [data-hx-carte], .js [data-hx-photo], .js [data-hx-tampon] { opacity: 0; }
 }
 .formulaire__statut--erreur { background: color-mix(in srgb, var(--erreur-encre) 8%, var(--surface)); color: var(--erreur-encre); }
+}
+
+/* À l'impression, un tableau des tarifs pas encore regardé ne s'imprime pas vide. */
+@media print {
+  .js .tp[data-anime] tbody tr, .js .tp[data-anime] thead th, .js .tp[data-anime] thead td { opacity: 1; transform: none; }
 }

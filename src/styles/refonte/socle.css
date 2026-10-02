@@ -677,6 +677,7 @@ code { font: 500 .92em/1 ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .champ-acces.est-invalide .champ-acces__boite { border-color: var(--erreur-encre); box-shadow: 0 0 0 3px color-mix(in srgb, var(--erreur-encre) 16%, transparent); }
 .champ-acces__erreur { display: none; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--erreur-encre); }
 .champ-acces.est-invalide .champ-acces__erreur { display: flex; animation: entre 240ms var(--ease-sortie); }
+.champ-acces.est-invalide .champ-acces__erreur:empty { display: none; }
 .champ-acces__aide { font-size: 12.5px; color: var(--sourdine); }
 .champ-acces__aide span { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--corps); }
 .champ-acces__aide.est-ok span { color: var(--succes-encre); }
@@ -742,11 +743,11 @@ code { font: 500 .92em/1 ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .carte-flottante b { white-space: nowrap; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .page-acces .acces__corps, .page-acces .acces__legal { animation: monte 560ms var(--ease-sortie) 60ms both; }
-  .page-acces [data-vitrine-tel] { animation: monte-scene 800ms var(--ease-sortie) 140ms both; }
-  .page-acces [data-flottante] { animation: bulle 560ms var(--ease-sortie) both; }
-  .page-acces .carte-flottante--vues { animation-delay: 520ms; }
-  .page-acces .carte-flottante--suivi { animation-delay: 680ms; }
+  .js .page-acces .acces__corps, .js .page-acces .acces__legal { animation: monte 560ms var(--ease-sortie) 60ms both; }
+  .js .page-acces [data-vitrine-tel] { animation: monte-scene 800ms var(--ease-sortie) 140ms both; }
+  .js .page-acces [data-flottante] { animation: bulle 560ms var(--ease-sortie) both; }
+  .js .page-acces .carte-flottante--vues { animation-delay: 520ms; }
+  .js .page-acces .carte-flottante--suivi { animation-delay: 680ms; }
 }
 
 @media (max-width: 1020px) {

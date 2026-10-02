@@ -7,7 +7,7 @@ import type { Article } from "@/lib/blog/types";
  */
 export const article: Article = {
   slug: "cest-ou-mon-colis-arreter-de-repondre",
-  titre: "« C'est où mon colis ? » — arrêter de répondre dix fois par jour",
+  titre: "« C'est où mon colis ? » : arrêter de répondre dix fois par jour",
   titreMeta: "« C'est où mon colis ? » : arrêter d'y répondre",
   description:
     "La question revient parce que la réponse n'est nulle part. Comment mettre l'information là où le client la cherche, pour qu'il cesse d'avoir à la demander.",
@@ -26,7 +26,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "Un client qui demande où en est son colis ne doute pas de vous. Il essaie d'obtenir une information, et vous êtes la seule source disponible. Tant que c'est le cas, il reviendra — et il reviendra d'autant plus souvent que l'attente est longue.",
+        "Un client qui demande où en est son colis ne doute pas de vous. Il essaie d'obtenir une information, et vous êtes la seule source disponible. Tant que c'est le cas, il reviendra, et il reviendra d'autant plus souvent que l'attente est longue.",
     },
     {
       type: "paragraphe",
@@ -55,7 +55,7 @@ export const article: Article = {
       items: [
         "Une adresse unique, envoyée une fois, où tout se trouve : les photos, le suivi, l'état de la commande.",
         "Une mise à jour automatique, pour que la page dise aujourd'hui autre chose qu'hier sans que vous y touchiez.",
-        "Un vocabulaire de client, pas de transporteur : « expédié », « en transit », « livré » — pas de codes ni de sigles.",
+        "Un vocabulaire de client, pas de transporteur : « expédié », « en transit », « livré », pas de codes ni de sigles.",
         "Une phrase quand rien ne bouge, plutôt qu'un écran figé. « Aucun mouvement depuis huit jours » se comprend ; le silence, non.",
       ],
     },
@@ -63,7 +63,7 @@ export const article: Article = {
     {
       type: "paragraphe",
       texte:
-        "On croit gagner les minutes passées à répondre. En réalité, ce qui change est ailleurs : un client qui peut regarder lui-même cesse de se demander si quelque chose ne va pas. La question n'était pas seulement une demande d'information — c'était aussi une demande de réassurance.",
+        "On croit gagner les minutes passées à répondre. En réalité, ce qui change est ailleurs : un client qui peut regarder lui-même cesse de se demander si quelque chose ne va pas. La question n'était pas seulement une demande d'information, c'était aussi une demande de réassurance.",
     },
     {
       type: "paragraphe",

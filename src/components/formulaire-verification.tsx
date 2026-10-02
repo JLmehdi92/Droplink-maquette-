@@ -1,11 +1,14 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { verifierCode, type ResultatVerification } from "@/app/[locale]/verification/actions";
 import { BoutonPrincipalDs, MessageErreurDs } from "@/components/acces-champs";
+import { secouer } from "@/components/acces/validation-locale";
 
 const INITIAL: ResultatVerification = { statut: "inactif" };
+const sansAbonnement = () => () => {};
 
 /**
  * LE CODE À 6 CHIFFRES, EN SIX CASES (maquette `verification.html`, arbitrage du § 5).
@@ -32,6 +35,43 @@ export function FormulaireVerification({
   const [resultat, action] = useActionState(verifierCode, INITIAL);
   const [chiffres, setChiffres] = useState<readonly string[]>(["", "", "", "", "", ""]);
   const cases = useRef<Array<HTMLInputElement | null>>([]);
+  const zone = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  // Le refus de la saisie (moins de six chiffres) : il ne part pas au serveur, qui
+  // consommerait un essai du quota partagé avec la connexion pour rien.
+  const [incomplet, setIncomplet] = useState(false);
+  // Le refus du serveur s'efface dès qu'on retape (maquette, `compte.js`).
+  const [ecarte, setEcarte] = useState<ResultatVerification | null>(null);
+  // Hydraté : le formulaire saura naviguer lui-même après les cases vertes.
+  const hydrate = useSyncExternalStore(sansAbonnement, () => true, () => false);
+
+  // Un nouveau refus du serveur vide les cases (ajustement au rendu, pas dans un effet).
+  const [dernier, setDernier] = useState(resultat);
+  if (dernier !== resultat) {
+    setDernier(resultat);
+    if (resultat.statut === "erreur") setChiffres(["", "", "", "", "", ""]);
+  }
+
+  useEffect(() => {
+    if (resultat.statut === "erreur") {
+      // Refusé (maquette, `compte.js`) : les cases tremblent, se sont vidées, et
+      // le focus revient à la première.
+      secouer(zone.current);
+      cases.current[0]?.focus();
+    }
+    if (resultat.statut === "valide") {
+      // Accepté PAR LE SERVEUR : les cases passent au vert, puis la suite (380 ms).
+      const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const minuteur = window.setTimeout(() => router.replace(resultat.chemin), reduit ? 0 : 380);
+      return () => window.clearTimeout(minuteur);
+    }
+  }, [resultat, router]);
+
+  // Au premier affichage, le focus est dans la première case — à la souris seulement :
+  // au téléphone, ouvrir le clavier d'office cacherait la moitié de l'écran.
+  useEffect(() => {
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) cases.current[0]?.focus();
+  }, []);
 
   /** Pose des chiffres à partir d'une case (frappe, collage ou proposition du téléphone). */
   const poser = (depuis: number, saisie: string): void => {
@@ -40,13 +80,16 @@ export function FormulaireVerification({
       setChiffres((c) => c.map((x, i) => (i === depuis ? "" : x)));
       return;
     }
+    setIncomplet(false);
+    setEcarte(resultat);
     setChiffres((c) => c.map((x, i) => (i >= depuis && i < depuis + nouveaux.length ? (nouveaux[i - depuis] ?? x) : x)));
     cases.current[Math.min(depuis + nouveaux.length, 5)]?.focus();
   };
   // Une table EXPLICITE et non `erreurs.${motif}` : la garde des chaînes mortes
   // doit pouvoir voir chaque clé appelée.
-  const message =
-    resultat.statut !== "erreur"
+  const message = incomplet
+    ? t("erreurs.invalide")
+    : resultat.statut !== "erreur" || ecarte === resultat
       ? null
       : {
           code: t("erreurs.code"),
@@ -56,12 +99,31 @@ export function FormulaireVerification({
         }[resultat.motif];
 
   return (
-    <form action={action} className="formulaire" noValidate>
+    <form
+      action={action}
+      className="formulaire v4-carte"
+      noValidate
+      onSubmit={(e) => {
+        if (chiffres.every((c) => c !== "")) {
+          setIncomplet(false);
+          return;
+        }
+        e.preventDefault();
+        setIncomplet(true);
+        secouer(zone.current);
+        cases.current[chiffres.findIndex((c) => c === "")]?.focus();
+      }}
+    >
       <input type="hidden" name="locale" value={locale} />
+      {hydrate ? <input type="hidden" name="js" value="1" /> : null}
       {suite === null ? null : <input type="hidden" name="suite" value={suite} />}
-      <fieldset className={"code-2fa" + (message !== null ? " est-invalide" : "")}>
+      <fieldset
+        className={
+          "code-2fa" + (message !== null ? " est-invalide" : "") + (resultat.statut === "valide" ? " est-valide" : "")
+        }
+      >
         <legend>{t("libelle")}</legend>
-        <div className="code-2fa__cases">
+        <div className="code-2fa__cases" ref={zone}>
           {chiffres.map((chiffre, i) => (
             <input
               key={i}
@@ -112,7 +174,7 @@ export function FormulaireVerification({
           <span>{t("souvenirAppareil")}</span>
         </label>
       ) : null}
-      <BoutonPrincipalDs libelle={t("bouton")} libelleEnCours={t("enCours")} />
+      <BoutonPrincipalDs libelle={t("bouton")} libelleEnCours={t("enCours")} occupe={resultat.statut === "valide"} />
     </form>
   );
 }

@@ -132,11 +132,14 @@ const DERNIERE_MAJ = new Date("2026-09-30T00:00:00Z");
  * ouverture publique, et aucun médiateur de la consommation n'est encore
  * désigné — les conditions n'en citent donc aucun plutôt que d'en inventer un.
  *
- * LE SOMMAIRE EST UN VRAI SOMMAIRE, SANS ENTRÉE « ACTIVE ». Le kit suit le
- * défilement en JavaScript pour surligner la section courante ; un marquage
- * figé sur la première ment dès qu'on défile, et le suivi coûterait un îlot
- * client sur une page de texte. Au téléphone il est REPLIÉ en tête du document
- * (15/09/2026) : dépliées, ses dix entrées de 44 px passaient avant le texte.
+ * LE SOMMAIRE SUIT LA LECTURE, comme dans la maquette (`public.js`) : la section
+ * active est la dernière dont le titre a passé le tiers haut de l'écran. C'est
+ * l'îlot des pages publiques (`AnimationsPubliques`) qui la marque — rendu par le
+ * serveur, le sommaire n'a AUCUNE entrée active (un marquage figé sur la première
+ * mentirait dès qu'on défile) ; sans JavaScript, il reste un sommaire. Au téléphone
+ * il est REPLIÉ en tête du document (15/09/2026) : dépliées, ses dix entrées de
+ * 44 px passaient avant le texte ; le volet dit la section en cours et se referme
+ * au choix d'une section.
  *
  * Ces pages restent indexables — contrairement aux pages de commande. Un
  * hébergeur dont les conditions ne sont pas consultables se prive du statut
@@ -165,7 +168,7 @@ export async function PageLegale({
   const liensSommaire = (
     <>
       {sections.map((s, i) => (
-        <a key={s.id} href={`#${s.id}`}>
+        <a key={s.id} href={`#${s.id}`} data-ancre={s.id}>
           {`${i + 1}. ${s.titre}`}
         </a>
       ))}
@@ -186,9 +189,10 @@ export async function PageLegale({
      l'encart de signalement à gauche, le texte à droite, sections numérotées. Le texte
      reste celui du kit légal recopié dans les catalogues (`legal.pages`), validé par Zod.
 
-     LE SOMMAIRE RESTE SANS JAVASCRIPT (arbitrage du § 5) : une colonne au bureau, un
-     `<details>` replié au téléphone — deux rendus du même contenu, chacun masqué à
-     l'autre largeur, plutôt qu'un script qui ouvrirait l'un ou l'autre. */
+     LE SOMMAIRE : une colonne au bureau, un `<details>` replié au téléphone — deux
+     rendus du même contenu, chacun masqué à l'autre largeur, plutôt qu'un script qui
+     ouvrirait l'un ou l'autre. Le suivi de lecture (`data-sommaire`) les marque tous
+     les deux. */
   return (
     <CoqueSite locale={locale} page="legal">
       <main id="contenu" className="pub">
@@ -199,7 +203,11 @@ export async function PageLegale({
             </span>
             {pastille}
           </p>
-          <h1 className="pub-titre">{titre}</h1>
+          <h1 className="pub-titre l4-titre">
+            <span className="l4-ligne" style={{ "--l": 0 } as React.CSSProperties}>
+              {titre}
+            </span>
+          </h1>
           <p className="leg-meta">
             <CalendarDays aria-hidden="true" className="ic" />
             {/* Une seule chaîne par ligne, ponctuation comprise : « : » prend une espace
@@ -211,19 +219,19 @@ export async function PageLegale({
           </p>
         </section>
         <div className="conteneur doc leg">
-          <aside className="doc-cote">
+          <aside className="doc-cote" data-sommaire>
             <details className="doc-sommaire sommaire--telephone">
               <summary>
                 <ListFilter aria-hidden="true" className="ic" />
                 <span>{t("sommaireTitre")}</span>
-                <b />
+                <b data-sommaire-courant>{sections[0] === undefined ? null : `1. ${sections[0].titre}`}</b>
                 <ChevronDown aria-hidden="true" className="ic" />
               </summary>
-              <nav className="doc-nav" aria-label={t("sommaireTitre")}>
+              <nav className="doc-nav" aria-label={t("sommaireTitre")} data-sommaire-nav>
                 {liensSommaire}
               </nav>
             </details>
-            <nav className="doc-nav sommaire--bureau" aria-label={t("sommaireTitre")}>
+            <nav className="doc-nav sommaire--bureau" aria-label={t("sommaireTitre")} data-sommaire-nav>
               {liensSommaire}
             </nav>
             {/* L'ENCART DE SIGNALEMENT : la procédure de notification et retrait fonde

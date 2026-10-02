@@ -87,9 +87,10 @@ export default async function ArticleDuBlog({
 
       {/* LA REFONTE (02/10/2026) suit les articles de la maquette (`.art`) : 760 px de
           texte, au-delà l'œil perd le début de la ligne suivante. La barre de progression
-          de la maquette n'est pas portée : elle demande un script et ne dit rien que la
-          barre de défilement ne dise. */}
+          de lecture est portée (décision de Mehdi, 02/10/2026) : `AnimationsPubliques`
+          la tient, une écriture par image au plus ; masquée au téléphone par le CSS. */}
       <main id="contenu" className="pub">
+        <div className="art-progres" aria-hidden="true" data-progres />
         <article className="conteneur art">
           <Link className="art-retour min-h-11" href={`/${locale}/blog`}>
             <ArrowLeft aria-hidden="true" className="ic" />
@@ -111,7 +112,7 @@ export default async function ArticleDuBlog({
           {/* L'APPEL DE FIN, une seule fois, et le seul dégradé de l'écran (règle 3).
               « Gratuit pendant le lancement » n'est plus vrai depuis le plan Pro : le texte
               de la maquette, juste, le remplace. */}
-          <aside className="pub-cta v4-carte">
+          <aside className="pub-cta v4-carte" data-anime>
             <h2>Un seul lien pour toute la commande</h2>
             <p>Compte gratuit, sans carte bancaire, prêt en moins d’une minute.</p>
             <Link className="bouton bouton--marque bouton--large min-h-11" href={`/${locale}/inscription`}>

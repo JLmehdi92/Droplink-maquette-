@@ -21,13 +21,13 @@ export const article: Article = {
     {
       type: "chapeau",
       texte:
-        "Vendre en message privé fonctionne. C'est même souvent plus efficace qu'une boutique : la conversation vend mieux qu'une fiche produit. Ce qui manque n'est pas un site — c'est ce qui se passe après « c'est commandé ».",
+        "Vendre en message privé fonctionne. C'est même souvent plus efficace qu'une boutique : la conversation vend mieux qu'une fiche produit. Ce qui manque n'est pas un site, c'est ce qui se passe après « c'est commandé ».",
     },
     { type: "titre", texte: "Ce qu'on croit qu'il faut, et qui ne sert à rien" },
     {
       type: "paragraphe",
       texte:
-        "Le premier réflexe est d'ouvrir une boutique en ligne. Elle apporte un catalogue, un panier et un paiement — trois choses que vous avez déjà résolues autrement, souvent mieux. Elle apporte aussi un abonnement mensuel, une mise en page à faire, des photos à recadrer et un stock à tenir à jour.",
+        "Le premier réflexe est d'ouvrir une boutique en ligne. Elle apporte un catalogue, un panier et un paiement, trois choses que vous avez déjà résolues autrement, souvent mieux. Elle apporte aussi un abonnement mensuel, une mise en page à faire, des photos à recadrer et un stock à tenir à jour.",
     },
     {
       type: "paragraphe",
@@ -51,7 +51,7 @@ export const article: Article = {
         "Un endroit stable où le client retrouve sa commande, sans faire défiler la conversation.",
         "Des photos qui ne disparaissent pas au bout d'une semaine, et qu'on n'a pas à renvoyer.",
         "Un suivi de colis qui se met à jour seul, pour que la question ne revienne pas.",
-        "Quelque chose qui ait votre nom dessus — pas le logo d'un service de transfert de fichiers.",
+        "Quelque chose qui ait votre nom dessus, pas le logo d'un service de transfert de fichiers.",
       ],
     },
     { type: "titre", texte: "Pourquoi le nom compte plus qu'on ne croit" },
