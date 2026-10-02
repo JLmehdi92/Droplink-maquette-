@@ -1,0 +1,101 @@
+# Audit de fidélité de la refonte (03/10/2026)
+
+État audité : `34bd810` sur le bac à sable. Trois agents `ecc:code-explorer` ont comparé, en
+lecture seule, la maquette (`design/maquette/src/`) au produit (`src/`), zone par zone. Ils
+n'ont rien mesuré au navigateur : tout vient du code et des CSS. Contrôles relancés à part :
+`typecheck` 0 erreur, `lint` 0 erreur et 2 avertissements (un nouveau :
+`admin/comptes/page.tsx:121`, `suspendu` inutilisé), `test` 1 268 / 1 269 (seule l'alarme
+Railway échoue). Exclusions voulues vérifiées dans le code : pas de témoignages, pas de
+Vinted/eBay, pas de thème sombre, pas de flou sur `/p`.
+
+**Verdict : la STRUCTURE et le CSS sont portés presque partout (le CSS de mouvement est un
+portage quasi littéral). Ce qui manque, c'est surtout le MOUVEMENT que la maquette pilote en
+JavaScript** — les règles CSS existent, mais les scripts qui posent les classes ne sont pas
+montés.
+
+## 1. Les causes communes (corriger une fois, plusieurs écrans en profitent)
+
+1. **`CoucheV4` et `ScriptEntreeV4` ne sont montés que dans `(app)` et `admin`.** Les pages
+   d'accès (connexion, inscription, vérification, nouveau mot de passe) et les pages
+   publiques n'ont donc ni entrée de page (`v4-entree`), ni bordure lumineuse au pointeur.
+2. **`public.js` n'est pas porté.** Sur tarifs, docs, blog, articles, légal et signalement,
+   `.js` n'est jamais posé : pas de titre révélé ligne à ligne (`l4-ligne`), pas de cascade
+   `data-entree`, pas de `data-anime → est-vu`, et les croix du tableau de tarifs sont mal
+   posées (`--tp-croix` jamais calculé).
+3. **Les sorties ne sont jamais animées** : fondu de sortie entre écrans (110 ms), fondu
+   0,35 de la table quand un filtre ou un tri change, sortie des dialogues admin (`.sort`),
+   de la feuille d'historique et du visionneur de `/p`.
+4. **`changer()` / `redessiner()` (analytique.js) ne sont pas portés** : pas de fondu flouté
+   des chiffres ni de redessin de la courbe au changement de période.
+5. **`.secoue` n'est jamais appliquée** (connexion, inscription, vérification, nouveau mot de
+   passe, bienvenue, dialogues admin).
+
+## 2. MANQUANT, écran par écran
+
+**Landing** — l'icône du sceau QC ne passe pas en bulle au refus (`animations-landing.tsx`
+l. 658-667). Tout le reste est porté (≈ 43 éléments, mêmes durées et courbes).
+
+**Connexion / inscription** — entrée de page ; bordure lumineuse du formulaire ; transition
+sans rechargement entre connexion et inscription (fondu des films, adresse recopiée : le CSS
+`acces-sort`/`acces-entre`/`est-entrant` est porté mais rien ne le déclenche) ; secousse ;
+panneau « mot de passe oublié » animé (le produit va sur une route, écart déclaré). Les deux
+FILMS sont portés intégralement (actes, durées, zooms, fouet, 3D, mode léger, mouvement réduit).
+
+**Coque vendeur** — fondu de sortie entre écrans. Tiroir, pastille qui glisse, cloche,
+menus, rouleaux : portés.
+
+**Tableau de bord / Analyses** — fondu des chiffres et redessin de la courbe au changement
+de période ; rouleau du taux de validation (Analyses).
+
+**Commandes** — remplissage animé des frises au premier affichage ; repli d'une ligne
+archivée (`.est-partie`) ; fondu de la table.
+
+**Suivi d'envois** — entrée des mini-frises ; fondu de la table.
+
+**Ma marque** — retour d'erreur à la saisie (couleur, lien, réseaux) et focus sur le premier
+champ fautif ; animation du statut « Enregistré. » ; lien « Voir la page client » ; le badge
+« Contraste conforme » reste affiché même quand le code n'est pas une couleur valide.
+
+**Paramètres** — fondu du panneau au changement d'onglet ; boutons « Enregistrer » (nom) et
+« Changer le mot de passe » toujours actifs, alors que la maquette les désactive tant que
+rien n'a changé ; initiales de l'avatar figées pendant la saisie ; révélations animées
+(confirmation d'adresse, suppression, étapes 2FA) ; disparition animée des sessions.
+
+**Fiche commande** — ⚠️ **l'historique ne se met pas à jour après une sauvegarde** (composant
+serveur jamais relu : défaut de COMPORTEMENT, pas seulement de mouvement) ; focus auto sur
+« Nom du client » pour une commande neuve ; entrée des nouvelles vignettes ; réapparition
+floutée du jeton après révocation.
+
+**Page client `/p`** — camion qui glisse (1 100 ms) ; cascade d'entrée de 45 ms (`--i`
+jamais posé : tout entre en même temps) ; pastille numérotée des photos ; compteur du
+carrousel « 1 / 4 » (le produit affiche le total seul, aussi au bureau) ; glisser pour
+fermer la feuille d'historique ; sorties animées de la feuille et du visionneur ;
+animations du visionneur (entrée, glissement entre photos) ; fondu des étapes de la
+validation QC ; lien « Retour à l'accueil » de la page de lien invalide ; le lien « Comment
+fonctionne DropLink » de cette page mène à `/fr` au lieu de `/fr/docs`.
+
+**Pages publiques** — tout le § 1.2 ; barre de progression de lecture des articles (écartée
+volontairement : à trancher) ; suivi de lecture du sommaire des pages légales ; validation
+en place et animation du bloc « prêt » du signalement ; « Copié » qui ne revient pas à
+« Copier le message » ; **ordre des articles du blog** différent (l'article « à la une »
+n'est pas celui de la maquette) et petites différences de titres.
+
+**Comptes** — vérification : secousse, cases vertes `est-valide` avant la redirection,
+focus de la première case ; nouveau mot de passe : secousse, `aria-live`, focus ;
+notification : fondu de changement d'état et titre de page par état.
+
+**Administration** — sortie des dialogues ; message « motif trop court » (le produit
+désactive le bouton à la place) ; rouleaux des tuiles ; enregistrement d'un réglage qui dit
+« fait » au lieu de « Enregistré. 300 → 400, écrit au journal ».
+
+**États** — portés. Seul écart : « Réessayer » sans état « en cours » (assumé).
+
+## 3. Points à trancher (Mehdi)
+
+- `/p` lien invalide et erreur : le bloc `.etat-p` utilise le violet DropLink en aplat. Le
+  jeton est inconnu, donc ce n'est pas la page d'un vendeur, mais la règle 3 de `CLAUDE.md`
+  dit « jamais de couleur DropLink sur `/p` ».
+- `client.css` contient des `#FFFFFF` en dur, sur des fonds de carte et non sur du texte posé
+  sur l'aplat du vendeur : la règle 1 tient, la lettre « jamais de #fff » non.
+- La fiche de compte admin affiche un badge de plan : à rapprocher de « aucun badge Pro ».
+- La barre de progression des articles : la porter, ou la garder écartée.
