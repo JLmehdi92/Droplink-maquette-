@@ -192,12 +192,27 @@ describe("La famille reste calée sur le SQL — sinon le filtre ment", () => {
 });
 
 describe("Aucun écran ne redéfinit la règle dans son coin", () => {
-  const ECRANS = ["src/app/[locale]/admin/journal/page.tsx", "src/app/[locale]/admin/page.tsx"];
+  // Depuis la refonte (02/10/2026), le journal et la vue d'ensemble rendent leurs lignes par
+  // UN composant commun, `EntreeJournal` : c'est lui qui lit la règle. Les deux écrans restent
+  // inspectés pour qu'aucun ne la redérive dans son coin.
+  const LECTEUR = "src/components/admin/entree-journal.tsx";
+  const ECRANS = [LECTEUR, "src/app/[locale]/admin/journal/page.tsx", "src/app/[locale]/admin/page.tsx"];
 
-  test("CONTRE-TEST : les deux écrans existent et importent le module", () => {
-    for (const ecran of ECRANS) {
-      expect(codeSansCommentaires(ecran), `${ecran} n'importe pas la règle commune`).toContain(
-        "@/lib/admin/nature-d-action",
+  test("CONTRE-TEST : le composant des entrées importe le module, et les deux écrans l'emploient", () => {
+    expect(codeSansCommentaires(LECTEUR), `${LECTEUR} n'importe pas la règle commune`).toContain(
+      "@/lib/admin/nature-d-action",
+    );
+    for (const ecran of ECRANS.slice(1)) {
+      expect(codeSansCommentaires(ecran), `${ecran} n'emploie plus le composant commun`).toContain(
+        "@/components/admin/entree-journal",
+      );
+    }
+  });
+
+  test("CONTRE-TEST (ancien) : aucun écran ne réimporte la règle pour peindre lui-même", () => {
+    for (const ecran of ECRANS.slice(1)) {
+      expect(codeSansCommentaires(ecran), `${ecran} peint ses lignes sans le composant commun`).not.toMatch(
+        /natureDAction\(/,
       );
     }
   });

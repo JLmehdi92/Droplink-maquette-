@@ -126,7 +126,8 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
      plus rien. C'est l'AUTRE SENS du test qui les a sorties, pas une relecture :
      une exception qui ne désigne plus rien est une porte ouverte sur la valeur
      du jour où quelqu'un la réécrira. */
-  ["#f3dfb4", "filet de l'encadré d'avertissement des pages légales — kit legal"],
+  /* `#f3dfb4` (filet ambre des alertes) est parti le 02/10/2026 avec les cartes
+     d'alerte de l'ancienne administration. */
   /*
    * LA PAGE DU LIEN MORT, portée sur `client_link/not-found` le 13/09/2026 : un
    * cinquième lavande, et le kit le pose en dur sur cette seule page.
@@ -136,27 +137,9 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#f6f2fc", "fond de la page du lien mort — arrêt 100 %"],
   // Le dernier arrêt du fond des pages légales. Il n'était PAS déclaré et la
   // garde n'a rien dit : c'est la couleur que la correction du motif a sortie.
-  /*
-   * ⚠️ LE FOND DE L'ESPACE VENDEUR, ET C'EST UN QUATRIÈME LAVANDE. Le design
-   * system en pose un par surface, tous voisins et tous différents :
-   *   accès          #F3F1FE → #FAF8FE → #F7F2FC
-   *   page client    #F6F4FE → #FBFAFE → #F8F3FD
-   *   espace vendeur #F7F5FE → #FBFAFE → #F8F4FD
-   *
-   * Deux d'entre eux partagent leur arrêt médian et aucun n'a les mêmes bornes.
-   * À l'œil ils sont indiscernables ; c'est précisément pourquoi ils sont
-   * NOMMÉS ici plutôt que tolérés : le jour où l'un est recopié sur la mauvaise
-   * surface, cette liste est le seul endroit où l'écart se lit.
-   */
-  ["#f7f5fe", "fond de l'espace vendeur — arrêt 0 %"],
-  [
-    "#fbfafe",
-    "l'arrêt MÉDIAN, partagé par la page client et l'espace vendeur. Le seul " +
-      "des onze arrêts que deux surfaces emploient réellement — et je l'avais " +
-      "décrit dans le commentaire ci-dessus sans le déclarer : le contrôle l'a " +
-      "dit, la relecture ne l'avait pas vu.",
-  ],
-  ["#f8f4fd", "fond de l'espace vendeur — arrêt 100 %"],
+  /* Les trois arrêts du fond de l'ancienne coque (`#f7f5fe`, `#fbfafe`, `#f8f4fd`)
+     sont partis le 02/10/2026 : l'administration, dernière à les peindre, prend le
+     fond de la refonte (`page-app`). */
   /* Les étoiles des témoignages de la landing — `TestimonialCard` du kit les
      peint en `#F5B843` en dur, et aucun jeton du design system ne le porte.
      Portées le 18/09/2026 avec la section, sur la liste d'écarts de Wassim. */

@@ -187,8 +187,10 @@ describe("Les surfaces peintes du dégradé de marque", () => {
       "aucune surface `degrade-ds-marque` trouvée : le balayage ne mesure plus rien",
       // 6 au 02/10/2026 : la refonte peint ses actions de marque par ses feuilles
       // (`.bouton--marque`, `.ed-voir`), plus par la classe Tailwind. 4 le même
-      // jour, après le retrait des orphelins `coque-acces` et `maquette-application`.
-    ).toBeGreaterThan(2);
+      // jour, après le retrait des orphelins `coque-acces` et `maquette-application` ;
+      // 1 après l'administration, dont la vue courante des statistiques était peinte du
+      // dégradé calme (les filtres de la refonte sont neutres).
+    ).toBeGreaterThan(0);
 
     expect(
       restants,
@@ -217,7 +219,8 @@ describe("Les pilules et tuiles colorées", () => {
     expect(
       resolues.length,
       "le balayage ne trouve plus une seule paire fond + texte résolue : un ensemble vide passe tout",
-    ).toBeGreaterThan(30);
+      // 20 après le portage de l'administration (02/10/2026) : ses pilules sont des `.adm-badge`.
+    ).toBeGreaterThan(15);
 
     const illisibles = resolues
       .filter((p) => jetons.get(p.fond) === jetons.get(p.texte))

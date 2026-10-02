@@ -5,6 +5,7 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CircleCheck, Images, MessageCircle, Upload, Users } from "lucide-react";
 import { ApercuPageClient } from "@/components/marque/apercu-page-client";
+import { supprimerLogo } from "@/app/[locale]/(app)/marque/actions";
 import type { LibellesApercu } from "@/lib/boutique/phrases-apercu";
 import {
   confirmerDepotLogo,
@@ -60,9 +61,12 @@ const TYPES = [
 
 export function FormulaireOnboarding({
   locale,
+  languePage,
   libelles,
 }: {
   readonly locale: string;
+  /** La langue de la page client (l'anglais par défaut), celle de l'aperçu. */
+  readonly languePage: string;
   readonly libelles: LibellesApercu;
 }) {
   const t = useTranslations("onboarding");
@@ -170,7 +174,7 @@ export function FormulaireOnboarding({
             placeholder={t("nomPlaceholder")}
             value={nom}
             onChange={(e) => setNom(e.target.value)}
-            aria-invalid={champsEnEchec.includes("nom") ? true : undefined}
+            aria-invalid={champsEnEchec.includes("nomBoutique") ? true : undefined}
           />
         </div>
 
@@ -211,7 +215,18 @@ export function FormulaireOnboarding({
                 </span>
               </label>
               {logo.phase === "pose" ? (
-                <button type="button" className="onb-lien" onClick={() => setLogo({ phase: "vide" })}>
+                <button
+                  type="button"
+                  className="onb-lien"
+                  onClick={() => {
+                    // Le logo est DÉJÀ enregistré sur la boutique (`confirmerDepotLogo`) :
+                    // le retirer de l'écran seulement laisserait la page client le
+                    // montrer (contrainte 8). On ne l'efface qu'une fois la base d'accord.
+                    void supprimerLogo().then((retrait) =>
+                      setLogo(retrait.statut === "ok" ? { phase: "vide" } : { phase: "erreur", motif: t("logoErreur.retrait") }),
+                    );
+                  }}
+                >
                   {t("logoRetirer")}
                 </button>
               ) : null}
@@ -239,7 +254,14 @@ export function FormulaireOnboarding({
               maxLength={7}
               spellCheck={false}
               autoComplete="off"
-              onChange={(e) => setCouleur(e.target.value.trim())}
+              aria-invalid={champsEnEchec.includes("couleurAccent") ? true : undefined}
+              aria-describedby={champsEnEchec.includes("couleurAccent") ? "erreur-couleur" : undefined}
+              onChange={(e) => {
+                // « 0F766E » sans dièse est une couleur : on le pose, comme la maquette,
+                // plutôt que de laisser la base la refuser sans un mot.
+                const v = e.target.value.trim();
+                setCouleur(/^[0-9a-fA-F]{6}$/.test(v) ? "#" + v : v);
+              }}
             />
             <div className="onb-couleur__vite" role="group" aria-label={t("couleursRapides")}>
               {COULEURS_RAPIDES.map(([valeur, cle]) => (
@@ -257,6 +279,11 @@ export function FormulaireOnboarding({
           {/* L'AJUSTEMENT EST DIT D'AVANCE : un avertissement « couleur ajustée » s'afficherait
               avant que le vendeur ait rien choisi, sur la couleur par défaut. */}
           <p className="onb-aide">{t("couleurAide")}</p>
+          {champsEnEchec.includes("couleurAccent") ? (
+            <p role="alert" id="erreur-couleur" className="champ-acces__erreur">
+              {t("erreurCouleur")}
+            </p>
+          ) : null}
         </div>
 
         {/* LA SEULE COLONNE SANS VALEUR PAR DÉFAUT EN BASE : un défaut aurait classé tous
@@ -317,13 +344,12 @@ export function FormulaireOnboarding({
               textes={libelles.page}
               pour={libelles.pourGenerique}
               nom={nom.trim()}
-              nomProvisoire={t("sansNom")}
               description=""
               logo={logo.phase === "pose" ? logo.apercu : null}
               accent={accent}
               reseaux={[]}
               marqueMasquee={false}
-              langue={locale}
+              langue={languePage}
             />
           </div>
         </div>

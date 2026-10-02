@@ -1,29 +1,13 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  ArrowDown,
-  ArrowUp,
-  CalendarDays,
-  Clock,
-  Eye,
-  Image as IconeImage,
-  Link2,
-  Package,
-  ShoppingCart,
-  UserPlus,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
-import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
-import { TuileVolume } from "@/components/admin/tuile-volume";
+import { FiltresAdmin } from "@/components/admin/filtres-admin";
+import { TuileVolume, Tuiles } from "@/components/admin/tuile-volume";
 import { AnneauStatuts } from "@/components/admin/anneau-statuts";
 import { Anneau } from "@/components/admin/anneau";
-import { CourbeCommandes } from "@/components/admin/courbe-commandes";
-import { GraphiqueLignes } from "@/components/admin/graphique-lignes";
-import { GraphiqueBarres } from "@/components/admin/graphique-barres";
+import { BarresAdmin } from "@/components/admin/barres-admin";
+import { LignesAdmin } from "@/components/admin/lignes-admin";
 import { jourCourt } from "@/components/admin/echelle";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { lireRepartition } from "@/lib/audit/panneau";
@@ -38,7 +22,7 @@ import {
   VUES_STATISTIQUES,
   type VueStatistiques,
 } from "@/lib/audit/statistiques";
-import { lireTransporteur, monogramme } from "@/lib/tracking/transporteurs";
+import { lireTransporteur } from "@/lib/tracking/transporteurs";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -72,13 +56,6 @@ const LIBELLE_FENETRE = {
   "30": "statistiques.fenetres.30",
   "90": "statistiques.fenetres.90",
 } as const;
-
-/* LES GÉOMÉTRIES DU KIT : `AdminPanel` (remplissage 22, titre 18/700) et
-   `StatCard` (remplissage 20, pastille 34, titre 16/700, valeur 27/800). */
-const PANNEAU =
-  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
-const PANNEAU_TITRE = "text-[18px] leading-[normal] font-bold tracking-[-0.025em] text-ds-texte-titre";
-const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[normal] text-ds-texte-corps";
 
 /**
  * LES STATISTIQUES DE LA PLATEFORME — décision de Wassim du 14/09/2026.
@@ -137,460 +114,297 @@ export default async function AdminStatistiques({
     return s === "" ? base : `${base}?${s}`;
   };
 
-  const montre = (v: VueStatistiques): boolean => vue === "globale" || vue === v;
-  const etiquettes = series.map((j) => jourCourt(format, j.jour));
   const nombre = (n: number): string => format.number(n);
+  const debut = jourCourt(format, series[0]?.jour ?? "");
+  const fin = jourCourt(format, series[series.length - 1]?.jour ?? "");
 
-  /** Le badge d'écart du kit, ou rien quand la période précédente n'a pas de base. */
-  const badge = (valeur: number | null, taille: "tuile" | "carte"): ReactNode => {
-    if (valeur === null) return null;
-    const hausse = valeur >= 0;
-    const Fleche = hausse ? ArrowUp : ArrowDown;
-    return (
-      <span
-        className={
-          "inline-flex items-center rounded-ds-pill font-bold " +
-          (taille === "tuile" ? "gap-0.5 px-[7px] py-0.5 text-[11.5px] lg:text-[11px] " : "gap-[3px] px-[9px] py-[3px] text-[12px] ") +
-          (hausse ? "bg-ds-succes-fond text-ds-succes-encre" : "bg-ds-erreur-fond text-ds-erreur-encre")
-        }
-      >
-        <Fleche aria-hidden="true" size={taille === "tuile" ? 10 : 11} strokeWidth={3} />
-        {hausse
-          ? t("statistiques.ecartHausse", { ecart: valeur })
-          : t("statistiques.ecartBaisse", { ecart: Math.abs(valeur) })}
+  /** L'écart avec la période précédente, CALCULÉ sur les tables horodatées ; sans base, rien. */
+  const delta = (valeur: number | null): ReactNode =>
+    valeur === null ? null : (
+      <span className="delta" data-ton={valeur >= 0 ? "hausse" : "baisse"}>
+        {valeur >= 0 ? t("statistiques.ecartHausse", { ecart: valeur }) : t("statistiques.ecartBaisse", { ecart: Math.abs(valeur) })}
       </span>
+    );
+  const dessous = (aide: string | null, valeur: number | null): ReactNode => {
+    const d = delta(valeur);
+    if (d === null) return aide ?? t("statistiques.sansAvant");
+    return (
+      <>
+        {aide === null ? null : `${aide} · `}
+        {d} {t("statistiques.vsAvant")}
+      </>
     );
   };
 
-  const taux = (consultes: number, total: number): number | null =>
-    total === 0 ? null : Math.round((100 * consultes) / total);
+  const taux = (consultes: number, total: number): number | null => (total === 0 ? null : Math.round((100 * consultes) / total));
   const tauxCourant = taux(ind.liens_consultes, ind.commandes);
-  const tauxAvant = taux(ind.liens_consultes_avant, ind.commandes_avant);
+  const vuesTotales = series.reduce((n, j) => n + j.vues, 0);
+  const sansType = Math.max(0, ind.comptes - ind.fournisseurs - ind.revendeurs);
 
-  const carte = (
-    Icone: LucideIcon,
-    titre: string,
-    valeur: string,
-    ecartValeur: number | null,
-    corps: ReactNode,
-    sourdine = false,
-  ) => (
-    <section className="flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-5">
-      <div className="mb-2.5 flex items-center gap-[11px]">
-        <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
-          <Icone aria-hidden="true" size={17} strokeWidth={1.9} />
-        </span>
-        <h2 className="min-w-0 text-[16px] leading-[normal] font-bold tracking-[-0.02em] text-ds-texte-titre">{titre}</h2>
-      </div>
-      <div className="mb-3 flex flex-wrap items-center gap-[11px]">
-        <span
-          className={
-            "text-[27px] leading-[normal] font-extrabold tracking-[-0.045em] " +
-            (sourdine ? "text-ds-texte-sourdine" : "text-ds-texte-fort")
-          }
-        >
-          {valeur}
-        </span>
-        {badge(ecartValeur, "carte")}
-      </div>
+  const bloc = (id: string, titre: string, corps: ReactNode, options: { aide?: string; periode?: boolean; anneau?: boolean } = {}) => (
+    <section key={id} className={"bloc adm-bloc" + (options.anneau === true ? " adm-bloc--anneau" : "")} aria-labelledby={`stat-${id}`}>
+      <header className="bloc__tete">
+        <div>
+          <h2 id={`stat-${id}`}>{titre}</h2>
+        </div>
+        {options.periode === true ? <span className="adm-periode">{t(`statistiques.fenetres.${jours}`)}</span> : null}
+      </header>
+      {options.aide === undefined ? null : <p className="adm-aide adm-aide--haut">{options.aide}</p>}
       {corps}
     </section>
   );
+  const aucuneMesure = <p className="adm-texte pb-4">{t("statistiques.aucuneMesure")}</p>;
 
-  const panneau = (titre: string, aide: string | null, corps: ReactNode) => (
-    <section className={PANNEAU}>
-      <header className="mb-[18px]">
-        <h2 className={PANNEAU_TITRE}>{titre}</h2>
-        {aide === null ? null : <p className={PANNEAU_AIDE}>{aide}</p>}
-      </header>
-      <div className="min-w-0 flex-1">{corps}</div>
-    </section>
+  const evolutionCommandes = bloc(
+    "commandes",
+    t("statistiques.evolutionCommandes"),
+    series.length === 0 ? (
+      aucuneMesure
+    ) : (
+      <BarresAdmin
+        etiquette={t("statistiques.evolutionCommandes")}
+        debut={debut}
+        fin={fin}
+        valeurs={series.map((j) => ({ valeur: j.commandes, info: t("panneau.barre", { jour: jourCourt(format, j.jour), n: j.commandes }) }))}
+      />
+    ),
+    { periode: true },
+  );
+  const evolutionComptes = bloc(
+    "comptes",
+    t("statistiques.evolutionComptes"),
+    series.length === 0 ? (
+      aucuneMesure
+    ) : (
+      <LignesAdmin
+        etiquette={t("statistiques.evolutionComptes")}
+        debut={debut}
+        fin={fin}
+        series={[
+          { cle: "actifs", libelle: t("statistiques.serieActifs"), trait: "var(--color-ds-accent)", valeurs: series.map((j) => j.comptes_actifs) },
+          { cle: "nouveaux", libelle: t("statistiques.serieNouveaux"), trait: "var(--color-ds-succes)", valeurs: series.map((j) => j.nouveaux_comptes) },
+        ]}
+      />
+    ),
+  );
+  const typesDeCompte = bloc(
+    "types",
+    t("statistiques.typesDeCompte"),
+    <Anneau
+      etiquette={t("statistiques.typesDeCompte")}
+      total={ind.comptes}
+      unite={t("statistiques.uniteComptes")}
+      part={(pourcent) => t("statistiques.part", { part: pourcent })}
+      parts={[
+        { cle: "fournisseurs", libelle: t("statistiques.typeFournisseurs"), valeur: ind.fournisseurs, trait: "var(--color-ds-accent)" },
+        { cle: "revendeurs", libelle: t("statistiques.typeRevendeurs"), valeur: ind.revendeurs, trait: "var(--adm-expedie)" },
+        { cle: "sans", libelle: t("statistiques.typeSans"), valeur: sansType, trait: "var(--st-attente)" },
+      ]}
+    />,
+    { anneau: true },
   );
 
-  const aucuneMesure = <p className="text-[14px] text-ds-texte-corps">{t("statistiques.aucuneMesure")}</p>;
-
-  /* --- LES CARTES, dans l'ordre des rangées du kit --- */
-  const evolutionCommandes = montre("commandes")
-    ? carte(
-        CalendarDays,
-        t("statistiques.evolutionCommandes"),
-        nombre(ind.commandes),
-        ecart(ind.commandes, ind.commandes_avant),
-        <CourbeCommandes jours={series.map((j) => ({ jour: j.jour, total: j.commandes }))} hauteur={185} reperes={5} />,
-      )
-    : null;
-
-  const evolutionComptes = montre("comptes")
-    ? carte(
-        Users,
-        t("statistiques.evolutionComptes"),
-        nombre(ind.comptes_actifs),
-        ecart(ind.comptes_actifs, ind.comptes_actifs_avant),
-        <GraphiqueLignes
-          hauteur={172}
-          etiquettes={etiquettes}
-          series={[
-            { cle: "nouveaux", libelle: t("statistiques.serieNouveaux"), trait: "var(--color-ds-accent)", valeurs: series.map((j) => j.nouveaux_comptes) },
-            { cle: "actifs", libelle: t("statistiques.serieActifs"), trait: "var(--color-ds-violet-300)", valeurs: series.map((j) => j.comptes_actifs) },
-          ]}
-        />,
-      )
-    : null;
-
-  const sansType = Math.max(0, ind.comptes - ind.fournisseurs - ind.revendeurs);
-  const typesDeCompte = montre("comptes")
-    ? panneau(
-        t("statistiques.typesDeCompte"),
-        t("statistiques.typesTotal", { total: ind.comptes }),
-        <Anneau
-          variante="statistiques"
-          total={ind.comptes}
-          unite={t("statistiques.uniteComptes")}
-          part={(pourcent) => t("statistiques.part", { part: pourcent })}
-          parts={[
-            { cle: "fournisseurs", libelle: t("statistiques.typeFournisseurs"), valeur: ind.fournisseurs, trait: "var(--color-ds-accent)" },
-            { cle: "revendeurs", libelle: t("statistiques.typeRevendeurs"), valeur: ind.revendeurs, trait: "var(--color-ds-violet-300)" },
-            { cle: "sans", libelle: t("statistiques.typeSans"), valeur: sansType, trait: "var(--color-ds-filet-appuye)" },
-          ]}
-        />,
-      )
-    : null;
-
-  const vuesTotales = series.reduce((n, j) => n + j.vues, 0);
-  const pagesConsultees = montre("utilisation")
-    ? carte(
-        Eye,
-        t("statistiques.pagesConsultees"),
-        nombre(vuesTotales),
-        null,
-        <GraphiqueBarres hauteur={132} valeurs={series.map((j) => j.vues)} etiquettes={etiquettes} />,
-      )
-    : null;
-
-  const tauxConsultes = montre("utilisation")
-    ? carte(
-        Link2,
-        t("statistiques.tauxConsultes"),
-        tauxCourant === null ? "—" : t("statistiques.tauxValeur", { valeur: tauxCourant }),
-        ecart(tauxCourant, tauxAvant),
-        series.every((j) => j.taux_consultes === null) ? (
-          aucuneMesure
-        ) : (
-          <GraphiqueLignes
-            hauteur={130}
-            etiquettes={etiquettes}
-            series={[{ cle: "taux", libelle: t("statistiques.tauxConsultes"), trait: "var(--color-ds-accent)", valeurs: series.map((j) => j.taux_consultes) }]}
-          />
-        ),
-        tauxCourant === null,
-      )
-    : null;
-
-  const delai = montre("utilisation")
-    ? carte(
-        Clock,
-        t("statistiques.delaiLivraison"),
-        ind.delai_jours === null ? "—" : t("statistiques.delaiValeur", { valeur: ind.delai_jours }),
-        ecart(ind.delai_jours, ind.delai_jours_avant),
-        series.every((j) => j.delai_jours === null) ? (
-          aucuneMesure
-        ) : (
-          <GraphiqueLignes
-            hauteur={130}
-            etiquettes={etiquettes}
-            series={[{ cle: "delai", libelle: t("statistiques.serieDelai"), trait: "var(--color-ds-accent)", valeurs: series.map((j) => j.delai_jours) }]}
-          />
-        ),
-        ind.delai_jours === null,
-      )
-    : null;
-
-  const statutCommandes =
-    montre("commandes") && repartition !== null
-      ? panneau(
-          t("statistiques.statutCommandes"),
-          t("statistiques.statutTotal", { total: repartition.total }),
-          <AnneauStatuts repartition={repartition} variante="statistiques" />,
-        )
-      : null;
-
-  /* LES CINQ TRANSPORTEURS EN TÊTE, et leur part des colis de la fenêtre. La barre
-     se mesure contre le PREMIER, comme au kit : elle compare les transporteurs
-     entre eux, la part écrite dit le reste. */
+  /* LES CINQ TRANSPORTEURS EN TÊTE ; la barre se mesure contre le PREMIER (elle
+     compare les transporteurs entre eux), la part écrite dit le reste. */
   const totalColis = transporteurs.reduce((n, c) => n + c.nombre, 0);
   const tete = transporteurs.slice(0, 5);
   const premier = tete[0]?.nombre ?? 0;
-  const lesTransporteurs = montre("utilisation")
-    ? panneau(
-        t("statistiques.transporteurs"),
-        t("statistiques.transporteursTotal", { total: totalColis }),
-        tete.length === 0 ? (
-          <p className="text-[14px] text-ds-texte-corps">{t("statistiques.aucunColis")}</p>
-        ) : (
-          <ul className="flex flex-col gap-[15px]">
-            {tete.map((c) => {
-              const connu = lireTransporteur(c.carrier_code);
-              const nom = connu?.nom ?? t("statistiques.transporteurInconnu");
-              const m = connu === null ? null : monogramme(connu.nom);
-              const court = m?.court ?? "?";
-              return (
-                <li key={c.carrier_code ?? "inconnu"} className="flex items-center gap-3">
-                  <span
-                    aria-hidden="true"
-                    className={
-                      "inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-ds-sm font-extrabold tracking-[-0.02em] " +
-                      (court.length > 2 ? "text-[11.5px] lg:text-[9px] " : "text-[11.5px] lg:text-[11px] ") +
-                      (m?.fond == null ? "bg-ds-surface-creux text-ds-texte-corps" : "")
-                    }
-                    style={m?.fond == null ? undefined : { background: m.fond, color: m.encre ?? undefined }}
-                  >
-                    {court}
-                  </span>
-                  <span className="w-24 flex-none truncate text-[13.5px] leading-[normal] text-ds-texte-fort">{nom}</span>
-                  <span className="h-[9px] min-w-10 flex-1 overflow-hidden rounded-ds-pill bg-ds-surface-creux">
-                    <span
-                      className="block h-full rounded-ds-pill bg-[image:var(--degrade-ds-marque-calme)] text-ds-texte-sur-marque"
-                      style={{ width: `${premier === 0 ? 0 : (100 * c.nombre) / premier}%` }}
-                    />
-                  </span>
-                  <span className="w-9 text-right text-[13.5px] leading-[normal] font-bold text-ds-texte-fort">
-                    {t("statistiques.part", { part: totalColis === 0 ? 0 : Math.round((100 * c.nombre) / totalColis) })}
-                  </span>
-                  <span className="w-[52px] text-right text-[12.5px] leading-[normal] text-ds-texte-sourdine">
-                    {t("statistiques.nombreEntreParentheses", { nombre: nombre(c.nombre) })}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        ),
-      )
-    : null;
+  const lesTransporteurs = bloc(
+    "transporteurs",
+    t("statistiques.transporteurs"),
+    tete.length === 0 ? (
+      <p className="adm-texte pb-4">{t("statistiques.aucunColis")}</p>
+    ) : (
+      <ul className="adm-barres-h">
+        {tete.map((c, i) => (
+          <li key={c.carrier_code ?? "inconnu"}>
+            <span className="truncate">{lireTransporteur(c.carrier_code)?.nom ?? t("statistiques.transporteurInconnu")}</span>
+            <i aria-hidden="true">
+              <b style={{ "--k": (premier === 0 ? 0 : c.nombre / premier).toFixed(3), "--i": String(i) } as React.CSSProperties} />
+            </i>
+            <em title={nombre(c.nombre)}>{t("statistiques.part", { part: totalColis === 0 ? 0 : Math.round((100 * c.nombre) / totalColis) })}</em>
+          </li>
+        ))}
+      </ul>
+    ),
+    { aide: t("statistiques.transporteursTotal", { total: totalColis }) },
+  );
 
-  /* LA CROISSANCE : les trois derniers mois (le courant compris) contre les trois
-     précédents. Sans base, pas de pourcentage — le mot « nouveau ». */
-  const somme = (cle: "comptes" | "commandes" | "colis" | "photos", debut: number, fin: number): number =>
-    croissance.slice(debut, fin).reduce((n, m) => n + m[cle], 0);
-  const indicateursCroissance = (
-    [
-      { cle: "comptes", icone: UserPlus, libelle: t("statistiques.croissanceComptes") },
-      { cle: "commandes", icone: ShoppingCart, libelle: t("statistiques.croissanceCommandes") },
-      { cle: "colis", icone: Package, libelle: t("statistiques.croissanceColis") },
-      { cle: "photos", icone: IconeImage, libelle: t("statistiques.croissancePhotos") },
-    ] as const
-  ).map((g) => ({ ...g, ecart: ecart(somme(g.cle, 6, 9), somme(g.cle, 3, 6)), recent: somme(g.cle, 6, 9) }));
-
-  const laCroissance = montre("croissance")
-    ? panneau(
-        t("statistiques.croissance"),
-        t("statistiques.croissanceAide"),
-        <>
-          <div className="mb-4 grid grid-cols-2 gap-x-4 gap-y-3.5">
-            {indicateursCroissance.map((g) => {
-              const Icone = g.icone;
-              return (
-                <div key={g.cle} className="flex min-w-0 items-center gap-2.5">
-                  <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
-                    <Icone aria-hidden="true" size={16} strokeWidth={1.9} />
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-[12.5px] leading-[normal] text-ds-texte-sourdine">{g.libelle}</span>
-                    <span
-                      className={
-                        "text-[16px] leading-[normal] font-extrabold tracking-[-0.03em] " +
-                        (g.ecart === null
-                          ? "text-ds-texte-sourdine"
-                          : g.ecart >= 0
-                            ? "text-ds-succes-encre"
-                            : "text-ds-erreur-encre")
-                      }
-                    >
-                      {g.ecart === null
-                        ? g.recent === 0
-                          ? "—"
-                          : t("statistiques.croissanceSansBase")
-                        : g.ecart >= 0
-                          ? t("statistiques.ecartHausse", { ecart: g.ecart })
-                          : t("statistiques.ecartBaisse", { ecart: Math.abs(g.ecart) })}
-                    </span>
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <GraphiqueBarres
-            hauteur={150}
-            valeurs={croissance.map((m) => m.commandes)}
-            etiquettes={croissance.map((m) =>
-              format.dateTime(new Date(`${m.mois}T00:00:00Z`), { month: "short", year: "numeric", timeZone: "UTC" }),
+  /* LA CROISSANCE : les trois derniers mois contre les trois précédents. Sans
+     base, pas de pourcentage — le mot « nouveau ». */
+  const somme = (cle: "comptes" | "commandes" | "colis" | "photos", debutM: number, finM: number): number =>
+    croissance.slice(debutM, finM).reduce((n, m) => n + m[cle], 0);
+  const laCroissance = bloc(
+    "croissance",
+    t("statistiques.croissance"),
+    <ul className="adm-croissance">
+      {(
+        [
+          { cle: "comptes", libelle: t("statistiques.croissanceComptes") },
+          { cle: "commandes", libelle: t("statistiques.croissanceCommandes") },
+          { cle: "colis", libelle: t("statistiques.croissanceColis") },
+          { cle: "photos", libelle: t("statistiques.croissancePhotos") },
+        ] as const
+      ).map((g) => {
+        const e = ecart(somme(g.cle, 6, 9), somme(g.cle, 3, 6));
+        const recent = somme(g.cle, 6, 9);
+        return (
+          <li key={g.cle}>
+            <span>{g.libelle}</span>
+            {e === null ? (
+              <b className="adm-sourdine">{recent === 0 ? "—" : t("statistiques.croissanceSansBase")}</b>
+            ) : (
+              <b className="delta" data-ton={e >= 0 ? "hausse" : "baisse"}>
+                {e >= 0 ? t("statistiques.ecartHausse", { ecart: e }) : t("statistiques.ecartBaisse", { ecart: Math.abs(e) })}
+              </b>
             )}
-          />
-        </>,
-      )
-    : null;
+          </li>
+        );
+      })}
+    </ul>,
+    { aide: t("statistiques.croissanceAide") },
+  );
 
-  const cartes = [
-    evolutionCommandes,
-    evolutionComptes,
-    typesDeCompte,
-    pagesConsultees,
-    tauxConsultes,
-    delai,
-    statutCommandes,
-    lesTransporteurs,
-    laCroissance,
-  ].filter((c) => c !== null);
+  const tuileSeule = (libelle: string, valeur: string, aide: string, sourdine = false) => (
+    <Tuiles etiquette={libelle} colonnes={1}>
+      <TuileVolume libelle={libelle} valeur={valeur} complement={aide} valeurEnSourdine={sourdine} />
+    </Tuiles>
+  );
+
+  /* LES COURBES DÉTAILLÉES des vues filtrées : la vue globale suit la maquette
+     (trois chiffres), les vues « utilisation », « commandes » et « croissance »
+     gardent les séries que le produit calculait déjà — rien ne se perd. */
+  const pagesParJour = bloc(
+    "pages",
+    t("statistiques.pagesConsultees"),
+    <BarresAdmin
+      etiquette={t("statistiques.pagesConsultees")}
+      debut={debut}
+      fin={fin}
+      valeurs={series.map((j) => ({ valeur: j.vues, info: `${jourCourt(format, j.jour)} : ${nombre(j.vues)}` }))}
+    />,
+    { periode: true },
+  );
+  const tauxParJour = bloc(
+    "taux",
+    t("statistiques.tauxConsultes"),
+    series.every((j) => j.taux_consultes === null) ? (
+      aucuneMesure
+    ) : (
+      <LignesAdmin
+        etiquette={t("statistiques.tauxConsultes")}
+        debut={debut}
+        fin={fin}
+        series={[{ cle: "taux", libelle: t("statistiques.tauxConsultes"), trait: "var(--color-ds-accent)", valeurs: series.map((j) => j.taux_consultes) }]}
+      />
+    ),
+  );
+  const delaiParJour = bloc(
+    "delai",
+    t("statistiques.delaiLivraison"),
+    series.every((j) => j.delai_jours === null) ? (
+      aucuneMesure
+    ) : (
+      <LignesAdmin
+        etiquette={t("statistiques.serieDelai")}
+        debut={debut}
+        fin={fin}
+        series={[{ cle: "delai", libelle: t("statistiques.serieDelai"), trait: "var(--color-ds-accent)", valeurs: series.map((j) => j.delai_jours) }]}
+      />
+    ),
+  );
+  const statutCommandes =
+    repartition === null
+      ? null
+      : bloc("statuts", t("statistiques.statutCommandes"), <AnneauStatuts repartition={repartition} />, {
+          anneau: true,
+          aide: t("statistiques.statutTotal", { total: repartition.total }),
+        });
+  const croissanceMensuelle = bloc(
+    "mois",
+    t("statistiques.evolutionCommandes"),
+    <BarresAdmin
+      etiquette={t("statistiques.croissanceAide")}
+      debut={croissance[0] === undefined ? "" : format.dateTime(new Date(`${croissance[0].mois}T00:00:00Z`), { month: "short", year: "numeric", timeZone: "UTC" })}
+      fin={croissance.at(-1) === undefined ? "" : format.dateTime(new Date(`${croissance.at(-1)?.mois ?? ""}T00:00:00Z`), { month: "short", year: "numeric", timeZone: "UTC" })}
+      valeurs={croissance.map((m) => ({
+        valeur: m.commandes,
+        info: `${format.dateTime(new Date(`${m.mois}T00:00:00Z`), { month: "long", year: "numeric", timeZone: "UTC" })} : ${nombre(m.commandes)}`,
+      }))}
+    />,
+  );
+
+  const parVue: Record<Exclude<VueStatistiques, "globale">, ReactNode[]> = {
+    utilisation: [pagesParJour, tauxParJour, delaiParJour, lesTransporteurs],
+    croissance: [laCroissance, croissanceMensuelle],
+    commandes: [evolutionCommandes, statutCommandes],
+    comptes: [evolutionComptes, typesDeCompte],
+  };
 
   return (
-    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
+    <main id="contenu" className="tableau adm">
       <EnTeteAdmin titre={t("statistiques.titre")} sousTitre={t("statistiques.sousTitre")} sousTitreAuBureauSeulement />
 
-      <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-[18px] md:px-0 md:py-0">
-        {/* --- SIX TUILES, COMME LE KIT ---
-
-            Ses « Liens clients générés » valent le nombre de commandes — une
-            commande, un lien — et ne diraient rien de plus : la tuile compte
-            ceux qui ont été OUVERTS. Ses « Nouvelles boutiques » sont nos
-            nouveaux comptes, une boutique naissant avec son compte. Ses
-            « Nouveaux abonnements » sont interdits : la sixième tuile compte
-            les colis pris en charge, le seul poste facturé du produit. */}
-        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
-            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
-            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
-            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
-        {/* ⚠️ SIX TUILES PAR RANGÉE À PARTIR DE `2xl` : à 1 280 px, six tuiles
-            laissaient 56 px au texte, et « Total commandes » SORTAIT de sa tuile
-            (balayage du 18/09/2026). Trois entre les deux. */}
-        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-3 xl:gap-3.5 2xl:grid-cols-6">
-          <TuileVolume
-            icone={ShoppingCart}
-            compacte
-            libelle={t("statistiques.tuileCommandes")}
-            valeur={nombre(ind.commandes)}
-            badge={badge(ecart(ind.commandes, ind.commandes_avant), "tuile")}
-            complement={ecart(ind.commandes, ind.commandes_avant) === null ? t("statistiques.sansAvant") : t("statistiques.vsAvant")}
-          />
-          <TuileVolume
-            icone={Link2}
-            compacte
-            teinte="info"
-            libelle={t("statistiques.tuileLiens")}
-            valeur={nombre(ind.liens_consultes)}
-            badge={badge(ecart(ind.liens_consultes, ind.liens_consultes_avant), "tuile")}
-            complement={
-              ecart(ind.liens_consultes, ind.liens_consultes_avant) === null
-                ? t("statistiques.tuileLiensAide")
-                : t("statistiques.vsAvant")
-            }
-          />
-          <TuileVolume
-            icone={IconeImage}
-            compacte
-            teinte="succes"
-            libelle={t("statistiques.tuilePhotos")}
-            valeur={nombre(ind.photos)}
-            badge={badge(ecart(ind.photos, ind.photos_avant), "tuile")}
-            complement={ecart(ind.photos, ind.photos_avant) === null ? t("statistiques.sansAvant") : t("statistiques.vsAvant")}
-          />
-          <TuileVolume
-            icone={Users}
-            compacte
-            libelle={t("statistiques.tuileActifs")}
-            valeur={nombre(ind.comptes_actifs)}
-            badge={badge(ecart(ind.comptes_actifs, ind.comptes_actifs_avant), "tuile")}
-            complement={t("statistiques.surComptes", { total: ind.comptes })}
-          />
-          <TuileVolume
-            icone={UserPlus}
-            compacte
-            teinte="alerte"
-            libelle={t("statistiques.tuileNouveaux")}
-            valeur={nombre(ind.nouveaux_comptes)}
-            badge={badge(ecart(ind.nouveaux_comptes, ind.nouveaux_comptes_avant), "tuile")}
-            complement={t("statistiques.surComptes", { total: ind.comptes })}
-          />
-          <TuileVolume
-            icone={Package}
-            compacte
-            teinte="info"
-            libelle={t("statistiques.tuileColis")}
-            valeur={nombre(ind.colis)}
-            badge={badge(ecart(ind.colis, ind.colis_avant), "tuile")}
-            complement={t("statistiques.tuileColisAide")}
-          />
-        </div>
-
-        {/* --- LES VUES ET LA PÉRIODE ---
-
-            Des LIENS, pas des boutons : la vue vit dans l'URL. Au téléphone la
-            rangée défile plutôt que de passer sur trois lignes — et elle prend
-            sa RANGÉE : partagée avec le sélecteur de période, il ne lui restait
-            que 159 px, et ses marges négatives passaient sous lui. */}
-        <div className="flex flex-wrap items-center gap-3.5">
-          <nav
-            aria-label={t("statistiques.filtreVue")}
-            className="defilement-discret -mx-4 flex min-w-0 basis-full gap-2.5 overflow-x-auto px-4 md:mx-0 md:flex-1 md:basis-auto md:flex-wrap md:overflow-visible md:px-0"
-          >
-            {VUES_STATISTIQUES.map((v) => {
-              const courante = v === vue;
-              return (
-                <Link prefetch={false}
-                  key={v}
-                  href={lien({ vue: v })}
-                  aria-current={courante ? "page" : undefined}
-                  className={
-                    "flex h-11 flex-none items-center rounded-ds-card border px-5 text-[13.5px] leading-[normal] whitespace-nowrap lg:h-[42px] " +
-                    (courante
-                      ? "border-transparent bg-[image:var(--degrade-ds-marque-calme)] font-bold text-ds-texte-sur-marque"
-                      : "border-ds-filet bg-ds-surface-carte font-medium text-ds-texte-corps hover:bg-ds-surface-creux")
-                  }
-                >
-                  {t(LIBELLE_VUE[v])}
-                </Link>
-              );
-            })}
-          </nav>
-          <SelecteurAdmin
-            etiquette={t("statistiques.filtreJours")}
-            courant={jours}
-            largeurMin={185}
-            options={FENETRES_STATISTIQUES.map((j) => ({
-              valeur: j,
-              libelle: t(LIBELLE_FENETRE[j]),
-              href: lien({ jours: j }),
-            }))}
-          />
-        </div>
-
-        {/* --- LES CARTES ---
-
-            En vue globale, les trois rangées du kit ; sur un onglet, une grille
-            qui se remplit — le kit fait de même. L'« Activité récente » du kit
-            n'est pas portée : elle nommerait des vendeurs à chaque ouverture. */}
-        {vue === "globale" ? (
-          <>
-            <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1.05fr)_minmax(330px,1fr)] xl:items-start">
-              {evolutionCommandes}
-              {evolutionComptes}
-              {typesDeCompte}
-            </div>
-            <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(330px,1.1fr)] xl:items-start">
-              {pagesConsultees}
-              {tauxConsultes}
-              {delai}
-              {statutCommandes}
-            </div>
-            <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] xl:items-start">
-              {lesTransporteurs}
-              {laCroissance}
-            </div>
-          </>
-        ) : (
-          <div className="grid gap-2.5 md:gap-[18px] xl:grid-cols-[repeat(auto-fit,minmax(340px,1fr))] xl:items-start">
-            {cartes}
-          </div>
-        )}
+      {/* LA VUE ET LA PÉRIODE VIVENT DANS L'URL : des liens, pas des boutons. */}
+      <div className="adm-outils adm-outils--tete">
+        <FiltresAdmin
+          etiquette={t("statistiques.filtreVue")}
+          courant={vue}
+          options={VUES_STATISTIQUES.map((v) => ({ valeur: v, libelle: t(LIBELLE_VUE[v]), href: lien({ vue: v }) }))}
+        />
+        <FiltresAdmin
+          etiquette={t("statistiques.filtreJours")}
+          courant={jours}
+          options={FENETRES_STATISTIQUES.map((j) => ({ valeur: j, libelle: t(LIBELLE_FENETRE[j]), href: lien({ jours: j }) }))}
+        />
       </div>
+
+      {/* SIX TUILES : les colis pris en charge prennent la place des « nouveaux
+          abonnements » du kit (interdits), les liens comptent ceux qui ont été
+          OUVERTS. QUE DES NOMBRES : rien n'est écrit au journal (migration 161). */}
+      <Tuiles etiquette={t("statistiques.titre")} colonnes={6}>
+        <TuileVolume libelle={t("statistiques.tuileCommandes")} valeur={nombre(ind.commandes)} complement={dessous(null, ecart(ind.commandes, ind.commandes_avant))} />
+        <TuileVolume
+          libelle={t("statistiques.tuileLiens")}
+          valeur={nombre(ind.liens_consultes)}
+          complement={dessous(t("statistiques.tuileLiensAide"), ecart(ind.liens_consultes, ind.liens_consultes_avant))}
+        />
+        <TuileVolume libelle={t("statistiques.tuilePhotos")} valeur={nombre(ind.photos)} complement={dessous(null, ecart(ind.photos, ind.photos_avant))} />
+        <TuileVolume libelle={t("statistiques.tuileActifs")} valeur={nombre(ind.comptes_actifs)} complement={t("statistiques.surComptes", { total: ind.comptes })} />
+        <TuileVolume libelle={t("statistiques.tuileNouveaux")} valeur={nombre(ind.nouveaux_comptes)} complement={dessous(null, ecart(ind.nouveaux_comptes, ind.nouveaux_comptes_avant))} />
+        <TuileVolume libelle={t("statistiques.tuileColis")} valeur={nombre(ind.colis)} complement={dessous(t("statistiques.tuileColisAide"), ecart(ind.colis, ind.colis_avant))} />
+      </Tuiles>
+
+      {vue === "globale" ? (
+        <>
+          <div className="adm-rangee adm-rangee--2">
+            {evolutionCommandes}
+            {evolutionComptes}
+          </div>
+          <div className="adm-rangee adm-rangee--3">
+            {typesDeCompte}
+            {lesTransporteurs}
+            {laCroissance}
+          </div>
+          <div className="adm-rangee adm-rangee--3">
+            {tuileSeule(t("statistiques.pagesConsultees"), nombre(vuesTotales), t(`statistiques.fenetres.${jours}`))}
+            {tuileSeule(
+              t("statistiques.tauxConsultes"),
+              tauxCourant === null ? "—" : t("statistiques.tauxValeur", { valeur: tauxCourant }),
+              t("statistiques.tuileLiensAide"),
+              tauxCourant === null,
+            )}
+            {tuileSeule(
+              t("statistiques.delaiLivraison"),
+              ind.delai_jours === null ? "—" : t("statistiques.delaiValeur", { valeur: ind.delai_jours }),
+              t("statistiques.delaiAide"),
+              ind.delai_jours === null,
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="adm-rangee adm-rangee--2">{parVue[vue]}</div>
+      )}
     </main>
   );
 }

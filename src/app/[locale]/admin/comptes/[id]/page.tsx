@@ -5,7 +5,9 @@ import type { Metadata } from "next";
 import { DialogueSuspension } from "@/components/admin/dialogue-suspension";
 import { EncartTrace } from "@/components/admin/encart-trace";
 import { PlanCompte } from "@/components/admin/plan-compte";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Ban, Crown } from "lucide-react";
+import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
+import { AvatarCompte } from "@/components/admin/briques-admin";
 import { TraductionsClient } from "@/components/traductions-client";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
@@ -34,22 +36,6 @@ export async function generateMetadata({
   // d'adresse à la frappe suivante — une donnée d'un tiers n'a rien à y faire.
   return { title: t("fiche.titre"), robots: { index: false, follow: false } };
 }
-
-/*
- * ⚠️ LES VALEURS SONT CELLES DE LA PLANCHE `#compte` DU KIT ADMIN, écrite le
- * 14/09/2026 : le kit n'en dessinait qu'un tiroir, dont le texte promettait « la
- * fiche complète quand elle sera maquettée ». Les cartes prennent le titre des
- * `AdminPanel` (18/700) au lieu d'un sur-titre en capitales, et les rangées
- * celles du tiroir.
- */
-const PANNEAU =
-  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
-const PANNEAU_TITRE = "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
-const LIGNE = "flex items-center gap-3.5 border-t border-ds-filet py-[11px]";
-const ETIQUETTE = "shrink-0 text-[13.5px] text-ds-texte-corps";
-const VALEUR = "ml-auto text-right text-[14px] font-semibold text-ds-texte-fort";
-const TUILE = "rounded-ds-card border p-[15px]";
-const CHIFFRE = "block text-[24px] font-extrabold tracking-[-0.03em]";
 
 /**
  * LA FICHE D'UN COMPTE.
@@ -113,318 +99,235 @@ export default async function FicheCompte({
    * Une barre de plafond. `part` est bornée à 1 : une barre qui déborde de son
    * conteneur ne dit pas « beaucoup », elle dit « le gabarit est cassé ».
    */
-  const barre = (part: number, alerte: boolean) => (
-    <div className="h-2 overflow-hidden rounded-ds-pill bg-ds-ink-100">
-      <div
-        className={"h-full rounded-ds-pill " + (alerte ? "bg-ds-erreur" : "bg-ds-accent")}
-        style={{ width: `${Math.round(Math.min(Math.max(part, 0), 1) * 100)}%` }}
-      />
-    </div>
-  );
+  const quota = fiche.quotaCommandes;
 
   return (
-    <main id="contenu" className="leading-[normal] md:px-8 md:pt-0 md:pb-8">
-      {/* --- L'IDENTITÉ, EN TÊTE ---
-
-          Le retour vers la liste est un LIEN, pas un bouton d'historique : un
-          administrateur arrive souvent ici depuis une recherche, et
-          `history.back()` lui rendrait une page qu'il n'a pas demandée. */}
-      <div className="flex items-start gap-3 px-margin-mobile pt-4 pb-3.5 md:items-center md:gap-4 md:px-0 md:pt-[30px] md:pb-[22px]">
-        <Link prefetch={false}
-          href={`/${langue}/admin/comptes`}
-          aria-label={t("fiche.retour")}
-          className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte text-ds-texte-fort shadow-ds-xs transition-colors before:absolute before:-inset-[3px] before:content-[''] hover:bg-ds-surface-teinte"
-        >
-          <ArrowLeft aria-hidden="true" size={18} strokeWidth={1.9} />
+    <main id="contenu" className="tableau adm">
+      {/* LE TITRE EST NEUTRE, jamais l'adresse du compte : l'onglet du navigateur
+          et l'historique ne doivent pas nommer un vendeur. Le retour est un LIEN,
+          pas `history.back()` : on arrive souvent ici depuis une recherche. */}
+      <EnTeteAdmin
+        titre={t("fiche.titre")}
+        sousTitre={t("fiche.resume", {
+          email: fiche.email,
+          type: typeLisible,
+          date: format.dateTime(new Date(fiche.creeLe), { dateStyle: "long" }),
+        })}
+        sousTitreAuBureauSeulement
+        fil={[{ href: `/${langue}/admin/comptes`, libelle: t("comptes.titre") }, { libelle: t("fiche.titre") }]}
+      >
+        <Link prefetch={false} className="bouton-outil" href={`/${langue}/admin/comptes`}>
+          <ArrowLeft aria-hidden="true" className="ic" />
+          {t("fiche.retour")}
         </Link>
+      </EnTeteAdmin>
+      <EncartTrace texte={t("fiche.trace")} />
 
-        {/* La pastille prend la couleur d'accent DU VENDEUR : c'est la seule
-            chose de cet écran qui lui appartienne visuellement, et elle aide à
-            reconnaître un compte qu'on a déjà ouvert. */}
-        <span
-          aria-hidden="true"
-          className="hidden h-12 w-12 shrink-0 rounded-ds-control md:block"
-          style={{ backgroundColor: fiche.accent ?? "var(--color-ds-accent)" }}
-        />
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-[24px] leading-7 font-extrabold tracking-[-0.045em] text-ds-texte-titre md:text-[36px] md:leading-[1.05]">
-              {fiche.boutique ?? t("comptes.sansNom")}
-            </h1>
-            <span
-              className={
-                "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-[5px] text-[11.5px] font-bold tracking-[-0.02em] whitespace-nowrap md:text-[11px] " +
-                (suspendu ? "bg-ds-erreur-fond text-ds-erreur-encre" : "bg-ds-succes-fond text-ds-succes-encre")
-              }
-            >
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-ds-pill bg-current" />
+      <article className="adm-fiche">
+        <header className="adm-fiche__tete">
+          <AvatarCompte email={fiche.email} nom={fiche.boutique} />
+          <div>
+            <h2>{fiche.email}</h2>
+            <p>
+              {fiche.boutique ?? t("comptes.sansNom")} · {typeLisible}
+            </p>
+          </div>
+          <div className="adm-fiche__etats">
+            <span className="adm-badge" data-statut={fiche.statut}>
+              <i aria-hidden="true" />
               {t(`comptes.statuts.${fiche.statut}`)}
             </span>
+            {plan.statut === "ok" ? (
+              <span className="adm-plan" data-plan={plan.plan}>
+                {plan.plan === "pro" ? <Crown aria-hidden="true" className="ic" /> : null}
+                {t(`plan.plans.${plan.plan}`)}
+              </span>
+            ) : null}
           </div>
-          <p className="mt-2 text-[14px] leading-[1.55] text-ds-texte-corps md:text-[15px]">
-            {t("fiche.resume", {
-              email: fiche.email,
-              type: typeLisible,
-              date: format.dateTime(new Date(fiche.creeLe), { dateStyle: "long" }),
-            })}
-          </p>
-        </div>
-      </div>
+        </header>
 
-      <div className="flex flex-col gap-4 p-4 md:gap-[18px] md:p-0">
-        <EncartTrace texte={t("fiche.trace")} />
-
-        <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_380px] xl:items-start">
-          {/* ================= COLONNE DE GAUCHE ================= */}
-          <div className="flex min-w-0 flex-col gap-4">
-            {/* --- LES VOLUMES --- */}
-            <section className={PANNEAU} aria-label={t("fiche.volumes")}>
-              <h2 className={PANNEAU_TITRE + " mb-[18px]"}>{t("fiche.volumes")}</h2>
-              <div className="grid grid-cols-2 gap-3.5 xl:grid-cols-4">
-                {/* LE COMPTEUR FACTURÉ EN TÊTE ET ENCADRÉ : c'est le seul poste
-                    du produit qui corresponde à une facture. */}
-                <div className={TUILE + " border-ds-violet-200 bg-ds-surface-teinte"}>
-                  <div className="mb-[7px] flex flex-wrap items-center gap-1.5">
-                    <span className="text-[12px] font-bold text-ds-accent-encre">{t("fiche.colis")}</span>
-                    <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-accent-doux px-2 py-0.5 text-[11.5px] font-bold tracking-[-0.02em] text-ds-accent-encre md:text-[11px]">
-                      {t("panneau.facture")}
-                    </span>
-                  </div>
-                  <span className={CHIFFRE + " text-ds-accent-encre"}>{format.number(fiche.colisCeMois)}</span>
-                </div>
-
-                {(
-                  [
-                    { cle: "commandes", valeur: format.number(fiche.commandes) },
-                    { cle: "medias", valeur: format.number(fiche.medias) },
-                    /* LE STOCKAGE PORTE UN CHIFFRE DEPUIS LA MIGRATION 049, dans
-                       la même taille que les autres volumes : l'afficher plus
-                       petit en faisait un volume de seconde zone. */
-                    {
-                      cle: "stockage",
-                      valeur: t("panneau.stockageValeur", {
-                        valeur: format.number(taille.valeur, {
-                          minimumFractionDigits: taille.decimales,
-                          maximumFractionDigits: taille.decimales,
-                        }),
-                        unite: t(`unites.${taille.unite}`),
-                      }),
-                    },
-                  ] as const
-                ).map((v) => (
-                  <div key={v.cle} className={TUILE + " border-ds-filet"}>
-                    <span className="mb-[7px] block text-[12px] text-ds-texte-sourdine">{t(`fiche.${v.cle}`)}</span>
-                    <span className={CHIFFRE + " text-ds-texte-fort"}>{v.valeur}</span>
-                  </div>
-                ))}
+        <div className="adm-rangee adm-rangee--3">
+          <section className="bloc adm-bloc" aria-labelledby="fiche-identite">
+            <header className="bloc__tete">
+              <div>
+                <h2 id="fiche-identite">{t("fiche.identite")}</h2>
               </div>
-            </section>
-
-            {/* --- LES PLAFONDS --- */}
-            <section className={PANNEAU} aria-label={t("fiche.plafonds")}>
-              <h2 className={PANNEAU_TITRE + " mb-[18px]"}>{t("fiche.plafonds")}</h2>
-              <div className="flex flex-col gap-4">
-                <div>
-                  <div className="mb-[7px] flex flex-wrap justify-between gap-2">
-                    <span
-                      className={
-                        "text-[14px] font-semibold " + (colisAuDessus ? "text-ds-erreur-encre" : "text-ds-texte-fort")
-                      }
-                    >
-                      {t("fiche.plafondColis")}
-                    </span>
-                    <span
-                      className={
-                        "text-[14px] " + (colisAuDessus ? "font-bold text-ds-erreur-encre" : "text-ds-texte-sourdine")
-                      }
-                    >
-                      {t("fiche.surPlafond", {
-                        valeur: format.number(fiche.colisCeMois),
-                        plafond: format.number(seuils.colis),
-                      })}
-                    </span>
-                  </div>
-                  {barre(fiche.colisCeMois / Math.max(seuils.colis, 1), colisAuDessus)}
-                  {/* LE DÉPASSEMENT PORTE SON CHIFFRE : « dépassé de 640 » se
-                      vérifie, « au-dessus du seuil » se discute. */}
-                  {colisAuDessus ? (
-                    <p className="mt-[7px] text-[12px] leading-[1.5] text-ds-erreur-encre">
-                      {t("fiche.depassementColis", {
-                        ecart: format.number(fiche.colisCeMois - seuils.colis),
-                      })}
-                    </p>
-                  ) : null}
-                </div>
-
-                {/* LE QUOTA À LA RÈGLE DU PLAN (200, planche `#compte`), lu là où il BLOQUE.
-                    À vie et tout compris en gratuit ; ce mois-ci et en Pro seulement en Pro.
-                    La jauge disait « commandes ce mois / plafond mensuel » pour tous : un
-                    gratuit bloqué à vie y lisait « 0 sur 300 ». */}
-                {fiche.quotaCommandes === null ? null : (
-                  <div>
-                    <div className="mb-[7px] flex flex-wrap justify-between gap-2">
-                      <span className="text-[14px] font-semibold text-ds-texte-fort">
-                        {t(fiche.plan === "gratuit" ? "fiche.quotaAVie" : "fiche.quotaMoisPro")}
-                      </span>
-                      <span className="text-[14px] text-ds-texte-sourdine">
-                        {t("fiche.surPlafond", {
-                          valeur: format.number(fiche.quotaCommandes.utilise),
-                          plafond: format.number(fiche.quotaCommandes.plafond),
-                        })}
-                      </span>
-                    </div>
-                    {barre(fiche.quotaCommandes.utilise / Math.max(fiche.quotaCommandes.plafond, 1), false)}
-                  </div>
-                )}
+            </header>
+            <dl className="adm-dl">
+              <div>
+                <dt>{t("fiche.email")}</dt>
+                <dd>{fiche.email}</dd>
               </div>
-            </section>
-
-            {/* --- CE QUE CE COMPTE A FAIT --- */}
-            <section className={PANNEAU} aria-label={t("fiche.activite")}>
-              <div className="mb-[18px]">
-                <h2 className={PANNEAU_TITRE}>{t("fiche.activite")}</h2>
-                <p className="mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps">{t("fiche.activiteAide")}</p>
+              <div>
+                <dt>{t("fiche.type")}</dt>
+                <dd>{typeLisible}</dd>
               </div>
-
-              {fiche.activite.length === 0 ? (
-                <p className="text-[14px] text-ds-texte-corps">{t("fiche.activiteVide")}</p>
-              ) : (
-                <ul className="flex flex-col gap-[13px]">
-                  {fiche.activite.map((a) => (
-                    <li key={a.type + a.jour} className="flex items-center gap-3">
-                      <span aria-hidden="true" className="h-[7px] w-[7px] shrink-0 rounded-ds-pill bg-ds-accent" />
-                      <span className="min-w-0 flex-1 text-[14px] text-ds-texte-fort">
-                        {/* ⚠️ L'ACCORD EST DANS LE LIBELLÉ, PAS AUTOUR. La phrase
-                            était « {n} {quoi} » avec un libellé toujours au
-                            pluriel : la fiche écrivait « 1 modifications de
-                            commande ». Chaque événement porte désormais son
-                            singulier et son pluriel. */}
-                        {t.has(`fiche.evenement.${a.type}`)
-                          ? t(`fiche.evenement.${a.type}`, { n: a.n })
-                          : `${format.number(a.n)} ${a.type}`}
-                      </span>
-                      <span className="shrink-0 text-[13px] text-ds-texte-sourdine">
-                        {format.dateTime(new Date(a.jour), { dateStyle: "medium" })}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </div>
-
-          {/* ================= COLONNE DE DROITE ================= */}
-          <div className="flex min-w-0 flex-col gap-4">
-            {/* LE GESTE DE L'ÉCRAN VIENT EN PREMIER, dans un panneau qui porte son
-                titre et ce que le geste fait AVANT qu'on l'ouvre. Il s'ouvre EN
-                LIGNE — comme la révocation de lien de l'éditeur, et pour la même
-                raison : une modale demande un piège de focus et une sortie, un
-                panneau non. */}
-            <section className={PANNEAU} aria-label={suspendu ? t("suspension.rouvrir") : t("suspension.ouvrir")}>
-              <TraductionsClient espaces={["admin.suspension"]}>
-                {/* `key` : le motif tapé pour un compte ne doit pas survivre à une
-                    navigation vers un autre (même correctif que l'éditeur, cb9e45b). */}
-                <DialogueSuspension
-                  key={fiche.id}
-                  profilId={fiche.id}
-                  email={fiche.email}
-                  suspendu={suspendu}
-                  motifMin={MOTIF_MIN}
-                />
-              </TraductionsClient>
-            </section>
-
-            {/* LE PLAN, juste sous la suspension comme sur la planche : ce sont les deux seuls
-                gestes de la fiche, et tous deux exigent un motif. */}
-            <section className={PANNEAU} aria-label={t("plan.titre")}>
-              <TraductionsClient espaces={["admin.plan"]}>
-                <PlanCompte
-                  key={fiche.id}
-                  profilId={fiche.id}
-                  plan={plan.statut === "ok" ? plan.plan : null}
-                  motifMin={MOTIF_MIN}
-                />
-              </TraductionsClient>
-            </section>
-
-            <section className={PANNEAU} aria-label={t("fiche.identite")}>
-              <h2 className={PANNEAU_TITRE + " mb-[18px]"}>{t("fiche.identite")}</h2>
-              <dl className="flex flex-col">
-                {(
-                  [
-                    { cle: "email", valeur: fiche.email },
-                    { cle: "type", valeur: typeLisible },
-                    { cle: "role", valeur: t(`comptes.roles.${fiche.role}`) },
-                    {
-                      cle: "langue",
-                      valeur: t.has(`langues.${fiche.langue}`) ? t(`langues.${fiche.langue}`) : fiche.langue,
-                    },
-                  ] as const
-                ).map((l, i) => (
-                  <div key={l.cle} className={LIGNE + (i === 0 ? " border-t-0 pt-0" : "")}>
-                    <dt className={ETIQUETTE}>{t(`fiche.${l.cle}`)}</dt>
-                    <dd className={VALEUR + " min-w-0 break-all"}>{l.valeur}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-
-            <section className={PANNEAU} aria-label={t("fiche.boutique")}>
-              <h2 className={PANNEAU_TITRE + " mb-[18px]"}>{t("fiche.boutique")}</h2>
-
-              <div className="mb-3.5 flex items-center gap-3">
-                <span
-                  aria-hidden="true"
-                  className="h-11 w-11 shrink-0 rounded-ds-control"
-                  style={{ backgroundColor: fiche.accent ?? "var(--color-ds-accent)" }}
-                />
-                <div className="min-w-0">
-                  <span className="block truncate text-[15px] font-bold text-ds-texte-fort">
-                    {fiche.boutique ?? t("fiche.boutiqueNonConfiguree")}
-                  </span>
-                  {/* LA VALEUR EXACTE, EN CHASSE FIXE. Un aplat de couleur ne se
-                      recopie pas dans un message ; un code hexadécimal, si. */}
-                  <span className="mt-px block font-mono text-[13px] text-ds-texte-sourdine">
-                    {fiche.accent ?? t("fiche.boutiqueNonConfiguree")}
-                  </span>
-                </div>
+              <div>
+                <dt>{t("fiche.role")}</dt>
+                <dd>{t(`comptes.roles.${fiche.role}`)}</dd>
               </div>
-
-              <div className={LIGNE}>
-                <span className={ETIQUETTE}>{t("fiche.filigrane")}</span>
-                <span className={VALEUR}>{fiche.filigrane ? t("fiche.active") : t("fiche.inactive")}</span>
+              <div>
+                <dt>{t("fiche.boutique")}</dt>
+                <dd>{fiche.boutique ?? t("fiche.boutiqueNonConfiguree")}</dd>
               </div>
-              <div className={LIGNE}>
-                <span className={ETIQUETTE}>{t("fiche.reseaux")}</span>
-                {/* UNE ABSENCE EST NOMMÉE, pas remplacée par un tiret : « aucun »
-                    se lit, « — » se devine. */}
-                <span className={VALEUR}>
+              {/* LA COULEUR DU VENDEUR, en aplat ET en valeur exacte : un aplat ne
+                  se recopie pas dans un message, un code hexadécimal si. */}
+              <div>
+                <dt>{t("fiche.couleur")}</dt>
+                <dd className="inline-flex items-center justify-end gap-2 font-mono">
+                  {fiche.accent === null ? (
+                    t("fiche.boutiqueNonConfiguree")
+                  ) : (
+                    <>
+                      <span aria-hidden="true" className="inline-block h-4 w-4 rounded-[5px]" style={{ backgroundColor: fiche.accent }} />
+                      {fiche.accent}
+                    </>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>{t("fiche.langue")}</dt>
+                <dd>{t.has(`langues.${fiche.langue}`) ? t(`langues.${fiche.langue}`) : fiche.langue}</dd>
+              </div>
+              <div>
+                <dt>{t("fiche.filigrane")}</dt>
+                <dd>{fiche.filigrane ? t("fiche.active") : t("fiche.inactive")}</dd>
+              </div>
+              {/* UNE ABSENCE EST NOMMÉE : « aucun » se lit, « — » se devine. */}
+              <div>
+                <dt>{t("fiche.reseaux")}</dt>
+                <dd>
                   {fiche.reseaux.length === 0
                     ? t("fiche.reseauxAucun")
                     : fiche.reseaux.map((r) => (tMarque.has(`reseau.${r}`) ? tMarque(`reseau.${r}`) : r)).join(", ")}
-                </span>
+                </dd>
               </div>
-            </section>
+            </dl>
+          </section>
 
-            {/* --- CE QUE CETTE PAGE NE PERMET PAS --- */}
-            <section
-              className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-creux p-4 md:p-[22px]"
-              aria-label={t("fiche.interdits")}
-            >
-              <h2 className={PANNEAU_TITRE + " mb-3.5"}>{t("fiche.interdits")}</h2>
-              <ul className="flex flex-col gap-3">
+          <section className="bloc adm-bloc" aria-labelledby="fiche-volumes">
+            <header className="bloc__tete">
+              <div>
+                <h2 id="fiche-volumes">{t("fiche.volumes")}</h2>
+              </div>
+            </header>
+            <dl className="adm-dl">
+              <div>
+                <dt>{t("fiche.commandes")}</dt>
+                <dd>{format.number(fiche.commandes)}</dd>
+              </div>
+              {/* LE SEUL POSTE FACTURÉ EST DIT COMME TEL. */}
+              <div>
+                <dt>
+                  {t("fiche.colis")} <span className="adm-facture">{t("panneau.facture")}</span>
+                </dt>
+                <dd>{format.number(fiche.colisCeMois)}</dd>
+              </div>
+              <div>
+                <dt>{t("fiche.medias")}</dt>
+                <dd>{format.number(fiche.medias)}</dd>
+              </div>
+              <div>
+                <dt>{t("fiche.stockage")}</dt>
+                <dd>
+                  {t("panneau.stockageValeur", {
+                    valeur: format.number(taille.valeur, {
+                      minimumFractionDigits: taille.decimales,
+                      maximumFractionDigits: taille.decimales,
+                    }),
+                    unite: t(`unites.${taille.unite}`),
+                  })}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="bloc adm-bloc" aria-labelledby="fiche-plafonds">
+            <header className="bloc__tete">
+              <div>
+                <h2 id="fiche-plafonds">{t("fiche.plafonds")}</h2>
+              </div>
+            </header>
+            <div className="adm-plafonds">
+              <div className={"adm-plafond" + (colisAuDessus ? " est-depasse" : "")}>
+                <p>
+                  <span>{t("fiche.plafondColis")}</span>
+                  <b>{t("fiche.surPlafond", { valeur: format.number(fiche.colisCeMois), plafond: format.number(seuils.colis) })}</b>
+                </p>
+                <i aria-hidden="true" style={{ "--k": Math.min(1, fiche.colisCeMois / Math.max(seuils.colis, 1)).toFixed(3) } as React.CSSProperties} />
+                {/* LE DÉPASSEMENT PORTE SON CHIFFRE : « dépassé de 640 » se vérifie. */}
+                {colisAuDessus ? <small>{t("fiche.depassementColis", { ecart: format.number(fiche.colisCeMois - seuils.colis) })}</small> : null}
+              </div>
+              {/* LE QUOTA À LA RÈGLE DU PLAN (200), lu là où il BLOQUE : à vie en
+                  gratuit, ce mois-ci en Pro. */}
+              {quota === null ? null : (
+                <div className={"adm-plafond" + (quota.utilise >= quota.plafond ? " est-plein" : "")}>
+                  <p>
+                    <span>{t(fiche.plan === "gratuit" ? "fiche.quotaAVie" : "fiche.quotaMoisPro")}</span>
+                    <b>{t("fiche.surPlafond", { valeur: format.number(quota.utilise), plafond: format.number(quota.plafond) })}</b>
+                  </p>
+                  <i aria-hidden="true" style={{ "--k": Math.min(1, quota.utilise / Math.max(quota.plafond, 1)).toFixed(3) } as React.CSSProperties} />
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        <div className="adm-rangee adm-rangee--2">
+          {/* CE QUE CE COMPTE A FAIT : agrégé par type et par jour, jamais un
+              contenu. L'accord est dans le libellé (« 1 commande créée »). */}
+          <section className="bloc adm-bloc" aria-labelledby="fiche-activite">
+            <header className="bloc__tete">
+              <div>
+                <h2 id="fiche-activite">{t("fiche.activite")}</h2>
+                <p className="adm-aide">{t("fiche.activiteAide")}</p>
+              </div>
+            </header>
+            {fiche.activite.length === 0 ? (
+              <p className="adm-texte pb-4">{t("fiche.activiteVide")}</p>
+            ) : (
+              <dl className="adm-dl">
+                {fiche.activite.map((a) => (
+                  <div key={a.type + a.jour}>
+                    <dt>{t.has(`fiche.evenement.${a.type}`) ? t(`fiche.evenement.${a.type}`, { n: a.n }) : `${format.number(a.n)} ${a.type}`}</dt>
+                    <dd className="font-normal text-[var(--corps)]">{format.dateTime(new Date(a.jour), { dateStyle: "medium" })}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </section>
+
+          <div className="adm-colonne">
+            {/* LES DEUX GESTES DE LA FICHE, tous deux avec motif, dans des
+                dialogues modaux. `key` : un motif tapé pour un compte ne survit
+                pas à une navigation vers un autre. */}
+            <TraductionsClient espaces={["admin.plan"]}>
+              <PlanCompte key={fiche.id} profilId={fiche.id} plan={plan.statut === "ok" ? plan.plan : null} motifMin={MOTIF_MIN} />
+            </TraductionsClient>
+            <TraductionsClient espaces={["admin.suspension"]}>
+              <DialogueSuspension key={fiche.id} profilId={fiche.id} email={fiche.email} suspendu={suspendu} motifMin={MOTIF_MIN} />
+            </TraductionsClient>
+            <section className="bloc adm-bloc" aria-labelledby="fiche-interdits">
+              <header className="bloc__tete">
+                <div>
+                  <h2 id="fiche-interdits">{t("fiche.interdits")}</h2>
+                </div>
+              </header>
+              <ul className="adm-interdits">
                 {(["suppression", "usurpation", "commandes"] as const).map((cle) => (
-                  <li key={cle} className="text-[13px] leading-[1.55] text-ds-texte-corps">
-                    <strong className="font-bold text-ds-texte-fort">{t(`fiche.interdit.${cle}.quoi`)}</strong>{" "}
-                    {t(`fiche.interdit.${cle}.pourquoi`)}
+                  <li key={cle}>
+                    <Ban aria-hidden="true" className="ic" />
+                    <p>
+                      <b>{t(`fiche.interdit.${cle}.quoi`)}</b>
+                      <span>{t(`fiche.interdit.${cle}.pourquoi`)}</span>
+                    </p>
                   </li>
                 ))}
               </ul>
             </section>
           </div>
         </div>
-      </div>
+      </article>
     </main>
   );
 }

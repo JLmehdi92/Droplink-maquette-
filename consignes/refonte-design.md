@@ -936,6 +936,63 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   erreur console, aucune violation CSP, aucune cible sous 44 px.
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
 
+### ▶️ 02/10/2026 — corrections de la relecture de l'étape 7 (session cloud)
+
+- **Vérification à deux facteurs sans JavaScript** : les six cases portent `name="code"`, l'action
+  recolle leurs valeurs (le champ caché rempli par React n'envoyait rien avant l'hydratation — un
+  compte administrateur ne pouvait plus se connecter). Case remplie remplacée à la frappe, code
+  collé réparti depuis la première case, retour arrière qui efface la case précédente.
+- **Onboarding** : l'aperçu parle la langue de la PAGE CLIENT (anglais, migration 205), plus celle
+  de l'écran ; « Retirer le logo » l'efface en base (`supprimerLogo`) avant de l'effacer à l'écran ;
+  une couleur saisie sans `#` est complétée, une couleur refusée est dite ; l'en-tête provisoire
+  « Votre boutique » est retiré (décision 24 : une page sans nom n'a pas d'en-tête).
+- **Nouveau mot de passe** : « Revenir à la connexion » est désormais une déconnexion (POST natif) —
+  le lien menait dans l'application avec la session de récupération ouverte.
+- Cible « Retirer le logo » à 44 px, nom de boutique long coupé proprement, animation du focus des
+  cases sous `prefers-reduced-motion`.
+- ⚠️ **Constaté dans le bac à sable, pas un défaut du produit** : la vérification TOTP par le
+  formulaire échoue ici (« Challenge and verify IP addresses mismatch » : la sortie réseau du
+  conteneur change d'adresse entre les deux appels). La mesure de l'administration a donc ouvert sa
+  session à deux facteurs par script, puis l'a posée en cookie.
+
+### ▶️ 02/10/2026 — étape 8 : l'administration, 10 écrans (session cloud)
+
+- **La coque** prend la colonne de l'espace vendeur (`CoqueTiroir`, `NavigationVendeur` avec les
+  icônes de la maquette) : pastille « Admin », encart « Tout est tracé », menu de compte, barre haute
+  avec la recherche de comptes (un GET natif vers la liste, dont la recherche était déjà auditée) et
+  le bandeau « ADMINISTRATION ». **La barre d'onglets du bas devient le tiroir** de la maquette : il
+  montre les huit entrées, ce qui levait l'objection faite à l'ancienne bande défilante.
+  **Non portés** : le lien « Espace vendeur » (aucun lien entre les deux surfaces, verrouillé) et le
+  thème sombre (§ 5). Un `template.tsx` pose `.entree-ecran`, comme chez le vendeur ; toujours aucun
+  `loading.tsx`.
+- **Briques communes** : en-tête à fil d'Ariane, encart de trace, tuiles (`.compteurs.adm-tuiles`),
+  anneau et légende, barres et courbes (`.adm-graphe`, info-bulle au survol, `<title>` par barre),
+  filtres en pastilles (des LIENS : le filtre reste en base et dans la trace), recherche,
+  avatar d'initiales, colis contre seuil, entrée de journal, et **un dialogue modal unique**
+  (`<dialog>` natif : piège de focus du navigateur, rien ne ferme pendant la requête) pour la
+  suspension, le plan, le blocage et la contestation.
+- **Vue d'ensemble** : ajout de l'alerte « comptes en doublon » de la maquette (un nombre, rien au
+  journal). **L'alerte « contestation » n'est pas portée** : aucune fonction ne compte les
+  contestations de la plateforme, il faudrait une migration. La courbe devient des barres ; le choix
+  7 / 30 / 90 jours reste.
+- **Surveillance** : la consommation du mois (interrogations, colis, abandons) que la base rendait et
+  que l'écran ne montrait pas ; la frise reste à 14 jours (donnée du produit).
+- **Statistiques** : vue globale au dessin de la maquette ; les vues filtrées gardent les séries
+  détaillées du produit (pages par jour, taux, délai, statuts, croissance mensuelle).
+- **Commandes, boutiques, comptes, doublons, fiche, journal, paramètres** : tableaux défilants de la
+  maquette (plus de cartes au téléphone), « Voir » vers la fiche du compte gardé partout, aucun
+  contenu de commande, « Aucun transporteur » seulement quand il n'y a pas de colis. Pas de badge
+  Pro dans la liste des comptes (la liste ne lit pas le plan ; il faudrait étendre la fonction).
+- **Ménage** : `navigation-admin`, `selecteur-admin`, `courbe-commandes`, `graphique-lignes`,
+  `graphique-barres` supprimés ; 18 chaînes mortes ; planchers des gardes Tailwind abaissés avec leur
+  raison (les écrans peignent par la feuille, mesurée par l'autre moitié de chaque garde).
+- **Mesuré** (compte administrateur de test à deux facteurs, base de tests) : les dix écrans à 1560 et
+  390 px, fr et zh-CN (en sur deux écrans), mouvement réduit, dialogue de suspension ouvert. Côte à
+  côte avec la maquette : même grammaire ; deux défauts trouvés et corrigés en cours de mesure
+  (largeur du contenu sans `template`, filtres de période qui débordaient au téléphone). Aucune
+  erreur console, aucune violation CSP, aucun débordement.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

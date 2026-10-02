@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { FormulaireNouveauMotDePasse } from "@/components/formulaire-nouveau-mot-de-passe";
 import { TraductionsClient } from "@/components/traductions-client";
-import Link from "next/link";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { LONGUEUR_MINIMALE } from "@/lib/auth/mot-de-passe";
 import { CoqueAccesSimple } from "@/components/acces/coque-acces-simple";
@@ -114,12 +113,17 @@ export default async function NouveauMotDePasse({
       <TraductionsClient espaces={["connexion", "inscription", "motDePasse"]}>
         <FormulaireNouveauMotDePasse locale={langue} longueurMinimale={LONGUEUR_MINIMALE} />
       </TraductionsClient>
-      <p className="acces__bascule">
-        <Link href={`/${langue}/connexion`} className="lien-texte lien-retour min-h-11">
+      {/* ⚠️ UNE DÉCONNEXION, PAS UN LIEN (relecture du 02/10/2026) : cet écran tient
+          une session de récupération, et `/connexion` renvoie toute session ouverte
+          vers les commandes — le lien menait donc DANS l'application, sans que le mot
+          de passe ait changé. Un POST natif vers la déconnexion ferme la session et
+          ramène à la connexion, script ou non. */}
+      <form className="acces__bascule" action={`/${langue}/deconnexion`} method="post">
+        <button type="submit" className="lien-texte lien-retour min-h-11">
           <ArrowLeft aria-hidden="true" className="ic" />
           {t("retourConnexion")}
-        </Link>
-      </p>
+        </button>
+      </form>
     </CoqueAccesSimple>
   );
 }

@@ -7,6 +7,7 @@ import { TraductionsClient } from "@/components/traductions-client";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { lireEtatOuDireLaPanne } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
+import { LANGUE_PAGE_CLIENT_PAR_DEFAUT } from "@/lib/boutique/reglages";
 import Link from "next/link";
 import { LogoDropLink } from "@/components/logo-droplink";
 
@@ -80,7 +81,14 @@ export default async function Bienvenue({
         </header>
         <main id="contenu" className="grid">
           <TraductionsClient espaces={["onboarding"]}>
-            <FormulaireOnboarding locale={langue} libelles={await libellesApercu(langue)} />
+            {/* L'APERÇU PARLE LA LANGUE DE LA PAGE CLIENT, pas celle de l'écran :
+                l'onboarding pose l'anglais par défaut (migration 205), et c'est
+                dans cette langue que le client la recevra. */}
+            <FormulaireOnboarding
+              locale={langue}
+              languePage={LANGUE_PAGE_CLIENT_PAR_DEFAUT}
+              libelles={await libellesApercu(LANGUE_PAGE_CLIENT_PAR_DEFAUT)}
+            />
           </TraductionsClient>
         </main>
       </div>

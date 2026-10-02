@@ -72,80 +72,49 @@ export function ReglageNombre({ reglage }: { reglage: ReglageVu }) {
   };
 
   return (
-    <div className="border-t border-ds-filet py-4">
-      <div className="flex items-center justify-between gap-6">
-        <div className="min-w-0">
-          <label
-            htmlFor={champ}
-            className="block text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
-          >
-            {t(`cles.${reglage.cle}.titre`)}
-          </label>
-          <p className="mt-[2px] text-[12px] leading-[15px] text-ds-texte-sourdine">
-            {t(`cles.${reglage.cle}.aide`)}
-          </p>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2">
-          {/* ⚠️ LA CLÉ CHANGE AVEC LA VALEUR RELUE, ce qui remonte le champ. Sans
-              cela, le champ garderait ce qui a été SAISI — et si quelqu'un
-              d'autre a écrit entre-temps, l'écran afficherait un nombre que la
-              base ne porte pas, juste après avoir dit « enregistré ». */}
-          <input
-            key={apres === null ? "serveur" : String(apres.valeur)}
-            ref={champRef}
-            id={champ}
-            name="valeur"
-            type="number"
-            inputMode="numeric"
-            required
-            min={reglage.min}
-            max={reglage.max}
-            step={1}
-            defaultValue={apres === null ? reglage.valeur : apres.valeur}
-            onChange={() => setModifie(true)}
-            className="h-[42px] min-h-11 w-[120px] rounded-ds-control border border-ds-filet-appuye bg-[#fafafc] px-[13px] text-right font-mono text-[14px] text-ds-texte-fort md:min-h-0"
-          />
-          {modifie ? (
-            <button
-              type="button"
-              disabled={enCours}
-              onClick={() => void enregistrer()}
-              className="h-12 shrink-0 rounded-ds-card bg-ds-accent px-[18px] text-[14px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol disabled:opacity-60"
-            >
-              {enCours ? t("enCours") : t("enregistrer")}
-            </button>
-          ) : null}
-        </div>
+    <form
+      className={"adm-reglage" + (etat.statut === "erreur" ? " est-erreur" : "")}
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (modifie && !enCours) void enregistrer();
+      }}
+    >
+      <div>
+        <label htmlFor={champ}>{t(`cles.${reglage.cle}.titre`)}</label>
+        <p>{t(`cles.${reglage.cle}.aide`)}</p>
+        {/* LES BORNES SONT ÉCRITES EN CLAIR : `min`/`max` ne sont qu'une aide du
+            navigateur, la règle est refaite côté serveur. */}
+        <small>{t("bornes", { min: reglage.min, max: reglage.max, defaut: reglage.defaut })}</small>
+        {/* TROIS ÉTATS : « jamais décidé » n'est pas « décidé à cette valeur ». */}
+        <small className="adm-origine">{ecrit ? origine : t("origine.jamaisDecide")}</small>
       </div>
-
-      {/* LES BORNES SONT ÉCRITES EN CLAIR, mais seulement pendant qu'on modifie :
-          `min`/`max` sont une aide du navigateur, jamais la règle — elle est
-          refaite côté serveur. Les afficher évite de découvrir la limite par un
-          refus ; les afficher en permanence noierait la prose de la planche. */}
-      {modifie ? (
-        <p className="mt-[6px] text-[12px] leading-[15px] text-ds-texte-sourdine">
-          {t("bornes", { min: reglage.min, max: reglage.max, defaut: reglage.defaut })}
-        </p>
-      ) : null}
-
-      {/* TROIS ÉTATS, PAS DEUX : « jamais décidé » n'est pas « décidé à cette
-          valeur ». Un défaut subi et un défaut choisi portent le même chiffre et
-          n'appellent pas la même décision. Rien ne s'affiche tant que personne
-          n'a décidé — c'est l'état du produit neuf, et celui de la planche. */}
-      {ecrit ? (
-        <p className="mt-[6px] text-[12px] leading-[15px] text-ds-texte-sourdine">
-          {origine}
-        </p>
-      ) : null}
-
-      <p aria-live="polite" className="text-[12px] leading-[16px] empty:hidden">
-        {etat.statut === "ok" ? (
-          <span className="mt-[6px] block text-ds-texte-fort">{t("fait")}</span>
-        ) : etat.statut === "erreur" ? (
-          <span className="mt-[6px] block text-ds-erreur-encre">{t(`erreur.${etat.motif}`)}</span>
-        ) : null}
+      <div className="adm-reglage__saisie">
+        {/* ⚠️ LA CLÉ CHANGE AVEC LA VALEUR RELUE, ce qui remonte le champ : sans
+            cela il garderait ce qui a été SAISI, et si quelqu'un d'autre a écrit
+            entre-temps l'écran afficherait un nombre que la base ne porte pas. */}
+        <input
+          key={apres === null ? "serveur" : String(apres.valeur)}
+          ref={champRef}
+          id={champ}
+          name="valeur"
+          type="number"
+          inputMode="numeric"
+          required
+          min={reglage.min}
+          max={reglage.max}
+          step={1}
+          defaultValue={apres === null ? reglage.valeur : apres.valeur}
+          onChange={() => setModifie(true)}
+        />
+        {/* ENREGISTRER N'EXISTE QUE SUR UNE VALEUR MODIFIÉE : grisé sinon. */}
+        <button type="submit" className="bouton-outil" disabled={!modifie || enCours}>
+          {enCours ? t("enCours") : t("enregistrer")}
+        </button>
+      </div>
+      <p className="adm-reglage__retour" role="status" aria-live="polite">
+        {etat.statut === "ok" ? t("fait") : etat.statut === "erreur" ? t(`erreur.${etat.motif}`) : null}
       </p>
-    </div>
+    </form>
   );
 }

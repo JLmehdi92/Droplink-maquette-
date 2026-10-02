@@ -1,17 +1,15 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarPlus, Check, Clock, PackageCheck, ShoppingCart, Truck } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { EncartTrace } from "@/components/admin/encart-trace";
 import { RechercheAdmin } from "@/components/admin/recherche-admin";
-import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
-import { TuileVolume } from "@/components/admin/tuile-volume";
+import { FiltresAdmin } from "@/components/admin/filtres-admin";
+import { TuileVolume, Tuiles } from "@/components/admin/tuile-volume";
 import { AnneauStatuts } from "@/components/admin/anneau-statuts";
 import { BlocageLien } from "@/components/admin/blocage-lien";
 import { ContestationLien } from "@/components/admin/contestation-lien";
 import { TraductionsClient } from "@/components/traductions-client";
-import { Store } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
@@ -26,7 +24,7 @@ import { lireCompteurs, lireRepartition } from "@/lib/audit/panneau";
 import { liensBloquesParmi } from "@/lib/audit/blocage-lien";
 import { contestationsEnAttenteParmi } from "@/lib/audit/contestation";
 import { MOTIF_MIN } from "@/lib/audit/suspension";
-import { lireTransporteur, monogramme } from "@/lib/tracking/transporteurs";
+import { lireTransporteur } from "@/lib/tracking/transporteurs";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
 
@@ -43,24 +41,6 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "admin" });
   return { title: t("commandes.titre"), robots: { index: false, follow: false } };
 }
-
-/*
- * LES GÉOMÉTRIES DES ÉCRANS DE LISTE DU KIT ADMIN — celles de `boutiques` et
- * `comptes`, relevées sur la page servie.
- */
-const PILULE =
-  "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] whitespace-nowrap";
-const EN_TETE_COLONNE =
-  "pb-3 pr-3 text-left text-[12.5px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-sourdine last:pr-0 last:text-right";
-/* SANS TAILLE NI GRAISSE : chaque colonne pose les siennes. Une taille commune
-   surchargée par une autre dans la même liste de classes se résout dans l'ordre
-   de la feuille, pas dans celui de l'attribut — la référence sortait en 400 et
-   les dates en 14, mesuré. */
-const CELLULE = "border-t border-ds-filet py-3 pr-3 leading-[18px] last:pr-0";
-const PANNEAU =
-  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
-const PANNEAU_TITRE = "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
-const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps";
 
 /*
  * LES CLÉS DE LIBELLÉ SONT ÉCRITES EN TOUTES LETTRES, jamais composées
@@ -86,12 +66,6 @@ const LIBELLE_FENETRE = {
  * LA TEINTE DE CHAQUE STATUT — celle de l'anneau, pour qu'une pilule et sa part
  * d'anneau se reconnaissent d'un coup d'œil.
  */
-const TEINTE_STATUT: Record<LigneCommandeAdmin["statut"], string> = {
-  preparation: "bg-ds-alerte-fond text-ds-alerte-encre",
-  expedie: "bg-ds-surface-teinte text-ds-accent-encre",
-  en_transit: "bg-ds-info-fond text-ds-info",
-  livre: "bg-ds-succes-fond text-ds-succes-encre",
-};
 
 /**
  * LES COMMANDES DE LA PLATEFORME — décision de Wassim du 14/09/2026.
@@ -196,381 +170,180 @@ export default async function AdminCommandes({
   const filtre = parametres.statut !== "" || parametres.jours !== "" || parametres.q !== "";
 
   /** Le transporteur nommé par le catalogue, ou rien : un code inconnu est omis. */
-  const transporteur = (code: number | null) => {
-    const c = lireTransporteur(code);
-    return c === null ? null : { nom: c.nom, monogramme: monogramme(c.nom) };
-  };
-
-  const pastilleBoutique = (l: LigneCommandeAdmin, taille: string) => (
-    <span
-      aria-hidden="true"
-      className={
-        "flex shrink-0 items-center justify-center rounded-ds-pill " +
-        taille +
-        (l.boutiqueNom === null ? " bg-ds-surface-creux" : "")
-      }
-      {...(l.boutiqueNom === null ? {} : { style: { backgroundColor: l.accent } })}
-    >
-      {l.boutiqueNom === null ? (
-        <Store aria-hidden="true" size={14} strokeWidth={1.9} className="text-ds-texte-tenu" />
-      ) : null}
-    </span>
-  );
-
-  const nomBoutique = (l: LigneCommandeAdmin, classes: string) =>
-    l.boutiqueNom === null ? (
-      <span className={classes + " italic text-ds-texte-sourdine"}>{t("commandes.nonConfiguree")}</span>
-    ) : (
-      <span className={classes + " text-ds-texte-corps"}>{l.boutiqueNom}</span>
-    );
-
-  /* LE LIEN BLOQUÉ S AJOUTE AU STATUT, il ne le remplace pas : c est un état du LIEN,
-     la commande garde le sien. */
-  const pilule = (l: LigneCommandeAdmin) => (
-    <span className="inline-flex flex-wrap items-center gap-1.5">
-      <span className={PILULE + " " + TEINTE_STATUT[l.statut]}>{t(LIBELLE_STATUT[l.statut])}</span>
-      {bloque(l) === true ? (
-        <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>{t("commandes.lienBloque")}</span>
-      ) : null}
-      {bloque(l) === true && conteste(l) ? (
-        <span className={PILULE + " bg-ds-alerte-fond text-ds-alerte-encre"}>{t("contestation.pastille")}</span>
-      ) : null}
-    </span>
-  );
-  const geste = (l: LigneCommandeAdmin, carte: boolean) => {
-    const etat = bloque(l);
-    if (etat === true && conteste(l)) {
-      return <ContestationLien commandeId={l.id} reference={l.reference} motifMin={MOTIF_MIN} carte={carte} />;
-    }
-    return etat === null ? null : (
-      <BlocageLien commandeId={l.id} reference={l.reference} bloque={etat} motifMin={MOTIF_MIN} carte={carte} />
-    );
-  };
-
+  /* LE LIEN BLOQUÉ S'AJOUTE À LA RÉFÉRENCE, il ne remplace pas le statut : c'est
+     un état du LIEN, la commande garde le sien. Si la lecture des blocages a
+     échoué, ni pastille ni bouton (contrainte 8). */
   const date = (l: LigneCommandeAdmin): string =>
-    format.dateTime(new Date(l.creeLe), { dateStyle: "short", timeStyle: "short" });
+    format.dateTime(new Date(l.creeLe), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const geste = (l: LigneCommandeAdmin) => {
+    const etat = bloque(l);
+    return etat === null ? null : <BlocageLien commandeId={l.id} reference={l.reference} bloque={etat} motifMin={MOTIF_MIN} />;
+  };
 
   return (
-    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
-      <EnTeteAdmin
-        titre={t("commandes.titre")}
-        sousTitre={t("commandes.sousTitreListe")}
-        sousTitreAuBureauSeulement
-      />
+    <main id="contenu" className="tableau adm">
+      <EnTeteAdmin titre={t("commandes.titre")} sousTitre={t("commandes.sousTitreListe")} sousTitreAuBureauSeulement />
+      <EncartTrace texte={t("commandes.trace")} />
+      {repartition === null ? <p className="adm-aide">{t("panneau.compteursIndisponibles")}</p> : null}
 
-      <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-[18px] md:px-0 md:py-0">
-        <EncartTrace texte={t("commandes.trace")} />
+      {/* SIX TUILES ET AUCUNE N'EST INVENTÉE : les quatre étapes de la frise
+          (décision 4), le total, et les commandes créées ce mois-ci. */}
+      <Tuiles etiquette={t("commandes.titre")} colonnes={6}>
+        <TuileVolume libelle={t("commandes.tuileTotal")} valeur={nombre(repartition?.total)} valeurEnSourdine={repartition === null} complement={t("commandes.tuileTotalAide")} />
+        <TuileVolume
+          libelle={t("commandes.tuilePreparation")}
+          valeur={nombre(repartition?.preparation)}
+          valeurEnSourdine={repartition === null}
+          complement={repartition === null ? undefined : part(repartition.preparation)}
+        />
+        <TuileVolume
+          libelle={t("commandes.tuileExpediees")}
+          valeur={nombre(repartition?.expedie)}
+          valeurEnSourdine={repartition === null}
+          complement={repartition === null ? undefined : part(repartition.expedie)}
+        />
+        <TuileVolume
+          libelle={t("commandes.tuileEnTransit")}
+          valeur={nombre(repartition?.enTransit)}
+          valeurEnSourdine={repartition === null}
+          complement={repartition === null ? undefined : part(repartition.enTransit)}
+        />
+        <TuileVolume
+          libelle={t("commandes.tuileLivrees")}
+          valeur={nombre(repartition?.livre)}
+          valeurEnSourdine={repartition === null}
+          complement={repartition === null ? undefined : part(repartition.livre)}
+        />
+        <TuileVolume libelle={t("commandes.tuileCeMois")} valeur={format.number(compteurs.commandesCreeesCeMois)} complement={t("commandes.tuileCeMoisAide")} />
+      </Tuiles>
 
-        {repartition === null ? (
-          <p className="text-ds-texte-corps">{t("panneau.compteursIndisponibles")}</p>
-        ) : null}
-
-        {/* --- LES VOLUMES ---
-
-            SIX TUILES, COMME LE KIT, ET AUCUNE N'EST INVENTÉE. Ses « Problèmes »
-            et « Annulées » n'existent pas — la décision 4 arrête la frise à
-            quatre étapes — : leurs places portent « Expédiées », la quatrième
-            étape que le kit ne compte pas, et les commandes créées ce mois-ci,
-            le compteur que la vue d'ensemble affiche déjà. Aucun badge
-            « +12 % » : aucun compteur ne porte son historique. */}
-        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
-            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
-            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
-            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
-        {/* ⚠️ SIX TUILES PAR RANGÉE À PARTIR DE `2xl` : à 1 280 px, six tuiles
-            laissaient 56 px au texte, et « Total commandes » SORTAIT de sa tuile
-            (balayage du 18/09/2026). Trois entre les deux. */}
-        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-3 xl:gap-3.5 2xl:grid-cols-6">
-          <TuileVolume
-            icone={ShoppingCart}
-            compacte
-            libelle={t("commandes.tuileTotal")}
-            valeur={nombre(repartition?.total)}
-            valeurEnSourdine={repartition === null}
-            complement={t("commandes.tuileTotalAide")}
-          />
-          <TuileVolume
-            icone={Truck}
-            compacte
-            teinte="info"
-            libelle={t("commandes.tuileEnTransit")}
-            valeur={nombre(repartition?.enTransit)}
-            valeurEnSourdine={repartition === null}
-            complement={repartition === null ? null : part(repartition.enTransit)}
-          />
-          <TuileVolume
-            icone={Check}
-            compacte
-            teinte="succes"
-            libelle={t("commandes.tuileLivrees")}
-            valeur={nombre(repartition?.livre)}
-            valeurEnSourdine={repartition === null}
-            complement={repartition === null ? null : part(repartition.livre)}
-          />
-          <TuileVolume
-            icone={Clock}
-            compacte
-            teinte="alerte"
-            libelle={t("commandes.tuilePreparation")}
-            valeur={nombre(repartition?.preparation)}
-            valeurEnSourdine={repartition === null}
-            complement={repartition === null ? null : part(repartition.preparation)}
-          />
-          <TuileVolume
-            icone={PackageCheck}
-            compacte
-            libelle={t("commandes.tuileExpediees")}
-            valeur={nombre(repartition?.expedie)}
-            valeurEnSourdine={repartition === null}
-            complement={repartition === null ? null : part(repartition.expedie)}
-          />
-          <TuileVolume
-            icone={CalendarPlus}
-            compacte
-            teinte="info"
-            libelle={t("commandes.tuileCeMois")}
-            valeur={format.number(compteurs.commandesCreeesCeMois)}
-            complement={t("commandes.tuileCeMoisAide")}
-          />
-        </div>
-
-        {/* --- LA BARRE DE FILTRES ---
-
-            Recherche, statut, date et réinitialisation, comme le kit. Ses
-            « transporteurs » et « boutiques » n'y sont pas : une liste de toutes
-            les boutiques ne tient pas dans un menu à trois mille entrées — la
-            recherche les trouve par leur nom —, et les codes de transporteur ne
-            forment pas un inventaire fermé qu'un menu puisse énumérer. */}
-        <div className="flex flex-wrap items-center gap-3 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3.5 shadow-ds-card">
-          <div className="min-w-[240px] flex-1 md:max-w-[320px]">
+      <div className="adm-rangee adm-rangee--pleine">
+        <section className="bloc adm-bloc" aria-labelledby="adm-liste">
+          <header className="bloc__tete">
+            <div>
+              <h2 id="adm-liste">{t("commandes.liste")}</h2>
+              {total === null ? null : <p className="adm-aide">{t("commandes.listeTotal", { total })}</p>}
+            </div>
+          </header>
+          {/* Statut et fenêtre, appliqués EN BASE, critères tracés. Les
+              « transporteurs » et « boutiques » ne forment pas un inventaire fermé
+              qu'un filtre puisse énumérer : la recherche les trouve. */}
+          <div className="adm-outils">
+            <FiltresAdmin
+              etiquette={t("commandes.filtreStatut")}
+              courant={parametres.statut}
+              options={(["", ...STATUTS_FILTRABLES] as const).map((statut) => ({ valeur: statut, libelle: t(LIBELLE_STATUT[statut]), href: lien({ statut }) }))}
+            />
+            <FiltresAdmin
+              etiquette={t("commandes.filtreJours")}
+              courant={parametres.jours}
+              options={(["", ...FENETRES] as const).map((jours) => ({ valeur: jours, libelle: t(LIBELLE_FENETRE[jours]), href: lien({ jours }) }))}
+            />
             <RechercheAdmin
               action={base}
               valeur={parametres.q}
               etiquette={t("commandes.recherche")}
               exemple={t("commandes.recherchePlaceholder")}
               chercher={t("commandes.chercher")}
+              garder={{
+                ...(parametres.statut === "" ? {} : { statut: parametres.statut }),
+                ...(parametres.jours === "" ? {} : { jours: parametres.jours }),
+              }}
             />
           </div>
-          <SelecteurAdmin
-            etiquette={t("commandes.filtreStatut")}
-            courant={parametres.statut}
-            options={(["", ...STATUTS_FILTRABLES] as const).map((statut) => ({
-              valeur: statut,
-              libelle: t(LIBELLE_STATUT[statut]),
-              href: lien({ statut }),
-            }))}
-          />
-          <SelecteurAdmin
-            etiquette={t("commandes.filtreJours")}
-            courant={parametres.jours}
-            options={(["", ...FENETRES] as const).map((jours) => ({
-              valeur: jours,
-              libelle: t(LIBELLE_FENETRE[jours]),
-              href: lien({ jours }),
-            }))}
-          />
-          <Link prefetch={false}
-            href={base}
-            className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
-          >
-            {t("commandes.reinitialiser")}
-          </Link>
-        </div>
 
-        {/* --- LA LISTE, ET L'ANNEAU DE STATUT À SA DROITE ---
-
-            ⚠️ LE PANNEAU « ACTIVITÉ RÉCENTE » DU KIT N'EST PAS PORTÉ : il nomme
-            des commandes et des vendeurs tiers qu'on n'a pas demandé à voir, à
-            chaque ouverture — la même raison que sur les boutiques. */}
-        <div className="grid gap-2.5 md:gap-[18px] 2xl:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] 2xl:items-start">
-          <section className={PANNEAU + " xl:px-0 xl:pb-0"}>
-            <header className="mb-[18px] xl:px-[22px]">
-              <h2 className={PANNEAU_TITRE}>{t("commandes.liste")}</h2>
-              {total === null ? null : (
-                <p className={PANNEAU_AIDE}>{t("commandes.listeTotal", { total })}</p>
-              )}
-            </header>
-
-            {page.lignes.length === 0 ? (
-              /* DEUX ÉTATS VIDES DISTINCTS : annoncer « aucune commande » à qui
-                 vient de filtrer une plateforme pleine est une perte de
-                 confiance immédiate. */
-              <p className="py-6 text-center text-ds-texte-corps">
-                {filtre ? t("commandes.videFiltre") : t("commandes.videTout")}
-              </p>
-            ) : (
-              <TraductionsClient espaces={["admin.blocage", "admin.contestation"]}>
-                {/* --- LE TABLEAU, au bureau --- */}
-                <div className="hidden xl:block">
-                  <table className="w-full table-fixed border-collapse">
-                    <colgroup>
-                      <col className="w-[92px]" />
-                      <col />
-                      <col />
-                      <col className="w-[118px]" />
-                      <col />
-                      <col className="w-[128px]" />
-                      <col className="w-[116px]" />
-                    </colgroup>
-                    <thead>
-                      <tr>
-                        <th scope="col" className={EN_TETE_COLONNE + " pl-[18px]"}>
-                          {t("commandes.colonnes.reference")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("commandes.colonnes.compte")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("commandes.colonnes.boutique")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("commandes.colonnes.statut")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("commandes.colonnes.transporteur")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("commandes.colonnes.date")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE + " pr-[18px] last:pr-[18px]"}>
-                          {t("commandes.colonnes.actions")}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {page.lignes.map((l) => {
-                        const c = transporteur(l.transporteur);
-                        return (
-                          <tr key={l.id}>
-                            <td className={CELLULE + " pl-[18px] text-[14px] font-bold whitespace-nowrap text-ds-texte-fort"}>
-                              {l.reference}
-                            </td>
-                            <td className={CELLULE}>
-                              <span className="block truncate text-[14px] text-ds-texte-corps">
-                                {l.proprietaireEmail}
+          {page.lignes.length === 0 ? (
+            <p className="adm-vide">{filtre ? t("commandes.videFiltre") : t("commandes.videTout")}</p>
+          ) : (
+            <TraductionsClient espaces={["admin.blocage", "admin.contestation"]}>
+              {/* AUCUN CONTENU : ni client, ni référence produit, ni lien. « Voir »
+                  mène à la fiche du COMPTE, jamais à la commande. */}
+              <div className="adm-defil">
+                <table className="adm-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">{t("commandes.colonnes.reference")}</th>
+                      <th scope="col">{t("commandes.colonnes.compte")}</th>
+                      <th scope="col">{t("commandes.colonnes.boutique")}</th>
+                      <th scope="col">{t("commandes.colonnes.statut")}</th>
+                      <th scope="col">{t("commandes.colonnes.transporteur")}</th>
+                      <th scope="col">{t("commandes.colonnes.date")}</th>
+                      <th scope="col">
+                        <span className="sr">{t("commandes.colonnes.actions")}</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {page.lignes.map((l) => {
+                      const c = lireTransporteur(l.transporteur);
+                      return (
+                        <tr key={l.id}>
+                          <td className="adm-ref">
+                            {l.reference}
+                            {bloque(l) === true ? (
+                              <span className="adm-badge" data-ton="erreur">
+                                <i aria-hidden="true" />
+                                {t("commandes.lienBloque")}
                               </span>
-                            </td>
-                            <td className={CELLULE}>
-                              <span className="flex min-w-0 items-center gap-2.5">
-                                {pastilleBoutique(l, "h-7 w-7")}
-                                {nomBoutique(l, "truncate text-[14px]")}
-                              </span>
-                            </td>
-                            <td className={CELLULE}>{pilule(l)}</td>
-                            <td className={CELLULE}>
-                              {c === null ? null : (
-                                <span className="flex min-w-0 items-center gap-2.5">
-                                  <span
-                                    className={
-                                      "inline-flex h-7 w-7 flex-none items-center justify-center rounded-ds-sm text-[10.5px] font-extrabold tracking-[-0.02em] " +
-                                      (c.monogramme.fond === null
-                                        ? "bg-ds-surface-creux text-ds-texte-corps"
-                                        : "")
-                                    }
-                                    style={
-                                      c.monogramme.fond === null
-                                        ? undefined
-                                        : {
-                                            background: c.monogramme.fond,
-                                            color: c.monogramme.encre ?? undefined,
-                                          }
-                                    }
-                                  >
-                                    {c.monogramme.court}
-                                  </span>
-                                  <span className="truncate text-[13.5px] text-ds-texte-corps">{c.nom}</span>
-                                </span>
-                              )}
-                            </td>
-                            <td className={CELLULE}>
-                              <span className="text-[13.5px] leading-[normal] whitespace-nowrap text-ds-texte-sourdine">
-                                {date(l)}
-                              </span>
-                            </td>
-                            <td className={CELLULE + " pr-[18px] text-right last:pr-[18px]"}>
-                              <span className="inline-flex items-center gap-2">
-                              <Link prefetch={false}
-                                href={`/${langue}/admin/comptes/${l.proprietaireId}`}
-                                aria-label={t("commandes.voirLong", { email: l.proprietaireEmail })}
-                                className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
-                              >
+                            ) : null}
+                            {/* LA CONTESTATION EN ATTENTE s'ouvre depuis sa pastille ;
+                                sa lecture est tracée au geste, jamais au rendu. */}
+                            {bloque(l) === true && conteste(l) ? <ContestationLien commandeId={l.id} reference={l.reference} motifMin={MOTIF_MIN} /> : null}
+                          </td>
+                          <td className="adm-email">{l.proprietaireEmail}</td>
+                          <td>{l.boutiqueNom === null ? <span className="adm-sourdine">{t("commandes.nonConfiguree")}</span> : l.boutiqueNom}</td>
+                          <td>
+                            <span className="adm-badge" data-cmd={l.statut}>
+                              <i aria-hidden="true" />
+                              {t(LIBELLE_STATUT[l.statut])}
+                            </span>
+                          </td>
+                          {/* SANS COLIS, « Aucun transporteur » est un fait. Un code
+                              présent mais inconnu, lui, ne se remplace par rien : un
+                              repli deviné vaudrait moins que rien. */}
+                          <td>{l.transporteur === null ? <span className="adm-sourdine">{t("commandes.aucunTransporteur")}</span> : c === null ? null : c.nom}</td>
+                          <td className="adm-date">{date(l)}</td>
+                          <td>
+                            <div className="adm-actions">
+                              <Link prefetch={false} className="bouton-outil" href={`/${langue}/admin/comptes/${l.proprietaireId}`} aria-label={t("commandes.voirLong", { email: l.proprietaireEmail })}>
                                 {t("commandes.voir")}
                               </Link>
-                              {geste(l, false)}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                              {geste(l)}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </TraductionsClient>
+          )}
 
-                {/* --- LES CARTES, sous `xl` --- */}
-                <ul className="flex flex-col gap-2.5 xl:hidden">
-                  {page.lignes.map((l) => {
-                    const c = transporteur(l.transporteur);
-                    return (
-                      <li
-                        key={l.id}
-                        className="min-w-0 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-4"
-                      >
-                        <div className="mb-3 flex items-center justify-between gap-2.5">
-                          <span className="text-[15px] leading-[19px] font-bold text-ds-texte-fort">
-                            {l.reference}
-                          </span>
-                          {pilule(l)}
-                        </div>
-                        <div className="mb-3 flex min-w-0 items-center gap-2.5">
-                          {pastilleBoutique(l, "h-8 w-8")}
-                          <div className="min-w-0">
-                            {nomBoutique(l, "block truncate text-[14px] leading-[18px] font-semibold")}
-                            <span className="block truncate text-[12px] leading-[15px] text-ds-texte-sourdine">
-                              {l.proprietaireEmail}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between gap-2.5 border-t border-ds-filet pt-3">
-                          <span className="min-w-0 truncate text-[12.5px] text-ds-texte-sourdine">
-                            {c === null ? date(l) : `${c.nom} · ${date(l)}`}
-                          </span>
-                          <Link prefetch={false}
-                            href={`/${langue}/admin/comptes/${l.proprietaireId}`}
-                            aria-label={t("commandes.voirLong", { email: l.proprietaireEmail })}
-                            className="inline-flex min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold text-ds-texte-fort"
-                          >
-                            {t("commandes.voir")}
-                          </Link>
-                          {geste(l, true)}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </TraductionsClient>
-            )}
-
-            {lienSuivant === null ? null : (
-              <LienEcran prefetch={false}
-                href={lienSuivant}
-                className="mx-auto my-4 inline-flex min-h-11 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-6 text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
-              >
+          {lienSuivant === null ? null : (
+            <footer className="adm-pied">
+              <span>{t("commandes.surTotal", { affichees: page.lignes.length, total: total ?? page.lignes.length })}</span>
+              <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
                 {t("commandes.pageSuivante")}
               </LienEcran>
-            )}
-          </section>
+            </footer>
+          )}
+        </section>
 
-          <section className={PANNEAU}>
-            <header className="mb-[18px]">
-              <h2 className={PANNEAU_TITRE}>{t("commandes.repartition")}</h2>
-            </header>
-            {repartition === null ? (
-              <p className="text-[14px] text-ds-texte-corps">{t("panneau.statutsIndisponible")}</p>
-            ) : (
-              <AnneauStatuts repartition={repartition} variante="commandes" />
-            )}
-          </section>
-        </div>
+        <section className="bloc adm-bloc adm-bloc--anneau" aria-labelledby="adm-repartition">
+          <header className="bloc__tete">
+            <div>
+              <h2 id="adm-repartition">{t("commandes.repartition")}</h2>
+            </div>
+          </header>
+          {repartition === null ? (
+            <p className="adm-texte pb-4">{t("panneau.statutsIndisponible")}</p>
+          ) : repartition.total === 0 ? (
+            <p className="adm-texte pb-4">{t("panneau.aucuneCommande")}</p>
+          ) : (
+            <AnneauStatuts repartition={repartition} />
+          )}
+        </section>
       </div>
     </main>
   );

@@ -10,9 +10,10 @@ import { empreinteAdmin } from "@/lib/audit/empreinte-admin";
 import { listerComptes, ParametresComptes, type LigneCompte } from "@/lib/audit/comptes";
 import { lireCompteurs, lireInscriptionsRecentes, lireSeuils } from "@/lib/audit/panneau";
 import { Anneau } from "@/components/admin/anneau";
-import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
-import { TuileVolume } from "@/components/admin/tuile-volume";
-import { ArrowRight, UserCheck, UserPlus, UserX, Users } from "lucide-react";
+import { FiltresAdmin } from "@/components/admin/filtres-admin";
+import { TuileVolume, Tuiles } from "@/components/admin/tuile-volume";
+import { AvatarCompte, ColisSeuil } from "@/components/admin/briques-admin";
+import { ArrowRight, Users } from "lucide-react";
 import { compterDoublons } from "@/lib/audit/doublons";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
@@ -32,31 +33,6 @@ export async function generateMetadata({
   return { title: t("comptes.titre"), robots: { index: false, follow: false } };
 }
 
-/*
- * GÉOMÉTRIES RELEVÉES SUR LE KIT SERVI — `AdminUsers`.
- *
- * En-tête de colonne : 12,5/600 en sourdine, 12 px de retrait sous la ligne, SANS
- * majuscules ni interlettrage. Les majuscules étaient une habitude de l'ancien
- * canevas ; le kit écrit ses entêtes en casse normale, et c'est ce qui les
- * distingue d'un eyebrow de section.
- *
- * Pilule d'état : 11,5/700 à l'interlettrage -0,02em, remplissage 6/11,
- * hauteur 26.
- */
-const EN_TETE_COLONNE =
-  "pb-3 text-left text-[12.5px] leading-[normal] font-semibold text-ds-texte-sourdine";
-const CELLULE = "border-t border-ds-filet py-3.5 text-[14px] leading-[18px] font-normal";
-const PILULE =
-  "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[-0.02em]";
-const PILULE_NEUTRE = PILULE + " bg-ds-surface-creux text-ds-texte-corps";
-
-/* Le panneau du kit admin — les mêmes valeurs que sur la vue d'ensemble. */
-const PANNEAU =
-  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
-const PANNEAU_TITRE = "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
-const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps";
-
-/** La fenêtre de la tuile « nouveaux inscrits », celle de la courbe du panneau. */
 const JOURS_INSCRIPTIONS = 30;
 
 /**
@@ -158,271 +134,131 @@ export default async function AdminComptes({
         }).toString()}`;
 
   /** Le nom de boutique, ou le fait qu'il n'y en ait pas — jamais une invention. */
-  const nom = (l: LigneCompte, style: string): React.ReactNode =>
-    l.boutique === null ? (
-      <span className={style + " italic text-ds-texte-sourdine"}>{t("comptes.sansNom")}</span>
-    ) : (
-      <span className={style}>{l.boutique}</span>
-    );
-
-  /** La pilule d'état, la seule chose de la ligne qui se lise sans lire. */
-  const pilluleEtat = (l: LigneCompte) => (
-    <span
-      className={
-        PILULE +
-        " shrink-0 " +
-        (suspendu(l) ? "bg-ds-erreur-fond text-ds-erreur-encre" : "bg-ds-succes-fond text-ds-succes-encre")
-      }
-    >
-      {/* ⚠️ LA PASTILLE DE COULEUR A DISPARU, ET LE KIT N'EN A JAMAIS POSÉ.
-          Elle doublait le mot qui suit — « Actif » dit déjà ce qu'elle disait —
-          et elle élargissait la pilule de douze pixels, mesurés contre la
-          référence. Ce qui reste de son intention est intact : la pilule se lit
-          sans lire, par sa couleur de fond. */}
-      {t(`comptes.statuts.${l.statut}`)}
-    </span>
-  );
-
   const typeLisible = (l: LigneCompte): string =>
-    // UNE INFORMATION ABSENTE EST NOMMÉE, pas remplacée. Le type de compte est
-    // nullable SANS DÉFAUT pour que le manque soit visible : un défaut aurait
-    // classé tous les fournisseurs comme revendeurs et faussé la segmentation
-    // d'usage, qui est le livrable réel de la phase de validation.
     l.typeDeCompte === null ? t("comptes.typeNonDeclare") : t(`comptes.type.${l.typeDeCompte}`);
 
   return (
-    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
-      <EnTeteAdmin
-        titre={t("comptes.titre")}
-        // LE DÉCOMPTE A QUITTÉ LE SOUS-TITRE POUR LES TUILES, qui le disent
-        // mieux : quatre chiffres nommés valent une phrase qui en porte deux.
-        // Ce qui reste ici est ce que le kit écrit — à quoi sert l'écran.
-        sousTitre={t("comptes.sousTitreListe")}
-        // L'encart violet répète l'avertissement trois centimètres plus bas. Au
-        // téléphone, le redire dans le noir pousse le champ de recherche hors de
-        // l'écran d'ouverture, qui est exactement ce qu'on vient y faire.
-        sousTitreAuBureauSeulement
-      />
+    <main id="contenu" className="tableau adm">
+      <EnTeteAdmin titre={t("comptes.titre")} sousTitre={t("comptes.sousTitreListe")} sousTitreAuBureauSeulement />
+      <EncartTrace texte={t("comptes.trace")} />
 
-      <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-[18px] md:px-0 md:py-0">
-        <EncartTrace texte={t("comptes.trace")} />
+      {/* QUATRE TUILES, PAS SIX : le kit compte aussi les plans, que la liste ne
+          lit pas (le plan ne se lit que sur la fiche). « Nouveaux inscrits »
+          dit sa FENÊTRE plutôt qu'un écart calculé sur rien. */}
+      <Tuiles etiquette={t("comptes.titre")} colonnes={4}>
+        <TuileVolume
+          libelle={t("comptes.tuileTotal")}
+          valeur={format.number(compteurs.comptes)}
+          complement={t("comptes.tuileTotalAide", { sansType: format.number(compteurs.comptesSansType) })}
+        />
+        <TuileVolume
+          libelle={t("comptes.tuileNouveaux")}
+          valeurEnSourdine={nouveaux === null}
+          valeur={nouveaux === null ? t("panneau.stockageIndisponible") : format.number(nouveaux)}
+          complement={t("comptes.surJours", { jours: JOURS_INSCRIPTIONS })}
+        />
+        <TuileVolume
+          libelle={t("comptes.tuileActifs")}
+          valeur={format.number(compteurs.comptesActifs)}
+          complement={t("comptes.partDuTotal", { part: part(compteurs.comptesActifs) })}
+        />
+        <TuileVolume
+          ton={compteurs.comptesSuspendus > 0 ? "erreur" : undefined}
+          libelle={t("comptes.tuileSuspendus")}
+          valeur={format.number(compteurs.comptesSuspendus)}
+          complement={t("comptes.partDuTotal", { part: part(compteurs.comptesSuspendus) })}
+        />
+      </Tuiles>
 
-        {/* --- LES VOLUMES, en quatre tuiles ---
-
-            Le kit en pose SIX : deux d'entre elles comptent les plans Pro et
-            Gratuit, et aucune colonne de plan n'existe — la contrainte n°1
-            interdit d'en créer une. Les plans peuvent être AFFICHÉS sur la
-            tarification ; ils ne sont jamais APPLIQUÉS, donc il n'y a rien à
-            compter. Les quatre autres sont exactement les nôtres. */}
-        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
-            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
-            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
-            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
-        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:gap-[18px]">
-          <TuileVolume
-            icone={Users}
-            compacte
-            libelle={t("comptes.tuileTotal")}
-            valeur={format.number(compteurs.comptes)}
-            /* LE CHIFFRE QUI INFORME SOUS UN TOTAL : combien d'inscrits n'ont
-               jamais fini leur onboarding. `account_type` est nullable SANS
-               DÉFAUT pour que ce manque soit visible — un défaut aurait classé
-               tous les fournisseurs comme revendeurs et faussé la segmentation
-               d'usage, qui est le livrable réel de la phase de validation. Les
-               suspendus, eux, ont leur propre tuile. */
-            complement={t("comptes.tuileTotalAide", {
-              sansType: format.number(compteurs.comptesSansType),
-            })}
-          />
-          {/* « vs période précédente » du kit est remplacé par la FENÊTRE. Aucun
-              compteur du produit ne porte son historique ; un écart calculé sur
-              rien aurait la FORME d'une mesure. Dire sur quels jours on compte
-              est la seule chose vraie qu'on puisse écrire là. */}
-          <TuileVolume
-            icone={UserPlus}
-            compacte
-            teinte="info"
-            libelle={t("comptes.tuileNouveaux")}
-            valeurEnSourdine={nouveaux === null}
-            valeur={
-              nouveaux === null
-                ? t("panneau.stockageIndisponible")
-                : format.number(nouveaux)
-            }
-            complement={t("comptes.surJours", { jours: JOURS_INSCRIPTIONS })}
-          />
-          <TuileVolume
-            icone={UserCheck}
-            compacte
-            teinte="succes"
-            libelle={t("comptes.tuileActifs")}
-            valeur={format.number(compteurs.comptesActifs)}
-            complement={t("comptes.partDuTotal", { part: part(compteurs.comptesActifs) })}
-          />
-          <TuileVolume
-            icone={UserX}
-            compacte
-            teinte="alerte"
-            libelle={t("comptes.tuileSuspendus")}
-            valeur={format.number(compteurs.comptesSuspendus)}
-            complement={t("comptes.partDuTotal", { part: part(compteurs.comptesSuspendus) })}
-          />
-        </div>
-
-        {/* --- LA BARRE DE FILTRES ---
-
-            ⚠️ UN SEUL DES QUATRE FILTRES DU KIT EST PORTÉ, ET C'EST CELUI QUE LA
-            BASE SAIT APPLIQUER. Les plans n'existent pas ; la « boutique » n'est
-            pas une dimension distincte du compte, un compte en ayant exactement
-            une ; et une plage de dates ne se combine pas avec une pagination PAR
-            CURSEUR sans changer le contrat de la fonction. Le statut, lui, vit
-            dans `profiles` depuis la première migration — et c'est le filtre pour
-            lequel on ouvre cet écran.
-
-            LE CRITÈRE ENTRE DANS LA TRACE : la fonction en base l'écrit dans la
-            charge utile de l'entrée d'audit, sans quoi le journal ne pourrait
-            pas dire ce qui a réellement été consulté. */}
-        <div className="flex flex-wrap items-center gap-3 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3.5 shadow-ds-card">
-          <div className="min-w-[240px] flex-1 md:max-w-[320px]">
+      <div className="adm-rangee adm-rangee--liste">
+        <section className="bloc adm-bloc" aria-labelledby="adm-liste">
+          <header className="bloc__tete">
+            <div>
+              <h2 id="adm-liste">{t("comptes.liste")}</h2>
+              <p className="adm-aide">{t("comptes.listeTotal", { total: compteurs.comptes })}</p>
+            </div>
+          </header>
+          {/* LE STATUT EST LE SEUL FILTRE QUE LA BASE SAIT APPLIQUER, et le critère
+              entre dans la trace : la fonction l'écrit dans l'entrée d'audit. */}
+          <div className="adm-outils">
+            <FiltresAdmin
+              etiquette={t("comptes.filtreStatut")}
+              courant={parametres.statut}
+              options={[
+                { valeur: "tous", libelle: t("comptes.statutTous"), href: lienFiltre("tous") },
+                { valeur: "active", libelle: t("comptes.statuts.active"), href: lienFiltre("active") },
+                { valeur: "suspended", libelle: t("comptes.statuts.suspended"), href: lienFiltre("suspended") },
+              ]}
+            />
             <RechercheAdmin
               action={base}
               valeur={parametres.q}
               etiquette={t("comptes.recherche")}
               exemple={t("comptes.recherchePlaceholder")}
               chercher={t("comptes.chercher")}
+              garder={parametres.statut === "tous" ? {} : { statut: parametres.statut }}
             />
           </div>
-          <SelecteurAdmin
-            etiquette={t("comptes.filtreStatut")}
-            courant={parametres.statut}
-            options={[
-              { valeur: "tous", libelle: t("comptes.statutTous"), href: lienFiltre("tous") },
-              {
-                valeur: "active",
-                libelle: t("comptes.statuts.active"),
-                href: lienFiltre("active"),
-              },
-              {
-                valeur: "suspended",
-                libelle: t("comptes.statuts.suspended"),
-                href: lienFiltre("suspended"),
-              },
-            ]}
-          />
-          <Link prefetch={false}
-            href={base}
-            className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
-          >
-            {t("comptes.reinitialiser")}
-          </Link>
-        </div>
 
-        {/* --- LA LISTE, ET L'ANNEAU DE STATUT À SA DROITE ---
-
-            Deux panneaux, comme la planche. Celui de droite ne rend QUE DES
-            NOMBRES : compter n'est pas consulter, donc il n'ajoute aucune entrée
-            au journal là où la liste, elle, en écrit une par consultation.
-
-            ⚠️ LE KIT EN POSE TROIS : un anneau « Répartition par plan », que rien
-            ne peut remplir, et un flux « Activité récente » qui nomme des
-            vendeurs tiers à chaque ouverture — donc une entrée d'audit par
-            chargement d'écran, qui noierait les consultations délibérées que le
-            journal existe pour retrouver. */}
-        <div className="grid gap-2.5 md:gap-[18px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] 2xl:items-start">
-          <section className={PANNEAU}>
-            <header className="mb-[18px]">
-              <h2 className={PANNEAU_TITRE}>{t("comptes.liste")}</h2>
-              <p className={PANNEAU_AIDE}>
-                {t("comptes.listeTotal", { total: compteurs.comptes })}
-              </p>
-            </header>
-        {page.lignes.length === 0 ? (
-          <p className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-6 text-center text-ds-texte-corps md:rounded-ds-card-lg">
-            {parametres.q === "" && parametres.statut === "tous"
-              ? t("comptes.videCompte")
-              : parametres.q === ""
-                ? t("comptes.videFiltre")
-                : t("comptes.videRecherche")}
-          </p>
-        ) : (
-          <>
-            {/* --- LE TABLEAU, au bureau ---
-
-                ⚠️ IL BASCULE À `xl`, PAS À `md`. Sept colonnes derrière une
-                colonne de navigation de 236 px : à 768 il resterait 472 px, soit
-                67 par colonne, et « 1 840 / 1 200 » en réclame 90 à lui seul. Le
-                même calcul a déjà fait basculer Envois, Analyses et le Panneau. */}
-            <div className="hidden xl:block">
-              <table className="w-full border-collapse">
+          {page.lignes.length === 0 ? (
+            <p className="adm-vide">
+              {parametres.q === "" && parametres.statut === "tous"
+                ? t("comptes.videCompte")
+                : parametres.q === ""
+                  ? t("comptes.videFiltre")
+                  : t("comptes.videRecherche")}
+            </p>
+          ) : (
+            <div className="adm-defil">
+              <table className="adm-table">
                 <thead>
                   <tr>
-                    <th scope="col" className={EN_TETE_COLONNE}>
-                      {t("comptes.colonnes.email")}
-                    </th>
-                    <th scope="col" className={EN_TETE_COLONNE}>
-                      {t("comptes.colonnes.type")}
-                    </th>
-                    <th scope="col" className={EN_TETE_COLONNE}>
-                      {t("comptes.colonnes.statut")}
-                    </th>
-                    <th scope="col" className={EN_TETE_COLONNE}>
-                      {t("comptes.colonnes.commandes")}
-                    </th>
-                    <th scope="col" className={EN_TETE_COLONNE}>
-                      {t("comptes.colonnes.colis")}
-                    </th>
-                    <th scope="col" className={EN_TETE_COLONNE}>
-                      {t("comptes.colonnes.cree")}
-                    </th>
-                    <th scope="col" className={EN_TETE_COLONNE + " text-right"}>
-                      {t("comptes.colonnes.action")}
+                    <th scope="col">{t("comptes.colonnes.email")}</th>
+                    <th scope="col">{t("comptes.colonnes.type")}</th>
+                    <th scope="col">{t("comptes.colonnes.statut")}</th>
+                    <th scope="col">{t("comptes.colonnes.commandes")}</th>
+                    <th scope="col">{t("comptes.colonnes.colis")}</th>
+                    <th scope="col">{t("comptes.colonnes.cree")}</th>
+                    <th scope="col">
+                      <span className="sr">{t("comptes.colonnes.action")}</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {page.lignes.map((ligne) => (
                     <tr key={ligne.id}>
-                      <td className={CELLULE}>
-                        <span className="flex items-center gap-2">
-                          {nom(ligne, "font-semibold text-ds-texte-fort")}
-                          {ligne.role === "admin" ? (
-                            <span className={PILULE_NEUTRE}>{t("comptes.roles.admin")}</span>
-                          ) : null}
+                      <td>
+                        <Link prefetch={false} className="adm-qui" href={`${base}/${ligne.id}`}>
+                          <AvatarCompte email={ligne.email} nom={ligne.boutique} />
+                          <span>
+                            <b>{ligne.email}</b>
+                            <small>
+                              {ligne.boutique === null ? <span className="adm-sourdine">{t("comptes.sansNom")}</span> : ligne.boutique}
+                              {ligne.role === "admin" ? <span className="adm-pro">{t("comptes.roles.admin")}</span> : null}
+                            </small>
+                          </span>
+                        </Link>
+                      </td>
+                      <td>{ligne.typeDeCompte === null ? <span className="adm-sourdine">{typeLisible(ligne)}</span> : typeLisible(ligne)}</td>
+                      <td>
+                        <span className="adm-badge" data-statut={ligne.statut}>
+                          <i aria-hidden="true" />
+                          {t(`comptes.statuts.${ligne.statut}`)}
                         </span>
-                        <span className="mt-0.5 block text-[12.5px] leading-[15px] text-ds-texte-sourdine">
-                          {ligne.email}
-                        </span>
                       </td>
-                      <td className={CELLULE + " text-ds-texte-sourdine"}>
-                        {typeLisible(ligne)}
+                      <td className="adm-nb">{format.number(ligne.commandes)}</td>
+                      <td>
+                        <ColisSeuil
+                          valeur={format.number(ligne.colisCeMois)}
+                          seuil={format.number(seuils.colis)}
+                          k={seuils.colis > 0 ? ligne.colisCeMois / seuils.colis : 0}
+                          depasse={auDessus(ligne)}
+                          info={t("comptes.colisInfo", { valeur: format.number(ligne.colisCeMois), seuil: format.number(seuils.colis) })}
+                        />
                       </td>
-                      <td className={CELLULE}>{pilluleEtat(ligne)}</td>
-                      <td className={CELLULE + " text-ds-texte-fort"}>
-                        {format.number(ligne.commandes)}
-                      </td>
-                      {/* LE COLIS PORTE SON SEUIL quand il le dépasse : « 1 840 /
-                          1 200 » se vérifie et se compare ; « au-dessus » se
-                          discute, et l'on finit par ne plus le lire. */}
-                      <td
-                        className={
-                          CELLULE + (auDessus(ligne) ? " font-bold text-ds-erreur-encre" : " text-ds-texte-fort")
-                        }
-                      >
-                        {auDessus(ligne)
-                          ? t("comptes.colisSurSeuil", {
-                              valeur: format.number(ligne.colisCeMois),
-                              seuil: format.number(seuils.colis),
-                            })
-                          : format.number(ligne.colisCeMois)}
-                      </td>
-                      <td className={CELLULE + " text-ds-texte-sourdine"}>
-                        {format.dateTime(new Date(ligne.creeLe), { dateStyle: "medium" })}
-                      </td>
-                      <td className={CELLULE + " text-right"}>
-                        <Link prefetch={false}
-                          href={`${base}/${ligne.id}`}
-                          className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet-appuye bg-ds-surface-carte px-[13px] text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
-                        >
+                      <td className="adm-date">{format.dateTime(new Date(ligne.creeLe), { dateStyle: "medium" })}</td>
+                      <td>
+                        <Link prefetch={false} className="bouton-outil adm-ouvrir" href={`${base}/${ligne.id}`} aria-label={t("comptes.ouvrirLong", { email: ligne.email })}>
                           {t("comptes.ouvrir")}
                         </Link>
                       </td>
@@ -431,143 +267,60 @@ export default async function AdminComptes({
                 </tbody>
               </table>
             </div>
+          )}
 
-            {/* --- LES CARTES, sous `xl` --- */}
-            <ul className="flex flex-col gap-2.5 xl:hidden">
-              {page.lignes.map((ligne) => (
-                <li
-                  key={ligne.id}
-                  className={
-                    "rounded-ds-card border p-4 " +
-                    (suspendu(ligne)
-                      ? "border-ds-erreur bg-ds-erreur-fond"
-                      : "border-ds-filet bg-ds-surface-carte")
-                  }
-                >
-                  <div className="mb-2.5 flex items-center justify-between gap-2.5">
-                    <div className="min-w-0">
-                      {nom(ligne, "block truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort")}
-                      <span className="mt-px block truncate text-[12.5px] leading-[15px] text-ds-texte-sourdine">
-                        {ligne.email}
-                      </span>
-                    </div>
-                    {pilluleEtat(ligne)}
-                  </div>
+          {lienSuivant === null ? null : (
+            <footer className="adm-pied">
+              <span>{t("comptes.surTotal", { affichees: page.lignes.length, total: compteurs.comptes })}</span>
+              <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
+                {t("comptes.pageSuivante")}
+              </LienEcran>
+            </footer>
+          )}
+        </section>
 
-                  <div className="mb-3 flex flex-wrap gap-1.5">
-                    <span className={PILULE_NEUTRE}>{typeLisible(ligne)}</span>
-                    {ligne.role === "admin" ? (
-                      <span className={PILULE_NEUTRE}>{t("comptes.roles.admin")}</span>
-                    ) : null}
-                    {auDessus(ligne) ? (
-                      <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>
-                        {t("comptes.colisSurSeuilLong", {
-                          valeur: format.number(ligne.colisCeMois),
-                          seuil: format.number(seuils.colis),
-                        })}
-                      </span>
-                    ) : (
-                      <span className={PILULE_NEUTRE}>
-                        {t("comptes.commandesLong", { n: format.number(ligne.commandes) })}
-                      </span>
-                    )}
-                  </div>
-
-                  <Link prefetch={false}
-                    href={`${base}/${ligne.id}`}
-                    className="flex min-h-11 w-full items-center justify-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
-                  >
-                    {t("comptes.ouvrir")}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-
-        {lienSuivant === null ? null : (
-          <LienEcran prefetch={false}
-            href={lienSuivant}
-            className="mx-auto inline-flex min-h-11 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-6 text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
-          >
-            {t("comptes.pageSuivante")}
-          </LienEcran>
-        )}
+        {/* LA COLONNE DE DROITE NE REND QUE DES NOMBRES : compter n'est pas
+            consulter, elle n'écrit rien au journal. Le lien des doublons n'existe
+            que s'il y a quelque chose à voir. */}
+        <div className="adm-colonne">
+          <section className="bloc adm-bloc adm-bloc--anneau" aria-labelledby="adm-repartition">
+            <header className="bloc__tete">
+              <div>
+                <h2 id="adm-repartition">{t("comptes.repartition")}</h2>
+              </div>
+            </header>
+            <Anneau
+              etiquette={t("comptes.repartition")}
+              total={compteurs.comptes}
+              unite={t("comptes.unite")}
+              part={(pourcent) => t("comptes.part", { part: pourcent })}
+              parts={[
+                { cle: "actifs", libelle: t("comptes.statuts.active"), valeur: compteurs.comptesActifs, trait: "var(--color-ds-succes)" },
+                { cle: "suspendus", libelle: t("comptes.statuts.suspended"), valeur: compteurs.comptesSuspendus, trait: "var(--color-ds-erreur)" },
+              ]}
+            />
           </section>
-
-          {/* LA COLONNE DE DROITE, comme la planche : l'anneau, puis les doublons. */}
-          <div className="flex min-w-0 flex-col gap-2.5 md:gap-[18px]">
-            <section className={PANNEAU}>
-              <header className="mb-[18px]">
-                <h2 className={PANNEAU_TITRE}>{t("comptes.repartition")}</h2>
-              </header>
-              <Anneau
-                variante="liste"
-                total={compteurs.comptes}
-                unite={t("comptes.unite")}
-                part={(pourcent) => t("comptes.part", { part: pourcent })}
-                parts={[
-                  {
-                    cle: "actifs",
-                    libelle: t("comptes.statuts.active"),
-                    valeur: compteurs.comptesActifs,
-                    trait: "var(--color-ds-succes)",
-                  },
-                  {
-                    cle: "suspendus",
-                    libelle: t("comptes.statuts.suspended"),
-                    valeur: compteurs.comptesSuspendus,
-                    trait: "var(--color-ds-erreur)",
-                  },
-                ]}
-              />
-            </section>
-
-            {/* --- LES DOUBLONS (migration 170, décision de Wassim du 20/09/2026) ---
-
-                UN NOMBRE ICI, les adresses sur leur écran : compter n'est pas consulter, donc ce
-                panneau n'écrit rien au journal ; l'écran des doublons, qui nomme des comptes, en
-                écrit une ligne à chaque ouverture. Le lien n'existe que s'il y a quelque chose à
-                voir. */}
-            <section className={PANNEAU}>
-              <header className="mb-[18px] flex flex-wrap items-start gap-3.5">
-                <div className="min-w-0 flex-[1_1_180px]">
-                  <h2 className={PANNEAU_TITRE}>{t("doublons.titre")}</h2>
-                  <p className={PANNEAU_AIDE}>{t("doublons.sousTitre")}</p>
+          {doublons.identifiants === 0 ? (
+            <section className="bloc adm-bloc" aria-labelledby="adm-doublons">
+              <header className="bloc__tete">
+                <div>
+                  <h2 id="adm-doublons">{t("doublons.titre")}</h2>
+                  <p className="adm-aide">{t("doublons.vide")}</p>
                 </div>
-                {doublons.identifiants === 0 ? null : (
-                  <Link
-                    prefetch={false}
-                    href={`${base}/doublons`}
-                    className="inline-flex min-h-11 items-center gap-1.5 text-[13px] leading-[normal] font-semibold text-ds-accent hover:text-ds-accent-encre lg:min-h-0"
-                  >
-                    {t("doublons.panneauVoir")}
-                    <ArrowRight aria-hidden="true" size={14} strokeWidth={2} />
-                  </Link>
-                )}
               </header>
-              {doublons.identifiants === 0 ? (
-                <p className="text-[14px] leading-[normal] text-ds-texte-sourdine">{t("doublons.vide")}</p>
-              ) : (
-                <div className="flex items-center gap-3.5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-card bg-ds-alerte-fond text-ds-alerte-encre">
-                    <Users aria-hidden="true" size={20} strokeWidth={1.9} />
-                  </span>
-                  <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="text-[23px] leading-[1.1] font-extrabold tracking-[-0.045em] text-ds-texte-fort">
-                      {format.number(doublons.comptes)}
-                    </span>
-                    <span className="text-[13px] leading-[normal] text-ds-texte-corps">
-                      {t("doublons.panneauResume", {
-                        comptes: doublons.comptes,
-                        identifiants: doublons.identifiants,
-                      })}
-                    </span>
-                  </span>
-                </div>
-              )}
             </section>
-          </div>
+          ) : (
+            <Link prefetch={false} className="bloc adm-doublons-lien v4-carte" href={`${base}/doublons`}>
+              <span className="adm-doublons-lien__icone" aria-hidden="true">
+                <Users className="ic" />
+              </span>
+              <span>
+                <b>{t("doublons.titre")}</b>
+                <small>{t("panneau.alerteDoublons", { comptes: doublons.comptes, identifiants: doublons.identifiants })}</small>
+              </span>
+              <ArrowRight aria-hidden="true" className="ic" />
+            </Link>
+          )}
         </div>
       </div>
     </main>

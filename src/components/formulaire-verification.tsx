@@ -10,14 +10,16 @@ const INITIAL: ResultatVerification = { statut: "inactif" };
 /**
  * LE CODE À 6 CHIFFRES, EN SIX CASES (maquette `verification.html`, arbitrage du § 5).
  *
- * UN SEUL CHAMP PART : `code`, caché, recomposé des six cases (qui n'ont pas de
- * `name`). La première porte `one-time-code` : les téléphones y proposent le code au-
- * dessus du clavier, et le code collé ou proposé se répartit dans les six cases. Un
- * chiffre tapé avance d'une case, l'effacement d'une case vide recule.
+ * LES SIX CASES PORTENT `name="code"`, et l'action recolle leurs valeurs : le
+ * formulaire marche ainsi sans JavaScript et avant l'hydratation (relecture du
+ * 02/10/2026 — un champ caché rempli par React n'envoyait rien dans ces cas). La
+ * première porte `one-time-code` : les téléphones y proposent le code au-dessus du
+ * clavier, et le code collé ou proposé se répartit dans les six cases. Un chiffre
+ * tapé avance d'une case, l'effacement d'une case vide efface et rejoint la précédente.
  *
  * AUCUN ENVOI AUTOMATIQUE AU SIXIÈME CHIFFRE : chaque envoi consomme le quota partagé
  * avec la connexion, et une faute de frappe le dépenserait sans qu'on l'ait voulu.
- * Les cases ne sont jamais préremplies ni renvoyées par l'état.
+ * Les cases ne sont jamais préremplies par le serveur.
  */
 export function FormulaireVerification({
   locale,
@@ -57,7 +59,6 @@ export function FormulaireVerification({
     <form action={action} className="formulaire" noValidate>
       <input type="hidden" name="locale" value={locale} />
       {suite === null ? null : <input type="hidden" name="suite" value={suite} />}
-      <input type="hidden" name="code" value={chiffres.join("")} />
       <fieldset className={"code-2fa" + (message !== null ? " est-invalide" : "")}>
         <legend>{t("libelle")}</legend>
         <div className="code-2fa__cases">
@@ -68,6 +69,7 @@ export function FormulaireVerification({
                 cases.current[i] = el;
               }}
               type="text"
+              name="code"
               inputMode="numeric"
               autoComplete={i === 0 ? "one-time-code" : "off"}
               pattern="[0-9]*"
@@ -75,13 +77,24 @@ export function FormulaireVerification({
               aria-describedby={message !== null ? "erreur-verification" : undefined}
               aria-invalid={message !== null ? true : undefined}
               value={chiffre}
-              onChange={(e) => poser(i, e.target.value)}
+              onChange={(e) => {
+                // Une case déjà remplie qui reçoit un chiffre le REMPLACE (la
+                // sélection posée au focus a pu être annulée par le clic).
+                const v = e.target.value;
+                poser(i, chiffre !== "" && v.length === 2 && v.startsWith(chiffre) ? v.slice(1) : v);
+              }}
               onPaste={(e) => {
                 e.preventDefault();
-                poser(i, e.clipboardData.getData("text"));
+                const colle = e.clipboardData.getData("text").replace(/\D/g, "");
+                // Un code entier collé repart de la première case, où qu'on soit.
+                poser(colle.length >= 6 ? 0 : i, colle);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Backspace" && chiffre === "" && i > 0) cases.current[i - 1]?.focus();
+                if (e.key === "Backspace" && chiffre === "" && i > 0) {
+                  e.preventDefault();
+                  setChiffres((c) => c.map((x, k) => (k === i - 1 ? "" : x)));
+                  cases.current[i - 1]?.focus();
+                }
                 if (e.key === "ArrowLeft" && i > 0) cases.current[i - 1]?.focus();
                 if (e.key === "ArrowRight" && i < 5) cases.current[i + 1]?.focus();
               }}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
+import { DialogueAdmin } from "@/components/admin/dialogue-admin";
 import { BoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
 import { definirPlan, type EtatPlan } from "@/app/[locale]/admin/comptes/[id]/actions";
@@ -32,15 +33,17 @@ export function PlanCompte({
 }: {
   readonly profilId: string;
   readonly plan: "gratuit" | "pro" | null;
-  /** Reçu en propriété : le module qui le porte est `server-only`. */
   readonly motifMin: number;
 }) {
   const t = useTranslations("admin.plan");
+  const idTitre = useId();
+  const dialogue = useRef<HTMLDialogElement>(null);
   const [etat, setEtat] = useState<EtatPlan>(INITIAL);
   const [travaille, setTravaille] = useState(false);
-  const [ouvert, setOuvert] = useState(false);
   const [motif, setMotif] = useState("");
 
+  // LE PLAN VISÉ VOYAGE, pas « l'inverse de l'actuel » : deux onglets ouverts ne
+  // s'annulent pas, la base répond « déjà dans ce plan ».
   const vise = plan === "pro" ? "gratuit" : "pro";
   const pret = motif.trim().length >= motifMin;
   const geste = vise === "pro" ? t("passerPro") : t("passerGratuit");
@@ -57,104 +60,72 @@ export function PlanCompte({
     if (resultat.statut === "ok") window.location.reload();
   }
 
-  function fermer(): void {
-    setOuvert(false);
-    setMotif("");
-  }
-
-  /* Passer en Pro prend le contour de l'accent, comme la planche. Repasser en gratuit n'est pas
-     un geste dangereux — il fait revenir la carte DropLink — : contour neutre. */
-  const bouton =
-    "flex h-11 items-center justify-center rounded-ds-card border bg-ds-surface-carte text-[14px] font-bold transition-colors disabled:opacity-50 " +
-    (vise === "pro"
-      ? "border-ds-accent text-ds-accent-encre hover:bg-ds-surface-teinte"
-      : "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux");
-
   return (
-    <div
-      onKeyDown={(e) => {
-        if (e.key === "Escape" && ouvert && !travaille) fermer();
-      }}
-    >
-      <div className="mb-[18px]">
-        <h2 className="text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre">
-          {t("titre")}
-        </h2>
-        <p className="mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps">{t("aide")}</p>
-      </div>
-
-      {/* La rangée de la planche (`AccRow`, première du panneau) : sans filet ni retrait en
-          haut, 11 px en bas — c'est eux qui posent le bouton 42 px sous le libellé. */}
-      <div className="flex items-center gap-3.5 pb-[11px]">
-        <span className="text-[13.5px] text-ds-texte-corps">{t("planActuel")}</span>
-        <span className="flex-1" />
-        <span className="text-right text-[14px] font-semibold text-ds-texte-fort">
-          {plan === null ? t("illisible") : t(`plans.${plan}`)}
-        </span>
-      </div>
-
-      {plan === null ? null : !ouvert ? (
-        <>
+    <section className="bloc adm-bloc" aria-labelledby={idTitre + "-bloc"}>
+      <header className="bloc__tete">
+        <div>
+          <h2 id={idTitre + "-bloc"}>{t("titre")}</h2>
+        </div>
+      </header>
+      <p className="adm-texte">{t("aide")}</p>
+      <div className="adm-plan-ligne">
+        <span>{t("planActuel")}</span>
+        {/* ILLISIBLE, AUCUN GESTE : proposer de changer un plan qu'on n'a pas su
+            lire reviendrait à agir à l'aveugle. */}
+        <b>{plan === null ? t("illisible") : t(`plans.${plan}`)}</b>
+        {plan === null ? null : (
           <button
             type="button"
+            className="bouton-outil"
             onClick={() => {
               setEtat(INITIAL);
-              setOuvert(true);
+              setMotif("");
+              dialogue.current?.showModal();
             }}
-            className={bouton + " mt-3.5 w-full px-1.5 py-px"}
           >
             {geste}
           </button>
-          {etat.statut === "ok" ? (
-            <p role="status" className="mt-2 text-[13px] text-ds-texte-corps">
-              {t("fait")}
-            </p>
-          ) : null}
-        </>
-      ) : (
-        <div className="mt-3.5 flex flex-col gap-4">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-[12.5px] font-semibold text-ds-texte-sourdine">{t("motif")}</span>
-            <textarea
-              name="motif"
-              rows={3}
-              // LE FOCUS SUIT L'OUVERTURE (audit du 20/09/2026) : le bouton disparaît avec le clic.
-              autoFocus
-              value={motif}
-              onChange={(e) => setMotif(e.target.value)}
-              className="w-full resize-none rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[13px] py-[11px] text-[13.5px] leading-[1.55] text-ds-texte-fort outline-none focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"
-            />
-            <span className="text-[12.5px] leading-[1.5] text-ds-texte-corps">
-              {t("motifAide", { n: motifMin })}
-            </span>
-          </label>
+        )}
+      </div>
+      {etat.statut === "ok" ? (
+        <p role="status" className="adm-texte pb-4">
+          {t("fait")}
+        </p>
+      ) : null}
 
-          {etat.statut === "erreur" ? (
-            <p role="alert" className="text-[13px] text-ds-erreur-encre">
-              {t(`erreur.${etat.motif}`)}
-            </p>
-          ) : null}
-
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <button
-              type="button"
-              disabled={travaille}
-              onClick={fermer}
-              className="h-11 px-4 text-[14px] font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort disabled:opacity-50"
-            >
-              {t("annuler")}
-            </button>
-            <BoutonAction
-              type="button"
-              enAttente={travaille}
-              disabled={!pret}
-              onClick={() => void confirmer()}
-              libelles={{ repos: geste, enCours: t("enCours"), reussi: geste, echoue: geste }}
-              className={bouton + " px-5"}
-            />
-          </div>
-        </div>
-      )}
-    </div>
+      <DialogueAdmin
+        refDialogue={dialogue}
+        idTitre={idTitre}
+        titre={geste}
+        aide={t("aide")}
+        travaille={travaille}
+        fermer={t("annuler")}
+        onClose={() => setMotif("")}
+      >
+        <label className="adm-champ">
+          <span>{t("motif")}</span>
+          <textarea name="motif" rows={3} value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <small>{t("motifAide", { n: motifMin })}</small>
+        </label>
+        {etat.statut === "erreur" ? (
+          <p role="alert" className="adm-dialogue__erreur">
+            {t(`erreur.${etat.motif}`)}
+          </p>
+        ) : null}
+        <footer>
+          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => dialogue.current?.close()}>
+            {t("annuler")}
+          </button>
+          <BoutonAction
+            type="button"
+            enAttente={travaille}
+            disabled={!pret}
+            onClick={() => void confirmer()}
+            libelles={{ repos: geste, enCours: t("enCours"), reussi: geste, echoue: geste }}
+            className="adm-confirmer disabled:opacity-50"
+          />
+        </footer>
+      </DialogueAdmin>
+    </section>
   );
 }

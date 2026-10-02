@@ -588,7 +588,8 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
   .page-publique__fermer { top: auto; bottom: -58px; right: 50%; translate: 50% 0; }
 }
 @media (pointer: coarse) {
-  .bouton-outil, .bouton-app--plein, .bouton-app--second, .bouton-texte, .vues-liste button, .puce { min-height: 44px; }
+  .bouton-outil, .bouton-app--plein, .bouton-app--second, .bouton-texte, .vues-liste button, .puce, .adm-danger, .adm-confirmer, .adm-pastille-contest, .adm-lien { min-height: 44px; }
+  .adm-reglage__saisie input, .adm-filtres a, .adm-champ input { height: 44px; }
   .action-ligne { width: 44px; height: 44px; }
   .coche { width: 44px; height: 44px; margin: -11px; }
   .col-commande a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
@@ -2020,7 +2021,8 @@ a.action-ligne { color: var(--corps); }
 .code-2fa__cases { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
 .code-2fa__cases input:nth-child(3) { margin-right: 10px; }
 .code-2fa__cases input { width: 100%; min-width: 0; height: 60px; border-radius: 14px; border: 1px solid var(--filet-appuye); background: var(--surface); text-align: center; font: 700 26px/1 var(--font-ds-body); font-variant-numeric: tabular-nums; color: var(--encre); caret-color: var(--accent); transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease), transform 160ms var(--ease-sortie), background-color 200ms var(--ease); }
-.code-2fa__cases input:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus); transform: translateY(-1px); }
+.code-2fa__cases input:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus); }
+@media (prefers-reduced-motion: no-preference) { .code-2fa__cases input:focus { transform: translateY(-1px); } }
 .code-2fa.est-invalide .code-2fa__cases input { border-color: var(--erreur-encre); }
 .code-2fa.est-invalide .champ-acces__erreur { display: flex; animation: entre 240ms var(--ease-sortie); }
 .code-2fa.est-valide .code-2fa__cases input { border-color: color-mix(in srgb, var(--color-ds-succes) 60%, transparent); background: color-mix(in srgb, var(--color-ds-succes) 8%, var(--surface)); }
@@ -2051,7 +2053,7 @@ a.action-ligne { color: var(--corps); }
 .onb-logo__actions small { flex-basis: 100%; font-size: 12.5px; color: var(--sourdine); }
 .onb-logo__choisir { height: 40px; cursor: pointer; }
 .onb-logo__choisir:focus-within { border-color: var(--accent); box-shadow: var(--focus); }
-.onb-lien { min-height: 40px; font-size: 13.5px; font-weight: 600; color: var(--erreur-encre); }
+.onb-lien { min-height: 44px; font-size: 13.5px; font-weight: 600; color: var(--erreur-encre); }
 .onb-couleur { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .onb-couleur .couleur__pastille { width: 50px; height: 50px; border-radius: 13px; }
 .onb-couleur input[type="text"] { width: 132px; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 15px; letter-spacing: .03em; text-transform: uppercase; }
@@ -2079,7 +2081,6 @@ a.action-ligne { color: var(--corps); }
 .telephone--onb { width: 300px; --z: .718; }
 .telephone--onb .telephone__ecran { max-height: 600px; }
 .telephone--onb .pc * { transition: color 260ms var(--ease), background-color 260ms var(--ease), border-color 260ms var(--ease); }
-.pc [data-pc-nom].est-provisoire { color: var(--color-ds-texte-tenu); }
 
 /* suivi par e-mail */
 .page-notif { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, var(--fond)), var(--fond) 42%, color-mix(in srgb, #A855E0 5%, var(--fond))); }
@@ -2262,6 +2263,15 @@ a.notifp__bouton { text-decoration: none; }
 .adm-filtres button { height: 30px; padding: 0 11px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--corps); transition: background-color 140ms var(--ease), color 140ms var(--ease), box-shadow 140ms var(--ease); }
 .adm-filtres button[aria-pressed="true"] { background: var(--feuille); color: var(--encre); font-weight: 600; box-shadow: var(--ombre-xs); }
 .adm-filtres button:active { transform: scale(.97); }
+/* Le produit filtre CÔTÉ SERVEUR, par des liens (le filtre vit dans l'URL et entre dans la
+   trace) : les mêmes pastilles, portées par des liens, l'entrée courante en `aria-current`. */
+.adm-filtres a { display: inline-flex; align-items: center; height: 30px; padding: 0 11px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--corps); white-space: nowrap; transition: background-color 140ms var(--ease), color 140ms var(--ease), box-shadow 140ms var(--ease); }
+.adm-filtres a[aria-current="true"] { background: var(--feuille); color: var(--encre); font-weight: 600; box-shadow: var(--ombre-xs); }
+.adm-filtres a:active { transform: scale(.97); }
+.bloc__tete > .adm-filtres { flex: none; flex-wrap: nowrap; }
+.bloc__tete:has(> .adm-filtres) { flex-wrap: wrap; }
+@media (max-width: 640px) { .bloc__tete > .adm-filtres { flex: 1 1 100%; flex-wrap: wrap; } }
+@media (max-width: 900px) { .adm-filtres a { height: 44px; } }
 .adm-cherche { width: 280px; }
 .adm-defil { overflow-x: auto; }
 .adm-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
@@ -2291,7 +2301,8 @@ a.notifp__bouton { text-decoration: none; }
 .adm-badge[data-ton="alerte"] i { background: var(--color-ds-alerte); }
 .adm-badge[data-cmd="en_transit"] { background: var(--teinte); color: var(--accent-texte); }
 .adm-badge[data-cmd="en_transit"] i { background: var(--accent); }
-.adm-badge[data-cmd="expedie"] i { background: #4F7CF5; }
+.page-admin { --adm-expedie: #4F7CF5; }
+.adm-badge[data-cmd="expedie"] i { background: var(--adm-expedie); }
 .adm-badge[data-cmd="livre"] { background: color-mix(in srgb, var(--color-ds-succes) 11%, transparent); color: var(--succes-encre); }
 .adm-badge[data-cmd="livre"] i { background: var(--color-ds-succes); }
 .adm-pastille-contest { display: inline-flex; align-items: center; gap: 5px; height: 24px; margin-left: 4px; padding: 0 9px; border-radius: 99px; background: var(--teinte); color: var(--accent-texte); font: 600 12px/1 var(--font-ds-body); }
@@ -2321,11 +2332,14 @@ a.notifp__bouton { text-decoration: none; }
 .adm-entree + .adm-entree { border-top: 1px solid var(--filet); }
 .adm-entree > i { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: var(--teinte); color: var(--accent-texte); }
 .adm-entree > i[data-ton="suspension"] { background: color-mix(in srgb, var(--color-ds-erreur) 11%, transparent); color: var(--erreur-encre); }
+.adm-entree > i[data-ton="reactivation"] { background: color-mix(in srgb, var(--color-ds-succes) 11%, transparent); color: var(--succes-encre); }
 .adm-entree > i[data-ton="parametre"] { background: color-mix(in srgb, var(--color-ds-alerte) 13%, transparent); color: var(--alerte-encre, var(--color-ds-alerte-encre)); }
 .adm-entree > i .ic { width: 15px; height: 15px; }
 .adm-entree b { display: block; font-size: 13.5px; font-weight: 600; color: var(--encre); }
 .adm-entree span { display: block; margin-top: 2px; font-size: 12.5px; color: var(--corps); overflow-wrap: anywhere; }
 .adm-entree span a { color: var(--accent-texte); font-weight: 600; }
+.adm-entree span strong { color: var(--encre); font-weight: 600; }
+.adm-entree span small { font-size: inherit; }
 .adm-motif { padding: 6px 9px; margin-top: 6px !important; border-radius: 8px; background: var(--sol-onglet); border: 1px solid var(--filet); }
 .adm-entree > p { text-align: right; font-size: 12.5px; color: var(--corps); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .adm-entree > p small { display: block; font-size: 12px; color: var(--sourdine); }
@@ -2398,6 +2412,10 @@ a.notifp__bouton { text-decoration: none; }
 .adm-taches small { font-size: 12.5px; color: var(--corps); }
 .adm-pouls { position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--color-ds-succes); }
 .adm-pouls::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--color-ds-succes); animation: l4-pouls 2.2s var(--ease-sortie) infinite; }
+/* Le produit a deux états de plus que la maquette : le pouls ne bat que sur une tâche active. */
+.adm-pouls[data-etat="en_retard"] { background: var(--color-ds-alerte); }
+.adm-pouls[data-etat="jamais_executee"] { background: var(--st-attente); }
+.adm-pouls:not([data-etat="actif"])::after { display: none; }
 .adm-limites { display: grid; gap: 16px; padding: 6px 18px 18px; }
 .adm-limites p { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
 .adm-limites p span { color: var(--corps); font-variant-numeric: tabular-nums; }
@@ -2433,7 +2451,7 @@ a.notifp__bouton { text-decoration: none; }
 .adm-constates .adm-constate { border-top: 1px solid var(--filet); }
 
 /* dialogues */
-.adm-dialogue { width: min(520px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--filet); border-radius: 18px; background: var(--feuille); color: var(--encre); box-shadow: var(--ombre-lg); }
+.adm-dialogue { width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; overflow-y: auto; padding: 0; border: 1px solid var(--filet); border-radius: 18px; background: var(--feuille); color: var(--encre); box-shadow: var(--ombre-lg); }
 .adm-dialogue::backdrop { background: rgba(11, 11, 24, .38); }
 .adm-dialogue[open] { animation: adm-dlg 240ms cubic-bezier(.23, 1, .32, 1); }
 .adm-dialogue.sort { animation: adm-dlg-sort 160ms cubic-bezier(.4, 0, 1, 1) forwards; }
@@ -2484,7 +2502,8 @@ a.notifp__bouton { text-decoration: none; }
   .compteurs--3 { grid-template-columns: minmax(0, 1fr); }
   .compteurs--3 .compteur-app { border-right: 0 !important; }
   .adm-entree { grid-template-columns: 32px minmax(0, 1fr); }
-  .adm-entree > p { grid-column: 2; text-align: left; }
+  .adm-entree > p { grid-column: 2; text-align: left; white-space: normal; }
+  .adm-entree > p small { overflow-wrap: anywhere; }
   .adm-reglage { grid-template-columns: minmax(0, 1fr); }
   .adm-fiche__etats { margin-left: 0; }
   .adm-absents, .adm-croissance { grid-template-columns: repeat(2, minmax(0, 1fr)); }

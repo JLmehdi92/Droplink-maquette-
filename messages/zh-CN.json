@@ -918,7 +918,8 @@
       "type": "不支持这种图片格式。",
       "taille": "这张图片太大了。",
       "envoi": "上传失败。请重试。",
-      "confirmation": "服务器未确认上传。请重试。"
+      "confirmation": "服务器未确认上传。请重试。",
+      "retrait": "未能移除标志，请重试。"
     },
     "couleurTitre": "您的主色",
     "couleurAide": "对比度会自动调整：任何颜色都能保持清晰易读。",
@@ -948,7 +949,7 @@
       "encre": "墨黑",
       "ambre": "琥珀色"
     },
-    "sansNom": "您的店铺"
+    "erreurCouleur": "请输入六位十六进制颜色，例如 #5B4BF5。"
   },
   "marque": {
     "titre": "我的品牌",
@@ -1709,9 +1710,6 @@
       "trace": "本次访问及所用的搜索条件都会写入审计日志。打开一个账户会再增加一条记录。",
       "sansNom": "尚未命名",
       "ouvrir": "打开",
-      "colisSurSeuil": "{valeur} / {seuil}",
-      "colisSurSeuilLong": "{valeur} / {seuil} 个包裹",
-      "commandesLong": "{n} 笔订单",
       "decompte": "{total, plural, other {# 个账户}} · {suspendus, plural, other {# 个已停用}}",
       "tuileTotal": "账户总数",
       "tuileNouveaux": "新注册",
@@ -1723,13 +1721,15 @@
       "listeTotal": "共 {total} 个账户",
       "filtreStatut": "按状态筛选",
       "statutTous": "全部状态",
-      "reinitialiser": "重置",
       "repartition": "账户状态",
       "unite": "个账户",
       "part": "{part}%",
       "videFiltre": "没有符合此筛选的账户。",
       "sousTitreListe": "管理并跟踪所有 DropLink 账户。",
-      "tuileTotalAide": "其中 {sansType} 个未声明类型"
+      "tuileTotalAide": "其中 {sansType} 个未声明类型",
+      "colisInfo": "已登记 {valeur} 个包裹，提醒阈值 {seuil}",
+      "ouvrirLong": "打开账户 {email}",
+      "surTotal": "共 {total, number} 个账户，显示 {affichees} 个"
     },
     "journal": {
       "titre": "审计日志",
@@ -1770,9 +1770,7 @@
         "30": "最近 30 天"
       },
       "colonnes": {
-        "quand": "时间",
-        "quoi": "做了什么",
-        "qui": "操作人"
+        "quoi": "做了什么"
       },
       "cibleAvant": "涉及账户：",
       "motifAvant": "原因：",
@@ -1793,8 +1791,7 @@
       "part": "{part}%",
       "repartitionIndisponible": "分布不可用。",
       "filtreFamille": "按操作类别筛选",
-      "filtreFenetre": "选择时间窗",
-      "reinitialiser": "重置"
+      "filtreFenetre": "选择时间窗"
     },
     "fiche": {
       "identite": "基本信息",
@@ -1853,7 +1850,8 @@
         }
       },
       "email": "邮箱",
-      "titre": "账户详情"
+      "titre": "账户详情",
+      "couleur": "颜色"
     },
     "suspension": {
       "ouvrir": "停用此账户",
@@ -1951,7 +1949,9 @@
       "courbeIndisponible": "曲线不可用。",
       "courbe": "订单",
       "periode": "最近 {jours} 天",
-      "periodeEtiquette": "曲线时间窗"
+      "periodeEtiquette": "曲线时间窗",
+      "alerteDoublons": "{comptes} 个账户，共用 {identifiants} 个标识",
+      "barre": "{jour}：{n} 个订单"
     },
     "parametres": {
       "titre": "系统参数",
@@ -2113,9 +2113,7 @@
       "tuileStockage": "媒体存储",
       "stockageAide": "上传时在服务器端重新读取",
       "filtreType": "按账户类型筛选",
-      "reinitialiser": "重置",
       "videFiltre": "没有符合此筛选的店铺。",
-      "colonneProprietaire": "所有者",
       "colonneCreation": "创建时间",
       "legendeConfigurees": "已配置",
       "legendeSansNom": "未命名"
@@ -2183,22 +2181,18 @@
       "degradation": {
         "autorise": "如果计数器发生故障，访问仍然放行：这次故障与卖家的客户无关。",
         "refuse": "在这里，计数器故障会拒绝访问。受影响的只有我们自己。"
-      }
+      },
+      "barre": "{jour}：{n} 个包裹"
     },
     "traceTitre": "一切都有记录",
     "traceTexte": "管理员对卖家数据的每一次查看都会写入日志。",
     "allerAuContenu": "跳到正文",
     "roleAdministrateur": "管理员",
     "onglets": {
-      "panneau": "总面板",
       "comptes": "账户",
       "boutiques": "店铺",
-      "journal": "日志",
-      "surveillance": "监控",
       "parametres": "设置",
-      "commandes": "订单",
-      "statistiques": "统计",
-      "plus": "更多"
+      "commandes": "订单"
     },
     "langues": {
       "fr": "法语",
@@ -2235,7 +2229,6 @@
         "30": "近 30 天",
         "toutes": "全部日期"
       },
-      "reinitialiser": "重置",
       "liste": "订单列表",
       "listeTotal": "共 {total} 个订单",
       "colonnes": {
@@ -2254,7 +2247,9 @@
       "videFiltre": "没有订单符合当前筛选条件。",
       "pageSuivante": "查看更多",
       "repartition": "状态分布",
-      "lienBloque": "链接已停用"
+      "lienBloque": "链接已停用",
+      "surTotal": "共 {total, number} 个订单，显示 {affichees} 个",
+      "aucunTransporteur": "无承运商"
     },
     "statistiques": {
       "titre": "统计",
@@ -2289,7 +2284,6 @@
       "serieNouveaux": "新增账户",
       "serieActifs": "活跃账户",
       "typesDeCompte": "账户类型",
-      "typesTotal": "共 {total} 个账户",
       "typeFournisseurs": "供应商",
       "typeRevendeurs": "分销商",
       "typeSans": "未声明类型",
@@ -2308,7 +2302,6 @@
       "transporteurInconnu": "尚未识别",
       "aucunColis": "该周期内没有包裹。",
       "part": "{part}%",
-      "nombreEntreParentheses": "（{nombre}）",
       "croissance": "整体增长",
       "croissanceAide": "近三个月与前三个月对比",
       "croissanceComptes": "账户",
@@ -2317,7 +2310,8 @@
       "croissancePhotos": "照片",
       "croissanceSansBase": "新增",
       "ecartHausse": "+{ecart}%",
-      "ecartBaisse": "−{ecart}%"
+      "ecartBaisse": "−{ecart}%",
+      "delaiAide": "按本期已送达的包裹计算"
     },
     "blocage": {
       "bloquer": "停用链接",
@@ -2394,9 +2388,10 @@
       },
       "vide": "没有任何标识在两个账户之间共享。",
       "plafond": "显示共享最多的 100 个标识，共 {total, number} 个。",
-      "panneauVoir": "查看重复账户",
-      "panneauResume": "个账户，涉及 {identifiants} 个共享标识"
-    }
+      "panneauVoir": "查看重复账户"
+    },
+    "accueil": "DropLink 管理后台",
+    "pastille": "管理"
   },
   "erreurs": {
     "titre": "此页面无法显示",

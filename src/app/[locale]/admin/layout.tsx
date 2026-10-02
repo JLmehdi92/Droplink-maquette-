@@ -1,7 +1,14 @@
+import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ChevronsUpDown, Search, Shield, ShieldCheck } from "lucide-react";
 import { exigerAdmin } from "@/lib/audit/garde";
 import { estLangueSupportee } from "@/i18n/config";
-import { NavigationAdmin, type EntreeAdmin } from "@/components/admin/navigation-admin";
+import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
+import { BoutonTiroir, CoqueTiroir } from "@/components/app/coque-tiroir";
+import { DetailsFermable } from "@/components/app/details-fermable";
+import { CoucheV4, ScriptEntreeV4 } from "@/components/app/couche-v4";
+import { InfoBulles } from "@/components/admin/info-bulles";
+import { LogoDropLink } from "@/components/logo-droplink";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 
 /**
@@ -61,211 +68,118 @@ export default async function LayoutAdmin({
   const admin = await exigerAdmin();
 
   const t = await getTranslations("admin");
+  const tn = await getTranslations("navigation");
 
-  const entrees: readonly EntreeAdmin[] = [
-    {
-      href: `/${langue}/admin`,
-      libelle: t("panneau.titre"),
-      court: t("onglets.panneau"),
-      icone: "panneau",
-    },
-    {
-      href: `/${langue}/admin/commandes`,
-      libelle: t("commandes.titre"),
-      court: t("onglets.commandes"),
-      icone: "commandes",
-    },
-    {
-      href: `/${langue}/admin/comptes`,
-      libelle: t("comptes.titre"),
-      court: t("onglets.comptes"),
-      icone: "comptes",
-    },
-    {
-      href: `/${langue}/admin/boutiques`,
-      libelle: t("boutiques.titre"),
-      court: t("onglets.boutiques"),
-      icone: "boutiques",
-    },
-    {
-      href: `/${langue}/admin/statistiques`,
-      libelle: t("statistiques.titre"),
-      court: t("onglets.statistiques"),
-      icone: "statistiques",
-    },
-    {
-      href: `/${langue}/admin/journal`,
-      libelle: t("journal.titre"),
-      court: t("onglets.journal"),
-      icone: "journal",
-    },
-    {
-      href: `/${langue}/admin/surveillance`,
-      libelle: t("surveillance.titre"),
-      court: t("onglets.surveillance"),
-      icone: "veille",
-    },
-    {
-      href: `/${langue}/admin/parametres`,
-      libelle: t("parametres.titre"),
-      court: t("onglets.parametres"),
-      icone: "reglages",
-    },
+  const entrees: readonly EntreeNavigation[] = [
+    { href: `/${langue}/admin`, libelle: t("panneau.titre"), icone: "tableau", exacte: true },
+    { href: `/${langue}/admin/commandes`, libelle: t("commandes.titre"), icone: "adm-commandes" },
+    { href: `/${langue}/admin/comptes`, libelle: t("comptes.titre"), icone: "adm-comptes" },
+    { href: `/${langue}/admin/boutiques`, libelle: t("boutiques.titre"), icone: "adm-boutiques" },
+    { href: `/${langue}/admin/statistiques`, libelle: t("statistiques.titre"), icone: "analyses" },
+    { href: `/${langue}/admin/journal`, libelle: t("journal.titre"), icone: "adm-journal" },
+    { href: `/${langue}/admin/surveillance`, libelle: t("surveillance.titre"), icone: "adm-surveillance" },
+    { href: `/${langue}/admin/parametres`, libelle: t("parametres.titre"), icone: "parametres" },
   ];
 
   /*
-   * LA COQUILLE DE L'ADMINISTRATION — chrome CLAIR DEPUIS LE 12/09/2026.
+   * LA COQUILLE DE L'ADMINISTRATION — refonte du 02/10/2026 (maquette,
+   * `outils/admin.mjs`) : la même colonne que l'espace vendeur, qui devient le
+   * même tiroir sous 1 020 px, avec ses huit entrées.
    *
-   * ⚠️ CE BLOC DISAIT « chrome SOMBRE, et ce n'est pas décoratif », et
-   * argumentait que le noir rendait impossible de confondre l'administration
-   * avec l'espace vendeur. L'argument était bon ; le noir vient de l'ANCIEN
-   * canevas, et `CLAUDE.md` le déclare mort — « Chrome admin : sombre `#111117`
-   * → clair, comme le reste ». C'était le DERNIER aplat sombre du produit.
+   * ⚠️ LA BARRE D'ONGLETS DU BAS EST PARTIE. Elle avait remplacé une bande
+   * défilante qui cachait la moitié des entrées ; le tiroir les montre toutes
+   * l'une sous l'autre, ce qui levait l'objection. C'est le dessin de la
+   * maquette, et celui de l'espace vendeur depuis l'étape 1.
    *
-   * CE QUI REND LA CONFUSION IMPOSSIBLE DANS LE NOUVEAU DESSIN, et le kit le
-   * mesure : la colonne porte un eyebrow « ADMINISTRATION » en 11,5/700 à
-   * l'interlettrage de 0,12em au-dessus de ses entrées, et l'entrée courante y
-   * est peinte du DÉGRADÉ DE MARQUE là où l'espace vendeur emploie un aplat
-   * teinté. Ce ne sont pas les mêmes objets, et ils ne se ressemblent pas.
+   * CE QUI LA DISTINGUE DE L'ESPACE VENDEUR, puisqu'elles partagent la colonne :
+   * la pastille « Admin » au logo, le bandeau « ADMINISTRATION » de la barre
+   * haute, et l'encart « Tout est tracé » — un rappel permanent, pas une
+   * décoration : chaque consultation de données d'un vendeur écrit une ligne au
+   * journal, LECTURES comprises. Celui qui regarde doit le savoir avant.
    *
-   * L'ENCART « TOUT EST TRACÉ » EST UN RAPPEL PERMANENT, pas une décoration :
-   * chaque consultation de données d'un vendeur écrit une ligne au journal, y
-   * compris les LECTURES. Celui qui regarde doit le savoir avant de regarder,
-   * pas le découvrir dans le journal.
+   * ⚠️ DEUX ÉLÉMENTS DE LA MAQUETTE NE SONT PAS PORTÉS : le lien « Espace
+   * vendeur » de son menu de compte (voir plus haut, aucun lien entre les deux
+   * surfaces) et son thème sombre (décision du § 5 de la refonte).
    *
-   * AU TÉLÉPHONE, LA COLONNE DEVIENT DEUX BLOCS : la marque en haut, la
-   * navigation en barre d'onglets tout en bas. C'est le dessin des trois
-   * planches mobiles, et il vaut mieux que la bande défilante d'avant — une
-   * navigation qu'il faut faire défiler cache la moitié de ses entrées, donc la
-   * moitié de la surface.
-   *
-   * ⚠️ SIX ONGLETS LÀ OÙ LES PLANCHES EN DESSINENT QUATRE. Elles omettent
-   * Boutiques et Paramètres ; les porter telles quelles rendrait ces deux écrans
-   * INATTEIGNABLES sous 768 px, puisque rien d'autre n'y mène. Un écran
-   * inaccessible n'est pas un écart de dessin, c'est une fonction perdue.
+   * LA RECHERCHE DE LA BARRE HAUTE n'ouvre aucun point d'entrée nouveau : c'est
+   * un formulaire GET natif vers la liste des comptes, dont la recherche était
+   * déjà auditée (critères écrits au journal à chaque consultation).
    */
   return (
-    /* LE FOND DE LA COQUE ADMIN, relevé sur `AdminShell.jsx` : un dégradé posé sur la racine
-       (il défile avec la page, sans halos — ce n'est pas celui de l'espace vendeur, fixe et
-       halé). Absent du produit à toutes les largeurs jusqu'au 19/09/2026, et invisible à la
-       soustraction pour la même raison qu'au vendeur : un décor ne porte aucun texte. */
-    <div
-      data-surface="administration"
-      className="min-h-dvh bg-ds-surface-page"
-      style={{ backgroundImage: "linear-gradient(135deg,#F7F5FE 0%,#FBFAFE 46%,#F8F4FD 100%)" }}
-    >
-      {/* PREMIER ÉLÉMENT FOCUSABLE DE LA PAGE. Au bureau, la colonne pose six
-          liens avant le contenu ; les traverser à chaque écran au clavier est
-          le genre de coût qu'on ne mesure jamais parce qu'on ne le paie pas
-          soi-même. */}
-      <a
-        href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-ds-sm focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:text-[14px] focus:font-semibold focus:text-ds-texte-fort focus:shadow-ds-md"
-      >
+    <div data-surface="administration" className="page-app v4 page-admin">
+      <ScriptEntreeV4 />
+      <CoucheV4 />
+      <a href="#contenu" className="evitement">
         {t("allerAuContenu")}
       </a>
+      <CoqueTiroir
+        libelles={{ ouvrir: tn("ouvrirMenu"), fermer: tn("fermerMenu") }}
+        barre={
+          <>
+            <Link href={`/${langue}/admin`} prefetch={false} className="logo app__logo" aria-label={t("accueil")}>
+              <LogoDropLink hauteur={24} />
+              <span className="adm-pastille">{t("pastille")}</span>
+            </Link>
 
-      <div className="flex min-h-dvh w-full flex-col md:flex-row">
-        {/* --- LA COLONNE : bande supérieure au téléphone, colonne au bureau ---
+            <NavigationVendeur
+              entrees={entrees}
+              etiquette={t("navigation")}
+              idPastille="pastille-navigation-admin"
+              prefetch={false}
+            />
 
-            VALEURS MESURÉES SUR LE KIT SERVI À 1690 px : 240 de large, fond de
-            carte, `padding 24px 16px 18px`, filet à droite. */}
-        <div className="flex flex-col border-b border-ds-filet bg-ds-surface-carte px-4 pt-4 md:w-60 md:shrink-0 md:border-r md:border-b-0 md:px-4 md:pt-6 md:pb-[18px]">
-          <div className="mb-4 flex items-center justify-between md:mb-5 md:block md:px-1.5">
-            <div>
-              <span className="block text-[17px] leading-[22px] font-extrabold tracking-[-0.02em] text-ds-texte-titre">
-                DropLink
-              </span>
-              {/* ⚠️ 11,5 px ET NON 10. Le kit écrit cet eyebrow à 11 ; le
-                  plancher de la règle 5 est 11,5 au téléphone, et cette bande y
-                  est rendue. L'interlettrage de 0,12em est celui du design
-                  system pour les eyebrows. */}
-              <span className="mt-1 block text-[11.5px] leading-[15px] font-bold tracking-[0.12em] text-ds-texte-tenu uppercase">
-                {t("bandeau")}
-              </span>
-            </div>
-
-            {/* AU TÉLÉPHONE, LA DÉCONNEXION EST ICI : la colonne est devenue une
-                bande supérieure, et son bloc d'identité — qui porte le bouton au
-                bureau — n'y est pas rendu. */}
-            <div className="flex items-center gap-2 md:hidden">
-              <BoutonDeconnexion langue={langue} variante="sombre-mobile" />
-            </div>
-          </div>
-
-          <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="colonne" />
-
-          {/* L'espace pousse le rappel et l'identité en bas de colonne, comme le
-              kit : ce sont les deux choses qu'on relit, pas celles qu'on
-              parcourt. */}
-          <div className="hidden md:block md:flex-grow" />
-
-          <div className="hidden md:block">
-            {/*
-              L'ENCART « TOUT EST TRACÉ » EST UN RAPPEL PERMANENT, pas une
-              décoration : chaque consultation de données d'un vendeur écrit une
-              ligne au journal, y compris les LECTURES. Celui qui regarde doit le
-              savoir AVANT de regarder, pas le découvrir dans le journal.
-
-              ⚠️ LE KIT MET ICI UNE CARTE DÉCORATIVE — « DropLink Admin / Tout
-              sous contrôle » avec une illustration. On garde SA GÉOMÉTRIE (207
-              de large, rayon 20, teinte lavande — le kit y pose un dégradé de
-              `#F1F0FE` à `#FAF6FE`, deux valeurs que l oeil ne separe pas sur
-              136 px de haut, et l aplat du jeton les vaut —, titre
-              15/800, texte 12,5/400) et NOTRE CONTENU : à cet endroit précis, la
-              seule phrase qui mérite d'être relue est celle qui dit que tout est
-              tracé.
-            */}
-            <div className="rounded-ds-card-lg bg-ds-surface-teinte p-4">
-              <p className="text-[15px] leading-5 font-extrabold text-ds-texte-titre">
-                {t("traceTitre")}
-              </p>
-              <p className="mt-1 text-[12.5px] leading-[17px] text-ds-texte-corps">
-                {t("traceTexte")}
+            <div className="adm-trace">
+              <ShieldCheck aria-hidden="true" className="ic" />
+              <p>
+                <b>{t("traceTitre")}</b>
+                <span>{t("traceTexte")}</span>
               </p>
             </div>
 
             {/*
-              LA DÉCONNEXION COMPTE PLUS ICI QU'AILLEURS. C'est la seule surface
-              où l'on lit les données de quelqu'un d'autre, et chaque lecture est
-              tracée AU NOM de qui est connecté. Une session d'administration
-              laissée ouverte fait donc signer à quelqu'un des consultations
-              qu'il n'a pas faites — et le journal est append-only.
+              LA DÉCONNEXION COMPTE PLUS ICI QU'AILLEURS : chaque lecture est
+              tracée AU NOM de qui est connecté, et le journal est append-only.
+              L'ADRESSE, PAS UN PRÉNOM : le journal identifie le compte par elle.
             */}
-            <div className="mt-3.5 flex items-center gap-2.5 pt-3.5">
-              <span
-                aria-hidden="true"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent text-[13px] font-bold text-ds-texte-sur-marque"
-              >
-                {(admin.email ?? "?").slice(0, 1).toUpperCase()}
-              </span>
-              <div className="min-w-0 flex-grow">
-                {/* L'ADRESSE, PAS UN PRÉNOM. Le compte est identifié par son
-                    email dans le journal ; afficher autre chose ici obligerait à
-                    faire la correspondance de tête au moment de relire une
-                    trace. */}
-                <p className="truncate text-[13.5px] leading-[18px] font-bold text-ds-texte-fort">
-                  {admin.email}
-                </p>
-                <p className="text-[12px] leading-4 text-ds-texte-sourdine">
-                  {t("roleAdministrateur")}
-                </p>
+            <DetailsFermable className="compte">
+              <summary>
+                <span className="compte__avatar adm-avatar" aria-hidden="true">
+                  <Shield className="ic" />
+                </span>
+                <span className="compte__qui">
+                  <b>{t("roleAdministrateur")}</b>
+                  <small>{admin.email}</small>
+                </span>
+                <ChevronsUpDown aria-hidden="true" className="ic" />
+              </summary>
+              <div className="compte__menu">
+                <BoutonDeconnexion langue={langue} variante="menu" />
               </div>
-              <BoutonDeconnexion langue={langue} variante="sombre" />
-            </div>
-          </div>
-        </div>
-
-        {/* --- LE CONTENU, et la barre d'onglets sous lui au téléphone --- */}
-        <div className="flex min-w-0 flex-1 flex-col">
-          {children}
-
-          {/* L'espace n'existe qu'au téléphone : il colle la barre d'onglets au
-              bas de l'écran quand la page est courte. */}
-          <div className="flex-grow md:hidden" />
-          <NavigationAdmin entrees={entrees} etiquette={t("navigation")} variante="onglets" plus={t("onglets.plus")} />
-        </div>
-      </div>
+            </DetailsFermable>
+          </>
+        }
+      >
+        <header className="app__haut adm-haut">
+          <BoutonTiroir />
+          <form className="recherche" role="search" action={`/${langue}/admin/comptes`} method="get">
+            <Search aria-hidden="true" className="ic" />
+            <input
+              type="search"
+              name="q"
+              placeholder={t("comptes.recherchePlaceholder")}
+              aria-label={t("comptes.recherche")}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </form>
+          <p className="adm-bandeau">
+            <ShieldCheck aria-hidden="true" className="ic" />
+            <span>{t("bandeau")}</span>
+          </p>
+        </header>
+        {children}
+      </CoqueTiroir>
+      <InfoBulles />
     </div>
   );
 }

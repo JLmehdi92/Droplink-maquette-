@@ -29,44 +29,25 @@ export function RangeeConstatee({
   etat,
 }: {
   readonly titre: string;
-  /**
-   * ABSENTE SUR LES TROIS RANGÉES DE DÉBIT, comme sur la planche : « Jeton
-   * inconnu » n'appelle aucune glose, et une phrase de remplissage sous chacune
-   * ferait de la carte un mur de texte là où elle est censée se lire d'un coup
-   * d'œil. La rangée garde sa hauteur : elle est dictée par la boîte de valeur,
-   * pas par le texte.
-   */
   readonly aide?: string;
   readonly etat: FormeConstatee;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6 border-t border-ds-filet py-4">
-      <div className="min-w-0">
-        <p className="text-[14px] leading-[18px] font-semibold text-ds-texte-fort">
-          {titre}
-        </p>
-        {aide === undefined ? null : (
-          <p className="mt-[2px] text-[12px] leading-[15px] text-ds-texte-sourdine">{aide}</p>
-        )}
+    <div className="adm-constate">
+      <div>
+        <p>{titre}</p>
+        {aide === undefined ? null : <small>{aide}</small>}
       </div>
-
       {etat.forme === "valeur" ? (
-        // MÊME GÉOMÉTRIE QUE LE CHAMP DE LA PLANCHE — 120 × 42, rayon 11, chiffre
-        // à droite — mais un fond neutre et aucune bordure de contrôle : rien
-        // n'invite à cliquer là où rien ne se saisit.
-        <span className="flex h-[42px] w-[120px] shrink-0 items-center justify-end rounded-ds-control bg-ds-surface-creux px-[13px] font-mono text-[14px] text-ds-texte-sourdine">
-          {etat.valeur}
-        </span>
+        <b>{etat.valeur}</b>
       ) : etat.forme === "absent" ? (
-        <span className="flex h-[42px] w-[120px] shrink-0 items-center justify-end rounded-ds-control bg-ds-surface-creux px-[13px] text-[12px] leading-[16px] text-ds-texte-sourdine">
-          {etat.mention}
-        </span>
+        <b>{etat.mention}</b>
       ) : (
-        <span
-          aria-hidden="true"
-          className="flex h-[27px] w-[46px] shrink-0 items-center justify-start rounded-ds-pill bg-[#dcdce4] px-[3px]"
-        >
-          <span className="block h-[21px] w-[21px] rounded-ds-pill bg-white" />
+        /* ÉTEINT ET NON CLIQUABLE : rien ne le pilote encore, et un
+           interrupteur qui ne commande rien serait un réglage qui ment. */
+        <span className="interrupteur" aria-hidden="true">
+          <input type="checkbox" disabled tabIndex={-1} />
+          <i />
         </span>
       )}
     </div>

@@ -240,6 +240,13 @@ const PORTEES_PAR_LA_FEUILLE: ReadonlyArray<{ readonly classe: string; readonly 
       "pieds de « Paramètres » et de « Passer au Pro » compris.",
   },
   {
+    classe: "bouton-outil",
+    regle: ".bouton-outil, .bouton-app--plein, .bouton-app--second, .bouton-texte, .vues-liste button, .puce, .adm-danger, .adm-confirmer, .adm-pastille-contest, .adm-lien { min-height: 44px; }",
+    raison:
+      "Toute `.bouton-outil` vaut 44 px au toucher (règle `pointer: coarse` de la feuille) : « Voir la " +
+      "suite » des listes d'administration et « Annuler » de ses dialogues compris.",
+  },
+  {
     classe: "lien-r",
     regle: "@media (pointer: coarse) { .lien-r { display: inline-flex; align-items: center; min-height: 44px; } }",
     raison: "Les deux liens autonomes de « Paramètres » (portail de résiliation, « Ma marque »).",
@@ -552,31 +559,6 @@ const AUTHENTIFIEES: ReadonlyArray<{
       "focalisé : l'agrandir ne déplace aucun pixel du flux.",
   },
   {
-    fichier: "src/app/[locale]/admin/layout.tsx",
-    repere: "focus:not-sr-only focus:absolute focus:top-4",
-    plancher: "focus:min-h-11",
-    raison: "« Aller au contenu » de l'administration.",
-  },
-  {
-    fichier: "src/components/admin/recherche-admin.tsx",
-    repere: "focus:not-sr-only focus:absolute focus:top-full",
-    plancher: "focus:min-h-11",
-    raison:
-      "Le bouton « Rechercher », révélé au clavier sur les écrans Comptes et " +
-      "Boutiques. 34 px mesurés une fois focalisé.",
-  },
-  {
-    fichier: "src/app/[locale]/admin/comptes/[id]/page.tsx",
-    repere: "flex h-11 w-11 shrink-0",
-    plancher: "before:-inset-[3px]",
-    raison:
-      "Le retour vers la liste des comptes. Il faisait 40 × 40 et gagnait ses " +
-      "44 px par un pseudo-élément transparent ; la migration du 12/09 l'a porté " +
-      "à 44 pour de bon — le kit dessine ses boutons d'action à 48. Le " +
-      "pseudo-élément reste : il donne 50 de zone au doigt là où le bouton en " +
-      "montre 44, et c'est gratuit.",
-  },
-  {
     // La refonte (02/10/2026) dessine l'interrupteur dans sa feuille : la cible
     // y est portée à 44 px de haut au toucher.
     fichier: "src/styles/refonte/app.css",
@@ -591,13 +573,20 @@ const AUTHENTIFIEES: ReadonlyArray<{
       "paramètres système, eux, sont des <button> et n'ont RIEN eu à changer.",
   },
   {
-    fichier: "src/components/admin/reglage-nombre.tsx",
-    repere: "w-[120px] rounded-ds-control",
-    plancher: "min-h-11",
+    fichier: "src/styles/refonte/app.css",
+    repere: ".adm-reglage__saisie input, .adm-filtres a, .adm-champ input {",
+    plancher: "height: 44px",
     raison:
-      "Les trois champs nombre des paramètres système, mesurés à 42 px. Le " +
-      "plancher est levé à partir de `md`, où la planche AdminParametres — qui " +
-      "n'a PAS de variante téléphone — redevient la référence.",
+      "Les champs nombre des paramètres système (36 px au bureau) et les pastilles de " +
+      "filtre de l'administration (30 px), portés à 44 au toucher par la feuille de la refonte.",
+  },
+  {
+    fichier: "src/styles/refonte/app.css",
+    repere: ".puce, .adm-danger, .adm-confirmer, .adm-pastille-contest, .adm-lien {",
+    plancher: "min-height: 44px",
+    raison:
+      "Les boutons des dialogues d'administration (confirmer, danger), la pastille " +
+      "« Contestation » et les liens « Tout le journal » — 24 à 36 px au bureau.",
   },
 ];
 
@@ -644,12 +633,15 @@ describe("les cibles tactiles des surfaces authentifiees", () => {
     expect(
       AUTHENTIFIEES.length,
       "inventaire vide : le contrôle ne garderait rien",
-    ).toBeGreaterThanOrEqual(6);
+    ).toBeGreaterThanOrEqual(4);
     const fichiers = [...new Set(AUTHENTIFIEES.map((c) => c.fichier))];
     // Cinq et non plus six : la refonte (02/10/2026) a déplacé l'interrupteur de
     // « Ma marque » dans la feuille où vivait déjà le lien d'évitement. Les
     // entrées, elles, restent toutes là (test précédent).
-    expect(fichiers.length, "un seul fichier gardé : le relevé en couvrait plusieurs").toBeGreaterThanOrEqual(5);
+    // UN SEUL FICHIER depuis le portage de l'administration (02/10/2026) : chaque plancher
+    // relevé le 10/09 vit désormais dans la feuille de la refonte, à côté de la règle qui
+    // dessine sa cible — les utilitaires `min-h-11` des composants sont partis avec eux.
+    expect(fichiers, "le relevé ne lit plus la feuille de la refonte").toContain("src/styles/refonte/app.css");
   });
 
   /**

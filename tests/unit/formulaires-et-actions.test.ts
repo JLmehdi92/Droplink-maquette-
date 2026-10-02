@@ -228,6 +228,12 @@ const SANS_CHAMP_ADMIS: ReadonlyMap<string, string> = new Map([
       "l'origine — voyage dans les en-têtes. Lui inventer un champ caché " +
       "donnerait au client une prise sur un geste qui n'en demande aucune.",
   ],
+  [
+    join("src", "app", "[locale]", "nouveau-mot-de-passe", "page.tsx"),
+    "« Revenir à la connexion » est une DÉCONNEXION (relecture du 02/10/2026) : la " +
+      "session de récupération doit être fermée, sinon /connexion renvoie dans " +
+      "l'application. Même route que le bouton de déconnexion, même corps vide.",
+  ],
 ]);
 
 describe("Le contrat FormData tient des deux côtés", () => {

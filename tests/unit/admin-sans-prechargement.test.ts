@@ -45,7 +45,10 @@ describe("La surface d'administration", () => {
   test("CONTRE-TEST : la sonde trouve bien les liens de l'administration", () => {
     // Un ensemble vide passe tout : renommer un composant ou déplacer un
     // dossier rendrait ce fichier vert en ne regardant plus rien.
-    expect(liens().length).toBeGreaterThanOrEqual(20);
+    // 18 le 02/10/2026 : la refonte a remis la navigation dans la colonne commune
+    // (`NavigationVendeur`, `prefetch={false}` passé par le layout) et les filtres dans
+    // `FiltresAdmin` — moins de balises, autant de liens.
+    expect(liens().length).toBeGreaterThanOrEqual(15);
   });
 
   test("aucun lien ne précharge : chaque balise porte prefetch={false}", () => {

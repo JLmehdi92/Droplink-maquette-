@@ -918,7 +918,8 @@
       "type": "Ce format d’image n’est pas accepté.",
       "taille": "Cette image est trop lourde.",
       "envoi": "L’envoi a échoué. Réessayez.",
-      "confirmation": "Le serveur n’a pas confirmé l’envoi. Réessayez."
+      "confirmation": "Le serveur n’a pas confirmé l’envoi. Réessayez.",
+      "retrait": "Le logo n’a pas pu être retiré. Réessayez."
     },
     "couleurTitre": "Votre couleur",
     "couleurAide": "Le contraste est ajusté automatiquement : n’importe quelle couleur reste lisible.",
@@ -948,7 +949,7 @@
       "encre": "Encre",
       "ambre": "Ambre"
     },
-    "sansNom": "Votre boutique"
+    "erreurCouleur": "Saisissez une couleur hexadécimale à six chiffres, par exemple #5B4BF5."
   },
   "marque": {
     "titre": "Ma marque",
@@ -1709,9 +1710,6 @@
       "trace": "Cette consultation est écrite au journal d'audit, avec les critères employés. Ouvrir un compte y ajoute une entrée.",
       "sansNom": "Pas encore nommée",
       "ouvrir": "Ouvrir",
-      "colisSurSeuil": "{valeur} / {seuil}",
-      "colisSurSeuilLong": "{valeur} / {seuil} colis",
-      "commandesLong": "{n} commandes",
       "decompte": "{total, plural, one {# compte} other {# comptes}} · {suspendus, plural, one {# suspendu} other {# suspendus}}",
       "tuileTotal": "Comptes totaux",
       "tuileNouveaux": "Nouveaux inscrits",
@@ -1723,13 +1721,15 @@
       "listeTotal": "{total, plural, one {# compte au total} other {# comptes au total}}",
       "filtreStatut": "Filtrer par statut",
       "statutTous": "Tous les statuts",
-      "reinitialiser": "Réinitialiser",
       "repartition": "Statut des comptes",
       "unite": "comptes",
       "part": "{part} %",
       "videFiltre": "Aucun compte ne correspond à ce filtre.",
       "sousTitreListe": "Gérez et suivez tous les comptes de DropLink.",
-      "tuileTotalAide": "dont {sansType} sans type déclaré"
+      "tuileTotalAide": "dont {sansType} sans type déclaré",
+      "colisInfo": "{valeur} colis pris en charge, seuil d'alerte {seuil}",
+      "ouvrirLong": "Ouvrir le compte {email}",
+      "surTotal": "{affichees} sur {total, number} comptes"
     },
     "journal": {
       "titre": "Journal d'audit",
@@ -1770,9 +1770,7 @@
         "30": "30 derniers jours"
       },
       "colonnes": {
-        "quand": "Quand",
-        "quoi": "Ce qui a été fait",
-        "qui": "Par qui"
+        "quoi": "Ce qui a été fait"
       },
       "cibleAvant": "Compte visé :",
       "motifAvant": "Motif :",
@@ -1793,8 +1791,7 @@
       "part": "{part} %",
       "repartitionIndisponible": "Répartition indisponible.",
       "filtreFamille": "Filtrer par famille d'action",
-      "filtreFenetre": "Choisir la fenêtre",
-      "reinitialiser": "Réinitialiser"
+      "filtreFenetre": "Choisir la fenêtre"
     },
     "fiche": {
       "identite": "Identité",
@@ -1853,7 +1850,8 @@
         }
       },
       "email": "Email",
-      "titre": "Fiche de compte"
+      "titre": "Fiche de compte",
+      "couleur": "Couleur"
     },
     "suspension": {
       "ouvrir": "Suspendre ce compte",
@@ -1951,7 +1949,9 @@
       "courbeIndisponible": "Courbe indisponible.",
       "courbe": "Commandes",
       "periode": "{jours} derniers jours",
-      "periodeEtiquette": "Fenêtre de la courbe"
+      "periodeEtiquette": "Fenêtre de la courbe",
+      "alerteDoublons": "{comptes, plural, one {# compte} other {# comptes}}, sur {identifiants, plural, one {# identifiant partagé} other {# identifiants partagés}}",
+      "barre": "{jour} : {n, plural, one {# commande} other {# commandes}}"
     },
     "parametres": {
       "titre": "Paramètres système",
@@ -2113,9 +2113,7 @@
       "tuileStockage": "Stockage des médias",
       "stockageAide": "relu côté serveur au dépôt",
       "filtreType": "Filtrer par type de compte",
-      "reinitialiser": "Réinitialiser",
       "videFiltre": "Aucune boutique ne correspond à ce filtre.",
-      "colonneProprietaire": "Propriétaire",
       "colonneCreation": "Création",
       "legendeConfigurees": "Configurées",
       "legendeSansNom": "Sans nom"
@@ -2183,22 +2181,18 @@
       "degradation": {
         "autorise": "Si le compteur tombe en panne, l'accès reste autorisé : l'incident ne concerne pas les clients d'un vendeur.",
         "refuse": "Ici, une panne du compteur refuse l'accès. Ça ne pénalise que nous."
-      }
+      },
+      "barre": "{jour} : {n, plural, one {# colis} other {# colis}}"
     },
     "traceTitre": "Tout est tracé",
     "traceTexte": "Chaque consultation de données d’un vendeur est écrite au journal.",
     "allerAuContenu": "Aller au contenu",
     "roleAdministrateur": "Administrateur",
     "onglets": {
-      "panneau": "Panneau",
       "comptes": "Comptes",
       "boutiques": "Boutiques",
-      "journal": "Journal",
-      "surveillance": "Veille",
       "parametres": "Réglages",
-      "commandes": "Commandes",
-      "statistiques": "Statistiques",
-      "plus": "Plus"
+      "commandes": "Commandes"
     },
     "langues": {
       "fr": "Français",
@@ -2235,7 +2229,6 @@
         "30": "30 derniers jours",
         "toutes": "Toutes les dates"
       },
-      "reinitialiser": "Réinitialiser",
       "liste": "Liste des commandes",
       "listeTotal": "{total, plural, one {# commande au total} other {# commandes au total}}",
       "colonnes": {
@@ -2254,7 +2247,9 @@
       "videFiltre": "Aucune commande ne correspond à ces filtres.",
       "pageSuivante": "Voir la suite",
       "repartition": "Répartition des statuts",
-      "lienBloque": "Lien bloqué"
+      "lienBloque": "Lien bloqué",
+      "surTotal": "{affichees} sur {total, number} commandes",
+      "aucunTransporteur": "Aucun transporteur"
     },
     "statistiques": {
       "titre": "Statistiques",
@@ -2289,7 +2284,6 @@
       "serieNouveaux": "Nouveaux comptes",
       "serieActifs": "Comptes actifs",
       "typesDeCompte": "Types de compte",
-      "typesTotal": "{total, plural, one {# compte} other {# comptes}}",
       "typeFournisseurs": "Fournisseurs",
       "typeRevendeurs": "Revendeurs",
       "typeSans": "Sans type déclaré",
@@ -2308,7 +2302,6 @@
       "transporteurInconnu": "Pas encore reconnu",
       "aucunColis": "Aucun colis sur la période.",
       "part": "{part} %",
-      "nombreEntreParentheses": "({nombre})",
       "croissance": "Croissance globale",
       "croissanceAide": "Trois derniers mois contre les trois précédents",
       "croissanceComptes": "Comptes",
@@ -2317,7 +2310,8 @@
       "croissancePhotos": "Photos",
       "croissanceSansBase": "nouveau",
       "ecartHausse": "+{ecart} %",
-      "ecartBaisse": "−{ecart} %"
+      "ecartBaisse": "−{ecart} %",
+      "delaiAide": "sur les colis livrés de la période"
     },
     "blocage": {
       "bloquer": "Bloquer le lien",
@@ -2394,9 +2388,10 @@
       },
       "vide": "Aucun identifiant n'est partagé entre deux comptes.",
       "plafond": "Les 100 identifiants les plus partagés sont affichés, sur {total, number}.",
-      "panneauVoir": "Voir les doublons",
-      "panneauResume": "{comptes, plural, one {compte} other {comptes}}, sur {identifiants, plural, one {# identifiant partagé} other {# identifiants partagés}}"
-    }
+      "panneauVoir": "Voir les doublons"
+    },
+    "accueil": "Administration DropLink",
+    "pastille": "Admin"
   },
   "erreurs": {
     "titre": "Cet écran n'a pas pu s'afficher",

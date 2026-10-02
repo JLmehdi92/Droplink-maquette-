@@ -1,22 +1,11 @@
 import Link from "next/link";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import {
-  Eye,
-  HardDrive,
-  Package,
-  ShoppingCart,
-  SlidersHorizontal,
-  Store,
-  UserCheck,
-  UserX,
-  Users,
-} from "lucide-react";
-import { Clock, TriangleAlert } from "lucide-react";
+import { ArrowRight, CircleAlert, Clock, Users } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { exigerAdmin } from "@/lib/audit/garde";
-import { natureDAction } from "@/lib/admin/nature-d-action";
 import { lireDernieresActions } from "@/lib/audit/comptes";
+import { compterDoublons, type NombresDoublons } from "@/lib/audit/doublons";
 import {
   lireCommandesParJour,
   lirePanneau,
@@ -24,9 +13,12 @@ import {
   lireSeuils,
 } from "@/lib/audit/panneau";
 import { AnneauStatuts } from "@/components/admin/anneau-statuts";
-import { CourbeCommandes } from "@/components/admin/courbe-commandes";
-import { TuileVolume } from "@/components/admin/tuile-volume";
-import { SelecteurPeriode, lirePeriode } from "@/components/admin/selecteur-periode";
+import { BarresAdmin } from "@/components/admin/barres-admin";
+import { EntreeJournal } from "@/components/admin/entree-journal";
+import { FiltresAdmin } from "@/components/admin/filtres-admin";
+import { TuileVolume, Tuiles } from "@/components/admin/tuile-volume";
+import { PERIODES, lirePeriode } from "@/components/admin/selecteur-periode";
+import { jourCourt } from "@/components/admin/echelle";
 import { mettreOctetsALEchelle } from "@/lib/format/octets";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
@@ -45,45 +37,8 @@ export async function generateMetadata({
   return { title: t("panneau.titre"), robots: { index: false, follow: false } };
 }
 
-/** Combien de lignes du journal la planche pose sous les volumes. */
-const DERNIERES_ACTIONS = 4;
-
-const CARTE = "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-6";
-const SUR_TITRE =
-  "text-[11.5px] leading-[13px] font-bold tracking-[0.08em] text-ds-texte-sourdine uppercase";
-
-/*
- * LE PANNEAU DU KIT ADMIN — valeurs relevées sur la page servie : carte blanche
- * au rayon `card-lg`, filet, ombre de carte, remplissage 22 ; titre 18/700 à
- * l'interlettrage -0,025em et l'interligne 19,8 px ; sous-titre 13/400 en corps
- * à 3 px sous le titre, interligne 1,55.
- */
-const PANNEAU =
-  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
-const PANNEAU_TITRE = "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
-const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps";
-
-/**
- * LA TUILE RONDE D'UNE LIGNE DE JOURNAL, par famille d'action.
- *
- * ⚠️ ELLE NE PORTE AUCUNE INFORMATION, ET C'EST DÉLIBÉRÉ. Ni sa couleur ni son
- * icône ne disent quoi que ce soit que le libellé juste à côté ne dise déjà en
- * toutes lettres : c'est un repère de balayage, pas un code à apprendre. D'où
- * l'`aria-hidden` — annoncée, elle répéterait la ligne.
- *
- * Valeurs relevées sur le kit : 38 de côté, ronde, fond de la teinte d'état,
- * icône de 17 au trait 1,9.
- */
-const TUILE = {
-  suspension: { fond: "bg-ds-erreur-fond text-ds-erreur-encre", icone: UserX },
-  reactivation: { fond: "bg-ds-succes-fond text-ds-succes-encre", icone: UserCheck },
-  parametre: { fond: "bg-ds-surface-teinte text-ds-accent", icone: SlidersHorizontal },
-  consultation: { fond: "bg-ds-info-fond text-ds-info", icone: Eye },
-} as const;
-
-function tuileDAction(action: string): (typeof TUILE)[keyof typeof TUILE] {
-  return TUILE[natureDAction(action)];
-}
+/** Combien de lignes du journal la maquette pose sous les volumes. */
+const DERNIERES_ACTIONS = 5;
 
 /**
  * LE PANNEAU D'ADMINISTRATION.
@@ -145,11 +100,15 @@ export default async function PanneauAdmin({
   // s'ecrire differemment — et la borne haute de la courbe pourrait tomber un
   // jour plus loin que les dates du journal rendu juste en dessous.
   const maintenant = new Date();
-  const [panneau, actions, repartition, courbe] = await Promise.all([
+  const [panneau, actions, repartition, courbe, doublons] = await Promise.all([
     lirePanneau(supabase, seuils),
     lireDernieresActions(supabase, DERNIERES_ACTIONS),
     lireRepartition(supabase),
     lireCommandesParJour(supabase, maintenant, periode),
+    // UN COMPTE, PAS UNE LISTE : `compter_doublons_admin` n'écrit rien au journal
+    // et ne nomme personne. Illisible, il ne pose simplement pas d'alerte (il ne
+    // dit pas « aucun doublon »). La liste nominative, elle, s'ouvre en un clic.
+    compterDoublons(supabase).catch((): NombresDoublons | null => null),
   ]);
 
   const t = await getTranslations("admin");
@@ -180,367 +139,206 @@ export default async function PanneauAdmin({
       ? `/${langue}/admin/surveillance`
       : `/${langue}/admin/comptes?q=${encodeURIComponent(sujet)}`;
 
+  const doublonsAAlerter = doublons !== null && doublons.identifiants > 0 ? doublons : null;
+
   return (
-    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
-      <EnTeteAdmin titre={t("panneau.titre")} sousTitre={t("panneau.sousTitre")} />
+    <main id="contenu" className="tableau adm">
+      <EnTeteAdmin titre={t("panneau.titre")} sousTitre={t("panneau.sousTitre")} fil={[]} />
 
-      <div className="p-4 md:mt-[22px] md:p-0">
-        {/* --- CE QUI DEMANDE UNE DÉCISION --- */}
-        <section aria-label={t("panneau.decision")}>
-          <p className={SUR_TITRE + " mb-3"}>{t("panneau.decision")}</p>
+      {/* --- CE QUI DEMANDE UNE DÉCISION ---
+          TROIS ÉTATS, PAS DEUX : « aucune alerte » sur une lecture qui n'a pas
+          abouti ferait conclure que tout va bien. La troisième alerte de la
+          maquette — une contestation en attente — n'est pas portée : aucune
+          fonction ne compte les contestations de toute la plateforme, et en
+          écrire une demanderait une migration (§ 5 de la refonte : on les
+          évite). Les contestations se voient sur l'écran Commandes. */}
+      <section className="bloc adm-bloc adm-decision" aria-labelledby="adm-decision">
+        <header className="bloc__tete">
+          <div>
+            <h2 id="adm-decision">{t("panneau.decision")}</h2>
+          </div>
+        </header>
+        {panneau.alertes === null ? <p className="adm-texte pb-4">{t("panneau.alertesIndisponibles")}</p> : null}
+        {panneau.alertes !== null && panneau.alertes.length === 0 && doublonsAAlerter === null ? (
+          <p className="adm-texte pb-4">{t("panneau.aucuneAlerte")}</p>
+        ) : null}
+        {(panneau.alertes?.length ?? 0) > 0 || doublonsAAlerter !== null ? (
+          <ul className="adm-alertes">
+            {(panneau.alertes ?? []).map((a) => (
+              <li key={a.genre + a.sujet} className="adm-alerte">
+                {/* LA COULEUR SUIT LA GRAVITÉ RENDUE PAR LA BASE, pas le dessin :
+                    un veilleur muet arrête le suivi de TOUS les vendeurs. */}
+                <i data-ton={critique(a) ? "erreur" : "attente"} aria-hidden="true">
+                  {a.genre === "veilleur_en_retard" ? <Clock className="ic" /> : <CircleAlert className="ic" />}
+                </i>
+                <div>
+                  {/* LA VALEUR ET LE SEUIL SONT DANS LE TITRE, tous les deux. */}
+                  <b>{t(`panneau.alerte.${a.genre}`, { valeur: format.number(a.valeur), seuil: format.number(a.seuil) })}</b>
+                  <span>{t(`panneau.alerteDetail.${a.genre}`, { sujet: a.sujet, seuil: format.number(a.seuil) })}</span>
+                </div>
+                <Link prefetch={false} className="bouton-outil" href={ouExaminer(a.genre, a.sujet)}>
+                  {t("panneau.examiner")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </Link>
+              </li>
+            ))}
+            {doublonsAAlerter === null ? null : (
+              <li className="adm-alerte">
+                <i data-ton="attente" aria-hidden="true">
+                  <Users className="ic" />
+                </i>
+                <div>
+                  <b>
+                    {t("panneau.alerteDoublons", {
+                      comptes: doublonsAAlerter.comptes,
+                      identifiants: doublonsAAlerter.identifiants,
+                    })}
+                  </b>
+                  <span>{t("doublons.sousTitre")}</span>
+                </div>
+                <Link prefetch={false} className="bouton-outil" href={`/${langue}/admin/comptes/doublons`}>
+                  {t("doublons.panneauVoir")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </Link>
+              </li>
+            )}
+          </ul>
+        ) : null}
+      </section>
 
-          {/* TROIS ÉTATS, PAS DEUX. « Aucune alerte » sur une lecture qui n'a
-              pas abouti ferait conclure que tout va bien — c'est exactement ce
-              que le brief interdit, et sur la section qu'il range en tête. */}
-          {panneau.alertes === null ? (
-            <p className={CARTE + " text-ds-texte-corps"}>
-              {t("panneau.alertesIndisponibles")}
-            </p>
-          ) : panneau.alertes.length === 0 ? (
-            <p className={CARTE + " text-ds-texte-corps"}>
-              {t("panneau.aucuneAlerte")}
-            </p>
+      {/* --- LES VOLUMES ---
+          L'INDISPONIBILITÉ SE DIT, elle ne se devine pas à cinq tirets.
+          `parcels_registered` porte « FACTURÉ » : c'est le seul compteur du
+          produit qui corresponde à une facture. */}
+      <h2 className="adm-h2">{t("panneau.volumes")}</h2>
+      {panneau.compteurs === null ? <p className="adm-aide">{t("panneau.compteursIndisponibles")}</p> : null}
+      <Tuiles etiquette={t("panneau.volumes")} colonnes={5}>
+        <TuileVolume libelle={t("panneau.commandes")} valeur={chiffre(panneau.compteurs?.commandesCreeesCeMois)} complement={t("panneau.ceMoisCi")} />
+        <TuileVolume
+          libelle={t("panneau.comptesActifs")}
+          valeur={chiffre(panneau.compteurs?.comptesActifs)}
+          complement={t("panneau.comptesDont", {
+            suspendus: chiffre(panneau.compteurs?.comptesSuspendus),
+            sansType: chiffre(panneau.compteurs?.comptesSansType),
+          })}
+        />
+        {/* LE CHIFFRE QUI INFORME EST LE SECOND : une boutique naît à
+            l'inscription ; combien sont allées jusqu'à se donner un nom, c'est
+            la mesure d'activation. */}
+        <TuileVolume
+          libelle={t("panneau.boutiques")}
+          valeur={chiffre(panneau.compteurs?.boutiques)}
+          complement={t("panneau.boutiquesDont", { nommees: chiffre(panneau.compteurs?.boutiquesNommees) })}
+        />
+        <TuileVolume
+          ton="facture"
+          libelle={t("panneau.colisFactures")}
+          valeur={chiffre(panneau.compteurs?.colisPrisEnChargeCeMois)}
+          complement={
+            <>
+              <span className="adm-facture">{t("panneau.facture")}</span> {t("panneau.ceMoisCi")}
+            </>
+          }
+        />
+        {/* « INDISPONIBLE » ET JAMAIS « 0 o » : la bascule vient de l'existence
+            d'un MÉCANISME de mesure (migration 049), pas d'une valeur observée. */}
+        <TuileVolume
+          libelle={t("panneau.stockage")}
+          valeurEnSourdine={taille === null}
+          valeur={
+            taille === null
+              ? t("panneau.stockageIndisponible")
+              : t("panneau.stockageValeur", {
+                  valeur: format.number(taille.valeur, {
+                    minimumFractionDigits: taille.decimales,
+                    maximumFractionDigits: taille.decimales,
+                  }),
+                  unite: t(`unites.${taille.unite}`),
+                })
+          }
+          complement={t("panneau.stockageAide")}
+        />
+      </Tuiles>
+
+      {/* --- LES COMMANDES PAR JOUR, PUIS L'ANNEAU DES STATUTS ---
+          QUE DES NOMBRES : c'est ce qui les autorise sur l'écran d'accueil. Un
+          tableau « Dernières commandes » nommerait les clients d'autres vendeurs
+          et obligerait à un audit À CHAQUE OUVERTURE du panneau. */}
+      <div className="adm-rangee adm-rangee--2">
+        <section className="bloc adm-bloc" aria-labelledby="adm-courbe">
+          <header className="bloc__tete">
+            <div>
+              <h2 id="adm-courbe">{t("panneau.courbe")}</h2>
+              <p className="adm-aide">{t("panneau.commandesAide", { jours: periode })}</p>
+            </div>
+            {/* LA PÉRIODE SE CHOISIT (7, 30 ou 90 jours) là où la maquette pose
+                une étiquette fixe : le produit l'avait, rien ne se perd. */}
+            <FiltresAdmin
+              etiquette={t("panneau.periodeEtiquette")}
+              courant={String(periode)}
+              options={PERIODES.map((j) => ({ valeur: String(j), libelle: t("panneau.periode", { jours: j }), href: `/${langue}/admin?jours=${j}` }))}
+            />
+          </header>
+          {courbe === null ? (
+            <p className="adm-texte pb-4">{t("panneau.courbeIndisponible")}</p>
+          ) : courbe.length === 0 ? (
+            <p className="adm-texte pb-4">{t("panneau.aucuneCommande")}</p>
           ) : (
-            <ul className="flex flex-col gap-2.5 md:gap-2.5">
-              {panneau.alertes.map((a) => (
-                <li
-                  key={a.genre + a.sujet}
-                  className={
-                    "flex flex-col gap-[13px] rounded-ds-card border p-4 md:flex-row md:items-start md:rounded-ds-card md:px-[18px] md:py-4 " +
-                    (critique(a)
-                      ? "border-ds-erreur/30 bg-ds-erreur-fond"
-                      : "border-[#F3DFB4] bg-ds-alerte-fond")
-                  }
-                >
-                  <div className="flex gap-[11px] md:flex-grow md:gap-[13px]">
-                    {/* La pastille double la couleur de fond, elle ne la
-                        remplace pas : une couleur seule ne se lit pas de la même
-                        façon selon les yeux. */}
-                    <span
-                      aria-hidden="true"
-                      className={
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-ds-sm md:h-[34px] md:w-[34px] " +
-                        /* ⚠️ LA PASTILLE D'ATTENTION ÉTAIT DE LA COULEUR DE SA
-                           CARTE (bg-ds-alerte-fond sur bg-ds-alerte-fond) : elle
-                           passe sur le blanc, comme le badge de la surveillance. */
-                        (critique(a) ? "bg-ds-surface-carte text-ds-erreur-encre" : "bg-ds-surface-carte text-ds-alerte-encre")
-                      }
-                    >
-                      {critique(a) ? (
-                        <TriangleAlert aria-hidden="true" size={17} strokeWidth={1.9} />
-                      ) : (
-                        <Clock aria-hidden="true" size={17} strokeWidth={1.9} />
-                      )}
-                    </span>
-
-                    <div className="min-w-0">
-                      {/* LA VALEUR ET LE SEUIL SONT DANS LE TITRE, tous les
-                          deux. Sans le seuil, on ne sait pas de combien on
-                          dépasse ; sans la valeur, on ne sait pas quoi
-                          vérifier. */}
-                      <p
-                        className={
-                          /* ⚠️ L'ENCRE, PAS LA COULEUR DE L'ALERTE. Mesuré le
-                             15/09/2026 : le titre ambre rendait 2,44:1 sur son
-                             fond, le détail rouge 3,16:1 — illisibles, sur les
-                             deux seules lignes de l'écran faites pour être lues
-                             en premier. La couleur reste portée par la carte, la
-                             pastille et l'icône. */
-                          "text-[14px] leading-5 font-bold text-ds-texte-fort md:text-[15px] md:leading-[19px]"
-                        }
-                      >
-                        {t(`panneau.alerte.${a.genre}`, {
-                          valeur: format.number(a.valeur),
-                          seuil: format.number(a.seuil),
-                        })}
-                      </p>
-                      <p
-                        className={
-                          /* ink-600 et non le gris de corps : #6B6F8C tombe à
-                             4,30:1 sur le fond rouge et 4,46:1 sur l'ambre ;
-                             #4A4E68 rend 7,1:1 et 7,4:1. */
-                          "mt-[3px] text-[13px] leading-[19px] font-normal text-ds-ink-600 md:leading-5"
-                        }
-                      >
-                        {t(`panneau.alerteDetail.${a.genre}`, {
-                          sujet: a.sujet,
-                          seuil: format.number(a.seuil),
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Link prefetch={false}
-                    href={ouExaminer(a.genre, a.sujet)}
-                    className={
-                      "flex min-h-11 shrink-0 items-center justify-center rounded-ds-control border bg-ds-surface-carte px-[15px] text-[14px] leading-[18px] font-bold md:h-[38px] md:min-h-0 md:rounded-ds-sm md:text-[13px] md:leading-4 " +
-                      /* Le bouton est NEUTRE : l'ambre sur blanc rendait 2,69:1. */
-                      "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux"
-                    }
-                  >
-                    {t("panneau.examiner")}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <BarresAdmin
+              etiquette={t("panneau.commandesAide", { jours: periode })}
+              debut={jourCourt(format, courbe[0]?.jour ?? "")}
+              fin={jourCourt(format, courbe[courbe.length - 1]?.jour ?? "")}
+              valeurs={courbe.map((j) => ({
+                valeur: j.total,
+                info: t("panneau.barre", { jour: jourCourt(format, j.jour), n: j.total }),
+              }))}
+            />
           )}
         </section>
 
-        {/* --- LES VOLUMES --- */}
-        <section aria-label={t("panneau.volumes")} className="mt-5 md:mt-7">
-          <p className={SUR_TITRE + " mb-3"}>{t("panneau.volumes")}</p>
-
-          {/* L'INDISPONIBILITÉ SE DIT, elle ne se devine pas à quatre tirets.
-              Un tiret seul se lirait comme « zéro mal affiché » ; cette ligne
-              est ce qui distingue « on n'a pas pu compter » de « il n'y a
-              rien », et c'est la distinction qui compte pour qui décide. */}
-          {panneau.compteurs === null ? (
-            <p className="mb-2.5 text-ds-texte-corps">
-              {t("panneau.compteursIndisponibles")}
-            </p>
-          ) : null}
-
-          {/* CINQ TUILES là où le kit en pose quatre. Sa quatrième est un
-              revenu d'abonnements que la contrainte n°1 interdit ; les nôtres
-              sont les colis facturés, les comptes, les commandes, les boutiques
-              et le stockage. Elles gardent l'anatomie de `AdminStat`. */}
-          <div className="flex flex-col gap-2.5 xl:grid xl:grid-cols-5 xl:gap-[18px]">
-            {/* `parcels_registered` EN TÊTE ET ENCADRÉ : c'est le seul compteur
-                du produit qui corresponde à une FACTURE. Le noyer parmi les
-                autres reviendrait à traiter notre seul coût variable comme une
-                statistique de plus. */}
-            <TuileVolume
-              icone={Package}
-              accent
-              libelle={t("panneau.colisFactures")}
-              valeur={chiffre(panneau.compteurs?.colisPrisEnChargeCeMois)}
-              badge={
-                <span className="rounded-ds-pill bg-ds-accent px-2 py-0.5 text-[11.5px] leading-[15px] font-bold text-ds-texte-sur-marque">
-                  {t("panneau.facture")}
-                </span>
-              }
-              complement={t("panneau.ceMoisCi")}
-            />
-
-            <TuileVolume
-              icone={Users}
-              libelle={t("panneau.comptesActifs")}
-              valeur={chiffre(panneau.compteurs?.comptesActifs)}
-              /* LES DEUX AUTRES ÉTATS DE COMPTE TIENNENT DANS CETTE LIGNE. La
-                 planche n'en met qu'un ; sortir « sans type » de l'écran aurait
-                 fait disparaître le seul endroit où l'on voit d'un coup combien
-                 d'inscrits n'ont jamais fini leur onboarding — et cette colonne
-                 existe précisément pour être mesurée. */
-              complement={t("panneau.comptesDont", {
-                suspendus: chiffre(panneau.compteurs?.comptesSuspendus),
-                sansType: chiffre(panneau.compteurs?.comptesSansType),
-              })}
-            />
-
-            <TuileVolume
-              icone={ShoppingCart}
-              libelle={t("panneau.commandes")}
-              valeur={chiffre(panneau.compteurs?.commandesCreeesCeMois)}
-              complement={t("panneau.ceMoisCi")}
-            />
-
-            {/*
-              LES BOUTIQUES — la troisième tuile du kit, et elle manquait.
-
-              ⚠️ LE CHIFFRE QUI INFORME EST LE SECOND. Une boutique naît à
-              l'inscription : il y en a exactement autant que de comptes, et
-              afficher ce seul total annoncerait « 20 boutiques » pour vingt
-              comptes dont dix-huit n'ont jamais rien configuré. La ligne du
-              dessous dit combien sont allés jusqu'à se donner un nom — c'est la
-              mesure d'activation, pas de volume.
-            */}
-            <TuileVolume
-              icone={Store}
-              libelle={t("panneau.boutiques")}
-              valeur={chiffre(panneau.compteurs?.boutiques)}
-              complement={t("panneau.boutiquesDont", {
-                nommees: chiffre(panneau.compteurs?.boutiquesNommees),
-              })}
-            />
-
-            {/* LE STOCKAGE EST MESURÉ DEPUIS LA MIGRATION 049 : les octets sont
-                tenus à l'écriture, boutique par boutique, à partir de la taille
-                RELUE CÔTÉ SERVEUR au dépôt — jamais celle annoncée par le
-                client, qui est la base du modèle de coût.
-
-                IL A LONGTEMPS AFFICHÉ « INDISPONIBLE », ET C'ÉTAIT CORRECT :
-                zéro aurait affirmé qu'on avait mesuré. La bascule vient de
-                l'existence d'un MÉCANISME, pas d'une valeur observée — déduire
-                « zéro donc pas mesuré » serait faux pour toute installation
-                neuve, c'est-à-dire dès le premier jour.
-
-                C'est l'inverse de la règle de la page publique, et c'est voulu :
-                là une information absente est OMISE, ici elle est NOMMÉE. Un
-                client consulte, un administrateur décide. */}
-            <TuileVolume
-              icone={HardDrive}
-              libelle={t("panneau.stockage")}
-              valeurEnSourdine={taille === null}
-              valeur={
-                taille === null
-                  ? t("panneau.stockageIndisponible")
-                  : t("panneau.stockageValeur", {
-                      valeur: format.number(taille.valeur, {
-                        minimumFractionDigits: taille.decimales,
-                        maximumFractionDigits: taille.decimales,
-                      }),
-                      unite: t(`unites.${taille.unite}`),
-                    })
-              }
-              complement={t("panneau.stockageAide")}
-            />
-          </div>
-        </section>
-
-        {/*
-          --- LA RANGÉE DU KIT : LA COURBE, PUIS L'ANNEAU DES STATUTS ---
-
-          Deux panneaux à 1,45 contre 1, comme la planche. Ils répondent à deux
-          questions qu'on ne pose pas ensemble : combien de commandes naissent
-          chaque jour, et où en sont celles qui existent.
-
-          ⚠️ ILS NE RENDENT QUE DES NOMBRES, et c'est ce qui les autorise à vivre
-          sur l'écran d'accueil. Le kit pose à leur droite un tableau
-          « Dernières commandes » portant le pseudo du client, la boutique et le
-          transporteur de commandes appartenant à d'autres vendeurs : le brief
-          obligerait à écrire un audit À CHAQUE OUVERTURE du panneau, et cette
-          entrée-là noierait les consultations délibérées que le journal existe
-          pour retrouver.
-        */}
-        <div className="mt-5 grid gap-[18px] md:mt-7 xl:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
-          <section className={PANNEAU}>
-            {/* L'EN-TÊTE PARTAGE SA LIGNE AVEC LE SÉLECTEUR, comme le kit : la
-                colonne du titre se replie à 180 px, elle ne prend pas toute la
-                largeur du panneau. */}
-            <header className="mb-[18px] flex flex-wrap items-start gap-3.5">
-              <div className="min-w-0 flex-[1_1_180px]">
-                <h2 className={PANNEAU_TITRE}>{t("panneau.courbe")}</h2>
-                <p className={PANNEAU_AIDE}>
-                  {t("panneau.commandesAide", { jours: periode })}
-                </p>
-              </div>
-              <SelecteurPeriode langue={langue} periode={periode} />
-            </header>
-            {courbe === null ? (
-              <p className="text-[14px] text-ds-texte-corps">{t("panneau.courbeIndisponible")}</p>
-            ) : (
-              <CourbeCommandes jours={courbe} />
-            )}
-          </section>
-
-          <section className={PANNEAU}>
-            <header className="mb-[18px]">
-              <h2 className={PANNEAU_TITRE}>{t("panneau.statuts")}</h2>
-              <p className={PANNEAU_AIDE}>{t("panneau.statutsAide")}</p>
-            </header>
-            {repartition === null ? (
-              <p className="text-[14px] text-ds-texte-corps">
-                {t("panneau.statutsIndisponible")}
-              </p>
-            ) : repartition.total === 0 ? (
-              <p className="text-[14px] text-ds-texte-corps">{t("panneau.aucuneCommande")}</p>
-            ) : (
-              <AnneauStatuts repartition={repartition} />
-            )}
-          </section>
-        </div>
-
-        {/* --- LES DERNIÈRES ACTIONS D'ADMINISTRATION ---
-
-            AU BUREAU SEULEMENT, comme la planche. Rien n'est perdu au
-            téléphone : le journal complet est à un onglet, et cette carte n'en
-            est qu'un aperçu.
-
-            LA LIRE N'ÉCRIT RIEN. `lire_journal_admin` est déclarée `stable`,
-            donc PostgREST l'exécute en transaction lecture seule : le panneau ne
-            peut pas se remplir de sa propre consultation. */}
-        <section aria-label={t("panneau.dernieresActions")} className="mt-[18px] hidden md:block">
-          <div className={PANNEAU}>
-            <div className="mb-[18px] flex items-start justify-between gap-3.5">
-              <h2 className={PANNEAU_TITRE}>{t("panneau.dernieresActions")}</h2>
-              <Link prefetch={false}
-                href={`/${langue}/admin/journal`}
-                className="shrink-0 text-[13px] leading-4 font-semibold text-ds-accent hover:text-ds-accent-survol"
-              >
-                {t("panneau.toutLeJournal")}
-              </Link>
+        <section className="bloc adm-bloc adm-bloc--anneau" aria-labelledby="adm-statuts">
+          <header className="bloc__tete">
+            <div>
+              <h2 id="adm-statuts">{t("panneau.statuts")}</h2>
+              <p className="adm-aide">{t("panneau.statutsAide")}</p>
             </div>
-
-            {/* TROIS ÉTATS, PAS DEUX. « Aucune entrée » sur un journal qu'on
-                n'a PAS PU LIRE serait une affirmation fausse, et posée sur
-                l'écran dont tout le rôle est de porter des faits vérifiables.
-                Côté administration une information absente se NOMME — c'est
-                l'inverse de la page publique, et c'est voulu : un client
-                consulte, un administrateur décide. */}
-            {actions === null ? (
-              <p className="text-ds-texte-corps">
-                {t("panneau.dernieresActionsIndisponibles")}
-              </p>
-            ) : actions.length === 0 ? (
-              <p className="text-ds-texte-corps">
-                {t("journal.vide")}
-              </p>
-            ) : (
-              <ul className="flex flex-col">
-                {actions.map((ligne, rang) => {
-                  const tuile = tuileDAction(ligne.action);
-                  const IconeDeLigne = tuile.icone;
-                  return (
-                    <li
-                      key={ligne.id}
-                      className={
-                        "flex items-center gap-[13px] py-[13px] " +
-                        (rang === 0 ? "" : "border-t border-ds-filet")
-                      }
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={
-                          "flex h-[38px] w-[38px] flex-none items-center justify-center rounded-ds-pill " +
-                          tuile.fond
-                        }
-                      >
-                        <IconeDeLigne size={17} strokeWidth={1.9} />
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className="truncate text-[14px] leading-[normal] font-bold text-ds-texte-fort">
-                          {/* Le point devient un souligné : next-intl le traite
-                              comme un séparateur de NIVEAU, et
-                              `journal.actions.compte.suspension` irait chercher
-                              une clé imbriquée qui n'existe pas. */}
-                          {t.has(`journal.actions.${ligne.action.replaceAll(".", "_")}`)
-                            ? t(`journal.actions.${ligne.action.replaceAll(".", "_")}`)
-                            : ligne.action}
-                        </span>
-                        {/* LA LIGNE DE DESSOUS NE NAÎT QUE SI ELLE A QUELQUE CHOSE
-                            À DIRE. Un tiret de remplissage sur chaque action sans
-                            cible ferait une colonne de tirets, et l'œil
-                            apprendrait à sauter l'endroit où s'écrit l'email. */}
-                        {ligne.cibleEmail === null ? null : (
-                          <span className="truncate text-[13px] leading-[normal] text-ds-texte-sourdine">
-                            {ligne.cibleEmail}
-                          </span>
-                        )}
-                      </span>
-                      <span className="shrink-0 text-[12.5px] leading-[normal] whitespace-nowrap text-ds-texte-sourdine">
-                        {format.relativeTime(new Date(ligne.quand), {
-                          now: maintenant,
-                          style: "short",
-                        })}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+          </header>
+          {repartition === null ? (
+            <p className="adm-texte pb-4">{t("panneau.statutsIndisponible")}</p>
+          ) : repartition.total === 0 ? (
+            <p className="adm-texte pb-4">{t("panneau.aucuneCommande")}</p>
+          ) : (
+            <AnneauStatuts repartition={repartition} />
+          )}
         </section>
       </div>
+
+      {/* --- LES DERNIÈRES ACTIONS D'ADMINISTRATION ---
+          LA LIRE N'ÉCRIT RIEN : `lire_journal_admin` est `stable`, PostgREST
+          l'exécute en transaction lecture seule. TROIS ÉTATS : « aucune entrée »
+          sur un journal qu'on n'a pas pu lire serait une affirmation fausse. */}
+      <section className="bloc adm-bloc" aria-labelledby="adm-actions">
+        <header className="bloc__tete">
+          <div>
+            <h2 id="adm-actions">{t("panneau.dernieresActions")}</h2>
+          </div>
+          <Link prefetch={false} className="lien-texte adm-lien" href={`/${langue}/admin/journal`}>
+            {t("panneau.toutLeJournal")}
+            <ArrowRight aria-hidden="true" className="ic" />
+          </Link>
+        </header>
+        {actions === null ? (
+          <p className="adm-texte pb-4">{t("panneau.dernieresActionsIndisponibles")}</p>
+        ) : actions.length === 0 ? (
+          <p className="adm-texte pb-4">{t("journal.vide")}</p>
+        ) : (
+          <ol className="adm-journal adm-journal--court">
+            {actions.map((ligne) => (
+              <EntreeJournal key={ligne.id} ligne={ligne} />
+            ))}
+          </ol>
+        )}
+      </section>
     </main>
   );
 }

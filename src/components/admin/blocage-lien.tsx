@@ -1,9 +1,9 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { Ban, Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { BoutonAction } from "@/components/bouton-action";
+import { DialogueAdmin } from "@/components/admin/dialogue-admin";
 import { bloquerLien, debloquerLien, type EtatBlocage } from "@/app/[locale]/admin/commandes/actions";
 
 /**
@@ -76,106 +76,58 @@ export function BlocageLien({
 
   // `leading-[normal]` comme la planche (15 px) : hérité du `label`, l'interligne montait à
   // 18 px et décalait tout le dialogue de 3 px (mesuré le 19/09/2026).
-  const libelle = "text-[12.5px] leading-[normal] font-semibold text-ds-texte-sourdine";
-  const aide = "text-[12.5px] leading-[1.5] text-ds-texte-corps";
-
   return (
     <>
+      {/* UN LIBELLÉ EN TOUTES LETTRES, comme la maquette : l'icône seule d'avant
+          (« interdit ») demandait de survoler pour savoir ce qu'elle faisait. */}
       <button
         type="button"
         onClick={ouvrir}
         aria-label={t(bloque ? "debloquerLong" : "bloquerLong", { reference })}
-        title={t(bloque ? "debloquer" : "bloquer")}
-        className={
-          "inline-flex flex-none items-center justify-center rounded-ds-sm border bg-ds-surface-carte align-middle transition-colors " +
-          (carte ? "min-h-11 min-w-11 " : "h-[34px] w-[34px] ") +
-          (bloque
-            ? "border-ds-erreur text-ds-erreur-encre hover:bg-ds-erreur-fond"
-            : "border-ds-filet text-ds-texte-sourdine hover:bg-ds-surface-creux hover:text-ds-texte-fort")
-        }
+        className={"bouton-outil" + (carte ? " w-full justify-center" : "")}
       >
-        {bloque ? (
-          <Link2 aria-hidden="true" size={16} strokeWidth={1.9} />
-        ) : (
-          <Ban aria-hidden="true" size={16} strokeWidth={1.9} />
-        )}
+        {t(bloque ? "debloquer" : "bloquer")}
       </button>
 
-      <dialog
-        ref={dialogue}
+      <DialogueAdmin
+        refDialogue={dialogue}
+        idTitre={idTitre}
+        titre={t(bloque ? "debloquerLong" : "bloquerLong", { reference })}
+        aide={t(bloque ? "aideDeblocage" : "aideBlocage")}
+        travaille={travaille}
+        fermer={t("annuler")}
         onClose={reinitialiser}
-        /* ⚠️ PENDANT LA REQUÊTE, ÉCHAP NE FERME PAS. Une Server Action ne s'annule pas :
-           fermer ferait croire à une annulation, puis la page se rechargerait sur un
-           blocage bel et bien fait (revue du 19/09/2026, contrainte 8). */
-        onCancel={(e) => {
-          if (travaille) e.preventDefault();
-        }}
-        aria-labelledby={idTitre}
-        className="m-auto w-[480px] max-w-[calc(100%-32px)] rounded-ds-card-lg bg-ds-surface-carte p-6 text-left shadow-ds-window backdrop:bg-[rgba(11,11,24,.34)]"
       >
-        <div className="flex flex-col gap-4">
-          <div>
-            <h2
-              id={idTitre}
-              className="text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre"
-            >
-              {t(bloque ? "debloquerLong" : "bloquerLong", { reference })}
-            </h2>
-            <p className="mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps">
-              {t(bloque ? "aideDeblocage" : "aideBlocage")}
-            </p>
-          </div>
-
-          <label className="flex flex-col gap-1.5">
-            <span className={libelle}>{t("motif")}</span>
-            <textarea
-              name="motif"
-              rows={3}
-              value={motif}
-              onChange={(e) => setMotif(e.target.value)}
-              className="w-full resize-none rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[13px] py-[11px] text-[13.5px] leading-[1.55] text-ds-texte-fort outline-none focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]"
-            />
-            <span className={aide}>{t(bloque ? "motifAide" : "motifAideBlocage", { n: motifMin })}</span>
-          </label>
-
-          {etat.statut === "erreur" ? (
-            <p role="alert" className="text-[13px] text-ds-erreur-encre">
-              {t(`erreur.${etat.motif}`)}
-            </p>
-          ) : null}
-
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            {/* Annuler ne dépend que d'une chose : qu'aucune requête ne soit partie. Tant
-                qu'elle court, il n'annulerait rien — le proposer serait mentir. */}
-            <button
-              type="button"
-              disabled={travaille}
-              onClick={() => dialogue.current?.close()}
-              className="h-11 px-4 text-[14px] font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort disabled:opacity-50"
-            >
-              {t("annuler")}
-            </button>
-            <BoutonAction
-              type="button"
-              enAttente={travaille}
-              disabled={!pret}
-              onClick={() => void confirmer()}
-              libelles={{
-                repos: t(bloque ? "debloquer" : "bloquer"),
-                enCours: t("enCours"),
-                reussi: t(bloque ? "debloquer" : "bloquer"),
-                echoue: t(bloque ? "debloquer" : "bloquer"),
-              }}
-              className={
-                "flex h-11 items-center justify-center rounded-ds-card border bg-ds-surface-carte px-5 text-[14px] font-bold transition-colors disabled:opacity-50 " +
-                (bloque
-                  ? "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux"
-                  : "border-ds-erreur text-ds-erreur-encre hover:bg-ds-erreur-fond")
-              }
-            />
-          </div>
-        </div>
-      </dialog>
+        <label className="adm-champ">
+          <span>{t("motif")}</span>
+          <textarea name="motif" rows={3} value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <small>{t(bloque ? "motifAide" : "motifAideBlocage", { n: motifMin })}</small>
+        </label>
+        {etat.statut === "erreur" ? (
+          <p role="alert" className="adm-dialogue__erreur">
+            {t(`erreur.${etat.motif}`)}
+          </p>
+        ) : null}
+        <footer>
+          {/* Annuler ne dépend que d'une chose : qu'aucune requête ne soit partie. */}
+          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => dialogue.current?.close()}>
+            {t("annuler")}
+          </button>
+          <BoutonAction
+            type="button"
+            enAttente={travaille}
+            disabled={!pret}
+            onClick={() => void confirmer()}
+            libelles={{
+              repos: t(bloque ? "debloquer" : "bloquer"),
+              enCours: t("enCours"),
+              reussi: t(bloque ? "debloquer" : "bloquer"),
+              echoue: t(bloque ? "debloquer" : "bloquer"),
+            }}
+            className={(bloque ? "adm-confirmer" : "adm-danger") + " disabled:opacity-50"}
+          />
+        </footer>
+      </DialogueAdmin>
     </>
   );
 }

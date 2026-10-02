@@ -1,4 +1,3 @@
-import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 /**
@@ -24,30 +23,21 @@ import type { ReactNode } from "react";
 export function CarteReglages({
   titre,
   sousTitre,
-  icone: Icone,
   children,
 }: {
   readonly titre: string;
   readonly sousTitre: string;
-  readonly icone: LucideIcon;
   readonly children: ReactNode;
 }) {
+  const id = `reglages-${titre.replace(/\W+/g, "-")}`;
   return (
-    <section className="rounded-ds-card border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:rounded-ds-card-lg md:p-5">
-      <div className="mb-4 flex items-start gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent"
-        >
-          <Icone size={18} strokeWidth={1.9} />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <h2 className="text-[16.5px] leading-[normal] font-bold tracking-[-0.025em] text-ds-texte-fort">
-            {titre}
-          </h2>
-          <p className="text-[13px] leading-[normal] text-ds-texte-corps">{sousTitre}</p>
-        </span>
-      </div>
+    <section className="bloc adm-bloc" aria-labelledby={id}>
+      <header className="bloc__tete">
+        <div>
+          <h2 id={id}>{titre}</h2>
+          <p className="adm-aide">{sousTitre}</p>
+        </div>
+      </header>
       {children}
     </section>
   );

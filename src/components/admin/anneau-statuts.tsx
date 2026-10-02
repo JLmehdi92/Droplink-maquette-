@@ -3,53 +3,32 @@ import { Anneau } from "@/components/admin/anneau";
 import type { RepartitionAdmin } from "@/lib/audit/panneau";
 
 /**
- * LA RÉPARTITION DES COMMANDES DE LA PLATEFORME PAR STATUT.
- *
- * ⚠️ QUATRE PARTS LÀ OÙ LE KIT EN DESSINE CINQ. Ses « Problème » et « Annulées »
- * n'existent pas : la décision 4 arrête la frise à quatre étapes — préparation,
- * expédié, en transit, livré — et la granularité vit dans le DÉTAIL du suivi.
- * Inventer deux états pour remplir un anneau leur donnerait une existence que la
- * base ne leur accorde pas.
- *
- * L'ordre est celui de la frise, du plus avancé au moins avancé — comme le kit,
- * qui ouvre sur « Livrées ». C'est l'ordre dans lequel on lit un avancement.
+ * L'ANNEAU DES STATUTS DE COMMANDE — dans l'ordre et aux couleurs de la
+ * maquette : en préparation, expédiées, en transit, livrées. Que des nombres :
+ * aucune commande n'y est nommée, donc aucune lecture à tracer.
  */
 const PARTS = [
-  { cle: "livre", trait: "var(--color-ds-succes)" },
-  { cle: "enTransit", trait: "var(--color-ds-info)" },
-  { cle: "expedie", trait: "var(--color-ds-accent)" },
-  { cle: "preparation", trait: "var(--color-ds-alerte)" },
+  { cle: "preparation", trait: "var(--st-attente)" },
+  { cle: "expedie", trait: "var(--adm-expedie)" },
+  { cle: "enTransit", trait: "var(--st-transit)" },
+  { cle: "livre", trait: "var(--st-livre)" },
 ] as const;
 
-export async function AnneauStatuts({
-  repartition,
-  variante = "panneau",
-}: {
-  readonly repartition: RepartitionAdmin;
-  /** « commandes » : l'écran de liste des commandes, où le kit le pose à 170. */
-  readonly variante?: "panneau" | "commandes" | "statistiques";
-}) {
+export async function AnneauStatuts({ repartition }: { readonly repartition: RepartitionAdmin }) {
   const t = await getTranslations("admin.panneau");
-
   const valeurs = {
     livre: repartition.livre,
     enTransit: repartition.enTransit,
     expedie: repartition.expedie,
     preparation: repartition.preparation,
   } as const;
-
   return (
     <Anneau
-      variante={variante}
+      etiquette={t("statutsAide")}
       total={repartition.total}
       unite={t("statutsUnite")}
       part={(pourcent) => t("statutPart", { part: pourcent })}
-      parts={PARTS.map((p) => ({
-        cle: p.cle,
-        trait: p.trait,
-        libelle: t(`statut.${p.cle}`),
-        valeur: valeurs[p.cle],
-      }))}
+      parts={PARTS.map((p) => ({ cle: p.cle, trait: p.trait, libelle: t(`statut.${p.cle}`), valeur: valeurs[p.cle] }))}
     />
   );
 }

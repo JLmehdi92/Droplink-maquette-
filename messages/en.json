@@ -918,7 +918,8 @@
       "type": "This image format is not accepted.",
       "taille": "This image is too heavy.",
       "envoi": "The upload failed. Try again.",
-      "confirmation": "The server did not confirm the upload. Try again."
+      "confirmation": "The server did not confirm the upload. Try again.",
+      "retrait": "The logo couldn’t be removed. Try again."
     },
     "couleurTitre": "Your colour",
     "couleurAide": "Contrast is adjusted automatically: any colour stays readable.",
@@ -948,7 +949,7 @@
       "encre": "Ink",
       "ambre": "Amber"
     },
-    "sansNom": "Your shop"
+    "erreurCouleur": "Enter a six-digit hex colour, for example #5B4BF5."
   },
   "marque": {
     "titre": "My brand",
@@ -1709,9 +1710,6 @@
       "trace": "This view is written to the audit log, along with the criteria used. Opening an account adds another entry.",
       "sansNom": "Not named yet",
       "ouvrir": "Open",
-      "colisSurSeuil": "{valeur} / {seuil}",
-      "colisSurSeuilLong": "{valeur} / {seuil} parcels",
-      "commandesLong": "{n} orders",
       "decompte": "{total, plural, one {# account} other {# accounts}} · {suspendus, plural, one {# suspended} other {# suspended}}",
       "tuileTotal": "Total accounts",
       "tuileNouveaux": "New sign-ups",
@@ -1723,13 +1721,15 @@
       "listeTotal": "{total, plural, one {# account in total} other {# accounts in total}}",
       "filtreStatut": "Filter by status",
       "statutTous": "All statuses",
-      "reinitialiser": "Reset",
       "repartition": "Account status",
       "unite": "accounts",
       "part": "{part}%",
       "videFiltre": "No account matches this filter.",
       "sousTitreListe": "Manage and monitor every DropLink account.",
-      "tuileTotalAide": "of which {sansType} with no declared type"
+      "tuileTotalAide": "of which {sansType} with no declared type",
+      "colisInfo": "{valeur} parcels registered, alert threshold {seuil}",
+      "ouvrirLong": "Open account {email}",
+      "surTotal": "{affichees} of {total, number} accounts"
     },
     "journal": {
       "titre": "Audit log",
@@ -1770,9 +1770,7 @@
         "30": "Last 30 days"
       },
       "colonnes": {
-        "quand": "When",
-        "quoi": "What was done",
-        "qui": "By whom"
+        "quoi": "What was done"
       },
       "cibleAvant": "Account concerned:",
       "motifAvant": "Reason:",
@@ -1793,8 +1791,7 @@
       "part": "{part}%",
       "repartitionIndisponible": "Breakdown unavailable.",
       "filtreFamille": "Filter by action family",
-      "filtreFenetre": "Choose the window",
-      "reinitialiser": "Reset"
+      "filtreFenetre": "Choose the window"
     },
     "fiche": {
       "identite": "Identity",
@@ -1853,7 +1850,8 @@
         }
       },
       "email": "Email",
-      "titre": "Account record"
+      "titre": "Account record",
+      "couleur": "Colour"
     },
     "suspension": {
       "ouvrir": "Suspend this account",
@@ -1951,7 +1949,9 @@
       "courbeIndisponible": "Chart unavailable.",
       "courbe": "Orders",
       "periode": "Last {jours} days",
-      "periodeEtiquette": "Chart window"
+      "periodeEtiquette": "Chart window",
+      "alerteDoublons": "{comptes, plural, one {# account} other {# accounts}}, across {identifiants, plural, one {# shared identifier} other {# shared identifiers}}",
+      "barre": "{jour}: {n, plural, one {# order} other {# orders}}"
     },
     "parametres": {
       "titre": "System settings",
@@ -2113,9 +2113,7 @@
       "tuileStockage": "Media storage",
       "stockageAide": "measured server-side on upload",
       "filtreType": "Filter by account type",
-      "reinitialiser": "Reset",
       "videFiltre": "No shop matches this filter.",
-      "colonneProprietaire": "Owner",
       "colonneCreation": "Created",
       "legendeConfigurees": "Configured",
       "legendeSansNom": "Unnamed"
@@ -2183,22 +2181,18 @@
       "degradation": {
         "autorise": "If the counter fails, access stays allowed: the incident does not concern a vendor's customers.",
         "refuse": "Here, a counter failure denies access. That only penalises us."
-      }
+      },
+      "barre": "{jour}: {n, plural, one {# parcel} other {# parcels}}"
     },
     "traceTitre": "Everything is logged",
     "traceTexte": "Every read of a seller’s data is written to the audit log.",
     "allerAuContenu": "Skip to content",
     "roleAdministrateur": "Administrator",
     "onglets": {
-      "panneau": "Overview",
       "comptes": "Accounts",
       "boutiques": "Shops",
-      "journal": "Log",
-      "surveillance": "Watch",
       "parametres": "Settings",
-      "commandes": "Orders",
-      "statistiques": "Statistics",
-      "plus": "More"
+      "commandes": "Orders"
     },
     "langues": {
       "fr": "French",
@@ -2235,7 +2229,6 @@
         "30": "Last 30 days",
         "toutes": "All dates"
       },
-      "reinitialiser": "Reset",
       "liste": "Order list",
       "listeTotal": "{total, plural, one {# order in total} other {# orders in total}}",
       "colonnes": {
@@ -2254,7 +2247,9 @@
       "videFiltre": "No order matches these filters.",
       "pageSuivante": "Show more",
       "repartition": "Status breakdown",
-      "lienBloque": "Link blocked"
+      "lienBloque": "Link blocked",
+      "surTotal": "{affichees} of {total, number} orders",
+      "aucunTransporteur": "No carrier"
     },
     "statistiques": {
       "titre": "Statistics",
@@ -2289,7 +2284,6 @@
       "serieNouveaux": "New accounts",
       "serieActifs": "Active accounts",
       "typesDeCompte": "Account types",
-      "typesTotal": "{total, plural, one {# account} other {# accounts}}",
       "typeFournisseurs": "Suppliers",
       "typeRevendeurs": "Resellers",
       "typeSans": "No type declared",
@@ -2308,7 +2302,6 @@
       "transporteurInconnu": "Not recognised yet",
       "aucunColis": "No parcel over the period.",
       "part": "{part}%",
-      "nombreEntreParentheses": "({nombre})",
       "croissance": "Overall growth",
       "croissanceAide": "Last three months against the three before",
       "croissanceComptes": "Accounts",
@@ -2317,7 +2310,8 @@
       "croissancePhotos": "Photos",
       "croissanceSansBase": "new",
       "ecartHausse": "+{ecart}%",
-      "ecartBaisse": "−{ecart}%"
+      "ecartBaisse": "−{ecart}%",
+      "delaiAide": "on parcels delivered in the period"
     },
     "blocage": {
       "bloquer": "Block the link",
@@ -2339,7 +2333,7 @@
       "motifAideBlocage": "At least {n} characters. The seller reads it on their order, and it is written to the log."
     },
     "contestation": {
-      "pastille": "Dispute",
+      "pastille": "Appeal",
       "voir": "View the dispute for {ref}",
       "titre": "Dispute of the block on {ref}",
       "aide": "Sent by the seller on {date} · {rang, selectordinal, one {first} two {second} few {third} other {#th}} of three. This reading is written to the audit log.",
@@ -2394,9 +2388,10 @@
       },
       "vide": "No identifier is shared between two accounts.",
       "plafond": "The 100 most shared identifiers are shown, out of {total, number}.",
-      "panneauVoir": "View duplicates",
-      "panneauResume": "{comptes, plural, one {account} other {accounts}}, across {identifiants, plural, one {# shared identifier} other {# shared identifiers}}"
-    }
+      "panneauVoir": "View duplicates"
+    },
+    "accueil": "DropLink administration",
+    "pastille": "Admin"
   },
   "erreurs": {
     "titre": "This screen could not be displayed",

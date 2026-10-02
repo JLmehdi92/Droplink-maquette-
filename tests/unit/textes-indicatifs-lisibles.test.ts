@@ -102,7 +102,11 @@ function releverRegles(): Array<{ ou: string; couleur: string | null }> {
 
 // Relevés le 02/10/2026 : les classes fondent à mesure que les écrans passent aux feuilles
 // (2 après la page client, 1 après le signalement, passé à `.sig-champ ::placeholder`).
-const PLANCHER_CLASSES = 1;
+// ⚠️ 0 DEPUIS L'ADMINISTRATION (02/10/2026) : la dernière classe `placeholder:text-*` était
+// celle de son champ de recherche, passé à `.recherche-envoi input::placeholder`. La moitié
+// Tailwind est donc VIDE, et c'est un fait, pas une panne : la moitié des feuilles garde son
+// plancher (`PLANCHER_REGLES`), et une classe réintroduite serait de nouveau mesurée.
+const PLANCHER_CLASSES = 0;
 const PLANCHER_REGLES = 10;
 
 const CARTE = JETONS.get("ds-surface-carte") ?? "";

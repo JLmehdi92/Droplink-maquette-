@@ -1,5 +1,3 @@
-import { getTranslations } from "next-intl/server";
-import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
 
 /**
  * LA FENÊTRE DE LA COURBE DU PANNEAU — le `AdminSelect` de `Overview` du kit.
@@ -19,26 +17,4 @@ export const PERIODE_PAR_DEFAUT: Periode = 30;
 export function lirePeriode(brut: string | undefined): Periode {
   const n = Number(brut);
   return (PERIODES as readonly number[]).includes(n) ? (n as Periode) : PERIODE_PAR_DEFAUT;
-}
-
-export async function SelecteurPeriode({
-  langue,
-  periode,
-}: {
-  readonly langue: string;
-  readonly periode: Periode;
-}) {
-  const t = await getTranslations("admin.panneau");
-
-  return (
-    <SelecteurAdmin
-      etiquette={t("periodeEtiquette")}
-      courant={String(periode)}
-      options={PERIODES.map((valeur) => ({
-        valeur: String(valeur),
-        libelle: t("periode", { jours: valeur }),
-        href: `/${langue}/admin?jours=${valeur}`,
-      }))}
-    />
-  );
 }

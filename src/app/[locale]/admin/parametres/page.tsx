@@ -5,8 +5,7 @@ import {
 } from "next-intl/server";
 import type { Metadata } from "next";
 import { CarteReglages } from "@/components/admin/carte-reglages";
-import type { LucideIcon } from "lucide-react";
-import { Gauge, Lock, Timer, ToggleRight, Truck } from "lucide-react";
+import { KeyRound } from "lucide-react";
 import { EnTeteAdmin } from "@/components/admin/en-tete-admin";
 import { RangeeConstatee, type FormeConstatee } from "@/components/admin/rangee-constatee";
 import { ReglageInterrupteur } from "@/components/admin/reglage-interrupteur";
@@ -96,13 +95,11 @@ type Rangee =
 const CARTES: readonly {
   readonly id: string;
   readonly colonne: "gauche" | "droite";
-  readonly icone: LucideIcon;
   readonly rangees: readonly Rangee[];
 }[] = [
   {
     id: "plafonds",
     colonne: "gauche",
-    icone: Gauge,
     rangees: [
       /*
        * LES DEUX QUOTAS, ET ILS NE MESURENT PAS LA MÊME CHOSE. Le premier
@@ -121,7 +118,6 @@ const CARTES: readonly {
   {
     id: "suivi",
     colonne: "gauche",
-    icone: Truck,
     rangees: [
       { genre: "reglage", cle: "seuil_colis_par_compte" },
       /*
@@ -154,7 +150,6 @@ const CARTES: readonly {
   {
     id: "debit",
     colonne: "droite",
-    icone: Timer,
     rangees: [
       { genre: "constate", id: "debit_inconnu", sansAide: true },
       { genre: "constate", id: "debit_valide", sansAide: true },
@@ -164,7 +159,6 @@ const CARTES: readonly {
   {
     id: "interrupteurs",
     colonne: "droite",
-    icone: ToggleRight,
     rangees: [
       { genre: "reglage", cle: "inscriptions_ouvertes" },
       { genre: "reglage", cle: "suivi_actif" },
@@ -281,49 +275,30 @@ export default async function ParametresAdmin({
         key={c.id}
         titre={t("carte." + c.id + ".titre")}
         sousTitre={t("carte." + c.id + ".sousTitre")}
-        icone={c.icone}
       >
         {c.rangees.map(rendreRangee)}
       </CarteReglages>
     ));
 
   return (
-    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
+    <main id="contenu" className="tableau adm">
       <EnTeteAdmin titre={t("titre")} sousTitre={t("sousTitre")} />
-
-      {/* ⚠️ SANS CE PROVIDER, L'ÉCRAN LÈVE AU RENDU. Les deux composants de
-          réglage sont CLIENTS et appellent `useTranslations` ; la racine
-          `[locale]` n'a délibérément aucun provider — le catalogue entier ne
-          part pas dans chaque page. Il manquait ici, l'écran des paramètres
-          était cassé, et aucune sonde ne pouvait le voir puisque `pnpm fumee`
-          n'interroge que les pages atteignables SANS session. */}
+      {/* ⚠️ SANS CE PROVIDER, L'ÉCRAN LÈVE AU RENDU : les deux composants de
+          réglage sont CLIENTS et appellent `useTranslations`. */}
       <TraductionsClient espaces={["admin.parametres"]}>
-        {/* LES CARTES SONT RÉPARTIES EXPLICITEMENT, deux à gauche et trois à
-            droite, parce que c'est ce qui aligne leurs bas sur la planche. Une
-            grille qui répartirait par ordre d'apparition laisserait une colonne
-            dépasser de la hauteur d'une carte entière. */}
-        <div className="grid grid-cols-1 gap-4 px-4 py-3.5 md:mt-5 md:px-0 md:py-0 xl:grid-cols-2 xl:items-start">
-          <div className="flex flex-col gap-4">{cartesDe("gauche")}</div>
-          <div className="flex flex-col gap-4">
-            {cartesDe("droite")}
-
-            {/* CE QUI N'EST PAS ICI EST DIT, plutôt que laissé à deviner. Un
-                écran de paramètres muet sur les secrets laisse chercher où les
-                régler — et la recherche finit par une clé collée quelque part. */}
-            <section className="flex gap-3 rounded-ds-card border border-ds-filet bg-ds-surface-teinte p-4 md:rounded-ds-card-lg md:p-[22px]">
-              <Lock size={18} strokeWidth={1.9} aria-hidden="true" className="mt-px shrink-0 text-ds-accent-encre" />
-              <div>
-                <p className="text-[14px] font-bold leading-[18px] text-ds-accent-encre">
-                  {t("secretsTitre")}
-                </p>
-                <p className="mt-1 text-[13px] leading-[20px] text-ds-accent-encre">
-                  {t("secretsAide")}
-                </p>
-              </div>
-            </section>
-          </div>
+        <div className="adm-rangee adm-rangee--2">
+          <div className="adm-colonne">{cartesDe("gauche")}</div>
+          <div className="adm-colonne">{cartesDe("droite")}</div>
         </div>
       </TraductionsClient>
+      {/* CE QUI N'EST PAS ICI EST DIT, plutôt que laissé à deviner : un écran de
+          paramètres muet sur les secrets laisse chercher où les régler. */}
+      <p className="adm-garantie">
+        <KeyRound aria-hidden="true" className="ic" />
+        <span>
+          <b>{t("secretsTitre")}</b> {t("secretsAide")}
+        </span>
+      </p>
     </main>
   );
 }

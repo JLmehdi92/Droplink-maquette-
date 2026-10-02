@@ -55,7 +55,14 @@ export async function verifierCode(
   const suiteBrute = donnees.get("suite");
   const souvenirBrut = donnees.get("souvenir");
   const analyse = Saisie.safeParse({
-    code: donnees.get("code"),
+    // LES SIX CASES PORTENT TOUTES `name="code"` : sans JavaScript, ou avant
+    // l'hydratation, le navigateur envoie les six valeurs, recollées ici. Un
+    // seul champ caché rempli par React laissait un compte à double facteur
+    // (l'administration, depuis la 186) sans moyen de se connecter.
+    code: donnees
+      .getAll("code")
+      .map((v) => (typeof v === "string" ? v.trim() : ""))
+      .join(""),
     locale: donnees.get("locale"),
     suite: typeof suiteBrute === "string" && suiteBrute !== "" ? suiteBrute : undefined,
     souvenir: typeof souvenirBrut === "string" && souvenirBrut !== "" ? souvenirBrut : undefined,

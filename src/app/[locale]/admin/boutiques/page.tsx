@@ -13,10 +13,10 @@ import {
 } from "@/lib/audit/boutiques";
 import { lireCompteurs, lirePanneau, lireSeuils } from "@/lib/audit/panneau";
 import { Anneau } from "@/components/admin/anneau";
-import { SelecteurAdmin } from "@/components/admin/selecteur-admin";
-import { TuileVolume } from "@/components/admin/tuile-volume";
+import { FiltresAdmin } from "@/components/admin/filtres-admin";
+import { TuileVolume, Tuiles } from "@/components/admin/tuile-volume";
+import { AvatarCompte, ColisSeuil } from "@/components/admin/briques-admin";
 import Link from "next/link";
-import { CircleCheck, HardDrive, ShoppingCart, Store } from "lucide-react";
 import { mettreOctetsALEchelle } from "@/lib/format/octets";
 import { creerClientServeur } from "@/lib/supabase/server";
 import { estLangueSupportee } from "@/i18n/config";
@@ -35,27 +35,6 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "admin" });
   return { title: t("boutiques.titre"), robots: { index: false, follow: false } };
 }
-
-/*
- * GÉOMÉTRIES RELEVÉES SUR LE KIT SERVI — `AdminShops`, les mêmes que
- * `AdminUsers` : pilule 11,5/700 à l'interlettrage -0,02em et au remplissage
- * 6/11 ; en-tête de colonne 12,5/600 en sourdine, SANS majuscules ni
- * interlettrage ; panneau au rayon `card-lg`, filet, ombre de carte,
- * remplissage 22, titre 18/700 à -0,025em, sous-titre 13/400 à 3 px.
- */
-const PILULE =
-  "inline-flex items-center gap-1.5 rounded-ds-pill px-[11px] py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[-0.02em]";
-const PILULE_NEUTRE = PILULE + " bg-ds-surface-creux text-ds-texte-corps";
-/* L'ECART DE 12 PX DU KIT ENTRE SES COLONNES. Sans lui, les entetes numeriques
-   se touchent : « CommandesColisMedias » — mesure a l'appui. */
-const EN_TETE_COLONNE =
-  "pb-3 pr-3 text-left text-[12.5px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-sourdine last:pr-0";
-const CELLULE =
-  "border-t border-ds-filet py-3.5 pr-3 text-[14px] leading-[18px] font-normal last:pr-0";
-const PANNEAU =
-  "flex min-w-0 flex-col rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card md:p-[22px]";
-const PANNEAU_TITRE = "text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre";
-const PANNEAU_AIDE = "mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps";
 
 /**
  * LES BOUTIQUES — ce que chaque compte OCCUPE.
@@ -168,457 +147,192 @@ export default async function AdminBoutiques({
     });
   };
 
+  // LA BARRE DE STOCKAGE EST RELATIVE À LA PLUS GROSSE BOUTIQUE DE LA PAGE :
+  // elle sert à comparer les lignes entre elles, le chiffre dit la valeur.
+  const plusGrosse = Math.max(1, ...page.lignes.map((b) => b.octets));
+  // UNE SEULE PASTILLE D'ÉTAT, LA PLUS GRAVE : suspendue, puis plafond dépassé.
+  const etat = (b: LigneBoutique) =>
+    suspendue(b) ? (
+      <span className="adm-badge" data-statut="suspended">
+        <i aria-hidden="true" />
+        {t("boutiques.suspendue")}
+      </span>
+    ) : auDessus(b) ? (
+      <span className="adm-badge" data-ton="alerte">
+        <i aria-hidden="true" />
+        {t("boutiques.plafondDepasse")}
+      </span>
+    ) : (
+      <span className="adm-badge" data-statut="active">
+        <i aria-hidden="true" />
+        {t("boutiques.activeEtat")}
+      </span>
+    );
+
   return (
-    <main id="contenu" className="md:px-8 md:pt-0 md:pb-8">
-      <EnTeteAdmin
-        titre={t("boutiques.titre")}
-        // LE DÉCOMPTE A QUITTÉ LE SOUS-TITRE POUR LES TUILES, qui le disent
-        // mieux : quatre chiffres nommés valent une phrase qui en porte un.
-        sousTitre={t("boutiques.sousTitreListe")}
-        sousTitreAuBureauSeulement
-      />
+    <main id="contenu" className="tableau adm">
+      <EnTeteAdmin titre={t("boutiques.titre")} sousTitre={t("boutiques.sousTitreListe")} sousTitreAuBureauSeulement />
+      <EncartTrace texte={t("boutiques.trace")} />
 
-      <div className="flex flex-col gap-2.5 px-4 py-3.5 md:mt-5 md:gap-[18px] md:px-0 md:py-0">
-        <EncartTrace texte={t("boutiques.trace")} />
+      {/* « CONFIGURÉES » ET NON « ACTIVES » : une boutique naît à l'inscription
+          et n'a pas d'état propre. Ce qui distingue deux boutiques, c'est qu'un
+          vendeur soit allé jusqu'à se donner un nom. */}
+      <Tuiles etiquette={t("boutiques.titre")} colonnes={4}>
+        <TuileVolume libelle={t("boutiques.tuileTotal")} valeur={format.number(compteurs.boutiques)} complement={t("boutiques.tuileTotalAide")} />
+        <TuileVolume
+          libelle={t("boutiques.tuileConfigurees")}
+          valeur={format.number(compteurs.boutiquesNommees)}
+          complement={t("boutiques.partDuTotal", { part: part(compteurs.boutiquesNommees) })}
+        />
+        <TuileVolume libelle={t("boutiques.tuileCommandes")} valeur={format.number(compteurs.commandesCreeesCeMois)} complement={t("boutiques.ceMoisCi")} />
+        <TuileVolume
+          libelle={t("boutiques.tuileStockage")}
+          valeurEnSourdine={stockage === null}
+          valeur={
+            stockage === null
+              ? t("panneau.stockageIndisponible")
+              : t("boutiques.taille", {
+                  valeur: format.number(stockage.valeur, {
+                    minimumFractionDigits: stockage.decimales,
+                    maximumFractionDigits: stockage.decimales,
+                  }),
+                  unite: t(`unites.${stockage.unite}`),
+                })
+          }
+          complement={t("boutiques.stockageAide")}
+        />
+      </Tuiles>
 
-        {/* --- LES VOLUMES ---
-
-            Le kit en pose SIX. Deux comptent les plans Pro et Gratuit : aucune
-            colonne de plan n'existe, et la contrainte n°1 interdit d'en créer
-            une. Une septième, « liens clients actifs », demanderait un agrégat
-            de `link_views` sur toute la plateforme, qu'aucune fonction ne rend.
-            Les quatre qui restent sont les nôtres.
-
-            ⚠️ « ACTIVES » DU KIT DEVIENT « CONFIGURÉES », et ce n'est pas un
-            synonyme. Une boutique naît à l'inscription et n'a pas d'état propre :
-            c'est le COMPTE qui est actif ou suspendu. Ce qui distingue réellement
-            deux boutiques, c'est qu'un vendeur soit allé jusqu'à se donner un
-            nom — et c'est la mesure d'activation, celle sur laquelle on
-            décidera. */}
-        {/* DEUX COLONNES AU TÉLÉPHONE (15/09/2026) : une tuile par rangée, c'est 104 px chacune et 550 px
-            avant la première ligne de la liste. Les tuiles compactes tiennent à deux : pastille de 44, libellé
-            sur deux lignes. La vue d'ensemble garde UNE colonne — ses tuiles portent une icône de 52 et un
-            complément long (« dont 0 sans type · 0 suspendus, hors de ce total »). */}
-        <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:gap-[18px]">
-          <TuileVolume
-            icone={Store}
-            compacte
-            libelle={t("boutiques.tuileTotal")}
-            valeur={format.number(compteurs.boutiques)}
-            complement={t("boutiques.tuileTotalAide")}
-          />
-          <TuileVolume
-            icone={CircleCheck}
-            compacte
-            teinte="succes"
-            libelle={t("boutiques.tuileConfigurees")}
-            valeur={format.number(compteurs.boutiquesNommees)}
-            complement={t("boutiques.partDuTotal", {
-              part: part(compteurs.boutiquesNommees),
-            })}
-          />
-          <TuileVolume
-            icone={ShoppingCart}
-            compacte
-            teinte="info"
-            libelle={t("boutiques.tuileCommandes")}
-            valeur={format.number(compteurs.commandesCreeesCeMois)}
-            complement={t("boutiques.ceMoisCi")}
-          />
-          <TuileVolume
-            icone={HardDrive}
-            compacte
-            teinte="alerte"
-            libelle={t("boutiques.tuileStockage")}
-            valeurEnSourdine={stockage === null}
-            valeur={
-              stockage === null
-                ? t("panneau.stockageIndisponible")
-                : t("boutiques.taille", {
-                    valeur: format.number(stockage.valeur, {
-                      minimumFractionDigits: stockage.decimales,
-                      maximumFractionDigits: stockage.decimales,
-                    }),
-                    unite: t(`unites.${stockage.unite}`),
-                  })
-            }
-            complement={t("boutiques.stockageAide")}
-          />
-        </div>
-
-        {/* --- LA BARRE DE FILTRES ---
-
-            ⚠️ LES QUATRE PILULES SONT DEVENUES UNE LISTE DÉROULANTE, comme le
-            kit. Elles disaient la même chose et faisaient la même chose ; ce
-            qu'elles faisaient de PLUS, c'était deux rangées au téléphone, qui
-            repoussaient la première carte hors de l'écran d'ouverture.
-
-            Le filtre reste dans l'URL : il se partage, se recharge et revient
-            avec le bouton retour — et le CRITÈRE ENTRE DANS LA TRACE, la
-            fonction en base l'écrivant dans la charge utile de l'audit. */}
-        <div className="flex flex-wrap items-center gap-3 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3.5 shadow-ds-card">
-          <div className="min-w-[240px] flex-1 md:max-w-[320px]">
+      <div className="adm-rangee adm-rangee--pleine">
+        <section className="bloc adm-bloc" aria-labelledby="adm-liste">
+          <header className="bloc__tete">
+            <div>
+              <h2 id="adm-liste">{t("boutiques.liste")}</h2>
+              <p className="adm-aide">{t("boutiques.listeTotal", { total: compteurs.boutiques })}</p>
+            </div>
+          </header>
+          {/* LE FILTRE VIT DANS L'URL et son critère entre dans la trace. */}
+          <div className="adm-outils">
+            <FiltresAdmin
+              etiquette={t("boutiques.filtreType")}
+              courant={parametres.type}
+              options={(["", ...TYPES_FILTRABLES] as const).map((type) => ({
+                valeur: type,
+                libelle: t(`boutiques.filtre.${type === "" ? "toutes" : type}`),
+                href: lienFiltre(type),
+              }))}
+            />
             <RechercheAdmin
               action={base}
               valeur={parametres.q}
               etiquette={t("boutiques.recherche")}
               exemple={t("boutiques.recherchePlaceholder")}
               chercher={t("boutiques.chercher")}
+              garder={parametres.type === "" ? {} : { type: parametres.type }}
             />
           </div>
-          <SelecteurAdmin
-            etiquette={t("boutiques.filtreType")}
-            courant={parametres.type}
-            options={(["", ...TYPES_FILTRABLES] as const).map((type) => ({
-              valeur: type,
-              libelle: t(`boutiques.filtre.${type === "" ? "toutes" : type}`),
-              href: lienFiltre(type),
-            }))}
-          />
-          <Link prefetch={false}
-            href={base}
-            className="flex h-[42px] min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-[18px] text-[13.5px] leading-[normal] font-semibold text-ds-accent-encre transition-colors hover:bg-ds-surface-creux md:ml-auto"
-          >
-            {t("boutiques.reinitialiser")}
-          </Link>
-        </div>
 
-        {/* --- LA LISTE, ET L'ANNEAU DE STATUT À SA DROITE ---
-
-            ⚠️ LE KIT POSE TROIS PANNEAUX À DROITE. Un anneau « Répartition des
-            boutiques par plan », que rien ne peut remplir, et un flux
-            « Activité récente » qui nomme des vendeurs tiers à chaque ouverture —
-            donc une entrée d'audit par chargement d'écran, qui noierait les
-            consultations délibérées que le journal existe pour retrouver. Le
-            nôtre ne rend que des nombres. */}
-        {/*
-          ⚠️ LE PANNEAU LATÉRAL NE SE RANGE À CÔTÉ QU'À `2xl` (1 536 px), plus à
-          `xl`. Vu en capture le 18/09/2026 à 1 280 px : à côté de ses 424 px, le
-          tableau n'avait plus la place de ses colonnes et le panneau les ROGNAIT
-          — Stockage, Création, Statut et « Voir » disparaissaient sans barre de
-          défilement. Même geste sur les comptes et les commandes, dont les
-          en-têtes se touchaient.
-
-          ⚠️ ET LA COLONNE « MÉDIAS » NE S'AFFICHE QU'À 1 700 px. À 1 545 (la
-          largeur de la planche), la colonne « Actions » ajoutée le 18/09 dépassait
-          la carte et « Voir » passait SOUS le panneau des statuts : neuf colonnes
-          de vraies données ne tiennent pas à côté de 424 px. Repousser le panneau
-          sous la liste jusqu'à 1 700 px (essayé le 18/09) réparait le débordement
-          mais n'était plus la planche. La planche n'a pas de colonne Médias, et le
-          Stockage voisin en porte déjà le coût : c'est elle qui cède, le seuil des
-          colis restant visible. La soustraction ne l'avait pas vu — sa place
-          avait été déclarée « structure » —, la règle `[cadre]` de la sonde, si.
-        */}
-        <div className="grid gap-2.5 md:gap-[18px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,424px)] 2xl:items-start">
-          <section className={PANNEAU}>
-            <header className="mb-[18px]">
-              <h2 className={PANNEAU_TITRE}>{t("boutiques.liste")}</h2>
-              <p className={PANNEAU_AIDE}>
-                {t("boutiques.listeTotal", { total: compteurs.boutiques })}
-              </p>
-            </header>
-
-            {page.lignes.length === 0 ? (
-              /* DEUX ÉTATS VIDES DISTINCTS. Annoncer « aucune boutique » à qui
-                 vient de filtrer une base pleine est une perte de confiance
-                 immédiate. */
-              <p className="py-6 text-center text-ds-texte-corps">
-                {parametres.q === "" && parametres.type === ""
-                  ? t("boutiques.videTout")
-                  : parametres.q === ""
-                    ? t("boutiques.videFiltre")
-                    : t("boutiques.videRecherche")}
-              </p>
-            ) : (
-              <>
-                {/* --- LE TABLEAU, au bureau ---
-
-                    ⚠️ IL BASCULE À `xl`, PAS À `md`. Huit colonnes derrière une
-                    colonne de navigation de 236 px : à 768 il resterait 472 px,
-                    soit 59 par colonne, et « 1 840 / 1 200 » en réclame 90 à lui
-                    seul. */}
-                <div className="hidden xl:block">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("boutiques.colonnes.nom")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("boutiques.colonneProprietaire")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("boutiques.colonnes.commandes")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("boutiques.colonnes.colis")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE + " hidden min-[1700px]:table-cell"}>
-                          {t("boutiques.colonnes.medias")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("boutiques.colonnes.stockage")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("boutiques.colonneCreation")}
-                        </th>
-                        <th scope="col" className={EN_TETE_COLONNE}>
-                          {t("boutiques.colonnes.statut")}
-                        </th>
-                        {/*
-                          ⚠️ « VOIR » AVAIT DISPARU AU PORTAGE DE L'ÉCRAN (8e8cd8d,
-                          29/08) : la ligne menait à la fiche du compte, la grille
-                          de cartes n'y menait plus, et rien ne le signalait — le
-                          bouton du kit était rangé dans une déclaration de
-                          VOCABULAIRE dont la raison ne le couvrait pas. Même geste
-                          que la liste admin des commandes.
-                        */}
-                        <th scope="col" className={EN_TETE_COLONNE + " pr-[18px] last:pr-[18px]"}>
-                          {t("commandes.colonnes.actions")}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {page.lignes.map((b) => (
-                        <tr key={b.id}>
-                          <td className={CELLULE}>
-                            <span className="flex items-center gap-3">
-                              {/* LA PASTILLE PORTE LA COULEUR DU VENDEUR quand
-                                  il en a choisi une. Sans nom de boutique elle
-                                  reste neutre : une couleur inventée ferait
-                                  croire à une configuration. */}
-                              <span
-                                aria-hidden="true"
-                                className={
-                                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-ds-pill " +
-                                  (b.nom === null ? "bg-ds-surface-creux" : "")
-                                }
-                                {...(b.nom === null
-                                  ? {}
-                                  : { style: { backgroundColor: b.accent } })}
-                              >
-                                {b.nom === null ? (
-                                  <Store aria-hidden="true" size={15} strokeWidth={1.9} className="text-ds-texte-tenu" />
-                                ) : null}
-                              </span>
-                              {/* HUIT COLONNES DANS 755 PX : le nom se tronque a
-                                  150, l adresse a 130. Sans ces deux bornes, le
-                                  tableau depassait son panneau de 83 px — mesure. */}
-                              {b.nom === null ? (
-                                <span className="max-w-[150px] truncate font-semibold italic text-ds-texte-sourdine">
-                                  {t("boutiques.nonConfiguree")}
-                                </span>
-                              ) : (
-                                <span className="max-w-[150px] truncate font-semibold text-ds-texte-fort">
-                                  {b.nom}
-                                </span>
-                              )}
-                            </span>
-                          </td>
-                          {/* ⚠️ L ADRESSE SE TRONQUE, ELLE NE SE REPLIE NI NE POUSSE.
-                              Repliee, elle chevauchait le nom de la ligne voisine ;
-                              en `nowrap` seul, elle a pousse le tableau hors de son
-                              panneau — deux mesures, deux defauts, meme cause : une
-                              adresse jetable de 37 caracteres dans une colonne qui
-                              n en a pas la place. Le nom de boutique, lui, reste
-                              entier : c est par lui qu on identifie la ligne. */}
-                          <td className={CELLULE + " text-ds-texte-sourdine"}>
-                            <span className="block max-w-[120px] truncate">{b.email}</span>
-                          </td>
-                          <td className={CELLULE + " text-ds-texte-fort"}>
-                            {format.number(b.commandes)}
-                          </td>
-                          {/* LE COLIS PORTE SON SEUIL quand il le dépasse :
-                              « 1 840 / 1 200 » se vérifie et se compare ; « au-dessus »
-                              se discute, et l'on finit par ne plus le lire. */}
-                          <td
-                            className={
-                              CELLULE +
-                              (auDessus(b)
-                                ? " font-bold text-ds-erreur-encre"
-                                : " text-ds-texte-fort")
-                            }
-                          >
-                            {auDessus(b)
-                              ? t("comptes.colisSurSeuil", {
-                                  valeur: format.number(b.colisCeMois),
-                                  seuil: format.number(seuils.colis),
-                                })
-                              : format.number(b.colisCeMois)}
-                          </td>
-                          <td className={CELLULE + " hidden text-ds-texte-fort min-[1700px]:table-cell"}>
-                            {format.number(b.medias)}
-                          </td>
-                          <td className={CELLULE + " text-ds-texte-fort"}>{taille(b.octets)}</td>
-                          <td className={CELLULE + " whitespace-nowrap text-ds-texte-sourdine"}>
-                            {format.dateTime(new Date(b.creeLe), { dateStyle: "medium" })}
-                          </td>
-                          <td className={CELLULE}>
-                            {suspendue(b) ? (
-                              <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>
-                                {t("boutiques.suspendue")}
-                              </span>
-                            ) : (
-                              <span className={PILULE + " bg-ds-succes-fond text-ds-succes-encre"}>
-                                {t("boutiques.activeEtat")}
-                              </span>
-                            )}
-                          </td>
-                          <td className={CELLULE + " pr-[18px] text-right last:pr-[18px]"}>
-                            <Link prefetch={false}
-                              href={`/${locale}/admin/comptes/${b.proprietaireId}`}
-                              aria-label={t("commandes.voirLong", { email: b.email })}
-                              className="inline-flex h-[34px] items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] leading-4 font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-creux"
-                            >
-                              {t("commandes.voir")}
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* --- LES CARTES, sous `xl` --- */}
-                <ul className="flex flex-col gap-2.5 xl:hidden">
+          {page.lignes.length === 0 ? (
+            <p className="adm-vide">
+              {parametres.q === "" && parametres.type === ""
+                ? t("boutiques.videTout")
+                : parametres.q === ""
+                  ? t("boutiques.videFiltre")
+                  : t("boutiques.videRecherche")}
+            </p>
+          ) : (
+            <div className="adm-defil">
+              <table className="adm-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{t("boutiques.colonnes.nom")}</th>
+                    <th scope="col">{t("boutiques.colonnes.type")}</th>
+                    <th scope="col">{t("boutiques.colonnes.statut")}</th>
+                    <th scope="col">{t("boutiques.colonnes.commandes")}</th>
+                    <th scope="col">{t("boutiques.colonnes.medias")}</th>
+                    <th scope="col">{t("boutiques.colonnes.stockage")}</th>
+                    <th scope="col">{t("boutiques.colonnes.colis")}</th>
+                    <th scope="col">{t("boutiques.colonneCreation")}</th>
+                    {/* « VOIR » MÈNE À LA FICHE DU COMPTE : la maquette n'a aucune
+                        action ici, et c'est le seul chemin d'une boutique vers son
+                        compte (perdu une fois au portage, 29/08). */}
+                    <th scope="col">
+                      <span className="sr">{t("commandes.colonnes.actions")}</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
                   {page.lignes.map((b) => (
-                    <li
-                      key={b.id}
-                      className="min-w-0 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-[18px]"
-                    >
-                      <div className="mb-4 flex items-center gap-3">
-                        <span
-                          aria-hidden="true"
-                          className={
-                            "flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-control " +
-                            (b.nom === null ? "bg-ds-surface-creux" : "")
-                          }
-                          {...(b.nom === null ? {} : { style: { backgroundColor: b.accent } })}
-                        >
-                          {b.nom === null ? (
-                            <Store aria-hidden="true" size={18} strokeWidth={1.9} className="text-ds-texte-tenu" />
-                          ) : null}
+                    <tr key={b.id}>
+                      <td>
+                        <span className="adm-qui">
+                          <AvatarCompte email={b.email} nom={b.nom} />
+                          <span>
+                            <b>{b.nom ?? <span className="adm-sourdine">{t("boutiques.nonConfiguree")}</span>}</b>
+                            <small>{b.email}</small>
+                          </span>
                         </span>
-                        <div className="min-w-0 flex-grow">
-                          {b.nom === null ? (
-                            <p className="truncate text-[15px] leading-[19px] font-semibold italic text-ds-texte-sourdine">
-                              {t("boutiques.nonConfiguree")}
-                            </p>
-                          ) : (
-                            <p className="truncate text-[15px] leading-[19px] font-bold text-ds-texte-fort">
-                              {b.nom}
-                            </p>
-                          )}
-                          <p className="mt-px truncate text-[12px] leading-[15px] text-ds-texte-sourdine">
-                            {b.email}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mb-3.5 flex flex-wrap gap-1.5">
-                        <span className={PILULE_NEUTRE}>
-                          {b.typeDeCompte === null
-                            ? t("comptes.typeNonDeclare")
-                            : t(`comptes.type.${b.typeDeCompte}`)}
+                      </td>
+                      <td>{b.typeDeCompte === null ? <span className="adm-sourdine">{t("comptes.typeNonDeclare")}</span> : t(`comptes.type.${b.typeDeCompte}`)}</td>
+                      <td>{etat(b)}</td>
+                      <td className="adm-nb">{format.number(b.commandes)}</td>
+                      <td className="adm-nb">{format.number(b.medias)}</td>
+                      <td>
+                        <span className="adm-stock" data-info={taille(b.octets)}>
+                          <b>{taille(b.octets)}</b>
+                          <i aria-hidden="true" style={{ "--k": (b.octets / plusGrosse).toFixed(3) } as React.CSSProperties} />
                         </span>
-                        {/* UNE SEULE PILULE D'ÉTAT, ET C'EST LA PLUS GRAVE QUI
-                            GAGNE. Une boutique suspendue qui dépasse aussi son
-                            plafond n'a pas besoin qu'on le lui dise : elle ne
-                            prend plus rien en charge. */}
-                        {suspendue(b) ? (
-                          <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>
-                            {t("boutiques.suspendue")}
-                          </span>
-                        ) : auDessus(b) ? (
-                          <span className={PILULE + " bg-ds-erreur-fond text-ds-erreur-encre"}>
-                            {t("boutiques.plafondDepasse")}
-                          </span>
-                        ) : (
-                          <span className={PILULE + " bg-ds-succes-fond text-ds-succes-encre"}>
-                            {t("boutiques.activeEtat")}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-2 border-t border-ds-filet pt-3.5">
-                        {(
-                          [
-                            { cle: "commandes", valeur: format.number(b.commandes), alerte: false },
-                            { cle: "colis", valeur: format.number(b.colisCeMois), alerte: auDessus(b) },
-                            { cle: "medias", valeur: format.number(b.medias), alerte: false },
-                            { cle: "stockage", valeur: taille(b.octets), alerte: false },
-                          ] as const
-                        ).map((c) => (
-                          <div key={c.cle} className="min-w-0">
-                            <p className="mb-0.5 text-[11.5px] leading-[14px] text-ds-texte-sourdine">
-                              {t(`boutiques.colonnes.${c.cle}`)}
-                            </p>
-                            <p
-                              className={
-                                "truncate text-[15px] leading-[19px] font-bold " +
-                                (c.alerte ? "text-ds-erreur-encre" : "text-ds-texte-fort")
-                              }
-                            >
-                              {c.valeur}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-3.5 flex justify-end">
-                        <Link prefetch={false}
-                          href={`/${locale}/admin/comptes/${b.proprietaireId}`}
-                          aria-label={t("commandes.voirLong", { email: b.email })}
-                          className="inline-flex min-h-11 shrink-0 items-center rounded-ds-sm border border-ds-filet bg-ds-surface-carte px-4 text-[13px] font-semibold text-ds-texte-fort"
-                        >
+                      </td>
+                      <td>
+                        <ColisSeuil
+                          valeur={format.number(b.colisCeMois)}
+                          seuil={format.number(seuils.colis)}
+                          k={seuils.colis > 0 ? b.colisCeMois / seuils.colis : 0}
+                          depasse={auDessus(b)}
+                          info={t("comptes.colisInfo", { valeur: format.number(b.colisCeMois), seuil: format.number(seuils.colis) })}
+                        />
+                      </td>
+                      <td className="adm-date">{format.dateTime(new Date(b.creeLe), { dateStyle: "medium" })}</td>
+                      <td>
+                        <Link prefetch={false} className="bouton-outil adm-ouvrir" href={`/${langue}/admin/comptes/${b.proprietaireId}`} aria-label={t("commandes.voirLong", { email: b.email })}>
                           {t("commandes.voir")}
                         </Link>
-                      </div>
-                    </li>
+                      </td>
+                    </tr>
                   ))}
-                </ul>
-              </>
-            )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
+          <footer className="adm-pied">
+            <span>{t("boutiques.decompte", { total: compteurs.boutiques })}</span>
             {lienSuivant === null ? null : (
-              <LienEcran prefetch={false}
-                href={lienSuivant}
-                className="mx-auto mt-4 inline-flex min-h-11 items-center rounded-ds-control border border-ds-filet-appuye bg-ds-surface-carte px-6 text-[14px] leading-[18px] font-semibold text-ds-texte-fort"
-              >
+              <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
                 {t("boutiques.pageSuivante")}
               </LienEcran>
             )}
-          </section>
+          </footer>
+        </section>
 
-          <section className={PANNEAU}>
-            <header className="mb-[18px]">
-              <h2 className={PANNEAU_TITRE}>{t("boutiques.repartition")}</h2>
-            </header>
-            <Anneau
-              variante="liste"
-              total={compteurs.boutiques}
-              unite={t("boutiques.unite")}
-              part={(pourcent) => t("boutiques.part", { part: pourcent })}
-              parts={[
-                {
-                  cle: "configurees",
-                  // LES LIBELLES DE LEGENDE SONT COURTS : la colonne du kit
-                  // TRONQUE a 150 px, et « Boutiques configurees » y rendait
-                  // « Boutiques c... ». Le panneau dit deja de quoi il parle.
-                  libelle: t("boutiques.legendeConfigurees"),
-                  valeur: compteurs.boutiquesNommees,
-                  trait: "var(--color-ds-succes)",
-                },
-                {
-                  cle: "sans",
-                  libelle: t("boutiques.legendeSansNom"),
-                  valeur: nonConfigurees,
-                  trait: "var(--color-ds-filet-appuye)",
-                },
-              ]}
-            />
-          </section>
-        </div>
+        {/* QUE DES NOMBRES : configurées contre sans nom. */}
+        <section className="bloc adm-bloc adm-bloc--anneau" aria-labelledby="adm-repartition">
+          <header className="bloc__tete">
+            <div>
+              <h2 id="adm-repartition">{t("boutiques.repartition")}</h2>
+            </div>
+          </header>
+          <Anneau
+            etiquette={t("boutiques.repartition")}
+            total={compteurs.boutiques}
+            unite={t("boutiques.unite")}
+            part={(pourcent) => t("boutiques.part", { part: pourcent })}
+            parts={[
+              { cle: "configurees", libelle: t("boutiques.legendeConfigurees"), valeur: compteurs.boutiquesNommees, trait: "var(--color-ds-accent)" },
+              { cle: "sansNom", libelle: t("boutiques.legendeSansNom"), valeur: nonConfigurees, trait: "var(--st-attente)" },
+            ]}
+          />
+        </section>
       </div>
     </main>
   );

@@ -5,12 +5,17 @@ import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { LienEcran } from "@/components/lien-ecran";
 import {
+  Activity,
   ChartColumn,
+  FileText,
   LayoutDashboard,
   Package,
   Palette,
+  ScrollText,
   Settings,
+  Store,
   Truck,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -36,7 +41,19 @@ import {
  * traverse pas la frontière serveur → client. Les six icônes sont celles de la
  * maquette (`coque.html`).
  */
-export type CleIcone = "tableau" | "commandes" | "envois" | "analyses" | "marque" | "parametres";
+export type CleIcone =
+  | "tableau"
+  | "commandes"
+  | "envois"
+  | "analyses"
+  | "marque"
+  | "parametres"
+  // Les huit de l'administration (maquette, `outils/admin.mjs`), qui partage cette colonne.
+  | "adm-commandes"
+  | "adm-comptes"
+  | "adm-boutiques"
+  | "adm-journal"
+  | "adm-surveillance";
 
 const ICONES: Record<CleIcone, LucideIcon> = {
   tableau: LayoutDashboard,
@@ -45,6 +62,11 @@ const ICONES: Record<CleIcone, LucideIcon> = {
   analyses: ChartColumn,
   marque: Palette,
   parametres: Settings,
+  "adm-commandes": FileText,
+  "adm-comptes": Users,
+  "adm-boutiques": Store,
+  "adm-journal": ScrollText,
+  "adm-surveillance": Activity,
 };
 
 export interface EntreeNavigation {
@@ -57,6 +79,11 @@ export interface EntreeNavigation {
    * aucun (jamais « 0 », qui affirmerait qu'on a compté).
    */
   readonly compte?: number;
+  /**
+   * Active sur son seul chemin, jamais sur ses sous-chemins : la racine de
+   * l'administration (`/fr/admin`) préfixe tous les autres écrans.
+   */
+  readonly exacte?: boolean;
 }
 
 /**
@@ -87,7 +114,7 @@ export function NavigationVendeur({
 }) {
   const chemin = usePathname();
   const mouvementReduit = useReducedMotion();
-  const rangActif = entrees.findIndex((e) => estActive(chemin, e.href));
+  const rangActif = entrees.findIndex((e) => (e.exacte === true ? chemin === e.href : estActive(chemin, e.href)));
 
   return (
     <nav className="app__nav" aria-label={etiquette}>

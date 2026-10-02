@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { DialogueAdmin } from "@/components/admin/dialogue-admin";
+import { useId, useRef, useState } from "react";
 import { BoutonAction } from "@/components/bouton-action";
 import { useTranslations } from "next-intl";
 import {
@@ -102,12 +103,7 @@ function BoutonConfirmation({
          JETONS DE L'ANCIEN CANEVAS — un bouton noir, ou rouge #ba1a1a, au milieu
          d'un écran du design system. Le geste dangereux prend le contour rouge
          du bouton qui l'ouvre : même couleur au départ et à l'arrivée. */
-      className={
-        "flex h-11 items-center justify-center rounded-ds-card border bg-ds-surface-carte px-5 text-[14px] font-bold transition-colors disabled:opacity-50 " +
-        (danger
-          ? "border-ds-erreur text-ds-erreur-encre hover:bg-ds-erreur-fond"
-          : "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux")
-      }
+      className={(danger ? "adm-danger" : "adm-confirmer") + " disabled:opacity-50"}
     />
   );
 }
@@ -122,30 +118,31 @@ export function DialogueSuspension({
   readonly email: string;
   readonly suspendu: boolean;
   /**
-   * REÇU EN PROPRIÉTÉ, jamais importé. Le module qui porte cette constante est
-   * `server-only` — l'importer ici faisait ÉCHOUER LE BUILD, ce qui est
-   * exactement le comportement recherché : la barrière existe pour qu'un module
-   * serveur ne puisse pas atteindre le navigateur par accident, et elle vaut
-   * mieux qu'une fuite silencieuse. Le plancher reste défini à un seul endroit,
-   * du côté qui fait autorité.
+   * REÇU EN PROPRIÉTÉ, jamais importé : le module qui porte cette constante est
+   * `server-only`, et la barrière vaut mieux qu'une fuite silencieuse.
    */
   readonly motifMin: number;
 }) {
   const t = useTranslations("admin.suspension");
+  const idTitre = useId();
+  const dialogue = useRef<HTMLDialogElement>(null);
   const [etat, setEtat] = useState<EtatSuspension>(INITIAL);
   const [travaille, setTravaille] = useState(false);
-  const [ouvert, setOuvert] = useState(false);
   const [motif, setMotif] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [colle, setColle] = useState(false);
-  const zone = useRef<HTMLDivElement>(null);
 
   const motifSuffisant = motif.trim().length >= motifMin;
   // La comparaison ignore la casse et les espaces de bord : un email n'y est pas
-  // sensible, et refuser « Alice@ » pour « alice@ » ferait douter de l'outil au
-  // lieu de faire relire le compte.
+  // sensible, et refuser « Alice@ » pour « alice@ » ferait douter de l'outil.
   const confirme = confirmation.trim().toLowerCase() === email.trim().toLowerCase();
   const pret = suspendu ? motifSuffisant : motifSuffisant && confirme;
+
+  function reinitialiser(): void {
+    setMotif("");
+    setConfirmation("");
+    setColle(false);
+  }
 
   async function confirmer(): Promise<void> {
     setTravaille(true);
@@ -158,141 +155,92 @@ export function DialogueSuspension({
     setEtat(resultat);
     setTravaille(false);
     // ON NE RECHARGE QU'APRÈS UNE CONFIRMATION DE LA BASE. Recharger sur un
-    // échec effacerait le message d'erreur ET la saisie, en laissant croire que
-    // quelque chose s'est passé.
+    // échec effacerait le message d'erreur ET la saisie.
     if (resultat.statut === "ok") window.location.reload();
   }
 
-  function fermer(): void {
-    setOuvert(false);
-    setMotif("");
-    setConfirmation("");
-    setColle(false);
-  }
+  const titre = suspendu ? t("titreReactivation") : t("titreSuspension");
 
-  /* LE TITRE ET CE QUE LE GESTE FAIT SONT LISIBLES AVANT D'OUVRIR — planche
-     `#compte` du kit admin. Les découvrir seulement une fois le formulaire
-     ouvert, c'était demander de s'engager pour savoir à quoi. */
-  const entete = (
-    <div className="mb-[18px]">
-      <h2 className="text-[18px] leading-[19.8px] font-bold tracking-[-0.025em] text-ds-texte-titre">
-        {suspendu ? t("titreReactivation") : t("titreSuspension")}
-      </h2>
-      <p className="mt-[3px] text-[13px] leading-[1.55] text-ds-texte-corps">
-        {suspendu ? t("aideReactivation") : t("aideSuspension")}
-      </p>
-    </div>
-  );
-
-  /* Planche `#compte-suspension` du kit admin (15/09/2026), dans le vocabulaire
-     des paramètres : le libellé ENVELOPPE son champ, en colonne à 6 px. */
-  const groupe = "flex flex-col gap-1.5";
-  const libelle = "text-[12.5px] font-semibold text-ds-texte-sourdine";
-  const aide = "text-[12.5px] leading-[1.5] text-ds-texte-corps";
-  const champ =
-    "w-full rounded-ds-sm border border-ds-filet bg-ds-surface-carte text-[13.5px] text-ds-texte-fort outline-none focus:border-ds-filet-focus focus:shadow-[var(--anneau-ds-focus)]";
-
-  if (!ouvert) {
-    return (
-      <div>
-        {entete}
-        <button
-          type="button"
-          onClick={() => {
-            // L'état repart de zéro à l'OUVERTURE : une erreur arrivée après une
-            // fermeture ne doit pas accueillir la tentative suivante (revue du 19/09/2026).
-            setEtat(INITIAL);
-            setOuvert(true);
-          }}
-          className={
-            "flex h-11 w-full items-center justify-center rounded-ds-card border bg-ds-surface-carte px-[18px] text-[14px] font-bold transition-colors " +
-            (suspendu
-              ? "border-ds-filet-appuye text-ds-texte-fort hover:bg-ds-surface-creux"
-              : "border-ds-erreur text-ds-erreur-encre hover:bg-ds-erreur-fond")
-          }
-        >
-          {suspendu ? t("rouvrir") : t("ouvrir")}
-        </button>
-        {etat.statut === "ok" ? (
-          <p role="status" className="mt-2 text-[13px] text-ds-texte-corps">
-            {t("fait")}
-          </p>
-        ) : null}
-      </div>
-    );
-  }
-
+  /* LE TITRE ET CE QUE LE GESTE FAIT SONT LISIBLES AVANT D'OUVRIR : les
+     découvrir une fois le dialogue ouvert, ce serait demander de s'engager pour
+     savoir à quoi. */
   return (
-    <div
-      ref={zone}
-      onKeyDown={(e) => {
-        // Échap ferme. La sortie doit toujours être plus facile que l'action — sauf
-        // pendant la requête : une Server Action ne s'annule pas, et fermer ferait
-        // croire à une annulation avant de recharger sur une suspension bien faite.
-        if (e.key === "Escape" && !travaille) fermer();
-      }}
-    >
-      {entete}
-      <div className="flex flex-col gap-4">
-        <label className={groupe}>
-          <span className={libelle}>{t("motif")}</span>
-          {/* LE MOTIF EST LA PIÈCE QU'ON DEMANDERAIT EN CAS DE LITIGE. Il
-              s'affiche en clair sur la ligne du journal, pas replié derrière un
-              détail que personne n'ouvre. */}
-          <textarea
-            name="motif"
-            rows={3}
-            // LE FOCUS SUIT L'OUVERTURE (audit du 20/09/2026) : le bouton qui ouvre ce panneau
-            // disparaît avec le clic, et le focus retombait sur la page — un lecteur d'écran
-            // perdait le fil. Le panneau n'existe qu'après un geste explicite : pas de vol.
-            autoFocus
-            value={motif}
-            onChange={(e) => setMotif(e.target.value)}
-            className={champ + " resize-none px-[13px] py-[11px] leading-[1.55]"}
-          />
-          <span className={aide}>{t("motifAide", { n: motifMin })}</span>
+    <section className={"bloc adm-bloc" + (suspendu ? "" : " adm-bloc--danger")} aria-labelledby={idTitre + "-bloc"}>
+      <header className="bloc__tete">
+        <div>
+          <h2 id={idTitre + "-bloc"}>{titre}</h2>
+        </div>
+      </header>
+      <p className="adm-texte">{suspendu ? t("aideReactivation") : t("aideSuspension")}</p>
+      <button
+        type="button"
+        className={suspendu ? "bouton-outil" : "adm-danger"}
+        onClick={() => {
+          // L'état repart de zéro à l'OUVERTURE : une erreur arrivée après une
+          // fermeture ne doit pas accueillir la tentative suivante (revue du 19/09/2026).
+          setEtat(INITIAL);
+          reinitialiser();
+          dialogue.current?.showModal();
+        }}
+      >
+        {suspendu ? t("rouvrir") : t("ouvrir")}
+      </button>
+      {etat.statut === "ok" ? (
+        <p role="status" className="adm-texte pb-4">
+          {t("fait")}
+        </p>
+      ) : null}
+
+      <DialogueAdmin
+        refDialogue={dialogue}
+        idTitre={idTitre}
+        titre={titre}
+        aide={suspendu ? t("aideReactivation") : t("aideSuspension")}
+        travaille={travaille}
+        fermer={t("annuler")}
+        onClose={reinitialiser}
+      >
+        {/* LE MOTIF EST LA PIÈCE QU'ON DEMANDERAIT EN CAS DE LITIGE. Il s'affiche
+            en clair sur la ligne du journal. */}
+        <label className="adm-champ">
+          <span>{t("motif")}</span>
+          <textarea name="motif" rows={3} value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <small>{t("motifAide", { n: motifMin })}</small>
         </label>
 
         {!suspendu ? (
-          <label className={groupe}>
-            <span className={libelle}>{t("recopier")}</span>
-            <span className="font-mono text-[13px] text-ds-texte-fort select-none">{email}</span>
+          <label className="adm-champ">
+            <span>{t("recopier")}</span>
             <input
               name="confirmation"
               type="text"
               autoComplete="off"
               spellCheck={false}
+              placeholder={email}
               value={confirmation}
               onChange={(e) => setConfirmation(e.target.value)}
               onPaste={(e) => {
-                // COLLER, C'EST REPRODUIRE SANS LIRE — donc contourner
-                // exactement ce que ce champ cherche à obtenir. Le refus est
-                // annoncé juste en dessous : un champ qui refuse sans expliquer
-                // passe pour un bogue, et l'on cherche alors à le contourner.
+                // COLLER, C'EST REPRODUIRE SANS LIRE — donc contourner exactement ce
+                // que ce champ cherche à obtenir. Le refus est annoncé juste en
+                // dessous : un champ qui refuse sans expliquer passe pour un bogue.
                 e.preventDefault();
                 setColle(true);
               }}
-              className={champ + " h-11 px-[13px] font-mono"}
             />
-            <span className={aide}>{colle ? t("collageRefuse") : t("collageAide")}</span>
+            <small role={colle ? "alert" : undefined}>{colle ? t("collageRefuse") : t("collageAide")}</small>
           </label>
         ) : null}
 
         {etat.statut === "erreur" ? (
-          <p role="alert" className="text-[13px] text-ds-erreur-encre">
+          <p role="alert" className="adm-dialogue__erreur">
             {t(`erreur.${etat.motif}`)}
           </p>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          {/* ANNULER N'EST DÉSACTIVÉ QUE PENDANT LA REQUÊTE : il n'annulerait alors
-              rien, et le proposer serait mentir (contrainte 8, revue du 19/09/2026). */}
-          <button
-            type="button"
-            disabled={travaille}
-            onClick={fermer}
-            className="h-11 px-4 text-[14px] font-semibold text-ds-texte-corps transition-colors hover:text-ds-texte-fort disabled:opacity-50"
-          >
+        <footer>
+          {/* ANNULER N'EST DÉSACTIVÉ QUE PENDANT LA REQUÊTE : il n'annulerait
+              alors rien, et le proposer serait mentir. */}
+          <button type="button" className="bouton-outil" disabled={travaille} onClick={() => dialogue.current?.close()}>
             {t("annuler")}
           </button>
           <BoutonConfirmation
@@ -303,8 +251,8 @@ export function DialogueSuspension({
             travaille={travaille}
             onConfirmer={() => void confirmer()}
           />
-        </div>
-      </div>
-    </div>
+        </footer>
+      </DialogueAdmin>
+    </section>
   );
 }
