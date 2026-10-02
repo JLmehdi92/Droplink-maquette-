@@ -112,21 +112,6 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#4d148c", "monogramme FedEx — dessin du kit"],
   ["#ff6600", "encre du monogramme FedEx — dessin du kit"],
   /*
-   * ⚠️ LES TROIS ARRÊTS DU FOND DES ÉCRANS D'ACCÈS, ET POURQUOI ILS N'ONT PAS
-   * DE TOKEN. Le design system pose ce dégradé EN DUR dans son `AuthBackdrop` :
-   * `linear-gradient(135deg,#F3F1FE 0%,#FAF8FE 42%,#F7F2FC 100%)`. Il ne le
-   * range pas dans `tokens/colors.css` parce qu'il ne sert qu'à ces deux
-   * écrans — trois teintes de lavande à peine distinctes, qui n'ont de sens
-   * qu'ensemble et dans cet ordre.
-   *
-   * Les nommer ici les rend RELUES plutôt que tolérées : si un troisième écran
-   * les employait, ce serait le signe qu'elles méritent un token, et cette
-   * ligne est l'endroit où on s'en apercevrait.
-   */
-  ["#f3f1fe", "fond des écrans d'accès — arrêt 0 %, repris du design system"],
-  ["#faf8fe", "fond des écrans d'accès — arrêt 42 %"],
-  ["#f7f2fc", "fond des écrans d'accès — arrêt 100 %"],
-  /*
    * LES PAGES LÉGALES, portées sur le kit `legal` le 13/09/2026. Trois couleurs
    * que le kit écrit en dur et qu'aucun token ne porte : la pastille « à
    * compléter » — filet pointillé et encre ambre — et le filet de l'encadré
@@ -172,25 +157,20 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
       "dit, la relecture ne l'avait pas vu.",
   ],
   ["#f8f4fd", "fond de l'espace vendeur — arrêt 100 %"],
-  /*
-   * ⚠️ LES TROIS PASTILLES DE LA FENÊTRE DE LA MAQUETTE DU HÉROS, portées avec
-   * elle le 17/09/2026 (`AppWindowMock` du kit `marketing_site`).
-   *
-   * Ce ne sont PAS des couleurs de thème, et c'est la raison de les garder hors
-   * de la palette : elles citent le chrome de fenêtre d'un système
-   * d'exploitation, comme un logo de marque tierce. Les jetonner les ferait
-   * suivre notre palette au prochain changement de design — et une pastille
-   * « fermer » verte ne se lirait plus comme une fenêtre.
-   *
-   * Elles ne peignent rien d'autre que ce dessin : `aria-hidden`, aucun texte
-   * par-dessus, donc aucun contraste à tenir.
-   */
   /* Les étoiles des témoignages de la landing — `TestimonialCard` du kit les
      peint en `#F5B843` en dur, et aucun jeton du design system ne le porte.
      Portées le 18/09/2026 avec la section, sur la liste d'écarts de Wassim. */
-  ["#ff5f57", "pastille « fermer » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
-  ["#febc2e", "pastille « réduire » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
-  ["#28c840", "pastille « agrandir » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
+  /*
+   * LES COULEURS RAPIDES DE L'ONBOARDING (refonte, 02/10/2026, `bienvenue.html`).
+   * Ce sont des PROPOSITIONS de couleur de marque pour le vendeur, pas des
+   * couleurs de notre thème : elles finissent dans `shops.accent_color` et
+   * passent par `resoudreAccent()` comme une saisie libre. Les jetonner les
+   * ferait suivre notre palette, alors qu'elles doivent rester des choix variés.
+   * (Les trois arrêts du fond d'accès et les pastilles de la fenêtre du héros
+   * sont partis le même jour avec `coque-acces` et `maquette-application`.)
+   */
+  ["#e5484d", "couleur rapide « corail » proposée à l'onboarding — maquette bienvenue.html"],
+  ["#d97706", "couleur rapide « ambre » proposée à l'onboarding — maquette bienvenue.html"],
 ];
 const tolerees = new Map(EXCEPTIONS);
 

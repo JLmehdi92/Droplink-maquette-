@@ -244,6 +244,11 @@ const PORTEES_PAR_LA_FEUILLE: ReadonlyArray<{ readonly classe: string; readonly 
     regle: "@media (pointer: coarse) { .lien-r { display: inline-flex; align-items: center; min-height: 44px; } }",
     raison: "Les deux liens autonomes de « Paramètres » (portail de résiliation, « Ma marque »).",
   },
+  {
+    classe: "notif-pied__lien",
+    regle: ".notif-pied__lien { display: inline-flex; align-items: center; min-height: 44px;",
+    raison: "Le lien « Comment fonctionne DropLink » du pied de la page de notification (refonte, 02/10/2026).",
+  },
 ];
 
 describe("les cibles portées par la feuille de la refonte", () => {

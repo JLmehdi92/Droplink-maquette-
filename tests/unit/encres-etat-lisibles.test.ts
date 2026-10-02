@@ -87,8 +87,10 @@ function releverFeuilles(): Array<{ ou: string; famille: string; jeton: string }
     }),
   );
 }
-/** Relevés le 02/10/2026 ; un plancher PAR MOITIÉ, pour qu'aucune ne masque la disparition de l'autre. */
-const PLANCHER_UTILITAIRES = 70;
+/** Relevés le 02/10/2026 ; un plancher PAR MOITIÉ, pour qu'aucune ne masque la disparition de l'autre.
+ *  Utilitaires : 63 le même jour, après le retrait de `coque-acces` et de l'ancienne
+ *  `maquette-application`, orphelins une fois l'onboarding porté. */
+const PLANCHER_UTILITAIRES = 60;
 const PLANCHER_FEUILLES = 80;
 
 describe("les encres des couleurs d'état", () => {

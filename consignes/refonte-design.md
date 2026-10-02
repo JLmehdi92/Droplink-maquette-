@@ -914,6 +914,28 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   à vérifier au poste de Mehdi.
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
 
+### ▶️ 02/10/2026 — étape 7b : bienvenue (onboarding) et notification (session cloud)
+
+- **Bienvenue** (`bienvenue.html`) : la coquille `onb` (logo, « Étape 1 sur 2 » et sa barre), le
+  formulaire à gauche, la page client à droite dans un téléphone — c'est `ApercuPageClient`, le même
+  composant que « Ma marque », qui gagne une prop `nomProvisoire` (« Votre boutique », grisé, tant
+  que le nom est vide). Logo en `bouton-outil`, couleur par pastille + saisie hexadécimale + cinq
+  couleurs rapides (celles de la maquette, déclarées dans `couleurs-en-dur` : ce sont des
+  propositions de couleur de VENDEUR, qui passent par `resoudreAccent()`), type de compte en deux
+  cartes. Les champs, l'action et la redirection ne changent pas.
+- **Notification** (`notification.html`) : une icône par état dans trois ondes (décoratives,
+  arrêtées sous mouvement réduit), titre, texte, bouton. Toujours un POST natif, toujours aucune
+  action à l'ouverture, toujours aucune donnée de commande. Les illustrations de l'ancienne planche
+  ne servent plus ici (la page du lien introuvable garde la sienne jusqu'à l'étape 9).
+- **Ménage** : `coque-acces.tsx` et `maquette-application.tsx` (l'ancienne fenêtre du héros de la
+  landing) n'avaient plus d'appelant que l'un l'autre — supprimés, avec 48 chaînes mortes. Deux
+  planchers baissés avec leur raison (`encres-etat-lisibles` 70 → 60, `pilules-lisibles` > 2).
+- **Mesuré** : bienvenue (compte de test sans type de compte, base de tests) à 1440 et 390 px, fr,
+  en, zh-CN, mouvement réduit ; notification dans ses états confirmer, désinscrire, invalide, fr,
+  zh-CN, en, 1440 et 390 px. Côte à côte avec la maquette : même rendu. Aucun débordement, aucune
+  erreur console, aucune violation CSP, aucune cible sous 44 px.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

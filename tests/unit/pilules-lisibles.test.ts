@@ -186,8 +186,9 @@ describe("Les surfaces peintes du dégradé de marque", () => {
       vues,
       "aucune surface `degrade-ds-marque` trouvée : le balayage ne mesure plus rien",
       // 6 au 02/10/2026 : la refonte peint ses actions de marque par ses feuilles
-      // (`.bouton--marque`, `.ed-voir`), plus par la classe Tailwind.
-    ).toBeGreaterThan(4);
+      // (`.bouton--marque`, `.ed-voir`), plus par la classe Tailwind. 4 le même
+      // jour, après le retrait des orphelins `coque-acces` et `maquette-application`.
+    ).toBeGreaterThan(2);
 
     expect(
       restants,

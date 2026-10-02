@@ -38,6 +38,7 @@ export function ApercuPageClient({
   langue,
   bureau = false,
   zoom,
+  nomProvisoire,
 }: {
   readonly textes: TextesPageApercu;
   readonly pour: string;
@@ -50,6 +51,8 @@ export function ApercuPageClient({
   readonly langue: string;
   readonly bureau?: boolean;
   readonly zoom?: number;
+  /** Onboarding : tant que le nom est vide, l'en-tête montre ce mot, grisé (`bienvenue.html`). */
+  readonly nomProvisoire?: string;
 }) {
   const style = {
     "--pc-texte": accent.texte,
@@ -61,7 +64,7 @@ export function ApercuPageClient({
     ...(zoom === undefined ? {} : { "--z": String(zoom) }),
   } as React.CSSProperties;
   // Une page sans nom ni logo commence directement par son contenu (décision 24).
-  const enTete = nom !== "" || logo !== null;
+  const enTete = nom !== "" || logo !== null || nomProvisoire !== undefined;
   // « Une question ? » n'existe que s'il y a un réseau pour répondre ; le site n'en est pas un.
   const contacts = reseaux.filter((r) => r.clef !== "site");
   const icone = (trace: string) => (
@@ -78,7 +81,13 @@ export function ApercuPageClient({
         <img className="pc__logo" src={logo} alt="" width={44} height={44} />
       )}
       <small>{textes.commandeDe}</small>
-      {nom === "" ? null : <b>{nom}</b>}
+      {nom !== "" ? (
+        <b data-pc-nom>{nom}</b>
+      ) : nomProvisoire === undefined ? null : (
+        <b data-pc-nom className="est-provisoire">
+          {nomProvisoire}
+        </b>
+      )}
       {/* La description suit le nom, et seulement lui : seule, elle ne dirait pas de qui elle parle. */}
       {nom === "" || description === "" ? null : <span>{description}</span>}
       {reseaux.length === 0 ? null : (

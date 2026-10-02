@@ -7,7 +7,8 @@ import { TraductionsClient } from "@/components/traductions-client";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { lireEtatOuDireLaPanne } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
-import { FondAcces, LogoMarque } from "@/components/acces/coque-acces";
+import Link from "next/link";
+import { LogoDropLink } from "@/components/logo-droplink";
 
 export async function generateMetadata({
   params,
@@ -53,29 +54,36 @@ export default async function Bienvenue({
   if (!onboardingAFaire(profil)) redirect(`/${langue}/commandes`);
 
   const t = await getTranslations("onboarding");
+  const ta = await getTranslations("accueil");
+  const nav = await getTranslations("navigation");
 
+  // Coquille de la maquette (`bienvenue.html`) : logo et étape en haut, puis
+  // le formulaire et l'aperçu de la page client côte à côte. `main` ne fait
+  // qu'envelopper : c'est le formulaire qui porte la grille, parce que l'aperçu
+  // lit l'état de ses champs.
   return (
-    <>
-      {/*
-        ⚠️ LE CADRE LAVANDE ET LA CARTE-PAGE À RAYON 28 SONT PARTIS LE 14/09/2026 :
-        l'onboarding suit l'inscription d'une minute, et il portait l'ancien
-        canevas pendant que l'inscription portait le design system. Même fond et
-        même logo que la connexion (`OnboardingScreen` du kit `auth`).
-      */}
-      <FondAcces />
-      <div className="relative flex min-h-dvh flex-col px-4 pt-[22px] pb-6 leading-[normal] md:px-14 md:pt-10 md:pb-8">
-        <header className="flex flex-wrap items-center gap-3">
-          <LogoMarque hauteur={44} className="md:h-13 md:w-auto" />
-          <div className="flex-1" />
-          <span className="text-[13px] font-semibold text-ds-texte-sourdine">{t("etape")}</span>
+    <div className="page-acces v4 onb-page">
+      <a className="evitement" href="#contenu">
+        {nav("allerAuContenu")}
+      </a>
+      <div className="onb">
+        <header className="onb__haut">
+          <Link className="logo min-h-11" href={`/${langue}`} aria-label={ta("accueil")}>
+            <LogoDropLink />
+          </Link>
+          <p className="onb__etape">
+            <span>{t("etape")}</span>
+            <i aria-hidden="true">
+              <b />
+            </i>
+          </p>
         </header>
-
-        <main id="contenu" className="flex flex-1 flex-col justify-start pt-5 pb-6 md:justify-center md:pt-10">
+        <main id="contenu" className="grid">
           <TraductionsClient espaces={["onboarding"]}>
             <FormulaireOnboarding locale={langue} libelles={await libellesApercu(langue)} />
           </TraductionsClient>
         </main>
       </div>
-    </>
+    </div>
   );
 }
