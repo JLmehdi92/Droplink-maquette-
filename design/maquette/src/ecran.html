@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{titre}} · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Un écran du produit pas encore maquetté : son vrai titre, son vrai
+     sous-titre (messages/fr.json), et rien d'inventé à la place du contenu. -->
+<!--COQUE:{{cle}}-->
+    <main id="contenu" class="tableau" data-ecran>
+      <div class="tableau__tete">
+        <div>
+          <h1>{{titre}}</h1>
+          <p>{{sousTitre}}</p>
+        </div>
+      </div>
+      <section class="bloc a-venir" aria-label="Écran à venir">
+        <span class="a-venir__icone"><svg class="ic"><use href="#i-{{icone}}"/></svg></span>
+        <p class="a-venir__titre">Cet écran n’est pas encore maquetté</p>
+        <p>Il sera refait comme le tableau de bord et les commandes : uniquement avec les fonctions et les libellés du produit.</p>
+        <a class="bouton-app bouton-app--second" href="commandes.html">Revenir aux commandes</a>
+      </section>
+    </main>
+  </div>
+</div>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+</body>
+</html>

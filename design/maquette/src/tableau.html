@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tableau de bord · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette fidèle au produit (droplink2) : chaque panneau, chaque libellé et
+     chaque nombre correspond à une lecture que l'écran /tableau-de-bord fait
+     réellement. Rien n'est ajouté : pas de temps réel, pas de palette. -->
+<!--COQUE:tableau-->
+    <main id="contenu" class="tableau" data-tableau>
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Tableau de bord</b></p>
+          <h1>Bonjour Atelier Nord&#8239;!</h1>
+          <p>Voici un aperçu rapide de votre activité sur DropLink.</p>
+        </div>
+        <div class="periodes" role="radiogroup" aria-label="Période" data-periodes>
+          <i class="periodes__curseur" data-curseur></i>
+          <button type="button" role="radio" aria-checked="false" data-periode="7j">7 jours</button>
+          <button type="button" role="radio" aria-checked="true" data-periode="30j">30 jours</button>
+          <button type="button" role="radio" aria-checked="false" data-periode="90j">90 jours</button>
+        </div>
+      </div>
+
+      <section class="compteurs" aria-label="Vue d’ensemble" data-compteurs></section>
+
+      <div class="tableau__haut">
+        <section class="bloc bloc--graphe" aria-labelledby="t-graphe">
+          <header class="bloc__tete">
+            <h2 id="t-graphe" data-graphe-titre>Évolution des commandes</h2>
+            <div class="bascule" role="tablist" aria-label="Graphique affiché" data-bascule>
+              <button type="button" role="tab" aria-selected="true" data-vue-graphe="semaines">Commandes</button>
+              <button type="button" role="tab" aria-selected="false" data-vue-graphe="liens">Liens clients</button>
+            </div>
+          </header>
+          <p class="bloc__aide" data-graphe-aide>Nombre de commandes créées par semaine.</p>
+          <div class="graphe" data-graphe></div>
+          <details class="table-vue"><summary>Voir les valeurs</summary><div class="table-vue__defil"><table data-table-graphe></table></div></details>
+        </section>
+
+        <div class="pile">
+          <section class="bloc" aria-labelledby="t-dernieres">
+            <header class="bloc__tete">
+              <h2 id="t-dernieres">Dernières commandes</h2>
+              <a class="bloc__lien" href="commandes.html">Voir tout<svg class="ic"><use href="#i-chevron-right"/></svg></a>
+            </header>
+            <ul class="dernieres" data-dernieres></ul>
+          </section>
+          <section class="bloc" aria-labelledby="t-actions">
+            <header class="bloc__tete"><h2 id="t-actions">Actions rapides</h2></header>
+            <ul class="actions-rapides">
+              <li><a href="commande.html"><svg class="ic"><use href="#i-plus"/></svg>Créer une commande<svg class="ic"><use href="#i-chevron-right"/></svg></a></li>
+              <li><a href="marque.html"><svg class="ic"><use href="#i-palette"/></svg>Personnaliser ma page client<svg class="ic"><use href="#i-chevron-right"/></svg></a></li>
+              <li><a href="envois.html"><svg class="ic"><use href="#i-truck"/></svg>Voir mes envois<svg class="ic"><use href="#i-chevron-right"/></svg></a></li>
+              <li><a href="analyses.html"><svg class="ic"><use href="#i-chart-column"/></svg>Accéder aux analyses<svg class="ic"><use href="#i-chevron-right"/></svg></a></li>
+            </ul>
+          </section>
+        </div>
+      </div>
+
+      <div class="tableau__bas">
+        <section class="bloc" aria-labelledby="t-colis">
+          <header class="bloc__tete"><h2 id="t-colis">Répartition des statuts</h2><p class="bloc__meta" data-colis-total></p></header>
+          <p class="bloc__aide">Statut actuel de vos envois.</p>
+          <div class="envois" data-envois></div>
+        </section>
+        <section class="bloc" aria-labelledby="t-transp">
+          <header class="bloc__tete"><h2 id="t-transp">Transporteurs les plus utilisés</h2><a class="bloc__lien" href="envois.html">Voir tout<svg class="ic"><use href="#i-chevron-right"/></svg></a></header>
+          <p class="bloc__aide">Répartition de vos envois par transporteur.</p>
+          <div class="envois" data-transp></div>
+        </section>
+        <section class="bloc" aria-labelledby="t-activite">
+          <header class="bloc__tete"><h2 id="t-activite">Activité récente</h2></header>
+          <ol class="activite" data-activite></ol>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- aperçu de la page client, au survol d'une commande (la même page que l'aperçu de la fiche commande) -->
+<div class="apercu-flottant" data-page data-apercu hidden aria-hidden="true">
+  <div class="telephone telephone--apercu"><div class="telephone__ecran" data-apercu-ecran></div></div>
+</div>
+<template data-page data-pc><!--PAGE_CLIENT--></template>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="analytique.js" defer></script>
+<script src="tableau.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vue d'ensemble · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span></p>
+          <h1>Vue d'ensemble</h1>
+          <p>Voici un aperçu global de l'activité sur DropLink.</p>
+        </div>
+        
+      </div>
+      
+
+      <section class="bloc adm-bloc adm-decision"><header class="bloc__tete"><div><h2>Ce qui demande une décision</h2></div></header><ul class="adm-alertes"><li class="adm-alerte"><i data-ton="erreur"><svg class="ic" aria-hidden="true"><use href="#i-circle-alert"/></svg></i><div><b>Un compte dépasse le plafond de colis : 342 sur un seuil de 300</b><span>hello@maisonlou.fr · Chaque colis pris en charge nous est facturé.</span></div><a class="bouton-outil" href="admin-compte.html#c2">Examiner<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li><li class="adm-alerte"><i data-ton="attente"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></i><div><b>4 comptes, sur 2 identifiants partagés</b><span>Des comptes distincts qui affichent le même Instagram, TikTok, WhatsApp ou site web.</span></div><a class="bouton-outil" href="admin-doublons.html">Voir les doublons<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li><li class="adm-alerte"><i data-ton="attente"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></i><div><b>Contestation du blocage de #7E0B6D</b><span>Envoyée par le vendeur le 30 sept. 2026 · première sur trois.</span></div><a class="bouton-outil" href="admin-commandes.html#7E0B6D">Examiner<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li></ul></section>
+      <h2 class="adm-h2">Volumes</h2>
+      <section class="compteurs compteurs--5 adm-tuiles" aria-label="Chiffres clés"><div class="compteur-app"><p class="compteur-app__titre">Commandes créées</p><p class="compteur-app__valeur">612</p><p class="compteur-app__dessous">ce mois-ci</p></div><div class="compteur-app"><p class="compteur-app__titre">Comptes actifs</p><p class="compteur-app__valeur">46</p><p class="compteur-app__dessous">dont 3 sans type · 2 suspendus, hors de ce total</p></div><div class="compteur-app"><p class="compteur-app__titre">Boutiques</p><p class="compteur-app__valeur">48</p><p class="compteur-app__dessous">dont 41 avec un nom de boutique</p></div><div class="compteur-app" data-ton="facture"><p class="compteur-app__titre">Colis pris en charge</p><p class="compteur-app__valeur">438</p><p class="compteur-app__dessous"><span class="adm-facture">FACTURÉ</span> ce mois-ci</p></div><div class="compteur-app"><p class="compteur-app__titre">Stockage des médias</p><p class="compteur-app__valeur">18,4 Go</p><p class="compteur-app__dessous">Somme des tailles relues côté serveur au dépôt</p></div></section>
+      <div class="adm-rangee adm-rangee--2">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Commandes</h2><p class="adm-aide">Évolution du nombre de commandes sur les 30 derniers jours</p></div><span class="adm-periode">30 derniers jours</span></header><div class="adm-graphe"><div class="adm-graphe__plot"><svg viewBox="0 0 600 160" preserveAspectRatio="none" role="img" aria-label="Évolution du nombre de commandes sur les 30 derniers jours">
+    <line x1="0" x2="600" y1="160" y2="160" class="adm-graphe__grille"/><line x1="0" x2="600" y1="120" y2="120" class="adm-graphe__grille"/><line x1="0" x2="600" y1="80" y2="80" class="adm-graphe__grille"/><line x1="0" x2="600" y1="40" y2="40" class="adm-graphe__grille"/><line x1="0" x2="600" y1="0" y2="0" class="adm-graphe__grille"/>
+    <rect x="3.6" y="72.0" width="12.8" height="88.0" rx="3" style="--i:0" data-info="Il y a 29 j : 22 commandes"/><rect x="23.6" y="76.0" width="12.8" height="84.0" rx="3" style="--i:1" data-info="Il y a 28 j : 21 commandes"/><rect x="43.6" y="80.0" width="12.8" height="80.0" rx="3" style="--i:2" data-info="Il y a 27 j : 20 commandes"/><rect x="63.6" y="84.0" width="12.8" height="76.0" rx="3" style="--i:3" data-info="Il y a 26 j : 19 commandes"/><rect x="83.6" y="92.0" width="12.8" height="68.0" rx="3" style="--i:4" data-info="Il y a 25 j : 17 commandes"/><rect x="103.6" y="64.0" width="12.8" height="96.0" rx="3" style="--i:5" data-info="Il y a 24 j : 24 commandes"/><rect x="123.6" y="76.0" width="12.8" height="84.0" rx="3" style="--i:6" data-info="Il y a 23 j : 21 commandes"/><rect x="143.6" y="84.0" width="12.8" height="76.0" rx="3" style="--i:7" data-info="Il y a 22 j : 19 commandes"/><rect x="163.6" y="92.0" width="12.8" height="68.0" rx="3" style="--i:8" data-info="Il y a 21 j : 17 commandes"/><rect x="183.6" y="100.0" width="12.8" height="60.0" rx="3" style="--i:9" data-info="Il y a 20 j : 15 commandes"/><rect x="203.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:10" data-info="Il y a 19 j : 13 commandes"/><rect x="223.6" y="112.0" width="12.8" height="48.0" rx="3" style="--i:11" data-info="Il y a 18 j : 12 commandes"/><rect x="243.6" y="112.0" width="12.8" height="48.0" rx="3" style="--i:12" data-info="Il y a 17 j : 12 commandes"/><rect x="263.6" y="112.0" width="12.8" height="48.0" rx="3" style="--i:13" data-info="Il y a 16 j : 12 commandes"/><rect x="283.6" y="76.0" width="12.8" height="84.0" rx="3" style="--i:14" data-info="Il y a 15 j : 21 commandes"/><rect x="303.6" y="72.0" width="12.8" height="88.0" rx="3" style="--i:15" data-info="Il y a 14 j : 22 commandes"/><rect x="323.6" y="68.0" width="12.8" height="92.0" rx="3" style="--i:16" data-info="Il y a 13 j : 23 commandes"/><rect x="343.6" y="68.0" width="12.8" height="92.0" rx="3" style="--i:17" data-info="Il y a 12 j : 23 commandes"/><rect x="363.6" y="64.0" width="12.8" height="96.0" rx="3" style="--i:18" data-info="Il y a 11 j : 24 commandes"/><rect x="383.6" y="64.0" width="12.8" height="96.0" rx="3" style="--i:19" data-info="Il y a 10 j : 24 commandes"/><rect x="403.6" y="64.0" width="12.8" height="96.0" rx="3" style="--i:20" data-info="Il y a 9 j : 24 commandes"/><rect x="423.6" y="68.0" width="12.8" height="92.0" rx="3" style="--i:21" data-info="Il y a 8 j : 23 commandes"/><rect x="443.6" y="72.0" width="12.8" height="88.0" rx="3" style="--i:22" data-info="Il y a 7 j : 22 commandes"/><rect x="463.6" y="40.0" width="12.8" height="120.0" rx="3" style="--i:23" data-info="Il y a 6 j : 30 commandes"/><rect x="483.6" y="48.0" width="12.8" height="112.0" rx="3" style="--i:24" data-info="Il y a 5 j : 28 commandes"/><rect x="503.6" y="56.0" width="12.8" height="104.0" rx="3" style="--i:25" data-info="Il y a 4 j : 26 commandes"/><rect x="523.6" y="68.0" width="12.8" height="92.0" rx="3" style="--i:26" data-info="Il y a 3 j : 23 commandes"/><rect x="543.6" y="76.0" width="12.8" height="84.0" rx="3" style="--i:27" data-info="Il y a 2 j : 21 commandes"/><rect x="563.6" y="84.0" width="12.8" height="76.0" rx="3" style="--i:28" data-info="Il y a 1 j : 19 commandes"/><rect x="583.6" y="92.0" width="12.8" height="68.0" rx="3" class="est-dernier" style="--i:29" data-info="Aujourd'hui : 17 commandes"/>
+  </svg><div class="adm-graphe__axe"><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span></div></div><p class="adm-graphe__bas"><span>Il y a 29 jours</span><span>Aujourd'hui</span></p></div></section>
+        <section class="bloc adm-bloc adm-bloc--anneau"><header class="bloc__tete"><div><h2>Statut des commandes</h2><p class="adm-aide">Répartition des commandes par statut</p></div></header><div class="adm-anneau"><svg viewBox="0 0 128 128" role="img" aria-label="Répartition des commandes par statut"><circle r="52" cx="64" cy="64" fill="none" stroke="var(--filet)" stroke-width="14"/><circle r="52" cx="64" cy="64" fill="none" stroke="#A9AEC4" stroke-width="14" stroke-dasharray="70.71 326.73" stroke-dashoffset="0.00" transform="rotate(-90 64 64)" data-info="En préparation : 486 (22 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#4F7CF5" stroke-width="14" stroke-dasharray="27.47 326.73" stroke-dashoffset="-72.71" transform="rotate(-90 64 64)" data-info="Expédiées : 197 (9 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#5B4BF5" stroke-width="14" stroke-dasharray="98.83 326.73" stroke-dashoffset="-102.18" transform="rotate(-90 64 64)" data-info="En transit : 674 (31 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#12A87A" stroke-width="14" stroke-dasharray="121.72 326.73" stroke-dashoffset="-203.01" transform="rotate(-90 64 64)" data-info="Livrées : 827 (38 %)"/></svg><p class="adm-anneau__centre"><b>2 184</b><span>commandes</span></p></div>
+  <ul class="adm-legende"><li><i style="background:#A9AEC4"></i><span>En préparation</span><b>486</b><small>22 %</small></li><li><i style="background:#4F7CF5"></i><span>Expédiées</span><b>197</b><small>9 %</small></li><li><i style="background:#5B4BF5"></i><span>En transit</span><b>674</b><small>31 %</small></li><li><i style="background:#12A87A"></i><span>Livrées</span><b>827</b><small>38 %</small></li></ul></section>
+      </div>
+      <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Dernières actions d'administration</h2></div><a class="lien-texte adm-lien" href="admin-journal.html">Tout le journal<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></header><ol class="adm-journal adm-journal--court"><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation d’une fiche de compte</b><span>Compte visé : <a href="admin-compte.html#c2">hello@maisonlou.fr</a></span></div><p><time>30 sept. à 11:42</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation des alertes du panneau</b></div><p><time>30 sept. à 11:40</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></i><div><b>Lecture d’une contestation</b><span>Compte visé : <a href="admin-compte.html#c13">vintage.rue@gmail.com</a></span></div><p><time>30 sept. à 10:18</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></i><div><b>Blocage du lien d’une commande</b><span>Compte visé : <a href="admin-compte.html#c13">vintage.rue@gmail.com</a></span><span class="adm-motif">Motif : Photos signalées comme reprises d’une autre boutique, en attente de vérification.</span></div><p><time>29 sept. à 18:05</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation de la liste des commandes</b></div><p><time>29 sept. à 17:58</time><small>Par admin@droplink.fr</small></p></li></ol></section>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

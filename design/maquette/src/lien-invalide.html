@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lien invalide · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-notif">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<div class="notif-page">
+  <header class="notif-haut">
+    <a class="logo" href="./" aria-label="DropLink, accueil"><img src="assets/img/symbole-84.png" alt="" width="20" height="28"><span>DropLink</span></a>
+    <a class="notif-accueil" href="./"><svg class="ic"><use href="#i-house"/></svg>Retour à l'accueil</a>
+  </header>
+  <main id="contenu" class="notifp">
+    <section class="notifp__carte" data-etat="invalide">
+      <div class="notifp__visuel" aria-hidden="true"><span class="notifp__icone"><svg class="ic"><use href="#i-package-open"/></svg></span><i></i><i></i><i></i></div>
+      <h1>Ce lien n'est plus valable</h1>
+      <p class="notifp__texte">Ce lien de suivi ne mène plus à aucune commande.</p>
+      <a class="notifp__bouton" href="./">Retour à l'accueil<svg class="ic"><use href="#i-arrow-right"/></svg></a>
+      <div class="notifp__aide"><svg class="ic"><use href="#i-message-circle"/></svg><p><b>Vous pensez qu'il s'agit d'une erreur ?</b><span>Contactez la boutique qui vous a envoyé le lien : elle peut vous en générer un nouveau en quelques secondes.</span></p></div>
+    </section>
+  </main>
+  <footer class="notif-pied">
+    <span class="logo logo--petit"><img src="assets/img/symbole-84.png" alt="" width="14" height="20"><span>DropLink</span></span>
+    <a class="notif-pied__lien" href="docs.html">Comment fonctionne DropLink</a>
+  </footer>
+</div>
+
+<script>document.documentElement.classList.add("js");try{const t=localStorage.getItem("dl-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch{}</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!-- La coque de l’espace vendeur, commune aux écrans (navigation-vendeur, barre-superieure, recherche-globale, cloche-alertes du produit). -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Espace vendeur">
+    <a class="logo app__logo" href="./" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+
+    <nav class="app__nav" aria-label="Espace vendeur">
+      <a href="tableau.html" data-nav="tableau"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle" style="view-transition-name:nav-tableau"><svg class="ic"><use href="#i-layout-dashboard"/></svg>Tableau de bord</span></a>
+      <a href="commandes.html" data-nav="commandes"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle" style="view-transition-name:nav-commandes"><svg class="ic"><use href="#i-package"/></svg>Commandes<span class="app__compte">24</span></span></a>
+      <a href="envois.html" data-nav="envois"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle" style="view-transition-name:nav-envois"><svg class="ic"><use href="#i-truck"/></svg>Suivi d’envois</span></a>
+      <a href="analyses.html" data-nav="analyses"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle" style="view-transition-name:nav-analyses"><svg class="ic"><use href="#i-chart-column"/></svg>Analyses</span></a>
+      <a href="marque.html" data-nav="marque"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle" style="view-transition-name:nav-marque"><svg class="ic"><use href="#i-palette"/></svg>Ma marque</span></a>
+      <a href="parametres.html" data-nav="parametres"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle" style="view-transition-name:nav-parametres"><svg class="ic"><use href="#i-settings"/></svg>Paramètres</span></a>
+    </nav>
+
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar" aria-hidden="true">AN</span>
+        <span class="compte__qui"><b>Atelier Nord</b><small>contact@ateliernord.fr</small></span>
+        <svg class="ic"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="parametres.html"><svg class="ic"><use href="#i-settings"/></svg>Paramètres</a>
+        <a href="connexion.html"><svg class="ic"><use href="#i-arrow-left"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" data-recherche>
+        <svg class="ic"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Client, référence, numéro de suivi…" aria-label="Rechercher une commande" aria-keyshortcuts="Control+K Meta+K" autocomplete="off" spellcheck="false" data-recherche-champ>
+        <kbd data-touche>Ctrl K</kbd>
+      </form>
+      <div class="alertes" data-alertes>
+        <button class="alertes__bouton" type="button" aria-expanded="false" aria-controls="panneau-alertes" aria-label="Alertes (2)" data-alertes-bouton>
+          <svg class="ic"><use href="#i-bell"/></svg><span class="alertes__pastille">2</span>
+        </button>
+        <div class="alertes__panneau" id="panneau-alertes" hidden data-alertes-panneau>
+          <p class="alertes__titre">Alertes (2)</p>
+          <a href="commandes.html#jamais-ouvertes" class="alerte" data-alerte-commandes>
+            <i data-ton="attente"><svg class="ic"><use href="#i-eye-off"/></svg></i>
+            <span><b>1 commande jamais ouverte</b><small>Le client n’a pas encore ouvert son lien. Il ne l’a peut-être jamais reçu.</small></span>
+          </a>
+          <a href="envois.html" class="alerte">
+            <i data-ton="silence"><svg class="ic"><use href="#i-clock-alert"/></svg></i>
+            <span><b>1 colis sans mouvement</b><small>Plus de dix jours sans information du transporteur.</small></span>
+          </a>
+        </div>
+      </div>
+      <a class="bouton-app bouton-app--marque" href="commande.html"><svg class="ic"><use href="#i-plus"/></svg><span>Créer une commande</span></a>
+    </header>
+

@@ -228,6 +228,31 @@ Next.js 16 App Router · React 19 · TypeScript strict (`noUncheckedIndexedAcces
 
 ## Assets design
 
+> ⚠️ **LA RÉFÉRENCE CHANGE ENCORE LE 01/10/2026 — décision de Mehdi : c'est la
+> MAQUETTE DE LA REFONTE, versionnée dans `design/maquette/`.** Une refonte
+> complète a été faite hors de ce dépôt (session Claude Code web), écran par
+> écran : les 36 routes et les 8 écrans d'état du produit, dans une nouvelle
+> direction artistique (grammaire des grands SaaS, mouvement mesuré). Elle a été
+> construite en LISANT ce dépôt au commit `d1f3389` : textes de
+> `messages/fr.json`, règles de `src/lib/`, fonctionnalités des routes
+> existantes. Elle n'invente aucune fonctionnalité, sauf un thème sombre qui ne
+> se porte pas.
+>
+> **Le design system ci-dessous reste valable pour tout ce que la maquette ne
+> tranche pas** : jetons, contraintes de la page client, règles d'accessibilité.
+> Quand les deux divergent sur un écran, c'est la maquette qui gagne, et le
+> design system se resynchronise après coup (il est gitignoré, sur le poste de
+> Mehdi).
+>
+> **Avant de toucher un écran, lire `consignes/refonte-design.md`** : le journal
+> d'intégration, ce qui est porté, ce qui reste, et les décisions déjà prises.
+> Pour voir la maquette : `node design/maquette/outils/construire.mjs`, puis
+> servir le dossier `dist/` qu'il produit à côté et ouvrir `plan.html`.
+>
+> Décision du même jour : **les témoignages et « +2 500 vendeurs nous font déjà
+> confiance » quittent la landing** (`landing.kit.trust`, `testi*`, `q1` à
+> `q3`), comme dans la maquette. Ce ne sont pas des faits vérifiables.
+
 > ⚠️ **LE CANEVAS DES 47 PLANCHES N'EST PLUS LA RÉFÉRENCE — décision de Wassim,
 > 11/09/2026.** Ce fichier a longtemps dit « la source du design est le canevas
 > Claude Design, en cas de désaccord c'est la planche qui gagne ». **Cette phrase

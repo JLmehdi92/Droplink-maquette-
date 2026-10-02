@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Commandes · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Commandes</b></p>
+          <h1>Commandes</h1>
+          <p>Gérez et suivez toutes les commandes créées sur DropLink.</p>
+        </div>
+        
+      </div>
+      <p class="adm-encart"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span>Cette consultation est écrite au journal d'audit, avec ses critères. La liste ne montre ni le client, ni la référence produit, ni le lien de la commande.</span></p>
+
+      <section class="compteurs compteurs--6 adm-tuiles" aria-label="Chiffres clés"><div class="compteur-app"><p class="compteur-app__titre">Total commandes</p><p class="compteur-app__valeur">2 184</p><p class="compteur-app__dessous">avec du contenu réel</p></div><div class="compteur-app"><p class="compteur-app__titre">En préparation</p><p class="compteur-app__valeur">486</p><p class="compteur-app__dessous">22 % du total</p></div><div class="compteur-app"><p class="compteur-app__titre">Expédiées</p><p class="compteur-app__valeur">197</p><p class="compteur-app__dessous">9 % du total</p></div><div class="compteur-app"><p class="compteur-app__titre">En transit</p><p class="compteur-app__valeur">674</p><p class="compteur-app__dessous">31 % du total</p></div><div class="compteur-app"><p class="compteur-app__titre">Livrées</p><p class="compteur-app__valeur">827</p><p class="compteur-app__dessous">38 % du total</p></div><div class="compteur-app"><p class="compteur-app__titre">Créées ce mois-ci</p><p class="compteur-app__valeur">612</p><p class="compteur-app__dessous">depuis le 1er du mois</p></div></section>
+      <div class="adm-rangee adm-rangee--pleine">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Liste des commandes</h2><p class="adm-aide">2 184 commandes au total</p></div></header>
+          <div class="adm-outils"><div class="adm-filtres" role="group" aria-label="Filtrer par statut" data-filtres><button type="button" aria-pressed="true" data-filtre="tous">Tous les statuts</button><button type="button" aria-pressed="false" data-filtre="preparation">En préparation</button><button type="button" aria-pressed="false" data-filtre="expedie">Expédiée</button><button type="button" aria-pressed="false" data-filtre="en_transit">En transit</button><button type="button" aria-pressed="false" data-filtre="livre">Livrée</button></div><label class="recherche-envoi adm-cherche"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input type="search" placeholder="Référence, boutique ou adresse…" aria-label="Rechercher une commande" data-cherche></label></div>
+          <div class="adm-defil"><table class="adm-table" data-table>
+            <thead><tr><th scope="col">#</th><th scope="col">Compte</th><th scope="col">Boutique</th><th scope="col">Statut</th><th scope="col">Transporteur</th><th scope="col">Date</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+            <tbody><tr data-statut="en_transit" id="6A4D21" data-cherche="6a4d21 contact@ateliernord.fr atelier nord">
+          <td class="adm-ref">#6A4D21</td>
+          <td class="adm-email">contact@ateliernord.fr</td><td>Atelier Nord</td><td><span class="adm-badge" data-cmd="en_transit"><i></i>En transit</span></td>
+          <td>Colissimo</td><td class="adm-date">30 sept. à 09:12</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c1" aria-label="Voir le compte de contact@ateliernord.fr">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="6A4D21">Bloquer le lien</button></div></td></tr>
+<tr data-statut="preparation" id="9F2C04" data-cherche="9f2c04 hello@maisonlou.fr maison lou">
+          <td class="adm-ref">#9F2C04</td>
+          <td class="adm-email">hello@maisonlou.fr</td><td>Maison Lou</td><td><span class="adm-badge" data-cmd="preparation"><i></i>En préparation</span></td>
+          <td><span class="adm-sourdine">Aucun transporteur</span></td><td class="adm-date">30 sept. à 08:51</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c2" aria-label="Voir le compte de hello@maisonlou.fr">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="9F2C04">Bloquer le lien</button></div></td></tr>
+<tr data-statut="en_transit" id="B71E3A" data-cherche="b71e3a kicks.lab@gmail.com kicks lab">
+          <td class="adm-ref">#B71E3A</td>
+          <td class="adm-email">kicks.lab@gmail.com</td><td>Kicks Lab</td><td><span class="adm-badge" data-cmd="en_transit"><i></i>En transit</span></td>
+          <td>Chronopost</td><td class="adm-date">30 sept. à 08:22</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c3" aria-label="Voir le compte de kicks.lab@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="B71E3A">Bloquer le lien</button></div></td></tr>
+<tr data-statut="expedie" id="3D8F11" data-cherche="3d8f11 drip.paris@gmail.com drip paris">
+          <td class="adm-ref">#3D8F11</td>
+          <td class="adm-email">drip.paris@gmail.com</td><td>Drip Paris</td><td><span class="adm-badge" data-cmd="expedie"><i></i>Expédiée</span></td>
+          <td>Mondial Relay</td><td class="adm-date">29 sept. à 19:40</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c5" aria-label="Voir le compte de drip.paris@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="3D8F11">Bloquer le lien</button></div></td></tr>
+<tr data-statut="livre" id="C5A2E9" data-cherche="c5a2e9 nora.drops@outlook.fr nora drops">
+          <td class="adm-ref">#C5A2E9</td>
+          <td class="adm-email">nora.drops@outlook.fr</td><td>Nora Drops</td><td><span class="adm-badge" data-cmd="livre"><i></i>Livrée</span></td>
+          <td>Colissimo</td><td class="adm-date">29 sept. à 17:05</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c6" aria-label="Voir le compte de nora.drops@outlook.fr">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="C5A2E9">Bloquer le lien</button></div></td></tr>
+<tr data-statut="preparation" id="7E0B6D" data-cherche="7e0b6d vintage.rue@gmail.com vintage rue">
+          <td class="adm-ref">#7E0B6D <span class="adm-badge" data-ton="erreur"><i></i>Lien bloqué</span> <button type="button" class="adm-pastille-contest" data-dialogue="contestation" data-ref="7E0B6D"><svg class="ic" aria-hidden="true"><use href="#i-message-circle"/></svg>Contestation</button></td>
+          <td class="adm-email">vintage.rue@gmail.com</td><td>Vintage Rue</td><td><span class="adm-badge" data-cmd="preparation"><i></i>En préparation</span></td>
+          <td><span class="adm-sourdine">Aucun transporteur</span></td><td class="adm-date">29 sept. à 15:33</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c13" aria-label="Voir le compte de vintage.rue@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="7E0B6D">Débloquer le lien</button></div></td></tr>
+<tr data-statut="en_transit" id="2A9C47" data-cherche="2a9c47 contact@lesboxesdesam.fr les boxes de sam">
+          <td class="adm-ref">#2A9C47</td>
+          <td class="adm-email">contact@lesboxesdesam.fr</td><td>Les Boxes de Sam</td><td><span class="adm-badge" data-cmd="en_transit"><i></i>En transit</span></td>
+          <td>La Poste</td><td class="adm-date">29 sept. à 11:18</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c4" aria-label="Voir le compte de contact@lesboxesdesam.fr">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="2A9C47">Bloquer le lien</button></div></td></tr>
+<tr data-statut="en_transit" id="E8D350" data-cherche="e8d350 hello@maisonlou.fr maison lou">
+          <td class="adm-ref">#E8D350</td>
+          <td class="adm-email">hello@maisonlou.fr</td><td>Maison Lou</td><td><span class="adm-badge" data-cmd="en_transit"><i></i>En transit</span></td>
+          <td>Colissimo</td><td class="adm-date">29 sept. à 10:02</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c2" aria-label="Voir le compte de hello@maisonlou.fr">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="E8D350">Bloquer le lien</button></div></td></tr>
+<tr data-statut="livre" id="0F6B92" data-cherche="0f6b92 bijoux.selene@gmail.com bijoux séléné">
+          <td class="adm-ref">#0F6B92</td>
+          <td class="adm-email">bijoux.selene@gmail.com</td><td>Bijoux Séléné</td><td><span class="adm-badge" data-cmd="livre"><i></i>Livrée</span></td>
+          <td>Mondial Relay</td><td class="adm-date">28 sept. à 18:47</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c7" aria-label="Voir le compte de bijoux.selene@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="0F6B92">Bloquer le lien</button></div></td></tr>
+<tr data-statut="expedie" id="5C1E78" data-cherche="5c1e78 studio.kaia@gmail.com studio kaia">
+          <td class="adm-ref">#5C1E78</td>
+          <td class="adm-email">studio.kaia@gmail.com</td><td>Studio Kaia</td><td><span class="adm-badge" data-cmd="expedie"><i></i>Expédiée</span></td>
+          <td>Colissimo</td><td class="adm-date">28 sept. à 14:26</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c9" aria-label="Voir le compte de studio.kaia@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="5C1E78">Bloquer le lien</button></div></td></tr>
+<tr data-statut="livre" id="A3F0C2" data-cherche="a3f0c2 kicks.lab@gmail.com kicks lab">
+          <td class="adm-ref">#A3F0C2</td>
+          <td class="adm-email">kicks.lab@gmail.com</td><td>Kicks Lab</td><td><span class="adm-badge" data-cmd="livre"><i></i>Livrée</span></td>
+          <td>Chronopost</td><td class="adm-date">28 sept. à 09:15</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c3" aria-label="Voir le compte de kicks.lab@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="A3F0C2">Bloquer le lien</button></div></td></tr>
+<tr data-statut="preparation" id="D9274B" data-cherche="d9274b yanis.shop@gmail.com yanis shop">
+          <td class="adm-ref">#D9274B</td>
+          <td class="adm-email">yanis.shop@gmail.com</td><td>Yanis Shop</td><td><span class="adm-badge" data-cmd="preparation"><i></i>En préparation</span></td>
+          <td><span class="adm-sourdine">Aucun transporteur</span></td><td class="adm-date">27 sept. à 21:03</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c14" aria-label="Voir le compte de yanis.shop@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="D9274B">Bloquer le lien</button></div></td></tr>
+<tr data-statut="livre" id="41B8E6" data-cherche="41b8e6 contact@ateliernord.fr atelier nord">
+          <td class="adm-ref">#41B8E6</td>
+          <td class="adm-email">contact@ateliernord.fr</td><td>Atelier Nord</td><td><span class="adm-badge" data-cmd="livre"><i></i>Livrée</span></td>
+          <td>Mondial Relay</td><td class="adm-date">27 sept. à 16:40</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c1" aria-label="Voir le compte de contact@ateliernord.fr">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="41B8E6">Bloquer le lien</button></div></td></tr>
+<tr data-statut="en_transit" id="8E5D1A" data-cherche="8e5d1a drip.paris@gmail.com drip paris">
+          <td class="adm-ref">#8E5D1A</td>
+          <td class="adm-email">drip.paris@gmail.com</td><td>Drip Paris</td><td><span class="adm-badge" data-cmd="en_transit"><i></i>En transit</span></td>
+          <td>Colissimo</td><td class="adm-date">27 sept. à 12:54</td>
+          <td><div class="adm-actions"><a class="bouton-outil" href="admin-compte.html#c5" aria-label="Voir le compte de drip.paris@gmail.com">Voir</a><button type="button" class="bouton-outil" data-dialogue="blocage" data-ref="8E5D1A">Bloquer le lien</button></div></td></tr></tbody>
+          </table></div>
+          <p class="adm-vide" hidden data-vide>Aucune commande ne correspond à ces filtres.</p>
+          <footer class="adm-pied"><span>14 sur 2 184 commandes</span><button type="button" class="bouton-outil" data-suite>Voir la suite</button></footer></section>
+        <section class="bloc adm-bloc adm-bloc--anneau"><header class="bloc__tete"><div><h2>Répartition des statuts</h2></div></header><div class="adm-anneau"><svg viewBox="0 0 128 128" role="img" aria-label="Répartition des statuts"><circle r="52" cx="64" cy="64" fill="none" stroke="var(--filet)" stroke-width="14"/><circle r="52" cx="64" cy="64" fill="none" stroke="#A9AEC4" stroke-width="14" stroke-dasharray="70.71 326.73" stroke-dashoffset="0.00" transform="rotate(-90 64 64)" data-info="En préparation : 486 (22 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#4F7CF5" stroke-width="14" stroke-dasharray="27.47 326.73" stroke-dashoffset="-72.71" transform="rotate(-90 64 64)" data-info="Expédiées : 197 (9 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#5B4BF5" stroke-width="14" stroke-dasharray="98.83 326.73" stroke-dashoffset="-102.18" transform="rotate(-90 64 64)" data-info="En transit : 674 (31 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#12A87A" stroke-width="14" stroke-dasharray="121.72 326.73" stroke-dashoffset="-203.01" transform="rotate(-90 64 64)" data-info="Livrées : 827 (38 %)"/></svg><p class="adm-anneau__centre"><b>2 184</b><span>commandes</span></p></div>
+  <ul class="adm-legende"><li><i style="background:#A9AEC4"></i><span>En préparation</span><b>486</b><small>22 %</small></li><li><i style="background:#4F7CF5"></i><span>Expédiées</span><b>197</b><small>9 %</small></li><li><i style="background:#5B4BF5"></i><span>En transit</span><b>674</b><small>31 %</small></li><li><i style="background:#12A87A"></i><span>Livrées</span><b>827</b><small>38 %</small></li></ul></section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

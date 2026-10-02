@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Suivi par e-mail · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-notif">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<div class="notif-page">
+  <header class="notif-haut">
+    <a class="logo" href="./" aria-label="DropLink, accueil"><img src="assets/img/symbole-84.png" alt="" width="20" height="28"><span>DropLink</span></a>
+    <a class="notif-accueil" href="./"><svg class="ic"><use href="#i-house"/></svg>Retour à l'accueil</a>
+  </header>
+  <main id="contenu" class="notifp">
+    <section class="notifp__carte" aria-live="polite" data-notif>
+      <div class="notifp__visuel" aria-hidden="true" data-notif-visuel><span class="notifp__icone" data-notif-icone><svg class="ic"><use href="#i-mail"/></svg></span><i></i><i></i><i></i></div>
+      <h1 tabindex="-1" data-notif-titre>Confirmer le suivi par e-mail</h1>
+      <p class="notifp__texte" data-notif-texte>Appuyez sur le bouton pour recevoir un e-mail à l'expédition, pendant le transit et à la livraison de cette commande.</p>
+      <button type="button" class="notifp__bouton" data-notif-bouton><span data-notif-libelle>Confirmer</span><svg class="ic"><use href="#i-arrow-right"/></svg></button>
+    </section>
+  </main>
+  <footer class="notif-pied">
+    <span class="logo logo--petit"><img src="assets/img/symbole-84.png" alt="" width="14" height="20"><span>DropLink</span></span>
+    <a class="notif-pied__lien" href="docs.html">Comment fonctionne DropLink</a>
+  </footer>
+</div>
+
+<script src="compte.js" defer></script>
+</body>
+</html>

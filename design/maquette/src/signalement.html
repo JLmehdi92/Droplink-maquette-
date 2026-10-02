@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signaler un contenu · DropLink</title>
+<meta name="description" content="Signaler un contenu hébergé sur DropLink. Décrivez le lien concerné et le motif : chaque signalement est lu, et une page peut être coupée sans délai.">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="l4 publique publique--signalement">
+<!--ICONES-->
+<div class="l4-grain" aria-hidden="true"></div>
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<div class="sentinelle" data-sentinelle aria-hidden="true"></div>
+
+<header class="entete" data-entete>
+  <div class="entete__barre">
+    <a class="logo" href="index.html" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <div class="entete__actions">
+      <a class="lien-discret" href="connexion.html">Se connecter</a>
+      <a class="bouton bouton--plein bouton--petit" href="inscription.html">Créer un compte</a>
+      <button class="bouton-icone menu-bouton" type="button" aria-expanded="false" aria-controls="menu-mobile" aria-label="Ouvrir le menu" data-menu-bouton>
+        <svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <a href="index.html#studio">Comment ça marche</a>
+    <a href="tarifs.html">Tarifs</a>
+    <a href="docs.html">Documentation</a>
+    <a href="blog.html">Blog</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</header>
+
+<main id="contenu" class="pub">
+
+  <div class="conteneur sig">
+    <div class="sig-gauche">
+      <p class="l4-etiquette"><span><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>Notification et retrait</p>
+      <h1 class="pub-titre l4-titre"><span class="l4-ligne" style="--l:0">Signaler un contenu</span></h1>
+      <p class="pub-chapo" data-entree>Si une page hébergée chez nous porte atteinte à vos droits ou vous paraît illicite, décrivez-la ici. Chaque signalement est examiné par une personne.</p>
+      <ol class="sig-etapes">
+        <li><span>1</span><div><b>Vous envoyez le lien concerné</b><p>L'adresse complète de la page, pour que nous puissions l'identifier sans ambiguïté.</p></div></li>
+        <li><span>2</span><div><b>Nous examinons</b><p>Le compte concerné peut être suspendu à titre conservatoire pendant l'examen.</p></div></li>
+        <li><span>3</span><div><b>Les pages cessent d'être servies</b><p>Si le signalement est fondé, la coupure est immédiate et porte sur l'ensemble des pages du compte.</p></div></li>
+      </ol>
+      <aside class="sig-note" role="note"><svg class="ic" aria-hidden="true"><use href="#i-circle-alert"/></svg><p>Un signalement manifestement abusif peut engager votre responsabilité. Vos coordonnées ne sont jamais transmises à la personne visée.</p></aside>
+    </div>
+    <form class="sig-form v4-carte" novalidate data-signalement>
+      <div class="sig-champ"><label for="sig-lien">Adresse de la page concernée</label><input id="sig-lien" type="url" inputmode="url" placeholder="https://…" required data-sig="lien"><p class="sig-erreur" data-erreur></p></div>
+      <div class="sig-champ"><label for="sig-cat">Nature du signalement</label><span class="sig-liste"><select id="sig-cat" data-sig="categorie">
+        <option>Atteinte à un droit de propriété intellectuelle</option><option>Contenu illicite</option><option>Atteinte à la vie privée</option><option>Autre</option>
+      </select><svg class="ic" aria-hidden="true"><use href="#i-chevron-down"/></svg></span></div>
+      <div class="sig-champ"><label for="sig-desc">Description</label><textarea id="sig-desc" rows="5" placeholder="Précisez ce qui pose problème et à quel titre vous agissez." required data-sig="description"></textarea><p class="sig-erreur" data-erreur></p></div>
+      <div class="sig-champ"><label for="sig-email">Votre adresse email</label><input id="sig-email" type="email" inputmode="email" autocomplete="email" placeholder="Pour vous répondre" required data-sig="email"><p class="sig-erreur" data-erreur></p></div>
+      <button class="bouton bouton--marque bouton--large" type="submit">Préparer le signalement<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+      <p class="sig-aide">Ce bouton ouvre votre messagerie avec le message déjà rempli. Rien n'est envoyé tant que vous ne l'envoyez pas vous-même.</p>
+      <div class="sig-pret" hidden data-pret>
+        <p class="sig-pret__tete"><svg class="ic" aria-hidden="true"><use href="#i-circle-check"/></svg><b>Votre message est prêt</b></p>
+        <dl><div><dt>À</dt><dd><span class="sig-copiable">abus@droplink.fr</span></dd></div><div><dt>Objet</dt><dd data-pret-objet></dd></div></dl>
+        <pre class="sig-pret__corps" data-pret-corps></pre>
+        <div class="sig-pret__actions"><button type="button" class="bouton bouton--second" data-copier-message><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg>Copier le message</button><a class="bouton bouton--plein" data-ouvrir-messagerie href="#"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg>Ouvrir ma messagerie</a></div>
+        <p class="sig-aide">Rien n'est envoyé tant que vous ne l'envoyez pas vous-même.</p>
+      </div>
+      <p class="sig-directe">Ou écrivez directement à <span class="sig-copiable">abus@droplink.fr</span></p>
+    </form>
+  </div>
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied__grille">
+    <div>
+      <a class="logo" href="index.html" aria-label="DropLink, accueil">
+        <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+        <span>DropLink</span>
+      </a>
+      <p class="pied__devise">Un seul lien de suivi pour toute la commande.</p>
+    </div>
+    <nav aria-label="Produit">
+      <h3>Produit</h3>
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <nav aria-label="Pages légales">
+      <h3>Légal</h3>
+      <a href="conditions.html">Conditions</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="signalement.html">Signaler un contenu</a>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© 2026 DropLink. Tous droits réservés. · <a class="l4-comparer" href="plan.html">Toutes les pages</a></p>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-choix="light" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg><span class="sr">Clair</span></button>
+      <button type="button" data-theme-choix="dark" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span class="sr">Sombre</span></button>
+    </div>
+  </div>
+</footer>
+
+<script src="public.js" defer></script>
+
+</body>
+</html>

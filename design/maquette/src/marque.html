@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma marque · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette fidèle à /marque (droplink2 : marque/page.tsx,
+     components/marque/formulaire-marque.tsx, lib/boutique/*) : sections,
+     champs, bornes et libellés sont ceux du produit. L'aperçu est la page
+     client de la maquette, traduite avec les chaînes du produit. -->
+<!--COQUE:marque-->
+    <main id="contenu" class="tableau marque-ecran" data-ecran>
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Ma marque</b></p>
+          <h1>Ma marque</h1>
+          <p>Personnalisez votre page client et renforcez votre image de marque.</p>
+        </div>
+      </div>
+
+      <form class="marque" novalidate data-formulaire-marque>
+        <div class="marque__champs">
+          <section class="bloc reglage" aria-labelledby="m-identite">
+            <header class="reglage__tete"><span class="reglage__n">1</span><div><h2 id="m-identite">Identité de la marque</h2><p>Ajoutez les informations principales de votre boutique.</p></div></header>
+            <div class="reglage__corps reglage__corps--identite">
+              <div class="champ-reglage">
+                <span class="champ-reglage__etiquette">Logo de la marque</span>
+                <div class="depot" data-depot>
+                  <label class="depot__zone" data-depot-zone>
+                    <input type="file" accept="image/png,image/jpeg,image/webp" class="sr" data-depot-fichier>
+                    <span class="depot__visuel" data-depot-visuel><svg class="ic"><use href="#i-upload"/></svg></span>
+                    <span class="depot__texte"><b data-depot-titre>Choisir une image</b><small>PNG, JPG ou WebP · Max 20 Ko</small></span>
+                  </label>
+                  <button type="button" class="bouton-texte" hidden data-depot-retirer>Retirer</button>
+                </div>
+                <p class="champ-reglage__erreur" role="alert" data-erreur-logo></p>
+              </div>
+              <div class="champ-reglage__pile">
+                <label class="champ-reglage">
+                  <span class="champ-reglage__etiquette">Nom de la boutique</span>
+                  <input type="text" name="nom" maxlength="60" placeholder="Par exemple : Studio Nord" value="Atelier Nord" autocomplete="organization">
+                  <small class="champ-reglage__aide">Sans nom ni logo, la page de votre client commence directement par son contenu.</small>
+                </label>
+                <label class="champ-reglage">
+                  <span class="champ-reglage__etiquette">Description (optionnelle) <small class="champ-reglage__compteur" data-compteur-description></small></span>
+                  <input type="text" name="description" maxlength="150" placeholder="Vêtements · Sneakers · Accessoires" value="Sneakers et streetwear, expédiés avec soin.">
+                  <small class="champ-reglage__aide">Une ligne sous votre nom, sur la page de votre client.</small>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="bloc reglage" aria-labelledby="m-couleur">
+            <header class="reglage__tete"><span class="reglage__n">2</span><div><h2 id="m-couleur">Personnalisation</h2><p>Choisissez les couleurs qui représentent votre marque.</p></div></header>
+            <div class="reglage__corps">
+              <div class="champ-reglage">
+                <label class="champ-reglage__etiquette" for="couleur-texte">Couleur principale</label>
+                <div class="couleur">
+                  <label class="couleur__pastille" data-pastille><span class="sr">Code de la couleur</span><input type="color" value="#0f766e" data-couleur-roue></label>
+                  <input id="couleur-texte" type="text" name="couleur" value="#0F766E" aria-label="Code de la couleur" spellcheck="false" autocomplete="off" maxlength="7" data-couleur-texte>
+                  <span class="conforme" data-conforme><svg class="ic"><use href="#i-circle-check"/></svg>Contraste conforme</span>
+                </div>
+                <p class="champ-reglage__erreur" role="alert" data-erreur-couleur></p>
+              </div>
+              <div class="demos" aria-hidden="true">
+                <div class="demo"><small>Texte sur blanc</small><b data-demo-texte>Votre colis est en transit</b><span class="demo__seuil">4,5:1 minimum</span></div>
+                <div class="demo"><small>Bouton</small><span class="demo__bouton" data-demo-bouton>Approuver</span><span class="demo__seuil">3:1 minimum</span></div>
+                <div class="demo"><small>Bandeau</small><span class="demo__bandeau" data-demo-bandeau>En cours</span><span class="demo__seuil">Texte inversé</span></div>
+              </div>
+              <p class="note-reglage" data-note-ajustee hidden><svg class="ic"><use href="#i-circle-alert"/></svg>Sur la page de vos clients, le texte posé sur cette couleur est légèrement assombri ou éclairci pour rester lisible. Votre couleur, elle, n'est pas modifiée.</p>
+            </div>
+          </section>
+
+          <section class="bloc reglage" aria-labelledby="m-reseaux">
+            <header class="reglage__tete"><span class="reglage__n">3</span><div><h2 id="m-reseaux">Réseaux sociaux <small>facultatif</small></h2><p>Ajoutez vos réseaux sociaux pour qu'ils apparaissent sur votre page client.</p></div></header>
+            <div class="reglage__corps reglage__corps--reseaux" data-reseaux></div>
+            <p class="note-reglage note-reglage--basse">Ces liens s’ouvrent hors de la page de votre client, dans un nouvel onglet. Ils ne créent aucun compte et ne demandent rien à votre client.</p>
+          </section>
+
+          <section class="bloc reglage" aria-labelledby="m-options">
+            <header class="reglage__tete"><span class="reglage__n">4</span><div><h2 id="m-options">Options d'affichage</h2><p>Choisissez les éléments à afficher sur votre page client.</p></div></header>
+            <div class="reglage__corps reglage__corps--lignes">
+              <div class="option">
+                <div><p class="option__titre">Filigrane sur les photos</p><p class="option__aide" data-aide-filigrane>Votre nom apparaît en discret sur chaque photo agrandie. Cela décourage la réutilisation, mais ne l’empêche pas.</p></div>
+                <label class="interrupteur"><input type="checkbox" role="switch" name="filigrane" data-filigrane><i></i><span class="sr">Afficher le nom de ma boutique sur les photos</span></label>
+              </div>
+              <div class="option">
+                <div><p class="option__titre">Langue des pages client</p><p class="option__aide">Vos clients voient toujours cette langue, où qu’ils soient.</p></div>
+                <select name="langue" aria-label="Langue des pages client" data-langue>
+                  <option value="fr" selected>Français</option>
+                  <option value="en">Anglais</option>
+                  <option value="zh-CN">Chinois simplifié</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="bloc reglage" aria-labelledby="m-lien">
+            <header class="reglage__tete"><span class="reglage__n">5</span><div><h2 id="m-lien">Lien personnalisé <span class="badge-pro">Pro</span></h2><p>Personnalisez votre lien pour un rendu plus professionnel.</p></div></header>
+            <div class="reglage__corps">
+              <div class="lien-perso">
+                <span class="lien-perso__origine">droplink.fr/</span>
+                <input type="text" name="lien" value="atelier-nord" maxlength="40" placeholder="votre-boutique" aria-label="Lien personnalisé" autocomplete="off" spellcheck="false" data-lien>
+              </div>
+              <p class="champ-reglage__erreur" role="alert" data-erreur-lien></p>
+            </div>
+          </section>
+
+          <section class="bloc reglage" aria-labelledby="m-marque">
+            <header class="reglage__tete"><span class="reglage__n">6</span><div><h2 id="m-marque">Marque DropLink <span class="badge-pro">Pro</span></h2><p>Retirez la carte « Propulsé par DropLink » de vos pages client.</p></div></header>
+            <div class="reglage__corps reglage__corps--lignes">
+              <div class="option">
+                <div><p class="option__titre">Masquer la marque DropLink</p><p class="option__aide">Vos clients ne voient plus que votre boutique.</p></div>
+                <label class="interrupteur"><input type="checkbox" role="switch" name="masquer" data-masquer><i></i><span class="sr">Masquer la marque DropLink</span></label>
+              </div>
+            </div>
+          </section>
+
+          <div class="marque__enregistrer">
+            <p class="marque__statut" role="status" aria-live="polite" data-statut></p>
+            <button type="submit" class="bouton-app bouton-app--plein bouton-envoi-marque" data-enregistrer><span>Enregistrer les modifications</span></button>
+          </div>
+        </div>
+
+        <aside class="bloc marque__apercu" aria-labelledby="m-apercu">
+          <header class="bloc__tete"><h2 id="m-apercu">Aperçu de votre page client</h2><p class="direct"><i></i>en direct</p></header>
+          <p class="bloc__aide">Voici un aperçu de ce que verront vos clients.</p>
+          <div class="apercu-format" role="group" aria-label="Format de l’aperçu" data-formats>
+            <button type="button" aria-pressed="false" data-format="desktop"><svg class="ic"><use href="#i-monitor"/></svg>Desktop</button>
+            <button type="button" aria-pressed="true" data-format="mobile"><svg class="ic"><use href="#i-smartphone"/></svg>Mobile</button>
+            <a class="apercu-format__lien" href="client.html" aria-label="Voir la page client" title="Voir la page client"><svg class="ic"><use href="#i-external-link"/></svg></a>
+          </div>
+          <div class="apercu-zone" data-apercu-zone>
+            <div class="apercu-mobile" data-vue="mobile"><div class="apercu-mobile__ecran" role="img" aria-label="Aperçu mobile de la page client" data-apercu-ecran="mobile"></div></div>
+            <div class="apercu-bureau" data-vue="desktop" role="img" aria-label="Aperçu desktop de la page client" hidden data-apercu-ecran="desktop"></div>
+          </div>
+        </aside>
+      </form>
+    </main>
+  </div>
+</div>
+
+<template data-page data-pc><!--PAGE_CLIENT--></template>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="marque.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Connexion · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-acces v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<div class="acces">
+  <main class="acces__colonne" id="contenu">
+    <a class="logo acces__logo" href="./" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+
+    <div class="acces__corps">
+     <section class="panneau" data-panneau="connexion">
+      <header class="acces__tete">
+        <h1 tabindex="-1">Bon retour</h1>
+        <p>Retrouvez vos commandes et vos liens de suivi client.</p>
+      </header>
+
+      <form class="formulaire" novalidate data-formulaire="connexion">
+        <!--CHAMP_EMAIL-->
+
+        <div class="champ-acces" data-champ-mdp>
+          <div class="champ-acces__ligne">
+            <label for="mdp">Mot de passe</label>
+            <a class="lien-texte" href="#oubli" data-oubli>Mot de passe oublié ?</a>
+          </div>
+          <div class="champ-acces__boite">
+            <input id="mdp" name="mdp" type="password" autocomplete="current-password" placeholder="Votre mot de passe" required aria-describedby="mdp-erreur">
+            <button type="button" class="champ-acces__oeil" aria-label="Afficher le mot de passe" aria-pressed="false" data-oeil>
+              <svg class="ic"><use href="#i-eye"/></svg>
+            </button>
+          </div>
+          <p class="champ-acces__erreur" id="mdp-erreur" data-erreur></p>
+        </div>
+
+        <!--BOUTON:Se connecter:Connexion…-->
+        <p class="formulaire__statut" role="status" aria-live="polite" data-statut></p>
+      </form>
+
+      <!--GOOGLE:apres-->
+
+      <p class="acces__bascule">Pas encore de compte ? <a class="lien-texte" href="inscription.html">Créer un compte</a></p>
+     </section>
+
+     <section class="panneau" data-panneau="oubli" hidden>
+      <header class="acces__tete">
+        <h1 tabindex="-1">Mot de passe oublié</h1>
+        <p>Entrez votre adresse. Si un compte existe, vous recevez un lien pour en choisir un nouveau.</p>
+      </header>
+      <form class="formulaire" novalidate data-formulaire="oubli">
+        <!--CHAMP_EMAIL:oubli-->
+        <!--BOUTON:Envoyer le lien:Envoi…-->
+        <p class="formulaire__statut" role="status" aria-live="polite" data-statut></p>
+      </form>
+      <div class="envoye" hidden data-envoye>
+        <span class="envoye__icone"><svg class="ic"><use href="#i-mail"/></svg></span>
+        <h2 tabindex="-1">Regardez votre boîte mail</h2>
+        <p>Si un compte existe pour cette adresse, un lien de réinitialisation vous parviendra. Pensez à regarder dans les indésirables.</p>
+      </div>
+      <p class="acces__bascule"><a class="lien-texte lien-retour" href="#connexion" data-retour><svg class="ic"><use href="#i-arrow-left"/></svg>Revenir à la connexion</a></p>
+     </section>
+    </div>
+
+    <p class="acces__legal">En continuant, vous acceptez nos <a href="conditions.html">conditions d'utilisation</a> et notre <a href="confidentialite.html">politique de confidentialité</a>.</p>
+  </main>
+
+  <aside class="acces__vitrine acces__vitrine--film" aria-hidden="true">
+    <div class="film-hote" data-film="absence"></div>
+    <template data-pc><!--PAGE_CLIENT--></template>
+  </aside>
+</div>
+
+<script src="acces.js" defer></script>
+<script src="film.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

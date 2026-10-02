@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cet écran n'a pas pu s'afficher · DropLink</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-erreur">
+<!--ICONES-->
+<!-- Maquette de l'erreur du site public (droplink2 : src/app/[locale]/error.tsx,
+     EcranErreurPublic, messages « erreurs »). La référence est celle que Next
+     donne à l'incident (digest) : le produit ne l'affiche que s'il en existe une. -->
+<div class="err-page">
+  <header class="err-haut"><a class="logo" href="index.html" aria-label="DropLink, accueil"><img src="assets/img/symbole-84.png" alt="" width="24" height="34"><span>DropLink</span></a></header>
+  <main id="contenu" class="err-corps">
+    <span class="err-icone" aria-hidden="true"><svg class="ic"><use href="#i-triangle-alert"/></svg></span>
+    <h1>Cet écran n'a pas pu s'afficher</h1>
+    <p>Une erreur est survenue de notre côté. Vos données ne sont pas touchées : rien n'a été enregistré ni supprimé.</p>
+    <button class="bouton bouton--marque err-action" type="button" data-reessayer="index.html"><svg class="ic"><use href="#i-rotate-ccw"/></svg><span>Réessayer</span></button>
+    <p class="err-ref">Référence de l'incident : 2741983056</p>
+  </main>
+  <footer class="err-pied"><span class="logo logo--petit"><img src="assets/img/symbole-84.png" alt="" width="15" height="22"><span>DropLink</span></span></footer>
+</div>
+<script src="etats.js" defer></script>
+</body>
+</html>

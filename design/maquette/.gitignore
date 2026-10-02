@@ -1,0 +1,3 @@
+# Produits par outils/construire.mjs : la maquette se sert depuis dist/, ses sources restent dans src/
+dist/
+src/styles.css

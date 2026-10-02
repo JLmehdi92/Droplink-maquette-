@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Envoyer des photos sans lien qui expire · DropLink</title>
+<meta name="description" content="Sept jours en gratuit, vingt-huit en payant : après quoi le lien envoyé à votre client ne mène plus nulle part. Pourquoi ça arrive, et comment livrer des photos qui restent consultables.">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="l4 publique publique--blog">
+<!--ICONES-->
+<div class="l4-grain" aria-hidden="true"></div>
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<div class="sentinelle" data-sentinelle aria-hidden="true"></div>
+
+<header class="entete" data-entete>
+  <div class="entete__barre">
+    <a class="logo" href="index.html" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html" aria-current="page">Blog</a>
+    </nav>
+    <div class="entete__actions">
+      <a class="lien-discret" href="connexion.html">Se connecter</a>
+      <a class="bouton bouton--plein bouton--petit" href="inscription.html">Créer un compte</a>
+      <button class="bouton-icone menu-bouton" type="button" aria-expanded="false" aria-controls="menu-mobile" aria-label="Ouvrir le menu" data-menu-bouton>
+        <svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <a href="index.html#studio">Comment ça marche</a>
+    <a href="tarifs.html">Tarifs</a>
+    <a href="docs.html">Documentation</a>
+    <a href="blog.html" aria-current="page">Blog</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</header>
+
+<main id="contenu" class="pub">
+
+  <div class="art-progres" aria-hidden="true" data-progres></div>
+  <article class="conteneur art">
+    <a class="art-retour" href="blog.html"><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Tous les articles</a>
+    <p class="l4-etiquette art-etiquette"><span><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg></span>SUIVI &amp; PARTAGE</p>
+    <h1 class="pub-titre art-titre">Envoyer des photos à un client sans que le lien expire</h1>
+    <p class="art-meta"><span class="blog-meta"><svg class="ic" aria-hidden="true"><use href="#i-calendar-days"/></svg><time datetime="2026-09-08">8 septembre 2026</time><span aria-hidden="true">·</span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>6 min</span></p>
+    <div class="art-corps">
+      <p class="art-chapeau">Sept jours en gratuit, vingt-huit en payant. Passé ce délai, le lien que vous avez envoyé à votre client ne mène plus nulle part, et c'est souvent le moment où il y revient.</p>
+      <h2>Pourquoi le lien meurt</h2>
+      <p>Les services de transfert de fichiers ont été conçus pour envoyer un document, pas pour livrer une commande. Le fichier part, il est téléchargé, l'affaire est close. C'est un modèle qui tient parfaitement tant que personne ne revient regarder.</p>
+      <p>Un client qui attend un colis, lui, revient. Il revient le lendemain pour montrer les photos à quelqu'un, la semaine suivante pour vérifier un détail dont il n'est plus sûr, et un mois plus tard parce que le colis est arrivé abîmé et qu'il veut comparer avec ce qu'il avait vu.</p>
+      <p>L'expiration n'est pas un défaut de ces outils : c'est leur fonctionnement normal. Stocker des fichiers coûte de l'argent, et un service de transfert n'a aucune raison de les garder une fois qu'ils sont arrivés. Le problème n'est pas l'outil, c'est qu'on lui demande un travail pour lequel il n'a pas été fait.</p>
+      <h2>Ce que ça coûte vraiment</h2>
+      <p>Le coût n'est pas le lien mort. Le coût, c'est le message qui suit, celui où votre client vous demande de tout renvoyer, et où vous devez retrouver les bonnes photos parmi celles de trente autres commandes, sur un téléphone qui a effacé les plus anciennes.</p>
+      <blockquote>Un lien qui expire ne vous fait pas perdre un fichier. Il vous fait perdre la conversation.</blockquote>
+      <p>Il y a un second coût, moins visible : ce que le client en déduit. Un lien mort ressemble à un vendeur qui a disparu. Vous savez que vous êtes toujours là ; lui voit une page d'erreur, et c'est exactement au moment où il attend quelque chose de vous.</p>
+      <h2>Les trois façons de s'en sortir</h2>
+      <p>Il y en a trois, et chacune a un défaut qu'on découvre à l'usage plutôt qu'au moment de choisir.</p>
+      <ul><li>Un dossier partagé. Le lien ne meurt pas, mais il donne accès à tout ce qu'il y a dans le dossier, pour toujours, à qui le possède. Un client qui transfère le lien transfère aussi ce que vous y ajouterez demain.</li><li>Envoyer les photos une par une dans la conversation. Rien n'expire, mais tout se perd : au bout de trois mois de messages, retrouver les photos d'une commande précise est plus long que de les reprendre.</li><li>Une page par commande. Le lien est unique, il ne change jamais, et il ne montre que cette commande-là. C'est plus de travail à mettre en place une fois, et plus rien ensuite.</li></ul>
+      <h2>Ce qui compte vraiment dans le choix</h2>
+      <p>Une question tranche entre les trois : que se passe-t-il quand vous devez ajouter quelque chose après avoir envoyé le lien ? Une photo oubliée, un numéro de suivi qui arrive deux jours plus tard, une réponse à une question. Avec un transfert de fichiers, il faut tout renvoyer. Avec un dossier partagé, le client doit deviner que quelque chose a changé.</p>
+      <p>C'est ce point-là qui a décidé la forme de DropLink : une page par commande, modifiable après l'envoi, sur un lien qui ne bouge jamais. Le client garde la même adresse et y trouve ce qu'il y a de plus récent, sans qu'on ait à le prévenir.</p>
+    </div>
+    <aside class="pub-cta v4-carte" data-anime>
+      <h2>Un seul lien pour toute la commande</h2>
+      <p>Compte gratuit, sans carte bancaire, prêt en moins d'une minute.</p>
+      <a class="bouton bouton--marque bouton--large" href="inscription.html">Créer mon compte<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+    </aside>
+    <nav class="art-suite" aria-label="À lire aussi">
+      <p class="art-suite__titre">À lire aussi</p>
+      <a class="blog-carte v4-carte" href="blog-cest-ou-mon-colis-arreter-de-repondre.html"><span class="blog-carte__etiquette">RELATION CLIENT</span><h2>« C'est où mon colis ? » : arrêter de répondre dix fois par jour</h2><span class="blog-carte__pied"><span class="blog-meta"><svg class="ic" aria-hidden="true"><use href="#i-calendar-days"/></svg><time datetime="2026-09-08">8 septembre 2026</time><span aria-hidden="true">·</span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>5 min</span><span class="blog-carte__lire">Lire<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></span></a>
+      <a class="blog-carte v4-carte" href="blog-photos-controle-sans-dossier-partage.html"><span class="blog-carte__etiquette">PARTAGE</span><h2>Photos de contrôle : les partager sans passer par un dossier partagé</h2><span class="blog-carte__pied"><span class="blog-meta"><svg class="ic" aria-hidden="true"><use href="#i-calendar-days"/></svg><time datetime="2026-09-08">8 septembre 2026</time><span aria-hidden="true">·</span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>6 min</span><span class="blog-carte__lire">Lire<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></span></a>
+    </nav>
+  </article>
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied__grille">
+    <div>
+      <a class="logo" href="index.html" aria-label="DropLink, accueil">
+        <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+        <span>DropLink</span>
+      </a>
+      <p class="pied__devise">Un seul lien de suivi pour toute la commande.</p>
+    </div>
+    <nav aria-label="Produit">
+      <h3>Produit</h3>
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <nav aria-label="Pages légales">
+      <h3>Légal</h3>
+      <a href="conditions.html">Conditions</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="signalement.html">Signaler un contenu</a>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© 2026 DropLink. Tous droits réservés. · <a class="l4-comparer" href="plan.html">Toutes les pages</a></p>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-choix="light" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg><span class="sr">Clair</span></button>
+      <button type="button" data-theme-choix="dark" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span class="sr">Sombre</span></button>
+    </div>
+  </div>
+</footer>
+
+<script src="public.js" defer></script>
+
+</body>
+</html>

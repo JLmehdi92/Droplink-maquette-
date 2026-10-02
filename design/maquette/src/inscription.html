@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Créer un compte · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-acces v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<div class="acces">
+  <main class="acces__colonne" id="contenu">
+    <a class="logo acces__logo" href="./" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+
+    <div class="acces__corps">
+     <section class="panneau" data-panneau="inscription">
+      <header class="acces__tete">
+        <h1 tabindex="-1">Créer votre compte</h1>
+        <p>Commencez gratuitement. Votre premier lien de suivi part juste après.</p>
+      </header>
+
+      <!--GOOGLE:avant-->
+
+      <form class="formulaire" novalidate data-formulaire="inscription">
+        <!--CHAMP_EMAIL-->
+
+        <div class="champ-acces" data-champ-mdp>
+          <div class="champ-acces__ligne">
+            <label for="mdp">Mot de passe</label>
+          </div>
+          <div class="champ-acces__boite">
+            <input id="mdp" name="mdp" type="password" autocomplete="new-password" placeholder="Une phrase, plutôt qu'un mot" required minlength="12" aria-describedby="mdp-aide mdp-erreur">
+            <button type="button" class="champ-acces__oeil" aria-label="Afficher le mot de passe" aria-pressed="false" data-oeil>
+              <svg class="ic"><use href="#i-eye"/></svg>
+            </button>
+          </div>
+          <div class="jauge-mdp" data-jauge aria-hidden="true"><i></i></div>
+          <p class="champ-acces__aide" id="mdp-aide" data-aide-mdp><span data-compteur>0</span> / 12 caractères minimum. Prenez plutôt une phrase qu’un mot compliqué.</p>
+          <p class="champ-acces__erreur" id="mdp-erreur" data-erreur></p>
+        </div>
+
+        <!--BOUTON:Créer mon compte:Création…-->
+        <p class="formulaire__statut" role="status" aria-live="polite" data-statut></p>
+      </form>
+
+      <ul class="l4-garanties v4-garanties">
+        <li><svg class="ic"><use href="#i-check"/></svg>5 commandes offertes</li>
+        <li><svg class="ic"><use href="#i-check"/></svg>Sans carte bancaire</li>
+        <li><svg class="ic"><use href="#i-check"/></svg>Aucun compte pour votre client</li>
+      </ul>
+      <p class="acces__bascule">Déjà un compte ? <a class="lien-texte" href="connexion.html">Se connecter</a></p>
+     </section>
+    </div>
+
+    <p class="acces__legal">En continuant, vous acceptez nos <a href="conditions.html">conditions d'utilisation</a> et notre <a href="confidentialite.html">politique de confidentialité</a>.</p>
+  </main>
+
+  <aside class="acces__vitrine acces__vitrine--film" aria-hidden="true">
+    <div class="film-hote" data-film="minute"></div>
+    <template data-pc><!--PAGE_CLIENT--></template>
+  </aside>
+</div>
+
+<script src="acces.js" defer></script>
+<script src="film.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

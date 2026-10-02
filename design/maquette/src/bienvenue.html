@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bienvenue · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-acces v4 onb-page">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<div class="onb">
+  <header class="onb__haut">
+    <a class="logo" href="./" aria-label="DropLink, accueil"><img src="assets/img/symbole-84.png" alt="" width="20" height="28"><span>DropLink</span></a>
+    <p class="onb__etape"><span>Étape 1 sur 2</span><i aria-hidden="true"><b></b></i></p>
+  </header>
+
+  <main id="contenu" class="onb__grille">
+    <form class="onb__form" novalidate data-onboarding>
+      <header class="acces__tete">
+        <h1 tabindex="-1">Mettons votre nom sur la page</h1>
+        <p>C’est ce que verra votre client. Vous pourrez tout changer plus tard.</p>
+      </header>
+
+      <div class="onb-champ">
+        <label for="onb-nom">Nom de votre boutique</label>
+        <input id="onb-nom" type="text" placeholder="Atelier Nord" maxlength="60" autocomplete="organization" data-onb-nom>
+      </div>
+
+      <div class="onb-champ">
+        <span class="onb-champ__titre">Logo</span>
+        <div class="onb-logo">
+          <span class="onb-logo__visuel" data-onb-logo-visuel><svg class="ic"><use href="#i-images"/></svg></span>
+          <div class="onb-logo__actions">
+            <label class="bouton-outil onb-logo__choisir"><input type="file" accept="image/png,image/jpeg" class="sr" data-onb-logo><svg class="ic"><use href="#i-upload"/></svg><span data-onb-logo-libelle>Choisir une image</span></label>
+            <button type="button" class="onb-lien" hidden data-onb-logo-retirer>Retirer le logo</button>
+            <small>PNG ou JPG, 512 px minimum</small>
+          </div>
+        </div>
+        <p class="champ-acces__erreur" role="alert" data-onb-logo-erreur></p>
+      </div>
+
+      <div class="onb-champ">
+        <label for="onb-couleur">Votre couleur</label>
+        <div class="onb-couleur">
+          <label class="couleur__pastille" data-onb-pastille><span class="sr">Choisir une couleur</span><input type="color" value="#5b4bf5" data-onb-roue></label>
+          <input id="onb-couleur" type="text" value="#5B4BF5" maxlength="7" spellcheck="false" autocomplete="off" data-onb-hex>
+          <div class="onb-couleur__vite" role="group" aria-label="Couleurs rapides"><button type="button" style="--c:#5B4BF5" aria-label="Violet" data-onb-vite="#5B4BF5"></button><button type="button" style="--c:#0F766E" aria-label="Vert sapin" data-onb-vite="#0F766E"></button><button type="button" style="--c:#E5484D" aria-label="Corail" data-onb-vite="#E5484D"></button><button type="button" style="--c:#0B0B18" aria-label="Encre" data-onb-vite="#0B0B18"></button><button type="button" style="--c:#D97706" aria-label="Ambre" data-onb-vite="#D97706"></button></div>
+        </div>
+        <p class="onb-aide">Le contraste est ajusté automatiquement : n’importe quelle couleur reste lisible.</p>
+      </div>
+
+      <fieldset class="onb-champ onb-type">
+        <legend class="onb-champ__titre">Vous vendez plutôt…</legend>
+        <div class="onb-type__choix">
+          <label class="onb-carte"><input type="radio" name="type" value="supplier" data-onb-type><span class="onb-carte__icone"><svg class="ic"><use href="#i-users"/></svg></span><b>À des revendeurs</b><small>Vous fournissez d’autres vendeurs</small><svg class="ic onb-carte__coche"><use href="#i-circle-check"/></svg></label>
+          <label class="onb-carte"><input type="radio" name="type" value="reseller" data-onb-type><span class="onb-carte__icone"><svg class="ic"><use href="#i-message-circle"/></svg></span><b>À vos clients</b><small>Vous vendez en direct, en message privé</small><svg class="ic onb-carte__coche"><use href="#i-circle-check"/></svg></label>
+        </div>
+        <p class="champ-acces__erreur" role="alert" data-onb-type-erreur></p>
+      </fieldset>
+
+      <!--BOUTON:Continuer:Enregistrement…-->
+    </form>
+
+    <section class="onb__apercu" aria-label="Aperçu de votre page client">
+      <p class="onb__apercu-titre"><span class="direct"><i></i></span>CE QUE VOTRE CLIENT VERRA</p>
+      <div class="telephone telephone--onb" aria-hidden="true">
+        <div class="telephone__ecran" data-onb-ecran>
+          <!--PAGE_CLIENT-->
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="compte.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

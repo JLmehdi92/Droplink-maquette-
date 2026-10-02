@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Commandes · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette fidèle à /commandes (droplink2 : commandes/page.tsx,
+     components/commandes/*, lib/commandes/liste.ts) : colonnes, filtres, tris,
+     vues, actions et libellés sont ceux du produit. -->
+<!--COQUE:commandes-->
+    <main id="contenu" class="tableau commandes-ecran" data-ecran>
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Commandes</b></p>
+          <h1>Commandes</h1>
+          <p data-sous-titre></p>
+        </div>
+        <div class="outils-tete">
+          <div class="deroulant" data-deroulant>
+            <button type="button" class="bouton-outil" aria-expanded="false" aria-controls="pop-periode" data-ouvrir><svg class="ic"><use href="#i-calendar-days"/></svg><span data-periode-libelle>Toutes les périodes</span><svg class="ic ic--petit"><use href="#i-chevron-down"/></svg></button>
+            <form class="pop pop--droite" id="pop-periode" hidden data-pop-periode>
+              <label>Créées à partir du<input type="date" name="du" min="2026-09-01" max="2026-09-30"></label>
+              <label>Jusqu'au<input type="date" name="au" min="2026-09-01" max="2026-09-30"></label>
+              <div class="pop__pied"><button type="button" class="bouton-texte" data-periode-effacer>Toutes les périodes</button><button type="submit" class="bouton-app bouton-app--plein">Appliquer</button></div>
+            </form>
+          </div>
+          <div class="deroulant" data-deroulant>
+            <button type="button" class="bouton-outil" aria-expanded="false" aria-controls="pop-export" data-ouvrir><svg class="ic"><use href="#i-download"/></svg><span>Exporter</span></button>
+            <div class="pop pop--droite pop--export" id="pop-export" hidden>
+              <p class="pop__avert"><svg class="ic"><use href="#i-circle-alert"/></svg>Le fichier contient les liens publics de vos commandes : qui l’ouvre peut ouvrir les pages de vos clients.</p>
+              <button type="button" class="bouton-app bouton-app--plein" data-telecharger>Télécharger le CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="compteurs compteurs--4" aria-label="Résumé" data-tuiles></section>
+
+      <div class="barre-liste">
+        <div class="vues-liste" role="tablist" aria-label="Vues" data-vues>
+          <i class="vues-liste__trait" data-vues-trait></i>
+          <button type="button" role="tab" aria-selected="true" data-vue="toutes">Toutes</button>
+          <button type="button" role="tab" aria-selected="false" data-vue="en-transit">En transit</button>
+          <button type="button" role="tab" aria-selected="false" data-vue="jamais-ouvertes">Jamais ouvertes</button>
+          <button type="button" role="tab" aria-selected="false" data-vue="bloquees">Bloquées</button>
+        </div>
+        <div class="barre-liste__outils">
+          <div class="deroulant" data-deroulant>
+            <button type="button" class="bouton-outil" aria-expanded="false" aria-controls="pop-filtres" data-ouvrir><svg class="ic"><use href="#i-list-filter"/></svg><span>Filtres</span><b class="bouton-outil__n" data-filtres-n hidden></b></button>
+            <form class="pop pop--droite pop--filtres" id="pop-filtres" hidden data-pop-filtres>
+              <label>Statut d’expédition
+                <select name="statut"><option value="">Tous les statuts</option><option value="preparation">Préparation</option><option value="expedie">Expédié</option><option value="en_transit">En transit</option><option value="livre">Livré</option></select>
+              </label>
+              <label>Statut des photos
+                <select name="qc"><option value="">Tous les états</option><option value="en_attente">En attente</option><option value="approuve">Approuvées</option><option value="refuse">Refusées</option></select>
+              </label>
+              <label class="case"><input type="checkbox" name="archives"><span>Voir les commandes archivées</span></label>
+              <div class="pop__pied"><button type="button" class="bouton-texte" data-filtres-effacer>Tout effacer</button><button type="submit" class="bouton-app bouton-app--plein">Appliquer</button></div>
+            </form>
+          </div>
+          <div class="deroulant" data-deroulant>
+            <button type="button" class="bouton-outil" aria-expanded="false" aria-controls="pop-tri" data-ouvrir><svg class="ic"><use href="#i-chevrons-up-down"/></svg><span>Trier</span></button>
+            <div class="pop pop--droite pop--menu" id="pop-tri" role="listbox" aria-label="Trier" hidden data-pop-tri>
+              <button type="button" role="option" aria-selected="true" data-tri="recentes">Plus récentes</button>
+              <button type="button" role="option" aria-selected="false" data-tri="anciennes">Plus anciennes</button>
+              <button type="button" role="option" aria-selected="false" data-tri="modifiees">Modifiées en dernier</button>
+              <button type="button" role="option" aria-selected="false" data-tri="jamais-ouvert">Jamais ouvertes par le client</button>
+              <button type="button" role="option" aria-selected="false" data-tri="bloquees">Bloquées en transit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="puces" data-puces hidden></div>
+
+      <section class="bloc liste" aria-label="Commandes">
+        <div class="table" role="table" aria-label="Commandes" data-table></div>
+        <div class="liste__vide" data-vide hidden></div>
+        <p class="liste__pied" data-pied></p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- actions groupées : apparaissent dès qu'une commande est cochée -->
+<div class="lot" data-page role="region" aria-label="Actions groupées" data-lot hidden>
+  <p><b data-lot-n>0</b> <span data-lot-libelle>sélectionnée</span></p>
+  <button type="button" class="bouton-app bouton-app--plein" data-lot-archiver>Archiver la sélection</button>
+  <button type="button" class="lot__fermer" aria-label="Tout désélectionner" data-lot-fermer><svg class="ic"><use href="#i-x"/></svg></button>
+</div>
+
+<!-- la page publique, ouverte depuis une ligne -->
+<div class="page-publique" data-page data-page-publique hidden>
+  <div class="page-publique__fond" data-fermer-page></div>
+  <div class="page-publique__cadre" role="dialog" aria-modal="true" aria-label="Page du client">
+    <div class="telephone telephone--apercu telephone--grand"><div class="telephone__ecran" data-page-ecran></div></div>
+    <button type="button" class="page-publique__fermer" aria-label="Fermer" data-fermer-page><svg class="ic"><use href="#i-x"/></svg></button>
+  </div>
+</div>
+<template data-page data-pc><!--PAGE_CLIENT--></template>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="commandes.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

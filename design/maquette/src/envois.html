@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Suivi d’envois · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette fidèle à /envois (droplink2 : envois/page.tsx,
+     components/envois/*, lib/envois/liste.ts) : tuiles, menus, tris,
+     colonnes, actions et libellés sont ceux du produit. -->
+<!--COQUE:envois-->
+    <main id="contenu" class="tableau envois-ecran" data-ecran>
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Suivi d’envois</b></p>
+          <h1>Suivi d’envois</h1>
+          <p>Suivez tous vos colis en temps réel. Les informations sont automatiquement mises à jour par les transporteurs.</p>
+        </div>
+        <div class="fraicheur">
+          <p><span>Dernière mise à jour</span><time data-fraicheur></time></p>
+          <button type="button" class="bouton-outil" data-actualiser><svg class="ic"><use href="#i-refresh-cw"/></svg><span>Actualiser</span></button>
+        </div>
+      </div>
+
+      <section class="compteurs compteurs--5 compteurs--liens" aria-label="Vue d’ensemble" data-tuiles></section>
+
+      <div class="barre-envois">
+        <div class="barre-envois__filtres">
+          <div class="deroulant" data-deroulant>
+            <button type="button" class="bouton-outil" aria-expanded="false" aria-controls="pop-statut" data-ouvrir><span data-statut-libelle>Tous les statuts</span><svg class="ic ic--petit"><use href="#i-chevron-down"/></svg></button>
+            <div class="pop pop--menu" id="pop-statut" role="listbox" aria-label="Statut" hidden data-pop-statut></div>
+          </div>
+          <div class="deroulant" data-deroulant>
+            <button type="button" class="bouton-outil" aria-expanded="false" aria-controls="pop-transp" data-ouvrir><span data-transp-libelle>Tous les transporteurs</span><svg class="ic ic--petit"><use href="#i-chevron-down"/></svg></button>
+            <div class="pop pop--menu" id="pop-transp" role="listbox" aria-label="Transporteur" hidden data-pop-transp></div>
+          </div>
+          <form class="recherche-envoi" role="search" data-recherche-envoi>
+            <svg class="ic"><use href="#i-search"/></svg>
+            <input type="search" name="q" placeholder="Rechercher un envoi…" aria-label="Rechercher un envoi…" autocomplete="off" spellcheck="false" autocapitalize="characters">
+          </form>
+        </div>
+        <div class="deroulant" data-deroulant>
+          <button type="button" class="bouton-outil" aria-expanded="false" aria-controls="pop-tri-envois" data-ouvrir><svg class="ic"><use href="#i-chevrons-up-down"/></svg><span data-tri-libelle>Ce qui ne bouge plus</span></button>
+          <div class="pop pop--droite pop--menu" id="pop-tri-envois" role="listbox" aria-label="Trier" hidden data-pop-tri></div>
+        </div>
+      </div>
+
+      <p class="aide-envois"><svg class="ic"><use href="#i-circle-alert"/></svg>Un numéro tout juste collé n’est souvent pas encore scanné. Ce n’est pas une erreur : le transporteur n’a simplement rien publié.</p>
+
+      <section class="bloc liste" aria-label="Envois">
+        <div class="table" role="table" aria-label="Envois" data-table></div>
+        <div class="liste__vide" data-vide hidden></div>
+        <p class="liste__pied" data-pied></p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="lot" data-page role="region" aria-label="Sélection" data-lot hidden>
+  <p><b data-lot-n>0</b> <span data-lot-libelle>colis sélectionné</span></p>
+  <button type="button" class="bouton-app bouton-app--plein" data-lot-exporter>Exporter la sélection</button>
+  <button type="button" class="lot__fermer" aria-label="Tout désélectionner" data-lot-fermer><svg class="ic"><use href="#i-x"/></svg></button>
+</div>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="envois.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DropLink · Un seul lien pour toute la commande (ancienne version)</title>
+<meta name="description" content="Photos, numéro de suivi et date de livraison sur une page à vos couleurs. Votre client suit sa commande tout seul, sans compte.">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!--ICONES-->
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<div class="sentinelle" data-sentinelle aria-hidden="true"></div>
+
+<header class="entete" data-entete>
+  <div class="entete__barre">
+    <a class="logo" href="#" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#studio">Comment ça marche</a>
+      <a href="#client">La page client</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="#questions">Questions</a>
+    </nav>
+    <div class="entete__actions">
+      <a class="lien-discret" href="connexion.html">Se connecter</a>
+      <a class="bouton bouton--plein bouton--petit" href="inscription.html">Créer un compte</a>
+      <button class="bouton-icone menu-bouton" type="button" aria-expanded="false" aria-controls="menu-mobile" aria-label="Ouvrir le menu" data-menu-bouton>
+        <svg class="ic"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <a href="#studio">Comment ça marche</a>
+    <a href="#client">La page client</a>
+    <a href="#tarifs">Tarifs</a>
+    <a href="#questions">Questions</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</header>
+
+<main id="contenu">
+
+<!-- HÉROS -->
+<section class="heros">
+  <div class="conteneur heros__grille">
+    <div class="heros__texte">
+      <h1 class="heros__titre" data-entree>Un seul lien.<br><span>Toute la commande.</span></h1>
+      <p class="heros__chapo" data-entree>Photos, numéro de suivi et date de livraison sur une page à vos couleurs. Votre client suit tout seul, sans compte et sans vous écrire.</p>
+      <div class="heros__actions" data-entree>
+        <a class="bouton bouton--marque" href="inscription.html">Commencer gratuitement<svg class="ic"><use href="#i-arrow-right"/></svg></a>
+        <a class="bouton bouton--second" href="#client">Voir une page client</a>
+      </div>
+    </div>
+
+    <div class="heros__scene" role="img" aria-label="Un message contenant le lien, et la page client qu'il ouvre : date de livraison estimée, colis en transit, quatre photos.">
+      <div class="telephone telephone--heros" data-entree-scene>
+        <div class="telephone__ecran" data-defilement>
+          <!--PAGE_CLIENT-->
+        </div>
+      </div>
+
+      <div class="message" data-entree-message>
+        <div class="message__entete">
+          <span class="avatar">AN</span>
+          <span><strong>Atelier Nord</strong><small>à Léa M.</small></span>
+        </div>
+        <p class="message__bulle">Ta commande est prête, tout est sur ce lien :</p>
+        <div class="apercu-lien">
+          <img src="assets/img/apercu-sneaker.jpg" alt="" width="44" height="44">
+          <div>
+            <strong>Commande 6A4D21</strong>
+            <span>droplink.fr/p/k7Qm2xR9vLpA</span>
+          </div>
+        </div>
+        <p class="message__statut"><svg class="ic"><use href="#i-check"/></svg>Vu</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LE PROBLÈME -->
+<section class="probleme" aria-labelledby="probleme-titre">
+  <div class="conteneur conteneur--etroit">
+    <h2 id="probleme-titre" class="titre-section">Dix messages par commande.<br>Toujours les mêmes.</h2>
+  </div>
+  <div class="defileur" aria-hidden="true">
+    <div class="defileur__piste" data-defileur>
+      <span class="question">Il est où mon colis ?</span>
+      <span class="question">Tu peux me renvoyer les photos ?</span>
+      <span class="question">C'est quoi le numéro de suivi ?</span>
+      <span class="question">Ça arrive quand ?</span>
+      <span class="question">T'as bien envoyé ?</span>
+      <span class="question">Il a bougé depuis hier ?</span>
+      <span class="question">Je peux voir la taille sur la photo ?</span>
+      <span class="question">C'est quel transporteur ?</span>
+    </div>
+  </div>
+  <div class="conteneur conteneur--etroit">
+    <p class="probleme__reponse">Avec DropLink, la réponse est déjà dans le lien. <span>Vous l'envoyez une fois, il se met à jour tout seul.</span></p>
+  </div>
+</section>
+
+<!-- STUDIO : l'éditeur et la page client, côte à côte -->
+<section class="studio" id="studio" aria-labelledby="studio-titre">
+  <div class="conteneur">
+    <div class="entete-section">
+      <p class="surtitre">Côté vendeur</p>
+      <h2 id="studio-titre" class="titre-section">Vous remplissez.<br>Votre client voit.</h2>
+      <p class="chapo">Une commande prête à partager en quatre gestes. Chaque modification arrive sur la page client, et le lien ne change jamais.</p>
+    </div>
+
+    <div class="studio__onglets" role="tablist" aria-label="Les quatre gestes" data-onglets>
+      <button role="tab" type="button" aria-selected="true" aria-controls="studio-plan" id="onglet-0" data-onglet="0"><span>01</span>Le client<i class="studio__jauge"></i></button>
+      <button role="tab" type="button" aria-selected="false" aria-controls="studio-plan" id="onglet-1" data-onglet="1" tabindex="-1"><span>02</span>Les photos<i class="studio__jauge"></i></button>
+      <button role="tab" type="button" aria-selected="false" aria-controls="studio-plan" id="onglet-2" data-onglet="2" tabindex="-1"><span>03</span>Le suivi<i class="studio__jauge"></i></button>
+      <button role="tab" type="button" aria-selected="false" aria-controls="studio-plan" id="onglet-3" data-onglet="3" tabindex="-1"><span>04</span>Le lien<i class="studio__jauge"></i></button>
+    </div>
+
+    <div class="studio__plan" id="studio-plan" role="tabpanel" aria-labelledby="onglet-0" data-studio data-etape="0">
+      <p class="studio__legende" aria-live="polite" data-legende>Un nom ou un pseudo suffit. Pas d'adresse à saisir, pas de compte à lui créer.</p>
+
+      <div class="studio__scene">
+        <div class="editeur" aria-hidden="true">
+          <div class="editeur__tete">
+            <div>
+              <small>Commandes</small>
+              <b>#6A4D21</b>
+            </div>
+            <div class="editeur__actions">
+              <span class="editeur__enregistre"><svg class="ic"><use href="#i-check"/></svg>Enregistré</span>
+              <span class="editeur__partager" data-partager>
+                <span class="editeur__partager-a"><svg class="ic"><use href="#i-share-2"/></svg>Partager</span>
+                <span class="editeur__partager-b"><svg class="ic"><use href="#i-check"/></svg>Lien copié</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="editeur__carte">
+            <b class="editeur__titre">La commande</b>
+            <div class="editeur__grille">
+              <div class="champ" data-champ="client">
+                <small>Nom ou pseudo du client</small>
+                <span class="champ__boite"><span class="champ__valeur" data-saisie="Léa M."></span><i class="champ__curseur"></i><span class="champ__vide">Ex : Léa M.</span></span>
+                <em>Texte libre. Votre client n'a pas de compte.</em>
+              </div>
+              <div class="champ">
+                <small>Référence produit</small>
+                <span class="champ__boite"><span class="champ__valeur">Sneakers T39, sweat, jogging et casquette</span></span>
+              </div>
+              <div class="champ" data-champ="suivi">
+                <small>Numéro de suivi</small>
+                <span class="champ__boite"><span class="champ__valeur" data-saisie="6A30489215734"></span><i class="champ__curseur"></i><span class="champ__vide">Collez le numéro</span></span>
+              </div>
+              <div class="champ" data-champ="transporteur">
+                <small>Transporteur</small>
+                <span class="champ__boite champ__boite--liste">
+                  <span class="transporteur" data-transporteur>
+                    <span class="transporteur__a">Détection automatique</span>
+                    <span class="transporteur__b"><svg class="ic"><use href="#i-circle-check"/></svg>Colissimo</span>
+                  </span>
+                  <svg class="ic"><use href="#i-chevron-down"/></svg>
+                </span>
+              </div>
+            </div>
+
+            <div class="depot" data-depot>
+              <div class="depot__tete"><b>Photos et vidéos</b><small data-compte-medias>0 sur 20</small></div>
+              <div class="depot__grille">
+                <figure class="depot__media"><img src="assets/img/apercu-sneaker.jpg" alt="" width="90" height="90"><span>Couverture</span></figure>
+                <figure class="depot__media"><img src="assets/img/apercu-hoodie.jpg" alt="" width="90" height="90"></figure>
+                <figure class="depot__media"><img src="assets/img/apercu-jogger.jpg" alt="" width="90" height="90"></figure>
+                <figure class="depot__media"><img src="assets/img/apercu-cap.jpg" alt="" width="90" height="90"></figure>
+                <span class="depot__ajouter"><svg class="ic"><use href="#i-upload"/></svg>Ajouter</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lien-partage" data-lien>
+            <svg class="ic"><use href="#i-link"/></svg>
+            <span>droplink.fr/p/k7Qm2xR9vLpA</span>
+            <small>Ce lien ne changera plus.</small>
+          </div>
+        </div>
+
+        <div class="studio__apercu" aria-hidden="true">
+          <div class="telephone telephone--studio">
+            <div class="telephone__ecran">
+              <!--PAGE_CLIENT-->
+            </div>
+          </div>
+          <p class="studio__sync"><i></i>Aperçu de la page client</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CE QUE LE CLIENT OUVRE -->
+<section class="client" id="client" aria-labelledby="client-titre">
+  <div class="conteneur">
+    <div class="entete-section">
+      <h2 id="client-titre" class="titre-section">Ce que votre client ouvre.</h2>
+      <p class="chapo">Une page par commande, sans application ni compte. Il y trouve tout, vous n'avez plus rien à renvoyer.</p>
+    </div>
+
+    <div class="grille-client">
+      <article class="case case--couleurs">
+        <div class="case__texte">
+          <h3>À vos couleurs, lisible quoi qu'il arrive</h3>
+          <p>Choisissez n'importe quelle teinte. Si elle est trop claire pour du texte, la page l'ajuste toute seule pour rester lisible.</p>
+          <div class="nuancier" role="radiogroup" aria-label="Couleur de la boutique">
+            <button type="button" role="radio" aria-checked="true" data-teinte="#5B4BF5" style="--pastille:#5B4BF5"><span class="sr">Violet</span></button>
+            <button type="button" role="radio" aria-checked="false" data-teinte="#E0533F" style="--pastille:#E0533F"><span class="sr">Corail</span></button>
+            <button type="button" role="radio" aria-checked="false" data-teinte="#0F766E" style="--pastille:#0F766E"><span class="sr">Vert</span></button>
+            <button type="button" role="radio" aria-checked="false" data-teinte="#F5C518" style="--pastille:#F5C518"><span class="sr">Jaune</span></button>
+            <label class="nuancier__libre">
+              <input type="color" value="#5B4BF5" data-couleur-libre aria-label="Choisir votre couleur">
+              <svg class="ic"><use href="#i-palette"/></svg>
+            </label>
+          </div>
+          <p class="nuancier__code" aria-live="polite" data-code-couleur>Couleur choisie <code>#5B4BF5</code></p>
+        </div>
+        <div class="telephone telephone--case" aria-hidden="true">
+          <div class="telephone__ecran" data-teinte-cible>
+            <!--PAGE_CLIENT-->
+          </div>
+        </div>
+      </article>
+
+      <article class="case case--livraison">
+        <div class="case__texte">
+          <h3>Une date, pas un « bientôt »</h3>
+          <p>La fourchette de livraison estimée et les quatre étapes du colis, datées.</p>
+        </div>
+        <div class="mini-suivi" aria-hidden="true">
+          <div class="pc__date">
+            <i class="pc__tuile"><svg class="ic"><use href="#i-calendar-days"/></svg></i>
+            <p><small>Date estimée de livraison</small><strong>1 au 2 octobre</strong></p>
+          </div>
+          <ol class="pc__frise" data-frise-demo style="--avance:2">
+        <li class="fait"><i><svg class="ic"><use href="#i-check"/></svg></i><b>Préparation</b><small class="pc__quand">28 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+        <li class="fait"><i><svg class="ic"><use href="#i-check"/></svg></i><b>Expédié</b><small class="pc__quand">29 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+        <li class="actuel"><i><svg class="ic"><use href="#i-check"/></svg></i><b>En transit</b><small class="pc__quand">30 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+        <li><i><svg class="ic"><use href="#i-check"/></svg></i><b>Livré</b><small class="pc__quand">1 oct.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+          </ol>
+        </div>
+      </article>
+
+      <article class="case case--validation">
+        <div class="case__texte">
+          <h3>Il valide les photos avant l'envoi</h3>
+          <p>Un bouton, et vous savez que c'est la bonne pièce, la bonne taille. Essayez.</p>
+        </div>
+        <div class="qc" data-qc>
+          <div class="qc__question" data-qc-question>
+            <b>Votre validation</b>
+            <p>Ces photos correspondent-elles à votre commande ?</p>
+            <div class="qc__vignettes" aria-hidden="true">
+              <img src="assets/img/apercu-sneaker.jpg" alt="" width="90" height="90">
+              <img src="assets/img/apercu-hoodie.jpg" alt="" width="90" height="90">
+              <img src="assets/img/apercu-jogger.jpg" alt="" width="90" height="90">
+              <img src="assets/img/apercu-cap.jpg" alt="" width="90" height="90">
+            </div>
+            <div class="qc__actions">
+              <button type="button" class="qc__refuser" data-qc-refuser>Refuser</button>
+              <button type="button" class="qc__approuver" data-qc-approuver>Approuver</button>
+            </div>
+          </div>
+          <div class="qc__reponse" hidden data-qc-reponse>
+            <span class="qc__sceau" data-qc-sceau><svg class="ic"><use href="#i-check"/></svg></span>
+            <b data-qc-texte>Cette commande est validée.</b>
+            <button type="button" class="qc__changer" data-qc-changer>Changer d’avis</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="case case--langues">
+        <div class="case__texte">
+          <h3>Dans sa langue</h3>
+          <p>Français, anglais ou chinois simplifié.</p>
+        </div>
+        <p class="langues" aria-hidden="true">
+          <span class="langues__ligne est-actif"><small>Une commande de Atelier Nord</small>Votre commande</span>
+          <span class="langues__ligne"><small>An order from Atelier Nord</small>Your order</span>
+          <span class="langues__ligne" lang="zh-CN"><small>来自以下店铺的订单 Atelier Nord</small>您的订单</span>
+        </p>
+      </article>
+
+      <article class="case case--historique">
+        <div class="case__texte">
+          <h3>Chaque passage du colis</h3>
+          <p>L'historique du transporteur, relevé automatiquement. Vous n'avez plus à aller le chercher pour lui.</p>
+        </div>
+        <ol class="historique" aria-label="Exemple d'historique de suivi">
+          <li class="historique__recent"><i><svg class="ic"><use href="#i-truck"/></svg></i><p><small>30 septembre 2026 à 07:19</small><b>Colis en cours d'acheminement</b><span>Wissous</span></p></li>
+          <li><i><svg class="ic"><use href="#i-package"/></svg></i><p><small>29 septembre 2026 à 18:19</small><b>Pris en charge par La Poste</b><span>Paris</span></p></li>
+          <li><i><svg class="ic"><use href="#i-package"/></svg></i><p><small>28 septembre 2026 à 11:19</small><b>Commande préparée</b></p></li>
+        </ol>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- TARIFS -->
+<section class="tarifs" id="tarifs" aria-labelledby="tarifs-titre">
+  <div class="conteneur">
+    <div class="entete-section entete-section--centre">
+      <h2 id="tarifs-titre" class="titre-section">Gratuit pour commencer.<br>Pro quand vous grandissez.</h2>
+    </div>
+    <div class="offres">
+      <article class="offre">
+        <header>
+          <h3>Gratuit</h3>
+          <p class="offre__prix"><span>0 €</span></p>
+          <p class="offre__note">Sans carte bancaire</p>
+        </header>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg><span><strong>5 commandes</strong> au total</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span><strong>5 colis</strong> suivis</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span>Photos et vidéos, 20 par commande</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span>Suivi automatique du transporteur</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span>Page à vos couleurs</span></li>
+        </ul>
+        <a class="bouton bouton--second bouton--large" href="inscription.html">Commencer gratuitement</a>
+      </article>
+
+      <article class="offre offre--pro">
+        <header>
+          <h3>Pro</h3>
+          <p class="offre__prix"><span>20 €</span><small>/ mois</small></p>
+          <p class="offre__note">Sans engagement</p>
+        </header>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg><span><strong>300 commandes</strong> par mois</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span><strong>300 colis</strong> suivis par mois</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span>Le lien à votre nom<span class="offre__url">droplink.fr/votre-boutique/…</span></span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span>Votre page, sans la mention DropLink</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span>Tout le plan Gratuit</span></li>
+        </ul>
+        <a class="bouton bouton--plein bouton--large" href="inscription.html">Commencer avec Pro</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- QUESTIONS -->
+<section class="questions" id="questions" aria-labelledby="questions-titre">
+  <div class="conteneur questions__grille">
+    <h2 id="questions-titre" class="titre-section">Questions fréquentes</h2>
+    <div class="accordeon">
+      <details name="faq">
+        <summary>Mon client doit-il créer un compte ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Non. Il ouvre le lien et voit sa commande, sur téléphone comme sur ordinateur. Aucune application, aucun mot de passe.</p></div>
+      </details>
+      <details name="faq">
+        <summary>Quels transporteurs sont suivis ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Collez le numéro de suivi : le transporteur est détecté automatiquement, et vous pouvez le choisir à la main s'il ne l'est pas. Les étapes se mettent à jour sans que vous ayez à revenir sur la commande.</p></div>
+      </details>
+      <details name="faq">
+        <summary>Je peux modifier la commande après avoir envoyé le lien ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Oui, autant que vous voulez. Photos, numéro, statut : votre client voit la version à jour sur le même lien, qui ne change jamais.</p></div>
+      </details>
+      <details name="faq">
+        <summary>Que se passe-t-il après les 5 commandes gratuites ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Le plan gratuit compte 5 commandes au total. Pour en créer de nouvelles, passez au Pro : 300 commandes par mois pour 20 €, sans engagement.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- APPEL FINAL -->
+<section class="final" aria-labelledby="final-titre">
+  <div class="conteneur final__boite">
+    <h2 id="final-titre" class="final__titre">Votre prochain colis part avec un lien.</h2>
+    <a class="bouton bouton--plein" href="inscription.html">Commencer gratuitement<svg class="ic"><use href="#i-arrow-right"/></svg></a>
+    <ul class="faits">
+      <li><svg class="ic"><use href="#i-check"/></svg>5 commandes offertes</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Sans carte bancaire</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Aucun compte pour votre client</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied__grille">
+    <div>
+      <a class="logo" href="#" aria-label="DropLink, accueil">
+        <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+        <span>DropLink</span>
+      </a>
+      <p class="pied__devise">Un seul lien de suivi pour toute la commande.</p>
+    </div>
+    <nav aria-label="Produit">
+      <h3>Produit</h3>
+      <a href="#studio">Comment ça marche</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <nav aria-label="Légal">
+      <h3>Légal</h3>
+      <a href="conditions.html">Conditions</a>
+      <a href="confidentialite.html">Confidentialité</a>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© 2026 DropLink</p>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-choix="light" aria-pressed="false"><svg class="ic"><use href="#i-sun"/></svg><span class="sr">Clair</span></button>
+      <button type="button" data-theme-choix="dark" aria-pressed="false"><svg class="ic"><use href="#i-moon"/></svg><span class="sr">Sombre</span></button>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>

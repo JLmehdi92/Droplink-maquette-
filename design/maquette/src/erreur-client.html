@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cette page n'a pas pu s'afficher</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-erreur-client">
+<!--ICONES-->
+<!-- Maquette de l'erreur de la page client (droplink2 : src/app/p/[token]/error.tsx,
+     messages « page-publique.erreur »). Aucune marque DropLink : la page client
+     porte la couleur du vendeur. Un point d'attention, pas un maillon rompu : le
+     lien n'est pas en cause, et le visiteur ne doit pas croire qu'il faut en
+     redemander un. -->
+<main id="contenu" class="errc">
+  <span class="errc__icone" aria-hidden="true"><svg class="ic"><use href="#i-circle-alert"/></svg></span>
+  <h1>Cette page n'a pas pu s'afficher</h1>
+  <p>Une erreur est survenue de notre côté. Réessayez dans un instant : votre lien, lui, reste valable.</p>
+  <button class="errc__bouton" type="button" data-reessayer="client.html"><span>Réessayer</span></button>
+</main>
+<script src="etats.js" defer></script>
+</body>
+</html>

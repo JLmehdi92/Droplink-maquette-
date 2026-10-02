@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cette page n’existe pas</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-erreur">
+<!--ICONES-->
+<!-- Maquette de la page introuvable (droplink2 : src/app/global-not-found.tsx,
+     composant EcranErreurPublic, messages « erreurs.introuvable* »). Un maillon
+     rompu, pas une loupe : il n'y a pas eu de recherche, il y a une adresse qui
+     ne mène à rien. -->
+<div class="err-page">
+  <header class="err-haut"><a class="logo" href="index.html" aria-label="DropLink, accueil"><img src="assets/img/symbole-84.png" alt="" width="24" height="34"><span>DropLink</span></a></header>
+  <main id="contenu" class="err-corps">
+    <span class="err-icone" aria-hidden="true"><svg class="ic"><use href="#i-unlink"/></svg></span>
+    <h1>Cette page n’existe pas</h1>
+    <p>L’adresse que vous avez suivie ne mène à rien. Elle a peut-être été mal recopiée, ou la page a été retirée.</p>
+    <a class="bouton bouton--marque err-action" href="index.html">Revenir à l’accueil<svg class="ic"><use href="#i-arrow-right"/></svg></a>
+  </main>
+  <footer class="err-pied"><span class="logo logo--petit"><img src="assets/img/symbole-84.png" alt="" width="15" height="22"><span>DropLink</span></span></footer>
+</div>
+<script src="etats.js" defer></script>
+</body>
+</html>

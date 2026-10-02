@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Erreur · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm etat-ecran" data-ecran tabindex="-1">
+      
+      
+
+      <section class="etat" aria-labelledby="etat-titre">
+        <span class="etat__icone" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-triangle-alert"/></svg></span>
+        <h1 id="etat-titre">Cet écran n'a pas pu s'afficher</h1>
+        <p>Une erreur est survenue de notre côté. Vos données ne sont pas touchées : rien n'a été enregistré ni supprimé.</p>
+        <div class="etat__actions">
+          <button class="etat__bouton" type="button" data-reessayer="admin.html"><svg class="ic" aria-hidden="true"><use href="#i-rotate-ccw"/></svg><span>Réessayer</span></button>
+          <p class="etat__ref">Référence de l'incident : 2741983056</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+<script src="etats.js" defer></script>
+</body>
+</html>

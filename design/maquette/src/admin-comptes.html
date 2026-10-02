@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comptes · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Comptes</b></p>
+          <h1>Comptes</h1>
+          <p>Gérez et suivez tous les comptes de DropLink.</p>
+        </div>
+        
+      </div>
+      <p class="adm-encart"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span>Cette consultation est écrite au journal d'audit, avec les critères employés. Ouvrir un compte y ajoute une entrée.</span></p>
+
+      <section class="compteurs compteurs--4 adm-tuiles" aria-label="Chiffres clés"><div class="compteur-app"><p class="compteur-app__titre">Comptes totaux</p><p class="compteur-app__valeur">48</p><p class="compteur-app__dessous">dont 3 sans type déclaré</p></div><div class="compteur-app"><p class="compteur-app__titre">Nouveaux inscrits</p><p class="compteur-app__valeur">19</p><p class="compteur-app__dessous">sur 30 jours</p></div><div class="compteur-app"><p class="compteur-app__titre">Comptes actifs</p><p class="compteur-app__valeur">46</p><p class="compteur-app__dessous">96 % du total</p></div><div class="compteur-app" data-ton="erreur"><p class="compteur-app__titre">Comptes suspendus</p><p class="compteur-app__valeur">2</p><p class="compteur-app__dessous">4 % du total</p></div></section>
+      <div class="adm-rangee adm-rangee--liste">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Liste des comptes</h2><p class="adm-aide">48 comptes au total</p></div></header>
+          <div class="adm-outils"><div class="adm-filtres" role="group" aria-label="Filtrer par statut" data-filtres><button type="button" aria-pressed="true" data-filtre="tous">Tous les statuts</button><button type="button" aria-pressed="false" data-filtre="active">Actifs</button><button type="button" aria-pressed="false" data-filtre="suspended">Suspendus</button></div><label class="recherche-envoi adm-cherche"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input type="search" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" data-cherche></label></div>
+          <div class="adm-defil"><table class="adm-table" data-table>
+            <thead><tr><th scope="col">Compte</th><th scope="col">Type</th><th scope="col">Statut</th><th scope="col">Commandes</th><th scope="col">Colis</th><th scope="col">Inscrit le</th><th scope="col"><span class="sr">Action</span></th></tr></thead>
+            <tbody><tr data-statut="active" data-cherche="contact@ateliernord.fr atelier nord">
+          <td><a class="adm-qui" href="admin-compte.html#c1"><span class="adm-av" style="--h:91" aria-hidden="true">AN</span><span><b>contact@ateliernord.fr</b><small>Atelier Nord <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">186</td><td><span class="adm-colis" data-info="152 colis pris en charge, seuil d'alerte 300"><b>152</b><small>/ 300</small><i style="--k:0.507"></i></span></td><td class="adm-date">14 juin 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c1">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="hello@maisonlou.fr maison lou">
+          <td><a class="adm-qui" href="admin-compte.html#c2"><span class="adm-av" style="--h:41" aria-hidden="true">ML</span><span><b>hello@maisonlou.fr</b><small>Maison Lou <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">512</td><td><span class="adm-colis est-depasse" data-info="342 colis pris en charge, seuil d'alerte 300"><b>342</b><small>/ 300</small><i style="--k:1.000"></i></span></td><td class="adm-date">2 mai 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c2">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="kicks.lab@gmail.com kicks lab">
+          <td><a class="adm-qui" href="admin-compte.html#c3"><span class="adm-av" style="--h:33" aria-hidden="true">KL</span><span><b>kicks.lab@gmail.com</b><small>Kicks Lab <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">388</td><td><span class="adm-colis" data-info="271 colis pris en charge, seuil d'alerte 300"><b>271</b><small>/ 300</small><i style="--k:0.903"></i></span></td><td class="adm-date">19 mai 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c3">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="contact@lesboxesdesam.fr les boxes de sam">
+          <td><a class="adm-qui" href="admin-compte.html#c4"><span class="adm-av" style="--h:305" aria-hidden="true">LB</span><span><b>contact@lesboxesdesam.fr</b><small>Les Boxes de Sam <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">297</td><td><span class="adm-colis" data-info="240 colis pris en charge, seuil d'alerte 300"><b>240</b><small>/ 300</small><i style="--k:0.800"></i></span></td><td class="adm-date">1 juin 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c4">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="drip.paris@gmail.com drip paris">
+          <td><a class="adm-qui" href="admin-compte.html#c5"><span class="adm-av" style="--h:171" aria-hidden="true">DP</span><span><b>drip.paris@gmail.com</b><small>Drip Paris <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">205</td><td><span class="adm-colis" data-info="166 colis pris en charge, seuil d'alerte 300"><b>166</b><small>/ 300</small><i style="--k:0.553"></i></span></td><td class="adm-date">22 juin 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c5">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="nora.drops@outlook.fr nora drops">
+          <td><a class="adm-qui" href="admin-compte.html#c6"><span class="adm-av" style="--h:337" aria-hidden="true">ND</span><span><b>nora.drops@outlook.fr</b><small>Nora Drops <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">143</td><td><span class="adm-colis" data-info="118 colis pris en charge, seuil d'alerte 300"><b>118</b><small>/ 300</small><i style="--k:0.393"></i></span></td><td class="adm-date">3 juil. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c6">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="bijoux.selene@gmail.com bijoux séléné">
+          <td><a class="adm-qui" href="admin-compte.html#c7"><span class="adm-av" style="--h:130" aria-hidden="true">BS</span><span><b>bijoux.selene@gmail.com</b><small>Bijoux Séléné <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">96</td><td><span class="adm-colis" data-info="74 colis pris en charge, seuil d'alerte 300"><b>74</b><small>/ 300</small><i style="--k:0.247"></i></span></td><td class="adm-date">28 juil. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c7">Ouvrir</a></td></tr>
+<tr data-statut="suspended" data-cherche="sneakhouse.lyon@gmail.com sneak house lyon">
+          <td><a class="adm-qui" href="admin-compte.html#c8"><span class="adm-av" style="--h:5" aria-hidden="true">SH</span><span><b>sneakhouse.lyon@gmail.com</b><small>Sneak House Lyon <span class="adm-pro">Pro</span></small></span></a></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="suspended"><i></i>Suspendu</span></td><td class="adm-nb">61</td><td><span class="adm-colis" data-info="55 colis pris en charge, seuil d'alerte 300"><b>55</b><small>/ 300</small><i style="--k:0.183"></i></span></td><td class="adm-date">4 août 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c8">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="studio.kaia@gmail.com studio kaia">
+          <td><a class="adm-qui" href="admin-compte.html#c9"><span class="adm-av" style="--h:267" aria-hidden="true">SK</span><span><b>studio.kaia@gmail.com</b><small>Studio Kaia</small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">5</td><td><span class="adm-colis" data-info="5 colis pris en charge, seuil d'alerte 300"><b>5</b><small>/ 300</small><i style="--k:0.017"></i></span></td><td class="adm-date">21 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c9">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="ines.store@icloud.com inès store">
+          <td><a class="adm-qui" href="admin-compte.html#c10"><span class="adm-av" style="--h:303" aria-hidden="true">IS</span><span><b>ines.store@icloud.com</b><small>Inès Store</small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">5</td><td><span class="adm-colis" data-info="5 colis pris en charge, seuil d'alerte 300"><b>5</b><small>/ 300</small><i style="--k:0.017"></i></span></td><td class="adm-date">12 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c10">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="la.petite.friperie@gmail.com la petite friperie">
+          <td><a class="adm-qui" href="admin-compte.html#c11"><span class="adm-av" style="--h:233" aria-hidden="true">LP</span><span><b>la.petite.friperie@gmail.com</b><small>La Petite Friperie</small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">5</td><td><span class="adm-colis" data-info="5 colis pris en charge, seuil d'alerte 300"><b>5</b><small>/ 300</small><i style="--k:0.017"></i></span></td><td class="adm-date">2 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c11">Ouvrir</a></td></tr>
+<tr data-statut="suspended" data-cherche="b.collection@gmail.com b collection">
+          <td><a class="adm-qui" href="admin-compte.html#c12"><span class="adm-av" style="--h:3" aria-hidden="true">BC</span><span><b>b.collection@gmail.com</b><small>B Collection</small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="suspended"><i></i>Suspendu</span></td><td class="adm-nb">5</td><td><span class="adm-colis" data-info="4 colis pris en charge, seuil d'alerte 300"><b>4</b><small>/ 300</small><i style="--k:0.013"></i></span></td><td class="adm-date">15 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c12">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="vintage.rue@gmail.com vintage rue">
+          <td><a class="adm-qui" href="admin-compte.html#c13"><span class="adm-av" style="--h:279" aria-hidden="true">VR</span><span><b>vintage.rue@gmail.com</b><small>Vintage Rue</small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">4</td><td><span class="adm-colis" data-info="3 colis pris en charge, seuil d'alerte 300"><b>3</b><small>/ 300</small><i style="--k:0.010"></i></span></td><td class="adm-date">26 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c13">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="yanis.shop@gmail.com yanis shop">
+          <td><a class="adm-qui" href="admin-compte.html#c14"><span class="adm-av" style="--h:187" aria-hidden="true">YS</span><span><b>yanis.shop@gmail.com</b><small>Yanis Shop</small></span></a></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">3</td><td><span class="adm-colis" data-info="2 colis pris en charge, seuil d'alerte 300"><b>2</b><small>/ 300</small><i style="--k:0.007"></i></span></td><td class="adm-date">28 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c14">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="mode.atelier9@gmail.com ">
+          <td><a class="adm-qui" href="admin-compte.html#c15"><span class="adm-av" style="--h:57" aria-hidden="true">M</span><span><b>mode.atelier9@gmail.com</b><small><span class="adm-sourdine">Pas encore nommée</span></small></span></a></td>
+          <td><span class="adm-sourdine">Non déclaré</span></td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">1</td><td><span class="adm-colis" data-info="0 colis pris en charge, seuil d'alerte 300"><b>0</b><small>/ 300</small><i style="--k:0.000"></i></span></td><td class="adm-date">29 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c15">Ouvrir</a></td></tr>
+<tr data-statut="active" data-cherche="nouveau.compte82@gmail.com ">
+          <td><a class="adm-qui" href="admin-compte.html#c16"><span class="adm-av" style="--h:2" aria-hidden="true">N</span><span><b>nouveau.compte82@gmail.com</b><small><span class="adm-sourdine">Pas encore nommée</span></small></span></a></td>
+          <td><span class="adm-sourdine">Non déclaré</span></td><td><span class="adm-badge" data-statut="active"><i></i>Actif</span></td><td class="adm-nb">0</td><td><span class="adm-colis" data-info="0 colis pris en charge, seuil d'alerte 300"><b>0</b><small>/ 300</small><i style="--k:0.000"></i></span></td><td class="adm-date">30 sept. 2026</td>
+          <td><a class="bouton-outil adm-ouvrir" href="admin-compte.html#c16">Ouvrir</a></td></tr></tbody>
+          </table></div>
+          <p class="adm-vide" hidden data-vide>Aucun compte ne correspond à ce filtre.</p>
+          <footer class="adm-pied"><span>16 sur 48 comptes</span><button type="button" class="bouton-outil" data-suite>Voir la suite</button></footer></section>
+        <div class="adm-colonne">
+          <section class="bloc adm-bloc adm-bloc--anneau"><header class="bloc__tete"><div><h2>Statut des comptes</h2></div></header><div class="adm-anneau"><svg viewBox="0 0 128 128" role="img" aria-label="Statut des comptes"><circle r="52" cx="64" cy="64" fill="none" stroke="var(--filet)" stroke-width="14"/><circle r="52" cx="64" cy="64" fill="none" stroke="#12A87A" stroke-width="14" stroke-dasharray="311.11 326.73" stroke-dashoffset="0.00" transform="rotate(-90 64 64)" data-info="Actifs : 46 (96 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#EF4B57" stroke-width="14" stroke-dasharray="11.61 326.73" stroke-dashoffset="-313.11" transform="rotate(-90 64 64)" data-info="Suspendus : 2 (4 %)"/></svg><p class="adm-anneau__centre"><b>48</b><span>comptes</span></p></div>
+  <ul class="adm-legende"><li><i style="background:#12A87A"></i><span>Actifs</span><b>46</b><small>96 %</small></li><li><i style="background:#EF4B57"></i><span>Suspendus</span><b>2</b><small>4 %</small></li></ul></section>
+          <a class="bloc adm-doublons-lien v4-carte" href="admin-doublons.html"><span class="adm-doublons-lien__icone"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></span><span><b>Comptes en doublon</b><small>4 comptes, sur 2 identifiants partagés</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

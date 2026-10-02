@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vérification en deux étapes · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-acces v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<div class="acces">
+  <main class="acces__colonne" id="contenu">
+    <a class="logo acces__logo" href="./" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+
+    <div class="acces__corps">
+     <section class="panneau" data-panneau="verification">
+      <header class="acces__tete">
+        <span class="acces__pastille"><svg class="ic"><use href="#i-shield-check"/></svg></span>
+        <h1 tabindex="-1">Vérification en deux étapes</h1>
+        <p>Saisissez le code à 6 chiffres de votre application d'authentification.</p>
+      </header>
+
+      <form class="formulaire" novalidate data-verification>
+        <fieldset class="code-2fa" data-code>
+          <legend>Code de vérification</legend>
+          <div class="code-2fa__cases"><input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" pattern="[0-9]" aria-label="Chiffre 1 sur 6" data-chiffre><input type="text" inputmode="numeric" autocomplete="off" maxlength="1" pattern="[0-9]" aria-label="Chiffre 2 sur 6" data-chiffre><input type="text" inputmode="numeric" autocomplete="off" maxlength="1" pattern="[0-9]" aria-label="Chiffre 3 sur 6" data-chiffre><input type="text" inputmode="numeric" autocomplete="off" maxlength="1" pattern="[0-9]" aria-label="Chiffre 4 sur 6" data-chiffre><input type="text" inputmode="numeric" autocomplete="off" maxlength="1" pattern="[0-9]" aria-label="Chiffre 5 sur 6" data-chiffre><input type="text" inputmode="numeric" autocomplete="off" maxlength="1" pattern="[0-9]" aria-label="Chiffre 6 sur 6" data-chiffre></div>
+          <p class="champ-acces__erreur" role="alert" data-code-erreur></p>
+        </fieldset>
+        <label class="coche-acces"><input type="checkbox" name="souvenir"><span>Se souvenir de cet appareil pendant 30 jours</span></label>
+        <!--BOUTON:Vérifier:Vérification…-->
+      </form>
+
+      <p class="acces__note acces__note--douce"><svg class="ic"><use href="#i-key-round"/></svg>Appareil perdu ? Ajoutez la clé de secours notée à l'activation dans une nouvelle application d'authentification.</p>
+      <p class="acces__bascule">Ce n'est pas votre compte ? <a class="lien-texte" href="connexion.html">Se déconnecter</a></p>
+     </section>
+    </div>
+
+    <p class="acces__legal">En continuant, vous acceptez nos <a href="conditions.html">conditions d'utilisation</a> et notre <a href="confidentialite.html">politique de confidentialité</a>.</p>
+  </main>
+
+  <aside class="acces__vitrine acces__vitrine--film" aria-hidden="true">
+    <div class="film-hote" data-film="absence"></div>
+    <template data-pc><!--PAGE_CLIENT--></template>
+  </aside>
+</div>
+
+<script src="film.js" defer></script>
+<script src="compte.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

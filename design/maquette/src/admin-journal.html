@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Journal d'audit · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Journal d'audit</b></p>
+          <h1>Journal d'audit</h1>
+          <p>Consultez toutes les actions d'administration enregistrées sur DropLink.</p>
+        </div>
+        
+      </div>
+      
+
+      <section class="compteurs compteurs--4 adm-tuiles" aria-label="Chiffres clés"><div class="compteur-app"><p class="compteur-app__titre">Entrées au journal</p><p class="compteur-app__valeur">1 268</p><p class="compteur-app__dessous">sur la fenêtre choisie</p></div><div class="compteur-app"><p class="compteur-app__titre">Suspensions et réactivations</p><p class="compteur-app__valeur">9</p><p class="compteur-app__dessous">1 % du total</p></div><div class="compteur-app"><p class="compteur-app__titre">Paramètres modifiés</p><p class="compteur-app__valeur">6</p><p class="compteur-app__dessous">0 % du total</p></div><div class="compteur-app"><p class="compteur-app__titre">Consultations de données</p><p class="compteur-app__valeur">1 253</p><p class="compteur-app__dessous">99 % du total</p></div></section>
+      <p class="adm-garantie"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span>Ce journal ne peut être ni modifié ni effacé, et il survit à la suppression des comptes concernés. Le consulter n'y écrit rien.</span></p>
+      <div class="adm-rangee adm-rangee--liste">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Liste des entrées</h2><p class="adm-aide">1 268 entrées au total</p></div></header>
+          <div class="adm-outils"><div class="adm-filtres" role="group" aria-label="Filtrer par famille d'action" data-filtres><button type="button" aria-pressed="true" data-filtre="toutes">Toutes</button><button type="button" aria-pressed="false" data-filtre="suspension">Suspensions</button><button type="button" aria-pressed="false" data-filtre="consultation">Consultations</button><button type="button" aria-pressed="false" data-filtre="parametre">Paramètres</button></div><div class="adm-filtres" role="group" aria-label="Choisir la fenêtre" data-filtres><button type="button" aria-pressed="true" data-filtre="0">Depuis le début</button><button type="button" aria-pressed="false" data-filtre="7">7 derniers jours</button><button type="button" aria-pressed="false" data-filtre="30">30 derniers jours</button></div></div>
+          <ol class="adm-journal" data-table><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation d’une fiche de compte</b><span>Compte visé : <a href="admin-compte.html#c2">hello@maisonlou.fr</a></span></div><p><time>30 sept. à 11:42</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation des alertes du panneau</b></div><p><time>30 sept. à 11:40</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></i><div><b>Lecture d’une contestation</b><span>Compte visé : <a href="admin-compte.html#c13">vintage.rue@gmail.com</a></span></div><p><time>30 sept. à 10:18</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg></i><div><b>Blocage du lien d’une commande</b><span>Compte visé : <a href="admin-compte.html#c13">vintage.rue@gmail.com</a></span><span class="adm-motif">Motif : Photos signalées comme reprises d’une autre boutique, en attente de vérification.</span></div><p><time>29 sept. à 18:05</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation de la liste des commandes</b></div><p><time>29 sept. à 17:58</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg></i><div><b>Changement de plan d’un compte</b><span>Compte visé : <a href="admin-compte.html#c6">nora.drops@outlook.fr</a></span><span class="adm-motif">Motif : Paiement reçu le 28/09, passage en Pro.</span></div><p><time>28 sept. à 16:31</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation des comptes en doublon</b></div><p><time>27 sept. à 14:12</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="suspension"><i data-ton="suspension"><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg></i><div><b>Suspension d’un compte</b><span>Compte visé : <a href="admin-compte.html#c8">sneakhouse.lyon@gmail.com</a></span><span class="adm-motif">Motif : Signalement fondé : contenus repris sans droits, pages coupées le temps de l’examen.</span></div><p><time>27 sept. à 14:09</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="parametre"><i data-ton="parametre"><svg class="ic" aria-hidden="true"><use href="#i-sliders-horizontal"/></svg></i><div><b>Modification d’un paramètre système</b><span class="adm-motif">Motif : Plafond gratuit à vie : 15 → 5</span></div><p><time>26 sept. à 09:44</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="suspension"><i data-ton="suspension"><svg class="ic" aria-hidden="true"><use href="#i-circle-check"/></svg></i><div><b>Réactivation d’un compte</b><span>Compte visé : <a href="admin-compte.html#c5">drip.paris@gmail.com</a></span><span class="adm-motif">Motif : Justificatifs reçus, signalement non fondé.</span></div><p><time>25 sept. à 20:30</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation de la liste des boutiques</b></div><p><time>24 sept. à 15:02</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="suspension"><i data-ton="suspension"><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg></i><div><b>Suspension d’un compte</b><span>Compte visé : <a href="admin-compte.html#c12">b.collection@gmail.com</a></span><span class="adm-motif">Motif : Compte recréé pour contourner le quota gratuit, même WhatsApp qu’un compte existant.</span></div><p><time>23 sept. à 11:27</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="consultation"><i data-ton="consultation"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></i><div><b>Consultation de la liste des comptes</b></div><p><time>22 sept. à 10:05</time><small>Par admin@droplink.fr</small></p></li><li class="adm-entree" data-famille="parametre"><i data-ton="parametre"><svg class="ic" aria-hidden="true"><use href="#i-sliders-horizontal"/></svg></i><div><b>Modification d’un paramètre système</b><span class="adm-motif">Motif : Seuil d’alerte colis : 250 → 300</span></div><p><time>20 sept. à 17:48</time><small>Par admin@droplink.fr</small></p></li></ol>
+          <p class="adm-vide" hidden data-vide>Aucune entrée ne correspond à ce filtre.</p>
+          <footer class="adm-pied"><span>14 sur 1 268 entrées · ni modifiables ni effaçables</span><button type="button" class="bouton-outil" data-suite>Voir la suite</button></footer></section>
+        <section class="bloc adm-bloc adm-bloc--anneau"><header class="bloc__tete"><div><h2>Répartition du journal</h2></div></header><div class="adm-anneau"><svg viewBox="0 0 128 128" role="img" aria-label="Répartition du journal"><circle r="52" cx="64" cy="64" fill="none" stroke="var(--filet)" stroke-width="14"/><circle r="52" cx="64" cy="64" fill="none" stroke="#5B4BF5" stroke-width="14" stroke-dasharray="320.86 326.73" stroke-dashoffset="0.00" transform="rotate(-90 64 64)" data-info="Consultations : 1 253 (99 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#EF4B57" stroke-width="14" stroke-dasharray="0.32 326.73" stroke-dashoffset="-322.86" transform="rotate(-90 64 64)" data-info="Suspensions : 9 (1 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#E08A18" stroke-width="14" stroke-dasharray="-0.45 326.73" stroke-dashoffset="-325.18" transform="rotate(-90 64 64)" data-info="Paramètres : 6 (0 %)"/></svg><p class="adm-anneau__centre"><b>1 268</b><span>entrées</span></p></div>
+  <ul class="adm-legende"><li><i style="background:#5B4BF5"></i><span>Consultations</span><b>1 253</b><small>99 %</small></li><li><i style="background:#EF4B57"></i><span>Suspensions</span><b>9</b><small>1 %</small></li><li><i style="background:#E08A18"></i><span>Paramètres</span><b>6</b><small>0 %</small></li></ul></section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

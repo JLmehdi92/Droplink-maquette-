@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Passer au Pro · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de /passer-pro (droplink2 : (app)/passer-pro/page.tsx, messages
+     « passerPro »). Le compte de démonstration est Pro : la page affiche donc
+     « Votre plan Pro est actif », comme le produit, et ne propose pas de payer
+     ce qui l'est déjà. -->
+<!--COQUE:parametres-->
+    <main id="contenu" class="tableau pro-ecran" data-ecran>
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><a href="parametres.html#abonnement">Paramètres</a><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Passer au Pro</b></p>
+          <h1>Passer au Pro</h1>
+          <p>Ce que le plan Pro change, et ce qu'il ne change pas.</p>
+        </div>
+      </div>
+
+      <section class="pro-accroche">
+        <p class="l4-etiquette"><span><svg class="ic"><use href="#i-crown"/></svg></span>Plan Pro</p>
+        <h2>Vos liens, à votre nom</h2>
+        <p>Quatre choses changent, et ce sont les seules. Tout le reste, les photos, les vidéos, le suivi automatique et vos couleurs, est déjà inclus dans le plan gratuit.</p>
+      </section>
+
+      <div class="pro-atouts">
+        <section class="bloc pro-atout v4-carte"><span class="pro-atout__icone"><svg class="ic"><use href="#i-link"/></svg></span><div><h3>Le lien à votre nom</h3><p>droplink.fr/votre-boutique/… au lieu de droplink.fr/p/…. Vos anciens liens continuent de répondre, même si vous renommez votre boutique.</p></div></section>
+        <section class="bloc pro-atout v4-carte"><span class="pro-atout__icone"><svg class="ic"><use href="#i-badge-check"/></svg></span><div><h3>Votre page, sans la nôtre</h3><p>La carte « Propulsé par DropLink » disparaît de vos pages client.</p></div></section>
+        <section class="bloc pro-atout v4-carte"><span class="pro-atout__icone"><svg class="ic"><use href="#i-package"/></svg></span><div><h3>Un plafond qui se recharge</h3><p>Un compte gratuit est borné à 5 commandes À VIE. En Pro, le plafond redevient mensuel.</p></div></section>
+        <section class="bloc pro-atout v4-carte"><span class="pro-atout__icone"><svg class="ic"><use href="#i-truck"/></svg></span><div><h3>Le suivi qui suit</h3><p>Même règle pour les colis suivis : un total à vie en gratuit, un plafond mensuel en Pro.</p></div></section>
+      </div>
+
+      <section class="bloc pro-comparer" aria-label="Gratuit et Pro">
+        <div class="tp pro-tp">
+          <table class="tp__table">
+            <caption class="sr">Comparaison des plans Gratuit et Pro</caption>
+            <colgroup><col class="tp__col-libelle"><col><col class="tp__col-pro"></colgroup>
+            <thead><tr><td class="tp__coin"></td><th scope="col"><span class="tp__nom">Gratuit</span></th><th scope="col" class="tp__pro"><span class="tp__nom">Pro</span><span class="pro-prix">20 € / mois</span></th></tr></thead>
+            <tbody>
+              <tr style="--i:0"><th scope="row">Commandes</th><td><b>5</b> au total, à vie</td><td><b>300</b> par mois</td></tr>
+              <tr style="--i:1"><th scope="row">Colis suivis</th><td><b>5</b> au total, à vie</td><td><b>300</b> par mois</td></tr>
+              <tr style="--i:2"><th scope="row">Adresse de la page client</th><td><code class="tp-code">droplink.fr/p/xK9…</code></td><td><code class="tp-code tp-code--pro">droplink.fr/votre-boutique/xK9…</code></td></tr>
+              <tr style="--i:3"><th scope="row">Carte « Propulsé par DropLink »</th><td>Affichée</td><td>Retirée</td></tr>
+              <tr style="--i:4"><th scope="row">Photos, vidéos et suivi automatique</th><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td></tr>
+              <tr style="--i:5"><th scope="row">Page brandée à vos couleurs</th><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <footer class="pro-pied">
+          <p>Le paiement est traité par Lemon Squeezy, qui émet la facture. Résiliable à tout moment : votre plan reste actif jusqu'à la fin de la période déjà payée.</p>
+          <span class="pro-actif"><svg class="ic"><use href="#i-badge-check"/></svg>Votre plan Pro est actif</span>
+        </footer>
+      </section>
+    </main>
+  </div>
+</div>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

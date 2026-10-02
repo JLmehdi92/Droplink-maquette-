@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Paramètres · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de /parametres (droplink2 : parametres/page.tsx,
+     components/parametres/*, messages/fr.json « parametres »). Les réglages,
+     les règles de saisie et les messages sont ceux du produit ; la mise en
+     page est celle d'un vrai écran de réglages : un onglet par sujet, un bloc
+     par réglage, et chaque bloc porte sa propre action dans son pied.
+     Compte démo : plan Pro, double authentification activée. Le mot de passe
+     actuel attendu est celui de la connexion démo. -->
+<!--COQUE:parametres-->
+    <main id="contenu" class="tableau reglages-ecran" data-ecran>
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Paramètres</b></p>
+          <h1>Paramètres</h1>
+          <p>Gérez votre compte, vos préférences et la configuration de DropLink.</p>
+        </div>
+      </div>
+
+      <div class="reglages__corps">
+      <nav class="barre-liste reglages__onglets" aria-label="Paramètres">
+        <div class="vues-liste" role="tablist" aria-label="Sections des paramètres" data-onglets>
+          <i class="vues-liste__trait" data-onglets-trait></i>
+          <button type="button" role="tab" id="o-compte" aria-controls="s-compte" aria-selected="true" data-onglet="compte"><svg class="ic"><use href="#i-user-round"/></svg>Compte</button>
+          <button type="button" role="tab" id="o-preferences" aria-controls="s-preferences" aria-selected="false" tabindex="-1" data-onglet="preferences"><svg class="ic"><use href="#i-sliders-horizontal"/></svg>Préférences</button>
+          <button type="button" role="tab" id="o-securite" aria-controls="s-securite" aria-selected="false" tabindex="-1" data-onglet="securite"><svg class="ic"><use href="#i-lock"/></svg>Sécurité</button>
+          <button type="button" role="tab" id="o-abonnement" aria-controls="s-abonnement" aria-selected="false" tabindex="-1" data-onglet="abonnement"><svg class="ic"><use href="#i-crown"/></svg>Abonnement</button>
+          <button type="button" role="tab" id="o-donnees" aria-controls="s-donnees" aria-selected="false" tabindex="-1" data-onglet="donnees"><svg class="ic"><use href="#i-database"/></svg>Données</button>
+          <button type="button" role="tab" id="o-support" aria-controls="s-support" aria-selected="false" tabindex="-1" data-onglet="support"><svg class="ic"><use href="#i-life-buoy"/></svg>Support</button>
+        </div>
+      </nav>
+
+      <div class="reglages">
+
+        <!-- ============ Compte ============ -->
+        <section class="reglages__panneau" id="s-compte" role="tabpanel" aria-labelledby="o-compte" data-panneau="compte">
+
+          <form class="bloc-r" novalidate data-form="nom">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2>Nom complet</h2><p>Le nom affiché dans votre espace, et ses initiales.</p></div>
+              <div class="nom-r">
+                <span class="nom-r__avatar" aria-hidden="true" data-initiales>AN</span>
+                <div class="champ-r champ-r--large"><label for="r-nom" class="sr">Nom complet</label><input id="r-nom" name="nom" value="Atelier Nord" maxlength="80" autocomplete="name"></div>
+              </div>
+            </div>
+            <footer class="bloc-r__pied"><p data-annonce>80 caractères maximum.</p><button type="submit" class="bouton-app bouton-app--plein" disabled data-en-cours="Enregistrement…">Enregistrer</button></footer>
+          </form>
+
+          <form class="bloc-r" novalidate data-form="adresse">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2>Adresse e-mail</h2><p>L’adresse de connexion de votre compte. Un lien de confirmation part vers la nouvelle adresse.</p></div>
+              <div class="grille-r">
+                <div class="champ-r"><label for="r-adresse">Nouvelle adresse e-mail</label><input id="r-adresse" name="adresse" type="email" value="contact@ateliernord.fr" maxlength="254" autocomplete="email" spellcheck="false"></div>
+                <div class="champ-r" hidden data-si-modifie><label for="r-actuel-adresse">Mot de passe actuel</label><input id="r-actuel-adresse" name="actuel" type="password" maxlength="1024" autocomplete="current-password"></div>
+              </div>
+            </div>
+            <footer class="bloc-r__pied"><p data-annonce>Votre adresse ne change qu'une fois ce lien suivi.</p><button type="submit" class="bouton-app bouton-app--plein" disabled data-en-cours="Envoi…">Envoyer le lien de confirmation</button></footer>
+          </form>
+
+          <form class="bloc-r" novalidate data-form="motDePasse">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2>Mot de passe</h2><p>Changer le mot de passe déconnecte vos autres appareils.</p></div>
+              <div class="grille-r">
+                <div class="champ-r"><label for="r-actuel-mdp">Mot de passe actuel</label><input id="r-actuel-mdp" name="actuel" type="password" maxlength="1024" autocomplete="current-password"></div>
+                <div class="champ-r"><label for="r-nouveau">Nouveau mot de passe</label><input id="r-nouveau" name="nouveau" type="password" maxlength="1024" autocomplete="new-password" aria-describedby="r-nouveau-aide"></div>
+              </div>
+              <p class="aide-r aide-r--note">Vous vous connectez avec Google ? Définissez d'abord un mot de passe avec « Mot de passe oublié ».</p>
+            </div>
+            <footer class="bloc-r__pied"><p id="r-nouveau-aide" data-annonce>12 caractères minimum. Une phrase vaut mieux qu'un mot compliqué.</p><button type="submit" class="bouton-app bouton-app--plein" disabled data-en-cours="Changement…">Changer le mot de passe</button></footer>
+          </form>
+
+          <form class="bloc-r bloc-r--danger" novalidate data-form="supCompte" data-danger>
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2>Supprimer le compte</h2><p>Cette action est définitive. Votre compte, vos commandes, vos envois et vos liens clients seront supprimés et ne pourront pas être restaurés.</p></div>
+              <div class="grille-r confirmation-r" hidden data-confirmation>
+                <div class="champ-r"><label for="r-recopie-compte">Recopiez votre adresse e-mail pour confirmer : <b data-adresse>contact@ateliernord.fr</b></label><input id="r-recopie-compte" name="confirmation" type="email" maxlength="254" autocomplete="off" spellcheck="false" data-sans-coller></div>
+                <div class="champ-r"><label for="r-actuel-sup-compte">Mot de passe actuel</label><input id="r-actuel-sup-compte" name="actuel" type="password" maxlength="1024" autocomplete="current-password"></div>
+              </div>
+            </div>
+            <footer class="bloc-r__pied"><p data-annonce>Seules votre adresse e-mail et les dates d'inscription et de suppression sont conservées un an, comme la loi l'impose à un hébergeur, puis effacées.</p><span class="bloc-r__actions"><button type="button" class="bouton-app bouton-app--second" hidden data-annuler>Annuler</button><button type="submit" class="bouton-app bouton-app--danger" data-en-cours="Suppression…" data-libelle-final="Supprimer le compte">Supprimer</button></span></footer>
+          </form>
+        </section>
+
+        <!-- ============ Préférences ============ -->
+        <section class="reglages__panneau" id="s-preferences" role="tabpanel" aria-labelledby="o-preferences" hidden data-panneau="preferences">
+          <form class="bloc-r" novalidate data-form="langue">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2>Langue</h2><p>Personnalisez votre expérience sur DropLink.</p></div>
+              <div class="champ-r champ-r--select"><label for="r-langue" class="sr">Langue</label>
+                <select id="r-langue" name="langue"><option value="fr" selected>Français</option><option value="en">Anglais</option><option value="zh-CN">Chinois simplifié</option></select>
+                <svg class="ic"><use href="#i-chevron-down"/></svg>
+              </div>
+            </div>
+            <footer class="bloc-r__pied"><p><a class="lien-r" href="marque.html">La langue des pages que voient vos clients se règle dans Ma marque.</a></p><button type="submit" class="bouton-app bouton-app--plein" disabled>Appliquer</button></footer>
+          </form>
+        </section>
+
+        <!-- ============ Sécurité ============ -->
+        <section class="reglages__panneau" id="s-securite" role="tabpanel" aria-labelledby="o-securite" hidden data-panneau="securite">
+
+          <form class="bloc-r" novalidate data-form="deuxEtapes">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete bloc-r__tete--ligne">
+                <div><h2>Authentification à deux facteurs (2FA)</h2><p>Sécurisez votre compte avec un code de vérification.</p></div>
+                <span class="bloc-r__actions"><span class="etat-r" data-etat-deux><i></i><span>Activée</span></span><button type="button" class="bouton-app bouton-app--second" data-ouvrir-deux>Désactiver</button></span>
+              </div>
+              <div class="etape-r" hidden data-etape="mdp">
+                <p class="aide-r" data-aide-deux></p>
+                <div class="grille-r"><div class="champ-r"><label for="r-actuel-deux">Mot de passe actuel</label><input id="r-actuel-deux" name="actuel" type="password" maxlength="1024" autocomplete="current-password"></div></div>
+              </div>
+              <div class="etape-r" hidden data-etape="qr">
+                <p class="aide-r">Scannez ce code avec votre application d'authentification, puis saisissez le code qu'elle affiche.</p>
+                <div class="qr-r">
+                  <span class="qr-r__code"><svg role="img" aria-label="Code QR à scanner avec votre application d'authentification" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41" shape-rendering="crispEdges"><path fill="#FFFFFF" d="M0 0h41v41H0z"/><path stroke="#0B0B18" d="M0 0.5h7m2 0h1m3 0h1m1 0h1m1 0h3m2 0h1m2 0h2m1 0h2m2 0h1m1 0h7M0 1.5h1m5 0h1m1 0h5m1 0h1m3 0h1m1 0h3m6 0h2m1 0h1m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h4m2 0h1m4 0h1m1 0h2m4 0h1m1 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h2m1 0h1m1 0h1m1 0h1m3 0h1m1 0h2m6 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m2 0h1m3 0h3m1 0h1m1 0h3m1 0h2m1 0h1m1 0h5m1 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m2 0h1m1 0h3m2 0h3m1 0h1m3 0h1m3 0h2m2 0h1m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m3 0h5m1 0h2m8 0h1M0 8.5h1m5 0h1m1 0h1m1 0h1m2 0h2m2 0h1m2 0h3m2 0h1m1 0h4m2 0h2m2 0h3M0 9.5h2m2 0h1m4 0h1m1 0h1m1 0h1m1 0h2m1 0h6m2 0h2m2 0h3m2 0h3M0 10.5h1m1 0h3m1 0h1m13 0h1m1 0h1m2 0h1m1 0h1m5 0h1m1 0h1m1 0h3M4 11.5h2m1 0h1m2 0h1m5 0h1m2 0h1m3 0h1m4 0h1m1 0h2m1 0h2m1 0h2m1 0h2M0 12.5h9m2 0h1m3 0h1m4 0h1m6 0h2m3 0h2m1 0h1m3 0h1M0 13.5h4m1 0h1m1 0h3m7 0h2m1 0h2m2 0h2m2 0h1m1 0h4m2 0h2m1 0h2M0 14.5h1m1 0h2m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m1 0h2m2 0h2m3 0h1m5 0h1M0 15.5h1m3 0h1m4 0h1m2 0h1m3 0h2m1 0h1m2 0h1m1 0h1m2 0h1m3 0h10M0 16.5h4m1 0h4m1 0h2m2 0h3m1 0h3m1 0h1m2 0h1m3 0h2m1 0h1m2 0h1m2 0h1M1 17.5h1m2 0h1m7 0h1m1 0h2m1 0h1m1 0h1m4 0h4m1 0h9m1 0h2M4 18.5h3m1 0h1m2 0h1m1 0h3m3 0h1m1 0h4m2 0h2m1 0h1m3 0h1m1 0h3m1 0h1M0 19.5h5m7 0h2m2 0h3m3 0h1m2 0h1m1 0h1m3 0h3m2 0h1m3 0h1M1 20.5h1m1 0h1m2 0h1m1 0h1m1 0h2m2 0h3m3 0h2m2 0h1m1 0h2m1 0h1m3 0h1m3 0h2m1 0h1M2 21.5h2m5 0h1m1 0h1m1 0h2m3 0h2m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1M0 22.5h1m1 0h2m1 0h4m2 0h2m1 0h5m1 0h3m1 0h6m3 0h1m3 0h2M0 23.5h3m1 0h2m2 0h1m1 0h1m1 0h2m1 0h1m3 0h2m2 0h2m1 0h1m7 0h1m3 0h1M1 24.5h1m1 0h2m1 0h2m2 0h2m4 0h1m3 0h1m2 0h3m5 0h1m1 0h1m1 0h2m1 0h2M2 25.5h1m2 0h1m1 0h2m4 0h2m3 0h3m2 0h1m1 0h1m1 0h2m2 0h1m2 0h2m1 0h1m2 0h1M0 26.5h3m1 0h3m2 0h2m1 0h2m1 0h1m1 0h2m3 0h1m1 0h5m4 0h1m2 0h1m2 0h2M4 27.5h1m4 0h2m1 0h1m3 0h1m2 0h1m2 0h3m1 0h2m4 0h2m2 0h4M0 28.5h1m1 0h3m1 0h1m1 0h3m2 0h5m1 0h2m1 0h1m1 0h3m2 0h1m1 0h1m3 0h1m1 0h4M0 29.5h1m2 0h1m1 0h1m2 0h1m1 0h5m1 0h2m3 0h2m6 0h2m2 0h4m3 0h1M0 30.5h4m2 0h5m1 0h2m2 0h1m1 0h2m1 0h2m1 0h2m1 0h4m3 0h1m3 0h1m1 0h1M0 31.5h1m3 0h2m1 0h1m1 0h1m3 0h2m1 0h2m3 0h3m1 0h1m4 0h2m4 0h2m2 0h1M0 32.5h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h3m3 0h1m4 0h2m3 0h2m1 0h6m1 0h2M8 33.5h1m1 0h1m4 0h2m3 0h3m1 0h1m2 0h1m3 0h2m3 0h2M0 34.5h7m2 0h2m2 0h1m1 0h1m2 0h2m2 0h2m5 0h2m1 0h1m1 0h1m1 0h2M0 35.5h1m5 0h1m2 0h1m2 0h1m1 0h1m1 0h1m4 0h1m2 0h1m1 0h1m5 0h1m3 0h1m2 0h2M0 36.5h1m1 0h3m1 0h1m2 0h1m1 0h1m1 0h1m2 0h4m1 0h1m3 0h2m1 0h2m2 0h6M0 37.5h1m1 0h3m1 0h1m2 0h4m1 0h2m3 0h1m1 0h1m1 0h1m2 0h3m2 0h1m1 0h1m5 0h2M0 38.5h1m1 0h3m1 0h1m4 0h2m8 0h1m4 0h2m5 0h5m1 0h1M0 39.5h1m5 0h1m2 0h2m1 0h1m4 0h1m1 0h2m2 0h1m2 0h1m3 0h2m1 0h2m1 0h2m2 0h1M0 40.5h7m1 0h1m2 0h1m2 0h2m1 0h1m4 0h2m1 0h2m2 0h1m3 0h1m2 0h1m1 0h1"/></svg>
+</span>
+                  <div class="qr-r__cle">
+                    <span class="qr-r__libelle">Clé de secours</span>
+                    <span class="cle-r">JBSW Y3DP EHPK 3PXP Q7NL OZ4V</span>
+                    <span class="aide-r">Notez-la en lieu sûr : c'est la seule façon de retrouver l'accès si vous perdez votre appareil.</span>
+                  </div>
+                </div>
+                <div class="champ-r champ-r--code"><label for="r-code">Code à 6 chiffres</label><input id="r-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="123456"></div>
+              </div>
+            </div>
+            <footer class="bloc-r__pied" hidden data-pied-deux><p data-annonce></p><span class="bloc-r__actions"><button type="button" class="bouton-app bouton-app--second" data-annuler>Annuler</button><button type="submit" class="bouton-app bouton-app--plein" data-action-deux>Continuer</button></span></footer>
+          </form>
+
+          <form class="bloc-r" novalidate data-form="sessions">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2>Sessions actives</h2><p>Gérez vos appareils connectés.</p></div>
+              <ul class="appareils-r" data-sessions>
+                <li><span class="appareils-r__ic"><svg class="ic"><use href="#i-monitor"/></svg></span><span><b>Chrome · macOS</b><small>Dernière activité : 30 sept. 2026, 14:32</small></span><span class="etiquette-r">Cet appareil</span></li>
+                <li data-autre><span class="appareils-r__ic"><svg class="ic"><use href="#i-smartphone"/></svg></span><span><b>Safari · iOS</b><small>Dernière activité : 30 sept. 2026, 09:12</small></span></li>
+                <li data-autre><span class="appareils-r__ic"><svg class="ic"><use href="#i-monitor"/></svg></span><span><b>Firefox · Windows</b><small>Dernière activité : 24 sept. 2026, 18:47</small></span></li>
+              </ul>
+              <div class="grille-r confirmation-r" hidden data-confirmation><div class="champ-r"><label for="r-actuel-sessions">Mot de passe actuel</label><input id="r-actuel-sessions" name="actuel" type="password" maxlength="1024" autocomplete="current-password"></div></div>
+            </div>
+            <footer class="bloc-r__pied"><p data-annonce>Déconnectez tous vos autres appareils. Celui-ci reste connecté.</p><span class="bloc-r__actions"><button type="button" class="bouton-app bouton-app--second" hidden data-annuler>Annuler</button><button type="submit" class="bouton-app bouton-app--second" data-en-cours="Déconnexion…" data-libelle-final="Déconnecter les autres appareils">Déconnecter les autres appareils</button></span></footer>
+          </form>
+
+          <section class="bloc-r" aria-labelledby="r-fiables" data-bloc-fiables>
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2 id="r-fiables">Appareils fiables</h2><p>Les appareils qui ne redemandent pas votre code.</p></div>
+              <ul class="appareils-r" data-fiables>
+                <li><span class="appareils-r__ic"><svg class="ic"><use href="#i-monitor"/></svg></span><span><b>Chrome · macOS</b><small>Fiable jusqu’au 29 oct. 2026</small></span><button type="button" class="bouton-texte-r" aria-label="Révoquer, Chrome · macOS" data-revoquer>Révoquer</button></li>
+                <li><span class="appareils-r__ic"><svg class="ic"><use href="#i-smartphone"/></svg></span><span><b>Safari · iOS</b><small>Fiable jusqu’au 21 oct. 2026</small></span><button type="button" class="bouton-texte-r" aria-label="Révoquer, Safari · iOS" data-revoquer>Révoquer</button></li>
+              </ul>
+              <p class="vide-r" hidden data-fiables-aucun>Aucun appareil fiable pour le moment.</p>
+            </div>
+          </section>
+        </section>
+
+        <!-- ============ Abonnement ============ -->
+        <section class="reglages__panneau" id="s-abonnement" role="tabpanel" aria-labelledby="o-abonnement" hidden data-panneau="abonnement">
+          <section class="bloc-r" aria-labelledby="r-plan">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2 id="r-plan">Abonnement</h2><p>Gérez votre abonnement et accédez à plus de fonctionnalités.</p></div>
+              <div class="plan-r">
+                <div class="plan-r__nom"><span class="etiquette-r">Plan actuel</span><b>Pro</b><small>Votre abonnement Pro est actif.</small></div>
+                <ul class="plan-r__liste">
+                  <li><svg class="ic" aria-hidden="true"><use href="#i-circle-check"/></svg>Photos, vidéos et suivi automatique</li>
+                  <li><svg class="ic" aria-hidden="true"><use href="#i-circle-check"/></svg>Page client à vos couleurs</li>
+                  <li><svg class="ic" aria-hidden="true"><use href="#i-circle-check"/></svg>Le lien à votre nom</li>
+                  <li><svg class="ic" aria-hidden="true"><use href="#i-circle-check"/></svg>Sans la carte DropLink</li>
+                  <li><svg class="ic" aria-hidden="true"><use href="#i-circle-check"/></svg>Plafond mensuel, pas à vie</li>
+                </ul>
+                <a class="lien-texte plan-r__detail" href="passer-pro.html">Ce que le plan Pro change<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- ============ Données ============ -->
+        <section class="reglages__panneau" id="s-donnees" role="tabpanel" aria-labelledby="o-donnees" hidden data-panneau="donnees">
+          <section class="bloc-r" aria-labelledby="r-export">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2 id="r-export">Exporter mes données</h2><p>Commandes, colis, médias et vues, au format JSON. Sans vos notes internes.</p></div>
+            </div>
+            <footer class="bloc-r__pied"><p>Le fichier contient les liens publics de vos commandes : quiconque les obtient voit les pages de vos clients. Rangez-le comme tel.</p><button type="button" class="bouton-app bouton-app--second" data-exporter><svg class="ic"><use href="#i-download"/></svg>Exporter</button></footer>
+          </section>
+
+          <form class="bloc-r bloc-r--danger" novalidate data-form="supDonnees" data-danger>
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2>Supprimer toutes les données</h2><p>Toutes vos commandes, photos, vidéos et liens clients seront supprimés définitivement. Votre compte restera actif mais vide.</p></div>
+              <div class="grille-r confirmation-r" hidden data-confirmation>
+                <div class="champ-r"><label for="r-recopie-donnees">Recopiez votre adresse e-mail pour confirmer : <b data-adresse>contact@ateliernord.fr</b></label><input id="r-recopie-donnees" name="confirmation" type="email" maxlength="254" autocomplete="off" spellcheck="false" data-sans-coller></div>
+                <div class="champ-r"><label for="r-actuel-sup-donnees">Mot de passe actuel</label><input id="r-actuel-sup-donnees" name="actuel" type="password" maxlength="1024" autocomplete="current-password"></div>
+              </div>
+            </div>
+            <footer class="bloc-r__pied"><p data-annonce>Supprimez toutes vos données de manière définitive.</p><span class="bloc-r__actions"><button type="button" class="bouton-app bouton-app--second" hidden data-annuler>Annuler</button><button type="submit" class="bouton-app bouton-app--danger" data-en-cours="Suppression…" data-libelle-final="Tout supprimer">Supprimer</button></span></footer>
+          </form>
+        </section>
+
+        <!-- ============ Support ============ -->
+        <section class="reglages__panneau" id="s-support" role="tabpanel" aria-labelledby="o-support" hidden data-panneau="support">
+          <section class="bloc-r" aria-labelledby="r-aide">
+            <div class="bloc-r__corps">
+              <div class="bloc-r__tete"><h2 id="r-aide">Centre d'aide</h2><p>Besoin d'aide ? Consultez nos guides et tutoriels.</p></div>
+            </div>
+            <footer class="bloc-r__pied"><p></p><a class="bouton-app bouton-app--second" href="#" data-maquette="Centre d’aide">Ouvrir<svg class="ic"><use href="#i-arrow-up-right"/></svg></a></footer>
+          </section>
+        </section>
+      </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="parametres.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

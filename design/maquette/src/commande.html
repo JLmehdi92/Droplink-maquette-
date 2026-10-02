@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nouvelle commande · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'éditeur de commande (droplink2 : commandes/[id]/page.tsx,
+     components/commandes/editeur.tsx, carte-medias, carte-revocation,
+     messages/fr.json « editeur », « medias », « actions »).
+     « Créer une commande » ne mène à aucun formulaire à part : le produit crée
+     un brouillon et ouvre son éditeur. Cet écran EST donc la création. Tout s'y
+     enregistre seul, et le lien existe dès la première seconde. -->
+<!--COQUE:commandes-->
+    <main id="contenu" class="tableau fiche" data-ecran>
+      <div class="tableau__tete fiche__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><a href="commandes.html">Commandes</a><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b data-fil>Nouvelle commande</b></p>
+          <h1 data-titre>Nouvelle commande</h1>
+          <p class="fiche__meta">
+            <span class="temoin" data-temoin data-etat="ok" role="status" aria-live="polite"><i aria-hidden="true"></i><span data-temoin-texte>Enregistré</span></span>
+            <span aria-hidden="true">·</span><span>Créée aujourd’hui à <time data-creee>14:32</time></span>
+            <span aria-hidden="true">·</span><span class="fiche__ref">#6B2F41</span>
+          </p>
+        </div>
+        <div class="fiche__actions">
+          <button type="button" class="bouton-outil" data-copier><svg class="ic"><use href="#i-copy"/></svg><span>Copier le lien</span></button>
+          <a class="ed-voir" href="client.html"><span>Voir la page client</span><svg class="ic"><use href="#i-arrow-up-right"/></svg></a>
+        </div>
+      </div>
+
+      <section class="compteurs compteurs--4 fiche__resume" aria-label="Résumé de la commande">
+        <div class="compteur-app"><p class="compteur-app__titre">Client</p><p class="compteur-app__valeur" data-resume="client" data-vide>Non renseigné</p></div>
+        <div class="compteur-app"><p class="compteur-app__titre">Référence produit</p><p class="compteur-app__valeur" data-resume="reference" data-vide>Non renseigné</p></div>
+        <div class="compteur-app"><p class="compteur-app__titre">Suivi</p><p class="compteur-app__valeur" data-resume="suivi" data-vide>Non renseigné</p><p class="compteur-app__dessous" data-resume="transporteur"></p></div>
+        <div class="compteur-app"><p class="compteur-app__titre">Vues du lien</p><p class="compteur-app__valeur">Jamais ouvert</p></div>
+      </section>
+
+      <div class="fiche__grille">
+        <!-- LA COMMANDE -->
+        <section class="bloc ed-carte ed-carte--commande" aria-labelledby="ed-commande">
+          <header class="ed-carte__tete"><h2 id="ed-commande">La commande</h2></header>
+          <div class="ed-champs">
+            <div class="ed-champ">
+              <label for="ed-client">Nom ou pseudo du client</label>
+              <input id="ed-client" type="text" placeholder="Ex : Yanis, ou @pseudo" autocomplete="off" data-champ="client">
+              <p class="ed-aide">Texte libre. Votre client n’a pas de compte.</p>
+            </div>
+            <div class="ed-champ">
+              <label for="ed-reference">Référence produit</label>
+              <input id="ed-reference" type="text" placeholder="Ex : veste bleue taille M" autocomplete="off" data-champ="reference">
+            </div>
+            <div class="ed-champ">
+              <label for="ed-suivi">Numéro de suivi</label>
+              <div class="ed-suivi">
+                <input id="ed-suivi" type="text" placeholder="Collez le numéro du transporteur" autocomplete="off" spellcheck="false" aria-describedby="ed-suivi-aide" data-champ="suivi">
+                <span class="ed-reconnu" hidden data-reconnu><svg class="ic"><use href="#i-circle-check"/></svg><span data-reconnu-nom></span></span>
+              </div>
+              <p class="ed-aide" id="ed-suivi-aide">Un numéro tout juste collé n’est souvent pas encore scanné : c’est normal, le transporteur n’a rien publié. Si le colis part de l’étranger, le suivi peut ne commencer qu’à son arrivée ; un numéro d’expédition d’origine, lui, suit tout le trajet.</p>
+            </div>
+            <div class="ed-champ">
+              <label for="ed-transporteur">Transporteur</label>
+              <span class="ed-liste"><select id="ed-transporteur" aria-describedby="ed-transporteur-aide" data-champ="transporteur">
+                <option value="">Détection automatique</option>
+                <option value="colissimo">Colissimo</option>
+                <option value="chronopost">Chronopost</option>
+                <option value="mondial-relay">Mondial Relay</option>
+                <option value="la-poste">La Poste</option>
+              </select><svg class="ic"><use href="#i-chevron-down"/></svg></span>
+              <p class="ed-aide" id="ed-transporteur-aide">Reconnu d’après le numéro. Choisissez-le seulement s’il ne l’est pas.</p>
+            </div>
+            <div class="ed-champ">
+              <label for="ed-statut">Statut</label>
+              <span class="ed-liste"><select id="ed-statut" data-champ="statut">
+                <option value="preparation">En préparation</option>
+                <option value="expedie">Expédiée</option>
+                <option value="en_transit">En transit</option>
+                <option value="livre">Livrée</option>
+              </select><svg class="ic"><use href="#i-chevron-down"/></svg></span>
+            </div>
+            <div class="ed-champ">
+              <label for="ed-qc">État des photos</label>
+              <span class="ed-liste"><select id="ed-qc" data-champ="qc">
+                <option value="en_attente">En attente</option>
+                <option value="approuve">Approuvées</option>
+                <option value="refuse">Refusées</option>
+              </select><svg class="ic"><use href="#i-chevron-down"/></svg></span>
+              <p class="ed-aide">À renseigner si votre client vous répond ailleurs que sur sa page.</p>
+            </div>
+            <div class="ed-champ ed-champ--large">
+              <label for="ed-notes">Notes internes <svg class="ic"><use href="#i-lock"/></svg></label>
+              <textarea id="ed-notes" rows="3" placeholder="Prix d’achat, remarques, tout ce qui ne doit pas sortir d’ici." data-champ="notes"></textarea>
+              <p class="ed-aide">Jamais visible par le client, et absent de l’export.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- APERÇU : la vraie page, qui se met à jour pendant qu'on tape -->
+        <section class="bloc ed-carte ed-carte--apercu" aria-labelledby="ed-apercu">
+          <header class="ed-carte__tete"><h2 id="ed-apercu">Aperçu de la page client</h2><p class="direct"><i></i>en direct</p></header>
+          <div class="ed-apercu">
+            <div class="telephone telephone--fiche" aria-hidden="true">
+              <div class="telephone__ecran" data-apercu>
+                <!--PAGE_CLIENT-->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PHOTOS ET VIDÉOS -->
+        <section class="bloc ed-carte ed-carte--medias" aria-labelledby="ed-medias">
+          <header class="ed-carte__tete"><h2 id="ed-medias">Photos et vidéos</h2><p class="ed-compteur"><span data-nb-medias>0</span> sur 20 <span class="ed-compteur__videos">· <span data-nb-videos>0</span> vidéo sur 3</span></p></header>
+          <div class="ed-medias">
+            <label class="ed-depot" data-depot>
+              <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple class="sr" data-fichiers>
+              <span class="ed-depot__icone"><svg class="ic"><use href="#i-upload"/></svg></span>
+              <b>Cliquez ou déposez vos fichiers ici</b>
+              <small>JPEG, PNG, WebP ou MP4 · 3 vidéos au maximum</small>
+              <span class="ed-depot__ou">ou <button type="button" class="ed-lien" data-demo-photos>prendre les 4 photos de démonstration</button></span>
+            </label>
+            <ol class="ed-grille" data-grille aria-label="Médias de la commande"></ol>
+            <p class="ed-aide" data-aide-ordre hidden>Glissez une vignette pour changer l’ordre. La couverture est la première image que voit votre client.</p>
+          </div>
+        </section>
+
+        <!-- LE LIEN -->
+        <section class="bloc ed-carte ed-carte--lien" aria-labelledby="ed-lien">
+          <header class="ed-carte__tete"><h2 id="ed-lien">Lien client</h2></header>
+          <div class="ed-lien-zone">
+            <div class="ed-url"><svg class="ic"><use href="#i-link"/></svg><span>droplink.fr/p/<b data-jeton>Hc4Tq8wNz2Ry</b></span><button type="button" class="ed-url__copier" aria-label="Copier le lien" data-copier><svg class="ic"><use href="#i-copy"/></svg></button></div>
+            <p class="ed-aide">Il existe dès la création et ne change plus : chaque modification arrive sur la même page.</p>
+            <details class="ed-revoquer">
+              <summary><svg class="ic"><use href="#i-refresh-cw"/></svg>Révoquer le lien<svg class="ic ed-revoquer__chevron"><use href="#i-chevron-down"/></svg></summary>
+              <div class="ed-revoquer__corps">
+                <p>L’ancien lien cessera définitivement de fonctionner, y compris pour qui l’a déjà reçu. Un nouveau lien sera créé.</p>
+                <label class="ed-coche"><input type="checkbox" data-comprends><span>Je comprends que l’ancien lien cessera définitivement de fonctionner.</span></label>
+                <button type="button" class="ed-danger" disabled data-revoquer>Révoquer et régénérer</button>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- SUIVI -->
+        <section class="bloc ed-carte ed-carte--suivi" aria-labelledby="ed-suivi-titre">
+          <header class="ed-carte__tete"><h2 id="ed-suivi-titre">Suivi de la commande</h2></header>
+          <ol class="ed-frise" data-frise>
+            <li data-etape="preparation"><i></i><b>En préparation</b><small data-quand>Aujourd’hui</small></li>
+            <li data-etape="expedie"><i></i><b>Expédiée</b><small data-quand>En attente</small></li>
+            <li data-etape="en_transit"><i></i><b>En transit</b><small data-quand>En attente</small></li>
+            <li data-etape="livre"><i></i><b>Livrée</b><small data-quand>En attente</small></li>
+          </ol>
+        </section>
+
+        <!-- HISTORIQUE -->
+        <section class="bloc ed-carte ed-carte--historique" aria-labelledby="ed-historique">
+          <header class="ed-carte__tete"><h2 id="ed-historique">Historique de la commande</h2></header>
+          <ol class="ed-histo" data-histo aria-live="polite">
+            <li><i><svg class="ic"><use href="#i-plus"/></svg></i><p>Commande créée<small>Aujourd’hui à 14:32</small></p></li>
+          </ol>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- au téléphone : la bande d'action collée en bas, comme dans le produit -->
+<div class="ed-barre-mobile" data-page>
+  <button type="button" class="ed-barre-mobile__copier" aria-label="Copier le lien" data-copier><svg class="ic"><use href="#i-copy"/></svg></button>
+  <a class="ed-barre-mobile__voir" href="client.html">Voir la page client<svg class="ic"><use href="#i-arrow-up-right"/></svg></a>
+</div>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="commande.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Toutes les pages · DropLink</title>
+<meta name="description" content="Le plan de la maquette DropLink : chaque écran, rangé par surface.">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="l4 publique publique--plan">
+<!--ICONES-->
+<div class="l4-grain" aria-hidden="true"></div>
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<div class="sentinelle" data-sentinelle aria-hidden="true"></div>
+
+<header class="entete" data-entete>
+  <div class="entete__barre">
+    <a class="logo" href="index.html" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <div class="entete__actions">
+      <a class="lien-discret" href="connexion.html">Se connecter</a>
+      <a class="bouton bouton--plein bouton--petit" href="inscription.html">Créer un compte</a>
+      <button class="bouton-icone menu-bouton" type="button" aria-expanded="false" aria-controls="menu-mobile" aria-label="Ouvrir le menu" data-menu-bouton>
+        <svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <a href="index.html#studio">Comment ça marche</a>
+    <a href="tarifs.html">Tarifs</a>
+    <a href="docs.html">Documentation</a>
+    <a href="blog.html">Blog</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</header>
+
+<main id="contenu" class="pub">
+
+  <section class="pub-tete conteneur">
+    <p class="l4-etiquette"><span><svg class="ic" aria-hidden="true"><use href="#i-panel-left"/></svg></span>Plan de la maquette</p>
+    <h1 class="pub-titre l4-titre"><span class="l4-ligne" style="--l:0">Toutes les pages</span></h1>
+    <p class="pub-chapo" data-entree>Les 44 écrans de la maquette, rangés par surface. Certains ne s'atteignent qu'en situation réelle (un e-mail reçu, un rôle d'administrateur) : ils sont tous ici.</p>
+  </section>
+  <div class="conteneur plan">
+    <section class="plan-groupe" aria-labelledby="g-globe">
+      <header><span class="plan-groupe__ic"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></span><div><h2 id="g-globe">Le site public</h2><p>Ce que voit un visiteur avant d'avoir un compte.</p></div><b>7</b></header>
+      <ul>
+        <li><a href="index.html"><span><b>Accueil</b><small>La landing</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="tarifs.html"><span><b>Tarifs</b><small>Gratuit et Pro, comparés</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="docs.html"><span><b>Documentation</b><small>Prise en main, pas à pas</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="blog.html"><span><b>Blog</b><small>5 articles</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="conditions.html"><span><b>Conditions</b><small>Conditions d'utilisation</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="confidentialite.html"><span><b>Confidentialité</b><small>Données et droits</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="signalement.html"><span><b>Signaler un contenu</b><small>Le message préparé pour abus@droplink.fr</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+      </ul>
+    </section>
+    <section class="plan-groupe" aria-labelledby="g-lock-keyhole">
+      <header><span class="plan-groupe__ic"><svg class="ic" aria-hidden="true"><use href="#i-lock-keyhole"/></svg></span><div><h2 id="g-lock-keyhole">Le compte</h2><p>Entrer, revenir, et ce que l'on reçoit par e-mail.</p></div><b>7</b></header>
+      <ul>
+        <li><a href="connexion.html"><span><b>Connexion</b><small>E-mail ou Google</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="inscription.html"><span><b>Inscription</b><small>Création du compte</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="connexion.html#oubli"><span><b>Mot de passe oublié</b><small>Le lien de réinitialisation</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="nouveau-mot-de-passe.html"><span><b>Nouveau mot de passe</b><small>Depuis le lien reçu</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="verification.html"><span><b>Vérification en deux étapes</b><small>Le code à six chiffres</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="bienvenue.html"><span><b>Bienvenue</b><small>Les premiers réglages</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="notification.html"><span><b>Messages du compte</b><small>Lien envoyé, adresse confirmée, lien expiré</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+      </ul>
+    </section>
+    <section class="plan-groupe" aria-labelledby="g-layout-dashboard">
+      <header><span class="plan-groupe__ic"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg></span><div><h2 id="g-layout-dashboard">L'espace vendeur</h2><p>Là où le vendeur passe sa journée.</p></div><b>9</b></header>
+      <ul>
+        <li><a href="tableau.html"><span><b>Tableau de bord</b><small>La semaine en un coup d'œil</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="commandes.html"><span><b>Commandes</b><small>La liste, filtres et recherche</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="commande.html"><span><b>Nouvelle commande</b><small>Photos, suivi, lien</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="commande.html#6A4D21"><span><b>Fiche d'une commande</b><small>Une commande existante</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="envois.html"><span><b>Suivi d'envois</b><small>Tous les colis en cours</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="analyses.html"><span><b>Analyses</b><small>Vues et commandes</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="marque.html"><span><b>Ma marque</b><small>Logo, couleur, réseaux</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="parametres.html"><span><b>Paramètres</b><small>Compte, sécurité, abonnement</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="passer-pro.html"><span><b>Plan Pro</b><small>Ce que le plan Pro change</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+      </ul>
+    </section>
+    <section class="plan-groupe" aria-labelledby="g-link">
+      <header><span class="plan-groupe__ic"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg></span><div><h2 id="g-link">La page client</h2><p>Ce que reçoit le client, sans compte.</p></div><b>3</b></header>
+      <ul>
+        <li><a href="client.html"><span><b>Page client</b><small>Photos, suivi, aux couleurs du vendeur</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="client-produit.html"><span><b>Page client, autre vendeur</b><small>Une autre marque, un autre accent</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="lien-invalide.html"><span><b>Lien introuvable</b><small>Un lien qui ne mène à rien</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+      </ul>
+    </section>
+    <section class="plan-groupe" aria-labelledby="g-shield">
+      <header><span class="plan-groupe__ic"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span><div><h2 id="g-shield">L'administration</h2><p>Réservée à l'équipe, chaque consultation est journalisée.</p></div><b>10</b></header>
+      <ul>
+        <li><a href="admin.html"><span><b>Vue d'ensemble</b><small>L'état de la plateforme</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-comptes.html"><span><b>Comptes</b><small>Plans, suspensions</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-compte.html#c2"><span><b>Fiche d'un compte</b><small>Suspendre, changer de plan</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-doublons.html"><span><b>Comptes en doublon</b><small>Mêmes réseaux, comptes distincts</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-boutiques.html"><span><b>Boutiques</b><small>Les marques des vendeurs</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-commandes.html"><span><b>Commandes</b><small>Sans aucun contenu</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-statistiques.html"><span><b>Statistiques</b><small>Que des nombres</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-journal.html"><span><b>Journal</b><small>Qui a consulté quoi</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-surveillance.html"><span><b>Surveillance</b><small>Limitation de débit, tâches</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-parametres.html"><span><b>Paramètres</b><small>Plafonds et suivi</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+      </ul>
+    </section>
+    <section class="plan-groupe" aria-labelledby="g-circle-alert">
+      <header><span class="plan-groupe__ic"><svg class="ic" aria-hidden="true"><use href="#i-circle-alert"/></svg></span><div><h2 id="g-circle-alert">Les états</h2><p>Ce que le produit montre quand une page charge, échoue ou ne mène à rien.</p></div><b>8</b></header>
+      <ul>
+        <li><a href="introuvable.html"><span><b>Page introuvable</b><small>Une adresse qui ne mène à rien</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="erreur.html"><span><b>Erreur du site</b><small>Réessayer, avec la référence de l'incident</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="erreur-espace.html"><span><b>Erreur de l'espace vendeur</b><small>Vos données ne sont pas touchées</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="commande-introuvable.html"><span><b>Commande introuvable</b><small>Retour à la liste</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="chargement.html"><span><b>Chargement d'une liste</b><small>Le squelette de l'espace vendeur</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="commande-chargement.html"><span><b>Chargement d'une commande</b><small>Le squelette de la fiche</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="erreur-client.html"><span><b>Erreur de la page client</b><small>Le lien reste valable</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+        <li><a href="admin-erreur.html"><span><b>Erreur de l'administration</b><small>La même carte, côté équipe</small></span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied__grille">
+    <div>
+      <a class="logo" href="index.html" aria-label="DropLink, accueil">
+        <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+        <span>DropLink</span>
+      </a>
+      <p class="pied__devise">Un seul lien de suivi pour toute la commande.</p>
+    </div>
+    <nav aria-label="Produit">
+      <h3>Produit</h3>
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <nav aria-label="Pages légales">
+      <h3>Légal</h3>
+      <a href="conditions.html">Conditions</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="signalement.html">Signaler un contenu</a>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© 2026 DropLink. Tous droits réservés. · <a class="l4-comparer" href="plan.html">Toutes les pages</a></p>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-choix="light" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg><span class="sr">Clair</span></button>
+      <button type="button" data-theme-choix="dark" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span class="sr">Sombre</span></button>
+    </div>
+  </div>
+</footer>
+
+<script src="public.js" defer></script>
+
+</body>
+</html>

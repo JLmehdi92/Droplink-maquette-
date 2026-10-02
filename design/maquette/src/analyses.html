@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Analyses · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette fidèle à /analyses (droplink2 : analyses/page.tsx,
+     components/analyses/*, lib/analyses/*) : panneaux, ordre et libellés
+     sont ceux du produit. Aucun export sur cet écran, comme dans le produit. -->
+<!--COQUE:analyses-->
+    <main id="contenu" class="tableau analyses-ecran" data-ecran>
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Atelier Nord</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Analyses</b></p>
+          <h1>Analyses</h1>
+          <p>Suivez les performances de votre activité et l'efficacité de vos envois.</p>
+        </div>
+        <div class="periodes" role="radiogroup" aria-label="Période" data-periodes>
+          <i class="periodes__curseur" data-curseur></i>
+          <button type="button" role="radio" aria-checked="false" data-periode="7j">7 jours</button>
+          <button type="button" role="radio" aria-checked="true" data-periode="30j">30 jours</button>
+          <button type="button" role="radio" aria-checked="false" data-periode="90j">90 jours</button>
+        </div>
+      </div>
+
+      <section class="compteurs" aria-label="Vue d’ensemble" data-compteurs></section>
+
+      <div class="analyses__rangee analyses__rangee--16">
+        <section class="bloc bloc--graphe" aria-labelledby="a-evolution">
+          <header class="bloc__tete"><h2 id="a-evolution">Évolution des commandes</h2><p class="bloc__meta">12 dernières semaines</p></header>
+          <p class="bloc__aide">Nombre de commandes créées par semaine.</p>
+          <div class="graphe" data-frise></div>
+          <details class="table-vue"><summary>Voir les valeurs</summary><div class="table-vue__defil"><table data-table-frise></table></div></details>
+        </section>
+        <section class="bloc" aria-labelledby="a-colis">
+          <header class="bloc__tete"><h2 id="a-colis">Répartition des statuts</h2></header>
+          <p class="bloc__aide">Statut actuel de vos envois.</p>
+          <p class="reponses__taux total-colis"><b data-colis-total></b><span>colis suivis</span></p>
+          <div class="envois envois--colis" data-colis></div>
+        </section>
+      </div>
+
+      <div class="analyses__rangee analyses__rangee--3">
+        <section class="bloc bloc--graphe" aria-labelledby="a-liens">
+          <header class="bloc__tete"><h2 id="a-liens">Liens clients</h2><p class="bloc__meta" data-liens-total></p></header>
+          <p class="bloc__aide">Nombre d'ouvertures des liens de suivi.</p>
+          <div class="graphe graphe--compact" data-liens></div>
+          <details class="table-vue"><summary>Voir les valeurs</summary><div class="table-vue__defil"><table data-table-liens></table></div></details>
+        </section>
+        <section class="bloc" aria-labelledby="a-transp">
+          <header class="bloc__tete"><h2 id="a-transp">Transporteurs les plus utilisés</h2></header>
+          <p class="bloc__aide">Répartition de vos envois par transporteur.</p>
+          <div class="envois" data-transp></div>
+        </section>
+        <section class="bloc" aria-labelledby="a-activite">
+          <header class="bloc__tete"><h2 id="a-activite">Activité récente</h2></header>
+          <ol class="activite" data-activite></ol>
+        </section>
+      </div>
+
+      <section class="bloc" aria-labelledby="a-consultees">
+        <header class="bloc__tete"><h2 id="a-consultees">Vos commandes les plus consultées</h2></header>
+        <p class="bloc__aide">Un client qui revient plusieurs fois sur sa page est un client rassuré.</p>
+        <ol class="consultees" data-consultees></ol>
+      </section>
+
+      <section class="bloc" aria-labelledby="a-qc">
+        <header class="bloc__tete"><h2 id="a-qc">Réponses de vos clients</h2></header>
+        <p class="bloc__aide">Ce que vos clients ont répondu après avoir vu les photos. Sans réponse de leur part, la commande reste en attente.</p>
+        <div class="reponses" data-qc></div>
+      </section>
+
+      <aside class="bandeau-analyses" aria-label="À propos des analyses">
+        <div>
+          <p class="bandeau-analyses__titre">Des analyses simples et utiles</p>
+          <p>Suivez l'efficacité de vos envois et améliorez l'expérience de vos clients.</p>
+        </div>
+        <div class="bandeau-analyses__marque">
+          <p>Propulsé par <b><img src="assets/img/symbole-84.png" alt="" width="12" height="17">DropLink</b></p>
+          <p class="bandeau-analyses__slogan">Des liens de suivi simples et puissants.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+</div>
+
+<template data-page data-pc><!--PAGE_CLIENT--></template>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="analytique.js" defer></script>
+<script src="analyses.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

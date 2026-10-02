@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Surveillance · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Surveillance</b></p>
+          <h1>Surveillance</h1>
+          <p>Ce qui tourne sans personne devant.</p>
+        </div>
+        
+      </div>
+      
+
+      <div class="adm-rangee adm-rangee--2">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Tâches de fond</h2></div></header><ul class="adm-taches"><li><span class="adm-pouls" aria-hidden="true"></span><div><b>Interrogation des transporteurs</b><small>Dernier passage il y a 3 minutes</small></div><span class="adm-badge" data-statut="active"><i></i>Actif</span></li><li><span class="adm-pouls" aria-hidden="true"></span><div><b>Veille mutuelle des tâches</b><small>Dernier passage il y a 1 minute</small></div><span class="adm-badge" data-statut="active"><i></i>Actif</span></li></ul></section>
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Consommation</h2></div></header><dl class="adm-dl adm-dl--chiffres"><div><dt>Interrogations du transporteur ce mois</dt><dd>9 214</dd></div><div><dt>Colis pris en charge ce mois <span class="adm-facture">le seul poste facturé</span></dt><dd>438</dd></div><div><dt>Suivis abandonnés ce mois</dt><dd>6</dd></div></dl></section>
+      </div>
+      <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Colis pris en charge par jour</h2><p class="adm-aide">30 derniers jours · la dernière barre est aujourd'hui</p></div></header><div class="adm-graphe"><div class="adm-graphe__plot"><svg viewBox="0 0 600 160" preserveAspectRatio="none" role="img" aria-label="Colis pris en charge chaque jour sur les 30 derniers jours">
+    <line x1="0" x2="600" y1="160" y2="160" class="adm-graphe__grille"/><line x1="0" x2="600" y1="120" y2="120" class="adm-graphe__grille"/><line x1="0" x2="600" y1="80" y2="80" class="adm-graphe__grille"/><line x1="0" x2="600" y1="40" y2="40" class="adm-graphe__grille"/><line x1="0" x2="600" y1="0" y2="0" class="adm-graphe__grille"/>
+    <rect x="3.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:0" data-info="Il y a 29 j : 13 colis"/><rect x="23.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:1" data-info="Il y a 28 j : 13 colis"/><rect x="43.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:2" data-info="Il y a 27 j : 13 colis"/><rect x="63.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:3" data-info="Il y a 26 j : 13 colis"/><rect x="83.6" y="76.0" width="12.8" height="84.0" rx="3" style="--i:4" data-info="Il y a 25 j : 21 colis"/><rect x="103.6" y="80.0" width="12.8" height="80.0" rx="3" style="--i:5" data-info="Il y a 24 j : 20 colis"/><rect x="123.6" y="88.0" width="12.8" height="72.0" rx="3" style="--i:6" data-info="Il y a 23 j : 18 colis"/><rect x="143.6" y="96.0" width="12.8" height="64.0" rx="3" style="--i:7" data-info="Il y a 22 j : 16 colis"/><rect x="163.6" y="104.0" width="12.8" height="56.0" rx="3" style="--i:8" data-info="Il y a 21 j : 14 colis"/><rect x="183.6" y="112.0" width="12.8" height="48.0" rx="3" style="--i:9" data-info="Il y a 20 j : 12 colis"/><rect x="203.6" y="120.0" width="12.8" height="40.0" rx="3" style="--i:10" data-info="Il y a 19 j : 10 colis"/><rect x="223.6" y="128.0" width="12.8" height="32.0" rx="3" style="--i:11" data-info="Il y a 18 j : 8 colis"/><rect x="243.6" y="132.0" width="12.8" height="28.0" rx="3" style="--i:12" data-info="Il y a 17 j : 7 colis"/><rect x="263.6" y="104.0" width="12.8" height="56.0" rx="3" style="--i:13" data-info="Il y a 16 j : 14 colis"/><rect x="283.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:14" data-info="Il y a 15 j : 13 colis"/><rect x="303.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:15" data-info="Il y a 14 j : 13 colis"/><rect x="323.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:16" data-info="Il y a 13 j : 13 colis"/><rect x="343.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:17" data-info="Il y a 12 j : 13 colis"/><rect x="363.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:18" data-info="Il y a 11 j : 13 colis"/><rect x="383.6" y="108.0" width="12.8" height="52.0" rx="3" style="--i:19" data-info="Il y a 10 j : 13 colis"/><rect x="403.6" y="104.0" width="12.8" height="56.0" rx="3" style="--i:20" data-info="Il y a 9 j : 14 colis"/><rect x="423.6" y="104.0" width="12.8" height="56.0" rx="3" style="--i:21" data-info="Il y a 8 j : 14 colis"/><rect x="443.6" y="68.0" width="12.8" height="92.0" rx="3" style="--i:22" data-info="Il y a 7 j : 23 colis"/><rect x="463.6" y="72.0" width="12.8" height="88.0" rx="3" style="--i:23" data-info="Il y a 6 j : 22 colis"/><rect x="483.6" y="72.0" width="12.8" height="88.0" rx="3" style="--i:24" data-info="Il y a 5 j : 22 colis"/><rect x="503.6" y="76.0" width="12.8" height="84.0" rx="3" style="--i:25" data-info="Il y a 4 j : 21 colis"/><rect x="523.6" y="84.0" width="12.8" height="76.0" rx="3" style="--i:26" data-info="Il y a 3 j : 19 colis"/><rect x="543.6" y="92.0" width="12.8" height="68.0" rx="3" style="--i:27" data-info="Il y a 2 j : 17 colis"/><rect x="563.6" y="100.0" width="12.8" height="60.0" rx="3" style="--i:28" data-info="Il y a 1 j : 15 colis"/><rect x="583.6" y="108.0" width="12.8" height="52.0" rx="3" class="est-dernier" style="--i:29" data-info="Aujourd'hui : 13 colis"/>
+  </svg><div class="adm-graphe__axe"><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span></div></div><p class="adm-graphe__bas"><span>Il y a 29 jours</span><span>Aujourd'hui</span></p></div></section>
+      <div class="adm-rangee adm-rangee--2">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Limitation de débit</h2></div></header><ul class="adm-limites"><li><p><b>Pages publiques</b><span>34 / 120 par minute</span></p><i><b style="--k:0.283"></b></i><small>Si le compteur tombe en panne, l'accès reste autorisé : l'incident ne concerne pas les clients d'un vendeur.</small></li><li><p><b>Jetons inconnus</b><span>3 / 20 par minute</span></p><i><b style="--k:0.150"></b></i><small>Si le compteur tombe en panne, l'accès reste autorisé : l'incident ne concerne pas les clients d'un vendeur.</small></li><li><p><b>Administration</b><span>4 / 30 par minute</span></p><i><b style="--k:0.133"></b></i><small>Ici, une panne du compteur refuse l'accès. Ça ne pénalise que nous.</small></li></ul></section>
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Non mesuré</h2></div></header><p class="adm-texte">Aucun mécanisme ne relève ces grandeurs aujourd'hui. Elles apparaîtront ici avec le mécanisme qui les mesure, jamais avant : un chiffre inventé sur cet écran ferait douter de tous les autres.</p><ul class="adm-absents"><li><span>Disponibilité</span><b>Non mesuré</b></li><li><span>Latence</span><b>Non mesuré</b></li><li><span>Charge serveur</span><b>Non mesuré</b></li><li><span>Erreurs serveur</span><b>Non mesuré</b></li></ul></section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

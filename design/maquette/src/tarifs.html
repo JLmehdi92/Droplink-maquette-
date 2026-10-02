@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tarifs · DropLink</title>
+<meta name="description" content="Commencez gratuitement, sans carte bancaire. Le plan Pro à 20 € par mois, sans engagement : votre lien à votre nom, une page sans mention DropLink et un plafond qui se recharge chaque mois.">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="l4 publique publique--tarifs">
+<!--ICONES-->
+<div class="l4-grain" aria-hidden="true"></div>
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<div class="sentinelle" data-sentinelle aria-hidden="true"></div>
+
+<header class="entete" data-entete>
+  <div class="entete__barre">
+    <a class="logo" href="index.html" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html" aria-current="page">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <div class="entete__actions">
+      <a class="lien-discret" href="connexion.html">Se connecter</a>
+      <a class="bouton bouton--plein bouton--petit" href="inscription.html">Créer un compte</a>
+      <button class="bouton-icone menu-bouton" type="button" aria-expanded="false" aria-controls="menu-mobile" aria-label="Ouvrir le menu" data-menu-bouton>
+        <svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <a href="index.html#studio">Comment ça marche</a>
+    <a href="tarifs.html" aria-current="page">Tarifs</a>
+    <a href="docs.html">Documentation</a>
+    <a href="blog.html">Blog</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</header>
+
+<main id="contenu" class="pub">
+
+  <section class="pub-tete conteneur">
+    <p class="l4-etiquette"><span><svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg></span>Tarifs</p>
+    <h1 class="pub-titre l4-titre"><span class="l4-ligne" style="--l:0">Gratuit pour commencer, Pro quand vous grandissez</span></h1>
+    <p class="pub-chapo" data-entree>Photos, vidéos, suivi automatique et page à vos couleurs : tout ce qui fait DropLink est déjà dans le plan gratuit. Le Pro ajoute quatre choses, et seulement quatre.</p>
+  </section>
+
+  <section class="conteneur tf-plans" aria-label="Les deux plans">
+    <article class="tf-plan v4-carte" data-anime>
+      <header>
+        <h2>Gratuit</h2>
+        <p class="tf-prix"><b>0 €</b></p>
+        <p class="tf-sous">Sans carte bancaire</p>
+      </header>
+      <ul class="tf-inclus"><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Photos, vidéos et suivi automatique</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Page brandée à vos couleurs</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>5 commandes au total, à vie</span></li></ul>
+      <a class="bouton bouton--second bouton--large" href="inscription.html">Créer un compte gratuit<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+    </article>
+    <article class="tf-plan tf-plan--pro v4-carte" data-anime>
+      <header>
+        <h2><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</h2>
+        <p class="tf-prix"><b>20 €</b><small>/ mois</small></p>
+        <p class="tf-sous">Par mois, sans engagement</p>
+      </header>
+      <ul class="tf-inclus"><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Tout le plan gratuit</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Le lien à votre nom</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Votre page, sans la nôtre</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>300 commandes par mois</span></li></ul>
+      <div class="tf-pro-actions">
+        <a class="bouton bouton--marque bouton--large" href="inscription.html">Commencer avec Pro<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+        <p class="tf-note">Le Pro s'active depuis votre espace, une fois le compte créé. Déjà un compte ? <a class="lien-texte" href="connexion.html">Se connecter</a></p>
+      </div>
+    </article>
+  </section>
+
+  <section class="conteneur tf-comparer" aria-labelledby="tf-comparer">
+    <h2 id="tf-comparer" class="pub-h2">Comparer les deux plans</h2>
+    <div class="tp tf-tp" data-anime>
+      <table class="tp__table">
+        <caption class="sr">Comparer les deux plans</caption>
+        <colgroup><col class="tp__col-libelle"><col><col class="tp__col-pro"></colgroup>
+        <thead><tr>
+          <td class="tp__coin"></td>
+          <th scope="col"><span class="tp__nom">Gratuit</span><span class="tp__prix"><b>0 €</b></span></th>
+          <th scope="col" class="tp__pro"><span class="tp__nom">Pro</span><span class="tp__prix"><b>20 €</b><small>/ mois</small></span></th>
+        </tr></thead>
+        <tbody>
+          <tr style="--i:0"><th scope="row">Commandes</th><td><b>5</b> au total, à vie</td><td><b>300</b> par mois</td></tr>
+          <tr style="--i:1"><th scope="row">Colis suivis</th><td><b>5</b> au total, à vie</td><td><b>300</b> par mois</td></tr>
+          <tr style="--i:2"><th scope="row">Adresse de la page client</th><td><code class="tp-code">droplink.fr/p/xK9…</code></td><td><code class="tp-code tp-code--pro">droplink.fr/votre-boutique/xK9…</code></td></tr>
+          <tr style="--i:3"><th scope="row">Carte « Propulsé par DropLink »</th><td>Affichée</td><td>Retirée</td></tr>
+          <tr style="--i:4"><th scope="row">Photos, vidéos et suivi automatique</th><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td></tr>
+          <tr style="--i:5"><th scope="row">Page brandée à vos couleurs</th><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tf-question">Une question sur les plans ? <a class="lien-texte" href="docs.html#plans">Tout est expliqué dans la documentation<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></p>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied__grille">
+    <div>
+      <a class="logo" href="index.html" aria-label="DropLink, accueil">
+        <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+        <span>DropLink</span>
+      </a>
+      <p class="pied__devise">Un seul lien de suivi pour toute la commande.</p>
+    </div>
+    <nav aria-label="Produit">
+      <h3>Produit</h3>
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <nav aria-label="Pages légales">
+      <h3>Légal</h3>
+      <a href="conditions.html">Conditions</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="signalement.html">Signaler un contenu</a>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© 2026 DropLink. Tous droits réservés. · <a class="l4-comparer" href="plan.html">Toutes les pages</a></p>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-choix="light" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg><span class="sr">Clair</span></button>
+      <button type="button" data-theme-choix="dark" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span class="sr">Sombre</span></button>
+    </div>
+  </div>
+</footer>
+
+<script src="public.js" defer></script>
+
+</body>
+</html>

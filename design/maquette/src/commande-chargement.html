@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chargement · DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette du chargement de la fiche commande (droplink2 : src/app/[locale]/(app)/commandes/[id]/loading.tsx) : deux cartes de champs à gauche, la grille des médias à droite. -->
+<!--COQUE:commandes-->
+    <main id="contenu" class="tableau squelette" data-ecran aria-busy="true">
+      <p class="sr" role="status">Chargement…</p>
+      <div class="squelette__corps" aria-hidden="true">
+        <i class="sq sq--titre sq--large"></i>
+        <div class="squelette__fiche">
+          <div class="squelette__gauche">
+            <div class="squelette__carte"><i class="sq sq--etiquette"></i><i class="sq sq--champ"></i><i class="sq sq--champ"></i></div>
+            <div class="squelette__carte"><i class="sq sq--etiquette"></i><i class="sq sq--champ"></i><i class="sq sq--champ"></i></div>
+          </div>
+          <div class="squelette__carte squelette__droite"><i class="sq sq--etiquette sq--court"></i><div class="squelette__medias"><i class="sq"></i><i class="sq"></i><i class="sq"></i><i class="sq"></i></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+
+<script src="coque.js" defer></script>
+<script src="v4.js" defer></script>
+<script src="etats.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boutiques · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Boutiques</b></p>
+          <h1>Boutiques</h1>
+          <p>Gérez et suivez toutes les boutiques utilisant DropLink.</p>
+        </div>
+        
+      </div>
+      <p class="adm-encart"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span>Ce que chaque compte occupe, trié par stockage. Cet écran ne montre aucun contenu : ni nom de client, ni référence, ni note. Cette consultation est écrite au journal d'audit, avec les critères employés, filtre compris.</span></p>
+
+      <section class="compteurs compteurs--4 adm-tuiles" aria-label="Chiffres clés"><div class="compteur-app"><p class="compteur-app__titre">Boutiques totales</p><p class="compteur-app__valeur">48</p><p class="compteur-app__dessous">une par compte, créée à l'inscription</p></div><div class="compteur-app"><p class="compteur-app__titre">Boutiques configurées</p><p class="compteur-app__valeur">41</p><p class="compteur-app__dessous">85 % du total</p></div><div class="compteur-app"><p class="compteur-app__titre">Commandes créées</p><p class="compteur-app__valeur">612</p><p class="compteur-app__dessous">ce mois-ci</p></div><div class="compteur-app"><p class="compteur-app__titre">Stockage des médias</p><p class="compteur-app__valeur">18,4 Go</p><p class="compteur-app__dessous">relu côté serveur au dépôt</p></div></section>
+      <div class="adm-rangee adm-rangee--pleine">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Liste des boutiques</h2><p class="adm-aide">48 boutiques au total</p></div></header>
+          <div class="adm-outils"><div class="adm-filtres" role="group" aria-label="Filtrer par type de compte" data-filtres><button type="button" aria-pressed="true" data-filtre="toutes">Toutes</button><button type="button" aria-pressed="false" data-filtre="supplier">Fournisseurs</button><button type="button" aria-pressed="false" data-filtre="reseller">Revendeurs</button><button type="button" aria-pressed="false" data-filtre="sans">Non configurées</button></div><label class="recherche-envoi adm-cherche"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input type="search" placeholder="Nom de boutique ou adresse email…" aria-label="Rechercher une boutique" data-cherche></label></div>
+          <div class="adm-defil"><table class="adm-table" data-table>
+            <thead><tr><th scope="col">Boutique</th><th scope="col">Type</th><th scope="col">Statut</th><th scope="col">Commandes</th><th scope="col">Médias</th><th scope="col">Stockage</th><th scope="col">Colis</th></tr></thead>
+            <tbody><tr data-type="supplier" data-cherche="hello@maisonlou.fr maison lou">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:41" aria-hidden="true">ML</span><span><b>Maison Lou</b><small>hello@maisonlou.fr</small></span></span></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-ton="alerte"><i></i>Plafond dépassé</span></td>
+          <td class="adm-nb">512</td><td class="adm-nb">2 310</td>
+          <td><span class="adm-stock" data-info="4,5 Go relus côté serveur"><b>4,5 Go</b><i style="--k:1.000"></i></span></td><td><span class="adm-colis est-depasse" data-info="342 colis pris en charge, seuil d'alerte 300"><b>342</b><small>/ 300</small><i style="--k:1.000"></i></span></td></tr>
+<tr data-type="supplier" data-cherche="kicks.lab@gmail.com kicks lab">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:33" aria-hidden="true">KL</span><span><b>Kicks Lab</b><small>kicks.lab@gmail.com</small></span></span></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">388</td><td class="adm-nb">1 904</td>
+          <td><span class="adm-stock" data-info="3,7 Go relus côté serveur"><b>3,7 Go</b><i style="--k:0.825"></i></span></td><td><span class="adm-colis" data-info="271 colis pris en charge, seuil d'alerte 300"><b>271</b><small>/ 300</small><i style="--k:0.903"></i></span></td></tr>
+<tr data-type="supplier" data-cherche="contact@lesboxesdesam.fr les boxes de sam">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:305" aria-hidden="true">LB</span><span><b>Les Boxes de Sam</b><small>contact@lesboxesdesam.fr</small></span></span></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">297</td><td class="adm-nb">1 288</td>
+          <td><span class="adm-stock" data-info="2,4 Go relus côté serveur"><b>2,4 Go</b><i style="--k:0.538"></i></span></td><td><span class="adm-colis" data-info="240 colis pris en charge, seuil d'alerte 300"><b>240</b><small>/ 300</small><i style="--k:0.800"></i></span></td></tr>
+<tr data-type="supplier" data-cherche="drip.paris@gmail.com drip paris">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:171" aria-hidden="true">DP</span><span><b>Drip Paris</b><small>drip.paris@gmail.com</small></span></span></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">205</td><td class="adm-nb">1 015</td>
+          <td><span class="adm-stock" data-info="1,9 Go relus côté serveur"><b>1,9 Go</b><i style="--k:0.423"></i></span></td><td><span class="adm-colis" data-info="166 colis pris en charge, seuil d'alerte 300"><b>166</b><small>/ 300</small><i style="--k:0.553"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="contact@ateliernord.fr atelier nord">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:91" aria-hidden="true">AN</span><span><b>Atelier Nord</b><small>contact@ateliernord.fr</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">186</td><td class="adm-nb">744</td>
+          <td><span class="adm-stock" data-info="1,2 Go relus côté serveur"><b>1,2 Go</b><i style="--k:0.261"></i></span></td><td><span class="adm-colis" data-info="152 colis pris en charge, seuil d'alerte 300"><b>152</b><small>/ 300</small><i style="--k:0.507"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="nora.drops@outlook.fr nora drops">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:337" aria-hidden="true">ND</span><span><b>Nora Drops</b><small>nora.drops@outlook.fr</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">143</td><td class="adm-nb">602</td>
+          <td><span class="adm-stock" data-info="1,1 Go relus côté serveur"><b>1,1 Go</b><i style="--k:0.240"></i></span></td><td><span class="adm-colis" data-info="118 colis pris en charge, seuil d'alerte 300"><b>118</b><small>/ 300</small><i style="--k:0.393"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="bijoux.selene@gmail.com bijoux séléné">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:130" aria-hidden="true">BS</span><span><b>Bijoux Séléné</b><small>bijoux.selene@gmail.com</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">96</td><td class="adm-nb">410</td>
+          <td><span class="adm-stock" data-info="640 Mo relus côté serveur"><b>640 Mo</b><i style="--k:0.138"></i></span></td><td><span class="adm-colis" data-info="74 colis pris en charge, seuil d'alerte 300"><b>74</b><small>/ 300</small><i style="--k:0.247"></i></span></td></tr>
+<tr data-type="supplier" data-cherche="sneakhouse.lyon@gmail.com sneak house lyon">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:5" aria-hidden="true">SH</span><span><b>Sneak House Lyon</b><small>sneakhouse.lyon@gmail.com</small></span></span></td>
+          <td>Fournisseur</td><td><span class="adm-badge" data-statut="suspended"><i></i>Suspendue</span></td>
+          <td class="adm-nb">61</td><td class="adm-nb">288</td>
+          <td><span class="adm-stock" data-info="590 Mo relus côté serveur"><b>590 Mo</b><i style="--k:0.127"></i></span></td><td><span class="adm-colis" data-info="55 colis pris en charge, seuil d'alerte 300"><b>55</b><small>/ 300</small><i style="--k:0.183"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="studio.kaia@gmail.com studio kaia">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:267" aria-hidden="true">SK</span><span><b>Studio Kaia</b><small>studio.kaia@gmail.com</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">5</td><td class="adm-nb">31</td>
+          <td><span class="adm-stock" data-info="54 Mo relus côté serveur"><b>54 Mo</b><i style="--k:0.012"></i></span></td><td><span class="adm-colis" data-info="5 colis pris en charge, seuil d'alerte 300"><b>5</b><small>/ 300</small><i style="--k:0.017"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="ines.store@icloud.com inès store">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:303" aria-hidden="true">IS</span><span><b>Inès Store</b><small>ines.store@icloud.com</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">5</td><td class="adm-nb">27</td>
+          <td><span class="adm-stock" data-info="41 Mo relus côté serveur"><b>41 Mo</b><i style="--k:0.009"></i></span></td><td><span class="adm-colis" data-info="5 colis pris en charge, seuil d'alerte 300"><b>5</b><small>/ 300</small><i style="--k:0.017"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="la.petite.friperie@gmail.com la petite friperie">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:233" aria-hidden="true">LP</span><span><b>La Petite Friperie</b><small>la.petite.friperie@gmail.com</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">5</td><td class="adm-nb">22</td>
+          <td><span class="adm-stock" data-info="36 Mo relus côté serveur"><b>36 Mo</b><i style="--k:0.008"></i></span></td><td><span class="adm-colis" data-info="5 colis pris en charge, seuil d'alerte 300"><b>5</b><small>/ 300</small><i style="--k:0.017"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="b.collection@gmail.com b collection">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:3" aria-hidden="true">BC</span><span><b>B Collection</b><small>b.collection@gmail.com</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="suspended"><i></i>Suspendue</span></td>
+          <td class="adm-nb">5</td><td class="adm-nb">19</td>
+          <td><span class="adm-stock" data-info="33 Mo relus côté serveur"><b>33 Mo</b><i style="--k:0.007"></i></span></td><td><span class="adm-colis" data-info="4 colis pris en charge, seuil d'alerte 300"><b>4</b><small>/ 300</small><i style="--k:0.013"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="vintage.rue@gmail.com vintage rue">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:279" aria-hidden="true">VR</span><span><b>Vintage Rue</b><small>vintage.rue@gmail.com</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">4</td><td class="adm-nb">16</td>
+          <td><span class="adm-stock" data-info="24 Mo relus côté serveur"><b>24 Mo</b><i style="--k:0.005"></i></span></td><td><span class="adm-colis" data-info="3 colis pris en charge, seuil d'alerte 300"><b>3</b><small>/ 300</small><i style="--k:0.010"></i></span></td></tr>
+<tr data-type="reseller" data-cherche="yanis.shop@gmail.com yanis shop">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:187" aria-hidden="true">YS</span><span><b>Yanis Shop</b><small>yanis.shop@gmail.com</small></span></span></td>
+          <td>Revendeur</td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">3</td><td class="adm-nb">9</td>
+          <td><span class="adm-stock" data-info="14 Mo relus côté serveur"><b>14 Mo</b><i style="--k:0.003"></i></span></td><td><span class="adm-colis" data-info="2 colis pris en charge, seuil d'alerte 300"><b>2</b><small>/ 300</small><i style="--k:0.007"></i></span></td></tr>
+<tr data-type="sans" data-cherche="mode.atelier9@gmail.com ">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:57" aria-hidden="true">M</span><span><b><span class="adm-sourdine">Boutique non configurée</span></b><small>mode.atelier9@gmail.com</small></span></span></td>
+          <td><span class="adm-sourdine">Non déclaré</span></td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">1</td><td class="adm-nb">0</td>
+          <td><span class="adm-stock" data-info="0 Mo relus côté serveur"><b>0 Mo</b><i style="--k:0.000"></i></span></td><td><span class="adm-colis" data-info="0 colis pris en charge, seuil d'alerte 300"><b>0</b><small>/ 300</small><i style="--k:0.000"></i></span></td></tr>
+<tr data-type="sans" data-cherche="nouveau.compte82@gmail.com ">
+          <td><span class="adm-qui"><span class="adm-av" style="--h:2" aria-hidden="true">N</span><span><b><span class="adm-sourdine">Boutique non configurée</span></b><small>nouveau.compte82@gmail.com</small></span></span></td>
+          <td><span class="adm-sourdine">Non déclaré</span></td><td><span class="adm-badge" data-statut="active"><i></i>Active</span></td>
+          <td class="adm-nb">0</td><td class="adm-nb">0</td>
+          <td><span class="adm-stock" data-info="0 Mo relus côté serveur"><b>0 Mo</b><i style="--k:0.000"></i></span></td><td><span class="adm-colis" data-info="0 colis pris en charge, seuil d'alerte 300"><b>0</b><small>/ 300</small><i style="--k:0.000"></i></span></td></tr></tbody>
+          </table></div>
+          <p class="adm-vide" hidden data-vide>Aucune boutique ne correspond à ce filtre.</p>
+          <footer class="adm-pied"><span>Une boutique par compte · 48 au total</span><button type="button" class="bouton-outil" data-suite>Voir la suite</button></footer></section>
+        <section class="bloc adm-bloc adm-bloc--anneau"><header class="bloc__tete"><div><h2>Statut des boutiques</h2></div></header><div class="adm-anneau"><svg viewBox="0 0 128 128" role="img" aria-label="Statut des boutiques"><circle r="52" cx="64" cy="64" fill="none" stroke="var(--filet)" stroke-width="14"/><circle r="52" cx="64" cy="64" fill="none" stroke="#5B4BF5" stroke-width="14" stroke-dasharray="277.08 326.73" stroke-dashoffset="0.00" transform="rotate(-90 64 64)" data-info="Configurées : 41 (85 %)"/><circle r="52" cx="64" cy="64" fill="none" stroke="#A9AEC4" stroke-width="14" stroke-dasharray="45.65 326.73" stroke-dashoffset="-279.08" transform="rotate(-90 64 64)" data-info="Sans nom : 7 (15 %)"/></svg><p class="adm-anneau__centre"><b>48</b><span>boutiques</span></p></div>
+  <ul class="adm-legende"><li><i style="background:#5B4BF5"></i><span>Configurées</span><b>41</b><small>85 %</small></li><li><i style="background:#A9AEC4"></i><span>Sans nom</span><b>7</b><small>15 %</small></li></ul></section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

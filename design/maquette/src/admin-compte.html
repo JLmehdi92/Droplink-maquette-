@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fiche de compte · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><a href="admin-comptes.html">Comptes</a><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Fiche de compte</b></p>
+          <h1>Fiche de compte</h1>
+          
+        </div>
+        <a class="bouton-outil" href="admin-comptes.html"><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Revenir à la liste des comptes</a>
+      </div>
+      <p class="adm-encart"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span>L'ouverture de cette fiche a été écrite au journal d'audit, avec votre identité. Le contenu des commandes de ce vendeur n'est accessible depuis nulle part ici.</span></p>
+
+      <article class="adm-fiche" data-fiche="c1" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:91" aria-hidden="true">AN</span>
+          <div><h2>contact@ateliernord.fr</h2><p>Revendeur · inscrit le 14 juin 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>contact@ateliernord.fr</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Atelier Nord</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>186</dd></div><div><dt>Colis</dt><dd>152</dd></div><div><dt>Médias</dt><dd>744</dd></div><div><dt>Stockage</dt><dd>1,2 Go</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>152 sur 300</b></p><i style="--k:0.507"></i></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>41 sur 300</b></p><i style="--k:0.136"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>186</b><span>commandes créées</span></li><li><b>428</b><span>modifications de commande</span></li><li><b>744</b><span>médias ajoutés</span></li><li><b>97</b><span>validations de client</span></li><li><b>7</b><span>refus de client</span></li><li><b>58</b><span>commandes archivées</span></li><li><b>2</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c1">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c1">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c2" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:41" aria-hidden="true">ML</span>
+          <div><h2>hello@maisonlou.fr</h2><p>Fournisseur · inscrit le 2 mai 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>hello@maisonlou.fr</dd></div><div><dt>Type</dt><dd>Fournisseur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Maison Lou</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Activé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram, WhatsApp</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>512</dd></div><div><dt>Colis</dt><dd>342</dd></div><div><dt>Médias</dt><dd>2 310</dd></div><div><dt>Stockage</dt><dd>4,5 Go</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond est-depasse"><p><span>Colis pris en charge</span><b>342 sur 300</b></p><i style="--k:1.000"></i><small>Dépassé de 42. Chaque prise en charge nous est facturée par le fournisseur de suivi.</small></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>113 sur 300</b></p><i style="--k:0.375"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>512</b><span>commandes créées</span></li><li><b>1 178</b><span>modifications de commande</span></li><li><b>2 310</b><span>médias ajoutés</span></li><li><b>266</b><span>validations de client</span></li><li><b>20</b><span>refus de client</span></li><li><b>159</b><span>commandes archivées</span></li><li><b>5</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c2">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c2">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c3" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:33" aria-hidden="true">KL</span>
+          <div><h2>kicks.lab@gmail.com</h2><p>Fournisseur · inscrit le 19 mai 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>kicks.lab@gmail.com</dd></div><div><dt>Type</dt><dd>Fournisseur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Kicks Lab</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Activé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram, TikTok</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>388</dd></div><div><dt>Colis</dt><dd>271</dd></div><div><dt>Médias</dt><dd>1 904</dd></div><div><dt>Stockage</dt><dd>3,7 Go</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>271 sur 300</b></p><i style="--k:0.903"></i></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>85 sur 300</b></p><i style="--k:0.285"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>388</b><span>commandes créées</span></li><li><b>892</b><span>modifications de commande</span></li><li><b>1 904</b><span>médias ajoutés</span></li><li><b>202</b><span>validations de client</span></li><li><b>16</b><span>refus de client</span></li><li><b>120</b><span>commandes archivées</span></li><li><b>4</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c3">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c3">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c4" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:305" aria-hidden="true">LB</span>
+          <div><h2>contact@lesboxesdesam.fr</h2><p>Fournisseur · inscrit le 1 juin 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>contact@lesboxesdesam.fr</dd></div><div><dt>Type</dt><dd>Fournisseur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Les Boxes de Sam</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>TikTok</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>297</dd></div><div><dt>Colis</dt><dd>240</dd></div><div><dt>Médias</dt><dd>1 288</dd></div><div><dt>Stockage</dt><dd>2,4 Go</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>240 sur 300</b></p><i style="--k:0.800"></i></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>65 sur 300</b></p><i style="--k:0.218"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>297</b><span>commandes créées</span></li><li><b>683</b><span>modifications de commande</span></li><li><b>1 288</b><span>médias ajoutés</span></li><li><b>154</b><span>validations de client</span></li><li><b>12</b><span>refus de client</span></li><li><b>92</b><span>commandes archivées</span></li><li><b>3</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c4">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c4">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c5" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:171" aria-hidden="true">DP</span>
+          <div><h2>drip.paris@gmail.com</h2><p>Fournisseur · inscrit le 22 juin 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>drip.paris@gmail.com</dd></div><div><dt>Type</dt><dd>Fournisseur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Drip Paris</dd></div><div><dt>Langue</dt><dd>Anglais</dd></div><div><dt>Filigrane</dt><dd>Activé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram, Site web</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>205</dd></div><div><dt>Colis</dt><dd>166</dd></div><div><dt>Médias</dt><dd>1 015</dd></div><div><dt>Stockage</dt><dd>1,9 Go</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>166 sur 300</b></p><i style="--k:0.553"></i></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>45 sur 300</b></p><i style="--k:0.150"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>205</b><span>commandes créées</span></li><li><b>471</b><span>modifications de commande</span></li><li><b>1 015</b><span>médias ajoutés</span></li><li><b>107</b><span>validations de client</span></li><li><b>8</b><span>refus de client</span></li><li><b>64</b><span>commandes archivées</span></li><li><b>2</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c5">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c5">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c6" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:337" aria-hidden="true">ND</span>
+          <div><h2>nora.drops@outlook.fr</h2><p>Revendeur · inscrit le 3 juil. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>nora.drops@outlook.fr</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Nora Drops</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>143</dd></div><div><dt>Colis</dt><dd>118</dd></div><div><dt>Médias</dt><dd>602</dd></div><div><dt>Stockage</dt><dd>1,1 Go</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>118 sur 300</b></p><i style="--k:0.393"></i></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>31 sur 300</b></p><i style="--k:0.105"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>143</b><span>commandes créées</span></li><li><b>329</b><span>modifications de commande</span></li><li><b>602</b><span>médias ajoutés</span></li><li><b>74</b><span>validations de client</span></li><li><b>6</b><span>refus de client</span></li><li><b>44</b><span>commandes archivées</span></li><li><b>1</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c6">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c6">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c7" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:130" aria-hidden="true">BS</span>
+          <div><h2>bijoux.selene@gmail.com</h2><p>Revendeur · inscrit le 28 juil. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>bijoux.selene@gmail.com</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Bijoux Séléné</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Activé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram, Site web</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>96</dd></div><div><dt>Colis</dt><dd>74</dd></div><div><dt>Médias</dt><dd>410</dd></div><div><dt>Stockage</dt><dd>640 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>74 sur 300</b></p><i style="--k:0.247"></i></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>21 sur 300</b></p><i style="--k:0.070"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>96</b><span>commandes créées</span></li><li><b>221</b><span>modifications de commande</span></li><li><b>410</b><span>médias ajoutés</span></li><li><b>50</b><span>validations de client</span></li><li><b>4</b><span>refus de client</span></li><li><b>30</b><span>commandes archivées</span></li><li><b>1</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c7">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c7">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c8" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:5" aria-hidden="true">SH</span>
+          <div><h2>sneakhouse.lyon@gmail.com</h2><p>Fournisseur · inscrit le 4 août 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="suspended"><i></i>Suspendu</span><span class="adm-plan" data-plan="pro"><svg class="ic" aria-hidden="true"><use href="#i-crown"/></svg>Pro</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>sneakhouse.lyon@gmail.com</dd></div><div><dt>Type</dt><dd>Fournisseur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Sneak House Lyon</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>61</dd></div><div><dt>Colis</dt><dd>55</dd></div><div><dt>Médias</dt><dd>288</dd></div><div><dt>Stockage</dt><dd>590 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>55 sur 300</b></p><i style="--k:0.183"></i></div>
+            <div class="adm-plafond"><p><span>Commandes ce mois (Pro)</span><b>13 sur 300</b></p><i style="--k:0.045"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>61</b><span>commandes créées</span></li><li><b>140</b><span>modifications de commande</span></li><li><b>288</b><span>médias ajoutés</span></li><li><b>32</b><span>validations de client</span></li><li><b>2</b><span>refus de client</span></li><li><b>19</b><span>commandes archivées</span></li><li><b>1</b><span>liens révoqués</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Pro</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c8">Repasser en gratuit</button></div></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Réactiver ce compte</h2></div></header><p class="adm-texte">Ses pages redeviendront accessibles sur les mêmes liens que ceux déjà envoyés à ses clients.</p><button type="button" class="bouton-outil" data-dialogue="suspension" data-compte="c8">Réactiver ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c9" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:267" aria-hidden="true">SK</span>
+          <div><h2>studio.kaia@gmail.com</h2><p>Revendeur · inscrit le 21 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>studio.kaia@gmail.com</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Studio Kaia</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>5</dd></div><div><dt>Colis</dt><dd>5</dd></div><div><dt>Médias</dt><dd>31</dd></div><div><dt>Stockage</dt><dd>54 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>5 sur 300</b></p><i style="--k:0.017"></i></div>
+            <div class="adm-plafond est-plein"><p><span>Commandes à vie</span><b>5 sur 5</b></p><i style="--k:1.000"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>5</b><span>commandes créées</span></li><li><b>12</b><span>modifications de commande</span></li><li><b>31</b><span>médias ajoutés</span></li><li><b>3</b><span>validations de client</span></li><li><b>2</b><span>commandes archivées</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c9">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c9">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c10" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:303" aria-hidden="true">IS</span>
+          <div><h2>ines.store@icloud.com</h2><p>Revendeur · inscrit le 12 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>ines.store@icloud.com</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Inès Store</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>WhatsApp</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>5</dd></div><div><dt>Colis</dt><dd>5</dd></div><div><dt>Médias</dt><dd>27</dd></div><div><dt>Stockage</dt><dd>41 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>5 sur 300</b></p><i style="--k:0.017"></i></div>
+            <div class="adm-plafond est-plein"><p><span>Commandes à vie</span><b>5 sur 5</b></p><i style="--k:1.000"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>5</b><span>commandes créées</span></li><li><b>12</b><span>modifications de commande</span></li><li><b>27</b><span>médias ajoutés</span></li><li><b>3</b><span>validations de client</span></li><li><b>2</b><span>commandes archivées</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c10">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c10">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c11" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:233" aria-hidden="true">LP</span>
+          <div><h2>la.petite.friperie@gmail.com</h2><p>Revendeur · inscrit le 2 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>la.petite.friperie@gmail.com</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>La Petite Friperie</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd><span class="adm-sourdine">Aucun</span></dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>5</dd></div><div><dt>Colis</dt><dd>5</dd></div><div><dt>Médias</dt><dd>22</dd></div><div><dt>Stockage</dt><dd>36 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>5 sur 300</b></p><i style="--k:0.017"></i></div>
+            <div class="adm-plafond est-plein"><p><span>Commandes à vie</span><b>5 sur 5</b></p><i style="--k:1.000"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>5</b><span>commandes créées</span></li><li><b>12</b><span>modifications de commande</span></li><li><b>22</b><span>médias ajoutés</span></li><li><b>3</b><span>validations de client</span></li><li><b>2</b><span>commandes archivées</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c11">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c11">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c12" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:3" aria-hidden="true">BC</span>
+          <div><h2>b.collection@gmail.com</h2><p>Revendeur · inscrit le 15 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="suspended"><i></i>Suspendu</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>b.collection@gmail.com</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>B Collection</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>WhatsApp</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>5</dd></div><div><dt>Colis</dt><dd>4</dd></div><div><dt>Médias</dt><dd>19</dd></div><div><dt>Stockage</dt><dd>33 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>4 sur 300</b></p><i style="--k:0.013"></i></div>
+            <div class="adm-plafond est-plein"><p><span>Commandes à vie</span><b>5 sur 5</b></p><i style="--k:1.000"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>5</b><span>commandes créées</span></li><li><b>12</b><span>modifications de commande</span></li><li><b>19</b><span>médias ajoutés</span></li><li><b>3</b><span>validations de client</span></li><li><b>2</b><span>commandes archivées</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c12">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Réactiver ce compte</h2></div></header><p class="adm-texte">Ses pages redeviendront accessibles sur les mêmes liens que ceux déjà envoyés à ses clients.</p><button type="button" class="bouton-outil" data-dialogue="suspension" data-compte="c12">Réactiver ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c13" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:279" aria-hidden="true">VR</span>
+          <div><h2>vintage.rue@gmail.com</h2><p>Revendeur · inscrit le 26 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>vintage.rue@gmail.com</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Vintage Rue</dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd>Instagram</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>4</dd></div><div><dt>Colis</dt><dd>3</dd></div><div><dt>Médias</dt><dd>16</dd></div><div><dt>Stockage</dt><dd>24 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>3 sur 300</b></p><i style="--k:0.010"></i></div>
+            <div class="adm-plafond"><p><span>Commandes à vie</span><b>4 sur 5</b></p><i style="--k:0.800"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>4</b><span>commandes créées</span></li><li><b>9</b><span>modifications de commande</span></li><li><b>16</b><span>médias ajoutés</span></li><li><b>2</b><span>validations de client</span></li><li><b>1</b><span>commandes archivées</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c13">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c13">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c14" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:187" aria-hidden="true">YS</span>
+          <div><h2>yanis.shop@gmail.com</h2><p>Revendeur · inscrit le 28 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>yanis.shop@gmail.com</dd></div><div><dt>Type</dt><dd>Revendeur</dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd>Yanis Shop</dd></div><div><dt>Langue</dt><dd>Chinois simplifié</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd><span class="adm-sourdine">Aucun</span></dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>3</dd></div><div><dt>Colis</dt><dd>2</dd></div><div><dt>Médias</dt><dd>9</dd></div><div><dt>Stockage</dt><dd>14 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>2 sur 300</b></p><i style="--k:0.007"></i></div>
+            <div class="adm-plafond"><p><span>Commandes à vie</span><b>3 sur 5</b></p><i style="--k:0.600"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>3</b><span>commandes créées</span></li><li><b>7</b><span>modifications de commande</span></li><li><b>9</b><span>médias ajoutés</span></li><li><b>2</b><span>validations de client</span></li><li><b>1</b><span>commandes archivées</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c14">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c14">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c15" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:57" aria-hidden="true">M</span>
+          <div><h2>mode.atelier9@gmail.com</h2><p>Non déclaré · inscrit le 29 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>mode.atelier9@gmail.com</dd></div><div><dt>Type</dt><dd><span class="adm-sourdine">Non déclaré</span></dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd><span class="adm-sourdine">Non configurée</span></dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd><span class="adm-sourdine">Aucun</span></dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>1</dd></div><div><dt>Colis</dt><dd>0</dd></div><div><dt>Médias</dt><dd>0</dd></div><div><dt>Stockage</dt><dd>0 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>0 sur 300</b></p><i style="--k:0.000"></i></div>
+            <div class="adm-plafond"><p><span>Commandes à vie</span><b>1 sur 5</b></p><i style="--k:0.200"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><ul class="adm-activite"><li><b>1</b><span>commandes créées</span></li><li><b>2</b><span>modifications de commande</span></li><li><b>1</b><span>validations de client</span></li></ul></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c15">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c15">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+<article class="adm-fiche" data-fiche="c16" hidden>
+        <header class="adm-fiche__tete">
+          <span class="adm-av" style="--h:2" aria-hidden="true">N</span>
+          <div><h2>nouveau.compte82@gmail.com</h2><p>Non déclaré · inscrit le 30 sept. 2026</p></div>
+          <div class="adm-fiche__etats"><span class="adm-badge" data-statut="active"><i></i>Actif</span><span class="adm-plan" data-plan="gratuit">Gratuit</span></div>
+        </header>
+        <div class="adm-rangee adm-rangee--3">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Identité</h2></div></header><dl class="adm-dl"><div><dt>Email</dt><dd>nouveau.compte82@gmail.com</dd></div><div><dt>Type</dt><dd><span class="adm-sourdine">Non déclaré</span></dd></div><div><dt>Rôle</dt><dd>Vendeur</dd></div><div><dt>Boutique</dt><dd><span class="adm-sourdine">Non configurée</span></dd></div><div><dt>Langue</dt><dd>Français</dd></div><div><dt>Filigrane</dt><dd>Désactivé</dd></div><div><dt>Réseaux configurés</dt><dd><span class="adm-sourdine">Aucun</span></dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Volumes</h2></div></header><dl class="adm-dl"><div><dt>Commandes</dt><dd>0</dd></div><div><dt>Colis</dt><dd>0</dd></div><div><dt>Médias</dt><dd>0</dd></div><div><dt>Stockage</dt><dd>0 Mo</dd></div></dl></section>
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds</h2></div></header><div class="adm-plafonds">
+            <div class="adm-plafond"><p><span>Colis pris en charge</span><b>0 sur 300</b></p><i style="--k:0.000"></i></div>
+            <div class="adm-plafond"><p><span>Commandes à vie</span><b>0 sur 5</b></p><i style="--k:0.000"></i></div>
+          </div></section>
+        </div>
+        <div class="adm-rangee adm-rangee--2">
+          <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que ce compte a fait</h2><p class="adm-aide">Les événements du vendeur, pas les vôtres, et seulement leur nombre. Aucun contenu de commande n'apparaît ici.</p></div></header><p class="adm-vide">Ce compte n'a encore rien fait.</p></section>
+          <div class="adm-colonne">
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plan</h2></div></header><p class="adm-texte">Aucun paiement ne passe par DropLink : une fois le paiement reçu, passez le compte en Pro ici. Un vendeur Pro peut retirer la marque DropLink de ses pages client.</p><div class="adm-plan-ligne"><span>Plan actuel</span><b>Gratuit</b><button type="button" class="bouton-outil" data-dialogue="plan" data-compte="c16">Passer en Pro</button></div></section>
+            <section class="bloc adm-bloc adm-bloc--danger"><header class="bloc__tete"><div><h2>Suspendre ce compte</h2></div></header><p class="adm-texte">Ses pages publiques cesseront immédiatement d'être servies. Ses liens ne seront pas détruits : une réactivation les rétablit à l'identique.</p><button type="button" class="adm-danger" data-dialogue="suspension" data-compte="c16">Suspendre ce compte</button></section>
+            <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Ce que cette page ne permet pas</h2></div></header><ul class="adm-interdits"><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Supprimer le compte.</b><span>Suspendre est réversible, supprimer ne l'est pas.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Se connecter à sa place.</b><span>La lecture tracée suffit au diagnostic.</span></p></li><li><svg class="ic" aria-hidden="true"><use href="#i-ban"/></svg><p><b>Ouvrir ses commandes.</b><span>Leur contenu appartient à son client.</span></p></li></ul></section>
+          </div>
+        </div>
+      </article>
+      <script type="application/json" data-comptes>{"c1":{"email":"contact@ateliernord.fr","statut":"active","plan":"pro"},"c2":{"email":"hello@maisonlou.fr","statut":"active","plan":"pro"},"c3":{"email":"kicks.lab@gmail.com","statut":"active","plan":"pro"},"c4":{"email":"contact@lesboxesdesam.fr","statut":"active","plan":"pro"},"c5":{"email":"drip.paris@gmail.com","statut":"active","plan":"pro"},"c6":{"email":"nora.drops@outlook.fr","statut":"active","plan":"pro"},"c7":{"email":"bijoux.selene@gmail.com","statut":"active","plan":"pro"},"c8":{"email":"sneakhouse.lyon@gmail.com","statut":"suspended","plan":"pro"},"c9":{"email":"studio.kaia@gmail.com","statut":"active","plan":"gratuit"},"c10":{"email":"ines.store@icloud.com","statut":"active","plan":"gratuit"},"c11":{"email":"la.petite.friperie@gmail.com","statut":"active","plan":"gratuit"},"c12":{"email":"b.collection@gmail.com","statut":"suspended","plan":"gratuit"},"c13":{"email":"vintage.rue@gmail.com","statut":"active","plan":"gratuit"},"c14":{"email":"yanis.shop@gmail.com","statut":"active","plan":"gratuit"},"c15":{"email":"mode.atelier9@gmail.com","statut":"active","plan":"gratuit"},"c16":{"email":"nouveau.compte82@gmail.com","statut":"active","plan":"gratuit"}}</script>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>

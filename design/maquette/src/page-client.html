@@ -1,0 +1,76 @@
+<div class="pc" data-page-client>
+  <header class="pc__boutique">
+    <img class="pc__logo" src="" alt="" width="44" height="44" hidden data-pc-logo>
+    <small data-t="commandeDe">Une commande de</small>
+    <b data-pc-nom>Atelier Nord</b>
+    <span data-pc-description>Sneakers et streetwear, expédiés avec soin.</span>
+    <ul class="pc__icones" hidden data-pc-icones></ul>
+  </header>
+  <section class="pc__commande">
+    <small><span data-t="titre">Votre commande</span> <em class="pc__pour" data-pc-pour>pour Léa M.</em></small>
+    <b>6A4D21</b>
+    <span data-t="commande.sousTitre">Suivi mis à jour automatiquement.</span>
+    <div class="pc__bandeau pc__prep" data-pc-prep>
+      <svg class="ic"><use href="#i-package"/></svg>
+      <p><strong>Votre commande est en préparation</strong><small>Le vendeur prépare votre commande.</small></p>
+    </div>
+    <div class="pc__suivi" data-pc-suivi>
+      <div class="pc__date">
+        <i class="pc__tuile"><svg class="ic"><use href="#i-calendar-days"/></svg></i>
+        <p><small data-t="commande.dateEstimee">Date estimée de livraison</small><strong data-t="dates">1 au 2 octobre</strong></p>
+      </div>
+      <ol class="pc__frise" data-pc-frise style="--avance:2">
+        <li class="fait"><i><svg class="ic"><use href="#i-check"/></svg></i><b data-t="frise.preparation">Préparation</b><small class="pc__quand">28 sept.</small><small class="pc__pastille" data-t="frise.enCours">En cours</small><small class="pc__attente" data-t="frise.enAttente">En attente</small></li>
+        <li class="fait"><i><svg class="ic"><use href="#i-check"/></svg></i><b data-t="frise.expedie">Expédié</b><small class="pc__quand">29 sept.</small><small class="pc__pastille" data-t="frise.enCours">En cours</small><small class="pc__attente" data-t="frise.enAttente">En attente</small></li>
+        <li class="actuel"><i><svg class="ic"><use href="#i-check"/></svg></i><b data-t="frise.en_transit">En transit</b><small class="pc__quand">30 sept.</small><small class="pc__pastille" data-t="frise.enCours">En cours</small><small class="pc__attente" data-t="frise.enAttente">En attente</small></li>
+        <li><i><svg class="ic"><use href="#i-check"/></svg></i><b data-t="frise.livre">Livré</b><small class="pc__quand">1 oct.</small><small class="pc__pastille" data-t="frise.enCours">En cours</small><small class="pc__attente" data-t="frise.enAttente">En attente</small></li>
+      </ol>
+      <div class="pc__bandeau">
+        <svg class="ic"><use href="#i-truck"/></svg>
+        <p><strong data-pc-bandeau data-t="bandeau.en_transit">Votre colis est en transit</strong><small data-pc-mouvement data-t="suivi.aujourdHui">Mouvement aujourd’hui</small></p>
+      </div>
+    </div>
+  </section>
+  <section class="pc__photos" data-pc-photos>
+    <h4><span data-t="galerie.titre">Photos et vidéos</span> <span data-pc-compte>(4)</span></h4>
+    <div class="pc__vide" data-pc-vide>
+      <svg class="ic"><use href="#i-images"/></svg>
+      <strong>Pas encore de photos</strong>
+      <small>Elles apparaîtront ici dès que le vendeur les aura ajoutées.</small>
+    </div>
+    <div class="pc__grille" data-pc-grille>
+      <figure><img src="assets/img/apercu-sneaker.jpg" alt="" width="90" height="90"></figure>
+      <figure><img src="assets/img/apercu-hoodie.jpg" alt="" width="90" height="90"></figure>
+      <figure><img src="assets/img/apercu-jogger.jpg" alt="" width="90" height="90"></figure>
+      <figure><img src="assets/img/apercu-cap.jpg" alt="" width="90" height="90"></figure>
+    </div>
+  </section>
+  <section class="pc__qc">
+    <h4 data-t="qc.titre">Votre validation</h4>
+    <p data-t="qc.texte">Ces photos correspondent-elles à votre commande ?</p>
+    <div class="pc__qc-actions"><span data-t="qc.refuser">Refuser</span><span class="pc__plein" data-t="qc.approuver">Approuver</span></div>
+    <p class="pc__qc-ok"><i><svg class="ic"><use href="#i-check"/></svg></i>Cette commande est validée.</p>
+  </section>
+  <section class="pc__carte pc__livraison" hidden data-pc-livraison>
+    <h4 data-t="livraison.titre">Informations de livraison</h4>
+    <dl>
+      <div><dt data-t="livraison.transporteur">Transporteur</dt><dd>Colissimo</dd></div>
+      <div><dt data-t="livraison.numero">Numéro de suivi</dt><dd>6A30489215734</dd></div>
+      <div><dt data-t="livraison.dateEstimee">Date estimée</dt><dd data-t="dates">1 au 2 octobre</dd></div>
+    </dl>
+  </section>
+  <section class="pc__carte pc__contact" hidden data-pc-contact>
+    <div class="pc__contact-tete">
+      <i class="pc__tuile pc__tuile--rond"><svg class="ic"><use href="#i-message-circle"/></svg></i>
+      <p><b data-t="contact.titre">Une question ?</b><span data-t="contact.texte">Pour toute question concernant votre commande, contactez directement la boutique.</span></p>
+    </div>
+    <span class="pc__contact-bouton"><span data-t="contact.bouton">Contacter la boutique</span><svg class="ic"><use href="#i-arrow-right"/></svg></span>
+    <ul data-pc-contact-liens></ul>
+  </section>
+  <aside class="pc__propulse" hidden data-pc-propulse>
+    <small data-t="carteDropLink.surtitre">PROPULSÉ PAR DROPLINK</small>
+    <b data-t="carteDropLink.titre">Des liens de suivi simples et puissants.</b>
+    <span data-t="carteDropLink.texte">Créez un lien de suivi par commande, en moins d'une minute.</span>
+    <em data-t="carteDropLink.bouton">Découvrir DropLink</em>
+  </aside>
+</div>

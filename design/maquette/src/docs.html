@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Documentation · DropLink</title>
+<meta name="description" content="Le guide complet de DropLink : créer une commande, ajouter ses photos, coller le numéro de suivi et partager un lien client.">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="l4 publique publique--docs">
+<!--ICONES-->
+<div class="l4-grain" aria-hidden="true"></div>
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<div class="sentinelle" data-sentinelle aria-hidden="true"></div>
+
+<header class="entete" data-entete>
+  <div class="entete__barre">
+    <a class="logo" href="index.html" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html" aria-current="page">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <div class="entete__actions">
+      <a class="lien-discret" href="connexion.html">Se connecter</a>
+      <a class="bouton bouton--plein bouton--petit" href="inscription.html">Créer un compte</a>
+      <button class="bouton-icone menu-bouton" type="button" aria-expanded="false" aria-controls="menu-mobile" aria-label="Ouvrir le menu" data-menu-bouton>
+        <svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <a href="index.html#studio">Comment ça marche</a>
+    <a href="tarifs.html">Tarifs</a>
+    <a href="docs.html" aria-current="page">Documentation</a>
+    <a href="blog.html">Blog</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</header>
+
+<main id="contenu" class="pub">
+
+  <div class="conteneur doc">
+    <aside class="doc-cote">
+      <details class="doc-sommaire" data-sommaire open>
+        <summary><svg class="ic" aria-hidden="true"><use href="#i-list-filter"/></svg><span>Sommaire</span><b data-sommaire-courant>Présentation</b><svg class="ic" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
+        <nav class="doc-nav" aria-label="Documentation" data-sommaire-nav><p class="doc-nav__groupe">Commencer</p><a href="#presentation" data-ancre="presentation">Présentation</a><a href="#demarrer" data-ancre="demarrer">Créer son compte</a><a href="#marque" data-ancre="marque">Configurer sa marque</a><p class="doc-nav__groupe">Utiliser DropLink</p><a href="#commande" data-ancre="commande">Créer une commande</a><a href="#medias" data-ancre="medias">Photos et vidéos</a><a href="#suivi" data-ancre="suivi">Transporteur et suivi</a><a href="#statuts" data-ancre="statuts">Statuts de commande</a><a href="#lien" data-ancre="lien">Le lien client</a><p class="doc-nav__groupe">Piloter</p><a href="#envois" data-ancre="envois">Suivi d'envois</a><a href="#analyses" data-ancre="analyses">Analyses</a><a href="#notifications" data-ancre="notifications">Notifications</a><p class="doc-nav__groupe">Compte</p><a href="#parametres" data-ancre="parametres">Paramètres</a><a href="#plans" data-ancre="plans">Gratuit et Pro</a><p class="doc-nav__groupe">Aide</p><a href="#faq" data-ancre="faq">Questions fréquentes</a><a href="#support" data-ancre="support">Contacter le support</a></nav>
+      </details>
+    </aside>
+    <article class="doc-article">
+      <p class="l4-etiquette"><span><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg></span>Documentation</p>
+      <h1 class="pub-titre doc-titre">Comment fonctionne DropLink</h1>
+      <p class="doc-auteur"><span class="doc-auteur__avatar"><img src="assets/img/symbole-84.png" alt="" width="14" height="20"></span><span><b>Équipe produit DropLink</b><small>Rédigé à partir de l'application en production</small></span><span class="doc-auteur__meta"><svg class="ic" aria-hidden="true"><use href="#i-calendar-days"/></svg>Mis à jour le 14 septembre 2026<span aria-hidden="true">·</span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>7 min de lecture</span></p>
+      <p class="doc-resume"><b>En résumé :</b> DropLink transforme une commande en un lien de suivi que vous envoyez à votre client. Vous ajoutez vos photos et le numéro de suivi ; DropLink interroge le transporteur et met le statut à jour tout seul. Ce guide couvre chaque écran, de la création du compte à la lecture des <a class="lien-texte" href="#analyses">analyses</a>.</p>
+
+      <section class="doc-section" id="presentation" aria-labelledby="h-presentation"><h2 id="h-presentation">Présentation</h2><p>DropLink répond à un seul problème : les clients qui demandent dix fois où en est leur colis. Le principe tient en une ligne.</p>
+        <div class="doc-flux" aria-label="Le principe"><span class="doc-flux__etape">Client</span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg><span class="doc-flux__etape">Photos / vidéos</span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg><span class="doc-flux__etape">Numéro de suivi</span><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg><span class="doc-flux__etape est-lien">Lien client</span></div>
+        <h3>Ce que DropLink fait</h3><ul class="doc-liste"><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Créer une commande à partir du nom du client, de ses photos et d'un numéro de suivi.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Générer une page de suivi unique, à votre image, que le client consulte sans compte.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Récupérer les informations du transporteur et faire évoluer le statut automatiquement.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Vous donner une vue d'ensemble : envois en cours, colis sans mouvement, liens ouverts.</span></li></ul>
+        <h3>Ce que DropLink ne fait pas</h3><p>DropLink n'est pas une marketplace et ne gère pas votre catalogue. Vous ne trouverez ni produits, ni quantités, ni prix, ni panier, ni chiffre d'affaires : ces données appartiennent à votre boutique, pas à votre suivi.</p></section>
+      <section class="doc-section" id="demarrer" aria-labelledby="h-demarrer"><h2 id="h-demarrer">Créer son compte</h2><ol class="doc-etapes"><li><span>1</span><div><b>Ouvrez un compte</b><p>Par e-mail ou avec Google depuis la <a class="lien-texte" href="inscription.html">page d'inscription</a>. Aucune carte bancaire n'est demandée.</p></div></li><li><span>2</span><div><b>Nommez votre boutique</b><p>Le nom et le logo apparaissent en haut de chaque page client.</p></div></li><li><span>3</span><div><b>Créez votre première commande</b><p>Vous obtenez un lien à partager immédiatement.</p></div></li></ol><aside class="doc-encart" data-ton="info"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><div><b>Combien de temps</b><p>Un compte se crée en moins d'une minute, et le premier lien de suivi part dans la même session. Il n'y a aucune intégration transporteur à configurer au préalable.</p></div></aside></section>
+      <section class="doc-section" id="marque" aria-labelledby="h-marque"><h2 id="h-marque">Configurer sa marque</h2><p>L'écran <b>Ma marque</b> est un éditeur de votre <a class="lien-texte" href="client.html">page client</a>, pas un simple formulaire : chaque modification s'affiche immédiatement dans l'aperçu.</p><div class="doc-tableau"><table><thead><tr><th scope="col">Réglage</th><th scope="col">Effet sur la page client</th></tr></thead><tbody><tr><th scope="row">Logo</th><td>Affiché en en-tête, à côté du nom de la boutique.</td></tr><tr><th scope="row">Nom et description</th><td>Identifient votre boutique auprès du client.</td></tr><tr><th scope="row">Couleur d'accent</th><td>Appliquée aux accents de la page. Valeur par défaut : #5B4BF5. Le contraste est ajusté automatiquement pour rester lisible.</td></tr><tr><th scope="row">Réseaux sociaux</th><td>Instagram, TikTok, WhatsApp et site web, affichés s'ils sont renseignés.</td></tr><tr><th scope="row">Filigrane</th><td>Appose votre nom sur les photos que vous déposez.</td></tr></tbody></table></div></section>
+      <section class="doc-section" id="commande" aria-labelledby="h-commande"><h2 id="h-commande">Créer une commande</h2><p>Le bouton <b>Créer une commande</b> est disponible depuis la liste des commandes. Le formulaire tient en trois blocs, et l'aperçu de la page client s'affiche en parallèle.</p><ol class="doc-etapes"><li><span>1</span><div><b>Informations du client</b><p>Nom ou pseudo du client, et e-mail facultatif. L'e-mail sert uniquement à envoyer le lien ; il ne crée aucun compte.</p></div></li><li><span>2</span><div><b>Photos et vidéos</b><p>Glissez vos fichiers : commande, préparation, colis fermé.</p></div></li><li><span>3</span><div><b>Suivi et expédition</b><p>Collez le numéro de suivi. DropLink reconnaît le transporteur et commence à l'interroger.</p></div></li></ol><aside class="doc-encart" data-ton="info"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><div><b>Il n'y a pas de bouton « enregistrer »</b><p>La commande s'enregistre toute seule pendant que vous la remplissez. Un numéro de suivi ajouté plus tard suffit à lancer le suivi.</p></div></aside></section>
+      <section class="doc-section" id="medias" aria-labelledby="h-medias"><h2 id="h-medias">Photos et vidéos</h2><p>Les médias sont le cœur de DropLink : ce sont eux qui remplacent les échanges de messages. Ils s'ajoutent par glisser-déposer ou par la sélection de fichiers, et se réordonnent à la souris comme au clavier.</p><ul class="doc-liste"><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Photos et vidéos acceptées. La première image sert de couverture.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Vingt médias par commande, dont trois vidéos.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Le client ouvre chaque photo en plein écran, et lit les vidéos sans quitter la page.</span></li></ul></section>
+      <section class="doc-section" id="suivi" aria-labelledby="h-suivi"><h2 id="h-suivi">Transporteur et suivi</h2><p>Vous n'avez aucun statut à saisir. Collez le numéro de suivi : DropLink interroge le transporteur et met la page à jour.</p><aside class="doc-encart" data-ton="alerte"><svg class="ic" aria-hidden="true"><use href="#i-circle-alert"/></svg><div><b>Un numéro tout juste collé n'est pas encore scanné</b><p>Ce n'est pas une erreur : le transporteur n'a simplement rien publié. La page le dit ainsi, et jamais « numéro introuvable ».</p></div></aside><h3>Transporteurs</h3><p>Le transporteur est reconnu à partir du numéro de suivi. L'écran <a class="lien-texte" href="#analyses">Analyses</a> indique la répartition de vos envois par transporteur.</p></section>
+      <section class="doc-section" id="statuts" aria-labelledby="h-statuts"><h2 id="h-statuts">Statuts de commande</h2><p>La frise compte quatre étapes, et elle ne recule jamais. La granularité fine vit dans le détail du suivi, pas dans la frise.</p><div class="doc-statuts"><div class="doc-statut"><span class="doc-badge" data-statut="attente"><i></i>Pas encore scanné</span><p>Le numéro est enregistré, le transporteur n'a encore rien publié.</p></div><div class="doc-statut"><span class="doc-badge" data-statut="expedie"><i></i>Expédié</span><p>Le transporteur a pris le colis en charge.</p></div><div class="doc-statut"><span class="doc-badge" data-statut="transit"><i></i>En transit</span><p>Le colis avance, chaque mouvement s'affiche sur la page client.</p></div><div class="doc-statut"><span class="doc-badge" data-statut="livre"><i></i>Livré</span><p>Le transporteur a confirmé la remise du colis.</p></div></div><aside class="doc-encart" data-ton="alerte"><svg class="ic" aria-hidden="true"><use href="#i-circle-alert"/></svg><div><b>Le silence est nommé au-delà de dix jours</b><p>Un colis sans mouvement depuis plus de dix jours est signalé, sur l'écran Envois comme sur la page client. Un silence nommé est une information ; un silence subi se lit comme une panne.</p></div></aside></section>
+      <section class="doc-section" id="lien" aria-labelledby="h-lien"><h2 id="h-lien">Le lien client</h2><p>Chaque commande possède son propre lien. Votre client l'ouvre sans compte, sur mobile comme sur ordinateur, et il y retrouve vos photos, le statut du colis, l'historique des mouvements et vos coordonnées si vous les avez renseignées.</p><ul class="doc-liste"><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Votre logo, le nom de la boutique et vos réseaux sociaux.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>La référence de commande et la date de livraison estimée.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Une frise de suivi : Pas encore scanné, Expédié, En transit, Livré.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Vos photos et vidéos de la commande.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Le transporteur et le numéro de suivi.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>L'historique détaillé des événements de suivi.</span></li></ul><aside class="doc-encart" data-ton="info"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><div><b>Le lien ne change jamais tout seul</b><p>Vous pouvez modifier une commande déjà envoyée : le client voit la mise à jour sur le même lien. Seule l'action « révoquer et régénérer » crée une nouvelle adresse, et elle coupe définitivement l'ancienne.</p></div></aside></section>
+      <section class="doc-section" id="envois" aria-labelledby="h-envois"><h2 id="h-envois">Suivi d'envois</h2><p>L'écran <b>Suivi d'envois</b> regroupe tous vos colis, indépendamment des commandes. C'est la vue à ouvrir quand vous cherchez ce qui ne bouge plus : le tri par défaut remonte les colis immobiles.</p></section>
+      <section class="doc-section" id="analyses" aria-labelledby="h-analyses"><h2 id="h-analyses">Analyses</h2><p>Les analyses mesurent l'usage de DropLink et l'efficacité de votre suivi. Aucune donnée de chiffre d'affaires n'y figure : DropLink ne connaît pas vos prix.</p><div class="doc-tableau"><table><thead><tr><th scope="col">Indicateur</th><th scope="col">Ce qu'il mesure</th></tr></thead><tbody><tr><th scope="row">Commandes créées</th><td>Nombre de commandes créées sur la période.</td></tr><tr><th scope="row">Commandes livrées</th><td>Commandes dont le transporteur a confirmé la livraison.</td></tr><tr><th scope="row">Liens clients ouverts</th><td>Nombre d'ouvertures de vos pages de suivi.</td></tr><tr><th scope="row">Temps moyen de livraison</th><td>Délai moyen entre la prise en charge du colis et sa livraison.</td></tr></tbody></table></div><p>S'y ajoutent l'évolution des commandes sur 7, 30 ou 90 jours, la répartition des statuts, l'usage des transporteurs et l'activité récente.</p></section>
+      <section class="doc-section" id="notifications" aria-labelledby="h-notifications"><h2 id="h-notifications">Notifications</h2><p>Quand vous renseignez l'e-mail de votre client, il reçoit un message à la livraison du colis. Vous gardez la main : l'e-mail reste facultatif, et il ne crée jamais de compte.</p></section>
+      <section class="doc-section" id="parametres" aria-labelledby="h-parametres"><h2 id="h-parametres">Paramètres</h2><ul class="doc-liste"><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Compte : nom, e-mail et mot de passe, l'e-mail et le mot de passe ne changent qu'avec votre mot de passe actuel.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Préférences : langue de l'interface. La langue des pages client se règle dans Ma marque.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Sécurité : authentification à deux facteurs, sessions actives, suppression du compte.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Données : export de vos données, suppression complète, chaque action destructive demande une confirmation.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Abonnement : plan en cours. Pendant la phase de validation, DropLink est gratuit.</span></li><li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Support : centre d'aide.</span></li></ul></section>
+      <section class="doc-section" id="plans" aria-labelledby="h-plans"><h2 id="h-plans">Gratuit et Pro</h2><p>DropLink a un plan gratuit et un plan Pro. Le gratuit permet de créer 5 commandes au total, c’est un quota à vie, il ne se recharge pas chaque mois. Le Pro le porte à 300 commandes par mois et retire la mention DropLink de la page que voit votre client.</p><div class="doc-tableau"><table><thead><tr><th scope="col"></th><th scope="col">Gratuit</th><th scope="col">Pro, 20 €/mois</th></tr></thead><tbody><tr><th scope="row">Commandes</th><td>5 au total</td><td>300 par mois</td></tr><tr><th scope="row">Page client</th><td>Avec la mention DropLink</td><td>Sans la mention DropLink</td></tr></tbody></table></div></section>
+      <section class="doc-section" id="faq" aria-labelledby="h-faq"><h2 id="h-faq">Questions fréquentes</h2><div class="doc-faq"><details class="doc-q" name="doc-faq"><summary>Mon client doit-il créer un compte ?<svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Non. Il ouvre le lien et voit sa commande immédiatement, sans inscription ni application à installer.</p></details><details class="doc-q" name="doc-faq"><summary>Dois-je mettre le statut à jour moi-même ?<svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Non. Le numéro de suivi suffit : DropLink interroge le transporteur et fait évoluer le statut tout seul.</p></details><details class="doc-q" name="doc-faq"><summary>Puis-je créer une commande sans numéro de suivi ?<svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Oui. Créez-la, partagez le lien, et ajoutez le numéro dès que le colis est expédié : le client verra la mise à jour sur le même lien.</p></details><details class="doc-q" name="doc-faq"><summary>Est-ce que DropLink vend mes produits ?<svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Non. DropLink ne gère ni catalogue, ni paiement, ni prix : uniquement le suivi et la communication client.</p></details><details class="doc-q" name="doc-faq"><summary>Combien de temps mon lien reste-t-il actif ?<svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Aussi longtemps que vous le souhaitez. Un lien ne s'éteint pas tout seul : seule l'action « révoquer et régénérer » le remplace.</p></details><details class="doc-q" name="doc-faq"><summary>Que voit mon client si j'ai révoqué le lien ?<svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Une page DropLink lui expliquant que le lien n'est plus valable et l'invitant à vous contacter. Elle ne divulgue rien de votre boutique.</p></details></div></section>
+      <section class="doc-section" id="support" aria-labelledby="h-support"><h2 id="h-support">Contacter le support</h2><p>Une question qui n'a pas sa réponse ici ? Écrivez-nous depuis la page de signalement : chaque message arrive à l'équipe produit.</p><p><a class="lien-texte" href="signalement.html">Signaler un contenu<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></p></section>
+
+      <aside class="pub-cta v4-carte" data-anime>
+        <h2>Prêt à créer votre premier lien ?</h2>
+        <p>Compte gratuit, sans carte bancaire, prêt en moins d'une minute.</p>
+        <a class="bouton bouton--marque bouton--large" href="inscription.html">Créer mon compte<svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+      </aside>
+    </article>
+  </div>
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied__grille">
+    <div>
+      <a class="logo" href="index.html" aria-label="DropLink, accueil">
+        <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+        <span>DropLink</span>
+      </a>
+      <p class="pied__devise">Un seul lien de suivi pour toute la commande.</p>
+    </div>
+    <nav aria-label="Produit">
+      <h3>Produit</h3>
+      <a href="index.html#studio">Comment ça marche</a>
+      <a href="tarifs.html">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <nav aria-label="Pages légales">
+      <h3>Légal</h3>
+      <a href="conditions.html">Conditions</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="signalement.html">Signaler un contenu</a>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© 2026 DropLink. Tous droits réservés. · <a class="l4-comparer" href="plan.html">Toutes les pages</a></p>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-choix="light" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg><span class="sr">Clair</span></button>
+      <button type="button" data-theme-choix="dark" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span class="sr">Sombre</span></button>
+    </div>
+  </div>
+</footer>
+
+<script src="public.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DropLink · Un seul lien pour toute la commande</title>
+<meta name="description" content="Photos, numéro de suivi et date de livraison sur une page à vos couleurs. Votre client suit sa commande tout seul, sans compte.">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="l4">
+<!--ICONES-->
+<div class="l4-grain" aria-hidden="true"></div>
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<div class="sentinelle" data-sentinelle aria-hidden="true"></div>
+
+<header class="entete" data-entete>
+  <div class="entete__barre">
+    <a class="logo" href="#" aria-label="DropLink, accueil">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#studio">Comment ça marche</a>
+      <a href="#client">La page client</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="#questions">Questions</a>
+    </nav>
+    <div class="entete__actions">
+      <a class="lien-discret" href="connexion.html">Se connecter</a>
+      <a class="bouton bouton--plein bouton--petit" href="inscription.html">Créer un compte</a>
+      <button class="bouton-icone menu-bouton" type="button" aria-expanded="false" aria-controls="menu-mobile" aria-label="Ouvrir le menu" data-menu-bouton>
+        <svg class="ic"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <a href="#studio">Comment ça marche</a>
+    <a href="#client">La page client</a>
+    <a href="#tarifs">Tarifs</a>
+    <a href="#questions">Questions</a>
+    <a href="connexion.html">Se connecter</a>
+  </div>
+</header>
+
+<main id="contenu">
+
+<!-- HÉROS -->
+<section class="heros">
+  <div class="conteneur heros__grille">
+    <div class="heros__texte">
+      <a class="l4-pastille" href="#tarifs" data-entree><span>Pro</span><i class="l4-pastille__texte">Le lien à votre nom<em>, droplink.fr/votre-boutique</em></i><svg class="ic"><use href="#i-arrow-right"/></svg></a>
+      <h1 class="heros__titre l4-titre"><span class="l4-ligne" style="--l:0">Un seul lien.</span><span class="l4-ligne" style="--l:1"><span>Toute la commande.</span></span></h1>
+      <p class="heros__chapo" data-entree>Photos, numéro de suivi et date de livraison sur une page à vos couleurs. Votre client suit tout seul, sans compte et sans vous écrire.</p>
+      <div class="heros__actions" data-entree>
+        <a class="bouton bouton--marque" href="inscription.html">Commencer gratuitement<svg class="ic"><use href="#i-arrow-right"/></svg></a>
+        <a class="bouton bouton--second" href="#client">Voir une page client</a>
+      </div>
+      <ul class="l4-garanties" data-entree>
+        <li><svg class="ic"><use href="#i-check"/></svg>5 commandes offertes</li>
+        <li><svg class="ic"><use href="#i-check"/></svg>Sans carte bancaire</li>
+        <li><svg class="ic"><use href="#i-check"/></svg>Aucun compte pour votre client</li>
+      </ul>
+    </div>
+
+    <div class="heros__scene hx" data-hx role="img" aria-label="Un lien envoyé dans une conversation se déplie en page client : la commande 6A4D21 d’Atelier Nord, son suivi en transit avec une livraison estimée du 1 au 2 octobre, et quatre photos approuvées par Léa M.">
+      <div class="hx__scene" aria-hidden="true">
+        <svg class="hx__fils" data-hx-fils></svg>
+
+        <article class="hx__carte hx__carte--suivi pc" data-hx-carte style="--p:1.5">
+          <header class="hx__boutique"><i class="hx__monogramme">AN</i><p><b>Atelier Nord</b><small>Une commande pour Léa M.</small></p><p class="hx__ref"><small>Commande</small><b>6A4D21</b></p></header>
+          <div class="hx__ligne">
+            <div class="pc__date">
+              <i class="pc__tuile"><svg class="ic"><use href="#i-calendar-days"/></svg></i>
+              <p><small>Date estimée de livraison</small><strong>1 au 2 octobre</strong></p>
+            </div>
+            <em class="hx__direct" data-hx-direct><i></i>Mis à jour automatiquement</em>
+          </div>
+          <ol class="pc__frise" data-hx-frise style="--avance:1">
+            <li class="fait"><i><svg class="ic"><use href="#i-check"/></svg></i><b>Préparation</b><small class="pc__quand">28 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+            <li class="actuel"><i><svg class="ic"><use href="#i-check"/></svg></i><b>Expédié</b><small class="pc__quand">29 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+            <li class=""><i><svg class="ic"><use href="#i-check"/></svg></i><b>En transit</b><small class="pc__quand">30 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+            <li class=""><i><svg class="ic"><use href="#i-check"/></svg></i><b>Livré</b><small class="pc__quand">1 oct.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+          </ol>
+          <div class="pc__bandeau">
+            <svg class="ic"><use href="#i-truck"/></svg>
+            <p><strong data-hx-bandeau>Votre colis a été expédié</strong><small data-hx-mouvement>Colissimo · Mouvement hier</small></p>
+          </div>
+        </article>
+
+        <article class="hx__carte hx__carte--photos pc" data-hx-carte style="--p:1">
+          <p class="hx__titre"><span>Photos<span class="hx__long"> et vidéos</span></span><em class="hx__compte">4</em></p>
+          <div class="pc__grille">
+            <figure data-hx-photo><img src="assets/img/apercu-sneaker.jpg" alt="" width="90" height="90"></figure>
+            <figure data-hx-photo><img src="assets/img/apercu-hoodie.jpg" alt="" width="90" height="90"></figure>
+            <figure data-hx-photo><img src="assets/img/apercu-jogger.jpg" alt="" width="90" height="90"></figure>
+            <figure data-hx-photo><img src="assets/img/apercu-cap.jpg" alt="" width="90" height="90"></figure>
+          </div>
+          <p class="hx__tampon" data-hx-tampon><svg class="ic"><use href="#i-circle-check"/></svg><span>Approuvées <span>par Léa M.</span></span></p>
+        </article>
+
+        <div class="message hx__message" data-hx-message style="--p:.6">
+          <div class="message__entete">
+            <span class="avatar">AN</span>
+            <span><strong>Atelier Nord</strong><small>à Léa M.</small></span>
+          </div>
+          <p class="message__bulle">Ta commande est prête, tout est sur ce lien :</p>
+          <div class="apercu-lien" data-hx-lien>
+            <img src="assets/img/apercu-sneaker.jpg" alt="" width="44" height="44">
+            <div>
+              <strong>Commande 6A4D21</strong>
+              <span>droplink.fr/p/k7Qm2xR9vLpA</span>
+            </div>
+          </div>
+          <p class="message__statut"><svg class="ic"><use href="#i-check"/></svg>Vu</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHIFFRES : ceux du produit, rien d'autre -->
+<section class="l4-chiffres" aria-label="DropLink en chiffres">
+  <div class="conteneur l4-chiffres__grille">
+    <p><b class="l4-compteur" data-compteur="20">20</b><span>photos ou vidéos par commande</span></p>
+    <p><b class="l4-compteur" data-compteur="4">4</b><span>étapes de suivi, datées</span></p>
+    <p><b class="l4-compteur" data-compteur="3">3</b><span>langues pour la page client</span></p>
+    <p><b class="l4-compteur" data-compteur="0">0</b><span>compte à créer pour votre client</span></p>
+  </div>
+</section>
+
+<!-- LE PROBLÈME -->
+<section class="probleme" aria-labelledby="probleme-titre">
+  <div class="conteneur conteneur--etroit">
+    <h2 id="probleme-titre" class="titre-section l4-mots" data-mots>Dix messages par commande.<br>Toujours les mêmes.</h2>
+  </div>
+  <div class="defileur" aria-hidden="true">
+    <div class="defileur__piste" data-defileur>
+      <span class="question">Il est où mon colis ?</span>
+      <span class="question">Tu peux me renvoyer les photos ?</span>
+      <span class="question">C'est quoi le numéro de suivi ?</span>
+      <span class="question">Ça arrive quand ?</span>
+      <span class="question">T'as bien envoyé ?</span>
+      <span class="question">Il a bougé depuis hier ?</span>
+      <span class="question">Je peux voir la taille sur la photo ?</span>
+      <span class="question">C'est quel transporteur ?</span>
+    </div>
+  </div>
+  <div class="conteneur conteneur--etroit">
+    <p class="probleme__reponse">Avec DropLink, la réponse est déjà dans le lien. <span>Vous l'envoyez une fois, il se met à jour tout seul.</span></p>
+  </div>
+</section>
+
+<!-- STUDIO : l'éditeur et la page client, côte à côte -->
+<section class="studio" id="studio" aria-labelledby="studio-titre">
+  <div class="conteneur">
+    <div class="entete-section">
+      <p class="l4-etiquette"><span>01</span>Comment ça marche</p>
+      <h2 id="studio-titre" class="titre-section">Vous remplissez.<br>Votre client voit.</h2>
+      <p class="chapo">Une commande prête à partager en quatre gestes. Chaque modification arrive sur la page client, et le lien ne change jamais.</p>
+    </div>
+
+    <div class="studio__onglets" role="tablist" aria-label="Les quatre gestes" data-onglets>
+      <button role="tab" type="button" aria-selected="true" aria-controls="studio-plan" id="onglet-0" data-onglet="0"><span>01</span><b class="l4-geste">Le client<small>Un nom ou un pseudo suffit. Pas d'adresse à saisir, pas de compte à lui créer.</small></b><i class="studio__jauge"></i></button>
+      <button role="tab" type="button" aria-selected="false" aria-controls="studio-plan" id="onglet-1" data-onglet="1" tabindex="-1"><span>02</span><b class="l4-geste">Les photos<small>Glissez vos photos et vidéos, jusqu'à 20 par commande. La première sert de couverture.</small></b><i class="studio__jauge"></i></button>
+      <button role="tab" type="button" aria-selected="false" aria-controls="studio-plan" id="onglet-2" data-onglet="2" tabindex="-1"><span>03</span><b class="l4-geste">Le suivi<small>Collez le numéro : le transporteur est reconnu et les étapes se mettent à jour seules.</small></b><i class="studio__jauge"></i></button>
+      <button role="tab" type="button" aria-selected="false" aria-controls="studio-plan" id="onglet-3" data-onglet="3" tabindex="-1"><span>04</span><b class="l4-geste">Le lien<small>Un clic sur Partager et le lien est copié. Il ne change plus, même quand vous modifiez la commande.</small></b><i class="studio__jauge"></i></button>
+    </div>
+
+    <div class="studio__plan" id="studio-plan" role="tabpanel" aria-labelledby="onglet-0" data-studio data-etape="0">
+      <p class="studio__legende" aria-live="polite" data-legende>Un nom ou un pseudo suffit. Pas d'adresse à saisir, pas de compte à lui créer.</p>
+
+      <div class="studio__scene">
+        <div class="editeur" aria-hidden="true">
+          <div class="editeur__tete">
+            <div>
+              <small>Commandes</small>
+              <b>#6A4D21</b>
+            </div>
+            <div class="editeur__actions">
+              <span class="editeur__enregistre"><svg class="ic"><use href="#i-check"/></svg>Enregistré</span>
+              <span class="editeur__partager" data-partager>
+                <span class="editeur__partager-a"><svg class="ic"><use href="#i-share-2"/></svg>Partager</span>
+                <span class="editeur__partager-b"><svg class="ic"><use href="#i-check"/></svg>Lien copié</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="editeur__carte">
+            <b class="editeur__titre">La commande</b>
+            <div class="editeur__grille">
+              <div class="champ" data-champ="client">
+                <small>Nom ou pseudo du client</small>
+                <span class="champ__boite"><span class="champ__valeur" data-saisie="Léa M."></span><i class="champ__curseur"></i><span class="champ__vide">Ex : Léa M.</span></span>
+                <em>Texte libre. Votre client n'a pas de compte.</em>
+              </div>
+              <div class="champ">
+                <small>Référence produit</small>
+                <span class="champ__boite"><span class="champ__valeur">Sneakers T39, sweat, jogging et casquette</span></span>
+              </div>
+              <div class="champ" data-champ="suivi">
+                <small>Numéro de suivi</small>
+                <span class="champ__boite"><span class="champ__valeur" data-saisie="6A30489215734"></span><i class="champ__curseur"></i><span class="champ__vide">Collez le numéro</span></span>
+              </div>
+              <div class="champ" data-champ="transporteur">
+                <small>Transporteur</small>
+                <span class="champ__boite champ__boite--liste">
+                  <span class="transporteur" data-transporteur>
+                    <span class="transporteur__a">Détection automatique</span>
+                    <span class="transporteur__b"><svg class="ic"><use href="#i-circle-check"/></svg>Colissimo</span>
+                  </span>
+                  <svg class="ic"><use href="#i-chevron-down"/></svg>
+                </span>
+              </div>
+            </div>
+
+            <div class="depot" data-depot>
+              <div class="depot__tete"><b>Photos et vidéos</b><small data-compte-medias>0 sur 20</small></div>
+              <div class="depot__grille">
+                <figure class="depot__media"><img src="assets/img/apercu-sneaker.jpg" alt="" width="90" height="90"><span>Couverture</span></figure>
+                <figure class="depot__media"><img src="assets/img/apercu-hoodie.jpg" alt="" width="90" height="90"></figure>
+                <figure class="depot__media"><img src="assets/img/apercu-jogger.jpg" alt="" width="90" height="90"></figure>
+                <figure class="depot__media"><img src="assets/img/apercu-cap.jpg" alt="" width="90" height="90"></figure>
+                <span class="depot__ajouter"><svg class="ic"><use href="#i-upload"/></svg>Ajouter</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lien-partage" data-lien>
+            <svg class="ic"><use href="#i-link"/></svg>
+            <span>droplink.fr/p/k7Qm2xR9vLpA</span>
+            <small>Ce lien ne changera plus.</small>
+          </div>
+        </div>
+
+        <div class="studio__apercu" aria-hidden="true">
+          <div class="telephone telephone--studio">
+            <div class="telephone__ecran">
+              <!--PAGE_CLIENT-->
+            </div>
+          </div>
+          <p class="studio__sync"><i></i>Aperçu de la page client</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CE QUE LE CLIENT OUVRE -->
+<section class="client" id="client" aria-labelledby="client-titre">
+  <div class="conteneur">
+    <div class="entete-section">
+      <p class="l4-etiquette"><span>02</span>La page client</p>
+      <h2 id="client-titre" class="titre-section">Ce que votre client ouvre.</h2>
+      <p class="chapo">Une page par commande, sans application ni compte. Il y trouve tout, vous n'avez plus rien à renvoyer.</p>
+    </div>
+
+    <div class="grille-client">
+      <article class="case case--couleurs">
+        <div class="case__texte">
+          <h3>À vos couleurs, lisible quoi qu'il arrive</h3>
+          <p>Choisissez n'importe quelle teinte. Si elle est trop claire pour du texte, la page l'ajuste toute seule pour rester lisible.</p>
+          <div class="nuancier" role="radiogroup" aria-label="Couleur de la boutique">
+            <button type="button" role="radio" aria-checked="true" data-teinte="#5B4BF5" style="--pastille:#5B4BF5"><span class="sr">Violet</span></button>
+            <button type="button" role="radio" aria-checked="false" data-teinte="#E0533F" style="--pastille:#E0533F"><span class="sr">Corail</span></button>
+            <button type="button" role="radio" aria-checked="false" data-teinte="#0F766E" style="--pastille:#0F766E"><span class="sr">Vert</span></button>
+            <button type="button" role="radio" aria-checked="false" data-teinte="#F5C518" style="--pastille:#F5C518"><span class="sr">Jaune</span></button>
+            <label class="nuancier__libre">
+              <input type="color" value="#5B4BF5" data-couleur-libre aria-label="Choisir votre couleur">
+              <svg class="ic"><use href="#i-palette"/></svg>
+            </label>
+          </div>
+          <p class="nuancier__code" aria-live="polite" data-code-couleur>Couleur choisie <code>#5B4BF5</code></p>
+        </div>
+        <div class="telephone telephone--case" aria-hidden="true">
+          <div class="telephone__ecran" data-teinte-cible>
+            <!--PAGE_CLIENT-->
+          </div>
+        </div>
+      </article>
+
+      <article class="case case--livraison">
+        <div class="case__texte">
+          <h3>Une date, pas un « bientôt »</h3>
+          <p>La fourchette de livraison estimée et les quatre étapes du colis, datées.</p>
+        </div>
+        <div class="mini-suivi" aria-hidden="true">
+          <div class="pc__date">
+            <i class="pc__tuile"><svg class="ic"><use href="#i-calendar-days"/></svg></i>
+            <p><small>Date estimée de livraison</small><strong>1 au 2 octobre</strong></p>
+          </div>
+          <ol class="pc__frise" data-frise-demo style="--avance:2">
+        <li class="fait"><i><svg class="ic"><use href="#i-check"/></svg></i><b>Préparation</b><small class="pc__quand">28 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+        <li class="fait"><i><svg class="ic"><use href="#i-check"/></svg></i><b>Expédié</b><small class="pc__quand">29 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+        <li class="actuel"><i><svg class="ic"><use href="#i-check"/></svg></i><b>En transit</b><small class="pc__quand">30 sept.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+        <li><i><svg class="ic"><use href="#i-check"/></svg></i><b>Livré</b><small class="pc__quand">1 oct.</small><small class="pc__pastille">En cours</small><small class="pc__attente">En attente</small></li>
+          </ol>
+        </div>
+      </article>
+
+      <article class="case case--validation">
+        <div class="case__texte">
+          <h3>Il valide les photos avant l'envoi</h3>
+          <p>Un bouton, et vous savez que c'est la bonne pièce, la bonne taille. Essayez.</p>
+        </div>
+        <div class="qc" data-qc>
+          <div class="qc__question" data-qc-question>
+            <b>Votre validation</b>
+            <p>Ces photos correspondent-elles à votre commande ?</p>
+            <div class="qc__vignettes" aria-hidden="true">
+              <img src="assets/img/apercu-sneaker.jpg" alt="" width="90" height="90">
+              <img src="assets/img/apercu-hoodie.jpg" alt="" width="90" height="90">
+              <img src="assets/img/apercu-jogger.jpg" alt="" width="90" height="90">
+              <img src="assets/img/apercu-cap.jpg" alt="" width="90" height="90">
+            </div>
+            <div class="qc__actions">
+              <button type="button" class="qc__refuser" data-qc-refuser>Refuser</button>
+              <button type="button" class="qc__approuver" data-qc-approuver>Approuver</button>
+            </div>
+          </div>
+          <div class="qc__reponse" hidden data-qc-reponse>
+            <span class="qc__sceau" data-qc-sceau><svg class="ic"><use href="#i-check"/></svg></span>
+            <b data-qc-texte>Cette commande est validée.</b>
+            <button type="button" class="qc__changer" data-qc-changer>Changer d’avis</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="case case--langues">
+        <div class="case__texte">
+          <h3>Dans sa langue</h3>
+          <p>Français, anglais ou chinois simplifié.</p>
+        </div>
+        <p class="langues" aria-hidden="true">
+          <span class="langues__ligne est-actif"><small>Une commande de Atelier Nord</small>Votre commande</span>
+          <span class="langues__ligne"><small>An order from Atelier Nord</small>Your order</span>
+          <span class="langues__ligne" lang="zh-CN"><small>来自以下店铺的订单 Atelier Nord</small>您的订单</span>
+        </p>
+      </article>
+
+      <article class="case case--historique">
+        <div class="case__texte">
+          <h3>Chaque passage du colis</h3>
+          <p>L'historique du transporteur, relevé automatiquement. Vous n'avez plus à aller le chercher pour lui.</p>
+        </div>
+        <ol class="historique" aria-label="Exemple d'historique de suivi">
+          <li class="historique__recent"><i><svg class="ic"><use href="#i-truck"/></svg></i><p><small>30 septembre 2026 à 07:19</small><b>Colis en cours d'acheminement</b><span>Wissous</span></p></li>
+          <li><i><svg class="ic"><use href="#i-package"/></svg></i><p><small>29 septembre 2026 à 18:19</small><b>Pris en charge par La Poste</b><span>Paris</span></p></li>
+          <li><i><svg class="ic"><use href="#i-package"/></svg></i><p><small>28 septembre 2026 à 11:19</small><b>Commande préparée</b></p></li>
+        </ol>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- CÔTÉ VENDEUR : les vrais écrans de l'espace vendeur, en miniature -->
+<section class="l4-vendeur" id="vendeur" aria-labelledby="vendeur-titre">
+  <div class="conteneur">
+    <div class="entete-section">
+      <p class="l4-etiquette"><span>03</span>Côté vendeur</p>
+      <h2 id="vendeur-titre" class="titre-section">Rien ne vous échappe.<br>Même pas un colis immobile.</h2>
+      <p class="chapo">Votre espace repère ce qui cloche avant votre client, et vous dit qui a ouvert son lien.</p>
+    </div>
+    <div class="l4-bento">
+      <article class="l4-carte l4-carte--alertes" data-anime>
+        <div class="l4-carte__texte">
+          <h3>Des alertes, pas des surprises</h3>
+          <p>Un lien jamais ouvert, un colis sans nouvelle depuis dix jours : la cloche vous le dit.</p>
+        </div>
+        <div class="l4-alertes" aria-hidden="true">
+          <p class="l4-alertes__tete"><svg class="ic"><use href="#i-bell"/></svg>Alertes <span>2</span></p>
+          <div class="l4-alerte" data-ton="attente"><i><svg class="ic"><use href="#i-eye-off"/></svg></i><span><b>1 commande jamais ouverte</b><small>Le client n’a pas encore ouvert son lien. Il ne l’a peut-être jamais reçu.</small></span></div>
+          <div class="l4-alerte" data-ton="silence"><i><svg class="ic"><use href="#i-clock-alert"/></svg></i><span><b>1 colis sans mouvement</b><small>Plus de dix jours sans information du transporteur.</small></span></div>
+        </div>
+      </article>
+
+      <article class="l4-carte l4-carte--vues" data-anime>
+        <div class="l4-carte__texte">
+          <h3>Qui a regardé, et combien de fois</h3>
+          <p>Chaque ouverture de lien est comptée. Un client qui revient souvent est un client rassuré.</p>
+        </div>
+        <div class="l4-vues" aria-hidden="true">
+          <p class="l4-vues__total"><b class="l4-compteur" data-compteur="142">142</b><span>ouvertures sur 30 jours</span></p>
+          <div class="l4-barres">
+            <i style="--h:.32"></i><i style="--h:.45"></i><i style="--h:.38"></i><i style="--h:.6"></i><i style="--h:.52"></i><i style="--h:.74"></i><i style="--h:.66"></i><i style="--h:.9"></i><i style="--h:.71"></i><i style="--h:.84"></i><i style="--h:1"></i><i style="--h:.88"></i>
+          </div>
+          <ol class="l4-classement">
+            <li><span>1</span><b>Luca R.</b><small>9 vues</small></li>
+            <li><span>2</span><b>Maëlys D.</b><small>8 vues</small></li>
+            <li><span>3</span><b>Yanis B.</b><small>7 vues</small></li>
+          </ol>
+        </div>
+      </article>
+
+      <article class="l4-carte l4-carte--envois" data-anime>
+        <div class="l4-carte__texte">
+          <h3>Tous vos colis sur un écran</h3>
+          <p>Le dernier point de chaque colis, relevé chez le transporteur. Vous n'ouvrez plus dix sites de suivi.</p>
+        </div>
+        <ul class="l4-envois" aria-hidden="true">
+          <li><span class="l4-etat" data-etat="transit">En transit</span><b>6A30489215734</b><small>Colissimo · Léa M.</small><em>Colis en cours d’acheminement</em></li>
+          <li><span class="l4-etat" data-etat="transit">En transit</span><b>6A30571182466</b><small>Colissimo · Ethan G.</small><em>Arrivé sur le site de distribution</em></li>
+          <li><span class="l4-etat" data-etat="livre">Livré</span><b>6A29917702231</b><small>Colissimo · Luca R.</small><em>Votre colis a été livré</em></li>
+          <li><span class="l4-etat" data-etat="silence">Sans mouvement</span><b>LA982231665FR</b><small>Inès D.</small><em>12 jours sans information</em></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- TARIFS -->
+<section class="tarifs" id="tarifs" aria-labelledby="tarifs-titre">
+  <div class="conteneur">
+    <div class="entete-section entete-section--centre">
+      <p class="l4-etiquette"><span>04</span>Tarifs</p>
+      <h2 id="tarifs-titre" class="titre-section">Gratuit pour commencer.<br>Pro quand vous grandissez.</h2>
+    </div>
+    <div class="tp" data-anime>
+      <table class="tp__table">
+        <caption class="visuellement-cache">Comparaison des plans Gratuit et Pro</caption>
+        <colgroup><col class="tp__col-libelle"><col><col class="tp__col-pro"></colgroup>
+        <thead>
+          <tr>
+            <td class="tp__coin"><p>Les deux plans suivent vos colis tout seuls et gardent le même lien du début à la fin.</p></td>
+            <th scope="col">
+              <span class="tp__nom">Gratuit</span>
+              <span class="tp__prix"><b>0 €</b></span>
+              <span class="tp__note">Sans carte bancaire</span>
+              <a class="bouton bouton--second bouton--large" href="inscription.html">Commencer gratuitement</a>
+            </th>
+            <th scope="col" class="tp__pro">
+              <span class="tp__nom">Pro</span>
+              <span class="tp__prix"><b>20 €</b><small>/ mois</small></span>
+              <span class="tp__note">Sans engagement</span>
+              <a class="bouton bouton--plein bouton--large" href="inscription.html">Commencer avec Pro</a>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="--i:0"><th scope="row">Commandes</th><td><b>5</b> au total</td><td><b>300</b> par mois</td></tr>
+          <tr style="--i:1"><th scope="row">Colis suivis</th><td><b>5</b> au total</td><td><b>300</b> par mois</td></tr>
+          <tr style="--i:2"><th scope="row">Photos et vidéos</th><td>20 par commande</td><td>20 par commande</td></tr>
+          <tr style="--i:3"><th scope="row">Suivi automatique du transporteur</th><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td></tr>
+          <tr style="--i:4"><th scope="row">Page à vos couleurs</th><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td></tr>
+          <tr style="--i:5"><th scope="row">Le lien à votre nom</th><td><span class="tp-non"><span class="visuellement-cache">Non inclus</span></span></td><td><span class="tp-url">droplink.fr/votre-boutique/…</span></td></tr>
+          <tr style="--i:6"><th scope="row">Votre page, sans la mention DropLink</th><td><span class="tp-non"><span class="visuellement-cache">Non inclus</span></span></td><td><svg class="ic tp-oui" role="img" aria-label="Inclus"><use href="#i-check"/></svg></td></tr>
+        </tbody>
+      </table>
+      <div class="tp__actions">
+        <a class="bouton bouton--plein bouton--large" href="inscription.html">Commencer avec Pro</a>
+        <a class="bouton bouton--second bouton--large" href="inscription.html">Commencer gratuitement</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUESTIONS -->
+<section class="questions" id="questions" aria-labelledby="questions-titre">
+  <div class="conteneur questions__grille">
+    <div>
+      <p class="l4-etiquette"><span>05</span>Questions</p>
+      <h2 id="questions-titre" class="titre-section">Questions fréquentes</h2>
+    </div>
+    <div class="accordeon">
+      <details name="faq">
+        <summary>Mon client doit-il créer un compte ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Non. Il ouvre le lien et voit sa commande, sur téléphone comme sur ordinateur. Aucune application, aucun mot de passe.</p></div>
+      </details>
+      <details name="faq">
+        <summary>Quels transporteurs sont suivis ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Collez le numéro de suivi : le transporteur est détecté automatiquement, et vous pouvez le choisir à la main s'il ne l'est pas. Les étapes se mettent à jour sans que vous ayez à revenir sur la commande.</p></div>
+      </details>
+      <details name="faq">
+        <summary>Je peux modifier la commande après avoir envoyé le lien ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Oui, autant que vous voulez. Photos, numéro, statut : votre client voit la version à jour sur le même lien, qui ne change jamais.</p></div>
+      </details>
+      <details name="faq">
+        <summary>Que se passe-t-il après les 5 commandes gratuites ?<svg class="ic"><use href="#i-plus"/></svg></summary>
+        <div class="accordeon__corps"><p>Le plan gratuit compte 5 commandes au total. Pour en créer de nouvelles, passez au Pro : 300 commandes par mois pour 20 €, sans engagement.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- APPEL FINAL -->
+<section class="final" aria-labelledby="final-titre">
+  <div class="conteneur final__boite">
+    <h2 id="final-titre" class="final__titre">Votre prochain colis part avec un lien.</h2>
+    <a class="l4-champ-final" href="inscription.html">
+      <span class="l4-champ-final__url" aria-hidden="true">droplink.fr/<b data-slug>atelier-nord</b><i class="l4-curseur"></i></span>
+      <span class="bouton bouton--plein">Commencer gratuitement<svg class="ic"><use href="#i-arrow-right"/></svg></span>
+    </a>
+    <ul class="faits">
+      <li><svg class="ic"><use href="#i-check"/></svg>5 commandes offertes</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Sans carte bancaire</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Aucun compte pour votre client</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="pied">
+  <div class="conteneur pied__grille">
+    <div>
+      <a class="logo" href="#" aria-label="DropLink, accueil">
+        <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+        <span>DropLink</span>
+      </a>
+      <p class="pied__devise">Un seul lien de suivi pour toute la commande.</p>
+    </div>
+    <nav aria-label="Produit">
+      <h3>Produit</h3>
+      <a href="#studio">Comment ça marche</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="docs.html">Documentation</a>
+      <a href="blog.html">Blog</a>
+    </nav>
+    <nav aria-label="Légal">
+      <h3>Légal</h3>
+      <a href="conditions.html">Conditions</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="signalement.html">Signaler un contenu</a>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© 2026 DropLink · <a class="l4-comparer" href="plan.html">Toutes les pages</a> · <a class="l4-comparer" href="ancienne-landing.html">Voir l'ancienne landing</a></p>
+    <div class="theme" role="group" aria-label="Thème">
+      <button type="button" data-theme-choix="light" aria-pressed="false"><svg class="ic"><use href="#i-sun"/></svg><span class="sr">Clair</span></button>
+      <button type="button" data-theme-choix="dark" aria-pressed="false"><svg class="ic"><use href="#i-moon"/></svg><span class="sr">Sombre</span></button>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+<script src="l4.js" defer></script>
+</body>
+</html>

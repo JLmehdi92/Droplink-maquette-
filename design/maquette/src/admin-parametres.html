@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Paramètres système · Administration DropLink</title>
+<meta name="robots" content="noindex">
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-app v4 page-admin">
+<!--ICONES-->
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<!-- Maquette de l'administration (droplink2 : src/app/[locale]/admin/*,
+     messages/fr.json « admin »). Elle ne montre aucun contenu de commande, ne
+     facture rien, ne supprime aucun compte : comme le produit. -->
+<div class="app">
+  <aside class="app__barre" data-barre aria-label="Administration">
+    <a class="logo app__logo" href="admin.html" aria-label="Administration DropLink">
+      <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
+      <span>DropLink</span><span class="adm-pastille">Admin</span>
+    </a>
+    <nav class="app__nav" aria-label="Administration">
+      <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
+      <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
+      <a href="admin-comptes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg>Comptes</span></a>
+      <a href="admin-boutiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-store"/></svg>Boutiques</span></a>
+      <a href="admin-statistiques.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg>Statistiques</span></a>
+      <a href="admin-journal.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-scroll-text"/></svg>Journal d'audit</span></a>
+      <a href="admin-surveillance.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-activity"/></svg>Surveillance</span></a>
+      <a href="admin-parametres.html" aria-current="page"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres système</span></a>
+    </nav>
+    <div class="adm-trace"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><p><b>Tout est tracé</b><span>Chaque consultation de données d’un vendeur est écrite au journal.</span></p></div>
+    <details class="compte" data-compte>
+      <summary>
+        <span class="compte__avatar adm-avatar" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <span class="compte__qui"><b>Administrateur</b><small>admin@droplink.fr</small></span>
+        <svg class="ic" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+      </summary>
+      <div class="compte__menu">
+        <a href="tableau.html"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Espace vendeur</a>
+        <a href="connexion.html"><svg class="ic" aria-hidden="true"><use href="#i-log-out"/></svg>Se déconnecter</a>
+      </div>
+    </details>
+  </aside>
+
+  <div class="app__feuille">
+    <header class="app__haut adm-haut">
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
+      </form>
+      <p class="adm-bandeau"><svg class="ic" aria-hidden="true"><use href="#i-shield-check"/></svg><span>ADMINISTRATION</span></p>
+    </header>
+
+    <main id="contenu" class="tableau adm" data-ecran tabindex="-1">
+      <div class="tableau__tete">
+        <div>
+          <p class="v4-fil"><span>Administration</span><svg class="ic" aria-hidden="true"><use href="#i-chevron-right"/></svg><b>Paramètres système</b></p>
+          <h1>Paramètres système</h1>
+          <p>Chaque modification est écrite au journal d'audit, avec l'ancienne et la nouvelle valeur. Les valeurs grisées se changent au déploiement.</p>
+        </div>
+        
+      </div>
+      
+
+      <div class="adm-rangee adm-rangee--2">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Plafonds par compte</h2><p class="adm-aide">Vérifiés en base, pas seulement dans l'interface.</p></div></header><form class="adm-reglage" data-reglage="plafond_commandes_mensuel" novalidate>
+      <div><label for="r-plafond_commandes_mensuel">Commandes par mois</label><p>Au-delà, la création est refusée</p><small>Entre 100 et 100 000.</small><small class="adm-origine">Modifié le 20 sept. 2026 par admin@droplink.fr.</small></div>
+      <div class="adm-reglage__saisie"><input id="r-plafond_commandes_mensuel" type="number" inputmode="numeric" min="100" max="100000" value="300" data-initial="300"><button type="submit" class="bouton-outil" disabled>Enregistrer</button></div>
+      <p class="adm-reglage__retour" role="status" aria-live="polite"></p></form><form class="adm-reglage" data-reglage="plafond_commandes_gratuit_a_vie" novalidate>
+      <div><label for="r-plafond_commandes_gratuit_a_vie">Commandes gratuites (à vie)</label><p>Total sur la vie d'un compte gratuit</p><small>Entre 1 et 100 000.</small><small class="adm-origine">Modifié le 26 sept. 2026 par admin@droplink.fr.</small></div>
+      <div class="adm-reglage__saisie"><input id="r-plafond_commandes_gratuit_a_vie" type="number" inputmode="numeric" min="1" max="100000" value="5" data-initial="5"><button type="submit" class="bouton-outil" disabled>Enregistrer</button></div>
+      <p class="adm-reglage__retour" role="status" aria-live="polite"></p></form></section>
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Suivi des colis</h2><p class="adm-aide">Le seul poste de coût variable du produit.</p></div></header><form class="adm-reglage" data-reglage="budget_suivi_total" novalidate>
+      <div><label for="r-budget_suivi_total">Budget de suivi (à vie)</label><p>Prises en charge que le palier autorise en tout</p><small>Entre 0 et 1 000 000.</small><small class="adm-origine">Modifié le 20 sept. 2026 par admin@droplink.fr.</small></div>
+      <div class="adm-reglage__saisie"><input id="r-budget_suivi_total" type="number" inputmode="numeric" min="0" max="1000000" value="200" data-initial="200"><button type="submit" class="bouton-outil" disabled>Enregistrer</button></div>
+      <p class="adm-reglage__retour" role="status" aria-live="polite"></p></form><form class="adm-reglage" data-reglage="budget_suivi_deja_consomme" novalidate>
+      <div><label for="r-budget_suivi_deja_consomme">Déjà consommé ailleurs</label><p>Payé au fournisseur, absent de nos lignes</p><small>Entre 0 et 1 000 000.</small><small class="adm-origine">Modifié le 20 sept. 2026 par admin@droplink.fr.</small></div>
+      <div class="adm-reglage__saisie"><input id="r-budget_suivi_deja_consomme" type="number" inputmode="numeric" min="0" max="1000000" value="7" data-initial="7"><button type="submit" class="bouton-outil" disabled>Enregistrer</button></div>
+      <p class="adm-reglage__retour" role="status" aria-live="polite"></p></form><form class="adm-reglage" data-reglage="seuil_colis_par_compte" novalidate>
+      <div><label for="r-seuil_colis_par_compte">Seuil d'alerte colis</label><p>Signale un compte au-delà de ce nombre</p><small>Entre 1 et 1 000 000.</small><small class="adm-origine">Modifié le 20 sept. 2026 par admin@droplink.fr.</small></div>
+      <div class="adm-reglage__saisie"><input id="r-seuil_colis_par_compte" type="number" inputmode="numeric" min="1" max="1000000" value="300" data-initial="300"><button type="submit" class="bouton-outil" disabled>Enregistrer</button></div>
+      <p class="adm-reglage__retour" role="status" aria-live="polite"></p></form><form class="adm-reglage" data-reglage="retard_veilleur_minutes" novalidate>
+      <div><label for="r-retard_veilleur_minutes">Tâche en retard après</label><p>En minutes sans battement</p><small>Entre 5 et 10 080.</small><small class="adm-origine">Valeur par défaut : personne ne l'a jamais modifiée.</small></div>
+      <div class="adm-reglage__saisie"><input id="r-retard_veilleur_minutes" type="number" inputmode="numeric" min="5" max="10080" value="30" data-initial="30"><button type="submit" class="bouton-outil" disabled>Enregistrer</button></div>
+      <p class="adm-reglage__retour" role="status" aria-live="polite"></p></form></section>
+      </div>
+      <div class="adm-rangee adm-rangee--2">
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Interrupteurs</h2><p class="adm-aide">Effet immédiat sur toute la plateforme.</p></div></header><div class="adm-reglage adm-reglage--inter"><div><p class="adm-reglage__titre">Inscriptions ouvertes</p><p>Fermer n'affecte pas les comptes existants</p><small class="adm-origine">Valeur par défaut : personne ne l'a jamais modifiée.</small></div><label class="interrupteur"><input type="checkbox" role="switch" checked data-interrupteur="Inscriptions ouvertes"><i></i><span class="sr">Inscriptions ouvertes</span></label></div><div class="adm-reglage adm-reglage--inter"><div><p class="adm-reglage__titre">Interrogation des transporteurs</p><p>Couper arrête la facturation à la prise en charge</p><small class="adm-origine">Valeur par défaut : personne ne l'a jamais modifiée.</small></div><label class="interrupteur"><input type="checkbox" role="switch" checked data-interrupteur="Interrogation des transporteurs"><i></i><span class="sr">Interrogation des transporteurs</span></label></div></section>
+        <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Limitation de débit</h2><p class="adm-aide">Par fenêtre d'une minute, comptée en base.</p></div></header><div class="adm-constate"><div><p>Jeton inconnu</p></div><b>20 / min</b></div><div class="adm-constate"><div><p>Jeton valide</p></div><b>120 / min</b></div><div class="adm-constate"><div><p>Dépôts de médias</p></div><b>60 / min</b></div></section>
+      </div>
+      <section class="bloc adm-bloc "><header class="bloc__tete"><div><h2>Constaté, changé au déploiement</h2><p class="adm-aide">Les valeurs grisées se changent au déploiement.</p></div></header><div class="adm-constates"><div class="adm-constate"><div><p>Stockage par compte</p><small>Aucun plafond n'est appliqué</small></div><b>Aucun</b></div><div class="adm-constate"><div><p>Médias par commande</p><small>Dont 3 vidéos au maximum</small></div><b>20</b></div><div class="adm-constate"><div><p>Poids maximum d'une vidéo</p><small>En mégaoctets · provisoire, à calibrer</small></div><b>20 Mo</b></div><div class="adm-constate"><div><p>Silence nommé après</p><small>En jours sans mouvement</small></div><b>10 jours</b></div><div class="adm-constate"><div><p>Purge des réponses brutes</p><small>En jours après le dernier mouvement</small></div><b>90 jours</b></div></div></section>
+      <p class="adm-garantie"><svg class="ic" aria-hidden="true"><use href="#i-key-round"/></svg><span><b>Les secrets ne sont pas ici.</b> Clés d'API, jeton de stockage et clé de service ne passent jamais par cet écran ni par la base. Ils vivent uniquement dans les variables d'environnement du serveur.</span></p>
+    </main>
+  </div>
+</div>
+
+<div class="adm-info" role="tooltip" hidden data-info-bulle></div>
+<p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="admin.js" defer></script>
+<script src="v4.js" defer></script>
+</body>
+</html>
