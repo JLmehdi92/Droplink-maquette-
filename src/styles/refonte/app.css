@@ -1683,9 +1683,9 @@ a.action-ligne { color: var(--corps); }
 .fiche__gestes .pop { min-width: 240px; }
 .ed-champ [aria-invalid="true"] { border-color: var(--color-ds-erreur); }
 .ed-carte--apercu .apercu-format { margin: 12px 18px 0; }
-.ed-apercu__cadre { position: absolute; top: 0; left: 0; display: block; border: 0; background: #fff; transform-origin: top left; }
+.ed-apercu__cadre { position: absolute; top: 0; left: 0; display: block; border: 0; background: var(--feuille); transform-origin: top left; }
 .ed-apercu__cadre.est-en-chargement { visibility: hidden; }
-.ed-apercu__bureau { position: relative; justify-self: stretch; height: 520px; overflow: hidden; border: 1px solid var(--filet); border-radius: 14px; background: #fff; }
+.ed-apercu__bureau { position: relative; justify-self: stretch; height: 520px; overflow: hidden; border: 1px solid var(--filet); border-radius: 14px; background: var(--feuille); }
 .telephone--fiche .telephone__ecran { width: 100%; }
 .ed-avis { margin: 12px 18px 0; padding: 11px 13px; border-radius: 11px; background: var(--color-ds-alerte-fond); color: var(--avert-encre); font-size: 13px; line-height: 1.5; font-weight: 500; }
 .ed-avis__lien { font-weight: 700; color: inherit; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
@@ -1706,6 +1706,11 @@ a.action-ligne { color: var(--corps); }
 .ed-vignette--envoi .ed-vignette__alerte { color: var(--erreur-encre); }
 .ed-vignette__refus { font-size: 11.5px; line-height: 1.35; color: var(--erreur-encre); }
 .ed-vignette__geste.ed-vignette__poignee { left: 6px; right: auto; cursor: grab; touch-action: none; }
+/* L'étoile (couverture) descend en bas à gauche, là où la pastille « Couverture » se pose : trois
+   gestes dans trois coins, aucun chevauchement même au doigt, à 44 px dans une vignette de 103. */
+.ed-vignette .ed-vignette__geste.ed-vignette__etoile { top: auto; right: auto; left: 6px; bottom: 6px; }
+.fiche__tete > div { min-width: 0; }
+.fiche__tete h1, .fiche .v4-fil b { overflow-wrap: anywhere; }
 .ed-vignette.est-saisie { z-index: 2; opacity: .85; box-shadow: var(--ombre-lg); }
 .ed-aide--doigt { display: none; }
 @media (pointer: coarse) { .ed-aide--souris { display: none; } .ed-aide--doigt { display: block; } }
@@ -1715,17 +1720,14 @@ a.action-ligne { color: var(--corps); }
 .ed-echec .bouton-app { justify-self: start; margin-top: 4px; }
 @media (max-width: 900px) {
   .fiche__tete { position: relative; }
-  .fiche__tete h1 { padding-right: 52px; }
+  .fiche__tete h1, .fiche__tete .v4-fil { padding-right: 52px; }
+  .ed-vignette__geste.ed-vignette__poignee { left: 0; top: 0; }
+  .ed-vignette .ed-vignette__geste.ed-vignette__etoile { left: 0; bottom: 0; right: auto; top: auto; }
   .fiche__actions-mobile { position: absolute; top: 0; right: 0; display: flex; align-items: center; }
   .fiche__actions-mobile .bouton-outil--icone { width: 44px; height: 44px; }
   .ed-echec { left: 12px; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); max-width: none; }
 }
-@media (max-width: 640px) {
-  .ed-vignette__geste.ed-vignette__poignee { left: 0; top: 0; }
-}
-@media (max-width: 900px) {
-  .ed-vignette__geste.ed-vignette__poignee { left: 0; right: auto; top: 0; }
-}
+
 @media (max-width: 900px) {
   .fiche .v4-fil a { display: inline-flex; align-items: center; min-height: 44px; margin-block: -11px; }
   .ed-champ input, .ed-champ select { height: 46px; font-size: 16px; }

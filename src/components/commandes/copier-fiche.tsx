@@ -38,21 +38,23 @@ export function BoutonCopierFiche({
   const libelle = etat === "copie" ? t("lienCopie") : etat === "echec" ? t("copieEchouee") : t("copierLien");
   const Icone = etat === "copie" ? Check : etat === "echec" ? TriangleAlert : Copy;
   return (
-    <button
-      type="button"
-      className={className + (etat === "copie" ? " est-copie" : "") + (etat === "echec" ? " est-echec" : "")}
-      aria-label={avecTexte ? undefined : libelle}
-      title={libelle}
-      onClick={() => void copier()}
-    >
-      <Icone aria-hidden="true" className="ic" />
-      {avecTexte ? <span>{libelle}</span> : null}
-      {/* Une région annoncée qui existe AVANT son texte : posée avec lui, l'annonce se perd. */}
-      {avecTexte ? null : (
-        <span className="sr" role="status">
-          {etat === "repos" ? "" : libelle}
-        </span>
-      )}
-    </button>
+    <>
+      <button
+        type="button"
+        className={className + (etat === "copie" ? " est-copie" : "") + (etat === "echec" ? " est-echec" : "")}
+        aria-label={avecTexte ? undefined : libelle}
+        title={libelle}
+        onClick={() => void copier()}
+      >
+        <Icone aria-hidden="true" className="ic" />
+        {avecTexte ? <span>{libelle}</span> : null}
+      </button>
+      {/* L'ANNONCE VIT HORS DU BOUTON : les enfants d'un bouton sont « présentationnels »
+          pour ARIA, une région posée dedans ne s'annonce pas de façon fiable. Elle existe
+          AVANT son texte — posée avec lui, l'annonce se perd. */}
+      <span className="sr" role="status">
+        {etat === "repos" ? "" : libelle}
+      </span>
+    </>
   );
 }

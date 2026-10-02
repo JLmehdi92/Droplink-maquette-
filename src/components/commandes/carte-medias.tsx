@@ -184,7 +184,6 @@ export function CarteMedias({
    */
   const [echecAction, setEchecAction] = useState<string | null>(null);
   const [survol, setSurvol] = useState(false);
-  const champFichier = useRef<HTMLInputElement>(null);
   const compteur = useRef(0);
 
   const capteurs = useSensors(
@@ -513,7 +512,6 @@ export function CarteMedias({
             }}
           >
             <input
-              ref={champFichier}
               type="file"
               multiple
               accept={typesAcceptes.join(",")}
@@ -698,15 +696,15 @@ function Case({
       {media.type === "video" ? (
         <span className="ed-vignette__video">
           <Play aria-hidden="true" className="ic" />
-          {media.dureeS === null ? t("estUneVideo") : duree(media.dureeS)}
-          {media.dureeS === null ? null : <span className="sr">{t("estUneVideo")}</span>}
+          {media.dureeS === null ? null : duree(media.dureeS)}
+          <span className="sr">{t("estUneVideo")}</span>
         </span>
       ) : null}
 
       {media.estCouverture ? (
         <span className="ed-vignette__couverture">{t("couverture")}</span>
       ) : (
-        <button type="button" onClick={onCouvrir} className="ed-vignette__geste" aria-label={t("definirCouverture")} title={t("definirCouverture")}>
+        <button type="button" onClick={onCouvrir} className="ed-vignette__geste ed-vignette__etoile" aria-label={t("definirCouverture")} title={t("definirCouverture")}>
           <Star aria-hidden="true" className="ic" />
         </button>
       )}

@@ -138,7 +138,7 @@ export function Editeur({
     /** Par étape, ce que le transporteur a dit en la franchissant. */
     readonly notes: Readonly<Partial<Record<Etape, string>>>;
   };
-  /** Les deux dates de la commande, formatées côté serveur pour la même raison. */
+  /** La date de création, formatée côté serveur pour la même raison. */
   readonly dates: {
     readonly creeLe: string;
   };

@@ -39,6 +39,8 @@ export function CarteRevocation({
   const t = useTranslations("actions");
   const te = useTranslations("editeur");
   const volet = useRef<HTMLDetailsElement>(null);
+  const titreVolet = useRef<HTMLElement>(null);
+  const [reussi, setReussi] = useState(false);
 
   const [compris, setCompris] = useState(false);
   const [enCours, setEnCours] = useState(false);
@@ -47,6 +49,7 @@ export function CarteRevocation({
   const revoquer = useCallback(async (): Promise<void> => {
     setEnCours(true);
     setEchec(null);
+    setReussi(false);
     const resultat = await revoquerLienPublic(orderId, jeton).catch(() => null);
     setEnCours(false);
 
@@ -57,7 +60,11 @@ export function CarteRevocation({
 
     onNouveauJeton(resultat.nouveauJeton);
     setCompris(false);
+    setReussi(true);
+    // Le volet se replie sur le bouton qui avait le focus : sans ce renvoi, le focus
+    // tomberait sur `body`, et le clavier repartirait du haut de la page.
     if (volet.current !== null) volet.current.open = false;
+    titreVolet.current?.focus();
   }, [orderId, jeton, onNouveauJeton, t]);
 
   // L'adresse se lit sans son protocole, et sa DERNIÈRE partie — le jeton — en gras :
@@ -80,8 +87,12 @@ export function CarteRevocation({
           <BoutonCopierFiche lien={lienPublic} className="ed-url__copier" />
         </div>
         <p className="ed-aide">{te("lienClientAide")}</p>
+        {/* Le nouveau lien se DIT : la carte change sous les yeux, pas sous l'oreille. */}
+        <p className="sr" role="status">
+          {reussi ? t("revocation.reussi") : ""}
+        </p>
         <details ref={volet} className="ed-revoquer">
-          <summary>
+          <summary ref={titreVolet}>
             <RefreshCw aria-hidden="true" className="ic" />
             {t("revocation.titre")}
             <ChevronDown aria-hidden="true" className="ic ed-revoquer__chevron" />

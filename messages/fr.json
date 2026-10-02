@@ -1611,7 +1611,8 @@
       "jeComprends": "Je comprends que l’ancien lien cessera définitivement de fonctionner.",
       "confirmer": "Révoquer et régénérer",
       "enCours": "Révocation…",
-      "echec": "Révocation impossible. L’ancien lien reste actif."
+      "echec": "Révocation impossible. L’ancien lien reste actif.",
+      "reussi": "Nouveau lien créé. L’ancien ne fonctionne plus."
     }
   },
   "page-publique": {

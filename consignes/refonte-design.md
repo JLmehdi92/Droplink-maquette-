@@ -773,8 +773,19 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   console, aucune violation CSP. Comportements au navigateur : le titre et le fil suivent la frappe et
   reviennent, le menu s'ouvre dans l'écran (390 et 1440), la révocation reste désactivée sans la case,
   l'aperçu desktop sert la page à 1 180 px réduite.
-- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway. La
-  relecture sur quatre angles tourne ; ses corrections feront l'objet du commit suivant.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+- **Relecture (commit suivant)** : 0 CRITICAL ; 1 HIGH corrigé — un nom de client sans espace (jusqu'à
+  120 caractères) débordait à 390 px, maintenant que le titre est ce nom (`overflow-wrap`, `min-width: 0`,
+  remesuré : 0 px) ; MEDIUM corrigés — les trois gestes d'une vignette se chevauchaient au doigt
+  (l'étoile descend en bas à gauche : trois coins), le « ••• » couvrait le fil d'Ariane, le focus tombait
+  sur `body` après une révocation (rendu au volet, et le nouveau lien est annoncé), l'annonce de copie
+  vivait dans le bouton (sortie). LOW corrigés : note du transporteur lisible en entier au survol, badge
+  vidéo sans durée réduit à l'icône, référence morte, deux `#fff` passés au jeton. Gardé : les quatre
+  compteurs au téléphone (la maquette mobile les montre) et la phrase « ne change plus » de la maquette
+  (elle parle des modifications). **Défaut antérieur relevé, non corrigé ici** : le menu « ••• » est
+  rendu au serveur avec le jeton du chargement ; après une révocation sans rechargement, archiver poste
+  l'ancien jeton (il ne sert qu'à invalider la page publique). `scripts/ecarts-declares.json` cite encore
+  l'ancienne fiche (outil de l'ancien kit, déjà signalé).
 
 ## 9. Ce qui attend Mehdi
 

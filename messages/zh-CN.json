@@ -1611,7 +1611,8 @@
       "jeComprends": "我明白旧链接将永久失效。",
       "confirmer": "撤销并重新生成",
       "enCours": "正在撤销…",
-      "echec": "无法撤销。旧链接仍然有效。"
+      "echec": "无法撤销。旧链接仍然有效。",
+      "reussi": "已生成新链接，旧链接已失效。"
     }
   },
   "page-publique": {

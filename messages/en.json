@@ -1611,7 +1611,8 @@
       "jeComprends": "I understand the old link will permanently stop working.",
       "confirmer": "Revoke and regenerate",
       "enCours": "Revoking…",
-      "echec": "Could not revoke. The old link is still active."
+      "echec": "Could not revoke. The old link is still active.",
+      "reussi": "New link created. The old one no longer works."
     }
   },
   "page-publique": {

@@ -48,7 +48,7 @@ export function FriseDetail({
             <i aria-hidden="true" />
             <b>{e.libelle}</b>
             {etat === undefined ? <small>{libelleAttente}</small> : e.quand === null ? null : <small>{e.quand}</small>}
-            {e.note === null || etat === undefined ? null : <small className="ed-frise__note">{e.note}</small>}
+            {e.note === null || etat === undefined ? null : <small className="ed-frise__note" title={e.note}>{e.note}</small>}
           </li>
         );
       })}
