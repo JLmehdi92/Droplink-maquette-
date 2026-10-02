@@ -14,7 +14,7 @@ export function VuesListe({
   vues,
 }: {
   readonly etiquette: string;
-  readonly vues: ReadonlyArray<{ readonly clef: string; readonly href: string; readonly libelle: string; readonly actif: boolean }>;
+  readonly vues: ReadonlyArray<{ readonly clef: string; readonly href: string; readonly libelle: React.ReactNode; readonly actif: boolean }>;
 }) {
   const rangee = useRef<HTMLElement>(null);
   const trait = useRef<HTMLElement>(null);
@@ -28,7 +28,8 @@ export function VuesListe({
       t.style.opacity = a ? "1" : "0";
       if (a) {
         t.style.width = `${a.offsetWidth}px`;
-        t.style.transform = `translateX(${a.offsetLeft}px)`;
+        // X et Y : la même rangée devient une colonne dans « Paramètres » au bureau.
+        t.style.transform = `translate(${a.offsetLeft}px, ${a.offsetTop}px)`;
       }
       const reste = r.scrollWidth - r.clientWidth;
       r.classList.toggle("a-suite", reste > 2 && r.scrollLeft < reste - 2);

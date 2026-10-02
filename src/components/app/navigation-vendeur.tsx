@@ -66,7 +66,10 @@ export interface EntreeNavigation {
  * `/fr/commandes-archivees` ne s'allume pas sur `/fr/commandes`.
  */
 function estActive(chemin: string, href: string): boolean {
-  return chemin === href || chemin.startsWith(href + "/");
+  if (chemin === href || chemin.startsWith(href + "/")) return true;
+  // « Passer au Pro » s'ouvre depuis l'onglet Abonnement des Paramètres, et son
+  // fil d'Ariane le dit : la maquette y allume « Paramètres ».
+  return href.endsWith("/parametres") && chemin === href.slice(0, -"/parametres".length) + "/passer-pro";
 }
 
 export function NavigationVendeur({

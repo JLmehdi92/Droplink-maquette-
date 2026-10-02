@@ -341,7 +341,7 @@
 
 .cv-notif { display: flex; flex-wrap: wrap; gap: 10px; }
 .cv-notif input { flex: 1 1 180px; min-width: 0; height: 48px; padding: 0 14px; border: 1px solid var(--color-ds-filet-appuye); border-radius: 14px; background: #FFFFFF; color: var(--color-ds-texte-fort); font: inherit; font-size: 16px; }
-.cv-notif input::placeholder { color: var(--color-ds-texte-sourdine); }
+.cv-notif input::placeholder { color: var(--color-ds-texte-corps); }
 .cv-qc__motif textarea:focus-visible, .cv-notif input:focus-visible { outline: none; border-color: var(--cl-interface); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cl-interface) 22%, transparent); }
 .cv-erreur { width: 100%; margin: 10px 0 0; font-size: 13px; color: var(--color-ds-erreur-encre); }
 .cv-notif .cv-erreur { margin: 0; }

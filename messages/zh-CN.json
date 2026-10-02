@@ -1003,7 +1003,7 @@
   "marque": {
     "titre": "我的品牌",
     "sousTitre": "定制客户页面，强化品牌形象。",
-    "identiteTitre": "1. 品牌标识",
+    "identiteTitre": "品牌标识",
     "nomTitre": "店铺名称",
     "nomAide": "如果既没有店名也没有标志，客户的页面会直接从内容开始。",
     "nomPlaceholder": "例如：北方工作室",
@@ -1019,9 +1019,10 @@
       "session": "您的登录状态已过期。请重新登录后再试。",
       "reseau": "上传未完成。请检查网络后重试。",
       "confirmation": "图片已发出，但我们未能保存。请重试。",
-      "illisible": "您的浏览器无法读取这张图片。请尝试 PNG、JPG 或 WebP。"
+      "illisible": "您的浏览器无法读取这张图片。请尝试 PNG、JPG 或 WebP。",
+      "retrait": "无法移除标志，请重试。"
     },
-    "couleurTitre": "2. 个性化",
+    "couleurTitre": "个性化",
     "couleurAide": "选择代表您品牌的配色。",
     "couleurHex": "颜色代码",
     "couleurAjustee": "在客户页面上，这个颜色上的文字会被稍微调暗或调亮以保持可读。您的颜色本身不会被改动。",
@@ -1045,7 +1046,7 @@
       "session": "您的登录状态已过期。请重新登录后再试。",
       "ecriture": "没有保存任何内容。请稍后重试。"
     },
-    "reseauxTitre": "3. 社交账号",
+    "reseauxTitre": "社交账号",
     "reseauxAide": "添加社交账号，使其显示在客户页面上。",
     "reseau": {
       "instagram": "Instagram",
@@ -1067,7 +1068,6 @@
     },
     "logoTitre": "品牌 logo",
     "contrasteConforme": "对比度合规",
-    "contrasteCourt": "合规",
     "demoTexte": "白底文字",
     "demoTexteSeuil": "最低 4.5:1",
     "demoBouton": "按钮",
@@ -1076,7 +1076,7 @@
     "demoBandeauSeuil": "反白文字",
     "reseauxFacultatif": "选填",
     "reseauxNouvelOnglet": "这些链接会在新标签页中打开，离开客户页面。它们不会创建任何账户，也不会向您的客户索取任何信息。",
-    "optionsTitre": "4. 显示选项",
+    "optionsTitre": "显示选项",
     "apercuDirect": "实时",
     "apercuPour": "致您的客户",
     "reessayer": "重试",
@@ -1089,13 +1089,12 @@
     "descriptionCompteur": "{n} / {max}",
     "descriptionAide": "显示在客户页面您的店名下方。",
     "erreurDescription": "简介过长：最多 {max} 个字符。",
-    "lienTitre": "5. 自定义链接",
-    "lienPro": "（Pro）",
+    "lienTitre": "自定义链接",
     "lienAide": "定制您的链接，更显专业。",
     "lienProBadge": "Pro",
     "lienProTitre": "Pro 功能",
     "lienProAide": "使用您品牌的自定义链接。",
-    "marqueTitre": "6. DropLink 品牌标识",
+    "marqueTitre": "DropLink 品牌标识",
     "marqueAide": "从客户页面移除“由 DropLink 提供支持”卡片。",
     "marqueOption": "隐藏 DropLink 品牌标识",
     "marqueOptionAide": "客户只会看到您的店铺。",
@@ -1103,7 +1102,12 @@
     "lienPlaceholder": "your-shop",
     "erreurLien": "该名称不可用：3 至 40 个字符，仅限小写字母、数字和连字符，且不能以连字符开头或结尾，也不能连续使用两个连字符。",
     "erreurLienPris": "该名称已被占用，请换一个。",
-    "erreurLienPro": "自定义链接为 Pro 套餐专属功能。"
+    "erreurLienPro": "自定义链接为 Pro 套餐专属功能。",
+    "apercuFormats": "预览格式",
+    "apercuBureau": "桌面端",
+    "apercuMobile": "移动端",
+    "apercuImageMobile": "客户页面的移动端预览",
+    "apercuImageBureau": "客户页面的桌面端预览"
   },
   "envois": {
     "titre": "物流追踪",
@@ -2678,14 +2682,11 @@
     "titre": "设置",
     "sousTitre": "管理账号、偏好设置与 DropLink 配置。",
     "compte": {
-      "titre": "账号信息",
-      "aide": "管理个人信息与账号。",
       "nom": "姓名",
       "enregistrer": "保存",
       "enregistrement": "正在保存…",
       "enregistre": "已保存。",
       "adresse": "邮箱地址",
-      "modifier": "编辑",
       "nouvelleAdresse": "新的电子邮箱",
       "motDePasse": "密码",
       "actuel": "当前密码",
@@ -2699,25 +2700,25 @@
       "changement": "正在修改…",
       "motDePasseChange": "密码已修改，您的其他设备已退出登录。",
       "sansMotDePasse": "使用 Google 登录？请先通过「忘记密码」设置密码。",
-      "annuler": "取消"
+      "annuler": "取消",
+      "nomAide": "显示在您工作区中的名称及其缩写。",
+      "nomMax": "最多 80 个字符。",
+      "adresseAide": "您账户的登录邮箱。确认链接会发送到新邮箱。",
+      "adresseNote": "只有点击该链接后，邮箱才会更改。",
+      "motDePasseAide": "更改密码会让您的其他设备退出登录。"
     },
     "preferences": {
-      "titre": "偏好设置",
       "aide": "定制您的 DropLink 使用体验。",
       "langue": "语言",
       "appliquer": "应用",
       "languePubliqueAide": "客户所见页面的语言在「我的品牌」中设置。"
     },
     "securite": {
-      "titre": "安全",
-      "aide": "保护您的账号与数据。",
       "sessions": "活跃会话",
       "sessionsAide": "管理已登录设备。",
       "fermer": "退出其他设备",
       "fermeture": "正在退出…",
       "ferme": "您的其他设备已退出登录。",
-      "voir": "查看会话",
-      "masquer": "收起会话",
       "cetAppareil": "本设备",
       "activeLe": "最近活动：{date}",
       "appareilInconnu": "未识别的设备",
@@ -2726,8 +2727,6 @@
       "appareilsFiables": {
         "titre": "受信任的设备",
         "aide": "无需再次输入验证码的设备。",
-        "voir": "查看设备",
-        "masquer": "隐藏设备",
         "actifJusqu": "信任至 {date}",
         "aucun": "暂无受信任的设备。",
         "revoquer": "移除",
@@ -2755,7 +2754,9 @@
         "desactiverBouton": "停用双重验证",
         "desactivation": "正在停用…",
         "desactiveeOk": "双重验证已停用。",
-        "fermer": "关闭"
+        "fermer": "关闭",
+        "desactivee": "未启用",
+        "lectureImpossible": "暂时无法读取两步验证状态。"
       }
     },
     "abonnement": {
@@ -2773,10 +2774,10 @@
       "proMarque": "不显示「由 DropLink 提供支持」卡片",
       "proPlafond": "按月重置的上限，而非终身额度",
       "bouton": "升级至 Pro",
-      "nonInclus": "不包含："
+      "nonInclus": "不包含：",
+      "detail": "专业版带来的变化"
     },
     "support": {
-      "titre": "客服支持",
       "aide": "需要帮助？",
       "centre": "帮助中心",
       "centreAide": "查看我们的指南与教程。",
@@ -2800,7 +2801,6 @@
       "abonnementEnCours": "您的专业版订阅仍然有效：在这里删除账户不会停止 Lemon Squeezy 的扣款。请先在 Lemon Squeezy 客户中心取消订阅，然后再回来删除账户。"
     },
     "donnees": {
-      "titre": "数据",
       "aide": "管理数据并导出信息。",
       "exporter": "导出我的数据",
       "exporterAide": "订单、包裹、媒体与浏览记录，JSON 格式，不含内部备注。",
@@ -2810,9 +2810,7 @@
     "suppression": {
       "compte": {
         "titre": "注销账号",
-        "aide": "永久删除您的账号及全部数据。",
         "bouton": "删除",
-        "question": "确认注销账号？",
         "avertissement": "此操作不可撤销。您的账号、订单、发货记录与客户链接将被删除且无法恢复。",
         "conservation": "仅保留您的电子邮箱及注册、注销日期一年（依法对托管服务商的要求），随后删除。",
         "soumettre": "注销账号",
@@ -2824,7 +2822,6 @@
         "titre": "删除全部数据",
         "aide": "永久删除您的全部数据。",
         "bouton": "删除",
-        "question": "确认删除全部数据？",
         "avertissement": "您的全部订单、照片、视频与客户链接将被永久删除。账号仍然有效，但内容为空。",
         "soumettre": "全部删除",
         "enCours": "正在删除…",
@@ -2832,6 +2829,15 @@
       },
       "recopier": "请输入您的电子邮箱以确认：{adresse}",
       "annuler": "取消"
+    },
+    "onglets": {
+      "titre": "设置分区",
+      "compte": "账户",
+      "preferences": "偏好设置",
+      "securite": "安全",
+      "abonnement": "订阅",
+      "donnees": "数据",
+      "support": "支持"
     }
   },
   "verification": {
@@ -2926,15 +2932,17 @@
       "carte": "「由 DropLink 提供支持」卡片",
       "medias": "照片、视频与自动物流跟踪",
       "couleurs": "品牌配色页面",
-      "aVie": "共 {n} 个，终身",
-      "parMois": "每月 {n} 个",
+      "aVie": "共 <b>{n}</b> 个，终身",
+      "parMois": "每月 <b>{n}</b> 个",
       "mensuel": "每月上限",
       "adresseGratuit": "droplink.fr/p/xK9…",
       "adressePro": "droplink.fr/你的店铺/xK9…",
       "carteGratuit": "显示",
       "cartePro": "移除",
       "inclus": "包含"
-    }
+    },
+    "filParametres": "设置",
+    "comparaison": "免费版与专业版对比"
   },
   "notifications": {
     "carte": {

@@ -41,6 +41,48 @@ export interface LibellesApercu {
   readonly statut: string;
   /** Le gabarit « Retrouvez {nom} », substitué avec le nom de la boutique. */
   readonly reseauxGabarit: string;
+  /** La page client complète de l'aperçu de « Ma marque » (refonte, 02/10/2026). */
+  readonly page: TextesPageApercu;
+}
+
+/**
+ * LES TEXTES DE LA PAGE CLIENT D'APERÇU, dans la langue des pages client.
+ *
+ * Ce sont ceux de la VRAIE page (`page-publique.*`) ; seules les valeurs de
+ * démonstration (dates, transporteur, numéro) ne viennent d'aucune commande, et
+ * l'aperçu le sait : « pour votre client », jamais un nom inventé.
+ */
+export interface TextesPageApercu {
+  readonly commandeDe: string;
+  readonly titre: string;
+  readonly sousTitre: string;
+  readonly dateEstimee: string;
+  /** La fourchette de livraison de démonstration, formatée dans la langue. */
+  readonly dates: string;
+  readonly etapes: readonly [string, string, string, string];
+  /** Les dates des quatre étapes de démonstration, formatées dans la langue. */
+  readonly quand: readonly [string, string, string, string];
+  readonly enCours: string;
+  readonly enAttente: string;
+  readonly bandeau: string;
+  readonly mouvement: string;
+  readonly galerie: string;
+  readonly qcTitre: string;
+  readonly qcTexte: string;
+  readonly qcRefuser: string;
+  readonly qcApprouver: string;
+  readonly livraisonTitre: string;
+  readonly transporteur: string;
+  readonly numero: string;
+  readonly dateCourte: string;
+  readonly contactTitre: string;
+  readonly contactTexte: string;
+  readonly contactBouton: string;
+  readonly propulseSurtitre: string;
+  readonly propulseTitre: string;
+  readonly propulseTexte: string;
+  readonly propulseBouton: string;
+  readonly site: string;
 }
 
 /**

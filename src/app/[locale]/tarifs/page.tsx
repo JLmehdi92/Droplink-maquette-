@@ -104,22 +104,23 @@ export default async function Tarifs({ params }: { params: Promise<{ locale: str
 
   /* Le tableau de « Passer au Pro », ligne pour ligne : un plafond illisible
      fait disparaître ses deux lignes plutôt que d'afficher un nombre de secours. */
-  const LIGNES: ReadonlyArray<{ readonly cle: string; readonly gratuit: string; readonly pro: string }> = [
+  const gras = { b: (c: React.ReactNode) => <b>{c}</b> };
+  const LIGNES: ReadonlyArray<{ readonly cle: string; readonly gratuit: React.ReactNode; readonly pro: React.ReactNode }> = [
     ...(aVie === null
       ? []
       : [
           {
             cle: "commandes",
-            gratuit: p("tableau.aVie", { n: nombre(aVie) }),
-            pro: parMois === null ? p("tableau.mensuel") : p("tableau.parMois", { n: nombre(parMois) }),
+            gratuit: p.rich("tableau.aVie", { n: nombre(aVie), ...gras }),
+            pro: parMois === null ? p("tableau.mensuel") : p.rich("tableau.parMois", { n: nombre(parMois), ...gras }),
           },
           {
             cle: "colis",
             // UNE FOIS le quota de commandes (201) : 5 commandes, 5 colis depuis la 210, sans marge
             // de correction payée par le budget de suivi commun.
-            gratuit: p("tableau.aVie", { n: nombre(aVie) }),
+            gratuit: p.rich("tableau.aVie", { n: nombre(aVie), ...gras }),
             // Une fois le plafond de commandes, plus deux (197) : 300 commandes, 300 colis.
-            pro: parMois === null ? p("tableau.mensuel") : p("tableau.parMois", { n: nombre(parMois) }),
+            pro: parMois === null ? p("tableau.mensuel") : p.rich("tableau.parMois", { n: nombre(parMois), ...gras }),
           },
         ]),
     { cle: "adresse", gratuit: p("tableau.adresseGratuit"), pro: p("tableau.adressePro") },

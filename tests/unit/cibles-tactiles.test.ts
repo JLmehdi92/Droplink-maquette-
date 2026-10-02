@@ -45,7 +45,8 @@ const CLASSE_MINIMALE = "min-h-11";
 const CLASSE_COMPENSATION = /-my-(?:\d+(?:\.\d+)?|\[[^\]]+\])/;
 
 /** Ce qui compte comme cible tactile dans un pied. */
-const OUVERTURE_CIBLE = /<(?:Link|a|button)\b/g;
+// `LienEcran` est un `<a>` : le 02/10/2026 un lien de pied écrit avec lui échappait au motif.
+const OUVERTURE_CIBLE = /<(?:Link|LienEcran|a|button)\b/g;
 
 function fichiersSource(racine: string): string[] {
   const trouves: string[] = [];
@@ -213,9 +214,42 @@ const EN_FLUX: ReadonlyArray<{
 }> = [
 ];
 
-/** Les cibles d'un pied qui ne sont PAS exemptées comme liens de prose. */
+/**
+ * LES CIBLES DONT LA FEUILLE DE LA REFONTE PORTE LES 44 PX (02/10/2026).
+ *
+ * Les pieds des blocs de « Paramètres » (`.bloc-r__pied`) sont des `<footer>` : la
+ * maquette y dessine des boutons de 34 px au bureau, portés à 44 au toucher par
+ * sa feuille, pas par une classe. L'exemption n'est valable que si la règle
+ * existe ENCORE dans la feuille — sans elle, la cible retombe sous le plancher.
+ */
+const FEUILLE_REFONTE = readFileSync(join(process.cwd(), "src", "styles", "refonte", "app.css"), "utf8");
+const PORTEES_PAR_LA_FEUILLE: ReadonlyArray<{ readonly classe: string; readonly regle: string; readonly raison: string }> = [
+  {
+    classe: "bouton-app",
+    regle: ".recherche, .bouton-app, .alertes__bouton { height: 44px; }",
+    raison:
+      "Toute `.bouton-app` vaut 44 px au toucher, par la règle `@media (pointer: coarse)` de la feuille d'app — " +
+      "pieds de « Paramètres » et de « Passer au Pro » compris.",
+  },
+  {
+    classe: "lien-r",
+    regle: "@media (pointer: coarse) { .lien-r { display: inline-flex; align-items: center; min-height: 44px; } }",
+    raison: "Les deux liens autonomes de « Paramètres » (portail de résiliation, « Ma marque »).",
+  },
+];
+
+describe("les cibles portées par la feuille de la refonte", () => {
+  test("chaque règle déclarée existe encore dans la feuille", () => {
+    const absentes = PORTEES_PAR_LA_FEUILLE.filter((p) => !FEUILLE_REFONTE.includes(p.regle)).map((p) => p.regle);
+    expect(absentes, "règle disparue : les cibles qu'elle portait retombent sous 44 px").toEqual([]);
+  });
+});
+
+/** Les cibles d'un pied qui ne sont PAS exemptées comme liens de prose, ni portées par la feuille. */
 const CIBLES_AUTONOMES_DES_PIEDS = CIBLES.filter(
-  (c) => !EN_FLUX.some((e) => c.fichier === e.fichier && c.balise.includes(e.repere)),
+  (c) =>
+    !EN_FLUX.some((e) => c.fichier === e.fichier && c.balise.includes(e.repere)) &&
+    !PORTEES_PAR_LA_FEUILLE.some((p) => c.classes.includes(p.classe) && FEUILLE_REFONTE.includes(p.regle)),
 );
 
 describe("les liens en flux de texte sont exemptés, et seulement eux", () => {
@@ -480,9 +514,9 @@ describe("les cibles tactiles autonomes hors des pieds", () => {
  * plancher retiré d'un de ces huit contrôles.
  *
  * ⚠️ DEUX EXCEPTIONS DÉCLARÉES, mesurées et écartées volontairement :
- *   - `formulaire-marque.tsx` porte un `<input type="file">` en `sr-only`,
- *     déclenché par un bouton visible qui, lui, dépasse 44 px. L'input n'est
- *     jamais visé par un doigt.
+ *   - `formulaire-marque.tsx` porte un `<input type="file">` visuellement caché
+ *     DANS la zone de dépôt (un `<label>` de 148 px) : c'est la zone qu'on
+ *     touche, jamais l'input.
  *   - le `<input type="color">` du même écran est en `sr-only` DANS un
  *     `<label>` de 46 × 46 qui est la pastille de couleur. C'est le label que
  *     l'on touche.
@@ -533,9 +567,11 @@ const AUTHENTIFIEES: ReadonlyArray<{
       "montre 44, et c'est gratuit.",
   },
   {
-    fichier: "src/components/marque/formulaire-marque.tsx",
-    repere: "inline-flex h-[27px] w-[46px]",
-    plancher: "before:h-11",
+    // La refonte (02/10/2026) dessine l'interrupteur dans sa feuille : la cible
+    // y est portée à 44 px de haut au toucher.
+    fichier: "src/styles/refonte/app.css",
+    repere: ".interrupteur { width: 52px",
+    plancher: "height: 44px",
     raison:
       "L'interrupteur de filigrane de « Ma marque ». ⚠️ C'est un <label>, et " +
       "c'est pour cela qu'il échappe au plancher de `globals.css`, qui ne vise " +
@@ -600,7 +636,10 @@ describe("les cibles tactiles des surfaces authentifiees", () => {
       "inventaire vide : le contrôle ne garderait rien",
     ).toBeGreaterThanOrEqual(6);
     const fichiers = [...new Set(AUTHENTIFIEES.map((c) => c.fichier))];
-    expect(fichiers.length, "un seul fichier gardé : le relevé en couvrait six").toBeGreaterThanOrEqual(6);
+    // Cinq et non plus six : la refonte (02/10/2026) a déplacé l'interrupteur de
+    // « Ma marque » dans la feuille où vivait déjà le lien d'évitement. Les
+    // entrées, elles, restent toutes là (test précédent).
+    expect(fichiers.length, "un seul fichier gardé : le relevé en couvrait plusieurs").toBeGreaterThanOrEqual(5);
   });
 
   /**

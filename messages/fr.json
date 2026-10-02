@@ -1003,7 +1003,7 @@
   "marque": {
     "titre": "Ma marque",
     "sousTitre": "Personnalisez votre page client et renforcez votre image de marque.",
-    "identiteTitre": "1. Identité de la marque",
+    "identiteTitre": "Identité de la marque",
     "nomTitre": "Nom de la boutique",
     "nomAide": "Sans nom ni logo, la page de votre client commence directement par son contenu.",
     "nomPlaceholder": "Par exemple : Studio Nord",
@@ -1019,9 +1019,10 @@
       "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
       "reseau": "L'envoi n'a pas abouti. Vérifiez votre connexion et réessayez.",
       "confirmation": "L'image est partie mais nous n'avons pas pu l'enregistrer. Réessayez.",
-      "illisible": "Cette image n'a pas pu être lue par votre navigateur. Essayez un PNG, un JPG ou un WebP."
+      "illisible": "Cette image n'a pas pu être lue par votre navigateur. Essayez un PNG, un JPG ou un WebP.",
+      "retrait": "Le logo n’a pas pu être retiré. Réessayez."
     },
-    "couleurTitre": "2. Personnalisation",
+    "couleurTitre": "Personnalisation",
     "couleurAide": "Choisissez les couleurs qui représentent votre marque.",
     "couleurHex": "Code de la couleur",
     "couleurAjustee": "Sur la page de vos clients, le texte posé sur cette couleur est légèrement assombri ou éclairci pour rester lisible. Votre couleur, elle, n'est pas modifiée.",
@@ -1045,7 +1046,7 @@
       "session": "Votre session a expiré. Reconnectez-vous, puis réessayez.",
       "ecriture": "Rien n'a été enregistré. Réessayez dans un instant."
     },
-    "reseauxTitre": "3. Réseaux sociaux",
+    "reseauxTitre": "Réseaux sociaux",
     "reseauxAide": "Ajoutez vos réseaux sociaux pour qu'ils apparaissent sur votre page client.",
     "reseau": {
       "instagram": "Instagram",
@@ -1067,7 +1068,6 @@
     },
     "logoTitre": "Logo de la marque",
     "contrasteConforme": "Contraste conforme",
-    "contrasteCourt": "Conforme",
     "demoTexte": "Texte sur blanc",
     "demoTexteSeuil": "4,5:1 minimum",
     "demoBouton": "Bouton",
@@ -1076,7 +1076,7 @@
     "demoBandeauSeuil": "Texte inversé",
     "reseauxFacultatif": "facultatif",
     "reseauxNouvelOnglet": "Ces liens s’ouvrent hors de la page de votre client, dans un nouvel onglet. Ils ne créent aucun compte et ne demandent rien à votre client.",
-    "optionsTitre": "4. Options d'affichage",
+    "optionsTitre": "Options d'affichage",
     "apercuDirect": "en direct",
     "apercuPour": "pour votre client",
     "reessayer": "Réessayer",
@@ -1089,13 +1089,12 @@
     "descriptionCompteur": "{n} / {max}",
     "descriptionAide": "Une ligne sous votre nom, sur la page de votre client.",
     "erreurDescription": "Description trop longue : {max} caractères au maximum.",
-    "lienTitre": "5. Lien personnalisé",
-    "lienPro": "(Pro)",
+    "lienTitre": "Lien personnalisé",
     "lienAide": "Personnalisez votre lien pour un rendu plus professionnel.",
     "lienProBadge": "Pro",
     "lienProTitre": "Fonctionnalité Pro",
     "lienProAide": "Avec un lien personnalisé à votre marque.",
-    "marqueTitre": "6. Marque DropLink",
+    "marqueTitre": "Marque DropLink",
     "marqueAide": "Retirez la carte « Propulsé par DropLink » de vos pages client.",
     "marqueOption": "Masquer la marque DropLink",
     "marqueOptionAide": "Vos clients ne voient plus que votre boutique.",
@@ -1103,7 +1102,12 @@
     "lienPlaceholder": "votre-boutique",
     "erreurLien": "Ce nom ne convient pas : 3 à 40 caractères, en minuscules, chiffres et tirets — sans tiret au début, à la fin, ni deux à la suite.",
     "erreurLienPris": "Ce nom est déjà pris. Choisissez-en un autre.",
-    "erreurLienPro": "Le lien personnalisé est réservé au plan Pro."
+    "erreurLienPro": "Le lien personnalisé est réservé au plan Pro.",
+    "apercuFormats": "Format de l’aperçu",
+    "apercuBureau": "Desktop",
+    "apercuMobile": "Mobile",
+    "apercuImageMobile": "Aperçu mobile de la page client",
+    "apercuImageBureau": "Aperçu desktop de la page client"
   },
   "envois": {
     "titre": "Suivi d'envois",
@@ -2678,14 +2682,11 @@
     "titre": "Paramètres",
     "sousTitre": "Gérez votre compte, vos préférences et la configuration de DropLink.",
     "compte": {
-      "titre": "Informations du compte",
-      "aide": "Gérez vos informations personnelles et votre compte.",
       "nom": "Nom complet",
       "enregistrer": "Enregistrer",
       "enregistrement": "Enregistrement…",
       "enregistre": "Enregistré.",
       "adresse": "Adresse e-mail",
-      "modifier": "Modifier",
       "nouvelleAdresse": "Nouvelle adresse e-mail",
       "motDePasse": "Mot de passe",
       "actuel": "Mot de passe actuel",
@@ -2699,25 +2700,25 @@
       "changement": "Changement…",
       "motDePasseChange": "Mot de passe modifié. Vos autres appareils ont été déconnectés.",
       "sansMotDePasse": "Vous vous connectez avec Google ? Définissez d'abord un mot de passe avec « Mot de passe oublié ».",
-      "annuler": "Annuler"
+      "annuler": "Annuler",
+      "nomAide": "Le nom affiché dans votre espace, et ses initiales.",
+      "nomMax": "80 caractères maximum.",
+      "adresseAide": "L’adresse de connexion de votre compte. Un lien de confirmation part vers la nouvelle adresse.",
+      "adresseNote": "Votre adresse ne change qu’une fois ce lien suivi.",
+      "motDePasseAide": "Changer le mot de passe déconnecte vos autres appareils."
     },
     "preferences": {
-      "titre": "Préférences",
       "aide": "Personnalisez votre expérience sur DropLink.",
       "langue": "Langue",
       "appliquer": "Appliquer",
       "languePubliqueAide": "La langue des pages que voient vos clients se règle dans Ma marque."
     },
     "securite": {
-      "titre": "Sécurité",
-      "aide": "Protégez votre compte et vos données.",
       "sessions": "Sessions actives",
       "sessionsAide": "Gérez vos appareils connectés.",
       "fermer": "Déconnecter les autres appareils",
       "fermeture": "Déconnexion…",
       "ferme": "Vos autres appareils ont été déconnectés.",
-      "voir": "Voir les sessions",
-      "masquer": "Masquer les sessions",
       "cetAppareil": "Cet appareil",
       "activeLe": "Dernière activité : {date}",
       "appareilInconnu": "Appareil non reconnu",
@@ -2726,8 +2727,6 @@
       "appareilsFiables": {
         "titre": "Appareils fiables",
         "aide": "Les appareils qui ne redemandent pas votre code.",
-        "voir": "Voir les appareils",
-        "masquer": "Masquer les appareils",
         "actifJusqu": "Fiable jusqu’au {date}",
         "aucun": "Aucun appareil fiable pour le moment.",
         "revoquer": "Révoquer",
@@ -2755,7 +2754,9 @@
         "desactiverBouton": "Désactiver la double authentification",
         "desactivation": "Désactivation…",
         "desactiveeOk": "Double authentification désactivée.",
-        "fermer": "Fermer"
+        "fermer": "Fermer",
+        "desactivee": "Désactivée",
+        "lectureImpossible": "Impossible de lire l’état de la double authentification pour le moment."
       }
     },
     "abonnement": {
@@ -2773,10 +2774,10 @@
       "proMarque": "Sans la carte DropLink",
       "proPlafond": "Plafond mensuel, pas à vie",
       "bouton": "Passer au Pro",
-      "nonInclus": "Non inclus :"
+      "nonInclus": "Non inclus :",
+      "detail": "Ce que le plan Pro change"
     },
     "support": {
-      "titre": "Support",
       "aide": "Besoin d'aide ?",
       "centre": "Centre d'aide",
       "centreAide": "Consultez nos guides et tutoriels.",
@@ -2800,7 +2801,6 @@
       "abonnementEnCours": "Votre abonnement Pro est encore actif : supprimer votre compte ici ne l'arrêterait pas chez Lemon Squeezy, qui continuerait de vous prélever. Résiliez-le d'abord depuis votre espace client Lemon Squeezy, puis revenez supprimer votre compte."
     },
     "donnees": {
-      "titre": "Données",
       "aide": "Gérez vos données et exportez vos informations.",
       "exporter": "Exporter mes données",
       "exporterAide": "Commandes, colis, médias et vues, au format JSON. Sans vos notes internes.",
@@ -2810,9 +2810,7 @@
     "suppression": {
       "compte": {
         "titre": "Supprimer le compte",
-        "aide": "Supprimez définitivement votre compte et toutes vos données.",
         "bouton": "Supprimer",
-        "question": "Supprimer le compte ?",
         "avertissement": "Cette action est définitive. Votre compte, vos commandes, vos envois et vos liens clients seront supprimés et ne pourront pas être restaurés.",
         "conservation": "Seules votre adresse e-mail et les dates d'inscription et de suppression sont conservées un an, comme la loi l'impose à un hébergeur, puis effacées.",
         "soumettre": "Supprimer le compte",
@@ -2824,7 +2822,6 @@
         "titre": "Supprimer toutes les données",
         "aide": "Supprimez toutes vos données de manière définitive.",
         "bouton": "Supprimer",
-        "question": "Supprimer toutes les données ?",
         "avertissement": "Toutes vos commandes, photos, vidéos et liens clients seront supprimés définitivement. Votre compte restera actif mais vide.",
         "soumettre": "Tout supprimer",
         "enCours": "Suppression…",
@@ -2832,6 +2829,15 @@
       },
       "recopier": "Recopiez votre adresse e-mail pour confirmer : {adresse}",
       "annuler": "Annuler"
+    },
+    "onglets": {
+      "titre": "Sections des paramètres",
+      "compte": "Compte",
+      "preferences": "Préférences",
+      "securite": "Sécurité",
+      "abonnement": "Abonnement",
+      "donnees": "Données",
+      "support": "Support"
     }
   },
   "verification": {
@@ -2926,15 +2932,17 @@
       "carte": "Carte « Propulsé par DropLink »",
       "medias": "Photos, vidéos et suivi automatique",
       "couleurs": "Page brandée à vos couleurs",
-      "aVie": "{n} au total, à vie",
-      "parMois": "{n} par mois",
+      "aVie": "<b>{n}</b> au total, à vie",
+      "parMois": "<b>{n}</b> par mois",
       "mensuel": "Plafond mensuel",
       "adresseGratuit": "droplink.fr/p/xK9…",
       "adressePro": "droplink.fr/votre-boutique/xK9…",
       "carteGratuit": "Affichée",
       "cartePro": "Retirée",
       "inclus": "Inclus"
-    }
+    },
+    "filParametres": "Paramètres",
+    "comparaison": "Comparaison des plans Gratuit et Pro"
   },
   "notifications": {
     "carte": {

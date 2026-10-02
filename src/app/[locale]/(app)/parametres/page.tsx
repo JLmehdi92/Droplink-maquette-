@@ -6,30 +6,28 @@ import {
   ArrowRight,
   ArrowUpRight,
   ChevronDown,
+  ChevronRight,
   CircleCheck,
-  CircleHelp,
   CircleX,
   Crown,
   Database,
   Download,
   LifeBuoy,
+  Lock,
   SlidersHorizontal,
+  UserRound,
 } from "lucide-react";
-import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
 import { LienEcran } from "@/components/lien-ecran";
 import { TraductionsClient } from "@/components/traductions-client";
-import { CarteReglage, LigneAction } from "@/components/parametres/carte-reglage";
+import { VuesListe } from "@/components/commandes/vues-liste";
 import {
-  CLASSE_BOUTON,
-  CLASSE_CHAMP,
-  CLASSE_CHAMP_ETIQUETE,
-  CLASSE_ENTREE,
-  CLASSE_LIBELLE,
-} from "@/components/parametres/classes";
-import {
-  CarteCompte,
-  CarteSecurite,
-  LigneSuppression,
+  BlocAdresse,
+  BlocAppareilsFiables,
+  BlocDeuxEtapes,
+  BlocMotDePasse,
+  BlocNom,
+  BlocSessions,
+  BlocSuppression,
   type AppareilFiableAffiche,
   type SessionAffichee,
 } from "@/components/parametres/formulaires-parametres";
@@ -94,6 +92,8 @@ function libelleAppareil({ navigateur, systeme }: AppareilDecrit): string | null
  * 13/09/2026 (option A) : tout part, sauf l'adresse et les dates, gardées un an.
  * Voir la migration 157 et `actions.ts`.
  */
+const SECTIONS = ["compte", "preferences", "securite", "abonnement", "donnees", "support"] as const;
+
 export default async function Parametres({
   params,
   searchParams,
@@ -114,7 +114,8 @@ export default async function Parametres({
     getFormatter(),
     creerClientServeur(),
   ]);
-  const adresseSuivie = (await searchParams)["adresse"] === "suivie";
+  const requete = await searchParams;
+  const adresseSuivie = requete["adresse"] === "suivie";
   const [lues, facteurs, quota, appareils] = await Promise.all([
     lireMesSessions(supabase),
     supabase.rpc("lister_mes_facteurs"),
@@ -133,10 +134,10 @@ export default async function Parametres({
   // nombre de secours — indiscernable d'un vrai.
   const quotaAVie = typeof quota.data === "number" ? quota.data : null;
   if (facteurs.error !== null) console.error("[parametres] facteurs illisibles — " + facteurs.error.message);
-  // UNE LECTURE ÉCHOUÉE SE LIT « NON ACTIVÉE » : l'écran propose alors d'activer,
-  // et l'action d'enrôlement relit l'état chez le serveur d'authentification
-  // avant de rien faire — elle refuse si un facteur vérifié existe déjà.
-  const deuxEtapesActive = (facteurs.data ?? []).length > 0;
+  // UNE LECTURE ÉCHOUÉE N'EST NI « ACTIVÉE » NI « DÉSACTIVÉE » (contrainte n° 8) :
+  // l'écran le dit, et propose quand même d'activer — l'action d'enrôlement relit
+  // l'état chez le serveur d'authentification et refuse si un facteur vérifié existe.
+  const deuxEtapesActive: boolean | null = facteurs.error !== null ? null : (facteurs.data ?? []).length > 0;
 
   const sessions: readonly SessionAffichee[] | null =
     lues === null
@@ -175,185 +176,209 @@ export default async function Parametres({
     .map((m) => m[0]?.toUpperCase() ?? "")
     .join("");
 
+  /*
+   * LA REFONTE (02/10/2026) suit `parametres.html` : six onglets, une colonne de
+   * blocs `.bloc-r`. Les onglets sont des LIENS (`?section=`), lus ici : l'écran
+   * marche sans JavaScript, comme le reste de l'espace vendeur, et un lien mène
+   * droit à une section (le retour d'un changement d'adresse ouvre « Compte »).
+   */
+  const section = SECTIONS.find((s) => s === requete["section"]) ?? "compte";
+  const base = `/${langue}/parametres`;
+  const nom = profil.nomAffiche ?? profil.nomBoutique;
+  const onglets = [
+    { clef: "compte", Icone: UserRound },
+    { clef: "preferences", Icone: SlidersHorizontal },
+    { clef: "securite", Icone: Lock },
+    { clef: "abonnement", Icone: Crown },
+    { clef: "donnees", Icone: Database },
+    { clef: "support", Icone: LifeBuoy },
+  ] as const;
+
   return (
-    <>
-      <EnTeteEcranDs titre={t("titre")} sousTitre={t("sousTitre")} pleineLargeur />
+    <main id="contenu" className="tableau reglages-ecran">
+      <div className="tableau__tete">
+        <div>
+          <p className="v4-fil">
+            {nom === null ? null : (
+              <>
+                <span>{nom}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
+            )}
+            <b>{t("titre")}</b>
+          </p>
+          <h1>{t("titre")}</h1>
+          <p>{t("sousTitre")}</p>
+        </div>
+      </div>
 
-      <main
-        id="contenu"
-        className="grid grid-cols-1 items-start gap-5 px-margin-mobile pt-3.5 pb-6 md:px-8 md:pt-0 md:pb-8 xl:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]"
-      >
-        <TraductionsClient espaces={["parametres"]}>
-          <div className="flex min-w-0 flex-col gap-[18px]">
-            <CarteCompte
-              nomActuel={profil.nomAffiche}
-              adresse={profil.email}
-              initiales={initiales}
-              locale={langue}
-              adresseSuivie={adresseSuivie}
-            />
+      <div className="reglages__corps">
+        <div className="barre-liste reglages__onglets">
+          <VuesListe
+            etiquette={t("onglets.titre")}
+            vues={onglets.map(({ clef, Icone }) => ({
+              clef,
+              href: clef === "compte" ? base : `${base}?section=${clef}`,
+              actif: section === clef,
+              libelle: (
+                <>
+                  <Icone aria-hidden="true" className="ic" />
+                  {t(`onglets.${clef}`)}
+                </>
+              ),
+            }))}
+          />
+        </div>
 
-            <CarteReglage icone={SlidersHorizontal} titre={t("preferences.titre")} sousTitre={t("preferences.aide")}>
-              {/* UN FORMULAIRE SERVEUR, ET UN BOUTON « APPLIQUER » QUE LE KIT N'A
-                  PAS. Changer de langue recharge l'écran dans une autre URL : le
-                  faire au simple changement du menu déclencherait la navigation à
-                  chaque flèche du clavier, et un changement de contexte sur une
-                  simple saisie est ce que le critère WCAG 3.2.2 interdit. */}
-              <form action={changerLangueInterface} className="flex flex-col gap-3">
-                <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
-                  <div className={CLASSE_CHAMP_ETIQUETE}>
-                    <label htmlFor="langue-interface" className={CLASSE_LIBELLE}>
-                      {t("preferences.langue")}
-                    </label>
-                    <span className={CLASSE_CHAMP + " relative"}>
-                      <select
-                        id="langue-interface"
-                        name="langue"
-                        defaultValue={langue}
-                        className={CLASSE_ENTREE + " cursor-pointer appearance-none pr-6"}
-                      >
+        <div className="reglages">
+          <TraductionsClient espaces={["parametres"]}>
+            <section className="reglages__panneau" aria-label={t(`onglets.${section}`)}>
+              {section === "compte" ? (
+                <>
+                  <BlocNom nomActuel={profil.nomAffiche} initiales={initiales} />
+                  <BlocAdresse adresse={profil.email} locale={langue} adresseSuivie={adresseSuivie} />
+                  <BlocMotDePasse />
+                  <BlocSuppression variante="compte" adresse={profil.email} locale={langue} />
+                </>
+              ) : null}
+
+              {section === "preferences" ? (
+                /* « Appliquer » et non un changement au menu : déclencher la
+                   navigation à chaque flèche du clavier est ce que WCAG 3.2.2
+                   interdit. */
+                <form action={changerLangueInterface} className="bloc-r">
+                  <div className="bloc-r__corps">
+                    <div className="bloc-r__tete">
+                      <h2>{t("preferences.langue")}</h2>
+                      <p>{t("preferences.aide")}</p>
+                    </div>
+                    <div className="champ-r champ-r--select">
+                      <label htmlFor="langue-interface" className="visuellement-cache">
+                        {t("preferences.langue")}
+                      </label>
+                      <select id="langue-interface" name="langue" defaultValue={langue}>
                         {LANGUES.map((l) => (
                           <option key={l} value={l}>
                             {tl(l)}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown
-                        aria-hidden="true"
-                        size={17}
-                        className="pointer-events-none absolute right-3.5 text-ds-texte-tenu"
-                      />
-                    </span>
+                      <ChevronDown aria-hidden="true" className="ic" />
+                    </div>
                   </div>
-                  <div>
-                    <button type="submit" className={CLASSE_BOUTON}>
+                  <footer className="bloc-r__pied">
+                    <p>
+                      <LienEcran className="lien-r" href={`/${langue}/marque`}>
+                        {t("preferences.languePubliqueAide")}
+                      </LienEcran>
+                    </p>
+                    <button type="submit" className="bouton-app bouton-app--plein">
                       {t("preferences.appliquer")}
                     </button>
+                  </footer>
+                </form>
+              ) : null}
+
+              {section === "securite" ? (
+                <>
+                  <BlocDeuxEtapes active={deuxEtapesActive} />
+                  <BlocSessions sessions={sessions} />
+                  {deuxEtapesActive === true ? <BlocAppareilsFiables appareils={appareilsFiables} /> : null}
+                </>
+              ) : null}
+
+              {section === "abonnement" ? (
+                /* LE PLAN EST LU EN BASE, jamais écrit en dur : « Plan actuel :
+                   Gratuit » à un compte qui paie le Pro serait une affirmation que
+                   la base contredit (contrainte n° 8). En gratuit, ce qui est inclus
+                   est coché et les vraies fonctions Pro sont barrées. */
+                <section className="bloc-r" aria-labelledby="r-plan">
+                  <div className="bloc-r__corps">
+                    <div className="bloc-r__tete">
+                      <h2 id="r-plan">{t("abonnement.titre")}</h2>
+                      <p>{t("abonnement.aide")}</p>
+                    </div>
+                    <div className="plan-r">
+                      <div className="plan-r__nom">
+                        <span className="etiquette-r">{t("abonnement.planActuel")}</span>
+                        <b>{profil.planPro ? t("abonnement.pro") : t("abonnement.gratuit")}</b>
+                        <small>{profil.planPro ? t("abonnement.proAide") : t("abonnement.gratuitAide")}</small>
+                      </div>
+                      <ul className="plan-r__liste">
+                        {(
+                          [
+                            { cle: "photos", texte: t("abonnement.inclusPhotos"), inclus: true },
+                            { cle: "couleurs", texte: t("abonnement.inclusCouleurs"), inclus: true },
+                            ...(profil.planPro || quotaAVie === null
+                              ? []
+                              : [{ cle: "total", texte: t("abonnement.inclusTotal", { n: quotaAVie }), inclus: true }]),
+                            { cle: "lien", texte: t("abonnement.proLien"), inclus: profil.planPro },
+                            { cle: "marque", texte: t("abonnement.proMarque"), inclus: profil.planPro },
+                            { cle: "plafond", texte: t("abonnement.proPlafond"), inclus: profil.planPro },
+                          ] as const
+                        ).map((ligne) => (
+                          <li key={ligne.cle} data-inclus={ligne.inclus ? undefined : "non"}>
+                            {ligne.inclus ? <CircleCheck aria-hidden="true" className="ic" /> : <CircleX aria-hidden="true" className="ic" />}
+                            {/* Une ligne barrée se DIT absente : le pictogramme seul porterait l'information. */}
+                            {ligne.inclus ? null : <span className="visuellement-cache">{t("abonnement.nonInclus")} </span>}
+                            {ligne.texte}
+                          </li>
+                        ))}
+                      </ul>
+                      <LienEcran className="lien-texte plan-r__detail" href={`/${langue}/passer-pro`}>
+                        {profil.planPro ? t("abonnement.detail") : t("abonnement.bouton")}
+                        <ArrowRight aria-hidden="true" className="ic" />
+                      </LienEcran>
+                    </div>
                   </div>
-                </div>
-                <p className="text-[12.5px] leading-[1.5] text-ds-texte-sourdine">
-                  <Link
-                    href={`/${langue}/marque`}
-                    className="inline-flex min-h-11 items-center font-semibold text-ds-texte-lien hover:underline lg:min-h-0"
-                  >
-                    {t("preferences.languePubliqueAide")}
-                  </Link>
-                </p>
-              </form>
-            </CarteReglage>
+                </section>
+              ) : null}
 
-            <CarteSecurite
-              sessions={sessions}
-              appareilsFiables={appareilsFiables}
-              deuxEtapesActive={deuxEtapesActive}
-              adresse={profil.email}
-              locale={langue}
-            />
+              {section === "donnees" ? (
+                <>
+                  <section className="bloc-r" aria-labelledby="r-export">
+                    <div className="bloc-r__corps">
+                      <div className="bloc-r__tete">
+                        <h2 id="r-export">{t("donnees.exporter")}</h2>
+                        <p>{t("donnees.exporterAide")}</p>
+                      </div>
+                    </div>
+                    <footer className="bloc-r__pied">
+                      <p>{t("donnees.avertissement")}</p>
+                      {/* UN LIEN ET NON UN BOUTON : la route rend le fichier avec
+                          `Content-Disposition`, le navigateur le télécharge sans
+                          quitter l'écran, et rien n'a besoin de JavaScript. */}
+                      <a href="/api/compte/export" download className="bouton-app bouton-app--second">
+                        <Download aria-hidden="true" className="ic" />
+                        {t("donnees.bouton")}
+                      </a>
+                    </footer>
+                  </section>
+                  <BlocSuppression variante="donnees" adresse={profil.email} locale={langue} />
+                </>
+              ) : null}
 
-            <CarteReglage icone={Database} titre={t("donnees.titre")} sousTitre={t("donnees.aide")}>
-              <LigneAction premiere icone={Download} titre={t("donnees.exporter")} sousTitre={t("donnees.exporterAide")}>
-                {/* UN LIEN ET NON UN BOUTON : la route rend le fichier avec
-                    `Content-Disposition`, le navigateur le télécharge sans quitter
-                    l'écran, et rien n'a besoin de JavaScript. */}
-                <a href="/api/compte/export" download className={CLASSE_BOUTON}>
-                  {t("donnees.bouton")}
-                </a>
-              </LigneAction>
-              <LigneSuppression variante="donnees" adresse={profil.email} locale={langue} />
-              <p className="mt-1 text-[12.5px] leading-[1.5] text-ds-texte-sourdine">{t("donnees.avertissement")}</p>
-            </CarteReglage>
-          </div>
-        </TraductionsClient>
-
-        <div className="flex min-w-0 flex-col gap-[18px]">
-          <CarteReglage icone={Crown} titre={t("abonnement.titre")} sousTitre={t("abonnement.aide")}>
-            {/*
-              ⚠️ CETTE CARTE MENTAIT DEPUIS LE 20/09/2026 — audit avant mise en ligne, 24/09.
-              Elle affirmait « DropLink est gratuit et sans limite » alors qu'un compte
-              gratuit est borné à quinze commandes À VIE (175-176), et elle disait « Plan
-              actuel : Gratuit » en dur, y compris à un compte qui PAIE le Pro. Deux
-              affirmations que la base contredit (contrainte n° 8).
-
-              Au dessin de la planche `SettingsView` (« Abonnement »), dont la liste
-              inventait elle aussi trois lignes sur six — corrigée d'abord dans le kit :
-              en gratuit, ce qui est inclus coché et les vraies fonctions Pro barrées, puis
-              « Passer au Pro » ; en Pro, tout coché et AUCUN bouton.
-            */}
-            <div className="rounded-ds-card border border-ds-violet-200 bg-[image:var(--degrade-ds-teinte)] p-[22px]">
-              <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-violet-100 px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] text-ds-accent-encre lg:text-[11px]">
-                {t("abonnement.planActuel")}
-              </span>
-              <p className="mt-2.5 mb-1 text-[30px] leading-[normal] font-extrabold tracking-[-0.045em] text-ds-texte-fort">
-                {profil.planPro ? t("abonnement.pro") : t("abonnement.gratuit")}
-              </p>
-              <p className="text-[13px] leading-[normal] text-ds-texte-corps">
-                {profil.planPro ? t("abonnement.proAide") : t("abonnement.gratuitAide")}
-              </p>
-              <ul className={"flex flex-col gap-[11px] " + (profil.planPro ? "mt-5" : "mt-5 mb-[22px]")}>
-                {(
-                  [
-                    { cle: "photos", texte: t("abonnement.inclusPhotos"), inclus: true },
-                    { cle: "couleurs", texte: t("abonnement.inclusCouleurs"), inclus: true },
-                    ...(profil.planPro || quotaAVie === null
-                      ? []
-                      : [{ cle: "total", texte: t("abonnement.inclusTotal", { n: quotaAVie }), inclus: true }]),
-                    { cle: "lien", texte: t("abonnement.proLien"), inclus: profil.planPro },
-                    { cle: "marque", texte: t("abonnement.proMarque"), inclus: profil.planPro },
-                    { cle: "plafond", texte: t("abonnement.proPlafond"), inclus: profil.planPro },
-                  ] as const
-                ).map((ligne) => (
-                  <li key={ligne.cle} className="flex items-center gap-[11px]">
-                    {ligne.inclus ? (
-                      <CircleCheck
-                        aria-hidden="true"
-                        size={17}
-                        strokeWidth={1.8}
-                        className="shrink-0 fill-ds-accent text-ds-white"
-                      />
-                    ) : (
-                      <CircleX
-                        aria-hidden="true"
-                        size={17}
-                        strokeWidth={1.8}
-                        className="shrink-0 fill-ds-ink-300 text-ds-white"
-                      />
-                    )}
-                    <span
-                      className={
-                        "text-[14px] leading-[normal] " +
-                        (ligne.inclus ? "font-medium text-ds-texte-fort" : "text-ds-texte-tenu")
-                      }
-                    >
-                      {/* Une ligne barrée se DIT absente au lecteur d'écran : le
-                          pictogramme seul porterait l'information (règle de la couleur). */}
-                      {ligne.inclus ? null : <span className="sr-only">{t("abonnement.nonInclus")} </span>}
-                      {ligne.texte}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              {profil.planPro ? null : (
-                <LienEcran
-                  href={`/${langue}/passer-pro`}
-                  className="degrade-ds-marque flex h-[52px] w-full items-center justify-center gap-2 rounded-ds-card border border-transparent px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
-                >
-                  {t("abonnement.bouton")}
-                  <ArrowRight aria-hidden="true" size={18} strokeWidth={2.2} />
-                </LienEcran>
-              )}
-            </div>
-          </CarteReglage>
-
-          <CarteReglage icone={LifeBuoy} titre={t("support.titre")} sousTitre={t("support.aide")}>
-            <LigneAction premiere icone={CircleHelp} titre={t("support.centre")} sousTitre={t("support.centreAide")}>
-              <Link href={`/${langue}/docs`} className={CLASSE_BOUTON}>
-                {t("support.ouvrir")}
-                <ArrowUpRight aria-hidden="true" size={15} />
-              </Link>
-            </LigneAction>
-          </CarteReglage>
+              {section === "support" ? (
+                <section className="bloc-r" aria-labelledby="r-support">
+                  <div className="bloc-r__corps">
+                    <div className="bloc-r__tete">
+                      <h2 id="r-support">{t("support.centre")}</h2>
+                      <p>{t("support.centreAide")}</p>
+                    </div>
+                  </div>
+                  <footer className="bloc-r__pied">
+                    <p>{t("support.aide")}</p>
+                    <Link href={`/${langue}/docs`} className="bouton-app bouton-app--second">
+                      {t("support.ouvrir")}
+                      <ArrowUpRight aria-hidden="true" className="ic" />
+                    </Link>
+                  </footer>
+                </section>
+              ) : null}
+            </section>
+          </TraductionsClient>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }

@@ -403,7 +403,7 @@ export async function changerLangueInterface(donnees: unknown): Promise<void> {
     langue: donnees instanceof FormData ? donnees.get("langue") : null,
   });
   if (profil === null || !analyse.success) {
-    redirect(`/${profil?.langue ?? "fr"}/parametres`);
+    redirect(`/${profil?.langue ?? "fr"}/parametres?section=preferences`);
   }
 
   const supabase = await creerClientServeur();
@@ -415,7 +415,7 @@ export async function changerLangueInterface(donnees: unknown): Promise<void> {
     console.error("[parametres] langue non enregistrée — " + error.message);
   }
 
-  redirect(`/${analyse.data.langue}/parametres`);
+  redirect(`/${analyse.data.langue}/parametres?section=preferences`);
 }
 
 /**

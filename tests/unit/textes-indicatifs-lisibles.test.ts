@@ -74,14 +74,56 @@ function releverClasses(): Array<{ ou: string; couleur: string }> {
   return trouves;
 }
 
+/*
+ * LA REFONTE (02/10/2026) PEINT SES CHAMPS PAR SES FEUILLES, plus par des classes
+ * Tailwind : la maquette posait ses textes indicatifs en `--sourdine` (3,16:1),
+ * et cette garde, qui ne lisait que les classes, ne l'a pas vu sur la connexion.
+ * Elle relève donc aussi chaque règle `::placeholder` des feuilles de la refonte,
+ * en résolvant l'alias (`--corps` → `--color-ds-texte-corps` → sa valeur).
+ */
+const FEUILLES = ["socle", "app", "client"].map((f) => readFileSync(join(RACINE, "styles", "refonte", f + ".css"), "utf8"));
+const ALIAS: ReadonlyMap<string, string> = new Map(
+  FEUILLES.flatMap((css) => [...css.matchAll(/(--[a-z-]+)\s*:\s*var\(--color-(ds-[a-z0-9-]+)\)/g)].map((m) => [m[1] ?? "", m[2] ?? ""] as const)),
+);
+function releverRegles(): Array<{ ou: string; couleur: string | null }> {
+  return FEUILLES.flatMap((css, i) =>
+    // TOUTE couleur de `::placeholder`, pas seulement une variable : une valeur en
+    // clair qu'on ne sait pas résoudre est une faute, jamais une règle ignorée.
+    [...css.matchAll(/::placeholder[^{]*\{[^}]*?(?<![-\w])color:\s*([^;}]+)/g)].map((m) => {
+      const valeur = (m[1] ?? "").trim();
+      const variable = /^var\((--[a-z0-9-]+)\)$/.exec(valeur)?.[1];
+      const ou = `refonte/${["socle", "app", "client"][i]}.css (${valeur})`;
+      if (variable === undefined) return { ou, couleur: /^#[0-9a-f]{6}$/i.test(valeur) ? valeur.toLowerCase() : null };
+      const jeton = variable.startsWith("--color-") ? variable.slice("--color-".length) : (ALIAS.get(variable) ?? "");
+      return { ou, couleur: JETONS.get(jeton) ?? null };
+    }),
+  );
+}
+
+// Relevés le 02/10/2026 : les classes fondent à mesure que les écrans passent aux feuilles.
+const PLANCHER_CLASSES = 4;
+const PLANCHER_REGLES = 10;
+
 const CARTE = JETONS.get("ds-surface-carte") ?? "";
 const CREUX = JETONS.get("ds-surface-creux") ?? "";
 
 describe("les textes indicatifs des champs", () => {
+  test("chaque règle `::placeholder` des feuilles de la refonte tient 4,5:1 sur la carte et sur le creux", () => {
+    const regles = releverRegles();
+    expect(regles.length, "aucune règle relevée dans les feuilles de la refonte").toBeGreaterThanOrEqual(PLANCHER_REGLES);
+    const fautes = regles.filter(
+      ({ couleur }) => couleur === null || contraste(couleur, CARTE) < 4.5 || contraste(couleur, CREUX) < 4.5,
+    );
+    expect(fautes.map((f) => f.ou), "textes indicatifs illisibles ou couleur non résolue").toEqual([]);
+  });
+
   test("CONTRE-TEST : la garde voit des textes indicatifs, et elle sait mesurer un contraste", () => {
     expect(CARTE, "fond de carte introuvable dans globals.css").toMatch(/^#[0-9a-f]{6}$/);
     expect(CREUX, "fond creux introuvable dans globals.css").toMatch(/^#[0-9a-f]{6}$/);
-    expect(releverClasses().length, "aucun `placeholder:text-*` relevé : la garde ne regarde plus rien").toBeGreaterThanOrEqual(8);
+    // Un plancher PAR MOITIÉ : additionnés, les relevés des feuilles masqueraient
+    // la disparition des classes, et l'inverse.
+    expect(releverClasses().length, "aucun `placeholder:text-*` relevé : la moitié Tailwind ne regarde plus rien").toBeGreaterThanOrEqual(PLANCHER_CLASSES);
+    expect(releverRegles().length, "aucune règle `::placeholder` relevée dans les feuilles de la refonte").toBeGreaterThanOrEqual(PLANCHER_REGLES);
     // Les valeurs relevées le 15/09/2026, à la main, dans Chrome.
     expect(contraste("#a9aec4", "#ffffff")).toBeCloseTo(2.2, 1);
     expect(contraste("#757575", "#ffffff")).toBeCloseTo(4.61, 1);

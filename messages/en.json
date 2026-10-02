@@ -1003,7 +1003,7 @@
   "marque": {
     "titre": "My brand",
     "sousTitre": "Brand your customer page and strengthen your image.",
-    "identiteTitre": "1. Brand identity",
+    "identiteTitre": "Brand identity",
     "nomTitre": "Shop name",
     "nomAide": "With no name and no logo, your customer’s page starts straight with its content.",
     "nomPlaceholder": "For example: Studio Nord",
@@ -1019,9 +1019,10 @@
       "session": "Your session has expired. Sign in again, then retry.",
       "reseau": "The upload did not go through. Check your connection and retry.",
       "confirmation": "The image was sent but we could not save it. Please retry.",
-      "illisible": "Your browser could not read this image. Try a PNG, a JPG or a WebP."
+      "illisible": "Your browser could not read this image. Try a PNG, a JPG or a WebP.",
+      "retrait": "The logo could not be removed. Try again."
     },
-    "couleurTitre": "2. Customisation",
+    "couleurTitre": "Customisation",
     "couleurAide": "Pick the colours that represent your brand.",
     "couleurHex": "Colour code",
     "couleurAjustee": "On your customers' page, text sitting on this colour is darkened or lightened slightly so it stays readable. Your colour itself is not changed.",
@@ -1045,7 +1046,7 @@
       "session": "Your session has expired. Sign in again, then retry.",
       "ecriture": "Nothing was saved. Please retry in a moment."
     },
-    "reseauxTitre": "3. Social links",
+    "reseauxTitre": "Social links",
     "reseauxAide": "Add your social links so they appear on your customer page.",
     "reseau": {
       "instagram": "Instagram",
@@ -1067,7 +1068,6 @@
     },
     "logoTitre": "Brand logo",
     "contrasteConforme": "Contrast compliant",
-    "contrasteCourt": "Compliant",
     "demoTexte": "Text on white",
     "demoTexteSeuil": "4.5:1 minimum",
     "demoBouton": "Button",
@@ -1076,7 +1076,7 @@
     "demoBandeauSeuil": "Inverted text",
     "reseauxFacultatif": "optional",
     "reseauxNouvelOnglet": "These links open outside your customer’s page, in a new tab. They create no account and ask your customer for nothing.",
-    "optionsTitre": "4. Display options",
+    "optionsTitre": "Display options",
     "apercuDirect": "live",
     "apercuPour": "for your customer",
     "reessayer": "Try again",
@@ -1089,13 +1089,12 @@
     "descriptionCompteur": "{n} / {max}",
     "descriptionAide": "One line under your name, on your customer's page.",
     "erreurDescription": "Description too long: {max} characters maximum.",
-    "lienTitre": "5. Custom link",
-    "lienPro": "(Pro)",
+    "lienTitre": "Custom link",
     "lienAide": "Customise your link for a more professional look.",
     "lienProBadge": "Pro",
     "lienProTitre": "Pro feature",
     "lienProAide": "With a link customised to your brand.",
-    "marqueTitre": "6. DropLink branding",
+    "marqueTitre": "DropLink branding",
     "marqueAide": "Remove the “Powered by DropLink” card from your customer pages.",
     "marqueOption": "Hide DropLink branding",
     "marqueOptionAide": "Your customers only see your shop.",
@@ -1103,7 +1102,12 @@
     "lienPlaceholder": "your-shop",
     "erreurLien": "That name won't work: 3 to 40 characters, lowercase letters, digits and hyphens — no hyphen at the start, at the end, or two in a row.",
     "erreurLienPris": "That name is already taken. Pick another one.",
-    "erreurLienPro": "The custom link is a Pro feature."
+    "erreurLienPro": "The custom link is a Pro feature.",
+    "apercuFormats": "Preview format",
+    "apercuBureau": "Desktop",
+    "apercuMobile": "Mobile",
+    "apercuImageMobile": "Mobile preview of the customer page",
+    "apercuImageBureau": "Desktop preview of the customer page"
   },
   "envois": {
     "titre": "Shipments",
@@ -2678,14 +2682,11 @@
     "titre": "Settings",
     "sousTitre": "Manage your account, your preferences and your DropLink setup.",
     "compte": {
-      "titre": "Account details",
-      "aide": "Manage your personal information and your account.",
       "nom": "Full name",
       "enregistrer": "Save",
       "enregistrement": "Saving…",
       "enregistre": "Saved.",
       "adresse": "Email address",
-      "modifier": "Edit",
       "nouvelleAdresse": "New email address",
       "motDePasse": "Password",
       "actuel": "Current password",
@@ -2699,25 +2700,25 @@
       "changement": "Changing…",
       "motDePasseChange": "Password changed. Your other devices have been signed out.",
       "sansMotDePasse": "Signing in with Google? Set a password first with Forgot password.",
-      "annuler": "Cancel"
+      "annuler": "Cancel",
+      "nomAide": "The name shown in your workspace, and its initials.",
+      "nomMax": "80 characters maximum.",
+      "adresseAide": "The sign-in address of your account. A confirmation link is sent to the new address.",
+      "adresseNote": "Your address only changes once that link is followed.",
+      "motDePasseAide": "Changing your password signs out your other devices."
     },
     "preferences": {
-      "titre": "Preferences",
       "aide": "Tailor your DropLink experience.",
       "langue": "Language",
       "appliquer": "Apply",
       "languePubliqueAide": "The language of the pages your customers see is set in My brand."
     },
     "securite": {
-      "titre": "Security",
-      "aide": "Protect your account and your data.",
       "sessions": "Active sessions",
       "sessionsAide": "Manage your signed-in devices.",
       "fermer": "Sign out other devices",
       "fermeture": "Signing out…",
       "ferme": "Your other devices have been signed out.",
-      "voir": "View sessions",
-      "masquer": "Hide sessions",
       "cetAppareil": "This device",
       "activeLe": "Last active: {date}",
       "appareilInconnu": "Unrecognised device",
@@ -2726,8 +2727,6 @@
       "appareilsFiables": {
         "titre": "Trusted devices",
         "aide": "Devices that skip your code.",
-        "voir": "View devices",
-        "masquer": "Hide devices",
         "actifJusqu": "Trusted until {date}",
         "aucun": "No trusted devices yet.",
         "revoquer": "Revoke",
@@ -2755,7 +2754,9 @@
         "desactiverBouton": "Disable two-factor authentication",
         "desactivation": "Disabling…",
         "desactiveeOk": "Two-factor authentication disabled.",
-        "fermer": "Close"
+        "fermer": "Close",
+        "desactivee": "Off",
+        "lectureImpossible": "Two-step verification status can't be read right now."
       }
     },
     "abonnement": {
@@ -2773,10 +2774,10 @@
       "proMarque": "Without the “Powered by DropLink” card",
       "proPlafond": "Monthly cap, not lifetime",
       "bouton": "Upgrade to Pro",
-      "nonInclus": "Not included:"
+      "nonInclus": "Not included:",
+      "detail": "What the Pro plan changes"
     },
     "support": {
-      "titre": "Support",
       "aide": "Need help?",
       "centre": "Help centre",
       "centreAide": "Browse our guides and tutorials.",
@@ -2800,7 +2801,6 @@
       "abonnementEnCours": "Your Pro subscription is still active: deleting your account here would not stop it at Lemon Squeezy, which would keep charging you. Cancel it first from your Lemon Squeezy customer portal, then come back to delete your account."
     },
     "donnees": {
-      "titre": "Data",
       "aide": "Manage your data and export your information.",
       "exporter": "Export my data",
       "exporterAide": "Orders, parcels, media and views, in JSON. Without your internal notes.",
@@ -2810,9 +2810,7 @@
     "suppression": {
       "compte": {
         "titre": "Delete account",
-        "aide": "Permanently delete your account and all your data.",
         "bouton": "Delete",
-        "question": "Delete the account?",
         "avertissement": "This action is final. Your account, your orders, your shipments and your customer links will be deleted and cannot be restored.",
         "conservation": "Only your email address and your sign-up and deletion dates are kept for one year, as the law requires of a host, then erased.",
         "soumettre": "Delete the account",
@@ -2824,7 +2822,6 @@
         "titre": "Delete all data",
         "aide": "Permanently delete all your data.",
         "bouton": "Delete",
-        "question": "Delete all data?",
         "avertissement": "All your orders, photos, videos and customer links will be permanently deleted. Your account stays active but empty.",
         "soumettre": "Delete everything",
         "enCours": "Deleting…",
@@ -2832,6 +2829,15 @@
       },
       "recopier": "Type your email address to confirm: {adresse}",
       "annuler": "Cancel"
+    },
+    "onglets": {
+      "titre": "Settings sections",
+      "compte": "Account",
+      "preferences": "Preferences",
+      "securite": "Security",
+      "abonnement": "Subscription",
+      "donnees": "Data",
+      "support": "Support"
     }
   },
   "verification": {
@@ -2926,15 +2932,17 @@
       "carte": "“Powered by DropLink” card",
       "medias": "Photos, videos and automatic tracking",
       "couleurs": "Page branded in your colours",
-      "aVie": "{n} in total, for life",
-      "parMois": "{n} per month",
+      "aVie": "<b>{n}</b> in total, for life",
+      "parMois": "<b>{n}</b> per month",
       "mensuel": "Monthly cap",
       "adresseGratuit": "droplink.fr/p/xK9…",
       "adressePro": "droplink.fr/your-shop/xK9…",
       "carteGratuit": "Shown",
       "cartePro": "Removed",
       "inclus": "Included"
-    }
+    },
+    "filParametres": "Settings",
+    "comparaison": "Free and Pro plans compared"
   },
   "notifications": {
     "carte": {

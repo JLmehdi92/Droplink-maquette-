@@ -80,8 +80,9 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#ea4335", "logo Google"],
   ["#fbbc05", "logo Google"],
   ["#34a853", "logo Google"],
-  ["#c13584", "logo Instagram"],
-  ["#1da851", "logo WhatsApp"],
+  // Instagram (#c13584) et WhatsApp (#1da851) sont sortis le 02/10/2026 : les
+  // tuiles colorées des réseaux de « Ma marque » ont laissé place aux champs à
+  // icône de la refonte, dans la couleur de l'interface.
   /*
    * ⚠️ LES NEUF MONOGRAMMES DE TRANSPORTEUR, ET POURQUOI CE NE SONT PAS DES
    * LOGOS RECONSTITUÉS.

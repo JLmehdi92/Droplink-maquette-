@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
+import { ChevronRight } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { FormulaireMarque } from "@/components/marque/formulaire-marque";
@@ -65,12 +65,26 @@ export default async function Marque({
   const logoUrl =
     profil.logoUrl === null ? null : await signerLecture(profil.logoUrl).catch(() => null);
 
+  const nom = profil.nomAffiche ?? profil.nomBoutique;
+  /* LA REFONTE (02/10/2026) suit `marque.html` : six réglages numérotés à
+     gauche, l'aperçu de la page client à droite (mobile ou desktop). */
   return (
-    <>
-      <EnTeteEcranDs titre={t("titre")} sousTitre={t("sousTitre")} />
-
-      <main id="contenu" className="px-margin-mobile py-5 md:px-8 md:pt-0 md:pb-8">
+    <main id="contenu" className="tableau marque-ecran">
+      <div className="tableau__tete">
         <div>
+          <p className="v4-fil">
+            {nom === null ? null : (
+              <>
+                <span>{nom}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
+            )}
+            <b>{t("titre")}</b>
+          </p>
+          <h1>{t("titre")}</h1>
+          <p>{t("sousTitre")}</p>
+        </div>
+      </div>
         <TraductionsClient espaces={["marque"]}>
           <FormulaireMarque
             /*
@@ -104,8 +118,6 @@ export default async function Marque({
             }}
           />
         </TraductionsClient>
-      </div>
-      </main>
-    </>
+    </main>
   );
 }

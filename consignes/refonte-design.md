@@ -704,6 +704,50 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   Railway. **Au poste de Mehdi** : `fumee` (les trois écrans servent un autre HTML), `test:rls`,
   `couverture`.
 
+### ▶️ 02/10/2026 — étapes 4e à 4g : Ma marque, Paramètres, Passer au Pro (session cloud)
+
+- **Ma marque (`marque.html`)** : sections numérotées en `.bloc.reglage`, dépôt du logo par
+  glisser-déposer, couleur et pastilles de démonstration, réseaux en champs à icône, interrupteurs
+  `role="switch"` (le retrait de la carte « Propulsé par DropLink » reste réservé au Pro, refusé en
+  base sinon), lien personnalisé et carte Pro. **L'aperçu suit la maquette** : la vraie grammaire de
+  la page client (`.pc`, `client.css`), aux couleurs résolues par `resoudreAccent()`, dans la langue
+  des pages client choisie — et la bascule Desktop/Mobile change la MISE EN PAGE (deux colonnes en
+  bureau), plus seulement le cadre. Mise à l'échelle mesurée : `zoom` au téléphone, transformation en
+  bureau (à 0,4, `zoom` arrondit chaque lettre et les mots se collent).
+- **Paramètres (`parametres.html`)** : six onglets en LIENS `?section=` (l'écran marche sans
+  JavaScript, chaque panneau est rendu au serveur), blocs `bloc-r` avec pied. Le mot de passe actuel
+  n'apparaît qu'une fois l'adresse modifiée ; la suppression garde sa confirmation en deux gestes et
+  son collage bloqué ; la 2FA garde ses deux parcours. `carte-reglage` et `classes.ts` supprimés.
+- **Passer au Pro (`passer-pro.html`)** : fil d'Ariane, accroche, quatre atouts, tableau Gratuit/Pro
+  (nombres en gras, adresses en chasse fixe comme la maquette — les messages `tableau.aVie` et
+  `tableau.parMois` portent désormais `<b>`, et Tarifs les lit par `t.rich`), pied avec le lien de
+  paiement SIGNÉ (204). Plafonds et prix LUS ; un plafond illisible retire ses lignes. « Paramètres »
+  s'allume dans la barre latérale, comme dans la maquette. Hors maquette : l'abonnement pas encore
+  ouvert se lit comme une aide, pas comme une action.
+- **Décision d'accessibilité, contre la maquette** : ses textes indicatifs étaient en `--sourdine`
+  (3,16:1). Ils passent en `--corps` partout, et `textes-indicatifs-lisibles` relève désormais aussi
+  chaque règle `::placeholder` des feuilles de la refonte — toute couleur, une valeur non résolue est
+  une faute — avec un plancher PAR MOITIÉ (classes, feuilles). Falsifiée : `#a9aec4` posé dans
+  `app.css` → rouge.
+- **Relecture de Ma marque** : 1 HIGH (le logo confirmé et le geste en cours partageaient un état : un
+  retrait échoué effaçait l'aperçu d'un logo toujours en base — séparés en deux états), 5 MEDIUM
+  (double dépôt, exception non rattrapée, échec du retrait muet, commentaires périmés, variables
+  mortes) et leurs LOW : corrigés.
+- **Relecture de Paramètres** : 0 CRITICAL/HIGH, 4 MEDIUM, corrigés — la 2FA disait « Désactivée »
+  quand sa lecture échouait (contrainte n° 8 : l'écran dit maintenant qu'il n'a pas pu lire) ; les
+  deux liens autonomes `.lien-r` étaient tombés sous 44 px, et `cibles-tactiles` ne voyait pas
+  `LienEcran` (motif élargi) ; « Appliquer » la langue renvoyait sur l'onglet Compte ; l'exemption
+  des pieds était ancrée sur une règle qui ne couvrait pas tout ce qu'elle exemptait (ré-ancrée sur
+  la règle tactile globale de `.bouton-app`). LOW corrigés : l'aide du pied ne disparaît plus sous un
+  message (le message vit dans une région annoncée qui existe avant son texte), `aria-controls` sur
+  la 2FA, pieds vides, onglets à 44 px au toucher au-delà de 1 100 px, neuf clés mortes retirées.
+  Gardé : `LienEcran` pour le lien vers « Ma marque » (il ne fait que préfixer la langue).
+- **Mesuré** : 1440 et 390 px, fr/en/zh-CN, mouvement réduit ; aucun débordement, aucune erreur
+  console, aucune violation CSP. Comportements : le mot de passe apparaît quand l'adresse change, la
+  confirmation de suppression s'ouvre et s'annule, le trait suit l'onglet, l'aperçu bascule.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` 1 268/1 269 — seule l'alarme
+  Railway. **Au poste de Mehdi** : `fumee`, `test:rls`, `couverture`.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -1,7 +1,7 @@
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { ArrowRight, BadgeCheck, Crown, Link as LinkIcon, Package, Truck } from "lucide-react";
-import { EnTeteEcranDs } from "@/components/app/en-tete-ecran";
+import { ArrowRight, BadgeCheck, Check, ChevronRight, Crown, Link as LinkIcon, Package, Truck } from "lucide-react";
+import { LienEcran } from "@/components/lien-ecran";
 import { exigerVendeur } from "@/lib/comptes/apres-session";
 import { lireProfilVendeur } from "@/lib/comptes/profil";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -125,196 +125,154 @@ export default async function PasserProPage({ params }: { params: Promise<{ loca
    * le plan gratuit n'est pas une version mutilée du produit. Les photos, les
    * vidéos, le suivi automatique et sa page à ses couleurs y sont déjà.
    */
+  const gras = { b: (c: React.ReactNode) => <b>{c}</b> };
+  const inclus = <Check className="ic tp-oui" role="img" aria-label={t("tableau.inclus")} />;
   const LIGNES: ReadonlyArray<{
     readonly cle: string;
-    readonly gratuit: string;
-    readonly pro: string;
+    readonly gratuit: React.ReactNode;
+    readonly pro: React.ReactNode;
   }> = [
     ...(aVie === null
       ? []
       : [
           {
             cle: "commandes",
-            gratuit: t("tableau.aVie", { n: nombre(aVie) }),
+            gratuit: t.rich("tableau.aVie", { n: nombre(aVie), ...gras }),
             pro:
-              parMois === null ? t("tableau.mensuel") : t("tableau.parMois", { n: nombre(parMois) }),
+              parMois === null ? t("tableau.mensuel") : t.rich("tableau.parMois", { n: nombre(parMois), ...gras }),
           },
           {
             cle: "colis",
             // UNE FOIS le quota de commandes (201) : 5 commandes, 5 colis depuis la 210, sans marge
             // de correction payée par le budget de suivi commun.
-            gratuit: t("tableau.aVie", { n: nombre(aVie) }),
+            gratuit: t.rich("tableau.aVie", { n: nombre(aVie), ...gras }),
             pro:
               parMois === null
                 ? t("tableau.mensuel")
                 : // Une fois le plafond de commandes, plus deux (197) : 300 commandes, 300 colis.
-                  t("tableau.parMois", { n: nombre(parMois) }),
+                  t.rich("tableau.parMois", { n: nombre(parMois), ...gras }),
           },
         ]),
-    { cle: "adresse", gratuit: t("tableau.adresseGratuit"), pro: t("tableau.adressePro") },
+    {
+      cle: "adresse",
+      gratuit: <code className="tp-code">{t("tableau.adresseGratuit")}</code>,
+      pro: <code className="tp-code tp-code--pro">{t("tableau.adressePro")}</code>,
+    },
     { cle: "carte", gratuit: t("tableau.carteGratuit"), pro: t("tableau.cartePro") },
-    { cle: "medias", gratuit: t("tableau.inclus"), pro: t("tableau.inclus") },
-    { cle: "couleurs", gratuit: t("tableau.inclus"), pro: t("tableau.inclus") },
+    { cle: "medias", gratuit: inclus, pro: inclus },
+    { cle: "couleurs", gratuit: inclus, pro: inclus },
   ];
 
+  const nom = profil?.nomAffiche ?? profil?.nomBoutique ?? null;
+  const prix = t("parMois", {
+    prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
+  });
+
+  /* LA REFONTE (02/10/2026) suit `passer-pro.html` : l'accroche, les quatre
+     atouts, puis le tableau Gratuit / Pro. Les plafonds et le prix sont LUS
+     (base, `PRIX_PRO_EUR`) : un plafond illisible retire ses lignes plutôt que
+     d'écrire un nombre. Le paiement est un lien SIGNÉ vers Lemon Squeezy (204) :
+     aucun paiement ne passe par le produit (contrainte n° 1). */
   return (
-    <>
-      <EnTeteEcranDs titre={t("titre")} sousTitre={t("sousTitre")} />
+    <main id="contenu" className="tableau pro-ecran">
+      <div className="tableau__tete">
+        <div>
+          <p className="v4-fil">
+            {nom === null ? null : (
+              <>
+                <span>{nom}</span>
+                <ChevronRight aria-hidden="true" className="ic" />
+              </>
+            )}
+            <LienEcran href={`/${langue}/parametres?section=abonnement`}>{t("filParametres")}</LienEcran>
+            <ChevronRight aria-hidden="true" className="ic" />
+            <b>{t("titre")}</b>
+          </p>
+          <h1>{t("titre")}</h1>
+          <p>{t("sousTitre")}</p>
+        </div>
+      </div>
 
-      <main id="contenu" className="px-margin-mobile py-5 md:px-8 md:pt-0 md:pb-8">
-        {/* 32 px DANS la boîte de 1180, comme la planche (`padding: 0 32px`, maxWidth 1180) :
-            sans eux la colonne commençait 32 px plus à gauche (remesure du 24/09/2026). Et 8 px
-            en bas : la planche en pose 40, la page 32. */}
-        <div className="mx-auto w-full max-w-[1180px] md:px-8 md:pb-2">
-          <header className="max-w-[720px] pt-1 pb-6">
-            <span className="mb-3.5 inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3 py-[5px] text-[11px] leading-[normal] font-extrabold tracking-[0.12em] text-ds-accent-encre uppercase">
-              <Crown aria-hidden="true" size={13} strokeWidth={2.2} />
-              {t("eyebrow")}
+      <section className="pro-accroche">
+        <p className="l4-etiquette">
+          <span>
+            <Crown aria-hidden="true" className="ic" />
+          </span>
+          {t("eyebrow")}
+        </p>
+        <h2>{t("accroche")}</h2>
+        <p>{t("intro")}</p>
+      </section>
+
+      <div className="pro-atouts">
+        {FEATURES.map(({ cle, Icone }) => (
+          <section key={cle} className="bloc pro-atout v4-carte">
+            <span className="pro-atout__icone">
+              <Icone aria-hidden="true" className="ic" />
             </span>
-            <h2 className="text-[30px] leading-[1.1] font-extrabold tracking-[-0.045em] text-ds-texte-fort">
-              {t("accroche")}
-            </h2>
-            <p className="mt-2.5 text-[16px] leading-[1.55] text-ds-texte-corps">{t("intro")}</p>
-          </header>
-
-          <div className="mb-6 grid gap-4 md:grid-cols-2 lg:gap-[18px]">
-            {FEATURES.map(({ cle, Icone }) => (
-              <section
-                key={cle}
-                className="flex items-start gap-3.5 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-[22px] shadow-ds-card"
-              >
-                <span className="inline-flex size-11 flex-none items-center justify-center rounded-ds-icon-tile bg-ds-surface-teinte text-ds-accent">
-                  <Icone aria-hidden="true" size={20} strokeWidth={1.9} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[17px] leading-[normal] font-bold tracking-[-0.025em] text-ds-texte-fort">
-                    {t(`features.${cle}.titre`)}
-                  </span>
-                  <span className="mt-[5px] block text-[13.5px] leading-[1.55] text-ds-texte-corps">
-                    {/* Le quota à vie est DIT, comme la planche (« borné à 5 commandes À
-                        VIE »), dès qu'il est lu ; illisible, la phrase ne cite aucun nombre. */}
-                    {cle === "commandes" && aVie !== null
-                      ? t("features.commandes.texteNombre", { n: nombre(aVie) })
-                      : t(`features.${cle}.texte`)}
-                  </span>
-                </span>
-              </section>
-            ))}
-          </div>
-
-          <section className="rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-6 shadow-ds-card">
-            {/*
-              ⚠️ TROIS COLONNES NE TIENNENT PAS À 390 px, ET LA SONDE L'A DIT :
-              « droplink.fr/votre-boutique/… » sortait de sa carte. Au téléphone
-              chaque ligne devient un bloc — le libellé, puis les deux valeurs
-              nommées —, et l'en-tête de colonnes n'a plus rien à coiffer.
-            */}
-            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ds-filet-appuye pb-3.5 md:hidden">
-              <span className="text-[13px] leading-[normal] font-bold text-ds-accent-encre">
-                {t("pro")}
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-violet-100 px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] text-ds-accent-encre">
-                {t("parMois", {
-                  prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
-                })}
-              </span>
-            </div>
-
-            <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] items-baseline gap-4 border-b border-ds-filet-appuye pb-3.5 md:grid">
-              <span />
-              <span className="text-[13px] leading-[normal] font-bold text-ds-texte-sourdine">
-                {t("gratuit")}
-              </span>
-              <span className="flex flex-wrap items-baseline gap-2">
-                <span className="text-[13px] leading-[normal] font-bold text-ds-accent-encre">
-                  {t("pro")}
-                </span>
-                {/* 11,5 px est le PLANCHER du téléphone (règle 5) ; le kit
-                    descend à 11 px, et c'est réservé au bureau. */}
-                <span className="inline-flex items-center gap-1.5 rounded-ds-pill bg-ds-violet-100 px-[11px] py-[5px] text-[11.5px] leading-[normal] font-bold tracking-[-0.02em] text-ds-accent-encre lg:text-[11px]">
-                  {t("parMois", {
-                    prix: format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
-                  })}
-                </span>
-              </span>
-            </div>
-
-            {LIGNES.map((ligne, i) => (
-              <div
-                key={ligne.cle}
-                className={
-                  "py-3.5 md:grid md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-center md:gap-4 " +
-                  (i === LIGNES.length - 1 ? "" : "border-b border-ds-filet")
-                }
-              >
-                <span className="block text-[14px] leading-[normal] font-semibold text-ds-texte-fort">
-                  {t(`tableau.${ligne.cle}`)}
-                </span>
-                {/* Au téléphone les deux valeurs portent leur nom : sans en-tête
-                    de colonne, « Affichée » tout seul ne dit pas de quel plan.
-                    Au bureau la valeur est un BLOC, comme la cellule du kit : en ligne,
-                    elle héritait de l'interligne de 24 px de la page — 53 px par
-                    rangée au lieu de 46 (remesure du 24/09/2026). */}
-                <span className="mt-1.5 flex min-w-0 items-baseline justify-between gap-3 md:mt-0 md:block">
-                  <span className="flex-none text-[12.5px] leading-[normal] text-ds-texte-sourdine md:hidden">
-                    {t("gratuit")}
-                  </span>
-                  <span className="min-w-0 text-right text-[14px] leading-[normal] break-words text-ds-texte-corps md:block md:text-left">
-                    {ligne.gratuit}
-                  </span>
-                </span>
-                <span className="mt-1 flex min-w-0 items-baseline justify-between gap-3 md:mt-0 md:block">
-                  <span className="flex-none text-[12.5px] leading-[normal] text-ds-texte-sourdine md:hidden">
-                    {t("pro")}
-                  </span>
-                  <span className="min-w-0 text-right text-[14px] leading-[normal] font-semibold break-words text-ds-accent-encre md:block md:text-left">
-                    {ligne.pro}
-                  </span>
-                </span>
-              </div>
-            ))}
-
-            <div className="mt-[22px] flex flex-wrap items-center justify-between gap-5">
-              <span className="max-w-[520px] text-[12.5px] leading-[1.55] text-ds-texte-sourdine">
-                {t("facture")}
-              </span>
-
-              {/*
-                TROIS ÉTATS, ET AUCUN NE MENT.
-                — déjà Pro : rien à vendre, on le dit ;
-                — adresse de paiement configurée : le bouton mène au fournisseur ;
-                — pas d'adresse : pas de bouton, et une phrase qui dit pourquoi.
-              */}
-              {dejaPro ? (
-                <span className="inline-flex min-h-11 items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-5 text-[14px] leading-[normal] font-bold text-ds-accent-encre">
-                  <BadgeCheck aria-hidden="true" size={17} strokeWidth={2} />
-                  {t("dejaPro")}
-                </span>
-              ) : paiement === null ? (
-                <span className="text-[13px] leading-[1.55] text-ds-texte-sourdine">
-                  {t("pasEncoreOuvert")}
-                </span>
-              ) : (
-                <a
-                  href={paiement}
-                  /*
-                   * `noopener noreferrer` : la page de paiement est un domaine
-                   * TIERS, et `window.opener` lui donnerait prise sur l'onglet
-                   * du vendeur — celui où sa session est ouverte.
-                   */
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-11 items-center gap-2 rounded-ds-pill border border-transparent bg-[image:var(--degrade-ds-marque)] px-[22px] text-[14px] leading-[normal] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-transform active:scale-[.98]"
-                >
-                  {/* Le `Button primary` du kit : flèche à droite, demi-gras, 22 px. */}
-                  {t("passer")}
-                  <ArrowRight aria-hidden="true" size={16} strokeWidth={2.2} />
-                </a>
-              )}
+            <div>
+              <h3>{t(`features.${cle}.titre`)}</h3>
+              {/* Le nombre du plafond gratuit, dès qu'il est lu ; illisible, la
+                  phrase ne cite aucun nombre. */}
+              <p>
+                {cle === "commandes" && aVie !== null
+                  ? t("features.commandes.texteNombre", { n: nombre(aVie) })
+                  : t(`features.${cle}.texte`)}
+              </p>
             </div>
           </section>
+        ))}
+      </div>
+
+      <section className="bloc pro-comparer" aria-label={t("comparaison")}>
+        <div className="tp pro-tp">
+          <table className="tp__table">
+            <caption className="visuellement-cache">{t("comparaison")}</caption>
+            <colgroup>
+              <col className="tp__col-libelle" />
+              <col />
+              <col className="tp__col-pro" />
+            </colgroup>
+            <thead>
+              <tr>
+                <td className="tp__coin" />
+                <th scope="col">
+                  <span className="tp__nom">{t("gratuit")}</span>
+                </th>
+                <th scope="col" className="tp__pro">
+                  <span className="tp__nom">{t("pro")}</span>
+                  <span className="pro-prix">{prix}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {LIGNES.map((ligne) => (
+                <tr key={ligne.cle}>
+                  <th scope="row">{t(`tableau.${ligne.cle}`)}</th>
+                  <td>{ligne.gratuit}</td>
+                  <td>{ligne.pro}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </main>
-    </>
+        <footer className="pro-pied">
+          <p>{t("facture")}</p>
+          {dejaPro ? (
+            <span className="pro-actif">
+              <BadgeCheck aria-hidden="true" className="ic" />
+              {t("dejaPro")}
+            </span>
+          ) : paiement === null ? (
+            <span className="pro-pied__ferme">{t("pasEncoreOuvert")}</span>
+          ) : (
+            <a href={paiement} target="_blank" rel="noopener noreferrer" className="bouton-app bouton-app--marque pro-pied__payer">
+              {t("passer")}
+              <ArrowRight aria-hidden="true" className="ic" />
+            </a>
+          )}
+        </footer>
+      </section>
+    </main>
   );
 }

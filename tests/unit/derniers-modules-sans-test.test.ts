@@ -47,6 +47,12 @@ vi.mock("next-intl/server", () => ({
     t.raw = t;
     return t;
   },
+  // Le formateur réel du navigateur, dans la langue demandée : l'aperçu de « Ma
+  // marque » formate ses dates de démonstration dans la langue des pages client.
+  getFormatter: async ({ locale }: { locale: string }) => ({
+    dateTime: (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale, o).format(d),
+    dateTimeRange: (a: Date, b: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale, o).formatRange(a, b),
+  }),
 }));
 
 process.env["HASH_SALT"] = "sel-de-test-pour-l-empreinte";
@@ -129,7 +135,15 @@ describe("Les libellés de l'aperçu de la page client", () => {
     expect(Object.keys(tous).sort()).toEqual(["en", "fr", "zh-CN"]);
     for (const [langue, libelles] of Object.entries(tous)) {
       for (const [cle, valeur] of Object.entries(libelles)) {
+        if (cle === "page") continue;
         expect(String(valeur).trim(), `${langue}.${cle}`).not.toBe("");
+      }
+      // La page client complète de l'aperçu de « Ma marque » : chaque texte, y
+      // compris ceux des listes (étapes, dates), existe et n'est pas vide.
+      for (const [cle, valeur] of Object.entries(libelles.page)) {
+        for (const v of Array.isArray(valeur) ? valeur : [valeur]) {
+          expect(String(v).trim(), `${langue}.page.${cle}`).not.toBe("");
+        }
       }
     }
   });

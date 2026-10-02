@@ -140,7 +140,6 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      nom du plan, et l'exemple de lien doit montrer la FORME attendue — un
      segment d'URL en lettres latines, parce que c'est ce qu'une adresse
      accepte. */
-  ["marque.lienPro", "Le nom du plan, entre parenthèses pleine largeur."],
   ["marque.lienProBadge", "Le nom du plan, seul."],
   ["admin.plan.plans.pro", "Le nom du plan, seul, comme le badge de « Ma marque »."],
   ["marque.lienPlaceholder", "Un exemple de segment d'URL : il doit ressembler à une adresse."],
