@@ -2606,10 +2606,6 @@
     "ctaTexte": "Compte gratuit, sans carte bancaire, prêt en moins d'une minute.",
     "ctaBouton": "Créer mon compte",
     "metaDescription": "Le guide complet de DropLink : créer une commande, ajouter ses photos, coller le numéro de suivi et partager un lien client.",
-    "pastille": "Docs",
-    "accueil": "Accueil",
-    "seConnecter": "Se connecter",
-    "piedContact": "Contact",
     "resumeEtiquette": "En résumé :",
     "param1": "Compte : nom, e-mail et mot de passe — l'e-mail et le mot de passe ne changent qu'avec votre mot de passe actuel.",
     "param2": "Préférences : langue de l'interface. La langue des pages client se règle dans Ma marque.",
@@ -3000,7 +2996,6 @@
   "tarifs": {
     "metaTitre": "Tarifs — DropLink",
     "metaDescription": "Commencez gratuitement, sans carte bancaire. Le plan Pro à {prix} par mois, sans engagement : votre lien à votre nom, une page sans mention DropLink et un plafond qui se recharge chaque mois.",
-    "pastille": "Tarifs",
     "eyebrow": "Tarifs",
     "titre": "Gratuit pour commencer, Pro quand vous grandissez",
     "intro": "Photos, vidéos, suivi automatique et page à vos couleurs : tout ce qui fait DropLink est déjà dans le plan gratuit. Le Pro ajoute quatre choses, et seulement quatre.",

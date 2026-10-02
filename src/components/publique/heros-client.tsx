@@ -1,4 +1,4 @@
-import { Truck } from "lucide-react";
+import { CircleAlert, Truck } from "lucide-react";
 import { liensDuVendeur } from "@/components/publique/reseaux-vendeur";
 import type { Boutique, CommandePublique } from "@/lib/page-publique/lecture";
 
@@ -13,7 +13,7 @@ type Etape = (typeof ETAPES)[number];
  * ⚠️ LE TRAJET NE NOMME AUCUN LIEU, contrairement à la maquette (« Lyon · 29 sept. ») :
  * ce serait interpréter les passages du transporteur, ce que l'arbitrage du § 5 refuse.
  * Chaque arrêt porte sa DATE quand on la connaît, rien sinon ; le dernier, tant qu'il
- * n'est pas atteint, porte le destinataire — c'est la seule « destination » que la page
+ * n'est pas atteint, dit pour qui (« pour Léa M. ») — c'est la seule « destination » que la page
  * connaisse, et elle n'est pas une adresse.
  *
  * Le trajet est une IMAGE pour un lecteur d'écran (`role="img"`), avec une étiquette qui
@@ -23,10 +23,10 @@ export function HerosClient({
   boutique,
   libelleSite,
   reference,
-  client,
   statut,
   titre,
   sousTitre,
+  silencieux,
   estimation,
   dates,
   libelles,
@@ -34,12 +34,13 @@ export function HerosClient({
   readonly boutique: Boutique;
   readonly libelleSite: string;
   readonly reference: string | null;
-  readonly client: string | null;
   readonly statut: CommandePublique["statut"];
   /** L'état du colis, en phrase (« Votre colis est en transit »), ou le silence anormal. */
   readonly titre: string;
   /** Sous le titre quand aucune date n'est estimée : le dernier mouvement, ou la préparation. */
   readonly sousTitre: string;
+  /** Le silence anormal (plus de dix jours sans mouvement) : il se signale par une icône. */
+  readonly silencieux: boolean;
   readonly estimation: string | null;
   readonly dates: Readonly<Record<Etape, string | null>>;
   readonly libelles: {
@@ -77,6 +78,8 @@ export function HerosClient({
               <p className="cv-boutique">
                 <small>{libelles.commandeDe}</small>
                 <b>{boutique.nom}</b>
+                {/* La description suit le nom, et seulement lui (la base la retire sans nom, 147). */}
+                {boutique.description === null ? null : <span>{boutique.description}</span>}
               </p>
             )}
           </div>
@@ -111,7 +114,10 @@ export function HerosClient({
                 client vient poser. */}
             <h1 className="cv-entree">{titre}</h1>
             {estimation === null ? (
-              <p className="cv-sous cv-entree">{sousTitre}</p>
+              <p className="cv-sous cv-entree">
+                {silencieux ? <CircleAlert aria-hidden="true" className="ic" /> : null}
+                {sousTitre}
+              </p>
             ) : (
               <p className="cv-date cv-entree">
                 <small>{libelles.dateEstimee}</small>
@@ -139,7 +145,9 @@ export function HerosClient({
             </div>
             <ol className="cv-trajet__etapes" aria-hidden="true">
               {ETAPES.map((etape, rang) => {
-                const date = rang <= courante ? dates[etape] : etape === "livre" ? client : null;
+                // Avant la livraison, le dernier arrêt dit POUR QUI (« pour Léa M. ») : le nom seul sous
+                // « Livré » se lisait comme une livraison accomplie.
+                const date = rang <= courante ? dates[etape] : etape === "livre" ? libelles.pourClient : null;
                 return (
                   <li key={etape} className={rang === courante ? "est-actuel" : undefined}>
                     <b>{libelles.etapes[etape]}</b>

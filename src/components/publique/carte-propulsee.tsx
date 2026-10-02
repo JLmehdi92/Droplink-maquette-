@@ -15,7 +15,7 @@ export function CartePropulsee({
   libelles,
 }: {
   readonly langue: string;
-  readonly libelles: { readonly surtitre: string; readonly titre: string; readonly bouton: string };
+  readonly libelles: { readonly surtitre: string; readonly titre: string };
 }) {
   return (
     <a
@@ -23,7 +23,6 @@ export function CartePropulsee({
       target="_blank"
       rel="noopener noreferrer"
       className="cv-propulse cv-entree"
-      aria-label={libelles.surtitre + ". " + libelles.bouton}
     >
       <Image src={symbole} alt="" width={14} sizes="14px" loading="lazy" />
       <span>

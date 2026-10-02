@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 
 /**
@@ -100,6 +100,21 @@ export function ArbitrageQc({
 
   const decide = etat !== "en_attente" && !rouvert;
 
+  /* LE FOCUS SUIT LA BASCULE : le bouton qui avait le focus disparaît à chaque étape, et
+     sans ce renvoi le clavier repartirait du haut de la page. Pas au premier rendu : on
+     ne vole pas le focus à qui ouvre la page. */
+  const statut = useRef<HTMLParagraphElement>(null);
+  const question = useRef<HTMLHeadingElement>(null);
+  const interagi = useRef(false);
+  useEffect(() => {
+    if (!interagi.current) {
+      interagi.current = true;
+      return;
+    }
+    if (decide) statut.current?.focus();
+    else if (!motif) question.current?.focus();
+  }, [decide, motif]);
+
   /* L'échec est DIT. Un pari perdu qui ne se dit pas laisse le visiteur croire que sa
      décision est enregistrée. */
   const messageEchec = echec ? (
@@ -117,7 +132,13 @@ export function ArbitrageQc({
           </span>
           {/* `role="status"` : un client qui n'y voit pas doit savoir que sa décision est
               enregistrée (WCAG 4.1.3, audit du 24/09/2026). */}
-          <p role="status">{etat === "approuve" ? libelles.approuve : libelles.refuse}</p>
+          {/* Le titre reste pour la section (son nom), hors de la vue : la marque dit l'état. */}
+          <h2 id="cv-qc-titre" className="sr-only">
+            {libelles.titre}
+          </h2>
+          <p role="status" ref={statut} tabIndex={-1}>
+            {etat === "approuve" ? libelles.approuve : libelles.refuse}
+          </p>
           <button type="button" onClick={() => setRouvert(true)} className="cv-lien">
             {libelles.modifier}
           </button>
@@ -161,7 +182,9 @@ export function ArbitrageQc({
         </div>
       ) : (
         <div>
-          <h2 id="cv-qc-titre">{libelles.titre}</h2>
+          <h2 id="cv-qc-titre" ref={question} tabIndex={-1}>
+            {libelles.titre}
+          </h2>
           <p className="cv-qc__question">{libelles.texte}</p>
           <div className="cv-qc__actions">
             <button

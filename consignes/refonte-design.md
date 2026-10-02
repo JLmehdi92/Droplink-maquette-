@@ -822,6 +822,40 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   44 px. Hors de portée : une commande AVEC photos (les clés R2 du jeu n'existent pas) — le carrousel
   est vérifié par la feuille et `visionneur-focus`, pas à l'œil.
 
+- **Relecture de la page client** (corrigée au commit suivant) : 3 HIGH — la section des photos se
+  posait sur l'aplat du vendeur quand la commande n'a pas encore de colis (3,17:1 sur l'accent par
+  défaut, 1:1 sur un vendeur noir : marge haute quand elle ouvre le corps) ; la description de la
+  boutique avait disparu alors que l'aperçu de « Ma marque » la montrait (rendue sous le nom) ; le texte
+  du haut de page à opacité réduite passait sous 4,5:1 — `resoudreAccent()` calibre `surRemplissage`
+  à 4,5 tout juste, mesuré de 4,03 à 2,88:1 selon l'accent : toute transparence retirée, la hiérarchie
+  passe par la taille et la graisse. MEDIUM corrigés : compteur de l'historique en `--cl-sur-teinte`,
+  « Propulsé par » posé sur blanc (son encre est calibrée contre le blanc) et nommé par son texte
+  visible (WCAG 2.5.3), titre et focus de l'arbitrage QC après chaque bascule, silence anormal signalé
+  par une icône, « pour Léa M. » sous « Livré » (le nom seul se lisait comme une livraison faite), compte
+  des photos visible au bureau, règles d'impression (sinon blanc sur blanc), poignée de la feuille sans
+  curseur de glisser, champ e-mail de nouveau `required`. **Limite gardée et dite** : au téléphone,
+  l'historique complet s'ouvre après l'hydratation ; le dernier mouvement, lui, est dans le HTML.
+
+### ▶️ 02/10/2026 — étape 6a : Tarifs et Documentation (session cloud)
+
+- **Une coque commune** (`components/public/coque-site.tsx`) : l'en-tête et le pied de la landing,
+  avec la navigation des pages de la maquette (« Comment ça marche », Tarifs, Documentation, Blog en
+  français) et l'entrée courante en `aria-current="page"`. Elle remplacera `CoquePublique` page après
+  page.
+- **Tarifs (`tarifs.html`)** : en-tête de page, les deux plans (`tf-plan`), le tableau de comparaison
+  partagé avec « Passer au Pro » (nombres en gras, adresses en chasse fixe, coches nommées). Plafonds
+  et prix LUS ; le dégradé sur « Commencer avec Pro » seulement.
+- **Documentation (`docs.html`)** : sommaire en `<details>` ouvert au rendu (lisible sans
+  JavaScript), replié au montage au téléphone et qui dit la section en cours ; sections `doc-section`,
+  étapes, encarts, vrais tableaux, statuts en pastilles, FAQ repliable (`name` partagé), appel final en
+  carte. **Le texte reste celui du produit** : la maquette l'avait recopié à un commit donné, et une
+  partie a vieilli (elle promettait par exemple un e-mail facultatif du client, que l'éditeur ne
+  demande pas). Briques réécrites dans le vocabulaire de la maquette ; leurs anciennes valeurs Tailwind
+  sont parties avec elles.
+- **Mesuré** : 1280 et 390 px, fr et zh-CN, mouvement réduit ; aucun débordement, aucune erreur
+  console, aucune violation CSP, aucune cible sous 44 px. Cinq clés mortes retirées.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

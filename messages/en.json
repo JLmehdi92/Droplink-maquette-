@@ -2606,10 +2606,6 @@
     "ctaTexte": "Free account, no credit card, ready in under a minute.",
     "ctaBouton": "Create my account",
     "metaDescription": "The complete DropLink guide: create an order, add your photos, paste the tracking number and share a customer link.",
-    "pastille": "Docs",
-    "accueil": "Home",
-    "seConnecter": "Log in",
-    "piedContact": "Contact",
     "resumeEtiquette": "In short:",
     "param1": "Account: name, email and password — the email and password only change with your current password.",
     "param2": "Preferences: interface language. The language of customer pages is set in My brand.",
@@ -3000,7 +2996,6 @@
   "tarifs": {
     "metaTitre": "Pricing — DropLink",
     "metaDescription": "Start free, no credit card needed. The Pro plan is {prix} a month, no commitment: links under your name, a page without the DropLink mention and a cap that resets every month.",
-    "pastille": "Pricing",
     "eyebrow": "Pricing",
     "titre": "Free to start, Pro when you grow",
     "intro": "Photos, videos, automatic tracking and a page in your colours: everything DropLink does is already in the free plan. Pro adds four things, and only four.",

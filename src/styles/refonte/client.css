@@ -87,10 +87,10 @@
 .cv-compte b { font-weight: 700; color: var(--color-ds-texte-fort); }
 .cv-carrousel { display: flex; gap: 12px; margin-inline: -20px; padding: 2px 20px 6px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; scrollbar-width: none; overscroll-behavior-x: contain; }
 .cv-carrousel::-webkit-scrollbar { display: none; }
-/* Deux tuiles et demie au téléphone, pas une : la vignette fait 200 px (brief, budget), agrandie à
+/* Deux tuiles au téléphone, pas une : la vignette fait 200 px (brief, budget), agrandie à
    270 elle serait floue. */
 .cv-carrousel li { flex: 0 0 46%; max-width: 300px; scroll-snap-align: start; }
-@media (max-width: 639px) { .cv-photo { aspect-ratio: 1; } }
+
 .cv-photo { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 22px; background: linear-gradient(165deg, color-mix(in srgb, var(--cl-teinte) 100%, #FFFFFF), color-mix(in srgb, var(--cl-teinte) 45%, #FFFFFF)); transition: transform 160ms var(--ease-sortie); }
 /* Les VRAIES photos de contrôle remplissent leur tuile : la maquette détoure des produits sur fond
    teinté (`mix-blend-mode`), ce qui assombrirait une photo QC (risque noté au § 5). */
@@ -269,5 +269,31 @@ dialog.cv-feuille[open] .cv-feuille__panneau { animation: cv-monte 300ms cubic-b
   .cv-trajet__ligne { margin-inline: 12.5%; }
   .cv-trajet__etapes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; height: auto; }
   .cv-trajet__etapes li { position: static; align-items: center; transform: none !important; text-align: center !important; white-space: normal; overflow-wrap: anywhere; }
+}
+/* ---- Corrections de la relecture (02/10/2026) ---- */
+@media (max-width: 639px) { .cv-carrousel .cv-photo { aspect-ratio: 1; } }
+/* LE TEXTE DU HAUT DE PAGE GARDE SON PLEIN CONTRASTE : `resoudreAccent()` calibre
+   `surRemplissage` à 4,5:1 tout juste, et toute opacité réduite passait sous le seuil
+   (de 4,03 à 2,88:1 selon l'accent). La hiérarchie passe par la taille et la graisse. */
+.cv-ref, .cv-boutique small, .cv-date small, .cv-sous, .cv-trajet__etapes small, .cv-trajet__etapes li:nth-child(4) b { opacity: 1; }
+.cv-boutique small, .cv-date small, .cv-trajet__etapes small { font-weight: 500; }
+.cv-boutique span { margin-top: 2px; font-size: 12.5px; line-height: 1.4; }
+.cv-sous .ic { width: 15px; height: 15px; margin-right: 6px; vertical-align: -2px; }
+/* Sans colis, la section des photos ouvre le corps : elle ne doit pas se poser sur l'aplat. */
+.cv-principal > .cv-section:first-child { padding-top: 58px; }
+@media (min-width: 1024px) { .cv-principal > .cv-section:first-child { padding-top: 70px; } .cv-cote > .cv-propulse:first-child { margin-top: 70px; } }
+.cv-dernier__lien em { color: var(--cl-sur-teinte); }
+.cv-propulse { background: #FFFFFF; }
+.cv-compte { display: inline; }
+.cv-feuille__poignee { cursor: default; touch-action: auto; }
+.cv-lien-fort { min-height: 44px; }
+@media (pointer: coarse) { .cv-pied a { min-height: 44px; } }
+/* À L'IMPRESSION, le navigateur retire les fonds : l'écriture du vendeur, souvent blanche,
+   sortirait blanc sur blanc. Le haut de page s'imprime à l'encre. */
+@media print {
+  .cv-heros { background: none !important; color: var(--color-ds-texte-fort); }
+  .cv-heros::before { display: none; }
+  .cv-trajet__ligne { background: var(--color-ds-filet-appuye); }
+  .cv-trajet__fait, .cv-arret--fait, .cv-camion { background: var(--color-ds-texte-fort); color: #FFFFFF; }
 }
 }

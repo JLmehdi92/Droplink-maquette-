@@ -28,9 +28,9 @@ import { lireTransporteur } from "@/lib/tracking/transporteurs";
  * son trajet dessiné ; puis le dernier mouvement (qui ouvre l'historique en feuille), les
  * photos en carrousel, la validation ; à droite la livraison, le contact, le suivi par
  * e-mail. Ses risques notés au § 5 sont tenus : aucun `mix-blend-mode` sur une vraie
- * photo, aucun texte à opacité réduite sous 4,5:1 hors du haut de page (dont le texte
- * reste à `surRemplissage`), aucun lieu interprété dans le trajet, et la feuille est un
- * `<dialog>` natif plutôt qu'un script.
+ * photo, aucun texte à opacité réduite sur l'aplat du vendeur (`surRemplissage` y est à
+ * 4,5:1 tout juste, toute transparence passait sous le seuil), aucun lieu interprété dans
+ * le trajet, et la feuille est un `<dialog>` natif plutôt qu'un script.
  *
  * L'ORDRE DE LA SOURCE EST CELUI DU TÉLÉPHONE, et c'est lui qui compte pour la
  * grande majorité des visiteurs : où en est la commande, à quoi elle ressemble
@@ -337,10 +337,10 @@ export async function PageClient({
           boutique={commande.boutique}
           libelleSite={t("reseaux.site")}
           reference={commande.referenceCourte}
-          client={commande.client}
           statut={statutAffiche}
           titre={bandeau.titre}
           sousTitre={bandeau.texte}
+          silencieux={bandeau.silencieux}
           estimation={estimation}
           dates={datesTrajet}
           libelles={{
@@ -469,7 +469,6 @@ export async function PageClient({
                 libelles={{
                   surtitre: t("carteDropLink.surtitre"),
                   titre: t("carteDropLink.titre"),
-                  bouton: t("carteDropLink.bouton"),
                 }}
               />
             )}

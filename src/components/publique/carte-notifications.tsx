@@ -82,7 +82,6 @@ export function CarteNotifications({
       ) : (
         <form
           className="cv-notif"
-          noValidate
           onSubmit={(e) => {
             e.preventDefault();
             void envoyer();

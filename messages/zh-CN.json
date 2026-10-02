@@ -2606,10 +2606,6 @@
     "ctaTexte": "免费账号，无需银行卡，一分钟内完成。",
     "ctaBouton": "创建账号",
     "metaDescription": "DropLink 完整指南：创建订单、上传照片、填写运单号并分享客户链接。",
-    "pastille": "文档",
-    "accueil": "首页",
-    "seConnecter": "登录",
-    "piedContact": "联系我们",
     "resumeEtiquette": "简而言之：",
     "param1": "账号：姓名、邮箱与密码——邮箱和密码须输入当前密码才能修改。",
     "param2": "偏好：界面语言。客户页面的语言在「我的品牌」中设置。",
@@ -3000,7 +2996,6 @@
   "tarifs": {
     "metaTitre": "价格 — DropLink",
     "metaDescription": "免费开始，无需银行卡。Pro 套餐每月 {prix}，无需长期绑定：以你的名义生成链接、客户页面不显示 DropLink 标识、上限每月重置。",
-    "pastille": "价格",
     "eyebrow": "价格",
     "titre": "免费起步，业务增长后升级 Pro",
     "intro": "照片、视频、自动物流跟踪和品牌配色页面：DropLink 的核心功能，免费套餐已经全部包含。Pro 只增加四项。",
