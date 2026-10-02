@@ -62,6 +62,10 @@ export function secouerInvalides(portee: Element | null): void {
  * champ ; le message qui apparaît alors pousse le bouton de 20 px, et le relâché
  * tombe à côté — aucun envoi, aucune secousse. La maquette a le même défaut. Une
  * sortie vers le bouton d'envoi est donc laissée à l'envoi, qui valide tout.
+ *
+ * ET VERS UN LIEN DU FORMULAIRE (audit du 02/10/2026) : la suggestion d'adresse, posée à la
+ * sortie, poussait « Mot de passe oublié ? » et le lien de bascule d'une quarantaine de
+ * pixels entre l'appui et le relâché. Une sortie vers un lien ou un bouton ne pose rien.
  */
 let dernierAppuiEnvoi = -Infinity;
 let ecoute = false;
@@ -72,12 +76,12 @@ export function ecouterAppuisEnvoi(): void {
   document.addEventListener(
     "pointerdown",
     (e) => {
-      if ((e.target as Element | null)?.closest?.('button[type="submit"]')) dernierAppuiEnvoi = performance.now();
+      if ((e.target as Element | null)?.closest?.('button, a[href]')) dernierAppuiEnvoi = performance.now();
     },
     { capture: true, passive: true },
   );
 }
 
 export function sortieVersEnvoi(cible: EventTarget | null): boolean {
-  return (cible instanceof HTMLButtonElement && cible.type === "submit") || performance.now() - dernierAppuiEnvoi < 400;
+  return cible instanceof HTMLButtonElement || cible instanceof HTMLAnchorElement || performance.now() - dernierAppuiEnvoi < 400;
 }

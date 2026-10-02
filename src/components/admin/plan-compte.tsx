@@ -95,11 +95,7 @@ export function PlanCompte({
           </button>
         )}
       </div>
-      {etat.statut === "ok" ? (
-        <p role="status" className="adm-texte pb-4">
-          {t("fait")}
-        </p>
-      ) : null}
+      {/* Le succès se dit dans la bulle, après le rechargement (`confirmerEtRecharger`). */}
 
       <DialogueAdmin
         refDialogue={dialogue}

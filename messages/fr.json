@@ -1145,8 +1145,8 @@
       "selectionner": "Sélectionner le colis {numero}",
       "exporter": "Exporter la sélection",
       "toutSelectionner": "Tout sélectionner",
-      "selectionUn": "# sélectionné",
-      "selectionPlusieurs": "# sélectionnés",
+      "selectionUn": "# colis sélectionné",
+      "selectionPlusieurs": "# colis sélectionnés",
       "toutDeselectionner": "Tout désélectionner"
     },
     "autresCommandes": "{n, plural, one {et # autre commande} other {et # autres commandes}}",
@@ -1882,7 +1882,6 @@
       "confirmerSuspension": "Suspendre",
       "confirmerReactivation": "Réactiver",
       "enCours": "En cours…",
-      "fait": "Effectué.",
       "erreur": {
         "saisie": "Le motif est trop court.",
         "confirmation": "L'adresse recopiée ne correspond pas à ce compte.",
@@ -1908,7 +1907,6 @@
       "motifAide": "Au moins {n} caractères. Par exemple : « paiement reçu le 19/09 par virement ». Il s'affiche en clair dans le journal.",
       "annuler": "Annuler",
       "enCours": "En cours…",
-      "fait": "Effectué.",
       "erreur": {
         "saisie": "Le motif est trop court.",
         "deja": "Ce compte est déjà dans ce plan. Rechargez la fiche.",
@@ -2082,8 +2080,8 @@
         "panne": "Enregistrement impossible. Le réglage n'a pas changé."
       },
       "faitDetail": "Enregistré. {avant} → {apres}, écrit au journal.",
-      "faitActive": "Activé, effet immédiat, écrit au journal.",
-      "faitDesactive": "Désactivé, effet immédiat, écrit au journal."
+      "faitActive": "{nom} : activé, effet immédiat, écrit au journal.",
+      "faitDesactive": "{nom} : désactivé, effet immédiat, écrit au journal."
     },
     "boutiques": {
       "titre": "Boutiques",

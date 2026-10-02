@@ -1,5 +1,6 @@
 "use client";
 
+import { annoncer } from "@/components/app/annonce";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -85,8 +86,17 @@ export function ReglageInterrupteur({ reglage }: { reglage: InterrupteurVu }) {
     // qui aurait pu diverger.
     donnees.set("valeur", actif ? "0" : "1");
 
-    setEtat(await enregistrerParametre(INITIAL, donnees));
+    const resultat = await enregistrerParametre(INITIAL, donnees);
+    setEtat(resultat);
     setEnCours(false);
+    // LA BULLE DE LA MAQUETTE (`admin.js`) : « Suivi des colis : activé, effet immédiat, écrit
+    // au journal. » — l'état DIT est celui que la base a relu ; la trace vient du déclencheur
+    // `tracer_parametre`, dans la même transaction que l'écriture.
+    if (resultat.statut === "ok") {
+      annoncer(
+        t(resultat.apres.valeur !== 0 ? "faitActive" : "faitDesactive", { nom: t(`cles.${reglage.cle}.titre`) }),
+      );
+    }
   };
 
   return (
@@ -110,13 +120,8 @@ export function ReglageInterrupteur({ reglage }: { reglage: InterrupteurVu }) {
         <i aria-hidden="true" />
       </label>
       <p className="adm-reglage__retour" role="status" aria-live="polite">
-        {/* L'état DIT est celui que la base a relu, et la trace vient du déclencheur
-            `tracer_parametre`, dans la même transaction que l'écriture. */}
-        {etat.statut === "ok"
-          ? t(etat.apres.valeur !== 0 ? "faitActive" : "faitDesactive")
-          : etat.statut === "erreur"
-            ? t(`erreur.${etat.motif}`)
-            : null}
+        {/* Un refus reste écrit dans la rangée ; un succès se dit dans la bulle. */}
+        {etat.statut === "erreur" ? t(`erreur.${etat.motif}`) : null}
       </p>
     </div>
   );

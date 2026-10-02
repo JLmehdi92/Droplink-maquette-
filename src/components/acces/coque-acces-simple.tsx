@@ -33,7 +33,7 @@ export async function CoqueAccesSimple({
             <Icone aria-hidden="true" className="ic" />
           </span>
         )}
-        <h1>{titre}</h1>
+        <h1 tabIndex={-1}>{titre}</h1>
         <p>{sousTitre}</p>
       </header>
       {children}

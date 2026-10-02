@@ -118,7 +118,8 @@ function Pied({
         <p
           ref={zone}
           className="bloc-r__message"
-          role="status"
+          // Une erreur s'impose (`alert`), un succès se dit (`status`) — maquette `annoncer`.
+          role={affiche && message?.erreur === true ? "alert" : "status"}
           data-ton={!affiche || message === null ? undefined : message.erreur ? "erreur" : "ok"}
         >
           {affiche ? texte : ""}
@@ -143,12 +144,14 @@ function Tete({ titre, aide, id }: { readonly titre: string; readonly aide: stri
  * vers le bas) : le mot de passe demandé quand l'adresse change, la confirmation d'une
  * suppression, les étapes de la double authentification. Sous mouvement réduit, posé.
  */
-function useDevoilement<T extends HTMLElement>() {
+function useDevoilement<T extends HTMLElement>(focaliser: boolean) {
   const ref = useRef<T>(null);
   useEffect(() => {
     // Le focus va au premier champ révélé (maquette : `focus({ preventScroll: true })`) :
-    // celui qui vient de demander la confirmation n'a pas à aller la chercher.
-    ref.current?.querySelector<HTMLElement>("input:not([type=hidden]), textarea, select")?.focus({ preventScroll: true });
+    // celui qui vient de demander la confirmation n'a pas à aller la chercher. PAS pour le
+    // mot de passe qui apparaît pendant qu'on tape une adresse : il volerait la frappe
+    // (relecture du 02/10/2026 ; la maquette ne le focalise pas non plus).
+    if (focaliser) ref.current?.querySelector<HTMLElement>("input:not([type=hidden]), textarea, select")?.focus({ preventScroll: true });
     if (ref.current === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     ref.current.animate(
       [
@@ -157,12 +160,12 @@ function useDevoilement<T extends HTMLElement>() {
       ],
       { duration: 200, easing: "cubic-bezier(.23,1,.32,1)" },
     );
-  }, []);
+  }, [focaliser]);
   return ref;
 }
 
 function Devoile({ className, id, children }: { readonly className?: string; readonly id?: string; readonly children: ReactNode }) {
-  const ref = useDevoilement<HTMLDivElement>();
+  const ref = useDevoilement<HTMLDivElement>(true);
   return (
     <div ref={ref} className={className} id={id}>
       {children}
@@ -213,7 +216,7 @@ function ChampMotDePasse({
   readonly surSaisie?: (valeur: string) => void;
 }) {
   const id = useId();
-  const ref = useDevoilement<HTMLDivElement>();
+  const ref = useDevoilement<HTMLDivElement>(false);
   return (
     <div className="champ-r" ref={devoile ? ref : undefined}>
       <label htmlFor={id}>{libelle}</label>
@@ -418,6 +421,13 @@ export function BlocSuppression({
   const [ouvert, setOuvert] = useState(false);
   const id = useId();
   const message = useMessage(etat, t("suppression.donnees.ok"));
+  // UN SUCCÈS REPLIE LA CONFIRMATION (maquette `parametres.js`, `replier()`), puis le pied
+  // le dit : mot de passe, « Annuler » et bouton final n'ont plus rien à faire à l'écran.
+  const [etatVu, setEtatVu] = useState(etat);
+  if (etatVu !== etat) {
+    setEtatVu(etat);
+    if (etat.statut === "enregistre") setOuvert(false);
+  }
   return (
     <form action={action} className="bloc-r bloc-r--danger" noValidate>
       <input type="hidden" name="locale" value={locale} />
@@ -640,6 +650,13 @@ export function BlocSessions({ sessions }: { readonly sessions: readonly Session
   const t = useTranslations("parametres");
   const [etat, action, pendant] = useActionState(fermerAutresSessions, INITIAL);
   const [ouvert, setOuvert] = useState(false);
+  // UN SUCCÈS REPLIE LA CONFIRMATION (maquette `parametres.js`, `replier()`), puis le pied
+  // le dit : mot de passe, « Annuler » et bouton final n'ont plus rien à faire à l'écran.
+  const [etatVu, setEtatVu] = useState(etat);
+  if (etatVu !== etat) {
+    setEtatVu(etat);
+    if (etat.statut === "enregistre") setOuvert(false);
+  }
   /*
    * LES AUTRES APPAREILS S'EN VONT (maquette, `parametres.js` : 180 ms, 6 px vers la
    * droite) — APRÈS la confirmation du serveur, jamais avant (contrainte n° 8). La

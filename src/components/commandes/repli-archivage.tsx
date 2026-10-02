@@ -24,7 +24,12 @@ export function RepliArchivage() {
       const geste = f.querySelector<HTMLInputElement>('input[name="geste"]')?.value;
       // Un geste de la liste recharge la page (POST natif, puis la liste relue) : ce
       // n'est pas une arrivée, l'entrée du premier chargement ne se rejoue pas.
-      if (geste === "archiver" || geste === "lot" || geste === "dupliquer") {
+      // Pas sous mouvement réduit : aucune entrée n'y joue, et le drapeau resterait posé
+      // jusqu'à sauter celle d'un écran bien plus tard.
+      if (
+        (geste === "archiver" || geste === "lot" || geste === "dupliquer") &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
         try {
           sessionStorage.setItem("dl-sans-entree", "1");
         } catch {

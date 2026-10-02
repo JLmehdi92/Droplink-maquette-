@@ -31,7 +31,8 @@ export function annoncerApresRechargement(texte: string): void {
   }
 }
 
-export function Annonce() {
+/** `duree` : 2 600 ms dans l'espace vendeur (`coque.js`), 2 800 dans l'administration (`admin.js`). */
+export function Annonce({ duree = DUREE_MS }: { readonly duree?: number }) {
   const [texte, setTexte] = useState("");
   const [visible, setVisible] = useState(false);
   const minuterie = useRef(0);
@@ -41,7 +42,7 @@ export function Annonce() {
       setTexte(t);
       setVisible(true);
       window.clearTimeout(minuterie.current);
-      minuterie.current = window.setTimeout(() => setVisible(false), DUREE_MS);
+      minuterie.current = window.setTimeout(() => setVisible(false), duree);
     };
     const surAnnonce = (e: Event): void => montrer((e as CustomEvent<string>).detail);
     window.addEventListener(EVENEMENT, surAnnonce);
@@ -59,11 +60,24 @@ export function Annonce() {
       window.cancelAnimationFrame(image);
       window.clearTimeout(minuterie.current);
     };
-  }, []);
+  }, [duree]);
 
   return (
     <p className={"toast" + (visible ? " est-visible" : "")} role="status" aria-live="polite">
       {texte}
     </p>
   );
+}
+
+/**
+ * Une annonce dite À L'ARRIVÉE sur l'écran (un résultat porté par l'adresse, après un POST
+ * natif : « 3 commandes traitées. »). Une image plus tard, pour que la bulle de la coque
+ * écoute déjà.
+ */
+export function AnnonceAuChargement({ texte }: { readonly texte: string }) {
+  useEffect(() => {
+    const image = window.requestAnimationFrame(() => annoncer(texte));
+    return () => window.cancelAnimationFrame(image);
+  }, [texte]);
+  return null;
 }

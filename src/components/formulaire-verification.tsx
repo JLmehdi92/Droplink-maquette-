@@ -76,12 +76,13 @@ export function FormulaireVerification({
   /** Pose des chiffres à partir d'une case (frappe, collage ou proposition du téléphone). */
   const poser = (depuis: number, saisie: string): void => {
     const nouveaux = saisie.replace(/\D/g, "").slice(0, 6 - depuis).split("");
+    // Toute saisie retire l'erreur, effacement compris (maquette `compte.js`).
+    setIncomplet(false);
+    setEcarte(resultat);
     if (nouveaux.length === 0) {
       setChiffres((c) => c.map((x, i) => (i === depuis ? "" : x)));
       return;
     }
-    setIncomplet(false);
-    setEcarte(resultat);
     setChiffres((c) => c.map((x, i) => (i >= depuis && i < depuis + nouveaux.length ? (nouveaux[i - depuis] ?? x) : x)));
     cases.current[Math.min(depuis + nouveaux.length, 5)]?.focus();
   };

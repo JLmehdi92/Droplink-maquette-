@@ -112,7 +112,7 @@ export default async function LayoutAdmin({
     <div data-surface="administration" className="page-app v4 page-admin">
       <ScriptEntreeV4 />
       <CoucheV4 />
-      <Annonce />
+      <Annonce duree={2800} />
       {/* Sortie d'un écran, estompe d'une liste qu'on filtre (maquette, `coque.js`). */}
       <Suspense fallback={null}>
         <TransitionsEcran />

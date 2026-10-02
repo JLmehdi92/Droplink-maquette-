@@ -516,6 +516,13 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 .liste__lot .lot { display: none; opacity: 1; transform: none; animation: lot-entre 240ms var(--ease-sortie); }
 .liste__lot:has(input[name="selection"]:checked) .lot { display: flex; }
 @keyframes lot-entre { from { opacity: 0; transform: translateY(16px); } }
+.liste__lot .lot.est-sortante { display: flex; animation: lot-sort 200ms var(--ease) forwards; pointer-events: none; }
+@keyframes lot-sort { to { opacity: 0; transform: translateY(16px); } }
+.lot__n { font-variant-numeric: tabular-nums; }
+/* Le contenu reçoit le focus à l'arrivée d'un écran (`TemplateEcran`) : un repère pour le
+   lecteur d'écran, pas une cible — aucun anneau autour de l'écran entier. */
+#contenu:focus { outline: none; }
+@media (prefers-reduced-motion: reduce) { .liste__lot .lot.est-sortante { display: none; } }
 .liste__suite { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--filet-appuye); background: var(--feuille); font-weight: 500; color: var(--encre); }
 .message-lot { padding: 10px 14px; border-radius: 10px; font-size: 13px; background: var(--creux); color: var(--encre); }
 .message-lot[data-ton="refus"] { background: color-mix(in srgb, var(--st-silence) 14%, transparent); color: var(--avert-encre); }

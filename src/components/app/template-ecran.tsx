@@ -42,7 +42,9 @@ function CadreEcran({ children }: { readonly children: React.ReactNode }) {
     window.__entreeDifferee = false;
     let b = 0;
     const a = requestAnimationFrame(() => {
-      b = requestAnimationFrame(() => setAttente(false));
+      b = requestAnimationFrame(() => {
+        setAttente(false);
+      });
     });
     return () => {
       cancelAnimationFrame(a);

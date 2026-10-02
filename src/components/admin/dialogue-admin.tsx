@@ -47,13 +47,17 @@ export function fermerDialogue(d: HTMLDialogElement | null | undefined): void {
  */
 export function confirmerEtRecharger(d: HTMLDialogElement | null | undefined, annonce: string): void {
   annoncerApresRechargement(annonce);
-  try {
-    window.sessionStorage.setItem("dl-sans-entree", "1");
-  } catch {
-    // Stockage refusé : l'écran rejouera son entrée, rien de plus.
+  const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Sous mouvement réduit, aucune entrée ne joue et le script qui lit ce drapeau sort avant
+  // de l'effacer : le poser là sauterait l'entrée d'un écran bien plus tard.
+  if (!reduit) {
+    try {
+      window.sessionStorage.setItem("dl-sans-entree", "1");
+    } catch {
+      // Stockage refusé : l'écran rejouera son entrée, rien de plus.
+    }
   }
   fermerDialogue(d);
-  const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   window.setTimeout(() => window.location.reload(), reduit ? 0 : 170);
 }
 

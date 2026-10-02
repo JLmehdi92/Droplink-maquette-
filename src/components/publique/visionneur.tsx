@@ -282,8 +282,10 @@ export function Visionneur({
    * un point d'ouverture oublié rendrait le focus à la mauvaise vignette, ou à
    * rien, sans qu'aucune porte ne s'en aperçoive.
    */
-  const ouvrirA = useCallback((rang: number) => {
-    declencheur.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const ouvrirA = useCallback((rang: number, depuis?: HTMLElement) => {
+    // LA TUILE ELLE-MÊME, comme la maquette (`retour = depuis`) : sur Safari, un clic ne
+    // donne pas le focus à un bouton, et `activeElement` y vaut `<body>`.
+    declencheur.current = depuis ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     setIndex(rang);
   }, []);
 
@@ -472,7 +474,9 @@ export function Visionneur({
       // référence a été prise AU CLIC : la lire ici reviendrait à lire le
       // bouton « fermer » que `autoFocus` vient de saisir.
       const retour = declencheur.current;
-      if (retour !== null && retour.isConnected) retour.focus();
+      // Sans défiler (maquette : `preventScroll`) : une tuile à moitié hors champ ferait
+      // sauter la page ou le carrousel au moment où l'on ferme.
+      if (retour !== null && retour.isConnected) retour.focus({ preventScroll: true });
     };
   }, [ouvert]);
 
@@ -496,6 +500,9 @@ export function Visionneur({
   // AU POINTEUR, comme la maquette : le doigt ET la souris. `touch-action: pan-y` sur la
   // scène laisse le navigateur faire défiler à la verticale et nous donne l'horizontale.
   const surAppui = (e: React.PointerEvent): void => {
+    // Au doigt, un balayage n'est en principe suivi d'aucun `click` : le drapeau tombe au
+    // geste SUIVANT, sans quoi le prochain toucher à côté de la photo serait avalé.
+    balaye.current = false;
     if (geste.current !== null) return;
     geste.current = { id: e.pointerId, x: e.clientX, t: performance.now() };
   };
@@ -541,7 +548,7 @@ export function Visionneur({
               <li key={media.id} className={rang >= TUILES_TELEPHONE ? "cv-carrousel__bureau" : undefined}>
                 <button
                   type="button"
-                  onClick={() => ouvrirA(rang)}
+                  onClick={(e) => ouvrirA(rang, e.currentTarget)}
                   className="cv-photo"
                   aria-label={
                     libelles.tuile === undefined
@@ -705,9 +712,13 @@ export function Visionneur({
                         type="button"
                         onClick={() => choisir(rang)}
                         aria-label={
-                          libelles.vignette === undefined
-                            ? (media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)
-                            : position(libelles.vignette, rang + 1)
+                          // Une vidéo n'est pas une « photo » : elle garde son action (« Lire la
+                          // vidéo, 3 sur 6 »), par le gabarit des tuiles.
+                          media.type === "video" && libelles.tuile !== undefined
+                            ? position(libelles.tuile.replace("{action}", libelles.ouvrirVideo), rang + 1)
+                            : libelles.vignette === undefined
+                              ? (media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)
+                              : position(libelles.vignette, rang + 1)
                         }
                         aria-current={rang === index ? "true" : "false"}
                         ref={

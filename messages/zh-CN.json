@@ -1145,8 +1145,8 @@
       "selectionner": "选择包裹 {numero}",
       "exporter": "导出所选",
       "toutSelectionner": "全选",
-      "selectionUn": "已选 # 个",
-      "selectionPlusieurs": "已选 # 个",
+      "selectionUn": "已选 # 个包裹",
+      "selectionPlusieurs": "已选 # 个包裹",
       "toutDeselectionner": "取消全选"
     },
     "autresCommandes": "另有 {n} 个订单",
@@ -1882,7 +1882,6 @@
       "confirmerSuspension": "停用",
       "confirmerReactivation": "恢复",
       "enCours": "处理中…",
-      "fait": "已完成。",
       "erreur": {
         "saisie": "原因太短了。",
         "confirmation": "输入的地址与该账户不符。",
@@ -1908,7 +1907,6 @@
       "motifAide": "至少 {n} 个字符。例如：“9 月 19 日已通过银行转账收到付款”。原因会完整显示在日志中。",
       "annuler": "取消",
       "enCours": "处理中…",
-      "fait": "已完成。",
       "erreur": {
         "saisie": "原因太短。",
         "deja": "该账号已是此套餐。请重新加载页面。",
@@ -2082,8 +2080,8 @@
         "panne": "保存失败。设置未发生变化。"
       },
       "faitDetail": "已保存。{avant} → {apres}，已写入审计日志。",
-      "faitActive": "已启用，立即生效，已写入审计日志。",
-      "faitDesactive": "已停用，立即生效，已写入审计日志。"
+      "faitActive": "{nom}：已启用，立即生效，已写入审计日志。",
+      "faitDesactive": "{nom}：已停用，立即生效，已写入审计日志。"
     },
     "boutiques": {
       "titre": "店铺",

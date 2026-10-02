@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AnnonceAuChargement } from "@/components/app/annonce";
 import { getFormatter, getTranslations } from "next-intl/server";
 import {
   Archive,
@@ -325,9 +326,21 @@ export async function ListeCommandes({
     <>
       {/* Le résultat du dernier lot, dit : un lot refusé et un lot en panne ne se
           disent pas pareil, et « rien n'a été modifié » est une information. */}
-      {lot.etat !== null ? (
-        <p role="status" className="message-lot" data-ton={lot.etat === "ok" ? "ok" : "refus"}>
-          {lot.etat === "ok" ? t("lot.ok", { n: lot.nombre }) : t(`lot.${lot.etat}`)}
+      {/* UN SUCCÈS SE DIT DANS LA BULLE (maquette : « 3 commandes traitées. »), un refus
+          reste écrit au-dessus de la liste : il demande qu'on le relise. Sans JavaScript, le
+          succès reste écrit aussi. */}
+      {lot.etat === "ok" ? (
+        <>
+          <AnnonceAuChargement texte={t("lot.ok", { n: lot.nombre })} />
+          <noscript>
+            <p className="message-lot" data-ton="ok">
+              {t("lot.ok", { n: lot.nombre })}
+            </p>
+          </noscript>
+        </>
+      ) : lot.etat !== null ? (
+        <p role="status" className="message-lot" data-ton="refus">
+          {t(`lot.${lot.etat}`)}
         </p>
       ) : null}
 

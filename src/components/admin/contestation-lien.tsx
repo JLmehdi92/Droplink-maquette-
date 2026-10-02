@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { MessageCircle } from "lucide-react";
-import { DialogueAdmin, confirmerEtRecharger, fermerDialogue } from "@/components/admin/dialogue-admin";
+import { DialogueAdmin, confirmerEtRecharger, fermerDialogue, secouerDialogue } from "@/components/admin/dialogue-admin";
 import { useFormatter, useTranslations } from "next-intl";
 import { BoutonAction } from "@/components/bouton-action";
 import {
@@ -47,6 +47,7 @@ export function ContestationLien({
   readonly carte?: boolean;
 }) {
   const t = useTranslations("admin.contestation");
+  const td = useTranslations("admin.dialogue");
   const idTitre = useId();
   const format = useFormatter();
   const dialogue = useRef<HTMLDialogElement>(null);
@@ -69,10 +70,15 @@ export function ContestationLien({
 
   async function repondre(geste: "refuser" | "debloquer"): Promise<void> {
     if (lecture.etat !== "ok") return;
-    // « La réponse est trop courte. », SANS secousse : la maquette (`admin.js`) réserve la
-    // secousse aux motifs d'une sanction ; ici on répond au vendeur.
+    // Comme la maquette (`admin.js`) : « Refuser » dit « La réponse est trop courte. » sans
+    // secousse ; « Débloquer » est un motif de déblocage — « Le motif est trop court. », secoué.
     if (reponse.trim().length < motifMin) {
-      setRefus(t("reponseCourte"));
+      if (geste === "refuser") {
+        setRefus(t("reponseCourte"));
+      } else {
+        setRefus(td("motifCourt"));
+        secouerDialogue(dialogue.current);
+      }
       return;
     }
     setTravaille(geste);

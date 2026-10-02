@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 
 /**
@@ -108,7 +108,8 @@ export function ArbitrageQc({
   const interagi = useRef(false);
   const zone = useRef<HTMLElement>(null);
   const champMotif = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
+  // `useLayoutEffect` : l'étape arrive souvent après un `await` ; elle entre avant d'être peinte.
+  useLayoutEffect(() => {
     if (!interagi.current) {
       interagi.current = true;
       return;

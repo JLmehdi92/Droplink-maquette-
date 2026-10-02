@@ -22,6 +22,9 @@ interface Bascule {
   readonly adresse: string;
   readonly quand: number;
   entree: boolean;
+  /** Vers « Mot de passe oublié » : l'adresse suit, mais ni le film ne se fond (la
+   *  maquette ne quitte pas sa page), ni la bascule ne rejoue d'entrée. */
+  readonly versOubli?: boolean;
 }
 
 declare global {
@@ -38,7 +41,17 @@ function recente(): Bascule | null {
 
 /** La bascule vient-elle d'avoir lieu ? (le film entrant se fond alors dans le sortant) */
 export function basculeRecente(): boolean {
-  return recente() !== null;
+  const b = recente();
+  return b !== null && b.versOubli !== true;
+}
+
+/** L'arrivée sur « Mot de passe oublié » depuis la connexion (une fois) : son titre prend
+ *  le focus, comme le panneau de la maquette. */
+export function arriveeVersOubli(): boolean {
+  const b = recente();
+  if (b === null || b.versOubli !== true || b.entree) return false;
+  b.entree = true;
+  return true;
 }
 
 /**
@@ -53,10 +66,10 @@ export function adresseTransmise(): string {
 /**
  * L'adresse suit aussi vers « Mot de passe oublié » (maquette : `depuis.value` recopié) —
  * sans chorégraphie : cette page a sa propre coque, l'écart de panneau est déclaré.
- * `entree: true` : personne ne rejoue d'entrée à l'arrivée.
+ * `versOubli` : personne ne rejoue d'entrée ni de fondu de film à l'arrivée.
  */
 export function transmettreAdresse(adresse: string): void {
-  window.__basculeAcces = { adresse: adresse.trim(), quand: performance.now(), entree: true };
+  window.__basculeAcces = { adresse: adresse.trim(), quand: performance.now(), entree: false, versOubli: true };
 }
 
 const CHEMIN_BASCULE = /^\/[^/]+\/(connexion|inscription)$/;
@@ -74,7 +87,7 @@ export function BasculeAcces() {
 
     /* ---------- l'arrivée : le formulaire entre, le film sortant s'efface ---------- */
     const arrivee = recente();
-    if (arrivee !== null && !arrivee.entree) {
+    if (arrivee !== null && !arrivee.entree && arrivee.versOubli !== true) {
       arrivee.entree = true;
       const corps = document.querySelector(".acces__corps");
       const legal = document.querySelector(".acces__legal");

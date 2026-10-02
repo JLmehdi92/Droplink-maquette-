@@ -1145,8 +1145,8 @@
       "selectionner": "Select parcel {numero}",
       "exporter": "Export the selection",
       "toutSelectionner": "Select all",
-      "selectionUn": "# selected",
-      "selectionPlusieurs": "# selected",
+      "selectionUn": "# parcel selected",
+      "selectionPlusieurs": "# parcels selected",
       "toutDeselectionner": "Clear selection"
     },
     "autresCommandes": "{n, plural, one {and # more order} other {and # more orders}}",
@@ -1882,7 +1882,6 @@
       "confirmerSuspension": "Suspend",
       "confirmerReactivation": "Reactivate",
       "enCours": "Working…",
-      "fait": "Done.",
       "erreur": {
         "saisie": "The reason is too short.",
         "confirmation": "The address you retyped does not match this account.",
@@ -1908,7 +1907,6 @@
       "motifAide": "At least {n} characters. For example: “payment received on 19/09 by bank transfer”. It is shown in full in the log.",
       "annuler": "Cancel",
       "enCours": "Working…",
-      "fait": "Done.",
       "erreur": {
         "saisie": "The reason is too short.",
         "deja": "This account is already on this plan. Reload the page.",
@@ -2082,8 +2080,8 @@
         "panne": "Could not save. The setting has not changed."
       },
       "faitDetail": "Saved. {avant} → {apres}, written to the audit log.",
-      "faitActive": "Enabled, effective immediately, written to the audit log.",
-      "faitDesactive": "Disabled, effective immediately, written to the audit log."
+      "faitActive": "{nom}: enabled, effective immediately, written to the audit log.",
+      "faitDesactive": "{nom}: disabled, effective immediately, written to the audit log."
     },
     "boutiques": {
       "titre": "Shops",

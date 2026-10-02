@@ -127,6 +127,9 @@ export function FormulaireInscription({
       className="formulaire v4-carte"
       noValidate
       onSubmit={(e) => {
+        // La suggestion d'adresse se propose aussi à l'envoi (une sortie vers le bouton ne
+        // la pose pas) : après un refus, c'est elle qui peut dire la faute de frappe.
+        aLaSortie();
         // On valide ce qui PART, pas l'état React (un remplissage automatique peut le taire).
         const f = e.currentTarget;
         const adresse = valeurEnvoyee(f, "email");

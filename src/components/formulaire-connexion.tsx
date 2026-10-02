@@ -73,6 +73,9 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
       className="formulaire v4-carte"
       noValidate
       onSubmit={(e) => {
+        // La suggestion d'adresse se propose aussi à l'envoi (une sortie vers le bouton ne
+        // la pose pas) : après un refus, c'est elle qui peut dire la faute de frappe.
+        aLaSortie();
         // Ce qui est refusé ici ne part pas : la secousse, le message sous le champ,
         // et le focus sur le premier champ fautif (maquette, `acces.js`).
         // On valide ce qui PART, pas l'état React (un remplissage automatique peut le taire).
@@ -156,7 +159,11 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
         invalide={messageErreur !== null}
         {...(messageErreur !== null ? { decritPar: "erreur-connexion" } : {})}
         action={
-          <Link href={`/${locale}/mot-de-passe-oublie`} className="lien-texte min-h-11" onClick={() => transmettreAdresse(email)}>
+          <Link href={`/${locale}/mot-de-passe-oublie`} className="lien-texte min-h-11" onClick={() =>
+              // Le CHAMP, pas l'état React : un remplissage automatique d'avant l'hydratation
+              // ne passe pas par `onChange` (même règle que `valeurEnvoyee`).
+              transmettreAdresse(document.querySelector<HTMLInputElement>("#email")?.value ?? email)
+            }>
             {t("motDePasseOublie")}
           </Link>
         }

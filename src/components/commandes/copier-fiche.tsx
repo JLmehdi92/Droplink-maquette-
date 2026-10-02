@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Copy, TriangleAlert } from "lucide-react";
+import { annoncer } from "@/components/app/annonce";
 
 /**
  * COPIER LE LIEN DE LA PAGE CLIENT, depuis la fiche — trois endroits de la maquette :
@@ -29,9 +30,11 @@ export function BoutonCopierFiche({
     try {
       await navigator.clipboard.writeText(lien);
       setEtat("copie");
+      annoncer(t("lienCopie"));
       window.setTimeout(() => setEtat("repos"), 2000);
     } catch {
       setEtat("echec");
+      annoncer(t("copieEchouee"));
     }
   };
 
@@ -49,12 +52,8 @@ export function BoutonCopierFiche({
         <Icone aria-hidden="true" className="ic" />
         {avecTexte ? <span>{libelle}</span> : null}
       </button>
-      {/* L'ANNONCE VIT HORS DU BOUTON : les enfants d'un bouton sont « présentationnels »
-          pour ARIA, une région posée dedans ne s'annonce pas de façon fiable. Elle existe
-          AVANT son texte — posée avec lui, l'annonce se perd. */}
-      <span className="sr" role="status">
-        {etat === "repos" ? "" : libelle}
-      </span>
+      {/* L'ANNONCE est la bulle de la coque (maquette `commande.js` : « Lien copié »,
+          « Copie refusée par le navigateur »), `role="status"` : vue ET lue. */}
     </>
   );
 }

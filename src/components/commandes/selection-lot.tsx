@@ -79,10 +79,38 @@ export function BarreLot({
       f.removeEventListener("reset", apresReset);
     };
   }, []);
-  const forme = new Intl.PluralRules(langue).select(n) === "one" ? libelles.un : libelles.plusieurs;
+  // LA BARRE SORT EN FONDU (maquette : 200 ms) quand la dernière case est décochée : le
+  // CSS ne sait pas animer un `display: none`, elle reste donc posée le temps de sortir,
+  // avec le dernier compte affiché.
+  const [sortie, setSortie] = useState<number | null>(null);
+  const [nVu, setNVu] = useState(n);
+  if (nVu !== n) {
+    setNVu(n);
+    if (n === 0 && nVu > 0) setSortie(nVu);
+    else if (n > 0) setSortie(null);
+  }
+  useEffect(() => {
+    if (sortie === null) return;
+    const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const m = window.setTimeout(() => setSortie(null), reduit ? 0 : 200);
+    return () => window.clearTimeout(m);
+  }, [sortie]);
+  const affiche = sortie ?? n;
+  const forme = new Intl.PluralRules(langue).select(affiche) === "one" ? libelles.un : libelles.plusieurs;
+  // Le nombre en gras, à chiffres tabulaires (maquette : `<b data-lot-n>`).
+  const [avant, apres] = forme.split("#") as [string, string | undefined];
   return (
-    <div ref={ref} className={"lot" + (n > 0 ? " est-visible" : "")} role="region" aria-label={libelles.region}>
-      <p aria-live="polite">{forme.replace("#", new Intl.NumberFormat(langue).format(n))}</p>
+    <div
+      ref={ref}
+      className={"lot" + (n > 0 ? " est-visible" : "") + (sortie !== null ? " est-sortante" : "")}
+      role="region"
+      aria-label={libelles.region}
+    >
+      <p aria-live="polite">
+        {avant}
+        <b className="lot__n">{new Intl.NumberFormat(langue).format(affiche)}</b>
+        {apres ?? ""}
+      </p>
       {children}
       <button type="reset" className="lot__fermer" aria-label={libelles.fermer}>
         <X aria-hidden="true" className="ic" />

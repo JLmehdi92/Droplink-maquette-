@@ -42,6 +42,45 @@ export function TransitionsEcran() {
   const estompee = useRef<Animation[]>([]);
   const sortieEnCours = useRef<Animation | null>(null);
 
+  /* ---------- arrivé sur un AUTRE écran : le focus va au contenu ----------
+     Maquette `coque.js` : `main#contenu`. Sans cela il reste sur le lien d'un menu qui n'a
+     pas changé, et le lecteur d'écran ne dit rien de l'écran neuf. Posé quand le nouveau
+     chemin est RENDU (un `main` posé plus tôt est remplacé, et le focus retombait sur
+     `<body>` — mesuré le 02/10/2026). Pas au premier chargement, ni sur un filtre. */
+  const premierChemin = useRef(true);
+  useEffect(() => {
+    if (premierChemin.current) {
+      premierChemin.current = false;
+      return;
+    }
+    const focaliser = (): void => {
+      const contenu = document.getElementById("contenu");
+      if (contenu === null || contenu === document.activeElement) return;
+      if (!contenu.hasAttribute("tabindex")) contenu.setAttribute("tabindex", "-1");
+      contenu.focus({ preventScroll: true });
+    };
+    const image = requestAnimationFrame(focaliser);
+    // LE SQUELETTE DE CHARGEMENT PORTE AUSSI `#contenu` : le focus y va d'abord, puis le vrai
+    // contenu le remplace et le focus retombe sur `<body>`. Tant que la page se remplit (8 s
+    // au plus), un `#contenu` neuf reprend le focus — seulement si personne d'autre ne l'a pris.
+    const veille = new MutationObserver(() => {
+      if (document.activeElement === null || document.activeElement === document.body) focaliser();
+    });
+    veille.observe(document.body, { childList: true, subtree: true });
+    // Dès que la personne agit, le focus est à elle : la veille s'arrête.
+    const arreter = (): void => veille.disconnect();
+    document.addEventListener("pointerdown", arreter, { capture: true, once: true });
+    document.addEventListener("keydown", arreter, { capture: true, once: true });
+    const fin = window.setTimeout(arreter, 8000);
+    return () => {
+      cancelAnimationFrame(image);
+      veille.disconnect();
+      document.removeEventListener("pointerdown", arreter, { capture: true });
+      document.removeEventListener("keydown", arreter, { capture: true });
+      window.clearTimeout(fin);
+    };
+  }, [chemin]);
+
   /* ---------- la liste revient quand la nouvelle adresse est rendue ---------- */
   useEffect(() => {
     // L'écran est arrivé : une sortie restée posée sur un élément encore là (navigation
@@ -66,6 +105,24 @@ export function TransitionsEcran() {
 
   useEffect(() => {
     const reduit = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // LE SENS SUIT L'ORDRE DES ÉCRANS, pour tout lien (maquette `coque.js`, `ORDRE`) — le
+    // menu le pose lui-même au clic ; ailleurs (fiche → liste, « Retour », Précédent), on le
+    // déduit ici : on remonte l'ordre, le contenu descend.
+    const poserSens = (vers: URL): void => {
+      if (document.documentElement.dataset.sens !== undefined) return;
+      const de = rangEcran(location.pathname);
+      const a = rangEcran(vers.pathname);
+      if (de === null || a === null || de === a) return;
+      document.documentElement.dataset.sens = a < de ? "haut" : "bas";
+    };
+    // « Précédent » / « Suivant » : aucune sortie possible (le navigateur a déjà changé
+    // d'adresse), mais l'écran qui arrive entre dans le bon sens.
+    const navigation = (window as Window & { navigation?: EventTarget }).navigation;
+    const surNavigation = (e: Event): void => {
+      const n = e as Event & { navigationType?: string; destination?: { url?: string } };
+      if (n.navigationType === "traverse" && n.destination?.url !== undefined) poserSens(new URL(n.destination.url));
+    };
+    navigation?.addEventListener("navigate", surNavigation);
     let enCours = false;
     let filet = 0;
 
@@ -110,6 +167,7 @@ export function TransitionsEcran() {
       // le sens est posé par le menu dans son propre gestionnaire de clic, qui passe
       // APRÈS celui-ci : la sortie part à la tâche suivante, quand il est connu
       window.setTimeout(() => {
+        poserSens(url);
         const sens = document.documentElement.dataset.sens === "haut" ? -1 : 1;
         const sortie = ecran.animate(
           [
@@ -134,10 +192,19 @@ export function TransitionsEcran() {
 
     document.addEventListener("click", clic, true);
     return () => {
+      navigation?.removeEventListener("navigate", surNavigation);
       document.removeEventListener("click", clic, true);
       window.clearTimeout(filet);
     };
   }, [router]);
 
   return null;
+}
+
+/** Le rang d'un écran dans l'ordre de la maquette (`coque.js`), ou `null` hors de cet ordre. */
+const ORDRE_ECRANS = [/^\/tableau-de-bord$/, /^\/commandes$/, /^\/commandes\/[^/]+$/, /^\/envois$/, /^\/analyses$/, /^\/marque$/, /^\/parametres$/, /^\/passer-pro$/];
+function rangEcran(chemin: string): number | null {
+  const sansLangue = chemin.replace(/^\/(fr|en|zh-CN)(?=\/|$)/, "");
+  const i = ORDRE_ECRANS.findIndex((m) => m.test(sansLangue));
+  return i < 0 ? null : i;
 }

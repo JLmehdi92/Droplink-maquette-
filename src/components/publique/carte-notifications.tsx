@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 
 /**
@@ -76,7 +76,9 @@ export function CarteNotifications({
   // vendeur par les variables `--cl-*` de la page.
   // « Presque fini » ENTRE (maquette : `apparaitre`, 200 ms, 4 px) — après le 202 seulement.
   const succes = useRef<HTMLParagraphElement>(null);
-  useEffect(() => {
+  // `useLayoutEffect` : l'état arrive après un `await`, hors d'un événement ; posé dans un
+  // effet ordinaire, le message pourrait être peint une image avant d'entrer.
+  useLayoutEffect(() => {
     if (etat !== "envoye" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     succes.current?.animate(
       [

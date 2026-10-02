@@ -69,6 +69,9 @@ export function FeuilleHistorique({
       const p = panneau();
       if (p !== null) p.scrollTop = 0;
       d.showModal();
+      // Le focus sur la croix, comme la maquette : sans cela il dépend du navigateur
+      // (premier focalisable, ou le dialogue lui-même).
+      d.querySelector<HTMLElement>('form[method="dialog"] button')?.focus({ preventScroll: true });
       bloquerFond();
     };
 

@@ -8,7 +8,7 @@ import {
   type ResultatReinitialisation,
 } from "@/app/[locale]/connexion/actions";
 import { useSuggestionAdresse } from "@/components/acces/suggestion-adresse";
-import { adresseTransmise } from "@/components/acces/bascule-acces";
+import { adresseTransmise, arriveeVersOubli } from "@/components/acces/bascule-acces";
 import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
 import { emailValide, secouer, secouerInvalides, valeurEnvoyee } from "@/components/acces/validation-locale";
 
@@ -52,6 +52,12 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
 
   const { suggestion, aLaSortie } = useSuggestionAdresse(email);
 
+  // Venu de la connexion par « Mot de passe oublié ? » : le titre prend le focus, comme le
+  // panneau de la maquette (`acces.js`) — le lecteur d'écran dit où l'on est arrivé.
+  useEffect(() => {
+    if (arriveeVersOubli()) document.querySelector<HTMLElement>(".acces__corps h1")?.focus({ preventScroll: true });
+  }, []);
+
   if (resultat.statut === "envoye") {
     return (
       <div role="status" className="envoye">
@@ -82,6 +88,9 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
       className="formulaire v4-carte"
       noValidate
       onSubmit={(e) => {
+        // La suggestion d'adresse se propose aussi à l'envoi (une sortie vers le bouton ne
+        // la pose pas) : après un refus, c'est elle qui peut dire la faute de frappe.
+        aLaSortie();
         if (emailValide(valeurEnvoyee(e.currentTarget, "email"))) {
           setErreurEmail("");
           return;
