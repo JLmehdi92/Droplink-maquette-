@@ -74,10 +74,27 @@ export function Annonce({ duree = DUREE_MS }: { readonly duree?: number }) {
  * natif : « 3 commandes traitées. »). Une image plus tard, pour que la bulle de la coque
  * écoute déjà.
  */
-export function AnnonceAuChargement({ texte }: { readonly texte: string }) {
+export function AnnonceAuChargement({
+  texte,
+  retirer = [],
+}: {
+  readonly texte: string;
+  /** Les paramètres d'adresse qui portent ce résultat : retirés une fois dit, sans quoi un
+   *  « Précédent » ou un rechargement ré-annoncerait un geste ancien. */
+  readonly retirer?: readonly string[];
+}) {
+  // Une clé stable : la liste est un littéral recréé à chaque rendu.
+  const aRetirer = retirer.join(",");
   useEffect(() => {
-    const image = window.requestAnimationFrame(() => annoncer(texte));
+    const image = window.requestAnimationFrame(() => {
+      annoncer(texte);
+      if (aRetirer === "") return;
+      const url = new URL(window.location.href);
+      aRetirer.split(",").forEach((p) => url.searchParams.delete(p));
+      // `history.replaceState` est relayé au routeur de Next : l'adresse change, rien ne se recharge.
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    });
     return () => window.cancelAnimationFrame(image);
-  }, [texte]);
+  }, [texte, aRetirer]);
   return null;
 }

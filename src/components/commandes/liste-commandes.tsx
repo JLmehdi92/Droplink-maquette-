@@ -331,7 +331,7 @@ export async function ListeCommandes({
           succès reste écrit aussi. */}
       {lot.etat === "ok" ? (
         <>
-          <AnnonceAuChargement texte={t("lot.ok", { n: lot.nombre })} />
+          <AnnonceAuChargement texte={t("lot.ok", { n: lot.nombre })} retirer={["lot", "n"]} />
           <noscript>
             <p className="message-lot" data-ton="ok">
               {t("lot.ok", { n: lot.nombre })}

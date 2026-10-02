@@ -47,15 +47,21 @@ export function TransitionsEcran() {
      pas changé, et le lecteur d'écran ne dit rien de l'écran neuf. Posé quand le nouveau
      chemin est RENDU (un `main` posé plus tôt est remplacé, et le focus retombait sur
      `<body>` — mesuré le 02/10/2026). Pas au premier chargement, ni sur un filtre. */
-  const premierChemin = useRef(true);
+  // Le chemin du premier rendu (et non un booléen : sous StrictMode l'effet tourne deux
+  // fois au montage, et le second passage aurait focalisé dès le chargement).
+  const cheminInitial = useRef(chemin);
   useEffect(() => {
-    if (premierChemin.current) {
-      premierChemin.current = false;
-      return;
-    }
+    if (chemin === cheminInitial.current) return;
+    cheminInitial.current = "";
     const focaliser = (): void => {
       const contenu = document.getElementById("contenu");
-      if (contenu === null || contenu === document.activeElement) return;
+      const actif = document.activeElement;
+      // ⚠️ UN ÉCRAN QUI A DÉJÀ PLACÉ SON FOCUS LE GARDE (relecture du 02/10/2026) : la fiche
+      // d'une commande neuve met le curseur dans « Nom du client » — le lui reprendre
+      // forcerait un clic de plus. Seul un focus resté sur `<body>` ou hors de l'écran
+      // (le lien du menu) part au contenu.
+      if (contenu === null || contenu === actif) return;
+      if (actif !== null && actif !== document.body && actif.closest(".entree-ecran") !== null) return;
       if (!contenu.hasAttribute("tabindex")) contenu.setAttribute("tabindex", "-1");
       contenu.focus({ preventScroll: true });
     };
@@ -108,8 +114,10 @@ export function TransitionsEcran() {
     // LE SENS SUIT L'ORDRE DES ÉCRANS, pour tout lien (maquette `coque.js`, `ORDRE`) — le
     // menu le pose lui-même au clic ; ailleurs (fiche → liste, « Retour », Précédent), on le
     // déduit ici : on remonte l'ordre, le contenu descend.
-    const poserSens = (vers: URL): void => {
-      if (document.documentElement.dataset.sens !== undefined) return;
+    const poserSens = (vers: URL, imposer = false): void => {
+      // Le menu pose son sens au clic ; un « Précédent » le recalcule toujours (un sens
+      // resté d'une navigation abandonnée serait périmé).
+      if (!imposer && document.documentElement.dataset.sens !== undefined) return;
       const de = rangEcran(location.pathname);
       const a = rangEcran(vers.pathname);
       if (de === null || a === null || de === a) return;
@@ -120,7 +128,7 @@ export function TransitionsEcran() {
     const navigation = (window as Window & { navigation?: EventTarget }).navigation;
     const surNavigation = (e: Event): void => {
       const n = e as Event & { navigationType?: string; destination?: { url?: string } };
-      if (n.navigationType === "traverse" && n.destination?.url !== undefined) poserSens(new URL(n.destination.url));
+      if (n.navigationType === "traverse" && n.destination?.url !== undefined) poserSens(new URL(n.destination.url), true);
     };
     navigation?.addEventListener("navigate", surNavigation);
     let enCours = false;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useActionState, useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Monitor, Smartphone } from "lucide-react";
 import {
@@ -83,6 +83,7 @@ function Pied({
 }) {
   const pied = useRef<HTMLElement>(null);
   const zone = useRef<HTMLParagraphElement>(null);
+  const zoneErreur = useRef<HTMLParagraphElement>(null);
   // Le texte du message que la saisie suivante a « calmé » : il reste masqué tant qu'aucun
   // nouvel envoi n'a eu lieu (un même refus redit après un nouvel envoi se réaffiche).
   const [calme, setCalme] = useState<string | null>(null);
@@ -102,10 +103,12 @@ function Pied({
     };
   }, [texte]);
 
+  const enErreur = message?.erreur === true;
   useEffect(() => {
-    if (!affiche || zone.current === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    zone.current.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "cubic-bezier(.23,1,.32,1)" });
-  }, [affiche, texte]);
+    const cible = enErreur ? zoneErreur.current : zone.current;
+    if (!affiche || cible === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    cible.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "cubic-bezier(.23,1,.32,1)" });
+  }, [affiche, texte, enErreur]);
 
   return (
     <footer className="bloc-r__pied" ref={pied}>
@@ -115,14 +118,14 @@ function Pied({
             {aide}
           </p>
         )}
-        <p
-          ref={zone}
-          className="bloc-r__message"
-          // Une erreur s'impose (`alert`), un succès se dit (`status`) — maquette `annoncer`.
-          role={affiche && message?.erreur === true ? "alert" : "status"}
-          data-ton={!affiche || message === null ? undefined : message.erreur ? "erreur" : "ok"}
-        >
-          {affiche ? texte : ""}
+        {/* DEUX RÉGIONS PERMANENTES, une par nature : un succès se dit (`status`), une
+            erreur s'impose (`alert`). Une région qui changerait de rôle en recevant son
+            texte ne serait pas annoncée de façon fiable (relecture du 02/10/2026). */}
+        <p ref={zone} className="bloc-r__message" role="status" data-ton={affiche && message?.erreur === false ? "ok" : undefined}>
+          {affiche && message?.erreur === false ? texte : ""}
+        </p>
+        <p ref={zoneErreur} className="bloc-r__message" role="alert" data-ton={affiche && message?.erreur === true ? "erreur" : undefined}>
+          {affiche && message?.erreur === true ? texte : ""}
         </p>
       </div>
       <span className="bloc-r__actions">{children}</span>
@@ -424,10 +427,22 @@ export function BlocSuppression({
   // UN SUCCÈS REPLIE LA CONFIRMATION (maquette `parametres.js`, `replier()`), puis le pied
   // le dit : mot de passe, « Annuler » et bouton final n'ont plus rien à faire à l'écran.
   const [etatVu, setEtatVu] = useState(etat);
+  const [replie, setReplie] = useState(false);
   if (etatVu !== etat) {
     setEtatVu(etat);
-    if (etat.statut === "enregistre") setOuvert(false);
+    if (etat.statut === "enregistre") {
+      setOuvert(false);
+      setReplie(true);
+    }
   }
+  // Le bouton qui avait le focus vient de disparaître avec la confirmation : le focus va à
+  // celui qui rouvre le bloc, à sa place, plutôt que de retomber sur `<body>`.
+  const focusApresRepli = useCallback(
+    (bouton: HTMLButtonElement | null) => {
+      if (replie) bouton?.focus({ preventScroll: true });
+    },
+    [replie],
+  );
   return (
     <form action={action} className="bloc-r bloc-r--danger" noValidate>
       <input type="hidden" name="locale" value={locale} />
@@ -478,7 +493,11 @@ export function BlocSuppression({
             </button>
           </>
         ) : (
-          <button type="button" className="bouton-app bouton-app--danger" onClick={() => setOuvert(true)}>
+          <button type="button" className="bouton-app bouton-app--danger" ref={focusApresRepli}
+            onClick={() => {
+              setReplie(false);
+              setOuvert(true);
+            }}>
             {t(`suppression.${variante}.bouton`)}
           </button>
         )}
@@ -653,10 +672,22 @@ export function BlocSessions({ sessions }: { readonly sessions: readonly Session
   // UN SUCCÈS REPLIE LA CONFIRMATION (maquette `parametres.js`, `replier()`), puis le pied
   // le dit : mot de passe, « Annuler » et bouton final n'ont plus rien à faire à l'écran.
   const [etatVu, setEtatVu] = useState(etat);
+  const [replie, setReplie] = useState(false);
   if (etatVu !== etat) {
     setEtatVu(etat);
-    if (etat.statut === "enregistre") setOuvert(false);
+    if (etat.statut === "enregistre") {
+      setOuvert(false);
+      setReplie(true);
+    }
   }
+  // Le bouton qui avait le focus vient de disparaître avec la confirmation : le focus va à
+  // celui qui rouvre le bloc, à sa place, plutôt que de retomber sur `<body>`.
+  const focusApresRepli = useCallback(
+    (bouton: HTMLButtonElement | null) => {
+      if (replie) bouton?.focus({ preventScroll: true });
+    },
+    [replie],
+  );
   /*
    * LES AUTRES APPAREILS S'EN VONT (maquette, `parametres.js` : 180 ms, 6 px vers la
    * droite) — APRÈS la confirmation du serveur, jamais avant (contrainte n° 8). La
@@ -740,7 +771,11 @@ export function BlocSessions({ sessions }: { readonly sessions: readonly Session
             </button>
           </>
         ) : (
-          <button type="button" className="bouton-app bouton-app--second" onClick={() => setOuvert(true)}>
+          <button type="button" className="bouton-app bouton-app--second" ref={focusApresRepli}
+            onClick={() => {
+              setReplie(false);
+              setOuvert(true);
+            }}>
             {t("securite.fermer")}
           </button>
         )}
