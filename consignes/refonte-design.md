@@ -422,6 +422,33 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   Seul ce journal est commité, vers le bac à sable uniquement.
 - La maquette se construit (`49 pages`) et se sert : le travail de lecture est prêt.
 
+### ▶️ 02/10/2026 — réseau « Full » : l'API répond, Postgres reste hors d'atteinte
+
+- **Variables** (aucune valeur affichée) : `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL`,
+  `SUPABASE_PROJECT_REF`, `CRON_SECRET` et `NEXT_PUBLIC_SITE_URL` sont présentes. Aucune ne
+  contient `csndfatwtbzqmhgqseem` : les trois qui portent une référence désignent
+  `djvjaocvndqhqqgilrof`.
+- **HTTPS : débloqué.** `GET <url>/auth/v1/health` rend **200** (le refus `Host not in
+  allowlist` de la séance précédente a disparu).
+- **Postgres : toujours injoignable, et le pooler n'y change rien.** Mesures :
+  - `db.djvjaocvndqhqqgilrof.supabase.co` n'a **aucun enregistrement A** (`ENODATA`). Il n'a
+    qu'une adresse IPv6, et le conteneur n'a pas d'IPv6 : la connexion échoue en
+    `EAFNOSUPPORT` ;
+  - **le TCP brut sortant est coupé** : `aws-0-eu-west-3.pooler.supabase.com` en 5432 et en
+    6543, `aws-1-eu-west-3.pooler.supabase.com:5432` et même `github.com:22` restent sans
+    réponse au bout de 6 s, alors que `example.com:80` répond. La documentation du proxy de
+    l'environnement le dit en toutes lettres : les bases en TCP brut ne passent pas par lui ;
+  - **passer `SUPABASE_DB_URL` à l'URL « Session pooler » ne suffira donc pas** : le pooler
+    est en IPv4, mais son port n'est pas joignable non plus.
+- **Portes non relancées.** `tests/aide/base.ts` ouvre une connexion Postgres directe :
+  `test:rls`, puis `couverture` (qui lit son rapport) et une partie de la fumée en dépendent.
+  En plus, l'écriture de `.env.test.local` à partir des secrets de l'environnement a été
+  refusée par le classifieur du mode auto (« Credential Materialization »). Le fichier a été
+  supprimé aussitôt, et rien n'a tourné avec lui.
+- **Conséquence : la refonte n'est pas commencée.** La règle reste la même : pas d'écran
+  commité sans `pnpm gates` vert.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
@@ -431,6 +458,13 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   `test:rls`, `couverture` et `fumee` ne peuvent pas tourner, et aucun écran ne se porte.
   Si le port 5432 reste fermé même autorisé, une `SUPABASE_DB_URL` vers le pooler de
   Supabase (port 6543) est l'autre voie.
+- [ ] **(02/10, mis à jour) Le réseau « Full » a ouvert l'API HTTPS, pas Postgres.** Le
+  conteneur n'a pas d'IPv6, et il ne laisse sortir aucun TCP brut (5432 et 6543 du pooler
+  compris). Il reste trois voies : **(a)** faire tourner les portes sur le poste de Mehdi,
+  qui a `.env.test.local` ; **(b)** obtenir un environnement cloud qui laisse sortir le TCP
+  vers Postgres ; **(c)** autoriser, dans les réglages de permission de la session,
+  l'écriture de `.env.test.local` à partir des secrets de l'environnement, ce que le mode
+  auto a refusé. (c) ne suffit pas sans (b).
 - [x] Ajouter les variables de `.env.test.local` à l'environnement cloud — présentes le
   02/10/2026 (mais le réseau refuse encore l'hôte, voir la case du dessus).
 - [ ] Railway : recopier les réglages de `railway.json` dans l'onglet Settings, puis supprimer
