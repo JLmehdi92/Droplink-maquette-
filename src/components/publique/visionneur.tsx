@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState , useLayoutEffect} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { bloquerFond, libererFond } from "@/components/publique/bloquer-fond";
 
 /**
  * LE VISIONNEUR PLEIN ÉCRAN, ÉCRIT À LA MAIN.
@@ -299,7 +300,9 @@ export function Visionneur({
       copie.style.pointerEvents = "none";
       document.body.append(copie);
       copie
-        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: "ease-out", fill: "forwards" })
+        // Depuis l'opacité EN COURS : fermé pendant son entrée, le visionneur ne remonte pas
+        // à 1 avant de s'effacer (la copie n'hérite pas de l'animation WAAPI).
+        .animate([{ opacity: getComputedStyle(boite).opacity }, { opacity: 0 }], { duration: 140, easing: "ease-out", fill: "forwards" })
         .finished.finally(() => copie.remove())
         .catch(() => copie.remove());
     }
@@ -358,7 +361,11 @@ export function Visionneur({
       if (premiere === null) return;
       const pas = premiere.getBoundingClientRect().width + 12;
       const visibles = [...ul.children].filter((li) => li.getClientRects().length > 0).length;
-      position.textContent = String(Math.max(1, Math.min(visibles, Math.round(ul.scrollLeft / pas) + 1)));
+      // EN BUTÉE, la dernière tuile : l'arrondi du pas s'arrêtait une tuile avant (la
+      // maquette a le même défaut, relevé à la relecture du 02/10/2026).
+      const auBout = ul.scrollLeft >= ul.scrollWidth - ul.clientWidth - 1;
+      const rang = auBout ? visibles : Math.round(ul.scrollLeft / pas) + 1;
+      position.textContent = String(Math.max(1, Math.min(visibles, rang)));
     };
     ul.addEventListener("scroll", suivre, { passive: true });
     return () => ul.removeEventListener("scroll", suivre);
@@ -423,24 +430,29 @@ export function Visionneur({
     };
     window.addEventListener("keydown", surTouche);
 
+    return () => window.removeEventListener("keydown", surTouche);
+  }, [index, fermer, aller]);
+
+  /* L'OUVERTURE ET LA FERMETURE, SÉPARÉES DU CHANGEMENT DE PHOTO (relecture du
+     02/10/2026) : liées à `index`, elles se rejouaient à chaque flèche — et le focus
+     repartait sur la vignette, DERRIÈRE la couche, à chaque photo suivante. */
+  const ouvert = index !== null;
+  useEffect(() => {
+    if (!ouvert) return;
     // Le fond ne défile pas pendant qu'on regarde une photo : sur mobile, un
     // défilement derrière une couche plein écran donne l'impression que la page
     // a sauté quand on ferme.
-    const avant = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    document.documentElement.classList.add("cl-bloque");
-
+    // (`cl-bloque`, `client.css` : la même règle que la feuille d'historique.)
+    bloquerFond();
     return () => {
-      window.removeEventListener("keydown", surTouche);
-      document.body.style.overflow = avant;
-      document.documentElement.classList.remove("cl-bloque");
+      libererFond();
       // Rendu à la vignette d'où l'on vient, si elle est toujours là. La
       // référence a été prise AU CLIC : la lire ici reviendrait à lire le
       // bouton « fermer » que `autoFocus` vient de saisir.
       const retour = declencheur.current;
       if (retour !== null && retour.isConnected) retour.focus();
     };
-  }, [index, fermer, aller]);
+  }, [ouvert]);
 
   /*
    * LE BALAYAGE, parce que la planche l'ANNONCE en toutes lettres.

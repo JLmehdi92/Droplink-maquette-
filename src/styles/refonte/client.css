@@ -274,7 +274,13 @@ dialog.cv-feuille.sort::backdrop { animation: cv-voile-sort 220ms ease-out forwa
 @media (min-width: 1024px) { dialog.cv-feuille[open] .cv-feuille__panneau { animation-name: cv-glisse; } }
 @media (prefers-reduced-motion: reduce) { dialog.cv-feuille[open] .cv-feuille__panneau, dialog.cv-feuille[open]::backdrop, dialog.cv-feuille.sort::backdrop { animation: none; } }
 /* le fond ne défile pas sous la feuille ni sous le visionneur */
-.cl-bloque, .cl-bloque body { overflow: hidden; }
+/* LE FOND NE DÉFILE PAS sous une feuille ou un visionneur. Au bureau, `html` SEUL : bloquer
+   aussi `body` en faisait un conteneur de défilement immobile, et la colonne collante
+   (`.cv-cote`) sautait de 20 à -237 px sous le voile (mesuré le 02/10/2026). Au téléphone,
+   où rien n'est collant, `body` aussi — c'est lui que Safari iOS fait défiler. La largeur de
+   la barre disparue est rendue en marge (`--cl-barre`, mesurée par `bloquer-fond.ts`). */
+.cl-bloque { overflow: hidden; padding-right: var(--cl-barre, 0px); }
+@media (max-width: 1023px) { .cl-bloque body { overflow: hidden; } }
 /* AU TÉLÉPHONE, LES LIBELLÉS DU TRAJET EN QUATRE COLONNES ÉGALES, chacune centrée sous son
    arrêt (la ligne rentre de 12,5 % de chaque côté) : posés en absolu comme au bureau,
    « Preparation » et « Shipped » se chevauchaient en anglais à 390 px. */

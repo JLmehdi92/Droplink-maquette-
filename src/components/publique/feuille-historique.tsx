@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { bloquerFond, libererFond } from "@/components/publique/bloquer-fond";
 
 /**
  * LA FEUILLE DE L'HISTORIQUE (maquette v3 de la page client, `.cv-feuille`) : elle monte
@@ -47,14 +48,28 @@ export function FeuilleHistorique({
     let y0 = 0;
     let t0 = 0;
     let dy = 0;
+    // LA SORTIE EN COURS, et elle seule (relecture du 02/10/2026) : sa fin ne ferme la
+    // feuille que si elle est toujours LA sortie courante — une fermeture sèche suivie d'une
+    // réouverture dans les 240 ms aurait sinon refermé la feuille qu'on venait de rouvrir.
+    let sortie: Animation | null = null;
+    const abandonnerSortie = (): void => {
+      const a = sortie;
+      sortie = null;
+      a?.cancel();
+    };
 
     const ouvrir = (evenement: MouseEvent): void => {
       const cible = evenement.target instanceof Element ? evenement.target.closest("[data-ouvrir-historique]") : null;
       if (cible === null || d.open) return;
+      abandonnerSortie();
       enSortie.current = false;
       d.classList.remove("sort");
+      // Mise en page d'avance (`client.css`), la feuille garde son défilement d'une
+      // ouverture à l'autre : elle rouvre sur le mouvement le plus récent.
+      const p = panneau();
+      if (p !== null) p.scrollTop = 0;
       d.showModal();
-      document.documentElement.classList.add("cl-bloque");
+      bloquerFond();
     };
 
     /** La sortie animée, puis la vraie fermeture (qui rend le focus au bouton d'origine). */
@@ -68,24 +83,26 @@ export function FeuilleHistorique({
       enSortie.current = true;
       d.classList.add("sort");
       const depart = getComputedStyle(p).transform;
-      p.animate([{ transform: depart === "none" ? "none" : depart }, { transform: bureau() ? "translateX(calc(100% + 24px))" : "translateY(100%)" }], {
+      const ici = p.animate([{ transform: depart === "none" ? "none" : depart }, { transform: bureau() ? "translateX(calc(100% + 24px))" : "translateY(100%)" }], {
         duration: 240,
         easing: TIROIR,
         fill: "forwards",
-      })
-        .finished.then(
-          () => d.close(),
-          () => d.close(),
-        )
-        .finally(() => {
-          p.getAnimations().forEach((a) => a.cancel());
-          p.style.transform = "";
-        });
+      });
+      sortie = ici;
+      // Annulée (réouverture, démontage), elle rejette : rien à faire, la feuille a déjà
+      // été rendue à son état par celui qui l'a annulée.
+      ici.finished.then(
+        () => {
+          if (sortie === ici && d.open) d.close();
+        },
+        () => undefined,
+      );
     };
 
     const surFermeture = (): void => {
       // Quel que soit le chemin (sortie animée, mouvement réduit après un glisser), la
       // feuille se rouvrira à sa place : aucun reste du geste précédent.
+      abandonnerSortie();
       const p = panneau();
       if (p !== null) {
         p.style.transform = "";
@@ -94,7 +111,7 @@ export function FeuilleHistorique({
       id = null;
       enSortie.current = false;
       d.classList.remove("sort");
-      document.documentElement.classList.remove("cl-bloque");
+      libererFond();
     };
     // Échap : la sortie animée plutôt que la fermeture sèche du navigateur.
     const surAnnulation = (e: Event): void => {
@@ -141,7 +158,8 @@ export function FeuilleHistorique({
       if (e.pointerId !== id || p === null) return;
       id = null;
       const vitesse = dy / Math.max(1, performance.now() - t0);
-      if (dy > 110 || vitesse > 0.11) {
+      // La vitesse seule ne suffit pas : un appui qui tremble de 5 px en 30 ms la dépasse.
+      if (dy > 110 || (dy > 12 && vitesse > 0.11)) {
         fermer();
         return;
       }
@@ -159,6 +177,8 @@ export function FeuilleHistorique({
     poignee?.addEventListener("pointermove", tirer);
     poignee?.addEventListener("pointerup", lacher);
     poignee?.addEventListener("pointercancel", lacher);
+    // Une capture perdue sans `pointerup` laisserait `id` posé, et tout glisser suivant ignoré.
+    poignee?.addEventListener("lostpointercapture", lacher);
     return () => {
       document.removeEventListener("click", ouvrir);
       d.removeEventListener("close", surFermeture);
@@ -169,7 +189,9 @@ export function FeuilleHistorique({
       poignee?.removeEventListener("pointermove", tirer);
       poignee?.removeEventListener("pointerup", lacher);
       poignee?.removeEventListener("pointercancel", lacher);
-      document.documentElement.classList.remove("cl-bloque");
+      poignee?.removeEventListener("lostpointercapture", lacher);
+      abandonnerSortie();
+      libererFond();
     };
   }, []);
 

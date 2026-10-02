@@ -1218,7 +1218,21 @@ les optimisations pour que ce ne soit pas lent ». Liste traitée : `consignes/a
   CPU ×4 : pire image 33-67 ms (maquette 17) ; les 67 ms tombent sur le premier rendu React de la
   scène, à opacité 0 : rien de visible n'est sauté. Assumé.
 - **Validation QC** : l'étape qui arrive entre (200 ms, 4 px), jamais au premier rendu ; le focus suit.
-- **Budget** : 140 Ko hors médias au téléphone, 94 Ko au bureau (< 300 Ko).
+- **Budget** : **288 Ko TRANSFÉRÉS hors médias** (gzip, mesurés par `encodedDataLength`), au
+  téléphone comme au bureau — sous les 300 Ko, mais la marge n'est plus que de 12 Ko. Ce lot y
+  ajoute quelques centaines d'octets ; l'essentiel vient du socle React (71 + 43 Ko) et de la
+  police Inter (72 Ko). ⚠️ Une première mesure disait « 140 / 94 Ko » : elle lisait des corps
+  décompressés, et de façon irrégulière. Elle était fausse. À surveiller avant tout ajout sur `/p`.
+- **Relecture (un agent)** : aucun HIGH. Corrigés — `cl-bloque` sur `body` faisait sauter la
+  colonne collante du bureau de 20 à −237 px sous le voile (mesuré) : au bureau seul `html` est
+  bloqué, et la largeur de la barre disparue est rendue en marge (`bloquer-fond.ts`, décalage 0 px
+  mesuré) ; une sortie de feuille pouvait refermer la feuille rouverte dans ses 240 ms (génération
+  gardée) ; la feuille rouvrait au défilement précédent (remise en haut) ; une pichenette de 5 px
+  la fermait (12 px minimum) ; `lostpointercapture` écouté ; le compteur s'arrêtait une tuile avant
+  la fin (butée) ; chaque flèche du visionneur renvoyait le focus DERRIÈRE la couche (défaut
+  antérieur : effet d'ouverture séparé de celui de la photo) ; la copie de sortie repart de
+  l'opacité en cours ; une entrée déjà commencée garde son rang (pas de clignotement en 4G).
+  Écartés : deux liens vers l'accueil sur le lien invalide (la maquette a les deux).
 - **Lien invalide et erreur de `/p` NEUTRES** (décision de Mehdi) : l'« accent » de `.etat-p` est
   l'encre, plus aucun `rgba(91,75,245,…)` ni `--shadow-ds-brand` dessous — mesuré : aucun style
   calculé violet ou en dégradé sur la page. Ajoutés comme la maquette : « Retour à l'accueil » dans

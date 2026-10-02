@@ -515,8 +515,12 @@ export async function PageClient({
   );
 }
 
+/* ⚠️ UNE ENTRÉE DÉJÀ COMMENCÉE GARDE SON RANG 0 (relecture du 02/10/2026) : en 4G, le haut
+   du document peut être peint avant que ce script, en bas, soit lu. Lui donner un délai en
+   cours d'animation le renverrait à l'opacité 0 (`both`) — le texte déjà vu clignoterait.
+   Il entre alors avec les premiers, et la cascade ne se dégrade que dans ce cas-là. */
 const SCRIPT_ARRIVEE =
-  '(function(){var l=document.querySelectorAll(".cv-entree");for(var i=0;i<l.length;i++)l[i].style.setProperty("--i",String(Math.min(i,8)));if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var c=document.querySelector(".cv-camion");if(!c||!c.animate||!c.parentElement)return;var x=parseFloat(getComputedStyle(c).getPropertyValue("--x"))/100;if(!(x>0))return;c.animate([{transform:"translateX("+(-c.parentElement.getBoundingClientRect().width*x)+"px)"},{transform:"none"}],{duration:1100,delay:300,easing:"cubic-bezier(.23,1,.32,1)",fill:"backwards"})})()';
+  '(function(){var l=document.querySelectorAll(".cv-entree");for(var i=0;i<l.length;i++){var a=l[i].getAnimations?l[i].getAnimations()[0]:null;if(a&&a.currentTime>0)continue;l[i].style.setProperty("--i",String(Math.min(i,8)))}if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;var c=document.querySelector(".cv-camion");if(!c||!c.animate||!c.parentElement)return;var x=parseFloat(getComputedStyle(c).getPropertyValue("--x"))/100;if(!(x>0))return;c.animate([{transform:"translateX("+(-c.parentElement.getBoundingClientRect().width*x)+"px)"},{transform:"none"}],{duration:1100,delay:300,easing:"cubic-bezier(.23,1,.32,1)",fill:"backwards"})})()';
 
 /**
  * L'APERÇU NE PEUT RIEN ÉCRIRE AU NOM DU CLIENT : dans `/p/<jeton>/apercu`, les îlots qui
