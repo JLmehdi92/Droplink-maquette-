@@ -1595,7 +1595,10 @@
       "position": "第 {n} 张，共 {total} 张",
       "videTitre": "还没有照片",
       "videTexte": "卖家上传后，照片会显示在这里。",
-      "balayez": "左右滑动切换照片"
+      "balayez": "左右滑动切换照片",
+      "dialogue": "照片和视频，第 {n} 张，共 {total} 张",
+      "tuile": "{action}，第 {n} 张，共 {total} 张",
+      "vignette": "第 {n} 张，共 {total} 张"
     },
     "details": {
       "reference": "商品编号",
@@ -1678,7 +1681,9 @@
       "titre": "简单而强大的物流链接。",
       "texte": "为每笔订单创建物流链接，一分钟内完成。",
       "bouton": "了解 DropLink"
-    }
+    },
+    "allerAuContenu": "跳到主要内容",
+    "logoAccueil": "DropLink，首页"
   },
   "admin": {
     "navigation": "后台管理",

@@ -114,9 +114,15 @@ function monter(): void {
   });
 }
 
-/** Le dialogue plein écran, ou `null` s'il est fermé. */
+/**
+ * Le dialogue plein écran, ou `null` s'il est fermé.
+ *
+ * CHERCHÉ DANS TOUT LE DOCUMENT, pas dans le conteneur : le visionneur est monté dans
+ * `<body>` par un portail depuis le 02/10/2026 (rendu dans sa section, il héritait de son
+ * entrée animée et tenait dans 644 × 425 px). Les assertions, elles, n'ont pas bougé.
+ */
 function dialogue(): HTMLElement | null {
-  return conteneur.querySelector<HTMLElement>('[role="dialog"]');
+  return document.querySelector<HTMLElement>('[role="dialog"]');
 }
 
 /** Les éléments focalisables DU DIALOGUE, dans l'ordre du document. */

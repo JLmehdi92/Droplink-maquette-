@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { resoudreAccent } from "@/lib/design/contraste";
 import { BaliseVue } from "@/components/publique/balise-vue";
 import { PageClient } from "@/components/publique/page-client";
 import {
@@ -70,6 +71,17 @@ export async function generateMetadata({
     title: commande === null ? t("lienInvalideTitre") : t("titre"),
     robots: { index: false, follow: false, nocache: true },
   };
+}
+
+/**
+ * LA BARRE DU NAVIGATEUR À LA COULEUR DU VENDEUR (maquette `client.html`, `theme-color`) :
+ * sa couleur d'aplat RÉSOLUE (`resoudreAccent`), jamais la saisie brute. Même lecture mise
+ * en cache que le titre : aucune requête de plus. Un lien mort n'en pose aucune.
+ */
+export async function generateViewport({ params }: { params: Promise<{ token: string }> }): Promise<Viewport> {
+  const { token } = await params;
+  const commande = await lireCommandePublique(token);
+  return commande === null ? {} : { themeColor: resoudreAccent(commande.boutique.couleur).remplissage };
 }
 
 export default async function PagePublique({

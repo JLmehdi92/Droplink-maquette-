@@ -48,12 +48,16 @@ export default async function LienInvalide() {
   );
   return (
     <div className="etat-p page-notif">
+      {/* PAS DE LIEN D'ÉVITEMENT ICI, contrairement à la maquette : cet écran est encadré
+          par l'aperçu d'un lien bloqué, où chaque lien doit ouvrir l'onglet ENTIER
+          (`target="_top"`) — et un « #contenu » en `_top` y chargerait l'adresse du cadre.
+          Le contenu suit de toute façon deux liens d’en-tête. */}
       <div className="notif-page">
         <header className="notif-haut">
           {/* `_top` ET NON LE CADRE COURANT : dans l'aperçu de l'éditeur, qui encadre
               la page d'un lien bloqué, l'accueil s'ouvrirait dans le cadre — et
               l'accueil refuse d'être encadré. */}
-          <Link className="logo" href="/fr" target="_top" aria-label="DropLink">
+          <Link className="logo" href="/fr" target="_top" aria-label={t("logoAccueil")}>
             {logo(28)}
           </Link>
           <Link className="notif-accueil" href="/fr" target="_top">

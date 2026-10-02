@@ -4,7 +4,10 @@
 @layer components {
 /* Les deux courbes de la refonte, redéfinies ici : la page client ne charge pas `socle.css`. */
 .page-client { --ease: cubic-bezier(.4, 0, .2, 1); --ease-sortie: cubic-bezier(.16, 1, .3, 1); color-scheme: light; background: #FFFFFF; color: var(--color-ds-texte-fort); font-size: 14px; line-height: normal; }
-.page-client .evitement { background: var(--color-ds-texte-fort); color: #fff; }
+/* LE LIEN D'ÉVITEMENT (maquette `client.html`, `lien-invalide.html`) : `socle.css` n'est pas
+   chargée sous /p, la règle entière est donc ici. Hors de l'écran, il descend au focus. */
+.page-client .evitement, .etat-p .evitement { position: absolute; left: 16px; top: -60px; z-index: 100; display: inline-flex; align-items: center; min-height: 44px; padding: 10px 14px; border-radius: 10px; font-weight: 600; background: var(--color-ds-texte-fort); color: #fff; }
+.page-client .evitement:focus, .etat-p .evitement:focus { top: 12px; }
 
 /* les mouvements partagés par la page client */
 @keyframes cn-rail { from { transform: scaleX(0); } }
@@ -384,3 +387,30 @@ dialog.cv-feuille.sort::backdrop { animation: cv-voile-sort 220ms ease-out forwa
 .etat-p .errc__bouton[aria-busy="true"] { opacity: .72; }
 @media (hover: hover) and (pointer: fine) { .etat-p .errc__bouton:hover { opacity: .9; } }
 .etat-p.page-erreur-client { background: var(--surface); }
+
+/* LE VISIONNEUR PLEIN ÉCRAN (maquette `app.css`, `.cl-visionneur`) — NOTRE surface, pas
+   celle du vendeur : fond noir fixe, blanc seul possible, l'accent n'y entre pas (pas même
+   pour l'anneau de focus, blanc ici). Monté dans `<body>` (portail). */
+.cv-vis { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: #0A0A0D; color: #FFFFFF; }
+.cv-vis__haut, .cv-vis__bas { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 10px; }
+.cv-vis__bas { padding-top: 16px; }
+.cv-vis__compteur { font-size: 14px; font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.cv-vis-cale { width: 46px; }
+.cv-vis-bouton { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 99px; background: rgba(255, 255, 255, .12); color: #FFFFFF; transition: background-color 160ms cubic-bezier(.4, 0, .2, 1), transform 160ms cubic-bezier(.16, 1, .3, 1); }
+.cv-vis-bouton:active { transform: scale(.95); }
+.cv-vis-bouton--grand { width: 52px; height: 52px; }
+.cv-vis-bouton:focus-visible, .cv-vis-vignette:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(255, 255, 255, .5); }
+.cv-vis__aide { font-size: 13px; color: rgba(255, 255, 255, .6); }
+.cv-vis__scene { position: relative; display: flex; flex: 1; align-items: center; justify-content: center; min-height: 0; padding: 0 8px; overflow: hidden; touch-action: pan-y; }
+.cv-vis__scene > p { color: #FFFFFF; }
+.cv-vis__media { max-width: min(100%, 720px); max-height: 100%; border-radius: 4px; }
+.cv-vis__photo { width: min(100%, 560px); height: auto; aspect-ratio: 1; object-fit: contain; background: #FFFFFF; user-select: none; -webkit-user-drag: none; }
+.cv-vis__vignettes { display: flex; justify-content: center; gap: 6px; padding: 6px 14px 22px; overflow-x: auto; scrollbar-width: none; }
+.cv-vis__vignettes::-webkit-scrollbar { display: none; }
+.cv-vis__vignettes > li { flex: none; }
+.cv-vis-vignette { position: relative; display: block; width: 52px; height: 52px; overflow: hidden; border-radius: 8px; background: #FFFFFF; opacity: .5; outline: 2px solid transparent; outline-offset: 1px; transition: opacity 160ms cubic-bezier(.4, 0, .2, 1), outline-color 160ms cubic-bezier(.4, 0, .2, 1); }
+.cv-vis-vignette[aria-current="true"] { opacity: 1; outline-color: #FFFFFF; }
+.cv-vis-vignette img { width: 100%; height: 100%; object-fit: contain; }
+.cv-vis-vignette__lecture { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(11, 11, 24, .7); pointer-events: none; }
+@media (hover: hover) and (pointer: fine) { .cv-vis-bouton:hover { background: rgba(255, 255, 255, .2); } .cv-vis-vignette:hover { opacity: .85; } }
+@media (prefers-reduced-motion: reduce) { .cv-vis-bouton, .cv-vis-vignette { transition: none; } }

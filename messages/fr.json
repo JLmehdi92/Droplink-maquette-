@@ -1595,7 +1595,10 @@
       "position": "{n} sur {total}",
       "videTitre": "Pas encore de photos",
       "videTexte": "Elles apparaîtront ici dès que le vendeur les aura ajoutées.",
-      "balayez": "Balayez pour changer de photo"
+      "balayez": "Balayez pour changer de photo",
+      "dialogue": "Photos et vidéos, {n} sur {total}",
+      "tuile": "{action}, {n} sur {total}",
+      "vignette": "Photo {n} sur {total}"
     },
     "details": {
       "reference": "Référence",
@@ -1678,7 +1681,9 @@
       "titre": "Des liens de suivi simples et puissants.",
       "texte": "Créez un lien de suivi par commande, en moins d'une minute.",
       "bouton": "Découvrir DropLink"
-    }
+    },
+    "allerAuContenu": "Aller au contenu",
+    "logoAccueil": "DropLink, accueil"
   },
   "admin": {
     "navigation": "Administration",

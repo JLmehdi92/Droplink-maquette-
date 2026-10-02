@@ -107,6 +107,7 @@ export function ArbitrageQc({
   const question = useRef<HTMLHeadingElement>(null);
   const interagi = useRef(false);
   const zone = useRef<HTMLElement>(null);
+  const champMotif = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     if (!interagi.current) {
       interagi.current = true;
@@ -124,7 +125,10 @@ export function ArbitrageQc({
       );
     }
     if (decide) statut.current?.focus();
-    else if (!motif) question.current?.focus();
+    // Le motif prend le focus SANS faire défiler (maquette : `preventScroll`) — `autoFocus`
+    // ramenait la page sur le champ.
+    else if (motif) champMotif.current?.focus({ preventScroll: true });
+    else question.current?.focus();
   }, [decide, motif]);
 
   /* L'échec est DIT. Un pari perdu qui ne se dit pas laisse le visiteur croire que sa
@@ -136,7 +140,7 @@ export function ArbitrageQc({
   ) : null;
 
   return (
-    <section ref={zone} className="cv-qc" aria-labelledby="cv-qc-titre" data-etat={decide ? etat : undefined}>
+    <section ref={zone} className="cv-qc cv-entree" aria-labelledby="cv-qc-titre" data-etat={decide ? etat : undefined}>
       {decide ? (
         <div className="cv-qc__decide">
           <span className="cv-qc__marque" aria-hidden="true">
@@ -167,7 +171,7 @@ export function ArbitrageQc({
             id="cv-motif"
             value={commentaire}
             onChange={(e) => setCommentaire(e.target.value)}
-            autoFocus
+            ref={champMotif}
             // Le même plafond qu'en base : refuser à la saisie explique, tronquer en
             // base protège.
             maxLength={1000}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { bloquerFond, libererFond } from "@/components/publique/bloquer-fond";
 
 /**
@@ -71,8 +72,13 @@ export interface EntreeVisionneur {
 const TUILES_TELEPHONE = 6;
 const TUILES_BUREAU = 8;
 
-/** Au-delà de ce déplacement horizontal, un glissement du doigt change de média. */
-const SEUIL_BALAYAGE_PX = 40;
+/**
+ * LE BALAYAGE DE LA MAQUETTE (`client.js`) : la distance OU la vitesse suffit — au-delà de
+ * 50 px, ou de 12 px à plus de 0,11 px/ms : un geste vif n'a pas à aller loin.
+ */
+const SEUIL_BALAYAGE_PX = 50;
+const SEUIL_GESTE_VIF_PX = 12;
+const VITESSE_GESTE_VIF = 0.11;
 
 /**
  * La pastille de lecture d'une vidéo, posée sur sa vignette — celle du kit :
@@ -182,6 +188,12 @@ export function Visionneur({
     readonly indisponible: string;
     readonly position: string;
     readonly balayez: string;
+    /** « Photos et vidéos, {n} sur {total} » : le nom du dialogue (maquette). */
+    readonly dialogue?: string;
+    /** « {action}, {n} sur {total} » : une tuile qui dit aussi combien il y en a. */
+    readonly tuile?: string;
+    /** « Photo {n} sur {total} » : une vignette de la pellicule. */
+    readonly vignette?: string;
   };
 }) {
   const [index, setIndex] = useState<number | null>(null);
@@ -309,17 +321,27 @@ export function Visionneur({
     setIndex(null);
   }, []);
 
+  /** Le sens du dernier geste (±1), pour le glissement : il ne se déduit plus des rangs
+   *  depuis que la navigation BOUCLE — de la dernière à la première, on va « en avant ». */
+  const sens = useRef(0);
+  // LA NAVIGATION BOUCLE, comme la maquette (`(i + n) % n`) : aucune flèche n'est
+  // jamais grisée, la dernière photo mène à la première.
   const aller = useCallback(
     (pas: number) => {
-      setIndex((actuel) => {
-        if (actuel === null) return null;
-        const suivant = actuel + pas;
-        if (suivant < 0 || suivant >= medias.length) return actuel;
-        return suivant;
-      });
+      sens.current = pas;
+      setIndex((actuel) => (actuel === null ? null : (actuel + pas + medias.length) % medias.length));
     },
     [medias.length],
   );
+  /** Depuis la pellicule : change de photo SANS changer d'où l'on est venu (le focus
+   *  rendu à la fermeture reste celui de la vignette de la page, pas d'un bouton du
+   *  visionneur qui n'existera plus). */
+  const choisir = useCallback((rang: number) => {
+    setIndex((actuel) => {
+      sens.current = actuel === null ? 0 : Math.sign(rang - actuel);
+      return rang;
+    });
+  }, []);
 
   const scene = useRef<HTMLDivElement | null>(null);
   const indexPrecedent = useRef<number | null>(null);
@@ -337,11 +359,11 @@ export function Visionneur({
         { duration: 200, easing: "cubic-bezier(.23,1,.32,1)" },
       );
     } else if (avant !== index) {
-      const sens = index > avant ? 1 : -1;
+      const dans = sens.current !== 0 ? sens.current : index > avant ? 1 : -1;
       if (typeof scene.current?.animate !== "function") return;
       scene.current.animate(
         [
-          { opacity: 0, transform: `translateX(${sens * 24}px)` },
+          { opacity: 0, transform: `translateX(${dans * 24}px)` },
           { opacity: 1, transform: "none" },
         ],
         { duration: 200, easing: "cubic-bezier(.23,1,.32,1)" },
@@ -467,21 +489,32 @@ export function Visionneur({
    */
   /** Le conteneur du plein écran, pour y borner la tabulation. */
   const dialogue = useRef<HTMLDivElement | null>(null);
-  const departX = useRef<number | null>(null);
+  const geste = useRef<{ id: number; x: number; t: number } | null>(null);
+  /** Un balayage vient d'aboutir : le clic qui le suit n'est pas un « clic à côté ». */
+  const balaye = useRef(false);
 
-  const surDebutToucher = (e: React.TouchEvent): void => {
-    departX.current = e.touches[0]?.clientX ?? null;
+  // AU POINTEUR, comme la maquette : le doigt ET la souris. `touch-action: pan-y` sur la
+  // scène laisse le navigateur faire défiler à la verticale et nous donne l'horizontale.
+  const surAppui = (e: React.PointerEvent): void => {
+    if (geste.current !== null) return;
+    geste.current = { id: e.pointerId, x: e.clientX, t: performance.now() };
   };
 
-  const surFinToucher = (e: React.TouchEvent): void => {
-    const depart = departX.current;
-    departX.current = null;
-    const fin = e.changedTouches[0]?.clientX;
-    if (depart === null || fin === undefined) return;
-    const ecart = fin - depart;
-    if (Math.abs(ecart) < SEUIL_BALAYAGE_PX) return;
-    aller(ecart < 0 ? 1 : -1);
+  const surRelache = (e: React.PointerEvent): void => {
+    const depart = geste.current;
+    if (depart === null || depart.id !== e.pointerId) return;
+    geste.current = null;
+    const ecart = e.clientX - depart.x;
+    const vitesse = Math.abs(ecart) / Math.max(1, performance.now() - depart.t);
+    if (Math.abs(ecart) > SEUIL_BALAYAGE_PX || (Math.abs(ecart) > SEUIL_GESTE_VIF_PX && vitesse > VITESSE_GESTE_VIF)) {
+      balaye.current = true;
+      aller(ecart < 0 ? 1 : -1);
+    }
   };
+
+  const total = medias.length;
+  const position = (modele: string, n: number): string =>
+    modele.replace("{n}", String(n)).replace("{total}", String(total));
 
   return (
     <>
@@ -510,7 +543,11 @@ export function Visionneur({
                   type="button"
                   onClick={() => ouvrirA(rang)}
                   className="cv-photo"
-                  aria-label={(media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)}
+                  aria-label={
+                    libelles.tuile === undefined
+                      ? (media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)
+                      : position(libelles.tuile.replace("{action}", media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir), rang + 1)
+                  }
                 >
                   {"url" in apercu ? (
                     /* eslint-disable-next-line @next/next/no-img-element -- URL
@@ -546,231 +583,163 @@ export function Visionneur({
         </ul>
       ) : null}
 
-      {courant !== undefined ? (
-        <div
-          ref={dialogue}
-          role="dialog"
-          aria-modal="true"
-          aria-label={libelles.position
-            .replace("{n}", String((index ?? 0) + 1))
-            .replace("{total}", String(medias.length))}
-          className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0d]"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) fermer();
-          }}
-        >
-          {/* La fermeture est à GAUCHE et ronde, le compteur au centre : le
-              pouce d'une main qui tient le téléphone atteint le coin haut
-              gauche, pas le coin haut droit. */}
-          <div className="flex items-center justify-between px-3.5 pt-3.5 pb-2.5 text-white">
-            <button
-              type="button"
-              onClick={fermer}
-              autoFocus
-              aria-label={libelles.fermer}
-              className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-white/12"
+      {/* LE PLEIN ÉCRAN EST MONTÉ DANS `<body>` (maquette : `document.body.append`).
+          ⚠️ DÉFAUT MESURÉ LE 02/10/2026 : rendu dans sa section, il héritait de son entrée
+          animée (`.cv-entree`, `transform` maintenu par `animation-fill-mode: both`), qui
+          faisait de la section le bloc conteneur des éléments `fixed` — le « plein écran »
+          tenait dans 644 × 425 px au bureau, 348 × 201 au téléphone. */}
+      {courant !== undefined
+        ? createPortal(
+            <div
+              ref={dialogue}
+              role="dialog"
+              aria-modal="true"
+              aria-label={position(libelles.dialogue ?? libelles.position, (index ?? 0) + 1)}
+              className="cv-vis"
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                aria-hidden="true"
+              {/* La fermeture est à GAUCHE et ronde, le compteur au centre : le
+                  pouce d'une main qui tient le téléphone atteint le coin haut
+                  gauche, pas le coin haut droit. */}
+              <div className="cv-vis__haut">
+                <button type="button" onClick={fermer} autoFocus aria-label={libelles.fermer} className="cv-vis-bouton">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+                {/* « 3 / 7 » : la planche écrit la position telle quelle. La forme
+                    lisible — « 3 sur 7 » — reste sur le dialogue lui-même, pour qui
+                    ne lit pas l'écran. */}
+                <span aria-hidden="true" className="cv-vis__compteur">
+                  {(index ?? 0) + 1} / {total}
+                </span>
+                <span className="cv-vis-cale" />
+              </div>
+
+              {/*
+                LA PHOTO PLEINE, dans le cadre carré blanc de la maquette (560 px au plus,
+                `object-fit: contain`) : une photo posée à plat n'y est jamais rognée, et le
+                fond blanc est celui des photos de contrôle. Un clic À CÔTÉ de la photo
+                ferme, comme dans la maquette.
+              */}
+              <div
+                ref={scene}
+                className="cv-vis__scene"
+                onPointerDown={surAppui}
+                onPointerUp={surRelache}
+                onPointerCancel={() => {
+                  geste.current = null;
+                }}
+                onClick={(e) => {
+                  if (balaye.current) {
+                    balaye.current = false;
+                    return;
+                  }
+                  if (e.target === e.currentTarget) fermer();
+                }}
               >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-            {/* « 3 / 7 » : la planche écrit la position telle quelle. La forme
-                lisible — « 3 sur 7 » — reste sur le dialogue lui-même, pour qui
-                ne lit pas l'écran. */}
-            <span
-              aria-hidden="true"
-              className="text-[14px] font-bold tracking-[0.02em]"
-            >
-              {(index ?? 0) + 1} / {medias.length}
-            </span>
-            <span className="w-[46px]" />
-          </div>
+                {echec ? (
+                  <p>{libelles.indisponible}</p>
+                ) : url === null ? (
+                  <p>{libelles.chargement}</p>
+                ) : courant.type === "video" ? (
+                  // `preload="none"` : la vidéo ne se télécharge qu'au moment où on
+                  // demande à la lire. Le poster est la vignette déjà en cache.
+                  <video src={url} poster={courant.urlVignette ?? undefined} controls preload="none" playsInline className="cv-vis__media" />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element -- même
+                     raison : URL signée à expiration. */
+                  <img
+                    src={url}
+                    alt=""
+                    width={courant.largeur ?? undefined}
+                    height={courant.hauteur ?? undefined}
+                    draggable={false}
+                    className="cv-vis__media cv-vis__photo"
+                  />
+                )}
 
-          {/*
-            LA PHOTO PLEINE. La planche `Visionneur` lui donne un cadre 3/4, un
-            rayon de 4 et 8 px de marge latérale — le rayon et la marge sont
-            repris tels quels.
+                {/* LE FILIGRANE. Superposition à L'AFFICHAGE, jamais gravée dans le
+                    fichier : graver exigerait de réencoder chaque photo au dépôt,
+                    donc de payer un transcodage sur le téléphone du vendeur pour un
+                    résultat qu'un recadrage retire de toute façon.
 
-            LE CADRE 3/4 NE L'EST PAS, et c'est délibéré : sur la planche c'est
-            un aplat gris, ici c'est une vraie photo. Imposer un portrait à une
-            photo posée à plat ajouterait deux bandes noires et RÉDUIRAIT le
-            sujet, sur l'écran dont le produit tout entier promet qu'on y voit
-            l'article. `object-contain` dans l'espace disponible donne le même
-            résultat que la planche pour une photo portrait, et un meilleur
-            pour les autres.
-          */}
-          <div
-            ref={scene}
-            className="relative flex flex-1 items-center justify-center overflow-hidden px-2"
-            onTouchStart={surDebutToucher}
-            onTouchEnd={surFinToucher}
-          >
-            {echec ? (
-              <p className="text-white">{libelles.indisponible}</p>
-            ) : url === null ? (
-              <p className="text-white">{libelles.chargement}</p>
-            ) : courant.type === "video" ? (
-              // `preload="none"` : la vidéo ne se télécharge qu'au moment où on
-              // demande à la lire. Le poster est la vignette déjà en cache.
-              <video
-                src={url}
-                poster={courant.urlVignette ?? undefined}
-                controls
-                preload="none"
-                playsInline
-                className="max-h-full max-w-full rounded-[4px]"
-              />
-            ) : (
-              /* eslint-disable-next-line @next/next/no-img-element -- même
-                 raison : URL signée à expiration. */
-              <img
-                src={url}
-                alt=""
-                width={courant.largeur ?? undefined}
-                height={courant.hauteur ?? undefined}
-                className="max-h-full max-w-full rounded-[4px] object-contain"
-              />
-            )}
+                    IL NE PROTÈGE PAS, IL DÉCOURAGE. Trois clics dans l'inspecteur
+                    le font disparaître, et une capture d'écran le garde.
 
-            {/* LE FILIGRANE. Superposition à L'AFFICHAGE, jamais gravée dans le
-                fichier : graver exigerait de réencoder chaque photo au dépôt,
-                donc de payer un transcodage sur le téléphone du vendeur pour un
-                résultat qu'un recadrage retire de toute façon.
+                    `pointer-events-none` : sans lui, la couche intercepterait le
+                    balayage. Aucune police n'est chargée pour lui. */}
+                {filigrane !== null && url !== null && !echec ? (
+                  <span className="pointer-events-none absolute right-5 bottom-5 select-none text-[13px] font-bold tracking-[0.02em] text-white/40">
+                    {filigrane}
+                  </span>
+                ) : null}
+              </div>
 
-                IL NE PROTÈGE PAS, IL DÉCOURAGE. Trois clics dans l'inspecteur
-                le font disparaître, et une capture d'écran le garde.
+              {/* NAVIGATION : cibles larges, pouce en bas d'écran. Elle boucle : aucune
+                  flèche n'est grisée. */}
+              <div className="cv-vis__bas">
+                <button type="button" onClick={() => aller(-1)} aria-label={libelles.precedent} className="cv-vis-bouton cv-vis-bouton--grand">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m15 6-6 6 6 6" />
+                  </svg>
+                </button>
+                <span className="cv-vis__aide">{libelles.balayez}</span>
+                <button type="button" onClick={() => aller(1)} aria-label={libelles.suivant} className="cv-vis-bouton cv-vis-bouton--grand">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m9 6 6 6-6 6" />
+                  </svg>
+                </button>
+              </div>
 
-                `pointer-events-none` : sans lui, la couche intercepterait le
-                balayage. Aucune police n'est chargée pour lui. */}
-            {filigrane !== null && url !== null && !echec ? (
-              <span className="pointer-events-none absolute right-5 bottom-5 select-none text-[13px] font-bold tracking-[0.02em] text-white/40">
-                {filigrane}
-              </span>
-            ) : null}
-          </div>
-
-          {/* NAVIGATION : cibles larges, pouce en bas d'écran. */}
-          <div className="flex items-center justify-between px-3.5 pt-4 pb-2.5 text-white">
-            <button
-              type="button"
-              onClick={() => aller(-1)}
-              disabled={index === 0}
-              aria-label={libelles.precedent}
-              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/12 disabled:opacity-30"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="m15 6-6 6 6 6" />
-              </svg>
-            </button>
-            <span className="text-[13px] text-white/50 lg:hidden">
-              {libelles.balayez}
-            </span>
-            <button
-              type="button"
-              onClick={() => aller(1)}
-              disabled={index === medias.length - 1}
-              aria-label={libelles.suivant}
-              className="flex h-13 w-13 items-center justify-center rounded-full bg-white/12 disabled:opacity-30"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="m9 6 6 6-6 6" />
-              </svg>
-            </button>
-          </div>
-
-          {/*
-            LA PELLICULE — on sait toujours combien il en reste et où l'on est.
-
-            Elle manquait, et c'est la seule pièce du visionneur qui répond à
-            « combien y en a-t-il encore » sans compter. La tuile courante porte
-            un liseré ; les autres sont assombries, ce qui distingue la position
-            sans ajouter un mot.
-          */}
-          {medias.length > 1 ? (
-            <ul className="defilement-discret flex gap-1.5 overflow-x-auto px-3.5 pt-1.5 pb-[22px]">
-              {medias.map((media, rang) => (
-                <li key={media.id} className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => ouvrirA(rang)}
-                    aria-label={(media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)}
-                    aria-current={rang === index ? "true" : undefined}
-                    ref={
-                      rang === index
-                        ? (element) => {
-                            element?.scrollIntoView({ block: "nearest", inline: "center" });
-                          }
-                        : undefined
-                    }
-                    className={
-                      /* ⚠️ `rounded-ds-sm` VAUT 16 DANS CE THÈME, la planche dit 8.
-                         Un token de rayon NOMMÉ n'est pas une valeur de rayon :
-                         c'est le même piège que les trois boutons de la liste
-                         des commandes, qui portaient 28 pour 12. */
-                      "relative block h-[52px] w-[52px] overflow-hidden rounded-[8px] bg-[#2a2730] " +
-                      (rang === index ? "ring-2 ring-white" : "opacity-50")
-                    }
-                  >
-                    {media.urlVignette !== null ? (
-                      /* eslint-disable-next-line @next/next/no-img-element --
-                         URL signée à expiration. */
-                      <img
-                        src={media.urlVignette}
-                        alt=""
-                        width={200}
-                        height={200}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                    {media.type === "video" ? (
-                      <span
-                        className="pointer-events-none absolute inset-0 flex items-center justify-center text-white/70"
-                        aria-hidden="true"
+              {/*
+                LA PELLICULE — on sait toujours combien il en reste et où l'on est.
+                La vignette courante porte un liseré blanc ; les autres sont estompées,
+                ce qui distingue la position sans ajouter un mot.
+              */}
+              {total > 1 ? (
+                <ul className="cv-vis__vignettes">
+                  {medias.map((media, rang) => (
+                    <li key={media.id}>
+                      <button
+                        type="button"
+                        onClick={() => choisir(rang)}
+                        aria-label={
+                          libelles.vignette === undefined
+                            ? (media.type === "video" ? libelles.ouvrirVideo : libelles.ouvrir) + " " + (rang + 1)
+                            : position(libelles.vignette, rang + 1)
+                        }
+                        aria-current={rang === index ? "true" : "false"}
+                        ref={
+                          rang === index
+                            ? (element) => {
+                                element?.scrollIntoView({ block: "nearest", inline: "center" });
+                              }
+                            : undefined
+                        }
+                        className="cv-vis-vignette"
                       >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </span>
-                    ) : null}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      ) : null}
+                        {media.urlVignette !== null ? (
+                          /* eslint-disable-next-line @next/next/no-img-element --
+                             URL signée à expiration. */
+                          <img src={media.urlVignette} alt="" width={200} height={200} loading="lazy" decoding="async" />
+                        ) : null}
+                        {media.type === "video" ? (
+                          <span className="cv-vis-vignette__lecture" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

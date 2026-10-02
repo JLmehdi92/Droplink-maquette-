@@ -332,6 +332,9 @@ export async function PageClient({
     // (`<dialog>`) vit hors de `.cv`, et sans elles son point « récent » perdait la
     // couleur du vendeur.
     <div lang={langue} className="page-client page-client--v3" style={couleurs}>
+      <a className="evitement" href="#contenu">
+        {t("allerAuContenu")}
+      </a>
       <div className="cv">
         <HerosClient
           boutique={commande.boutique}
@@ -409,6 +412,10 @@ export async function PageClient({
                     indisponible: t("galerie.indisponible"),
                     position: t("galerie.position"),
                     balayez: t("galerie.balayez"),
+                    // `raw` : les marques {n}, {total}, {action} sont remplies par le visionneur.
+                    dialogue: t.raw("galerie.dialogue") as string,
+                    tuile: t.raw("galerie.tuile") as string,
+                    vignette: t.raw("galerie.vignette") as string,
                   }}
                 />
               )}

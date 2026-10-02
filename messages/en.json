@@ -1595,7 +1595,10 @@
       "position": "{n} of {total}",
       "videTitre": "No photos yet",
       "videTexte": "They will appear here as soon as the seller adds them.",
-      "balayez": "Swipe to change photo"
+      "balayez": "Swipe to change photo",
+      "dialogue": "Photos and videos, {n} of {total}",
+      "tuile": "{action}, {n} of {total}",
+      "vignette": "Photo {n} of {total}"
     },
     "details": {
       "reference": "Reference",
@@ -1678,7 +1681,9 @@
       "titre": "Tracking links, simple and powerful.",
       "texte": "Create one tracking link per order, in under a minute.",
       "bouton": "Discover DropLink"
-    }
+    },
+    "allerAuContenu": "Skip to content",
+    "logoAccueil": "DropLink, home"
   },
   "admin": {
     "navigation": "Administration",
