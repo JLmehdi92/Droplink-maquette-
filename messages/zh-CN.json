@@ -842,7 +842,8 @@
           }
         ]
       }
-    }
+    },
+    "confidentialiteChapo": "我们收集哪些信息、为什么收集，以及保存多长时间。"
   },
   "connexion": {
     "titre": "欢迎回来",
@@ -952,7 +953,8 @@
       "encre": "墨黑",
       "ambre": "琥珀色"
     },
-    "erreurCouleur": "请输入六位十六进制颜色，例如 #5B4BF5。"
+    "erreurCouleur": "请输入六位十六进制颜色，例如 #5B4BF5。",
+    "nomProvisoire": "您的店铺"
   },
   "marque": {
     "titre": "我的品牌",

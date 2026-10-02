@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { ArrowRight, Unlink } from "lucide-react";
 import { CLASSE_ACTION_ERREUR, EcranErreurPublic } from "@/components/ecran-erreur-public";
 import { routing } from "@/i18n/routing";
+import { MarqueurHydratation, ScriptJs } from "@/components/script-js";
 import "./globals.css";
 // Ce fichier remplace la racine : les feuilles de la refonte, que `[locale]/layout`
 // importe d'ordinaire, doivent être importées ici aussi.
@@ -87,8 +88,12 @@ export default async function PageIntrouvable() {
   const t = await getTranslations({ locale: langue, namespace: "erreurs" });
 
   return (
-    <html lang={langue}>
+    <html lang={langue} suppressHydrationWarning>
       <body className={`${corps.variable} antialiased`}>
+        {/* La classe `js` des autres surfaces : sans elle, l'entrée en cascade de
+            `introuvable.html` (`.js .err-corps > *`) ne jouait jamais ici. */}
+        <ScriptJs />
+        <MarqueurHydratation />
         {/* React hisse ce titre dans le `<head>`. Il est ici et non dans un
             `metadata` exporté parce que ce fichier ne reçoit aucune propriété :
             un `metadata` statique ne pourrait pas être dans la bonne langue. */}

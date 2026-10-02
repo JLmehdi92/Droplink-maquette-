@@ -842,7 +842,8 @@
           }
         ]
       }
-    }
+    },
+    "confidentialiteChapo": "Ce que nous collectons, pourquoi, et pendant combien de temps."
   },
   "connexion": {
     "titre": "Bon retour",
@@ -952,7 +953,8 @@
       "encre": "Encre",
       "ambre": "Ambre"
     },
-    "erreurCouleur": "Saisissez une couleur hexadécimale à six chiffres, par exemple #5B4BF5."
+    "erreurCouleur": "Saisissez une couleur hexadécimale à six chiffres, par exemple #5B4BF5.",
+    "nomProvisoire": "Votre boutique"
   },
   "marque": {
     "titre": "Ma marque",

@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { adresseTransmise } from "@/components/acces/bascule-acces";
+import { adresseTransmise, transmettreAdresse } from "@/components/acces/bascule-acces";
 import { seConnecter, type ResultatConnexion } from "@/app/[locale]/connexion/actions";
-import { suggererCorrection } from "@/lib/email/domaines";
+import { useSuggestionAdresse } from "@/components/acces/suggestion-adresse";
 import {
   BoutonPrincipalDs,
   ChampAcces,
@@ -53,7 +53,7 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
     if (resultat.statut === "erreur") secouerInvalides(formulaire.current);
   }, [resultat]);
 
-  const suggestion = useMemo(() => suggererCorrection(email), [email]);
+  const { suggestion, aLaSortie } = useSuggestionAdresse(email);
 
   const messageErreur =
     resultat.statut === "erreur"
@@ -106,6 +106,7 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
           if (erreurEmail !== "" && emailValide(v)) setErreurEmail("");
         }}
         surSortie={() => {
+          aLaSortie();
           if (email !== "" && !emailValide(email)) setErreurEmail(t("erreurEmailInvalide"));
         }}
         erreurLocale={erreurEmail}
@@ -121,6 +122,7 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
               type="button"
               onClick={() => {
                 setEmail(suggestion.adresse);
+                document.getElementById("email")?.focus();
                 setErreurEmail("");
               }}
             >
@@ -154,7 +156,7 @@ export function FormulaireConnexion({ locale }: { readonly locale: string }) {
         invalide={messageErreur !== null}
         {...(messageErreur !== null ? { decritPar: "erreur-connexion" } : {})}
         action={
-          <Link href={`/${locale}/mot-de-passe-oublie`} className="lien-texte min-h-11">
+          <Link href={`/${locale}/mot-de-passe-oublie`} className="lien-texte min-h-11" onClick={() => transmettreAdresse(email)}>
             {t("motDePasseOublie")}
           </Link>
         }

@@ -178,7 +178,7 @@ export function FormulaireOnboarding({
 
       <div className="onb__form">
         <header className="acces__tete">
-          <h1>{t("titre")}</h1>
+          <h1 tabIndex={-1}>{t("titre")}</h1>
           <p>{t("sousTitre")}</p>
         </header>
 
@@ -372,6 +372,7 @@ export function FormulaireOnboarding({
               reseaux={[]}
               marqueMasquee={false}
               langue={languePage}
+              nomProvisoire={t("nomProvisoire")}
             />
           </div>
         </div>

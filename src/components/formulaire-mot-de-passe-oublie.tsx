@@ -1,13 +1,14 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Mail } from "lucide-react";
 import {
   demanderReinitialisation,
   type ResultatReinitialisation,
 } from "@/app/[locale]/connexion/actions";
-import { suggererCorrection } from "@/lib/email/domaines";
+import { useSuggestionAdresse } from "@/components/acces/suggestion-adresse";
+import { adresseTransmise } from "@/components/acces/bascule-acces";
 import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acces-champs";
 import { emailValide, secouer, secouerInvalides, valeurEnvoyee } from "@/components/acces/validation-locale";
 
@@ -37,7 +38,7 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
   const t = useTranslations("connexion");
   const tm = useTranslations("motDePasse");
   const [resultat, action] = useActionState(demanderReinitialisation, INITIAL);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(adresseTransmise);
   const [erreurEmail, setErreurEmail] = useState("");
   const formulaire = useRef<HTMLFormElement>(null);
   const envoye = useRef<HTMLHeadingElement>(null);
@@ -49,7 +50,7 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
     if (resultat.statut === "envoye") envoye.current?.focus();
   }, [resultat]);
 
-  const suggestion = useMemo(() => suggererCorrection(email), [email]);
+  const { suggestion, aLaSortie } = useSuggestionAdresse(email);
 
   if (resultat.statut === "envoye") {
     return (
@@ -108,6 +109,7 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
           if (erreurEmail !== "" && emailValide(v)) setErreurEmail("");
         }}
         surSortie={() => {
+          aLaSortie();
           if (email !== "" && !emailValide(email)) setErreurEmail(t("erreurEmailInvalide"));
         }}
         erreurLocale={erreurEmail}
@@ -122,6 +124,7 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
               type="button"
               onClick={() => {
                 setEmail(suggestion.adresse);
+                document.getElementById("email-oubli")?.focus();
                 setErreurEmail("");
               }}
             >

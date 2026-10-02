@@ -109,6 +109,7 @@ export function ChampAcces({
             className="champ-acces__oeil"
             onClick={() => setDevoile((d) => !d)}
             aria-label={devoile ? libellesOeil.masquer : libellesOeil.afficher}
+            aria-pressed={devoile}
           >
             {devoile ? <EyeOff aria-hidden="true" className="ic" /> : <Eye aria-hidden="true" className="ic" />}
           </button>

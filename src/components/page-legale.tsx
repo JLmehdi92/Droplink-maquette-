@@ -208,6 +208,12 @@ export async function PageLegale({
               {titre}
             </span>
           </h1>
+          {/* Le chapô de la maquette, sur la seule page qui en porte un (`confidentialite.html`). */}
+          {sorte === "confidentialite" ? (
+            <p className="pub-chapo" data-entree="">
+              {t("confidentialiteChapo")}
+            </p>
+          ) : null}
           <p className="leg-meta">
             <CalendarDays aria-hidden="true" className="ic" />
             {/* Une seule chaîne par ligne, ponctuation comprise : « : » prend une espace

@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { adresseTransmise } from "@/components/acces/bascule-acces";
 import { sInscrire, type ResultatInscription } from "@/app/[locale]/connexion/actions";
-import { suggererCorrection } from "@/lib/email/domaines";
+import { useSuggestionAdresse } from "@/components/acces/suggestion-adresse";
 import {
   BoutonPrincipalDs,
   ChampAcces,
@@ -77,7 +77,7 @@ export function FormulaireInscription({
     if (resultat.statut === "erreur") secouerInvalides(formulaire.current);
   }, [resultat]);
 
-  const suggestion = useMemo(() => suggererCorrection(email), [email]);
+  const { suggestion, aLaSortie } = useSuggestionAdresse(email);
 
   const messageErreur =
     resultat.statut === "erreur"
@@ -165,6 +165,7 @@ export function FormulaireInscription({
           if (erreurEmail !== "" && emailValide(v)) setErreurEmail("");
         }}
         surSortie={() => {
+          aLaSortie();
           if (email !== "" && !emailValide(email)) setErreurEmail(t("erreurEmailInvalide"));
         }}
         erreurLocale={erreurEmail}
@@ -178,6 +179,7 @@ export function FormulaireInscription({
               type="button"
               onClick={() => {
                 setEmail(suggestion.adresse);
+                document.getElementById("email-inscription")?.focus();
                 setErreurEmail("");
               }}
             >

@@ -230,6 +230,7 @@ code { font: 500 .92em/1 ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .pc__boutique { display: grid; gap: 2px; padding-bottom: 18px; border-bottom: 1px solid var(--color-ds-filet); }
 .pc__boutique small { color: var(--color-ds-texte-sourdine); font-size: 13px; }
 .pc__boutique b { font-size: 21px; font-weight: 800; letter-spacing: -.04em; overflow-wrap: anywhere; }
+.pc__boutique b.est-provisoire { color: #A9AEC4; }
 .pc__boutique span { color: var(--color-ds-texte-corps); font-size: 13px; }
 .pc__commande { display: grid; gap: 2px; padding-block: 20px 18px; border-bottom: 1px solid var(--color-ds-filet); }
 .pc__commande > small { color: var(--color-ds-texte-corps); font-size: 15px; }

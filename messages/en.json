@@ -842,7 +842,8 @@
           }
         ]
       }
-    }
+    },
+    "confidentialiteChapo": "What we collect, why, and for how long."
   },
   "connexion": {
     "titre": "Welcome back",
@@ -952,7 +953,8 @@
       "encre": "Ink",
       "ambre": "Amber"
     },
-    "erreurCouleur": "Enter a six-digit hex colour, for example #5B4BF5."
+    "erreurCouleur": "Enter a six-digit hex colour, for example #5B4BF5.",
+    "nomProvisoire": "Your shop"
   },
   "marque": {
     "titre": "My brand",

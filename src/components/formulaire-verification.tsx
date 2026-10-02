@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState, useSyncExternalStore } fro
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { verifierCode, type ResultatVerification } from "@/app/[locale]/verification/actions";
-import { BoutonPrincipalDs, MessageErreurDs } from "@/components/acces-champs";
+import { BoutonPrincipalDs } from "@/components/acces-champs";
 import { secouer } from "@/components/acces/validation-locale";
 
 const INITIAL: ResultatVerification = { statut: "inactif" };
@@ -164,8 +164,14 @@ export function FormulaireVerification({
             />
           ))}
         </div>
+        {/* LA LIGNE D'ERREUR DE LA MAQUETTE (`verification.html`), DANS le groupe des six
+            cases : elle entre par `.code-2fa.est-invalide .champ-acces__erreur` (240 ms). */}
+        {message !== null ? (
+          <p id="erreur-verification" className="champ-acces__erreur" role="alert">
+            {message}
+          </p>
+        ) : null}
       </fieldset>
-      {message !== null ? <MessageErreurDs id="erreur-verification" texte={message} /> : null}
       {/* « Se souvenir de cet appareil » (203) : jamais dans le flux de
           réinitialisation (`suite`), où la session ne devient pas durable. */}
       {suite === null ? (

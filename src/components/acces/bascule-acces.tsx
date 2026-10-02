@@ -50,6 +50,15 @@ export function adresseTransmise(): string {
   return recente()?.adresse ?? "";
 }
 
+/**
+ * L'adresse suit aussi vers « Mot de passe oublié » (maquette : `depuis.value` recopié) —
+ * sans chorégraphie : cette page a sa propre coque, l'écart de panneau est déclaré.
+ * `entree: true` : personne ne rejoue d'entrée à l'arrivée.
+ */
+export function transmettreAdresse(adresse: string): void {
+  window.__basculeAcces = { adresse: adresse.trim(), quand: performance.now(), entree: true };
+}
+
 const CHEMIN_BASCULE = /^\/[^/]+\/(connexion|inscription)$/;
 
 /** Demande au film de la page qui part de s'arrêter sur sa dernière image. */
@@ -112,8 +121,27 @@ export function BasculeAcces() {
       // page qui n'est pas arrivée en 4 s est chargée comme un lien ordinaire
       plus(() => window.location.assign(url.href), 4000);
     };
+    // « Précédent » / « Suivant » entre connexion et inscription : la maquette rejoue la
+    // bascule. L'adresse suit et le formulaire qui arrive entre ; la sortie, elle, ne peut
+    // pas attendre — le navigateur a déjà changé d'adresse. ⚠️ Mesuré le 02/10/2026 : à
+    // `popstate`, Next a DÉJÀ rendu la page d'arrivée (son champ, vide de ce qu'on avait
+    // tapé, et ce composant démonté). L'événement `navigate` de la Navigation API part
+    // AVANT : c'est lui qu'on écoute. Sans elle (Safari < 18.2), le retour reste un retour sec.
+    const noter = (chemin: string): void => {
+      if (!CHEMIN_BASCULE.test(chemin) || chemin === location.pathname) return;
+      const adresse = document.querySelector<HTMLInputElement>('.acces__corps input[type="email"]')?.value.trim() ?? "";
+      window.__basculeAcces = { adresse, quand: performance.now(), entree: false };
+    };
+    const navigation = (window as Window & { navigation?: EventTarget }).navigation;
+    const surNavigation = (e: Event): void => {
+      const n = e as Event & { navigationType?: string; destination?: { url?: string } };
+      if (n.navigationType !== "traverse" || n.destination?.url === undefined) return;
+      noter(new URL(n.destination.url).pathname);
+    };
+    navigation?.addEventListener("navigate", surNavigation);
     document.addEventListener("click", clic, true);
     return () => {
+      navigation?.removeEventListener("navigate", surNavigation);
       document.removeEventListener("click", clic, true);
       minuteurs.forEach((m) => window.clearTimeout(m));
     };

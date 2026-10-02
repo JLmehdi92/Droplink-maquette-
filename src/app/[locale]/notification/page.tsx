@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BoutonNotification, TitreNotification } from "@/components/notification/envoi-notification";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight, BellOff, CircleAlert, CircleCheck, Clock, House, Mail, MailCheck, type LucideIcon } from "lucide-react";
@@ -118,17 +119,17 @@ export default async function PageNotification({
               <i />
               <i />
             </div>
-            <h1>{t(`${etat}.titre`)}</h1>
+            <TitreNotification focaliser={change}>{t(`${etat}.titre`)}</TitreNotification>
             <p className="notifp__texte">{t(`${etat}.texte`)}</p>
             {actionEnCours === null ? null : (
               <form method="post" action={CIBLES_NOTIFICATION[actionEnCours]}>
                 <input type="hidden" name="j" value={jeton} />
                 <input type="hidden" name="langue" value={locale} />
                 {actionEnCours === "desinscrire" ? <input type="hidden" name="retour" value="page" /> : null}
-                <button type="submit" className="notifp__bouton">
+                <BoutonNotification>
                   <span>{t(`${actionEnCours}.bouton`)}</span>
                   <ArrowRight aria-hidden="true" className="ic" />
-                </button>
+                </BoutonNotification>
               </form>
             )}
           </section>
