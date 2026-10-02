@@ -18,12 +18,7 @@
   const toast = $("[data-toast]"); let minuterie = 0;
   const annoncer = (t) => { toast.textContent = t; toast.classList.add("est-visible"); clearTimeout(minuterie); minuterie = setTimeout(() => toast.classList.remove("est-visible"), 2800); };
 
-  /* ---------- tiroir de navigation (écrans étroits) ---------- */
-  const barre = $("[data-barre]"), menu = $("[data-menu-app]");
-  const tiroir = (o) => { barre.classList.toggle("est-ouverte", o); menu.setAttribute("aria-expanded", String(o)); $("use", menu).setAttribute("href", o ? "#i-x" : "#i-menu"); };
-  menu.addEventListener("click", () => tiroir(!barre.classList.contains("est-ouverte")));
-  document.addEventListener("click", (e) => { if (barre.classList.contains("est-ouverte") && !e.target.closest("[data-barre], [data-menu-app]")) tiroir(false); });
-  addEventListener("keydown", (e) => { if (e.key === "Escape" && barre.classList.contains("est-ouverte")) { tiroir(false); menu.focus(); } });
+  /* ---------- tiroir de navigation (écrans étroits) : tiroir.js ---------- */
 
   /* ---------- recherche de compte, depuis n'importe quel écran ---------- */
   $("[data-adm-recherche]").addEventListener("submit", (e) => {

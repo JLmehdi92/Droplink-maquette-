@@ -58,6 +58,37 @@
 .app__feuille { min-width: 0; margin: 8px 8px 8px 0; min-height: calc(100dvh - 16px); background: var(--feuille); border: 1px solid var(--filet); border-radius: 12px; box-shadow: var(--ombre-xs); }
 .app__haut { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 20px 0 24px; border-bottom: 1px solid var(--filet); border-radius: 12px 12px 0 0; background: color-mix(in srgb, var(--feuille) 98%, transparent); } /* sans backdrop-filter : voir .entete.est-defile (Commandes 27 → 60 images/s) */
 .app__menu { display: none; place-items: center; flex: none; width: 44px; height: 44px; margin-left: -10px; border-radius: 10px; }
+/* ---------- le menu des écrans étroits (tiroir.js) ---------- */
+:root { --ease-tiroir: cubic-bezier(.32, .72, 0, 1); --tiroir-entree: 380ms; --tiroir-sortie: 260ms; }
+.app__menu:active { transform: scale(.94); }
+.app__menu { transition: transform 120ms var(--ease-out), background-color 160ms ease; }
+.app__menu:hover { background: var(--creux, #F6F6FA); }
+/* ☰ → ✕ : trois traits qui se rejoignent, pas une icône qu'on échange */
+.burger { position: relative; display: block; width: 18px; height: 14px; }
+.burger i { position: absolute; left: 0; width: 100%; height: 2px; border-radius: 2px; background: currentColor; transition: top 200ms var(--ease-out) 120ms, transform 200ms var(--ease-out), opacity 120ms ease 80ms; }
+.burger i:nth-child(1) { top: 0; }
+.burger i:nth-child(2) { top: 6px; }
+.burger i:nth-child(3) { top: 12px; }
+[aria-expanded="true"] > .burger i { transition: top 200ms var(--ease-out), transform 240ms var(--ease-out) 160ms, opacity 100ms ease; }
+[aria-expanded="true"] > .burger i:nth-child(1) { top: 6px; transform: rotate(45deg); }
+[aria-expanded="true"] > .burger i:nth-child(2) { opacity: 0; }
+[aria-expanded="true"] > .burger i:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+.app__fermer { display: none; position: absolute; top: max(8px, env(safe-area-inset-top)); right: 8px; place-items: center; width: 44px; height: 44px; border-radius: 10px; color: var(--corps, #6B6F8C); transition: background-color 160ms ease, transform 120ms var(--ease-out); }
+.app__fermer:hover { background: var(--creux, #F6F6FA); }
+.app__fermer:active { transform: scale(.94); }
+/* le voile : pas de flou (il coûterait chaque image du glissement sur un téléphone modeste) */
+.tiroir-voile { display: none; position: fixed; inset: 0; z-index: 69; background: rgba(11, 11, 24, .36); opacity: 0; pointer-events: none; transition: opacity var(--tiroir-sortie) ease; }
+.tiroir-voile.est-visible { opacity: 1; pointer-events: auto; transition-duration: var(--tiroir-entree); }
+.tiroir-ouvert, .tiroir-ouvert body { overflow: hidden; }
+@keyframes tiroir-lien { from { opacity: 0; transform: translateX(-14px); } }
+@media (prefers-reduced-motion: reduce) and (max-width: 1020px) {
+  .app__barre, .app__barre.est-ouverte { transform: none !important; opacity: 0; transition: opacity 160ms ease, visibility 0s linear 160ms !important; }
+  .app__barre.est-ouverte { opacity: 1; transition: opacity 160ms ease, visibility 0s !important; }
+  .app__barre.est-ouverte .app__nav a, .app__barre.est-ouverte .compte { animation: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .burger i, [aria-expanded="true"] > .burger i { transition: none; }
+}
 .recherche { display: flex; align-items: center; gap: 8px; flex: 0 1 380px; min-width: 0; height: 36px; margin-right: auto; padding: 0 6px 0 11px; border-radius: 9px; border: 1px solid var(--filet-appuye); background: var(--sol-onglet); color: var(--sourdine); transition: border-color 120ms var(--ease), background-color 120ms var(--ease), box-shadow 120ms var(--ease); }
 .recherche .ic { width: 15px; height: 15px; flex: none; }
 .recherche input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; outline: none; font: 400 13.5px/1 "Inter", system-ui, sans-serif; color: var(--encre); }
@@ -243,8 +274,16 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 }
 @media (max-width: 1020px) {
   .app { grid-template-columns: minmax(0, 1fr); }
-  .app__barre { position: fixed; left: 0; top: 0; z-index: 70; width: 272px; background: var(--sol); border-right: 1px solid var(--filet); transform: translateX(-100%); transition: transform 280ms cubic-bezier(.32, .72, 0, 1); visibility: hidden; }
-  .app__barre.est-ouverte { transform: none; visibility: visible; box-shadow: var(--ombre-lg); }
+  /* Le tiroir. Fermé, il quitte l'arbre d'accessibilité APRÈS sa sortie
+     (visibility retardée de la durée du glissement) : sans ce délai il
+     disparaissait d'un coup, et c'est ce qui faisait la fermeture sèche. */
+  .app__barre { position: fixed; left: 0; top: 0; z-index: 70; width: min(300px, 84vw); height: 100dvh; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: max(10px, env(safe-area-inset-bottom)); background: var(--sol); border-right: 1px solid var(--filet); transform: translateX(-100%); visibility: hidden; box-shadow: none; transition: transform var(--tiroir-sortie) var(--ease-tiroir), box-shadow var(--tiroir-sortie) ease, visibility 0s linear var(--tiroir-sortie); }
+  .app__barre.est-ouverte { transform: none; visibility: visible; box-shadow: 0 0 0 1px rgba(28, 22, 78, .04), 24px 0 60px rgba(28, 22, 78, .18); transition: transform var(--tiroir-entree) var(--ease-tiroir), box-shadow var(--tiroir-entree) ease, visibility 0s; }
+  .app__barre.est-tire, .tiroir-voile.est-tire { transition: none; }
+  .tiroir-voile { display: block; }
+  .app__fermer { display: grid; }
+  /* les liens entrent en cascade, une seule fois par ouverture */
+  .app__barre.est-ouverte .app__nav a, .app__barre.est-ouverte .compte { animation: tiroir-lien 420ms var(--ease-out) backwards; animation-delay: calc(70ms + var(--rang, 6) * 32ms); }
   .app__nav a { min-height: 44px; }
   .app__menu { display: grid; }
   .app__feuille { margin: 0; min-height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }

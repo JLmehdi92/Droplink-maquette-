@@ -101,7 +101,7 @@ for (const p of PAGES) {
     : assembler(p);
   writeFileSync(path.join(dist, p), html);
 }
-for (const f of ["styles.css", "main.js", "acces.js", "film.js", "coque.js", "analytique.js", "tableau.js", "commandes.js", "envois.js", "analyses.js", "marque.js", "parametres.js", "commande.js", "public.js", "compte.js", "admin.js", "etats.js", "client.js", "l4.js", "v4.js"]) cpSync(src(f), path.join(dist, f));
+for (const f of ["styles.css", "main.js", "acces.js", "film.js", "coque.js", "tiroir.js", "analytique.js", "tableau.js", "commandes.js", "envois.js", "analyses.js", "marque.js", "parametres.js", "commande.js", "public.js", "compte.js", "admin.js", "etats.js", "client.js", "l4.js", "v4.js"]) cpSync(src(f), path.join(dist, f));
 cpSync(path.join(racine, "assets"), path.join(dist, "assets"), { recursive: true, filter: (s) => !s.includes("captures") });
 
 // Versions autonomes : chaque asset devient une data: URI.

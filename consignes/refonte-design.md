@@ -186,7 +186,13 @@ l'écran concerné ; une ligne sans réponse veut dire « ne pas porter, garder 
 
 | n° | Réponse de Mehdi | Date |
 |---|---|---|
-| 1 à 13 | — en attente — | — |
+| 1 à 13 | **« je prends tout »** : chaque décision suit la MAQUETTE. Pour la n° 1, le menu hamburger, avec la précision « un menu hamburger fluide avec une animation fluide » — le tiroir de la maquette a été refait en conséquence (§ 8, entrée du 02/10) | 02/10/2026 |
+
+⚠️ **Ce que « la maquette » implique, à dire en portant chaque écran** : n° 3, prix et quotas
+LUS EN BASE (jamais écrits dans la page) ; n° 4, la ligne « Utilisé par des vendeurs sur
+Vinted, eBay… » reste, alors que c'est le même genre d'affirmation invérifiable que les
+témoignages retirés le 01/10 — reconfirmé auprès de Mehdi avant de la porter ; n° 13, le
+badge « Pro » demande une migration, donc une écriture en production par Mehdi AVANT le push.
 
 
 1. Navigation mobile de l'espace vendeur : barre d'onglets en bas (produit) ou tiroir à hamburger (maquette).
@@ -342,6 +348,41 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   complètes** (pas de base de tests dans cette session) et avec l'alarme Railway rouge : c'est
   admis UNIQUEMENT parce qu'il part vers le bac à sable. Rien de ce dépôt ne revient dans le
   vrai sans `pnpm gates` vert (§ 10, étape 4).
+
+### ▶️ 02/10/2026 — le menu des écrans étroits refait (maquette)
+
+- **Mehdi :** « faut un menu hamburger quand on est dans le saas genre tableau de bord,
+  commandes etc soit c'est moi j'le vois pas soit y'a pas de menu hamburger fluide ».
+- **Ce qui existait** : un tiroir sous 1 020 px, espace vendeur et administration. Ses trois
+  défauts, mesurés : la fermeture était SÈCHE (`visibility: hidden` tombait au premier instant,
+  le glissement de sortie n'était jamais vu) ; aucun voile, donc rien ne disait que l'écran
+  derrière était hors d'atteinte ; l'icône sautait de ☰ à ✕ par échange de symbole. Et le
+  code était recopié dans `coque.js` et `admin.js`.
+- **Ce qui le remplace** : `design/maquette/src/tiroir.js`, un seul module pour les deux
+  surfaces (`window.DropLinkTiroir`), et ses styles dans `src/css/app.css` :
+  - glissement `cubic-bezier(.32, .72, 0, 1)`, **380 ms à l'ouverture, 260 ms à la fermeture**
+    (on attend une ouverture, jamais une fermeture), `visibility` retardée de la durée de
+    sortie ;
+  - un voile `rgba(11, 11, 24, .36)` **sans flou** (le flou coûterait chaque image du
+    glissement sur un téléphone modeste) ; un toucher dessus ferme ;
+  - ☰ → ✕ par trois traits qui se rejoignent, et une croix dans le tiroir lui-même (le bouton
+    du haut est recouvert par le tiroir ouvert) ;
+  - les liens entrent en cascade (32 ms d'écart), à chaque ouverture ;
+  - **le geste du pouce** : on repousse le tiroir vers la gauche, il suit le doigt, le voile
+    pâlit avec lui ; au lâcher il se ferme au-delà de 32 % de sa largeur OU à plus de
+    0,45 px/ms, sinon il revient. Un geste vertical reste un défilement ;
+  - le reste de l'écran est `inert` tant que le tiroir est ouvert, le défilement de la page
+    est bloqué, le focus va au lien de l'écran courant et revient au bouton à la fermeture
+    (Échap, voile, croix) ; au-dessus de 1 020 px le tiroir se referme de lui-même ;
+  - sous `prefers-reduced-motion` : un fondu de 160 ms, aucun déplacement, pas de cascade.
+- **Mesuré au navigateur, 390 px tactile**, sur Commandes, Tableau de bord, Administration
+  et Comptes, mouvement normal et réduit : ouverture (à 120 ms le tiroir est à −33/−44 px,
+  le voile à 0,53-0,61), Échap (à 80 ms il est encore visible et en sortie, invisible à
+  480 ms), geste long (fermé), geste court (revenu en place), voile, navigation depuis le
+  tiroir (écran changé, tiroir refermé), aucun débordement horizontal, **aucune erreur en
+  console**. Artefact « Landing DropLink » republié (version 41).
+- **À porter dans le produit** avec l'espace vendeur et l'administration : le produit a
+  aujourd'hui une barre d'onglets en bas sur téléphone, elle est remplacée par ce tiroir.
 
 ## 9. Ce qui attend Mehdi
 

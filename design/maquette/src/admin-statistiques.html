@@ -21,6 +21,7 @@
       <img src="assets/img/symbole-84.png" alt="" width="20" height="28">
       <span>DropLink</span><span class="adm-pastille">Admin</span>
     </a>
+    <button class="app__fermer" type="button" aria-label="Fermer le menu" data-tiroir-fermer><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
     <nav class="app__nav" aria-label="Administration">
       <a href="admin.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Vue d'ensemble</span></a>
       <a href="admin-commandes.html"><i class="app__nav-pastille" aria-hidden="true"></i><span class="app__nav-libelle"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>Commandes</span></a>
@@ -47,7 +48,7 @@
 
   <div class="app__feuille">
     <header class="app__haut adm-haut">
-      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <button class="app__menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-app><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span></button>
       <form class="recherche" role="search" action="admin-comptes.html" data-adm-recherche>
         <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
         <input type="search" name="q" placeholder="Adresse email ou nom de boutique…" aria-label="Rechercher un compte" autocomplete="off" spellcheck="false">
@@ -96,6 +97,7 @@
 
 <div class="adm-info" role="tooltip" hidden data-info-bulle></div>
 <p class="toast" role="status" aria-live="polite" data-toast></p>
+<script src="tiroir.js" defer></script>
 <script src="admin.js" defer></script>
 <script src="v4.js" defer></script>
 </body>

@@ -53,12 +53,9 @@
   document.addEventListener("click", (e) => { if (compte.open && !e.target.closest("[data-compte]")) compte.open = false; });
   addEventListener("keydown", (e) => { if (e.key === "Escape" && compte.open) { compte.open = false; compte.querySelector("summary").focus(); } });
 
-  /* ---------- tiroir de navigation (écrans étroits) ---------- */
-  const barre = $("[data-barre]"), menu = $("[data-menu-app]");
-  const tiroir = (ouvrir) => { barre.classList.toggle("est-ouverte", ouvrir); menu.setAttribute("aria-expanded", String(ouvrir)); menu.querySelector("use").setAttribute("href", ouvrir ? "#i-x" : "#i-menu"); };
-  menu.addEventListener("click", () => tiroir(!barre.classList.contains("est-ouverte")));
-  document.addEventListener("click", (e) => { if (barre.classList.contains("est-ouverte") && !e.target.closest("[data-barre], [data-menu-app]")) tiroir(false); });
-  addEventListener("keydown", (e) => { if (e.key === "Escape" && barre.classList.contains("est-ouverte")) { tiroir(false); menu.focus(); } });
+  /* ---------- tiroir de navigation (écrans étroits) : tiroir.js ---------- */
+  const barre = $("[data-barre]");
+  const tiroir = (ouvrir) => (ouvrir ? window.DropLinkTiroir?.ouvrir() : window.DropLinkTiroir?.fermer());
 
   /* ---------- passer d'un écran à l'autre, sans recharger ----------
      Comme les outils qu'on garde ouverts toute la journée : au clic, seul le
