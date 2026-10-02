@@ -31,6 +31,52 @@
 > Le détail de chaque lot, avec ses mesures, est au § 8 de `refonte-design.md`. Ce qui suit
 > est l'audit du 03/10, conservé tel quel.
 
+> ## ▶️ CONTRE-AUDIT INDÉPENDANT DU 03/10/2026, SUR `e5ce6bd`
+>
+> Trois nouveaux agents `ecc:code-explorer`, lecture seule, consigne « ne crois pas la session
+> précédente ». `typecheck` 0, `lint` 0 erreur et 1 avertissement préexistant, `test`
+> 1 270 / 1 271 (alarme Railway). **Toutes les animations de la maquette sont portées et
+> câblées** (landing, films, accès, public, comptes, vendeur, `/p`, admin, états), durées et
+> courbes identiques, `prefers-reduced-motion` respecté partout. Il reste :
+>
+> **Règle dure violée (1)** — `src/app/p/[token]/not-found.tsx:43-47` et `:97` : le logo au
+> DÉGRADÉ de marque sur l'écran de lien invalide, qui doit être neutre (décision du 02/10).
+>
+> **Défauts de comportement**
+> - Historique de la fiche : le journal s'écrit par `after()` et n'est relu qu'une fois, 700 ms
+>   après la réponse, sans nouvelle tentative → la ligne peut manquer. `historiqueRelu` n'est
+>   jamais remis à zéro (`editeur.tsx:208`). Pas d'`aria-live` (`liste-historique.tsx:36`).
+>   Aucun test de `relireHistorique`.
+> - Filtres, période et recherche en `<form method="get">` : rechargement complet, l'intro v4
+>   se rejoue à chaque filtre (`recherche-globale.tsx:64`, `liste-commandes.tsx:94,182`,
+>   `tableau-envois.tsx:224`) au lieu de l'estompe sur place.
+> - « Copier le lien » d'une ligne : l'état d'échec ne revient jamais au repos
+>   (`copier-lien-ligne.tsx:31-33`).
+> - Aperçu au survol : l'intention n'est annulée qu'en quittant la LISTE (`apercu-survol.tsx:73-76`)
+>   et cinq iframes restent actives masquées (`:101-110`).
+> - Second clic pendant la sortie de 110 ms ignoré (`transitions-ecran.tsx:173`) ; `data-sens`
+>   posé même sur un clic modifié (`navigation-vendeur.tsx:138-143`) ; `dl-sans-entree` laissé
+>   en `sessionStorage` si le geste échoue (`repli-archivage.tsx:33`).
+>
+> **Écarts à la maquette**
+> - `/p` : date estimée « 1 octobre — 2 octobre » au lieu de « 1 au 2 octobre » ; jamais
+>   « Aujourd'hui » dans l'historique ; « Propulsé par DropLink » sans son `aria-label`.
+> - Commandes : « Ouvrir la page » ouvre un onglet au lieu de la fenêtre téléphone ; bascule du
+>   graphique et onglets de Paramètres sans navigation aux flèches (`tablist`) ; recherche
+>   d'envois sans frappe en direct ; menus déroulants sans focus sur le premier élément ;
+>   cloche sans `aria-expanded`.
+> - Admin : pied « X sur N » absent (commandes, comptes, dernière page du journal) ; cartes de
+>   Paramètres réorganisées (« Constaté, changé au déploiement » éclatée) ; Boutiques avec
+>   colonne « Création » et « Voir » en plus ; double info-bulle (`<title>` + `data-info`,
+>   `barres-admin.tsx:56`) ; propriété `carte` morte (`blocage-lien.tsx`, `contestation-lien.tsx`) ;
+>   3e alerte « contestation » absente (faute de fonction de comptage : migration).
+> - Pages publiques : encart « Le lien ne change jamais tout seul » en alerte au lieu d'info
+>   (`docs/page.tsx:295`) ; lien « Signaler un contenu » de Docs disparu, adresse e-mail non
+>   cliquable ; « 6 min de lecture » au lieu de « 6 min » ; icône « Éditeur » bâtiment au lieu
+>   de maison ; nouveau mot de passe sans le message immédiat « contient votre adresse ».
+> - Écarts déjà ARBITRÉS dans le code et à confirmer par Mehdi : trajet du colis sans lieux
+>   (« Lyon », « Wissous ») ; film qui repart de zéro entre connexion et mot de passe oublié.
+
 État audité : `34bd810` sur le bac à sable. Trois agents `ecc:code-explorer` ont comparé, en
 lecture seule, la maquette (`design/maquette/src/`) au produit (`src/`), zone par zone. Ils
 n'ont rien mesuré au navigateur : tout vient du code et des CSS. Contrôles relancés à part :
