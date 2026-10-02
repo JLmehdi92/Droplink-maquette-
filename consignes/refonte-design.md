@@ -477,6 +477,14 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
 
 ## 10. Le dépôt bac à sable — comment le travail circule
 
+> ⚠️ **Décision de Mehdi du 02/10/2026 : portage dans le cloud, vérification finale sur son
+> poste.** Le cloud ne joint pas Postgres (pas d'IPv6, pas de TCP brut sortant) : chaque
+> écran y est porté avec `typecheck`, `lint`, `build`, `test` et la comparaison au
+> navigateur, et **`test:rls`, `couverture` et `fumee` tournent sur le poste de Mehdi avant
+> tout retour dans le vrai dépôt**. C'est une exception à « jamais de commit par-dessus des
+> portes rouges », bornée au bac à sable. Le prompt de cette vérification finale est dans
+> **`consignes/verification-finale-locale.md`**.
+
 ```
 JLmehdi92/Droplink-maquette- (privé)       JLmehdi92/droplink2
   ← Claude pousse ici, autant qu'il veut       ← Railway déploie depuis ici
