@@ -56,13 +56,10 @@ describe("Configuration des langues", () => {
  * sens : une exception dont la valeur n'est plus vide est retirée de force,
  * sans quoi la liste finirait par tout couvrir.
  */
-const VIDES_VOULUS: ReadonlyMap<string, string> = new Map([
-  /* Le titre des étapes de la landing met son dernier mot en dégradé (« étapes »,
-     « steps »). La phrase chinoise de la planche, 三步生成客户物流链接, ouvre sur
-     « 三步 » et n'a pas de mot final à mettre en valeur : la planche laisse ce
-     mot VIDE, et le titre se lit entier. En inventer un serait réécrire sa
-     traduction (18/09/2026). */
-  ["zh-CN:landing.kit.howHl", "La planche ne met aucun mot en dégradé dans ce titre chinois."],
+const VIDES_VOULUS: ReadonlyMap<string, string> = new Map<string, string>([
+  /* VIDE DEPUIS LE 02/10/2026 : la seule entrée (le mot en dégradé du titre des
+     étapes de l'ancienne landing, sans équivalent chinois) est partie avec cette
+     landing. Le mécanisme reste pour la prochaine valeur vide voulue. */
 ]);
 
 describe("Parité des catalogues", () => {

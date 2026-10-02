@@ -1,81 +1,61 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  BarChart3,
+  Bell,
+  CalendarDays,
   Check,
-  Heart,
-  Image as ImageIcon,
-  Layers,
-  Link2,
-  Menu,
-  MessageCircle,
+  ChevronDown,
+  CircleCheck,
+  ClockAlert,
+  EyeOff,
+  Link as IconeLien,
   Package,
+  Palette,
   Plus,
-  Star,
-  Store,
+  Share2,
   Truck,
   Upload,
-  type LucideIcon,
 } from "lucide-react";
 import { routing } from "@/i18n/routing";
-import { LogoMarque } from "@/components/acces/coque-acces";
-import { MaquetteApplication, TelephoneClient } from "@/components/landing/maquette-application";
-import { ChampDeLien, FriseDeSuivi, ZoneDeDepot } from "@/components/landing/illustrations-etapes";
-import { SelecteurLangue } from "@/components/landing/selecteur-langue";
-import { IconeInstagram, IconeTwitter, IconeYoutube } from "@/components/landing/icones-reseaux";
 import { alternatesDe, openGraphDe } from "@/lib/seo/alternates";
 import { donneesStructurees } from "@/lib/seo/donnees-structurees";
 import { estLangueSupportee, LANGUE_DEFAUT } from "@/i18n/config";
-import avatar1 from "@/../public/marque/avatar-1.jpg";
-import avatar2 from "@/../public/marque/avatar-2.jpg";
-import avatar3 from "@/../public/marque/avatar-3.jpg";
-import avatar4 from "@/../public/marque/avatar-4.jpg";
-import avatar5 from "@/../public/marque/avatar-5.jpg";
+import { lirePlafondsPublics } from "@/lib/page-publique/plafonds";
+import { limites } from "@/lib/storage/limites";
+import { PRIX_PRO_EUR } from "@/lib/paiement/plan";
+import { LogoDropLink } from "@/components/logo-droplink";
+import { EntetePublique } from "@/components/public/entete-publique";
+import { PiedPublic } from "@/components/public/pied-public";
+import { SelecteurLangue } from "@/components/landing/selecteur-langue";
+import { PageClientDemo } from "@/components/landing/page-client-demo";
+import { IMAGES_DEMO } from "@/components/landing/images-demo";
+import { AnimationsLanding } from "@/components/landing/animations-landing";
 
-/**
- * LA LANDING — `ui_kits/marketing_site/index.html`, SECTION PAR SECTION.
+/*
+ * LA LANDING DE LA REFONTE (maquette, `design/maquette/src/index.html`, « l4 »).
  *
- * ⚠️ RÉÉCRITE LE 18/09/2026 SUR LA PLANCHE, ET POURQUOI. La version précédente
- * s'en écartait sur quatorze points, et la plupart venaient d'avoir REDESSINÉ au
- * lieu de COPIER : une section inventée (« Vos clients n'ont rien à installer »),
- * un téléphone reconstruit à la main, les textes des six cartes réécrits, la
- * navigation modifiée, un pied à deux colonnes. Wassim a fourni la liste ; elle
- * vit dans le commit. La règle de cette page est donc la sienne : on ne
- * redessine rien, on ne réécrit aucun texte, on n'ajoute aucune section.
+ * Ce qui la distingue de la maquette, et pourquoi :
+ * - les QUOTAS et le PRIX sont lus en base et dans `PRIX_PRO_EUR` (décision n° 3
+ *   de Mehdi) : un plafond illisible retire la ligne, ou la phrase se dit sans
+ *   nombre — jamais un chiffre de secours ;
+ * - la page reste PRÉRENDUE, revalidée toutes les cinq minutes : les plafonds se
+ *   lisent sans session (`lirePlafondsPublics`), et un changement d'administration
+ *   arrive sur la landing en cinq minutes au plus ;
+ * - partent, comme dans la maquette, les témoignages, « +2 500 vendeurs », la ligne
+ *   « Utilisé par des vendeurs sur Vinted, eBay… » et « Fonctionne avec Vinted,
+ *   eBay… » : des affirmations invérifiables (décisions des 01 et 02/10/2026) ;
+ * - le sélecteur de langue, les mentions légales et le JSON-LD du produit restent ;
+ * - aucun thème sombre ;
+ * - un seul dégradé : « Commencer gratuitement » du héros (règle 3).
  *
- * LES HUIT SECTIONS DE LA PLANCHE, DANS CET ORDRE, ET RIEN D'AUTRE :
- *   en-tête · héros · plateformes · fonctionnalités · étapes · témoignages ·
- *   bannière · pied
- *
- * LES TEXTES VIENNENT DU CATALOGUE DE LA PLANCHE, clé pour clé (`landing.kit`),
- * versés par programme depuis son `strings.js` dans les trois langues — aucune
- * chaîne n'a été retraduite à la main.
- *
- * LES PALIERS SONT CEUX DE SA FEUILLE — 1180, 900, 760, 640, 560 — et sont
- * écrits en `max-[…]` / `min-[…]` à la valeur exacte : un palier Tailwind
- * standard les aurait décalés de plusieurs dizaines de pixels.
- *
- * ⚠️ À UN PIXEL PRÈS, ET DANS LE BON SENS. La planche écrit `max-width: 900px`,
- * donc 900 INCLUS ; `max-[900px]:` de Tailwind v4 compile en `width < 900px`,
- * donc 900 EXCLU. Mesuré le 18/09/2026 à la largeur exacte de chaque palier :
- * à 900 et à 640 le produit ne basculait pas — titre de 64 au lieu de 46,
- * cartes sur trois colonnes au lieu de deux. Les bornes hautes s'écrivent
- * donc `max-[901px]`, `max-[641px]`… et les basses `min-[901px]`.
- *
- * ⚠️ CE QUI S'ÉCARTE DE LA PLANCHE, ET C'EST DIT ICI PLUTÔT QUE CACHÉ :
- *  - « Voir un exemple de page client » mène à la section de la documentation
- *    qui décrit cette page (`/docs#lien`). La planche vise une page de
- *    démonstration que le dépôt n'a pas ; en faire une vraie demande de rendre
- *    `/p/[token]` indépendante de sa lecture en base.
- *  - « À propos » mène à la présentation de la documentation : la planche
- *    l'écrit `href="#"`, un lien qui ne mène nulle part.
- *  - « Restez informé » n'a pas de liste de diffusion derrière lui : le champ
- *    envoie vers l'inscription, qui est la seule suite honnête.
- *  - l'année du pied est l'année courante : la planche écrit « © 2025 ».
+ * Le mouvement est porté par UN îlot client (`AnimationsLanding`) qui anime ce que
+ * le serveur a rendu ; sans lui, tout reste lisible, dans son état final.
  */
+
+export const revalidate = 300;
 
 export function generateStaticParams(): Array<{ locale: string }> {
   return routing.locales.map((locale) => ({ locale }));
@@ -101,526 +81,937 @@ export async function generateMetadata({
   };
 }
 
-/* ---------------------------------------------------------------------------
- * LES BOUTONS DU DESIGN SYSTEM — `Button`, tailles `sm` (36 · 16 · 13) et `lg`
- * (52 · 28 · 15), graisse 600, interlettrage -0,02em, rayon pilule.
- * ⚠️ Le dégradé porte TOUJOURS `text-ds-texte-sur-marque` : sans lui l'appel
- * principal héritait de l'encre — du noir sur violet (13/09/2026).
- * ------------------------------------------------------------------------- */
-const BOUTON_LG =
-  "inline-flex h-13 items-center justify-center gap-2 rounded-ds-pill px-7 text-[15px] font-semibold tracking-[-0.02em] whitespace-nowrap transition-shadow";
-const BOUTON_SM =
-  "inline-flex h-9 items-center justify-center gap-2 rounded-ds-pill px-4 text-[13px] font-semibold tracking-[-0.02em] whitespace-nowrap transition-shadow";
-const PRIMAIRE =
-  "degrade-ds-marque border border-transparent text-ds-texte-sur-marque shadow-ds-brand hover:shadow-ds-brand-hover";
-const SECONDAIRE =
-  "border border-ds-filet bg-ds-surface-carte text-ds-texte-fort shadow-ds-sm hover:shadow-ds-md";
+/** Les dates de la démonstration (28 sept. → 1 oct.), formatées par la langue de la page. */
+const JOURS_DEMO = ["2026-09-28", "2026-09-29", "2026-09-30", "2026-10-01"] as const;
 
-/** `SectionHeading` : eyebrow, titre de 44 au mot final en dégradé, sous-titre. */
-function EnTeteSection({
-  surtitre,
-  titre,
-  motFort,
-  sousTitre,
-}: {
-  readonly surtitre: string;
-  readonly titre: string;
-  readonly motFort: string;
-  readonly sousTitre: string;
-}) {
-  return (
-    <div className="mx-auto flex max-w-[720px] flex-col items-center gap-[18px] text-center">
-      <span className="inline-flex items-center gap-2 rounded-ds-pill bg-ds-surface-teinte px-3.5 py-1.5 text-[11.5px] leading-[normal] font-bold tracking-[0.12em] text-ds-accent-encre uppercase md:text-[11px]">
-        <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
-        {surtitre}
-        <span aria-hidden="true" className="h-1 w-1 rounded-full bg-current opacity-60" />
-      </span>
-      <h2 className="text-[44px] leading-[1.05] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort [:lang(zh-CN)_&]:leading-[1.24]">
-        {titre}
-        {/* Vide en chinois pour le titre des étapes : la planche n'y met aucun mot
-            en dégradé, et une `span` vide n'a rien à peindre. */}
-        {motFort === "" ? null : (
-          <>
-            {" "}
-            <span className="degrade-ds-marque bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">
-              {motFort}
-            </span>
-          </>
-        )}
-      </h2>
-      <p className="text-[16px] leading-[1.55] text-pretty text-ds-texte-corps">{sousTitre}</p>
-    </div>
-  );
-}
-
-/** Une `Card` du design system : fond carte, filet, rayon 16, ombre de carte. */
-const CARTE = "rounded-ds-card border border-ds-filet bg-ds-surface-carte shadow-ds-card";
-
-export default async function Accueil({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function Accueil({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const langue = estLangueSupportee(locale) ? locale : LANGUE_DEFAUT;
-  const t = await getTranslations("landing");
-  const k = await getTranslations("landing.kit");
+  const t = await getTranslations("accueil");
+  const tl = await getTranslations("landing");
+  const nav = await getTranslations("navigation");
+  const pp = await getTranslations("page-publique");
+  const format = await getFormatter();
 
-  const graphe = donneesStructurees(langue, {
-    nom: "DropLink",
-    description: t("metaDescription"),
-  });
+  const [{ gratuitAVie, proParMois }, enCatalogues] = await Promise.all([
+    lirePlafondsPublics(),
+    Promise.all(
+      routing.locales.map(async (l) => {
+        const tp = await getTranslations({ locale: l, namespace: "page-publique" });
+        return { code: l, commandeDe: tp("commandeDe"), titre: tp("titre") };
+      }),
+    ),
+  ]);
+  const maxMedias = limites().mediasParCommande;
+  const prix = format.number(PRIX_PRO_EUR, { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const zero = format.number(0, { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const jourDemo = (j: string) =>
+    format.dateTime(new Date(`${j}T12:00:00Z`), { day: "numeric", month: "short", timeZone: "UTC" });
+  const datesEtapes = [jourDemo(JOURS_DEMO[0]), jourDemo(JOURS_DEMO[1]), jourDemo(JOURS_DEMO[2]), jourDemo(JOURS_DEMO[3])] as const;
+  const dateHistorique = (iso: string): string =>
+    format.dateTime(new Date(iso), { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 
+  const graphe = donneesStructurees(langue, { nom: "DropLink", description: tl("metaDescription") });
   const inscription = `/${locale}/inscription`;
-  const connexion = `/${locale}/connexion`;
-  const exemple = `/${locale}/docs#lien`;
+  const offertes =
+    gratuitAVie === null ? t("garanties.offertesSansNombre") : t("garanties.offertes", { n: gratuitAVie });
+  const garanties = [offertes, t("garanties.carte"), t("garanties.compte")];
+  const gras = { b: (morceau: React.ReactNode) => <b>{morceau}</b> };
 
-  /* La navigation de la planche : cinq entrées, dans cet ordre. */
-  const NAV: ReadonlyArray<readonly [string, string]> = [
-    [k("navFeatures"), "#fonctionnalites"],
-    [k("navHow"), "#etapes"],
-    [k("navPricing"), `/${locale}/tarifs`],
-    [k("navDocs"), `/${locale}/docs`],
-    [k("navFaq"), `/${locale}/docs#faq`],
-  ];
-
-  const PASTILLES: ReadonlyArray<readonly [LucideIcon, string, string, string]> = [
-    [Upload, k("chip1"), k("chip1c"), "left-0 top-[170px]"],
-    [Truck, k("chip2"), k("chip2c"), "-left-[18px] top-[300px]"],
-    [Link2, k("chip3"), k("chip3c"), "right-0 top-[170px]"],
-    [Store, k("chip4"), k("chip4c"), "-right-3 top-[300px]"],
-  ];
-
-  const FONCTIONNALITES: ReadonlyArray<readonly [LucideIcon, string, string]> = [
-    [Package, k("f1"), k("f1b")],
-    [ImageIcon, k("f2"), k("f2b")],
-    [Truck, k("f3"), k("f3b")],
-    [Link2, k("f4"), k("f4b")],
-    [BarChart3, k("f5"), k("f5b")],
-    [Layers, k("f6"), k("f6b")],
-  ];
-
-  const TEMOIGNAGES = [
-    { nom: "Yanis", role: k("q1role"), citation: k("q1"), avatar: avatar2 },
-    { nom: "Sarah", role: k("q2role"), citation: k("q2"), avatar: avatar3 },
-    { nom: "Mehdi", role: k("q3role"), citation: k("q3"), avatar: avatar4 },
+  const ETAPES_HEROS = [
+    ["preparation", "fait"],
+    ["expedie", "actuel"],
+    ["en_transit", ""],
+    ["livre", ""],
   ] as const;
-
-  /* La planche écrit « © 2025 » en dur ; l'année est celle du rendu. */
-  const droits = k("footRights").replace(/\b20\d\d\b/, String(new Date().getFullYear()));
-
-  /* Liens du pied : la planche fait 44 px au téléphone par marge négative. */
-  const lienPied =
-    "text-[13px] leading-[normal] font-medium text-ds-texte-sourdine hover:text-ds-texte-fort max-[767.98px]:-my-[5px] max-[767.98px]:inline-flex max-[767.98px]:min-h-11 max-[767.98px]:items-center max-[767.98px]:self-start";
+  const GESTES = [
+    [t("studio.g1"), t("studio.g1t")],
+    [t("studio.g2"), t("studio.g2t", { n: maxMedias })],
+    [t("studio.g3"), t("studio.g3t")],
+    [t("studio.g4"), t("studio.g4t")],
+  ] as const;
+  const QUESTIONS = [
+    t("probleme.q1"),
+    t("probleme.q2"),
+    t("probleme.q3"),
+    t("probleme.q4"),
+    t("probleme.q5"),
+    t("probleme.q6"),
+    t("probleme.q7"),
+    t("probleme.q8"),
+  ];
+  const TEINTES = [
+    ["#5B4BF5", t("client.violet")],
+    ["#E0533F", t("client.corail")],
+    ["#0F766E", t("client.vert")],
+    ["#F5C518", t("client.jaune")],
+  ] as const;
+  const inclus = <Check className="ic tp-oui" role="img" aria-label={t("tarifs.inclus")} />;
+  const nonInclus = (
+    <span className="tp-non">
+      <span className="visuellement-cache">{t("tarifs.nonInclus")}</span>
+    </span>
+  );
 
   return (
-    <div className="min-h-screen bg-[image:var(--degrade-ds-page)] bg-fixed">
+    <div className="l4">
       {graphe === null ? null : (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(graphe).replace(/</g, "\\u003c") }}
         />
       )}
+      {/*
+        Le mouvement de la landing est gardé par la classe `js` : posée AVANT le
+        premier rendu (sinon le contenu s'afficherait, disparaîtrait puis
+        reviendrait). Les entrées attendent que la police soit chargée, avec un
+        plafond de 900 ms (refonte-design.md § 6). Et si l'îlot qui fait vivre la
+        page ne démarre pas en 2,5 s, la classe est retirée : rien ne reste masqué.
+      */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            '(function(){var r=document.documentElement;r.classList.add("js","attente");var f=false;function p(){if(f)return;f=true;requestAnimationFrame(function(){requestAnimationFrame(function(){r.classList.remove("attente");r.classList.add("pret")})})}(document.fonts?document.fonts.ready:Promise.resolve()).then(p,p);setTimeout(p,900);setTimeout(function(){if(!window.__landing)r.classList.remove("js")},2500)})();',
+        }}
+      />
+      <a className="evitement" href="#contenu">
+        {nav("allerAuContenu")}
+      </a>
+      <EntetePublique
+        accueil={`/${locale}`}
+        libelleAccueil={t("accueil")}
+        logo={<LogoDropLink />}
+        etiquetteNav={t("nav.principale")}
+        liens={[
+          { href: "#studio", libelle: t("nav.comment") },
+          { href: "#client", libelle: t("nav.client") },
+          { href: "#tarifs", libelle: t("nav.tarifs") },
+          { href: "#questions", libelle: t("nav.questions") },
+        ]}
+        connexion={{ href: `/${locale}/connexion`, libelle: nav("seConnecter") }}
+        inscription={{ href: inscription, libelle: nav("creerCompte") }}
+        selecteurLangue={<SelecteurLangue locale={locale} compact />}
+        libellesMenu={{ ouvrir: nav("ouvrirMenu"), fermer: nav("fermerMenu") }}
+      />
 
-      {/* `#root` de la planche : 1280 de large, gouttière 32 · 20 sous 900 · 16 sous 640. */}
-      <div className="mx-auto w-full max-w-[1280px] px-4 min-[641px]:px-5 min-[901px]:px-8">
-        {/* ==== 1 · EN-TÊTE ============================================== */}
-        <header className="relative mx-auto w-full max-w-[1180px] py-[18px]">
-          <div className="flex items-center justify-between gap-4">
-            <Link href={`/${locale}`} aria-label="DropLink" className="flex min-h-11 flex-none items-center md:min-h-0">
-              <LogoMarque hauteur={38} />
-            </Link>
-            <nav aria-label={k("menu")} className="hidden gap-7 min-[1181px]:flex">
-              {NAV.map(([libelle, cible]) => (
-                <a
-                  key={cible}
-                  href={cible}
-                  className="text-[14px] leading-[normal] font-semibold whitespace-nowrap text-ds-texte-corps hover:text-ds-texte-fort"
-                >
-                  {libelle}
+      <main id="contenu">
+        {/* ==== HÉROS ==== */}
+        <section className="heros">
+          <div className="conteneur heros__grille">
+            <div className="heros__texte">
+              <a className="l4-pastille" href="#tarifs" data-entree>
+                <span>{t("heros.pastillePro")}</span>
+                <i className="l4-pastille__texte">
+                  {t("heros.pastille")}
+                  <em>{t("heros.pastilleUrl")}</em>
+                </i>
+                <ArrowRight aria-hidden="true" className="ic" />
+              </a>
+              <h1 className="heros__titre l4-titre">
+                <span className="l4-ligne" style={{ "--l": 0 } as React.CSSProperties}>
+                  {t("heros.titre1")}
+                </span>{" "}
+                <span className="l4-ligne" style={{ "--l": 1 } as React.CSSProperties}>
+                  <span>{t("heros.titre2")}</span>
+                </span>
+              </h1>
+              <p className="heros__chapo" data-entree>
+                {t("heros.chapo")}
+              </p>
+              <div className="heros__actions" data-entree>
+                <Link className="bouton bouton--marque" href={inscription}>
+                  {t("heros.cta")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </Link>
+                <a className="bouton bouton--second" href="#client">
+                  {t("heros.cta2")}
                 </a>
-              ))}
-            </nav>
-            <div className="flex items-center gap-2.5">
-              <SelecteurLangue locale={locale} compact />
-              <span className="hidden items-center gap-2.5 min-[641px]:flex">
-                <Link href={connexion} className={BOUTON_SM + " " + SECONDAIRE}>
-                  {k("login")}
-                </Link>
-                <Link href={inscription} className={BOUTON_SM + " " + PRIMAIRE}>
-                  {k("signup")}
-                  <ArrowRight aria-hidden="true" size={15} strokeWidth={2} />
-                </Link>
-              </span>
-              {/* LE BURGER N'APPARAÎT QUE SOUS 640 : entre 640 et 1180 la
-                  navigation disparaît sans lui, comme dans la planche. */}
-              <details className="group min-[641px]:hidden">
-                <summary
-                  aria-label={k("menu")}
-                  className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-ds-card border border-ds-filet bg-ds-surface-carte text-ds-texte-fort [&::-webkit-details-marker]:hidden"
-                >
-                  <Menu aria-hidden="true" size={19} />
-                </summary>
-                <div className="absolute inset-x-0 top-full z-40 mt-3.5 flex flex-col gap-1 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-3 shadow-ds-card">
-                  {NAV.map(([libelle, cible]) => (
-                    <a
-                      key={cible}
-                      href={cible}
-                      className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps"
-                    >
-                      {libelle}
-                    </a>
-                  ))}
-                  <Link
-                    href={connexion}
-                    className="flex min-h-11 items-center rounded-ds-sm px-3 text-[15px] font-semibold text-ds-texte-corps"
-                  >
-                    {k("login")}
-                  </Link>
-                  <Link href={inscription} className={"mt-1 w-full " + BOUTON_LG.replace("h-13", "h-11") + " " + PRIMAIRE}>
-                    {k("signup")}
-                    <ArrowRight aria-hidden="true" size={16} strokeWidth={2} />
-                  </Link>
+              </div>
+              <ul className="l4-garanties" data-entree>
+                {garanties.map((g) => (
+                  <li key={g}>
+                    <Check aria-hidden="true" className="ic" />
+                    {g}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="heros__scene hx" data-hx role="img" aria-label={t("scene.description")}>
+              <div className="hx__scene" aria-hidden="true">
+                <svg className="hx__fils" data-hx-fils />
+                <article className="hx__carte hx__carte--suivi pc" data-hx-carte style={{ "--p": 1.5 } as React.CSSProperties}>
+                  <header className="hx__boutique">
+                    <i className="hx__monogramme">AN</i>
+                    <p>
+                      <b>{t("scene.boutique")}</b>
+                      <small>{t("scene.pour")}</small>
+                    </p>
+                    <p className="hx__ref">
+                      <small>{t("scene.commande")}</small>
+                      <b>6A4D21</b>
+                    </p>
+                  </header>
+                  <div className="hx__ligne">
+                    <div className="pc__date">
+                      <i className="pc__tuile">
+                        <CalendarDays aria-hidden="true" className="ic" />
+                      </i>
+                      <p>
+                        <small>{pp("commande.dateEstimee")}</small>
+                        <strong>{t("scene.dates")}</strong>
+                      </p>
+                    </div>
+                    <em className="hx__direct" data-hx-direct>
+                      <i />
+                      {t("scene.direct")}
+                    </em>
+                  </div>
+                  <ol className="pc__frise" data-hx-frise style={{ "--avance": 1 } as React.CSSProperties}>
+                    {ETAPES_HEROS.map(([cle, etat], i) => (
+                      <li key={cle} className={etat}>
+                        <i>
+                          <Check aria-hidden="true" className="ic" />
+                        </i>
+                        <b>{pp(`frise.${cle}`)}</b>
+                        <small className="pc__quand">{datesEtapes[i]}</small>
+                        <small className="pc__pastille">{pp("frise.enCours")}</small>
+                        <small className="pc__attente">{pp("frise.enAttente")}</small>
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="pc__bandeau">
+                    <Truck aria-hidden="true" className="ic" />
+                    <p>
+                      <strong data-hx-bandeau data-apres={pp("bandeau.en_transit")}>
+                        {pp("bandeau.expedie")}
+                      </strong>
+                      <small data-hx-mouvement data-apres={t("scene.mouvementAujourdhui")}>
+                        {t("scene.mouvementHier")}
+                      </small>
+                    </p>
+                  </div>
+                </article>
+
+                <article className="hx__carte hx__carte--photos pc" data-hx-carte style={{ "--p": 1 } as React.CSSProperties}>
+                  <p className="hx__titre">
+                    <span>
+                      {t("scene.photos")}
+                      <span className="hx__long">{t("scene.etVideos")}</span>
+                    </span>
+                    <em className="hx__compte">4</em>
+                  </p>
+                  <div className="pc__grille">
+                    {IMAGES_DEMO.map((img, i) => (
+                      <figure key={i} data-hx-photo>
+                        <Image src={img} alt="" width={90} height={90} sizes="90px" />
+                      </figure>
+                    ))}
+                  </div>
+                  <p className="hx__tampon" data-hx-tampon>
+                    <CircleCheck aria-hidden="true" className="ic" />
+                    <span>
+                      {t("scene.approuvees")} <span>{t("scene.parLea")}</span>
+                    </span>
+                  </p>
+                </article>
+
+                <div className="message hx__message" data-hx-message style={{ "--p": 0.6 } as React.CSSProperties}>
+                  <div className="message__entete">
+                    <span className="avatar">AN</span>
+                    <span>
+                      <strong>{t("scene.boutique")}</strong>
+                      <small>{t("scene.aLea")}</small>
+                    </span>
+                  </div>
+                  <p className="message__bulle">{t("scene.message")}</p>
+                  <div className="apercu-lien" data-hx-lien>
+                    <Image src={IMAGES_DEMO[0]} alt="" width={44} height={44} sizes="44px" />
+                    <div>
+                      <strong>{t("scene.commandeRef", { ref: "6A4D21" })}</strong>
+                      <span>droplink.fr/p/k7Qm2xR9vLpA</span>
+                    </div>
+                  </div>
+                  <p className="message__statut">
+                    <Check aria-hidden="true" className="ic" />
+                    {t("scene.vu")}
+                  </p>
                 </div>
-              </details>
+              </div>
             </div>
           </div>
-        </header>
+        </section>
 
-        <main id="contenu">
-          {/* ==== 2 · HÉROS =============================================== */}
-          <section className="relative mx-auto w-full max-w-[1180px] pt-[34px] text-center max-[641px]:text-left">
-            {/* Le badge de confiance : « + », cinq avatars qui se chevauchent
-                (30 % de leur côté), le texte en 12/700. */}
-            <div className="inline-flex max-w-full items-center gap-3 rounded-ds-pill bg-[rgba(255,255,255,0.8)] py-[7px] pr-4 pl-2.5 shadow-ds-sm max-[641px]:mb-1 backdrop-blur-[14px] backdrop-saturate-[1.4]">
-              <Plus aria-hidden="true" size={14} className="flex-none text-ds-accent" />
-              <span className="inline-flex flex-none items-center">
-                {[avatar1, avatar2, avatar3, avatar4, avatar5].map((a, i) => (
-                  <Image
-                    key={i}
-                    src={a}
-                    alt=""
-                    width={26}
-                    height={26}
-                    className={"h-[26px] w-[26px] rounded-full object-cover ring-2 ring-ds-surface-carte" + (i === 0 ? "" : " -ml-[7.8px]")}
-                  />
-                ))}
-              </span>
-              <span className="text-[12px] leading-[normal] font-bold text-ds-texte-corps max-[767.98px]:text-[11.5px]">
-                {k("trust")}
-              </span>
-            </div>
+        {/* ==== CHIFFRES : ceux du produit, rien d'autre ==== */}
+        <section className="l4-chiffres" aria-label={t("chiffres.titre")}>
+          <div className="conteneur l4-chiffres__grille">
+            {(
+              [
+                [maxMedias, t("chiffres.medias")],
+                [4, t("chiffres.etapes")],
+                [routing.locales.length, t("chiffres.langues")],
+                [0, t("chiffres.compte")],
+              ] as const
+            ).map(([n, libelle]) => (
+              <p key={libelle}>
+                <b className="l4-compteur" data-compteur={n}>
+                  {n}
+                </b>
+                <span>{libelle}</span>
+              </p>
+            ))}
+          </div>
+        </section>
 
-            {/* Deux lignes par un `<br>`, comme la planche ; l'espace avant lui
-                garde la phrase lisible d'un seul tenant pour un lecteur d'écran
-                et un moteur (il disparaît en fin de ligne). */}
-            <h1 className="mt-[26px] text-[64px] leading-[0.98] font-extrabold tracking-[-0.045em] text-balance text-ds-texte-fort max-[901px]:text-[46px] max-[641px]:text-[34px] max-[641px]:leading-[1.06] [:lang(zh-CN)_&]:leading-[1.24]">
-              {k("heroTitle1")}{" "}
+        {/* ==== LE PROBLÈME ==== */}
+        <section className="probleme" aria-labelledby="probleme-titre">
+          <div className="conteneur conteneur--etroit">
+            <h2 id="probleme-titre" className="titre-section l4-mots" data-mots>
+              <Mots texte={t("probleme.titre1")} />
               <br />
-              {k("heroTitle2")}
-              <span className="degrade-ds-marque bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">
-                {k("heroTitleHl")}
-              </span>
-            </h1>
-            <p className="mx-auto mt-5 max-w-[500px] text-[17px] leading-[1.55] text-pretty text-ds-texte-corps max-[641px]:text-[15.5px]">
-              {k("heroLead")}
-            </p>
-
-            <div className="mt-7 flex flex-wrap justify-center gap-3.5 max-[641px]:flex-col max-[641px]:items-stretch">
-              <Link href={inscription} className={BOUTON_LG + " " + PRIMAIRE}>
-                {k("ctaPrimary")}
-                <ArrowRight aria-hidden="true" size={17} strokeWidth={2} />
-              </Link>
-              <Link href={exemple} className={BOUTON_LG + " " + SECONDAIRE}>
-                {k("ctaSecondary")}
-              </Link>
-            </div>
-
-            <ul className="mt-[22px] flex flex-wrap justify-center gap-7 max-[641px]:flex-col max-[641px]:items-start max-[641px]:gap-2.5">
-              {[k("perk1"), k("perk2"), k("perk3")].map((garantie) => (
-                <li key={garantie} className="inline-flex items-center gap-[9px]">
-                  <span className="inline-flex h-[18px] w-[18px] flex-none items-center justify-center rounded-ds-xs border border-ds-accent bg-ds-accent text-ds-texte-sur-marque">
-                    <Check aria-hidden="true" size={12} strokeWidth={3} />
-                  </span>
-                  <span className="text-[14px] leading-[normal] font-medium text-ds-texte-corps">{garantie}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Les quatre pastilles, absolues dans le conteneur de 1180, aux
-                coordonnées de la planche. Masquées sous 1181 : pas la place. */}
-            <div aria-hidden="true" className="hidden min-[1181px]:block">
-              {PASTILLES.map(([Icone, titre, legende, place]) => (
-                <span
-                  key={titre}
-                  className={
-                    "absolute inline-flex items-center gap-[11px] rounded-ds-card border border-[rgba(255,255,255,0.9)] bg-[rgba(255,255,255,0.86)] py-[11px] pr-4 pl-[11px] text-left shadow-ds-md backdrop-blur-[14px] backdrop-saturate-[1.4] " +
-                    place
-                  }
-                >
-                  <span className="inline-flex h-[34px] w-[34px] flex-none items-center justify-center rounded-ds-sm bg-ds-surface-teinte text-ds-accent">
-                    <Icone size={16} strokeWidth={1.9} />
-                  </span>
-                  <span className="flex flex-col gap-px">
-                    <span className="text-[13px] leading-[normal] font-bold text-ds-texte-fort">{titre}</span>
-                    <span className="text-[11.5px] leading-[normal] font-medium text-ds-texte-sourdine md:text-[11px]">{legende}</span>
-                  </span>
+              <Mots texte={t("probleme.titre2")} />
+            </h2>
+          </div>
+          <div className="defileur" aria-hidden="true">
+            <div className="defileur__piste" data-defileur>
+              {[...QUESTIONS, ...QUESTIONS].map((q, i) => (
+                <span key={i} className="question">
+                  {q}
                 </span>
               ))}
             </div>
-
-            {/* LES DEUX MAQUETTES. Au-dessus de 1180, bloc de 600 et téléphone en
-                absolu ; en dessous, ils s'empilent.
-
-                ⚠️ SOUS 1181, LA FENÊTRE SE RÉDUIT PAR `zoom`, PAS PAR UNE
-                TRANSFORMATION (26/09/2026). Une transformation laisse la place
-                d'une fenêtre de 1180 px : la colonne la rognait AVANT la réduction,
-                et à 390 px il ne restait que le bord gauche du tableau de bord, en
-                timbre-poste de 50 px — Wassim l'a vu sur son iPhone ; la planche
-                avait le même défaut, corrigé d'abord chez elle. `zoom` réduit aussi
-                la place occupée : la fenêtre entière tient dans la colonne, sans
-                hauteur fixe ni rognage. Au-dessus de 1180, rien ne change. */}
-            <div className="relative mt-8 flex flex-col items-center gap-2 min-[761px]:gap-6 min-[1181px]:mt-10 min-[1181px]:block min-[1181px]:h-[600px]">
-              <div className="[zoom:0.275] min-[561px]:[zoom:0.44] min-[761px]:[zoom:0.6] min-[1181px]:absolute min-[1181px]:left-1/2 min-[1181px]:max-w-full min-[1181px]:-translate-x-[64%] min-[1181px]:overflow-hidden min-[1181px]:[zoom:1]">
-                <div className="w-[1180px] min-[1181px]:origin-top min-[1181px]:scale-[0.68]">
-                  <MaquetteApplication />
-                </div>
-              </div>
-              <div className="min-[1181px]:absolute min-[1181px]:-top-2.5 min-[1181px]:-right-[30px]">
-                <TelephoneClient largeur={286} />
-              </div>
-            </div>
-          </section>
-
-          {/* ==== 3 · PLATEFORMES ========================================= */}
-          <div className="pt-9 pb-3.5 text-center">
-            <div className="text-[12px] leading-[normal] font-semibold text-ds-texte-sourdine">{k("usedOn")}</div>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-[54px] max-[901px]:gap-7">
-              <span className="text-[22px] font-semibold leading-[normal] tracking-[-0.02em] text-ds-ink-300 italic">Vinted</span>
-              <span className="text-[22px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">ebay</span>
-              <span className="text-[22px] font-semibold leading-[normal] tracking-[-0.02em] text-ds-ink-300">amazon</span>
-              <span className="text-[21px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">shopify</span>
-              <span className="text-[20px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">Leboncoin</span>
-              <span className="text-[20px] font-bold leading-[normal] tracking-[-0.02em] text-ds-ink-300">TikTok Shop</span>
-            </div>
           </div>
+          <div className="conteneur conteneur--etroit">
+            <p className="probleme__reponse" data-apparait>
+              {t("probleme.reponse1")} <span>{t("probleme.reponse2")}</span>
+            </p>
+          </div>
+        </section>
 
-          {/* ==== 4 · FONCTIONNALITÉS ===================================== */}
-          <section id="fonctionnalites" className="mx-auto w-full max-w-[1180px] scroll-mt-6 py-[72px]">
-            <EnTeteSection
-              surtitre={k("featEyebrow")}
-              titre={k("featTitle")}
-              motFort={k("featHl")}
-              sousTitre={k("featSub")}
-            />
-            <div className="mt-11 grid grid-cols-3 gap-5 max-[901px]:grid-cols-2 max-[641px]:grid-cols-1">
-              {FONCTIONNALITES.map(([Icone, titre, corps]) => (
-                <div
+        {/* ==== STUDIO : l'éditeur et la page client, côte à côte ==== */}
+        <section className="studio" id="studio" aria-labelledby="studio-titre">
+          <div className="conteneur">
+            <div className="entete-section" data-apparait>
+              <p className="l4-etiquette">
+                <span>01</span>
+                {t("studio.etiquette")}
+              </p>
+              <h2 id="studio-titre" className="titre-section">
+                {t("studio.titre1")}
+                <br />
+                {t("studio.titre2")}
+              </h2>
+              <p className="chapo">{t("studio.chapo")}</p>
+            </div>
+
+            <div className="studio__onglets" role="tablist" aria-label={t("studio.gestes")} data-onglets data-apparait>
+              {GESTES.map(([titre, texte], i) => (
+                <button
                   key={titre}
-                  className={
-                    CARTE +
-                    " flex items-start gap-4 p-[22px] transition-[transform,box-shadow] duration-[240ms] hover:-translate-y-0.5 hover:shadow-ds-md"
-                  }
+                  role="tab"
+                  type="button"
+                  aria-selected={i === 0}
+                  aria-controls="studio-plan"
+                  id={`onglet-${i}`}
+                  data-onglet={i}
+                  tabIndex={i === 0 ? 0 : -1}
                 >
-                  <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-ds-md bg-ds-surface-teinte text-ds-accent">
-                    <Icone aria-hidden="true" size={20} strokeWidth={1.9} />
-                  </span>
-                  <div className="flex flex-col gap-1.5">
-                    <h3 className="text-[18px] leading-[1.1] font-bold tracking-[-0.02em] text-ds-texte-fort">{titre}</h3>
-                    <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">{corps}</p>
-                  </div>
-                </div>
+                  <span>{String(i + 1).padStart(2, "0")}</span>
+                  <b className="l4-geste">
+                    {titre}
+                    <small>{texte}</small>
+                  </b>
+                  <i className="studio__jauge" />
+                </button>
               ))}
             </div>
-          </section>
 
-          {/* ==== 5 · ÉTAPES ============================================== */}
-          <section id="etapes" className="mx-auto w-full max-w-[1180px] scroll-mt-6 pt-10 pb-[72px]">
-            <EnTeteSection
-              surtitre={k("howEyebrow")}
-              titre={k("howTitle")}
-              motFort={k("howHl")}
-              sousTitre={k("howSub")}
-            />
-            <div className="mt-11 grid grid-cols-3 items-start gap-5 max-[901px]:grid-cols-2 max-[641px]:grid-cols-1">
-              {(
-                [
-                  ["01", k("s1"), k("s1b"), <ZoneDeDepot key="depot" />],
-                  ["02", k("s2"), k("s2b"), <ChampDeLien key="lien" />],
-                  ["03", k("s3"), k("s3b"), <FriseDeSuivi key="frise" />],
-                ] as const
-              ).map(([numero, titre, corps, illustration]) => (
-                <div key={numero} className={CARTE + " flex flex-col gap-4 p-6"}>
-                  <div className="flex items-start gap-3.5">
-                    <span className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-ds-pill bg-ds-surface-teinte text-[14px] font-extrabold text-ds-accent-encre">
-                      {numero}
-                    </span>
-                    <div className="flex flex-col gap-1.5">
-                      <h3 className="text-[18px] leading-[1.1] font-bold tracking-[-0.045em] text-ds-texte-fort">{titre}</h3>
-                      <p className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">{corps}</p>
+            <div
+              className="studio__plan"
+              id="studio-plan"
+              role="tabpanel"
+              aria-labelledby="onglet-0"
+              data-studio
+              data-etape="0"
+              data-apparait
+              data-legendes={JSON.stringify(GESTES.map(([, texte]) => texte))}
+              data-compte-modele={t("studio.compteMedias", { n: "{n}", max: maxMedias })}
+            >
+              <p className="studio__legende" data-legende>
+                {GESTES[0][1]}
+              </p>
+              <div className="studio__scene">
+                <div className="editeur" aria-hidden="true">
+                  <div className="editeur__tete">
+                    <div>
+                      <small>{t("studio.commandes")}</small>
+                      <b>#6A4D21</b>
+                    </div>
+                    <div className="editeur__actions">
+                      <span className="editeur__enregistre">
+                        <Check aria-hidden="true" className="ic" />
+                        {t("studio.enregistre")}
+                      </span>
+                      <span className="editeur__partager" data-partager>
+                        <span className="editeur__partager-a">
+                          <Share2 aria-hidden="true" className="ic" />
+                          {t("studio.partager")}
+                        </span>
+                        <span className="editeur__partager-b">
+                          <Check aria-hidden="true" className="ic" />
+                          {t("studio.copie")}
+                        </span>
+                      </span>
                     </div>
                   </div>
-                  {illustration}
+                  <div className="editeur__carte">
+                    <b className="editeur__titre">{t("studio.laCommande")}</b>
+                    <div className="editeur__grille">
+                      <div className="champ" data-champ="client">
+                        <small>{t("studio.champClient")}</small>
+                        <span className="champ__boite">
+                          <span className="champ__valeur" data-saisie="Léa M." />
+                          <i className="champ__curseur" />
+                          <span className="champ__vide">{t("studio.exClient")}</span>
+                        </span>
+                        <em>{t("studio.aideClient")}</em>
+                      </div>
+                      <div className="champ">
+                        <small>{t("studio.champRef")}</small>
+                        <span className="champ__boite">
+                          <span className="champ__valeur">{t("studio.valeurRef")}</span>
+                        </span>
+                      </div>
+                      <div className="champ" data-champ="suivi">
+                        <small>{t("studio.champSuivi")}</small>
+                        <span className="champ__boite">
+                          <span className="champ__valeur" data-saisie="6A30489215734" />
+                          <i className="champ__curseur" />
+                          <span className="champ__vide">{t("studio.collez")}</span>
+                        </span>
+                      </div>
+                      <div className="champ" data-champ="transporteur">
+                        <small>{t("studio.champTransporteur")}</small>
+                        <span className="champ__boite champ__boite--liste">
+                          <span className="transporteur" data-transporteur>
+                            <span className="transporteur__a">{t("studio.detection")}</span>
+                            <span className="transporteur__b">
+                              <CircleCheck aria-hidden="true" className="ic" />
+                              Colissimo
+                            </span>
+                          </span>
+                          <ChevronDown aria-hidden="true" className="ic" />
+                        </span>
+                      </div>
+                    </div>
+                    <div className="depot" data-depot>
+                      <div className="depot__tete">
+                        <b>{t("studio.medias")}</b>
+                        <small data-compte-medias>{t("studio.compteMedias", { n: 0, max: maxMedias })}</small>
+                      </div>
+                      <div className="depot__grille">
+                        {IMAGES_DEMO.map((img, i) => (
+                          <figure key={i} className="depot__media">
+                            <Image src={img} alt="" width={90} height={90} sizes="90px" />
+                            {i === 0 ? <span>{t("studio.couverture")}</span> : null}
+                          </figure>
+                        ))}
+                        <span className="depot__ajouter">
+                          <Upload aria-hidden="true" className="ic" />
+                          {t("studio.ajouter")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="lien-partage" data-lien>
+                    <IconeLien aria-hidden="true" className="ic" />
+                    <span>droplink.fr/p/k7Qm2xR9vLpA</span>
+                    <small>{t("studio.lienFixe")}</small>
+                  </div>
                 </div>
-              ))}
+                <div className="studio__apercu" aria-hidden="true">
+                  <div className="telephone telephone--studio">
+                    <div className="telephone__ecran">
+                      <PageClientDemo datesEtapes={datesEtapes} />
+                    </div>
+                  </div>
+                  <p className="studio__sync">
+                    <i />
+                    {t("studio.apercu")}
+                  </p>
+                </div>
+              </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* ==== 6 · TÉMOIGNAGES ========================================= */}
-          <section id="temoignages" className="mx-auto w-full max-w-[1180px] scroll-mt-6 pb-[72px]">
-            <EnTeteSection
-              surtitre={k("testiEyebrow")}
-              titre={k("testiTitle")}
-              motFort={k("testiHl")}
-              sousTitre={k("testiSub")}
-            />
-            <div className="mt-11 grid grid-cols-3 gap-5 max-[901px]:grid-cols-2 max-[641px]:grid-cols-1">
-              {TEMOIGNAGES.map((q) => (
-                <figure key={q.nom} className={CARTE + " flex flex-col gap-3 p-5"}>
-                  <figcaption className="flex items-center gap-[11px]">
-                    <Image src={q.avatar} alt="" width={34} height={34} className="h-[34px] w-[34px] rounded-full object-cover" />
-                    <span className="flex flex-col gap-px">
-                      <span className="text-[14px] leading-[normal] font-bold text-ds-texte-fort">{q.nom}</span>
-                      <span className="text-[13px] leading-[normal] font-medium text-ds-texte-sourdine">{q.role}</span>
-                    </span>
-                  </figcaption>
-                  <span aria-hidden="true" className="flex gap-0.5">
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <Star key={i} size={13} strokeWidth={0} className="fill-[#F5B843]" />
+        {/* ==== CE QUE LE CLIENT OUVRE ==== */}
+        <section className="client" id="client" aria-labelledby="client-titre">
+          <div className="conteneur">
+            <div className="entete-section" data-apparait>
+              <p className="l4-etiquette">
+                <span>02</span>
+                {t("client.etiquette")}
+              </p>
+              <h2 id="client-titre" className="titre-section">
+                {t("client.titre")}
+              </h2>
+              <p className="chapo">{t("client.chapo")}</p>
+            </div>
+
+            <div className="grille-client">
+              <article className="case case--couleurs" data-apparait>
+                <div className="case__texte">
+                  <h3>{t("client.couleursTitre")}</h3>
+                  <p>{t("client.couleursTexte")}</p>
+                  <div className="nuancier" role="radiogroup" aria-label={t("client.nuancier")}>
+                    {TEINTES.map(([hex, nom], i) => (
+                      <button
+                        key={hex}
+                        type="button"
+                        role="radio"
+                        aria-checked={i === 0}
+                        tabIndex={i === 0 ? 0 : -1}
+                        data-teinte={hex}
+                        style={{ "--pastille": hex } as React.CSSProperties}
+                      >
+                        <span className="sr">{nom}</span>
+                      </button>
                     ))}
-                  </span>
-                  <blockquote className="text-[14px] leading-[1.55] font-medium text-ds-texte-corps">
-                    “{q.citation}”
-                  </blockquote>
-                </figure>
+                    <label className="nuancier__libre">
+                      <input type="color" defaultValue="#5B4BF5" data-couleur-libre aria-label={t("client.libre")} />
+                      <Palette aria-hidden="true" className="ic" />
+                    </label>
+                  </div>
+                  <p
+                    className="nuancier__code"
+                    aria-live="polite"
+                    data-code-couleur
+                    data-ajuste={t("client.ajuste")}
+                  >
+                    {t("client.choisie")} <code>#5B4BF5</code>
+                  </p>
+                </div>
+                <div className="telephone telephone--case" aria-hidden="true">
+                  <div className="telephone__ecran" data-teinte-cible>
+                    <PageClientDemo datesEtapes={datesEtapes} />
+                  </div>
+                </div>
+              </article>
+
+              <article className="case case--livraison" data-apparait>
+                <div className="case__texte">
+                  <h3>{t("client.livraisonTitre")}</h3>
+                  <p>{t("client.livraisonTexte")}</p>
+                </div>
+                <div className="mini-suivi" aria-hidden="true">
+                  <div className="pc__date">
+                    <i className="pc__tuile">
+                      <CalendarDays aria-hidden="true" className="ic" />
+                    </i>
+                    <p>
+                      <small>{pp("commande.dateEstimee")}</small>
+                      <strong>{t("scene.dates")}</strong>
+                    </p>
+                  </div>
+                  <ol className="pc__frise" data-frise-demo style={{ "--avance": 2 } as React.CSSProperties}>
+                    {(["preparation", "expedie", "en_transit", "livre"] as const).map((cle, i) => (
+                      <li key={cle} className={i < 2 ? "fait" : i === 2 ? "actuel" : ""}>
+                        <i>
+                          <Check aria-hidden="true" className="ic" />
+                        </i>
+                        <b>{pp(`frise.${cle}`)}</b>
+                        <small className="pc__quand">{datesEtapes[i]}</small>
+                        <small className="pc__pastille">{pp("frise.enCours")}</small>
+                        <small className="pc__attente">{pp("frise.enAttente")}</small>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </article>
+
+              <article className="case case--validation" data-apparait>
+                <div className="case__texte">
+                  <h3>{t("client.validationTitre")}</h3>
+                  <p>{t("client.validationTexte")}</p>
+                </div>
+                <div className="qc" data-qc data-approuve={pp("qc.approuve")} data-refuse={pp("qc.refuse")}>
+                  <div className="qc__question" data-qc-question>
+                    <b>{pp("qc.titre")}</b>
+                    <p>{pp("qc.texte")}</p>
+                    <div className="qc__vignettes" aria-hidden="true">
+                      {IMAGES_DEMO.map((img, i) => (
+                        <Image key={i} src={img} alt="" width={90} height={90} sizes="90px" />
+                      ))}
+                    </div>
+                    <div className="qc__actions">
+                      <button type="button" className="qc__refuser" data-qc-refuser>
+                        {pp("qc.refuser")}
+                      </button>
+                      <button type="button" className="qc__approuver" data-qc-approuver>
+                        {pp("qc.approuver")}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="qc__reponse" hidden data-qc-reponse>
+                    <span className="qc__sceau" data-qc-sceau>
+                      <Check aria-hidden="true" className="ic" data-sceau="ok" />
+                    </span>
+                    <b data-qc-texte>{pp("qc.approuve")}</b>
+                    <button type="button" className="qc__changer" data-qc-changer>
+                      {pp("qc.modifier")}
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <article className="case case--langues" data-apparait>
+                <div className="case__texte">
+                  <h3>{t("client.languesTitre")}</h3>
+                  <p>{t("client.languesTexte")}</p>
+                </div>
+                <p className="langues" aria-hidden="true">
+                  {enCatalogues.map((c, i) => (
+                    <span key={c.code} className={"langues__ligne" + (i === 0 ? " est-actif" : "")} lang={c.code}>
+                      <small>
+                        {c.commandeDe} {t("scene.boutique")}
+                      </small>
+                      {c.titre}
+                    </span>
+                  ))}
+                </p>
+              </article>
+
+              <article className="case case--historique" data-apparait>
+                <div className="case__texte">
+                  <h3>{t("client.historiqueTitre")}</h3>
+                  <p>{t("client.historiqueTexte")}</p>
+                </div>
+                <ol className="historique" aria-label={t("client.historiqueEtiquette")}>
+                  <li className="historique__recent">
+                    <i>
+                      <Truck aria-hidden="true" className="ic" />
+                    </i>
+                    <p>
+                      <small>{dateHistorique("2026-09-30T07:19:00Z")}</small>
+                      <b>{t("client.h1")}</b>
+                      <span>{t("client.h1lieu")}</span>
+                    </p>
+                  </li>
+                  <li>
+                    <i>
+                      <Package aria-hidden="true" className="ic" />
+                    </i>
+                    <p>
+                      <small>{dateHistorique("2026-09-29T18:19:00Z")}</small>
+                      <b>{t("client.h2")}</b>
+                      <span>{t("client.h2lieu")}</span>
+                    </p>
+                  </li>
+                  <li>
+                    <i>
+                      <Package aria-hidden="true" className="ic" />
+                    </i>
+                    <p>
+                      <small>{dateHistorique("2026-09-28T11:19:00Z")}</small>
+                      <b>{t("client.h3")}</b>
+                    </p>
+                  </li>
+                </ol>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        {/* ==== CÔTÉ VENDEUR ==== */}
+        <section className="l4-vendeur" id="vendeur" aria-labelledby="vendeur-titre">
+          <div className="conteneur">
+            <div className="entete-section" data-apparait>
+              <p className="l4-etiquette">
+                <span>03</span>
+                {t("vendeur.etiquette")}
+              </p>
+              <h2 id="vendeur-titre" className="titre-section">
+                {t("vendeur.titre1")}
+                <br />
+                {t("vendeur.titre2")}
+              </h2>
+              <p className="chapo">{t("vendeur.chapo")}</p>
+            </div>
+            <div className="l4-bento">
+              <article className="l4-carte l4-carte--alertes" data-anime>
+                <div className="l4-carte__texte">
+                  <h3>{t("vendeur.alertesTitre")}</h3>
+                  <p>{t("vendeur.alertesTexte")}</p>
+                </div>
+                <div className="l4-alertes" aria-hidden="true">
+                  <p className="l4-alertes__tete">
+                    <Bell aria-hidden="true" className="ic" />
+                    {(await getTranslations("alertes"))("titre")} <span>2</span>
+                  </p>
+                  <AlerteDemo ton="attente" famille="jamaisOuvertes" />
+                  <AlerteDemo ton="silence" famille="silencieux" />
+                </div>
+              </article>
+
+              <article className="l4-carte l4-carte--vues" data-anime>
+                <div className="l4-carte__texte">
+                  <h3>{t("vendeur.vuesTitre")}</h3>
+                  <p>{t("vendeur.vuesTexte")}</p>
+                </div>
+                <div className="l4-vues" aria-hidden="true">
+                  <p className="l4-vues__total">
+                    <b className="l4-compteur" data-compteur="142">
+                      142
+                    </b>
+                    <span>{t("vendeur.ouvertures")}</span>
+                  </p>
+                  <div className="l4-barres">
+                    {[0.32, 0.45, 0.38, 0.6, 0.52, 0.74, 0.66, 0.9, 0.71, 0.84, 1, 0.88].map((h, i) => (
+                      <i key={i} style={{ "--h": h, "--n": i } as React.CSSProperties} />
+                    ))}
+                  </div>
+                  <ol className="l4-classement">
+                    {(
+                      [
+                        ["Luca R.", 9],
+                        ["Maëlys D.", 8],
+                        ["Yanis B.", 7],
+                      ] as const
+                    ).map(([nom, n], i) => (
+                      <li key={nom}>
+                        <span>{i + 1}</span>
+                        <b>{nom}</b>
+                        <small>{t("vendeur.vues", { n })}</small>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </article>
+
+              <article className="l4-carte l4-carte--envois" data-anime>
+                <div className="l4-carte__texte">
+                  <h3>{t("vendeur.envoisTitre")}</h3>
+                  <p>{t("vendeur.envoisTexte")}</p>
+                </div>
+                <ul className="l4-envois" aria-hidden="true">
+                  {(
+                    [
+                      ["transit", t("vendeur.enTransit"), "6A30489215734", "Colissimo · Léa M.", t("vendeur.e1")],
+                      ["transit", t("vendeur.enTransit"), "6A30571182466", "Colissimo · Ethan G.", t("vendeur.e2")],
+                      ["livre", t("vendeur.livre"), "6A29917702231", "Colissimo · Luca R.", t("vendeur.e3")],
+                      ["silence", t("vendeur.sansMouvement"), "LA982231665FR", "Inès D.", t("vendeur.e4")],
+                    ] as const
+                  ).map(([etat, libelle, numero, qui, dernier], i) => (
+                    <li key={numero} style={{ "--n": i } as React.CSSProperties}>
+                      <span className="l4-etat" data-etat={etat}>
+                        {libelle}
+                      </span>
+                      <b>{numero}</b>
+                      <small>{qui}</small>
+                      <em>{dernier}</em>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        {/* ==== TARIFS : les plafonds viennent de la base ==== */}
+        <section className="tarifs" id="tarifs" aria-labelledby="tarifs-titre">
+          <div className="conteneur">
+            <div className="entete-section entete-section--centre" data-apparait>
+              <p className="l4-etiquette">
+                <span>04</span>
+                {t("tarifs.etiquette")}
+              </p>
+              <h2 id="tarifs-titre" className="titre-section">
+                {t("tarifs.titre1")}
+                <br />
+                {t("tarifs.titre2")}
+              </h2>
+            </div>
+            <div className="tp" data-anime>
+              <table className="tp__table">
+                <caption className="visuellement-cache">{t("tarifs.legende")}</caption>
+                <colgroup>
+                  <col className="tp__col-libelle" />
+                  <col />
+                  <col className="tp__col-pro" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <td className="tp__coin">
+                      <p>{t("tarifs.coin")}</p>
+                    </td>
+                    <th scope="col">
+                      <span className="tp__nom">{t("tarifs.gratuit")}</span>
+                      <span className="tp__prix">
+                        <b>{zero}</b>
+                      </span>
+                      <span className="tp__note">{t("tarifs.sansCarte")}</span>
+                      <Link className="bouton bouton--second bouton--large" href={inscription}>
+                        {t("tarifs.ctaGratuit")}
+                      </Link>
+                    </th>
+                    <th scope="col" className="tp__pro">
+                      <span className="tp__nom">{t("tarifs.pro")}</span>
+                      <span className="tp__prix">
+                        <b>{prix}</b>
+                        <small>{t("tarifs.parMois")}</small>
+                      </span>
+                      <span className="tp__note">{t("tarifs.sansEngagement")}</span>
+                      <Link className="bouton bouton--plein bouton--large" href={inscription}>
+                        {t("tarifs.ctaPro")}
+                      </Link>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {gratuitAVie === null || proParMois === null
+                    ? null
+                    : (["commandes", "colis"] as const).map((cle, i) => (
+                        <tr key={cle} style={{ "--i": i } as React.CSSProperties}>
+                          <th scope="row">{t(`tarifs.${cle}`)}</th>
+                          <td>{t.rich("tarifs.auTotal", { ...gras, n: format.number(gratuitAVie) })}</td>
+                          <td>{t.rich("tarifs.parMoisN", { ...gras, n: format.number(proParMois) })}</td>
+                        </tr>
+                      ))}
+                  {(
+                    [
+                      ["medias", t("tarifs.parCommande", { n: maxMedias }), t("tarifs.parCommande", { n: maxMedias })],
+                      ["suiviAuto", inclus, inclus],
+                      ["couleurs", inclus, inclus],
+                      ["lien", nonInclus, <span key="url" className="tp-url">{t("tarifs.lienUrl")}</span>],
+                      ["sansMention", nonInclus, inclus],
+                    ] as const
+                  ).map(([cle, gratuit, pro], i) => (
+                    <tr key={cle} style={{ "--i": i + 2 } as React.CSSProperties}>
+                      <th scope="row">{t(`tarifs.${cle}`)}</th>
+                      <td>{gratuit}</td>
+                      <td>{pro}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="tp__actions">
+                <Link className="bouton bouton--plein bouton--large" href={inscription}>
+                  {t("tarifs.ctaPro")}
+                </Link>
+                <Link className="bouton bouton--second bouton--large" href={inscription}>
+                  {t("tarifs.ctaGratuit")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ==== QUESTIONS ==== */}
+        <section className="questions" id="questions" aria-labelledby="questions-titre">
+          <div className="conteneur questions__grille">
+            <div>
+              <p className="l4-etiquette">
+                <span>05</span>
+                {t("questions.etiquette")}
+              </p>
+              <h2 id="questions-titre" className="titre-section">
+                {t("questions.titre")}
+              </h2>
+            </div>
+            <div className="accordeon">
+              {(
+                [
+                  [t("questions.q1"), t("questions.r1")],
+                  [t("questions.q2"), t("questions.r2")],
+                  [t("questions.q3"), t("questions.r3")],
+                  gratuitAVie === null || proParMois === null
+                    ? [t("questions.q4SansNombre"), t("questions.r4SansNombre", { prix })]
+                    : [
+                        t("questions.q4", { n: gratuitAVie }),
+                        t("questions.r4", {
+                          gratuit: format.number(gratuitAVie),
+                          pro: format.number(proParMois),
+                          prix,
+                        }),
+                      ],
+                ] as const
+              ).map(([question, reponse]) => (
+                <details key={question} name="faq">
+                  <summary>
+                    {question}
+                    <Plus aria-hidden="true" className="ic" />
+                  </summary>
+                  <div className="accordeon__corps">
+                    <p>{reponse}</p>
+                  </div>
+                </details>
               ))}
             </div>
-          </section>
-
-          {/* ==== 7 · BANNIÈRE ============================================ */}
-          <section className="mx-auto w-full max-w-[1180px] pb-14">
-            <div className="degrade-ds-marque-diagonal relative overflow-hidden rounded-ds-3xl px-14 py-[52px] shadow-ds-lg max-[901px]:px-7 max-[901px]:py-[34px]">
-              <div className="relative z-10 max-w-[520px]">
-                <h2 className="text-[40px] leading-[1.05] font-extrabold tracking-[-0.04em] text-ds-texte-sur-marque max-[901px]:text-[32px] max-[641px]:text-[27px] [:lang(zh-CN)_&]:leading-[1.24]">
-                  {k("bannerTitle1")}
-                  <br />
-                  {k("bannerTitle2")}
-                </h2>
-                <p className="mt-3.5 text-[15px] leading-[1.55] text-[rgba(255,255,255,0.88)]">{k("bannerSub")}</p>
-                <div className="mt-[26px] flex flex-wrap gap-3">
-                  <Link href={inscription} className={BOUTON_LG + " " + SECONDAIRE}>
-                    {k("ctaPrimary")}
-                    <ArrowRight aria-hidden="true" size={17} strokeWidth={2} />
-                  </Link>
-                  <Link
-                    href={exemple}
-                    className={BOUTON_LG + " border border-[rgba(255,255,255,0.5)] text-ds-texte-sur-marque hover:bg-[rgba(255,255,255,0.12)]"}
-                  >
-                    {k("ctaSecondaryShort")}
-                  </Link>
-                </div>
-              </div>
-              {/* Recadré par l'`overflow: hidden` de la bande ; masqué sous 900. */}
-              <div aria-hidden="true" className="pointer-events-none absolute top-2.5 right-[30px] hidden min-[901px]:block">
-                <TelephoneClient largeur={272} />
-              </div>
-            </div>
-          </section>
-        </main>
-
-        {/* ==== 8 · PIED ===================================================== */}
-        <footer className="mx-auto w-full max-w-[1180px] pt-12 pb-7">
-          <div className="grid grid-cols-[1.4fr_1fr_1fr_1.3fr] gap-8 max-[901px]:grid-cols-2 max-[901px]:gap-[26px] max-[641px]:grid-cols-1">
-            {/* Sous 768, la planche retire l'écart des colonnes du pied et pose 5 px
-                sous chacun de leurs `span` directs : le texte et le sélecteur de
-                langue ici, pas le logo, qui n'y est pas enveloppé. */}
-            <div className="flex flex-col gap-3 max-[767.98px]:gap-0">
-              <span className="self-start">
-                <LogoMarque hauteur={32} />
-              </span>
-              <span className="text-[13px] leading-[normal] font-medium text-ds-texte-sourdine max-[767.98px]:mb-[5px]">
-                {k("footTag")}
-              </span>
-              <div aria-hidden="true" className="mt-1 flex gap-3.5 text-ds-texte-sourdine">
-                <IconeTwitter />
-                <IconeInstagram />
-                <IconeYoutube />
-                <MessageCircle size={16} />
-              </div>
-              <div className="self-start max-[767.98px]:mb-[5px]">
-                <SelecteurLangue locale={locale} versLeHaut />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-[9px] max-[767.98px]:gap-0">
-              <span className="mb-[3px] text-[13px] leading-[normal] font-extrabold text-ds-texte-fort max-[767.98px]:mb-[5px]">
-                {k("footProduct")}
-              </span>
-              <a href="#fonctionnalites" className={lienPied}>{k("navFeatures")}</a>
-              <a href="#etapes" className={lienPied}>{k("navHow")}</a>
-              <Link href={`/${locale}/docs`} className={lienPied}>{k("navDocs")}</Link>
-              <Link href={`/${locale}/docs#faq`} className={lienPied}>{k("footFaq")}</Link>
-              {/* ⚠️ LE SEUL CHEMIN VERS LE BLOG, ET IL AVAIT DISPARU. La réécriture
-                  de la landing sur sa planche (18/09/2026) avait emporté l'ancien
-                  pied, et plus aucune page ne menait au blog ; la fumée parcourt
-                  désormais le site et nomme les pages orphelines. En français
-                  seulement : /en/blog et /zh-CN/blog rendent 404, exprès. */}
-              {locale === "fr" ? (
-                <Link href="/fr/blog" className={lienPied}>
-                  {k("footBlog")}
-                </Link>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col gap-[9px] max-[767.98px]:gap-0">
-              <span className="mb-[3px] text-[13px] leading-[normal] font-extrabold text-ds-texte-fort max-[767.98px]:mb-[5px]">
-                {k("footCompany")}
-              </span>
-              <Link href={`/${locale}/docs#presentation`} className={lienPied}>{k("footAbout")}</Link>
-              <Link href={`/${locale}/docs#support`} className={lienPied}>{k("footContact")}</Link>
-              <Link href={`/${locale}/conditions`} className={lienPied}>{k("footTerms")}</Link>
-              <Link href={`/${locale}/confidentialite`} className={lienPied}>{k("footPrivacy")}</Link>
-              <Link href={`/${locale}/mentions-legales`} className={lienPied}>{k("footLegal")}</Link>
-            </div>
-
-            <div className="flex flex-col gap-2.5 max-[767.98px]:gap-0">
-              <span className="text-[13px] leading-[normal] font-extrabold text-ds-texte-fort max-[767.98px]:mb-[5px]">
-                {k("footNews")}
-              </span>
-              <form
-                action={inscription}
-                className="flex items-center gap-2 rounded-ds-pill border border-ds-filet bg-ds-surface-carte py-1.5 pr-1.5 pl-4"
-              >
-                <input
-                  type="email"
-                  aria-label={k("footMail")}
-                  placeholder={k("footMail")}
-                  className="min-w-0 flex-1 border-none bg-transparent text-[13px] font-medium max-[767.98px]:min-h-11 text-ds-texte-fort outline-none placeholder:text-ds-texte-corps"
-                />
-                <button
-                  type="submit"
-                  aria-label={k("footNews")}
-                  className="degrade-ds-marque inline-flex h-[30px] w-[30px] flex-none items-center justify-center rounded-ds-sm text-ds-texte-sur-marque max-[767.98px]:-my-[7px] max-[767.98px]:min-h-11 max-[767.98px]:w-11"
-                >
-                  <ArrowRight aria-hidden="true" size={14} />
-                </button>
-              </form>
-            </div>
           </div>
+        </section>
 
-          {/* 12 px d'écart à toutes les largeurs : la feuille de la planche demande
-              8 sous 640, mais son style en ligne (12) l'emporte, et c'est 12 qu'elle
-              rend. */}
-          <div className="mt-8 flex justify-between gap-3 border-t border-ds-filet pt-[18px] text-[12px] leading-[normal] font-medium text-ds-texte-tenu max-[641px]:flex-col">
-            <span>{droits}</span>
-            <span className="inline-flex items-center gap-1.5">
-              {k("footMade")}
-              <Heart aria-hidden="true" size={12} className="fill-ds-coral-500 text-ds-coral-500" />
-            </span>
+        {/* ==== APPEL FINAL ==== */}
+        <section className="final" aria-labelledby="final-titre">
+          <div className="conteneur final__boite">
+            <h2 id="final-titre" className="final__titre" data-apparait>
+              {t("final.titre")}
+            </h2>
+            <Link className="l4-champ-final" href={inscription} data-apparait>
+              <span className="l4-champ-final__url" aria-hidden="true">
+                droplink.fr/
+                <b data-slug data-slugs={t("final.slugs")}>
+                  {t("final.slugs").split("|")[0]}
+                </b>
+                <i className="l4-curseur" />
+              </span>
+              <span className="bouton bouton--plein">
+                {t("heros.cta")}
+                <ArrowRight aria-hidden="true" className="ic" />
+              </span>
+            </Link>
+            <ul className="faits" data-apparait>
+              {garanties.map((g) => (
+                <li key={g}>
+                  <Check aria-hidden="true" className="ic" />
+                  {g}
+                </li>
+              ))}
+            </ul>
           </div>
-        </footer>
-      </div>
+        </section>
+      </main>
+
+      <PiedPublic locale={locale} />
+      <AnimationsLanding />
+    </div>
+  );
+}
+
+/** Une phrase découpée en mots, pour qu'elle s'éclaire mot à mot au défilement. */
+function Mots({ texte }: { readonly texte: string }) {
+  const morceaux = texte.split(/(\s+)/).filter((m) => m !== "");
+  return (
+    <>
+      {morceaux.map((m, i) => (/^\s+$/.test(m) ? m : <span key={i} className="l4-mot">{m}</span>))}
+    </>
+  );
+}
+
+/** Une alerte de la cloche, en miniature : les vrais libellés du produit (`alertes.*`). */
+async function AlerteDemo({ ton, famille }: { readonly ton: "attente" | "silence"; readonly famille: "jamaisOuvertes" | "silencieux" }) {
+  const t = await getTranslations("alertes");
+  const Icone = ton === "attente" ? EyeOff : ClockAlert;
+  return (
+    <div className="l4-alerte" data-ton={ton}>
+      <i>
+        <Icone aria-hidden="true" className="ic" />
+      </i>
+      <span>
+        <b>{t(`${famille}.titre`, { n: 1 })}</b>
+        <small>{t(`${famille}.texte`)}</small>
+      </span>
     </div>
   );
 }

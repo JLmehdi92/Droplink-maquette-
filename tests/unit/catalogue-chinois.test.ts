@@ -60,9 +60,15 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
      catalogues (18/09/2026). */
   ["landing.kit.langues.fr", "Le nom du français en français : un sélecteur nomme chaque langue en elle-même."],
   ["landing.kit.langues.en", "Le nom de l'anglais en anglais : un sélecteur nomme chaque langue en elle-même."],
-  /* Vide, et c'est la planche : sa phrase chinoise 三步生成客户物流链接 n'a pas de
-     mot final à mettre en dégradé. Même exception dans `i18n-parite`. */
-  ["landing.kit.howHl", "Vide : la planche ne met aucun mot en dégradé dans ce titre chinois."],
+  /* La landing de la refonte (02/10/2026) : des noms propres et des adresses
+     d'exemple de sa démonstration, qui s'écrivent en lettres latines partout. */
+  ["accueil.heros.pastillePro", "Le nom du plan, « Pro », identique dans les trois langues."],
+  ["accueil.heros.pastilleUrl", "Une adresse d'exemple : une URL s'écrit en lettres latines."],
+  ["accueil.scene.boutique", "Le nom de la boutique de démonstration, un nom propre."],
+  ["accueil.client.h1lieu", "Un nom de ville, Wissous : un nom propre."],
+  ["accueil.tarifs.pro", "Le nom du plan, « Pro », identique dans les trois langues."],
+  ["accueil.tarifs.lienUrl", "Une adresse d'exemple : une URL s'écrit en lettres latines."],
+  ["accueil.final.slugs", "Des noms de lien d'exemple, en lettres latines comme toute adresse."],
   /* Deux gabarits de l'éditeur, composés d'une variable ou d'un signe seul.
      « à 09:15 » n'a pas d'équivalent chinois : l'heure s'écrit nue à côté de sa
      date, et ajouter un idéogramme pour satisfaire ce garde mettrait un mot

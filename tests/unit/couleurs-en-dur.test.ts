@@ -68,6 +68,15 @@ const DU_CANEVAS = new Set([
  */
 const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   ["#4285f4", "logo Google — une marque tierce ne se retouche pas"],
+  /* La landing de la refonte (02/10/2026). Les deux pastilles du nuancier de
+     démonstration sont des teintes de VENDEUR imaginaires — corail et jaune — que
+     `resoudreAccent` corrige sous les yeux du visiteur : elles n'appartiennent à
+     aucune palette, c'est tout leur propos. Et `#6A4D21` n'est pas une couleur :
+     c'est la référence de la commande de démonstration (« Commande #6A4D21 »),
+     que le motif hexadécimal attrape. */
+  ["#e0533f", "nuancier de la landing : une teinte de vendeur imaginaire, corrigée par resoudreAccent"],
+  ["#f5c518", "nuancier de la landing : un jaune trop clair pour du texte, la démonstration de l'ajustement"],
+  ["#6a4d21", "pas une couleur : la référence de la commande de démonstration de la landing"],
   ["#ea4335", "logo Google"],
   ["#fbbc05", "logo Google"],
   ["#34a853", "logo Google"],
@@ -179,7 +188,6 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
   /* Les étoiles des témoignages de la landing — `TestimonialCard` du kit les
      peint en `#F5B843` en dur, et aucun jeton du design system ne le porte.
      Portées le 18/09/2026 avec la section, sur la liste d'écarts de Wassim. */
-  ["#f5b843", "étoiles pleines des témoignages de la landing — TestimonialCard, kit marketing_site"],
   ["#ff5f57", "pastille « fermer » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
   ["#febc2e", "pastille « réduire » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],
   ["#28c840", "pastille « agrandir » de la fenêtre dessinée du héros — chrome macOS, kit marketing_site"],

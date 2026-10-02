@@ -237,6 +237,29 @@ describe("les liens en flux de texte sont exemptés, et seulement eux", () => {
   });
 });
 
+/**
+ * LES PIEDS OÙ 44 PX EST LA HAUTEUR DESSINÉE, PAS UN AGRANDISSEMENT.
+ *
+ * La compensation (`-my-…`) existe pour qu'une cible portée à 44 px ne fasse pas
+ * grandir un pied dessiné plus serré. Le pied de la refonte (maquette du
+ * 01/10/2026, `.pied nav a { min-height: 44px }`) DESSINE ses liens à 44 px : il
+ * n'y a rien à compenser, et une marge négative ferait chevaucher les liens. Le
+ * plancher `min-h-11` reste exigé sur chacun (test précédent).
+ */
+const PIEDS_DESSINES_A_44: ReadonlyArray<{ readonly fichier: string; readonly raison: string }> = [
+  {
+    fichier: "src/components/public/pied-public.tsx",
+    raison: "Le pied des pages publiques de la refonte : liens dessinés à 44 px par la maquette.",
+  },
+];
+
+describe("les pieds dessinés à 44 px existent encore", () => {
+  test("chaque déclaration désigne un pied balayé", () => {
+    const morts = PIEDS_DESSINES_A_44.filter((p) => !CIBLES.some((c) => c.fichier === p.fichier)).map((p) => p.fichier);
+    expect(morts).toEqual([]);
+  });
+});
+
 describe("les cibles tactiles des pieds de page (suite)", () => {
   test("chaque cible d'un pied atteint les 44 points du brief §8", () => {
     const fautives = CIBLES_AUTONOMES_DES_PIEDS.filter(
@@ -251,7 +274,10 @@ describe("les cibles tactiles des pieds de page (suite)", () => {
 
   test("chaque cible agrandie compense sa hauteur pour ne pas gonfler le pied", () => {
     const sansCompensation = CIBLES.filter(
-      (c) => c.classes.includes(CLASSE_MINIMALE) && !CLASSE_COMPENSATION.test(c.classes),
+      (c) =>
+        c.classes.includes(CLASSE_MINIMALE) &&
+        !CLASSE_COMPENSATION.test(c.classes) &&
+        !PIEDS_DESSINES_A_44.some((p) => p.fichier === c.fichier),
     ).map((c) => c.libelle);
     expect(
       sansCompensation,

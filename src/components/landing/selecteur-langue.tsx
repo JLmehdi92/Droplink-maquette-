@@ -44,22 +44,20 @@ export async function SelecteurLangue({
 }) {
   const t = await getTranslations("landing.kit");
   const courante = LANGUES.find((l) => l.code === locale) ?? LANGUES[0]!;
+  /*
+   * Habillé au vocabulaire de la refonte (`.langue`, feuille `app.css`) : la
+   * maquette n'a pas de sélecteur — elle est en français seulement —, il garde
+   * donc le dessin des contrôles discrets de l'en-tête. Le menu s'ouvre TOUJOURS
+   * aligné à droite : ouvert depuis la gauche, il sortait de l'écran à 390 px.
+   */
   return (
-    <details className="group relative flex-none self-start">
-      <summary
-        aria-label={t("langueChoisir")}
-        className="inline-flex h-11 cursor-pointer list-none items-center gap-[7px] rounded-ds-card border border-ds-filet bg-ds-surface-carte px-2.5 text-[13px] leading-[normal] font-semibold text-ds-texte-fort md:h-9 [&::-webkit-details-marker]:hidden"
-      >
-        <Image src={courante.drapeau} alt="" width={18} height={13} className="h-[13px] w-[18px] rounded-[2px] object-cover" />
+    <details className={"langue" + (versLeHaut ? " langue--haut" : "")}>
+      <summary {...(compact ? { "aria-label": t("langueChoisir") } : { title: t("langueChoisir") })}>
+        <Image src={courante.drapeau} alt="" width={18} height={13} />
         {compact ? null : <span>{t(`langues.${courante.code}`)}</span>}
-        <ChevronDown aria-hidden="true" size={13} className="text-ds-texte-tenu" />
+        <ChevronDown aria-hidden="true" className="ic" />
       </summary>
-      <span
-        className={
-          "absolute right-0 z-40 flex min-w-[168px] flex-col gap-0.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1.5 shadow-ds-lg " +
-          (versLeHaut ? "bottom-[calc(100%+6px)] left-0 right-auto" : "top-[42px]")
-        }
-      >
+      <span className="langue__menu">
         {LANGUES.map((l) => {
           const active = l.code === courante.code;
           return (
@@ -68,14 +66,9 @@ export async function SelecteurLangue({
               href={`/${l.code}`}
               hrefLang={l.hreflang}
               lang={l.hreflang}
-              className={
-                "flex min-h-11 items-center gap-[9px] rounded-ds-sm px-2.5 py-2 text-[13.5px] md:min-h-0 " +
-                (active
-                  ? "bg-ds-surface-teinte font-bold text-ds-accent-encre"
-                  : "font-medium text-ds-texte-corps hover:bg-ds-surface-creux")
-              }
+              {...(active ? { "aria-current": "true" as const } : {})}
             >
-              <Image src={l.drapeau} alt="" width={18} height={13} className="h-[13px] w-[18px] rounded-[2px] object-cover" />
+              <Image src={l.drapeau} alt="" width={18} height={13} />
               {t(`langues.${l.code}`)}
             </a>
           );

@@ -2504,4 +2504,11 @@ img.compte__avatar { object-fit: cover; }
 .langue__menu a[aria-current] { background: var(--teinte); color: var(--accent-texte); font-weight: 700; }
 @media (hover: hover) and (pointer: fine) { .langue__menu a:not([aria-current]):hover { background: var(--creux); color: var(--encre); } }
 @media (prefers-reduced-motion: reduce) { .langue__menu { animation: none; } }
+/* landing : les cartes du héros sortent du lien ; masquées dès le premier rendu (le
+   serveur les peindrait, puis l'îlot les cacherait pour les rejouer : un clignement).
+   Le filet du script inline retire `js` si l'îlot ne démarre pas. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-hx-carte], .js [data-hx-photo], .js [data-hx-tampon] { opacity: 0; }
+}
+.formulaire__statut--erreur { background: color-mix(in srgb, var(--erreur-encre) 8%, var(--surface)); color: var(--erreur-encre); }
 }

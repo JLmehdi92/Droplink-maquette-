@@ -873,14 +873,14 @@ console.log("");
 // Elle refuse une valeur trop courte : lire une chaine vide rendrait le
 // controle vrai sans rien prouver, `includes("")` etant toujours vrai.
 //
-// ⚠️ IL EST COMPOSE DES TROIS CLES QUE LE `h1` REND, PAS LU DANS UNE QUATRIEME.
-// Depuis le 18/09/2026 le titre vient du catalogue de la planche (`landing.kit`) :
-// premiere ligne, seconde ligne, mot en degrade. Une cle `heroTitre` recopiee
-// a cote serait une chaine que rien n affiche — la garde des chaines mortes
-// l a d ailleurs signalee — et la sonde verifierait une copie, pas l ecran.
+// ⚠️ IL EST COMPOSE DES CLES QUE LE `h1` REND, PAS LU DANS UNE AUTRE.
+// Depuis la refonte du 02/10/2026 le titre vient de `accueil.heros` : deux lignes
+// (« Un seul lien. » / « Toute la commande. »), separees par une espace dans le
+// HTML pour qu un lecteur d ecran et un moteur lisent deux phrases, pas
+// « lien.Toute ». Une cle recopiee a cote serait une chaine que rien n affiche.
 const titreDuHeros = (langue) => {
-  const k = JSON.parse(readFileSync(join(process.cwd(), "messages", langue + ".json"), "utf8")).landing.kit;
-  return k.heroTitle1 + " " + k.heroTitle2 + k.heroTitleHl;
+  const h = JSON.parse(readFileSync(join(process.cwd(), "messages", langue + ".json"), "utf8")).accueil.heros;
+  return h.titre1 + " " + h.titre2;
 };
 const titreFr = titreDuHeros("fr");
 const titreEn = titreDuHeros("en");
@@ -924,8 +924,8 @@ const controles = [
   [renduEn !== null, "la page anglaise porte un h1"],
   [rendufr !== null && rendufr === normaliser(titreFr), "titre francais rendu"],
   [renduEn !== null && renduEn === normaliser(titreEn), "titre anglais rendu"],
-  [!fr.includes("landing."), "aucune cle brute rendue en francais"],
-  [!en.includes("landing."), "aucune cle brute rendue en anglais"],
+  [!fr.includes("landing.") && !/accueil\.[a-z]+\.[a-zA-Z]/.test(fr), "aucune cle brute rendue en francais"],
+  [!en.includes("landing.") && !/accueil\.[a-z]+\.[a-zA-Z]/.test(en), "aucune cle brute rendue en anglais"],
   [fr.includes('lang="fr"'), "attribut lang correct en francais"],
   [en.includes('lang="en"'), "attribut lang correct en anglais"],
   // Copy de fret et faux logos clients supprimes de la maquette Stitch : le

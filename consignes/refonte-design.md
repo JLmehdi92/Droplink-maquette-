@@ -509,6 +509,52 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   (`body` 16 px/1,55, `cv11`/`ss01`, `text-wrap`) touchent aussi les écrans pas encore portés
   jusqu'à leur portage.
 
+### ▶️ 02/10/2026 — étape 2 : la landing (session cloud)
+
+- **Portée de `index.html`** (« l4 ») : héros où le lien se déplie en page client (fils SVG,
+  parallaxe, tampon « Approuvées »), bande de quatre chiffres en rouleaux, phrase qui s'éclaire mot
+  à mot avec son défileur de questions, studio à quatre onglets (jauge, flèches, Origine/Fin, pause
+  au survol ET au focus), page client en cinq cases (nuancier qui applique `resoudreAccent` du
+  produit, frise, démonstration de validation, langues, historique), côté vendeur en trois cartes,
+  tarifs, questions (`<details name="faq">`), appel final dont le nom de lien s'écrit.
+- **Décisions de Mehdi appliquées** : n° 3, quotas et prix LUS (`lirePlafondsPublics`, client sans
+  session de `lib/page-publique/`, et `PRIX_PRO_EUR`) — un plafond illisible retire ses lignes et la
+  phrase se dit sans nombre ; la page reste prérendue (ISR, 5 min ; vérifié dans
+  `prerender-manifest.json`). N° 4 : partent témoignages, « +2 500 vendeurs », `usedOn`, `f6b`,
+  « Restez informé », icônes de réseaux. N° 12 : en-tête collant SANS flou (fluidité), surface
+  presque opaque dès que la page défile. Aucun thème sombre.
+- **Gardé du produit** : sélecteur de langue (restylé, menu toujours aligné à droite — ouvert depuis
+  la gauche, il sortait de l'écran à 390 px), mentions légales et contact au pied, blog en
+  français seulement, signalement s'il existe, JSON-LD, Open Graph, alternates.
+- **Composants partagés avec les pages publiques** : `EntetePublique` (menu des écrans étroits,
+  Échap, focus rendu) et `PiedPublic`. Textes neufs en FR/EN/zh-CN sous `accueil.*` ; la démo de
+  page client réutilise les libellés de la VRAIE page (`page-publique.*`) ; dates formatées par la
+  langue. 91 clés mortes de l'ancienne landing supprimées (garde des chaînes mortes).
+- **Le mouvement** est un seul îlot (`AnimationsLanding`) qui anime ce que le serveur a rendu (port
+  de `main.js` et `l4.js`) ; la classe `js` est posée par un script avant le premier rendu, avec un
+  filet : si l'îlot ne démarre pas en 2,5 s, ou lève, elle est retirée et tout s'affiche dans son
+  état final. Sous mouvement réduit : tout est posé, immobile.
+- **Mesuré** : 1280 et 390 px, fr/en/zh-CN, mouvement normal et réduit : rendu identique à la
+  maquette (captures côte à côte), aucun débordement (y compris masqué par `overflow-x: clip`),
+  aucune erreur console, aucune violation CSP, aucune police sous 11,5 px ni cible sous 44 px au
+  téléphone.
+- **Relecture** (agent généraliste, quatre angles) : 0 CRITICAL/HIGH, 5 MEDIUM, ~10 LOW. Corrigés :
+  l'îlot qui pouvait laisser la page masquée ou la remplacer par l'écran d'erreur (try/catch,
+  `__landing` posé en fin), clignement des cartes du héros (masquées dès le premier rendu),
+  compteurs muets au lecteur d'écran (valeur en texte caché), démonstration qui parlait seule
+  (`aria-live` après une action seulement, pause au focus), « Dans sa langue » qui promettait la
+  langue du CLIENT alors que c'est celle choisie dans « Ma marque », classe `js` qui survivait à la
+  navigation, client sans session créé hors du `try`, cast de tuple, `priority` obsolète, nom
+  accessible du sélecteur, traductions (ordre chinois, classificateurs, « opens », « branding »,
+  « 1er »). Écarté : l'état de repos du studio (celui de la maquette).
+- **Tests adaptés** : la sonde de fumée lit le h1 dans `accueil.heros` ; exceptions déclarées pour
+  le nuancier (#E0533F, #F5C518, « #6A4D21 » qui est une référence) et pour des noms propres en
+  chinois ; l'exception des étoiles des témoignages est retirée avec eux ; le pied de la refonte
+  dessine ses liens à 44 px (pas de compensation). Nouveau test : `plafonds-publics`.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert (`/fr`, `/en`, `/zh-CN` en ●),
+  `test` : seule l'alarme Railway. **Au poste de Mehdi** : `fumee` (titre du héros), `couverture`
+  (`lib/page-publique/plafonds.ts` a son test).
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de
