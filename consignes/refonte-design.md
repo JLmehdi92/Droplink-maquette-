@@ -885,6 +885,35 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   erreur console, aucune violation CSP, aucune cible sous 44 px.
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
 
+- **Relecture de 6b** (corrigée au commit suivant) : 0 CRITICAL/HIGH, 4 MEDIUM — le sommaire légal
+  restait ouvert et collé au-dessus du texte au téléphone (sans script pour le refermer : il reste
+  désormais dans le flux) ; l'encart de signalement avait disparu au téléphone (il revient en fin de
+  document) ; le message de signalement préparé survivait à une correction des champs et l'ancien texte
+  serait parti (il disparaît dès qu'un champ change, et l'annonce est courte, hors des contrôles) ; la
+  garde des surfaces de marque ne lisait plus les feuilles, où vivent désormais les boutons en dégradé
+  (elle les lit, falsifiée sur `.ed-voir`). Signalé à Mehdi, non tranché : la mention de facturation de
+  Tarifs est en gris secondaire (3,16:1), conforme à la décision du 15/09 mais c'est un texte
+  contractuel.
+
+### ▶️ 02/10/2026 — étape 7a : mot de passe oublié, nouveau mot de passe, vérification (session cloud)
+
+- **La coque des pages de compte** (`coque-acces-simple.tsx`) devient la page d'accès de la refonte
+  (`PageAcces`, film « absence ») : le même dessin que la connexion, sans phrase de consentement.
+- **Mot de passe oublié** : la route reste (§ 5, des liens y pointent), au dessin de l'accès ;
+  suggestion de faute de frappe dans le champ, retour en `lien-retour`. **Nouveau mot de passe**
+  (`nouveau-mot-de-passe.html`) : l'adresse rappelée en clair, la note « ce lien ne servira qu'une
+  fois », la jauge et le compteur de l'inscription (le minimum vient de `LONGUEUR_MINIMALE`).
+  **Vérification** (`verification.html`) : **six cases** (arbitrage du § 5) — un seul champ `code`
+  envoyé, `one-time-code` sur la première, le code collé ou proposé se répartit, aucun envoi
+  automatique au sixième chiffre (chaque envoi consomme le quota partagé avec la connexion) ;
+  « se souvenir de cet appareil » en `coche-acces`.
+- **Mesuré** : le mot de passe oublié à 1440 et 390 px, fr et zh-CN, mouvement réduit ; aucun
+  débordement, aucune erreur, aucune cible sous 44 px. **Hors de portée de ce bac à sable** : le
+  nouveau mot de passe (session de récupération) et la vérification (compte à double authentification)
+  ne s'ouvrent qu'avec une session que la base de tests ne fournit pas sans écrire un facteur ;
+  à vérifier au poste de Mehdi.
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

@@ -375,19 +375,11 @@ const AUTONOMES: ReadonlyArray<{
       "charge pas et que le lien retombe à la hauteur de son texte.",
   },
   {
-    fichier: "src/components/acces/coque-acces-simple.tsx",
-    repere: 'className="inline-flex min-h-11 items-center"',
-    raison:
-      "Le logo d'en-tête du mot de passe oublié et du nouveau mot de passe : une " +
-      "IMAGE de 44 px au téléphone, et `min-h-11` reste posé si elle ne se charge pas.",
-  },
-  {
     fichier: "src/app/[locale]/mot-de-passe-oublie/page.tsx",
-    repere: "font-bold text-ds-texte-lien hover:underline lg:my-0 lg:min-h-0",
+    repere: 'className="lien-texte lien-retour min-h-11"',
     raison:
-      "« Revenir à la connexion » : SEUL dans son paragraphe, donc autonome et " +
-      "non un lien en flux de texte. Porté sur le design system le 14/09/2026 ; " +
-      "le logo d'en-tête, lui, vit désormais dans la coque partagée.",
+      "« Revenir à la connexion » : SEUL dans son paragraphe, donc autonome et non un " +
+      "lien en flux de texte (refonte du 02/10/2026, `.lien-retour` de la maquette).",
   },
   {
     fichier: "src/app/[locale]/blog/[slug]/page.tsx",
@@ -409,6 +401,11 @@ const AUTONOMES: ReadonlyArray<{
     raison:
       "« Signaler un contenu », l'encart des pages légales (refonte du 02/10/2026, " +
       "`.leg-encart` de la maquette qui le pose à 36 px) : 44 par son plancher.",
+  },
+  {
+    fichier: "src/app/[locale]/nouveau-mot-de-passe/page.tsx",
+    repere: 'className="lien-texte lien-retour min-h-11"',
+    raison: "« Revenir à la connexion » sous le nouveau mot de passe (refonte du 02/10/2026, maquette).",
   },
   {
     fichier: "src/app/[locale]/tarifs/page.tsx",

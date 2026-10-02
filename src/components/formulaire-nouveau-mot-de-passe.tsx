@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   changerMotDePasse,
@@ -24,11 +24,19 @@ import { BoutonPrincipalDs, ChampAcces, MessageErreurDs } from "@/components/acc
 
 const INITIAL: ResultatChangement = { statut: "inactif" };
 
-export function FormulaireNouveauMotDePasse({ locale }: { readonly locale: string }) {
+export function FormulaireNouveauMotDePasse({
+  locale,
+  longueurMinimale,
+}: {
+  readonly locale: string;
+  /** Arrive du serveur (`LONGUEUR_MINIMALE`) : afficher un autre nombre promettrait un mot de passe refusé. */
+  readonly longueurMinimale: number;
+}) {
   const t = useTranslations("connexion");
   const tm = useTranslations("motDePasse");
   const ti = useTranslations("inscription");
   const [resultat, action] = useActionState(changerMotDePasse, INITIAL);
+  const [motDePasse, setMotDePasse] = useState("");
 
   const messageErreur =
     resultat.statut === "erreur"
@@ -45,29 +53,45 @@ export function FormulaireNouveauMotDePasse({ locale }: { readonly locale: strin
                 : t("erreurIndisponible")
       : null;
 
+  const longueur = [...motDePasse].length;
+  const assez = longueur >= longueurMinimale;
+
   return (
-    <form action={action} className="flex flex-col gap-[22px]" noValidate>
+    <form action={action} className="formulaire" noValidate>
       <input type="hidden" name="locale" value={locale} />
 
-      <div>
-        <ChampAcces
-          id="nouveau-mot-de-passe"
-          nom="motDePasse"
-          type="password"
-          libelle={tm("labelNouveau")}
-          autoComplete="new-password"
-          libellesOeil={{ afficher: t("afficherMotDePasse"), masquer: t("masquerMotDePasse") }}
-          invalide={messageErreur !== null}
-          decritPar={
-            messageErreur !== null
-              ? "aide-nouveau-mot-de-passe erreur-nouveau-mot-de-passe"
-              : "aide-nouveau-mot-de-passe"
-          }
-        />
-        <p id="aide-nouveau-mot-de-passe" className="mt-2 text-[12.5px] leading-[1.5] text-ds-texte-sourdine">
-          {ti("aideMotDePasse")}
+      {/* LA JAUGE DE LA MAQUETTE, comme à l'inscription : elle compte vers la seule règle
+          que le navigateur peut voir, la longueur. Le serveur reste l'autorité. */}
+      <ChampAcces
+        id="nouveau-mot-de-passe"
+        nom="motDePasse"
+        type="password"
+        libelle={tm("labelNouveau")}
+        placeholder={ti("placeholderMotDePasse")}
+        autoComplete="new-password"
+        valeur={motDePasse}
+        surChangement={setMotDePasse}
+        libellesOeil={{ afficher: t("afficherMotDePasse"), masquer: t("masquerMotDePasse") }}
+        invalide={messageErreur !== null}
+        decritPar={
+          messageErreur !== null ? "aide-nouveau-mot-de-passe erreur-nouveau-mot-de-passe" : "aide-nouveau-mot-de-passe"
+        }
+      >
+        <div
+          className={"jauge-mdp" + (assez ? " est-ok" : "")}
+          style={{ "--remplie": String(Math.min(1, longueur / longueurMinimale)) } as React.CSSProperties}
+          aria-hidden="true"
+        >
+          <i />
+        </div>
+        <p id="aide-nouveau-mot-de-passe" className={"champ-acces__aide" + (assez ? " est-ok" : "")}>
+          {ti.rich("compteurMotDePasse", {
+            n: longueur,
+            min: longueurMinimale,
+            b: (morceau) => <span>{morceau}</span>,
+          })}
         </p>
-      </div>
+      </ChampAcces>
 
       {messageErreur !== null ? (
         <MessageErreurDs id="erreur-nouveau-mot-de-passe" texte={messageErreur} />

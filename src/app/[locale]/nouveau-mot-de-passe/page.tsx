@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { FormulaireNouveauMotDePasse } from "@/components/formulaire-nouveau-mot-de-passe";
 import { TraductionsClient } from "@/components/traductions-client";
-import { Info, KeyRound } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { LONGUEUR_MINIMALE } from "@/lib/auth/mot-de-passe";
 import { CoqueAccesSimple } from "@/components/acces/coque-acces-simple";
 import { sessionParEmail } from "@/lib/auth/recuperation";
 import { creerClientServeur } from "@/lib/supabase/server";
@@ -92,27 +94,32 @@ export default async function NouveauMotDePasse({
   return (
     <CoqueAccesSimple
       langue={langue}
-      icone={KeyRound}
       titre={t("nouveauTitre")}
       /* L'ADRESSE CONCERNÉE EST RAPPELÉE, EN CLAIR ET NON MODIFIABLE. Quelqu'un
          qui gère deux comptes doit voir lequel il change avant de taper — et
          elle vient de la SESSION, jamais de l'URL. */
       sousTitre={t.rich("nouveauSousTitre", {
         email: profil.email,
-        adresse: (morceaux) => <span className="font-semibold text-ds-texte-fort">{morceaux}</span>,
+        adresse: (morceaux) => <b className="acces__adresse">{morceaux}</b>,
       })}
     >
       {/* CE QUE LE GESTE COÛTE EST DIT AVANT, pas découvert après : les autres
           appareils devront se reconnecter. C'est précisément ce qu'on vient
           chercher quand on soupçonne une intrusion. */}
-      <div className="flex items-start gap-3 rounded-ds-card bg-ds-surface-creux px-4 py-3.5">
-        <Info aria-hidden="true" size={17} strokeWidth={1.9} className="mt-px flex-none text-ds-texte-sourdine" />
-        <p className="text-[13px] leading-[1.55] text-ds-texte-corps">{t("avertissement")}</p>
-      </div>
+      <p className="acces__note">
+        <ShieldCheck aria-hidden="true" className="ic" />
+        {t("avertissement")}
+      </p>
 
       <TraductionsClient espaces={["connexion", "inscription", "motDePasse"]}>
-        <FormulaireNouveauMotDePasse locale={langue} />
+        <FormulaireNouveauMotDePasse locale={langue} longueurMinimale={LONGUEUR_MINIMALE} />
       </TraductionsClient>
+      <p className="acces__bascule">
+        <Link href={`/${langue}/connexion`} className="lien-texte lien-retour min-h-11">
+          <ArrowLeft aria-hidden="true" className="ic" />
+          {t("retourConnexion")}
+        </Link>
+      </p>
     </CoqueAccesSimple>
   );
 }

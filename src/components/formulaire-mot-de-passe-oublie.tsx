@@ -42,12 +42,13 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
 
   if (resultat.statut === "envoye") {
     return (
-      <div role="status" className="flex gap-3 rounded-ds-card bg-ds-surface-teinte px-4 py-3.5">
-        <MailCheck aria-hidden="true" size={18} strokeWidth={1.9} className="mt-px flex-none text-ds-accent" />
-        <div className="min-w-0">
-          <p className="text-[15px] leading-[normal] font-bold text-ds-texte-fort">{tm("envoyeTitre")}</p>
-          <p className="mt-1 text-[13.5px] leading-[1.55] text-ds-texte-corps">{tm("envoyeTexte")}</p>
-        </div>
+      <div role="status" className="acces__note">
+        <MailCheck aria-hidden="true" className="ic" />
+        <p>
+          <b>{tm("envoyeTitre")}</b>
+          <br />
+          {tm("envoyeTexte")}
+        </p>
       </div>
     );
   }
@@ -60,7 +61,7 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
       : null;
 
   return (
-    <form action={action} className="flex flex-col gap-[22px]" noValidate>
+    <form action={action} className="formulaire" noValidate>
       <input type="hidden" name="locale" value={locale} />
 
       <ChampAcces
@@ -75,21 +76,18 @@ export function FormulaireMotDePasseOublie({ locale }: { readonly locale: string
         surChangement={setEmail}
         invalide={messageErreur !== null}
         {...(messageErreur !== null ? { decritPar: "erreur-oubli" } : {})}
-      />
-
-      {suggestion !== null ? (
-        <p className="-mt-3 text-[13px] leading-[1.5] text-ds-texte-corps" aria-live="polite">
-          {t("suggestionPrefixe")}{" "}
-          <button
-            type="button"
-            onClick={() => setEmail(suggestion.adresse)}
-            className="font-semibold text-ds-texte-lien underline"
-          >
-            {suggestion.adresse}
-          </button>
-          {t("suggestionSuffixe")}
-        </p>
-      ) : null}
+      >
+        {/* La suggestion de faute de frappe reste LOCALE : aucune requête. */}
+        {suggestion !== null ? (
+          <p className="champ-acces__suggestion" aria-live="polite">
+            {t("suggestionPrefixe")}{" "}
+            <button type="button" onClick={() => setEmail(suggestion.adresse)}>
+              {suggestion.adresse}
+            </button>
+            {t("suggestionSuffixe")}
+          </p>
+        ) : null}
+      </ChampAcces>
 
       {messageErreur !== null ? <MessageErreurDs id="erreur-oubli" texte={messageErreur} /> : null}
 

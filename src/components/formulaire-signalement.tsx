@@ -15,6 +15,9 @@ import { ArrowRight, Check, ChevronDown, CircleCheck, Copy, Mail, TriangleAlert 
  * devant un bouton qui ne faisait rien. Annoncer un accusé de réception qui n'arrivera
  * jamais ferait recommencer un signalement, ou renoncer.
  *
+ * LE MESSAGE PRÉPARÉ DISPARAÎT DÈS QU'UN CHAMP CHANGE : il affirmerait un contenu que
+ * le formulaire ne porte plus, et c'est l'ancien texte qui partirait.
+ *
  * LA VALIDATION EST CELLE DU NAVIGATEUR (`required`, `type="url"`, `type="email"`) :
  * aucun serveur ne reçoit ce formulaire, il n'y a donc pas d'autorité à doubler.
  */
@@ -79,7 +82,10 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
           required
           placeholder={t("signalement.lienExemple")}
           value={lien}
-          onChange={(e) => setLien(e.target.value)}
+          onChange={(e) => {
+            setLien(e.target.value);
+            setPret(null);
+          }}
         />
       </div>
 
@@ -93,6 +99,7 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
             onChange={(e) => {
               const choisie = CATEGORIES.find(([c]) => c === e.target.value);
               if (choisie !== undefined) setCategorie(choisie[0]);
+              setPret(null);
             }}
           >
             {CATEGORIES.map(([c, cle]) => (
@@ -114,7 +121,10 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
           rows={5}
           placeholder={t("signalement.descriptionExemple")}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            setDescription(e.target.value);
+            setPret(null);
+          }}
         />
       </div>
 
@@ -129,7 +139,10 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
           required
           placeholder={t("signalement.emailExemple")}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setPret(null);
+          }}
         />
       </div>
 
@@ -139,8 +152,12 @@ export function FormulaireSignalement({ adresse }: { readonly adresse: string })
       </button>
       <p className="sig-aide">{t("signalement.ouvreMessagerie")}</p>
 
-      {/* LE MESSAGE PRÊT, annoncé : il apparaît là où l'on vient d'agir. */}
-      <div role="status">
+      {/* L'ANNONCE EST COURTE, à part des contrôles : un `role="status"` autour du bloc
+          entier faisait lire tout le corps du message. */}
+      <p className="sr-only" role="status">
+        {pret === null ? "" : t("signalement.pretTitre")}
+      </p>
+      <div>
         {pret === null ? null : (
           <div className="sig-pret">
             <p className="sig-pret__tete">

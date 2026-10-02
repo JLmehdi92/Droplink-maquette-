@@ -35,16 +35,8 @@
       "titre": "What the page holds"
     },
     "menu": {
-      "etapes": "How it works",
-      "docs": "Documentation"
+      "etapes": "How it works"
     },
-    "pied": {
-      "docs": "Documentation"
-    },
-    "piedCourt": {
-      "docs": "Documentation"
-    },
-    "piedDroits": "© {annee} DropLink. All rights reserved.",
     "kit": {
       "langues": {
         "fr": "Français",
@@ -945,7 +937,6 @@
     "dejaCompteTexte": "Already have an account?",
     "bouton": "Create my account",
     "boutonEnCours": "Creating…",
-    "aideMotDePasse": "12 characters minimum. Prefer a phrase over a complicated word.",
     "erreurMdpTropCourt": "Your password must be at least 12 characters long.",
     "erreurMdpTropLong": "Your password is too long. Shorten it a little.",
     "erreurMdpContientEmail": "Your password must not contain your email address.",
@@ -2842,7 +2833,8 @@
       "invalide": "Enter the 6 digits shown by your app.",
       "trop": "Too many attempts. Try again in a few minutes.",
       "indisponible": "The service is temporarily unavailable. Please try again."
-    }
+    },
+    "chiffre": "Digit {n} of 6"
   },
   "blocageVendeur": {
     "titre": "Link blocked by DropLink",

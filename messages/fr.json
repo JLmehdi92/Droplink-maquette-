@@ -35,16 +35,8 @@
       "titre": "Ce que contient la page"
     },
     "menu": {
-      "etapes": "Comment ça marche",
-      "docs": "Documentation"
+      "etapes": "Comment ça marche"
     },
-    "pied": {
-      "docs": "Documentation"
-    },
-    "piedCourt": {
-      "docs": "Documentation"
-    },
-    "piedDroits": "© {annee} DropLink. Tous droits réservés.",
     "kit": {
       "langues": {
         "fr": "Français",
@@ -945,7 +937,6 @@
     "dejaCompteTexte": "Déjà un compte ?",
     "bouton": "Créer mon compte",
     "boutonEnCours": "Création…",
-    "aideMotDePasse": "12 caractères minimum. Prenez plutôt une phrase qu’un mot compliqué.",
     "erreurMdpTropCourt": "Votre mot de passe doit faire au moins 12 caractères.",
     "erreurMdpTropLong": "Votre mot de passe est trop long. Raccourcissez-le un peu.",
     "erreurMdpContientEmail": "Votre mot de passe ne doit pas contenir votre adresse email.",
@@ -2842,7 +2833,8 @@
       "invalide": "Saisissez les 6 chiffres affichés par votre application.",
       "trop": "Trop de tentatives. Réessayez dans quelques minutes.",
       "indisponible": "Le service est momentanément indisponible. Réessayez."
-    }
+    },
+    "chiffre": "Chiffre {n} sur 6"
   },
   "blocageVendeur": {
     "titre": "Lien bloqué par DropLink",

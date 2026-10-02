@@ -35,16 +35,8 @@
       "titre": "页面包含什么"
     },
     "menu": {
-      "etapes": "使用方式",
-      "docs": "使用文档"
+      "etapes": "使用方式"
     },
-    "pied": {
-      "docs": "使用文档"
-    },
-    "piedCourt": {
-      "docs": "使用文档"
-    },
-    "piedDroits": "© {annee} DropLink. 保留所有权利。",
     "kit": {
       "langues": {
         "fr": "Français",
@@ -945,7 +937,6 @@
     "dejaCompteTexte": "已有账号？",
     "bouton": "创建我的账户",
     "boutonEnCours": "正在创建…",
-    "aideMotDePasse": "至少 12 个字符。建议用一句话，而不是一个复杂的词。",
     "erreurMdpTropCourt": "密码至少需要 12 个字符。",
     "erreurMdpTropLong": "密码太长了，请稍微缩短。",
     "erreurMdpContientEmail": "密码不能包含您的邮箱地址。",
@@ -2842,7 +2833,8 @@
       "invalide": "请输入应用显示的 6 位数字。",
       "trop": "尝试次数过多，请几分钟后再试。",
       "indisponible": "服务暂时不可用，请重试。"
-    }
+    },
+    "chiffre": "第 {n} 位，共 6 位"
   },
   "blocageVendeur": {
     "titre": "链接已被 DropLink 停用",

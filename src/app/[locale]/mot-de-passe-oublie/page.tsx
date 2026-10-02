@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FormulaireMotDePasseOublie } from "@/components/formulaire-mot-de-passe-oublie";
 import { TraductionsClient } from "@/components/traductions-client";
-import { Mail } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { CoqueAccesSimple } from "@/components/acces/coque-acces-simple";
 import { estLangueSupportee } from "@/i18n/config";
 import { routing } from "@/i18n/routing";
@@ -50,16 +50,14 @@ export default async function MotDePasseOublie({
   const t = await getTranslations("motDePasse");
 
   return (
-    <CoqueAccesSimple langue={langue} icone={Mail} titre={t("oublieTitre")} sousTitre={t("oublieSousTitre")}>
+    <CoqueAccesSimple langue={langue} titre={t("oublieTitre")} sousTitre={t("oublieSousTitre")}>
       <TraductionsClient espaces={["connexion", "motDePasse"]}>
         <FormulaireMotDePasseOublie locale={langue} />
       </TraductionsClient>
 
-      <p className="text-center text-[14px] text-ds-texte-corps">
-        <Link
-          href={`/${langue}/connexion`}
-          className="-my-3.5 inline-flex min-h-11 items-center font-bold text-ds-texte-lien hover:underline lg:my-0 lg:min-h-0"
-        >
+      <p className="acces__bascule">
+        <Link href={`/${langue}/connexion`} className="lien-texte lien-retour min-h-11">
+          <ArrowLeft aria-hidden="true" className="ic" />
           {t("retourConnexion")}
         </Link>
       </p>

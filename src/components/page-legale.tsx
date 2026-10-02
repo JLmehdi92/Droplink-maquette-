@@ -253,6 +253,18 @@ export async function PageLegale({
                 ))}
               </section>
             ))}
+            {/* AU TÉLÉPHONE, L'ENCART VIENT EN FIN DE DOCUMENT : la colonne qui le porte
+                au bureau n'existe plus, et le mettre en tête retarderait le texte. */}
+            {signalable ? (
+              <div className="leg-encart leg-encart--telephone v4-carte">
+                <b>{t("encartSignalerTitre")}</b>
+                <p>{t("encartSignalerTexte")}</p>
+                <Link className="lien-texte min-h-11" href={`/${locale}/signalement`}>
+                  {t("encartSignalerLien")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </Link>
+              </div>
+            ) : null}
           </article>
         </div>
       </main>

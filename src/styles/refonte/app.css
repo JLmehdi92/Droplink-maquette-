@@ -1870,6 +1870,11 @@ a.action-ligne { color: var(--corps); }
 .sommaire--telephone { display: none; }
 .leg-chapeau { font-size: 17px; line-height: 1.65; color: var(--encre); text-wrap: pretty; }
 @media (max-width: 980px) { .sommaire--telephone { display: block; } .sommaire--bureau { display: none; } }
+/* Les pages légales n'ont aucun script pour refermer le volet après un choix : au téléphone
+   leur sommaire reste dans le flux, il ne colle pas au-dessus du texte. Et l'encart de
+   signalement revient, en fin de document. */
+.leg-encart--telephone { display: none; }
+@media (max-width: 980px) { .leg .doc-cote { position: static; } .leg .leg-encart--telephone { display: grid; margin-top: 40px; } }
 .leg-encart p { font-size: 13px; line-height: 1.5; color: var(--corps); }
 .leg-encart .lien-texte { display: inline-flex; align-items: center; gap: 4px; min-height: 36px; font-size: 13.5px; }
 

@@ -34,13 +34,13 @@ export async function generateMetadata({
 }
 
 /**
- * LA PAGE DE SIGNALEMENT — `legal/signalement.html` du design system, écrite le
- * 14/09/2026 avant ce fichier.
+ * LA PAGE DE SIGNALEMENT (refonte du 02/10/2026, maquette `signalement.html`).
  *
- * Au bureau, deux colonnes : à gauche la pastille, le titre, l'intention, les
- * TROIS ÉTAPES et l'avertissement ; à droite le formulaire dans sa carte. Au
- * téléphone tout s'empile, et l'avertissement passe APRÈS le formulaire : le
- * remonter repousserait le formulaire sous la ligne de flottaison.
+ * Au bureau, deux colonnes : à gauche l'étiquette, le titre, l'intention, les TROIS
+ * ÉTAPES et l'avertissement ; à droite le formulaire dans sa carte. Au téléphone tout
+ * s'empile DANS CET ORDRE, comme la maquette : l'avertissement passe avant le
+ * formulaire (l'ancien écran le mettait après) — on lit ce qu'engage un signalement
+ * avant de le rédiger.
  *
  * Les étapes portent des pastilles TEINTÉES, pas le dégradé : il est réservé au
  * bouton du formulaire, la seule action principale de l'écran.
