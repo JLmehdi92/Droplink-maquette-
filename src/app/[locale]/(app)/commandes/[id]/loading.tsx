@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 /**
  * L'ÉDITEUR — l'écran le plus cliqué du produit.
  *
@@ -10,34 +11,39 @@
  * décalage n'ait lieu à l'arrivée du contenu. Porté sur les jetons du design
  * system le 15/09/2026, comme celui de la liste.
  */
-export default function Chargement() {
-  const bloc = "rounded-ds-sm bg-ds-surface-creux animate-pulse";
-  const carte = "rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-[22px] shadow-ds-card";
+export default async function ChargementFiche() {
+  const t = await getTranslations("commun");
+  // Refonte du 02/10/2026 (`commande-chargement.html`) : la géométrie de la fiche
+  // (deux cartes de champs, une carte de médias), pour qu'elle ne saute pas à
+  // l'arrivée des données.
   return (
-    <div className="px-margin-mobile pt-4 pb-6 md:px-8 md:pt-[30px] md:pb-[26px]" aria-hidden="true">
-      <div className={`h-9 w-64 max-w-full md:h-10 ${bloc}`} />
-
-      <div className="mt-[26px] grid grid-cols-1 gap-4 md:grid-cols-12">
-        <div className="flex flex-col gap-4 md:col-span-7">
-          {[0, 1].map((i) => (
-            <div key={i} className={carte}>
-              <div className={`h-4 w-32 ${bloc}`} />
-              <div className={`mt-4 h-11 w-full ${bloc}`} />
-              <div className={`mt-3 h-11 w-full ${bloc}`} />
-            </div>
-          ))}
-        </div>
-        <div className="md:col-span-5">
-          <div className={carte}>
-            <div className={`h-4 w-24 ${bloc}`} />
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className={`aspect-square ${bloc}`} />
-              ))}
+    <main id="contenu" className="tableau squelette" aria-busy="true">
+      <p className="sr" role="status">
+        {t("chargement")}
+      </p>
+      <div className="squelette__corps" aria-hidden="true">
+        <i className="sq sq--titre sq--large" />
+        <div className="squelette__fiche">
+          <div className="squelette__gauche">
+            {[0, 1].map((k) => (
+              <div key={k} className="squelette__carte">
+                <i className="sq sq--etiquette" />
+                <i className="sq sq--champ" />
+                <i className="sq sq--champ" />
+              </div>
+            ))}
+          </div>
+          <div className="squelette__carte squelette__droite">
+            <i className="sq sq--etiquette sq--court" />
+            <div className="squelette__medias">
+              <i className="sq" />
+              <i className="sq" />
+              <i className="sq" />
+              <i className="sq" />
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

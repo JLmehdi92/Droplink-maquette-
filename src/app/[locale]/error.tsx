@@ -1,6 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useTransition } from "react";
 import { RotateCcw, TriangleAlert } from "lucide-react";
 import { CLASSE_ACTION_ERREUR, EcranErreurPublic } from "@/components/ecran-erreur-public";
 
@@ -31,18 +32,23 @@ export default function ErreurPublique({
   readonly reset: () => void;
 }) {
   const t = useTranslations("erreurs");
+  const langue = useLocale();
+  const [enCours, demarrer] = useTransition();
 
-  /* PORTÉE SUR `ui_kits/erreurs/erreur.html` LE 14/09/2026 — elle rendait un
-     titre en Plus Jakarta Sans au-dessus d'un bouton noir. */
+  /* Refonte du 02/10/2026 : maquette `erreur.html`. */
   return (
-    <EcranErreurPublic icone={TriangleAlert} titre={t("titre")} texte={t("texte")}>
-      <button type="button" onClick={reset} className={CLASSE_ACTION_ERREUR}>
-        <RotateCcw aria-hidden="true" size={18} strokeWidth={1.9} />
-        {t("reessayer")}
+    <EcranErreurPublic
+      icone={TriangleAlert}
+      titre={t("titre")}
+      texte={t("texte")}
+      accueil={{ href: `/${langue}`, libelle: t("accueilLogo") }}
+    >
+      {/* L'attente est celle de la VRAIE relance (transition), jamais un délai fixe. */}
+      <button type="button" onClick={() => demarrer(reset)} aria-busy={enCours} disabled={enCours} className={CLASSE_ACTION_ERREUR}>
+        <RotateCcw aria-hidden="true" className="ic" />
+        <span>{t("reessayer")}</span>
       </button>
-      {error.digest !== undefined && (
-        <p className="mt-6 text-[13px] text-ds-texte-sourdine">{t("reference", { ref: error.digest })}</p>
-      )}
+      {error.digest === undefined ? null : <p className="err-ref">{t("reference", { ref: error.digest })}</p>}
     </EcranErreurPublic>
   );
 }

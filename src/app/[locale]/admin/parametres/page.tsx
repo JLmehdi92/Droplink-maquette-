@@ -273,6 +273,7 @@ export default async function ParametresAdmin({
     CARTES.filter((c) => c.colonne === cote).map((c) => (
       <CarteReglages
         key={c.id}
+        id={c.id}
         titre={t("carte." + c.id + ".titre")}
         sousTitre={t("carte." + c.id + ".sousTitre")}
       >

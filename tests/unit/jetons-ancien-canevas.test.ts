@@ -74,7 +74,8 @@ describe("les couleurs de l'ancien canevas", () => {
     // la garde ne chercherait plus rien et resterait verte.
     expect(ANCIENNES.length, "aucune couleur de l'ancien thème lue dans globals.css").toBeGreaterThanOrEqual(20);
     const ds = [...CSS.matchAll(/--color-(ds-[a-z0-9-]+)\s*:/g)].map((m) => m[1] ?? "");
-    expect(relever(motifPour(ds)).length, "la sonde ne trouve aucune classe du design system : elle est cassée").toBeGreaterThan(100);
+    expect(relever(motifPour(ds)).length, "la sonde ne trouve aucune classe du design system : elle est cassée").toBeGreaterThan(60);
+    // 89 après les écrans d'état (même jour), passés aux classes `.etat`, `.err-*`, `.sq`.
     // 135 le 02/10/2026, après le portage de l'administration : les écrans de la refonte
     // emploient les classes de leurs feuilles, plus les utilitaires `ds-*`.
   });

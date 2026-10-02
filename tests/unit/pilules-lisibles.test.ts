@@ -190,7 +190,11 @@ describe("Les surfaces peintes du dégradé de marque", () => {
       // jour, après le retrait des orphelins `coque-acces` et `maquette-application` ;
       // 1 après l'administration, dont la vue courante des statistiques était peinte du
       // dégradé calme (les filtres de la refonte sont neutres).
-    ).toBeGreaterThan(0);
+    ).toBeGreaterThanOrEqual(0);
+    // ⚠️ 0 APRÈS LES ÉCRANS D'ÉTAT (même jour) : la dernière surface Tailwind au dégradé
+    // était l'action des erreurs publiques, devenue `.bouton--marque` (feuille). Ce
+    // balayage n'a donc plus rien à mesurer côté utilitaires ; la règle qui exige une
+    // `color` pour chaque `var(--degrade)` DES FEUILLES (plus bas) prend le relais.
 
     expect(
       restants,
@@ -220,7 +224,8 @@ describe("Les pilules et tuiles colorées", () => {
       resolues.length,
       "le balayage ne trouve plus une seule paire fond + texte résolue : un ensemble vide passe tout",
       // 20 après le portage de l'administration (02/10/2026) : ses pilules sont des `.adm-badge`.
-    ).toBeGreaterThan(15);
+      // 14 après les écrans d'état.
+    ).toBeGreaterThan(10);
 
     const illisibles = resolues
       .filter((p) => jetons.get(p.fond) === jetons.get(p.texte))

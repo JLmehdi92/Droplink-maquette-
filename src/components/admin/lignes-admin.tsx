@@ -1,3 +1,4 @@
+import { getFormatter } from "next-intl/server";
 import { echelle } from "@/components/admin/echelle";
 
 /**
@@ -11,7 +12,7 @@ import { echelle } from "@/components/admin/echelle";
 const L = 600;
 const H = 160;
 
-export function LignesAdmin({
+export async function LignesAdmin({
   series,
   etiquette,
   debut,
@@ -23,6 +24,7 @@ export function LignesAdmin({
   readonly fin: string;
 }) {
   const toutes = series.flatMap((s) => s.valeurs.filter((v): v is number => v !== null));
+  const format = await getFormatter();
   const { plafond, graduations } = echelle(Math.max(0, ...toutes), 4);
   const n = Math.max(2, ...series.map((s) => s.valeurs.length));
   const x = (i: number) => (i / (n - 1)) * L;
@@ -63,7 +65,7 @@ export function LignesAdmin({
         </svg>
         <div className="adm-graphe__axe" aria-hidden="true">
           {graduations.map((g) => (
-            <span key={g}>{Math.round(g)}</span>
+            <span key={g}>{format.number(Math.round(g))}</span>
           ))}
         </div>
       </div>

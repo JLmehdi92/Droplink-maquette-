@@ -103,6 +103,7 @@ const SANS_IDEOGRAMME: ReadonlyMap<string, string> = new Map([
   ["admin.boutiques.part", "Le même gabarit, sur l'anneau des boutiques."],
   ["admin.statistiques.tauxValeur", "Une variable et le signe pour cent, collés comme en chinois."],
   ["admin.statistiques.part", "Le même gabarit, sur la légende des types de compte et des transporteurs."],
+  ["admin.infoValeur", "Deux variables séparées par un deux-points pleine chasse : l’info-bulle des graphiques."],
   ["admin.statistiques.ecartHausse", "Un signe, une variable et le signe pour cent."],
   ["admin.statistiques.ecartBaisse", "Un signe moins, une variable et le signe pour cent."],
   ["admin.commandes.colonnes.reference", "Le dièse de la colonne des références, comme le kit l'écrit dans les trois langues."],

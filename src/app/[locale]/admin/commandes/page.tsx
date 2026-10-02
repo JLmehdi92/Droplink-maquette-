@@ -175,8 +175,12 @@ export default async function AdminCommandes({
      échoué, ni pastille ni bouton (contrainte 8). */
   const date = (l: LigneCommandeAdmin): string =>
     format.dateTime(new Date(l.creeLe), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  /* UNE CONTESTATION EN ATTENTE REMPLACE LE DÉBLOCAGE DIRECT : débloquer passe
+     alors par sa lecture (tracée à l'ouverture) et sa réponse, qui part au vendeur.
+     Sa pastille se pose dans la cellule de référence, comme la maquette. */
   const geste = (l: LigneCommandeAdmin) => {
     const etat = bloque(l);
+    if (etat === true && conteste(l)) return null;
     return etat === null ? null : <BlocageLien commandeId={l.id} reference={l.reference} bloque={etat} motifMin={MOTIF_MIN} />;
   };
 
@@ -322,7 +326,6 @@ export default async function AdminCommandes({
 
           {lienSuivant === null ? null : (
             <footer className="adm-pied">
-              <span>{t("commandes.surTotal", { affichees: page.lignes.length, total: total ?? page.lignes.length })}</span>
               <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
                 {t("commandes.pageSuivante")}
               </LienEcran>

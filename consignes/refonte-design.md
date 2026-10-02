@@ -993,6 +993,42 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
   erreur console, aucune violation CSP, aucun débordement.
 - **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
 
+### ▶️ 02/10/2026 — corrections de la relecture de l'étape 8 (session cloud)
+
+- Ancres des cartes de paramètres stables en toute langue (en chinois les quatre cartes partageaient
+  la même) ; le pied « N sur M » des comptes et commandes retiré (il annonçait le total GLOBAL avec
+  un filtre actif, et « 50 sur 50 » quand le total était illisible) ; le dialogue ne se ferme plus
+  sur une sélection relâchée hors de la boîte ni sur sa barre de défilement ; croix à 44 px au
+  toucher ; focus sur le motif à l'ouverture et aide reliée (`aria-describedby`) ; glisser-déposer
+  refusé comme le collage dans la recopie d'adresse.
+- **Une contestation en attente remplace de nouveau le déblocage direct** : débloquer passe par sa
+  lecture (tracée) et sa réponse, comme avant la refonte.
+- « Aucune alerte » exige aussi un comptage des doublons lisible ; graduations et info-bulles
+  formatées par la langue ; états vides et indisponibles des statistiques et de la frise.
+- Garde ajoutée : le layout doit demander à la navigation commune de ne rien précharger.
+
+### ▶️ 02/10/2026 — étape 9 : les états (session cloud)
+
+- **Espace vendeur et administration** : `error.tsx` (×2) et la commande introuvable prennent
+  `.etat` (maquettes `erreur-espace.html`, `admin-erreur.html`, `commande-introuvable.html`). « Réessayer »
+  montre l'attente RÉELLE de la relance (`reset` dans une transition), jamais un délai fixe. Les deux
+  `loading.tsx` prennent les squelettes `.sq` et annoncent « Chargement… » (`role="status"`,
+  `aria-busy`) — toujours aucune donnée dans un squelette.
+- **Public** : l'erreur du site et la page introuvable globale (`erreur.html`, `introuvable.html`) par
+  `EcranErreurPublic`, réécrit en `.err-*` ; le 404 global importe désormais les feuilles de la
+  refonte, puisqu'il remplace la racine.
+- **Page client** : le lien mort prend la grammaire de la notification (`lien-invalide.html`) et
+  l'erreur `.errc` (`erreur-client.html`). `app.css` n'étant pas chargée sous /p (budget), les règles
+  de ces deux écrans sont recopiées dans `client.css` sous `.etat-p`, avec leurs variables lues aux
+  jetons du design system. Aucune couleur de vendeur, aucun dégradé.
+- **Ménage** : `en-tete-ecran` supprimé (orphelin), deux chaînes mortes, planchers de gardes abaissés
+  avec leur raison.
+- **Mesuré** : 404 global, lien mort et commande introuvable à 1440 et 390 px : conformes, aucune
+  erreur hors le 404 voulu. **Non mesurés au navigateur** : les trois frontières d'erreur et les deux
+  chargements, qu'aucune URL ne déclenche à la demande — à voir au poste de Mehdi (en provoquant une
+  erreur de rendu, ou avec un réseau ralenti pour les chargements).
+- **Portes** : `typecheck` 0, `lint` 0 erreur, `build` vert, `test` : seule l'alarme Railway.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

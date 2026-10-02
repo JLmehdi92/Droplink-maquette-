@@ -204,7 +204,7 @@ export function DialogueSuspension({
             en clair sur la ligne du journal. */}
         <label className="adm-champ">
           <span>{t("motif")}</span>
-          <textarea name="motif" rows={3} value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <textarea name="motif" rows={3} autoFocus value={motif} onChange={(e) => setMotif(e.target.value)} />
           <small>{t("motifAide", { n: motifMin })}</small>
         </label>
 
@@ -219,6 +219,11 @@ export function DialogueSuspension({
               placeholder={email}
               value={confirmation}
               onChange={(e) => setConfirmation(e.target.value)}
+              onDrop={(e) => {
+                // Déposer un texte glissé, c'est coller sans le dire.
+                e.preventDefault();
+                setColle(true);
+              }}
               onPaste={(e) => {
                 // COLLER, C'EST REPRODUIRE SANS LIRE — donc contourner exactement ce
                 // que ce champ cherche à obtenir. Le refus est annoncé juste en

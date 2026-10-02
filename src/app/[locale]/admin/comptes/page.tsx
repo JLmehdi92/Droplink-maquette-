@@ -271,7 +271,6 @@ export default async function AdminComptes({
 
           {lienSuivant === null ? null : (
             <footer className="adm-pied">
-              <span>{t("comptes.surTotal", { affichees: page.lignes.length, total: compteurs.comptes })}</span>
               <LienEcran prefetch={false} href={lienSuivant} className="bouton-outil">
                 {t("comptes.pageSuivante")}
               </LienEcran>

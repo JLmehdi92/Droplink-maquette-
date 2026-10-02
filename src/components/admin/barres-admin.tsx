@@ -1,3 +1,4 @@
+import { getFormatter } from "next-intl/server";
 import { echelle } from "@/components/admin/echelle";
 
 /**
@@ -12,7 +13,7 @@ import { echelle } from "@/components/admin/echelle";
 const L = 600;
 const H = 160;
 
-export function BarresAdmin({
+export async function BarresAdmin({
   valeurs,
   etiquette,
   debut,
@@ -26,6 +27,7 @@ export function BarresAdmin({
   /** Part de hauteur donnée à une barre nulle (la frise des colis : 2 %). */
   readonly hauteurMinimale?: number;
 }) {
+  const format = await getFormatter();
   const { plafond, graduations } = echelle(Math.max(0, ...valeurs.map((v) => v.valeur)), 4);
   const pas = L / Math.max(1, valeurs.length);
   const largeur = pas * 0.64;
@@ -58,7 +60,7 @@ export function BarresAdmin({
         </svg>
         <div className="adm-graphe__axe" aria-hidden="true">
           {graduations.map((g) => (
-            <span key={g}>{Math.round(g)}</span>
+            <span key={g}>{format.number(Math.round(g))}</span>
           ))}
         </div>
       </div>

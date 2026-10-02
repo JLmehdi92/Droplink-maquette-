@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 /**
  * L'ÉCRAN RÉPOND AU CLIC, MÊME QUAND LA DONNÉE N'EST PAS ENCORE LÀ.
  *
@@ -19,34 +20,38 @@
  * contenu arrive — un décalage de mise en page est plus désagréable que
  * l'attente qu'il prétend masquer.
  *
- * PORTÉ SUR LE DESIGN SYSTEM LE 14/09/2026 : la géométrie d'`EnTeteEcranDs` et
+ * PORTÉ SUR LE DESIGN SYSTEM LE 14/09/2026 (la géométrie de l'ancien en-tête d'écran) et
  * des cartes du kit (filet, rayon 20, fond carte), des blocs sur le creux.
  *
  * `animate-pulse` est décoratif et disparaît sous `prefers-reduced-motion` :
  * la règle est posée dans `globals.css`, et une animation ne porte jamais
  * d'information.
  */
-export default function Chargement() {
-  const bloc = "rounded-ds-sm bg-ds-surface-creux animate-pulse";
+export default async function Chargement() {
+  const t = await getTranslations("commun");
+  // Refonte du 02/10/2026 (`chargement.html`) : le squelette reste muet pour
+  // l'œil d'un lecteur d'écran (`aria-hidden`), et UNE annonce dit qu'on charge.
+  // AUCUNE DONNÉE dans un squelette : il affirmerait ce que la base n'a pas dit.
   return (
-    <div className="px-margin-mobile pt-4 pb-6 md:px-8 md:pt-[30px] md:pb-[26px]" aria-hidden="true">
-      <div className={`h-9 w-56 md:h-10 ${bloc}`} />
-      <div className={`mt-2 h-4 w-80 max-w-full ${bloc}`} />
-
-      <div className="mt-[26px] flex flex-col gap-3">
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-          <div
-            key={i}
-            className="flex items-center gap-4 rounded-ds-card-lg border border-ds-filet bg-ds-surface-carte p-4 shadow-ds-card"
-          >
-            <div className={`h-12 w-12 shrink-0 ${bloc}`} />
-            <div className="flex-1">
-              <div className={`h-4 w-40 max-w-full ${bloc}`} />
-              <div className={`mt-2 h-3 w-64 max-w-full ${bloc}`} />
+    <main id="contenu" className="tableau squelette" aria-busy="true">
+      <p className="sr" role="status">
+        {t("chargement")}
+      </p>
+      <div className="squelette__corps" aria-hidden="true">
+        <i className="sq sq--titre" />
+        <i className="sq sq--ligne" />
+        <div className="squelette__liste">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="squelette__rangee" style={{ "--i": String(i) } as React.CSSProperties}>
+              <i className="sq sq--tuile" />
+              <div>
+                <i className="sq sq--l1" />
+                <i className="sq sq--l2" />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

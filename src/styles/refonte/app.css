@@ -590,6 +590,7 @@ kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; 
 @media (pointer: coarse) {
   .bouton-outil, .bouton-app--plein, .bouton-app--second, .bouton-texte, .vues-liste button, .puce, .adm-danger, .adm-confirmer, .adm-pastille-contest, .adm-lien { min-height: 44px; }
   .adm-reglage__saisie input, .adm-filtres a, .adm-champ input { height: 44px; }
+  .adm-dialogue__x { width: 44px; height: 44px; }
   .action-ligne { width: 44px; height: 44px; }
   .coche { width: 44px; height: 44px; margin: -11px; }
   .col-commande a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }

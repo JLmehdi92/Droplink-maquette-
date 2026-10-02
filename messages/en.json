@@ -1,8 +1,6 @@
 {
   "commun": {
-    "chargement": "Loading…",
-    "fermer": "Close",
-    "copie": "Copied"
+    "chargement": "Loading…"
   },
   "navigation": {
     "seConnecter": "Log in",
@@ -1728,8 +1726,7 @@
       "sousTitreListe": "Manage and monitor every DropLink account.",
       "tuileTotalAide": "of which {sansType} with no declared type",
       "colisInfo": "{valeur} parcels registered, alert threshold {seuil}",
-      "ouvrirLong": "Open account {email}",
-      "surTotal": "{affichees} of {total, number} accounts"
+      "ouvrirLong": "Open account {email}"
     },
     "journal": {
       "titre": "Audit log",
@@ -1757,7 +1754,6 @@
       "decompteAuDela": "More than {total, number} entries · neither editable nor erasable",
       "decompte": "{total, plural, one {# entry} other {# entries}} · neither editable nor erasable",
       "garantie": "This log can be neither edited nor erased, and it outlives the deletion of the accounts it describes. Reading it writes nothing to it.",
-      "filtres": "Filter the log",
       "famille": {
         "toutes": "All",
         "suspension": "Suspensions",
@@ -2088,7 +2084,6 @@
       },
       "decompte": "One shop per account · {total, plural, one {# in total} other {# in total}}",
       "trace": "This view is written to the audit log, along with the criteria used, filter included.",
-      "filtres": "Filter by account type",
       "filtre": {
         "toutes": "All",
         "supplier": "Suppliers",
@@ -2248,7 +2243,6 @@
       "pageSuivante": "Show more",
       "repartition": "Status breakdown",
       "lienBloque": "Link blocked",
-      "surTotal": "{affichees} of {total, number} orders",
       "aucunTransporteur": "No carrier"
     },
     "statistiques": {
@@ -2391,7 +2385,8 @@
       "panneauVoir": "View duplicates"
     },
     "accueil": "DropLink administration",
-    "pastille": "Admin"
+    "pastille": "Admin",
+    "infoValeur": "{libelle}: {valeur}"
   },
   "erreurs": {
     "titre": "This screen could not be displayed",
@@ -2400,7 +2395,8 @@
     "reference": "Incident reference: {ref}",
     "introuvableTitre": "This page does not exist",
     "introuvableTexte": "The address you followed leads nowhere. It may have been mistyped, or the page was removed.",
-    "introuvableRetour": "Back to the homepage"
+    "introuvableRetour": "Back to the homepage",
+    "accueilLogo": "DropLink, home"
   },
   "motDePasse": {
     "oublieTitre": "Forgotten password",

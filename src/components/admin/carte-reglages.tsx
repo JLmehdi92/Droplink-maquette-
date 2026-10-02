@@ -21,15 +21,18 @@ import type { ReactNode } from "react";
  * changements, et l'on ne saurait plus lequel a été fait exprès.
  */
 export function CarteReglages({
+  id: cle,
   titre,
   sousTitre,
   children,
 }: {
+  /** La clé de la carte (`plafonds`, `suivi`…) : l'ancre de son titre, stable en toute langue. */
+  readonly id: string;
   readonly titre: string;
   readonly sousTitre: string;
   readonly children: ReactNode;
 }) {
-  const id = `reglages-${titre.replace(/\W+/g, "-")}`;
+  const id = `reglages-${cle}`;
   return (
     <section className="bloc adm-bloc" aria-labelledby={id}>
       <header className="bloc__tete">

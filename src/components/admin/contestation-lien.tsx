@@ -150,7 +150,7 @@ export function ContestationLien({
 
         <label className="adm-champ">
           <span>{t("reponse")}</span>
-          <textarea name="reponse" rows={3} value={reponse} onChange={(e) => setReponse(e.target.value)} />
+          <textarea name="reponse" rows={3} autoFocus value={reponse} onChange={(e) => setReponse(e.target.value)} />
           <small>{t("reponseAide", { n: motifMin })}</small>
         </label>
 

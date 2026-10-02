@@ -43,7 +43,7 @@ export function ColisSeuil({
   readonly depasse: boolean;
 }) {
   return (
-    <span className={"adm-colis" + (depasse ? " est-depasse" : "")} data-info={info} title={info}>
+    <span className={"adm-colis" + (depasse ? " est-depasse" : "")} data-info={info}>
       <b>{valeur}</b>
       <small>/ {seuil}</small>
       <i aria-hidden="true" style={{ "--k": Math.min(1, Math.max(0, k)).toFixed(3) } as React.CSSProperties} />

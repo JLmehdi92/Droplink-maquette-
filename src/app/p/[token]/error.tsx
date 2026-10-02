@@ -1,6 +1,8 @@
 "use client";
 
+import { useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { CircleAlert } from "lucide-react";
 
 /**
  * LA FRONTIÈRE D'ERREUR DE LA PAGE CLIENT.
@@ -29,46 +31,22 @@ import { useTranslations } from "next-intl";
  */
 export default function ErreurPagePublique({ reset }: { readonly reset: () => void }) {
   const t = useTranslations("page-publique.erreur");
-
+  const [enCours, demarrer] = useTransition();
+  // Refonte du 02/10/2026 (`erreur-client.html`). UN POINT D'ATTENTION, PAS UN
+  // MAILLON ROMPU : le lien n'est pas en cause, et le visiteur ne doit pas croire
+  // qu'il faut en redemander un. Aucune marque DropLink.
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-ds-surface-carte px-6 py-8">
-      <div className="mb-[26px] flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-ds-surface-creux">
-        {/* Un point d'attention, pas un maillon rompu : le lien n'est pas en
-            cause, et le dire par le dessin autant que par le texte évite de
-            faire croire au visiteur qu'il doit en redemander un. */}
-        <svg
-          width="30"
-          height="30"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-ds-texte-tenu"
-          aria-hidden="true"
-        >
-          <path d="M12 9v4" />
-          <path d="M12 17h.01" />
-          <circle cx="12" cy="12" r="9" />
-        </svg>
-      </div>
-
-      <h1 className="mb-3 text-center text-[26px] leading-[32px] font-extrabold tracking-[-0.03em] text-ds-texte-fort">
-        {t("titre")}
-      </h1>
-
-      <p className="max-w-[320px] text-center text-[15px] leading-[24px] text-ds-texte-sourdine">
-        {t("texte")}
-      </p>
-
-      <button
-        type="button"
-        onClick={reset}
-        className="mt-7 inline-flex min-h-11 items-center rounded-ds-card bg-ds-accent px-6 text-[15px] font-semibold text-ds-texte-sur-marque transition-colors hover:bg-ds-accent-survol"
-      >
-        {t("reessayer")}
-      </button>
+    <div className="etat-p page-erreur-client">
+      <main id="contenu" className="errc">
+        <span className="errc__icone" aria-hidden="true">
+          <CircleAlert className="ic" />
+        </span>
+        <h1>{t("titre")}</h1>
+        <p>{t("texte")}</p>
+        <button type="button" className="errc__bouton" aria-busy={enCours} disabled={enCours} onClick={() => demarrer(reset)}>
+          <span>{t("reessayer")}</span>
+        </button>
+      </main>
     </div>
   );
 }

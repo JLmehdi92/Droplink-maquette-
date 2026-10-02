@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, House, MessageCircle } from "lucide-react";
-import logoDropLink from "@/../public/marque/logo-droplink.png";
-import illustration from "@/../public/marque/illus-colis-introuvable.png";
+import { ArrowRight, MessageCircle, PackageOpen } from "lucide-react";
+import symbole from "@/../public/marque/logo-symbole.png";
 
 /**
- * L'ÉCRAN D'UN LIEN QUI NE MÈNE NULLE PART — porté sur `client_link/not-found`.
+ * L'ÉCRAN D'UN LIEN QUI NE MÈNE NULLE PART — refonte du 02/10/2026, maquette
+ * `lien-invalide.html` (la grammaire de la page de notification, sans bouton d'état).
  *
  * ⚠️ IL N'EXISTAIT PAS, PUIS IL ÉTAIT NU. `notFound()` servait le 404 générique
  * de Next — Times New Roman, en anglais — puis un écran gris minimal. Le kit en
@@ -37,77 +37,60 @@ import illustration from "@/../public/marque/illus-colis-introuvable.png";
 export default async function LienInvalide() {
   const t = await getTranslations({ locale: "fr", namespace: "page-publique" });
 
+  // Le logo est rendu ici et non par `LogoDropLink` : sous /p, rien ne doit tirer
+  // les feuilles de l'espace vendeur. Le mot est une marque, il ne se traduit pas.
+  const logo = (hauteur: number) => (
+    <>
+      <Image src={symbole} alt="" height={hauteur} width={Math.round((hauteur * 520) / 724)} />
+      <span>DropLink</span>
+    </>
+  );
   return (
-    <div className="flex min-h-dvh flex-col bg-[linear-gradient(135deg,#F2F0FD_0%,#FAF9FE_42%,#F6F2FC_100%)] bg-fixed leading-[normal]">
-      <header className="flex items-center px-4 py-[18px] sm:px-[34px] sm:py-[26px]">
-        <Image src={logoDropLink} alt="DropLink" height={34} width={Math.round((34 * 2172) / 724)} />
-        <span className="flex-1" />
-        {/* `_top` ET NON LE CADRE COURANT (26/09/2026). Pour le client, c'est la même
-            chose : cette page EST la fenêtre. Dans l'aperçu de l'éditeur, qui encadre la
-            page d'un lien bloqué, l'accueil s'ouvrirait DANS le cadre — et l'accueil
-            refuse d'être encadré : le vendeur aurait vu une page d'erreur du navigateur. */}
-        <Link
-          href="/fr"
-          target="_top"
-          className="inline-flex h-12 items-center gap-2.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] text-[14px] font-semibold text-ds-texte-fort shadow-ds-xs transition-shadow hover:shadow-ds-sm sm:h-[46px]"
-        >
-          <House aria-hidden="true" size={18} strokeWidth={1.9} className="text-ds-accent" />
-          {t("lienInvalideAccueil")}
-        </Link>
-      </header>
-
-      <main className="flex flex-1 flex-col items-center justify-center px-6 pt-5 pb-10 text-center">
-        {/* DÉCORATIVE, et servie par `next/image` : le fichier du kit pèse
-            823 Ko, la variante demandée pour 360 px en pèse une fraction. */}
-        <Image
-          src={illustration}
-          alt=""
-          sizes="(max-width: 500px) 72vw, 360px"
-          className="mb-[34px] h-auto w-[min(360px,72vw)]"
-          priority
-        />
-        <h1 className="text-[32px] leading-[1.1] font-extrabold tracking-[-0.045em] text-ds-texte-fort sm:text-[44px]">
-          {t("lienInvalideTitre")}
-        </h1>
-        <p className="mt-4 max-w-[520px] text-[16px] leading-[1.5] text-ds-texte-corps sm:text-[18px]">
-          {t("lienInvalideSousTitre")}
-        </p>
-        <Link
-          href="/fr"
-          target="_top"
-          className="mt-8 inline-flex h-14 items-center gap-2.5 rounded-ds-card bg-ds-accent px-8 text-[16px] font-bold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
-        >
-          {t("lienInvalideAccueil")}
-          <ArrowRight aria-hidden="true" size={18} strokeWidth={1.9} />
-        </Link>
-        <div className="mt-11 flex w-[min(660px,100%)] items-center gap-4 rounded-ds-card-lg border border-ds-filet bg-[rgba(255,255,255,0.6)] px-6 py-[22px] text-left">
-          <MessageCircle aria-hidden="true" size={26} strokeWidth={1.9} className="shrink-0 text-ds-accent" />
-          <div>
-            <b className="block text-[15px] font-bold text-ds-texte-fort">{t("lienInvalideAideTitre")}</b>
-            <span className="text-[14px] text-ds-texte-corps">{t("lienInvalideAideTexte")}</span>
-          </div>
-        </div>
-      </main>
-
-      {/*
-        LE PIED DU KIT, et la mention DropLink avec ses garde-fous : secondaire,
-        et ouverte HORS de la page. Ici il n'y a pas d'expéditeur avec qui la
-        confondre — c'est la seule page du parcours client qui soit entièrement
-        la nôtre.
-      */}
-      <footer className="flex flex-col items-center gap-2 px-6 pb-[34px]">
-        <Image src={logoDropLink} alt="DropLink" height={22} width={Math.round((22 * 2172) / 724)} />
-        <span className="text-[12.5px] text-ds-texte-sourdine">
-          <a
-            href="/fr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="-my-3.5 inline-flex min-h-11 items-center px-1.5 font-semibold text-ds-texte-corps hover:underline sm:my-0 sm:min-h-0 sm:px-0"
-          >
+    <div className="etat-p page-notif">
+      <div className="notif-page">
+        <header className="notif-haut">
+          {/* `_top` ET NON LE CADRE COURANT : dans l'aperçu de l'éditeur, qui encadre
+              la page d'un lien bloqué, l'accueil s'ouvrirait dans le cadre — et
+              l'accueil refuse d'être encadré. */}
+          <Link className="logo" href="/fr" target="_top" aria-label="DropLink">
+            {logo(28)}
+          </Link>
+        </header>
+        <main id="contenu" className="notifp">
+          <section className="notifp__carte" data-etat="invalide">
+            <div className="notifp__visuel" aria-hidden="true">
+              <span className="notifp__icone">
+                <PackageOpen className="ic" />
+              </span>
+              <i />
+              <i />
+              <i />
+            </div>
+            <h1>{t("lienInvalideTitre")}</h1>
+            <p className="notifp__texte">{t("lienInvalideSousTitre")}</p>
+            {/* Un aplat, jamais le dégradé de marque (règle 3, /p). */}
+            <Link className="notifp__bouton" href="/fr" target="_top">
+              {t("lienInvalideAccueil")}
+              <ArrowRight aria-hidden="true" className="ic" />
+            </Link>
+            <div className="notifp__aide">
+              <MessageCircle aria-hidden="true" className="ic" />
+              <p>
+                <b>{t("lienInvalideAideTitre")}</b>
+                <span>{t("lienInvalideAideTexte")}</span>
+              </p>
+            </div>
+          </section>
+        </main>
+        {/* LA MENTION DROPLINK, secondaire et ouverte HORS de la page : c'est la
+            seule page du parcours client qui soit entièrement la nôtre. */}
+        <footer className="notif-pied">
+          <span className="logo logo--petit">{logo(20)}</span>
+          <a className="notif-pied__lien" href="/fr" target="_blank" rel="noopener noreferrer">
             {t("lienInvalideCommentCaMarche")}
           </a>
-        </span>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

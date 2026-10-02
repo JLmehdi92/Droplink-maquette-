@@ -1,4 +1,4 @@
-import { getFormatter } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 
 /**
  * L'ANNEAU DE RÉPARTITION — refonte du 02/10/2026 (maquette, `.adm-anneau` et
@@ -38,6 +38,7 @@ export async function Anneau({
   readonly etiquette: string;
 }) {
   const format = await getFormatter();
+  const t = await getTranslations("admin");
   const pourcent = (v: number) => (total === 0 ? 0 : Math.round((100 * v) / total));
   // Les segments sont calculés AVANT le rendu : un cumul tenu pendant le `map`
   // serait une écriture après rendu.
@@ -63,7 +64,7 @@ export async function Anneau({
                 strokeDasharray={`${Math.max(0, k * C - 2).toFixed(2)} ${C.toFixed(2)}`}
                 strokeDashoffset={(-acc * C).toFixed(2)}
                 transform="rotate(-90 64 64)"
-                data-info={`${p.libelle} : ${format.number(p.valeur)} (${part(pourcent(p.valeur))})`}
+                data-info={t("infoValeur", { libelle: p.libelle, valeur: `${format.number(p.valeur)} (${part(pourcent(p.valeur))})` })}
               />
             ),
           )}

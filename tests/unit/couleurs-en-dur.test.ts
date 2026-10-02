@@ -128,13 +128,9 @@ const EXCEPTIONS: ReadonlyArray<readonly [string, string]> = [
      du jour où quelqu'un la réécrira. */
   /* `#f3dfb4` (filet ambre des alertes) est parti le 02/10/2026 avec les cartes
      d'alerte de l'ancienne administration. */
-  /*
-   * LA PAGE DU LIEN MORT, portée sur `client_link/not-found` le 13/09/2026 : un
-   * cinquième lavande, et le kit le pose en dur sur cette seule page.
-   */
-  ["#f2f0fd", "fond de la page du lien mort — arrêt 0 %, kit client_link"],
-  ["#faf9fe", "fond de la page du lien mort — arrêt 42 %, et fond des pages légales — arrêt 0 %"],
-  ["#f6f2fc", "fond de la page du lien mort — arrêt 100 %"],
+  /* Les trois arrêts lavande de l'ancienne page du lien mort (`#f2f0fd`, `#faf9fe`,
+     `#f6f2fc`) sont partis le 02/10/2026 : elle prend la grammaire de la page de
+     notification (`lien-invalide.html`), peinte par la feuille. */
   // Le dernier arrêt du fond des pages légales. Il n'était PAS déclaré et la
   // garde n'a rien dit : c'est la couleur que la correction du motif a sortie.
   /* Les trois arrêts du fond de l'ancienne coque (`#f7f5fe`, `#fbfafe`, `#f8f4fd`)

@@ -115,8 +115,10 @@ export default async function AdminStatistiques({
   };
 
   const nombre = (n: number): string => format.number(n);
-  const debut = jourCourt(format, series[0]?.jour ?? "");
-  const fin = jourCourt(format, series[series.length - 1]?.jour ?? "");
+  const premierJour = series[0]?.jour;
+  const dernierJour = series[series.length - 1]?.jour;
+  const debut = premierJour === undefined ? "" : jourCourt(format, premierJour);
+  const fin = dernierJour === undefined ? "" : jourCourt(format, dernierJour);
 
   /** L'écart avec la période précédente, CALCULÉ sur les tables horodatées ; sans base, rien. */
   const delta = (valeur: number | null): ReactNode =>
@@ -277,12 +279,16 @@ export default async function AdminStatistiques({
   const pagesParJour = bloc(
     "pages",
     t("statistiques.pagesConsultees"),
+    series.length === 0 ? (
+      aucuneMesure
+    ) : (
     <BarresAdmin
       etiquette={t("statistiques.pagesConsultees")}
       debut={debut}
       fin={fin}
-      valeurs={series.map((j) => ({ valeur: j.vues, info: `${jourCourt(format, j.jour)} : ${nombre(j.vues)}` }))}
-    />,
+      valeurs={series.map((j) => ({ valeur: j.vues, info: t("infoValeur", { libelle: jourCourt(format, j.jour), valeur: nombre(j.vues) }) }))}
+    />
+    ),
     { periode: true },
   );
   const tauxParJour = bloc(
@@ -315,7 +321,7 @@ export default async function AdminStatistiques({
   );
   const statutCommandes =
     repartition === null
-      ? null
+      ? bloc("statuts", t("statistiques.statutCommandes"), <p className="adm-texte pb-4">{t("panneau.statutsIndisponible")}</p>)
       : bloc("statuts", t("statistiques.statutCommandes"), <AnneauStatuts repartition={repartition} />, {
           anneau: true,
           aide: t("statistiques.statutTotal", { total: repartition.total }),
@@ -329,7 +335,10 @@ export default async function AdminStatistiques({
       fin={croissance.at(-1) === undefined ? "" : format.dateTime(new Date(`${croissance.at(-1)?.mois ?? ""}T00:00:00Z`), { month: "short", year: "numeric", timeZone: "UTC" })}
       valeurs={croissance.map((m) => ({
         valeur: m.commandes,
-        info: `${format.dateTime(new Date(`${m.mois}T00:00:00Z`), { month: "long", year: "numeric", timeZone: "UTC" })} : ${nombre(m.commandes)}`,
+        info: t("infoValeur", {
+          libelle: format.dateTime(new Date(`${m.mois}T00:00:00Z`), { month: "long", year: "numeric", timeZone: "UTC" }),
+          valeur: nombre(m.commandes),
+        }),
       }))}
     />,
   );

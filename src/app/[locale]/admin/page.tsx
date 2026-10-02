@@ -159,7 +159,9 @@ export default async function PanneauAdmin({
           </div>
         </header>
         {panneau.alertes === null ? <p className="adm-texte pb-4">{t("panneau.alertesIndisponibles")}</p> : null}
-        {panneau.alertes !== null && panneau.alertes.length === 0 && doublonsAAlerter === null ? (
+        {/* « Aucune alerte » exige les DEUX lectures : un comptage des doublons
+            illisible ne vaut pas « aucun doublon ». */}
+        {panneau.alertes !== null && panneau.alertes.length === 0 && doublons !== null && doublonsAAlerter === null ? (
           <p className="adm-texte pb-4">{t("panneau.aucuneAlerte")}</p>
         ) : null}
         {(panneau.alertes?.length ?? 0) > 0 || doublonsAAlerter !== null ? (

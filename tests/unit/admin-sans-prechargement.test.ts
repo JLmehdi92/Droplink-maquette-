@@ -42,6 +42,16 @@ function liens(): { fichier: string; balise: string }[] {
 }
 
 describe("La surface d'administration", () => {
+  // ⚠️ LA NAVIGATION DE LA COLONNE EST COMMUNE À L'ESPACE VENDEUR (refonte, 02/10/2026) :
+  // elle vit hors des dossiers admin, et ne coupe ses préchargements que si le layout
+  // le lui DEMANDE. Huit liens préchargés à chaque écran consommeraient le plafond admin.
+  test("le layout demande à la navigation commune de ne rien précharger", () => {
+    const layout = readFileSync(join(process.cwd(), "src", "app", "[locale]", "admin", "layout.tsx"), "utf8");
+    const balise = layout.match(/<NavigationVendeur\b[\s\S]*?\/>/)?.[0] ?? "";
+    expect(balise, "la navigation de l'administration n'est plus rendue par NavigationVendeur").not.toBe("");
+    expect(balise).toContain("prefetch={false}");
+  });
+
   test("CONTRE-TEST : la sonde trouve bien les liens de l'administration", () => {
     // Un ensemble vide passe tout : renommer un composant ou déplacer un
     // dossier rendrait ce fichier vert en ne regardant plus rien.

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeft, Search } from "lucide-react";
-import { CarteEtatVide, CLASSE_BOUTON_SECONDAIRE } from "@/components/app/carte-etat-vide";
+import { CarteEtatVide } from "@/components/app/carte-etat-vide";
 
 /**
  * CE QUE VOIT UN VENDEUR QUAND UNE COMMANDE N'EXISTE PAS.
@@ -37,7 +37,7 @@ export default async function CommandeIntrouvable() {
   const t = await getTranslations("commandes");
 
   return (
-    <main id="contenu" className="px-margin-mobile pt-3.5 pb-5 md:px-8 md:pt-8 md:pb-[26px]">
+    <main id="contenu" className="tableau etat-ecran">
       <CarteEtatVide icone={Search} titre={t("introuvable.titre")} texte={t("introuvable.texte")}>
         {/*
           UN LIEN ORDINAIRE, ET LA DESTINATION EST LA LISTE.
@@ -45,9 +45,9 @@ export default async function CommandeIntrouvable() {
           écrire `/fr/commandes` en dur enverrait un vendeur anglophone sur une
           page française, ce que la surface entière évite déjà.
         */}
-        <Link href="./" className={CLASSE_BOUTON_SECONDAIRE}>
-          <ArrowLeft aria-hidden="true" size={17} strokeWidth={1.9} />
-          {t("introuvable.retour")}
+        <Link href="./" className="etat__bouton">
+          <ArrowLeft aria-hidden="true" className="ic" />
+          <span>{t("introuvable.retour")}</span>
         </Link>
       </CarteEtatVide>
     </main>

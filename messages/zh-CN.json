@@ -1,8 +1,6 @@
 {
   "commun": {
-    "chargement": "加载中…",
-    "fermer": "关闭",
-    "copie": "已复制"
+    "chargement": "加载中…"
   },
   "navigation": {
     "seConnecter": "登录",
@@ -1728,8 +1726,7 @@
       "sousTitreListe": "管理并跟踪所有 DropLink 账户。",
       "tuileTotalAide": "其中 {sansType} 个未声明类型",
       "colisInfo": "已登记 {valeur} 个包裹，提醒阈值 {seuil}",
-      "ouvrirLong": "打开账户 {email}",
-      "surTotal": "共 {total, number} 个账户，显示 {affichees} 个"
+      "ouvrirLong": "打开账户 {email}"
     },
     "journal": {
       "titre": "审计日志",
@@ -1757,7 +1754,6 @@
       "decompteAuDela": "超过 {total, number} 条记录 · 不可修改，也不可删除",
       "decompte": "{total, plural, other {# 条记录}} · 不可修改，也不可删除",
       "garantie": "本日志不可修改也不可删除，并且在相关账户被删除后依然保留。查看它不会写入任何内容。",
-      "filtres": "筛选日志",
       "famille": {
         "toutes": "全部",
         "suspension": "停用操作",
@@ -2088,7 +2084,6 @@
       },
       "decompte": "每个账户一个店铺 · {total, plural, other {共 # 个}}",
       "trace": "本次访问及所用的搜索条件（含筛选）都会写入审计日志。",
-      "filtres": "按账户类型筛选",
       "filtre": {
         "toutes": "全部",
         "supplier": "供货商",
@@ -2248,7 +2243,6 @@
       "pageSuivante": "查看更多",
       "repartition": "状态分布",
       "lienBloque": "链接已停用",
-      "surTotal": "共 {total, number} 个订单，显示 {affichees} 个",
       "aucunTransporteur": "无承运商"
     },
     "statistiques": {
@@ -2391,7 +2385,8 @@
       "panneauVoir": "查看重复账户"
     },
     "accueil": "DropLink 管理后台",
-    "pastille": "管理"
+    "pastille": "管理",
+    "infoValeur": "{libelle}：{valeur}"
   },
   "erreurs": {
     "titre": "此页面无法显示",
@@ -2400,7 +2395,8 @@
     "reference": "事件编号：{ref}",
     "introuvableTitre": "此页面不存在",
     "introuvableTexte": "您访问的地址没有对应的页面。可能是抄写有误，或该页面已被移除。",
-    "introuvableRetour": "返回首页"
+    "introuvableRetour": "返回首页",
+    "accueilLogo": "DropLink，首页"
   },
   "motDePasse": {
     "oublieTitre": "忘记密码",

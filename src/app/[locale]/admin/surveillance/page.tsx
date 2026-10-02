@@ -189,7 +189,9 @@ export default async function SurveillanceAdmin({
         </header>
         {surveillance.colisParJour === null ? (
           <p className="adm-texte pb-4">{t("surveillance.friseIndisponible")}</p>
-        ) : colisParJour.length === 0 ? null : (
+        ) : colisParJour.length === 0 ? (
+          <p className="adm-texte pb-4">{t("statistiques.aucunColis")}</p>
+        ) : (
           <BarresAdmin
             etiquette={t("surveillance.friseAide", { n: JOURS_DE_FRISE })}
             hauteurMinimale={0.02}

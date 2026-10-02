@@ -1,8 +1,6 @@
 {
   "commun": {
-    "chargement": "Chargement…",
-    "fermer": "Fermer",
-    "copie": "Copié"
+    "chargement": "Chargement…"
   },
   "navigation": {
     "seConnecter": "Se connecter",
@@ -1728,8 +1726,7 @@
       "sousTitreListe": "Gérez et suivez tous les comptes de DropLink.",
       "tuileTotalAide": "dont {sansType} sans type déclaré",
       "colisInfo": "{valeur} colis pris en charge, seuil d'alerte {seuil}",
-      "ouvrirLong": "Ouvrir le compte {email}",
-      "surTotal": "{affichees} sur {total, number} comptes"
+      "ouvrirLong": "Ouvrir le compte {email}"
     },
     "journal": {
       "titre": "Journal d'audit",
@@ -1757,7 +1754,6 @@
       "decompteAuDela": "Plus de {total, number} entrées · ni modifiables ni effaçables",
       "decompte": "{total, plural, one {# entrée} other {# entrées}} · ni modifiables ni effaçables",
       "garantie": "Ce journal ne peut être ni modifié ni effacé, et il survit à la suppression des comptes concernés. Le consulter n'y écrit rien.",
-      "filtres": "Filtrer le journal",
       "famille": {
         "toutes": "Toutes",
         "suspension": "Suspensions",
@@ -2088,7 +2084,6 @@
       },
       "decompte": "Une boutique par compte · {total, plural, one {# au total} other {# au total}}",
       "trace": "Cette consultation est écrite au journal d'audit, avec les critères employés, filtre compris.",
-      "filtres": "Filtrer par type de compte",
       "filtre": {
         "toutes": "Toutes",
         "supplier": "Fournisseurs",
@@ -2248,7 +2243,6 @@
       "pageSuivante": "Voir la suite",
       "repartition": "Répartition des statuts",
       "lienBloque": "Lien bloqué",
-      "surTotal": "{affichees} sur {total, number} commandes",
       "aucunTransporteur": "Aucun transporteur"
     },
     "statistiques": {
@@ -2391,7 +2385,8 @@
       "panneauVoir": "Voir les doublons"
     },
     "accueil": "Administration DropLink",
-    "pastille": "Admin"
+    "pastille": "Admin",
+    "infoValeur": "{libelle} : {valeur}"
   },
   "erreurs": {
     "titre": "Cet écran n'a pas pu s'afficher",
@@ -2400,7 +2395,8 @@
     "reference": "Référence de l'incident : {ref}",
     "introuvableTitre": "Cette page n’existe pas",
     "introuvableTexte": "L’adresse que vous avez suivie ne mène à rien. Elle a peut-être été mal recopiée, ou la page a été retirée.",
-    "introuvableRetour": "Revenir à l’accueil"
+    "introuvableRetour": "Revenir à l’accueil",
+    "accueilLogo": "DropLink, accueil"
   },
   "motDePasse": {
     "oublieTitre": "Mot de passe oublié",

@@ -104,7 +104,7 @@ export function PlanCompte({
       >
         <label className="adm-champ">
           <span>{t("motif")}</span>
-          <textarea name="motif" rows={3} value={motif} onChange={(e) => setMotif(e.target.value)} />
+          <textarea name="motif" rows={3} autoFocus value={motif} onChange={(e) => setMotif(e.target.value)} />
           <small>{t("motifAide", { n: motifMin })}</small>
         </label>
         {etat.statut === "erreur" ? (

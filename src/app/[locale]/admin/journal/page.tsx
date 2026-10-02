@@ -180,7 +180,7 @@ export default async function AdminJournal({
           </header>
           {/* LE FILTRE VIT DANS L'URL : il se partage, se recharge, revient avec
               le bouton retour. Le curseur est jeté à chaque changement. */}
-          <div className="adm-outils" aria-label={t("journal.filtres")}>
+          <div className="adm-outils">
             <FiltresAdmin
               etiquette={t("journal.filtreFamille")}
               courant={parametres.famille}
