@@ -449,6 +449,66 @@ Les hooks d'ECC (`config-protection`, GateGuard) sont actifs : on ne les contour
 - **Conséquence : la refonte n'est pas commencée.** La règle reste la même : pas d'écran
   commité sans `pnpm gates` vert.
 
+### ▶️ 02/10/2026 — étape 1 : jetons et coque de l'espace vendeur (session cloud)
+
+- **Portage dans le cloud, vérification finale sur le poste de Mehdi** (§ 10) : à chaque écran,
+  `typecheck`, `lint`, `build`, `test` et la comparaison au navigateur ; `test:rls`, `couverture`
+  et `fumee` tournent sur son poste. **Les agents ECC (`ecc:*`) ne sont pas installés dans cet
+  environnement cloud** : chaque diff est relu par un agent généraliste chargé des quatre angles
+  (React, TypeScript, échecs silencieux, sécurité) ; la relecture ECC proprement dite revient à
+  l'étape 6 de `verification-finale-locale.md`.
+- **Le CSS de la maquette est CONVERTI, pas recopié, dans `src/styles/refonte/`** — `socle.css`
+  (base.css : jetons, socle, landing, accès, pages publiques), `app.css` (espace vendeur, admin,
+  états, ajustements du portage), `client.css` (la page client, importée plus tard par `/p`).
+  Conversion outillée : thème sombre retiré, `@font-face` retirés (Inter vient de `next/font`),
+  les couleurs qui sont des jetons du produit remplacées par leur `var(--color-ds-*)`, la pile de
+  polices par `var(--font-ds-body)`, `--ease-out`/`--ease-in-out` renommés `--ease-sortie`/
+  `--ease-bascule` (Tailwind définit déjà `--ease-out`). **Tout est rangé dans `@layer base` et
+  `@layer components`** : hors couche, une règle battrait tous les utilitaires Tailwind. Pourquoi
+  convertir plutôt que retraduire chaque règle en classes `ds-*` : 4 100 lignes et ~45 écrans ;
+  la traduction à la main est exactement ce qui a produit, le 12/09, quatre écrans « conformes »
+  qui ne ressemblaient pas à la référence. La conversion garde les valeurs de la maquette au pixel,
+  et leurs couleurs passent quand même par les jetons du produit.
+- **La coque** (`(app)/layout.tsx`, `components/app/*`) : colonne de 236 px sur le sol gris, contenu
+  sur une feuille arrondie, barre du haut collante sans flou (recherche Ctrl/⌘ K, cloche à deux
+  familles, « Créer une commande » au dégradé — décision n° 5), menu du compte en bas de colonne
+  (paramètres, déconnexion POST), lien d'évitement, encart « Passez au Pro » gardé (masqué pour
+  un compte Pro), pied légal gardé. Icônes de la maquette (Lucide). **La barre d'onglets du bas est
+  supprimée** : sous 1 020 px la colonne devient le tiroir de `tiroir.js` (`CoqueTiroir`) —
+  380/260 ms, voile sans flou, ☰ → ✕ en trois traits, cascade des liens, geste du pouce (32 % ou
+  0,45 px/ms), `inert` sur la feuille, défilement bloqué, focus au lien courant puis rendu au bouton,
+  fermeture sur Échap, voile, croix, lien suivi (même vers le chemin courant) et au-dessus de 1 020 px.
+  Les paramètres sont désormais dans le menu à toutes les largeurs.
+- **Changement d'écran** : `(app)/template.tsx` rejoue l'entrée du contenu (240 ms sur 10 px, dans
+  le sens du menu, fondu de 160 ms sous mouvement réduit) ; la pastille du menu glisse (Motion,
+  `layoutId`). Les View Transitions entre documents de la maquette ne se portent pas : le produit
+  ne recharge pas la page.
+- **Ce qui a suivi la suppression de la barre d'onglets** : le bouton flottant de `/commandes`
+  (calé dessus) est retiré — la barre du haut le remplace —, la marge négative de l'éditeur aussi ;
+  les trois autres « Créer une commande » au dégradé (liste, liste vide, carte de lancement)
+  passent en bouton plein : un seul dégradé par écran.
+- **Mesuré au navigateur** (build de production, base de tests, vendeur de démonstration
+  `refonte-demo@droplink-test.invalid` créé sur la base de TESTS) : coque à 1440 et 390 px,
+  identique à `tableau.html` de la maquette ; tiroir éprouvé à 390 px tactile — à 120 ms il est à
+  −33 px et le voile à 0,61 (maquette : −33/−44 et 0,53-0,61), Échap le ferme (encore visible à
+  80 ms, caché ensuite) avec le focus rendu au bouton, voile, geste long (fermé), geste court (revenu),
+  navigation depuis le tiroir (écran changé, tiroir refermé) ; mouvement réduit (fondu, pas de geste) ;
+  fr, en, zh-CN ; aucune erreur console, aucune violation CSP, aucun débordement.
+- **Relecture** (agent généraliste, quatre angles) : 17 constats ; corrigés — focus invisible sous une
+  ombre (le socle garde désormais un contour), `data-scroll-behavior="smooth"` sur `<html>`, marge
+  morte de l'éditeur, bouton flottant et dégradés en double, tiroir et menus qui restaient ouverts
+  sur une navigation vers le même chemin, focus perdu après une navigation depuis le tiroir, Échap
+  qui fermait deux choses, règle CSS morte, double repère « Espace vendeur », sens d'entrée périmé,
+  `priority` obsolète, deux `catch` muets (journalisés). Écartés : poids du CSS (accepté pendant le
+  chantier), cast `CSSProperties` (inoffensif).
+- **Portes** : `typecheck` 0 erreur ; `lint` 0 erreur (1 avertissement préexistant) ; `build` vert ;
+  `test` : seule l'alarme Railway en échec (attendue). Tests adaptés, chacun avec sa raison : la
+  cible « Aller au contenu » vit dans la feuille (`cibles-tactiles`), le bouton flottant devient le
+  bouton de la barre du haut (`boutons-attente`).
+- **⚠️ Ce qui reste au poste de Mehdi** : `test:rls`, `couverture`, `fumee` ; les règles du socle
+  (`body` 16 px/1,55, `cv11`/`ss01`, `text-wrap`) touchent aussi les écrans pas encore portés
+  jusqu'à leur portage.
+
 ## 9. Ce qui attend Mehdi
 
 - [ ] **Ouvrir le réseau de l'environnement cloud vers la base de tests** (menu de

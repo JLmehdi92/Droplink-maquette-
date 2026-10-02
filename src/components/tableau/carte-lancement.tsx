@@ -46,7 +46,7 @@ export async function CarteLancement({ langue }: { readonly langue: string }) {
               echoue: tc("nouvelle"),
             }}
             gapLibelle="gap-2"
-            className="degrade-ds-marque inline-flex h-[52px] items-center gap-2 rounded-ds-card border border-transparent px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+            className="inline-flex h-[52px] items-center gap-2 rounded-ds-card border border-transparent bg-ds-accent px-7 text-[15px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-xs transition-colors hover:bg-ds-accent-survol"
           />
         </form>
       </div>

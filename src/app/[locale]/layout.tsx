@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
 import { origineConfiguree } from "@/lib/site";
 import "../globals.css";
+import "@/styles/refonte/socle.css";
+import "@/styles/refonte/app.css";
 import { TraductionsClient } from "@/components/traductions-client";
 
 /*
@@ -92,7 +94,7 @@ export default async function LayoutLangue({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale}>
+    <html lang={locale} data-scroll-behavior="smooth">
       <body className={`${corps.variable} antialiased`}>
         {/*
          * AUCUN PROVIDER I18N ICI, DÉLIBÉRÉMENT.

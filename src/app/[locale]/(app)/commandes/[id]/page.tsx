@@ -315,13 +315,7 @@ export default async function EditeurCommande({
   const jourLong = (iso: string): string => format.dateTime(new Date(iso), { dateStyle: "long" });
 
   return (
-    /*
-      LA MARGE NÉGATIVE ANNULE LA PLACE RÉSERVÉE AUX ONGLETS. Le layout de
-      l'espace vendeur réserve 86 px en bas pour la barre d'onglets fixe ;
-      l'éditeur n'en a pas — la planche `EditeurMobile` met une bande d'action à
-      la place. Sans cette annulation, 86 px de gris flottaient sous la bande.
-    */
-    <main id="contenu" className="-mb-[86px] flex min-h-dvh flex-col md:mb-0">
+    <main id="contenu" className="flex min-h-dvh flex-col">
       <TraductionsClient espaces={["editeur", "medias", "actions", "blocageVendeur"]}>
         <Editeur
           // UNE CLÉ PAR COMMANDE (revue ECC du 23/09/2026) : l'éditeur et sa carte

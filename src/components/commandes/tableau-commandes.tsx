@@ -1148,7 +1148,7 @@ async function AccueilCompteVide({ langue }: { readonly langue: string }) {
                 </>
               ),
             }}
-            className="degrade-ds-marque mx-auto flex h-[50px] items-center gap-2 rounded-ds-card px-7 text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+            className="mx-auto flex h-[50px] items-center gap-2 rounded-ds-card bg-ds-accent px-7 text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-xs transition-colors hover:bg-ds-accent-survol"
           />
         </form>
 

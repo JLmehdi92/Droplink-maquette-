@@ -472,9 +472,15 @@ const AUTHENTIFIEES: ReadonlyArray<{
   readonly raison: string;
 }> = [
   {
-    fichier: "src/app/[locale]/(app)/layout.tsx",
-    repere: "focus:not-sr-only focus:absolute focus:top-4",
-    plancher: "focus:min-h-11",
+    /*
+     * ⚠️ DÉPLACÉ LE 02/10/2026 PAR LA REFONTE : le lien de l'espace vendeur
+     * porte désormais la classe `evitement` de la maquette, et son plancher vit
+     * dans la feuille de la refonte, pas dans des utilitaires. La garde suit le
+     * plancher là où il est écrit ; `codeSeul` retire aussi les commentaires CSS.
+     */
+    fichier: "src/styles/refonte/app.css",
+    repere: ".evitement {",
+    plancher: "min-height: 44px",
     raison:
       "« Aller au contenu » de l'espace vendeur. Positionné en absolu une fois " +
       "focalisé : l'agrandir ne déplace aucun pixel du flux.",

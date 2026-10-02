@@ -1,70 +1,47 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
 /**
- * LA RECHERCHE DE LA BARRE SUPÉRIEURE — `dl-topsearch` du kit.
+ * LA RECHERCHE DE LA BARRE DU HAUT : un formulaire GET vers `/commandes?q=`.
  *
- * ⚠️ ELLE REMPLACE CELLE DE L'EN-TÊTE DE « COMMANDES », elle ne s'y ajoute pas.
- * Le kit ne dessine qu'un seul champ de recherche par écran, et il est en haut :
- * deux champs qui cherchent la même chose à 200 px l'un de l'autre, c'est un
- * champ de trop et une question — « lequel cherche quoi ? » — à chaque écran.
- * L'en-tête de `Commandes` récupère la place pour le sélecteur de période, qui
- * est ce que le kit y met.
+ * Elle ne filtre rien elle-même : c'est l'écran des commandes, côté serveur, qui
+ * cherche (index insensible aux accents, pagination par curseur). Ctrl/⌘ K lui
+ * donne le focus, comme dans la maquette (`coque.js`).
  *
- * ELLE CHERCHE DANS LES COMMANDES, depuis n'importe quel écran. C'est le seul
- * ensemble du produit qui se cherche — les envois se filtrent, les analyses se
- * lisent — et c'est aussi ce que le kit annonce dans son propre texte de
- * remplacement : « une commande, un produit, un client ou un numéro de suivi ».
- *
- * ⚠️ UN FORMULAIRE `GET`, PAS UN ÉTAT CLIENT. L'URL décrit ce qui est affiché :
- * elle se met en favori, se recopie, revient par l'historique. Le seul morceau
- * de JavaScript ici est le raccourci clavier — et s'il ne charge pas, le champ
- * reste un champ.
+ * Le champ n'est prérempli que SUR l'écran des commandes : ailleurs, « q » ne
+ * désigne pas une recherche de commande.
  */
 export function RechercheGlobale({
   action,
   placeholder,
+  placeholderCourt,
   etiquette,
 }: {
   readonly action: string;
   readonly placeholder: string;
+  /** Sous 640 px le champ fait 180 px : le texte complet y était coupé en plein mot. */
+  readonly placeholderCourt: string;
   readonly etiquette: string;
 }) {
   const champ = useRef<HTMLInputElement>(null);
   const chemin = usePathname();
   const parametres = useSearchParams();
+  const etroit = useSyncExternalStore(abonnerEtroit, lireEtroit, () => false);
+  // « Ctrl K » au rendu serveur ; « ⌘K » une fois le navigateur connu (Mac, iPhone, iPad).
+  const touche = useSyncExternalStore(
+    sansAbonnement,
+    () => (/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"),
+    () => "Ctrl K",
+  );
 
-  /*
-   * ⚠️ LA RECHERCHE EN COURS EST RELUE DEPUIS L URL, ET SEULEMENT SUR LA LISTE
-   * QU ELLE FILTRE. La coque est un composant SERVEUR : Next ne lui passe pas
-   * les paramètres de requête, donc la valeur ne peut pas descendre en
-   * propriété. Sans cette relecture, un vendeur qui a cherché « crème » voit un
-   * champ VIDE au-dessus d une liste filtrée — et conclut que sa recherche n a
-   * pas été prise.
-   *
-   * La borne au chemin compte : ailleurs, `?q=` ne veut rien dire, et préremplir
-   * le champ avec le paramètre d un autre écran afficherait une recherche qui
-   * n est pas celle qu on regarde.
-   */
   const valeurInitiale = chemin === action ? (parametres.get("q") ?? "") : "";
 
-  /*
-   * ⚠️ LE RACCOURCI EST ANNONCÉ À L'ÉCRAN, DONC IL DOIT EXISTER. Le kit dessine
-   * les deux touches `Ctrl` et `K` dans le champ ; les dessiner sans les câbler
-   * serait une affirmation fausse posée sur l'interface — exactement ce que le
-   * principe XII interdit, appliqué à une promesse de clavier plutôt qu'à une
-   * donnée.
-   *
-   * `metaKey` autant que `ctrlKey` : sur un Mac le geste est `⌘ K`, et le
-   * fournisseur comme le revendeur peuvent être sur l'un ou l'autre.
-   */
   useEffect(() => {
     const surTouche = (e: KeyboardEvent): void => {
-      if (e.key !== "k" && e.key !== "K") return;
-      if (!e.ctrlKey && !e.metaKey) return;
+      if (e.key.toLowerCase() !== "k" || (!e.ctrlKey && !e.metaKey)) return;
       e.preventDefault();
       champ.current?.focus();
       champ.current?.select();
@@ -74,57 +51,36 @@ export function RechercheGlobale({
   }, []);
 
   return (
-    <form
-      method="get"
-      action={action}
-      /* 551 × 46, rayon de carte, filet, fond carte, ombre xs — mesuré sur la
-         référence servie à 1690 px. Le champ ne s'étale pas : au-delà, la ligne
-         de texte devient plus longue que ce qu'on y tape. */
-      className="hidden h-[46px] w-full max-w-[551px] items-center gap-3 rounded-ds-card border border-ds-filet bg-ds-surface-carte px-[18px] shadow-ds-xs transition-shadow focus-within:border-ds-filet-focus focus-within:shadow-[var(--anneau-ds-focus)] md:flex"
-    >
-      <Search
-        aria-hidden="true"
-        size={18}
-        strokeWidth={1.8}
-        className="shrink-0 text-ds-texte-sourdine"
-      />
+    <form className="recherche" role="search" method="get" action={action}>
+      <Search aria-hidden="true" className="ic" />
       <input
         ref={champ}
         type="search"
         name="q"
         key={valeurInitiale}
         defaultValue={valeurInitiale}
-        placeholder={placeholder}
+        placeholder={etroit ? placeholderCourt : placeholder}
         aria-label={etiquette}
-        /* ⚠️ `w-0` : un champ garde sa largeur INTRINSÈQUE (≈ 200 px) dans le
-           calcul du minimum, même en `min-w-0 flex-1`. À 768 px, à côté de la
-           barre latérale, l'en-tête débordait donc de 17 px et le menu du
-           compte sortait de l'écran (balayage du 18/09/2026). */
-        className="w-0 min-w-0 flex-1 bg-transparent text-[14px] text-ds-texte-fort placeholder:text-ds-texte-corps focus-visible:outline-none"
+        aria-keyshortcuts="Control+K Meta+K"
+        autoComplete="off"
+        spellCheck={false}
       />
-      {/* Les deux touches du kit : 11 px en 600, creux, rayon 6, filet.
-          `aria-hidden` parce qu'elles décrivent un geste, pas un contenu — un
-          lecteur d'écran annoncerait « Ctrl K » au milieu d'un champ de saisie. */}
-      <span aria-hidden="true" className="hidden shrink-0 items-center gap-1 lg:flex">
-        <kbd /* ⚠️ `font-[inherit]` ET NON `font-sans`. Le defaut d un `<kbd>` est le
-             MONOSPACE du navigateur, et `font-sans` de Tailwind pointe sur la pile
-             SYSTEME — pas sur Inter, qui arrive par la variable de `next/font`.
-             Mesure : ces deux pastilles rendaient en `-apple-system` quand tout le
-             reste de l ecran rend en Inter. La soustraction l a vu du premier coup,
-             l oeil jamais — a onze pixels, deux sans-serif se ressemblent. */
-          className="rounded-ds-xs border border-ds-filet bg-ds-surface-creux px-2 py-[3px] font-[inherit] text-[11px] leading-[normal] font-semibold text-ds-texte-sourdine">
-          Ctrl
-        </kbd>
-        <kbd /* ⚠️ `font-[inherit]` ET NON `font-sans`. Le defaut d un `<kbd>` est le
-             MONOSPACE du navigateur, et `font-sans` de Tailwind pointe sur la pile
-             SYSTEME — pas sur Inter, qui arrive par la variable de `next/font`.
-             Mesure : ces deux pastilles rendaient en `-apple-system` quand tout le
-             reste de l ecran rend en Inter. La soustraction l a vu du premier coup,
-             l oeil jamais — a onze pixels, deux sans-serif se ressemblent. */
-          className="rounded-ds-xs border border-ds-filet bg-ds-surface-creux px-2 py-[3px] font-[inherit] text-[11px] leading-[normal] font-semibold text-ds-texte-sourdine">
-          K
-        </kbd>
-      </span>
+      {/* Elle décrit un geste, pas un contenu : un lecteur d'écran l'annoncerait
+          au milieu d'un champ de saisie. */}
+      <kbd aria-hidden="true">{touche}</kbd>
     </form>
   );
+}
+
+const ETROIT = "(max-width: 640px)";
+function abonnerEtroit(rappel: () => void): () => void {
+  const media = window.matchMedia(ETROIT);
+  media.addEventListener("change", rappel);
+  return () => media.removeEventListener("change", rappel);
+}
+function lireEtroit(): boolean {
+  return window.matchMedia(ETROIT).matches;
+}
+function sansAbonnement(): () => void {
+  return () => {};
 }

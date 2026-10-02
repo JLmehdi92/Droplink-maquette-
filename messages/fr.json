@@ -22,8 +22,11 @@
       "bouton": "Passer au Pro"
     },
     "tableauDeBord": "Tableau de bord",
-    "tableauDeBordCourt": "Accueil",
-    "parametres": "Paramètres"
+    "parametres": "Paramètres",
+    "ouvrirMenu": "Ouvrir le menu",
+    "fermerMenu": "Fermer le menu",
+    "rechercheCourte": "Rechercher…",
+    "accueilDropLink": "DropLink, tableau de bord"
   },
   "landing": {
     "metaTitre": "DropLink — Un seul lien de suivi pour toute la commande",
@@ -1472,7 +1475,6 @@
     "sousTitreChiffre": "{total, plural, one {# commande} other {# commandes}}, {semaine, plural, one {# créée} other {# créées}} cette semaine",
     "sousTitreVide": "Votre espace est prêt",
     "rechercherExempleCourt": "Client, référence, suivi…",
-    "nouvelleCourt": "Nouvelle",
     "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# vue} other {# vues}}",
     "surTotal": "Affichage de {n} sur {total, plural, one {# commande} other {# commandes}}",
     "chargerLaSuite": "Charger la suite",

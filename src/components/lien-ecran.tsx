@@ -83,6 +83,10 @@ export function LienEcran({
    * les préchargements (voir `tests/unit/admin-sans-prechargement.test.ts`).
    */
   readonly prefetch?: boolean;
+  /** Le rang d'une entrée de la coque (`--rang`), pour la cascade du tiroir. */
+  readonly style?: React.CSSProperties;
+  /** Le sens de l'entrée de l'écran suivant, posé au clic (`NavigationVendeur`). */
+  readonly onClick?: () => void;
 }) {
   return (
     <Link href={href} className={className} {...reste}>

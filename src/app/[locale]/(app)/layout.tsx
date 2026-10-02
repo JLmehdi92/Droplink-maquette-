@@ -1,15 +1,16 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { FondApplication } from "@/components/app/fond-application";
-import { LogoMarque } from "@/components/acces/coque-acces";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { onboardingAFaire } from "@/lib/comptes/profil";
 import { lireEtatOuDireLaPanne } from "@/lib/comptes/apres-session";
 import { estLangueSupportee } from "@/i18n/config";
 import { NavigationVendeur, type EntreeNavigation } from "@/components/app/navigation-vendeur";
-import { ArrowRight, ChevronDown, Zap } from "lucide-react";
+import { ArrowRight, ChevronsUpDown, Zap } from "lucide-react";
 import { LienEcran } from "@/components/lien-ecran";
 import { BarreSuperieure } from "@/components/app/barre-superieure";
+import { CoqueTiroir } from "@/components/app/coque-tiroir";
+import { DetailsFermable } from "@/components/app/details-fermable";
+import { LogoDropLink } from "@/components/logo-droplink";
 import { BoutonDeconnexion } from "@/components/bouton-deconnexion";
 import { LienParametres } from "@/components/app/lien-parametres";
 import { compterParEtat } from "@/lib/commandes/liste";
@@ -97,36 +98,34 @@ export default async function LayoutApplication({
   // Signée ici et pas dans chaque écran : ce bloc vit dans le layout, donc une
   // signature par page serait une signature par navigation, pour la même image.
   const logoSigne =
-    profil.logoUrl === null ? null : await signerLecture(profil.logoUrl).catch(() => null);
+    profil.logoUrl === null
+      ? null
+      : await signerLecture(profil.logoUrl).catch((erreur: unknown) => {
+          // Repli sur les initiales, mais une panne R2 ne passe pas inaperçue.
+          console.error("[coque] logo non signé —", erreur instanceof Error ? erreur.message : erreur);
+          return null;
+        });
 
   /*
-   * LE VOLUME DE COMMANDES, EN PASTILLE SUR L ENTRÉE « Commandes ».
+   * LE VOLUME DE COMMANDES, EN COMPTE SUR L'ENTRÉE « Commandes ».
    *
-   * ⚠️ UNE LECTURE QUI ÉCHOUE N AFFICHE PAS ZÉRO. Un « 0 » affirme qu on a
-   * compté et trouvé rien ; l absence de pastille n affirme rien. C est la
-   * même règle que le sous-titre de l écran des commandes, et pour la même
-   * raison — un nombre crédible et faux fait décider de travers.
-   */
-  /*
-   * ⚠️ LES DEUX LECTURES SONT MENÉES ENSEMBLE, PAS L UNE APRÈS L AUTRE. En série,
-   * la coque de CHAQUE écran vendeur payerait deux allers-retours au lieu d un ;
-   * elles ne dépendent pas l une de l autre. Et toutes deux passent par `cache`
-   * de React : l écran qui les redemande ne paie rien.
+   * ⚠️ UNE LECTURE QUI ÉCHOUE N'AFFICHE PAS ZÉRO. Un « 0 » affirme qu'on a
+   * compté et trouvé rien ; l'absence de compte n'affirme rien.
+   *
+   * ⚠️ LES DEUX LECTURES SONT MENÉES ENSEMBLE : en série, la coque de CHAQUE
+   * écran vendeur payerait deux allers-retours au lieu d'un. Et toutes deux
+   * passent par `cache` de React : l'écran qui les redemande ne paie rien.
    */
   const [compteurs, envois] = await Promise.all([
     compterParEtat(),
-    compterEnvois(await creerClientServeur()).catch(() => null),
+    compterEnvois(await creerClientServeur()).catch((erreur: unknown) => {
+      console.error("[coque] envois illisibles —", erreur instanceof Error ? erreur.message : erreur);
+      return null;
+    }),
   ]);
 
   const entrees: readonly EntreeNavigation[] = [
-    /* LE TABLEAU DE BORD EN TÊTE, comme au kit — mais la connexion mène
-       toujours aux commandes : voir `tableau-de-bord/page.tsx`. */
-    {
-      href: `/${langue}/tableau-de-bord`,
-      libelle: t("tableauDeBord"),
-      libelleCourt: t("tableauDeBordCourt"),
-      icone: "tableau",
-    },
+    { href: `/${langue}/tableau-de-bord`, libelle: t("tableauDeBord"), icone: "tableau" },
     {
       href: `/${langue}/commandes`,
       libelle: t("mesCommandes"),
@@ -136,238 +135,106 @@ export default async function LayoutApplication({
     { href: `/${langue}/envois`, libelle: t("mesEnvois"), icone: "envois" },
     { href: `/${langue}/analyses`, libelle: t("mesAnalyses"), icone: "analyses" },
     { href: `/${langue}/marque`, libelle: t("maMarque"), icone: "marque" },
-    {
-      href: `/${langue}/parametres`,
-      libelle: t("parametres"),
-      icone: "parametres",
-      auTelephone: false,
-    },
+    // Les paramètres sont dans le menu à TOUTES les largeurs : la barre d'onglets
+    // du bas les excluait faute de place, le tiroir n'a pas cette limite.
+    { href: `/${langue}/parametres`, libelle: t("parametres"), icone: "parametres" },
   ];
 
   /*
-   * LA COQUILLE DU CANEVAS : une carte-page posée sur le fond lavande.
-   *
-   * Ce n'est pas une bordure décorative. Le fond extérieur borne la largeur du
-   * contenu sans le centrer dans du vide : à 2560 px, une application qui
-   * s'étale de bord à bord force à balayer l'écran des yeux pour relier une
-   * ligne à son action.
-   *
-   * AUCUN CADRE AU TÉLÉPHONE : encadrer coûterait seize pixels de chaque côté sur
-   * une largeur de 390 — un dixième de la ligne, pris à ce qu'il y a dedans. Le FOND,
-   * lui, est celui de la planche à toutes les largeurs : cette racine reste
-   * transparente, sans quoi elle recouvrirait `FondApplication` (posé en `-z-10`).
+   * LA COQUE DE LA REFONTE (maquette, `coque.html`) : une colonne de 236 px posée
+   * sur un sol gris, et le contenu sur une FEUILLE blanche arrondie. Sous
+   * 1 020 px la colonne devient un tiroir (`CoqueTiroir`), et la feuille touche
+   * les bords : l'encadrer coûterait seize pixels de chaque côté sur 390.
    */
   return (
-    <div className="min-h-dvh">
-      <FondApplication />
+    <div className="page-app">
       {/*
-        ⚠️ CE LIEN MANQUAIT ICI, ALORS QU'IL EXISTE DANS L'ADMIN.
-        Trouvé à l'audit du 31/08/2026. Les deux racines sont structurellement
-        identiques — barre latérale au bureau, barre d'onglets au téléphone — et
-        les cinq écrans du vendeur déclarent tous `id="contenu"` : la CIBLE
-        existait partout, le lien nulle part. Au clavier, un fournisseur à
-        200 commandes/semaine retraversait donc quatre destinations de navigation
-        à CHAQUE changement de page, sur l'écran le plus utilisé du produit.
+        Le lien d'évitement : sans lui, un vendeur au clavier retraverse les six
+        destinations du menu à CHAQUE changement d'écran. Chaque écran déclare
+        `id="contenu"`.
       */}
-      <a
-        href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-ds-sm focus:bg-ds-surface-carte focus:px-4 focus:py-2 focus:text-[14px] focus:font-semibold focus:text-ds-texte-fort focus:shadow-ds-md"
-      >
+      <a href="#contenu" className="evitement">
         {t("allerAuContenu")}
       </a>
-      {/*
-        ⚠️ PLUS DE CARTE-PAGE NI DE CADRE LAVANDE. Le design system les supprime
-        — c'est l'un des six changements declares. La colonne laterale touche
-        desormais le bord de l'ecran, et le fond teinte vient de `FondApplication`
-        plutot que d'une marge de 20 px autour d'une carte blanche.
-      */}
-      <div className="relative mx-auto flex w-full flex-col md:min-h-dvh md:flex-row">
-        <aside className="hidden border-r border-ds-filet bg-ds-surface-carte px-[18px] pt-[26px] pb-5 md:flex md:w-[264px] md:shrink-0 md:flex-col md:gap-1.5">
-          {/* Logo de 38 px avec un retrait de 8 et 24 px sous lui — mesure sur
-              la reference, ou il remplace le mot « DropLink » ecrit en dur. */}
-          {/* Le logo MÈNE AU TABLEAU DE BORD, jamais à la landing : dans son
-              espace, le vendeur veut revenir chez lui, pas relire la
-              présentation d'un produit qu'il emploie (Wassim, 26/09/2026). */}
-          <Link href={`/${langue}/tableau-de-bord`} className="self-start px-2 pb-6">
-            <LogoMarque hauteur={38} />
-          </Link>
-
-          <NavigationVendeur entrees={entrees} variante="cote" etiquette={t("espaceVendeur")} />
-
-          <div className="flex-grow" />
-
-          {/*
-            LA PHASE DE LANCEMENT EST DITE, ET C'EST UNE DÉCISION PRODUIT.
-            Le produit est gratuit et sans limite pendant la validation ; ne
-            rien dire laisserait un vendeur découvrir un jour une facture qu'il
-            n'attendait pas, ou craindre une limite qui n'existe pas.
-          */}
-          {/*
-            L ENCART DU BAS DE COLONNE, AU DESSIN DU KIT : fond teinté, filet
-            `violet-200`, rayon carte-lg, `padding: 18`, écart 6, titre de 15 px
-            en 700 à l encre d accent précédé d un éclair de 17, texte de 13 px
-            en interligne 1,45, bouton de 42 au dégradé de marque.
-
-            ⚠️ CE BLOC A LONGTEMPS DIT « Phase de lancement », ET C ÉTAIT LA
-            BONNE DÉCISION JUSQU AU 12/09/2026. Il portait : « le kit y met
-            Passez au Pro et un bouton Upgrade, la contrainte n°1 l interdit ».
-            Wassim a tranché ce jour-là — « jcompte mettre un pricing genre un
-            gratuit et un pro » — et l encart reprend donc le dessin du kit.
-
-            ⚠️ CE BLOC DISAIT « AUCUN CODE DE PAIEMENT », ET CE N EST PLUS VRAI
-            DEPUIS LE 20/09/2026 : Wassim a levé la contrainte n°1 pour
-            l abonnement — « quand le mec a payé via stripe ou lemon squeezy, il
-            a son abonnement automatiquement sur le saas ». Les plafonds sont
-            appliqués EN BASE (migrations 175-176 et 181), le plan est posé par
-            le webhook (177-181), et le bouton mène désormais à l écran
-            « Passer au Pro » plutôt qu à une section de documentation.
-
-            ⚠️ TROIS DÉFAUTS CORRIGÉS ICI, TOUS VUS SUR UNE CAPTURE ET AUCUN PAR
-            UNE MESURE — les nombres disaient que rien ne débordait :
-
-            1. LE BOUTON DISAIT « Upgrade » EN FRANÇAIS. Le catalogue `fr.json`
-               portait le mot anglais, recopié du kit ; le chinois, lui, était
-               traduit. L incohérence venait de la planche, corrigée d abord.
-            2. IL MENAIT À `/docs#plans`, une section de documentation, alors
-               qu il existe un écran qui répond exactement à la question.
-            3. ⚠️ ET LA CARTE S AFFICHAIT À UN COMPTE QUI PAIE DÉJÀ. Proposer
-               « Passez au Pro » à un abonné Pro n est pas qu une maladresse :
-               c est l interface qui affirme un état que la base contredit.
-          */}
-          {profil.planPro ? null : (
-          <div className="flex flex-col gap-1.5 rounded-ds-card-lg border border-ds-violet-200 bg-ds-surface-teinte p-[18px]">
-            <span className="flex items-center gap-[9px] text-[15px] leading-[normal] font-bold text-ds-accent-encre">
-              <Zap aria-hidden="true" size={17} strokeWidth={2.2} />
-              {t("pro.titre")}
-            </span>
-            <span className="text-[13px] leading-[1.45] text-ds-texte-corps">{t("pro.texte")}</span>
-            <LienEcran
-              href={`/${langue}/passer-pro`}
-              className="degrade-ds-marque mt-2 flex h-[42px] items-center justify-center gap-2 rounded-ds-pill border border-transparent px-[22px] text-[14px] font-semibold tracking-[-0.02em] text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+      <CoqueTiroir
+        libelles={{ ouvrir: t("ouvrirMenu"), fermer: t("fermerMenu") }}
+        barre={
+          <>
+            {/* Le logo MÈNE AU TABLEAU DE BORD, jamais à la landing : dans son
+                espace, le vendeur veut revenir chez lui (Wassim, 26/09/2026). */}
+            <Link
+              href={`/${langue}/tableau-de-bord`}
+              className="logo app__logo"
+              aria-label={t("accueilDropLink")}
             >
-              {t("pro.bouton")}
-              <ArrowRight aria-hidden="true" size={16} strokeWidth={2.2} />
-            </LienEcran>
-          </div>
-          )}
+              <LogoDropLink hauteur={24} />
+            </Link>
 
-          {/*
-            LE BLOC DE COMPTE PORTE LA DÉCONNEXION, et c'est le seul endroit
-            possible au bureau : c'est le seul de l'écran qui dise QUI est
-            connecté. Un bouton posé ailleurs obligerait à se demander quel
-            compte il ferme.
+            <NavigationVendeur entrees={entrees} etiquette={t("espaceVendeur")} />
 
-            Au téléphone cette barre latérale n'existe pas — la déconnexion y
-            vit, avec les paramètres, dans le menu du compte de la barre du haut
-            (`BarreSuperieure`), commune à tous les écrans depuis le 15/09/2026.
-          */}
-          <details className="group relative mt-3">
             {/*
-              LE BLOC DE COMPTE DU KIT : bouton pleine largeur, `padding: 12`,
-              rayon de carte, filet, fond carte, écart 12, pastille de 38 et
-              chevron de 16.
-
-              ⚠️ LE CHEVRON N EST PAS DÉCORATIF — IL OUVRE. Le kit dessine un
-              menu ; le produit n en avait aucun et posait la déconnexion à
-              nu, c est-à-dire un geste destructif à portée de clic accidentel
-              dans le coin le plus survolé de l écran. Un `<details>` le range
-              derrière un geste, sans une ligne de JavaScript.
+              L'ENCART « Passez au Pro ». La maquette ne le dessine pas, mais le
+              produit l'a (« rien ne se perd au portage ») : il mène à l'écran
+              « Passer au Pro », et il est MASQUÉ pour un compte Pro — proposer
+              l'offre à qui la paie déjà, c'est l'interface qui affirme un état
+              que la base contredit.
             */}
-            <summary className="flex w-full cursor-pointer list-none items-center gap-3 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-3 text-left transition-colors hover:bg-ds-surface-teinte">
-            {/*
-              LE LOGO DU VENDEUR, LÀ OÙ IL Y AVAIT UN DISQUE GRIS.
-
-              ⚠️ MONTRÉ EN CAPTURE PAR WASSIM LE 03/09/2026 : « j'ai configuré
-              ma marque avec mon logo, ici je suis censé avoir mon logo sauf
-              que je ne l'ai pas ». Il avait raison, et la cause n'était pas où
-              on l'aurait cherchée.
-
-              LA PLANCHE N'EST PAS EN CAUSE, ET IL NE FALLAIT DONC PAS LA
-              MODIFIER. Les six planches qui portent ce bloc — `Commandes`,
-              `CommandesVide`, `CommandesFiltreVide`, `Envois`, `Analyses`,
-              `Marque` — dessinent un disque plein de 32 px en `#e4e2ee`,
-              sans image. Mais c'est AUSSI ce que dessinent les quatre planches
-              de la page client, où le code rend le vrai logo depuis toujours :
-              dans le vocabulaire du canevas, ce disque est l'EMPLACEMENT du
-              logo, pas un ornement. Le code était donc incohérent avec
-              lui-même, pas avec le dessin.
-
-              `profil.logoUrl` était déjà lu et rendu par `lireProfilVendeur`
-              — la donnée arrivait ici depuis le début, personne ne s'en
-              servait.
-
-              ⚠️ C'EST UNE CLÉ D'OBJET, PAS UNE URL. La rendre brute dans
-              `src` produirait une image cassée ET ferait sortir le `shop_id`
-              dans le HTML — c'est le défaut exact déjà corrigé sur la page
-              publique, dont `lib/page-publique/lecture.ts` garde la trace.
-              Même remède, même repli : une signature qui échoue rend `null`
-              et l'écran retombe sur le disque, plutôt que d'emporter la page.
-            */}
-            {logoSigne !== null ? (
-              /* eslint-disable-next-line @next/next/no-img-element --
-                 URL signée à expiration : l'optimiseur de Next la mettrait en
-                 cache sous une clé stable et servirait une image dont la
-                 signature a expiré. Même raison que partout ailleurs. */
-              <img
-                src={logoSigne}
-                alt=""
-                width={38}
-                height={38}
-                className="h-[38px] w-[38px] shrink-0 rounded-ds-pill object-cover"
-              />
-            ) : (
-              /* Sans logo, les initiales sur l accent — l `Avatar` du kit. Un
-                 disque gris vide ne dit pas à qui appartient le compte. */
-              <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-ds-pill bg-ds-accent text-[14px] font-bold text-ds-texte-sur-marque">
-                {initiales(profil.nomBoutique ?? profil.email)}
-              </span>
+            {profil.planPro ? null : (
+              <div className="app__pro">
+                <span className="app__pro-titre">
+                  <Zap aria-hidden="true" className="ic" />
+                  {t("pro.titre")}
+                </span>
+                <span className="app__pro-texte">{t("pro.texte")}</span>
+                <LienEcran href={`/${langue}/passer-pro`} className="app__pro-lien">
+                  {t("pro.bouton")}
+                  <ArrowRight aria-hidden="true" className="ic" />
+                </LienEcran>
+              </div>
             )}
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-[14px] font-bold text-ds-texte-fort">
-                {profil.nomBoutique ?? t("monCompte")}
-              </span>
-              <span className="truncate text-[12px] text-ds-texte-sourdine">{profil.email}</span>
-            </span>
-            <ChevronDown
-              aria-hidden="true"
-              size={16}
-              strokeWidth={1.8}
-              className="shrink-0 text-ds-texte-tenu transition-transform group-open:rotate-180"
-            />
-            </summary>
-            <div className="absolute right-0 bottom-full left-0 z-20 mb-1.5 rounded-ds-card border border-ds-filet bg-ds-surface-carte p-1.5 shadow-ds-lg">
-              <LienParametres langue={langue} variante="menu" />
-              <BoutonDeconnexion langue={langue} variante="menu" />
-            </div>
-          </details>
-        </aside>
 
-        {/* La marge basse laisse la place à la barre d'onglets, qui est fixe :
-            sans elle, la dernière ligne de chaque écran est inatteignable. */}
-        <div className="flex min-w-0 flex-1 flex-col pb-[86px] md:pb-0">
-          <BarreSuperieure
-            langue={langue}
-            email={profil.email}
-            nomBoutique={profil.nomBoutique}
-            logoSigne={logoSigne}
-            jamaisOuvertes={compteurs?.jamaisOuvertes ?? null}
-            colisSilencieux={envois?.silencieux ?? null}
-          />
-          {children}
-          {/* Le pied du kit : 64 de haut, 12 px, couleur tenue, centré. Il ne
-              se rend qu au bureau — au téléphone la barre d onglets occupe déjà
-              le bas de l écran, et une mention légale sous elle serait hors de
-              portée du pouce comme du regard. */}
-          {/* ⚠️ `26px 32px 22px`, MESURÉ SUR LE KIT. Nous posions une hauteur fixe de
-              64 sans remplissage : le pied tombait 128 px trop haut sur un écran
-              rempli, et sa ligne ne s'alignait sur rien. */}
-          <footer className="mt-auto hidden shrink-0 items-center justify-center px-8 pt-[26px] pb-[22px] text-[12px] leading-[normal] text-ds-texte-tenu md:flex">
-            {t("piedDePage", { annee: new Date().getFullYear() })}
-          </footer>
-        </div>
-      </div>
-
-      <NavigationVendeur entrees={entrees} variante="bas" etiquette={t("espaceVendeur")} />
+            {/*
+              LE BLOC DE COMPTE PORTE LA DÉCONNEXION : c'est le seul endroit de
+              l'écran qui dise QUI est connecté. Un bouton posé ailleurs obligerait
+              à se demander quel compte il ferme. Il est rangé derrière un
+              `<details>` : un geste destructif à nu, dans le coin le plus survolé
+              de l'écran, partirait au premier clic accidentel.
+            */}
+            <DetailsFermable className="compte">
+              <summary>
+                {logoSigne !== null ? (
+                  /* eslint-disable-next-line @next/next/no-img-element --
+                     URL signée à expiration : l'optimiseur de Next la mettrait en
+                     cache sous une clé stable et servirait une image dont la
+                     signature a expiré. */
+                  <img src={logoSigne} alt="" width={30} height={30} className="compte__avatar" />
+                ) : (
+                  <span className="compte__avatar" aria-hidden="true">
+                    {initiales(profil.nomBoutique ?? profil.email)}
+                  </span>
+                )}
+                <span className="compte__qui">
+                  <b>{profil.nomBoutique ?? t("monCompte")}</b>
+                  <small>{profil.email}</small>
+                </span>
+                <ChevronsUpDown aria-hidden="true" className="ic" />
+              </summary>
+              <div className="compte__menu">
+                <LienParametres langue={langue} variante="menu" />
+                <BoutonDeconnexion langue={langue} variante="menu" />
+              </div>
+            </DetailsFermable>
+          </>
+        }
+      >
+        <BarreSuperieure
+          langue={langue}
+          jamaisOuvertes={compteurs?.jamaisOuvertes ?? null}
+          colisSilencieux={envois?.silencieux ?? null}
+        />
+        {children}
+        <footer className="app__pied">{t("piedDePage", { annee: new Date().getFullYear() })}</footer>
+      </CoqueTiroir>
     </div>
   );
 }

@@ -60,7 +60,7 @@ const CLASSES: Readonly<Record<Variante, string>> = {
    * un menu déroulant, où une icône nue obligerait à deviner ce qu on ouvre
    * juste avant de fermer sa session.
    */
-  menu: "min-h-11 w-full justify-start gap-2.5 rounded-ds-sm px-3 text-[13px] font-semibold text-ds-texte-fort hover:bg-ds-surface-teinte",
+  menu: "compte__lien",
   /*
    * `lien` : « Ce n'est pas votre compte ? Se déconnecter », sur l'écran de
    * vérification en deux étapes. Un mot EN LIGNE dans une phrase, sans icône —
@@ -101,7 +101,7 @@ export async function BoutonDeconnexion({
          */
         {...(dansUnMenu || enLigne ? {} : { "aria-label": libelle })}
         className={
-          (enLigne ? "" : "flex items-center justify-center transition-colors ") + CLASSES[variante]
+          (enLigne || dansUnMenu ? "" : "flex items-center justify-center transition-colors ") + CLASSES[variante]
         }
       >
         {enLigne ? libelle : <LogOut aria-hidden="true" size={17} strokeWidth={1.9} />}

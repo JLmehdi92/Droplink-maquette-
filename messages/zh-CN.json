@@ -22,8 +22,11 @@
       "bouton": "升级至 Pro"
     },
     "tableauDeBord": "仪表盘",
-    "tableauDeBordCourt": "首页",
-    "parametres": "设置"
+    "parametres": "设置",
+    "ouvrirMenu": "打开菜单",
+    "fermerMenu": "关闭菜单",
+    "rechercheCourte": "搜索…",
+    "accueilDropLink": "DropLink，仪表盘"
   },
   "landing": {
     "metaTitre": "DropLink — 一个链接，搞定整个订单的物流查询",
@@ -1472,7 +1475,6 @@
     "sousTitreChiffre": "{total, plural, other {共 # 笔订单}}，{semaine, plural, other {本周新增 # 笔}}",
     "sousTitreVide": "您的工作台已准备好",
     "rechercherExempleCourt": "客户、编号、运单号…",
-    "nouvelleCourt": "新建",
     "photosEtVues": "{photos, plural, other {# 张照片}} · {vues, plural, other {# 次浏览}}",
     "surTotal": "显示 {n} 条，共 {total} 条订单",
     "chargerLaSuite": "加载更多",

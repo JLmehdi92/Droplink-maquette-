@@ -233,7 +233,7 @@ export default async function Commandes({
                      surcharges que `OrdersView` lui pose : 50 px de haut et le
                      rayon de CARTE au lieu de la pilule. Le dégradé reste
                      l'action principale UNIQUE de l'écran. */
-                  className="degrade-ds-marque flex h-[50px] items-center gap-2 rounded-ds-card px-7 text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand transition-shadow hover:shadow-ds-brand-hover"
+                  className="flex h-[50px] items-center gap-2 rounded-ds-card bg-ds-accent px-7 text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-xs transition-colors hover:bg-ds-accent-survol"
                 />
               </form>
             </div>
@@ -366,44 +366,11 @@ export default async function Commandes({
       </main>
 
       {/*
-        L'ACTION FLOTTANTE DU TÉLÉPHONE, dessinée par la planche `CommandesMobile`
-        juste au-dessus de la barre d'onglets.
-
-        `bottom-[102px]` = les 86 px réservés à la barre d'onglets fixe par le
-        layout, plus les 16 px de marge de la planche. Sans ce calage, le bouton
-        se poserait SUR la navigation — c'est-à-dire sur les quatre destinations
-        du produit.
+        L'ACTION FLOTTANTE DU TÉLÉPHONE A ÉTÉ RETIRÉE PAR LA REFONTE (02/10/2026) :
+        « Créer une commande » est dans la barre du haut, à toutes les largeurs
+        (décision n° 5), et la barre d'onglets sur laquelle elle se calait n'existe
+        plus. Elle aurait fait un second dégradé sur l'écran.
       */}
-      {compteVide ? null : (
-        <form action={creerBrouillon} className="fixed right-4 bottom-[102px] z-20 md:hidden">
-          <input type="hidden" name="langue" value={langue} />
-          {/* ⚠️ C'EST LE BOUTON LE PLUS CLIQUÉ DU PRODUIT AU TÉLÉPHONE, et
-              celui où l'absence de retour se paie le plus cher : il est fixe,
-              donc rien autour de lui ne bouge au clic — l'écran reste
-              exactement tel qu'il était, et c'est très exactement ce que
-              Wassim a décrit par « c'est sec ».
-
-              ⚠️ ET C'EST LE SEUL BOUTON DU PRODUIT OÙ L'ATTENTE GARDE LE MOT DU
-              REPOS AU LIEU DE LE REMPLACER. Mesuré : avec « Création… » en
-              libellé d'attente, ce bouton passait de 132,7 à 144,8 px de large
-              AU REPOS — la grille interne réserve la largeur du libellé le plus
-              long, et le plus long devenait celui qu'on ne voit presque jamais.
-              Douze pixels sur un bouton flottant que la planche `CommandesMobile`
-              dessine, pour un mot affiché un tiers de seconde. L'anneau prend
-              donc la place du « + », à largeur constante, et c'est `aria-busy`
-              — posé par le composant — qui porte l'état à qui ne le voit pas. */}
-          <BoutonAction
-            libelles={{
-              repos: <LibelleNouvelle libelle={t("nouvelleCourt")} />,
-              enCours: t("nouvelleCourt"),
-              reussi: <LibelleNouvelle libelle={t("nouvelleCourt")} />,
-              echoue: <LibelleNouvelle libelle={t("nouvelleCourt")} />,
-            }}
-            gapLibelle="gap-2"
-            className="degrade-ds-marque flex h-[52px] items-center gap-2 rounded-ds-pill px-[22px] text-[15px] font-semibold text-ds-texte-sur-marque shadow-ds-brand"
-          />
-        </form>
-      )}
     </>
   );
 }

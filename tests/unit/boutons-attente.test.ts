@@ -119,24 +119,20 @@ describe("les actions principales montrent leur attente", () => {
   });
 
   /**
-   * ⚠️ LE BOUTON FLOTTANT EST LE SEUL DONT LE MOT NE CHANGE PAS, ET C'EST
-   * MESURÉ. Avec « Création… » en libellé d'attente, il passait de 132,7 à
-   * 144,8 px de large AU REPOS : la grille réserve la largeur du libellé le plus
-   * long, et le plus long devenait celui qu'on ne voit presque jamais. La
-   * planche `CommandesMobile` dessine ce bouton ; douze pixels y sont un écart.
+   * LE BOUTON « Créer une commande » DE LA BARRE DU HAUT (refonte du 02/10/2026).
+   *
+   * Il remplace le bouton flottant du téléphone, calé sur une barre d'onglets
+   * qui n'existe plus. C'est le bouton le plus cliqué du produit : il DOIT dire
+   * qu'il travaille — désactivé pendant l'envoi (un second clic créerait un
+   * second brouillon, une place de quota de plus), `aria-busy` pour qui ne voit
+   * pas l'anneau, et l'anneau à la place du « + », à largeur constante.
    */
-  test("le bouton flottant garde son mot pendant l attente, donc sa largeur", () => {
-    const code = lire("src/app/[locale]/(app)/commandes/page.tsx");
-    const flottant = /className="fixed[\s\S]*?<\/form>/.exec(code)?.[0] ?? "";
-    expect(
-      flottant.length,
-      "le bouton flottant est introuvable : ce contrôle n'inspecte rien",
-    ).toBeGreaterThan(200);
-    expect(
-      /enCours: t\("nouvelleCourt"\)/.test(flottant),
-      "Le bouton flottant emploie un libellé d'attente différent de son " +
-        "libellé de repos : sa largeur au repos suivra le plus long des deux, " +
-        "et il cessera de correspondre à la planche `CommandesMobile`.",
-    ).toBe(true);
+  test("le bouton de la barre du haut montre son attente et refuse un second clic", () => {
+    const code = lire("src/components/app/bouton-creer-commande.tsx");
+    expect(code.length, "le bouton de la barre du haut est introuvable").toBeGreaterThan(200);
+    expect(/useFormStatus\(\)/.test(code), "l'attente n'est plus lue du formulaire").toBe(true);
+    expect(/disabled=\{pending\}/.test(code), "le bouton reste cliquable pendant l'envoi").toBe(true);
+    expect(/aria-busy=\{pending\}/.test(code), "l'attente n'est plus annoncée").toBe(true);
+    expect(/className="ic tourne"/.test(code), "l'anneau d'attente a disparu").toBe(true);
   });
 });

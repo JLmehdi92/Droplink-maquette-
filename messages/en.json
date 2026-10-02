@@ -22,8 +22,11 @@
       "bouton": "Upgrade to Pro"
     },
     "tableauDeBord": "Dashboard",
-    "tableauDeBordCourt": "Home",
-    "parametres": "Settings"
+    "parametres": "Settings",
+    "ouvrirMenu": "Open menu",
+    "fermerMenu": "Close menu",
+    "rechercheCourte": "Search…",
+    "accueilDropLink": "DropLink, dashboard"
   },
   "landing": {
     "metaTitre": "DropLink — One tracking link for the whole order",
@@ -1472,7 +1475,6 @@
     "sousTitreChiffre": "{total, plural, one {# order} other {# orders}}, {semaine, plural, one {# created} other {# created}} this week",
     "sousTitreVide": "Your space is ready",
     "rechercherExempleCourt": "Customer, reference, tracking…",
-    "nouvelleCourt": "New",
     "photosEtVues": "{photos, plural, one {# photo} other {# photos}} · {vues, plural, one {# view} other {# views}}",
     "surTotal": "Showing {n} of {total, plural, one {# order} other {# orders}}",
     "chargerLaSuite": "Load more",

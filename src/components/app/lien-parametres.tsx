@@ -15,8 +15,7 @@ import { Settings } from "lucide-react";
  * de menu dessinées différemment se liraient comme deux sortes de choses.
  */
 const CLASSES = {
-  menu: "flex min-h-11 w-full items-center justify-start gap-2.5 rounded-ds-sm px-3 text-[13px] font-semibold text-ds-texte-fort transition-colors hover:bg-ds-surface-teinte",
-  rond: "flex h-11 w-11 items-center justify-center rounded-ds-pill border border-ds-filet bg-ds-surface-carte text-ds-texte-corps transition-colors hover:bg-ds-surface-teinte md:hidden",
+  menu: "compte__lien",
 } as const;
 
 export async function LienParametres({
@@ -33,10 +32,9 @@ export async function LienParametres({
     <Link
       href={`/${langue}/parametres`}
       className={CLASSES[variante]}
-      {...(variante === "rond" ? { "aria-label": libelle } : {})}
     >
       <Settings aria-hidden="true" size={17} strokeWidth={1.9} />
-      {variante === "menu" ? <span>{libelle}</span> : null}
+      <span>{libelle}</span>
     </Link>
   );
 }
